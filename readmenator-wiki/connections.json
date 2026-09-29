@@ -1,161 +1,161 @@
 [
   {
-    "community_a": 0,
-    "community_b": 6,
+    "community_a": 2,
+    "community_b": 9,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/block_flow.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
+    "community_a": 2,
+    "community_b": 0,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/css.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 2,
     "community_b": 1,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 2,
+    "community_b": 3,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/download.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
-    "community_b": 8,
+    "community_a": 2,
+    "community_b": 7,
     "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/interp.h.",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/frame_clock.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
-    "community_b": 2,
+    "community_a": 2,
+    "community_b": 11,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/hostedit.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 2,
+    "community_b": 4,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/image_decode.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 2,
+    "community_b": 5,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/pdf_export.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
-    "community_b": 3,
+    "community_a": 2,
+    "community_b": 6,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
-    "community_b": 4,
+    "community_a": 2,
+    "community_b": 8,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/text_shape.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
-    "community_b": 9,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/textfield.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 0,
-    "community_b": 5,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/tls_impersonate.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 0,
-    "community_b": 7,
+    "community_a": 7,
+    "community_b": 10,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: include/profile.h imports include/local_store.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 1,
+    "community_a": 10,
     "community_b": 2,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: src/disk_store.c imports include/util.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 3,
+    "community_b": 5,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: src/download.c imports include/pdf_export.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
+    "community_a": 2,
+    "community_b": 12,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: src/freedom.c imports include/perf_trace.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 8,
+    "community_b": 0,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: src/text_shape.c imports include/css.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
     "community_a": 0,
-    "community_b": 10,
+    "community_b": 1,
     "connection_type": "shares_context",
-    "explanation": "Inferred shared context (layer utility) with no import path between community 0 (include) and community 10 (orphans).",
+    "explanation": "Inferred shared context (language c) with no import path between community 0 (include) and community 1 (include).",
     "strength": 0.5,
     "confidence": "INFERRED"
   },
   {
-    "community_a": 1,
+    "community_a": 0,
     "community_b": 3,
     "connection_type": "shares_context",
-    "explanation": "Inferred shared context (language c and layer utility) with no import path between community 1 (include) and community 3 (include).",
+    "explanation": "Inferred shared context (language c and layer utility) with no import path between community 0 (include) and community 3 (include).",
     "strength": 0.5,
     "confidence": "INFERRED"
   },
   {
-    "community_a": 1,
+    "community_a": 0,
     "community_b": 4,
     "connection_type": "shares_context",
-    "explanation": "Inferred shared context (language c and layer utility) with no import path between community 1 (include) and community 4 (include).",
+    "explanation": "Inferred shared context (language c and layer utility) with no import path between community 0 (include) and community 4 (tests).",
     "strength": 0.5,
     "confidence": "INFERRED"
   },
   {
-    "community_a": 1,
+    "community_a": 0,
     "community_b": 5,
     "connection_type": "shares_context",
-    "explanation": "Inferred shared context (language c and layer utility) with no import path between community 1 (include) and community 5 (include).",
+    "explanation": "Inferred shared context (language c and layer utility) with no import path between community 0 (include) and community 5 (include).",
     "strength": 0.5,
     "confidence": "INFERRED"
   },
   {
-    "community_a": 1,
+    "community_a": 0,
     "community_b": 6,
     "connection_type": "shares_context",
-    "explanation": "Inferred shared context (language c and layer utility) with no import path between community 1 (include) and community 6 (include).",
-    "strength": 0.5,
-    "confidence": "INFERRED"
-  },
-  {
-    "community_a": 1,
-    "community_b": 7,
-    "connection_type": "shares_context",
-    "explanation": "Inferred shared context (language c) with no import path between community 1 (include) and community 7 (include).",
-    "strength": 0.5,
-    "confidence": "INFERRED"
-  },
-  {
-    "community_a": 1,
-    "community_b": 8,
-    "connection_type": "shares_context",
-    "explanation": "Inferred shared context (language c and layer utility) with no import path between community 1 (include) and community 8 (include).",
-    "strength": 0.5,
-    "confidence": "INFERRED"
-  },
-  {
-    "community_a": 1,
-    "community_b": 9,
-    "connection_type": "shares_context",
-    "explanation": "Inferred shared context (language c and layer utility) with no import path between community 1 (include) and community 9 (include).",
-    "strength": 0.5,
-    "confidence": "INFERRED"
-  },
-  {
-    "community_a": 1,
-    "community_b": 10,
-    "connection_type": "shares_context",
-    "explanation": "Inferred shared context (layer utility) with no import path between community 1 (include) and community 10 (orphans).",
-    "strength": 0.5,
-    "confidence": "INFERRED"
-  },
-  {
-    "community_a": 2,
-    "community_b": 3,
-    "connection_type": "shares_context",
-    "explanation": "Inferred shared context (language c and layer utility) with no import path between community 2 (include) and community 3 (include).",
+    "explanation": "Inferred shared context (language c and layer utility) with no import path between community 0 (include) and community 6 (include).",
     "strength": 0.5,
     "confidence": "INFERRED"
   }

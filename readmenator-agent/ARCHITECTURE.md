@@ -1610,3 +1610,7 @@
 - `tools/pngprof.py` -> `struct`
 - `tools/pngprof.py` -> `sys`
 - `tools/pngprof.py` -> `zlib`
+- `tools/snapshot.py` -> `re`
+- `tools/snapshot.py` -> `sys`
+- `tools/snapshot.py` -> `urllib.parse`
+- `tools/snapshot.py` -> `urllib.request`

@@ -1,14 +1,14 @@
 {
   "tool": "readmenator",
-  "generated_at": "2026-09-19T05:14:58Z",
+  "generated_at": "2026-09-29T12:30:07Z",
   "project_root": "/home/grisun0/src_note/c/freedom-0.0.3",
-  "files": 218,
-  "symbols": 5231,
-  "imports": 1454,
+  "files": 219,
+  "symbols": 5282,
+  "imports": 1510,
   "resolved_imports": 398,
   "security_findings": 0,
   "languages": {
-    "py": 4,
+    "py": 5,
     "sh": 5,
     "c": 144,
     "h": 65

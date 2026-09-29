@@ -23,7 +23,7 @@
 | `fuzz/fuzz_text_shape.c` | - | fuzz | 2 |
 | `fuzz/fuzz_tls_impersonate.c` | - | fuzz | 0 |
 | `fuzz/fuzz_url.c` | - | fuzz | 2 |
-| `gui/browser_ui.c` | - | gui | 493 |
+| `gui/browser_ui.c` | - | gui | 496 |
 | `gui/browser_ui_internal.h` | - | gui | 10 |
 | `gui/bui_theme.c` | - | gui | 6 |
 | `gui/freedom_view.c` | - | gui | 2 |
@@ -32,7 +32,7 @@
 | `include/anti_fp.h` | - | include | 35 |
 | `include/block_flow.h` | block_flow (bf_) -- vertical margin collapsing for block-level boxes. | include | 4 |
 | `include/box_style.h` | - | include | 24 |
-| `include/box_tree.h` | - | include | 28 |
+| `include/box_tree.h` | - | include | 30 |
 | `include/browser.h` | - | include | 17 |
 | `include/compositor.h` | - | include | 9 |
 | `include/css.h` | - | include | 127 |
@@ -50,7 +50,7 @@
 | `include/dom.h` | - | include | 20 |
 | `include/dom_debug.h` | - | include | 4 |
 | `include/download.h` | - | include | 9 |
-| `include/flex_layout.h` | - | include | 28 |
+| `include/flex_layout.h` | - | include | 29 |
 | `include/form.h` | - | include | 12 |
 | `include/frame_clock.h` | - | include | 7 |
 | `include/freebug.h` | - | include | 18 |
@@ -70,7 +70,7 @@
 | `include/media_decoder.h` | - | include | 12 |
 | `include/net_realm.h` | - | include | 10 |
 | `include/os_sandbox.h` | - | include | 12 |
-| `include/page_view.h` | - | include | 65 |
+| `include/page_view.h` | - | include | 68 |
 | `include/pdf_export.h` | - | include | 10 |
 | `include/perf_trace.h` | - | include | 17 |
 | `include/prefetch.h` | - | include | 21 |
@@ -87,7 +87,7 @@
 | `include/tab.h` | - | include | 28 |
 | `include/text_shape.h` | - | include | 11 |
 | `include/textfield.h` | - | include | 15 |
-| `include/tls_impersonate.h` | - | include | 22 |
+| `include/tls_impersonate.h` | - | include | 23 |
 | `include/ui.h` | - | include | 15 |
 | `include/url.h` | - | include | 14 |
 | `include/util.h` | util.h — shared pure helpers (no I/O except where noted). Static inline so each  | include | 6 |
@@ -98,7 +98,7 @@
 | `src/anti_fp.c` | - | src | 23 |
 | `src/block_flow.c` | block_flow (bf_) -- vertical margin collapsing. See spec/block_flow.md. | src | 4 |
 | `src/box_style.c` | - | src | 40 |
-| `src/box_tree.c` | - | src | 19 |
+| `src/box_tree.c` | - | src | 20 |
 | `src/browser.c` | - | src | 37 |
 | `src/compositor.c` | - | src | 5 |
 | `src/css.c` | - | src | 219 |
@@ -107,7 +107,7 @@
 | `src/css_color.c` | - | src | 20 |
 | `src/css_gradient.c` | - | src | 13 |
 | `src/css_length.c` | - | src | 18 |
-| `src/css_select.c` | - | src | 17 |
+| `src/css_select.c` | - | src | 18 |
 | `src/css_text.c` | --- text-presentation extensions (Hito 23b-6) --- | src | 17 |
 | `src/css_values.c` | - | src | 6 |
 | `src/data_url.c` | - | src | 6 |
@@ -115,11 +115,11 @@
 | `src/dom.c` | - | src | 63 |
 | `src/dom_debug.c` | - | src | 24 |
 | `src/download.c` | - | src | 12 |
-| `src/flex_layout.c` | - | src | 19 |
+| `src/flex_layout.c` | - | src | 20 |
 | `src/form.c` | - | src | 8 |
 | `src/frame_clock.c` | - | src | 4 |
 | `src/freebug.c` | - | src | 9 |
-| `src/freedom.c` | - | src | 37 |
+| `src/freedom.c` | - | src | 38 |
 | `src/hls.c` | - | src | 10 |
 | `src/hostblock.c` | - | src | 18 |
 | `src/hostedit.c` | - | src | 13 |
@@ -135,7 +135,7 @@
 | `src/media_decoder.c` | - | src | 15 |
 | `src/net_realm.c` | - | src | 10 |
 | `src/os_sandbox.c` | - | src | 31 |
-| `src/page_view.c` | - | src | 191 |
+| `src/page_view.c` | - | src | 201 |
 | `src/pdf_export.c` | - | src | 4 |
 | `src/perf_trace.c` | - | src | 12 |
 | `src/prefetch.c` | - | src | 17 |
@@ -159,10 +159,10 @@
 | `tests/test_anti_fp.c` | - | tests | 15 |
 | `tests/test_block_flow.c` | - | tests | 8 |
 | `tests/test_box_style.c` | - | tests | 41 |
-| `tests/test_box_tree.c` | - | tests | 55 |
+| `tests/test_box_tree.c` | - | tests | 56 |
 | `tests/test_browser.c` | - | tests | 15 |
 | `tests/test_compositor.c` | - | tests | 21 |
-| `tests/test_css.c` | - | tests | 264 |
+| `tests/test_css.c` | - | tests | 266 |
 | `tests/test_css_box.c` | - | tests | 9 |
 | `tests/test_css_color.c` | - | tests | 29 |
 | `tests/test_css_drops.c` | Suite for the parser drop log (spec/css_drops.md). | tests | 25 |
@@ -175,11 +175,11 @@
 | `tests/test_dom.c` | - | tests | 37 |
 | `tests/test_dom_debug.c` | - | tests | 11 |
 | `tests/test_download.c` | - | tests | 21 |
-| `tests/test_flex_layout.c` | - | tests | 62 |
+| `tests/test_flex_layout.c` | - | tests | 63 |
 | `tests/test_form.c` | - | tests | 20 |
 | `tests/test_frame_clock.c` | - | tests | 4 |
 | `tests/test_freebug.c` | - | tests | 13 |
-| `tests/test_freedom.c` | - | tests | 54 |
+| `tests/test_freedom.c` | - | tests | 61 |
 | `tests/test_hls.c` | - | tests | 16 |
 | `tests/test_hostblock.c` | - | tests | 22 |
 | `tests/test_hostedit.c` | - | tests | 11 |
@@ -195,7 +195,7 @@
 | `tests/test_media_decoder.c` | - | tests | 6 |
 | `tests/test_net_realm.c` | - | tests | 13 |
 | `tests/test_os_sandbox.c` | - | tests | 19 |
-| `tests/test_page_view.c` | - | tests | 152 |
+| `tests/test_page_view.c` | - | tests | 162 |
 | `tests/test_pdf_export.c` | - | tests | 30 |
 | `tests/test_perf_trace.c` | - | tests | 12 |
 | `tests/test_prefetch.c` | Tests for prefetch (Hito 29): pure lookahead scanner + parallel download pool. | tests | 12 |
@@ -220,3 +220,4 @@
 | `tools/mutate.py` | mutate -- compile-time mutation testing for the CMocka suites.  One mutant = one | tools | 6 |
 | `tools/pngdiff.c` | - | tools | 14 |
 | `tools/pngprof.py` | pngprof -- structural ink-profile dump for page screenshots.  Build-time tool fo | tools | 4 |
+| `tools/snapshot.py` | Freeze a live page into one self-contained HTML file for `make parity`.  Both en | tools | 6 |

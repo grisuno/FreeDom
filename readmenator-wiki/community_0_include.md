@@ -1,156 +1,136 @@
 # include
 
-*Community 0 | 172 files | cohesion 0.96*
+*Community 0 | 28 files | cohesion 0.71*
 
 ## Definition
 
-This community groups 172 file(s) rooted at `include` with dominant language c (cohesion 0.96). Central symbols: `ALIVE`, `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `BLOCK`, `BLOCKED`, `BROWSER_STATUS_DURATION_MS`. Core file: `gui/browser_ui.c` (493 symbols). Documented purpose: svg_paint — Cairo back end for the shapes svg_render extracted..
+This community groups 28 file(s) rooted at `include` with dominant language c (cohesion 0.71). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CB_AUTO_REJECT`, `CB_AUTO_RESET`, `CB_AUTO_RESET_NONE`, `CB_AUTO_VALUE`. Core file: `tests/test_css.c` (266 symbols). Documented purpose: Bound for the ::before/::after content string pool (and the grid-template.
 
 ## Files
 
-### `include` (54 files)
+### `include` (10 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `include/anti_fp.h` | h | utility | 35 | no |
-| `include/box_style.h` | h | utility | 24 | no |
-| `include/box_tree.h` | h | utility | 28 | no |
-| `include/browser.h` | h | utility | 17 | no |
+| `include/css.h` | h | utility | 127 | no |
+| `include/css_box.h` | h | utility | 25 | no |
+| `include/css_chain.h` | h | utility | 5 | no |
+| `include/css_color.h` | h | utility | 7 | no |
+| `include/css_decl.h` | h | utility | 12 | yes |
+| `include/css_gradient.h` | h | infrastructure | 3 | no |
+| `include/css_length.h` | h | utility | 20 | no |
 
-### `src` (50 files)
-
-| File | Language | Layer | Symbols | Doc |
-|------|----------|-------|---------|-----|
-| `src/anti_fp.c` | c | utility | 23 | no |
-| `src/box_style.c` | c | utility | 40 | no |
-| `src/box_tree.c` | c | utility | 19 | no |
-| `src/browser.c` | c | utility | 37 | no |
-
-### `tests` (50 files)
+### `src` (9 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `tests/itest_secure_fetch.c` | c | testing | 2 | no |
-| `tests/test_anti_fp.c` | c | testing | 15 | no |
-| `tests/test_box_style.c` | c | testing | 41 | no |
-| `tests/test_box_tree.c` | c | testing | 55 | no |
+| `src/css.c` | c | utility | 219 | no |
+| `src/css_box.c` | c | utility | 47 | no |
+| `src/css_chain.c` | c | utility | 15 | no |
+| `src/css_color.c` | c | utility | 20 | no |
+| `src/css_gradient.c` | c | infrastructure | 13 | no |
+| `src/css_length.c` | c | utility | 18 | no |
 
-### `fuzz` (12 files)
+### `tests` (8 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `tests/test_css.c` | c | testing | 266 | no |
+| `tests/test_css_box.c` | c | testing | 9 | no |
+| `tests/test_css_color.c` | c | testing | 29 | no |
+| `tests/test_css_drops.c` | c | testing | 25 | yes |
+| `tests/test_css_gradient.c` | c | testing | 7 | no |
+| `tests/test_css_length.c` | c | testing | 25 | no |
+
+### `fuzz` (1 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `fuzz/fuzz_css.c` | c | utility | 1 | no |
-| `fuzz/fuzz_data_url.c` | c | data_access | 1 | no |
-| `fuzz/fuzz_dom.c` | c | utility | 2 | no |
-| `fuzz/fuzz_dom_debug.c` | c | utility | 1 | no |
 
-### `gui` (6 files)
-
-| File | Language | Layer | Symbols | Doc |
-|------|----------|-------|---------|-----|
-| `gui/browser_ui.c` | c | presentation | 493 | no |
-| `gui/browser_ui_internal.h` | h | presentation | 10 | no |
-| `gui/bui_theme.c` | c | presentation | 6 | no |
-| `gui/freedom_view.c` | c | presentation | 2 | no |
-
-*... and 152 more files in this community.*
+*... and 8 more files in this community.*
 
 
 ## Key Symbols
 
 - `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_css.c:62`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-- `worker` (function, `fuzz/fuzz_data_url.c:5`) `* confined tab worker (OP_DECODE_IMAGE_B64) on bytes the parent only sliced, nev`
-- `ensure_built` (function, `fuzz/fuzz_dom.c:41`) `static void ensure_built(void)`
-- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_dom.c:48`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-- `pass` (function, `fuzz/fuzz_dom_debug.c:8`) `* the measure pass (cap 0) must agree with the would-write return value.  *  * B`
-- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_freebug.c:37`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-- `poke_and_free` (function, `fuzz/fuzz_image_decode.c:21`) `static void poke_and_free(img_pixels *px)` - Touch every claimed pixel corner so the sanitizer flags an out-of-bounds extent, * then release. Saf
-- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_image_decode.c:32`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_prefs.c:21`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_svg_render.c:24`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-- `check_split` (function, `fuzz/fuzz_url.c:30`) `static void check_split(const char *url)`
-- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_url.c:58`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-- `_GNU_SOURCE` (macro, `gui/browser_ui.c:12`) `#define _GNU_SOURCE`
-- `UI_TOOLBAR_H` (macro, `gui/browser_ui.c:81`) `#define UI_TOOLBAR_H`
-- `UI_TITLEBAR_H` (macro, `gui/browser_ui.c:82`) `#define UI_TITLEBAR_H`
-- `UI_TABBAR_H` (macro, `gui/browser_ui.c:83`) `#define UI_TABBAR_H`
-- `UI_TAB_MIN_W` (macro, `gui/browser_ui.c:84`) `#define UI_TAB_MIN_W`
-- `UI_TAB_MAX_W` (macro, `gui/browser_ui.c:85`) `#define UI_TAB_MAX_W`
-- `UI_TAB_NEW_W` (macro, `gui/browser_ui.c:86`) `#define UI_TAB_NEW_W`
-- `UI_TAB_CLOSE_W` (macro, `gui/browser_ui.c:87`) `#define UI_TAB_CLOSE_W`
-- `UI_BTN_W` (macro, `gui/browser_ui.c:88`) `#define UI_BTN_W`
-- `UI_WIN_BTN_W` (macro, `gui/browser_ui.c:89`) `#define UI_WIN_BTN_W`
-- `UI_MARGIN` (macro, `gui/browser_ui.c:90`) `#define UI_MARGIN`
-- `UI_BTN_LEFT` (macro, `gui/browser_ui.c:91`) `#define UI_BTN_LEFT`
-- `UI_LIST_INDENT` (macro, `gui/browser_ui.c:92`) `#define UI_LIST_INDENT`
-- `UI_SCROLLBAR_W` (macro, `gui/browser_ui.c:97`) `#define UI_SCROLLBAR_W`
-- `UI_SCROLLBAR_MIN` (macro, `gui/browser_ui.c:98`) `#define UI_SCROLLBAR_MIN`
-- `UI_SCROLLBAR_PAD` (macro, `gui/browser_ui.c:99`) `#define UI_SCROLLBAR_PAD`
-- `UI_RESIZE_MARGIN` (macro, `gui/browser_ui.c:103`) `#define UI_RESIZE_MARGIN`
-- `UI_MENU_W` (macro, `gui/browser_ui.c:108`) `#define UI_MENU_W`
+- `FREEDOM_CSS_H` (macro, `include/css.h:2`) `#define FREEDOM_CSS_H`
+- `css_status` (enum, `include/css.h:28`)
+- `css_align` (enum, `include/css.h:34`)
+- `css_display` (enum, `include/css.h:42`)
+- `css_justify` (enum, `include/css.h:64`)
+- `CSS_GAP_MAX` (macro, `include/css.h:75`) `#define CSS_GAP_MAX`
+- `CSS_GRID_COLS_MAX` (macro, `include/css.h:76`) `#define CSS_GRID_COLS_MAX`
+- `CSS_GRID_TRACKS_MAX` (macro, `include/css.h:77`) `#define CSS_GRID_TRACKS_MAX`
+- `verbatim` (function, `include/css.h:79`) `* the quoted row strings verbatim (flex_layout parses them);`
+- `CSS_GRID_AREAS_MAX` (macro, `include/css.h:83`) `#define CSS_GRID_AREAS_MAX`
+- `CSS_GRAD_STOPS_MAX` (macro, `include/css.h:84`) `#define CSS_GRAD_STOPS_MAX`
+- `CSS_LINE_MIN` (macro, `include/css.h:85`) `#define CSS_LINE_MIN`
+- `CSS_LINE_MAX` (macro, `include/css.h:86`) `#define CSS_LINE_MAX`
+- `CSS_URL_MAX` (macro, `include/css.h:87`) `#define CSS_URL_MAX`
+- `CSS_DECO_UNDERLINE` (macro, `include/css.h:92`) `#define CSS_DECO_UNDERLINE`
+- `CSS_DECO_LINE_THROUGH` (macro, `include/css.h:93`) `#define CSS_DECO_LINE_THROUGH`
+- `CSS_DECO_OVERLINE` (macro, `include/css.h:94`) `#define CSS_DECO_OVERLINE`
+- `css_font_family` (enum, `include/css.h:98`) - Generic font family bucket (font-family). A specific family name is mapped to its * generic group; a
+- `css_text_transform` (enum, `include/css.h:104`) - Generic font family bucket (font-family). A specific family name is mapped to its * generic group; a
+- `css_valign` (enum, `include/css.h:109`) - Generic font family bucket (font-family). A specific family name is mapped to its * generic group; a
+- `css_white_space` (enum, `include/css.h:115`) - } css_font_family; /* text-transform. 0 is unset; CSS_TT_NONE is an explicit `none`. typedef enum cs
+- `css_list_style` (enum, `include/css.h:121`) - /* vertical-align (subset: only the inline shifts). 0 unset. typedef enum css_valign { CSS_VA_UNSET
+- `css_position` (enum, `include/css.h:133`) - position. 0 unset; STATIC is the explicit in-flow default. RELATIVE offsets the box from its in-flow
+- `css_box_sizing` (enum, `include/css.h:140`) - box-sizing. 0 unset; CONTENT is content-box (width excludes padding/border), * BORDER is border-box
+- `css_border_style` (enum, `include/css.h:147`) - border-style / outline-style (subset). 0 unset; NONE/HIDDEN paint nothing. The decorative variants a
+- `css_flex_direction` (enum, `include/css.h:154`) - border-style / outline-style (subset). 0 unset; NONE/HIDDEN paint nothing. The decorative variants a
+- `css_flex_wrap` (enum, `include/css.h:160`) - collapse the fancier ones (groove/ridge/inset/outset) to solid. typedef enum css_border_style { CSS_
+- `css_align_kw` (enum, `include/css.h:166`) - align-items / align-self / align-content / justify-items (cross-axis alignment). * 0 unset. AUTO onl
+- `css_grid_flow` (enum, `include/css.h:173`) - align-items / align-self / align-content / justify-items (cross-axis alignment). * 0 unset. AUTO onl
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 354
-- Cross-boundary resolved imports (EXTRACTED): 15
+- Internal resolved imports (EXTRACTED): 67
+- Cross-boundary resolved imports (EXTRACTED): 27
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/block_flow.h.
-- [EXTRACTED] depends_on community 0 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/download.h.
-- [EXTRACTED] depends_on community 0 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/interp.h.
-- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/pdf_export.h.
-- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
-- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/text_shape.h.
-- [EXTRACTED] depends_on community 0 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/textfield.h.
-- [EXTRACTED] depends_on community 0 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/tls_impersonate.h.
-- [EXTRACTED] depends_on community 0 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/profile.h imports include/local_store.h.
-- [INFERRED] shares_context community 0 <-> 10 (strength 0.5): Inferred shared context (layer utility) with no import path between community 0 (include) and community 10 (orphans).
+- [EXTRACTED] depends_on community 2 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/css.h.
+- [EXTRACTED] depends_on community 8 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/text_shape.c imports include/css.h.
+- [INFERRED] shares_context community 0 <-> 1 (strength 0.5): Inferred shared context (language c) with no import path between community 0 (include) and community 1 (include).
+- [INFERRED] shares_context community 0 <-> 3 (strength 0.5): Inferred shared context (language c and layer utility) with no import path between community 0 (include) and community 3 (include).
+- [INFERRED] shares_context community 0 <-> 4 (strength 0.5): Inferred shared context (language c and layer utility) with no import path between community 0 (include) and community 4 (tests).
+- [INFERRED] shares_context community 0 <-> 5 (strength 0.5): Inferred shared context (language c and layer utility) with no import path between community 0 (include) and community 5 (include).
+- [INFERRED] shares_context community 0 <-> 6 (strength 0.5): Inferred shared context (language c and layer utility) with no import path between community 0 (include) and community 6 (include).
 
 ## Risks
 
-- [layer strict] `gui/browser_ui.c` (presentation) -> `include/data_url.h` (data_access)
-- [layer strict] `gui/browser_ui.c` (presentation) -> `include/form.h` (data_access)
-- [layer strict] `src/render_doc.c` (presentation) -> `include/data_url.h` (data_access)
-- [layer strict] `src/render_policy.c` (presentation) -> `include/data_url.h` (data_access)
-- [layer strict] `tests/test_box_tree.c` (testing) -> `include/page_view.h` (presentation)
-- [layer strict] `tests/test_dom_debug.c` (testing) -> `include/flex_layout.h` (presentation)
-- [layer strict] `tests/test_dom_debug.c` (testing) -> `include/page_view.h` (presentation)
-- [layer strict] `tests/test_dom_debug.c` (testing) -> `include/render_doc.h` (presentation)
-- [layer strict] `tests/test_dom_debug.c` (testing) -> `include/render_policy.h` (presentation)
-- [layer strict] `tests/test_flex_layout.c` (testing) -> `include/flex_layout.h` (presentation)
-- [layer strict] `tests/test_page_view.c` (testing) -> `include/flex_layout.h` (presentation)
-- [layer strict] `tests/test_page_view.c` (testing) -> `include/page_view.h` (presentation)
-- [layer strict] `tests/test_render_doc.c` (testing) -> `include/flex_layout.h` (presentation)
-- [layer strict] `tests/test_render_doc.c` (testing) -> `include/page_view.h` (presentation)
-- [layer strict] `tests/test_render_doc.c` (testing) -> `include/render_doc.h` (presentation)
+- [dataflow DEAD_STORE] `src/css.c:3601` `drop_record` `important`: `important` assigned at line 3601 but never read afterwards.
+- [dataflow DEAD_STORE] `src/css_color.c:150` `parse_hex` `r`: `r` assigned at line 150 but never read afterwards.
+- [dataflow DEAD_STORE] `src/css_color.c:151` `parse_hex` `g`: `g` assigned at line 151 but never read afterwards.
 
 ## Open Questions
 
-- Why do 164 file(s) lack file-level docs (e.g. `fuzz/fuzz_css.c`)? What purpose do they serve?
+- Why do 24 file(s) lack file-level docs (e.g. `fuzz/fuzz_css.c`)? What purpose do they serve?
 - What would break if the most connected file in include changed?
-- Should include be split, given cohesion 0.96?
+- Should include be split, given cohesion 0.71?
 
 ## Sources
 
 - `fuzz/fuzz_css.c`
-- `fuzz/fuzz_data_url.c`
-- `fuzz/fuzz_dom.c`
-- `fuzz/fuzz_dom_debug.c`
-- `fuzz/fuzz_freebug.c`
-- `fuzz/fuzz_html_parse.c`
-- `fuzz/fuzz_image_decode.c`
-- `fuzz/fuzz_js_sandbox.c`
-- `fuzz/fuzz_page_view.c`
-- `fuzz/fuzz_prefs.c`
-- `fuzz/fuzz_svg_render.c`
-- `fuzz/fuzz_url.c`
-- `gui/browser_ui.c`
-- `gui/browser_ui_internal.h`
-- `gui/bui_theme.c`
-- `gui/freedom_view.c`
-- `gui/svg_paint.c`
-- `gui/ui_render.c`
-- `include/anti_fp.h`
-- `include/box_style.h`
-- *... and 152 more*
+- `include/css.h`
+- `include/css_box.h`
+- `include/css_chain.h`
+- `include/css_color.h`
+- `include/css_decl.h`
+- `include/css_gradient.h`
+- `include/css_length.h`
+- `include/css_select.h`
+- `include/css_text.h`
+- `include/css_values.h`
+- `src/css.c`
+- `src/css_box.c`
+- `src/css_chain.c`
+- `src/css_color.c`
+- `src/css_gradient.c`
+- `src/css_length.c`
+- `src/css_select.c`
+- `src/css_text.c`
+- `src/css_values.c`
+- *... and 8 more*

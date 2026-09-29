@@ -25,607 +25,611 @@
 | `LLVMFuzzerTestOneInput` | function | `fuzz/fuzz_text_shape.c:25` | `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)` |
 | `LLVMFuzzerTestOneInput` | function | `fuzz/fuzz_url.c:58` | `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)` |
 | `check_split` | function | `fuzz/fuzz_url.c:30` | `static void check_split(const char *url)` |
-| `ALIVE` | function | `gui/browser_ui.c:2179` | `* keep the worker ALIVE (tab_worker) so the console REPL can tab_eval against this * live page. The next render (or a ta` |
-| `BUI_CONIC_SLICES` | macro | `gui/browser_ui.c:8881` | `#define BUI_CONIC_SLICES` |
-| `FBW_COPY_BTN_H` | macro | `gui/browser_ui.c:12881` | `#define FBW_COPY_BTN_H` |
-| `FBW_COPY_BTN_W` | macro | `gui/browser_ui.c:12880` | `#define FBW_COPY_BTN_W` |
-| `FBW_GUTTER` | macro | `gui/browser_ui.c:12877` | `#define FBW_GUTTER` |
-| `FBW_H` | macro | `gui/browser_ui.c:12873` | `#define FBW_H` |
-| `FBW_HEADER` | macro | `gui/browser_ui.c:12874` | `#define FBW_HEADER` |
-| `FBW_LINE` | macro | `gui/browser_ui.c:12876` | `#define FBW_LINE` |
-| `FBW_MAX_SPLIT` | macro | `gui/browser_ui.c:12879` | `#define FBW_MAX_SPLIT` |
-| `FBW_MIN_SPLIT` | macro | `gui/browser_ui.c:12878` | `#define FBW_MIN_SPLIT` |
-| `FBW_PAD` | macro | `gui/browser_ui.c:12875` | `#define FBW_PAD` |
-| `FBW_W` | macro | `gui/browser_ui.c:12872` | `#define FBW_W` |
-| `FLEX_MEASURE_W` | macro | `gui/browser_ui.c:4562` | `#define FLEX_MEASURE_W` |
-| `FLEX_MIN_MEASURE_W` | macro | `gui/browser_ui.c:4567` | `#define FLEX_MIN_MEASURE_W` |
-| `GET` | function | `gui/browser_ui.c:1326` | `* a GET (Zero Trust). cfg->policy is restored before returning. */
+| `ALIVE` | function | `gui/browser_ui.c:2187` | `* keep the worker ALIVE (tab_worker) so the console REPL can tab_eval against this * live page. The next render (or a ta` |
+| `BUI_CONIC_SLICES` | macro | `gui/browser_ui.c:8993` | `#define BUI_CONIC_SLICES` |
+| `FBW_COPY_BTN_H` | macro | `gui/browser_ui.c:13008` | `#define FBW_COPY_BTN_H` |
+| `FBW_COPY_BTN_W` | macro | `gui/browser_ui.c:13007` | `#define FBW_COPY_BTN_W` |
+| `FBW_GUTTER` | macro | `gui/browser_ui.c:13004` | `#define FBW_GUTTER` |
+| `FBW_H` | macro | `gui/browser_ui.c:13000` | `#define FBW_H` |
+| `FBW_HEADER` | macro | `gui/browser_ui.c:13001` | `#define FBW_HEADER` |
+| `FBW_LINE` | macro | `gui/browser_ui.c:13003` | `#define FBW_LINE` |
+| `FBW_MAX_SPLIT` | macro | `gui/browser_ui.c:13006` | `#define FBW_MAX_SPLIT` |
+| `FBW_MIN_SPLIT` | macro | `gui/browser_ui.c:13005` | `#define FBW_MIN_SPLIT` |
+| `FBW_PAD` | macro | `gui/browser_ui.c:13002` | `#define FBW_PAD` |
+| `FBW_W` | macro | `gui/browser_ui.c:12999` | `#define FBW_W` |
+| `FLEX_MEASURE_W` | macro | `gui/browser_ui.c:4596` | `#define FLEX_MEASURE_W` |
+| `FLEX_MIN_MEASURE_W` | macro | `gui/browser_ui.c:4601` | `#define FLEX_MIN_MEASURE_W` |
+| `GET` | function | `gui/browser_ui.c:1333` | `* a GET (Zero Trust). cfg->policy is restored before returning. */
 static sf_status fetch_post_na...` |
-| `GET` | function | `gui/browser_ui.c:11794` | `* the network under weaker rules than a GET (Zero Trust). */
+| `GET` | function | `gui/browser_ui.c:11921` | `* the network under weaker rules than a GET (Zero Trust). */
 static void do_submit_post(browser_w...` |
-| `H2R` | macro | `gui/browser_ui.c:10180` | `#define H2R(p,q,t)` |
-| `HarfBuzz` | function | `gui/browser_ui.c:3289` | `* descriptor via HarfBuzz (text_shape);` |
-| `ITEMS` | function | `gui/browser_ui.c:4996` | `* between ITEMS (not between the lines inside one item). column-reverse
+| `H2R` | macro | `gui/browser_ui.c:10292` | `#define H2R(p,q,t)` |
+| `HarfBuzz` | function | `gui/browser_ui.c:3297` | `* descriptor via HarfBuzz (text_shape);` |
+| `ITEMS` | function | `gui/browser_ui.c:5050` | `* between ITEMS (not between the lines inside one item). column-reverse
      * reverses the visua...` |
-| `JS_NAV_MAX` | macro | `gui/browser_ui.c:1934` | `#define JS_NAV_MAX` |
-| `JS_TICKS_PER_LOAD` | macro | `gui/browser_ui.c:2009` | `#define JS_TICKS_PER_LOAD` |
-| `OMNI_MAX_SUGG` | macro | `gui/browser_ui.c:118` | `#define OMNI_MAX_SUGG` |
-| `OV_MAX_DEPTH` | macro | `gui/browser_ui.c:9577` | `#define OV_MAX_DEPTH` |
-| `PDF_MARGIN` | macro | `gui/browser_ui.c:10931` | `#define PDF_MARGIN` |
-| `PDF_PAGE_H` | macro | `gui/browser_ui.c:10930` | `#define PDF_PAGE_H` |
-| `PDF_PAGE_W` | macro | `gui/browser_ui.c:10929` | `#define PDF_PAGE_W` |
-| `PNG_MARGIN` | macro | `gui/browser_ui.c:11106` | `#define PNG_MARGIN` |
-| `PNG_MAX_H` | macro | `gui/browser_ui.c:11107` | `#define PNG_MAX_H` |
-| `PNG_PAGE_W` | macro | `gui/browser_ui.c:11093` | `#define PNG_PAGE_W` |
-| `RC_BOX_STACK_MAX` | macro | `gui/browser_ui.c:3031` | `#define RC_BOX_STACK_MAX` |
-| `RC_DEFER_BAND_RUNS` | macro | `gui/browser_ui.c:6329` | `#define RC_DEFER_BAND_RUNS` |
-| `RC_DEFER_COLS` | macro | `gui/browser_ui.c:6246` | `#define RC_DEFER_COLS` |
-| `RC_DEFER_RANGES` | macro | `gui/browser_ui.c:6247` | `#define RC_DEFER_RANGES` |
-| `RC_FLOAT_FIT_MIN` | macro | `gui/browser_ui.c:3042` | `#define RC_FLOAT_FIT_MIN` |
-| `RC_FLOAT_MAX` | macro | `gui/browser_ui.c:3035` | `#define RC_FLOAT_MAX` |
-| `RC_MAX_OUT_OF_FLOW` | macro | `gui/browser_ui.c:6138` | `#define RC_MAX_OUT_OF_FLOW` |
-| `TABLE` | function | `gui/browser_ui.c:4857` | `* container TABLE (rd_cont_at) rather than from the head run, because a container * whose children are all containers ha` |
+| `JS_NAV_MAX` | macro | `gui/browser_ui.c:1942` | `#define JS_NAV_MAX` |
+| `JS_TICKS_PER_LOAD` | macro | `gui/browser_ui.c:2017` | `#define JS_TICKS_PER_LOAD` |
+| `OMNI_MAX_SUGG` | macro | `gui/browser_ui.c:121` | `#define OMNI_MAX_SUGG` |
+| `OV_MAX_DEPTH` | macro | `gui/browser_ui.c:9689` | `#define OV_MAX_DEPTH` |
+| `PDF_MARGIN` | macro | `gui/browser_ui.c:11058` | `#define PDF_MARGIN` |
+| `PDF_PAGE_H` | macro | `gui/browser_ui.c:11057` | `#define PDF_PAGE_H` |
+| `PDF_PAGE_W` | macro | `gui/browser_ui.c:11056` | `#define PDF_PAGE_W` |
+| `PNG_MARGIN` | macro | `gui/browser_ui.c:11233` | `#define PNG_MARGIN` |
+| `PNG_MAX_H` | macro | `gui/browser_ui.c:11234` | `#define PNG_MAX_H` |
+| `PNG_PAGE_W` | macro | `gui/browser_ui.c:11220` | `#define PNG_PAGE_W` |
+| `RC_BOX_STACK_MAX` | macro | `gui/browser_ui.c:3039` | `#define RC_BOX_STACK_MAX` |
+| `RC_DEFER_BAND_RUNS` | macro | `gui/browser_ui.c:6410` | `#define RC_DEFER_BAND_RUNS` |
+| `RC_DEFER_COLS` | macro | `gui/browser_ui.c:6327` | `#define RC_DEFER_COLS` |
+| `RC_DEFER_RANGES` | macro | `gui/browser_ui.c:6328` | `#define RC_DEFER_RANGES` |
+| `RC_FLOAT_FIT_MIN` | macro | `gui/browser_ui.c:3050` | `#define RC_FLOAT_FIT_MIN` |
+| `RC_FLOAT_MAX` | macro | `gui/browser_ui.c:3043` | `#define RC_FLOAT_MAX` |
+| `RC_MAX_OUT_OF_FLOW` | macro | `gui/browser_ui.c:6219` | `#define RC_MAX_OUT_OF_FLOW` |
+| `TABLE` | function | `gui/browser_ui.c:4891` | `* container TABLE (rd_cont_at) rather than from the head run, because a container * whose children are all containers ha` |
 | `UI_BTN_LEFT` | macro | `gui/browser_ui.c:91` | `#define UI_BTN_LEFT` |
 | `UI_BTN_W` | macro | `gui/browser_ui.c:88` | `#define UI_BTN_W` |
-| `UI_BUTTON_HPAD` | macro | `gui/browser_ui.c:129` | `#define UI_BUTTON_HPAD` |
-| `UI_CHECK_SZ` | macro | `gui/browser_ui.c:111` | `#define UI_CHECK_SZ` |
-| `UI_CURSOR_SIZE` | macro | `gui/browser_ui.c:116` | `#define UI_CURSOR_SIZE` |
-| `UI_FORM_FIELDS_MAX` | macro | `gui/browser_ui.c:130` | `#define UI_FORM_FIELDS_MAX` |
-| `UI_HAMBURGER_GAP` | macro | `gui/browser_ui.c:115` | `#define UI_HAMBURGER_GAP` |
-| `UI_HAMBURGER_W` | macro | `gui/browser_ui.c:114` | `#define UI_HAMBURGER_W` |
-| `UI_IMAGE_MAX_BODY` | macro | `gui/browser_ui.c:219` | `#define UI_IMAGE_MAX_BODY` |
-| `UI_INPUT_MEASURE_W` | macro | `gui/browser_ui.c:127` | `#define UI_INPUT_MEASURE_W` |
-| `UI_INPUT_PAD` | macro | `gui/browser_ui.c:124` | `#define UI_INPUT_PAD` |
-| `UI_INPUT_WIDTH` | macro | `gui/browser_ui.c:128` | `#define UI_INPUT_WIDTH` |
-| `UI_LIST_INDENT` | macro | `gui/browser_ui.c:92` | `#define UI_LIST_INDENT` |
+| `UI_BUTTON_HPAD` | macro | `gui/browser_ui.c:132` | `#define UI_BUTTON_HPAD` |
+| `UI_CHECK_SZ` | macro | `gui/browser_ui.c:114` | `#define UI_CHECK_SZ` |
+| `UI_CURSOR_SIZE` | macro | `gui/browser_ui.c:119` | `#define UI_CURSOR_SIZE` |
+| `UI_FORM_FIELDS_MAX` | macro | `gui/browser_ui.c:133` | `#define UI_FORM_FIELDS_MAX` |
+| `UI_HAMBURGER_GAP` | macro | `gui/browser_ui.c:118` | `#define UI_HAMBURGER_GAP` |
+| `UI_HAMBURGER_W` | macro | `gui/browser_ui.c:117` | `#define UI_HAMBURGER_W` |
+| `UI_IMAGE_MAX_BODY` | macro | `gui/browser_ui.c:222` | `#define UI_IMAGE_MAX_BODY` |
+| `UI_INPUT_MEASURE_W` | macro | `gui/browser_ui.c:130` | `#define UI_INPUT_MEASURE_W` |
+| `UI_INPUT_PAD` | macro | `gui/browser_ui.c:127` | `#define UI_INPUT_PAD` |
+| `UI_INPUT_WIDTH` | macro | `gui/browser_ui.c:131` | `#define UI_INPUT_WIDTH` |
+| `UI_LIST_INDENT` | macro | `gui/browser_ui.c:95` | `#define UI_LIST_INDENT` |
 | `UI_MARGIN` | macro | `gui/browser_ui.c:90` | `#define UI_MARGIN` |
-| `UI_MAX_TABS` | macro | `gui/browser_ui.c:258` | `#define UI_MAX_TABS` |
-| `UI_MENU_COUNT` | macro | `gui/browser_ui.c:201` | `#define UI_MENU_COUNT` |
-| `UI_MENU_INPUT_H` | macro | `gui/browser_ui.c:113` | `#define UI_MENU_INPUT_H` |
-| `UI_MENU_ITEM_H` | macro | `gui/browser_ui.c:109` | `#define UI_MENU_ITEM_H` |
-| `UI_MENU_LABEL_H` | macro | `gui/browser_ui.c:112` | `#define UI_MENU_LABEL_H` |
-| `UI_MENU_PAD` | macro | `gui/browser_ui.c:110` | `#define UI_MENU_PAD` |
-| `UI_MENU_W` | macro | `gui/browser_ui.c:108` | `#define UI_MENU_W` |
-| `UI_OMNI_ROW_H` | macro | `gui/browser_ui.c:119` | `#define UI_OMNI_ROW_H` |
-| `UI_OVERLINE_OFFSET` | macro | `gui/browser_ui.c:138` | `#define UI_OVERLINE_OFFSET` |
-| `UI_READER_COLUMN_W` | macro | `gui/browser_ui.c:555` | `#define UI_READER_COLUMN_W` |
-| `UI_RELOAD_X` | macro | `gui/browser_ui.c:2730` | `#define UI_RELOAD_X` |
-| `UI_RESIZE_MARGIN` | macro | `gui/browser_ui.c:103` | `#define UI_RESIZE_MARGIN` |
-| `UI_SCROLLBAR_MIN` | macro | `gui/browser_ui.c:98` | `#define UI_SCROLLBAR_MIN` |
-| `UI_SCROLLBAR_PAD` | macro | `gui/browser_ui.c:99` | `#define UI_SCROLLBAR_PAD` |
-| `UI_SCROLLBAR_W` | macro | `gui/browser_ui.c:97` | `#define UI_SCROLLBAR_W` |
-| `UI_SLICE_MAX` | macro | `gui/browser_ui.c:142` | `#define UI_SLICE_MAX` |
-| `UI_STRIKE_OFFSET` | macro | `gui/browser_ui.c:137` | `#define UI_STRIKE_OFFSET` |
+| `UI_MAX_TABS` | macro | `gui/browser_ui.c:261` | `#define UI_MAX_TABS` |
+| `UI_MENU_COUNT` | macro | `gui/browser_ui.c:204` | `#define UI_MENU_COUNT` |
+| `UI_MENU_INPUT_H` | macro | `gui/browser_ui.c:116` | `#define UI_MENU_INPUT_H` |
+| `UI_MENU_ITEM_H` | macro | `gui/browser_ui.c:112` | `#define UI_MENU_ITEM_H` |
+| `UI_MENU_LABEL_H` | macro | `gui/browser_ui.c:115` | `#define UI_MENU_LABEL_H` |
+| `UI_MENU_PAD` | macro | `gui/browser_ui.c:113` | `#define UI_MENU_PAD` |
+| `UI_MENU_W` | macro | `gui/browser_ui.c:111` | `#define UI_MENU_W` |
+| `UI_OMNI_ROW_H` | macro | `gui/browser_ui.c:122` | `#define UI_OMNI_ROW_H` |
+| `UI_OVERLINE_OFFSET` | macro | `gui/browser_ui.c:141` | `#define UI_OVERLINE_OFFSET` |
+| `UI_READER_COLUMN_W` | macro | `gui/browser_ui.c:558` | `#define UI_READER_COLUMN_W` |
+| `UI_RELOAD_X` | macro | `gui/browser_ui.c:2738` | `#define UI_RELOAD_X` |
+| `UI_RESIZE_MARGIN` | macro | `gui/browser_ui.c:106` | `#define UI_RESIZE_MARGIN` |
+| `UI_SCROLLBAR_MIN` | macro | `gui/browser_ui.c:101` | `#define UI_SCROLLBAR_MIN` |
+| `UI_SCROLLBAR_PAD` | macro | `gui/browser_ui.c:102` | `#define UI_SCROLLBAR_PAD` |
+| `UI_SCROLLBAR_W` | macro | `gui/browser_ui.c:100` | `#define UI_SCROLLBAR_W` |
+| `UI_SLICE_MAX` | macro | `gui/browser_ui.c:145` | `#define UI_SLICE_MAX` |
+| `UI_STRIKE_OFFSET` | macro | `gui/browser_ui.c:140` | `#define UI_STRIKE_OFFSET` |
 | `UI_TABBAR_H` | macro | `gui/browser_ui.c:83` | `#define UI_TABBAR_H` |
 | `UI_TAB_CLOSE_W` | macro | `gui/browser_ui.c:87` | `#define UI_TAB_CLOSE_W` |
 | `UI_TAB_MAX_W` | macro | `gui/browser_ui.c:85` | `#define UI_TAB_MAX_W` |
 | `UI_TAB_MIN_W` | macro | `gui/browser_ui.c:84` | `#define UI_TAB_MIN_W` |
 | `UI_TAB_NEW_W` | macro | `gui/browser_ui.c:86` | `#define UI_TAB_NEW_W` |
 | `UI_TITLEBAR_H` | macro | `gui/browser_ui.c:82` | `#define UI_TITLEBAR_H` |
-| `UI_TOAST_PAD` | macro | `gui/browser_ui.c:117` | `#define UI_TOAST_PAD` |
+| `UI_TOAST_PAD` | macro | `gui/browser_ui.c:120` | `#define UI_TOAST_PAD` |
 | `UI_TOOLBAR_H` | macro | `gui/browser_ui.c:81` | `#define UI_TOOLBAR_H` |
-| `UI_TWO_PI` | macro | `gui/browser_ui.c:120` | `#define UI_TWO_PI` |
-| `UI_UNDERLINE_OFFSET` | macro | `gui/browser_ui.c:135` | `#define UI_UNDERLINE_OFFSET` |
-| `UI_UNDERLINE_THICK` | macro | `gui/browser_ui.c:136` | `#define UI_UNDERLINE_THICK` |
+| `UI_TWO_PI` | macro | `gui/browser_ui.c:123` | `#define UI_TWO_PI` |
+| `UI_UNDERLINE_OFFSET` | macro | `gui/browser_ui.c:138` | `#define UI_UNDERLINE_OFFSET` |
+| `UI_UNDERLINE_THICK` | macro | `gui/browser_ui.c:139` | `#define UI_UNDERLINE_THICK` |
 | `UI_WIN_BTN_W` | macro | `gui/browser_ui.c:89` | `#define UI_WIN_BTN_W` |
 | `_GNU_SOURCE` | macro | `gui/browser_ui.c:12` | `#define _GNU_SOURCE` |
-| `add` | function | `gui/browser_ui.c:3468` | `* about to add (top/h passed in). A box that survived a line wrap simply ends at the
+| `add` | function | `gui/browser_ui.c:3476` | `* about to add (top/h passed in). A box that survived a line wrap simply ends at the
  * wrap -- m...` |
-| `add_current_host_to_list` | function | `gui/browser_ui.c:771` | `static void add_current_host_to_list(browser_window *w, int sel)` |
-| `again` | function | `gui/browser_ui.c:8272` | `* before a respawn opens it again (the WNOHANG reap left the old * process alive long enough to make the new one fail wi` |
-| `allowlisted` | type_alias | `gui/browser_ui.c:1486` | `typedef struct fetch_prep { int allowlisted;` |
-| `anchor` | function | `gui/browser_ui.c:7156` | `* anchor (spec/float.md §7d.3) exactly like a text block. An * empty/hidden one leaves cur_top untouched, so this is a n` |
-| `applies` | function | `gui/browser_ui.c:14928` | `* persisted choice applies (prefs_parse already clamped it to a valid mode). */ const char *js_env = getenv("FREEDOM_JS"` |
-| `apply_click_result` | function | `gui/browser_ui.c:11688` | `static void apply_click_result(browser_window *w, tab_page *page)` |
-| `apply_zoom` | function | `gui/browser_ui.c:572` | `static void apply_zoom(browser_window *w)` |
-| `arrives` | function | `gui/browser_ui.c:2263` | `* on screen until the result arrives (deliver_fetch_result renders it). about:blank
+| `add_current_host_to_list` | function | `gui/browser_ui.c:778` | `static void add_current_host_to_list(browser_window *w, int sel)` |
+| `again` | function | `gui/browser_ui.c:8384` | `* before a respawn opens it again (the WNOHANG reap left the old * process alive long enough to make the new one fail wi` |
+| `allowlisted` | type_alias | `gui/browser_ui.c:1493` | `typedef struct fetch_prep { int allowlisted;` |
+| `anchor` | function | `gui/browser_ui.c:7261` | `* anchor (spec/float.md §7d.3) exactly like a text block. An * empty/hidden one leaves cur_top untouched, so this is a n` |
+| `applies` | function | `gui/browser_ui.c:15055` | `* persisted choice applies (prefs_parse already clamped it to a valid mode). */ const char *js_env = getenv("FREEDOM_JS"` |
+| `apply_click_result` | function | `gui/browser_ui.c:11815` | `static void apply_click_result(browser_window *w, tab_page *page)` |
+| `apply_zoom` | function | `gui/browser_ui.c:575` | `static void apply_zoom(browser_window *w)` |
+| `arrives` | function | `gui/browser_ui.c:2271` | `* on screen until the result arrives (deliver_fetch_result renders it). about:blank
  * and local ...` |
-| `audio_mark_dead` | function | `gui/browser_ui.c:8231` | `static void audio_mark_dead(browser_window *w)` |
-| `audio_spawn` | function | `gui/browser_ui.c:8177` | `static void audio_spawn(browser_window *w, int rate, int channels)` |
-| `audio_stop` | function | `gui/browser_ui.c:8263` | `static void audio_stop(browser_window *w)` |
-| `audio_write` | function | `gui/browser_ui.c:8248` | `static void audio_write(browser_window *w, const uint8_t *data, size_t len)` |
-| `band_common_box` | function | `gui/browser_ui.c:6158` | `static int band_common_box(const rd_doc *doc, size_t start, size_t end)` |
-| `behind` | function | `gui/browser_ui.c:5738` | `* previous block left behind (CSS 2.1 8.3.1) -- read from the element's cascade, * never a theme constant. The old code ` |
-| `bg` | function | `gui/browser_ui.c:9446` | `* its own DISTINCT bg (an inline span highlight) still paints. */ int own_bid = row_owner_block_id(L, r);` |
-| `block_id` | type_alias | `gui/browser_ui.c:2986` | `typedef struct rc_open_box { int block_id;` |
-| `block_in_table_caption` | function | `gui/browser_ui.c:6222` | `static int block_in_table_caption(const rd_doc *doc, const rd_block *b)` |
-| `block_is_oof` | function | `gui/browser_ui.c:4869` | `static int block_is_oof(const rd_doc *doc, const rd_block *bk)` |
-| `block_margins` | function | `gui/browser_ui.c:3438` | `static void block_margins(const ui_theme *th, const rd_block *b,
+| `audio_mark_dead` | function | `gui/browser_ui.c:8343` | `static void audio_mark_dead(browser_window *w)` |
+| `audio_spawn` | function | `gui/browser_ui.c:8289` | `static void audio_spawn(browser_window *w, int rate, int channels)` |
+| `audio_stop` | function | `gui/browser_ui.c:8375` | `static void audio_stop(browser_window *w)` |
+| `audio_write` | function | `gui/browser_ui.c:8360` | `static void audio_write(browser_window *w, const uint8_t *data, size_t len)` |
+| `band_common_box` | function | `gui/browser_ui.c:6239` | `static int band_common_box(const rd_doc *doc, size_t start, size_t end)` |
+| `behind` | function | `gui/browser_ui.c:5810` | `* previous block left behind (CSS 2.1 8.3.1) -- read from the element's cascade, * never a theme constant. The old code ` |
+| `bg` | function | `gui/browser_ui.c:9558` | `* its own DISTINCT bg (an inline span highlight) still paints. */ int own_bid = row_owner_block_id(L, r);` |
+| `block_id` | type_alias | `gui/browser_ui.c:2994` | `typedef struct rc_open_box { int block_id;` |
+| `block_in_table_caption` | function | `gui/browser_ui.c:6303` | `static int block_in_table_caption(const rd_doc *doc, const rd_block *b)` |
+| `block_is_oof` | function | `gui/browser_ui.c:4903` | `static int block_is_oof(const rd_doc *doc, const rd_block *bk)` |
+| `block_leaves_flow` | function | `gui/browser_ui.c:4010` | `static int block_leaves_flow(const rd_doc *doc, const rd_block *bk);` |
+| `block_margins` | function | `gui/browser_ui.c:3446` | `static void block_margins(const ui_theme *th, const rd_block *b,
                           double...` |
-| `block_style` | function | `gui/browser_ui.c:3411` | `static void block_style(const ui_theme *th, const rd_block *b,
+| `block_style` | function | `gui/browser_ui.c:3419` | `static void block_style(const ui_theme *th, const rd_block *b,
                         double *si...` |
-| `blocking` | function | `gui/browser_ui.c:8559` | `* are blocking (POLLIN guaranteed data is available). */ int flags = fcntl(out_fd, F_GETFL, 0);` |
-| `bookmark_toggle_current` | function | `gui/browser_ui.c:941` | `static void bookmark_toggle_current(browser_window *w)` |
-| `box` | function | `gui/browser_ui.c:4118` | `* declared intrinsic size reserves that box (broken-image parity);` |
-| `box_edge_px` | function | `gui/browser_ui.c:4343` | `static double box_edge_px(int wpx)` |
-| `box_forms_stacking_context` | function | `gui/browser_ui.c:9708` | `static int box_forms_stacking_context(const pv_box_def *def)` |
-| `box_is_strict_descendant` | function | `gui/browser_ui.c:4442` | `static int box_is_strict_descendant(const rd_doc *doc, int id, int anc)` |
-| `box_line_visible` | function | `gui/browser_ui.c:5542` | `static int box_line_visible(int style)` |
-| `box_margin_bottom` | function | `gui/browser_ui.c:5719` | `static double box_margin_bottom(const ui_theme *th, const pv_box_def *def, double cb_w)` |
-| `box_margin_top` | function | `gui/browser_ui.c:5712` | `static double box_margin_top(const ui_theme *th, const pv_box_def *def, double cb_w)` |
-| `box_path` | function | `gui/browser_ui.c:8814` | `static void box_path(cairo_t *cr, double x, double y, double w, double h, double r)` |
-| `box_path_has` | function | `gui/browser_ui.c:6031` | `static int box_path_has(const rd_doc *doc, int block_id, int want)` |
-| `box_path_of` | function | `gui/browser_ui.c:6142` | `static int box_path_of(const rd_doc *doc, int block_id, int *out)` |
-| `box_pointer_events_none` | function | `gui/browser_ui.c:11540` | `static int box_pointer_events_none(const rd_doc *doc, int block_id)` |
-| `box_shrink_width` | function | `gui/browser_ui.c:6046` | `static double box_shrink_width(cairo_t *cr, const browser_window *w,
+| `blocking` | function | `gui/browser_ui.c:8671` | `* are blocking (POLLIN guaranteed data is available). */ int flags = fcntl(out_fd, F_GETFL, 0);` |
+| `bookmark_toggle_current` | function | `gui/browser_ui.c:948` | `static void bookmark_toggle_current(browser_window *w)` |
+| `box` | function | `gui/browser_ui.c:4152` | `* declared intrinsic size reserves that box (broken-image parity);` |
+| `box_edge_px` | function | `gui/browser_ui.c:4377` | `static double box_edge_px(int wpx)` |
+| `box_forms_stacking_context` | function | `gui/browser_ui.c:9820` | `static int box_forms_stacking_context(const pv_box_def *def)` |
+| `box_is_strict_descendant` | function | `gui/browser_ui.c:4476` | `static int box_is_strict_descendant(const rd_doc *doc, int id, int anc)` |
+| `box_line_visible` | function | `gui/browser_ui.c:5614` | `static int box_line_visible(int style)` |
+| `box_margin_bottom` | function | `gui/browser_ui.c:5791` | `static double box_margin_bottom(const ui_theme *th, const pv_box_def *def, double cb_w)` |
+| `box_margin_top` | function | `gui/browser_ui.c:5784` | `static double box_margin_top(const ui_theme *th, const pv_box_def *def, double cb_w)` |
+| `box_path` | function | `gui/browser_ui.c:8926` | `static void box_path(cairo_t *cr, double x, double y, double w, double h, double r)` |
+| `box_path_has` | function | `gui/browser_ui.c:6103` | `static int box_path_has(const rd_doc *doc, int block_id, int want)` |
+| `box_path_of` | function | `gui/browser_ui.c:6223` | `static int box_path_of(const rd_doc *doc, int block_id, int *out)` |
+| `box_pointer_events_none` | function | `gui/browser_ui.c:11667` | `static int box_pointer_events_none(const rd_doc *doc, int block_id)` |
+| `box_shrink_width` | function | `gui/browser_ui.c:6118` | `static double box_shrink_width(cairo_t *cr, const browser_window *w,
                             ...` |
-| `box_transform_matrix` | function | `gui/browser_ui.c:9758` | `static void box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
+| `box_transform_matrix` | function | `gui/browser_ui.c:9870` | `static void box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
              ...` |
-| `browser_window` | struct | `gui/browser_ui.c:282` | `` |
-| `bs` | type_alias | `gui/browser_ui.c:266` | `typedef struct tab_ctx { browser_state bs;` |
-| `buffer_release` | function | `gui/browser_ui.c:583` | `static void buffer_release(void *data, struct wl_buffer *wl_buffer)` |
-| `bui_blend_operator` | function | `gui/browser_ui.c:9876` | `static cairo_operator_t bui_blend_operator(int mix_blend)` |
-| `bui_grad_color_at` | function | `gui/browser_ui.c:8856` | `static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
+| `browser_window` | struct | `gui/browser_ui.c:285` | `` |
+| `bs` | type_alias | `gui/browser_ui.c:269` | `typedef struct tab_ctx { browser_state bs;` |
+| `buffer_release` | function | `gui/browser_ui.c:586` | `static void buffer_release(void *data, struct wl_buffer *wl_buffer)` |
+| `bui_blend_operator` | function | `gui/browser_ui.c:9988` | `static cairo_operator_t bui_blend_operator(int mix_blend)` |
+| `bui_grad_color_at` | function | `gui/browser_ui.c:8968` | `static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
                    ...` |
-| `bui_paint_backdrop_blur` | function | `gui/browser_ui.c:10014` | `static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
+| `bui_paint_backdrop_blur` | function | `gui/browser_ui.c:10126` | `static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
                          ...` |
-| `bui_pop_group_composite` | function | `gui/browser_ui.c:10072` | `static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms)` |
-| `bui_skew_tan` | function | `gui/browser_ui.c:9751` | `static double bui_skew_tan(int deg)` |
-| `build_file_origin` | function | `gui/browser_ui.c:664` | `static int build_file_origin(const char *path_or_url, char *out, size_t outsz)` |
-| `build_host_filter` | function | `gui/browser_ui.c:691` | `static hb_set *build_host_filter(void)` |
-| `build_impersonate_filter` | function | `gui/browser_ui.c:741` | `static hb_set *build_impersonate_filter(void)` |
-| `build_js_filter` | function | `gui/browser_ui.c:738` | `static hb_set *build_js_filter(void)` |
-| `button_box_width` | function | `gui/browser_ui.c:7560` | `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
+| `bui_pop_group_composite` | function | `gui/browser_ui.c:10184` | `static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms)` |
+| `bui_skew_tan` | function | `gui/browser_ui.c:9863` | `static double bui_skew_tan(int deg)` |
+| `build_file_origin` | function | `gui/browser_ui.c:667` | `static int build_file_origin(const char *path_or_url, char *out, size_t outsz)` |
+| `build_host_filter` | function | `gui/browser_ui.c:694` | `static hb_set *build_host_filter(void)` |
+| `build_impersonate_optin` | function | `gui/browser_ui.c:744` | `static int build_impersonate_optin(void)` |
+| `build_js_filter` | function | `gui/browser_ui.c:741` | `static hb_set *build_js_filter(void)` |
+| `button_box_width` | function | `gui/browser_ui.c:7672` | `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
               ...` |
-| `cairo_set_dash` | function | `gui/browser_ui.c:9125` | `cairo_set_dash(cr, (double[])` |
-| `cairo_set_dash` | function | `gui/browser_ui.c:9128` | `cairo_set_dash(cr, (double[])` |
-| `cairo_set_dash` | function | `gui/browser_ui.c:9167` | `cairo_set_dash(cr, (double[])` |
-| `cairo_set_dash` | function | `gui/browser_ui.c:9170` | `cairo_set_dash(cr, (double[])` |
-| `cairo_set_dash` | function | `gui/browser_ui.c:9227` | `cairo_set_dash(cr, (double[])` |
-| `cairo_set_dash` | function | `gui/browser_ui.c:9230` | `cairo_set_dash(cr, (double[])` |
-| `cairo_set_dash` | function | `gui/browser_ui.c:9322` | `cairo_set_dash(cr, (double[])` |
-| `cairo_set_dash` | function | `gui/browser_ui.c:9324` | `cairo_set_dash(cr, (double[])` |
-| `caller` | function | `gui/browser_ui.c:11270` | `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
+| `cairo_set_dash` | function | `gui/browser_ui.c:9237` | `cairo_set_dash(cr, (double[])` |
+| `cairo_set_dash` | function | `gui/browser_ui.c:9240` | `cairo_set_dash(cr, (double[])` |
+| `cairo_set_dash` | function | `gui/browser_ui.c:9279` | `cairo_set_dash(cr, (double[])` |
+| `cairo_set_dash` | function | `gui/browser_ui.c:9282` | `cairo_set_dash(cr, (double[])` |
+| `cairo_set_dash` | function | `gui/browser_ui.c:9339` | `cairo_set_dash(cr, (double[])` |
+| `cairo_set_dash` | function | `gui/browser_ui.c:9342` | `cairo_set_dash(cr, (double[])` |
+| `cairo_set_dash` | function | `gui/browser_ui.c:9434` | `cairo_set_dash(cr, (double[])` |
+| `cairo_set_dash` | function | `gui/browser_ui.c:9436` | `cairo_set_dash(cr, (double[])` |
+| `caller` | function | `gui/browser_ui.c:11397` | `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
  * out_path ve...` |
-| `chain` | function | `gui/browser_ui.c:7072` | `* chain (the box that left the normal flow at this pen position);` |
-| `child_cont_at_level` | function | `gui/browser_ui.c:4817` | `static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid)` |
-| `children` | function | `gui/browser_ui.c:5729` | `* own content rect onto the stack so its children (text or nested boxes) place inside
+| `chain` | function | `gui/browser_ui.c:7169` | `* chain (the box that left the normal flow at this pen position);` |
+| `child_cont_at_level` | function | `gui/browser_ui.c:4851` | `static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid)` |
+| `children` | function | `gui/browser_ui.c:5801` | `* own content rect onto the stack so its children (text or nested boxes) place inside
  * it. At t...` |
-| `clear_doc` | function | `gui/browser_ui.c:1202` | `static void clear_doc(browser_window *w)` |
-| `clipboard_copy` | function | `gui/browser_ui.c:14072` | `static void clipboard_copy(browser_window *w)` |
-| `close_all_boxes` | function | `gui/browser_ui.c:4791` | `static void close_all_boxes(rc_layout *L, rc_state *s, const ui_theme *th);` |
-| `close_top_box` | function | `gui/browser_ui.c:5548` | `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)` |
-| `col` | type_alias | `gui/browser_ui.c:6265` | `typedef struct rc_defer { rc_defer_col col[RC_DEFER_COLS];` |
-| `column` | function | `gui/browser_ui.c:5937` | `*
+| `clear_doc` | function | `gui/browser_ui.c:1209` | `static void clear_doc(browser_window *w)` |
+| `clipboard_copy` | function | `gui/browser_ui.c:14199` | `static void clipboard_copy(browser_window *w)` |
+| `close_all_boxes` | function | `gui/browser_ui.c:4825` | `static void close_all_boxes(rc_layout *L, rc_state *s, const ui_theme *th);` |
+| `close_top_box` | function | `gui/browser_ui.c:5620` | `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)` |
+| `col` | type_alias | `gui/browser_ui.c:6346` | `typedef struct rc_defer { rc_defer_col col[RC_DEFER_COLS];` |
+| `column` | function | `gui/browser_ui.c:6009` | `*
  * Returns the height of the tallest column (0 when there is nothing to fragment). */
 static do...` |
-| `compositing` | function | `gui/browser_ui.c:10493` | `* * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context * (box_forms_stacking_context: opac` |
-| `compute_page_js` | function | `gui/browser_ui.c:1954` | `static int compute_page_js(const browser_window *w)` |
-| `container_box_of` | function | `gui/browser_ui.c:4493` | `static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid)` |
-| `content_font` | function | `gui/browser_ui.c:3296` | `static void content_font(cairo_t *cr, double size, int bold, int italic, int family)` |
-| `content_geometry` | function | `gui/browser_ui.c:2589` | `static void content_geometry(const browser_window *w, double *top, double *height)` |
-| `content_width` | function | `gui/browser_ui.c:2616` | `static double content_width(const browser_window *w)` |
-| `context` | function | `gui/browser_ui.c:6211` | `* side by side inside the current box context (spec/float.md). Blocks are grouped by * float_id into items (document ord` |
-| `convention` | function | `gui/browser_ui.c:9190` | `* on the 3D bevel convention (light top/left, dark right/bottom). */ int is_3d = (style == CSS_BST_GROOVE \|\| style == ` |
-| `cost` | function | `gui/browser_ui.c:15140` | `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
+| `compositing` | function | `gui/browser_ui.c:10605` | `* * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context * (box_forms_stacking_context: opac` |
+| `compute_page_js` | function | `gui/browser_ui.c:1962` | `static int compute_page_js(const browser_window *w)` |
+| `container_box_of` | function | `gui/browser_ui.c:4527` | `static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid)` |
+| `content_font` | function | `gui/browser_ui.c:3304` | `static void content_font(cairo_t *cr, double size, int bold, int italic, int family)` |
+| `content_geometry` | function | `gui/browser_ui.c:2597` | `static void content_geometry(const browser_window *w, double *top, double *height)` |
+| `content_width` | function | `gui/browser_ui.c:2624` | `static double content_width(const browser_window *w)` |
+| `context` | function | `gui/browser_ui.c:6292` | `* side by side inside the current box context (spec/float.md). Blocks are grouped by * float_id into items (document ord` |
+| `convention` | function | `gui/browser_ui.c:9302` | `* on the 3D bevel convention (light top/left, dark right/bottom). */ int is_3d = (style == CSS_BST_GROOVE \|\| style == ` |
+| `cost` | function | `gui/browser_ui.c:15267` | `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
              * cheap pages paint at...` |
-| `css_align_to_bt` | function | `gui/browser_ui.c:4333` | `static int css_align_to_bt(int align_kw)` |
-| `css_replaced_box` | function | `gui/browser_ui.c:4064` | `static int css_replaced_box(const rd_doc *doc, const rd_block *b, double avail_w,
+| `css_align_to_bt` | function | `gui/browser_ui.c:4367` | `static int css_align_to_bt(int align_kw)` |
+| `css_replaced_box` | function | `gui/browser_ui.c:4098` | `static int css_replaced_box(const rd_doc *doc, const rd_block *b, double avail_w,
                ...` |
-| `cursor_at_point` | function | `gui/browser_ui.c:11556` | `static int cursor_at_point(browser_window *w, double px, double py)` |
-| `data_device_data_offer` | function | `gui/browser_ui.c:13867` | `static void data_device_data_offer(void *data, struct wl_data_device *dev,
+| `cursor_at_point` | function | `gui/browser_ui.c:11683` | `static int cursor_at_point(browser_window *w, double px, double py)` |
+| `data_device_data_offer` | function | `gui/browser_ui.c:13994` | `static void data_device_data_offer(void *data, struct wl_data_device *dev,
                       ...` |
-| `data_device_drop` | function | `gui/browser_ui.c:13908` | `static void data_device_drop(void *d, struct wl_data_device *dev)` |
-| `data_device_enter` | function | `gui/browser_ui.c:13898` | `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
+| `data_device_drop` | function | `gui/browser_ui.c:14035` | `static void data_device_drop(void *d, struct wl_data_device *dev)` |
+| `data_device_enter` | function | `gui/browser_ui.c:14025` | `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
              ...` |
-| `data_device_leave` | function | `gui/browser_ui.c:13903` | `static void data_device_leave(void *d, struct wl_data_device *dev)` |
-| `data_device_motion` | function | `gui/browser_ui.c:13904` | `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
+| `data_device_leave` | function | `gui/browser_ui.c:14030` | `static void data_device_leave(void *d, struct wl_data_device *dev)` |
+| `data_device_motion` | function | `gui/browser_ui.c:14031` | `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
                  ...` |
-| `data_device_selection` | function | `gui/browser_ui.c:13879` | `static void data_device_selection(void *data, struct wl_data_device *dev,
+| `data_device_selection` | function | `gui/browser_ui.c:14006` | `static void data_device_selection(void *data, struct wl_data_device *dev,
                        ...` |
-| `data_offer_action` | function | `gui/browser_ui.c:13857` | `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)` |
-| `data_offer_source_actions` | function | `gui/browser_ui.c:13854` | `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)` |
-| `data_source_cancelled` | function | `gui/browser_ui.c:13919` | `static void data_source_cancelled(void *data, struct wl_data_source *src)` |
-| `data_source_send` | function | `gui/browser_ui.c:13925` | `static void data_source_send(void *data, struct wl_data_source *src,
+| `data_offer_action` | function | `gui/browser_ui.c:13984` | `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)` |
+| `data_offer_source_actions` | function | `gui/browser_ui.c:13981` | `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)` |
+| `data_source_cancelled` | function | `gui/browser_ui.c:14046` | `static void data_source_cancelled(void *data, struct wl_data_source *src)` |
+| `data_source_send` | function | `gui/browser_ui.c:14052` | `static void data_source_send(void *data, struct wl_data_source *src,
                             ...` |
-| `data_source_target` | function | `gui/browser_ui.c:13938` | `static void data_source_target(void *d, struct wl_data_source *s, const char *m)` |
-| `deco_configure` | function | `gui/browser_ui.c:12794` | `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)` |
-| `defer_append` | function | `gui/browser_ui.c:6409` | `static int defer_append(rc_defer *d, int key, int side,
+| `data_source_target` | function | `gui/browser_ui.c:14065` | `static void data_source_target(void *d, struct wl_data_source *s, const char *m)` |
+| `deco_configure` | function | `gui/browser_ui.c:12921` | `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)` |
+| `defer_append` | function | `gui/browser_ui.c:6490` | `static int defer_append(rc_defer *d, int key, int side,
                         int ml, int mlpct...` |
-| `defer_flush` | function | `gui/browser_ui.c:6443` | `static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
+| `defer_flush` | function | `gui/browser_ui.c:6524` | `static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                      ...` |
-| `defer_key_block` | function | `gui/browser_ui.c:6286` | `static int defer_key_block(const rd_block *bk)` |
-| `delay` | function | `gui/browser_ui.c:356` | `* timer delay (tab_page.next_timer_ms);` |
-| `deliver_fetch_result` | function | `gui/browser_ui.c:11908` | `static void deliver_fetch_result(browser_window *w, fetch_job *j)` |
-| `descriptors` | function | `gui/browser_ui.c:8191` | `* descriptors (especially the Wayland display fd) so the sink does * not corrupt the Wayland protocol connection — the m` |
-| `destroy_buffer` | function | `gui/browser_ui.c:589` | `static void destroy_buffer(browser_window *w)` |
-| `dies` | function | `gui/browser_ui.c:8168` | `* child dies (exec failed, device busy, daemon absent) is detected on the
+| `defer_key_block` | function | `gui/browser_ui.c:6367` | `static int defer_key_block(const rd_block *bk)` |
+| `delay` | function | `gui/browser_ui.c:359` | `* timer delay (tab_page.next_timer_ms);` |
+| `deliver_fetch_result` | function | `gui/browser_ui.c:12035` | `static void deliver_fetch_result(browser_window *w, fetch_job *j)` |
+| `descriptors` | function | `gui/browser_ui.c:8303` | `* descriptors (especially the Wayland display fd) so the sink does * not corrupt the Wayland protocol connection — the m` |
+| `destroy_buffer` | function | `gui/browser_ui.c:592` | `static void destroy_buffer(browser_window *w)` |
+| `dies` | function | `gui/browser_ui.c:8280` | `* child dies (exec failed, device busy, daemon absent) is detected on the
  * next PCM write (EPIP...` |
-| `dispatch_js_event` | function | `gui/browser_ui.c:14207` | `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
+| `dispatch_js_event` | function | `gui/browser_ui.c:14334` | `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
                            ...` |
-| `do_load` | function | `gui/browser_ui.c:1930` | `static void do_load(browser_window *w, const char *url);` |
-| `down` | function | `gui/browser_ui.c:13439` | `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void dispatch_` |
-| `drain_fetch_results` | function | `gui/browser_ui.c:11962` | `static void drain_fetch_results(browser_window *w)` |
-| `draw_clock` | function | `gui/browser_ui.c:12181` | `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
+| `do_load` | function | `gui/browser_ui.c:1938` | `static void do_load(browser_window *w, const char *url);` |
+| `down` | function | `gui/browser_ui.c:13566` | `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void dispatch_` |
+| `drain_fetch_results` | function | `gui/browser_ui.c:12089` | `static void drain_fetch_results(browser_window *w)` |
+| `draw_clock` | function | `gui/browser_ui.c:12308` | `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
                ...` |
-| `draw_hamburger` | function | `gui/browser_ui.c:12193` | `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)` |
-| `draw_hover_url` | function | `gui/browser_ui.c:12342` | `static double draw_hover_url(cairo_t *cr, browser_window *w)` |
-| `draw_menu` | function | `gui/browser_ui.c:12231` | `static void draw_menu(cairo_t *cr, browser_window *w)` |
-| `draw_omnibox` | function | `gui/browser_ui.c:12459` | `static void draw_omnibox(cairo_t *cr, browser_window *w)` |
-| `draw_reload` | function | `gui/browser_ui.c:12209` | `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)` |
-| `draw_scrollbar` | function | `gui/browser_ui.c:2685` | `static void draw_scrollbar(cairo_t *cr, const browser_window *w)` |
-| `draw_slice` | function | `gui/browser_ui.c:3358` | `static void draw_slice(cairo_t *cr, double x, double baseline, const char *s, size_t n)` |
-| `draw_tabstrip` | function | `gui/browser_ui.c:12404` | `static void draw_tabstrip(cairo_t *cr, browser_window *w)` |
-| `draw_text` | function | `gui/browser_ui.c:2800` | `static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered)` |
-| `draw_toast` | function | `gui/browser_ui.c:12374` | `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)` |
-| `drop_repl_worker` | function | `gui/browser_ui.c:2000` | `static void drop_repl_worker(browser_window *w)` |
-| `element` | function | `gui/browser_ui.c:12836` | `* cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
+| `draw_hamburger` | function | `gui/browser_ui.c:12320` | `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)` |
+| `draw_hover_url` | function | `gui/browser_ui.c:12469` | `static double draw_hover_url(cairo_t *cr, browser_window *w)` |
+| `draw_menu` | function | `gui/browser_ui.c:12358` | `static void draw_menu(cairo_t *cr, browser_window *w)` |
+| `draw_omnibox` | function | `gui/browser_ui.c:12586` | `static void draw_omnibox(cairo_t *cr, browser_window *w)` |
+| `draw_reload` | function | `gui/browser_ui.c:12336` | `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)` |
+| `draw_scrollbar` | function | `gui/browser_ui.c:2693` | `static void draw_scrollbar(cairo_t *cr, const browser_window *w)` |
+| `draw_slice` | function | `gui/browser_ui.c:3366` | `static void draw_slice(cairo_t *cr, double x, double baseline, const char *s, size_t n)` |
+| `draw_tabstrip` | function | `gui/browser_ui.c:12531` | `static void draw_tabstrip(cairo_t *cr, browser_window *w)` |
+| `draw_text` | function | `gui/browser_ui.c:2808` | `static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered)` |
+| `draw_toast` | function | `gui/browser_ui.c:12501` | `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)` |
+| `drop_repl_worker` | function | `gui/browser_ui.c:2008` | `static void drop_repl_worker(browser_window *w)` |
+| `element` | function | `gui/browser_ui.c:12963` | `* cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
  * even without...` |
-| `emit_replaced_row` | function | `gui/browser_ui.c:4073` | `static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
+| `emit_replaced_row` | function | `gui/browser_ui.c:4107` | `static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
                 ...` |
-| `ensure_buffer` | function | `gui/browser_ui.c:595` | `static int ensure_buffer(browser_window *w)` |
-| `ensure_download_dir` | function | `gui/browser_ui.c:11828` | `static int ensure_download_dir(char *out, size_t outsz)` |
-| `export_pdf` | function | `gui/browser_ui.c:11051` | `static void export_pdf(browser_window *w)` |
-| `export_png` | function | `gui/browser_ui.c:11236` | `static void export_png(browser_window *w)` |
-| `family` | type_alias | `gui/browser_ui.c:3618` | `typedef struct rc_ext { int family;` |
-| `family_face` | function | `gui/browser_ui.c:3278` | `static const char *family_face(int family)` |
-| `fbw_console_lines` | function | `gui/browser_ui.c:12953` | `static size_t fbw_console_lines(const fb_buffer *log)` |
-| `fbw_level_rgb` | function | `gui/browser_ui.c:12942` | `static void fbw_level_rgb(int level, double *r, double *g, double *b)` |
-| `fbw_split_y` | function | `gui/browser_ui.c:12906` | `static double fbw_split_y(const freebug_window *fb)` |
-| `fbw_toplevel_close` | function | `gui/browser_ui.c:13211` | `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)` |
-| `fbw_toplevel_configure` | function | `gui/browser_ui.c:13202` | `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
+| `ensure_buffer` | function | `gui/browser_ui.c:598` | `static int ensure_buffer(browser_window *w)` |
+| `ensure_download_dir` | function | `gui/browser_ui.c:11955` | `static int ensure_download_dir(char *out, size_t outsz)` |
+| `export_pdf` | function | `gui/browser_ui.c:11178` | `static void export_pdf(browser_window *w)` |
+| `export_png` | function | `gui/browser_ui.c:11363` | `static void export_png(browser_window *w)` |
+| `family` | type_alias | `gui/browser_ui.c:3626` | `typedef struct rc_ext { int family;` |
+| `family_face` | function | `gui/browser_ui.c:3286` | `static const char *family_face(int family)` |
+| `fbw_console_lines` | function | `gui/browser_ui.c:13080` | `static size_t fbw_console_lines(const fb_buffer *log)` |
+| `fbw_level_rgb` | function | `gui/browser_ui.c:13069` | `static void fbw_level_rgb(int level, double *r, double *g, double *b)` |
+| `fbw_split_y` | function | `gui/browser_ui.c:13033` | `static double fbw_split_y(const freebug_window *fb)` |
+| `fbw_toplevel_close` | function | `gui/browser_ui.c:13338` | `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)` |
+| `fbw_toplevel_configure` | function | `gui/browser_ui.c:13329` | `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
                           ...` |
-| `fbw_xdg_surface_configure` | function | `gui/browser_ui.c:13194` | `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)` |
-| `fetch_follow_navigable` | function | `gui/browser_ui.c:1290` | `static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
+| `fbw_xdg_surface_configure` | function | `gui/browser_ui.c:13321` | `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)` |
+| `fetch_follow_navigable` | function | `gui/browser_ui.c:1297` | `static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
                         ...` |
-| `fetch_job` | struct | `gui/browser_ui.c:1564` | `` |
-| `fetch_job_free` | function | `gui/browser_ui.c:1596` | `static void fetch_job_free(fetch_job *j)` |
-| `fetch_launch` | function | `gui/browser_ui.c:1688` | `static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg,
+| `fetch_job` | struct | `gui/browser_ui.c:1572` | `` |
+| `fetch_job_free` | function | `gui/browser_ui.c:1604` | `static void fetch_job_free(fetch_job *j)` |
+| `fetch_launch` | function | `gui/browser_ui.c:1696` | `static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg,
                ...` |
-| `fetch_prep` | struct | `gui/browser_ui.c:1486` | `` |
-| `fetch_thread` | function | `gui/browser_ui.c:1640` | `static void *fetch_thread(void *arg)` |
-| `fields` | function | `gui/browser_ui.c:262` | `* fields (so the 200+ render/event call sites stay unchanged);` |
-| `fill` | function | `gui/browser_ui.c:10400` | `* fill (paint_content_row's r->bg_rgb branch) cascades the SAME author * background-color as the box, but paints in the ` |
-| `find_bg_image` | function | `gui/browser_ui.c:1108` | `static const ui_bg_image *find_bg_image(const browser_window *w, const char *url)` |
-| `find_input_state` | function | `gui/browser_ui.c:1194` | `static ui_input_state *find_input_state(browser_window *w, const rd_block *blk)` |
-| `first` | function | `gui/browser_ui.c:7134` | `* flush first (no-op when nothing is deferred). */ defer_flush(cr, w, L, &s, th, content_w, doc, &df);` |
-| `flex_item_basis` | function | `gui/browser_ui.c:4739` | `static double flex_item_basis(cairo_t *cr, const browser_window *w,
+| `fetch_prep` | struct | `gui/browser_ui.c:1493` | `` |
+| `fetch_thread` | function | `gui/browser_ui.c:1648` | `static void *fetch_thread(void *arg)` |
+| `fields` | function | `gui/browser_ui.c:265` | `* fields (so the 200+ render/event call sites stay unchanged);` |
+| `fill` | function | `gui/browser_ui.c:10512` | `* fill (paint_content_row's r->bg_rgb branch) cascades the SAME author * background-color as the box, but paints in the ` |
+| `find_bg_image` | function | `gui/browser_ui.c:1115` | `static const ui_bg_image *find_bg_image(const browser_window *w, const char *url)` |
+| `find_input_state` | function | `gui/browser_ui.c:1201` | `static ui_input_state *find_input_state(browser_window *w, const rd_block *blk)` |
+| `first` | function | `gui/browser_ui.c:7236` | `* flush first (no-op when nothing is deferred). */ /* The open line beside the float is committed where it is BEFORE the` |
+| `flex_item_basis` | function | `gui/browser_ui.c:4773` | `static double flex_item_basis(cairo_t *cr, const browser_window *w,
                              ...` |
-| `flex_item_min_main` | function | `gui/browser_ui.c:4769` | `static double flex_item_min_main(cairo_t *cr, const browser_window *w,
+| `flex_item_min_main` | function | `gui/browser_ui.c:4803` | `static double flex_item_min_main(cairo_t *cr, const browser_window *w,
                           ...` |
-| `flow` | function | `gui/browser_ui.c:15118` | `* flow (counting them starved aplay). A video frame read while * overdue overwrites the held slot (standard player frame` |
-| `flow_emit_frag` | function | `gui/browser_ui.c:3647` | `static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
+| `flow` | function | `gui/browser_ui.c:15245` | `* flow (counting them starved aplay). A video frame read while * overdue overwrites the held slot (standard player frame` |
+| `flow_emit_frag` | function | `gui/browser_ui.c:3655` | `static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
                  ...` |
-| `flow_text` | function | `gui/browser_ui.c:3714` | `static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
+| `flow_text` | function | `gui/browser_ui.c:3722` | `static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                ...` |
-| `flow_text_block` | function | `gui/browser_ui.c:4176` | `static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
+| `flow_text_block` | function | `gui/browser_ui.c:4210` | `static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
                  ...` |
-| `flush_line` | function | `gui/browser_ui.c:3528` | `static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th)` |
-| `foldback_session_cookies` | function | `gui/browser_ui.c:1981` | `static void foldback_session_cookies(const char *url, const char *jar)` |
-| `font_size` | type_alias | `gui/browser_ui.c:2819` | `typedef struct rc_frag { double x, width, font_size;` |
-| `frag_styled` | function | `gui/browser_ui.c:3371` | `static int frag_styled(const rc_frag *f)` |
-| `fragment` | function | `gui/browser_ui.c:9653` | `* first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
+| `flush_line` | function | `gui/browser_ui.c:3536` | `static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th)` |
+| `foldback_session_cookies` | function | `gui/browser_ui.c:1989` | `static void foldback_session_cookies(const char *url, const char *jar)` |
+| `font_size` | type_alias | `gui/browser_ui.c:2827` | `typedef struct rc_frag { double x, width, font_size;` |
+| `frag_styled` | function | `gui/browser_ui.c:3379` | `static int frag_styled(const rc_frag *f)` |
+| `fragment` | function | `gui/browser_ui.c:9765` | `* first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
  * blk->block_id alo...` |
-| `free_images` | function | `gui/browser_ui.c:1069` | `static void free_images(browser_window *w)` |
-| `free_inputs` | function | `gui/browser_ui.c:1061` | `static void free_inputs(browser_window *w)` |
-| `free_live_page` | function | `gui/browser_ui.c:2426` | `static void free_live_page(browser_window *w)` |
-| `freebug_copy_console` | function | `gui/browser_ui.c:13950` | `static void freebug_copy_console(browser_window *w)` |
-| `freebug_destroy` | function | `gui/browser_ui.c:13256` | `static void freebug_destroy(browser_window *w)` |
-| `freebug_ensure_buffer` | function | `gui/browser_ui.c:12915` | `static int freebug_ensure_buffer(freebug_window *fb)` |
-| `freebug_eval` | function | `gui/browser_ui.c:13311` | `static void freebug_eval(browser_window *w)` |
-| `freebug_handle_key` | function | `gui/browser_ui.c:13351` | `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
+| `free_images` | function | `gui/browser_ui.c:1076` | `static void free_images(browser_window *w)` |
+| `free_inputs` | function | `gui/browser_ui.c:1068` | `static void free_inputs(browser_window *w)` |
+| `free_live_page` | function | `gui/browser_ui.c:2434` | `static void free_live_page(browser_window *w)` |
+| `freebug_copy_console` | function | `gui/browser_ui.c:14077` | `static void freebug_copy_console(browser_window *w)` |
+| `freebug_destroy` | function | `gui/browser_ui.c:13383` | `static void freebug_destroy(browser_window *w)` |
+| `freebug_ensure_buffer` | function | `gui/browser_ui.c:13042` | `static int freebug_ensure_buffer(freebug_window *fb)` |
+| `freebug_eval` | function | `gui/browser_ui.c:13438` | `static void freebug_eval(browser_window *w)` |
+| `freebug_handle_key` | function | `gui/browser_ui.c:13478` | `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
                              ...` |
-| `freebug_hide` | function | `gui/browser_ui.c:13178` | `static void freebug_hide(browser_window *w)` |
-| `freebug_is_open` | function | `gui/browser_ui.c:13267` | `static int freebug_is_open(const browser_window *w)` |
-| `freebug_owns_surface` | function | `gui/browser_ui.c:13263` | `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)` |
-| `freebug_paint` | function | `gui/browser_ui.c:12966` | `static void freebug_paint(freebug_window *fb)` |
-| `freebug_pointer_axis` | function | `gui/browser_ui.c:13427` | `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)` |
-| `freebug_pointer_button` | function | `gui/browser_ui.c:13386` | `static void freebug_pointer_button(browser_window *w, uint32_t serial,
+| `freebug_hide` | function | `gui/browser_ui.c:13305` | `static void freebug_hide(browser_window *w)` |
+| `freebug_is_open` | function | `gui/browser_ui.c:13394` | `static int freebug_is_open(const browser_window *w)` |
+| `freebug_owns_surface` | function | `gui/browser_ui.c:13390` | `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)` |
+| `freebug_paint` | function | `gui/browser_ui.c:13093` | `static void freebug_paint(freebug_window *fb)` |
+| `freebug_pointer_axis` | function | `gui/browser_ui.c:13554` | `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)` |
+| `freebug_pointer_button` | function | `gui/browser_ui.c:13513` | `static void freebug_pointer_button(browser_window *w, uint32_t serial,
                           ...` |
-| `freebug_pointer_motion` | function | `gui/browser_ui.c:13405` | `static void freebug_pointer_motion(browser_window *w)` |
-| `freebug_redraw` | function | `gui/browser_ui.c:13174` | `static void freebug_redraw(browser_window *w)` |
-| `freebug_redraw_fb` | function | `gui/browser_ui.c:13165` | `static void freebug_redraw_fb(freebug_window *fb)` |
-| `freebug_repl_worker` | function | `gui/browser_ui.c:13274` | `static tab *freebug_repl_worker(browser_window *w)` |
-| `freebug_show` | function | `gui/browser_ui.c:13221` | `static void freebug_show(browser_window *w)` |
-| `freebug_toggle` | function | `gui/browser_ui.c:13251` | `static void freebug_toggle(browser_window *w)` |
-| `freebug_window` | type_alias | `gui/browser_ui.c:532` | `typedef struct freebug_window freebug_window;` |
-| `freebug_window` | struct | `gui/browser_ui.c:12883` | `` |
-| `freedom_write_dir` | function | `gui/browser_ui.c:746` | `static int freedom_write_dir(char *out, size_t cap)` |
-| `go_omnibox` | function | `gui/browser_ui.c:13518` | `static void go_omnibox(browser_window *w)` |
-| `gui_subresource_fetch` | function | `gui/browser_ui.c:1368` | `static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
+| `freebug_pointer_motion` | function | `gui/browser_ui.c:13532` | `static void freebug_pointer_motion(browser_window *w)` |
+| `freebug_redraw` | function | `gui/browser_ui.c:13301` | `static void freebug_redraw(browser_window *w)` |
+| `freebug_redraw_fb` | function | `gui/browser_ui.c:13292` | `static void freebug_redraw_fb(freebug_window *fb)` |
+| `freebug_repl_worker` | function | `gui/browser_ui.c:13401` | `static tab *freebug_repl_worker(browser_window *w)` |
+| `freebug_show` | function | `gui/browser_ui.c:13348` | `static void freebug_show(browser_window *w)` |
+| `freebug_toggle` | function | `gui/browser_ui.c:13378` | `static void freebug_toggle(browser_window *w)` |
+| `freebug_window` | type_alias | `gui/browser_ui.c:535` | `typedef struct freebug_window freebug_window;` |
+| `freebug_window` | struct | `gui/browser_ui.c:13010` | `` |
+| `freedom_write_dir` | function | `gui/browser_ui.c:753` | `static int freedom_write_dir(char *out, size_t cap)` |
+| `go_omnibox` | function | `gui/browser_ui.c:13645` | `static void go_omnibox(browser_window *w)` |
+| `gui_subresource_fetch` | function | `gui/browser_ui.c:1375` | `static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
                ...` |
-| `gutter` | function | `gui/browser_ui.c:551` | `* gutter (content_margin) is intentionally left unzoomed, like a browser's text
+| `gutter` | function | `gui/browser_ui.c:554` | `* gutter (content_margin) is intentionally left unzoomed, like a browser's text
  * zoom. The PDF ...` |
-| `h` | type_alias | `gui/browser_ui.c:2899` | `typedef struct rc_box { double x, top, w, h;` |
-| `handle_key_press` | function | `gui/browser_ui.c:14264` | `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
+| `h` | type_alias | `gui/browser_ui.c:2907` | `typedef struct rc_box { double x, top, w, h;` |
+| `handle_key_press` | function | `gui/browser_ui.c:14391` | `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
              ...` |
-| `have` | function | `gui/browser_ui.c:7229` | `* as they always have (spec/float.md §6b.3). */ rc_float_clear(&s);` |
-| `hb_is_allowlisted` | function | `gui/browser_ui.c:1449` | `&& hb_is_allowlisted(w->hosts, ihost);` |
-| `host_from_url` | function | `gui/browser_ui.c:1004` | `static int host_from_url(const char *url, char *out, size_t outsz)` |
-| `hot_actionable` | function | `gui/browser_ui.c:2763` | `static int hot_actionable(const browser_window *w, ui_hot hot)` |
-| `html_center_offset` | function | `gui/browser_ui.c:2626` | `static double html_center_offset(const browser_window *w)` |
-| `in` | function | `gui/browser_ui.c:11393` | `* a line landed in (Stage 3), which no other dump shows. Text stays out (it is * --dump-dom's job);` |
-| `init_net_config` | function | `gui/browser_ui.c:979` | `static void init_net_config(browser_window *w)` |
-| `input_box_width` | function | `gui/browser_ui.c:7551` | `static double input_box_width(double content_w)` |
-| `input_is_editable` | function | `gui/browser_ui.c:1055` | `static int input_is_editable(int input_type)` |
-| `input_is_interactive` | function | `gui/browser_ui.c:1049` | `static int input_is_interactive(int input_type)` |
-| `insert_pasted_text` | function | `gui/browser_ui.c:14008` | `static void insert_pasted_text(browser_window *w, const char *text, size_t len)` |
-| `is_http_url` | function | `gui/browser_ui.c:993` | `static int is_http_url(const char *s)` |
-| `is_https_url` | function | `gui/browser_ui.c:989` | `static int is_https_url(const char *s)` |
-| `it` | function | `gui/browser_ui.c:7296` | `* column: flush first so the column lands above it (source order), * then move the anchor — the image bottom is the cont` |
-| `item_at_level` | function | `gui/browser_ui.c:4802` | `static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid)` |
-| `item_declared_basis` | function | `gui/browser_ui.c:4683` | `static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
+| `have` | function | `gui/browser_ui.c:7335` | `* as they always have (spec/float.md §6b.3). The line still open beside * the previous float is committed first, at its ` |
+| `hb_is_allowlisted` | function | `gui/browser_ui.c:1456` | `&& hb_is_allowlisted(w->hosts, ihost);` |
+| `host_from_url` | function | `gui/browser_ui.c:1011` | `static int host_from_url(const char *url, char *out, size_t outsz)` |
+| `hot_actionable` | function | `gui/browser_ui.c:2771` | `static int hot_actionable(const browser_window *w, ui_hot hot)` |
+| `html_center_offset` | function | `gui/browser_ui.c:2634` | `static double html_center_offset(const browser_window *w)` |
+| `in` | function | `gui/browser_ui.c:11520` | `* a line landed in (Stage 3), which no other dump shows. Text stays out (it is * --dump-dom's job);` |
+| `init_net_config` | function | `gui/browser_ui.c:986` | `static void init_net_config(browser_window *w)` |
+| `input_box_width` | function | `gui/browser_ui.c:7663` | `static double input_box_width(double content_w)` |
+| `input_is_editable` | function | `gui/browser_ui.c:1062` | `static int input_is_editable(int input_type)` |
+| `input_is_interactive` | function | `gui/browser_ui.c:1056` | `static int input_is_interactive(int input_type)` |
+| `insert_pasted_text` | function | `gui/browser_ui.c:14135` | `static void insert_pasted_text(browser_window *w, const char *text, size_t len)` |
+| `is_http_url` | function | `gui/browser_ui.c:1000` | `static int is_http_url(const char *s)` |
+| `is_https_url` | function | `gui/browser_ui.c:996` | `static int is_https_url(const char *s)` |
+| `it` | function | `gui/browser_ui.c:7408` | `* column: flush first so the column lands above it (source order), * then move the anchor — the image bottom is the cont` |
+| `item_at_level` | function | `gui/browser_ui.c:4836` | `static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid)` |
+| `item_declared_basis` | function | `gui/browser_ui.c:4717` | `static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
                       ...` |
-| `item_root_box` | function | `gui/browser_ui.c:4324` | `static int item_root_box(const rd_doc *doc, size_t b0, size_t b1)` |
-| `item_root_box_in` | function | `gui/browser_ui.c:4288` | `static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox)` |
-| `item_sides` | struct | `gui/browser_ui.c:4413` | `` |
-| `item_sides_at_level` | function | `gui/browser_ui.c:4464` | `static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
+| `item_root_box` | function | `gui/browser_ui.c:4358` | `static int item_root_box(const rd_doc *doc, size_t b0, size_t b1)` |
+| `item_root_box_in` | function | `gui/browser_ui.c:4322` | `static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox)` |
+| `item_sides` | struct | `gui/browser_ui.c:4447` | `` |
+| `item_sides_at_level` | function | `gui/browser_ui.c:4498` | `static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
                   ...` |
-| `key` | type_alias | `gui/browser_ui.c:6258` | `typedef struct rc_defer_col { int key;` |
-| `key` | function | `gui/browser_ui.c:7215` | `* founders splits by key (stories, rail, footer nav each take * their column);` |
-| `key_is_repeatable` | function | `gui/browser_ui.c:14594` | `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)` |
-| `key_repeat_arm` | function | `gui/browser_ui.c:14610` | `static void key_repeat_arm(browser_window *w, uint32_t key)` |
-| `key_repeat_fire` | function | `gui/browser_ui.c:14634` | `static void key_repeat_fire(browser_window *w)` |
-| `key_repeat_stop` | function | `gui/browser_ui.c:14623` | `static void key_repeat_stop(browser_window *w)` |
-| `key_sym_to_js_key` | function | `gui/browser_ui.c:14156` | `static const char *key_sym_to_js_key(xkb_keysym_t sym)` |
-| `key_sym_to_keycode` | function | `gui/browser_ui.c:14182` | `static int key_sym_to_keycode(xkb_keysym_t sym)` |
-| `keyboard_enter` | function | `gui/browser_ui.c:14141` | `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
+| `key` | type_alias | `gui/browser_ui.c:6339` | `typedef struct rc_defer_col { int key;` |
+| `key` | function | `gui/browser_ui.c:7321` | `* founders splits by key (stories, rail, footer nav each take * their column);` |
+| `key_is_repeatable` | function | `gui/browser_ui.c:14721` | `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)` |
+| `key_repeat_arm` | function | `gui/browser_ui.c:14737` | `static void key_repeat_arm(browser_window *w, uint32_t key)` |
+| `key_repeat_fire` | function | `gui/browser_ui.c:14761` | `static void key_repeat_fire(browser_window *w)` |
+| `key_repeat_stop` | function | `gui/browser_ui.c:14750` | `static void key_repeat_stop(browser_window *w)` |
+| `key_sym_to_js_key` | function | `gui/browser_ui.c:14283` | `static const char *key_sym_to_js_key(xkb_keysym_t sym)` |
+| `key_sym_to_keycode` | function | `gui/browser_ui.c:14309` | `static int key_sym_to_keycode(xkb_keysym_t sym)` |
+| `keyboard_enter` | function | `gui/browser_ui.c:14268` | `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                         ...` |
-| `keyboard_key` | function | `gui/browser_ui.c:14648` | `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
+| `keyboard_key` | function | `gui/browser_ui.c:14775` | `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                   ...` |
-| `keyboard_keymap` | function | `gui/browser_ui.c:14120` | `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
+| `keyboard_keymap` | function | `gui/browser_ui.c:14247` | `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
                             uint...` |
-| `keyboard_leave` | function | `gui/browser_ui.c:14148` | `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)` |
-| `keyboard_modifiers` | function | `gui/browser_ui.c:14688` | `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
+| `keyboard_leave` | function | `gui/browser_ui.c:14275` | `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)` |
+| `keyboard_modifiers` | function | `gui/browser_ui.c:14815` | `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                  ...` |
-| `keyboard_repeat_info` | function | `gui/browser_ui.c:14697` | `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)` |
-| `kind` | type_alias | `gui/browser_ui.c:2879` | `typedef struct rc_row { rc_rowkind kind;` |
-| `layer` | function | `gui/browser_ui.c:9079` | `* first layer (CSS multi-background: the first declared URL is the topmost) * and OVER bg_rgb/gradient, UNDER the border` |
-| `layout` | function | `gui/browser_ui.c:1120` | `* shared by layout (row height) and paint (blit), so they cannot drift apart. */
+| `keyboard_repeat_info` | function | `gui/browser_ui.c:14824` | `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)` |
+| `kind` | type_alias | `gui/browser_ui.c:2887` | `typedef struct rc_row { rc_rowkind kind;` |
+| `layer` | function | `gui/browser_ui.c:9191` | `* first layer (CSS multi-background: the first declared URL is the topmost) * and OVER bg_rgb/gradient, UNDER the border` |
+| `layout` | function | `gui/browser_ui.c:1127` | `* shared by layout (row height) and paint (blit), so they cannot drift apart. */
 static int image...` |
-| `layout_container` | function | `gui/browser_ui.c:4886` | `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
+| `layout_container` | function | `gui/browser_ui.c:4940` | `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 ...` |
-| `layout_doc` | function | `gui/browser_ui.c:7023` | `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
+| `layout_doc` | function | `gui/browser_ui.c:7120` | `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                   ...` |
-| `layout_float_band` | function | `gui/browser_ui.c:6664` | `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
+| `layout_float_band` | function | `gui/browser_ui.c:6745` | `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                ...` |
-| `limits` | function | `gui/browser_ui.c:10302` | `* documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
+| `limits` | function | `gui/browser_ui.c:10414` | `* documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
  * grouped this w...` |
-| `line` | function | `gui/browser_ui.c:3781` | `* its neighbours on the line (spec/page_view.md "Colapso de espacio en el borde * entre runs"). Read from src, the same ` |
-| `line_desc` | type_alias | `gui/browser_ui.c:3043` | `typedef struct rc_state { double cur_top, pending_gap, pen_x, line_asc, line_desc;` |
-| `line_limit` | function | `gui/browser_ui.c:3225` | `static double line_limit(const rc_state *s, double content_w)` |
-| `link_at_point` | function | `gui/browser_ui.c:11433` | `static const char *link_at_point(browser_window *w, double px, double py)` |
-| `load_bg_images` | function | `gui/browser_ui.c:1893` | `static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx)` |
-| `load_current` | function | `gui/browser_ui.c:13505` | `static void load_current(browser_window *w)` |
-| `load_favorites` | function | `gui/browser_ui.c:839` | `static void load_favorites(browser_window *w)` |
-| `load_host_file` | function | `gui/browser_ui.c:674` | `static void load_host_file(hb_set *s, const char *dir, const char *name, hb_list list)` |
-| `load_images` | function | `gui/browser_ui.c:1809` | `static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx)` |
-| `loop` | function | `gui/browser_ui.c:13999` | `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately mig` |
-| `main` | function | `gui/browser_ui.c:488` | `* * Feeder thread: downloads TS segments and writes them to the decoder pipe * so the main (Wayland) thread never blocks` |
-| `measure_item_content_w` | function | `gui/browser_ui.c:4652` | `static double measure_item_content_w(cairo_t *cr, const browser_window *w,
+| `line` | function | `gui/browser_ui.c:3789` | `* its neighbours on the line (spec/page_view.md "Colapso de espacio en el borde * entre runs"). Read from src, the same ` |
+| `line_desc` | type_alias | `gui/browser_ui.c:3051` | `typedef struct rc_state { double cur_top, pending_gap, pen_x, line_asc, line_desc;` |
+| `line_limit` | function | `gui/browser_ui.c:3233` | `static double line_limit(const rc_state *s, double content_w)` |
+| `link_at_point` | function | `gui/browser_ui.c:11560` | `static const char *link_at_point(browser_window *w, double px, double py)` |
+| `load_bg_images` | function | `gui/browser_ui.c:1901` | `static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx)` |
+| `load_current` | function | `gui/browser_ui.c:13632` | `static void load_current(browser_window *w)` |
+| `load_favorites` | function | `gui/browser_ui.c:846` | `static void load_favorites(browser_window *w)` |
+| `load_host_file` | function | `gui/browser_ui.c:677` | `static void load_host_file(hb_set *s, const char *dir, const char *name, hb_list list)` |
+| `load_images` | function | `gui/browser_ui.c:1817` | `static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx)` |
+| `loop` | function | `gui/browser_ui.c:14126` | `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately mig` |
+| `main` | function | `gui/browser_ui.c:491` | `* * Feeder thread: downloads TS segments and writes them to the decoder pipe * so the main (Wayland) thread never blocks` |
+| `measure_item_content_w` | function | `gui/browser_ui.c:4686` | `static double measure_item_content_w(cairo_t *cr, const browser_window *w,
                       ...` |
-| `memory` | function | `gui/browser_ui.c:11711` | `* memory (the href pointer, not its contents, was all the old code preserved). */
+| `memory` | function | `gui/browser_ui.c:11838` | `* memory (the href pointer, not its contents, was all the old code preserved). */
 static void dis...` |
-| `menu_item_checked` | function | `gui/browser_ui.c:12049` | `static int menu_item_checked(const browser_window *w, size_t i)` |
-| `menu_item_toggle` | function | `gui/browser_ui.c:12071` | `static void menu_item_toggle(browser_window *w, size_t i)` |
-| `menu_panel_rect` | function | `gui/browser_ui.c:2774` | `static void menu_panel_rect(const browser_window *w, double *x, double *y,
+| `menu_item_checked` | function | `gui/browser_ui.c:12176` | `static int menu_item_checked(const browser_window *w, size_t i)` |
+| `menu_item_toggle` | function | `gui/browser_ui.c:12198` | `static void menu_item_toggle(browser_window *w, size_t i)` |
+| `menu_panel_rect` | function | `gui/browser_ui.c:2782` | `static void menu_panel_rect(const browser_window *w, double *x, double *y,
                       ...` |
-| `mime_is_text` | function | `gui/browser_ui.c:13836` | `static int mime_is_text(const char *mime)` |
-| `mr` | type_alias | `gui/browser_ui.c:4413` | `typedef struct item_sides { double ml, mr;` |
-| `multicol_fragment` | function | `gui/browser_ui.c:5539` | `static double multicol_fragment(rc_layout *L, const rc_open_box *ob, double content_bottom);` |
-| `nested_cont_basis` | function | `gui/browser_ui.c:4697` | `static double nested_cont_basis(cairo_t *cr, const browser_window *w,
+| `mime_is_text` | function | `gui/browser_ui.c:13963` | `static int mime_is_text(const char *mime)` |
+| `mr` | type_alias | `gui/browser_ui.c:4447` | `typedef struct item_sides { double ml, mr;` |
+| `multicol_fragment` | function | `gui/browser_ui.c:5611` | `static double multicol_fragment(rc_layout *L, const rc_open_box *ob, double content_bottom);` |
+| `nested_cont_basis` | function | `gui/browser_ui.c:4731` | `static double nested_cont_basis(cairo_t *cr, const browser_window *w,
                            ...` |
-| `newtab_x` | function | `gui/browser_ui.c:2553` | `static double newtab_x(const browser_window *w)` |
-| `node_at_point` | function | `gui/browser_ui.c:11619` | `static dom_node_id node_at_point(browser_window *w, double px, double py)` |
-| `now_ms` | function | `gui/browser_ui.c:145` | `static uint64_t now_ms(void)` |
-| `offset` | function | `gui/browser_ui.c:155` | `* offset (labels and the flag live in one place, no magic indices);` |
-| `omni_refresh` | function | `gui/browser_ui.c:885` | `static void omni_refresh(browser_window *w)` |
-| `open_line` | function | `gui/browser_ui.c:3599` | `static void open_line(rc_layout *L, rc_state *s)` |
-| `open_line_height` | function | `gui/browser_ui.c:3586` | `static double open_line_height(const rc_state *s, const ui_theme *th)` |
-| `origin` | function | `gui/browser_ui.c:11315` | `* top_url is the page origin (https or file://);` |
-| `ov_box_bounds` | function | `gui/browser_ui.c:9609` | `static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out)` |
-| `ov_box_clips` | function | `gui/browser_ui.c:9581` | `static int ov_box_clips(const pv_box_def *d)` |
-| `ov_collect_chain` | function | `gui/browser_ui.c:9588` | `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)` |
-| `ov_content_rect` | function | `gui/browser_ui.c:9633` | `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
+| `newtab_x` | function | `gui/browser_ui.c:2561` | `static double newtab_x(const browser_window *w)` |
+| `node_at_point` | function | `gui/browser_ui.c:11746` | `static dom_node_id node_at_point(browser_window *w, double px, double py)` |
+| `now_ms` | function | `gui/browser_ui.c:148` | `static uint64_t now_ms(void)` |
+| `offset` | function | `gui/browser_ui.c:158` | `* offset (labels and the flag live in one place, no magic indices);` |
+| `omni_refresh` | function | `gui/browser_ui.c:892` | `static void omni_refresh(browser_window *w)` |
+| `open_line` | function | `gui/browser_ui.c:3607` | `static void open_line(rc_layout *L, rc_state *s)` |
+| `open_line_height` | function | `gui/browser_ui.c:3594` | `static double open_line_height(const rc_state *s, const ui_theme *th)` |
+| `origin` | function | `gui/browser_ui.c:11442` | `* top_url is the page origin (https or file://);` |
+| `ov_box_bounds` | function | `gui/browser_ui.c:9721` | `static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out)` |
+| `ov_box_clips` | function | `gui/browser_ui.c:9693` | `static int ov_box_clips(const pv_box_def *d)` |
+| `ov_collect_chain` | function | `gui/browser_ui.c:9700` | `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)` |
+| `ov_content_rect` | function | `gui/browser_ui.c:9745` | `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
                             do...` |
-| `own` | function | `gui/browser_ui.c:5437` | `* root box of its own (rb < 0) the walk must still stop at the * container's box, or it re-opens the container (and its ` |
-| `page_js_host_allowlisted` | function | `gui/browser_ui.c:1948` | `static int page_js_host_allowlisted(const browser_window *w)` |
-| `paint` | function | `gui/browser_ui.c:12493` | `static void paint(browser_window *w)` |
-| `paint_bg_layer` | function | `gui/browser_ui.c:8919` | `static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
+| `own` | function | `gui/browser_ui.c:5509` | `* root box of its own (rb < 0) the walk must still stop at the * container's box, or it re-opens the container (and its ` |
+| `page_js_host_allowlisted` | function | `gui/browser_ui.c:1956` | `static int page_js_host_allowlisted(const browser_window *w)` |
+| `paint` | function | `gui/browser_ui.c:12620` | `static void paint(browser_window *w)` |
+| `paint_bg_layer` | function | `gui/browser_ui.c:9031` | `static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
                ...` |
-| `paint_box_and_direct_rows` | function | `gui/browser_ui.c:10411` | `static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
+| `paint_box_and_direct_rows` | function | `gui/browser_ui.c:10523` | `static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
        ...` |
-| `paint_box_decoration` | function | `gui/browser_ui.c:8963` | `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
+| `paint_box_decoration` | function | `gui/browser_ui.c:9075` | `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
            ...` |
-| `paint_box_decoration_grouped` | function | `gui/browser_ui.c:10371` | `static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
+| `paint_box_decoration_grouped` | function | `gui/browser_ui.c:10483` | `static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                         ...` |
-| `paint_content_row` | function | `gui/browser_ui.c:9393` | `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
+| `paint_content_row` | function | `gui/browser_ui.c:9505` | `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                ...` |
-| `paint_deco_line` | function | `gui/browser_ui.c:9288` | `static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
+| `paint_deco_line` | function | `gui/browser_ui.c:9400` | `static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
                        ...` |
-| `paint_inline_replaced` | function | `gui/browser_ui.c:9373` | `static void paint_inline_replaced(cairo_t *cr, browser_window *w,
+| `paint_inline_replaced` | function | `gui/browser_ui.c:9485` | `static void paint_inline_replaced(cairo_t *cr, browser_window *w,
                                ...` |
-| `paint_nested_children` | function | `gui/browser_ui.c:10695` | `static void paint_nested_children(cairo_t *cr, browser_window *w,
+| `paint_nested_children` | function | `gui/browser_ui.c:10822` | `static void paint_nested_children(cairo_t *cr, browser_window *w,
                                ...` |
-| `paint_positioned_one` | function | `gui/browser_ui.c:10506` | `static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
+| `paint_positioned_one` | function | `gui/browser_ui.c:10618` | `static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
             ...` |
-| `paint_structured` | function | `gui/browser_ui.c:10728` | `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
+| `paint_structured` | function | `gui/browser_ui.c:10855` | `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 ...` |
-| `paint_svg_at` | function | `gui/browser_ui.c:9344` | `static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
+| `paint_svg_at` | function | `gui/browser_ui.c:9456` | `static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
                          doub...` |
-| `paint_video_row` | function | `gui/browser_ui.c:8634` | `static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
+| `paint_video_row` | function | `gui/browser_ui.c:8746` | `static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
                 ...` |
-| `path` | function | `gui/browser_ui.c:5207` | `*
+| `path` | function | `gui/browser_ui.c:5282` | `*
          * Only a SYNTHESISED table grid takes this path (cdv.is_table), and only when
         ...` |
-| `place_inline_replaced` | function | `gui/browser_ui.c:4009` | `static int place_inline_replaced(rc_layout *L, rc_state *s, const ui_theme *th,
+| `place_inline_replaced` | function | `gui/browser_ui.c:4042` | `static int place_inline_replaced(rc_layout *L, rc_state *s, const ui_theme *th,
                  ...` |
-| `position_doc` | function | `gui/browser_ui.c:7394` | `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
+| `position_doc` | function | `gui/browser_ui.c:7506` | `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
                 ...` |
-| `prepare_fetch` | function | `gui/browser_ui.c:1495` | `static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
+| `prepare_fetch` | function | `gui/browser_ui.c:1502` | `static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
                     ...` |
-| `presentation` | function | `gui/browser_ui.c:12069` | `* affect presentation (a repaint, which re-runs layout, suffices);` |
-| `proceed` | function | `gui/browser_ui.c:1492` | `* may proceed (cfg and pr->allowlisted are then set);` |
-| `produced` | function | `gui/browser_ui.c:3697` | `* href tags every fragment produced (NULL for non-link runs) so a later hit-test * can recover the click target without ` |
-| `profile_sync` | function | `gui/browser_ui.c:916` | `static void profile_sync(browser_window *w)` |
-| `proxy` | function | `gui/browser_ui.c:976` | `* and enable each proxy ("1" => the default port);` |
-| `proxy_addr_from_env` | function | `gui/browser_ui.c:965` | `static int proxy_addr_from_env(const char *envname, const char *deflt,
+| `presentation` | function | `gui/browser_ui.c:12196` | `* affect presentation (a repaint, which re-runs layout, suffices);` |
+| `proceed` | function | `gui/browser_ui.c:1499` | `* may proceed (cfg and pr->allowlisted are then set);` |
+| `produced` | function | `gui/browser_ui.c:3705` | `* href tags every fragment produced (NULL for non-link runs) so a later hit-test * can recover the click target without ` |
+| `profile_sync` | function | `gui/browser_ui.c:923` | `static void profile_sync(browser_window *w)` |
+| `proxy` | function | `gui/browser_ui.c:983` | `* and enable each proxy ("1" => the default port);` |
+| `proxy_addr_from_env` | function | `gui/browser_ui.c:972` | `static int proxy_addr_from_env(const char *envname, const char *deflt,
                           ...` |
-| `ptr_axis` | function | `gui/browser_ui.c:13796` | `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
+| `ptr_axis` | function | `gui/browser_ui.c:13923` | `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32...` |
-| `ptr_button` | function | `gui/browser_ui.c:13563` | `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
+| `ptr_button` | function | `gui/browser_ui.c:13690` | `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
               ...` |
-| `ptr_enter` | function | `gui/browser_ui.c:13445` | `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
+| `ptr_enter` | function | `gui/browser_ui.c:13572` | `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_...` |
-| `ptr_frame` | function | `gui/browser_ui.c:13820` | `static void ptr_frame(void *d, struct wl_pointer *p)` |
-| `ptr_leave` | function | `gui/browser_ui.c:13463` | `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)` |
-| `ptr_motion` | function | `gui/browser_ui.c:13480` | `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)` |
-| `rc_add_box` | function | `gui/browser_ui.c:3239` | `static rc_box *rc_add_box(rc_layout *L)` |
-| `rc_add_frag` | function | `gui/browser_ui.c:3251` | `static rc_frag *rc_add_frag(rc_layout *L)` |
-| `rc_add_row` | function | `gui/browser_ui.c:3266` | `static rc_row *rc_add_row(rc_layout *L)` |
-| `rc_box` | struct | `gui/browser_ui.c:2899` | `` |
-| `rc_box_context` | function | `gui/browser_ui.c:5685` | `static void rc_box_context(const rc_state *s, double content_w,
+| `ptr_frame` | function | `gui/browser_ui.c:13947` | `static void ptr_frame(void *d, struct wl_pointer *p)` |
+| `ptr_leave` | function | `gui/browser_ui.c:13590` | `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)` |
+| `ptr_motion` | function | `gui/browser_ui.c:13607` | `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)` |
+| `rc_add_box` | function | `gui/browser_ui.c:3247` | `static rc_box *rc_add_box(rc_layout *L)` |
+| `rc_add_frag` | function | `gui/browser_ui.c:3259` | `static rc_frag *rc_add_frag(rc_layout *L)` |
+| `rc_add_row` | function | `gui/browser_ui.c:3274` | `static rc_row *rc_add_row(rc_layout *L)` |
+| `rc_box` | struct | `gui/browser_ui.c:2907` | `` |
+| `rc_box_context` | function | `gui/browser_ui.c:5757` | `static void rc_box_context(const rc_state *s, double content_w,
                            double...` |
-| `rc_box_copy_decoration` | function | `gui/browser_ui.c:4363` | `static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def)` |
-| `rc_defer` | struct | `gui/browser_ui.c:6265` | `` |
-| `rc_defer_col` | struct | `gui/browser_ui.c:6258` | `` |
-| `rc_ext` | struct | `gui/browser_ui.c:3618` | `` |
-| `rc_float_bottom` | function | `gui/browser_ui.c:3138` | `static double rc_float_bottom(const rc_state *s)` |
-| `rc_float_clear` | function | `gui/browser_ui.c:3147` | `static void rc_float_clear(rc_state *s)` |
-| `rc_float_fit_line` | function | `gui/browser_ui.c:3206` | `static void rc_float_fit_line(rc_state *s, double line_h)` |
-| `rc_float_refresh` | function | `gui/browser_ui.c:3160` | `static void rc_float_refresh(rc_state *s, double line_h)` |
-| `rc_frag` | struct | `gui/browser_ui.c:2820` | `` |
-| `rc_free` | function | `gui/browser_ui.c:3230` | `static void rc_free(rc_layout *L)` |
-| `rc_layout` | struct | `gui/browser_ui.c:2950` | `` |
-| `rc_open_box` | struct | `gui/browser_ui.c:2986` | `` |
-| `rc_row` | struct | `gui/browser_ui.c:2880` | `` |
-| `rc_rowkind` | enum | `gui/browser_ui.c:2878` | `` |
-| `rc_state` | struct | `gui/browser_ui.c:3044` | `` |
-| `rd_build` | function | `gui/browser_ui.c:7955` | `* rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr, rgb_from_packed(b-` |
-| `read_file` | function | `gui/browser_ui.c:625` | `static char *read_file(const char *path, size_t *out_len)` |
-| `rebuild_inputs` | function | `gui/browser_ui.c:1169` | `static void rebuild_inputs(browser_window *w)` |
-| `reconcile_boxes` | function | `gui/browser_ui.c:6128` | `static void reconcile_boxes(cairo_t *cr, const browser_window *w,
+| `rc_box_copy_decoration` | function | `gui/browser_ui.c:4397` | `static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def)` |
+| `rc_defer` | struct | `gui/browser_ui.c:6346` | `` |
+| `rc_defer_col` | struct | `gui/browser_ui.c:6339` | `` |
+| `rc_ext` | struct | `gui/browser_ui.c:3626` | `` |
+| `rc_float_bottom` | function | `gui/browser_ui.c:3146` | `static double rc_float_bottom(const rc_state *s)` |
+| `rc_float_clear` | function | `gui/browser_ui.c:3155` | `static void rc_float_clear(rc_state *s)` |
+| `rc_float_fit_line` | function | `gui/browser_ui.c:3214` | `static void rc_float_fit_line(rc_state *s, double line_h)` |
+| `rc_float_refresh` | function | `gui/browser_ui.c:3168` | `static void rc_float_refresh(rc_state *s, double line_h)` |
+| `rc_frag` | struct | `gui/browser_ui.c:2828` | `` |
+| `rc_free` | function | `gui/browser_ui.c:3238` | `static void rc_free(rc_layout *L)` |
+| `rc_layout` | struct | `gui/browser_ui.c:2958` | `` |
+| `rc_open_box` | struct | `gui/browser_ui.c:2994` | `` |
+| `rc_row` | struct | `gui/browser_ui.c:2888` | `` |
+| `rc_rowkind` | enum | `gui/browser_ui.c:2886` | `` |
+| `rc_state` | struct | `gui/browser_ui.c:3052` | `` |
+| `rd_build` | function | `gui/browser_ui.c:8067` | `* rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr, rgb_from_packed(b-` |
+| `read_file` | function | `gui/browser_ui.c:628` | `static char *read_file(const char *path, size_t *out_len)` |
+| `rebuild_inputs` | function | `gui/browser_ui.c:1176` | `static void rebuild_inputs(browser_window *w)` |
+| `reconcile_boxes` | function | `gui/browser_ui.c:6209` | `static void reconcile_boxes(cairo_t *cr, const browser_window *w,
                             rc_...` |
-| `reconcile_boxes_below` | function | `gui/browser_ui.c:6055` | `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
+| `reconcile_boxes_below` | function | `gui/browser_ui.c:6127` | `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                          ...` |
-| `rect` | function | `gui/browser_ui.c:8827` | `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops land on` |
-| `redraw` | function | `gui/browser_ui.c:12737` | `static void redraw(browser_window *w)` |
-| `redraws` | function | `gui/browser_ui.c:14858` | `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A 4 Ki` |
-| `reference` | function | `gui/browser_ui.c:11667` | `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
+| `rect` | function | `gui/browser_ui.c:8939` | `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops land on` |
+| `redraw` | function | `gui/browser_ui.c:12864` | `static void redraw(browser_window *w)` |
+| `redraws` | function | `gui/browser_ui.c:14985` | `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A 4 Ki` |
+| `reference` | function | `gui/browser_ui.c:11794` | `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
  * hostile content...` |
-| `registry_global` | function | `gui/browser_ui.c:14734` | `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
+| `registry_global` | function | `gui/browser_ui.c:14861` | `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...` |
-| `registry_remove` | function | `gui/browser_ui.c:14754` | `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)` |
-| `remember_visit` | function | `gui/browser_ui.c:933` | `static void remember_visit(browser_window *w, const char *url)` |
-| `render_current` | function | `gui/browser_ui.c:2196` | `static void render_current(browser_window *w)` |
-| `render_current_ex` | function | `gui/browser_ui.c:2024` | `static void render_current_ex(browser_window *w, int allow_js_nav)` |
-| `render_doc_images` | function | `gui/browser_ui.c:11319` | `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
+| `registry_remove` | function | `gui/browser_ui.c:14881` | `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)` |
+| `remember_visit` | function | `gui/browser_ui.c:940` | `static void remember_visit(browser_window *w, const char *url)` |
+| `render_current` | function | `gui/browser_ui.c:2204` | `static void render_current(browser_window *w)` |
+| `render_current_ex` | function | `gui/browser_ui.c:2032` | `static void render_current_ex(browser_window *w, int allow_js_nav)` |
+| `render_doc_images` | function | `gui/browser_ui.c:11446` | `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
               ...` |
-| `replaced_current_color` | function | `gui/browser_ui.c:9364` | `static int replaced_current_color(const browser_window *w, const rd_block *blk)` |
-| `replaced_inline_size` | function | `gui/browser_ui.c:3966` | `static int replaced_inline_size(const browser_window *w, const rd_block *b,
+| `replaced_current_color` | function | `gui/browser_ui.c:9476` | `static int replaced_current_color(const browser_window *w, const rd_block *blk)` |
+| `replaced_inline_size` | function | `gui/browser_ui.c:3974` | `static int replaced_inline_size(const browser_window *w, const rd_block *b,
                      ...` |
-| `replaced_is_inline_level` | function | `gui/browser_ui.c:3996` | `static int replaced_is_inline_level(const rc_state *s, const rd_block *b)` |
-| `resizes` | function | `gui/browser_ui.c:12771` | `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);` |
-| `resolve` | function | `gui/browser_ui.c:2365` | `* origin so its relative references and local images resolve (confined to the * document's directory) -- a local page "a` |
-| `resolve_box_cursor` | function | `gui/browser_ui.c:11526` | `static int resolve_box_cursor(const rd_doc *doc, int block_id)` |
-| `root_cont_of` | function | `gui/browser_ui.c:4832` | `static int root_cont_of(const rd_doc *doc, int cid)` |
-| `row` | function | `gui/browser_ui.c:4575` | `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */
+| `replaced_is_inline_level` | function | `gui/browser_ui.c:4004` | `static int replaced_is_inline_level(const rc_state *s, const rd_block *b)` |
+| `replaced_opens_inline_line` | function | `gui/browser_ui.c:4017` | `static size_t replaced_opens_inline_line(const rd_doc *doc, size_t i)` |
+| `resizes` | function | `gui/browser_ui.c:12898` | `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);` |
+| `resolve` | function | `gui/browser_ui.c:2373` | `* origin so its relative references and local images resolve (confined to the * document's directory) -- a local page "a` |
+| `resolve_box_cursor` | function | `gui/browser_ui.c:11653` | `static int resolve_box_cursor(const rd_doc *doc, int block_id)` |
+| `root_cont_of` | function | `gui/browser_ui.c:4866` | `static int root_cont_of(const rd_doc *doc, int cid)` |
+| `row` | function | `gui/browser_ui.c:4609` | `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */
 static d...` |
-| `row_align_offset` | function | `gui/browser_ui.c:8758` | `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` |
-| `row_line_slack` | function | `gui/browser_ui.c:8746` | `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)` |
-| `row_owner_block_id` | function | `gui/browser_ui.c:9339` | `static int row_owner_block_id(const rc_layout *L, const rc_row *r);` |
-| `rows` | function | `gui/browser_ui.c:9652` | `* RC_IMAGE rows (see its declaration);` |
-| `run` | function | `gui/browser_ui.c:3503` | `* continuation run (block_id < 0 with no block break) deliberately skips reconcile
+| `row_align_offset` | function | `gui/browser_ui.c:8870` | `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` |
+| `row_line_slack` | function | `gui/browser_ui.c:8858` | `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)` |
+| `row_owner_block_id` | function | `gui/browser_ui.c:9451` | `static int row_owner_block_id(const rc_layout *L, const rc_row *r);` |
+| `rows` | function | `gui/browser_ui.c:9764` | `* RC_IMAGE rows (see its declaration);` |
+| `run` | function | `gui/browser_ui.c:3511` | `* continuation run (block_id < 0 with no block break) deliberately skips reconcile
  * to stay on ...` |
-| `save_current_page` | function | `gui/browser_ui.c:11898` | `static void save_current_page(browser_window *w)` |
-| `save_download` | function | `gui/browser_ui.c:11865` | `static void save_download(browser_window *w, const char *url, const char *bytes,
+| `save_current_page` | function | `gui/browser_ui.c:12025` | `static void save_current_page(browser_window *w)` |
+| `save_download` | function | `gui/browser_ui.c:11992` | `static void save_download(browser_window *w, const char *url, const char *bytes,
                 ...` |
-| `saving` | function | `gui/browser_ui.c:14779` | `* disables saving (never clobber);` |
-| `schedule_js_tick` | function | `gui/browser_ui.c:2014` | `static void schedule_js_tick(browser_window *w, int next_ms)` |
-| `scroll_line_px` | function | `gui/browser_ui.c:13792` | `static double scroll_line_px(const browser_window *w)` |
-| `scrollbar_drag_to` | function | `gui/browser_ui.c:2668` | `static void scrollbar_drag_to(browser_window *w)` |
-| `scrollbar_metrics` | function | `gui/browser_ui.c:2640` | `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,
+| `saving` | function | `gui/browser_ui.c:14906` | `* disables saving (never clobber);` |
+| `schedule_js_tick` | function | `gui/browser_ui.c:2022` | `static void schedule_js_tick(browser_window *w, int next_ms)` |
+| `scroll_line_px` | function | `gui/browser_ui.c:13919` | `static double scroll_line_px(const browser_window *w)` |
+| `scrollbar_drag_to` | function | `gui/browser_ui.c:2676` | `static void scrollbar_drag_to(browser_window *w)` |
+| `scrollbar_metrics` | function | `gui/browser_ui.c:2648` | `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,
          ...` |
-| `seat_caps` | function | `gui/browser_ui.c:14716` | `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` |
-| `seat_name` | function | `gui/browser_ui.c:14727` | `static void seat_name(void *d, struct wl_seat *s, const char *name)` |
-| `secure_fetch` | function | `gui/browser_ui.c:1740` | `* through secure_fetch (Zero Trust);` |
-| `seed_session_cookies` | function | `gui/browser_ui.c:1968` | `static void seed_session_cookies(tab *t, int trusted, const char *url)` |
-| `select_box_width` | function | `gui/browser_ui.c:7555` | `static double select_box_width(double content_w)` |
-| `set_cache` | function | `gui/browser_ui.c:1212` | `static void set_cache(browser_window *w, char *html, size_t len, const char *top)` |
-| `set_cursor` | function | `gui/browser_ui.c:12806` | `static void set_cursor(browser_window *w, int cur_kind)` |
-| `set_rgb` | function | `gui/browser_ui.c:9204` | `set_rgb(cr, (ui_rgb)` |
-| `set_rgb_alpha` | function | `gui/browser_ui.c:3309` | `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)` |
-| `show_busy` | function | `gui/browser_ui.c:2203` | `static void show_busy(browser_window *w)` |
-| `show_fetch_error` | function | `gui/browser_ui.c:2212` | `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
+| `seat_caps` | function | `gui/browser_ui.c:14843` | `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` |
+| `seat_name` | function | `gui/browser_ui.c:14854` | `static void seat_name(void *d, struct wl_seat *s, const char *name)` |
+| `secure_fetch` | function | `gui/browser_ui.c:1748` | `* through secure_fetch (Zero Trust);` |
+| `seed_session_cookies` | function | `gui/browser_ui.c:1976` | `static void seed_session_cookies(tab *t, int trusted, const char *url)` |
+| `select_box_width` | function | `gui/browser_ui.c:7667` | `static double select_box_width(double content_w)` |
+| `set_cache` | function | `gui/browser_ui.c:1219` | `static void set_cache(browser_window *w, char *html, size_t len, const char *top)` |
+| `set_cursor` | function | `gui/browser_ui.c:12933` | `static void set_cursor(browser_window *w, int cur_kind)` |
+| `set_rgb` | function | `gui/browser_ui.c:9316` | `set_rgb(cr, (ui_rgb)` |
+| `set_rgb_alpha` | function | `gui/browser_ui.c:3317` | `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)` |
+| `show_busy` | function | `gui/browser_ui.c:2211` | `static void show_busy(browser_window *w)` |
+| `show_fetch_error` | function | `gui/browser_ui.c:2220` | `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
                   ...` |
-| `slot` | function | `gui/browser_ui.c:5088` | `* layout slot (item 0 → rightmost, last item → leftmost). */
+| `slot` | function | `gui/browser_ui.c:5157` | `* layout slot (item 0 → rightmost, last item → leftmost). */
     if (use_flex && cdv.direction ==...` |
-| `smaller` | function | `gui/browser_ui.c:2921` | `* size when the content is smaller (height) or wider (min-width);` |
-| `spaced` | function | `gui/browser_ui.c:8887` | `* or evenly spaced (bui_grad_color_at). */
+| `smaller` | function | `gui/browser_ui.c:2929` | `* size when the content is smaller (height) or wider (min-width);` |
+| `spaced` | function | `gui/browser_ui.c:8999` | `* or evenly spaced (bui_grad_color_at). */
 static void bui_paint_conic(cairo_t *cr, double x, dou...` |
-| `standalone` | function | `gui/browser_ui.c:7248` | `* must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */ int ` |
-| `strcmp` | function | `gui/browser_ui.c:2331` | `&& strcmp(auth_host_buf, w->auth_host) != 0)` |
-| `stream_progress_cb` | function | `gui/browser_ui.c:1616` | `static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata)` |
-| `string` | function | `gui/browser_ui.c:1888` | `* or an empty string (unset, blocked, or off by caps.images), so there is no * decision to re-check, unlike load_images ` |
-| `struct` | function | `gui/browser_ui.c:5193` | `* struct (0 = auto);` |
-| `styled_advance` | function | `gui/browser_ui.c:3378` | `static double styled_advance(cairo_t *cr, const rc_frag *f)` |
-| `styled_draw` | function | `gui/browser_ui.c:3394` | `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)` |
-| `stylesheets` | function | `gui/browser_ui.c:2044` | `* External stylesheets (Hito 27) follow the author-styles opt-in -- or the * trusted-host doctrine (Hito 28) -- (GET-onl` |
-| `surface_from_pixels` | function | `gui/browser_ui.c:1223` | `static cairo_surface_t *surface_from_pixels(const tab_image *img)` |
-| `tab_ctx` | struct | `gui/browser_ui.c:266` | `` |
-| `tab_ctx_release` | function | `gui/browser_ui.c:2435` | `static void tab_ctx_release(tab_ctx *c)` |
-| `tab_new` | function | `gui/browser_ui.c:2478` | `static void tab_new(browser_window *w, const char *url)` |
-| `tab_restore` | function | `gui/browser_ui.c:2409` | `static void tab_restore(browser_window *w)` |
-| `tab_save` | function | `gui/browser_ui.c:2392` | `static void tab_save(browser_window *w)` |
-| `tab_switch` | function | `gui/browser_ui.c:2459` | `static void tab_switch(browser_window *w, int idx)` |
-| `tab_title` | function | `gui/browser_ui.c:2560` | `static const char *tab_title(const browser_window *w, int i)` |
-| `tabbar_top` | function | `gui/browser_ui.c:2576` | `static double tabbar_top(const browser_window *w)` |
-| `table` | function | `gui/browser_ui.c:4515` | `* synthesised table (no descriptors to disagree) keeps the stamp. */
+| `standalone` | function | `gui/browser_ui.c:7356` | `* must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */ size` |
+| `strcmp` | function | `gui/browser_ui.c:2339` | `&& strcmp(auth_host_buf, w->auth_host) != 0)` |
+| `stream_progress_cb` | function | `gui/browser_ui.c:1624` | `static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata)` |
+| `string` | function | `gui/browser_ui.c:1896` | `* or an empty string (unset, blocked, or off by caps.images), so there is no * decision to re-check, unlike load_images ` |
+| `struct` | function | `gui/browser_ui.c:5268` | `* struct (0 = auto);` |
+| `styled_advance` | function | `gui/browser_ui.c:3386` | `static double styled_advance(cairo_t *cr, const rc_frag *f)` |
+| `styled_draw` | function | `gui/browser_ui.c:3402` | `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)` |
+| `stylesheets` | function | `gui/browser_ui.c:2052` | `* External stylesheets (Hito 27) follow the author-styles opt-in -- or the * trusted-host doctrine (Hito 28) -- (GET-onl` |
+| `surface_from_pixels` | function | `gui/browser_ui.c:1230` | `static cairo_surface_t *surface_from_pixels(const tab_image *img)` |
+| `tab_ctx` | struct | `gui/browser_ui.c:269` | `` |
+| `tab_ctx_release` | function | `gui/browser_ui.c:2443` | `static void tab_ctx_release(tab_ctx *c)` |
+| `tab_new` | function | `gui/browser_ui.c:2486` | `static void tab_new(browser_window *w, const char *url)` |
+| `tab_restore` | function | `gui/browser_ui.c:2417` | `static void tab_restore(browser_window *w)` |
+| `tab_save` | function | `gui/browser_ui.c:2400` | `static void tab_save(browser_window *w)` |
+| `tab_switch` | function | `gui/browser_ui.c:2467` | `static void tab_switch(browser_window *w, int idx)` |
+| `tab_title` | function | `gui/browser_ui.c:2568` | `static const char *tab_title(const browser_window *w, int i)` |
+| `tabbar_top` | function | `gui/browser_ui.c:2584` | `static double tabbar_top(const browser_window *w)` |
+| `table` | function | `gui/browser_ui.c:4549` | `* synthesised table (no descriptors to disagree) keeps the stamp. */
         if (cd != NULL && !c...` |
-| `text` | function | `gui/browser_ui.c:8831` | `* fill and gradient text (2026-07-19). */
+| `text` | function | `gui/browser_ui.c:8943` | `* fill and gradient text (2026-07-19). */
 static cairo_pattern_t *bui_linear_grad(double x, doubl...` |
-| `the` | function | `gui/browser_ui.c:10224` | `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset -- ` |
-| `thumbnail` | function | `gui/browser_ui.c:6747` | `* is what made a wikipedia thumbnail (a 250px image and its caption, no
+| `the` | function | `gui/browser_ui.c:10336` | `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset -- ` |
+| `thumbnail` | function | `gui/browser_ui.c:6828` | `* is what made a wikipedia thumbnail (a 250px image and its caption, no
      * declared width) sp...` |
-| `toggle` | function | `gui/browser_ui.c:1937` | `* No network: a capability toggle (images/CSS) re-renders from cache. Does nothing * when there is no cached source (sta` |
-| `toggle_fullscreen` | function | `gui/browser_ui.c:1034` | `static void toggle_fullscreen(browser_window *w)` |
-| `toggle_reader` | function | `gui/browser_ui.c:12038` | `static void toggle_reader(browser_window *w)` |
-| `toolbar_button_at` | function | `gui/browser_ui.c:2747` | `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)` |
-| `toolbar_rects` | function | `gui/browser_ui.c:2732` | `static void toolbar_rects(const browser_window *w,
+| `toggle` | function | `gui/browser_ui.c:1945` | `* No network: a capability toggle (images/CSS) re-renders from cache. Does nothing * when there is no cached source (sta` |
+| `toggle_fullscreen` | function | `gui/browser_ui.c:1041` | `static void toggle_fullscreen(browser_window *w)` |
+| `toggle_reader` | function | `gui/browser_ui.c:12165` | `static void toggle_reader(browser_window *w)` |
+| `toolbar_button_at` | function | `gui/browser_ui.c:2755` | `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)` |
+| `toolbar_rects` | function | `gui/browser_ui.c:2740` | `static void toolbar_rects(const browser_window *w,
                           double *back_x, doub...` |
-| `toolbar_top` | function | `gui/browser_ui.c:2582` | `static double toolbar_top(const browser_window *w)` |
-| `toplevel_close` | function | `gui/browser_ui.c:12785` | `static void toplevel_close(void *data, struct xdg_toplevel *t)` |
-| `toplevel_configure` | function | `gui/browser_ui.c:12763` | `static void toplevel_configure(void *data, struct xdg_toplevel *t,
+| `toolbar_top` | function | `gui/browser_ui.c:2590` | `static double toolbar_top(const browser_window *w)` |
+| `toplevel_close` | function | `gui/browser_ui.c:12912` | `static void toplevel_close(void *data, struct xdg_toplevel *t)` |
+| `toplevel_configure` | function | `gui/browser_ui.c:12890` | `static void toplevel_configure(void *data, struct xdg_toplevel *t,
                               ...` |
-| `treatment` | function | `gui/browser_ui.c:6100` | `* block treatment (shrink-wrapped and placed by text-align), which is what a
+| `treatment` | function | `gui/browser_ui.c:6178` | `* block treatment (shrink-wrapped and placed by text-align), which is what a
          * standalon...` |
-| `ua_box_rect` | function | `gui/browser_ui.c:2790` | `static void ua_box_rect(const browser_window *w, double *x, double *y,
+| `ua_box_rect` | function | `gui/browser_ui.c:2798` | `static void ua_box_rect(const browser_window *w, double *x, double *y,
                         do...` |
-| `ui_bg_image` | struct | `gui/browser_ui.c:249` | `` |
-| `ui_dump_layout` | function | `gui/browser_ui.c:11371` | `ui_status ui_dump_layout(const rd_doc *doc)` |
-| `ui_hot` | enum | `gui/browser_ui.c:205` | `` |
-| `ui_image` | struct | `gui/browser_ui.c:236` | `` |
-| `ui_input_state` | struct | `gui/browser_ui.c:212` | `` |
-| `ui_menu_action` | enum | `gui/browser_ui.c:157` | `` |
-| `ui_menu_item` | struct | `gui/browser_ui.c:174` | `` |
-| `ui_render_pdf_images` | function | `gui/browser_ui.c:11356` | `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
+| `ui_bg_image` | struct | `gui/browser_ui.c:252` | `` |
+| `ui_dump_layout` | function | `gui/browser_ui.c:11498` | `ui_status ui_dump_layout(const rd_doc *doc)` |
+| `ui_hot` | enum | `gui/browser_ui.c:208` | `` |
+| `ui_image` | struct | `gui/browser_ui.c:239` | `` |
+| `ui_input_state` | struct | `gui/browser_ui.c:215` | `` |
+| `ui_menu_action` | enum | `gui/browser_ui.c:160` | `` |
+| `ui_menu_item` | struct | `gui/browser_ui.c:177` | `` |
+| `ui_render_pdf_images` | function | `gui/browser_ui.c:11483` | `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...` |
-| `ui_render_png` | function | `gui/browser_ui.c:11293` | `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` |
-| `ui_render_png_images` | function | `gui/browser_ui.c:11350` | `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
+| `ui_render_png` | function | `gui/browser_ui.c:11420` | `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` |
+| `ui_render_png_images` | function | `gui/browser_ui.c:11477` | `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...` |
-| `ui_run_browser` | function | `gui/browser_ui.c:14764` | `ui_status ui_run_browser(const char *start_url)` |
-| `uitab_close` | function | `gui/browser_ui.c:2511` | `static void uitab_close(browser_window *w, int idx)` |
-| `upstream` | function | `gui/browser_ui.c:8786` | `* upstream (see spec/css.md). */
+| `ui_run_browser` | function | `gui/browser_ui.c:14891` | `ui_status ui_run_browser(const char *start_url)` |
+| `uitab_close` | function | `gui/browser_ui.c:2519` | `static void uitab_close(browser_window *w, int idx)` |
+| `upstream` | function | `gui/browser_ui.c:8898` | `* upstream (see spec/css.md). */
 static void box_path4(cairo_t *cr, double x, double y, double w,...` |
-| `utf8_clen` | function | `gui/browser_ui.c:3318` | `static size_t utf8_clen(const char *s, size_t n)` |
-| `v_read` | function | `gui/browser_ui.c:8140` | `static int v_read(int fd, void *buf, size_t n)` |
-| `video_feeder_thread` | function | `gui/browser_ui.c:1029` | `static void *video_feeder_thread(void *arg);` |
-| `video_fetch` | function | `gui/browser_ui.c:8461` | `static sf_status video_fetch(const char *url, browser_window *w,
+| `utf8_clen` | function | `gui/browser_ui.c:3326` | `static size_t utf8_clen(const char *s, size_t n)` |
+| `v_read` | function | `gui/browser_ui.c:8252` | `static int v_read(int fd, void *buf, size_t n)` |
+| `video_feeder_thread` | function | `gui/browser_ui.c:1036` | `static void *video_feeder_thread(void *arg);` |
+| `video_fetch` | function | `gui/browser_ui.c:8573` | `static sf_status video_fetch(const char *url, browser_window *w,
                               sf...` |
-| `video_play` | function | `gui/browser_ui.c:8478` | `static int video_play(browser_window *w, const char *m3u8_url)` |
-| `video_stop` | function | `gui/browser_ui.c:8283` | `static void video_stop(browser_window *w)` |
-| `video_stop` | function | `gui/browser_ui.c:8580` | `* each segment loop so a video_stop() in the main thread (which sets it to 0
+| `video_play` | function | `gui/browser_ui.c:8590` | `static int video_play(browser_window *w, const char *m3u8_url)` |
+| `video_stop` | function | `gui/browser_ui.c:8395` | `static void video_stop(browser_window *w)` |
+| `video_stop` | function | `gui/browser_ui.c:8692` | `* each segment loop so a video_stop() in the main thread (which sets it to 0
  * then calls pthrea...` |
-| `way` | function | `gui/browser_ui.c:4616` | `* intrinsic box either way (it does not wrap below its own size). */
+| `way` | function | `gui/browser_ui.c:4650` | `* intrinsic box either way (it does not wrap below its own size). */
 static double measure_item_w...` |
-| `window_button_rects` | function | `gui/browser_ui.c:2722` | `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...` |
-| `wl_array_for_each` | function | `gui/browser_ui.c:12779` | `wl_array_for_each(st, states)` |
-| `wm_base_ping` | function | `gui/browser_ui.c:12749` | `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)` |
-| `write_doc_pdf` | function | `gui/browser_ui.c:10945` | `static long write_doc_pdf(browser_window *w, const char *path)` |
-| `write_doc_png` | function | `gui/browser_ui.c:11114` | `static long write_doc_png(browser_window *w, const char *path)` |
-| `write_file_atomic` | function | `gui/browser_ui.c:11843` | `static int write_file_atomic(const char *path, const void *bytes, size_t len)` |
-| `x` | function | `gui/browser_ui.c:6496` | `* reported x is already the BORDER x (the §7c.2 rule);` |
-| `xdg_surface_configure` | function | `gui/browser_ui.c:12755` | `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)` |
+| `window_button_rects` | function | `gui/browser_ui.c:2730` | `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...` |
+| `wl_array_for_each` | function | `gui/browser_ui.c:12906` | `wl_array_for_each(st, states)` |
+| `wm_base_ping` | function | `gui/browser_ui.c:12876` | `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)` |
+| `write_doc_pdf` | function | `gui/browser_ui.c:11072` | `static long write_doc_pdf(browser_window *w, const char *path)` |
+| `write_doc_png` | function | `gui/browser_ui.c:11241` | `static long write_doc_png(browser_window *w, const char *path)` |
+| `write_file_atomic` | function | `gui/browser_ui.c:11970` | `static int write_file_atomic(const char *path, const void *bytes, size_t len)` |
+| `x` | function | `gui/browser_ui.c:6577` | `* reported x is already the BORDER x (the §7c.2 rule);` |
+| `xdg_surface_configure` | function | `gui/browser_ui.c:12882` | `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)` |
+| `yet` | function | `gui/browser_ui.c:7108` | `* does not carry yet (WPT flex-abspos-staticpos-*). */
+static int runs_share_float(const rd_doc *...` |
 | `FREEDOM_BROWSER_UI_INTERNAL_H` | macro | `gui/browser_ui_internal.h:2` | `#define FREEDOM_BROWSER_UI_INTERNAL_H` |
 | `UI_FONT_SIZE` | macro | `gui/browser_ui_internal.h:30` | `#define UI_FONT_SIZE` |
 | `UI_HEADING_LEVELS` | macro | `gui/browser_ui_internal.h:32` | `#define UI_HEADING_LEVELS` |
@@ -751,6 +755,8 @@ static double measure_item_w...` |
 | `BT_ALIGN_END` | macro | `include/box_tree.h:60` | `#define BT_ALIGN_END` |
 | `BT_ALIGN_START` | macro | `include/box_tree.h:58` | `#define BT_ALIGN_START` |
 | `BT_ALIGN_STRETCH` | macro | `include/box_tree.h:61` | `#define BT_ALIGN_STRETCH` |
+| `BT_MAUTO_LEFT` | macro | `include/box_tree.h:64` | `#define BT_MAUTO_LEFT` |
+| `BT_MAUTO_RIGHT` | macro | `include/box_tree.h:65` | `#define BT_MAUTO_RIGHT` |
 | `BT_MAX_CHILDREN` | macro | `include/box_tree.h:36` | `#define BT_MAX_CHILDREN` |
 | `BT_MAX_DEPTH` | macro | `include/box_tree.h:35` | `#define BT_MAX_DEPTH` |
 | `BT_MAX_POSITIONED` | macro | `include/box_tree.h:42` | `#define BT_MAX_POSITIONED` |
@@ -760,21 +766,21 @@ static double measure_item_w...` |
 | `BT_POS_STATIC` | macro | `include/box_tree.h:47` | `#define BT_POS_STATIC` |
 | `BT_POS_STICKY` | macro | `include/box_tree.h:51` | `#define BT_POS_STICKY` |
 | `FREEDOM_BOX_TREE_H` | macro | `include/box_tree.h:2` | `#define FREEDOM_BOX_TREE_H` |
-| `bottom` | function | `include/box_tree.h:184` | `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in box` |
-| `box_index` | type_alias | `include/box_tree.h:122` | `typedef struct bt_positioned { size_t box_index;` |
-| `bt_box_hidden` | function | `include/box_tree.h:209` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);` |
-| `bt_node` | struct | `include/box_tree.h:63` | `` |
-| `bt_oof_anchor` | function | `include/box_tree.h:223` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);` |
-| `bt_oof_root` | function | `include/box_tree.h:224` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);` |
-| `bt_positioned` | struct | `include/box_tree.h:122` | `` |
-| `bt_status` | enum | `include/box_tree.h:129` | `` |
+| `bottom` | function | `include/box_tree.h:190` | `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in box` |
+| `box_index` | type_alias | `include/box_tree.h:128` | `typedef struct bt_positioned { size_t box_index;` |
+| `bt_box_hidden` | function | `include/box_tree.h:215` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);` |
+| `bt_node` | struct | `include/box_tree.h:67` | `` |
+| `bt_oof_anchor` | function | `include/box_tree.h:229` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);` |
+| `bt_oof_root` | function | `include/box_tree.h:230` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);` |
+| `bt_positioned` | struct | `include/box_tree.h:128` | `` |
+| `bt_status` | enum | `include/box_tree.h:135` | `` |
 | `closed` | function | `include/box_tree.h:34` | `* fails closed (BT_ERR_RANGE) instead of overflowing the stack. */ #define BT_MAX_DEPTH 64u #define BT_MAX_CHILDREN 128u` |
-| `display` | type_alias | `include/box_tree.h:62` | `typedef struct bt_node { bx_display display;` |
-| `flow` | function | `include/box_tree.h:177` | `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);` |
-| `line` | function | `include/box_tree.h:91` | `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a grid i` |
-| `node` | function | `include/box_tree.h:138` | `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller compose` |
-| `one` | function | `include/box_tree.h:77` | `* of forcing them all onto one (flex-wrap);` |
-| `placed` | function | `include/box_tree.h:191` | `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour). */ bt` |
+| `display` | type_alias | `include/box_tree.h:66` | `typedef struct bt_node { bx_display display;` |
+| `flow` | function | `include/box_tree.h:183` | `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);` |
+| `line` | function | `include/box_tree.h:97` | `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a grid i` |
+| `node` | function | `include/box_tree.h:144` | `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller compose` |
+| `one` | function | `include/box_tree.h:81` | `* of forcing them all onto one (flex-wrap);` |
+| `placed` | function | `include/box_tree.h:197` | `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour). */ bt` |
 | `BROWSER_STATUS_DURATION_MS` | macro | `include/browser.h:25` | `#define BROWSER_STATUS_DURATION_MS` |
 | `BROWSER_STATUS_MAX` | macro | `include/browser.h:24` | `#define BROWSER_STATUS_MAX` |
 | `BROWSER_URL_MAX` | macro | `include/browser.h:21` | `#define BROWSER_URL_MAX` |
@@ -1094,19 +1100,19 @@ static double measure_item_w...` |
 | `FX_AREA_NAME_MAX` | macro | `include/flex_layout.h:111` | `#define FX_AREA_NAME_MAX` |
 | `FX_ERR_NULL_ARG` | function | `include/flex_layout.h:200` | `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);` |
 | `FX_FLOAT_MIN_LINE` | macro | `include/flex_layout.h:180` | `#define FX_FLOAT_MIN_LINE` |
-| `FX_MAX_COLUMNS` | macro | `include/flex_layout.h:231` | `#define FX_MAX_COLUMNS` |
+| `FX_MAX_COLUMNS` | macro | `include/flex_layout.h:240` | `#define FX_MAX_COLUMNS` |
 | `FX_MAX_ITEMS` | macro | `include/flex_layout.h:28` | `#define FX_MAX_ITEMS` |
 | `basis` | type_alias | `include/flex_layout.h:40` | `typedef struct fx_item { double basis;` |
 | `bottom` | type_alias | `include/flex_layout.h:186` | `typedef struct fx_float_rect { double top, bottom;` |
 | `cols` | type_alias | `include/flex_layout.h:116` | `typedef struct fx_area_map { int rows, cols;` |
 | `fx_area_map` | struct | `include/flex_layout.h:116` | `` |
-| `fx_auto_min_size` | function | `include/flex_layout.h:226` | `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` |
+| `fx_auto_min_size` | function | `include/flex_layout.h:235` | `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` |
 | `fx_float_rect` | struct | `include/flex_layout.h:186` | `` |
 | `fx_grid_area_hash` | function | `include/flex_layout.h:125` | `unsigned fx_grid_area_hash(const char *name);` |
 | `fx_grid_cell` | function | `include/flex_layout.h:74` | `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);` |
 | `fx_item` | struct | `include/flex_layout.h:40` | `` |
 | `fx_justify` | enum | `include/flex_layout.h:30` | `` |
-| `fx_justify_name` | function | `include/flex_layout.h:282` | `const char *fx_justify_name(fx_justify j);` |
+| `fx_justify_name` | function | `include/flex_layout.h:291` | `const char *fx_justify_name(fx_justify j);` |
 | `fx_result` | struct | `include/flex_layout.h:48` | `` |
 | `fx_status` | enum | `include/flex_layout.h:53` | `` |
 | `offset` | function | `include/flex_layout.h:143` | `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would overfl` |
@@ -1114,6 +1120,7 @@ static double measure_item_w...` |
 | `pos` | type_alias | `include/flex_layout.h:48` | `typedef struct fx_result { double pos;` |
 | `required` | function | `include/flex_layout.h:156` | `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);` |
 | `size` | function | `include/flex_layout.h:60` | `* content size (px);` |
+| `space` | function | `include/flex_layout.h:206` | `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin (auto_l[i]/auto_r[i]` |
 | `widths` | function | `include/flex_layout.h:166` | `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens it)` |
 | `FM_BODY_MAX` | macro | `include/form.h:30` | `#define FM_BODY_MAX` |
 | `FM_CONTENT_TYPE_URLENCODED` | variable | `include/form.h:68` | `extern const char FM_CONTENT_TYPE_URLENCODED[];` |
@@ -1349,71 +1356,74 @@ static double measure_item_w...` |
 | `os_prot_allowed` | function | `include/os_sandbox.h:52` | `int os_prot_allowed(long syscall_nr, unsigned long prot);` |
 | `os_status` | enum | `include/os_sandbox.h:21` | `` |
 | `os_violation` | enum | `include/os_sandbox.h:30` | `` |
-| `CSS_LEN_UNSET` | function | `include/page_view.h:460` | `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an in-f` |
+| `CSS_LEN_UNSET` | function | `include/page_view.h:468` | `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an in-f` |
 | `FREEDOM_PAGE_VIEW_H` | macro | `include/page_view.h:2` | `#define FREEDOM_PAGE_VIEW_H` |
-| `PV_BG_URL_MAX` | macro | `include/page_view.h:59` | `#define PV_BG_URL_MAX` |
-| `PV_CONT_DEPTH` | macro | `include/page_view.h:53` | `#define PV_CONT_DEPTH` |
-| `PV_GRID_TRACKS` | macro | `include/page_view.h:48` | `#define PV_GRID_TRACKS` |
-| `PV_LEN_AUTO` | macro | `include/page_view.h:44` | `#define PV_LEN_AUTO` |
-| `PV_LEN_END` | macro | `include/page_view.h:45` | `#define PV_LEN_END` |
-| `PV_LEN_UNSET` | macro | `include/page_view.h:43` | `#define PV_LEN_UNSET` |
-| `ancestors` | function | `include/page_view.h:906` | `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box stack ` |
-| `bx_display` | function | `include/page_view.h:208` | `* bx_display (flex/grid);` |
-| `cause` | function | `include/page_view.h:767` | `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?" is a` |
-| `container` | function | `include/page_view.h:207` | `* cont_id groups runs of one container (-1 = none);` |
-| `default` | function | `include/page_view.h:835` | `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);` |
-| `form` | function | `include/page_view.h:798` | `* form (-1 if none);` |
-| `kind` | type_alias | `include/page_view.h:108` | `typedef struct pv_run { pv_kind kind;` |
-| `nonzero` | function | `include/page_view.h:734` | `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const hp_docume` |
-| `order` | function | `include/page_view.h:269` | `* groups the runs of ONE floated element in document order (-1 = not in a float);` |
-| `parent_id` | type_alias | `include/page_view.h:388` | `typedef struct pv_box_def { int parent_id;` |
-| `parent_id` | type_alias | `include/page_view.h:673` | `typedef struct pv_cont_def { int parent_id;` |
-| `policy` | function | `include/page_view.h:749` | `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The external te` |
-| `pv_at` | function | `include/page_view.h:1041` | `const pv_run *pv_at(const pv_view *v, size_t i);` |
-| `pv_box_at` | function | `include/page_view.h:1046` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i);` |
-| `pv_box_count` | function | `include/page_view.h:1045` | `size_t pv_box_count(const pv_view *v);` |
-| `pv_box_def` | struct | `include/page_view.h:388` | `` |
-| `pv_cont_at` | function | `include/page_view.h:1026` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);` |
-| `pv_cont_count` | function | `include/page_view.h:1025` | `size_t pv_cont_count(const pv_view *v);` |
-| `pv_cont_def` | struct | `include/page_view.h:673` | `` |
-| `pv_count` | function | `include/page_view.h:1040` | `size_t pv_count(const pv_view *v);` |
-| `pv_form_method` | enum | `include/page_view.h:94` | `` |
-| `pv_free` | function | `include/page_view.h:1037` | `void pv_free(pv_view *v);` |
-| `pv_input_type` | enum | `include/page_view.h:77` | `` |
-| `pv_kind` | enum | `include/page_view.h:61` | `` |
-| `pv_new` | function | `include/page_view.h:779` | `pv_view *pv_new(void);` |
-| `pv_run` | struct | `include/page_view.h:108` | `` |
-| `pv_set_bgcolor` | function | `include/page_view.h:845` | `void pv_set_bgcolor(pv_view *v, int bg_rgb);` |
-| `pv_set_block_id` | function | `include/page_view.h:1002` | `void pv_set_block_id(pv_view *v, int block_id);` |
-| `pv_set_box` | function | `include/page_view.h:985` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` |
-| `pv_set_box_pct` | function | `include/page_view.h:991` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` |
-| `pv_set_color` | function | `include/page_view.h:838` | `void pv_set_color(pv_view *v, int fg_rgb);` |
-| `pv_set_cont_box` | function | `include/page_view.h:952` | `void pv_set_cont_box(pv_view *v, int cont_box_id);` |
-| `pv_set_cont_item` | function | `include/page_view.h:966` | `void pv_set_cont_item(pv_view *v, int cont_item);` |
-| `pv_set_emphasis` | function | `include/page_view.h:830` | `void pv_set_emphasis(pv_view *v, int bold, int italic);` |
-| `pv_set_flex` | function | `include/page_view.h:961` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int fle` |
-| `pv_set_float` | function | `include/page_view.h:975` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int float_m` |
-| `pv_set_grad_text` | function | `include/page_view.h:922` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` |
-| `pv_set_grid` | function | `include/page_view.h:953` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);` |
-| `pv_set_grid_area` | function | `include/page_view.h:942` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` |
-| `pv_set_grid_rows` | function | `include/page_view.h:943` | `void pv_set_grid_rows(pv_view *v, int grid_rows);` |
-| `pv_set_input_checked` | function | `include/page_view.h:1030` | `void pv_set_input_checked(pv_view *v, int checked);` |
-| `pv_set_input_select_opts` | function | `include/page_view.h:1034` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` |
-| `pv_set_node_id` | function | `include/page_view.h:997` | `void pv_set_node_id(pv_view *v, dom_node_id node_id);` |
-| `pv_set_oof` | function | `include/page_view.h:1010` | `void pv_set_oof(pv_view *v, int oof);` |
-| `pv_set_own_box` | function | `include/page_view.h:1006` | `void pv_set_own_box(pv_view *v, int box_id);` |
-| `pv_set_row_span` | function | `include/page_view.h:938` | `void pv_set_row_span(pv_view *v, int row_span);` |
-| `pv_set_text_ext` | function | `include/page_view.h:916` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);` |
-| `pv_set_text_style` | function | `include/page_view.h:854` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` |
-| `pv_set_ua_tag` | function | `include/page_view.h:948` | `void pv_set_ua_tag(pv_view *v, int ua_tag);` |
+| `PV_BG_URL_MAX` | macro | `include/page_view.h:64` | `#define PV_BG_URL_MAX` |
+| `PV_CONT_DEPTH` | macro | `include/page_view.h:58` | `#define PV_CONT_DEPTH` |
+| `PV_GRID_TRACKS` | macro | `include/page_view.h:53` | `#define PV_GRID_TRACKS` |
+| `PV_LEN_AUTO` | macro | `include/page_view.h:49` | `#define PV_LEN_AUTO` |
+| `PV_LEN_END` | macro | `include/page_view.h:50` | `#define PV_LEN_END` |
+| `PV_LEN_UNSET` | macro | `include/page_view.h:48` | `#define PV_LEN_UNSET` |
+| `PV_MAUTO_LEFT` | macro | `include/page_view.h:43` | `#define PV_MAUTO_LEFT` |
+| `PV_MAUTO_RIGHT` | macro | `include/page_view.h:44` | `#define PV_MAUTO_RIGHT` |
+| `ancestors` | function | `include/page_view.h:915` | `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box stack ` |
+| `bx_display` | function | `include/page_view.h:213` | `* bx_display (flex/grid);` |
+| `cause` | function | `include/page_view.h:776` | `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?" is a` |
+| `container` | function | `include/page_view.h:212` | `* cont_id groups runs of one container (-1 = none);` |
+| `default` | function | `include/page_view.h:844` | `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);` |
+| `form` | function | `include/page_view.h:807` | `* form (-1 if none);` |
+| `kind` | type_alias | `include/page_view.h:113` | `typedef struct pv_run { pv_kind kind;` |
+| `nonzero` | function | `include/page_view.h:743` | `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const hp_docume` |
+| `order` | function | `include/page_view.h:277` | `* groups the runs of ONE floated element in document order (-1 = not in a float);` |
+| `parent_id` | type_alias | `include/page_view.h:396` | `typedef struct pv_box_def { int parent_id;` |
+| `parent_id` | type_alias | `include/page_view.h:681` | `typedef struct pv_cont_def { int parent_id;` |
+| `policy` | function | `include/page_view.h:758` | `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The external te` |
+| `pv_at` | function | `include/page_view.h:1052` | `const pv_run *pv_at(const pv_view *v, size_t i);` |
+| `pv_box_at` | function | `include/page_view.h:1057` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i);` |
+| `pv_box_count` | function | `include/page_view.h:1056` | `size_t pv_box_count(const pv_view *v);` |
+| `pv_box_def` | struct | `include/page_view.h:396` | `` |
+| `pv_cont_at` | function | `include/page_view.h:1037` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);` |
+| `pv_cont_count` | function | `include/page_view.h:1036` | `size_t pv_cont_count(const pv_view *v);` |
+| `pv_cont_def` | struct | `include/page_view.h:681` | `` |
+| `pv_count` | function | `include/page_view.h:1051` | `size_t pv_count(const pv_view *v);` |
+| `pv_form_method` | enum | `include/page_view.h:99` | `` |
+| `pv_free` | function | `include/page_view.h:1048` | `void pv_free(pv_view *v);` |
+| `pv_input_type` | enum | `include/page_view.h:82` | `` |
+| `pv_kind` | enum | `include/page_view.h:66` | `` |
+| `pv_new` | function | `include/page_view.h:788` | `pv_view *pv_new(void);` |
+| `pv_run` | struct | `include/page_view.h:113` | `` |
+| `pv_set_bgcolor` | function | `include/page_view.h:854` | `void pv_set_bgcolor(pv_view *v, int bg_rgb);` |
+| `pv_set_block_id` | function | `include/page_view.h:1013` | `void pv_set_block_id(pv_view *v, int block_id);` |
+| `pv_set_box` | function | `include/page_view.h:996` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` |
+| `pv_set_box_pct` | function | `include/page_view.h:1002` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` |
+| `pv_set_color` | function | `include/page_view.h:847` | `void pv_set_color(pv_view *v, int fg_rgb);` |
+| `pv_set_cont_box` | function | `include/page_view.h:961` | `void pv_set_cont_box(pv_view *v, int cont_box_id);` |
+| `pv_set_cont_item` | function | `include/page_view.h:977` | `void pv_set_cont_item(pv_view *v, int cont_item);` |
+| `pv_set_emphasis` | function | `include/page_view.h:839` | `void pv_set_emphasis(pv_view *v, int bold, int italic);` |
+| `pv_set_flex` | function | `include/page_view.h:970` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int fle` |
+| `pv_set_flex_mauto` | function | `include/page_view.h:973` | `void pv_set_flex_mauto(pv_view *v, int mauto);` |
+| `pv_set_float` | function | `include/page_view.h:986` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int float_m` |
+| `pv_set_grad_text` | function | `include/page_view.h:931` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` |
+| `pv_set_grid` | function | `include/page_view.h:962` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);` |
+| `pv_set_grid_area` | function | `include/page_view.h:951` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` |
+| `pv_set_grid_rows` | function | `include/page_view.h:952` | `void pv_set_grid_rows(pv_view *v, int grid_rows);` |
+| `pv_set_input_checked` | function | `include/page_view.h:1041` | `void pv_set_input_checked(pv_view *v, int checked);` |
+| `pv_set_input_select_opts` | function | `include/page_view.h:1045` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` |
+| `pv_set_node_id` | function | `include/page_view.h:1008` | `void pv_set_node_id(pv_view *v, dom_node_id node_id);` |
+| `pv_set_oof` | function | `include/page_view.h:1021` | `void pv_set_oof(pv_view *v, int oof);` |
+| `pv_set_own_box` | function | `include/page_view.h:1017` | `void pv_set_own_box(pv_view *v, int box_id);` |
+| `pv_set_row_span` | function | `include/page_view.h:947` | `void pv_set_row_span(pv_view *v, int row_span);` |
+| `pv_set_text_ext` | function | `include/page_view.h:925` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);` |
+| `pv_set_text_style` | function | `include/page_view.h:863` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` |
+| `pv_set_ua_tag` | function | `include/page_view.h:957` | `void pv_set_ua_tag(pv_view *v, int ua_tag);` |
 | `pv_status` | enum | `include/page_view.h:34` | `` |
-| `pv_text_ext` | struct | `include/page_view.h:870` | `` |
-| `pv_text_ext_reset` | function | `include/page_view.h:901` | `void pv_text_ext_reset(pv_text_ext *e);` |
-| `pv_view` | struct | `include/page_view.h:709` | `` |
-| `resolved` | function | `include/page_view.h:741` | `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full with` |
-| `run` | function | `include/page_view.h:925` | `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an empty o` |
-| `scale` | function | `include/page_view.h:535` | `* scale(1)) and rotate in whole degrees (transform_rotate);` |
-| `word_spacing` | type_alias | `include/page_view.h:870` | `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;` |
+| `pv_text_ext` | struct | `include/page_view.h:879` | `` |
+| `pv_text_ext_reset` | function | `include/page_view.h:910` | `void pv_text_ext_reset(pv_text_ext *e);` |
+| `pv_view` | struct | `include/page_view.h:718` | `` |
+| `resolved` | function | `include/page_view.h:750` | `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full with` |
+| `run` | function | `include/page_view.h:934` | `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an empty o` |
+| `scale` | function | `include/page_view.h:543` | `* scale(1)) and rotate in whole degrees (transform_rotate);` |
+| `word_spacing` | type_alias | `include/page_view.h:879` | `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;` |
 | `FREEDOM_PDF_EXPORT_H` | macro | `include/pdf_export.h:2` | `#define FREEDOM_PDF_EXPORT_H` |
 | `PE_EXT` | macro | `include/pdf_export.h:29` | `#define PE_EXT` |
 | `PE_EXT_PNG` | macro | `include/pdf_export.h:30` | `#define PE_EXT_PNG` |
@@ -1497,30 +1507,30 @@ static double measure_item_w...` |
 | `psl_wildcards` | variable | `include/psl_data.h:23` | `extern const char *const psl_wildcards[];` |
 | `psl_wildcards_n` | variable | `include/psl_data.h:24` | `extern const size_t psl_wildcards_n;` |
 | `FREEDOM_RENDER_DOC_H` | macro | `include/render_doc.h:2` | `#define FREEDOM_RENDER_DOC_H` |
-| `IMG_FAIL_OK` | function | `include/render_doc.h:322` | `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);` |
+| `IMG_FAIL_OK` | function | `include/render_doc.h:323` | `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);` |
 | `RD_IMAGE` | function | `include/render_doc.h:59` | `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);` |
-| `decision` | function | `include/render_doc.h:316` | `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char *rd_image_label(rdp_i` |
+| `decision` | function | `include/render_doc.h:317` | `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char *rd_image_label(rdp_i` |
 | `default` | function | `include/render_doc.h:142` | `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer can la` |
 | `form` | function | `include/render_doc.h:63` | `* form (-1 = none);` |
 | `img_fail_reason` | enum | `include/render_doc.h:34` | `` |
 | `kind` | type_alias | `include/render_doc.h:64` | `typedef struct rd_block { rd_kind kind;` |
 | `list` | function | `include/render_doc.h:18` | `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides WHA` |
-| `rd_at` | function | `include/render_doc.h:291` | `const rd_block *rd_at(const rd_doc *d, size_t i);` |
+| `rd_at` | function | `include/render_doc.h:292` | `const rd_block *rd_at(const rd_doc *d, size_t i);` |
 | `rd_block` | struct | `include/render_doc.h:64` | `` |
-| `rd_block_tag` | function | `include/render_doc.h:313` | `const char *rd_block_tag(const rd_block *b);` |
-| `rd_box_at` | function | `include/render_doc.h:296` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);` |
-| `rd_box_count` | function | `include/render_doc.h:295` | `size_t rd_box_count(const rd_doc *d);` |
-| `rd_cont_at` | function | `include/render_doc.h:301` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);` |
-| `rd_cont_count` | function | `include/render_doc.h:300` | `size_t rd_cont_count(const rd_doc *d);` |
-| `rd_count` | function | `include/render_doc.h:290` | `size_t rd_count(const rd_doc *d);` |
-| `rd_doc` | struct | `include/render_doc.h:242` | `` |
-| `rd_free` | function | `include/render_doc.h:287` | `void rd_free(rd_doc *d);` |
-| `rd_input_label` | function | `include/render_doc.h:327` | `const char *rd_input_label(int input_type);` |
+| `rd_block_tag` | function | `include/render_doc.h:314` | `const char *rd_block_tag(const rd_block *b);` |
+| `rd_box_at` | function | `include/render_doc.h:297` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);` |
+| `rd_box_count` | function | `include/render_doc.h:296` | `size_t rd_box_count(const rd_doc *d);` |
+| `rd_cont_at` | function | `include/render_doc.h:302` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);` |
+| `rd_cont_count` | function | `include/render_doc.h:301` | `size_t rd_cont_count(const rd_doc *d);` |
+| `rd_count` | function | `include/render_doc.h:291` | `size_t rd_count(const rd_doc *d);` |
+| `rd_doc` | struct | `include/render_doc.h:243` | `` |
+| `rd_free` | function | `include/render_doc.h:288` | `void rd_free(rd_doc *d);` |
+| `rd_input_label` | function | `include/render_doc.h:328` | `const char *rd_input_label(int input_type);` |
 | `rd_kind` | enum | `include/render_doc.h:42` | `` |
-| `rd_kind_name` | function | `include/render_doc.h:305` | `const char *rd_kind_name(rd_kind k);` |
-| `rd_status` | enum | `include/render_doc.h:268` | `` |
-| `rdp_images_warning` | function | `include/render_doc.h:277` | `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose img_decisio` |
-| `to` | function | `include/render_doc.h:228` | `* belongs to (-1 = none);` |
+| `rd_kind_name` | function | `include/render_doc.h:306` | `const char *rd_kind_name(rd_kind k);` |
+| `rd_status` | enum | `include/render_doc.h:269` | `` |
+| `rdp_images_warning` | function | `include/render_doc.h:278` | `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose img_decisio` |
+| `to` | function | `include/render_doc.h:229` | `* belongs to (-1 = none);` |
 | `FREEDOM_RENDER_POLICY_H` | macro | `include/render_policy.h:2` | `#define FREEDOM_RENDER_POLICY_H` |
 | `RDP_TRACKER_MAX_DIM` | macro | `include/render_policy.h:27` | `#define RDP_TRACKER_MAX_DIM` |
 | `images` | type_alias | `include/render_policy.h:32` | `typedef struct rdp_caps { bool images;` |
@@ -1651,27 +1661,28 @@ static double measure_item_w...` |
 | `tf_status` | enum | `include/textfield.h:31` | `` |
 | `tf_text` | function | `include/textfield.h:66` | `const char *tf_text(const tf_field *f);` |
 | `FREEDOM_TLS_IMPERSONATE_H` | macro | `include/tls_impersonate.h:2` | `#define FREEDOM_TLS_IMPERSONATE_H` |
-| `TI_MAGIC` | macro | `include/tls_impersonate.h:56` | `#define TI_MAGIC` |
-| `TI_MAX_BODY` | macro | `include/tls_impersonate.h:60` | `#define TI_MAX_BODY` |
-| `TI_MAX_CHAIN` | macro | `include/tls_impersonate.h:63` | `#define TI_MAX_CHAIN` |
-| `TI_MAX_GROUP` | macro | `include/tls_impersonate.h:64` | `#define TI_MAX_GROUP` |
-| `TI_MAX_HEADERS` | macro | `include/tls_impersonate.h:59` | `#define TI_MAX_HEADERS` |
-| `TI_MAX_METHOD` | macro | `include/tls_impersonate.h:58` | `#define TI_MAX_METHOD` |
-| `TI_MAX_RESP_BODY` | macro | `include/tls_impersonate.h:62` | `#define TI_MAX_RESP_BODY` |
-| `TI_MAX_RESP_HDR` | macro | `include/tls_impersonate.h:61` | `#define TI_MAX_RESP_HDR` |
-| `TI_MAX_URL` | macro | `include/tls_impersonate.h:57` | `#define TI_MAX_URL` |
-| `chain` | function | `include/tls_impersonate.h:29` | `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT re-applies th` |
-| `status` | type_alias | `include/tls_impersonate.h:78` | `typedef struct ti_resp { long status;` |
-| `success` | function | `include/tls_impersonate.h:93` | `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out left z` |
-| `ti_decode_req` | function | `include/tls_impersonate.h:97` | `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);` |
-| `ti_decode_resp` | function | `include/tls_impersonate.h:101` | `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);` |
-| `ti_encode_resp` | function | `include/tls_impersonate.h:100` | `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);` |
-| `ti_profile` | enum | `include/tls_impersonate.h:38` | `` |
-| `ti_req` | struct | `include/tls_impersonate.h:68` | `` |
-| `ti_req_free` | function | `include/tls_impersonate.h:98` | `void ti_req_free(ti_req *r);` |
-| `ti_resp` | struct | `include/tls_impersonate.h:78` | `` |
-| `ti_resp_free` | function | `include/tls_impersonate.h:102` | `void ti_resp_free(ti_resp *r);` |
-| `ti_should_impersonate` | function | `include/tls_impersonate.h:52` | `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int host_in_impersonate);` |
+| `TI_MAGIC` | macro | `include/tls_impersonate.h:60` | `#define TI_MAGIC` |
+| `TI_MAX_BODY` | macro | `include/tls_impersonate.h:64` | `#define TI_MAX_BODY` |
+| `TI_MAX_CHAIN` | macro | `include/tls_impersonate.h:67` | `#define TI_MAX_CHAIN` |
+| `TI_MAX_GROUP` | macro | `include/tls_impersonate.h:68` | `#define TI_MAX_GROUP` |
+| `TI_MAX_HEADERS` | macro | `include/tls_impersonate.h:63` | `#define TI_MAX_HEADERS` |
+| `TI_MAX_METHOD` | macro | `include/tls_impersonate.h:62` | `#define TI_MAX_METHOD` |
+| `TI_MAX_RESP_BODY` | macro | `include/tls_impersonate.h:66` | `#define TI_MAX_RESP_BODY` |
+| `TI_MAX_RESP_HDR` | macro | `include/tls_impersonate.h:65` | `#define TI_MAX_RESP_HDR` |
+| `TI_MAX_URL` | macro | `include/tls_impersonate.h:61` | `#define TI_MAX_URL` |
+| `chain` | function | `include/tls_impersonate.h:32` | `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT re-applies th` |
+| `path` | function | `include/tls_impersonate.h:26` | `* Zero Knowledge path (PQ-hybrid, VERIFYPEER). * * 2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed seria` |
+| `status` | type_alias | `include/tls_impersonate.h:82` | `typedef struct ti_resp { long status;` |
+| `success` | function | `include/tls_impersonate.h:97` | `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out left z` |
+| `ti_decode_req` | function | `include/tls_impersonate.h:101` | `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);` |
+| `ti_decode_resp` | function | `include/tls_impersonate.h:105` | `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);` |
+| `ti_encode_resp` | function | `include/tls_impersonate.h:104` | `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);` |
+| `ti_profile` | enum | `include/tls_impersonate.h:41` | `` |
+| `ti_req` | struct | `include/tls_impersonate.h:72` | `` |
+| `ti_req_free` | function | `include/tls_impersonate.h:102` | `void ti_req_free(ti_req *r);` |
+| `ti_resp` | struct | `include/tls_impersonate.h:82` | `` |
+| `ti_resp_free` | function | `include/tls_impersonate.h:106` | `void ti_resp_free(ti_resp *r);` |
+| `ti_should_impersonate` | function | `include/tls_impersonate.h:56` | `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);` |
 | `FREEDOM_UI_H` | macro | `include/ui.h:2` | `#define FREEDOM_UI_H` |
 | `available` | function | `include/ui.h:85` | `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG dir` |
 | `disk` | function | `include/ui.h:102` | `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https or f` |
@@ -1796,29 +1807,31 @@ static double measure_item_w...` |
 | `take` | function | `src/box_style.c:293` | `* caller has to take (Sizing 3 section 5.1), so to a resolver that only sums a * px and a percentage half they read exac` |
 | `BT_LEN_AUTO` | macro | `src/box_tree.c:31` | `#define BT_LEN_AUTO` |
 | `BT_WRAP_EPS` | macro | `src/box_tree.c:62` | `#define BT_WRAP_EPS` |
-| `assign_doc_order` | function | `src/box_tree.c:393` | `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
+| `assign_doc_order` | function | `src/box_tree.c:412` | `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
                   ...` |
-| `block` | function | `src/box_tree.c:512` | `* approximation of the true block (same flow neighbourhood), strictly
+| `block` | function | `src/box_tree.c:531` | `* approximation of the true block (same flow neighbourhood), strictly
              * better than ...` |
-| `bt_box_hidden` | function | `src/box_tree.c:659` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)` |
-| `bt_layout` | function | `src/box_tree.c:353` | `bt_status bt_layout(bt_node *root, double avail_w)` |
+| `bt_box_hidden` | function | `src/box_tree.c:678` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)` |
+| `bt_layout` | function | `src/box_tree.c:372` | `bt_status bt_layout(bt_node *root, double avail_w)` |
 | `bt_nn` | function | `src/box_tree.c:58` | `static double bt_nn(double v)` |
-| `bt_oof_anchor` | function | `src/box_tree.c:651` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)` |
-| `bt_oof_root` | function | `src/box_tree.c:655` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)` |
-| `bt_resolve_positioning` | function | `src/box_tree.c:443` | `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
+| `bt_oof_anchor` | function | `src/box_tree.c:670` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)` |
+| `bt_oof_root` | function | `src/box_tree.c:674` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)` |
+| `bt_resolve_positioning` | function | `src/box_tree.c:462` | `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                           ...` |
-| `bt_resolve_positioning_ex` | function | `src/box_tree.c:454` | `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
+| `bt_resolve_positioning_ex` | function | `src/box_tree.c:473` | `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
                        ...` |
-| `find_positioned_ancestor` | function | `src/box_tree.c:410` | `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
+| `find_positioned_ancestor` | function | `src/box_tree.c:429` | `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
                        ...` |
-| `inset_unset` | function | `src/box_tree.c:439` | `static int inset_unset(int v, int pct_pm)` |
+| `inset_unset` | function | `src/box_tree.c:458` | `static int inset_unset(int v, int pct_pm)` |
 | `layout_block` | function | `src/box_tree.c:37` | `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,
                    ...` |
-| `layout_grid` | function | `src/box_tree.c:201` | `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
+| `layout_flex` | function | `src/box_tree.c:97` | `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
                     ...` |
-| `layout_node` | function | `src/box_tree.c:308` | `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)` |
-| `oof_walk` | function | `src/box_tree.c:634` | `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` |
-| `resolve_inset` | function | `src/box_tree.c:430` | `static double resolve_inset(int v, int pct_pm, double basis)` |
+| `layout_grid` | function | `src/box_tree.c:220` | `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
+                    ...` |
+| `layout_node` | function | `src/box_tree.c:327` | `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)` |
+| `oof_walk` | function | `src/box_tree.c:653` | `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` |
+| `resolve_inset` | function | `src/box_tree.c:449` | `static double resolve_inset(int v, int pct_pm, double basis)` |
 | `wrap_reverse` | function | `src/box_tree.c:79` | `*
  * wrap_reverse (node->wrap_reverse): when node->wrap is active and node->wrap_reverse
  * is no...` |
@@ -1877,59 +1890,59 @@ static double measure_item_w...` |
 | `CSS_INLINE_SPEC` | macro | `src/css.c:66` | `#define CSS_INLINE_SPEC` |
 | `CSS_MAX_CUSTOM_PROPS` | macro | `src/css.c:77` | `#define CSS_MAX_CUSTOM_PROPS` |
 | `CSS_MAX_FONT_FACES` | macro | `src/css.c:141` | `#define CSS_MAX_FONT_FACES` |
-| `CSS_MEDIA_MAX_DEPTH` | macro | `src/css.c:3898` | `#define CSS_MEDIA_MAX_DEPTH` |
-| `CSS_MEDIA_TOK` | macro | `src/css.c:3767` | `#define CSS_MEDIA_TOK` |
+| `CSS_MEDIA_MAX_DEPTH` | macro | `src/css.c:3923` | `#define CSS_MEDIA_MAX_DEPTH` |
+| `CSS_MEDIA_TOK` | macro | `src/css.c:3792` | `#define CSS_MEDIA_TOK` |
 | `CSS_SELS_PER_GROUP` | macro | `src/css.c:64` | `#define CSS_SELS_PER_GROUP` |
 | `CSS_VAR_MAX_DEPTH` | macro | `src/css.c:78` | `#define CSS_VAR_MAX_DEPTH` |
-| `LIST` | function | `src/css.c:2249` | `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose into ` |
-| `NULL` | function | `src/css.c:5081` | `* Sheet can be NULL (inline style, no @keyframes). */
+| `LIST` | function | `src/css.c:2250` | `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose into ` |
+| `NULL` | function | `src/css.c:5105` | `* Sheet can be NULL (inline style, no @keyframes). */
 void css_resolve_anim_keyframes(css_style *...` |
-| `add_rule` | function | `src/css.c:3654` | `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
+| `add_rule` | function | `src/css.c:3680` | `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
                      siz...` |
-| `apply_decl` | function | `src/css.c:4464` | `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+| `apply_decl` | function | `src/css.c:4488` | `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
               ...` |
-| `at_is_media` | function | `src/css.c:3889` | `static int at_is_media(const char *s, size_t i, size_t n)` |
+| `at_is_media` | function | `src/css.c:3914` | `static int at_is_media(const char *s, size_t i, size_t n)` |
 | `bg_alpha_of` | function | `src/css.c:205` | `static int bg_alpha_of(const char *v)` |
-| `block_end` | function | `src/css.c:3755` | `static size_t block_end(const char *s, size_t open, size_t n)` |
+| `block_end` | function | `src/css.c:3780` | `static size_t block_end(const char *s, size_t open, size_t n)` |
 | `blur` | function | `src/css.c:1246` | `* consumes ONLY blur(Npx);` |
-| `caller` | function | `src/css.c:2913` | `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached a br` |
-| `collect_custom_props_scoped` | function | `src/css.c:3907` | `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
+| `caller` | function | `src/css.c:2914` | `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached a br` |
+| `collect_custom_props_scoped` | function | `src/css.c:3932` | `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
                 ...` |
-| `column` | function | `src/css.c:1673` | `* column (`flex: 1 1 0%`);` |
-| `computed_font_size` | function | `src/css.c:4828` | `static double computed_font_size(const css_style *o, const css_element *el)` |
-| `copy_lower_trim` | function | `src/css.c:3800` | `static size_t copy_lower_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
-| `copy_trim` | function | `src/css.c:1829` | `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
+| `column` | function | `src/css.c:1674` | `* column (`flex: 1 1 0%`);` |
+| `computed_font_size` | function | `src/css.c:4852` | `static double computed_font_size(const css_style *o, const css_element *el)` |
+| `copy_lower_trim` | function | `src/css.c:3825` | `static size_t copy_lower_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
+| `copy_trim` | function | `src/css.c:1830` | `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
 | `css_custom_prop` | struct | `src/css.c:91` | `` |
-| `css_emit_utf8` | function | `src/css.c:1406` | `static size_t css_emit_utf8(unsigned int cp, char *out)` |
-| `css_font_face_at` | function | `src/css.c:5117` | `int css_font_face_at(const css_sheet *sheet, size_t i,
+| `css_emit_utf8` | function | `src/css.c:1407` | `static size_t css_emit_utf8(unsigned int cp, char *out)` |
+| `css_font_face_at` | function | `src/css.c:5141` | `int css_font_face_at(const css_sheet *sheet, size_t i,
                      char *family, size_t ...` |
-| `css_font_face_count` | function | `src/css.c:5113` | `size_t css_font_face_count(const css_sheet *sheet)` |
-| `css_free` | function | `src/css.c:4451` | `void css_free(css_sheet *s)` |
-| `css_hex_val` | function | `src/css.c:1399` | `static int css_hex_val(char c)` |
+| `css_font_face_count` | function | `src/css.c:5137` | `size_t css_font_face_count(const css_sheet *sheet)` |
+| `css_free` | function | `src/css.c:4475` | `void css_free(css_sheet *s)` |
+| `css_hex_val` | function | `src/css.c:1400` | `static int css_hex_val(char c)` |
 | `css_keyframe_stop` | struct | `src/css.c:123` | `` |
-| `css_parse` | function | `src/css.c:4367` | `css_status css_parse(const char *text, size_t len, css_sheet **out)` |
-| `css_parse_inline` | function | `src/css.c:5127` | `css_style css_parse_inline(const char *style, size_t len)` |
-| `css_parse_logged` | function | `src/css.c:4381` | `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
+| `css_parse` | function | `src/css.c:4391` | `css_status css_parse(const char *text, size_t len, css_sheet **out)` |
+| `css_parse_inline` | function | `src/css.c:5151` | `css_style css_parse_inline(const char *style, size_t len)` |
+| `css_parse_logged` | function | `src/css.c:4405` | `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
                ...` |
-| `css_parse_media` | function | `src/css.c:4371` | `css_status css_parse_media(const char *text, size_t len, const css_media *media,
+| `css_parse_media` | function | `src/css.c:4395` | `css_status css_parse_media(const char *text, size_t len, const css_media *media,
                 ...` |
-| `css_parse_scoped` | function | `src/css.c:4376` | `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
+| `css_parse_scoped` | function | `src/css.c:4400` | `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
                ...` |
-| `css_resolve` | function | `src/css.c:5057` | `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
+| `css_resolve` | function | `src/css.c:5081` | `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                   ...` |
-| `css_resolve_el` | function | `src/css.c:4877` | `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
+| `css_resolve_el` | function | `src/css.c:4901` | `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          ...` |
 | `css_rule` | struct | `src/css.c:99` | `` |
 | `css_sheet` | struct | `src/css.c:101` | `` |
-| `css_unescape_into` | function | `src/css.c:1428` | `static void css_unescape_into(char *dst, size_t cap, const char *src, size_t n)` |
-| `declared` | function | `src/css.c:3608` | `* the referenced custom property was never declared (or the fallback * chain bottomed out), so the declaration is invali` |
-| `drop_copy_text` | function | `src/css.c:3539` | `static void drop_copy_text(char *dst, size_t cap, const char *src)` |
-| `drop_record` | function | `src/css.c:3558` | `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)` |
-| `emit_content` | function | `src/css.c:1381` | `static int emit_content(css_decl *dst, int cap, const char *str,
+| `css_unescape_into` | function | `src/css.c:1429` | `static void css_unescape_into(char *dst, size_t cap, const char *src, size_t n)` |
+| `declared` | function | `src/css.c:3609` | `* the referenced custom property was never declared (or the fallback * chain bottomed out), so the declaration is invali` |
+| `drop_copy_text` | function | `src/css.c:3540` | `static void drop_copy_text(char *dst, size_t cap, const char *src)` |
+| `drop_record` | function | `src/css.c:3559` | `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)` |
+| `emit_content` | function | `src/css.c:1382` | `static int emit_content(css_decl *dst, int cap, const char *str,
                         char (*c...` |
 | `emit_radius_corner` | function | `src/css.c:875` | `static int emit_radius_corner(css_decl *dst, int cap, int slot, const char *val)` |
 | `emit_spacing` | function | `src/css.c:343` | `static int emit_spacing(css_decl *dst, int cap, int slot, const char *val)` |
-| `empty` | function | `src/css.c:1472` | `* the slot with an explicit empty (ival -1) instead of dropping, or a * lower-priority string would leak through and the` |
+| `empty` | function | `src/css.c:1473` | `* the slot with an explicit empty (ival -1) instead of dropping, or a * lower-priority string would leak through and the` |
 | `expand_backdrop_filter` | function | `src/css.c:1249` | `static int expand_backdrop_filter(const char *val, css_decl *dst, int cap)` |
 | `expand_background` | function | `src/css.c:222` | `static int expand_background(const char *val, css_decl *dst, int cap,
                            ...` |
@@ -1941,36 +1954,36 @@ void css_resolve_anim_keyframes(css_style *...` |
                        int ...` |
 | `expand_box4` | function | `src/css.c:254` | `static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg,
             ...` |
-| `expand_box_shadow` | function | `src/css.c:1622` | `static int expand_box_shadow(const char *val, css_decl *dst, int cap)` |
+| `expand_box_shadow` | function | `src/css.c:1623` | `static int expand_box_shadow(const char *val, css_decl *dst, int cap)` |
 | `expand_column_rule` | function | `src/css.c:1045` | `static int expand_column_rule(const char *val, css_decl *dst, int cap)` |
 | `expand_columns` | function | `src/css.c:989` | `static int expand_columns(const char *val, css_decl *dst, int cap)` |
-| `expand_content` | function | `src/css.c:1468` | `static int expand_content(const char *val, css_decl *dst, int cap,
+| `expand_content` | function | `src/css.c:1469` | `static int expand_content(const char *val, css_decl *dst, int cap,
                           char...` |
-| `expand_flex` | function | `src/css.c:1694` | `static int expand_flex(const char *val, css_decl *dst, int cap)` |
+| `expand_flex` | function | `src/css.c:1695` | `static int expand_flex(const char *val, css_decl *dst, int cap)` |
 | `expand_flex_flow` | function | `src/css.c:1023` | `static int expand_flex_flow(const char *val, css_decl *dst, int cap)` |
-| `expand_gap` | function | `src/css.c:2757` | `static int expand_gap(const char *val, css_decl *dst, int cap)` |
-| `expand_grid_areas` | function | `src/css.c:1504` | `static int expand_grid_areas(const char *val, css_decl *dst, int cap,
+| `expand_gap` | function | `src/css.c:2758` | `static int expand_gap(const char *val, css_decl *dst, int cap)` |
+| `expand_grid_areas` | function | `src/css.c:1505` | `static int expand_grid_areas(const char *val, css_decl *dst, int cap,
                            ...` |
-| `expand_grid_template` | function | `src/css.c:1571` | `static int expand_grid_template(const char *val, css_decl *dst, int cap,
+| `expand_grid_template` | function | `src/css.c:1572` | `static int expand_grid_template(const char *val, css_decl *dst, int cap,
                         ...` |
 | `expand_grid_template_cols` | function | `src/css.c:325` | `static int expand_grid_template_cols(const char *val, css_decl *dst, int cap)` |
 | `expand_outline` | function | `src/css.c:950` | `static int expand_outline(const char *val, css_decl *dst, int cap)` |
 | `expand_shadow` | function | `src/css.c:344` | `static int expand_shadow(const char *val, css_decl *dst, int cap)` |
-| `expand_transform_list` | function | `src/css.c:2505` | `* LISTS compose in order through expand_transform_list (CSS Transforms 1 3);` |
-| `expand_transform_origin` | function | `src/css.c:2725` | `static int expand_transform_origin(const char *val, css_decl *dst, int cap)` |
+| `expand_transform_list` | function | `src/css.c:2506` | `* LISTS compose in order through expand_transform_list (CSS Transforms 1 3);` |
+| `expand_transform_origin` | function | `src/css.c:2726` | `static int expand_transform_origin(const char *val, css_decl *dst, int cap)` |
 | `expand_valign` | function | `src/css.c:334` | `static int expand_valign(const char *val, css_decl *dst, int cap)` |
 | `filter_paren_body` | function | `src/css.c:1086` | `static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen)` |
-| `fold_font_relative` | function | `src/css.c:4848` | `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
+| `fold_font_relative` | function | `src/css.c:4872` | `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
                          ...` |
 | `function` | function | `src/css.c:1213` | `* function (the rest of the list still applies). Emits the whole * 4-decl group in lock-step or nothing. */ const char *` |
-| `grammar` | function | `src/css.c:2943` | `* grammar (`justify`/`distribute`) is not `justify-content`'s. Guessing
+| `grammar` | function | `src/css.c:2944` | `* grammar (`justify`/`distribute`) is not `justify-content`'s. Guessing
      * there would be inv...` |
 | `here` | function | `src/css.c:73` | `* A value is capped at CSS_TOK_MAX like every other token here (an overlong one * could never fit a re-substituted decla` |
-| `ignored` | function | `src/css.c:2776` | `* engine slot and is ignored (documented simplification, like list-style's
+| `ignored` | function | `src/css.c:2777` | `* engine slot and is ignored (documented simplification, like list-style's
  * ignored tokens). An...` |
 | `interp_accent_color` | function | `src/css.c:677` | `static int interp_accent_color(const char *v)` |
 | `interp_align` | function | `src/css.c:285` | `static int interp_align(const char *v)` |
-| `interp_align_kw` | function | `src/css.c:1739` | `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)` |
+| `interp_align_kw` | function | `src/css.c:1740` | `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)` |
 | `interp_appearance` | function | `src/css.c:549` | `static int interp_appearance(const char *v)` |
 | `interp_aspect_ratio` | function | `src/css.c:340` | `static int interp_aspect_ratio(const char *v, int *num, int *den)` |
 | `interp_backface_visibility` | function | `src/css.c:784` | `static int interp_backface_visibility(const char *v)` |
@@ -1983,7 +1996,7 @@ void css_resolve_anim_keyframes(css_style *...` |
 | `interp_bg_size` | function | `src/css.c:589` | `static int interp_bg_size(const char *v)` |
 | `interp_border_collapse` | function | `src/css.c:457` | `static int interp_border_collapse(const char *v)` |
 | `interp_border_style` | function | `src/css.c:807` | `static int interp_border_style(const char *v)` |
-| `interp_box_orient` | function | `src/css.c:1770` | `static int interp_box_orient(const char *v)` |
+| `interp_box_orient` | function | `src/css.c:1771` | `static int interp_box_orient(const char *v)` |
 | `interp_boxsizing` | function | `src/css.c:357` | `static int interp_boxsizing(const char *v)` |
 | `interp_bs_tok` | function | `src/css.c:884` | `static int interp_bs_tok(const char *t, int *o)` |
 | `interp_bw_tok` | function | `src/css.c:883` | `static int interp_bw_tok(const char *t, int *o)` |
@@ -2003,10 +2016,10 @@ void css_resolve_anim_keyframes(css_style *...` |
 | `interp_empty_cells` | function | `src/css.c:491` | `static int interp_empty_cells(const char *v)` |
 | `interp_filter_deg` | function | `src/css.c:1071` | `static int interp_filter_deg(const char *s)` |
 | `interp_filter_pct` | function | `src/css.c:1057` | `static int interp_filter_pct(const char *s)` |
-| `interp_flex_basis` | function | `src/css.c:1660` | `static int interp_flex_basis(const char *v, int *out)` |
-| `interp_flex_direction` | function | `src/css.c:1752` | `static int interp_flex_direction(const char *v)` |
-| `interp_flex_factor` | function | `src/css.c:1650` | `static int interp_flex_factor(const char *v)` |
-| `interp_flex_wrap` | function | `src/css.c:1776` | `static int interp_flex_wrap(const char *v)` |
+| `interp_flex_basis` | function | `src/css.c:1661` | `static int interp_flex_basis(const char *v, int *out)` |
+| `interp_flex_direction` | function | `src/css.c:1753` | `static int interp_flex_direction(const char *v)` |
+| `interp_flex_factor` | function | `src/css.c:1651` | `static int interp_flex_factor(const char *v)` |
+| `interp_flex_wrap` | function | `src/css.c:1777` | `static int interp_flex_wrap(const char *v)` |
 | `interp_float` | function | `src/css.c:363` | `static int interp_float(const char *v)` |
 | `interp_font_kerning` | function | `src/css.c:728` | `static int interp_font_kerning(const char *v)` |
 | `interp_font_stretch` | function | `src/css.c:743` | `static int interp_font_stretch(const char *v)` |
@@ -2015,8 +2028,8 @@ void css_resolve_anim_keyframes(css_style *...` |
 | `interp_fontsize_ex` | function | `src/css.c:289` | `static int interp_fontsize_ex(const char *v, int *abs_out)` |
 | `interp_forced_color_adjust` | function | `src/css.c:688` | `static int interp_forced_color_adjust(const char *v)` |
 | `interp_gap` | function | `src/css.c:313` | `static int interp_gap(const char *v)` |
-| `interp_grid_flow` | function | `src/css.c:1784` | `static int interp_grid_flow(const char *v)` |
-| `interp_grid_span` | function | `src/css.c:1810` | `static int interp_grid_span(const char *v)` |
+| `interp_grid_flow` | function | `src/css.c:1785` | `static int interp_grid_flow(const char *v)` |
+| `interp_grid_span` | function | `src/css.c:1811` | `static int interp_grid_span(const char *v)` |
 | `interp_gridcols` | function | `src/css.c:321` | `static int interp_gridcols(const char *v)` |
 | `interp_hyphens` | function | `src/css.c:520` | `static int interp_hyphens(const char *v)` |
 | `interp_image_rendering` | function | `src/css.c:652` | `static int interp_image_rendering(const char *v)` |
@@ -2056,74 +2069,74 @@ void css_resolve_anim_keyframes(css_style *...` |
 | `interp_weight` | function | `src/css.c:297` | `static int interp_weight(const char *v)` |
 | `interp_whitespace` | function | `src/css.c:336` | `static int interp_whitespace(const char *v)` |
 | `interp_word_break` | function | `src/css.c:441` | `static int interp_word_break(const char *v)` |
-| `interpret_decls` | function | `src/css.c:3636` | `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
+| `interpret_decls` | function | `src/css.c:3637` | `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
                ...` |
-| `interpret_prop` | function | `src/css.c:3512` | `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
+| `interpret_prop` | function | `src/css.c:3513` | `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
             ...` |
-| `interpret_prop_dispatch` | function | `src/css.c:2925` | `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
+| `interpret_prop_dispatch` | function | `src/css.c:2926` | `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
    ...` |
 | `length_px` | function | `src/css.c:268` | `static int length_px(const char *v, double *px)` |
 | `lp_can_be_nonneg` | function | `src/css.c:277` | `static int lp_can_be_nonneg(int px_val, int pct_pm)` |
-| `matrix` | function | `src/css.c:2164` | `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands on ` |
-| `media_matches` | function | `src/css.c:3875` | `static int media_matches(const char *s, size_t a, size_t b, const css_media *m)` |
-| `media_part_matches` | function | `src/css.c:3809` | `static int media_part_matches(const char *p, const css_media *m)` |
-| `media_segment_matches` | function | `src/css.c:3838` | `static int media_segment_matches(const char *s, size_t a, size_t b, const css_media *m)` |
+| `matrix` | function | `src/css.c:2165` | `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands on ` |
+| `media_matches` | function | `src/css.c:3900` | `static int media_matches(const char *s, size_t a, size_t b, const css_media *m)` |
+| `media_part_matches` | function | `src/css.c:3834` | `static int media_part_matches(const char *p, const css_media *m)` |
+| `media_segment_matches` | function | `src/css.c:3863` | `static int media_segment_matches(const char *s, size_t a, size_t b, const css_media *m)` |
 | `name` | type_alias | `src/css.c:91` | `typedef struct css_custom_prop { char name[CSS_TOK_MAX];` |
 | `next_ws_token` | function | `src/css.c:281` | `static int next_ws_token(const char **p, char *tok, size_t cap)` |
 | `number` | function | `src/css.c:466` | `* number (no unit) as px (common in shorthand context like "10 5"). */
 static int interp_border_s...` |
 | `order` | function | `src/css.c:1211` | `* Lengths in declaration order (dx, dy, optional blur >= 0);` |
-| `origin_component` | function | `src/css.c:2699` | `static int origin_component(const char *tok, int axis, int *out)` |
-| `overflowed` | function | `src/css.c:2078` | `* overflowed (caller drops the declaration). */
+| `origin_component` | function | `src/css.c:2700` | `static int origin_component(const char *tok, int axis, int *out)` |
+| `overflowed` | function | `src/css.c:2079` | `* overflowed (caller drops the declaration). */
 static int resolve_var(const char *val, char *out...` |
-| `page_view` | function | `src/css.c:4470` | `* the generated text reaches page_view (which materialises it as a synthetic * run);` |
-| `parent` | function | `src/css.c:4499` | `* property from the parent (`inherit`), and an unset non-inherited one
+| `page_view` | function | `src/css.c:4494` | `* the generated text reaches page_view (which materialises it as a synthetic * run);` |
+| `parent` | function | `src/css.c:4523` | `* property from the parent (`inherit`), and an unset non-inherited one
          * stands at its i...` |
-| `parse_angle_deg` | function | `src/css.c:2502` | `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);` |
-| `parse_block` | function | `src/css.c:3963` | `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
+| `parse_angle_deg` | function | `src/css.c:2503` | `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);` |
+| `parse_block` | function | `src/css.c:3987` | `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                  ...` |
 | `parse_color` | function | `src/css.c:165` | `static int parse_color(const char *v)` |
-| `parse_matrix6` | function | `src/css.c:2194` | `static int parse_matrix6(const char *p, size_t argn, double m6[6])` |
+| `parse_matrix6` | function | `src/css.c:2195` | `static int parse_matrix6(const char *p, size_t argn, double m6[6])` |
 | `parse_num` | function | `src/css.c:154` | `static int parse_num(const char *s, double *out, const char **endp)` |
-| `property` | function | `src/css.c:2811` | `* error drops the whole property (fail closed). */
+| `property` | function | `src/css.c:2812` | `* error drops the whole property (fail closed). */
 static int expand_clip(const char *val, css_de...` |
-| `rem_emit_px` | function | `src/css.c:4187` | `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)` |
-| `rem_ident_ch` | function | `src/css.c:4169` | `static int rem_ident_ch(char c)` |
-| `rem_num_starts_after` | function | `src/css.c:4177` | `static int rem_num_starts_after(char prev)` |
-| `rem_rebase` | function | `src/css.c:4217` | `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)` |
-| `resolve_var_rec` | function | `src/css.c:1987` | `static int resolve_var_rec(const char *val, size_t vlen, char *out, size_t outcap, size_t *o, const css_custom_prop *tab` |
-| `scope_has_class` | function | `src/css.c:1922` | `static int scope_has_class(const char *list, const char *name, size_t len)` |
-| `sheet_rewind` | function | `src/css.c:4284` | `static void sheet_rewind(css_sheet *sh)` |
-| `sheet_root_font_px` | function | `src/css.c:4324` | `static double sheet_root_font_px(const css_sheet *sh)` |
-| `shorthand` | function | `src/css.c:2854` | `* generic bucket keeps the rest of the shorthand (same net effect as the
+| `rem_emit_px` | function | `src/css.c:4211` | `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)` |
+| `rem_ident_ch` | function | `src/css.c:4193` | `static int rem_ident_ch(char c)` |
+| `rem_num_starts_after` | function | `src/css.c:4201` | `static int rem_num_starts_after(char prev)` |
+| `rem_rebase` | function | `src/css.c:4241` | `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)` |
+| `resolve_var_rec` | function | `src/css.c:1988` | `static int resolve_var_rec(const char *val, size_t vlen, char *out, size_t outcap, size_t *o, const css_custom_prop *tab` |
+| `scope_has_class` | function | `src/css.c:1923` | `static int scope_has_class(const char *list, const char *name, size_t len)` |
+| `sheet_rewind` | function | `src/css.c:4308` | `static void sheet_rewind(css_sheet *sh)` |
+| `sheet_root_font_px` | function | `src/css.c:4348` | `static double sheet_root_font_px(const css_sheet *sh)` |
+| `shorthand` | function | `src/css.c:2855` | `* generic bucket keeps the rest of the shorthand (same net effect as the
  * font-family longhand ...` |
-| `skip_at_rule` | function | `src/css.c:3739` | `static size_t skip_at_rule(const char *s, size_t i, size_t n)` |
-| `slots` | function | `src/css.c:3035` | `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return emit_len(dst, ` |
-| `split_top_args` | function | `src/css.c:2226` | `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,
+| `skip_at_rule` | function | `src/css.c:3764` | `static size_t skip_at_rule(const char *s, size_t i, size_t n)` |
+| `slots` | function | `src/css.c:3036` | `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return emit_len(dst, ` |
+| `split_top_args` | function | `src/css.c:2227` | `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,
                ...` |
-| `strip_comments` | function | `src/css.c:4332` | `static char *strip_comments(const char *text, size_t len, size_t *outlen)` |
-| `strip_important` | function | `src/css.c:1842` | `static int strip_important(char *val)` |
-| `stylesheet` | function | `src/css.c:5010` | `* the stylesheet (e.g. a `:root` rule). Inline-declared names win on a * collision (closer to the use site), so they go ` |
+| `strip_comments` | function | `src/css.c:4356` | `static char *strip_comments(const char *text, size_t len, size_t *outlen)` |
+| `strip_important` | function | `src/css.c:1843` | `static int strip_important(char *val)` |
+| `stylesheet` | function | `src/css.c:5034` | `* the stylesheet (e.g. a `:root` rule). Inline-declared names win on a * collision (closer to the use site), so they go ` |
 | `text` | function | `src/css.c:234` | `* source text (rem_rebase, see below) rather than by threading a context here.
  *
  * Viewport uni...` |
 | `through` | function | `src/css.c:185` | `* at the two SHARED chokepoints every property funnels through (the generic
  * dispatch tail, and...` |
-| `tr_decompose` | function | `src/css.c:2171` | `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
+| `tr_decompose` | function | `src/css.c:2172` | `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
                         in...` |
-| `tr_mul` | function | `src/css.c:2151` | `static void tr_mul(double out[6], const double l[6], const double r[6])` |
-| `translate3d` | function | `src/css.c:2256` | `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine
+| `tr_mul` | function | `src/css.c:2152` | `static void tr_mul(double out[6], const double l[6], const double r[6])` |
+| `translate3d` | function | `src/css.c:2257` | `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine
  * renders z as nothing,...` |
-| `translate3d` | function | `src/css.c:2506` | `* translate3d()/translateZ() flatten to their 2D projection. Any other
+| `translate3d` | function | `src/css.c:2507` | `* translate3d()/translateZ() flatten to their 2D projection. Any other
  * transform function (per...` |
-| `translateX` | function | `src/css.c:2498` | `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc numbers ` |
-| `trim_inplace` | function | `src/css.c:3791` | `static void trim_inplace(char *s)` |
-| `value` | function | `src/css.c:2018` | `* any other unsupported value (fail closed, never a partially-substituted value). */
+| `translateX` | function | `src/css.c:2499` | `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc numbers ` |
+| `trim_inplace` | function | `src/css.c:3816` | `static void trim_inplace(char *s)` |
+| `value` | function | `src/css.c:2019` | `* any other unsupported value (fail closed, never a partially-substituted value). */
 static int r...` |
-| `var` | function | `src/css.c:4342` | `* collected and forty var() declarations -- font sizes, widths, radii, the
+| `var` | function | `src/css.c:4366` | `* collected and forty var() declarations -- font sizes, widths, radii, the
      * whole theme -- ...` |
-| `var_append` | function | `src/css.c:1991` | `static int var_append(char *out, size_t outcap, size_t *o, const char *s, size_t n)` |
-| `wide_claim` | function | `src/css.c:3472` | `static int wide_claim(const char *prop, css_decl *dst, int cap,
+| `var_append` | function | `src/css.c:1992` | `static int var_append(char *out, size_t outcap, size_t *o, const char *s, size_t n)` |
+| `wide_claim` | function | `src/css.c:3473` | `static int wide_claim(const char *prop, css_decl *dst, int cap,
                       char (*urlt...` |
 | `AUTO_REJECT` | macro | `src/css_box.c:932` | `#define AUTO_REJECT` |
 | `AUTO_RESET` | macro | `src/css_box.c:934` | `#define AUTO_RESET` |
@@ -2254,28 +2267,29 @@ int cg_expand_bg_imag...` |
 | `cl_viewport_scale` | function | `src/css_length.c:80` | `static int cl_viewport_scale(const char *u, size_t len, const cl_ctx *ctx, double *per)` |
 | `know` | function | `src/css_length.c:7` | `* this module cannot know (real font metrics, the viewport) arrives through
  * cl_ctx rather than...` |
-| `HAS_MAX_DEPTH` | macro | `src/css_select.c:650` | `#define HAS_MAX_DEPTH` |
-| `attr_matches` | function | `src/css_select.c:511` | `static int attr_matches(const css_attr_match *am, const css_element *el)` |
-| `between` | function | `src/css_select.c:210` | `* between ( and ) is split on commas (not inside [] or ());` |
-| `built` | function | `src/css_select.c:824` | `* chains the caller built (an element without parent/prev links never matches
+| `HAS_MAX_DEPTH` | macro | `src/css_select.c:658` | `#define HAS_MAX_DEPTH` |
+| `attr_matches` | function | `src/css_select.c:519` | `static int attr_matches(const css_attr_match *am, const css_element *el)` |
+| `between` | function | `src/css_select.c:211` | `* between ( and ) is split on commas (not inside [] or ());` |
+| `built` | function | `src/css_select.c:832` | `* chains the caller built (an element without parent/prev links never matches
  * through that com...` |
-| `compound_matches` | function | `src/css_select.c:791` | `static int compound_matches(const css_compound *c, const css_element *el,
+| `compound_matches` | function | `src/css_select.c:799` | `static int compound_matches(const css_compound *c, const css_element *el,
                        ...` |
-| `csel_matches` | function | `src/css_select.c:865` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+| `csel_matches` | function | `src/css_select.c:873` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
               ...` |
-| `el_attr_value` | function | `src/css_select.c:478` | `static const char *el_attr_value(const css_element *el, const char *name)` |
-| `ends_with` | function | `src/css_select.c:488` | `static int ends_with(const char *v, const char *suf, int ci)` |
-| `has_word` | function | `src/css_select.c:496` | `static int has_word(const char *v, const char *w, int ci)` |
-| `is_form_control` | function | `src/css_select.c:540` | `static int is_form_control(const char *tag)` |
-| `nth_matches` | function | `src/css_select.c:531` | `static int nth_matches(int A, int B, int idx)` |
+| `el_attr_value` | function | `src/css_select.c:486` | `static const char *el_attr_value(const css_element *el, const char *name)` |
+| `ends_with` | function | `src/css_select.c:496` | `static int ends_with(const char *v, const char *suf, int ci)` |
+| `has_word` | function | `src/css_select.c:504` | `static int has_word(const char *v, const char *w, int ci)` |
+| `is_form_control` | function | `src/css_select.c:548` | `static int is_form_control(const char *tag)` |
+| `nth_matches` | function | `src/css_select.c:539` | `static int nth_matches(int A, int B, int idx)` |
 | `parse_attr_sel` | function | `src/css_select.c:19` | `static int parse_attr_sel(const char *s, size_t *ip, size_t b, css_attr_match *am)` |
-| `parse_compound` | function | `src/css_select.c:325` | `static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
+| `parse_compound` | function | `src/css_select.c:333` | `static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
                   ...` |
 | `parse_nth_arg` | function | `src/css_select.c:76` | `static int parse_nth_arg(const char *s, size_t a, size_t b, int *A, int *B)` |
-| `parse_sub_compound` | function | `src/css_select.c:274` | `static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub)` |
-| `selector` | function | `src/css_select.c:384` | `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
+| `parse_sub_compound` | function | `src/css_select.c:266` | `static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub)` |
+| `selector` | function | `src/css_select.c:392` | `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
  * dropped. Whitespa...` |
-| `sub_sel_matches` | function | `src/css_select.c:549` | `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)` |
+| `sub_sel_matches` | function | `src/css_select.c:557` | `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)` |
+| `take_sub_arg` | function | `src/css_select.c:128` | `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);` |
 | `ct_emit_spacing` | function | `src/css_text.c:300` | `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)` |
 | `ct_expand_shadow` | function | `src/css_text.c:313` | `int ct_expand_shadow(const char *val, css_decl *dst, int cap)` |
 | `ct_expand_valign` | function | `src/css_text.c:122` | `int ct_expand_valign(const char *val, css_decl *dst, int cap)` |
@@ -2295,7 +2309,7 @@ int cg_expand_bg_imag...` |
 | `ct_liststyle_unknown_name` | function | `src/css_text.c:254` | `static int ct_liststyle_unknown_name(const char *t)` |
 | `cv_bg_alpha_of` | function | `src/css_values.c:45` | `int cv_bg_alpha_of(const char *v)` |
 | `cv_color_ok` | function | `src/css_values.c:40` | `int cv_color_ok(int c)` |
-| `cv_interp_bg` | function | `src/css_values.c:137` | `int cv_interp_bg(const char *v)` |
+| `cv_interp_bg` | function | `src/css_values.c:138` | `int cv_interp_bg(const char *v)` |
 | `cv_interp_color` | function | `src/css_values.c:35` | `int cv_interp_color(const char *v)` |
 | `cv_parse_color` | function | `src/css_values.c:15` | `int cv_parse_color(const char *v)` |
 | `cv_parse_num` | function | `src/css_values.c:10` | `static int cv_parse_num(const char *s, double *out, const char **endp)` |
@@ -2398,8 +2412,8 @@ static dom_node_id qs_walk(const dom_inde...` |
 | `dd_cursor_name` | function | `src/dom_debug.c:165` | `static const char *dd_cursor_name(int c)` |
 | `dd_display_name` | function | `src/dom_debug.c:88` | `static const char *dd_display_name(int d)` |
 | `dd_emit` | function | `src/dom_debug.c:36` | `static void dd_emit(dd_cursor *c, const char *s, size_t len)` |
-| `dd_format` | function | `src/dom_debug.c:375` | `size_t dd_format(const rd_doc *doc, char *out, size_t cap)` |
-| `dd_format_css` | function | `src/dom_debug.c:407` | `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)` |
+| `dd_format` | function | `src/dom_debug.c:376` | `size_t dd_format(const rd_doc *doc, char *out, size_t cap)` |
+| `dd_format_css` | function | `src/dom_debug.c:408` | `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)` |
 | `dd_image_rendering_name` | function | `src/dom_debug.c:202` | `static const char *dd_image_rendering_name(int r)` |
 | `dd_inset` | function | `src/dom_debug.c:187` | `static int dd_inset(int v)` |
 | `dd_justify_name` | function | `src/dom_debug.c:96` | `static const char *dd_justify_name(int j)` |
@@ -2430,7 +2444,9 @@ static dom_node_id qs_walk(const dom_inde...` |
 | `area_token_is_null_cell` | function | `src/flex_layout.c:294` | `static int area_token_is_null_cell(const char *tok, size_t len)` |
 | `float_pack_impl` | function | `src/flex_layout.c:417` | `static fx_status float_pack_impl(const double *width, const int *side, size_t n,
                 ...` |
-| `fx_auto_min_size` | function | `src/flex_layout.c:556` | `double fx_auto_min_size(double min_content, double basis, double author_min,
+| `fx_auto_margins` | function | `src/flex_layout.c:556` | `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
+                ...` |
+| `fx_auto_min_size` | function | `src/flex_layout.c:579` | `double fx_auto_min_size(double min_content, double basis, double author_min,
                     ...` |
 | `fx_flex_line` | function | `src/flex_layout.c:22` | `fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,
                 ...` |
@@ -2451,10 +2467,10 @@ static dom_node_id qs_walk(const dom_inde...` |
                       ...` |
 | `fx_grid_place_span` | function | `src/flex_layout.c:166` | `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
                       ...` |
-| `fx_justify_name` | function | `src/flex_layout.c:638` | `const char *fx_justify_name(fx_justify j)` |
-| `fx_multicol_balance` | function | `src/flex_layout.c:607` | `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
+| `fx_justify_name` | function | `src/flex_layout.c:661` | `const char *fx_justify_name(fx_justify j)` |
+| `fx_multicol_balance` | function | `src/flex_layout.c:630` | `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
                         ...` |
-| `fx_multicol_used` | function | `src/flex_layout.c:570` | `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
+| `fx_multicol_used` | function | `src/flex_layout.c:593` | `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
                ...` |
 | `nn` | function | `src/flex_layout.c:18` | `static double nn(double v)` |
 | `clean_action` | function | `src/form.c:75` | `static int clean_action(const char *action, char *out, size_t outsz)` |
@@ -2482,46 +2498,47 @@ static dom_node_id qs_walk(const dom_inde...` |
 | `fb_buffer_reset` | function | `src/freebug.c:78` | `void fb_buffer_reset(fb_buffer *b)` |
 | `fb_level_name` | function | `src/freebug.c:110` | `const char *fb_level_name(int level)` |
 | `whole` | function | `src/freebug.c:5` | `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);` |
-| `BLOCKED` | function | `src/freedom.c:779` | `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);` |
-| `CSS_DROPS_REPORT_MAX` | macro | `src/freedom.c:160` | `#define CSS_DROPS_REPORT_MAX` |
+| `BLOCKED` | function | `src/freedom.c:782` | `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);` |
+| `CSS_DROPS_REPORT_MAX` | macro | `src/freedom.c:161` | `#define CSS_DROPS_REPORT_MAX` |
 | `EXIT_ERROR` | macro | `src/freedom.c:44` | `#define EXIT_ERROR` |
 | `EXIT_OK` | macro | `src/freedom.c:43` | `#define EXIT_OK` |
 | `EXIT_USAGE` | macro | `src/freedom.c:45` | `#define EXIT_USAGE` |
-| `HL_JS_NAV_MAX` | macro | `src/freedom.c:749` | `#define HL_JS_NAV_MAX` |
+| `HL_JS_NAV_MAX` | macro | `src/freedom.c:752` | `#define HL_JS_NAV_MAX` |
 | `_DEFAULT_SOURCE` | macro | `src/freedom.c:10` | `#define _DEFAULT_SOURCE` |
 | `_POSIX_C_SOURCE` | macro | `src/freedom.c:9` | `#define _POSIX_C_SOURCE` |
-| `elsewhere` | function | `src/freedom.c:814` | `* page whose script immediately forwards elsewhere (e.g. a search engine's
+| `elsewhere` | function | `src/freedom.c:817` | `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...` |
-| `fetch_and_render_one` | function | `src/freedom.c:753` | `static int fetch_and_render_one(const char *url, char **out_nav)` |
-| `foldback_cookies` | function | `src/freedom.c:471` | `static void foldback_cookies(const char *url, const char *jar)` |
-| `gets` | function | `src/freedom.c:409` | `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed (fail-c` |
-| `headless_fetch` | function | `src/freedom.c:413` | `static int headless_fetch(void *ctx, const char *method, const char *url,
+| `fetch_and_render_one` | function | `src/freedom.c:756` | `static int fetch_and_render_one(const char *url, char **out_nav)` |
+| `foldback_cookies` | function | `src/freedom.c:474` | `static void foldback_cookies(const char *url, const char *jar)` |
+| `gets` | function | `src/freedom.c:411` | `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed (fail-c` |
+| `headless_fetch` | function | `src/freedom.c:415` | `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...` |
-| `headless_load_hosts` | function | `src/freedom.c:213` | `static void headless_load_hosts(void)` |
-| `is_blank_text` | function | `src/freedom.c:251` | `static int is_blank_text(const char *s)` |
-| `is_http_url` | function | `src/freedom.c:76` | `static int is_http_url(const char *s)` |
-| `is_https_url` | function | `src/freedom.c:72` | `static int is_https_url(const char *s)` |
-| `is_overlay_http` | function | `src/freedom.c:81` | `static int is_overlay_http(const char *s)` |
-| `main` | function | `src/freedom.c:1026` | `int main(int argc, char **argv)` |
-| `now_us` | function | `src/freedom.c:135` | `static uint64_t now_us(void)` |
-| `only` | function | `src/freedom.c:622` | `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote fetch` |
-| `pool` | function | `src/freedom.c:586` | `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void *)(uintptr_` |
-| `print_console` | function | `src/freedom.c:357` | `static void print_console(const fb_buffer *log)` |
-| `print_css_drops` | function | `src/freedom.c:495` | `static void print_css_drops(const char *html, size_t len)` |
-| `print_doc` | function | `src/freedom.c:264` | `static void print_doc(const rd_doc *doc)` |
-| `print_dom` | function | `src/freedom.c:374` | `static void print_dom(const rd_doc *doc)` |
-| `print_dom_css` | function | `src/freedom.c:389` | `static void print_dom_css(const rd_doc *doc)` |
+| `headless_load_hosts` | function | `src/freedom.c:223` | `static void headless_load_hosts(void)` |
+| `is_blank_text` | function | `src/freedom.c:253` | `static int is_blank_text(const char *s)` |
+| `is_http_url` | function | `src/freedom.c:77` | `static int is_http_url(const char *s)` |
+| `is_https_url` | function | `src/freedom.c:73` | `static int is_https_url(const char *s)` |
+| `is_overlay_http` | function | `src/freedom.c:82` | `static int is_overlay_http(const char *s)` |
+| `main` | function | `src/freedom.c:1029` | `int main(int argc, char **argv)` |
+| `now_us` | function | `src/freedom.c:136` | `static uint64_t now_us(void)` |
+| `only` | function | `src/freedom.c:625` | `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote fetch` |
+| `pool` | function | `src/freedom.c:589` | `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void *)(uintptr_` |
+| `print_console` | function | `src/freedom.c:359` | `static void print_console(const fb_buffer *log)` |
+| `print_css_drops` | function | `src/freedom.c:498` | `static void print_css_drops(const char *html, size_t len)` |
+| `print_doc` | function | `src/freedom.c:266` | `static void print_doc(const rd_doc *doc)` |
+| `print_dom` | function | `src/freedom.c:376` | `static void print_dom(const rd_doc *doc)` |
+| `print_dom_css` | function | `src/freedom.c:391` | `static void print_dom_css(const rd_doc *doc)` |
 | `print_usage` | function | `src/freedom.c:47` | `static void print_usage(FILE *fp, const char *prog)` |
-| `read_file` | function | `src/freedom.c:195` | `static char *read_file(const char *path, size_t *out_len)` |
-| `render_page` | function | `src/freedom.c:526` | `static int render_page(const char *html, size_t len, const char *top_url,
+| `read_file` | function | `src/freedom.c:205` | `static char *read_file(const char *path, size_t *out_len)` |
+| `render_page` | function | `src/freedom.c:529` | `static int render_page(const char *html, size_t len, const char *top_url,
                        ...` |
-| `run_dump_video` | function | `src/freedom.c:1007` | `static int run_dump_video(const char *url)` |
-| `run_headless` | function | `src/freedom.c:833` | `static int run_headless(const char *target)` |
-| `sf_reason` | function | `src/freedom.c:734` | `static const char *sf_reason(sf_status ss)` |
-| `timings_dump` | function | `src/freedom.c:149` | `static void timings_dump(void)` |
-| `timings_enabled` | function | `src/freedom.c:145` | `static int timings_enabled(void)` |
-| `timings_ensure_init` | function | `src/freedom.c:141` | `static void timings_ensure_init(void)` |
-| `video_fetch_with_fallback` | function | `src/freedom.c:896` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+| `run_dump_video` | function | `src/freedom.c:1010` | `static int run_dump_video(const char *url)` |
+| `run_headless` | function | `src/freedom.c:836` | `static int run_headless(const char *target)` |
+| `sf_reason` | function | `src/freedom.c:737` | `static const char *sf_reason(sf_status ss)` |
+| `timings_dump` | function | `src/freedom.c:150` | `static void timings_dump(void)` |
+| `timings_enabled` | function | `src/freedom.c:146` | `static int timings_enabled(void)` |
+| `timings_ensure_init` | function | `src/freedom.c:142` | `static void timings_ensure_init(void)` |
+| `user_impersonate_enabled` | function | `src/freedom.c:198` | `static int user_impersonate_enabled(void)` |
+| `video_fetch_with_fallback` | function | `src/freedom.c:899` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...` |
 | `_GNU_SOURCE` | macro | `src/hls.c:21` | `#define _GNU_SOURCE` |
 | `_POSIX_C_SOURCE` | macro | `src/hls.c:22` | `#define _POSIX_C_SOURCE` |
@@ -3185,248 +3202,264 @@ int os_namespac...` |
 | `os_policy_size` | function | `src/os_sandbox.c:107` | `size_t os_policy_size(void)` |
 | `os_prot_allowed` | function | `src/os_sandbox.c:65` | `int os_prot_allowed(long syscall_nr, unsigned long prot)` |
 | `os_prot_allowed` | function | `src/os_sandbox.c:108` | `int os_prot_allowed(long syscall_nr, unsigned long prot)` |
-| `PV_COLOR_TOKEN_MAX` | macro | `src/page_view.c:1019` | `#define PV_COLOR_TOKEN_MAX` |
+| `PV_COLOR_TOKEN_MAX` | macro | `src/page_view.c:1025` | `#define PV_COLOR_TOKEN_MAX` |
 | `PV_FONT_CHAIN_MAX` | macro | `src/page_view.c:56` | `#define PV_FONT_CHAIN_MAX` |
 | `PV_FONT_PCT_MAX` | macro | `src/page_view.c:58` | `#define PV_FONT_PCT_MAX` |
 | `PV_FONT_PCT_MIN` | macro | `src/page_view.c:57` | `#define PV_FONT_PCT_MIN` |
 | `PV_FONT_REL_MAX` | macro | `src/page_view.c:50` | `#define PV_FONT_REL_MAX` |
 | `PV_FONT_REL_MIN` | macro | `src/page_view.c:49` | `#define PV_FONT_REL_MIN` |
-| `PV_MAX_BOXES` | macro | `src/page_view.c:1066` | `#define PV_MAX_BOXES` |
-| `PV_MAX_CONTAINERS` | macro | `src/page_view.c:1057` | `#define PV_MAX_CONTAINERS` |
+| `PV_MAX_BOXES` | macro | `src/page_view.c:1072` | `#define PV_MAX_BOXES` |
+| `PV_MAX_CONTAINERS` | macro | `src/page_view.c:1063` | `#define PV_MAX_CONTAINERS` |
 | `PV_MAX_DIM` | macro | `src/page_view.c:44` | `#define PV_MAX_DIM` |
-| `PV_MAX_GRID_COLS` | macro | `src/page_view.c:1058` | `#define PV_MAX_GRID_COLS` |
-| `PV_MAX_INLINE_ROW_ITEMS` | macro | `src/page_view.c:2099` | `#define PV_MAX_INLINE_ROW_ITEMS` |
-| `PV_MAX_STYLE_BYTES` | macro | `src/page_view.c:3713` | `#define PV_MAX_STYLE_BYTES` |
-| `PV_NODE_MAP_INIT_CAP` | macro | `src/page_view.c:267` | `#define PV_NODE_MAP_INIT_CAP` |
-| `PV_TEXTLESS_DEPTH_MAX` | macro | `src/page_view.c:2146` | `#define PV_TEXTLESS_DEPTH_MAX` |
+| `PV_MAX_GRID_COLS` | macro | `src/page_view.c:1064` | `#define PV_MAX_GRID_COLS` |
+| `PV_MAX_INLINE_ROW_ITEMS` | macro | `src/page_view.c:2147` | `#define PV_MAX_INLINE_ROW_ITEMS` |
+| `PV_MAX_STYLE_BYTES` | macro | `src/page_view.c:3896` | `#define PV_MAX_STYLE_BYTES` |
+| `PV_NODE_MAP_INIT_CAP` | macro | `src/page_view.c:268` | `#define PV_NODE_MAP_INIT_CAP` |
+| `PV_TEXTLESS_DEPTH_MAX` | macro | `src/page_view.c:2310` | `#define PV_TEXTLESS_DEPTH_MAX` |
+| `URL` | function | `src/page_view.c:4926` | `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);` |
 | `_POSIX_C_SOURCE` | macro | `src/page_view.c:10` | `#define _POSIX_C_SOURCE` |
-| `address` | function | `src/page_view.c:1069` | `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <= BT_MAX_POS` |
-| `annotate_replaced_run` | function | `src/page_view.c:3842` | `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
+| `address` | function | `src/page_view.c:1075` | `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <= BT_MAX_POS` |
+| `annotate_flow_run` | function | `src/page_view.c:1555` | `static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *items,
+          ...` |
+| `annotate_replaced_run` | function | `src/page_view.c:4025` | `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
                             ...` |
-| `appended` | function | `src/page_view.c:5138` | `* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
+| `appended` | function | `src/page_view.c:5385` | `* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
         if (cont.fl...` |
-| `ascii_ieq` | function | `src/page_view.c:3129` | `static int ascii_ieq(const char *s, const char *lit)` |
-| `attr_dup` | function | `src/page_view.c:3141` | `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` |
-| `bgcolor_attr` | function | `src/page_view.c:1047` | `static int bgcolor_attr(lxb_dom_element_t *el)` |
-| `block_id` | function | `src/page_view.c:4610` | `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it falls ` |
-| `box_reg_free` | function | `src/page_view.c:1574` | `static void box_reg_free(pv_box_reg *r)` |
-| `box_reg_id` | function | `src/page_view.c:1804` | `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
+| `ascii_ieq` | function | `src/page_view.c:3312` | `static int ascii_ieq(const char *s, const char *lit)` |
+| `attr_dup` | function | `src/page_view.c:3324` | `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` |
+| `bgcolor_attr` | function | `src/page_view.c:1053` | `static int bgcolor_attr(lxb_dom_element_t *el)` |
+| `block_id` | function | `src/page_view.c:4795` | `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it falls ` |
+| `box_reg_free` | function | `src/page_view.c:1622` | `static void box_reg_free(pv_box_reg *r)` |
+| `box_reg_id` | function | `src/page_view.c:1852` | `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
            ...` |
-| `boxdef_from_style` | function | `src/page_view.c:1583` | `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` |
-| `builder` | function | `src/page_view.c:2013` | `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
+| `boxdef_from_style` | function | `src/page_view.c:1631` | `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` |
+| `builder` | function | `src/page_view.c:2061` | `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
  * (the ...` |
-| `causes_block_break` | function | `src/page_view.c:908` | `static int causes_block_break(lxb_tag_id_t t, css_display display)` |
-| `cell_anchors` | function | `src/page_view.c:3608` | `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)` |
-| `cell_has_nested_table` | function | `src/page_view.c:3588` | `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)` |
-| `child` | function | `src/page_view.c:1077` | `* child (NULL = anonymous item: text directly inside the container);` |
-| `classify_input` | function | `src/page_view.c:3223` | `static pv_input_type classify_input(const char *type)` |
-| `collapse_ws` | function | `src/page_view.c:2850` | `static char *collapse_ws(const char *s, size_t n)` |
-| `collect_page_css` | function | `src/page_view.c:3880` | `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
+| `causes_block_break` | function | `src/page_view.c:914` | `static int causes_block_break(lxb_tag_id_t t, css_display display)` |
+| `cell_anchors` | function | `src/page_view.c:3791` | `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)` |
+| `cell_has_nested_table` | function | `src/page_view.c:3771` | `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)` |
+| `child` | function | `src/page_view.c:1083` | `* child (NULL = anonymous item: text directly inside the container);` |
+| `children_all_inline_block` | function | `src/page_view.c:2175` | `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,
+           ...` |
+| `classify_input` | function | `src/page_view.c:3406` | `static pv_input_type classify_input(const char *type)` |
+| `collapse_ws` | function | `src/page_view.c:3033` | `static char *collapse_ws(const char *s, size_t n)` |
+| `collect_page_css` | function | `src/page_view.c:4064` | `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
                      ...` |
-| `collect_style_text` | function | `src/page_view.c:3719` | `static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen)` |
-| `collect_text` | function | `src/page_view.c:3199` | `static char *collect_text(const lxb_dom_node_t *el)` |
-| `cols` | type_alias | `src/page_view.c:1079` | `typedef struct pv_cont_info { int id, display, gap, justify, cols;` |
-| `cont_def_reset` | function | `src/page_view.c:1478` | `static void cont_def_reset(pv_cont_def *d)` |
-| `container` | function | `src/page_view.c:2596` | `* membership in this container (and none in any container further out,
+| `collect_style_text` | function | `src/page_view.c:3902` | `static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen)` |
+| `collect_text` | function | `src/page_view.c:3382` | `static char *collect_text(const lxb_dom_node_t *el)` |
+| `cols` | type_alias | `src/page_view.c:1085` | `typedef struct pv_cont_info { int id, display, gap, justify, cols;` |
+| `cont_def_reset` | function | `src/page_view.c:1494` | `static void cont_def_reset(pv_cont_def *d)` |
+| `container` | function | `src/page_view.c:2776` | `* membership in this container (and none in any container further out,
                  * since i...` |
-| `container_id` | function | `src/page_view.c:1492` | `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` |
-| `content` | function | `src/page_view.c:1001` | `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);` |
-| `control` | function | `src/page_view.c:4294` | `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);` |
+| `container_id` | function | `src/page_view.c:1509` | `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` |
+| `content` | function | `src/page_view.c:1007` | `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);` |
+| `control` | function | `src/page_view.c:4479` | `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);` |
 | `cp1252_to_ucs` | function | `src/page_view.c:82` | `static unsigned int cp1252_to_ucs(unsigned char c)` |
-| `css_has_boxdeco` | function | `src/page_view.c:1339` | `static int css_has_boxdeco(const css_style *cs)` |
-| `css_has_hbox` | function | `src/page_view.c:1277` | `static int css_has_hbox(const css_style *cs)` |
-| `css_has_position` | function | `src/page_view.c:1334` | `static int css_has_position(const css_style *cs)` |
-| `css_hbox_resolve` | function | `src/page_view.c:1290` | `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)` |
-| `css_to_fx_justify` | function | `src/page_view.c:2042` | `static int css_to_fx_justify(css_justify j)` |
-| `dimensions` | function | `src/page_view.c:3032` | `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
+| `css_has_boxdeco` | function | `src/page_view.c:1355` | `static int css_has_boxdeco(const css_style *cs)` |
+| `css_has_hbox` | function | `src/page_view.c:1287` | `static int css_has_hbox(const css_style *cs)` |
+| `css_has_position` | function | `src/page_view.c:1350` | `static int css_has_position(const css_style *cs)` |
+| `css_hbox_resolve` | function | `src/page_view.c:1306` | `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)` |
+| `css_to_fx_justify` | function | `src/page_view.c:2090` | `static int css_to_fx_justify(css_justify j)` |
+| `dimensions` | function | `src/page_view.c:3215` | `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
 static void srcse...` |
 | `dup_n` | function | `src/page_view.c:143` | `static char *dup_n(const char *s, size_t n)` |
-| `element_is_content_leaf` | function | `src/page_view.c:2183` | `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
+| `element_is_content_leaf` | function | `src/page_view.c:2347` | `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
              ...` |
-| `engine` | function | `src/page_view.c:5084` | `* layout engine (contiguous item gather) drops every cell onto its own row and
+| `engine` | function | `src/page_view.c:5330` | `* layout engine (contiguous item gather) drops every cell onto its own row and
          * a 2-col...` |
-| `find_body` | function | `src/page_view.c:3064` | `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)` |
-| `float` | function | `src/page_view.c:2766` | `* genuinely nested float (oid != id) takes the deferred-column path. */
+| `find_body` | function | `src/page_view.c:3247` | `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)` |
+| `flex_column_flows_as_block` | function | `src/page_view.c:2197` | `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,
+            ...` |
+| `float` | function | `src/page_view.c:2949` | `* genuinely nested float (oid != id) takes the deferred-column path. */
     if (cont->float_oid =...` |
-| `flow` | function | `src/page_view.c:4986` | `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through it. ` |
-| `flow_table` | function | `src/page_view.c:3647` | `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)` |
-| `font_color_attr` | function | `src/page_view.c:1041` | `static int font_color_attr(lxb_dom_element_t *el)` |
-| `form_for` | function | `src/page_view.c:3170` | `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
+| `flow` | function | `src/page_view.c:5231` | `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through it. ` |
+| `flow_table` | function | `src/page_view.c:3830` | `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)` |
+| `fold_column_gap` | function | `src/page_view.c:2223` | `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,
+                            ...` |
+| `font_color_attr` | function | `src/page_view.c:1047` | `static int font_color_attr(lxb_dom_element_t *el)` |
+| `form_for` | function | `src/page_view.c:3353` | `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
                     const lxb_...` |
-| `form_rec` | struct | `src/page_view.c:3111` | `` |
-| `form_table` | struct | `src/page_view.c:3117` | `` |
-| `forms_add` | function | `src/page_view.c:3150` | `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` |
-| `forms_free` | function | `src/page_view.c:3122` | `static void forms_free(form_table *ft)` |
-| `generates_box` | function | `src/page_view.c:889` | `static int generates_box(lxb_tag_id_t t, css_display display)` |
-| `generates_box_style` | function | `src/page_view.c:901` | `static int generates_box_style(lxb_tag_id_t t, const css_style *cs)` |
-| `glyphs` | function | `src/page_view.c:1710` | `* glyphs (the runs carry it as their fill source);` |
-| `heading_level` | function | `src/page_view.c:964` | `static int heading_level(lxb_tag_id_t t)` |
-| `height` | function | `src/page_view.c:4512` | `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);` |
-| `here` | function | `src/page_view.c:1672` | `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3 sectio` |
-| `id` | function | `src/page_view.c:1097` | `* group id (-1 = the nearest IS the outermost: single-level float, the * painter's old path);` |
-| `ignored` | function | `src/page_view.c:574` | `* source is ignored (fail-visible: never invisible text from half a
+| `form_rec` | struct | `src/page_view.c:3294` | `` |
+| `form_table` | struct | `src/page_view.c:3300` | `` |
+| `forms_add` | function | `src/page_view.c:3333` | `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` |
+| `forms_free` | function | `src/page_view.c:3305` | `static void forms_free(form_table *ft)` |
+| `generates_box` | function | `src/page_view.c:895` | `static int generates_box(lxb_tag_id_t t, css_display display)` |
+| `generates_box_style` | function | `src/page_view.c:907` | `static int generates_box_style(lxb_tag_id_t t, const css_style *cs)` |
+| `glyphs` | function | `src/page_view.c:1758` | `* glyphs (the runs carry it as their fill source);` |
+| `heading_level` | function | `src/page_view.c:970` | `static int heading_level(lxb_tag_id_t t)` |
+| `height` | function | `src/page_view.c:4697` | `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);` |
+| `here` | function | `src/page_view.c:1720` | `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3 sectio` |
+| `id` | function | `src/page_view.c:1103` | `* group id (-1 = the nearest IS the outermost: single-level float, the * painter's old path);` |
+| `ignored` | function | `src/page_view.c:575` | `* source is ignored (fail-visible: never invisible text from half a
      * pattern). A real text-...` |
-| `in_boilerplate_subtree` | function | `src/page_view.c:3777` | `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
-| `in_closed_details_subtree` | function | `src/page_view.c:3792` | `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
-| `in_flow_table_cell` | function | `src/page_view.c:3659` | `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
+| `in_boilerplate_subtree` | function | `src/page_view.c:3960` | `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
+| `in_closed_details_subtree` | function | `src/page_view.c:3975` | `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
+| `in_flow_table_cell` | function | `src/page_view.c:3842` | `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
            ...` |
-| `in_hidden_subtree` | function | `src/page_view.c:3760` | `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+| `in_hidden_subtree` | function | `src/page_view.c:3943` | `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...` |
-| `in_skipped_subtree` | function | `src/page_view.c:1004` | `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+| `in_mixed_line` | function | `src/page_view.c:2159` | `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,
+                       ...` |
+| `in_skipped_subtree` | function | `src/page_view.c:1010` | `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
               ...` |
-| `is_block_like` | function | `src/page_view.c:842` | `static int is_block_like(lxb_tag_id_t t, css_display display)` |
-| `is_block_like_style` | function | `src/page_view.c:877` | `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)` |
-| `is_block_tag` | function | `src/page_view.c:817` | `static int is_block_tag(lxb_tag_id_t t)` |
-| `is_bold_tag` | function | `src/page_view.c:2061` | `static int is_bold_tag(lxb_tag_id_t t)` |
-| `is_inline_block_row` | function | `src/page_view.c:2101` | `static int is_inline_block_row(const lxb_dom_node_t *p, const css_sheet *sheet,
-                 ...` |
-| `is_italic_tag` | function | `src/page_view.c:2066` | `static int is_italic_tag(lxb_tag_id_t t)` |
-| `is_skipped_tag` | function | `src/page_view.c:976` | `static int is_skipped_tag(lxb_tag_id_t t)` |
-| `it` | function | `src/page_view.c:1183` | `* it (they inherit in CSS). list_style drives the <li> marker (structural);` |
-| `item_ordinal` | function | `src/page_view.c:1156` | `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` |
-| `li_ordinal` | function | `src/page_view.c:3402` | `static int li_ordinal(const lxb_dom_node_t *li)` |
-| `line` | function | `src/page_view.c:5093` | `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);` |
-| `links` | function | `src/page_view.c:3626` | `* its links (the Hacker News case: every story link lives inside a <td>), so the
+| `is_block_like` | function | `src/page_view.c:848` | `static int is_block_like(lxb_tag_id_t t, css_display display)` |
+| `is_block_like_style` | function | `src/page_view.c:883` | `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)` |
+| `is_block_tag` | function | `src/page_view.c:823` | `static int is_block_tag(lxb_tag_id_t t)` |
+| `is_bold_tag` | function | `src/page_view.c:2109` | `static int is_bold_tag(lxb_tag_id_t t)` |
+| `is_inline_level_style` | function | `src/page_view.c:2151` | `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)` |
+| `is_italic_tag` | function | `src/page_view.c:2114` | `static int is_italic_tag(lxb_tag_id_t t)` |
+| `is_layout_container` | function | `src/page_view.c:2247` | `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
+                   ...` |
+| `is_skipped_tag` | function | `src/page_view.c:982` | `static int is_skipped_tag(lxb_tag_id_t t)` |
+| `it` | function | `src/page_view.c:1193` | `* it (they inherit in CSS). list_style drives the <li> marker (structural);` |
+| `item_ordinal` | function | `src/page_view.c:1166` | `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` |
+| `li_is_list_item` | function | `src/page_view.c:2257` | `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,
+                    ...` |
+| `li_ordinal` | function | `src/page_view.c:3585` | `static int li_ordinal(const lxb_dom_node_t *li)` |
+| `line` | function | `src/page_view.c:5339` | `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);` |
+| `links` | function | `src/page_view.c:3809` | `* its links (the Hacker News case: every story link lives inside a <td>), so the
  * caller flows ...` |
-| `list_marker` | function | `src/page_view.c:3453` | `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
+| `list_marker` | function | `src/page_view.c:3636` | `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
                   ...` |
-| `margins` | function | `src/page_view.c:2480` | `* margins (boxdef_from_style) and the painter applies them when
+| `margins` | function | `src/page_view.c:2660` | `* margins (boxdef_from_style) and the painter applies them when
                          * it ope...` |
-| `mb` | type_alias | `src/page_view.c:1168` | `typedef struct pv_box_info { int l, r, w, center, mt, mb;` |
-| `nearest_cell` | function | `src/page_view.c:3573` | `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+| `mb` | type_alias | `src/page_view.c:1178` | `typedef struct pv_box_info { int l, r, w, center, mt, mb;` |
+| `nearest_cell` | function | `src/page_view.c:3756` | `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
   ...` |
-| `nearest_table` | function | `src/page_view.c:3512` | `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+| `nearest_table` | function | `src/page_view.c:3695` | `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
  ...` |
-| `next_skip` | function | `src/page_view.c:3597` | `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` |
-| `node_next` | function | `src/page_view.c:807` | `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` |
-| `node_table_role` | function | `src/page_view.c:3494` | `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
-| `node_tag` | function | `src/page_view.c:996` | `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)` |
-| `opens` | function | `src/page_view.c:2453` | `* painter applies it when the box opens (band/shared context) — seeding
+| `next_skip` | function | `src/page_view.c:3780` | `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` |
+| `node_next` | function | `src/page_view.c:813` | `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` |
+| `node_table_role` | function | `src/page_view.c:3677` | `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
+| `node_tag` | function | `src/page_view.c:1002` | `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)` |
+| `opens` | function | `src/page_view.c:2633` | `* painter applies it when the box opens (band/shared context) — seeding
              * it onto ru...` |
-| `outermost` | function | `src/page_view.c:2404` | `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);` |
-| `paints` | function | `src/page_view.c:917` | `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas
+| `outermost` | function | `src/page_view.c:2584` | `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);` |
+| `paints` | function | `src/page_view.c:923` | `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas
  * vacías"). Comment a...` |
-| `paints` | function | `src/page_view.c:2120` | `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas vacías").
+| `paints` | function | `src/page_view.c:2284` | `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas vacías").
  *
  * A chil...` |
-| `parent_is_table_internal` | function | `src/page_view.c:3546` | `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
-| `parse_dim` | function | `src/page_view.c:2874` | `static int parse_dim(const lxb_char_t *s, size_t len)` |
+| `parent_is_table_internal` | function | `src/page_view.c:3729` | `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
+| `parse_dim` | function | `src/page_view.c:3057` | `static int parse_dim(const lxb_char_t *s, size_t len)` |
 | `positions` | function | `src/page_view.c:132` | `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);` |
-| `present` | function | `src/page_view.c:2891` | `* when no width descriptors are present (density-only or bare URLs). */
+| `present` | function | `src/page_view.c:3074` | `* when no width descriptors are present (density-only or bare URLs). */
 static void srcset_best_u...` |
-| `pv_add_box_def` | function | `src/page_view.c:756` | `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)` |
-| `pv_add_cont_def` | function | `src/page_view.c:734` | `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)` |
-| `pv_append` | function | `src/page_view.c:332` | `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
+| `pv_add_box_def` | function | `src/page_view.c:762` | `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)` |
+| `pv_add_cont_def` | function | `src/page_view.c:740` | `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)` |
+| `pv_append` | function | `src/page_view.c:333` | `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
                     c...` |
-| `pv_append_image` | function | `src/page_view.c:366` | `pv_status pv_append_image(pv_view *v, int heading, int block_break,
+| `pv_append_image` | function | `src/page_view.c:367` | `pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           con...` |
-| `pv_append_input` | function | `src/page_view.c:396` | `pv_status pv_append_input(pv_view *v, int heading, int block_break,
+| `pv_append_input` | function | `src/page_view.c:397` | `pv_status pv_append_input(pv_view *v, int heading, int block_break,
                           pv_...` |
-| `pv_append_svg` | function | `src/page_view.c:472` | `pv_status pv_append_svg(pv_view *v, int heading, int block_break,
+| `pv_append_svg` | function | `src/page_view.c:473` | `pv_status pv_append_svg(pv_view *v, int heading, int block_break,
                         const c...` |
-| `pv_append_video` | function | `src/page_view.c:436` | `pv_status pv_append_video(pv_view *v, int heading, int block_break,
+| `pv_append_video` | function | `src/page_view.c:437` | `pv_status pv_append_video(pv_view *v, int heading, int block_break,
                           con...` |
-| `pv_at` | function | `src/page_view.c:790` | `const pv_run *pv_at(const pv_view *v, size_t i)` |
-| `pv_box_at` | function | `src/page_view.c:799` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i)` |
-| `pv_box_count` | function | `src/page_view.c:795` | `size_t pv_box_count(const pv_view *v)` |
-| `pv_box_info` | struct | `src/page_view.c:1168` | `` |
-| `pv_box_reg` | struct | `src/page_view.c:1535` | `` |
-| `pv_build` | function | `src/page_view.c:3812` | `pv_status pv_build(const hp_document *doc, pv_view **out)` |
-| `pv_build_ex` | function | `src/page_view.c:3816` | `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)` |
-| `pv_build_full` | function | `src/page_view.c:3820` | `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
+| `pv_at` | function | `src/page_view.c:796` | `const pv_run *pv_at(const pv_view *v, size_t i)` |
+| `pv_box_at` | function | `src/page_view.c:805` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i)` |
+| `pv_box_count` | function | `src/page_view.c:801` | `size_t pv_box_count(const pv_view *v)` |
+| `pv_box_info` | struct | `src/page_view.c:1178` | `` |
+| `pv_box_reg` | struct | `src/page_view.c:1583` | `` |
+| `pv_build` | function | `src/page_view.c:3995` | `pv_status pv_build(const hp_document *doc, pv_view **out)` |
+| `pv_build_ex` | function | `src/page_view.c:3999` | `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)` |
+| `pv_build_full` | function | `src/page_view.c:4003` | `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                      ...` |
-| `pv_build_styled` | function | `src/page_view.c:3905` | `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+| `pv_build_styled` | function | `src/page_view.c:4089` | `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                    ...` |
-| `pv_cache_find` | function | `src/page_view.c:1872` | `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
-| `pv_cache_put` | function | `src/page_view.c:1888` | `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
+| `pv_cache_find` | function | `src/page_view.c:1920` | `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
+| `pv_cache_put` | function | `src/page_view.c:1936` | `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
                      ...` |
-| `pv_cached_font_px` | function | `src/page_view.c:1883` | `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
-| `pv_cont_at` | function | `src/page_view.c:751` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)` |
-| `pv_cont_count` | function | `src/page_view.c:747` | `size_t pv_cont_count(const pv_view *v)` |
-| `pv_cont_info` | struct | `src/page_view.c:1079` | `` |
-| `pv_container_reg` | struct | `src/page_view.c:1468` | `` |
-| `pv_content_hidden` | function | `src/page_view.c:1187` | `int pv_content_hidden(int box_hidden, int run_visibility)` |
-| `pv_count` | function | `src/page_view.c:786` | `size_t pv_count(const pv_view *v)` |
-| `pv_css_drops` | function | `src/page_view.c:5228` | `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
+| `pv_cached_font_px` | function | `src/page_view.c:1931` | `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
+| `pv_cont_at` | function | `src/page_view.c:757` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)` |
+| `pv_cont_count` | function | `src/page_view.c:753` | `size_t pv_cont_count(const pv_view *v)` |
+| `pv_cont_info` | struct | `src/page_view.c:1085` | `` |
+| `pv_container_reg` | struct | `src/page_view.c:1484` | `` |
+| `pv_content_hidden` | function | `src/page_view.c:1197` | `int pv_content_hidden(int box_hidden, int run_visibility)` |
+| `pv_count` | function | `src/page_view.c:792` | `size_t pv_count(const pv_view *v)` |
+| `pv_css_drops` | function | `src/page_view.c:5455` | `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
                        const cha...` |
-| `pv_flow_reg` | struct | `src/page_view.c:2202` | `` |
-| `pv_flow_reg` | struct | `src/page_view.c:3480` | `` |
-| `pv_free` | function | `src/page_view.c:769` | `void pv_free(pv_view *v)` |
-| `pv_item_track` | struct | `src/page_view.c:1149` | `` |
-| `pv_new` | function | `src/page_view.c:328` | `pv_view *pv_new(void)` |
-| `pv_node_map` | struct | `src/page_view.c:269` | `` |
-| `pv_node_map_build` | function | `src/page_view.c:319` | `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)` |
-| `pv_node_map_free` | function | `src/page_view.c:283` | `static void pv_node_map_free(pv_node_map *m)` |
-| `pv_node_map_init` | function | `src/page_view.c:275` | `static int pv_node_map_init(pv_node_map *m)` |
-| `pv_parent_element` | function | `src/page_view.c:1911` | `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)` |
-| `pv_set_bgcolor` | function | `src/page_view.c:518` | `void pv_set_bgcolor(pv_view *v, int bg_rgb)` |
-| `pv_set_block_id` | function | `src/page_view.c:706` | `void pv_set_block_id(pv_view *v, int block_id)` |
-| `pv_set_box` | function | `src/page_view.c:672` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
+| `pv_flow_reg` | struct | `src/page_view.c:2366` | `` |
+| `pv_flow_reg` | struct | `src/page_view.c:3663` | `` |
+| `pv_free` | function | `src/page_view.c:775` | `void pv_free(pv_view *v)` |
+| `pv_item_track` | struct | `src/page_view.c:1159` | `` |
+| `pv_mauto_of` | function | `src/page_view.c:1301` | `static int pv_mauto_of(const css_style *cs)` |
+| `pv_new` | function | `src/page_view.c:329` | `pv_view *pv_new(void)` |
+| `pv_node_map` | struct | `src/page_view.c:270` | `` |
+| `pv_node_map_build` | function | `src/page_view.c:320` | `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)` |
+| `pv_node_map_free` | function | `src/page_view.c:284` | `static void pv_node_map_free(pv_node_map *m)` |
+| `pv_node_map_init` | function | `src/page_view.c:276` | `static int pv_node_map_init(pv_node_map *m)` |
+| `pv_parent_element` | function | `src/page_view.c:1959` | `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)` |
+| `pv_set_bgcolor` | function | `src/page_view.c:519` | `void pv_set_bgcolor(pv_view *v, int bg_rgb)` |
+| `pv_set_block_id` | function | `src/page_view.c:712` | `void pv_set_block_id(pv_view *v, int block_id)` |
+| `pv_set_box` | function | `src/page_view.c:678` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                 int box_center, int ...` |
-| `pv_set_box_pct` | function | `src/page_view.c:684` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
+| `pv_set_box_pct` | function | `src/page_view.c:690` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
                     ...` |
-| `pv_set_color` | function | `src/page_view.c:513` | `void pv_set_color(pv_view *v, int fg_rgb)` |
-| `pv_set_cont_box` | function | `src/page_view.c:629` | `void pv_set_cont_box(pv_view *v, int cont_box_id)` |
-| `pv_set_cont_item` | function | `src/page_view.c:645` | `void pv_set_cont_item(pv_view *v, int cont_item)` |
-| `pv_set_container` | function | `src/page_view.c:589` | `void pv_set_container(pv_view *v, int cont_id, int cont_display,
+| `pv_set_color` | function | `src/page_view.c:514` | `void pv_set_color(pv_view *v, int fg_rgb)` |
+| `pv_set_cont_box` | function | `src/page_view.c:630` | `void pv_set_cont_box(pv_view *v, int cont_box_id)` |
+| `pv_set_cont_item` | function | `src/page_view.c:651` | `void pv_set_cont_item(pv_view *v, int cont_item)` |
+| `pv_set_container` | function | `src/page_view.c:590` | `void pv_set_container(pv_view *v, int cont_id, int cont_display,
                       int cont_g...` |
-| `pv_set_emphasis` | function | `src/page_view.c:501` | `void pv_set_emphasis(pv_view *v, int bold, int italic)` |
-| `pv_set_flex` | function | `src/page_view.c:633` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
+| `pv_set_emphasis` | function | `src/page_view.c:502` | `void pv_set_emphasis(pv_view *v, int bold, int italic)` |
+| `pv_set_flex` | function | `src/page_view.c:634` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
                  int...` |
-| `pv_set_float` | function | `src/page_view.c:650` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
+| `pv_set_flex_mauto` | function | `src/page_view.c:646` | `void pv_set_flex_mauto(pv_view *v, int mauto)` |
+| `pv_set_float` | function | `src/page_view.c:656` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
                 int ...` |
-| `pv_set_grad_text` | function | `src/page_view.c:534` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)` |
-| `pv_set_grid` | function | `src/page_view.c:615` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)` |
-| `pv_set_grid_area` | function | `src/page_view.c:608` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start)` |
-| `pv_set_grid_rows` | function | `src/page_view.c:625` | `void pv_set_grid_rows(pv_view *v, int grid_rows)` |
-| `pv_set_indent` | function | `src/page_view.c:508` | `void pv_set_indent(pv_view *v, int indent)` |
-| `pv_set_input_checked` | function | `src/page_view.c:721` | `void pv_set_input_checked(pv_view *v, int checked)` |
-| `pv_set_input_select_opts` | function | `src/page_view.c:726` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts)` |
-| `pv_set_node_id` | function | `src/page_view.c:701` | `void pv_set_node_id(pv_view *v, dom_node_id node_id)` |
-| `pv_set_oof` | function | `src/page_view.c:716` | `void pv_set_oof(pv_view *v, int oof)` |
-| `pv_set_own_box` | function | `src/page_view.c:711` | `void pv_set_own_box(pv_view *v, int box_id)` |
-| `pv_set_row_span` | function | `src/page_view.c:604` | `void pv_set_row_span(pv_view *v, int row_span)` |
-| `pv_set_text_ext` | function | `src/page_view.c:542` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)` |
-| `pv_set_text_style` | function | `src/page_view.c:523` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,
+| `pv_set_grad_text` | function | `src/page_view.c:535` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)` |
+| `pv_set_grid` | function | `src/page_view.c:616` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)` |
+| `pv_set_grid_area` | function | `src/page_view.c:609` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start)` |
+| `pv_set_grid_rows` | function | `src/page_view.c:626` | `void pv_set_grid_rows(pv_view *v, int grid_rows)` |
+| `pv_set_indent` | function | `src/page_view.c:509` | `void pv_set_indent(pv_view *v, int indent)` |
+| `pv_set_input_checked` | function | `src/page_view.c:727` | `void pv_set_input_checked(pv_view *v, int checked)` |
+| `pv_set_input_select_opts` | function | `src/page_view.c:732` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts)` |
+| `pv_set_node_id` | function | `src/page_view.c:707` | `void pv_set_node_id(pv_view *v, dom_node_id node_id)` |
+| `pv_set_oof` | function | `src/page_view.c:722` | `void pv_set_oof(pv_view *v, int oof)` |
+| `pv_set_own_box` | function | `src/page_view.c:717` | `void pv_set_own_box(pv_view *v, int box_id)` |
+| `pv_set_row_span` | function | `src/page_view.c:605` | `void pv_set_row_span(pv_view *v, int row_span)` |
+| `pv_set_text_ext` | function | `src/page_view.c:543` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)` |
+| `pv_set_text_style` | function | `src/page_view.c:524` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,
                 ...` |
-| `pv_set_ua_tag` | function | `src/page_view.c:695` | `void pv_set_ua_tag(pv_view *v, int ua_tag)` |
-| `pv_style_cache` | struct | `src/page_view.c:1837` | `` |
-| `pv_style_cache_free` | function | `src/page_view.c:1862` | `static void pv_style_cache_free(pv_style_cache *c)` |
-| `pv_style_cache_init` | function | `src/page_view.c:1848` | `static int pv_style_cache_init(pv_style_cache *c)` |
-| `pv_text_ext_merge` | function | `src/page_view.c:1219` | `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` |
-| `pv_text_ext_reset` | function | `src/page_view.c:1193` | `void pv_text_ext_reset(pv_text_ext *e)` |
-| `px` | function | `src/page_view.c:4445` | `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
+| `pv_set_ua_tag` | function | `src/page_view.c:701` | `void pv_set_ua_tag(pv_view *v, int ua_tag)` |
+| `pv_style_cache` | struct | `src/page_view.c:1885` | `` |
+| `pv_style_cache_free` | function | `src/page_view.c:1910` | `static void pv_style_cache_free(pv_style_cache *c)` |
+| `pv_style_cache_init` | function | `src/page_view.c:1896` | `static int pv_style_cache_init(pv_style_cache *c)` |
+| `pv_text_ext_merge` | function | `src/page_view.c:1229` | `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` |
+| `pv_text_ext_reset` | function | `src/page_view.c:1203` | `void pv_text_ext_reset(pv_text_ext *e)` |
+| `px` | function | `src/page_view.c:4630` | `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
                 if (iw <...` |
-| `resolve_context` | function | `src/page_view.c:2206` | `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+| `resolve_context` | function | `src/page_view.c:2370` | `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 ...` |
-| `resolves` | function | `src/page_view.c:867` | `* box_tree already resolves (R4/R8) had nothing to place -- every badge/close
+| `resolves` | function | `src/page_view.c:873` | `* box_tree already resolves (R4/R8) had nothing to place -- every badge/close
  * button/tooltip w...` |
-| `roman_marker` | function | `src/page_view.c:3428` | `static void roman_marker(int n, int upper, char *out, size_t cap)` |
+| `roman_marker` | function | `src/page_view.c:3611` | `static void roman_marker(int n, int upper, char *out, size_t cap)` |
 | `run_init_common` | function | `src/page_view.c:157` | `static void run_init_common(pv_run *r)` |
-| `serialize_subtree` | function | `src/page_view.c:2831` | `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)` |
-| `size` | function | `src/page_view.c:1993` | `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
+| `serialize_subtree` | function | `src/page_view.c:3014` | `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)` |
+| `size` | function | `src/page_view.c:2041` | `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
 static void app...` |
-| `srcset_slot_width` | function | `src/page_view.c:2986` | `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
+| `srcset_slot_width` | function | `src/page_view.c:3169` | `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
                               ...` |
-| `string` | function | `src/page_view.c:3074` | `* Returns a heap string (caller frees) or NULL when neither carries a class —
+| `string` | function | `src/page_view.c:3257` | `* Returns a heap string (caller frees) or NULL when neither carries a class —
  * NULL simply mean...` |
-| `subtree_has_own_text` | function | `src/page_view.c:2163` | `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+| `subtree_has_own_text` | function | `src/page_view.c:2327` | `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             ...` |
-| `subtree_is_oof` | function | `src/page_view.c:1973` | `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
+| `subtree_is_oof` | function | `src/page_view.c:2021` | `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
                      ...` |
-| `sz_count` | function | `src/page_view.c:2809` | `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` |
-| `sz_fill` | struct | `src/page_view.c:2817` | `` |
-| `sz_write` | function | `src/page_view.c:2823` | `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)` |
-| `table` | function | `src/page_view.c:3668` | `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
+| `sz_count` | function | `src/page_view.c:2992` | `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` |
+| `sz_fill` | struct | `src/page_view.c:3000` | `` |
+| `sz_write` | function | `src/page_view.c:3006` | `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)` |
+| `table` | function | `src/page_view.c:3851` | `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
  * content -- their ...` |
-| `table_columns` | function | `src/page_view.c:3686` | `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` |
-| `trying` | function | `src/page_view.c:1545` | `* a real page passes without trying (slashdot's front page saturates it), and past
+| `table_columns` | function | `src/page_view.c:3869` | `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` |
+| `trying` | function | `src/page_view.c:1593` | `* a real page passes without trying (slashdot's front page saturates it), and past
  * it box_reg_...` |
-| `ua_tag_of` | function | `src/page_view.c:942` | `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)` |
-| `under_unrendered` | function | `src/page_view.c:3186` | `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` |
+| `ua_tag_of` | function | `src/page_view.c:948` | `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)` |
+| `under_unrendered` | function | `src/page_view.c:3369` | `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` |
 | `utf8_encode` | function | `src/page_view.c:96` | `static size_t utf8_encode(unsigned int cp, char *out)` |
 | `utf8_sanitized_dup` | function | `src/page_view.c:109` | `static char *utf8_sanitized_dup(const char *s)` |
-| `walk` | function | `src/page_view.c:2679` | `* far on this walk (they are all inside this element). */
+| `walk` | function | `src/page_view.c:2860` | `* far on this walk (they are all inside this element). */
 
                         /* The innermo...` |
 | `pe_build_path` | function | `src/pdf_export.c:91` | `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz)` |
@@ -3507,27 +3540,27 @@ static void app...` |
 | `profile_load` | function | `src/profile.c:112` | `profile_status profile_load(const profile_ctx *ctx, prefs_state *out)` |
 | `profile_open` | function | `src/profile.c:59` | `profile_status profile_open(profile_ctx *ctx, const char *dir)` |
 | `profile_save` | function | `src/profile.c:133` | `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p)` |
-| `place` | function | `src/render_doc.c:217` | `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never resolved,` |
-| `rd_at` | function | `src/render_doc.c:697` | `const rd_block *rd_at(const rd_doc *d, size_t i)` |
-| `rd_block_tag` | function | `src/render_doc.c:734` | `const char *rd_block_tag(const rd_block *b)` |
-| `rd_box_at` | function | `src/render_doc.c:706` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)` |
-| `rd_box_count` | function | `src/render_doc.c:702` | `size_t rd_box_count(const rd_doc *d)` |
-| `rd_build` | function | `src/render_doc.c:249` | `rd_status rd_build(const pv_view *view, rdp_caps caps,
+| `place` | function | `src/render_doc.c:218` | `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never resolved,` |
+| `rd_at` | function | `src/render_doc.c:700` | `const rd_block *rd_at(const rd_doc *d, size_t i)` |
+| `rd_block_tag` | function | `src/render_doc.c:737` | `const char *rd_block_tag(const rd_block *b)` |
+| `rd_box_at` | function | `src/render_doc.c:709` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)` |
+| `rd_box_count` | function | `src/render_doc.c:705` | `size_t rd_box_count(const rd_doc *d)` |
+| `rd_build` | function | `src/render_doc.c:250` | `rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_u...` |
-| `rd_cont_at` | function | `src/render_doc.c:715` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)` |
-| `rd_cont_count` | function | `src/render_doc.c:711` | `size_t rd_cont_count(const rd_doc *d)` |
-| `rd_count` | function | `src/render_doc.c:693` | `size_t rd_count(const rd_doc *d)` |
-| `rd_free` | function | `src/render_doc.c:677` | `void rd_free(rd_doc *d)` |
-| `rd_image_fail_label` | function | `src/render_doc.c:795` | `const char *rd_image_fail_label(img_fail_reason reason)` |
-| `rd_image_label` | function | `src/render_doc.c:784` | `const char *rd_image_label(rdp_img_decision d)` |
-| `rd_input_label` | function | `src/render_doc.c:765` | `const char *rd_input_label(int input_type)` |
-| `rd_kind_name` | function | `src/render_doc.c:720` | `const char *rd_kind_name(rd_kind k)` |
+| `rd_cont_at` | function | `src/render_doc.c:718` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)` |
+| `rd_cont_count` | function | `src/render_doc.c:714` | `size_t rd_cont_count(const rd_doc *d)` |
+| `rd_count` | function | `src/render_doc.c:696` | `size_t rd_count(const rd_doc *d)` |
+| `rd_free` | function | `src/render_doc.c:680` | `void rd_free(rd_doc *d)` |
+| `rd_image_fail_label` | function | `src/render_doc.c:798` | `const char *rd_image_fail_label(img_fail_reason reason)` |
+| `rd_image_label` | function | `src/render_doc.c:787` | `const char *rd_image_label(rdp_img_decision d)` |
+| `rd_input_label` | function | `src/render_doc.c:768` | `const char *rd_input_label(int input_type)` |
+| `rd_kind_name` | function | `src/render_doc.c:723` | `const char *rd_kind_name(rd_kind k)` |
 | `rd_push` | function | `src/render_doc.c:60` | `static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
                  ...` |
-| `rd_push_input` | function | `src/render_doc.c:192` | `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` |
-| `resolve_image_decision` | function | `src/render_doc.c:227` | `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
+| `rd_push_input` | function | `src/render_doc.c:193` | `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` |
+| `resolve_image_decision` | function | `src/render_doc.c:228` | `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
         ...` |
-| `unset` | function | `src/render_doc.c:612` | `* background paints as if unset (no border/box-shadow-style
+| `unset` | function | `src/render_doc.c:615` | `* background paints as if unset (no border/box-shadow-style
                  * "broken image" pla...` |
 | `utf8_sanitized_dup` | function | `src/render_doc.c:28` | `static char *utf8_sanitized_dup(const char *s)` |
 | `rdp_caps_safe` | function | `src/render_policy.c:17` | `rdp_caps rdp_caps_safe(void)` |
@@ -3649,11 +3682,11 @@ static void app...` |
 | `sv_span_eq` | function | `src/svg_render.c:32` | `static int sv_span_eq(const char *s, size_t n, const char *lit)` |
 | `sv_style_next` | function | `src/svg_render.c:238` | `static int sv_style_next(const char *s, size_t n, size_t *i,
                          const char ...` |
-| `EPIPE` | function | `src/tab.c:1390` | `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();` |
-| `FB_MAX_FILE_BYTES` | function | `src/tab.c:651` | `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
+| `EPIPE` | function | `src/tab.c:1395` | `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();` |
+| `FB_MAX_FILE_BYTES` | function | `src/tab.c:656` | `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
  * the stream. ...` |
 | `PV_MAX_CONTAINERS_WIRE` | macro | `src/tab.c:71` | `#define PV_MAX_CONTAINERS_WIRE` |
-| `TAB_MAX_EXTERN_CSS` | macro | `src/tab.c:724` | `#define TAB_MAX_EXTERN_CSS` |
+| `TAB_MAX_EXTERN_CSS` | macro | `src/tab.c:729` | `#define TAB_MAX_EXTERN_CSS` |
 | `TAB_MAX_JS_JOBS` | macro | `src/tab.c:91` | `#define TAB_MAX_JS_JOBS` |
 | `TAB_MAX_RUNS` | macro | `src/tab.c:67` | `#define TAB_MAX_RUNS` |
 | `TAB_MAX_SUBREQ` | macro | `src/tab.c:89` | `#define TAB_MAX_SUBREQ` |
@@ -3667,93 +3700,93 @@ static void app...` |
 | `TAB_WIRE_GRID_N` | macro | `src/tab.c:63` | `#define TAB_WIRE_GRID_N` |
 | `TAB_WIRE_HEAD_N` | macro | `src/tab.c:59` | `#define TAB_WIRE_HEAD_N` |
 | `_GNU_SOURCE` | macro | `src/tab.c:14` | `#define _GNU_SOURCE` |
-| `answered` | function | `src/tab.c:2226` | `* A refused frame is still consumed and answered (status 0), so the protocol never
+| `answered` | function | `src/tab.c:2234` | `* A refused frame is still consumed and answered (status 0), so the protocol never
  * desyncs. Re...` |
-| `blocks` | function | `src/tab.c:293` | `*
+| `blocks` | function | `src/tab.c:294` | `*
  * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the
  * grid arr...` |
-| `budget_remaining_ms` | function | `src/tab.c:681` | `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` |
+| `budget_remaining_ms` | function | `src/tab.c:686` | `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` |
 | `buffer` | function | `src/tab.c:236` | `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of run_j` |
-| `child_handle_click` | function | `src/tab.c:1171` | `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)` |
-| `child_handle_decode_image` | function | `src/tab.c:1334` | `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` |
-| `child_handle_decode_image_b64` | function | `src/tab.c:1356` | `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)` |
-| `child_handle_eval` | function | `src/tab.c:1301` | `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` |
-| `child_handle_event` | function | `src/tab.c:1185` | `static void child_handle_event(int wfd, child_state *cs)` |
-| `child_handle_load` | function | `src/tab.c:808` | `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
+| `child_handle_click` | function | `src/tab.c:1176` | `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)` |
+| `child_handle_decode_image` | function | `src/tab.c:1339` | `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` |
+| `child_handle_decode_image_b64` | function | `src/tab.c:1361` | `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)` |
+| `child_handle_eval` | function | `src/tab.c:1306` | `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` |
+| `child_handle_event` | function | `src/tab.c:1190` | `static void child_handle_event(int wfd, child_state *cs)` |
+| `child_handle_load` | function | `src/tab.c:813` | `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
            ...` |
-| `child_handle_mouse` | function | `src/tab.c:1233` | `static void child_handle_mouse(int wfd, child_state *cs)` |
-| `child_handle_mutation` | function | `src/tab.c:1104` | `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
+| `child_handle_mouse` | function | `src/tab.c:1238` | `static void child_handle_mouse(int wfd, child_state *cs)` |
+| `child_handle_mutation` | function | `src/tab.c:1109` | `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                         ...` |
-| `child_handle_submit` | function | `src/tab.c:1267` | `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)` |
-| `child_handle_tick` | function | `src/tab.c:1175` | `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)` |
-| `child_next_timer_ms` | function | `src/tab.c:1089` | `static int32_t child_next_timer_ms(child_state *cs)` |
+| `child_handle_submit` | function | `src/tab.c:1272` | `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)` |
+| `child_handle_tick` | function | `src/tab.c:1180` | `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)` |
+| `child_next_timer_ms` | function | `src/tab.c:1094` | `static int32_t child_next_timer_ms(child_state *cs)` |
 | `child_reset_page` | function | `src/tab.c:124` | `static void child_reset_page(child_state *cs)` |
 | `child_state` | struct | `src/tab.c:102` | `` |
-| `column` | function | `src/tab.c:1783` | `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation as te` |
-| `content` | function | `src/tab.c:997` | `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video> elements i` |
-| `ctype_is_css` | function | `src/tab.c:704` | `static int ctype_is_css(const char *ctype)` |
-| `ctype_is_javascript` | function | `src/tab.c:695` | `static int ctype_is_javascript(const char *ctype)` |
-| `depth` | function | `src/tab.c:1411` | `* defense in depth (seccomp already excludes open/socket/exec);` |
-| `exec_worker_child` | function | `src/tab.c:2116` | `static void exec_worker_child(int rfd, int wfd)` |
-| `fallback` | function | `src/tab.c:877` | `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it even ` |
-| `gen_session_key` | function | `src/tab.c:1368` | `static uint64_t gen_session_key(void)` |
+| `column` | function | `src/tab.c:1789` | `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation as te` |
+| `content` | function | `src/tab.c:1002` | `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video> elements i` |
+| `ctype_is_css` | function | `src/tab.c:709` | `static int ctype_is_css(const char *ctype)` |
+| `ctype_is_javascript` | function | `src/tab.c:700` | `static int ctype_is_javascript(const char *ctype)` |
+| `depth` | function | `src/tab.c:1416` | `* defense in depth (seccomp already excludes open/socket/exec);` |
+| `exec_worker_child` | function | `src/tab.c:2124` | `static void exec_worker_child(int rfd, int wfd)` |
+| `fallback` | function | `src/tab.c:882` | `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it even ` |
+| `gen_session_key` | function | `src/tab.c:1373` | `static uint64_t gen_session_key(void)` |
 | `host` | function | `src/tab.c:248` | `* granted net access for this host (allow.conf AND js.conf). Otherwise they stay * undefined (Same-Origin-by-constructio` |
-| `ignore_sigpipe` | function | `src/tab.c:1583` | `static void ignore_sigpipe(void)` |
-| `io_failure` | function | `src/tab.c:2108` | `static tab_status io_failure(tab *t)` |
-| `layout` | function | `src/tab.c:1773` | `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property. */ pv` |
-| `load` | function | `src/tab.c:1570` | `* subresource requests this load (set per page: host in allow.conf AND js.conf);` |
-| `log_external_skip` | function | `src/tab.c:712` | `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
+| `ignore_sigpipe` | function | `src/tab.c:1588` | `static void ignore_sigpipe(void)` |
+| `io_failure` | function | `src/tab.c:2116` | `static tab_status io_failure(tab *t)` |
+| `layout` | function | `src/tab.c:1779` | `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property. */ pv` |
+| `load` | function | `src/tab.c:1575` | `* subresource requests this load (set per page: host in allow.conf AND js.conf);` |
+| `log_external_skip` | function | `src/tab.c:717` | `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
                 ...` |
-| `once` | function | `src/tab.c:1042` | `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);` |
-| `parse_worker_fd` | function | `src/tab.c:1531` | `static int parse_worker_fd(const char *s, int *out)` |
+| `once` | function | `src/tab.c:1047` | `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);` |
+| `parse_worker_fd` | function | `src/tab.c:1536` | `static int parse_worker_fd(const char *s, int *out)` |
 | `policy` | function | `src/tab.c:139` | `* policy (host blocklist/tracker filter, realm routing, TLS-PQ) before fetching, so a
  * compromi...` |
-| `read_console` | function | `src/tab.c:2061` | `static int read_console(int fd, fb_buffer *out)` |
-| `read_field` | function | `src/tab.c:1609` | `static int read_field(int fd, char **out, size_t *out_len)` |
-| `read_view` | function | `src/tab.c:1625` | `static int read_view(int fd, pv_view **out)` |
-| `run` | function | `src/tab.c:730` | `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
+| `read_console` | function | `src/tab.c:2069` | `static int read_console(int fd, fb_buffer *out)` |
+| `read_field` | function | `src/tab.c:1614` | `static int read_field(int fd, char **out, size_t *out_len)` |
+| `read_view` | function | `src/tab.c:1630` | `static int read_view(int fd, pv_view **out)` |
+| `run` | function | `src/tab.c:735` | `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
  * Call after every ...` |
 | `run_js` | function | `src/tab.c:193` | `* regardless of run_js (a no-JS load simply never records a request). */
 static int child_load(ch...` |
-| `send_request` | function | `src/tab.c:2098` | `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` |
-| `swap` | function | `src/tab.c:1051` | `* display:none hiding an element via class swap (CSS, not
+| `send_request` | function | `src/tab.c:2106` | `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` |
+| `swap` | function | `src/tab.c:1056` | `* display:none hiding an element via class swap (CSS, not
      * DOM removal). */
     if (ok && v...` |
-| `tab` | struct | `src/tab.c:1563` | `` |
-| `tab_alive` | function | `src/tab.c:2699` | `int tab_alive(const tab *t)` |
-| `tab_child_pid` | function | `src/tab.c:2705` | `pid_t tab_child_pid(const tab *t)` |
-| `tab_click` | function | `src/tab.c:2416` | `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)` |
-| `tab_close` | function | `src/tab.c:2709` | `void tab_close(tab *t)` |
-| `tab_decode_image` | function | `src/tab.c:2675` | `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)` |
-| `tab_decode_image_data_url` | function | `src/tab.c:2681` | `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)` |
-| `tab_decode_image_op` | function | `src/tab.c:2633` | `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
+| `tab` | struct | `src/tab.c:1568` | `` |
+| `tab_alive` | function | `src/tab.c:2707` | `int tab_alive(const tab *t)` |
+| `tab_child_pid` | function | `src/tab.c:2713` | `pid_t tab_child_pid(const tab *t)` |
+| `tab_click` | function | `src/tab.c:2424` | `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)` |
+| `tab_close` | function | `src/tab.c:2717` | `void tab_close(tab *t)` |
+| `tab_decode_image` | function | `src/tab.c:2683` | `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)` |
+| `tab_decode_image_data_url` | function | `src/tab.c:2689` | `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)` |
+| `tab_decode_image_op` | function | `src/tab.c:2641` | `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
         ...` |
-| `tab_eval` | function | `src/tab.c:2593` | `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)` |
-| `tab_eval_result_free` | function | `src/tab.c:2740` | `void tab_eval_result_free(tab_eval_result *r)` |
-| `tab_image_free` | function | `src/tab.c:2749` | `void tab_image_free(tab_image *img)` |
-| `tab_load` | function | `src/tab.c:2262` | `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)` |
-| `tab_load_ex` | function | `src/tab.c:2266` | `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)` |
-| `tab_load_full` | function | `src/tab.c:2270` | `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+| `tab_eval` | function | `src/tab.c:2601` | `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)` |
+| `tab_eval_result_free` | function | `src/tab.c:2748` | `void tab_eval_result_free(tab_eval_result *r)` |
+| `tab_image_free` | function | `src/tab.c:2757` | `void tab_image_free(tab_image *img)` |
+| `tab_load` | function | `src/tab.c:2270` | `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)` |
+| `tab_load_ex` | function | `src/tab.c:2274` | `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)` |
+| `tab_load_full` | function | `src/tab.c:2278` | `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...` |
-| `tab_page_free` | function | `src/tab.c:2722` | `void tab_page_free(tab_page *p)` |
-| `tab_parse_worker_args` | function | `src/tab.c:1543` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)` |
-| `tab_read_view` | function | `src/tab.c:2537` | `tab_status tab_read_view(tab *t, tab_page *out)` |
-| `tab_refresh_alive` | function | `src/tab.c:1590` | `static void tab_refresh_alive(tab *t)` |
-| `tab_set_cookies` | function | `src/tab.c:2208` | `void tab_set_cookies(tab *t, const char *cookies)` |
-| `tab_set_css_allowed` | function | `src/tab.c:2198` | `void tab_set_css_allowed(tab *t, int allowed)` |
-| `tab_set_fetcher` | function | `src/tab.c:2187` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)` |
-| `tab_set_net_allowed` | function | `src/tab.c:2193` | `void tab_set_net_allowed(tab *t, int allowed)` |
-| `tab_set_viewport_w` | function | `src/tab.c:2203` | `void tab_set_viewport_w(tab *t, int px)` |
-| `tab_submit` | function | `src/tab.c:2432` | `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` |
-| `tab_subreq_permitted` | function | `src/tab.c:2214` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)` |
-| `tab_tick` | function | `src/tab.c:2423` | `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)` |
-| `tab_worker_dispatch` | function | `src/tab.c:1553` | `void tab_worker_dispatch(int argc, char **argv)` |
-| `tab_worker_run` | function | `src/tab.c:1388` | `static void tab_worker_run(int rfd, int wfd)` |
-| `tzset` | function | `src/tab.c:1406` | `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);` |
-| `window` | function | `src/tab.c:763` | `* net window (cs->net_active). */
+| `tab_page_free` | function | `src/tab.c:2730` | `void tab_page_free(tab_page *p)` |
+| `tab_parse_worker_args` | function | `src/tab.c:1548` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)` |
+| `tab_read_view` | function | `src/tab.c:2545` | `tab_status tab_read_view(tab *t, tab_page *out)` |
+| `tab_refresh_alive` | function | `src/tab.c:1595` | `static void tab_refresh_alive(tab *t)` |
+| `tab_set_cookies` | function | `src/tab.c:2216` | `void tab_set_cookies(tab *t, const char *cookies)` |
+| `tab_set_css_allowed` | function | `src/tab.c:2206` | `void tab_set_css_allowed(tab *t, int allowed)` |
+| `tab_set_fetcher` | function | `src/tab.c:2195` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)` |
+| `tab_set_net_allowed` | function | `src/tab.c:2201` | `void tab_set_net_allowed(tab *t, int allowed)` |
+| `tab_set_viewport_w` | function | `src/tab.c:2211` | `void tab_set_viewport_w(tab *t, int px)` |
+| `tab_submit` | function | `src/tab.c:2440` | `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` |
+| `tab_subreq_permitted` | function | `src/tab.c:2222` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)` |
+| `tab_tick` | function | `src/tab.c:2431` | `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)` |
+| `tab_worker_dispatch` | function | `src/tab.c:1558` | `void tab_worker_dispatch(int argc, char **argv)` |
+| `tab_worker_run` | function | `src/tab.c:1393` | `static void tab_worker_run(int rfd, int wfd)` |
+| `tzset` | function | `src/tab.c:1411` | `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);` |
+| `window` | function | `src/tab.c:768` | `* net window (cs->net_active). */
 static void child_fetch_stylesheets(child_state *cs)` |
 | `write_field` | function | `src/tab.c:260` | `static int write_field(int fd, const char *s)` |
-| `write_full` | function | `src/tab.c:1071` | `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 \|\| write_full(wfd, text, xl) == 0) && write_view(wfd, write_which)` |
+| `write_full` | function | `src/tab.c:1076` | `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 \|\| write_full(wfd, text, xl) == 0) && write_view(wfd, write_which)` |
 | `TSH_CACHE_SLOTS` | macro | `src/text_shape.c:32` | `#define TSH_CACHE_SLOTS` |
 | `TSH_MAX_FONT_BYTES` | macro | `src/text_shape.c:28` | `#define TSH_MAX_FONT_BYTES` |
 | `_POSIX_C_SOURCE` | macro | `src/text_shape.c:12` | `#define _POSIX_C_SOURCE` |
@@ -3919,61 +3952,62 @@ static int looks_like_host(const c...` |
 | `test_unknown_and_null_are_neutral_inline` | function | `tests/test_box_style.c:118` | `static void test_unknown_and_null_are_neutral_inline(void **state)` |
 | `test_width_cap_pct` | function | `tests/test_box_style.c:508` | `static void test_width_cap_pct(void **state)` |
 | `width` | function | `tests/test_box_style.c:534` | `* a negative width (CSS Values 4 section 10.1: out-of-range calc() results are * clamped at used-value time). */ assert_` |
-| `UNSET4` | macro | `tests/test_box_tree.c:610` | `#define UNSET4` |
+| `UNSET4` | macro | `tests/test_box_tree.c:630` | `#define UNSET4` |
 | `assert_rect` | function | `tests/test_box_tree.c:28` | `static void assert_rect(const bt_node *n, double x, double y, double w, double h)` |
-| `card` | function | `tests/test_box_tree.c:749` | `* containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */ assert_true(dbl_eq(out[2].x, 100));` |
-| `main` | function | `tests/test_box_tree.c:889` | `int main(void)` |
-| `test_abspos_resolves_against_placed_ancestor` | function | `tests/test_box_tree.c:724` | `static void test_abspos_resolves_against_placed_ancestor(void **state)` |
-| `test_abspos_unplaced_without_anchor_falls_to_viewport` | function | `tests/test_box_tree.c:754` | `static void test_abspos_unplaced_without_anchor_falls_to_viewport(void **state)` |
+| `card` | function | `tests/test_box_tree.c:769` | `* containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */ assert_true(dbl_eq(out[2].x, 100));` |
+| `main` | function | `tests/test_box_tree.c:909` | `int main(void)` |
+| `test_abspos_resolves_against_placed_ancestor` | function | `tests/test_box_tree.c:744` | `static void test_abspos_resolves_against_placed_ancestor(void **state)` |
+| `test_abspos_unplaced_without_anchor_falls_to_viewport` | function | `tests/test_box_tree.c:774` | `static void test_abspos_unplaced_without_anchor_falls_to_viewport(void **state)` |
 | `test_block_stacking_with_collapse` | function | `tests/test_box_tree.c:62` | `static void test_block_stacking_with_collapse(void **state)` |
-| `test_box_hidden_ancestor` | function | `tests/test_box_tree.c:786` | `static void test_box_hidden_ancestor(void **state)` |
-| `test_box_hidden_fail_closed` | function | `tests/test_box_tree.c:799` | `static void test_box_hidden_fail_closed(void **state)` |
-| `test_box_hidden_self` | function | `tests/test_box_tree.c:774` | `static void test_box_hidden_self(void **state)` |
-| `test_children_cap` | function | `tests/test_box_tree.c:368` | `static void test_children_cap(void **state)` |
-| `test_depth_cap` | function | `tests/test_box_tree.c:378` | `static void test_depth_cap(void **state)` |
-| `test_display_none_skipped` | function | `tests/test_box_tree.c:333` | `static void test_display_none_skipped(void **state)` |
-| `test_flex_cross_axis_align` | function | `tests/test_box_tree.c:193` | `static void test_flex_cross_axis_align(void **state)` |
-| `test_flex_gap_and_justify_center` | function | `tests/test_box_tree.c:93` | `static void test_flex_gap_and_justify_center(void **state)` |
-| `test_flex_negative_gap` | function | `tests/test_box_tree.c:358` | `static void test_flex_negative_gap(void **state)` |
-| `test_flex_nowrap_default_single_line_unchanged` | function | `tests/test_box_tree.c:131` | `static void test_flex_nowrap_default_single_line_unchanged(void **state)` |
+| `test_box_hidden_ancestor` | function | `tests/test_box_tree.c:806` | `static void test_box_hidden_ancestor(void **state)` |
+| `test_box_hidden_fail_closed` | function | `tests/test_box_tree.c:819` | `static void test_box_hidden_fail_closed(void **state)` |
+| `test_box_hidden_self` | function | `tests/test_box_tree.c:794` | `static void test_box_hidden_self(void **state)` |
+| `test_children_cap` | function | `tests/test_box_tree.c:388` | `static void test_children_cap(void **state)` |
+| `test_depth_cap` | function | `tests/test_box_tree.c:398` | `static void test_depth_cap(void **state)` |
+| `test_display_none_skipped` | function | `tests/test_box_tree.c:353` | `static void test_display_none_skipped(void **state)` |
+| `test_flex_auto_margin_pushes_item` | function | `tests/test_box_tree.c:95` | `static void test_flex_auto_margin_pushes_item(void **state)` |
+| `test_flex_cross_axis_align` | function | `tests/test_box_tree.c:213` | `static void test_flex_cross_axis_align(void **state)` |
+| `test_flex_gap_and_justify_center` | function | `tests/test_box_tree.c:113` | `static void test_flex_gap_and_justify_center(void **state)` |
+| `test_flex_negative_gap` | function | `tests/test_box_tree.c:378` | `static void test_flex_negative_gap(void **state)` |
+| `test_flex_nowrap_default_single_line_unchanged` | function | `tests/test_box_tree.c:151` | `static void test_flex_nowrap_default_single_line_unchanged(void **state)` |
 | `test_flex_row_grow` | function | `tests/test_box_tree.c:75` | `static void test_flex_row_grow(void **state)` |
-| `test_flex_wrap_reverse_two_lines` | function | `tests/test_box_tree.c:151` | `static void test_flex_wrap_reverse_two_lines(void **state)` |
-| `test_flex_wrap_row_gap_distinct_from_gap` | function | `tests/test_box_tree.c:173` | `static void test_flex_wrap_row_gap_distinct_from_gap(void **state)` |
-| `test_flex_wrap_two_lines` | function | `tests/test_box_tree.c:109` | `static void test_flex_wrap_two_lines(void **state)` |
-| `test_grid` | function | `tests/test_box_tree.c:250` | `static void test_grid(void **state)` |
-| `test_grid_bad_columns` | function | `tests/test_box_tree.c:348` | `static void test_grid_bad_columns(void **state)` |
-| `test_grid_column_span` | function | `tests/test_box_tree.c:289` | `static void test_grid_column_span(void **state)` |
-| `test_grid_row_gap_distinct_from_gap` | function | `tests/test_box_tree.c:211` | `static void test_grid_row_gap_distinct_from_gap(void **state)` |
-| `test_grid_weighted_tracks` | function | `tests/test_box_tree.c:271` | `static void test_grid_weighted_tracks(void **state)` |
-| `test_grid_without_row_gap_falls_back_to_gap` | function | `tests/test_box_tree.c:234` | `static void test_grid_without_row_gap_falls_back_to_gap(void **state)` |
+| `test_flex_wrap_reverse_two_lines` | function | `tests/test_box_tree.c:171` | `static void test_flex_wrap_reverse_two_lines(void **state)` |
+| `test_flex_wrap_row_gap_distinct_from_gap` | function | `tests/test_box_tree.c:193` | `static void test_flex_wrap_row_gap_distinct_from_gap(void **state)` |
+| `test_flex_wrap_two_lines` | function | `tests/test_box_tree.c:129` | `static void test_flex_wrap_two_lines(void **state)` |
+| `test_grid` | function | `tests/test_box_tree.c:270` | `static void test_grid(void **state)` |
+| `test_grid_bad_columns` | function | `tests/test_box_tree.c:368` | `static void test_grid_bad_columns(void **state)` |
+| `test_grid_column_span` | function | `tests/test_box_tree.c:309` | `static void test_grid_column_span(void **state)` |
+| `test_grid_row_gap_distinct_from_gap` | function | `tests/test_box_tree.c:231` | `static void test_grid_row_gap_distinct_from_gap(void **state)` |
+| `test_grid_weighted_tracks` | function | `tests/test_box_tree.c:291` | `static void test_grid_weighted_tracks(void **state)` |
+| `test_grid_without_row_gap_falls_back_to_gap` | function | `tests/test_box_tree.c:254` | `static void test_grid_without_row_gap_falls_back_to_gap(void **state)` |
 | `test_leaf` | function | `tests/test_box_tree.c:40` | `static void test_leaf(void **state)` |
 | `test_leaf_with_padding` | function | `tests/test_box_tree.c:47` | `static void test_leaf_with_padding(void **state)` |
-| `test_nested_flex_in_block` | function | `tests/test_box_tree.c:309` | `static void test_nested_flex_in_block(void **state)` |
+| `test_nested_flex_in_block` | function | `tests/test_box_tree.c:329` | `static void test_nested_flex_in_block(void **state)` |
 | `test_null_root` | function | `tests/test_box_tree.c:35` | `static void test_null_root(void **state)` |
-| `test_oof_anchor_none_on_static_chain` | function | `tests/test_box_tree.c:812` | `static void test_oof_anchor_none_on_static_chain(void **state)` |
-| `test_oof_anchor_self` | function | `tests/test_box_tree.c:822` | `static void test_oof_anchor_self(void **state)` |
-| `test_oof_anchor_via_ancestor` | function | `tests/test_box_tree.c:829` | `static void test_oof_anchor_via_ancestor(void **state)` |
-| `test_oof_fail_open` | function | `tests/test_box_tree.c:871` | `static void test_oof_fail_open(void **state)` |
-| `test_oof_nested_absolute_anchor_vs_root` | function | `tests/test_box_tree.c:842` | `static void test_oof_nested_absolute_anchor_vs_root(void **state)` |
-| `test_oof_relative_does_not_anchor` | function | `tests/test_box_tree.c:857` | `static void test_oof_relative_does_not_anchor(void **state)` |
-| `test_positioning_absolute_against_ancestor` | function | `tests/test_box_tree.c:442` | `static void test_positioning_absolute_against_ancestor(void **state)` |
-| `test_positioning_absolute_against_viewport` | function | `tests/test_box_tree.c:465` | `static void test_positioning_absolute_against_viewport(void **state)` |
-| `test_positioning_doc_order_tiebreak` | function | `tests/test_box_tree.c:539` | `static void test_positioning_doc_order_tiebreak(void **state)` |
-| `test_positioning_fixed_against_viewport` | function | `tests/test_box_tree.c:482` | `static void test_positioning_fixed_against_viewport(void **state)` |
-| `test_positioning_nbox_cap` | function | `tests/test_box_tree.c:591` | `static void test_positioning_nbox_cap(void **state)` |
-| `test_positioning_no_insets` | function | `tests/test_box_tree.c:557` | `static void test_positioning_no_insets(void **state)` |
-| `test_positioning_null_args` | function | `tests/test_box_tree.c:395` | `static void test_positioning_null_args(void **state)` |
-| `test_positioning_null_geometry` | function | `tests/test_box_tree.c:574` | `static void test_positioning_null_geometry(void **state)` |
-| `test_positioning_relative_offset` | function | `tests/test_box_tree.c:421` | `static void test_positioning_relative_offset(void **state)` |
-| `test_positioning_stacking_order` | function | `tests/test_box_tree.c:519` | `static void test_positioning_stacking_order(void **state)` |
-| `test_positioning_static_unchanged` | function | `tests/test_box_tree.c:409` | `static void test_positioning_static_unchanged(void **state)` |
-| `test_positioning_sticky_treated_as_relative` | function | `tests/test_box_tree.c:501` | `static void test_positioning_sticky_treated_as_relative(void **state)` |
-| `test_static_position_absolute_auto_insets` | function | `tests/test_box_tree.c:613` | `static void test_static_position_absolute_auto_insets(void **state)` |
-| `test_static_position_explicit_insets_win` | function | `tests/test_box_tree.c:645` | `static void test_static_position_explicit_insets_win(void **state)` |
-| `test_static_position_fixed_auto_insets` | function | `tests/test_box_tree.c:629` | `static void test_static_position_fixed_auto_insets(void **state)` |
-| `test_static_position_mixed_axis` | function | `tests/test_box_tree.c:666` | `static void test_static_position_mixed_axis(void **state)` |
-| `test_static_position_null_arrays_legacy` | function | `tests/test_box_tree.c:706` | `static void test_static_position_null_arrays_legacy(void **state)` |
-| `test_static_position_right_inset_keeps_anchor` | function | `tests/test_box_tree.c:686` | `static void test_static_position_right_inset_keeps_anchor(void **state)` |
+| `test_oof_anchor_none_on_static_chain` | function | `tests/test_box_tree.c:832` | `static void test_oof_anchor_none_on_static_chain(void **state)` |
+| `test_oof_anchor_self` | function | `tests/test_box_tree.c:842` | `static void test_oof_anchor_self(void **state)` |
+| `test_oof_anchor_via_ancestor` | function | `tests/test_box_tree.c:849` | `static void test_oof_anchor_via_ancestor(void **state)` |
+| `test_oof_fail_open` | function | `tests/test_box_tree.c:891` | `static void test_oof_fail_open(void **state)` |
+| `test_oof_nested_absolute_anchor_vs_root` | function | `tests/test_box_tree.c:862` | `static void test_oof_nested_absolute_anchor_vs_root(void **state)` |
+| `test_oof_relative_does_not_anchor` | function | `tests/test_box_tree.c:877` | `static void test_oof_relative_does_not_anchor(void **state)` |
+| `test_positioning_absolute_against_ancestor` | function | `tests/test_box_tree.c:462` | `static void test_positioning_absolute_against_ancestor(void **state)` |
+| `test_positioning_absolute_against_viewport` | function | `tests/test_box_tree.c:485` | `static void test_positioning_absolute_against_viewport(void **state)` |
+| `test_positioning_doc_order_tiebreak` | function | `tests/test_box_tree.c:559` | `static void test_positioning_doc_order_tiebreak(void **state)` |
+| `test_positioning_fixed_against_viewport` | function | `tests/test_box_tree.c:502` | `static void test_positioning_fixed_against_viewport(void **state)` |
+| `test_positioning_nbox_cap` | function | `tests/test_box_tree.c:611` | `static void test_positioning_nbox_cap(void **state)` |
+| `test_positioning_no_insets` | function | `tests/test_box_tree.c:577` | `static void test_positioning_no_insets(void **state)` |
+| `test_positioning_null_args` | function | `tests/test_box_tree.c:415` | `static void test_positioning_null_args(void **state)` |
+| `test_positioning_null_geometry` | function | `tests/test_box_tree.c:594` | `static void test_positioning_null_geometry(void **state)` |
+| `test_positioning_relative_offset` | function | `tests/test_box_tree.c:441` | `static void test_positioning_relative_offset(void **state)` |
+| `test_positioning_stacking_order` | function | `tests/test_box_tree.c:539` | `static void test_positioning_stacking_order(void **state)` |
+| `test_positioning_static_unchanged` | function | `tests/test_box_tree.c:429` | `static void test_positioning_static_unchanged(void **state)` |
+| `test_positioning_sticky_treated_as_relative` | function | `tests/test_box_tree.c:521` | `static void test_positioning_sticky_treated_as_relative(void **state)` |
+| `test_static_position_absolute_auto_insets` | function | `tests/test_box_tree.c:633` | `static void test_static_position_absolute_auto_insets(void **state)` |
+| `test_static_position_explicit_insets_win` | function | `tests/test_box_tree.c:665` | `static void test_static_position_explicit_insets_win(void **state)` |
+| `test_static_position_fixed_auto_insets` | function | `tests/test_box_tree.c:649` | `static void test_static_position_fixed_auto_insets(void **state)` |
+| `test_static_position_mixed_axis` | function | `tests/test_box_tree.c:686` | `static void test_static_position_mixed_axis(void **state)` |
+| `test_static_position_null_arrays_legacy` | function | `tests/test_box_tree.c:726` | `static void test_static_position_null_arrays_legacy(void **state)` |
+| `test_static_position_right_inset_keeps_anchor` | function | `tests/test_box_tree.c:706` | `static void test_static_position_right_inset_keeps_anchor(void **state)` |
 | `_POSIX_C_SOURCE` | macro | `tests/test_browser.c:8` | `#define _POSIX_C_SOURCE` |
 | `main` | function | `tests/test_browser.c:326` | `int main(void)` |
 | `test_accepts_https_and_file` | function | `tests/test_browser.c:108` | `static void test_accepts_https_and_file(void **state)` |
@@ -4012,18 +4046,19 @@ static int looks_like_host(const c...` |
 | `test_sort_z_within_layer` | function | `tests/test_compositor.c:177` | `static void test_sort_z_within_layer(void **state)` |
 | `assert_int_equal` | function | `tests/test_css.c:1192` | `assert_int_equal(css_parse("tr:nth-child(even)` |
 | `assert_int_equal` | function | `tests/test_css.c:1215` | `assert_int_equal(css_parse("li:nth-last-child(2)` |
-| `assert_int_equal` | function | `tests/test_css.c:1540` | `assert_int_equal(css_parse("li:nth-child()` |
-| `assert_int_equal` | function | `tests/test_css.c:1575` | `assert_int_equal(css_parse("li:nth-of-type(2n)` |
-| `assert_int_equal` | function | `tests/test_css.c:1607` | `assert_int_equal(css_parse("div:has(.x)` |
-| `assert_int_equal` | function | `tests/test_css.c:1628` | `assert_int_equal(css_parse("html:lang(en)` |
-| `assert_int_equal` | function | `tests/test_css.c:1984` | `assert_int_equal(css_parse(
+| `assert_int_equal` | function | `tests/test_css.c:1311` | `assert_int_equal(css_parse("p:not(.x > y)` |
+| `assert_int_equal` | function | `tests/test_css.c:1590` | `assert_int_equal(css_parse("li:nth-child()` |
+| `assert_int_equal` | function | `tests/test_css.c:1625` | `assert_int_equal(css_parse("li:nth-of-type(2n)` |
+| `assert_int_equal` | function | `tests/test_css.c:1657` | `assert_int_equal(css_parse("div:has(.x)` |
+| `assert_int_equal` | function | `tests/test_css.c:1678` | `assert_int_equal(css_parse("html:lang(en)` |
+| `assert_int_equal` | function | `tests/test_css.c:2034` | `assert_int_equal(css_parse(
         "@media (min-width: 600px)` |
-| `assert_int_equal` | function | `tests/test_css.c:1999` | `assert_int_equal(css_parse(
+| `assert_int_equal` | function | `tests/test_css.c:2049` | `assert_int_equal(css_parse(
         "@media screen and (min-width: 600px)` |
-| `assert_int_equal` | function | `tests/test_css.c:2013` | `assert_int_equal(css_parse(
+| `assert_int_equal` | function | `tests/test_css.c:2063` | `assert_int_equal(css_parse(
         "@media (hover: hover)` |
-| `assert_int_equal` | function | `tests/test_css.c:4170` | `assert_int_equal(css_parse("@media (min-width: 200em)` |
-| `assert_int_equal` | function | `tests/test_css.c:4176` | `assert_int_equal(css_parse("@media (min-width: 40em)` |
+| `assert_int_equal` | function | `tests/test_css.c:4224` | `assert_int_equal(css_parse("@media (min-width: 200em)` |
+| `assert_int_equal` | function | `tests/test_css.c:4230` | `assert_int_equal(css_parse("@media (min-width: 40em)` |
 | `box` | function | `tests/test_css.c:228` | `* box (CSS 2.1 section 10.8.1). With one line box per line and no separate * parent content edge, they land on the same ` |
 | `closed` | function | `tests/test_css.c:472` | `* fail closed (unset), never a wrong guess. */ assert_int_equal( css_parse_inline("grid-template-columns: repeat(auto-fi` |
 | `downstream` | function | `tests/test_css.c:643` | `* and deciding whether to fetch happens downstream (render_doc.c) */ assert_string_equal(css_parse_inline( "background-i` |
@@ -4035,29 +4070,29 @@ static int looks_like_host(const c...` |
                               ...` |
 | `el_type_node` | function | `tests/test_css.c:964` | `static css_element el_type_node(const char *tag, int nth, int nsib,
                              ...` |
-| `geometry` | function | `tests/test_css.c:2265` | `* hostile sheet never sees real window geometry (anti-fingerprinting) yet 100vh
+| `geometry` | function | `tests/test_css.c:2315` | `* hostile sheet never sees real window geometry (anti-fingerprinting) yet 100vh
  * heroes and cal...` |
 | `invalid` | function | `tests/test_css.c:745` | `* invalid (fail closed), not silently coerced into some default. */ css_style s = css_parse_inline("color: var(--missing` |
-| `main` | function | `tests/test_css.c:4247` | `int main(void)` |
-| `silent` | function | `tests/test_css.c:1881` | `* silent (anti-DoS truncation, not a parse failure). 500 filler rules is well past
+| `main` | function | `tests/test_css.c:4301` | `int main(void)` |
+| `silent` | function | `tests/test_css.c:1931` | `* silent (anti-DoS truncation, not a parse failure). 500 filler rules is well past
  * the OLD cap...` |
-| `terminator` | function | `tests/test_css.c:1363` | `* terminator (consumed, not painted);` |
+| `terminator` | function | `tests/test_css.c:1413` | `* terminator (consumed, not painted);` |
 | `test_adjacent_sibling_combinator` | function | `tests/test_css.c:1066` | `static void test_adjacent_sibling_combinator(void **state)` |
-| `test_anim_keyframes_resolved_from_sheet` | function | `tests/test_css.c:3920` | `static void test_anim_keyframes_resolved_from_sheet(void **state)` |
-| `test_anim_transform_keyframes_from_sheet` | function | `tests/test_css.c:3953` | `static void test_anim_transform_keyframes_from_sheet(void **state)` |
-| `test_at_rules_skipped` | function | `tests/test_css.c:1929` | `static void test_at_rules_skipped(void **state)` |
-| `test_attr_case_insensitive_flag` | function | `tests/test_css.c:1716` | `static void test_attr_case_insensitive_flag(void **state)` |
-| `test_attr_equals` | function | `tests/test_css.c:1666` | `static void test_attr_equals(void **state)` |
-| `test_attr_in_combinator` | function | `tests/test_css.c:1773` | `static void test_attr_in_combinator(void **state)` |
-| `test_attr_malformed_fail_closed` | function | `tests/test_css.c:1789` | `static void test_attr_malformed_fail_closed(void **state)` |
-| `test_attr_name_case_insensitive` | function | `tests/test_css.c:1731` | `static void test_attr_name_case_insensitive(void **state)` |
-| `test_attr_operators` | function | `tests/test_css.c:1684` | `static void test_attr_operators(void **state)` |
-| `test_attr_presence` | function | `tests/test_css.c:1653` | `static void test_attr_presence(void **state)` |
-| `test_attr_quoted_value_with_space` | function | `tests/test_css.c:1742` | `static void test_attr_quoted_value_with_space(void **state)` |
-| `test_attr_specificity_and_compound` | function | `tests/test_css.c:1756` | `static void test_attr_specificity_and_compound(void **state)` |
-| `test_backdrop_filter_blur` | function | `tests/test_css.c:3880` | `static void test_backdrop_filter_blur(void **state)` |
-| `test_background_clip_text` | function | `tests/test_css.c:3755` | `static void test_background_clip_text(void **state)` |
-| `test_background_rgba_alpha` | function | `tests/test_css.c:3726` | `static void test_background_rgba_alpha(void **state)` |
+| `test_anim_keyframes_resolved_from_sheet` | function | `tests/test_css.c:3974` | `static void test_anim_keyframes_resolved_from_sheet(void **state)` |
+| `test_anim_transform_keyframes_from_sheet` | function | `tests/test_css.c:4007` | `static void test_anim_transform_keyframes_from_sheet(void **state)` |
+| `test_at_rules_skipped` | function | `tests/test_css.c:1979` | `static void test_at_rules_skipped(void **state)` |
+| `test_attr_case_insensitive_flag` | function | `tests/test_css.c:1766` | `static void test_attr_case_insensitive_flag(void **state)` |
+| `test_attr_equals` | function | `tests/test_css.c:1716` | `static void test_attr_equals(void **state)` |
+| `test_attr_in_combinator` | function | `tests/test_css.c:1823` | `static void test_attr_in_combinator(void **state)` |
+| `test_attr_malformed_fail_closed` | function | `tests/test_css.c:1839` | `static void test_attr_malformed_fail_closed(void **state)` |
+| `test_attr_name_case_insensitive` | function | `tests/test_css.c:1781` | `static void test_attr_name_case_insensitive(void **state)` |
+| `test_attr_operators` | function | `tests/test_css.c:1734` | `static void test_attr_operators(void **state)` |
+| `test_attr_presence` | function | `tests/test_css.c:1703` | `static void test_attr_presence(void **state)` |
+| `test_attr_quoted_value_with_space` | function | `tests/test_css.c:1792` | `static void test_attr_quoted_value_with_space(void **state)` |
+| `test_attr_specificity_and_compound` | function | `tests/test_css.c:1806` | `static void test_attr_specificity_and_compound(void **state)` |
+| `test_backdrop_filter_blur` | function | `tests/test_css.c:3934` | `static void test_backdrop_filter_blur(void **state)` |
+| `test_background_clip_text` | function | `tests/test_css.c:3809` | `static void test_background_clip_text(void **state)` |
+| `test_background_rgba_alpha` | function | `tests/test_css.c:3780` | `static void test_background_rgba_alpha(void **state)` |
 | `test_background_shorthand_resets_gradient` | function | `tests/test_css.c:601` | `static void test_background_shorthand_resets_gradient(void **state)` |
 | `test_bg_image_url_absolute` | function | `tests/test_css.c:640` | `static void test_bg_image_url_absolute(void **state)` |
 | `test_bg_image_url_basic` | function | `tests/test_css.c:622` | `static void test_bg_image_url_basic(void **state)` |
@@ -4067,41 +4102,41 @@ static int looks_like_host(const c...` |
 | `test_bg_image_url_quoted` | function | `tests/test_css.c:629` | `static void test_bg_image_url_quoted(void **state)` |
 | `test_bg_shorthand_captures_url_and_resets_color` | function | `tests/test_css.c:684` | `static void test_bg_shorthand_captures_url_and_resets_color(void **state)` |
 | `test_bg_size_and_repeat` | function | `tests/test_css.c:703` | `static void test_bg_size_and_repeat(void **state)` |
-| `test_border_longhands` | function | `tests/test_css.c:2728` | `static void test_border_longhands(void **state)` |
-| `test_border_shorthand` | function | `tests/test_css.c:2698` | `static void test_border_shorthand(void **state)` |
-| `test_box_auto_and_centering` | function | `tests/test_css.c:2098` | `static void test_box_auto_and_centering(void **state)` |
-| `test_box_clamp_anti_dos` | function | `tests/test_css.c:2355` | `static void test_box_clamp_anti_dos(void **state)` |
-| `test_box_extension_sheet_cascade` | function | `tests/test_css.c:2405` | `static void test_box_extension_sheet_cascade(void **state)` |
-| `test_box_orient_maps_to_flex_direction` | function | `tests/test_css.c:2854` | `static void test_box_orient_maps_to_flex_direction(void **state)` |
-| `test_box_shadow_and_outline` | function | `tests/test_css.c:2754` | `static void test_box_shadow_and_outline(void **state)` |
-| `test_box_sheet_cascade_inline_wins` | function | `tests/test_css.c:2532` | `static void test_box_sheet_cascade_inline_wins(void **state)` |
-| `test_box_shorthand_expansion` | function | `tests/test_css.c:2070` | `static void test_box_shorthand_expansion(void **state)` |
-| `test_box_sizing` | function | `tests/test_css.c:2690` | `static void test_box_sizing(void **state)` |
-| `test_box_units_and_failclosed` | function | `tests/test_css.c:2115` | `static void test_box_units_and_failclosed(void **state)` |
-| `test_calc_basic_arithmetic` | function | `tests/test_css.c:2211` | `static void test_calc_basic_arithmetic(void **state)` |
-| `test_calc_clamped_anti_dos` | function | `tests/test_css.c:2257` | `static void test_calc_clamped_anti_dos(void **state)` |
-| `test_calc_dimension_errors_fail_closed` | function | `tests/test_css.c:2235` | `static void test_calc_dimension_errors_fail_closed(void **state)` |
-| `test_calc_inside_shorthands` | function | `tests/test_css.c:2310` | `static void test_calc_inside_shorthands(void **state)` |
-| `test_calc_precedence_and_parens` | function | `tests/test_css.c:2220` | `static void test_calc_precedence_and_parens(void **state)` |
-| `test_calc_units_and_signs` | function | `tests/test_css.c:2227` | `static void test_calc_units_and_signs(void **state)` |
-| `test_calc_with_custom_property` | function | `tests/test_css.c:2348` | `static void test_calc_with_custom_property(void **state)` |
-| `test_cascade_document_order` | function | `tests/test_css.c:1911` | `static void test_cascade_document_order(void **state)` |
-| `test_cascade_inline_wins` | function | `tests/test_css.c:1920` | `static void test_cascade_inline_wins(void **state)` |
-| `test_cascade_specificity` | function | `tests/test_css.c:1865` | `static void test_cascade_specificity(void **state)` |
+| `test_border_longhands` | function | `tests/test_css.c:2778` | `static void test_border_longhands(void **state)` |
+| `test_border_shorthand` | function | `tests/test_css.c:2748` | `static void test_border_shorthand(void **state)` |
+| `test_box_auto_and_centering` | function | `tests/test_css.c:2148` | `static void test_box_auto_and_centering(void **state)` |
+| `test_box_clamp_anti_dos` | function | `tests/test_css.c:2405` | `static void test_box_clamp_anti_dos(void **state)` |
+| `test_box_extension_sheet_cascade` | function | `tests/test_css.c:2455` | `static void test_box_extension_sheet_cascade(void **state)` |
+| `test_box_orient_maps_to_flex_direction` | function | `tests/test_css.c:2904` | `static void test_box_orient_maps_to_flex_direction(void **state)` |
+| `test_box_shadow_and_outline` | function | `tests/test_css.c:2804` | `static void test_box_shadow_and_outline(void **state)` |
+| `test_box_sheet_cascade_inline_wins` | function | `tests/test_css.c:2582` | `static void test_box_sheet_cascade_inline_wins(void **state)` |
+| `test_box_shorthand_expansion` | function | `tests/test_css.c:2120` | `static void test_box_shorthand_expansion(void **state)` |
+| `test_box_sizing` | function | `tests/test_css.c:2740` | `static void test_box_sizing(void **state)` |
+| `test_box_units_and_failclosed` | function | `tests/test_css.c:2165` | `static void test_box_units_and_failclosed(void **state)` |
+| `test_calc_basic_arithmetic` | function | `tests/test_css.c:2261` | `static void test_calc_basic_arithmetic(void **state)` |
+| `test_calc_clamped_anti_dos` | function | `tests/test_css.c:2307` | `static void test_calc_clamped_anti_dos(void **state)` |
+| `test_calc_dimension_errors_fail_closed` | function | `tests/test_css.c:2285` | `static void test_calc_dimension_errors_fail_closed(void **state)` |
+| `test_calc_inside_shorthands` | function | `tests/test_css.c:2360` | `static void test_calc_inside_shorthands(void **state)` |
+| `test_calc_precedence_and_parens` | function | `tests/test_css.c:2270` | `static void test_calc_precedence_and_parens(void **state)` |
+| `test_calc_units_and_signs` | function | `tests/test_css.c:2277` | `static void test_calc_units_and_signs(void **state)` |
+| `test_calc_with_custom_property` | function | `tests/test_css.c:2398` | `static void test_calc_with_custom_property(void **state)` |
+| `test_cascade_document_order` | function | `tests/test_css.c:1961` | `static void test_cascade_document_order(void **state)` |
+| `test_cascade_inline_wins` | function | `tests/test_css.c:1970` | `static void test_cascade_inline_wins(void **state)` |
+| `test_cascade_specificity` | function | `tests/test_css.c:1915` | `static void test_cascade_specificity(void **state)` |
 | `test_child_combinator` | function | `tests/test_css.c:1019` | `static void test_child_combinator(void **state)` |
-| `test_clip_auto` | function | `tests/test_css.c:4194` | `static void test_clip_auto(void **state)` |
-| `test_clip_rect` | function | `tests/test_css.c:4184` | `static void test_clip_rect(void **state)` |
+| `test_clip_auto` | function | `tests/test_css.c:4248` | `static void test_clip_auto(void **state)` |
+| `test_clip_rect` | function | `tests/test_css.c:4238` | `static void test_clip_rect(void **state)` |
 | `test_combinator_class_chain` | function | `tests/test_css.c:1047` | `static void test_combinator_class_chain(void **state)` |
 | `test_combinator_specificity_sum` | function | `tests/test_css.c:1032` | `static void test_combinator_specificity_sum(void **state)` |
-| `test_conic_gradient_basic` | function | `tests/test_css.c:3775` | `static void test_conic_gradient_basic(void **state)` |
-| `test_conic_gradient_deg_positions` | function | `tests/test_css.c:3816` | `static void test_conic_gradient_deg_positions(void **state)` |
-| `test_conic_gradient_fails_closed` | function | `tests/test_css.c:3826` | `static void test_conic_gradient_fails_closed(void **state)` |
-| `test_conic_gradient_from_angle` | function | `tests/test_css.c:3787` | `static void test_conic_gradient_from_angle(void **state)` |
-| `test_conic_gradient_pie_hard_stop` | function | `tests/test_css.c:3801` | `static void test_conic_gradient_pie_hard_stop(void **state)` |
+| `test_conic_gradient_basic` | function | `tests/test_css.c:3829` | `static void test_conic_gradient_basic(void **state)` |
+| `test_conic_gradient_deg_positions` | function | `tests/test_css.c:3870` | `static void test_conic_gradient_deg_positions(void **state)` |
+| `test_conic_gradient_fails_closed` | function | `tests/test_css.c:3880` | `static void test_conic_gradient_fails_closed(void **state)` |
+| `test_conic_gradient_from_angle` | function | `tests/test_css.c:3841` | `static void test_conic_gradient_from_angle(void **state)` |
+| `test_conic_gradient_pie_hard_stop` | function | `tests/test_css.c:3855` | `static void test_conic_gradient_pie_hard_stop(void **state)` |
 | `test_container_cascade_inline_wins` | function | `tests/test_css.c:375` | `static void test_container_cascade_inline_wins(void **state)` |
 | `test_container_fail_closed_and_bounds` | function | `tests/test_css.c:390` | `static void test_container_fail_closed_and_bounds(void **state)` |
 | `test_container_unset` | function | `tests/test_css.c:494` | `static void test_container_unset(void **state)` |
-| `test_cursor` | function | `tests/test_css.c:2642` | `static void test_cursor(void **state)` |
+| `test_cursor` | function | `tests/test_css.c:2692` | `static void test_cursor(void **state)` |
 | `test_custom_prop_class_scoped_applies_with_root_scope` | function | `tests/test_css.c:831` | `static void test_custom_prop_class_scoped_applies_with_root_scope(void **state)` |
 | `test_custom_prop_class_scoped_skipped_without_scope` | function | `tests/test_css.c:819` | `static void test_custom_prop_class_scoped_skipped_without_scope(void **state)` |
 | `test_custom_prop_dark_media_collected_in_dark` | function | `tests/test_css.c:806` | `static void test_custom_prop_dark_media_collected_in_dark(void **state)` |
@@ -4118,171 +4153,172 @@ static int looks_like_host(const c...` |
 | `test_custom_prop_var_self_reference_fails_closed` | function | `tests/test_css.c:759` | `static void test_custom_prop_var_self_reference_fails_closed(void **state)` |
 | `test_custom_prop_var_unbalanced_paren_drops` | function | `tests/test_css.c:875` | `static void test_custom_prop_var_unbalanced_paren_drops(void **state)` |
 | `test_descendant_combinator` | function | `tests/test_css.c:1003` | `static void test_descendant_combinator(void **state)` |
-| `test_filter_blur_and_grayscale` | function | `tests/test_css.c:3892` | `static void test_filter_blur_and_grayscale(void **state)` |
-| `test_filter_drop_shadow` | function | `tests/test_css.c:3853` | `static void test_filter_drop_shadow(void **state)` |
-| `test_filter_drop_shadow_defaults_and_failclosed` | function | `tests/test_css.c:3866` | `static void test_filter_drop_shadow_defaults_and_failclosed(void **state)` |
-| `test_flex_align` | function | `tests/test_css.c:2823` | `static void test_flex_align(void **state)` |
-| `test_flex_item` | function | `tests/test_css.c:2779` | `static void test_flex_item(void **state)` |
-| `test_float_and_clear` | function | `tests/test_css.c:2578` | `static void test_float_and_clear(void **state)` |
+| `test_filter_blur_and_grayscale` | function | `tests/test_css.c:3946` | `static void test_filter_blur_and_grayscale(void **state)` |
+| `test_filter_drop_shadow` | function | `tests/test_css.c:3907` | `static void test_filter_drop_shadow(void **state)` |
+| `test_filter_drop_shadow_defaults_and_failclosed` | function | `tests/test_css.c:3920` | `static void test_filter_drop_shadow_defaults_and_failclosed(void **state)` |
+| `test_flex_align` | function | `tests/test_css.c:2873` | `static void test_flex_align(void **state)` |
+| `test_flex_item` | function | `tests/test_css.c:2829` | `static void test_flex_item(void **state)` |
+| `test_float_and_clear` | function | `tests/test_css.c:2628` | `static void test_float_and_clear(void **state)` |
 | `test_font_family` | function | `tests/test_css.c:137` | `static void test_font_family(void **state)` |
-| `test_font_shorthand` | function | `tests/test_css.c:3696` | `static void test_font_shorthand(void **state)` |
-| `test_gap_two_value` | function | `tests/test_css.c:3679` | `static void test_gap_two_value(void **state)` |
+| `test_font_shorthand` | function | `tests/test_css.c:3750` | `static void test_font_shorthand(void **state)` |
+| `test_gap_two_value` | function | `tests/test_css.c:3733` | `static void test_gap_two_value(void **state)` |
 | `test_general_sibling_combinator` | function | `tests/test_css.c:1081` | `static void test_general_sibling_combinator(void **state)` |
-| `test_grid_extras` | function | `tests/test_css.c:2877` | `static void test_grid_extras(void **state)` |
+| `test_grid_extras` | function | `tests/test_css.c:2927` | `static void test_grid_extras(void **state)` |
 | `test_grid_minmax_counts_as_one_track` | function | `tests/test_css.c:461` | `static void test_grid_minmax_counts_as_one_track(void **state)` |
 | `test_grid_repeat_autofill_fails_closed` | function | `tests/test_css.c:469` | `static void test_grid_repeat_autofill_fails_closed(void **state)` |
 | `test_grid_repeat_clamped_anti_dos` | function | `tests/test_css.c:487` | `static void test_grid_repeat_clamped_anti_dos(void **state)` |
 | `test_grid_repeat_expands_count` | function | `tests/test_css.c:450` | `static void test_grid_repeat_expands_count(void **state)` |
 | `test_grid_repeat_malformed_fails_closed` | function | `tests/test_css.c:480` | `static void test_grid_repeat_malformed_fails_closed(void **state)` |
-| `test_has_parses_and_fails_closed` | function | `tests/test_css.c:1601` | `static void test_has_parses_and_fails_closed(void **state)` |
-| `test_important_beats_specificity` | function | `tests/test_css.c:1817` | `static void test_important_beats_specificity(void **state)` |
-| `test_important_in_shorthand` | function | `tests/test_css.c:1848` | `static void test_important_in_shorthand(void **state)` |
-| `test_important_inline_beats_sheet_important` | function | `tests/test_css.c:1836` | `static void test_important_inline_beats_sheet_important(void **state)` |
-| `test_important_inline_not_dropped` | function | `tests/test_css.c:1807` | `static void test_important_inline_not_dropped(void **state)` |
-| `test_important_tier_then_normal_order` | function | `tests/test_css.c:1826` | `static void test_important_tier_then_normal_order(void **state)` |
-| `test_inline_accent_color` | function | `tests/test_css.c:3174` | `static void test_inline_accent_color(void **state)` |
-| `test_inline_appearance` | function | `tests/test_css.c:3049` | `static void test_inline_appearance(void **state)` |
-| `test_inline_aspect_ratio` | function | `tests/test_css.c:2471` | `static void test_inline_aspect_ratio(void **state)` |
-| `test_inline_backface_visibility` | function | `tests/test_css.c:3563` | `static void test_inline_backface_visibility(void **state)` |
-| `test_inline_bg_clip_origin_attachment` | function | `tests/test_css.c:3103` | `static void test_inline_bg_clip_origin_attachment(void **state)` |
-| `test_inline_bg_repeat` | function | `tests/test_css.c:3082` | `static void test_inline_bg_repeat(void **state)` |
-| `test_inline_bg_size` | function | `tests/test_css.c:3094` | `static void test_inline_bg_size(void **state)` |
-| `test_inline_border_collapse` | function | `tests/test_css.c:2962` | `static void test_inline_border_collapse(void **state)` |
-| `test_inline_border_spacing` | function | `tests/test_css.c:2971` | `static void test_inline_border_spacing(void **state)` |
-| `test_inline_box_longhands` | function | `tests/test_css.c:2052` | `static void test_inline_box_longhands(void **state)` |
-| `test_inline_caption_side` | function | `tests/test_css.c:2991` | `static void test_inline_caption_side(void **state)` |
-| `test_inline_caret_color` | function | `tests/test_css.c:3039` | `static void test_inline_caret_color(void **state)` |
-| `test_inline_color_scheme` | function | `tests/test_css.c:3164` | `static void test_inline_color_scheme(void **state)` |
-| `test_inline_contain` | function | `tests/test_css.c:3131` | `static void test_inline_contain(void **state)` |
+| `test_has_parses_and_fails_closed` | function | `tests/test_css.c:1651` | `static void test_has_parses_and_fails_closed(void **state)` |
+| `test_important_beats_specificity` | function | `tests/test_css.c:1867` | `static void test_important_beats_specificity(void **state)` |
+| `test_important_in_shorthand` | function | `tests/test_css.c:1898` | `static void test_important_in_shorthand(void **state)` |
+| `test_important_inline_beats_sheet_important` | function | `tests/test_css.c:1886` | `static void test_important_inline_beats_sheet_important(void **state)` |
+| `test_important_inline_not_dropped` | function | `tests/test_css.c:1857` | `static void test_important_inline_not_dropped(void **state)` |
+| `test_important_tier_then_normal_order` | function | `tests/test_css.c:1876` | `static void test_important_tier_then_normal_order(void **state)` |
+| `test_inline_accent_color` | function | `tests/test_css.c:3228` | `static void test_inline_accent_color(void **state)` |
+| `test_inline_appearance` | function | `tests/test_css.c:3099` | `static void test_inline_appearance(void **state)` |
+| `test_inline_aspect_ratio` | function | `tests/test_css.c:2521` | `static void test_inline_aspect_ratio(void **state)` |
+| `test_inline_backface_visibility` | function | `tests/test_css.c:3617` | `static void test_inline_backface_visibility(void **state)` |
+| `test_inline_bg_clip_origin_attachment` | function | `tests/test_css.c:3157` | `static void test_inline_bg_clip_origin_attachment(void **state)` |
+| `test_inline_bg_repeat` | function | `tests/test_css.c:3136` | `static void test_inline_bg_repeat(void **state)` |
+| `test_inline_bg_size` | function | `tests/test_css.c:3148` | `static void test_inline_bg_size(void **state)` |
+| `test_inline_border_collapse` | function | `tests/test_css.c:3012` | `static void test_inline_border_collapse(void **state)` |
+| `test_inline_border_spacing` | function | `tests/test_css.c:3021` | `static void test_inline_border_spacing(void **state)` |
+| `test_inline_box_longhands` | function | `tests/test_css.c:2102` | `static void test_inline_box_longhands(void **state)` |
+| `test_inline_caption_side` | function | `tests/test_css.c:3041` | `static void test_inline_caption_side(void **state)` |
+| `test_inline_caret_color` | function | `tests/test_css.c:3089` | `static void test_inline_caret_color(void **state)` |
+| `test_inline_color_scheme` | function | `tests/test_css.c:3218` | `static void test_inline_color_scheme(void **state)` |
+| `test_inline_contain` | function | `tests/test_css.c:3185` | `static void test_inline_contain(void **state)` |
 | `test_inline_container_props` | function | `tests/test_css.c:327` | `static void test_inline_container_props(void **state)` |
-| `test_inline_content_visibility` | function | `tests/test_css.c:3146` | `static void test_inline_content_visibility(void **state)` |
-| `test_inline_direction` | function | `tests/test_css.c:2501` | `static void test_inline_direction(void **state)` |
+| `test_inline_content_visibility` | function | `tests/test_css.c:3200` | `static void test_inline_content_visibility(void **state)` |
+| `test_inline_direction` | function | `tests/test_css.c:2551` | `static void test_inline_direction(void **state)` |
 | `test_inline_display` | function | `tests/test_css.c:289` | `static void test_inline_display(void **state)` |
 | `test_inline_display_table_family` | function | `tests/test_css.c:302` | `static void test_inline_display_table_family(void **state)` |
-| `test_inline_empty_cells` | function | `tests/test_css.c:2982` | `static void test_inline_empty_cells(void **state)` |
-| `test_inline_font_kerning` | function | `tests/test_css.c:3493` | `static void test_inline_font_kerning(void **state)` |
+| `test_inline_empty_cells` | function | `tests/test_css.c:3032` | `static void test_inline_empty_cells(void **state)` |
+| `test_inline_font_kerning` | function | `tests/test_css.c:3547` | `static void test_inline_font_kerning(void **state)` |
 | `test_inline_font_size` | function | `tests/test_css.c:41` | `static void test_inline_font_size(void **state)` |
 | `test_inline_font_size_absolute_flag` | function | `tests/test_css.c:56` | `static void test_inline_font_size_absolute_flag(void **state)` |
-| `test_inline_font_stretch` | function | `tests/test_css.c:3512` | `static void test_inline_font_stretch(void **state)` |
-| `test_inline_font_variant` | function | `tests/test_css.c:3009` | `static void test_inline_font_variant(void **state)` |
+| `test_inline_font_stretch` | function | `tests/test_css.c:3566` | `static void test_inline_font_stretch(void **state)` |
+| `test_inline_font_variant` | function | `tests/test_css.c:3059` | `static void test_inline_font_variant(void **state)` |
 | `test_inline_font_weight_style` | function | `tests/test_css.c:98` | `static void test_inline_font_weight_style(void **state)` |
-| `test_inline_hyphens` | function | `tests/test_css.c:3018` | `static void test_inline_hyphens(void **state)` |
-| `test_inline_image_rendering` | function | `tests/test_css.c:3155` | `static void test_inline_image_rendering(void **state)` |
-| `test_inline_isolation` | function | `tests/test_css.c:3123` | `static void test_inline_isolation(void **state)` |
+| `test_inline_hyphens` | function | `tests/test_css.c:3068` | `static void test_inline_hyphens(void **state)` |
+| `test_inline_image_rendering` | function | `tests/test_css.c:3209` | `static void test_inline_image_rendering(void **state)` |
+| `test_inline_isolation` | function | `tests/test_css.c:3177` | `static void test_inline_isolation(void **state)` |
 | `test_inline_line_height` | function | `tests/test_css.c:83` | `static void test_inline_line_height(void **state)` |
-| `test_inline_list_style_pos` | function | `tests/test_css.c:3485` | `static void test_inline_list_style_pos(void **state)` |
-| `test_inline_min_max_height` | function | `tests/test_css.c:2391` | `static void test_inline_min_max_height(void **state)` |
-| `test_inline_min_width_height` | function | `tests/test_css.c:2364` | `static void test_inline_min_width_height(void **state)` |
-| `test_inline_mix_blend_mode` | function | `tests/test_css.c:3197` | `static void test_inline_mix_blend_mode(void **state)` |
-| `test_inline_object_fit` | function | `tests/test_css.c:3474` | `static void test_inline_object_fit(void **state)` |
-| `test_inline_outline_longhands` | function | `tests/test_css.c:2931` | `static void test_inline_outline_longhands(void **state)` |
-| `test_inline_outline_offset` | function | `tests/test_css.c:2510` | `static void test_inline_outline_offset(void **state)` |
-| `test_inline_overscroll_behavior` | function | `tests/test_css.c:3554` | `static void test_inline_overscroll_behavior(void **state)` |
-| `test_inline_pointer_events` | function | `tests/test_css.c:3058` | `static void test_inline_pointer_events(void **state)` |
-| `test_inline_print_forced_adjust` | function | `tests/test_css.c:3183` | `static void test_inline_print_forced_adjust(void **state)` |
-| `test_inline_resize` | function | `tests/test_css.c:3527` | `static void test_inline_resize(void **state)` |
-| `test_inline_scroll_behavior` | function | `tests/test_css.c:3537` | `static void test_inline_scroll_behavior(void **state)` |
-| `test_inline_tab_size` | function | `tests/test_css.c:2522` | `static void test_inline_tab_size(void **state)` |
-| `test_inline_table_layout` | function | `tests/test_css.c:3000` | `static void test_inline_table_layout(void **state)` |
+| `test_inline_list_style_pos` | function | `tests/test_css.c:3539` | `static void test_inline_list_style_pos(void **state)` |
+| `test_inline_min_max_height` | function | `tests/test_css.c:2441` | `static void test_inline_min_max_height(void **state)` |
+| `test_inline_min_width_height` | function | `tests/test_css.c:2414` | `static void test_inline_min_width_height(void **state)` |
+| `test_inline_mix_blend_mode` | function | `tests/test_css.c:3251` | `static void test_inline_mix_blend_mode(void **state)` |
+| `test_inline_object_fit` | function | `tests/test_css.c:3528` | `static void test_inline_object_fit(void **state)` |
+| `test_inline_outline_longhands` | function | `tests/test_css.c:2981` | `static void test_inline_outline_longhands(void **state)` |
+| `test_inline_outline_offset` | function | `tests/test_css.c:2560` | `static void test_inline_outline_offset(void **state)` |
+| `test_inline_overscroll_behavior` | function | `tests/test_css.c:3608` | `static void test_inline_overscroll_behavior(void **state)` |
+| `test_inline_pointer_events` | function | `tests/test_css.c:3110` | `static void test_inline_pointer_events(void **state)` |
+| `test_inline_print_forced_adjust` | function | `tests/test_css.c:3237` | `static void test_inline_print_forced_adjust(void **state)` |
+| `test_inline_resize` | function | `tests/test_css.c:3581` | `static void test_inline_resize(void **state)` |
+| `test_inline_scroll_behavior` | function | `tests/test_css.c:3591` | `static void test_inline_scroll_behavior(void **state)` |
+| `test_inline_tab_size` | function | `tests/test_css.c:2572` | `static void test_inline_tab_size(void **state)` |
+| `test_inline_table_layout` | function | `tests/test_css.c:3050` | `static void test_inline_table_layout(void **state)` |
 | `test_inline_text_align` | function | `tests/test_css.c:33` | `static void test_inline_text_align(void **state)` |
 | `test_inline_text_decoration` | function | `tests/test_css.c:110` | `static void test_inline_text_decoration(void **state)` |
-| `test_inline_text_decoration_color_style` | function | `tests/test_css.c:2425` | `static void test_inline_text_decoration_color_style(void **state)` |
-| `test_inline_text_decoration_thickness` | function | `tests/test_css.c:2454` | `static void test_inline_text_decoration_thickness(void **state)` |
-| `test_inline_text_rendering` | function | `tests/test_css.c:3502` | `static void test_inline_text_rendering(void **state)` |
-| `test_inline_touch_action` | function | `tests/test_css.c:3545` | `static void test_inline_touch_action(void **state)` |
-| `test_inline_transform_independent_cascade_combines` | function | `tests/test_css.c:3460` | `static void test_inline_transform_independent_cascade_combines(void **state)` |
-| `test_inline_transform_rotate` | function | `tests/test_css.c:3309` | `static void test_inline_transform_rotate(void **state)` |
-| `test_inline_transform_scale` | function | `tests/test_css.c:3269` | `static void test_inline_transform_scale(void **state)` |
-| `test_inline_transform_skew` | function | `tests/test_css.c:3339` | `static void test_inline_transform_skew(void **state)` |
-| `test_inline_transform_translate` | function | `tests/test_css.c:3218` | `static void test_inline_transform_translate(void **state)` |
-| `test_inline_user_select` | function | `tests/test_css.c:3028` | `static void test_inline_user_select(void **state)` |
-| `test_keyframes_overflow_skips_block_not_sheet` | function | `tests/test_css.c:4024` | `static void test_keyframes_overflow_skips_block_not_sheet(void **state)` |
-| `test_layout_sheet_cascade_and_unset` | function | `tests/test_css.c:2895` | `static void test_layout_sheet_cascade_and_unset(void **state)` |
+| `test_inline_text_decoration_color_style` | function | `tests/test_css.c:2475` | `static void test_inline_text_decoration_color_style(void **state)` |
+| `test_inline_text_decoration_thickness` | function | `tests/test_css.c:2504` | `static void test_inline_text_decoration_thickness(void **state)` |
+| `test_inline_text_rendering` | function | `tests/test_css.c:3556` | `static void test_inline_text_rendering(void **state)` |
+| `test_inline_touch_action` | function | `tests/test_css.c:3599` | `static void test_inline_touch_action(void **state)` |
+| `test_inline_transform_independent_cascade_combines` | function | `tests/test_css.c:3514` | `static void test_inline_transform_independent_cascade_combines(void **state)` |
+| `test_inline_transform_rotate` | function | `tests/test_css.c:3363` | `static void test_inline_transform_rotate(void **state)` |
+| `test_inline_transform_scale` | function | `tests/test_css.c:3323` | `static void test_inline_transform_scale(void **state)` |
+| `test_inline_transform_skew` | function | `tests/test_css.c:3393` | `static void test_inline_transform_skew(void **state)` |
+| `test_inline_transform_translate` | function | `tests/test_css.c:3272` | `static void test_inline_transform_translate(void **state)` |
+| `test_inline_user_select` | function | `tests/test_css.c:3078` | `static void test_inline_user_select(void **state)` |
+| `test_keyframes_overflow_skips_block_not_sheet` | function | `tests/test_css.c:4078` | `static void test_keyframes_overflow_skips_block_not_sheet(void **state)` |
+| `test_layout_sheet_cascade_and_unset` | function | `tests/test_css.c:2945` | `static void test_layout_sheet_cascade_and_unset(void **state)` |
 | `test_letter_word_spacing` | function | `tests/test_css.c:172` | `static void test_letter_word_spacing(void **state)` |
 | `test_linear_gradient_basic` | function | `tests/test_css.c:523` | `static void test_linear_gradient_basic(void **state)` |
 | `test_linear_gradient_directions` | function | `tests/test_css.c:534` | `static void test_linear_gradient_directions(void **state)` |
 | `test_linear_gradient_fail_closed` | function | `tests/test_css.c:571` | `static void test_linear_gradient_fail_closed(void **state)` |
-| `test_linear_gradient_positions_emitted` | function | `tests/test_css.c:3836` | `static void test_linear_gradient_positions_emitted(void **state)` |
+| `test_linear_gradient_positions_emitted` | function | `tests/test_css.c:3890` | `static void test_linear_gradient_positions_emitted(void **state)` |
 | `test_linear_gradient_stops` | function | `tests/test_css.c:553` | `static void test_linear_gradient_stops(void **state)` |
 | `test_list_style_type` | function | `tests/test_css.c:260` | `static void test_list_style_type(void **state)` |
-| `test_logical_inset_and_sizes` | function | `tests/test_css.c:3634` | `static void test_logical_inset_and_sizes(void **state)` |
-| `test_logical_margin_padding` | function | `tests/test_css.c:3608` | `static void test_logical_margin_padding(void **state)` |
+| `test_logical_inset_and_sizes` | function | `tests/test_css.c:3688` | `static void test_logical_inset_and_sizes(void **state)` |
+| `test_logical_margin_padding` | function | `tests/test_css.c:3662` | `static void test_logical_margin_padding(void **state)` |
 | `test_malformed_inline_no_crash` | function | `tests/test_css.c:717` | `static void test_malformed_inline_no_crash(void **state)` |
-| `test_math_clamp` | function | `tests/test_css.c:3584` | `static void test_math_clamp(void **state)` |
-| `test_math_min_max_top_level` | function | `tests/test_css.c:3572` | `static void test_math_min_max_top_level(void **state)` |
-| `test_math_nested_in_calc` | function | `tests/test_css.c:3594` | `static void test_math_nested_in_calc(void **state)` |
-| `test_media_and_or` | function | `tests/test_css.c:1996` | `static void test_media_and_or(void **state)` |
-| `test_media_prefers_color_scheme` | function | `tests/test_css.c:1965` | `static void test_media_prefers_color_scheme(void **state)` |
-| `test_media_query_length_honours_its_unit` | function | `tests/test_css.c:4163` | `static void test_media_query_length_honours_its_unit(void **state)` |
-| `test_media_screen_and_print` | function | `tests/test_css.c:1946` | `static void test_media_screen_and_print(void **state)` |
-| `test_media_unknown_fails_closed` | function | `tests/test_css.c:2010` | `static void test_media_unknown_fails_closed(void **state)` |
-| `test_media_width_queries` | function | `tests/test_css.c:1981` | `static void test_media_width_queries(void **state)` |
+| `test_math_clamp` | function | `tests/test_css.c:3638` | `static void test_math_clamp(void **state)` |
+| `test_math_min_max_top_level` | function | `tests/test_css.c:3626` | `static void test_math_min_max_top_level(void **state)` |
+| `test_math_nested_in_calc` | function | `tests/test_css.c:3648` | `static void test_math_nested_in_calc(void **state)` |
+| `test_media_and_or` | function | `tests/test_css.c:2046` | `static void test_media_and_or(void **state)` |
+| `test_media_prefers_color_scheme` | function | `tests/test_css.c:2015` | `static void test_media_prefers_color_scheme(void **state)` |
+| `test_media_query_length_honours_its_unit` | function | `tests/test_css.c:4217` | `static void test_media_query_length_honours_its_unit(void **state)` |
+| `test_media_screen_and_print` | function | `tests/test_css.c:1996` | `static void test_media_screen_and_print(void **state)` |
+| `test_media_unknown_fails_closed` | function | `tests/test_css.c:2060` | `static void test_media_unknown_fails_closed(void **state)` |
+| `test_media_width_queries` | function | `tests/test_css.c:2031` | `static void test_media_width_queries(void **state)` |
+| `test_not_unreadable_argument_fails_closed` | function | `tests/test_css.c:1308` | `static void test_not_unreadable_argument_fails_closed(void **state)` |
 | `test_opacity` | function | `tests/test_css.c:209` | `static void test_opacity(void **state)` |
-| `test_overflow` | function | `tests/test_css.c:2619` | `static void test_overflow(void **state)` |
-| `test_parse_null_args` | function | `tests/test_css.c:2028` | `static void test_parse_null_args(void **state)` |
-| `test_place_shorthands` | function | `tests/test_css.c:3656` | `static void test_place_shorthands(void **state)` |
-| `test_position_and_insets` | function | `tests/test_css.c:2547` | `static void test_position_and_insets(void **state)` |
-| `test_pseudo_content_before_after_separate` | function | `tests/test_css.c:1275` | `static void test_pseudo_content_before_after_separate(void **state)` |
-| `test_pseudo_content_decodes_escaped_char` | function | `tests/test_css.c:1312` | `static void test_pseudo_content_decodes_escaped_char(void **state)` |
-| `test_pseudo_content_decodes_hex_escape` | function | `tests/test_css.c:1289` | `static void test_pseudo_content_decodes_hex_escape(void **state)` |
-| `test_pseudo_content_empty_without_pseudo` | function | `tests/test_css.c:1413` | `static void test_pseudo_content_empty_without_pseudo(void **state)` |
-| `test_pseudo_content_escape_eats_terminator_space` | function | `tests/test_css.c:1301` | `static void test_pseudo_content_escape_eats_terminator_space(void **state)` |
-| `test_pseudo_content_escapes_fail_closed` | function | `tests/test_css.c:1359` | `static void test_pseudo_content_escapes_fail_closed(void **state)` |
-| `test_pseudo_content_none_parses_empty` | function | `tests/test_css.c:1390` | `static void test_pseudo_content_none_parses_empty(void **state)` |
-| `test_pseudo_does_not_claim_cascade_slot` | function | `tests/test_css.c:1487` | `static void test_pseudo_does_not_claim_cascade_slot(void **state)` |
-| `test_pseudo_empty` | function | `tests/test_css.c:1588` | `static void test_pseudo_empty(void **state)` |
-| `test_pseudo_geometry_does_not_leak_to_element` | function | `tests/test_css.c:1431` | `static void test_pseudo_geometry_does_not_leak_to_element(void **state)` |
-| `test_pseudo_lang` | function | `tests/test_css.c:1625` | `static void test_pseudo_lang(void **state)` |
+| `test_overflow` | function | `tests/test_css.c:2669` | `static void test_overflow(void **state)` |
+| `test_parse_null_args` | function | `tests/test_css.c:2078` | `static void test_parse_null_args(void **state)` |
+| `test_place_shorthands` | function | `tests/test_css.c:3710` | `static void test_place_shorthands(void **state)` |
+| `test_position_and_insets` | function | `tests/test_css.c:2597` | `static void test_position_and_insets(void **state)` |
+| `test_pseudo_content_before_after_separate` | function | `tests/test_css.c:1325` | `static void test_pseudo_content_before_after_separate(void **state)` |
+| `test_pseudo_content_decodes_escaped_char` | function | `tests/test_css.c:1362` | `static void test_pseudo_content_decodes_escaped_char(void **state)` |
+| `test_pseudo_content_decodes_hex_escape` | function | `tests/test_css.c:1339` | `static void test_pseudo_content_decodes_hex_escape(void **state)` |
+| `test_pseudo_content_empty_without_pseudo` | function | `tests/test_css.c:1463` | `static void test_pseudo_content_empty_without_pseudo(void **state)` |
+| `test_pseudo_content_escape_eats_terminator_space` | function | `tests/test_css.c:1351` | `static void test_pseudo_content_escape_eats_terminator_space(void **state)` |
+| `test_pseudo_content_escapes_fail_closed` | function | `tests/test_css.c:1409` | `static void test_pseudo_content_escapes_fail_closed(void **state)` |
+| `test_pseudo_content_none_parses_empty` | function | `tests/test_css.c:1440` | `static void test_pseudo_content_none_parses_empty(void **state)` |
+| `test_pseudo_does_not_claim_cascade_slot` | function | `tests/test_css.c:1537` | `static void test_pseudo_does_not_claim_cascade_slot(void **state)` |
+| `test_pseudo_empty` | function | `tests/test_css.c:1638` | `static void test_pseudo_empty(void **state)` |
+| `test_pseudo_geometry_does_not_leak_to_element` | function | `tests/test_css.c:1481` | `static void test_pseudo_geometry_does_not_leak_to_element(void **state)` |
+| `test_pseudo_lang` | function | `tests/test_css.c:1675` | `static void test_pseudo_lang(void **state)` |
 | `test_pseudo_link` | function | `tests/test_css.c:1113` | `static void test_pseudo_link(void **state)` |
 | `test_pseudo_never_match_keeps_group` | function | `tests/test_css.c:1131` | `static void test_pseudo_never_match_keeps_group(void **state)` |
 | `test_pseudo_nth_child` | function | `tests/test_css.c:1189` | `static void test_pseudo_nth_child(void **state)` |
 | `test_pseudo_nth_last_child` | function | `tests/test_css.c:1212` | `static void test_pseudo_nth_last_child(void **state)` |
-| `test_pseudo_nth_malformed_drops` | function | `tests/test_css.c:1535` | `static void test_pseudo_nth_malformed_drops(void **state)` |
-| `test_pseudo_nth_of_type` | function | `tests/test_css.c:1572` | `static void test_pseudo_nth_of_type(void **state)` |
-| `test_pseudo_of_type` | function | `tests/test_css.c:1553` | `static void test_pseudo_of_type(void **state)` |
+| `test_pseudo_nth_malformed_drops` | function | `tests/test_css.c:1585` | `static void test_pseudo_nth_malformed_drops(void **state)` |
+| `test_pseudo_nth_of_type` | function | `tests/test_css.c:1622` | `static void test_pseudo_nth_of_type(void **state)` |
+| `test_pseudo_of_type` | function | `tests/test_css.c:1603` | `static void test_pseudo_of_type(void **state)` |
 | `test_pseudo_root_and_form_state` | function | `tests/test_css.c:1223` | `static void test_pseudo_root_and_form_state(void **state)` |
-| `test_pseudo_single_colon_before_class_tmp` | function | `tests/test_css.c:1402` | `static void test_pseudo_single_colon_before_class_tmp(void **state)` |
-| `test_pseudo_single_colon_before_matches` | function | `tests/test_css.c:1324` | `static void test_pseudo_single_colon_before_matches(void **state)` |
-| `test_pseudo_specificity` | function | `tests/test_css.c:1500` | `static void test_pseudo_specificity(void **state)` |
+| `test_pseudo_single_colon_before_class_tmp` | function | `tests/test_css.c:1452` | `static void test_pseudo_single_colon_before_class_tmp(void **state)` |
+| `test_pseudo_single_colon_before_matches` | function | `tests/test_css.c:1374` | `static void test_pseudo_single_colon_before_matches(void **state)` |
+| `test_pseudo_specificity` | function | `tests/test_css.c:1550` | `static void test_pseudo_specificity(void **state)` |
 | `test_pseudo_structural` | function | `tests/test_css.c:1169` | `static void test_pseudo_structural(void **state)` |
-| `test_pseudo_target` | function | `tests/test_css.c:1614` | `static void test_pseudo_target(void **state)` |
+| `test_pseudo_target` | function | `tests/test_css.c:1664` | `static void test_pseudo_target(void **state)` |
 | `test_pseudo_unknown_drops_selector` | function | `tests/test_css.c:1247` | `static void test_pseudo_unknown_drops_selector(void **state)` |
-| `test_pseudo_with_sibling_combinator` | function | `tests/test_css.c:1518` | `static void test_pseudo_with_sibling_combinator(void **state)` |
-| `test_rem_rebase_62_5_percent_idiom` | function | `tests/test_css.c:4148` | `static void test_rem_rebase_62_5_percent_idiom(void **state)` |
-| `test_rem_rebase_absent_root_declaration_is_byte_identical` | function | `tests/test_css.c:4077` | `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)` |
-| `test_rem_rebase_applies_to_box_lengths` | function | `tests/test_css.c:4063` | `static void test_rem_rebase_applies_to_box_lengths(void **state)` |
-| `test_rem_rebase_honours_root_pseudo_class` | function | `tests/test_css.c:4089` | `static void test_rem_rebase_honours_root_pseudo_class(void **state)` |
-| `test_rem_rebase_ignores_identifier_lookalikes` | function | `tests/test_css.c:4133` | `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)` |
-| `test_rem_rebase_leaves_quoted_text_alone` | function | `tests/test_css.c:4122` | `static void test_rem_rebase_leaves_quoted_text_alone(void **state)` |
-| `test_rem_rebase_skips_at_rule_prelude` | function | `tests/test_css.c:4099` | `static void test_rem_rebase_skips_at_rule_prelude(void **state)` |
-| `test_rem_rebased_on_root_font_size` | function | `tests/test_css.c:4051` | `static void test_rem_rebased_on_root_font_size(void **state)` |
-| `test_resolve_el_inline_only` | function | `tests/test_css.c:1646` | `static void test_resolve_el_inline_only(void **state)` |
-| `test_resolve_null_safe` | function | `tests/test_css.c:2038` | `static void test_resolve_null_safe(void **state)` |
+| `test_pseudo_with_sibling_combinator` | function | `tests/test_css.c:1568` | `static void test_pseudo_with_sibling_combinator(void **state)` |
+| `test_rem_rebase_62_5_percent_idiom` | function | `tests/test_css.c:4202` | `static void test_rem_rebase_62_5_percent_idiom(void **state)` |
+| `test_rem_rebase_absent_root_declaration_is_byte_identical` | function | `tests/test_css.c:4131` | `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)` |
+| `test_rem_rebase_applies_to_box_lengths` | function | `tests/test_css.c:4117` | `static void test_rem_rebase_applies_to_box_lengths(void **state)` |
+| `test_rem_rebase_honours_root_pseudo_class` | function | `tests/test_css.c:4143` | `static void test_rem_rebase_honours_root_pseudo_class(void **state)` |
+| `test_rem_rebase_ignores_identifier_lookalikes` | function | `tests/test_css.c:4187` | `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)` |
+| `test_rem_rebase_leaves_quoted_text_alone` | function | `tests/test_css.c:4176` | `static void test_rem_rebase_leaves_quoted_text_alone(void **state)` |
+| `test_rem_rebase_skips_at_rule_prelude` | function | `tests/test_css.c:4153` | `static void test_rem_rebase_skips_at_rule_prelude(void **state)` |
+| `test_rem_rebased_on_root_font_size` | function | `tests/test_css.c:4105` | `static void test_rem_rebased_on_root_font_size(void **state)` |
+| `test_resolve_el_inline_only` | function | `tests/test_css.c:1696` | `static void test_resolve_el_inline_only(void **state)` |
+| `test_resolve_null_safe` | function | `tests/test_css.c:2088` | `static void test_resolve_null_safe(void **state)` |
 | `test_sheet_class_and_id` | function | `tests/test_css.c:907` | `static void test_sheet_class_and_id(void **state)` |
 | `test_sheet_compound_selector` | function | `tests/test_css.c:927` | `static void test_sheet_compound_selector(void **state)` |
 | `test_sheet_container_props` | function | `tests/test_css.c:355` | `static void test_sheet_container_props(void **state)` |
 | `test_sheet_type_selector` | function | `tests/test_css.c:896` | `static void test_sheet_type_selector(void **state)` |
 | `test_sheet_universal_and_group` | function | `tests/test_css.c:917` | `static void test_sheet_universal_and_group(void **state)` |
 | `test_sibling_mixed_with_child` | function | `tests/test_css.c:1096` | `static void test_sibling_mixed_with_child(void **state)` |
-| `test_table_sheet_cascade` | function | `tests/test_css.c:3067` | `static void test_table_sheet_cascade(void **state)` |
+| `test_table_sheet_cascade` | function | `tests/test_css.c:3121` | `static void test_table_sheet_cascade(void **state)` |
 | `test_text_decoration_cascade` | function | `tests/test_css.c:984` | `static void test_text_decoration_cascade(void **state)` |
 | `test_text_ext_cascade_and_important` | function | `tests/test_css.c:274` | `static void test_text_ext_cascade_and_important(void **state)` |
-| `test_text_fill_color` | function | `tests/test_css.c:3764` | `static void test_text_fill_color(void **state)` |
+| `test_text_fill_color` | function | `tests/test_css.c:3818` | `static void test_text_fill_color(void **state)` |
 | `test_text_indent` | function | `tests/test_css.c:240` | `static void test_text_indent(void **state)` |
-| `test_text_overflow_and_word_break` | function | `tests/test_css.c:2658` | `static void test_text_overflow_and_word_break(void **state)` |
+| `test_text_overflow_and_word_break` | function | `tests/test_css.c:2708` | `static void test_text_overflow_and_word_break(void **state)` |
 | `test_text_shadow` | function | `tests/test_css.c:187` | `static void test_text_shadow(void **state)` |
 | `test_text_transform` | function | `tests/test_css.c:158` | `static void test_text_transform(void **state)` |
-| `test_transform_origin` | function | `tests/test_css.c:3418` | `static void test_transform_origin(void **state)` |
+| `test_transform_origin` | function | `tests/test_css.c:3472` | `static void test_transform_origin(void **state)` |
 | `test_unknown_props_ignored` | function | `tests/test_css.c:514` | `static void test_unknown_props_ignored(void **state)` |
 | `test_url_value_dropped` | function | `tests/test_css.c:504` | `static void test_url_value_dropped(void **state)` |
-| `test_vendor_prefixes` | function | `tests/test_css.c:4211` | `static void test_vendor_prefixes(void **state)` |
+| `test_vendor_prefixes` | function | `tests/test_css.c:4265` | `static void test_vendor_prefixes(void **state)` |
 | `test_vertical_align` | function | `tests/test_css.c:219` | `static void test_vertical_align(void **state)` |
-| `test_viewport_units_font_size` | function | `tests/test_css.c:2289` | `static void test_viewport_units_font_size(void **state)` |
-| `test_viewport_units_in_calc_and_mathfn` | function | `tests/test_css.c:2281` | `static void test_viewport_units_in_calc_and_mathfn(void **state)` |
-| `test_viewport_units_junk_fail_closed` | function | `tests/test_css.c:2297` | `static void test_viewport_units_junk_fail_closed(void **state)` |
-| `test_visibility` | function | `tests/test_css.c:2602` | `static void test_visibility(void **state)` |
+| `test_viewport_units_font_size` | function | `tests/test_css.c:2339` | `static void test_viewport_units_font_size(void **state)` |
+| `test_viewport_units_in_calc_and_mathfn` | function | `tests/test_css.c:2331` | `static void test_viewport_units_in_calc_and_mathfn(void **state)` |
+| `test_viewport_units_junk_fail_closed` | function | `tests/test_css.c:2347` | `static void test_viewport_units_junk_fail_closed(void **state)` |
+| `test_visibility` | function | `tests/test_css.c:2652` | `static void test_visibility(void **state)` |
 | `test_white_space` | function | `tests/test_css.c:249` | `static void test_white_space(void **state)` |
-| `test_white_space_break_spaces` | function | `tests/test_css.c:3718` | `static void test_white_space_break_spaces(void **state)` |
+| `test_white_space_break_spaces` | function | `tests/test_css.c:3772` | `static void test_white_space_break_spaces(void **state)` |
 | `main` | function | `tests/test_css_box.c:84` | `int main(void)` |
 | `test_align_display_gap` | function | `tests/test_css_box.c:52` | `static void test_align_display_gap(void **state)` |
 | `test_box4_partial_fails_closed` | function | `tests/test_css_box.c:44` | `static void test_box4_partial_fails_closed(void **state)` |
@@ -4508,7 +4544,7 @@ static void test_leading_b...` |
 
 static void test_float_pack_m_holy_grail_pull_u...` |
 | `assert_item` | function | `tests/test_flex_layout.c:26` | `static void assert_item(fx_result r, double pos, double size)` |
-| `main` | function | `tests/test_flex_layout.c:937` | `int main(void)` |
+| `main` | function | `tests/test_flex_layout.c:969` | `int main(void)` |
 | `test_area_hash_basics` | function | `tests/test_flex_layout.c:775` | `static void test_area_hash_basics(void **state)` |
 | `test_areas_non_rectangular_is_rejected` | function | `tests/test_flex_layout.c:853` | `static void test_areas_non_rectangular_is_rejected(void **state)` |
 | `test_areas_null_cell` | function | `tests/test_flex_layout.c:821` | `static void test_areas_null_cell(void **state)` |
@@ -4516,6 +4552,7 @@ static void test_float_pack_m_holy_grail_pull_u...` |
 | `test_areas_parse_bounds` | function | `tests/test_flex_layout.c:885` | `static void test_areas_parse_bounds(void **state)` |
 | `test_areas_parse_fails_closed` | function | `tests/test_flex_layout.c:867` | `static void test_areas_parse_fails_closed(void **state)` |
 | `test_areas_rect_spans_rows_and_cols` | function | `tests/test_flex_layout.c:836` | `static void test_areas_rect_spans_rows_and_cols(void **state)` |
+| `test_auto_margins_push_right_and_center` | function | `tests/test_flex_layout.c:938` | `static void test_auto_margins_push_right_and_center(void **state)` |
 | `test_auto_min_size_is_min_content` | function | `tests/test_flex_layout.c:642` | `static void test_auto_min_size_is_min_content(void **state)` |
 | `test_flex_errors` | function | `tests/test_flex_layout.c:146` | `static void test_flex_errors(void **state)` |
 | `test_flex_zero_items_is_noop` | function | `tests/test_flex_layout.c:141` | `static void test_flex_zero_items_is_noop(void **state)` |
@@ -4609,61 +4646,69 @@ static void test_float_pack_m_holy_grail_pull_u...` |
 | `FREEDOM_BIN` | macro | `tests/test_freedom.c:26` | `#define FREEDOM_BIN` |
 | `OUT_FILE` | macro | `tests/test_freedom.c:27` | `#define OUT_FILE` |
 | `_POSIX_C_SOURCE` | macro | `tests/test_freedom.c:11` | `#define _POSIX_C_SOURCE` |
-| `ballooned` | function | `tests/test_freedom.c:1428` | `* ballooned (body + wrapper re-opened per child) and the LAST wrapper piece
+| `ballooned` | function | `tests/test_freedom.c:1474` | `* ballooned (body + wrapper re-opened per child) and the LAST wrapper piece
  * became the contain...` |
-| `blend` | function | `tests/test_freedom.c:393` | `* not some other blend (double-composited or wrong alpha). */
+| `band` | function | `tests/test_freedom.c:1792` | `* band (which already recurses into nested containers) owns it. */
+static void test_dump_layout_c...` |
+| `blend` | function | `tests/test_freedom.c:439` | `* not some other blend (double-composited or wrong alpha). */
 static void test_download_png_group...` |
-| `blend` | function | `tests/test_freedom.c:1087` | `* visibly different from either input color or an OVER blend (which would show
+| `blend` | function | `tests/test_freedom.c:1133` | `* visibly different from either input color or an OVER blend (which would show
  * opaque blue). E...` |
-| `bottom` | function | `tests/test_freedom.c:1536` | `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ assert_non_null(strstr(out, "nbox=1"));` |
+| `bottom` | function | `tests/test_freedom.c:1582` | `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ assert_non_null(strstr(out, "nbox=1"));` |
 | `cleanup_files` | function | `tests/test_freedom.c:84` | `static void cleanup_files(void)` |
-| `ink_width` | function | `tests/test_freedom.c:532` | `static double ink_width(const char *html)` |
+| `ink_width` | function | `tests/test_freedom.c:578` | `static double ink_width(const char *html)` |
 | `is_pdf_file` | function | `tests/test_freedom.c:64` | `static int is_pdf_file(const char *path)` |
 | `is_png_file` | function | `tests/test_freedom.c:74` | `static int is_png_file(const char *path)` |
-| `main` | function | `tests/test_freedom.c:2003` | `int main(void)` |
-| `markup` | function | `tests/test_freedom.c:1217` | `* against an unrotated control render of the identical markup (a 50-char-wide box
+| `main` | function | `tests/test_freedom.c:2281` | `int main(void)` |
+| `markup` | function | `tests/test_freedom.c:1263` | `* against an unrotated control render of the identical markup (a 50-char-wide box
  * at x:[24,975...` |
-| `markup` | function | `tests/test_freedom.c:1276` | `* unscaled control render of the identical markup (box y:[24,49] at x=500,
+| `markup` | function | `tests/test_freedom.c:1322` | `* unscaled control render of the identical markup (box y:[24,49] at x=500,
  * center y~36.5): y=2...` |
 | `read_file_all` | function | `tests/test_freedom.c:90` | `static uint8_t *read_file_all(const char *path, size_t *out_len)` |
-| `rows` | function | `tests/test_freedom.c:894` | `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);` |
+| `rows` | function | `tests/test_freedom.c:940` | `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);` |
 | `run_freedom` | function | `tests/test_freedom.c:30` | `static int run_freedom(const char *arg, char *out, size_t out_size, int *exit_status)` |
 | `run_freedom_raw` | function | `tests/test_freedom.c:52` | `static int run_freedom_raw(const char *args, int *exit_status)` |
-| `test_absolute_font_size_lands_exact` | function | `tests/test_freedom.c:579` | `static void test_absolute_font_size_lands_exact(void **state)` |
-| `test_absolute_span_honours_right_bottom` | function | `tests/test_freedom.c:691` | `static void test_absolute_span_honours_right_bottom(void **state)` |
-| `test_author_can_unbold_a_heading` | function | `tests/test_freedom.c:672` | `static void test_author_can_unbold_a_heading(void **state)` |
-| `test_author_font_size_on_heading_replaces_ua_scale` | function | `tests/test_freedom.c:597` | `static void test_author_font_size_on_heading_replaces_ua_scale(void **state)` |
+| `test_absolute_font_size_lands_exact` | function | `tests/test_freedom.c:625` | `static void test_absolute_font_size_lands_exact(void **state)` |
+| `test_absolute_span_honours_right_bottom` | function | `tests/test_freedom.c:737` | `static void test_absolute_span_honours_right_bottom(void **state)` |
+| `test_author_can_unbold_a_heading` | function | `tests/test_freedom.c:718` | `static void test_author_can_unbold_a_heading(void **state)` |
+| `test_author_font_size_on_heading_replaces_ua_scale` | function | `tests/test_freedom.c:643` | `static void test_author_font_size_on_heading_replaces_ua_scale(void **state)` |
 | `test_download_pdf_local` | function | `tests/test_freedom.c:194` | `static void test_download_pdf_local(void **state)` |
 | `test_download_pdf_requires_path` | function | `tests/test_freedom.c:220` | `static void test_download_pdf_requires_path(void **state)` |
-| `test_download_png_absolute_shrinks_and_anchors_right` | function | `tests/test_freedom.c:458` | `static void test_download_png_absolute_shrinks_and_anchors_right(void **state)` |
-| `test_download_png_flex_container_paints_one_band` | function | `tests/test_freedom.c:1898` | `static void test_download_png_flex_container_paints_one_band(void **state)` |
-| `test_download_png_gradient_box_text_keeps_gradient` | function | `tests/test_freedom.c:1873` | `static void test_download_png_gradient_box_text_keeps_gradient(void **state)` |
+| `test_download_png_absolute_shrinks_and_anchors_right` | function | `tests/test_freedom.c:504` | `static void test_download_png_absolute_shrinks_and_anchors_right(void **state)` |
+| `test_download_png_flex_container_paints_one_band` | function | `tests/test_freedom.c:2176` | `static void test_download_png_flex_container_paints_one_band(void **state)` |
+| `test_download_png_gradient_box_text_keeps_gradient` | function | `tests/test_freedom.c:2151` | `static void test_download_png_gradient_box_text_keeps_gradient(void **state)` |
 | `test_download_png_images_local` | function | `tests/test_freedom.c:261` | `static void test_download_png_images_local(void **state)` |
-| `test_download_png_inline_block_flows_in_line` | function | `tests/test_freedom.c:840` | `static void test_download_png_inline_block_flows_in_line(void **state)` |
-| `test_download_png_inline_block_shrinks_and_centers` | function | `tests/test_freedom.c:1918` | `static void test_download_png_inline_block_shrinks_and_centers(void **state)` |
-| `test_download_png_inline_svg_path_and_drops_image` | function | `tests/test_freedom.c:1962` | `static void test_download_png_inline_svg_path_and_drops_image(void **state)` |
-| `test_download_png_line_height_zero_does_not_shrink_line` | function | `tests/test_freedom.c:956` | `static void test_download_png_line_height_zero_does_not_shrink_line(void **state)` |
+| `test_download_png_inline_block_flows_in_line` | function | `tests/test_freedom.c:886` | `static void test_download_png_inline_block_flows_in_line(void **state)` |
+| `test_download_png_inline_block_shrinks_and_centers` | function | `tests/test_freedom.c:2196` | `static void test_download_png_inline_block_shrinks_and_centers(void **state)` |
+| `test_download_png_inline_svg_path_and_drops_image` | function | `tests/test_freedom.c:2240` | `static void test_download_png_inline_svg_path_and_drops_image(void **state)` |
+| `test_download_png_line_height_zero_does_not_shrink_line` | function | `tests/test_freedom.c:1002` | `static void test_download_png_line_height_zero_does_not_shrink_line(void **state)` |
 | `test_download_png_local` | function | `tests/test_freedom.c:229` | `static void test_download_png_local(void **state)` |
 | `test_download_png_negative_zindex_paints_behind_inflow` | function | `tests/test_freedom.c:338` | `static void test_download_png_negative_zindex_paints_behind_inflow(void **state)` |
-| `test_download_png_nested_flex_lays_out_on_one_row` | function | `tests/test_freedom.c:761` | `static void test_download_png_nested_flex_lays_out_on_one_row(void **state)` |
+| `test_download_png_nested_flex_lays_out_on_one_row` | function | `tests/test_freedom.c:807` | `static void test_download_png_nested_flex_lays_out_on_one_row(void **state)` |
+| `test_download_png_positioned_overflow_clips_own_content` | function | `tests/test_freedom.c:391` | `static void test_download_png_positioned_overflow_clips_own_content(void **state)` |
 | `test_download_png_requires_path` | function | `tests/test_freedom.c:322` | `static void test_download_png_requires_path(void **state)` |
-| `test_dump_console_shows_output_and_error` | function | `tests/test_freedom.c:1335` | `static void test_dump_console_shows_output_and_error(void **state)` |
-| `test_dump_dom_prints_render_tree` | function | `tests/test_freedom.c:1395` | `static void test_dump_dom_prints_render_tree(void **state)` |
-| `test_dump_layout_nested_column_takes_max` | function | `tests/test_freedom.c:1666` | `static void test_dump_layout_nested_column_takes_max(void **state)` |
-| `test_dump_layout_pulled_rail_single_margin` | function | `tests/test_freedom.c:1550` | `static void test_dump_layout_pulled_rail_single_margin(void **state)` |
-| `test_dump_timings_prints_stages` | function | `tests/test_freedom.c:1978` | `static void test_dump_timings_prints_stages(void **state)` |
-| `test_heading_colour_matches_body_text` | function | `tests/test_freedom.c:617` | `static void test_heading_colour_matches_body_text(void **state)` |
+| `test_dump_console_shows_output_and_error` | function | `tests/test_freedom.c:1381` | `static void test_dump_console_shows_output_and_error(void **state)` |
+| `test_dump_dom_prints_render_tree` | function | `tests/test_freedom.c:1441` | `static void test_dump_dom_prints_render_tree(void **state)` |
+| `test_dump_layout_band_flushes_line_before_clear` | function | `tests/test_freedom.c:1861` | `static void test_dump_layout_band_flushes_line_before_clear(void **state)` |
+| `test_dump_layout_flex_auto_margin_push_right` | function | `tests/test_freedom.c:1901` | `static void test_dump_layout_flex_auto_margin_push_right(void **state)` |
+| `test_dump_layout_inline_box_second_run_stays` | function | `tests/test_freedom.c:1763` | `static void test_dump_layout_inline_box_second_run_stays(void **state)` |
+| `test_dump_layout_line_opening_image_is_inline` | function | `tests/test_freedom.c:1835` | `static void test_dump_layout_line_opening_image_is_inline(void **state)` |
+| `test_dump_layout_nested_column_takes_max` | function | `tests/test_freedom.c:1944` | `static void test_dump_layout_nested_column_takes_max(void **state)` |
+| `test_dump_layout_pulled_rail_single_margin` | function | `tests/test_freedom.c:1596` | `static void test_dump_layout_pulled_rail_single_margin(void **state)` |
+| `test_dump_layout_row_nested_in_column` | function | `tests/test_freedom.c:1712` | `static void test_dump_layout_row_nested_in_column(void **state)` |
+| `test_dump_timings_prints_stages` | function | `tests/test_freedom.c:2256` | `static void test_dump_timings_prints_stages(void **state)` |
+| `test_heading_colour_matches_body_text` | function | `tests/test_freedom.c:663` | `static void test_heading_colour_matches_body_text(void **state)` |
 | `test_help` | function | `tests/test_freedom.c:107` | `static void test_help(void **state)` |
-| `test_inline_run_boundary_collapses_runs_of_space` | function | `tests/test_freedom.c:934` | `static void test_inline_run_boundary_collapses_runs_of_space(void **state)` |
-| `test_inline_run_boundary_does_not_invent_space` | function | `tests/test_freedom.c:913` | `static void test_inline_run_boundary_does_not_invent_space(void **state)` |
+| `test_inline_run_boundary_collapses_runs_of_space` | function | `tests/test_freedom.c:980` | `static void test_inline_run_boundary_collapses_runs_of_space(void **state)` |
+| `test_inline_run_boundary_does_not_invent_space` | function | `tests/test_freedom.c:959` | `static void test_inline_run_boundary_does_not_invent_space(void **state)` |
 | `test_local_form_renders_inputs` | function | `tests/test_freedom.c:158` | `static void test_local_form_renders_inputs(void **state)` |
 | `test_local_html` | function | `tests/test_freedom.c:135` | `static void test_local_html(void **state)` |
 | `test_missing_file` | function | `tests/test_freedom.c:184` | `static void test_missing_file(void **state)` |
 | `test_no_args` | function | `tests/test_freedom.c:125` | `static void test_no_args(void **state)` |
-| `test_no_dump_console_without_flag` | function | `tests/test_freedom.c:1370` | `static void test_no_dump_console_without_flag(void **state)` |
-| `test_rejects_http_url` | function | `tests/test_freedom.c:1715` | `static void test_rejects_http_url(void **state)` |
+| `test_no_dump_console_without_flag` | function | `tests/test_freedom.c:1416` | `static void test_no_dump_console_without_flag(void **state)` |
+| `test_rejects_http_url` | function | `tests/test_freedom.c:1993` | `static void test_rejects_http_url(void **state)` |
 | `test_version` | function | `tests/test_freedom.c:116` | `static void test_version(void **state)` |
-| `white` | function | `tests/test_freedom.c:1777` | `* and not white (the old behaviour where only text rows got background fills). */
+| `white` | function | `tests/test_freedom.c:2055` | `* and not white (the old behaviour where only text rows got background fills). */
 static void tes...` |
 | `main` | function | `tests/test_hls.c:219` | `int main(void)` |
 | `test_empty_m3u8_is_ok` | function | `tests/test_hls.c:22` | `static void test_empty_m3u8_is_ok(void **state)` |
@@ -5068,162 +5113,172 @@ static void test_cookie_jar_enabled_for_trusted_hos...` |
 | `test_policy_denies_io_uring` | function | `tests/test_os_sandbox.c:64` | `static void test_policy_denies_io_uring(void **state)` |
 | `test_policy_size` | function | `tests/test_os_sandbox.c:71` | `static void test_policy_size(void **state)` |
 | `test_prot_allowed_wx` | function | `tests/test_os_sandbox.c:151` | `static void test_prot_allowed_wx(void **state)` |
-| `applies` | function | `tests/test_page_view.c:3249` | `* <style>: an extern rule applies (presentation and display:none alike);` |
-| `break` | function | `tests/test_page_view.c:686` | `* block break (from entering <p>);` |
-| `dropped` | function | `tests/test_page_view.c:408` | `* either flank is dropped (the inter-cell rule above stays). */
+| `applies` | function | `tests/test_page_view.c:3267` | `* <style>: an extern rule applies (presentation and display:none alike);` |
+| `break` | function | `tests/test_page_view.c:703` | `* block break (from entering <p>);` |
+| `dropped` | function | `tests/test_page_view.c:425` | `* either flank is dropped (the inter-cell rule above stays). */
 static void test_build_table_inli...` |
-| `find_image` | function | `tests/test_page_view.c:44` | `static const pv_run *find_image(const pv_view *v, const char *src)` |
-| `find_input` | function | `tests/test_page_view.c:2719` | `static const pv_run *find_input(const pv_view *v, const char *name)` |
-| `find_svg` | function | `tests/test_page_view.c:62` | `static const pv_run *find_svg(const pv_view *v)` |
+| `find_image` | function | `tests/test_page_view.c:53` | `static const pv_run *find_image(const pv_view *v, const char *src)` |
+| `find_input` | function | `tests/test_page_view.c:2737` | `static const pv_run *find_input(const pv_view *v, const char *name)` |
+| `find_link` | function | `tests/test_page_view.c:71` | `static const pv_run *find_link(const pv_view *v, const char *href)` |
+| `find_sub` | function | `tests/test_page_view.c:44` | `static const pv_run *find_sub(const pv_view *v, const char *sub)` |
+| `find_svg` | function | `tests/test_page_view.c:79` | `static const pv_run *find_svg(const pv_view *v)` |
 | `find_text` | function | `tests/test_page_view.c:35` | `static const pv_run *find_text(const pv_view *v, const char *text)` |
-| `find_video` | function | `tests/test_page_view.c:53` | `static const pv_run *find_video(const pv_view *v, const char *src)` |
-| `float_id` | function | `tests/test_page_view.c:1512` | `* A run inside a float nested in another float reports the inner element as * float_id (unchanged) plus the outer elemen` |
-| `height` | function | `tests/test_page_view.c:3223` | `* real height (jkanime's donghuas/ovas panes are display:none, yet all their
+| `find_video` | function | `tests/test_page_view.c:62` | `static const pv_run *find_video(const pv_view *v, const char *src)` |
+| `float_id` | function | `tests/test_page_view.c:1530` | `* A run inside a float nested in another float reports the inner element as * float_id (unchanged) plus the outer elemen` |
+| `height` | function | `tests/test_page_view.c:3241` | `* real height (jkanime's donghuas/ovas panes are display:none, yet all their
  * thumbnails flowed...` |
-| `it` | function | `tests/test_page_view.c:617` | `* the rest of the row share it (so an overflowing table degrades to one row per * line, not one blob). */ assert_int_equ` |
-| `main` | function | `tests/test_page_view.c:3769` | `int main(void)` |
-| `ordinal` | function | `tests/test_page_view.c:1738` | `* cont_item ordinal (they are one flex/grid item and must flow together in one * cell);` |
+| `it` | function | `tests/test_page_view.c:634` | `* the rest of the row share it (so an overflowing table degrades to one row per * line, not one blob). */ assert_int_equ` |
+| `main` | function | `tests/test_page_view.c:4007` | `int main(void)` |
+| `ordinal` | function | `tests/test_page_view.c:1756` | `* cont_item ordinal (they are one flex/grid item and must flow together in one * cell);` |
 | `parse` | function | `tests/test_page_view.c:27` | `static hp_document *parse(const char *html)` |
-| `reverted` | function | `tests/test_page_view.c:3209` | `* behavior of treating inline display:none as visible when JS is off * was reverted (commit 897f414 regression) because ` |
-| `size` | function | `tests/test_page_view.c:755` | `* size (~100px) instead of the CSS 40px, blowing up flex rows (slashdot socials). */
+| `reverted` | function | `tests/test_page_view.c:3227` | `* behavior of treating inline display:none as visible when JS is off * was reverted (commit 897f414 regression) because ` |
+| `size` | function | `tests/test_page_view.c:772` | `* size (~100px) instead of the CSS 40px, blowing up flex rows (slashdot socials). */
 static void ...` |
-| `test_append_copies_fields` | function | `tests/test_page_view.c:81` | `static void test_append_copies_fields(void **state)` |
-| `test_append_image_copies_fields` | function | `tests/test_page_view.c:108` | `static void test_append_image_copies_fields(void **state)` |
-| `test_append_image_null_args` | function | `tests/test_page_view.c:124` | `static void test_append_image_null_args(void **state)` |
-| `test_append_null_args` | function | `tests/test_page_view.c:188` | `static void test_append_null_args(void **state)` |
-| `test_append_transcodes_cp1252_quotes` | function | `tests/test_page_view.c:160` | `static void test_append_transcodes_cp1252_quotes(void **state)` |
-| `test_append_transcodes_latin1` | function | `tests/test_page_view.c:139` | `static void test_append_transcodes_latin1(void **state)` |
-| `test_append_transcodes_word` | function | `tests/test_page_view.c:149` | `static void test_append_transcodes_word(void **state)` |
-| `test_append_undefined_cp1252_is_qmark` | function | `tests/test_page_view.c:170` | `static void test_append_undefined_cp1252_is_qmark(void **state)` |
-| `test_append_valid_utf8_passthrough` | function | `tests/test_page_view.c:180` | `static void test_append_valid_utf8_passthrough(void **state)` |
-| `test_append_video_copies_fields` | function | `tests/test_page_view.c:3626` | `static void test_append_video_copies_fields(void **state)` |
-| `test_append_video_no_poster` | function | `tests/test_page_view.c:3645` | `static void test_append_video_no_poster(void **state)` |
-| `test_append_video_null_args` | function | `tests/test_page_view.c:3661` | `static void test_append_video_null_args(void **state)` |
-| `test_box_defaults_and_setter` | function | `tests/test_page_view.c:2160` | `static void test_box_defaults_and_setter(void **state)` |
-| `test_build_abs_child_is_not_a_flex_item` | function | `tests/test_page_view.c:1915` | `static void test_build_abs_child_is_not_a_flex_item(void **state)` |
-| `test_build_absolute_inside_float_escapes` | function | `tests/test_page_view.c:1632` | `static void test_build_absolute_inside_float_escapes(void **state)` |
-| `test_build_audio_as_video_kind` | function | `tests/test_page_view.c:3755` | `static void test_build_audio_as_video_kind(void **state)` |
-| `test_build_author_color` | function | `tests/test_page_view.c:1129` | `static void test_build_author_color(void **state)` |
-| `test_build_bgcolor_attr_fallback` | function | `tests/test_page_view.c:570` | `static void test_build_bgcolor_attr_fallback(void **state)` |
-| `test_build_block_break_between_paragraphs` | function | `tests/test_page_view.c:654` | `static void test_build_block_break_between_paragraphs(void **state)` |
-| `test_build_box_leaf_inline` | function | `tests/test_page_view.c:2125` | `static void test_build_box_leaf_inline(void **state)` |
-| `test_build_box_tree_empty_no_box` | function | `tests/test_page_view.c:2707` | `static void test_build_box_tree_empty_no_box(void **state)` |
-| `test_build_box_tree_textless_wrapper` | function | `tests/test_page_view.c:2682` | `static void test_build_box_tree_textless_wrapper(void **state)` |
-| `test_build_boxdeco_border_padding` | function | `tests/test_page_view.c:2273` | `static void test_build_boxdeco_border_padding(void **state)` |
-| `test_build_boxdeco_defaults_no_box` | function | `tests/test_page_view.c:2588` | `static void test_build_boxdeco_defaults_no_box(void **state)` |
-| `test_build_boxdeco_dims_alone_trigger_box` | function | `tests/test_page_view.c:2483` | `static void test_build_boxdeco_dims_alone_trigger_box(void **state)` |
-| `test_build_boxdeco_fit_content_height_is_auto` | function | `tests/test_page_view.c:2233` | `static void test_build_boxdeco_fit_content_height_is_auto(void **state)` |
-| `test_build_boxdeco_h_margin_alone_creates_box` | function | `tests/test_page_view.c:2191` | `static void test_build_boxdeco_h_margin_alone_creates_box(void **state)` |
-| `test_build_boxdeco_h_margin_zero_auto_no_box` | function | `tests/test_page_view.c:2211` | `static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state)` |
-| `test_build_boxdeco_min_content_height_is_auto` | function | `tests/test_page_view.c:2255` | `static void test_build_boxdeco_min_content_height_is_auto(void **state)` |
-| `test_build_boxdeco_shadow_outline` | function | `tests/test_page_view.c:2381` | `static void test_build_boxdeco_shadow_outline(void **state)` |
-| `test_build_boxdeco_shared_id_within_block` | function | `tests/test_page_view.c:2620` | `static void test_build_boxdeco_shared_id_within_block(void **state)` |
-| `test_build_boxdeco_sibling_blocks_distinct_ids` | function | `tests/test_page_view.c:2602` | `static void test_build_boxdeco_sibling_blocks_distinct_ids(void **state)` |
-| `test_build_boxdeco_visibility_overflow_cursor` | function | `tests/test_page_view.c:2404` | `static void test_build_boxdeco_visibility_overflow_cursor(void **state)` |
-| `test_build_caret_color_inherited` | function | `tests/test_page_view.c:3602` | `static void test_build_caret_color_inherited(void **state)` |
-| `test_build_combinator_selectors` | function | `tests/test_page_view.c:1255` | `static void test_build_combinator_selectors(void **state)` |
-| `test_build_cont_item_identity` | function | `tests/test_page_view.c:1740` | `static void test_build_cont_item_identity(void **state)` |
-| `test_build_content_visibility_hidden_folds` | function | `tests/test_page_view.c:3557` | `static void test_build_content_visibility_hidden_folds(void **state)` |
-| `test_build_control_without_form` | function | `tests/test_page_view.c:2871` | `static void test_build_control_without_form(void **state)` |
-| `test_build_css_bold_and_inline_wins` | function | `tests/test_page_view.c:3178` | `static void test_build_css_bold_and_inline_wins(void **state)` |
-| `test_build_cursor_alone_triggers_box` | function | `tests/test_page_view.c:2428` | `static void test_build_cursor_alone_triggers_box(void **state)` |
-| `test_build_display_none_hidden` | function | `tests/test_page_view.c:3197` | `static void test_build_display_none_hidden(void **state)` |
-| `test_build_empty_box_gets_run_and_box` | function | `tests/test_page_view.c:2304` | `static void test_build_empty_box_gets_run_and_box(void **state)` |
-| `test_build_empty_document` | function | `tests/test_page_view.c:1093` | `static void test_build_empty_document(void **state)` |
-| `test_build_empty_flex_grow_spacer` | function | `tests/test_page_view.c:914` | `static void test_build_empty_flex_grow_spacer(void **state)` |
-| `test_build_flex_container` | function | `tests/test_page_view.c:1293` | `static void test_build_flex_container(void **state)` |
-| `test_build_flex_container_from_sheet` | function | `tests/test_page_view.c:2016` | `static void test_build_flex_container_from_sheet(void **state)` |
-| `test_build_flex_item_values` | function | `tests/test_page_view.c:1406` | `static void test_build_flex_item_values(void **state)` |
-| `test_build_flex_whitespace_not_item` | function | `tests/test_page_view.c:1662` | `static void test_build_flex_whitespace_not_item(void **state)` |
-| `test_build_flex_wrap_align_row_gap` | function | `tests/test_page_view.c:1365` | `static void test_build_flex_wrap_align_row_gap(void **state)` |
-| `test_build_float_outermost_founder` | function | `tests/test_page_view.c:1515` | `static void test_build_float_outermost_founder(void **state)` |
-| `test_build_float_threading` | function | `tests/test_page_view.c:1469` | `static void test_build_float_threading(void **state)` |
-| `test_build_float_widthless_stays_unset` | function | `tests/test_page_view.c:858` | `static void test_build_float_widthless_stays_unset(void **state)` |
-| `test_build_flow_table_row_is_one_block` | function | `tests/test_page_view.c:2346` | `static void test_build_flow_table_row_is_one_block(void **state)` |
-| `test_build_form_post_and_hidden` | function | `tests/test_page_view.c:2762` | `static void test_build_form_post_and_hidden(void **state)` |
-| `test_build_grid_columns_from_sheet` | function | `tests/test_page_view.c:2038` | `static void test_build_grid_columns_from_sheet(void **state)` |
-| `test_build_grid_container` | function | `tests/test_page_view.c:1852` | `static void test_build_grid_container(void **state)` |
-| `test_build_hbox_container_width_never_seeds_items` | function | `tests/test_page_view.c:1603` | `static void test_build_hbox_container_width_never_seeds_items(void **state)` |
-| `test_build_hbox_margin_above_container_merges` | function | `tests/test_page_view.c:1583` | `static void test_build_hbox_margin_above_container_merges(void **state)` |
-| `test_build_heading_level` | function | `tests/test_page_view.c:227` | `static void test_build_heading_level(void **state)` |
-| `test_build_image_auto_size_keeps_attr` | function | `tests/test_page_view.c:894` | `static void test_build_image_auto_size_keeps_attr(void **state)` |
-| `test_build_image_css_size_overrides_attr` | function | `tests/test_page_view.c:877` | `static void test_build_image_css_size_overrides_attr(void **state)` |
-| `test_build_image_in_skipped_subtree_ignored` | function | `tests/test_page_view.c:932` | `static void test_build_image_in_skipped_subtree_ignored(void **state)` |
-| `test_build_image_no_src_and_no_srcset_ignored` | function | `tests/test_page_view.c:1078` | `static void test_build_image_no_src_and_no_srcset_ignored(void **state)` |
-| `test_build_image_plain_src_wins_over_srcset` | function | `tests/test_page_view.c:1035` | `static void test_build_image_plain_src_wins_over_srcset(void **state)` |
-| `test_build_image_px_and_tracking_dims` | function | `tests/test_page_view.c:730` | `static void test_build_image_px_and_tracking_dims(void **state)` |
-| `test_build_image_rendering_inherited` | function | `tests/test_page_view.c:3583` | `static void test_build_image_rendering_inherited(void **state)` |
-| `test_build_image_srcset_data_url_not_truncated_at_comma` | function | `tests/test_page_view.c:1063` | `static void test_build_image_srcset_data_url_not_truncated_at_comma(void **state)` |
-| `test_build_image_srcset_fallback_when_no_src` | function | `tests/test_page_view.c:1019` | `static void test_build_image_srcset_fallback_when_no_src(void **state)` |
-| `test_build_image_srcset_single_no_descriptor` | function | `tests/test_page_view.c:1050` | `static void test_build_image_srcset_single_no_descriptor(void **state)` |
-| `test_build_image_unknown_dims` | function | `tests/test_page_view.c:715` | `static void test_build_image_unknown_dims(void **state)` |
-| `test_build_image_with_dims` | function | `tests/test_page_view.c:698` | `static void test_build_image_with_dims(void **state)` |
-| `test_build_image_without_src_dims_emit_broken` | function | `tests/test_page_view.c:1002` | `static void test_build_image_without_src_dims_emit_broken(void **state)` |
-| `test_build_image_without_src_ignored` | function | `tests/test_page_view.c:971` | `static void test_build_image_without_src_ignored(void **state)` |
-| `test_build_inline_emphasis` | function | `tests/test_page_view.c:244` | `static void test_build_inline_emphasis(void **state)` |
-| `test_build_inline_link_no_break_within_paragraph` | function | `tests/test_page_view.c:680` | `static void test_build_inline_link_no_break_within_paragraph(void **state)` |
-| `test_build_inline_whitespace_kept` | function | `tests/test_page_view.c:1718` | `static void test_build_inline_whitespace_kept(void **state)` |
-| `test_build_link_with_href` | function | `tests/test_page_view.c:635` | `static void test_build_link_with_href(void **state)` |
-| `test_build_nested_table_not_flattened` | function | `tests/test_page_view.c:586` | `static void test_build_nested_table_not_flattened(void **state)` |
-| `test_build_node_id_matches_dom_index` | function | `tests/test_page_view.c:3468` | `static void test_build_node_id_matches_dom_index(void **state)` |
-| `test_build_noscript_hidden_when_js_on` | function | `tests/test_page_view.c:958` | `static void test_build_noscript_hidden_when_js_on(void **state)` |
-| `test_build_noscript_shown_when_js_off` | function | `tests/test_page_view.c:945` | `static void test_build_noscript_shown_when_js_off(void **state)` |
-| `test_build_null_args` | function | `tests/test_page_view.c:205` | `static void test_build_null_args(void **state)` |
-| `test_build_oof_flag_badges_idiom` | function | `tests/test_page_view.c:1996` | `static void test_build_oof_flag_badges_idiom(void **state)` |
-| `test_build_oof_flag_via_cascade` | function | `tests/test_page_view.c:1972` | `static void test_build_oof_flag_via_cascade(void **state)` |
-| `test_build_oof_image_carries_block_id` | function | `tests/test_page_view.c:1547` | `static void test_build_oof_image_carries_block_id(void **state)` |
-| `test_build_ordered_and_nested_list` | function | `tests/test_page_view.c:303` | `static void test_build_ordered_and_nested_list(void **state)` |
-| `test_build_plain_text` | function | `tests/test_page_view.c:214` | `static void test_build_plain_text(void **state)` |
-| `test_build_pointer_events_on_box` | function | `tests/test_page_view.c:3538` | `static void test_build_pointer_events_on_box(void **state)` |
-| `test_build_pseudo_classes_and_siblings` | function | `tests/test_page_view.c:2943` | `static void test_build_pseudo_classes_and_siblings(void **state)` |
-| `test_build_reader_skips_boilerplate` | function | `tests/test_page_view.c:3424` | `static void test_build_reader_skips_boilerplate(void **state)` |
-| `test_build_root_element_style_inherits` | function | `tests/test_page_view.c:1877` | `static void test_build_root_element_style_inherits(void **state)` |
-| `test_build_root_font_size_is_overridable` | function | `tests/test_page_view.c:1895` | `static void test_build_root_font_size_is_overridable(void **state)` |
-| `test_build_search_form_get` | function | `tests/test_page_view.c:2729` | `static void test_build_search_form_get(void **state)` |
-| `test_build_select_defaults_to_first_option` | function | `tests/test_page_view.c:2854` | `static void test_build_select_defaults_to_first_option(void **state)` |
-| `test_build_select_shows_selected_option` | function | `tests/test_page_view.c:2815` | `static void test_build_select_shows_selected_option(void **state)` |
-| `test_build_skips_script_and_style` | function | `tests/test_page_view.c:666` | `static void test_build_skips_script_and_style(void **state)` |
-| `test_build_style_cache_distinct_siblings` | function | `tests/test_page_view.c:3066` | `static void test_build_style_cache_distinct_siblings(void **state)` |
-| `test_build_styled_external_css` | function | `tests/test_page_view.c:3253` | `static void test_build_styled_external_css(void **state)` |
-| `test_build_svg_fills_border_box_ancestor` | function | `tests/test_page_view.c:797` | `static void test_build_svg_fills_border_box_ancestor(void **state)` |
-| `test_build_svg_no_ancestor_width_unset` | function | `tests/test_page_view.c:817` | `static void test_build_svg_no_ancestor_width_unset(void **state)` |
-| `test_build_table_cell_author_styles` | function | `tests/test_page_view.c:3006` | `static void test_build_table_cell_author_styles(void **state)` |
-| `test_build_table_colspan_rowspan` | function | `tests/test_page_view.c:1806` | `static void test_build_table_colspan_rowspan(void **state)` |
-| `test_build_table_flattens_cell` | function | `tests/test_page_view.c:434` | `static void test_build_table_flattens_cell(void **state)` |
-| `test_build_table_grid` | function | `tests/test_page_view.c:326` | `static void test_build_table_grid(void **state)` |
-| `test_build_table_intercell_whitespace_dropped` | function | `tests/test_page_view.c:366` | `static void test_build_table_intercell_whitespace_dropped(void **state)` |
-| `test_build_text_align_and_font_size` | function | `tests/test_page_view.c:3108` | `static void test_build_text_align_and_font_size(void **state)` |
-| `test_build_text_decoration` | function | `tests/test_page_view.c:3155` | `static void test_build_text_decoration(void **state)` |
-| `test_build_text_overflow_and_word_break` | function | `tests/test_page_view.c:2528` | `static void test_build_text_overflow_and_word_break(void **state)` |
-| `test_build_textarea_value` | function | `tests/test_page_view.c:2796` | `static void test_build_textarea_value(void **state)` |
-| `test_build_two_forms_distinct_groups` | function | `tests/test_page_view.c:2884` | `static void test_build_two_forms_distinct_groups(void **state)` |
-| `test_build_unordered_list` | function | `tests/test_page_view.c:285` | `static void test_build_unordered_list(void **state)` |
-| `test_build_video_fallback_suppressed` | function | `tests/test_page_view.c:3729` | `static void test_build_video_fallback_suppressed(void **state)` |
-| `test_build_video_source_type_preference` | function | `tests/test_page_view.c:3711` | `static void test_build_video_source_type_preference(void **state)` |
-| `test_build_video_uses_source_child` | function | `tests/test_page_view.c:3691` | `static void test_build_video_uses_source_child(void **state)` |
-| `test_build_video_with_source` | function | `tests/test_page_view.c:3671` | `static void test_build_video_with_source(void **state)` |
-| `test_build_video_without_src_ignored` | function | `tests/test_page_view.c:3744` | `static void test_build_video_without_src_ignored(void **state)` |
-| `test_build_zero_padding_is_not_a_box` | function | `tests/test_page_view.c:2329` | `static void test_build_zero_padding_is_not_a_box(void **state)` |
-| `test_container_defaults` | function | `tests/test_page_view.c:2077` | `static void test_container_defaults(void **state)` |
-| `test_free_null_and_double` | function | `tests/test_page_view.c:196` | `static void test_free_null_and_double(void **state)` |
-| `test_gradient_text_runs` | function | `tests/test_page_view.c:1177` | `static void test_gradient_text_runs(void **state)` |
-| `test_new_is_empty` | function | `tests/test_page_view.c:72` | `static void test_new_is_empty(void **state)` |
-| `test_pseudo_after_on_element_with_children` | function | `tests/test_page_view.c:3305` | `static void test_pseudo_after_on_element_with_children(void **state)` |
-| `test_pseudo_after_on_whitespace_only_no_run` | function | `tests/test_page_view.c:3383` | `static void test_pseudo_after_on_whitespace_only_no_run(void **state)` |
-| `test_pseudo_before_escape_end_to_end` | function | `tests/test_page_view.c:3370` | `static void test_pseudo_before_escape_end_to_end(void **state)` |
-| `test_pseudo_before_fires_with_nested_text` | function | `tests/test_page_view.c:3397` | `static void test_pseudo_before_fires_with_nested_text(void **state)` |
-| `test_pseudo_before_on_element_with_children` | function | `tests/test_page_view.c:3290` | `static void test_pseudo_before_on_element_with_children(void **state)` |
-| `test_pseudo_before_on_empty` | function | `tests/test_page_view.c:3277` | `static void test_pseudo_before_on_empty(void **state)` |
-| `test_pseudo_before_on_textless_subtree` | function | `tests/test_page_view.c:3354` | `static void test_pseudo_before_on_textless_subtree(void **state)` |
-| `test_pseudo_both_before_and_after` | function | `tests/test_page_view.c:3320` | `static void test_pseudo_both_before_and_after(void **state)` |
-| `test_pseudo_no_content_no_run` | function | `tests/test_page_view.c:3410` | `static void test_pseudo_no_content_no_run(void **state)` |
-| `test_set_color_model` | function | `tests/test_page_view.c:1107` | `static void test_set_color_model(void **state)` |
-| `test_set_node_id_model` | function | `tests/test_page_view.c:3452` | `static void test_set_node_id_model(void **state)` |
-| `test_set_text_style_model` | function | `tests/test_page_view.c:3507` | `static void test_set_text_style_model(void **state)` |
-| `test_text_fill_color_runs` | function | `tests/test_page_view.c:1209` | `static void test_text_fill_color_runs(void **state)` |
-| `unset` | function | `tests/test_page_view.c:777` | `* unset (-1) so the render step derives it from the viewBox aspect. */
+| `test_append_copies_fields` | function | `tests/test_page_view.c:98` | `static void test_append_copies_fields(void **state)` |
+| `test_append_image_copies_fields` | function | `tests/test_page_view.c:125` | `static void test_append_image_copies_fields(void **state)` |
+| `test_append_image_null_args` | function | `tests/test_page_view.c:141` | `static void test_append_image_null_args(void **state)` |
+| `test_append_null_args` | function | `tests/test_page_view.c:205` | `static void test_append_null_args(void **state)` |
+| `test_append_transcodes_cp1252_quotes` | function | `tests/test_page_view.c:177` | `static void test_append_transcodes_cp1252_quotes(void **state)` |
+| `test_append_transcodes_latin1` | function | `tests/test_page_view.c:156` | `static void test_append_transcodes_latin1(void **state)` |
+| `test_append_transcodes_word` | function | `tests/test_page_view.c:166` | `static void test_append_transcodes_word(void **state)` |
+| `test_append_undefined_cp1252_is_qmark` | function | `tests/test_page_view.c:187` | `static void test_append_undefined_cp1252_is_qmark(void **state)` |
+| `test_append_valid_utf8_passthrough` | function | `tests/test_page_view.c:197` | `static void test_append_valid_utf8_passthrough(void **state)` |
+| `test_append_video_copies_fields` | function | `tests/test_page_view.c:3820` | `static void test_append_video_copies_fields(void **state)` |
+| `test_append_video_no_poster` | function | `tests/test_page_view.c:3839` | `static void test_append_video_no_poster(void **state)` |
+| `test_append_video_null_args` | function | `tests/test_page_view.c:3855` | `static void test_append_video_null_args(void **state)` |
+| `test_author_list_padding_replaces_ua_indent` | function | `tests/test_page_view.c:3300` | `static void test_author_list_padding_replaces_ua_indent(void **state)` |
+| `test_before_rides_float_and_container` | function | `tests/test_page_view.c:3325` | `static void test_before_rides_float_and_container(void **state)` |
+| `test_block_inside_inline_block_in_line` | function | `tests/test_page_view.c:3423` | `static void test_block_inside_inline_block_in_line(void **state)` |
+| `test_box_defaults_and_setter` | function | `tests/test_page_view.c:2178` | `static void test_box_defaults_and_setter(void **state)` |
+| `test_build_abs_child_is_not_a_flex_item` | function | `tests/test_page_view.c:1933` | `static void test_build_abs_child_is_not_a_flex_item(void **state)` |
+| `test_build_absolute_inside_float_escapes` | function | `tests/test_page_view.c:1650` | `static void test_build_absolute_inside_float_escapes(void **state)` |
+| `test_build_audio_as_video_kind` | function | `tests/test_page_view.c:3949` | `static void test_build_audio_as_video_kind(void **state)` |
+| `test_build_author_color` | function | `tests/test_page_view.c:1146` | `static void test_build_author_color(void **state)` |
+| `test_build_bgcolor_attr_fallback` | function | `tests/test_page_view.c:587` | `static void test_build_bgcolor_attr_fallback(void **state)` |
+| `test_build_block_break_between_paragraphs` | function | `tests/test_page_view.c:671` | `static void test_build_block_break_between_paragraphs(void **state)` |
+| `test_build_box_leaf_inline` | function | `tests/test_page_view.c:2143` | `static void test_build_box_leaf_inline(void **state)` |
+| `test_build_box_tree_empty_no_box` | function | `tests/test_page_view.c:2725` | `static void test_build_box_tree_empty_no_box(void **state)` |
+| `test_build_box_tree_textless_wrapper` | function | `tests/test_page_view.c:2700` | `static void test_build_box_tree_textless_wrapper(void **state)` |
+| `test_build_boxdeco_border_padding` | function | `tests/test_page_view.c:2291` | `static void test_build_boxdeco_border_padding(void **state)` |
+| `test_build_boxdeco_defaults_no_box` | function | `tests/test_page_view.c:2606` | `static void test_build_boxdeco_defaults_no_box(void **state)` |
+| `test_build_boxdeco_dims_alone_trigger_box` | function | `tests/test_page_view.c:2501` | `static void test_build_boxdeco_dims_alone_trigger_box(void **state)` |
+| `test_build_boxdeco_fit_content_height_is_auto` | function | `tests/test_page_view.c:2251` | `static void test_build_boxdeco_fit_content_height_is_auto(void **state)` |
+| `test_build_boxdeco_h_margin_alone_creates_box` | function | `tests/test_page_view.c:2209` | `static void test_build_boxdeco_h_margin_alone_creates_box(void **state)` |
+| `test_build_boxdeco_h_margin_zero_auto_no_box` | function | `tests/test_page_view.c:2229` | `static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state)` |
+| `test_build_boxdeco_min_content_height_is_auto` | function | `tests/test_page_view.c:2273` | `static void test_build_boxdeco_min_content_height_is_auto(void **state)` |
+| `test_build_boxdeco_shadow_outline` | function | `tests/test_page_view.c:2399` | `static void test_build_boxdeco_shadow_outline(void **state)` |
+| `test_build_boxdeco_shared_id_within_block` | function | `tests/test_page_view.c:2638` | `static void test_build_boxdeco_shared_id_within_block(void **state)` |
+| `test_build_boxdeco_sibling_blocks_distinct_ids` | function | `tests/test_page_view.c:2620` | `static void test_build_boxdeco_sibling_blocks_distinct_ids(void **state)` |
+| `test_build_boxdeco_visibility_overflow_cursor` | function | `tests/test_page_view.c:2422` | `static void test_build_boxdeco_visibility_overflow_cursor(void **state)` |
+| `test_build_caret_color_inherited` | function | `tests/test_page_view.c:3796` | `static void test_build_caret_color_inherited(void **state)` |
+| `test_build_combinator_selectors` | function | `tests/test_page_view.c:1272` | `static void test_build_combinator_selectors(void **state)` |
+| `test_build_cont_item_identity` | function | `tests/test_page_view.c:1758` | `static void test_build_cont_item_identity(void **state)` |
+| `test_build_content_visibility_hidden_folds` | function | `tests/test_page_view.c:3751` | `static void test_build_content_visibility_hidden_folds(void **state)` |
+| `test_build_control_without_form` | function | `tests/test_page_view.c:2889` | `static void test_build_control_without_form(void **state)` |
+| `test_build_css_bold_and_inline_wins` | function | `tests/test_page_view.c:3196` | `static void test_build_css_bold_and_inline_wins(void **state)` |
+| `test_build_cursor_alone_triggers_box` | function | `tests/test_page_view.c:2446` | `static void test_build_cursor_alone_triggers_box(void **state)` |
+| `test_build_display_none_hidden` | function | `tests/test_page_view.c:3215` | `static void test_build_display_none_hidden(void **state)` |
+| `test_build_empty_box_gets_run_and_box` | function | `tests/test_page_view.c:2322` | `static void test_build_empty_box_gets_run_and_box(void **state)` |
+| `test_build_empty_document` | function | `tests/test_page_view.c:1110` | `static void test_build_empty_document(void **state)` |
+| `test_build_empty_flex_grow_spacer` | function | `tests/test_page_view.c:931` | `static void test_build_empty_flex_grow_spacer(void **state)` |
+| `test_build_flex_container` | function | `tests/test_page_view.c:1310` | `static void test_build_flex_container(void **state)` |
+| `test_build_flex_container_from_sheet` | function | `tests/test_page_view.c:2034` | `static void test_build_flex_container_from_sheet(void **state)` |
+| `test_build_flex_item_values` | function | `tests/test_page_view.c:1423` | `static void test_build_flex_item_values(void **state)` |
+| `test_build_flex_whitespace_not_item` | function | `tests/test_page_view.c:1680` | `static void test_build_flex_whitespace_not_item(void **state)` |
+| `test_build_flex_wrap_align_row_gap` | function | `tests/test_page_view.c:1382` | `static void test_build_flex_wrap_align_row_gap(void **state)` |
+| `test_build_float_outermost_founder` | function | `tests/test_page_view.c:1533` | `static void test_build_float_outermost_founder(void **state)` |
+| `test_build_float_threading` | function | `tests/test_page_view.c:1487` | `static void test_build_float_threading(void **state)` |
+| `test_build_float_widthless_stays_unset` | function | `tests/test_page_view.c:875` | `static void test_build_float_widthless_stays_unset(void **state)` |
+| `test_build_flow_table_row_is_one_block` | function | `tests/test_page_view.c:2364` | `static void test_build_flow_table_row_is_one_block(void **state)` |
+| `test_build_form_post_and_hidden` | function | `tests/test_page_view.c:2780` | `static void test_build_form_post_and_hidden(void **state)` |
+| `test_build_grid_columns_from_sheet` | function | `tests/test_page_view.c:2056` | `static void test_build_grid_columns_from_sheet(void **state)` |
+| `test_build_grid_container` | function | `tests/test_page_view.c:1870` | `static void test_build_grid_container(void **state)` |
+| `test_build_hbox_container_width_never_seeds_items` | function | `tests/test_page_view.c:1621` | `static void test_build_hbox_container_width_never_seeds_items(void **state)` |
+| `test_build_hbox_margin_above_container_merges` | function | `tests/test_page_view.c:1601` | `static void test_build_hbox_margin_above_container_merges(void **state)` |
+| `test_build_heading_level` | function | `tests/test_page_view.c:244` | `static void test_build_heading_level(void **state)` |
+| `test_build_iframe_display_none_hidden` | function | `tests/test_page_view.c:3994` | `static void test_build_iframe_display_none_hidden(void **state)` |
+| `test_build_iframe_emits_navigable_link` | function | `tests/test_page_view.c:3963` | `static void test_build_iframe_emits_navigable_link(void **state)` |
+| `test_build_iframe_without_src_ignored` | function | `tests/test_page_view.c:3981` | `static void test_build_iframe_without_src_ignored(void **state)` |
+| `test_build_image_auto_size_keeps_attr` | function | `tests/test_page_view.c:911` | `static void test_build_image_auto_size_keeps_attr(void **state)` |
+| `test_build_image_css_size_overrides_attr` | function | `tests/test_page_view.c:894` | `static void test_build_image_css_size_overrides_attr(void **state)` |
+| `test_build_image_in_skipped_subtree_ignored` | function | `tests/test_page_view.c:949` | `static void test_build_image_in_skipped_subtree_ignored(void **state)` |
+| `test_build_image_no_src_and_no_srcset_ignored` | function | `tests/test_page_view.c:1095` | `static void test_build_image_no_src_and_no_srcset_ignored(void **state)` |
+| `test_build_image_plain_src_wins_over_srcset` | function | `tests/test_page_view.c:1052` | `static void test_build_image_plain_src_wins_over_srcset(void **state)` |
+| `test_build_image_px_and_tracking_dims` | function | `tests/test_page_view.c:747` | `static void test_build_image_px_and_tracking_dims(void **state)` |
+| `test_build_image_rendering_inherited` | function | `tests/test_page_view.c:3777` | `static void test_build_image_rendering_inherited(void **state)` |
+| `test_build_image_srcset_data_url_not_truncated_at_comma` | function | `tests/test_page_view.c:1080` | `static void test_build_image_srcset_data_url_not_truncated_at_comma(void **state)` |
+| `test_build_image_srcset_fallback_when_no_src` | function | `tests/test_page_view.c:1036` | `static void test_build_image_srcset_fallback_when_no_src(void **state)` |
+| `test_build_image_srcset_single_no_descriptor` | function | `tests/test_page_view.c:1067` | `static void test_build_image_srcset_single_no_descriptor(void **state)` |
+| `test_build_image_unknown_dims` | function | `tests/test_page_view.c:732` | `static void test_build_image_unknown_dims(void **state)` |
+| `test_build_image_with_dims` | function | `tests/test_page_view.c:715` | `static void test_build_image_with_dims(void **state)` |
+| `test_build_image_without_src_dims_emit_broken` | function | `tests/test_page_view.c:1019` | `static void test_build_image_without_src_dims_emit_broken(void **state)` |
+| `test_build_image_without_src_ignored` | function | `tests/test_page_view.c:988` | `static void test_build_image_without_src_ignored(void **state)` |
+| `test_build_inline_emphasis` | function | `tests/test_page_view.c:261` | `static void test_build_inline_emphasis(void **state)` |
+| `test_build_inline_link_no_break_within_paragraph` | function | `tests/test_page_view.c:697` | `static void test_build_inline_link_no_break_within_paragraph(void **state)` |
+| `test_build_inline_whitespace_kept` | function | `tests/test_page_view.c:1736` | `static void test_build_inline_whitespace_kept(void **state)` |
+| `test_build_link_with_href` | function | `tests/test_page_view.c:652` | `static void test_build_link_with_href(void **state)` |
+| `test_build_nested_table_not_flattened` | function | `tests/test_page_view.c:603` | `static void test_build_nested_table_not_flattened(void **state)` |
+| `test_build_node_id_matches_dom_index` | function | `tests/test_page_view.c:3662` | `static void test_build_node_id_matches_dom_index(void **state)` |
+| `test_build_noscript_hidden_when_js_on` | function | `tests/test_page_view.c:975` | `static void test_build_noscript_hidden_when_js_on(void **state)` |
+| `test_build_noscript_shown_when_js_off` | function | `tests/test_page_view.c:962` | `static void test_build_noscript_shown_when_js_off(void **state)` |
+| `test_build_null_args` | function | `tests/test_page_view.c:222` | `static void test_build_null_args(void **state)` |
+| `test_build_oof_flag_badges_idiom` | function | `tests/test_page_view.c:2014` | `static void test_build_oof_flag_badges_idiom(void **state)` |
+| `test_build_oof_flag_via_cascade` | function | `tests/test_page_view.c:1990` | `static void test_build_oof_flag_via_cascade(void **state)` |
+| `test_build_oof_image_carries_block_id` | function | `tests/test_page_view.c:1565` | `static void test_build_oof_image_carries_block_id(void **state)` |
+| `test_build_ordered_and_nested_list` | function | `tests/test_page_view.c:320` | `static void test_build_ordered_and_nested_list(void **state)` |
+| `test_build_plain_text` | function | `tests/test_page_view.c:231` | `static void test_build_plain_text(void **state)` |
+| `test_build_pointer_events_on_box` | function | `tests/test_page_view.c:3732` | `static void test_build_pointer_events_on_box(void **state)` |
+| `test_build_pseudo_classes_and_siblings` | function | `tests/test_page_view.c:2961` | `static void test_build_pseudo_classes_and_siblings(void **state)` |
+| `test_build_reader_skips_boilerplate` | function | `tests/test_page_view.c:3618` | `static void test_build_reader_skips_boilerplate(void **state)` |
+| `test_build_root_element_style_inherits` | function | `tests/test_page_view.c:1895` | `static void test_build_root_element_style_inherits(void **state)` |
+| `test_build_root_font_size_is_overridable` | function | `tests/test_page_view.c:1913` | `static void test_build_root_font_size_is_overridable(void **state)` |
+| `test_build_search_form_get` | function | `tests/test_page_view.c:2747` | `static void test_build_search_form_get(void **state)` |
+| `test_build_select_defaults_to_first_option` | function | `tests/test_page_view.c:2872` | `static void test_build_select_defaults_to_first_option(void **state)` |
+| `test_build_select_shows_selected_option` | function | `tests/test_page_view.c:2833` | `static void test_build_select_shows_selected_option(void **state)` |
+| `test_build_skips_script_and_style` | function | `tests/test_page_view.c:683` | `static void test_build_skips_script_and_style(void **state)` |
+| `test_build_style_cache_distinct_siblings` | function | `tests/test_page_view.c:3084` | `static void test_build_style_cache_distinct_siblings(void **state)` |
+| `test_build_styled_external_css` | function | `tests/test_page_view.c:3271` | `static void test_build_styled_external_css(void **state)` |
+| `test_build_svg_fills_border_box_ancestor` | function | `tests/test_page_view.c:814` | `static void test_build_svg_fills_border_box_ancestor(void **state)` |
+| `test_build_svg_no_ancestor_width_unset` | function | `tests/test_page_view.c:834` | `static void test_build_svg_no_ancestor_width_unset(void **state)` |
+| `test_build_table_cell_author_styles` | function | `tests/test_page_view.c:3024` | `static void test_build_table_cell_author_styles(void **state)` |
+| `test_build_table_colspan_rowspan` | function | `tests/test_page_view.c:1824` | `static void test_build_table_colspan_rowspan(void **state)` |
+| `test_build_table_flattens_cell` | function | `tests/test_page_view.c:451` | `static void test_build_table_flattens_cell(void **state)` |
+| `test_build_table_grid` | function | `tests/test_page_view.c:343` | `static void test_build_table_grid(void **state)` |
+| `test_build_table_intercell_whitespace_dropped` | function | `tests/test_page_view.c:383` | `static void test_build_table_intercell_whitespace_dropped(void **state)` |
+| `test_build_text_align_and_font_size` | function | `tests/test_page_view.c:3126` | `static void test_build_text_align_and_font_size(void **state)` |
+| `test_build_text_decoration` | function | `tests/test_page_view.c:3173` | `static void test_build_text_decoration(void **state)` |
+| `test_build_text_overflow_and_word_break` | function | `tests/test_page_view.c:2546` | `static void test_build_text_overflow_and_word_break(void **state)` |
+| `test_build_textarea_value` | function | `tests/test_page_view.c:2814` | `static void test_build_textarea_value(void **state)` |
+| `test_build_two_forms_distinct_groups` | function | `tests/test_page_view.c:2902` | `static void test_build_two_forms_distinct_groups(void **state)` |
+| `test_build_unordered_list` | function | `tests/test_page_view.c:302` | `static void test_build_unordered_list(void **state)` |
+| `test_build_video_fallback_suppressed` | function | `tests/test_page_view.c:3923` | `static void test_build_video_fallback_suppressed(void **state)` |
+| `test_build_video_source_type_preference` | function | `tests/test_page_view.c:3905` | `static void test_build_video_source_type_preference(void **state)` |
+| `test_build_video_uses_source_child` | function | `tests/test_page_view.c:3885` | `static void test_build_video_uses_source_child(void **state)` |
+| `test_build_video_with_source` | function | `tests/test_page_view.c:3865` | `static void test_build_video_with_source(void **state)` |
+| `test_build_video_without_src_ignored` | function | `tests/test_page_view.c:3938` | `static void test_build_video_without_src_ignored(void **state)` |
+| `test_build_zero_padding_is_not_a_box` | function | `tests/test_page_view.c:2347` | `static void test_build_zero_padding_is_not_a_box(void **state)` |
+| `test_container_defaults` | function | `tests/test_page_view.c:2095` | `static void test_container_defaults(void **state)` |
+| `test_free_null_and_double` | function | `tests/test_page_view.c:213` | `static void test_free_null_and_double(void **state)` |
+| `test_gradient_text_runs` | function | `tests/test_page_view.c:1194` | `static void test_gradient_text_runs(void **state)` |
+| `test_inline_level_tag_list_stays_in_line` | function | `tests/test_page_view.c:3356` | `static void test_inline_level_tag_list_stays_in_line(void **state)` |
+| `test_marker_only_for_list_item_display` | function | `tests/test_page_view.c:3384` | `static void test_marker_only_for_list_item_display(void **state)` |
+| `test_new_is_empty` | function | `tests/test_page_view.c:89` | `static void test_new_is_empty(void **state)` |
+| `test_pseudo_after_on_element_with_children` | function | `tests/test_page_view.c:3499` | `static void test_pseudo_after_on_element_with_children(void **state)` |
+| `test_pseudo_after_on_whitespace_only_no_run` | function | `tests/test_page_view.c:3577` | `static void test_pseudo_after_on_whitespace_only_no_run(void **state)` |
+| `test_pseudo_before_escape_end_to_end` | function | `tests/test_page_view.c:3564` | `static void test_pseudo_before_escape_end_to_end(void **state)` |
+| `test_pseudo_before_fires_with_nested_text` | function | `tests/test_page_view.c:3591` | `static void test_pseudo_before_fires_with_nested_text(void **state)` |
+| `test_pseudo_before_on_element_with_children` | function | `tests/test_page_view.c:3484` | `static void test_pseudo_before_on_element_with_children(void **state)` |
+| `test_pseudo_before_on_empty` | function | `tests/test_page_view.c:3471` | `static void test_pseudo_before_on_empty(void **state)` |
+| `test_pseudo_before_on_textless_subtree` | function | `tests/test_page_view.c:3548` | `static void test_pseudo_before_on_textless_subtree(void **state)` |
+| `test_pseudo_both_before_and_after` | function | `tests/test_page_view.c:3514` | `static void test_pseudo_both_before_and_after(void **state)` |
+| `test_pseudo_no_content_no_run` | function | `tests/test_page_view.c:3604` | `static void test_pseudo_no_content_no_run(void **state)` |
+| `test_set_color_model` | function | `tests/test_page_view.c:1124` | `static void test_set_color_model(void **state)` |
+| `test_set_node_id_model` | function | `tests/test_page_view.c:3646` | `static void test_set_node_id_model(void **state)` |
+| `test_set_text_style_model` | function | `tests/test_page_view.c:3701` | `static void test_set_text_style_model(void **state)` |
+| `test_text_fill_color_runs` | function | `tests/test_page_view.c:1226` | `static void test_text_fill_color_runs(void **state)` |
+| `unset` | function | `tests/test_page_view.c:794` | `* unset (-1) so the render step derives it from the viewBox aspect. */
 static void test_build_svg...` |
-| `wrapping` | function | `tests/test_page_view.c:1333` | `* sideways instead of wrapping (spec/page_view.md, 2026-08-11 correction). */
+| `wrapping` | function | `tests/test_page_view.c:1350` | `* sideways instead of wrapping (spec/page_view.md, 2026-08-11 correction). */
 static void test_bu...` |
 | `main` | function | `tests/test_pdf_export.c:290` | `int main(void)` |
 | `pagination` | function | `tests/test_pdf_export.c:8` | `* deterministic pagination (single/multi page, no row splitting, oversized row,
@@ -5454,96 +5509,96 @@ static void test_bu...` |
 | `test_polygon_points` | function | `tests/test_svg_render.c:140` | `static void test_polygon_points(void **state)` |
 | `test_text_element` | function | `tests/test_svg_render.c:288` | `static void test_text_element(void **state)` |
 | `test_url_bearing_elements_are_dropped` | function | `tests/test_svg_render.c:208` | `static void test_url_bearing_elements_are_dropped(void **state)` |
-| `CSS_PAGE` | macro | `tests/test_tab.c:1687` | `#define CSS_PAGE(HREF)` |
-| `EXT_PAGE` | macro | `tests/test_tab.c:1560` | `#define EXT_PAGE(SRC)` |
-| `XHR_PAGE` | macro | `tests/test_tab.c:1470` | `#define XHR_PAGE(URL)` |
+| `CSS_PAGE` | macro | `tests/test_tab.c:1730` | `#define CSS_PAGE(HREF)` |
+| `EXT_PAGE` | macro | `tests/test_tab.c:1603` | `#define EXT_PAGE(SRC)` |
+| `XHR_PAGE` | macro | `tests/test_tab.c:1513` | `#define XHR_PAGE(URL)` |
 | `_POSIX_C_SOURCE` | macro | `tests/test_tab.c:14` | `#define _POSIX_C_SOURCE` |
-| `console_find` | function | `tests/test_tab.c:1118` | `static const fb_entry *console_find(const fb_buffer *log, int level, const char *needle)` |
+| `console_find` | function | `tests/test_tab.c:1161` | `static const fb_entry *console_find(const fb_buffer *log, int level, const char *needle)` |
 | `expect_eval` | function | `tests/test_tab.c:62` | `static void expect_eval(tab *t, const char *js, const char *expected)` |
 | `fixture` | struct | `tests/test_tab.c:39` | `` |
-| `main` | function | `tests/test_tab.c:2286` | `int main(int argc, char **argv)` |
-| `read` | function | `tests/test_tab.c:1827` | `* vector no page may read (Zero Knowledge). Google's real JS hit exactly this. */
+| `main` | function | `tests/test_tab.c:2329` | `int main(int argc, char **argv)` |
+| `read` | function | `tests/test_tab.c:1870` | `* vector no page may read (Zero Knowledge). Google's real JS hit exactly this. */
 static void tes...` |
 | `setup_loaded` | function | `tests/test_tab.c:41` | `static int setup_loaded(void **state)` |
-| `stub_css_fetch` | function | `tests/test_tab.c:1670` | `static int stub_css_fetch(void *ctx, const char *method, const char *url,
+| `stub_css_fetch` | function | `tests/test_tab.c:1713` | `static int stub_css_fetch(void *ctx, const char *method, const char *url,
                        ...` |
-| `stub_fetch` | function | `tests/test_tab.c:1458` | `static int stub_fetch(void *ctx, const char *method, const char *url,
+| `stub_fetch` | function | `tests/test_tab.c:1501` | `static int stub_fetch(void *ctx, const char *method, const char *url,
                       const...` |
-| `stub_script_fetch` | function | `tests/test_tab.c:1536` | `static int stub_script_fetch(void *ctx, const char *method, const char *url,
+| `stub_script_fetch` | function | `tests/test_tab.c:1579` | `static int stub_script_fetch(void *ctx, const char *method, const char *url,
                     ...` |
 | `teardown` | function | `tests/test_tab.c:52` | `static int teardown(void **state)` |
-| `test_binary_does_not_crash_parent` | function | `tests/test_tab.c:1905` | `static void test_binary_does_not_crash_parent(void **state)` |
-| `test_child_death_survived` | function | `tests/test_tab.c:1920` | `static void test_child_death_survived(void **state)` |
-| `test_click_runs_handler_and_returns_view` | function | `tests/test_tab.c:472` | `static void test_click_runs_handler_and_returns_view(void **state)` |
-| `test_decode_image_data_url_in_sandbox` | function | `tests/test_tab.c:2036` | `static void test_decode_image_data_url_in_sandbox(void **state)` |
-| `test_decode_image_data_url_null_args` | function | `tests/test_tab.c:2078` | `static void test_decode_image_data_url_null_args(void **state)` |
-| `test_decode_image_in_sandbox` | function | `tests/test_tab.c:1980` | `static void test_decode_image_in_sandbox(void **state)` |
-| `test_decode_image_null_args` | function | `tests/test_tab.c:2017` | `static void test_decode_image_null_args(void **state)` |
-| `test_decode_image_rejects_junk` | function | `tests/test_tab.c:2002` | `static void test_decode_image_rejects_junk(void **state)` |
-| `test_eval_captures_console_output` | function | `tests/test_tab.c:1275` | `static void test_eval_captures_console_output(void **state)` |
-| `test_eval_exception` | function | `tests/test_tab.c:1848` | `static void test_eval_exception(void **state)` |
-| `test_eval_no_network_or_cross_origin_api` | function | `tests/test_tab.c:1439` | `static void test_eval_no_network_or_cross_origin_api(void **state)` |
-| `test_eval_persistent_state` | function | `tests/test_tab.c:1860` | `static void test_eval_persistent_state(void **state)` |
-| `test_eval_sees_dom` | function | `tests/test_tab.c:1412` | `static void test_eval_sees_dom(void **state)` |
-| `test_eval_sees_env` | function | `tests/test_tab.c:1422` | `static void test_eval_sees_env(void **state)` |
-| `test_eval_without_load` | function | `tests/test_tab.c:1893` | `static void test_eval_without_load(void **state)` |
-| `test_event_ipc_via_tab_eval` | function | `tests/test_tab.c:511` | `static void test_event_ipc_via_tab_eval(void **state)` |
-| `test_external_css_applied_when_allowed` | function | `tests/test_tab.c:1703` | `static void test_external_css_applied_when_allowed(void **state)` |
-| `test_external_css_bad_ctype_not_parsed` | function | `tests/test_tab.c:1742` | `static void test_external_css_bad_ctype_not_parsed(void **state)` |
-| `test_external_css_blocked_host_refused` | function | `tests/test_tab.c:1760` | `static void test_external_css_blocked_host_refused(void **state)` |
-| `test_external_css_skipped_without_grant` | function | `tests/test_tab.c:1723` | `static void test_external_css_skipped_without_grant(void **state)` |
-| `test_external_css_survives_click_rederive` | function | `tests/test_tab.c:1778` | `static void test_external_css_survives_click_rederive(void **state)` |
-| `test_external_script_bad_ctype_not_executed` | function | `tests/test_tab.c:1630` | `static void test_external_script_bad_ctype_not_executed(void **state)` |
-| `test_external_script_blocked_host_refused` | function | `tests/test_tab.c:1647` | `static void test_external_script_blocked_host_refused(void **state)` |
-| `test_external_script_document_order` | function | `tests/test_tab.c:1583` | `static void test_external_script_document_order(void **state)` |
-| `test_external_script_executes_when_net_allowed` | function | `tests/test_tab.c:1566` | `static void test_external_script_executes_when_net_allowed(void **state)` |
-| `test_external_script_skipped_without_net` | function | `tests/test_tab.c:1606` | `static void test_external_script_skipped_without_net(void **state)` |
-| `test_focus_ipc_round_trip` | function | `tests/test_tab.c:611` | `static void test_focus_ipc_round_trip(void **state)` |
-| `test_free_null_and_double` | function | `tests/test_tab.c:1946` | `static void test_free_null_and_double(void **state)` |
-| `test_js_navigation_relative_resolved` | function | `tests/test_tab.c:1341` | `static void test_js_navigation_relative_resolved(void **state)` |
-| `test_js_navigation_unsafe_is_blocked` | function | `tests/test_tab.c:1360` | `static void test_js_navigation_unsafe_is_blocked(void **state)` |
+| `test_binary_does_not_crash_parent` | function | `tests/test_tab.c:1948` | `static void test_binary_does_not_crash_parent(void **state)` |
+| `test_child_death_survived` | function | `tests/test_tab.c:1963` | `static void test_child_death_survived(void **state)` |
+| `test_click_runs_handler_and_returns_view` | function | `tests/test_tab.c:515` | `static void test_click_runs_handler_and_returns_view(void **state)` |
+| `test_decode_image_data_url_in_sandbox` | function | `tests/test_tab.c:2079` | `static void test_decode_image_data_url_in_sandbox(void **state)` |
+| `test_decode_image_data_url_null_args` | function | `tests/test_tab.c:2121` | `static void test_decode_image_data_url_null_args(void **state)` |
+| `test_decode_image_in_sandbox` | function | `tests/test_tab.c:2023` | `static void test_decode_image_in_sandbox(void **state)` |
+| `test_decode_image_null_args` | function | `tests/test_tab.c:2060` | `static void test_decode_image_null_args(void **state)` |
+| `test_decode_image_rejects_junk` | function | `tests/test_tab.c:2045` | `static void test_decode_image_rejects_junk(void **state)` |
+| `test_eval_captures_console_output` | function | `tests/test_tab.c:1318` | `static void test_eval_captures_console_output(void **state)` |
+| `test_eval_exception` | function | `tests/test_tab.c:1891` | `static void test_eval_exception(void **state)` |
+| `test_eval_no_network_or_cross_origin_api` | function | `tests/test_tab.c:1482` | `static void test_eval_no_network_or_cross_origin_api(void **state)` |
+| `test_eval_persistent_state` | function | `tests/test_tab.c:1903` | `static void test_eval_persistent_state(void **state)` |
+| `test_eval_sees_dom` | function | `tests/test_tab.c:1455` | `static void test_eval_sees_dom(void **state)` |
+| `test_eval_sees_env` | function | `tests/test_tab.c:1465` | `static void test_eval_sees_env(void **state)` |
+| `test_eval_without_load` | function | `tests/test_tab.c:1936` | `static void test_eval_without_load(void **state)` |
+| `test_event_ipc_via_tab_eval` | function | `tests/test_tab.c:554` | `static void test_event_ipc_via_tab_eval(void **state)` |
+| `test_external_css_applied_when_allowed` | function | `tests/test_tab.c:1746` | `static void test_external_css_applied_when_allowed(void **state)` |
+| `test_external_css_bad_ctype_not_parsed` | function | `tests/test_tab.c:1785` | `static void test_external_css_bad_ctype_not_parsed(void **state)` |
+| `test_external_css_blocked_host_refused` | function | `tests/test_tab.c:1803` | `static void test_external_css_blocked_host_refused(void **state)` |
+| `test_external_css_skipped_without_grant` | function | `tests/test_tab.c:1766` | `static void test_external_css_skipped_without_grant(void **state)` |
+| `test_external_css_survives_click_rederive` | function | `tests/test_tab.c:1821` | `static void test_external_css_survives_click_rederive(void **state)` |
+| `test_external_script_bad_ctype_not_executed` | function | `tests/test_tab.c:1673` | `static void test_external_script_bad_ctype_not_executed(void **state)` |
+| `test_external_script_blocked_host_refused` | function | `tests/test_tab.c:1690` | `static void test_external_script_blocked_host_refused(void **state)` |
+| `test_external_script_document_order` | function | `tests/test_tab.c:1626` | `static void test_external_script_document_order(void **state)` |
+| `test_external_script_executes_when_net_allowed` | function | `tests/test_tab.c:1609` | `static void test_external_script_executes_when_net_allowed(void **state)` |
+| `test_external_script_skipped_without_net` | function | `tests/test_tab.c:1649` | `static void test_external_script_skipped_without_net(void **state)` |
+| `test_focus_ipc_round_trip` | function | `tests/test_tab.c:654` | `static void test_focus_ipc_round_trip(void **state)` |
+| `test_free_null_and_double` | function | `tests/test_tab.c:1989` | `static void test_free_null_and_double(void **state)` |
+| `test_js_navigation_relative_resolved` | function | `tests/test_tab.c:1384` | `static void test_js_navigation_relative_resolved(void **state)` |
+| `test_js_navigation_unsafe_is_blocked` | function | `tests/test_tab.c:1403` | `static void test_js_navigation_unsafe_is_blocked(void **state)` |
 | `test_load_basic` | function | `tests/test_tab.c:90` | `static void test_load_basic(void **state)` |
-| `test_load_captures_console_and_error` | function | `tests/test_tab.c:1128` | `static void test_load_captures_console_and_error(void **state)` |
+| `test_load_captures_console_and_error` | function | `tests/test_tab.c:1171` | `static void test_load_captures_console_and_error(void **state)` |
 | `test_load_carries_author_color` | function | `tests/test_tab.c:165` | `static void test_load_carries_author_color(void **state)` |
-| `test_load_carries_box_decoration` | function | `tests/test_tab.c:725` | `static void test_load_carries_box_decoration(void **state)` |
-| `test_load_carries_box_tree` | function | `tests/test_tab.c:761` | `static void test_load_carries_box_tree(void **state)` |
+| `test_load_carries_box_decoration` | function | `tests/test_tab.c:768` | `static void test_load_carries_box_decoration(void **state)` |
+| `test_load_carries_box_tree` | function | `tests/test_tab.c:804` | `static void test_load_carries_box_tree(void **state)` |
 | `test_load_carries_flex_item` | function | `tests/test_tab.c:192` | `static void test_load_carries_flex_item(void **state)` |
-| `test_load_carries_flex_wrap_align_row_gap` | function | `tests/test_tab.c:236` | `static void test_load_carries_flex_wrap_align_row_gap(void **state)` |
-| `test_load_carries_float` | function | `tests/test_tab.c:276` | `static void test_load_carries_float(void **state)` |
-| `test_load_carries_input_box_and_clip` | function | `tests/test_tab.c:848` | `static void test_load_carries_input_box_and_clip(void **state)` |
-| `test_load_carries_node_id` | function | `tests/test_tab.c:403` | `static void test_load_carries_node_id(void **state)` |
-| `test_load_carries_oof_flag` | function | `tests/test_tab.c:437` | `static void test_load_carries_oof_flag(void **state)` |
-| `test_load_carries_visibility_overflow_cursor_and_text_wrap` | function | `tests/test_tab.c:319` | `static void test_load_carries_visibility_overflow_cursor_and_text_wrap(void **state)` |
-| `test_load_document_fonts_stub` | function | `tests/test_tab.c:1239` | `static void test_load_document_fonts_stub(void **state)` |
-| `test_load_element_wrapper_idioms` | function | `tests/test_tab.c:1209` | `static void test_load_element_wrapper_idioms(void **state)` |
-| `test_load_error_carries_location` | function | `tests/test_tab.c:1183` | `static void test_load_error_carries_location(void **state)` |
-| `test_load_ex_builds_dom_and_fires_onload` | function | `tests/test_tab.c:1039` | `static void test_load_ex_builds_dom_and_fires_onload(void **state)` |
-| `test_load_ex_inner_html_renders` | function | `tests/test_tab.c:1067` | `static void test_load_ex_inner_html_renders(void **state)` |
-| `test_load_ex_noscript_hidden_with_js` | function | `tests/test_tab.c:940` | `static void test_load_ex_noscript_hidden_with_js(void **state)` |
-| `test_load_full_location_is_real` | function | `tests/test_tab.c:1304` | `static void test_load_full_location_is_real(void **state)` |
-| `test_load_isolates_script_errors` | function | `tests/test_tab.c:1155` | `static void test_load_isolates_script_errors(void **state)` |
-| `test_load_no_session_cookies_when_untrusted` | function | `tests/test_tab.c:1017` | `static void test_load_no_session_cookies_when_untrusted(void **state)` |
-| `test_load_null_and_too_large` | function | `tests/test_tab.c:1396` | `static void test_load_null_and_too_large(void **state)` |
+| `test_load_carries_flex_wrap_align_row_gap` | function | `tests/test_tab.c:279` | `static void test_load_carries_flex_wrap_align_row_gap(void **state)` |
+| `test_load_carries_float` | function | `tests/test_tab.c:319` | `static void test_load_carries_float(void **state)` |
+| `test_load_carries_input_box_and_clip` | function | `tests/test_tab.c:891` | `static void test_load_carries_input_box_and_clip(void **state)` |
+| `test_load_carries_node_id` | function | `tests/test_tab.c:446` | `static void test_load_carries_node_id(void **state)` |
+| `test_load_carries_oof_flag` | function | `tests/test_tab.c:480` | `static void test_load_carries_oof_flag(void **state)` |
+| `test_load_carries_visibility_overflow_cursor_and_text_wrap` | function | `tests/test_tab.c:362` | `static void test_load_carries_visibility_overflow_cursor_and_text_wrap(void **state)` |
+| `test_load_document_fonts_stub` | function | `tests/test_tab.c:1282` | `static void test_load_document_fonts_stub(void **state)` |
+| `test_load_element_wrapper_idioms` | function | `tests/test_tab.c:1252` | `static void test_load_element_wrapper_idioms(void **state)` |
+| `test_load_error_carries_location` | function | `tests/test_tab.c:1226` | `static void test_load_error_carries_location(void **state)` |
+| `test_load_ex_builds_dom_and_fires_onload` | function | `tests/test_tab.c:1082` | `static void test_load_ex_builds_dom_and_fires_onload(void **state)` |
+| `test_load_ex_inner_html_renders` | function | `tests/test_tab.c:1110` | `static void test_load_ex_inner_html_renders(void **state)` |
+| `test_load_ex_noscript_hidden_with_js` | function | `tests/test_tab.c:983` | `static void test_load_ex_noscript_hidden_with_js(void **state)` |
+| `test_load_full_location_is_real` | function | `tests/test_tab.c:1347` | `static void test_load_full_location_is_real(void **state)` |
+| `test_load_isolates_script_errors` | function | `tests/test_tab.c:1198` | `static void test_load_isolates_script_errors(void **state)` |
+| `test_load_no_session_cookies_when_untrusted` | function | `tests/test_tab.c:1060` | `static void test_load_no_session_cookies_when_untrusted(void **state)` |
+| `test_load_null_and_too_large` | function | `tests/test_tab.c:1439` | `static void test_load_null_and_too_large(void **state)` |
 | `test_load_returns_image_run` | function | `tests/test_tab.c:134` | `static void test_load_returns_image_run(void **state)` |
 | `test_load_returns_view_with_link` | function | `tests/test_tab.c:107` | `static void test_load_returns_view_with_link(void **state)` |
-| `test_load_strips_script` | function | `tests/test_tab.c:894` | `static void test_load_strips_script(void **state)` |
-| `test_load_view_codec_full_roundtrip` | function | `tests/test_tab.c:2138` | `static void test_load_view_codec_full_roundtrip(void **state)` |
-| `test_load_without_js_has_empty_console` | function | `tests/test_tab.c:1259` | `static void test_load_without_js_has_empty_console(void **state)` |
-| `test_mouse_ipc_round_trip` | function | `tests/test_tab.c:566` | `static void test_mouse_ipc_round_trip(void **state)` |
-| `test_no_js_no_navigation` | function | `tests/test_tab.c:1382` | `static void test_no_js_no_navigation(void **state)` |
+| `test_load_strips_script` | function | `tests/test_tab.c:937` | `static void test_load_strips_script(void **state)` |
+| `test_load_view_codec_full_roundtrip` | function | `tests/test_tab.c:2181` | `static void test_load_view_codec_full_roundtrip(void **state)` |
+| `test_load_without_js_has_empty_console` | function | `tests/test_tab.c:1302` | `static void test_load_without_js_has_empty_console(void **state)` |
+| `test_mouse_ipc_round_trip` | function | `tests/test_tab.c:609` | `static void test_mouse_ipc_round_trip(void **state)` |
+| `test_no_js_no_navigation` | function | `tests/test_tab.c:1425` | `static void test_no_js_no_navigation(void **state)` |
 | `test_open_close` | function | `tests/test_tab.c:73` | `static void test_open_close(void **state)` |
 | `test_open_null` | function | `tests/test_tab.c:83` | `static void test_open_null(void **state)` |
-| `test_reload_replaces_page` | function | `tests/test_tab.c:1869` | `static void test_reload_replaces_page(void **state)` |
-| `test_subreq_permitted_pure` | function | `tests/test_tab.c:1806` | `static void test_subreq_permitted_pure(void **state)` |
-| `test_tick_fires_delayed_timer` | function | `tests/test_tab.c:658` | `static void test_tick_fires_delayed_timer(void **state)` |
-| `test_tick_interval_rearms` | function | `tests/test_tab.c:695` | `static void test_tick_interval_rearms(void **state)` |
-| `test_worker_args_malformed` | function | `tests/test_tab.c:2107` | `static void test_worker_args_malformed(void **state)` |
-| `test_worker_args_not_worker` | function | `tests/test_tab.c:2100` | `static void test_worker_args_not_worker(void **state)` |
-| `test_worker_args_null_safe` | function | `tests/test_tab.c:2122` | `static void test_worker_args_null_safe(void **state)` |
-| `test_worker_args_valid` | function | `tests/test_tab.c:2091` | `static void test_worker_args_valid(void **state)` |
-| `test_xhr_undefined_when_net_not_allowed` | function | `tests/test_tab.c:1497` | `static void test_xhr_undefined_when_net_not_allowed(void **state)` |
-| `test_xhr_works_when_net_allowed` | function | `tests/test_tab.c:1477` | `static void test_xhr_works_when_net_allowed(void **state)` |
-| `view_find_text` | function | `tests/test_tab.c:1692` | `static const pv_run *view_find_text(const pv_view *v, const char *needle)` |
+| `test_reload_replaces_page` | function | `tests/test_tab.c:1912` | `static void test_reload_replaces_page(void **state)` |
+| `test_subreq_permitted_pure` | function | `tests/test_tab.c:1849` | `static void test_subreq_permitted_pure(void **state)` |
+| `test_tick_fires_delayed_timer` | function | `tests/test_tab.c:701` | `static void test_tick_fires_delayed_timer(void **state)` |
+| `test_tick_interval_rearms` | function | `tests/test_tab.c:738` | `static void test_tick_interval_rearms(void **state)` |
+| `test_worker_args_malformed` | function | `tests/test_tab.c:2150` | `static void test_worker_args_malformed(void **state)` |
+| `test_worker_args_not_worker` | function | `tests/test_tab.c:2143` | `static void test_worker_args_not_worker(void **state)` |
+| `test_worker_args_null_safe` | function | `tests/test_tab.c:2165` | `static void test_worker_args_null_safe(void **state)` |
+| `test_worker_args_valid` | function | `tests/test_tab.c:2134` | `static void test_worker_args_valid(void **state)` |
+| `test_xhr_undefined_when_net_not_allowed` | function | `tests/test_tab.c:1540` | `static void test_xhr_undefined_when_net_not_allowed(void **state)` |
+| `test_xhr_works_when_net_allowed` | function | `tests/test_tab.c:1520` | `static void test_xhr_works_when_net_allowed(void **state)` |
+| `view_find_text` | function | `tests/test_tab.c:1735` | `static const pv_run *view_find_text(const pv_view *v, const char *needle)` |
 | `main` | function | `tests/test_text_shape.c:149` | `int main(void)` |
 | `teardown` | function | `tests/test_text_shape.c:143` | `static int teardown(void **state)` |
 | `test_determinism` | function | `tests/test_text_shape.c:92` | `static void test_determinism(void **state)` |
@@ -5696,3 +5751,9 @@ static void tes...` |
 | `lum` | function | `tools/pngprof.py:95` | `def lum(p)` |
 | `main` | function | `tools/pngprof.py:109` | `def main(argv)` |
 | `render_glyph` | function | `tools/pngprof.py:99` | `def render_glyph(v)` |
+| `expand_imports` | function | `tools/snapshot.py:31` | `def expand_imports(css, base, depth)` |
+| `fetch` | function | `tools/snapshot.py:17` | `def fetch(url)` |
+| `inline_css` | function | `tools/snapshot.py:48` | `def inline_css(html, base)` |
+| `main` | function | `tools/snapshot.py:69` | `def main()` |
+| `repl` | function | `tools/snapshot.py:34` | `def repl(m)` |
+| `repl` | function | `tools/snapshot.py:49` | `def repl(m)` |

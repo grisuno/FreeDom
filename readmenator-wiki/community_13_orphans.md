@@ -1,10 +1,10 @@
 # orphans
 
-*Community 10 | 11 files | cohesion 0.00*
+*Community 13 | 12 files | cohesion 0.00*
 
 ## Definition
 
-This community groups 11 file(s) rooted at `root` with dominant language sh (cohesion 0.00). Central symbols: `PD_COLS`, `PD_INK_DELTA`, `PD_ROWS`, `_POSIX_C_SOURCE`, `_append_probe`, `_word_reader`, `ascii_lower`, `bit`. Core file: `tools/pngdiff.c` (14 symbols). Documented purpose: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and.
+This community groups 12 file(s) rooted at `tools` with dominant language py (cohesion 0.00). Central symbols: `PD_COLS`, `PD_INK_DELTA`, `PD_ROWS`, `_POSIX_C_SOURCE`, `_append_probe`, `_word_reader`, `ascii_lower`, `bit`. Core file: `tools/pngdiff.c` (14 symbols). Documented purpose: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and.
 
 ## Files
 
@@ -21,6 +21,7 @@ This community groups 11 file(s) rooted at `root` with dominant language sh (coh
 | `tools/mutate.py` | py | utility | 6 | yes |
 | `tools/pngdiff.c` | c | infrastructure | 14 | no |
 | `tools/pngprof.py` | py | utility | 4 | yes |
+| `tools/snapshot.py` | py | utility | 6 | yes |
 
 ## Key Symbols
 
@@ -62,14 +63,14 @@ This community groups 11 file(s) rooted at `root` with dominant language sh (coh
 
 ## Connections
 
-- [INFERRED] shares_context community 0 <-> 10 (strength 0.5): Inferred shared context (layer utility) with no import path between community 0 (include) and community 10 (orphans).
-- [INFERRED] shares_context community 1 <-> 10 (strength 0.5): Inferred shared context (layer utility) with no import path between community 1 (include) and community 10 (orphans).
+- No cross-community bridges recorded. This community is self-contained.
 
 ## Risks
 
 - [taint high] `app.py` -> `app.py` via `subprocess` (0 hops)
 - [taint high] `tools/ffgeom.py` -> `tools/ffgeom.py` via `subprocess` (0 hops)
 - [taint high] `tools/mutate.py` -> `tools/mutate.py` via `subprocess` (0 hops)
+- [taint medium] `tools/snapshot.py` -> `tools/snapshot.py` via `urllib.request` (0 hops)
 
 ## Open Questions
 
@@ -91,3 +92,4 @@ This community groups 11 file(s) rooted at `root` with dominant language sh (coh
 - `tools/mutate.py`
 - `tools/pngdiff.c`
 - `tools/pngprof.py`
+- `tools/snapshot.py`

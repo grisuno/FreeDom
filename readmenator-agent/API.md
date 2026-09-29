@@ -111,1830 +111,1844 @@
 ## gui/browser_ui.c
 
 ### now_ms (function) `static uint64_t now_ms(void)`
-- Defined: `gui/browser_ui.c:145`
+- Defined: `gui/browser_ui.c:148`
 - Doc: Largest text slice measured/drawn at once (one word, or one clipped label). * Words longer than this are still placed, j
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### gutter (function) `* gutter (content_margin) is intentionally left unzoomed, like a browser's text
  * zoom. The PDF ...`
-- Defined: `gui/browser_ui.c:551`
+- Defined: `gui/browser_ui.c:554`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### apply_zoom (function) `static void apply_zoom(browser_window *w)`
-- Defined: `gui/browser_ui.c:572`
+- Defined: `gui/browser_ui.c:575`
 - Doc: Applies a new zoom level: rebuild the theme and repaint. The page is laid out fresh from w->theme on every paint, so no 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### buffer_release (function) `static void buffer_release(void *data, struct wl_buffer *wl_buffer)`
-- Defined: `gui/browser_ui.c:583`
+- Defined: `gui/browser_ui.c:586`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### destroy_buffer (function) `static void destroy_buffer(browser_window *w)`
-- Defined: `gui/browser_ui.c:589`
+- Defined: `gui/browser_ui.c:592`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ensure_buffer (function) `static int ensure_buffer(browser_window *w)`
-- Defined: `gui/browser_ui.c:595`
+- Defined: `gui/browser_ui.c:598`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### read_file (function) `static char *read_file(const char *path, size_t *out_len)`
-- Defined: `gui/browser_ui.c:625`
+- Defined: `gui/browser_ui.c:628`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### build_file_origin (function) `static int build_file_origin(const char *path_or_url, char *out, size_t outsz)`
-- Defined: `gui/browser_ui.c:664`
+- Defined: `gui/browser_ui.c:667`
 - Doc: Builds a "file:///<canonical absolute path>" origin from a local path (or passes through a file:// URL's path). realpath
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### load_host_file (function) `static void load_host_file(hb_set *s, const char *dir, const char *name, hb_list list)`
-- Defined: `gui/browser_ui.c:674`
+- Defined: `gui/browser_ui.c:677`
 - Doc: Loads one /etc/hosts-format .conf file (if present and readable) into the given * list. A missing file is not an error: 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### build_host_filter (function) `static hb_set *build_host_filter(void)`
-- Defined: `gui/browser_ui.c:691`
+- Defined: `gui/browser_ui.c:694`
 - Doc: Builds the host filter from the user's .conf lists. Privacy by Default: block.conf (a /etc/hosts-format blocklist) block
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### build_js_filter (function) `static hb_set *build_js_filter(void)`
-- Defined: `gui/browser_ui.c:738`
+- Defined: `gui/browser_ui.c:741`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
-### build_impersonate_filter (function) `static hb_set *build_impersonate_filter(void)`
-- Defined: `gui/browser_ui.c:741`
-- Doc: impersonate.conf: the THIRD opt-in signal. A host here (and in allow.conf and js.conf) * gets the Chrome/Firefox-consist
+### build_impersonate_optin (function) `static int build_impersonate_optin(void)`
+- Defined: `gui/browser_ui.c:744`
+- Doc: No impersonate.conf: third signal is the user flag (FREEDOM_IMPERSONATE=1). * allow.conf AND js.conf AND this flag => TL
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freedom_write_dir (function) `static int freedom_write_dir(char *out, size_t cap)`
-- Defined: `gui/browser_ui.c:746`
+- Defined: `gui/browser_ui.c:753`
 - Doc: The writable Freedom config dir: $FREEDOM_HOSTS_DIR if set, else ~/.config/freedom (created if absent). Returns 0 on suc
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### add_current_host_to_list (function) `static void add_current_host_to_list(browser_window *w, int sel)`
-- Defined: `gui/browser_ui.c:771`
+- Defined: `gui/browser_ui.c:778`
 - Doc: Appends the current page's host to one of the user's .conf lists (block/allow/js), then reloads the in-memory filter so 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### load_favorites (function) `static void load_favorites(browser_window *w)`
-- Defined: `gui/browser_ui.c:839`
+- Defined: `gui/browser_ui.c:846`
 - Doc: Concatenates the allow.conf bodies along the same search path build_host_filter uses into one string: the omnibox "favor
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### omni_refresh (function) `static void omni_refresh(browser_window *w)`
-- Defined: `gui/browser_ui.c:885`
+- Defined: `gui/browser_ui.c:892`
 - Doc: Recomputes the omnibox autocomplete suggestions for the current URL-bar text. Shown only while the URL bar is focused an
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### profile_sync (function) `static void profile_sync(browser_window *w)`
-- Defined: `gui/browser_ui.c:916`
+- Defined: `gui/browser_ui.c:923`
 - Doc: Mirrors the session's persistable choices into w->prefs and seals them to disk. Called after any preference change; with
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### remember_visit (function) `static void remember_visit(browser_window *w, const char *url)`
-- Defined: `gui/browser_ui.c:933`
+- Defined: `gui/browser_ui.c:940`
 - Doc: Records a committed navigation in the persistent history (dedup + cap live in prefs). Opt-out via the "Remember history"
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### bookmark_toggle_current (function) `static void bookmark_toggle_current(browser_window *w)`
-- Defined: `gui/browser_ui.c:941`
+- Defined: `gui/browser_ui.c:948`
 - Doc: Records a committed navigation in the persistent history (dedup + cap live in prefs). Opt-out via the "Remember history"
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### proxy_addr_from_env (function) `static int proxy_addr_from_env(const char *envname, const char *deflt,
                           ...`
-- Defined: `gui/browser_ui.c:965`
+- Defined: `gui/browser_ui.c:972`
 - Doc: Copies a proxy "host:port" into dst: if the env value is unset/empty the default is used; the literal "1" also means "us
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### init_net_config (function) `static void init_net_config(browser_window *w)`
-- Defined: `gui/browser_ui.c:979`
+- Defined: `gui/browser_ui.c:986`
 - Doc: Builds the Tor/I2P routing config from the environment (Privacy by Default: opt-in, everything off unless explicitly ena
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### is_https_url (function) `static int is_https_url(const char *s)`
-- Defined: `gui/browser_ui.c:989`
+- Defined: `gui/browser_ui.c:996`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### is_http_url (function) `static int is_http_url(const char *s)`
-- Defined: `gui/browser_ui.c:993`
+- Defined: `gui/browser_ui.c:1000`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### host_from_url (function) `static int host_from_url(const char *url, char *out, size_t outsz)`
-- Defined: `gui/browser_ui.c:1004`
+- Defined: `gui/browser_ui.c:1011`
 - Doc: A plain-http URL whose realm self-authenticates (an i2p eepsite today): it is * fetched over the network (through the ov
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### toggle_fullscreen (function) `static void toggle_fullscreen(browser_window *w)`
-- Defined: `gui/browser_ui.c:1034`
+- Defined: `gui/browser_ui.c:1041`
 - Doc: Fullscreen toggle: ALT+ENTER switches the window between windowed and * compositor-managed fullscreen. ESC exits fullscr
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### input_is_interactive (function) `static int input_is_interactive(int input_type)`
-- Defined: `gui/browser_ui.c:1049`
+- Defined: `gui/browser_ui.c:1056`
 - Doc: An editable control gets a live text field; submit/button/hidden do not. Checkboxes, radios, and selects are interactive
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### input_is_editable (function) `static int input_is_editable(int input_type)`
-- Defined: `gui/browser_ui.c:1055`
+- Defined: `gui/browser_ui.c:1062`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### free_inputs (function) `static void free_inputs(browser_window *w)`
-- Defined: `gui/browser_ui.c:1061`
+- Defined: `gui/browser_ui.c:1068`
 - Doc: are not text-editable -- they are tracked via rebuild_inputs so clicks * dispatch to them, but they have no tf_field. st
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### free_images (function) `static void free_images(browser_window *w)`
-- Defined: `gui/browser_ui.c:1069`
+- Defined: `gui/browser_ui.c:1076`
 - Doc: static int input_is_editable(int input_type) { return input_type == PV_IN_TEXT || input_type == PV_IN_PASSWORD || input_
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### find_bg_image (function) `static const ui_bg_image *find_bg_image(const browser_window *w, const char *url)`
-- Defined: `gui/browser_ui.c:1108`
+- Defined: `gui/browser_ui.c:1115`
 - Doc: The decoded background-image for url (a box's bg_image_url), or NULL when it has none (unset / blocked / failed -- the c
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### layout (function) `* shared by layout (row height) and paint (blit), so they cannot drift apart. */
 static int image...`
-- Defined: `gui/browser_ui.c:1120`
+- Defined: `gui/browser_ui.c:1127`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rebuild_inputs (function) `static void rebuild_inputs(browser_window *w)`
-- Defined: `gui/browser_ui.c:1169`
+- Defined: `gui/browser_ui.c:1176`
 - Doc: Builds the live editable state for the current doc: one entry per editable * control, seeded with its declared value. Al
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### find_input_state (function) `static ui_input_state *find_input_state(browser_window *w, const rd_block *blk)`
-- Defined: `gui/browser_ui.c:1194`
+- Defined: `gui/browser_ui.c:1201`
 - Doc: if (w->inputs == NULL) return; /* fail closed: no editable fields, page still shows size_t k = 0; for (size_t i = 0; i <
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### clear_doc (function) `static void clear_doc(browser_window *w)`
-- Defined: `gui/browser_ui.c:1202`
+- Defined: `gui/browser_ui.c:1209`
 - Doc: Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls a
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### set_cache (function) `static void set_cache(browser_window *w, char *html, size_t len, const char *top)`
-- Defined: `gui/browser_ui.c:1212`
+- Defined: `gui/browser_ui.c:1219`
 - Doc: Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls a
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### surface_from_pixels (function) `static cairo_surface_t *surface_from_pixels(const tab_image *img)`
-- Defined: `gui/browser_ui.c:1223`
+- Defined: `gui/browser_ui.c:1230`
 - Doc: Wraps decoded ARGB32 pixels in a Cairo surface the painter can blit. Copies row by row because Cairo may use a wider str
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fetch_follow_navigable (function) `static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
                         ...`
-- Defined: `gui/browser_ui.c:1290`
+- Defined: `gui/browser_ui.c:1297`
 - Doc: Fetches url (following redirects) under cfg's policy, applying two navigability fallbacks in order of decreasing securit
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### GET (function) `* a GET (Zero Trust). cfg->policy is restored before returning. */
 static sf_status fetch_post_na...`
-- Defined: `gui/browser_ui.c:1326`
+- Defined: `gui/browser_ui.c:1333`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### gui_subresource_fetch (function) `static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
                ...`
-- Defined: `gui/browser_ui.c:1368`
+- Defined: `gui/browser_ui.c:1375`
 - Doc: tab_fetch_fn: the trusted parent's policy-checked subresource fetch for page XHR/fetch. The worker has no network; it pr
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### prepare_fetch (function) `static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
                     ...`
-- Defined: `gui/browser_ui.c:1495`
+- Defined: `gui/browser_ui.c:1502`
 - Doc: Builds cfg for url and applies the pre-fetch gates. Returns nonzero when the fetch may proceed (cfg and pr->allowlisted 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fetch_job_free (function) `static void fetch_job_free(fetch_job *j)`
-- Defined: `gui/browser_ui.c:1596`
+- Defined: `gui/browser_ui.c:1604`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### stream_progress_cb (function) `static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata)`
-- Defined: `gui/browser_ui.c:1616`
+- Defined: `gui/browser_ui.c:1624`
 - Doc: Called by the fetch thread (~1/sec) with the downloaded body so far. Copies the data to the window's thread-safe streami
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fetch_thread (function) `static void *fetch_thread(void *arg)`
-- Defined: `gui/browser_ui.c:1640`
+- Defined: `gui/browser_ui.c:1648`
 - Doc: Worker body: runs the (blocking) policy-enforcing fetch, then posts the job pointer back to the event loop. Pure with re
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fetch_launch (function) `static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg,
                ...`
-- Defined: `gui/browser_ui.c:1688`
+- Defined: `gui/browser_ui.c:1696`
 - Doc: Spawns a detached worker to fetch url under cfg (already gated by prepare_fetch). The caller has bumped w->net_gen for t
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### load_images (function) `static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx)`
-- Defined: `gui/browser_ui.c:1809`
+- Defined: `gui/browser_ui.c:1817`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### load_bg_images (function) `static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx)`
-- Defined: `gui/browser_ui.c:1893`
+- Defined: `gui/browser_ui.c:1901`
 - Doc: Fetches and decodes every box's resolved CSS background-image into w->bg_images (2026-07-16, mirrors load_images -- see 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### page_js_host_allowlisted (function) `static int page_js_host_allowlisted(const browser_window *w)`
-- Defined: `gui/browser_ui.c:1948`
+- Defined: `gui/browser_ui.c:1956`
 - Doc: Resolves the JS policy for the current page's host (Secure by Default: off unless the global mode is ON or the host is o
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### compute_page_js (function) `static int compute_page_js(const browser_window *w)`
-- Defined: `gui/browser_ui.c:1954`
+- Defined: `gui/browser_ui.c:1962`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### seed_session_cookies (function) `static void seed_session_cookies(tab *t, int trusted, const char *url)`
-- Defined: `gui/browser_ui.c:1968`
+- Defined: `gui/browser_ui.c:1976`
 - Doc: Seeds document.cookie for the next load from the ephemeral network jar (trusted host * only); reset to none otherwise so
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### foldback_session_cookies (function) `static void foldback_session_cookies(const char *url, const char *jar)`
-- Defined: `gui/browser_ui.c:1981`
+- Defined: `gui/browser_ui.c:1989`
 - Doc: Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network jar * one pair at a time, so JS-set sess
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### drop_repl_worker (function) `static void drop_repl_worker(browser_window *w)`
-- Defined: `gui/browser_ui.c:2000`
+- Defined: `gui/browser_ui.c:2008`
 - Doc: Drops the kept-alive REPL worker and clears the (active-tab) console transcript. Used when the active page changes WITHO
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### schedule_js_tick (function) `static void schedule_js_tick(browser_window *w, int next_ms)`
-- Defined: `gui/browser_ui.c:2014`
+- Defined: `gui/browser_ui.c:2022`
 - Doc: Schedules the next JS timer tick from the worker's reported smallest pending delay (tab_page.next_timer_ms; < 0 = nothin
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### render_current_ex (function) `static void render_current_ex(browser_window *w, int allow_js_nav)`
-- Defined: `gui/browser_ui.c:2024`
+- Defined: `gui/browser_ui.c:2032`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### render_current (function) `static void render_current(browser_window *w)`
-- Defined: `gui/browser_ui.c:2196`
+- Defined: `gui/browser_ui.c:2204`
 - Doc: Real async timers: a fresh load resets the per-page tick budget and schedules * the first OP_TICK from the worker's repo
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### show_busy (function) `static void show_busy(browser_window *w)`
-- Defined: `gui/browser_ui.c:2203`
+- Defined: `gui/browser_ui.c:2211`
 - Doc: Marks a request in flight and paints a frame so the spinner appears at once. The fetch now runs on a worker thread, so t
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### show_fetch_error (function) `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
                   ...`
-- Defined: `gui/browser_ui.c:2212`
+- Defined: `gui/browser_ui.c:2220`
 - Doc: Replaces the page with the standard "Failed to load" diagnostic for status ss on url. allowlisted tailors the hint (alre
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### arrives (function) `* on screen until the result arrives (deliver_fetch_result renders it). about:blank
  * and local ...`
-- Defined: `gui/browser_ui.c:2263`
+- Defined: `gui/browser_ui.c:2271`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### strcmp (function) `&& strcmp(auth_host_buf, w->auth_host) != 0)`
-- Defined: `gui/browser_ui.c:2331`
+- Defined: `gui/browser_ui.c:2339`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### tab_save (function) `static void tab_save(browser_window *w)`
-- Defined: `gui/browser_ui.c:2392`
+- Defined: `gui/browser_ui.c:2400`
 - Doc: Parks the active tab's live state into its slot (a shallow move: the slot and the live fields briefly alias the same all
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### tab_restore (function) `static void tab_restore(browser_window *w)`
-- Defined: `gui/browser_ui.c:2409`
+- Defined: `gui/browser_ui.c:2417`
 - Doc: c->doc = w->doc; c->caps = w->caps; c->scroll = w->scroll; c->content_total_h = w->content_total_h; c->inputs = w->input
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### free_live_page (function) `static void free_live_page(browser_window *w)`
-- Defined: `gui/browser_ui.c:2426`
+- Defined: `gui/browser_ui.c:2434`
 - Doc: w->doc = c->doc; w->caps = c->caps; w->scroll = c->scroll; w->content_total_h = c->content_total_h; w->inputs = c->input
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### tab_ctx_release (function) `static void tab_ctx_release(tab_ctx *c)`
-- Defined: `gui/browser_ui.c:2435`
+- Defined: `gui/browser_ui.c:2443`
 - Doc: w->hover_href = c->hover_href; w->hover_cursor = c->hover_cursor; } /* Frees the LIVE page's owned state (used when clos
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### tab_switch (function) `static void tab_switch(browser_window *w, int idx)`
-- Defined: `gui/browser_ui.c:2459`
+- Defined: `gui/browser_ui.c:2467`
 - Doc: if (c->bg_images[i].surface != NULL) cairo_surface_destroy(c->bg_images[i].surface); free(c->bg_images[i].url); } free(c
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### tab_new (function) `static void tab_new(browser_window *w, const char *url)`
-- Defined: `gui/browser_ui.c:2478`
+- Defined: `gui/browser_ui.c:2486`
 - Doc: w->net_gen++; w->loading = 0; drop_repl_worker(w); /* active page changes without a render; rebind on next eval tab_save
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### uitab_close (function) `static void uitab_close(browser_window *w, int idx)`
-- Defined: `gui/browser_ui.c:2511`
+- Defined: `gui/browser_ui.c:2519`
 - Doc: w->images = NULL; w->image_count = 0; w->bg_images = NULL; w->bg_image_count = 0; w->cur_html = NULL; w->cur_html_len = 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### newtab_x (function) `static double newtab_x(const browser_window *w)`
-- Defined: `gui/browser_ui.c:2553`
+- Defined: `gui/browser_ui.c:2561`
 - Doc: X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge.
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### tab_title (function) `static const char *tab_title(const browser_window *w, int i)`
-- Defined: `gui/browser_ui.c:2560`
+- Defined: `gui/browser_ui.c:2568`
 - Doc: X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge. static double
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### tabbar_top (function) `static double tabbar_top(const browser_window *w)`
-- Defined: `gui/browser_ui.c:2576`
+- Defined: `gui/browser_ui.c:2584`
 - Doc: Top of the tab strip: directly under the client-side titlebar (or at the surface * top under server-side decorations).
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### toolbar_top (function) `static double toolbar_top(const browser_window *w)`
-- Defined: `gui/browser_ui.c:2582`
+- Defined: `gui/browser_ui.c:2590`
 - Doc: Top of the toolbar: under the tab strip, which is always reserved. The whole * content area derives from this, so adding
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### content_geometry (function) `static void content_geometry(const browser_window *w, double *top, double *height)`
-- Defined: `gui/browser_ui.c:2589`
+- Defined: `gui/browser_ui.c:2597`
 - Doc: The content area rectangle below the toolbar, in surface coordinates. The single source of truth for both painting and c
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### content_width (function) `static double content_width(const browser_window *w)`
-- Defined: `gui/browser_ui.c:2616`
+- Defined: `gui/browser_ui.c:2624`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### html_center_offset (function) `static double html_center_offset(const browser_window *w)`
-- Defined: `gui/browser_ui.c:2626`
+- Defined: `gui/browser_ui.c:2634`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### scrollbar_metrics (function) `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,
          ...`
-- Defined: `gui/browser_ui.c:2640`
+- Defined: `gui/browser_ui.c:2648`
 - Doc: Geometry of the vertical scrollbar in surface coordinates, plus the current thumb position. Returns 0 (and leaves output
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### scrollbar_drag_to (function) `static void scrollbar_drag_to(browser_window *w)`
-- Defined: `gui/browser_ui.c:2668`
+- Defined: `gui/browser_ui.c:2676`
 - Doc: Maps the current pointer Y (less the grab offset) to a scroll offset while the * thumb is being dragged, then repaints. 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### draw_scrollbar (function) `static void draw_scrollbar(cairo_t *cr, const browser_window *w)`
-- Defined: `gui/browser_ui.c:2685`
+- Defined: `gui/browser_ui.c:2693`
 - Doc: Paints the scrollbar track and thumb. The thumb highlights while hovered or * dragged, the same affordance the toolbar b
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### window_button_rects (function) `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...`
-- Defined: `gui/browser_ui.c:2722`
+- Defined: `gui/browser_ui.c:2730`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### toolbar_rects (function) `static void toolbar_rects(const browser_window *w,
                           double *back_x, doub...`
-- Defined: `gui/browser_ui.c:2732`
+- Defined: `gui/browser_ui.c:2740`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### toolbar_button_at (function) `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)`
-- Defined: `gui/browser_ui.c:2747`
+- Defined: `gui/browser_ui.c:2755`
 - Doc: Which toolbar button (if any) is at (px, py). Shared by the hover highlight and * the cursor shape so they cannot drift 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### hot_actionable (function) `static int hot_actionable(const browser_window *w, ui_hot hot)`
-- Defined: `gui/browser_ui.c:2763`
+- Defined: `gui/browser_ui.c:2771`
 - Doc: A hovered button is "actionable" (gets the hand cursor) when clicking it would * do something: Go/menu always, Back/Forw
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### menu_panel_rect (function) `static void menu_panel_rect(const browser_window *w, double *x, double *y,
                       ...`
-- Defined: `gui/browser_ui.c:2774`
+- Defined: `gui/browser_ui.c:2782`
 - Doc: The options-menu panel rectangle (below the gear button), and its per-item row * height. The single source of truth for 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ua_box_rect (function) `static void ua_box_rect(const browser_window *w, double *x, double *y,
                         do...`
-- Defined: `gui/browser_ui.c:2790`
+- Defined: `gui/browser_ui.c:2798`
 - Doc: The editable User-Agent box rectangle inside the options panel. The single * source of truth for drawing and hit-testing
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### draw_text (function) `static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered)`
-- Defined: `gui/browser_ui.c:2800`
+- Defined: `gui/browser_ui.c:2808`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rc_float_bottom (function) `static double rc_float_bottom(const rc_state *s)`
-- Defined: `gui/browser_ui.c:3138`
+- Defined: `gui/browser_ui.c:3146`
 - Doc: Width left for the line after both insets, in the CURRENT box context. rc_float_fit_line uses it to decide whether the l
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rc_float_clear (function) `static void rc_float_clear(rc_state *s)`
-- Defined: `gui/browser_ui.c:3147`
+- Defined: `gui/browser_ui.c:3155`
 - Doc: Ends the float context: drops every exclusion and moves cur_top below the tallest one. This is what puts a `clear:both` 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rc_float_refresh (function) `static void rc_float_refresh(rc_state *s, double line_h)`
-- Defined: `gui/browser_ui.c:3160`
+- Defined: `gui/browser_ui.c:3168`
 - Doc: Recomputes the open line's float insets for its own cur_top, discarding exclusions the flow has already passed. Called o
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rc_float_fit_line (function) `static void rc_float_fit_line(rc_state *s, double line_h)`
-- Defined: `gui/browser_ui.c:3206`
+- Defined: `gui/browser_ui.c:3214`
 - Doc: CSS 2.1 9.5: "if there is not enough horizontal room for the line box beside the float, it is shifted downward until eit
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### line_limit (function) `static double line_limit(const rc_state *s, double content_w)`
-- Defined: `gui/browser_ui.c:3225`
+- Defined: `gui/browser_ui.c:3233`
 - Doc: The right edge available to the open line: the block's content width minus what a float steals from the right at this li
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rc_free (function) `static void rc_free(rc_layout *L)`
-- Defined: `gui/browser_ui.c:3230`
+- Defined: `gui/browser_ui.c:3238`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rc_add_box (function) `static rc_box *rc_add_box(rc_layout *L)`
-- Defined: `gui/browser_ui.c:3239`
+- Defined: `gui/browser_ui.c:3247`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rc_add_frag (function) `static rc_frag *rc_add_frag(rc_layout *L)`
-- Defined: `gui/browser_ui.c:3251`
+- Defined: `gui/browser_ui.c:3259`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rc_add_row (function) `static rc_row *rc_add_row(rc_layout *L)`
-- Defined: `gui/browser_ui.c:3266`
+- Defined: `gui/browser_ui.c:3274`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### family_face (function) `static const char *family_face(int family)`
-- Defined: `gui/browser_ui.c:3278`
+- Defined: `gui/browser_ui.c:3286`
 - Doc: Maps an author font-family bucket (css_font_family) to a Cairo toy-font family. * The engine matches no exact families, 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### content_font (function) `static void content_font(cairo_t *cr, double size, int bold, int italic, int family)`
-- Defined: `gui/browser_ui.c:3296`
+- Defined: `gui/browser_ui.c:3304`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### set_rgb_alpha (function) `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)`
-- Defined: `gui/browser_ui.c:3309`
+- Defined: `gui/browser_ui.c:3317`
 - Doc: Sets the source color, applying an author opacity (0..100) as an alpha when set * (-1 = fully opaque). Used for author t
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### utf8_clen (function) `static size_t utf8_clen(const char *s, size_t n)`
-- Defined: `gui/browser_ui.c:3318`
+- Defined: `gui/browser_ui.c:3326`
 - Doc: Bytes in the UTF-8 cluster starting at s[0] (1 for a stray/continuation byte), * clamped to n.
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### draw_slice (function) `static void draw_slice(cairo_t *cr, double x, double baseline, const char *s, size_t n)`
-- Defined: `gui/browser_ui.c:3358`
+- Defined: `gui/browser_ui.c:3366`
 - Doc: Draws a text slice at (x, baseline) in the current content font/source. Shapes with HarfBuzz when available; otherwise t
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### frag_styled (function) `static int frag_styled(const rc_frag *f)`
-- Defined: `gui/browser_ui.c:3371`
+- Defined: `gui/browser_ui.c:3379`
 - Doc: True if a fragment needs the per-cluster path (text-transform other than none/unset, or a non-zero letter-spacing). Othe
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### styled_advance (function) `static double styled_advance(cairo_t *cr, const rc_frag *f)`
-- Defined: `gui/browser_ui.c:3378`
+- Defined: `gui/browser_ui.c:3386`
 - Doc: Advance (px) of a fragment's text under its text-transform + letter-spacing. The current Cairo font must already be sele
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### styled_draw (function) `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)`
-- Defined: `gui/browser_ui.c:3394`
+- Defined: `gui/browser_ui.c:3402`
 - Doc: Draws a fragment's text starting at (x, baseline) under its text-transform + * letter-spacing. The current Cairo font/so
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### block_style (function) `static void block_style(const ui_theme *th, const rd_block *b,
                         double *si...`
-- Defined: `gui/browser_ui.c:3411`
+- Defined: `gui/browser_ui.c:3419`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### block_margins (function) `static void block_margins(const ui_theme *th, const rd_block *b,
                           double...`
-- Defined: `gui/browser_ui.c:3438`
+- Defined: `gui/browser_ui.c:3446`
 - Doc: cb_w is the containing block's content width: a PERCENTAGE vertical margin * resolves against it, not against any height
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### add (function) `* about to add (top/h passed in). A box that survived a line wrap simply ends at the
  * wrap -- m...`
-- Defined: `gui/browser_ui.c:3468`
+- Defined: `gui/browser_ui.c:3476`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### run (function) `* continuation run (block_id < 0 with no block break) deliberately skips reconcile
  * to stay on ...`
-- Defined: `gui/browser_ui.c:3503`
+- Defined: `gui/browser_ui.c:3511`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### flush_line (function) `static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th)`
-- Defined: `gui/browser_ui.c:3528`
+- Defined: `gui/browser_ui.c:3536`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### open_line_height (function) `static double open_line_height(const rc_state *s, const ui_theme *th)`
-- Defined: `gui/browser_ui.c:3586`
+- Defined: `gui/browser_ui.c:3594`
 - Doc: Height the currently open line WILL have when it flushes (same formula flush_line uses): an out-of-flow static position 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### open_line (function) `static void open_line(rc_layout *L, rc_state *s)`
-- Defined: `gui/browser_ui.c:3599`
+- Defined: `gui/browser_ui.c:3607`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### flow_emit_frag (function) `static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
                  ...`
-- Defined: `gui/browser_ui.c:3647`
+- Defined: `gui/browser_ui.c:3655`
 - Doc: Emits one fragment at the current pen position, advancing it. Shared by the * whole-word path and the word-break split p
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### flow_text (function) `static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                ...`
-- Defined: `gui/browser_ui.c:3714`
+- Defined: `gui/browser_ui.c:3722`
 - Doc: owning box (for the hover-cursor lookup), -1 if none.  word-break/overflow-wrap (s->break_words): a single word wider th
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### replaced_inline_size (function) `static int replaced_inline_size(const browser_window *w, const rd_block *b,
                      ...`
-- Defined: `gui/browser_ui.c:3966`
+- Defined: `gui/browser_ui.c:3974`
 - Doc: Intrinsic size of an inline-level replaced block, in px, or 0 when the block is not one this engine can size without lay
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### replaced_is_inline_level (function) `static int replaced_is_inline_level(const rc_state *s, const rd_block *b)`
-- Defined: `gui/browser_ui.c:3996`
+- Defined: `gui/browser_ui.c:4004`
 - Doc: True when a replaced block is INLINE-LEVEL content of the line already being built, rather than a block of its own.  The
+- Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
+
+### replaced_opens_inline_line (function) `static size_t replaced_opens_inline_line(const rd_doc *doc, size_t i)`
+- Defined: `gui/browser_ui.c:4017`
+- Doc: The same atomic inline when it OPENS its block's first line: a replaced element whose next in-flow run is text continuin
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### place_inline_replaced (function) `static int place_inline_replaced(rc_layout *L, rc_state *s, const ui_theme *th,
                  ...`
-- Defined: `gui/browser_ui.c:4009`
+- Defined: `gui/browser_ui.c:4042`
 - Doc: Places an inline-level replaced element inside the open line as an atomic inline: it advances the pen like a word, and r
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### css_replaced_box (function) `static int css_replaced_box(const rd_doc *doc, const rd_block *b, double avail_w,
                ...`
-- Defined: `gui/browser_ui.c:4064`
+- Defined: `gui/browser_ui.c:4098`
 - Doc: The box an unavailable replaced element gets from its own CSS: a definite width plus an aspect-ratio (CSS Sizing 4 secti
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### emit_replaced_row (function) `static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
                 ...`
-- Defined: `gui/browser_ui.c:4073`
+- Defined: `gui/browser_ui.c:4107`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### flow_text_block (function) `static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
                  ...`
-- Defined: `gui/browser_ui.c:4176`
+- Defined: `gui/browser_ui.c:4210`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### item_root_box_in (function) `static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox)`
-- Defined: `gui/browser_ui.c:4288`
+- Defined: `gui/browser_ui.c:4322`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### item_root_box (function) `static int item_root_box(const rd_doc *doc, size_t b0, size_t b1)`
-- Defined: `gui/browser_ui.c:4324`
+- Defined: `gui/browser_ui.c:4358`
 - Doc: Root box of a flex/grid item, bounded by the container box page_view stamped on the item's runs (pv_run.cont_box_id). Th
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### css_align_to_bt (function) `static int css_align_to_bt(int align_kw)`
-- Defined: `gui/browser_ui.c:4333`
+- Defined: `gui/browser_ui.c:4367`
 - Doc: Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis alignment it drives. BASELINE/AUTO/UNSET/space-*
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_edge_px (function) `static double box_edge_px(int wpx)`
-- Defined: `gui/browser_ui.c:4343`
+- Defined: `gui/browser_ui.c:4377`
 - Doc: Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis alignment it drives. BASELINE/AUTO/UNSET/space-*
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rc_box_copy_decoration (function) `static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def)`
-- Defined: `gui/browser_ui.c:4363`
+- Defined: `gui/browser_ui.c:4397`
 - Doc: Copies a box def's paint-time decoration (borders, radius, shadow, outline, background, gradient, background-image param
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_is_strict_descendant (function) `static int box_is_strict_descendant(const rd_doc *doc, int id, int anc)`
-- Defined: `gui/browser_ui.c:4442`
+- Defined: `gui/browser_ui.c:4476`
 - Doc: True iff box `id` is a STRICT descendant of `anc` in the box tree (or anc < 0, * which means "no container box", where a
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### item_sides_at_level (function) `static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
                   ...`
-- Defined: `gui/browser_ui.c:4464`
+- Defined: `gui/browser_ui.c:4498`
 - Doc: item_sides for one item of container `cid`. A NESTED container item takes the child container's OWN box, not item_root_b
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### container_box_of (function) `static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid)`
-- Defined: `gui/browser_ui.c:4493`
+- Defined: `gui/browser_ui.c:4527`
 - Doc: The innermost box ENCLOSING a flex/grid container's items: the parent shared by the items' root boxes. page_view stamps 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### table (function) `* synthesised table (no descriptors to disagree) keeps the stamp. */
         if (cd != NULL && !c...`
-- Defined: `gui/browser_ui.c:4515`
+- Defined: `gui/browser_ui.c:4549`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### row (function) `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */
 static d...`
-- Defined: `gui/browser_ui.c:4575`
+- Defined: `gui/browser_ui.c:4609`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### way (function) `* intrinsic box either way (it does not wrap below its own size). */
 static double measure_item_w...`
-- Defined: `gui/browser_ui.c:4616`
+- Defined: `gui/browser_ui.c:4650`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### measure_item_content_w (function) `static double measure_item_content_w(cairo_t *cr, const browser_window *w,
                       ...`
-- Defined: `gui/browser_ui.c:4652`
+- Defined: `gui/browser_ui.c:4686`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### item_declared_basis (function) `static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
                       ...`
-- Defined: `gui/browser_ui.c:4683`
+- Defined: `gui/browser_ui.c:4717`
 - Doc: The flex base size a DEFINITE width gives an item, or 0 when it has none.  CSS Flexbox 1 section 7.2.3: with `flex-basis
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### nested_cont_basis (function) `static double nested_cont_basis(cairo_t *cr, const browser_window *w,
                            ...`
-- Defined: `gui/browser_ui.c:4697`
+- Defined: `gui/browser_ui.c:4731`
 - Doc: Max-content width of a NESTED container acting as one item: the sum of its own items' bases plus its gaps. Measuring its
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### flex_item_basis (function) `static double flex_item_basis(cairo_t *cr, const browser_window *w,
                              ...`
-- Defined: `gui/browser_ui.c:4739`
+- Defined: `gui/browser_ui.c:4773`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### flex_item_min_main (function) `static double flex_item_min_main(cairo_t *cr, const browser_window *w,
                           ...`
-- Defined: `gui/browser_ui.c:4769`
+- Defined: `gui/browser_ui.c:4803`
 - Doc: Automatic minimum size of one flex item (CSS Flexbox 4.5), in the same border-box+margin units flex_item_basis returns -
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### item_at_level (function) `static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
-- Defined: `gui/browser_ui.c:4802`
+- Defined: `gui/browser_ui.c:4836`
 - Doc: Item index of run `bk` at container level `cid`: the run's own cont_item when it sits directly in cid, otherwise the par
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### child_cont_at_level (function) `static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
-- Defined: `gui/browser_ui.c:4817`
+- Defined: `gui/browser_ui.c:4851`
 - Doc: The container on `bk`'s ancestor chain that is a DIRECT child of cid, or -1 when the run sits directly in cid. That chil
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### root_cont_of (function) `static int root_cont_of(const rd_doc *doc, int cid)`
-- Defined: `gui/browser_ui.c:4832`
+- Defined: `gui/browser_ui.c:4866`
 - Doc: Root of a run's container chain: the outermost container that encloses it. That is the container the main layout loop gr
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### block_is_oof (function) `static int block_is_oof(const rd_doc *doc, const rd_block *bk)`
-- Defined: `gui/browser_ui.c:4869`
+- Defined: `gui/browser_ui.c:4903`
 - Doc: True iff the block lives inside an out-of-flow (absolute/fixed) subtree: Stage 2 positions it separately, so the in-flow
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### layout_container (function) `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 ...`
-- Defined: `gui/browser_ui.c:4886`
+- Defined: `gui/browser_ui.c:4940`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ITEMS (function) `* between ITEMS (not between the lines inside one item). column-reverse
      * reverses the visua...`
-- Defined: `gui/browser_ui.c:4996`
+- Defined: `gui/browser_ui.c:5050`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### slot (function) `* layout slot (item 0 → rightmost, last item → leftmost). */
     if (use_flex && cdv.direction ==...`
-- Defined: `gui/browser_ui.c:5088`
+- Defined: `gui/browser_ui.c:5157`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### path (function) `*
          * Only a SYNTHESISED table grid takes this path (cdv.is_table), and only when
         ...`
-- Defined: `gui/browser_ui.c:5207`
+- Defined: `gui/browser_ui.c:5282`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_line_visible (function) `static int box_line_visible(int style)`
-- Defined: `gui/browser_ui.c:5542`
+- Defined: `gui/browser_ui.c:5614`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### close_top_box (function) `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)`
-- Defined: `gui/browser_ui.c:5548`
+- Defined: `gui/browser_ui.c:5620`
 - Doc: Closes the open block box: flushes the current line, reserves the box's bottom * padding+border, and finalizes the recor
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rc_box_context (function) `static void rc_box_context(const rc_state *s, double content_w,
                            double...`
-- Defined: `gui/browser_ui.c:5685`
+- Defined: `gui/browser_ui.c:5757`
 - Doc: Content rect (left, width) the current run/box is laid out in: the innermost open * box's, or the page content box when 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_margin_top (function) `static double box_margin_top(const ui_theme *th, const pv_box_def *def, double cb_w)`
-- Defined: `gui/browser_ui.c:5712`
+- Defined: `gui/browser_ui.c:5784`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_margin_bottom (function) `static double box_margin_bottom(const ui_theme *th, const pv_box_def *def, double cb_w)`
-- Defined: `gui/browser_ui.c:5719`
+- Defined: `gui/browser_ui.c:5791`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### children (function) `* own content rect onto the stack so its children (text or nested boxes) place inside
  * it. At t...`
-- Defined: `gui/browser_ui.c:5729`
+- Defined: `gui/browser_ui.c:5801`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### column (function) `*
  * Returns the height of the tallest column (0 when there is nothing to fragment). */
 static do...`
-- Defined: `gui/browser_ui.c:5937`
+- Defined: `gui/browser_ui.c:6009`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_path_has (function) `static int box_path_has(const rd_doc *doc, int block_id, int want)`
-- Defined: `gui/browser_ui.c:6031`
+- Defined: `gui/browser_ui.c:6103`
 - Doc: Reconciles the open-box stack so it equals block b's box path (root..b->block_id), derived from the box-def parent_id ch
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_shrink_width (function) `static double box_shrink_width(cairo_t *cr, const browser_window *w,
                             ...`
-- Defined: `gui/browser_ui.c:6046`
+- Defined: `gui/browser_ui.c:6118`
 - Doc: Max-content width (px) of the box `box_id` opening at run `start`: the widest line produced by the maximal run of blocks
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### reconcile_boxes_below (function) `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                          ...`
-- Defined: `gui/browser_ui.c:6055`
+- Defined: `gui/browser_ui.c:6127`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### treatment (function) `* block treatment (shrink-wrapped and placed by text-align), which is what a
          * standalon...`
-- Defined: `gui/browser_ui.c:6100`
+- Defined: `gui/browser_ui.c:6178`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### reconcile_boxes (function) `static void reconcile_boxes(cairo_t *cr, const browser_window *w,
                             rc_...`
-- Defined: `gui/browser_ui.c:6128`
+- Defined: `gui/browser_ui.c:6209`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_path_of (function) `static int box_path_of(const rd_doc *doc, int block_id, int *out)`
-- Defined: `gui/browser_ui.c:6142`
+- Defined: `gui/browser_ui.c:6223`
 - Doc: Box path root..block_id via the box-def parent_id chain (root first), written into * out (bounded by RC_BOX_STACK_MAX). 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### band_common_box (function) `static int band_common_box(const rd_doc *doc, size_t start, size_t end)`
-- Defined: `gui/browser_ui.c:6158`
+- Defined: `gui/browser_ui.c:6239`
 - Doc: The innermost box that is an ancestor (or self) of EVERY block in [start, end), via the longest common prefix of their b
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### block_in_table_caption (function) `static int block_in_table_caption(const rd_doc *doc, const rd_block *b)`
-- Defined: `gui/browser_ui.c:6222`
+- Defined: `gui/browser_ui.c:6303`
 - Doc: True when a block sits inside a `display: table-caption` box. The walk goes up the box tree because the caption's text r
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### defer_key_block (function) `static int defer_key_block(const rd_block *bk)`
-- Defined: `gui/browser_ui.c:6286`
+- Defined: `gui/browser_ui.c:6367`
 - Doc: The defer key of one block: its outermost founder id, else its own id (a single-level float is its own column). Callers 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### defer_append (function) `static int defer_append(rc_defer *d, int key, int side,
                         int ml, int mlpct...`
-- Defined: `gui/browser_ui.c:6409`
+- Defined: `gui/browser_ui.c:6490`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### defer_flush (function) `static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                      ...`
-- Defined: `gui/browser_ui.c:6443`
+- Defined: `gui/browser_ui.c:6524`
 - Doc: Places every deferred column: each lays its inner bands (reused, not forked) at the column's border width, stacked in do
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### layout_float_band (function) `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                ...`
-- Defined: `gui/browser_ui.c:6664`
+- Defined: `gui/browser_ui.c:6745`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### thumbnail (function) `* is what made a wikipedia thumbnail (a 250px image and its caption, no
      * declared width) sp...`
-- Defined: `gui/browser_ui.c:6747`
+- Defined: `gui/browser_ui.c:6828`
+- Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
+
+### yet (function) `* does not carry yet (WPT flex-abspos-staticpos-*). */
+static int runs_share_float(const rd_doc *...`
+- Defined: `gui/browser_ui.c:7108`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### layout_doc (function) `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                   ...`
-- Defined: `gui/browser_ui.c:7023`
+- Defined: `gui/browser_ui.c:7120`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### position_doc (function) `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
                 ...`
-- Defined: `gui/browser_ui.c:7394`
+- Defined: `gui/browser_ui.c:7506`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### input_box_width (function) `static double input_box_width(double content_w)`
-- Defined: `gui/browser_ui.c:7551`
+- Defined: `gui/browser_ui.c:7663`
 - Doc: make the painter repaint the box on TOP of its rows — covering everything past the first block with the box background. 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### select_box_width (function) `static double select_box_width(double content_w)`
-- Defined: `gui/browser_ui.c:7555`
+- Defined: `gui/browser_ui.c:7667`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### button_box_width (function) `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
               ...`
-- Defined: `gui/browser_ui.c:7560`
+- Defined: `gui/browser_ui.c:7672`
 - Doc: } L->npositioned = keep; } /* Width of a painted text-input box: the preferred width clamped to the content. static doub
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### v_read (function) `static int v_read(int fd, void *buf, size_t n)`
-- Defined: `gui/browser_ui.c:8140`
+- Defined: `gui/browser_ui.c:8252`
 - Doc: EINTR/EAGAIN-safe pipe read — loops until all bytes arrive or hard error. With O_NONBLOCK, a partial read triggers EAGAI
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### dies (function) `* child dies (exec failed, device busy, daemon absent) is detected on the
  * next PCM write (EPIP...`
-- Defined: `gui/browser_ui.c:8168`
+- Defined: `gui/browser_ui.c:8280`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### audio_spawn (function) `static void audio_spawn(browser_window *w, int rate, int channels)`
-- Defined: `gui/browser_ui.c:8177`
+- Defined: `gui/browser_ui.c:8289`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### audio_mark_dead (function) `static void audio_mark_dead(browser_window *w)`
-- Defined: `gui/browser_ui.c:8231`
+- Defined: `gui/browser_ui.c:8343`
 - Doc: Reaps a dead sink child and advances the rotation so the next spawn tries * the next player. Called when a PCM write hit
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### audio_write (function) `static void audio_write(browser_window *w, const uint8_t *data, size_t len)`
-- Defined: `gui/browser_ui.c:8248`
+- Defined: `gui/browser_ui.c:8360`
 - Doc: Best-effort PCM write: whatever does not fit in the pipe is dropped (with PTS pacing the producer runs at ~real time, so
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### audio_stop (function) `static void audio_stop(browser_window *w)`
-- Defined: `gui/browser_ui.c:8263`
+- Defined: `gui/browser_ui.c:8375`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### video_stop (function) `static void video_stop(browser_window *w)`
-- Defined: `gui/browser_ui.c:8283`
+- Defined: `gui/browser_ui.c:8395`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### video_fetch (function) `static sf_status video_fetch(const char *url, browser_window *w,
                               sf...`
-- Defined: `gui/browser_ui.c:8461`
+- Defined: `gui/browser_ui.c:8573`
 - Doc: Fetches a single resource (m3u8 or TS segment) under the full policy gates: impersonation, routing, auth, navigability f
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### video_play (function) `static int video_play(browser_window *w, const char *m3u8_url)`
-- Defined: `gui/browser_ui.c:8478`
+- Defined: `gui/browser_ui.c:8590`
 - Doc: Starts video playback from an m3u8 playlist URL. Fetches the playlist, parses it, handles multi-variant master playlists
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### video_stop (function) `* each segment loop so a video_stop() in the main thread (which sets it to 0
  * then calls pthrea...`
-- Defined: `gui/browser_ui.c:8580`
+- Defined: `gui/browser_ui.c:8692`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_video_row (function) `static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
                 ...`
-- Defined: `gui/browser_ui.c:8634`
+- Defined: `gui/browser_ui.c:8746`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### row_line_slack (function) `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)`
-- Defined: `gui/browser_ui.c:8746`
+- Defined: `gui/browser_ui.c:8858`
 - Doc: Free space left on a row's LINE BOX after its last fragment, or a negative/zero value when the line is full. The line bo
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### row_align_offset (function) `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)`
-- Defined: `gui/browser_ui.c:8758`
+- Defined: `gui/browser_ui.c:8870`
 - Doc: Horizontal shift a row's text gets from author text-align (center/right): the slack between the available width and the 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### upstream (function) `* upstream (see spec/css.md). */
 static void box_path4(cairo_t *cr, double x, double y, double w,...`
-- Defined: `gui/browser_ui.c:8786`
+- Defined: `gui/browser_ui.c:8898`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_path (function) `static void box_path(cairo_t *cr, double x, double y, double w, double h, double r)`
-- Defined: `gui/browser_ui.c:8814`
+- Defined: `gui/browser_ui.c:8926`
 - Doc: One radius for all four corners: the shape every non-border-radius caller * (shadow blur, backdrop clip) still wants.
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### text (function) `* fill and gradient text (2026-07-19). */
 static cairo_pattern_t *bui_linear_grad(double x, doubl...`
-- Defined: `gui/browser_ui.c:8831`
+- Defined: `gui/browser_ui.c:8943`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### bui_grad_color_at (function) `static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
                    ...`
-- Defined: `gui/browser_ui.c:8856`
+- Defined: `gui/browser_ui.c:8968`
 - Doc: Interpolated gradient color at fraction t (0..1) of the stop run. Stops sit at explicit 0-1000 positions or evenly space
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### spaced (function) `* or evenly spaced (bui_grad_color_at). */
 static void bui_paint_conic(cairo_t *cr, double x, dou...`
-- Defined: `gui/browser_ui.c:8887`
+- Defined: `gui/browser_ui.c:8999`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_bg_layer (function) `static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
                ...`
-- Defined: `gui/browser_ui.c:8919`
+- Defined: `gui/browser_ui.c:9031`
 - Doc: Paints one background-image layer into the box rect (x,y,w,h) with `radius_c` corners. The geometry -- used image size a
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_box_decoration (function) `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
            ...`
-- Defined: `gui/browser_ui.c:8963`
+- Defined: `gui/browser_ui.c:9075`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### cairo_set_dash (function) `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:9125`
+- Defined: `gui/browser_ui.c:9237`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### cairo_set_dash (function) `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:9128`
+- Defined: `gui/browser_ui.c:9240`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### cairo_set_dash (function) `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:9167`
+- Defined: `gui/browser_ui.c:9279`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### cairo_set_dash (function) `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:9170`
+- Defined: `gui/browser_ui.c:9282`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### set_rgb (function) `set_rgb(cr, (ui_rgb)`
-- Defined: `gui/browser_ui.c:9204`
+- Defined: `gui/browser_ui.c:9316`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### cairo_set_dash (function) `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:9227`
+- Defined: `gui/browser_ui.c:9339`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### cairo_set_dash (function) `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:9230`
+- Defined: `gui/browser_ui.c:9342`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_deco_line (function) `static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
                        ...`
-- Defined: `gui/browser_ui.c:9288`
+- Defined: `gui/browser_ui.c:9400`
 - Doc: Paints one text-decoration line at a given y. Shared by underline, strikethrough and overline so the wavy/double/dashed/
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### cairo_set_dash (function) `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:9322`
+- Defined: `gui/browser_ui.c:9434`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### cairo_set_dash (function) `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:9324`
+- Defined: `gui/browser_ui.c:9436`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_svg_at (function) `static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
                          doub...`
-- Defined: `gui/browser_ui.c:9344`
+- Defined: `gui/browser_ui.c:9456`
 - Doc: Draws one SVG block into an arbitrary rect. Shared by the row painter and the inline-fragment painter so an <svg> looks 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### replaced_current_color (function) `static int replaced_current_color(const browser_window *w, const rd_block *blk)`
-- Defined: `gui/browser_ui.c:9364`
+- Defined: `gui/browser_ui.c:9476`
 - Doc: Resolves currentColor for a replaced element: the run's own author colour when it has one, else the theme's text colour,
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_inline_replaced (function) `static void paint_inline_replaced(cairo_t *cr, browser_window *w,
                                ...`
-- Defined: `gui/browser_ui.c:9373`
+- Defined: `gui/browser_ui.c:9485`
 - Doc: Resolves currentColor for a replaced element: the run's own author colour when it has one, else the theme's text colour,
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_content_row (function) `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                ...`
-- Defined: `gui/browser_ui.c:9393`
+- Defined: `gui/browser_ui.c:9505`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ov_box_clips (function) `static int ov_box_clips(const pv_box_def *d)`
-- Defined: `gui/browser_ui.c:9581`
+- Defined: `gui/browser_ui.c:9693`
 - Doc: Returns nonzero if a box clips content on either axis (single predicate with * the layout path's close_top_box, which de
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ov_collect_chain (function) `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)`
-- Defined: `gui/browser_ui.c:9588`
+- Defined: `gui/browser_ui.c:9700`
 - Doc: Walks the ancestor chain of block_id and collects overflow:hidden box IDs * into out[] (outermost first). Returns count,
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ov_box_bounds (function) `static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out)`
-- Defined: `gui/browser_ui.c:9609`
+- Defined: `gui/browser_ui.c:9721`
 - Doc: Fills *out (x/top/w/h only) with the UNION of every rc_box fragment carrying block_id bid, returning 1 if any exists. A 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ov_content_rect (function) `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
                             do...`
-- Defined: `gui/browser_ui.c:9633`
+- Defined: `gui/browser_ui.c:9745`
 - Doc: Computes the padding-box content rect (in page coords: y, x, w, h) for a box. * Used as the clip region for overflow:hid
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fragment (function) `* first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
  * blk->block_id alo...`
-- Defined: `gui/browser_ui.c:9653`
+- Defined: `gui/browser_ui.c:9765`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_forms_stacking_context (function) `static int box_forms_stacking_context(const pv_box_def *def)`
-- Defined: `gui/browser_ui.c:9708`
+- Defined: `gui/browser_ui.c:9820`
 - Doc: Does this box need its own offscreen compositing group? Single source of truth: the compositor's cx_forms_stacking_conte
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### bui_skew_tan (function) `static double bui_skew_tan(int deg)`
-- Defined: `gui/browser_ui.c:9751`
+- Defined: `gui/browser_ui.c:9863`
 - Doc: transform (M1.2 translate; M1.2b scale/rotate; M1.2c skew + origin): builds the box's full 2D affine transform -- transl
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_transform_matrix (function) `static void box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
              ...`
-- Defined: `gui/browser_ui.c:9758`
+- Defined: `gui/browser_ui.c:9870`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### bui_blend_operator (function) `static cairo_operator_t bui_blend_operator(int mix_blend)`
-- Defined: `gui/browser_ui.c:9876`
+- Defined: `gui/browser_ui.c:9988`
 - Doc: Maps CSS mix-blend-mode to the Cairo compositing operator used when a box's offscreen group is blended back over its bac
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### bui_paint_backdrop_blur (function) `static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
                          ...`
-- Defined: `gui/browser_ui.c:10014`
+- Defined: `gui/browser_ui.c:10126`
 - Doc: backdrop-filter: blur (2026-07-19, glassmorphism v1). Samples the CURRENT paint target under the box rect (device-space 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### bui_pop_group_composite (function) `static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms)`
-- Defined: `gui/browser_ui.c:10072`
+- Defined: `gui/browser_ui.c:10184`
 - Doc: Composites the currently-pushed group back onto cr using def's opacity/mix-blend (the group must already be open via cai
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### limits (function) `* documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
  * grouped this w...`
-- Defined: `gui/browser_ui.c:10302`
+- Defined: `gui/browser_ui.c:10414`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_box_decoration_grouped (function) `static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                         ...`
-- Defined: `gui/browser_ui.c:10371`
+- Defined: `gui/browser_ui.c:10483`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_box_and_direct_rows (function) `static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
        ...`
-- Defined: `gui/browser_ui.c:10411`
+- Defined: `gui/browser_ui.c:10523`
 - Doc: (blk->block_id match), together, when the box forms a stacking context -- so a translucent/blended box's background and 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_positioned_one (function) `static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
             ...`
-- Defined: `gui/browser_ui.c:10506`
+- Defined: `gui/browser_ui.c:10618`
 - Doc: Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context (box_forms_stacking_context: opacity<1,
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_nested_children (function) `static void paint_nested_children(cairo_t *cr, browser_window *w,
                                ...`
-- Defined: `gui/browser_ui.c:10695`
+- Defined: `gui/browser_ui.c:10822`
 - Doc: R6: recursively paints child boxes of `parent_id` that form stacking contexts, inside the parent's already-open cairo gr
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint_structured (function) `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 ...`
-- Defined: `gui/browser_ui.c:10728`
+- Defined: `gui/browser_ui.c:10855`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### write_doc_pdf (function) `static long write_doc_pdf(browser_window *w, const char *path)`
-- Defined: `gui/browser_ui.c:10945`
+- Defined: `gui/browser_ui.c:11072`
 - Doc: Writes the window's current laid-out document to a vector PDF at `path`, paginated to US Letter. Returns the page count 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### export_pdf (function) `static void export_pdf(browser_window *w)`
-- Defined: `gui/browser_ui.c:11051`
+- Defined: `gui/browser_ui.c:11178`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### write_doc_png (function) `static long write_doc_png(browser_window *w, const char *path)`
-- Defined: `gui/browser_ui.c:11114`
+- Defined: `gui/browser_ui.c:11241`
 - Doc: Writes the window's current laid-out document to a single full-height PNG at `path` (the same layout/paint path as the s
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### export_png (function) `static void export_png(browser_window *w)`
-- Defined: `gui/browser_ui.c:11236`
+- Defined: `gui/browser_ui.c:11363`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### caller (function) `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
  * out_path ve...`
-- Defined: `gui/browser_ui.c:11270`
+- Defined: `gui/browser_ui.c:11397`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ui_render_png (function) `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)`
-- Defined: `gui/browser_ui.c:11293`
+- Defined: `gui/browser_ui.c:11420`
 - Doc: Headless PNG export (no Wayland; see include/ui.h). One full-height bitmap of the whole page, the cheapest artifact for 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### render_doc_images (function) `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
               ...`
-- Defined: `gui/browser_ui.c:11319`
+- Defined: `gui/browser_ui.c:11446`
 - Doc: Headless PNG/PDF export WITH image decoding (see include/ui.h). Unlike the plain ui_render_png/pdf (which always draw pl
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ui_render_png_images (function) `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-- Defined: `gui/browser_ui.c:11350`
+- Defined: `gui/browser_ui.c:11477`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ui_render_pdf_images (function) `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-- Defined: `gui/browser_ui.c:11356`
+- Defined: `gui/browser_ui.c:11483`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ui_dump_layout (function) `ui_status ui_dump_layout(const rd_doc *doc)`
-- Defined: `gui/browser_ui.c:11371`
+- Defined: `gui/browser_ui.c:11498`
 - Doc: Headless layout dump: runs the same layout_doc + position_doc pass as the on-screen/PNG renderer and prints the resolved
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### link_at_point (function) `static const char *link_at_point(browser_window *w, double px, double py)`
-- Defined: `gui/browser_ui.c:11433`
+- Defined: `gui/browser_ui.c:11560`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### resolve_box_cursor (function) `static int resolve_box_cursor(const rd_doc *doc, int block_id)`
-- Defined: `gui/browser_ui.c:11526`
+- Defined: `gui/browser_ui.c:11653`
 - Doc: First non-unset author `cursor` on block_id's box or an ancestor (nearest wins, like the rest of the box-decoration fiel
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box_pointer_events_none (function) `static int box_pointer_events_none(const rd_doc *doc, int block_id)`
-- Defined: `gui/browser_ui.c:11540`
+- Defined: `gui/browser_ui.c:11667`
 - Doc: True when author `pointer-events: none` removes block_id's content from hit-testing (2026-07-10): the nearest box in the
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### cursor_at_point (function) `static int cursor_at_point(browser_window *w, double px, double py)`
-- Defined: `gui/browser_ui.c:11556`
+- Defined: `gui/browser_ui.c:11683`
 - Doc: Returns the resolved author `cursor` (css_cursor) at (px, py), or CSS_CUR_UNSET when outside content / no box sets one. 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### node_at_point (function) `static dom_node_id node_at_point(browser_window *w, double px, double py)`
-- Defined: `gui/browser_ui.c:11619`
+- Defined: `gui/browser_ui.c:11746`
 - Doc: Returns the DOM node id of the element under (px, py), or DOM_NODE_NONE if the point is over blank space / outside conte
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### reference (function) `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
  * hostile content...`
-- Defined: `gui/browser_ui.c:11667`
+- Defined: `gui/browser_ui.c:11794`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### apply_click_result (function) `static void apply_click_result(browser_window *w, tab_page *page)`
-- Defined: `gui/browser_ui.c:11688`
+- Defined: `gui/browser_ui.c:11815`
 - Doc: Applies a click result returned by the worker: rebuild the rendered document and refresh inputs/console, but keep the cu
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### memory (function) `* memory (the href pointer, not its contents, was all the old code preserved). */
 static void dis...`
-- Defined: `gui/browser_ui.c:11711`
+- Defined: `gui/browser_ui.c:11838`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### GET (function) `* the network under weaker rules than a GET (Zero Trust). */
 static void do_submit_post(browser_w...`
-- Defined: `gui/browser_ui.c:11794`
+- Defined: `gui/browser_ui.c:11921`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ensure_download_dir (function) `static int ensure_download_dir(char *out, size_t outsz)`
-- Defined: `gui/browser_ui.c:11828`
+- Defined: `gui/browser_ui.c:11955`
 - Doc: Builds ~/Downloads/freedom into out and creates both levels (best effort; an existing directory is fine). Returns 1 on s
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### write_file_atomic (function) `static int write_file_atomic(const char *path, const void *bytes, size_t len)`
-- Defined: `gui/browser_ui.c:11843`
+- Defined: `gui/browser_ui.c:11970`
 - Doc: Writes len bytes to path with 0600 perms via a temp file + atomic rename (the disk_store convention): a crash mid-write 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### save_download (function) `static void save_download(browser_window *w, const char *url, const char *bytes,
                 ...`
-- Defined: `gui/browser_ui.c:11865`
+- Defined: `gui/browser_ui.c:11992`
 - Doc: Saves a fetched resource to ~/Downloads/freedom instead of rendering it. The filename is derived fail-closed from the ho
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### save_current_page (function) `static void save_current_page(browser_window *w)`
-- Defined: `gui/browser_ui.c:11898`
+- Defined: `gui/browser_ui.c:12025`
 - Doc: Ctrl+S: save the current page's cached source to ~/Downloads/freedom. No network * round-trip -- the bytes already in th
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### deliver_fetch_result (function) `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
-- Defined: `gui/browser_ui.c:11908`
+- Defined: `gui/browser_ui.c:12035`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### drain_fetch_results (function) `static void drain_fetch_results(browser_window *w)`
-- Defined: `gui/browser_ui.c:11962`
+- Defined: `gui/browser_ui.c:12089`
 - Doc: Drains every completed fetch the worker threads have posted (the read end is non-blocking; pointer-sized writes are atom
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### toggle_reader (function) `static void toggle_reader(browser_window *w)`
-- Defined: `gui/browser_ui.c:12038`
+- Defined: `gui/browser_ui.c:12165`
 - Doc: Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styl
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### menu_item_checked (function) `static int menu_item_checked(const browser_window *w, size_t i)`
-- Defined: `gui/browser_ui.c:12049`
+- Defined: `gui/browser_ui.c:12176`
 - Doc: Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styl
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### menu_item_toggle (function) `static void menu_item_toggle(browser_window *w, size_t i)`
-- Defined: `gui/browser_ui.c:12071`
+- Defined: `gui/browser_ui.c:12198`
 - Doc: Toggles options-menu item i and applies its effect. Theme and force-colors only affect presentation (a repaint, which re
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### draw_clock (function) `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
                ...`
-- Defined: `gui/browser_ui.c:12181`
+- Defined: `gui/browser_ui.c:12308`
 - Doc: A small spinner meaning "busy". Now that the fetch runs off the event-loop thread, the loop ticks ~12 fps while loading 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### draw_hamburger (function) `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-- Defined: `gui/browser_ui.c:12193`
+- Defined: `gui/browser_ui.c:12320`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### draw_reload (function) `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-- Defined: `gui/browser_ui.c:12209`
+- Defined: `gui/browser_ui.c:12336`
 - Doc: The reload button glyph: a ~300-degree circular arrow centred in a UI_BTN_W button starting at bx. Drawn with Cairo (not
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### draw_menu (function) `static void draw_menu(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:12231`
+- Defined: `gui/browser_ui.c:12358`
 - Doc: double a1 = a0 + UI_TWO_PI * 0.82;      /* leave a gap for the arrowhead cairo_new_sub_path(cr); cairo_arc(cr, cx, cy, r
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### draw_hover_url (function) `static double draw_hover_url(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:12342`
+- Defined: `gui/browser_ui.c:12469`
 - Doc: Persistent bottom strip showing the target of the link under the pointer, so the user always knows where a click will go
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### draw_toast (function) `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)`
-- Defined: `gui/browser_ui.c:12374`
+- Defined: `gui/browser_ui.c:12501`
 - Doc: Draws the transient status toast (a banner near the bottom of the window), * raised by bottom_offset so it stacks above 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### draw_tabstrip (function) `static void draw_tabstrip(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:12404`
+- Defined: `gui/browser_ui.c:12531`
 - Doc: Paints the tab strip: one cell per tab (the active one connected to the content background, the rest dimmed), each with 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### draw_omnibox (function) `static void draw_omnibox(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:12459`
+- Defined: `gui/browser_ui.c:12586`
 - Doc: Omnibox autocomplete dropdown: a panel of favorite-host suggestions below the URL bar, drawn as an overlay (on top of co
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### paint (function) `static void paint(browser_window *w)`
-- Defined: `gui/browser_ui.c:12493`
+- Defined: `gui/browser_ui.c:12620`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### redraw (function) `static void redraw(browser_window *w)`
-- Defined: `gui/browser_ui.c:12737`
+- Defined: `gui/browser_ui.c:12864`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### wm_base_ping (function) `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)`
-- Defined: `gui/browser_ui.c:12749`
+- Defined: `gui/browser_ui.c:12876`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### xdg_surface_configure (function) `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- Defined: `gui/browser_ui.c:12755`
+- Defined: `gui/browser_ui.c:12882`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### toplevel_configure (function) `static void toplevel_configure(void *data, struct xdg_toplevel *t,
                               ...`
-- Defined: `gui/browser_ui.c:12763`
+- Defined: `gui/browser_ui.c:12890`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### wl_array_for_each (function) `wl_array_for_each(st, states)`
-- Defined: `gui/browser_ui.c:12779`
+- Defined: `gui/browser_ui.c:12906`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### toplevel_close (function) `static void toplevel_close(void *data, struct xdg_toplevel *t)`
-- Defined: `gui/browser_ui.c:12785`
+- Defined: `gui/browser_ui.c:12912`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### deco_configure (function) `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
-- Defined: `gui/browser_ui.c:12794`
+- Defined: `gui/browser_ui.c:12921`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### set_cursor (function) `static void set_cursor(browser_window *w, int cur_kind)`
-- Defined: `gui/browser_ui.c:12806`
+- Defined: `gui/browser_ui.c:12933`
 - Doc: Applies the appropriate Wayland cursor for the given CSS cursor value. * A no-op when no themed cursor is available (the
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### element (function) `* cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
  * even without...`
-- Defined: `gui/browser_ui.c:12836`
+- Defined: `gui/browser_ui.c:12963`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fbw_split_y (function) `static double fbw_split_y(const freebug_window *fb)`
-- Defined: `gui/browser_ui.c:12906`
+- Defined: `gui/browser_ui.c:13033`
 - Doc: struct wl_buffer *buffer; void  *shm_data; size_t shm_size; cairo_surface_t *cairo_surface; double split;          /* lo
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_ensure_buffer (function) `static int freebug_ensure_buffer(freebug_window *fb)`
-- Defined: `gui/browser_ui.c:12915`
+- Defined: `gui/browser_ui.c:13042`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fbw_level_rgb (function) `static void fbw_level_rgb(int level, double *r, double *g, double *b)`
-- Defined: `gui/browser_ui.c:12942`
+- Defined: `gui/browser_ui.c:13069`
 - Doc: struct wl_shm_pool *pool = wl_shm_create_pool(fb->owner->shm, fd, (int32_t)size); fb->buffer = wl_shm_pool_create_buffer
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fbw_console_lines (function) `static size_t fbw_console_lines(const fb_buffer *log)`
-- Defined: `gui/browser_ui.c:12953`
+- Defined: `gui/browser_ui.c:13080`
 - Doc: } /* Color for a console level (dark devtools palette). static void fbw_level_rgb(int level, double *r, double *g, doubl
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_paint (function) `static void freebug_paint(freebug_window *fb)`
-- Defined: `gui/browser_ui.c:12966`
+- Defined: `gui/browser_ui.c:13093`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_redraw_fb (function) `static void freebug_redraw_fb(freebug_window *fb)`
-- Defined: `gui/browser_ui.c:13165`
+- Defined: `gui/browser_ui.c:13292`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_redraw (function) `static void freebug_redraw(browser_window *w)`
-- Defined: `gui/browser_ui.c:13174`
+- Defined: `gui/browser_ui.c:13301`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_hide (function) `static void freebug_hide(browser_window *w)`
-- Defined: `gui/browser_ui.c:13178`
+- Defined: `gui/browser_ui.c:13305`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fbw_xdg_surface_configure (function) `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- Defined: `gui/browser_ui.c:13194`
+- Defined: `gui/browser_ui.c:13321`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fbw_toplevel_configure (function) `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
                           ...`
-- Defined: `gui/browser_ui.c:13202`
+- Defined: `gui/browser_ui.c:13329`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fbw_toplevel_close (function) `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
-- Defined: `gui/browser_ui.c:13211`
+- Defined: `gui/browser_ui.c:13338`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_show (function) `static void freebug_show(browser_window *w)`
-- Defined: `gui/browser_ui.c:13221`
+- Defined: `gui/browser_ui.c:13348`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_toggle (function) `static void freebug_toggle(browser_window *w)`
-- Defined: `gui/browser_ui.c:13251`
+- Defined: `gui/browser_ui.c:13378`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_destroy (function) `static void freebug_destroy(browser_window *w)`
-- Defined: `gui/browser_ui.c:13256`
+- Defined: `gui/browser_ui.c:13383`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_owns_surface (function) `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
-- Defined: `gui/browser_ui.c:13263`
+- Defined: `gui/browser_ui.c:13390`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_is_open (function) `static int freebug_is_open(const browser_window *w)`
-- Defined: `gui/browser_ui.c:13267`
+- Defined: `gui/browser_ui.c:13394`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_repl_worker (function) `static tab *freebug_repl_worker(browser_window *w)`
-- Defined: `gui/browser_ui.c:13274`
+- Defined: `gui/browser_ui.c:13401`
 - Doc: Returns the live page worker for the REPL, lazily (re)opening one bound to the active page's cache if none is kept alive
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_eval (function) `static void freebug_eval(browser_window *w)`
-- Defined: `gui/browser_ui.c:13311`
+- Defined: `gui/browser_ui.c:13438`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_handle_key (function) `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
                              ...`
-- Defined: `gui/browser_ui.c:13351`
+- Defined: `gui/browser_ui.c:13478`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_pointer_button (function) `static void freebug_pointer_button(browser_window *w, uint32_t serial,
                           ...`
-- Defined: `gui/browser_ui.c:13386`
+- Defined: `gui/browser_ui.c:13513`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_pointer_motion (function) `static void freebug_pointer_motion(browser_window *w)`
-- Defined: `gui/browser_ui.c:13405`
+- Defined: `gui/browser_ui.c:13532`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_pointer_axis (function) `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
-- Defined: `gui/browser_ui.c:13427`
+- Defined: `gui/browser_ui.c:13554`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ptr_enter (function) `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_...`
-- Defined: `gui/browser_ui.c:13445`
+- Defined: `gui/browser_ui.c:13572`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ptr_leave (function) `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
-- Defined: `gui/browser_ui.c:13463`
+- Defined: `gui/browser_ui.c:13590`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ptr_motion (function) `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
-- Defined: `gui/browser_ui.c:13480`
+- Defined: `gui/browser_ui.c:13607`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### load_current (function) `static void load_current(browser_window *w)`
-- Defined: `gui/browser_ui.c:13505`
+- Defined: `gui/browser_ui.c:13632`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### go_omnibox (function) `static void go_omnibox(browser_window *w)`
-- Defined: `gui/browser_ui.c:13518`
+- Defined: `gui/browser_ui.c:13645`
 - Doc: Commits the URL bar like a real omnibox: an existing local file is opened as before; otherwise url_omnibox (pure) decide
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ptr_button (function) `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
               ...`
-- Defined: `gui/browser_ui.c:13563`
+- Defined: `gui/browser_ui.c:13690`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### scroll_line_px (function) `static double scroll_line_px(const browser_window *w)`
-- Defined: `gui/browser_ui.c:13792`
+- Defined: `gui/browser_ui.c:13919`
 - Doc: } } /* PV_IN_BUTTON (reset/generic) is inert in v1. } else { /* Clicking non-input: dispatch blur on old if any. if (old
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ptr_axis (function) `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32...`
-- Defined: `gui/browser_ui.c:13796`
+- Defined: `gui/browser_ui.c:13923`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ptr_frame (function) `static void ptr_frame(void *d, struct wl_pointer *p)`
-- Defined: `gui/browser_ui.c:13820`
+- Defined: `gui/browser_ui.c:13947`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### mime_is_text (function) `static int mime_is_text(const char *mime)`
-- Defined: `gui/browser_ui.c:13836`
+- Defined: `gui/browser_ui.c:13963`
 - Doc: } static const struct wl_pointer_listener pointer_listener = { .enter = ptr_enter, .leave = ptr_leave, .motion = ptr_mot
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### data_offer_source_actions (function) `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
-- Defined: `gui/browser_ui.c:13854`
+- Defined: `gui/browser_ui.c:13981`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### data_offer_action (function) `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
-- Defined: `gui/browser_ui.c:13857`
+- Defined: `gui/browser_ui.c:13984`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### data_device_data_offer (function) `static void data_device_data_offer(void *data, struct wl_data_device *dev,
                       ...`
-- Defined: `gui/browser_ui.c:13867`
+- Defined: `gui/browser_ui.c:13994`
 - Doc: } static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a) { (void)d; (void)o; (void)a; } sta
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### data_device_selection (function) `static void data_device_selection(void *data, struct wl_data_device *dev,
                        ...`
-- Defined: `gui/browser_ui.c:13879`
+- Defined: `gui/browser_ui.c:14006`
 - Doc: The clipboard selection changed. Commit the new offer (or NULL when the clipboard * was cleared), destroying any previou
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### data_device_enter (function) `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
              ...`
-- Defined: `gui/browser_ui.c:13898`
+- Defined: `gui/browser_ui.c:14025`
 - Doc: wl_data_offer_destroy(w->selection_offer); if (offer == NULL) { w->selection_offer = NULL; w->selection_offer_has_text =
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### data_device_leave (function) `static void data_device_leave(void *d, struct wl_data_device *dev)`
-- Defined: `gui/browser_ui.c:13903`
+- Defined: `gui/browser_ui.c:14030`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### data_device_motion (function) `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
                  ...`
-- Defined: `gui/browser_ui.c:13904`
+- Defined: `gui/browser_ui.c:14031`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### data_device_drop (function) `static void data_device_drop(void *d, struct wl_data_device *dev)`
-- Defined: `gui/browser_ui.c:13908`
+- Defined: `gui/browser_ui.c:14035`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### data_source_cancelled (function) `static void data_source_cancelled(void *data, struct wl_data_source *src)`
-- Defined: `gui/browser_ui.c:13919`
+- Defined: `gui/browser_ui.c:14046`
 - Doc: wl_fixed_t x, wl_fixed_t y) { (void)d; (void)dev; (void)t; (void)x; (void)y; } static void data_device_drop(void *d, str
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### data_source_send (function) `static void data_source_send(void *data, struct wl_data_source *src,
                             ...`
-- Defined: `gui/browser_ui.c:13925`
+- Defined: `gui/browser_ui.c:14052`
 - Doc: .enter = data_device_enter, .leave = data_device_leave, .motion = data_device_motion, .drop = data_device_drop, .selecti
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### data_source_target (function) `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
-- Defined: `gui/browser_ui.c:13938`
+- Defined: `gui/browser_ui.c:14065`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### freebug_copy_console (function) `static void freebug_copy_console(browser_window *w)`
-- Defined: `gui/browser_ui.c:13950`
+- Defined: `gui/browser_ui.c:14077`
 - Doc: Formats the entire Freebug console buffer and places it on the Wayland clipboard, so the user can paste the developer co
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### insert_pasted_text (function) `static void insert_pasted_text(browser_window *w, const char *text, size_t len)`
-- Defined: `gui/browser_ui.c:14008`
+- Defined: `gui/browser_ui.c:14135`
 - Doc: Inserts pasted bytes into whichever text target currently has focus (page input, User-Agent box, or the URL bar). Contro
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### clipboard_copy (function) `static void clipboard_copy(browser_window *w)`
-- Defined: `gui/browser_ui.c:14072`
+- Defined: `gui/browser_ui.c:14199`
 - Doc: Ctrl+C: copy the focused field's text (or, with nothing focused, the page address) * to the clipboard by owning a wl_dat
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### keyboard_keymap (function) `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
                             uint...`
-- Defined: `gui/browser_ui.c:14120`
+- Defined: `gui/browser_ui.c:14247`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### keyboard_enter (function) `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                         ...`
-- Defined: `gui/browser_ui.c:14141`
+- Defined: `gui/browser_ui.c:14268`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### keyboard_leave (function) `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
-- Defined: `gui/browser_ui.c:14148`
+- Defined: `gui/browser_ui.c:14275`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### key_sym_to_js_key (function) `static const char *key_sym_to_js_key(xkb_keysym_t sym)`
-- Defined: `gui/browser_ui.c:14156`
+- Defined: `gui/browser_ui.c:14283`
 - Doc: Maps an xkb keysym to a JS event.key string. Returns NULL for printable chars * (the utf8 bytes should be used as the ke
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### key_sym_to_keycode (function) `static int key_sym_to_keycode(xkb_keysym_t sym)`
-- Defined: `gui/browser_ui.c:14182`
+- Defined: `gui/browser_ui.c:14309`
 - Doc: Maps an xkb keysym to a JS keyCode number. For printable ASCII, returns the * ASCII value; for special keys, returns the
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### dispatch_js_event (function) `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
                            ...`
-- Defined: `gui/browser_ui.c:14207`
+- Defined: `gui/browser_ui.c:14334`
 - Doc: Dispatches a JS DOM event to the worker for the given node_id. The worker returns a re-derived view which is applied via
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### handle_key_press (function) `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
              ...`
-- Defined: `gui/browser_ui.c:14264`
+- Defined: `gui/browser_ui.c:14391`
 - Doc: Performs the effect of a single key press. Factored out of keyboard_key so a held key can be re-fired from the repeat ti
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### key_is_repeatable (function) `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)`
-- Defined: `gui/browser_ui.c:14594`
+- Defined: `gui/browser_ui.c:14721`
 - Doc: Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion and scrolling. A Ctrl chord (tab spawn,
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### key_repeat_arm (function) `static void key_repeat_arm(browser_window *w, uint32_t key)`
-- Defined: `gui/browser_ui.c:14610`
+- Defined: `gui/browser_ui.c:14737`
 - Doc: Arms the repeat timer for key: first fire after repeat_delay ms, then every * 1/repeat_rate s. A held key thus repeats u
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### key_repeat_stop (function) `static void key_repeat_stop(browser_window *w)`
-- Defined: `gui/browser_ui.c:14623`
+- Defined: `gui/browser_ui.c:14750`
 - Doc: 1/repeat_rate s. A held key thus repeats until released (key_repeat_stop). static void key_repeat_arm(browser_window *w,
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### key_repeat_fire (function) `static void key_repeat_fire(browser_window *w)`
-- Defined: `gui/browser_ui.c:14634`
+- Defined: `gui/browser_ui.c:14761`
 - Doc: Re-fires the currently held key. Called from the event loop when the timer expires. Modifiers/keysym are recomputed from
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### keyboard_key (function) `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                   ...`
-- Defined: `gui/browser_ui.c:14648`
+- Defined: `gui/browser_ui.c:14775`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### keyboard_modifiers (function) `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                  ...`
-- Defined: `gui/browser_ui.c:14688`
+- Defined: `gui/browser_ui.c:14815`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### keyboard_repeat_info (function) `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
-- Defined: `gui/browser_ui.c:14697`
+- Defined: `gui/browser_ui.c:14824`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### seat_caps (function) `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
-- Defined: `gui/browser_ui.c:14716`
+- Defined: `gui/browser_ui.c:14843`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### seat_name (function) `static void seat_name(void *d, struct wl_seat *s, const char *name)`
-- Defined: `gui/browser_ui.c:14727`
+- Defined: `gui/browser_ui.c:14854`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### registry_global (function) `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...`
-- Defined: `gui/browser_ui.c:14734`
+- Defined: `gui/browser_ui.c:14861`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### registry_remove (function) `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
-- Defined: `gui/browser_ui.c:14754`
+- Defined: `gui/browser_ui.c:14881`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ui_run_browser (function) `ui_status ui_run_browser(const char *start_url)`
-- Defined: `gui/browser_ui.c:14764`
+- Defined: `gui/browser_ui.c:14891`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### cost (function) `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
              * cheap pages paint at...`
-- Defined: `gui/browser_ui.c:15140`
+- Defined: `gui/browser_ui.c:15267`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### offset (function) `* offset (labels and the flag live in one place, no magic indices);`
-- Defined: `gui/browser_ui.c:155`
+- Defined: `gui/browser_ui.c:158`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fields (function) `* fields (so the 200+ render/event call sites stay unchanged);`
-- Defined: `gui/browser_ui.c:262`
+- Defined: `gui/browser_ui.c:265`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### delay (function) `* timer delay (tab_page.next_timer_ms);`
-- Defined: `gui/browser_ui.c:356`
+- Defined: `gui/browser_ui.c:359`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### main (function) `* * Feeder thread: downloads TS segments and writes them to the decoder pipe * so the main (Wayland) thread never blocks on HTTP. The thread is spawned by * video_play() and joined by video_stop();`
-- Defined: `gui/browser_ui.c:488`
+- Defined: `gui/browser_ui.c:491`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### proxy (function) `* and enable each proxy ("1" => the default port);`
-- Defined: `gui/browser_ui.c:976`
+- Defined: `gui/browser_ui.c:983`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### video_feeder_thread (function) `static void *video_feeder_thread(void *arg);`
-- Defined: `gui/browser_ui.c:1029`
+- Defined: `gui/browser_ui.c:1036`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### hb_is_allowlisted (function) `&& hb_is_allowlisted(w->hosts, ihost);`
-- Defined: `gui/browser_ui.c:1449`
+- Defined: `gui/browser_ui.c:1456`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### proceed (function) `* may proceed (cfg and pr->allowlisted are then set);`
-- Defined: `gui/browser_ui.c:1492`
+- Defined: `gui/browser_ui.c:1499`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### secure_fetch (function) `* through secure_fetch (Zero Trust);`
-- Defined: `gui/browser_ui.c:1740`
+- Defined: `gui/browser_ui.c:1748`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### string (function) `* or an empty string (unset, blocked, or off by caps.images), so there is no * decision to re-check, unlike load_images which still reads b->img_decision (a * box def carries no decision field, only t`
-- Defined: `gui/browser_ui.c:1888`
+- Defined: `gui/browser_ui.c:1896`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### do_load (function) `static void do_load(browser_window *w, const char *url);`
-- Defined: `gui/browser_ui.c:1930`
+- Defined: `gui/browser_ui.c:1938`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### toggle (function) `* No network: a capability toggle (images/CSS) re-renders from cache. Does nothing * when there is no cached source (start/error pages stay in plain-text mode). * * allow_js_nav: on a FRESH load (not `
-- Defined: `gui/browser_ui.c:1937`
+- Defined: `gui/browser_ui.c:1945`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### stylesheets (function) `* External stylesheets (Hito 27) follow the author-styles opt-in -- or the * trusted-host doctrine (Hito 28) -- (GET-only at the parent gate);`
-- Defined: `gui/browser_ui.c:2044`
+- Defined: `gui/browser_ui.c:2052`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### ALIVE (function) `* keep the worker ALIVE (tab_worker) so the console REPL can tab_eval against this * live page. The next render (or a tab switch) closes it. */ fb_buffer_free(&w->console);`
-- Defined: `gui/browser_ui.c:2179`
+- Defined: `gui/browser_ui.c:2187`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### resolve (function) `* origin so its relative references and local images resolve (confined to the * document's directory) -- a local page "acts like https" for resolution. */ clear_doc(w);`
-- Defined: `gui/browser_ui.c:2365`
+- Defined: `gui/browser_ui.c:2373`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### smaller (function) `* size when the content is smaller (height) or wider (min-width);`
-- Defined: `gui/browser_ui.c:2921`
+- Defined: `gui/browser_ui.c:2929`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### HarfBuzz (function) `* descriptor via HarfBuzz (text_shape);`
-- Defined: `gui/browser_ui.c:3289`
+- Defined: `gui/browser_ui.c:3297`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### produced (function) `* href tags every fragment produced (NULL for non-link runs) so a later hit-test * can recover the click target without re-walking the document. node_id tags the * originating element for JS click dis`
-- Defined: `gui/browser_ui.c:3697`
+- Defined: `gui/browser_ui.c:3705`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### line (function) `* its neighbours on the line (spec/page_view.md "Colapso de espacio en el borde * entre runs"). Read from src, the same buffer the loop scans, so a tab-expanded * <pre> agrees with itself. */ int star`
-- Defined: `gui/browser_ui.c:3781`
+- Defined: `gui/browser_ui.c:3789`
+- Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
+
+### block_leaves_flow (function) `static int block_leaves_flow(const rd_doc *doc, const rd_block *bk);`
+- Defined: `gui/browser_ui.c:4010`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### box (function) `* declared intrinsic size reserves that box (broken-image parity);`
-- Defined: `gui/browser_ui.c:4118`
+- Defined: `gui/browser_ui.c:4152`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### close_all_boxes (function) `static void close_all_boxes(rc_layout *L, rc_state *s, const ui_theme *th);`
-- Defined: `gui/browser_ui.c:4791`
+- Defined: `gui/browser_ui.c:4825`
 - Doc: Defined below with the flat-flow box machinery; a flex/grid item's interior uses the SAME box opening/closing code, so t
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### TABLE (function) `* container TABLE (rd_cont_at) rather than from the head run, because a container * whose children are all containers has no run of its own to read them from -- that * is the whole reason the table ex`
-- Defined: `gui/browser_ui.c:4857`
+- Defined: `gui/browser_ui.c:4891`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### struct (function) `* struct (0 = auto);`
-- Defined: `gui/browser_ui.c:5193`
+- Defined: `gui/browser_ui.c:5268`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### own (function) `* root box of its own (rb < 0) the walk must still stop at the * container's box, or it re-opens the container (and its ancestors) * INSIDE the item -- which is what painted a nested nav's own backdro`
-- Defined: `gui/browser_ui.c:5437`
+- Defined: `gui/browser_ui.c:5509`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### multicol_fragment (function) `static double multicol_fragment(rc_layout *L, const rc_open_box *ob, double content_bottom);`
-- Defined: `gui/browser_ui.c:5539`
+- Defined: `gui/browser_ui.c:5611`
 - Doc: True iff a border/outline style paints a line (solid..outset); none/hidden/unset * paint nothing. The fancier 3D styles 
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### behind (function) `* previous block left behind (CSS 2.1 8.3.1) -- read from the element's cascade, * never a theme constant. The old code used th->paragraph_gap as a floor here, * which gave a <div> the vertical rhythm`
-- Defined: `gui/browser_ui.c:5738`
+- Defined: `gui/browser_ui.c:5810`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### context (function) `* side by side inside the current box context (spec/float.md). Blocks are grouped by * float_id into items (document order);`
-- Defined: `gui/browser_ui.c:6211`
+- Defined: `gui/browser_ui.c:6292`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### x (function) `* reported x is already the BORDER x (the §7c.2 rule);`
-- Defined: `gui/browser_ui.c:6496`
+- Defined: `gui/browser_ui.c:6577`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### chain (function) `* chain (the box that left the normal flow at this pen position);`
-- Defined: `gui/browser_ui.c:7072`
+- Defined: `gui/browser_ui.c:7169`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
-### first (function) `* flush first (no-op when nothing is deferred). */ defer_flush(cr, w, L, &s, th, content_w, doc, &df);`
-- Defined: `gui/browser_ui.c:7134`
+### first (function) `* flush first (no-op when nothing is deferred). */ /* The open line beside the float is committed where it is BEFORE the * float context ends -- clearing first moved it to the float bottom. */ flush_l`
+- Defined: `gui/browser_ui.c:7236`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### anchor (function) `* anchor (spec/float.md §7d.3) exactly like a text block. An * empty/hidden one leaves cur_top untouched, so this is a no-op * for it. Without this a flex header never anchored and pulled * columns te`
-- Defined: `gui/browser_ui.c:7156`
+- Defined: `gui/browser_ui.c:7261`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### key (function) `* founders splits by key (stories, rail, footer nav each take * their column);`
-- Defined: `gui/browser_ui.c:7215`
+- Defined: `gui/browser_ui.c:7321`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
-### have (function) `* as they always have (spec/float.md §6b.3). */ rc_float_clear(&s);`
-- Defined: `gui/browser_ui.c:7229`
+### have (function) `* as they always have (spec/float.md §6b.3). The line still open beside * the previous float is committed first, at its own top. */ flush_line(L, &s, th);`
+- Defined: `gui/browser_ui.c:7335`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
-### standalone (function) `* must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */ int inline_replaced = replaced_is_inline_level(&s, b);`
-- Defined: `gui/browser_ui.c:7248`
+### standalone (function) `* must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */ size_t line_mate = replaced_opens_inline_line(doc, i);`
+- Defined: `gui/browser_ui.c:7356`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### it (function) `* column: flush first so the column lands above it (source order), * then move the anchor — the image bottom is the container top * for whatever follows. */ defer_flush(cr, w, L, &s, th, content_w, do`
-- Defined: `gui/browser_ui.c:7296`
+- Defined: `gui/browser_ui.c:7408`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rd_build (function) `* rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr, rgb_from_packed(b->caret_color));`
-- Defined: `gui/browser_ui.c:7955`
+- Defined: `gui/browser_ui.c:8067`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### descriptors (function) `* descriptors (especially the Wayland display fd) so the sink does * not corrupt the Wayland protocol connection — the most common * cause of the "page flashes white and render loops" bug. */ close(p[`
-- Defined: `gui/browser_ui.c:8191`
+- Defined: `gui/browser_ui.c:8303`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### again (function) `* before a respawn opens it again (the WNOHANG reap left the old * process alive long enough to make the new one fail with "Device * or resource busy"). Death is immediate, so the wait is too. */ kill`
-- Defined: `gui/browser_ui.c:8272`
+- Defined: `gui/browser_ui.c:8384`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### blocking (function) `* are blocking (POLLIN guaranteed data is available). */ int flags = fcntl(out_fd, F_GETFL, 0);`
-- Defined: `gui/browser_ui.c:8559`
+- Defined: `gui/browser_ui.c:8671`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rect (function) `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops land on the corners. Stops at explicit * 0-1000 positions (pos1000, -1 or NULL = evenly`
-- Defined: `gui/browser_ui.c:8827`
+- Defined: `gui/browser_ui.c:8939`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### layer (function) `* first layer (CSS multi-background: the first declared URL is the topmost) * and OVER bg_rgb/gradient, UNDER the border. Same sizing/repeat/position * as the first layer, using the SAME rc_box fields`
-- Defined: `gui/browser_ui.c:9079`
+- Defined: `gui/browser_ui.c:9191`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### convention (function) `* on the 3D bevel convention (light top/left, dark right/bottom). */ int is_3d = (style == CSS_BST_GROOVE || style == CSS_BST_RIDGE || style == CSS_BST_INSET || style == CSS_BST_OUTSET);`
-- Defined: `gui/browser_ui.c:9190`
+- Defined: `gui/browser_ui.c:9302`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### row_owner_block_id (function) `static int row_owner_block_id(const rc_layout *L, const rc_row *r);`
-- Defined: `gui/browser_ui.c:9339`
+- Defined: `gui/browser_ui.c:9451`
 - Doc: Paints one laid-out row at vertical position ry. Shared by the on-screen painter and the PDF exporter so both render ide
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### bg (function) `* its own DISTINCT bg (an inline span highlight) still paints. */ int own_bid = row_owner_block_id(L, r);`
-- Defined: `gui/browser_ui.c:9446`
+- Defined: `gui/browser_ui.c:9558`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### rows (function) `* RC_IMAGE rows (see its declaration);`
-- Defined: `gui/browser_ui.c:9652`
+- Defined: `gui/browser_ui.c:9764`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### the (function) `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset -- the shadow * follows the real content shape (PNG transparency, glyphs), not * th`
-- Defined: `gui/browser_ui.c:10224`
+- Defined: `gui/browser_ui.c:10336`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### fill (function) `* fill (paint_content_row's r->bg_rgb branch) cascades the SAME author * background-color as the box, but paints in the caller's separate row pass -- * left ungrouped, it shows as a solid, un-faded re`
-- Defined: `gui/browser_ui.c:10400`
+- Defined: `gui/browser_ui.c:10512`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### compositing (function) `* * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context * (box_forms_stacking_context: opacity<1, mix-blend != normal, isolation:isolate, * transform != none, or the posit`
-- Defined: `gui/browser_ui.c:10493`
+- Defined: `gui/browser_ui.c:10605`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### origin (function) `* top_url is the page origin (https or file://);`
-- Defined: `gui/browser_ui.c:11315`
+- Defined: `gui/browser_ui.c:11442`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### in (function) `* a line landed in (Stage 3), which no other dump shows. Text stays out (it is * --dump-dom's job);`
-- Defined: `gui/browser_ui.c:11393`
+- Defined: `gui/browser_ui.c:11520`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### presentation (function) `* affect presentation (a repaint, which re-runs layout, suffices);`
-- Defined: `gui/browser_ui.c:12069`
+- Defined: `gui/browser_ui.c:12196`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### resizes (function) `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);`
-- Defined: `gui/browser_ui.c:12771`
+- Defined: `gui/browser_ui.c:12898`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### down (function) `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void dispatch_mouse_event(browser_window *w, dom_node_id node_id, const char *event_type, int `
-- Defined: `gui/browser_ui.c:13439`
+- Defined: `gui/browser_ui.c:13566`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### loop (function) `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately might miss it). */ wl_display_roundtrip(w->display);`
-- Defined: `gui/browser_ui.c:13999`
+- Defined: `gui/browser_ui.c:14126`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### saving (function) `* disables saving (never clobber);`
-- Defined: `gui/browser_ui.c:14779`
+- Defined: `gui/browser_ui.c:14906`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### redraws (function) `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A 4 KiB buffer overflows when * accumulated messages exceed that, since manual flushes`
-- Defined: `gui/browser_ui.c:14858`
+- Defined: `gui/browser_ui.c:14985`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### applies (function) `* persisted choice applies (prefs_parse already clamped it to a valid mode). */ const char *js_env = getenv("FREEDOM_JS");`
-- Defined: `gui/browser_ui.c:14928`
+- Defined: `gui/browser_ui.c:15055`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ### flow (function) `* flow (counting them starved aplay). A video frame read while * overdue overwrites the held slot (standard player frame drop);`
-- Defined: `gui/browser_ui.c:15118`
+- Defined: `gui/browser_ui.c:15245`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/zoom.h`
 
 ## gui/browser_ui_internal.h
@@ -2306,49 +2320,49 @@ static void do_submit_post(browser_w...`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
 ### one (function) `* of forcing them all onto one (flex-wrap);`
-- Defined: `include/box_tree.h:77`
+- Defined: `include/box_tree.h:81`
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
 ### line (function) `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a grid item of its GRID parent (2026-07-11): columns it spans * (grid-column: span N);`
-- Defined: `include/box_tree.h:91`
+- Defined: `include/box_tree.h:97`
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
 ### node (function) `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller composes absolute coordinates by accumulating parent * origins. */ bt_status bt_layout(`
-- Defined: `include/box_tree.h:138`
+- Defined: `include/box_tree.h:144`
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
 ### flow (function) `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);`
-- Defined: `include/box_tree.h:177`
+- Defined: `include/box_tree.h:183`
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
 ### bottom (function) `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in box_x/y/w/h: * an absolutely positioned box whose containing block was never placed`
-- Defined: `include/box_tree.h:184`
+- Defined: `include/box_tree.h:190`
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
 ### placed (function) `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour). */ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const do`
-- Defined: `include/box_tree.h:191`
+- Defined: `include/box_tree.h:197`
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
 ### bt_box_hidden (function) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);`
-- Defined: `include/box_tree.h:209`
+- Defined: `include/box_tree.h:215`
 - Doc: Stage 2b visibility gate: 1 when the box at `bid` or any ancestor on the parent_id chain has visibility HIDDEN/COLLAPSE 
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
 ### bt_oof_anchor (function) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);`
-- Defined: `include/box_tree.h:223`
+- Defined: `include/box_tree.h:229`
 - Doc: Stage 2d out-of-flow subtree classification (spec/box_engine.md). Both walk the parent_id chain from `bid` (self first) 
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
 ### bt_oof_root (function) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);`
-- Defined: `include/box_tree.h:224`
+- Defined: `include/box_tree.h:230`
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
@@ -2994,13 +3008,17 @@ static void do_submit_post(browser_w...`
 - Defined: `include/flex_layout.h:200`
 - Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
+### space (function) `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin (auto_l[i]/auto_r[i] non-zero), which overrides justify-content. With no * auto margin or no positiv`
+- Defined: `include/flex_layout.h:206`
+- Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+
 ### fx_auto_min_size (function) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
-- Defined: `include/flex_layout.h:226`
+- Defined: `include/flex_layout.h:235`
 - Doc: min_content  the item's min-content size (its longest unbreakable word, or a replaced element's intrinsic size), in the 
 - Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### fx_justify_name (function) `const char *fx_justify_name(fx_justify j);`
-- Defined: `include/flex_layout.h:282`
+- Defined: `include/flex_layout.h:291`
 - Doc: Stable, short English name of a justify mode for structured/agent output. Never * NULL; an unknown enum value yields "st
 - Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
@@ -3493,252 +3511,258 @@ static void do_submit_post(browser_w...`
 ## include/page_view.h
 
 ### container (function) `* cont_id groups runs of one container (-1 = none);`
-- Defined: `include/page_view.h:207`
+- Defined: `include/page_view.h:212`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### bx_display (function) `* bx_display (flex/grid);`
-- Defined: `include/page_view.h:208`
+- Defined: `include/page_view.h:213`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### order (function) `* groups the runs of ONE floated element in document order (-1 = not in a float);`
-- Defined: `include/page_view.h:269`
+- Defined: `include/page_view.h:277`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### CSS_LEN_UNSET (function) `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an in-flow offset, reader-safe);`
-- Defined: `include/page_view.h:460`
+- Defined: `include/page_view.h:468`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### scale (function) `* scale(1)) and rotate in whole degrees (transform_rotate);`
-- Defined: `include/page_view.h:535`
+- Defined: `include/page_view.h:543`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### nonzero (function) `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out);`
-- Defined: `include/page_view.h:734`
+- Defined: `include/page_view.h:743`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### resolved (function) `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full with reader == 0 and prefers_dark == 0. */ pv_status pv_build_full(const hp_document`
-- Defined: `include/page_view.h:741`
+- Defined: `include/page_view.h:750`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### policy (function) `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The external text precedes the document's own <style> * blocks in the parsed sheet (document-or`
-- Defined: `include/page_view.h:749`
+- Defined: `include/page_view.h:758`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### cause (function) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?" is a measurement instead of a grep over the * dispatch, which sees property names on`
-- Defined: `include/page_view.h:767`
+- Defined: `include/page_view.h:776`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_new (function) `pv_view *pv_new(void);`
-- Defined: `include/page_view.h:779`
+- Defined: `include/page_view.h:788`
 - Doc: Allocates an empty view (used by the IPC deserialiser to rebuild a view on the * receiving side). Returns NULL on alloca
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### form (function) `* form (-1 if none);`
-- Defined: `include/page_view.h:798`
+- Defined: `include/page_view.h:807`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_emphasis (function) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
-- Defined: `include/page_view.h:830`
+- Defined: `include/page_view.h:839`
 - Doc: Sets the inline emphasis flags (bold from <b>/<strong>/<th>, italic from <i>/<em>) on the most recently appended run. No
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### default (function) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
-- Defined: `include/page_view.h:835`
+- Defined: `include/page_view.h:844`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_color (function) `void pv_set_color(pv_view *v, int fg_rgb);`
-- Defined: `include/page_view.h:838`
+- Defined: `include/page_view.h:847`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_bgcolor (function) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
-- Defined: `include/page_view.h:845`
+- Defined: `include/page_view.h:854`
 - Doc: Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most recently appended run. No-op when the vie
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_text_style (function) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
-- Defined: `include/page_view.h:854`
+- Defined: `include/page_view.h:863`
 - Doc: Sets the author text presentation (text_align as a css_align, font_scale as a font-size percent or 0, font_abs as 1 when
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_text_ext_reset (function) `void pv_text_ext_reset(pv_text_ext *e);`
-- Defined: `include/page_view.h:901`
+- Defined: `include/page_view.h:910`
 - Doc: Gradient text (2026-07-19). text_fill: -webkit-text-fill-color from the nearest ancestor that sets it (packed / CC_COLOR
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### ancestors (function) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box stack in both directions: that is * what makes `visibility` inherited-but-overridable,`
-- Defined: `include/page_view.h:906`
+- Defined: `include/page_view.h:915`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_text_ext (function) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
-- Defined: `include/page_view.h:916`
+- Defined: `include/page_view.h:925`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_grad_text (function) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
-- Defined: `include/page_view.h:922`
+- Defined: `include/page_view.h:931`
 - Doc: Sets the gradient-text fill (grad_text_*) verbatim on the most recently appended run. n < 2 is a no-op (no gradient). Us
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### run (function) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an empty or NULL view. Both append helpers * default cont_id to -1 (no container), cont_wr`
-- Defined: `include/page_view.h:925`
+- Defined: `include/page_view.h:934`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_row_span (function) `void pv_set_row_span(pv_view *v, int row_span);`
-- Defined: `include/page_view.h:938`
+- Defined: `include/page_view.h:947`
 - Doc: Sets the container's grid track sizes and this run's ITEM column span on the most recently appended run (2026-07-11). co
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_grid_area (function) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
-- Defined: `include/page_view.h:942`
+- Defined: `include/page_view.h:951`
 - Doc: Sets the last run's RESOLVED named-grid cell (-1, -1 = auto-placed). See * spec/grid_areas.md; the name matching happens
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_grid_rows (function) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
-- Defined: `include/page_view.h:943`
+- Defined: `include/page_view.h:952`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_ua_tag (function) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
-- Defined: `include/page_view.h:948`
+- Defined: `include/page_view.h:957`
 - Doc: Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its nearest block-level ancestor). Out-of-r
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_cont_box (function) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
-- Defined: `include/page_view.h:952`
+- Defined: `include/page_view.h:961`
 - Doc: Sets the last run's cont_box_id (the box enclosing its container's items; -1 = * none). No-op on an empty view.
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_grid (function) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
-- Defined: `include/page_view.h:953`
+- Defined: `include/page_view.h:962`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_flex (function) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int flex_align_self);`
-- Defined: `include/page_view.h:961`
+- Defined: `include/page_view.h:970`
+- Doc: Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1 uns
+- Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+
+### pv_set_flex_mauto (function) `void pv_set_flex_mauto(pv_view *v, int mauto);`
+- Defined: `include/page_view.h:973`
 - Doc: Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1 uns
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_cont_item (function) `void pv_set_cont_item(pv_view *v, int cont_item);`
-- Defined: `include/page_view.h:966`
+- Defined: `include/page_view.h:977`
 - Doc: Sets the container-item ordinal on the most recently appended run (-1 = none). * No-op on an empty or NULL view; the app
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_float (function) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int float_mr, int float_mr_pct, int float_oid, int float_oside, int float_oml, int float_om`
-- Defined: `include/page_view.h:975`
+- Defined: `include/page_view.h:986`
 - Doc: Float layout setter for the most recently appended run (spec/float.md): float_side (css_float), float_id (floated-elemen
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_box (function) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
-- Defined: `include/page_view.h:985`
+- Defined: `include/page_view.h:996`
 - Doc: Sets the author box model on the most recently appended run (left/right insets, width cap, centered flag, and top/bottom
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_box_pct (function) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
-- Defined: `include/page_view.h:991`
+- Defined: `include/page_view.h:1002`
 - Doc: Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the most recently appended run. No-op on an emp
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_node_id (function) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
-- Defined: `include/page_view.h:997`
+- Defined: `include/page_view.h:1008`
 - Doc: Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of the source element. No-op on an empty o
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_block_id (function) `void pv_set_block_id(pv_view *v, int block_id);`
-- Defined: `include/page_view.h:1002`
+- Defined: `include/page_view.h:1013`
 - Doc: Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of the box-carrying block it belongs to 
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_own_box (function) `void pv_set_own_box(pv_view *v, int box_id);`
-- Defined: `include/page_view.h:1006`
+- Defined: `include/page_view.h:1017`
 - Doc: Records the replaced element's own box def index on the last appended run. See * pv_run.own_box_id for why this is separ
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_oof (function) `void pv_set_oof(pv_view *v, int oof);`
-- Defined: `include/page_view.h:1010`
+- Defined: `include/page_view.h:1021`
 - Doc: Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree). No-op on an empty or NULL vi
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_cont_count (function) `size_t pv_cont_count(const pv_view *v);`
-- Defined: `include/page_view.h:1025`
+- Defined: `include/page_view.h:1036`
 - Doc: pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] * (i == a cont_id) or NULL when out of range /
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_cont_at (function) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
-- Defined: `include/page_view.h:1026`
+- Defined: `include/page_view.h:1037`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_input_checked (function) `void pv_set_input_checked(pv_view *v, int checked);`
-- Defined: `include/page_view.h:1030`
+- Defined: `include/page_view.h:1041`
 - Doc: Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run. No-op on an empty o
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_set_input_select_opts (function) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
-- Defined: `include/page_view.h:1034`
+- Defined: `include/page_view.h:1045`
 - Doc: Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy. N
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_free (function) `void pv_free(pv_view *v);`
-- Defined: `include/page_view.h:1037`
+- Defined: `include/page_view.h:1048`
 - Doc: Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy. N
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_count (function) `size_t pv_count(const pv_view *v);`
-- Defined: `include/page_view.h:1040`
+- Defined: `include/page_view.h:1051`
 - Doc: Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy. N
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_at (function) `const pv_run *pv_at(const pv_view *v, size_t i);`
-- Defined: `include/page_view.h:1041`
+- Defined: `include/page_view.h:1052`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_box_count (function) `size_t pv_box_count(const pv_view *v);`
-- Defined: `include/page_view.h:1045`
+- Defined: `include/page_view.h:1056`
 - Doc: Box tree accessors (Step D). pv_box_count is the number of box definitions; * pv_box_at returns boxes[i] (i == a block_i
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ### pv_box_at (function) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
-- Defined: `include/page_view.h:1046`
+- Defined: `include/page_view.h:1057`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
@@ -3915,78 +3939,78 @@ static void do_submit_post(browser_w...`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### to (function) `* belongs to (-1 = none);`
-- Defined: `include/render_doc.h:228`
+- Defined: `include/render_doc.h:229`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### rdp_images_warning (function) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose img_decision is computed with * rdp_image_decision(caps, top_level_url, src, img_w, img_h) `
-- Defined: `include/render_doc.h:277`
+- Defined: `include/render_doc.h:278`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### rd_free (function) `void rd_free(rd_doc *d);`
-- Defined: `include/render_doc.h:287`
+- Defined: `include/render_doc.h:288`
 - Doc: Builds the paint-ready document from an inert display list and the page's capabilities. view == NULL is treated as an em
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### rd_count (function) `size_t rd_count(const rd_doc *d);`
-- Defined: `include/render_doc.h:290`
+- Defined: `include/render_doc.h:291`
 - Doc: images and caps.images is false, a single RD_NOTICE block carrying rdp_images_warning() is prepended so the user is alwa
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### rd_at (function) `const rd_block *rd_at(const rd_doc *d, size_t i);`
-- Defined: `include/render_doc.h:291`
+- Defined: `include/render_doc.h:292`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### rd_box_count (function) `size_t rd_box_count(const rd_doc *d);`
-- Defined: `include/render_doc.h:295`
+- Defined: `include/render_doc.h:296`
 - Doc: Box tree accessors (Step D). rd_box_count is the number of box definitions (0 when * caps.css is off); rd_box_at returns
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### rd_box_at (function) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-- Defined: `include/render_doc.h:296`
+- Defined: `include/render_doc.h:297`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### rd_cont_count (function) `size_t rd_cont_count(const rd_doc *d);`
-- Defined: `include/render_doc.h:300`
+- Defined: `include/render_doc.h:301`
 - Doc: Container table accessors. rd_cont_count is the number of containers; rd_cont_at * returns conts[i] (i == a run's cont_i
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### rd_cont_at (function) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-- Defined: `include/render_doc.h:301`
+- Defined: `include/render_doc.h:302`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### rd_kind_name (function) `const char *rd_kind_name(rd_kind k);`
-- Defined: `include/render_doc.h:305`
+- Defined: `include/render_doc.h:306`
 - Doc: Stable, short English name of a block kind for structured/agent output. Never * NULL; an unknown enum value yields "bloc
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### rd_block_tag (function) `const char *rd_block_tag(const rd_block *b);`
-- Defined: `include/render_doc.h:313`
+- Defined: `include/render_doc.h:314`
 - Doc: Canonical HTML tag name for a block, so the presentation layer can look up its user-agent box (box_style) without re-der
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### decision (function) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char *rd_image_label(rdp_img_decision d);`
-- Defined: `include/render_doc.h:316`
+- Defined: `include/render_doc.h:317`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### IMG_FAIL_OK (function) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-- Defined: `include/render_doc.h:322`
+- Defined: `include/render_doc.h:323`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ### rd_input_label (function) `const char *rd_input_label(int input_type);`
-- Defined: `include/render_doc.h:327`
+- Defined: `include/render_doc.h:328`
 - Doc: Stable, short English name of a form control type (a pv_input_type value), e.g. * "text" / "password" / "submit". Never 
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
@@ -4313,37 +4337,41 @@ static void do_submit_post(browser_w...`
 
 ## include/tls_impersonate.h
 
-### chain (function) `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT re-applies the strength policy (RSA<3072 leaf, SHA-1 fatal, * hybrid-KE) with OpenSSL over wh`
-- Defined: `include/tls_impersonate.h:29`
+### path (function) `* Zero Knowledge path (PQ-hybrid, VERIFYPEER). * * 2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed serialization of * the parent<->helper request/response. Every field is bounded (TI_M`
+- Defined: `include/tls_impersonate.h:26`
 - Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
 
-### ti_should_impersonate (function) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int host_in_impersonate);`
-- Defined: `include/tls_impersonate.h:52`
-- Doc: The triple opt-in gate (pure). Returns 1 IFF all three signals are set: host_in_allowlist  — an explicit allow.conf entr
+### chain (function) `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT re-applies the strength policy (RSA<3072 leaf, SHA-1 fatal, * hybrid-KE) with OpenSSL over wh`
+- Defined: `include/tls_impersonate.h:32`
+- Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
+
+### ti_should_impersonate (function) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);`
+- Defined: `include/tls_impersonate.h:56`
+- Doc: The double opt-in + user-flag gate (pure). Returns 1 IFF all three signals are set: host_in_allowlist  — an explicit all
 - Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
 
 ### success (function) `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out left zeroed / owned buffers freed). */ size_t ti_encode_req(const ti_req *r, uint8_t *`
-- Defined: `include/tls_impersonate.h:93`
-- Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
-
-### ti_decode_req (function) `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
 - Defined: `include/tls_impersonate.h:97`
 - Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
 
-### ti_req_free (function) `void ti_req_free(ti_req *r);`
-- Defined: `include/tls_impersonate.h:98`
-- Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
-
-### ti_encode_resp (function) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
-- Defined: `include/tls_impersonate.h:100`
-- Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
-
-### ti_decode_resp (function) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
+### ti_decode_req (function) `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
 - Defined: `include/tls_impersonate.h:101`
 - Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
 
-### ti_resp_free (function) `void ti_resp_free(ti_resp *r);`
+### ti_req_free (function) `void ti_req_free(ti_req *r);`
 - Defined: `include/tls_impersonate.h:102`
+- Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
+
+### ti_encode_resp (function) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
+- Defined: `include/tls_impersonate.h:104`
+- Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
+
+### ti_decode_resp (function) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
+- Defined: `include/tls_impersonate.h:105`
+- Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
+
+### ti_resp_free (function) `void ti_resp_free(ti_resp *r);`
+- Defined: `include/tls_impersonate.h:106`
 - Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
 
 ## include/ui.h
@@ -4698,72 +4726,77 @@ static void do_submit_post(browser_w...`
 - Defined: `src/box_tree.c:79`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
+### layout_flex (function) `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
+                    ...`
+- Defined: `src/box_tree.c:97`
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
+
 ### layout_grid (function) `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
                     ...`
-- Defined: `src/box_tree.c:201`
+- Defined: `src/box_tree.c:220`
 - Doc: Grid: sized columns via flex_layout (fixed px reserved first, the rest split by fr weight; a NULL grid_track keeps the h
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### layout_node (function) `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)`
-- Defined: `src/box_tree.c:308`
+- Defined: `src/box_tree.c:327`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### bt_layout (function) `bt_status bt_layout(bt_node *root, double avail_w)`
-- Defined: `src/box_tree.c:353`
+- Defined: `src/box_tree.c:372`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### assign_doc_order (function) `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
                   ...`
-- Defined: `src/box_tree.c:393`
+- Defined: `src/box_tree.c:412`
 - Doc: Recursive doc_order assignment. The box tree is acyclic (each box has at most one parent_id), so the visited bitmap is j
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### find_positioned_ancestor (function) `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
                        ...`
-- Defined: `src/box_tree.c:410`
+- Defined: `src/box_tree.c:429`
 - Doc: Walk the parent_id chain from `start` to find the nearest ancestor with position != STATIC. Returns the ancestor's index
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### resolve_inset (function) `static double resolve_inset(int v, int pct_pm, double basis)`
-- Defined: `src/box_tree.c:430`
+- Defined: `src/box_tree.c:449`
 - Doc: Resolves an inset <length-percentage>: PV_LEN_UNSET or BT_LEN_AUTO with no percentage half → 0 (anchor at the containing
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### inset_unset (function) `static int inset_unset(int v, int pct_pm)`
-- Defined: `src/box_tree.c:439`
+- Defined: `src/box_tree.c:458`
 - Doc: Stage 2b: an inset axis the author left undeclared (UNSET) or `auto`. Both mean "no inset" for the unset checks; resolve
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### bt_resolve_positioning (function) `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                           ...`
-- Defined: `src/box_tree.c:443`
+- Defined: `src/box_tree.c:462`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### bt_resolve_positioning_ex (function) `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
                        ...`
-- Defined: `src/box_tree.c:454`
+- Defined: `src/box_tree.c:473`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### block (function) `* approximation of the true block (same flow neighbourhood), strictly
              * better than ...`
-- Defined: `src/box_tree.c:512`
+- Defined: `src/box_tree.c:531`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### oof_walk (function) `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)`
-- Defined: `src/box_tree.c:634`
+- Defined: `src/box_tree.c:653`
 - Doc: Shared walk for the Stage 2d classifiers: nearest==1 stops at the first * ABSOLUTE/FIXED box, nearest==0 remembers the l
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### bt_oof_anchor (function) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
-- Defined: `src/box_tree.c:651`
+- Defined: `src/box_tree.c:670`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### bt_oof_root (function) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
-- Defined: `src/box_tree.c:655`
+- Defined: `src/box_tree.c:674`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ### bt_box_hidden (function) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
-- Defined: `src/box_tree.c:659`
+- Defined: `src/box_tree.c:678`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ## src/browser.c
@@ -5425,387 +5458,387 @@ static int interp_border_s...`
 
 ### emit_content (function) `static int emit_content(css_decl *dst, int cap, const char *str,
                         char (*c...`
-- Defined: `src/css.c:1381`
-- Doc: w = comp_px[0]; wp = comp_pm[0]; h = (n == 2) ? comp_px[1] : CSS_LEN_AUTO; hp = (n == 2) ? comp_pm[1] : 0; kw = CSS_BGS_
+- Defined: `src/css.c:1382`
+- Doc: h = (n == 2) ? comp_px[1] : CSS_LEN_AUTO; hp = (n == 2) ? comp_pm[1] : 0; /* The bare keyword keeps its own code; an exp
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_hex_val (function) `static int css_hex_val(char c)`
-- Defined: `src/css.c:1399`
+- Defined: `src/css.c:1400`
 - Doc: R8: CSS Syntax 4.3.7 escape consumption inside a quoted value. Backslash + 1-6 hex digits (then one optional whitespace,
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_emit_utf8 (function) `static size_t css_emit_utf8(unsigned int cp, char *out)`
-- Defined: `src/css.c:1406`
+- Defined: `src/css.c:1407`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_unescape_into (function) `static void css_unescape_into(char *dst, size_t cap, const char *src, size_t n)`
-- Defined: `src/css.c:1428`
+- Defined: `src/css.c:1429`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### expand_content (function) `static int expand_content(const char *val, css_decl *dst, int cap,
                           char...`
-- Defined: `src/css.c:1468`
+- Defined: `src/css.c:1469`
 - Doc: R8: content property. Extracts quoted string, stores in content pool, emits * P_CONTENT with pool index. Returns 1 if pa
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### expand_grid_areas (function) `static int expand_grid_areas(const char *val, css_decl *dst, int cap,
                            ...`
-- Defined: `src/css.c:1504`
+- Defined: `src/css.c:1505`
 - Doc: grid-template-areas (CSS Grid 1 7.3): the value is a list of quoted strings, one per grid row. It is stored VERBATIM in 
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### expand_grid_template (function) `static int expand_grid_template(const char *val, css_decl *dst, int cap,
                         ...`
-- Defined: `src/css.c:1571`
+- Defined: `src/css.c:1572`
 - Doc: grid-template: <rows> / <columns>            e.g. `auto / 15.5rem minmax(0,1fr)` grid-template: "a b" 1fr "c d" 1fr / 20
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### expand_box_shadow (function) `static int expand_box_shadow(const char *val, css_decl *dst, int cap)`
-- Defined: `src/css.c:1622`
+- Defined: `src/css.c:1623`
 - Doc: box-shadow (single layer): up to four lengths in order dx, dy, blur, spread, an optional color, and an optional `inset` 
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### interp_flex_factor (function) `static int interp_flex_factor(const char *v)`
-- Defined: `src/css.c:1650`
+- Defined: `src/css.c:1651`
 - Doc: flex-grow / flex-shrink: a non-negative number stored x100 (0.5 -> 50), clamped to * [0, CSS_FLEX_FACTOR_MAX]. Negative 
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### interp_flex_basis (function) `static int interp_flex_basis(const char *v, int *out)`
-- Defined: `src/css.c:1660`
+- Defined: `src/css.c:1661`
 - Doc: flex-basis: `auto`/`content` -> CSS_LEN_AUTO; a non-negative length -> px; a percentage as per-mille encoded negative (e
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### expand_flex (function) `static int expand_flex(const char *val, css_decl *dst, int cap)`
-- Defined: `src/css.c:1694`
+- Defined: `src/css.c:1695`
 - Doc: flex shorthand -> the three contiguous P_FLEX_GROW/SHRINK/BASIS slots. Keywords none/auto/initial; otherwise up to three
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### interp_align_kw (function) `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)`
-- Defined: `src/css.c:1739`
+- Defined: `src/css.c:1740`
 - Doc: align-items / align-self / align-content / justify-items keyword. allow_auto is for * align-self; allow_dist (space-*) i
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### interp_flex_direction (function) `static int interp_flex_direction(const char *v)`
-- Defined: `src/css.c:1752`
+- Defined: `src/css.c:1753`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### interp_box_orient (function) `static int interp_box_orient(const char *v)`
-- Defined: `src/css.c:1770`
+- Defined: `src/css.c:1771`
 - Doc: 2009 flexbox `box-orient` axis names onto `css_flex_direction`.  Contract: the 2009 draft names the main axis, not the d
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### interp_flex_wrap (function) `static int interp_flex_wrap(const char *v)`
-- Defined: `src/css.c:1776`
+- Defined: `src/css.c:1777`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### interp_grid_flow (function) `static int interp_grid_flow(const char *v)`
-- Defined: `src/css.c:1784`
+- Defined: `src/css.c:1785`
 - Doc: static int interp_box_orient(const char *v) { if (csel_ci_eq(v, "horizontal") || csel_ci_eq(v, "inline-axis")) return CS
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### interp_grid_span (function) `static int interp_grid_span(const char *v)`
-- Defined: `src/css.c:1810`
+- Defined: `src/css.c:1811`
 - Doc: grid-column / grid-row: only the `span N` form is supported -> N (clamped to * [1, CSS_GRID_SPAN_MAX]). Line-number / na
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### copy_trim (function) `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
-- Defined: `src/css.c:1829`
+- Defined: `src/css.c:1830`
 - Doc: Copies s[a,b) into dst (bounded, NUL-terminated), trimming ASCII whitespace from * both ends. Returns the trimmed length
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### strip_important (function) `static int strip_important(char *val)`
-- Defined: `src/css.c:1842`
+- Defined: `src/css.c:1843`
 - Doc: Strips a trailing "!important" (case-insensitive, with optional whitespace before '!' and between '!' and the keyword) f
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### scope_has_class (function) `static int scope_has_class(const char *list, const char *name, size_t len)`
-- Defined: `src/css.c:1922`
+- Defined: `src/css.c:1923`
 - Doc: memcpy(tab[slot].name, namebuf, name_len + 1); strcpy(tab[slot].value, valbuf); if (slot == *ntab) ++*ntab; } } i = v; c
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### var_append (function) `static int var_append(char *out, size_t outcap, size_t *o, const char *s, size_t n)`
-- Defined: `src/css.c:1991`
+- Defined: `src/css.c:1992`
 - Doc: t[k] = '\0'; if (strcmp(t, "html") != 0 && strcmp(t, "body") != 0) return 0; i = j; continue; } return 0;               
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### value (function) `* any other unsupported value (fail closed, never a partially-substituted value). */
 static int r...`
-- Defined: `src/css.c:2018`
+- Defined: `src/css.c:2019`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### overflowed (function) `* overflowed (caller drops the declaration). */
 static int resolve_var(const char *val, char *out...`
-- Defined: `src/css.c:2078`
+- Defined: `src/css.c:2079`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### tr_mul (function) `static void tr_mul(double out[6], const double l[6], const double r[6])`
-- Defined: `src/css.c:2151`
+- Defined: `src/css.c:2152`
 - Doc: Right-multiply 2D affine matrices: out = l * r (r applies first).  Contract: matrices are {a,b,c,d,e,f} with x' = a*x + 
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### tr_decompose (function) `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
                         in...`
-- Defined: `src/css.c:2171`
+- Defined: `src/css.c:2172`
 - Doc: QR-decompose an affine matrix into whole px/percent/degree slots.  Contract: the matrix() branch's math, shared so the s
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### parse_matrix6 (function) `static int parse_matrix6(const char *p, size_t argn, double m6[6])`
-- Defined: `src/css.c:2194`
+- Defined: `src/css.c:2195`
 - Doc: Parse matrix(a,b,c,d,e,f): six comma-separated unitless numbers.  Contract: the matrix() branch's argument grammar, shar
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### split_top_args (function) `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,
                ...`
-- Defined: `src/css.c:2226`
+- Defined: `src/css.c:2227`
 - Doc: Split a top-level comma list honouring paren depth.  Contract: calc()/min()/max() nest commas that must not split argume
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### translate3d (function) `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine
  * renders z as nothing,...`
-- Defined: `src/css.c:2256`
+- Defined: `src/css.c:2257`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### translate3d (function) `* translate3d()/translateZ() flatten to their 2D projection. Any other
  * transform function (per...`
-- Defined: `src/css.c:2506`
+- Defined: `src/css.c:2507`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### origin_component (function) `static int origin_component(const char *tok, int axis, int *out)`
-- Defined: `src/css.c:2699`
+- Defined: `src/css.c:2700`
 - Doc: One transform-origin component: keyword (axis-checked), a percent, or a bare zero. axis: 0 = x (left/right valid), 1 = y
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### expand_transform_origin (function) `static int expand_transform_origin(const char *val, css_decl *dst, int cap)`
-- Defined: `src/css.c:2725`
+- Defined: `src/css.c:2726`
 - Doc: transform-origin (M1.2c): 1-2 values; keywords and percents only (px lengths fail closed -- the parser has no box size t
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### expand_gap (function) `static int expand_gap(const char *val, css_decl *dst, int cap)`
-- Defined: `src/css.c:2757`
+- Defined: `src/css.c:2758`
 - Doc: gap / grid-gap (2026-07-10): one value keeps the pre-existing semantics (both axes; row-gap stays unset and falls back t
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### ignored (function) `* engine slot and is ignored (documented simplification, like list-style's
  * ignored tokens). An...`
-- Defined: `src/css.c:2776`
+- Defined: `src/css.c:2777`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### property (function) `* error drops the whole property (fail closed). */
 static int expand_clip(const char *val, css_de...`
-- Defined: `src/css.c:2811`
+- Defined: `src/css.c:2812`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### shorthand (function) `* generic bucket keeps the rest of the shorthand (same net effect as the
  * font-family longhand ...`
-- Defined: `src/css.c:2854`
+- Defined: `src/css.c:2855`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### interpret_prop_dispatch (function) `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
    ...`
-- Defined: `src/css.c:2925`
+- Defined: `src/css.c:2926`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### grammar (function) `* grammar (`justify`/`distribute`) is not `justify-content`'s. Guessing
      * there would be inv...`
-- Defined: `src/css.c:2943`
+- Defined: `src/css.c:2944`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### wide_claim (function) `static int wide_claim(const char *prop, css_decl *dst, int cap,
                       char (*urlt...`
-- Defined: `src/css.c:3472`
+- Defined: `src/css.c:3473`
 - Doc: SHORTHAND it applies to every longhand the shorthand expands to. So honouring one needs the longhand SLOT SET, not the p
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### interpret_prop (function) `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
             ...`
-- Defined: `src/css.c:3512`
+- Defined: `src/css.c:3513`
 - Doc: The two value-level rules that hold for EVERY property, applied once around the dispatch so no per-property branch has t
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### drop_copy_text (function) `static void drop_copy_text(char *dst, size_t cap, const char *src)`
-- Defined: `src/css.c:3539`
+- Defined: `src/css.c:3540`
 - Doc: Copies hostile CSS text into a fixed report buffer: bounded, NUL-terminated, truncated with a visible "..." marker rathe
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### drop_record (function) `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)`
-- Defined: `src/css.c:3558`
+- Defined: `src/css.c:3559`
 - Doc: Records one dropped declaration, coalescing by (property, cause). `total` counts every drop seen even once the listing i
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### interpret_decls (function) `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
                ...`
-- Defined: `src/css.c:3636`
+- Defined: `src/css.c:3637`
 - Doc: Splits a ';'-separated declaration block into dst (up to cap). Returns count. tab/ntab is the custom-property table var(
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### add_rule (function) `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
                      siz...`
-- Defined: `src/css.c:3654`
-- Doc: css_drop_log *log) { size_t count = 0, i = 0; while (i < n && count < cap) { size_t j = i; while (j < n && s[j] != ';') 
+- Defined: `src/css.c:3680`
+- Doc: } else if (c == '"' || c == '\'') { quote = c; } else if (c == '(' || c == '[') { ++depth; } else if (c == ')' || c == '
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### skip_at_rule (function) `static size_t skip_at_rule(const char *s, size_t i, size_t n)`
-- Defined: `src/css.c:3739`
+- Defined: `src/css.c:3764`
 - Doc: Skips an @-rule starting at s[i] ('@'): to the terminating ';' or past a * brace-balanced block. Returns the index just 
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### block_end (function) `static size_t block_end(const char *s, size_t open, size_t n)`
-- Defined: `src/css.c:3755`
+- Defined: `src/css.c:3780`
 - Doc: Index just past the '}' that closes the block whose '{' is at s[open]. n if * unbalanced.
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### trim_inplace (function) `static void trim_inplace(char *s)`
-- Defined: `src/css.c:3791`
+- Defined: `src/css.c:3816`
 - Doc: Not a length. Keep the historical bare-number reading so a query with a unit this engine does not model still compares s
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### copy_lower_trim (function) `static size_t copy_lower_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
-- Defined: `src/css.c:3800`
+- Defined: `src/css.c:3825`
 - Doc: if (!parse_num(v, &d, &e)) return 0; return css_round_clamp(d, 0, CSS_LEN_MAX); } /* Trims ASCII spaces/tabs from both e
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### media_part_matches (function) `static int media_part_matches(const char *p, const css_media *m)`
-- Defined: `src/css.c:3809`
+- Defined: `src/css.c:3834`
 - Doc: One media part: a type word ("screen"/"print"/"all") or a "(feature: value)". * p is already lowercased and trimmed. Unk
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### media_segment_matches (function) `static int media_segment_matches(const char *s, size_t a, size_t b, const css_media *m)`
-- Defined: `src/css.c:3838`
+- Defined: `src/css.c:3863`
 - Doc: One media query segment (between commas): an AND of parts. `not`/`or`/unknown * fail closed. An empty segment matches (a
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### media_matches (function) `static int media_matches(const char *s, size_t a, size_t b, const css_media *m)`
-- Defined: `src/css.c:3875`
+- Defined: `src/css.c:3900`
 - Doc: if (strcmp(buf, "and") == 0 || strcmp(buf, "only") == 0) { /* connector / legacy keyword: ignore } else if (strcmp(buf, 
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### at_is_media (function) `static int at_is_media(const char *s, size_t i, size_t n)`
-- Defined: `src/css.c:3889`
+- Defined: `src/css.c:3914`
 - Doc: static int media_matches(const char *s, size_t a, size_t b, const css_media *m) { while (a < b && (s[a] == ' ' || s[a] =
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### collect_custom_props_scoped (function) `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
                 ...`
-- Defined: `src/css.c:3907`
+- Defined: `src/css.c:3932`
 - Doc: Structure-aware custom-property collection (see the block comment above collect_custom_decls): walks s[start,end) with t
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### parse_block (function) `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                  ...`
-- Defined: `src/css.c:3963`
+- Defined: `src/css.c:3987`
 - Doc: Parses rules in s[start,end). A matched @media block is descended into (bounded * depth); @import/@font-face/other @-rul
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### rem_ident_ch (function) `static int rem_ident_ch(char c)`
-- Defined: `src/css.c:4169`
+- Defined: `src/css.c:4193`
 - Doc: True for a character that continues a CSS identifier, so a `rem` glued to one is * part of a name and not a unit.
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### rem_num_starts_after (function) `static int rem_num_starts_after(char prev)`
-- Defined: `src/css.c:4177`
+- Defined: `src/css.c:4201`
 - Doc: True when a number may START at a character preceded by prev -- i.e. prev cannot be part of a longer name or number. A s
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### rem_emit_px (function) `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)`
-- Defined: `src/css.c:4187`
+- Defined: `src/css.c:4211`
 - Doc: Appends the px equivalent of num rem. Returns 0 (and writes nothing) when the product is not a sane finite length or doe
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### rem_rebase (function) `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)`
-- Defined: `src/css.c:4217`
+- Defined: `src/css.c:4241`
 - Doc: Rewrites every `<number>rem` length in s[0,n) into `<number x rem_px>px`. Pure: text in, freshly malloc'd NUL-terminated
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### sheet_rewind (function) `static void sheet_rewind(css_sheet *sh)`
-- Defined: `src/css.c:4284`
+- Defined: `src/css.c:4308`
 - Doc: Rewinds a sheet to empty while keeping every allocation, so the text can be * re-parsed in place. Caps are preserved; on
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### sheet_root_font_px (function) `static double sheet_root_font_px(const css_sheet *sh)`
-- Defined: `src/css.c:4324`
+- Defined: `src/css.c:4348`
 - Doc: The root element's font-size in px, as the cascade resolves it (16px when the sheet leaves the root alone). Tag "html" i
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### strip_comments (function) `static char *strip_comments(const char *text, size_t len, size_t *outlen)`
-- Defined: `src/css.c:4332`
+- Defined: `src/css.c:4356`
 - Doc: Removes C-style block comments into a fresh NUL-terminated buffer (each comment * becomes one space). Caller frees.
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### var (function) `* collected and forty var() declarations -- font sizes, widths, radii, the
      * whole theme -- ...`
-- Defined: `src/css.c:4342`
+- Defined: `src/css.c:4366`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_parse (function) `css_status css_parse(const char *text, size_t len, css_sheet **out)`
-- Defined: `src/css.c:4367`
+- Defined: `src/css.c:4391`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_parse_media (function) `css_status css_parse_media(const char *text, size_t len, const css_media *media,
                 ...`
-- Defined: `src/css.c:4371`
+- Defined: `src/css.c:4395`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_parse_scoped (function) `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
                ...`
-- Defined: `src/css.c:4376`
+- Defined: `src/css.c:4400`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_parse_logged (function) `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
                ...`
-- Defined: `src/css.c:4381`
+- Defined: `src/css.c:4405`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_free (function) `void css_free(css_sheet *s)`
-- Defined: `src/css.c:4451`
+- Defined: `src/css.c:4475`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### apply_decl (function) `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
               ...`
-- Defined: `src/css.c:4464`
+- Defined: `src/css.c:4488`
 - Doc: Applies one declaration to the running style if it wins its property slot. The cascade is two-tiered: an !important decl
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### parent (function) `* property from the parent (`inherit`), and an unset non-inherited one
          * stands at its i...`
-- Defined: `src/css.c:4499`
+- Defined: `src/css.c:4523`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### computed_font_size (function) `static double computed_font_size(const css_style *o, const css_element *el)`
-- Defined: `src/css.c:4828`
+- Defined: `src/css.c:4852`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### fold_font_relative (function) `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
                          ...`
-- Defined: `src/css.c:4848`
+- Defined: `src/css.c:4872`
 - Doc: computed font-size. This is the ONE place a font-relative length becomes pixels, the way bx_lp_px is the one place a per
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_resolve_el (function) `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          ...`
-- Defined: `src/css.c:4877`
+- Defined: `src/css.c:4901`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_resolve (function) `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                   ...`
-- Defined: `src/css.c:5057`
+- Defined: `src/css.c:5081`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### NULL (function) `* Sheet can be NULL (inline style, no @keyframes). */
 void css_resolve_anim_keyframes(css_style *...`
-- Defined: `src/css.c:5081`
+- Defined: `src/css.c:5105`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_font_face_count (function) `size_t css_font_face_count(const css_sheet *sheet)`
-- Defined: `src/css.c:5113`
+- Defined: `src/css.c:5137`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_font_face_at (function) `int css_font_face_at(const css_sheet *sheet, size_t i,
                      char *family, size_t ...`
-- Defined: `src/css.c:5117`
+- Defined: `src/css.c:5141`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### css_parse_inline (function) `css_style css_parse_inline(const char *style, size_t len)`
-- Defined: `src/css.c:5127`
+- Defined: `src/css.c:5151`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### here (function) `* A value is capped at CSS_TOK_MAX like every other token here (an overlong one * could never fit a re-substituted declaration value anyway), and lookups recurse * at most CSS_VAR_MAX_DEPTH deep (a ch`
@@ -5825,55 +5858,55 @@ void css_resolve_anim_keyframes(css_style *...`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### empty (function) `* the slot with an explicit empty (ival -1) instead of dropping, or a * lower-priority string would leak through and the drops gate would count * a conforming declaration as a discard. */ if (csel_ci_`
-- Defined: `src/css.c:1472`
+- Defined: `src/css.c:1473`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### column (function) `* column (`flex: 1 1 0%`);`
-- Defined: `src/css.c:1673`
+- Defined: `src/css.c:1674`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### resolve_var_rec (function) `static int resolve_var_rec(const char *val, size_t vlen, char *out, size_t outcap, size_t *o, const css_custom_prop *tab, size_t ntab, int depth);`
-- Defined: `src/css.c:1987`
+- Defined: `src/css.c:1988`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### matrix (function) `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands on skx only (the decomposition * convention: a shear pair has a family of factoriza`
-- Defined: `src/css.c:2164`
+- Defined: `src/css.c:2165`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### LIST (function) `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose into one * affine matrix, QR-decomposed into the seven slots (shared with matrix()). `
-- Defined: `src/css.c:2249`
+- Defined: `src/css.c:2250`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### translateX (function) `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc numbers all fail closed, same as any other * box-model length here);`
-- Defined: `src/css.c:2498`
+- Defined: `src/css.c:2499`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### parse_angle_deg (function) `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);`
-- Defined: `src/css.c:2502`
+- Defined: `src/css.c:2503`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### expand_transform_list (function) `* LISTS compose in order through expand_transform_list (CSS Transforms 1 3);`
-- Defined: `src/css.c:2505`
+- Defined: `src/css.c:2506`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### caller (function) `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached a branch of the * dispatch below, which is what separates "not implemented" from "im`
-- Defined: `src/css.c:2913`
+- Defined: `src/css.c:2914`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### slots (function) `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return emit_len(dst, cap, P_INSET_TOP, val, 1, 1);`
-- Defined: `src/css.c:3035`
+- Defined: `src/css.c:3036`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### declared (function) `* the referenced custom property was never declared (or the fallback * chain bottomed out), so the declaration is invalid at computed-value * time exactly as CSS Variables 1 says. */ drop_record(log, `
-- Defined: `src/css.c:3608`
+- Defined: `src/css.c:3609`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### page_view (function) `* the generated text reaches page_view (which materialises it as a synthetic * run);`
-- Defined: `src/css.c:4470`
+- Defined: `src/css.c:4494`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ### stylesheet (function) `* the stylesheet (e.g. a `:root` rule). Inline-declared names win on a * collision (closer to the use site), so they go first in the combined * table -- expand_lookup takes the first match, which also`
-- Defined: `src/css.c:5010`
+- Defined: `src/css.c:5034`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
 
 ## src/css_box.c
@@ -6311,74 +6344,78 @@ int cg_expand_bg_imag...`
 - Depends on: `include/css_select.h`
 
 ### parse_sub_compound (function) `static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub)`
-- Defined: `src/css_select.c:274`
+- Defined: `src/css_select.c:266`
 - Doc: Parses one SIMPLE sub-selector span s[a,b) for :not()/:is()/:where(): only tag name, .class, #id, or [attr] (no pseudo-c
 - Depends on: `include/css_select.h`
 
 ### parse_compound (function) `static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
                   ...`
-- Defined: `src/css_select.c:325`
+- Defined: `src/css_select.c:333`
 - Doc: Parses one COMPOUND selector span s[a,b) (no combinators, no surrounding space) into *cp. sel holds the sub-selector sto
 - Depends on: `include/css_select.h`
 
 ### selector (function) `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
  * dropped. Whitespa...`
-- Defined: `src/css_select.c:384`
+- Defined: `src/css_select.c:392`
 - Depends on: `include/css_select.h`
 
 ### el_attr_value (function) `static const char *el_attr_value(const css_element *el, const char *name)`
-- Defined: `src/css_select.c:478`
+- Defined: `src/css_select.c:486`
 - Doc: The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no value re
 - Depends on: `include/css_select.h`
 
 ### ends_with (function) `static int ends_with(const char *v, const char *suf, int ci)`
-- Defined: `src/css_select.c:488`
+- Defined: `src/css_select.c:496`
 - Doc: The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no value re
 - Depends on: `include/css_select.h`
 
 ### has_word (function) `static int has_word(const char *v, const char *w, int ci)`
-- Defined: `src/css_select.c:496`
+- Defined: `src/css_select.c:504`
 - Doc: True if `v` is a whitespace-separated list containing the word `w` (non-empty), * case-folded when ci (the `~=` operator
 - Depends on: `include/css_select.h`
 
 ### attr_matches (function) `static int attr_matches(const css_attr_match *am, const css_element *el)`
-- Defined: `src/css_select.c:511`
+- Defined: `src/css_select.c:519`
 - Doc: size_t wl = strlen(w); if (wl == 0) return 0; const char *p = v; while (*p != '\0') { while (*p == ' ' || *p == '\t' || 
 - Depends on: `include/css_select.h`
 
 ### nth_matches (function) `static int nth_matches(int A, int B, int idx)`
-- Defined: `src/css_select.c:531`
+- Defined: `src/css_select.c:539`
 - Doc: True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling positio
 - Depends on: `include/css_select.h`
 
 ### is_form_control (function) `static int is_form_control(const char *tag)`
-- Defined: `src/css_select.c:540`
+- Defined: `src/css_select.c:548`
 - Doc: True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling positio
 - Depends on: `include/css_select.h`
 
 ### sub_sel_matches (function) `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
-- Defined: `src/css_select.c:549`
+- Defined: `src/css_select.c:557`
 - Doc: if (A > 0) return d >= 0 && d % A == 0; return d <= 0 && (-d) % (long)(-A) == 0; } /* Form controls for :enabled (per HT
 - Depends on: `include/css_select.h`
 
 ### compound_matches (function) `static int compound_matches(const css_compound *c, const css_element *el,
                        ...`
-- Defined: `src/css_select.c:791`
+- Defined: `src/css_select.c:799`
 - Doc: True if one compound matches one element (no ancestor context). When pseudo_kind is non-NULL and the compound matches vi
 - Depends on: `include/css_select.h`
 
 ### built (function) `* chains the caller built (an element without parent/prev links never matches
  * through that com...`
-- Defined: `src/css_select.c:824`
+- Defined: `src/css_select.c:832`
 - Depends on: `include/css_select.h`
 
 ### csel_matches (function) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
               ...`
-- Defined: `src/css_select.c:865`
+- Defined: `src/css_select.c:873`
+- Depends on: `include/css_select.h`
+
+### take_sub_arg (function) `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);`
+- Defined: `src/css_select.c:128`
 - Depends on: `include/css_select.h`
 
 ### between (function) `* between ( and ) is split on commas (not inside [] or ());`
-- Defined: `src/css_select.c:210`
+- Defined: `src/css_select.c:211`
 - Depends on: `include/css_select.h`
 
 ## src/css_text.c
@@ -6486,7 +6523,7 @@ int cg_expand_bg_imag...`
 - Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ### cv_interp_bg (function) `int cv_interp_bg(const char *v)`
-- Defined: `src/css_values.c:137`
+- Defined: `src/css_values.c:138`
 - Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/data_url.c
@@ -6867,11 +6904,11 @@ static dom_node_id qs_walk(const dom_inde...`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`
 
 ### dd_format (function) `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
-- Defined: `src/dom_debug.c:375`
+- Defined: `src/dom_debug.c:376`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`
 
 ### dd_format_css (function) `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)`
-- Defined: `src/dom_debug.c:407`
+- Defined: `src/dom_debug.c:408`
 - Doc: } dd_puts(&c, "[blocks]\n"); for (size_t i = 0; i < nblocks; ++i) { const rd_block *b = rd_at(doc, i); if (b != NULL) dd
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`
 
@@ -7003,24 +7040,29 @@ static dom_node_id qs_walk(const dom_inde...`
 - Defined: `src/flex_layout.c:544`
 - Depends on: `include/flex_layout.h`
 
-### fx_auto_min_size (function) `double fx_auto_min_size(double min_content, double basis, double author_min,
-                    ...`
+### fx_auto_margins (function) `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
+                ...`
 - Defined: `src/flex_layout.c:556`
 - Doc: } void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col) { if (row == NULL || col == NULL) return; if (
 - Depends on: `include/flex_layout.h`
 
+### fx_auto_min_size (function) `double fx_auto_min_size(double min_content, double basis, double author_min,
+                    ...`
+- Defined: `src/flex_layout.c:579`
+- Depends on: `include/flex_layout.h`
+
 ### fx_multicol_used (function) `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
                ...`
-- Defined: `src/flex_layout.c:570`
+- Defined: `src/flex_layout.c:593`
 - Depends on: `include/flex_layout.h`
 
 ### fx_multicol_balance (function) `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
                         ...`
-- Defined: `src/flex_layout.c:607`
+- Defined: `src/flex_layout.c:630`
 - Depends on: `include/flex_layout.h`
 
 ### fx_justify_name (function) `const char *fx_justify_name(fx_justify j)`
-- Defined: `src/flex_layout.c:638`
+- Defined: `src/flex_layout.c:661`
 - Depends on: `include/flex_layout.h`
 
 ## src/form.c
@@ -7126,136 +7168,140 @@ static dom_node_id qs_walk(const dom_inde...`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### is_https_url (function) `static int is_https_url(const char *s)`
-- Defined: `src/freedom.c:72`
+- Defined: `src/freedom.c:73`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### is_http_url (function) `static int is_http_url(const char *s)`
-- Defined: `src/freedom.c:76`
+- Defined: `src/freedom.c:77`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### is_overlay_http (function) `static int is_overlay_http(const char *s)`
-- Defined: `src/freedom.c:81`
+- Defined: `src/freedom.c:82`
 - Doc: fprintf(fp, "  --dump-video-url: headless, print the first detected video source URL to stdout (no truncation)\n"); fpri
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### now_us (function) `static uint64_t now_us(void)`
-- Defined: `src/freedom.c:135`
+- Defined: `src/freedom.c:136`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### timings_ensure_init (function) `static void timings_ensure_init(void)`
-- Defined: `src/freedom.c:141`
+- Defined: `src/freedom.c:142`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### timings_enabled (function) `static int timings_enabled(void)`
-- Defined: `src/freedom.c:145`
+- Defined: `src/freedom.c:146`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### timings_dump (function) `static void timings_dump(void)`
-- Defined: `src/freedom.c:149`
+- Defined: `src/freedom.c:150`
+- Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
+
+### user_impersonate_enabled (function) `static int user_impersonate_enabled(void)`
+- Defined: `src/freedom.c:198`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### read_file (function) `static char *read_file(const char *path, size_t *out_len)`
-- Defined: `src/freedom.c:195`
-- Doc: When non-NULL (set by --dump-video=PATH), headless mode downloads the video stream from a URL and writes it to the speci
+- Defined: `src/freedom.c:205`
+- Doc: User opt-in for TLS-impersonation blend: --impersonate or FREEDOM_IMPERSONATE=1. Third gate signal alongside allow.conf 
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### headless_load_hosts (function) `static void headless_load_hosts(void)`
-- Defined: `src/freedom.c:213`
+- Defined: `src/freedom.c:223`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### is_blank_text (function) `static int is_blank_text(const char *s)`
-- Defined: `src/freedom.c:251`
-- Doc: impersonate.conf lives in the same search dirs; load it as an allowlist so * hb_is_allowlisted answers the third gate si
+- Defined: `src/freedom.c:253`
+- Doc: No impersonate.conf: third signal is the user flag (--impersonate / * FREEDOM_IMPERSONATE=1). impersonate.conf on disk, 
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### print_doc (function) `static void print_doc(const rd_doc *doc)`
-- Defined: `src/freedom.c:264`
+- Defined: `src/freedom.c:266`
 - Doc: Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data, nev
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### print_console (function) `static void print_console(const fb_buffer *log)`
-- Defined: `src/freedom.c:357`
+- Defined: `src/freedom.c:359`
 - Doc: Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed with i
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### print_dom (function) `static void print_dom(const rd_doc *doc)`
-- Defined: `src/freedom.c:374`
+- Defined: `src/freedom.c:376`
 - Doc: Prints the paint-ready render tree (dom_debug) to stdout. Two-pass: measure, then allocate exactly and format. The dump 
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### print_dom_css (function) `static void print_dom_css(const rd_doc *doc)`
-- Defined: `src/freedom.c:389`
+- Defined: `src/freedom.c:391`
 - Doc: Prints the CSS property inspector (dd_format_css) to stdout. Same contract as * print_dom: two-pass measure-then-allocat
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### headless_fetch (function) `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...`
-- Defined: `src/freedom.c:413`
+- Defined: `src/freedom.c:415`
 - Doc: tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page XHR/fetch and external <script src>.
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### foldback_cookies (function) `static void foldback_cookies(const char *url, const char *jar)`
-- Defined: `src/freedom.c:471`
+- Defined: `src/freedom.c:474`
 - Doc: Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network * jar, one pair at a time, so JS-set ses
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### print_css_drops (function) `static void print_css_drops(const char *html, size_t len)`
-- Defined: `src/freedom.c:495`
+- Defined: `src/freedom.c:498`
 - Doc: Prints the author-CSS drop report for `html`, sorted by occurrence count. The document is re-parsed here on the TRUSTED 
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### render_page (function) `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-- Defined: `src/freedom.c:526`
+- Defined: `src/freedom.c:529`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### sf_reason (function) `static const char *sf_reason(sf_status ss)`
-- Defined: `src/freedom.c:734`
+- Defined: `src/freedom.c:737`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### fetch_and_render_one (function) `static int fetch_and_render_one(const char *url, char **out_nav)`
-- Defined: `src/freedom.c:753`
+- Defined: `src/freedom.c:756`
 - Doc: Fetches one url with secure_fetch and renders the result. The response body is * consumed directly; no extra copy is mad
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### elsewhere (function) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-- Defined: `src/freedom.c:814`
+- Defined: `src/freedom.c:817`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### run_headless (function) `static int run_headless(const char *target)`
-- Defined: `src/freedom.c:833`
+- Defined: `src/freedom.c:836`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### video_fetch_with_fallback (function) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
-- Defined: `src/freedom.c:896`
+- Defined: `src/freedom.c:899`
 - Doc: Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as fetch_follow_navigab
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### run_dump_video (function) `static int run_dump_video(const char *url)`
-- Defined: `src/freedom.c:1007`
+- Defined: `src/freedom.c:1010`
 - Doc: -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### main (function) `int main(int argc, char **argv)`
-- Defined: `src/freedom.c:1026`
+- Defined: `src/freedom.c:1029`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### gets (function) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed (fail-closed);`
-- Defined: `src/freedom.c:409`
+- Defined: `src/freedom.c:411`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### pool (function) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void *)(uintptr_t)top_url);`
-- Defined: `src/freedom.c:586`
+- Defined: `src/freedom.c:589`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### only (function) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote fetches (so --download-png --images actually * shows images in the bitmap). */ rdp_ca`
-- Defined: `src/freedom.c:622`
+- Defined: `src/freedom.c:625`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ### BLOCKED (function) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
-- Defined: `src/freedom.c:779`
+- Defined: `src/freedom.c:782`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ## src/hls.c
@@ -8615,680 +8661,729 @@ int os_namespac...`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_node_map_init (function) `static int pv_node_map_init(pv_node_map *m)`
-- Defined: `src/page_view.c:275`
+- Defined: `src/page_view.c:276`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_node_map_free (function) `static void pv_node_map_free(pv_node_map *m)`
-- Defined: `src/page_view.c:283`
+- Defined: `src/page_view.c:284`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_node_map_build (function) `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:319`
+- Defined: `src/page_view.c:320`
 - Doc: Builds a document-order map of all element nodes under root. Returns 0, or -1 on * allocation failure.
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_new (function) `pv_view *pv_new(void)`
-- Defined: `src/page_view.c:328`
+- Defined: `src/page_view.c:329`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_append (function) `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
                     c...`
-- Defined: `src/page_view.c:332`
+- Defined: `src/page_view.c:333`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_append_image (function) `pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           con...`
-- Defined: `src/page_view.c:366`
+- Defined: `src/page_view.c:367`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_append_input (function) `pv_status pv_append_input(pv_view *v, int heading, int block_break,
                           pv_...`
-- Defined: `src/page_view.c:396`
+- Defined: `src/page_view.c:397`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_append_video (function) `pv_status pv_append_video(pv_view *v, int heading, int block_break,
                           con...`
-- Defined: `src/page_view.c:436`
+- Defined: `src/page_view.c:437`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_append_svg (function) `pv_status pv_append_svg(pv_view *v, int heading, int block_break,
                         const c...`
-- Defined: `src/page_view.c:472`
+- Defined: `src/page_view.c:473`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_emphasis (function) `void pv_set_emphasis(pv_view *v, int bold, int italic)`
-- Defined: `src/page_view.c:501`
+- Defined: `src/page_view.c:502`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_indent (function) `void pv_set_indent(pv_view *v, int indent)`
-- Defined: `src/page_view.c:508`
+- Defined: `src/page_view.c:509`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_color (function) `void pv_set_color(pv_view *v, int fg_rgb)`
-- Defined: `src/page_view.c:513`
+- Defined: `src/page_view.c:514`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_bgcolor (function) `void pv_set_bgcolor(pv_view *v, int bg_rgb)`
-- Defined: `src/page_view.c:518`
+- Defined: `src/page_view.c:519`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_text_style (function) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,
                 ...`
-- Defined: `src/page_view.c:523`
+- Defined: `src/page_view.c:524`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_grad_text (function) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)`
-- Defined: `src/page_view.c:534`
+- Defined: `src/page_view.c:535`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_text_ext (function) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)`
-- Defined: `src/page_view.c:542`
+- Defined: `src/page_view.c:543`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### ignored (function) `* source is ignored (fail-visible: never invisible text from half a
      * pattern). A real text-...`
-- Defined: `src/page_view.c:574`
+- Defined: `src/page_view.c:575`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_container (function) `void pv_set_container(pv_view *v, int cont_id, int cont_display,
                       int cont_g...`
-- Defined: `src/page_view.c:589`
+- Defined: `src/page_view.c:590`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_row_span (function) `void pv_set_row_span(pv_view *v, int row_span)`
-- Defined: `src/page_view.c:604`
+- Defined: `src/page_view.c:605`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_grid_area (function) `void pv_set_grid_area(pv_view *v, int row_start, int col_start)`
-- Defined: `src/page_view.c:608`
+- Defined: `src/page_view.c:609`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_grid (function) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)`
-- Defined: `src/page_view.c:615`
+- Defined: `src/page_view.c:616`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_grid_rows (function) `void pv_set_grid_rows(pv_view *v, int grid_rows)`
-- Defined: `src/page_view.c:625`
+- Defined: `src/page_view.c:626`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_cont_box (function) `void pv_set_cont_box(pv_view *v, int cont_box_id)`
-- Defined: `src/page_view.c:629`
+- Defined: `src/page_view.c:630`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_flex (function) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
                  int...`
-- Defined: `src/page_view.c:633`
+- Defined: `src/page_view.c:634`
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+
+### pv_set_flex_mauto (function) `void pv_set_flex_mauto(pv_view *v, int mauto)`
+- Defined: `src/page_view.c:646`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_cont_item (function) `void pv_set_cont_item(pv_view *v, int cont_item)`
-- Defined: `src/page_view.c:645`
+- Defined: `src/page_view.c:651`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_float (function) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
                 int ...`
-- Defined: `src/page_view.c:650`
+- Defined: `src/page_view.c:656`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_box (function) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                 int box_center, int ...`
-- Defined: `src/page_view.c:672`
+- Defined: `src/page_view.c:678`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_box_pct (function) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
                     ...`
-- Defined: `src/page_view.c:684`
+- Defined: `src/page_view.c:690`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_ua_tag (function) `void pv_set_ua_tag(pv_view *v, int ua_tag)`
-- Defined: `src/page_view.c:695`
-- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
-
-### pv_set_node_id (function) `void pv_set_node_id(pv_view *v, dom_node_id node_id)`
 - Defined: `src/page_view.c:701`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
+### pv_set_node_id (function) `void pv_set_node_id(pv_view *v, dom_node_id node_id)`
+- Defined: `src/page_view.c:707`
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+
 ### pv_set_block_id (function) `void pv_set_block_id(pv_view *v, int block_id)`
-- Defined: `src/page_view.c:706`
+- Defined: `src/page_view.c:712`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_own_box (function) `void pv_set_own_box(pv_view *v, int box_id)`
-- Defined: `src/page_view.c:711`
+- Defined: `src/page_view.c:717`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_oof (function) `void pv_set_oof(pv_view *v, int oof)`
-- Defined: `src/page_view.c:716`
+- Defined: `src/page_view.c:722`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_input_checked (function) `void pv_set_input_checked(pv_view *v, int checked)`
-- Defined: `src/page_view.c:721`
+- Defined: `src/page_view.c:727`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_set_input_select_opts (function) `void pv_set_input_select_opts(pv_view *v, const char *select_opts)`
-- Defined: `src/page_view.c:726`
+- Defined: `src/page_view.c:732`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_add_cont_def (function) `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)`
-- Defined: `src/page_view.c:734`
+- Defined: `src/page_view.c:740`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_cont_count (function) `size_t pv_cont_count(const pv_view *v)`
-- Defined: `src/page_view.c:747`
+- Defined: `src/page_view.c:753`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_cont_at (function) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)`
-- Defined: `src/page_view.c:751`
+- Defined: `src/page_view.c:757`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_add_box_def (function) `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)`
-- Defined: `src/page_view.c:756`
+- Defined: `src/page_view.c:762`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_free (function) `void pv_free(pv_view *v)`
-- Defined: `src/page_view.c:769`
+- Defined: `src/page_view.c:775`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_count (function) `size_t pv_count(const pv_view *v)`
-- Defined: `src/page_view.c:786`
+- Defined: `src/page_view.c:792`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_at (function) `const pv_run *pv_at(const pv_view *v, size_t i)`
-- Defined: `src/page_view.c:790`
+- Defined: `src/page_view.c:796`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_box_count (function) `size_t pv_box_count(const pv_view *v)`
-- Defined: `src/page_view.c:795`
+- Defined: `src/page_view.c:801`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_box_at (function) `const pv_box_def *pv_box_at(const pv_view *v, size_t i)`
-- Defined: `src/page_view.c:799`
+- Defined: `src/page_view.c:805`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### node_next (function) `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:807`
+- Defined: `src/page_view.c:813`
 - Doc: } size_t pv_box_count(const pv_view *v) { return (v != NULL) ? v->nbox : 0; } const pv_box_def *pv_box_at(const pv_view 
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### is_block_tag (function) `static int is_block_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:817`
+- Defined: `src/page_view.c:823`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### is_block_like (function) `static int is_block_like(lxb_tag_id_t t, css_display display)`
-- Defined: `src/page_view.c:842`
+- Defined: `src/page_view.c:848`
 - Doc: An element should be treated as block-like (eligible for box registration, hbox, float) when its CSS display property in
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### resolves (function) `* box_tree already resolves (R4/R8) had nothing to place -- every badge/close
  * button/tooltip w...`
-- Defined: `src/page_view.c:867`
+- Defined: `src/page_view.c:873`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### is_block_like_style (function) `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)`
-- Defined: `src/page_view.c:877`
+- Defined: `src/page_view.c:883`
 - Doc: is_block_like with the out-of-flow coercion applied. Takes the resolved style * because the answer depends on position/f
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### generates_box (function) `static int generates_box(lxb_tag_id_t t, css_display display)`
-- Defined: `src/page_view.c:889`
+- Defined: `src/page_view.c:895`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### generates_box_style (function) `static int generates_box_style(lxb_tag_id_t t, const css_style *cs)`
-- Defined: `src/page_view.c:901`
+- Defined: `src/page_view.c:907`
 - Doc: Form controls (input/select/textarea/button) are inline-block by default but can carry author CSS like position:absolute
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### causes_block_break (function) `static int causes_block_break(lxb_tag_id_t t, css_display display)`
-- Defined: `src/page_view.c:908`
+- Defined: `src/page_view.c:914`
 - Doc: Returns 1 when the element should cause a block break (start a new line). display:inline-block and display:inline do NOT
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### paints (function) `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas
  * vacías"). Comment a...`
-- Defined: `src/page_view.c:917`
+- Defined: `src/page_view.c:923`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### ua_tag_of (function) `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:942`
+- Defined: `src/page_view.c:948`
 - Doc: User-agent box identity of a block-level element, from its lexbor tag id. Only the tags the UA sheet gives a vertical ma
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### heading_level (function) `static int heading_level(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:964`
+- Defined: `src/page_view.c:970`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### is_skipped_tag (function) `static int is_skipped_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:976`
+- Defined: `src/page_view.c:982`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### node_tag (function) `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)`
-- Defined: `src/page_view.c:996`
+- Defined: `src/page_view.c:1002`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### in_skipped_subtree (function) `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
               ...`
-- Defined: `src/page_view.c:1004`
+- Defined: `src/page_view.c:1010`
 - Doc: Nonzero if any ancestor up to base is a non-rendered container. When js_enabled, a <noscript> ancestor also suppresses c
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### font_color_attr (function) `static int font_color_attr(lxb_dom_element_t *el)`
-- Defined: `src/page_view.c:1041`
+- Defined: `src/page_view.c:1047`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### bgcolor_attr (function) `static int bgcolor_attr(lxb_dom_element_t *el)`
-- Defined: `src/page_view.c:1047`
+- Defined: `src/page_view.c:1053`
 - Doc: Legacy bgcolor attribute (body/table/tr/td), the background twin of <font * color>: pre-CSS sites (Hacker News' orange b
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### item_ordinal (function) `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)`
-- Defined: `src/page_view.c:1156`
+- Defined: `src/page_view.c:1166`
 - Doc: Ordinal for a run of container `cid` whose direct-child item is `item` (NULL = * anonymous: every such run is its own it
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_content_hidden (function) `int pv_content_hidden(int box_hidden, int run_visibility)`
-- Defined: `src/page_view.c:1187`
+- Defined: `src/page_view.c:1197`
 - Doc: The author text-presentation extensions struct (pv_text_ext) is public now (include/page_view.h): each field resolves fr
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_text_ext_reset (function) `void pv_text_ext_reset(pv_text_ext *e)`
-- Defined: `src/page_view.c:1193`
+- Defined: `src/page_view.c:1203`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_text_ext_merge (function) `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)`
-- Defined: `src/page_view.c:1219`
+- Defined: `src/page_view.c:1229`
 - Doc: Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten — ke
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### css_has_hbox (function) `static int css_has_hbox(const css_style *cs)`
-- Defined: `src/page_view.c:1277`
+- Defined: `src/page_view.c:1287`
 - Doc: True if the resolved style declares any HORIZONTAL box property, in either half of the <length-percentage>: `width: 50%`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
-### css_hbox_resolve (function) `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)`
-- Defined: `src/page_view.c:1290`
+### pv_mauto_of (function) `static int pv_mauto_of(const css_style *cs)`
+- Defined: `src/page_view.c:1301`
 - Doc: Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side (clam
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
+### css_hbox_resolve (function) `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)`
+- Defined: `src/page_view.c:1306`
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+
 ### css_has_position (function) `static int css_has_position(const css_style *cs)`
-- Defined: `src/page_view.c:1334`
+- Defined: `src/page_view.c:1350`
 - Doc: A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree (pa
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### css_has_boxdeco (function) `static int css_has_boxdeco(const css_style *cs)`
-- Defined: `src/page_view.c:1339`
+- Defined: `src/page_view.c:1355`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### cont_def_reset (function) `static void cont_def_reset(pv_cont_def *d)`
-- Defined: `src/page_view.c:1478`
+- Defined: `src/page_view.c:1494`
 - Doc: Per-container parameters + parent linkage (2026-07-31). Mirrors pv_box_reg's def[] array: the registry is the one place 
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### container_id (function) `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:1492`
-- Doc: static void cont_def_reset(pv_cont_def *d) { memset(d, 0, sizeof *d); d->parent_id = -1; d->parent_item = -1; d->row_gap
+- Defined: `src/page_view.c:1509`
+- Doc: memset(d, 0, sizeof *d); d->parent_id = -1; d->parent_item = -1; d->row_gap = -1; d->box_id = -1; d->item_grow = -1; d->
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+
+### annotate_flow_run (function) `static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *items,
+          ...`
+- Defined: `src/page_view.c:1555`
+- Doc: Stamps the last run with its element's layout annotation: container membership and item slot, flex/grid item properties,
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### trying (function) `* a real page passes without trying (slashdot's front page saturates it), and past
  * it box_reg_...`
-- Defined: `src/page_view.c:1545`
+- Defined: `src/page_view.c:1593`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### box_reg_free (function) `static void box_reg_free(pv_box_reg *r)`
-- Defined: `src/page_view.c:1574`
+- Defined: `src/page_view.c:1622`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### boxdef_from_style (function) `static void boxdef_from_style(pv_box_def *d, const css_style *cs)`
-- Defined: `src/page_view.c:1583`
+- Defined: `src/page_view.c:1631`
 - Doc: Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style. Padding unset -> 0 (geometry default)
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### box_reg_id (function) `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
            ...`
-- Defined: `src/page_view.c:1804`
+- Defined: `src/page_view.c:1852`
 - Doc: Registers (or finds) the box for `node`. font_px is the element's COMPUTED font-size, needed because the user-agent marg
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_style_cache_init (function) `static int pv_style_cache_init(pv_style_cache *c)`
-- Defined: `src/page_view.c:1848`
+- Defined: `src/page_view.c:1896`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_style_cache_free (function) `static void pv_style_cache_free(pv_style_cache *c)`
-- Defined: `src/page_view.c:1862`
+- Defined: `src/page_view.c:1910`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_cache_find (function) `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:1872`
+- Defined: `src/page_view.c:1920`
 - Doc: cch_element_style(el, sheet), memoized in *cache. A NULL cache (OOM at init, or a caller that opts out) simply calls thr
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_cached_font_px (function) `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:1883`
+- Defined: `src/page_view.c:1931`
 - Doc: The COMPUTED font-size memoized for `node`, or 0 when it is not in the cache (no cache, or the element's style was never
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_cache_put (function) `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
                      ...`
-- Defined: `src/page_view.c:1888`
+- Defined: `src/page_view.c:1936`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_parent_element (function) `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)`
-- Defined: `src/page_view.c:1911`
+- Defined: `src/page_view.c:1959`
 - Doc: if (ns != NULL) cache->style = ns; double *nf = (double *)realloc(cache->font_size, ncap * sizeof *nf); if (nf != NULL) 
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### subtree_is_oof (function) `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
                      ...`
-- Defined: `src/page_view.c:1973`
+- Defined: `src/page_view.c:2021`
 - Doc: True iff the element itself is out of flow (position:absolute/fixed) or descends from one. Such a subtree is removed fro
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### size (function) `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
 static void app...`
-- Defined: `src/page_view.c:1993`
+- Defined: `src/page_view.c:2041`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### builder (function) `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
  * (the ...`
-- Defined: `src/page_view.c:2013`
+- Defined: `src/page_view.c:2061`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### css_to_fx_justify (function) `static int css_to_fx_justify(css_justify j)`
-- Defined: `src/page_view.c:2042`
+- Defined: `src/page_view.c:2090`
 - Doc: Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to FX_J
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### is_bold_tag (function) `static int is_bold_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:2061`
+- Defined: `src/page_view.c:2109`
 - Doc: Tags the user-agent sheet renders bold. Headings belong here: making the UA bold part of the RESOLVED weight is what let
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### is_italic_tag (function) `static int is_italic_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:2066`
+- Defined: `src/page_view.c:2114`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
-### is_inline_block_row (function) `static int is_inline_block_row(const lxb_dom_node_t *p, const css_sheet *sheet,
-                 ...`
-- Defined: `src/page_view.c:2101`
+### is_inline_level_style (function) `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)`
+- Defined: `src/page_view.c:2151`
+- Doc: Inline-level box (CSS 2.1 9.2.2): display inline or inline-block, or a tag the UA * sheet makes inline, and not taken ou
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+
+### in_mixed_line (function) `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,
+                       ...`
+- Defined: `src/page_view.c:2159`
+- Doc: True when `p` shares a line with inline content: a sibling that is non-blank text * or an inline-level element.
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+
+### children_all_inline_block (function) `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,
+           ...`
+- Defined: `src/page_view.c:2175`
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+
+### flex_column_flows_as_block (function) `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,
+            ...`
+- Defined: `src/page_view.c:2197`
+- Doc: A flex COLUMN with the initial geometry (no reverse, no wrap, justify-content start, align-items stretch) stacks full-wi
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+
+### fold_column_gap (function) `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,
+                            ...`
+- Defined: `src/page_view.c:2223`
+- Doc: The gap of a column that flows as block (above) is the space BETWEEN its items (Flexbox 8.1), so every item but the firs
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+
+### is_layout_container (function) `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
+                   ...`
+- Defined: `src/page_view.c:2247`
+- Doc: int prev = 0; for (const lxb_dom_node_t *c = el->prev; c != NULL && !prev; c = c->prev) { if (c->type != LXB_DOM_NODE_TY
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+
+### li_is_list_item (function) `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,
+                    ...`
+- Defined: `src/page_view.c:2257`
+- Doc: A marker is generated by a `display:list-item` box (CSS Lists 3 3.1), which is what the UA sheet makes an <li>; an autho
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### paints (function) `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas vacías").
  *
  * A chil...`
-- Defined: `src/page_view.c:2120`
+- Defined: `src/page_view.c:2284`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### subtree_has_own_text (function) `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             ...`
-- Defined: `src/page_view.c:2163`
+- Defined: `src/page_view.c:2327`
 - Doc: True when the subtree holds no non-blank text of its own outside skipped / hidden / closed-details subtrees -- exactly t
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### element_is_content_leaf (function) `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
              ...`
-- Defined: `src/page_view.c:2183`
+- Defined: `src/page_view.c:2347`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### resolve_context (function) `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 ...`
-- Defined: `src/page_view.c:2206`
+- Defined: `src/page_view.c:2370`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### opens (function) `* painter applies it when the box opens (band/shared context) — seeding
              * it onto ru...`
-- Defined: `src/page_view.c:2453`
+- Defined: `src/page_view.c:2633`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### margins (function) `* margins (boxdef_from_style) and the painter applies them when
                          * it ope...`
-- Defined: `src/page_view.c:2480`
+- Defined: `src/page_view.c:2660`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### container (function) `* membership in this container (and none in any container further out,
                  * since i...`
-- Defined: `src/page_view.c:2596`
+- Defined: `src/page_view.c:2776`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### walk (function) `* far on this walk (they are all inside this element). */
 
                         /* The innermo...`
-- Defined: `src/page_view.c:2679`
+- Defined: `src/page_view.c:2860`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### float (function) `* genuinely nested float (oid != id) takes the deferred-column path. */
     if (cont->float_oid =...`
-- Defined: `src/page_view.c:2766`
+- Defined: `src/page_view.c:2949`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### sz_count (function) `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)`
-- Defined: `src/page_view.c:2809`
+- Defined: `src/page_view.c:2992`
 - Doc: Serialises an element subtree (the element itself included) into a fresh NUL-terminated buffer. Two passes -- one to mea
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### sz_write (function) `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)`
-- Defined: `src/page_view.c:2823`
+- Defined: `src/page_view.c:3006`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### serialize_subtree (function) `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)`
-- Defined: `src/page_view.c:2831`
+- Defined: `src/page_view.c:3014`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### collapse_ws (function) `static char *collapse_ws(const char *s, size_t n)`
-- Defined: `src/page_view.c:2850`
+- Defined: `src/page_view.c:3033`
 - Doc: if (total == 0 || total > SV_MAX_INPUT) return NULL; char *buf = (char *)calloc(1, total + 1u); if (buf == NULL) return 
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### parse_dim (function) `static int parse_dim(const lxb_char_t *s, size_t len)`
-- Defined: `src/page_view.c:2874`
+- Defined: `src/page_view.c:3057`
 - Doc: Parses the leading non-negative integer of an HTML length attribute value (e.g. "640", "640px", "50%"). Returns the valu
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### present (function) `* when no width descriptors are present (density-only or bare URLs). */
 static void srcset_best_u...`
-- Defined: `src/page_view.c:2891`
+- Defined: `src/page_view.c:3074`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### srcset_slot_width (function) `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
                               ...`
-- Defined: `src/page_view.c:2986`
+- Defined: `src/page_view.c:3169`
 - Doc: Parses a sizes attribute ("(max-width: 600px) 100vw, 50vw") and returns the effective slot width in px for the given vie
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### dimensions (function) `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
 static void srcse...`
-- Defined: `src/page_view.c:3032`
+- Defined: `src/page_view.c:3215`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### find_body (function) `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:3064`
+- Defined: `src/page_view.c:3247`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### string (function) `* Returns a heap string (caller frees) or NULL when neither carries a class —
  * NULL simply mean...`
-- Defined: `src/page_view.c:3074`
+- Defined: `src/page_view.c:3257`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### forms_free (function) `static void forms_free(form_table *ft)`
-- Defined: `src/page_view.c:3122`
+- Defined: `src/page_view.c:3305`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### ascii_ieq (function) `static int ascii_ieq(const char *s, const char *lit)`
-- Defined: `src/page_view.c:3129`
+- Defined: `src/page_view.c:3312`
 - Doc: } form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void forms_free(form_
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### attr_dup (function) `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)`
-- Defined: `src/page_view.c:3141`
+- Defined: `src/page_view.c:3324`
 - Doc: Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute y
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### forms_add (function) `static int forms_add(form_table *ft, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:3150`
+- Defined: `src/page_view.c:3333`
 - Doc: Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute y
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### form_for (function) `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
                     const lxb_...`
-- Defined: `src/page_view.c:3170`
+- Defined: `src/page_view.c:3353`
 - Doc: } lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)node); char *method = attr_dup(el, "method", 6); i
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### under_unrendered (function) `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)`
-- Defined: `src/page_view.c:3186`
+- Defined: `src/page_view.c:3369`
 - Doc: Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected subtr
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### collect_text (function) `static char *collect_text(const lxb_dom_node_t *el)`
-- Defined: `src/page_view.c:3199`
+- Defined: `src/page_view.c:3382`
 - Doc: Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of a <
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### classify_input (function) `static pv_input_type classify_input(const char *type)`
-- Defined: `src/page_view.c:3223`
+- Defined: `src/page_view.c:3406`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### li_ordinal (function) `static int li_ordinal(const lxb_dom_node_t *li)`
-- Defined: `src/page_view.c:3402`
+- Defined: `src/page_view.c:3585`
 - Doc: 1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out of s
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### roman_marker (function) `static void roman_marker(int n, int upper, char *out, size_t cap)`
-- Defined: `src/page_view.c:3428`
+- Defined: `src/page_view.c:3611`
 - Doc: int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ? 'A'
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### list_marker (function) `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
                   ...`
-- Defined: `src/page_view.c:3453`
+- Defined: `src/page_view.c:3636`
 - Doc: Builds the list marker for the first run of an <li>. With no author list-style (CSS_LS_UNSET) it is the UA default: "N. 
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### node_table_role (function) `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3494`
+- Defined: `src/page_view.c:3677`
 - Doc: The table role of an element: its computed `display` when that names one, else the role the HTML user-agent sheet gives 
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### nearest_table (function) `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
  ...`
-- Defined: `src/page_view.c:3512`
+- Defined: `src/page_view.c:3695`
 - Doc: const lxb_char_t *nm = lxb_dom_element_local_name(el, &nl); char tag[BX_TAG_NAME_MAX]; const char *tagp = NULL; if (nm !
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### parent_is_table_internal (function) `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3546`
+- Defined: `src/page_view.c:3729`
 - Doc: Nonzero when n's DIRECT parent is table structure that is not a cell -- a table, a row group, a row or a column group. T
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### nearest_cell (function) `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
   ...`
-- Defined: `src/page_view.c:3573`
+- Defined: `src/page_view.c:3756`
 - Doc: if (s->type == LXB_DOM_NODE_TYPE_TEXT && text_node_is_blank(s)) continue; if (s->type == LXB_DOM_NODE_TYPE_ELEMENT && no
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### cell_has_nested_table (function) `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3588`
+- Defined: `src/page_view.c:3771`
 - Doc: Nonzero if cell has a descendant table box: it is then a structural CONTAINER, not a leaf cell. Only leaf cells (no nest
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### next_skip (function) `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:3597`
+- Defined: `src/page_view.c:3780`
 - Doc: Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the table 
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### cell_anchors (function) `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)`
-- Defined: `src/page_view.c:3608`
+- Defined: `src/page_view.c:3791`
 - Doc: First <a href> element in the cell's subtree, with *count receiving how many * such anchors exist, capped at 2 (only non
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### links (function) `* its links (the Hacker News case: every story link lives inside a <td>), so the
  * caller flows ...`
-- Defined: `src/page_view.c:3626`
+- Defined: `src/page_view.c:3809`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### flow_table (function) `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
-- Defined: `src/page_view.c:3647`
+- Defined: `src/page_view.c:3830`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### in_flow_table_cell (function) `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
            ...`
-- Defined: `src/page_view.c:3659`
+- Defined: `src/page_view.c:3842`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### table (function) `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
  * content -- their ...`
-- Defined: `src/page_view.c:3668`
+- Defined: `src/page_view.c:3851`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### table_columns (function) `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3686`
+- Defined: `src/page_view.c:3869`
 - Doc: Grid column count of a table: the maximum number of logical columns across all its rows, computed by summing each cell's
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### collect_style_text (function) `static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen)`
-- Defined: `src/page_view.c:3719`
+- Defined: `src/page_view.c:3902`
 - Doc: Concatenates the text of every <style> element in the document (head included) into one owned, NUL-terminated buffer, ca
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### in_hidden_subtree (function) `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...`
-- Defined: `src/page_view.c:3760`
+- Defined: `src/page_view.c:3943`
 - Doc: Nonzero if n or any ancestor up to base has display:none (from the <style> sheet or its inline style=). display:none is 
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### in_boilerplate_subtree (function) `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-- Defined: `src/page_view.c:3777`
+- Defined: `src/page_view.c:3960`
 - Doc: Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>). Used only in distraction
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### in_closed_details_subtree (function) `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-- Defined: `src/page_view.c:3792`
+- Defined: `src/page_view.c:3975`
 - Doc: Nonzero if n or any ancestor up to base is inside a <details> without an `open` attribute and n is NOT inside its <summa
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_build (function) `pv_status pv_build(const hp_document *doc, pv_view **out)`
-- Defined: `src/page_view.c:3812`
+- Defined: `src/page_view.c:3995`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_build_ex (function) `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
-- Defined: `src/page_view.c:3816`
+- Defined: `src/page_view.c:3999`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_build_full (function) `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                      ...`
-- Defined: `src/page_view.c:3820`
+- Defined: `src/page_view.c:4003`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### annotate_replaced_run (function) `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
                             ...`
-- Defined: `src/page_view.c:3842`
+- Defined: `src/page_view.c:4025`
 - Doc: Attaches the layout membership a replaced run needs to take part in its surroundings: flex/grid container identity and i
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### collect_page_css (function) `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
                      ...`
-- Defined: `src/page_view.c:3880`
+- Defined: `src/page_view.c:4064`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_build_styled (function) `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                    ...`
-- Defined: `src/page_view.c:3905`
+- Defined: `src/page_view.c:4089`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### px (function) `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
                 if (iw <...`
-- Defined: `src/page_view.c:4445`
+- Defined: `src/page_view.c:4630`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### engine (function) `* layout engine (contiguous item gather) drops every cell onto its own row and
          * a 2-col...`
-- Defined: `src/page_view.c:5084`
+- Defined: `src/page_view.c:5330`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### appended (function) `* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
         if (cont.fl...`
-- Defined: `src/page_view.c:5138`
+- Defined: `src/page_view.c:5385`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### pv_css_drops (function) `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
                        const cha...`
-- Defined: `src/page_view.c:5228`
+- Defined: `src/page_view.c:5455`
 - Doc: Diagnostic counterpart to pv_build_styled: same document, same collected CSS text, same @media/root-scope context -- but
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
@@ -9297,55 +9392,59 @@ static void srcse...`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### content (function) `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);`
-- Defined: `src/page_view.c:1001`
+- Defined: `src/page_view.c:1007`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### address (function) `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <= BT_MAX_POSITIONED, "PV_MAX_BOXES must fit the out-of-flow solver's per-box arrays");`
-- Defined: `src/page_view.c:1069`
+- Defined: `src/page_view.c:1075`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### child (function) `* child (NULL = anonymous item: text directly inside the container);`
-- Defined: `src/page_view.c:1077`
+- Defined: `src/page_view.c:1083`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### id (function) `* group id (-1 = the nearest IS the outermost: single-level float, the * painter's old path);`
-- Defined: `src/page_view.c:1097`
+- Defined: `src/page_view.c:1103`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### it (function) `* it (they inherit in CSS). list_style drives the <li> marker (structural);`
-- Defined: `src/page_view.c:1183`
+- Defined: `src/page_view.c:1193`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### here (function) `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3 section 5.1) is content height * with indefinite available space, i.e. `auto`: letting`
-- Defined: `src/page_view.c:1672`
+- Defined: `src/page_view.c:1720`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### glyphs (function) `* glyphs (the runs carry it as their fill source);`
-- Defined: `src/page_view.c:1710`
+- Defined: `src/page_view.c:1758`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### outermost (function) `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);`
-- Defined: `src/page_view.c:2404`
+- Defined: `src/page_view.c:2584`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### control (function) `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
-- Defined: `src/page_view.c:4294`
+- Defined: `src/page_view.c:4479`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### height (function) `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
-- Defined: `src/page_view.c:4512`
+- Defined: `src/page_view.c:4697`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### block_id (function) `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it falls * into flow as a full-width row. Gated on img_oof, so every * in-flow image keep`
-- Defined: `src/page_view.c:4610`
+- Defined: `src/page_view.c:4795`
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+
+### URL (function) `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+- Defined: `src/page_view.c:4926`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### flow (function) `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through it. Subtree-wide: the run * may sit deep inside an undecorated abspos wrapper, where`
-- Defined: `src/page_view.c:4986`
+- Defined: `src/page_view.c:5231`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ### line (function) `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
-- Defined: `src/page_view.c:5093`
+- Defined: `src/page_view.c:5339`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ## src/pdf_export.c
@@ -9628,76 +9727,76 @@ static void srcse...`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_push_input (function) `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)`
-- Defined: `src/render_doc.c:192`
+- Defined: `src/render_doc.c:193`
 - Doc: Appends an RD_INPUT block, copying text (placeholder/label), the form action * (href), and the control name/value. Retur
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### resolve_image_decision (function) `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
         ...`
-- Defined: `src/render_doc.c:227`
+- Defined: `src/render_doc.c:228`
 - Doc: Resolves raw_src (possibly relative, or a data: URI) against top_level_url and judges it under the exact same policy an 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_build (function) `rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_u...`
-- Defined: `src/render_doc.c:249`
+- Defined: `src/render_doc.c:250`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### unset (function) `* background paints as if unset (no border/box-shadow-style
                  * "broken image" pla...`
-- Defined: `src/render_doc.c:612`
+- Defined: `src/render_doc.c:615`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_free (function) `void rd_free(rd_doc *d)`
-- Defined: `src/render_doc.c:677`
+- Defined: `src/render_doc.c:680`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_count (function) `size_t rd_count(const rd_doc *d)`
-- Defined: `src/render_doc.c:693`
+- Defined: `src/render_doc.c:696`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_at (function) `const rd_block *rd_at(const rd_doc *d, size_t i)`
-- Defined: `src/render_doc.c:697`
+- Defined: `src/render_doc.c:700`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_box_count (function) `size_t rd_box_count(const rd_doc *d)`
-- Defined: `src/render_doc.c:702`
+- Defined: `src/render_doc.c:705`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_box_at (function) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
-- Defined: `src/render_doc.c:706`
+- Defined: `src/render_doc.c:709`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_cont_count (function) `size_t rd_cont_count(const rd_doc *d)`
-- Defined: `src/render_doc.c:711`
+- Defined: `src/render_doc.c:714`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_cont_at (function) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
-- Defined: `src/render_doc.c:715`
+- Defined: `src/render_doc.c:718`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_kind_name (function) `const char *rd_kind_name(rd_kind k)`
-- Defined: `src/render_doc.c:720`
+- Defined: `src/render_doc.c:723`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_block_tag (function) `const char *rd_block_tag(const rd_block *b)`
-- Defined: `src/render_doc.c:734`
+- Defined: `src/render_doc.c:737`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_input_label (function) `const char *rd_input_label(int input_type)`
-- Defined: `src/render_doc.c:765`
+- Defined: `src/render_doc.c:768`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_image_label (function) `const char *rd_image_label(rdp_img_decision d)`
-- Defined: `src/render_doc.c:784`
+- Defined: `src/render_doc.c:787`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### rd_image_fail_label (function) `const char *rd_image_fail_label(img_fail_reason reason)`
-- Defined: `src/render_doc.c:795`
+- Defined: `src/render_doc.c:798`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ### place (function) `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never resolved, never touches the network either way);`
-- Defined: `src/render_doc.c:217`
+- Defined: `src/render_doc.c:218`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ## src/render_policy.c
@@ -10142,264 +10241,264 @@ static int child_load(ch...`
 ### blocks (function) `*
  * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the
  * grid arr...`
-- Defined: `src/tab.c:293`
+- Defined: `src/tab.c:294`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### FB_MAX_FILE_BYTES (function) `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
  * the stream. ...`
-- Defined: `src/tab.c:651`
+- Defined: `src/tab.c:656`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### budget_remaining_ms (function) `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)`
-- Defined: `src/tab.c:681`
+- Defined: `src/tab.c:686`
 - Doc: Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent. * Used to share one page-wide JS bud
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### ctype_is_javascript (function) `static int ctype_is_javascript(const char *ctype)`
-- Defined: `src/tab.c:695`
+- Defined: `src/tab.c:700`
 - Doc: Content-Type gate for an external script's response (anti type-confusion, fail closed for real content types): accept a 
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### ctype_is_css (function) `static int ctype_is_css(const char *ctype)`
-- Defined: `src/tab.c:704`
+- Defined: `src/tab.c:709`
 - Doc: Content-Type gate for an external stylesheet (Hito 27), same shape as the script gate: a missing/empty type is accepted,
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### log_external_skip (function) `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
                 ...`
-- Defined: `src/tab.c:712`
+- Defined: `src/tab.c:717`
 - Doc: Freebug note about an external subresource (script/stylesheet) that was not used (skipped or refused). The raw hostile s
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### run (function) `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
  * Call after every ...`
-- Defined: `src/tab.c:730`
+- Defined: `src/tab.c:735`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### window (function) `* net window (cs->net_active). */
 static void child_fetch_stylesheets(child_state *cs)`
-- Defined: `src/tab.c:763`
+- Defined: `src/tab.c:768`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### child_handle_load (function) `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
            ...`
-- Defined: `src/tab.c:808`
+- Defined: `src/tab.c:813`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### swap (function) `* display:none hiding an element via class swap (CSS, not
      * DOM removal). */
     if (ok && v...`
-- Defined: `src/tab.c:1051`
+- Defined: `src/tab.c:1056`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### child_next_timer_ms (function) `static int32_t child_next_timer_ms(child_state *cs)`
-- Defined: `src/tab.c:1089`
+- Defined: `src/tab.c:1094`
 - Doc: Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the * eval fails, or nothing is pending. Does 
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### child_handle_mutation (function) `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                         ...`
-- Defined: `src/tab.c:1104`
+- Defined: `src/tab.c:1109`
 - Doc: Fire click handlers for node_id (OP_CLICK) or advance the virtual timer clock (OP_TICK), then re-derive the view so the 
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### child_handle_click (function) `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
-- Defined: `src/tab.c:1171`
+- Defined: `src/tab.c:1176`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### child_handle_tick (function) `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
-- Defined: `src/tab.c:1175`
+- Defined: `src/tab.c:1180`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### child_handle_event (function) `static void child_handle_event(int wfd, child_state *cs)`
-- Defined: `src/tab.c:1185`
+- Defined: `src/tab.c:1190`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### child_handle_mouse (function) `static void child_handle_mouse(int wfd, child_state *cs)`
-- Defined: `src/tab.c:1233`
+- Defined: `src/tab.c:1238`
 - Doc: Handles a mouse DOM event (OP_MOUSE). Reads: node_id:int32, event_type_len:size_t, event_type, client_x:int32, client_y:
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### child_handle_submit (function) `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)`
-- Defined: `src/tab.c:1267`
+- Defined: `src/tab.c:1272`
 - Doc: Fires a submit event on the form enclosing node_id. Walks up the DOM to find the <form> element, dispatches the event, a
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### child_handle_eval (function) `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)`
-- Defined: `src/tab.c:1301`
+- Defined: `src/tab.c:1306`
 - Doc: Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a JS-le
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### child_handle_decode_image (function) `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)`
-- Defined: `src/tab.c:1334`
+- Defined: `src/tab.c:1339`
 - Doc: Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data]. Decoding hostile image bytes happens h
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### child_handle_decode_image_b64 (function) `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)`
-- Defined: `src/tab.c:1356`
+- Defined: `src/tab.c:1361`
 - Doc: data: URI images: the parent only sliced the base64 payload (pure pointer arithmetic, no interpretation); the base64 DEC
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### gen_session_key (function) `static uint64_t gen_session_key(void)`
-- Defined: `src/tab.c:1368`
+- Defined: `src/tab.c:1373`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_worker_run (function) `static void tab_worker_run(int rfd, int wfd)`
-- Defined: `src/tab.c:1388`
+- Defined: `src/tab.c:1393`
 - Doc: The confined request loop. Runs in the re-exec'd worker image (see * tab_worker_dispatch). Never returns to the caller (
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### parse_worker_fd (function) `static int parse_worker_fd(const char *s, int *out)`
-- Defined: `src/tab.c:1531`
+- Defined: `src/tab.c:1536`
 - Doc: else /* OP_DECODE_IMAGE_B64 */       child_handle_decode_image_b64(wfd, buf, len); free(buf); free(url); free(cookies); 
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_parse_worker_args (function) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
-- Defined: `src/tab.c:1543`
+- Defined: `src/tab.c:1548`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_worker_dispatch (function) `void tab_worker_dispatch(int argc, char **argv)`
-- Defined: `src/tab.c:1553`
+- Defined: `src/tab.c:1558`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### ignore_sigpipe (function) `static void ignore_sigpipe(void)`
-- Defined: `src/tab.c:1583`
+- Defined: `src/tab.c:1588`
 - Doc: A write to a dead child must not kill the parent with SIGPIPE. Idempotent; * no module-level mutable state of our own (t
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_refresh_alive (function) `static void tab_refresh_alive(tab *t)`
-- Defined: `src/tab.c:1590`
+- Defined: `src/tab.c:1595`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### read_field (function) `static int read_field(int fd, char **out, size_t *out_len)`
-- Defined: `src/tab.c:1609`
+- Defined: `src/tab.c:1614`
 - Doc: Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### read_view (function) `static int read_view(int fd, pv_view **out)`
-- Defined: `src/tab.c:1625`
+- Defined: `src/tab.c:1630`
 - Doc: Reads a display list serialised by write_view into a fresh pv_view. The run * count and each field are capped against am
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### read_console (function) `static int read_console(int fd, fb_buffer *out)`
-- Defined: `src/tab.c:2061`
+- Defined: `src/tab.c:2069`
 - Doc: Reads the console section written by write_console into out (a zero-initialised fb_buffer). Bounds the entry count and e
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### send_request (function) `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)`
-- Defined: `src/tab.c:2098`
+- Defined: `src/tab.c:2106`
 - Doc: if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt, elen) !=
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### io_failure (function) `static tab_status io_failure(tab *t)`
-- Defined: `src/tab.c:2108`
+- Defined: `src/tab.c:2116`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### exec_worker_child (function) `static void exec_worker_child(int rfd, int wfd)`
-- Defined: `src/tab.c:2116`
+- Defined: `src/tab.c:2124`
 - Doc: Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other tabs' c
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_set_fetcher (function) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-- Defined: `src/tab.c:2187`
+- Defined: `src/tab.c:2195`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_set_net_allowed (function) `void tab_set_net_allowed(tab *t, int allowed)`
-- Defined: `src/tab.c:2193`
+- Defined: `src/tab.c:2201`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_set_css_allowed (function) `void tab_set_css_allowed(tab *t, int allowed)`
-- Defined: `src/tab.c:2198`
+- Defined: `src/tab.c:2206`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_set_viewport_w (function) `void tab_set_viewport_w(tab *t, int px)`
-- Defined: `src/tab.c:2203`
+- Defined: `src/tab.c:2211`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_set_cookies (function) `void tab_set_cookies(tab *t, const char *cookies)`
-- Defined: `src/tab.c:2208`
+- Defined: `src/tab.c:2216`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_subreq_permitted (function) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-- Defined: `src/tab.c:2214`
+- Defined: `src/tab.c:2222`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### answered (function) `* A refused frame is still consumed and answered (status 0), so the protocol never
  * desyncs. Re...`
-- Defined: `src/tab.c:2226`
+- Defined: `src/tab.c:2234`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_load (function) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-- Defined: `src/tab.c:2262`
+- Defined: `src/tab.c:2270`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_load_ex (function) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-- Defined: `src/tab.c:2266`
+- Defined: `src/tab.c:2274`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_load_full (function) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...`
-- Defined: `src/tab.c:2270`
+- Defined: `src/tab.c:2278`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_click (function) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-- Defined: `src/tab.c:2416`
+- Defined: `src/tab.c:2424`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_tick (function) `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-- Defined: `src/tab.c:2423`
+- Defined: `src/tab.c:2431`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_submit (function) `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)`
-- Defined: `src/tab.c:2432`
+- Defined: `src/tab.c:2440`
 - Doc: Dispatches a submit event on the form enclosing node_id. Simple response: * [TAG_RESULT][ok:int32][prevented:int32]. No 
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_read_view (function) `tab_status tab_read_view(tab *t, tab_page *out)`
-- Defined: `src/tab.c:2537`
+- Defined: `src/tab.c:2545`
 - Doc: Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console). * Used by tab_mutation_request, tab_subreq
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_eval (function) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-- Defined: `src/tab.c:2593`
+- Defined: `src/tab.c:2601`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_decode_image_op (function) `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
         ...`
-- Defined: `src/tab.c:2633`
+- Defined: `src/tab.c:2641`
 - Doc: Shared by tab_decode_image and tab_decode_image_data_url: sends `bytes` under opcode `op` and parses the [ok][w][h][stri
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_decode_image (function) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-- Defined: `src/tab.c:2675`
+- Defined: `src/tab.c:2683`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_decode_image_data_url (function) `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
-- Defined: `src/tab.c:2681`
+- Defined: `src/tab.c:2689`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_alive (function) `int tab_alive(const tab *t)`
-- Defined: `src/tab.c:2699`
+- Defined: `src/tab.c:2707`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_child_pid (function) `pid_t tab_child_pid(const tab *t)`
-- Defined: `src/tab.c:2705`
+- Defined: `src/tab.c:2713`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_close (function) `void tab_close(tab *t)`
-- Defined: `src/tab.c:2709`
+- Defined: `src/tab.c:2717`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_page_free (function) `void tab_page_free(tab_page *p)`
-- Defined: `src/tab.c:2722`
+- Defined: `src/tab.c:2730`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_eval_result_free (function) `void tab_eval_result_free(tab_eval_result *r)`
-- Defined: `src/tab.c:2740`
+- Defined: `src/tab.c:2748`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tab_image_free (function) `void tab_image_free(tab_image *img)`
-- Defined: `src/tab.c:2749`
+- Defined: `src/tab.c:2757`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### buffer (function) `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of run_js so the REPL works on any page. */ fb_buffer_reset(&cs->log);`
@@ -10411,43 +10510,43 @@ static void child_fetch_stylesheets(child_state *cs)`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### fallback (function) `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it even with JS on. */ (void)pv_build_styled(cs->doc, run_js, reader, prefers_dark, cs->`
-- Defined: `src/tab.c:877`
+- Defined: `src/tab.c:882`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### content (function) `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video> elements in the DOM for any * found. */ if (cs->idx != NULL) jd_process_iframes(cs->js, cs`
-- Defined: `src/tab.c:997`
+- Defined: `src/tab.c:1002`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### once (function) `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);`
-- Defined: `src/tab.c:1042`
+- Defined: `src/tab.c:1047`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### write_full (function) `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd, write_which) == 0 && write_full(wfd, &nlen, sizeof nlen) == 0 && (nlen == 0 || write_full(wfd,`
-- Defined: `src/tab.c:1071`
+- Defined: `src/tab.c:1076`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### EPIPE (function) `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();`
-- Defined: `src/tab.c:1390`
+- Defined: `src/tab.c:1395`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### tzset (function) `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);`
-- Defined: `src/tab.c:1406`
-- Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
-
-### depth (function) `* defense in depth (seccomp already excludes open/socket/exec);`
 - Defined: `src/tab.c:1411`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
+### depth (function) `* defense in depth (seccomp already excludes open/socket/exec);`
+- Defined: `src/tab.c:1416`
+- Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
+
 ### load (function) `* subresource requests this load (set per page: host in allow.conf AND js.conf);`
-- Defined: `src/tab.c:1570`
+- Defined: `src/tab.c:1575`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### layout (function) `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property. */ pv_set_box_pct(v, (int)bwpct, (int)b[36], (int)b[37], (int)b[38], (int)b[39]);`
-- Defined: `src/tab.c:1773`
+- Defined: `src/tab.c:1779`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ### column (function) `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation as text runs. */ pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (in`
-- Defined: `src/tab.c:1783`
+- Defined: `src/tab.c:1789`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ## src/text_shape.c
@@ -11120,197 +11219,202 @@ static int looks_like_host(const c...`
 - Defined: `tests/test_box_tree.c:75`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
+### test_flex_auto_margin_pushes_item (function) `static void test_flex_auto_margin_pushes_item(void **state)`
+- Defined: `tests/test_box_tree.c:95`
+- Doc: Flexbox 8.1: an item's auto margin takes the free space before justify-content * (the `.push-right{margin-left:auto}` na
+- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
+
 ### test_flex_gap_and_justify_center (function) `static void test_flex_gap_and_justify_center(void **state)`
-- Defined: `tests/test_box_tree.c:93`
+- Defined: `tests/test_box_tree.c:113`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_flex_wrap_two_lines (function) `static void test_flex_wrap_two_lines(void **state)`
-- Defined: `tests/test_box_tree.c:109`
+- Defined: `tests/test_box_tree.c:129`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_flex_nowrap_default_single_line_unchanged (function) `static void test_flex_nowrap_default_single_line_unchanged(void **state)`
-- Defined: `tests/test_box_tree.c:131`
-- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
-
-### test_flex_wrap_reverse_two_lines (function) `static void test_flex_wrap_reverse_two_lines(void **state)`
 - Defined: `tests/test_box_tree.c:151`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
-### test_flex_wrap_row_gap_distinct_from_gap (function) `static void test_flex_wrap_row_gap_distinct_from_gap(void **state)`
-- Defined: `tests/test_box_tree.c:173`
+### test_flex_wrap_reverse_two_lines (function) `static void test_flex_wrap_reverse_two_lines(void **state)`
+- Defined: `tests/test_box_tree.c:171`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
-### test_flex_cross_axis_align (function) `static void test_flex_cross_axis_align(void **state)`
+### test_flex_wrap_row_gap_distinct_from_gap (function) `static void test_flex_wrap_row_gap_distinct_from_gap(void **state)`
 - Defined: `tests/test_box_tree.c:193`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
+### test_flex_cross_axis_align (function) `static void test_flex_cross_axis_align(void **state)`
+- Defined: `tests/test_box_tree.c:213`
+- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
+
 ### test_grid_row_gap_distinct_from_gap (function) `static void test_grid_row_gap_distinct_from_gap(void **state)`
-- Defined: `tests/test_box_tree.c:211`
+- Defined: `tests/test_box_tree.c:231`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_grid_without_row_gap_falls_back_to_gap (function) `static void test_grid_without_row_gap_falls_back_to_gap(void **state)`
-- Defined: `tests/test_box_tree.c:234`
+- Defined: `tests/test_box_tree.c:254`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_grid (function) `static void test_grid(void **state)`
-- Defined: `tests/test_box_tree.c:250`
+- Defined: `tests/test_box_tree.c:270`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_grid_weighted_tracks (function) `static void test_grid_weighted_tracks(void **state)`
-- Defined: `tests/test_box_tree.c:271`
+- Defined: `tests/test_box_tree.c:291`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_grid_column_span (function) `static void test_grid_column_span(void **state)`
-- Defined: `tests/test_box_tree.c:289`
-- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
-
-### test_nested_flex_in_block (function) `static void test_nested_flex_in_block(void **state)`
 - Defined: `tests/test_box_tree.c:309`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
+### test_nested_flex_in_block (function) `static void test_nested_flex_in_block(void **state)`
+- Defined: `tests/test_box_tree.c:329`
+- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
+
 ### test_display_none_skipped (function) `static void test_display_none_skipped(void **state)`
-- Defined: `tests/test_box_tree.c:333`
+- Defined: `tests/test_box_tree.c:353`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_grid_bad_columns (function) `static void test_grid_bad_columns(void **state)`
-- Defined: `tests/test_box_tree.c:348`
-- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
-
-### test_flex_negative_gap (function) `static void test_flex_negative_gap(void **state)`
-- Defined: `tests/test_box_tree.c:358`
-- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
-
-### test_children_cap (function) `static void test_children_cap(void **state)`
 - Defined: `tests/test_box_tree.c:368`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
-### test_depth_cap (function) `static void test_depth_cap(void **state)`
+### test_flex_negative_gap (function) `static void test_flex_negative_gap(void **state)`
 - Defined: `tests/test_box_tree.c:378`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
+### test_children_cap (function) `static void test_children_cap(void **state)`
+- Defined: `tests/test_box_tree.c:388`
+- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
+
+### test_depth_cap (function) `static void test_depth_cap(void **state)`
+- Defined: `tests/test_box_tree.c:398`
+- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
+
 ### test_positioning_null_args (function) `static void test_positioning_null_args(void **state)`
-- Defined: `tests/test_box_tree.c:395`
+- Defined: `tests/test_box_tree.c:415`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_positioning_static_unchanged (function) `static void test_positioning_static_unchanged(void **state)`
-- Defined: `tests/test_box_tree.c:409`
+- Defined: `tests/test_box_tree.c:429`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_positioning_relative_offset (function) `static void test_positioning_relative_offset(void **state)`
-- Defined: `tests/test_box_tree.c:421`
+- Defined: `tests/test_box_tree.c:441`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_positioning_absolute_against_ancestor (function) `static void test_positioning_absolute_against_ancestor(void **state)`
-- Defined: `tests/test_box_tree.c:442`
+- Defined: `tests/test_box_tree.c:462`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_positioning_absolute_against_viewport (function) `static void test_positioning_absolute_against_viewport(void **state)`
-- Defined: `tests/test_box_tree.c:465`
+- Defined: `tests/test_box_tree.c:485`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_positioning_fixed_against_viewport (function) `static void test_positioning_fixed_against_viewport(void **state)`
-- Defined: `tests/test_box_tree.c:482`
+- Defined: `tests/test_box_tree.c:502`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_positioning_sticky_treated_as_relative (function) `static void test_positioning_sticky_treated_as_relative(void **state)`
-- Defined: `tests/test_box_tree.c:501`
+- Defined: `tests/test_box_tree.c:521`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_positioning_stacking_order (function) `static void test_positioning_stacking_order(void **state)`
-- Defined: `tests/test_box_tree.c:519`
-- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
-
-### test_positioning_doc_order_tiebreak (function) `static void test_positioning_doc_order_tiebreak(void **state)`
 - Defined: `tests/test_box_tree.c:539`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
+### test_positioning_doc_order_tiebreak (function) `static void test_positioning_doc_order_tiebreak(void **state)`
+- Defined: `tests/test_box_tree.c:559`
+- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
+
 ### test_positioning_no_insets (function) `static void test_positioning_no_insets(void **state)`
-- Defined: `tests/test_box_tree.c:557`
+- Defined: `tests/test_box_tree.c:577`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_positioning_null_geometry (function) `static void test_positioning_null_geometry(void **state)`
-- Defined: `tests/test_box_tree.c:574`
+- Defined: `tests/test_box_tree.c:594`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_positioning_nbox_cap (function) `static void test_positioning_nbox_cap(void **state)`
-- Defined: `tests/test_box_tree.c:591`
+- Defined: `tests/test_box_tree.c:611`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_static_position_absolute_auto_insets (function) `static void test_static_position_absolute_auto_insets(void **state)`
-- Defined: `tests/test_box_tree.c:613`
+- Defined: `tests/test_box_tree.c:633`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_static_position_fixed_auto_insets (function) `static void test_static_position_fixed_auto_insets(void **state)`
-- Defined: `tests/test_box_tree.c:629`
+- Defined: `tests/test_box_tree.c:649`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_static_position_explicit_insets_win (function) `static void test_static_position_explicit_insets_win(void **state)`
-- Defined: `tests/test_box_tree.c:645`
+- Defined: `tests/test_box_tree.c:665`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_static_position_mixed_axis (function) `static void test_static_position_mixed_axis(void **state)`
-- Defined: `tests/test_box_tree.c:666`
-- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
-
-### test_static_position_right_inset_keeps_anchor (function) `static void test_static_position_right_inset_keeps_anchor(void **state)`
 - Defined: `tests/test_box_tree.c:686`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
-### test_static_position_null_arrays_legacy (function) `static void test_static_position_null_arrays_legacy(void **state)`
+### test_static_position_right_inset_keeps_anchor (function) `static void test_static_position_right_inset_keeps_anchor(void **state)`
 - Defined: `tests/test_box_tree.c:706`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
+### test_static_position_null_arrays_legacy (function) `static void test_static_position_null_arrays_legacy(void **state)`
+- Defined: `tests/test_box_tree.c:726`
+- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
+
 ### test_abspos_resolves_against_placed_ancestor (function) `static void test_abspos_resolves_against_placed_ancestor(void **state)`
-- Defined: `tests/test_box_tree.c:724`
+- Defined: `tests/test_box_tree.c:744`
 - Doc: The `placed` bitmap climbs past an unplaced containing block to the nearest placed ancestor: an undecorated absolute bad
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_abspos_unplaced_without_anchor_falls_to_viewport (function) `static void test_abspos_unplaced_without_anchor_falls_to_viewport(void **state)`
-- Defined: `tests/test_box_tree.c:754`
-- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
-
-### test_box_hidden_self (function) `static void test_box_hidden_self(void **state)`
 - Defined: `tests/test_box_tree.c:774`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
+### test_box_hidden_self (function) `static void test_box_hidden_self(void **state)`
+- Defined: `tests/test_box_tree.c:794`
+- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
+
 ### test_box_hidden_ancestor (function) `static void test_box_hidden_ancestor(void **state)`
-- Defined: `tests/test_box_tree.c:786`
+- Defined: `tests/test_box_tree.c:806`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_box_hidden_fail_closed (function) `static void test_box_hidden_fail_closed(void **state)`
-- Defined: `tests/test_box_tree.c:799`
+- Defined: `tests/test_box_tree.c:819`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_oof_anchor_none_on_static_chain (function) `static void test_oof_anchor_none_on_static_chain(void **state)`
-- Defined: `tests/test_box_tree.c:812`
+- Defined: `tests/test_box_tree.c:832`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_oof_anchor_self (function) `static void test_oof_anchor_self(void **state)`
-- Defined: `tests/test_box_tree.c:822`
-- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
-
-### test_oof_anchor_via_ancestor (function) `static void test_oof_anchor_via_ancestor(void **state)`
-- Defined: `tests/test_box_tree.c:829`
-- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
-
-### test_oof_nested_absolute_anchor_vs_root (function) `static void test_oof_nested_absolute_anchor_vs_root(void **state)`
 - Defined: `tests/test_box_tree.c:842`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
+### test_oof_anchor_via_ancestor (function) `static void test_oof_anchor_via_ancestor(void **state)`
+- Defined: `tests/test_box_tree.c:849`
+- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
+
+### test_oof_nested_absolute_anchor_vs_root (function) `static void test_oof_nested_absolute_anchor_vs_root(void **state)`
+- Defined: `tests/test_box_tree.c:862`
+- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
+
 ### test_oof_relative_does_not_anchor (function) `static void test_oof_relative_does_not_anchor(void **state)`
-- Defined: `tests/test_box_tree.c:857`
+- Defined: `tests/test_box_tree.c:877`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### test_oof_fail_open (function) `static void test_oof_fail_open(void **state)`
-- Defined: `tests/test_box_tree.c:871`
+- Defined: `tests/test_box_tree.c:891`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### main (function) `int main(void)`
-- Defined: `tests/test_box_tree.c:889`
+- Defined: `tests/test_box_tree.c:909`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ### card (function) `* containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */ assert_true(dbl_eq(out[2].x, 100));`
-- Defined: `tests/test_box_tree.c:749`
+- Defined: `tests/test_box_tree.c:769`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ## tests/test_browser.c
@@ -11811,754 +11915,763 @@ static int looks_like_host(const c...`
 - Defined: `tests/test_css.c:1247`
 - Depends on: `include/css.h`, `include/css_select.h`
 
+### test_not_unreadable_argument_fails_closed (function) `static void test_not_unreadable_argument_fails_closed(void **state)`
+- Defined: `tests/test_css.c:1308`
+- Doc: :not() is not forgiving (Selectors 4 4.3): an argument this engine cannot read invalidates the WHOLE selector, because d
+- Depends on: `include/css.h`, `include/css_select.h`
+
+### assert_int_equal (function) `assert_int_equal(css_parse("p:not(.x > y)`
+- Defined: `tests/test_css.c:1311`
+- Depends on: `include/css.h`, `include/css_select.h`
+
 ### test_pseudo_content_before_after_separate (function) `static void test_pseudo_content_before_after_separate(void **state)`
-- Defined: `tests/test_css.c:1275`
+- Defined: `tests/test_css.c:1325`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_content_decodes_hex_escape (function) `static void test_pseudo_content_decodes_hex_escape(void **state)`
-- Defined: `tests/test_css.c:1289`
+- Defined: `tests/test_css.c:1339`
 - Doc: CSS Syntax 4.3.7: a hex escape is 1-6 digits plus one optional terminator * space. U+E8F0 in UTF-8 is EE A3 B0.
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_content_escape_eats_terminator_space (function) `static void test_pseudo_content_escape_eats_terminator_space(void **state)`
-- Defined: `tests/test_css.c:1301`
+- Defined: `tests/test_css.c:1351`
 - Doc: CSS Syntax 4.3.7: a hex escape is 1-6 digits plus one optional terminator * space. U+E8F0 in UTF-8 is EE A3 B0. static v
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_content_decodes_escaped_char (function) `static void test_pseudo_content_decodes_escaped_char(void **state)`
-- Defined: `tests/test_css.c:1312`
+- Defined: `tests/test_css.c:1362`
 - Doc: } /* Six digits eat exactly one following space as the terminator. static void test_pseudo_content_escape_eats_terminato
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_single_colon_before_matches (function) `static void test_pseudo_single_colon_before_matches(void **state)`
-- Defined: `tests/test_css.c:1324`
+- Defined: `tests/test_css.c:1374`
 - Doc: CSS 2.1 section 5.12.3: single-colon :before/:after are the legacy spelling * of the pseudo-elements and cascade exactly
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_content_escapes_fail_closed (function) `static void test_pseudo_content_escapes_fail_closed(void **state)`
-- Defined: `tests/test_css.c:1359`
+- Defined: `tests/test_css.c:1409`
 - Doc: Invalid codepoints fail closed to U+FFFD (never NUL, never a bare * surrogate, never past U+10FFFF); the 2-byte UTF-8 pa
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_content_none_parses_empty (function) `static void test_pseudo_content_none_parses_empty(void **state)`
-- Defined: `tests/test_css.c:1390`
+- Defined: `tests/test_css.c:1440`
 - Doc: `content: none` is a conforming "no box" value, not a discard: it parses to * an explicit empty and beats a lower-priori
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_single_colon_before_class_tmp (function) `static void test_pseudo_single_colon_before_class_tmp(void **state)`
-- Defined: `tests/test_css.c:1402`
+- Defined: `tests/test_css.c:1452`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_content_empty_without_pseudo (function) `static void test_pseudo_content_empty_without_pseudo(void **state)`
-- Defined: `tests/test_css.c:1413`
+- Defined: `tests/test_css.c:1463`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_geometry_does_not_leak_to_element (function) `static void test_pseudo_geometry_does_not_leak_to_element(void **state)`
-- Defined: `tests/test_css.c:1431`
+- Defined: `tests/test_css.c:1481`
 - Doc: CSS 2.1 §12.1: a ::before/::after rule styles the GENERATED box, never the element it originates from. Only `content` cr
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_does_not_claim_cascade_slot (function) `static void test_pseudo_does_not_claim_cascade_slot(void **state)`
-- Defined: `tests/test_css.c:1487`
+- Defined: `tests/test_css.c:1537`
 - Doc: The pseudo rule must not even CLAIM the cascade slot: a later, real rule for the same property still has to win it. Skip
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_specificity (function) `static void test_pseudo_specificity(void **state)`
-- Defined: `tests/test_css.c:1500`
+- Defined: `tests/test_css.c:1550`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_with_sibling_combinator (function) `static void test_pseudo_with_sibling_combinator(void **state)`
-- Defined: `tests/test_css.c:1518`
+- Defined: `tests/test_css.c:1568`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_nth_malformed_drops (function) `static void test_pseudo_nth_malformed_drops(void **state)`
-- Defined: `tests/test_css.c:1535`
+- Defined: `tests/test_css.c:1585`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### assert_int_equal (function) `assert_int_equal(css_parse("li:nth-child()`
-- Defined: `tests/test_css.c:1540`
+- Defined: `tests/test_css.c:1590`
 - Doc: Malformed or oversized An+B drops the selector (fail closed); partner rules * survive.
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_of_type (function) `static void test_pseudo_of_type(void **state)`
-- Defined: `tests/test_css.c:1553`
+- Defined: `tests/test_css.c:1603`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_pseudo_nth_of_type (function) `static void test_pseudo_nth_of_type(void **state)`
-- Defined: `tests/test_css.c:1572`
+- Defined: `tests/test_css.c:1622`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### assert_int_equal (function) `assert_int_equal(css_parse("li:nth-of-type(2n)`
-- Defined: `tests/test_css.c:1575`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_pseudo_empty (function) `static void test_pseudo_empty(void **state)`
-- Defined: `tests/test_css.c:1588`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_has_parses_and_fails_closed (function) `static void test_has_parses_and_fails_closed(void **state)`
-- Defined: `tests/test_css.c:1601`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### assert_int_equal (function) `assert_int_equal(css_parse("div:has(.x)`
-- Defined: `tests/test_css.c:1607`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_pseudo_target (function) `static void test_pseudo_target(void **state)`
-- Defined: `tests/test_css.c:1614`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_pseudo_lang (function) `static void test_pseudo_lang(void **state)`
 - Defined: `tests/test_css.c:1625`
 - Depends on: `include/css.h`, `include/css_select.h`
 
+### test_pseudo_empty (function) `static void test_pseudo_empty(void **state)`
+- Defined: `tests/test_css.c:1638`
+- Depends on: `include/css.h`, `include/css_select.h`
+
+### test_has_parses_and_fails_closed (function) `static void test_has_parses_and_fails_closed(void **state)`
+- Defined: `tests/test_css.c:1651`
+- Depends on: `include/css.h`, `include/css_select.h`
+
+### assert_int_equal (function) `assert_int_equal(css_parse("div:has(.x)`
+- Defined: `tests/test_css.c:1657`
+- Depends on: `include/css.h`, `include/css_select.h`
+
+### test_pseudo_target (function) `static void test_pseudo_target(void **state)`
+- Defined: `tests/test_css.c:1664`
+- Depends on: `include/css.h`, `include/css_select.h`
+
+### test_pseudo_lang (function) `static void test_pseudo_lang(void **state)`
+- Defined: `tests/test_css.c:1675`
+- Depends on: `include/css.h`, `include/css_select.h`
+
 ### assert_int_equal (function) `assert_int_equal(css_parse("html:lang(en)`
-- Defined: `tests/test_css.c:1628`
+- Defined: `tests/test_css.c:1678`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_resolve_el_inline_only (function) `static void test_resolve_el_inline_only(void **state)`
-- Defined: `tests/test_css.c:1646`
+- Defined: `tests/test_css.c:1696`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_attr_presence (function) `static void test_attr_presence(void **state)`
-- Defined: `tests/test_css.c:1653`
+- Defined: `tests/test_css.c:1703`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_attr_equals (function) `static void test_attr_equals(void **state)`
-- Defined: `tests/test_css.c:1666`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_attr_operators (function) `static void test_attr_operators(void **state)`
-- Defined: `tests/test_css.c:1684`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_attr_case_insensitive_flag (function) `static void test_attr_case_insensitive_flag(void **state)`
 - Defined: `tests/test_css.c:1716`
 - Depends on: `include/css.h`, `include/css_select.h`
 
+### test_attr_operators (function) `static void test_attr_operators(void **state)`
+- Defined: `tests/test_css.c:1734`
+- Depends on: `include/css.h`, `include/css_select.h`
+
+### test_attr_case_insensitive_flag (function) `static void test_attr_case_insensitive_flag(void **state)`
+- Defined: `tests/test_css.c:1766`
+- Depends on: `include/css.h`, `include/css_select.h`
+
 ### test_attr_name_case_insensitive (function) `static void test_attr_name_case_insensitive(void **state)`
-- Defined: `tests/test_css.c:1731`
+- Defined: `tests/test_css.c:1781`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_attr_quoted_value_with_space (function) `static void test_attr_quoted_value_with_space(void **state)`
-- Defined: `tests/test_css.c:1742`
+- Defined: `tests/test_css.c:1792`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_attr_specificity_and_compound (function) `static void test_attr_specificity_and_compound(void **state)`
-- Defined: `tests/test_css.c:1756`
+- Defined: `tests/test_css.c:1806`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_attr_in_combinator (function) `static void test_attr_in_combinator(void **state)`
-- Defined: `tests/test_css.c:1773`
+- Defined: `tests/test_css.c:1823`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_attr_malformed_fail_closed (function) `static void test_attr_malformed_fail_closed(void **state)`
-- Defined: `tests/test_css.c:1789`
+- Defined: `tests/test_css.c:1839`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_important_inline_not_dropped (function) `static void test_important_inline_not_dropped(void **state)`
-- Defined: `tests/test_css.c:1807`
+- Defined: `tests/test_css.c:1857`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_important_beats_specificity (function) `static void test_important_beats_specificity(void **state)`
-- Defined: `tests/test_css.c:1817`
+- Defined: `tests/test_css.c:1867`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_important_tier_then_normal_order (function) `static void test_important_tier_then_normal_order(void **state)`
-- Defined: `tests/test_css.c:1826`
+- Defined: `tests/test_css.c:1876`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_important_inline_beats_sheet_important (function) `static void test_important_inline_beats_sheet_important(void **state)`
-- Defined: `tests/test_css.c:1836`
+- Defined: `tests/test_css.c:1886`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_important_in_shorthand (function) `static void test_important_in_shorthand(void **state)`
-- Defined: `tests/test_css.c:1848`
+- Defined: `tests/test_css.c:1898`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_cascade_specificity (function) `static void test_cascade_specificity(void **state)`
-- Defined: `tests/test_css.c:1865`
+- Defined: `tests/test_css.c:1915`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### silent (function) `* silent (anti-DoS truncation, not a parse failure). 500 filler rules is well past
  * the OLD cap...`
-- Defined: `tests/test_css.c:1881`
+- Defined: `tests/test_css.c:1931`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_cascade_document_order (function) `static void test_cascade_document_order(void **state)`
-- Defined: `tests/test_css.c:1911`
+- Defined: `tests/test_css.c:1961`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_cascade_inline_wins (function) `static void test_cascade_inline_wins(void **state)`
-- Defined: `tests/test_css.c:1920`
+- Defined: `tests/test_css.c:1970`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_at_rules_skipped (function) `static void test_at_rules_skipped(void **state)`
-- Defined: `tests/test_css.c:1929`
+- Defined: `tests/test_css.c:1979`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_media_screen_and_print (function) `static void test_media_screen_and_print(void **state)`
-- Defined: `tests/test_css.c:1946`
+- Defined: `tests/test_css.c:1996`
 - Doc: @import is skipped entirely (no network). @media screen matches the default context, so its rule applies, then the later
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_media_prefers_color_scheme (function) `static void test_media_prefers_color_scheme(void **state)`
-- Defined: `tests/test_css.c:1965`
+- Defined: `tests/test_css.c:2015`
 - Doc: "@media print { p { color:#010101 } }", 0, &sh), CSS_OK); assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_media_width_queries (function) `static void test_media_width_queries(void **state)`
-- Defined: `tests/test_css.c:1981`
+- Defined: `tests/test_css.c:2031`
 - Doc: const char *css = "@media (prefers-color-scheme: dark) { body { color:#ffffff } }"; css_sheet *sh = NULL; assert_int_equ
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### assert_int_equal (function) `assert_int_equal(css_parse(
         "@media (min-width: 600px)`
-- Defined: `tests/test_css.c:1984`
+- Defined: `tests/test_css.c:2034`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_media_and_or (function) `static void test_media_and_or(void **state)`
-- Defined: `tests/test_css.c:1996`
+- Defined: `tests/test_css.c:2046`
 - Doc: (void)state; css_sheet *sh = NULL; assert_int_equal(css_parse( "@media (min-width: 600px) { p { color:#111111 } }\n" "@m
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### assert_int_equal (function) `assert_int_equal(css_parse(
         "@media screen and (min-width: 600px)`
-- Defined: `tests/test_css.c:1999`
+- Defined: `tests/test_css.c:2049`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_media_unknown_fails_closed (function) `static void test_media_unknown_fails_closed(void **state)`
-- Defined: `tests/test_css.c:2010`
+- Defined: `tests/test_css.c:2060`
 - Doc: static void test_media_and_or(void **state) { (void)state; css_sheet *sh = NULL; assert_int_equal(css_parse( "@media scr
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### assert_int_equal (function) `assert_int_equal(css_parse(
         "@media (hover: hover)`
-- Defined: `tests/test_css.c:2013`
+- Defined: `tests/test_css.c:2063`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_parse_null_args (function) `static void test_parse_null_args(void **state)`
-- Defined: `tests/test_css.c:2028`
+- Defined: `tests/test_css.c:2078`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_resolve_null_safe (function) `static void test_resolve_null_safe(void **state)`
-- Defined: `tests/test_css.c:2038`
+- Defined: `tests/test_css.c:2088`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_box_longhands (function) `static void test_inline_box_longhands(void **state)`
-- Defined: `tests/test_css.c:2052`
+- Defined: `tests/test_css.c:2102`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_box_shorthand_expansion (function) `static void test_box_shorthand_expansion(void **state)`
-- Defined: `tests/test_css.c:2070`
+- Defined: `tests/test_css.c:2120`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_box_auto_and_centering (function) `static void test_box_auto_and_centering(void **state)`
-- Defined: `tests/test_css.c:2098`
+- Defined: `tests/test_css.c:2148`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_box_units_and_failclosed (function) `static void test_box_units_and_failclosed(void **state)`
-- Defined: `tests/test_css.c:2115`
+- Defined: `tests/test_css.c:2165`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_calc_basic_arithmetic (function) `static void test_calc_basic_arithmetic(void **state)`
-- Defined: `tests/test_css.c:2211`
+- Defined: `tests/test_css.c:2261`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_calc_precedence_and_parens (function) `static void test_calc_precedence_and_parens(void **state)`
-- Defined: `tests/test_css.c:2220`
+- Defined: `tests/test_css.c:2270`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_calc_units_and_signs (function) `static void test_calc_units_and_signs(void **state)`
-- Defined: `tests/test_css.c:2227`
+- Defined: `tests/test_css.c:2277`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_calc_dimension_errors_fail_closed (function) `static void test_calc_dimension_errors_fail_closed(void **state)`
-- Defined: `tests/test_css.c:2235`
+- Defined: `tests/test_css.c:2285`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_calc_clamped_anti_dos (function) `static void test_calc_clamped_anti_dos(void **state)`
-- Defined: `tests/test_css.c:2257`
+- Defined: `tests/test_css.c:2307`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### geometry (function) `* hostile sheet never sees real window geometry (anti-fingerprinting) yet 100vh
  * heroes and cal...`
-- Defined: `tests/test_css.c:2265`
+- Defined: `tests/test_css.c:2315`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_viewport_units_in_calc_and_mathfn (function) `static void test_viewport_units_in_calc_and_mathfn(void **state)`
-- Defined: `tests/test_css.c:2281`
+- Defined: `tests/test_css.c:2331`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_viewport_units_font_size (function) `static void test_viewport_units_font_size(void **state)`
-- Defined: `tests/test_css.c:2289`
+- Defined: `tests/test_css.c:2339`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_viewport_units_junk_fail_closed (function) `static void test_viewport_units_junk_fail_closed(void **state)`
-- Defined: `tests/test_css.c:2297`
+- Defined: `tests/test_css.c:2347`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_calc_inside_shorthands (function) `static void test_calc_inside_shorthands(void **state)`
-- Defined: `tests/test_css.c:2310`
+- Defined: `tests/test_css.c:2360`
 - Doc: calc() must survive being ONE token inside a multi-value shorthand: a naive whitespace splitter would break "calc(10px +
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_calc_with_custom_property (function) `static void test_calc_with_custom_property(void **state)`
-- Defined: `tests/test_css.c:2348`
+- Defined: `tests/test_css.c:2398`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_box_clamp_anti_dos (function) `static void test_box_clamp_anti_dos(void **state)`
-- Defined: `tests/test_css.c:2355`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_inline_min_width_height (function) `static void test_inline_min_width_height(void **state)`
-- Defined: `tests/test_css.c:2364`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_inline_min_max_height (function) `static void test_inline_min_max_height(void **state)`
-- Defined: `tests/test_css.c:2391`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_box_extension_sheet_cascade (function) `static void test_box_extension_sheet_cascade(void **state)`
 - Defined: `tests/test_css.c:2405`
 - Depends on: `include/css.h`, `include/css_select.h`
 
+### test_inline_min_width_height (function) `static void test_inline_min_width_height(void **state)`
+- Defined: `tests/test_css.c:2414`
+- Depends on: `include/css.h`, `include/css_select.h`
+
+### test_inline_min_max_height (function) `static void test_inline_min_max_height(void **state)`
+- Defined: `tests/test_css.c:2441`
+- Depends on: `include/css.h`, `include/css_select.h`
+
+### test_box_extension_sheet_cascade (function) `static void test_box_extension_sheet_cascade(void **state)`
+- Defined: `tests/test_css.c:2455`
+- Depends on: `include/css.h`, `include/css_select.h`
+
 ### test_inline_text_decoration_color_style (function) `static void test_inline_text_decoration_color_style(void **state)`
-- Defined: `tests/test_css.c:2425`
+- Defined: `tests/test_css.c:2475`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_text_decoration_thickness (function) `static void test_inline_text_decoration_thickness(void **state)`
-- Defined: `tests/test_css.c:2454`
+- Defined: `tests/test_css.c:2504`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_aspect_ratio (function) `static void test_inline_aspect_ratio(void **state)`
-- Defined: `tests/test_css.c:2471`
+- Defined: `tests/test_css.c:2521`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_direction (function) `static void test_inline_direction(void **state)`
-- Defined: `tests/test_css.c:2501`
+- Defined: `tests/test_css.c:2551`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_outline_offset (function) `static void test_inline_outline_offset(void **state)`
-- Defined: `tests/test_css.c:2510`
+- Defined: `tests/test_css.c:2560`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_tab_size (function) `static void test_inline_tab_size(void **state)`
-- Defined: `tests/test_css.c:2522`
+- Defined: `tests/test_css.c:2572`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_box_sheet_cascade_inline_wins (function) `static void test_box_sheet_cascade_inline_wins(void **state)`
-- Defined: `tests/test_css.c:2532`
+- Defined: `tests/test_css.c:2582`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_position_and_insets (function) `static void test_position_and_insets(void **state)`
-- Defined: `tests/test_css.c:2547`
+- Defined: `tests/test_css.c:2597`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_float_and_clear (function) `static void test_float_and_clear(void **state)`
-- Defined: `tests/test_css.c:2578`
+- Defined: `tests/test_css.c:2628`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_visibility (function) `static void test_visibility(void **state)`
-- Defined: `tests/test_css.c:2602`
+- Defined: `tests/test_css.c:2652`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_overflow (function) `static void test_overflow(void **state)`
-- Defined: `tests/test_css.c:2619`
+- Defined: `tests/test_css.c:2669`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_cursor (function) `static void test_cursor(void **state)`
-- Defined: `tests/test_css.c:2642`
+- Defined: `tests/test_css.c:2692`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_text_overflow_and_word_break (function) `static void test_text_overflow_and_word_break(void **state)`
-- Defined: `tests/test_css.c:2658`
+- Defined: `tests/test_css.c:2708`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_box_sizing (function) `static void test_box_sizing(void **state)`
-- Defined: `tests/test_css.c:2690`
+- Defined: `tests/test_css.c:2740`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_border_shorthand (function) `static void test_border_shorthand(void **state)`
-- Defined: `tests/test_css.c:2698`
+- Defined: `tests/test_css.c:2748`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_border_longhands (function) `static void test_border_longhands(void **state)`
-- Defined: `tests/test_css.c:2728`
+- Defined: `tests/test_css.c:2778`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_box_shadow_and_outline (function) `static void test_box_shadow_and_outline(void **state)`
-- Defined: `tests/test_css.c:2754`
+- Defined: `tests/test_css.c:2804`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_flex_item (function) `static void test_flex_item(void **state)`
-- Defined: `tests/test_css.c:2779`
+- Defined: `tests/test_css.c:2829`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_flex_align (function) `static void test_flex_align(void **state)`
-- Defined: `tests/test_css.c:2823`
+- Defined: `tests/test_css.c:2873`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_box_orient_maps_to_flex_direction (function) `static void test_box_orient_maps_to_flex_direction(void **state)`
-- Defined: `tests/test_css.c:2854`
+- Defined: `tests/test_css.c:2904`
 - Doc: 2009 flexbox `box-orient` drafts as `flex-direction`.  Contract: `box-orient` is the 2009 name of the main axis (`horizo
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_grid_extras (function) `static void test_grid_extras(void **state)`
-- Defined: `tests/test_css.c:2877`
+- Defined: `tests/test_css.c:2927`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_layout_sheet_cascade_and_unset (function) `static void test_layout_sheet_cascade_and_unset(void **state)`
-- Defined: `tests/test_css.c:2895`
+- Defined: `tests/test_css.c:2945`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_outline_longhands (function) `static void test_inline_outline_longhands(void **state)`
-- Defined: `tests/test_css.c:2931`
+- Defined: `tests/test_css.c:2981`
 - Doc: const char *cls[] = { "card" }; css_style s = css_resolve(sh, "div", NULL, cls, 1, "z-index:9", 0); assert_int_equal(s.p
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_border_collapse (function) `static void test_inline_border_collapse(void **state)`
-- Defined: `tests/test_css.c:2962`
+- Defined: `tests/test_css.c:3012`
 - Doc: assert_int_equal(css_parse_inline("outline-style:none", 0).outline_style, CSS_BST_NONE); assert_int_equal(css_parse_inli
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_border_spacing (function) `static void test_inline_border_spacing(void **state)`
-- Defined: `tests/test_css.c:2971`
+- Defined: `tests/test_css.c:3021`
 - Doc: assert_int_equal(css_parse_inline("outline-color:auto", 0).outline_color, -1); /* dropped assert_int_equal(css_parse_inl
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_empty_cells (function) `static void test_inline_empty_cells(void **state)`
-- Defined: `tests/test_css.c:2982`
+- Defined: `tests/test_css.c:3032`
 - Doc: } /* --- border-spacing --- static void test_inline_border_spacing(void **state) { (void)state; assert_int_equal(css_par
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_caption_side (function) `static void test_inline_caption_side(void **state)`
-- Defined: `tests/test_css.c:2991`
+- Defined: `tests/test_css.c:3041`
 - Doc: assert_int_equal(css_parse_inline("border-spacing:auto", 0).border_spacing, CSS_LEN_UNSET); /* dropped assert_int_equal(
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_table_layout (function) `static void test_inline_table_layout(void **state)`
-- Defined: `tests/test_css.c:3000`
+- Defined: `tests/test_css.c:3050`
 - Doc: assert_int_equal(css_parse_inline("empty-cells:auto", 0).empty_cells, CSS_EC_UNSET); /* unknown assert_int_equal(css_par
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_font_variant (function) `static void test_inline_font_variant(void **state)`
-- Defined: `tests/test_css.c:3009`
+- Defined: `tests/test_css.c:3059`
 - Doc: assert_int_equal(css_parse_inline("caption-side:left", 0).caption_side, CSS_CS_UNSET); /* unknown assert_int_equal(css_p
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_hyphens (function) `static void test_inline_hyphens(void **state)`
-- Defined: `tests/test_css.c:3018`
+- Defined: `tests/test_css.c:3068`
 - Doc: assert_int_equal(css_parse_inline("table-layout:collapse", 0).table_layout, CSS_TL_UNSET); /* unknown assert_int_equal(c
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_user_select (function) `static void test_inline_user_select(void **state)`
-- Defined: `tests/test_css.c:3028`
+- Defined: `tests/test_css.c:3078`
 - Doc: assert_int_equal(css_parse_inline("color:red", 0).font_variant, CSS_FV_UNSET); } /* --- hyphens --- static void test_inl
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_caret_color (function) `static void test_inline_caret_color(void **state)`
-- Defined: `tests/test_css.c:3039`
+- Defined: `tests/test_css.c:3089`
 - Doc: } /* --- user-select --- static void test_inline_user_select(void **state) { (void)state; assert_int_equal(css_parse_inl
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_appearance (function) `static void test_inline_appearance(void **state)`
-- Defined: `tests/test_css.c:3049`
+- Defined: `tests/test_css.c:3099`
 - Doc: assert_int_equal(css_parse_inline("color:red", 0).user_select, CSS_US_UNSET); } /* --- caret-color --- static void test_
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_pointer_events (function) `static void test_inline_pointer_events(void **state)`
-- Defined: `tests/test_css.c:3058`
-- Doc: assert_int_equal(css_parse_inline("caret-color:blargh", 0).caret_color, -1); /* unknown -> unset assert_int_equal(css_pa
+- Defined: `tests/test_css.c:3110`
+- Doc: } /* --- appearance --- static void test_inline_appearance(void **state) { (void)state; assert_int_equal(css_parse_inlin
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_table_sheet_cascade (function) `static void test_table_sheet_cascade(void **state)`
-- Defined: `tests/test_css.c:3067`
-- Doc: assert_int_equal(css_parse_inline("appearance:button", 0).appearance, CSS_AP_UNSET); /* unknown assert_int_equal(css_par
+- Defined: `tests/test_css.c:3121`
+- Doc: } /* --- pointer-events --- static void test_inline_pointer_events(void **state) { (void)state; assert_int_equal(css_par
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_bg_repeat (function) `static void test_inline_bg_repeat(void **state)`
-- Defined: `tests/test_css.c:3082`
+- Defined: `tests/test_css.c:3136`
 - Doc: (void)state; css_sheet *sh = NULL; assert_int_equal(css_parse("table{border-collapse:collapse;empty-cells:hide;caption-s
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_bg_size (function) `static void test_inline_bg_size(void **state)`
-- Defined: `tests/test_css.c:3094`
+- Defined: `tests/test_css.c:3148`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_bg_clip_origin_attachment (function) `static void test_inline_bg_clip_origin_attachment(void **state)`
-- Defined: `tests/test_css.c:3103`
+- Defined: `tests/test_css.c:3157`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_isolation (function) `static void test_inline_isolation(void **state)`
-- Defined: `tests/test_css.c:3123`
+- Defined: `tests/test_css.c:3177`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_contain (function) `static void test_inline_contain(void **state)`
-- Defined: `tests/test_css.c:3131`
+- Defined: `tests/test_css.c:3185`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_content_visibility (function) `static void test_inline_content_visibility(void **state)`
-- Defined: `tests/test_css.c:3146`
+- Defined: `tests/test_css.c:3200`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_image_rendering (function) `static void test_inline_image_rendering(void **state)`
-- Defined: `tests/test_css.c:3155`
+- Defined: `tests/test_css.c:3209`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_color_scheme (function) `static void test_inline_color_scheme(void **state)`
-- Defined: `tests/test_css.c:3164`
+- Defined: `tests/test_css.c:3218`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_accent_color (function) `static void test_inline_accent_color(void **state)`
-- Defined: `tests/test_css.c:3174`
+- Defined: `tests/test_css.c:3228`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_print_forced_adjust (function) `static void test_inline_print_forced_adjust(void **state)`
-- Defined: `tests/test_css.c:3183`
+- Defined: `tests/test_css.c:3237`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_mix_blend_mode (function) `static void test_inline_mix_blend_mode(void **state)`
-- Defined: `tests/test_css.c:3197`
+- Defined: `tests/test_css.c:3251`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_transform_translate (function) `static void test_inline_transform_translate(void **state)`
-- Defined: `tests/test_css.c:3218`
+- Defined: `tests/test_css.c:3272`
 - Doc: assert_int_equal(css_parse_inline("mix-blend-mode:lighten", 0).mix_blend_mode, CSS_MB_LIGHTEN); assert_int_equal(css_par
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_transform_scale (function) `static void test_inline_transform_scale(void **state)`
-- Defined: `tests/test_css.c:3269`
+- Defined: `tests/test_css.c:3323`
 - Doc: s = css_parse_inline("transform:translate(10%,10%)", 0); /* % rides the pct half assert_int_equal(s.transform_tx, CSS_LE
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_transform_rotate (function) `static void test_inline_transform_rotate(void **state)`
-- Defined: `tests/test_css.c:3309`
+- Defined: `tests/test_css.c:3363`
 - Doc: transform: rotate() (M1.2b), <angle> in any unit (CSS Values 4 6.1), * fractional allowed, rounded to whole degrees for 
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_transform_skew (function) `static void test_inline_transform_skew(void **state)`
-- Defined: `tests/test_css.c:3339`
+- Defined: `tests/test_css.c:3393`
 - Doc: transform: skew()/skewX()/skewY() (M1.2c), <angle> like rotate(). skew(a) means skew(a, 0) -- like translate(x), both sl
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_transform_origin (function) `static void test_transform_origin(void **state)`
-- Defined: `tests/test_css.c:3418`
+- Defined: `tests/test_css.c:3472`
 - Doc: transform-origin (M1.2c): keywords + percentages into percent slots; unset * means the CSS default 50% 50% (box center).
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_transform_independent_cascade_combines (function) `static void test_inline_transform_independent_cascade_combines(void **state)`
-- Defined: `tests/test_css.c:3460`
+- Defined: `tests/test_css.c:3514`
 - Doc: Independent-cascade combination (M1.2b): translate/scale/rotate are separate cascade slots, so two DIFFERENT rules match
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_object_fit (function) `static void test_inline_object_fit(void **state)`
-- Defined: `tests/test_css.c:3474`
+- Defined: `tests/test_css.c:3528`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_list_style_pos (function) `static void test_inline_list_style_pos(void **state)`
-- Defined: `tests/test_css.c:3485`
+- Defined: `tests/test_css.c:3539`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_font_kerning (function) `static void test_inline_font_kerning(void **state)`
-- Defined: `tests/test_css.c:3493`
+- Defined: `tests/test_css.c:3547`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_text_rendering (function) `static void test_inline_text_rendering(void **state)`
-- Defined: `tests/test_css.c:3502`
+- Defined: `tests/test_css.c:3556`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_font_stretch (function) `static void test_inline_font_stretch(void **state)`
-- Defined: `tests/test_css.c:3512`
+- Defined: `tests/test_css.c:3566`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_resize (function) `static void test_inline_resize(void **state)`
-- Defined: `tests/test_css.c:3527`
+- Defined: `tests/test_css.c:3581`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_scroll_behavior (function) `static void test_inline_scroll_behavior(void **state)`
-- Defined: `tests/test_css.c:3537`
+- Defined: `tests/test_css.c:3591`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_touch_action (function) `static void test_inline_touch_action(void **state)`
-- Defined: `tests/test_css.c:3545`
+- Defined: `tests/test_css.c:3599`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_overscroll_behavior (function) `static void test_inline_overscroll_behavior(void **state)`
-- Defined: `tests/test_css.c:3554`
+- Defined: `tests/test_css.c:3608`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_inline_backface_visibility (function) `static void test_inline_backface_visibility(void **state)`
-- Defined: `tests/test_css.c:3563`
+- Defined: `tests/test_css.c:3617`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_math_min_max_top_level (function) `static void test_math_min_max_top_level(void **state)`
-- Defined: `tests/test_css.c:3572`
+- Defined: `tests/test_css.c:3626`
 - Doc: assert_int_equal(css_parse_inline("overscroll-behavior:none", 0).overscroll_behavior, CSS_OS_NONE); assert_int_equal(css
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_math_clamp (function) `static void test_math_clamp(void **state)`
-- Defined: `tests/test_css.c:3584`
+- Defined: `tests/test_css.c:3638`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_math_nested_in_calc (function) `static void test_math_nested_in_calc(void **state)`
-- Defined: `tests/test_css.c:3594`
+- Defined: `tests/test_css.c:3648`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_logical_margin_padding (function) `static void test_logical_margin_padding(void **state)`
-- Defined: `tests/test_css.c:3608`
+- Defined: `tests/test_css.c:3662`
 - Doc: static void test_math_nested_in_calc(void **state) { (void)state; assert_int_equal(css_parse_inline("width:calc(min(10px
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_logical_inset_and_sizes (function) `static void test_logical_inset_and_sizes(void **state)`
-- Defined: `tests/test_css.c:3634`
+- Defined: `tests/test_css.c:3688`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_place_shorthands (function) `static void test_place_shorthands(void **state)`
-- Defined: `tests/test_css.c:3656`
+- Defined: `tests/test_css.c:3710`
 - Doc: assert_int_equal(s.inset_left, 1); assert_int_equal(s.inset_bottom, 2); s = css_parse_inline("inline-size:200px; block-s
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_gap_two_value (function) `static void test_gap_two_value(void **state)`
-- Defined: `tests/test_css.c:3679`
+- Defined: `tests/test_css.c:3733`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_font_shorthand (function) `static void test_font_shorthand(void **state)`
-- Defined: `tests/test_css.c:3696`
+- Defined: `tests/test_css.c:3750`
 - Doc: assert_int_equal(s.row_gap, 10); assert_int_equal(s.gap, 20); s = css_parse_inline("gap:12px", 0); assert_int_equal(s.ga
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_white_space_break_spaces (function) `static void test_white_space_break_spaces(void **state)`
-- Defined: `tests/test_css.c:3718`
+- Defined: `tests/test_css.c:3772`
 - Doc: s = css_parse_inline("font:16px sans-serif", 0); assert_int_equal(s.font_scale, 100); assert_int_equal(s.font_family, CS
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_background_rgba_alpha (function) `static void test_background_rgba_alpha(void **state)`
-- Defined: `tests/test_css.c:3726`
+- Defined: `tests/test_css.c:3780`
 - Doc: background alpha (2026-07-19): rgba()/hsla() keep their 4th component in bg_alpha (percent 0..100; CSS_LEN_UNSET = opaqu
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_background_clip_text (function) `static void test_background_clip_text(void **state)`
-- Defined: `tests/test_css.c:3755`
+- Defined: `tests/test_css.c:3809`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_text_fill_color (function) `static void test_text_fill_color(void **state)`
-- Defined: `tests/test_css.c:3764`
+- Defined: `tests/test_css.c:3818`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_conic_gradient_basic (function) `static void test_conic_gradient_basic(void **state)`
-- Defined: `tests/test_css.c:3775`
+- Defined: `tests/test_css.c:3829`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_conic_gradient_from_angle (function) `static void test_conic_gradient_from_angle(void **state)`
-- Defined: `tests/test_css.c:3787`
+- Defined: `tests/test_css.c:3841`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_conic_gradient_pie_hard_stop (function) `static void test_conic_gradient_pie_hard_stop(void **state)`
-- Defined: `tests/test_css.c:3801`
+- Defined: `tests/test_css.c:3855`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_conic_gradient_deg_positions (function) `static void test_conic_gradient_deg_positions(void **state)`
-- Defined: `tests/test_css.c:3816`
+- Defined: `tests/test_css.c:3870`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_conic_gradient_fails_closed (function) `static void test_conic_gradient_fails_closed(void **state)`
-- Defined: `tests/test_css.c:3826`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_linear_gradient_positions_emitted (function) `static void test_linear_gradient_positions_emitted(void **state)`
-- Defined: `tests/test_css.c:3836`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_filter_drop_shadow (function) `static void test_filter_drop_shadow(void **state)`
-- Defined: `tests/test_css.c:3853`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_filter_drop_shadow_defaults_and_failclosed (function) `static void test_filter_drop_shadow_defaults_and_failclosed(void **state)`
-- Defined: `tests/test_css.c:3866`
-- Depends on: `include/css.h`, `include/css_select.h`
-
-### test_backdrop_filter_blur (function) `static void test_backdrop_filter_blur(void **state)`
 - Defined: `tests/test_css.c:3880`
 - Depends on: `include/css.h`, `include/css_select.h`
 
-### test_filter_blur_and_grayscale (function) `static void test_filter_blur_and_grayscale(void **state)`
-- Defined: `tests/test_css.c:3892`
+### test_linear_gradient_positions_emitted (function) `static void test_linear_gradient_positions_emitted(void **state)`
+- Defined: `tests/test_css.c:3890`
 - Depends on: `include/css.h`, `include/css_select.h`
 
-### test_anim_keyframes_resolved_from_sheet (function) `static void test_anim_keyframes_resolved_from_sheet(void **state)`
+### test_filter_drop_shadow (function) `static void test_filter_drop_shadow(void **state)`
+- Defined: `tests/test_css.c:3907`
+- Depends on: `include/css.h`, `include/css_select.h`
+
+### test_filter_drop_shadow_defaults_and_failclosed (function) `static void test_filter_drop_shadow_defaults_and_failclosed(void **state)`
 - Defined: `tests/test_css.c:3920`
 - Depends on: `include/css.h`, `include/css_select.h`
 
+### test_backdrop_filter_blur (function) `static void test_backdrop_filter_blur(void **state)`
+- Defined: `tests/test_css.c:3934`
+- Depends on: `include/css.h`, `include/css_select.h`
+
+### test_filter_blur_and_grayscale (function) `static void test_filter_blur_and_grayscale(void **state)`
+- Defined: `tests/test_css.c:3946`
+- Depends on: `include/css.h`, `include/css_select.h`
+
+### test_anim_keyframes_resolved_from_sheet (function) `static void test_anim_keyframes_resolved_from_sheet(void **state)`
+- Defined: `tests/test_css.c:3974`
+- Depends on: `include/css.h`, `include/css_select.h`
+
 ### test_anim_transform_keyframes_from_sheet (function) `static void test_anim_transform_keyframes_from_sheet(void **state)`
-- Defined: `tests/test_css.c:3953`
+- Defined: `tests/test_css.c:4007`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_keyframes_overflow_skips_block_not_sheet (function) `static void test_keyframes_overflow_skips_block_not_sheet(void **state)`
-- Defined: `tests/test_css.c:4024`
+- Defined: `tests/test_css.c:4078`
 - Doc: -- @keyframes overflow skips the block, never aborts the sheet -------------  The @keyframes table is bounded (CSS_MAX_K
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_rem_rebased_on_root_font_size (function) `static void test_rem_rebased_on_root_font_size(void **state)`
-- Defined: `tests/test_css.c:4051`
+- Defined: `tests/test_css.c:4105`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_rem_rebase_applies_to_box_lengths (function) `static void test_rem_rebase_applies_to_box_lengths(void **state)`
-- Defined: `tests/test_css.c:4063`
+- Defined: `tests/test_css.c:4117`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_rem_rebase_absent_root_declaration_is_byte_identical (function) `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)`
-- Defined: `tests/test_css.c:4077`
+- Defined: `tests/test_css.c:4131`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_rem_rebase_honours_root_pseudo_class (function) `static void test_rem_rebase_honours_root_pseudo_class(void **state)`
-- Defined: `tests/test_css.c:4089`
+- Defined: `tests/test_css.c:4143`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_rem_rebase_skips_at_rule_prelude (function) `static void test_rem_rebase_skips_at_rule_prelude(void **state)`
-- Defined: `tests/test_css.c:4099`
+- Defined: `tests/test_css.c:4153`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_rem_rebase_leaves_quoted_text_alone (function) `static void test_rem_rebase_leaves_quoted_text_alone(void **state)`
-- Defined: `tests/test_css.c:4122`
+- Defined: `tests/test_css.c:4176`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_rem_rebase_ignores_identifier_lookalikes (function) `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)`
-- Defined: `tests/test_css.c:4133`
+- Defined: `tests/test_css.c:4187`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_rem_rebase_62_5_percent_idiom (function) `static void test_rem_rebase_62_5_percent_idiom(void **state)`
-- Defined: `tests/test_css.c:4148`
+- Defined: `tests/test_css.c:4202`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_media_query_length_honours_its_unit (function) `static void test_media_query_length_honours_its_unit(void **state)`
-- Defined: `tests/test_css.c:4163`
+- Defined: `tests/test_css.c:4217`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### assert_int_equal (function) `assert_int_equal(css_parse("@media (min-width: 200em)`
-- Defined: `tests/test_css.c:4170`
+- Defined: `tests/test_css.c:4224`
 - Doc: A media-query length used to be read as a bare number with the unit discarded, so `min-width: 200em` compared 200 agains
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### assert_int_equal (function) `assert_int_equal(css_parse("@media (min-width: 40em)`
-- Defined: `tests/test_css.c:4176`
+- Defined: `tests/test_css.c:4230`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_clip_rect (function) `static void test_clip_rect(void **state)`
-- Defined: `tests/test_css.c:4184`
+- Defined: `tests/test_css.c:4238`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_clip_auto (function) `static void test_clip_auto(void **state)`
-- Defined: `tests/test_css.c:4194`
+- Defined: `tests/test_css.c:4248`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### test_vendor_prefixes (function) `static void test_vendor_prefixes(void **state)`
-- Defined: `tests/test_css.c:4211`
+- Defined: `tests/test_css.c:4265`
 - Doc: -- Vendor-prefixed properties are aliases (spec/css.md) -----------------  ~900 declarations in the parity corpus carry 
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### main (function) `int main(void)`
-- Defined: `tests/test_css.c:4247`
+- Defined: `tests/test_css.c:4301`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### box (function) `* box (CSS 2.1 section 10.8.1). With one line box per line and no separate * parent content edge, they land on the same edge as top/bottom -- which is a * closer answer than dropping them, since a dro`
@@ -12578,7 +12691,7 @@ static int looks_like_host(const c...`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ### terminator (function) `* terminator (consumed, not painted);`
-- Defined: `tests/test_css.c:1363`
+- Defined: `tests/test_css.c:1413`
 - Depends on: `include/css.h`, `include/css_select.h`
 
 ## tests/test_css_box.c
@@ -13757,8 +13870,13 @@ static void test_float_pack_m_holy_grail_pull_u...`
 - Doc: An explicit cell outside the grid is clamped into range rather than dropped: a * visible item at the edge beats a vanish
 - Depends on: `include/flex_layout.h`
 
+### test_auto_margins_push_right_and_center (function) `static void test_auto_margins_push_right_and_center(void **state)`
+- Defined: `tests/test_flex_layout.c:938`
+- Doc: An explicit cell outside the grid is clamped into range rather than dropped: a * visible item at the edge beats a vanish
+- Depends on: `include/flex_layout.h`
+
 ### main (function) `int main(void)`
-- Defined: `tests/test_flex_layout.c:937`
+- Defined: `tests/test_flex_layout.c:969`
 - Depends on: `include/flex_layout.h`
 
 ### to (function) `* jumps to (1,0);`
@@ -14001,160 +14119,195 @@ static void test_float_pack_m_holy_grail_pull_u...`
 - Doc: Regression for the M1.1-adjacent paint-order fix in write_doc_png/paint_structured (gui/browser_ui.c, paint_positioned_o
 - Depends on: `include/image_decode.h`
 
+### test_download_png_positioned_overflow_clips_own_content (function) `static void test_download_png_positioned_overflow_clips_own_content(void **state)`
+- Defined: `tests/test_freedom.c:391`
+- Doc: An absolutely positioned box with overflow:hidden clips its OWN content (CSS Overflow 3 2.2). The visually-hidden idiom 
+- Depends on: `include/image_decode.h`
+
 ### blend (function) `* not some other blend (double-composited or wrong alpha). */
 static void test_download_png_group...`
-- Defined: `tests/test_freedom.c:393`
+- Defined: `tests/test_freedom.c:439`
 - Depends on: `include/image_decode.h`
 
 ### test_download_png_absolute_shrinks_and_anchors_right (function) `static void test_download_png_absolute_shrinks_and_anchors_right(void **state)`
-- Defined: `tests/test_freedom.c:458`
+- Defined: `tests/test_freedom.c:504`
 - Doc: An out-of-flow box with `width: auto` SHRINK-WRAPS to its content (CSS 2.2 §10.3.7) instead of filling its containing bl
 - Depends on: `include/image_decode.h`
 
 ### ink_width (function) `static double ink_width(const char *html)`
-- Defined: `tests/test_freedom.c:532`
+- Defined: `tests/test_freedom.c:578`
 - Doc: Renders `html` to a PNG and returns the horizontal extent of its dark ink, or -1. The ink extent is the direct measure o
 - Depends on: `include/image_decode.h`
 
 ### test_absolute_font_size_lands_exact (function) `static void test_absolute_font_size_lands_exact(void **state)`
-- Defined: `tests/test_freedom.c:579`
+- Defined: `tests/test_freedom.c:625`
 - Doc: An absolute font-size must land at exactly that many pixels, which means a 32px * declaration measures twice as wide as 
 - Depends on: `include/image_decode.h`
 
 ### test_author_font_size_on_heading_replaces_ua_scale (function) `static void test_author_font_size_on_heading_replaces_ua_scale(void **state)`
-- Defined: `tests/test_freedom.c:597`
+- Defined: `tests/test_freedom.c:643`
 - Doc: An <h1> with an author font-size takes THAT size, not the size multiplied by the user-agent heading scale (the doubled-h
 - Depends on: `include/image_decode.h`
 
 ### test_heading_colour_matches_body_text (function) `static void test_heading_colour_matches_body_text(void **state)`
-- Defined: `tests/test_freedom.c:617`
+- Defined: `tests/test_freedom.c:663`
 - Doc: CSS `color` INHERITS: the user-agent sheet gives a heading no colour of its own, so a document that sets none must paint
 - Depends on: `include/image_decode.h`
 
 ### test_author_can_unbold_a_heading (function) `static void test_author_can_unbold_a_heading(void **state)`
-- Defined: `tests/test_freedom.c:672`
+- Defined: `tests/test_freedom.c:718`
 - Doc: A heading is bold in the user-agent sheet, but the author can turn that OFF. block_style forced bold for every RD_HEADIN
 - Depends on: `include/image_decode.h`
 
 ### test_absolute_span_honours_right_bottom (function) `static void test_absolute_span_honours_right_bottom(void **state)`
-- Defined: `tests/test_freedom.c:691`
+- Defined: `tests/test_freedom.c:737`
 - Doc: CSS 2.2 section 9.7: position:absolute|fixed computes display to block, so an absolutely positioned <span> is a block bo
 - Depends on: `include/image_decode.h`
 
 ### test_download_png_nested_flex_lays_out_on_one_row (function) `static void test_download_png_nested_flex_lays_out_on_one_row(void **state)`
-- Defined: `tests/test_freedom.c:761`
+- Defined: `tests/test_freedom.c:807`
 - Doc: Nested flex/grid containers lay out as ONE container, not two stacked rows. A `header{display:flex}` holding a flex `<na
 - Depends on: `include/image_decode.h`
 
 ### test_download_png_inline_block_flows_in_line (function) `static void test_download_png_inline_block_flows_in_line(void **state)`
-- Defined: `tests/test_freedom.c:840`
+- Defined: `tests/test_freedom.c:886`
 - Doc: display:inline-block flows INSIDE the line it sits in (a badge, a pill, a chip in the middle of a sentence). Registering
 - Depends on: `include/image_decode.h`
 
 ### test_inline_run_boundary_does_not_invent_space (function) `static void test_inline_run_boundary_does_not_invent_space(void **state)`
-- Defined: `tests/test_freedom.c:913`
+- Defined: `tests/test_freedom.c:959`
 - Doc: CSS whitespace collapsing does NOT invent a space where the source had none. The word flow used to insert one before eve
 - Depends on: `include/image_decode.h`
 
 ### test_inline_run_boundary_collapses_runs_of_space (function) `static void test_inline_run_boundary_collapses_runs_of_space(void **state)`
-- Defined: `tests/test_freedom.c:934`
+- Defined: `tests/test_freedom.c:980`
 - Doc: The collapse still happens: a run of several spaces between two runs paints ONE * space, so it must measure the same as 
 - Depends on: `include/image_decode.h`
 
 ### test_download_png_line_height_zero_does_not_shrink_line (function) `static void test_download_png_line_height_zero_does_not_shrink_line(void **state)`
-- Defined: `tests/test_freedom.c:956`
+- Defined: `tests/test_freedom.c:1002`
 - Doc: CSS 2.1 §10.8 line-box regression (Wikipedia headings): the line takes the MAX leading of its fragments. A trailing `lin
 - Depends on: `include/image_decode.h`
 
 ### blend (function) `* visibly different from either input color or an OVER blend (which would show
  * opaque blue). E...`
-- Defined: `tests/test_freedom.c:1087`
+- Defined: `tests/test_freedom.c:1133`
 - Depends on: `include/image_decode.h`
 
 ### markup (function) `* against an unrotated control render of the identical markup (a 50-char-wide box
  * at x:[24,975...`
-- Defined: `tests/test_freedom.c:1217`
+- Defined: `tests/test_freedom.c:1263`
 - Depends on: `include/image_decode.h`
 
 ### markup (function) `* unscaled control render of the identical markup (box y:[24,49] at x=500,
  * center y~36.5): y=2...`
-- Defined: `tests/test_freedom.c:1276`
+- Defined: `tests/test_freedom.c:1322`
 - Depends on: `include/image_decode.h`
 
 ### test_dump_console_shows_output_and_error (function) `static void test_dump_console_shows_output_and_error(void **state)`
-- Defined: `tests/test_freedom.c:1335`
+- Defined: `tests/test_freedom.c:1381`
 - Doc: uint8_t br = (uint8_t)(below >> 16), bg = (uint8_t)(below >> 8), bb = (uint8_t)below; uint8_t mr = (uint8_t)(middle >> 1
 - Depends on: `include/image_decode.h`
 
 ### test_no_dump_console_without_flag (function) `static void test_no_dump_console_without_flag(void **state)`
-- Defined: `tests/test_freedom.c:1370`
+- Defined: `tests/test_freedom.c:1416`
 - Doc: size_t got = fread(out, 1, sizeof out - 1, o); out[got] = '\0'; fclose(o); assert_non_null(strstr(out, "Freebug console"
 - Depends on: `include/image_decode.h`
 
 ### test_dump_dom_prints_render_tree (function) `static void test_dump_dom_prints_render_tree(void **state)`
-- Defined: `tests/test_freedom.c:1395`
+- Defined: `tests/test_freedom.c:1441`
 - Doc: -dump-dom prints the agent-readable render tree (header + per-block lines) instead * of the normal text render, and does
 - Depends on: `include/image_decode.h`
 
 ### ballooned (function) `* ballooned (body + wrapper re-opened per child) and the LAST wrapper piece
  * became the contain...`
-- Defined: `tests/test_freedom.c:1428`
+- Defined: `tests/test_freedom.c:1474`
 - Depends on: `include/image_decode.h`
 
 ### test_dump_layout_pulled_rail_single_margin (function) `static void test_dump_layout_pulled_rail_single_margin(void **state)`
-- Defined: `tests/test_freedom.c:1550`
+- Defined: `tests/test_freedom.c:1596`
 - Doc: A pulled column spends its founder margin twice unless rows shift by the packed OUTER x: the inner band pack applies eve
 - Depends on: `include/image_decode.h`
 
+### test_dump_layout_row_nested_in_column (function) `static void test_dump_layout_row_nested_in_column(void **state)`
+- Defined: `tests/test_freedom.c:1712`
+- Doc: The column branch of layout_container flowed every item as plain text, so an item that is itself a flex row (lobste.rs: 
+- Depends on: `include/image_decode.h`
+
+### test_dump_layout_inline_box_second_run_stays (function) `static void test_dump_layout_inline_box_second_run_stays(void **state)`
+- Defined: `tests/test_freedom.c:1763`
+- Doc: A margin makes lobste.rs' `ul.tags{display:inline-block;margin-right:.25em}` register a box. Its first run opened it as 
+- Depends on: `include/image_decode.h`
+
+### band (function) `* band (which already recurses into nested containers) owns it. */
+static void test_dump_layout_c...`
+- Defined: `tests/test_freedom.c:1792`
+- Depends on: `include/image_decode.h`
+
+### test_dump_layout_line_opening_image_is_inline (function) `static void test_dump_layout_line_opening_image_is_inline(void **state)`
+- Defined: `tests/test_freedom.c:1835`
+- Doc: lobste.rs' byline starts with a 16px avatar <img> followed by " via author": one line in Firefox. R7 only kept an image 
+- Depends on: `include/image_decode.h`
+
+### test_dump_layout_band_flushes_line_before_clear (function) `static void test_dump_layout_band_flushes_line_before_clear(void **state)`
+- Defined: `tests/test_freedom.c:1861`
+- Doc: Starting the next float band cleared the previous float context -- moving the pen below the float -- while the last line
+- Depends on: `include/image_decode.h`
+
+### test_dump_layout_flex_auto_margin_push_right (function) `static void test_dump_layout_flex_auto_margin_push_right(void **state)`
+- Defined: `tests/test_freedom.c:1901`
+- Doc: Flexbox 8.1, end to end (page_view -> codec -> box_tree): lobste.rs' nav pushes * "Login" to the right edge with `.push-
+- Depends on: `include/image_decode.h`
+
 ### test_dump_layout_nested_column_takes_max (function) `static void test_dump_layout_nested_column_takes_max(void **state)`
-- Defined: `tests/test_freedom.c:1666`
+- Defined: `tests/test_freedom.c:1944`
 - Doc: A one-item flex row holding a `flex-direction:column` card (blocked thumbnail alt + title + badge) must size the card to
 - Depends on: `include/image_decode.h`
 
 ### test_rejects_http_url (function) `static void test_rejects_http_url(void **state)`
-- Defined: `tests/test_freedom.c:1715`
+- Defined: `tests/test_freedom.c:1993`
 - Depends on: `include/image_decode.h`
 
 ### white (function) `* and not white (the old behaviour where only text rows got background fills). */
 static void tes...`
-- Defined: `tests/test_freedom.c:1777`
+- Defined: `tests/test_freedom.c:2055`
 - Depends on: `include/image_decode.h`
 
 ### test_download_png_gradient_box_text_keeps_gradient (function) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
-- Defined: `tests/test_freedom.c:1873`
+- Defined: `tests/test_freedom.c:2151`
 - Doc: Firefox parity: a text row inside a box whose background is a GRADIENT (or an image) must not repaint an OUTER ancestor'
 - Depends on: `include/image_decode.h`
 
 ### test_download_png_flex_container_paints_one_band (function) `static void test_download_png_flex_container_paints_one_band(void **state)`
-- Defined: `tests/test_freedom.c:1898`
+- Defined: `tests/test_freedom.c:2176`
 - Doc: Firefox parity: a flex container's own background is ONE band across the container, not one rectangle per item.  A `disp
 - Depends on: `include/image_decode.h`
 
 ### test_download_png_inline_block_shrinks_and_centers (function) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
-- Defined: `tests/test_freedom.c:1918`
+- Defined: `tests/test_freedom.c:2196`
 - Doc: Firefox parity: `display:inline-block` shrink-wraps to its content and is placed by the parent's text-align, instead of 
 - Depends on: `include/image_decode.h`
 
 ### test_download_png_inline_svg_path_and_drops_image (function) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
-- Defined: `tests/test_freedom.c:1962`
+- Defined: `tests/test_freedom.c:2240`
 - Doc: A <path> with a fill reaches the painter, and an element that could name a resource is dropped instead: the same page ca
 - Depends on: `include/image_decode.h`
 
 ### test_dump_timings_prints_stages (function) `static void test_dump_timings_prints_stages(void **state)`
-- Defined: `tests/test_freedom.c:1978`
+- Defined: `tests/test_freedom.c:2256`
 - Doc: -dump-timings prints the pure pt_ accumulator (Fase 0): one line per * measured stage, enum order. Fail-closed: without 
 - Depends on: `include/image_decode.h`
 
 ### main (function) `int main(void)`
-- Defined: `tests/test_freedom.c:2003`
+- Defined: `tests/test_freedom.c:2281`
 - Depends on: `include/image_decode.h`
 
 ### rows (function) `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);`
-- Defined: `tests/test_freedom.c:894`
+- Defined: `tests/test_freedom.c:940`
 - Depends on: `include/image_decode.h`
 
 ### bottom (function) `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ assert_non_null(strstr(out, "nbox=1"));`
-- Defined: `tests/test_freedom.c:1536`
+- Defined: `tests/test_freedom.c:1582`
 - Depends on: `include/image_decode.h`
 
 ## tests/test_hls.c
@@ -15833,693 +15986,740 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
 - Doc: #include "dom.h" #include "flex_layout.h" #include "html_parse.h" #include "page_view.h" /* Parse helper: aborts the tes
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
-### find_image (function) `static const pv_run *find_image(const pv_view *v, const char *src)`
+### find_sub (function) `static const pv_run *find_sub(const pv_view *v, const char *sub)`
 - Defined: `tests/test_page_view.c:44`
 - Doc: assert_non_null(doc); return doc; } /* Finds the i-th run whose collapsed text equals `text`; NULL if none. static const
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
-### find_video (function) `static const pv_run *find_video(const pv_view *v, const char *src)`
+### find_image (function) `static const pv_run *find_image(const pv_view *v, const char *src)`
 - Defined: `tests/test_page_view.c:53`
+- Doc: } return NULL; } /* Finds the first run whose text contains `sub` (a list marker is prefixed). static const pv_run *find
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
+### find_video (function) `static const pv_run *find_video(const pv_view *v, const char *src)`
+- Defined: `tests/test_page_view.c:62`
 - Doc: } return NULL; } /* Finds the first image run whose src equals `src`; NULL if none. static const pv_run *find_image(cons
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
-### find_svg (function) `static const pv_run *find_svg(const pv_view *v)`
-- Defined: `tests/test_page_view.c:62`
+### find_link (function) `static const pv_run *find_link(const pv_view *v, const char *href)`
+- Defined: `tests/test_page_view.c:71`
 - Doc: } return NULL; } /* Finds the first video run whose src equals `src`; NULL if none. static const pv_run *find_video(cons
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
+### find_svg (function) `static const pv_run *find_svg(const pv_view *v)`
+- Defined: `tests/test_page_view.c:79`
+- Doc: if (r->kind == PV_VIDEO && r->src != NULL && strcmp(r->src, src) == 0) return r; } return NULL; } /* Finds the first lin
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
 ### test_new_is_empty (function) `static void test_new_is_empty(void **state)`
-- Defined: `tests/test_page_view.c:72`
+- Defined: `tests/test_page_view.c:89`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_copies_fields (function) `static void test_append_copies_fields(void **state)`
-- Defined: `tests/test_page_view.c:81`
+- Defined: `tests/test_page_view.c:98`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_image_copies_fields (function) `static void test_append_image_copies_fields(void **state)`
-- Defined: `tests/test_page_view.c:108`
+- Defined: `tests/test_page_view.c:125`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_image_null_args (function) `static void test_append_image_null_args(void **state)`
-- Defined: `tests/test_page_view.c:124`
+- Defined: `tests/test_page_view.c:141`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_transcodes_latin1 (function) `static void test_append_transcodes_latin1(void **state)`
-- Defined: `tests/test_page_view.c:139`
+- Defined: `tests/test_page_view.c:156`
 - Doc: A lone high byte that is invalid UTF-8 is reinterpreted as Windows-1252 (a superset of Latin-1) and re-emitted as UTF-8,
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_transcodes_word (function) `static void test_append_transcodes_word(void **state)`
-- Defined: `tests/test_page_view.c:149`
+- Defined: `tests/test_page_view.c:166`
 - Doc: A lone high byte that is invalid UTF-8 is reinterpreted as Windows-1252 (a superset of Latin-1) and re-emitted as UTF-8,
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_transcodes_cp1252_quotes (function) `static void test_append_transcodes_cp1252_quotes(void **state)`
-- Defined: `tests/test_page_view.c:160`
+- Defined: `tests/test_page_view.c:177`
 - Doc: Windows-1252 0x80-0x9F carry printable glyphs (unlike Latin-1 C1 controls): * 0x93/0x94 are curly double quotes -> U+201
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_undefined_cp1252_is_qmark (function) `static void test_append_undefined_cp1252_is_qmark(void **state)`
-- Defined: `tests/test_page_view.c:170`
+- Defined: `tests/test_page_view.c:187`
 - Doc: Windows-1252 0x80-0x9F carry printable glyphs (unlike Latin-1 C1 controls): * 0x93/0x94 are curly double quotes -> U+201
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_valid_utf8_passthrough (function) `static void test_append_valid_utf8_passthrough(void **state)`
-- Defined: `tests/test_page_view.c:180`
+- Defined: `tests/test_page_view.c:197`
 - Doc: pv_free(v); } /* Undefined Windows-1252 positions (0x81 here) have no glyph and still fail to '?'. static void test_appe
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_null_args (function) `static void test_append_null_args(void **state)`
-- Defined: `tests/test_page_view.c:188`
-- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
-
-### test_free_null_and_double (function) `static void test_free_null_and_double(void **state)`
-- Defined: `tests/test_page_view.c:196`
-- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
-
-### test_build_null_args (function) `static void test_build_null_args(void **state)`
 - Defined: `tests/test_page_view.c:205`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
+### test_free_null_and_double (function) `static void test_free_null_and_double(void **state)`
+- Defined: `tests/test_page_view.c:213`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
+### test_build_null_args (function) `static void test_build_null_args(void **state)`
+- Defined: `tests/test_page_view.c:222`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
 ### test_build_plain_text (function) `static void test_build_plain_text(void **state)`
-- Defined: `tests/test_page_view.c:214`
+- Defined: `tests/test_page_view.c:231`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_heading_level (function) `static void test_build_heading_level(void **state)`
-- Defined: `tests/test_page_view.c:227`
+- Defined: `tests/test_page_view.c:244`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_inline_emphasis (function) `static void test_build_inline_emphasis(void **state)`
-- Defined: `tests/test_page_view.c:244`
+- Defined: `tests/test_page_view.c:261`
 - Doc: Inline emphasis: <b>/<strong> set bold, <i>/<em> set italic, on the wrapped run * only; surrounding text stays plain. Ne
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_unordered_list (function) `static void test_build_unordered_list(void **state)`
-- Defined: `tests/test_page_view.c:285`
+- Defined: `tests/test_page_view.c:302`
 - Doc: Unordered list: each <li>'s first run is prefixed with a bullet marker and * carries list depth 1.
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_ordered_and_nested_list (function) `static void test_build_ordered_and_nested_list(void **state)`
-- Defined: `tests/test_page_view.c:303`
+- Defined: `tests/test_page_view.c:320`
 - Doc: assert_int_equal(pv_build(doc, &v), PV_OK); const pv_run *a = find_text(v, "\xE2\x80\xA2 apple"); /* "* apple" assert_no
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_table_grid (function) `static void test_build_table_grid(void **state)`
-- Defined: `tests/test_page_view.c:326`
+- Defined: `tests/test_page_view.c:343`
 - Doc: A table becomes a grid: each cell is one collected text run sharing the table's * cont_id, with the column count = wides
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_table_intercell_whitespace_dropped (function) `static void test_build_table_intercell_whitespace_dropped(void **state)`
-- Defined: `tests/test_page_view.c:366`
+- Defined: `tests/test_page_view.c:383`
 - Doc: CSS 2.1 §17.2.1 (anonymous table objects): white space directly inside table structure -- a text node whose parent is <t
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### dropped (function) `* either flank is dropped (the inter-cell rule above stays). */
 static void test_build_table_inli...`
-- Defined: `tests/test_page_view.c:408`
+- Defined: `tests/test_page_view.c:425`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_table_flattens_cell (function) `static void test_build_table_flattens_cell(void **state)`
-- Defined: `tests/test_page_view.c:434`
+- Defined: `tests/test_page_view.c:451`
 - Doc: Cell inner markup is flattened into the cell's text and not re-emitted as a * separate run; the column count comes from 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_bgcolor_attr_fallback (function) `static void test_build_bgcolor_attr_fallback(void **state)`
-- Defined: `tests/test_page_view.c:570`
+- Defined: `tests/test_page_view.c:587`
 - Doc: Legacy bgcolor attribute is the background fallback when no CSS background won (like <font color> for the foreground). H
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_nested_table_not_flattened (function) `static void test_build_nested_table_not_flattened(void **state)`
-- Defined: `tests/test_page_view.c:586`
+- Defined: `tests/test_page_view.c:603`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_link_with_href (function) `static void test_build_link_with_href(void **state)`
-- Defined: `tests/test_page_view.c:635`
+- Defined: `tests/test_page_view.c:652`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_block_break_between_paragraphs (function) `static void test_build_block_break_between_paragraphs(void **state)`
-- Defined: `tests/test_page_view.c:654`
+- Defined: `tests/test_page_view.c:671`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_skips_script_and_style (function) `static void test_build_skips_script_and_style(void **state)`
-- Defined: `tests/test_page_view.c:666`
+- Defined: `tests/test_page_view.c:683`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_inline_link_no_break_within_paragraph (function) `static void test_build_inline_link_no_break_within_paragraph(void **state)`
-- Defined: `tests/test_page_view.c:680`
+- Defined: `tests/test_page_view.c:697`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_with_dims (function) `static void test_build_image_with_dims(void **state)`
-- Defined: `tests/test_page_view.c:698`
-- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
-
-### test_build_image_unknown_dims (function) `static void test_build_image_unknown_dims(void **state)`
 - Defined: `tests/test_page_view.c:715`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
+### test_build_image_unknown_dims (function) `static void test_build_image_unknown_dims(void **state)`
+- Defined: `tests/test_page_view.c:732`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
 ### test_build_image_px_and_tracking_dims (function) `static void test_build_image_px_and_tracking_dims(void **state)`
-- Defined: `tests/test_page_view.c:730`
+- Defined: `tests/test_page_view.c:747`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### size (function) `* size (~100px) instead of the CSS 40px, blowing up flex rows (slashdot socials). */
 static void ...`
-- Defined: `tests/test_page_view.c:755`
+- Defined: `tests/test_page_view.c:772`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### unset (function) `* unset (-1) so the render step derives it from the viewBox aspect. */
 static void test_build_svg...`
-- Defined: `tests/test_page_view.c:777`
+- Defined: `tests/test_page_view.c:794`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_svg_fills_border_box_ancestor (function) `static void test_build_svg_fills_border_box_ancestor(void **state)`
-- Defined: `tests/test_page_view.c:797`
+- Defined: `tests/test_page_view.c:814`
 - Doc: The containing block is the CONTENT box: with box-sizing:border-box (the ubiquitous `*{box-sizing:border-box}` reset) th
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_svg_no_ancestor_width_unset (function) `static void test_build_svg_no_ancestor_width_unset(void **state)`
-- Defined: `tests/test_page_view.c:817`
+- Defined: `tests/test_page_view.c:834`
 - Doc: No ancestor sets a definite px width -> the viewBox-only SVG keeps its size unset (-1), so the render step fills the ava
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_float_widthless_stays_unset (function) `static void test_build_float_widthless_stays_unset(void **state)`
-- Defined: `tests/test_page_view.c:858`
+- Defined: `tests/test_page_view.c:875`
 - Doc: A width-less float stays width-less (box_w_pct 0): the float band still splits the * leftover evenly, so shrink-to-fit f
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_css_size_overrides_attr (function) `static void test_build_image_css_size_overrides_attr(void **state)`
-- Defined: `tests/test_page_view.c:877`
+- Defined: `tests/test_page_view.c:894`
 - Doc: An author CSS width/height wins over the width/height presentation attribute * (presentation attrs sit at ~zero specific
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_auto_size_keeps_attr (function) `static void test_build_image_auto_size_keeps_attr(void **state)`
-- Defined: `tests/test_page_view.c:894`
+- Defined: `tests/test_page_view.c:911`
 - Doc: A responsive-image rule (max-width:100%;height:auto) leaves the intrinsic/attr * size intact: width stays auto, height:a
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_empty_flex_grow_spacer (function) `static void test_build_empty_flex_grow_spacer(void **state)`
-- Defined: `tests/test_page_view.c:914`
+- Defined: `tests/test_page_view.c:931`
 - Doc: An empty flex item with flex-grow (a nav spacer: <span class="grow"></span> with flex:1) must be emitted as a placeholde
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_in_skipped_subtree_ignored (function) `static void test_build_image_in_skipped_subtree_ignored(void **state)`
-- Defined: `tests/test_page_view.c:932`
+- Defined: `tests/test_page_view.c:949`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_noscript_shown_when_js_off (function) `static void test_build_noscript_shown_when_js_off(void **state)`
-- Defined: `tests/test_page_view.c:945`
+- Defined: `tests/test_page_view.c:962`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_noscript_hidden_when_js_on (function) `static void test_build_noscript_hidden_when_js_on(void **state)`
-- Defined: `tests/test_page_view.c:958`
+- Defined: `tests/test_page_view.c:975`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_without_src_ignored (function) `static void test_build_image_without_src_ignored(void **state)`
-- Defined: `tests/test_page_view.c:971`
+- Defined: `tests/test_page_view.c:988`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_without_src_dims_emit_broken (function) `static void test_build_image_without_src_dims_emit_broken(void **state)`
-- Defined: `tests/test_page_view.c:1002`
+- Defined: `tests/test_page_view.c:1019`
 - Doc: Declared width+height reserve the box even with no source (the blocked- * thumbnail probe: <img width="200" height="280"
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_srcset_fallback_when_no_src (function) `static void test_build_image_srcset_fallback_when_no_src(void **state)`
-- Defined: `tests/test_page_view.c:1019`
+- Defined: `tests/test_page_view.c:1036`
 - Doc: An <img> with no plain src but a srcset falls back to the first srcset candidate -- the common shape of responsive-image
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_plain_src_wins_over_srcset (function) `static void test_build_image_plain_src_wins_over_srcset(void **state)`
-- Defined: `tests/test_page_view.c:1035`
+- Defined: `tests/test_page_view.c:1052`
 - Doc: hp_document *doc = parse( "<body><img srcset=\"https://e.example/a.jpg 1x, https://e.example/b.jpg 2x\" " "alt=\"respons
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_srcset_single_no_descriptor (function) `static void test_build_image_srcset_single_no_descriptor(void **state)`
-- Defined: `tests/test_page_view.c:1050`
+- Defined: `tests/test_page_view.c:1067`
 - Doc: A single srcset candidate with no descriptor at all (just a bare URL) is still * picked up.
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_srcset_data_url_not_truncated_at_comma (function) `static void test_build_image_srcset_data_url_not_truncated_at_comma(void **state)`
-- Defined: `tests/test_page_view.c:1063`
+- Defined: `tests/test_page_view.c:1080`
 - Doc: A data: URI candidate in srcset must not be truncated at its internal * ";base64," comma -- that comma is part of the UR
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_no_src_and_no_srcset_ignored (function) `static void test_build_image_no_src_and_no_srcset_ignored(void **state)`
-- Defined: `tests/test_page_view.c:1078`
+- Defined: `tests/test_page_view.c:1095`
 - Doc: Neither src nor srcset (or an empty/whitespace-only srcset): nothing to show, * same as the existing no-src case.
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_empty_document (function) `static void test_build_empty_document(void **state)`
-- Defined: `tests/test_page_view.c:1093`
+- Defined: `tests/test_page_view.c:1110`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_set_color_model (function) `static void test_set_color_model(void **state)`
-- Defined: `tests/test_page_view.c:1107`
+- Defined: `tests/test_page_view.c:1124`
 - Doc: The pure model defaults a run's author color to -1 (none); pv_set_color sets it * on the most recent run and is a safe n
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_author_color (function) `static void test_build_author_color(void **state)`
-- Defined: `tests/test_page_view.c:1129`
+- Defined: `tests/test_page_view.c:1146`
 - Doc: pv_build extracts the author foreground color: inline style "color:" and the legacy <font color>; the nearest ancestor t
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_gradient_text_runs (function) `static void test_gradient_text_runs(void **state)`
-- Defined: `tests/test_page_view.c:1177`
+- Defined: `tests/test_page_view.c:1194`
 - Doc: Gradient text (2026-07-19): an element with background gradient + background-clip:text hands its gradient to the text ru
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_text_fill_color_runs (function) `static void test_text_fill_color_runs(void **state)`
-- Defined: `tests/test_page_view.c:1209`
+- Defined: `tests/test_page_view.c:1226`
 - Doc: webkit-text-fill-color: a real color overrides the glyph color; transparent WITHOUT a bg-clip:text source keeps the auth
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_combinator_selectors (function) `static void test_build_combinator_selectors(void **state)`
-- Defined: `tests/test_page_view.c:1255`
+- Defined: `tests/test_page_view.c:1272`
 - Doc: Descendant (`div p`) and child (`nav > a`) combinators from a <style> sheet * resolve through the real DOM ancestor chai
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_flex_container (function) `static void test_build_flex_container(void **state)`
-- Defined: `tests/test_page_view.c:1293`
+- Defined: `tests/test_page_view.c:1310`
 - Doc: pv_build records the nearest author flex/grid container per run: its id, display, and parsed gap/justify/columns. Runs o
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### wrapping (function) `* sideways instead of wrapping (spec/page_view.md, 2026-08-11 correction). */
 static void test_bu...`
-- Defined: `tests/test_page_view.c:1333`
+- Defined: `tests/test_page_view.c:1350`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_flex_wrap_align_row_gap (function) `static void test_build_flex_wrap_align_row_gap(void **state)`
-- Defined: `tests/test_page_view.c:1365`
+- Defined: `tests/test_page_view.c:1382`
 - Doc: flex-wrap / row-gap / align-items (CONTAINER) + align-self (ITEM) resolve through * the same cascade and thread through 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_flex_item_values (function) `static void test_build_flex_item_values(void **state)`
-- Defined: `tests/test_page_view.c:1406`
+- Defined: `tests/test_page_view.c:1423`
 - Doc: Stage 3: each run carries the flex ITEM's own resolved values (the direct child of the container on the run's ancestor c
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_float_threading (function) `static void test_build_float_threading(void **state)`
-- Defined: `tests/test_page_view.c:1469`
+- Defined: `tests/test_page_view.c:1487`
 - Doc: float.md: a run inside a floated block carries that block's side + a stable float_id grouping all its runs; two floated 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_float_outermost_founder (function) `static void test_build_float_outermost_founder(void **state)`
-- Defined: `tests/test_page_view.c:1515`
+- Defined: `tests/test_page_view.c:1533`
 - Doc: float.md §7d: runs carry the OUTERMOST float founder alongside the nearest. A run inside a float nested in another float
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_oof_image_carries_block_id (function) `static void test_build_oof_image_carries_block_id(void **state)`
-- Defined: `tests/test_page_view.c:1547`
+- Defined: `tests/test_page_view.c:1565`
 - Doc: float.md §7d (slashdot rail): an image inside an out-of-flow (absolute) subtree must carry its nearest box block_id, or 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_hbox_margin_above_container_merges (function) `static void test_build_hbox_margin_above_container_merges(void **state)`
-- Defined: `tests/test_page_view.c:1583`
+- Defined: `tests/test_page_view.c:1601`
 - Doc: float.md §7d (slashdot main column): a margin-only wrapper's reservation lives on its OWN box def (painter applies it wh
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_hbox_container_width_never_seeds_items (function) `static void test_build_hbox_container_width_never_seeds_items(void **state)`
-- Defined: `tests/test_page_view.c:1603`
+- Defined: `tests/test_page_view.c:1621`
 - Doc: The `.ua{width:50%}` guard (tanda 8): the container's OWN width never seeds its items — a flex bar of inline-block links
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_absolute_inside_float_escapes (function) `static void test_build_absolute_inside_float_escapes(void **state)`
-- Defined: `tests/test_page_view.c:1632`
+- Defined: `tests/test_page_view.c:1650`
 - Doc: CSS 2.2 section 9.7: an absolutely (or fixed) positioned element computes `float` to none and is taken out of flow -- it
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_flex_whitespace_not_item (function) `static void test_build_flex_whitespace_not_item(void **state)`
-- Defined: `tests/test_page_view.c:1662`
+- Defined: `tests/test_page_view.c:1680`
 - Doc: CSS: whitespace directly inside a flex/grid container creates NO anonymous item (the source newlines between <p> items m
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_inline_whitespace_kept (function) `static void test_build_inline_whitespace_kept(void **state)`
-- Defined: `tests/test_page_view.c:1718`
+- Defined: `tests/test_page_view.c:1736`
 - Doc: The separator space BETWEEN two inline elements is content, not an anonymous box: * it flows mid-block (no break) and mu
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_cont_item_identity (function) `static void test_build_cont_item_identity(void **state)`
-- Defined: `tests/test_page_view.c:1740`
+- Defined: `tests/test_page_view.c:1758`
 - Doc: Container-item identity: inline fragments of the SAME direct child share one cont_item ordinal (they are one flex/grid i
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_table_colspan_rowspan (function) `static void test_build_table_colspan_rowspan(void **state)`
-- Defined: `tests/test_page_view.c:1806`
+- Defined: `tests/test_page_view.c:1824`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_grid_container (function) `static void test_build_grid_container(void **state)`
-- Defined: `tests/test_page_view.c:1852`
+- Defined: `tests/test_page_view.c:1870`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_root_element_style_inherits (function) `static void test_build_root_element_style_inherits(void **state)`
-- Defined: `tests/test_page_view.c:1877`
+- Defined: `tests/test_page_view.c:1895`
 - Doc: CSS inheritance starts at the ROOT element. The context walk used to stop at the rendering root (<body>), so every `html
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_root_font_size_is_overridable (function) `static void test_build_root_font_size_is_overridable(void **state)`
-- Defined: `tests/test_page_view.c:1895`
+- Defined: `tests/test_page_view.c:1913`
 - Doc: A percentage on the root is relative to the UA default, and a nearer ancestor still wins over it -- the root is the STAR
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_abs_child_is_not_a_flex_item (function) `static void test_build_abs_child_is_not_a_flex_item(void **state)`
-- Defined: `tests/test_page_view.c:1915`
+- Defined: `tests/test_page_view.c:1933`
 - Doc: CSS Flexbox 4.1: "An absolutely-positioned child of a flex container does not participate in flex layout" -- it is not a
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_oof_flag_via_cascade (function) `static void test_build_oof_flag_via_cascade(void **state)`
-- Defined: `tests/test_page_view.c:1972`
+- Defined: `tests/test_page_view.c:1990`
 - Doc: Same rule through the stylesheet cascade (class selectors, not inline * style): the subtree walk must see the abspos anc
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_oof_flag_badges_idiom (function) `static void test_build_oof_flag_badges_idiom(void **state)`
-- Defined: `tests/test_page_view.c:1996`
+- Defined: `tests/test_page_view.c:2014`
 - Doc: jkanime badges idiom: inline-block pills inside an undecorated absolute * wrapper. The pill text is OOF by ancestry even
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_flex_container_from_sheet (function) `static void test_build_flex_container_from_sheet(void **state)`
-- Defined: `tests/test_page_view.c:2016`
+- Defined: `tests/test_page_view.c:2034`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_grid_columns_from_sheet (function) `static void test_build_grid_columns_from_sheet(void **state)`
-- Defined: `tests/test_page_view.c:2038`
+- Defined: `tests/test_page_view.c:2056`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_container_defaults (function) `static void test_container_defaults(void **state)`
-- Defined: `tests/test_page_view.c:2077`
+- Defined: `tests/test_page_view.c:2095`
 - Doc: pv_view *v = NULL; assert_int_equal(pv_build(doc, &v), PV_OK); const pv_run *x = find_text(v, "x"); assert_non_null(x); 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_box_leaf_inline (function) `static void test_build_box_leaf_inline(void **state)`
-- Defined: `tests/test_page_view.c:2125`
+- Defined: `tests/test_page_view.c:2143`
 - Doc: A leaf block's own box: vertical margins override the UA, horizontal padding + * a fixed width inset and cap the content
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_box_defaults_and_setter (function) `static void test_box_defaults_and_setter(void **state)`
-- Defined: `tests/test_page_view.c:2160`
+- Defined: `tests/test_page_view.c:2178`
 - Doc: A run with no author box carries the neutral defaults; pv_set_box fixes the * last run and is NULL-safe.
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_boxdeco_h_margin_alone_creates_box (function) `static void test_build_boxdeco_h_margin_alone_creates_box(void **state)`
-- Defined: `tests/test_page_view.c:2191`
+- Defined: `tests/test_page_view.c:2209`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_boxdeco_h_margin_zero_auto_no_box (function) `static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state)`
-- Defined: `tests/test_page_view.c:2211`
+- Defined: `tests/test_page_view.c:2229`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_boxdeco_fit_content_height_is_auto (function) `static void test_build_boxdeco_fit_content_height_is_auto(void **state)`
-- Defined: `tests/test_page_view.c:2233`
+- Defined: `tests/test_page_view.c:2251`
 - Doc: `height: fit-content` on the block axis behaves as `auto` (CSS Sizing 3 5.1): with indefinite available space a block si
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_boxdeco_min_content_height_is_auto (function) `static void test_build_boxdeco_min_content_height_is_auto(void **state)`
-- Defined: `tests/test_page_view.c:2255`
+- Defined: `tests/test_page_view.c:2273`
 - Doc: Same for `min-content`: an intrinsic keyword on the block axis is content * height, never a declared 0 that arms box_h_s
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_boxdeco_border_padding (function) `static void test_build_boxdeco_border_padding(void **state)`
-- Defined: `tests/test_page_view.c:2273`
+- Defined: `tests/test_page_view.c:2291`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_empty_box_gets_run_and_box (function) `static void test_build_empty_box_gets_run_and_box(void **state)`
-- Defined: `tests/test_page_view.c:2304`
+- Defined: `tests/test_page_view.c:2322`
 - Doc: An empty <div> with a background + explicit height paints an 8px bar in a real browser. It has no text, so the text-node
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_zero_padding_is_not_a_box (function) `static void test_build_zero_padding_is_not_a_box(void **state)`
-- Defined: `tests/test_page_view.c:2329`
+- Defined: `tests/test_page_view.c:2347`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_flow_table_row_is_one_block (function) `static void test_build_flow_table_row_is_one_block(void **state)`
-- Defined: `tests/test_page_view.c:2346`
+- Defined: `tests/test_page_view.c:2364`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_boxdeco_shadow_outline (function) `static void test_build_boxdeco_shadow_outline(void **state)`
-- Defined: `tests/test_page_view.c:2381`
+- Defined: `tests/test_page_view.c:2399`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_boxdeco_visibility_overflow_cursor (function) `static void test_build_boxdeco_visibility_overflow_cursor(void **state)`
-- Defined: `tests/test_page_view.c:2404`
+- Defined: `tests/test_page_view.c:2422`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_cursor_alone_triggers_box (function) `static void test_build_cursor_alone_triggers_box(void **state)`
-- Defined: `tests/test_page_view.c:2428`
+- Defined: `tests/test_page_view.c:2446`
 - Doc: A block that sets ONLY cursor (no other box property) still registers a box: the trigger for a box-def entry must includ
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_boxdeco_dims_alone_trigger_box (function) `static void test_build_boxdeco_dims_alone_trigger_box(void **state)`
-- Defined: `tests/test_page_view.c:2483`
+- Defined: `tests/test_page_view.c:2501`
 - Doc: 2026-07-10: a block that sets ONLY min-width / min-height / max-height / height / aspect-ratio (no other box property) s
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_text_overflow_and_word_break (function) `static void test_build_text_overflow_and_word_break(void **state)`
-- Defined: `tests/test_page_view.c:2528`
+- Defined: `tests/test_page_view.c:2546`
 - Doc: assert_int_equal(bd->box_h, 80); const pv_run *e = find_text(v, "E"); assert_non_null(e); const pv_box_def *be = pv_box_
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_boxdeco_defaults_no_box (function) `static void test_build_boxdeco_defaults_no_box(void **state)`
-- Defined: `tests/test_page_view.c:2588`
+- Defined: `tests/test_page_view.c:2606`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_boxdeco_sibling_blocks_distinct_ids (function) `static void test_build_boxdeco_sibling_blocks_distinct_ids(void **state)`
-- Defined: `tests/test_page_view.c:2602`
-- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
-
-### test_build_boxdeco_shared_id_within_block (function) `static void test_build_boxdeco_shared_id_within_block(void **state)`
 - Defined: `tests/test_page_view.c:2620`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
+### test_build_boxdeco_shared_id_within_block (function) `static void test_build_boxdeco_shared_id_within_block(void **state)`
+- Defined: `tests/test_page_view.c:2638`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
 ### test_build_box_tree_textless_wrapper (function) `static void test_build_box_tree_textless_wrapper(void **state)`
-- Defined: `tests/test_page_view.c:2682`
+- Defined: `tests/test_page_view.c:2700`
 - Doc: A text-less wrapper (a card whose only child is a body div with the text) owns no run, yet its box def must still exist 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_box_tree_empty_no_box (function) `static void test_build_box_tree_empty_no_box(void **state)`
-- Defined: `tests/test_page_view.c:2707`
+- Defined: `tests/test_page_view.c:2725`
 - Doc: const pv_box_def *bd = pv_box_at(v, (size_t)body->block_id); assert_non_null(bd); assert_int_equal(bd->pad_t, 9); int ca
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### find_input (function) `static const pv_run *find_input(const pv_view *v, const char *name)`
-- Defined: `tests/test_page_view.c:2719`
+- Defined: `tests/test_page_view.c:2737`
 - Doc: /* A page with no author box has an empty box tree (default render byte-identical). static void test_build_box_tree_empt
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_search_form_get (function) `static void test_build_search_form_get(void **state)`
-- Defined: `tests/test_page_view.c:2729`
+- Defined: `tests/test_page_view.c:2747`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_form_post_and_hidden (function) `static void test_build_form_post_and_hidden(void **state)`
-- Defined: `tests/test_page_view.c:2762`
+- Defined: `tests/test_page_view.c:2780`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_textarea_value (function) `static void test_build_textarea_value(void **state)`
-- Defined: `tests/test_page_view.c:2796`
+- Defined: `tests/test_page_view.c:2814`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_select_shows_selected_option (function) `static void test_build_select_shows_selected_option(void **state)`
-- Defined: `tests/test_page_view.c:2815`
+- Defined: `tests/test_page_view.c:2833`
 - Doc: A closed <select> displays ONLY its selected option's label, not every option's text concatenated. The selected option i
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_select_defaults_to_first_option (function) `static void test_build_select_defaults_to_first_option(void **state)`
-- Defined: `tests/test_page_view.c:2854`
+- Defined: `tests/test_page_view.c:2872`
 - Doc: With no option marked `selected`, a single (non-multiple) select defaults to * displaying its FIRST option -- never the 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_control_without_form (function) `static void test_build_control_without_form(void **state)`
-- Defined: `tests/test_page_view.c:2871`
+- Defined: `tests/test_page_view.c:2889`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_two_forms_distinct_groups (function) `static void test_build_two_forms_distinct_groups(void **state)`
-- Defined: `tests/test_page_view.c:2884`
+- Defined: `tests/test_page_view.c:2902`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_pseudo_classes_and_siblings (function) `static void test_build_pseudo_classes_and_siblings(void **state)`
-- Defined: `tests/test_page_view.c:2943`
+- Defined: `tests/test_page_view.c:2961`
 - Doc: Pseudo-classes + sibling combinators (Hito 23b-9) resolve through the real pipeline: page_view must feed the css engine 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_table_cell_author_styles (function) `static void test_build_table_cell_author_styles(void **state)`
-- Defined: `tests/test_page_view.c:3006`
+- Defined: `tests/test_page_view.c:3024`
 - Doc: Collected DATA-table cells resolve author styles too (found via --dump-dom: the cell path never called resolve_context, 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_style_cache_distinct_siblings (function) `static void test_build_style_cache_distinct_siblings(void **state)`
-- Defined: `tests/test_page_view.c:3066`
+- Defined: `tests/test_page_view.c:3084`
 - Doc: Regression for pv_style_cache (page_view.c): resolve_context()/in_hidden_subtree() now memoize cch_element_style() per e
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_text_align_and_font_size (function) `static void test_build_text_align_and_font_size(void **state)`
-- Defined: `tests/test_page_view.c:3108`
+- Defined: `tests/test_page_view.c:3126`
 - Doc: text-align and font-size resolve into the new run fields, from both a <style> * sheet and inline style=.
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_text_decoration (function) `static void test_build_text_decoration(void **state)`
-- Defined: `tests/test_page_view.c:3155`
+- Defined: `tests/test_page_view.c:3173`
 - Doc: text-decoration resolves into text_decoration from a <style> sheet and inline * style=, inherits to descendant text, and
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_css_bold_and_inline_wins (function) `static void test_build_css_bold_and_inline_wins(void **state)`
-- Defined: `tests/test_page_view.c:3178`
+- Defined: `tests/test_page_view.c:3196`
 - Doc: pv_view *v = NULL; assert_int_equal(pv_build(doc, &v), PV_OK); assert_int_equal(find_text(v, "struck ")->text_decoration
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_display_none_hidden (function) `static void test_build_display_none_hidden(void **state)`
-- Defined: `tests/test_page_view.c:3197`
+- Defined: `tests/test_page_view.c:3215`
 - Doc: "<p class='b'>strongish</p></body>"); pv_view *v = NULL; assert_int_equal(pv_build(doc, &v), PV_OK); const pv_run *t = f
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### height (function) `* real height (jkanime's donghuas/ovas panes are display:none, yet all their
  * thumbnails flowed...`
-- Defined: `tests/test_page_view.c:3223`
+- Defined: `tests/test_page_view.c:3241`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_styled_external_css (function) `static void test_build_styled_external_css(void **state)`
-- Defined: `tests/test_page_view.c:3253`
+- Defined: `tests/test_page_view.c:3271`
 - Doc: External pre-fetched CSS (Hito 27) feeds the same cascade as the document's <style>: an extern rule applies (presentatio
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
+### test_author_list_padding_replaces_ua_indent (function) `static void test_author_list_padding_replaces_ua_indent(void **state)`
+- Defined: `tests/test_page_view.c:3300`
+- Doc: A list's indentation is its UA `padding-inline-start` (HTML rendering 15.3.7), so an author padding-left on the <ul>/<ol
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
+### test_before_rides_float_and_container (function) `static void test_before_rides_float_and_container(void **state)`
+- Defined: `tests/test_page_view.c:3325`
+- Doc: ::before content is the first inline content of its element (CSS 2.1 12.1), so it rides the element's whole layout annot
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
+### test_inline_level_tag_list_stays_in_line (function) `static void test_inline_level_tag_list_stays_in_line(void **state)`
+- Defined: `tests/test_page_view.c:3356`
+- Doc: An inline-block whose children are all inline-block is still an INLINE-LEVEL box of its parent's line (CSS 2.1 9.2.2). O
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
+### test_marker_only_for_list_item_display (function) `static void test_marker_only_for_list_item_display(void **state)`
+- Defined: `tests/test_page_view.c:3384`
+- Doc: A marker belongs to a `display:list-item` box (CSS Lists 3 3.1), not to the <li> * tag: `li{display:inline-block}` (ever
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
+### test_block_inside_inline_block_in_line (function) `static void test_block_inside_inline_block_in_line(void **state)`
+- Defined: `tests/test_page_view.c:3423`
+- Doc: An inline-block sitting in a MIXED line is an atom of that line (CSS 2.1 9.2.2): a block inside it (lobste.rs' `details.
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
 ### test_pseudo_before_on_empty (function) `static void test_pseudo_before_on_empty(void **state)`
-- Defined: `tests/test_page_view.c:3277`
+- Defined: `tests/test_page_view.c:3471`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_pseudo_before_on_element_with_children (function) `static void test_pseudo_before_on_element_with_children(void **state)`
-- Defined: `tests/test_page_view.c:3290`
+- Defined: `tests/test_page_view.c:3484`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_pseudo_after_on_element_with_children (function) `static void test_pseudo_after_on_element_with_children(void **state)`
-- Defined: `tests/test_page_view.c:3305`
+- Defined: `tests/test_page_view.c:3499`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_pseudo_both_before_and_after (function) `static void test_pseudo_both_before_and_after(void **state)`
-- Defined: `tests/test_page_view.c:3320`
+- Defined: `tests/test_page_view.c:3514`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_pseudo_before_on_textless_subtree (function) `static void test_pseudo_before_on_textless_subtree(void **state)`
-- Defined: `tests/test_page_view.c:3354`
+- Defined: `tests/test_page_view.c:3548`
 - Doc: Nested shape from the wild (.icon-beaker:before on a span holding an empty * span): the outer element owns generated con
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_pseudo_before_escape_end_to_end (function) `static void test_pseudo_before_escape_end_to_end(void **state)`
-- Defined: `tests/test_page_view.c:3370`
+- Defined: `tests/test_page_view.c:3564`
 - Doc: End to end with a hex escape: the emitted run carries the decoded codepoint * (U+E8F0), not the backslash literal.
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_pseudo_after_on_whitespace_only_no_run (function) `static void test_pseudo_after_on_whitespace_only_no_run(void **state)`
-- Defined: `tests/test_page_view.c:3383`
+- Defined: `tests/test_page_view.c:3577`
 - Doc: Whitespace gaps between block children must not arm generated content: a * clearfix `content:"."` firing once per gap sh
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_pseudo_before_fires_with_nested_text (function) `static void test_pseudo_before_fires_with_nested_text(void **state)`
-- Defined: `tests/test_page_view.c:3397`
+- Defined: `tests/test_page_view.c:3591`
 - Doc: With real text anywhere under the parent the first text node (even a leading * gap) still triggers, so marker position i
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_pseudo_no_content_no_run (function) `static void test_pseudo_no_content_no_run(void **state)`
-- Defined: `tests/test_page_view.c:3410`
+- Defined: `tests/test_page_view.c:3604`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_reader_skips_boilerplate (function) `static void test_build_reader_skips_boilerplate(void **state)`
-- Defined: `tests/test_page_view.c:3424`
+- Defined: `tests/test_page_view.c:3618`
 - Doc: Reader (distraction-free) mode skips nav/header/footer/aside boilerplate but * keeps the main article content; with read
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_set_node_id_model (function) `static void test_set_node_id_model(void **state)`
-- Defined: `tests/test_page_view.c:3452`
+- Defined: `tests/test_page_view.c:3646`
 - Doc: The setter is a no-op when the view is empty or NULL, and it writes to the * most recently appended run otherwise.
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_node_id_matches_dom_index (function) `static void test_build_node_id_matches_dom_index(void **state)`
-- Defined: `tests/test_page_view.c:3468`
+- Defined: `tests/test_page_view.c:3662`
 - Doc: Stage 0 keystone: every emitted run carries the document-order element id of its source element, matching the id that do
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_set_text_style_model (function) `static void test_set_text_style_model(void **state)`
-- Defined: `tests/test_page_view.c:3507`
+- Defined: `tests/test_page_view.c:3701`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_pointer_events_on_box (function) `static void test_build_pointer_events_on_box(void **state)`
-- Defined: `tests/test_page_view.c:3538`
+- Defined: `tests/test_page_view.c:3732`
 - Doc: pointer-events rides the box-def tree like cursor: a block whose style sets it becomes box-carrying and the def records 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_content_visibility_hidden_folds (function) `static void test_build_content_visibility_hidden_folds(void **state)`
-- Defined: `tests/test_page_view.c:3557`
+- Defined: `tests/test_page_view.c:3751`
 - Doc: content-visibility: hidden folds into the box's visibility (skip paint, keep space) -- the documented visibility:collaps
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_image_rendering_inherited (function) `static void test_build_image_rendering_inherited(void **state)`
-- Defined: `tests/test_page_view.c:3583`
+- Defined: `tests/test_page_view.c:3777`
 - Doc: image-rendering inherits (nearest ancestor) and is stamped on IMAGE runs so the * painter can pick the nearest-neighbour
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_caret_color_inherited (function) `static void test_build_caret_color_inherited(void **state)`
-- Defined: `tests/test_page_view.c:3602`
+- Defined: `tests/test_page_view.c:3796`
 - Doc: caret-color inherits and is stamped on INPUT runs so the painter can tint the * caret of a focused control. auto/unset s
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_video_copies_fields (function) `static void test_append_video_copies_fields(void **state)`
-- Defined: `tests/test_page_view.c:3626`
+- Defined: `tests/test_page_view.c:3820`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_video_no_poster (function) `static void test_append_video_no_poster(void **state)`
-- Defined: `tests/test_page_view.c:3645`
+- Defined: `tests/test_page_view.c:3839`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_append_video_null_args (function) `static void test_append_video_null_args(void **state)`
-- Defined: `tests/test_page_view.c:3661`
+- Defined: `tests/test_page_view.c:3855`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_video_with_source (function) `static void test_build_video_with_source(void **state)`
-- Defined: `tests/test_page_view.c:3671`
+- Defined: `tests/test_page_view.c:3865`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_video_uses_source_child (function) `static void test_build_video_uses_source_child(void **state)`
-- Defined: `tests/test_page_view.c:3691`
+- Defined: `tests/test_page_view.c:3885`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_video_source_type_preference (function) `static void test_build_video_source_type_preference(void **state)`
-- Defined: `tests/test_page_view.c:3711`
+- Defined: `tests/test_page_view.c:3905`
 - Doc: Given several <source> children, When one carries a natively-playable type (HLS playlist / MPEG-TS / MP4), Then it wins 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_video_fallback_suppressed (function) `static void test_build_video_fallback_suppressed(void **state)`
-- Defined: `tests/test_page_view.c:3729`
+- Defined: `tests/test_page_view.c:3923`
 - Doc: Given a <video> with fallback markup, When the view is built, Then the fallback text is suppressed regardless of the JS 
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_video_without_src_ignored (function) `static void test_build_video_without_src_ignored(void **state)`
-- Defined: `tests/test_page_view.c:3744`
+- Defined: `tests/test_page_view.c:3938`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### test_build_audio_as_video_kind (function) `static void test_build_audio_as_video_kind(void **state)`
-- Defined: `tests/test_page_view.c:3755`
+- Defined: `tests/test_page_view.c:3949`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
+### test_build_iframe_emits_navigable_link (function) `static void test_build_iframe_emits_navigable_link(void **state)`
+- Defined: `tests/test_page_view.c:3963`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
+### test_build_iframe_without_src_ignored (function) `static void test_build_iframe_without_src_ignored(void **state)`
+- Defined: `tests/test_page_view.c:3981`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
+
+### test_build_iframe_display_none_hidden (function) `static void test_build_iframe_display_none_hidden(void **state)`
+- Defined: `tests/test_page_view.c:3994`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### main (function) `int main(void)`
-- Defined: `tests/test_page_view.c:3769`
+- Defined: `tests/test_page_view.c:4007`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### it (function) `* the rest of the row share it (so an overflowing table degrades to one row per * line, not one blob). */ assert_int_equal(rank1->block_break, 1);`
-- Defined: `tests/test_page_view.c:617`
+- Defined: `tests/test_page_view.c:634`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### break (function) `* block break (from entering <p>);`
-- Defined: `tests/test_page_view.c:686`
+- Defined: `tests/test_page_view.c:703`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### float_id (function) `* A run inside a float nested in another float reports the inner element as * float_id (unchanged) plus the outer element as float_oid (group id, side and * founder margins);`
-- Defined: `tests/test_page_view.c:1512`
+- Defined: `tests/test_page_view.c:1530`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### ordinal (function) `* cont_item ordinal (they are one flex/grid item and must flow together in one * cell);`
-- Defined: `tests/test_page_view.c:1738`
+- Defined: `tests/test_page_view.c:1756`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### reverted (function) `* behavior of treating inline display:none as visible when JS is off * was reverted (commit 897f414 regression) because it broke many sites: * elements with stylesheet display:none AND any inline styl`
-- Defined: `tests/test_page_view.c:3209`
+- Defined: `tests/test_page_view.c:3227`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ### applies (function) `* <style>: an extern rule applies (presentation and display:none alike);`
-- Defined: `tests/test_page_view.c:3249`
+- Defined: `tests/test_page_view.c:3267`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ## tests/test_pdf_export.c
@@ -17508,336 +17708,336 @@ static void test_bu...`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_carries_flex_wrap_align_row_gap (function) `static void test_load_carries_flex_wrap_align_row_gap(void **state)`
-- Defined: `tests/test_tab.c:236`
+- Defined: `tests/test_tab.c:279`
 - Doc: flex-wrap / row-gap / align-items (CONTAINER) + align-self (ITEM) survive the worker round-trip (write_view/read_view se
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_carries_float (function) `static void test_load_carries_float(void **state)`
-- Defined: `tests/test_tab.c:276`
+- Defined: `tests/test_tab.c:319`
 - Doc: float.md over IPC: float_side/float_id/float_clear survive the worker round-trip * (write_view/read_view serialize them 
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_carries_visibility_overflow_cursor_and_text_wrap (function) `static void test_load_carries_visibility_overflow_cursor_and_text_wrap(void **state)`
-- Defined: `tests/test_tab.c:319`
+- Defined: `tests/test_tab.c:362`
 - Doc: visibility/overflow/cursor (box-level) and text-overflow/word-break (run-level) survive the worker round-trip -- write_v
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_carries_node_id (function) `static void test_load_carries_node_id(void **state)`
-- Defined: `tests/test_tab.c:403`
+- Defined: `tests/test_tab.c:446`
 - Doc: Stage 0 keystone: the document-order element id assigned by the child must survive the IPC round-trip, so the parent can
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_carries_oof_flag (function) `static void test_load_carries_oof_flag(void **state)`
-- Defined: `tests/test_tab.c:437`
+- Defined: `tests/test_tab.c:480`
 - Doc: The oof_subtree flag crosses the worker IPC (write_view/read_view mirror): * an out-of-flow run arrives flagged, an in-f
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_click_runs_handler_and_returns_view (function) `static void test_click_runs_handler_and_returns_view(void **state)`
-- Defined: `tests/test_tab.c:472`
+- Defined: `tests/test_tab.c:515`
 - Doc: Stage 4 dispatcher: a click on a node with a JS handler mutates the DOM, and the * new view is returned over IPC with th
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_event_ipc_via_tab_eval (function) `static void test_event_ipc_via_tab_eval(void **state)`
-- Defined: `tests/test_tab.c:511`
+- Defined: `tests/test_tab.c:554`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_mouse_ipc_round_trip (function) `static void test_mouse_ipc_round_trip(void **state)`
-- Defined: `tests/test_tab.c:566`
+- Defined: `tests/test_tab.c:609`
 - Doc: Dispatches a mouse event (mouseover) via tab_dispatch_mouse and verifies the * handler fires and mutates the DOM. Covers
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_focus_ipc_round_trip (function) `static void test_focus_ipc_round_trip(void **state)`
-- Defined: `tests/test_tab.c:611`
+- Defined: `tests/test_tab.c:654`
 - Doc: Dispatches a focus event via tab_dispatch_event (OP_EVENT path) and verifies * the handler fires and mutates the DOM. Co
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_tick_fires_delayed_timer (function) `static void test_tick_fires_delayed_timer(void **state)`
-- Defined: `tests/test_tab.c:658`
+- Defined: `tests/test_tab.c:701`
 - Doc: Real async timers (2026-07-11): a setTimeout with a delay does NOT fire on the load pump; the load response reports the 
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_tick_interval_rearms (function) `static void test_tick_interval_rearms(void **state)`
-- Defined: `tests/test_tab.c:695`
+- Defined: `tests/test_tab.c:738`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_carries_box_decoration (function) `static void test_load_carries_box_decoration(void **state)`
-- Defined: `tests/test_tab.c:725`
+- Defined: `tests/test_tab.c:768`
 - Doc: Box-engine identity + decoration resolved in the confined child must survive the * IPC round-trip (write_view/read_view 
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_carries_box_tree (function) `static void test_load_carries_box_tree(void **state)`
-- Defined: `tests/test_tab.c:761`
+- Defined: `tests/test_tab.c:804`
 - Doc: The box TREE (Step D) — the box-definition list with its parent links — must survive the IPC round-trip: a nested box pa
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_carries_input_box_and_clip (function) `static void test_load_carries_input_box_and_clip(void **state)`
-- Defined: `tests/test_tab.c:848`
+- Defined: `tests/test_tab.c:891`
 - Doc: Stage 2d + P5 regression: (a) a form control's own box (the checkbox-hack pattern: position:absolute; opacity:0) must re
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_strips_script (function) `static void test_load_strips_script(void **state)`
-- Defined: `tests/test_tab.c:894`
+- Defined: `tests/test_tab.c:937`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_ex_noscript_hidden_with_js (function) `static void test_load_ex_noscript_hidden_with_js(void **state)`
-- Defined: `tests/test_tab.c:940`
+- Defined: `tests/test_tab.c:983`
 - Doc: Given a page with a <noscript> fallback and a script, When loaded with run_js, Then the fallback text is absent from the
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_no_session_cookies_when_untrusted (function) `static void test_load_no_session_cookies_when_untrusted(void **state)`
-- Defined: `tests/test_tab.c:1017`
+- Defined: `tests/test_tab.c:1060`
 - Doc: Untrusted host (net off): the cookie jar stays disabled -- document.cookie is '' even * if the parent were to seed it, a
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_ex_builds_dom_and_fires_onload (function) `static void test_load_ex_builds_dom_and_fires_onload(void **state)`
-- Defined: `tests/test_tab.c:1039`
+- Defined: `tests/test_tab.c:1082`
 - Doc: Live JS construction (Hito 20c): a script builds a node and an onload handler * mutates it; both must be reflected in th
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_ex_inner_html_renders (function) `static void test_load_ex_inner_html_renders(void **state)`
-- Defined: `tests/test_tab.c:1067`
+- Defined: `tests/test_tab.c:1110`
 - Doc: innerHTML (Hito 20d): a script replaces a container's markup; the parsed content * renders, and ephemeral storage / empt
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### console_find (function) `static const fb_entry *console_find(const fb_buffer *log, int level, const char *needle)`
-- Defined: `tests/test_tab.c:1118`
+- Defined: `tests/test_tab.c:1161`
 - Doc: assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK); assert_non_null(p.title); assert_string_equal(p.title, "Old"
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_captures_console_and_error (function) `static void test_load_captures_console_and_error(void **state)`
-- Defined: `tests/test_tab.c:1128`
+- Defined: `tests/test_tab.c:1171`
 - Doc: Freebug (FB-1): with run_js, the page's console.* output and any uncaught script * error are captured and delivered to t
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_isolates_script_errors (function) `static void test_load_isolates_script_errors(void **state)`
-- Defined: `tests/test_tab.c:1155`
+- Defined: `tests/test_tab.c:1198`
 - Doc: Per-script isolation (browser semantics): an uncaught error in the FIRST inline <script> must NOT abort later scripts. B
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_error_carries_location (function) `static void test_load_error_carries_location(void **state)`
-- Defined: `tests/test_tab.c:1183`
+- Defined: `tests/test_tab.c:1226`
 - Doc: FB error locations (Hito 24): an uncaught error reports the inline script name ("inline #N") plus the line and column of
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_element_wrapper_idioms (function) `static void test_load_element_wrapper_idioms(void **state)`
-- Defined: `tests/test_tab.c:1209`
+- Defined: `tests/test_tab.c:1252`
 - Doc: Element-wrapper completeness (Hito 24): the exact google.com startup idioms that previously threw -- dataset.X, hasAttri
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_document_fonts_stub (function) `static void test_load_document_fonts_stub(void **state)`
-- Defined: `tests/test_tab.c:1239`
+- Defined: `tests/test_tab.c:1282`
 - Doc: document.fonts stub: a feature-detecting script that calls document.fonts.load()/ .check() must not throw (this exact ca
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_without_js_has_empty_console (function) `static void test_load_without_js_has_empty_console(void **state)`
-- Defined: `tests/test_tab.c:1259`
+- Defined: `tests/test_tab.c:1302`
 - Doc: "</script></body></html>"; tab *t = NULL; assert_int_equal(tab_open(&t), TAB_OK); tab_page p; assert_int_equal(tab_load_
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_eval_captures_console_output (function) `static void test_eval_captures_console_output(void **state)`
-- Defined: `tests/test_tab.c:1275`
+- Defined: `tests/test_tab.c:1318`
 - Doc: Freebug (FB-1): the REPL (tab_eval) returns the value AND the console output the * evaluation produced, each eval report
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_full_location_is_real (function) `static void test_load_full_location_is_real(void **state)`
-- Defined: `tests/test_tab.c:1304`
+- Defined: `tests/test_tab.c:1347`
 - Doc: Real location (Hito 20e): the page URL passed to tab_load_full backs a real * location object the page's JS can read (no
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_js_navigation_relative_resolved (function) `static void test_js_navigation_relative_resolved(void **state)`
-- Defined: `tests/test_tab.c:1341`
+- Defined: `tests/test_tab.c:1384`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_js_navigation_unsafe_is_blocked (function) `static void test_js_navigation_unsafe_is_blocked(void **state)`
-- Defined: `tests/test_tab.c:1360`
+- Defined: `tests/test_tab.c:1403`
 - Doc: Fail-closed gate: the parent rejects a downgrade / foreign-scheme / fragment nav, * so a hostile or compromised worker c
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_no_js_no_navigation (function) `static void test_no_js_no_navigation(void **state)`
-- Defined: `tests/test_tab.c:1382`
+- Defined: `tests/test_tab.c:1425`
 - Doc: const char *cases[] = { DOWNGRADE, FOREIGN, FRAGMENT }; for (size_t i = 0; i < 3; ++i) { tab *t = NULL; assert_int_equal
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_null_and_too_large (function) `static void test_load_null_and_too_large(void **state)`
-- Defined: `tests/test_tab.c:1396`
+- Defined: `tests/test_tab.c:1439`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_eval_sees_dom (function) `static void test_eval_sees_dom(void **state)`
-- Defined: `tests/test_tab.c:1412`
+- Defined: `tests/test_tab.c:1455`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_eval_sees_env (function) `static void test_eval_sees_env(void **state)`
-- Defined: `tests/test_tab.c:1422`
+- Defined: `tests/test_tab.c:1465`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_eval_no_network_or_cross_origin_api (function) `static void test_eval_no_network_or_cross_origin_api(void **state)`
-- Defined: `tests/test_tab.c:1439`
+- Defined: `tests/test_tab.c:1482`
 - Doc: SOP/CORS confidentiality (gap audit #2): the JS sandbox exposes NO way to make a network request or open a cross-origin 
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### stub_fetch (function) `static int stub_fetch(void *ctx, const char *method, const char *url,
                       const...`
-- Defined: `tests/test_tab.c:1458`
+- Defined: `tests/test_tab.c:1501`
 - Doc: Stub parent fetcher: returns a fixed 200/"PONG" body, but REFUSES any "blocked.example" * host -- standing in for the re
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_xhr_works_when_net_allowed (function) `static void test_xhr_works_when_net_allowed(void **state)`
-- Defined: `tests/test_tab.c:1477`
+- Defined: `tests/test_tab.c:1520`
 - Doc: With net allowed (host in allow.conf AND js.conf) the page's XHR reaches the parent * fetcher and the response is visibl
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_xhr_undefined_when_net_not_allowed (function) `static void test_xhr_undefined_when_net_not_allowed(void **state)`
-- Defined: `tests/test_tab.c:1497`
+- Defined: `tests/test_tab.c:1540`
 - Doc: Default (net not allowed): XHR/fetch stay undefined -- Same-Origin-by-construction holds for every site not in BOTH list
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### stub_script_fetch (function) `static int stub_script_fetch(void *ctx, const char *method, const char *url,
                     ...`
-- Defined: `tests/test_tab.c:1536`
+- Defined: `tests/test_tab.c:1579`
 - Doc: Stub parent fetcher for external scripts: serves JS bodies by URL with a proper JavaScript Content-Type; refuses "blocke
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_external_script_executes_when_net_allowed (function) `static void test_external_script_executes_when_net_allowed(void **state)`
-- Defined: `tests/test_tab.c:1566`
+- Defined: `tests/test_tab.c:1609`
 - Doc: With net granted (allow.conf AND js.conf) an external script's bytes come from the * trusted parent and execute: its DOM
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_external_script_document_order (function) `static void test_external_script_document_order(void **state)`
-- Defined: `tests/test_tab.c:1583`
+- Defined: `tests/test_tab.c:1626`
 - Doc: External scripts execute IN DOCUMENT ORDER interleaved with inline ones: a later * inline script sees the external scrip
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_external_script_skipped_without_net (function) `static void test_external_script_skipped_without_net(void **state)`
-- Defined: `tests/test_tab.c:1606`
+- Defined: `tests/test_tab.c:1649`
 - Doc: Without the network grant an external script is SKIPPED (never fetched, never run): the page still loads and a Freebug w
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_external_script_bad_ctype_not_executed (function) `static void test_external_script_bad_ctype_not_executed(void **state)`
-- Defined: `tests/test_tab.c:1630`
+- Defined: `tests/test_tab.c:1673`
 - Doc: A response that is not JavaScript (e.g. an HTML error page) is NOT executed * (type-confusion guard, fail closed); the p
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_external_script_blocked_host_refused (function) `static void test_external_script_blocked_host_refused(void **state)`
-- Defined: `tests/test_tab.c:1647`
+- Defined: `tests/test_tab.c:1690`
 - Doc: Even with net granted, the trusted parent's refusal (blocked host) means the script * never runs -- the gate is the PARE
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### stub_css_fetch (function) `static int stub_css_fetch(void *ctx, const char *method, const char *url,
                        ...`
-- Defined: `tests/test_tab.c:1670`
+- Defined: `tests/test_tab.c:1713`
 - Doc: Stub parent fetcher for stylesheets: serves CSS bodies by URL with a text/css Content-Type; refuses "blocked.example" (s
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### view_find_text (function) `static const pv_run *view_find_text(const pv_view *v, const char *needle)`
-- Defined: `tests/test_tab.c:1692`
+- Defined: `tests/test_tab.c:1735`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_external_css_applied_when_allowed (function) `static void test_external_css_applied_when_allowed(void **state)`
-- Defined: `tests/test_tab.c:1703`
+- Defined: `tests/test_tab.c:1746`
 - Doc: With the css grant, the <link rel=stylesheet> bytes come from the trusted parent * and feed the author-CSS cascade -- no
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_external_css_skipped_without_grant (function) `static void test_external_css_skipped_without_grant(void **state)`
-- Defined: `tests/test_tab.c:1723`
+- Defined: `tests/test_tab.c:1766`
 - Doc: Default (no grant): zero subresource requests and no external styling -- * Privacy by Default holds, byte-identical to t
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_external_css_bad_ctype_not_parsed (function) `static void test_external_css_bad_ctype_not_parsed(void **state)`
-- Defined: `tests/test_tab.c:1742`
+- Defined: `tests/test_tab.c:1785`
 - Doc: A non-CSS Content-Type (an HTML 404 page, a script) is never parsed as a sheet * (anti type-confusion, fail closed); the
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_external_css_blocked_host_refused (function) `static void test_external_css_blocked_host_refused(void **state)`
-- Defined: `tests/test_tab.c:1760`
+- Defined: `tests/test_tab.c:1803`
 - Doc: The parent's policy refusal (blocked host) degrades to "no sheet", never a * failed load: presentation is fail-open like
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_external_css_survives_click_rederive (function) `static void test_external_css_survives_click_rederive(void **state)`
-- Defined: `tests/test_tab.c:1778`
+- Defined: `tests/test_tab.c:1821`
 - Doc: The fetched sheet PERSISTS in the worker: a click re-derives the view (OP_CLICK) * and the styling survives without a re
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_subreq_permitted_pure (function) `static void test_subreq_permitted_pure(void **state)`
-- Defined: `tests/test_tab.c:1806`
+- Defined: `tests/test_tab.c:1849`
 - Doc: Pure parent-side subresource gate (Zero Trust: the parent decides from ITS flags, never the worker's): net grants any we
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### read (function) `* vector no page may read (Zero Knowledge). Google's real JS hit exactly this. */
 static void tes...`
-- Defined: `tests/test_tab.c:1827`
+- Defined: `tests/test_tab.c:1870`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_eval_exception (function) `static void test_eval_exception(void **state)`
-- Defined: `tests/test_tab.c:1848`
+- Defined: `tests/test_tab.c:1891`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_eval_persistent_state (function) `static void test_eval_persistent_state(void **state)`
-- Defined: `tests/test_tab.c:1860`
+- Defined: `tests/test_tab.c:1903`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_reload_replaces_page (function) `static void test_reload_replaces_page(void **state)`
-- Defined: `tests/test_tab.c:1869`
+- Defined: `tests/test_tab.c:1912`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_eval_without_load (function) `static void test_eval_without_load(void **state)`
-- Defined: `tests/test_tab.c:1893`
+- Defined: `tests/test_tab.c:1936`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_binary_does_not_crash_parent (function) `static void test_binary_does_not_crash_parent(void **state)`
-- Defined: `tests/test_tab.c:1905`
+- Defined: `tests/test_tab.c:1948`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_child_death_survived (function) `static void test_child_death_survived(void **state)`
-- Defined: `tests/test_tab.c:1920`
+- Defined: `tests/test_tab.c:1963`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_free_null_and_double (function) `static void test_free_null_and_double(void **state)`
-- Defined: `tests/test_tab.c:1946`
+- Defined: `tests/test_tab.c:1989`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_decode_image_in_sandbox (function) `static void test_decode_image_in_sandbox(void **state)`
-- Defined: `tests/test_tab.c:1980`
+- Defined: `tests/test_tab.c:2023`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_decode_image_rejects_junk (function) `static void test_decode_image_rejects_junk(void **state)`
-- Defined: `tests/test_tab.c:2002`
+- Defined: `tests/test_tab.c:2045`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_decode_image_null_args (function) `static void test_decode_image_null_args(void **state)`
-- Defined: `tests/test_tab.c:2017`
+- Defined: `tests/test_tab.c:2060`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_decode_image_data_url_in_sandbox (function) `static void test_decode_image_data_url_in_sandbox(void **state)`
-- Defined: `tests/test_tab.c:2036`
+- Defined: `tests/test_tab.c:2079`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_decode_image_data_url_null_args (function) `static void test_decode_image_data_url_null_args(void **state)`
-- Defined: `tests/test_tab.c:2078`
+- Defined: `tests/test_tab.c:2121`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_worker_args_valid (function) `static void test_worker_args_valid(void **state)`
-- Defined: `tests/test_tab.c:2091`
+- Defined: `tests/test_tab.c:2134`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_worker_args_not_worker (function) `static void test_worker_args_not_worker(void **state)`
-- Defined: `tests/test_tab.c:2100`
+- Defined: `tests/test_tab.c:2143`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_worker_args_malformed (function) `static void test_worker_args_malformed(void **state)`
-- Defined: `tests/test_tab.c:2107`
+- Defined: `tests/test_tab.c:2150`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_worker_args_null_safe (function) `static void test_worker_args_null_safe(void **state)`
-- Defined: `tests/test_tab.c:2122`
+- Defined: `tests/test_tab.c:2165`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### test_load_view_codec_full_roundtrip (function) `static void test_load_view_codec_full_roundtrip(void **state)`
-- Defined: `tests/test_tab.c:2138`
+- Defined: `tests/test_tab.c:2181`
 - Doc: M0.2 codec golden: one load packs a broad spread of run + box fields across BOTH fixed-width run blocks (block A: image/
 - Depends on: `include/css.h`, `include/tab.h`
 
 ### main (function) `int main(int argc, char **argv)`
-- Defined: `tests/test_tab.c:2286`
+- Defined: `tests/test_tab.c:2329`
 - Depends on: `include/css.h`, `include/tab.h`
 
 ## tests/test_text_shape.c
@@ -18420,3 +18620,24 @@ static void tes...`
 
 ### main (function) `def main(argv)`
 - Defined: `tools/pngprof.py:109`
+
+## tools/snapshot.py
+
+### fetch (function) `def fetch(url)`
+- Defined: `tools/snapshot.py:17`
+
+### expand_imports (function) `def expand_imports(css, base, depth)`
+- Defined: `tools/snapshot.py:31`
+- Doc: Replace each @import with the imported text (wrapped in @media when the
+
+### inline_css (function) `def inline_css(html, base)`
+- Defined: `tools/snapshot.py:48`
+
+### main (function) `def main()`
+- Defined: `tools/snapshot.py:69`
+
+### repl (function) `def repl(m)`
+- Defined: `tools/snapshot.py:34`
+
+### repl (function) `def repl(m)`
+- Defined: `tools/snapshot.py:49`

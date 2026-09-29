@@ -4,15 +4,15 @@
 
 These files have the most connections. Changes here have high blast radius.
 
-- `gui/browser_ui.c` (score: 129.30)
+- `gui/browser_ui.c` (score: 129.60)
 - `include/css.h` (score: 78.70)
 - `src/tab.c` (score: 47.00)
-- `src/freedom.c` (score: 45.70)
-- `src/page_view.c` (score: 43.10)
+- `src/freedom.c` (score: 45.80)
+- `src/page_view.c` (score: 44.10)
 - `src/css.c` (score: 41.90)
 - `include/html_parse.h` (score: 40.40)
-- `include/page_view.h` (score: 38.50)
-- `tests/test_css.c` (score: 30.40)
+- `include/page_view.h` (score: 38.80)
+- `tests/test_css.c` (score: 30.60)
 - `src/local_store.c` (score: 29.10)
 
 ## Hotspots (complexity + centrality)
@@ -21,8 +21,8 @@ These files have the most connections. Changes here have high blast radius.
 - `src/tab.c` -- complexity: 0.2, centrality: 0.5, combined: 0.4
 - `src/page_view.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
 - `src/css.c` -- complexity: 0.4, centrality: 0.2, combined: 0.3
-- `include/css.h` -- complexity: 0.3, centrality: 0.3, combined: 0.3
 - `src/freedom.c` -- complexity: 0.1, centrality: 0.4, combined: 0.3
+- `include/css.h` -- complexity: 0.3, centrality: 0.3, combined: 0.3
 - `tests/test_css.c` -- complexity: 0.5, centrality: 0.1, combined: 0.3
 - `src/local_store.c` -- complexity: 0.5, centrality: 0.1, combined: 0.3
 - `tests/test_page_view.c` -- complexity: 0.3, centrality: 0.2, combined: 0.2
@@ -43,13 +43,13 @@ These files have the most connections. Changes here have high blast radius.
 
 ## Dataflow Issues (INFERRED, review each lead)
 
-- `gui/browser_ui.c:1411` `gui_subresource_fetch` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- `gui/browser_ui.c:3775` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 3775 but never read afterwards.
-- `gui/browser_ui.c:3777` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 3777 but never read afterwards.
-- `gui/browser_ui.c:4116` `emit_replaced_row` [DEAD_STORE] `box_w`: `box_w` assigned at line 4116 but never read afterwards.
-- `gui/browser_ui.c:4977` `layout_container` [DEAD_STORE] `item_cbox`: `item_cbox` assigned at line 4977 but never read afterwards.
-- `gui/browser_ui.c:6710` `layout_float_band` [DEAD_STORE] `base_top`: `base_top` assigned at line 6710 but never read afterwards.
-- `gui/browser_ui.c:7951` `button_box_width` [DEAD_STORE] `cx`: `cx` assigned at line 7951 but never read afterwards.
-- `gui/browser_ui.c:8969` `paint_box_decoration` [DEAD_STORE] `bt`: `bt` assigned at line 8969 but never read afterwards.
-- `gui/browser_ui.c:8970` `paint_box_decoration` [DEAD_STORE] `bb`: `bb` assigned at line 8970 but never read afterwards.
-- `gui/browser_ui.c:9124` `layer` [DEAD_STORE] `on`: `on` assigned at line 9124 but never read afterwards.
+- `gui/browser_ui.c:1418` `gui_subresource_fetch` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- `gui/browser_ui.c:3783` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 3783 but never read afterwards.
+- `gui/browser_ui.c:3785` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 3785 but never read afterwards.
+- `gui/browser_ui.c:4150` `emit_replaced_row` [DEAD_STORE] `box_w`: `box_w` assigned at line 4150 but never read afterwards.
+- `gui/browser_ui.c:5031` `layout_container` [DEAD_STORE] `item_cbox`: `item_cbox` assigned at line 5031 but never read afterwards.
+- `gui/browser_ui.c:6791` `layout_float_band` [DEAD_STORE] `base_top`: `base_top` assigned at line 6791 but never read afterwards.
+- `gui/browser_ui.c:8063` `button_box_width` [DEAD_STORE] `cx`: `cx` assigned at line 8063 but never read afterwards.
+- `gui/browser_ui.c:9081` `paint_box_decoration` [DEAD_STORE] `bt`: `bt` assigned at line 9081 but never read afterwards.
+- `gui/browser_ui.c:9082` `paint_box_decoration` [DEAD_STORE] `bb`: `bb` assigned at line 9082 but never read afterwards.
+- `gui/browser_ui.c:9236` `layer` [DEAD_STORE] `on`: `on` assigned at line 9236 but never read afterwards.

@@ -4,49 +4,49 @@
 
 ## Definition
 
-This community groups 4 file(s) rooted at `include` with dominant language c (cohesion 0.60). Central symbols: `FREEDOM_PREFETCH_H`, `LLVMFuzzerTestOneInput`, `PF_MAX_REFS`, `PF_MAX_THREADS`, `PF_MAX_URL`, `_POSIX_C_SOURCE`, `attr_span`, `barrier`. Core file: `include/prefetch.h` (21 symbols). Documented purpose: libFuzzer harness for the prefetch lookahead scanner (Hito 29). The scanned.
+This community groups 4 file(s) rooted at `include` with dominant language c (cohesion 0.60). Central symbols: `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`, `DL_MAX_BYTES`, `DL_NAME_MAX`, `FREEDOM_DOWNLOAD_H`, `LLVMFuzzerTestOneInput`, `basename`, `builder`. Core file: `tests/test_download.c` (21 symbols).
 
 ## Files
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `fuzz/fuzz_prefetch.c` | c | utility | 1 | yes |
-| `include/prefetch.h` | h | utility | 21 | no |
-| `src/prefetch.c` | c | utility | 17 | no |
-| `tests/test_prefetch.c` | c | testing | 12 | yes |
+| `fuzz/fuzz_download.c` | c | utility | 1 | no |
+| `include/download.h` | h | utility | 9 | no |
+| `src/download.c` | c | utility | 12 | no |
+| `tests/test_download.c` | c | testing | 21 | no |
 
 ## Key Symbols
 
-- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_prefetch.c:10`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-- `FREEDOM_PREFETCH_H` (macro, `include/prefetch.h:2`) `#define FREEDOM_PREFETCH_H`
-- `pf_kind` (enum, `include/prefetch.h:35`) - Subresource kinds the lookahead scanner recognizes. Anything else (icons, preload hints, images) is
-- `pf_ref` (struct, `include/prefetch.h:42`) - One scanned reference. url is the RAW attribute value (the policy-gated fetcher * resolves and valid
-- `kind` (type_alias, `include/prefetch.h:42`) `typedef struct pf_ref { pf_kind kind;` - One scanned reference. url is the RAW attribute value (the policy-gated fetcher * resolves and valid
-- `PF_MAX_REFS` (macro, `include/prefetch.h:47`) `#define PF_MAX_REFS`
-- `PF_MAX_THREADS` (macro, `include/prefetch.h:48`) `#define PF_MAX_THREADS`
-- `refs` (type_alias, `include/prefetch.h:49`) `typedef struct pf_list { pf_ref refs[PF_MAX_REFS];` - One scanned reference. url is the RAW attribute value (the policy-gated fetcher * resolves and valid
-- `pf_list` (struct, `include/prefetch.h:50`)
-- `pf_scan` (function, `include/prefetch.h:59`) `int pf_scan(const char *html, size_t len, pf_list *out);` - Lookahead scan of hostile HTML. Fills out (owns the URLs; free with pf_list_free). Comment, <script>
-- `pf_list_free` (function, `include/prefetch.h:60`) `void pf_list_free(pf_list *l);`
-- `pf_job_state` (enum, `include/prefetch.h:70`)
-- `pf_job` (struct, `include/prefetch.h:77`)
-- `jobs` (type_alias, `include/prefetch.h:86`) `typedef struct pf_pool { pf_job jobs[PF_MAX_REFS];`
-- `pf_pool` (struct, `include/prefetch.h:87`)
-- `fetch` (function, `include/prefetch.h:102`) `* claiming jobs and running fetch(ctx, "GET", url, ...). Returns 0 on success or`
-- `pf_pool_take` (function, `include/prefetch.h:115`) `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body,` - Cache-first take. On a hit (url matches an unconsumed job) WAITS for that job and MOVES the result t
-- `pf_pool_finish` (function, `include/prefetch.h:121`) `void pf_pool_finish(pf_pool *p);` - Joins the worker threads and frees every unconsumed result. Blocks until in-flight fetches end (boun
-- `pool` (function, `include/prefetch.h:125`) `* whose URL is pooled is served from the pool (a failed prefetch propagates the`
-- `pf_gated_fetch` (struct, `include/prefetch.h:129`) - Cache-first fetcher adapter, shared by every frontend (DRY): install pf_pooled_fetch as the tab fetc
-- `inner` (type_alias, `include/prefetch.h:129`) `typedef struct pf_gated_fetch { pf_fetch_fn inner;` - Cache-first fetcher adapter, shared by every frontend (DRY): install pf_pooled_fetch as the tab fetc
-- `pf_pooled_fetch` (function, `include/prefetch.h:135`) `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char`
-- `_POSIX_C_SOURCE` (macro, `src/prefetch.c:12`) `#define _POSIX_C_SOURCE`
-- `PF_MAX_URL` (macro, `src/prefetch.c:21`) `#define PF_MAX_URL`
-- `is_ws` (function, `src/prefetch.c:23`) `static int is_ws(char c)`
-- `is_name_char` (function, `src/prefetch.c:27`) `static int is_name_char(char c)`
-- `lower` (function, `src/prefetch.c:32`) `static int lower(int c)`
-- `ci_starts` (function, `src/prefetch.c:37`) `static int ci_starts(const char *p, const char *end, const char *kw)` - static int is_ws(char c) { return c == ' ' \|\| c == '\t' \|\| c == '\n' \|\| c == '\r' \|\| c == '\f'; } st
-- `ci_find` (function, `src/prefetch.c:46`) `static const char *ci_find(const char *p, const char *end, const char *kw)` - static int lower(int c) { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; } /* Case-insensitive
-- `ci_eq_span` (function, `src/prefetch.c:55`) `static int ci_eq_span(const char *s, size_t n, const char *kw)`
+- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_download.c:31`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- `FREEDOM_DOWNLOAD_H` (macro, `include/download.h:2`) `#define FREEDOM_DOWNLOAD_H`
+- `DL_NAME_MAX` (macro, `include/download.h:29`) `#define DL_NAME_MAX`
+- `DL_FALLBACK_NAME` (macro, `include/download.h:30`) `#define DL_FALLBACK_NAME`
+- `DL_MAX_BYTES` (macro, `include/download.h:31`) `#define DL_MAX_BYTES`
+- `dl_status` (enum, `include/download.h:33`)
+- `dl_should_download` (function, `include/download.h:43`) `int dl_should_download(const char *content_type, const char *content_disposition` - 1 if the response should be saved (attachment, or a non-renderable media type), 0 if it should be re
+- `literal` (function, `include/download.h:47`) `* a static string literal (never freed). */ const char *dl_ext_for_type(const ch`
+- `DL_ERR_OVERFLOW` (function, `include/download.h:56`) `* DL_ERR_OVERFLOW (out left empty). url/content_disposition NULL => absent. */ d`
+- `basename` (function, `include/download.h:61`) `* sanitized basename (a name still containing '/' is rejected => DL_ERR_OVERFLOW`
+- `lc` (function, `src/download.c:13`) `static int lc(int c)` - download — pure helpers for "save this resource to disk". See include/download.h and spec/download.m
+- `ci_find` (function, `src/download.c:19`) `static const char *ci_find(const char *hay, const char *needle)` - #include "download.h" #include "pdf_export.h"   /* pe_safe_basename: the single audited sanitizer #i
+- `media_type` (function, `src/download.c:33`) `static void media_type(const char *content_type, char *buf, size_t bufsz)` - Writes the lowercased media type of content_type (the part before ';', with * surrounding spaces tri
+- `dl_should_download` (function, `src/download.c:47`) `int dl_should_download(const char *content_type, const char *content_disposition`
+- `dl_ext_for_type` (function, `src/download.c:58`) `const char *dl_ext_for_type(const char *content_type)`
+- `copy_span` (function, `src/download.c:85`) `static void copy_span(const char *src, const char *end, char *buf, size_t bufsz)` - { "application/xhtml+xml",  ".html" }, { "text/plain",            ".txt"  }, { "image/png",
+- `extract_disposition_name` (function, `src/download.c:96`) `static int extract_disposition_name(const char *cd, char *buf, size_t bufsz)` - Extracts a filename candidate from a Content-Disposition value into buf. Handles filename="...", fil
+- `extract_url_name` (function, `src/download.c:134`) `static int extract_url_name(const char *url, char *buf, size_t bufsz)` - Extracts the last path segment of url (without ?query or #fragment) into buf. * Returns 1 if a non-e
+- `has_extension` (function, `src/download.c:148`) `static int has_extension(const char *name)` - Does name already carry an extension (a '.' past the first byte with at least * one character after
+- `dl_pick_name` (function, `src/download.c:153`) `dl_status dl_pick_name(const char *url, const char *content_disposition,`
+- `dl_build_path` (function, `src/download.c:195`) `dl_status dl_build_path(const char *dir, const char *name, char *out, size_t out`
+- `dl_check_size` (function, `src/download.c:213`) `dl_status dl_check_size(size_t len)`
+- `builder` (function, `tests/test_download.c:8`) `* builder (join, separator rejection, overflow, NULL), and the size cap.  */  #i`
+- `test_should_renderable_types` (function, `tests/test_download.c:30`) `static void test_should_renderable_types(void **state)`
+- `test_should_binary_types` (function, `tests/test_download.c:41`) `static void test_should_binary_types(void **state)`
+- `test_ext_known_types` (function, `tests/test_download.c:52`) `static void test_ext_known_types(void **state)`
+- `test_ext_unknown_type` (function, `tests/test_download.c:63`) `static void test_ext_unknown_type(void **state)`
+- `test_pick_from_disposition_quoted` (function, `tests/test_download.c:72`) `static void test_pick_from_disposition_quoted(void **state)`
+- `test_pick_from_disposition_ext_form` (function, `tests/test_download.c:81`) `static void test_pick_from_disposition_ext_form(void **state)`
+- `test_pick_from_url_segment` (function, `tests/test_download.c:91`) `static void test_pick_from_url_segment(void **state)`
 
 ## Internal vs External Edges
 
@@ -55,9 +55,9 @@ This community groups 4 file(s) rooted at `include` with dominant language c (co
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
-- [INFERRED] shares_context community 1 <-> 3 (strength 0.5): Inferred shared context (language c and layer utility) with no import path between community 1 (include) and community 3 (include).
-- [INFERRED] shares_context community 2 <-> 3 (strength 0.5): Inferred shared context (language c and layer utility) with no import path between community 2 (include) and community 3 (include).
+- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/download.h.
+- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/download.c imports include/pdf_export.h.
+- [INFERRED] shares_context community 0 <-> 3 (strength 0.5): Inferred shared context (language c and layer utility) with no import path between community 0 (include) and community 3 (include).
 
 ## Risks
 
@@ -65,13 +65,13 @@ This community groups 4 file(s) rooted at `include` with dominant language c (co
 
 ## Open Questions
 
-- Why do 2 file(s) lack file-level docs (e.g. `include/prefetch.h`)? What purpose do they serve?
+- Why do 4 file(s) lack file-level docs (e.g. `fuzz/fuzz_download.c`)? What purpose do they serve?
 - What would break if the most connected file in include changed?
 - Should include be split, given cohesion 0.60?
 
 ## Sources
 
-- `fuzz/fuzz_prefetch.c`
-- `include/prefetch.h`
-- `src/prefetch.c`
-- `tests/test_prefetch.c`
+- `fuzz/fuzz_download.c`
+- `include/download.h`
+- `src/download.c`
+- `tests/test_download.c`

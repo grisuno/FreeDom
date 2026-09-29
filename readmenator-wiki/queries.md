@@ -16,7 +16,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: How are the 172 files in 'include' related to each other?
+### Q: How are the 28 files in 'include' related to each other?
 
 - Status: unanswered
 

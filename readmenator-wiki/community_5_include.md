@@ -4,49 +4,49 @@
 
 ## Definition
 
-This community groups 4 file(s) rooted at `include` with dominant language c (cohesion 0.60). Central symbols: `FREEDOM_TLS_IMPERSONATE_H`, `TI_MAGIC`, `TI_MAX_BODY`, `TI_MAX_CHAIN`, `TI_MAX_GROUP`, `TI_MAX_HEADERS`, `TI_MAX_METHOD`, `TI_MAX_RESP_BODY`. Core file: `include/tls_impersonate.h` (22 symbols).
+This community groups 4 file(s) rooted at `include` with dominant language c (cohesion 0.60). Central symbols: `FREEDOM_PDF_EXPORT_H`, `LLVMFuzzerTestOneInput`, `PE_EXT`, `PE_EXT_PNG`, `PE_FALLBACK_NAME`, `PE_NAME_MAX`, `fallback`, `literal`. Core file: `tests/test_pdf_export.c` (30 symbols).
 
 ## Files
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `fuzz/fuzz_tls_impersonate.c` | c | utility | 0 | no |
-| `include/tls_impersonate.h` | h | utility | 22 | no |
-| `src/tls_impersonate.c` | c | utility | 20 | no |
-| `tests/test_tls_impersonate.c` | c | testing | 11 | no |
+| `fuzz/fuzz_pdf_export.c` | c | utility | 1 | no |
+| `include/pdf_export.h` | h | utility | 10 | no |
+| `src/pdf_export.c` | c | utility | 4 | no |
+| `tests/test_pdf_export.c` | c | testing | 30 | no |
 
 ## Key Symbols
 
-- `FREEDOM_TLS_IMPERSONATE_H` (macro, `include/tls_impersonate.h:2`) `#define FREEDOM_TLS_IMPERSONATE_H`
-- `chain` (function, `include/tls_impersonate.h:29`) `* * The response carries the peer certificate chain (DER) and the negotiated gro`
-- `ti_profile` (enum, `include/tls_impersonate.h:38`) - Browser profile imitated on the wire. Owner decision (2026-07-12): TI_PROFILE_CHROME_CLASSIC — maxim
-- `ti_should_impersonate` (function, `include/tls_impersonate.h:52`) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int host_i` - The triple opt-in gate (pure). Returns 1 IFF all three signals are set: host_in_allowlist  — an expl
-- `TI_MAGIC` (macro, `include/tls_impersonate.h:56`) `#define TI_MAGIC`
-- `TI_MAX_URL` (macro, `include/tls_impersonate.h:57`) `#define TI_MAX_URL`
-- `TI_MAX_METHOD` (macro, `include/tls_impersonate.h:58`) `#define TI_MAX_METHOD`
-- `TI_MAX_HEADERS` (macro, `include/tls_impersonate.h:59`) `#define TI_MAX_HEADERS`
-- `TI_MAX_BODY` (macro, `include/tls_impersonate.h:60`) `#define TI_MAX_BODY`
-- `TI_MAX_RESP_HDR` (macro, `include/tls_impersonate.h:61`) `#define TI_MAX_RESP_HDR`
-- `TI_MAX_RESP_BODY` (macro, `include/tls_impersonate.h:62`) `#define TI_MAX_RESP_BODY`
-- `TI_MAX_CHAIN` (macro, `include/tls_impersonate.h:63`) `#define TI_MAX_CHAIN`
-- `TI_MAX_GROUP` (macro, `include/tls_impersonate.h:64`) `#define TI_MAX_GROUP`
-- `ti_req` (struct, `include/tls_impersonate.h:68`) - Request: parent -> helper. Pointers are borrowed by ti_encode_req (not copied); * ti_decode_req allo
-- `ti_resp` (struct, `include/tls_impersonate.h:78`) - Request: parent -> helper. Pointers are borrowed by ti_encode_req (not copied); * ti_decode_req allo
-- `status` (type_alias, `include/tls_impersonate.h:78`) `typedef struct ti_resp { long status;` - Request: parent -> helper. Pointers are borrowed by ti_encode_req (not copied); * ti_decode_req allo
-- `success` (function, `include/tls_impersonate.h:93`) `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, *`
-- `ti_decode_req` (function, `include/tls_impersonate.h:97`) `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
-- `ti_req_free` (function, `include/tls_impersonate.h:98`) `void ti_req_free(ti_req *r);`
-- `ti_encode_resp` (function, `include/tls_impersonate.h:100`) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
-- `ti_decode_resp` (function, `include/tls_impersonate.h:101`) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
-- `ti_resp_free` (function, `include/tls_impersonate.h:102`) `void ti_resp_free(ti_resp *r);`
-- `ti_should_impersonate` (function, `src/tls_impersonate.c:18`) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled,`
-- `bounded_len` (function, `src/tls_impersonate.c:25`) `static size_t bounded_len(const char *s, size_t max)`
-- `ti_wr` (struct, `src/tls_impersonate.c:33`)
-- `put_u8` (function, `src/tls_impersonate.c:35`) `static void put_u8(ti_wr *w, uint8_t v)`
-- `put_u32` (function, `src/tls_impersonate.c:40`) `static void put_u32(ti_wr *w, uint32_t v)`
-- `put_u64` (function, `src/tls_impersonate.c:48`) `static void put_u64(ti_wr *w, uint64_t v)`
-- `put_blob` (function, `src/tls_impersonate.c:53`) `static void put_blob(ti_wr *w, const uint8_t *b, size_t n)`
-- `ti_rd` (struct, `src/tls_impersonate.c:63`)
+- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_pdf_export.c:30`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- `FREEDOM_PDF_EXPORT_H` (macro, `include/pdf_export.h:2`) `#define FREEDOM_PDF_EXPORT_H`
+- `PE_NAME_MAX` (macro, `include/pdf_export.h:28`) `#define PE_NAME_MAX`
+- `PE_EXT` (macro, `include/pdf_export.h:29`) `#define PE_EXT`
+- `PE_EXT_PNG` (macro, `include/pdf_export.h:30`) `#define PE_EXT_PNG`
+- `PE_FALLBACK_NAME` (macro, `include/pdf_export.h:31`) `#define PE_FALLBACK_NAME`
+- `pe_status` (enum, `include/pdf_export.h:33`)
+- `fallback` (function, `include/pdf_export.h:46`) `* fallback (PE_ERR_OVERFLOW, out left empty). title == NULL is treated as empty.`
+- `trusted` (function, `include/pdf_export.h:51`) `* dir is trusted (chosen by the app from XDG/$HOME);`
+- `literal` (function, `include/pdf_export.h:52`) `* trusted literal (e.g. PE_EXT / PE_EXT_PNG);`
+- `pe_paginate` (function, `include/pdf_export.h:70`) `size_t pe_paginate(const double *tops, const double *heights, size_t n, double p` - Deterministic pagination: lays the rows (document-space tops + heights, in order) onto pages of usab
+- `pe_safe_basename` (function, `src/pdf_export.c:25`) `pe_status pe_safe_basename(const char *title, char *out, size_t outsz)`
+- `pe_build_path_ext` (function, `src/pdf_export.c:66`) `pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext,`
+- `pe_build_path` (function, `src/pdf_export.c:91`) `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t ou`
+- `pe_paginate` (function, `src/pdf_export.c:95`) `size_t pe_paginate(const double *tops, const double *heights, size_t n,`
+- `pagination` (function, `tests/test_pdf_export.c:8`) `* deterministic pagination (single/multi page, no row splitting, oversized row,`
+- `test_basename_maps_spaces_and_reserved` (function, `tests/test_pdf_export.c:31`) `static void test_basename_maps_spaces_and_reserved(void **state)`
+- `test_basename_rejects_path_separators` (function, `tests/test_pdf_export.c:39`) `static void test_basename_rejects_path_separators(void **state)`
+- `test_basename_neutralizes_traversal` (function, `tests/test_pdf_export.c:49`) `static void test_basename_neutralizes_traversal(void **state)`
+- `test_basename_dotdot_only_falls_back` (function, `tests/test_pdf_export.c:57`) `static void test_basename_dotdot_only_falls_back(void **state)`
+- `test_basename_trims_edges` (function, `tests/test_pdf_export.c:64`) `static void test_basename_trims_edges(void **state)`
+- `test_basename_collapses_underscores` (function, `tests/test_pdf_export.c:72`) `static void test_basename_collapses_underscores(void **state)`
+- `test_basename_control_bytes_mapped` (function, `tests/test_pdf_export.c:79`) `static void test_basename_control_bytes_mapped(void **state)`
+- `test_basename_non_ascii_mapped` (function, `tests/test_pdf_export.c:87`) `static void test_basename_non_ascii_mapped(void **state)`
+- `test_basename_empty_and_null_fall_back` (function, `tests/test_pdf_export.c:96`) `static void test_basename_empty_and_null_fall_back(void **state)`
+- `test_basename_all_separators_fall_back` (function, `tests/test_pdf_export.c:105`) `static void test_basename_all_separators_fall_back(void **state)`
+- `test_basename_length_bound` (function, `tests/test_pdf_export.c:112`) `static void test_basename_length_bound(void **state)`
+- `test_basename_null_out_and_zero_size` (function, `tests/test_pdf_export.c:123`) `static void test_basename_null_out_and_zero_size(void **state)`
+- `test_basename_overflow_fails_closed` (function, `tests/test_pdf_export.c:130`) `static void test_basename_overflow_fails_closed(void **state)`
+- `test_build_path_basic` (function, `tests/test_pdf_export.c:139`) `static void test_build_path_basic(void **state)`
 
 ## Internal vs External Edges
 
@@ -55,8 +55,9 @@ This community groups 4 file(s) rooted at `include` with dominant language c (co
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/tls_impersonate.h.
-- [INFERRED] shares_context community 1 <-> 5 (strength 0.5): Inferred shared context (language c and layer utility) with no import path between community 1 (include) and community 5 (include).
+- [EXTRACTED] depends_on community 2 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/pdf_export.h.
+- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/download.c imports include/pdf_export.h.
+- [INFERRED] shares_context community 0 <-> 5 (strength 0.5): Inferred shared context (language c and layer utility) with no import path between community 0 (include) and community 5 (include).
 
 ## Risks
 
@@ -64,13 +65,13 @@ This community groups 4 file(s) rooted at `include` with dominant language c (co
 
 ## Open Questions
 
-- Why do 4 file(s) lack file-level docs (e.g. `fuzz/fuzz_tls_impersonate.c`)? What purpose do they serve?
+- Why do 4 file(s) lack file-level docs (e.g. `fuzz/fuzz_pdf_export.c`)? What purpose do they serve?
 - What would break if the most connected file in include changed?
 - Should include be split, given cohesion 0.60?
 
 ## Sources
 
-- `fuzz/fuzz_tls_impersonate.c`
-- `include/tls_impersonate.h`
-- `src/tls_impersonate.c`
-- `tests/test_tls_impersonate.c`
+- `fuzz/fuzz_pdf_export.c`
+- `include/pdf_export.h`
+- `src/pdf_export.c`
+- `tests/test_pdf_export.c`

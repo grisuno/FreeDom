@@ -87,21 +87,21 @@
 - Layer: utility
 - Language: h
 - Symbols:
-  - `bt_node` (struct, line 63)
-  - `bt_positioned` (struct, line 122)
-  - `bt_status` (enum, line 129)
-  - `display` (type_alias, line 62) `typedef struct bt_node { bx_display display;`
-  - `box_index` (type_alias, line 122) `typedef struct bt_positioned { size_t box_index;`
+  - `bt_node` (struct, line 67)
+  - `bt_positioned` (struct, line 128)
+  - `bt_status` (enum, line 135)
+  - `display` (type_alias, line 66) `typedef struct bt_node { bx_display display;`
+  - `box_index` (type_alias, line 128) `typedef struct bt_positioned { size_t box_index;`
   - `closed` (function, line 34) `* fails closed (BT_ERR_RANGE) instead of overflowing the stack. */ #define BT_MAX_DEPTH 64u #define BT_MAX_CHILDREN 128u /* Stage 2: the out-of-flow solver's arrays are indexed BY BOX ID, so this boun`
-  - `one` (function, line 77) `* of forcing them all onto one (flex-wrap);`
-  - `line` (function, line 91) `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a grid item of its GRID parent (2026-07-11): columns it spans * (grid-column: span N);`
-  - `node` (function, line 138) `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller composes absolute coordinates by accumulating parent * origins. */ bt_status bt_layout(`
-  - `flow` (function, line 177) `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);`
-  - `bottom` (function, line 184) `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in box_x/y/w/h: * an absolutely positioned box whose containing block was never placed`
-  - `placed` (function, line 191) `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour). */ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const do`
-  - `bt_box_hidden` (function, line 209) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);`
-  - `bt_oof_anchor` (function, line 223) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);`
-  - `bt_oof_root` (function, line 224) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);`
+  - `one` (function, line 81) `* of forcing them all onto one (flex-wrap);`
+  - `line` (function, line 97) `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a grid item of its GRID parent (2026-07-11): columns it spans * (grid-column: span N);`
+  - `node` (function, line 144) `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller composes absolute coordinates by accumulating parent * origins. */ bt_status bt_layout(`
+  - `flow` (function, line 183) `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);`
+  - `bottom` (function, line 190) `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in box_x/y/w/h: * an absolutely positioned box whose containing block was never placed`
+  - `placed` (function, line 197) `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour). */ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const do`
+  - `bt_box_hidden` (function, line 215) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);`
+  - `bt_oof_anchor` (function, line 229) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);`
+  - `bt_oof_root` (function, line 230) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);`
   - `FREEDOM_BOX_TREE_H` (macro, line 2) `#define FREEDOM_BOX_TREE_H`
   - `BT_MAX_DEPTH` (macro, line 35) `#define BT_MAX_DEPTH`
   - `BT_MAX_CHILDREN` (macro, line 36) `#define BT_MAX_CHILDREN`
@@ -115,6 +115,8 @@
   - `BT_ALIGN_CENTER` (macro, line 59) `#define BT_ALIGN_CENTER`
   - `BT_ALIGN_END` (macro, line 60) `#define BT_ALIGN_END`
   - `BT_ALIGN_STRETCH` (macro, line 61) `#define BT_ALIGN_STRETCH`
+  - `BT_MAUTO_LEFT` (macro, line 64) `#define BT_MAUTO_LEFT`
+  - `BT_MAUTO_RIGHT` (macro, line 65) `#define BT_MAUTO_RIGHT`
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
@@ -566,8 +568,9 @@
   - `required` (function, line 156) `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);`
   - `widths` (function, line 166) `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens it) with the wrap cursor discipline, then * reports the BORDER x (packed outer posi`
   - `FX_ERR_NULL_ARG` (function, line 200) `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);`
-  - `fx_auto_min_size` (function, line 226) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
-  - `fx_justify_name` (function, line 282) `const char *fx_justify_name(fx_justify j);`
+  - `space` (function, line 206) `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin (auto_l[i]/auto_r[i] non-zero), which overrides justify-content. With no * auto margin or no positiv`
+  - `fx_auto_min_size` (function, line 235) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
+  - `fx_justify_name` (function, line 291) `const char *fx_justify_name(fx_justify j);`
   - `FREEDOM_FLEX_LAYOUT_H` (macro, line 2) `#define FREEDOM_FLEX_LAYOUT_H`
   - `FX_MAX_ITEMS` (macro, line 28) `#define FX_MAX_ITEMS`
   - `FX_AREA_MAX_ROWS` (macro, line 108) `#define FX_AREA_MAX_ROWS`
@@ -575,7 +578,7 @@
   - `FX_AREA_MAX_CELLS` (macro, line 110) `#define FX_AREA_MAX_CELLS`
   - `FX_AREA_NAME_MAX` (macro, line 111) `#define FX_AREA_NAME_MAX`
   - `FX_FLOAT_MIN_LINE` (macro, line 180) `#define FX_FLOAT_MIN_LINE`
-  - `FX_MAX_COLUMNS` (macro, line 231) `#define FX_MAX_COLUMNS`
+  - `FX_MAX_COLUMNS` (macro, line 240) `#define FX_MAX_COLUMNS`
 - Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ## include/form.h
@@ -933,71 +936,74 @@
 - Layer: presentation
 - Language: h
 - Symbols:
-  - `pv_run` (struct, line 108)
-  - `pv_box_def` (struct, line 388)
-  - `pv_cont_def` (struct, line 673)
-  - `pv_view` (struct, line 709)
-  - `pv_text_ext` (struct, line 870)
+  - `pv_run` (struct, line 113)
+  - `pv_box_def` (struct, line 396)
+  - `pv_cont_def` (struct, line 681)
+  - `pv_view` (struct, line 718)
+  - `pv_text_ext` (struct, line 879)
   - `pv_status` (enum, line 34)
-  - `pv_kind` (enum, line 61)
-  - `pv_input_type` (enum, line 77)
-  - `pv_form_method` (enum, line 94)
-  - `kind` (type_alias, line 108) `typedef struct pv_run { pv_kind kind;`
-  - `parent_id` (type_alias, line 388) `typedef struct pv_box_def { int parent_id;`
-  - `parent_id` (type_alias, line 673) `typedef struct pv_cont_def { int parent_id;`
-  - `word_spacing` (type_alias, line 870) `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;`
-  - `container` (function, line 207) `* cont_id groups runs of one container (-1 = none);`
-  - `bx_display` (function, line 208) `* bx_display (flex/grid);`
-  - `order` (function, line 269) `* groups the runs of ONE floated element in document order (-1 = not in a float);`
-  - `CSS_LEN_UNSET` (function, line 460) `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an in-flow offset, reader-safe);`
-  - `scale` (function, line 535) `* scale(1)) and rotate in whole degrees (transform_rotate);`
-  - `nonzero` (function, line 734) `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out);`
-  - `resolved` (function, line 741) `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full with reader == 0 and prefers_dark == 0. */ pv_status pv_build_full(const hp_document`
-  - `policy` (function, line 749) `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The external text precedes the document's own <style> * blocks in the parsed sheet (document-or`
-  - `cause` (function, line 767) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?" is a measurement instead of a grep over the * dispatch, which sees property names on`
-  - `pv_new` (function, line 779) `pv_view *pv_new(void);`
-  - `form` (function, line 798) `* form (-1 if none);`
-  - `pv_set_emphasis` (function, line 830) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
-  - `default` (function, line 835) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
-  - `pv_set_color` (function, line 838) `void pv_set_color(pv_view *v, int fg_rgb);`
-  - `pv_set_bgcolor` (function, line 845) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
-  - `pv_set_text_style` (function, line 854) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
-  - `pv_text_ext_reset` (function, line 901) `void pv_text_ext_reset(pv_text_ext *e);`
-  - `ancestors` (function, line 906) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box stack in both directions: that is * what makes `visibility` inherited-but-overridable,`
-  - `pv_set_text_ext` (function, line 916) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
-  - `pv_set_grad_text` (function, line 922) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
-  - `run` (function, line 925) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an empty or NULL view. Both append helpers * default cont_id to -1 (no container), cont_wr`
-  - `pv_set_row_span` (function, line 938) `void pv_set_row_span(pv_view *v, int row_span);`
-  - `pv_set_grid_area` (function, line 942) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
-  - `pv_set_grid_rows` (function, line 943) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
-  - `pv_set_ua_tag` (function, line 948) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
-  - `pv_set_cont_box` (function, line 952) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
-  - `pv_set_grid` (function, line 953) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
-  - `pv_set_flex` (function, line 961) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int flex_align_self);`
-  - `pv_set_cont_item` (function, line 966) `void pv_set_cont_item(pv_view *v, int cont_item);`
-  - `pv_set_float` (function, line 975) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int float_mr, int float_mr_pct, int float_oid, int float_oside, int float_oml, int float_om`
-  - `pv_set_box` (function, line 985) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
-  - `pv_set_box_pct` (function, line 991) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
-  - `pv_set_node_id` (function, line 997) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
-  - `pv_set_block_id` (function, line 1002) `void pv_set_block_id(pv_view *v, int block_id);`
-  - `pv_set_own_box` (function, line 1006) `void pv_set_own_box(pv_view *v, int box_id);`
-  - `pv_set_oof` (function, line 1010) `void pv_set_oof(pv_view *v, int oof);`
-  - `pv_cont_count` (function, line 1025) `size_t pv_cont_count(const pv_view *v);`
-  - `pv_cont_at` (function, line 1026) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
-  - `pv_set_input_checked` (function, line 1030) `void pv_set_input_checked(pv_view *v, int checked);`
-  - `pv_set_input_select_opts` (function, line 1034) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
-  - `pv_free` (function, line 1037) `void pv_free(pv_view *v);`
-  - `pv_count` (function, line 1040) `size_t pv_count(const pv_view *v);`
-  - `pv_at` (function, line 1041) `const pv_run *pv_at(const pv_view *v, size_t i);`
-  - `pv_box_count` (function, line 1045) `size_t pv_box_count(const pv_view *v);`
-  - `pv_box_at` (function, line 1046) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
+  - `pv_kind` (enum, line 66)
+  - `pv_input_type` (enum, line 82)
+  - `pv_form_method` (enum, line 99)
+  - `kind` (type_alias, line 113) `typedef struct pv_run { pv_kind kind;`
+  - `parent_id` (type_alias, line 396) `typedef struct pv_box_def { int parent_id;`
+  - `parent_id` (type_alias, line 681) `typedef struct pv_cont_def { int parent_id;`
+  - `word_spacing` (type_alias, line 879) `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;`
+  - `container` (function, line 212) `* cont_id groups runs of one container (-1 = none);`
+  - `bx_display` (function, line 213) `* bx_display (flex/grid);`
+  - `order` (function, line 277) `* groups the runs of ONE floated element in document order (-1 = not in a float);`
+  - `CSS_LEN_UNSET` (function, line 468) `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an in-flow offset, reader-safe);`
+  - `scale` (function, line 543) `* scale(1)) and rotate in whole degrees (transform_rotate);`
+  - `nonzero` (function, line 743) `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out);`
+  - `resolved` (function, line 750) `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full with reader == 0 and prefers_dark == 0. */ pv_status pv_build_full(const hp_document`
+  - `policy` (function, line 758) `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The external text precedes the document's own <style> * blocks in the parsed sheet (document-or`
+  - `cause` (function, line 776) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?" is a measurement instead of a grep over the * dispatch, which sees property names on`
+  - `pv_new` (function, line 788) `pv_view *pv_new(void);`
+  - `form` (function, line 807) `* form (-1 if none);`
+  - `pv_set_emphasis` (function, line 839) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
+  - `default` (function, line 844) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
+  - `pv_set_color` (function, line 847) `void pv_set_color(pv_view *v, int fg_rgb);`
+  - `pv_set_bgcolor` (function, line 854) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
+  - `pv_set_text_style` (function, line 863) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
+  - `pv_text_ext_reset` (function, line 910) `void pv_text_ext_reset(pv_text_ext *e);`
+  - `ancestors` (function, line 915) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box stack in both directions: that is * what makes `visibility` inherited-but-overridable,`
+  - `pv_set_text_ext` (function, line 925) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
+  - `pv_set_grad_text` (function, line 931) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
+  - `run` (function, line 934) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an empty or NULL view. Both append helpers * default cont_id to -1 (no container), cont_wr`
+  - `pv_set_row_span` (function, line 947) `void pv_set_row_span(pv_view *v, int row_span);`
+  - `pv_set_grid_area` (function, line 951) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
+  - `pv_set_grid_rows` (function, line 952) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
+  - `pv_set_ua_tag` (function, line 957) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
+  - `pv_set_cont_box` (function, line 961) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
+  - `pv_set_grid` (function, line 962) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
+  - `pv_set_flex` (function, line 970) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int flex_align_self);`
+  - `pv_set_flex_mauto` (function, line 973) `void pv_set_flex_mauto(pv_view *v, int mauto);`
+  - `pv_set_cont_item` (function, line 977) `void pv_set_cont_item(pv_view *v, int cont_item);`
+  - `pv_set_float` (function, line 986) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int float_mr, int float_mr_pct, int float_oid, int float_oside, int float_oml, int float_om`
+  - `pv_set_box` (function, line 996) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
+  - `pv_set_box_pct` (function, line 1002) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
+  - `pv_set_node_id` (function, line 1008) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
+  - `pv_set_block_id` (function, line 1013) `void pv_set_block_id(pv_view *v, int block_id);`
+  - `pv_set_own_box` (function, line 1017) `void pv_set_own_box(pv_view *v, int box_id);`
+  - `pv_set_oof` (function, line 1021) `void pv_set_oof(pv_view *v, int oof);`
+  - `pv_cont_count` (function, line 1036) `size_t pv_cont_count(const pv_view *v);`
+  - `pv_cont_at` (function, line 1037) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
+  - `pv_set_input_checked` (function, line 1041) `void pv_set_input_checked(pv_view *v, int checked);`
+  - `pv_set_input_select_opts` (function, line 1045) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
+  - `pv_free` (function, line 1048) `void pv_free(pv_view *v);`
+  - `pv_count` (function, line 1051) `size_t pv_count(const pv_view *v);`
+  - `pv_at` (function, line 1052) `const pv_run *pv_at(const pv_view *v, size_t i);`
+  - `pv_box_count` (function, line 1056) `size_t pv_box_count(const pv_view *v);`
+  - `pv_box_at` (function, line 1057) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
   - `FREEDOM_PAGE_VIEW_H` (macro, line 2) `#define FREEDOM_PAGE_VIEW_H`
-  - `PV_LEN_UNSET` (macro, line 43) `#define PV_LEN_UNSET`
-  - `PV_LEN_AUTO` (macro, line 44) `#define PV_LEN_AUTO`
-  - `PV_LEN_END` (macro, line 45) `#define PV_LEN_END`
-  - `PV_GRID_TRACKS` (macro, line 48) `#define PV_GRID_TRACKS`
-  - `PV_CONT_DEPTH` (macro, line 53) `#define PV_CONT_DEPTH`
-  - `PV_BG_URL_MAX` (macro, line 59) `#define PV_BG_URL_MAX`
+  - `PV_MAUTO_LEFT` (macro, line 43) `#define PV_MAUTO_LEFT`
+  - `PV_MAUTO_RIGHT` (macro, line 44) `#define PV_MAUTO_RIGHT`
+  - `PV_LEN_UNSET` (macro, line 48) `#define PV_LEN_UNSET`
+  - `PV_LEN_AUTO` (macro, line 49) `#define PV_LEN_AUTO`
+  - `PV_LEN_END` (macro, line 50) `#define PV_LEN_END`
+  - `PV_GRID_TRACKS` (macro, line 53) `#define PV_GRID_TRACKS`
+  - `PV_CONT_DEPTH` (macro, line 58) `#define PV_CONT_DEPTH`
+  - `PV_BG_URL_MAX` (macro, line 64) `#define PV_BG_URL_MAX`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
@@ -1125,29 +1131,29 @@
 - Language: h
 - Symbols:
   - `rd_block` (struct, line 64)
-  - `rd_doc` (struct, line 242)
+  - `rd_doc` (struct, line 243)
   - `img_fail_reason` (enum, line 34)
   - `rd_kind` (enum, line 42)
-  - `rd_status` (enum, line 268)
+  - `rd_status` (enum, line 269)
   - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
   - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides WHAT to show and HOW to label it (a semantic * style plus, for images, the render_p`
   - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
   - `form` (function, line 63) `* form (-1 = none);`
   - `default` (function, line 142) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer can lay it out with box_tree/flex_layout. * cont_id groups blocks of one container (-1`
-  - `to` (function, line 228) `* belongs to (-1 = none);`
-  - `rdp_images_warning` (function, line 277) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose img_decision is computed with * rdp_image_decision(caps, top_level_url, src, img_w, img_h) `
-  - `rd_free` (function, line 287) `void rd_free(rd_doc *d);`
-  - `rd_count` (function, line 290) `size_t rd_count(const rd_doc *d);`
-  - `rd_at` (function, line 291) `const rd_block *rd_at(const rd_doc *d, size_t i);`
-  - `rd_box_count` (function, line 295) `size_t rd_box_count(const rd_doc *d);`
-  - `rd_box_at` (function, line 296) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-  - `rd_cont_count` (function, line 300) `size_t rd_cont_count(const rd_doc *d);`
-  - `rd_cont_at` (function, line 301) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-  - `rd_kind_name` (function, line 305) `const char *rd_kind_name(rd_kind k);`
-  - `rd_block_tag` (function, line 313) `const char *rd_block_tag(const rd_block *b);`
-  - `decision` (function, line 316) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char *rd_image_label(rdp_img_decision d);`
-  - `IMG_FAIL_OK` (function, line 322) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-  - `rd_input_label` (function, line 327) `const char *rd_input_label(int input_type);`
+  - `to` (function, line 229) `* belongs to (-1 = none);`
+  - `rdp_images_warning` (function, line 278) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose img_decision is computed with * rdp_image_decision(caps, top_level_url, src, img_w, img_h) `
+  - `rd_free` (function, line 288) `void rd_free(rd_doc *d);`
+  - `rd_count` (function, line 291) `size_t rd_count(const rd_doc *d);`
+  - `rd_at` (function, line 292) `const rd_block *rd_at(const rd_doc *d, size_t i);`
+  - `rd_box_count` (function, line 296) `size_t rd_box_count(const rd_doc *d);`
+  - `rd_box_at` (function, line 297) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+  - `rd_cont_count` (function, line 301) `size_t rd_cont_count(const rd_doc *d);`
+  - `rd_cont_at` (function, line 302) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+  - `rd_kind_name` (function, line 306) `const char *rd_kind_name(rd_kind k);`
+  - `rd_block_tag` (function, line 314) `const char *rd_block_tag(const rd_block *b);`
+  - `decision` (function, line 317) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char *rd_image_label(rdp_img_decision d);`
+  - `IMG_FAIL_OK` (function, line 323) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 328) `const char *rd_input_label(int input_type);`
   - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
@@ -1342,28 +1348,29 @@
 - Layer: utility
 - Language: h
 - Symbols:
-  - `ti_req` (struct, line 68)
-  - `ti_resp` (struct, line 78)
-  - `ti_profile` (enum, line 38)
-  - `status` (type_alias, line 78) `typedef struct ti_resp { long status;`
-  - `chain` (function, line 29) `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT re-applies the strength policy (RSA<3072 leaf, SHA-1 fatal, * hybrid-KE) with OpenSSL over wh`
-  - `ti_should_impersonate` (function, line 52) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int host_in_impersonate);`
-  - `success` (function, line 93) `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out left zeroed / owned buffers freed). */ size_t ti_encode_req(const ti_req *r, uint8_t *`
-  - `ti_decode_req` (function, line 97) `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
-  - `ti_req_free` (function, line 98) `void ti_req_free(ti_req *r);`
-  - `ti_encode_resp` (function, line 100) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
-  - `ti_decode_resp` (function, line 101) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
-  - `ti_resp_free` (function, line 102) `void ti_resp_free(ti_resp *r);`
+  - `ti_req` (struct, line 72)
+  - `ti_resp` (struct, line 82)
+  - `ti_profile` (enum, line 41)
+  - `status` (type_alias, line 82) `typedef struct ti_resp { long status;`
+  - `path` (function, line 26) `* Zero Knowledge path (PQ-hybrid, VERIFYPEER). * * 2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed serialization of * the parent<->helper request/response. Every field is bounded (TI_M`
+  - `chain` (function, line 32) `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT re-applies the strength policy (RSA<3072 leaf, SHA-1 fatal, * hybrid-KE) with OpenSSL over wh`
+  - `ti_should_impersonate` (function, line 56) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);`
+  - `success` (function, line 97) `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out left zeroed / owned buffers freed). */ size_t ti_encode_req(const ti_req *r, uint8_t *`
+  - `ti_decode_req` (function, line 101) `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
+  - `ti_req_free` (function, line 102) `void ti_req_free(ti_req *r);`
+  - `ti_encode_resp` (function, line 104) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
+  - `ti_decode_resp` (function, line 105) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
+  - `ti_resp_free` (function, line 106) `void ti_resp_free(ti_resp *r);`
   - `FREEDOM_TLS_IMPERSONATE_H` (macro, line 2) `#define FREEDOM_TLS_IMPERSONATE_H`
-  - `TI_MAGIC` (macro, line 56) `#define TI_MAGIC`
-  - `TI_MAX_URL` (macro, line 57) `#define TI_MAX_URL`
-  - `TI_MAX_METHOD` (macro, line 58) `#define TI_MAX_METHOD`
-  - `TI_MAX_HEADERS` (macro, line 59) `#define TI_MAX_HEADERS`
-  - `TI_MAX_BODY` (macro, line 60) `#define TI_MAX_BODY`
-  - `TI_MAX_RESP_HDR` (macro, line 61) `#define TI_MAX_RESP_HDR`
-  - `TI_MAX_RESP_BODY` (macro, line 62) `#define TI_MAX_RESP_BODY`
-  - `TI_MAX_CHAIN` (macro, line 63) `#define TI_MAX_CHAIN`
-  - `TI_MAX_GROUP` (macro, line 64) `#define TI_MAX_GROUP`
+  - `TI_MAGIC` (macro, line 60) `#define TI_MAGIC`
+  - `TI_MAX_URL` (macro, line 61) `#define TI_MAX_URL`
+  - `TI_MAX_METHOD` (macro, line 62) `#define TI_MAX_METHOD`
+  - `TI_MAX_HEADERS` (macro, line 63) `#define TI_MAX_HEADERS`
+  - `TI_MAX_BODY` (macro, line 64) `#define TI_MAX_BODY`
+  - `TI_MAX_RESP_HDR` (macro, line 65) `#define TI_MAX_RESP_HDR`
+  - `TI_MAX_RESP_BODY` (macro, line 66) `#define TI_MAX_RESP_BODY`
+  - `TI_MAX_CHAIN` (macro, line 67) `#define TI_MAX_CHAIN`
+  - `TI_MAX_GROUP` (macro, line 68) `#define TI_MAX_GROUP`
 - Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
 
 ## include/ui.h

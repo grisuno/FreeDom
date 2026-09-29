@@ -71,3 +71,15 @@
   - `lum` (function, line 95) `def lum(p)`
   - `render_glyph` (function, line 99) `def render_glyph(v)`
   - `main` (function, line 109) `def main(argv)`
+
+## tools/snapshot.py
+- Layer: utility
+- Doc: Freeze a live page into one self-contained HTML file for `make parity`.  Both engines must render the SAME document offl
+- Language: py
+- Symbols:
+  - `fetch` (function, line 17) `def fetch(url)`
+  - `expand_imports` (function, line 31) `def expand_imports(css, base, depth)`
+  - `inline_css` (function, line 48) `def inline_css(html, base)`
+  - `main` (function, line 69) `def main()`
+  - `repl` (function, line 34) `def repl(m)`
+  - `repl` (function, line 49) `def repl(m)`
