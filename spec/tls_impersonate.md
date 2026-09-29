@@ -100,32 +100,36 @@ tráfico de hosts allow∩js.
 - **Verificación de cert PQ** (`ML-DSA`/`SLH-DSA` en la cadena, `SF_POLICY_STRICT_PQ`) → **NO
   disponible en la ruta impersonada** (BoringSSL no la trae). Se maneja fail-closed: ver §4.
 
-## 2. Gate: quién usa el helper (Zero Trust intacto) — TRIPLE opt-in
+## 2. Gate: quién usa el helper (Zero Trust intacto) — DOBLE + flag de usuario
 
-Decisión del dueño (2026-07-12): la impersonación es **opt-in por un tercer archivo
-`impersonate.conf`** (formato `/etc/hosts`, reusa `hostblock`, cubre subdominios). El gate es
-**triple**, puro y testeable: un host usa la ruta impersonada **solo si está en `allow.conf` Y en
-`js.conf` Y en `impersonate.conf`**. Los dos primeros son la doble-confianza del Hito 26/28
-(`net_allowed`); el tercero es el opt-in explícito de "quiero que ESTE host salga disfrazado de
-Chrome". Para cualquier otro host la función devuelve 0 y **nunca** se instancia el helper — la ruta
-OpenSSL endurecida es la única que ve el resto del tráfico.
+Decisión del dueño (2026-09-29, revisa 2026-07-12): sin `impersonate.conf`.
+Si un host está en `allow.conf` Y en `js.conf` es confianza total (`jsp_trusted`):
+puede usar todo (XHR/fetch, scripts externos, CSS, imágenes, iframe gateado por el
+padre). La impersonación TLS añade una tercera señal que **no es un archivo**:
+el opt-in explícito del usuario (`--impersonate` / `FREEDOM_IMPERSONATE=1`).
+El gate es puro y testeable: un host usa la ruta impersonada **solo si
+allow ∧ js-enabled ∧ user_opt_in**. Para cualquier otro host la función devuelve 0
+y **nunca** se instancia el helper — la ruta OpenSSL endurecida (PQ-hybrid,
+fallback Zero Trust / Zero Knowledge actual) es la única que ve el resto del tráfico.
+Las opciones vendorizadas curl-impersonate / BoringSSL, cuando existan, viven detrás
+de este mismo flag: solo si el usuario lo decide, nunca por defecto.
 
 ```
-Dado  un host H y las listas allow.conf / js.conf / impersonate.conf
+Dado  un host H en allow.conf + js.conf y el flag de usuario U
 Cuando se decide la ruta de red para H
 Entonces ti_should_impersonate(H) == 1  SÍ Y SOLO SI
-             hb_is_allowlisted(H) ∧ jsp_host_enabled(H) ∧ hb_in_impersonate(H)
+             hb_is_allowlisted(H) ∧ jsp_host_enabled(H) ∧ U
          y en cualquier otro caso == 0 (fail-closed: se usa la ruta OpenSSL por defecto)
 ```
 
 Un modo global `JSP_ON` **no** basta (igual que en el Hito 28): exige la entrada **explícita** en
-`allow.conf`; y ni allow∩js basta sin el opt-in de `impersonate.conf`. Ver
+`allow.conf`; y ni allow∩js basta sin el flag `U`. Ver
 `[[freedom-trusted-host-full-caps]]`, `[[freedom-parent-gated-xhr]]`.
 
-**Consecuencia de doctrina del opt-in triple:** un host en `impersonate.conf` sale con **KE clásico**
-(perfil Chrome sin MLKEM, §1.1) — pierde la mitad KE del Principio 5 en esa ruta. Que sea un tercer
-archivo separado hace esa concesión **deliberada y por-host**, nunca implícita: el usuario firma la
-exposición Harvest-Now-Decrypt-Later host por host.
+**Consecuencia de doctrina del opt-in:** con `U` activo, un host allow∩js sale con **KE clásico**
+(perfil Chrome sin MLKEM, §1.1) — pierde la mitad KE del Principio 5 en esa ruta. Que sea un flag
+de usuario separado hace esa concesión **deliberada**, nunca implícita: el usuario firma la
+exposición Harvest-Now-Decrypt-Later al activarlo. Sin el flag, fallback intacto.
 
 ## 3. Tipos y API (borrador; se congela con el test rojo de §7)
 

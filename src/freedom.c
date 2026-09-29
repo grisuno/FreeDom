@@ -54,6 +54,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --images: enable image loading in headless render (off by default: Privacy by Default)\n");
     fprintf(fp, "  --user=user:password: HTTP Basic Authentication credentials (headless only)\n");
     fprintf(fp, "  --insecure: allow weak TLS certificates (headless only, explicit override)\n");
+    fprintf(fp, "  --impersonate: browser-consistent TLS ClientHello for allow+js hosts (opt-in; else PQ-hybrid)\n");
     fprintf(fp, "  --tor[=host:port]: route via a Tor SOCKS5h proxy (default 127.0.0.1:9050); reaches .onion\n");
     fprintf(fp, "  --i2p[=host:port]: route .i2p via an I2P HTTP proxy (default 127.0.0.1:4444)\n");
     fprintf(fp, "  --torify: also route ordinary clearnet through Tor (implies --tor)\n");
@@ -189,7 +190,16 @@ static char global_tor_addr[64] = "127.0.0.1:9050";
 static char global_i2p_addr[64] = "127.0.0.1:4444";
 
 static hb_set *g_hosts = NULL;
-static hb_set *g_impersonate = NULL; /* impersonate.conf: triple-opt-in TLS-blend hosts */
+/* User opt-in for TLS-impersonation blend: --impersonate or FREEDOM_IMPERSONATE=1.
+ * Third gate signal alongside allow.conf AND js.conf. Default 0 = hardened
+ * PQ-hybrid fallback (Zero Trust / Zero Knowledge preserved). */
+static int g_user_impersonate = 0;
+
+static int user_impersonate_enabled(void) {
+    if (g_user_impersonate) return 1;
+    const char *e = getenv("FREEDOM_IMPERSONATE");
+    return (e != NULL && e[0] != '\0' && !(e[0] == '0' && e[1] == '\0'));
+}
 
 /* Reads the whole file into a NUL-terminated buffer. Caller frees with free(). */
 static char *read_file(const char *path, size_t *out_len) {
@@ -212,7 +222,6 @@ static char *read_file(const char *path, size_t *out_len) {
 
 static void headless_load_hosts(void) {
     g_hosts = hb_new();
-    g_impersonate = hb_new();
     if (g_hosts == NULL) return;
     const char *dirs[] = { NULL, "config", NULL };
     /* home_dir must live for the whole function: dirs[2] aliases it and is read in
@@ -235,15 +244,8 @@ static void headless_load_hosts(void) {
         size_t len = 0;
         char *txt = read_file(path, &len);
         if (txt != NULL) { hb_load(g_hosts, txt, HB_LIST_ALLOW); free(txt); }
-        /* impersonate.conf lives in the same search dirs; load it as an allowlist so
-         * hb_is_allowlisted answers the third gate signal (covers subdomains). */
-        if (g_impersonate != NULL) {
-            n = snprintf(path, sizeof path, "%s/impersonate.conf", dirs[i]);
-            if (n > 0 && (size_t)n < sizeof path) {
-                char *itxt = read_file(path, NULL);
-                if (itxt != NULL) { hb_load(g_impersonate, itxt, HB_LIST_ALLOW); free(itxt); }
-            }
-        }
+        /* No impersonate.conf: third signal is the user flag (--impersonate /
+         * FREEDOM_IMPERSONATE=1). impersonate.conf on disk, if present, is ignored. */
     }
 }
 
@@ -431,9 +433,10 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
         if (rp_host_of(url, host, sizeof host) == 0) {
             int allowed = hb_is_allowlisted(g_hosts, host);
             if (allowed) cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
-            /* Triple opt-in TLS blend: allow.conf AND JS-on AND impersonate.conf. */
+            /* Double trust + user flag: allow.conf AND JS-on AND --impersonate.
+             * Default 0 = hardened PQ-hybrid fallback (Zero Trust). */
             cfg.impersonate = ti_should_impersonate(
-                allowed, g_headless_js, hb_is_allowlisted(g_impersonate, host));
+                allowed, g_headless_js, user_impersonate_enabled());
         }
     }
     if (global_insecure) { cfg.policy = SF_POLICY_PERMISSIVE; cfg.insecure = 1; }
@@ -769,7 +772,7 @@ static int fetch_and_render_one(const char *url, char **out_nav) {
             int allowed = hb_is_allowlisted(g_hosts, host);
             if (allowed) cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
             cfg.impersonate = ti_should_impersonate(
-                allowed, g_headless_js, hb_is_allowlisted(g_impersonate, host));
+                allowed, g_headless_js, user_impersonate_enabled());
         }
     }
     if (global_insecure) { cfg.policy = SF_POLICY_PERMISSIVE; cfg.insecure = 1; }
@@ -886,7 +889,7 @@ static int build_fetch_config(const char *url, sf_config *cfg,
         cfg->proxy_type = SF_PROXY_HTTP;    cfg->proxy_address = global_i2p_addr;
     }
     cfg->impersonate = ti_should_impersonate(
-        *allowlisted, 0, *allowlisted && hb_is_allowlisted(g_impersonate, host));
+        *allowlisted, 0, 0);
     return 0;
 }
 
@@ -1093,6 +1096,8 @@ int main(int argc, char **argv) {
             snprintf(g_auth_pass, sizeof g_auth_pass, "%s", colon + 1);
         } else if (strcmp(arg, "--insecure") == 0 || strcmp(arg, "-I") == 0) {
             global_insecure = 1;
+        } else if (strcmp(arg, "--impersonate") == 0) {
+            g_user_impersonate = 1;
         } else if (strcmp(arg, "--tor") == 0) {
             global_net.tor_enabled = 1;
         } else if (strncmp(arg, "--tor=", 6) == 0) {

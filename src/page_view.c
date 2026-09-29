@@ -4731,6 +4731,64 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                       unused_align, unused_fs, unused_fs_abs,
                                       unused_lh, unused_deco, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
+            } else if (t == LXB_TAG_IFRAME
+                       && !in_skipped_subtree(n, base, js_enabled)
+                       && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
+                       && !(reader && in_boilerplate_subtree(n, base))) {
+                /* Embedded frame as a navigable link (2026-09-29, fase captcha):
+                 * display-only, no fetch here (the content fetch stays gated by
+                 * net in jd_process_iframes). href carries the raw src; the click
+                 * path resolves it against the page URL (ln_resolve). */
+                lxb_dom_element_t *el = lxb_dom_interface_element(n);
+                size_t sl = 0;
+                const lxb_char_t *src =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &sl);
+                if (src == NULL || sl == 0) continue; /* nothing to navigate to */
+                /* Label is display text only; truncate a hostile long src (V-004:
+                 * snprintf NUL-terminates; truncation keeps a valid prefix). */
+                char label[1024];
+                int lr = snprintf(label, sizeof label, "Embedded frame: %.*s",
+                                  (int)sl, (const char *)src);
+                if (lr < 0) continue;
+                const char *unused_href = NULL;
+                size_t unused_hl = 0;
+                const lxb_dom_node_t *block = NULL;
+                int heading = 0, unused_fg = -1, unused_bg = -1;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0;
+                int unused_fs_abs = 0, unused_lh = 0, unused_deco = 0;
+                const lxb_dom_node_t *unused_li = NULL;
+                int unused_depth = 0, unused_ordered = 0;
+                pv_cont_info frame_cont;
+                pv_box_info unused_box;
+                pv_text_ext frame_ext;
+                int bdeco;
+                resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
+                                &unused_fg, &unused_bg, &unused_bold, &unused_italic,
+                                &unused_align, &unused_fs, &unused_fs_abs, &unused_lh,
+                                &unused_deco,
+                                &unused_li, &unused_depth, &unused_ordered,
+                                &reg, &frame_cont, &unused_box, &frame_ext,
+                                &box_reg, &float_reg, &bdeco, &cache, &flowreg);
+                int frame_oof = subtree_is_oof(n, sheet, &cache);
+                int brk = (pending_break || (block != prev_block)) && !frame_oof;
+                pending_break = 0;
+                prev_block = block;
+
+                char *href_dup = dup_n((const char *)src, sl);
+                if (href_dup == NULL) { rc = PV_ERR_OOM; goto cleanup; }
+                char *label_dup = dup_n(label, strlen(label));
+                if (label_dup == NULL) { free(href_dup); rc = PV_ERR_OOM; goto cleanup; }
+
+                pv_status st = pv_append(v, PV_LINK, heading, brk, label_dup, href_dup);
+                free(label_dup);
+                free(href_dup);
+                if (st != PV_OK) { rc = st; goto cleanup; }
+                annotate_replaced_run(v, &reg, &items, &frame_cont, &frame_ext,
+                                      unused_align, unused_fs, unused_fs_abs,
+                                      unused_lh, unused_deco, bdeco);
+                if (frame_oof) pv_set_block_id(v, bdeco);
+                pv_set_node_id(v, pv_node_map_id(&node_map, n));
+                pv_set_oof(v, frame_oof);
             } else if ((element_is_content_leaf(n, sheet, &cache)
                         || (pv_element_has_before(n, sheet, &cache)
                             && !subtree_has_own_text(n, base, sheet, &cache,

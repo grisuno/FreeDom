@@ -17,10 +17,13 @@
  * BoringSSL handshake) lives in the orchestrator; this module is the two pure,
  * testable, fuzzable pieces:
  *
- *   1. ti_should_impersonate() — the TRIPLE opt-in gate. A host uses the
- *      Chrome-blending TLS route ONLY when it is simultaneously on allow.conf,
- *      js.conf AND impersonate.conf. Any missing signal fails closed to the default
- *      hardened OpenSSL path. This is the sole place the helper is authorized.
+ *   1. ti_should_impersonate() — the DOUBLE opt-in + user-flag gate. A host uses the
+ *      Chrome-blending TLS route ONLY when it is simultaneously on allow.conf
+ *      AND js.conf (jsp_trusted) AND the user explicitly opted into impersonation
+ *      (--impersonate / FREEDOM_IMPERSONATE=1). No third file. Any missing signal
+ *      fails closed to the default hardened OpenSSL path. This is the sole place
+ *      the helper is authorized. Fallback is always the current Zero Trust /
+ *      Zero Knowledge path (PQ-hybrid, VERIFYPEER).
  *
  *   2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed serialization of
  *      the parent<->helper request/response. Every field is bounded (TI_MAX_*);
@@ -34,23 +37,24 @@
 
 /* Browser profile imitated on the wire. Owner decision (2026-07-12):
  * TI_PROFILE_CHROME_CLASSIC — maximally-common JA3, CLASSICAL key exchange (no
- * X25519MLKEM768) on this route, accepted per-host via impersonate.conf. */
+ * X25519MLKEM768) on this route, accepted per-host via user opt-in (see below). */
 typedef enum ti_profile {
     TI_PROFILE_CHROME_CLASSIC = 0,
     TI_PROFILE_CHROME_MLKEM   = 1   /* reserved: would keep PQ KE; not the default */
 } ti_profile;
 
 /*
- * The triple opt-in gate (pure). Returns 1 IFF all three signals are set:
+ * The double opt-in + user-flag gate (pure). Returns 1 IFF all three signals are set:
  *   host_in_allowlist  — an explicit allow.conf entry (hb_is_allowlisted)
  *   host_js_enabled    — JS permitted for this host (js_policy / js.conf)
- *   host_in_impersonate— an explicit impersonate.conf entry (hb_is_allowlisted on
- *                        the impersonate set)
+ *   user_opt_in        — explicit user decision for this run (CLI --impersonate
+ *                        or FREEDOM_IMPERSONATE=1; future vendored curl-impersonate /
+ *                        BoringSSL helper also gated here, never by default)
  * Any zero => 0 (fail-closed: the default hardened OpenSSL path is used). A global
- * JSP_ON does NOT substitute for the explicit allow.conf / impersonate.conf entries.
+ * JSP_ON does NOT substitute for the explicit allow.conf entry. No impersonate.conf.
  */
 int ti_should_impersonate(int host_in_allowlist, int host_js_enabled,
-                          int host_in_impersonate);
+                          int user_opt_in);
 
 /* Anti-DoS bounds: a hostile helper or a corrupt frame must never overrun. */
 #define TI_MAGIC          0x54494D50u        /* "TIMP" */

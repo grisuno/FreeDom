@@ -33,6 +33,11 @@ ningún consumidor los lee todavía (los cablean los milestones de Fase 3/4).
 - **Privacy-sensitive ⇒ `allow.conf ∩ js.conf` (doble consentimiento).** `net`
   (XHR/fetch + script externo), `cookies`, `persist`, `readback`, `gpu`, `sw`, `rtc`
   exigen que el host esté en **ambas** listas (el predicado `jsp_trusted`).
+  Decisión 2026-09-29: allow∩js es **allow total**: incluye subrecursos `<iframe src>`
+  fetchados por el padre confinado (misma `TAG_SUBREQ`, misma política; el worker nunca
+  toca el socket). Sin allow∩js no hay iframe ejecutable: fallback Zero Trust intacto.
+  Fase captcha usa esta vía: el iframe de reCAPTCHA/BotGuard solo se fetchea si el host
+  es allow∩js; si no, fail-closed como hoy.
 - El worker de contenido hostil mantiene TODOS sus invariantes estructurales
   (seccomp W^X, sin socket, sin GPU): "trusted" abre **qué capacidad se instala**,
   nunca **quién toca el socket** — el padre sigue re-aplicando toda la política.

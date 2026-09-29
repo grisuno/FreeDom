@@ -339,7 +339,7 @@ typedef struct browser_window {
     rdp_caps  caps;     /* per-page render capabilities (images off by default) */
     hb_set   *hosts;    /* /etc/hosts-format blocklist + allowlist; consulted pre-fetch */
     hb_set   *js_hosts; /* js.conf allowlist (HB_LIST_ALLOW): hosts permitted to run JS */
-    hb_set   *impersonate_hosts; /* impersonate.conf: triple-opt-in TLS-blend hosts */
+    int       impersonate_optin; /* user opt-in: FREEDOM_IMPERSONATE=1 or --impersonate (no file) */
     jsp_mode  js_mode;  /* global JS policy (Secure by Default: JSP_ALLOWLIST) */
     nr_config net_cfg;  /* Tor/I2P routing (Privacy by Default: opt-in, off by default) */
     char      tor_addr[64];  /* Tor SOCKS5h proxy "host:port" (default 127.0.0.1:9050) */
@@ -736,9 +736,13 @@ static hb_set *build_conf_allowlist(const char *fname) {
 }
 
 static hb_set *build_js_filter(void)          { return build_conf_allowlist("js.conf"); }
-/* impersonate.conf: the THIRD opt-in signal. A host here (and in allow.conf and js.conf)
- * gets the Chrome/Firefox-consistent TLS ClientHello blend (spec/tls_impersonate.md). */
-static hb_set *build_impersonate_filter(void) { return build_conf_allowlist("impersonate.conf"); }
+/* No impersonate.conf: third signal is the user flag (FREEDOM_IMPERSONATE=1).
+ * allow.conf AND js.conf AND this flag => TLS blend. Default 0 = hardened fallback. */
+static int build_impersonate_optin(void) {
+    const char *e = getenv("FREEDOM_IMPERSONATE");
+    if (e != NULL && e[0] != '\0' && !(e[0] == '0' && e[1] == '\0')) return 1;
+    return 0;
+}
 
 /* The writable Freedom config dir: $FREEDOM_HOSTS_DIR if set, else ~/.config/freedom
  * (created if absent). Returns 0 on success. Mirrors the read search path so an edit
@@ -1391,9 +1395,9 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     apply_auth(w, abs, &cfg);
     if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) return -1;  /* realm fail-closed */
     int allowlisted = hb_is_allowlisted(w->hosts, host), dg = 0;
-    /* Subrequests to a triple-opt-in host share the page's TLS-blend identity. */
+    /* Subrequests to a double-trust + user-flag host share the page's TLS-blend identity. */
     cfg.impersonate = ti_should_impersonate(allowlisted,
-        hb_is_allowlisted(w->js_hosts, host), hb_is_allowlisted(w->impersonate_hosts, host));
+        hb_is_allowlisted(w->js_hosts, host), w->impersonate_optin);
     sf_response resp; memset(&resp, 0, sizeof resp);
     int is_post = (method != NULL && (strcmp(method, "POST") == 0 || strcmp(method, "post") == 0));
     sf_status s = is_post
@@ -1459,9 +1463,9 @@ static int gui_image_fetch(void *vctx, const char *method, const char *url,
             && hb_is_allowlisted(w->hosts, phost))
             img_allow = 1;
     }
-    /* An image from a triple-opt-in host uses the same TLS-blend as its page. */
+    /* An image from a double-trust + user-flag host uses the same TLS-blend as its page. */
     cfg.impersonate = ti_should_impersonate(img_allow,
-        hb_is_allowlisted(w->js_hosts, ihost), hb_is_allowlisted(w->impersonate_hosts, ihost));
+        hb_is_allowlisted(w->js_hosts, ihost), w->impersonate_optin);
     sf_response resp;
     memset(&resp, 0, sizeof resp);
     if (fetch_follow_navigable(abs, &cfg, &resp, &dg, img_allow) != SF_OK) {
@@ -1524,13 +1528,14 @@ static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
      * below Freedom's standard (TLS 1.2, classical KE, weak cert) if strict fails. */
     pr->allowlisted = have_host && hb_is_allowlisted(w->hosts, host);
 
-    /* Triple opt-in TLS-ClientHello blend: allow.conf AND js.conf AND impersonate.conf.
+    /* Double trust + user-flag TLS-ClientHello blend: allow.conf AND js.conf AND opt-in.
      * Drops the X25519MLKEM768 tell and matches the browser cipher order we advertise
-     * (spec/tls_impersonate.md). Only shapes the handshake; authenticity is untouched. */
+     * (spec/tls_impersonate.md). Only shapes the handshake; authenticity is untouched.
+     * Default 0 = hardened PQ-hybrid fallback (Zero Trust). */
     cfg->impersonate = ti_should_impersonate(
         pr->allowlisted,
         have_host && hb_is_allowlisted(w->js_hosts, host),
-        have_host && hb_is_allowlisted(w->impersonate_hosts, host));
+        w->impersonate_optin);
 
     /* Socket-level anonymity routing (Tor/I2P). A .onion/.i2p host with its proxy
      * disabled is BLOCKED, never leaked over clearnet (fail closed). */
@@ -8451,7 +8456,7 @@ static int video_build_fetch_config(browser_window *w, const char *url, sf_confi
 
     cfg->impersonate = ti_should_impersonate(*allowlisted,
         have_host && hb_is_allowlisted(w->js_hosts, host),
-        have_host && hb_is_allowlisted(w->impersonate_hosts, host));
+        w != NULL && w->impersonate_optin);
     return 1;
 }
 
@@ -14921,7 +14926,7 @@ ui_status ui_run_browser(const char *start_url) {
      * the fallible Wayland setup so its error returns above never leak it. */
     w.hosts = build_host_filter();
     w.js_hosts = build_js_filter();        /* per-host JS allowlist (js.conf) */
-    w.impersonate_hosts = build_impersonate_filter(); /* per-host TLS blend (impersonate.conf) */
+    w.impersonate_optin = build_impersonate_optin(); /* user flag, no file */
     w.omni_sel = -1;
     load_favorites(&w);                    /* omnibox autocomplete from allow.conf */
     /* JS policy: an explicit FREEDOM_JS env wins for this session; otherwise the
@@ -15206,7 +15211,7 @@ ui_status ui_run_browser(const char *start_url) {
     clear_doc(&w);
     hb_free(w.hosts);
     hb_free(w.js_hosts);
-    hb_free(w.impersonate_hosts);
+    /* impersonate_optin is a plain int flag: nothing to free. */
     free(w.favorites);
     free(w.cur_html);
     free(w.cur_top);

@@ -13,11 +13,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* --- the triple opt-in gate --- */
+/* --- the double opt-in + user-flag gate (allow.conf AND js.conf AND user) --- */
 
 int ti_should_impersonate(int host_in_allowlist, int host_js_enabled,
-                          int host_in_impersonate) {
-    return (host_in_allowlist && host_js_enabled && host_in_impersonate) ? 1 : 0;
+                          int user_opt_in) {
+    return (host_in_allowlist && host_js_enabled && user_opt_in) ? 1 : 0;
 }
 
 /* --- bounded string length (no dependency on strnlen / feature macros) --- */

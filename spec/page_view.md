@@ -328,6 +328,20 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
   espacio. Un run que queda vacío se descarta.
 - **Enlace**: si el ancestro más cercano es un `<a>` con `href`, el run es `PV_LINK` y lleva ese
   `href`; si no, `PV_TEXT` con `href == NULL`.
+- **`<iframe src>` visible y navegable (2026-09-29, fase captcha)**: un `<iframe>` con `src`
+  no vacío se emite como run `PV_LINK` con `href = src` (crudo, como llega del markup; la
+  resolución a absoluta la hace la navegación al clicar, `ln_resolve`) y texto
+  `Embedded frame: <src>` (truncado a ~1 KiB, display-only). Sin `src` se ignora (nada que
+  mostrar, igual que `<video>` sin fuente). Respeta `display:none`, reader-boilerplate y
+  subárboles invisibles, igual que `<img>`/`<video>`. No fetchea nada: mostrar el enlace
+  no abre sockets (el fetch del contenido del iframe sigue gateado por `net` en
+  `jd_process_iframes`, solo allow∩js). Por eso no requiere flag de confianza y no cruza
+  nada nuevo por el IPC (reusa `PV_LINK`+`href`, ya cableado en `write_view`/`read_view`).
+  Dado un `<iframe src='https://google.com/recaptcha/...'>` cuando se construye la vista
+  entonces hay un run `PV_LINK` con ese `href` y el usuario puede navegar al challenge y
+  resolverlo; dado un `<iframe>` sin `src` entonces ningún run nuevo. Candados:
+  `test_build_iframe_emits_navigable_link`, `test_build_iframe_without_src_ignored`,
+  `test_build_iframe_display_none_hidden`.
 - **Encabezado**: `heading` = nivel (1..6) del ancestro `h1..h6` más cercano, o 0.
 - **Énfasis inline**: `bold` = 1 si algún ancestro es `<b>/<strong>/<th>`; `italic` = 1 si algún
   ancestro es `<i>/<em>`. Es estructura (peso/inclinación del glifo), se transporta por defecto y

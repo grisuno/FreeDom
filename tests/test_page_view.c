@@ -58,6 +58,14 @@ static const pv_run *find_video(const pv_view *v, const char *src) {
     return NULL;
 }
 
+/* Finds the first link run whose href equals `href`; NULL if none. */
+static const pv_run *find_link(const pv_view *v, const char *href) {
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->kind == PV_LINK && r->href != NULL && strcmp(r->href, href) == 0) return r;
+    }
+    return NULL;
+}
 /* Finds the first inline-SVG run; NULL if none. */
 static const pv_run *find_svg(const pv_view *v) {
     for (size_t i = 0; i < pv_count(v); ++i) {
@@ -3766,6 +3774,50 @@ static void test_build_audio_as_video_kind(void **state) {
     hp_document_free(doc);
 }
 
+static void test_build_iframe_emits_navigable_link(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><p>before</p>"
+        "<iframe src='https://google.example/recaptcha/anchor'></iframe>"
+        "<p>after</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *f = find_link(v, "https://google.example/recaptcha/anchor");
+    assert_non_null(f);
+    assert_non_null(f->text);
+    assert_non_null(strstr(f->text, "Embedded frame:"));
+    assert_non_null(find_text(v, "before"));
+    assert_non_null(find_text(v, "after"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_iframe_without_src_ignored(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><iframe></iframe><p>after</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    for (size_t i = 0; i < pv_count(v); ++i)
+        assert_int_not_equal(pv_at(v, i)->kind, PV_VIDEO);
+    assert_null(find_text(v, "Embedded frame:"));
+    assert_non_null(find_text(v, "after"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_iframe_display_none_hidden(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><iframe src='https://e.example/fr' style='display:none'></iframe>"
+        "<p>after</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, NULL, 0, 0, &v), PV_OK);
+    assert_null(find_link(v, "https://e.example/fr"));
+    assert_non_null(find_text(v, "after"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_new_is_empty),
@@ -3781,6 +3833,9 @@ int main(void) {
         cmocka_unit_test(test_build_video_fallback_suppressed),
         cmocka_unit_test(test_build_video_without_src_ignored),
         cmocka_unit_test(test_build_audio_as_video_kind),
+        cmocka_unit_test(test_build_iframe_emits_navigable_link),
+        cmocka_unit_test(test_build_iframe_without_src_ignored),
+        cmocka_unit_test(test_build_iframe_display_none_hidden),
         cmocka_unit_test(test_append_transcodes_latin1),
         cmocka_unit_test(test_append_transcodes_word),
         cmocka_unit_test(test_append_transcodes_cp1252_quotes),
