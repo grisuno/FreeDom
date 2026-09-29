@@ -79,6 +79,21 @@ static double bt_nn(double v) {
  * wrap_reverse (node->wrap_reverse): when node->wrap is active and node->wrap_reverse
  * is nonzero, the cross-axis line order is reversed: the first line packs at the
  * bottom, the last line at the top. Total height is the same as normal wrap. */
+/* Main-axis auto margins of one resolved flex line (Flexbox 8.1): the kids' mauto
+ * bits feed the pure fx_auto_margins, which re-places res[] in the free space. */
+static fx_status apply_auto_margins(bt_node *const *kids, size_t ln, double cw, double gap,
+                                    fx_result *res) {
+    unsigned char al[BT_MAX_CHILDREN], ar[BT_MAX_CHILDREN];
+    int any = 0;
+    for (size_t k = 0; k < ln && k < BT_MAX_CHILDREN; ++k) {
+        al[k] = (kids[k]->mauto & BT_MAUTO_LEFT) != 0;
+        ar[k] = (kids[k]->mauto & BT_MAUTO_RIGHT) != 0;
+        any |= al[k] | ar[k];
+    }
+    if (!any) return FX_OK;
+    return fx_auto_margins(res, ln, al, ar, cw, gap);
+}
+
 static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
                              double pl, double pt, double pb, double cw, unsigned depth) {
     if (node->gap < 0.0 || (node->has_row_gap && node->row_gap < 0.0)) return BT_ERR_RANGE;
@@ -124,6 +139,8 @@ static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
             }
             if (fx_flex_line(items, ln, cw, node->gap, node->justify, res) != FX_OK)
                 return BT_ERR_RANGE;
+            if (apply_auto_margins(kids + a, ln, cw, node->gap, res) != FX_OK)
+                return BT_ERR_RANGE;
             double lh = 0.0;
             for (size_t k = 0; k < ln; ++k) {
                 bt_status r = layout_node(kids[a + k], res[k].size, depth + 1);
@@ -165,6 +182,8 @@ static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
                 items[k].min = kids[a + k]->min_main;
             }
             if (fx_flex_line(items, ln, cw, node->gap, node->justify, res) != FX_OK)
+                return BT_ERR_RANGE;
+            if (apply_auto_margins(kids + a, ln, cw, node->gap, res) != FX_OK)
                 return BT_ERR_RANGE;
 
             double lineh = 0.0;

@@ -324,6 +324,7 @@ static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b) {
         if (b->flex_shrink >= 0)    dd_printf(c, " shrink=%d", b->flex_shrink);
         if (b->flex_basis >= 0)     dd_printf(c, " basis=%d", b->flex_basis);
         if (b->flex_order != CSS_LEN_UNSET) dd_printf(c, " order=%d", b->flex_order);
+        if (b->flex_mauto != 0)     dd_printf(c, " mauto=%d", b->flex_mauto);
     }
     if (b->block_id >= 0) dd_printf(c, " box=#%d", b->block_id);
 

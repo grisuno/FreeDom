@@ -40,6 +40,15 @@ static const pv_run *find_text(const pv_view *v, const char *text) {
     return NULL;
 }
 
+/* Finds the first run whose text contains `sub` (a list marker is prefixed). */
+static const pv_run *find_sub(const pv_view *v, const char *sub) {
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text != NULL && strstr(r->text, sub) != NULL) return r;
+    }
+    return NULL;
+}
+
 /* Finds the first image run whose src equals `src`; NULL if none. */
 static const pv_run *find_image(const pv_view *v, const char *src) {
     for (size_t i = 0; i < pv_count(v); ++i) {
@@ -1420,7 +1429,8 @@ static void test_build_flex_item_values(void **state) {
         "<div style='flex:0 0 200px;order:-1'>side</div>"
         "<div>plain</div>"
         "</div>"
-        "<div style='display:flex;flex-direction:column'><p>stacked</p></div>"
+        /* align-items:center: a DEFAULT column flows as block (no container). */
+        "<div style='display:flex;flex-direction:column;align-items:center'><p>stacked</p></div>"
         "<div style='display:flex'>anon</div>"
         "<p>outside</p>"
         "</body>");
@@ -3282,6 +3292,182 @@ static void test_build_styled_external_css(void **state) {
     hp_document_free(doc);
 }
 
+/* A list's indentation is its UA `padding-inline-start` (HTML rendering 15.3.7),
+ * so an author padding-left on the <ul>/<ol> REPLACES it: the level then no longer
+ * counts toward the run's UA indent (the author padding is applied by the box
+ * model instead). `ol{padding:0;list-style:none}` is how every nav and story list
+ * is written, and it kept a hardcoded indent per level (lobste.rs +24px). */
+static void test_author_list_padding_replaces_ua_indent(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><ol class=z><li>zero</li></ol>"
+                             "<ul><li>ua<ul class=z><li>inner</li></ul></li></ul></body>");
+    static const char CSS[] = ".z{padding:0;list-style:none}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *zero = find_sub(v, "zero");
+    assert_non_null(zero);
+    assert_int_equal(zero->indent, 0);
+    const pv_run *ua = find_sub(v, "ua");
+    assert_non_null(ua);
+    assert_int_equal(ua->indent, 1);
+    const pv_run *inner = find_sub(v, "inner");
+    assert_non_null(inner);
+    assert_int_equal(inner->indent, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* ::before content is the first inline content of its element (CSS 2.1 12.1), so
+ * it rides the element's whole layout annotation -- float, container, item --
+ * not only its block/indent. lobste.rs' upvote triangle (`.upvoter:before`) sits
+ * inside `div.voters{float:left}`; without the float fields the marker became an
+ * in-flow full-width row above every story. */
+static void test_before_rides_float_and_container(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class=v><a href=/l>57</a></div>"
+                             "<div class=f><span class=i>item</span></div></body>");
+    static const char CSS[] = ".v{float:left;width:40px} a::before{content:\"^\"}"
+                              ".f{display:flex} .i::before{content:\">\"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *mk = find_text(v, "^");
+    const pv_run *txt = find_text(v, "57");
+    assert_non_null(mk);
+    assert_non_null(txt);
+    assert_int_not_equal(txt->float_side, 0);
+    assert_int_equal(mk->float_side, txt->float_side);
+    assert_int_equal(mk->float_id, txt->float_id);
+    const pv_run *mk2 = find_text(v, ">");
+    const pv_run *it = find_text(v, "item");
+    assert_non_null(mk2);
+    assert_non_null(it);
+    assert_true(it->cont_id >= 0);
+    assert_int_equal(mk2->cont_id, it->cont_id);
+    assert_int_equal(mk2->cont_item, it->cont_item);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* An inline-block whose children are all inline-block is still an INLINE-LEVEL box
+ * of its parent's line (CSS 2.1 9.2.2). Only a block-level parent may become the
+ * anonymous flex row: lobste.rs' `ul.tags{display:inline-block}` between a story
+ * title and its domain was turned into a block-level row that split the title
+ * line in three. A block-level parent of inline-blocks keeps the row. */
+static void test_inline_level_tag_list_stays_in_line(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div>Title <ul class=t><li>aa</li><li>bb</li></ul>"
+                             " dom</div><div class=n><span>x1</span><span>x2</span></div>"
+                             "<div>lead <span class=u><i>y1</i><i>y2</i></span> tail</div>"
+                             "</body>");
+    static const char CSS[] = ".t{display:inline-block} .t li{display:inline-block}"
+                              ".n span{display:inline-block} .u i{display:inline-block}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *aa = find_sub(v, "aa");
+    const pv_run *bb = find_sub(v, "bb");
+    assert_non_null(aa);
+    assert_non_null(bb);
+    assert_int_equal(aa->cont_id, -1);
+    assert_int_equal(bb->cont_id, -1);
+    const pv_run *x1 = find_sub(v, "x1");
+    assert_non_null(x1);
+    assert_true(x1->cont_id >= 0);
+    const pv_run *y1 = find_sub(v, "y1");
+    assert_non_null(y1);
+    assert_int_equal(y1->cont_id, -1);   /* a UA-inline <span> is inline-level too */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A marker belongs to a `display:list-item` box (CSS Lists 3 3.1), not to the <li>
+ * tag: `li{display:inline-block}` (every tag strip and horizontal nav) paints none. */
+static void test_marker_only_for_list_item_display(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><ul><li class=i>chip</li><li>plain</li></ul></body>");
+    static const char CSS[] = ".i{display:inline-block}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_non_null(find_text(v, "chip"));
+    const pv_run *plain = find_sub(v, "plain");
+    assert_non_null(plain);
+    assert_true(strcmp(plain->text, "plain") != 0);   /* list-item keeps its marker */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A flex COLUMN with the initial alignment stacks full-width items: that IS block
+ * flow, so it is not registered as a container and its items reach the full block
+ * engine (floats, boxes, margins). Any non-default geometry keeps the container. */
+static void test_default_flex_column_flows_as_block(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class=c><p>c1</p><p>c2</p></div>"
+                             "<div class=m><p>m1</p><p>m2</p></div>"
+                             "<div class=r><p>r1</p><p>r2</p></div></body>");
+    static const char CSS[] = ".c,.m{display:flex;flex-direction:column}"
+                              ".m{align-items:center} .r{display:flex}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_int_equal(find_text(v, "c1")->cont_id, -1);
+    assert_int_equal(find_text(v, "c2")->cont_id, -1);
+    assert_true(find_text(v, "m1")->cont_id >= 0);
+    assert_true(find_text(v, "r1")->cont_id >= 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* An inline-block sitting in a MIXED line is an atom of that line (CSS 2.1 9.2.2):
+ * a block inside it (lobste.rs' `details.caches{display:inline-block}` holding its
+ * <summary>) must not break the outer line -- neither the summary text nor the
+ * text after the inline-block may carry a block break. An inline-block alone in
+ * its block keeps its inner blocks. */
+static void test_block_inside_inline_block_in_line(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div>by <a href=/u>me</a> | "
+                             "<span class=c><b class=s>caches</b></span> | tail</div>"
+                             "<div><span class=c><b class=s>p1</b><b class=s>p2</b></span></div>"
+                             "</body>");
+    static const char CSS[] = ".c{display:inline-block} .s{display:block}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *c = find_text(v, "caches");
+    assert_non_null(c);
+    assert_int_equal(c->block_break, 0);
+    const pv_run *t = find_sub(v, "tail");
+    assert_non_null(t);
+    assert_int_equal(t->block_break, 0);
+    const pv_run *p2 = find_text(v, "p2");
+    assert_non_null(p2);
+    assert_int_equal(p2->block_break, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* The gap of a column that flows as block becomes space ABOVE every item but the
+ * first (Flexbox 8.1 gaps sit between items). */
+static void test_block_column_gap_becomes_item_margin(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class=s><div>one</div><div>two</div></div></body>");
+    static const char CSS[] = ".s{display:flex;flex-direction:column;gap:16px}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *one = find_text(v, "one");
+    const pv_run *two = find_text(v, "two");
+    assert_non_null(one);
+    assert_non_null(two);
+    assert_int_equal(one->cont_id, -1);
+    /* The margin rides the item's BOX (applied once, where the box starts). */
+    assert_true(two->block_id >= 0);
+    const pv_box_def *b2 = pv_box_at(v, (size_t)two->block_id);
+    assert_non_null(b2);
+    assert_int_equal(b2->box_mt, 16);
+    if (one->block_id >= 0) {
+        const pv_box_def *b1 = pv_box_at(v, (size_t)one->block_id);
+        assert_true(b1->box_mt == PV_LEN_UNSET || b1->box_mt == 0);
+    }
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_pseudo_before_on_empty(void **state) {
     (void)state;
     hp_document *doc = parse("<body><div></div></body>");
@@ -3964,6 +4150,13 @@ int main(void) {
         cmocka_unit_test(test_build_display_none_hidden),
         cmocka_unit_test(test_build_display_none_hides_images),
         cmocka_unit_test(test_build_styled_external_css),
+        cmocka_unit_test(test_author_list_padding_replaces_ua_indent),
+        cmocka_unit_test(test_before_rides_float_and_container),
+        cmocka_unit_test(test_inline_level_tag_list_stays_in_line),
+        cmocka_unit_test(test_marker_only_for_list_item_display),
+        cmocka_unit_test(test_default_flex_column_flows_as_block),
+        cmocka_unit_test(test_block_inside_inline_block_in_line),
+        cmocka_unit_test(test_block_column_gap_becomes_item_margin),
         cmocka_unit_test(test_pseudo_before_on_empty),
         cmocka_unit_test(test_pseudo_before_on_element_with_children),
         cmocka_unit_test(test_pseudo_after_on_element_with_children),

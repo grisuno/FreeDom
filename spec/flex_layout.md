@@ -173,6 +173,22 @@ venía atribuyendo a "el contenedor reparte 0 px".
 El llamante mide `min_content` fluyendo el ítem al extremo angosto de la misma vara con la que mide
 `max-content`, y **se saltea esa medición** cuando no puede cambiar la respuesta.
 
+### `fx_auto_margins` (2026-09-29)
+
+Márgenes `auto` en el eje principal (Flexbox §8.1): **antes** de `justify-content`, el
+espacio libre positivo de la línea se reparte en partes iguales entre todos los márgenes
+`auto` de sus ítems, y con al menos uno presente `justify-content` no tiene efecto. Es
+el idioma `nav .push-right{margin-left:auto}` que manda "Login" al extremo derecho.
+
+Entrada: los `fx_result` ya resueltos por `fx_flex_line` (en orden de la línea), dos
+máscaras `auto_l`/`auto_r` por ítem, `avail` y `gap`. Salida: las posiciones se
+reescriben en su lugar (los tamaños no cambian). Sin márgenes auto, o sin espacio libre
+positivo, es un no-op (las posiciones de `justify-content` quedan intactas).
+
+Dado `[40][40][40]` en 300 px con gap 10 y `margin-left:auto` en el tercero, entonces
+las posiciones son 0, 50 y 260. Dado `margin:auto` (ambos) en un único ítem de 100 en
+300, entonces queda centrado en 100.
+
 ### `fx_justify_name`
 - Nombre en inglés, corto y estable (`"start"`, `"space-between"`, ...) para salida estructurada.
   Nunca `NULL`; valor desconocido → `"start"`.

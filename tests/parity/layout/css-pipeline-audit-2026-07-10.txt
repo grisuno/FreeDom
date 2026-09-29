@@ -22,12 +22,12 @@ content_w=1000 total_h=1238.4 nbox=9 nrow=27 npositioned=0
   row[18] top=941.6 h=34.0 x_off=0.0 w=984.0
   row[19] top=999.6 h=23.0 x_off=4.0 w=992.0
   row[20] top=1046.5 h=34.0 x_off=0.0 w=992.0
-  row[21] top=1100.4 h=23.0 x_off=24.0 w=992.0
-  row[22] top=1123.4 h=23.0 x_off=24.0 w=992.0
-  row[23] top=1146.4 h=23.0 x_off=24.0 w=992.0
-  row[24] top=1169.4 h=23.0 x_off=24.0 w=992.0
-  row[25] top=1192.4 h=23.0 x_off=24.0 w=992.0
-  row[26] top=1215.4 h=23.0 x_off=24.0 w=992.0
+  row[21] top=1100.4 h=23.0 x_off=40.0 w=992.0
+  row[22] top=1123.4 h=23.0 x_off=40.0 w=992.0
+  row[23] top=1146.4 h=23.0 x_off=40.0 w=992.0
+  row[24] top=1169.4 h=23.0 x_off=40.0 w=992.0
+  row[25] top=1192.4 h=23.0 x_off=40.0 w=992.0
+  row[26] top=1215.4 h=23.0 x_off=40.0 w=992.0
   box[0] bid=0 x=0.0 top=120.4 w=1000.0 h=39.0
   box[1] bid=1 x=0.0 top=233.2 w=1000.0 h=80.0
   box[2] bid=2 x=0.0 top=313.2 w=1000.0 h=100.0

@@ -1272,6 +1272,56 @@ static void test_pseudo_unknown_drops_selector(void **state) {
     css_free(sh);
 }
 
+/* A selector list splits on TOP-LEVEL commas only (Selectors 4 4.1): the commas
+ * inside :not(...) belong to its argument. Splitting on every comma turned
+ * lobste.rs' `.negative_1 *:not(div, .link, img)` into bare `.link` and `img`
+ * rules and dimmed every link on the page. */
+static void test_selector_list_splits_top_level_commas_only(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".n *:not(div, .link, img), .n .score{color:#111111} "
+                               "[data-x=\"a,b\"]{background:#222222}", 0, &sh), CSS_OK);
+    const char *lk[] = { "link" };
+    css_element a = el_node("a", NULL, lk, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, -1);
+    css_element img = el_node("img", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &img, NULL, 0).color, -1);
+    const char *nc[] = { "n" };
+    css_element li = el_node("li", NULL, nc, 1, NULL);
+    css_element span = el_node("span", NULL, NULL, 0, &li);
+    assert_int_equal(css_resolve_el(sh, &span, NULL, 0).color, 0x111111);
+    css_element a_in = el_node("a", NULL, lk, 1, &li);
+    assert_int_equal(css_resolve_el(sh, &a_in, NULL, 0).color, -1);
+    const char *sc[] = { "score" };
+    css_element score = el_node("div", NULL, sc, 1, &li);
+    assert_int_equal(css_resolve_el(sh, &score, NULL, 0).color, 0x111111);
+    css_attr at = { "data-x", "a,b" };
+    css_element d = el_attr_node("div", NULL, NULL, 0, &at, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &d, NULL, 0).background, 0x222222);
+    css_free(sh);
+}
+
+/* :not() is not forgiving (Selectors 4 4.3): an argument this engine cannot read
+ * invalidates the WHOLE selector, because dropping just that argument would
+ * exclude less than the author asked for. :is() is forgiving (4.2): the unreadable
+ * argument is skipped and the rest still matches. */
+static void test_not_unreadable_argument_fails_closed(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("p:not(.x > y){color:#111111} "
+                               "q:not(.a.b){color:#333333} "
+                               "s:is(.x > y, .ok){color:#222222}", 0, &sh), CSS_OK);
+    css_element p = el_node("p", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).color, -1);
+    const char *b[] = { "b" };
+    css_element q = el_node("q", NULL, b, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &q, NULL, 0).color, -1);
+    const char *ok[] = { "ok" };
+    css_element s = el_node("s", NULL, ok, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &s, NULL, 0).color, 0x222222);
+    css_free(sh);
+}
+
 static void test_pseudo_content_before_after_separate(void **state) {
     (void)state;
     css_sheet *sh = NULL;
@@ -3050,7 +3100,9 @@ static void test_inline_appearance(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("appearance:auto", 0).appearance, CSS_AP_AUTO);
     assert_int_equal(css_parse_inline("appearance:none", 0).appearance, CSS_AP_NONE);
-    assert_int_equal(css_parse_inline("appearance:button", 0).appearance, CSS_AP_UNSET); /* unknown */
+    /* <compat-auto> keywords compute to auto (CSS UI 4 7.2); junk stays unset. */
+    assert_int_equal(css_parse_inline("appearance:button", 0).appearance, CSS_AP_AUTO);
+    assert_int_equal(css_parse_inline("appearance:bogus", 0).appearance, CSS_AP_UNSET);
     assert_int_equal(css_parse_inline("color:red", 0).appearance, CSS_AP_UNSET);
 }
 
@@ -3059,7 +3111,9 @@ static void test_inline_pointer_events(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("pointer-events:auto", 0).pointer_events, CSS_PE_AUTO);
     assert_int_equal(css_parse_inline("pointer-events:none", 0).pointer_events, CSS_PE_NONE);
-    assert_int_equal(css_parse_inline("pointer-events:all", 0).pointer_events, CSS_PE_UNSET);
+    /* The SVG targeting values hit-test like auto on an HTML box; junk is unset. */
+    assert_int_equal(css_parse_inline("pointer-events:all", 0).pointer_events, CSS_PE_AUTO);
+    assert_int_equal(css_parse_inline("pointer-events:bogus", 0).pointer_events, CSS_PE_UNSET);
     assert_int_equal(css_parse_inline("color:red", 0).pointer_events, CSS_PE_UNSET);
 }
 
@@ -4495,6 +4549,8 @@ int main(void) {
         cmocka_unit_test(test_rem_rebase_ignores_identifier_lookalikes),
         cmocka_unit_test(test_rem_rebase_62_5_percent_idiom),
         cmocka_unit_test(test_media_query_length_honours_its_unit),
+        cmocka_unit_test(test_selector_list_splits_top_level_commas_only),
+        cmocka_unit_test(test_not_unreadable_argument_fails_closed),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

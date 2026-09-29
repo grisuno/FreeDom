@@ -934,6 +934,38 @@ static void test_grid_place_explicit_out_of_range_clamps(void **state) {
     assert_int_equal(col[0], 1);   /* clamped to the last column */
 }
 
+/* Flexbox 8.1: auto margins take the positive free space before justify-content. */
+static void test_auto_margins_push_right_and_center(void **state) {
+    (void)state;
+    fx_item it[3] = { {40, 0, 1, 0}, {40, 0, 1, 0}, {40, 0, 1, 0} };
+    fx_result r[3];
+    assert_int_equal(fx_flex_line(it, 3, 300.0, 10.0, FX_JUSTIFY_CENTER, r), FX_OK);
+    unsigned char al[3] = { 0, 0, 1 }, ar[3] = { 0, 0, 0 };
+    assert_int_equal(fx_auto_margins(r, 3, al, ar, 300.0, 10.0), FX_OK);
+    assert_item(r[0], 0.0, 40.0);
+    assert_item(r[1], 50.0, 40.0);
+    assert_item(r[2], 260.0, 40.0);
+
+    fx_item one[1] = { {100, 0, 1, 0} };
+    fx_result c[1];
+    assert_int_equal(fx_flex_line(one, 1, 300.0, 0.0, FX_JUSTIFY_START, c), FX_OK);
+    unsigned char bl[1] = { 1 }, br[1] = { 1 };
+    assert_int_equal(fx_auto_margins(c, 1, bl, br, 300.0, 0.0), FX_OK);
+    assert_item(c[0], 100.0, 100.0);
+
+    /* No auto margin, or no free space: positions untouched. */
+    unsigned char z[3] = { 0, 0, 0 };
+    fx_result keep[3] = { {5, 40}, {60, 40}, {110, 40} };
+    assert_int_equal(fx_auto_margins(keep, 3, z, z, 300.0, 10.0), FX_OK);
+    assert_item(keep[1], 60.0, 40.0);
+    fx_result full[1] = { {0, 300} };
+    assert_int_equal(fx_auto_margins(full, 1, bl, br, 300.0, 0.0), FX_OK);
+    assert_item(full[0], 0.0, 300.0);
+    /* Fail closed. */
+    assert_int_equal(fx_auto_margins(NULL, 1, bl, br, 300.0, 0.0), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_auto_margins(c, 1, bl, br, -1.0, 0.0), FX_ERR_RANGE);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_grow_equal),
@@ -997,6 +1029,7 @@ int main(void) {
         cmocka_unit_test(test_grid_place_null_fixed_is_unchanged),
         cmocka_unit_test(test_grid_place_explicit_out_of_range_clamps),
         cmocka_unit_test(test_multicol_balance),
+        cmocka_unit_test(test_auto_margins_push_right_and_center),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

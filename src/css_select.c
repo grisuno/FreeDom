@@ -125,6 +125,7 @@ static int parse_nth_arg(const char *s, size_t a, size_t b, int *A, int *B) {
 
 /* Forward declaration for parse_pseudo sub-selector parsing. */
 static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub);
+static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);
 
 /* Parses one pseudo-class starting at s[*ip] == ':' (within s[.,b)) into *pm.
  * Advances *ip past it (including a (arg) for the nth-child family). Returns 1
@@ -211,6 +212,9 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
          * parsed as a simple compound (tag, .class, #id only, no combinators). At
          * most CSS_MAX_SUB_SELS total per selector, no nesting. */
         if (i >= b || s[i] != '(') return 0;
+        /* :not() is not forgiving (Selectors 4 4.3): dropping an argument it
+         * cannot read would exclude LESS than the author asked for. */
+        int strict = (pm->kind == PSEUDO_NOT);
         size_t as = ++i;
         int depth = 0;
         size_t seg_start = as;
@@ -222,26 +226,14 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
             else if (s[i] == '[') ++depth;
             else if (s[i] == ']' || s[i] == ')') { if (depth > 0) --depth; }
             else if (s[i] == ',' && depth == 0) {
-                if (sel->nsubs < CSS_MAX_SUB_SELS) {
-                    size_t sa = seg_start, sb = i;
-                    while (sa < sb && (s[sa] == ' ' || s[sa] == '\t')) ++sa;
-                    while (sb > sa && (s[sb-1] == ' ' || s[sb-1] == '\t')) --sb;
-                    if (parse_sub_compound(s, sa, sb, &sel->subs[sel->nsubs]))
-                        ++sel->nsubs;
-                }
+                if (!take_sub_arg(s, seg_start, i, sel, strict)) return 0;
                 seg_start = i + 1;
             }
             ++i;
         }
         if (i >= b) return 0;   /* unterminated */
         /* Parse the last segment (after the last comma, or the only one). */
-        if (sel->nsubs < CSS_MAX_SUB_SELS) {
-            size_t sa = seg_start, sb = i;
-            while (sa < sb && (s[sa] == ' ' || s[sa] == '\t')) ++sa;
-            while (sb > sa && (s[sb-1] == ' ' || s[sb-1] == '\t')) --sb;
-            if (parse_sub_compound(s, sa, sb, &sel->subs[sel->nsubs]))
-                ++sel->nsubs;
-        }
+        if (!take_sub_arg(s, seg_start, i, sel, strict)) return 0;
         pm->sub_count = sel->nsubs - pm->sub_first;
         ++i;   /* past ')' */
     } else if (wants_arg == 3) {
@@ -290,7 +282,8 @@ static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *su
     while (i < b) {
         if (s[i] == '.') {
             ++i;
-            if (i >= b || !csel_ident_ch(s[i])) return 0;
+            /* One class slot: a second class would silently overwrite the first. */
+            if (i >= b || !csel_ident_ch(s[i]) || sub->has_cls) return 0;
             size_t k = 0;
             while (i < b && csel_ident_ch(s[i])) {
                 if (k + 1 < CSS_TOK_MAX) sub->cls[k++] = s[i];
@@ -317,6 +310,21 @@ static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *su
         }
     }
     return sub->has_tag || sub->has_cls || sub->has_id || sub->nattrs > 0;
+}
+
+/* Stores one functional-pseudo argument s[a,b) (untrimmed) into sel->subs[].
+ * Returns 0 only when strict (the :not() list) and the argument is unreadable or
+ * the storage is full -- the caller then drops the whole selector. A forgiving
+ * list (:is/:where/:has) just skips such an argument. */
+static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict) {
+    while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
+    while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
+    if (sel->nsubs < CSS_MAX_SUB_SELS &&
+        parse_sub_compound(s, a, b, &sel->subs[sel->nsubs])) {
+        ++sel->nsubs;
+        return 1;
+    }
+    return !strict;
 }
 
 /* Parses one COMPOUND selector span s[a,b) (no combinators, no surrounding space)

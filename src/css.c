@@ -1367,7 +1367,8 @@ static int expand_bg_size(const char *val, css_decl *dst, int cap) {
         w = comp_px[0]; wp = comp_pm[0];
         h = (n == 2) ? comp_px[1] : CSS_LEN_AUTO;
         hp = (n == 2) ? comp_pm[1] : 0;
-        kw = CSS_BGS_UNSET;
+        /* The bare keyword keeps its own code; an explicit pair is sized by w/h. */
+        if (kw != CSS_BGS_AUTO) kw = CSS_BGS_UNSET;
     }
     dst[0].prop = P_BG_SIZE;   dst[0].ival = kw;
     dst[1].prop = P_BG_SIZE_W; dst[1].ival = w;
@@ -3650,6 +3651,31 @@ static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap
     return count;
 }
 
+/* Index of the next TOP-LEVEL comma of the selector list s[i,end), or end.
+ * Commas inside (...) or [...] belong to a functional pseudo-class argument or an
+ * attribute value, and quoted text is opaque (Selectors 4 4.1). Splitting on every
+ * comma turned `*:not(div, .link)` into a bare `.link` rule. */
+static size_t sel_list_comma(const char *s, size_t i, size_t end) {
+    int depth = 0;
+    char quote = 0;
+    for (; i < end; ++i) {
+        char c = s[i];
+        if (quote) {
+            if (c == '\\' && i + 1 < end) ++i;
+            else if (c == quote) quote = 0;
+        } else if (c == '"' || c == '\'') {
+            quote = c;
+        } else if (c == '(' || c == '[') {
+            ++depth;
+        } else if (c == ')' || c == ']') {
+            if (depth > 0) --depth;
+        } else if (c == ',' && depth == 0) {
+            return i;
+        }
+    }
+    return end;
+}
+
 /* Adds a rule: selector list s[ss,se), declaration block s[ds,de). */
 static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
                      size_t ds, size_t de, css_drop_log *log) {
@@ -3657,8 +3683,7 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
     int got = 0;
     size_t i = ss;
     while (i < se && got < CSS_SELS_PER_GROUP) {
-        size_t j = i;
-        while (j < se && s[j] != ',') ++j;
+        size_t j = sel_list_comma(s, i, se);
         if (csel_parse(s, i, j, &tmp[got])) ++got;
         i = (j < se) ? j + 1 : j;
     }
@@ -3947,8 +3972,7 @@ static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
 
         size_t p = ss;
         while (p < se) {
-            size_t q = p;
-            while (q < se && s[q] != ',') ++q;
+            size_t q = sel_list_comma(s, p, se);
             if (selector_is_root_scoped(s, p, q, root_scope)) {
                 collect_custom_decls(s, ds, de, tab, cap, ntab);
                 break;

@@ -230,6 +230,49 @@ static void test_load_carries_flex_item(void **state) {
     tab_close(t);
 }
 
+/* Main-axis auto margins of a flex item (Flexbox 8.1) survive the worker round-trip,
+ * both on a run (pv_run.flex_mauto) and on a NESTED container's item slot
+ * (pv_cont_def.item_mauto) -- a field that does not cross the codec is dead. */
+static void test_load_carries_flex_auto_margins(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>M</title></head><body><div style=\"display:flex\">"
+        "<a href=\"/a\">Active</a>"
+        "<a href=\"/l\" style=\"margin-left:auto\">Login</a>"
+        "<div style=\"margin:0 auto;display:flex\"><span>in</span><span>row</span></div>"
+        "</div></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+    int saw_login = 0, saw_active = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text == NULL) continue;
+        if (strcmp(r->text, "Login") == 0) {
+            assert_int_equal(r->flex_mauto, PV_MAUTO_LEFT);
+            saw_login = 1;
+        }
+        if (strcmp(r->text, "Active") == 0) {
+            assert_int_equal(r->flex_mauto, 0);
+            saw_active = 1;
+        }
+    }
+    assert_true(saw_login && saw_active);
+    int saw_nested = 0;
+    for (size_t c = 0; c < pv_cont_count(p.view); ++c) {
+        const pv_cont_def *cd = pv_cont_at(p.view, c);
+        if (cd->parent_id >= 0) {
+            assert_int_equal(cd->item_mauto, PV_MAUTO_LEFT | PV_MAUTO_RIGHT);
+            saw_nested = 1;
+        }
+    }
+    assert_true(saw_nested);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* flex-wrap / row-gap / align-items (CONTAINER) + align-self (ITEM) survive the
  * worker round-trip (write_view/read_view serialize the 4 new fields in the same
  * order on both sides). */
@@ -2300,6 +2343,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_returns_image_run),
         cmocka_unit_test(test_load_carries_author_color),
         cmocka_unit_test(test_load_carries_flex_item),
+        cmocka_unit_test(test_load_carries_flex_auto_margins),
         cmocka_unit_test(test_load_carries_flex_wrap_align_row_gap),
         cmocka_unit_test(test_load_carries_float),
         cmocka_unit_test(test_load_carries_visibility_overflow_cursor_and_text_wrap),

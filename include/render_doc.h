@@ -182,6 +182,7 @@ typedef struct rd_block {
     int              cont_row_gap;
     int              cont_align_items;
     int              flex_align_self;
+    int              flex_mauto;       /* PV_MAUTO_* of the flex item */
     /* Float layout (spec/float.md). float_side (css_float), float_id (floated-element
      * group id, -1 = none), float_clear (css_clear). Structure like cont_* (never
      * gated). Defaults: 0 / -1 / 0. */

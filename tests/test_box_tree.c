@@ -90,6 +90,26 @@ static void test_flex_row_grow(void **state) {
     assert_true(dbl_eq(root.w, 300));
 }
 
+/* Flexbox 8.1: an item's auto margin takes the free space before justify-content
+ * (the `.push-right{margin-left:auto}` nav idiom). */
+static void test_flex_auto_margin_pushes_item(void **state) {
+    (void)state;
+    bt_node kids[3] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .basis = 50, .shrink = 1 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .basis = 50, .shrink = 1 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .basis = 50, .shrink = 1,
+          .mauto = BT_MAUTO_LEFT },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_FLEX, .justify = FX_JUSTIFY_CENTER, .gap = 10,
+        .children = kids, .child_count = 3,
+    };
+    assert_int_equal(bt_layout(&root, 300), BT_OK);
+    assert_rect(&kids[0], 0, 0, 50, 20);
+    assert_rect(&kids[1], 60, 0, 50, 20);
+    assert_rect(&kids[2], 250, 0, 50, 20);
+}
+
 static void test_flex_gap_and_justify_center(void **state) {
     (void)state;
     bt_node kids[2] = {
@@ -939,6 +959,7 @@ int main(void) {
         cmocka_unit_test(test_oof_nested_absolute_anchor_vs_root),
         cmocka_unit_test(test_oof_relative_does_not_anchor),
         cmocka_unit_test(test_oof_fail_open),
+        cmocka_unit_test(test_flex_auto_margin_pushes_item),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

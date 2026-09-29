@@ -38,6 +38,11 @@ typedef enum pv_status {
     PV_ERR_INTERNAL   /* backend returned an unexpected state */
 } pv_status;
 
+/* pv_run.flex_mauto / pv_cont_def.item_mauto bits: which horizontal margins of a
+ * flex item are `auto` (Flexbox 8.1). */
+#define PV_MAUTO_LEFT  1
+#define PV_MAUTO_RIGHT 2
+
 /* Sentinel for an unset author box vertical-margin override (box_mt/box_mb): the
  * presentation layer then uses the user-agent margin. Matches CSS_LEN_UNSET. */
 #define PV_LEN_UNSET (-2147483647 - 1)
@@ -264,6 +269,9 @@ typedef struct pv_run {
     int     cont_align_items; /* css_align_kw of the container (align-items) */
     int     flex_align_self;  /* css_align_kw of the ITEM (align-self); AUTO/UNSET
                                * defer to cont_align_items */
+    /* Main-axis auto margins of the ITEM (Flexbox 8.1): PV_MAUTO_LEFT/RIGHT bits.
+     * They take the line's positive free space before justify-content. */
+    int     flex_mauto;
     /* Float layout (spec/float.md). float_side is the css_float of the nearest floated
      * self-or-ancestor block (0 none, 2 left, 3 right — the css_float values); float_id
      * groups the runs of ONE floated element in document order (-1 = not in a float);
@@ -704,6 +712,7 @@ typedef struct pv_cont_def {
      * fell back to a run INSIDE the nested container -- the wrong element -- so the
      * item never grew. Set only when parent_id >= 0. */
     int item_grow, item_shrink, item_basis, item_order, item_align_self;
+    int item_mauto;     /* PV_MAUTO_* of that wrapper element (0 unset) */
 } pv_cont_def;
 
 typedef struct pv_view {
@@ -960,6 +969,8 @@ void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);
  * unset sentinels. */
 void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
                  int flex_order, int flex_direction, int flex_align_self);
+/* Stamps the last run's PV_MAUTO_* bits (other bits dropped). */
+void pv_set_flex_mauto(pv_view *v, int mauto);
 
 /* Sets the container-item ordinal on the most recently appended run (-1 = none).
  * No-op on an empty or NULL view; the append helpers default cont_item to -1. */

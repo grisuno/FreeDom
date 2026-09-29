@@ -202,6 +202,15 @@ typedef struct fx_float_rect {
 fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
                           double avail, double *out_l, double *out_r);
 
+/* Main-axis auto margins (Flexbox 8.1), applied AFTER fx_flex_line on its results in
+ * line order: positive free space (avail - sizes - gaps) is split equally among every
+ * auto margin (auto_l[i]/auto_r[i] non-zero), which overrides justify-content. With no
+ * auto margin or no positive free space the positions are left untouched. Sizes never
+ * change. Pure, no allocation. FX_ERR_NULL_ARG (NULL with n > 0), FX_ERR_RANGE (negative
+ * avail/gap, n > FX_MAX_ITEMS); nothing is written on error. */
+fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
+                          const unsigned char *auto_r, double avail, double gap);
+
 /* Automatic minimum size of a flex item along the main axis (CSS Flexbox 4.5), in px.
  * This is what `min-width: auto` -- the INITIAL value, so the case for almost every
  * item on the web -- resolves to. It is the floor fx_flex_line must not shrink an

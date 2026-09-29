@@ -58,7 +58,7 @@ static void ignore_sigpipe(void);
  * Change requires same-diff in both functions; _Static_assert below enforces. */
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
-#define TAB_WIRE_B_N 54
+#define TAB_WIRE_B_N 55
 #define TAB_WIRE_BOX_F_N 219
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
 
@@ -274,6 +274,7 @@ static int write_field(int fd, const char *s) {
  *            cont_col_w[PV_GRID_TRACKS],grid_span,
  *            flex_grow,flex_shrink,flex_basis,flex_order,flex_direction,cont_item,
  *            cont_wrap,cont_row_gap,cont_align_items,flex_align_self,
+ *            (block B tail: ...,float_omr_pct,flex_mauto),
  *            float_side,float_id,float_clear,
  *            float_ml,float_ml_pct,float_mr,float_mr_pct,
  *            float_oid,float_oside,float_oml,float_oml_pct,float_omr,float_omr_pct,
@@ -332,7 +333,7 @@ static int write_view(int wfd, const pv_view *v) {
         gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
         /* Block B: fixed-width scalars after the grid array (flex item, float, author
          * box model, block/node id, form control). */
-        int32_t b[54] = {
+        int32_t b[TAB_WIRE_B_N] = {
             (int32_t)r->flex_grow, (int32_t)r->flex_shrink, (int32_t)r->flex_basis,
             (int32_t)r->flex_order, (int32_t)r->flex_direction, (int32_t)r->cont_item,
             (int32_t)r->cont_wrap, (int32_t)r->cont_row_gap, (int32_t)r->cont_align_items,
@@ -388,6 +389,9 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)r->float_oid, (int32_t)r->float_oside,
             (int32_t)r->float_oml, (int32_t)r->float_oml_pct,
             (int32_t)r->float_omr, (int32_t)r->float_omr_pct,
+            /* Main-axis auto margins of the flex item, 2026-09-29 (appended;
+             * read_view mirrors this). See pv_run.flex_mauto. */
+            (int32_t)r->flex_mauto,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -604,7 +608,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nc, sizeof nc) != 0) return -1;
     for (size_t ci = 0; ci < nc; ++ci) {
         const pv_cont_def *cd = pv_cont_at(v, ci);
-        int32_t cf[22 + PV_GRID_TRACKS];
+        int32_t cf[23 + PV_GRID_TRACKS];
         size_t k = 0;
         cf[k++] = (int32_t)cd->parent_id;
         cf[k++] = (int32_t)cd->parent_item;
@@ -629,6 +633,7 @@ static int write_view(int wfd, const pv_view *v) {
         cf[k++] = (int32_t)cd->item_basis;
         cf[k++] = (int32_t)cd->item_order;
         cf[k++] = (int32_t)cd->item_align_self;
+        cf[k++] = (int32_t)cd->item_mauto;
         for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cf[k++] = (int32_t)cd->col_w[gk];
         if (write_full(wfd, cf, sizeof cf) != 0) return -1;
     }
@@ -1647,7 +1652,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[54];
+        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[TAB_WIRE_B_N];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1763,6 +1768,7 @@ static int read_view(int fd, pv_view **out) {
             }
             pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir,
                        (int)fself);
+            pv_set_flex_mauto(v, (int)b[54]);
             pv_set_cont_item(v, (int)citem);
             pv_set_float(v, (int)flside, (int)flid, (int)flclear,
                          (int)flml, (int)flmlpct, (int)flmr, (int)flmrpct,
@@ -1796,6 +1802,7 @@ static int read_view(int fd, pv_view **out) {
             }
             pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir,
                        (int)fself);
+            pv_set_flex_mauto(v, (int)b[54]);
             pv_set_cont_item(v, (int)citem);
             pv_set_float(v, (int)flside, (int)flid, (int)flclear,
                          (int)flml, (int)flmlpct, (int)flmr, (int)flmrpct,
@@ -1998,7 +2005,7 @@ static int read_view(int fd, pv_view **out) {
         if (read_full(fd, &nc, sizeof nc) != 0) { pv_free(v); return -1; }
         if (nc > PV_MAX_CONTAINERS_WIRE) { pv_free(v); return -1; }
         for (size_t ci = 0; ci < nc; ++ci) {
-            int32_t cf[22 + PV_GRID_TRACKS];
+            int32_t cf[23 + PV_GRID_TRACKS];
             if (read_full(fd, cf, sizeof cf) != 0) { pv_free(v); return -1; }
             pv_cont_def cd;
             memset(&cd, 0, sizeof cd);
@@ -2025,6 +2032,7 @@ static int read_view(int fd, pv_view **out) {
             cd.item_basis      = cf[k++];
             cd.item_order      = cf[k++];
             cd.item_align_self = cf[k++];
+            cd.item_mauto      = cf[k++] & (PV_MAUTO_LEFT | PV_MAUTO_RIGHT);
             for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cd.col_w[gk] = cf[k++];
             /* A hostile worker cannot make the parent chain point outside the
              * table: an out-of-range parent degrades the container to top level

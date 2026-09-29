@@ -212,3 +212,13 @@ para un host de `config/allow.conf`. Corpus cubierto por la allowlist:
 `wikipedia.org`, `jkanime.net`. JS sigue apagado en ambos lados aunque el host
 sea trusted: con JS los dos motores miden documentos distintos (lección
 wikipedia-navbox, §7.4 de CLAUDE.md) y el número dejaría de calificar el layout.
+
+## Snapshots de sitios reales: `make parity-snapshot URL=… NAME=…` (2026-09-29)
+
+`tools/snapshot.py` congela una página viva en `tests/parity/pages/NAME.html`: inlinea
+las hojas `<link rel=stylesheet>` **y su cadena de `@import`** (resuelta contra la URL de
+cada hoja; una condición de medios del import se vuelve `@media`), y quita los
+`<script>`. Sin los `@import` el snapshot mide un documento distinto al real: la paleta
+entera de lobste.rs vive en un `@import`. Primer sitio del allow∩js congelado:
+`lobsters` (42.60 → 1.44 en la tanda 32).
+

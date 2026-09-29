@@ -1,0 +1,15 @@
+Lobsters
+CSS drops: 15 declaration(s) dropped, 12 distinct
+  count  cause         property                     first value
+      3  bad-value     list-style                   '🕮'
+      2  bad-value     grid-column                  1 / -1
+      1  bad-value     outline                      auto
+      1  unknown-prop  clip-path                    inset(50%)
+      1  unknown-prop  text-underline-offset        0.4rem
+      1  unknown-prop  -webkit-text-stroke          1px rgb(172 19 13)
+      1  unknown-prop  justify-self                 center
+      1  unknown-prop  -webkit-text-size-adjust     none
+      1  unknown-prop  -moz-text-size-adjust        none
+      1  bad-value     color                        var(--color-fgcontrast-10)
+      1  bad-value     background                   url(data:image/png
+      1  bad-value     margin-left                  calc(....10px +    ....18px +    ....0.25rem +  ....0.25rem    ...)

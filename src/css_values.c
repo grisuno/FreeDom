@@ -126,8 +126,9 @@ int cv_bg_alpha_of(const char *v)
                 if (*end != '\0' && !(*end == '%' && end[1] == '\0')) {
                     return CSS_LEN_UNSET;
                 }
+                /* `end` points into abuf: read it before abuf leaves scope. */
+                pct = (*end == '%') ? num : num * 100.0;
             }
-            pct = (*end == '%') ? num : num * 100.0;
             return css_round_clamp(pct, 0, 100);
         }
     }

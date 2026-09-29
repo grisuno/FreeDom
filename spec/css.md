@@ -149,6 +149,31 @@ drop the **whole selector** (fail closed); the rest of the comma group still par
 stale; a spec that under-reports is as misleading as one that over-reports, because
 the next reader adds a feature that already exists.*
 
+### Lista de selectores: coma de NIVEL SUPERIOR (2026-09-28)
+
+Una lista de selectores (Selectors 4 §4.1) se parte **solo en comas de nivel
+superior**: una coma dentro de `(...)` o `[...]` pertenece al argumento de una
+pseudo-clase funcional (`:not(a, b)`, `:is(a, b)`) o a un valor de atributo, nunca a la
+lista. `add_rule` partía en TODA coma, así que
+
+    .negative_1 *:not(div, .link, img, .tags) { opacity: .7 }
+
+se convertía en las reglas sueltas `.link`, `img`, `.tags)`… y **todo enlace de
+lobste.rs** salía al 70 % de opacidad (medido: títulos de historia azul pálido donde
+Firefox los pinta negros). El mismo splitter de nivel superior lo usa la recolección
+de custom properties.
+
+Dado `.n *:not(div, .link){color:#111}`, cuando se resuelve un `<a class=link>` sin
+ancestro `.n`, entonces no recibe `#111`; y un `<span>` dentro de `.n` sí.
+
+**`:not()` falla CERRADO ante un argumento que no sabe leer.** La gramática de
+sub-selector es un compuesto simple; un argumento con combinador
+(`.dropdown_parent > div *`) se descartaba en silencio de la lista, y en `:not()` eso
+**ensancha** el match (excluye menos de lo que el autor pidió). Ahora un argumento
+ilegible dentro de `:not()` invalida el selector entero (Selectors 4 §4.3: la lista de
+`:not()` no es *forgiving*). En `:is()`/`:where()` —que sí son *forgiving* (§4.2)— el
+argumento ilegible se omite y el resto sigue matcheando.
+
 ### `display` de la familia tabla (2026-08-11)
 
 `interp_display` devolvía **-1** para `table`, `inline-table`, `table-row`,

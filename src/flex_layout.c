@@ -553,6 +553,29 @@ void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col) {
 }
 
 /* CSS Flexbox 4.5. See the contract in flex_layout.h. */
+fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
+                          const unsigned char *auto_r, double avail, double gap) {
+    if (n == 0) return FX_OK;
+    if (res == NULL || auto_l == NULL || auto_r == NULL) return FX_ERR_NULL_ARG;
+    if (avail < 0.0 || gap < 0.0 || n > FX_MAX_ITEMS) return FX_ERR_RANGE;
+    double used = gap * (double)(n - 1);
+    size_t nauto = 0;
+    for (size_t i = 0; i < n; ++i) {
+        used += nn(res[i].size);
+        nauto += (auto_l[i] != 0) + (auto_r[i] != 0);
+    }
+    double free_space = avail - used;
+    if (nauto == 0 || !(free_space > 0.0)) return FX_OK;
+    double share = free_space / (double)nauto;
+    double pen = 0.0;
+    for (size_t i = 0; i < n; ++i) {
+        if (auto_l[i]) pen += share;
+        res[i].pos = pen;
+        pen += nn(res[i].size) + (auto_r[i] ? share : 0.0) + gap;
+    }
+    return FX_OK;
+}
+
 double fx_auto_min_size(double min_content, double basis, double author_min,
                         int scroll_container) {
     /* An explicit author min-width means min-width is not `auto`, so the automatic

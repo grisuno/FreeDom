@@ -89,7 +89,10 @@
 #define UI_WIN_BTN_W   30.0
 #define UI_MARGIN      6.0
 #define UI_BTN_LEFT    0x110  /* BTN_LEFT */
-#define UI_LIST_INDENT 24.0   /* left indent (px) per list nesting level (ul/ol) */
+/* Left indent (px) per UA-padded list level: the HTML UA sheet gives ul/ol
+ * `padding-inline-start: 40px` (HTML rendering 15.3.7). A level whose padding the
+ * author declared does not count (page_view), its padding goes through the box model. */
+#define UI_LIST_INDENT 40.0
 
 /* Vertical scrollbar in the content area's right gutter. The gutter width is
  * always reserved (subtracted from the content width) so the scroll affordance and
@@ -4004,6 +4007,31 @@ static int replaced_is_inline_level(const rc_state *s, const rd_block *b) {
     return s->line_open;
 }
 
+static int block_leaves_flow(const rd_doc *doc, const rd_block *bk);
+
+/* The same atomic inline when it OPENS its block's first line: a replaced element
+ * whose next in-flow run is text continuing the same line (no block break, same
+ * float and container). A 16px avatar before " via author" is one line in every
+ * browser; treating it as the block's own row put the text below it. Returns that
+ * next run's index, or 0 when the element is not followed by inline text. */
+static size_t replaced_opens_inline_line(const rd_doc *doc, size_t i) {
+    const rd_block *b = rd_at(doc, i);
+    if ((b->kind != RD_SVG && b->kind != RD_IMAGE) || !b->block_break) return 0;
+    for (size_t k = i + 1; k < rd_count(doc); ++k) {
+        const rd_block *n = rd_at(doc, k);
+        if (block_leaves_flow(doc, n)) continue;
+        if (n->block_break || (n->kind != RD_PARAGRAPH && n->kind != RD_LINK)) return 0;
+        if (n->float_id != b->float_id || n->cont_id != b->cont_id) return 0;
+        /* Collapsible white space alone does not make a line: keep looking. */
+        int blank = 1;
+        for (const char *t = n->text; t != NULL && *t != '\0' && blank; ++t)
+            if (*t != ' ' && *t != '\t' && *t != '\n' && *t != '\r') blank = 0;
+        if (blank) continue;
+        return k;
+    }
+    return 0;
+}
+
 /* Places an inline-level replaced element inside the open line as an atomic
  * inline: it advances the pen like a word, and raises the line's ascent so the
  * line box grows to hold it (CSS 2.1 10.8 -- the line box is as tall as its
@@ -4018,6 +4046,7 @@ static int place_inline_replaced(rc_layout *L, rc_state *s, const ui_theme *th,
     if (avail < 1.0) avail = 1.0;
     double rw, rh;
     if (!replaced_inline_size(w, b, avail, &rw, &rh)) return 0;
+    open_line(L, s);   /* no-op mid-line; opens it when the element starts one */
 
     /* Wrap like a word when the rest of the line cannot hold it. */
     if (s->pen_x > 0.0 && s->pen_x + rw > avail) {
@@ -4888,6 +4917,26 @@ static int block_leaves_flow(const rd_doc *doc, const rd_block *bk) {
         && bt_oof_root(doc->boxes, rd_box_count(doc), bk->block_id) >= 0;
 }
 
+/* One maximal segment of an item's runs [k, end): the runs that belong to the same
+ * direct child container of cid (or to none: plain text, *seg_cont = -1). A run
+ * that leaves the flow carries no container annotation, and it belongs to the
+ * segment around it rather than cutting it: an sr-only label inside a nested row's
+ * first item split that row into two separate layouts, stacking the logo above
+ * lobste.rs' nav. Returns the index one past the segment. */
+static size_t item_segment_end(const rd_doc *doc, size_t k, size_t end, int cid,
+                               int *seg_cont) {
+    size_t f = k;
+    while (f < end && block_leaves_flow(doc, rd_at(doc, f))) ++f;
+    if (f >= end) { *seg_cont = -1; return end; }
+    int sc = child_cont_at_level(doc, rd_at(doc, f), cid);
+    size_t e = f + 1;
+    while (e < end && (block_leaves_flow(doc, rd_at(doc, e)) ||
+                       child_cont_at_level(doc, rd_at(doc, e), cid) == sc))
+        ++e;
+    *seg_cont = sc;
+    return e;
+}
+
 static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                              rc_state *s, const ui_theme *th,
                              double origin_x, double content_w,
@@ -5014,12 +5063,27 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             s->cur_top = cur;
             cum_off[j] = cur;
             size_t sr = L->nrow;
-            for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
-                const rd_block *bk = rd_at(doc, k);
-                if (block_leaves_flow(doc, bk)) continue;  /* positioned separately */
-                if (k > gstart[j] && bk->block_break) flush_line(L, s, th);
-                s->bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
-                flow_text_block(cr, w, L, s, th, bk, content_w);
+            /* Same segmentation as the row path: an item that is (or holds) a
+             * nested flex/grid container recurses into it, or a row nested in a
+             * column stacks its items one per line (lobste.rs' header nav). */
+            for (size_t k = gstart[j]; k < gstart[j + 1]; ) {
+                int seg_cont;
+                size_t seg_end = item_segment_end(doc, k, gstart[j + 1], cid, &seg_cont);
+                if (seg_cont >= 0) {
+                    flush_line(L, s, th);
+                    layout_container(cr, w, L, s, th, origin_x, content_w, doc,
+                                     k, seg_end, seg_cont);
+                    flush_line(L, s, th);
+                } else
+                for (size_t m = k; m < seg_end; ++m) {
+                    const rd_block *bk = rd_at(doc, m);
+                    if (block_leaves_flow(doc, bk)) continue;  /* positioned separately */
+                    if (m > gstart[j] && bk->block_break) flush_line(L, s, th);
+                    s->bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
+                    if (!emit_replaced_row(cr, w, L, s, th, bk, content_w, doc))
+                        flow_text_block(cr, w, L, s, th, bk, content_w);
+                }
+                k = seg_end;
             }
             flush_line(L, s, th);
             row_start[j] = sr;
@@ -5142,6 +5206,12 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                            ? ncd->item_align_self : bk->flex_align_self;
             kid->grow = (it_grow >= 0) ? (double)it_grow / 100.0 : 0.0;
             kid->shrink = (it_shrink >= 0) ? (double)it_shrink / 100.0 : 1.0;
+            /* Main-axis auto margins (Flexbox 8.1): `margin-left:auto` pushes the
+             * item (and everything after it) to the end of the line. */
+            int it_mauto = (ncd != NULL && ncd->item_mauto != 0) ? ncd->item_mauto
+                                                                 : bk->flex_mauto;
+            kid->mauto = ((it_mauto & PV_MAUTO_LEFT) ? BT_MAUTO_LEFT : 0)
+                       | ((it_mauto & PV_MAUTO_RIGHT) ? BT_MAUTO_RIGHT : 0);
             if (nb_child >= 0) {
                 /* An explicit item flex-basis/width (col-lg-9's 75%, `.col`'s 0) wins;
                  * otherwise the nested container's OWN max-content width (items+gaps),
@@ -5411,11 +5481,8 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
          * translation pass below just adds this item's origin. */
         item_nested[j] = 0;
         for (size_t k = gstart[j]; k < gstart[j + 1]; ) {
-            int seg_cont = child_cont_at_level(doc, rd_at(doc, k), cid);
-            size_t seg_end = k + 1;
-            while (seg_end < gstart[j + 1] &&
-                   child_cont_at_level(doc, rd_at(doc, seg_end), cid) == seg_cont)
-                ++seg_end;
+            int seg_cont;
+            size_t seg_end = item_segment_end(doc, k, gstart[j + 1], cid, &seg_cont);
             if (seg_cont >= 0) {
                 /* A nested flex/grid container is ONE run-range of this item: recurse
                  * instead of flowing its runs as plain text. layout_container emits
@@ -6096,6 +6163,12 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
     for (int k = common; k < n; ++k) {
         const pv_box_def *d = rd_box_at(doc, (size_t)path[k]);
         if (d == NULL) break;
+        /* The open inline-level box lives OFF the stack, so the common-prefix walk
+         * cannot see it: a later run of the same box must continue it, not reopen it
+         * as a block (which flushed the line after the first of two tags). */
+        if (s->inline_box_def != NULL && s->inline_box_id == path[k] &&
+            s->inline_box_frag1 == (size_t)-1)
+            break;
         /* An INLINE-LEVEL box sitting on a line that already has text (a badge, a
          * pill, a chip inside a sentence) must flow INSIDE that line: opening it as
          * a block box flushes the line and insets the content rect, which broke the
@@ -6105,7 +6178,10 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
          * block treatment (shrink-wrapped and placed by text-align), which is what a
          * standalone centred call-to-action button needs.
          * spec/page_view.md "Cajas de nivel inline". */
-        if (d->display == CSS_DISP_INLINE_BLOCK && k == n - 1 &&
+        /* Boxes INSIDE such an inline-block (a <summary> in lobste.rs' inline
+         * `details.caches`) are internal to the atom and are not opened: opening
+         * one as a block would flush the very line the atom sits on. */
+        if (d->display == CSS_DISP_INLINE_BLOCK &&
             s->line_open && L->nfrag > s->line_first && s->inline_box_def == NULL) {
             s->inline_box_def = d;
             s->inline_box_id = path[k];
@@ -7025,6 +7101,22 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
     }
 }
 
+/* True iff every in-flow run of [i, j) belongs to float `fid` and at least one of
+ * them carries text. A container with no in-flow text (a floated flex box whose
+ * children are all absolute) keeps the container path: the band would place such
+ * floats side by side past a `<br style="clear:both">`, whose clear this engine
+ * does not carry yet (WPT flex-abspos-staticpos-*). */
+static int runs_share_float(const rd_doc *doc, size_t i, size_t j, int fid) {
+    int text = 0;
+    for (size_t k = i; k < j; ++k) {
+        const rd_block *bk = rd_at(doc, k);
+        if (block_leaves_flow(doc, bk)) continue;
+        if (bk->float_id != fid) return 0;
+        if (bk->text != NULL && bk->text[0] != '\0') text = 1;
+    }
+    return text;
+}
+
 static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                        rc_layout *L) {
     const rd_doc *doc = w->doc;
@@ -7121,6 +7213,11 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                 if (root_cont_of(doc, bj->cont_id) != rootc) break;
                 ++j;
             }
+            /* A container whose every run lives in ONE float sits inside that float
+             * (a float that is itself a flex item has siblings outside it): the float
+             * band below owns it and recurses into it within the float's column. */
+            if (b->float_id >= 0 && runs_share_float(doc, i, j, b->float_id))
+                goto float_band;
             double mt, mb;
             block_margins(th, b, content_w, &mt, &mb);
             /* Reconcile to the innermost box ENCLOSING the container's items, exactly
@@ -7137,6 +7234,9 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * goes BELOW any live float rather than flowing beside it. A
              * source-later container likewise goes below pulled columns:
              * flush first (no-op when nothing is deferred). */
+            /* The open line beside the float is committed where it is BEFORE the
+             * float context ends -- clearing first moved it to the float bottom. */
+            flush_line(L, &s, th);
             defer_flush(cr, w, L, &s, th, content_w, doc, &df);
             rc_float_clear(&s);
             int cbox = container_box_of(doc, i, j, rootc);
@@ -7192,6 +7292,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * position:relative/background panel stays open and paints behind the columns.
          * A block whose own `clear` is set ends the band (the cleared block flows below).
          * Structure, applied by default (never gated by caps.css). */
+    float_band:
         if (b->float_id >= 0) {
             size_t j = i + 1;
             while (j < rd_count(doc)) {
@@ -7231,7 +7332,9 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * (no-op when nothing is deferred). */
             defer_flush(cr, w, L, &s, th, content_w, doc, &df);
             /* A new band ends the previous float context: consecutive bands stack,
-             * as they always have (spec/float.md §6b.3). */
+             * as they always have (spec/float.md §6b.3). The line still open beside
+             * the previous float is committed first, at its own top. */
+            flush_line(L, &s, th);
             rc_float_clear(&s);
             int shared = band_shared_box(doc, &s, i, j);
             reconcile_boxes(cr, w, L, &s, th, doc, content_w, shared, i);
@@ -7252,7 +7355,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         /* An inline-level replaced element belongs to the line already open, so it
          * must not be treated as standalone (which would flush that line and give
          * the element a row of its own -- R7). */
-        int inline_replaced = replaced_is_inline_level(&s, b);
+        size_t line_mate = replaced_opens_inline_line(doc, i);
+        int inline_replaced = replaced_is_inline_level(&s, b) || line_mate > 0;
         int standalone = !inline_replaced
                       && (b->kind == RD_IMAGE || b->kind == RD_NOTICE
                        || b->kind == RD_HEADING || b->kind == RD_INPUT
@@ -7265,8 +7369,11 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * stays in the current box context too; closing would flush the line and
          * split e.g. a flowed table row at its inter-cell gap runs. */
         leave_inline_box(L, &s, b->block_id);
-        if (standalone || b->block_break || b->block_id >= 0)
-            reconcile_boxes(cr, w, L, &s, th, doc, content_w, b->block_id, i);
+        /* A line-opening replaced element carries no box of its own on the wire;
+         * it lives in the box of the text that shares its line. */
+        int rec_id = (line_mate > 0) ? rd_at(doc, line_mate)->block_id : b->block_id;
+        if (standalone || b->block_break || rec_id >= 0)
+            reconcile_boxes(cr, w, L, &s, th, doc, content_w, rec_id, i);
         if (standalone || b->block_break) {
             flush_line(L, &s, th);
             /* Space before this block = its top margin collapsed with the previous
@@ -10588,6 +10695,20 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
     paint_box_decoration(cr, &bx, left, origin, bgimg, bgimg2, th);
     if (needs_group) cairo_restore(cr);
+    /* A box that clips (overflow other than visible) clips its OWN content to its
+     * padding box (CSS Overflow 3 2.2). ov_reconcile only knows in-flow rc_boxes,
+     * so a positioned box's own clip is set here -- without it the visually-hidden
+     * idiom (`.sr-only`: absolute, 1x1, overflow:hidden) painted its whole label. */
+    int own_clip = ov_box_clips(def);
+    if (own_clip) {
+        double obl = box_edge_px(def->bord_lw), obr = box_edge_px(def->bord_rw);
+        double obt = box_edge_px(def->bord_tw), obb = box_edge_px(def->bord_bw);
+        double ow = pb->w - obl - obr, oh = pb->h - obt - obb;
+        cairo_save(cr);
+        cairo_rectangle(cr, left + pb->x + obl, origin + pb->y + obt,
+                        (ow > 0.0) ? ow : 0.0, (oh > 0.0) ? oh : 0.0);
+        cairo_clip(cr);
+    }
     /* Stage 2d: paint every block of the box's out-of-flow SUBTREE (nearest
      * absolute/fixed anchor == this box), stacked one line per block inside the
      * content origin -- not just the first block whose block_id matches. A block
@@ -10690,6 +10811,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         }
     }
 
+    if (own_clip) cairo_restore(cr);
     if (needs_group) bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
     if (clip_saved) cairo_restore(cr);
 }

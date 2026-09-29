@@ -554,3 +554,23 @@ No new status codes. `css`/`page_view`/`render_doc`/`tab` keep their existing ta
 malformed author CSS was already dropped fail-closed by `css` before reaching here.
 `fx_float_pack` returns `FX_ERR_NULL_ARG` (NULL with `n > 0`) / `FX_ERR_RANGE`
 (`n > FX_MAX_ITEMS`, negative `avail`/`gap`) and writes nothing on error.
+
+## Cierre de línea antes de terminar un contexto de float (2026-09-29)
+
+Al empezar la **siguiente** banda flotante (o un contenedor flex/grid), la línea todavía
+abierta al lado del float anterior se cierra **en su propio top** antes de
+`rc_float_clear`. Limpiar primero movía el cursor al fondo del float y la línea se
+asentaba ahí: cada línea de autor de lobste.rs caía 25 px por debajo de su votador.
+
+Un contenedor cuyos runs viven TODOS en un mismo float está dentro de ese float
+(`runs_share_float`): lo maqueta la banda flotante, que ya recursa en contenedores
+anidados. Un float que es ítem flex tiene hermanos fuera de él y sigue la rama de
+contenedor (un ítem flex ignora `float`).
+
+
+Acotado a contenedores que aportan **texto en flujo**: un float que es él mismo un flex
+sin contenido en flujo (solo hijos absolutos) sigue la rama de contenedor. Motivo
+medido (WPT `flex-abspos-staticpos-*`, 3 regresiones revertidas): el `clear` de un
+`<br style="clear:both">` no viaja en ningún run (el `<br>` no es el bloque del run), así
+que la banda juntaba en una fila floats que Firefox separa. **Brecha abierta:** `clear`
+sobre `<br>`.

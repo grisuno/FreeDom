@@ -60,6 +60,10 @@
 #define BT_ALIGN_END     2
 #define BT_ALIGN_STRETCH 3
 
+/* bt_node.mauto bits (same values as page_view's PV_MAUTO_*). */
+#define BT_MAUTO_LEFT  1
+#define BT_MAUTO_RIGHT 2
+
 typedef struct bt_node {
     bx_display      display;     /* BLOCK / FLEX / GRID / NONE; others => block leaf */
     bx_edges        margin;      /* px; used by the parent when placing this node */
@@ -87,6 +91,8 @@ typedef struct bt_node {
 
     /* this node as a flex item of its FLEX parent: */
     double          grow, shrink, basis, min_main;
+    int             mauto;       /* BT_MAUTO_* bits: which main-axis margins are `auto`
+                                  * (Flexbox 8.1); 0 (zero-init) = none. */
     int             align;       /* BT_ALIGN_*: this item's cross-axis alignment within
                                   * its line (already resolved from align-self / the
                                   * container's align-items by the caller). */

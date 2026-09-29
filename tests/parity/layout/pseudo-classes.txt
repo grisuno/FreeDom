@@ -17,11 +17,11 @@ content_w=1000 total_h=704.0 nbox=0 nrow=25 npositioned=0
   row[13] top=317.3 h=23.0 x_off=0.0 w=93.0
   row[14] top=317.3 h=23.0 x_off=93.0 w=121.0
   row[15] top=360.2 h=34.0 x_off=0.0
-  row[16] top=414.1 h=23.0 x_off=24.0
-  row[17] top=437.1 h=23.0 x_off=24.0
-  row[18] top=460.1 h=23.0 x_off=24.0
-  row[19] top=483.1 h=23.0 x_off=24.0
-  row[20] top=506.1 h=23.0 x_off=24.0
+  row[16] top=414.1 h=23.0 x_off=40.0
+  row[17] top=437.1 h=23.0 x_off=40.0
+  row[18] top=460.1 h=23.0 x_off=40.0
+  row[19] top=483.1 h=23.0 x_off=40.0
+  row[20] top=506.1 h=23.0 x_off=40.0
   row[21] top=549.0 h=34.0 x_off=0.0
   row[22] top=603.0 h=23.0 x_off=0.0
   row[23] top=642.0 h=23.0 x_off=0.0

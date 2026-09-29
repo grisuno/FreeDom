@@ -383,6 +383,52 @@ static void test_download_png_negative_zindex_paints_behind_inflow(void **state)
     unlink(png);
 }
 
+/* An absolutely positioned box with overflow:hidden clips its OWN content (CSS
+ * Overflow 3 2.2). The visually-hidden idiom (`.sr-only{position:absolute;width:1px;
+ * height:1px;overflow:hidden}`, on nearly every modern site) painted its whole label
+ * over the page -- lobste.rs' "Lobsters" over its logo. A dark label is placed in a
+ * 1x1 hidden box on a white page: no ink may reach the area it would cover. */
+static void test_download_png_positioned_overflow_clips_own_content(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;padding:0;background:#fff;color:#000}"
+        ".sr{position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;"
+        "white-space:nowrap;font-size:32px}"
+        "</style></head><body><span class=\"sr\">WWWWWWWWWWWW</span>"
+        "<div style=\"height:200px\"></div></body></html>";
+    const char *path = "__freedom_srclip_page.html";
+    const char *png = "__freedom_srclip_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+    assert_true(px.width > 300 && px.height > 40);
+    int dark = 0;
+    for (int y = 2; y < 40; ++y)
+        for (int x = 4; x < 300; ++x) {
+            uint32_t pix = ((const uint32_t *)(const void *)px.data)[y * (px.stride / 4) + x];
+            if (((pix >> 16) & 0xff) < 128) ++dark;
+        }
+    assert_int_equal(dark, 0);
+    img_pixels_free(&px);
+    unlink(path);
+    unlink(png);
+}
+
 /* Regression for M1.1 increment 3 (real group opacity): a positioned box with
  * opacity:0.5 must be composited as ONE unit (decoration + content blended
  * together, then the whole result faded) via an offscreen Cairo group
@@ -1656,6 +1702,238 @@ static void test_dump_layout_flex_badges_share_row(void **state) {
     unlink(path);
 }
 
+/* --- a flex ROW nested inside a flex COLUMN keeps its own axis --- */
+
+/* The column branch of layout_container flowed every item as plain text, so an
+ * item that is itself a flex row (lobste.rs: `#header{flex-direction:column}` >
+ * nav > `ul{display:flex}`) stacked its links one per line where Firefox lays
+ * them side by side. The column path now recurses into a nested container
+ * exactly like the row path does. */
+static void test_dump_layout_row_nested_in_column(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0}"
+        ".h{display:flex;flex-direction:column}"
+        "ul{margin:0;padding:0;list-style:none;display:flex;gap:8px}"
+        "</style></head><body>"
+        "<div class=\"h\"><nav><ul><li>Active</li><li>Recent</li>"
+        "<li>Comments</li></ul></nav></div>"
+        "</body></html>";
+    const char *path = "__freedom_rowincol.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_rowincol.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    /* Three rows share top=0 at increasing x. */
+    size_t at0 = 0;
+    double last_x = -1.0;
+    int increasing = 1;
+    char *p = out;
+    while ((p = strstr(p, "row[")) != NULL) {
+        double t = -1.0, x = -1.0;
+        char *tp = strstr(p, "top=");
+        char *xp = strstr(p, "x_off=");
+        if (tp != NULL && xp != NULL && sscanf(tp, "top=%lf", &t) == 1 &&
+            sscanf(xp, "x_off=%lf", &x) == 1 && t < 0.5) {
+            ++at0;
+            if (x <= last_x) increasing = 0;
+            last_x = x;
+        }
+        p += 4;
+    }
+    assert_true(at0 >= 3);
+    assert_true(increasing);
+    unlink(path);
+}
+
+/* --- an inline-level box keeps every run of its subtree on the line --- */
+
+/* A margin makes lobste.rs' `ul.tags{display:inline-block;margin-right:.25em}`
+ * register a box. Its first run opened it as an INLINE box (off the box stack);
+ * the second run of the same box then failed to recognise it as open and reopened
+ * it as a BLOCK, flushing the line: two tags on two lines, the domain on a third. */
+static void test_dump_layout_inline_box_second_run_stays(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0}"
+        ".t{display:inline-block;margin-right:4px;padding:0}"
+        ".t li{display:inline-block}"
+        "</style></head><body><div>Yes <ul class=\"t\"><li>practices</li>"
+        "<li>vibecoding</li></ul> blog.org</div></body></html>";
+    const char *path = "__freedom_inlbox.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_inlbox.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "nrow=1 "));
+    unlink(path);
+}
+
+/* --- a flex container INSIDE a float lays out in the float's column --- */
+
+/* lobste.rs' upvoter is `display:flex` inside `div.voters{float:left;width:40px}`.
+ * layout_doc sent the run to the container branch before the float band, so the
+ * container spanned the page and the story text stacked below instead of wrapping
+ * beside the float. When every run of the container lives in one float, the float
+ * band (which already recurses into nested containers) owns it. */
+static void test_dump_layout_container_inside_float(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0}"
+        ".v{float:left;width:40px}"
+        ".u{display:flex;flex-direction:column;align-items:center}"
+        ".d{margin-left:32px}"
+        "</style></head><body><div class=\"v\"><a class=\"u\" href=\"/l\">57</a></div>"
+        "<div class=\"d\">Bill Gates tries</div></body></html>";
+    const char *path = "__freedom_contfloat.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_contfloat.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    /* Every row starts at top=0: the text wraps beside the float. */
+    char *p = out;
+    int rows = 0;
+    while ((p = strstr(p, "row[")) != NULL) {
+        double t = -1.0;
+        char *tp = strstr(p, "top=");
+        assert_non_null(tp);
+        assert_int_equal(sscanf(tp, "top=%lf", &t), 1);
+        assert_true(t < 0.5);
+        ++rows;
+        p += 4;
+    }
+    assert_true(rows >= 2);
+    unlink(path);
+}
+
+/* --- a replaced element that OPENS a line shares it with the text after it --- */
+
+/* lobste.rs' byline starts with a 16px avatar <img> followed by " via author":
+ * one line in Firefox. R7 only kept an image inline when it arrived between two
+ * text runs, so an image that opens its block took a row of its own and the text
+ * wrapped below it. */
+static void test_dump_layout_line_opening_image_is_inline(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0} .b{margin-left:32px}</style></head><body>"
+        "<div>title</div><div class=\"b\"><img src=\"a.png\" width=\"16\" "
+        "height=\"16\" alt=\"\"> via author</div></body></html>";
+    const char *path = "__freedom_imgline.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --images --dump-layout __freedom_imgline.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "nrow=2 "));
+    unlink(path);
+}
+
+/* --- a new float band closes the open line where it IS --- */
+
+/* Starting the next float band cleared the previous float context -- moving the pen
+ * below the float -- while the last line beside that float was still open, so the
+ * line was committed at the float's bottom: every lobste.rs byline sat 25px low. */
+static void test_dump_layout_band_flushes_line_before_clear(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0}"
+        ".v{float:left;width:40px;height:100px} .d{margin-left:48px}"
+        "</style></head><body>"
+        "<div class=\"v\">1</div><div class=\"d\">first<br>second</div>"
+        "<div class=\"v\">2</div><div class=\"d\">third</div></body></html>";
+    const char *path = "__freedom_bandflush.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_bandflush.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    /* "second" is the second text line beside the 100px float: some row sits
+     * strictly between the first line and the float bottom. */
+    int inside = 0;
+    char *p = out;
+    while ((p = strstr(p, "row[")) != NULL) {
+        double t = -1.0, x = -1.0;
+        char *tp = strstr(p, "top=");
+        char *xp = strstr(p, "x_off=");
+        if (tp && xp && sscanf(tp, "top=%lf", &t) == 1 && sscanf(xp, "x_off=%lf", &x) == 1
+            && x > 40.0 && t > 10.0 && t < 90.0)
+            inside = 1;
+        p += 4;
+    }
+    assert_true(inside);
+    unlink(path);
+}
+
+/* --- margin-left:auto pushes a flex item to the end of the line --- */
+
+/* Flexbox 8.1, end to end (page_view -> codec -> box_tree): lobste.rs' nav pushes
+ * "Login" to the right edge with `.push-right{margin-left:auto}`. */
+static void test_dump_layout_flex_auto_margin_push_right(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0}"
+        "ul{display:flex;margin:0;padding:0;list-style:none;gap:8px}"
+        ".r{margin-left:auto}"
+        "</style></head><body><ul><li>Active</li><li>Recent</li>"
+        "<li class=\"r\">Login</li></ul></body></html>";
+    const char *path = "__freedom_mauto.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_mauto.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    /* The last item's right edge sits at the page's right edge (1000). */
+    double maxr = 0.0;
+    char *p = out;
+    while ((p = strstr(p, "row[")) != NULL) {
+        double x = 0.0, wd = 0.0;
+        char *xp = strstr(p, "x_off=");
+        char *wp = strstr(p, " w=");
+        char *nl = strchr(p, '\n');
+        if (xp && wp && nl && wp < nl && sscanf(xp, "x_off=%lf", &x) == 1 &&
+            sscanf(wp, " w=%lf", &wd) == 1 && x + wd > maxr)
+            maxr = x + wd;
+        p += 4;
+    }
+    assert_true(maxr > 990.0);
+    unlink(path);
+}
+
 /* --- nested column max-content is the max, not the sum (box_engine.md) --- */
 
 /* A one-item flex row holding a `flex-direction:column` card (blocked thumbnail
@@ -2046,6 +2324,13 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_float_two_columns),
         cmocka_unit_test(test_dump_layout_pulled_rail_single_margin),
         cmocka_unit_test(test_dump_layout_flex_badges_share_row),
+        cmocka_unit_test(test_dump_layout_row_nested_in_column),
+        cmocka_unit_test(test_dump_layout_flex_auto_margin_push_right),
+        cmocka_unit_test(test_download_png_positioned_overflow_clips_own_content),
+        cmocka_unit_test(test_dump_layout_band_flushes_line_before_clear),
+        cmocka_unit_test(test_dump_layout_line_opening_image_is_inline),
+        cmocka_unit_test(test_dump_layout_container_inside_float),
+        cmocka_unit_test(test_dump_layout_inline_box_second_run_stays),
         cmocka_unit_test(test_dump_layout_nested_column_takes_max),
         cmocka_unit_test(test_rejects_http_url),
     };

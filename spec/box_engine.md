@@ -876,3 +876,19 @@ malformed author CSS was already dropped fail-closed by `css` before reaching he
 - Default-init duplication across the three `pv_append*` helpers is collapsed into a
   shared `run_init_style_defaults` (boy-scout) so the ~28 new fields are defaulted in
   one place, not three.
+
+## Tanda 32 (2026-09-29): recorte propio, reemplazado que abre línea, flex columna
+
+- **Una caja posicionada con `overflow` no-`visible` recorta su PROPIO contenido** a su
+  padding box (CSS Overflow 3 §2.2). `ov_reconcile` solo conoce `rc_box` en flujo, así
+  que el pase posicionado fija ese recorte él mismo. Era el idioma `.sr-only`
+  (absoluto, 1×1, `overflow:hidden`) pintando su etiqueta entera sobre la página.
+- **Un reemplazado que ABRE una línea seguida de texto no-blanco del mismo bloque** es un
+  átomo de esa línea (R7 extendido): el avatar de 16 px antes de " via autor". Se
+  reconcilia a la caja del texto que lo sigue (la imagen no lleva `block_id` propio en
+  el códec). Seguido solo de espacio en blanco conserva su fila.
+- **La rama columna de `layout_container` recursa en contenedores anidados** con la misma
+  segmentación que la rama fila (`item_segment_end`); un run fuera de flujo no corta un
+  segmento. Y una caja inline-block abierta se reconoce en cualquier posición del camino
+  de cajas: sus cajas internas no se abren como bloques.
+

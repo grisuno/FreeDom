@@ -1033,6 +1033,53 @@ esos contenedores se maquetan como nivel superior — degrada a lo de antes, nun
 `read_view` rechaza un `parent_id` fuera de rango o que apunte a sí mismo degradándolo a
 nivel superior, así que un worker hostil no puede indexar fuera de la tabla.
 
+### Flex en COLUMNA con geometría por defecto = flujo de bloques (2026-09-28)
+
+`body{display:flex;flex-direction:column}` (el idioma del *sticky footer*, y el
+`<body>` de lobste.rs) coloca a sus ítems uno debajo del otro, cada uno al ancho
+completo del contenedor: exactamente lo que hace el flujo de bloques. La rama columna
+de `layout_container` era un sustituto pobre de ese flujo (sin flotantes, sin cajas,
+sin márgenes, sin reemplazados), así que **ningún float de la página** funcionaba y
+cada `div.voters{float:left}` de lobste.rs salía centrado a ancho completo.
+
+Regla (`flex_column_flows_as_block`, pura): un contenedor `display:flex` con
+`flex-direction:column`, sin `wrap`, con `justify-content` inicial/`flex-start` y
+`align-items` inicial/`stretch` **no se registra como contenedor**: sus ítems fluyen
+por el motor de bloques normal. Cualquier otra combinación (`column-reverse`,
+`align-items:center`, `justify-content:space-between`, …) sigue por `layout_container`.
+
+Dado `div{display:flex;flex-direction:column}` con dos `<p>`, cuando se construye la
+vista, entonces sus runs no tienen `cont_id`; y con `align-items:center` sí.
+
+**Aproximaciones conocidas (documentadas, no silenciosas):** el `gap` del contenedor
+no se suma entre ítems, los márgenes entre ítems colapsan como en flujo de bloques
+(en flex no colapsan) y `flex-grow` no reparte un `min-height` sobrante (solo afecta
+a páginas más cortas que su propio `min-height`).
+
+### Tanda 32 (2026-09-29): lobste.rs — lo inline-level es un átomo de su línea
+
+Todas medidas contra Firefox con sondas antes de tocar código (`tests/parity/pages/lobsters.html`,
+42.60 → 1.44).
+
+- **Sangría de lista = `padding-inline-start` UA (40 px, HTML §15.3.7), no una constante.**
+  Un nivel `ul/ol` cuenta en `list_depth` solo si el autor NO declaró su `padding-left`;
+  si lo declaró, ese padding lo aplica el box model. Antes: 24 px fijos *más* el padding
+  de autor (`ol{padding:0}` sangraba 24; `padding-left:10px` daba 34, Firefox 0 y 10).
+- **El marcador lo genera `display:list-item`** (CSS Lists 3 §3.1), no la etiqueta `<li>`:
+  `li{display:inline-block}` no pinta "• ".
+- **`::before` lleva la anotación de layout COMPLETA del elemento** (contenedor, ítem,
+  float, caja) vía `annotate_flow_run`, compartida con el run de texto. Un marcador
+  dentro de `div.voters{float:left}` salía como fila de ancho completo.
+- **Solo un padre de nivel bloque se convierte en fila anónima de inline-blocks.** Un
+  `inline-block` en una línea mixta es un átomo de esa línea (CSS 2.1 §9.2.2): su
+  `ul.tags` partía el título de la historia en tres líneas.
+- **Un bloque DENTRO de un inline-block en línea mixta no rompe la línea exterior**:
+  la búsqueda del bloque del run se reinicia por encima del inline-block (el `<summary>`
+  de `details.caches{display:inline-block}`). v1: un inline-block de varios bloques dentro
+  de una oración se aplana en la línea.
+- **Márgenes `auto` de un ítem flex** (`flex_mauto`/`item_mauto`, bits `PV_MAUTO_*`) cruzan
+  el códec IPC y `box_tree` los aplica con `fx_auto_margins` (Flexbox §8.1).
+
 ## 5. Tabla de errores
 
 | Código | Condición |

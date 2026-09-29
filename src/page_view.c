@@ -219,6 +219,7 @@ static void run_init_common(pv_run *r) {
     r->cont_row_gap = -1;
     r->cont_align_items = 0;
     r->flex_align_self = 0;
+    r->flex_mauto = 0;
     r->float_side = 0;
     r->float_id = -1;
     r->float_clear = 0;
@@ -640,6 +641,11 @@ void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
     r->flex_order = flex_order;
     r->flex_direction = flex_direction;
     r->flex_align_self = flex_align_self;
+}
+
+void pv_set_flex_mauto(pv_view *v, int mauto) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].flex_mauto = mauto & (PV_MAUTO_LEFT | PV_MAUTO_RIGHT);
 }
 
 void pv_set_cont_item(pv_view *v, int cont_item) {
@@ -1106,6 +1112,9 @@ typedef struct pv_cont_info {
  * align_content / justify_items (CONTAINER), grid_rows / grid_flow (grid
  * container), row_span (ITEM) — 2026-07-12 batch. */
 int wrap, row_gap, align_items, align_self;
+/* Main-axis auto margins of the ITEM (Flexbox 8.1): bit 1 = margin-left:auto,
+ * bit 2 = margin-right:auto (PV_MAUTO_*). */
+int mauto;
 int align_content, justify_items;
 int grid_rows, grid_flow, row_span;
 /* Named grid placement (2026-08-14): the item's resolved cell, or -1 for auto.
@@ -1138,6 +1147,7 @@ int anc_item_shrink[PV_CONT_DEPTH];
 int anc_item_basis[PV_CONT_DEPTH];
 int anc_item_order[PV_CONT_DEPTH];
 int anc_item_align[PV_CONT_DEPTH];
+int anc_item_mauto[PV_CONT_DEPTH];
 int anc_n;
 } pv_cont_info;
 
@@ -1287,6 +1297,12 @@ static int css_has_hbox(const css_style *cs) {
 /* Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets =
  * padding + non-auto margin of each side (clamped >= 0); w = the tightest of
  * width/max-width (0 = none); center = margin: 0 auto with a width cap. */
+/* The PV_MAUTO_* bits of an element's own horizontal auto margins. */
+static int pv_mauto_of(const css_style *cs) {
+    return ((cs->margin_left == CSS_LEN_AUTO) ? PV_MAUTO_LEFT : 0)
+         | ((cs->margin_right == CSS_LEN_AUTO) ? PV_MAUTO_RIGHT : 0);
+}
+
 static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
     int ml = cs->margin_left, mr = cs->margin_right;
     int pl = (cs->pad_left  != CSS_LEN_UNSET) ? cs->pad_left  : 0;
@@ -1486,6 +1502,7 @@ static void cont_def_reset(pv_cont_def *d) {
     d->item_basis = CSS_LEN_UNSET;
     d->item_order = CSS_LEN_UNSET;
     d->item_align_self = CSS_AK_UNSET;
+    d->item_mauto = 0;
 }
 
 /* Id of node in reg, registering it on first sight. -1 when reg is full. */
@@ -1525,9 +1542,40 @@ static void link_cont_chain(pv_container_reg *reg, pv_item_track *tr,
         reg->def[inner].item_basis      = cont->anc_item_basis[k + 1];
         reg->def[inner].item_order      = cont->anc_item_order[k + 1];
         reg->def[inner].item_align_self = cont->anc_item_align[k + 1];
+        reg->def[inner].item_mauto      = cont->anc_item_mauto[k + 1];
     }
 }
 
+
+/* Stamps the last run with its element's layout annotation: container membership
+ * and item slot, flex/grid item properties, float band and author box. Shared by a
+ * text run and by the ::before run that opens the same element's first line (CSS
+ * 2.1 12.1): the marker must ride the SAME float/container/box or the painter
+ * separates the two -- a floated upvote triangle became a full-width row. */
+static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *items,
+                              const pv_cont_info *cont, const pv_box_info *box) {
+    pv_set_container(v, cont->id, cont->display, cont->gap, cont->justify, cont->cols,
+                     cont->wrap, cont->row_gap, cont->align_items);
+    pv_set_grid(v, cont->col_w, PV_GRID_TRACKS, cont->col_span);
+    pv_set_grid_rows(v, cont->grid_rows);
+    pv_set_cont_box(v, cont->box_id);
+    pv_set_row_span(v, cont->row_span);
+    pv_set_grid_area(v, cont->grid_row_start, cont->grid_col_start);
+    pv_set_flex(v, cont->grow, cont->shrink, cont->basis, cont->order, cont->direction,
+                cont->align_self);
+    pv_set_flex_mauto(v, cont->mauto);
+    pv_set_cont_item(v, item_ordinal(items, cont->id, cont->item));
+    link_cont_chain(reg, items, cont);
+    pv_set_float(v, cont->float_side, cont->float_id, cont->float_clear,
+                 cont->float_ml, cont->float_ml_pct,
+                 cont->float_mr, cont->float_mr_pct,
+                 cont->float_oid, cont->float_oside,
+                 cont->float_oml, cont->float_oml_pct,
+                 cont->float_omr, cont->float_omr_pct);
+    pv_set_box(v, box->l, box->r, box->w, box->center, box->mt, box->mb);
+    pv_set_ua_tag(v, box->ua);
+    pv_set_box_pct(v, box->w_pct, box->l_pct, box->r_pct, box->mt_pct, box->mb_pct);
+}
 
 /* Box engine (Hito 23b-8 Step D): document-order registry of box-carrying block
  * nodes plus each box's resolved definition (decoration + parent link). A box's
@@ -2098,8 +2146,34 @@ static int is_italic_tag(lxb_tag_id_t t) {
  * degrade the container to plain flow anyway. */
 #define PV_MAX_INLINE_ROW_ITEMS 128   /* mirrors the layout engine's per-container item cap */
 
-static int is_inline_block_row(const lxb_dom_node_t *p, const css_sheet *sheet,
-                               pv_style_cache *cache) {
+/* Inline-level box (CSS 2.1 9.2.2): display inline or inline-block, or a tag the UA
+ * sheet makes inline, and not taken out of flow (which blockifies it). */
+static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs) {
+    return !is_out_of_flow(cs) && cs->display != CSS_DISP_NONE
+        && cs->display != CSS_DISP_FLEX && cs->display != CSS_DISP_GRID
+        && (cs->display == CSS_DISP_INLINE_BLOCK || !is_block_like(t, cs->display));
+}
+
+/* True when `p` shares a line with inline content: a sibling that is non-blank text
+ * or an inline-level element. */
+static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,
+                         pv_style_cache *cache) {
+    if (p->parent == NULL) return 0;
+    for (const lxb_dom_node_t *c = p->parent->first_child; c != NULL; c = c->next) {
+        if (c == p) continue;
+        if (c->type == LXB_DOM_NODE_TYPE_TEXT) {
+            if (!text_node_is_blank(c)) return 1;
+        } else if (c->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            css_style ccs = cached_element_style(
+                lxb_dom_interface_element((lxb_dom_node_t *)c), sheet, cache);
+            if (is_inline_level_style(node_tag(c), &ccs)) return 1;
+        }
+    }
+    return 0;
+}
+
+static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,
+                                     pv_style_cache *cache) {
     int nel = 0;
     for (const lxb_dom_node_t *c = p->first_child; c != NULL; c = c->next) {
         if (c->type == LXB_DOM_NODE_TYPE_TEXT) {
@@ -2112,6 +2186,96 @@ static int is_inline_block_row(const lxb_dom_node_t *p, const css_sheet *sheet,
         }
     }
     return nel > 0;
+}
+
+/* A flex COLUMN with the initial geometry (no reverse, no wrap, justify-content
+ * start, align-items stretch) stacks full-width items one below the other: exactly
+ * block flow. Such a container is not registered, so its items reach the full block
+ * engine -- floats, boxes, margins, replaced rows -- instead of the column branch of
+ * layout_container, which flowed bare text and lost every float on lobste.rs'
+ * `body{display:flex;flex-direction:column}`. spec/page_view.md "Flex en COLUMNA". */
+static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,
+                                      const css_sheet *sheet, pv_style_cache *cache) {
+    if (!(cs->display == CSS_DISP_FLEX
+          && cs->flex_direction == CSS_FD_COLUMN
+          && (cs->flex_wrap == CSS_FW_UNSET || cs->flex_wrap == CSS_FW_NOWRAP)
+          && (cs->justify == CSS_JUSTIFY_UNSET || cs->justify == CSS_JUSTIFY_START)
+          && (cs->align_items == CSS_AK_UNSET || cs->align_items == CSS_AK_STRETCH)))
+        return 0;
+    /* `order` reorders a column too, and a per-item `align-self` other than
+     * stretch shrink-wraps that item: either makes the column not block flow. */
+    for (const lxb_dom_node_t *c = el->first_child; c != NULL; c = c->next) {
+        if (c->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        css_style ccs = cached_element_style(lxb_dom_interface_element((lxb_dom_node_t *)c),
+                                             sheet, cache);
+        if (ccs.order != CSS_LEN_UNSET && ccs.order != 0) return 0;
+        if (ccs.align_self != CSS_AK_UNSET && ccs.align_self != CSS_AK_AUTO &&
+            ccs.align_self != CSS_AK_STRETCH) return 0;
+    }
+    return 1;
+}
+
+/* The gap of a column that flows as block (above) is the space BETWEEN its items
+ * (Flexbox 8.1), so every item but the first takes it as extra top margin. Folded
+ * into the item's own style where the walk reads it, so the block margin and the
+ * item's box both see it. (v1: a UA margin the item had is replaced, and margins
+ * around the gap collapse, where flex keeps both.) */
+static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,
+                            const css_sheet *sheet, pv_style_cache *cache) {
+    const lxb_dom_node_t *par = el->parent;
+    if (par == NULL || par->type != LXB_DOM_NODE_TYPE_ELEMENT) return;
+    css_style pcs = cached_element_style(lxb_dom_interface_element((lxb_dom_node_t *)par),
+                                         sheet, cache);
+    if (pcs.gap <= 0 || pcs.display != CSS_DISP_FLEX ||
+        pcs.flex_direction != CSS_FD_COLUMN)
+        return;
+    if (is_out_of_flow(cs) || cs->display == CSS_DISP_NONE) return;
+    int prev = 0;
+    for (const lxb_dom_node_t *c = el->prev; c != NULL && !prev; c = c->prev) {
+        if (c->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        css_style ccs = cached_element_style(lxb_dom_interface_element((lxb_dom_node_t *)c),
+                                             sheet, cache);
+        if (ccs.display != CSS_DISP_NONE && !is_out_of_flow(&ccs)) prev = 1;
+    }
+    if (!prev || !flex_column_flows_as_block(par, &pcs, sheet, cache)) return;
+    int base = (cs->margin_top == CSS_LEN_UNSET || cs->margin_top == CSS_LEN_AUTO)
+             ? 0 : cs->margin_top;
+    cs->margin_top = base + pcs.gap;
+}
+
+/* A flex/grid container that lays its children out itself (see above). */
+static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
+                               const css_sheet *sheet, pv_style_cache *cache) {
+    return (cs->display == CSS_DISP_FLEX
+            && !flex_column_flows_as_block(el, cs, sheet, cache))
+        || cs->display == CSS_DISP_GRID;
+}
+
+/* A marker is generated by a `display:list-item` box (CSS Lists 3 3.1), which is
+ * what the UA sheet makes an <li>; an author display (inline-block chips, a flex
+ * nav) removes it. */
+static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,
+                           pv_style_cache *cache) {
+    css_style lcs = cached_element_style(lxb_dom_interface_element((lxb_dom_node_t *)li),
+                                         sheet, cache);
+    return lcs.display == CSS_DISP_UNSET || lcs.display == CSS_DISP_LIST_ITEM;
+}
+
+/* The anonymous row is a BLOCK-level box, so only a parent that may be one gets it.
+ * An inline-level parent (inline / inline-block) sitting in its own parent's mixed
+ * line is an atom of that line (CSS 2.1 9.2.2): a row there split lobste.rs' story
+ * title from its domain. It stays a row when its own parent is itself a row of
+ * inline-blocks (it is then an item of that row, a nested container). */
+static int is_inline_block_row(const lxb_dom_node_t *p, const css_sheet *sheet,
+                               pv_style_cache *cache) {
+    if (!children_all_inline_block(p, sheet, cache)) return 0;
+    if (p->type != LXB_DOM_NODE_TYPE_ELEMENT) return 1;
+    css_style pcs = cached_element_style(lxb_dom_interface_element((lxb_dom_node_t *)p),
+                                         sheet, cache);
+    if (!is_inline_level_style(node_tag(p), &pcs)) return 1;
+    const lxb_dom_node_t *gp = p->parent;
+    if (gp == NULL || gp->type != LXB_DOM_NODE_TYPE_ELEMENT) return 1;
+    return children_all_inline_block(gp, sheet, cache);
 }
 
 /* True iff an element has NO IN-FLOW content of its own: no in-flow child elements
@@ -2234,6 +2398,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->float_oml = 0; cont->float_oml_pct = 0;
     cont->float_omr = 0; cont->float_omr_pct = 0;
     cont->wrap = 0; cont->row_gap = -1; cont->align_items = 0; cont->align_self = 0;
+    cont->mauto = 0;
     cont->align_content = 0; cont->justify_items = 0;
     cont->grid_rows = 0; cont->grid_flow = 0; cont->row_span = 0;
     cont->grid_row_start = -1; cont->grid_col_start = -1;
@@ -2291,6 +2456,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     int prev_grow = -1, prev_shrink = -1;
     int prev_basis = CSS_LEN_UNSET, prev_order = CSS_LEN_UNSET;
     int prev_align_self = CSS_AK_UNSET;
+    int prev_mauto = 0;
     int prev_col_span = 0;
     int prev_row_span = 0;
     unsigned prev_area_name = 0u;
@@ -2307,6 +2473,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
             lxb_tag_id_t t = lxb_dom_element_tag_id(el);
             css_style cs = cached_element_style(el, sheet, style_cache);
+            fold_column_gap(p, &cs, sheet, style_cache);
             pv_text_ext_merge(ext, &cs);
 
             /* UA default styles for specific elements */
@@ -2332,14 +2499,18 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             /* Is THIS ancestor a flex/grid container of the run? (Same test used to
              * register the container below, computed once and reused there.) The moment
              * the walk reaches it, the item's own width is settled -- see crossed_container. */
-            int is_real_cont = (cs.display == CSS_DISP_FLEX || cs.display == CSS_DISP_GRID);
+            int is_real_cont = is_layout_container(p, &cs, sheet, style_cache);
             int is_anon_cont = (reg != NULL && !is_real_cont) &&
                                is_inline_block_row(p, sheet, style_cache);
             int p_is_container = (reg != NULL) && (is_real_cont || is_anon_cont);
             if (p_is_container) crossed_container = 1;
             if (!got_li && t == LXB_TAG_LI) { *li = p; got_li = 1; }
             if (t == LXB_TAG_UL || t == LXB_TAG_OL) {
-                ++(*list_depth);
+                /* The UA indent of a list level IS its padding-inline-start (HTML
+                 * rendering 15.3.7): an author padding-left replaces it, and the box
+                 * model applies that one, so the level no longer counts here. */
+                if (cs.pad_left == CSS_LEN_UNSET && cs.pct[CSS_PCT_PAD_LEFT] == 0)
+                    ++(*list_depth);
                 if (!got_list_kind) { *ordered = (t == LXB_TAG_OL); got_list_kind = 1; }
             }
             if (!got_link && t == LXB_TAG_A) {
@@ -2356,6 +2527,15 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 int lv = heading_level(t);
                 if (lv) { *heading = lv; got_heading = 1; heading_here = 1; }
             }
+            /* A block INSIDE an inline-block that sits in a mixed line is internal
+             * to that atom (CSS 2.1 9.2.2): the line belongs to the block around the
+             * inline-block, so the search starts over above it. Without this the
+             * <summary> of lobste.rs' inline-block `details.caches` broke the byline
+             * into three lines. (v1: a multi-block inline-block inside a sentence
+             * flattens into the line.) */
+            if (got_block && *block != p && cs.display == CSS_DISP_INLINE_BLOCK &&
+                !is_out_of_flow(&cs) && in_mixed_line(p, sheet, style_cache))
+                got_block = 0;
             int block_set_here = (!got_block && causes_block_break(t, cs.display));
             if (block_set_here) {
                 *block = p; got_block = 1;
@@ -2667,6 +2847,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             cont->anc_item_basis[a]  = have_prev_el ? prev_basis      : CSS_LEN_UNSET;
                             cont->anc_item_order[a]  = have_prev_el ? prev_order      : CSS_LEN_UNSET;
                             cont->anc_item_align[a]  = have_prev_el ? prev_align_self : CSS_AK_UNSET;
+                            cont->anc_item_mauto[a]  = have_prev_el ? prev_mauto      : 0;
                             cont->anc_n++;
                         }
 
@@ -2702,6 +2883,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                                 cont->grow = prev_grow; cont->shrink = prev_shrink;
                                 cont->basis = prev_basis; cont->order = prev_order;
                                 cont->align_self = prev_align_self;
+                                cont->mauto = prev_mauto;
                                 if (is_real) {
                                     cont->col_span = prev_col_span;
                                     cont->row_span = prev_row_span;
@@ -2745,6 +2927,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             prev_grow = cs.flex_grow; prev_shrink = cs.flex_shrink;
             prev_basis = cs.flex_basis; prev_order = cs.order;
             prev_align_self = cs.align_self;
+            prev_mauto = pv_mauto_of(&cs);
             prev_col_span = (cs.grid_col_span > 0) ? cs.grid_col_span : 0;
             prev_row_span = (cs.grid_row_span > 0) ? cs.grid_row_span : 0;
             prev_area_name = cs.grid_area_name;
@@ -3866,6 +4049,7 @@ static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
     pv_set_grid_area(v, cont->grid_row_start, cont->grid_col_start);
     pv_set_flex(v, cont->grow, cont->shrink, cont->basis,
                 cont->order, cont->direction, cont->align_self);
+    pv_set_flex_mauto(v, cont->mauto);
     pv_set_cont_item(v, item_ordinal(items, cont->id, cont->item));
     link_cont_chain(reg, items, cont);
     pv_set_float(v, cont->float_side, cont->float_id, cont->float_clear,
@@ -4282,6 +4466,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_grid_area(v, ictl_cont.grid_row_start, ictl_cont.grid_col_start);
                 pv_set_flex(v, ictl_cont.grow, ictl_cont.shrink, ictl_cont.basis,
                             ictl_cont.order, ictl_cont.direction, ictl_cont.align_self);
+                pv_set_flex_mauto(v, ictl_cont.mauto);
                 pv_set_cont_item(v, item_ordinal(&items, ictl_cont.id, ictl_cont.item));
                 link_cont_chain(&reg, &items, &ictl_cont);
                 pv_set_float(v, ictl_cont.float_side, ictl_cont.float_id, ictl_cont.float_clear,
@@ -4822,7 +5007,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     && n->parent->type == LXB_DOM_NODE_TYPE_ELEMENT) {
                     css_style pcs = cached_element_style(
                         lxb_dom_interface_element((lxb_dom_node_t *)n->parent), sheet, &cache);
-                    if (pcs.display == CSS_DISP_FLEX || pcs.display == CSS_DISP_GRID)
+                    if (is_layout_container(n->parent, &pcs, sheet, &cache))
                         flex_spacer = 1;
                 }
                 if ((is_block_like_style(node_tag(n), &ecs) && css_has_boxdeco(&ecs))
@@ -4886,6 +5071,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     pv_set_grid_area(v, econt.grid_row_start, econt.grid_col_start);
                     pv_set_flex(v, econt.grow, econt.shrink, econt.basis, econt.order,
                                 econt.direction, econt.align_self);
+                    pv_set_flex_mauto(v, econt.mauto);
                     pv_set_cont_item(v, item_ordinal(&items, econt.id, econt.item));
                     link_cont_chain(&reg, &items, &econt);
                     pv_set_float(v, econt.float_side, econt.float_id, econt.float_clear,
@@ -5025,6 +5211,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     pv_set_indent(v, list_depth);
                     pv_set_text_style(v, align, font_scale, font_abs, line_scale,
                                       text_decoration);
+                    annotate_flow_run(v, &reg, &items, &cont, &box);
                     pv_set_text_ext(v, &ext);
                     pv_set_block_id(v, bdeco);
                     pending_break = 0;
@@ -5092,6 +5279,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_cont_box(v, cont.box_id);
                 pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
                            cont.align_self);
+                pv_set_flex_mauto(v, cont.mauto);
                 pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
                 link_cont_chain(&reg, &items, &cont);
                 pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear,
@@ -5164,7 +5352,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             }
         }
         char *marked = NULL;
-        if (li != NULL && li != prev_li && has_content && ext.list_style != CSS_LS_NONE) {
+        if (li != NULL && li != prev_li && has_content && ext.list_style != CSS_LS_NONE
+            && li_is_list_item(li, sheet, &cache)) {
             char mk[32];
             list_marker(ordered, li, ext.list_style, mk, sizeof mk);
             size_t ml = strlen(mk), cl = strlen(collapsed);
@@ -5206,27 +5395,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_color(v, fg);
         pv_set_bgcolor(v, bg);
         pv_set_text_style(v, align, font_scale, font_abs, line_scale, text_decoration);
-        pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols,
-                          cont.wrap, cont.row_gap, cont.align_items);
-                pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
-                pv_set_grid_rows(v, cont.grid_rows);
-                pv_set_cont_box(v, cont.box_id);
-                pv_set_row_span(v, cont.row_span);
-                pv_set_grid_area(v, cont.grid_row_start, cont.grid_col_start);
-                pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
-                            cont.align_self);
-                pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
-                link_cont_chain(&reg, &items, &cont);
-                pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear,
-                         cont.float_ml, cont.float_ml_pct,
-                         cont.float_mr, cont.float_mr_pct,
-                         cont.float_oid, cont.float_oside,
-                         cont.float_oml, cont.float_oml_pct,
-                         cont.float_omr, cont.float_omr_pct);
-                pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
-                pv_set_ua_tag(v, box.ua);
-                pv_set_box_pct(v, box.w_pct, box.l_pct, box.r_pct,
-                               box.mt_pct, box.mb_pct);
+        annotate_flow_run(v, &reg, &items, &cont, &box);
                 pv_set_text_ext(v, &ext);
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
