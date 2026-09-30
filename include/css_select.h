@@ -136,6 +136,7 @@ typedef struct css_sel {
     int  spec;
     int  order;     /* document order (tie-break) */
     int  rule;      /* index into rules[] */
+    int  layer;     /* @layer rank (css_atrule), 0 = unlayered */
     css_sub_sel subs[CSS_MAX_SUB_SELS];
     int  nsubs;
 } css_sel;
@@ -153,6 +154,37 @@ int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);
  * pseudo-element kind; otherwise set to -1. */
 int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
                  int allow_pseudo_el, int *pseudo_kind);
+
+/* --- Identifiers: escapes and long names (spec/css_select.md, 2026-09-29) ---
+ * A selector identifier (tag, .class, #id) is read with CSS escapes decoded
+ * (`.md\:flex` is the class "md:flex") and stored in a CSS_TOK_MAX slot. One that
+ * does not fit is FOLDED: its first CSEL_FOLD_PREFIX bytes, CSEL_FOLD_MARK (a byte
+ * no identifier contains) and 16 hex digits of a 64-bit hash of the whole name.
+ * csel_ident_eq folds the element's token the same way, so a CSS Modules name such
+ * as `Primer_Brand__LogoSuite-module__...___bUhyS` (72 bytes) matches exactly
+ * instead of being truncated and never matching. */
+#define CSEL_FOLD_PREFIX   40u
+#define CSEL_FOLD_MARK     '\x1f'
+#define CSEL_IDENT_SCRATCH 1024u
+
+int    csel_hex_val(char c);
+size_t csel_emit_utf8(unsigned int cp, char *out);
+/* Decodes CSS escapes in src[0,n) into dst (cap bytes, NUL-terminated, truncates). */
+void   csel_unescape(char *dst, size_t cap, const char *src, size_t n);
+/* Bytes the escape starting at s[i] occupies (0 when s[i] does not start one). */
+size_t csel_escape_len(const char *s, size_t i, size_t b);
+/* dst (CSS_TOK_MAX bytes) receives src[0,len) as-is, or folded when too long. */
+void   csel_ident_fold(const char *src, size_t len, char *dst);
+/* A stored (possibly folded) identifier against an element token of tlen bytes. */
+int    csel_ident_eq(const char *stored, const char *tok, size_t tlen);
+/* Reads an identifier at s[*ip] (escapes decoded, non-ASCII kept, lowercased when
+ * lower != 0) into dst (CSS_TOK_MAX). Returns 0, *ip untouched, when none. */
+int    csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);
+
+/* Index of the ';' ending the declaration that starts at s[i] (or of a '}' when
+ * stop_brace), or b: separators inside quotes, inside (...) such as
+ * url(data:a;b), or escaped, are not separators (CSS Syntax 5 section 5.4.4). */
+size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);
 
 /* --- ASCII helpers shared by the selector and cascade sides (internal) --- */
 

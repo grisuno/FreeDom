@@ -212,6 +212,11 @@ typedef struct css_decl {
      * writing it leaves whatever an EARLIER, lower-specificity declaration already
      * put there, so `.a{width:50%} .a.b{width:auto}` kept the 50%. */
     int wide;
+    /* Meta declarations only (css.c P_META_VARSRC): how many ordinary
+     * declarations produced by the page-global var() resolution follow the
+     * marker, so a per-element re-resolution can replace exactly them. 0 on
+     * every ordinary declaration. See spec/css_vars.md, "Alcance por elemento". */
+    int span;
 } css_decl;
 
 #endif

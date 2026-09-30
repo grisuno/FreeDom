@@ -916,10 +916,18 @@ typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */
 /* Render-time media context for evaluating @media at parse time. width_px is a
  * fixed, normalized desktop width, so a (min/max-width) query leaks no real viewport
  * size (anti-fingerprinting). */
+struct css_sel;  /* css_select.h */
+
 typedef struct css_media {
     int prefers_dark; /* 1: the user prefers a dark color scheme */
     int print;        /* 1: rendering for print (PDF); 0: screen */
     int width_px;     /* assumed viewport width for min/max-width queries */
+    /* Optional root matcher for custom-property collection (spec/css.md, "Root
+     * matcher"): answers nonzero iff the parsed selector matches the document's
+     * <html> or <body>. NULL keeps the class-list-only root scope. The css
+     * module never sees the DOM; the caller answers with its real matcher. */
+    int (*scope_match)(void *ctx, const struct css_sel *sel);
+    void *scope_ctx;
 } css_media;
 
 #define CSS_MEDIA_DEFAULT_WIDTH 1920
@@ -1074,6 +1082,10 @@ typedef struct css_element {
      * used to do -- makes `width:10em` mean 160px on a 32px element.
      */
     double font_size;
+    /* The element's INHERITED custom properties (struct cvr_chain, css_vars.h):
+     * its parent's computed chain, supplied top-down by the engine like
+     * font_size. NULL = none, and var() then sees only the page-global table. */
+    const struct cvr_chain *vars;
 } css_element;
 
 /* As css_resolve, but matches descendant (`A B`) and child (`A > B`) combinators
@@ -1081,6 +1093,15 @@ typedef struct css_element {
  * allocates nothing, reentrant. css_resolve is this with a parentless element. */
 css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          const char *inline_style, size_t inline_len);
+
+struct cvr_table;
+/* As css_resolve_el, and when own_out is non-NULL (a zeroed cvr_table the caller
+ * owns and frees with cvr_free) it receives the element's OWN winning custom
+ * properties -- what its children inherit on top of el->vars. See
+ * spec/css_vars.md, "Alcance por elemento". */
+css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
+                            const char *inline_style, size_t inline_len,
+                            struct cvr_table *own_out);
 
 /*
  * The computed font-size in px of an element whose resolved style is *o and

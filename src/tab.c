@@ -726,7 +726,7 @@ static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
 /* Cap on the accumulated external stylesheet text (same order as page_view's
  * PV_MAX_STYLE_BYTES): a sheet that would overflow it is dropped WHOLE (fail
  * closed, never truncated mid-rule). */
-#define TAB_MAX_EXTERN_CSS ((size_t)(1u << 20))
+#define TAB_MAX_EXTERN_CSS FC_MAX_AUTHOR_CSS_BYTES
 
 /* Injects PV_VIDEO runs from DOM-index video elements directly into the view,
  * bypassing the Lexbor tree walk which may miss them due to jQuery corruption

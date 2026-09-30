@@ -48,6 +48,19 @@ css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet);
 css_style cch_element_style_fs(lxb_dom_element_t *el, const css_sheet *sheet,
                                double parent_font_size);
 
+struct cvr_chain;
+struct cvr_table;
+/*
+ * As cch_element_style_fs, plus the element's INHERITED custom properties
+ * (`inherited`, its parent's chain, NULL = none) and, when own_out is non-NULL
+ * (zeroed, caller frees with cvr_free), the element's OWN winning custom
+ * properties -- what its children inherit. spec/css_vars.md, "Alcance por
+ * elemento".
+ */
+css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
+                                 double parent_font_size,
+                                 const struct cvr_chain *inherited,
+                                 struct cvr_table *own_out);
 /* Nonzero iff the parsed selector *sel matches element `el`, built against the
  * same bounded ancestor/sibling/attribute context as cch_element_style. This is
  * the single source of truth for selector matching: the DOM's querySelector and

@@ -14,6 +14,7 @@
  */
 
 #include "css.h"
+#include "css_select.h"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -57,6 +58,23 @@ static void check_style(css_style s) {
     if (s.cursor < CSS_CUR_UNSET || s.cursor > CSS_CUR_NONE) abort();
     if (s.text_overflow < CSS_TO_UNSET || s.text_overflow > CSS_TO_ELLIPSIS) abort();
     if (s.word_break < CSS_WB_UNSET || s.word_break > CSS_WB_BREAK) abort();
+}
+
+/* Root matcher for the attribute-scoped custom-property path: a fixed
+ * <html class="theme-dark" data-color-mode="dark"> answered by the real
+ * selector engine, so hostile selectors reach csel_parse/csel_matches here. */
+static int fuzz_root_match(void *ctx, const css_sel *sel) {
+    (void)ctx;
+    static const css_attr attrs[] = { { "data-color-mode", "dark" } };
+    static const char *const cls[] = { "theme-dark" };
+    css_element html = { 0 };
+    html.tag = "html";
+    html.classes = cls;
+    html.nclasses = 1;
+    html.attrs = attrs;
+    html.nattrs = 1;
+    html.child_count = -1;
+    return csel_matches(sel, &html, NULL, 0, NULL);
 }
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
@@ -107,7 +125,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     css_media media = {
         (size > 0) ? (data[0] & 1) : 0,
         (size > 0) ? ((data[0] >> 1) & 1) : 0,
-        (size > 1) ? (int)data[1] * 16 : CSS_MEDIA_DEFAULT_WIDTH
+        (size > 1) ? (int)data[1] * 16 : CSS_MEDIA_DEFAULT_WIDTH,
+        fuzz_root_match, NULL
     };
     css_sheet *sm = NULL;
     if (css_parse_media(sheet_text, 0, &media, &sm) == CSS_OK) {

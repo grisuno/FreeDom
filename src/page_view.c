@@ -10,10 +10,12 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "page_view.h"
+#include "freedom_config.h"
 #include "box_tree.h"  /* BT_MAX_POSITIONED: the box-id bound the solver can address */
 #include "box_style.h"
 #include "css.h"
 #include "css_chain.h"
+#include "css_vars.h"
 #include "css_length.h"   /* CL_INITIAL_FONT_SIZE: the inherited-size base case */
 #include "css_color.h"
 #include "flex_layout.h"
@@ -847,8 +849,12 @@ static int is_block_tag(lxb_tag_id_t t) {
  * actually create a box for the <a> tag. */
 static int is_block_like(lxb_tag_id_t t, css_display display) {
     if (display == CSS_DISP_INLINE) return 0;
+    /* A flex or grid container generates a box whatever its tag (CSS Display 3
+     * section 2): `<a style=display:flex>` is how card grids are written, and
+     * leaving it to is_block_tag lost the card's height and background. */
     if (display == CSS_DISP_BLOCK || display == CSS_DISP_INLINE_BLOCK
-        || display == CSS_DISP_LIST_ITEM) return 1;
+        || display == CSS_DISP_LIST_ITEM || display == CSS_DISP_FLEX
+        || display == CSS_DISP_GRID) return 1;
     /* Every box of the table family is a BLOCK CONTAINER (CSS 2.1 17.2): a
      * table, a row group, a row, a cell and a caption all establish a block
      * formatting context for their content. Only table-column generates no box
@@ -1882,6 +1888,14 @@ static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style
  * element count, normally far smaller than the selector count). Grows like
  * pv_node_map: a dynamic array, doubling, degrading to "no cache" (not a crash)
  * on OOM. */
+/* One element's custom-property node: its own winning `--name` table and the
+ * chain it inherited. Allocated only for elements that declare something; every
+ * other element shares its parent's chain pointer. */
+typedef struct pv_var_node {
+    cvr_chain chain;
+    cvr_table own;
+} pv_var_node;
+
 typedef struct pv_style_cache {
     const lxb_dom_node_t **node;
     css_style             *style;
@@ -1890,27 +1904,62 @@ typedef struct pv_style_cache {
      * resolving one element would mean re-resolving its whole ancestor chain --
      * a full cascade per level, per element. */
     double                *font_size;
+    /* The element's computed custom-property chain (what its children inherit),
+     * memoised for the same reason. NULL = none. */
+    const cvr_chain      **vars;
     size_t                 count, cap;
+    /* Open-addressed index over node[]: slot holds entry index + 1, 0 = empty.
+     * A linear scan here made style resolution quadratic in the element count. */
+    size_t                *hidx;
+    size_t                 hcap;
+    pv_var_node          **vn;
+    size_t                 nvn, vncap;
 } pv_style_cache;
 
+static size_t pv_ptr_hash(const void *p) {
+    uintptr_t x = (uintptr_t)p;
+    x ^= x >> 17;
+    x *= (uintptr_t)0x9E3779B97F4A7C15ull;
+    x ^= x >> 29;
+    return (size_t)x;
+}
+
+static void pv_cache_reindex(pv_style_cache *c) {
+    if (c->hidx == NULL) return;
+    memset(c->hidx, 0, c->hcap * sizeof *c->hidx);
+    for (size_t k = 0; k < c->count; ++k) {
+        size_t h = pv_ptr_hash(c->node[k]) & (c->hcap - 1);
+        while (c->hidx[h] != 0) h = (h + 1) & (c->hcap - 1);
+        c->hidx[h] = k + 1;
+    }
+}
+
 static int pv_style_cache_init(pv_style_cache *c) {
+    memset(c, 0, sizeof *c);
     c->cap = 64;
+    c->hcap = 128;
     c->node = (const lxb_dom_node_t **)calloc(c->cap, sizeof *c->node);
     c->style = (css_style *)calloc(c->cap, sizeof *c->style);
     c->font_size = (double *)calloc(c->cap, sizeof *c->font_size);
-    if (c->node == NULL || c->style == NULL || c->font_size == NULL) {
-        free(c->node); free(c->style); free(c->font_size);
-        c->node = NULL; c->style = NULL; c->font_size = NULL; c->cap = 0;
+    c->vars = (const cvr_chain **)calloc(c->cap, sizeof *c->vars);
+    c->hidx = (size_t *)calloc(c->hcap, sizeof *c->hidx);
+    if (c->node == NULL || c->style == NULL || c->font_size == NULL || c->vars == NULL ||
+        c->hidx == NULL) {
+        free(c->node); free(c->style); free(c->font_size); free(c->vars); free(c->hidx);
+        memset(c, 0, sizeof *c);
         return -1;
     }
-    c->count = 0;
     return 0;
 }
 
 static void pv_style_cache_free(pv_style_cache *c) {
-    free(c->node); free(c->style); free(c->font_size);
-    c->node = NULL; c->style = NULL; c->font_size = NULL;
-    c->count = c->cap = 0;
+    free(c->node); free(c->style); free(c->font_size); free(c->vars); free(c->hidx);
+    for (size_t k = 0; k < c->nvn; ++k) {
+        cvr_free(&c->vn[k]->own);
+        free(c->vn[k]);
+    }
+    free(c->vn);
+    memset(c, 0, sizeof *c);
 }
 
 /* cch_element_style(el, sheet), memoized in *cache. A NULL cache (OOM at init,
@@ -1918,9 +1967,13 @@ static void pv_style_cache_free(pv_style_cache *c) {
  * failure, matching every other degrade-on-OOM path in this module. */
 /* Index of `node` in the cache, or -1. */
 static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node) {
-    if (cache == NULL) return -1;
-    for (size_t i = 0; i < cache->count; ++i)
-        if (cache->node[i] == node) return (long)i;
+    if (cache == NULL || cache->hidx == NULL || cache->count == 0) return -1;
+    size_t h = pv_ptr_hash(node) & (cache->hcap - 1);
+    while (cache->hidx[h] != 0) {
+        size_t k = cache->hidx[h] - 1;
+        if (cache->node[k] == node) return (long)k;
+        h = (h + 1) & (cache->hcap - 1);
+    }
     return -1;
 }
 
@@ -1934,8 +1987,8 @@ static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_
 }
 
 static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
-                         const css_style *cs, double font_size) {
-    if (cache == NULL) return;
+                         const css_style *cs, double font_size, const cvr_chain *vars) {
+    if (cache == NULL || cache->hidx == NULL) return;
     if (cache->count == cache->cap) {
         size_t ncap = cache->cap * 2;
         const lxb_dom_node_t **nn =
@@ -1945,14 +1998,51 @@ static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
         if (ns != NULL) cache->style = ns;
         double *nf = (double *)realloc(cache->font_size, ncap * sizeof *nf);
         if (nf != NULL) cache->font_size = nf;
-        if (nn != NULL && ns != NULL && nf != NULL) cache->cap = ncap;
+        const cvr_chain **nv = (const cvr_chain **)realloc(cache->vars, ncap * sizeof *nv);
+        if (nv != NULL) cache->vars = nv;
+        if (nn != NULL && ns != NULL && nf != NULL && nv != NULL) cache->cap = ncap;
     }
-    if (cache->count < cache->cap) {
-        cache->node[cache->count] = node;
-        cache->style[cache->count] = *cs;
-        cache->font_size[cache->count] = font_size;
-        ++cache->count;
+    if (cache->count >= cache->cap) return;
+    /* Keep the index at most half full. */
+    if ((cache->count + 1) * 2 > cache->hcap) {
+        size_t nh = cache->hcap * 2;
+        size_t *g = (size_t *)calloc(nh, sizeof *g);
+        if (g == NULL) return;
+        free(cache->hidx);
+        cache->hidx = g;
+        cache->hcap = nh;
+        pv_cache_reindex(cache);
     }
+    size_t k = cache->count++;
+    cache->node[k] = node;
+    cache->style[k] = *cs;
+    cache->font_size[k] = font_size;
+    cache->vars[k] = vars;
+    size_t h = pv_ptr_hash(node) & (cache->hcap - 1);
+    while (cache->hidx[h] != 0) h = (h + 1) & (cache->hcap - 1);
+    cache->hidx[h] = k + 1;
+}
+
+/* Takes ownership of *own (left zeroed) as a new chain node over `parent`.
+ * Returns the node's chain, or `parent` when there is nothing to add or on OOM. */
+static const cvr_chain *pv_var_push(pv_style_cache *cache, cvr_table *own,
+                                    const cvr_chain *parent) {
+    if (cache == NULL || cvr_count(own) == 0) { cvr_free(own); return parent; }
+    if (cache->nvn == cache->vncap) {
+        size_t nc = cache->vncap ? cache->vncap * 2 : 64;
+        pv_var_node **g = (pv_var_node **)realloc(cache->vn, nc * sizeof *g);
+        if (g == NULL) { cvr_free(own); return parent; }
+        cache->vn = g;
+        cache->vncap = nc;
+    }
+    pv_var_node *n = (pv_var_node *)calloc(1, sizeof *n);
+    if (n == NULL) { cvr_free(own); return parent; }
+    n->own = *own;
+    memset(own, 0, sizeof *own);
+    n->chain.own = &n->own;
+    n->chain.parent = parent;
+    cache->vn[cache->nvn++] = n;
+    return &n->chain;
 }
 
 /* The nearest ancestor that is an element, or NULL at the root. */
@@ -1987,24 +2077,28 @@ static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sh
     lxb_dom_element_t *stack[PV_FONT_CHAIN_MAX];
     size_t n = 0;
     double inherited = CL_INITIAL_FONT_SIZE;
+    const cvr_chain *vars = NULL;   /* the inherited custom-property chain */
     lxb_dom_element_t *cur = el;
     while (cur != NULL && n < PV_FONT_CHAIN_MAX) {
         long h = pv_cache_find(cache, (const lxb_dom_node_t *)cur);
-        if (h >= 0) { inherited = cache->font_size[h]; break; }
+        if (h >= 0) { inherited = cache->font_size[h]; vars = cache->vars[h]; break; }
         stack[n++] = cur;
         cur = pv_parent_element(cur);
     }
 
     /* n is at least 1 (el itself was not cached, so it was pushed) unless the
      * bound was already exhausted; resolve directly in that degenerate case. */
-    if (n == 0) return cch_element_style_fs(el, sheet, inherited);
+    if (n == 0) return cch_element_style_vars(el, sheet, inherited, vars, NULL);
 
-    /* Resolve top-down so each level sees its parent's computed size. */
-    css_style cs = cch_element_style_fs(stack[n - 1], sheet, inherited);
+    /* Resolve top-down so each level sees its parent's computed size and custom
+     * properties (spec/css_vars.md, "Alcance por elemento"). */
+    css_style cs = { 0 };
     for (size_t k = n; k-- > 0; ) {
-        if (k != n - 1) cs = cch_element_style_fs(stack[k], sheet, inherited);
+        cvr_table own = { 0 };
+        cs = cch_element_style_vars(stack[k], sheet, inherited, vars, &own);
         inherited = css_computed_font_size(&cs, inherited);
-        pv_cache_put(cache, (const lxb_dom_node_t *)stack[k], &cs, inherited);
+        vars = pv_var_push(cache, &own, vars);
+        pv_cache_put(cache, (const lxb_dom_node_t *)stack[k], &cs, inherited, vars);
     }
     return cs;
 }
@@ -2428,6 +2522,10 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
      * a heading needs. */
     double fs_rel = 1.0;
     int fs_rel_any = 0;
+    /* The heading itself declared font-size (any unit): that declaration, not the
+     * UA `h1{font-size:2em}`, is the heading's font-size, so the painter must not
+     * apply the UA heading scale on top of it. */
+    int heading_fs_own = 0;
     int got_li = 0, got_list_kind = 0, got_float = 0;
     /* Set once the walk passes through (or starts at) an absolutely/fixed positioned
      * element. Per CSS 2.2 section 9.7 such an element computes `float` to none and is
@@ -2718,6 +2816,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 *align = (int)cs.text_align; got_align = 1;
             }
             if (!got_fs && cs.font_scale != 0) {
+                if (heading_here) heading_fs_own = 1;
                 if (cs.font_abs) {
                     *font_scale = round_pct(cs.font_scale * fs_rel);
                     /* An absolute font-size REPLACES the user-agent heading scale
@@ -2736,7 +2835,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                      * rather than approximate because font_scale is already a
                      * percent of the same 16px root that the UA base is built from,
                      * so base(= scale x 16) x font_scale/100(= px/16) == scale x px. */
-                    *font_abs = (got_heading && !heading_here) ? 0 : 1;
+                    *font_abs = (got_heading && !heading_here && !heading_fs_own) ? 0 : 1;
                     got_fs = 1;
                 } else {
                     fs_rel *= (double)cs.font_scale / 100.0;
@@ -2959,7 +3058,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
      * inline inside a heading (`<h1>big <span style="font-size:.5em">small</span>`). */
     if (!got_fs && fs_rel_any) {
         *font_scale = round_pct(100.0 * fs_rel);
-        *font_abs = 0;
+        *font_abs = heading_fs_own;
     }
 
     *bold = got_css_bold ? css_bold : tag_bold;
@@ -3249,6 +3348,34 @@ static lxb_dom_node_t *find_body(lxb_dom_node_t *root) {
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(n) == LXB_TAG_BODY) return n;
     }
     return NULL;
+}
+
+/* The document's <html> and <body> elements (either may be NULL): the roots a
+ * custom-property rule must match to feed the page-global var() table. */
+typedef struct pv_root_els {
+    lxb_dom_element_t *el[2];
+} pv_root_els;
+
+static pv_root_els find_root_els(lxb_dom_node_t *root) {
+    pv_root_els r = { { NULL, NULL } };
+    for (lxb_dom_node_t *n = root; n != NULL; n = node_next(n, root)) {
+        if (n->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        lxb_tag_id_t t = node_tag(n);
+        if (t == LXB_TAG_HTML && r.el[0] == NULL) r.el[0] = lxb_dom_interface_element(n);
+        if (t == LXB_TAG_BODY) { r.el[1] = lxb_dom_interface_element(n); break; }
+    }
+    return r;
+}
+
+/* css_media.scope_match: answered by cch_element_matches, the same matcher the
+ * cascade and querySelector use, so an attribute-scoped palette
+ * (`[data-color-mode=dark][data-dark-theme=dark]`) applies iff the real root
+ * carries those attributes (spec/css.md, "Root matcher"). */
+static int root_els_match(void *ctx, const css_sel *sel) {
+    const pv_root_els *r = (const pv_root_els *)ctx;
+    for (int k = 0; k < 2; ++k)
+        if (r->el[k] != NULL && cch_element_matches(r->el[k], sel)) return 1;
+    return 0;
 }
 
 /* Space-joined class attributes of the document's <html> and <body> elements: the
@@ -3891,9 +4018,9 @@ static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr) {
 }
 
 /* Upper bound on concatenated <style> text (anti-DoS): a pathological document
- * cannot make the parser allocate without limit. The css module is itself bounded;
- * this caps the text fed to it. */
-#define PV_MAX_STYLE_BYTES (1u << 20)
+ * cannot make the parser allocate without limit. One value for inline and fetched
+ * sheets alike (freedom_config.h explains why it is not smaller). */
+#define PV_MAX_STYLE_BYTES FC_MAX_AUTHOR_CSS_BYTES
 
 /* Concatenates the text of every <style> element in the document (head included)
  * into one owned, NUL-terminated buffer, capped at PV_MAX_STYLE_BYTES. Returns NULL
@@ -4122,7 +4249,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
      * list scopes custom-property collection, so a theme palette keyed by a class the
      * page actually carries applies and an inactive one never clobbers it. */
     int media_w = (viewport_w > 0) ? viewport_w : CSS_MEDIA_DEFAULT_WIDTH;
-    css_media media = { prefers_dark ? 1 : 0, 0, media_w };
+    pv_root_els roots = find_root_els(root);
+    css_media media = { prefers_dark ? 1 : 0, 0, media_w, root_els_match, &roots };
     char *root_scope = collect_root_scope(root);
     (void)css_parse_scoped(style_text, style_len, &media, root_scope, &sheet);
     free(root_scope);
@@ -5466,7 +5594,8 @@ pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
     char *style_text = collect_page_css(root, extern_css, extern_len, &style_len);
 
     int media_w = (viewport_w > 0) ? viewport_w : CSS_MEDIA_DEFAULT_WIDTH;
-    css_media media = { prefers_dark ? 1 : 0, 0, media_w };
+    pv_root_els roots = find_root_els(root);
+    css_media media = { prefers_dark ? 1 : 0, 0, media_w, root_els_match, &roots };
     char *root_scope = collect_root_scope(root);
 
     css_sheet *sheet = NULL;

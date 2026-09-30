@@ -59,4 +59,12 @@
  * as UI_FONT_SIZE in gui/ui_render.c and gui/browser_ui_internal.h. */
 #define FC_UI_FONT_SIZE 16.0
 
+/* Ceiling on the author CSS text one page may feed the parser: the document's
+ * <style> blocks plus its fetched <link> sheets, together. It is an anti-DoS
+ * bound on parser memory and time, and it must sit ABOVE what real pages ship:
+ * github.com's front page links ~2.4 MB of distinct CSS, and the former 1 MiB
+ * value was consumed by its four colour-theme sheets alone, so the layout sheets
+ * that follow them were dropped whole and the page rendered unstyled. */
+#define FC_MAX_AUTHOR_CSS_BYTES ((size_t)16u << 20)
+
 #endif /* FREEDOM_CONFIG_H */

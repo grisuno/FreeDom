@@ -172,6 +172,54 @@ static void test_unsupported_syntax(void **state) {
     assert_int_equal(cc_parse("hwb(0,100%,0%)", &C), CC_ERR_SYNTAX);
 }
 
+/* --- CSS Color 4 section 8-9: oklab/oklch/lab/lch (2026-09-29) ---
+ * Tailwind v4 writes its whole palette in oklch(); huggingface.co lost ~765
+ * colour declarations to it. References: CSS Color 4 sample values and the
+ * Tailwind v4 palette (sRGB fallbacks it publishes). One unit of rounding slack
+ * per channel. */
+static void expect_near(const char *tok, int r, int g, int b) {
+    cc_rgb c;
+    assert_int_equal(cc_parse(tok, &c), CC_OK);
+    assert_int_in_range(c.r, r > 0 ? r - 1 : 0, r < 255 ? r + 1 : 255);
+    assert_int_in_range(c.g, g > 0 ? g - 1 : 0, g < 255 ? g + 1 : 255);
+    assert_int_in_range(c.b, b > 0 ? b - 1 : 0, b < 255 ? b + 1 : 255);
+}
+
+static void test_oklch_oklab(void **state) {
+    (void)state;
+    expect_near("oklch(70.7% .022 261.325)", 0x99, 0xa1, 0xaf);   /* tailwind gray-400 */
+    expect_near("oklch(62.8% 0.2577 29.23)", 255, 0, 0);
+    expect_near("oklch(0% 0 0)", 0, 0, 0);
+    expect_near("oklch(1 0 none)", 255, 255, 255);
+    expect_near("OKLCH(62.8% 0.2577 29.23deg / 50%)", 255, 0, 0);
+    expect_near("oklch(62.8% 64.4% 0.5102turn)", 0, 179, 153);   /* independent reference computation */
+    expect_near("oklab(0.628 0.2249 0.1258)", 255, 0, 0);
+    expect_near("oklab(62.8% 56.2% 31.5%)", 255, 0, 0);
+    /* Out of the sRGB gamut: clamped per channel, still a colour. */
+    cc_rgb c;
+    assert_int_equal(cc_parse("oklch(70% 0.4 150)", &c), CC_OK);
+}
+
+static void test_lab_lch(void **state) {
+    (void)state;
+    expect_near("lab(54.29 80.8 69.89)", 255, 0, 0);
+    expect_near("lab(54.29% 64.6% 55.9%)", 255, 0, 0);
+    expect_near("lch(54.29 106.84 40.85)", 255, 0, 0);
+    expect_near("lab(100 0 0)", 255, 255, 255);
+}
+
+static void test_lab_family_malformed(void **state) {
+    (void)state;
+    cc_rgb c;
+    assert_int_equal(cc_parse("oklch(50% 0.1)", &c), CC_ERR_SYNTAX);
+    assert_int_equal(cc_parse("oklch(50%, 0.1, 20)", &c), CC_ERR_SYNTAX);
+    assert_int_equal(cc_parse("oklch(50% 0.1 20 30)", &c), CC_ERR_SYNTAX);
+    assert_int_equal(cc_parse("oklch(50% 0.1 20deg20)", &c), CC_ERR_SYNTAX);
+    assert_int_equal(cc_parse("oklch(x 0.1 20)", &c), CC_ERR_SYNTAX);
+    assert_int_equal(cc_parse("oklab(0.5 0.1 0.1 / )", &c), CC_ERR_SYNTAX);
+    assert_int_equal(cc_parse("lab(50 0 0", &c), CC_ERR_SYNTAX);
+}
+
 static void test_pack_unpack(void **state) {
     (void)state;
     cc_rgb a = { 0x12, 0x34, 0x56 };
@@ -317,6 +365,9 @@ int main(void) {
         cmocka_unit_test(test_space_separated_still_fails_closed),
         cmocka_unit_test(test_unsupported_syntax),
         cmocka_unit_test(test_pack_unpack),
+        cmocka_unit_test(test_oklch_oklab),
+        cmocka_unit_test(test_lab_lch),
+        cmocka_unit_test(test_lab_family_malformed),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

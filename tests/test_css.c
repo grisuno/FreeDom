@@ -20,6 +20,7 @@
 
 #include "css.h"
 #include "css_select.h"
+#include "css_vars.h"
 
 /* --- inline declarations --- */
 
@@ -806,7 +807,7 @@ static void test_custom_prop_dark_media_not_collected_in_light(void **state) {
 static void test_custom_prop_dark_media_collected_in_dark(void **state) {
     (void)state;
     css_sheet *sh = NULL;
-    css_media m = { 1, 0, CSS_MEDIA_DEFAULT_WIDTH };
+    css_media m = { 1, 0, CSS_MEDIA_DEFAULT_WIDTH, NULL, NULL };
     assert_int_equal(css_parse_media(
         ":root{--c:#111111;}"
         "@media (prefers-color-scheme: dark){:root{--c:#eeeeee;}}"
@@ -872,9 +873,404 @@ static void test_custom_prop_table_holds_hundreds(void **state) {
     css_free(sh);
 }
 
+/* --- custom-property table sized for real design systems (2026-09-29) ---
+ * Measured on github.com: Primer declares 2443 distinct names, values longer than
+ * 64 bytes and chains four hops deep, and scopes its palettes by attributes on
+ * <html>. Each of these was a silent drop. */
+
+static void test_custom_prop_long_value_survives(void **state) {
+    (void)state;
+    /* A value past the old 64-byte token bound (a real border/font stack is). */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        ":root{--p:1px                                                            "
+        "2px 3px 4px;} p{padding:var(--p);}", 0, &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.pad_top, 1);
+    assert_int_equal(s.pad_right, 2);
+    assert_int_equal(s.pad_bottom, 3);
+    assert_int_equal(s.pad_left, 4);
+    css_free(sh);
+}
+
+static void test_custom_prop_long_name_survives(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        ":root{--prettylights-syntax-brackethighlighter-unmatched-with-a-long-tail:#123abc;}"
+        "p{color:var(--prettylights-syntax-brackethighlighter-unmatched-with-a-long-tail);}",
+        0, &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.color, 0x123abc);
+    css_free(sh);
+}
+
+static void test_custom_prop_table_holds_thousands(void **state) {
+    (void)state;
+    enum { N = 3000, CAP = 64 * 1024 };
+    char *text = (char *)malloc(CAP);
+    assert_non_null(text);
+    size_t o = 0;
+    o += (size_t)snprintf(text + o, CAP - o, ":root{");
+    for (int i = 0; i < N; ++i)
+        o += (size_t)snprintf(text + o, CAP - o, "--v%d:#%06x;", i, i);
+    o += (size_t)snprintf(text + o, CAP - o, "} p{color:var(--v2999);} a{color:var(--v7);}");
+    assert_true(o < CAP);
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(text, 0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 2999);
+    assert_int_equal(css_resolve(sh, "a", NULL, NULL, 0, NULL, 0).color, 7);
+    css_free(sh);
+    free(text);
+}
+
+static void test_custom_prop_chain_eight_deep(void **state) {
+    (void)state;
+    css_style s = css_parse_inline(
+        "--a:#0a0b0c; --b:var(--a); --c:var(--b); --d:var(--c); --e:var(--d);"
+        "--f:var(--e); --g:var(--f); --h:var(--g); color:var(--h)", 0);
+    assert_int_equal(s.color, 0x0a0b0c);
+}
+
+static void test_custom_prop_fanout_bounded(void **state) {
+    (void)state;
+    /* Exponential fan-out overflows the bounded output and fails the declaration
+     * instead of burning CPU or memory. */
+    css_style s = css_parse_inline(
+        "--a:xxxxxxxxxxxxxxxx; --b:var(--a) var(--a); --c:var(--b) var(--b);"
+        "--d:var(--c) var(--c); --e:var(--d) var(--d); --f:var(--e) var(--e);"
+        "--g:var(--f) var(--f); --h:var(--g) var(--g); --i:var(--h) var(--h);"
+        "--j:var(--i) var(--i); --k:var(--j) var(--j); font-family:var(--k);"
+        "background:#020304", 0);
+    assert_int_equal(s.background, 0x020304);
+}
+
+/* Root matcher for the attribute-scoped palette tests: the document root is
+ * <html data-color-mode="dark" data-dark-theme="dark">. */
+static int root_is_dark_html(void *ctx, const css_sel *sel) {
+    (void)ctx;
+    static const css_attr attrs[] = {
+        { "data-color-mode", "dark" }, { "data-dark-theme", "dark" } };
+    css_element html = { 0 };
+    html.tag = "html";
+    html.attrs = attrs;
+    html.nattrs = 2;
+    html.child_count = -1;
+    return csel_matches(sel, &html, NULL, 0, NULL);
+}
+
+static void test_custom_prop_attr_scoped_via_root_matcher(void **state) {
+    (void)state;
+    css_media m = { 0, 0, CSS_MEDIA_DEFAULT_WIDTH, root_is_dark_html, NULL };
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse_media(
+        "[data-color-mode=light][data-light-theme=light]{--fg:#111111;}"
+        "[data-color-mode=dark][data-dark-theme=dark]{--fg:#f0f6fc;}"
+        "p{color:var(--fg);}", 0, &m, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0xf0f6fc);
+    css_free(sh);
+}
+
+static void test_custom_prop_attr_scoped_skipped_without_matcher(void **state) {
+    (void)state;
+    /* No matcher: attribute scopes stay fail-safe (skipped). */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        ":root{--fg:#111111;} [data-color-mode=dark]{--fg:#f0f6fc;} p{color:var(--fg);}",
+        0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0x111111);
+    css_free(sh);
+}
+
+static void test_custom_prop_root_matcher_rejects_descendant(void **state) {
+    (void)state;
+    /* The matcher is asked about the ROOT: a rule for a descendant of a matching
+     * root is not document-wide and must not feed the table. */
+    css_media m = { 0, 0, CSS_MEDIA_DEFAULT_WIDTH, root_is_dark_html, NULL };
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse_media(
+        ":root{--fg:#111111;} [data-color-mode=dark] .card{--fg:#f0f6fc;}"
+        "p{color:var(--fg);}", 0, &m, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0x111111);
+    css_free(sh);
+}
+
+/* --- @supports / @layer (spec/css_atrule.md, 2026-09-29) --- */
+
+static void test_supports_true_block_applies(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@supports (display:grid){p{color:#010203;}}"
+        "@supports (display:no-such-value){p{background:#0a0a0a;}}"
+        "@supports not (display:no-such-value){p{padding-top:5px;}}", 0, &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.color, 0x010203);
+    assert_int_equal(s.background, -1);
+    assert_int_equal(s.pad_top, 5);
+    css_free(sh);
+}
+
+static void test_supports_collects_custom_props(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@supports (display:flex){:root{--c:#445566;}} p{color:var(--c);}", 0, &sh),
+        CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0x445566);
+    css_free(sh);
+}
+
+static void test_layer_block_applies(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@layer brand{.x{color:#112233;} :root{--g:7px;}} p{padding-top:var(--g);}",
+        0, &sh), CSS_OK);
+    const char *cl[] = { "x" };
+    assert_int_equal(css_resolve(sh, "div", NULL, cl, 1, NULL, 0).color, 0x112233);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).pad_top, 7);
+    css_free(sh);
+}
+
+static void test_unlayered_beats_layer_despite_specificity(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@layer base{div.x{color:#aa0000;}} div{color:#00bb00;}", 0, &sh), CSS_OK);
+    const char *cl[] = { "x" };
+    assert_int_equal(css_resolve(sh, "div", NULL, cl, 1, NULL, 0).color, 0x00bb00);
+    css_free(sh);
+}
+
+static void test_layer_order_statement(void **state) {
+    (void)state;
+    /* `@layer a, b;` fixes the order: b beats a even though a's block comes later
+     * and is more specific. */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@layer a, b; @layer b{div{color:#0000cc;}} @layer a{div.x{color:#cc0000;}}",
+        0, &sh), CSS_OK);
+    const char *cl[] = { "x" };
+    assert_int_equal(css_resolve(sh, "div", NULL, cl, 1, NULL, 0).color, 0x0000cc);
+    css_free(sh);
+}
+
+static void test_layer_important_reverses(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@layer a{div{color:#0000aa !important;}} div{color:#00aa00 !important;}",
+        0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "div", NULL, NULL, 0, NULL, 0).color, 0x0000aa);
+    css_free(sh);
+}
+
+static void test_layer_inline_still_wins(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("#i.x.y div{color:#111111;}", 0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "div", NULL, NULL, 0, "color:#222222", 0).color,
+                     0x222222);
+    css_free(sh);
+}
+
+static void test_container_block_still_skipped(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("@container (width>=10px){p{color:#123456;}}", 0, &sh),
+                     CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_keyframes_content_does_not_crash(void **state) {
+    (void)state;
+    /* A keyframe block has no content-string pool; `content` inside one used to
+     * dereference its NULL counter (SIGSEGV on hostile CSS). */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@keyframes a{from{content:'x';opacity:0}to{content:'y';opacity:1}}"
+        "p{animation-name:a}", 0, &sh), CSS_OK);
+    css_free(sh);
+}
+
+/* --- selector identifiers: escapes + long names (2026-09-29) ---
+ * Tailwind writes `.md\:flex`; CSS Modules write 70-byte hashed class names. Both
+ * were silently lost: the escape ended the selector, the long name was truncated. */
+
+static int color_for_class(const char *css, const char *cls) {
+    css_sheet *sh = NULL;
+    if (css_parse(css, 0, &sh) != CSS_OK) return -2;
+    const char *cl[] = { cls };
+    int c = css_resolve(sh, "div", NULL, cl, 1, NULL, 0).color;
+    css_free(sh);
+    return c;
+}
+
+static void test_selector_escaped_colon_and_slash(void **state) {
+    (void)state;
+    assert_int_equal(color_for_class(".md\\:flex{color:#010101;}", "md:flex"), 0x010101);
+    assert_int_equal(color_for_class(".w-1\\/2{color:#020202;}", "w-1/2"), 0x020202);
+    assert_int_equal(color_for_class(".hover\\:x:hover{color:#030303;}", "hover:x"), -1);
+    assert_int_equal(color_for_class(".\\!p-0{color:#040404;}", "!p-0"), 0x040404);
+}
+
+static void test_selector_hex_escape(void **state) {
+    (void)state;
+    /* `\31 ` is U+0031 '1'; the single blank after a hex escape belongs to it. */
+    assert_int_equal(color_for_class(".\\31 0{color:#050505;}", "10"), 0x050505);
+    assert_int_equal(color_for_class(".\\32xl\\:p-4{color:#060606;}", "2xl:p-4"), 0x060606);
+}
+
+static void test_selector_escaped_comma_and_parens(void **state) {
+    (void)state;
+    const char *css = ".a\\,b,.c{color:#070707;} .\\[mask\\:f\\(x\\)\\]{color:#080808;}";
+    assert_int_equal(color_for_class(css, "a,b"), 0x070707);
+    assert_int_equal(color_for_class(css, "c"), 0x070707);
+    assert_int_equal(color_for_class(css, "b"), -1);
+    assert_int_equal(color_for_class(css, "[mask:f(x)]"), 0x080808);
+}
+
+static void test_selector_escape_inside_not(void **state) {
+    (void)state;
+    const char *css = "div:not(.md\\:hidden){color:#090909;}";
+    assert_int_equal(color_for_class(css, "md:hidden"), -1);
+    assert_int_equal(color_for_class(css, "other"), 0x090909);
+}
+
+static void test_selector_long_class_exact(void **state) {
+    (void)state;
+    const char *css =
+        ".Primer_Brand__LogoSuite-module__LogoSuite__logobar-marqueeGroup___bUhyS"
+        "{color:#0a0a0a;}";
+    assert_int_equal(color_for_class(css,
+        "Primer_Brand__LogoSuite-module__LogoSuite__logobar-marqueeGroup___bUhyS"),
+        0x0a0a0a);
+    /* Same 63-byte prefix, different tail: must NOT match (the old truncation
+     * would have compared only the prefix). */
+    assert_int_equal(color_for_class(css,
+        "Primer_Brand__LogoSuite-module__LogoSuite__logobar-marqueeGroup___XXXXX"), -1);
+    assert_int_equal(color_for_class(css, "Primer_Brand__LogoSuite-module__LogoSuite__logobar-marqueeGr"), -1);
+}
+
+static void test_decl_split_ignores_semicolon_in_url_and_string(void **state) {
+    (void)state;
+    /* `;` inside url(...) or a quoted string is not a declaration separator
+     * (CSS Syntax 5 consumes both as one token). Splitting there turned
+     * `url(data:image/svg+xml;utf8,...)` into a bogus property and lost every
+     * declaration after it. */
+    css_style s = css_parse_inline(
+        "background:url(data:image/svg+xml;utf8,<svg></svg>) #0a0b0c;color:#0b0c0d;"
+        "content:'a;b';padding-top:3px", 0);
+    assert_int_equal(s.background, 0x0a0b0c);
+    assert_int_equal(s.color, 0x0b0c0d);
+    assert_int_equal(s.pad_top, 3);
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        ":root{--i:url(data:image/svg+xml;charset=utf-8,x);--c:#0e0f10;} p{color:var(--c);}",
+        0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0x0e0f10);
+    css_free(sh);
+}
+
+/* --- per-element custom properties (spec/css_vars.md, tanda 34) --- */
+
+static css_element cls_el(const char *tag, const char *const *cl, size_t n,
+                          const css_element *parent, const cvr_chain *vars) {
+    css_element e = { 0 };
+    e.tag = tag;
+    e.classes = cl;
+    e.nclasses = n;
+    e.parent = parent;
+    e.child_count = -1;
+    e.vars = vars;
+    return e;
+}
+
+static void test_component_var_same_element(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        ".btn{--bg:#112233;background:var(--bg);color:var(--fg,#445566)}", 0, &sh), CSS_OK);
+    const char *cl[] = { "btn" };
+    css_element e = cls_el("button", cl, 1, NULL, NULL);
+    css_style s = css_resolve_el(sh, &e, NULL, 0);
+    assert_int_equal(s.background, 0x112233);
+    assert_int_equal(s.color, 0x445566);
+    css_free(sh);
+}
+
+static void test_component_var_inherited_by_child(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        ":root{--c:#111111;} .card{--c:#abcdef;} p{color:var(--c);}", 0, &sh), CSS_OK);
+    const char *cl[] = { "card" };
+    css_element card = cls_el("div", cl, 1, NULL, NULL);
+    cvr_table own = { 0 };
+    (void)css_resolve_el_ex(sh, &card, NULL, 0, &own);
+    assert_string_equal(cvr_get(&own, "--c", 3), "#abcdef");
+    cvr_chain node = { &own, NULL };
+    css_element p = cls_el("p", NULL, 0, &card, &node);
+    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).color, 0xabcdef);
+    /* Outside the card: the :root value. */
+    css_element q = cls_el("p", NULL, 0, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &q, NULL, 0).color, 0x111111);
+    cvr_free(&own);
+    css_free(sh);
+}
+
+static void test_component_var_cascade_order(void **state) {
+    (void)state;
+    /* Custom properties cascade like any property: specificity beats order, and
+     * !important beats specificity. */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "div.a{--c:#000002;} .a{--c:#000001;} .a{color:var(--c);}"
+        ".b{--d:#000004 !important;} div.b{--d:#000003;} .b{background:var(--d);}",
+        0, &sh), CSS_OK);
+    const char *cl[] = { "a", "b" };
+    css_element e = cls_el("div", cl, 2, NULL, NULL);
+    css_style s = css_resolve_el(sh, &e, NULL, 0);
+    assert_int_equal(s.color, 0x000002);
+    assert_int_equal(s.background, 0x000004);
+    css_free(sh);
+}
+
+static void test_component_var_inline_overrides(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".x{--c:#010101;color:var(--c);}", 0, &sh), CSS_OK);
+    const char *cl[] = { "x" };
+    css_element e = cls_el("div", cl, 1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &e, "--c:#020202", 0).color, 0x020202);
+    css_free(sh);
+}
+
+static void test_property_initial_value(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@property --tw-c{syntax:'<color>';inherits:false;initial-value:#0a0b0c}"
+        "p{color:var(--tw-c);} .o{--tw-c:#0d0e0f;}", 0, &sh), CSS_OK);
+    css_element p = cls_el("p", NULL, 0, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).color, 0x0a0b0c);
+    const char *cl[] = { "o" };
+    css_element o = cls_el("p", cl, 1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &o, NULL, 0).color, 0x0d0e0f);
+    css_free(sh);
+}
+
 static void test_custom_prop_var_unbalanced_paren_drops(void **state) {
     (void)state;
+    /* An unclosed function consumes to the end of the block (CSS Syntax 3
+     * section 5.4.4): the ';' inside it is not a separator, so the would-be
+     * `background` is part of the invalid `color` value -- Firefox drops both. */
     css_style s = css_parse_inline("color: var(--a; background:#00ff00", 0);
+    assert_int_equal(s.color, -1);
+    assert_int_equal(s.background, -1);
+    s = css_parse_inline("background:#00ff00; color: var(--a", 0);
     assert_int_equal(s.color, -1);
     assert_int_equal(s.background, 0x00ff00);
 }
@@ -2003,7 +2399,7 @@ static void test_media_screen_and_print(void **state) {
     css_free(sh);
 
     /* With a print context, the print block applies and the screen block does not. */
-    css_media print_ctx = { 0, 1, CSS_MEDIA_DEFAULT_WIDTH };
+    css_media print_ctx = { 0, 1, CSS_MEDIA_DEFAULT_WIDTH, NULL, NULL };
     assert_int_equal(css_parse_media(
         "@media screen { p { color:#abcdef } }\n"
         "@media print { p { color:#010101 } }", 0, &print_ctx, &sh), CSS_OK);
@@ -2021,7 +2417,7 @@ static void test_media_prefers_color_scheme(void **state) {
     assert_int_equal(css_resolve(sh, "body", NULL, NULL, 0, NULL, 0).color, -1);
     css_free(sh);
 
-    css_media dark = { 1, 0, CSS_MEDIA_DEFAULT_WIDTH };
+    css_media dark = { 1, 0, CSS_MEDIA_DEFAULT_WIDTH, NULL, NULL };
     assert_int_equal(css_parse_media(css, 0, &dark, &sh), CSS_OK);
     assert_int_equal(css_resolve(sh, "body", NULL, NULL, 0, NULL, 0).color, 0xffffff);
     css_free(sh);
@@ -3122,7 +3518,7 @@ static void test_table_sheet_cascade(void **state) {
     (void)state;
     css_sheet *sh = NULL;
     assert_int_equal(css_parse("table{border-collapse:collapse;empty-cells:hide;caption-side:bottom;table-layout:fixed}", 0, &sh), CSS_OK);
-    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL, 0, 0.0 };
+    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL, 0, 0.0, NULL };
     css_style s = css_resolve_el(sh, &el, "border-spacing:4px", 0);
     assert_int_equal(s.border_collapse, CSS_BCOL_COLLAPSE);
     assert_int_equal(s.empty_cells, CSS_EC_HIDE);
@@ -4401,6 +4797,34 @@ int main(void) {
         cmocka_unit_test(test_custom_prop_dark_media_collected_in_dark),
         cmocka_unit_test(test_custom_prop_class_scoped_skipped_without_scope),
         cmocka_unit_test(test_custom_prop_class_scoped_applies_with_root_scope),
+        cmocka_unit_test(test_keyframes_content_does_not_crash),
+        cmocka_unit_test(test_component_var_same_element),
+        cmocka_unit_test(test_component_var_inherited_by_child),
+        cmocka_unit_test(test_component_var_cascade_order),
+        cmocka_unit_test(test_component_var_inline_overrides),
+        cmocka_unit_test(test_property_initial_value),
+        cmocka_unit_test(test_decl_split_ignores_semicolon_in_url_and_string),
+        cmocka_unit_test(test_selector_escaped_colon_and_slash),
+        cmocka_unit_test(test_selector_hex_escape),
+        cmocka_unit_test(test_selector_escaped_comma_and_parens),
+        cmocka_unit_test(test_selector_escape_inside_not),
+        cmocka_unit_test(test_selector_long_class_exact),
+        cmocka_unit_test(test_supports_true_block_applies),
+        cmocka_unit_test(test_supports_collects_custom_props),
+        cmocka_unit_test(test_layer_block_applies),
+        cmocka_unit_test(test_unlayered_beats_layer_despite_specificity),
+        cmocka_unit_test(test_layer_order_statement),
+        cmocka_unit_test(test_layer_important_reverses),
+        cmocka_unit_test(test_layer_inline_still_wins),
+        cmocka_unit_test(test_container_block_still_skipped),
+        cmocka_unit_test(test_custom_prop_long_value_survives),
+        cmocka_unit_test(test_custom_prop_long_name_survives),
+        cmocka_unit_test(test_custom_prop_table_holds_thousands),
+        cmocka_unit_test(test_custom_prop_chain_eight_deep),
+        cmocka_unit_test(test_custom_prop_fanout_bounded),
+        cmocka_unit_test(test_custom_prop_attr_scoped_via_root_matcher),
+        cmocka_unit_test(test_custom_prop_attr_scoped_skipped_without_matcher),
+        cmocka_unit_test(test_custom_prop_root_matcher_rejects_descendant),
         cmocka_unit_test(test_custom_prop_descendant_scoped_skipped),
         cmocka_unit_test(test_custom_prop_table_holds_hundreds),
         cmocka_unit_test(test_custom_prop_var_unbalanced_paren_drops),

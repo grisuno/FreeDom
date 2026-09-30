@@ -50,7 +50,7 @@ def inline_css(html, base):
         tag = m.group(0)
         if not re.search(r'rel\s*=\s*["\']?stylesheet', tag, re.I):
             return tag
-        href = re.search(r'href\s*=\s*["\']([^"\']+)', tag, re.I)
+        href = re.search(r'(?<![\w-])href\s*=\s*["\']([^"\']+)', tag, re.I)
         if not href:
             return tag
         url = urllib.parse.urljoin(base, href.group(1).replace("&amp;", "&"))

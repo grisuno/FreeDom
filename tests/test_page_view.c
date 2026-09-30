@@ -3211,6 +3211,82 @@ static void test_build_css_bold_and_inline_wins(void **state) {
     hp_document_free(doc);
 }
 
+/* An author font-size declared ON a heading replaces the UA `h1{font-size:2em}`
+ * rule whatever its unit -- the cascade has one font-size per element. A relative
+ * one used to leave font_abs clear, so the painter multiplied it by the UA heading
+ * scale again: Wikipedia's `h1{font-size:1.8em}` painted at 3.6em (the article
+ * title broke across three lines). Declared on an ANCESTOR it stays the inherited
+ * value the UA rule scales (tanda 19). */
+static void test_build_heading_own_relative_size_replaces_ua(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>body{font-size:0.875rem} h1{font-size:1.8em} .r{font-size:150%}</style>"
+        "<h1>title</h1><h2>plain</h2><h3 class='r'>pct</h3>"
+        "<div style='font-size:2em'><h1 style='font-size:1em'>nested</h1></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *t = find_text(v, "title");
+    assert_non_null(t);
+    assert_int_equal(t->font_scale, 158);   /* 1.8 x 87.5 */
+    assert_int_equal(t->font_abs, 1);       /* final: no UA x2.0 on top */
+    const pv_run *p = find_text(v, "plain");
+    assert_non_null(p);
+    assert_int_equal(p->font_scale, 88);
+    assert_int_equal(p->font_abs, 0);       /* no own size: UA x1.5 still applies */
+    const pv_run *r = find_text(v, "pct");
+    assert_non_null(r);
+    assert_int_in_range(r->font_scale, 131, 132);   /* 1.5 x 87.5, root rounded first */
+    assert_int_equal(r->font_abs, 1);
+    const pv_run *n = find_text(v, "nested");
+    assert_non_null(n);
+    assert_int_in_range(n->font_scale, 175, 176);   /* 1em x 2em x 87.5 */
+    assert_int_equal(n->font_abs, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Custom properties cascade per element and inherit (spec/css_vars.md, "Alcance por
+ * elemento"): a component token declared on .card reaches a <p> inside it, a
+ * token declared and used on the same element applies, and outside the card the
+ * :root value stands. Before, only root-scoped declarations fed var(). */
+static void test_build_component_custom_props(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>:root{--fg:#111111} .card{--fg:#abcdef} p{color:var(--fg)}"
+        ".btn{--bg:#123456;color:var(--bg)}</style>"
+        "<div class='card'><p>inside</p></div><p>outside</p>"
+        "<div class='btn'>button</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *in = find_text(v, "inside");
+    const pv_run *out = find_text(v, "outside");
+    const pv_run *b = find_text(v, "button");
+    assert_non_null(in); assert_non_null(out); assert_non_null(b);
+    assert_int_equal(in->fg_rgb, 0xabcdef);
+    assert_int_equal(out->fg_rgb, 0x111111);
+    assert_int_equal(b->fg_rgb, 0x123456);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A flex or grid container is a block-level (or inline-level) BOX whatever its
+ * tag (CSS Display 3 section 2): `<a class="card" style="display:flex">` -- how
+ * every card grid on the web is written -- must register its box, or its height,
+ * background and radius are lost. Only the tag decided before, so a <div> worked
+ * and the same CSS on an <a> or <span> painted nothing. */
+static void test_build_flex_anchor_generates_box(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>.c{display:flex;height:62px;background:#ff0000}"
+        ".g{display:grid;height:20px;border:1px solid #000}</style>"
+        "<a class='c' href='#'>card</a><span class='g'>grid</span></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_int_equal((int)pv_box_count(v), 2);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* display:none (inline or from a sheet) hides the element and its whole subtree. */
 static void test_build_display_none_hidden(void **state) {
     (void)state;
@@ -4147,6 +4223,9 @@ int main(void) {
         cmocka_unit_test(test_build_line_height),
         cmocka_unit_test(test_build_text_decoration),
         cmocka_unit_test(test_build_css_bold_and_inline_wins),
+        cmocka_unit_test(test_build_heading_own_relative_size_replaces_ua),
+        cmocka_unit_test(test_build_component_custom_props),
+        cmocka_unit_test(test_build_flex_anchor_generates_box),
         cmocka_unit_test(test_build_display_none_hidden),
         cmocka_unit_test(test_build_display_none_hides_images),
         cmocka_unit_test(test_build_styled_external_css),

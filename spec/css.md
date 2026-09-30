@@ -58,7 +58,7 @@ the initial font size, never the author's root.
   unknown → ignored). `var()` and `calc()` **are** evaluated (see below), but purely
   as bounded, allocation-light **text substitution and arithmetic** over values this
   module already understands — never code, never a fetch, never unbounded (custom
-  properties are a fixed-size table, `calc()`/`var()` recursion is depth-capped).
+  properties are a bounded hash table, `calc()`/`var()` recursion is depth-capped).
 
 ## Supported subset
 
@@ -877,9 +877,18 @@ predates the property keeps its exact prior geometry), and `align-items`/`align-
 (cross-axis offset within a flex line; grid cross-axis alignment is still deferred).
 
 **Custom properties + `var()` (CSS layout expansion; scoped collection 2026-07-29).**
-`--name: value` declarations feed one flat, **page-global** table (up to
-`CSS_MAX_CUSTOM_PROPS` (512) entries, each name/value bounded like every other token
-here to `CSS_TOK_MAX`; a later *collected* declaration of the same name overwrites an
+`--name: value` declarations feed one flat, **page-global** table. **Sizing (2026-09-29,
+measured on github.com):** the table is a heap-allocated, hash-indexed store that grows
+on demand up to `CSS_MAX_CUSTOM_PROPS` (65536) entries; a name may be up to
+`CSS_VAR_NAME_MAX` (256) bytes and a value up to `CSS_URL_MAX` (1024) bytes, the same
+bound as any declaration value. The previous fixed 512-entry table with names and
+values capped at `CSS_TOK_MAX` (64) is exactly what a real design system exceeds:
+Primer declares 2443 distinct names, and a value such as
+`var(--borderWidth-default) solid var(--borderColor-accent-emphasis)` or a
+`font-family` stack is longer than 64 bytes, so it was silently dropped and every
+declaration referencing it failed. A name or value beyond its bound is still dropped
+whole, never truncated (a line in the table is either the author's or absent; a later
+*collected* declaration of the same name overwrites an
 earlier one). Collection is **structure-aware**, not a raw text scan
 (`collect_custom_props_scoped`): a declaration is collected only when **(a)** every
 enclosing `@media` block matches the render context (same `media_matches` gate as
@@ -889,9 +898,17 @@ one **root-scoped** selector: a single compound (no combinators) made only of
 `:root`, `html`, `body`, `*`, and/or `.class` parts whose classes are actually
 present on the document's `<html>`/`<body>` elements. The caller passes those classes
 via `css_parse_scoped(text, len, media, root_scope, out)` (`root_scope` = space-
-separated class list, NULL = none); `css_parse`/`css_parse_media` pass NULL. Anything
-else — `.theme-dark` when the class is absent, `#id`, attribute selectors, pseudos
-other than `:root`, any descendant scope — is **skipped, fail-safe**: a skipped
+separated class list, NULL = none); `css_parse`/`css_parse_media` pass NULL.
+**Root matcher (2026-09-29):** when the caller also supplies
+`css_media.scope_match` (a callback that answers "does this parsed selector match the
+document's `<html>` or `<body>`?"), a selector the hand-rolled check rejects is parsed
+with `csel_parse` and asked through it. page_view answers with `cch_element_matches`,
+the same matcher the cascade and `querySelector` use, so attribute-scoped palettes
+(`[data-color-mode=dark][data-dark-theme=dark]`, which is how github ships its themes)
+apply exactly when the real root carries those attributes. Anything
+else — `.theme-dark` when the class is absent, `#id`, attribute selectors the root
+does not carry, pseudos other than `:root`, any descendant scope — is **skipped,
+fail-safe**: a skipped
 palette makes the referencing declaration drop to UA defaults (readable dark-on-
 light), whereas the old whole-text scan let an *inactive* theme palette (e.g.
 Wikipedia's `.skin-theme-clientpref-night` values, `#eaecf0` text) clobber the active
@@ -904,10 +921,16 @@ page-global, but only *applicable* rules feed it. An inline `style=` collects it
 custom property's (recursively resolved) value; a miss uses the fallback if given,
 else the **whole declaration fails** (matches real CSS: an unresolvable `var()`
 with no fallback makes the property invalid, not some improvised value). Lookups
-recurse at most `CSS_VAR_MAX_DEPTH` (4) deep, so a chain or a self-reference
+recurse at most `CSS_VAR_MAX_DEPTH` (32) deep, so a self-reference
 (`--a: var(--a)`) fails the declaration instead of recursing/expanding unboundedly
 (anti-DoS — the bound is per-lookup, not per-document, so a hostile stylesheet
-cannot use it to burn CPU). An inline `style=` sees BOTH its own custom properties
+cannot use it to burn CPU; exponential fan-out such as `--a: var(--b) var(--b)` is
+bounded by the 1024-byte output, since every leaf appends at least one byte). 4 was
+too shallow for a token system: Primer's `--button-danger-fgColor-rest` →
+`--fgColor-danger` → `--display-red-5` → literal is already 3 hops, and a component
+token over it is the 4th. A custom-property declaration whose own value holds an
+unresolvable `var()` is not recorded as a drop: it is not a property, and whether it
+resolves is decided where it is used. An inline `style=` sees BOTH its own custom properties
 and the stylesheet's (its own win on a name collision, being closer to the use
 site). `var()` never phones home: whatever text it substitutes still flows through
 the same property interpreter, so e.g. `background: var(--evil)` where

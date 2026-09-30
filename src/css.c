@@ -63,19 +63,22 @@
 #define CSS_INIT_RULES           256u
 #define CSS_SELS_PER_GROUP      32
 #define CSS_INLINE_DECLS        64u
-#define CSS_INLINE_SPEC         (1 << 20)
 
-/* Custom properties (--name: value) + var(--name[, fallback]) (see the "Custom
- * properties" section of spec/css.md). Deliberately simplified vs. real CSS custom
- * property scoping: every `--name` declaration found ANYWHERE in the stylesheet
- * (any rule, any @media) feeds one flat, page-global table (last declaration for a
- * name wins), which covers the overwhelmingly common `:root { --x: ... }` pattern.
- * A value is capped at CSS_TOK_MAX like every other token here (an overlong one
- * could never fit a re-substituted declaration value anyway), and lookups recurse
- * at most CSS_VAR_MAX_DEPTH deep (a chain or cycle beyond that fails the var(),
- * bounding the work to O(depth * CSS_TOK_MAX) -- anti-DoS, never a crash or hang). */
-#define CSS_MAX_CUSTOM_PROPS 512u
-#define CSS_VAR_MAX_DEPTH    4
+/* Custom properties + var(): the table and the substitution live in css_vars
+ * (spec/css_vars.md); this file only decides WHICH declarations feed it. */
+#include "css_vars.h"
+#include "css_atrule.h"
+
+/* Meta declarations (spec/css_vars.md, "Alcance por elemento"). They live in a
+ * rule's declaration array but never claim a cascade slot: P_META_CUSTOM is a
+ * `--name: value` declaration, P_META_VARSRC the raw text of a declaration whose
+ * value holds var(), followed by the `span` declarations the page-global
+ * resolution produced. ival indexes the sheet's raw pool. */
+#define P_META_CUSTOM (P_NSLOTS + 1)
+#define P_META_VARSRC (P_NSLOTS + 2)
+/* Raw-pool entries per sheet (anti-DoS); past it a declaration keeps only its
+ * page-global meaning. */
+#define CSS_MAX_RAW ((size_t)1 << 20)
 
 /* background-image: url(...) text pool (2026-07-16). A page-global table, same
  * flavour as the custom-property table above: parse time appends the raw url()
@@ -86,12 +89,6 @@
  * every css_decl would. */
 #include "css_decl.h"
 
-/* One custom property (--name: value), for var() lookups. Both fields are bounded
- * like every other token buffer here. */
-typedef struct css_custom_prop {
-    char name[CSS_TOK_MAX];
-    char value[CSS_TOK_MAX];
-} css_custom_prop;
 
 /* The selector types (css_attr_match/css_compound/css_sel) and their parser/matcher
  * live in css_select.{h,c}. */
@@ -111,8 +108,19 @@ struct css_sheet {
     size_t    sels_cap;
     size_t    nsels;
 
-    css_custom_prop custom[CSS_MAX_CUSTOM_PROPS];  /* --name table, page-global */
-    size_t          ncustom;
+    cvr_table       vars;   /* --name table, page-global (css_vars) */
+    /* @layer registry and the layer the parser is currently inside (0 = none).
+     * cur_layer_path is its full dotted name, the prefix of a nested layer. */
+    /* Raw text of the declarations the cascade re-resolves per element: a
+     * custom property ("--name\0value") or a declaration whose value holds var()
+     * ("prop\0value"). Owned; freed by css_free, emptied by sheet_rewind. */
+    char          **raw;
+    size_t          nraw, rawcap;
+    /* @property initial values: the base of every var() lookup. */
+    cvr_table       initial;
+    car_layers      layers;
+    int             cur_layer;
+    char            cur_layer_path[CAR_LAYER_NAME_MAX];
     char            bg_urls[CSS_MAX_BG_URLS][CSS_URL_MAX]; /* background-image url() pool */
     size_t          nbg_urls;
     char            content_urls[CSS_MAX_CONTENT_URLS][CSS_URL_MAX];  /* R8: ::before/::after content strings */
@@ -1390,79 +1398,8 @@ static int emit_content(css_decl *dst, int cap, const char *str,
     return 1;
 }
 
-/* R8: CSS Syntax 4.3.7 escape consumption inside a quoted value. Backslash +
- * 1-6 hex digits (then one optional whitespace, eaten as the terminator) is the
- * codepoint, emitted UTF-8; backslash + newline eats both (continuation);
- * backslash + anything else is that char; a trailing backslash is dropped. Null,
- * surrogates and > U+10FFFF become U+FFFD. Decoded output only ever shrinks,
- * except \0-like escapes (2 chars -> 3 bytes), so the write is capped and a
- * hostile value truncates instead of overflowing. */
-static int css_hex_val(char c) {
-    if (c >= '0' && c <= '9') return c - '0';
-    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
-    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
-    return -1;
-}
-
-static size_t css_emit_utf8(unsigned int cp, char *out) {
-    if (cp == 0 || (cp >= 0xD800 && cp <= 0xDFFF) || cp > 0x10FFFF)
-        cp = 0xFFFD;
-    if (cp < 0x80) { out[0] = (char)cp; return 1; }
-    if (cp < 0x800) {
-        out[0] = (char)(0xC0 | (cp >> 6));
-        out[1] = (char)(0x80 | (cp & 0x3F));
-        return 2;
-    }
-    if (cp < 0x10000) {
-        out[0] = (char)(0xE0 | (cp >> 12));
-        out[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
-        out[2] = (char)(0x80 | (cp & 0x3F));
-        return 3;
-    }
-    out[0] = (char)(0xF0 | (cp >> 18));
-    out[1] = (char)(0x80 | ((cp >> 12) & 0x3F));
-    out[2] = (char)(0x80 | ((cp >> 6) & 0x3F));
-    out[3] = (char)(0x80 | (cp & 0x3F));
-    return 4;
-}
-
-static void css_unescape_into(char *dst, size_t cap, const char *src, size_t n) {
-    size_t o = 0, i = 0;
-    while (i < n && o + 1 < cap) {
-        if (src[i] != '\\' || i + 1 >= n) {
-            if (src[i] == '\\') break; /* trailing backslash: dropped */
-            dst[o++] = src[i++];
-            continue;
-        }
-        char nx = src[i + 1];
-        if (nx == '\n') { i += 2; continue; }
-        if (nx == '\r') { i += 2; if (i < n && src[i] == '\n') ++i; continue; }
-        int hv = css_hex_val(nx);
-        if (hv < 0) {
-            if (o + 1 >= cap) break;
-            dst[o++] = nx;
-            i += 2;
-            continue;
-        }
-        unsigned int cp = 0;
-        size_t k = 0;
-        while (k < 6 && i + 1 + k < n && css_hex_val(src[i + 1 + k]) >= 0) {
-            cp = cp * 16u + (unsigned int)css_hex_val(src[i + 1 + k]);
-            ++k;
-        }
-        i += 1 + k;
-        if (i < n && (src[i] == ' ' || src[i] == '\t')) ++i;
-        else if (i < n && src[i] == '\n') ++i;
-        else if (i + 1 < n && src[i] == '\r' && src[i + 1] == '\n') i += 2;
-        else if (i < n && src[i] == '\r') ++i;
-        char enc[4];
-        size_t elen = css_emit_utf8(cp, enc);
-        if (o + elen >= cap) break;
-        memcpy(dst + o, enc, elen);
-        o += elen;
-    }
-    dst[o] = '\0';
-}
+/* R8: escapes inside a quoted content value are decoded by csel_unescape
+ * (css_select), the one CSS Syntax 4.3.7 decoder shared with selector idents. */
 
 /* R8: content property. Extracts quoted string, stores in content pool, emits
  * P_CONTENT with pool index. Returns 1 if parsed. */
@@ -1487,7 +1424,7 @@ static int expand_content(const char *val, css_decl *dst, int cap,
     size_t inner_len = len - 2;
     char buf[CSS_URL_MAX];
     if (inner_len >= sizeof buf) inner_len = sizeof buf - 1;
-    css_unescape_into(buf, sizeof buf, val + 1, inner_len);
+    csel_unescape(buf, sizeof buf, val + 1, inner_len);
     return emit_content(dst, cap, buf, contenttab, ncontent, contentcap);
 }
 
@@ -1855,69 +1792,18 @@ static int strip_important(char *val) {
     return 0;
 }
 
-/* --- Custom properties (--name: value) + var(--name[, fallback]) ---------------
+/* --- Custom properties (--name: value): which declarations feed the table -----
  *
  * Deliberately simplified vs. real cascade-scoped custom properties: all collected
- * declarations feed one flat page-global table. Collection, however, is
+ * declarations feed one flat page-global table (css_vars). Collection, however, is
  * structure-aware (collect_custom_props_scoped, further below): only rules whose
  * enclosing @media blocks match the render context AND whose selector is
- * root-scoped (`:root`, `html`, `body`, the universal selector, or a .class
- * actually present on <html>/<body>) contribute — an inactive theme palette
- * (e.g. a dark palette under
- * `.theme-night` or `@media (prefers-color-scheme: dark)`) must never clobber the
- * active one. resolve_var then substitutes var() references against that table
- * when a declaration's value is interpreted (parse_one_decl), bounded to
- * CSS_VAR_MAX_DEPTH nested lookups so a reference cycle (`--a: var(--a)`) or a
- * long chain fails the declaration instead of recursing/expanding unboundedly. */
-
-/* Scans the declaration span s[a,b) for `--ident : value ;|}` pairs and folds them
- * into tab. A name is recognised only where it cannot be part of a longer
- * identifier (its preceding character, if any, is not itself an identifier
- * character). A later occurrence of a name overwrites an earlier one (last
- * collected wins, approximating the cascade among applicable rules). An overlong
- * name or value (would not fit CSS_TOK_MAX) is dropped, not truncated -- a
- * truncated custom property would silently feed a wrong value to every var() that
- * references it. Bounded to cap entries (extra distinct names are ignored, fail
- * closed, never an overflow). Does NOT reset *ntab: callers accumulate. */
-static void collect_custom_decls(const char *s, size_t a, size_t b,
-                                 css_custom_prop *tab, size_t cap, size_t *ntab) {
-    size_t i = a;
-    while (i < b) {
-        if (s[i] == '-' && i + 1 < b && s[i + 1] == '-' &&
-            (i == a || !csel_ident_ch(s[i - 1]))) {
-            size_t j = i + 2;
-            while (j < b && csel_ident_ch(s[j])) ++j;
-            size_t name_len = j - i;
-            size_t k = j;
-            while (k < b && (s[k] == ' ' || s[k] == '\t' || s[k] == '\n' || s[k] == '\r')) ++k;
-            if (k < b && s[k] == ':' && name_len < CSS_TOK_MAX) {
-                size_t v0 = k + 1;
-                size_t v = v0;
-                while (v < b && s[v] != ';' && s[v] != '}') ++v;
-                char namebuf[CSS_TOK_MAX];
-                memcpy(namebuf, s + i, name_len);
-                namebuf[name_len] = '\0';
-                char valbuf[CSS_TOK_MAX];
-                size_t vlen = copy_trim(s, v0, v, valbuf, sizeof valbuf);
-                if (vlen != (size_t)-1 && vlen > 0) {
-                    strip_important(valbuf);
-                    size_t slot = *ntab;
-                    for (size_t e = 0; e < *ntab; ++e) {
-                        if (strcmp(tab[e].name, namebuf) == 0) { slot = e; break; }
-                    }
-                    if (slot < cap) {
-                        memcpy(tab[slot].name, namebuf, name_len + 1);
-                        strcpy(tab[slot].value, valbuf);
-                        if (slot == *ntab) ++*ntab;
-                    }
-                }
-                i = v;
-                continue;
-            }
-        }
-        ++i;
-    }
-}
+ * root-scoped (`:root`, `html`, `body`, the universal selector, a .class actually
+ * present on <html>/<body>, or anything the caller's root matcher says matches
+ * them) contribute -- an inactive theme palette (a dark palette under `.theme-night`
+ * or `@media (prefers-color-scheme: dark)`) must never clobber the active one.
+ * cvr_resolve then substitutes var() references when a declaration's value is
+ * interpreted (parse_one_decl). */
 
 /* True when name[0,len) appears as a whole space-separated token in list. */
 static int scope_has_class(const char *list, const char *name, size_t len) {
@@ -1930,6 +1816,20 @@ static int scope_has_class(const char *list, const char *name, size_t len) {
         if ((size_t)(p - t) == len && memcmp(t, name, len) == 0) return 1;
     }
     return 0;
+}
+
+/* True when the caller's root matcher (css_media.scope_match) says the selector
+ * s[a,b) matches the document's <html> or <body>. This is what lets an attribute-
+ * scoped palette (`[data-color-mode=dark][data-dark-theme=dark]`) apply exactly when
+ * the real root carries it; the css module never sees the DOM, the caller answers
+ * with the same matcher the cascade uses. No matcher, or a selector csel_parse
+ * refuses: not root-scoped (fail safe). */
+static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m) {
+    if (m == NULL || m->scope_match == NULL) return 0;
+    css_sel sel;
+    memset(&sel, 0, sizeof sel);
+    if (!csel_parse(s, a, b, &sel)) return 0;
+    return m->scope_match(m->scope_ctx, &sel) != 0;
 }
 
 /* True when the selector s[a,b) is root-scoped: a single compound (no
@@ -1982,107 +1882,6 @@ static int selector_is_root_scoped(const char *s, size_t a, size_t b,
         }
         return 0;                           /* #id, [attr], anything unknown */
     }
-    return 1;
-}
-
-static int resolve_var_rec(const char *val, size_t vlen, char *out, size_t outcap,
-                           size_t *o, const css_custom_prop *tab, size_t ntab, int depth);
-
-/* Appends s[0,n) to out at *o; fails (0) if it would not fit outcap. */
-static int var_append(char *out, size_t outcap, size_t *o, const char *s, size_t n) {
-    if (*o + n >= outcap) return 0;
-    memcpy(out + *o, s, n);
-    *o += n;
-    return 1;
-}
-
-/* Looks up name ("--ident", NUL-terminated) in tab; on a hit, recursively resolves
- * ITS stored value (which may itself reference var()) into out. Returns 1 on a
- * successful (found and resolved) expansion, 0 if not found or the nested
- * resolution failed/overflowed/exceeded depth. */
-static int expand_lookup(const char *name, char *out, size_t outcap, size_t *o,
-                         const css_custom_prop *tab, size_t ntab, int depth) {
-    if (depth >= CSS_VAR_MAX_DEPTH) return 0;
-    for (size_t i = 0; i < ntab; ++i) {
-        if (strcmp(tab[i].name, name) == 0)
-            return resolve_var_rec(tab[i].value, strlen(tab[i].value), out, outcap, o,
-                                   tab, ntab, depth + 1);
-    }
-    return 0;
-}
-
-/* Copies val[0,vlen) to out (via *o), expanding every var(...) call found at the
- * top level (recursively, bounded by depth via expand_lookup). Returns 1 if the
- * whole value was resolved and fit within outcap; 0 on an unresolved var() (no
- * matching custom property and no fallback), a malformed/unbalanced var(...), or
- * an overflow -- the caller (resolve_var) then drops the whole declaration, like
- * any other unsupported value (fail closed, never a partially-substituted value). */
-static int resolve_var_rec(const char *val, size_t vlen, char *out, size_t outcap,
-                           size_t *o, const css_custom_prop *tab, size_t ntab, int depth) {
-    size_t i = 0;
-    while (i < vlen) {
-        if (i + 4 <= vlen && csel_lower_ch(val[i]) == 'v' && csel_lower_ch(val[i + 1]) == 'a' &&
-            csel_lower_ch(val[i + 2]) == 'r' && val[i + 3] == '(') {
-            size_t j = i + 4;
-            int pdepth = 1;
-            size_t argstart = j;
-            while (j < vlen && pdepth > 0) {
-                if (val[j] == '(') ++pdepth;
-                else if (val[j] == ')') { if (--pdepth == 0) break; }
-                ++j;
-            }
-            if (pdepth != 0) return 0;             /* unbalanced var(...): invalid */
-            size_t argend = j;
-            size_t after = j + 1;                  /* past the matching ')' */
-
-            /* Split the argument on the first TOP-LEVEL comma (a fallback like
-             * rgb(1,2,3) must not split there). */
-            size_t comma = argend;
-            int cd = 0;
-            for (size_t k = argstart; k < argend; ++k) {
-                if (val[k] == '(') ++cd;
-                else if (val[k] == ')') --cd;
-                else if (val[k] == ',' && cd == 0) { comma = k; break; }
-            }
-            size_t na = argstart, nb = comma;
-            while (na < nb && (val[na] == ' ' || val[na] == '\t')) ++na;
-            while (nb > na && (val[nb - 1] == ' ' || val[nb - 1] == '\t')) --nb;
-            size_t nlen = nb - na;
-            char namebuf[CSS_TOK_MAX];
-            if (nlen == 0 || nlen >= sizeof namebuf ||
-                val[na] != '-' || na + 1 >= nb || val[na + 1] != '-')
-                return 0;                           /* not a custom-property reference */
-            memcpy(namebuf, val + na, nlen);
-            namebuf[nlen] = '\0';
-
-            if (!expand_lookup(namebuf, out, outcap, o, tab, ntab, depth)) {
-                if (comma >= argend) return 0;      /* unresolved, no fallback: invalid */
-                size_t fa = comma + 1, fb = argend;
-                while (fa < fb && (val[fa] == ' ' || val[fa] == '\t')) ++fa;
-                while (fb > fa && (val[fb - 1] == ' ' || val[fb - 1] == '\t')) --fb;
-                if (depth >= CSS_VAR_MAX_DEPTH) return 0;
-                if (!resolve_var_rec(val + fa, fb - fa, out, outcap, o, tab, ntab, depth + 1))
-                    return 0;
-            }
-            i = after;
-            continue;
-        }
-        if (!var_append(out, outcap, o, val + i, 1)) return 0;
-        ++i;
-    }
-    return 1;
-}
-
-/* Entry point: if val contains no "var(" this is a no-op (caller keeps using val
- * directly); otherwise resolves every var() against tab/ntab into out (bounded to
- * outcap, NUL-terminated). Returns 1 on success, 0 if resolution failed or
- * overflowed (caller drops the declaration). */
-static int resolve_var(const char *val, char *out, size_t outcap,
-                       const css_custom_prop *tab, size_t ntab) {
-    if (outcap == 0) return 0;
-    size_t o = 0;
-    if (!resolve_var_rec(val, strlen(val), out, outcap - 1, &o, tab, ntab, 0)) return 0;
-    out[o] = '\0';
     return 1;
 }
 
@@ -3581,8 +3380,38 @@ static void drop_record(css_drop_log *log, const char *prop, const char *val, in
  * tab/ntab (a custom-property declaration itself, `--name: ...`, is not a real
  * property and falls through interpret_prop's unknown-property path unchanged),
  * then dispatches on the property. `log` (optional) records what was discarded. */
+/* Stores "a\0b" in the sheet's raw pool; returns its index, or -1 (bound/OOM). */
+static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl) {
+    if (sh == NULL || sh->nraw >= CSS_MAX_RAW) return -1;
+    if (al > CSS_URL_MAX || bl > CSS_URL_MAX) return -1;
+    if (sh->nraw == sh->rawcap) {
+        size_t nc = sh->rawcap ? sh->rawcap * 2 : 256;
+        char **g = (char **)realloc(sh->raw, nc * sizeof *g);
+        if (g == NULL) return -1;
+        sh->raw = g;
+        sh->rawcap = nc;
+    }
+    char *e = (char *)malloc(al + bl + 2);
+    if (e == NULL) return -1;
+    memcpy(e, a, al);
+    e[al] = '\0';
+    memcpy(e + al + 1, b, bl);
+    e[al + 1 + bl] = '\0';
+    sh->raw[sh->nraw] = e;
+    return (int)sh->nraw++;
+}
+
+/* Interprets one declaration span s[0,n) into dst (up to cap). Returns the number of
+ * css_decl written (0 if unsupported). Splits `prop: value`, strips a trailing
+ * `!important` (stamping every emitted decl), resolves any var() reference against
+ * vs, then dispatches on the property. `log` (optional) records what was discarded.
+ *
+ * With a sheet (rawsh != NULL) two meta declarations make the value re-resolvable
+ * per element (spec/css_vars.md): a `--name` declaration becomes P_META_CUSTOM, and
+ * a value holding var() is preceded by a P_META_VARSRC marker whose `span` counts
+ * the page-global declarations that follow it. */
 static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
-                           const css_custom_prop *tab, size_t ntab,
+                           const cvr_scope *vs, css_sheet *rawsh,
                            char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
                            char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap,
                            css_drop_log *log) {
@@ -3590,6 +3419,30 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
     size_t c = 0;
     while (c < n && s[c] != ':') ++c;
     if (c >= n) return 0;  /* no colon */
+
+    /* A custom property: its name is case-sensitive and may be longer than any
+     * real property name, so it is read before the lowercased prop buffer. It is
+     * not a property, so it is never a drop. */
+    {
+        size_t a = 0, b = c;
+        while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
+        while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
+        if (b - a >= 2 && s[a] == '-' && s[a + 1] == '-') {
+            if (rawsh == NULL || b - a >= CVR_NAME_MAX) return 0;
+            char v[CSS_URL_MAX];
+            if (copy_trim(s, c + 1, n, v, sizeof v) == (size_t)-1) return 0;
+            int imp = strip_important(v);
+            size_t vl = strlen(v);
+            if (vl == 0) return 0;
+            int idx = raw_add(rawsh, s + a, b - a, v, vl);
+            if (idx < 0) return 0;
+            memset(&dst[0], 0, sizeof dst[0]);
+            dst[0].prop = P_META_CUSTOM;
+            dst[0].ival = idx;
+            dst[0].important = imp;
+            return 1;
+        }
+    }
 
     char prop[CSS_TOK_MAX];
     char val[CSS_URL_MAX];
@@ -3603,31 +3456,38 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
 
     const char *use_val = val;
     char resolved[CSS_URL_MAX];
+    int marker = 0;
     if (csel_substr(val, "var(", 1)) {
-        if (!resolve_var(val, resolved, sizeof resolved, tab, ntab)) {
-            /* An unresolvable var() is a value problem, not a missing property:
-             * the referenced custom property was never declared (or the fallback
-             * chain bottomed out), so the declaration is invalid at computed-value
-             * time exactly as CSS Variables 1 says. */
-            drop_record(log, prop, val, CSS_DROP_BAD_VALUE);
-            return 0;
+        if (rawsh != NULL && cap >= 2) {
+            int idx = raw_add(rawsh, prop, strlen(prop), val, strlen(val));
+            if (idx >= 0) {
+                memset(&dst[0], 0, sizeof dst[0]);
+                dst[0].prop = P_META_VARSRC;
+                dst[0].ival = idx;
+                dst[0].important = important;
+                marker = 1;
+            }
+        }
+        if (!cvr_resolve(val, resolved, sizeof resolved, vs)) {
+            /* Unresolvable against the page-global table. With a marker the
+             * element's own cascade may still resolve it, so it is not a drop;
+             * without one it is invalid at computed-value time (CSS Variables 1). */
+            if (!marker) drop_record(log, prop, val, CSS_DROP_BAD_VALUE);
+            return marker;
         }
         use_val = resolved;
     }
 
-    /* A custom property declaration is not a property, so it is not a drop -- it
-     * was already harvested into the var() table by collect_custom_props_scoped. */
-    int is_custom = (prop[0] == '-' && prop[1] == '-');
-
     int known = 1;
-    int nw = interpret_prop(prop, use_val, dst, cap, urltab, nurl, urlcap,
+    int nw = interpret_prop(prop, use_val, dst + marker, cap - marker, urltab, nurl, urlcap,
                              contenttab, ncontent, contentcap, &known);
-    if (nw == 0 && !is_custom) {
+    if (nw == 0) {
         drop_record(log, prop, use_val,
                     known ? CSS_DROP_BAD_VALUE : CSS_DROP_UNKNOWN_PROP);
     }
-    for (int i = 0; i < nw; ++i) dst[i].important = important;
-    return nw;
+    for (int i = 0; i < nw; ++i) dst[marker + i].important = important;
+    if (marker) dst[0].span = nw;
+    return nw + marker;
 }
 
 /* Splits a ';'-separated declaration block into dst (up to cap). Returns count.
@@ -3635,15 +3495,14 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
  * e.g. an inline style resolved against a NULL sheet). urltab/nurl/urlcap is the
  * background-image url() pool (see P_BG_IMAGE_URL). */
 static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
-                               const css_custom_prop *tab, size_t ntab,
+                               const cvr_scope *vs, css_sheet *rawsh,
                                char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
                                char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap,
                                css_drop_log *log) {
     size_t count = 0, i = 0;
     while (i < n && count < cap) {
-        size_t j = i;
-        while (j < n && s[j] != ';') ++j;
-        count += (size_t)parse_one_decl(s + i, j - i, &dst[count], (int)(cap - count), tab, ntab,
+        size_t j = csel_decl_end(s, i, n, 0);
+        count += (size_t)parse_one_decl(s + i, j - i, &dst[count], (int)(cap - count), vs, rawsh,
                                         urltab, nurl, urlcap, contenttab, ncontent, contentcap,
                                         log);
         i = (j < n) ? j + 1 : j;
@@ -3663,6 +3522,8 @@ static size_t sel_list_comma(const char *s, size_t i, size_t end) {
         if (quote) {
             if (c == '\\' && i + 1 < end) ++i;
             else if (c == quote) quote = 0;
+        } else if (c == '\\' && i + 1 < end) {
+            ++i;                                  /* `\,` is part of an identifier */
         } else if (c == '"' || c == '\'') {
             quote = c;
         } else if (c == '(' || c == '[') {
@@ -3704,12 +3565,14 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
              * it or the same drop would be counted once per attempt. */
             size_t log_n = (log != NULL) ? log->n : 0;
             size_t log_total = (log != NULL) ? log->total : 0;
-            dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart], room,
-                                 sh->custom, sh->ncustom,
+            size_t raw_n = sh->nraw;
+            const cvr_scope vs = { &sh->vars, NULL, NULL, &sh->initial };
+            dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart], room, &vs, sh,
                                  sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
                                  sh->content_urls, &sh->ncontent_urls, CSS_MAX_CONTENT_URLS, log);
             if (room - dn >= CSS_DECL_SLOTS_MIN) break;   /* finished with slack */
             if (log != NULL) { log->n = log_n; log->total = log_total; }
+            while (sh->nraw > raw_n) free(sh->raw[--sh->nraw]);
         }
         size_t nc = sh->decls_cap ? sh->decls_cap * 2 : CSS_INIT_DECLS;
         if (nc <= sh->decls_cap) return;                  /* overflow: fail closed */
@@ -3754,6 +3617,7 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
         css_sel *dst = &sh->sels[sh->nsels];
         *dst = tmp[g];
         dst->rule = (int)rule_idx;
+        dst->layer = sh->cur_layer;
         dst->order = (int)sh->nsels;
         ++sh->nsels;
     }
@@ -3920,10 +3784,134 @@ static int at_is_media(const char *s, size_t i, size_t n) {
         || s[j] == '{' || s[j] == '(';
 }
 
-#define CSS_MEDIA_MAX_DEPTH 4
+/* True when s[i] ('@') begins the at-keyword kw (lowercase, without '@') followed
+ * by a delimiter. */
+static int at_keyword(const char *s, size_t i, size_t n, const char *kw) {
+    size_t k = strlen(kw);
+    if (i + 1 + k > n) return 0;
+    for (size_t j = 0; j < k; ++j) if (csel_lower_ch(s[i + 1 + j]) != kw[j]) return 0;
+    size_t j = i + 1 + k;
+    return j >= n || s[j] == ' ' || s[j] == '\t' || s[j] == '\n' || s[j] == '\r'
+        || s[j] == '{' || s[j] == '(' || s[j] == ';';
+}
+
+/* @supports asks this engine, not a list: a declaration is supported iff the
+ * property interpreter accepts it (a var() value only needs a known property --
+ * it is valid at parse time). Scratch pools with zero capacity make a url() or a
+ * content string fail closed without being stored anywhere. */
+static int supports_decl_ok(void *ctx, const char *prop, const char *val) {
+    (void)ctx;
+    css_decl tmp[CSS_DECL_SLOTS_MIN];
+    memset(tmp, 0, sizeof tmp);
+    size_t nurl = 0, ncontent = 0;
+    int known = 0;
+    int nw = interpret_prop(prop, val, tmp, (int)CSS_DECL_SLOTS_MIN, NULL, &nurl, 0,
+                            NULL, &ncontent, 0, &known);
+    if (nw > 0) return 1;
+    return known && csel_substr(val, "var(", 1);
+}
+
+static int supports_selector_ok(void *ctx, const char *sel) {
+    (void)ctx;
+    css_sel *scratch = (css_sel *)calloc(1, sizeof *scratch);   /* too large for the stack */
+    if (scratch == NULL) return 0;
+    int ok = csel_parse(sel, 0, strlen(sel), scratch);
+    free(scratch);
+    return ok;
+}
+
+static int supports_matches(const char *s, size_t a, size_t b) {
+    static const car_ops ops = { supports_decl_ok, supports_selector_ok, NULL };
+    return car_supports(s, a, b, &ops);
+}
+
+/* Locates the block of the at-rule whose prelude starts at s[p]: *q is the '{' or
+ * ';' that ends the prelude. Returns 1 for a block (body_a, body_b and be set),
+ * 0 for a statement or an unterminated prelude (be just past it). */
+static int at_block(const char *s, size_t p, size_t end, size_t *q,
+                    size_t *body_a, size_t *body_b, size_t *be) {
+    size_t k = p;
+    while (k < end && s[k] != '{' && s[k] != ';') ++k;
+    *q = k;
+    if (k < end && s[k] == '{') {
+        *be = block_end(s, k, end);
+        *body_a = k + 1;
+        *body_b = (*be > *body_a) ? *be - 1 : *body_a;
+        return 1;
+    }
+    *be = (k < end) ? k + 1 : end;
+    return 0;
+}
+
+/* Stores the initial-value descriptor of `@property <name> { ... }` (prelude
+ * s[pa,pb), body s[ba,bb)) in `initial`. A missing or empty descriptor stores
+ * nothing (the property then has the guaranteed-invalid initial value). */
+static void property_initial(const char *s, size_t pa, size_t pb, size_t ba, size_t bb,
+                             cvr_table *initial) {
+    while (pa < pb && (s[pa] == ' ' || s[pa] == '\t' || s[pa] == '\n' || s[pa] == '\r')) ++pa;
+    while (pb > pa && (s[pb-1] == ' ' || s[pb-1] == '\t' || s[pb-1] == '\n' || s[pb-1] == '\r')) --pb;
+    if (pb - pa < 3 || s[pa] != '-' || s[pa + 1] != '-') return;
+    size_t i = ba;
+    while (i < bb) {
+        size_t j = csel_decl_end(s, i, bb, 0);
+        size_t c = i;
+        while (c < j && s[c] != ':') ++c;
+        if (c < j) {
+            size_t a = i, b = c;
+            while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
+            while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
+            if (b - a == 13 && csel_span_eq(s + a, "initial-value", 13, 1)) {
+                size_t va = c + 1, vb = j;
+                while (va < vb && (s[va] == ' ' || s[va] == '\t' || s[va] == '\n' || s[va] == '\r')) ++va;
+                while (vb > va && (s[vb-1] == ' ' || s[vb-1] == '\t' || s[vb-1] == '\n' || s[vb-1] == '\r')) --vb;
+                (void)cvr_set(initial, s + pa, pb - pa, s + va, vb - va);
+            }
+        }
+        i = (j < bb) ? j + 1 : j;
+    }
+}
+
+/* Registers the layer name s[a,b) (trimmed; empty = anonymous) nested under the
+ * sheet's current layer, and returns its rank. When path_out is non-NULL it
+ * receives the full dotted path, the prefix for layers nested inside it. */
+static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,
+                          char *path_out) {
+    while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
+    while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
+    int rank;
+    if (a == b) {
+        rank = car_layer_rank(&sh->layers, "", 0);
+        if (path_out != NULL) {
+            if (rank >= 1 && (size_t)rank <= sh->layers.n)
+                memcpy(path_out, sh->layers.name[rank - 1], CAR_LAYER_NAME_MAX);
+            else
+                path_out[0] = '\0';
+        }
+        return rank;
+    }
+    char path[CAR_LAYER_NAME_MAX];
+    size_t pl = strlen(sh->cur_layer_path);
+    size_t need = (pl ? pl + 1 : 0) + (b - a);
+    if (need >= sizeof path) {
+        if (path_out != NULL) path_out[0] = '\0';
+        return CAR_MAX_LAYERS;
+    }
+    size_t o = 0;
+    if (pl) { memcpy(path, sh->cur_layer_path, pl); o = pl; path[o++] = '.'; }
+    memcpy(path + o, s + a, b - a);
+    o += b - a;
+    path[o] = '\0';
+    rank = car_layer_rank(&sh->layers, path, o);
+    if (path_out != NULL) memcpy(path_out, path, o + 1);
+    return rank;
+}
+
+/* Nesting bound for conditional group rules (@media, @supports, @layer) -- they
+ * nest in real sheets (a @layer holding @media holding @supports). */
+#define CSS_MEDIA_MAX_DEPTH 8
 
 /* Structure-aware custom-property collection (see the block comment above
- * collect_custom_decls): walks s[start,end) with the same @media gating as
+ * cvr_collect_decls): walks s[start,end) with the same @media gating as
  * parse_block (a non-matching block — e.g. a dark palette in a light render — is
  * skipped whole; other @-rules are opaque) and folds `--name: value` declarations
  * into tab only from rules with a root-scoped selector (selector_is_root_scoped
@@ -3931,8 +3919,7 @@ static int at_is_media(const char *s, size_t i, size_t n) {
  * resolve against the complete applicable table regardless of document order. */
 static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
                                         const css_media *m, const char *root_scope,
-                                        css_custom_prop *tab, size_t cap,
-                                        size_t *ntab, int depth) {
+                                        cvr_table *tab, cvr_table *initial, int depth) {
     size_t i = start;
     while (i < end) {
         while (i < end && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r')) ++i;
@@ -3947,12 +3934,32 @@ static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
                     size_t body_end = (be > body_start) ? be - 1 : body_start;
                     if (depth < CSS_MEDIA_MAX_DEPTH && media_matches(s, i + 6, q, m))
                         collect_custom_props_scoped(s, body_start, body_end, m,
-                                                    root_scope, tab, cap, ntab,
-                                                    depth + 1);
+                                                    root_scope, tab, initial, depth + 1);
                     i = be;
                     continue;
                 }
                 i = (q < end && s[q] == ';') ? q + 1 : end;
+                continue;
+            }
+            /* @property --name { initial-value: v } (CSS Properties and Values
+             * API 1 section 3): the value a var() sees when nothing declares the
+             * name -- Tailwind v4's --tw-* defaults live only here. */
+            if (at_keyword(s, i, end, "property")) {
+                size_t q, ba, bb, be;
+                if (at_block(s, i + 9, end, &q, &ba, &bb, &be) && initial != NULL)
+                    property_initial(s, i + 9, q, ba, bb, initial);
+                i = be;
+                continue;
+            }
+            int is_layer = at_keyword(s, i, end, "layer");
+            int is_supports = !is_layer && at_keyword(s, i, end, "supports");
+            if (is_layer || is_supports) {
+                size_t pre = i + (is_layer ? 6 : 9), q, ba, bb, be;
+                if (at_block(s, pre, end, &q, &ba, &bb, &be) && depth < CSS_MEDIA_MAX_DEPTH &&
+                    (is_layer || supports_matches(s, pre, q)))
+                    collect_custom_props_scoped(s, ba, bb, m, root_scope, tab, initial,
+                                                depth + 1);
+                i = be;
                 continue;
             }
             i = skip_at_rule(s, i, end);
@@ -3973,8 +3980,9 @@ static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
         size_t p = ss;
         while (p < se) {
             size_t q = sel_list_comma(s, p, se);
-            if (selector_is_root_scoped(s, p, q, root_scope)) {
-                collect_custom_decls(s, ds, de, tab, cap, ntab);
+            if (selector_is_root_scoped(s, p, q, root_scope) ||
+                selector_matches_root(s, p, q, m)) {
+                cvr_collect_decls(tab, s, ds, de);
                 break;
             }
             p = (q < se) ? q + 1 : q;
@@ -4004,6 +4012,47 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                     continue;
                 }
                 i = (q < end && s[q] == ';') ? q + 1 : end;  /* @media with no block */
+                continue;
+            }
+            /* @layer: a block is parsed inside its layer (its rules carry the rank,
+             * which the cascade compares before specificity); a statement
+             * `@layer a, b;` only fixes the order. CSS Cascade 5 section 6.4. */
+            if (at_keyword(s, i, end, "layer")) {
+                size_t q, ba, bb, be;
+                if (at_block(s, i + 6, end, &q, &ba, &bb, &be)) {
+                    if (depth < CSS_MEDIA_MAX_DEPTH) {
+                        int saved = sh->cur_layer;
+                        char saved_path[CAR_LAYER_NAME_MAX];
+                        memcpy(saved_path, sh->cur_layer_path, sizeof saved_path);
+                        char path[CAR_LAYER_NAME_MAX];
+                        int rank = layer_register(sh, s, i + 6, q, path);
+                        sh->cur_layer = rank;
+                        memcpy(sh->cur_layer_path, path, sizeof path);
+                        parse_block(sh, s, ba, bb, media, depth + 1, log);
+                        sh->cur_layer = saved;
+                        memcpy(sh->cur_layer_path, saved_path, sizeof saved_path);
+                    }
+                } else if (q < end) {
+                    size_t a = i + 6;
+                    while (a < q) {
+                        size_t c = a;
+                        while (c < q && s[c] != ',') ++c;
+                        (void)layer_register(sh, s, a, c, NULL);
+                        a = c + 1;
+                    }
+                }
+                i = be;
+                continue;
+            }
+            /* @supports: parsed iff this engine supports the condition (CSS
+             * Conditional 3 section 6) -- what it does not implement is false, so
+             * the author's fallback for that case is what applies. */
+            if (at_keyword(s, i, end, "supports")) {
+                size_t q, ba, bb, be;
+                if (at_block(s, i + 9, end, &q, &ba, &bb, &be) &&
+                    depth < CSS_MEDIA_MAX_DEPTH && supports_matches(s, i + 9, q))
+                    parse_block(sh, s, ba, bb, media, depth + 1, log);
+                i = be;
                 continue;
             }
             /* @font-face { font-family: ...; src: url(...); } — v1: only
@@ -4115,10 +4164,15 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                                 while (de2 < ke && s[de2] != '}') ++de2;
                                 /* Parse inner declarations to extract opacity */
                                 css_decl kdecls[CSS_MAX_KEYFRAME_DECLS] = { { 0 } };  /* V-002: zero EVERY field, so a field added to css_decl cannot reintroduce the hole */
+                                const cvr_scope kvs = { &sh->vars, NULL, NULL, NULL };
+                                /* No content-string pool here: a zero-capacity
+                                 * counter makes `content` fail closed. A NULL one
+                                 * was dereferenced (SIGSEGV on hostile CSS). */
+                                size_t kncontent = 0;
                                 int nd = interpret_decls(s + db, de2 - db,
-                                    kdecls, CSS_MAX_KEYFRAME_DECLS, sh->custom, sh->ncustom,
+                                    kdecls, CSS_MAX_KEYFRAME_DECLS, &kvs, NULL,
                                     sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
-                                    NULL, NULL, 0, log);
+                                    NULL, &kncontent, 0, log);
                                 int kop = -1, kbg = -1, kfg = -1, ktx = CSS_LEN_UNSET, kty = CSS_LEN_UNSET, ksx = 0, ksy = 0, krot = 0;
                                 for (int dd = 0; dd < nd; ++dd) {
                                     int p = kdecls[dd].prop;
@@ -4316,17 +4370,21 @@ static void sheet_rewind(css_sheet *sh) {
     sh->ndecls = 0;
     sh->nrules = 0;
     sh->nsels = 0;
-    sh->ncustom = 0;
+    cvr_reset(&sh->vars);
     sh->nbg_urls = 0;
     sh->ncontent_urls = 0;
     sh->nkeyframes = 0;
     sh->nfont_faces = 0;
+    while (sh->nraw > 0) free(sh->raw[--sh->nraw]);
+    cvr_reset(&sh->initial);
+    memset(&sh->layers, 0, sizeof sh->layers);
+    sh->cur_layer = 0;
+    sh->cur_layer_path[0] = '\0';
 }
 
 static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
                                         const css_media *m, const char *root_scope,
-                                        css_custom_prop *tab, size_t cap,
-                                        size_t *ntab, int depth);
+                                        cvr_table *tab, cvr_table *initial, int depth);
 static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                         const css_media *media, int depth, css_drop_log *log);
 
@@ -4337,8 +4395,7 @@ static void sheet_reparse(css_sheet *sh, const char *s, size_t n,
                           const css_media *m, const char *root_scope,
                           css_drop_log *log) {
     sheet_rewind(sh);
-    collect_custom_props_scoped(s, 0, n, m, root_scope,
-                                sh->custom, CSS_MAX_CUSTOM_PROPS, &sh->ncustom, 0);
+    collect_custom_props_scoped(s, 0, n, m, root_scope, &sh->vars, &sh->initial, 0);
     parse_block(sh, s, 0, n, m, 0, log);
 }
 
@@ -4409,7 +4466,7 @@ css_status css_parse_logged(const char *text, size_t len, const css_media *media
     if (log != NULL) { log->n = 0; log->total = 0; }
     css_sheet *sh = (css_sheet *)calloc(1, sizeof *sh);
     if (sh == NULL) return CSS_ERR_OOM;
-    css_media def = { 0, 0, CSS_MEDIA_DEFAULT_WIDTH };  /* screen / light / desktop */
+    css_media def = { 0, 0, CSS_MEDIA_DEFAULT_WIDTH, NULL, NULL };  /* screen / light / desktop */
     const css_media *m = (media != NULL) ? media : &def;
 
     /* Allocate initial dynamic arrays. Start small; add_rule doubles on demand.
@@ -4433,8 +4490,8 @@ css_status css_parse_logged(const char *text, size_t len, const css_media *media
         size_t clen = 0;
         char *clean = strip_comments(text, len, &clen);
         if (clean == NULL) { css_free(sh); return CSS_ERR_OOM; }
-        collect_custom_props_scoped(clean, 0, clen, m, root_scope,
-                                    sh->custom, CSS_MAX_CUSTOM_PROPS, &sh->ncustom, 0);
+        collect_custom_props_scoped(clean, 0, clen, m, root_scope, &sh->vars,
+                                    &sh->initial, 0);
         parse_block(sh, clean, 0, clen, m, 0, log);
 
         /* Second pass, only when the sheet redefines the root font-size: `rem` is
@@ -4477,6 +4534,10 @@ void css_free(css_sheet *s) {
     free(s->decls);
     free(s->rules);
     free(s->sels);
+    cvr_free(&s->vars);
+    cvr_free(&s->initial);
+    for (size_t i = 0; i < s->nraw; ++i) free(s->raw[i]);
+    free(s->raw);
     free(s);
 }
 
@@ -4487,7 +4548,7 @@ void css_free(css_sheet *s) {
  * broken by document order. wi/ws/wo track the winning tier/specificity/order so far. */
 static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
                         const css_decl *d,
-                        int spec, int ord, const char (*urltab)[CSS_URL_MAX],
+                        int spec, int layer, int ord, const char (*urltab)[CSS_URL_MAX],
                         const char (*contenttab)[CSS_URL_MAX], int pseudo_kind) {
     /* CSS 2.1 §12.1: a ::before/::after rule styles the GENERATED box, never the
      * element it originates from. Only `content` crosses over, because that is how
@@ -4510,6 +4571,9 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
     }
     int slot = d->prop;
     int imp = d->important;
+    /* Cascade layers compare BEFORE specificity (CSS Cascade 5 section 6.4), so both
+     * fold into one value; layer < 0 means the caller already passes one. */
+    if (layer >= 0) spec = car_effective_spec(spec, layer, imp);
     int win = imp > wi[slot] ||
               (imp == wi[slot] && (spec > ws[slot] || (spec == ws[slot] && ord >= wo[slot])));
     if (win) {
@@ -4853,6 +4917,131 @@ static double computed_font_size(const css_style *o, const css_element *el) {
     return css_computed_font_size(o, (el != NULL) ? el->font_size : 0.0);
 }
 
+/* One matched selector, remembered between the passes of the element cascade. */
+typedef struct css_match {
+    const css_sel *sel;
+    int            pseudo;
+} css_match;
+
+/* A competing `--name` declaration: cascade key, then its text. */
+typedef struct css_cand {
+    int imp, espec, ord, idx;
+    const char *entry;   /* "--name\0value" in the sheet's raw pool */
+} css_cand;
+
+static int cand_cmp(const void *pa, const void *pb) {
+    const css_cand *a = (const css_cand *)pa, *b = (const css_cand *)pb;
+    int nc = strcmp(a->entry, b->entry);   /* group by name ("--name\0...") */
+    if (nc != 0) return nc;
+    if (a->imp != b->imp) return a->imp < b->imp ? -1 : 1;
+    if (a->espec != b->espec) return a->espec < b->espec ? -1 : 1;
+    if (a->ord != b->ord) return a->ord < b->ord ? -1 : 1;
+    return (a->idx > b->idx) - (a->idx < b->idx);
+}
+
+/* The element's winning custom properties from its matched rules: grouped by name
+ * and sorted into cascade order, so the last of each group is the winner. A winner
+ * whose value is already the one the element inherits (`inh`) is not stored: it
+ * changes no lookup, and a universal rule re-declaring Tailwind's thirty --tw-*
+ * resets on every element would otherwise cost a table per element. A
+ * ::before/::after rule declares them for the pseudo box, not the element. */
+static void element_custom_props(const css_sheet *sheet, const css_match *mt, size_t nm,
+                                 const cvr_scope *inh, cvr_table *own) {
+    if (sheet == NULL || nm == 0) return;
+    size_t n = 0;
+    for (size_t k = 0; k < nm; ++k) {
+        if (mt[k].pseudo == PSEUDO_BEFORE || mt[k].pseudo == PSEUDO_AFTER) continue;
+        const css_rule *r = &sheet->rules[mt[k].sel->rule];
+        for (size_t d = 0; d < r->count; ++d)
+            if (sheet->decls[r->start + d].prop == P_META_CUSTOM) ++n;
+    }
+    if (n == 0) return;
+    css_cand *c = (css_cand *)calloc(n, sizeof *c);
+    if (c == NULL) return;
+    size_t o = 0;
+    for (size_t k = 0; k < nm && o < n; ++k) {
+        if (mt[k].pseudo == PSEUDO_BEFORE || mt[k].pseudo == PSEUDO_AFTER) continue;
+        const css_sel *sel = mt[k].sel;
+        const css_rule *r = &sheet->rules[sel->rule];
+        for (size_t d = 0; d < r->count && o < n; ++d) {
+            const css_decl *dc = &sheet->decls[r->start + d];
+            if (dc->prop != P_META_CUSTOM || dc->ival < 0 || (size_t)dc->ival >= sheet->nraw)
+                continue;
+            c[o].imp = dc->important;
+            c[o].espec = car_effective_spec(sel->spec, sel->layer, dc->important);
+            c[o].ord = sel->order;
+            c[o].idx = (int)(r->start + d);
+            c[o].entry = sheet->raw[dc->ival];
+            ++o;
+        }
+    }
+    qsort(c, o, sizeof *c, cand_cmp);
+    for (size_t k = 0; k < o; ++k) {
+        if (k + 1 < o && strcmp(c[k].entry, c[k + 1].entry) == 0) continue;  /* not the winner */
+        const char *name = c[k].entry;
+        size_t nl = strlen(name);
+        const char *val = name + nl + 1;
+        const char *was = cvr_lookup(inh, name, nl);
+        if (was != NULL && strcmp(was, val) == 0) continue;
+        (void)cvr_set(own, name, nl, val, strlen(val));
+    }
+    free(c);
+}
+
+/* url()/content strings a re-resolved declaration may carry; they only need to
+ * live until apply_decl has copied them. */
+#define CSS_VAR_POOL 4u
+
+/* Re-resolves one var() source ("prop\0value") against the element's scope and
+ * applies what it interprets to, exactly as the rule would have. */
+static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+                             const char *entry, int important, const cvr_scope *sc,
+                             int spec, int layer, int ord, int pseudo) {
+    const char *prop = entry;
+    const char *val = entry + strlen(entry) + 1;
+    char resolved[CSS_URL_MAX];
+    if (!cvr_resolve(val, resolved, sizeof resolved, sc)) return;
+    css_decl tmp[CSS_DECL_SLOTS_MIN];
+    memset(tmp, 0, sizeof tmp);
+    char urls[CSS_VAR_POOL][CSS_URL_MAX];
+    char texts[CSS_VAR_POOL][CSS_URL_MAX];
+    size_t nu = 0, nt = 0;
+    int known = 1;
+    int nw = interpret_prop(prop, resolved, tmp, (int)CSS_DECL_SLOTS_MIN, urls, &nu,
+                            CSS_VAR_POOL, texts, &nt, CSS_VAR_POOL, &known);
+    for (int i = 0; i < nw; ++i) {
+        tmp[i].important = important;
+        apply_decl(o, wi, ws, wo, wem, wv, &tmp[i], spec, layer, ord,
+                   (const char (*)[CSS_URL_MAX])urls, (const char (*)[CSS_URL_MAX])texts,
+                   pseudo);
+    }
+}
+
+/* Applies one matched rule. es == NULL: the page-global meaning of every var()
+ * (markers skipped, their spans applied). Otherwise each marker is re-resolved
+ * against es and its span skipped. */
+static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+                       const css_sheet *sheet, const css_sel *sel, int pseudo,
+                       const cvr_scope *es) {
+    const css_rule *r = &sheet->rules[sel->rule];
+    for (size_t d = 0; d < r->count; ++d) {
+        const css_decl *dc = &sheet->decls[r->start + d];
+        if (dc->prop == P_META_CUSTOM) continue;
+        if (dc->prop == P_META_VARSRC) {
+            if (es != NULL) {
+                if (dc->ival >= 0 && (size_t)dc->ival < sheet->nraw)
+                    apply_var_source(o, wi, ws, wo, wem, wv, sheet->raw[dc->ival],
+                                     dc->important, es, sel->spec, sel->layer,
+                                     sel->order, pseudo);
+                d += (size_t)dc->span;
+            }
+            continue;
+        }
+        apply_decl(o, wi, ws, wo, wem, wv, dc, sel->spec, sel->layer, sel->order,
+                   sheet->bg_urls, sheet->content_urls, pseudo);
+    }
+}
+
 /*
  * Folds every font-relative length in the resolved style against this element's
  * computed font-size. This is the ONE place a font-relative length becomes
@@ -4894,12 +5083,18 @@ static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
         };
         if (folded.ival == wv[slot]) continue;   /* nothing moved */
         apply_decl(o, wi, ws, wo, NULL, NULL, &folded,
-                   ws[slot], wo[slot], urltab, contenttab, -1);
+                   ws[slot], -1, wo[slot], urltab, contenttab, -1);
     }
 }
 
 css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          const char *inline_style, size_t inline_len) {
+    return css_resolve_el_ex(sheet, el, inline_style, inline_len, NULL);
+}
+
+css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
+                            const char *inline_style, size_t inline_len,
+                            cvr_table *own_out) {
     /* Designated initializers: robust against field insertion/reordering (every
      * "unset" sentinel is named, so a new field cannot silently default to 0). */
     css_style out = {
@@ -5014,61 +5209,77 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         wi[k] = -1; ws[k] = -1; wo[k] = -1; wem[k] = 0; wv[k] = 0;
     }
 
+    /* Pass 1: match once, remembering the rules. OOM degrades to the page-global
+     * meaning of var() (never a partial cascade). */
+    css_match *mt = NULL;
+    size_t nm = 0, mcap = 0;
+    int m_oom = 0;
     if (sheet != NULL && el != NULL) {
         for (size_t si = 0; si < sheet->nsels; ++si) {
             const css_sel *sel = &sheet->sels[si];
             int pseudo_kind = -1;
             if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;
-            size_t start = sheet->rules[sel->rule].start;
-            size_t cnt = sheet->rules[sel->rule].count;
-            for (size_t d = 0; d < cnt; ++d)
-                apply_decl(&out, wi, ws, wo, wem, wv, &sheet->decls[start + d], sel->spec, sel->order,
-                           sheet->bg_urls, sheet->content_urls, pseudo_kind);
+            if (nm == mcap) {
+                size_t nc = mcap ? mcap * 2 : 32;
+                css_match *g = (css_match *)realloc(mt, nc * sizeof *g);
+                if (g == NULL) { m_oom = 1; break; }
+                mt = g;
+                mcap = nc;
+            }
+            mt[nm].sel = sel;
+            mt[nm].pseudo = pseudo_kind;
+            ++nm;
         }
     }
 
+    /* Pass 2: the element's own custom properties (spec/css_vars.md, "Alcance por
+     * elemento"), inline ones last so they win. */
+    cvr_table local = { 0 };
+    cvr_table *own = (own_out != NULL) ? own_out : &local;
+    const cvr_scope inh_scope = { NULL, sheet != NULL ? &sheet->vars : NULL,
+                                  (el != NULL) ? el->vars : NULL,
+                                  sheet != NULL ? &sheet->initial : NULL };
+    if (!m_oom) element_custom_props(sheet, mt, nm, &inh_scope, own);
     if (inline_style != NULL) {
         if (inline_len == 0) inline_len = strlen(inline_style);
-        /* var() in an inline style= can reference a custom property declared
-         * either in this SAME inline block (`style="--x:1;color:var(--x)"`) or in
-         * the stylesheet (e.g. a `:root` rule). Inline-declared names win on a
-         * collision (closer to the use site), so they go first in the combined
-         * table -- expand_lookup takes the first match, which also makes
-         * deduplicating the sheet's entries unnecessary. Heap-allocated (the
-         * table is too large for the stack); OOM degrades to sheet-only vars. */
-        css_custom_prop *combined =
-            (css_custom_prop *)calloc(2 * CSS_MAX_CUSTOM_PROPS, sizeof *combined);
-        size_t ncombined = 0;
-        if (combined != NULL) {
-            collect_custom_decls(inline_style, 0, inline_len,
-                                 combined, CSS_MAX_CUSTOM_PROPS, &ncombined);
-            if (sheet != NULL) {
-                for (size_t i = 0; i < sheet->ncustom &&
-                                   ncombined < 2 * CSS_MAX_CUSTOM_PROPS; ++i)
-                    combined[ncombined++] = sheet->custom[i];
-            }
+        cvr_collect_decls(own, inline_style, 0, inline_len);
+    }
+    const cvr_chain *inherited = (el != NULL) ? el->vars : NULL;
+    int per_element = !m_oom && (cvr_count(own) > 0 || inherited != NULL);
+    const cvr_scope es = { own, sheet != NULL ? &sheet->vars : NULL, inherited,
+                           sheet != NULL ? &sheet->initial : NULL };
+
+    /* Pass 3: the declarations. A var() source marker is re-resolved against the
+     * element's scope when it has one, replacing the page-global declarations it
+     * spans; otherwise the marker is skipped and they apply as always. */
+    if (m_oom && sheet != NULL && el != NULL) {
+        for (size_t si = 0; si < sheet->nsels; ++si) {
+            const css_sel *sel = &sheet->sels[si];
+            int pseudo_kind = -1;
+            if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;
+            apply_rule(&out, wi, ws, wo, wem, wv, sheet, sel, pseudo_kind, NULL);
         }
+    }
+    for (size_t k = 0; k < nm && !m_oom; ++k)
+        apply_rule(&out, wi, ws, wo, wem, wv, sheet, mt[k].sel, mt[k].pseudo,
+                   per_element ? &es : NULL);
+    free(mt);
+
+    if (inline_style != NULL) {
         css_decl tmp[CSS_INLINE_DECLS] = { { 0 } };  /* V-002, as above */
         char inline_bg_urls[CSS_INLINE_BG_URLS][CSS_URL_MAX];
         size_t n_inline_bg_urls = 0;
         char inline_content_urls[CSS_INLINE_BG_URLS][CSS_URL_MAX];
         size_t n_inline_content_urls = 0;
-        const css_custom_prop *vtab = combined;
-        size_t nvtab = ncombined;
-        if (vtab == NULL && sheet != NULL) {  /* OOM: degrade to sheet-only vars */
-            vtab = sheet->custom;
-            nvtab = sheet->ncustom;
-        }
-        size_t dn = interpret_decls(inline_style, inline_len, tmp, CSS_INLINE_DECLS,
-                                    vtab, nvtab,
+        size_t dn = interpret_decls(inline_style, inline_len, tmp, CSS_INLINE_DECLS, &es, NULL,
                                     inline_bg_urls, &n_inline_bg_urls, CSS_INLINE_BG_URLS,
                                     inline_content_urls, &n_inline_content_urls, CSS_INLINE_BG_URLS,
                                     NULL);
         for (size_t d = 0; d < dn; ++d)
-            apply_decl(&out, wi, ws, wo, wem, wv, &tmp[d], CSS_INLINE_SPEC, INT_MAX,
+            apply_decl(&out, wi, ws, wo, wem, wv, &tmp[d], CAR_INLINE_SPEC, -1, INT_MAX,
                        inline_bg_urls, inline_content_urls, -1);
-        free(combined);
     }
+    cvr_free(&local);
 
     fold_font_relative(&out, wi, ws, wo, wem, wv, el,
                        sheet != NULL ? sheet->bg_urls : NULL,

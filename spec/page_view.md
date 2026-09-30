@@ -1133,3 +1133,21 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
 - El gate de presentación **no cambia**: los colores/estilos de autor (externos o internos)
   siguen gateados por `caps.css` en `render_doc`; `display:none`/flex/grid siguen siendo
   estructurales.
+
+## Contenedores flex/grid generan caja siempre (2026-09-29, tanda 34)
+
+`is_block_like` decidía solo por `display:block|inline-block|list-item` o por la etiqueta, así
+que `<a style="display:flex;height:62px;background:…">` —la tarjeta de toda grilla moderna,
+p. ej. los "Spaces" de huggingface— no registraba caja y perdía alto, fondo y radio (el mismo
+CSS en un `<div>` sí funcionaba). Un contenedor flex o grid es una caja de nivel bloque o
+inline (CSS Display 3 §2): `display:flex|grid` ahora es block-like para el registro de cajas.
+Dado `<a class=c>` con `.c{display:flex;height:62px}`, entonces hay una caja de 62 px.
+
+## Caché de estilos: índice hash y cadena de custom properties (tanda 34)
+
+`pv_style_cache` indexa nodos con direccionamiento abierto (la búsqueda lineal hacía la
+resolución cuadrática en el número de elementos) y guarda por nodo su cadena de custom
+properties (`cvr_chain`), que se pasa al hijo como `css_element.vars` en el mismo recorrido
+raíz→abajo que el `font-size` (spec/css_vars.md, "Alcance por elemento"). Los nodos de la
+cadena se crean solo para elementos que declaran algo distinto de lo heredado y los libera
+`pv_style_cache_free`.

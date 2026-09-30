@@ -10,6 +10,171 @@
 
 /* For :has() pseudo-class: descendant DOM traversal via el->dom_node. */
 #include <lexbor/html/html.h>
+#include <string.h>
+
+/* CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted
+ * content values and selector identifiers). Backslash +
+ * 1-6 hex digits (then one optional whitespace, eaten as the terminator) is the
+ * codepoint, emitted UTF-8; backslash + newline eats both (continuation);
+ * backslash + anything else is that char; a trailing backslash is dropped. Null,
+ * surrogates and > U+10FFFF become U+FFFD. Decoded output only ever shrinks,
+ * except \0-like escapes (2 chars -> 3 bytes), so the write is capped and a
+ * hostile value truncates instead of overflowing. */
+int csel_hex_val(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+
+size_t csel_emit_utf8(unsigned int cp, char *out) {
+    if (cp == 0 || (cp >= 0xD800 && cp <= 0xDFFF) || cp > 0x10FFFF)
+        cp = 0xFFFD;
+    if (cp < 0x80) { out[0] = (char)cp; return 1; }
+    if (cp < 0x800) {
+        out[0] = (char)(0xC0 | (cp >> 6));
+        out[1] = (char)(0x80 | (cp & 0x3F));
+        return 2;
+    }
+    if (cp < 0x10000) {
+        out[0] = (char)(0xE0 | (cp >> 12));
+        out[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
+        out[2] = (char)(0x80 | (cp & 0x3F));
+        return 3;
+    }
+    out[0] = (char)(0xF0 | (cp >> 18));
+    out[1] = (char)(0x80 | ((cp >> 12) & 0x3F));
+    out[2] = (char)(0x80 | ((cp >> 6) & 0x3F));
+    out[3] = (char)(0x80 | (cp & 0x3F));
+    return 4;
+}
+
+void csel_unescape(char *dst, size_t cap, const char *src, size_t n) {
+    size_t o = 0, i = 0;
+    while (i < n && o + 1 < cap) {
+        if (src[i] != '\\' || i + 1 >= n) {
+            if (src[i] == '\\') break; /* trailing backslash: dropped */
+            dst[o++] = src[i++];
+            continue;
+        }
+        char nx = src[i + 1];
+        if (nx == '\n') { i += 2; continue; }
+        if (nx == '\r') { i += 2; if (i < n && src[i] == '\n') ++i; continue; }
+        int hv = csel_hex_val(nx);
+        if (hv < 0) {
+            if (o + 1 >= cap) break;
+            dst[o++] = nx;
+            i += 2;
+            continue;
+        }
+        unsigned int cp = 0;
+        size_t k = 0;
+        while (k < 6 && i + 1 + k < n && csel_hex_val(src[i + 1 + k]) >= 0) {
+            cp = cp * 16u + (unsigned int)csel_hex_val(src[i + 1 + k]);
+            ++k;
+        }
+        i += 1 + k;
+        if (i < n && (src[i] == ' ' || src[i] == '\t')) ++i;
+        else if (i < n && src[i] == '\n') ++i;
+        else if (i + 1 < n && src[i] == '\r' && src[i + 1] == '\n') i += 2;
+        else if (i < n && src[i] == '\r') ++i;
+        char enc[4];
+        size_t elen = csel_emit_utf8(cp, enc);
+        if (o + elen >= cap) break;
+        memcpy(dst + o, enc, elen);
+        o += elen;
+    }
+    dst[o] = '\0';
+}
+
+
+size_t csel_escape_len(const char *s, size_t i, size_t b) {
+    if (i >= b || s[i] != '\\') return 0;
+    if (i + 1 >= b || s[i + 1] == '\n' || s[i + 1] == '\r' || s[i + 1] == '\f') return 0;
+    size_t k = i + 1;
+    if (csel_hex_val(s[k]) < 0) return 2;
+    size_t h = 0;
+    while (h < 6 && k < b && csel_hex_val(s[k]) >= 0) { ++k; ++h; }
+    if (k + 1 < b && s[k] == '\r' && s[k + 1] == '\n') k += 2;
+    else if (k < b && (s[k] == ' ' || s[k] == '\t' || s[k] == '\n' || s[k] == '\r' ||
+                       s[k] == '\f')) ++k;
+    return k - i;
+}
+
+size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace) {
+    int depth = 0;
+    char q = 0;
+    for (; i < b; ++i) {
+        char c = s[i];
+        if (c == '\\' && i + 1 < b) { ++i; continue; }
+        if (q) { if (c == q) q = 0; continue; }
+        if (c == '"' || c == '\'') q = c;
+        else if (c == '(') ++depth;
+        else if (c == ')') { if (depth > 0) --depth; }
+        else if (depth == 0 && (c == ';' || (stop_brace && c == '}'))) return i;
+    }
+    return b;
+}
+
+/* 64-bit FNV-1a of the whole identifier: what makes a folded long name exact up to
+ * a hash collision -- and a collision only lets a page style its own elements. */
+static unsigned long long ident_hash(const char *s, size_t n) {
+    unsigned long long h = 1469598103934665603ull;
+    for (size_t i = 0; i < n; ++i) { h ^= (unsigned char)s[i]; h *= 1099511628211ull; }
+    return h;
+}
+
+void csel_ident_fold(const char *src, size_t len, char *dst) {
+    static const char hex[] = "0123456789abcdef";
+    if (len < CSS_TOK_MAX) {
+        memcpy(dst, src, len);
+        dst[len] = '\0';
+        return;
+    }
+    memcpy(dst, src, CSEL_FOLD_PREFIX);
+    size_t o = CSEL_FOLD_PREFIX;
+    dst[o++] = CSEL_FOLD_MARK;
+    unsigned long long h = ident_hash(src, len);
+    for (int k = 15; k >= 0; --k) dst[o++] = hex[(h >> (4 * k)) & 0xFu];
+    dst[o] = '\0';
+}
+
+int csel_ident_eq(const char *stored, const char *tok, size_t tlen) {
+    if (stored == NULL || tok == NULL) return 0;
+    if (tlen < CSS_TOK_MAX) return strlen(stored) == tlen && memcmp(stored, tok, tlen) == 0;
+    char f[CSS_TOK_MAX];
+    csel_ident_fold(tok, tlen, f);
+    return strcmp(stored, f) == 0;
+}
+
+int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower) {
+    size_t i = *ip;
+    size_t a = i;
+    while (i < b) {
+        size_t el = csel_escape_len(s, i, b);
+        if (el > 0) { i += el; continue; }
+        if (csel_ident_ch(s[i]) || (unsigned char)s[i] >= 0x80) { ++i; continue; }
+        break;
+    }
+    if (i == a) return 0;
+    char buf[CSEL_IDENT_SCRATCH];
+    size_t n;
+    if (memchr(s + a, '\\', i - a) != NULL) {
+        csel_unescape(buf, sizeof buf, s + a, i - a);
+        n = strlen(buf);
+    } else {
+        n = i - a;
+        if (n >= sizeof buf) n = sizeof buf - 1;
+        memcpy(buf, s + a, n);
+        buf[n] = '\0';
+    }
+    if (n == 0) return 0;
+    if (lower) for (size_t k = 0; k < n; ++k) buf[k] = csel_lower_ch(buf[k]);
+    csel_ident_fold(buf, n, dst);
+    *ip = i;
+    return 1;
+}
+
 
 /* Parses one attribute selector starting at s[*ip] == '[' (within s[.,b)) into *am.
  * Advances *ip past the closing ']'. Returns 1 if supported, 0 (fail closed) on any
@@ -221,6 +386,8 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
         pm->sub_first = sel->nsubs;
         pm->sub_count = 0;
         while (i < b) {
+            size_t esc = csel_escape_len(s, i, b);
+            if (esc > 0) { i += esc; continue; }
             if (s[i] == ')' && depth == 0) break;
             if (s[i] == '(') ++depth;
             else if (s[i] == '[') ++depth;
@@ -271,35 +438,18 @@ static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *su
         ++i;  /* universal: no type */
     } else if ((s[i] >= 'a' && s[i] <= 'z') || (s[i] >= 'A' && s[i] <= 'Z') ||
                s[i] == '_') {
-        size_t k = 0;
-        while (i < b && csel_ident_ch(s[i])) {
-            if (k + 1 < CSS_TOK_MAX) sub->tag[k++] = csel_lower_ch(s[i]);
-            ++i;
-        }
-        sub->tag[k] = '\0';
+        if (!csel_read_ident(s, &i, b, sub->tag, 1)) return 0;
         sub->has_tag = 1;
     }
     while (i < b) {
         if (s[i] == '.') {
             ++i;
             /* One class slot: a second class would silently overwrite the first. */
-            if (i >= b || !csel_ident_ch(s[i]) || sub->has_cls) return 0;
-            size_t k = 0;
-            while (i < b && csel_ident_ch(s[i])) {
-                if (k + 1 < CSS_TOK_MAX) sub->cls[k++] = s[i];
-                ++i;
-            }
-            sub->cls[k] = '\0';
+            if (sub->has_cls || !csel_read_ident(s, &i, b, sub->cls, 0)) return 0;
             sub->has_cls = 1;
         } else if (s[i] == '#') {
             ++i;
-            if (i >= b || !csel_ident_ch(s[i]) || sub->has_id) return 0;
-            size_t k = 0;
-            while (i < b && csel_ident_ch(s[i])) {
-                if (k + 1 < CSS_TOK_MAX) sub->id[k++] = s[i];
-                ++i;
-            }
-            sub->id[k] = '\0';
+            if (sub->has_id || !csel_read_ident(s, &i, b, sub->id, 0)) return 0;
             sub->has_id = 1;
         } else if (s[i] == '[') {
             if (sub->nattrs >= CSS_SUB_MAX_ATTRS) return 0;
@@ -338,12 +488,7 @@ static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
     if (s[i] == '*') {
         ++i;  /* universal: no type */
     } else if ((s[i] >= 'a' && s[i] <= 'z') || (s[i] >= 'A' && s[i] <= 'Z')) {
-        size_t k = 0;
-        while (i < b && csel_ident_ch(s[i])) {
-            if (k + 1 < sizeof cp->tag) cp->tag[k++] = csel_lower_ch(s[i]);
-            ++i;
-        }
-        cp->tag[k] = '\0';
+        if (!csel_read_ident(s, &i, b, cp->tag, 1)) return 0;
         cp->has_tag = 1;
     } else if (s[i] != '.' && s[i] != '#' && s[i] != '[' && s[i] != ':') {
         return 0;
@@ -356,24 +501,12 @@ static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
             ++cp->npseudo;
         } else if (s[i] == '.') {
             ++i;
-            if (i >= b || !csel_ident_ch(s[i])) return 0;
             if (cp->ncls >= CSS_MAX_CLASSES_PER_SEL) return 0;
-            size_t k = 0;
-            while (i < b && csel_ident_ch(s[i])) {
-                if (k + 1 < CSS_TOK_MAX) cp->cls[cp->ncls][k++] = s[i];
-                ++i;
-            }
-            cp->cls[cp->ncls][k] = '\0';
+            if (!csel_read_ident(s, &i, b, cp->cls[cp->ncls], 0)) return 0;
             ++cp->ncls;
         } else if (s[i] == '#') {
             ++i;
-            if (i >= b || !csel_ident_ch(s[i]) || cp->has_id) return 0;
-            size_t k = 0;
-            while (i < b && csel_ident_ch(s[i])) {
-                if (k + 1 < sizeof cp->id) cp->id[k++] = s[i];
-                ++i;
-            }
-            cp->id[k] = '\0';
+            if (cp->has_id || !csel_read_ident(s, &i, b, cp->id, 0)) return 0;
             cp->has_id = 1;
         } else if (s[i] == '[') {
             if (cp->nattrs >= CSS_MAX_ATTR_SEL) return 0;
@@ -424,6 +557,8 @@ int csel_parse(const char *s, size_t a, size_t b, css_sel *sel) {
         size_t ts = i;
         int br = 0, par = 0;
         while (i < b) {
+            size_t esc = csel_escape_len(s, i, b);
+            if (esc > 0) { i += esc; continue; }   /* `\(`, `\ `, `\>` are ident bytes */
             char c = s[i];
             if (c == '[') br = 1;
             else if (c == ']') br = 0;
@@ -557,12 +692,13 @@ static int is_form_control(const char *tag) {
 static int sub_sel_matches(const css_sub_sel *sub, const css_element *el) {
     if (sub->has_tag && (el->tag == NULL || !csel_ci_eq(sub->tag, el->tag)))
         return 0;
-    if (sub->has_id && (el->id == NULL || strcmp(sub->id, el->id) != 0))
+    if (sub->has_id && (el->id == NULL || !csel_ident_eq(sub->id, el->id, strlen(el->id))))
         return 0;
     if (sub->has_cls) {
         int found = 0;
         for (size_t j = 0; j < el->nclasses; ++j) {
-            if (el->classes[j] != NULL && strcmp(sub->cls, el->classes[j]) == 0) {
+            if (el->classes[j] != NULL &&
+                csel_ident_eq(sub->cls, el->classes[j], strlen(el->classes[j]))) {
                 found = 1; break;
             }
         }
@@ -691,8 +827,7 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
                         size_t il = 0;
                         const lxb_char_t *idv = lxb_dom_element_get_attribute(
                             cel, (const lxb_char_t *)"id", 2, &il);
-                        if (idv == NULL || (size_t)il != strlen(sub->id) ||
-                            memcmp(idv, sub->id, il) != 0)
+                        if (idv == NULL || !csel_ident_eq(sub->id, (const char *)idv, il))
                             match = 0;
                     }
                     if (!match) continue;
@@ -707,8 +842,8 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
                             while (tok_end <= cl) {
                                 if (tok_end == cl || cv[tok_end] == ' ') {
                                     size_t tkl = tok_end - tok_start;
-                                    if (tkl > 0 && tkl == strlen(sub->cls) &&
-                                        memcmp(cv + tok_start, sub->cls, tkl) == 0)
+                                    if (tkl > 0 &&
+                                        csel_ident_eq(sub->cls, (const char *)cv + tok_start, tkl))
                                         { found = 1; break; }
                                     tok_start = tok_end + 1;
                                 }
@@ -801,11 +936,13 @@ static int compound_matches(const css_compound *c, const css_element *el,
                             int allow_pseudo_el, int *pseudo_kind) {
     if (el == NULL) return 0;
     if (c->has_tag) { if (el->tag == NULL || !csel_ci_eq(c->tag, el->tag)) return 0; }
-    if (c->has_id)  { if (el->id == NULL || strcmp(c->id, el->id) != 0) return 0; }
+    if (c->has_id && (el->id == NULL || !csel_ident_eq(c->id, el->id, strlen(el->id))))
+        return 0;
     for (int i = 0; i < c->ncls; ++i) {
         int found = 0;
         for (size_t j = 0; j < el->nclasses; ++j) {
-            if (el->classes[j] != NULL && strcmp(c->cls[i], el->classes[j]) == 0) {
+            if (el->classes[j] != NULL &&
+                csel_ident_eq(c->cls[i], el->classes[j], strlen(el->classes[j]))) {
                 found = 1; break;
             }
         }

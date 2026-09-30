@@ -9,6 +9,7 @@
 
 #include "css_color.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -452,6 +453,115 @@ static int parse_func(const char *s, cc_rgb *out) {
     return 0;
 }
 
+/* --- CSS Color 4 sections 8-9: lab(), lch(), oklab(), oklch() -------------------
+ * Space-separated syntax only (these functions have no legacy comma form), with an
+ * optional `/ alpha` that is validated and discarded like every other alpha here.
+ * The result is converted to sRGB and clipped per channel to its gamut: CSS Color 4
+ * section 13.2 asks for chroma reduction instead, which differs only for colours
+ * sRGB cannot show at all. */
+
+#define CC_PI 3.14159265358979323846
+
+/* One component: a <number>, a <percentage> (scaled so 100% == pct_ref), `none`
+ * (0), or -- when is_hue -- an <angle> in deg/grad/rad/turn, returned in degrees. */
+static int lab_comp(const char *b, const char *e, double pct_ref, int is_hue, double *out) {
+    while (b < e && *b == ' ') ++b;
+    while (e > b && e[-1] == ' ') --e;
+    if (b == e) return -1;
+    if (e - b == 4 && memcmp(b, "none", 4) == 0) { *out = 0.0; return 0; }
+    if (e[-1] == '%') {
+        double v;
+        if (cc_scan_number(b, e - 1, &v) != 0) return -1;
+        if (is_hue) return -1;
+        *out = v / 100.0 * pct_ref;
+        return 0;
+    }
+    if (is_hue) {
+        static const struct { const char *u; double to_deg; } U[] = {
+            { "grad", 0.9 }, { "turn", 360.0 }, { "deg", 1.0 }, { "rad", 180.0 / CC_PI } };
+        for (size_t k = 0; k < sizeof U / sizeof U[0]; ++k) {
+            size_t n = strlen(U[k].u);
+            if ((size_t)(e - b) > n && memcmp(e - n, U[k].u, n) == 0) {
+                double v;
+                if (cc_scan_number(b, e - n, &v) != 0) return -1;
+                *out = v * U[k].to_deg;
+                return 0;
+            }
+        }
+    }
+    return cc_scan_number(b, e, out);
+}
+
+static unsigned char srgb_encode(double lin) {
+    double v = (lin <= 0.0031308) ? 12.92 * lin : 1.055 * pow(lin, 1.0 / 2.4) - 0.055;
+    if (!(v > 0.0)) v = 0.0;          /* also catches NaN */
+    if (v > 1.0) v = 1.0;
+    return (unsigned char)cc_round(v * 255.0);
+}
+
+static void oklab_to_rgb(double L, double a, double b, cc_rgb *out) {
+    double l = L + 0.3963377774 * a + 0.2158037573 * b;
+    double m = L - 0.1055613458 * a - 0.0638541728 * b;
+    double s = L - 0.0894841775 * a - 1.2914855480 * b;
+    l = l * l * l; m = m * m * m; s = s * s * s;
+    out->r = srgb_encode( 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s);
+    out->g = srgb_encode(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s);
+    out->b = srgb_encode(-0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s);
+}
+
+/* CIE Lab (D50, CSS Color 4 section 9.4) -> XYZ D50 -> Bradford D65 -> linear sRGB. */
+static void lab_to_rgb(double L, double a, double b, cc_rgb *out) {
+    const double k = 24389.0 / 27.0, e = 216.0 / 24389.0;
+    double fy = (L + 16.0) / 116.0, fx = a / 500.0 + fy, fz = fy - b / 200.0;
+    double xr = (fx * fx * fx > e) ? fx * fx * fx : (116.0 * fx - 16.0) / k;
+    double yr = (L > k * e) ? fy * fy * fy : L / k;
+    double zr = (fz * fz * fz > e) ? fz * fz * fz : (116.0 * fz - 16.0) / k;
+    double X = xr * 0.3457 / 0.3585, Y = yr, Z = zr * (1.0 - 0.3457 - 0.3585) / 0.3585;
+    double X65 =  0.955473421488075 * X - 0.02309845494876471 * Y + 0.06325924320057072 * Z;
+    double Y65 = -0.0283697093338637 * X + 1.0099953980813041 * Y + 0.021041441191917323 * Z;
+    double Z65 =  0.012314014864481998 * X - 0.020507649298898964 * Y + 1.330365926242124 * Z;
+    out->r = srgb_encode( 3.2409699419045226 * X65 - 1.537383177570094 * Y65 - 0.4986107602930034 * Z65);
+    out->g = srgb_encode(-0.9692436362808796 * X65 + 1.8759675015077202 * Y65 + 0.04155505740717559 * Z65);
+    out->b = srgb_encode( 0.05563007969699366 * X65 - 0.20397695888897652 * Y65 + 1.0569715142428786 * Z65);
+}
+
+/* lab()/lch()/oklab()/oklch() on the lowercased token s. Returns 0 / -1. */
+static int parse_lab_family(const char *s, cc_rgb *out) {
+    int ok = 0, polar = 0;
+    const char *p;
+    if (strncmp(s, "oklab(", 6) == 0)      { p = s + 6; ok = 1; }
+    else if (strncmp(s, "oklch(", 6) == 0) { p = s + 6; ok = 1; polar = 1; }
+    else if (strncmp(s, "lab(", 4) == 0)   { p = s + 4; }
+    else if (strncmp(s, "lch(", 4) == 0)   { p = s + 4; polar = 1; }
+    else return -1;
+    const char *close = strchr(p, ')');
+    if (close == NULL) return -1;
+    for (const char *q = close + 1; *q != '\0'; ++q) if (*q != ' ') return -1;
+    const char *bs[4], *es[4], *ab = NULL, *ae = NULL;
+    int comma = 0;
+    int nc = cc_split_args(p, close, bs, es, &ab, &ae, &comma);
+    if (nc != 3 || comma) return -1;
+    if (ab != NULL) { int dummy = 0; if (parse_component(ab, ae, 1, &dummy) != 0) return -1; }
+    /* Percentage references (CSS Color 4 sections 8.1, 8.2, 9.2, 9.3). */
+    double L, c1, c2;
+    double l_ref = ok ? 1.0 : 100.0;
+    double ab_ref = ok ? 0.4 : 125.0;
+    double c_ref = ok ? 0.4 : 150.0;
+    if (lab_comp(bs[0], es[0], l_ref, 0, &L) != 0) return -1;
+    if (lab_comp(bs[1], es[1], polar ? c_ref : ab_ref, 0, &c1) != 0) return -1;
+    if (lab_comp(bs[2], es[2], ab_ref, polar, &c2) != 0) return -1;
+    if (L < 0.0) L = 0.0;
+    if (L > l_ref) L = l_ref;
+    if (polar) {
+        double C = (c1 < 0.0) ? 0.0 : c1, h = c2 * CC_PI / 180.0;
+        c1 = C * cos(h);
+        c2 = C * sin(h);
+    }
+    if (ok) oklab_to_rgb(L, c1, c2, out);
+    else    lab_to_rgb(L, c1, c2, out);
+    return 0;
+}
+
 static int named_cmp(const void *key, const void *element) {
     const char *k = (const char *)key;
     const cc_named *n = (const cc_named *)element;
@@ -482,6 +592,9 @@ cc_status cc_parse(const char *token, cc_rgb *out) {
         rc = parse_func(buf, &tmp);
     } else if (strncmp(buf, "hsl", 3) == 0) {
         rc = parse_func(buf, &tmp);
+    } else if (strncmp(buf, "lab(", 4) == 0 || strncmp(buf, "lch(", 4) == 0 ||
+               strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0) {
+        rc = parse_lab_family(buf, &tmp);
     } else if (strcmp(buf, "transparent") == 0) {
         tmp.r = 0; tmp.g = 0; tmp.b = 0;
         *out = tmp;

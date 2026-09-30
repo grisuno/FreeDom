@@ -88,3 +88,30 @@
 re-matcheo dinámico de `:hover`/`:focus` (necesita re-cascada por evento de
 puntero — hito de interactividad). La semántica de qué pseudo-clase matchea qué
 estado vive en `spec/css.md` §Pseudo-clases.
+
+## Identificadores: escapes y nombres largos (2026-09-29)
+
+Medido en snapshots de sitios del allowlist: huggingface.co trae **6425** selectores con
+escapes (Tailwind: `.md\:flex`, `.w-1\/2`, `.\32xl\:p-4`, `.\[mask\:f\(x\)\]`) y github.com
+nombres de CSS Modules de **72 bytes** (`Primer_Brand__LogoSuite-module__…___bUhyS`). Los
+dos se perdían en silencio: el `\` terminaba el selector (se descartaba entero) y el nombre
+largo se **truncaba** a 63 bytes, así que nunca coincidía con la clase real del elemento.
+
+- `csel_read_ident` lee tag/`.clase`/`#id` decodificando escapes con el MISMO decodificador
+  de CSS Syntax §4.3.7 que usa `content` (`csel_unescape`, movido desde `css.c`): `\` + 1–6
+  hex (+ un blanco opcional que pertenece al escape) es el codepoint en UTF-8; `\` + otro
+  carácter es ese carácter. Los bytes ≥ 0x80 son caracteres de identificador.
+- Los escaneos que parten el texto del selector (compuestos, argumentos de
+  `:not()`/`:is()`, la lista por comas en `css.c`) saltan un escape completo
+  (`csel_escape_len`): `\,`, `\(`, `\ ` y `\>` son bytes del identificador, no sintaxis.
+- Un identificador decodificado de ≥ `CSS_TOK_MAX` bytes se guarda **plegado**
+  (`csel_ident_fold`): primeros 40 bytes + `0x1F` + 16 hex del FNV-1a de 64 bits del nombre
+  completo. `csel_ident_eq` pliega igual el token del elemento, así que la comparación es
+  exacta salvo colisión de 64 bits — y una colisión solo haría que la página se estile a sí
+  misma. Ampliar los buffers habría cuadruplicado `css_sel` (12.7 KB → ~50 KB por selector;
+  github tiene decenas de miles).
+
+Dado `.md\:flex{…}`, cuando un elemento tiene `class="md:flex"`, entonces coincide.
+Dado un nombre de 72 bytes, cuando otro elemento comparte sus primeros 63 bytes pero no la
+cola, entonces **no** coincide (el truncado viejo sí lo hacía coincidir con el prefijo).
+Fuera de alcance: escapes en valores de atributo sin comillas y en nombres de pseudo-clase.

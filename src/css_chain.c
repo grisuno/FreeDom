@@ -240,6 +240,13 @@ static const css_element *build_chain(lxb_dom_element_t *el,
  * execution): the css module drops url() and @-rules. */
 css_style cch_element_style_fs(lxb_dom_element_t *el, const css_sheet *sheet,
                                double parent_font_size) {
+    return cch_element_style_vars(el, sheet, parent_font_size, NULL, NULL);
+}
+
+css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
+                                 double parent_font_size,
+                                 const struct cvr_chain *inherited,
+                                 struct cvr_table *own_out) {
     cch_node chain[CCH_CHAIN_MAX];
     cch_node sibs[CCH_SIB_MAX];
     lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
@@ -250,14 +257,17 @@ css_style cch_element_style_fs(lxb_dom_element_t *el, const css_sheet *sheet,
      * and without it every `em` in the sheet would mean 16px regardless of the
      * element's own size. chain[0] is the subject; build_chain zeroes the view,
      * so leaving it 0 keeps the CSS initial context. */
-    if (subject != NULL) chain[0].el.font_size = parent_font_size;
+    if (subject != NULL) {
+        chain[0].el.font_size = parent_font_size;
+        chain[0].el.vars = inherited;   /* an engine input too, like font_size */
+    }
 
     /* Inline style= applies to the subject element only. */
     size_t sl = 0;
     const lxb_char_t *st =
         lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
 
-    return css_resolve_el(sheet, subject, (const char *)st, sl);
+    return css_resolve_el_ex(sheet, subject, (const char *)st, sl, own_out);
 }
 
 css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet) {

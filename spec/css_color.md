@@ -93,3 +93,20 @@ cc_rgb    cc_unpack(int packed);        /* inverso de cc_pack; bits altos ignora
 - La palabra `none` como componente (CSS Color 4 la permite; aquí falla cerrado a tema).
 - Composición de alfa: Freedom pinta opaco; el alfa se valida pero no se aplica.
 - La extracción del token desde el documento (qué declaración `color:` aplica): la hace `page_view`.
+
+## `lab()`, `lch()`, `oklab()`, `oklch()` (CSS Color 4 §8–9, 2026-09-29)
+
+Tailwind v4 escribe toda su paleta en `oklch()`: huggingface.co perdía ~765 declaraciones
+de color (fondos de tarjetas incluidos, así que su texto blanco quedaba sobre blanco).
+
+- Solo sintaxis separada por espacios (estas funciones no tienen forma legacy con comas),
+  exactamente 3 componentes, `/ alfa` opcional (validado y descartado, como en `rgb()`).
+- Componentes: `<number>`, `<percentage>` o `none` (= 0). Referencias del 100 %:
+  L = 1 (ok*) / 100 (lab/lch); a, b = 0.4 / 125; C = 0.4 / 150. El tono admite
+  `deg`/`grad`/`rad`/`turn` o número (grados); un porcentaje en el tono es inválido.
+- `oklab`/`oklch` → sRGB lineal con las matrices de Ottosson (las de la spec);
+  `lab`/`lch` son CIE Lab **D50** → XYZ D50 → Bradford a D65 → sRGB lineal.
+- Recorte al gamut sRGB **por canal** (clamp). CSS Color 4 §13.2 pide reducción de croma;
+  difiere solo en colores que sRGB no puede mostrar (aproximación documentada).
+- Referencias verificadas en tests: `oklch(70.7% .022 261.325)` = `#99a1af` (gray-400 de
+  Tailwind v4), `oklch(62.8% 0.2577 29.23)` = `lab(54.29 80.8 69.89)` = rojo sRGB.
