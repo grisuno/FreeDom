@@ -194,9 +194,9 @@ static void test_extract_script_list_separates(void **state) {
 }
 
 /* External-script semantics (Hito 24 EXT): a <script src> with an inline body lists
- * ONLY the src (browser rule: when src is present the content is ignored); module
- * scripts (type containing "module") are excluded entirely, inline or external
- * (import/export cannot run as a classic script -- fail closed). */
+ * ONLY the src (browser rule: when src is present the content is ignored). Module
+ * scripts are listed as MODULES (plan B6, spec/js_sandbox.md 7b), deferred by default
+ * like a browser runs them; nomodule is recorded so the worker can pick the right one. */
 static void test_extract_script_list_external_semantics(void **state) {
     (void)state;
     static const char H[] =
@@ -213,9 +213,16 @@ static void test_extract_script_list_external_semantics(void **state) {
     size_t n = 0;
     hp_script *s = hp_extract_script_list(doc, &n);
     assert_non_null(s);
-    assert_int_equal((unsigned long)n, 1UL);   /* only the classic external survives */
+    assert_int_equal((unsigned long)n, 3UL);
     assert_null(s[0].text);                    /* inline body ignored when src set */
     assert_string_equal(s[0].src, "https://cdn.example/a.js");
+    assert_int_equal(s[0].module, 0);
+    assert_int_equal(s[1].module, 1);          /* external module */
+    assert_string_equal(s[1].src, "https://cdn.example/m.js");
+    assert_int_equal(s[1].defer, 1);           /* modules are deferred by default */
+    assert_int_equal(s[2].module, 1);          /* inline module, deferred too */
+    assert_int_equal(s[2].defer, 1);
+    assert_non_null(s[2].text);
     hp_free_scripts(s, n);
     hp_document_free(doc);
 }
@@ -443,6 +450,60 @@ static void test_free_null_and_double(void **state) {
     hp_document_free(doc); /* freeing once is enough; NULL-safety covered above */
 }
 
+/* nomodule and async modules (plan B6): the flags the worker's module policy needs. */
+static void test_extract_script_list_module_flags(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body>"
+        "<script type='MODULE' async>var inl=1;</script>"
+        "<script nomodule>var legacy=1;</script>"
+        "<script type=' module '>var spaced=1;</script>"
+        "<script type='modulex'>var no=1;</script>"
+        "<script src='https://cdn.example/d.js' defer></script>"   /* bare boolean attr */
+        "</body></html>";
+    hp_config c = hp_config_default();
+    c.strip_scripts = 0;
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(LIT(H), &c, &doc), HP_OK);
+    size_t n = 0;
+    hp_script *s = hp_extract_script_list(doc, &n);
+    assert_non_null(s);
+    assert_int_equal((unsigned long)n, 4UL);
+    assert_int_equal(s[3].defer, 1);          /* was never detected before (get_attribute NULL) */
+    assert_int_equal(s[0].module, 1);
+    assert_int_equal(s[0].async, 1);
+    assert_int_equal(s[0].defer, 0);
+    assert_int_equal(s[1].module, 0);
+    assert_int_equal(s[1].nomodule, 1);
+    assert_int_equal(s[2].module, 1);
+    hp_free_scripts(s, n);
+    hp_document_free(doc);
+}
+
+/* <script type="importmap"> is listed with its own flag (plan B6, spec/import_map.md);
+ * an external one (src) does not exist in HTML and is dropped. */
+static void test_extract_script_list_importmap(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head>"
+        "<script type=' ImportMap '>{\"imports\":{\"a\":\"/a.js\"}}</script>"
+        "<script type='importmap' src='/map.json'></script>"
+        "</head><body></body></html>";
+    hp_config c = hp_config_default();
+    c.strip_scripts = 0;
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(LIT(H), &c, &doc), HP_OK);
+    size_t n = 0;
+    hp_script *s = hp_extract_script_list(doc, &n);
+    assert_non_null(s);
+    assert_int_equal((unsigned long)n, 1UL);
+    assert_int_equal(s[0].importmap, 1);
+    assert_int_equal(s[0].module, 0);
+    assert_non_null(s[0].text);
+    hp_free_scripts(s, n);
+    hp_document_free(doc);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_config_default_is_secure),
@@ -469,6 +530,8 @@ int main(void) {
         cmocka_unit_test(test_event_handlers_kept_when_disabled),
         cmocka_unit_test(test_parse_malformed_does_not_crash),
         cmocka_unit_test(test_free_null_and_double),
+        cmocka_unit_test(test_extract_script_list_module_flags),
+        cmocka_unit_test(test_extract_script_list_importmap),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

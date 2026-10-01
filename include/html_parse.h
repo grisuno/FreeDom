@@ -80,6 +80,9 @@ typedef struct hp_script {
     char  *type;   /* type attribute value, or NULL */
     int    defer;  /* R7: <script defer> — execute after DOM parse, in order */
     int    async;  /* <script async> — execute as soon as available, out of order */
+    int    module;   /* type="module": an ES module (deferred unless async) */
+    int    nomodule; /* <script nomodule>: the classic fallback for module-less engines */
+    int    importmap;/* type="importmap" (inline only): the module specifier map, not code */
 } hp_script;
 
 /* Returns the executable <script> elements in document order, as an owned array;

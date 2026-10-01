@@ -60,4 +60,13 @@ du_status du_base64_payload(const char *url, const char **payload, size_t *paylo
  * b64/out/out_len == NULL (with b64_len != 0) => DU_ERR_NULL_ARG. */
 du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len);
 
+/* The full data: URL processor (WHATWG Fetch 4.5, spec/data_url.md 2b): writes the
+ * media type (before the comma, ";base64" removed, trimmed; empty =>
+ * "text/plain;charset=US-ASCII"; truncated to mime_cap) and decodes the payload --
+ * forgiving base64 when flagged, percent-decoding otherwise -- into freshly malloc'd
+ * *out (NUL-terminated for convenience, *out_len excludes it). No comma =>
+ * DU_ERR_NOT_BASE64; bad base64 => DU_ERR_BAD_BASE64; over DU_MAX_ENCODED_LEN =>
+ * DU_ERR_TOO_LARGE. */
+du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len);
+
 #endif /* FREEDOM_DATA_URL_H */

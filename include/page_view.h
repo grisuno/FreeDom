@@ -660,6 +660,9 @@ typedef struct pv_box_def {
      * box shrink-wraps to its content and is placed by the parent's text-align,
      * instead of opening a full-width block box. CSS_DISP_UNSET (0) = not stated. */
     int display;
+    /* The element that generated this box (DOM_NODE_NONE if unknown), so the
+     * painter can attribute the box's laid-out rect to it (spec/js_geom.md). */
+    dom_node_id node_id;
     /* convenience: last field marker for IPC count */
 } pv_box_def;
 

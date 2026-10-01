@@ -208,6 +208,24 @@ Reglas de partición (todas tramos de la entrada):
 que el resto del módulo). Es el lado de **lectura** de `location`; la **decisión** de navegar
 (`location.href=`/`assign`/`replace`) la toma `link_nav` (`ln_resolve`), no este módulo.
 
+### 2.x `url_history_target` — destino de `history.pushState` (2026-09-30)
+
+```c
+url_status url_history_target(const char *base, const char *ref, char *out, size_t outsz);
+```
+
+Resuelve `ref` contra el documento `base` y exige **mismo origen** (HTML §7.4.4
+"URL and history update steps": un `pushState` a otro origen es `SecurityError`). Lo usan
+el worker (antes de actualizar `location`) y el padre (re-valida cada operación: Zero Trust).
+
+- `base` https ⇒ `url_resolve_https` y el origen (`https://host[:port]`) del resultado debe
+  ser idéntico al de `base`; si no, `URL_ERR_NOT_HTTPS`.
+- `base` `file://` ⇒ solo cambia la parte de consulta/fragmento del **mismo** archivo
+  (`ref` vacío o que empieza por `?`/`#`): el resultado es `ruta_de_base + ref`
+  (reemplazando la consulta/fragmento previos). Cualquier otra forma ⇒ `URL_ERR_NOT_LOCAL`.
+- `ref` vacío ⇒ `base` sin cambios (pushState(state, '') conserva la URL).
+- NULL/`outsz == 0` ⇒ `URL_ERR_NULL_ARG`; resultado que no cabe ⇒ `URL_ERR_OVERFLOW`.
+
 ## 3. Garantías
 
 - **Pureza / Zero Trust:** sin I/O, sin estado global, reentrante. Falla cerrado: ante cualquier

@@ -155,6 +155,58 @@ static void test_local_html(void **state) {
     unlink(path);
 }
 
+/* A trusted (--js=on) headless load lays the page out before its timers fire, so a
+ * timer that measures an element sees the geometry the export paints
+ * (spec/js_geom.md) -- the declared 300x80 box, not the old all-zero answer. */
+static void test_headless_js_measures_real_geometry(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><body>"
+        "<div id=\"box\" style=\"width:300px;height:80px;background:#8cf\">box</div>"
+        "<p id=\"out\">pending</p>"
+        "<script>setTimeout(function(){"
+        "var r=document.getElementById('box').getBoundingClientRect();"
+        "document.getElementById('out').textContent='measured '+r.width+'x'+r.height;"
+        "},50);</script></body></html>";
+    const char *path = "__freedom_geom.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[2048];
+    int rc;
+    assert_int_equal(run_freedom("--js=on --author-css __freedom_geom.html", out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "measured 300x80"));
+    unlink(path);
+}
+
+/* A timer that navigates (plan B4a) is followed headless, like a load-time JS
+ * navigation: the second local page is rendered. */
+static void test_headless_timer_navigation_followed(void **state) {
+    (void)state;
+    const char *a = "<html><body><p>first</p><script>"
+                    "setTimeout(function(){location.href='__freedom_nav_b.html';},20);"
+                    "</script></body></html>";
+    const char *b = "<html><body><p>second page reached</p></body></html>";
+    FILE *f = fopen("__freedom_nav_a.html", "w");
+    assert_non_null(f);
+    fputs(a, f);
+    fclose(f);
+    f = fopen("__freedom_nav_b.html", "w");
+    assert_non_null(f);
+    fputs(b, f);
+    fclose(f);
+    char out[2048];
+    int rc;
+    assert_int_equal(run_freedom("--js=on __freedom_nav_a.html", out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "second page reached"));
+    unlink("__freedom_nav_a.html");
+    unlink("__freedom_nav_b.html");
+}
+
 static void test_local_form_renders_inputs(void **state) {
     (void)state;
     const char *html =
@@ -2284,6 +2336,8 @@ int main(void) {
         cmocka_unit_test(test_version),
         cmocka_unit_test(test_no_args),
         cmocka_unit_test(test_local_html),
+        cmocka_unit_test(test_headless_js_measures_real_geometry),
+        cmocka_unit_test(test_headless_timer_navigation_followed),
         cmocka_unit_test(test_local_form_renders_inputs),
         cmocka_unit_test(test_missing_file),
         cmocka_unit_test(test_download_pdf_local),

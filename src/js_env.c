@@ -196,7 +196,14 @@ static JSValue build_languages(JSContext *ctx) {
 }
 
 static int build_navigator(JSContext *ctx, JSValueConst global) {
-    JSValue nav = JS_NewObject(ctx);
+    /* The identity fields are OWN, read-only and the object is non-extensible; its
+     * prototype is a separate, extensible object so a trusted page's runtime can add
+     * capability methods (sendBeacon, spec/js_dom.md 7h) without touching any
+     * fingerprintable field. An untrusted page's prototype stays empty. */
+    JSValue proto = JS_NewObject(ctx);
+    if (JS_IsException(proto)) return -1;
+    JSValue nav = JS_NewObjectProto(ctx, proto);
+    JS_FreeValue(ctx, proto);
     if (JS_IsException(nav)) return -1;
 
     JSValue languages = build_languages(ctx);

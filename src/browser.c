@@ -31,7 +31,9 @@ static void free_history(browser_state *bs) {
     if (bs == NULL || bs->history == NULL) return;
     for (size_t i = 0; i < bs->history_len; ++i) free(bs->history[i]);
     free(bs->history);
+    free(bs->history_doc);
     bs->history = NULL;
+    bs->history_doc = NULL;
     bs->history_len = 0;
     bs->history_cap = 0;
     bs->history_pos = 0;
@@ -190,39 +192,77 @@ browser_status browser_commit_url_bar(browser_state *bs) {
     return browser_navigate(bs, bs->url_bar);
 }
 
-browser_status browser_navigate(browser_state *bs, const char *url) {
-    if (bs == NULL || url == NULL) return BROWSER_ERR_NULL;
-    if (!url_is_allowed(url)) return BROWSER_ERR_INVALID_URL;
-
-    /* Discard forward history beyond current position. */
+/* Appends url as a new entry of document doc after history_pos, discarding the
+ * forward entries (standard Back/Forward semantics). Both arrays grow together. */
+static browser_status append_entry(browser_state *bs, const char *url, int doc) {
     if (bs->history_pos < bs->history_len) {
         for (size_t i = bs->history_pos + 1; i < bs->history_len; ++i) {
             free(bs->history[i]);
         }
         bs->history_len = bs->history_pos + 1;
     }
-
-    /* Grow if needed. */
     if (bs->history_len >= bs->history_cap) {
         size_t new_cap = bs->history_cap ? bs->history_cap * 2 : 8;
         char **nh = (char **)realloc(bs->history, new_cap * sizeof *nh);
         if (nh == NULL) return BROWSER_ERR_OOM;
         bs->history = nh;
+        int *nd = (int *)realloc(bs->history_doc, new_cap * sizeof *nd);
+        if (nd == NULL) return BROWSER_ERR_OOM;
+        bs->history_doc = nd;
         bs->history_cap = new_cap;
     }
-
     char *copy = xstrdup(url);
     if (copy == NULL) return BROWSER_ERR_OOM;
-
     bs->history[bs->history_len] = copy;
+    bs->history_doc[bs->history_len] = doc;
     bs->history_len++;
     bs->history_pos = bs->history_len - 1;
-
     browser_set_url_bar(bs, url);
+    return BROWSER_OK;
+}
+
+browser_status browser_navigate(browser_state *bs, const char *url) {
+    if (bs == NULL || url == NULL) return BROWSER_ERR_NULL;
+    if (!url_is_allowed(url)) return BROWSER_ERR_INVALID_URL;
+    browser_status st = append_entry(bs, url, bs->next_doc);
+    if (st != BROWSER_OK) return st;
+    bs->next_doc++;
     free_page(bs);
     bs->loading_error = 0;
     clear_status(bs);
     return BROWSER_OK;
+}
+
+browser_status browser_push_state(browser_state *bs, const char *url) {
+    if (bs == NULL || url == NULL) return BROWSER_ERR_NULL;
+    if (bs->history_len == 0) return BROWSER_ERR_NO_BACK;
+    if (!url_is_allowed(url)) return BROWSER_ERR_INVALID_URL;
+    return append_entry(bs, url, bs->history_doc[bs->history_pos]);
+}
+
+browser_status browser_replace_state(browser_state *bs, const char *url) {
+    if (bs == NULL || url == NULL) return BROWSER_ERR_NULL;
+    if (bs->history_len == 0) return BROWSER_ERR_NO_BACK;
+    if (!url_is_allowed(url)) return BROWSER_ERR_INVALID_URL;
+    char *copy = xstrdup(url);
+    if (copy == NULL) return BROWSER_ERR_OOM;
+    free(bs->history[bs->history_pos]);
+    bs->history[bs->history_pos] = copy;
+    browser_set_url_bar(bs, url);
+    return BROWSER_OK;
+}
+
+int browser_entry_doc(const browser_state *bs, size_t pos) {
+    if (bs == NULL || pos >= bs->history_len) return -1;
+    return bs->history_doc[pos];
+}
+
+int browser_doc_index(const browser_state *bs) {
+    if (bs == NULL || bs->history_len == 0) return -1;
+    size_t start = bs->history_pos;
+    int doc = bs->history_doc[start];
+    while (start > 0 && bs->history_doc[start - 1] == doc) start--;
+    return (int)(bs->history_pos - start);
 }
 
 browser_status browser_back(browser_state *bs) {

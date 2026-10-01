@@ -282,6 +282,172 @@ un solo bit real (identity-safe):
   decodificación real ocurre solo en el lado confiable
   (`spec/media_decoder.md`), disparada por el click del usuario en la GUI.
 
+## 7d. Propagación de eventos (DOM Standard §2.9) (2026-09-30)
+
+Antes: un handler solo corría si estaba registrado **en el nodo destino**; `click` guardaba
+**uno** por nodo (el último `addEventListener` pisaba al anterior); `removeEventListener` y
+`dispatchEvent` eran no-op; `document`/`window` solo aceptaban `load`. Toda delegación
+(React escucha en la raíz, jQuery `.on(sel)`, `document.addEventListener('click')`) quedaba
+sorda.
+
+**Un solo registro de listeners** (`__ls`, en el prelude) para elementos, `document` y `window`.
+`dom.registerClick`/`registerSubmit`/`registerEvent` y sus registros desaparecen; los tres
+`jd_fire_*` de C conservan su contrato (1 = acción por defecto, 0 = `preventDefault`) y pasan
+todos por `__dispatchEvent`.
+
+- **Registro:** `addEventListener(type, fn|{handleEvent}, opts)` con `opts` booleano
+  (`capture`) u objeto (`capture`, `once`). El par (tipo, callback, capture) es único: registrar
+  dos veces el mismo no duplica. `removeEventListener` lo quita (también de un despacho en curso).
+- **`on<evento>`:** el setter ocupa **una** ranura de listener en la posición del primer set y
+  la reemplaza en los siguientes; `null` la vacía; el getter devuelve la función.
+- **Camino:** destino → `dom.parent` hasta la raíz → `document` → `window`, calculado **antes**
+  de despachar (una mutación del DOM durante el despacho no lo cambia). Acotado a
+  `JD_EVENT_PATH_MAX` 4096 nodos.
+- **Fases:** captura (window → padre del destino, solo `capture`), destino (todos, en orden de
+  registro), burbuja (padre → window, solo no-`capture`) **si `bubbles`**.
+- **Qué burbujea** en los eventos que genera el motor: `click`, `submit`, `input`, `change`,
+  `key*`, `mouse{down,up,over,out,move}`, `wheel`, `focusin`/`focusout`. No burbujean
+  `focus`, `blur`, `mouseenter`, `mouseleave`, `scroll` ni `load`. Un evento sintético
+  (`new Event`/`CustomEvent`) burbujea solo con `{bubbles:true}`.
+- **Objeto evento:** `type`, `target`, `currentTarget`, `eventPhase` (1/2/3, 0 al terminar),
+  `bubbles`, `cancelable`, `defaultPrevented`, `isTrusted` (true solo para los del motor),
+  `timeStamp` **0** (anti-fp: sin reloj de alta resolución), `detail`, `composedPath()`,
+  `stopPropagation`, `stopImmediatePropagation`, `preventDefault` (sin efecto si no es
+  `cancelable`).
+- **Errores:** una excepción en un listener se registra en la consola (Freebug) y el despacho
+  **continúa** con el siguiente (como en todo navegador).
+- `el.dispatchEvent(ev)` / `document.dispatchEvent` / `window.dispatchEvent` despachan por el
+  mismo camino y devuelven `!defaultPrevented`.
+
+Dado `<div id=main><button id=go>` **cuando** `main` escucha `click` y el usuario hace click en
+`go` **entonces** el listener corre con `target === go` y `currentTarget === main`.
+Dado un listener de captura en `document`, uno en `go` y uno de burbuja en `main` **entonces** el
+orden es captura → destino → burbuja. Dado `stopPropagation()` en el destino **entonces** `main`
+no se entera. Dado `focus` **entonces** no burbujea, pero una captura en un ancestro sí lo ve.
+
+**Seguridad:** no cambia la superficie: el camino solo contiene nodos del documento propio,
+`document` y `window`; no hay nuevos nativos (al contrario, se eliminan tres). La cota del camino
+limita el costo por evento frente a un DOM hostil profundo.
+
+## 7e. `history` real y navegación JS después de la carga (2026-09-30)
+
+**Navegación posterior a la carga (B4a).** Una navegación que un handler, un timer o un
+evento pide (`location.href=`/`assign`/`replace`/`reload`) viaja en la respuesta de TODA
+operación (`OP_CLICK`/`OP_TICK`/`OP_EVENT`/`OP_MOUSE`), no solo en la de carga, y el padre la
+gatea con el mismo `ln_resolve` (función compartida `gate_js_nav`). Antes se descartaba en
+silencio: un botón que navega con JS no hacía nada.
+
+**`history` (B4b).** `pushState(state, title, url)` / `replaceState` resuelven `url` con
+`url_history_target` (nativo `dom.histTarget`, sin interpolar texto hostil): otro origen ⇒
+`SecurityError`. Actualizan `location` en el acto, sin cargar nada, y registran la operación
+(`push`/`replace` + URL absoluta) que viaja al padre en la respuesta. `history.state` devuelve
+el estado de la entrada actual; `history.length` la cuenta de entradas del documento.
+`back()`/`forward()`/`go(n)` registran un delta que el padre aplica con su propio historial.
+Al volver a una entrada del mismo documento, el padre manda `OP_POPSTATE(índice)`: el worker
+mueve su índice, actualiza `location` y despacha `popstate` (con `state`) en `window`, más
+`hashchange` si solo cambió el fragmento. Cotas: `JD_HIST_MAX` 256 entradas por documento
+(pasado el tope, `pushState` se comporta como `replaceState`) y el mismo tope de operaciones
+por respuesta. El estado vive solo en la memoria del worker (Zero Knowledge: nunca a disco).
+Volver a un documento **distinto** lo recarga (sin bfcache): su `history.state` se pierde.
+
+**`window.open` (B4c, solo allow∩js).** Semántica **noopener**: devuelve `null`, no existe
+referencia entre ventanas, así que tampoco un canal entre orígenes (`opener`/`postMessage` siguen
+ausentes). El destino se **registra** (máx. 4 por operación, sin caracteres de control) y el
+padre lo gatea como una navegación (`gate_js_nav`) y lo honra **solo en un gesto del usuario**
+(HTML §6.4.2: `click`, `keydown`, `mousedown`/`up`, `pointerdown`/`up`, `touchend`): la carga, un
+timer, `focus` o `mousemove` nunca abren ventanas. Cada destino abre una pestaña nueva. Un host
+no confiable no tiene `open` (candado `test_eval_no_network_or_cross_origin_api`).
+
+## 7f. `WebSocket` (B5, solo allow∩js, 2026-09-30)
+
+`jd_enable_ws` instala `WebSocket` **solo** para un host allow∩js; un host no confiable no lo
+tiene (candado `test_eval_no_network_or_cross_origin_api`). El worker **nunca** toca el
+socket: el objeto registra operaciones (`open`/`send`/`close`) que viajan al padre en cada
+respuesta, y el padre abre la conexión con `sf_ws_open` (misma política TLS/PQ/realm que un
+fetch, más `hostblock`) y empuja los eventos con `OP_WS_EVENT`.
+
+- Constructor: la URL se resuelve contra `location`; solo `wss:` (un `ws:` desde una página
+  https es contenido mixto ⇒ `SecurityError`, como en Firefox). Máx. `JD_WS_MAX` 8 sockets
+  por página (más ⇒ `SecurityError`).
+- `send(data)`: `readyState` debe ser OPEN (si no, `InvalidStateError`). Texto como UTF-8;
+  `ArrayBuffer`/vista tipada como binario. Un mensaje > 1 MiB ⇒ `SyntaxError` sin enviar.
+- Eventos `open`/`message`/`error`/`close` por `addEventListener` y `on<evento>`; `message`
+  entrega texto como string y binario como `ArrayBuffer` (`binaryType` se acepta pero `blob`
+  no está soportado). `close` trae `code`/`reason`/`wasClean`.
+- Los datos entrantes entran a JS como **valores** (`JS_NewStringLen`/`ArrayBuffer`) llamando a
+  una función interna, nunca interpolados en código.
+- Cotas: 64 operaciones y 4 MiB por respuesta; excederlas cierra el socket con error.
+- Las conexiones pertenecen a la página: se cierran al navegar, recargar o cambiar de pestaña
+  (v1: una pestaña en segundo plano pierde sus WebSocket).
+
+## 7g. Superficie DOM Standard (`js_dom_ext`, 2026-09-30)
+
+Medido en github.com: su JS moderno fallaba por APIs ausentes o incorrectas, no por
+política. Ahora, sobre los mismos nativos sellados de `dom` (ninguna capacidad nueva):
+
+- **Prototipos reales:** `HTML*Element → HTMLElement → Element → Node → EventTarget`,
+  `HTMLDocument → Document → Node`; todo wrapper hereda de `HTMLElement.prototype` y
+  `document` de `HTMLDocument.prototype`, así que `instanceof` responde como un navegador.
+- **Inserción ordenada:** nativos `dom.insertBefore` (`dom_insert_before`) y `dom.cloneNode`
+  (`dom_clone_node`, clona TEXTO y registra los elementos en el índice). `insertBefore`,
+  `prepend` y `replaceChild` insertaban al final; ahora respetan el orden. `before`, `after`,
+  `replaceWith`, `replaceChildren`, `append`/`prepend` de fragmentos.
+- **`js_dom_ext`:** `getRootNode`, `isConnected`, `previousElementSibling`/`previousSibling`,
+  `toggleAttribute`, `compareDocumentPosition` (orden real del árbol, no por id),
+  `attachShadow` (raíz de fragmento, no se pinta; una por host), `TreeWalker` /
+  `NodeIterator` sobre elementos que **siempre terminan en `null`**, `importNode`,
+  `adoptNode`, `createRange` (`createContextualFragment` incluido), `elementFromPoint` →
+  `null`. `<template>.content` es un `DocumentFragment` estable por plantilla.
+- `document.currentScript` se construye con VALORES (el `src` de la página nunca se interpola
+  en código) y es `null` mientras corre un módulo.
+
+## 7h. Errores de Freebug en sitios reales: nodos de texto, datos binarios, interfaces (2026-09-30)
+
+Medido recorriendo los sitios allow∩js con `--headless --js=on --dump-console`. Cada fila es
+una causa raíz, no un parche por sitio.
+
+| Causa | Síntoma medido | Arreglo |
+| :-- | :-- | :-- |
+| El JS no veía **nodos de texto**: `childNodes`/`firstChild`/`nextSibling` saltaban el texto y `createTextNode` devolvía un objeto plano no insertable | React no hidrataba (`#418`, crash de Next.js en DuckDuckGo: 17 errores) | Handles perezosos de texto/comentario (`spec/dom.md` §9) + wrapper `Text`/`Comment` (`__wrapChar`): `data`/`nodeValue`/`textContent` escriben al nodo real, `splitText`, `*Data`, `before`/`after`/`replaceWith`, eventos. `append('str')` crea texto. `TreeWalker`/`NodeIterator` respetan `whatToShow` (`1 << (nodeType-1)`). |
+| Los listeners de `load`/`DOMContentLoaded` se llamaban **sin evento** | Bootstrap hace `Object.defineProperty(event, …)` → "not an object" (OSM) | Evento real (`target` = document, `currentTarget` = window/document), orden de ciclo de vida (readystatechange, DOMContentLoaded, load), objetos `{handleEvent}`. |
+| `console.error(err)` imprimía `{}` (JSON de un Error) | Todo error reportado por un framework era ilegible | Un `Error` se imprime como `Name: message` + stack; un elemento como `<tag#id>`. |
+| Faltaban `Blob`/`File`/`FileReader`/`URL.createObjectURL`/`structuredClone`/`MessageChannel`/`BroadcastChannel` | `Blob is not defined` (OSM) | Implementados en página: object URLs opacos (sin fetch de `blob:` todavía), canales asíncronos dentro del propio realm, `structuredClone` con ciclos y `DataCloneError`. |
+| `insertAdjacent*` eran no-ops | Contenido que el sitio inserta no aparecía | Nativo `dom_move_children` con las cuatro posiciones; posición inválida ⇒ `SyntaxError`. |
+| Los prototipos de interfaz no tenían métodos | Polyfills de Shadow DOM capturan `Node.prototype.appendChild` y obtenían `undefined` (YouTube `webcomponents-sd`) | Métodos/accesores en `EventTarget`/`Node`/`Element`/`HTMLElement.prototype` que delegan al wrapper (`Illegal invocation` si no hay nada que delegar). |
+| Interfaces ausentes (`DocumentType`, `CDATASection`, `ProcessingInstruction`, `Window`, `Range`, `Selection`, …) y `window instanceof Window` falso | `ReferenceError` al arrancar Next.js, `CDATASection.prototype` en webcomponents | Constructores con cadena de prototipos real; el global hereda de `Window.prototype`. `Image` sigue indefinido (candado SOP). |
+| `<canvas>.getContext` inexistente; API 2D incompleta | web-animations / feature tests | `getContext('2d')` (contexto software, ≤ 1 Mpx), `'webgl'` ⇒ `null`; resto de la API 2D inerte; `measureText` determinista (anti-fp). |
+| `Intl` mínimo | formatjs llama `supportedLocalesOf`/`Locale`/`Segmenter` al arrancar | Superficie completa con identidad neutra `en-US`. |
+| `fetch` de confianza sin `Request`/`Response` | `Request is not defined` (Reddit) | Clases del Fetch Standard sobre la MISMA llamada gateada; señal abortada ⇒ `AbortError` sin tocar la red. |
+| `isEqualNode`/`isSameNode` | `updateHead` de Next.js | Igualdad estructural (atributos sin orden, texto incluido). |
+| Un módulo `data:` > 8 KiB se truncaba a su nombre | `SyntaxError` en el módulo de Reddit | El cuerpo sale del atributo; el nombre se acorta a uno sintético solo si no cabe. |
+
+**Resultado** (errores en consola, antes → después): duckduckgo 9 → 1, openstreetmap 5 → 3,
+youtube 2 → 0, animate.style 1 → 0, andreagrandi 1 → 0, old.reddit 3 → 0, facebook 47 avisos → 0;
+github 1 (sin cambio, `behaviors-*.js:0:0` sin ubicación). Lo que queda: la hidratación de
+DuckDuckGo (`#418`, React se recupera renderizando del lado cliente), `Worker` (OSM/MapLibre,
+que además exige WebGL) y el `TypeError` sin ubicación de github.
+
+## 7i. `Worker` dedicado (plan B6b, solo allow∩js, 2026-09-30)
+
+`new Worker(url)` corre el script en un **realm propio** (`spec/js_sandbox.md` §7c): su global es
+`self` (sin `window` ni `document`, como un `DedicatedWorkerGlobalScope`), con `postMessage`,
+`onmessage`/`addEventListener('message')`, `close`, `importScripts`, temporizadores, `console`,
+`location`/`navigator` de solo lectura y las APIs de datos de la página (`TextEncoder`/`Decoder`,
+`Blob`, `URL`, `atob`/`btoa`, `structuredClone`, `fetch` cuando la página es de confianza).
+
+- **Origen del código:** `blob:` (un object URL de la propia página), `data:` y, solo en página
+  de confianza, una URL https por la MISMA llamada gateada del padre (XHR síncrono). Cualquier
+  otra cosa ⇒ evento `error` asíncrono en el `Worker` (como en un navegador), nunca una excepción
+  que mate al llamante.
+- **Mensajes:** asíncronos en ambas direcciones (tarea de temporizador, nunca en línea), clonados
+  con `__realmClone` (los objetos llegan al realm del receptor). Un error no capturado en el
+  worker dispara `error` en el objeto `Worker` con `message`/`filename`.
+- `terminate()` y `self.close()` cortan la entrega en las dos direcciones.
+- `type: 'module'` ⇒ evento `error` (fuera de alcance por ahora).
+- **Por qué solo allow∩js:** un worker no abre red, pero multiplica la superficie del motor JS;
+  sigue la misma frontera de confianza que el resto del runtime de apps (§7d–7h). Para un host no
+  confiable `typeof Worker === 'undefined'`, como hoy.
+
 ## 8. Fuera de alcance
 
 - Eventos **interactivos** más allá del click (keydown/mousemove/submit; el click del

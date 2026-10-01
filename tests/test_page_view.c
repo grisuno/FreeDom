@@ -2248,6 +2248,25 @@ static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state) {
  * box_h/box_h_set (that collapsed the box to 0 and buried max-height with it --
  * jkanime's `.trending_div{height:fit-content;max-height:1200px;overflow:scroll}`
  * sidebar grew to ~7000px instead of clipping at 1200). */
+/* A box knows the element that generated it (spec/js_geom.md): the painter
+ * attributes the box's laid-out rect to that node so page JS can measure it. */
+static void test_build_boxdef_carries_node_id(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='border:1px solid red;height:40px'>inside</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_text(v, "inside");
+    assert_non_null(r);
+    assert_true(r->block_id >= 0);
+    const pv_box_def *bx = pv_box_at(v, (size_t)r->block_id);
+    assert_non_null(bx);
+    assert_int_not_equal(bx->node_id, DOM_NODE_NONE);
+    assert_int_equal(bx->node_id, r->node_id);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_boxdeco_fit_content_height_is_auto(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -4188,6 +4207,7 @@ int main(void) {
         cmocka_unit_test(test_build_boxdeco_h_margin_alone_creates_box),
         cmocka_unit_test(test_build_boxdeco_h_margin_zero_auto_no_box),
         cmocka_unit_test(test_build_boxdeco_fit_content_height_is_auto),
+        cmocka_unit_test(test_build_boxdef_carries_node_id),
         cmocka_unit_test(test_build_boxdeco_min_content_height_is_auto),
         cmocka_unit_test(test_build_empty_box_gets_run_and_box),
         cmocka_unit_test(test_build_zero_padding_is_not_a_box),

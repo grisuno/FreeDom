@@ -12,6 +12,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 /* --- small ASCII helpers (no locale dependence) --- */
 
@@ -89,7 +90,9 @@ url_status url_validate_https(const char *url) {
 
 size_t url_authority_len(const char *url) {
     size_t i = 8; /* strlen("https://"); url assumed validated to start with it */
-    while (url[i] != '\0' && url[i] != '/') ++i;
+    /* RFC 3986 3.2: the authority ends at the first '/', '?' or '#'. Stopping at '/'
+     * only swallowed a path-less URL's query into its host ("https://h?q=/x"). */
+    while (url[i] != '\0' && url[i] != '/' && url[i] != '?' && url[i] != '#') ++i;
     return i;
 }
 
@@ -636,5 +639,42 @@ url_status url_split(const char *url, url_parts *out) {
     out->pathname = rem;        out->pathname_len = qpos;
     out->search   = rem + qpos; out->search_len   = hpos - qpos;
     out->hash     = rem + hpos; out->hash_len     = rem_len - hpos;
+    return URL_OK;
+}
+
+static url_status copy_bounded(char *out, size_t outsz, const char *a, size_t alen,
+                               const char *b, size_t blen) {
+    if (alen > outsz || blen >= outsz - alen) return URL_ERR_OVERFLOW;
+    memcpy(out, a, alen);
+    memcpy(out + alen, b, blen);
+    out[alen + blen] = '\0';
+    return URL_OK;
+}
+
+url_status url_history_target(const char *base, const char *ref, char *out, size_t outsz) {
+    if (base == NULL || ref == NULL || out == NULL || outsz == 0) return URL_ERR_NULL_ARG;
+    size_t blen = strlen(base), rlen = strlen(ref);
+    if (url_is_file(base)) {
+        /* A local document may only change its own query/fragment. */
+        size_t cut = blen;
+        if (ref[0] == '?')      cut = strcspn(base, "?#");
+        else if (ref[0] == '#') cut = strcspn(base, "#");
+        else if (ref[0] != '\0') return URL_ERR_NOT_LOCAL;
+        return copy_bounded(out, outsz, base, cut, ref, rlen);
+    }
+    if (url_validate_https(base) != URL_OK) return URL_ERR_NOT_HTTPS;
+    if (rlen == 0) return copy_bounded(out, outsz, base, blen, "", 0);
+    /* RFC 3986 5.2.2: a query-only reference keeps the base path, a fragment-only
+     * one keeps path and query. Same document, so same origin by construction. */
+    if (ref[0] == '?') return copy_bounded(out, outsz, base, strcspn(base, "?#"), ref, rlen);
+    if (ref[0] == '#') return copy_bounded(out, outsz, base, strcspn(base, "#"), ref, rlen);
+    url_status st = url_resolve_https(base, ref, out, outsz);
+    if (st != URL_OK) return st;
+    /* Compare the parsed origins: a raw authority scan would stop at a '/' inside a
+     * path-less URL's query and misjudge the origin. */
+    url_parts pb, po;
+    if (url_split(base, &pb) != URL_OK || url_split(out, &po) != URL_OK) return URL_ERR_NOT_HTTPS;
+    if (pb.origin_len != po.origin_len
+        || strncasecmp(pb.origin, po.origin, pb.origin_len) != 0) return URL_ERR_NOT_HTTPS;
     return URL_OK;
 }

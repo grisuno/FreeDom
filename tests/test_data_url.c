@@ -265,6 +265,55 @@ static void test_end_to_end_png_data_uri(void **state) {
     free(out);
 }
 
+/* --- du_decode: the full data: URL processor (spec/data_url.md 2b) --- */
+
+static void test_decode_percent_encoded_script(void **state) {
+    (void)state;
+    char mime[64];
+    uint8_t *out = NULL;
+    size_t n = 0;
+    assert_int_equal(du_decode("data:text/javascript,%0Avar%20a%3D1%3B%zz", mime, sizeof mime, &out, &n),
+                     DU_OK);
+    assert_string_equal(mime, "text/javascript");
+    assert_int_equal(n, 12);                      /* "\nvar a=1;" + literal "%zz" */
+    assert_memory_equal(out, "\nvar a=1;%zz", 12);
+    assert_int_equal(out[n], 0);
+    free(out);
+}
+
+static void test_decode_base64_forgiving_and_mime(void **state) {
+    (void)state;
+    char mime[64];
+    uint8_t *out = NULL;
+    size_t n = 0;
+    /* "alert(1)" with whitespace inside and no padding */
+    assert_int_equal(du_decode("data:application/x-javascript; charset=utf-8;BASE64,YWxl cnQo\nMSk",
+                               mime, sizeof mime, &out, &n), DU_OK);
+    assert_string_equal(mime, "application/x-javascript; charset=utf-8");
+    assert_int_equal(n, 8);
+    assert_memory_equal(out, "alert(1)", 8);
+    free(out);
+    assert_int_equal(du_decode("data:,hi", mime, sizeof mime, &out, &n), DU_OK);
+    assert_string_equal(mime, "text/plain;charset=US-ASCII");
+    assert_memory_equal(out, "hi", 2);
+    free(out);
+}
+
+static void test_decode_rejects(void **state) {
+    (void)state;
+    char mime[8];
+    uint8_t *out = NULL;
+    size_t n = 0;
+    assert_int_equal(du_decode("data:text/javascript", mime, sizeof mime, &out, &n), DU_ERR_NOT_BASE64);
+    assert_int_equal(du_decode("data:;base64,@@@@", mime, sizeof mime, &out, &n), DU_ERR_BAD_BASE64);
+    assert_int_equal(du_decode("https://x/", mime, sizeof mime, &out, &n), DU_ERR_NOT_DATA_URL);
+    assert_int_equal(du_decode(NULL, mime, sizeof mime, &out, &n), DU_ERR_NULL_ARG);
+    /* mime is truncated, never overflowed */
+    assert_int_equal(du_decode("data:text/javascript,x", mime, sizeof mime, &out, &n), DU_OK);
+    assert_int_equal(strlen(mime), 7);
+    free(out);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_is_data_url_true),
@@ -289,6 +338,9 @@ int main(void) {
         cmocka_unit_test(test_decode_too_large),
         cmocka_unit_test(test_decode_nulls),
         cmocka_unit_test(test_end_to_end_png_data_uri),
+        cmocka_unit_test(test_decode_percent_encoded_script),
+        cmocka_unit_test(test_decode_base64_forgiving_and_mime),
+        cmocka_unit_test(test_decode_rejects),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 /* p[0..len) must lie within base[0..total]. */
 static void in_bounds(const char *p, size_t len, const char *base, size_t total) {
@@ -69,6 +70,27 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     if (ref != NULL) check_split(ref);
 
     (void)url_validate_https(base);
+
+    /* history.pushState target: an OK result is never cross-origin and never
+     * changes the scheme of its base (spec/url.md 2.x). */
+    if (ref != NULL) {
+        char ht[URL_MAX_LEN];
+        if (url_history_target(base, ref, ht, sizeof ht) == URL_OK) {
+            if (strlen(ht) >= sizeof ht) abort();
+            if (url_is_file(base)) {
+                if (strncmp(ht, "file:", 5) != 0) abort();
+            } else {
+                url_parts pb, ph;
+                if (url_split(base, &pb) == URL_OK) {
+                    if (url_split(ht, &ph) != URL_OK) abort();
+                    if (ph.origin_len != pb.origin_len
+                        || strncasecmp(ph.origin, pb.origin, pb.origin_len) != 0) abort();
+                }
+            }
+        }
+        char small[8];
+        (void)url_history_target(base, ref, small, sizeof small);
+    }
 
     /* The JS-navigation gate: ln_resolve(page_url, raw_request). A NAVIGATE result
      * must be an https URL or a local file path -- never a downgrade/foreign scheme. */

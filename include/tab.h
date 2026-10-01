@@ -6,6 +6,7 @@
 #include <sys/types.h>
 
 #include "freebug.h"
+#include "js_geom.h"
 #include "page_view.h"
 
 #ifdef __cplusplus
@@ -46,6 +47,31 @@ typedef struct tab tab;
 /* Inert result of loading a page: title + extracted text + structured display
  * list (all owned). text is kept for headless/plain output; view carries the
  * inline runs (headings, links, block breaks) the GUI lays out and paints. */
+/* One history operation the page's JS performed (spec/js_dom.md 7e): pushState
+ * (replace == 0) or replaceState (replace == 1) to url, an absolute same-origin URL
+ * the parent re-validated against the page URL. Owned by the tab_page. */
+typedef struct tab_hist_op {
+    int   replace;
+    char *url;
+} tab_hist_op;
+
+/* One WebSocket operation a trusted page's JS recorded (spec/js_dom.md 7f); the
+ * trusted parent owns the socket. Kinds mirror jd_ws_kind. Owned by the tab_page. */
+typedef enum tab_ws_kind {
+    TAB_WS_OPEN = 1, TAB_WS_SEND_TEXT = 2, TAB_WS_SEND_BIN = 3, TAB_WS_CLOSE = 4
+} tab_ws_kind;
+
+typedef enum tab_ws_event_kind {
+    TAB_WSE_OPEN = 1, TAB_WSE_TEXT = 2, TAB_WSE_BINARY = 3, TAB_WSE_CLOSE = 4, TAB_WSE_ERROR = 5
+} tab_ws_event_kind;
+
+typedef struct tab_ws_op {
+    int    kind;
+    int    id;
+    char  *data;   /* NUL-terminated; binary may contain NULs (use len) */
+    size_t len;
+} tab_ws_op;
+
 typedef struct tab_page {
     char    *title;     /* NUL-terminated; may be NULL */
     size_t   title_len; /* excludes the trailing NUL */
@@ -74,6 +100,27 @@ typedef struct tab_page {
      * next request. In-memory only; never persisted (Zero Knowledge). Owned; freed by
      * tab_page_free. */
     char    *set_cookies;
+    /* History operations the page's JS performed during this operation, in order,
+     * and the net history.back/forward/go delta it requested. Same-origin by
+     * construction: the parent drops any op whose URL fails url_history_target
+     * against the page URL. Owned; freed by tab_page_free. */
+    tab_hist_op *hist;
+    size_t       nhist;
+    int          hist_go;
+    /* window.open targets (trusted host only, noopener): resolved and gated like a
+     * navigation, and kept ONLY for a user-gesture operation (click, DOM/mouse event)
+     * -- a load or a timer cannot open windows. Owned; freed by tab_page_free. */
+    char       **open_urls;
+    size_t       nopen;
+    /* WebSocket operations (trusted load only; empty otherwise), in order. The caller
+     * opens/sends/closes the real connection under the full network policy. */
+    tab_ws_op   *ws;
+    size_t       nws;
+    /* The page's whole localStorage when it changed during this operation (trusted
+     * load only), a web_storage snapshot already validated with wst_decode_check;
+     * NULL when unchanged or untrusted. Owned; freed by tab_page_free. */
+    char        *storage;
+    size_t       storage_len;
 } tab_page;
 
 /* Result of evaluating script: the value, or a JS error message. */
@@ -149,6 +196,11 @@ void tab_set_net_allowed(tab *t, int allowed);
  * jar stays disabled (untrusted sites see no cookies -- Zero Knowledge). The bytes are
  * copied. In-memory only; never persisted. */
 void tab_set_cookies(tab *t, const char *cookies);
+
+/* Seeds localStorage for the next load from the parent's in-memory store for the
+ * page origin (web_storage snapshot, copied). Used only when the load is trusted
+ * (net granted); NULL/0 clears it. See spec/web_storage.md. */
+void tab_set_storage(tab *t, const char *blob, size_t len);
 
 /* Grants/revokes external stylesheet fetches (<link rel=stylesheet>, Hito 27) for the
  * NEXT load. Independent of JS: derive it from the author-styles opt-in (caps.css in the
@@ -240,6 +292,25 @@ tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented);
  * caller schedules ticks from tab_page.next_timer_ms; the worker cannot wake
  * itself. Same ownership/error contract as tab_click. */
 tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out);
+
+/* Hands the page's laid-out geometry to its JS (spec/js_geom.md): the worker
+ * aggregates it into ancestors and getBoundingClientRect/offset/client/scroll and
+ * the viewport become real. Sent ONLY when the current page was loaded with net
+ * granted (allow.conf AND js.conf); otherwise nothing is sent and TAB_OK is
+ * returned (the page keeps its zeros). The worker re-checks the same condition.
+ * g must be finished (jg_finish). */
+tab_status tab_set_geometry(tab *t, const jg_table *g);
+
+/* The parent went Back/Forward to entry index of the SAME document (a pushState
+ * entry): the worker moves its history there, updates location, dispatches
+ * popstate (+ hashchange) and re-derives the view like a click. */
+tab_status tab_popstate(tab *t, int index, tab_page *out);
+
+/* Delivers a WebSocket event the parent's connection produced (open, a text/binary
+ * message of len bytes, close with code/reason, error) to the page and re-derives the
+ * view like a click. Ignored by the worker unless the page was loaded trusted. */
+tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
+                        tab_page *out);
 
 /* Evaluates untrusted JS in the tab's current context (sees the loaded DOM,
  * navigator/screen/performance, canvas/audio). A JS-level error is reported via

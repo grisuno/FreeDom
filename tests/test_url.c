@@ -88,6 +88,9 @@ static void test_authority_len(void **state) {
     assert_int_equal((int)url_authority_len("https://h.example"), 17);
     assert_int_equal((int)url_authority_len("https://h.example/a/b"), 17);
     assert_int_equal((int)url_authority_len("https://h.example:8443/x"), 22);
+    /* RFC 3986 3.2: a path-less URL's query/fragment is not part of the authority */
+    assert_int_equal((int)url_authority_len("https://h.example?q=/x"), 17);
+    assert_int_equal((int)url_authority_len("https://h.example#/f"), 17);
 }
 
 /* --- url_remove_dot_segments --- */
@@ -633,6 +636,68 @@ static void test_split_fail_closed_non_https(void **state) {
     assert_int_equal(url_split("https://", &u), URL_ERR_NOT_HTTPS); /* empty host */
 }
 
+/* --- url_history_target (spec/url.md 2.x) --- */
+
+static void test_history_target_same_origin(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN];
+    assert_int_equal(url_history_target("https://a.test/x/y?q=1", "/p/2?t=3#h", out, sizeof out), URL_OK);
+    assert_string_equal(out, "https://a.test/p/2?t=3#h");
+    assert_int_equal(url_history_target("https://a.test/x/y", "z", out, sizeof out), URL_OK);
+    assert_string_equal(out, "https://a.test/x/z");
+    assert_int_equal(url_history_target("https://a.test/x", "https://a.test/abs", out, sizeof out), URL_OK);
+    assert_string_equal(out, "https://a.test/abs");
+    assert_int_equal(url_history_target("https://a.test/x", "", out, sizeof out), URL_OK);
+    assert_string_equal(out, "https://a.test/x");
+    /* RFC 3986 5.2.2: query-only keeps the path, fragment-only keeps path+query */
+    assert_int_equal(url_history_target("https://a.test/p?q=1#o", "#f", out, sizeof out), URL_OK);
+    assert_string_equal(out, "https://a.test/p?q=1#f");
+    assert_int_equal(url_history_target("https://a.test/p?q=1#o", "?z=2", out, sizeof out), URL_OK);
+    assert_string_equal(out, "https://a.test/p?z=2");
+    /* a path-less base with a slash in its query is still the same origin */
+    assert_int_equal(url_history_target("https://a.test?r=/x", "/p", out, sizeof out), URL_OK);
+    assert_string_equal(out, "https://a.test/p");
+}
+
+static void test_history_target_cross_origin_rejected(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN];
+    assert_int_equal(url_history_target("https://a.test/x", "https://evil.test/", out, sizeof out),
+                     URL_ERR_NOT_HTTPS);
+    assert_int_equal(url_history_target("https://a.test/x", "https://a.test:8443/", out, sizeof out),
+                     URL_ERR_NOT_HTTPS);
+    assert_int_equal(url_history_target("https://a.test/x", "//evil.test/p", out, sizeof out),
+                     URL_ERR_NOT_HTTPS);
+    assert_int_equal(url_history_target("https://a.test/x", "javascript:alert(1)", out, sizeof out),
+                     URL_ERR_NOT_HTTPS);
+    assert_int_equal(url_history_target("https://a.test/x", "http://a.test/", out, sizeof out),
+                     URL_ERR_NOT_HTTPS);
+}
+
+static void test_history_target_file_query_fragment_only(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN];
+    assert_int_equal(url_history_target("file:///d/p.html?a=1#x", "?b=2", out, sizeof out), URL_OK);
+    assert_string_equal(out, "file:///d/p.html?b=2");
+    assert_int_equal(url_history_target("file:///d/p.html?a=1#x", "#y", out, sizeof out), URL_OK);
+    assert_string_equal(out, "file:///d/p.html?a=1#y");
+    assert_int_equal(url_history_target("file:///d/p.html", "other.html", out, sizeof out),
+                     URL_ERR_NOT_LOCAL);
+    assert_int_equal(url_history_target("file:///d/p.html", "https://a.test/", out, sizeof out),
+                     URL_ERR_NOT_LOCAL);
+}
+
+static void test_history_target_bad_args(void **state) {
+    (void)state;
+    char out[16];
+    assert_int_equal(url_history_target(NULL, "x", out, sizeof out), URL_ERR_NULL_ARG);
+    assert_int_equal(url_history_target("https://a.test/", NULL, out, sizeof out), URL_ERR_NULL_ARG);
+    assert_int_equal(url_history_target("https://a.test/", "x", out, 0), URL_ERR_NULL_ARG);
+    assert_int_equal(url_history_target("https://a.test/", "/long/path/beyond", out, sizeof out),
+                     URL_ERR_OVERFLOW);
+    assert_int_equal(url_history_target("about:blank", "x", out, sizeof out), URL_ERR_NOT_HTTPS);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_is_https),
@@ -680,6 +745,10 @@ int main(void) {
         cmocka_unit_test(test_extract_userinfo_at_authority_start),
         cmocka_unit_test(test_extract_userinfo_no_at_sign),
         cmocka_unit_test(test_extract_userinfo_empty_password),
+        cmocka_unit_test(test_history_target_same_origin),
+        cmocka_unit_test(test_history_target_cross_origin_rejected),
+        cmocka_unit_test(test_history_target_file_query_fragment_only),
+        cmocka_unit_test(test_history_target_bad_args),
     };
     int r1 = cmocka_run_group_tests(tests, NULL, NULL);
     int r2 = cmocka_run_group_tests(extract_tests, NULL, NULL);

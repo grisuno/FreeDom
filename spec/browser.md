@@ -65,6 +65,19 @@ typedef struct browser_state {
   *(Pendiente: transcodificación real según el charset declarado para mostrar los
   acentos en vez de `?`.)*
 
+### 3b. Entradas del mismo documento (`history.pushState`, 2026-09-30)
+
+Cada entrada del historial lleva un **id de documento**. `browser_navigate` abre un documento
+nuevo; `browser_push_state(bs, url)` agrega una entrada del **mismo** documento que la actual
+(descartando las futuras, como una navegación) y `browser_replace_state(bs, url)` cambia la
+URL de la entrada actual sin tocar su documento. Ninguna de las dos borra la página ni pide
+una carga. Las entradas de un documento son siempre **contiguas** (toda inserción descarta lo
+que hay adelante), así que el índice de una entrada dentro de su documento
+(`browser_doc_index`) es su distancia al comienzo de la corrida: es exactamente el índice que
+el worker lleva en su propio `history`. `browser_entry_doc(bs, pos)` expone el id para que la
+GUI decida, al ir Atrás/Adelante, entre **popstate** (mismo documento: sin recarga) y recarga.
+`url_is_allowed` sigue aplicando a toda URL que entra al historial.
+
 ## 4. Garantías de seguridad
 
 - Solo se cargan URLs `https://` o ficheros locales; cualquier otro esquema se

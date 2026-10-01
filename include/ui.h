@@ -91,6 +91,16 @@ ui_status ui_render_pdf(const struct rd_doc *doc, const char *out_path, long *ou
  * null or the document is empty; UI_ERR_INTERNAL on a Cairo error. */
 ui_status ui_render_png(const struct rd_doc *doc, const char *out_path, long *out_h);
 
+struct jg_table;
+
+/* Headless layout geometry (spec/js_geom.md): lays doc out exactly as
+ * ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per
+ * element in document coordinates, plus a FC_PNG_PAGE_W x FC_HEADLESS_VIEW_H
+ * viewport at scroll 0. The caller hands it to the page's JS with tab_set_geometry,
+ * which only sends it for a trusted (--js=on) load. Returns UI_OK, UI_ERR_NULL_ARG
+ * on a null/empty doc. */
+ui_status ui_page_geometry(const struct rd_doc *doc, struct jg_table *out);
+
 struct tab;
 
 /* Headless PNG/PDF export WITH image decoding. The plain ui_render_png/ui_render_pdf

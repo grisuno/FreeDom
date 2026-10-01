@@ -432,7 +432,10 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
         char host[512];
         if (rp_host_of(url, host, sizeof host) == 0) {
             int allowed = hb_is_allowlisted(g_hosts, host);
-            if (allowed) cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
+            /* An allowlisted host, or any subresource of an operator-trusted (--js=on)
+             * page -- its CDN, modules, API -- gets the allowlist's relaxed strength;
+             * the certificate is verified either way. */
+            if (allowed || g_headless_js) cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
             /* Double trust + user flag: allow.conf AND JS-on AND --impersonate.
              * Default 0 = hardened PQ-hybrid fallback (Zero Trust). */
             cfg.impersonate = ti_should_impersonate(
@@ -601,8 +604,25 @@ static int render_page(const char *html, size_t len, const char *top_url,
      * page that renders via setTimeout/setInterval shows its final state in the
      * export. Each tick advances the worker's virtual clock straight to the next
      * pending timer; the shared per-page JS budget still bounds total work. */
+    /* A browser lays the page out before its timers fire: hand a trusted (--js=on)
+     * page its real geometry now, so a timer/rAF that measures an element sees what
+     * the export will paint (spec/js_geom.md). tab_set_geometry sends nothing for an
+     * untrusted load. */
+    if (wc.net && page.view != NULL && page.next_timer_ms >= 0) {
+        rd_doc *gdoc = NULL;
+        if (rd_build(page.view, wc_render_caps(wc), top_url, &gdoc) == RD_OK) {
+            jg_table geom;
+            jg_init(&geom);
+            if (ui_page_geometry(gdoc, &geom) == UI_OK) (void)tab_set_geometry(t, &geom);
+            jg_free(&geom);
+            rd_free(gdoc);
+        }
+    }
     enum { HL_TICK_MAX = 240 };
-    for (int tick = 0; tick < HL_TICK_MAX && page.next_timer_ms >= 0; ++tick) {
+    /* A JS navigation (at load or from a timer) ends the pumping: the page is
+     * leaving, and the caller follows page.nav_url through the full policy. */
+    for (int tick = 0; tick < HL_TICK_MAX && page.next_timer_ms >= 0 && page.nav_url == NULL;
+         ++tick) {
         tab_page ticked;
         if (tab_tick(t, page.next_timer_ms, &ticked) != TAB_OK) break;
         tab_page_free(&page);
@@ -833,12 +853,16 @@ static int fetch_and_render(const char *url) {
     return rc;
 }
 
-static int run_headless(const char *target) {
-    headless_load_hosts();
-    if (is_https_url(target) || is_overlay_http(target)) {
-        return fetch_and_render(target);
-    }
-
+/* Renders a local file with a file:// origin (its realpath) exactly like the GUI
+ * (build_file_origin): render_doc then resolves relative image src against it,
+ * confined to the document's directory (url_resolve_file -- no "../" escape, no
+ * remote/foreign scheme), so `--images` on a local page shows its local images
+ * instead of "invalid URL" placeholders. If realpath fails, top stays NULL (image
+ * decisions fail closed). A JS navigation the page requests -- at load, or from a
+ * timer the headless pump fires -- is followed like fetch_and_render does: already
+ * gated by the parent (ln_resolve: a local target stays under the document's
+ * directory, a remote one must be https), bounded by HL_JS_NAV_MAX hops. */
+static int render_local(const char *target, int hop) {
     size_t len = 0;
     timings_ensure_init();
     uint64_t fetch_t0 = now_us();
@@ -848,14 +872,6 @@ static int run_headless(const char *target) {
         fprintf(stderr, "freedom: cannot read '%s'\n", target);
         return EXIT_ERROR;
     }
-
-    /* A local file gets a file:// origin (its realpath) exactly like the GUI
-     * (build_file_origin): render_doc then resolves relative image src against it,
-     * confined to the document's directory (url_resolve_file -- no "../" escape, no
-     * remote/foreign scheme), so `--images` on a local page shows its local images
-     * instead of "invalid URL" placeholders. A JS navigation request is still gated
-     * against this base by the parent (ln_resolve). If realpath fails, top stays NULL
-     * (image decisions fail closed, as before). */
     char abs[PATH_MAX];
     char origin[PATH_MAX + 8];
     const char *top = NULL;
@@ -863,9 +879,30 @@ static int run_headless(const char *target) {
         int on = snprintf(origin, sizeof origin, "file://%s", abs);
         if (on > 0 && (size_t)on < sizeof origin) top = origin;
     }
-    int rc = render_page(html, len, top, NULL);
+    char *nav = NULL;
+    int rc = render_page(html, len, top, g_headless_js ? &nav : NULL);
     free(html);
+    if (nav == NULL) return rc;
+    if (hop >= HL_JS_NAV_MAX) { free(nav); return rc; }   /* cap: keep last render */
+    fprintf(stderr, "freedom: following JS navigation to '%s'\n", nav);
+    if (strncmp(nav, "file:", 5) == 0) {
+        /* ln_resolve's local target: "file:/abs" (also accept "file:///abs"). */
+        const char *path = nav + 5;
+        if (strncmp(path, "//", 2) == 0) path += 2;
+        rc = render_local(path, hop + 1);
+    } else {
+        rc = fetch_and_render(nav);
+    }
+    free(nav);
     return rc;
+}
+
+static int run_headless(const char *target) {
+    headless_load_hosts();
+    if (is_https_url(target) || is_overlay_http(target)) {
+        return fetch_and_render(target);
+    }
+    return render_local(target, 0);
 }
 
 /* Builds the TLS + proxy config for a headless fetch against `url`, same gate
@@ -905,9 +942,9 @@ static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
         s = sf_get_follow(url, cfg, resp, SF_DEFAULT_MAX_REDIRECTS);
     }
     if (s != SF_OK && allowlisted) {
+        /* Sovereignty override: strength relaxed, certificate still verified. */
         sf_response_free(resp);
         cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
-        cfg->insecure = 1;
         s = sf_get_follow(url, cfg, resp, SF_DEFAULT_MAX_REDIRECTS);
     }
     return s;

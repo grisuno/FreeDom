@@ -25,6 +25,7 @@
 #include "html_parse.h"
 #include "image_decode.h"
 #include "js_dom.h"
+#include "js_trusted.h"
 #include "js_env.h"
 #include "js_sandbox.h"
 #include "link_nav.h"
@@ -32,6 +33,8 @@
 #include "page_view.h"
 #include "request_policy.h"
 #include "url.h"
+#include "web_storage.h"
+#include "import_map.h"
 #include "util.h"
 
 #include <errno.h>
@@ -59,7 +62,7 @@ static void ignore_sigpipe(void);
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
 #define TAB_WIRE_B_N 55
-#define TAB_WIRE_BOX_F_N 219
+#define TAB_WIRE_BOX_F_N 220
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
 
 /* Anti-amplification cap on the number of display-list runs the parent will
@@ -76,7 +79,26 @@ static void ignore_sigpipe(void);
 /* Request opcodes (parent -> child). */
 enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4, OP_CLICK = 5,
        OP_TICK = 6, OP_SUBMIT = 7, OP_EVENT = 8, OP_MOUSE = 9,
-       OP_DECODE_IMAGE_B64 = 10 };
+       OP_DECODE_IMAGE_B64 = 10, OP_GEOM = 11, OP_POPSTATE = 12, OP_WS_EVENT = 13 };
+
+/* A WebSocket message pushed to the page (OP_WS_EVENT) is bounded like the
+ * connection's own per-message cap. */
+#define TAB_MAX_WS_MSG ((size_t)(1u * 1024u * 1024u))
+
+/* A localStorage snapshot on the wire: the quota plus the per-pair framing of a
+ * store of WST_MAX_KEYS pairs (spec/web_storage.md). */
+#define TAB_MAX_STORAGE (WST_QUOTA + 8u * (size_t)WST_MAX_KEYS + 4u)
+
+/* History ops one response may carry (2 x JD_HIST_MAX: every push can be followed
+ * by a coalesced replace) and the bytes of their serialised form. */
+#define TAB_MAX_HIST_OPS   (2u * JD_HIST_MAX)
+#define TAB_MAX_HIST_BYTES (TAB_MAX_HIST_OPS * (URL_MAX_LEN + 3u))
+/* window.open targets one response may carry (the shim records at most 4). */
+#define TAB_MAX_OPENS      4u
+#define TAB_MAX_OPEN_BYTES (TAB_MAX_OPENS * (URL_MAX_LEN + 1u))
+
+/* OP_GEOM payload bound in int32 words: a full js_geom table. */
+#define TAB_MAX_GEOM_WORDS (JG_HEADER_N + 1u + (size_t)JG_MAX_RECTS * JG_RECT_N)
 
 /* OP_LOAD response tags (child -> parent). While running the page's scripts the child
  * may issue zero or more TAG_SUBREQ subresource requests (XMLHttpRequest/fetch), which
@@ -119,7 +141,16 @@ typedef struct child_state {
     size_t          extern_css_len;    /* kept so click/re-derive restyles without refetch */
     pv_view        *preserved_view;    /* pre-script DOM snapshot (fallback when jQuery */
                                         /* corrupts the tree on mutation re-derive) */
+    int             last_net;          /* last OP_LOAD had net granted (trusted host) */
+    char           *page_url;          /* the loaded page's URL: base of module specifiers */
+    im_map         *imap;              /* the page's first <script type=importmap>, or NULL */
+    jg_table        geom;              /* laid-out geometry installed into js (OP_GEOM) */
 } child_state;
+
+static int write_opens(int wfd, child_state *cs);
+static int write_ws(int wfd, child_state *cs);
+static int write_storage(int wfd, child_state *cs);
+static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture);
 
 static void child_reset_page(child_state *cs) {
     if (cs->js != NULL) { js_context_free(cs->js); cs->js = NULL; }
@@ -131,6 +162,11 @@ static void child_reset_page(child_state *cs) {
     cs->extern_css_len = 0;
     pv_free(cs->preserved_view);
     cs->preserved_view = NULL;
+    jg_free(&cs->geom);   /* after js: the context held the only pointer to it */
+    free(cs->page_url);
+    cs->page_url = NULL;
+    im_free(cs->imap);
+    cs->imap = NULL;
 }
 
 /* jd_fetch_fn: the confined worker has NO network (CLONE_NEWNET + seccomp). An XHR/fetch
@@ -418,7 +454,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[219] = {
+        int32_t f[220] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -581,6 +617,7 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->bg_pos_x_pct, (int32_t)bd->bg_pos_y_pct,
             (int32_t)bd->bg_size_w, (int32_t)bd->bg_size_h,
             (int32_t)bd->bg_size_w_pct, (int32_t)bd->bg_size_h_pct,
+            (int32_t)bd->node_id,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -759,6 +796,94 @@ static void inject_video_into_view(child_state *cs, pv_view **vp) {
     free(vids);
 }
 
+/* A data: script/module (spec/data_url.md 2b): decoded locally -- it opens no
+ * network, so it runs for any JS page -- and only when its type is JavaScript.
+ * Returns the owned source (length in *len) or NULL. */
+static char *data_script(const char *url, size_t *len) {
+    char mime[128];
+    uint8_t *bytes = NULL;
+    size_t n = 0;
+    *len = 0;
+    if (du_decode(url, mime, sizeof mime, &bytes, &n) != DU_OK) return NULL;
+    if (!ctype_is_javascript(mime)) { free(bytes); return NULL; }
+    *len = n;
+    return (char *)bytes;
+}
+
+/* --- ES module host (plan B6, spec/js_sandbox.md 7b) --- */
+
+/* Resolves a module specifier against the importing module's URL. Relative
+ * ("./", "../", "/") and absolute specifiers resolve like any subresource URL (https,
+ * or a local file confined to its document's directory); a bare specifier needs an
+ * import map, which is not supported: it fails (TypeError in the page). */
+/* Plain URL resolution of ref against base (https, or a local file confined to its
+ * document's directory): the resolver both the module loader and the import map use. */
+static int tab_url_resolve(void *ctx, const char *base, const char *ref,
+                           char *out, size_t outsz) {
+    (void)ctx;
+    if (base == NULL || ref == NULL) return -1;
+    if (url_is_https(base)) return url_resolve_https(base, ref, out, outsz) == URL_OK ? 0 : -1;
+    if (url_is_file(base)) return url_resolve_file(base, ref, out, outsz) == URL_OK ? 0 : -1;
+    return -1;
+}
+
+static int tab_mod_resolve(void *host, const char *base, const char *spec,
+                           char *out, size_t outsz) {
+    child_state *cs = (child_state *)host;
+    if (base == NULL || spec == NULL) return -1;
+    if (du_is_data_url(spec)) {                    /* a data: module is its own URL */
+        size_t n = strlen(spec);
+        if (n >= outsz) return -1;
+        memcpy(out, spec, n + 1);
+        return 0;
+    }
+    /* The page's import map maps bare specifiers (spec/import_map.md); without one a
+     * bare specifier fails, as in any browser. */
+    if (cs != NULL && cs->imap != NULL)
+        return im_resolve(cs->imap, base, spec, tab_url_resolve, NULL, out, outsz);
+    int rel = (spec[0] == '/' || strncmp(spec, "./", 2) == 0 || strncmp(spec, "../", 3) == 0);
+    if (!rel && !url_has_scheme(spec)) return -1;
+    return tab_url_resolve(NULL, base, spec, out, outsz);
+}
+
+/* Loads a module's source through the trusted parent (TAG_SUBREQ: the full network
+ * policy applies), only inside a TRUSTED load's network window, and only when it is
+ * served as JavaScript. Anything else fails the import, never the page. */
+static char *tab_mod_fetch(void *host, const char *url, size_t *len) {
+    child_state *cs = (child_state *)host;
+    *len = 0;
+    if (du_is_data_url(url)) return data_script(url, len);   /* no network involved */
+    if (!cs->last_net || !cs->net_active) return NULL;
+    int st = 0;
+    char *body = NULL, *ctype = NULL;
+    size_t blen = 0;
+    int fr = child_fetch(cs, "GET", url, NULL, 0, &st, &body, &blen, &ctype);
+    if (fr != 0 || st < 200 || st >= 300 || !ctype_is_javascript(ctype)) {
+        log_external_skip(&cs->log, "module", fr != 0 ? "blocked or failed" : "refused", url);
+        free(body);
+        free(ctype);
+        return NULL;
+    }
+    free(ctype);
+    *len = blen;
+    return body;
+}
+
+/* Writes the history block of a response: [len][ops "K url\n"...][go:int32]
+ * (spec/js_dom.md 7e). Empty when JS is absent. */
+static int write_history(int wfd, child_state *cs) {
+    int go = 0;
+    char *ops = (cs->js != NULL) ? jd_take_history(cs->js, &go) : NULL;
+    size_t n = (ops != NULL) ? strlen(ops) : 0;
+    if (n > TAB_MAX_HIST_BYTES) n = 0;      /* cannot happen (bounded ops): fail closed */
+    int32_t g = (int32_t)go;
+    int rc = (write_full(wfd, &n, sizeof n) == 0
+           && (n == 0 || write_full(wfd, ops, n) == 0)
+           && write_full(wfd, &g, sizeof g) == 0) ? 0 : -1;
+    free(ops);
+    return rc;
+}
+
 /* Fetches the page's <link rel=stylesheet> sheets through the trusted parent
  * (TAG_SUBREQ; the confined worker never touches a socket) and accumulates the
  * accepted bodies into cs->extern_css, newline-separated, in document order.
@@ -813,8 +938,9 @@ static int32_t child_next_timer_ms(child_state *cs);
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
                               int run_js, int net, int reader, int prefers_dark,
                               int css, int viewport_w, const char *page_url,
-                              const char *cookies) {
+                              const char *cookies, const char *storage, size_t storage_len) {
     cs->last_run_js = run_js;
+    cs->last_net = net;
     cs->last_reader = reader;
     cs->last_prefers_dark = prefers_dark;
     cs->last_viewport_w = viewport_w;
@@ -826,11 +952,17 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     navbuf[0] = '\0';
     int32_t nav_replace = 0;
     int ok = (child_load(cs, html, len, run_js, net, page_url) == 0);
+    free(cs->page_url);
+    cs->page_url = (page_url != NULL && page_url[0] != '\0') ? strdup(page_url) : NULL;
+    if (ok && run_js) js_set_module_host(cs->js, tab_mod_resolve, tab_mod_fetch, cs);
     /* Enable + seed document.cookie ONLY for a trusted host (net => allow.conf AND
      * js.conf). Untrusted stays a no-op jar (Zero Knowledge). The cookie bytes are a
      * JS string value, never interpolated into source. */
     if (ok && net && cookies != NULL && cookies[0] != '\0')
         (void)jd_set_cookies(cs->js, cookies);
+    /* In-memory localStorage (spec/web_storage.md): trusted host only, seeded from
+     * the parent's store for this origin before any script runs. */
+    if (ok && net && run_js) (void)jt_enable_storage(cs->js, storage, storage_len);
     if (ok && css) {
         /* External stylesheets (Hito 27) come before the scripts, as a browser
          * fetches them. Independent of run_js: author CSS needs no JS. The parent
@@ -886,6 +1018,9 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                               cs->last_viewport_w, &preserve_view);
     }
     if (ok && run_js) {
+        /* window.open exists only for a trusted host (plan B4c); installed before the
+         * scripts so feature detection sees it. */
+        if (net) { (void)jt_enable_open(cs->js); (void)jt_enable_ws(cs->js); (void)jt_enable_worker(cs->js); }
         /* Open the network window: XHR/fetch (if installed) may now reach the parent.
          * Closed again before deriving the view so a later REPL eval cannot use it. */
         cs->net_active = 1;
@@ -902,12 +1037,18 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         /* Trusted hosts (allow.conf AND js.conf) get a larger JS budget: they
          * load heavier libraries (jQuery, Bootstrap, etc.) that need more time.
          * Untrusted hosts get the default budget (1s) to limit abuse. */
-        uint64_t total_budget = net ? 5000 : JS_DEFAULT_TIME_BUDGET;
+        uint64_t total_budget = net ? FC_TRUSTED_JS_BUDGET_MS : JS_DEFAULT_TIME_BUDGET;
         struct timespec t0;
         clock_gettime(CLOCK_MONOTONIC, &t0);
         /* R7: three-pass execution — sync first, async second, deferred last.
          * Each pass shares the same page-wide budget. When both async and defer
          * are present, async wins per HTML spec (handled during extraction). */
+        /* The first <script type=importmap> governs every module specifier of the page
+         * (spec/import_map.md); it is data, never executed. */
+        for (size_t i = 0; i < nscripts && cs->imap == NULL; i++)
+            if (scripts[i].importmap && scripts[i].text != NULL && cs->page_url != NULL)
+                cs->imap = im_parse(scripts[i].text, scripts[i].len, cs->page_url,
+                                    tab_url_resolve, NULL);
         for (int pass = 0; pass < 3; ++pass) {
         for (size_t i = 0; i < nscripts; i++) {
             if (pass == 0 && (scripts[i].defer || scripts[i].async)) continue; /* first pass: sync only */
@@ -919,16 +1060,71 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             const char *code = scripts[i].text;
             size_t code_len  = scripts[i].len;
             char  *ext_body  = NULL;
+            /* Module policy by trust (plan B6): a host that can load modules (net)
+             * skips the nomodule fallbacks, as a module-capable browser does; one that
+             * cannot skips EXTERNAL modules and runs the author's nomodule fallback. */
+            if (scripts[i].importmap) continue;          /* data, parsed above */
+            if (scripts[i].nomodule && net) continue;
+            int is_data = (scripts[i].src != NULL && du_is_data_url(scripts[i].src));
+            if (scripts[i].module && scripts[i].src != NULL && !net && !is_data) {
+                log_external_skip(&cs->log, "module",
+                    "skipped (host not granted network)", scripts[i].src);
+                continue;
+            }
             /* Name each script so an uncaught error in it reports a meaningful
-             * "file": inline ones by document position, external ones by src. */
-            char sname[192];
-            if (scripts[i].src != NULL) {
+             * "file": inline ones by document position, external ones by src. A
+             * module is named by its absolute URL: that is its import.meta.url and
+             * the base its own imports resolve against. */
+            char sname[URL_MAX_LEN];
+            if (scripts[i].module) {
+                if (scripts[i].src != NULL) {
+                    /* A script's src is a URL (relative paths included), never a module
+                     * specifier: "main.mjs" is fine and the import map does not apply. */
+                    int named;
+                    if (is_data) {
+                        /* The body comes from the attribute itself: a data: module may be
+                         * longer than any URL buffer (reddit ships one > 8 KiB). Its name is
+                         * the URL when it fits, else a per-script synthetic data: name. */
+                        int r = snprintf(sname, sizeof sname, "%s", scripts[i].src);
+                        if (r < 0 || (size_t)r >= sizeof sname)
+                            snprintf(sname, sizeof sname, "data:text/javascript,/*module-%zu*/", i);
+                        ext_body = data_script(scripts[i].src, &code_len);
+                        named = 1;
+                    } else {
+                        named = cs->page_url != NULL
+                             && tab_url_resolve(NULL, cs->page_url, scripts[i].src, sname, sizeof sname) == 0;
+                        if (named) ext_body = tab_mod_fetch(cs, sname, &code_len);
+                    }
+                    if (!named || ext_body == NULL) {
+                        log_external_skip(&cs->log, "module", "unresolvable or refused",
+                                          scripts[i].src);
+                        continue;
+                    }
+                    code = ext_body;
+                } else {
+                    int sn_r = snprintf(sname, sizeof sname, "%s",
+                                        cs->page_url != NULL ? cs->page_url : "inline module");
+                    if (sn_r < 0 || (size_t)sn_r >= sizeof sname) sname[sizeof sname - 1] = '\0';
+                }
+            } else if (scripts[i].src != NULL) {
                 /* External <script src> (Hito 24 EXT): runs ONLY for a doubly-trusted
                  * host (allow.conf AND js.conf => net). The confined worker has no
                  * socket; the bytes come from the TRUSTED parent via the same
                  * TAG_SUBREQ channel as XHR, under the full network policy. Every
                  * failure below is fail-closed: the script simply does not run and
                  * the load continues. */
+                if (is_data) {
+                    ext_body = data_script(scripts[i].src, &code_len);
+                    if (ext_body == NULL) {
+                        log_external_skip(&cs->log, "script", "data: URL not JavaScript or malformed",
+                                          "data:");
+                        continue;
+                    }
+                    code = ext_body;
+                    int sn_r = snprintf(sname, sizeof sname, "inline data: #%zu", i + 1);
+                    if (sn_r < 0 || (size_t)sn_r >= sizeof sname) sname[sizeof sname - 1] = '\0';
+                    goto run_script;
+                }
                 if (!net) {
                     log_external_skip(&cs->log, "script",
                         "skipped (host not granted network)", scripts[i].src);
@@ -962,14 +1158,21 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                 int sn_r = snprintf(sname, sizeof sname, "inline #%zu", i + 1);
                 if (sn_r < 0 || (size_t)sn_r >= sizeof sname) sname[sizeof sname - 1] = '\0';
             }
-            js_set_current_script(cs->js,
-                scripts[i].src, scripts[i].type);
+        run_script:
+            /* HTML: document.currentScript is null while a MODULE runs. */
+            if (scripts[i].module) js_set_current_script(cs->js, NULL, NULL);
+            else js_set_current_script(cs->js, scripts[i].src != NULL ? scripts[i].src : "",
+                                       scripts[i].type);
             js_result r;
             memset(&r, 0, sizeof r);
-            js_status es = js_eval_named(cs->js, code, code_len, sname, &r);
+            js_status es = scripts[i].module
+                ? js_eval_module(cs->js, code, code_len, sname, &r)
+                : js_eval_named(cs->js, code, code_len, sname, &r);
+            /* A native throw carries no stack location: name the script that ran, so
+             * the console still says WHERE (a module's URL, "inline #n", a src). */
             if (es != JS_OK && r.is_exception && r.value != NULL)
                 fb_buffer_push_loc(&cs->log, FB_ERROR, r.value, r.value_len,
-                                   r.file, r.line, r.col);
+                                   r.file != NULL ? r.file : sname, r.line, r.col);
             js_result_free(&r);
             js_set_current_script(cs->js, NULL, NULL);
             free(ext_body);
@@ -1079,6 +1282,10 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             && write_full(wfd, &nlen, sizeof nlen) == 0
             && (nlen == 0 || write_full(wfd, navbuf, nlen) == 0)
             && write_full(wfd, &nav_replace, sizeof nav_replace) == 0
+            && write_history(wfd, cs) == 0
+            && write_opens(wfd, cs) == 0
+            && write_ws(wfd, cs) == 0
+            && write_storage(wfd, cs) == 0
             && write_console(wfd, &cs->log) == 0
             && write_full(wfd, &next_ms, sizeof next_ms) == 0
             && write_full(wfd, &cklen, sizeof cklen) == 0
@@ -1087,6 +1294,49 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     hp_free(title);
     hp_free(text);
     pv_free(view);
+}
+
+/* Writes the WebSocket block of a response: [n:int32] then per op
+ * [kind:int32][id:int32][len][bytes] (spec/js_dom.md 7f). Empty without JS. */
+static int write_ws(int wfd, child_state *cs) {
+    jt_ws_op ops[JT_WS_MAX_OPS];
+    size_t n = (cs->js != NULL) ? jt_take_ws(cs->js, ops, JT_WS_MAX_OPS) : 0;
+    int32_t cnt = (int32_t)n;
+    int rc = (write_full(wfd, &cnt, sizeof cnt) == 0) ? 0 : -1;
+    for (size_t i = 0; i < n && rc == 0; ++i) {
+        int32_t k = (int32_t)ops[i].kind, id = (int32_t)ops[i].id;
+        size_t len = ops[i].len;
+        rc = (write_full(wfd, &k, sizeof k) == 0 && write_full(wfd, &id, sizeof id) == 0
+              && write_full(wfd, &len, sizeof len) == 0
+              && (len == 0 || write_full(wfd, ops[i].data, len) == 0)) ? 0 : -1;
+    }
+    jt_ws_ops_free(ops, n);
+    return rc;
+}
+
+/* Writes the localStorage block of a response: [dirty:int32][len][snapshot]. */
+static int write_storage(int wfd, child_state *cs) {
+    char *blob = NULL;
+    size_t len = 0;
+    int32_t dirty = (cs->js != NULL && jt_take_storage(cs->js, &blob, &len)) ? 1 : 0;
+    if (dirty && len > TAB_MAX_STORAGE) { dirty = 0; len = 0; }
+    if (!dirty) len = 0;
+    int rc = (write_full(wfd, &dirty, sizeof dirty) == 0
+           && write_full(wfd, &len, sizeof len) == 0
+           && (len == 0 || write_full(wfd, blob, len) == 0)) ? 0 : -1;
+    free(blob);
+    return rc;
+}
+
+/* Writes the window.open block of a response: [len][targets "url\n"...]. */
+static int write_opens(int wfd, child_state *cs) {
+    char *o = (cs->js != NULL) ? jt_take_opens(cs->js) : NULL;
+    size_t n = (o != NULL) ? strlen(o) : 0;
+    if (n > TAB_MAX_OPEN_BYTES) n = 0;
+    int rc = (write_full(wfd, &n, sizeof n) == 0
+           && (n == 0 || write_full(wfd, o, n) == 0)) ? 0 : -1;
+    free(o);
+    return rc;
 }
 
 /* Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the
@@ -1104,8 +1354,8 @@ static int32_t child_next_timer_ms(child_state *cs) {
 /* Fire click handlers for node_id (OP_CLICK) or advance the virtual timer clock
  * (OP_TICK), then re-derive the view so the parent can repaint mutations caused
  * by the handlers. Response format matches the tail of OP_LOAD: [ok:int32]
- * [title_len][title][text_len][text][view][nav_len=''][nav_replace][console]
- * [next_timer_ms:int32]. Neither produces a navigation. */
+ * [title_len][title][text_len][text][view][nav_len][nav][nav_replace][console]
+ * [next_timer_ms:int32]. A navigation the handlers/timers requested travels raw. */
 static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                                   dom_node_id node_id, int32_t elapsed_ms) {
     char  *title = NULL, *text = NULL;
@@ -1154,8 +1404,15 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
         && pv_count(cs->preserved_view) > pv_count(view) + 1) {
         write_which = cs->preserved_view;
     }
-    int32_t zero32 = 0;
-    size_t zero = 0;
+    /* A handler or timer may have navigated (location.href=/assign/replace): raw and
+     * unresolved, the parent gates it exactly like a load-time request. */
+    char navbuf[LN_MAX_TARGET];
+    int rep = 0;
+    navbuf[0] = '\0';
+    if (ok && cs->js != NULL)
+        (void)jd_take_nav_request(cs->js, navbuf, sizeof navbuf, &rep);
+    size_t navlen = strlen(navbuf);
+    int32_t nav_replace = rep ? 1 : 0;
     int32_t next_ms = child_next_timer_ms(cs);
     if (write_full(wfd, &rtag, 1) == 0 && write_full(wfd, &k, sizeof k) == 0 && ok) {
         (void)(write_full(wfd, &tl, sizeof tl) == 0
@@ -1163,8 +1420,13 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
             && write_full(wfd, &xl, sizeof xl) == 0
             && (xl == 0 || write_full(wfd, text, xl) == 0)
             && write_view(wfd, write_which) == 0
-            && write_full(wfd, &zero, sizeof zero) == 0
-            && write_full(wfd, &zero32, sizeof zero32) == 0 /* nav_replace = 0 */
+            && write_full(wfd, &navlen, sizeof navlen) == 0
+            && (navlen == 0 || write_full(wfd, navbuf, navlen) == 0)
+            && write_full(wfd, &nav_replace, sizeof nav_replace) == 0
+            && write_history(wfd, cs) == 0
+            && write_opens(wfd, cs) == 0
+            && write_ws(wfd, cs) == 0
+            && write_storage(wfd, cs) == 0
             && write_console(wfd, &cs->log) == 0
             && write_full(wfd, &next_ms, sizeof next_ms) == 0);
     }
@@ -1263,6 +1525,34 @@ static void child_handle_mouse(int wfd, child_state *cs) {
     (void)jd_fire_mouse_event(cs->js, (dom_node_id)nid, etype, (int)cx, (int)cy, (int)btn);
     free(etype);
     child_handle_mutation(wfd, cs, 0, (dom_node_id)nid, 0);
+}
+
+static dom_node_id geom_parent(void *ctx, dom_node_id n) {
+    return dom_parent((const dom_index *)ctx, n);
+}
+
+/* OP_GEOM (spec/js_geom.md): installs the parent's laid-out geometry into the page's
+ * JS, aggregated into ancestors over this worker's own DOM. Accepted only when the
+ * current page was loaded with net granted -- the same trust bit the parent gates
+ * on, re-checked here (fail closed). Reply: [TAG_RESULT][accepted:int32]. */
+static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n) {
+    int32_t accepted = 0;
+    if (cs->last_net && cs->js != NULL && cs->idx != NULL) {
+        jg_table tmp;
+        jg_init(&tmp);
+        if (jg_decode(words, n, &tmp) == 0) {
+            /* A full table past JG_MAX_RECTS still holds every rect it fit. */
+            (void)jg_aggregate(&tmp, geom_parent, cs->idx);
+            (void)jd_set_geometry(cs->js, NULL);
+            jg_free(&cs->geom);
+            cs->geom = tmp;
+            accepted = (jd_set_geometry(cs->js, &cs->geom) == JD_OK) ? 1 : 0;
+        } else {
+            jg_free(&tmp);
+        }
+    }
+    uint8_t rtag = TAG_RESULT;
+    (void)(write_full(wfd, &rtag, 1) == 0 && write_full(wfd, &accepted, sizeof accepted) == 0);
 }
 
 /* Fires a submit event on the form enclosing node_id. Walks up the DOM to find
@@ -1433,8 +1723,52 @@ static void tab_worker_run(int rfd, int wfd) {
         if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE &&
             op != OP_DECODE_IMAGE_B64 &&
             op != OP_CLICK && op != OP_TICK && op != OP_SUBMIT &&
-            op != OP_EVENT && op != OP_MOUSE)
+            op != OP_EVENT && op != OP_MOUSE && op != OP_GEOM && op != OP_POPSTATE &&
+            op != OP_WS_EVENT)
             break; /* desync */
+
+        /* OP_WS_EVENT: [id][kind][code][len][bytes] -- an event of a WebSocket the
+         * parent owns. Delivered only to a page loaded trusted (fail closed). */
+        if (op == OP_WS_EVENT) {
+            int32_t wid = 0, wkind = 0, wcode = 0;
+            size_t wlen = 0;
+            if (read_full(rfd, &wid, sizeof wid) != 0 || read_full(rfd, &wkind, sizeof wkind) != 0
+             || read_full(rfd, &wcode, sizeof wcode) != 0
+             || read_full(rfd, &wlen, sizeof wlen) != 0) break;
+            if (wlen > TAB_MAX_WS_MSG) break;
+            char *wdata = (char *)malloc(wlen + 1);
+            if (wdata == NULL) break;
+            if (wlen != 0 && read_full(rfd, wdata, wlen) != 0) { free(wdata); break; }
+            wdata[wlen] = '\0';
+            if (cs.last_net && cs.js != NULL)
+                (void)jt_ws_event(cs.js, (int)wid, (int)wkind, (int)wcode, wdata, wlen);
+            free(wdata);
+            child_handle_mutation(wfd, &cs, 0, DOM_NODE_NONE, 0);
+            continue;
+        }
+
+        /* OP_POPSTATE: [index:int32] -- the parent went Back/Forward within the
+         * same document; move the page's history and re-derive like a click. */
+        if (op == OP_POPSTATE) {
+            int32_t idx = -1;
+            if (read_full(rfd, &idx, sizeof idx) != 0) break;
+            if (cs.js != NULL) (void)jd_pop_state(cs.js, (int)idx);
+            child_handle_mutation(wfd, &cs, 0, DOM_NODE_NONE, 0);
+            continue;
+        }
+
+        /* OP_GEOM: [words:size_t][int32 x words], bounded by a full js_geom table. */
+        if (op == OP_GEOM) {
+            size_t words = 0;
+            if (read_full(rfd, &words, sizeof words) != 0) break;
+            if (words == 0 || words > TAB_MAX_GEOM_WORDS) break;
+            int32_t *gw = (int32_t *)calloc(words, sizeof *gw);
+            if (gw == NULL) break;
+            if (read_full(rfd, gw, words * sizeof *gw) != 0) { free(gw); break; }
+            child_handle_geom(wfd, &cs, gw, words);
+            free(gw);
+            continue;
+        }
 
         /* OP_CLICK is a short command: just the target node id. */
         if (op == OP_CLICK) {
@@ -1480,7 +1814,8 @@ static void tab_worker_run(int rfd, int wfd) {
          * the page URL (for the real location), before length+payload. */
         uint8_t run_js = 0, net = 0, reader = 0, dark = 0, css = 0;
         int32_t vpw = 0;
-        char *url = NULL, *cookies = NULL;
+        char *url = NULL, *cookies = NULL, *storage = NULL;
+        size_t storage_len = 0;
         if (op == OP_LOAD) {
             if (read_full(rfd, &run_js, 1) != 0
              || read_full(rfd, &net, 1) != 0
@@ -1504,6 +1839,15 @@ static void tab_worker_run(int rfd, int wfd) {
             if (cookies == NULL) { free(url); break; }
             if (cklen != 0 && read_full(rfd, cookies, cklen) != 0) { free(cookies); free(url); break; }
             cookies[cklen] = '\0';
+            if (read_full(rfd, &storage_len, sizeof storage_len) != 0) { free(cookies); free(url); break; }
+            if (storage_len > TAB_MAX_STORAGE) { free(cookies); free(url); break; }
+            if (storage_len != 0) {
+                storage = (char *)malloc(storage_len);
+                if (storage == NULL) { free(cookies); free(url); break; }
+                if (read_full(rfd, storage, storage_len) != 0) {
+                    free(storage); free(cookies); free(url); break;
+                }
+            }
         }
 
         size_t len = 0;
@@ -1516,13 +1860,14 @@ static void tab_worker_run(int rfd, int wfd) {
         if (len != 0 && read_full(rfd, buf, len) != 0) { free(buf); free(url); break; }
         buf[len] = '\0';
 
-        if (op == OP_LOAD)                   child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, css, (int)vpw, url, cookies);
+        if (op == OP_LOAD)                   child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, css, (int)vpw, url, cookies, storage, storage_len);
         else if (op == OP_EVAL)              child_handle_eval(wfd, &cs, buf, len);
         else if (op == OP_DECODE_IMAGE)      child_handle_decode_image(wfd, buf, len);
         else /* OP_DECODE_IMAGE_B64 */       child_handle_decode_image_b64(wfd, buf, len);
         free(buf);
         free(url);
         free(cookies);
+        free(storage);
     }
 
     child_reset_page(&cs);
@@ -1578,6 +1923,10 @@ struct tab {
     int            net_allowed;
     int            css_allowed;
     int            viewport_w;    /* @media render width for the next load (0 => default) */
+    int            last_net_granted; /* the current page was loaded with net granted */
+    char          *storage_in;    /* localStorage seed for the next load (owned) */
+    size_t         storage_in_len;
+    char          *page_url;      /* current page URL (owned): base that gates JS navigation */
     char          *cookies_in;   /* seeds document.cookie for the next load (owned) */
     tab_fetch_fn   fetcher;
     void          *fetcher_ctx;
@@ -1833,7 +2182,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[219];
+        int32_t f[220];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1950,6 +2299,7 @@ static int read_view(int fd, pv_view **out) {
             .bg_pos_x_pct = f[213], .bg_pos_y_pct = f[214],
             .bg_size_w = f[215], .bg_size_h = f[216],
             .bg_size_w_pct = f[217], .bg_size_h_pct = f[218],
+            .node_id = (dom_node_id)(uint32_t)f[219],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;
@@ -2267,6 +2617,207 @@ static int tab_serve_subreq(tab *t, int net_granted, int css_granted) {
     return wok ? 0 : -1;
 }
 
+static void hist_ops_free(tab_hist_op *ops, size_t n) {
+    if (ops == NULL) return;
+    for (size_t i = 0; i < n; ++i) free(ops[i].url);
+    free(ops);
+}
+
+/* Parses the worker's "K url\n" history lines into owned ops, keeping only those
+ * whose kind is P/R and whose URL is the same-origin target of itself against the
+ * page URL (url_history_target: the parent's own re-check, Zero Trust -- a
+ * compromised worker cannot spoof another origin into the URL bar). Bounded by
+ * TAB_MAX_HIST_OPS. Returns 0, or -1 on OOM. */
+static int parse_hist_ops(const char *page_url, const char *s, size_t n,
+                          tab_hist_op **out, size_t *nout) {
+    *out = NULL;
+    *nout = 0;
+    if (s == NULL || n == 0 || page_url == NULL) return 0;
+    tab_hist_op *ops = (tab_hist_op *)calloc(TAB_MAX_HIST_OPS, sizeof *ops);
+    if (ops == NULL) return -1;
+    size_t k = 0;
+    char chk[URL_MAX_LEN];
+    for (size_t i = 0; i < n && k < TAB_MAX_HIST_OPS; ) {
+        size_t e = i;
+        while (e < n && s[e] != '\n') ++e;
+        size_t len = e - i;
+        if (len >= 3 && (s[i] == 'P' || s[i] == 'R') && s[i + 1] == ' '
+            && len - 2 < sizeof chk) {
+            memcpy(chk, s + i + 2, len - 2);
+            chk[len - 2] = '\0';
+            char tgt[URL_MAX_LEN];
+            if (url_history_target(page_url, chk, tgt, sizeof tgt) == URL_OK
+                && strcmp(tgt, chk) == 0) {
+                ops[k].replace = (s[i] == 'R');
+                ops[k].url = strdup(chk);
+                if (ops[k].url == NULL) { hist_ops_free(ops, k); return -1; }
+                ++k;
+            }
+        }
+        i = e + 1;
+    }
+    if (k == 0) { free(ops); return 0; }
+    *out = ops;
+    *nout = k;
+    return 0;
+}
+
+/* Reads the history block of a response (see write_history). The ops are owned by
+ * the caller (hist_ops_free on a later failure, else moved into the tab_page). */
+static tab_status read_history(tab *t, const char *page_url, tab_hist_op **hist,
+                               size_t *nhist, int *go) {
+    char *ops = NULL;
+    size_t n = 0;
+    int32_t g = 0;
+    *hist = NULL; *nhist = 0; *go = 0;
+    if (read_field(t->resp_fd, &ops, &n) != 0) return io_failure(t);
+    if (read_full(t->resp_fd, &g, sizeof g) != 0) { free(ops); return io_failure(t); }
+    if (n > TAB_MAX_HIST_BYTES) { free(ops); return io_failure(t); }
+    int rc = parse_hist_ops(page_url, ops, n, hist, nhist);
+    free(ops);
+    if (rc != 0) return TAB_ERR_OOM;
+    *go = (int)g;
+    return TAB_OK;
+}
+
+/* HTML 6.4.2 activation-triggering input events: only these let a page open a
+ * window. A timer, a load, a focus or a mouse move never do. */
+static int is_activation_event(const char *type) {
+    static const char *const k[] = { "click", "keydown", "mousedown", "mouseup",
+                                     "pointerdown", "pointerup", "touchend" };
+    if (type == NULL) return 0;
+    for (size_t i = 0; i < sizeof k / sizeof k[0]; ++i)
+        if (strcmp(type, k[i]) == 0) return 1;
+    return 0;
+}
+
+static void open_urls_free(char **u, size_t n) {
+    if (u == NULL) return;
+    for (size_t i = 0; i < n; ++i) free(u[i]);
+    free(u);
+}
+
+static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom);
+
+/* Reads the window.open block (see write_opens). Targets survive only when the
+ * operation was a user gesture, each gated exactly like a JS navigation. */
+static tab_status read_opens(tab *t, const char *page_url, int gesture,
+                             char ***urls, size_t *nurl) {
+    *urls = NULL;
+    *nurl = 0;
+    char *o = NULL;
+    size_t n = 0;
+    if (read_field(t->resp_fd, &o, &n) != 0) return io_failure(t);
+    if (n > TAB_MAX_OPEN_BYTES) { free(o); return io_failure(t); }
+    if (!gesture || n == 0) { free(o); return TAB_OK; }
+    char **out = (char **)calloc(TAB_MAX_OPENS, sizeof *out);
+    if (out == NULL) { free(o); return TAB_ERR_OOM; }
+    size_t k = 0;
+    for (size_t i = 0; i < n && k < TAB_MAX_OPENS; ) {
+        size_t e = i;
+        while (e < n && o[e] != '\n') ++e;
+        if (e < n) o[e] = '\0';   /* read_field already NUL-terminates o[n] */
+        int oom = 0;
+        char *g = (e > i) ? gate_js_nav(page_url, o + i, e - i, &oom) : NULL;
+        if (oom) { open_urls_free(out, k); free(o); return TAB_ERR_OOM; }
+        if (g != NULL) out[k++] = g;
+        i = e + 1;
+    }
+    free(o);
+    if (k == 0) { free(out); return TAB_OK; }
+    *urls = out;
+    *nurl = k;
+    return TAB_OK;
+}
+
+static void ws_ops_free(tab_ws_op *ops, size_t n) {
+    if (ops == NULL) return;
+    for (size_t i = 0; i < n; ++i) free(ops[i].data);
+    free(ops);
+}
+
+/* Reads the WebSocket block (see write_ws), bounded by JT_WS_MAX_OPS ops and
+ * JT_WS_MAX_BYTES of payload. Kept only for a load the parent granted net (trusted);
+ * otherwise read and discarded -- a compromised worker cannot open a socket. */
+static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout) {
+    *out = NULL;
+    *nout = 0;
+    int32_t cnt = 0;
+    if (read_full(t->resp_fd, &cnt, sizeof cnt) != 0) return io_failure(t);
+    if (cnt < 0 || (size_t)cnt > JT_WS_MAX_OPS) return io_failure(t);
+    if (cnt == 0) return TAB_OK;
+    tab_ws_op *ops = (tab_ws_op *)calloc((size_t)cnt, sizeof *ops);
+    if (ops == NULL) return TAB_ERR_OOM;
+    size_t bytes = 0, k = 0;
+    for (int32_t i = 0; i < cnt; ++i) {
+        int32_t kind = 0, id = 0;
+        size_t len = 0;
+        if (read_full(t->resp_fd, &kind, sizeof kind) != 0
+         || read_full(t->resp_fd, &id, sizeof id) != 0
+         || read_full(t->resp_fd, &len, sizeof len) != 0
+         || len > JT_WS_MAX_BYTES - bytes) {
+            ws_ops_free(ops, k);
+            return io_failure(t);
+        }
+        char *d = (char *)malloc(len + 1);
+        if (d == NULL) { ws_ops_free(ops, k); return TAB_ERR_OOM; }
+        if (len != 0 && read_full(t->resp_fd, d, len) != 0) {
+            free(d); ws_ops_free(ops, k);
+            return io_failure(t);
+        }
+        d[len] = '\0';
+        bytes += len;
+        if (kind < TAB_WS_OPEN || kind > TAB_WS_CLOSE || !t->last_net_granted) {
+            free(d);
+            continue;
+        }
+        ops[k].kind = kind; ops[k].id = id; ops[k].data = d; ops[k].len = len;
+        ++k;
+    }
+    if (k == 0) { free(ops); return TAB_OK; }
+    *out = ops;
+    *nout = k;
+    return TAB_OK;
+}
+
+/* Reads the localStorage block (see write_storage). The snapshot is kept only for a
+ * trusted load and only when it passes wst_decode_check (the worker is hostile). */
+static tab_status read_storage(tab *t, char **out, size_t *nout) {
+    *out = NULL;
+    *nout = 0;
+    int32_t dirty = 0;
+    size_t len = 0;
+    if (read_full(t->resp_fd, &dirty, sizeof dirty) != 0
+     || read_full(t->resp_fd, &len, sizeof len) != 0) return io_failure(t);
+    if (len > TAB_MAX_STORAGE) return io_failure(t);
+    if (len == 0) return TAB_OK;
+    char *b = (char *)malloc(len);
+    if (b == NULL) return TAB_ERR_OOM;
+    if (read_full(t->resp_fd, b, len) != 0) { free(b); return io_failure(t); }
+    if (!dirty || !t->last_net_granted || wst_decode_check(b, len) != 0) {
+        free(b);
+        return TAB_OK;
+    }
+    *out = b;
+    *nout = len;
+    return TAB_OK;
+}
+
+/* Gates a raw JS navigation request against the page URL in the trusted parent
+ * (Zero Trust: a compromised worker cannot drive the browser off-policy): ln_resolve
+ * allows only https / a local file under a local base; a downgrade, a foreign scheme
+ * or a same-document fragment yields no navigation. Returns an owned target, NULL
+ * for none; *oom is set when the copy failed. */
+static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom) {
+    *oom = 0;
+    if (nlen == 0 || page_url == NULL || navreq == NULL) return NULL;
+    ln_result ln;
+    if (ln_resolve(page_url, navreq, &ln) != LN_OK || ln.action != LN_NAVIGATE) return NULL;
+    char *nav = strdup(ln.target);
+    if (nav == NULL) *oom = 1;
+    return nav;
+}
+
 tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out) {
     return tab_load_ex(t, html, len, 0, out); /* JS off by default */
 }
@@ -2298,6 +2849,8 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     int32_t vpw = (int32_t)t->viewport_w;
     const char *ck = (nflag && t->cookies_in != NULL) ? t->cookies_in : "";
     size_t cklen = strlen(ck);
+    /* localStorage seed: a trusted load only (the worker also re-checks net). */
+    size_t stlen = (nflag && t->storage_in != NULL) ? t->storage_in_len : 0;
     if (write_full(t->req_fd, &op, 1) != 0
      || write_full(t->req_fd, &jflag, 1) != 0
      || write_full(t->req_fd, &nflag, 1) != 0
@@ -2309,11 +2862,17 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
      || (ulen != 0 && write_full(t->req_fd, page_url, ulen) != 0)
      || write_full(t->req_fd, &cklen, sizeof cklen) != 0
      || (cklen != 0 && write_full(t->req_fd, ck, cklen) != 0)
+     || write_full(t->req_fd, &stlen, sizeof stlen) != 0
+     || (stlen != 0 && write_full(t->req_fd, t->storage_in, stlen) != 0)
      || write_full(t->req_fd, &len, sizeof len) != 0
      || (len != 0 && write_full(t->req_fd, html, len) != 0)) {
         tab_refresh_alive(t);
         return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
     }
+
+    t->last_net_granted = nflag;
+    free(t->page_url);
+    t->page_url = (ulen != 0) ? strdup(page_url) : NULL;
 
     /* While the worker runs the page's scripts it may issue subresource (XHR/fetch)
      * requests, each a TAG_SUBREQ frame the trusted parent services in policy. Loop
@@ -2351,11 +2910,42 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
         free(title); free(text); free(navreq); pv_free(view);
         return io_failure(t);
     }
+    /* History operations the load scripts performed (spec/js_dom.md 7e). */
+    tab_hist_op *hist = NULL;
+    size_t nhist = 0;
+    int hist_go = 0;
+    tab_status hs = read_history(t, page_url, &hist, &nhist, &hist_go);
+    if (hs != TAB_OK) { free(title); free(text); free(navreq); pv_free(view); return hs; }
+    char **no_opens = NULL;
+    size_t no_nopen = 0;
+    hs = read_opens(t, page_url, 0, &no_opens, &no_nopen);   /* a load is no gesture */
+    if (hs != TAB_OK) {
+        free(title); free(text); free(navreq); pv_free(view);
+        hist_ops_free(hist, nhist);
+        return hs;
+    }
+    tab_ws_op *wsops = NULL;
+    size_t nws = 0;
+    hs = read_ws(t, &wsops, &nws);
+    if (hs != TAB_OK) {
+        free(title); free(text); free(navreq); pv_free(view);
+        hist_ops_free(hist, nhist);
+        return hs;
+    }
+    char *stor = NULL;
+    size_t stor_len = 0;
+    hs = read_storage(t, &stor, &stor_len);
+    if (hs != TAB_OK) {
+        free(title); free(text); free(navreq); pv_free(view);
+        hist_ops_free(hist, nhist); ws_ops_free(wsops, nws);
+        return hs;
+    }
     /* Captured console transcript for Freebug. */
     fb_buffer console;
     fb_buffer_init(&console);
     if (read_console(t->resp_fd, &console) != 0) {
         free(title); free(text); free(navreq); pv_free(view);
+        hist_ops_free(hist, nhist); ws_ops_free(wsops, nws); free(stor);
         fb_buffer_free(&console);
         return io_failure(t);
     }
@@ -2363,6 +2953,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     int32_t next_ms = -1;
     if (read_full(t->resp_fd, &next_ms, sizeof next_ms) != 0) {
         free(title); free(text); free(navreq); pv_free(view);
+        hist_ops_free(hist, nhist); ws_ops_free(wsops, nws); free(stor);
         fb_buffer_free(&console);
         return io_failure(t);
     }
@@ -2372,6 +2963,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     size_t sclen = 0;
     if (read_field(t->resp_fd, &set_cookies, &sclen) != 0) {
         free(title); free(text); free(navreq); pv_free(view);
+        hist_ops_free(hist, nhist); ws_ops_free(wsops, nws); free(stor);
         fb_buffer_free(&console);
         return io_failure(t);
     }
@@ -2380,19 +2972,15 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     /* Gate the raw request HERE (trusted parent, Zero Trust): a compromised worker
      * cannot drive the browser off-policy. ln_resolve allows only https / a local
      * file under a local base; a downgrade / foreign scheme / fragment yields no nav. */
-    char *nav_url = NULL;
-    if (nlen != 0 && page_url != NULL) {
-        ln_result ln;
-        if (ln_resolve(page_url, navreq, &ln) == LN_OK && ln.action == LN_NAVIGATE) {
-            nav_url = strdup(ln.target);
-            if (nav_url == NULL) {
-                free(title); free(text); free(navreq); pv_free(view);
-                fb_buffer_free(&console); free(set_cookies);
-                return TAB_ERR_OOM;
-            }
-        }
-    }
+    int nav_oom = 0;
+    char *nav_url = gate_js_nav(page_url, navreq, nlen, &nav_oom);
     free(navreq);
+    if (nav_oom) {
+        free(title); free(text); pv_free(view);
+        hist_ops_free(hist, nhist); ws_ops_free(wsops, nws); free(stor);
+        fb_buffer_free(&console); free(set_cookies);
+        return TAB_ERR_OOM;
+    }
 
     out->title = title; out->title_len = tl;
     out->text  = text;  out->text_len  = xl;
@@ -2402,6 +2990,9 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     out->console = console; /* ownership moves to the caller (tab_page_free) */
     out->next_timer_ms = (next_ms >= 0) ? (int)next_ms : -1;
     out->set_cookies = set_cookies; /* ownership moves to the caller */
+    out->hist = hist; out->nhist = nhist; out->hist_go = hist_go;
+    out->ws = wsops; out->nws = nws;
+    out->storage = stor; out->storage_len = stor_len;
     return TAB_OK;
 }
 
@@ -2418,7 +3009,7 @@ static tab_status tab_mutation_request(tab *t, uint8_t op, int32_t arg, tab_page
         return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
     }
 
-    return tab_read_view(t, out);
+    return tab_read_view_ex(t, out, op == OP_CLICK);   /* a click is a user gesture */
 }
 
 tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out) {
@@ -2501,7 +3092,7 @@ tab_status tab_dispatch_event(tab *t, dom_node_id node_id,
     }
 
     /* The worker replies with TAG_RESULT + TAG_VIEW (re-derived page view). */
-    return tab_read_view(t, out);
+    return tab_read_view_ex(t, out, is_activation_event(event_type));
 }
 
 /* Sends a mouse DOM event to the worker. Wire format:
@@ -2537,12 +3128,16 @@ tab_status tab_dispatch_mouse(tab *t, dom_node_id node_id,
         return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
     }
 
-    return tab_read_view(t, out);
+    return tab_read_view_ex(t, out, is_activation_event(event_type));
 }
 
 /* Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console).
  * Used by tab_mutation_request, tab_subreq, tab_dispatch_event. */
 tab_status tab_read_view(tab *t, tab_page *out) {
+    return tab_read_view_ex(t, out, 0);
+}
+
+static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
     if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
     uint8_t tag = 0;
     if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);
@@ -2572,27 +3167,67 @@ tab_status tab_read_view(tab *t, tab_page *out) {
         free(title); free(text); free(navreq); pv_free(view);
         return io_failure(t);
     }
+    int nav_oom = 0;
+    char *nav_url = gate_js_nav(t->page_url, navreq, nlen, &nav_oom);
     free(navreq);
+    if (nav_oom) { free(title); free(text); pv_free(view); return TAB_ERR_OOM; }
+    tab_hist_op *hist = NULL;
+    size_t nhist = 0;
+    int hist_go = 0;
+    tab_status hs = read_history(t, t->page_url, &hist, &nhist, &hist_go);
+    if (hs != TAB_OK) { free(title); free(text); pv_free(view); free(nav_url); return hs; }
+    char **opens = NULL;
+    size_t nopen = 0;
+    hs = read_opens(t, t->page_url, gesture, &opens, &nopen);
+    if (hs != TAB_OK) {
+        free(title); free(text); pv_free(view); free(nav_url);
+        hist_ops_free(hist, nhist);
+        return hs;
+    }
+    tab_ws_op *wsops = NULL;
+    size_t nws = 0;
+    hs = read_ws(t, &wsops, &nws);
+    if (hs != TAB_OK) {
+        free(title); free(text); pv_free(view); free(nav_url);
+        hist_ops_free(hist, nhist); open_urls_free(opens, nopen);
+        return hs;
+    }
+    char *stor = NULL;
+    size_t stor_len = 0;
+    hs = read_storage(t, &stor, &stor_len);
+    if (hs != TAB_OK) {
+        free(title); free(text); pv_free(view); free(nav_url);
+        hist_ops_free(hist, nhist); open_urls_free(opens, nopen); ws_ops_free(wsops, nws);
+        return hs;
+    }
 
     fb_buffer console;
     fb_buffer_init(&console);
     if (read_console(t->resp_fd, &console) != 0) {
-        free(title); free(text); pv_free(view);
+        free(title); free(text); pv_free(view); free(nav_url);
+        hist_ops_free(hist, nhist); open_urls_free(opens, nopen); ws_ops_free(wsops, nws);
+        free(stor);
         fb_buffer_free(&console);
         return io_failure(t);
     }
     int32_t next_ms = -1;
     if (read_full(t->resp_fd, &next_ms, sizeof next_ms) != 0) {
-        free(title); free(text); pv_free(view);
+        free(title); free(text); pv_free(view); free(nav_url);
+        hist_ops_free(hist, nhist); open_urls_free(opens, nopen); ws_ops_free(wsops, nws);
+        free(stor);
         fb_buffer_free(&console);
         return io_failure(t);
     }
+    out->hist = hist; out->nhist = nhist; out->hist_go = hist_go;
+    out->open_urls = opens; out->nopen = nopen;
+    out->ws = wsops; out->nws = nws;
+    out->storage = stor; out->storage_len = stor_len;
 
     out->title = title; out->title_len = tl;
     out->text  = text;  out->text_len  = xl;
     out->view  = view;
-    out->nav_url = NULL;
-    out->nav_replace = 0;
+    out->nav_url = nav_url;
+    out->nav_replace = (nav_url != NULL) ? (nav_replace ? 1 : 0) : 0;
     out->console = console;
     out->next_timer_ms = (next_ms >= 0) ? (int)next_ms : -1;
     return TAB_OK;
@@ -2724,6 +3359,8 @@ void tab_close(tab *t) {
         while (waitpid(t->pid, &st, 0) < 0 && errno == EINTR) { /* retry */ }
     }
     free(t->cookies_in);
+    free(t->page_url);
+    free(t->storage_in);
     free(t);
 }
 
@@ -2734,6 +3371,18 @@ void tab_page_free(tab_page *p) {
     pv_free(p->view);
     free(p->nav_url);
     free(p->set_cookies);
+    hist_ops_free(p->hist, p->nhist);
+    p->hist = NULL;
+    p->nhist = 0;
+    open_urls_free(p->open_urls, p->nopen);
+    p->open_urls = NULL;
+    p->nopen = 0;
+    ws_ops_free(p->ws, p->nws);
+    p->ws = NULL;
+    p->nws = 0;
+    free(p->storage);
+    p->storage = NULL;
+    p->storage_len = 0;
     fb_buffer_free(&p->console);
     p->title = NULL;
     p->text = NULL;
@@ -2762,4 +3411,68 @@ void tab_image_free(tab_image *img) {
     img->height = 0;
     img->stride = 0;
     img->data_len = 0;
+}
+
+tab_status tab_set_geometry(tab *t, const jg_table *g) {
+    if (t == NULL || g == NULL) return TAB_ERR_NULL_ARG;
+    if (!t->last_net_granted) return TAB_OK;   /* untrusted page: never sent */
+    tab_refresh_alive(t);
+    if (!t->alive) return TAB_ERR_DEAD;
+    size_t words = jg_wire_len(g);
+    if (words == 0 || words > TAB_MAX_GEOM_WORDS) return TAB_ERR_TOO_LARGE;
+    int32_t *buf = (int32_t *)calloc(words, sizeof *buf);
+    if (buf == NULL) return TAB_ERR_OOM;
+    if (jg_encode(g, buf, words) != 0) { free(buf); return TAB_ERR_IO; }
+    uint8_t op = OP_GEOM;
+    int wok = (write_full(t->req_fd, &op, 1) == 0
+            && write_full(t->req_fd, &words, sizeof words) == 0
+            && write_full(t->req_fd, buf, words * sizeof *buf) == 0);
+    free(buf);
+    if (!wok) {
+        tab_refresh_alive(t);
+        return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
+    }
+    uint8_t tag = 0;
+    int32_t accepted = 0;
+    if (read_full(t->resp_fd, &tag, 1) != 0 || tag != TAG_RESULT) return io_failure(t);
+    if (read_full(t->resp_fd, &accepted, sizeof accepted) != 0) return io_failure(t);
+    return TAB_OK;
+}
+
+tab_status tab_popstate(tab *t, int index, tab_page *out) {
+    if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+    return tab_mutation_request(t, OP_POPSTATE, (int32_t)index, out);
+}
+
+tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
+                        tab_page *out) {
+    if (t == NULL || out == NULL || (data == NULL && len != 0)) return TAB_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+    if (len > TAB_MAX_WS_MSG) return TAB_ERR_TOO_LARGE;
+    tab_refresh_alive(t);
+    if (!t->alive) return TAB_ERR_DEAD;
+    uint8_t op = OP_WS_EVENT;
+    int32_t a[3] = { (int32_t)id, (int32_t)kind, (int32_t)code };
+    if (write_full(t->req_fd, &op, 1) != 0
+     || write_full(t->req_fd, a, sizeof a) != 0
+     || write_full(t->req_fd, &len, sizeof len) != 0
+     || (len != 0 && write_full(t->req_fd, data, len) != 0)) {
+        tab_refresh_alive(t);
+        return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
+    }
+    return tab_read_view_ex(t, out, 0);   /* a socket event is no user gesture */
+}
+
+void tab_set_storage(tab *t, const char *blob, size_t len) {
+    if (t == NULL) return;
+    free(t->storage_in);
+    t->storage_in = NULL;
+    t->storage_in_len = 0;
+    if (blob == NULL || len == 0 || len > TAB_MAX_STORAGE) return;
+    char *c = (char *)malloc(len);
+    if (c == NULL) return;
+    memcpy(c, blob, len);
+    t->storage_in = c;
+    t->storage_in_len = len;
 }

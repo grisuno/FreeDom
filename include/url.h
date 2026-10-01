@@ -46,8 +46,8 @@ int url_is_https(const char *s);
 int url_has_scheme(const char *s);
 
 /* Length of "https://host[:port]" within a validated absolute https URL: the
- * index of the first '/' after the scheme, or the whole length if there is no
- * path. Assumes url passed url_validate_https. */
+ * index of the first '/', '?' or '#' after the scheme (RFC 3986 3.2), or the whole
+ * length if there is none. Assumes url passed url_validate_https. */
 size_t url_authority_len(const char *url);
 
 /* URL_OK only for a syntactically valid absolute https URL with a non-empty host.
@@ -170,5 +170,13 @@ url_status url_extract_userinfo(const char *url, char *out, size_t outsz,
  * URL_ERR_NOT_LOCAL). Dot segments are collapsed before the confinement check.
  * NULL args / outsz == 0 => URL_ERR_NULL_ARG; overflow => URL_ERR_OVERFLOW. */
 url_status url_resolve_file(const char *base, const char *ref, char *out, size_t outsz);
+
+/* Target of history.pushState/replaceState (spec/url.md 2.x): resolves ref against
+ * the document base and requires the SAME origin (HTML 7.4.4). https base: resolved
+ * with url_resolve_https, origin must match (else URL_ERR_NOT_HTTPS). file:// base:
+ * only the query/fragment of the same file may change (ref empty or starting with
+ * '?' or '#'; else URL_ERR_NOT_LOCAL). Empty ref => base unchanged. NULL args /
+ * outsz == 0 => URL_ERR_NULL_ARG; overflow => URL_ERR_OVERFLOW. */
+url_status url_history_target(const char *base, const char *ref, char *out, size_t outsz);
 
 #endif /* FREEDOM_URL_H */

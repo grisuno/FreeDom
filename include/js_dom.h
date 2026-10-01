@@ -3,6 +3,7 @@
 
 #include "dom.h"
 #include "freebug.h"
+#include "js_geom.h"
 #include "js_sandbox.h"
 #include "url.h"
 
@@ -44,6 +45,7 @@ typedef struct jd_iframe_track {
 
 typedef struct jd_opaque {
     dom_index       *idx;
+    const jg_table  *geom;  /* laid-out geometry (trusted host only), NULL = none */
     jd_click_state  *click;
     jd_iframe_track  iframe_track;
 } jd_opaque;
@@ -63,6 +65,14 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque);
  * log == NULL to make console a silent no-op. Call after jd_install (it overrides
  * the no-op console the document shim defines). ctx == NULL => JD_ERR_NULL_ARG. */
 jd_status jd_install_console(js_context *ctx, fb_buffer *log);
+
+/* Installs (or, with geom == NULL, removes) the laid-out geometry that
+ * getBoundingClientRect/offset/client/scroll and the real viewport read. The table
+ * must be finished and aggregated (jg_aggregate) and must outlive its installation;
+ * it is sent by the trusted parent only for an allow.conf AND js.conf host
+ * (spec/js_geom.md). Without it every measurement is zero and the viewport stays
+ * normalized. ctx == NULL => JD_ERR_NULL_ARG. */
+jd_status jd_set_geometry(js_context *ctx, const jg_table *geom);
 
 /* Click-event state. Allocate with jd_click_state_new(), free with
  * jd_click_state_free(). Bound to one context via jd_install_events(). */
@@ -107,14 +117,7 @@ int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id,
                         const char *event_type,
                         int client_x, int client_y, int button);
 
-/* Installs a real, read-only `location` (and document.location / document.URL) over
- * the page's URL, and arms JS-navigation capture: location.href= / assign / replace /
- * reload / window.location= record the RAW requested string (never executed, never
- * resolved here) for the trusted parent to gate. href is the full page URL (may be a
- * file:// URL); parts, if non-NULL, is its url_split decomposition for the component
- * reads (NULL => only href is known, the rest fall back to stub defaults). Call after
- * jd_install, on the page's context. ctx == NULL => JD_ERR_NULL_ARG. */
-jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts);
+
 
 /* Enables and seeds the page's in-memory session cookie jar (document.cookie). Call ONLY
  * for a trusted host (allow.conf AND js.conf); until called, document.cookie is a no-op
@@ -130,11 +133,6 @@ jd_status jd_set_cookies(js_context *ctx, const char *cookies);
  * error. Never throws into the page. */
 int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);
 
-/* Reads and CLEARS the navigation the page's JS requested (globalThis.__navReq). Returns
- * 1 and copies the raw (unresolved) target into buf (bounded, NUL-terminated) with
- * *replace set from location.replace; returns 0 when no (non-empty) request is pending.
- * The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */
-int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);
 
 /* Host fetch callback for XMLHttpRequest/fetch. The JS sandbox NEVER touches a socket:
  * this proxies a subresource request to the TRUSTED parent, which re-applies the FULL
@@ -186,5 +184,8 @@ void jd_process_iframes(js_context *ctx, dom_index *idx,
 size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts,
                               const size_t *script_lens, size_t nscripts,
                               const char *page_url);
+
+/* location / history / JS-navigation capture live in their own module. */
+#include "js_location.h"
 
 #endif /* FREEDOM_JS_DOM_H */

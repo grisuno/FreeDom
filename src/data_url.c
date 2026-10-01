@@ -104,3 +104,102 @@ du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_
     *out_len = out_cap;
     return DU_OK;
 }
+
+static int hexval(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+
+static int ascii_ws(char c) {
+    return c == ' ' || c == '\t' || c == '\n' || c == '\f' || c == '\r';
+}
+
+/* Case-insensitive suffix test on [s, s+n). */
+static int ends_ci(const char *s, size_t n, const char *suf) {
+    size_t m = strlen(suf);
+    if (n < m) return 0;
+    for (size_t i = 0; i < m; ++i) {
+        char a = s[n - m + i], b = suf[i];
+        if (a >= 'A' && a <= 'Z') a = (char)(a + 32);
+        if (a != b) return 0;
+    }
+    return 1;
+}
+
+du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len) {
+    if (url == NULL || out == NULL || out_len == NULL) return DU_ERR_NULL_ARG;
+    *out = NULL;
+    *out_len = 0;
+    if (mime != NULL && mime_cap != 0) mime[0] = '\0';
+    if (!du_is_data_url(url)) return DU_ERR_NOT_DATA_URL;
+    const char *meta = url + 5;
+    const char *comma = strchr(meta, ',');
+    if (comma == NULL) return DU_ERR_NOT_BASE64;
+    const char *body = comma + 1;
+    size_t blen = strlen(body);
+    if (blen > DU_MAX_ENCODED_LEN) return DU_ERR_TOO_LARGE;
+
+    /* Media type: before the comma, minus a trailing ";base64", trimmed. */
+    size_t ml = (size_t)(comma - meta);
+    int is_b64 = 0;
+    {
+        size_t t = ml;
+        while (t > 0 && ascii_ws(meta[t - 1])) --t;
+        if (ends_ci(meta, t, ";base64")) { is_b64 = 1; ml = t - 7; }
+    }
+    size_t ms = 0;
+    while (ms < ml && ascii_ws(meta[ms])) ++ms;
+    while (ml > ms && ascii_ws(meta[ml - 1])) --ml;
+    if (mime != NULL && mime_cap != 0) {
+        const char *src = meta + ms;
+        size_t n = ml - ms;
+        if (n == 0) { src = "text/plain;charset=US-ASCII"; n = strlen(src); }
+        if (n >= mime_cap) n = mime_cap - 1;
+        memcpy(mime, src, n);
+        mime[n] = '\0';
+    }
+
+    if (is_b64) {
+        /* Forgiving base64 (WHATWG Infra): drop ASCII whitespace, padding optional. */
+        char *clean = (char *)malloc(blen + 4);
+        if (clean == NULL) return DU_ERR_OOM;
+        size_t n = 0;
+        for (size_t i = 0; i < blen; ++i)
+            if (!ascii_ws(body[i])) clean[n++] = body[i];
+        while (n > 0 && clean[n - 1] == '=') --n;      /* re-pad canonically below */
+        if (n % 4 == 1) { free(clean); return DU_ERR_BAD_BASE64; }
+        while (n % 4 != 0) clean[n++] = '=';
+        uint8_t *bytes = NULL;
+        size_t len = 0;
+        du_status st = du_base64_decode(clean, n, &bytes, &len);
+        free(clean);
+        if (st != DU_OK) return st;
+        uint8_t *z = (uint8_t *)realloc(bytes, len + 1);   /* NUL-terminate */
+        if (z == NULL) { free(bytes); return DU_ERR_OOM; }
+        z[len] = 0;
+        *out = z;
+        *out_len = len;
+        return DU_OK;
+    }
+
+    /* Percent-decoding: "%XX" is a byte; any other '%' stays literal. */
+    uint8_t *o = (uint8_t *)malloc(blen + 1);
+    if (o == NULL) return DU_ERR_OOM;
+    size_t n = 0;
+    for (size_t i = 0; i < blen; ++i) {
+        int hi, lo;
+        if (body[i] == '%' && i + 2 < blen        /* both hex digits exist */
+            && (hi = hexval(body[i + 1])) >= 0 && (lo = hexval(body[i + 2])) >= 0) {
+            o[n++] = (uint8_t)((hi << 4) | lo);
+            i += 2;
+        } else {
+            o[n++] = (uint8_t)body[i];
+        }
+    }
+    o[n] = 0;
+    *out = o;
+    *out_len = n;
+    return DU_OK;
+}

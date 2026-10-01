@@ -6776,7 +6776,10 @@ static void js_free_value_rt(JSRuntime *rt, JSValue v)
         }
         break;
     case JS_TAG_MODULE:
-        abort(); /* never freed here */
+        /* FREEDOM PATCH: only a def already released by js_free_module_def (its
+         * internals gone, header kept alive by outstanding values) reaches zero
+         * here; the loaded-modules list holds a reference until then. */
+        js_free_rt(rt, JS_VALUE_GET_PTR(v));
         break;
     case JS_TAG_BIG_INT:
         {
@@ -29721,6 +29724,14 @@ static void js_free_module_def(JSContext *ctx, JSModuleDef *m)
     JS_FreeValue(ctx, m->resolving_funcs[1]);
     JS_FreeValue(ctx, m->private_value);
     list_del(&m->link);
+    /* FREEDOM PATCH (2026-09-30, see VERSION.md): a module VALUE (JS_TAG_MODULE) may
+     * still be held -- e.g. by the resolving functions of a dynamic import() that
+     * never settled because the module awaits itself. Freeing the def regardless of
+     * that count let the runtime's final GC decrement freed memory (use-after-free at
+     * context teardown, found by fuzz-js). Release the internals now, keep the header
+     * until the last value goes (js_free_value_rt frees it there). */
+    if (--m->header.ref_count > 0)
+        return;
     js_free(ctx, m);
 }
 

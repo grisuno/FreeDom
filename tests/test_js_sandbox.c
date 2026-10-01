@@ -15,6 +15,8 @@
 #include <setjmp.h>
 #include <string.h>
 #include <cmocka.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "js_sandbox.h"
 
@@ -337,6 +339,211 @@ static void test_eval_thrown_primitive_has_no_location(void **state) {
     js_context_free(ctx);
 }
 
+/* --- ES modules (spec/js_sandbox.md 7b) --- */
+
+typedef struct mod_host { int fetches; } mod_host;
+
+static int mh_resolve(void *host, const char *base, const char *spec, char *out, size_t outsz) {
+    (void)host;
+    if (strncmp(spec, "./", 2) != 0 && strncmp(spec, "https://", 8) != 0) return -1;
+    const char *rel = (spec[0] == '.') ? spec + 2 : NULL;
+    int n;
+    if (rel == NULL) {
+        n = snprintf(out, outsz, "%s", spec);
+    } else {
+        const char *slash = strrchr(base, '/');
+        size_t dir = (slash != NULL) ? (size_t)(slash - base) + 1 : 0;
+        n = snprintf(out, outsz, "%.*s%s", (int)dir, base, rel);
+    }
+    return (n > 0 && (size_t)n < outsz) ? 0 : -1;
+}
+
+static char *mh_fetch(void *host, const char *url, size_t *len) {
+    mod_host *h = (mod_host *)host;
+    h->fetches++;
+    const char *src = NULL;
+    if (strcmp(url, "https://m.test/app/a.js") == 0)
+        src = "import { k } from './b.js'; export const v = k * 2;";
+    else if (strcmp(url, "https://m.test/app/b.js") == 0)
+        src = "export const k = 21; globalThis.bUrl = import.meta.url;";
+    else if (strcmp(url, "https://m.test/app/cyc1.js") == 0)
+        src = "import { c2 } from './cyc2.js'; export const c1 = 1; globalThis.cyc = () => c2;";
+    else if (strcmp(url, "https://m.test/app/cyc2.js") == 0)
+        src = "import { c1 } from './cyc1.js'; export const c2 = 2;";
+    else if (strcmp(url, "https://m.test/app/throws.js") == 0)
+        src = "throw new Error('boom in module');";
+    if (src == NULL) return NULL;
+    size_t n = strlen(src);
+    char *c = (char *)malloc(n + 1);
+    if (c != NULL) memcpy(c, src, n + 1);
+    *len = n;
+    return c;
+}
+
+static void test_module_imports_resolve_and_run(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    mod_host h = { 0 };
+    js_set_module_host(ctx, mh_resolve, mh_fetch, &h);
+    const char *main_src =
+        "import { v } from './a.js'; import './cyc1.js';"
+        "globalThis.out = v + '|' + import.meta.url + '|' + globalThis.cyc();";
+    js_result r;
+    assert_int_equal(js_eval_module(ctx, main_src, strlen(main_src),
+                                    "https://m.test/app/main.js", &r), JS_OK);
+    js_result_free(&r);
+    assert_int_equal(js_eval(ctx, "out + '|' + bUrl", 16, &r), JS_OK);
+    assert_string_equal(r.value,
+        "42|https://m.test/app/main.js|2|https://m.test/app/b.js");
+    js_result_free(&r);
+    assert_int_equal(h.fetches, 4);                 /* a, b, cyc1, cyc2: each once */
+    js_context_free(ctx);
+}
+
+static void test_module_errors_are_reported(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    mod_host h = { 0 };
+    js_set_module_host(ctx, mh_resolve, mh_fetch, &h);
+    js_result r;
+    const char *bare = "import x from 'lodash';";
+    assert_int_equal(js_eval_module(ctx, bare, strlen(bare), "https://m.test/app/m1.js", &r),
+                     JS_ERR_RUNTIME);
+    assert_true(r.is_exception);
+    js_result_free(&r);
+    const char *missing = "import './nope.js';";
+    assert_int_equal(js_eval_module(ctx, missing, strlen(missing), "https://m.test/app/m2.js", &r),
+                     JS_ERR_RUNTIME);
+    js_result_free(&r);
+    const char *thr = "import './throws.js';";
+    assert_int_equal(js_eval_module(ctx, thr, strlen(thr), "https://m.test/app/m3.js", &r),
+                     JS_ERR_RUNTIME);
+    assert_non_null(r.value);
+    assert_non_null(strstr(r.value, "boom in module"));
+    js_result_free(&r);
+    const char *syn = "export const = ;";
+    assert_int_equal(js_eval_module(ctx, syn, strlen(syn), "https://m.test/app/m4.js", &r),
+                     JS_ERR_SYNTAX);
+    js_result_free(&r);
+    js_context_free(ctx);
+}
+
+static void test_module_without_host_cannot_import(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    js_result r;
+    const char *ok = "globalThis.plain = 7; export const z = 1;";
+    assert_int_equal(js_eval_module(ctx, ok, strlen(ok), "inline", &r), JS_OK);
+    js_result_free(&r);
+    const char *imp = "import './a.js';";
+    assert_int_equal(js_eval_module(ctx, imp, strlen(imp), "https://m.test/app/x.js", &r),
+                     JS_ERR_RUNTIME);
+    js_result_free(&r);
+    assert_int_equal(js_eval_module(NULL, ok, strlen(ok), "x", &r), JS_ERR_NULL_ARG);
+    js_context_free(ctx);
+}
+
+/* A module that awaits its own dynamic import never settles; tearing the context down
+ * afterwards used to free the module def while an unsettled resolving function still
+ * held it (use-after-free found by fuzz-js; fixed in the vendored QuickJS, see
+ * third_party/quickjs/VERSION.md). Meaningful under make asan. */
+static const char *g_self_src;
+
+static char *self_fetch(void *host, const char *url, size_t *len) {
+    (void)host;
+    if (strcmp(url, "https://m.test/app/self.js") != 0) return NULL;
+    size_t n = strlen(g_self_src);
+    char *c = (char *)malloc(n + 1);
+    if (c != NULL) memcpy(c, g_self_src, n + 1);
+    *len = n;
+    return c;
+}
+
+static void test_module_self_await_teardown(void **state) {
+    (void)state;
+    g_self_src = "import './self.js'; await import('./self.js'); globalThis.never = 1;";
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    js_set_module_host(ctx, mh_resolve, self_fetch, NULL);
+    js_result r;
+    (void)js_eval_module(ctx, g_self_src, strlen(g_self_src), "https://m.test/app/self.js", &r);
+    js_result_free(&r);
+    assert_int_equal(js_eval(ctx, "typeof never", 12, &r), JS_OK);
+    assert_string_equal(r.value, "undefined");      /* deadlocked, never ran on */
+    js_result_free(&r);
+    js_context_free(ctx);                           /* must not touch freed memory */
+}
+
+/* A page-controlled stack line with an absurd line/column number saturates instead of
+ * overflowing int (UB found by fuzz-js). */
+static void test_loc_from_stack_saturates_huge_numbers(void **state) {
+    (void)state;
+    char file[JS_LOC_FILE_MAX];
+    int line = 0, col = 0;
+    assert_int_equal(js_loc_from_stack("    at f (https://x.test/a.js:44884888812345:99999999999999)",
+                                       file, sizeof file, &line, &col), 1);
+    assert_int_equal(line, 1000000000);
+    assert_int_equal(col, 1000000000);
+}
+
+/* --- realms (spec/js_sandbox.md 7c) --- */
+
+static void realm_expect(js_context *ctx, const char *src, const char *want) {
+    js_result r; memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, src, strlen(src), &r), JS_OK);
+    assert_non_null(r.value);
+    assert_string_equal(r.value, want);
+    js_result_free(&r);
+}
+
+static void test_realms_isolate_and_clone(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    assert_int_equal(js_install_realms(NULL), JS_ERR_NULL_ARG);
+    assert_int_equal(js_install_realms(ctx), JS_OK);
+    /* separate global: page bindings invisible; evaluation result stays there */
+    realm_expect(ctx, "var pageOnly=1; var g=__realmNew();"
+                      "__realmEval(g, 'var inner=typeof pageOnly; self=this; var n=40+2;', 'w.js');"
+                      "[g.inner, g.n, typeof g.pageOnly, g.self===g].join(',')",
+                 "undefined,42,undefined,true");
+    /* clone lands in the target realm, cycles and Map/Date survive */
+    realm_expect(ctx, "var o={a:[1,2],m:new Map([[1,'x']]),d:new Date(7)}; o.me=o;"
+                      "var c=__realmClone(o,g); g.c=c;"
+                      "__realmEval(g,'var ok=[Array.isArray(c.a), c.a instanceof Array, c.m.get(1), c.d.getTime(), c.me===c].join()','x');"
+                      "[g.ok, c.a instanceof Array, c!==o].join('|')",
+                 "true,true,x,7,true|false|true");
+    /* functions do not cross; a foreign global is rejected; errors come back as ours */
+    realm_expect(ctx, "var r=[];"
+                      "try{ __realmClone(function(){}, g); r.push('cloned'); }catch(e){ r.push(e.name); }"
+                      "try{ __realmClone(1, {}); r.push('bad'); }catch(e){ r.push(e.name); }"
+                      "try{ __realmEval(g,'null.x','boom.js'); }catch(e){ r.push(e instanceof Error, e.name); }"
+                      "try{ __realmEval(g,'][','syn.js'); }catch(e){ r.push(e.name); }"
+                      "r.join(',')",
+                 "DataCloneError,TypeError,true,TypeError,SyntaxError");
+    /* bounded count */
+    realm_expect(ctx, "var k=0; while(__realmNew()!==null && k<100) k++; k", "7");
+    js_context_free(ctx);
+}
+
+/* The context's time budget covers code running in a realm. */
+static void test_realm_shares_time_budget(void **state) {
+    (void)state;
+    js_limits l = js_limits_default();
+    l.time_budget_ms = 100;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(&l, &ctx), JS_OK);
+    assert_int_equal(js_install_realms(ctx), JS_OK);
+    static const char SRC[] = "var g=__realmNew(); __realmEval(g,'for(;;){}','spin.js'); 1";
+    js_result r; memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, SRC, sizeof SRC - 1, &r), JS_ERR_TIMEOUT);
+    js_result_free(&r);
+    js_context_free(ctx);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_limits_default_is_secure),
@@ -367,6 +574,13 @@ int main(void) {
         cmocka_unit_test(test_eval_named_captures_location),
         cmocka_unit_test(test_eval_named_null_filename_defaults),
         cmocka_unit_test(test_eval_thrown_primitive_has_no_location),
+        cmocka_unit_test(test_module_imports_resolve_and_run),
+        cmocka_unit_test(test_module_errors_are_reported),
+        cmocka_unit_test(test_module_without_host_cannot_import),
+        cmocka_unit_test(test_module_self_await_teardown),
+        cmocka_unit_test(test_loc_from_stack_saturates_huge_numbers),
+        cmocka_unit_test(test_realms_isolate_and_clone),
+        cmocka_unit_test(test_realm_shares_time_budget),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

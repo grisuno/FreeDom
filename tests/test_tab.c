@@ -16,6 +16,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
 #include <signal.h>
@@ -27,6 +28,9 @@
 
 #include "css.h"
 #include "tab.h"
+#include "url.h"
+#include "js_geom.h"
+#include "web_storage.h"
 
 static const char HTML[] =
     "<!DOCTYPE html><html><head><title>Isolated</title></head>"
@@ -1531,6 +1535,10 @@ static void test_xhr_works_when_net_allowed(void **state) {
     tab_page_free(&p);
     expect_eval(t, "typeof XMLHttpRequest", "function");
     expect_eval(t, "typeof fetch", "function");
+    /* the rest of the trusted runtime, on the REAL (frozen, anti-fp) navigator */
+    expect_eval(t, "typeof navigator.sendBeacon", "function");
+    expect_eval(t, "typeof Worker", "function");
+    expect_eval(t, "Object.isExtensible(navigator)+','+navigator.hasOwnProperty('sendBeacon')", "false,false");
     tab_close(t);
 }
 
@@ -1551,6 +1559,7 @@ static void test_xhr_undefined_when_net_not_allowed(void **state) {
     tab_page_free(&p);
     expect_eval(t, "typeof XMLHttpRequest", "undefined");
     expect_eval(t, "typeof fetch", "undefined");
+    expect_eval(t, "typeof Worker", "undefined");
     tab_close(t);
 }
 
@@ -1818,6 +1827,539 @@ static void test_external_css_blocked_host_refused(void **state) {
 
 /* The fetched sheet PERSISTS in the worker: a click re-derives the view (OP_CLICK)
  * and the styling survives without a re-fetch. */
+/* Delegated click through the real confined worker (spec/js_dom.md 7d): the only
+ * listener is on document (the React/jQuery-delegation shape); a click on text
+ * inside the button must bubble to it, and its DOM mutation must come back in the
+ * re-derived view. Before 7d the click never left the target node. */
+static void test_click_bubbles_to_delegated_document_listener(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>D</title></head><body>"
+        "<button id=\"b\"><span>press</span></button><p id=\"out\">idle</p>"
+        "<script>document.addEventListener('click', function(e){"
+        "  var b = e.target.closest('button');"
+        "  if (b && e.currentTarget === document && e.eventPhase === 3)"
+        "    document.getElementById('out').textContent = 'delegated';"
+        "});</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    const pv_run *r = view_find_text(p.view, "press");
+    assert_non_null(r);
+    dom_node_id nid = r->node_id;
+    tab_page_free(&p);
+
+    tab_page c;
+    assert_int_equal(tab_click(t, nid, &c), TAB_OK);
+    assert_non_null(view_find_text(c.view, "delegated"));
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+/* The box's generating element crosses the IPC codec (spec/js_geom.md): without
+ * it the parent cannot attribute a laid-out box to a node. */
+static void test_boxdef_node_id_crosses_codec(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><div style=\"border:1px solid red\">boxed</div></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    const pv_run *r = view_find_text(p.view, "boxed");
+    assert_non_null(r);
+    assert_true(r->block_id >= 0);
+    const pv_box_def *bx = pv_box_at(p.view, (size_t)r->block_id);
+    assert_non_null(bx);
+    assert_int_equal(bx->node_id, r->node_id);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Geometry through the real worker (spec/js_geom.md). The parent sends the
+ * table only for a trusted load (net granted: allow.conf AND js.conf); page JS
+ * then measures real rects. */
+static const char GEOM_PAGE[] =
+    "<html><body><div id=\"w\"><p id=\"a\">alpha</p></div>"
+    "<script>window.__measure=function(){"
+    "  var r=document.getElementById('a').getBoundingClientRect(),"
+    "      w=document.getElementById('w').getBoundingClientRect();"
+    "  return [r.top,r.height,w.width,innerWidth,scrollY].join(',');"
+    "};</script></body></html>";
+
+static int geom_load_and_measure(int net, char *out, size_t outsz) {
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, net);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, GEOM_PAGE, sizeof GEOM_PAGE - 1, 1, &p), TAB_OK);
+    const pv_run *r = view_find_text(p.view, "alpha");
+    assert_non_null(r);
+    jg_table g;
+    jg_init(&g);
+    g.scroll_y = 30; g.view_w = 1000; g.view_h = 700; g.doc_w = 1000; g.doc_h = 2000;
+    assert_int_equal(jg_add(&g, r->node_id, 8, 130, 400, 24), 0);
+    assert_int_equal(jg_finish(&g), 0);
+    tab_page_free(&p);
+    int rc = (int)tab_set_geometry(t, &g);
+    jg_free(&g);
+    tab_eval_result e;
+    assert_int_equal(tab_eval(t, "__measure()", 11, &e), TAB_OK);
+    assert_non_null(e.value);
+    snprintf(out, outsz, "%s", e.value);
+    tab_eval_result_free(&e);
+    tab_close(t);
+    return rc;
+}
+
+static void test_geometry_reaches_trusted_page(void **state) {
+    (void)state;
+    char v[128];
+    assert_int_equal(geom_load_and_measure(1, v, sizeof v), TAB_OK);
+    /* top = 130 - 30 scroll; the boxless wrapper measures its child. */
+    assert_string_equal(v, "100,24,400,1000,30");
+}
+
+static void test_geometry_never_reaches_untrusted_page(void **state) {
+    (void)state;
+    char v[128];
+    assert_int_equal(geom_load_and_measure(0, v, sizeof v), TAB_OK);
+    assert_string_equal(v, "0,0,0,1920,0");
+}
+
+/* JS navigation AFTER load (plan B4a): a click handler, a timer or a key handler
+ * that sets location must navigate, gated by the parent exactly like a load-time
+ * one. Before, every post-load response carried an empty navigation. */
+static void load_js_page(tab **out_t, const char *html, tab_page *p) {
+    assert_int_equal(tab_open(out_t), TAB_OK);
+    assert_int_equal(tab_load_full(*out_t, html, strlen(html), "https://site.test/dir/",
+                                   1, 0, 0, p), TAB_OK);
+}
+
+static void test_click_handler_navigation_reaches_parent(void **state) {
+    (void)state;
+    const char *H =
+        "<html><body><button id=\"b\">go</button><script>"
+        "document.getElementById('b').addEventListener('click',function(){"
+        "  location.href='/next?x=1'; });</script></body></html>";
+    tab *t = NULL;
+    tab_page p;
+    load_js_page(&t, H, &p);
+    assert_null(p.nav_url);
+    dom_node_id nid = view_find_text(p.view, "go")->node_id;
+    tab_page_free(&p);
+    tab_page c;
+    assert_int_equal(tab_click(t, nid, &c), TAB_OK);
+    assert_non_null(c.nav_url);
+    assert_string_equal(c.nav_url, "https://site.test/next?x=1");
+    assert_int_equal(c.nav_replace, 0);
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+static void test_timer_navigation_reaches_parent(void **state) {
+    (void)state;
+    const char *H =
+        "<html><body><p>wait</p><script>"
+        "setTimeout(function(){ location.replace('https://other.test/x'); }, 30);"
+        "</script></body></html>";
+    tab *t = NULL;
+    tab_page p;
+    load_js_page(&t, H, &p);
+    assert_null(p.nav_url);
+    assert_true(p.next_timer_ms >= 0);
+    int ms = p.next_timer_ms;
+    tab_page_free(&p);
+    tab_page c;
+    assert_int_equal(tab_tick(t, ms, &c), TAB_OK);
+    assert_non_null(c.nav_url);
+    assert_string_equal(c.nav_url, "https://other.test/x");
+    assert_int_equal(c.nav_replace, 1);
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+static void test_event_navigation_is_policy_gated(void **state) {
+    (void)state;
+    const char *H =
+        "<html><body><input id=\"q\" value=\"v\"><p>x</p><script>"
+        "document.getElementById('q').addEventListener('keydown',function(e){"
+        "  location.href = (e.key==='Enter') ? 'https://ok.test/' : 'javascript:alert(1)'; });"
+        "</script></body></html>";
+    tab *t = NULL;
+    tab_page p;
+    load_js_page(&t, H, &p);
+    /* The input's node: the element the view reports for the text control. */
+    dom_node_id nid = DOM_NODE_NONE;
+    for (size_t i = 0; i < pv_count(p.view); ++i)
+        if (pv_at(p.view, i)->kind == PV_INPUT) nid = pv_at(p.view, i)->node_id;
+    assert_int_not_equal(nid, DOM_NODE_NONE);
+    tab_page_free(&p);
+    tab_page c;
+    assert_int_equal(tab_dispatch_event(t, nid, "keydown", "a", 65, NULL, &c), TAB_OK);
+    assert_null(c.nav_url);                     /* javascript: never navigates */
+    tab_page_free(&c);
+    assert_int_equal(tab_dispatch_event(t, nid, "keydown", "Enter", 13, NULL, &c), TAB_OK);
+    assert_non_null(c.nav_url);
+    assert_string_equal(c.nav_url, "https://ok.test/");
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+/* history API through the real worker (spec/js_dom.md 7e). */
+static void test_history_ops_reach_parent_and_popstate_returns(void **state) {
+    (void)state;
+    const char *H =
+        "<html><body><button id=\"b\">tab2</button><p id=\"o\">start</p><script>"
+        "history.pushState({v:1},'','/app/one');"
+        "window.addEventListener('popstate',function(e){"
+        "  document.getElementById('o').textContent='popped '+location.pathname+' '+JSON.stringify(e.state); });"
+        "document.getElementById('b').addEventListener('click',function(){"
+        "  history.replaceState({v:2},'','/app/two'); history.back(); });"
+        "</script></body></html>";
+    tab *t = NULL;
+    tab_page p;
+    load_js_page(&t, H, &p);
+    assert_int_equal(p.nhist, 1);
+    assert_int_equal(p.hist[0].replace, 0);
+    assert_string_equal(p.hist[0].url, "https://site.test/app/one");
+    assert_int_equal(p.hist_go, 0);
+    dom_node_id nid = view_find_text(p.view, "tab2")->node_id;
+    tab_page_free(&p);
+
+    tab_page c;
+    assert_int_equal(tab_click(t, nid, &c), TAB_OK);
+    assert_int_equal(c.nhist, 1);
+    assert_int_equal(c.hist[0].replace, 1);
+    assert_string_equal(c.hist[0].url, "https://site.test/app/two");
+    assert_int_equal(c.hist_go, -1);
+    tab_page_free(&c);
+
+    /* The parent went Back within the same document: entry 0 is the load URL. */
+    assert_int_equal(tab_popstate(t, 0, &c), TAB_OK);
+    assert_non_null(view_find_text(c.view, "popped /dir/ null"));
+    assert_int_equal(c.nhist, 0);
+    tab_page_free(&c);
+    assert_int_equal(tab_popstate(t, 1, &c), TAB_OK);
+    assert_non_null(view_find_text(c.view, "popped /app/two {\"v\":2}"));
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+/* window.open for a trusted host (plan B4c): noopener semantics (returns null, no
+ * cross-window reference), gated like a navigation, honoured only on a user gesture. */
+static const char OPEN_PAGE[] =
+    "<html><body><button id=\"b\">pop</button><p id=\"o\">idle</p><script>"
+    "var r0 = (typeof open==='function') ? String(open('/at-load')) : 'none';"
+    "setTimeout(function(){ open('/from-timer'); }, 10);"
+    "document.getElementById('b').addEventListener('click',function(){"
+    "  var w = window.open('/popup?x=1','_blank');"
+    "  window.open('javascript:alert(1)');"
+    "  document.getElementById('o').textContent = 'ret ' + String(w) + ' ' + r0; });"
+    "</script></body></html>";
+
+static void open_page(int net, tab **t, tab_page *p) {
+    assert_int_equal(tab_open(t), TAB_OK);
+    tab_set_net_allowed(*t, net);
+    assert_int_equal(tab_load_full(*t, OPEN_PAGE, sizeof OPEN_PAGE - 1,
+                                   "https://site.test/dir/", 1, 0, 0, p), TAB_OK);
+}
+
+static void test_window_open_on_gesture_for_trusted_host(void **state) {
+    (void)state;
+    tab *t = NULL;
+    tab_page p;
+    open_page(1, &t, &p);
+    assert_int_equal(p.nopen, 0);                       /* no gesture at load */
+    int ms = p.next_timer_ms;
+    dom_node_id nid = view_find_text(p.view, "pop")->node_id;
+    tab_page_free(&p);
+    tab_page c;
+    assert_int_equal(tab_tick(t, ms, &c), TAB_OK);
+    assert_int_equal(c.nopen, 0);                       /* no gesture in a timer */
+    tab_page_free(&c);
+    assert_int_equal(tab_click(t, nid, &c), TAB_OK);
+    assert_int_equal(c.nopen, 1);                       /* javascript: dropped */
+    assert_string_equal(c.open_urls[0], "https://site.test/popup?x=1");
+    assert_non_null(view_find_text(c.view, "ret null null"));
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+static void test_window_open_absent_for_untrusted_host(void **state) {
+    (void)state;
+    tab *t = NULL;
+    tab_page p;
+    open_page(0, &t, &p);
+    dom_node_id nid = view_find_text(p.view, "pop")->node_id;
+    tab_page_free(&p);
+    tab_page c;
+    assert_int_equal(tab_click(t, nid, &c), TAB_OK);
+    assert_int_equal(c.nopen, 0);
+    tab_page_free(&c);
+    tab_eval_result e;
+    assert_int_equal(tab_eval(t, "typeof open", 11, &e), TAB_OK);
+    assert_string_equal(e.value, "undefined");
+    tab_eval_result_free(&e);
+    tab_close(t);
+}
+
+/* WebSocket through the real worker (spec/js_dom.md 7f): the page records ops, the
+ * parent would own the socket, and pushes events back with OP_WS_EVENT. */
+static const char WS_PAGE[] =
+    "<html><body><p id=\"o\">idle</p><script>"
+    "var s = (typeof WebSocket==='function') ? new WebSocket('/live') : null;"
+    "if (s) { s.onopen=function(){ s.send('hi'); document.getElementById('o').textContent='opened'; };"
+    "  s.onmessage=function(e){ document.getElementById('o').textContent='got '+e.data; }; }"
+    "</script></body></html>";
+
+static void test_websocket_ops_and_events_cross_the_worker(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, WS_PAGE, sizeof WS_PAGE - 1, "https://site.test/dir/",
+                                   1, 0, 0, &p), TAB_OK);
+    assert_int_equal(p.nws, 1);
+    assert_int_equal(p.ws[0].kind, TAB_WS_OPEN);
+    assert_string_equal(p.ws[0].data, "wss://site.test/live");
+    int id = p.ws[0].id;
+    tab_page_free(&p);
+
+    tab_page c;
+    assert_int_equal(tab_ws_event(t, id, TAB_WSE_OPEN, 0, NULL, 0, &c), TAB_OK);
+    assert_non_null(view_find_text(c.view, "opened"));
+    assert_int_equal(c.nws, 1);
+    assert_int_equal(c.ws[0].kind, TAB_WS_SEND_TEXT);
+    assert_string_equal(c.ws[0].data, "hi");
+    tab_page_free(&c);
+    assert_int_equal(tab_ws_event(t, id, TAB_WSE_TEXT, 0, "pong", 4, &c), TAB_OK);
+    assert_non_null(view_find_text(c.view, "got pong"));
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+static void test_websocket_absent_for_untrusted_host(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 0);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, WS_PAGE, sizeof WS_PAGE - 1, "https://site.test/dir/",
+                                   1, 0, 0, &p), TAB_OK);
+    assert_int_equal(p.nws, 0);
+    tab_page_free(&p);
+    tab_page c;
+    assert_int_equal(tab_ws_event(t, 1, TAB_WSE_TEXT, 0, "x", 1, &c), TAB_OK);
+    assert_non_null(view_find_text(c.view, "idle"));
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+/* In-memory localStorage through the real worker (spec/web_storage.md). */
+static const char LS_PAGE[] =
+    "<html><body><p id=\"o\">x</p><button id=\"b\">save</button><script>"
+    "document.getElementById('o').textContent = 'seed=' + localStorage.getItem('a');"
+    "localStorage.setItem('b','2');"
+    "document.getElementById('b').addEventListener('click',function(){ localStorage.setItem('c','3'); });"
+    "</script></body></html>";
+
+static void ls_load(int net, tab **t, tab_page *p) {
+    const char *k[] = { "a" }, *v[] = { "1" };
+    size_t kl[] = { 1 }, vl[] = { 1 };
+    char *seed = NULL;
+    size_t sl = 0;
+    assert_int_equal(wst_pack(k, kl, v, vl, 1, &seed, &sl), 0);
+    assert_int_equal(tab_open(t), TAB_OK);
+    tab_set_net_allowed(*t, net);
+    tab_set_storage(*t, seed, sl);
+    free(seed);
+    assert_int_equal(tab_load_full(*t, LS_PAGE, sizeof LS_PAGE - 1, "https://site.test/",
+                                   1, 0, 0, p), TAB_OK);
+}
+
+static void test_local_storage_seeded_and_collected_for_trusted(void **state) {
+    (void)state;
+    tab *t = NULL;
+    tab_page p;
+    ls_load(1, &t, &p);
+    assert_non_null(view_find_text(p.view, "seed=1"));
+    assert_non_null(p.storage);
+    wst_db *db = wst_new();
+    assert_int_equal(wst_replace(db, "https://site.test", p.storage, p.storage_len), 0);
+    assert_int_equal(wst_origin_bytes(db, "https://site.test"), 4);   /* a=1, b=2 */
+    dom_node_id nid = view_find_text(p.view, "save")->node_id;
+    tab_page_free(&p);
+    tab_page c;
+    assert_int_equal(tab_click(t, nid, &c), TAB_OK);
+    assert_non_null(c.storage);
+    assert_int_equal(wst_replace(db, "https://site.test", c.storage, c.storage_len), 0);
+    assert_int_equal(wst_origin_bytes(db, "https://site.test"), 6);
+    tab_page_free(&c);
+    wst_free(db);
+    tab_close(t);
+}
+
+static void test_local_storage_never_seeded_for_untrusted(void **state) {
+    (void)state;
+    tab *t = NULL;
+    tab_page p;
+    ls_load(0, &t, &p);
+    assert_non_null(view_find_text(p.view, "seed=null"));
+    assert_null(p.storage);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* ES modules through the real worker (plan B6, spec/js_sandbox.md 7b). */
+static int stub_module_fetch(void *ctx, const char *method, const char *url,
+                             const char *body, size_t body_len,
+                             int *st, char **ob, size_t *ol, char **oct) {
+    (void)ctx; (void)method; (void)body; (void)body_len;
+    const char *src = NULL;
+    if (strcmp(url, "https://site.test/app/m.js") == 0)
+        src = "import { word } from './dep.js';"
+              "document.getElementById('o').textContent = word + ' ' + import.meta.url;";
+    else if (strcmp(url, "https://site.test/app/dep.js") == 0)
+        src = "export const word = 'module-ok';";
+    else if (strcmp(url, "https://site.test/main.mjs") == 0)
+        src = "document.getElementById('o').textContent = 'relative-src-ok';";
+    else if (strcmp(url, "https://site.test/app/mapped.js") == 0)
+        src = "import { word } from 'dep';"
+              "document.getElementById('o').textContent = 'mapped ' + word;";
+    if (src == NULL) return -1;
+    *ob = strdup(src);
+    *ol = strlen(src);
+    *oct = strdup("text/javascript");
+    if (*ob == NULL || *oct == NULL) { free(*ob); free(*oct); return -1; }
+    *st = 200;
+    return 0;
+}
+
+static const char MODULE_PAGE[] =
+    "<html><body><p id=\"o\">none</p>"
+    "<script type=\"module\" src=\"/app/m.js\"></script>"
+    "<script nomodule>document.getElementById('o').textContent='legacy';</script>"
+    "</body></html>";
+
+static const pv_run *module_page(int net, tab **t, tab_page *p, const char *needle) {
+    assert_int_equal(tab_open(t), TAB_OK);
+    tab_set_fetcher(*t, stub_module_fetch, NULL);
+    tab_set_net_allowed(*t, net);
+    assert_int_equal(tab_load_full(*t, MODULE_PAGE, sizeof MODULE_PAGE - 1,
+                                   "https://site.test/index.html", 1, 0, 0, p), TAB_OK);
+    return view_find_text(p->view, needle);
+}
+
+static void test_module_scripts_run_for_trusted_host(void **state) {
+    (void)state;
+    tab *t = NULL;
+    tab_page p;
+    assert_non_null(module_page(1, &t, &p, "module-ok https://site.test/app/m.js"));
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+static void test_nomodule_fallback_for_untrusted_host(void **state) {
+    (void)state;
+    tab *t = NULL;
+    tab_page p;
+    assert_non_null(module_page(0, &t, &p, "legacy"));
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* A bare specifier resolves through the page's import map (spec/import_map.md). */
+static void test_import_map_resolves_bare_specifier(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><script type=\"importmap\">"
+        "{\"imports\":{\"dep\":\"./app/dep.js\"}}</script></head>"
+        "<body><p id=\"o\">none</p>"
+        "<script type=\"module\" src=\"/app/mapped.js\"></script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_module_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/index.html",
+                                   1, 0, 0, &p), TAB_OK);
+    assert_non_null(view_find_text(p.view, "mapped module-ok"));
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* data: scripts run locally, without network, for any JS page (spec/data_url.md 2b);
+ * a non-JavaScript data: type is refused. */
+static void test_data_url_classic_script_runs_without_network(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><p id=\"o\">none</p>"
+        "<script src=\"data:text/html,document.getElementById('o').textContent%3D'html'\"></script>"
+        "<script src=\"data:text/javascript,document.getElementById('o').textContent%3D'data-ok'\"></script>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 0);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/index.html",
+                                   1, 0, 0, &p), TAB_OK);
+    assert_non_null(view_find_text(p.view, "data-ok"));
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* A data: module longer than a URL buffer runs whole (reddit ships one > 8 KiB): its
+ * body comes from the attribute, never from a size-capped copy of its URL. */
+static void test_long_data_module_runs_whole(void **state) {
+    (void)state;
+    static const char PRE[] =
+        "<html><body><p id=\"d\">none</p><script type=\"module\" src=\"data:text/javascript,/*";
+    static const char POST[] = "*/document.getElementById('d').textContent='big-module';\"></script></body></html>";
+    size_t pad = URL_MAX_LEN + 1024;
+    size_t n = sizeof PRE - 1 + pad + sizeof POST - 1;
+    char *h = (char *)malloc(n + 1);
+    assert_non_null(h);
+    memcpy(h, PRE, sizeof PRE - 1);
+    memset(h + sizeof PRE - 1, 'a', pad);
+    memcpy(h + sizeof PRE - 1 + pad, POST, sizeof POST);
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 0);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, h, n, "https://site.test/index.html", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(view_find_text(p.view, "big-module"));
+    tab_page_free(&p);
+    tab_close(t);
+    free(h);
+}
+
+/* A data: module, and a module src that is a plain relative URL ("main.mjs" is a
+ * URL here, not a bare specifier -- even with an import map on the page). */
+static void test_module_src_is_a_url_and_data_modules_run(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><script type=\"importmap\">{\"imports\":{}}</script></head>"
+        "<body><p id=\"o\">none</p><p id=\"d\">none</p>"
+        "<script type=\"module\" src=\"main.mjs\"></script>"
+        "<script type=\"module\" src=\"data:text/javascript;base64,"
+        "ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2QnKS50ZXh0Q29udGVudD0nZGF0YS1tb2R1bGUnOw==\"></script>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_module_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/index.html",
+                                   1, 0, 0, &p), TAB_OK);
+    assert_non_null(view_find_text(p.view, "relative-src-ok"));
+    assert_non_null(view_find_text(p.view, "data-module"));
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 static void test_external_css_survives_click_rederive(void **state) {
     (void)state;
     tab *t = NULL;
@@ -2392,6 +2934,26 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_external_css_bad_ctype_not_parsed),
         cmocka_unit_test(test_external_css_blocked_host_refused),
         cmocka_unit_test(test_external_css_survives_click_rederive),
+        cmocka_unit_test(test_click_bubbles_to_delegated_document_listener),
+        cmocka_unit_test(test_boxdef_node_id_crosses_codec),
+        cmocka_unit_test(test_geometry_reaches_trusted_page),
+        cmocka_unit_test(test_geometry_never_reaches_untrusted_page),
+        cmocka_unit_test(test_click_handler_navigation_reaches_parent),
+        cmocka_unit_test(test_timer_navigation_reaches_parent),
+        cmocka_unit_test(test_event_navigation_is_policy_gated),
+        cmocka_unit_test(test_history_ops_reach_parent_and_popstate_returns),
+        cmocka_unit_test(test_window_open_on_gesture_for_trusted_host),
+        cmocka_unit_test(test_window_open_absent_for_untrusted_host),
+        cmocka_unit_test(test_websocket_ops_and_events_cross_the_worker),
+        cmocka_unit_test(test_websocket_absent_for_untrusted_host),
+        cmocka_unit_test(test_local_storage_seeded_and_collected_for_trusted),
+        cmocka_unit_test(test_local_storage_never_seeded_for_untrusted),
+        cmocka_unit_test(test_module_scripts_run_for_trusted_host),
+        cmocka_unit_test(test_nomodule_fallback_for_untrusted_host),
+        cmocka_unit_test(test_import_map_resolves_bare_specifier),
+        cmocka_unit_test(test_data_url_classic_script_runs_without_network),
+        cmocka_unit_test(test_module_src_is_a_url_and_data_modules_run),
+        cmocka_unit_test(test_long_data_module_runs_whole),
         cmocka_unit_test(test_subreq_permitted_pure),
         cmocka_unit_test(test_js_date_timezone_is_utc_and_survives),
         cmocka_unit_test_setup_teardown(test_eval_exception, setup_loaded, teardown),

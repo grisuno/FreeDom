@@ -29,6 +29,8 @@ typedef struct browser_state {
     size_t history_len;
     size_t history_cap;
     size_t history_pos;
+    int   *history_doc;  /* document id per entry (same-document pushState entries share it) */
+    int    next_doc;     /* id the next browser_navigate opens */
 
     char   url_bar[BROWSER_URL_MAX];
     size_t url_bar_len;
@@ -72,6 +74,21 @@ browser_status browser_navigate(browser_state *bs, const char *url);
 /* Move through history. Returns BROWSER_ERR_NO_* if impossible. */
 browser_status browser_back(browser_state *bs);
 browser_status browser_forward(browser_state *bs);
+
+/* Same-document entries (history.pushState, spec/browser.md 3b). push adds an entry
+ * of the CURRENT document after history_pos (discarding the future) and replace
+ * changes the current entry's URL; neither clears the page nor asks for a load.
+ * BROWSER_ERR_NO_BACK when there is no current entry; BROWSER_ERR_INVALID_URL for a
+ * URL browser_navigate would refuse. */
+browser_status browser_push_state(browser_state *bs, const char *url);
+browser_status browser_replace_state(browser_state *bs, const char *url);
+
+/* Document id of entry pos, or -1 when out of range / NULL. */
+int browser_entry_doc(const browser_state *bs, size_t pos);
+
+/* Index of the current entry within its document's contiguous run of entries (0 for
+ * the entry the document was loaded at) -- the worker's own history index. */
+int browser_doc_index(const browser_state *bs);
 
 /* Query helpers. */
 int  browser_can_back(const browser_state *bs);

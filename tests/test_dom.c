@@ -488,6 +488,151 @@ static void test_query_selector_fail_closed(void **state) {
     assert_int_equal(dom_matches(idx, DOM_NODE_NONE, "p"), 0);
 }
 
+/* dom_insert_before (DOM Standard "pre-insert"): ordered insertion, NONE ref appends,
+ * a ref that is not a child of parent and a cycle are rejected. */
+static void test_insert_before(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    dom_node_id first = dom_first_child(idx, main_id);
+    assert_int_not_equal(first, DOM_NODE_NONE);
+    dom_node_id a = DOM_NODE_NONE, b = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "i", &a), DOM_OK);
+    assert_int_equal(dom_create_element(idx, "b", &b), DOM_OK);
+    assert_int_equal(dom_insert_before(idx, main_id, a, first), DOM_OK);
+    assert_int_equal(dom_first_child(idx, main_id), a);
+    assert_int_equal(dom_next_sibling(idx, a), first);
+    assert_int_equal(dom_insert_before(idx, main_id, b, DOM_NODE_NONE), DOM_OK);  /* appends */
+    assert_int_equal(dom_parent(idx, b), main_id);
+    assert_int_equal(dom_next_sibling(idx, b), DOM_NODE_NONE);
+    /* moving an existing child before another */
+    assert_int_equal(dom_insert_before(idx, main_id, b, a), DOM_OK);
+    assert_int_equal(dom_first_child(idx, main_id), b);
+    /* ref not a child of parent */
+    dom_node_id go = dom_get_element_by_id(idx, "go");
+    dom_node_id loose = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "u", &loose), DOM_OK);   /* in no tree */
+    assert_int_equal(dom_insert_before(idx, main_id, a, loose), DOM_ERR_NULL_ARG);
+    /* cycle and self */
+    assert_int_equal(dom_insert_before(idx, go, main_id, DOM_NODE_NONE), DOM_ERR_NULL_ARG);
+    assert_int_equal(dom_insert_before(idx, main_id, main_id, DOM_NODE_NONE), DOM_ERR_NULL_ARG);
+    /* inserting a node before itself is a no-op success */
+    assert_int_equal(dom_insert_before(idx, main_id, a, a), DOM_OK);
+    assert_int_equal(dom_parent(idx, a), main_id);
+}
+
+/* dom_clone_node: a deep clone keeps TEXT (not only element children) and every cloned
+ * element is indexed; a shallow clone has no children. */
+static void test_clone_node(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    dom_node_id deep = DOM_NODE_NONE, shallow = DOM_NODE_NONE;
+    assert_int_equal(dom_clone_node(idx, main_id, 1, &deep), DOM_OK);
+    assert_int_not_equal(deep, main_id);
+    assert_int_equal(dom_parent(idx, deep), DOM_NODE_NONE);          /* detached */
+    size_t al = 0, bl = 0;
+    const char *a = dom_text_content(idx, main_id, &al);
+    const char *b = dom_text_content(idx, deep, &bl);
+    assert_non_null(a);
+    assert_non_null(b);
+    assert_true(al > 0);
+    assert_int_equal(al, bl);
+    assert_memory_equal(a, b, al);
+    assert_int_not_equal(dom_first_child(idx, deep), DOM_NODE_NONE);  /* children indexed */
+    assert_int_equal(dom_clone_node(idx, main_id, 0, &shallow), DOM_OK);
+    assert_int_equal(dom_first_child(idx, shallow), DOM_NODE_NONE);
+    assert_int_equal(dom_clone_node(idx, DOM_NODE_NONE, 1, &deep), DOM_ERR_NULL_ARG);
+}
+
+/* dom_move_children: every child node of src (TEXT included) moves into parent
+ * before ref (NONE appends), in order; moving into src's own subtree is rejected. */
+static void test_move_children(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    dom_node_id box = DOM_NODE_NONE, tgt = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "div", &box), DOM_OK);
+    assert_int_equal(dom_create_element(idx, "div", &tgt), DOM_OK);
+    assert_int_equal(dom_set_inner_html(idx, box, "lead <b>bold</b> tail", 21), DOM_OK);
+    assert_int_equal(dom_move_children(idx, box, tgt, DOM_AT_END, DOM_NODE_NONE), DOM_OK);
+    size_t n = 0;
+    const char *t = dom_text_content(idx, tgt, &n);
+    assert_non_null(t);
+    assert_int_equal(n, 14);
+    assert_memory_equal(t, "lead bold tail", 14);
+    assert_int_equal(dom_first_child(idx, box), DOM_NODE_NONE);
+    /* before a reference */
+    dom_node_id src2 = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "div", &src2), DOM_OK);
+    assert_int_equal(dom_set_inner_html(idx, src2, "<i>first</i>", 12), DOM_OK);
+    dom_node_id b = dom_first_child(idx, tgt);
+    assert_int_equal(dom_move_children(idx, src2, tgt, DOM_BEFORE_REF, b), DOM_OK);
+    assert_int_not_equal(dom_first_child(idx, tgt), b);
+    /* AT_START goes before the leading TEXT too; AFTER_REF right after the ref */
+    dom_node_id s3 = DOM_NODE_NONE, s4 = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "div", &s3), DOM_OK);
+    assert_int_equal(dom_set_inner_html(idx, s3, "AA", 2), DOM_OK);
+    assert_int_equal(dom_move_children(idx, s3, tgt, DOM_AT_START, DOM_NODE_NONE), DOM_OK);
+    t = dom_text_content(idx, tgt, &n);
+    assert_memory_equal(t, "AAlead first", 12);     /* <i> went before <b>, after "lead " */
+    assert_int_equal(dom_create_element(idx, "div", &s4), DOM_OK);
+    assert_int_equal(dom_set_inner_html(idx, s4, "ZZ", 2), DOM_OK);
+    assert_int_equal(dom_move_children(idx, s4, tgt, DOM_AFTER_REF, b), DOM_OK);
+    t = dom_text_content(idx, tgt, &n);
+    assert_non_null(strstr(t, "boldZZ"));
+    /* into its own subtree: rejected */
+    assert_int_equal(dom_move_children(idx, main_id, dom_get_element_by_id(idx, "go"),
+                                       DOM_AT_END, DOM_NODE_NONE), DOM_ERR_NULL_ARG);
+    assert_int_equal(dom_move_children(idx, tgt, tgt, DOM_AT_END, DOM_NODE_NONE), DOM_ERR_NULL_ARG);
+    assert_int_equal(dom_move_children(idx, s4, tgt, DOM_BEFORE_REF, DOM_NODE_NONE), DOM_ERR_NULL_ARG);
+}
+
+/* Text/comment nodes as lazy handles (spec/dom.md 9). */
+static void test_char_nodes(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id box = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "p", &box), DOM_OK);
+    assert_int_equal(dom_set_inner_html(idx, box, "t<b>u</b><!--c-->v", 18), DOM_OK);
+    dom_node_id a = dom_child_node(idx, box, 0);
+    assert_int_equal(dom_node_kind(idx, a), DOM_KIND_TEXT);
+    size_t n = 0;
+    assert_memory_equal(dom_text_content(idx, a, &n), "t", 1);
+    assert_int_equal(n, 1);
+    assert_int_equal(dom_child_node(idx, box, 0), a);          /* stable handle */
+    dom_node_id b = dom_sibling_node(idx, a, 0);
+    assert_int_equal(dom_node_kind(idx, b), DOM_KIND_ELEMENT);
+    assert_int_equal(b, dom_first_child(idx, box));            /* same as element API */
+    dom_node_id c = dom_sibling_node(idx, b, 0);
+    assert_int_equal(dom_node_kind(idx, c), DOM_KIND_COMMENT);
+    dom_node_id v = dom_child_node(idx, box, 1);
+    assert_int_equal(dom_sibling_node(idx, v, 1), c);
+    assert_int_equal(dom_sibling_node(idx, v, 0), DOM_NODE_NONE);
+    assert_int_equal(dom_parent(idx, v), box);
+    /* data setter on a text node replaces its data, not its (absent) children */
+    assert_int_equal(dom_set_text_content(idx, a, "TT", 2), DOM_OK);
+    assert_memory_equal(dom_text_content(idx, box, &n), "TTuv", 4);
+    /* created text inserts and renders as text */
+    dom_node_id x = DOM_NODE_NONE;
+    assert_int_equal(dom_create_char_node(idx, DOM_KIND_TEXT, "X", 1, &x), DOM_OK);
+    assert_int_equal(dom_append_child(idx, box, x), DOM_OK);
+    assert_memory_equal(dom_text_content(idx, box, &n), "TTuvX", 5);
+    assert_int_equal(dom_create_char_node(idx, DOM_KIND_ELEMENT, "X", 1, &x), DOM_ERR_NULL_ARG);
+    /* element-only operations reject a text handle */
+    assert_null(dom_tag_name(idx, a, NULL));
+    assert_null(dom_get_attribute(idx, a, "id", NULL));
+    assert_int_equal(dom_set_attribute(idx, a, "id", "z"), DOM_ERR_NULL_ARG);
+    assert_int_equal(dom_set_inner_html(idx, a, "<i></i>", 7), DOM_ERR_NULL_ARG);
+    assert_int_equal(dom_append_child(idx, a, b), DOM_ERR_NULL_ARG);
+    assert_int_equal(dom_matches(idx, a, "*"), 0);
+    assert_int_equal(dom_query_selector(idx, a, "*"), DOM_NODE_NONE);
+    char *html = NULL; size_t hl = 0;
+    assert_int_equal(dom_get_inner_html(idx, a, &html, &hl), DOM_ERR_NULL_ARG);
+    /* clone of a text node is a registered text node */
+    dom_node_id k = DOM_NODE_NONE;
+    assert_int_equal(dom_clone_node(idx, a, 1, &k), DOM_OK);
+    assert_int_equal(dom_node_kind(idx, k), DOM_KIND_TEXT);
+    assert_int_equal(dom_node_kind(idx, DOM_NODE_NONE), DOM_KIND_NONE);
+    assert_int_equal(dom_child_node(idx, a, 0), DOM_NODE_NONE);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_build_null_args),
@@ -522,6 +667,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_query_selector_scope_is_descendants_only, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_matches_and_closest, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_query_selector_fail_closed, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_insert_before, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_clone_node, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_move_children, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_char_nodes, setup_doc, teardown_doc),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

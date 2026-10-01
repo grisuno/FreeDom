@@ -165,6 +165,60 @@ dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_
  * => DOM_ERR_NULL_ARG. */
 dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child);
 
+/* Inserts child into parent before ref (DOM "pre-insert"); ref == DOM_NODE_NONE
+ * appends. child is detached from any current position first; child == ref is a no-op
+ * success. A ref that is not a child of parent, a cycle, self or an invalid handle =>
+ * DOM_ERR_NULL_ARG. */
+dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
+                             dom_node_id ref);
+
+/* Clones node (deep: its whole subtree, text included) as a detached node whose
+ * elements are all indexed; *out_id is the clone. Invalid handle => DOM_ERR_NULL_ARG,
+ * OOM => DOM_ERR_OOM. */
+dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id);
+
+/* Where dom_move_children places the moved nodes (insertAdjacent* needs all four:
+ * "after this node" and "first" cannot be expressed by an element-only reference). */
+typedef enum dom_place {
+    DOM_AT_END = 0,     /* as parent's last children */
+    DOM_AT_START,       /* before parent's first child node (any type) */
+    DOM_BEFORE_REF,     /* right before ref (a child of parent) */
+    DOM_AFTER_REF       /* right after ref (a child of parent) */
+} dom_place;
+
+/* Moves every child node of src (text and comments included, in order) into parent
+ * at the given place. parent inside src's subtree (or == src), a ref that is not a
+ * child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */
+dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
+                             dom_place where, dom_node_id ref);
+
+/* --- text and comment nodes (spec/dom.md 9) ---
+ * Character-data nodes get LAZY handles in the same arena: registered the first time
+ * node-level navigation or creation reaches them. Element-only functions reject them. */
+#define DOM_KIND_NONE    0
+#define DOM_KIND_ELEMENT 1   /* the DOM nodeType numbers */
+#define DOM_KIND_TEXT    3
+#define DOM_KIND_COMMENT 8
+
+/* Upper bound of the handle arena (elements + lazy text/comment handles). */
+#define DOM_MAX_HANDLES (1u << 24)
+
+/* DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle. */
+int dom_node_kind(const dom_index *idx, dom_node_id node);
+
+/* First (last != 0: last) child node of an element, counting elements, text and
+ * comments (other node types skipped), registering it on demand; or DOM_NODE_NONE. */
+dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last);
+
+/* Next (prev != 0: previous) sibling node, same node set, or DOM_NODE_NONE. */
+dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev);
+
+/* Creates a detached text (DOM_KIND_TEXT) or comment (DOM_KIND_COMMENT) node with
+ * text[0..len). Other kinds / no document => DOM_ERR_NULL_ARG; OOM or the handle
+ * bound => DOM_ERR_OOM. */
+dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
+                                dom_node_id *out_id);
+
 /* Detaches child (which must currently be a child of parent) from the tree; the node
  * stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */
 dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child);

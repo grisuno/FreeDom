@@ -323,10 +323,64 @@ static void test_status_truncates(void **state) {
     browser_free(&bs);
 }
 
+/* --- same-document entries (spec/browser.md 3b) --- */
+
+static void test_push_state_same_document(void **state) {
+    (void)state;
+    browser_state bs;
+    memset(&bs, 0, sizeof bs);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+    assert_int_equal(browser_navigate(&bs, "https://a.test/"), BROWSER_OK);
+    int d0 = browser_entry_doc(&bs, bs.history_pos);
+    assert_int_equal(browser_doc_index(&bs), 0);
+    assert_int_equal(browser_push_state(&bs, "https://a.test/p1"), BROWSER_OK);
+    assert_int_equal(browser_push_state(&bs, "https://a.test/p2"), BROWSER_OK);
+    assert_string_equal(browser_current_url(&bs), "https://a.test/p2");
+    assert_string_equal(bs.url_bar, "https://a.test/p2");
+    assert_int_equal(browser_entry_doc(&bs, bs.history_pos), d0);
+    assert_int_equal(browser_doc_index(&bs), 2);
+    assert_int_equal(browser_back(&bs), BROWSER_OK);
+    assert_int_equal(browser_entry_doc(&bs, bs.history_pos), d0);
+    assert_int_equal(browser_doc_index(&bs), 1);
+    /* replaceState changes the URL only */
+    assert_int_equal(browser_replace_state(&bs, "https://a.test/r"), BROWSER_OK);
+    assert_string_equal(browser_current_url(&bs), "https://a.test/r");
+    assert_int_equal(bs.history_len, 3);
+    assert_int_equal(browser_doc_index(&bs), 1);
+    /* a push from the middle discards the future, like a navigation */
+    assert_int_equal(browser_push_state(&bs, "https://a.test/n"), BROWSER_OK);
+    assert_int_equal(bs.history_len, 3);
+    assert_int_equal(browser_doc_index(&bs), 2);
+    /* a real navigation opens a new document */
+    assert_int_equal(browser_navigate(&bs, "https://b.test/"), BROWSER_OK);
+    assert_int_not_equal(browser_entry_doc(&bs, bs.history_pos), d0);
+    assert_int_equal(browser_doc_index(&bs), 0);
+    browser_free(&bs);
+}
+
+static void test_push_state_rejects_and_guards(void **state) {
+    (void)state;
+    browser_state bs;
+    memset(&bs, 0, sizeof bs);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+    /* nothing to push onto */
+    assert_int_equal(browser_push_state(&bs, "https://a.test/"), BROWSER_ERR_NO_BACK);
+    assert_int_equal(browser_replace_state(&bs, "https://a.test/"), BROWSER_ERR_NO_BACK);
+    assert_int_equal(browser_navigate(&bs, "https://a.test/"), BROWSER_OK);
+    assert_int_equal(browser_push_state(&bs, "javascript:alert(1)"), BROWSER_ERR_INVALID_URL);
+    assert_int_equal(browser_replace_state(&bs, "ftp://x/"), BROWSER_ERR_INVALID_URL);
+    assert_int_equal(browser_push_state(NULL, "https://a.test/"), BROWSER_ERR_NULL);
+    assert_int_equal(browser_entry_doc(&bs, 99), -1);
+    assert_int_equal(browser_entry_doc(NULL, 0), -1);
+    browser_free(&bs);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_init),
         cmocka_unit_test(test_navigate_history),
+        cmocka_unit_test(test_push_state_same_document),
+        cmocka_unit_test(test_push_state_rejects_and_guards),
         cmocka_unit_test(test_navigate_from_middle_discards_future),
         cmocka_unit_test(test_back_forward_bounds),
         cmocka_unit_test(test_rejects_invalid_url),

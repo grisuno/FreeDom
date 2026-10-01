@@ -21,12 +21,14 @@
 #include <string.h>
 
 #include "quickjs.h"
+#include "web_storage.h"
+#include "js_dom_internal.h"
 
-static jd_opaque *jd_opaque_get(JSContext *ctx) {
+jd_opaque *jd_opaque_get(JSContext *ctx) {
     return (jd_opaque *)JS_GetContextOpaque(ctx);
 }
 
-static dom_index *jd_idx(JSContext *ctx) {
+dom_index *jd_idx(JSContext *ctx) {
     jd_opaque *o = jd_opaque_get(ctx);
     return (o != NULL) ? o->idx : NULL;
 }
@@ -35,14 +37,14 @@ static dom_index *jd_idx(JSContext *ctx) {
 /* Coerces a JS argument to a node handle. Returns -1 with a pending exception
  * if coercion threw; otherwise stores the handle (out-of-range values stay
  * out of range and are rejected later by the dom validators). */
-static int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out) {
+int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out) {
     int64_t n;
     if (JS_ToInt64(ctx, &n, v) != 0) return -1;
     *out = (n < 0 || n > 0xFFFFFFFELL) ? DOM_NODE_NONE : (dom_node_id)n;
     return 0;
 }
 
-static JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h) {
+JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h) {
     return (h == DOM_NODE_NONE) ? JS_NULL : JS_NewInt64(ctx, (int64_t)h);
 }
 
@@ -146,6 +148,43 @@ static JSValue m_first_child(JSContext *ctx, JSValueConst this_val,
     return jd_handle_or_null(ctx, dom_first_child(jd_idx(ctx), h));
 }
 
+/* Node-level navigation (text and comments included, spec/dom.md 9). */
+static JSValue m_node_kind(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    return JS_NewInt32(ctx, dom_node_kind(jd_idx(ctx), h));
+}
+
+static JSValue m_child_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    return jd_handle_or_null(ctx, dom_child_node(jd_idx(ctx), h, JS_ToBool(ctx, argv[1])));
+}
+
+static JSValue m_sibling_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    return jd_handle_or_null(ctx, dom_sibling_node(jd_idx(ctx), h, JS_ToBool(ctx, argv[1])));
+}
+
+/* dom.createChar(kind 3|8, text): a detached text/comment node handle. */
+static JSValue m_create_char(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    int32_t kind = 0;
+    if (JS_ToInt32(ctx, &kind, argv[0]) != 0) return JS_EXCEPTION;
+    size_t len = 0;
+    const char *t = JS_ToCStringLen(ctx, &len, argv[1]);
+    if (t == NULL) return JS_EXCEPTION;
+    dom_node_id id = DOM_NODE_NONE;
+    dom_status st = dom_create_char_node(jd_idx(ctx), kind, t, len, &id);
+    JS_FreeCString(ctx, t);
+    if (st == DOM_ERR_OOM) return JS_ThrowOutOfMemory(ctx);
+    return jd_handle_or_null(ctx, st == DOM_OK ? id : DOM_NODE_NONE);
+}
+
 static JSValue m_next_sibling(JSContext *ctx, JSValueConst this_val,
                               int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -231,6 +270,44 @@ static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,
     return JS_NewBool(ctx, dom_append_child(jd_idx(ctx), p, c) == DOM_OK);
 }
 
+/* dom.moveChildren(src, parent, where, ref|null): every child node of src (text
+ * included) into parent at where (0 end, 1 start, 2 before ref, 3 after ref). */
+static JSValue m_move_children(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val;
+    dom_node_id src, parent, ref = DOM_NODE_NONE;
+    int32_t where = 0;
+    if (argc < 3 || jd_handle(ctx, argv[0], &src) < 0 || jd_handle(ctx, argv[1], &parent) < 0
+        || JS_ToInt32(ctx, &where, argv[2]) != 0)
+        return JS_EXCEPTION;
+    if (argc > 3 && !JS_IsNull(argv[3]) && !JS_IsUndefined(argv[3]) && jd_handle(ctx, argv[3], &ref) < 0)
+        return JS_EXCEPTION;
+    if (where < DOM_AT_END || where > DOM_AFTER_REF) return JS_FALSE;
+    return JS_NewBool(ctx, dom_move_children(jd_idx(ctx), src, parent, (dom_place)where, ref) == DOM_OK);
+}
+
+/* dom.cloneNode(h, deep): a detached, indexed clone (text included), or null. */
+static JSValue m_clone_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val;
+    dom_node_id h, out = DOM_NODE_NONE;
+    if (argc < 1 || jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    int deep = (argc > 1) ? JS_ToBool(ctx, argv[1]) : 0;
+    if (dom_clone_node(jd_idx(ctx), h, deep, &out) != DOM_OK) return JS_NULL;
+    return jd_handle_or_null(ctx, out);
+}
+
+/* dom.insertBefore(parent, child, ref|null): ordered insertion (null appends). */
+static JSValue m_insert_before(JSContext *ctx, JSValueConst this_val,
+                               int argc, JSValueConst *argv) {
+    (void)this_val;
+    dom_node_id p, c, r = DOM_NODE_NONE;
+    if (argc < 2 || jd_handle(ctx, argv[0], &p) < 0 || jd_handle(ctx, argv[1], &c) < 0)
+        return JS_EXCEPTION;
+    if (argc > 2 && !JS_IsNull(argv[2]) && !JS_IsUndefined(argv[2])
+        && jd_handle(ctx, argv[2], &r) < 0)
+        return JS_EXCEPTION;
+    return JS_NewBool(ctx, dom_insert_before(jd_idx(ctx), p, c, r) == DOM_OK);
+}
+
 static JSValue m_remove_child(JSContext *ctx, JSValueConst this_val,
                              int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -298,6 +375,54 @@ static JSValue m_get_inner_html(JSContext *ctx, JSValueConst this_val,
     return v;
 }
 
+#include "js_location_internal.h"
+#include "js_dom_ext.h"
+
+/* dom.u8len(s): UTF-8 byte length of String(s) -- the unit the localStorage quota is
+ * measured in (spec/web_storage.md). Native: a per-character JS loop over a large
+ * value is a real cost on every setItem. */
+static JSValue m_u8len(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val;
+    if (argc < 1) return JS_NewInt64(ctx, 0);
+    size_t n = 0;
+    const char *s = JS_ToCStringLen(ctx, &n, argv[0]);
+    if (s == NULL) return JS_EXCEPTION;
+    JS_FreeCString(ctx, s);
+    return JS_NewInt64(ctx, (int64_t)n);
+}
+
+/* dom.rect(h): [x, y, w, h] of h in document coordinates from the installed
+ * layout geometry, or null (no table, or the layout produced no box for h). */
+static JSValue m_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    jd_opaque *o = jd_opaque_get(ctx);
+    const jg_rect *r = (o != NULL) ? jg_find(o->geom, h) : NULL;
+    if (r == NULL) return JS_NULL;
+    JSValue a = JS_NewArray(ctx);
+    if (JS_IsException(a)) return a;
+    const int32_t v[4] = { r->x, r->y, r->w, r->h };
+    for (uint32_t i = 0; i < 4; ++i)
+        JS_SetPropertyUint32(ctx, a, i, JS_NewInt32(ctx, v[i]));
+    return a;
+}
+
+/* dom.viewport(): [scroll_x, scroll_y, view_w, view_h, doc_w, doc_h], or null when
+ * no geometry is installed (untrusted host: callers keep the normalized values). */
+static JSValue m_viewport(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc; (void)argv;
+    jd_opaque *o = jd_opaque_get(ctx);
+    const jg_table *g = (o != NULL) ? o->geom : NULL;
+    if (g == NULL) return JS_NULL;
+    JSValue a = JS_NewArray(ctx);
+    if (JS_IsException(a)) return a;
+    const int32_t v[6] = { g->scroll_x, g->scroll_y, g->view_w, g->view_h, g->doc_w, g->doc_h };
+    for (uint32_t i = 0; i < 6; ++i)
+        JS_SetPropertyUint32(ctx, a, i, JS_NewInt32(ctx, v[i]));
+    return a;
+}
+
 /* --- install --- */
 
 typedef struct jd_method {
@@ -305,110 +430,6 @@ typedef struct jd_method {
     JSCFunction *fn;
     int          nargs;
 } jd_method;
-
-static JSValue m_register_click(JSContext *ctx, JSValueConst this_val,
-                                int argc, JSValueConst *argv) {
-    (void)this_val; (void)argc;
-    dom_node_id h;
-    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
-    if (!JS_IsFunction(ctx, argv[1])) return JS_UNDEFINED;
-
-    JSValue global = JS_GetGlobalObject(ctx);
-    if (JS_IsException(global)) return JS_EXCEPTION;
-    JSValue reg = JS_GetPropertyStr(ctx, global, "__clickRegistry");
-    if (JS_IsUndefined(reg) || JS_IsNull(reg)) {
-        JS_FreeValue(ctx, reg);
-        reg = JS_NewObject(ctx);
-        if (JS_IsException(reg)) { JS_FreeValue(ctx, global); return JS_EXCEPTION; }
-        JS_SetPropertyStr(ctx, global, "__clickRegistry", JS_DupValue(ctx, reg));
-    }
-    JS_SetPropertyUint32(ctx, reg, (uint32_t)h, JS_DupValue(ctx, argv[1]));
-    JS_FreeValue(ctx, reg);
-    JS_FreeValue(ctx, global);
-    return JS_UNDEFINED;
-}
-
-static JSValue m_register_submit(JSContext *ctx, JSValueConst this_val,
-                                 int argc, JSValueConst *argv) {
-    (void)this_val; (void)argc;
-    dom_node_id h;
-    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
-    if (!JS_IsFunction(ctx, argv[1])) return JS_UNDEFINED;
-
-    JSValue global = JS_GetGlobalObject(ctx);
-    if (JS_IsException(global)) return JS_EXCEPTION;
-    JSValue reg = JS_GetPropertyStr(ctx, global, "__submitRegistry");
-    if (JS_IsUndefined(reg) || JS_IsNull(reg)) {
-        JS_FreeValue(ctx, reg);
-        reg = JS_NewObject(ctx);
-        if (JS_IsException(reg)) { JS_FreeValue(ctx, global); return JS_EXCEPTION; }
-        JS_SetPropertyStr(ctx, global, "__submitRegistry", JS_DupValue(ctx, reg));
-    }
-    JS_SetPropertyUint32(ctx, reg, (uint32_t)h, JS_DupValue(ctx, argv[1]));
-    JS_FreeValue(ctx, reg);
-    JS_FreeValue(ctx, global);
-    return JS_UNDEFINED;
-}
-
-/* Generic event registration: dom.registerEvent(node_id, event_type, fn).
- * Stores in __eventRegistry[node_id][event_type] = [fn, ...]. */
-static JSValue m_register_event(JSContext *ctx, JSValueConst this_val,
-                                int argc, JSValueConst *argv) {
-    (void)this_val; (void)argc;
-    dom_node_id h;
-    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
-    const char *type = JS_ToCString(ctx, argv[1]);
-    if (type == NULL) return JS_EXCEPTION;
-    if (!JS_IsFunction(ctx, argv[2])) { JS_FreeCString(ctx, type); return JS_UNDEFINED; }
-
-    JSValue global = JS_GetGlobalObject(ctx);
-    if (JS_IsException(global)) { JS_FreeCString(ctx, type); return JS_EXCEPTION; }
-
-    /* Get or create __eventRegistry */
-    JSValue reg = JS_GetPropertyStr(ctx, global, "__eventRegistry");
-    if (JS_IsUndefined(reg) || JS_IsNull(reg)) {
-        JS_FreeValue(ctx, reg);
-        reg = JS_NewObject(ctx);
-        if (JS_IsException(reg)) { JS_FreeValue(ctx, global); JS_FreeCString(ctx, type); return JS_EXCEPTION; }
-        JS_SetPropertyStr(ctx, global, "__eventRegistry", JS_DupValue(ctx, reg));
-    }
-
-    /* Get or create the map for this node_id */
-    char nstr[32];
-    snprintf(nstr, sizeof nstr, "%u", (unsigned)h);
-    JSValue node_map = JS_GetPropertyStr(ctx, reg, nstr);
-    if (JS_IsUndefined(node_map) || JS_IsNull(node_map)) {
-        JS_FreeValue(ctx, node_map);
-        node_map = JS_NewObject(ctx);
-        if (JS_IsException(node_map)) { JS_FreeValue(ctx, reg); JS_FreeValue(ctx, global); JS_FreeCString(ctx, type); return JS_EXCEPTION; }
-        JS_SetPropertyStr(ctx, reg, nstr, JS_DupValue(ctx, node_map));
-    }
-
-    /* Get or create the handler array for this event type.
-     * JS_SetProperty* steals a reference, so dup before storing and keep the local ref. */
-    JSValue type_arr = JS_GetPropertyStr(ctx, node_map, type);
-    if (JS_IsUndefined(type_arr) || JS_IsNull(type_arr)) {
-        JS_FreeValue(ctx, type_arr);
-        JSValue arr = JS_NewArray(ctx);
-        if (JS_IsException(arr)) { JS_FreeValue(ctx, node_map); JS_FreeValue(ctx, reg); JS_FreeValue(ctx, global); JS_FreeCString(ctx, type); return JS_EXCEPTION; }
-        JS_SetPropertyStr(ctx, node_map, type, JS_DupValue(ctx, arr));
-        type_arr = arr; /* arr still valid: SetPropertyStr stole the dup, not the original */
-    }
-
-    /* Append the handler to the array */
-    int32_t len = 0;
-    JSValue lv = JS_GetPropertyStr(ctx, type_arr, "length");
-    if (!JS_IsUndefined(lv) && !JS_IsException(lv)) JS_ToInt32(ctx, &len, lv);
-    JS_FreeValue(ctx, lv);
-    JS_SetPropertyUint32(ctx, type_arr, (uint32_t)len, JS_DupValue(ctx, argv[2]));
-
-    JS_FreeValue(ctx, type_arr);
-    JS_FreeValue(ctx, node_map);
-    JS_FreeValue(ctx, reg);
-    JS_FreeValue(ctx, global);
-    JS_FreeCString(ctx, type);
-    return JS_UNDEFINED;
-}
 
 /* --- CSS-selector queries (querySelector / matches / closest) --- */
 
@@ -509,6 +530,10 @@ static const jd_method JD_METHODS[] = {
     { "parent",         m_parent,            1 },
     { "firstChild",     m_first_child,       1 },
     { "nextSibling",    m_next_sibling,      1 },
+    { "nodeKind",       m_node_kind,         1 },
+    { "childNode",      m_child_node,        2 },
+    { "siblingNode",    m_sibling_node,      2 },
+    { "createChar",     m_create_char,       2 },
     { "precedes",       m_precedes,          2 },
     { "textContent",    m_text_content,      1 },
     { "setText",        m_set_text,          2 },
@@ -516,18 +541,22 @@ static const jd_method JD_METHODS[] = {
     { "setTitle",       m_set_title,         1 },
     { "createElement",  m_create_element,    1 },
     { "appendChild",    m_append_child,      2 },
+    { "insertBefore",   m_insert_before,     3 },
+    { "cloneNode",      m_clone_node,        2 },
+    { "moveChildren",   m_move_children,     4 },
     { "removeChild",    m_remove_child,      2 },
     { "setAttribute",   m_set_attribute,     3 },
     { "removeAttribute", m_remove_attribute, 2 },
     { "setInnerHtml",   m_set_inner_html,    2 },
     { "getInnerHtml",   m_get_inner_html,    1 },
-    { "registerClick",  m_register_click,    2 },
-    { "registerSubmit", m_register_submit,   2 },
-    { "registerEvent",  m_register_event,    3 },
     { "querySelector",    m_query_selector,     2 },
     { "querySelectorAll", m_query_selector_all, 2 },
     { "matches",          m_matches,            2 },
     { "closest",          m_closest,            2 },
+    { "rect",             m_rect,               1 },
+    { "viewport",         m_viewport,           0 },
+    { "histTarget",       jl_m_hist_target,     2 },
+    { "u8len",            m_u8len,              1 },
 };
 
 /* A small standard `document` facade over the native handle API, so real page
@@ -537,12 +566,32 @@ static const jd_method JD_METHODS[] = {
  * and window=globalThis keep common scripts from dying on a ReferenceError. */
 static const char JD_DOCUMENT_SHIM[] =
     "(function(){"
-    "  globalThis.__clickRegistry={};"
-    "  globalThis.__submitRegistry={};"
     "  var __wc={};"                          /* handle -> wrapper: stable node identity (===) */
+    /* Layout geometry (spec/js_geom.md): real only when the trusted parent installed
+     * a table (dom.viewport() non-null); otherwise every measurement is zero. */
+    /* ParentNode/ChildNode insertion: a fragment contributes its collected children
+     * (and is emptied); an element wrapper contributes itself. Every insertion is the
+     * ordered native dom.insertBefore (ref null = append). */
+    "  function nodesOf(a){ if(a&&a.__frag){ var l=a.__frag.slice(); a.__frag.length=0; return l; }"
+    "    if(typeof a==='string'){ var t=dom.createChar(3,a); return t===null?[]:[wrap(t)]; }"
+    "    return (a&&a._h!==undefined)?[a]:[]; }"
+    "  function insAt(p,list,ref){ for(var i=0;i<list.length;i++)"
+    "    if(list[i]&&list[i]._h!==undefined) dom.insertBefore(p,list[i]._h,ref); }"
+    "  function gRect(h){ return dom.rect(h)||[0,0,0,0]; }"
+    "  function mkRect(x,y,w,ht){ var o={x:x,y:y,left:x,top:y,width:w,height:ht,right:x+w,bottom:y+ht};"
+    "    o.toJSON=function(){ return {x:x,y:y,left:x,top:y,width:w,height:ht,right:x+w,bottom:y+ht}; };"
+    "    return o; }"
+    "  function gBox(h){ var r=dom.rect(h), v=dom.viewport(); if(!r||!v) return mkRect(0,0,0,0);"
+    "    return mkRect(r[0]-v[0],r[1]-v[1],r[2],r[3]); }"
+    /* <html>/<body> report the viewport/document for client/scroll metrics. */
+    "  function gRoot(h){ var t=dom.tagName(h); t=t?String(t).toLowerCase():'';"
+    "    return (t==='html'||t==='body')?dom.viewport():null; }"
     "  function wrap(h){"
     "    if (h===null||h===undefined) return null;"
     "    if (h in __wc) return __wc[h];"
+    /* Text / comment handles get their own wrapper (js_dom_ext __wrapChar). */
+    "    var kd=dom.nodeKind(h);"
+    "    if ((kd===3||kd===8)&&typeof __G.__wrapChar==='function') return (__wc[h]=__G.__wrapChar(h,kd));"
     "    var el={_h:h, nodeType:1, ELEMENT_NODE:1, nodeName:'',"
     "      get textContent(){ return dom.textContent(h); },"
     /* ownerDocument: needed by jQuery's buildFragment to access document methods
@@ -620,55 +669,61 @@ static const char JD_DOCUMENT_SHIM[] =
      "      set innerText(v){ dom.setText(h, String(v)); },"
     /* A DocumentFragment carries its collected children in __frag; appending the
      * fragment re-parents each child (its contents), never the fragment node. */
-    "      appendChild: function(c){ if(c&&c.__frag){ for(var i=0;i<c.__frag.length;i++) dom.appendChild(h,c.__frag[i]._h); c.__frag.length=0; return c; } if(c&&c._h!==undefined) dom.appendChild(h,c._h); return c; },"
+    "      appendChild: function(c){ insAt(h,nodesOf(c),null); return c; },"
     "      removeChild: function(c){ if(c&&c._h!==undefined) dom.removeChild(h,c._h); return c; },"
-    "      insertBefore: function(n,ref){ if(n&&n.__frag){ for(var i=0;i<n.__frag.length;i++) dom.appendChild(h,n.__frag[i]._h); n.__frag.length=0; return n; } if(n&&n._h!==undefined) dom.appendChild(h,n._h); return n; },"
-    "      replaceChild: function(nw,old){ if(old&&old._h!==undefined) dom.removeChild(h,old._h); if(nw&&nw._h!==undefined) dom.appendChild(h,nw._h); return old; },"
-    "      append: function(){ for(var i=0;i<arguments.length;i++){ var a=arguments[i]; if(a&&a.__frag){ for(var j=0;j<a.__frag.length;j++) dom.appendChild(h,a.__frag[j]._h); a.__frag.length=0; } else if(a&&a._h!==undefined) dom.appendChild(h,a._h); } },"
-    "      prepend: function(){ for(var i=0;i<arguments.length;i++){ var a=arguments[i]; if(a&&a._h!==undefined) dom.appendChild(h,a._h); } },"
+    "      insertBefore: function(n,ref){ insAt(h,nodesOf(n),(ref&&ref._h!==undefined)?ref._h:null); return n; },"
+    "      replaceChild: function(nw,old){ if(old&&old._h!==undefined&&dom.parent(old._h)===h){"
+    "        insAt(h,nodesOf(nw),old._h); dom.removeChild(h,old._h); } return old; },"
+    "      append: function(){ for(var i=0;i<arguments.length;i++) insAt(h,nodesOf(arguments[i]),null); },"
+    "      prepend: function(){ var f=dom.childNode(h,false);"
+    "        for(var i=0;i<arguments.length;i++) insAt(h,nodesOf(arguments[i]),f); },"
+    "      before: function(){ var p=dom.parent(h); if(p===null) return;"
+    "        for(var i=0;i<arguments.length;i++) insAt(p,nodesOf(arguments[i]),h); },"
+    "      after: function(){ var p=dom.parent(h); if(p===null) return; var nx=dom.siblingNode(h,false);"
+    "        for(var i=0;i<arguments.length;i++) insAt(p,nodesOf(arguments[i]),nx); },"
+    "      replaceWith: function(){ var p=dom.parent(h); if(p===null) return; var nx=dom.siblingNode(h,false);"
+    "        dom.removeChild(p,h); for(var i=0;i<arguments.length;i++) insAt(p,nodesOf(arguments[i]),nx); },"
+    "      replaceChildren: function(){ var c=dom.childNode(h,false), guard=0;"
+    "        while(c!==null&&guard++<100000){ dom.removeChild(h,c); c=dom.childNode(h,false); }"
+    "        for(var i=0;i<arguments.length;i++) insAt(h,nodesOf(arguments[i]),null); },"
     "      remove: function(){ var p=dom.parent(h); if(p!==null) dom.removeChild(p,h); },"
-     "      cloneNode: function(deep){ var t=dom.tagName(h); if(t===null) return null;"
-     "        function deepClone(src){"
-     "          var tag=dom.tagName(src); if(!tag) return null;"
-     "          var c=wrap(dom.createElement(String(tag)));"
-     "          var ns=dom.attrNames(src); for(var i=0;i<ns.length;i++){"
-     "            var v=dom.getAttribute(src,ns[i]); if(v!==null) dom.setAttribute(c._h,ns[i],v); }"
-     "          var ch=dom.firstChild(src);"
-     "          while(ch!==null){ var cc=deepClone(ch); if(cc) dom.appendChild(c._h,cc._h); ch=dom.nextSibling(ch); }"
-     "          return c; }"
-     "        return deep ? deepClone(h) : wrap(dom.createElement(String(t))); },"
-    "      insertAdjacentHTML: function(){}, insertAdjacentElement: function(){}, insertAdjacentText: function(){},"
+     "      cloneNode: function(deep){ var c=dom.cloneNode(h, !!deep); return c===null?null:wrap(c); },"
     "      get parentNode(){ var p=dom.parent(h); return p===null?null:wrap(p); },"
     "      get parentElement(){ var p=dom.parent(h); return p===null?null:wrap(p); },"
-    "      get firstChild(){ var c=dom.firstChild(h); return c===null?null:wrap(c); },"
+    "      get firstChild(){ var c=dom.childNode(h,false); return c===null?null:wrap(c); },"
     "      get firstElementChild(){ var c=dom.firstChild(h); return c===null?null:wrap(c); },"
-    "      get nextSibling(){ var s=dom.nextSibling(h); return s===null?null:wrap(s); },"
+    "      get nextSibling(){ var s=dom.siblingNode(h,false); return s===null?null:wrap(s); },"
     "      get nextElementSibling(){ var s=dom.nextSibling(h); return s===null?null:wrap(s); },"
-    "      get lastChild(){ var c=dom.firstChild(h),l=null; while(c!==null){ l=c; c=dom.nextSibling(c); } return l===null?null:wrap(l); },"
+    "      get lastChild(){ var c=dom.childNode(h,true); return c===null?null:wrap(c); },"
     "      get lastElementChild(){ var c=dom.firstChild(h),l=null; while(c!==null){ l=c; c=dom.nextSibling(c); } return l===null?null:wrap(l); },"
     "      get children(){ var r=[]; var c=dom.firstChild(h); while(c!==null){ r.push(wrap(c)); c=dom.nextSibling(c); } return r; },"
-    "      get childNodes(){ var r=[]; var c=dom.firstChild(h); while(c!==null){ r.push(wrap(c)); c=dom.nextSibling(c); } return r; },"
+    "      get childNodes(){ var r=[]; var c=dom.childNode(h,false); while(c!==null){ r.push(wrap(c)); c=dom.siblingNode(c,false); } return r; },"
     "      get childElementCount(){ var n=0; var c=dom.firstChild(h); while(c!==null){ n++; c=dom.nextSibling(c); } return n; },"
-    "      hasChildNodes: function(){ return dom.firstChild(h)!==null; },"
+    "      hasChildNodes: function(){ return dom.childNode(h,false)!==null; },"
     "      contains: function(o){ if(!o||o._h===undefined) return false; for(var p=o._h;p!==null&&p!==undefined;){ if(p===h) return true; p=dom.parent(p); } return false; },"
      "      getElementsByTagName: function(t){ return wrapList(dom.querySelectorAll(h, String(t))); },"
      "      getElementsByClassName: function(c){ return wrapList(dom.querySelectorAll(h, '.'+String(c))); },"
-      "      addEventListener: function(t,fn){ if(typeof fn!=='function') return; if(t==='click') dom.registerClick(h, fn); else if(t==='submit') dom.registerSubmit(h, fn); else dom.registerEvent(h, String(t), fn); },"
-      "      removeEventListener: function(){}, dispatchEvent: function(){ return true; },"
+      "      addEventListener: function(t,fn,o){ __G.__evAdd('n'+h,t,fn,o); },"
+      "      removeEventListener: function(t,fn,o){ __G.__evRemove('n'+h,t,fn,o); },"
+      "      dispatchEvent: function(ev){ return __G.__evDispatch('n'+h,ev); },"
     "      querySelector: function(s){ return wrap(dom.querySelector(h, String(s))); },"
     "      querySelectorAll: function(s){ return wrapList(dom.querySelectorAll(h, String(s))); },"
     "      matches: function(s){ return dom.matches(h, String(s)); },"
     "      webkitMatchesSelector: function(s){ return dom.matches(h, String(s)); },"
     "      closest: function(s){ return wrap(dom.closest(h, String(s))); },"
     "      focus: function(){}, blur: function(){}, click: function(){},"
-     "      scrollIntoView: function(){}, getBoundingClientRect: function(){ return {x:0,y:0,top:0,left:0,right:0,bottom:0,width:0,height:0}; },"
-     "      getClientRects: function(){ return [this.getBoundingClientRect()]; },"
-      "      get offsetWidth(){ return 0; }, get offsetHeight(){ return 0; },"
-      "      get offsetLeft(){ return 0; }, get offsetTop(){ return 0; },"
-      "      get offsetParent(){ return null; },"
-      "      get clientWidth(){ return 0; }, get clientHeight(){ return 0; },"
-      "      get scrollWidth(){ return 0; }, get scrollHeight(){ return 0; },"
-      "      get scrollLeft(){ return 0; }, get scrollTop(){ return 0; },"
+     "      scrollIntoView: function(){},"
+     "      getBoundingClientRect: function(){ return gBox(h); },"
+     "      getClientRects: function(){ return dom.rect(h)?[gBox(h)]:[]; },"
+      "      get offsetWidth(){ return gRect(h)[2]; }, get offsetHeight(){ return gRect(h)[3]; },"
+      "      get offsetLeft(){ return gRect(h)[0]; }, get offsetTop(){ return gRect(h)[1]; },"
+      "      get offsetParent(){ return dom.rect(h)?__G.document.body:null; },"
+      "      get clientWidth(){ var v=gRoot(h); return v?v[2]:gRect(h)[2]; },"
+      "      get clientHeight(){ var v=gRoot(h); return v?v[3]:gRect(h)[3]; },"
+      "      get scrollWidth(){ var v=gRoot(h); return v?v[4]:gRect(h)[2]; },"
+      "      get scrollHeight(){ var v=gRoot(h); return v?v[5]:gRect(h)[3]; },"
+      "      get scrollLeft(){ var v=gRoot(h); return v?v[0]:0; },"
+      "      get scrollTop(){ var v=gRoot(h); return v?v[1]:0; },"
       "      set scrollLeft(v){}, set scrollTop(v){},"
     /* classList backed by the class attribute (identity-safe: only this element). */
     "      get classList(){"
@@ -685,11 +740,8 @@ static const char JD_DOCUMENT_SHIM[] =
      * but never rendered from JS (author style is gated separately). */
     "      style:{ setProperty:function(k,v){ this[String(k)]=String(v); }, getPropertyValue:function(k){ var v=this[String(k)]; return v===undefined?'':v; }, removeProperty:function(k){ var v=this[String(k)]; delete this[String(k)]; return v===undefined?'':v; }, cssText:'' }"
     "    };"
-    "    Object.defineProperty(el,'onclick',{set:function(fn){ if(typeof fn==='function') dom.registerClick(h, fn); },get:function(){return null;}});"
-    "    Object.defineProperty(el,'onsubmit',{set:function(fn){ if(typeof fn==='function') dom.registerSubmit(h, fn); },get:function(){return null;}});"
-    "    ['keydown','keyup','keypress','input','change','focus','blur','scroll','mouseover','mouseout','mousemove','mouseenter','mouseleave','wheel'].forEach(function(t){"
-    "      Object.defineProperty(el,'on'+t,{set:function(fn){ if(typeof fn==='function') dom.registerEvent(h, String(t), fn); },get:function(){return null;}});"
-    "    });"
+    "    __G.__evHandlerProps(el,'n'+h,['click','submit','keydown','keyup','keypress','input','change','focus','blur',"
+    "      'focusin','focusout','scroll','mousedown','mouseup','mouseover','mouseout','mousemove','mouseenter','mouseleave','wheel']);"
     /* HTMLMediaElement facade for <video>/<audio>: identity-safe stubs so
      * player scripts (canPlayType feature-detection, play/pause, muted/loop
      * reflection, buffered ranges) run without throwing. No network, no real
@@ -722,20 +774,51 @@ static const char JD_DOCUMENT_SHIM[] =
     "        if(s!==null){ var sv=dom.getAttribute(s,'src'); if(sv!==null) return sv; } return ''; }});"
     "      ['play','pause','ended','timeupdate','canplay','canplaythrough','loadedmetadata','loadeddata',"
     "       'durationchange','volumechange','playing','waiting','seeking','seeked','stalled','suspend',"
-    "       'abort','emptied','ratechange'].forEach(function(t){"
-    "        Object.defineProperty(el,'on'+t,{set:function(fn){ if(typeof fn==='function') dom.registerEvent(h,String(t),fn); },get:function(){return null;}});"
-    "      });"
+    "       'abort','emptied','ratechange'].forEach(function(t){ __G.__evHandlerProps(el,'n'+h,[t]); });"
     "    })();"
+    /* instanceof HTMLElement/Element/Node/EventTarget hold for every wrapper. */
+    "    if(__G.__elProto) Object.setPrototypeOf(el, __G.__elProto);"
+    /* <canvas>: width/height reflect the attributes (300x150 by default); getContext
+     * gives the software 2D context ('2d' only -- webgl is null, the standard "not
+     * supported" answer), buffer area capped at 1 megapixel (worker memory). */
+    "    (function(){ var tn=dom.tagName(h); if(!tn||String(tn).toLowerCase()!=='canvas') return;"
+    "      function dim(a,d){ var v=parseInt(dom.getAttribute(h,a),10); return (isFinite(v)&&v>=0)?v:d; }"
+    "      Object.defineProperty(el,'width',{get:function(){ return dim('width',300); },"
+    "        set:function(v){ dom.setAttribute(h,'width',String(Math.max(0,v|0))); }});"
+    "      Object.defineProperty(el,'height',{get:function(){ return dim('height',150); },"
+    "        set:function(v){ dom.setAttribute(h,'height',String(Math.max(0,v|0))); }});"
+    "      var c2=null;"
+    "      el.getContext=function(t){ if(String(t)!=='2d') return null;"
+    "        if(c2===null&&__G.__CanvasCtx){ var w=el.width, hh=el.height;"
+    "          if(w*hh>1048576){ var k=Math.sqrt(1048576/(w*hh)); w=Math.floor(w*k); hh=Math.floor(hh*k); }"
+    "          c2=__G.__canvasFill(new __G.__CanvasCtx(w,hh)); c2.canvas=el; }"
+    "        return c2; };"
+    "      el.toDataURL=function(t){ var c=el.getContext('2d'); return c?c.toDataURL(t):'data:,'; };"
+    "      el.toBlob=function(cb){ if(typeof cb==='function') setTimeout(function(){ cb(null); },0); };"
+    "    })();"
+    /* <template>.content: one DocumentFragment per template, stable identity. */
+    "    (function(){ var tn=dom.tagName(h); if(!tn||String(tn).toLowerCase()!=='template') return;"
+    "      var tc=null; Object.defineProperty(el,'content',{get:function(){ if(tc===null) tc=mkFrag();"
+    "        return tc; }}); })();"
     "    __wc[h]=el;"
     "    return el;"
     "  }"
-    "  globalThis.__wrap=wrap;"
+    "  __G.__wrap=wrap;"
     "  function wrapList(hs){ var r=[]; for (var i=0;i<hs.length;i++) r.push(wrap(hs[i])); return r; }"
-    "  globalThis.__wrapList=wrapList;"
+    "  __G.__wrapList=wrapList;"
     "  var loadCbs=[], timers=[];"
-    "  globalThis.__queueTimer=function(fn){ if(typeof fn==='function') timers.push(fn); };"
-    "  function addL(type,fn){ if(typeof fn==='function' &&"
-    "    (type==='load'||type==='DOMContentLoaded'||type==='readystatechange')) loadCbs.push(fn); }"
+    "  __G.__queueTimer=function(fn){ if(typeof fn==='function') timers.push(fn); };"
+    /* Page-lifecycle listeners keep their own queue, fired once by __fireDeferred.
+     * Returns 1 when the type is a lifecycle type (consumed), 0 otherwise. */
+    "  function isLoadType(type){ return type==='load'||type==='DOMContentLoaded'||type==='readystatechange'; }"
+    /* Each entry remembers its type and target ('w' window / 'd' document) so the
+     * listener receives a real event; a {handleEvent} object is a listener too. */
+    "  function lcIdx(type,fn,tg){ for(var i=0;i<loadCbs.length;i++){ var c=loadCbs[i];"
+    "      if(c.f===fn&&c.t===type&&c.tg===tg) return i; } return -1; }"
+    "  function addL(type,fn,tg){ if(!isLoadType(type)) return 0;"
+    "    if((typeof fn==='function'||(fn&&typeof fn.handleEvent==='function'))&&lcIdx(type,fn,tg)<0)"
+    "      loadCbs.push({f:fn,t:type,tg:tg}); return 1; }"
+    "  function delL(type,fn,tg){ if(!isLoadType(type)) return; var i=lcIdx(type,fn,tg); if(i>=0) loadCbs.splice(i,1); }"
     "  var d={"
     "    getElementById: function(id){ return wrap(dom.getElementById(String(id))); },"
     "    getElementsByTagName: function(t){ return wrapList(dom.getByTag(String(t))); },"
@@ -751,14 +834,15 @@ static const char JD_DOCUMENT_SHIM[] =
     "        }}catch(e){}"
     "      } return el;"
     "    },"
-    "    createTextNode: function(t){ return {nodeType:3, textContent:String(t)}; },"
-    "    addEventListener: function(type,fn){ addL(String(type),fn); },"
+    "    createTextNode: function(t){ return wrap(dom.createChar(3,String(t))); },"
+    "    addEventListener: function(type,fn,o){ if(!addL(String(type),fn,'d')) __G.__evAdd('d',type,fn,o); },"
     /* Node identity of the document itself: Sizzle/jQuery's setDocument gates on
      * 9===doc.nodeType && doc.documentElement before it binds its internal document
      * reference; without nodeType:9 that reference stays undefined and every later
      * doc.createElement() throws "cannot read property createElement of undefined",
      * aborting the whole library bundle. defaultView is the window it lives in. */
-    "    removeEventListener: function(){}, readyState:'loading',"
+    "    removeEventListener: function(type,fn,o){ delL(String(type),fn,'d'); __G.__evRemove('d',type,fn,o); },"
+    "    readyState:'loading',"
     "    write: function(){}, writeln: function(){}, open: function(){}, close: function(){},"
     "    nodeType:9, DOCUMENT_NODE:9, nodeName:'#document', ownerDocument:null,"
     /* createDocumentFragment: jQuery's buildFragment uses this during DOM manipulation.
@@ -773,7 +857,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "      removeChild:function(c){return c;}, replaceChild:function(n,o){return o;},"
     "      insertBefore:function(n,ref){return n;}, hasChildNodes:function(){return false;} } },"
     "  };"
-    "  Object.defineProperty(d,'defaultView',{get:function(){return globalThis;},enumerable:true});"
+    "  Object.defineProperty(d,'defaultView',{get:function(){return __G;},enumerable:true});"
     "  Object.defineProperty(d,'title',{get:function(){return dom.getTitle();},"
     "    set:function(v){dom.setTitle(String(v));},enumerable:true});"
     "  function tagOne(t){ var a=dom.getByTag(t); return a.length?wrap(a[0]):null; }"
@@ -807,10 +891,10 @@ static const char JD_DOCUMENT_SHIM[] =
     "    var mm=attrs.match(/max-age\\s*=\\s*(-?[0-9]+)/); if(mm&&parseInt(mm[1],10)<=0) del=true;"
     "    var me=attrs.match(/expires\\s*=\\s*([^;]+)/); if(me){ var t=Date.parse(me[1]); if(!isNaN(t)&&t<=Date.now()) del=true; }"
     "    if(del) delete __ck[name]; else __ck[name]=val; }"
-    "  globalThis.__ckEnable=function(seed){ __ck={}; seed=String(seed||'');"
+    "  __G.__ckEnable=function(seed){ __ck={}; seed=String(seed||'');"
     "    var parts=seed.split(';'); for(var i=0;i<parts.length;i++){ var p=parts[i]; var eq=p.indexOf('=');"
     "      if(eq>0){ var n=p.substring(0,eq).replace(/^\\s+|\\s+$/g,''); if(n) __ck[n]=p.substring(eq+1).replace(/^\\s+|\\s+$/g,''); } } };"
-    "  globalThis.__ckDump=function(){ return __ckSer(); };"
+    "  __G.__ckDump=function(){ return __ckSer(); };"
     "  Object.defineProperty(d,'cookie',{get:function(){return __ckSer();},set:function(v){__ckAssign(v);},enumerable:true});"
     "  Object.defineProperty(d,'referrer',{get:function(){return '';},enumerable:true});"
     "  d.querySelector=function(s){ return wrap(dom.querySelector(-1, String(s))); };"
@@ -819,7 +903,7 @@ static const char JD_DOCUMENT_SHIM[] =
     /* createElementNS: the namespace is ignored (SVG/MathML become plain elements),
      * enough to keep scripts that build namespaced nodes from throwing. */
     "  d.createElementNS=function(ns,t){ return wrap(dom.createElement(String(t))); };"
-    "  d.createComment=function(t){ return {nodeType:8, textContent:String(t), data:String(t)}; };"
+    "  d.createComment=function(t){ return wrap(dom.createChar(8,String(t))); };"
     /* DocumentFragment: collects appended element children in __frag; a real node's
      * appendChild/insertBefore re-parents those children (see wrap()). Complete
      * enough (cloneNode/lastChild/removeChild/insertBefore) that library feature
@@ -841,15 +925,23 @@ static const char JD_DOCUMENT_SHIM[] =
     "    getElementById:function(){return null;},"
     "    querySelector:function(){return null;}, querySelectorAll:function(){return [];} }; return f; }"
     "  d.createDocumentFragment=function(){ return mkFrag(); };"
+    "  d.append=function(){ var r=tagOne('html'); if(r) r.append.apply(r,arguments); };"
+    "  d.prepend=function(){ var r=tagOne('html'); if(r) r.prepend.apply(r,arguments); };"
     /* Event/CustomEvent shims so new Event('x')/document.createEvent do not throw. */
+    /* timeStamp is always 0: no high-resolution clock leaks through events (anti-fp).
+     * __sp/__si are the stop-propagation / stop-immediate flags __evDispatch reads. */
     "  function mkEvent(type,opts){ opts=opts||{}; return {type:String(type),bubbles:!!opts.bubbles,"
     "    cancelable:!!opts.cancelable,detail:(opts.detail!==undefined?opts.detail:null),defaultPrevented:false,"
-    "    target:null,currentTarget:null,timeStamp:0,"
-    "    preventDefault:function(){this.defaultPrevented=true;},stopPropagation:function(){},"
-    "    stopImmediatePropagation:function(){},initEvent:function(t){this.type=String(t);},"
-    "    initCustomEvent:function(t,b,c,dt){this.type=String(t);this.detail=dt;}}; }"
+    "    target:null,currentTarget:null,eventPhase:0,isTrusted:false,timeStamp:0,__sp:false,__si:false,__path:[],"
+    "    NONE:0,CAPTURING_PHASE:1,AT_TARGET:2,BUBBLING_PHASE:3,"
+    "    preventDefault:function(){ if(this.cancelable) this.defaultPrevented=true; },"
+    "    stopPropagation:function(){ this.__sp=true; },"
+    "    stopImmediatePropagation:function(){ this.__sp=true; this.__si=true; },"
+    "    composedPath:function(){ return this.__path.slice(); },"
+    "    initEvent:function(t,b,c){ this.type=String(t); this.bubbles=!!b; this.cancelable=!!c; },"
+    "    initCustomEvent:function(t,b,c,dt){ this.initEvent(t,b,c); this.detail=dt; }}; }"
     "  d.createEvent=function(t){ return mkEvent('',{}); };"
-    "  globalThis.__mkEvent=mkEvent;"
+    "  __G.__mkEvent=mkEvent;"
     "  Object.defineProperty(d,'hidden',{get:function(){return false;},enumerable:true});"
     "  Object.defineProperty(d,'visibilityState',{get:function(){return 'visible';},enumerable:true});"
     "  d.hasFocus=function(){return true;}; d.currentScript=null;"
@@ -859,34 +951,39 @@ static const char JD_DOCUMENT_SHIM[] =
     "  Object.defineProperty(d,'images',{get:function(){return wrapList(dom.getByTag('img'));},enumerable:true});"
     "  Object.defineProperty(d,'forms',{get:function(){return wrapList(dom.getByTag('form'));},enumerable:true});"
     "  Object.defineProperty(d,'links',{get:function(){return wrapList(dom.querySelectorAll(-1,'a[href]'));},enumerable:true});"
-    "  d.dispatchEvent=function(){ return true; };"
+    "  d.dispatchEvent=function(ev){ return __G.__evDispatch('d',ev); };"
     "  d.implementation={ hasFeature:function(){return true;}, createHTMLDocument:function(){return d;} };"
-    "  globalThis.document=d;"
-    "  if (typeof globalThis.window==='undefined') globalThis.window=globalThis;"
+    "  __G.document=d;"
+    "  if (typeof __G.window==='undefined') __G.window=__G;"
     "  function memStore(){ var m={};"
     "    return { getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null;},"
     "      setItem:function(k,v){m[String(k)]=String(v);},"
     "      removeItem:function(k){delete m[String(k)];},"
     "      clear:function(){m={};}, key:function(i){var ks=Object.keys(m);return i<ks.length?ks[i]:null;},"
     "      get length(){return Object.keys(m).length;} }; }"
-    "  if (typeof globalThis.localStorage==='undefined') globalThis.localStorage=memStore();"
-    "  if (typeof globalThis.sessionStorage==='undefined') globalThis.sessionStorage=memStore();"
-    "  if (typeof globalThis.history==='undefined') globalThis.history={length:1,"
+    "  if (typeof __G.localStorage==='undefined') __G.localStorage=memStore();"
+    "  if (typeof __G.sessionStorage==='undefined') __G.sessionStorage=memStore();"
+    "  if (typeof __G.history==='undefined') __G.history={length:1,"
     "    state:null,pushState:function(){},replaceState:function(){},back:function(){},"
     "    forward:function(){},go:function(){}};"
-    "  if (typeof globalThis.location==='undefined') globalThis.location={href:'',protocol:'https:',"
+    "  if (typeof __G.location==='undefined') __G.location={href:'',protocol:'https:',"
     "    host:'',hostname:'',pathname:'/',search:'',hash:'',origin:'',"
     "    assign:function(){},replace:function(){},reload:function(){}};"
-    "  if (typeof globalThis.console==='undefined')"
-    "    globalThis.console={log:function(){},warn:function(){},error:function(){},"
+    "  if (typeof __G.console==='undefined')"
+    "    __G.console={log:function(){},warn:function(){},error:function(){},"
     "      info:function(){},debug:function(){}};"
     /* Intl: a minimal, identity-neutral stub (QuickJS-ng builds without ICU, so
      * Intl is otherwise undefined and any locale-aware script -- DuckDuckGo's
      * result formatting, date/number rendering -- dies with "Intl is not defined").
      * Everything resolves to a fixed en-US-ish behaviour via the engine's own
      * toLocaleString/toString: no real locale/timezone enumeration leaks (anti-fp). */
-    "  if (typeof globalThis.Intl==='undefined'){ (function(){"
+    "  if (typeof __G.Intl==='undefined'){ (function(){"
     "    function res(){ return {locale:'en-US',numberingSystem:'latn',calendar:'gregory',timeZone:'UTC'}; }"
+    /* BCP 47 case canonicalisation: language lower, 4-letter script title, region upper. */
+    "    function canon(t){ return t.split(/[-_]/).map(function(p,i){ if(i===0) return p.toLowerCase();"
+    "      if(p.length===2) return p.toUpperCase(); if(p.length===4) return p.charAt(0).toUpperCase()+p.slice(1).toLowerCase();"
+    "      return p.toLowerCase(); }).join('-'); }"
+    "    function canonList(l){ if(l==null) return []; return (Array.isArray(l)?l:[l]).map(function(x){ return canon(String(x)); }); }"
     "    function NumberFormat(l,o){ if(!(this instanceof NumberFormat)) return new NumberFormat(l,o); this._o=o||{}; }"
     "    NumberFormat.prototype.format=function(n){ try{ return Number(n).toLocaleString('en-US'); }catch(e){ return String(n); } };"
     "    NumberFormat.prototype.formatToParts=function(n){ return [{type:'integer',value:this.format(n)}]; };"
@@ -908,12 +1005,42 @@ static const char JD_DOCUMENT_SHIM[] =
     "    function ListFormat(l,o){ if(!(this instanceof ListFormat)) return new ListFormat(l,o); }"
     "    ListFormat.prototype.format=function(a){ return (a||[]).join(', '); };"
     "    ListFormat.prototype.resolvedOptions=res;"
-    "    globalThis.Intl={NumberFormat:NumberFormat,DateTimeFormat:DateTimeFormat,Collator:Collator,"
+    "    __G.Intl={NumberFormat:NumberFormat,DateTimeFormat:DateTimeFormat,Collator:Collator,"
     "      PluralRules:PluralRules,RelativeTimeFormat:RelativeTimeFormat,ListFormat:ListFormat,"
-    "      getCanonicalLocales:function(l){ return l==null?[]:(Array.isArray(l)?l.slice():[String(l)]); }};"
+    "      getCanonicalLocales:function(l){ return canonList(l); }};"
+    /* supportedLocalesOf on every constructor (formatjs calls it at startup): the
+     * requested tags, canonicalised -- formatting itself stays the fixed en-US. */
+    "    [NumberFormat,DateTimeFormat,Collator,PluralRules,RelativeTimeFormat,ListFormat].forEach(function(C){"
+    "      C.supportedLocalesOf=function(l){ return canonList(l); }; });"
+    "    function Locale(tag){ if(!(this instanceof Locale)) return new Locale(tag);"
+    "      var t=canon(String(tag)), p=t.split('-'); this.baseName=t; this.language=p[0]||'en';"
+    "      this.region=undefined; this.script=undefined;"
+    "      for(var i=1;i<p.length;i++){ if(/^[A-Z]{2}$|^[0-9]{3}$/.test(p[i])) this.region=p[i];"
+    "        else if(/^[A-Z][a-z]{3}$/.test(p[i])) this.script=p[i]; } }"
+    "    Locale.prototype.toString=function(){ return this.baseName; };"
+    "    Locale.prototype.maximize=function(){ return this; }; Locale.prototype.minimize=function(){ return this; };"
+    "    function DisplayNames(l,o){ if(!(this instanceof DisplayNames)) return new DisplayNames(l,o); this._o=o||{}; }"
+    "    DisplayNames.prototype.of=function(code){ return String(code); };"
+    "    DisplayNames.prototype.resolvedOptions=res; DisplayNames.supportedLocalesOf=function(l){ return canonList(l); };"
+    "    function Segmenter(l,o){ if(!(this instanceof Segmenter)) return new Segmenter(l,o);"
+    "      this._g=(o&&o.granularity)||'grapheme'; }"
+    "    Segmenter.prototype.segment=function(str){ str=String(str); var g=this._g, out=[];"
+    "      if(g==='grapheme'){ var a=Array.from(str), idx=0;"
+    "        a.forEach(function(ch){ out.push({segment:ch,index:idx,input:str}); idx+=ch.length; }); }"
+    "      else { var re=g==='word'?/\\w+|[^\\w]+/g:/[^.!?]+[.!?]*\\s*/g, m;"
+    "        while((m=re.exec(str))!==null){ if(m[0]==='') break; out.push({segment:m[0],index:m.index,input:str,"
+    "          isWordLike:g==='word'?/\\w/.test(m[0]):undefined}); } }"
+    "      out.containing=function(i){ for(var k=0;k<out.length;k++){ var s=out[k];"
+    "        if(i>=s.index&&i<s.index+s.segment.length) return s; } return undefined; };"
+    "      return out; };"
+    "    Segmenter.prototype.resolvedOptions=res; Segmenter.supportedLocalesOf=function(l){ return canonList(l); };"
+    "    __G.Intl.Locale=Locale; __G.Intl.DisplayNames=DisplayNames; __G.Intl.Segmenter=Segmenter;"
+    "    __G.Intl.supportedValuesOf=function(){ return []; };"
     "  })(); }"
-    "  globalThis.addEventListener=function(type,fn){ addL(String(type),fn); };"
-    "  globalThis.removeEventListener=function(){};"
+    "  __G.addEventListener=function(type,fn,o){ if(!addL(String(type),fn,'w')) __G.__evAdd('w',type,fn,o); };"
+    "  __G.removeEventListener=function(type,fn,o){ delL(String(type),fn,'w'); __G.__evRemove('w',type,fn,o); };"
+    "  __G.dispatchEvent=function(ev){ return __G.__evDispatch('w',ev); };"
+
     /* Timers with REAL delays (2026-07-11): each entry is {f, due, iv, id} where
      * due is the remaining virtual ms (the trusted parent advances the clock via
      * OP_TICK -> __tickTimers(elapsed); no real clock leaks -- anti-fp) and iv is
@@ -926,21 +1053,21 @@ static const char JD_DOCUMENT_SHIM[] =
     "    timers.push({f:fn,due:d,iv:iv?Math.max(d,16):0,id:++tmSeq}); return tmSeq; }"
     "  function tmDel(id){ for(var i=0;i<timers.length;i++)"
     "    if(timers[i].id===id){ timers.splice(i,1); return; } }"
-    "  globalThis.setTimeout=function(fn,ms){ return tmAdd(fn,ms,0); };"
-    "  globalThis.setInterval=function(fn,ms){ return tmAdd(fn,ms,1); };"
-    "  globalThis.clearTimeout=tmDel; globalThis.clearInterval=tmDel;"
+    "  __G.setTimeout=function(fn,ms){ return tmAdd(fn,ms,0); };"
+    "  __G.setInterval=function(fn,ms){ return tmAdd(fn,ms,1); };"
+    "  __G.clearTimeout=tmDel; __G.clearInterval=tmDel;"
     /* rAF/rIC feed the same synthetic timer queue; the callback gets a fixed
      * timestamp (identity-safe: no real high-res clock leaks through animation). */
-    "  globalThis.requestAnimationFrame=function(fn){ if(typeof fn!=='function') return 0;"
+    "  __G.requestAnimationFrame=function(fn){ if(typeof fn!=='function') return 0;"
     "    return tmAdd(function(){ fn(0); },0,0); };"
-    "  globalThis.cancelAnimationFrame=tmDel;"
-    "  globalThis.requestIdleCallback=function(fn){ if(typeof fn!=='function') return 0;"
+    "  __G.cancelAnimationFrame=tmDel;"
+    "  __G.requestIdleCallback=function(fn){ if(typeof fn!=='function') return 0;"
     "    return tmAdd(function(){ fn({didTimeout:false,timeRemaining:function(){return 0;}}); },0,0); };"
-    "  globalThis.cancelIdleCallback=tmDel;"
-    "  globalThis.queueMicrotask=function(fn){ if(typeof fn==='function') Promise.resolve().then(fn); };"
+    "  __G.cancelIdleCallback=tmDel;"
+    "  __G.queueMicrotask=function(fn){ if(typeof fn==='function') Promise.resolve().then(fn); };"
     /* Advances the virtual clock and fires everything due, in bounded ROUNDS (a
      * timer may schedule more timers). Intervals re-arm. Returns fired count. */
-    "  globalThis.__tickTimers=function(elapsed){"
+    "  __G.__tickTimers=function(elapsed){"
     "    var e=Number(elapsed)||0, fired=0, rounds=0;"
     "    for (var i=0;i<timers.length;i++) timers[i].due-=e;"
     "    while (rounds<8 && fired<256){"
@@ -949,7 +1076,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "      if (due.length===0) break;"
     "      timers=rest; rounds++;"
     "      for (var j=0;j<due.length && fired<256;j++){ fired++;"
-    "        try{ due[j].f.call(globalThis); }catch(ex){ try{console.error(ex.stack||String(ex));}catch(e){} }"
+    "        try{ due[j].f.call(__G); }catch(ex){ try{console.error(ex);}catch(e){} }"
     "        if (due[j].iv>0){ due[j].due=due[j].iv; timers.push(due[j]); }"
     "      }"
     "    }"
@@ -957,7 +1084,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "  };"
     /* Smallest remaining delay (>= 0), or -1 when nothing is pending -- the parent
      * uses it to schedule the next OP_TICK. */
-    "  globalThis.__nextTimerMs=function(){"
+    "  __G.__nextTimerMs=function(){"
     "    var m=-1;"
     "    for (var i=0;i<timers.length;i++){"
     "      var d=timers[i].due>0?timers[i].due:0;"
@@ -968,35 +1095,95 @@ static const char JD_DOCUMENT_SHIM[] =
     /* Synthetic, bounded "page loaded" pump: fire load handlers, then drain the
      * zero-delay timers (rAF loops, chained setTimeout with no delay). Timers with
      * a real delay stay queued for __tickTimers; microtasks are js_pump_jobs'. */
-    "  globalThis.__fireDeferred=function(){"
-    "    function fbLogErr(ex){ try{console.error(ex.stack||String(ex));}catch(e){} }"
-    "    for (var i=0;i<loadCbs.length;i++){ try{ loadCbs[i].call(globalThis); }catch(e){fbLogErr(e);} }"
-    "    if (typeof globalThis.onload==='function'){ try{ globalThis.onload(); }catch(e){fbLogErr(e);} }"
-    "    if (typeof d.onload==='function'){ try{ d.onload(); }catch(e){fbLogErr(e);} }"
-    "    globalThis.__tickTimers(0);"
-    "    if (typeof globalThis.__connectedCallback==='function') globalThis.__connectedCallback();"
+    "  __G.__fireDeferred=function(){"
+    "    function fbLogErr(ex){ try{console.error(ex);}catch(e){} }"
+    /* Lifecycle order (HTML 8.4.5): readystatechange + DOMContentLoaded on the
+     * document, then load on the window (its target is the document). */
+    "    function lcEvent(type,cur){ var E=__G.Event, e=(typeof E==='function')?Object.create(E.prototype):{};"
+    "      var stop=false, prevented=false;"
+    "      var props={type:type,target:d,srcElement:d,currentTarget:cur,eventPhase:2,bubbles:false,"
+    "        cancelable:false,isTrusted:true,composed:false,timeStamp:0,returnValue:true};"
+    "      for(var k in props) Object.defineProperty(e,k,{value:props[k],writable:true,configurable:true,enumerable:true});"
+    "      Object.defineProperty(e,'defaultPrevented',{get:function(){ return prevented; },configurable:true});"
+    "      e.preventDefault=function(){ prevented=true; }; e.stopPropagation=function(){};"
+    "      e.stopImmediatePropagation=function(){ stop=true; }; e.composedPath=function(){ return [cur]; };"
+    "      e.__stopped=function(){ return stop; }; return e; }"
+    "    function fireType(type){ var list=loadCbs.slice();"
+    "      for (var i=0;i<list.length;i++){ var c=list[i]; if(c.t!==type) continue;"
+    "        var cur=c.tg==='w'?__G:d, ev=lcEvent(type,cur);"
+    "        try{ if(typeof c.f==='function') c.f.call(cur,ev); else c.f.handleEvent(ev); }catch(e){fbLogErr(e);}"
+    "        if(ev.__stopped()) break; } }"
+    "    fireType('readystatechange'); fireType('DOMContentLoaded'); fireType('load');"
+    "    if (typeof __G.onload==='function'){ try{ __G.onload.call(__G,lcEvent('load',__G)); }catch(e){fbLogErr(e);} }"
+    "    if (typeof d.onload==='function'){ try{ d.onload.call(d,lcEvent('load',d)); }catch(e){fbLogErr(e);} }"
+    "    __G.__tickTimers(0);"
+    "    if (typeof __G.__connectedCallback==='function') __G.__connectedCallback();"
     "  };"
-    /* Generic event dispatcher: looks up handlers in __eventRegistry[node_id][type]
-     * and calls each with an event object. The event props are passed by the C side
-     * (trusted parent) as a plain object; we add target/preventDefault/type here.
-     * Returns 0 if a handler called preventDefault(), 1 otherwise. */
-    "  globalThis.__eventRegistry={};"
-    "  globalThis.__dispatchEvent=function(n,type,props){"
+    /* Event propagation (DOM Standard 2.9, spec/js_dom.md 7d). ONE listener registry
+     * for elements ('n'+handle), the document ('d') and the window ('w'):
+     * LS[key][type] = [{f, c(capture), o(once), rm(removed), on(handler slot)}].
+     * The path is computed before dispatch and bounded (hostile deep DOM). */
+    "  var LS={}, PATH_MAX=4096;"
+    "  var NOBUB={focus:1,blur:1,mouseenter:1,mouseleave:1,scroll:1,load:1};"
+    /* 'o'+id keys are standalone event targets (a WebSocket): registered in __objs,
+     * dispatched at target only -- they are not in the document tree. */
+    "  var OBJS={}; __G.__objRegister=function(id,o){ OBJS[id]=o; };"
+    "  function lsObj(k){ if(k==='w') return __G; if(k==='d') return d;"
+    "    if(k.charAt(0)==='o') return OBJS[k.slice(1)]||null;"
+    "    return __G.__wrap(Number(k.slice(1))); }"
+    "  function capOf(o){ return (typeof o==='boolean')?o:!!(o&&typeof o==='object'&&o.capture); }"
+    "  function isL(fn){ return typeof fn==='function'||(!!fn&&typeof fn.handleEvent==='function'); }"
+    "  function lsArr(k,type,make){ var m=LS[k]; if(!m){ if(!make) return null; m=LS[k]={}; }"
+    "    var a=m[type]; if(!a&&make) a=m[type]=[]; return a||null; }"
+    "  __G.__evAdd=function(k,type,fn,o){ if(!isL(fn)) return; type=String(type);"
+    "    var c=capOf(o), a=lsArr(k,type,true);"
+    "    for(var i=0;i<a.length;i++) if(!a[i].on&&a[i].f===fn&&a[i].c===c) return;"
+    "    a.push({f:fn,c:c,o:!!(o&&typeof o==='object'&&o.once),rm:false,on:false}); };"
+    "  function drop(a,i){ a[i].rm=true; a.splice(i,1); }"
+    "  __G.__evRemove=function(k,type,fn,o){ var a=lsArr(k,String(type),false); if(!a) return;"
+    "    var c=capOf(o);"
+    "    for(var i=0;i<a.length;i++) if(!a[i].on&&a[i].f===fn&&a[i].c===c){ drop(a,i); return; } };"
+    /* on<type> handler property: one slot, kept at the position of its first set. */
+    "  __G.__evHandlerProps=function(obj,k,types){ types.forEach(function(t){"
+    "    Object.defineProperty(obj,'on'+t,{configurable:true,"
+    "      get:function(){ var a=lsArr(k,t,false); if(a) for(var i=0;i<a.length;i++) if(a[i].on) return a[i].f; return null; },"
+    "      set:function(fn){ var a=lsArr(k,t,true);"
+    "        for(var i=0;i<a.length;i++) if(a[i].on){ if(typeof fn==='function') a[i].f=fn; else drop(a,i); return; }"
+    "        if(typeof fn==='function') a.push({f:fn,c:false,o:false,rm:false,on:true}); }}); }); };"
+    "  __G.__evHandlerProps(__G,'w',['popstate','hashchange','message']);"
+    "  function invoke(k,ev,phase){ var a=lsArr(k,ev.type,false); if(!a||!a.length) return;"
+    "    var snap=a.slice(), cur=lsObj(k); ev.currentTarget=cur; ev.eventPhase=phase;"
+    "    for(var i=0;i<snap.length;i++){ var l=snap[i]; if(l.rm) continue;"
+    "      if((phase===1&&!l.c)||(phase===3&&l.c)) continue;"
+    "      if(l.o){ var j=a.indexOf(l); if(j>=0) drop(a,j); }"
+    "      try{ if(typeof l.f==='function') l.f.call(cur,ev); else l.f.handleEvent(ev); }"
+    "      catch(ex){ try{ console.error(ex); }catch(e2){} }"
+    "      if(ev.__si) break; } }"
+    "  function evPath(k){ var p=[k];"
+    "    if(k.charAt(0)==='o') return p;"
+    "    if(k.charAt(0)==='n'){ var n=dom.parent(Number(k.slice(1)));"
+    "      while(n!==null&&p.length<PATH_MAX){ p.push('n'+n); n=dom.parent(n); }"
+    "      p.push('d'); }"
+    "    if(k!=='w') p.push('w'); return p; }"
+    "  __G.__evDispatch=function(k,ev){"
+    "    if(!ev||typeof ev.type!=='string') throw new TypeError('dispatchEvent: not an Event');"
+    "    if(typeof ev.__sp!=='boolean'){ ev.__sp=false; ev.__si=false; }"
+    "    var path=evPath(k), i;"
+    "    ev.target=lsObj(k); ev.__path=path.map(lsObj);"
+    "    for(i=path.length-1;i>0&&!ev.__sp;i--) invoke(path[i],ev,1);"
+    "    if(!ev.__sp) invoke(path[0],ev,2);"
+    "    if(ev.bubbles) for(i=1;i<path.length&&!ev.__sp;i++) invoke(path[i],ev,3);"
+    "    ev.eventPhase=0; ev.currentTarget=null;"
+    "    return !ev.defaultPrevented; };"
+    /* Engine-generated (trusted) event on node n: props carry the input data from
+     * the C side (key/keyCode/value/clientX...). Returns 0 if a listener called
+     * preventDefault(), 1 otherwise. */
+    "  __G.__dispatchEvent=function(n,type,props){"
     "    if(!type) return 1; type=String(type);"
-    "    var reg=globalThis.__eventRegistry; if(!reg) return 1;"
-    "    var na=reg[String(n)]; if(!na) return 1;"
-    "    var ha=na[type]; if(!ha||!ha.length) return 1;"
-    "    var e=props||{}; e.target=globalThis.__wrap(n);"
-    "    e.type=type;"
-    "    e.defaultPrevented=false;"
-    "    e.preventDefault=function(){this.defaultPrevented=true;};"
-    "    e.stopPropagation=function(){}; e.stopImmediatePropagation=function(){};"
-    "    for(var i=0;i<ha.length;i++){"
-    "      try{ ha[i].call(e.target,e); }catch(ex){"
-    "        try{ console.error(ex.stack||String(ex)); }catch(e2){}"
-    "      }"
-    "    }"
-    "    return e.defaultPrevented?0:1;"
+    "    var ev=mkEvent(type,{bubbles:!NOBUB[type],cancelable:true});"
+    "    if(props) for(var p in props) if(Object.prototype.hasOwnProperty.call(props,p)) ev[p]=props[p];"
+    "    ev.isTrusted=true;"
+    "    return __G.__evDispatch('n'+n,ev)?1:0;"
     "  };"
     "})();";
 
@@ -1014,7 +1201,7 @@ static const char JD_DOCUMENT_SHIM[] =
  * never clobbers an existing global. */
 static const char JD_MODERN_SHIM[] =
     "(function(){"
-    "  var g=globalThis;"
+    "  var g=__G;"
     "  function stubCtor(){ function F(){} return F; }"
     "  ['Node','Element','HTMLElement','HTMLDivElement','HTMLSpanElement','HTMLAnchorElement',"
     "   'HTMLImageElement','HTMLInputElement','HTMLButtonElement','HTMLScriptElement','HTMLStyleElement',"
@@ -1030,8 +1217,33 @@ static const char JD_MODERN_SHIM[] =
     "   'HTMLTimeElement','HTMLMapElement','HTMLAreaElement','HTMLModElement','HTMLMediaElement',"
     "   'HTMLDListElement','HTMLFrameSetElement','HTMLFrameElement','HTMLDirectoryElement','HTMLFontElement',"
      "   'XMLDocument','HTMLDocument','Document','DocumentFragment','ShadowRoot','CharacterData','Text','Comment','Attr',"
-     "   'DOMTokenList','NodeList','HTMLCollection','CSSStyleDeclaration','EventTarget'].forEach("
+     "   'DOMTokenList','NodeList','HTMLCollection','CSSStyleDeclaration','EventTarget',"
+     "   'DocumentType','CDATASection','ProcessingInstruction','Window','NamedNodeMap','Range','StaticRange',"
+     "   'Selection','TreeWalker','NodeIterator','Location','History','Navigator','Screen','Storage',"
+     "   'StyleSheet','CSSStyleSheet','CSSRule','MediaQueryList','DOMRect','DOMRectReadOnly'].forEach("
     "    function(n){ if(typeof g[n]==='undefined') g[n]=stubCtor(); });"
+    /* Interface prototype chains (DOM Standard): HTML*Element -> HTMLElement ->
+     * Element -> Node -> EventTarget, Document -> Node, so instanceof answers like a
+     * browser. Only stub constructors (no native ones) are re-chained. */
+    "  function chainTo(c,p){ if(typeof g[c]==='function'&&typeof g[p]==='function'&&g[c]!==g[p])"
+    "    try{ Object.setPrototypeOf(g[c].prototype, g[p].prototype); }catch(e){} }"
+    "  chainTo('Node','EventTarget'); chainTo('Element','Node'); chainTo('HTMLElement','Element');"
+    "  chainTo('SVGElement','Element'); chainTo('Document','Node'); chainTo('HTMLDocument','Document');"
+    "  chainTo('XMLDocument','Document'); chainTo('DocumentFragment','Node'); chainTo('ShadowRoot','DocumentFragment');"
+    "  chainTo('CharacterData','Node'); chainTo('Text','CharacterData'); chainTo('Comment','CharacterData');"
+    "  chainTo('CDATASection','Text'); chainTo('ProcessingInstruction','CharacterData');"
+    "  chainTo('DocumentType','Node'); chainTo('Window','EventTarget'); chainTo('DOMRect','DOMRectReadOnly');"
+    /* the global object IS a Window (window instanceof Window) */
+    "  if(typeof g.Window==='function') try{ Object.setPrototypeOf(g, g.Window.prototype); }catch(e){}"
+    /* DOMException carries name/message (pages throw and inspect it) */
+    "  if(typeof g.DOMException==='undefined'){ g.DOMException=function(m,n){ this.message=String(m===undefined?'':m);"
+    "      this.name=(n===undefined)?'Error':String(n); };"
+    "    g.DOMException.prototype=Object.create(Error.prototype); g.DOMException.prototype.constructor=g.DOMException; }"
+    "  Object.getOwnPropertyNames(g).forEach(function(n){"
+    "    if(/^HTML.+Element$/.test(n)&&n!=='HTMLElement') chainTo(n,'HTMLElement'); });"
+    "  if(typeof g.HTMLElement==='function') g.__elProto=g.HTMLElement.prototype;"
+    "  if(typeof g.HTMLDocument==='function'&&g.document)"
+    "    try{ Object.setPrototypeOf(g.document, g.HTMLDocument.prototype); }catch(e){}"
     "  if(g.Node){ g.Node.ELEMENT_NODE=1; g.Node.TEXT_NODE=3; g.Node.COMMENT_NODE=8;"
     "    g.Node.DOCUMENT_NODE=9; g.Node.DOCUMENT_FRAGMENT_NODE=11; }"
     "  function evCtor(){ return function(type,opts){ return g.__mkEvent?g.__mkEvent(type,opts):{type:String(type)}; }; }"
@@ -1138,6 +1350,36 @@ static const char JD_MODERN_SHIM[] =
   "      return __png_encode(rb(buf),this._w,this._h);"
   "    ;};"
   "  }"
+  "  g.__CanvasCtx=CanvasCtx;"
+  /* The rest of the 2D API as inert operations: pages call them while feature-testing
+   * and drawing; pixels only change through fillRect/clearRect. measureText answers a
+   * deterministic width from the string length (no font-metric leak, anti-fp). */
+  "  g.__canvasFill=function(c){ function nop(){}"
+  "    ['beginPath','closePath','moveTo','lineTo','arc','arcTo','rect','fill','stroke','save','restore',"
+  "     'translate','rotate','scale','setTransform','transform','resetTransform','drawImage','fillText',"
+  "     'strokeText','clip','quadraticCurveTo','bezierCurveTo','ellipse','setLineDash','putImageData',"
+  "     'strokeRect','drawFocusIfNeeded','scrollPathIntoView','roundRect','reset']"
+  "    .forEach(function(n){ if(typeof c[n]!=='function') c[n]=nop; });"
+  "    if(typeof c.measureText!=='function') c.measureText=function(t){ var w=String(t).length*8;"
+  "      return {width:w,actualBoundingBoxLeft:0,actualBoundingBoxRight:w,actualBoundingBoxAscent:10,"
+  "        actualBoundingBoxDescent:2,fontBoundingBoxAscent:12,fontBoundingBoxDescent:3}; };"
+  "    function grad(){ return {addColorStop:nop}; }"
+  "    if(typeof c.createLinearGradient!=='function') c.createLinearGradient=grad;"
+  "    if(typeof c.createRadialGradient!=='function') c.createRadialGradient=grad;"
+  "    if(typeof c.createConicGradient!=='function') c.createConicGradient=grad;"
+  "    if(typeof c.createPattern!=='function') c.createPattern=function(){ return {setTransform:nop}; };"
+  "    if(typeof c.getLineDash!=='function') c.getLineDash=function(){ return []; };"
+  "    if(typeof c.isPointInPath!=='function') c.isPointInPath=function(){ return false; };"
+  "    if(typeof c.isPointInStroke!=='function') c.isPointInStroke=function(){ return false; };"
+  "    if(typeof c.getTransform!=='function') c.getTransform=function(){ return {a:1,b:0,c:0,d:1,e:0,f:0}; };"
+  "    if(typeof c.createImageData!=='function') c.createImageData=function(w,h){"
+  "      w=Math.max(0,Math.min(w|0,1024)); h=Math.max(0,Math.min(h|0,1024));"
+  "      return {width:w,height:h,data:new Uint8ClampedArray(w*h*4)}; };"
+  "    if(typeof c.getImageData!=='function') c.getImageData=function(x,y,w,h){ return c.createImageData(w,h); };"
+  "    ['lineWidth','globalAlpha','font','textAlign','textBaseline','strokeStyle','lineCap','lineJoin',"
+  "     'shadowBlur','shadowColor','globalCompositeOperation','imageSmoothingEnabled','filter']"
+  "    .forEach(function(n){ if(!(n in c)) c[n]=(n==='globalAlpha'?1:n==='lineWidth'?1:''); });"
+  "    return c; };"
   "  if(typeof g.HTMLCanvasElement!=='undefined'){"
   "    g.HTMLCanvasElement=function(w,h){this.width=w||300;this.height=h||150;"
   "      this.getContext=function(t){"
@@ -1173,8 +1415,13 @@ static const char JD_MODERN_SHIM[] =
     "    return new Proxy(o,{ get:function(t,p){ if(p in t) return t[p]; return ''; } }); };"
     "  function ro(name,val){ if(typeof g[name]==='undefined'){ try{ Object.defineProperty(g,name,"
     "    {get:function(){return val;},configurable:true}); }catch(e){ try{ g[name]=val; }catch(e2){} } } }"
-    "  ro('innerWidth',1920); ro('innerHeight',1080); ro('outerWidth',1920); ro('outerHeight',1080);"
-    "  ro('devicePixelRatio',1); ro('scrollX',0); ro('scrollY',0); ro('pageXOffset',0); ro('pageYOffset',0);"
+    /* Viewport/scroll: real only with installed geometry (trusted host), else the
+     * normalized identity. outer* and devicePixelRatio stay normalized always. */
+    "  function vro(name,i,val){ if(typeof g[name]==='undefined'){ try{ Object.defineProperty(g,name,"
+    "    {get:function(){ var v=dom.viewport(); return v?v[i]:val; },configurable:true}); }"
+    "    catch(e){ try{ g[name]=val; }catch(e2){} } } }"
+    "  vro('innerWidth',2,1920); vro('innerHeight',3,1080); ro('outerWidth',1920); ro('outerHeight',1080);"
+    "  ro('devicePixelRatio',1); vro('scrollX',0,0); vro('scrollY',1,0); vro('pageXOffset',0,0); vro('pageYOffset',1,0);"
     "  if(typeof g.scrollTo==='undefined') g.scrollTo=function(){};"
     "  if(typeof g.scrollBy==='undefined') g.scrollBy=function(){};"
     "  if(typeof g.scroll==='undefined') g.scroll=function(){};"
@@ -1365,7 +1612,7 @@ static const char JD_MODERN_SHIM[] =
  * throws TypeError, as the standard requires. */
 static const char JD_URL_SHIM[] =
     "(function(){"
-    "  var g=globalThis;"
+    "  var g=__G;"
     "  function encf(s){ return encodeURIComponent(String(s)).replace(/%20/g,'+'); }"
     "  function decf(s){ try{ return decodeURIComponent(String(s).replace(/\\+/g,' ')); }"
     "    catch(e){ return String(s); } }"
@@ -1470,51 +1717,6 @@ static const char JD_URL_SHIM[] =
     "    g.URL=URLc; }"
     "})();";
 
-/* --- real location + JS-navigation capture (Hito 20e parte 1) --- */
-
-/* Defines a string property on the __locParts data object from a (ptr,len) span.
- * The span is copied into an engine string; a NULL span becomes "". */
-static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
-                      const char *p, size_t len) {
-    JSValue s = (p != NULL) ? JS_NewStringLen(ctx, p, len) : JS_NewString(ctx, "");
-    JS_SetPropertyStr(ctx, obj, name, s); /* consumes s; name copied */
-}
-
-/* Reads the page URL components from globalThis.__locParts (set natively, so a hostile
- * URL is never interpolated into JS) and installs a real, read-only `location`. The
- * navigating writes only RECORD the raw request into __navReq/__navReplace; they never
- * execute or resolve it. The trusted parent gates the raw string with ln_resolve. */
-static const char JD_LOCATION_SHIM[] =
-    "(function(){"
-    "  var lp = globalThis.__locParts || {};"
-    "  function nav(u, replace){ globalThis.__navReq = String(u);"
-    "    globalThis.__navReplace = !!replace; }"
-    "  var loc = {"
-    "    get href(){ return lp.href||''; }, set href(v){ nav(v,false); },"
-    "    get protocol(){ return lp.protocol||'https:'; },"
-    "    get host(){ return lp.host||''; },"
-    "    get hostname(){ return lp.hostname||''; },"
-    "    get port(){ return lp.port||''; },"
-    "    get pathname(){ return lp.pathname||'/'; },"
-    "    get search(){ return lp.search||''; },"
-    "    get hash(){ return lp.hash||''; },"
-    "    get origin(){ return lp.origin||''; },"
-    "    assign: function(u){ nav(u,false); },"
-    "    replace: function(u){ nav(u,true); },"
-    "    reload: function(){ nav(lp.href||'', true); },"
-    "    toString: function(){ return lp.href||''; }"
-    "  };"
-    "  try{ Object.defineProperty(globalThis,'location',{configurable:true,"
-    "    get:function(){return loc;}, set:function(v){ nav(v,false); }}); }catch(e){}"
-    "  try{ if(typeof document!=='undefined'){"
-    "    Object.defineProperty(document,'location',{configurable:true,enumerable:true,"
-    "      get:function(){return loc;}, set:function(v){ nav(v,false); }});"
-    "    Object.defineProperty(document,'URL',{configurable:true,enumerable:true,"
-    "      get:function(){return lp.href||'';}});"
-    "    Object.defineProperty(document,'documentURI',{configurable:true,enumerable:true,"
-    "      get:function(){return lp.href||'';}});"
-    "  } }catch(e){}"
-    "})();";
 
 jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
     if (ctx == NULL || idx == NULL || opaque == NULL) return JD_ERR_NULL_ARG;
@@ -1526,6 +1728,20 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
     memset(opaque, 0, sizeof *opaque);
     opaque->idx = idx;
     JS_SetContextOpaque(jsctx, (void *)opaque);
+
+    /* __G: the real global object, bound BEFORE any shim runs, non-writable and
+     * non-configurable. Every shim resolves the global through it, never through the
+     * identifier `globalThis`, which page polyfills rebind (openstreetmap.org did:
+     * every listener registration then failed). A page cannot replace it (`var __G=`
+     * is a silent no-op) nor shadow it (`let __G` is a SyntaxError on a
+     * non-configurable global property). */
+    {
+        JSValue g0 = JS_GetGlobalObject(jsctx);
+        if (JS_IsException(g0)) return JD_ERR_OOM;
+        int drc = JS_DefinePropertyValueStr(jsctx, g0, "__G", JS_DupValue(jsctx, g0), 0);
+        JS_FreeValue(jsctx, g0);
+        if (drc < 0) return JD_ERR_INTERNAL;
+    }
 
     JSValue dom = JS_NewObject(jsctx);
     if (JS_IsException(dom)) return JD_ERR_OOM;
@@ -1568,7 +1784,10 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
                          "<url-shim>", JS_EVAL_TYPE_GLOBAL);
     int url_ok = !JS_IsException(r3);
     JS_FreeValue(jsctx, r3);
-    return url_ok ? JD_OK : JD_ERR_INTERNAL;
+    if (!url_ok) return JD_ERR_INTERNAL;
+    /* DOM Standard extras + data APIs: after the interface chains (modern shim) and
+     * after URL (object URLs hang off it). */
+    return (jdx_install(jsctx) == 0) ? JD_OK : JD_ERR_INTERNAL;
 }
 
 /* --- capturing console (Freebug) --- */
@@ -1613,6 +1832,50 @@ static JSValue m_console(JSContext *ctx, JSValueConst this_val,
         if (i > 0 && cb_append(&msg, &len, &cap, " ", 1)) break;
         size_t sl = 0;
         const char *s = NULL;
+        char tagbuf[96];
+        /* An Error prints its stack (or "Name: message"): JSON of an Error is "{}"
+         * because none of its fields are own-enumerable, which hid every reported
+         * failure. An element wrapper prints as <tag#id>. */
+        if (JS_IsError(argv[i])) {
+            JSValue st = JS_GetPropertyStr(ctx, argv[i], "stack");
+            JSValue txt = JS_ToString(ctx, argv[i]);   /* "Name: message" */
+            const char *a = JS_IsString(txt) ? JS_ToCString(ctx, txt) : NULL;
+            const char *b = JS_IsString(st) ? JS_ToCString(ctx, st) : NULL;
+            if (a != NULL) {
+                full = cb_append(&msg, &len, &cap, a, strlen(a));
+                JS_FreeCString(ctx, a);
+            }
+            if (b != NULL && !full) {
+                full = cb_append(&msg, &len, &cap, "\n", 1)
+                    || cb_append(&msg, &len, &cap, b, strlen(b));
+                JS_FreeCString(ctx, b);
+            } else if (b != NULL) {
+                JS_FreeCString(ctx, b);
+            }
+            if (JS_IsException(txt)) JS_FreeValue(ctx, JS_GetException(ctx));
+            JS_FreeValue(ctx, txt);
+            JS_FreeValue(ctx, st);
+            continue;
+        }
+        if (JS_IsObject(argv[i])) {
+            JSValue hv = JS_GetPropertyStr(ctx, argv[i], "_h");
+            int32_t hid = -1;
+            if (JS_IsNumber(hv) && JS_ToInt32(ctx, &hid, hv) == 0 && hid >= 0) {
+                size_t tl = 0, il = 0;
+                const char *tag = dom_tag_name(jd_idx(ctx), (dom_node_id)hid, &tl);
+                const char *id = dom_get_attribute(jd_idx(ctx), (dom_node_id)hid, "id", &il);
+                int n = snprintf(tagbuf, sizeof tagbuf, "<%.*s%s%.*s>",
+                                 (int)(tl < 40 ? tl : 40), tag != NULL ? tag : "?",
+                                 (id != NULL && il != 0) ? "#" : "",
+                                 (int)(il < 40 ? il : 40), id != NULL ? id : "");
+                if (n > 0 && (size_t)n < sizeof tagbuf) {
+                    JS_FreeValue(ctx, hv);
+                    full = cb_append(&msg, &len, &cap, tagbuf, (size_t)n);
+                    continue;
+                }
+            }
+            JS_FreeValue(ctx, hv);
+        }
         if (JS_IsObject(argv[i])) {
             JSValue json = JS_JSONStringify(ctx, argv[i], JS_UNDEFINED, JS_UNDEFINED);
             if (!JS_IsException(json)) {
@@ -1641,7 +1904,7 @@ static JSValue m_console(JSContext *ctx, JSValueConst this_val,
 /* Non-capturing console methods scripts commonly call: defined as no-ops so they
  * never throw a ReferenceError (they produce no Freebug entry). */
 static const char JD_CONSOLE_EXTRA[] =
-    "(function(){var c=globalThis.console;"
+    "(function(){var c=__G.console;"
     "['assert','group','groupCollapsed','groupEnd','count','countReset',"
     "'time','timeEnd','timeLog','table','clear','dirxml'].forEach("
     "function(k){ if(typeof c[k]!=='function') c[k]=function(){}; });})();";
@@ -1682,39 +1945,6 @@ jd_status jd_install_console(js_context *ctx, fb_buffer *log) {
     return ok ? JD_OK : JD_ERR_INTERNAL;
 }
 
-jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts) {
-    if (ctx == NULL) return JD_ERR_NULL_ARG;
-    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
-    if (jsctx == NULL) return JD_ERR_INTERNAL;
-
-    JSValue global = JS_GetGlobalObject(jsctx);
-    if (JS_IsException(global)) return JD_ERR_OOM;
-
-    JSValue lp = JS_NewObject(jsctx);
-    if (JS_IsException(lp)) { JS_FreeValue(jsctx, global); return JD_ERR_OOM; }
-
-    jd_lp_set(jsctx, lp, "href", href, (href != NULL) ? strlen(href) : 0);
-    if (parts != NULL) {
-        jd_lp_set(jsctx, lp, "protocol", parts->protocol, parts->protocol_len);
-        jd_lp_set(jsctx, lp, "origin",   parts->origin,   parts->origin_len);
-        jd_lp_set(jsctx, lp, "host",     parts->host,     parts->host_len);
-        jd_lp_set(jsctx, lp, "hostname", parts->hostname, parts->hostname_len);
-        jd_lp_set(jsctx, lp, "port",     parts->port,     parts->port_len);
-        jd_lp_set(jsctx, lp, "pathname", parts->pathname, parts->pathname_len);
-        jd_lp_set(jsctx, lp, "search",   parts->search,   parts->search_len);
-        jd_lp_set(jsctx, lp, "hash",     parts->hash,     parts->hash_len);
-    }
-    JS_SetPropertyStr(jsctx, global, "__locParts", lp);  /* consumes lp */
-    JS_SetPropertyStr(jsctx, global, "__navReq", JS_NewString(jsctx, ""));
-    JS_SetPropertyStr(jsctx, global, "__navReplace", JS_NewBool(jsctx, 0));
-    JS_FreeValue(jsctx, global);
-
-    JSValue r = JS_Eval(jsctx, JD_LOCATION_SHIM, sizeof JD_LOCATION_SHIM - 1,
-                        "<location-shim>", JS_EVAL_TYPE_GLOBAL);
-    int ok = !JS_IsException(r);
-    JS_FreeValue(jsctx, r);
-    return ok ? JD_OK : JD_ERR_INTERNAL;
-}
 
 jd_status jd_set_cookies(js_context *ctx, const char *cookies) {
     if (ctx == NULL) return JD_ERR_NULL_ARG;
@@ -1728,8 +1958,8 @@ jd_status jd_set_cookies(js_context *ctx, const char *cookies) {
                       JS_NewString(jsctx, (cookies != NULL) ? cookies : ""));
     JS_FreeValue(jsctx, global);
     static const char en[] =
-        "if(typeof __ckEnable==='function'){__ckEnable(globalThis.__ckSeed);"
-        "globalThis.__ckSeed=undefined;}";
+        "if(typeof __ckEnable==='function'){__ckEnable(__G.__ckSeed);"
+        "__G.__ckSeed=undefined;}";
     JSValue r = JS_Eval(jsctx, en, sizeof en - 1, "<cookie-seed>", JS_EVAL_TYPE_GLOBAL);
     int ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
@@ -1758,727 +1988,13 @@ int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz) {
     return n;
 }
 
-int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace) {
-    if (replace != NULL) *replace = 0;
-    if (ctx == NULL || buf == NULL || bufsz == 0) return 0;
-    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
-    if (jsctx == NULL) return 0;
 
-    JSValue global = JS_GetGlobalObject(jsctx);
-    if (JS_IsException(global)) return 0;
-
-    buf[0] = '\0';
-    int present = 0;
-    JSValue req = JS_GetPropertyStr(jsctx, global, "__navReq");
-    if (!JS_IsUndefined(req) && !JS_IsNull(req)) {
-        const char *s = JS_ToCString(jsctx, req);
-        if (s != NULL && s[0] != '\0') {
-            size_t n = strlen(s);
-            if (n >= bufsz) n = bufsz - 1;
-            memcpy(buf, s, n);
-            buf[n] = '\0';
-            present = 1;
-        }
-        if (s != NULL) JS_FreeCString(jsctx, s);
-    }
-    JS_FreeValue(jsctx, req);
-
-    if (present && replace != NULL) {
-        JSValue rep = JS_GetPropertyStr(jsctx, global, "__navReplace");
-        *replace = JS_ToBool(jsctx, rep) ? 1 : 0;
-        JS_FreeValue(jsctx, rep);
-    }
-    if (present) /* clear so a later op does not re-trigger the same navigation */
-        JS_SetPropertyStr(jsctx, global, "__navReq", JS_NewString(jsctx, ""));
-
-    JS_FreeValue(jsctx, global);
-    return present;
-}
-
-/* --- XMLHttpRequest / fetch (parent-gated network; sovereignty boundary) --- */
-
-/* Carry the host fetch fn + its ctx as a function's closure data, each split into
- * 32-bit halves (no assumption about JS number width). The data lives with the
- * function object and is freed with the context: no global state, no leak. */
-static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p) {
-    uint64_t u = (uint64_t)(uintptr_t)p;
-    out2[0] = JS_NewInt32(ctx, (int32_t)(uint32_t)(u & 0xFFFFFFFFu));
-    out2[1] = JS_NewInt32(ctx, (int32_t)(uint32_t)(u >> 32));
-}
-static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi) {
-    int32_t l = 0, h = 0;
-    JS_ToInt32(ctx, &l, lo);
-    JS_ToInt32(ctx, &h, hi);
-    uint64_t u = ((uint64_t)(uint32_t)h << 32) | (uint32_t)l;
-    return (void *)(uintptr_t)u;
-}
-
-/* __hostFetch(method, url, body) -> { status, body, contentType }. The ONLY network
- * primitive exposed to script; it does NOT touch a socket -- it calls the host fetch
- * callback, which proxies to the trusted parent (full network policy re-applied there).
- * Fail-closed: a refused/failed request yields { status:0, body:'', contentType:'' },
- * never an exception that tells the page why. */
-static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
-                            int argc, JSValueConst *argv, int magic, JSValue *fd) {
-    (void)this_val; (void)magic;
-    jd_fetch_fn fn = (jd_fetch_fn)jd_unpack_ptr(ctx, fd[0], fd[1]);
-    void *fctx     = jd_unpack_ptr(ctx, fd[2], fd[3]);
-
-    const char *method = (argc > 0) ? JS_ToCString(ctx, argv[0]) : NULL;
-    const char *url    = (argc > 1) ? JS_ToCString(ctx, argv[1]) : NULL;
-    size_t blen = 0;
-    const char *body   = (argc > 2 && !JS_IsUndefined(argv[2]) && !JS_IsNull(argv[2]))
-                         ? JS_ToCStringLen(ctx, &blen, argv[2]) : NULL;
-
-    int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL;
-    int rc = -1;
-    if (fn != NULL && url != NULL)
-        rc = fn(fctx, method ? method : "GET", url, body ? body : "", blen,
-                &status, &rbody, &rlen, &rctype);
-
-    JSValue o = JS_NewObject(ctx);
-    if (rc == 0) {
-        JS_SetPropertyStr(ctx, o, "status", JS_NewInt32(ctx, status));
-        JS_SetPropertyStr(ctx, o, "body", JS_NewStringLen(ctx, rbody ? rbody : "", rlen));
-        /* R7e: raw binary body as Uint8Array for arrayBuffer responseType. */
-        JSValue buf = JS_NewArrayBufferCopy(ctx, (const uint8_t *)(rbody ? rbody : ""), rlen);
-        if (!JS_IsException(buf)) {
-            JS_SetPropertyStr(ctx, o, "bodyRaw", buf);
-        } else {
-            JS_SetPropertyStr(ctx, o, "bodyRaw", JS_NULL);
-            JS_FreeValue(ctx, buf);
-        }
-        JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, rctype ? rctype : ""));
-    } else { /* fail-closed */
-        JS_SetPropertyStr(ctx, o, "status", JS_NewInt32(ctx, 0));
-        JS_SetPropertyStr(ctx, o, "body", JS_NewString(ctx, ""));
-        JS_SetPropertyStr(ctx, o, "bodyRaw", JS_NULL);
-        JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, ""));
-    }
-    free(rbody); free(rctype);
-    if (method != NULL) JS_FreeCString(ctx, method);
-    if (url != NULL)    JS_FreeCString(ctx, url);
-    if (body != NULL)   JS_FreeCString(ctx, body);
-    return o;
-}
-
-/* XMLHttpRequest + fetch over the single synchronous __hostFetch primitive. The
- * round-trip is synchronous under the hood (the worker blocks on the parent), so XHR
- * callbacks fire right after send(); fetch returns a resolved promise (its .then/await
- * run when the worker pumps the job queue). __hostFetch is captured into a closure and
- * then deleted from the global, so page script cannot call it directly. */
-static const char JD_XHR_SHIM[] =
-    "(function(){"
-    "var HF=globalThis.__hostFetch; if(typeof HF!=='function')return;"
-    "function fire(o,n){var f=o['on'+n]; if(typeof f==='function'){try{f.call(o);}catch(e){}}}"
-    "function XHR(){this.readyState=0;this.status=0;this.statusText='';this.responseText='';"
-    "this.response='';this.responseType='';this.responseURL='';this.withCredentials=false;"
-    "this.onreadystatechange=null;this.onload=null;this.onerror=null;this.onloadend=null;"
-    "this._m='GET';this._u='';this._h='';}"
-    "XHR.UNSENT=0;XHR.OPENED=1;XHR.HEADERS_RECEIVED=2;XHR.LOADING=3;XHR.DONE=4;"
-    "XHR.prototype.open=function(m,u){this._m=String(m||'GET');this._u=String(u||'');"
-    "this.responseURL=this._u;this.readyState=1;fire(this,'readystatechange');};"
-    "XHR.prototype.setRequestHeader=function(){};"
-    "XHR.prototype.getAllResponseHeaders=function(){return this._h;};"
-    "XHR.prototype.getResponseHeader=function(k){k=String(k).toLowerCase();"
-    "var ls=this._h.split('\\r\\n');for(var i=0;i<ls.length;i++){var p=ls[i].indexOf(':');"
-    "if(p>0&&ls[i].slice(0,p).toLowerCase().trim()===k)return ls[i].slice(p+1).trim();}return null;};"
-    "XHR.prototype.abort=function(){};XHR.prototype.overrideMimeType=function(){};"
-    "XHR.prototype.send=function(b){var r;try{r=HF(this._m,this._u,(b==null?'':String(b)));}catch(e){r=null;}"
-    "if(!r||(r.status|0)===0){this.status=0;this.readyState=4;fire(this,'readystatechange');"
-    "fire(this,'error');fire(this,'loadend');return;}"
-    "this.status=r.status|0;this.responseText=r.body||'';"
-    "this._h=r.contentType?('content-type: '+r.contentType+'\\r\\n'):'';"
-    "if(this.responseType==='arraybuffer'){"
-    "  if(r.bodyRaw&&r.bodyRaw.buffer&&r.bodyRaw.buffer!==r.bodyRaw){"
-    "    try{this.response=r.bodyRaw.buffer;}catch(e){this.response=r.bodyRaw;}"
-    "  }else{this.response=r.bodyRaw;}"
-    "}else if(this.responseType==='json'){try{this.response=JSON.parse(this.responseText);}catch(e){this.response=null;}}"
-    "else{this.response=this.responseText;}"
-    "this.readyState=4;fire(this,'readystatechange');fire(this,'load');fire(this,'loadend');};"
-    "Object.defineProperty(globalThis,'XMLHttpRequest',{configurable:true,writable:true,value:XHR});"
-    "globalThis.fetch=function(u,opt){opt=opt||{};var r;"
-    "try{r=HF(String(opt.method||'GET'),String(u),(opt.body==null?'':String(opt.body)));}catch(e){r=null;}"
-    "var st=r?(r.status|0):0;var bt=r?(r.body||''):'';var ct=r?(r.contentType||''):'';"
-    "var ok=st>=200&&st<300;"
-    "var resp={ok:ok,status:st,statusText:'',url:String(u),redirected:false,type:'basic',bodyUsed:false,"
-    "headers:{get:function(k){return(String(k).toLowerCase()==='content-type'&&ct)?ct:null;},"
-    "has:function(k){return String(k).toLowerCase()==='content-type'&&!!ct;},forEach:function(){}},"
-    "text:function(){return Promise.resolve(bt);},"
-    "json:function(){try{return Promise.resolve(JSON.parse(bt));}catch(e){return Promise.reject(e);}},"
-    "arrayBuffer:function(){return Promise.resolve(r&&r.bodyRaw?r.bodyRaw:new Uint8Array(0).buffer);},clone:function(){return resp;}};"
-    "return st===0?Promise.reject(new TypeError('Failed to fetch')):Promise.resolve(resp);};"
-    "try{delete globalThis.__hostFetch;}catch(e){}"
-    "})();";
-
-jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx) {
-    if (ctx == NULL || fn == NULL) return JD_ERR_NULL_ARG;
-    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
-    if (jsctx == NULL) return JD_ERR_INTERNAL;
-
-    JSValue data[4];
-    jd_pack_ptr(jsctx, &data[0], (const void *)fn);
-    jd_pack_ptr(jsctx, &data[2], (const void *)fetch_ctx);
-    JSValue hf = JS_NewCFunctionData(jsctx, m_host_fetch, 3, 0, 4, data);
-    for (int i = 0; i < 4; ++i) JS_FreeValue(jsctx, data[i]);
-    if (JS_IsException(hf)) return JD_ERR_OOM;
-
-    JSValue global = JS_GetGlobalObject(jsctx);
-    if (JS_IsException(global)) { JS_FreeValue(jsctx, hf); return JD_ERR_OOM; }
-    JS_SetPropertyStr(jsctx, global, "__hostFetch", hf); /* consumes hf */
-    JS_FreeValue(jsctx, global);
-
-    JSValue r = JS_Eval(jsctx, JD_XHR_SHIM, sizeof JD_XHR_SHIM - 1,
-                        "<xhr-shim>", JS_EVAL_TYPE_GLOBAL);
-    int ok = !JS_IsException(r);
-    JS_FreeValue(jsctx, r);
-    return ok ? JD_OK : JD_ERR_INTERNAL;
-}
-
-/* --- click events (Stage 4 dispatcher keystone) --- */
-
-struct jd_click_state {
-    int installed; /* nonzero after jd_install_events succeeds */
-};
-
-jd_click_state *jd_click_state_new(void) {
-    jd_click_state *s = (jd_click_state *)calloc(1, sizeof *s);
-    return s;
-}
-
-void jd_click_state_free(jd_click_state *s) {
-    free(s);
-}
-
-jd_status jd_install_events(js_context *ctx, jd_click_state *state) {
-    if (ctx == NULL || state == NULL) return JD_ERR_NULL_ARG;
+jd_status jd_set_geometry(js_context *ctx, const jg_table *geom) {
+    if (ctx == NULL) return JD_ERR_NULL_ARG;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return JD_ERR_INTERNAL;
     jd_opaque *o = jd_opaque_get(jsctx);
     if (o == NULL) return JD_ERR_INTERNAL;
-    o->click = state;
-    state->installed = 1;
+    o->geom = geom;
     return JD_OK;
-}
-
-int jd_fire_click(js_context *ctx, dom_node_id node_id) {
-    if (ctx == NULL || node_id == DOM_NODE_NONE) return 1;
-    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
-    if (jsctx == NULL) return 1;
-
-    /* Build and run: var e={target:__wrap(n),preventDefault:function(){this.defaultPrevented=true},defaultPrevented:false}; var f=__clickRegistry[n]; if(typeof f==='function'){ f.call(e.target,e); } e.defaultPrevented?0:1; */
-    char src[512];
-    int n = snprintf(src, sizeof src,
-        "(function(){var n=%u;var f=globalThis.__clickRegistry[n];"
-        "if(typeof f!=='function')return 1;"
-        "var e={target:globalThis.__wrap(n),preventDefault:function(){this.defaultPrevented=true},defaultPrevented:false};"
-        "f.call(e.target,e);return e.defaultPrevented?0:1;})();",
-        (unsigned)node_id);
-    if (n < 0 || (size_t)n >= sizeof src) return 1;
-
-    JSValue r = JS_Eval(jsctx, src, (size_t)n, "<click-fire>", JS_EVAL_TYPE_GLOBAL);
-    int default_action = 1;
-    if (!JS_IsException(r)) {
-        int32_t v = 1;
-        JS_ToInt32(jsctx, &v, r);
-        default_action = v != 0 ? 1 : 0;
-    }
-    JS_FreeValue(jsctx, r);
-    return default_action;
-}
-
-/* Fires the submit event for form_node_id. Returns 0 if preventDefault() was
- * called, 1 if the default action should proceed. */
-int jd_fire_submit(js_context *ctx, dom_node_id form_node_id) {
-    if (ctx == NULL || form_node_id == DOM_NODE_NONE) return 1;
-    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
-    if (jsctx == NULL) return 1;
-
-    char src[512];
-    int n = snprintf(src, sizeof src,
-        "(function(){var n=%u;var f=globalThis.__submitRegistry[n];"
-        "if(typeof f!=='function')return 1;"
-        "var e={target:globalThis.__wrap(n),type:'submit',preventDefault:function(){this.defaultPrevented=true},defaultPrevented:false};"
-        "f.call(e.target,e);return e.defaultPrevented?0:1;})();",
-        (unsigned)form_node_id);
-    if (n < 0 || (size_t)n >= sizeof src) return 1;
-
-    JSValue r = JS_Eval(jsctx, src, (size_t)n, "<submit-fire>", JS_EVAL_TYPE_GLOBAL);
-    int default_action = 1;
-    if (!JS_IsException(r)) {
-        int32_t v = 1;
-        JS_ToInt32(jsctx, &v, r);
-        default_action = v != 0 ? 1 : 0;
-    }
-    JS_FreeValue(jsctx, r);
-    return default_action;
-}
-
-/* Escapes a string for safe interpolation into JS double-quoted string literal:
- * replaces backslash with \\ and double-quote with \". Returns number of bytes
- * written. Truncates if dst is too small (intended for bounded stack buffers). */
-static size_t jd_escape_js_str(const char *src, char *dst, size_t dstsz) {
-    size_t pos = 0;
-    if (dstsz == 0) return 0;
-    for (const char *p = src; *p != '\0' && pos + 6 < dstsz; ++p) {
-        unsigned char c = (unsigned char)*p;
-        if (c < 0x20) {  /* control chars: skip */
-            continue;
-        } else if (c == '\\' || c == '"') {
-            if (pos + 2 >= dstsz) break;
-            dst[pos++] = '\\';
-            dst[pos++] = c;
-        } else {
-            dst[pos++] = c;
-        }
-    }
-    dst[pos] = '\0';
-    return pos;
-}
-
-/* Fires a generic DOM event on node_id by calling
- * __dispatchEvent(node_id, event_type, {key, keyCode, value}).
- * Returns 1 if the default action should proceed, 0 if a handler called
- * preventDefault(). Fail-open: if anything goes wrong, action proceeds.
- * The key and value strings are escaped before interpolation into JS source
- * (defence in depth: the data comes from the trusted GUI, but a hostile
- * keyboard/input value must not be able to inject code). */
-int jd_fire_event(js_context *ctx, dom_node_id node_id,
-                  const char *event_type,
-                  const char *key, int key_code,
-                  const char *value) {
-    if (ctx == NULL || node_id == DOM_NODE_NONE || event_type == NULL) return 1;
-    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
-    if (jsctx == NULL) return 1;
-
-    /* Sanitise the event_type string: must be a simple identifier (no injection). */
-    for (const char *p = event_type; *p != '\0'; ++p) {
-        if (!((*p >= 'a' && *p <= 'z') || *p == '_')) return 1;
-    }
-
-    /* Escape key and value strings to prevent JS injection. */
-    char escaped_key[128];
-    char escaped_val[512];
-    if (key != NULL) jd_escape_js_str(key, escaped_key, sizeof escaped_key);
-    else escaped_key[0] = '\0';
-    if (value != NULL) jd_escape_js_str(value, escaped_val, sizeof escaped_val);
-    else escaped_val[0] = '\0';
-
-    /* Build: __dispatchEvent(NODE_ID, "event_type", {key: "...", keyCode: N, value: "..."}) */
-    char src[1536];
-    int n;
-    if (key != NULL && key[0] != '\0' && value != NULL && value[0] != '\0') {
-        n = snprintf(src, sizeof src,
-            "__dispatchEvent(%u,\"%s\",{key:\"%s\",keyCode:%d,value:\"%s\"})",
-            (unsigned)node_id, event_type, escaped_key, key_code, escaped_val);
-    } else if (key != NULL && key[0] != '\0') {
-        n = snprintf(src, sizeof src,
-            "__dispatchEvent(%u,\"%s\",{key:\"%s\",keyCode:%d})",
-            (unsigned)node_id, event_type, escaped_key, key_code);
-    } else if (value != NULL && value[0] != '\0') {
-        n = snprintf(src, sizeof src,
-            "__dispatchEvent(%u,\"%s\",{value:\"%s\"})",
-            (unsigned)node_id, event_type, escaped_val);
-    } else {
-        n = snprintf(src, sizeof src,
-            "__dispatchEvent(%u,\"%s\",{keyCode:%d})",
-            (unsigned)node_id, event_type, key_code);
-    }
-    if (n < 0 || (size_t)n >= sizeof src) return 1;
-
-    JSValue r = JS_Eval(jsctx, src, (size_t)n, "<event-fire>", JS_EVAL_TYPE_GLOBAL);
-    int default_action = 1;
-    if (!JS_IsException(r)) {
-        int32_t v = 1;
-        JS_ToInt32(jsctx, &v, r);
-        default_action = (v != 0) ? 1 : 0;
-    }
-    JS_FreeValue(jsctx, r);
-    return default_action;
-}
-
-int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id,
-                        const char *event_type,
-                        int client_x, int client_y, int button) {
-    if (ctx == NULL || node_id == DOM_NODE_NONE || event_type == NULL) return 1;
-    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
-    if (jsctx == NULL) return 1;
-
-    /* Sanitise the event_type string. */
-    for (const char *p = event_type; *p != '\0'; ++p) {
-        if (!((*p >= 'a' && *p <= 'z') || *p == '_')) return 1;
-    }
-
-    char src[1536];
-    int n = snprintf(src, sizeof src,
-        "__dispatchEvent(%u,\"%s\",{clientX:%d,clientY:%d,button:%d})",
-        (unsigned)node_id, event_type, client_x, client_y, button);
-    if (n < 0 || (size_t)n >= sizeof src) return 1;
-
-    JSValue r = JS_Eval(jsctx, src, (size_t)n, "<mouse-event>", JS_EVAL_TYPE_GLOBAL);
-    int default_action = 1;
-    if (!JS_IsException(r)) {
-        int32_t v = 1;
-        JS_ToInt32(jsctx, &v, r);
-        default_action = (v != 0) ? 1 : 0;
-    }
-    JS_FreeValue(jsctx, r);
-    return default_action;
-}
-
-/* Scans a string `val` (len `vlen`) for `<iframe` and extracts its `src`
- * attribute value (URL). Writes the URL into `out` (bounded by `outsz`).
- * Returns 1 if found, 0 otherwise. Only matches absolute URLs (http/https)
- * and root-relative URLs (starting with /). */
-static int extract_iframe_src(const char *val, size_t vlen,
-                               char *out, size_t outsz) {
-    if (val == NULL || vlen == 0 || out == NULL || outsz == 0) return 0;
-    const char *end = val + vlen;
-    const char *p = (const char *)memmem(val, vlen, "iframe", 6);
-    if (p == NULL) return 0;
-    /* Find src= after iframe */
-    const char *s = (const char *)memmem(p, (size_t)(end - p), "src", 3);
-    if (s == NULL) return 0;
-    const char *eq = s + 3;
-    while (eq < end && (*eq == ' ' || *eq == '\t' || *eq == '=')) eq++;
-    if (eq >= end || (*eq != '"' && *eq != '\'')) return 0;
-    char q = *eq;
-    const char *url_start = eq + 1;
-    const char *url_end = (const char *)memmem(url_start, (size_t)(end - url_start), &q, 1);
-    if (url_end == NULL) return 0;
-    size_t ulen = (size_t)(url_end - url_start);
-    if (ulen == 0 || ulen >= outsz) return 0;
-    memcpy(out, url_start, ulen);
-    out[ulen] = '\0';
-    return 1;
-}
-
-/* Resolves a potentially relative URL (root-relative: starts with /) against
- * page_url, writing the result into `out` (bounded by outsz). If the URL is
- * already absolute (starts with http:// or https://), it's copied as-is.
- * If page_url is NULL or parsing fails, the original URL is used. */
-static void resolve_video_url(const char *url, const char *page_url,
-                               char *out, size_t outsz) {
-    if (out == NULL || outsz == 0) return;
-    out[0] = '\0';
-    if (url == NULL || url[0] == '\0') return;
-    /* Already absolute: copy as-is */
-    if (strncmp(url, "http://", 7) == 0 || strncmp(url, "https://", 8) == 0) {
-        size_t ulen = strlen(url);
-        if (ulen < outsz) { memcpy(out, url, ulen + 1); }
-        return;
-    }
-    /* Root-relative: prepend origin from page_url */
-    if (url[0] == '/' && page_url != NULL && page_url[0] != '\0') {
-        url_parts parts;
-        if (url_split(page_url, &parts) == URL_OK && parts.origin != NULL) {
-            size_t olen = parts.origin_len;
-            size_t ulen = strlen(url);
-            if (olen + ulen < outsz) {
-                memcpy(out, parts.origin, olen);
-                memcpy(out + olen, url, ulen + 1);
-                return;
-            }
-        }
-    }
-    /* Fallback: copy as-is */
-    size_t ulen = strlen(url);
-    if (ulen < outsz) memcpy(out, url, ulen + 1);
-}
-
-/* Scans an inline script body for `video[N]` or `video_data` assignment
- * and extracts the first usable iframe src. Returns 1 if an iframe was
- * created in the DOM, 0 otherwise. */
-static int try_create_iframe_from_script(dom_index *idx,
-                                          const char *text, size_t len,
-                                          const char *page_url) {
-    if (idx == NULL || text == NULL || len == 0) return 0;
-    const char *end = text + len;
-    const char *p = text;
-    char best_url[2048];
-    best_url[0] = '\0';
-    int found = 0;
-
-    /* Try video_data first (highest priority) */
-    const char *vd = (const char *)memmem(p, (size_t)(end - p), "video_data", 10);
-    if (vd != NULL) {
-        const char *eq = vd + 10;
-        while (eq < end && (*eq == ' ' || *eq == '\t')) eq++;
-        if (eq < end && *eq == '=') {
-            eq++;
-            while (eq < end && (*eq == ' ' || *eq == '\t')) eq++;
-            if (eq < end && (*eq == '"' || *eq == '\'')) {
-                char q = *eq;
-                const char *vstart = eq + 1;
-                const char *vend = (const char *)memmem(vstart, (size_t)(end - vstart), &q, 1);
-                if (vend != NULL) {
-                    char tmp[2048];
-                    if (extract_iframe_src(vstart, (size_t)(vend - vstart), tmp, sizeof tmp)) {
-                        resolve_video_url(tmp, page_url, best_url, sizeof best_url);
-                        found = 1;
-                    }
-                }
-            }
-        }
-    }
-
-    /* If not found yet, scan for video[N] assignments */
-    if (!found) {
-        /* Collect all video[N] assignments, preferring N=1 then N=0 */
-        const char *vscan = p;
-        char candidate_urls[3][2048] = {{0}};
-        int ncandidates = 0;
-        while ((vscan = (const char *)memmem(vscan, (size_t)(end - vscan), "video", 5)) != NULL
-               && ncandidates < 3) {
-            const char *after = vscan + 5;
-            if (after < end && *after == '[') {
-                const char *b = after + 1;
-                int idx_val = 0;
-                while (b < end && *b >= '0' && *b <= '9') {
-                    idx_val = idx_val * 10 + (*b - '0');
-                    b++;
-                }
-                if (b < end && *b == ']') {
-                    const char *eq = b + 1;
-                    while (eq < end && (*eq == ' ' || *eq == '\t')) eq++;
-                    if (eq < end && *eq == '=') {
-                        eq++;
-                        while (eq < end && (*eq == ' ' || *eq == '\t')) eq++;
-                        if (eq < end && (*eq == '"' || *eq == '\'')) {
-                            char q = *eq;
-                            const char *vstart = eq + 1;
-                            const char *vend = (const char *)memmem(vstart, (size_t)(end - vstart), &q, 1);
-                            if (vend != NULL) {
-                                char tmp[2048];
-                                if (extract_iframe_src(vstart, (size_t)(vend - vstart), tmp, sizeof tmp)) {
-                                    char resolved[2048];
-                                    resolve_video_url(tmp, page_url, resolved, sizeof resolved);
-                                    /* Store by index for priority ordering */
-                                    if (idx_val == 1 && candidate_urls[0][0] == '\0') {
-                                        memcpy(candidate_urls[0], resolved, strlen(resolved) + 1);
-                                    } else if (idx_val == 0 && candidate_urls[1][0] == '\0') {
-                                        memcpy(candidate_urls[1], resolved, strlen(resolved) + 1);
-                                    } else {
-                                        memcpy(candidate_urls[2], resolved, strlen(resolved) + 1);
-                                    }
-                                    ncandidates++;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            vscan = after;
-        }
-        /* Pick best candidate: video[1] > video[0] > video[N] */
-        if (candidate_urls[0][0] != '\0') {
-            memcpy(best_url, candidate_urls[0], strlen(candidate_urls[0]) + 1);
-            found = 1;
-        } else if (candidate_urls[1][0] != '\0') {
-            memcpy(best_url, candidate_urls[1], strlen(candidate_urls[1]) + 1);
-            found = 1;
-        } else if (candidate_urls[2][0] != '\0') {
-            memcpy(best_url, candidate_urls[2], strlen(candidate_urls[2]) + 1);
-            found = 1;
-        }
-    }
-
-    if (!found || best_url[0] == '\0') return 0;
-
-    /* Find body element to append the iframe (same approach as jd_process_iframes). */
-    dom_node_id bid = DOM_NODE_NONE;
-    for (dom_node_id sib = dom_first_child(idx, 0);
-         sib != DOM_NODE_NONE;
-         sib = dom_next_sibling(idx, sib)) {
-        size_t tlen = 0;
-        const char *tag = dom_tag_name(idx, sib, &tlen);
-        if (tag != NULL && tlen == 4 && memcmp(tag, "body", 4) == 0) {
-            bid = sib;
-            break;
-        }
-    }
-    if (bid == DOM_NODE_NONE) return 0;
-
-    dom_node_id ifr_id;
-    if (dom_create_element(idx, "iframe", &ifr_id) != DOM_OK) return 0;
-    dom_set_attribute(idx, ifr_id, "src", best_url);
-    dom_append_child(idx, bid, ifr_id);
-    return 1;
-}
-
-size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts,
-                              const size_t *script_lens, size_t nscripts,
-                              const char *page_url) {
-    if (idx == NULL || script_texts == NULL || script_lens == NULL || nscripts == 0)
-        return 0;
-    size_t created = 0;
-    for (size_t i = 0; i < nscripts; i++) {
-        if (script_texts[i] != NULL && script_lens[i] > 0) {
-            if (try_create_iframe_from_script(idx, script_texts[i],
-                                               script_lens[i], page_url)) {
-                created++;
-                /* Only create ONE iframe across all scripts (first match wins) */
-                break;
-            }
-        }
-    }
-    return created;
-}
-
-/* JS shim that emulates a missing `video_min.js`: reads `video_data` or the
- * `video[]` array (defined by the page's inline script), extracts the iframe
- * `src` from the HTML string, resolves relative URLs, and creates an `<iframe>`
- * element in the DOM via the `dom.*` bridge. Later, `jd_process_iframes()`
- * fetches the iframe content and scans it for .m3u8 video URLs. */
-static const char JD_VIDEO_SHIM[] =
-    "(function(){try{"
-    "var h;"
-    "if(typeof video_data!=='undefined'&&video_data)h=video_data;"
-    "else{if(typeof video==='undefined'||!video)return;h=video[1]||video[0];}"
-    "if(typeof h!=='string'||!h)return;"
-    "var m=h.match(/src\\s*=\\s*[\"']([^\"']+)[\"']/);if(!m)return;"
-    "var s=m[1];"
-    "if(s.indexOf('://')===-1&&s.charCodeAt(0)===47){"
-    "try{s=location.protocol+'//'+location.hostname+s;}catch(e){}}"
-    "var bl=dom.getByTag('body');if(!bl||!bl.length)return;"
-    "var b=bl[0];var ifr=dom.createElement('iframe');"
-    "dom.setAttribute(ifr,'src',s);dom.appendChild(b,ifr);"
-    "}catch(e){}})();";
-
-jd_status jd_inject_video_shim(js_context *ctx) {
-    if (ctx == NULL) return JD_ERR_NULL_ARG;
-    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
-    if (jsctx == NULL) return JD_ERR_INTERNAL;
-    JSValue r = JS_Eval(jsctx, JD_VIDEO_SHIM, sizeof JD_VIDEO_SHIM - 1,
-                        "<video-shim>", JS_EVAL_TYPE_GLOBAL);
-    int ok = !JS_IsException(r);
-    JS_FreeValue(jsctx, r);
-    return ok ? JD_OK : JD_ERR_INTERNAL;
-}
-
-/* Scans a body buffer for `.m3u8` (HLS) or `.mp4` (progressive) video URLs.
- * Writes the first found URL into `out` (bounded by `outsz`). Prefers .m3u8
- * over .mp4. Returns 1 if found, 0 otherwise. */
-static int scan_video_url(const char *body, size_t blen,
-                           char *out, size_t outsz) {
-    if (body == NULL || blen == 0 || out == NULL || outsz == 0) return 0;
-    out[0] = '\0';
-    const char *end = body + blen;
-    static const char *exts[] = {".m3u8", ".mp4"};
-    static const size_t extlens[] = {5, 4};
-    for (int ei = 0; ei < 2; ei++) {
-        const char *marker = exts[ei];
-        size_t mlen = extlens[ei];
-        for (const char *p = body; p + mlen <= end; ++p) {
-            if (memcmp(p, marker, mlen) == 0) {
-                const char *url_start = p;
-                while (url_start > body && url_start[-1] != '\'' && url_start[-1] != '"'
-                       && url_start[-1] != ' ' && url_start[-1] != '>' && url_start[-1] != '<'
-                       && url_start[-1] != ')' && url_start[-1] != '}' && url_start[-1] != ']'
-                       && url_start[-1] != ';' && url_start[-1] != ',' && url_start[-1] != '\n'
-                       && url_start[-1] != '\r' && url_start[-1] != '\t')
-                    --url_start;
-                const char *url_end = p + mlen;
-                while (url_end < end && *url_end != '\'' && *url_end != '"'
-                       && *url_end != ' ' && *url_end != '>' && *url_end != '<'
-                       && *url_end != ')' && *url_end != '}' && *url_end != ']'
-                       && *url_end != ';' && *url_end != ',' && *url_end != '\n'
-                       && *url_end != '\r' && *url_end != '\t')
-                    ++url_end;
-                size_t ulen = (size_t)(url_end - url_start);
-                if (ulen > 0 && ulen + 1 <= outsz) {
-                    memcpy(out, url_start, ulen);
-                    out[ulen] = '\0';
-                    return 1;
-                }
-            }
-        }
-    }
-    return 0;
-}
-
-void jd_process_iframes(js_context *ctx, dom_index *idx,
-                        jd_fetch_fn fn, void *fetch_ctx) {
-    if (ctx == NULL || idx == NULL || fn == NULL) return;
-
-    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
-    if (jsctx == NULL) return;
-
-    /* Per-context iframe tracking (no static state — avoids cross-page leaks). */
-    jd_opaque *o = (jd_opaque *)JS_GetContextOpaque(jsctx);
-    if (o == NULL) return;
-    jd_iframe_track *track = &o->iframe_track;
-
-    /* Find all iframe elements in the index. */
-    size_t niframe = dom_get_by_tag(idx, "iframe", NULL, 0);
-    if (niframe == 0) return;
-    dom_node_id *iframes = (dom_node_id *)calloc(niframe, sizeof(dom_node_id));
-    if (iframes == NULL) return;
-    dom_get_by_tag(idx, "iframe", iframes, niframe);
-
-    for (size_t i = 0; i < niframe; ++i) {
-        dom_node_id nid = iframes[i];
-        if (nid == DOM_NODE_NONE) continue;
-
-        /* Skip already-processed iframes. */
-        int already = 0;
-        for (size_t j = 0; j < track->nprocessed; ++j) {
-            if (track->processed[j] == nid) { already = 1; break; }
-        }
-        if (already) continue;
-
-        /* Get the src attribute. */
-        size_t slen = 0;
-        const char *src = dom_get_attribute(idx, nid, "src", &slen);
-        if (src == NULL || slen == 0) continue;
-
-        /* Track this iframe as processed. */
-        if (track->nprocessed < JD_IFRAME_TRACK_MAX)
-            track->processed[track->nprocessed++] = nid;
-
-        /* Fetch the iframe content. */
-        int status = 0;
-        char *body = NULL;
-        size_t blen = 0;
-        char *ctype = NULL;
-        int fr = fn(fetch_ctx, "GET", src, "", 0,
-                    &status, &body, &blen, &ctype);
-        free(ctype);
-
-        if (fr != 0 || body == NULL || blen == 0) {
-            free(body);
-            continue;
-        }
-
-        /* Scan for video URLs in the response (.m3u8 first, then .mp4). */
-        char video_url[2048];
-        if (scan_video_url(body, blen, video_url, sizeof video_url)) {
-            /* Create a <video> element in the document with this URL
-             * and append it as a child of <body>. The DOM index tracks
-             * it — inject_video_into_view in tab.c finds it via the
-             * index and injects it with pv_append_video. */
-            dom_node_id root_id = 0;
-            dom_node_id body_id = DOM_NODE_NONE;
-            for (dom_node_id sib = dom_first_child(idx, root_id);
-                 sib != DOM_NODE_NONE;
-                 sib = dom_next_sibling(idx, sib)) {
-                size_t tlen = 0;
-                const char *tag = dom_tag_name(idx, sib, &tlen);
-                if (tag != NULL && tlen == 4 && memcmp(tag, "body", 4) == 0) {
-                    body_id = sib;
-                    break;
-                }
-            }
-            if (body_id != DOM_NODE_NONE) {
-                dom_node_id vid_id = DOM_NODE_NONE;
-                if (dom_create_element(idx, "video", &vid_id) == DOM_OK) {
-                    dom_set_attribute(idx, vid_id, "src", video_url);
-                    dom_append_child(idx, body_id, vid_id);
-                }
-            }
-        }
-
-        free(body);
-    }
-    free(iframes);
 }

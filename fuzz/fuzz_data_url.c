@@ -1,6 +1,7 @@
 /*
- * libFuzzer harness for data_url: du_base64_payload (data: URL slicing) and
- * du_base64_decode (RFC 4648 decode). Both process bytes that came straight from a
+ * libFuzzer harness for data_url: du_base64_payload (data: URL slicing),
+ * du_base64_decode (RFC 4648 decode) and du_decode (the WHATWG data: URL processor
+ * that feeds data: scripts and modules, spec/data_url.md 2b). Both process bytes that came straight from a
  * hostile remote HTML document; du_base64_decode specifically runs inside the
  * confined tab worker (OP_DECODE_IMAGE_B64) on bytes the parent only sliced, never
  * interpreted. Neither must ever crash, leak, read/write out of bounds, or (for
@@ -48,6 +49,24 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         du_status ds = du_base64_decode(buf, size, &out, &out_len);
         if (ds == DU_OK) {
             if (out == NULL) abort();
+            free(out);
+        } else if (out != NULL) {
+            abort();
+        }
+    }
+
+    /* du_decode: forgiving base64 + percent decoding over the whole URL. The MIME
+     * output stays NUL-terminated inside its (deliberately small) buffer. */
+    {
+        char mime[32];
+        memset(mime, 'Z', sizeof mime);
+        uint8_t *out = NULL;
+        size_t out_len = 0;
+        du_status ds = du_decode(buf, mime, sizeof mime, &out, &out_len);
+        if (ds == DU_OK) {
+            if (out == NULL) abort();
+            if (memchr(mime, '\0', sizeof mime) == NULL) abort();
+            if (out_len > size) abort();   /* decoding never expands */
             free(out);
         } else if (out != NULL) {
             abort();

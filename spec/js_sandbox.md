@@ -187,6 +187,47 @@ seguro; no es representable "sin límite").
 **nunca** se produzca crash/leak/UB (el `.stack` lleva nombres de función/archivo controlados por
 el script hostil, así que el parser ve entrada no confiable).
 
+## 7b. Módulos ES (`js_eval_module`, plan B6, 2026-09-30)
+
+El sandbox no sabe de red ni de URLs: el llamante instala un **host de módulos**
+(`js_set_module_host`) con dos funciones —`resolve(base, especificador) → URL absoluta` y
+`fetch(URL) → fuente`— y el cargador nativo de QuickJS-ng las usa para todo `import` estático
+y `import()` dinámico. Sin host, todo `import` falla (el comportamiento de siempre).
+
+- `js_eval_module(ctx, src, len, name, res)`: compila y evalúa `src` como módulo cuyo nombre
+  (y `import.meta.url`) es `name`; resuelve sus dependencias, drena la cola de jobs y reporta
+  un rechazo de la evaluación (incluida una excepción en un módulo importado o un error de
+  carga) como `JS_ERR_RUNTIME` con el mensaje en `res`.
+- Cada módulo cargado tiene `import.meta.url` = su URL absoluta.
+- Cotas: `JS_MODULE_MAX` 256 módulos y `JS_MODULE_BYTES_MAX` 16 MiB de fuente por contexto;
+  pasado cualquiera, la carga falla (`TypeError`) sin tocar el host.
+- El mismo presupuesto de tiempo que un script clásico cubre la compilación y la evaluación.
+- Los ciclos de importación los resuelve QuickJS (cada URL se carga una sola vez).
+
+## 7c. Realms: entornos globales extra para `Worker` (plan B6b, 2026-09-30)
+
+Un *realm* es otro `JSContext` en el **mismo** runtime: comparte el tope de memoria, el
+presupuesto de tiempo y el interrupt handler del contexto dueño (un bucle infinito en un worker
+se corta igual que en la página), y vive dentro del mismo proceso confinado (seccomp, netns).
+No abre ninguna capacidad: un realm nuevo solo tiene los intrínsecos de cómputo de QuickJS.
+
+```c
+js_status js_install_realms(js_context *ctx);   /* define __realmNew/__realmEval/__realmClone */
+```
+
+- `__realmNew()` ⇒ el objeto global de un realm nuevo, o `null` pasado `JS_REALM_MAX` (8).
+- `__realmEval(global, code, name)` ⇒ evalúa `code` como script clásico en ese realm; un error
+  se relanza en el llamante como `Error` de **su** realm (mensaje + `name`), nunca como un
+  objeto del realm ajeno.
+- `__realmClone(value, global)` ⇒ copia `value` al realm de `global` por el serializador de
+  QuickJS **sin** bytecode: datos, `Date`, `RegExp`, `Map`, `Set`, `ArrayBuffer`, typed arrays y
+  ciclos cruzan; una función (o cualquier cosa no serializable) es `DataCloneError`. Los objetos
+  resultantes pertenecen al realm destino (`instanceof Array` es verdadero allí).
+- Un `global` que no sea el de un realm propio ⇒ `TypeError`.
+- Los realms se liberan con el contexto, **antes** que el contexto principal y el runtime.
+- Los nativos los consume un shim (`jt_enable_worker`) que los captura en su closure y los borra
+  del global: la página nunca los ve.
+
 ## 8. Fuera de alcance
 
 - Cableado del DOM inerte (`html_parse`) hacia el motor y exposición de APIs de navegador

@@ -79,6 +79,28 @@ du_status du_base64_payload(const char *url, const char **payload, size_t *paylo
 du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len);
 ```
 
+### 2b. `du_decode` — el procesador completo (WHATWG Fetch §4.5 "data: URL processor", 2026-09-30)
+
+Los `<script src="data:...">` (Facebook los usa por decenas; Reddit trae módulos
+`data:text/javascript,%0A...`) necesitan las DOS formas, no solo base64:
+
+```c
+du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len);
+```
+
+- `mime` = lo que precede a la coma, sin `;base64` y sin espacios en los extremos; vacío ⇒
+  `text/plain;charset=US-ASCII`. Si no entra en `mime_cap`, se trunca (es solo para
+  clasificar el tipo).
+- `;base64` (sin distinguir mayúsculas) ⇒ decodificación base64 **tolerante** (WHATWG
+  "forgiving-base64": se quitan los espacios ASCII y el relleno `=` es opcional); cualquier
+  otro carácter ⇒ `DU_ERR_BAD_BASE64`.
+- Sin `;base64` ⇒ **percent-decoding** (`%XX` → byte; un `%` que no va seguido de dos dígitos
+  hex se conserva literal, como en WHATWG).
+- Sin coma ⇒ `DU_ERR_NOT_BASE64` (nombre histórico: "no es una data URL utilizable").
+- Mismo tope `DU_MAX_ENCODED_LEN` sobre la parte codificada (anti-DoS).
+- Corre donde corre el consumidor: para un script, en el worker confinado (los bytes son
+  código hostil igual que cualquier script de la página, y no abren ninguna red).
+
 ## 3. Tabla de errores / decisiones
 
 | Entrada | Resultado |

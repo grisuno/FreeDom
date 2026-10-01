@@ -209,3 +209,46 @@ clave ausente) devuelven `DOM_NODE_NONE`, `0`, o `NULL` según el tipo.
 - Shadow DOM / encapsulación de subárboles (se define en spec aparte; encaja con Zero Trust).
 - Cableado real al motor JS (la spec de las DOM bindings vive en el Hito 3).
 - Layout, estilo y render (Hito 4).
+
+## 9. Nodos de texto y comentario como handles (2026-09-30)
+
+**Por qué:** el índice era solo de elementos, así que el JS no veía texto: `childNodes`,
+`firstChild` y `nextSibling` lo saltaban y `createTextNode` devolvía un objeto plano que ningún
+`appendChild` podía insertar. React hidrata y renderiza con nodos de texto (`#418` en
+DuckDuckGo era eso), y cualquier librería que recorra el árbol nodo a nodo veía otro documento.
+
+**Modelo.** Un nodo de texto o comentario recibe un handle **perezoso**: el mismo arreglo del
+índice, registrado la primera vez que alguien lo pide (navegación por nodos o creación). Los
+elementos siguen indexándose al construir; nada cambia para quien solo usa la API de elementos
+(`dom_first_child`/`dom_next_sibling` siguen siendo element-only).
+
+```c
+#define DOM_KIND_NONE    0
+#define DOM_KIND_ELEMENT 1   /* = nodeType */
+#define DOM_KIND_TEXT    3
+#define DOM_KIND_COMMENT 8
+int         dom_node_kind(const dom_index *idx, dom_node_id node);
+dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last);   /* primero / último */
+dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev); /* siguiente / anterior */
+dom_status  dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
+                                 dom_node_id *out_id);
+```
+
+- La navegación por nodos solo ve elementos, texto (CDATA incluido) y comentarios; cualquier otro
+  tipo (doctype, instrucción de procesamiento) se salta.
+- `dom_set_text_content` sobre un texto/comentario **reemplaza su dato** (DOM: el setter de
+  `textContent` de un `CharacterData`); `dom_text_content` devuelve el dato.
+- Toda función propia de elementos (`tag_name`, atributos, `matches`, `closest`, `innerHTML`,
+  `move_children`, ser padre en `append`/`insert_before`/`remove_child`, raíz de `querySelector`)
+  rechaza un handle de texto con su centinela de error: nunca se castea un texto a elemento.
+- `dom_clone_node` de un texto devuelve un texto (registrado).
+- **Cota:** el arreglo de handles no supera `DOM_MAX_HANDLES` (2^24); pasado eso, crear o
+  registrar falla con `DOM_ERR_OOM` (fail-closed: una página hostil no agota la memoria del
+  worker registrando nodos).
+- `dom_precedes`/`dom_document_position` siguen describiendo solo el orden de construcción; el
+  orden real de árbol para nodos creados o perezosos lo calcula `compareDocumentPosition` del
+  lado JS recorriendo ancestros.
+
+Dado un `<p>t<b>u</b>v</p>`, cuando el JS pide `p.childNodes`, entonces recibe
+`[Text "t", <b>, Text "v"]` y `childNodes[0].data === "t"`. Dado `createTextNode("x")` y
+`p.appendChild(t)`, entonces `p.textContent` termina en `"x"` y el texto se pinta.

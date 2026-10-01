@@ -528,6 +528,17 @@ typedef struct browser_window {
      * signals whether the repaint loop should run when animations are active. */
     uint64_t page_load_mono_ms;
     fc_clock fc;
+    /* Last geometry handed to the page's JS (spec/js_geom.md): the table hash and
+     * the page it was sent for, so an unchanged frame sends nothing. */
+    uint64_t geom_hash;
+    uint64_t geom_page_ms;
+    int      hist_depth;   /* nested history.go() steps (popstate handlers that step again) */
+    /* The page's WebSocket connections (trusted host only), held on this side: the
+     * worker never touches a socket (spec/ws_hub.md). Closed with the page worker. */
+    struct wh_hub *ws_hub;   /* forward-declared; ws_hub.h is included further down */
+    /* In-memory localStorage of trusted origins, shared by every tab of the window and
+     * never written to disk (owner decision; spec/web_storage.md). */
+    struct wst_db *web_store;
 } browser_window;
 
 /* Freebug second-window forward declarations (defined further down, but referenced
@@ -1028,6 +1039,8 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 #include "form.h"
 #include "secure_fetch.h"
 #include "tab.h"
+#include "ws_hub.h"
+#include "web_storage.h"
 #include "tls_impersonate.h"
 
 /* Video playback functions (defined below; forward declarations for render path). */
@@ -1313,14 +1326,14 @@ static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
         if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_CLASSICAL_KE; return s; }
     }
     /* Classical KE failed too and host is allowlisted: try the sovereignty
-     * override (TLS 1.2 min, no cert verification). */
+     * override -- TLS 1.2 floor, classical KE, weak-but-VALID certificate. The
+     * certificate is still verified (VERIFYPEER): the allowlist relaxes strength,
+     * never authenticity (CLAUDE.md 7.2). It used to set insecure = 1, which turned
+     * verification AND sf_enforce_policy off: any certificate, any TLS version. */
     if (allowlisted && s != SF_OK) {
         sf_response_free(out);
-        int saved_insecure = cfg->insecure;
         cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
-        cfg->insecure = 1;
         s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
-        cfg->insecure = saved_insecure;
         if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
     }
     cfg->policy = saved;
@@ -1345,13 +1358,10 @@ static sf_status fetch_post_navigable(const char *url, sf_config *cfg,
         s = sf_post(url, cfg, body, body_len, content_type, out);
         if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_CLASSICAL_KE; return s; }
     }
-    if (allowlisted && s != SF_OK) {
+    if (allowlisted && s != SF_OK) {   /* same override as GET: verification stays on */
         sf_response_free(out);
-        int saved_insecure = cfg->insecure;
         cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
-        cfg->insecure = 1;
         s = sf_post(url, cfg, body, body_len, content_type, out);
-        cfg->insecure = saved_insecure;
         if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
     }
     cfg->policy = saved;
@@ -1372,6 +1382,8 @@ static int page_host_allowlisted(const browser_window *w) {
  * click/load gets -- https-only resolution (cross-host allowed), the host blocklist
  * (tracker filter), realm routing (fail-closed), TLS-PQ with the navigability fallbacks --
  * so a trusted page can talk to the network without ever bypassing policy. */
+static int page_trusted(const browser_window *w);
+
 static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
                                  const char *body, size_t body_len,
                                  int *out_status, char **out_body, size_t *out_body_len,
@@ -1398,6 +1410,11 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     apply_auth(w, abs, &cfg);
     if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) return -1;  /* realm fail-closed */
     int allowlisted = hb_is_allowlisted(w->hosts, host), dg = 0;
+    /* A subresource a TRUSTED page (allow.conf AND js.conf) asks for -- its CDN, API,
+     * fonts -- gets the allowlist's relaxed strength (owner decision 2026-09-30:
+     * third parties of a trusted host load, hostblock still applies). Authenticity is
+     * never relaxed: the certificate is verified either way. */
+    int relaxed = allowlisted || page_trusted(w);
     /* Subrequests to a double-trust + user-flag host share the page's TLS-blend identity. */
     cfg.impersonate = ti_should_impersonate(allowlisted,
         hb_is_allowlisted(w->js_hosts, host), w->impersonate_optin);
@@ -1405,8 +1422,8 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     int is_post = (method != NULL && (strcmp(method, "POST") == 0 || strcmp(method, "post") == 0));
     sf_status s = is_post
         ? fetch_post_navigable(abs, &cfg, body, body_len,
-                               "application/x-www-form-urlencoded", &resp, &dg, allowlisted)
-        : fetch_follow_navigable(abs, &cfg, &resp, &dg, allowlisted);
+                               "application/x-www-form-urlencoded", &resp, &dg, relaxed)
+        : fetch_follow_navigable(abs, &cfg, &resp, &dg, relaxed);
     if (s != SF_OK) { sf_response_free(&resp); return -1; }
 
     char *rb = (char *)malloc(resp.body_len + 1);
@@ -1522,9 +1539,11 @@ static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
         return 0;
     }
 
+    /* Ctrl+Shift+E session exception: tolerate a weak certificate (PERMISSIVE chain
+     * check), but it must still be a VALID one for this host -- verification stays
+     * on, or the exception would accept an impostor's certificate too. */
     if (have_host && browser_is_exception(&w->bs, host)) {
         cfg->policy = SF_POLICY_PERMISSIVE;
-        cfg->insecure = 1;
     }
 
     /* The user's sovereign override: a host explicitly on allow.conf may be navigated
@@ -1936,10 +1955,18 @@ static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, vo
 }
 
 static void do_load(browser_window *w, const char *url); /* JS navigation re-enters it */
+static void apply_history_ops(browser_window *w, const tab_page *page);
+static void history_step(browser_window *w, int steps);
+static int  apply_click_result(browser_window *w, tab_page *page);
+static void load_current(browser_window *w);
+static void tab_new(browser_window *w, const char *url);
+static void ws_apply_ops(browser_window *w, const tab_page *page);
 
 /* Cap on consecutive JS-driven navigations (location.href=) without a settling page,
  * so a hostile redirect loop cannot pin the browser. Reset when a page settles. */
 #define JS_NAV_MAX 10
+/* Nested history steps a page can chain (a popstate handler that calls back()). */
+#define HIST_STEP_DEPTH_MAX 8
 
 /* Renders the cached page source into the page/doc using the current capabilities.
  * No network: a capability toggle (images/CSS) re-renders from cache. Does nothing
@@ -1984,6 +2011,42 @@ static void seed_session_cookies(tab *t, int trusted, const char *url) {
     tab_set_cookies(t, NULL);
 }
 
+/* The page origin ("https://host[:port]") localStorage is keyed by, or 0 when the
+ * page has none (a local file never reaches the store: it is never trusted). */
+static int page_origin(const char *url, char *out, size_t outsz) {
+    url_parts u;
+    if (url == NULL || url_split(url, &u) != URL_OK || u.origin_len == 0
+        || u.origin_len >= outsz) return 0;
+    memcpy(out, u.origin, u.origin_len);
+    out[u.origin_len] = '\0';
+    return 1;
+}
+
+/* Seeds the next load's localStorage from the window's in-memory store (trusted host
+ * only; cleared otherwise so a reused worker never carries another page's store). */
+static void seed_local_storage(browser_window *w, tab *t, int trusted) {
+    char origin[WST_ORIGIN_MAX];
+    char *blob = NULL;
+    size_t len = 0;
+    if (trusted && w->web_store != NULL && page_origin(w->cur_top, origin, sizeof origin)
+        && wst_encode(w->web_store, origin, &blob, &len) == 0) {
+        tab_set_storage(t, blob, len);
+        free(blob);
+        return;
+    }
+    tab_set_storage(t, NULL, 0);
+}
+
+/* Takes the page's changed localStorage (already validated by the tab reader) into
+ * the window's store. */
+static void collect_local_storage(browser_window *w, const tab_page *page) {
+    char origin[WST_ORIGIN_MAX];
+    if (page->storage == NULL || !page_origin(w->cur_top, origin, sizeof origin)) return;
+    if (w->web_store == NULL) w->web_store = wst_new();
+    if (w->web_store != NULL)
+        (void)wst_replace(w->web_store, origin, page->storage, page->storage_len);
+}
+
 /* Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network jar
  * one pair at a time, so JS-set session cookies reach the next request. */
 static void foldback_session_cookies(const char *url, const char *jar) {
@@ -2005,8 +2068,15 @@ static void foldback_session_cookies(const char *url, const char *jar) {
 /* Drops the kept-alive REPL worker and clears the (active-tab) console transcript.
  * Used when the active page changes WITHOUT a re-render (tab switch / new / close):
  * a later eval lazily rebinds the worker to the now-active page. */
-static void drop_repl_worker(browser_window *w) {
+/* Closes the page worker and, with it, every WebSocket the page owned: a socket must
+ * never outlive the document that opened it (spec/js_dom.md 7f). */
+static void close_page_worker(browser_window *w) {
+    wh_close_all(w->ws_hub);
     if (w->tab_worker != NULL) { tab_close(w->tab_worker); w->tab_worker = NULL; }
+}
+
+static void drop_repl_worker(browser_window *w) {
+    close_page_worker(w);
     fb_buffer_reset(&w->console);
     if (w->freebug != NULL) freebug_redraw(w);
 }
@@ -2036,7 +2106,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
 
     /* A fresh render replaces the page: drop the previous tab's still-alive worker
      * (kept for the Freebug REPL) so a new one binds to the new page. */
-    if (w->tab_worker != NULL) { tab_close(w->tab_worker); w->tab_worker = NULL; }
+    close_page_worker(w);
 
     /* caps.js drives the worker's <noscript> handling and inline-script execution. */
     w->caps.js = compute_page_js(w);
@@ -2066,6 +2136,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     tab_set_net_allowed(t, wc.net);
     tab_set_css_allowed(t, wc.css);
     seed_session_cookies(t, wc.cookies, w->cur_top);
+    seed_local_storage(w, t, wc.cookies);
 
     /* Hito 29 (lookahead prefetch): scan the raw HTML for the external
      * stylesheets/scripts the worker will request over TAG_SUBREQ and download
@@ -2140,6 +2211,11 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
         w->js_nav_depth = 0; /* a page that did not auto-navigate ends the chain */
     }
 
+    /* history.pushState/replaceState run by the load scripts (spec/js_dom.md 7e) --
+     * only on a real navigation: a re-render from cache re-runs the same scripts and
+     * would push the same entries again. A back/forward delta at load is ignored. */
+    if (allow_js_nav) apply_history_ops(w, &page);
+
     browser_set_page(&w->bs, page.title, page.text, 0);
 
     /* Trusted-host doctrine (Hito 28) + presentation-trust (2026-07-11): a host
@@ -2195,8 +2271,10 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     w->js_ticks_left = JS_TICKS_PER_LOAD;
     schedule_js_tick(w, page.next_timer_ms);
 
-    tab_page_free(&page);
     w->tab_worker = t;
+    collect_local_storage(w, &page);
+    ws_apply_ops(w, &page);   /* sockets the load scripts opened (needs the live worker) */
+    tab_page_free(&page);
     if (w->freebug != NULL) freebug_redraw(w); /* refresh the console pane if open */
 }
 
@@ -2482,7 +2560,9 @@ static void tab_switch(browser_window *w, int idx) {
     redraw(w);
 }
 
-/* Opens a new tab after the active one and loads url (the start page when NULL). */
+/* Opens a new tab after the active one and loads url (the start page when NULL). A
+ * url (a window.open target, already policy-gated by the parent) is a navigation of
+ * the new tab: it enters its history and stays in the URL bar. */
 static void tab_new(browser_window *w, const char *url) {
     if (w->tab_count >= UI_MAX_TABS) {
         browser_set_status(&w->bs, "Tab limit reached.", now_ms());
@@ -2509,8 +2589,14 @@ static void tab_new(browser_window *w, const char *url) {
     w->caps = rdp_caps_safe();
     memset(&w->bs, 0, sizeof w->bs);
     if (browser_init(&w->bs) != BROWSER_OK) { browser_set_page(&w->bs, "Freedom", "", 0); }
+    if (url != NULL) {
+        w->url_bar_focused = 0;
+        if (browser_navigate(&w->bs, url) == BROWSER_OK) do_load(w, url);
+        redraw(w);
+        return;
+    }
     w->url_bar_focused = 1;
-    do_load(w, (url != NULL) ? url : "docs/index.html");
+    do_load(w, "docs/index.html");
     browser_url_bar_clear(&w->bs);
     redraw(w);
 }
@@ -10852,6 +10938,63 @@ static void paint_nested_children(cairo_t *cr, browser_window *w,
     }
 }
 
+/* One rect per element from a final layout, in document coordinates (spec/js_geom.md):
+ * every text fragment under its node and every in-flow/positioned box under its
+ * generating element. Shared by the window and the headless export so both hand
+ * page JS the same geometry for the same layout. */
+static void geom_from_layout(const rd_doc *doc, const rc_layout *L, double left,
+                             double top0, double content_w, jg_table *g) {
+    for (size_t i = 0; i < L->nrow; ++i) {
+        const rc_row *r = &L->rows[i];
+        if (r->kind != RC_TEXT) continue;
+        double ax = row_align_offset(L, r, content_w);
+        for (size_t k = r->first; k < r->first + r->count && k < L->nfrag; ++k) {
+            const rc_frag *f = &L->frags[k];
+            (void)jg_add(g, f->node_id, left + r->x_off + ax + f->x, top0 + r->top,
+                         f->width, r->height);
+        }
+    }
+    for (size_t i = 0; i < L->nbox; ++i) {
+        if (L->boxes[i].block_id < 0) continue;
+        const pv_box_def *bd = rd_box_at(doc, (size_t)L->boxes[i].block_id);
+        if (bd != NULL)
+            (void)jg_add(g, bd->node_id, left + L->boxes[i].x, top0 + L->boxes[i].top,
+                         L->boxes[i].w, L->boxes[i].h);
+    }
+    for (size_t i = 0; i < L->npositioned; ++i) {
+        const pv_box_def *bd = rd_box_at(doc, L->positioned[i].box_index);
+        if (bd != NULL)
+            (void)jg_add(g, bd->node_id, left + L->positioned[i].x, top0 + L->positioned[i].y,
+                         L->positioned[i].w, L->positioned[i].h);
+    }
+    (void)jg_finish(g);
+}
+
+/* Hands the window's final layout to a TRUSTED page's JS. Only for allow.conf AND
+ * js.conf (tab_set_geometry re-checks, and so does the worker); resent only when
+ * the table, the scroll or the page changed. */
+static void publish_geometry(browser_window *w, const rc_layout *L, double left,
+                             double content_w, double content_h) {
+    if (w->tab_worker == NULL || !page_trusted(w)) return;
+    double top0 = w->theme.content_margin;
+    jg_table g;
+    jg_init(&g);
+    g.scroll_y = (int32_t)lround(w->scroll);
+    g.view_w = w->width;
+    g.view_h = (int32_t)lround(content_h);
+    g.doc_w = w->width;
+    g.doc_h = (int32_t)lround(L->total_h + 2.0 * top0);
+    geom_from_layout(w->doc, L, left, top0, content_w, &g);
+    uint64_t h = jg_hash(&g);
+    if (h != w->geom_hash || w->geom_page_ms != w->page_load_mono_ms) {
+        if (tab_set_geometry(w->tab_worker, &g) == TAB_OK) {
+            w->geom_hash = h;
+            w->geom_page_ms = w->page_load_mono_ms;
+        }
+    }
+    jg_free(&g);
+}
+
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                              double content_h) {
     const ui_theme *th = &w->theme;
@@ -10868,6 +11011,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     if (w->scroll < 0.0) w->scroll = 0.0;
     if (w->scroll > max_scroll) w->scroll = max_scroll;
     double origin = content_top + th->content_margin - w->scroll;
+    publish_geometry(w, &L, left, content_w, content_h);
 
     /* R4: sticky positioning for OUT-OF-FLOW boxes — clamp to viewport top
      * (inset_top) when scrolled past. For in-flow sticky boxes (the common
@@ -11433,6 +11577,40 @@ ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h) {
     return UI_OK;
 }
 
+/* Headless layout geometry (see include/ui.h): the same page geometry write_doc_png
+ * lays out (left/top margin, content width), measured on a scratch surface. */
+ui_status ui_page_geometry(const rd_doc *doc, jg_table *out) {
+    if (doc == NULL || out == NULL || rd_count(doc) == 0) return UI_ERR_NULL_ARG;
+    browser_window w;
+    memset(&w, 0, sizeof w);
+    w.theme = ui_theme_for(UI_THEME_LIGHT);
+    w.doc = (rd_doc *)doc;
+    w.focused_input = -1;
+    double margin = (doc->html_margin_top >= 0) ? (double)doc->html_margin_top : PNG_MARGIN;
+    double left = margin;
+    double content_w = PNG_PAGE_W - 2.0 * margin;
+    if (doc->html_max_width > 0 && (double)doc->html_max_width < content_w) {
+        if (doc->html_center) left += (content_w - (double)doc->html_max_width) / 2.0;
+        content_w = (double)doc->html_max_width;
+    }
+    cairo_surface_t *meas = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
+    cairo_t *mcr = cairo_create(meas);
+    rc_layout L;
+    layout_doc(mcr, &w, content_w, &L);
+    position_doc(mcr, &w, content_w, (double)FC_HEADLESS_VIEW_H, &L);
+    out->scroll_x = 0;
+    out->scroll_y = 0;
+    out->view_w = (int32_t)PNG_PAGE_W;
+    out->view_h = FC_HEADLESS_VIEW_H;
+    out->doc_w = (int32_t)PNG_PAGE_W;
+    out->doc_h = (int32_t)lround(L.total_h + 2.0 * margin);
+    geom_from_layout(doc, &L, left, margin, content_w, out);
+    rc_free(&L);
+    cairo_destroy(mcr);
+    cairo_surface_destroy(meas);
+    return UI_OK;
+}
+
 /* Headless PNG/PDF export WITH image decoding (see include/ui.h). Unlike the plain
  * ui_render_png/pdf (which always draw placeholders), these decode the page's allowed
  * images through the still-open confined worker `t` -- the hostile image bytes never
@@ -11808,11 +11986,124 @@ static void follow_link(browser_window *w, const char *href) {
     do_load(w, res.target);
 }
 
-/* Applies a click result returned by the worker: rebuild the rendered document and
- * refresh inputs/console, but keep the current page in history (a click is not a
- * navigation). Images are not re-fetched: a click handler may add text, but v1 does
- * not introduce new remote images. */
-static void apply_click_result(browser_window *w, tab_page *page) {
+/* Makes url the page's base (link/image resolution) without touching the cached
+ * source: after pushState the document's URL changes in place, like Firefox. */
+static void set_page_url(browser_window *w, const char *url) {
+    if (url == NULL) return;
+    char *copy = strdup(url);
+    if (copy == NULL) return;
+    free(w->cur_top);
+    w->cur_top = copy;
+}
+
+/* A socket event from the hub goes to the page as OP_WS_EVENT; the refreshed view is
+ * applied like a click (handlers may mutate the DOM, send, navigate). */
+static void gui_ws_emit(void *ctx, int id, int kind, int code, const char *data, size_t len) {
+    browser_window *w = (browser_window *)ctx;
+    if (w->tab_worker == NULL) return;
+    tab_page page;
+    memset(&page, 0, sizeof page);
+    if (tab_ws_event(w->tab_worker, id, kind, code, data, len, &page) == TAB_OK)
+        (void)apply_click_result(w, &page);
+    tab_page_free(&page);
+    redraw(w);
+}
+
+/* Opens/sends/closes the page's WebSockets (trusted host only; spec/js_dom.md 7f).
+ * Each open gets the SAME gates as any subresource of a trusted page: the tracker/
+ * host blocklist, realm routing (fail-closed), the allowlist's relaxed strength and
+ * peer verification always on -- never an unverified certificate. */
+static void ws_apply_ops(browser_window *w, const tab_page *page) {
+    if (page->nws == 0) return;
+    if (w->ws_hub == NULL) w->ws_hub = wh_new();
+    for (size_t i = 0; i < page->nws; ++i) {
+        const tab_ws_op *op = &page->ws[i];
+        if (op->kind == TAB_WS_OPEN) {
+            char host[256];
+            int ok = (w->ws_hub != NULL && page_trusted(w)
+                      && sf_ws_url_check(op->data) == SF_OK
+                      && rp_host_of(op->data, host, sizeof host) == 0
+                      && hb_check(w->hosts, host) != HB_BLOCK);
+            sf_config cfg = sf_config_default();
+            if (ok) {
+                /* The page is trusted: the allowlist's relaxed strength, certificate
+                 * still verified (same rule as its other subresources). */
+                cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
+                ok = (apply_route(w, op->data, &cfg) != NR_ROUTE_BLOCKED)
+                     && wh_open_async(w->ws_hub, op->id, op->data, &cfg) == 0;
+            }
+            if (!ok) {
+                gui_ws_emit(w, op->id, WH_EV_ERROR, 0, NULL, 0);
+                gui_ws_emit(w, op->id, WH_EV_CLOSE, WH_CLOSE_ABNORMAL, NULL, 0);
+            }
+        } else if (op->kind == TAB_WS_SEND_TEXT || op->kind == TAB_WS_SEND_BIN) {
+            (void)wh_send(w->ws_hub, op->id, op->data, op->len, op->kind == TAB_WS_SEND_BIN);
+        } else if (op->kind == TAB_WS_CLOSE) {
+            wh_close(w->ws_hub, op->id);
+            gui_ws_emit(w, op->id, WH_EV_CLOSE, 1000, NULL, 0);
+        }
+    }
+}
+
+/* Mirrors the page's history.pushState/replaceState into the session history
+ * (spec/js_dom.md 7e): same-document entries, no load. The URLs were re-validated
+ * as same-origin by the parent's tab reader. */
+static void apply_history_ops(browser_window *w, const tab_page *page) {
+    for (size_t i = 0; i < page->nhist; ++i) {
+        const tab_hist_op *op = &page->hist[i];
+        browser_status st = op->replace ? browser_replace_state(&w->bs, op->url)
+                                        : browser_push_state(&w->bs, op->url);
+        if (st == BROWSER_OK) set_page_url(w, op->url);
+    }
+}
+
+/* Moves steps entries through the session history (negative = back). Within the
+ * SAME document (pushState entries) nothing is reloaded: the worker moves its own
+ * history and dispatches popstate; across documents the entry is reloaded. */
+static void history_step(browser_window *w, int steps) {
+    if (steps == 0) return;
+    size_t from = w->bs.history_pos;
+    int from_doc = browser_entry_doc(&w->bs, from);
+    int n = (steps < 0) ? -steps : steps;
+    for (int i = 0; i < n; ++i) {
+        browser_status st = (steps < 0) ? browser_back(&w->bs) : browser_forward(&w->bs);
+        if (st != BROWSER_OK) break;
+    }
+    if (w->bs.history_pos == from) return;
+    if (w->tab_worker != NULL && from_doc >= 0
+        && browser_entry_doc(&w->bs, w->bs.history_pos) == from_doc) {
+        tab_page page;
+        memset(&page, 0, sizeof page);
+        if (tab_popstate(w->tab_worker, browser_doc_index(&w->bs), &page) == TAB_OK) {
+            set_page_url(w, browser_current_url(&w->bs));
+            (void)apply_click_result(w, &page);
+            tab_page_free(&page);
+            return;
+        }
+        tab_page_free(&page);
+    }
+    load_current(w);
+}
+
+/* Applies a click/event/timer result returned by the worker: rebuild the rendered
+ * document and refresh inputs/console, keeping the current page in history. Images
+ * are not re-fetched: a handler may add text, but v1 does not introduce new remote
+ * images. When the handler or timer navigated (location.href=/assign/replace --
+ * already resolved and policy-gated by the parent), the navigation is performed
+ * instead, through do_load and ALL network policy, and 1 is returned: the caller must
+ * not touch the old document any more. Bounded by JS_NAV_MAX like a load-time
+ * redirect, so a timer cannot pin the browser in a loop. Returns 0 otherwise. */
+static int apply_click_result(browser_window *w, tab_page *page) {
+    if (page->nav_url != NULL && page->nav_url[0] != '\0') {
+        if (w->js_nav_depth < JS_NAV_MAX) {
+            char target[LN_MAX_TARGET];
+            snprintf(target, sizeof target, "%s", page->nav_url);
+            w->js_nav_depth++;
+            if (browser_navigate(&w->bs, target) == BROWSER_OK) do_load(w, target);
+            return 1;
+        }
+        browser_set_status(&w->bs, "Stopped a JavaScript redirect loop.", now_ms());
+    }
     if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
     w->hover_href = NULL; /* aliased the doc we just freed; recomputed on next hover */
     w->hover_cursor = CSS_CUR_UNSET;
@@ -11829,6 +12120,23 @@ static void apply_click_result(browser_window *w, tab_page *page) {
     browser_set_page(&w->bs, page->title, page->text, 0);
     /* Handlers may have (re)armed timers: schedule the next tick from the report. */
     schedule_js_tick(w, page->next_timer_ms);
+    apply_history_ops(w, page);
+    collect_local_storage(w, page);
+    ws_apply_ops(w, page);
+    /* window.open on a user gesture (trusted host, noopener): each target in a new
+     * tab. Last, because tab_new parks this tab and switches the window to the new
+     * one -- the caller must not touch the (now background) document afterwards. */
+    if (page->nopen > 0) {
+        for (size_t i = 0; i < page->nopen; ++i) tab_new(w, page->open_urls[i]);
+        return 1;
+    }
+    if (page->hist_go != 0 && w->hist_depth < HIST_STEP_DEPTH_MAX) {
+        w->hist_depth++;
+        history_step(w, page->hist_go);
+        w->hist_depth--;
+        return 1;   /* history_step may have replaced the document */
+    }
+    return 0;
 }
 
 /* Dispatches a click to the live worker for the node under the cursor. If the node
@@ -11864,9 +12172,9 @@ static void dispatch_click(browser_window *w, double px, double py) {
         return;
     }
 
-    apply_click_result(w, &page);
+    int navigated = apply_click_result(w, &page);
     tab_page_free(&page);
-    if (href != NULL) follow_link(w, href);
+    if (href != NULL && !navigated) follow_link(w, href);
     free(href);
 }
 
@@ -13418,6 +13726,7 @@ static tab *freebug_repl_worker(browser_window *w) {
     tab_set_net_allowed(t, wc.net);
     tab_set_css_allowed(t, wc.css);
     seed_session_cookies(t, wc.cookies, w->cur_top); /* REPL worker sees the same cookies */
+    seed_local_storage(w, t, wc.cookies);
     tab_set_viewport_w(t, (int)w->width);
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
     tab_page page;
@@ -13453,7 +13762,7 @@ static void freebug_eval(browser_window *w) {
     } else {
         tab_eval_result r;
         if (tab_eval(t, code, clen, &r) != TAB_OK) {
-            if (w->tab_worker == t) { tab_close(w->tab_worker); w->tab_worker = NULL; }
+            if (w->tab_worker == t) close_page_worker(w);
             fb_buffer_push(&w->console, FB_ERROR,
                            "Freebug: evaluation failed (the page worker is gone).", 52);
         } else {
@@ -13848,9 +14157,9 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
             w->bs.url_bar_anchor = w->bs.url_bar_cursor;  /* a click collapses any selection */
             cairo_destroy(cr);
         } else if (w->ptr_x >= fwd_x && w->ptr_x < fwd_x + UI_BTN_W) {
-            if (browser_forward(&w->bs) == BROWSER_OK) load_current(w);
+            history_step(w, 1);
         } else if (w->ptr_x >= back_x && w->ptr_x < back_x + UI_BTN_W) {
-            if (browser_back(&w->bs) == BROWSER_OK) load_current(w);
+            history_step(w, -1);
         } else {
             w->url_bar_focused = 0;
         }
@@ -14348,8 +14657,9 @@ static void dispatch_js_event(browser_window *w, dom_node_id node_id,
         tab_page_free(&page);
         return;
     }
-    apply_click_result(w, &page);
+    int navigated = apply_click_result(w, &page);
     tab_page_free(&page);
+    if (navigated) return;
 
     /* Restore focus and value: the fresh inputs have default values from the HTML
      * value attribute; re-set from the saved copy so live typing survives. */
@@ -15130,7 +15440,8 @@ ui_status ui_run_browser(const char *start_url) {
 
         /* Poll the Wayland fd, the key-repeat timer, the async-fetch result pipe,
          * and the video decoder + feeder-thread eventfds together. */
-        struct pollfd pfds[6];
+        struct pollfd pfds[7 + WH_MAX];
+        int ws_ids[WH_MAX];
         int nfds = 0;
         pfds[nfds].fd = wl_display_get_fd(w.display); pfds[nfds].events = POLLIN; pfds[nfds].revents = 0; nfds++;
         int timer_idx = -1, fetch_idx = -1, stream_idx = -1,
@@ -15158,6 +15469,15 @@ ui_status ui_run_browser(const char *start_url) {
             pfds[nfds].fd = w.video_evfd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
             video_ev_idx = nfds++;
         }
+        int ws_notify_idx = -1, ws_first = nfds;
+        size_t ws_n = 0;
+        if (w.ws_hub != NULL) {
+            pfds[nfds].fd = wh_notify_fd(w.ws_hub); pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
+            ws_notify_idx = nfds++;
+            ws_first = nfds;
+            ws_n = wh_poll_fds(w.ws_hub, &pfds[nfds], ws_ids, WH_MAX);
+            nfds += (int)ws_n;
+        }
         int pr = poll(pfds, (nfds_t)nfds, timeout);
 
         if (pr > 0 && (pfds[0].revents & POLLIN)) {
@@ -15181,6 +15501,15 @@ ui_status ui_run_browser(const char *start_url) {
             if (read(w.repeat_timer_fd, &expirations, sizeof expirations) > 0)
                 key_repeat_fire(&w);
         }
+
+        /* WebSockets (trusted pages): finished opens, then readable sockets. The ids
+         * were captured before poll; wh_on_readable re-looks each one up, so a socket
+         * a handler closed meanwhile is simply skipped. */
+        if (pr > 0 && ws_notify_idx >= 0 && (pfds[ws_notify_idx].revents & POLLIN))
+            wh_on_notify(w.ws_hub, gui_ws_emit, &w);
+        for (size_t k = 0; pr > 0 && k < ws_n; ++k)
+            if (pfds[ws_first + (int)k].revents & (POLLIN | POLLHUP | POLLERR))
+                wh_on_readable(w.ws_hub, ws_ids[k], gui_ws_emit, &w);
 
         /* One or more fetches completed: render them on this (main) thread. */
         if (pr > 0 && fetch_idx >= 0 && (pfds[fetch_idx].revents & POLLIN))
@@ -15286,6 +15615,8 @@ ui_status ui_run_browser(const char *start_url) {
     destroy_buffer(&w);
     freebug_destroy(&w);                       /* tear down the console window if open */
     if (w.tab_worker) tab_close(w.tab_worker); /* the kept-alive REPL worker */
+    wh_free(w.ws_hub);
+    wst_free(w.web_store);
     fb_buffer_free(&w.console);                /* captured console transcript */
     if (w.copy_source) wl_data_source_destroy(w.copy_source);
     free(w.copy_text);

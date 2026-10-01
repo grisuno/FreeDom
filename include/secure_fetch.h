@@ -287,6 +287,38 @@ sf_status sf_resolve_redirect(const char *base_url, const char *location,
  * On failure, out->status carries the reason and no body is allocated. */
 sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out);
 
+/* --- WebSocket (spec/secure_fetch.md 6quater): trusted-side only --- */
+
+#define SF_WS_MAX_MESSAGE ((size_t)(1u * 1024u * 1024u)) /* per-message cap (anti-DoS) */
+
+typedef struct sf_ws sf_ws;
+
+/* Pure: SF_OK only for a wss:// URL whose https:// twin passes sf_validate_url.
+ * ws:// (plaintext) and every other scheme => SF_ERR_INVALID_URL. NULL => SF_ERR_NULL_ARG. */
+sf_status sf_ws_url_check(const char *url);
+
+/* Opens a WebSocket through the SAME handle setup as sf_get (TLS floor, PQ groups,
+ * peer verification, realm proxy, identity headers), then enforces the full
+ * TLS/PQ/chain policy on the upgraded connection before returning it. On failure
+ * nothing is returned and the connection is closed. */
+sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out);
+
+/* Sends one whole message (text unless binary). SF_ERR_NETWORK on a broken link. */
+sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary);
+
+/* Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending.
+ * *flags receives CURLWS_* bits (text/binary/close/cont); *left (optional) the bytes
+ * of the current frame still to come, so a caller knows when a message is complete
+ * (left == 0 and no CURLWS_CONT). A message growing past SF_WS_MAX_MESSAGE fails with
+ * SF_ERR_TOO_LARGE. */
+sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left);
+
+/* The connection's socket for poll(), or -1. */
+int sf_ws_fd(const sf_ws *ws);
+
+/* Sends a close frame when possible and frees the connection. NULL is a no-op. */
+void sf_ws_close(sf_ws *ws);
+
 /* Like sf_get, but transparently follows HTTP redirects up to max_redirects
  * hops. Every hop is a fresh sf_get, so the full TLS/PQ/chain policy is enforced
  * on each connection (Zero Trust). Each target is re-validated and a downgrade

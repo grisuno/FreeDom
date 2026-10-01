@@ -243,6 +243,13 @@ static int valid(const dom_index *idx, dom_node_id n) {
     return idx != NULL && n < idx->count;
 }
 
+/* A handle that is an ELEMENT: every element-only operation (tag, attributes,
+ * selectors, innerHTML, being a parent) checks this, so a text handle is never
+ * cast to an element (spec/dom.md 9). */
+static int valid_el(const dom_index *idx, dom_node_id n) {
+    return valid(idx, n) && idx->nodes[n]->type == LXB_DOM_NODE_TYPE_ELEMENT;
+}
+
 /* Index a single element's id, class tokens and tag name. */
 static int index_element(dom_index *idx, lxb_dom_element_t *el, dom_node_id id) {
     size_t len = 0;
@@ -439,7 +446,7 @@ static dom_node_id qs_walk(const dom_index *idx, dom_node_id root,
         walk_root = idx->nodes[0];                 /* topmost element */
         start = walk_root;                         /* document scope: include it */
     } else {
-        if (!valid(idx, root)) return DOM_NODE_NONE;
+        if (!valid_el(idx, root)) return DOM_NODE_NONE;
         walk_root = idx->nodes[root];
         start = node_next(walk_root, walk_root);   /* element scope: descendants only */
     }
@@ -478,7 +485,7 @@ size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
 }
 
 int dom_matches(const dom_index *idx, dom_node_id node, const char *selector) {
-    if (!valid(idx, node) || selector == NULL) return 0;
+    if (!valid_el(idx, node) || selector == NULL) return 0;
     lxb_dom_node_t *n = idx->nodes[node];
     if (n->type != LXB_DOM_NODE_TYPE_ELEMENT) return 0;
     css_sel sels[DOM_QS_MAX_SELECTORS];
@@ -488,7 +495,7 @@ int dom_matches(const dom_index *idx, dom_node_id node, const char *selector) {
 
 dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
                         const char *selector) {
-    if (!valid(idx, node) || selector == NULL) return DOM_NODE_NONE;
+    if (!valid_el(idx, node) || selector == NULL) return DOM_NODE_NONE;
     css_sel sels[DOM_QS_MAX_SELECTORS];
     size_t nsel = parse_selector_list(selector, sels, DOM_QS_MAX_SELECTORS);
     if (nsel == 0) return DOM_NODE_NONE;
@@ -545,7 +552,7 @@ dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node) {
 
 const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len) {
     if (len != NULL) *len = 0;
-    if (!valid(idx, node)) return NULL;
+    if (!valid_el(idx, node)) return NULL;
     size_t tlen = 0;
     const lxb_char_t *tag =
         lxb_dom_element_qualified_name(lxb_dom_interface_element(idx->nodes[node]), &tlen);
@@ -557,7 +564,7 @@ const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len) {
 const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
                               const char *name, size_t *len) {
     if (len != NULL) *len = 0;
-    if (!valid(idx, node) || name == NULL) return NULL;
+    if (!valid_el(idx, node) || name == NULL) return NULL;
     lxb_dom_element_t *el = lxb_dom_interface_element(idx->nodes[node]);
     size_t vlen = 0;
     const lxb_char_t *val = lxb_dom_element_get_attribute(el,
@@ -578,7 +585,7 @@ const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
 
 size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
                            const char **names, size_t *lens, size_t cap) {
-    if (!valid(idx, node)) return 0;
+    if (!valid_el(idx, node)) return 0;
     lxb_dom_element_t *el = lxb_dom_interface_element(idx->nodes[node]);
     size_t count = 0;
     for (lxb_dom_attr_t *attr = lxb_dom_element_first_attribute(el);
@@ -621,6 +628,15 @@ dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
                                 const char *text, size_t len) {
     if (!valid(idx, node)) return DOM_ERR_NULL_ARG;
     lxb_dom_node_t *el = idx->nodes[node];
+    if (el->type == LXB_DOM_NODE_TYPE_TEXT || el->type == LXB_DOM_NODE_TYPE_COMMENT
+        || el->type == LXB_DOM_NODE_TYPE_CDATA_SECTION) {
+        lxb_dom_character_data_t *cd = lxb_dom_interface_character_data(el);
+        lxb_status_t st = lxb_dom_character_data_replace(cd,
+            (const lxb_char_t *)(text != NULL ? text : ""), text != NULL ? len : 0,
+            0, cd->data.length);
+        return (st == LXB_STATUS_OK) ? DOM_OK : DOM_ERR_OOM;
+    }
+    if (el->type != LXB_DOM_NODE_TYPE_ELEMENT) return DOM_ERR_NULL_ARG;
 
     /* Detach (not destroy) every child so any index handle into the removed subtree
      * stays a valid pointer (it just leaves the rendered tree). */
@@ -654,6 +670,7 @@ dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len) 
 
 /* Appends an element node to the index, assigning the next handle. */
 static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id) {
+    if (idx->count >= DOM_MAX_HANDLES) return DOM_ERR_OOM;   /* fail closed (spec 9) */
     if (idx->count == idx->cap) {
         size_t ncap = idx->cap ? idx->cap * 2 : 8;
         lxb_dom_node_t **grown =
@@ -691,7 +708,7 @@ dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_
 }
 
 dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child) {
-    if (!valid(idx, parent) || !valid(idx, child) || parent == child)
+    if (!valid_el(idx, parent) || !valid(idx, child) || parent == child)
         return DOM_ERR_NULL_ARG;
     lxb_dom_node_t *p = idx->nodes[parent];
     lxb_dom_node_t *c = idx->nodes[child];
@@ -705,7 +722,7 @@ dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id chil
 }
 
 dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child) {
-    if (!valid(idx, parent) || !valid(idx, child)) return DOM_ERR_NULL_ARG;
+    if (!valid_el(idx, parent) || !valid(idx, child)) return DOM_ERR_NULL_ARG;
     lxb_dom_node_t *c = idx->nodes[child];
     if (c->parent != idx->nodes[parent]) return DOM_ERR_NULL_ARG;
     lxb_dom_node_remove(c); /* detach; node stays valid in the index */
@@ -714,7 +731,7 @@ dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id chil
 
 dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
                              const char *name, const char *value) {
-    if (!valid(idx, node) || name == NULL) return DOM_ERR_NULL_ARG;
+    if (!valid_el(idx, node) || name == NULL) return DOM_ERR_NULL_ARG;
     const char *v = (value != NULL) ? value : "";
     size_t nl = strlen(name), vl = strlen(v);
 
@@ -742,7 +759,7 @@ dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
 }
 
 dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name) {
-    if (!valid(idx, node) || name == NULL) return DOM_ERR_NULL_ARG;
+    if (!valid_el(idx, node) || name == NULL) return DOM_ERR_NULL_ARG;
     lxb_status_t st =
         lxb_dom_element_remove_attribute(lxb_dom_interface_element(idx->nodes[node]),
                                          (const lxb_char_t *)name, strlen(name));
@@ -762,7 +779,7 @@ static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub) {
 
 dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
                               const char *html, size_t len) {
-    if (!valid(idx, node)) return DOM_ERR_NULL_ARG;
+    if (!valid_el(idx, node)) return DOM_ERR_NULL_ARG;
     if (idx->document == NULL) return DOM_ERR_INTERNAL;
     lxb_dom_node_t *el = idx->nodes[node];
 
@@ -871,7 +888,7 @@ dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
                               char **out, size_t *out_len) {
     if (out != NULL) *out = NULL;
     if (out_len != NULL) *out_len = 0;
-    if (!valid(idx, node) || out == NULL || out_len == NULL) return DOM_ERR_NULL_ARG;
+    if (!valid_el(idx, node) || out == NULL || out_len == NULL) return DOM_ERR_NULL_ARG;
 
     ih_acc a = { NULL, NULL, 0, 0, 0 };
     lxb_status_t st = lxb_html_serialize_deep_cb(idx->nodes[node], ih_append, &a);
@@ -895,4 +912,119 @@ dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
     *out = buf;
     *out_len = total;
     return DOM_OK;
+}
+
+dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
+                             dom_node_id ref) {
+    if (ref == DOM_NODE_NONE) return dom_append_child(idx, parent, child);
+    if (!valid_el(idx, parent) || !valid(idx, child) || !valid(idx, ref) || parent == child)
+        return DOM_ERR_NULL_ARG;
+    lxb_dom_node_t *p = idx->nodes[parent];
+    lxb_dom_node_t *c = idx->nodes[child];
+    lxb_dom_node_t *r = idx->nodes[ref];
+    if (r->parent != p) return DOM_ERR_NULL_ARG;
+    for (lxb_dom_node_t *a = p; a != NULL; a = a->parent)   /* same cycle rule as append */
+        if (a == c) return DOM_ERR_NULL_ARG;
+    if (c == r) return DOM_OK;
+    lxb_dom_node_remove(c);
+    lxb_dom_node_insert_before(r, c);
+    return DOM_OK;
+}
+
+dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id) {
+    if (out_id == NULL || !valid(idx, node)) return DOM_ERR_NULL_ARG;
+    *out_id = DOM_NODE_NONE;
+    lxb_dom_node_t *c = lxb_dom_node_clone(idx->nodes[node], deep != 0);
+    if (c == NULL) return DOM_ERR_OOM;
+    /* Index every cloned element (the clone root first, pre-order) so page script can
+     * address the copies; the clone stays detached until inserted. */
+    if (index_subtree(idx, c) != DOM_OK) return DOM_ERR_OOM;
+    dom_node_id id;
+    if (!pm_get(&idx->rev, c, &id) && idx_push(idx, c, &id) != DOM_OK) return DOM_ERR_OOM;
+    *out_id = id;
+    return DOM_OK;
+}
+
+dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
+                             dom_place where, dom_node_id ref) {
+    if (!valid_el(idx, src) || !valid_el(idx, parent)) return DOM_ERR_NULL_ARG;
+    lxb_dom_node_t *s = idx->nodes[src];
+    lxb_dom_node_t *p = idx->nodes[parent];
+    lxb_dom_node_t *r = NULL;
+    if (where == DOM_BEFORE_REF || where == DOM_AFTER_REF) {
+        if (!valid(idx, ref)) return DOM_ERR_NULL_ARG;
+        r = idx->nodes[ref];
+        if (r->parent != p) return DOM_ERR_NULL_ARG;
+    } else if (where != DOM_AT_END && where != DOM_AT_START) {
+        return DOM_ERR_NULL_ARG;
+    }
+    for (lxb_dom_node_t *a = p; a != NULL; a = a->parent)   /* parent inside src => cycle */
+        if (a == s) return DOM_ERR_NULL_ARG;
+    /* Normalise to "insert before anchor" (NULL anchor = append). */
+    lxb_dom_node_t *anchor = NULL;
+    if (where == DOM_AT_START) anchor = p->first_child;
+    else if (where == DOM_BEFORE_REF) anchor = r;
+    else if (where == DOM_AFTER_REF) anchor = r->next;
+    lxb_dom_node_t *c = s->first_child;
+    while (c != NULL) {
+        lxb_dom_node_t *next = c->next;
+        lxb_dom_node_remove(c);
+        if (anchor != NULL) lxb_dom_node_insert_before(anchor, c);
+        else lxb_dom_node_insert_child(p, c);
+        c = next;
+    }
+    return DOM_OK;
+}
+
+/* --- text and comment nodes (spec/dom.md 9) --- */
+
+static int char_kind(const lxb_dom_node_t *n) {
+    switch (n->type) {
+    case LXB_DOM_NODE_TYPE_ELEMENT:       return DOM_KIND_ELEMENT;
+    case LXB_DOM_NODE_TYPE_TEXT:
+    case LXB_DOM_NODE_TYPE_CDATA_SECTION: return DOM_KIND_TEXT;
+    case LXB_DOM_NODE_TYPE_COMMENT:       return DOM_KIND_COMMENT;
+    default:                              return DOM_KIND_NONE;
+    }
+}
+
+/* Handle for a node of the navigable set, registering it on first sight. */
+static dom_node_id handle_of(dom_index *idx, lxb_dom_node_t *n) {
+    if (n == NULL) return DOM_NODE_NONE;
+    dom_node_id id;
+    if (pm_get(&idx->rev, n, &id)) return id;
+    if (char_kind(n) == DOM_KIND_NONE) return DOM_NODE_NONE;
+    return (idx_push(idx, n, &id) == DOM_OK) ? id : DOM_NODE_NONE;
+}
+
+int dom_node_kind(const dom_index *idx, dom_node_id node) {
+    return valid(idx, node) ? char_kind(idx->nodes[node]) : DOM_KIND_NONE;
+}
+
+dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last) {
+    if (!valid_el(idx, node)) return DOM_NODE_NONE;
+    lxb_dom_node_t *c = last ? idx->nodes[node]->last_child : idx->nodes[node]->first_child;
+    while (c != NULL && char_kind(c) == DOM_KIND_NONE) c = last ? c->prev : c->next;
+    return handle_of(idx, c);
+}
+
+dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev) {
+    if (!valid(idx, node)) return DOM_NODE_NONE;
+    lxb_dom_node_t *s = prev ? idx->nodes[node]->prev : idx->nodes[node]->next;
+    while (s != NULL && char_kind(s) == DOM_KIND_NONE) s = prev ? s->prev : s->next;
+    return handle_of(idx, s);
+}
+
+dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
+                                dom_node_id *out_id) {
+    if (idx == NULL || out_id == NULL || idx->document == NULL) return DOM_ERR_NULL_ARG;
+    if (kind != DOM_KIND_TEXT && kind != DOM_KIND_COMMENT) return DOM_ERR_NULL_ARG;
+    *out_id = DOM_NODE_NONE;
+    const lxb_char_t *t = (const lxb_char_t *)(text != NULL ? text : "");
+    if (text == NULL) len = 0;
+    lxb_dom_node_t *n = (kind == DOM_KIND_TEXT)
+        ? lxb_dom_interface_node(lxb_dom_document_create_text_node(idx->document, t, len))
+        : lxb_dom_interface_node(lxb_dom_document_create_comment(idx->document, t, len));
+    if (n == NULL) return DOM_ERR_OOM;
+    return idx_push(idx, n, out_id);
 }

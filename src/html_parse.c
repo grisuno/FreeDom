@@ -94,16 +94,54 @@ enum { SCRIPT_SKIP = 0, SCRIPT_INLINE = 1, SCRIPT_EXTERNAL = 2 };
  * browser rule); otherwise it runs from its inline source. The parser never
  * fetches: external scripts are only REPORTED with their raw src. Mirrors
  * ctype_is_javascript in tab.c (same rule for the fetched Content-Type). */
+/* HTML "the script element": type="module" (ASCII case-insensitive, whitespace
+ * stripped) is an ES module; nothing else that is not a JavaScript MIME type runs. */
+/* type attribute equal to word (ASCII case-insensitive, whitespace stripped). */
+static int type_is(const lxb_char_t *t, size_t len, const char *word) {
+    while (len > 0 && (t[0] == ' ' || t[0] == '\t' || t[0] == '\n' || t[0] == '\r' || t[0] == '\f')) {
+        ++t; --len;
+    }
+    while (len > 0 && (t[len - 1] == ' ' || t[len - 1] == '\t' || t[len - 1] == '\n'
+                       || t[len - 1] == '\r' || t[len - 1] == '\f'))
+        --len;
+    size_t wl = strlen(word);
+    if (len != wl) return 0;
+    for (size_t i = 0; i < len; ++i) {
+        char c = (char)t[i];
+        if (c >= 'A' && c <= 'Z') c = (char)(c + ('a' - 'A'));
+        if (c != word[i]) return 0;
+    }
+    return 1;
+}
+
+static int type_is_module(const lxb_char_t *t, size_t len) {
+    return type_is(t, len, "module");
+}
+
 static int script_classify(const lxb_dom_node_t *n,
-                           const lxb_char_t **src, size_t *src_len) {
+                           const lxb_char_t **src, size_t *src_len, int *is_module,
+                           int *is_importmap) {
     lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)n);
     size_t len = 0;
+    *is_module = 0;
+    *is_importmap = 0;
     const lxb_char_t *type =
         lxb_dom_element_get_attribute(el, (const lxb_char_t *)"type", 4, &len);
-    if (type != NULL && len > 0
+    if (type != NULL && len > 0 && type_is(type, len, "importmap")) {
+        /* An import map is inline JSON only: an external one does not exist in HTML. */
+        size_t sl = 0;
+        if (lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &sl) != NULL)
+            return SCRIPT_SKIP;
+        *is_importmap = 1;
+        return SCRIPT_INLINE;
+    }
+    if (type != NULL && len > 0 && type_is_module(type, len)) {
+        *is_module = 1;
+    } else if (type != NULL && len > 0
         && !mem_contains_ci(type, len, "javascript")
-        && !mem_contains_ci(type, len, "ecmascript"))
+        && !mem_contains_ci(type, len, "ecmascript")) {
         return SCRIPT_SKIP;
+    }
     size_t slen = 0;
     const lxb_char_t *s =
         lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &slen);
@@ -135,7 +173,8 @@ hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count) {
         if (!node_is_script(n)) continue;
         const lxb_char_t *sattr = NULL;
         size_t slen = 0;
-        int cls = script_classify(n, &sattr, &slen);
+        int is_module = 0, is_importmap = 0;
+        int cls = script_classify(n, &sattr, &slen, &is_module, &is_importmap);
         if (cls == SCRIPT_SKIP) continue;
         char  *text = NULL, *src = NULL, *type = NULL;
         size_t tl = 0;
@@ -172,21 +211,23 @@ hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count) {
         list[count].type = type;
         int has_defer = 0;
         int has_async = 0;
-        if (src != NULL) {
-            size_t dl = 0;
-            const lxb_char_t *dv = lxb_dom_element_get_attribute(
-                lxb_dom_interface_element((lxb_dom_node_t *)n),
-                (const lxb_char_t *)"defer", 5, &dl);
-            has_defer = (dv != NULL);
-            size_t al = 0;
-            const lxb_char_t *av = lxb_dom_element_get_attribute(
-                lxb_dom_interface_element((lxb_dom_node_t *)n),
-                (const lxb_char_t *)"async", 5, &al);
-            has_async = (av != NULL);
+        /* defer/async/nomodule are BOOLEAN attributes: present with no value, for
+         * which get_attribute returns NULL -- presence must be asked with
+         * has_attribute, or a real <script defer src=...> is never deferred. */
+        lxb_dom_element_t *sel = lxb_dom_interface_element((lxb_dom_node_t *)n);
+        if (src != NULL || is_module) {   /* an inline MODULE honours async too */
+            has_defer = lxb_dom_element_has_attribute(sel, (const lxb_char_t *)"defer", 5);
+            has_async = lxb_dom_element_has_attribute(sel, (const lxb_char_t *)"async", 5);
         }
-        /* Per HTML spec: when both async and defer are present, async wins. */
+        /* Per HTML spec: when both async and defer are present, async wins; a module
+         * is deferred unless async, inline or external. */
+        if (is_module) has_defer = 1;
         list[count].defer = has_defer && !has_async;
         list[count].async = has_async;
+        list[count].module = is_module;
+        list[count].importmap = is_importmap;
+        list[count].nomodule = !is_module
+            && lxb_dom_element_has_attribute(sel, (const lxb_char_t *)"nomodule", 8);
         count++;
     }
     if (count == 0) { free(list); return NULL; }

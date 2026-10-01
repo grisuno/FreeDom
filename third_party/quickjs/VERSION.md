@@ -41,3 +41,13 @@ hardened build. quickjs-ng requires `_GNU_SOURCE` for `alloca`, `localtime_r`, `
 1. Download the new tag tarball, record its SHA-256 here.
 2. Copy the core `.c`/`.h` above (never `quickjs-libc.*`).
 3. Re-run `make test` and `make asan`; re-run the JS fuzzer.
+
+## Freedom patches
+
+- **2026-09-30 — module def use-after-free at context teardown.** `js_free_module_def`
+  freed a `JSModuleDef` regardless of its reference count, while a `JS_TAG_MODULE` value
+  could still be held by the resolving functions of a never-settled dynamic `import()` (a
+  module doing `await import('./self.js')`). The runtime's final GC then decremented freed
+  memory. Patch: release the internals, keep the header until the last value is freed; the
+  `JS_TAG_MODULE` case of `js_free_value_rt` (previously `abort()`) frees it. Reproducer
+  kept as a `fuzz-js` seed and as `test_module_self_await_teardown` in `test_js_sandbox`.

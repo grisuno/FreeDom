@@ -100,6 +100,31 @@ js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res);
 js_status js_eval_named(js_context *ctx, const char *src, size_t len,
                         const char *filename, js_result *res);
 
+/* --- ES modules (spec/js_sandbox.md 7b) --- */
+
+#define JS_MODULE_MAX       256                             /* modules per context */
+#define JS_MODULE_BYTES_MAX ((size_t)(16u * 1024u * 1024u)) /* module source per context */
+
+/* Resolves specifier against the importing module's base URL into out (absolute URL).
+ * Returns 0, or -1 when it cannot be resolved (e.g. a bare specifier). */
+typedef int (*js_module_resolve_fn)(void *host, const char *base, const char *specifier,
+                                    char *out, size_t outsz);
+
+/* Returns the module source at an absolute URL as an owned buffer (*len bytes), or
+ * NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */
+typedef char *(*js_module_fetch_fn)(void *host, const char *url, size_t *len);
+
+/* Installs the host every static import and dynamic import() goes through. host must
+ * outlive ctx. NULL functions uninstall it (every import then fails). */
+void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,
+                        js_module_fetch_fn fetch, void *host);
+
+/* Evaluates src as an ES module named name (also its import.meta.url), loading its
+ * imports through the module host, then drains the job queue. A rejected evaluation
+ * (a throw in any module, a failed load) => JS_ERR_RUNTIME with the message in res. */
+js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,
+                         js_result *res);
+
 /* Convenience: new context, evaluate once, free the context. Same error codes
  * as js_eval. lim == NULL => defaults. */
 js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res);
@@ -144,5 +169,14 @@ void *js_context_raw(js_context *ctx);
  * that answers these three keys. Pass src=NULL for an inline script (no src
  * attribute). Call after the evaluation to restore currentScript to null. */
 void js_set_current_script(js_context *ctx, const char *src, const char *type);
+
+/* --- realms (spec/js_sandbox.md 7c) ---
+ * Extra global environments on this context's runtime (same heap cap, time budget and
+ * interrupt handler): the substrate for dedicated Workers. Defines the natives
+ * __realmNew / __realmEval / __realmClone on the global object, for a trusted shim
+ * to capture and delete. Realms are freed with the context. ctx NULL =>
+ * JS_ERR_NULL_ARG; OOM => JS_ERR_OOM. */
+#define JS_REALM_MAX 8
+js_status js_install_realms(js_context *ctx);
 
 #endif /* FREEDOM_JS_SANDBOX_H */

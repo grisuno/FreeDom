@@ -1636,6 +1636,7 @@ static void box_reg_free(pv_box_reg *r) {
  * (PV_LEN_UNSET width/radius/outline width, -1 colors, 0 the rest). */
 static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->parent_id = -1;
+    d->node_id = DOM_NODE_NONE;
     pv_box_info hb = { .mt = PV_LEN_UNSET, .mb = PV_LEN_UNSET, .ua = BX_UA_NONE };
     css_hbox_resolve(cs, &hb);
     d->box_l = hb.l; d->box_r = hb.r; d->box_w = hb.w; d->box_center = hb.center;
@@ -5534,6 +5535,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
      * box-carrying block in document order (id == index) with parent links resolved
      * during the ancestor walks; copy them into the view in id order. */
     for (size_t bi = 0; bi < box_reg.count; ++bi) {
+        box_reg.def[bi].node_id = pv_node_map_id(&node_map, box_reg.node[bi]);
         pv_status st = pv_add_box_def(v, &box_reg.def[bi]);
         if (st != PV_OK) { rc = st; goto cleanup; }
     }

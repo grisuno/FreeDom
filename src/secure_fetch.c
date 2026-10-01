@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <pthread.h>
 #include <time.h>
 #include <inttypes.h>
@@ -507,6 +508,8 @@ static const char *get_negotiated_group_name(SSL *ssl) {
     return OBJ_nid2sn(nid);
 }
 
+static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl);
+
 /* Idempotent: takes the TLS snapshot the first time the SSL* is reachable. */
 static void tls_capture_try(tls_capture *cap) {
     if (cap->have) return;
@@ -514,8 +517,12 @@ static void tls_capture_try(tls_capture *cap) {
     struct curl_tlssessioninfo *ti = NULL;
     if (curl_easy_getinfo(cap->curl, CURLINFO_TLS_SSL_PTR, &ti) != CURLE_OK) return;
     if (ti == NULL || ti->backend != CURLSSLBACKEND_OPENSSL || ti->internals == NULL) return;
+    tls_capture_from_ssl(cap, (SSL *)ti->internals);
+}
 
-    SSL *ssl = (SSL *)ti->internals;
+/* The snapshot proper, from a live SSL*. Idempotent. */
+static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl) {
+    if (cap->have || ssl == NULL) return;
     
     /* 1. Capture TLS version */
     copy_bounded(cap->version, sizeof cap->version, SSL_get_version(ssl));
@@ -709,6 +716,162 @@ static int xferinfo_cb(void *userdata, curl_off_t dltotal, curl_off_t dlnow,
 
 /* --- public: orchestrator --- */
 
+/* Appends one header line without losing the list on OOM (the plain
+ * "h = curl_slist_append(h, ...)" idiom dropped the whole list when it failed).
+ * Returns 0, or -1 on OOM (the list is left intact for the caller to free). */
+static int add_header(struct curl_slist **h, const char *line) {
+    struct curl_slist *n = curl_slist_append(*h, line);
+    if (n == NULL) return -1;
+    *h = n;
+    return 0;
+}
+
+/* The ONE place a curl handle is configured for a request (spec/secure_fetch.md): URL,
+ * realm proxy, TLS floor + KE groups (or the impersonation blend), peer verification,
+ * protocol whitelist, timeouts, range, identity + anti-fp headers, callbacks into ctx.
+ * sf_perform and sf_ws_open share it, so an https fetch and a WebSocket can never be
+ * held to different policies. ws_protos overrides the protocol whitelist ("wss" for a
+ * WebSocket; NULL => https, or http,https for an overlay). *hdrs owns the header list
+ * even on failure. */
+static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,
+                                 fetch_ctx *ctx, const char *ws_protos,
+                                 struct curl_slist **hdrs) {
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    /* Socket-level anonymity proxy (Tor SOCKS5h / I2P HTTP). SOCKS5_HOSTNAME keeps DNS
+     * resolution at the proxy (no local lookup => no DNS leak; resolves .onion). When
+     * a proxy is set, libcurl never bypasses it, so there is no de-anonymizing direct
+     * fallback. The realm router (net_realm) chose this in the orchestrator. */
+    if (local->proxy_type != SF_PROXY_NONE && local->proxy_address != NULL) {
+        curl_easy_setopt(curl, CURLOPT_PROXY, local->proxy_address);
+        curl_easy_setopt(curl, CURLOPT_PROXYTYPE,
+                         (local->proxy_type == SF_PROXY_HTTP)
+                             ? (long)CURLPROXY_HTTP
+                             : (long)CURLPROXY_SOCKS5_HOSTNAME);
+    }
+    /* TLS 1.3 is the floor everywhere except the explicit allowlist override, which
+     * lowers the floor to TLS 1.2 (1.3 still the ceiling, so it is preferred). The
+     * negotiated version is re-checked against the policy in sf_enforce_policy. */
+    long sslmin = (local->policy == SF_POLICY_ALLOWLISTED_INSECURE)
+                  ? CURL_SSLVERSION_TLSv1_2 : CURL_SSLVERSION_TLSv1_3;
+    curl_easy_setopt(curl, CURLOPT_SSLVERSION,
+                     (long)(sslmin | CURL_SSLVERSION_MAX_TLSv1_3));
+    if (local->impersonate) {
+        /* Interim Chrome/Firefox-consistent ClientHello blend (spec/tls_impersonate.md
+         * Fase 3): drop X25519MLKEM768 and order the TLS 1.3 ciphersuites like the
+         * browser we advertise, so the JA3 stops contradicting the UA. Only the KE
+         * strength relaxes to classical -- authenticity (VERIFYPEER) is untouched, and
+         * the caller pairs this with a classical-KE-tolerant policy. */
+        curl_easy_setopt(curl, CURLOPT_SSL_EC_CURVES, SF_IMPERSONATE_KEX_GROUPS);
+        curl_easy_setopt(curl, CURLOPT_TLS13_CIPHERS, SF_IMPERSONATE_TLS13_CIPHERS);
+        curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, SF_IMPERSONATE_TLS12_CIPHERS);
+    } else {
+        curl_easy_setopt(curl, CURLOPT_SSL_EC_CURVES, local->kex_groups);
+    }
+    if (local->insecure) {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    } else {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+    }
+    /* https only, except an overlay request that also allows plain http. */
+    const char *protos = (ws_protos != NULL) ? ws_protos
+                       : (local->allow_overlay_http ? "http,https" : "https");
+    curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, protos);
+    curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, protos);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, local->timeout_ms);
+    /* Bound the handshake separately from the transfer. Without this a host that
+     * accepts nothing (a blackholed CDN, a dead tracker domain) consumed the
+     * entire request timeout before the connection was even established, and a
+     * page pays that once per subresource. Never longer than the request budget
+     * itself, or it would be unreachable. */
+    long connect_ms = SF_CONNECT_TIMEOUT_MS;
+    if (local->timeout_ms > 0 && connect_ms > local->timeout_ms)
+        connect_ms = local->timeout_ms;
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_ms);
+    /* Byte-range HTTP request (Range: bytes=N-M). When range_start >= 0, set the
+     * range header. libcurl handles the splitting of multipart responses (206 Partial).
+     * An open-ended range uses range_end < 0 (i.e., "bytes=N-"). */
+    if (local->range_start >= 0) {
+        char rbuf[64];
+        int rn;
+        if (local->range_end >= local->range_start)
+            rn = snprintf(rbuf, sizeof rbuf, "%" PRId64 "-%" PRId64,
+                          local->range_start, local->range_end);
+        else
+            rn = snprintf(rbuf, sizeof rbuf, "%" PRId64 "-", local->range_start);
+        if (rn > 0 && (size_t)rn < sizeof rbuf)
+            curl_easy_setopt(curl, CURLOPT_RANGE, rbuf);
+    }
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, sf_user_agent_or_default(local->user_agent));
+    /* HTTP Basic Authentication. When username is set, build a "user:pass" string
+     * and hand it to curl, which sends an Authorization: Basic header preemptively
+     * and on any 401 challenge. Curl automatically strips the header on cross-host
+     * redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
+     * different origin. */
+    if (local->username != NULL && local->username[0] != '\0') {
+        char userpwd[512];
+        const char *pw = (local->password != NULL) ? local->password : "";
+        int upn = snprintf(userpwd, sizeof userpwd, "%s:%s", local->username, pw);
+        if (upn > 0 && (size_t)upn < sizeof userpwd) {
+            curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd);
+            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_BASIC);
+        }
+    }
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, ctx);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, ctx);
+
+    /* Streaming progress: fires xferinfo_cb ~1/sec during download, passing the
+     * accumulated body to the caller's progress callback so it can progressively
+     * render before the response is complete. Only enabled when requested. */
+    if (ctx->progress_cb != NULL) {
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, ctx);
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    }
+
+    /* Send a normalized Accept-Language on every request (anti-fingerprinting): the
+     * value matches the JS-visible identity, so the on-the-wire and in-page locales
+     * agree. Omitting it is itself a signal; the real system locale must never leak. */
+    if (add_header(hdrs, "Accept-Language: " FP_ACCEPT_LANGUAGE_HEADER) != 0) return SF_ERR_OOM;
+
+    /* Browser-like Accept header (Hito 30b): replaces libcurl's generic accept with a
+     * standard Firefox content-negotiation string. Every real browser sends this;
+     * a bare wildcard accept is a bot/script signal. */
+    if (add_header(hdrs, "Accept: " FP_ACCEPT_HEADER_NAV) != 0) return SF_ERR_OOM;
+
+    /* DNT: 1 matches Firefox privacy defaults (Hito 30b). */
+    if (add_header(hdrs, "DNT: 1") != 0) return SF_ERR_OOM;
+
+    /* Sec-Fetch-* headers (Hito 30b): absent from all non-browser HTTP clients;
+     * every real browser sends them. The dest/mode come from sf_config
+     * (defaulting to document/navigate for top-level navigation); Site is
+     * "none" for direct nav, "same-origin"/"cross-site" from referrer_url. */
+    {
+        const char *dest  = (local->sec_fetch_dest != NULL)
+                                ? local->sec_fetch_dest : FP_SEC_FETCH_DEST_NAV;
+        const char *mode  = (local->sec_fetch_mode != NULL)
+                                ? local->sec_fetch_mode : FP_SEC_FETCH_MODE_NAV;
+        char sfh[128];
+        int sn = snprintf(sfh, sizeof sfh, "Sec-Fetch-Dest: %s", dest);
+        if (sn > 0 && (size_t)sn < sizeof sfh) {
+            if (add_header(hdrs, sfh) != 0) return SF_ERR_OOM;
+        }
+        sn = snprintf(sfh, sizeof sfh, "Sec-Fetch-Mode: %s", mode);
+        if (sn > 0 && (size_t)sn < sizeof sfh) {
+            if (add_header(hdrs, sfh) != 0) return SF_ERR_OOM;
+        }
+        if (add_header(hdrs, "Sec-Fetch-Site: " FP_SEC_FETCH_SITE_NONE) != 0) return SF_ERR_OOM;
+        if (add_header(hdrs, "Sec-Fetch-User: " FP_SEC_FETCH_USER_ON) != 0) return SF_ERR_OOM;
+    }
+
+    return SF_OK;
+}
+
 /* The shared request engine for sf_get and sf_post. When post_body == NULL it is a
  * GET; otherwise it is a POST carrying body (post_len bytes) with content_type. The
  * full TLS/PQ/chain policy is enforced identically for both methods (Zero Trust:
@@ -758,146 +921,9 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     struct curl_slist *hdrs = NULL;
     sf_status result = SF_ERR_INTERNAL;
 
-    curl_easy_setopt(curl, CURLOPT_URL, url);
-    /* Socket-level anonymity proxy (Tor SOCKS5h / I2P HTTP). SOCKS5_HOSTNAME keeps DNS
-     * resolution at the proxy (no local lookup => no DNS leak; resolves .onion). When
-     * a proxy is set, libcurl never bypasses it, so there is no de-anonymizing direct
-     * fallback. The realm router (net_realm) chose this in the orchestrator. */
-    if (local.proxy_type != SF_PROXY_NONE && local.proxy_address != NULL) {
-        curl_easy_setopt(curl, CURLOPT_PROXY, local.proxy_address);
-        curl_easy_setopt(curl, CURLOPT_PROXYTYPE,
-                         (local.proxy_type == SF_PROXY_HTTP)
-                             ? (long)CURLPROXY_HTTP
-                             : (long)CURLPROXY_SOCKS5_HOSTNAME);
-    }
-    /* TLS 1.3 is the floor everywhere except the explicit allowlist override, which
-     * lowers the floor to TLS 1.2 (1.3 still the ceiling, so it is preferred). The
-     * negotiated version is re-checked against the policy in sf_enforce_policy. */
-    long sslmin = (local.policy == SF_POLICY_ALLOWLISTED_INSECURE)
-                  ? CURL_SSLVERSION_TLSv1_2 : CURL_SSLVERSION_TLSv1_3;
-    curl_easy_setopt(curl, CURLOPT_SSLVERSION,
-                     (long)(sslmin | CURL_SSLVERSION_MAX_TLSv1_3));
-    if (local.impersonate) {
-        /* Interim Chrome/Firefox-consistent ClientHello blend (spec/tls_impersonate.md
-         * Fase 3): drop X25519MLKEM768 and order the TLS 1.3 ciphersuites like the
-         * browser we advertise, so the JA3 stops contradicting the UA. Only the KE
-         * strength relaxes to classical -- authenticity (VERIFYPEER) is untouched, and
-         * the caller pairs this with a classical-KE-tolerant policy. */
-        curl_easy_setopt(curl, CURLOPT_SSL_EC_CURVES, SF_IMPERSONATE_KEX_GROUPS);
-        curl_easy_setopt(curl, CURLOPT_TLS13_CIPHERS, SF_IMPERSONATE_TLS13_CIPHERS);
-        curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, SF_IMPERSONATE_TLS12_CIPHERS);
-    } else {
-        curl_easy_setopt(curl, CURLOPT_SSL_EC_CURVES, local.kex_groups);
-    }
-    if (local.insecure) {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-    } else {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
-    }
-    /* https only, except an overlay request that also allows plain http. */
-    const char *protos = local.allow_overlay_http ? "http,https" : "https";
-    curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, protos);
-    curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, protos);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, local.timeout_ms);
-    /* Bound the handshake separately from the transfer. Without this a host that
-     * accepts nothing (a blackholed CDN, a dead tracker domain) consumed the
-     * entire request timeout before the connection was even established, and a
-     * page pays that once per subresource. Never longer than the request budget
-     * itself, or it would be unreachable. */
-    long connect_ms = SF_CONNECT_TIMEOUT_MS;
-    if (local.timeout_ms > 0 && connect_ms > local.timeout_ms)
-        connect_ms = local.timeout_ms;
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_ms);
-    /* Byte-range HTTP request (Range: bytes=N-M). When range_start >= 0, set the
-     * range header. libcurl handles the splitting of multipart responses (206 Partial).
-     * An open-ended range uses range_end < 0 (i.e., "bytes=N-"). */
-    if (local.range_start >= 0) {
-        char rbuf[64];
-        int rn;
-        if (local.range_end >= local.range_start)
-            rn = snprintf(rbuf, sizeof rbuf, "%" PRId64 "-%" PRId64,
-                          local.range_start, local.range_end);
-        else
-            rn = snprintf(rbuf, sizeof rbuf, "%" PRId64 "-", local.range_start);
-        if (rn > 0 && (size_t)rn < sizeof rbuf)
-            curl_easy_setopt(curl, CURLOPT_RANGE, rbuf);
-    }
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, sf_user_agent_or_default(local.user_agent));
-    /* HTTP Basic Authentication. When username is set, build a "user:pass" string
-     * and hand it to curl, which sends an Authorization: Basic header preemptively
-     * and on any 401 challenge. Curl automatically strips the header on cross-host
-     * redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
-     * different origin. */
-    if (local.username != NULL && local.username[0] != '\0') {
-        char userpwd[512];
-        const char *pw = (local.password != NULL) ? local.password : "";
-        int upn = snprintf(userpwd, sizeof userpwd, "%s:%s", local.username, pw);
-        if (upn > 0 && (size_t)upn < sizeof userpwd) {
-            curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd);
-            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_BASIC);
-        }
-    }
-    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ctx);
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &ctx);
-
-    /* Streaming progress: fires xferinfo_cb ~1/sec during download, passing the
-     * accumulated body to the caller's progress callback so it can progressively
-     * render before the response is complete. Only enabled when requested. */
-    if (ctx.progress_cb != NULL) {
-        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
-        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &ctx);
-        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    }
-
-    /* Send a normalized Accept-Language on every request (anti-fingerprinting): the
-     * value matches the JS-visible identity, so the on-the-wire and in-page locales
-     * agree. Omitting it is itself a signal; the real system locale must never leak. */
-    hdrs = curl_slist_append(hdrs, "Accept-Language: " FP_ACCEPT_LANGUAGE_HEADER);
-    if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
-
-    /* Browser-like Accept header (Hito 30b): replaces libcurl's generic accept with a
-     * standard Firefox content-negotiation string. Every real browser sends this;
-     * a bare wildcard accept is a bot/script signal. */
-    hdrs = curl_slist_append(hdrs, "Accept: " FP_ACCEPT_HEADER_NAV);
-    if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
-
-    /* DNT: 1 matches Firefox privacy defaults (Hito 30b). */
-    hdrs = curl_slist_append(hdrs, "DNT: 1");
-    if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
-
-    /* Sec-Fetch-* headers (Hito 30b): absent from all non-browser HTTP clients;
-     * every real browser sends them. The dest/mode come from sf_config
-     * (defaulting to document/navigate for top-level navigation); Site is
-     * "none" for direct nav, "same-origin"/"cross-site" from referrer_url. */
-    {
-        const char *dest  = (local.sec_fetch_dest != NULL)
-                                ? local.sec_fetch_dest : FP_SEC_FETCH_DEST_NAV;
-        const char *mode  = (local.sec_fetch_mode != NULL)
-                                ? local.sec_fetch_mode : FP_SEC_FETCH_MODE_NAV;
-        char sfh[128];
-        int sn = snprintf(sfh, sizeof sfh, "Sec-Fetch-Dest: %s", dest);
-        if (sn > 0 && (size_t)sn < sizeof sfh) {
-            hdrs = curl_slist_append(hdrs, sfh);
-            if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
-        }
-        sn = snprintf(sfh, sizeof sfh, "Sec-Fetch-Mode: %s", mode);
-        if (sn > 0 && (size_t)sn < sizeof sfh) {
-            hdrs = curl_slist_append(hdrs, sfh);
-            if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
-        }
-        hdrs = curl_slist_append(hdrs,
-            "Sec-Fetch-Site: " FP_SEC_FETCH_SITE_NONE);
-        if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
-        hdrs = curl_slist_append(hdrs,
-            "Sec-Fetch-User: " FP_SEC_FETCH_USER_ON);
-        if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
-    }
+    result = sf_setup_handle(curl, url, &local, &ctx, NULL, &hdrs);
+    if (result != SF_OK) goto done;
+    result = SF_ERR_INTERNAL;
 
     if (post_body != NULL || post_len != 0) {
         const char *ct = (content_type != NULL) ? content_type
@@ -905,10 +931,9 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
         char hbuf[256];
         int hn = snprintf(hbuf, sizeof hbuf, "Content-Type: %s", ct);
         if (hn < 0 || (size_t)hn >= sizeof hbuf) { result = SF_ERR_INVALID_URL; goto done; }
-        hdrs = curl_slist_append(hdrs, hbuf);
+        if (add_header(&hdrs, hbuf) != 0) { result = SF_ERR_OOM; goto done; }
         /* Suppress libcurl's "Expect: 100-continue" so a small POST is one round trip. */
-        hdrs = curl_slist_append(hdrs, "Expect:");
-        if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
+        if (add_header(&hdrs, "Expect:") != 0) { result = SF_ERR_OOM; goto done; }
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)post_len);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (post_body != NULL) ? post_body : "");
@@ -1047,4 +1072,169 @@ sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
         sf_response_free(out);
         memcpy(current, next, strlen(next) + 1);
     }
+}
+
+/* --- WebSocket (spec/secure_fetch.md 6quater) --- */
+
+/* An upgraded (CONNECT_ONLY) connection never runs the header callback that snapshots
+ * TLS for a fetch, and curl no longer exposes its SSL* afterwards. So the WebSocket
+ * path snapshots from OpenSSL itself at handshake completion: the per-connection
+ * SSL_CTX carries the capture target as app data. The ws's fetch_ctx lives exactly as
+ * long as the curl handle that owns the connection. */
+static void ws_ssl_info_cb(const SSL *ssl, int where, int ret) {
+    (void)ret;
+    if ((where & SSL_CB_HANDSHAKE_DONE) == 0) return;
+    tls_capture *cap = (tls_capture *)SSL_CTX_get_app_data(SSL_get_SSL_CTX(ssl));
+    if (cap != NULL) tls_capture_from_ssl(cap, (SSL *)ssl);
+}
+
+static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata) {
+    (void)curl;
+    SSL_CTX_set_app_data((SSL_CTX *)sslctx, userdata);
+    SSL_CTX_set_info_callback((SSL_CTX *)sslctx, ws_ssl_info_cb);
+    return CURLE_OK;
+}
+
+struct sf_ws {
+    CURL              *curl;
+    fetch_ctx         *ctx;      /* heap: the handle's callbacks point into it */
+    struct curl_slist *hdrs;
+    size_t             msg_len;  /* bytes of the message being received so far */
+};
+
+sf_status sf_ws_url_check(const char *url) {
+    if (url == NULL) return SF_ERR_NULL_ARG;
+    if (strncasecmp(url, "wss://", 6) != 0) return SF_ERR_INVALID_URL;
+    /* The https twin must pass the same validator a fetch does. */
+    char twin[SF_MAX_URL];
+    size_t n = strlen(url);
+    if (n + 2 >= sizeof twin) return SF_ERR_INVALID_URL;
+    memcpy(twin, "https://", 8);
+    memcpy(twin + 8, url + 6, n - 6 + 1);
+    return (sf_validate_url(twin) == SF_OK) ? SF_OK : SF_ERR_INVALID_URL;
+}
+
+static void ws_free(sf_ws *ws) {
+    if (ws == NULL) return;
+    if (ws->curl != NULL) curl_easy_cleanup(ws->curl);
+    curl_slist_free_all(ws->hdrs);
+    if (ws->ctx != NULL) free(ws->ctx->sink.data);
+    free(ws->ctx);
+    free(ws);
+}
+
+sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out) {
+    if (out != NULL) *out = NULL;
+    if (url == NULL || out == NULL) return SF_ERR_NULL_ARG;
+    sf_status st = sf_ws_url_check(url);
+    if (st != SF_OK) return st;
+
+    sf_config local = (cfg != NULL) ? *cfg : sf_config_default();
+    if (local.timeout_ms == 0) local.timeout_ms = SF_DEFAULT_TIMEOUT_MS;
+    if (local.kex_groups == NULL) local.kex_groups = SF_DEFAULT_KEX_GROUPS;
+    if (local.sec_fetch_dest == NULL) local.sec_fetch_dest = "websocket";
+    if (local.sec_fetch_mode == NULL) local.sec_fetch_mode = "websocket";
+    local.allow_overlay_http = 0;          /* never a plaintext WebSocket */
+    local.progress_cb = NULL;
+
+    sf_ws *ws = (sf_ws *)calloc(1, sizeof *ws);
+    if (ws == NULL) return SF_ERR_OOM;
+    ws->ctx = (fetch_ctx *)calloc(1, sizeof *ws->ctx);
+    ws->curl = curl_easy_init();
+    if (ws->ctx == NULL || ws->curl == NULL) { ws_free(ws); return SF_ERR_OOM; }
+    ws->ctx->sink.limit = SF_WS_MAX_MESSAGE;
+    ws->ctx->cap.curl = ws->curl;
+    if (sf_share != NULL) curl_easy_setopt(ws->curl, CURLOPT_SHARE, sf_share);
+    curl_easy_setopt(ws->curl, CURLOPT_COOKIEFILE, "");
+
+    st = sf_setup_handle(ws->curl, url, &local, ws->ctx, "wss", &ws->hdrs);
+    if (st != SF_OK) { ws_free(ws); return st; }
+    curl_easy_setopt(ws->curl, CURLOPT_HTTPHEADER, ws->hdrs);
+    /* Upgrade, then hand the live connection to curl_ws_send/recv. */
+    curl_easy_setopt(ws->curl, CURLOPT_CONNECT_ONLY, 2L);
+    curl_easy_setopt(ws->curl, CURLOPT_SSL_CTX_FUNCTION, ws_ssl_ctx_cb);
+    curl_easy_setopt(ws->curl, CURLOPT_SSL_CTX_DATA, &ws->ctx->cap);
+
+    CURLcode rc = curl_easy_perform(ws->curl);
+    if (rc != CURLE_OK) {
+        st = map_curl_error(rc, &ws->ctx->sink);
+        ws_free(ws);
+        return st;
+    }
+    /* The upgraded connection is still live: take the TLS snapshot (the 101
+     * response's header callback normally already did) and hold it to the same
+     * policy as any fetch. No snapshot => fail closed. */
+    tls_capture_try(&ws->ctx->cap);
+    if (!ws->ctx->cap.have) { ws_free(ws); return SF_ERR_INTERNAL; }
+    if (!local.insecure) {
+        sf_chain_info *chain = ws->ctx->cap.chain_ok ? &ws->ctx->cap.chain : NULL;
+        st = sf_enforce_policy(ws->ctx->cap.version, ws->ctx->cap.group, chain, local.policy);
+        if (st != SF_OK) { ws_free(ws); return st; }
+    }
+    long code = 0;
+    curl_easy_getinfo(ws->curl, CURLINFO_RESPONSE_CODE, &code);
+    if (code != 101) { ws_free(ws); return SF_ERR_NETWORK; }
+    *out = ws;
+    return SF_OK;
+}
+
+sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary) {
+    if (ws == NULL || (data == NULL && len != 0)) return SF_ERR_NULL_ARG;
+    if (len > SF_WS_MAX_MESSAGE) return SF_ERR_TOO_LARGE;
+    const unsigned char *p = (const unsigned char *)data;
+    size_t off = 0;
+    unsigned int flags = binary ? CURLWS_BINARY : CURLWS_TEXT;
+    /* A few non-blocking retries: a message is small and the socket buffer usually
+     * takes it at once; a peer that never drains is a broken link, not a wait. */
+    for (int tries = 0; tries < 64; ++tries) {
+        size_t sent = 0;
+        CURLcode rc = curl_ws_send(ws->curl, p + off, len - off, &sent, 0, flags);
+        if (rc == CURLE_OK) {
+            off += sent;
+            if (off >= len) return SF_OK;
+            continue;
+        }
+        if (rc != CURLE_AGAIN) return SF_ERR_NETWORK;
+        struct timespec ts = { 0, 2000000L };
+        nanosleep(&ts, NULL);
+    }
+    return SF_ERR_NETWORK;
+}
+
+sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left) {
+    if (got != NULL) *got = 0;
+    if (flags != NULL) *flags = 0;
+    if (left != NULL) *left = 0;
+    if (ws == NULL || buf == NULL || got == NULL || flags == NULL) return SF_ERR_NULL_ARG;
+    size_t n = 0;
+    const struct curl_ws_frame *meta = NULL;
+    CURLcode rc = curl_ws_recv(ws->curl, buf, cap, &n, &meta);
+    if (rc == CURLE_AGAIN) return SF_OK;
+    if (rc != CURLE_OK || meta == NULL) return SF_ERR_NETWORK;
+    /* A fresh message starts at offset 0; bound its total size. */
+    if (meta->offset == 0) ws->msg_len = 0;
+    if (n > SF_WS_MAX_MESSAGE - ws->msg_len
+        || (curl_off_t)ws->msg_len + meta->bytesleft > (curl_off_t)SF_WS_MAX_MESSAGE)
+        return SF_ERR_TOO_LARGE;
+    ws->msg_len += n;
+    *got = n;
+    *flags = meta->flags;
+    if (left != NULL) *left = (meta->bytesleft > 0) ? (size_t)meta->bytesleft : 0;
+    return SF_OK;
+}
+
+int sf_ws_fd(const sf_ws *ws) {
+    if (ws == NULL || ws->curl == NULL) return -1;
+    curl_socket_t fd = CURL_SOCKET_BAD;
+    if (curl_easy_getinfo(ws->curl, CURLINFO_ACTIVESOCKET, &fd) != CURLE_OK) return -1;
+    return (fd == CURL_SOCKET_BAD) ? -1 : (int)fd;
+}
+
+void sf_ws_close(sf_ws *ws) {
+    if (ws == NULL) return;
+    if (ws->curl != NULL) {
+        size_t sent = 0;
+        (void)curl_ws_send(ws->curl, "", 0, &sent, 0, CURLWS_CLOSE);
+    }
+    ws_free(ws);
 }

@@ -529,6 +529,36 @@ static void test_cookie_jar_put_and_header(void **state) {
     assert_null(strstr(buf2, "SOCS"));
 }
 
+/* --- WebSocket (spec/secure_fetch.md 6quater) --- */
+
+static void test_ws_url_check(void **state) {
+    (void)state;
+    assert_int_equal(sf_ws_url_check("wss://chat.example.com/socket?x=1"), SF_OK);
+    assert_int_equal(sf_ws_url_check("WSS://chat.example.com/"), SF_OK);
+    assert_int_equal(sf_ws_url_check("ws://chat.example.com/"), SF_ERR_INVALID_URL);
+    assert_int_equal(sf_ws_url_check("https://chat.example.com/"), SF_ERR_INVALID_URL);
+    assert_int_equal(sf_ws_url_check("wss://"), SF_ERR_INVALID_URL);
+    assert_int_equal(sf_ws_url_check("wss:/x"), SF_ERR_INVALID_URL);
+    assert_int_equal(sf_ws_url_check(""), SF_ERR_INVALID_URL);
+    assert_int_equal(sf_ws_url_check(NULL), SF_ERR_NULL_ARG);
+}
+
+static void test_ws_open_rejects_before_any_io(void **state) {
+    (void)state;
+    sf_ws *ws = (sf_ws *)(uintptr_t)1;
+    assert_int_equal(sf_ws_open("ws://plain.example/", NULL, &ws), SF_ERR_INVALID_URL);
+    assert_null(ws);
+    assert_int_equal(sf_ws_open(NULL, NULL, &ws), SF_ERR_NULL_ARG);
+    assert_int_equal(sf_ws_open("wss://a.example/", NULL, NULL), SF_ERR_NULL_ARG);
+    assert_int_equal(sf_ws_send(NULL, "x", 1, 0), SF_ERR_NULL_ARG);
+    size_t got = 7;
+    int flags = 0;
+    char buf[4];
+    assert_int_equal(sf_ws_recv(NULL, buf, sizeof buf, &got, &flags, NULL), SF_ERR_NULL_ARG);
+    assert_int_equal(sf_ws_fd(NULL), -1);
+    sf_ws_close(NULL);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_config_default_is_secure),
@@ -580,6 +610,8 @@ int main(void) {
         cmocka_unit_test(test_post_rejects_non_https),
         cmocka_unit_test(test_cookie_line_matches_pure),
         cmocka_unit_test(test_cookie_jar_put_and_header),
+        cmocka_unit_test(test_ws_url_check),
+        cmocka_unit_test(test_ws_open_rejects_before_any_io),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

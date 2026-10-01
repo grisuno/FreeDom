@@ -266,6 +266,34 @@ volcado (`tab_page.set_cookies`); el orquestador hace el *foldback* con `sf_cook
 no-confiable el jar de JS queda **deshabilitado** (`document.cookie` = `''`, set no-op) — Zero
 Knowledge por defecto. Ver `[[freedom-session-cookies-trusted-spa]]`.
 
+## 6quater. WebSocket (`sf_ws_*`, plan B5, 2026-09-30)
+
+El padre confiable abre el WebSocket de una página allow∩js; el worker nunca toca el socket.
+La conexión pasa por **exactamente la misma** configuración que una petición https
+(`sf_setup_handle`, compartida con `sf_perform`): TLS 1.3 mínimo (1.2 bajo la allowlist),
+grupos KE híbridos, `VERIFYPEER`/`VERIFYHOST`, proxy del realm (Tor/I2P), UA e identidad
+anti-fp. Tras el handshake de upgrade (`CURLOPT_CONNECT_ONLY` = 2) se toma la misma
+instantánea TLS y se aplica `sf_enforce_policy`; si falla, se cierra antes de entregar nada.
+
+```c
+sf_status sf_ws_url_check(const char *url);           /* puro */
+sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out);
+sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary);
+sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags); /* no bloquea */
+int       sf_ws_fd(const sf_ws *ws);                   /* para poll(); -1 si no hay */
+void      sf_ws_close(sf_ws *ws);                      /* idempotente sobre NULL */
+```
+
+- `sf_ws_url_check`: solo `wss://` con una autoridad que `sf_validate_url` aceptaría como
+  `https://` (mismo validador: se reescribe el esquema y se valida). `ws://` se rechaza
+  (`SF_ERR_INVALID_URL`): un WebSocket en claro es un downgrade.
+- Un mensaje entrante mayor que `SF_WS_MAX_MESSAGE` (1 MiB) cierra la conexión
+  (`SF_ERR_TOO_LARGE`): cota anti-DoS de memoria del padre.
+- `sf_ws_recv` devuelve `SF_OK` con `*got == 0` cuando no hay datos todavía.
+- **Verificación:** la parte pura se prueba en `test_secure_fetch`; el handshake real necesita un
+  servidor `wss://` con certificado válido y KE PQ, así que queda como **prueba de integración
+  pendiente** (no se puede montar localmente sin debilitar la política).
+
 ## 7. Garantías de memoria
 
 - Sin estado global mutable; reentrante.
