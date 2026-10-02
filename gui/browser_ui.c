@@ -4442,14 +4442,19 @@ static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox) {
          * belongs to the container, not to this item. */
         int cur = -1;
         int guard = 0;
+        int found = 0;
         for (int id = bid; id >= 0 && guard < 256; ++guard) {
             if (id == cbox) { cur = -1; break; }   /* reached the container itself */
             const pv_box_def *d = rd_box_at(doc, (size_t)id);
             int parent = (d != NULL) ? d->parent_id : -1;
             cur = id;
-            if (parent == cbox) break;             /* child of the container box */
+            if (parent == cbox) { found = 1; break; }   /* child of the container box */
             id = parent;
         }
+        /* With a known container box, a run whose chain never passes through it is
+         * not inside any item box: the walk ran out to the ROOT, and taking <html>
+         * as the item's box re-opened it (min-height:100vh) inside the card. */
+        if (cbox >= 0 && !found) cur = -1;
         if (cur < 0) continue;
         int depth = 0;
         for (int id = cur; id >= 0 && depth < 256; ++depth) {
@@ -4981,6 +4986,8 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                                   rc_layout *L, rc_state *s, const ui_theme *th,
                                   const rd_doc *doc, double content_w, int block_id,
                                   size_t run_i, int stop_at);
+static int nested_stop(const rc_state *outer, const rd_doc *doc, int block_id, int stop_at);
+static int deepest_open_on_path(const rc_state *outer, const rd_doc *doc, int block_id);
 
 /* Item index of run `bk` at container level `cid`: the run's own cont_item when it
  * sits directly in cid, otherwise the parent_item of whichever container on its
@@ -5094,6 +5101,23 @@ static size_t item_segment_end(const rd_doc *doc, size_t k, size_t end, int cid,
     return e;
 }
 
+/* A flex/grid item's vertical margins: its root box's own (author, else the UA
+ * sheet's for its element), or -- for an item with no box -- its first block's. */
+static void item_vmargins(const ui_theme *th, const rd_doc *doc, const pv_box_def *ib,
+                          const rd_block *first, double cb_w, double *mt, double *mb) {
+    (void)doc;
+    if (ib != NULL) {
+        bx_box ua = bx_block_ua_box(0, 0, (bx_ua_tag)ib->ua_tag);
+        double fpx = (ib->font_px > 0) ? (double)ib->font_px : th->body_font;
+        *mt = (ib->box_mt != PV_LEN_UNSET || ib->box_mt_pct != 0)
+              ? bx_lp_px(ib->box_mt, ib->box_mt_pct, cb_w) : ua.margin.top * fpx;
+        *mb = (ib->box_mb != PV_LEN_UNSET || ib->box_mb_pct != 0)
+              ? bx_lp_px(ib->box_mb, ib->box_mb_pct, cb_w) : ua.margin.bottom * fpx;
+    } else {
+        block_margins(th, first, cb_w, mt, mb);
+    }
+}
+
 static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                              rc_state *s, const ui_theme *th,
                              double origin_x, double content_w,
@@ -5184,8 +5208,17 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
      * table's enclosing box, so use it as the bound. Only tables take this path, so
      * every author flex/grid container keeps its existing item boxes. */
     int item_cbox = cdv.box_id;
-    if (item_cbox < 0 && cdv.is_table && end > start)
-        item_cbox = band_common_box(doc, start, end);
+    /* Any container without a stamped box, not only a synthesised table: with no
+     * bound, the item-box walk climbs to the ROOT and <html> becomes "the item's
+     * box" -- re-opened inside every card with its min-height:100vh (1080px
+     * columns on huggingface/github). The box all the container's runs share is
+     * the context the container sits in. */
+    if (item_cbox < 0 && end > start) {
+        if (cdv.is_table)
+            item_cbox = band_common_box(doc, start, end);
+        else
+            item_cbox = deepest_open_on_path(s, doc, rd_at(doc, start)->block_id);
+    }
 
     if (nruns == 0 || grp_overflow || ncols > BT_MAX_CHILDREN) {
         /* Too many items for the grid engine: degrade to plain flow, but honor each
@@ -5547,6 +5580,10 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
      * this a box inside a card -- a badge pill, an icon chip, an avatar -- laid
      * out but never painted (the documented v1 gap in spec/page_view.md §4). */
     size_t item_root_idx[BT_MAX_CHILDREN];
+    /* Each item's vertical margins (Flexbox 4.2: outside its border box, never
+     * collapsing with a neighbour's) -- on the cross axis of a row, the main axis
+     * of a column. */
+    double item_mt[BT_MAX_CHILDREN], item_mb[BT_MAX_CHILDREN];
     size_t item_box_start[BT_MAX_CHILDREN], item_box_count[BT_MAX_CHILDREN];
     /* Which items were laid out by a NESTED container (their rows already carry an
      * x of their own, so the translation pass adds instead of overwriting). */
@@ -5638,7 +5675,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                  * INSIDE the item -- which is what painted a nested nav's own backdrop a
                  * second time, at item size, on top of itself. */
                 leave_inline_box(L, &si, bk->block_id);
-                int stop_at = (rb >= 0) ? rb : cdv.box_id;
+                int stop_at = (rb >= 0) ? rb : nested_stop(s, doc, bk->block_id, item_cbox);
                 reconcile_boxes_below(cr, w, L, &si, th, doc, inner_w, bk->block_id, m, stop_at);
                 int owns = (rb >= 0 && bk->block_id == rb);
                 si.bg_rgb = (owns || w->force_theme) ? -1 : bk->bg_rgb;
@@ -5686,6 +5723,10 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             }
         }
         kid->content_h = ih;
+        item_vmargins(th, doc, rbd, rd_at(doc, gstart[j]), content_w,
+                      &item_mt[j], &item_mb[j]);
+        /* A row's line is as tall as its items' MARGIN boxes. */
+        if (!is_col) kid->content_h += item_mt[j] + item_mb[j];
     }
 
     /* Second pass: final row packing + y now that the heights are known. */
@@ -5697,19 +5738,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         double ho[BT_MAX_CHILDREN], mts[BT_MAX_CHILDREN], mbs[BT_MAX_CHILDREN];
         for (size_t j = 0; j < g; ++j) {
             size_t p = pos_of[j];
-            double mt = 0.0, mb = 0.0;
-            const pv_box_def *ib = (item_box[j] >= 0) ? rd_box_at(doc, (size_t)item_box[j])
-                                                      : NULL;
-            if (ib != NULL) {
-                bx_box ua = bx_block_ua_box(0, 0, (bx_ua_tag)ib->ua_tag);
-                double fpx = (ib->font_px > 0) ? (double)ib->font_px : th->body_font;
-                mt = (ib->box_mt != PV_LEN_UNSET || ib->box_mt_pct != 0)
-                     ? bx_lp_px(ib->box_mt, ib->box_mt_pct, content_w) : ua.margin.top * fpx;
-                mb = (ib->box_mb != PV_LEN_UNSET || ib->box_mb_pct != 0)
-                     ? bx_lp_px(ib->box_mb, ib->box_mb_pct, content_w) : ua.margin.bottom * fpx;
-            } else {
-                block_margins(th, rd_at(doc, gstart[j]), content_w, &mt, &mb);
-            }
+            double mt = item_mt[j], mb = item_mb[j];
             mts[p] = mt;
             mbs[p] = mb;
             hs[p] = kids[p].content_h + mt + mb;
@@ -5745,7 +5774,17 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             if (kids[p].h < kids[p].content_h) kids[p].h = kids[p].content_h;
         }
         root.h = extent;
-    } else if (bt_layout(&root, content_w) != BT_OK) return;
+    } else {
+        if (bt_layout(&root, content_w) != BT_OK) return;
+        /* The line placed each item's MARGIN box; its border box (what the rows,
+         * the nested boxes and the root box are relative to) sits inside it. */
+        for (size_t j = 0; j < g; ++j) {
+            bt_node *kid = &kids[pos_of[j]];
+            kid->y += item_mt[j];
+            kid->h -= item_mt[j] + item_mb[j];
+            if (kid->h < 0.0) kid->h = 0.0;
+        }
+    }
 
     /* Translate each item's rows into its column rectangle (offset by the item's
      * padding+border so the content sits inside the box) and add an rc_box for the
@@ -6291,6 +6330,31 @@ static int box_path_has(const rd_doc *doc, int block_id, int want) {
         id = (d != NULL) ? d->parent_id : -1;
     }
     return 0;
+}
+
+/* The deepest box on block_id's path that is ALREADY OPEN in the enclosing layout
+ * state `outer` (-1 when none). A nested flow (a flex item, a float column) runs on
+ * a fresh state, and every box the enclosing flow has open is its context, never
+ * something to open again inside it -- re-opening `body{min-height:100vh}` inside
+ * each card made 1080px columns (huggingface, github). */
+static int deepest_open_on_path(const rc_state *outer, const rd_doc *doc, int block_id) {
+    int guard = 0;
+    for (int id = block_id; id >= 0 && guard < RC_BOX_STACK_MAX; ++guard) {
+        for (int k = outer->box_depth - 1; k >= 0; --k)
+            if (outer->box_stack[k].block_id == id) return id;
+        const pv_box_def *d = rd_box_at(doc, (size_t)id);
+        id = (d != NULL) ? d->parent_id : -1;
+    }
+    return -1;
+}
+
+/* The cut for a nested flow's reconcile: the caller's stop box, or -- when the
+ * enclosing state already holds a DEEPER box of this run's path -- that one. */
+static int nested_stop(const rc_state *outer, const rd_doc *doc, int block_id, int stop_at) {
+    int open = deepest_open_on_path(outer, doc, block_id);
+    if (open < 0) return stop_at;
+    if (stop_at < 0 || (open != stop_at && box_path_has(doc, open, stop_at))) return open;
+    return stop_at;
 }
 
 /* Max-content width (px) of the box `box_id` opening at run `start`: the widest
@@ -7169,8 +7233,11 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                 }
                 if (k > gstart[j]) flush_line(L, &si, th);
                 leave_inline_box(L, &si, bk->block_id);
-                reconcile_boxes_below(cr, w, L, &si, th, doc, cw,
-                                      container_box_of(doc, k, ce, rootc), k, band_box);
+                {
+                    int cbx = container_box_of(doc, k, ce, rootc);
+                    reconcile_boxes_below(cr, w, L, &si, th, doc, cw, cbx, k,
+                                          nested_stop(s, doc, cbx, band_box));
+                }
                 double cin_l, cin_w;
                 rc_box_context(&si, cw, &cin_l, &cin_w);
                 si.indent_px = cin_l;
@@ -7187,7 +7254,8 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
              * per column. Without this the header box is never created, so its bar
              * never paints and its white-on-teal title reads white-on-white. */
             leave_inline_box(L, &si, bk->block_id);
-            reconcile_boxes_below(cr, w, L, &si, th, doc, cw, bk->block_id, k, band_box);
+            reconcile_boxes_below(cr, w, L, &si, th, doc, cw, bk->block_id, k,
+                                  nested_stop(s, doc, bk->block_id, band_box));
             si.bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
             /* Column content width (spec/float.md §7c.3): the flat-path rule —
              * inside an open box the box's inner width (the block's own width
@@ -8572,23 +8640,22 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
             else if (blk->text_align == CSS_ALIGN_RIGHT) ax = slack;
         }
         double bx = left + pad + ax, by = ry + pad;
-        cairo_rectangle(cr, bx, by, pdw, pdh);
-        cairo_stroke(cr);
+        /* HTML 4.8.4.4: an unavailable image is its reserved box with its `alt`
+         * text in it, in the element's colour, clipped to the box -- and nothing
+         * else. The frame this used to stroke (red when blocked) was a diagnostic
+         * drawn into the page; the reason lives in devtools (--dump-dom). */
         const char *alt = (blk->text != NULL) ? blk->text : "";
         if (alt[0] != '\0') {
+            set_rgb(cr, blk->fg_rgb >= 0 ? rgb_from_packed(blk->fg_rgb) : th->text);
             content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
-            cairo_text_extents_t te;
             cairo_font_extents_t fe2;
-            cairo_text_extents(cr, alt, &te);
             cairo_font_extents(cr, &fe2);
-            if (te.width <= pdw - 2.0 && fe2.height <= pdh) {
-                cairo_save(cr);
-                cairo_rectangle(cr, bx, by, pdw, pdh);
-                cairo_clip(cr);
-                cairo_move_to(cr, bx + 1.0, by + fe2.ascent);
-                cairo_show_text(cr, alt);
-                cairo_restore(cr);
-            }
+            cairo_save(cr);
+            cairo_rectangle(cr, bx, by, pdw, pdh);
+            cairo_clip(cr);
+            cairo_move_to(cr, bx, by + fe2.ascent);
+            cairo_show_text(cr, alt);
+            cairo_restore(cr);
         }
         return;
     }

@@ -2939,7 +2939,19 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         return expand_grid_template_cols(val, dst, cap);
 
     int prop_id, ival;
-    if (strcmp(prop, "color") == 0)                 { prop_id = P_COLOR;    ival = interp_color(val); }
+    if (strcmp(prop, "color") == 0) {
+        /* `color` inherits: a CSS-wide keyword means "the parent's", which the
+         * cascade carries as the currentColor sentinel (in `color` the two are the
+         * same thing); `initial` too, since the engine's initial colour is the
+         * inherited default. Written (wide == 2), not just claimed. */
+        if (css_wide_keyword(val)) {
+            dst[0].prop = P_COLOR;
+            dst[0].ival = CC_COLOR_CURRENT;
+            dst[0].wide = 2;
+            return 1;
+        }
+        prop_id = P_COLOR;    ival = interp_color(val);
+    }
     else if (strcmp(prop, "text-align") == 0)        { prop_id = P_ALIGN;    ival = interp_align(val); }
     /* font-size emits TWO pairs (percent + absolute flag) so the cascade keeps them
      * in lock-step, exactly like aspect-ratio's num/den below. */
@@ -2956,7 +2968,19 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     else if (strcmp(prop, "font-weight") == 0)       { prop_id = P_WEIGHT;   ival = interp_weight(val); }
     else if (strcmp(prop, "font-style") == 0)        { prop_id = P_STYLE;    ival = interp_style(val); }
     else if (strcmp(prop, "text-decoration") == 0 ||
-             strcmp(prop, "text-decoration-line") == 0) { prop_id = P_TEXTDECO; ival = interp_textdeco(val); }
+             strcmp(prop, "text-decoration-line") == 0) {
+        /* A CSS-wide keyword resolves to `none` here (wide == 2 writes it): the
+         * initial value, and what `inherit` takes from any parent that is not
+         * itself decorated -- the case `a{text-decoration:inherit}` in every reset
+         * is written for. Claiming without writing let the link underline back. */
+        if (css_wide_keyword(val)) {
+            dst[0].prop = P_TEXTDECO;
+            dst[0].ival = 0;
+            dst[0].wide = 2;
+            return 1;
+        }
+        prop_id = P_TEXTDECO; ival = interp_textdeco(val);
+    }
     else if (strcmp(prop, "text-decoration-color") == 0) { prop_id = P_TEXTDECO_COLOR; ival = interp_color(val); }
     else if (strcmp(prop, "text-decoration-style") == 0) { prop_id = P_TEXTDECO_STYLE; ival = interp_textdeco_style(val); }
     else if (strcmp(prop, "text-decoration-thickness") == 0) { prop_id = P_TEXTDECO_THICKNESS; ival = interp_textdeco_thickness(val); }

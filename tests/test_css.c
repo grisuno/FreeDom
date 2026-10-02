@@ -1237,6 +1237,19 @@ static css_element cls_el(const char *tag, const char *const *cl, size_t n,
  * carries it -- and only those. The element itself still sees only `content`
  * cross over (the leak guard stays). YouTube's thumbnail skeleton is
  * `.rich-thumbnail:before{content:"";display:block;padding-top:56.25%}`. */
+
+/* `a{text-decoration:inherit}` (every CSS reset, Tailwind preflight) takes the
+ * parent's decoration -- `none` on any page that does not underline the parent --
+ * and `initial`/`unset` are `none`. Leaving the slot unset let the link's default
+ * underline back in under every link on huggingface.co. */
+static void test_text_decoration_wide_keyword_is_none(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("text-decoration:inherit", 0).text_decoration, 0);
+    assert_int_equal(css_parse_inline("text-decoration:initial", 0).text_decoration, 0);
+    assert_int_equal(css_parse_inline("text-decoration:unset", 0).text_decoration, 0);
+    assert_int_equal(css_parse_inline("color:red", 0).text_decoration, -1);
+}
+
 static void test_pseudo_element_style(void **state) {
     (void)state;
     css_sheet *sh = NULL;
@@ -4889,6 +4902,7 @@ int main(void) {
         cmocka_unit_test(test_keyframes_content_does_not_crash),
         cmocka_unit_test(test_component_var_same_element),
         cmocka_unit_test(test_pseudo_element_style),
+        cmocka_unit_test(test_text_decoration_wide_keyword_is_none),
         cmocka_unit_test(test_component_var_inherited_by_child),
         cmocka_unit_test(test_component_var_cascade_order),
         cmocka_unit_test(test_component_var_inline_overrides),

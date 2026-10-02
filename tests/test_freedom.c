@@ -1669,6 +1669,41 @@ static void test_dump_layout_flex_item_sibling_boxes(void **state) {
     unlink(path);
 }
 
+
+/* A flex item's vertical margins sit outside its border box (Flexbox 4.2): a
+ * 36px avatar with margin-top:12px in a row starts 12px down, and the row is as
+ * tall as its margin box (48), not its border box. */
+static void test_dump_layout_flex_row_item_vmargin(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>t</title><style>body{margin:0}.d{display:flex}"
+        ".av{width:36px;height:36px;margin-top:12px;background:#111}"
+        ".t{width:100px;height:20px;background:#222}</style></head><body>"
+        "<div class=\"d\"><div class=\"av\"></div><div class=\"t\"></div></div>"
+        "<p>z</p></body></html>";
+    const char *path = "__freedom_flexvm.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_flexvm.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    int saw = 0;
+    for (char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, w, h;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &w, &h) == 6
+            && w == 36.0 && h == 36.0 && top == 12.0)
+            saw = 1;
+    }
+    assert_true(saw);
+    unlink(path);
+}
+
 /* float.md end-to-end: two floated siblings lay out SIDE BY SIDE (the second column's
  * rows start at a larger x_off than the first), and a wrapping position:relative
  * background panel stays IN FLOW (a box, not pushed to the page bottom by the
@@ -2466,6 +2501,7 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_no_wrapper_fragmentation),
         cmocka_unit_test(test_dump_layout_oof_subtree_real_layout),
         cmocka_unit_test(test_dump_layout_flex_item_sibling_boxes),
+        cmocka_unit_test(test_dump_layout_flex_row_item_vmargin),
         cmocka_unit_test(test_dump_layout_float_two_columns),
         cmocka_unit_test(test_dump_layout_pulled_rail_single_margin),
         cmocka_unit_test(test_dump_layout_flex_badges_share_row),

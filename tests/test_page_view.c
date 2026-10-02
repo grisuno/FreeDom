@@ -2951,6 +2951,22 @@ static const pv_box_def *box_of_run_with_bg(const pv_view *v, int bg) {
 /* A percentage padding is padding: `padding-top:56.25%` is the aspect-ratio box of
  * every video/thumbnail grid on the web, and only its px half used to count, so the
  * box never existed and the tile collapsed to nothing. */
+
+/* `a{color:inherit}` takes the parent's colour, and with none set, the initial
+ * black -- never the UA link blue (Tailwind preflight, every reset). */
+static void test_link_color_inherit(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>x <a href='/a'>plain</a></p>"
+                             "<div class='r'><a href='/b'>red</a></div></body>");
+    static const char CSS[] = "a{color:inherit}.r{color:#ff0000}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_int_equal(find_text(v, "plain")->fg_rgb, 0x000000);
+    assert_int_equal(find_text(v, "red")->fg_rgb, 0xff0000);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_pct_padding_generates_box(void **state) {
     (void)state;
     hp_document *doc = parse("<body><div class='ph'></div><p>x</p></body>");
@@ -4425,6 +4441,7 @@ int main(void) {
         cmocka_unit_test(test_button_content_flows),
         cmocka_unit_test(test_button_submit_proxy),
         cmocka_unit_test(test_button_ua_face_loses_to_author),
+        cmocka_unit_test(test_link_color_inherit),
         cmocka_unit_test(test_pct_padding_generates_box),
         cmocka_unit_test(test_before_box_on_empty_element),
         cmocka_unit_test(test_before_box_before_text),

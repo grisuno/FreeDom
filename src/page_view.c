@@ -2684,6 +2684,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     pv_text_ext_reset(ext);
     *block_id_out = -1;
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
+    int color_inherits = 0;   /* an element on the walk said `color:inherit|currentColor` */
     int got_align = 0, got_fs = 0, got_lh = 0, got_deco = 0, got_hbox = 0, got_boxdeco = 0;
     /* font-size chaining (spec/css.md "font-size: absolute vs relative"): a RELATIVE
      * declaration (em/%/smaller/larger) does not end the search -- it multiplies into
@@ -2954,6 +2955,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 if (cs.color >= 0) c = cs.color;
                 else if (t == LXB_TAG_FONT) c = font_color_attr(el);
                 if (c >= 0) { *fg = c; got_color = 1; }
+                else if (cs.color == CC_COLOR_CURRENT) color_inherits = 1;
             }
             /* background-color does not inherit in CSS; in this flat model we take
              * the nearest ancestor's so a block's background shows behind its text.
@@ -3213,6 +3215,10 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
          * and it is not an element, so the loop ends immediately after it either way;
          * the walk stays bounded by the DOM depth exactly as before. */
     }
+    /* `color:inherit` (or currentColor, its synonym in `color`) with no ancestor
+     * that sets a colour inherits the INITIAL colour -- CanvasText, black -- never a
+     * UA link colour: `a{color:inherit}` is how every reset strips the link blue. */
+    if (!got_color && color_inherits) *fg = 0x000000;
 
     /* The OUTERMOST founder folds back to -1 when the nearest IS the outermost
      * (spec/float.md §7d.1): a single-level float matched once, so oid == id,
