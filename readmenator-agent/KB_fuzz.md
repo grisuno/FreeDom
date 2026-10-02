@@ -4,14 +4,15 @@
 - Layer: utility
 - Language: c
 - Symbols:
-  - `LLVMFuzzerTestOneInput` (function, line 62) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-- Depends on: `include/css.h`
+  - `fuzz_root_match` (function, line 66) `static int fuzz_root_match(void *ctx, const css_sel *sel)`
+  - `LLVMFuzzerTestOneInput` (function, line 80) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- Depends on: `include/css.h`, `include/css_select.h`
 
 ## fuzz/fuzz_data_url.c
 - Layer: data_access
 - Language: c
 - Symbols:
-  - `worker` (function, line 5) `* confined tab worker (OP_DECODE_IMAGE_B64) on bytes the parent only sliced, never
+  - `worker` (function, line 6) `* confined tab worker (OP_DECODE_IMAGE_B64) on bytes the parent only sliced, never
  * interpreted...`
 - Depends on: `include/data_url.h`
 
@@ -59,9 +60,41 @@
   - `LLVMFuzzerTestOneInput` (function, line 32) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 - Depends on: `include/image_decode.h`
 
+## fuzz/fuzz_import_map.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `fres` (function, line 17) `static int fres(void *ctx, const char *base, const char *ref, char *out, size_t outsz)`
+  - `LLVMFuzzerTestOneInput` (function, line 24) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- Depends on: `include/import_map.h`
+
+## fuzz/fuzz_js_dom.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `fz_dom_parent` (function, line 33) `static dom_node_id fz_dom_parent(void *ctx, dom_node_id n)`
+  - `LLVMFuzzerTestOneInput` (function, line 40) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+  - `FUZZ_JSDOM_MAX_NODES` (macro, line 38) `#define FUZZ_JSDOM_MAX_NODES`
+- Depends on: `include/dom.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_geom.h`, `include/js_sandbox.h`, `include/js_trusted.h`, `include/url.h`, `include/web_storage.h`
+
+## fuzz/fuzz_js_geom.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `fz_parent` (struct, line 17)
+  - `fz_parent_of` (function, line 20) `static dom_node_id fz_parent_of(void *ctx, dom_node_id n)`
+  - `LLVMFuzzerTestOneInput` (function, line 27) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- Depends on: `include/js_geom.h`
+
 ## fuzz/fuzz_js_sandbox.c
 - Layer: utility
 - Language: c
+- Symbols:
+  - `fz_mod` (struct, line 21)
+  - `fz_resolve` (function, line 23) `static int fz_resolve(void *host, const char *base, const char *spec, char *out, size_t outsz)`
+  - `fz_fetch` (function, line 33) `static char *fz_fetch(void *host, const char *url, size_t *len)`
+  - `LLVMFuzzerTestOneInput` (function, line 48) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+  - `js_sandbox` (function, line 2) `* libFuzzer harness for js_sandbox (Hito 3). * * Goal: arbitrary bytes treated as untrusted script through the full * eval + result + free pipeline must never crash, leak, or trigger UB on the * host.`
 - Depends on: `include/js_sandbox.h`
 
 ## fuzz/fuzz_page_view.c
@@ -115,6 +148,11 @@
 - Layer: utility
 - Language: c
 - Symbols:
-  - `check_split` (function, line 30) `static void check_split(const char *url)`
-  - `LLVMFuzzerTestOneInput` (function, line 58) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+  - `check_split` (function, line 31) `static void check_split(const char *url)`
+  - `LLVMFuzzerTestOneInput` (function, line 59) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 - Depends on: `include/link_nav.h`, `include/url.h`
+
+## fuzz/fuzz_web_storage.c
+- Layer: data_access
+- Language: c
+- Depends on: `include/web_storage.h`

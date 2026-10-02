@@ -1,10 +1,10 @@
 # tests
 
-*Community 4 | 5 files | cohesion 0.67*
+*Community 5 | 5 files | cohesion 0.67*
 
 ## Definition
 
-This community groups 5 file(s) rooted at `tests` with dominant language c (cohesion 0.67). Central symbols: `ERR_FILE`, `FREEDOM_BIN`, `FREEDOM_IMAGE_DECODE_H`, `GIF_LZW_MAX_CODES`, `IMG_MAX_DIM`, `IMG_MAX_PIXELS`, `LLVMFuzzerTestOneInput`, `OUT_FILE`. Core file: `tests/test_freedom.c` (61 symbols).
+This community groups 5 file(s) rooted at `tests` with dominant language c (cohesion 0.67). Central symbols: `ERR_FILE`, `FREEDOM_BIN`, `FREEDOM_IMAGE_DECODE_H`, `GIF_LZW_MAX_CODES`, `IMG_MAX_DIM`, `IMG_MAX_PIXELS`, `LLVMFuzzerTestOneInput`, `OUT_FILE`. Core file: `tests/test_freedom.c` (67 symbols).
 
 ## Files
 
@@ -13,7 +13,7 @@ This community groups 5 file(s) rooted at `tests` with dominant language c (cohe
 | `fuzz/fuzz_image_decode.c` | c | utility | 2 | no |
 | `include/image_decode.h` | h | utility | 13 | no |
 | `src/image_decode.c` | c | utility | 27 | no |
-| `tests/test_freedom.c` | c | testing | 61 | no |
+| `tests/test_freedom.c` | c | testing | 67 | no |
 | `tests/test_image_decode.c` | c | testing | 37 | no |
 
 ## Key Symbols
@@ -56,8 +56,7 @@ This community groups 5 file(s) rooted at `tests` with dominant language c (cohe
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/image_decode.h.
-- [INFERRED] shares_context community 0 <-> 4 (strength 0.5): Inferred shared context (language c and layer utility) with no import path between community 0 (include) and community 4 (tests).
+- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/image_decode.h.
 
 ## Risks
 

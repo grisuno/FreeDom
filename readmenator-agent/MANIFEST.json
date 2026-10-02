@@ -1,17 +1,17 @@
 {
   "tool": "readmenator",
-  "generated_at": "2026-09-29T12:30:07Z",
+  "generated_at": "2026-10-02T05:29:11Z",
   "project_root": "/home/grisun0/src_note/c/freedom-0.0.3",
-  "files": 219,
-  "symbols": 5282,
-  "imports": 1510,
-  "resolved_imports": 398,
+  "files": 255,
+  "symbols": 6084,
+  "imports": 1735,
+  "resolved_imports": 484,
   "security_findings": 0,
   "languages": {
     "py": 5,
     "sh": 5,
-    "c": 144,
-    "h": 65
+    "c": 168,
+    "h": 77
   },
   "entrypoints": [],
   "start_here": "INDEX.md",

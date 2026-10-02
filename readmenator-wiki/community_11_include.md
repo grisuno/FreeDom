@@ -1,59 +1,64 @@
 # include
 
-*Community 11 | 3 files | cohesion 0.67*
+*Community 11 | 6 files | cohesion 0.70*
 
 ## Definition
 
-This community groups 3 file(s) rooted at `include` with dominant language c (cohesion 0.67). Central symbols: `FREEDOM_HOSTEDIT_H`, `HE_MAX_HOST`, `contains_ci`, `has_host_cb`, `he_lower`, `he_make_line`, `he_scan`, `he_status`. Core file: `src/hostedit.c` (13 symbols).
+This community groups 6 file(s) rooted at `include` with dominant language c (cohesion 0.70). Central symbols: `FREEDOM_DISK_STORE_H`, `FREEDOM_LOCAL_STORE_H`, `LS_ARGON2_M_KIB`, `LS_ARGON2_P`, `LS_ARGON2_T`, `LS_HEADER_LEN`, `LS_KDF_ARGON2ID`, `LS_KDF_NONE`. Core file: `src/local_store.c` (271 symbols).
 
 ## Files
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `include/hostedit.h` | h | infrastructure | 5 | no |
-| `src/hostedit.c` | c | infrastructure | 13 | no |
-| `tests/test_hostedit.c` | c | testing | 11 | no |
+| `include/disk_store.h` | h | data_access | 3 | no |
+| `include/local_store.h` | h | data_access | 11 | no |
+| `src/disk_store.c` | c | data_access | 6 | no |
+| `src/local_store.c` | c | data_access | 271 | no |
+| `tests/test_disk_store.c` | c | testing | 16 | no |
+| `tests/test_local_store.c` | c | testing | 18 | no |
 
 ## Key Symbols
 
-- `FREEDOM_HOSTEDIT_H` (macro, `include/hostedit.h:2`) `#define FREEDOM_HOSTEDIT_H`
-- `he_status` (enum, `include/hostedit.h:24`)
-- `HE_MAX_HOST` (macro, `include/hostedit.h:32`) `#define HE_MAX_HOST`
-- `he_text_has_host` (function, `include/hostedit.h:46`) `int he_text_has_host(const char *text, const char *host);` - Returns 1 if text (the body of a hosts-format file) already lists host as a domain token on a non-co
-- `he_suggest` (function, `include/hostedit.h:55`) `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST +` - Omnibar autocomplete: treats allow.conf (a hosts-format text) as a favorites list. Fills results[0..
-- `he_lower` (function, `src/hostedit.c:12`) `static char he_lower(char c)`
-- `is_label_char` (function, `src/hostedit.c:16`) `static int is_label_char(char c)`
-- `valid_host` (function, `src/hostedit.c:22`) `static int valid_host(const char *host, size_t n)` - #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c >= 'A' && c <= 'Z
-- `he_make_line` (function, `src/hostedit.c:41`) `he_status he_make_line(const char *host, char *out, size_t cap)`
-- `is_ip_token` (function, `src/hostedit.c:67`) `static int is_ip_token(const char *ts, const char *te)` - True if the token looks like an IPv4 dotted-quad / contains only digits and dots * (matches hostbloc
-- `he_scan` (function, `src/hostedit.c:80`) `static int he_scan(const char *text, int (*fn)(const char *, size_t, void *), vo` - Visits each domain token (non-comment, non-IP) of a hosts-format text in document order, calling fn(
-- `has_host_cb` (function, `src/hostedit.c:105`) `static int has_host_cb(const char *ts, size_t tl, void *ctx)`
-- `he_text_has_host` (function, `src/hostedit.c:109`) `int he_text_has_host(const char *text, const char *host)`
-- `contains_ci` (function, `src/hostedit.c:115`) `static int contains_ci(const char *hs, size_t hl, const char *needle)` - } return 0; } static int has_host_cb(const char *ts, size_t tl, void *ctx) { return token_eq_host(ts
-- `starts_with_ci` (function, `src/hostedit.c:128`) `static int starts_with_ci(const char *hs, size_t hl, const char *pfx)`
-- `suggest_ctx` (struct, `src/hostedit.c:136`)
-- `suggest_cb` (function, `src/hostedit.c:144`) `static int suggest_cb(const char *ts, size_t tl, void *vctx)`
-- `he_suggest` (function, `src/hostedit.c:164`) `int he_suggest(const char *text, const char *query,                char results[`
-- `test_make_line_lowercases` (function, `tests/test_hostedit.c:11`) `static void test_make_line_lowercases(void **state)`
-- `test_make_line_plain_host` (function, `tests/test_hostedit.c:18`) `static void test_make_line_plain_host(void **state)`
-- `test_make_line_rejects_path_scheme_garbage` (function, `tests/test_hostedit.c:25`) `static void test_make_line_rejects_path_scheme_garbage(void **state)`
-- `test_make_line_rejects_bad_labels` (function, `tests/test_hostedit.c:36`) `static void test_make_line_rejects_bad_labels(void **state)`
-- `test_make_line_null_and_range` (function, `tests/test_hostedit.c:47`) `static void test_make_line_null_and_range(void **state)`
-- `test_make_line_single_label_ok` (function, `tests/test_hostedit.c:56`) `static void test_make_line_single_label_ok(void **state)`
-- `test_text_has_host` (function, `tests/test_hostedit.c:63`) `static void test_text_has_host(void **state)`
-- `test_suggest_prefix_first` (function, `tests/test_hostedit.c:76`) `static void test_suggest_prefix_first(void **state)`
-- `test_suggest_case_insensitive_and_dedup` (function, `tests/test_hostedit.c:92`) `static void test_suggest_case_insensitive_and_dedup(void **state)`
-- `test_suggest_empty_query_and_cap` (function, `tests/test_hostedit.c:101`) `static void test_suggest_empty_query_and_cap(void **state)`
-- `main` (function, `tests/test_hostedit.c:114`) `int main(void)`
+- `FREEDOM_DISK_STORE_H` (macro, `include/disk_store.h:2`) `#define FREEDOM_DISK_STORE_H`
+- `ds_status` (enum, `include/disk_store.h:25`)
+- `ds_free` (function, `include/disk_store.h:47`) `void ds_free(uint8_t *buf, size_t len);` - Reads and decrypts path. Wrong key / tampering => DS_ERR_AUTH (no plaintext). * *out is owned; relea
+- `FREEDOM_LOCAL_STORE_H` (macro, `include/local_store.h:2`) `#define FREEDOM_LOCAL_STORE_H`
+- `LS_KEY_LEN` (macro, `include/local_store.h:26`) `#define LS_KEY_LEN`
+- `LS_SALT_LEN` (macro, `include/local_store.h:27`) `#define LS_SALT_LEN`
+- `LS_NONCE_LEN` (macro, `include/local_store.h:28`) `#define LS_NONCE_LEN`
+- `LS_TAG_LEN` (macro, `include/local_store.h:29`) `#define LS_TAG_LEN`
+- `LS_HEADER_LEN` (macro, `include/local_store.h:30`) `#define LS_HEADER_LEN`
+- `LS_OVERHEAD` (macro, `include/local_store.h:31`) `#define LS_OVERHEAD`
+- `LS_MAX_PLAINTEXT` (macro, `include/local_store.h:32`) `#define LS_MAX_PLAINTEXT`
+- `ls_aead` (enum, `include/local_store.h:34`)
+- `ls_status` (enum, `include/local_store.h:39`)
+- `ls_free` (function, `include/local_store.h:80`) `void ls_free(uint8_t *buf, size_t len);` - Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in
+- `_POSIX_C_SOURCE` (macro, `src/disk_store.c:11`) `#define _POSIX_C_SOURCE`
+- `fsync_dir` (function, `src/disk_store.c:32`) `static void fsync_dir(const char *path)` - Best-effort fsync of the directory holding path, for crash durability of the * rename. Failures are
+- `map_ls` (function, `src/disk_store.c:50`) `static ds_status map_ls(ls_status s)`
+- `ds_write` (function, `src/disk_store.c:66`) `ds_status ds_write(const char *path, const uint8_t key[LS_KEY_LEN], ls_aead aead`
+- `ds_read` (function, `src/disk_store.c:103`) `ds_status ds_read(const char *path, const uint8_t key[LS_KEY_LEN],`
+- `ds_free` (function, `src/disk_store.c:136`) `void ds_free(uint8_t *buf, size_t len)`
+- `OSSL_KDF_PARAM_ARGON2_LANES` (macro, `src/local_store.c:3`) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, `src/local_store.c:6`) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+- `OSSL_KDF_PARAM_THREADS` (macro, `src/local_store.c:9`) `#define OSSL_KDF_PARAM_THREADS`
+- `_GNU_SOURCE` (macro, `src/local_store.c:11`) `#define _GNU_SOURCE`
+- `OSSL_KDF_PARAM_ARGON2_LANES` (macro, `src/local_store.c:14`) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, `src/local_store.c:17`) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+- `OSSL_KDF_PARAM_THREADS` (macro, `src/local_store.c:20`) `#define OSSL_KDF_PARAM_THREADS`
+- `_GNU_SOURCE` (macro, `src/local_store.c:22`) `#define _GNU_SOURCE`
+- `OSSL_KDF_PARAM_ARGON2_LANES` (macro, `src/local_store.c:25`) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, `src/local_store.c:28`) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 2
-- Cross-boundary resolved imports (EXTRACTED): 1
+- Internal resolved imports (EXTRACTED): 7
+- Cross-boundary resolved imports (EXTRACTED): 3
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 11 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/hostedit.h.
+- [EXTRACTED] depends_on community 3 <-> 11 (strength 0.9): Extracted import edge crosses communities: include/profile.h imports include/local_store.h.
+- [EXTRACTED] depends_on community 11 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
 
 ## Risks
 
@@ -61,12 +66,15 @@ This community groups 3 file(s) rooted at `include` with dominant language c (co
 
 ## Open Questions
 
-- Why do 3 file(s) lack file-level docs (e.g. `include/hostedit.h`)? What purpose do they serve?
+- Why do 6 file(s) lack file-level docs (e.g. `include/disk_store.h`)? What purpose do they serve?
 - What would break if the most connected file in include changed?
-- Should include be split, given cohesion 0.67?
+- Should include be split, given cohesion 0.70?
 
 ## Sources
 
-- `include/hostedit.h`
-- `src/hostedit.c`
-- `tests/test_hostedit.c`
+- `include/disk_store.h`
+- `include/local_store.h`
+- `src/disk_store.c`
+- `src/local_store.c`
+- `tests/test_disk_store.c`
+- `tests/test_local_store.c`
