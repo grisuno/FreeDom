@@ -290,4 +290,20 @@ fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
  * NULL; an unknown enum value yields "start". */
 const char *fx_justify_name(fx_justify j);
 
+/* Main-axis placement of a flex COLUMN's items (spec/flex_layout.md, Flexbox 9.7
+ * + 8.2). h[i] is each item's laid-out outer height and grow[i] its flex-grow
+ * (NULL = none grow); inner_h is the container's definite inner height, <= 0 when
+ * indefinite. Writes each item's top (y_out, relative to the content top) and its
+ * used height (h_out); *extent is the bottom of the lowest item. justify is an
+ * fx_justify; reverse lays out column-reverse. FX_ERR_NULL_ARG on NULL outputs
+ * with n > 0. */
+fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
+                          double inner_h, int justify, int reverse,
+                          double *y_out, double *h_out, double *extent);
+
+/* Cross-axis (horizontal) offset of a column item of width w in avail px. auto
+ * margins win (both = centre, left only = end); else align (BT-style 0 start,
+ * 1 center, 2 end, 3 stretch) places it. Never negative. */
+double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);
+
 #endif /* FREEDOM_FLEX_LAYOUT_H */

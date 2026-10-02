@@ -294,7 +294,7 @@ static void print_doc(const rd_doc *doc) {
                 break;
             case RD_INPUT: {
                 /* A hidden control is not shown to the reader. */
-                if (b->input_type == PV_IN_HIDDEN) break;
+                if (rd_input_invisible(b->input_type)) break;
                 if (line_open) { putchar('\n'); line_open = 0; }
                 if (b->input_type == PV_IN_SUBMIT || b->input_type == PV_IN_BUTTON) {
                     printf("[ %s ]\n", (b->text[0] != '\0') ? b->text : rd_input_label(b->input_type));

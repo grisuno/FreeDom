@@ -700,6 +700,13 @@ void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
     r->box_mb_pct = box_mb_pct;
 }
 
+void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct) {
+    if (v == NULL || v->count == 0) return;
+    pv_run *r = &v->runs[v->count - 1];
+    r->box_mw = box_mw;
+    r->box_mw_pct = box_mw_pct;
+}
+
 void pv_set_ua_tag(pv_view *v, int ua_tag) {
     if (v == NULL || v->count == 0) return;
     if (ua_tag < BX_UA_NONE || ua_tag >= BX_UA_COUNT) ua_tag = BX_UA_NONE;
@@ -986,8 +993,9 @@ static int heading_level(lxb_tag_id_t t) {
 }
 
 static int is_skipped_tag(lxb_tag_id_t t) {
-    /* TEXTAREA/SELECT/BUTTON content is a control's value/label, emitted as a
-     * PV_INPUT, not as page text; suppress their inner text from the normal walk.
+    /* TEXTAREA/SELECT content is a control's value/label, emitted as a PV_INPUT,
+     * not as page text; suppress their inner text from the normal walk. A <button>
+     * is NOT here: its content is laid out like any box's (HTML Rendering 15.5.3).
      * NOSCRIPT is handled separately (in_skipped_subtree): its fallback content is
      * shown when JS is disabled and hidden when JS runs.
      * PROGRESS/METER/LEGEND content is captured as attributes/text and emitted
@@ -1000,7 +1008,7 @@ static int is_skipped_tag(lxb_tag_id_t t) {
      * as paragraphs (it used to land mid-article as loose words). */
     return t == LXB_TAG_SCRIPT || t == LXB_TAG_STYLE || t == LXB_TAG_HEAD
         || t == LXB_TAG_TITLE
-        || t == LXB_TAG_TEXTAREA || t == LXB_TAG_SELECT || t == LXB_TAG_BUTTON
+        || t == LXB_TAG_TEXTAREA || t == LXB_TAG_SELECT
         || t == LXB_TAG_PROGRESS || t == LXB_TAG_METER || t == LXB_TAG_LEGEND
         || t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO || t == LXB_TAG_SVG;
 }
@@ -1192,6 +1200,7 @@ typedef struct pv_box_info {
      * block WIDTH (all four of them: CSS 2.1 8.3/8.4 resolve even the vertical
      * margins against the width). 0 = none. Appended for the same reason. */
     int l_pct, r_pct, mt_pct, mb_pct;
+    int mw, mw_pct;  /* max-width, its own <length-percentage> (tanda 40) */
 } pv_box_info;
 
 /* The author text-presentation extensions struct (pv_text_ext) is public now
@@ -1323,16 +1332,17 @@ static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
      * shrink-to-fit path that can act on it. */
     int cw = CSS_LEN_IS_INTRINSIC(cs->width) ? CSS_LEN_UNSET : cs->width;
     int cmw = CSS_LEN_IS_INTRINSIC(cs->max_width) ? CSS_LEN_UNSET : cs->max_width;
-    int w = CSS_LEN_UNSET;
-    if (cw != CSS_LEN_UNSET) w = cw;
-    if (cmw != CSS_LEN_UNSET && (w == CSS_LEN_UNSET || cmw < w))
-        w = cmw;
-    /* Percentage caps stay symbolic (per-mille, both against the same containing
-     * width, so the tighter per-mille IS the tighter cap); the painter resolves
-     * px-vs-pct with bx_lp_px at layout time. */
+    /* width and max-width are two <length-percentage> values, each kept whole
+     * (px half + per-mille half) and only compared at layout, where the basis is
+     * known (bx_width_cap2). Racing their px halves and their percentage halves
+     * separately and then SUMMING the winners turned `width:100%;max-width:768px`
+     * into 768px + 100% = no cap at all. */
+    int w = (cw != CSS_LEN_UNSET) ? cw : CSS_LEN_UNSET;
     int wp = (cs->pct[CSS_PCT_WIDTH] > 0) ? cs->pct[CSS_PCT_WIDTH] : 0;
-    int mwp = cs->pct[CSS_PCT_MAX_WIDTH];
-    if (mwp > 0 && (wp == 0 || mwp < wp)) wp = mwp;
+    int mwp = (cs->pct[CSS_PCT_MAX_WIDTH] > 0) ? cs->pct[CSS_PCT_MAX_WIDTH] : 0;
+    out->mw = (cmw != CSS_LEN_UNSET && (cmw > 0 || (mwp > 0 && cmw != CSS_LEN_AUTO)))
+              ? cmw : 0;
+    out->mw_pct = mwp;
     /* The inset percentages add exactly like the px ones: padding and margin on
      * one side share the containing block width as their basis, so their
      * per-mille shares are additive (CSS 2.1 8.3/8.4). An `auto` margin has no
@@ -1341,12 +1351,15 @@ static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
     int rp = cs->pct[CSS_PCT_PAD_RIGHT] + ((mr != CSS_LEN_AUTO) ? cs->pct[CSS_PCT_MARGIN_RIGHT] : 0);
     out->l = (l > 0) ? l : 0;
     out->r = (r > 0) ? r : 0;
-    out->w = (w != CSS_LEN_UNSET && w > 0) ? w : 0;
+    /* A negative px half is real when a percentage half rides with it: it is
+     * `calc(50% - 16px)`, the gutter-aware column width of every grid. */
+    out->w = (w != CSS_LEN_UNSET && (w > 0 || (wp > 0 && !CSS_LEN_IS_INTRINSIC(w)
+                                                && w != CSS_LEN_AUTO))) ? w : 0;
     out->w_pct = wp;
     out->l_pct = (lp > 0) ? lp : 0;
     out->r_pct = (rp > 0) ? rp : 0;
     out->center = (ml == CSS_LEN_AUTO && mr == CSS_LEN_AUTO &&
-                   (out->w > 0 || wp > 0)) ? 1 : 0;
+                   (out->w > 0 || wp > 0 || out->mw > 0 || out->mw_pct > 0)) ? 1 : 0;
 }
 
 /* True if the resolved style declares any paintable box (border/padding/radius/
@@ -1366,6 +1379,10 @@ static int css_has_boxdeco(const css_style *cs) {
      * Same for `visibility: visible` (the default, declared or not). */
     return cs->pad_top > 0 || cs->pad_right > 0 ||
            cs->pad_bottom > 0 || cs->pad_left > 0 ||
+           /* ...and the percentage half: `padding-top:56.25%` (the aspect-ratio
+            * box of every thumbnail grid) has no px half at all. */
+           cs->pct[CSS_PCT_PAD_TOP] > 0 || cs->pct[CSS_PCT_PAD_RIGHT] > 0 ||
+           cs->pct[CSS_PCT_PAD_BOTTOM] > 0 || cs->pct[CSS_PCT_PAD_LEFT] > 0 ||
            cs->border_top_width > 0 || cs->border_right_width > 0 ||
            cs->border_bottom_width > 0 || cs->border_left_width > 0 ||
            (cs->border_radius != CSS_LEN_UNSET && cs->border_radius > 0) ||
@@ -1581,6 +1598,7 @@ static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *
     pv_set_box(v, box->l, box->r, box->w, box->center, box->mt, box->mb);
     pv_set_ua_tag(v, box->ua);
     pv_set_box_pct(v, box->w_pct, box->l_pct, box->r_pct, box->mt_pct, box->mb_pct);
+    pv_set_box_maxw(v, box->mw, box->mw_pct);
 }
 
 /* Box engine (Hito 23b-8 Step D): document-order registry of box-carrying block
@@ -1641,6 +1659,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     css_hbox_resolve(cs, &hb);
     d->box_l = hb.l; d->box_r = hb.r; d->box_w = hb.w; d->box_center = hb.center;
     d->box_w_pct = hb.w_pct;
+    d->box_mw = hb.mw; d->box_mw_pct = hb.mw_pct;
     d->box_l_pct = hb.l_pct; d->box_r_pct = hb.r_pct;
     /* The box's own vertical margins, straight from its cascade. They are NOT
      * folded into box_l/box_r like the horizontal ones: a vertical margin has to
@@ -1878,6 +1897,117 @@ static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style
     return (int)id;
 }
 
+/* Registers (or finds) the GENERATED box of el's ::before / ::after (which =
+ * CSS_PSEUDO_BEFORE / CSS_PSEUDO_AFTER) under the box `parent` (spec/page_view.md
+ * "Cajas generadas"). The registry is keyed by node pointer; a generated box has no
+ * node, so its key is el's address with `which` in the low bits -- an element is at
+ * least 4-byte aligned, so the key can never equal a real node, and it is only ever
+ * COMPARED, never dereferenced (the published node_id lookup simply misses: a
+ * pseudo-element is not a DOM node). -1 when full or misaligned. */
+static int pseudo_box_reg(pv_box_reg *r, const lxb_dom_node_t *el, int which,
+                          const css_style *ps, int parent, double font_px) {
+    uintptr_t k = (uintptr_t)el;
+    if (el == NULL || (k & 3u) != 0) return -1;
+    const lxb_dom_node_t *key = (const lxb_dom_node_t *)(k | (uintptr_t)which);
+    for (size_t i = 0; i < r->count; ++i)
+        if (r->node[i] == key) return (int)i;
+    if (r->count == r->cap && box_reg_grow(r) != 0) return -1;
+    size_t id = r->count++;
+    r->node[id] = key;
+    boxdef_from_style(&r->def[id], ps);
+    r->def[id].parent_id = parent;
+    r->def[id].ua_tag = (int)BX_UA_NONE;
+    if (font_px > 0.0 && font_px < (double)CSS_LEN_MAX)
+        r->def[id].font_px = (int)(font_px + 0.5);
+    return (int)id;
+}
+
+/* True iff a generated box paints or sizes something of its own: the same gate as
+ * any element's box, plus a declared width or a plain background colour (a
+ * `content:""` bar or swatch is nothing but that). display:none never does. */
+static int pseudo_generates_box(const css_style *ps) {
+    if (ps->display == CSS_DISP_NONE) return 0;
+    /* Only a box that is not plain inline-level: an inline generated box (the
+     * `[`/`]` round every Wikipedia reference) is part of its line, and a box here
+     * would break the line at each one. Its text still flows as before. */
+    int level = (ps->display != CSS_DISP_UNSET && ps->display != CSS_DISP_INLINE)
+             || ps->position == CSS_POS_ABSOLUTE || ps->position == CSS_POS_FIXED
+             || ps->float_side == CSS_FLOAT_LEFT || ps->float_side == CSS_FLOAT_RIGHT;
+    if (!level) return 0;
+    return css_has_boxdeco(ps) || ps->width > 0 || ps->pct[CSS_PCT_WIDTH] > 0
+        || ps->background >= 0 || ps->bg_image_url[0] != '\0';
+}
+
+static int pseudo_is_oof(const css_style *ps) {
+    return ps->position == CSS_POS_ABSOLUTE || ps->position == CSS_POS_FIXED;
+}
+
+static int pseudo_is_block(const css_style *ps) {
+    return ps->display == CSS_DISP_BLOCK || ps->display == CSS_DISP_FLEX
+        || ps->display == CSS_DISP_GRID || ps->display == CSS_DISP_LIST_ITEM;
+}
+
+/* The tagged registry key of el's generated box (see pseudo_box_reg). */
+static const void *pseudo_key(const lxb_dom_node_t *el, int which) {
+    return (const void *)((uintptr_t)el | (uintptr_t)which);
+}
+
+/* A small open-addressed map pointer -> int: the per-element verdict on a
+ * generated box (-2 display:none, -1 no box, >= 0 its box id), so the pseudo's
+ * cascade runs ONCE per element even though every text node of it asks. Grows
+ * by doubling at half load; OOM leaves it as is (the answer is recomputed). */
+typedef struct pv_ptrmap {
+    const void **key;
+    int         *val;
+    size_t       cap, n;
+} pv_ptrmap;
+
+static size_t pv_ptrmap_slot(const pv_ptrmap *m, const void *k) {
+    uintptr_t x = (uintptr_t)k;
+    x ^= x >> 17;
+    x *= (uintptr_t)0x9E3779B97F4A7C15ull;
+    x ^= x >> 29;
+    size_t i = (size_t)x & (m->cap - 1);
+    while (m->key[i] != NULL && m->key[i] != k) i = (i + 1) & (m->cap - 1);
+    return i;
+}
+
+static int pv_ptrmap_get(const pv_ptrmap *m, const void *k, int *out) {
+    if (m->cap == 0) return 0;
+    size_t i = pv_ptrmap_slot(m, k);
+    if (m->key[i] == NULL) return 0;
+    *out = m->val[i];
+    return 1;
+}
+
+static void pv_ptrmap_put(pv_ptrmap *m, const void *k, int v) {
+    if ((m->n + 1) * 2 > m->cap) {
+        size_t nc = m->cap ? m->cap * 2 : 64;
+        pv_ptrmap g = { (const void **)calloc(nc, sizeof(void *)),
+                        (int *)calloc(nc, sizeof(int)), nc, 0 };
+        if (g.key == NULL || g.val == NULL) { free(g.key); free(g.val); return; }
+        for (size_t i = 0; i < m->cap; ++i) {
+            if (m->key[i] == NULL) continue;
+            size_t j = pv_ptrmap_slot(&g, m->key[i]);
+            g.key[j] = m->key[i];
+            g.val[j] = m->val[i];
+            ++g.n;
+        }
+        free(m->key);
+        free(m->val);
+        *m = g;
+    }
+    size_t i = pv_ptrmap_slot(m, k);
+    if (m->key[i] == NULL) { m->key[i] = k; ++m->n; }
+    m->val[i] = v;
+}
+
+static void pv_ptrmap_free(pv_ptrmap *m) {
+    free(m->key);
+    free(m->val);
+    m->key = NULL; m->val = NULL; m->cap = 0; m->n = 0;
+}
+
 /* Per-document memo of cch_element_style() results, keyed by element pointer.
  * resolve_context()/in_hidden_subtree() call cch_element_style once per ANCESTOR
  * on every walk from a node up to `base`; a common ancestor (e.g. <body>, a
@@ -2102,6 +2232,19 @@ static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sh
         pv_cache_put(cache, (const lxb_dom_node_t *)stack[k], &cs, inherited, vars);
     }
     return cs;
+}
+
+/* The ::before/::after generated box's style of el (spec/page_view.md "Cajas
+ * generadas"): resolved against el's computed font-size and custom properties,
+ * which the generated box inherits. Not memoized -- only elements whose cascade
+ * already said `content` generates a box ask. */
+static css_style cached_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet,
+                                     pv_style_cache *cache, int which) {
+    (void)cached_element_style(el, sheet, cache);
+    long h = pv_cache_find(cache, (const lxb_dom_node_t *)el);
+    double fs = (h >= 0) ? cache->font_size[h] : CL_INITIAL_FONT_SIZE;
+    const cvr_chain *vars = (h >= 0) ? cache->vars[h] : NULL;
+    return cch_pseudo_style(el, sheet, which, fs, vars);
 }
 
 /* True iff the element itself is out of flow (position:absolute/fixed) or
@@ -2346,6 +2489,32 @@ static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
         || cs->display == CSS_DISP_GRID;
 }
 
+/* An element with a declared width (or max-width) needs a box even with no
+ * decoration: the width bounds EVERYTHING inside it, nested boxes included, and
+ * only a box can carry that to them. Without one, `.container{max-width:48rem;
+ * margin:0 auto}` -- the page wrapper of every CSS framework -- capped its own text
+ * runs but let a decorated child box span the whole page; and a flex item's size
+ * (`.meter{width:280px}` in a centring column) had nowhere to be read from
+ * (spec/page_view.md, tanda 40). */
+static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,
+                             const css_sheet *sheet, pv_style_cache *cache) {
+    if (!(cs->width > 0 || cs->pct[CSS_PCT_WIDTH] > 0 ||
+          cs->max_width > 0 || cs->pct[CSS_PCT_MAX_WIDTH] > 0))
+        return 0;
+    /* A flex/grid item is blockified whatever its display says. */
+    const lxb_dom_node_t *par = el->parent;
+    if (par != NULL && par->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+        css_style pcs = cached_element_style(
+            lxb_dom_interface_element((lxb_dom_node_t *)par), sheet, cache);
+        if (is_layout_container(par, &pcs, sheet, cache)) return 1;
+    }
+    /* Otherwise only a BLOCK-level box: an inline-block with a width is an atom of
+     * its line, sized on its run, and a box here would break the line around it. */
+    if (cs->display == CSS_DISP_INLINE_BLOCK || cs->display == CSS_DISP_INLINE)
+        return 0;
+    return is_block_like_style(node_tag(el), cs);
+}
+
 /* A marker is generated by a `display:list-item` box (CSS Lists 3 3.1), which is
  * what the UA sheet makes an <li>; an author display (inline-block chips, a flex
  * nav) removes it. */
@@ -2511,6 +2680,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
      * them), and the merge below reads them — nondeterministic render. */
     box->w_pct = 0; box->l_pct = 0; box->r_pct = 0;
     box->mt_pct = 0; box->mb_pct = 0;
+    box->mw = 0; box->mw_pct = 0;
     pv_text_ext_reset(ext);
     *block_id_out = -1;
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
@@ -2744,7 +2914,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * structure; the decoration (on the box def) is author presentation that
              * render_doc gates behind caps.css. */
             int this_box = -1;   /* box registered for THIS ancestor, or -1 */
-            if (box_reg != NULL && generates_box_style(t, &cs) && css_has_boxdeco(&cs)
+            if (box_reg != NULL && generates_box_style(t, &cs)
+                && (css_has_boxdeco(&cs) || item_sizes_itself(p, &cs, sheet, style_cache))
                 && !((t == LXB_TAG_TD || t == LXB_TAG_TH)
                      && in_flow_table_cell(p, base, flowreg))) {
                 int bid = box_reg_id(box_reg, p, &cs, pv_cached_font_px(style_cache, p));
@@ -3645,24 +3816,17 @@ static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
     }
 
     if (tag == LXB_TAG_BUTTON) {
+        /* The button's face is its own content box (HTML Rendering 15.5.3), walked
+         * like any element: no label is collected and none is invented. Only a
+         * submit button gets a run -- the invisible proxy that lets a click inside
+         * its box submit the form; button/reset are inert without JS. */
         char *type = attr_dup(el, "type", 4);
         *out_type = (ascii_ieq(type, "button") || ascii_ieq(type, "reset"))
-                    ? PV_IN_BUTTON : PV_IN_SUBMIT; /* default button type is submit */
+                    ? PV_IN_BUTTON : PV_IN_SUBMIT_BOX; /* default type is submit */
         free(type);
         *out_name = attr_dup(el, "name", 4);
         *out_value = attr_dup(el, "value", 5);
-        char *txt = collect_text(node);
-        if (txt == NULL) return -1;
-        char *lab = collapse_ws(txt, strlen(txt));
-        free(txt);
-        if (lab == NULL) return -1;
-        if (lab[0] == '\0') { /* empty label: fall back to value or a generic word */
-            free(lab);
-            const char *fb = (*out_value != NULL && (*out_value)[0] != '\0') ? *out_value
-                             : (*out_type == PV_IN_SUBMIT ? "Submit" : "Button");
-            lab = dup_n(fb, strlen(fb));
-        }
-        *out_label = lab;
+        *out_label = dup_n("", 0);
         if (*out_label == NULL) return -1;
         return 0;
     }
@@ -4189,6 +4353,33 @@ static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
     if (ext != NULL) pv_set_text_ext(v, ext);
 }
 
+/* The presentational part of the UA stylesheet that the engine expresses as real
+ * CSS (spec/page_view.md, tanda 40). It is a layer declared BEFORE every author
+ * sheet, so by CSS Cascade 5 6.4 it loses to every later layer and to all unlayered
+ * author rules -- the precedence of the UA origin for normal declarations. Values
+ * are Firefox's for a non-native button face. Never !important (that would invert
+ * the layer order). */
+static const char PV_UA_CSS[] =
+    "@layer freedom-ua{"
+    "button{display:inline-block;padding:1px 6px;border:1px solid #8f8f9d;border-radius:4px;"
+    "background-color:#e9e9ed;color:#000;font-size:13.3333px;text-align:center}"
+    "}\n";
+
+/* Returns a fresh "UA + text" buffer (NUL-terminated) and updates *len, or NULL
+ * on OOM (the caller keeps the author text alone: no UA face, never a failure). */
+static char *prepend_ua_css(const char *text, size_t *len) {
+    size_t ul = sizeof PV_UA_CSS - 1;
+    size_t tl = (text != NULL) ? *len : 0;
+    if (tl > PV_MAX_STYLE_BYTES) tl = PV_MAX_STYLE_BYTES;
+    char *out = (char *)malloc(ul + tl + 1);
+    if (out == NULL) return NULL;
+    memcpy(out, PV_UA_CSS, ul);
+    if (tl != 0) memcpy(out + ul, text, tl);
+    out[ul + tl] = '\0';
+    *len = ul + tl;
+    return out;
+}
+
 static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
                               size_t extern_len, size_t *outlen) {
     size_t style_len = 0;
@@ -4210,6 +4401,10 @@ static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
             }
         }
     }
+    /* The UA layer goes FIRST of everything, external sheets included: a layer's
+     * rank is the order of its first declaration. */
+    char *ua = prepend_ua_css(style_text, &style_len);
+    if (ua != NULL) { free(style_text); style_text = ua; }
     *outlen = style_len;
     return style_text;
 }
@@ -4271,6 +4466,15 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     const lxb_dom_node_t *after_pending_el = NULL;
     char *after_pending_text = NULL;
     pv_style_cache cache;  /* memoized cch_element_style() per element (see above) */
+    pv_ptrmap pseudo_memo = { NULL, NULL, 0, 0 };  /* generated-box verdicts */
+    int after_pending_box = -1;      /* ::after generated box of after_pending_el */
+    int after_pending_brk = 0;       /* ... and whether it is block-level */
+    pv_cont_info after_cont;         /* the annotation it must ride */
+    pv_box_info after_boxinfo;
+    pv_text_ext after_ext;
+    memset(&after_cont, 0, sizeof after_cont);
+    memset(&after_boxinfo, 0, sizeof after_boxinfo);
+    memset(&after_ext, 0, sizeof after_ext);
     (void)pv_style_cache_init(&cache);  /* on OOM: cap stays 0, every lookup degrades to uncached */
     /* Per-table flow-vs-grid decisions, plus the style context the table role
      * resolution needs (a role is a computed `display`, spec/css.md). Declared
@@ -4326,15 +4530,26 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 css_style acs = cached_element_style(
                     lxb_dom_interface_element((lxb_dom_node_t *)after_pending_el),
                     sheet, &cache);
-                pv_status st = pv_append(v, PV_TEXT, 0, 0, after_pending_text, NULL);
+                pv_status st = pv_append(v, PV_TEXT, 0,
+                                         (after_pending_box >= 0) ? after_pending_brk : 0,
+                                         after_pending_text, NULL);
                 if (st != PV_OK) { free(after_pending_text); after_pending_text = NULL; rc = st; goto cleanup; }
                 pv_set_node_id(v, pv_node_map_id(&node_map, after_pending_el));
                 if (acs.color >= 0) pv_set_color(v, acs.color);
                 if (acs.background >= 0) pv_set_bgcolor(v, acs.background);
                 pv_set_emphasis(v, acs.bold > 0, acs.italic > 0);
+                if (after_pending_box >= 0) {
+                    /* The generated box rides its element's annotation (container,
+                     * item, float) captured when it was armed. */
+                    annotate_flow_run(v, &reg, &items, &after_cont, &after_boxinfo);
+                    pv_set_text_ext(v, &after_ext);
+                    pv_set_block_id(v, after_pending_box);
+                    if (after_pending_brk) pending_break = 1;
+                }
                 free(after_pending_text);
                 after_pending_text = NULL;
                 after_pending_el = NULL;
+                after_pending_box = -1;
             }
         }
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
@@ -4544,9 +4759,15 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &ictl_cont, &unused_box, &ctl_ext,
                                 &box_reg, &float_reg, &bdeco, &cache, &flowreg);
-                int brk = pending_break || (block != prev_block);
-                pending_break = 0;
-                prev_block = block;
+                /* A <button> only ever yields its invisible submit proxy here (its
+                 * face is walked as content): the proxy is never laid out, so it
+                 * must not consume the pending break or claim the block. */
+                int is_btn = (t == LXB_TAG_BUTTON);
+                int brk = !is_btn && (pending_break || (block != prev_block));
+                if (!is_btn) {
+                    pending_break = 0;
+                    prev_block = block;
+                }
 
                 int fidx = form_for(&forms, n, base);
                 const char *action = (fidx >= 0) ? forms.recs[fidx].action : NULL;
@@ -4560,6 +4781,11 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     free(label); free(name); free(value); free(ictl_opts);
                     rc = PV_ERR_OOM; goto cleanup;
                 }
+                if (is_btn && (itype != PV_IN_SUBMIT_BOX || fidx < 0)) {
+                    free(label); free(name); free(value); free(ictl_opts);
+                    continue;
+                }
+                if (is_btn) bdeco = -1;
                 pv_status st = pv_append_input(v, heading, brk, itype, label,
                                                name, value, action, fidx, method);
                 free(label); free(name); free(value);
@@ -4569,7 +4795,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * generating ancestors but may miss the input itself (got_boxdeco
                  * tracks the innermost block-like ancestor, not the input tag).
                  * So register the input's own box directly if needed. */
-                if (bdeco < 0) {
+                if (bdeco < 0 && !is_btn) {
                     css_style cs = cached_element_style(el, sheet, &cache);
                     if (css_has_boxdeco(&cs))
                         bdeco = box_reg_id(&box_reg, n, &cs, pv_cached_font_px(&cache, n));
@@ -5139,9 +5365,30 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     if (is_layout_container(n->parent, &pcs, sheet, &cache))
                         flex_spacer = 1;
                 }
+                /* The generated boxes (spec/page_view.md "Cajas generadas"): a
+                 * ::before/::after whose `content` generates a box with a style of
+                 * its own -- the aspect-ratio spacer, the decorative bar, the icon
+                 * tile. Asked only when the cascade said `content` is on. */
+                css_style bps, aps;
+                memset(&bps, 0, sizeof bps);
+                memset(&aps, 0, sizeof aps);
+                int bbox_want = 0, abox_want = 0, before_hidden = 0, after_hidden = 0;
+                if (ecs.content_before_on) {
+                    bps = cached_pseudo_style(lxb_dom_interface_element(n), sheet, &cache,
+                                              CSS_PSEUDO_BEFORE);
+                    before_hidden = (bps.display == CSS_DISP_NONE);
+                    bbox_want = pseudo_generates_box(&bps);
+                }
+                if (ecs.content_after_on) {
+                    aps = cached_pseudo_style(lxb_dom_interface_element(n), sheet, &cache,
+                                              CSS_PSEUDO_AFTER);
+                    after_hidden = (aps.display == CSS_DISP_NONE);
+                    abox_want = pseudo_generates_box(&aps);
+                }
                 if ((is_block_like_style(node_tag(n), &ecs) && css_has_boxdeco(&ecs))
                     || flex_spacer
-                    || ecs.content_before_str[0] != '\0') {
+                    || (ecs.content_before_str[0] != '\0' && !before_hidden)
+                    || bbox_want || abox_want) {
                     const char *ehref = NULL; size_t ehl = 0;
                     const lxb_dom_node_t *eblock = NULL;
                     int eheading = 0, efg = -1, ebg = -1, ebold = 0, eitalic = 0;
@@ -5176,8 +5423,18 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     pending_break = 0;
                     prev_block = eblock;
                     const char *leaf_text = "";
-                    if (ecs.content_str[0] != '\0') leaf_text = ecs.content_str;
-                    pv_status st = pv_append(v, PV_TEXT, 0, ebrk, leaf_text, NULL);
+                    if (ecs.content_str[0] != '\0' && !before_hidden) leaf_text = ecs.content_str;
+                    double efpx = pv_cached_font_px(&cache, n);
+                    int before_box = bbox_want
+                        ? pseudo_box_reg(&box_reg, n, CSS_PSEUDO_BEFORE, &bps, ebdeco, efpx) : -1;
+                    int after_box = abox_want
+                        ? pseudo_box_reg(&box_reg, n, CSS_PSEUDO_AFTER, &aps, ebdeco, efpx) : -1;
+                    /* An in-flow ::before box takes the element's run (its parent is
+                     * the element's box, so reconciling it opens both). An
+                     * out-of-flow one keeps the element's run and adds its own. */
+                    int before_in_flow = (before_box >= 0 && !pseudo_is_oof(&bps));
+                    const char *main_text = (before_box >= 0 && !before_in_flow) ? "" : leaf_text;
+                    pv_status st = pv_append(v, PV_TEXT, 0, ebrk, main_text, NULL);
                     if (st != PV_OK) { rc = st; goto cleanup; }
                     pv_set_oof(v, eleaf_oof);
                     last_was_gap = 0;
@@ -5213,16 +5470,40 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     pv_set_ua_tag(v, ebox.ua);
                     pv_set_box_pct(v, ebox.w_pct, ebox.l_pct, ebox.r_pct,
                                    ebox.mt_pct, ebox.mb_pct);
+                    pv_set_box_maxw(v, ebox.mw, ebox.mw_pct);
                     pv_set_text_ext(v, &eext);
-                    pv_set_block_id(v, ebdeco);
+                    pv_set_block_id(v, before_in_flow ? before_box : ebdeco);
+                    if (before_in_flow && bps.color >= 0) pv_set_color(v, bps.color);
                     pv_set_node_id(v, pv_node_map_id(&node_map, n));
-                    if (ecs.content_after_str[0] != '\0') {
-                        pv_status st2 = pv_append(v, PV_TEXT, 0, 0, ecs.content_after_str, NULL);
+                    if (before_box >= 0 && !before_in_flow) {
+                        pv_status sb = pv_append(v, PV_TEXT, 0, 0, leaf_text, NULL);
+                        if (sb != PV_OK) { rc = sb; goto cleanup; }
+                        annotate_flow_run(v, &reg, &items, &econt, &ebox);
+                        pv_set_text_ext(v, &eext);
+                        pv_set_oof(v, 1);
+                        pv_set_block_id(v, before_box);
+                        if (bps.color >= 0) pv_set_color(v, bps.color);
+                        pv_set_node_id(v, pv_node_map_id(&node_map, n));
+                    }
+                    if ((ecs.content_after_str[0] != '\0' || after_box >= 0) && !after_hidden) {
+                        int ablock = (aps.display == CSS_DISP_BLOCK || aps.display == CSS_DISP_FLEX
+                                      || aps.display == CSS_DISP_GRID
+                                      || aps.display == CSS_DISP_LIST_ITEM);
+                        pv_status st2 = pv_append(v, PV_TEXT, 0,
+                                                  (after_box >= 0 && ablock) ? 1 : 0,
+                                                  ecs.content_after_str, NULL);
                         if (st2 != PV_OK) { rc = st2; goto cleanup; }
                         pv_set_node_id(v, pv_node_map_id(&node_map, n));
                         if (ecs.color >= 0) pv_set_color(v, ecs.color);
                         if (ecs.background >= 0) pv_set_bgcolor(v, ecs.background);
                         pv_set_emphasis(v, ecs.bold > 0, ecs.italic > 0);
+                        if (after_box >= 0) {
+                            annotate_flow_run(v, &reg, &items, &econt, &ebox);
+                            pv_set_text_ext(v, &eext);
+                            pv_set_oof(v, pseudo_is_oof(&aps) || eleaf_oof);
+                            pv_set_block_id(v, after_box);
+                            if (aps.color >= 0) pv_set_color(v, aps.color);
+                        }
                     }
                 }
             }
@@ -5295,12 +5576,68 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         if (n->parent != NULL && n->parent->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *pel = lxb_dom_interface_element(n->parent);
             css_style pcs = cached_element_style(pel, sheet, &cache);
+            /* A ::before / ::after with a generated BOX of its own (spec/page_view.md
+             * "Cajas generadas"): decided once per element (pseudo_memo), and the
+             * ::before box is emitted at the element's first text, before it. */
+            int pbefore_done = 0, pafter_box = -1, pafter_hidden = 0, pafter_blk = 0;
+            if (pcs.content_before_on || pcs.content_after_on) {
+                for (int which = CSS_PSEUDO_BEFORE; which <= CSS_PSEUDO_AFTER; ++which) {
+                    if (which == CSS_PSEUDO_BEFORE ? !pcs.content_before_on
+                                                   : !pcs.content_after_on) continue;
+                    const void *pk = pseudo_key(n->parent, which);
+                    int verdict;
+                    int fresh_pseudo = !pv_ptrmap_get(&pseudo_memo, pk, &verdict);
+                    css_style pps;
+                    memset(&pps, 0, sizeof pps);
+                    if (fresh_pseudo) {
+                        pps = cached_pseudo_style(pel, sheet, &cache, which);
+                        if (pps.display == CSS_DISP_NONE) verdict = -2;
+                        else if (pseudo_generates_box(&pps))
+                            verdict = pseudo_box_reg(&box_reg, n->parent, which, &pps, bdeco,
+                                                     pv_cached_font_px(&cache, n->parent));
+                        else verdict = -1;
+                        pv_ptrmap_put(&pseudo_memo, pk, verdict);
+                    }
+                    if (which == CSS_PSEUDO_AFTER) {
+                        pafter_hidden = (verdict == -2);
+                        pafter_box = verdict;
+                        if (fresh_pseudo) pafter_blk = pseudo_is_block(&pps);
+                        continue;
+                    }
+                    if (verdict == -2) { pbefore_done = 1; continue; }
+                    if (verdict < 0) continue;
+                    pbefore_done = 1;
+                    if (!fresh_pseudo) continue;   /* emitted with the first text */
+                    int pblk = pseudo_is_block(&pps), poof = pseudo_is_oof(&pps);
+                    int pbrk = (pblk || pending_break || block != prev_block) && !poof;
+                    pv_status pst = pv_append(v, PV_TEXT, 0, pbrk, pcs.content_str, NULL);
+                    if (pst != PV_OK) { free(collapsed); rc = pst; goto cleanup; }
+                    pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
+                    pv_set_oof(v, poof || subtree_is_oof(n->parent, sheet, &cache));
+                    pv_set_color(v, (pps.color >= 0) ? pps.color : pcs.color);
+                    pv_set_emphasis(v, pcs.bold > 0, pcs.italic > 0);
+                    pv_set_indent(v, list_depth);
+                    pv_set_text_style(v, align, font_scale, font_abs, line_scale,
+                                      text_decoration);
+                    annotate_flow_run(v, &reg, &items, &cont, &box);
+                    pv_set_text_ext(v, &ext);
+                    pv_set_block_id(v, verdict);
+                    if (!poof) {
+                        /* A block-level generated box ends its line: the element's
+                         * own text starts below it. An inline one shares it. */
+                        pending_break = pblk;
+                        prev_block = block;
+                    }
+                }
+            }
             /* Cheap content check first: the subtree walk below is linear, so it
              * only runs for elements that actually carry generated content. */
-            if ((pcs.content_str[0] != '\0' || pcs.content_after_str[0] != '\0')
+            if (((pcs.content_str[0] != '\0' && !pbefore_done)
+                 || (pcs.content_after_str[0] != '\0' && !pafter_hidden)
+                 || pafter_box >= 0)
                 && subtree_has_own_text(n->parent, base, sheet, &cache,
                                         js_enabled, reader, 0)) {
-            if (pcs.content_str[0] != '\0') {
+            if (pcs.content_str[0] != '\0' && !pbefore_done) {
                 int fresh = 1;
                 for (size_t bi = 0; bi < box_reg.count; ++bi) {
                     if (box_reg.node[bi] == n->parent) {
@@ -5347,11 +5684,17 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     prev_block = block;
                 }
             }
-                if (after_pending_el == NULL && pcs.content_after_str[0] != '\0') {
+                if (after_pending_el == NULL && !pafter_hidden
+                    && (pcs.content_after_str[0] != '\0' || pafter_box >= 0)) {
                     after_pending_el = n->parent;
                     after_pending_text = dup_n(pcs.content_after_str,
                                                strlen(pcs.content_after_str));
                     if (after_pending_text == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
+                    after_pending_box = pafter_box;
+                    after_pending_brk = pafter_blk;
+                    after_cont = cont;
+                    after_boxinfo = box;
+                    after_ext = ext;
                 }
             }
             }
@@ -5421,6 +5764,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_ua_tag(v, box.ua);
                 pv_set_box_pct(v, box.w_pct, box.l_pct, box.r_pct,
                                box.mt_pct, box.mb_pct);
+                pv_set_box_maxw(v, box.mw, box.mw_pct);
                 pv_set_text_ext(v, &ext);
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
@@ -5550,9 +5894,16 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     }
 
     if (after_pending_el != NULL && after_pending_text != NULL) {
-        pv_status st = pv_append(v, PV_TEXT, 0, 0, after_pending_text, NULL);
+        pv_status st = pv_append(v, PV_TEXT, 0,
+                                 (after_pending_box >= 0) ? after_pending_brk : 0,
+                                 after_pending_text, NULL);
         if (st != PV_OK) { rc = st; goto cleanup; }
         pv_set_node_id(v, pv_node_map_id(&node_map, after_pending_el));
+        if (after_pending_box >= 0) {
+            annotate_flow_run(v, &reg, &items, &after_cont, &after_boxinfo);
+            pv_set_text_ext(v, &after_ext);
+            pv_set_block_id(v, after_pending_box);
+        }
         free(after_pending_text);
         after_pending_text = NULL;
         after_pending_el = NULL;
@@ -5563,6 +5914,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     css_free(sheet);
     pv_node_map_free(&node_map);
     pv_style_cache_free(&cache);
+    pv_ptrmap_free(&pseudo_memo);
     box_reg_free(&box_reg);
     return PV_OK;
 
@@ -5572,6 +5924,7 @@ cleanup:
     css_free(sheet);
     pv_node_map_free(&node_map);
     pv_style_cache_free(&cache);
+    pv_ptrmap_free(&pseudo_memo);
     box_reg_free(&box_reg);
     pv_free(v);
     return rc;

@@ -270,6 +270,21 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
     return css_resolve_el_ex(sheet, subject, (const char *)st, sl, own_out);
 }
 
+css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
+                           double font_size, const struct cvr_chain *inherited) {
+    cch_node chain[CCH_CHAIN_MAX];
+    cch_node sibs[CCH_SIB_MAX];
+    lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
+    const css_element *subject = build_chain(el, chain, sibs, nodes);
+    if (subject != NULL) {
+        /* The generated box inherits from its element: the element's computed
+         * size is the "parent" size its own em lengths resolve against. */
+        chain[0].el.font_size = font_size;
+        chain[0].el.vars = inherited;
+    }
+    return css_resolve_pseudo(sheet, subject, which);
+}
+
 css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet) {
     return cch_element_style_fs(el, sheet, 0.0);
 }

@@ -515,6 +515,24 @@ static void test_width_cap_pct(void **state) {
     assert_true(dbl_eq(bx_width_cap(-5, -3, 800.0), 0.0));     /* junk: none */
 }
 
+
+/* width and max-width are TWO <length-percentage> values (CSS 2.1 10.4): the
+ * used cap is the smaller of the two, each resolved on its own. Folding them into
+ * one value summed `width:100%` with `max-width:768px` into a 1768px "cap" --
+ * the `.container` idiom of every CSS framework then spanned the whole page. */
+static void test_width_cap2_is_min_of_two_values(void **state) {
+    (void)state;
+    assert_true(dbl_eq(bx_width_cap2(0, 1000, 768, 0, 1000.0), 768.0));
+    assert_true(dbl_eq(bx_width_cap2(0, 1000, 768, 0, 500.0), 500.0));
+    assert_true(dbl_eq(bx_width_cap2(600, 0, 0, 1000, 500.0), 500.0));
+    assert_true(dbl_eq(bx_width_cap2(600, 0, 0, 1000, 800.0), 600.0));
+    assert_true(dbl_eq(bx_width_cap2(0, 900, 1200, 0, 1000.0), 900.0));
+    assert_true(dbl_eq(bx_width_cap2(0, 900, 1200, 0, 1920.0), 1200.0));
+    assert_true(dbl_eq(bx_width_cap2(0, 0, 0, 0, 800.0), 0.0));
+    assert_true(dbl_eq(bx_width_cap2(300, 0, 0, 0, 800.0), 300.0));
+    assert_true(dbl_eq(bx_width_cap2(0, 0, 0, 500, 800.0), 400.0));
+}
+
 /* The two halves of a <length-percentage> are SUMMED, not raced.
  *
  * `width: calc(100% - 6px)` is one value with a px half of -6 and a percentage
@@ -595,6 +613,7 @@ int main(void) {
         cmocka_unit_test(test_place_insets),
         cmocka_unit_test(test_place_failclosed_bounds),
         cmocka_unit_test(test_width_cap_pct),
+        cmocka_unit_test(test_width_cap2_is_min_of_two_values),
         cmocka_unit_test(test_width_cap_sums_both_halves),
         cmocka_unit_test(test_replaced_box_from_aspect_ratio),
         cmocka_unit_test(test_content_cap_border_box),

@@ -21,6 +21,9 @@ content_w=1000 total_h=508.0 nbox=8 nrow=12 npositioned=3
   box[5] bid=7 x=182.0 top=264.0 w=636.0 h=46.0
   box[6] bid=8 x=182.0 top=318.0 w=636.0 h=46.0
   box[7] bid=9 x=182.0 top=372.0 w=636.0 h=46.0
-  pos[0] box=3 z=0 x=777.7 y=80.0 w=50.3 h=30.0
-  pos[1] box=10 z=50 x=0.0 y=29972.0 w=384.8 h=28.0
-  pos[2] box=1 z=100 x=0.0 y=0.0 w=199.4 h=32.0
+  pos[0] box=3 z=0 x=777.7 y=80.0 w=50.3 h=26.0
+    sub box bid=3 x=777.7 top=80.0 w=50.3 h=26.0
+  pos[1] box=10 z=50 x=0.0 y=732.0 w=1000.0 h=36.0
+    sub box bid=10 x=0.0 top=732.0 w=1000.0 h=36.0
+  pos[2] box=1 z=100 x=0.0 y=0.0 w=1000.0 h=44.0
+    sub box bid=1 x=0.0 top=0.0 w=1000.0 h=44.0

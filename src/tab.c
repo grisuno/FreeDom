@@ -61,8 +61,8 @@ static void ignore_sigpipe(void);
  * Change requires same-diff in both functions; _Static_assert below enforces. */
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
-#define TAB_WIRE_B_N 55
-#define TAB_WIRE_BOX_F_N 220
+#define TAB_WIRE_B_N 57
+#define TAB_WIRE_BOX_F_N 222
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
 
 /* Anti-amplification cap on the number of display-list runs the parent will
@@ -428,6 +428,9 @@ static int write_view(int wfd, const pv_view *v) {
             /* Main-axis auto margins of the flex item, 2026-09-29 (appended;
              * read_view mirrors this). See pv_run.flex_mauto. */
             (int32_t)r->flex_mauto,
+            /* max-width as its own <length-percentage>, tanda 40 (appended;
+             * read_view mirrors this). See pv_run.box_mw. */
+            (int32_t)r->box_mw, (int32_t)r->box_mw_pct,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -454,7 +457,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[220] = {
+        int32_t f[TAB_WIRE_BOX_F_N] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -618,6 +621,8 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->bg_size_w, (int32_t)bd->bg_size_h,
             (int32_t)bd->bg_size_w_pct, (int32_t)bd->bg_size_h_pct,
             (int32_t)bd->node_id,
+            /* max-width as its own <length-percentage>, tanda 40 (appended). */
+            (int32_t)bd->box_mw, (int32_t)bd->box_mw_pct,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -2129,6 +2134,7 @@ static int read_view(int fd, pv_view **out) {
              * the pair disagree about the same property. */
             pv_set_box_pct(v, (int)bwpct, (int)b[36], (int)b[37],
                            (int)b[38], (int)b[39]);
+            pv_set_box_maxw(v, (int)b[55], (int)b[56]);
         } else {
             /* An input skips the text-presentation restore above (its value/label
              * handling owns those slots), but its flex/grid container membership must
@@ -2182,7 +2188,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[220];
+        int32_t f[TAB_WIRE_BOX_F_N];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -2300,6 +2306,7 @@ static int read_view(int fd, pv_view **out) {
             .bg_size_w = f[215], .bg_size_h = f[216],
             .bg_size_w_pct = f[217], .bg_size_h_pct = f[218],
             .node_id = (dom_node_id)(uint32_t)f[219],
+            .box_mw = f[220], .box_mw_pct = f[221],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

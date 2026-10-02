@@ -229,4 +229,22 @@ int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);
 int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);
 int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);
 
+/* Stage 2f (spec/box_engine.md, CSS 2.1 10.3.7 / 10.6.4): the size available to
+ * an out-of-flow box's MARGIN box on one axis of its containing block `cb`: cb
+ * minus the two insets (px half + per-mille half of cb), an auto/unset inset
+ * counting 0, never below 0. *both (may be NULL) is 1 iff both insets were
+ * declared -- the box then stretches between them instead of shrink-wrapping. */
+double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both);
+
+/* The containing block of box i as the positioning solver resolves it: the
+ * viewport for FIXED (and for ABSOLUTE with no positioned ancestor), else the
+ * geometry of the nearest positioned ancestor -- climbing to the nearest PLACED
+ * ancestor when `placed` (may be NULL) says it never got a rect. Any non-absolute
+ * box answers the viewport. Pure; out pointers must be non-NULL. */
+void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
+                         const double *box_x, const double *box_y,
+                         const double *box_w, const double *box_h,
+                         const char *placed, double viewport_w, double viewport_h,
+                         double *cb_x, double *cb_y, double *cb_w, double *cb_h);
+
 #endif /* FREEDOM_BOX_TREE_H */

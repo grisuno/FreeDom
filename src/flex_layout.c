@@ -669,3 +669,64 @@ const char *fx_justify_name(fx_justify j) {
     }
     return "start";
 }
+
+fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
+                          double inner_h, int justify, int reverse,
+                          double *y_out, double *h_out, double *extent) {
+    if (extent != NULL) *extent = 0.0;
+    if (n == 0) return FX_OK;
+    if (h == NULL || y_out == NULL || h_out == NULL) return FX_ERR_NULL_ARG;
+    if (gap < 0.0) gap = 0.0;
+    double sum = 0.0, gsum = 0.0;
+    for (size_t i = 0; i < n; ++i) {
+        h_out[i] = (h[i] > 0.0) ? h[i] : 0.0;
+        sum += h_out[i];
+        if (grow != NULL && grow[i] > 0.0) gsum += grow[i];
+    }
+    sum += gap * (double)(n - 1);
+    double free_px = (inner_h > 0.0) ? inner_h - sum : 0.0;
+    if (free_px < 0.0) free_px = 0.0;
+    if (free_px > 0.0 && gsum > 0.0) {
+        for (size_t i = 0; i < n; ++i)
+            if (grow[i] > 0.0) h_out[i] += free_px * grow[i] / gsum;
+        free_px = 0.0;
+    }
+    double lead = 0.0, between = gap;
+    switch (justify) {
+        case FX_JUSTIFY_END:    lead = free_px; break;
+        case FX_JUSTIFY_CENTER: lead = free_px / 2.0; break;
+        case FX_JUSTIFY_SPACE_BETWEEN:
+            if (n > 1) between += free_px / (double)(n - 1);
+            else lead = 0.0;
+            break;
+        case FX_JUSTIFY_SPACE_AROUND:
+            lead = free_px / (double)(2 * n);
+            between += free_px / (double)n;
+            break;
+        case FX_JUSTIFY_SPACE_EVENLY:
+            lead = free_px / (double)(n + 1);
+            between += lead;
+            break;
+        default: break;
+    }
+    double y = lead;
+    for (size_t k = 0; k < n; ++k) {
+        size_t i = reverse ? n - 1 - k : k;
+        y_out[i] = y;
+        y += h_out[i];
+        if (extent != NULL) *extent = y;
+        if (k + 1 < n) y += between;
+    }
+    return FX_OK;
+}
+
+double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r) {
+    double room = avail - w;
+    if (room <= 0.0) return 0.0;
+    if (mauto_l && mauto_r) return room / 2.0;
+    if (mauto_l) return room;
+    if (mauto_r) return 0.0;
+    if (align == 1) return room / 2.0;
+    if (align == 2) return room;
+    return 0.0;
+}

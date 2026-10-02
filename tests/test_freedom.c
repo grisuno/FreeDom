@@ -1586,6 +1586,89 @@ static void test_dump_layout_no_wrapper_fragmentation(void **state) {
     unlink(path);
 }
 
+
+/* Stage 2f (spec/box_engine.md): an out-of-flow subtree is laid out by the real
+ * engine. A `position:fixed; inset:0` flex column stretches to the headless
+ * viewport (1000x768, both insets declared on each axis) and centres its 280px
+ * meter on both axes; the meter's 6px track -- a decorated EMPTY descendant the
+ * old approximation dropped -- is a box of the sub-layout. */
+static void test_dump_layout_oof_subtree_real_layout(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>*{margin:0;padding:0}"
+        ".o{position:fixed;inset:0;display:flex;flex-direction:column;"
+        "justify-content:center;align-items:center;background:#eee}"
+        ".m{width:280px}.t{height:6px;background:#ccc}"
+        "</style></head><body><div class=\"o\"><div class=\"m\">"
+        "<div class=\"t\"></div><div>Verifying</div></div></div></body></html>";
+    const char *path = "__freedom_oofsub.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    char args[256];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --dump-layout %s", path) < sizeof args);
+    assert_int_equal(run_freedom(args, out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    char *p = strstr(out, "pos[0]");
+    assert_non_null(p);
+    double x = -1, y = -1, w = 0, h = 0;
+    assert_int_equal(sscanf(strstr(p, " x="), " x=%lf y=%lf w=%lf h=%lf", &x, &y, &w, &h), 4);
+    assert_true(x == 0.0 && y == 0.0 && w == 1000.0 && h == 768.0);
+    /* The 6px track: centred horizontally (x 360) and vertically (mid-viewport). */
+    int track = 0;
+    for (char *q = strstr(out, "sub box"); q != NULL; q = strstr(q + 1, "sub box")) {
+        int bid; double bx, by, bw, bh;
+        if (sscanf(q, "sub box bid=%d x=%lf top=%lf w=%lf h=%lf", &bid, &bx, &by, &bw, &bh) == 5
+            && bh == 6.0 && bw == 280.0 && bx == 360.0 && by > 300.0 && by < 468.0)
+            track = 1;
+    }
+    assert_true(track);
+    unlink(path);
+}
+
+
+/* A flex item with no box of its own whose children are SIBLING boxes keeps both:
+ * the first child is not "the item's box" (tanda 40). */
+static void test_dump_layout_flex_item_sibling_boxes(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>t</title><style>body{margin:0}"
+        ".d{display:flex}.a{width:36px;height:36px;background:#111}"
+        ".x{flex:1 1 auto}.t{height:20px;background:#222}.u{height:20px;background:#333}"
+        "</style></head><body><div class=\"d\"><div class=\"a\"></div>"
+        "<div class=\"x\"><div class=\"t\"></div><div class=\"u\"></div></div></div>"
+        "<p>z</p></body></html>";
+    const char *path = "__freedom_flexsib.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_flexsib.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    /* Two 20px bars stacked beside the 36px square: tops 0 and 20. */
+    int saw0 = 0, saw20 = 0;
+    for (char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, w, h;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &w, &h) == 6
+            && h == 20.0 && x >= 36.0) {
+            if (top == 0.0) saw0 = 1;
+            if (top == 20.0) saw20 = 1;
+        }
+    }
+    assert_true(saw0);
+    assert_true(saw20);
+    unlink(path);
+}
+
 /* float.md end-to-end: two floated siblings lay out SIDE BY SIDE (the second column's
  * rows start at a larger x_off than the first), and a wrapping position:relative
  * background panel stays IN FLOW (a box, not pushed to the page bottom by the
@@ -1632,7 +1715,13 @@ static void test_dump_layout_float_two_columns(void **state) {
 
     /* The relative panel is in flow: at least one box, and no positioned box left it
      * at the page bottom (the grey-stripe bug had npositioned pushing it away). */
-    assert_non_null(strstr(out, "nbox=1"));
+    /* (Each sized float now has a box of its own too: a declared width is carried
+     * by a box, tanda 40 -- so "at least one", not "exactly one".) */
+    char *nbp = strstr(out, "nbox=");
+    assert_non_null(nbp);
+    size_t nbx = 0;
+    assert_int_equal(sscanf(nbp, "nbox=%zu", &nbx), 1);
+    assert_true(nbx >= 1);
     assert_non_null(strstr(out, "npositioned=0"));
 
     unlink(path);
@@ -2375,6 +2464,8 @@ int main(void) {
         cmocka_unit_test(test_dump_dom_prints_render_tree),
         cmocka_unit_test(test_dump_timings_prints_stages),
         cmocka_unit_test(test_dump_layout_no_wrapper_fragmentation),
+        cmocka_unit_test(test_dump_layout_oof_subtree_real_layout),
+        cmocka_unit_test(test_dump_layout_flex_item_sibling_boxes),
         cmocka_unit_test(test_dump_layout_float_two_columns),
         cmocka_unit_test(test_dump_layout_pulled_rail_single_margin),
         cmocka_unit_test(test_dump_layout_flex_badges_share_row),

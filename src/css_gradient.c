@@ -5,6 +5,7 @@
 #include "css_select.h"
 #include "css_values.h"
 
+#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -434,6 +435,51 @@ int cg_expand_bg_image(const char *val, css_decl *dst, int cap,
  * color-unset. A present-but-broken gradient or malformed url(...) drops the whole
  * declaration (fail closed); a value with no color, gradient nor url keeps the
  * historical drop path. */
+/* True iff every token of s (split on whitespace, '/' and ',') is a valid
+ * non-colour component of a background layer (CSS Backgrounds 3 section 3.10):
+ * a <length-percentage> or number (positions, sizes), or a position / repeat /
+ * attachment / box / size keyword. Such a shorthand names no colour, so it
+ * resets background-color to its initial `transparent` rather than failing. */
+static int bg_layer_tokens_ok(const char *s) {
+    static const char *const KW[] = {
+        "none", "left", "right", "top", "bottom", "center", "repeat", "repeat-x",
+        "repeat-y", "no-repeat", "space", "round", "scroll", "fixed", "local",
+        "border-box", "padding-box", "content-box", "text", "auto", "cover",
+        "contain"
+    };
+    char tok[64];
+    size_t n = 0;
+    int any = 0;
+    for (const char *p = s; ; ++p) {
+        char c = *p;
+        if (c == '\0' || c == ' ' || c == '\t' || c == '/' || c == ',') {
+            if (n > 0) {
+                tok[n] = '\0';
+                int ok = 0;
+                for (size_t k = 0; k < sizeof KW / sizeof KW[0] && !ok; ++k)
+                    ok = csel_ci_eq(tok, KW[k]);
+                if (!ok) {
+                    /* a number with an optional unit or % */
+                    const char *q = tok;
+                    if (*q == '+' || *q == '-') ++q;
+                    int dig = 0;
+                    while (isdigit((unsigned char)*q) || *q == '.') { if (*q != '.') dig = 1; ++q; }
+                    while (isalpha((unsigned char)*q) || *q == '%') ++q;
+                    ok = dig && *q == '\0';
+                }
+                if (!ok) return 0;
+                any = 1;
+                n = 0;
+            }
+            if (c == '\0') break;
+            continue;
+        }
+        if (n + 1 >= sizeof tok) return 0;
+        tok[n++] = c;
+    }
+    return any;
+}
+
 int cg_expand_background(const char *val, css_decl *dst, int cap,
                              char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
     size_t gs = 0, ge = 0, as = 0, an = 0;
@@ -493,7 +539,8 @@ int cg_expand_background(const char *val, css_decl *dst, int cap,
         if (tl >= sizeof kw) return 0;
         memcpy(kw, b, tl);
         kw[tl] = '\0';
-        if (!csel_ci_eq(kw, "none") && !cg_wide_keyword(kw)) return 0;
+        if (!csel_ci_eq(kw, "none") && !cg_wide_keyword(kw) && !bg_layer_tokens_ok(kw))
+            return 0;
         color = CC_COLOR_TRANSPARENT;
     }
     if (cap < 2) return 0;

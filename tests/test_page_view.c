@@ -489,11 +489,9 @@ static void test_build_collected_text_skips_style_and_script(void **state) {
     pv_view *v = NULL;
     assert_int_equal(pv_build_ex(doc, 1, &v), PV_OK);
 
-    const pv_run *btn = NULL;
-    for (size_t i = 0; i < pv_count(v); ++i)
-        if (pv_at(v, i)->kind == PV_INPUT) btn = pv_at(v, i);
-    assert_non_null(btn);
-    assert_string_equal(btn->text, "Press me");     /* no .x{color:red} in the label */
+    /* A <button>'s content flows as content (spec/page_view.md, tanda 40). */
+    assert_non_null(find_text(v, "Press"));
+    assert_null(find_sub(v, ".x{color"));           /* no .x{color:red} as content */
     assert_non_null(find_text(v, "Cell text"));     /* no var leak=1; in the cell */
     assert_null(find_text(v, "var leak=1; Cell text"));
 
@@ -948,12 +946,15 @@ static void test_build_empty_flex_grow_spacer(void **state) {
 
 static void test_build_image_in_skipped_subtree_ignored(void **state) {
     (void)state;
-    /* An <img> inside an always-skipped container (a control) emits no run. */
-    hp_document *doc = parse("<body><button><img src=\"https://e.example/x.png\"></button>"
-                            "<p>visible</p></body>");
+    /* An <img> inside an always-skipped container (media fallback) emits no run;
+     * inside a <button> it is the button's face and does (HTML Rendering 15.5.3). */
+    hp_document *doc = parse("<body><video><img src=\"https://e.example/x.png\"></video>"
+                            "<button type=button><img src=\"https://e.example/y.png\">"
+                            "</button><p>visible</p></body>");
     pv_view *v = NULL;
     assert_int_equal(pv_build(doc, &v), PV_OK);
     assert_null(find_image(v, "https://e.example/x.png"));
+    assert_non_null(find_image(v, "https://e.example/y.png"));
     assert_non_null(find_text(v, "visible"));
     pv_free(v);
     hp_document_free(doc);
@@ -2124,14 +2125,17 @@ static void test_build_box_wrapper_centering_from_sheet(void **state) {
     const pv_run *beta = find_text(v, "beta");
     assert_non_null(alpha);
     assert_non_null(beta);
-    assert_int_equal(alpha->box_w, 600);
+    /* max-width rides its own channel (tanda 40): width and max-width are two
+     * <length-percentage> values, never one folded cap. */
+    assert_int_equal(alpha->box_w, 0);
+    assert_int_equal(alpha->box_mw, 600);
     assert_int_equal(alpha->box_center, 1);
     assert_int_equal(alpha->box_l, 20);
     assert_int_equal(alpha->box_r, 20);
     /* the wrapper is not the leaf block of these paragraphs, so its vertical
      * margins do not override the leaf's UA margin. */
     assert_int_equal(alpha->box_mt, PV_LEN_UNSET);
-    assert_int_equal(beta->box_w, 600);
+    assert_int_equal(beta->box_mw, 600);
     assert_int_equal(beta->box_center, 1);
 
     pv_free(v);
@@ -2818,12 +2822,14 @@ static void test_build_form_post_and_hidden(void **state) {
     assert_int_equal(csrf->input_type, PV_IN_HIDDEN);
     assert_string_equal(csrf->value, "tok123");
 
-    /* A <button> with no type defaults to submit; its label is its text. */
+    /* A <button> with no type defaults to submit: its text is CONTENT and an
+     * invisible PV_IN_SUBMIT_BOX proxy carries the form (spec/page_view.md). */
+    assert_non_null(find_text(v, "Log in"));
     int found = 0;
     for (size_t i = 0; i < pv_count(v); ++i) {
         const pv_run *r = pv_at(v, i);
-        if (r->kind == PV_INPUT && r->input_type == PV_IN_SUBMIT
-            && r->text != NULL && strcmp(r->text, "Log in") == 0) found = 1;
+        if (r->kind == PV_INPUT && r->input_type == PV_IN_SUBMIT_BOX
+            && r->form_id == user->form_id) found = 1;
     }
     assert_true(found);
     pv_free(v);
@@ -2842,6 +2848,193 @@ static void test_build_textarea_value(void **state) {
     assert_string_equal(msg->value, "hello world");
     /* The textarea content must NOT also appear as a plain text run. */
     assert_null(find_text(v, "hello world"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+
+/* --- <button> is a box with content (spec/page_view.md, tanda 40) --- */
+
+static size_t count_inputs(const pv_view *v, int type) {
+    size_t n = 0;
+    for (size_t i = 0; i < pv_count(v); ++i)
+        if (pv_at(v, i)->kind == PV_INPUT && (type < 0 || pv_at(v, i)->input_type == type)) ++n;
+    return n;
+}
+
+static void test_button_icon_invents_no_label(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><button><svg width='16' height='16'>"
+                             "<rect width='16' height='16'/></svg></button></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_null(find_text(v, "Button"));
+    assert_null(find_text(v, "Submit"));
+    int svg = 0;
+    for (size_t i = 0; i < pv_count(v); ++i) if (pv_at(v, i)->kind == PV_SVG) svg = 1;
+    assert_true(svg);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_button_content_flows(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><button type='button'>Go <b>now</b></button></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_non_null(find_sub(v, "Go"));
+    const pv_run *now = find_text(v, "now");
+    assert_non_null(now);
+    assert_true(now->bold);
+    assert_int_equal(count_inputs(v, -1), 0);   /* type=button: no proxy */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_button_submit_proxy(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><form action='https://s.example/x'>"
+                             "<button name='a' value='1'>Send</button></form></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_int_equal(count_inputs(v, -1), 1);
+    const pv_run *p = find_input(v, "a");
+    assert_non_null(p);
+    assert_int_equal(p->input_type, PV_IN_SUBMIT_BOX);
+    assert_string_equal(p->value, "1");
+    assert_string_equal(p->href, "https://s.example/x");
+    assert_true(p->form_id >= 0);
+    const pv_run *t = find_text(v, "Send");
+    assert_non_null(t);
+    /* The proxy names the button's element, and the content sits in its box. */
+    assert_true(p->node_id != DOM_NODE_NONE);
+    assert_true(t->block_id >= 0);
+    const pv_box_def *bd = pv_box_at(v, (size_t)t->block_id);
+    assert_non_null(bd);
+    assert_int_equal(bd->node_id, p->node_id);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_button_ua_face_loses_to_author(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><button type='button'>A</button>"
+                             "<button type='button' class='r'>B</button></body>");
+    static const char CSS[] = ".r{background:#ff0000;border:0}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *a = find_text(v, "A");
+    const pv_run *b = find_text(v, "B");
+    assert_non_null(a);
+    assert_non_null(b);
+    assert_true(a->block_id >= 0 && b->block_id >= 0);
+    assert_int_equal(pv_box_at(v, (size_t)a->block_id)->bg_rgb, 0xe9e9ed);
+    assert_int_equal(pv_box_at(v, (size_t)b->block_id)->bg_rgb, 0xff0000);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+
+/* --- ::before / ::after generated BOXES (spec/page_view.md "Cajas generadas") --- */
+
+static const pv_box_def *box_of_run_with_bg(const pv_view *v, int bg) {
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->block_id < 0) continue;
+        const pv_box_def *d = pv_box_at(v, (size_t)r->block_id);
+        if (d != NULL && d->bg_rgb == bg) return d;
+    }
+    return NULL;
+}
+
+
+/* A percentage padding is padding: `padding-top:56.25%` is the aspect-ratio box of
+ * every video/thumbnail grid on the web, and only its px half used to count, so the
+ * box never existed and the tile collapsed to nothing. */
+static void test_pct_padding_generates_box(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='ph'></div><p>x</p></body>");
+    static const char CSS[] = ".ph{padding-top:20%;background:#cccccc}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_box_def *d = box_of_run_with_bg(v, 0xcccccc);
+    assert_non_null(d);
+    assert_int_equal(d->pad_t_pct, 200);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_before_box_on_empty_element(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='t'></div></body>");
+    static const char CSS[] = ".t{position:relative;border-radius:8px}"
+        ".t::before{content:\"\";display:block;padding-top:56.25%;background:#112233}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_box_def *d = box_of_run_with_bg(v, 0x112233);
+    assert_non_null(d);                         /* the generated box exists */
+    assert_int_equal(d->pad_t_pct, 563);        /* and carries the pseudo's padding */
+    assert_true(d->parent_id >= 0);             /* inside the element's box */
+    assert_int_equal(pv_box_at(v, (size_t)d->parent_id)->position, CSS_POS_RELATIVE);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_before_box_before_text(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p class='i'>Hi</p></body>");
+    static const char CSS[] = ".i::before{content:\"\";display:inline-block;"
+        "width:16px;height:16px;background:#ff0000}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_box_def *d = box_of_run_with_bg(v, 0xff0000);
+    assert_non_null(d);
+    assert_int_equal(d->box_w, 16);
+    assert_int_equal(d->box_h, 16);
+    assert_non_null(find_text(v, "Hi"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_pseudo_display_none_generates_nothing(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p class='n'>Body</p><div class='e'></div></body>");
+    static const char CSS[] = ".n::before{content:\"XX\";display:none}"
+        ".e::before{content:\"YY\";display:none}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_null(find_sub(v, "XX"));
+    assert_null(find_sub(v, "YY"));
+    assert_non_null(find_text(v, "Body"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* An INLINE generated box (no display) is part of its line: it registers no box,
+ * or the painter would break the line at each one -- Wikipedia's `[`/`]` round
+ * every reference marker multiplied its line count. Its text still flows. */
+static void test_inline_pseudo_registers_no_box(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>See <a class='r'>1</a> here</p></body>");
+    static const char CSS[] = ".r::before{content:\"[\";background:#abcdef;margin-left:2px}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_null(box_of_run_with_bg(v, 0xabcdef));
+    assert_non_null(find_sub(v, "["));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_after_box_on_empty_element(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='a'></div></body>");
+    static const char CSS[] = ".a::after{content:\"\";display:block;height:3px;"
+        "background:#0000ff}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_box_def *d = box_of_run_with_bg(v, 0x0000ff);
+    assert_non_null(d);
+    assert_int_equal(d->box_h, 3);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -4228,6 +4421,16 @@ int main(void) {
         cmocka_unit_test(test_build_search_form_get),
         cmocka_unit_test(test_build_form_post_and_hidden),
         cmocka_unit_test(test_build_textarea_value),
+        cmocka_unit_test(test_button_icon_invents_no_label),
+        cmocka_unit_test(test_button_content_flows),
+        cmocka_unit_test(test_button_submit_proxy),
+        cmocka_unit_test(test_button_ua_face_loses_to_author),
+        cmocka_unit_test(test_pct_padding_generates_box),
+        cmocka_unit_test(test_before_box_on_empty_element),
+        cmocka_unit_test(test_before_box_before_text),
+        cmocka_unit_test(test_pseudo_display_none_generates_nothing),
+        cmocka_unit_test(test_inline_pseudo_registers_no_box),
+        cmocka_unit_test(test_after_box_on_empty_element),
         cmocka_unit_test(test_build_select_shows_selected_option),
         cmocka_unit_test(test_build_select_last_selected_wins),
         cmocka_unit_test(test_build_select_defaults_to_first_option),

@@ -966,8 +966,52 @@ static void test_auto_margins_push_right_and_center(void **state) {
     assert_int_equal(fx_auto_margins(c, 1, bl, br, -1.0, 0.0), FX_ERR_RANGE);
 }
 
+
+/* --- flex column placement (spec/flex_layout.md, tanda 40) --- */
+static void test_column_place_stack_and_justify(void **state) {
+    (void)state;
+    double y[3], h[3], ext = -1.0;
+    const double h2[2] = { 20.0, 30.0 };
+    assert_int_equal(fx_column_place(h2, NULL, 2, 10.0, 0.0, FX_JUSTIFY_CENTER, 0,
+                                     y, h, &ext), FX_OK);
+    assert_true(y[0] == 0.0 && y[1] == 30.0 && ext == 60.0);
+    const double h1[1] = { 20.0 };
+    assert_int_equal(fx_column_place(h1, NULL, 1, 0.0, 100.0, FX_JUSTIFY_CENTER, 0,
+                                     y, h, &ext), FX_OK);
+    assert_true(y[0] == 40.0 && ext == 60.0);
+    fx_column_place(h1, NULL, 1, 0.0, 100.0, FX_JUSTIFY_END, 0, y, h, &ext);
+    assert_true(y[0] == 80.0);
+    const double hh[2] = { 20.0, 20.0 }, gr[2] = { 0.0, 1.0 };
+    fx_column_place(hh, gr, 2, 0.0, 100.0, FX_JUSTIFY_START, 0, y, h, &ext);
+    assert_true(h[0] == 20.0 && h[1] == 80.0 && y[0] == 0.0 && y[1] == 20.0 && ext == 100.0);
+    const double h10[2] = { 10.0, 10.0 };
+    fx_column_place(h10, NULL, 2, 0.0, 50.0, FX_JUSTIFY_SPACE_BETWEEN, 0, y, h, &ext);
+    assert_true(y[0] == 0.0 && y[1] == 40.0);
+    const double hr[2] = { 10.0, 20.0 };
+    fx_column_place(hr, NULL, 2, 0.0, 0.0, FX_JUSTIFY_START, 1, y, h, &ext);
+    assert_true(y[0] == 20.0 && y[1] == 0.0 && ext == 30.0);
+    /* overfull: free < 0 is treated as 0 */
+    fx_column_place(h2, NULL, 2, 0.0, 10.0, FX_JUSTIFY_CENTER, 0, y, h, &ext);
+    assert_true(y[0] == 0.0);
+    assert_int_equal(fx_column_place(h2, NULL, 2, 0.0, 0.0, 0, 0, NULL, h, &ext),
+                     FX_ERR_NULL_ARG);
+}
+
+static void test_cross_offset(void **state) {
+    (void)state;
+    assert_true(fx_cross_offset(1000.0, 280.0, 1, 0, 0) == 360.0);
+    assert_true(fx_cross_offset(1000.0, 280.0, 2, 0, 0) == 720.0);
+    assert_true(fx_cross_offset(1000.0, 280.0, 0, 0, 0) == 0.0);
+    assert_true(fx_cross_offset(1000.0, 280.0, 3, 0, 0) == 0.0);
+    assert_true(fx_cross_offset(1000.0, 280.0, 0, 1, 1) == 360.0);
+    assert_true(fx_cross_offset(1000.0, 280.0, 0, 1, 0) == 720.0);
+    assert_true(fx_cross_offset(100.0, 280.0, 1, 0, 0) == 0.0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_column_place_stack_and_justify),
+        cmocka_unit_test(test_cross_offset),
         cmocka_unit_test(test_grow_equal),
         cmocka_unit_test(test_grow_weighted),
         cmocka_unit_test(test_shrink_equal),

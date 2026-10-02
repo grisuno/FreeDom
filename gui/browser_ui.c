@@ -3041,6 +3041,8 @@ typedef struct rc_box {
     char   content_str[64];         /* R8: ::before/::after generated content */
 } rc_box;
 
+struct rc_oof_sub;
+
 typedef struct rc_layout {
     rc_frag *frags; size_t nfrag, capfrag;
     rc_row  *rows;  size_t nrow,  caprow;
@@ -3071,7 +3073,19 @@ typedef struct rc_layout {
     char  **text_bufs;       /* array of owned heap buffers */
     size_t  n_text_bufs;     /* count of valid entries */
     size_t  cap_text_bufs;   /* allocated slots */
+    /* Stage 2f (spec/box_engine.md): the out-of-flow subtrees laid out by the real
+     * engine, indexed by the anchor's box id (noof_sub entries, NULL = none built:
+     * that anchor keeps the Stage 2d approximation). Owned; rc_free releases it. */
+    struct rc_oof_sub *oof_sub;
+    size_t             noof_sub;
 } rc_layout;
+
+/* One out-of-flow subtree's own layout and where it lands on the page. */
+typedef struct rc_oof_sub {
+    rc_layout *L;      /* owned sub-layout, NULL = not built */
+    double     dx, dy; /* sub-layout space -> page layout space */
+    double     w;      /* width the subtree was laid out at */
+} rc_oof_sub;
 
 /* Box engine (Hito 23b-8 Step D): one entry of the open-box stack. A box's content
  * rect (inner_left/inner_w) is the coordinate context its children (text or nested
@@ -3328,6 +3342,17 @@ static void rc_free(rc_layout *L) {
     /* Free every owned text buffer (2026-07-10: tab-expanded <pre> slices). */
     for (size_t i = 0; i < L->n_text_bufs; ++i) free(L->text_bufs[i]);
     free(L->text_bufs);
+    if (L->oof_sub != NULL) {
+        for (size_t i = 0; i < L->noof_sub; ++i) {
+            if (L->oof_sub[i].L == NULL) continue;
+            rc_free(L->oof_sub[i].L);
+            free(L->oof_sub[i].L);
+        }
+        free(L->oof_sub);
+    }
+    L->frags = NULL; L->rows = NULL; L->boxes = NULL; L->text_bufs = NULL;
+    L->oof_sub = NULL; L->noof_sub = 0;
+    L->nfrag = L->nrow = L->nbox = L->n_text_bufs = 0;
 }
 
 static rc_box *rc_add_box(rc_layout *L) {
@@ -4408,6 +4433,7 @@ static void rc_box_context(const rc_state *s, double content_w,
 static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox) {
     int best = -1;
     int best_depth = 1 << 30;
+    int distinct = 0;   /* two different candidates at the shallowest depth */
     for (size_t k = b0; k < b1; ++k) {
         int bid = rd_at(doc, k)->block_id;
         if (bid < 0) continue;
@@ -4430,9 +4456,14 @@ static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox) {
             const pv_box_def *d = rd_box_at(doc, (size_t)id);
             id = (d != NULL) ? d->parent_id : -1;
         }
-        if (depth < best_depth) { best_depth = depth; best = cur; }
+        if (depth < best_depth) { best_depth = depth; best = cur; distinct = 0; }
+        else if (depth == best_depth && cur != best) distinct = 1;
     }
-    return best;
+    /* The item's root box is the ONE box that encloses all of its runs. An item
+     * with no box of its own whose children are SIBLING boxes (a `.txt` wrapper
+     * holding two decorated bars) has none: taking the first child as "the item's
+     * box" made it the stop for every later child, which then never opened. */
+    return distinct ? -1 : best;
 }
 
 /* Root box of a flex/grid item, bounded by the container box page_view stamped on
@@ -4734,6 +4765,8 @@ static double replaced_item_width(const browser_window *w, const ui_theme *th,
  * measure the runs wrap at every break and the widest line is the longest
  * unbreakable word -- the item's MIN-CONTENT width. A replaced element keeps its
  * intrinsic box either way (it does not wrap below its own size). */
+static int block_leaves_flow(const rd_doc *doc, const rd_block *bk);
+
 static double measure_item_w_at(cairo_t *cr, const browser_window *w,
                                 const ui_theme *th, const rd_doc *doc,
                                 size_t b0, size_t b1, double measure_w) {
@@ -4742,8 +4775,17 @@ static double measure_item_w_at(cairo_t *cr, const browser_window *w,
     memset(&M, 0, sizeof M);
     memset(&si, 0, sizeof si);
     double repl_max = 0.0;
+    /* The flow being measured is the one of the first block's out-of-flow anchor
+     * (-1 = the normal flow; a positioned box's measurement measures ITS subtree). */
+    size_t nbx = rd_box_count(doc);
+    int anchor0 = (b0 < b1) ? bt_oof_anchor(doc->boxes, nbx, rd_at(doc, b0)->block_id) : -1;
     for (size_t k = b0; k < b1; ++k) {
         const rd_block *bk = rd_at(doc, k);
+        /* What is not in this flow takes no width in it: an absolutely positioned
+         * badge or a faceless control inside an item never sizes the item. */
+        if (bk->kind == RD_INPUT && rd_input_invisible(bk->input_type)) continue;
+        if (block_leaves_flow(doc, bk)
+            && bt_oof_anchor(doc->boxes, nbx, bk->block_id) != anchor0) continue;
         if (k > b0 && bk->block_break) flush_line(&M, &si, th);
         si.bg_rgb = -1;
         /* A replaced element contributes its own intrinsic box, not the width of its
@@ -4800,12 +4842,29 @@ static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid);
  * one card per line. Measured on jkanime: 9800px against Firefox's 2398.
  *
  * Same helper for both paths, so the two cannot answer differently again. */
+/* The used width cap of a run / a box: the tighter of its `width` and its
+ * `max-width`, each its own <length-percentage> (bx_width_cap2). */
+static double run_width_cap(const rd_block *b, double avail_w) {
+    return bx_width_cap2(b->box_w, b->box_w_pct, b->box_mw, b->box_mw_pct, avail_w);
+}
+
+static double def_width_cap(const pv_box_def *d, double avail_w) {
+    return bx_width_cap2(d->box_w, d->box_w_pct, d->box_mw, d->box_mw_pct, avail_w);
+}
+
+/* A DECLARED width (not a max-width alone), clamped by max-width: what an item's
+ * flex base size is when the author sized it. 0 = no declared width. */
+static double def_declared_width(const pv_box_def *d, double avail_w) {
+    if (bx_width_cap(d->box_w, d->box_w_pct, avail_w) <= 0.0) return 0.0;
+    return def_width_cap(d, avail_w);
+}
+
 static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
                                   double content_w) {
     if (sd->box < 0) return 0.0;
     const pv_box_def *d = rd_box_at(doc, (size_t)sd->box);
     if (d == NULL) return 0.0;
-    return bx_width_cap(d->box_w, d->box_w_pct, content_w);
+    return def_declared_width(d, content_w);
 }
 
 /* Max-content width of a NESTED container acting as one item: the sum of its own
@@ -4869,7 +4928,16 @@ static double flex_item_basis(cairo_t *cr, const browser_window *w,
         double pm = (double)(-bk->flex_basis - 1000000);
         return (content_w * pm / 1000.0) + edges;
     }
-    double explicit_w = bx_width_cap(bk->box_w, bk->box_w_pct, content_w);
+    /* The ITEM's declared width is its base size. When the item has a box of its
+     * own, that box answers; the first run's width is some DESCENDANT's (a
+     * `.thumb{width:100%}` inside a `.item{width:calc(50% - 16px)}` made every
+     * card claim the whole line). Only a box-less item reads its run. */
+    double explicit_w;
+    if (sd->box >= 0)
+        explicit_w = item_declared_basis(doc, sd, content_w);
+    else
+        explicit_w = (bx_width_cap(bk->box_w, bk->box_w_pct, content_w) > 0.0)
+                     ? run_width_cap(bk, content_w) : 0.0;
     if (explicit_w > 0.0) return explicit_w + edges;
     double basis = measure_item_content_w(cr, w, th, doc, b0, b1)
                  + sd->pl + sd->pr + sd->bl + sd->br + edges;
@@ -4998,6 +5066,9 @@ static int block_is_oof(const rd_doc *doc, const rd_block *bk) {
  * abspos element -- the block stays in flow: positioned nowhere is worse
  * than positioned in flow (fail-open, content never vanishes). */
 static int block_leaves_flow(const rd_doc *doc, const rd_block *bk) {
+    /* A faceless control (hidden field, submit-button proxy) is in no flow at
+     * all: inside a flex form it used to become an item and paint a text box. */
+    if (bk->kind == RD_INPUT && rd_input_invisible(bk->input_type)) return 1;
     if (!block_is_oof(doc, bk)) return 0;
     return bk->block_id >= 0
         && bt_oof_root(doc->boxes, rd_box_count(doc), bk->block_id) >= 0;
@@ -5130,67 +5201,12 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         return;
     }
 
-    /* Stage 3: flex-direction column stacks the items vertically at full width
-     * (the row engine below would squeeze them into n side-by-side columns —
-     * exactly wrong for vertical navs). The container gap becomes vertical space
-     * between ITEMS (not between the lines inside one item). column-reverse
-     * reverses the visual order: last item at top, first at bottom. */
-    if (!is_grid && (cdv.direction == CSS_FD_COLUMN ||
-                     cdv.direction == CSS_FD_COLUMN_REVERSE)) {
-        size_t row_start[BT_MAX_CHILDREN], row_count[BT_MAX_CHILDREN];
-        double item_h[BT_MAX_CHILDREN], cum_off[BT_MAX_CHILDREN];
-        double base = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
-        s->pending_gap = 0;
-        double cur = base;
-        for (size_t j = 0; j < g; ++j) {
-            flush_line(L, s, th);
-            if (j > 0 && cdv.gap > 0)
-                cur += (double)cdv.gap;
-            s->cur_top = cur;
-            cum_off[j] = cur;
-            size_t sr = L->nrow;
-            /* Same segmentation as the row path: an item that is (or holds) a
-             * nested flex/grid container recurses into it, or a row nested in a
-             * column stacks its items one per line (lobste.rs' header nav). */
-            for (size_t k = gstart[j]; k < gstart[j + 1]; ) {
-                int seg_cont;
-                size_t seg_end = item_segment_end(doc, k, gstart[j + 1], cid, &seg_cont);
-                if (seg_cont >= 0) {
-                    flush_line(L, s, th);
-                    layout_container(cr, w, L, s, th, origin_x, content_w, doc,
-                                     k, seg_end, seg_cont);
-                    flush_line(L, s, th);
-                } else
-                for (size_t m = k; m < seg_end; ++m) {
-                    const rd_block *bk = rd_at(doc, m);
-                    if (block_leaves_flow(doc, bk)) continue;  /* positioned separately */
-                    if (m > gstart[j] && bk->block_break) flush_line(L, s, th);
-                    s->bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
-                    if (!emit_replaced_row(cr, w, L, s, th, bk, content_w, doc))
-                        flow_text_block(cr, w, L, s, th, bk, content_w);
-                }
-                k = seg_end;
-            }
-            flush_line(L, s, th);
-            row_start[j] = sr;
-            row_count[j] = L->nrow - sr;
-            item_h[j] = s->cur_top - cur;
-            cur = s->cur_top;
-        }
-        if (cdv.direction == CSS_FD_COLUMN_REVERSE) {
-            double total_h = s->cur_top - base;
-            double rev = base + total_h;
-            for (size_t j = 0; j < g; ++j) {
-                rev -= item_h[j];
-                double delta = rev - cum_off[j];
-                for (size_t r = row_start[j]; r < row_start[j] + row_count[j]; ++r)
-                    L->rows[r].top += delta;
-                rev -= (double)((cdv.gap > 0) ? cdv.gap : 0);
-            }
-            s->cur_top = base + total_h;
-        }
-        return;
-    }
+    /* A flex COLUMN goes through the same per-item flow as a row (each item's own
+     * box, the boxes nested in it, nested containers, heights); only the placement
+     * differs: items stack on the vertical main axis (fx_column_place) and align on
+     * the horizontal cross axis (fx_cross_offset). spec/flex_layout.md, tanda 40. */
+    int is_col = !is_grid && (cdv.direction == CSS_FD_COLUMN ||
+                              cdv.direction == CSS_FD_COLUMN_REVERSE);
 
     flush_line(L, s, th);
     double base_top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
@@ -5481,8 +5497,33 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         }
     }
 
-    /* First pass: column widths (heights still 0). */
-    if (bt_layout(&root, content_w) != BT_OK) {
+    /* First pass: column widths (heights still 0). A column sizes each item on its
+     * CROSS axis instead: a declared width is the item's width, `stretch` (with no
+     * auto margin) fills the line, anything else shrinks to its content. */
+    if (is_col) {
+        for (size_t j = 0; j < g; ++j) {
+            bt_node *kid = &kids[pos_of[j]];
+            item_sides sd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
+                                                cid, item_cbox, content_w);
+            double decl = item_declared_basis(doc, &sd, content_w);
+            int ml_auto = (kid->mauto & BT_MAUTO_LEFT) != 0;
+            int mr_auto = (kid->mauto & BT_MAUTO_RIGHT) != 0;
+            double iw;
+            if (decl > 0.0)
+                iw = decl + sd.ml + sd.mr;
+            else if (kid->align == BT_ALIGN_STRETCH && !ml_auto && !mr_auto)
+                iw = content_w;
+            else
+                iw = kid->basis;
+            if (iw > content_w) iw = content_w;
+            if (iw < 1.0) iw = 1.0;
+            kid->w = iw;
+            kid->x = fx_cross_offset(content_w, iw,
+                                     (kid->align == BT_ALIGN_STRETCH) ? BT_ALIGN_START
+                                                                      : kid->align,
+                                     ml_auto, mr_auto);
+        }
+    } else if (bt_layout(&root, content_w) != BT_OK) {
         for (size_t k = start; k < end; ++k) {
             const rd_block *bk = rd_at(doc, k);
             if (bk->block_break) flush_line(L, s, th);
@@ -5648,7 +5689,63 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     }
 
     /* Second pass: final row packing + y now that the heights are known. */
-    if (bt_layout(&root, content_w) != BT_OK) return;
+    if (is_col) {
+        /* Vertical margins sit OUTSIDE each item and never collapse between flex
+         * items (Flexbox 4.2); the item's own box declares them, or the UA sheet
+         * for its element, else its first block's. */
+        double hs[BT_MAX_CHILDREN], gs[BT_MAX_CHILDREN], ys[BT_MAX_CHILDREN];
+        double ho[BT_MAX_CHILDREN], mts[BT_MAX_CHILDREN], mbs[BT_MAX_CHILDREN];
+        for (size_t j = 0; j < g; ++j) {
+            size_t p = pos_of[j];
+            double mt = 0.0, mb = 0.0;
+            const pv_box_def *ib = (item_box[j] >= 0) ? rd_box_at(doc, (size_t)item_box[j])
+                                                      : NULL;
+            if (ib != NULL) {
+                bx_box ua = bx_block_ua_box(0, 0, (bx_ua_tag)ib->ua_tag);
+                double fpx = (ib->font_px > 0) ? (double)ib->font_px : th->body_font;
+                mt = (ib->box_mt != PV_LEN_UNSET || ib->box_mt_pct != 0)
+                     ? bx_lp_px(ib->box_mt, ib->box_mt_pct, content_w) : ua.margin.top * fpx;
+                mb = (ib->box_mb != PV_LEN_UNSET || ib->box_mb_pct != 0)
+                     ? bx_lp_px(ib->box_mb, ib->box_mb_pct, content_w) : ua.margin.bottom * fpx;
+            } else {
+                block_margins(th, rd_at(doc, gstart[j]), content_w, &mt, &mb);
+            }
+            mts[p] = mt;
+            mbs[p] = mb;
+            hs[p] = kids[p].content_h + mt + mb;
+            gs[p] = kids[p].grow;
+        }
+        /* The container's definite inner height, when it has one: a declared (or,
+         * for an out-of-flow box between two insets, forced) height, or a
+         * min-height floor -- that is what justify-content and grow distribute. */
+        double inner_h = 0.0;
+        const pv_box_def *cbd = (cdv.box_id >= 0) ? rd_box_at(doc, (size_t)cdv.box_id) : NULL;
+        if (cbd != NULL) {
+            int bb = (cbd->box_sizing == CSS_BOXS_BORDER);
+            double cpt = box_pad_px(cbd->pad_t, cbd->pad_t_pct, content_w);
+            double cpb = box_pad_px(cbd->pad_b, cbd->pad_b_pct, content_w);
+            double cbt = box_edge_px(cbd->bord_tw), cbb = box_edge_px(cbd->bord_bw);
+            double edges = cpt + cpb + cbt + cbb;
+            if (cbd->box_h > 0 || cbd->box_h_set)
+                inner_h = bx_border_box_h((double)cbd->box_h, bb, cpt, cpb, cbt, cbb) - edges;
+            if (cbd->box_min_h > 0) {
+                double mn = bx_border_box_h((double)cbd->box_min_h, bb, cpt, cpb, cbt, cbb)
+                          - edges;
+                if (mn > inner_h) inner_h = mn;
+            }
+        }
+        double extent = 0.0;
+        if (fx_column_place(hs, gs, g, (double)(cdv.gap > 0 ? cdv.gap : 0), inner_h,
+                            cdv.justify, cdv.direction == CSS_FD_COLUMN_REVERSE,
+                            ys, ho, &extent) != FX_OK)
+            return;
+        for (size_t p = 0; p < g; ++p) {
+            kids[p].y = ys[p] + mts[p];
+            kids[p].h = ho[p] - mts[p] - mbs[p];
+            if (kids[p].h < kids[p].content_h) kids[p].h = kids[p].content_h;
+        }
+        root.h = extent;
+    } else if (bt_layout(&root, content_w) != BT_OK) return;
 
     /* Translate each item's rows into its column rectangle (offset by the item's
      * padding+border so the content sits inside the box) and add an rc_box for the
@@ -5961,7 +6058,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
     double pb = box_pad_px(def->pad_b, def->pad_b_pct, avail_w);
     /* box-sizing: border-box (2026-07-11): the declared width includes the
      * horizontal padding + border, so the CONTENT cap shrinks by those edges. */
-    double wcap = bx_content_cap(bx_width_cap(def->box_w, def->box_w_pct, avail_w),
+    double wcap = bx_content_cap(def_width_cap(def, avail_w),
                                  def->box_sizing == CSS_BOXS_BORDER, pl, pr, bl, br);
     /* An inline-level box with `width:auto` SHRINK-WRAPS to its content instead of
      * filling the line (CSS 2.2 §10.3.9): shrink_w is that measured content width,
@@ -6635,11 +6732,11 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                 const rd_block *bb = rd_at(doc, k);
                 if (block_leaves_flow(doc, bb)) continue;
                 if (bb->float_oid < 0 && bb->float_id == dc->key) {
-                    double t = bx_width_cap(bb->box_w, bb->box_w_pct, ctx_w);
+                    double t = run_width_cap(bb, ctx_w);
                     if (t > fw) fw = t;
                 }
-                if (bb->box_w > 0) {
-                    double t = bx_width_cap(bb->box_w, 0, ctx_w);
+                if (bb->box_w > 0 || bb->box_mw > 0) {
+                    double t = bx_width_cap2(bb->box_w, 0, bb->box_mw, 0, ctx_w);
                     if (t > pxw) pxw = t;
                 }
                 int seen = 0;
@@ -6902,7 +6999,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
             /* Out-of-flow blocks size nothing in flow (spec/float.md §7c.5):
              * a wide abspos badge must not become the column's width. */
             if (block_leaves_flow(doc, bb)) continue;
-            double c = bx_width_cap(bb->box_w, bb->box_w_pct, ctx_w);
+            double c = run_width_cap(bb, ctx_w);
             if (c > capw) capw = c;
         }
         width[j] = (capw > 0.0) ? capw : -1.0;
@@ -7107,8 +7204,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                     double avail_in = in_w - base_l;
                     if (avail_in < 1.0) avail_in = 1.0;
                     bx_hplace hp_in = bx_place(0.0, 0.0,
-                                               bx_width_cap(bk->box_w, bk->box_w_pct,
-                                                            avail_in),
+                                               run_width_cap(bk, avail_in),
                                                bk->box_center, avail_in);
                     si.indent_px = in_l + base_l + hp_in.x_off;
                     si.bg_w = hp_in.content_w;
@@ -7118,8 +7214,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                     if (avail_w < 1.0) avail_w = 1.0;
                     bx_hplace hp = bx_place(bx_lp_px(bk->box_l, bk->box_l_pct, avail_w),
                                             bx_lp_px(bk->box_r, bk->box_r_pct, avail_w),
-                                            bx_width_cap(bk->box_w, bk->box_w_pct,
-                                                         avail_w),
+                                            run_width_cap(bk, avail_w),
                                             bk->box_center, avail_w);
                     si.indent_px = base_l + hp.x_off;
                     si.bg_w = hp.content_w;
@@ -7234,7 +7329,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
     for (size_t i = 0; i < rd_count(doc); ++i) {
         const rd_block *b = rd_at(doc, i);
         /* Hidden controls are never painted (their value still submits). */
-        if (b->kind == RD_INPUT && b->input_type == PV_IN_HIDDEN) continue;
+        if (b->kind == RD_INPUT && rd_input_invisible(b->input_type)) continue;
 
         /* A zero-content placeholder (an empty box-generating leaf, page_view §4)
          * whose box was gated off with author CSS (block_id < 0) carries no box to
@@ -7527,7 +7622,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * a `max-width:560px; margin:0 auto` paragraph inside a hero stayed
              * full-bleed before this, so its text never wrapped where Firefox wraps it. */
             bx_hplace hp_in = bx_place(0.0, 0.0,
-                                       bx_width_cap(b->box_w, b->box_w_pct, avail_in),
+                                       run_width_cap(b, avail_in),
                                        b->box_center, avail_in);
             s.indent_px = ctx_left + base_l + hp_in.x_off;
             inner_w = hp_in.content_w;
@@ -7545,7 +7640,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             if (avail_w < 1.0) avail_w = 1.0;
             bx_hplace hp = bx_place(bx_lp_px(b->box_l, b->box_l_pct, avail_w),
                                     bx_lp_px(b->box_r, b->box_r_pct, avail_w),
-                                    bx_width_cap(b->box_w, b->box_w_pct, avail_w),
+                                    run_width_cap(b, avail_w),
                                     b->box_center, avail_w);
             s.indent_px = base_l + hp.x_off;
             inner_w = hp.content_w;
@@ -7579,6 +7674,212 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
      * context so total_h covers it (spec/float.md §6b.3). */
     rc_float_clear(&s);
     L->total_h = s.cur_top;
+}
+
+static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
+                       rc_layout *L);
+
+/* Stage 2f (spec/box_engine.md): number of absolute/fixed boxes STRICTLY above box
+ * `a` on its parent chain -- the nesting depth that orders the sub-layouts so an
+ * enclosing subtree is placed before anything positioned inside it. Bounded by
+ * the box count (a hostile parent cycle terminates). */
+static int oof_depth(const rd_doc *doc, size_t a) {
+    size_t nbox = rd_box_count(doc);
+    int d = 0;
+    int cur = rd_box_at(doc, a)->parent_id;
+    for (size_t steps = 0; cur >= 0 && (size_t)cur < nbox && steps <= nbox; ++steps) {
+        const pv_box_def *b = rd_box_at(doc, (size_t)cur);
+        if (b->position == BT_POS_ABSOLUTE || b->position == BT_POS_FIXED) ++d;
+        cur = b->parent_id;
+    }
+    return d;
+}
+
+/* Stage 2f: lays out every out-of-flow subtree with layout_doc itself (outermost
+ * first) and records its geometry for the solver. On return gw/gh hold the
+ * anchors' real border boxes, the sub-layouts' own boxes are placed (gx..gh,
+ * in_flow, placed) so a nested absolute box finds its containing block, nested
+ * static positions are translated into page space, and L->oof_sub owns each
+ * sub-layout with its translation. Any allocation failure leaves the remaining
+ * anchors on the Stage 2d approximation (fail-open: content never vanishes). */
+static void oof_sublayouts(cairo_t *cr, const browser_window *w, double content_w,
+                           double vp_h, rc_layout *L, double *gx, double *gy,
+                           double *gw, double *gh, char *in_flow, char *placed) {
+    const rd_doc *doc = w->doc;
+    size_t nbox = rd_box_count(doc), nblk = rd_count(doc);
+    if (nbox == 0 || nblk == 0 || nbox > BT_MAX_POSITIONED) return;
+
+    size_t *first = (size_t *)malloc(nbox * sizeof *first);
+    size_t *endb = (size_t *)calloc(nbox, sizeof *endb);
+    pv_box_def *vboxes = (pv_box_def *)malloc(nbox * sizeof *vboxes);
+    browser_window *vw = (browser_window *)malloc(sizeof *vw);
+    bt_positioned *tmp = (bt_positioned *)malloc(BT_MAX_POSITIONED * sizeof *tmp);
+    rc_oof_sub *subs = (rc_oof_sub *)calloc(nbox, sizeof *subs);
+    if (first == NULL || endb == NULL || vboxes == NULL || vw == NULL || tmp == NULL
+        || subs == NULL) {
+        free(first); free(endb); free(vboxes); free(vw); free(tmp); free(subs);
+        return;
+    }
+    for (size_t a = 0; a < nbox; ++a) first[a] = (size_t)-1;
+
+    /* The consecutive block run of every anchor's subtree: a block belongs to each
+     * absolute/fixed box on its chain. */
+    int maxd = 0;
+    for (size_t i = 0; i < nblk; ++i) {
+        const rd_block *b = rd_at(doc, i);
+        if (b->block_id < 0 || (size_t)b->block_id >= nbox) continue;
+        int cur = b->block_id;
+        for (size_t steps = 0; cur >= 0 && (size_t)cur < nbox && steps <= nbox; ++steps) {
+            const pv_box_def *bd = rd_box_at(doc, (size_t)cur);
+            if ((bd->position == BT_POS_ABSOLUTE || bd->position == BT_POS_FIXED)
+                && !in_flow[cur]) {
+                if (first[cur] == (size_t)-1) {
+                    first[cur] = i;
+                    int d = oof_depth(doc, (size_t)cur);
+                    if (d > maxd) maxd = d;
+                }
+                endb[cur] = i + 1;
+            }
+            cur = bd->parent_id;
+        }
+    }
+
+    memcpy(vboxes, doc->boxes, nbox * sizeof *vboxes);
+    memcpy(vw, w, sizeof *vw);
+    rd_doc vd = *doc;
+    vd.boxes = vboxes;
+    /* Page-level centring of the root (<html> max-width) is the PAGE's, not the
+     * subtree's. */
+    vd.html_max_width = -1;
+    vd.html_margin_top = 0;
+    vd.html_center = 0;
+    vw->doc = &vd;
+
+    for (int depth = 0; depth <= maxd && depth < (int)BT_MAX_DEPTH; ++depth) {
+        for (size_t a = 0; a < nbox; ++a) {
+            if (first[a] == (size_t)-1 || oof_depth(doc, a) != depth) continue;
+            const pv_box_def *bd = rd_box_at(doc, a);
+            if (bt_box_hidden(doc->boxes, nbox, a)) continue;  /* paints nothing */
+
+            double cbx, cby, cbw, cbh;
+            bt_containing_block(doc->boxes, nbox, a, gx, gy, gw, gh, placed,
+                                content_w, vp_h, &cbx, &cby, &cbw, &cbh);
+            (void)cbx; (void)cby;
+            int both_w = 0, both_h = 0;
+            double avail_w = bt_oof_avail(bd->inset_left, bd->inset_left_pct,
+                                          bd->inset_right, bd->inset_right_pct,
+                                          cbw, &both_w);
+            double avail_h = bt_oof_avail(bd->inset_top, bd->inset_top_pct,
+                                          bd->inset_bottom, bd->inset_bottom_pct,
+                                          cbh, &both_h);
+            /* The margin box's width (CSS 2.1 10.3.7): declared width or both
+             * insets -> the available width (the box fills it, capped by its own
+             * width); otherwise shrink-to-fit, the Stage 2d measurement (content
+             * + padding + border) plus the horizontal margins. */
+            int declared_w = (bd->box_w > 0 || bd->box_w_pct != 0);
+            double W = avail_w;
+            if (!declared_w && !both_w) {
+                double pl = box_pad_px(bd->pad_l, bd->pad_l_pct, cbw);
+                double pr = box_pad_px(bd->pad_r, bd->pad_r_pct, cbw);
+                double ml = bx_lp_px(bd->box_l, bd->box_l_pct, cbw) - pl;
+                double mr = bx_lp_px(bd->box_r, bd->box_r_pct, cbw) - pr;
+                double shrink = gw[a] + (ml > 0.0 ? ml : 0.0) + (mr > 0.0 ? mr : 0.0);
+                if (shrink < W) W = shrink;
+            }
+            if (W < 1.0) W = 1.0;
+
+            vboxes[a].position = BT_POS_STATIC;
+            vboxes[a].parent_id = -1;
+            /* height:auto between two declared insets is FORCED before layout
+             * (CSS 2.1 10.6.4), so a flex column inside centres against it. */
+            if (both_h && bd->box_h == 0 && !bd->box_h_set) {
+                double mt = (bd->box_mt != PV_LEN_UNSET)
+                            ? bx_lp_px(bd->box_mt, bd->box_mt_pct, cbw) : 0.0;
+                double mb = (bd->box_mb != PV_LEN_UNSET)
+                            ? bx_lp_px(bd->box_mb, bd->box_mb_pct, cbw) : 0.0;
+                double H = avail_h - mt - mb;
+                if (bd->box_sizing != CSS_BOXS_BORDER)
+                    H -= box_pad_px(bd->pad_t, bd->pad_t_pct, cbw)
+                       + box_pad_px(bd->pad_b, bd->pad_b_pct, cbw)
+                       + box_edge_px(bd->bord_tw) + box_edge_px(bd->bord_bw);
+                if (H < 0.0) H = 0.0;
+                vboxes[a].box_h = (int)(H + 0.5);
+                vboxes[a].box_h_set = 1;
+            }
+            vd.blocks = doc->blocks + first[a];
+            vd.count = endb[a] - first[a];
+
+            rc_layout *Ls = (rc_layout *)malloc(sizeof *Ls);
+            if (Ls == NULL) { vboxes[a] = *bd; continue; }
+            layout_doc(cr, vw, W, Ls);
+            vboxes[a] = *bd;   /* the next anchor sees the real tree again */
+
+            /* The anchor's border box in sub-layout space (union of fragments). */
+            double bx0 = 0.0, by0 = 0.0, bx1 = W, by1 = Ls->total_h;
+            int got = 0;
+            for (size_t k = 0; k < Ls->nbox; ++k) {
+                const rc_box *rb = &Ls->boxes[k];
+                if (rb->block_id != (int)a) continue;
+                if (!got || rb->x < bx0) bx0 = rb->x;
+                if (!got || rb->top < by0) by0 = rb->top;
+                if (!got || rb->x + rb->w > bx1) bx1 = rb->x + rb->w;
+                if (!got || rb->top + rb->h > by1) by1 = rb->top + rb->h;
+                got = 1;
+            }
+            gw[a] = (bx1 - bx0 > 0.0) ? bx1 - bx0 : 1.0;
+            gh[a] = (by1 - by0 > 0.0) ? by1 - by0 : 1.0;
+
+            size_t n = 0;
+            (void)bt_resolve_positioning_ex(doc->boxes, nbox, gx, gy, gw, gh,
+                                            L->oof_sx, L->oof_sy, placed,
+                                            content_w, vp_h, tmp, BT_MAX_POSITIONED, &n);
+            double px = 0.0, py = 0.0;
+            for (size_t k = 0; k < n && k < BT_MAX_POSITIONED; ++k)
+                if (tmp[k].box_index == a) { px = tmp[k].x; py = tmp[k].y; break; }
+            /* The solver places the border box; a left/static-anchored box keeps its
+             * own left margin (the margin box starts at the anchor point), a right-
+             * anchored one ends at it. Same for the vertical axis. */
+            int right_anchored = (bd->inset_left == PV_LEN_UNSET || bd->inset_left == PV_LEN_AUTO)
+                                 && bd->inset_left_pct == 0
+                                 && !((bd->inset_right == PV_LEN_UNSET || bd->inset_right == PV_LEN_AUTO)
+                                      && bd->inset_right_pct == 0);
+            int bottom_anchored = (bd->inset_top == PV_LEN_UNSET || bd->inset_top == PV_LEN_AUTO)
+                                  && bd->inset_top_pct == 0
+                                  && !((bd->inset_bottom == PV_LEN_UNSET || bd->inset_bottom == PV_LEN_AUTO)
+                                       && bd->inset_bottom_pct == 0);
+            double dx = right_anchored ? px - bx0 : px;
+            double dy = bottom_anchored ? py - by0 : py;
+            subs[a].L = Ls;
+            subs[a].dx = dx;
+            subs[a].dy = dy;
+            subs[a].w = W;
+
+            gx[a] = bx0 + dx;
+            gy[a] = by0 + dy;
+            placed[a] = 1;
+            for (size_t k = 0; k < Ls->nbox; ++k) {
+                const rc_box *rb = &Ls->boxes[k];
+                int b = rb->block_id;
+                if (b < 0 || (size_t)b >= nbox || b == (int)a) continue;
+                gx[b] = rb->x + dx;
+                gy[b] = rb->top + dy;
+                gw[b] = rb->w;
+                gh[b] = rb->h;
+                in_flow[b] = 1;
+                placed[b] = 1;
+            }
+            for (size_t k = 0; k < nbox; ++k) {
+                if (!Ls->oof_static_set[k] || L->oof_static_set[k]) continue;
+                L->oof_sx[k] = Ls->oof_sx[k] + dx;
+                L->oof_sy[k] = Ls->oof_sy[k] + dy;
+                L->oof_static_set[k] = 1;
+            }
+        }
+    }
+
+    L->oof_sub = subs;
+    L->noof_sub = nbox;
+    free(first); free(endb); free(vboxes); free(vw); free(tmp);
 }
 
 /* Stage 2: resolves out-of-flow positioning for every absolute/fixed block in the
@@ -7664,7 +7965,7 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
          * full-width bar and sent `right`-anchored boxes far off-screen (their x is
          * cb_right - width). The both-left-and-right case is stretched by the solver,
          * which is the only place that knows the containing block. */
-        double bw = bx_width_cap(bd->box_w, bd->box_w_pct, content_w);
+        double bw = def_declared_width(bd, content_w);
         if (bw <= 0.0) {
             double pl = box_pad_px(bd->pad_l, bd->pad_l_pct, content_w);
             double pr = box_pad_px(bd->pad_r, bd->pad_r_pct, content_w);
@@ -7679,6 +7980,9 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
                 bw = measure_item_content_w(cr, w, th, doc, i, bend) + edges;
             }
             if (bw > content_w) bw = content_w;
+            /* max-width still bounds a shrink-to-fit box (CSS 2.1 10.4). */
+            double mwc = bx_width_cap(bd->box_mw, bd->box_mw_pct, content_w);
+            if (mwc > 0.0 && bw > mwc) bw = mwc;
         }
         if (bw < 1.0) bw = 1.0;
         gw[bid] = bw;
@@ -7701,6 +8005,8 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
             double sub_h = default_h;
             for (size_t k = i + 1; k < bend; ++k) {
                 const rd_block *bk = rd_at(doc, k);
+                if (bk->kind == RD_INPUT && rd_input_invisible(bk->input_type))
+                    continue;
                 if (bk->kind == RD_IMAGE || bk->kind == RD_INPUT || bk->block_break)
                     sub_h += default_h;
             }
@@ -7719,12 +8025,17 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
             gh[bid] = (double)bd->box_min_h;
     }
 
+    /* Stage 2f: the subtrees laid out by the real engine (outermost first). */
+    char placed[BT_MAX_POSITIONED];
+    memcpy(placed, in_flow, sizeof placed);
+    oof_sublayouts(cr, w, content_w, vp_h, L, gx, gy, gw, gh, in_flow, placed);
+
     /* Stage 2b: pass the recorded static positions so auto-inset boxes land at
      * their hypothetical in-flow spot. Boxes never visited by layout_doc keep a
      * zero static position, but they also keep zero geometry (gw/gh == 0), so
      * the painter skips them regardless — the zero never reaches the screen. */
     bt_status st = bt_resolve_positioning_ex(
-        doc->boxes, nbox, gx, gy, gw, gh, L->oof_sx, L->oof_sy, in_flow,
+        doc->boxes, nbox, gx, gy, gw, gh, L->oof_sx, L->oof_sy, placed,
         content_w, vp_h,
         L->positioned, BT_MAX_POSITIONED, &L->npositioned);
     (void)st;  /* BT_OK / BT_ERR_NULL_ARG / BT_ERR_RANGE all logged via dom_debug */
@@ -9313,6 +9624,10 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
     int uniform = rad > 0.0 && bt > 0.0 && bt == br && bt == bb && bt == bl &&
                   box_line_visible(bs[0]) && bs[0] == bs[1] && bs[0] == bs[2] &&
                   bs[0] == bs[3] && bc[0] == bc[1] && bc[0] == bc[2] && bc[0] == bc[3];
+    /* A `transparent` border keeps its width (layout already took it) and paints
+     * nothing; folding the sentinel into the default grey drew a frame the author
+     * had explicitly made invisible (`border:1px solid rgba(0,0,0,0)`). */
+    if (uniform && bc[0] == CC_COLOR_TRANSPARENT) goto after_borders;
     if (uniform) {
         int style = bs[0];
         int col = bc[0] >= 0 ? bc[0] : 0x333333;
@@ -9353,6 +9668,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
         for (int k = 0; k < 4; ++k) {
             double side_w = bw[k];
             if (side_w <= 0.0 || !box_line_visible(bs[k])) continue;
+            if (bc[k] == CC_COLOR_TRANSPARENT) continue;
             int style = bs[k];
             int col = bc[k] >= 0 ? bc[k] : 0x333333;
             double x1, y1, x2, y2;
@@ -9415,7 +9731,8 @@ after_borders:
      * (positive pushes the outline further out, negative pulls it inside).
      * Non-solid outline styles follow the same dash/double pattern as borders. */
     double ow = box_edge_px(bx->outline_w);
-    if (ow > 0.0 && box_line_visible(bx->outline_style)) {
+    if (ow > 0.0 && box_line_visible(bx->outline_style)
+        && bx->outline_color != CC_COLOR_TRANSPARENT) {
         int ostyle = bx->outline_style;
         int ocol = bx->outline_color >= 0 ? bx->outline_color : 0x333333;
         set_rgb(cr, rgb_from_packed(ocol));
@@ -10701,6 +11018,48 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
  * box_transform_matrix (M1.2 translate; M1.2b scale/rotate) shifts where
  * decoration/content PAINT -- the box's stored rect used for hit-testing is
  * untouched, see include/page_view.h. */
+/* Stage 2f: paints one out-of-flow subtree's own layout at its translation. The
+ * anchor's decoration is painted flat (the caller already opened its stacking
+ * group and transform); every other box keeps its own stacking behaviour, exactly
+ * as in the page flow. */
+static void paint_oof_sub(cairo_t *cr, browser_window *w, const rc_oof_sub *sub,
+                          int anchor, double left, double origin, double page_w,
+                          double content_top, double content_h) {
+    const rc_layout *Ls = sub->L;
+    const ui_theme *th = &w->theme;
+    double sl = left + sub->dx, so = origin + sub->dy;
+    char *row_done = (Ls->nrow > 0) ? (char *)calloc(Ls->nrow, 1) : NULL;
+    for (size_t bi = 0; bi < Ls->nbox; ++bi) {
+        const rc_box *bx = &Ls->boxes[bi];
+        if (bx->block_id == anchor) {
+            const pv_box_def *def = rd_box_at(w->doc, (size_t)anchor);
+            rc_box ba = *bx;
+            if (def != NULL)
+                ba.bg_rgb = anim_kf_color(def, def->anim_kf_bg, def->bg_rgb,
+                                          w->page_load_mono_ms);
+            paint_box_decoration(cr, &ba, sl, so,
+                                 def ? find_bg_image(w, def->bg_image_url) : NULL,
+                                 def ? find_bg_image(w, def->bg_image_url2) : NULL, th);
+            continue;
+        }
+        paint_box_and_direct_rows(cr, w, Ls, bx, sl, so, sub->w, page_w,
+                                  content_top, content_h, 0, row_done);
+    }
+    int ov_stack[OV_MAX_DEPTH] = {0};
+    int ov_depth = 0;
+    for (size_t i = 0; i < Ls->nrow; ++i) {
+        if (row_done != NULL && row_done[i]) continue;
+        const rc_row *r = &Ls->rows[i];
+        double ry = so + r->top;
+        if (ry + r->height < content_top || ry > content_top + content_h) continue;
+        ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_owner_block_id(Ls, r), Ls,
+                     so, sl);
+        paint_content_row(cr, w, Ls, r, sl, ry, sub->w, page_w, 0);
+    }
+    while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
+    free(row_done);
+}
+
 static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
                                  const bt_positioned *pb, double left, double origin,
                                  double content_top, double content_h, double page_w,
@@ -10778,8 +11137,11 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     };
     const ui_bg_image *bgimg = find_bg_image(w, def->bg_image_url);
     const ui_bg_image *bgimg2 = find_bg_image(w, def->bg_image_url2);
+    const rc_oof_sub *sub = (L != NULL && L->oof_sub != NULL && pb->box_index < L->noof_sub
+                             && L->oof_sub[pb->box_index].L != NULL)
+                            ? &L->oof_sub[pb->box_index] : NULL;
     if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
-    paint_box_decoration(cr, &bx, left, origin, bgimg, bgimg2, th);
+    if (sub == NULL) paint_box_decoration(cr, &bx, left, origin, bgimg, bgimg2, th);
     if (needs_group) cairo_restore(cr);
     /* A box that clips (overflow other than visible) clips its OWN content to its
      * padding box (CSS Overflow 3 2.2). ov_reconcile only knows in-flow rc_boxes,
@@ -10795,12 +11157,19 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
                         (ow > 0.0) ? ow : 0.0, (oh > 0.0) ? oh : 0.0);
         cairo_clip(cr);
     }
+    /* Stage 2f: the subtree's real layout, when it was built. */
+    if (sub != NULL) {
+        if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
+        paint_oof_sub(cr, w, sub, (int)pb->box_index, left, origin, page_w,
+                      content_top - cull_ty, content_h);
+        if (needs_group) cairo_restore(cr);
+    }
     /* Stage 2d: paint every block of the box's out-of-flow SUBTREE (nearest
      * absolute/fixed anchor == this box), stacked one line per block inside the
      * content origin -- not just the first block whose block_id matches. A block
      * under a hidden child box is skipped individually; a nested absolute box's
      * content belongs to that box (painted by its own positioned entry). */
-    {
+    if (sub == NULL) {
         size_t doc_nbox = rd_box_count(w->doc);
         double edge_l = box_edge_px(def->bord_lw) + ((def->pad_l > 0) ? (double)def->pad_l : 0.0);
         double edge_t = box_edge_px(def->bord_tw) + ((def->pad_t > 0) ? (double)def->pad_t : 0.0);
@@ -11406,7 +11775,9 @@ static long write_doc_png(browser_window *w, const char *path) {
     cairo_t *mcr = cairo_create(meas);
     rc_layout L;
     layout_doc(mcr, w, content_w, &L);
-    position_doc(mcr, w, content_w, 30000.0, &L);
+    /* The headless viewport (a fixed box's containing block): the same height
+     * window.innerHeight reports and the parity reference renders at. */
+    position_doc(mcr, w, content_w, (double)FC_HEADLESS_VIEW_H, &L);
     double content_h = L.total_h;
     /* The document is as tall as its tallest THING, not as its text flow: a page
      * whose content is entirely boxes (a hero, a card grid, an absolutely placed
@@ -11687,7 +12058,7 @@ ui_status ui_dump_layout(const rd_doc *doc) {
     cairo_t *cr = cairo_create(meas);
     rc_layout L;
     layout_doc(cr, &w, content_w, &L);
-    position_doc(cr, &w, content_w, 30000.0, &L);
+    position_doc(cr, &w, content_w, (double)FC_HEADLESS_VIEW_H, &L);
     cairo_destroy(cr);
     cairo_surface_destroy(meas);
 
@@ -11713,6 +12084,16 @@ ui_status ui_dump_layout(const rd_doc *doc) {
         const bt_positioned *p = &L.positioned[i];
         printf("  pos[%zu] box=%zu z=%d x=%.1f y=%.1f w=%.1f h=%.1f\n",
                i, p->box_index, p->z_index, p->x, p->y, p->w, p->h);
+        /* Stage 2f: the subtree's own boxes, in page coordinates. */
+        const rc_oof_sub *sb = (L.oof_sub != NULL && p->box_index < L.noof_sub)
+                               ? &L.oof_sub[p->box_index] : NULL;
+        if (sb != NULL && sb->L != NULL) {
+            for (size_t k = 0; k < sb->L->nbox; ++k) {
+                const rc_box *b = &sb->L->boxes[k];
+                printf("    sub box bid=%d x=%.1f top=%.1f w=%.1f h=%.1f\n",
+                       b->block_id, b->x + sb->dx, b->top + sb->dy, b->w, b->h);
+            }
+        }
     }
     /* Container table: the nesting chain is invisible in the row/box dumps, and it
      * is exactly what breaks when a navbar collapses. */
@@ -11921,7 +12302,39 @@ static int cursor_at_point(browser_window *w, double px, double py) {
 /* Returns the DOM node id of the element under (px, py), or DOM_NODE_NONE if the
  * point is over blank space / outside content. Mirrors layout and scroll clamping
  * exactly so the hit matches the painted frame. */
+static dom_node_id frag_at_point(browser_window *w, double px, double py,
+                                 int *out_block_id);
+
 static dom_node_id node_at_point(browser_window *w, double px, double py) {
+    return frag_at_point(w, px, py, NULL);
+}
+
+/* The submit proxy (PV_IN_SUBMIT_BOX) of the <button> whose box contains box
+ * `bid`, or NULL: walks the box parent chain (bounded by the box count, cycle-
+ * safe) and matches each box's element against the proxies' element ids. A click
+ * anywhere on a button's content therefore submits its form, exactly as a click
+ * on its face does in Firefox (spec/page_view.md, tanda 40). */
+static const rd_block *submit_proxy_for_box(const rd_doc *doc, int bid) {
+    size_t nbox = rd_box_count(doc);
+    for (size_t steps = 0; bid >= 0 && (size_t)bid < nbox && steps <= nbox; ++steps) {
+        const pv_box_def *bd = rd_box_at(doc, (size_t)bid);
+        if (bd == NULL) return NULL;
+        if (bd->node_id != DOM_NODE_NONE) {
+            for (size_t i = 0; i < rd_count(doc); ++i) {
+                const rd_block *b = rd_at(doc, i);
+                if (b->kind == RD_INPUT && b->input_type == PV_IN_SUBMIT_BOX
+                    && b->node_id == bd->node_id)
+                    return b;
+            }
+        }
+        bid = bd->parent_id;
+    }
+    return NULL;
+}
+
+static dom_node_id frag_at_point(browser_window *w, double px, double py,
+                                 int *out_block_id) {
+    if (out_block_id != NULL) *out_block_id = -1;
     if (w->doc == NULL || w->cairo_surface == NULL) return DOM_NODE_NONE;
 
     double content_top, content_h;
@@ -11955,7 +12368,11 @@ static dom_node_id node_at_point(browser_window *w, double px, double py) {
             const rc_frag *f = &L.frags[k];
             double fx = left + r->x_off + ax + f->x + jdx;
             if (f->node_id != DOM_NODE_NONE && !box_pointer_events_none(w->doc, f->block_id)
-                && px >= fx && px <= fx + f->width) { hit = f->node_id; break; }
+                && px >= fx && px <= fx + f->width) {
+                hit = f->node_id;
+                if (out_block_id != NULL) *out_block_id = f->block_id;
+                break;
+            }
             for (size_t j = 0; j < f->len; ++j)
                 if (f->text[j] == ' ') jdx += jgap;
         }
@@ -14218,7 +14635,25 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
             /* Clicking non-input: dispatch blur on old if any. */
             if (old_nid != DOM_NODE_NONE)
                 dispatch_js_event(w, old_nid, "blur", NULL, 0, NULL);
+            /* Resolved BEFORE the click: a handler may replace the document. */
+            int hit_bid = -1;
+            (void)frag_at_point(w, w->ptr_x, w->ptr_y, &hit_bid);
+            const rd_block *proxy = submit_proxy_for_box(w->doc, hit_bid);
+            /* A click that navigated (link, handler) supersedes the submit; the
+             * navigation generation says so without comparing freed pointers. */
+            unsigned long gen_before = (unsigned long)w->net_gen;
+            dom_node_id proxy_nid = (proxy != NULL) ? proxy->node_id : DOM_NODE_NONE;
             dispatch_click(w, w->ptr_x, w->ptr_y);
+            if (proxy_nid != DOM_NODE_NONE && (unsigned long)w->net_gen == gen_before) {
+                /* Re-find it: the click handler may have rebuilt the document. */
+                const rd_block *again = NULL;
+                for (size_t i = 0; w->doc != NULL && i < rd_count(w->doc); ++i) {
+                    const rd_block *b = rd_at(w->doc, i);
+                    if (b->kind == RD_INPUT && b->input_type == PV_IN_SUBMIT_BOX
+                        && b->node_id == proxy_nid) { again = b; break; }
+                }
+                if (again != NULL) submit_form(w, again);
+            }
         }
     }
     redraw(w);

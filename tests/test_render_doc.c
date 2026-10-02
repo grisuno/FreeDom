@@ -577,6 +577,18 @@ static void test_input_label_total(void **state) {
     assert_string_equal(rd_input_label(PV_IN_HIDDEN), "hidden");
     assert_string_equal(rd_input_label(9999), "field");
     assert_string_equal(rd_kind_name(RD_INPUT), "input");
+    assert_string_equal(rd_input_label(PV_IN_SUBMIT_BOX), "submit");
+}
+
+/* A control with no face is never laid out: a hidden field, and the proxy of a
+ * submit <button> whose face is its own content box (spec/page_view.md). */
+static void test_input_invisible(void **state) {
+    (void)state;
+    assert_true(rd_input_invisible(PV_IN_HIDDEN));
+    assert_true(rd_input_invisible(PV_IN_SUBMIT_BOX));
+    assert_false(rd_input_invisible(PV_IN_SUBMIT));
+    assert_false(rd_input_invisible(PV_IN_TEXT));
+    assert_false(rd_input_invisible(PV_IN_BUTTON));
 }
 
 /* The author flex/grid container annotation is structure, not styling: it is
@@ -845,6 +857,7 @@ int main(void) {
         cmocka_unit_test(test_caret_color_gated_on_input),
         cmocka_unit_test(test_input_passthrough),
         cmocka_unit_test(test_input_label_total),
+        cmocka_unit_test(test_input_invisible),
         cmocka_unit_test(test_node_id_carried_by_default),
         cmocka_unit_test(test_free_null_and_double),
     };

@@ -1,35 +1,36 @@
 Freedom — demo
 === Freedom layout ===
-content_w=1000 total_h=1238.4 nbox=0 nrow=32 npositioned=0
+content_w=1000 total_h=1223.4 nbox=1 nrow=32 npositioned=0
   row[0] top=0.0 h=45.0 x_off=0.0
   row[1] top=66.4 h=23.0 x_off=0.0
   row[2] top=89.4 h=23.0 x_off=0.0
-  row[3] top=128.4 h=34.0 x_off=0.0 w=1000.0
-  row[4] top=178.4 h=23.0 x_off=0.0
-  row[5] top=201.4 h=23.0 x_off=0.0
-  row[6] top=240.4 h=23.0 x_off=0.0
-  row[7] top=279.4 h=23.0 x_off=0.0
-  row[8] top=318.4 h=23.0 x_off=0.0
-  row[9] top=357.4 h=23.0 x_off=0.0
-  row[10] top=396.4 h=23.0 x_off=0.0
-  row[11] top=435.4 h=23.0 x_off=0.0
-  row[12] top=474.4 h=23.0 x_off=0.0
-  row[13] top=513.4 h=23.0 x_off=0.0
-  row[14] top=552.4 h=23.0 x_off=0.0
-  row[15] top=591.4 h=23.0 x_off=0.0
-  row[16] top=630.4 h=23.0 x_off=0.0
-  row[17] top=669.4 h=23.0 x_off=0.0
-  row[18] top=708.4 h=23.0 x_off=0.0
-  row[19] top=747.4 h=23.0 x_off=0.0
-  row[20] top=786.4 h=23.0 x_off=0.0
-  row[21] top=825.4 h=23.0 x_off=0.0
-  row[22] top=864.4 h=23.0 x_off=0.0
-  row[23] top=903.4 h=23.0 x_off=0.0
-  row[24] top=942.4 h=23.0 x_off=0.0
-  row[25] top=981.4 h=23.0 x_off=0.0
-  row[26] top=1020.4 h=23.0 x_off=0.0
-  row[27] top=1059.4 h=23.0 x_off=0.0
-  row[28] top=1098.4 h=23.0 x_off=0.0
-  row[29] top=1137.4 h=23.0 x_off=0.0
-  row[30] top=1176.4 h=23.0 x_off=0.0
-  row[31] top=1215.4 h=23.0 x_off=0.0
+  row[3] top=128.4 h=19.0 x_off=0.0
+  row[4] top=163.4 h=23.0 x_off=0.0
+  row[5] top=186.4 h=23.0 x_off=0.0
+  row[6] top=225.4 h=23.0 x_off=0.0
+  row[7] top=264.4 h=23.0 x_off=0.0
+  row[8] top=303.4 h=23.0 x_off=0.0
+  row[9] top=342.4 h=23.0 x_off=0.0
+  row[10] top=381.4 h=23.0 x_off=0.0
+  row[11] top=420.4 h=23.0 x_off=0.0
+  row[12] top=459.4 h=23.0 x_off=0.0
+  row[13] top=498.4 h=23.0 x_off=0.0
+  row[14] top=537.4 h=23.0 x_off=0.0
+  row[15] top=576.4 h=23.0 x_off=0.0
+  row[16] top=615.4 h=23.0 x_off=0.0
+  row[17] top=654.4 h=23.0 x_off=0.0
+  row[18] top=693.4 h=23.0 x_off=0.0
+  row[19] top=732.4 h=23.0 x_off=0.0
+  row[20] top=771.4 h=23.0 x_off=0.0
+  row[21] top=810.4 h=23.0 x_off=0.0
+  row[22] top=849.4 h=23.0 x_off=0.0
+  row[23] top=888.4 h=23.0 x_off=0.0
+  row[24] top=927.4 h=23.0 x_off=0.0
+  row[25] top=966.4 h=23.0 x_off=0.0
+  row[26] top=1005.4 h=23.0 x_off=0.0
+  row[27] top=1044.4 h=23.0 x_off=0.0
+  row[28] top=1083.4 h=23.0 x_off=0.0
+  row[29] top=1122.4 h=23.0 x_off=0.0
+  row[30] top=1161.4 h=23.0 x_off=0.0
+  row[31] top=1200.4 h=23.0 x_off=0.0
+  box[0] bid=0 x=527.0 top=89.4 w=7.0 h=23.0

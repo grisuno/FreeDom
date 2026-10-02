@@ -169,6 +169,8 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->box_mt = PV_LEN_UNSET;
     b->box_mb = PV_LEN_UNSET;
     b->box_w_pct = 0;
+    b->box_mw = 0;
+    b->box_mw_pct = 0;
     b->box_l_pct = 0;
     b->box_r_pct = 0;
     b->box_mt_pct = 0;
@@ -510,6 +512,8 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->box_mt = r->box_mt;
                 lb->box_mb = r->box_mb;
                 lb->box_w_pct = r->box_w_pct;
+                lb->box_mw = r->box_mw;
+                lb->box_mw_pct = r->box_mw_pct;
                 lb->box_l_pct = r->box_l_pct;
                 lb->box_r_pct = r->box_r_pct;
                 lb->box_mt_pct = r->box_mt_pct;
@@ -780,8 +784,13 @@ const char *rd_input_label(int input_type) {
         case PV_IN_PROGRESS: return "progress";
         case PV_IN_METER:    return "meter";
         case PV_IN_LEGEND:   return "legend";
+        case PV_IN_SUBMIT_BOX: return "submit";
     }
     return "field";
+}
+
+int rd_input_invisible(int input_type) {
+    return input_type == PV_IN_HIDDEN || input_type == PV_IN_SUBMIT_BOX;
 }
 
 const char *rd_image_label(rdp_img_decision d) {

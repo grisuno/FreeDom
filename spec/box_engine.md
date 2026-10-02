@@ -834,6 +834,55 @@ Regression lock: `test_dump_layout_nested_column_takes_max` (card ≈ title
 width, not row width) plus the `jkanime-tile` parity probe as the real-page
 guard.
 
+### Stage 2f — the out-of-flow subtree is laid out by the real engine (tanda 40)
+
+Measured on the allow.conf sites (exploit.in, github.com, youtube.com): every
+`position:absolute|fixed` subtree was painted by an approximation inside
+`paint_positioned_one` — one theme-coloured text line per block, the theme font,
+no nested boxes, no flex/grid, no author colour or size. An overlay
+(`position:fixed; inset:0; display:flex; justify-content:center`) collapsed to a
+132×22 box at the top-left holding its label in body text; its 6 px progress
+track and every decorated descendant vanished. And `width:auto` with BOTH `left`
+and `right` set shrink-wrapped instead of stretching (the "Still v1" note above).
+
+Two rules close it.
+
+1. **Used size, CSS 2.1 §10.3.7 / §10.6.4** — pure `bt_oof_avail(a, a_pct, b,
+   b_pct, cb, &both)`: the space an out-of-flow box's MARGIN box gets on one axis
+   is `cb − a − b`, an `auto`/unset inset counting 0; `both` reports whether the
+   two insets were declared. Width: a declared width (or both insets) lays the
+   subtree out at that available width — the box fills it, capped by its own
+   `width`; otherwise the box shrink-wraps, `min(max-content + edges, avail)`.
+   Height: with `height:auto` and BOTH `top` and `bottom` declared, the box's
+   used border height is `cb_h − top − bottom − margins` (it is forced on the
+   box before layout, so a flex column inside can centre against it); otherwise
+   it is the laid-out content height (an author `height` still wins).
+
+2. **The subtree is laid out by `layout_doc` itself**, not approximated. The
+   subtree's blocks are consecutive in document order, so a *view* of the document
+   (the same block array from the subtree's first block, the same box/container
+   tables) is laid out at the used width with the anchor box turned into the root
+   of its own flow (`position` static, `parent_id` −1, the forced height when
+   rule 1 applies). Everything the in-flow engine knows applies inside: boxes,
+   margins, flex/grid, floats, author colours and fonts, images. The anchor's
+   border box gives `w`/`h` to the solver, which places it exactly as before;
+   the painter then paints the sub-layout translated so the anchor's border box
+   lands at the solved position. Anchors are processed outermost first, so a
+   nested absolute box resolves its containing block against geometry that the
+   enclosing sub-layout has already placed, and its static position is the pen
+   position inside that sub-layout, translated.
+
+Fail-open as Stage 2e: an anchor whose sub-layout cannot be built (OOM) keeps the
+approximation, so content never disappears.
+
+**Given** `.o{position:fixed;inset:0;display:flex;flex-direction:column;
+justify-content:center;align-items:center}` holding a 280 px meter, **when** the
+page is laid out at 1000×768, **then** the overlay's rect is 0,0 1000×768 and the
+meter is centred in it with its track painted.
+
+**Given** `position:absolute;left:10px;right:10px` with `width:auto` inside a
+400 px relative box, **then** the box is 380 px wide (stretch), not its content.
+
 ### Out of scope (Stage 2)
 
 - `position:sticky` with scroll (own follow-up: needs the scroll path).

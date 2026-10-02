@@ -5,6 +5,7 @@
 #include "css_length.h"
 #include "css_select.h"
 
+#include <ctype.h>
 #include <string.h>
 
 static int cv_parse_num(const char *s, double *out, const char **endp)
@@ -49,6 +50,27 @@ int cv_bg_alpha_of(const char *v)
         return CSS_LEN_UNSET;
     }
     for (p = v; *p != '\0'; ++p) {
+        /* #RGBA / #RRGGBBAA (CSS Color 4 section 5.2): a hex token standing on
+         * its own (start or after a space/comma -- never `url(#id)`). */
+        if (*p == '#' && (p == v || p[-1] == ' ' || p[-1] == '\t' || p[-1] == ',')) {
+            size_t nd = 0;
+            while (nd < 9 && isxdigit((unsigned char)p[1 + nd])) ++nd;
+            char after = p[1 + nd];
+            if ((nd == 4 || nd == 8)
+                && (after == '\0' || after == ' ' || after == '\t' || after == ',')) {
+                int a;
+                if (nd == 4) {
+                    char h = p[4];
+                    a = isdigit((unsigned char)h) ? h - '0' : (csel_lower_ch(h) - 'a' + 10);
+                    return (int)((double)a * 100.0 / 15.0 + 0.5);
+                }
+                char h1 = p[7], h2 = p[8];
+                int d1 = isdigit((unsigned char)h1) ? h1 - '0' : (csel_lower_ch(h1) - 'a' + 10);
+                int d2 = isdigit((unsigned char)h2) ? h2 - '0' : (csel_lower_ch(h2) - 'a' + 10);
+                a = d1 * 16 + d2;
+                return (int)((double)a * 100.0 / 255.0 + 0.5);
+            }
+        }
         int is_rgba = (csel_lower_ch(p[0]) == 'r' && csel_lower_ch(p[1]) == 'g' &&
                        csel_lower_ch(p[2]) == 'b' && csel_lower_ch(p[3]) == 'a' && p[4] == '(');
         int is_rgb = !is_rgba && csel_lower_ch(p[0]) == 'r' && csel_lower_ch(p[1]) == 'g' &&

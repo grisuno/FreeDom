@@ -249,3 +249,38 @@ por debajo de él.
 
 Las funciones de áreas nombradas (`fx_grid_area_hash`, `fx_grid_areas_parse`,
 `fx_grid_area_rect`) tienen su contrato completo en **`spec/grid_areas.md`**.
+
+## Columna flex: `fx_column_place` y `fx_cross_offset` (tanda 40)
+
+Una columna flex con `justify-content`/`align-items` distintos de los iniciales se
+maquetaba por una rama propia que fluía texto pelado: sin la caja de cada ítem, sin
+cajas anidadas y sin alinear en ninguno de los dos ejes (medido en el overlay de
+exploit.in: la pista de progreso desaparecía y el bloque quedaba arriba a la
+izquierda en vez de centrado). Ahora la columna usa la MISMA pasada de flujo por
+ítem que la fila (caja raíz, cajas anidadas, contenedores anidados, alturas) y solo
+la colocación es propia, en dos funciones puras:
+
+`fx_column_place(h, grow, n, gap, inner_h, justify, reverse, y_out, h_out, &extent)`
+(Flexbox §9.7 y §8.2, eje principal vertical):
+- `inner_h <= 0` = altura indefinida: los ítems se apilan con `gap` y no hay espacio
+  libre que repartir (justify es inerte).
+- con altura definida, el espacio libre `inner_h − Σh − gap·(n−1)` se reparte
+  primero por `grow` (proporcional, Flexbox §9.7); lo que sobra lo coloca
+  `justify-content`: start 0, end todo, center la mitad, space-between entre ítems,
+  space-around medio a cada lado, space-evenly igual en n+1 huecos. Un libre
+  negativo se trata como 0 (sin desbordar hacia arriba).
+- `reverse` (column-reverse) coloca el último ítem arriba.
+- `extent` es el fondo del último ítem: la altura de contenido de la columna.
+
+`fx_cross_offset(avail, w, align, mauto_l, mauto_r)` (Flexbox §8.1/§9.6, eje
+cruzado horizontal): márgenes `auto` ganan (los dos centran, solo el izquierdo
+empuja al final); si no, `center` → `(avail−w)/2`, `end` → `avail−w`, start y
+stretch → 0. Nunca negativo.
+
+Dado-Cuando-Entonces:
+- Dado h={20,30}, gap 10, inner_h 0, entonces y={0,30} y extent 60.
+- Dado h={20}, inner_h 100, center, entonces y=40; con end, y=80.
+- Dado h={20,20}, grow={0,1}, inner_h 100, entonces h_out={20,80}, y={0,20}.
+- Dado h={10,10}, inner_h 50, space-between, entonces y={0,40}.
+- Dado reverse con h={10,20}, entonces y={20,0}.
+- Dado avail 1000, w 280, center, entonces 360; con márgenes auto a la izquierda, 720.

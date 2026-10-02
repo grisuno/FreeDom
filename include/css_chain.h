@@ -68,4 +68,11 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
  * (see csel_parse); NULL args return 0 (fail closed). */
 int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);
 
+/* The style of el's ::before (CSS_PSEUDO_BEFORE) or ::after (CSS_PSEUDO_AFTER)
+ * generated box (css_resolve_pseudo) against the same element context.
+ * font_size is el's own COMPUTED font-size (the pseudo inherits it) and
+ * inherited el's own custom-property chain (NULL = none). */
+css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
+                           double font_size, const struct cvr_chain *inherited);
+
 #endif /* FREEDOM_CSS_CHAIN_H */

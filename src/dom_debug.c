@@ -246,6 +246,8 @@ static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b) {
               id, b->parent_id, b->display,
               b->box_l, b->box_r, b->box_w, b->box_center);
     if (b->box_w_pct) dd_printf(c, " w%%=%d", b->box_w_pct);
+    if (b->box_mw) dd_printf(c, " mw=%d", b->box_mw);
+    if (b->box_mw_pct) dd_printf(c, " mw%%=%d", b->box_mw_pct);
     dd_color(c, b->bg_rgb);
     dd_printf(c, " pad(%d/%d/%d/%d) bord(%d/%d/%d/%d %s/%s/%s/%s) radius=%d shadow=%d outline=%d",
               dd_w(b->pad_t), dd_w(b->pad_r), dd_w(b->pad_b), dd_w(b->pad_l),
@@ -352,6 +354,8 @@ static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b) {
     if (b->bg_rgb >= 0)   { dd_puts(c, " bg="); dd_color(c, b->bg_rgb); }
     if (b->box_w)         dd_printf(c, " w=%d", b->box_w);
     if (b->box_w_pct)     dd_printf(c, " w%%=%d", b->box_w_pct);
+    if (b->box_mw)        dd_printf(c, " mw=%d", b->box_mw);
+    if (b->box_mw_pct)    dd_printf(c, " mw%%=%d", b->box_mw_pct);
     if (b->box_l || b->box_r) dd_printf(c, " ins(l=%d r=%d)", b->box_l, b->box_r);
     if (b->box_center)    dd_puts(c, " center");
 

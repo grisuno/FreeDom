@@ -906,6 +906,28 @@ static void test_oof_fail_open(void **state) {
     assert_int_equal(bt_oof_root(boxes, 2, 0), -1);
 }
 
+
+/* Stage 2f (spec/box_engine.md): the available size of an out-of-flow box's
+ * margin box on one axis is cb - a - b, auto insets counting 0, and `both`
+ * says whether the box stretches between two declared insets. */
+static void test_oof_avail_stretch_and_shrink(void **state) {
+    (void)state;
+    int both = -1;
+    assert_true(bt_oof_avail(10, 0, 10, 0, 400.0, &both) == 380.0);
+    assert_int_equal(both, 1);
+    assert_true(bt_oof_avail(PV_LEN_UNSET, 0, 0, 0, 1000.0, &both) == 1000.0);
+    assert_int_equal(both, 0);
+    assert_true(bt_oof_avail(PV_LEN_AUTO, 0, PV_LEN_AUTO, 0, 500.0, &both) == 500.0);
+    assert_int_equal(both, 0);
+    /* left:10%; right:5% of 1000 */
+    assert_true(bt_oof_avail(PV_LEN_UNSET, 100, PV_LEN_UNSET, 50, 1000.0, &both) == 850.0);
+    assert_int_equal(both, 1);
+    /* never negative */
+    assert_true(bt_oof_avail(600, 0, 600, 0, 1000.0, &both) == 0.0);
+    /* NULL out is allowed */
+    assert_true(bt_oof_avail(0, 0, 0, 0, 20.0, NULL) == 20.0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_null_root),
@@ -960,6 +982,7 @@ int main(void) {
         cmocka_unit_test(test_oof_relative_does_not_anchor),
         cmocka_unit_test(test_oof_fail_open),
         cmocka_unit_test(test_flex_auto_margin_pushes_item),
+        cmocka_unit_test(test_oof_avail_stretch_and_shrink),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

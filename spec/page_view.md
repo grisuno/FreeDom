@@ -1151,3 +1151,73 @@ properties (`cvr_chain`), que se pasa al hijo como `css_element.vars` en el mism
 raíz→abajo que el `font-size` (spec/css_vars.md, "Alcance por elemento"). Los nodos de la
 cadena se crean solo para elementos que declaran algo distinto de lo heredado y los libera
 `pv_style_cache_free`.
+
+## `<button>` es una caja con contenido, no un control con etiqueta (tanda 40)
+
+HTML *Rendering* §15.5.3: un `<button>` es un elemento `inline-block` cuyo contenido
+(texto, `<svg>`, `<span>`, imágenes) se maqueta como el de cualquier otra caja. Antes se
+aplanaba a un `PV_INPUT` con `collect_text` y, si no había texto (el botón-ícono
+universal: `<button><svg>…</svg></button>`), se **inventaba** la etiqueta `"Button"` o
+`"Submit"` — una cadena que no viene del HTML/CSS/JS, pintada con el cromo del tema por
+encima de todo el estilo del autor (medido en github.com e ipinfo.io).
+
+**Hoja UA.** Las reglas de presentación de la hoja UA de Firefox para `button` viajan
+como CSS real en una capa `@layer` declarada ANTES que cualquier hoja del autor
+(`PV_UA_CSS`): por CSS Cascade 5 §6.4 una capa anterior pierde contra toda capa
+posterior y contra todo lo no estratificado, que es exactamente la precedencia del
+origen UA para declaraciones normales. Ninguna regla UA es `!important`.
+
+| Propiedad | Valor UA (Firefox) |
+| :-- | :-- |
+| `padding` | `1px 6px` |
+| `border` | `1px solid #8f8f9d` |
+| `border-radius` | `4px` |
+| `background-color` | `#e9e9ed` |
+| `color` | `#000` |
+| `font-size` | `13.3333px` |
+| `text-align` | `center` |
+
+**Envío del formulario.** Un `<button>` de tipo submit (el tipo por defecto) dentro de un
+`<form>` emite, al visitarse el elemento, un run `PV_INPUT` de tipo `PV_IN_SUBMIT_BOX`:
+invisible (no se maqueta ni pinta, como `PV_IN_HIDDEN`), sin etiqueta, con el
+`node_id` del botón y los datos del formulario. Un clic sobre contenido cuya cadena de
+cajas contiene la caja del botón envía ese formulario por el MISMO `submit_form`
+(evento `submit` para JS incluido). Un `<button type=button|reset>` no emite proxy: es
+inerte sin JS y con JS el clic llega por `dispatch_click` como en cualquier elemento.
+
+Dado-Cuando-Entonces:
+- Dado `<button><svg/></button>`, cuando se construye la vista, entonces no aparece
+  ningún run con el texto `Button` ni `Submit`, y aparece el `PV_SVG`.
+- Dado `<button>Go <b>now</b></button>`, entonces el texto sale como runs de flujo
+  (`Go `, `now` en negrita), no como la etiqueta de un control.
+- Dado `<form><button name=a value=1>Send</button></form>`, entonces hay exactamente un
+  `PV_INPUT` `PV_IN_SUBMIT_BOX` con nombre `a`, valor `1` y el `node_id` del botón.
+- Dado `<button type=button>X</button>`, entonces no hay ningún `PV_INPUT`.
+- Dado `button{background:red}` del autor, entonces el fondo de la caja del botón es
+  rojo (la capa UA pierde); sin regla del autor es `#e9e9ed`.
+
+Fuera de alcance: `<input type=submit|button|reset>` sigue siendo un control pintado
+(no tiene hijos); el aspecto nativo `appearance:auto` más allá de la tabla de arriba.
+
+## Cajas generadas: `::before` / `::after` con estilo propio (tanda 40)
+
+CSS 2.1 §12.1: el pseudo-elemento es una CAJA con su propio estilo, no solo un texto.
+`css_resolve_pseudo` resuelve ese estilo (solo las reglas cuyo sujeto lleva el pseudo,
+todas sus declaraciones, sin estilo inline) y `content_before_on`/`content_after_on`
+distinguen `content:""` (genera caja) de `none`. `page_view` registra la caja generada
+con una clave etiquetada (dirección del elemento | 1/2, nunca desreferenciada) cuyo
+padre es la caja del elemento, y el run del pseudo lleva ese `block_id`.
+
+- Solo genera caja un pseudo que NO es inline (`display` de bloque/inline-block/flex/
+  grid, posicionado o flotante) y que decora o dimensiona algo. Uno inline sigue siendo
+  texto de su línea: una caja ahí parte la línea (los `[`/`]` de cada referencia de
+  Wikipedia multiplicaban su número de líneas).
+- `display:none` en el pseudo no emite nada, tampoco su texto.
+- El veredicto se memoriza por elemento (`pseudo_memo`): la cascada del pseudo corre una
+  vez aunque cada nodo de texto del elemento pregunte.
+- Un `::before` en flujo toma el run del elemento vacío; uno posicionado añade su propio
+  run fuera del flujo y el elemento conserva el suyo.
+
+Dado `.thumb::before{content:"";display:block;padding-top:56.25%}`, entonces la caja
+generada existe con el padding porcentual y la miniatura reserva el alto 16:9
+(youtube.com: 43.30 → 7.31 en `make parity`).

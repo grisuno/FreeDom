@@ -2789,7 +2789,9 @@ static void test_load_view_codec_full_roundtrip(void **state) {
             assert_int_equal(r->tab_size, 4);
             assert_int_equal(r->opacity, 50);
             assert_int_equal(r->box_l, 11);
-            assert_int_equal(r->box_w, 222);
+            /* max-width travels as its OWN value (tanda 40), not folded into box_w. */
+            assert_int_equal(r->box_w, 0);
+            assert_int_equal(r->box_mw, 222);
             assert_int_not_equal(r->node_id, DOM_NODE_NONE);
             saw_alpha = 1;
         } else if (strcmp(r->text, "grid") == 0) {

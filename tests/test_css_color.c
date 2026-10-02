@@ -335,8 +335,29 @@ static void test_space_separated_still_fails_closed(void **state) {
     assert_int_not_equal(cc_parse("hsl(0 150% 50%)", &C), CC_OK);
 }
 
+
+/* A colour whose alpha is ZERO is `transparent` (CSS Color 4 section 6.1: it IS
+ * rgba(0,0,0,0)). Minifiers and frameworks write it as #0000, rgba(0,0,0,0) or
+ * hsla(...,0); painting it opaque drew a black frame round every DuckDuckGo
+ * result (`border:1px solid rgba(0,0,0,0)`). A non-zero alpha stays a colour. */
+static void test_zero_alpha_is_transparent(void **state) {
+    (void)state;
+    cc_rgb c;
+    assert_int_equal(cc_parse("rgba(0,0,0,0)", &c), CC_TRANSPARENT);
+    assert_int_equal(cc_parse("rgba(10,20,30,0.0)", &c), CC_TRANSPARENT);
+    assert_int_equal(cc_parse("rgb(0 0 0 / 0%)", &c), CC_TRANSPARENT);
+    assert_int_equal(cc_parse("hsla(0,0%,0%,0)", &c), CC_TRANSPARENT);
+    assert_int_equal(cc_parse("#0000", &c), CC_TRANSPARENT);
+    assert_int_equal(cc_parse("#ffffff00", &c), CC_TRANSPARENT);
+    assert_int_equal(cc_parse("oklch(0.5 0.1 120 / 0)", &c), CC_TRANSPARENT);
+    assert_int_equal(cc_parse("rgba(0,0,0,0.5)", &c), CC_OK);
+    assert_int_equal(cc_parse("#0008", &c), CC_OK);
+    assert_int_equal(cc_parse("#00000001", &c), CC_OK);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_zero_alpha_is_transparent),
         cmocka_unit_test(test_null_args),
         cmocka_unit_test(test_hex_short),
         cmocka_unit_test(test_hex_short_alpha),

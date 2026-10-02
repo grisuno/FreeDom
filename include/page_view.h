@@ -92,7 +92,10 @@ typedef enum pv_input_type {
     PV_IN_SELECT,     /* <select> with <option> children: painted value, click->options */
     PV_IN_PROGRESS,   /* <progress>: value/max bar, not interactive */
     PV_IN_METER,      /* <meter>: colored bar with value/min/max/low/high/optimum */
-    PV_IN_LEGEND      /* <legend> inside <fieldset>: text displayed overlapping border */
+    PV_IN_LEGEND,     /* <legend> inside <fieldset>: text displayed overlapping border */
+    PV_IN_SUBMIT_BOX  /* invisible proxy of a submit <button> whose face is its own
+                       * content box: never laid out or painted; a click inside the
+                       * button's box submits its form (spec/page_view.md, tanda 40) */
 } pv_input_type;
 
 /* Form method carried on a PV_INPUT run (denormalised from the owning <form>). */
@@ -323,6 +326,11 @@ typedef struct pv_run {
      * against the containing WIDTH -- CSS 2.1 8.3, not a simplification.
      * Gated by caps.css like the px halves. */
     int     box_w_pct;
+    /* max-width as its OWN <length-percentage> (tanda 40): px half (0 = none)
+     * and per-mille half. The used cap is min(width, max-width), each resolved
+     * by itself (bx_width_cap2); folding the two into box_w/box_w_pct summed
+     * `width:100%` with `max-width:768px` into a 1768px "cap". */
+    int     box_mw, box_mw_pct;
     int     box_l_pct, box_r_pct;
     int     box_mt_pct, box_mb_pct;
     /* User-agent box identity of this run's nearest BLOCK-LEVEL ancestor: a bx_ua_tag
@@ -434,7 +442,8 @@ typedef struct pv_box_def {
      * a constant -- which is the bug this whole batch exists to remove. 0 = unknown,
      * and the painter then falls back to the theme's body size. */
     int font_px;
-    int box_w_pct;      /* width/max-width cap */
+    int box_w_pct;      /* width cap (per-mille half) */
+    int box_mw, box_mw_pct;  /* max-width: its own <length-percentage> (tanda 40) */
     int box_l_pct, box_r_pct;              /* the l/r insets (padding + margin) */
     int box_min_w_pct;                     /* min-width */
     int pad_t_pct, pad_r_pct, pad_b_pct, pad_l_pct;
@@ -1004,6 +1013,10 @@ void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
  * default box_w_pct to 0. */
 void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
                     int box_mt_pct, int box_mb_pct);
+
+/* Sets the max-width cap (px half, 0 = none; per-mille half, 0 = none) on the most
+ * recently appended run. No-op on an empty or NULL view; appends default to 0/0. */
+void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);
 
 /* Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of
  * the source element. No-op on an empty or NULL view; the append helpers default

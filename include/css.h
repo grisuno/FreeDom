@@ -585,6 +585,12 @@ typedef struct css_style {
     int         bg_grad_radial;   /* gradient KIND: 0=linear, 1=radial, 2=conic */
     char        content_str[CSS_URL_MAX];                   /* R8: ::before content (backward compat; synced from content_before_str or content_after_str) */
     char        content_before_str[CSS_URL_MAX];            /* R8: ::before{content:"X"} value */
+    /* The winning `content` GENERATES a box (any string, `""` included) rather
+     * than `none`/`normal`/unset: content_on for the element/pseudo itself,
+     * content_before_on/content_after_on for its ::before/::after. An empty string
+     * is how almost every decorative generated box is written, and it is the one
+     * the *_str fields cannot tell from `none`. 0 by default. */
+    int         content_on, content_before_on, content_after_on;
     char        content_after_str[CSS_URL_MAX];             /* R8: ::after{content:"X"} value */
     css_align   text_align;  /* CSS_ALIGN_UNSET if absent */
     int         font_scale;  /* percent (e.g. 150), or 0 (unset) */
@@ -1102,6 +1108,18 @@ struct cvr_table;
 css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
                             const char *inline_style, size_t inline_len,
                             struct cvr_table *own_out);
+
+/* Which generated box css_resolve_pseudo resolves (CSS 2.1 12.1). */
+#define CSS_PSEUDO_BEFORE 1
+#define CSS_PSEUDO_AFTER  2
+
+/* The computed style of el's ::before (CSS_PSEUDO_BEFORE) or ::after
+ * (CSS_PSEUDO_AFTER) generated box: only the rules whose subject carries that
+ * pseudo-element take part, and they apply EVERY declaration (content included,
+ * in content_str). No inline style (an attribute cannot style a pseudo). The
+ * result is not merged with the originating element: inherited properties the
+ * pseudo does not set are the caller's to take from el. Pure, reentrant. */
+css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which);
 
 /*
  * The computed font-size in px of an element whose resolved style is *o and

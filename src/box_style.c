@@ -308,6 +308,14 @@ double bx_width_cap(int w_px, int w_pct, double avail_w) {
 }
 
 
+double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w) {
+    double a = bx_width_cap(w_px, w_pct, avail_w);
+    double b = bx_width_cap(mw_px, mw_pct, avail_w);
+    if (a <= 0.0) return b;
+    if (b <= 0.0) return a;
+    return (a < b) ? a : b;
+}
+
 int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den,
                     double avail_w, double *out_w, double *out_h) {
     if (out_w == NULL || out_h == NULL) return 0;

@@ -171,6 +171,11 @@ bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
  * => 0 (no cap). Never negative. Pure. */
 double bx_width_cap(int w_px, int w_pct, double avail_w);
 
+/* The used width cap of an element: the tighter of its `width` (w_px, w_pct) and
+ * its `max-width` (mw_px, mw_pct), each one <length-percentage> resolved on its
+ * own by bx_width_cap; 0 = neither declared. Pure. */
+double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w);
+
 /* The used BOX of a replaced element (image/video) that has no intrinsic pixel size
  * of its own -- because it did not load, or was never allowed to.
  *

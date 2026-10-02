@@ -68,6 +68,7 @@
  * (spec/css_vars.md); this file only decides WHICH declarations feed it. */
 #include "css_vars.h"
 #include "css_atrule.h"
+#include "css_mq.h"
 
 /* Meta declarations (spec/css_vars.md, "Alcance por elemento"). They live in a
  * rule's declaration array but never claim a cascade slot: P_META_CUSTOM is a
@@ -271,10 +272,6 @@ static int expand_box2(const char *val, int slot_start, int slot_end,
 
 static int interp_len(const char *v, int allow_auto, int *out) {
     return cb_interp_len(v, allow_auto, out);
-}
-
-static int length_px(const char *v, double *px) {
-    return cb_length_px(v, px);
 }
 
 static int interp_lp(const char *v, int allow_auto, int allow_pct,
@@ -3653,125 +3650,13 @@ static size_t block_end(const char *s, size_t open, size_t n) {
 /* --- @media query evaluation (Hito 23b). All inputs are bounded substrings; the
  * query never fetches and unknown features fail closed (do not match). --- */
 
-#define CSS_MEDIA_TOK 128u
-
-/* A media-query length in px ("600px" -> 600, "40em" -> 640).
- *
- * The unit is load-bearing and used to be discarded, which made the reader return
- * the bare number: `(min-width: 40em)` compared 40 against the viewport and every
- * em/rem-based query was therefore true no matter how wide the query asked for.
- * Inside a media query `em`/`rem` refer to the INITIAL font size (16px), never the
- * author's root font-size -- which is exactly why rem_rebase leaves at-rule
- * preludes alone. An unknown unit keeps the historical bare-number reading. */
-static int media_len_px(const char *v) {
-    double px;
-    if (length_px(v, &px)) return css_round_clamp(px, 0, CSS_LEN_MAX);
-
-    /* Not a length. Keep the historical bare-number reading so a query with a
-     * unit this engine does not model still compares something rather than
-     * collapsing to 0 (which would make every min-width query true). */
-    double d;
-    const char *e;
-    if (!parse_num(v, &d, &e)) return 0;
-    return css_round_clamp(d, 0, CSS_LEN_MAX);
-}
-
-/* Trims ASCII spaces/tabs from both ends of a NUL-terminated string, in place. */
-static void trim_inplace(char *s) {
-    size_t a = 0;
-    while (s[a] == ' ' || s[a] == '\t') ++a;
-    size_t n = strlen(s + a);
-    memmove(s, s + a, n + 1);
-    while (n > 0 && (s[n-1] == ' ' || s[n-1] == '\t')) s[--n] = '\0';
-}
-
-/* Lowercased, trimmed copy of s[a,b) into dst; SIZE_MAX if it does not fit. */
-static size_t copy_lower_trim(const char *s, size_t a, size_t b, char *dst, size_t cap) {
-    size_t n = copy_trim(s, a, b, dst, cap);
-    if (n == (size_t)-1) return (size_t)-1;
-    for (size_t i = 0; i < n; ++i) dst[i] = csel_lower_ch(dst[i]);
-    return n;
-}
-
-/* One media part: a type word ("screen"/"print"/"all") or a "(feature: value)".
- * p is already lowercased and trimmed. Unknown -> 0 (fail closed). */
-static int media_part_matches(const char *p, const css_media *m) {
-    if (p[0] == '(') {
-        size_t L = strlen(p);
-        if (L < 2 || p[L-1] != ')') return 0;
-        char inner[CSS_MEDIA_TOK];
-        size_t k = 0;
-        for (size_t i = 1; i + 1 < L && k + 1 < sizeof inner; ++i) inner[k++] = p[i];
-        inner[k] = '\0';
-        char *colon = strchr(inner, ':');
-        if (colon == NULL) return 0;  /* boolean feature (e.g. "(color)"): fail closed */
-        *colon = '\0';
-        char *name = inner, *value = colon + 1;
-        trim_inplace(name);
-        trim_inplace(value);
-        if (strcmp(name, "prefers-color-scheme") == 0)
-            return (strcmp(value, "dark") == 0)  ? (m->prefers_dark ? 1 : 0)
-                 : (strcmp(value, "light") == 0) ? (m->prefers_dark ? 0 : 1) : 0;
-        if (strcmp(name, "min-width") == 0) return m->width_px >= media_len_px(value);
-        if (strcmp(name, "max-width") == 0) return m->width_px <= media_len_px(value);
-        return 0;  /* unknown feature: fail closed */
-    }
-    if (strcmp(p, "all") == 0) return 1;
-    if (strcmp(p, "screen") == 0) return m->print ? 0 : 1;
-    if (strcmp(p, "print") == 0) return m->print ? 1 : 0;
-    return 0;  /* unknown media type: fail closed */
-}
-
-/* One media query segment (between commas): an AND of parts. `not`/`or`/unknown
- * fail closed. An empty segment matches (all). */
-static int media_segment_matches(const char *s, size_t a, size_t b, const css_media *m) {
-    int result = 1, any = 0;
-    size_t i = a;
-    while (i < b) {
-        while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
-        if (i >= b) break;
-        size_t ts = i;
-        char buf[CSS_MEDIA_TOK];
-        if (s[i] == '(') {
-            int d = 0;
-            while (i < b) {
-                if (s[i] == '(') ++d;
-                else if (s[i] == ')') { ++i; if (--d == 0) break; continue; }
-                ++i;
-            }
-            if (copy_lower_trim(s, ts, i, buf, sizeof buf) == (size_t)-1) return 0;
-            if (!media_part_matches(buf, m)) result = 0;
-            any = 1;
-        } else {
-            size_t we = i;
-            while (we < b && s[we] != ' ' && s[we] != '\t' && s[we] != '(') ++we;
-            if (copy_lower_trim(s, ts, we, buf, sizeof buf) == (size_t)-1) return 0;
-            i = we;
-            if (strcmp(buf, "and") == 0 || strcmp(buf, "only") == 0) {
-                /* connector / legacy keyword: ignore */
-            } else if (strcmp(buf, "not") == 0 || strcmp(buf, "or") == 0) {
-                return 0;  /* negation / level-4 or: fail closed */
-            } else {
-                if (!media_part_matches(buf, m)) result = 0;
-                any = 1;
-            }
-        }
-    }
-    return any ? result : 1;
-}
-
-/* A media query list s[a,b): comma-separated segments OR'd together. */
+/* A media query list s[a,b), evaluated by the Media Queries 4 module against the
+ * render width (the only real datum, tanda 12) and the normalized desktop for
+ * everything else (spec/css_mq.md). */
 static int media_matches(const char *s, size_t a, size_t b, const css_media *m) {
-    while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
-    if (a >= b) return 1;  /* empty query == all */
-    size_t i = a;
-    while (i < b) {
-        size_t seg = i;
-        while (i < b && s[i] != ',') ++i;
-        if (media_segment_matches(s, seg, i, m)) return 1;
-        if (i < b) ++i;
-    }
-    return 0;
+    if (b < a) return 0;
+    cmq_env env = { m->width_px, CSS_MEDIA_DEFAULT_HEIGHT, m->prefers_dark, m->print };
+    return cmq_matches(s + a, b - a, &env);
 }
 
 /* True when s[i] ('@') begins an "@media" at-rule. */
@@ -4288,7 +4173,7 @@ static int rem_emit_px(char *out, size_t cap, size_t *o, double px) {
  * solely between a ':' inside a block and the next ';'/'{'/'}'. That single rule is
  * what keeps three classes of text safe at once:
  *   - at-rule preludes (`@media (min-width: 48rem)`), which sit at depth 0 and where
- *     rem means the INITIAL 16px, never the author's root (see media_len_px);
+ *     rem means the INITIAL 16px, never the author's root (spec/css_mq.md);
  *   - selectors, including a class that merely spells a unit (`.mt-1rem`);
  *   - quoted strings and url(...), skipped explicitly since `content: "5rem"` is
  *     text and a data: URI is opaque. */
@@ -4838,12 +4723,18 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
                     if (pseudo_kind == PSEUDO_BEFORE) {
                         o->content_before_str[0] = '\0';
                         o->content_str[0] = '\0';
+                        o->content_before_on = 0;
                     } else if (pseudo_kind == PSEUDO_AFTER) {
                         o->content_after_str[0] = '\0';
+                        o->content_after_on = 0;
                     } else {
                         o->content_str[0] = '\0';
+                        o->content_on = 0;
                     }
                 } else if (contenttab != NULL) {
+                    if (pseudo_kind == PSEUDO_BEFORE) o->content_before_on = 1;
+                    else if (pseudo_kind == PSEUDO_AFTER) o->content_after_on = 1;
+                    else o->content_on = 1;
                     if (pseudo_kind == PSEUDO_BEFORE) {
                         memcpy(o->content_before_str, contenttab[d->ival], CSS_URL_MAX);
                         o->content_before_str[CSS_URL_MAX - 1] = '\0';
@@ -5092,9 +4983,29 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
     return css_resolve_el_ex(sheet, el, inline_style, inline_len, NULL);
 }
 
+static css_style resolve_core(const css_sheet *sheet, const css_element *el,
+                              const char *inline_style, size_t inline_len,
+                              cvr_table *own_out, int want_pseudo);
+
 css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
                             const char *inline_style, size_t inline_len,
                             cvr_table *own_out) {
+    return resolve_core(sheet, el, inline_style, inline_len, own_out, 0);
+}
+
+css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which) {
+    if (which != CSS_PSEUDO_BEFORE && which != CSS_PSEUDO_AFTER) {
+        return resolve_core(NULL, NULL, NULL, 0, NULL, 0);   /* all-unset style */
+    }
+    return resolve_core(sheet, el, NULL, 0, NULL, which);
+}
+
+/* The cascade. want_pseudo 0 resolves the ELEMENT (a ::before/::after rule only
+ * hands it `content`); CSS_PSEUDO_BEFORE/AFTER resolves that generated box: only
+ * the rules whose subject carries it, applying all their declarations. */
+static css_style resolve_core(const css_sheet *sheet, const css_element *el,
+                              const char *inline_style, size_t inline_len,
+                              cvr_table *own_out, int want_pseudo) {
     /* Designated initializers: robust against field insertion/reordering (every
      * "unset" sentinel is named, so a new field cannot silently default to 0). */
     css_style out = {
@@ -5219,6 +5130,11 @@ css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
             const css_sel *sel = &sheet->sels[si];
             int pseudo_kind = -1;
             if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;
+            if (want_pseudo != 0) {
+                int wk = (want_pseudo == CSS_PSEUDO_BEFORE) ? PSEUDO_BEFORE : PSEUDO_AFTER;
+                if (pseudo_kind != wk) continue;
+                pseudo_kind = -1;   /* the generated box takes every declaration */
+            }
             if (nm == mcap) {
                 size_t nc = mcap ? mcap * 2 : 32;
                 css_match *g = (css_match *)realloc(mt, nc * sizeof *g);
@@ -5240,6 +5156,7 @@ css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
                                   (el != NULL) ? el->vars : NULL,
                                   sheet != NULL ? &sheet->initial : NULL };
     if (!m_oom) element_custom_props(sheet, mt, nm, &inh_scope, own);
+    if (want_pseudo != 0) inline_style = NULL;   /* an attribute styles the element */
     if (inline_style != NULL) {
         if (inline_len == 0) inline_len = strlen(inline_style);
         cvr_collect_decls(own, inline_style, 0, inline_len);
@@ -5257,6 +5174,11 @@ css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
             const css_sel *sel = &sheet->sels[si];
             int pseudo_kind = -1;
             if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;
+            if (want_pseudo != 0) {
+                int wk = (want_pseudo == CSS_PSEUDO_BEFORE) ? PSEUDO_BEFORE : PSEUDO_AFTER;
+                if (pseudo_kind != wk) continue;
+                pseudo_kind = -1;
+            }
             apply_rule(&out, wi, ws, wo, wem, wv, sheet, sel, pseudo_kind, NULL);
         }
     }

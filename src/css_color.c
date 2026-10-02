@@ -147,6 +147,10 @@ static int parse_hex(const char *s, cc_rgb *out) {
     for (size_t i = 0; i < n; ++i) {
         if (hex_val((unsigned char)s[i]) < 0) return -1;
     }
+    /* #RGBA / #RRGGBBAA with a zero alpha IS transparent (CSS Color 4 6.1). */
+    if (n == 4 && hex_val((unsigned char)s[3]) == 0) return 1;
+    if (n == 8 && hex_val((unsigned char)s[6]) == 0 && hex_val((unsigned char)s[7]) == 0)
+        return 1;
     if (n == 3 || n == 4) {
         int r = hex_val((unsigned char)s[0]);
         int g = hex_val((unsigned char)s[1]);
@@ -225,7 +229,7 @@ static int parse_component(const char *b, const char *e, int is_alpha, int *out)
         const char *ae = (e > b && e[-1] == '%') ? e - 1 : e;
         double a;
         if (cc_scan_number(b, ae, &a) != 0) return -1;
-        *out = 0;
+        *out = (a <= 0.0) ? 1 : 0;   /* 1 = the colour is fully transparent */
         return 0;
     }
 
@@ -422,16 +426,14 @@ static int parse_func(const char *s, cc_rgb *out) {
         if (ab == NULL && nc == 4 && !comma) return -1;
         for (int i = 0; i < 3; ++i)
             if (parse_hsl_comp(bs[i], es[i], i == 0, &comps[i]) != 0) return -1;
-        {
-            int dummy = 0;
-            if (ab != NULL) {
-                if (parse_component(ab, ae, 1, &dummy) != 0) return -1;
-            } else if (nc == 4) {
-                if (parse_component(bs[3], es[3], 1, &dummy) != 0) return -1;
-            }
+        int zero_a = 0;
+        if (ab != NULL) {
+            if (parse_component(ab, ae, 1, &zero_a) != 0) return -1;
+        } else if (nc == 4) {
+            if (parse_component(bs[3], es[3], 1, &zero_a) != 0) return -1;
         }
         hsl_to_rgb(comps[0], comps[1], comps[2], &out->r, &out->g, &out->b);
-        return 0;
+        return zero_a ? 1 : 0;   /* 1: fully transparent */
     }
 
     if (nc < 3 || nc > 4) return -1;
@@ -439,18 +441,16 @@ static int parse_func(const char *s, cc_rgb *out) {
     if (ab == NULL && nc == 4 && !comma) return -1;
     for (int i = 0; i < 3; ++i)
         if (parse_component(bs[i], es[i], 0, &comps[i]) != 0) return -1;
-    {
-        int dummy = 0;
-        if (ab != NULL) {
-            if (parse_component(ab, ae, 1, &dummy) != 0) return -1;
-        } else if (nc == 4) {
-            if (parse_component(bs[3], es[3], 1, &dummy) != 0) return -1;
-        }
+    int zero_a = 0;
+    if (ab != NULL) {
+        if (parse_component(ab, ae, 1, &zero_a) != 0) return -1;
+    } else if (nc == 4) {
+        if (parse_component(bs[3], es[3], 1, &zero_a) != 0) return -1;
     }
     out->r = (unsigned char)comps[0];
     out->g = (unsigned char)comps[1];
     out->b = (unsigned char)comps[2];
-    return 0;
+    return zero_a ? 1 : 0;   /* 1: fully transparent */
 }
 
 /* --- CSS Color 4 sections 8-9: lab(), lch(), oklab(), oklch() -------------------
@@ -541,7 +541,9 @@ static int parse_lab_family(const char *s, cc_rgb *out) {
     int comma = 0;
     int nc = cc_split_args(p, close, bs, es, &ab, &ae, &comma);
     if (nc != 3 || comma) return -1;
-    if (ab != NULL) { int dummy = 0; if (parse_component(ab, ae, 1, &dummy) != 0) return -1; }
+    int zero_a = 0;
+    if (ab != NULL && parse_component(ab, ae, 1, &zero_a) != 0) return -1;
+    if (zero_a) { out->r = 0; out->g = 0; out->b = 0; return 1; }   /* transparent */
     /* Percentage references (CSS Color 4 sections 8.1, 8.2, 9.2, 9.3). */
     double L, c1, c2;
     double l_ref = ok ? 1.0 : 100.0;
@@ -605,6 +607,12 @@ cc_status cc_parse(const char *token, cc_rgb *out) {
         return CC_CURRENT_COLOR;
     } else {
         rc = parse_named(buf, &tmp);
+    }
+    /* 1 = parsed, but with a zero alpha: that colour IS `transparent`. */
+    if (rc == 1) {
+        tmp.r = 0; tmp.g = 0; tmp.b = 0;
+        *out = tmp;
+        return CC_TRANSPARENT;
     }
     if (rc != 0) return CC_ERR_SYNTAX;
 

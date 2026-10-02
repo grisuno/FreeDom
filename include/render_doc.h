@@ -209,6 +209,7 @@ typedef struct rd_block {
      * are the vertical margins, which CSS 2.1 8.3 also resolves against the
      * containing WIDTH. Gated by caps.css like their px halves. */
     int              box_w_pct;
+    int              box_mw, box_mw_pct;  /* max-width cap (its own value) */
     int              box_l_pct, box_r_pct, box_mt_pct, box_mb_pct;
     /* User-agent box identity of the block this came from (a bx_ua_tag code).
      * STRUCTURE, carried regardless of caps.css: the UA sheet is not author styling.
@@ -326,5 +327,10 @@ const char *rd_image_fail_label(img_fail_reason reason);
 /* Stable, short English name of a form control type (a pv_input_type value), e.g.
  * "text" / "password" / "submit". Never NULL; an unknown value yields "field". */
 const char *rd_input_label(int input_type);
+
+/* Nonzero iff a control of this type has no face of its own and is therefore never
+ * laid out or painted: a hidden field, or the submit proxy of a <button> whose face
+ * is its own content box. Its data still takes part in form submission. */
+int rd_input_invisible(int input_type);
 
 #endif /* FREEDOM_RENDER_DOC_H */

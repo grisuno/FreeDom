@@ -39,6 +39,14 @@ static void test_alpha(void **state)
     assert_int_equal(cv_bg_alpha_of("rgba(0,0,0,2)"), 100);
     assert_int_equal(cv_bg_alpha_of("rgba(0,0,0,100%)"), 100);
     assert_int_equal(cv_bg_alpha_of("red"), CSS_LEN_UNSET);
+    /* CSS Color 4 section 5.2: #RGBA and #RRGGBBAA carry the alpha in the last
+     * digit(s) -- the minifier writes `transparent` as #0000. */
+    assert_int_equal(cv_bg_alpha_of("#0000"), 0);
+    assert_int_equal(cv_bg_alpha_of("#00f8"), 53);
+    assert_int_equal(cv_bg_alpha_of("#00ff0080"), 50);
+    assert_int_equal(cv_bg_alpha_of("#00ff00"), CSS_LEN_UNSET);
+    assert_int_equal(cv_bg_alpha_of("#fff"), CSS_LEN_UNSET);
+    assert_int_equal(cv_bg_alpha_of("url(#a0b1) #0000"), 0);
 }
 
 /* CSS Color 4 slash alpha rides on the rgb()/hsl() names too, not just the

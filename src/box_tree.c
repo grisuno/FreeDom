@@ -459,6 +459,36 @@ static int inset_unset(int v, int pct_pm) {
     return pct_pm == 0 && (v == PV_LEN_UNSET || v == BT_LEN_AUTO);
 }
 
+void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
+                         const double *box_x, const double *box_y,
+                         const double *box_w, const double *box_h,
+                         const char *placed, double viewport_w, double viewport_h,
+                         double *cb_x, double *cb_y, double *cb_w, double *cb_h) {
+    *cb_x = 0.0; *cb_y = 0.0; *cb_w = viewport_w; *cb_h = viewport_h;
+    if (boxes == NULL || i >= nbox || boxes[i].position != BT_POS_ABSOLUTE) return;
+    int ancestor = find_positioned_ancestor(boxes, nbox, i);
+    /* The containing block may never have been placed (no in-flow rect): its
+     * offsets would resolve against a zero rect. Climb to the nearest placed
+     * ancestor, whose rect is real; a static ancestor is an approximation of the
+     * true block (same flow neighbourhood), strictly better than zeros. NULL
+     * placed keeps legacy behaviour. */
+    if (placed != NULL) {
+        unsigned hops = 0;
+        while (ancestor >= 0 && (size_t)ancestor < nbox &&
+               !placed[ancestor] && hops < BT_MAX_DEPTH) {
+            ancestor = (int)boxes[ancestor].parent_id;
+            hops++;
+        }
+    }
+    if (ancestor >= 0 && (size_t)ancestor < nbox) {
+        *cb_x = (box_x != NULL) ? box_x[ancestor] : 0.0;
+        *cb_y = (box_y != NULL) ? box_y[ancestor] : 0.0;
+        *cb_w = (box_w != NULL) ? box_w[ancestor] : 0.0;
+        *cb_h = (box_h != NULL) ? box_h[ancestor] : 0.0;
+    }
+    /* else: the viewport (FIXED always; ABSOLUTE with no positioned ancestor). */
+}
+
 bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                                  const double *box_x, const double *box_y,
                                  const double *box_w, const double *box_h,
@@ -518,34 +548,9 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
             continue;
         }
 
-        /* Find the containing block. cb_w/cb_h are computed for completeness
-         * (the v1 spec honors top/left only, so they don't feed the offset; they
-         * are kept here so the `right`/`bottom` extension in a future hito is a
-         * one-line change). */
-        double cb_x = 0.0, cb_y = 0.0, cb_w = viewport_w, cb_h = viewport_h;
-        if (pos == BT_POS_ABSOLUTE) {
-            int ancestor = find_positioned_ancestor(boxes, nbox, i);
-            /* The containing block may never have been placed (no in-flow rect):
-             * its offsets would resolve against a zero rect. Climb to the nearest
-             * placed ancestor, whose rect is real; a static ancestor is an
-             * approximation of the true block (same flow neighbourhood), strictly
-             * better than zeros. NULL placed keeps legacy behaviour. */
-            if (placed != NULL) {
-                unsigned hops = 0;
-                while (ancestor >= 0 && (size_t)ancestor < nbox &&
-                       !placed[ancestor] && hops < BT_MAX_DEPTH) {
-                    ancestor = (int)boxes[ancestor].parent_id;
-                    hops++;
-                }
-            }
-            if (ancestor >= 0) {
-                cb_x = (box_x != NULL) ? box_x[ancestor] : 0.0;
-                cb_y = (box_y != NULL) ? box_y[ancestor] : 0.0;
-                cb_w = (box_w != NULL) ? box_w[ancestor] : 0.0;
-                cb_h = (box_h != NULL) ? box_h[ancestor] : 0.0;
-            }
-            /* else: viewport (already the default). */
-        }
+        double cb_x, cb_y, cb_w, cb_h;
+        bt_containing_block(boxes, nbox, i, box_x, box_y, box_w, box_h, placed,
+                            viewport_w, viewport_h, &cb_x, &cb_y, &cb_w, &cb_h);
         /* FIXED → viewport (default). RELATIVE/STICKY → in-flow. */
 
         double x, y;
@@ -686,4 +691,12 @@ int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid) {
         bid = (size_t)b->parent_id;
     }
     return 1;  /* more links than boxes: a parent cycle */
+}
+
+double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both) {
+    int ua = inset_unset(a, a_pct), ub = inset_unset(b, b_pct);
+    if (both != NULL) *both = (!ua && !ub);
+    double v = cb - (ua ? 0.0 : resolve_inset(a, a_pct, cb))
+                  - (ub ? 0.0 : resolve_inset(b, b_pct, cb));
+    return (v > 0.0) ? v : 0.0;
 }

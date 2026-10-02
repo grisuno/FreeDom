@@ -512,6 +512,25 @@ static void test_url_value_dropped(void **state) {
     assert_int_equal(css_parse_inline("background:#112233", 0).background, 0x112233);
 }
 
+/* CSS Backgrounds 3 section 3.10: the shorthand resets every longhand it omits,
+ * so ANY valid value without a colour -- `0 0` (a minified `none`), a position,
+ * a repeat keyword -- leaves background-color transparent instead of being
+ * dropped (which kept a lower rule's, or the UA button face's, colour). */
+static void test_background_shorthand_resets_color(void **state) {
+    (void)state;
+    const char *vals[] = { "0 0", "no-repeat center", "left top / cover",
+                           "none 0 0 no-repeat", "50% 50%" };
+    for (size_t i = 0; i < sizeof vals / sizeof vals[0]; ++i) {
+        char decl[96];
+        snprintf(decl, sizeof decl, "background:#123456; background:%s", vals[i]);
+        css_style s = css_parse_inline(decl, 0);
+        assert_true(s.background == CC_COLOR_TRANSPARENT || s.background == -1);
+    }
+    /* still rejected: junk */
+    assert_int_equal(css_parse_inline("background:#123456; background:wobble", 0).background,
+                     0x123456);
+}
+
 static void test_unknown_props_ignored(void **state) {
     (void)state;
     css_style s = css_parse_inline("position:absolute; z-index:9; color:#abcdef; --x:1", 0);
@@ -995,6 +1014,30 @@ static void test_custom_prop_root_matcher_rejects_descendant(void **state) {
     css_free(sh);
 }
 
+
+/* Media Queries 4 range syntax and not/or reach the cascade (spec/css_mq.md):
+ * Tailwind v4's `.container` breakpoints and github's `(width<=767px)`. */
+static void test_media_range_syntax_applies(void **state) {
+    (void)state;
+    css_media m = { 0, 0, 1000, NULL, NULL };
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse_media(
+        ".c{width:100%}"
+        "@media (width>=40rem){.c{max-width:40rem}}"
+        "@media (width>=48rem){.c{max-width:48rem}}"
+        "@media (width>=64rem){.c{max-width:64rem}}"
+        "@media (width<=767px){p{color:#ff0000}}"
+        "@media not all and (max-width:600px){p{background:#00ff00}}"
+        "@media (prefers-reduced-motion:reduce){p{padding-top:9px}}", 0, &m, &sh), CSS_OK);
+    const char *c[] = { "c" };
+    assert_int_equal(css_resolve(sh, "div", NULL, c, 1, NULL, 0).max_width, 768);
+    css_style ps = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(ps.color, -1);
+    assert_int_equal(ps.background, 0x00ff00);
+    assert_true(ps.pad_top != 9);
+    css_free(sh);
+}
+
 /* --- @supports / @layer (spec/css_atrule.md, 2026-09-29) --- */
 
 static void test_supports_true_block_applies(void **state) {
@@ -1186,6 +1229,49 @@ static css_element cls_el(const char *tag, const char *const *cl, size_t n,
     e.child_count = -1;
     e.vars = vars;
     return e;
+}
+
+
+/* The ::before / ::after GENERATED BOX has a style of its own (CSS 2.1 12.1):
+ * resolving the pseudo applies every declaration of the rules whose subject
+ * carries it -- and only those. The element itself still sees only `content`
+ * cross over (the leak guard stays). YouTube's thumbnail skeleton is
+ * `.rich-thumbnail:before{content:"";display:block;padding-top:56.25%}`. */
+static void test_pseudo_element_style(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        ".t{color:#010101}"
+        ".t::before{content:\"\";display:block;padding-top:56.25%;"
+        "background:#123456;width:50px}"
+        ".t:after{content:\"x\";position:absolute;top:0}", 0, &sh), CSS_OK);
+    const char *cl[] = { "t" };
+    css_element e = cls_el("div", cl, 1, NULL, NULL);
+    css_style b = css_resolve_pseudo(sh, &e, CSS_PSEUDO_BEFORE);
+    assert_int_equal(b.display, CSS_DISP_BLOCK);
+    assert_int_equal(b.pct[CSS_PCT_PAD_TOP], 563);   /* 562.5 per-mille, rounded */
+    assert_int_equal(b.background, 0x123456);
+    assert_int_equal(b.width, 50);
+    assert_int_equal(b.color, -1);            /* the element's rule is not the pseudo's */
+    css_style a = css_resolve_pseudo(sh, &e, CSS_PSEUDO_AFTER);
+    assert_int_equal(a.position, CSS_POS_ABSOLUTE);
+    assert_int_equal(a.background, -1);
+    /* content:"" GENERATES a box (empty string), content:none does not. */
+    assert_int_equal(b.content_on, 1);
+    assert_int_equal(a.content_on, 1);
+    css_style el = css_resolve_el(sh, &e, NULL, 0);
+    assert_int_equal(el.content_before_on, 1);
+    assert_int_equal(el.content_after_on, 1);
+    assert_int_equal(el.background, -1);      /* no leak into the element */
+    assert_int_equal(el.display, CSS_DISP_UNSET);
+    assert_int_equal(el.color, 0x010101);
+    css_free(sh);
+    assert_int_equal(css_parse(".n::before{content:\"\"}.n::before{content:none}", 0, &sh),
+                     CSS_OK);
+    const char *cn[] = { "n" };
+    css_element en = cls_el("div", cn, 1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &en, NULL, 0).content_before_on, 0);
+    css_free(sh);
 }
 
 static void test_component_var_same_element(void **state) {
@@ -2452,12 +2538,14 @@ static void test_media_and_or(void **state) {
     css_free(sh);
 }
 
-/* Fail closed: unknown media type/feature and `not` never apply their rules. */
+/* Fail closed: an unknown media type/feature never applies its rules, and `not`
+ * negates (`not screen` is false on a screen). `(hover:hover)` is NOT unknown:
+ * the desktop identity answers it (spec/css_mq.md). */
 static void test_media_unknown_fails_closed(void **state) {
     (void)state;
     css_sheet *sh = NULL;
     assert_int_equal(css_parse(
-        "@media (hover: hover) { p { color:#cccccc } }\n"
+        "@media (frobnicate: 1) { p { color:#cccccc } }\n"
         "@media tv { a { color:#dddddd } }\n"
         "@media not screen { b { color:#eeeeee } }\n"
         "h1 { color:#0f0f0f }", 0, &sh), CSS_OK);
@@ -4771,6 +4859,7 @@ int main(void) {
         cmocka_unit_test(test_grid_repeat_clamped_anti_dos),
         cmocka_unit_test(test_container_unset),
         cmocka_unit_test(test_url_value_dropped),
+        cmocka_unit_test(test_background_shorthand_resets_color),
         cmocka_unit_test(test_unknown_props_ignored),
         cmocka_unit_test(test_linear_gradient_basic),
         cmocka_unit_test(test_linear_gradient_directions),
@@ -4799,6 +4888,7 @@ int main(void) {
         cmocka_unit_test(test_custom_prop_class_scoped_applies_with_root_scope),
         cmocka_unit_test(test_keyframes_content_does_not_crash),
         cmocka_unit_test(test_component_var_same_element),
+        cmocka_unit_test(test_pseudo_element_style),
         cmocka_unit_test(test_component_var_inherited_by_child),
         cmocka_unit_test(test_component_var_cascade_order),
         cmocka_unit_test(test_component_var_inline_overrides),
@@ -4809,6 +4899,7 @@ int main(void) {
         cmocka_unit_test(test_selector_escaped_comma_and_parens),
         cmocka_unit_test(test_selector_escape_inside_not),
         cmocka_unit_test(test_selector_long_class_exact),
+        cmocka_unit_test(test_media_range_syntax_applies),
         cmocka_unit_test(test_supports_true_block_applies),
         cmocka_unit_test(test_supports_collects_custom_props),
         cmocka_unit_test(test_layer_block_applies),
