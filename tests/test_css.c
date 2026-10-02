@@ -1250,6 +1250,26 @@ static void test_text_decoration_wide_keyword_is_none(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).text_decoration, -1);
 }
 
+
+/* A gradient stop keeps its alpha (CSS Images 3 3.4): the transparency rides the
+ * stop colour's bits 24..30 (0 = opaque, 127 = transparent), so every opaque stop
+ * is byte-for-byte what it was. A veil like github's
+ * `linear-gradient(#fff0,#ffffff1a 62%)` painted as opaque white before. */
+static void test_gradient_stop_alpha(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("background:linear-gradient(#fff0,#ffffff1a)", 0);
+    assert_int_equal(s.bg_grad_n, 2);
+    assert_int_equal((s.bg_grad_c[0] >> 24) & 0x7f, 127);
+    assert_int_equal((s.bg_grad_c[1] >> 24) & 0x7f, 114);
+    assert_int_equal(s.bg_grad_c[1] & 0xffffff, 0xffffff);
+    css_style o = css_parse_inline("background:linear-gradient(red,rgba(0,0,255,.5))", 0);
+    assert_int_equal(o.bg_grad_c[0], 0xff0000);
+    assert_int_equal((o.bg_grad_c[1] >> 24) & 0x7f, 64);
+    assert_int_equal(o.bg_grad_c[1] & 0xffffff, 0x0000ff);
+    css_style t2 = css_parse_inline("background:linear-gradient(transparent,#000)", 0);
+    assert_int_equal((t2.bg_grad_c[0] >> 24) & 0x7f, 127);
+}
+
 static void test_pseudo_element_style(void **state) {
     (void)state;
     css_sheet *sh = NULL;
@@ -1793,6 +1813,34 @@ static void test_selector_list_splits_top_level_commas_only(void **state) {
     css_attr at = { "data-x", "a,b" };
     css_element d = el_attr_node("div", NULL, NULL, 0, &at, 1, NULL);
     assert_int_equal(css_resolve_el(sh, &d, NULL, 0).background, 0x222222);
+    css_free(sh);
+}
+
+
+/* Simple pseudo-classes inside :not()/:is() (Selectors 4 4.3): the visually-hidden
+ * skip link `.show-on-focus:not(:focus){width:1px!important;...}` and every
+ * `li:not(:last-child)` separator dropped the whole rule before. */
+static void test_not_with_pseudo_class(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".s:not(:focus){color:#111111} "
+                               "li:not(:last-child){background:#222222} "
+                               "b:is(:hover, .k){color:#333333}", 0, &sh), CSS_OK);
+    const char *sc[] = { "s" };
+    css_element a = el_node("a", NULL, sc, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x111111);
+    a.state = CSEL_STATE_FOCUS;
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, -1);
+    css_element li1 = el_node("li", NULL, NULL, 0, NULL);
+    li1.nth = 1; li1.nsib = 2;
+    assert_int_equal(css_resolve_el(sh, &li1, NULL, 0).background, 0x222222);
+    css_element li2 = el_node("li", NULL, NULL, 0, NULL);
+    li2.nth = 2; li2.nsib = 2;
+    assert_int_equal(css_resolve_el(sh, &li2, NULL, 0).background, -1);
+    css_element b = el_node("b", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, -1);
+    b.state = CSEL_STATE_HOVER;
+    assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, 0x333333);
     css_free(sh);
 }
 
@@ -4902,6 +4950,7 @@ int main(void) {
         cmocka_unit_test(test_keyframes_content_does_not_crash),
         cmocka_unit_test(test_component_var_same_element),
         cmocka_unit_test(test_pseudo_element_style),
+        cmocka_unit_test(test_gradient_stop_alpha),
         cmocka_unit_test(test_text_decoration_wide_keyword_is_none),
         cmocka_unit_test(test_component_var_inherited_by_child),
         cmocka_unit_test(test_component_var_cascade_order),
@@ -5080,6 +5129,7 @@ int main(void) {
         cmocka_unit_test(test_media_query_length_honours_its_unit),
         cmocka_unit_test(test_selector_list_splits_top_level_commas_only),
         cmocka_unit_test(test_not_unreadable_argument_fails_closed),
+        cmocka_unit_test(test_not_with_pseudo_class),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

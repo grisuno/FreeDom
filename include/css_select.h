@@ -79,6 +79,7 @@ enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_HOVER, PSEUDO_ROOT,
  * sub-selectors). Bounded: CSS_MAX_SUB_SELS per selector, one level deep. */
 #define CSS_MAX_SUB_SELS 4
 #define CSS_SUB_MAX_ATTRS 1
+#define CSS_SUB_MAX_PSEUDOS 2
 
 /* One attribute selector inside a compound: name OP value, with a case flag. */
 typedef struct css_attr_match {
@@ -97,6 +98,9 @@ typedef struct css_sub_sel {
     int  has_cls;
     css_attr_match attrs[CSS_SUB_MAX_ATTRS];
     int  nattrs;
+    /* Simple (argument-less, non-element) pseudo-classes: PSEUDO_* kinds. */
+    int  pseudos[CSS_SUB_MAX_PSEUDOS];
+    int  npseudos;
 } css_sub_sel;
 
 /* One pseudo-class inside a compound. a/b are the An+B coefficients of the

@@ -9399,6 +9399,8 @@ static void box_path(cairo_t *cr, double x, double y, double w, double h, double
  * when the four borders are uniform -- the border ring; mixed per-side borders keep
  * square corners. Content is not clipped to the rounded rect (v1). The box
  * decoration was gated behind caps.css upstream (render_doc). */
+static ui_rgb grad_stop(const int *cols, int nst, int k, double *alpha);
+
 /* Linear gradient pattern along the CSS angle (0 = to top, 90 = to right)
  * across rect (x,y,w,h): the gradient line runs through the rect center, long
  * enough that the first/last stops land on the corners. Stops at explicit
@@ -9416,13 +9418,30 @@ static cairo_pattern_t *bui_linear_grad(double x, double y, double w, double h,
         cx - dx * half, cy - dy * half, cx + dx * half, cy + dy * half);
     if (nst > 4) nst = 4;
     for (int k = 0; k < nst; ++k) {
-        ui_rgb sc = rgb_from_packed(cols[k] >= 0 ? cols[k] : 0);
+        double sa;
+        ui_rgb sc = grad_stop(cols, nst, k, &sa);
         double pos = (pos1000 != NULL && pos1000[k] >= 0)
                    ? (double)pos1000[k] / 1000.0
                    : (double)k / (double)(nst - 1);
-        cairo_pattern_add_color_stop_rgba(pat, pos, sc.r, sc.g, sc.b, alpha);
+        cairo_pattern_add_color_stop_rgba(pat, pos, sc.r, sc.g, sc.b, alpha * sa);
     }
     return pat;
+}
+
+/* Stop k of a gradient (spec/css.md, stop alpha): its colour and opacity. The
+ * stop's TRANSPARENCY rides bits 24..30 of the packed colour (0 opaque, 127
+ * clear). A fully transparent stop borrows its neighbour's colour, which is what
+ * premultiplied interpolation does: `#fff0 -> #fff` must fade white, not through
+ * grey. */
+static ui_rgb grad_stop(const int *cols, int nst, int k, double *alpha) {
+    int c = (cols[k] >= 0) ? cols[k] : 0;
+    int t7 = (c >> 24) & 0x7f;
+    *alpha = 1.0 - (double)t7 / 127.0;
+    if (t7 == 127) {
+        int nb = (k + 1 < nst) ? k + 1 : k - 1;
+        if (nb >= 0 && cols[nb] >= 0 && ((cols[nb] >> 24) & 0x7f) != 127) c = cols[nb];
+    }
+    return rgb_from_packed(c & 0xffffff);
 }
 
 /* Interpolated gradient color at fraction t (0..1) of the stop run. Stops sit
@@ -9430,7 +9449,7 @@ static cairo_pattern_t *bui_linear_grad(double x, double y, double w, double h,
  * non-decreasing (author order wins, like browsers); a zero-width segment is a
  * hard edge. */
 static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
-                                double t) {
+                                double t, double *alpha) {
     double p[4];
     if (nst > 4) nst = 4;
     for (int k = 0; k < nst; ++k) {
@@ -9439,19 +9458,21 @@ static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
              : (double)k / (double)(nst - 1);
         if (k > 0 && p[k] < p[k - 1]) p[k] = p[k - 1];
     }
-    if (t <= p[0]) return rgb_from_packed(cols[0] >= 0 ? cols[0] : 0);
+    if (t <= p[0]) return grad_stop(cols, nst, 0, alpha);
     for (int k = 0; k + 1 < nst; ++k) {
         if (t > p[k + 1]) continue;
-        ui_rgb c0 = rgb_from_packed(cols[k] >= 0 ? cols[k] : 0);
-        ui_rgb c1 = rgb_from_packed(cols[k + 1] >= 0 ? cols[k + 1] : 0);
+        double a0, a1;
+        ui_rgb c0 = grad_stop(cols, nst, k, &a0);
+        ui_rgb c1 = grad_stop(cols, nst, k + 1, &a1);
         double span = p[k + 1] - p[k];
         double u = (span > 0.0) ? (t - p[k]) / span : 1.0;
         ui_rgb out = { c0.r + (c1.r - c0.r) * u,
                        c0.g + (c1.g - c0.g) * u,
                        c0.b + (c1.b - c0.b) * u };
+        *alpha = a0 + (a1 - a0) * u;
         return out;
     }
-    return rgb_from_packed(cols[nst - 1] >= 0 ? cols[nst - 1] : 0);
+    return grad_stop(cols, nst, nst - 1, alpha);
 }
 
 #define BUI_CONIC_SLICES 128
@@ -9472,7 +9493,8 @@ static void bui_paint_conic(cairo_t *cr, double x, double y, double w, double h,
     for (int s = 0; s < BUI_CONIC_SLICES; ++s) {
         double t0 = (double)s / BUI_CONIC_SLICES;
         double t1 = (double)(s + 1) / BUI_CONIC_SLICES;
-        ui_rgb sc = bui_grad_color_at(cols, pos1000, nst, (t0 + t1) / 2.0);
+        double sa;
+        ui_rgb sc = bui_grad_color_at(cols, pos1000, nst, (t0 + t1) / 2.0, &sa);
         /* CSS 0deg points up and runs clockwise; Cairo's y-down arc runs
          * clockwise from the +x axis, so shift by -90deg. A hair of overlap on
          * the closing edge hides antialiasing seams between sectors. */
@@ -9481,7 +9503,7 @@ static void bui_paint_conic(cairo_t *cr, double x, double y, double w, double h,
         cairo_move_to(cr, cx, cy);
         cairo_arc(cr, cx, cy, R, a0, a1);
         cairo_close_path(cr);
-        cairo_set_source_rgb(cr, sc.r, sc.g, sc.b);
+        cairo_set_source_rgba(cr, sc.r, sc.g, sc.b, sa);
         cairo_fill(cr);
     }
     cairo_restore(cr);
@@ -9620,10 +9642,11 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
             cairo_pattern_t *pat = cairo_pattern_create_radial(cx, cy, 0.0, cx, cy, r);
             int nst = bx->grad_n <= 4 ? bx->grad_n : 4;
             for (int k = 0; k < nst; ++k) {
-                ui_rgb sc = rgb_from_packed(bx->grad_c[k] >= 0 ? bx->grad_c[k] : 0);
+                double sa;
+                ui_rgb sc = grad_stop(bx->grad_c, nst, k, &sa);
                 double pos = (bx->grad_pos[k] >= 0) ? (double)bx->grad_pos[k] / 1000.0
                                                      : (double)k / (double)(nst - 1);
-                cairo_pattern_add_color_stop_rgb(pat, pos, sc.r, sc.g, sc.b);
+                cairo_pattern_add_color_stop_rgba(pat, pos, sc.r, sc.g, sc.b, sa);
             }
             cairo_set_source(cr, pat);
             box_path4(cr, x, y, w, h, radius_c);

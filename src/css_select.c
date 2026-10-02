@@ -426,6 +426,25 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
     return 1;
 }
 
+/* The PSEUDO_* kind of an argument-less pseudo-class usable inside a
+ * sub-selector, or -1. */
+static int simple_pseudo_kind(const char *nm) {
+    static const struct { const char *n; int k; } T[] = {
+        { "link", PSEUDO_LINK }, { "any-link", PSEUDO_LINK }, { "visited", PSEUDO_NEVER },
+        { "hover", PSEUDO_HOVER }, { "active", PSEUDO_ACTIVE }, { "focus", PSEUDO_FOCUS },
+        { "focus-within", PSEUDO_FOCUS_WITHIN }, { "focus-visible", PSEUDO_FOCUS_VISIBLE },
+        { "root", PSEUDO_ROOT }, { "first-child", PSEUDO_FIRST_CHILD },
+        { "last-child", PSEUDO_LAST_CHILD }, { "only-child", PSEUDO_ONLY_CHILD },
+        { "checked", PSEUDO_CHECKED }, { "disabled", PSEUDO_DISABLED },
+        { "enabled", PSEUDO_ENABLED }, { "first-of-type", PSEUDO_FIRST_OF_TYPE },
+        { "last-of-type", PSEUDO_LAST_OF_TYPE }, { "only-of-type", PSEUDO_ONLY_OF_TYPE },
+        { "empty", PSEUDO_EMPTY }, { "target", PSEUDO_TARGET },
+    };
+    for (size_t k = 0; k < sizeof T / sizeof T[0]; ++k)
+        if (strcmp(nm, T[k].n) == 0) return T[k].k;
+    return -1;
+}
+
 /* Parses one SIMPLE sub-selector span s[a,b) for :not()/:is()/:where(): only
  * tag name, .class, #id, or [attr] (no pseudo-classes, no combinators).
  * The caller MUST trim leading/trailing space. Returns 1 if any component was
@@ -455,11 +474,26 @@ static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *su
             if (sub->nattrs >= CSS_SUB_MAX_ATTRS) return 0;
             if (!parse_attr_sel(s, &i, b, &sub->attrs[sub->nattrs])) return 0;
             ++sub->nattrs;
+        } else if (s[i] == ':' && i + 1 < b && s[i + 1] != ':') {
+            /* A simple pseudo-class (state or structure): `:not(:focus)`,
+             * `:not(:last-child)`. Functional ones stay out (fail closed). */
+            ++i;
+            char nm[CSS_TOK_MAX];
+            size_t nk = 0;
+            while (i < b && csel_ident_ch(s[i])) {
+                if (nk + 1 < sizeof nm) nm[nk++] = csel_lower_ch(s[i]);
+                ++i;
+            }
+            nm[nk] = '\0';
+            int kind = simple_pseudo_kind(nm);
+            if (kind < 0 || sub->npseudos >= CSS_SUB_MAX_PSEUDOS) return 0;
+            sub->pseudos[sub->npseudos++] = kind;
         } else {
             return 0;
         }
     }
-    return sub->has_tag || sub->has_cls || sub->has_id || sub->nattrs > 0;
+    return sub->has_tag || sub->has_cls || sub->has_id || sub->nattrs > 0
+        || sub->npseudos > 0;
 }
 
 /* Stores one functional-pseudo argument s[a,b) (untrimmed) into sel->subs[].
@@ -689,6 +723,10 @@ static int is_form_control(const char *tag) {
 }
 
 /* True if a css_sub_sel (tag/class/id/[attr]) matches element el. */
+static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
+                          const css_sel *sel, const char *target_id,
+                          int allow_pseudo_el);
+
 static int sub_sel_matches(const css_sub_sel *sub, const css_element *el) {
     if (sub->has_tag && (el->tag == NULL || !csel_ci_eq(sub->tag, el->tag)))
         return 0;
@@ -706,6 +744,13 @@ static int sub_sel_matches(const css_sub_sel *sub, const css_element *el) {
     }
     for (int i = 0; i < sub->nattrs; ++i)
         if (!attr_matches(&sub->attrs[i], el)) return 0;
+    for (int i = 0; i < sub->npseudos; ++i) {
+        css_pseudo_match pm;
+        memset(&pm, 0, sizeof pm);
+        pm.kind = sub->pseudos[i];
+        pm.sub_first = -1;
+        if (!pseudo_matches(&pm, el, NULL, NULL, 0)) return 0;
+    }
     return 1;
 }
 

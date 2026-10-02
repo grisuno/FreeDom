@@ -234,6 +234,21 @@ static int parse_gradient_args(const char *s, size_t n, int kind, int *angle,
             color[ce] = '\0';
             int cv = cv_parse_color(color);
             if (cv == -1) return 0;
+            /* The stop's alpha rides bits 24..30 as TRANSPARENCY (0 opaque, 127
+             * clear), so an opaque stop is exactly the colour it always was and no
+             * consumer that masks the low 24 bits sees a difference. A fully
+             * transparent stop has no colour of its own (the painter borrows its
+             * neighbour's, as premultiplied interpolation would). */
+            {
+                int sa = cv_bg_alpha_of(color);   /* percent, or CSS_LEN_UNSET */
+                if (cv == CC_COLOR_TRANSPARENT) { cv = 0; sa = 0; }
+                else if (cv < 0) cv = 0;
+                if (sa != CSS_LEN_UNSET && sa < 100) {
+                    if (sa < 0) sa = 0;
+                    int t7 = (int)((double)(100 - sa) * 127.0 / 100.0 + 0.5);
+                    cv = (cv & 0xffffff) | (t7 << 24);
+                }
+            }
             int p1 = -1, p2 = -1;
             const char *pp = seg + ce;
             while (*pp == ' ' || *pp == '\t') ++pp;
