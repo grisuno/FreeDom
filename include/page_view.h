@@ -42,6 +42,8 @@ typedef enum pv_status {
  * flex item are `auto` (Flexbox 8.1). */
 #define PV_MAUTO_LEFT  1
 #define PV_MAUTO_RIGHT 2
+#define PV_MAUTO_TOP   4   /* vertical auto margins: the main axis of a column */
+#define PV_MAUTO_BOTTOM 8
 
 /* Sentinel for an unset author box vertical-margin override (box_mt/box_mb): the
  * presentation layer then uses the user-agent margin. Matches CSS_LEN_UNSET. */

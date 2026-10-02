@@ -941,3 +941,17 @@ malformed author CSS was already dropped fail-closed by `css` before reaching he
   segmento. Y una caja inline-block abierta se reconoce en cualquier posición del camino
   de cajas: sus cajas internas no se abren como bloques.
 
+
+## Reconciliación de un run sin caja (tanda 41)
+
+`block_id == -1` en un run significa "no pertenece a ninguna caja **debajo** de las
+que su propia cadena ya tiene abiertas", nunca "cerrá también a los ancestros".
+- Un run de texto sin caja reconcilia contra la caja abierta más profunda de su
+  camino (`deepest_open_on_path`).
+- Un reemplazado (`RD_IMAGE`/`RD_SVG`/`RD_VIDEO`) sin caja no es dueño de caja: no
+  cierra ni abre nada, queda dentro de lo que esté abierto.
+
+Dado-Cuando-Entonces:
+- Dado `<body>` con fondo y un `<img style=float:right>` sin caja en medio de los
+  resultados (ddg), cuando se maqueta, entonces la caja raíz es UNA sola y cubre
+  toda la página (antes terminaba en 167 px y reabría un segundo fragmento).

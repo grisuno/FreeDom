@@ -647,7 +647,8 @@ void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
 
 void pv_set_flex_mauto(pv_view *v, int mauto) {
     if (v == NULL || v->count == 0) return;
-    v->runs[v->count - 1].flex_mauto = mauto & (PV_MAUTO_LEFT | PV_MAUTO_RIGHT);
+    v->runs[v->count - 1].flex_mauto =
+        mauto & (PV_MAUTO_LEFT | PV_MAUTO_RIGHT | PV_MAUTO_TOP | PV_MAUTO_BOTTOM);
 }
 
 void pv_set_cont_item(pv_view *v, int cont_item) {
@@ -1315,7 +1316,9 @@ static int css_has_hbox(const css_style *cs) {
 /* The PV_MAUTO_* bits of an element's own horizontal auto margins. */
 static int pv_mauto_of(const css_style *cs) {
     return ((cs->margin_left == CSS_LEN_AUTO) ? PV_MAUTO_LEFT : 0)
-         | ((cs->margin_right == CSS_LEN_AUTO) ? PV_MAUTO_RIGHT : 0);
+         | ((cs->margin_right == CSS_LEN_AUTO) ? PV_MAUTO_RIGHT : 0)
+         | ((cs->margin_top == CSS_LEN_AUTO) ? PV_MAUTO_TOP : 0)
+         | ((cs->margin_bottom == CSS_LEN_AUTO) ? PV_MAUTO_BOTTOM : 0);
 }
 
 static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
@@ -2426,6 +2429,14 @@ static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *s
     return nel > 0;
 }
 
+/* True iff a column can have FREE space on its main axis: a px height or a px
+ * min-height floor. Without one, auto margins distribute nothing, and block flow is
+ * the same layout. Percentage heights are not resolved by this engine yet. */
+static int col_has_free_space(const css_style *cs) {
+    if (cs->min_height > 0) return 1;
+    return cs->height > 0 && cs->height != CSS_LEN_AUTO && !CSS_LEN_IS_INTRINSIC(cs->height);
+}
+
 /* A flex COLUMN with the initial geometry (no reverse, no wrap, justify-content
  * start, align-items stretch) stacks full-width items one below the other: exactly
  * block flow. Such a container is not registered, so its items reach the full block
@@ -2449,6 +2460,12 @@ static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style 
         if (ccs.order != CSS_LEN_UNSET && ccs.order != 0) return 0;
         if (ccs.align_self != CSS_AK_UNSET && ccs.align_self != CSS_AK_AUTO &&
             ccs.align_self != CSS_AK_STRETCH) return 0;
+        /* A growing item or a vertical auto margin distributes the column's free
+         * space (the sticky footer: `main{flex:1}`, `footer{margin-top:auto}`) --
+         * block flow has none to distribute. */
+        if ((ccs.margin_top == CSS_LEN_AUTO || ccs.margin_bottom == CSS_LEN_AUTO)
+            && col_has_free_space(cs))
+            return 0;
     }
     return 1;
 }

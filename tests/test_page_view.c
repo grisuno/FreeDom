@@ -2967,6 +2967,7 @@ static void test_link_color_inherit(void **state) {
     hp_document_free(doc);
 }
 
+
 static void test_pct_padding_generates_box(void **state) {
     (void)state;
     hp_document *doc = parse("<body><div class='ph'></div><p>x</p></body>");

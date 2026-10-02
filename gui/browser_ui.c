@@ -5382,6 +5382,11 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             int akw = (it_align != CSS_AK_UNSET && it_align != CSS_AK_AUTO)
                       ? it_align : cdv.align_items;
             kid->align = css_align_to_bt(akw);
+            /* In a column the initial `stretch` matters: an unset alignment fills
+             * the line (the row path keeps its v1 START approximation). */
+            if (is_col && (akw == CSS_AK_UNSET || akw == CSS_AK_AUTO ||
+                           akw == CSS_AK_STRETCH))
+                kid->align = BT_ALIGN_STRETCH;
         }
     } else {
         root.display = BX_DISPLAY_GRID;   /* flex row == grid with g columns, one row */
@@ -5763,10 +5768,19 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 if (mn > inner_h) inner_h = mn;
             }
         }
+        int ma[BT_MAX_CHILDREN];
+        for (size_t j = 0; j < g; ++j) {
+            const rd_block *bk0 = rd_at(doc, gstart[j]);
+            int nbc = child_cont_at_level(doc, bk0, cid);
+            const pv_cont_def *ncd0 = (nbc >= 0) ? rd_cont_at(doc, (size_t)nbc) : NULL;
+            int m = (ncd0 != NULL && ncd0->item_mauto != 0) ? ncd0->item_mauto : bk0->flex_mauto;
+            ma[pos_of[j]] = ((m & PV_MAUTO_TOP) ? FX_MAUTO_TOP : 0)
+                          | ((m & PV_MAUTO_BOTTOM) ? FX_MAUTO_BOTTOM : 0);
+        }
         double extent = 0.0;
-        if (fx_column_place(hs, gs, g, (double)(cdv.gap > 0 ? cdv.gap : 0), inner_h,
-                            cdv.justify, cdv.direction == CSS_FD_COLUMN_REVERSE,
-                            ys, ho, &extent) != FX_OK)
+        if (fx_column_place_m(hs, gs, ma, g, (double)(cdv.gap > 0 ? cdv.gap : 0), inner_h,
+                              cdv.justify, cdv.direction == CSS_FD_COLUMN_REVERSE,
+                              ys, ho, &extent) != FX_OK)
             return;
         for (size_t p = 0; p < g; ++p) {
             kids[p].y = ys[p] + mts[p];
@@ -6457,6 +6471,20 @@ static void reconcile_boxes(cairo_t *cr, const browser_window *w,
                             rc_layout *L, rc_state *s, const ui_theme *th,
                             const rd_doc *doc, double content_w, int block_id,
                             size_t run_i) {
+    /* "No box" means the run sits in no box BELOW the ones its own chain already
+     * has open -- never "close the ancestors too": closing <body> under the first
+     * box-less container ended its box (and any min-height:100%) halfway down the
+     * page, with the rest flowing outside it. */
+    if (block_id < 0 && run_i < rd_count(doc)) {
+        const rd_block *rb = rd_at(doc, run_i);
+        /* A replaced element carries no block_id of its own (it is not a box
+         * owner), so "-1" says nothing about where it sits: it is inside whatever
+         * is open. Closing everything for it ended <body> at the first image. */
+        if (rb->block_id < 0 && (rb->kind == RD_IMAGE || rb->kind == RD_SVG ||
+                                 rb->kind == RD_VIDEO))
+            return;
+        block_id = deepest_open_on_path(s, doc, rb->block_id);
+    }
     reconcile_boxes_below(cr, w, L, s, th, doc, content_w, block_id, run_i, -1);
 }
 

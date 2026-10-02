@@ -673,6 +673,13 @@ const char *fx_justify_name(fx_justify j) {
 fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
                           double inner_h, int justify, int reverse,
                           double *y_out, double *h_out, double *extent) {
+    return fx_column_place_m(h, grow, NULL, n, gap, inner_h, justify, reverse,
+                             y_out, h_out, extent);
+}
+
+fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
+                            size_t n, double gap, double inner_h, int justify,
+                            int reverse, double *y_out, double *h_out, double *extent) {
     if (extent != NULL) *extent = 0.0;
     if (n == 0) return FX_OK;
     if (h == NULL || y_out == NULL || h_out == NULL) return FX_ERR_NULL_ARG;
@@ -690,6 +697,15 @@ fx_status fx_column_place(const double *h, const double *grow, size_t n, double 
         for (size_t i = 0; i < n; ++i)
             if (grow[i] > 0.0) h_out[i] += free_px * grow[i] / gsum;
         free_px = 0.0;
+    }
+    /* Auto margins take whatever grow left (Flexbox 8.1), and then there is no
+     * free space for justify-content. */
+    double per_auto = 0.0;
+    if (free_px > 0.0 && mauto != NULL) {
+        int na = 0;
+        for (size_t i = 0; i < n; ++i)
+            na += ((mauto[i] & FX_MAUTO_TOP) != 0) + ((mauto[i] & FX_MAUTO_BOTTOM) != 0);
+        if (na > 0) { per_auto = free_px / (double)na; free_px = 0.0; }
     }
     double lead = 0.0, between = gap;
     switch (justify) {
@@ -712,8 +728,10 @@ fx_status fx_column_place(const double *h, const double *grow, size_t n, double 
     double y = lead;
     for (size_t k = 0; k < n; ++k) {
         size_t i = reverse ? n - 1 - k : k;
+        if (mauto != NULL && (mauto[i] & FX_MAUTO_TOP)) y += per_auto;
         y_out[i] = y;
         y += h_out[i];
+        if (mauto != NULL && (mauto[i] & FX_MAUTO_BOTTOM)) y += per_auto;
         if (extent != NULL) *extent = y;
         if (k + 1 < n) y += between;
     }

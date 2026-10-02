@@ -1704,6 +1704,72 @@ static void test_dump_layout_flex_row_item_vmargin(void **state) {
     unlink(path);
 }
 
+
+/* The sticky footer: a flex column with a min-height floor, the footer pushed to
+ * the bottom by its auto top margin and stretched across the column. */
+static void test_dump_layout_sticky_footer(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>t</title><style>body{margin:0;min-height:600px}"
+        "body{display:flex;flex-direction:column}main{flex-shrink:0}"
+        ".ft{margin-top:auto;background:#ddd;height:30px}</style></head>"
+        "<body><main><p>content</p></main><footer class=\"ft\">f</footer></body></html>";
+    const char *path = "__freedom_sticky.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_sticky.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    int saw = 0;
+    for (char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, w, h;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &w, &h) == 6
+            && h == 30.0 && w == 1000.0 && top == 570.0)
+            saw = 1;
+    }
+    assert_true(saw);
+    unlink(path);
+}
+
+/* A box-less replaced run (ddg's result favicon, a floated <img> with block_id -1)
+ * sits INSIDE whatever is open: reconciling it as "no box" closed <body> at the
+ * first image, so the root box (and its background/min-height) ended at 167 px and
+ * reopened below as a second fragment. The root box must be ONE box spanning the
+ * whole page. */
+static void test_dump_layout_root_box_survives_replaced_run(void **state) {
+    (void)state;
+    static char out[1 << 18];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --images --dump-layout "
+                                 "tests/parity/pages/ddg-results.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    double total = 0.0;
+    const char *t = strstr(out, "total_h=");
+    assert_non_null(t);
+    assert_int_equal(sscanf(t, "total_h=%lf", &total), 1);
+    int roots = 0;
+    double root_h = 0.0;
+    for (char *q = strstr(out, "  box["); q != NULL; q = strstr(q + 1, "  box[")) {
+        double x, top, w, h;
+        int bid;
+        size_t i;
+        if (sscanf(q, "  box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top,
+                   &w, &h) == 6 && bid == 0) {
+            ++roots;
+            root_h = h;
+        }
+    }
+    assert_int_equal(roots, 1);
+    assert_true(root_h >= total - 1.0);
+}
+
 /* float.md end-to-end: two floated siblings lay out SIDE BY SIDE (the second column's
  * rows start at a larger x_off than the first), and a wrapping position:relative
  * background panel stays IN FLOW (a box, not pushed to the page bottom by the
@@ -2502,6 +2568,8 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_oof_subtree_real_layout),
         cmocka_unit_test(test_dump_layout_flex_item_sibling_boxes),
         cmocka_unit_test(test_dump_layout_flex_row_item_vmargin),
+        cmocka_unit_test(test_dump_layout_sticky_footer),
+        cmocka_unit_test(test_dump_layout_root_box_survives_replaced_run),
         cmocka_unit_test(test_dump_layout_float_two_columns),
         cmocka_unit_test(test_dump_layout_pulled_rail_single_margin),
         cmocka_unit_test(test_dump_layout_flex_badges_share_row),

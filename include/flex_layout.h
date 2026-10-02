@@ -301,6 +301,15 @@ fx_status fx_column_place(const double *h, const double *grow, size_t n, double 
                           double inner_h, int justify, int reverse,
                           double *y_out, double *h_out, double *extent);
 
+/* As fx_column_place, plus each item's main-axis auto margins (mauto[i]: bits
+ * FX_MAUTO_TOP / FX_MAUTO_BOTTOM, NULL = none): after grow, any free space is
+ * split equally among the auto margins and justify-content is moot (Flexbox 8.1). */
+#define FX_MAUTO_TOP    1
+#define FX_MAUTO_BOTTOM 2
+fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
+                            size_t n, double gap, double inner_h, int justify,
+                            int reverse, double *y_out, double *h_out, double *extent);
+
 /* Cross-axis (horizontal) offset of a column item of width w in avail px. auto
  * margins win (both = centre, left only = end); else align (BT-style 0 start,
  * 1 center, 2 end, 3 stretch) places it. Never negative. */

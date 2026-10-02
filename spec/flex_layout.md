@@ -284,3 +284,20 @@ Dado-Cuando-Entonces:
 - Dado h={10,10}, inner_h 50, space-between, entonces y={0,40}.
 - Dado reverse con h={10,20}, entonces y={20,0}.
 - Dado avail 1000, w 280, center, entonces 360; con márgenes auto a la izquierda, 720.
+
+### Márgenes `auto` en el eje principal: `fx_column_place_m` (tanda 41)
+
+`fx_column_place_m(h, grow, mauto, n, gap, inner_h, justify, reverse, y_out, h_out,
+&extent)` es `fx_column_place` con una máscara por ítem (`FX_MAUTO_TOP`,
+`FX_MAUTO_BOTTOM`). Flexbox §8.1: el espacio libre que dejó `grow` lo absorben los
+márgenes `auto` del eje principal, repartido en partes iguales entre todos los
+márgenes `auto` de la línea, **antes** de `justify-content` (que entonces queda
+inerte). Es el *sticky footer* (`footer{margin-top:auto}`): el pie baja al fondo de
+la columna. `mauto == NULL` es exactamente `fx_column_place`.
+
+- Dado h={20,30}, mauto={0,TOP}, inner_h 100, entonces y={0,70}.
+- Dado h={20}, mauto={TOP|BOTTOM}, inner_h 100, entonces y=40 (centrado).
+- Dado mauto sin altura definida (inner_h 0), entonces apilado normal.
+
+Una columna con `align-items` inicial estira sus ítems al ancho (Flexbox §9.4,
+`stretch` es el valor inicial): el pie toma el ancho completo.

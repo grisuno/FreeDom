@@ -1056,6 +1056,15 @@ no se suma entre ítems, los márgenes entre ítems colapsan como en flujo de bl
 (en flex no colapsan) y `flex-grow` no reparte un `min-height` sobrante (solo afecta
 a páginas más cortas que su propio `min-height`).
 
+
+**Excepción (tanda 41):** un hijo con `margin-top:auto` o `margin-bottom:auto` en una
+columna con espacio libre en el eje principal (una `height` o `min-height` en px)
+sí registra el contenedor: los márgenes `auto` reparten ese espacio, y el flujo de
+bloques no sabe hacerlo. Sin espacio libre el margen `auto` vale 0 y el flujo de
+bloques sigue siendo la misma maqueta. Las alturas en porcentaje todavía no se
+resuelven (se midió: resolverlas contra el viewport normalizado de 1080 px partió
+wikipedia, bgp y ddg), así que no cuentan como espacio libre.
+
 ### Tanda 32 (2026-09-29): lobste.rs — lo inline-level es un átomo de su línea
 
 Todas medidas contra Firefox con sondas antes de tocar código (`tests/parity/pages/lobsters.html`,

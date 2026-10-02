@@ -1008,10 +1008,31 @@ static void test_cross_offset(void **state) {
     assert_true(fx_cross_offset(100.0, 280.0, 1, 0, 0) == 0.0);
 }
 
+
+/* Auto margins on the main axis of a column absorb the free space before
+ * justify-content (Flexbox 8.1): `footer{margin-top:auto}` sits at the bottom. */
+static void test_column_place_auto_margins(void **state) {
+    (void)state;
+    double y[3], h[3], ext = 0.0;
+    const double hh[2] = { 20.0, 20.0 };
+    const int ma[2] = { 0, FX_MAUTO_TOP };
+    assert_int_equal(fx_column_place_m(hh, NULL, ma, 2, 0.0, 100.0, FX_JUSTIFY_CENTER, 0,
+                                       y, h, &ext), FX_OK);
+    assert_true(y[0] == 0.0 && y[1] == 80.0 && ext == 100.0);
+    const int mb[2] = { FX_MAUTO_TOP | FX_MAUTO_BOTTOM, 0 };
+    fx_column_place_m(hh, NULL, mb, 2, 0.0, 100.0, FX_JUSTIFY_START, 0, y, h, &ext);
+    assert_true(y[0] == 30.0 && y[1] == 80.0);
+    /* grow takes the space first: nothing left for the auto margin */
+    const double gr[2] = { 1.0, 0.0 };
+    fx_column_place_m(hh, gr, ma, 2, 0.0, 100.0, FX_JUSTIFY_START, 0, y, h, &ext);
+    assert_true(h[0] == 80.0 && y[1] == 80.0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_column_place_stack_and_justify),
         cmocka_unit_test(test_cross_offset),
+        cmocka_unit_test(test_column_place_auto_margins),
         cmocka_unit_test(test_grow_equal),
         cmocka_unit_test(test_grow_weighted),
         cmocka_unit_test(test_shrink_equal),
