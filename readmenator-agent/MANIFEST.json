@@ -1,25 +1,327 @@
 {
   "tool": "readmenator",
-  "generated_at": "2026-10-02T05:29:11Z",
-  "project_root": "/home/grisun0/src_note/c/freedom-0.0.3",
+  "schema_version": 2,
+  "generated_at": "2026-10-08T00:40:43Z",
+  "project_root": ".",
+  "project_name": "push_FreeDom_20261007_212737",
+  "git_commit": "50e8303faef3b97f6883f0e34bde735fd2d7002c",
+  "git_branch": "security-export",
+  "source_fingerprint": "3629a7dce3a7ecb2bc811d3e288a9213455a4af87bc8903f820152279a54935a",
+  "freshness_check": "readmenator . fresh  # exit 0 = docs match sources, exit 1 = run: readmenator . --rebuild",
   "files": 255,
   "symbols": 6084,
-  "imports": 1735,
+  "imports": 1436,
+  "calls": 299,
+  "inherits": 0,
   "resolved_imports": 484,
   "security_findings": 0,
   "languages": {
-    "py": 5,
-    "sh": 5,
     "c": 168,
-    "h": 77
+    "h": 77,
+    "py": 5,
+    "sh": 5
   },
-  "entrypoints": [],
+  "subsystems": {
+    "fuzz": 21,
+    "gui": 6,
+    "include": 73,
+    "root": 6,
+    "src": 76,
+    "tests": 67,
+    "tools": 6
+  },
+  "entrypoints": [
+    "app.py"
+  ],
   "start_here": "INDEX.md",
+  "read_order": [
+    "readmenator-wiki/index.md  # big picture, communities, god nodes",
+    "readmenator-agent/INDEX.md  # file -> purpose -> used-by count",
+    "readmenator-agent/GOTCHAS.md  # blast radius before editing",
+    "readmenator-agent/KB_<subsystem>.md  # only the subsystem you touch"
+  ],
   "workflow": [
     "ls *.md readmenator-*/  # orient: docs first, ignore build noise",
-    "grep -n '<keyword>' INDEX.md",
+    "grep -n '<keyword>' INDEX*.md SYMBOLS*.md",
     "cat KB_<subsystem>.md",
-    "grep -n '<file>' ARCHITECTURE.md SYMBOLS.md"
+    "grep -n '<file>' ARCHITECTURE*.md API*.md"
+  ],
+  "documents": [
+    {
+      "path": "API.md",
+      "lines": 91,
+      "approx_tokens": 1434
+    },
+    {
+      "path": "API_p2.md",
+      "lines": 500,
+      "approx_tokens": 17496
+    },
+    {
+      "path": "API_p3.md",
+      "lines": 497,
+      "approx_tokens": 16228
+    },
+    {
+      "path": "API_p4.md",
+      "lines": 483,
+      "approx_tokens": 15823
+    },
+    {
+      "path": "API_p5.md",
+      "lines": 476,
+      "approx_tokens": 15402
+    },
+    {
+      "path": "API_p6.md",
+      "lines": 478,
+      "approx_tokens": 13425
+    },
+    {
+      "path": "API_p7.md",
+      "lines": 417,
+      "approx_tokens": 10299
+    },
+    {
+      "path": "API_p8.md",
+      "lines": 469,
+      "approx_tokens": 13519
+    },
+    {
+      "path": "API_p9.md",
+      "lines": 364,
+      "approx_tokens": 9625
+    },
+    {
+      "path": "ARCHITECTURE.md",
+      "lines": 491,
+      "approx_tokens": 5562
+    },
+    {
+      "path": "ARCHITECTURE_p2.md",
+      "lines": 236,
+      "approx_tokens": 3955
+    },
+    {
+      "path": "CONCEPTS.md",
+      "lines": 120,
+      "approx_tokens": 4249
+    },
+    {
+      "path": "GOTCHAS.md",
+      "lines": 75,
+      "approx_tokens": 1138
+    },
+    {
+      "path": "INDEX.md",
+      "lines": 259,
+      "approx_tokens": 6905
+    },
+    {
+      "path": "KB_fuzz.md",
+      "lines": 162,
+      "approx_tokens": 1545
+    },
+    {
+      "path": "KB_gui.md",
+      "lines": 500,
+      "approx_tokens": 10581
+    },
+    {
+      "path": "KB_gui_p2.md",
+      "lines": 252,
+      "approx_tokens": 5278
+    },
+    {
+      "path": "KB_include.md",
+      "lines": 461,
+      "approx_tokens": 7869
+    },
+    {
+      "path": "KB_include_p2.md",
+      "lines": 493,
+      "approx_tokens": 8551
+    },
+    {
+      "path": "KB_include_p3.md",
+      "lines": 487,
+      "approx_tokens": 8331
+    },
+    {
+      "path": "KB_include_p4.md",
+      "lines": 333,
+      "approx_tokens": 5680
+    },
+    {
+      "path": "KB_root.md",
+      "lines": 34,
+      "approx_tokens": 196
+    },
+    {
+      "path": "KB_src.md",
+      "lines": 491,
+      "approx_tokens": 9879
+    },
+    {
+      "path": "KB_src_p2.md",
+      "lines": 481,
+      "approx_tokens": 9166
+    },
+    {
+      "path": "KB_src_p3.md",
+      "lines": 491,
+      "approx_tokens": 8711
+    },
+    {
+      "path": "KB_src_p4.md",
+      "lines": 261,
+      "approx_tokens": 4658
+    },
+    {
+      "path": "KB_src_p5.md",
+      "lines": 374,
+      "approx_tokens": 7070
+    },
+    {
+      "path": "KB_src_p6.md",
+      "lines": 482,
+      "approx_tokens": 9282
+    },
+    {
+      "path": "KB_src_p7.md",
+      "lines": 478,
+      "approx_tokens": 9178
+    },
+    {
+      "path": "KB_tests.md",
+      "lines": 216,
+      "approx_tokens": 4761
+    },
+    {
+      "path": "KB_tests_p2.md",
+      "lines": 500,
+      "approx_tokens": 12221
+    },
+    {
+      "path": "KB_tests_p3.md",
+      "lines": 480,
+      "approx_tokens": 10453
+    },
+    {
+      "path": "KB_tests_p4.md",
+      "lines": 489,
+      "approx_tokens": 11414
+    },
+    {
+      "path": "KB_tests_p5.md",
+      "lines": 482,
+      "approx_tokens": 11572
+    },
+    {
+      "path": "KB_tests_p6.md",
+      "lines": 401,
+      "approx_tokens": 9311
+    },
+    {
+      "path": "KB_tools.md",
+      "lines": 87,
+      "approx_tokens": 1024
+    },
+    {
+      "path": "SECURITY.md",
+      "lines": 3,
+      "approx_tokens": 10
+    },
+    {
+      "path": "SYMBOLS.md",
+      "lines": 500,
+      "approx_tokens": 15399
+    },
+    {
+      "path": "SYMBOLS_p10.md",
+      "lines": 500,
+      "approx_tokens": 15866
+    },
+    {
+      "path": "SYMBOLS_p11.md",
+      "lines": 500,
+      "approx_tokens": 16148
+    },
+    {
+      "path": "SYMBOLS_p12.md",
+      "lines": 500,
+      "approx_tokens": 17029
+    },
+    {
+      "path": "SYMBOLS_p13.md",
+      "lines": 174,
+      "approx_tokens": 4813
+    },
+    {
+      "path": "SYMBOLS_p2.md",
+      "lines": 500,
+      "approx_tokens": 12479
+    },
+    {
+      "path": "SYMBOLS_p3.md",
+      "lines": 500,
+      "approx_tokens": 12828
+    },
+    {
+      "path": "SYMBOLS_p4.md",
+      "lines": 500,
+      "approx_tokens": 12630
+    },
+    {
+      "path": "SYMBOLS_p5.md",
+      "lines": 500,
+      "approx_tokens": 14245
+    },
+    {
+      "path": "SYMBOLS_p6.md",
+      "lines": 500,
+      "approx_tokens": 14651
+    },
+    {
+      "path": "SYMBOLS_p7.md",
+      "lines": 500,
+      "approx_tokens": 13686
+    },
+    {
+      "path": "SYMBOLS_p8.md",
+      "lines": 500,
+      "approx_tokens": 14301
+    },
+    {
+      "path": "SYMBOLS_p9.md",
+      "lines": 500,
+      "approx_tokens": 15843
+    },
+    {
+      "path": "recipes/add-function.md",
+      "lines": 9,
+      "approx_tokens": 99
+    },
+    {
+      "path": "recipes/change-impact.md",
+      "lines": 9,
+      "approx_tokens": 108
+    },
+    {
+      "path": "recipes/fix-cycle.md",
+      "lines": 7,
+      "approx_tokens": 106
+    },
+    {
+      "path": "recipes/fix-security.md",
+      "lines": 6,
+      "approx_tokens": 69
+    },
+    {
+      "path": "recipes/reduce-complexity.md",
+      "lines": 9,
+      "approx_tokens": 75
+    }
   ],
   "regenerate": "readmenator . --rebuild"
 }

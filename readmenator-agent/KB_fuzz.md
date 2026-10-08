@@ -1,6 +1,7 @@
 # Subsystem: fuzz
 
 ## fuzz/fuzz_css.c
+- Doc: fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed <html...
 - Layer: utility
 - Language: c
 - Symbols:
@@ -53,6 +54,7 @@
 - Depends on: `include/html_parse.h`
 
 ## fuzz/fuzz_image_decode.c
+- Doc: poke_and_free: Touch every claimed pixel corner so the sanitizer flags an out-of-bounds extent...
 - Layer: utility
 - Language: c
 - Symbols:
@@ -78,6 +80,7 @@
 - Depends on: `include/dom.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_geom.h`, `include/js_sandbox.h`, `include/js_trusted.h`, `include/url.h`, `include/web_storage.h`
 
 ## fuzz/fuzz_js_geom.c
+- Doc: fz_parent_of: trigger UB, and a decoded table must re-encode to a table that decodes again.
 - Layer: utility
 - Language: c
 - Symbols:
@@ -87,6 +90,7 @@
 - Depends on: `include/js_geom.h`
 
 ## fuzz/fuzz_js_sandbox.c
+- Doc: fz_mod: Module host for the fuzzer: every "./" specifier resolves, and "./self.js" loads the...
 - Layer: utility
 - Language: c
 - Symbols:
@@ -94,7 +98,7 @@
   - `fz_resolve` (function, line 23) `static int fz_resolve(void *host, const char *base, const char *spec, char *out, size_t outsz)`
   - `fz_fetch` (function, line 33) `static char *fz_fetch(void *host, const char *url, size_t *len)`
   - `LLVMFuzzerTestOneInput` (function, line 48) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-  - `js_sandbox` (function, line 2) `* libFuzzer harness for js_sandbox (Hito 3). * * Goal: arbitrary bytes treated as untrusted script through the full * eval + result + free pipeline must never crash, leak, or trigger UB on the * host.`
+  - `js_sandbox` (function, line 2) `* libFuzzer harness for js_sandbox (Hito 3). * * Goal: arbitrary bytes treated as untrusted script through the full...`
 - Depends on: `include/js_sandbox.h`
 
 ## fuzz/fuzz_page_view.c
@@ -110,8 +114,8 @@
 - Depends on: `include/pdf_export.h`
 
 ## fuzz/fuzz_prefetch.c
+- Doc: libFuzzer harness for the prefetch lookahead scanner (Hito 29).
 - Layer: utility
-- Doc: libFuzzer harness for the prefetch lookahead scanner (Hito 29). The scanned
 - Language: c
 - Symbols:
   - `LLVMFuzzerTestOneInput` (function, line 10) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`

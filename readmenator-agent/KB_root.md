@@ -1,8 +1,8 @@
 # Subsystem: root
 
 ## app.py
+- Doc: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL...
 - Layer: utility
-- Doc: app.py  Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: 
 - Language: py
 - Symbols:
   - `read_fuzz_stats` (function, line 30) `def read_fuzz_stats()`
@@ -14,21 +14,21 @@
 - Language: sh
 
 ## docker_run.sh
+- Doc: Thin wrapper.
 - Layer: utility
-- Doc: Thin wrapper. The docker build/run lives in the Makefile (single source of truth).
 - Language: sh
 
 ## fuzz.sh
+- Doc: Thin wrapper.
 - Layer: utility
-- Doc: Thin wrapper. The fuzz build/run logic now lives in the Makefile (single source of truth), so it can never drift from th
 - Language: sh
 
 ## install.sh
-- Layer: utility
 - Doc: Exit immediately if a command exits with a non-zero status,
+- Layer: utility
 - Language: sh
 
 ## run_freedom.sh
+- Doc: Thin wrapper.
 - Layer: utility
-- Doc: Thin wrapper. Launches a nested weston (for boxes without a Wayland session), then runs the browser through the Makefile
 - Language: sh

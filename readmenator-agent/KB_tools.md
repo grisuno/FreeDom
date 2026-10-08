@@ -1,8 +1,8 @@
 # Subsystem: tools
 
 ## tools/ffgeom.py
+- Doc: ffgeom -- Firefox geometry as TEXT, no image reading.
 - Layer: utility
-- Doc: ffgeom -- Firefox geometry as TEXT, no image reading.  The `make geom` loop needs Firefox's getBoundingClientRect() numb
 - Language: py
 - Symbols:
   - `load_rows` (function, line 99) `def load_rows(path)`
@@ -19,6 +19,7 @@
   - `word` (function, line 192) `def word(grid_row, origin)`
 
 ## tools/gen_psl.c
+- Doc: sort_unique: v->cap = v->cap ? v->cap * 2 : 1024; v->items = (char **)realloc(v->items, v->cap *...
 - Layer: utility
 - Language: c
 - Symbols:
@@ -32,8 +33,8 @@
   - `_POSIX_C_SOURCE` (macro, line 15) `#define _POSIX_C_SOURCE`
 
 ## tools/mutate.py
+- Doc: mutate -- compile-time mutation testing for the CMocka suites.
 - Layer: utility
-- Doc: mutate -- compile-time mutation testing for the CMocka suites.  One mutant = one operator substitution in one src/ file 
 - Language: py
 - Symbols:
   - `line_sites` (function, line 41) `def line_sites(text)`
@@ -44,7 +45,8 @@
   - `main` (function, line 137) `def main(argv)`
 
 ## tools/pngdiff.c
-- Layer: infrastructure
+- Doc: pd_reader_open: Opens `path` and normalises whatever colour type it carries into 8-bit RGB, so *...
+- Layer: utility
 - Language: c
 - Symbols:
   - `pd_profile` (struct, line 65)
@@ -63,8 +65,8 @@
   - `PD_INK_DELTA` (macro, line 63) `#define PD_INK_DELTA`
 
 ## tools/pngprof.py
+- Doc: pngprof -- structural ink-profile dump for page screenshots.
 - Layer: utility
-- Doc: pngprof -- structural ink-profile dump for page screenshots.  Build-time tool for Freedom layout work (companion to tool
 - Language: py
 - Symbols:
   - `load_rows` (function, line 41) `def load_rows(path)`
@@ -73,8 +75,8 @@
   - `main` (function, line 109) `def main(argv)`
 
 ## tools/snapshot.py
+- Doc: Freeze a live page into one self-contained HTML file for `make parity`.
 - Layer: utility
-- Doc: Freeze a live page into one self-contained HTML file for `make parity`.  Both engines must render the SAME document offl
 - Language: py
 - Symbols:
   - `fetch` (function, line 17) `def fetch(url)`

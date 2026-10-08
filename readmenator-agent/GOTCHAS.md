@@ -5,15 +5,29 @@
 These files have the most connections. Changes here have high blast radius.
 
 - `gui/browser_ui.c` (score: 136.50)
-- `include/css.h` (score: 79.10)
+- `include/css.h` (score: 79.10, imported by 32 files)
 - `src/tab.c` (score: 55.90)
 - `src/page_view.c` (score: 50.20)
-- `include/html_parse.h` (score: 48.40)
+- `include/html_parse.h` (score: 48.40, imported by 23 files)
 - `src/css.c` (score: 48.00)
 - `src/freedom.c` (score: 45.90)
-- `include/dom.h` (score: 40.80)
-- `include/page_view.h` (score: 39.20)
-- `tests/test_css.c` (score: 36.60)
+- `include/dom.h` (score: 40.80, imported by 18 files)
+- `include/page_view.h` (score: 39.20, imported by 13 files)
+
+## Blast Radius (change impact)
+
+Editing these files can break the listed number of dependents. Run their tests after any change.
+
+- `include/css_color.h` -- 13 direct, 51 total dependents
+- `include/css.h` -- 32 direct, 50 total dependents
+- `include/html_parse.h` -- 23 direct, 45 total dependents
+- `include/dom.h` -- 18 direct, 40 total dependents
+- `include/url.h` -- 16 direct, 26 total dependents
+- `include/css_select.h` -- 14 direct, 21 total dependents
+- `include/freebug.h` -- 12 direct, 21 total dependents
+- `include/js_geom.h` -- 8 direct, 21 total dependents
+- `include/js_sandbox.h` -- 16 direct, 19 total dependents
+- `include/page_view.h` -- 13 direct, 18 total dependents
 
 ## Hotspots (complexity + centrality)
 
@@ -21,12 +35,12 @@ These files have the most connections. Changes here have high blast radius.
 - `src/tab.c` -- complexity: 0.2, centrality: 0.5, combined: 0.4
 - `src/page_view.c` -- complexity: 0.4, centrality: 0.3, combined: 0.4
 - `src/css.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
-- `tests/test_css.c` -- complexity: 0.6, centrality: 0.1, combined: 0.3
 - `src/freedom.c` -- complexity: 0.1, centrality: 0.4, combined: 0.3
 - `include/css.h` -- complexity: 0.2, centrality: 0.3, combined: 0.3
 - `src/local_store.c` -- complexity: 0.5, centrality: 0.1, combined: 0.3
-- `tests/test_js_dom.c` -- complexity: 0.3, centrality: 0.2, combined: 0.3
-- `tests/test_page_view.c` -- complexity: 0.3, centrality: 0.2, combined: 0.2
+- `include/page_view.h` -- complexity: 0.1, centrality: 0.2, combined: 0.2
+- `src/js_dom.c` -- complexity: 0.1, centrality: 0.2, combined: 0.2
+- `include/html_parse.h` -- complexity: 0.0, centrality: 0.2, combined: 0.2
 
 ## Dependency Cycles
 
@@ -37,7 +51,6 @@ Circular dependencies. Refactor to break the cycle.
 ## Layer Violations
 
 - `gui/browser_ui.c` (presentation) -> `include/data_url.h` (data_access): presentation must not import data_access
-- `gui/browser_ui.c` (presentation) -> `include/form.h` (data_access): presentation must not import data_access
 - `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access): presentation must not import data_access
 - `src/render_doc.c` (presentation) -> `include/data_url.h` (data_access): presentation must not import data_access
 - `src/render_policy.c` (presentation) -> `include/data_url.h` (data_access): presentation must not import data_access
@@ -46,6 +59,7 @@ Circular dependencies. Refactor to break the cycle.
 - `tests/test_dom_debug.c` (testing) -> `include/page_view.h` (presentation): testing must not import presentation
 - `tests/test_dom_debug.c` (testing) -> `include/render_doc.h` (presentation): testing must not import presentation
 - `tests/test_dom_debug.c` (testing) -> `include/render_policy.h` (presentation): testing must not import presentation
+- `tests/test_flex_layout.c` (testing) -> `include/flex_layout.h` (presentation): testing must not import presentation
 
 ## Dataflow Issues (INFERRED, review each lead)
 
