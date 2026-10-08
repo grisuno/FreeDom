@@ -1,0 +1,236 @@
+# Architecture (page 2 of 2)
+Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
+
+## External Imports
+
+- `app.py` -> logging, mcp.server.fastmcp, os, subprocess, sys
+- `fuzz/fuzz_css.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_data_url.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_dom.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_dom_debug.c` -> stddef.h, stdint.h, string.h
+- `fuzz/fuzz_download.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_freebug.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_html_parse.c` -> stddef.h, stdint.h
+- `fuzz/fuzz_image_decode.c` -> stddef.h, stdint.h
+- `fuzz/fuzz_import_map.c` -> stdint.h, stdio.h, stdlib.h, string.h
+- `fuzz/fuzz_js_dom.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_js_geom.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_js_sandbox.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_page_view.c` -> stddef.h, stdint.h
+- `fuzz/fuzz_pdf_export.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_prefetch.c` -> stddef.h, stdint.h
+- `fuzz/fuzz_prefs.c` -> stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `fuzz/fuzz_svg_render.c` -> math.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_text_shape.c` -> stddef.h, stdint.h, stdlib.h
+- `fuzz/fuzz_tls_impersonate.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_url.c` -> stdint.h, stdlib.h, string.h, strings.h
+- `fuzz/fuzz_web_storage.c` -> stdint.h, stdlib.h, string.h
+- `gui/browser_ui.c` -> cairo/cairo-pdf.h, cairo/cairo.h, errno.h, fcntl.h, fontconfig/fontconfig.h, limits.h, math.h, poll.h, pthread.h, signal.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/mman.h, sys/stat.h, sys/timerfd.h, sys/wait.h, time.h, unistd.h, wayland-client.h, wayland-cursor.h, xdg-decoration-client-protocol.h, xdg-shell-client-protocol.h, xkbcommon/xkbcommon.h
+- `gui/browser_ui_internal.h` -> cairo/cairo.h
+- `gui/freedom_view.c` -> stdio.h, stdlib.h, string.h
+- `gui/svg_paint.c` -> math.h, string.h
+- `gui/ui_render.c` -> cairo/cairo.h, stdio.h, stdlib.h, string.h, sys/mman.h, unistd.h, wayland-client.h, xdg-decoration-client-protocol.h, xdg-shell-client-protocol.h
+- `include/anti_fp.h` -> stddef.h, stdint.h
+- `include/block_flow.h` -> stddef.h
+- `include/box_tree.h` -> stddef.h
+- `include/browser.h` -> stddef.h, stdint.h
+- `include/compositor.h` -> stddef.h
+- `include/css.h` -> stddef.h
+- `include/css_atrule.h` -> stddef.h
+- `include/css_chain.h` -> lexbor/html/html.h
+- `include/css_gradient.h` -> stddef.h
+- `include/css_length.h` -> stddef.h
+- `include/css_mq.h` -> stddef.h
+- `include/css_select.h` -> stddef.h, string.h
+- `include/css_vars.h` -> stddef.h
+- `include/data_url.h` -> stddef.h, stdint.h
+- `include/disk_store.h` -> stddef.h, stdint.h
+- `include/dom.h` -> stddef.h, stdint.h
+- `include/dom_debug.h` -> stddef.h
+- `include/download.h` -> stddef.h
+- `include/flex_layout.h` -> stddef.h
+- `include/form.h` -> stddef.h
+- `include/freebug.h` -> stddef.h
+- `include/hls.h` -> stddef.h
+- `include/hostblock.h` -> stddef.h
+- `include/hostedit.h` -> stddef.h
+- `include/html_parse.h` -> stddef.h, stdint.h
+- `include/image_decode.h` -> stddef.h, stdint.h
+- `include/import_map.h` -> stddef.h
+- `include/interp.h` -> stdint.h
+- `include/js_geom.h` -> stddef.h, stdint.h
+- `include/js_location.h` -> stddef.h
+- `include/js_policy.h` -> stdbool.h
+- `include/js_sandbox.h` -> stddef.h, stdint.h
+- `include/js_trusted.h` -> stddef.h
+- `include/link_nav.h` -> stddef.h
+- `include/local_store.h` -> stddef.h, stdint.h
+- `include/media_decoder.h` -> stddef.h, stdint.h, sys/types.h
+- `include/os_sandbox.h` -> stddef.h
+- `include/page_view.h` -> stddef.h, stdint.h
+- `include/pdf_export.h` -> stddef.h
+- `include/perf_trace.h` -> stddef.h, stdint.h
+- `include/prefetch.h` -> pthread.h, stddef.h
+- `include/prefs.h` -> stddef.h
+- `include/profile.h` -> stddef.h, stdint.h
+- `include/psl_data.h` -> stddef.h
+- `include/render_doc.h` -> stddef.h
+- `include/render_policy.h` -> stdbool.h
+- `include/renderer.h` -> stddef.h
+- `include/request_policy.h` -> stddef.h
+- `include/secure_fetch.h` -> stddef.h, stdint.h
+- `include/svg_paint.h` -> cairo.h
+- `include/svg_render.h` -> stddef.h
+- `include/tab.h` -> stddef.h, stdint.h, sys/types.h
+- `include/text_shape.h` -> cairo/cairo.h, stddef.h
+- `include/textfield.h` -> stddef.h
+- `include/tls_impersonate.h` -> stddef.h, stdint.h
+- `include/ui.h` -> stddef.h
+- `include/url.h` -> stddef.h
+- `include/util.h` -> errno.h, stddef.h, stdint.h, string.h, unistd.h
+- `include/web_storage.h` -> stddef.h
+- `include/webcaps.h` -> stdbool.h
+- `include/ws_hub.h` -> poll.h, stddef.h
+- `src/block_flow.c` -> math.h
+- `src/box_style.c` -> stddef.h, stdlib.h, string.h
+- `src/box_tree.c` -> stddef.h
+- `src/browser.c` -> stdlib.h, string.h
+- `src/css.c` -> limits.h, math.h, stdint.h, stdio.h, stdlib.h, string.h
+- `src/css_atrule.c` -> string.h
+- `src/css_box.c` -> math.h, stdlib.h, string.h
+- `src/css_chain.c` -> string.h
+- `src/css_color.c` -> math.h, stdlib.h, string.h
+- `src/css_gradient.c` -> ctype.h, stdlib.h, string.h
+- `src/css_length.c` -> math.h, string.h
+- `src/css_mq.c` -> string.h
+- `src/css_select.c` -> lexbor/html/html.h, string.h
+- `src/css_text.c` -> stdlib.h, string.h
+- `src/css_values.c` -> ctype.h, string.h
+- `src/css_vars.c` -> stdint.h, stdlib.h, string.h
+- `src/data_url.c` -> stdlib.h, string.h
+- `src/disk_store.c` -> errno.h, fcntl.h, stdint.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
+- `src/dom.c` -> lexbor/html/html.h, stdint.h, stdlib.h, string.h
+- `src/dom_debug.c` -> stdarg.h, stddef.h, stdio.h
+- `src/download.c` -> ctype.h, string.h
+- `src/flex_layout.c` -> stddef.h
+- `src/form.c` -> string.h
+- `src/freebug.c` -> stdlib.h, string.h
+- `src/freedom.c` -> limits.h, stdio.h, stdlib.h, string.h, time.h, unistd.h
+- `src/hls.c` -> stdlib.h, string.h
+- `src/hostblock.c` -> stdint.h, stdlib.h, string.h
+- `src/hostedit.c` -> string.h
+- `src/html_parse.c` -> lexbor/html/html.h, lexbor/tag/const.h, stdlib.h, string.h
+- `src/image_decode.c` -> jpeglib.h, png.h, setjmp.h, stdlib.h, string.h, webp/decode.h
+- `src/import_map.c` -> stdint.h, stdlib.h, string.h
+- `src/interp.c` -> float.h, math.h
+- `src/js_dom.c` -> quickjs.h, stdint.h, stdlib.h, string.h
+- `src/js_dom_ext.h` -> quickjs.h
+- `src/js_dom_internal.h` -> quickjs.h
+- `src/js_embed.c` -> quickjs.h, stdint.h, stdio.h, stdlib.h, string.h
+- `src/js_env.c` -> quickjs.h, stdint.h, stdio.h, stdlib.h, string.h, sys/random.h, time.h
+- `src/js_events.c` -> quickjs.h, stdint.h, stdio.h, stdlib.h, string.h
+- `src/js_fetch.c` -> quickjs.h, stdint.h, stdio.h, stdlib.h, string.h
+- `src/js_geom.c` -> math.h, stdlib.h, string.h
+- `src/js_location.c` -> quickjs.h, stdint.h, stdio.h, stdlib.h, string.h
+- `src/js_location_internal.h` -> quickjs.h
+- `src/js_policy.c` -> string.h
+- `src/js_sandbox.c` -> malloc.h, quickjs.h, stdlib.h, string.h, time.h
+- `src/js_trusted.c` -> quickjs.h, stdint.h, stdlib.h, string.h
+- `src/link_nav.c` -> string.h
+- `src/local_store.c` -> openssl/core_names.h, openssl/crypto.h, openssl/evp.h, openssl/kdf.h, openssl/params.h, openssl/rand.h, stdlib.h, string.h
+- `src/media_decoder.c` -> errno.h, libavcodec/avcodec.h, libavformat/avformat.h, libavutil/avutil.h, libavutil/imgutils.h, libswscale/swscale.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, unistd.h
+- `src/net_realm.c` -> stddef.h, string.h
+- `src/os_sandbox.c` -> errno.h, fcntl.h, linux/audit.h, linux/filter.h, linux/landlock.h, linux/seccomp.h, sched.h, stddef.h, stdint.h, string.h, sys/mman.h, sys/prctl.h, sys/resource.h, sys/syscall.h, unistd.h
+- `src/page_view.c` -> ctype.h, lexbor/html/html.h, lexbor/tag/const.h, stdint.h, stdio.h, stdlib.h, string.h
+- `src/pdf_export.c` -> string.h
+- `src/perf_trace.c` -> stdio.h, stdlib.h, string.h
+- `src/prefetch.c` -> stdlib.h, string.h
+- `src/prefs.c` -> stdio.h, stdlib.h, string.h
+- `src/profile.c` -> errno.h, fcntl.h, openssl/crypto.h, openssl/rand.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
+- `src/render_doc.c` -> stdlib.h, string.h
+- `src/renderer.c` -> errno.h, stdint.h, stdlib.h, string.h, sys/wait.h, unistd.h
+- `src/request_policy.c` -> stdlib.h, string.h
+- `src/secure_fetch.c` -> curl/curl.h, inttypes.h, openssl/objects.h, openssl/ssl.h, openssl/x509.h, pthread.h, stdlib.h, string.h, strings.h, time.h
+- `src/svg_render.c` -> math.h, stddef.h, string.h
+- `src/tab.c` -> errno.h, fcntl.h, linux/close_range.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, sys/random.h, sys/wait.h, time.h, unistd.h
+- `src/text_shape.c` -> cairo/cairo-ft.h, fontconfig/fontconfig.h, ft2build.h, harfbuzz/hb.h, stdio.h, stdlib.h, string.h
+- `src/textfield.c` -> string.h
+- `src/tls_impersonate.c` -> stdlib.h, string.h
+- `src/ui_layout.c` -> stdlib.h
+- `src/url.c` -> stdlib.h, string.h, strings.h
+- `src/web_storage.c` -> stdint.h, stdlib.h, string.h
+- `src/ws_hub.c` -> curl/curl.h, errno.h, fcntl.h, pthread.h, stdint.h, stdlib.h, string.h, sys/socket.h, unistd.h
+- `tests/itest_secure_fetch.c` -> stdio.h, string.h
+- `tests/test_anti_fp.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_block_flow.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tests/test_box_style.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_box_tree.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_browser.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_compositor.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tests/test_css.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_css_atrule.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_css_box.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
+- `tests/test_css_color.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_css_drops.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h
+- `tests/test_css_gradient.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
+- `tests/test_css_length.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tests/test_css_mq.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_css_text.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
+- `tests/test_css_values.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
+- `tests/test_css_vars.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_data_url.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_disk_store.c` -> cmocka.h, dirent.h, fcntl.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
+- `tests/test_dom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_dom_debug.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_download.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_flex_layout.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
+- `tests/test_form.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_frame_clock.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tests/test_freebug.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_freedom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/wait.h, unistd.h
+- `tests/test_hls.c` -> cmocka.h, setjmp.h, stddef.h, stdlib.h, string.h
+- `tests/test_hostblock.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_hostedit.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_html_parse.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_image_decode.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_import_map.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
+- `tests/test_interp.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tests/test_js_dom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_js_env.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_js_geom.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_js_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_js_sandbox.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_link_nav.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_local_store.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_media_decoder.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tests/test_net_realm.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_os_sandbox.c` -> cmocka.h, errno.h, fcntl.h, linux/audit.h, sched.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/mman.h, sys/prctl.h, sys/resource.h, sys/socket.h, sys/stat.h, sys/syscall.h, sys/wait.h, unistd.h
+- `tests/test_page_view.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_pdf_export.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_perf_trace.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_prefetch.c` -> cmocka.h, pthread.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_prefs.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_profile.c` -> cmocka.h, dirent.h, fcntl.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
+- `tests/test_render_doc.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_render_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_renderer.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_request_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_secure_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_svg_render.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_tab.c` -> cmocka.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/types.h, time.h, unistd.h
+- `tests/test_text_shape.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_textfield.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_tls_impersonate.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_ui.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_url.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_web_storage.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_webcaps.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_ws_hub.c` -> cmocka.h, poll.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h, time.h
+- `tests/test_zoom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tools/ffgeom.py` -> re, struct, subprocess, sys, zlib
+- `tools/gen_psl.c` -> stdio.h, stdlib.h, string.h
+- `tools/mutate.py` -> os, re, shutil, subprocess, sys
+- `tools/pngdiff.c` -> math.h, png.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tools/pngprof.py` -> struct, sys, zlib
+- `tools/snapshot.py` -> re, sys, urllib.parse, urllib.request
+
