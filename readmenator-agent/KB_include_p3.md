@@ -1,0 +1,487 @@
+# Subsystem: include (page 3 of 4)
+Previous: [KB_include_p2.md](KB_include_p2.md)
+
+## include/js_geom.h
+- Doc: jg_init: typedef struct jg_rect { dom_node_id node; int32_t     x, y, w, h;       /* document...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `jg_rect` (struct, line 30)
+  - `jg_table` (struct, line 35)
+  - `node` (type_alias, line 29) `typedef struct jg_rect { dom_node_id node;`
+  - `jg_init` (function, line 44) `void jg_init(jg_table *t);`
+  - `jg_free` (function, line 47) `void jg_free(jg_table *t);`
+  - `jg_add` (function, line 52) `int jg_add(jg_table *t, dom_node_id node, double x, double y, double w, double h);`
+  - `jg_finish` (function, line 56) `int jg_finish(jg_table *t);`
+  - `jg_find` (function, line 59) `const jg_rect *jg_find(const jg_table *t, dom_node_id node);`
+  - `jg_aggregate` (function, line 65) `int jg_aggregate(jg_table *t, dom_node_id (*parent)(void *ctx, dom_node_id node), void *ctx);`
+  - `jg_wire_len` (function, line 68) `size_t jg_wire_len(const jg_table *t);`
+  - `jg_encode` (function, line 71) `int jg_encode(const jg_table *t, int32_t *out, size_t cap);`
+  - `jg_decode` (function, line 77) `int jg_decode(const int32_t *in, size_t n, jg_table *out);`
+  - `jg_hash` (function, line 80) `uint64_t jg_hash(const jg_table *t);`
+  - `FREEDOM_JS_GEOM_H` (macro, line 2) `#define FREEDOM_JS_GEOM_H`
+  - `JG_MAX_RECTS` (macro, line 24) `#define JG_MAX_RECTS`
+  - `JG_MAX_DEPTH` (macro, line 25) `#define JG_MAX_DEPTH`
+  - `JG_COORD_MAX` (macro, line 26) `#define JG_COORD_MAX`
+  - `JG_HEADER_N` (macro, line 27) `#define JG_HEADER_N`
+  - `JG_RECT_N` (macro, line 28) `#define JG_RECT_N`
+- Depends on: `include/dom.h`
+- Imported by: `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_js_geom.c`, `include/js_dom.h`, `include/tab.h`, `src/js_geom.c`, `tests/test_js_dom.c`, `tests/test_js_geom.c`, `tests/test_tab.c`
+
+## include/js_location.h
+- Doc: jd_take_history: Drains the history operations page JS performed since the last call: an owned...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `reads` (function, line 25) `* reads (NULL => only href is known, the rest fall back to stub defaults). Call after * jd_install, on the page's...`
+  - `jd_take_history` (function, line 38) `char *jd_take_history(js_context *ctx, int *go);`
+  - `jd_pop_state` (function, line 44) `int jd_pop_state(js_context *ctx, int index);`
+  - `acting` (function, line 49) `* The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */ int...`
+  - `FREEDOM_JS_LOCATION_H` (macro, line 2) `#define FREEDOM_JS_LOCATION_H`
+  - `JD_HIST_MAX` (macro, line 31) `#define JD_HIST_MAX`
+- Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `include/url.h`
+- Imported by: `include/js_dom.h`
+
+## include/js_policy.h
+- Doc: jsp_trusted: Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its...
+- Layer: business_logic
+- Language: h
+- Symbols:
+  - `jsp_mode` (enum, line 27)
+  - `membership` (function, line 16) `* membership (the allowlist itself is matched by the hostblock module, which * already covers subdomains). No I/O...`
+  - `allowlist` (function, line 34) `* allowlist (e.g. hb_is_allowlisted over js.conf). Fails closed: an unknown mode * yields false. */ bool...`
+  - `jsp_trusted` (function, line 45) `bool jsp_trusted(bool js_enabled, int host_allowlisted);`
+  - `jsp_present_trusted` (function, line 54) `bool jsp_present_trusted(int host_allowlisted);`
+  - `jsp_mode_str` (function, line 64) `const char *jsp_mode_str(jsp_mode mode);`
+  - `FREEDOM_JS_POLICY_H` (macro, line 2) `#define FREEDOM_JS_POLICY_H`
+- Imported by: `gui/browser_ui.c`, `include/webcaps.h`, `src/freedom.c`, `src/js_policy.c`, `tests/test_js_policy.c`
+
+## include/js_sandbox.h
+- Doc: js_limits: Per-evaluation resource limits.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `js_limits` (struct, line 39)
+  - `js_result` (struct, line 49)
+  - `js_status` (enum, line 24)
+  - `max_source_bytes` (type_alias, line 39) `typedef struct js_limits { size_t max_source_bytes;`
+  - `js_context` (type_alias, line 47) `typedef struct js_context js_context;`
+  - `status` (type_alias, line 48) `typedef struct js_result { js_status status;`
+  - `js_context_free` (function, line 86) `void js_context_free(js_context *ctx);`
+  - `loaded` (function, line 114) `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...`
+  - `js_set_module_host` (function, line 119) `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);`
+  - `js_loc_from_stack` (function, line 140) `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);`
+  - `js_set_time_budget` (function, line 148) `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);`
+  - `js_result_free` (function, line 151) `void js_result_free(js_result *res);`
+  - `js_pump_jobs` (function, line 159) `int js_pump_jobs(js_context *ctx, int max_jobs);`
+  - `handle` (function, line 162) `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
+  - `js_set_current_script` (function, line 171) `void js_set_current_script(js_context *ctx, const char *src, const char *type);`
+  - `FREEDOM_JS_SANDBOX_H` (macro, line 2) `#define FREEDOM_JS_SANDBOX_H`
+  - `JS_LOC_FILE_MAX` (macro, line 64) `#define JS_LOC_FILE_MAX`
+  - `JS_DEFAULT_MAX_SOURCE` (macro, line 66) `#define JS_DEFAULT_MAX_SOURCE`
+  - `JS_DEFAULT_MEM_LIMIT` (macro, line 67) `#define JS_DEFAULT_MEM_LIMIT`
+  - `JS_DEFAULT_STACK_LIMIT` (macro, line 68) `#define JS_DEFAULT_STACK_LIMIT`
+  - `JS_DEFAULT_TIME_BUDGET` (macro, line 69) `#define JS_DEFAULT_TIME_BUDGET`
+  - `JS_MODULE_MAX` (macro, line 105) `#define JS_MODULE_MAX`
+  - `JS_MODULE_BYTES_MAX` (macro, line 106) `#define JS_MODULE_BYTES_MAX`
+  - `JS_REALM_MAX` (macro, line 179) `#define JS_REALM_MAX`
+- Imported by: `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_js_sandbox.c`, `include/js_dom.h`, `include/js_env.h`, `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_sandbox.c`
+
+## include/js_trusted.h
+- Doc: jt_take_opens: Installs window.open for a TRUSTED host (allow.conf AND js.conf) only (plan B4c)....
+- Layer: utility
+- Language: h
+- Symbols:
+  - `jt_ws_op` (struct, line 46)
+  - `jt_ws_kind` (enum, line 39)
+  - `jt_ws_event_kind` (enum, line 53)
+  - `kind` (type_alias, line 45) `typedef struct jt_ws_op { int kind;`
+  - `null` (function, line 24) `* noopener semantics: it returns null (no cross-window reference, so no same-origin * channel) and only records up...`
+  - `jt_take_opens` (function, line 31) `char *jt_take_opens(js_context *ctx);`
+  - `parent` (function, line 58) `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);`
+  - `jt_take_ws` (function, line 64) `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);`
+  - `jt_ws_ops_free` (function, line 65) `void jt_ws_ops_free(jt_ws_op *ops, size_t n);`
+  - `jt_ws_event` (function, line 70) `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);`
+  - `jt_take_storage` (function, line 82) `int jt_take_storage(js_context *ctx, char **out, size_t *len);`
+  - `realm` (function, line 85) `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...`
+  - `FREEDOM_JS_TRUSTED_H` (macro, line 2) `#define FREEDOM_JS_TRUSTED_H`
+  - `JT_WS_MAX` (macro, line 35) `#define JT_WS_MAX`
+  - `JT_WS_MAX_OPS` (macro, line 36) `#define JT_WS_MAX_OPS`
+  - `JT_WS_MAX_BYTES` (macro, line 37) `#define JT_WS_MAX_BYTES`
+- Depends on: `include/js_dom.h`, `include/js_sandbox.h`
+- Imported by: `fuzz/fuzz_js_dom.c`, `src/js_trusted.c`, `src/tab.c`, `tests/test_js_dom.c`
+
+## include/link_nav.h
+- Doc: ln_block_reason: Why a reference was blocked, for a precise user-facing notice and for *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ln_result` (struct, line 62)
+  - `ln_action` (enum, line 40)
+  - `ln_target_kind` (enum, line 46)
+  - `ln_block_reason` (enum, line 54)
+  - `ln_status` (enum, line 70)
+  - `action` (type_alias, line 61) `typedef struct ln_result { ln_action action;`
+  - `dropped` (function, line 36) `* A longer fragment is dropped (stored as "");`
+  - `ln_block_reason_text` (function, line 85) `const char *ln_block_reason_text(ln_block_reason reason);`
+  - `FREEDOM_LINK_NAV_H` (macro, line 2) `#define FREEDOM_LINK_NAV_H`
+  - `LN_MAX_TARGET` (macro, line 33) `#define LN_MAX_TARGET`
+  - `LN_MAX_FRAGMENT` (macro, line 38) `#define LN_MAX_FRAGMENT`
+- Imported by: `fuzz/fuzz_url.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/link_nav.c`, `src/tab.c`, `tests/test_link_nav.c`
+
+## include/local_store.h
+- Doc: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and...
+- Layer: data_access
+- Language: h
+- Symbols:
+  - `ls_aead` (enum, line 34)
+  - `ls_status` (enum, line 39)
+  - `ls_free` (function, line 80) `void ls_free(uint8_t *buf, size_t len);`
+  - `FREEDOM_LOCAL_STORE_H` (macro, line 2) `#define FREEDOM_LOCAL_STORE_H`
+  - `LS_KEY_LEN` (macro, line 26) `#define LS_KEY_LEN`
+  - `LS_SALT_LEN` (macro, line 27) `#define LS_SALT_LEN`
+  - `LS_NONCE_LEN` (macro, line 28) `#define LS_NONCE_LEN`
+  - `LS_TAG_LEN` (macro, line 29) `#define LS_TAG_LEN`
+  - `LS_HEADER_LEN` (macro, line 30) `#define LS_HEADER_LEN`
+  - `LS_OVERHEAD` (macro, line 31) `#define LS_OVERHEAD`
+  - `LS_MAX_PLAINTEXT` (macro, line 32) `#define LS_MAX_PLAINTEXT`
+- Imported by: `include/disk_store.h`, `include/profile.h`, `src/disk_store.c`, `src/local_store.c`, `tests/test_disk_store.c`, `tests/test_local_store.c`
+
+## include/media_decoder.h
+- Doc: md_cmd: Communicates with the parent over two pipes: out_fd: decoder → parent (frames, stream...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `md_pacer` (struct, line 67)
+  - `md_cmd` (enum, line 29)
+  - `md_resp` (enum, line 38)
+  - `epoch_ms` (type_alias, line 66) `typedef struct md_pacer { uint64_t epoch_ms;`
+  - `md_pace_due_ms` (function, line 79) `static inline uint64_t md_pace_due_ms(md_pacer *p, uint64_t now_ms,
+                             ...`
+  - `media_decoder_run` (function, line 99) `void media_decoder_run(int out_fd, int cmd_fd);`
+  - `media_decoder_spawn` (function, line 104) `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd);`
+  - `FREEDOM_MEDIA_DECODER_H` (macro, line 2) `#define FREEDOM_MEDIA_DECODER_H`
+  - `MD_MAX_SEGMENT_BYTES` (macro, line 46) `#define MD_MAX_SEGMENT_BYTES`
+  - `MD_PACE_MAX_LAG_MS` (macro, line 58) `#define MD_PACE_MAX_LAG_MS`
+  - `MD_PACE_MAX_STEP_MS` (macro, line 62) `#define MD_PACE_MAX_STEP_MS`
+  - `MD_MAX_CATCHUP_READS` (macro, line 65) `#define MD_MAX_CATCHUP_READS`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/media_decoder.c`, `tests/test_media_decoder.c`
+
+## include/net_realm.h
+- Doc: nr_realm_allows_http: 1 iff plain http:// is acceptable for this realm.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `nr_config` (struct, line 42)
+  - `nr_realm` (enum, line 29)
+  - `nr_route` (enum, line 35)
+  - `tor_enabled` (type_alias, line 41) `typedef struct nr_config { int tor_enabled;`
+  - `NR_ROUTE_BLOCKED` (function, line 57) `* NR_ROUTE_BLOCKED (fail closed: never route what cannot be classified). A realm * whose proxy is not enabled =>...`
+  - `address` (function, line 62) `* and encrypts by its address (the I2P destination / onion key), so http over it is * not a downgrade. Currently...`
+  - `nr_realm_allows_http` (function, line 66) `int nr_realm_allows_http(nr_realm r);`
+  - `nr_realm_name` (function, line 69) `const char *nr_realm_name(nr_realm r);`
+  - `nr_route_name` (function, line 70) `const char *nr_route_name(nr_route r);`
+  - `FREEDOM_NET_REALM_H` (macro, line 2) `#define FREEDOM_NET_REALM_H`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/net_realm.c`, `tests/test_net_realm.c`
+
+## include/os_sandbox.h
+- Doc: os_violation: function (os_policy_allows) that mirrors the installed BPF program.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `os_fs_rule` (struct, line 108)
+  - `os_status` (enum, line 21)
+  - `os_violation` (enum, line 30)
+  - `os_fs_access` (enum, line 102)
+  - `flags` (function, line 39) `* permission also depends on the protection flags (see os_prot_allowed / W^X). */ int os_policy_allows(long syscall_nr);`
+  - `os_policy_size` (function, line 43) `size_t os_policy_size(void);`
+  - `os_prot_allowed` (function, line 52) `int os_prot_allowed(long syscall_nr, unsigned long prot);`
+  - `denied` (function, line 59) `* request PROT_EXEC are denied (see os_prot_allowed). * Returns OS_ERR_UNSUPPORTED on platforms without seccomp-bpf...`
+  - `namespace` (function, line 75) `* namespace (the unprivileged enabler), network (the worker never needs the * network -- the parent fetches and...`
+  - `os_namespace_flags` (function, line 81) `int os_namespace_flags(void);`
+  - `os_landlock_abi` (function, line 114) `int os_landlock_abi(void);`
+  - `FREEDOM_OS_SANDBOX_H` (macro, line 2) `#define FREEDOM_OS_SANDBOX_H`
+- Imported by: `src/os_sandbox.c`, `src/renderer.c`, `src/tab.c`, `tests/test_os_sandbox.c`
+
+## include/page_view.h
+- Doc: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `pv_run` (struct, line 118)
+  - `pv_box_def` (struct, line 406)
+  - `pv_cont_def` (struct, line 695)
+  - `pv_view` (struct, line 732)
+  - `pv_text_ext` (struct, line 893)
+  - `pv_status` (enum, line 34)
+  - `pv_kind` (enum, line 68)
+  - `pv_input_type` (enum, line 84)
+  - `pv_form_method` (enum, line 104)
+  - `kind` (type_alias, line 118) `typedef struct pv_run { pv_kind kind;`
+  - `parent_id` (type_alias, line 406) `typedef struct pv_box_def { int parent_id;`
+  - `parent_id` (type_alias, line 695) `typedef struct pv_cont_def { int parent_id;`
+  - `word_spacing` (type_alias, line 893) `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;`
+  - `container` (function, line 217) `* cont_id groups runs of one container (-1 = none);`
+  - `bx_display` (function, line 218) `* bx_display (flex/grid);`
+  - `order` (function, line 282) `* groups the runs of ONE floated element in document order (-1 = not in a float);`
+  - `itself` (function, line 333) `* by itself (bx_width_cap2);`
+  - `CSS_LEN_UNSET` (function, line 479) `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
+  - `scale` (function, line 554) `* scale(1)) and rotate in whole degrees (transform_rotate);`
+  - `nonzero` (function, line 757) `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
+  - `resolved` (function, line 764) `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
+  - `policy` (function, line 772) `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
+  - `cause` (function, line 790) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
+  - `pv_new` (function, line 802) `pv_view *pv_new(void);`
+  - `form` (function, line 821) `* form (-1 if none);`
+  - `pv_set_emphasis` (function, line 853) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
+  - `default` (function, line 858) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
+  - `pv_set_color` (function, line 861) `void pv_set_color(pv_view *v, int fg_rgb);`
+  - `pv_set_bgcolor` (function, line 868) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
+  - `pv_set_text_style` (function, line 877) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
+  - `pv_text_ext_reset` (function, line 924) `void pv_text_ext_reset(pv_text_ext *e);`
+  - `ancestors` (function, line 929) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
+  - `pv_set_text_ext` (function, line 939) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
+  - `pv_set_grad_text` (function, line 945) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
+  - `run` (function, line 948) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
+  - `pv_set_row_span` (function, line 961) `void pv_set_row_span(pv_view *v, int row_span);`
+  - `pv_set_grid_area` (function, line 965) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
+  - `pv_set_grid_rows` (function, line 966) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
+  - `pv_set_ua_tag` (function, line 971) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
+  - `pv_set_cont_box` (function, line 975) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
+  - `pv_set_grid` (function, line 976) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
+  - `pv_set_flex` (function, line 984) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...`
+  - `pv_set_flex_mauto` (function, line 987) `void pv_set_flex_mauto(pv_view *v, int mauto);`
+  - `pv_set_cont_item` (function, line 991) `void pv_set_cont_item(pv_view *v, int cont_item);`
+  - `pv_set_float` (function, line 1000) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
+  - `pv_set_box` (function, line 1010) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
+  - `pv_set_box_pct` (function, line 1016) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
+  - `pv_set_box_maxw` (function, line 1021) `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);`
+  - `pv_set_node_id` (function, line 1026) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
+  - `pv_set_block_id` (function, line 1031) `void pv_set_block_id(pv_view *v, int block_id);`
+  - `pv_set_own_box` (function, line 1035) `void pv_set_own_box(pv_view *v, int box_id);`
+  - `pv_set_oof` (function, line 1039) `void pv_set_oof(pv_view *v, int oof);`
+  - `pv_cont_count` (function, line 1054) `size_t pv_cont_count(const pv_view *v);`
+  - `pv_cont_at` (function, line 1055) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
+  - `pv_set_input_checked` (function, line 1059) `void pv_set_input_checked(pv_view *v, int checked);`
+  - `pv_set_input_select_opts` (function, line 1063) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
+  - `pv_free` (function, line 1066) `void pv_free(pv_view *v);`
+  - `pv_count` (function, line 1069) `size_t pv_count(const pv_view *v);`
+  - `pv_at` (function, line 1070) `const pv_run *pv_at(const pv_view *v, size_t i);`
+  - `pv_box_count` (function, line 1074) `size_t pv_box_count(const pv_view *v);`
+  - `pv_box_at` (function, line 1075) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
+  - `FREEDOM_PAGE_VIEW_H` (macro, line 2) `#define FREEDOM_PAGE_VIEW_H`
+  - `PV_MAUTO_LEFT` (macro, line 43) `#define PV_MAUTO_LEFT`
+  - `PV_MAUTO_RIGHT` (macro, line 44) `#define PV_MAUTO_RIGHT`
+  - `PV_MAUTO_TOP` (macro, line 45) `#define PV_MAUTO_TOP`
+  - `PV_MAUTO_BOTTOM` (macro, line 46) `#define PV_MAUTO_BOTTOM`
+  - `PV_LEN_UNSET` (macro, line 50) `#define PV_LEN_UNSET`
+  - `PV_LEN_AUTO` (macro, line 51) `#define PV_LEN_AUTO`
+  - `PV_LEN_END` (macro, line 52) `#define PV_LEN_END`
+  - `PV_GRID_TRACKS` (macro, line 55) `#define PV_GRID_TRACKS`
+  - `PV_CONT_DEPTH` (macro, line 60) `#define PV_CONT_DEPTH`
+  - `PV_BG_URL_MAX` (macro, line 66) `#define PV_BG_URL_MAX`
+- Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+
+## include/pdf_export.h
+- Doc: pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order)...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `pe_status` (enum, line 33)
+  - `fallback` (function, line 46) `* fallback (PE_ERR_OVERFLOW, out left empty). title == NULL is treated as empty. * Does NOT append the extension...`
+  - `trusted` (function, line 51) `* dir is trusted (chosen by the app from XDG/$HOME);`
+  - `literal` (function, line 52) `* trusted literal (e.g. PE_EXT / PE_EXT_PNG);`
+  - `pe_paginate` (function, line 70) `size_t pe_paginate(const double *tops, const double *heights, size_t n, double page_h, int *out_page, double...`
+  - `FREEDOM_PDF_EXPORT_H` (macro, line 2) `#define FREEDOM_PDF_EXPORT_H`
+  - `PE_NAME_MAX` (macro, line 28) `#define PE_NAME_MAX`
+  - `PE_EXT` (macro, line 29) `#define PE_EXT`
+  - `PE_EXT_PNG` (macro, line 30) `#define PE_EXT_PNG`
+  - `PE_FALLBACK_NAME` (macro, line 31) `#define PE_FALLBACK_NAME`
+- Imported by: `fuzz/fuzz_pdf_export.c`, `gui/browser_ui.c`, `src/download.c`, `src/pdf_export.c`, `tests/test_pdf_export.c`
+
+## include/perf_trace.h
+- Doc: pt_init: #define PT_MAX_SAMPLES 256 typedef struct pt_stage_stats { uint64_t...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `pt_stage_stats` (struct, line 34)
+  - `pt_trace` (struct, line 41)
+  - `order` (enum, line 71)
+  - `samples` (type_alias, line 33) `typedef struct pt_stage_stats { uint64_t samples[PT_MAX_SAMPLES];`
+  - `stage` (type_alias, line 40) `typedef struct pt_trace { pt_stage_stats stage[PT_STAGE_COUNT];`
+  - `pt_init` (function, line 46) `void pt_init(pt_trace *t);`
+  - `pt_elapsed_us` (function, line 50) `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us);`
+  - `pt_record` (function, line 54) `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us);`
+  - `pt_count` (function, line 57) `size_t pt_count(const pt_trace *t, pt_stage stage);`
+  - `pt_last_us` (function, line 60) `uint64_t pt_last_us(const pt_trace *t, pt_stage stage);`
+  - `pt_min_us` (function, line 63) `uint64_t pt_min_us(const pt_trace *t, pt_stage stage);`
+  - `pt_max_us` (function, line 64) `uint64_t pt_max_us(const pt_trace *t, pt_stage stage);`
+  - `pt_median_us` (function, line 65) `uint64_t pt_median_us(const pt_trace *t, pt_stage stage);`
+  - `pt_stage_name` (function, line 69) `const char *pt_stage_name(pt_stage stage);`
+  - `pt_format` (function, line 76) `size_t pt_format(const pt_trace *t, char *buf, size_t cap);`
+  - `FREEDOM_PERF_TRACE_H` (macro, line 2) `#define FREEDOM_PERF_TRACE_H`
+  - `PT_MAX_SAMPLES` (macro, line 32) `#define PT_MAX_SAMPLES`
+- Imported by: `src/freedom.c`, `src/perf_trace.c`, `tests/test_perf_trace.c`
+
+## include/prefetch.h
+- Doc: pf_ref: One scanned reference. url is the RAW attribute value (the policy-gated fetcher *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `pf_ref` (struct, line 42)
+  - `pf_list` (struct, line 50)
+  - `pf_job` (struct, line 77)
+  - `pf_pool` (struct, line 87)
+  - `pf_gated_fetch` (struct, line 129)
+  - `pf_kind` (enum, line 35)
+  - `pf_job_state` (enum, line 70)
+  - `kind` (type_alias, line 42) `typedef struct pf_ref { pf_kind kind;`
+  - `refs` (type_alias, line 49) `typedef struct pf_list { pf_ref refs[PF_MAX_REFS];`
+  - `jobs` (type_alias, line 86) `typedef struct pf_pool { pf_job jobs[PF_MAX_REFS];`
+  - `inner` (type_alias, line 129) `typedef struct pf_gated_fetch { pf_fetch_fn inner;`
+  - `pf_scan` (function, line 59) `int pf_scan(const char *html, size_t len, pf_list *out);`
+  - `pf_list_free` (function, line 60) `void pf_list_free(pf_list *l);`
+  - `fetch` (function, line 102) `* claiming jobs and running fetch(ctx, "GET", url, ...). Returns 0 on success or * -1 when no thread could start...`
+  - `pf_pool_take` (function, line 115) `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body, size_t *len, char **ctype);`
+  - `pf_pool_finish` (function, line 121) `void pf_pool_finish(pf_pool *p);`
+  - `pool` (function, line 125) `* whose URL is pooled is served from the pool (a failed prefetch propagates the * failure -- never refetched);`
+  - `pf_pooled_fetch` (function, line 135) `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int...`
+  - `FREEDOM_PREFETCH_H` (macro, line 2) `#define FREEDOM_PREFETCH_H`
+  - `PF_MAX_REFS` (macro, line 47) `#define PF_MAX_REFS`
+  - `PF_MAX_THREADS` (macro, line 48) `#define PF_MAX_THREADS`
+- Imported by: `fuzz/fuzz_prefetch.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/prefetch.c`, `tests/test_prefetch.c`
+
+## include/prefs.h
+- Doc: prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `prefs_entry` (struct, line 45)
+  - `prefs_state` (struct, line 50)
+  - `prefs_status` (enum, line 36)
+  - `theme_mode` (type_alias, line 49) `typedef struct prefs_state { int theme_mode;`
+  - `prefs_init` (function, line 65) `void prefs_init(prefs_state *p);`
+  - `prefs_free` (function, line 68) `void prefs_free(prefs_state *p);`
+  - `free` (function, line 71) `* free(). */ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len);`
+  - `prefs_bookmark_index` (function, line 81) `int prefs_bookmark_index(const prefs_state *p, const char *url);`
+  - `prefs_suggest` (function, line 100) `int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows);`
+  - `anyway` (function, line 105) `* page is rendered by the normal confined pipeline anyway (defence in depth). * *out is owned (free());`
+  - `FREEDOM_PREFS_H` (macro, line 2) `#define FREEDOM_PREFS_H`
+  - `PREFS_VERSION` (macro, line 26) `#define PREFS_VERSION`
+  - `PREFS_MAX_URL` (macro, line 27) `#define PREFS_MAX_URL`
+  - `PREFS_MAX_TITLE` (macro, line 28) `#define PREFS_MAX_TITLE`
+  - `PREFS_MAX_BOOKMARKS` (macro, line 29) `#define PREFS_MAX_BOOKMARKS`
+  - `PREFS_MAX_HISTORY` (macro, line 30) `#define PREFS_MAX_HISTORY`
+  - `PREFS_MAX_TEXT` (macro, line 31) `#define PREFS_MAX_TEXT`
+  - `PREFS_PAGE_HISTORY` (macro, line 34) `#define PREFS_PAGE_HISTORY`
+- Imported by: `fuzz/fuzz_prefs.c`, `gui/browser_ui.c`, `include/profile.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
+
+## include/profile.h
+- Doc: profile_close: Loads and decrypts prefs.bin over an out ALREADY initialised (prefs_init).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `profile_ctx` (struct, line 46)
+  - `profile_status` (enum, line 35)
+  - `dir` (type_alias, line 45) `typedef struct profile_ctx { char dir[1024];`
+  - `absent` (function, line 53) `* the keyfile when absent (0600, atomic write);`
+  - `closed` (function, line 54) `* wrong size fails closed (PROFILE_ERR_KEY, never overwritten). Derives the * AEAD key (Argon2id, per-device salt)...`
+  - `profile_close` (function, line 67) `void profile_close(profile_ctx *ctx);`
+  - `FREEDOM_PROFILE_H` (macro, line 2) `#define FREEDOM_PROFILE_H`
+  - `PROFILE_KEY_FILE` (macro, line 32) `#define PROFILE_KEY_FILE`
+  - `PROFILE_PREFS_FILE` (macro, line 33) `#define PROFILE_PREFS_FILE`
+- Depends on: `include/local_store.h`, `include/prefs.h`
+- Imported by: `gui/browser_ui.c`, `src/profile.c`, `tests/test_profile.c`
+
+## include/psl_data.h
+- Layer: data_access
+- Language: h
+- Symbols:
+  - `psl_rules` (variable, line 21) `extern const char *const psl_rules[];`
+  - `psl_rules_n` (variable, line 22) `extern const size_t psl_rules_n;`
+  - `psl_wildcards` (variable, line 23) `extern const char *const psl_wildcards[];`
+  - `psl_wildcards_n` (variable, line 24) `extern const size_t psl_wildcards_n;`
+  - `psl_exceptions` (variable, line 25) `extern const char *const psl_exceptions[];`
+  - `psl_exceptions_n` (variable, line 26) `extern const size_t psl_exceptions_n;`
+  - `FREEDOM_PSL_DATA_H` (macro, line 2) `#define FREEDOM_PSL_DATA_H`
+- Imported by: `src/request_policy.c`
+
+## include/render_doc.h
+- Doc: rd_block: One paint-ready block in document order. text is owned, NUL-terminated and valid...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `rd_block` (struct, line 64)
+  - `rd_doc` (struct, line 244)
+  - `img_fail_reason` (enum, line 34)
+  - `rd_kind` (enum, line 42)
+  - `rd_status` (enum, line 270)
+  - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
+  - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
+  - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
+  - `form` (function, line 63) `* form (-1 = none);`
+  - `default` (function, line 142) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
+  - `to` (function, line 230) `* belongs to (-1 = none);`
+  - `rdp_images_warning` (function, line 279) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
+  - `rd_free` (function, line 289) `void rd_free(rd_doc *d);`
+  - `rd_count` (function, line 292) `size_t rd_count(const rd_doc *d);`
+  - `rd_at` (function, line 293) `const rd_block *rd_at(const rd_doc *d, size_t i);`
+  - `rd_box_count` (function, line 297) `size_t rd_box_count(const rd_doc *d);`
+  - `rd_box_at` (function, line 298) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+  - `rd_cont_count` (function, line 302) `size_t rd_cont_count(const rd_doc *d);`
+  - `rd_cont_at` (function, line 303) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+  - `rd_kind_name` (function, line 307) `const char *rd_kind_name(rd_kind k);`
+  - `rd_block_tag` (function, line 315) `const char *rd_block_tag(const rd_block *b);`
+  - `decision` (function, line 318) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+  - `IMG_FAIL_OK` (function, line 324) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 329) `const char *rd_input_label(int input_type);`
+  - `rd_input_invisible` (function, line 334) `int rd_input_invisible(int input_type);`
+  - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
+- Depends on: `include/page_view.h`, `include/render_policy.h`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
+
+## include/render_policy.h
+- Doc: rdp_caps: Render capabilities for a page.
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `rdp_caps` (struct, line 32)
+  - `rdp_img_decision` (enum, line 39)
+  - `images` (type_alias, line 32) `typedef struct rdp_caps { bool images;`
+  - `rdp_is_tracking_pixel` (function, line 53) `int rdp_is_tracking_pixel(int w, int h);`
+  - `size` (function, line 56) `* announced size (e.g. <img width height>);`
+  - `rdp_img_reason` (function, line 66) `const char *rdp_img_reason(rdp_img_decision d);`
+  - `rdp_images_warning` (function, line 69) `const char *rdp_images_warning(void);`
+  - `FREEDOM_RENDER_POLICY_H` (macro, line 2) `#define FREEDOM_RENDER_POLICY_H`
+  - `RDP_TRACKER_MAX_DIM` (macro, line 27) `#define RDP_TRACKER_MAX_DIM`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
+
+## include/renderer.h
+- Doc: rd_result_free: Renders untrusted HTML out-of-process and returns an inert title + text. html ==...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `rd_result` (struct, line 29)
+  - `rd_status` (enum, line 20)
+  - `status` (type_alias, line 28) `typedef struct rd_result { rd_status status;`
+  - `rd_result_free` (function, line 46) `void rd_result_free(rd_result *out);`
+  - `FREEDOM_RENDERER_H` (macro, line 2) `#define FREEDOM_RENDERER_H`
+  - `RD_MAX_INPUT` (macro, line 37) `#define RD_MAX_INPUT`
+  - `RD_MAX_FIELD` (macro, line 38) `#define RD_MAX_FIELD`
+- Imported by: `src/renderer.c`, `tests/test_renderer.c`
+
+## include/request_policy.h
+- Doc: rp_host_of: Lowercased host of an absolute URL into out.
+- Layer: business_logic
+- Language: h
+- Symbols:
+  - `rp_decision` (enum, line 21)
+  - `rp_host_of` (function, line 30) `int rp_host_of(const char *url, char *out, size_t out_size);`
+  - `rp_site_of` (function, line 34) `int rp_site_of(const char *host, char *out, size_t out_size);`
+  - `rp_same_site` (function, line 37) `int rp_same_site(const char *top_level_url, const char *request_url);`
+  - `FREEDOM_REQUEST_POLICY_H` (macro, line 2) `#define FREEDOM_REQUEST_POLICY_H`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/request_policy.c`, `src/tab.c`, `tests/test_request_policy.c`
+
+
+Next: [KB_include_p4.md](KB_include_p4.md)
