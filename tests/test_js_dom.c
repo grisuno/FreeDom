@@ -295,7 +295,51 @@ static void test_intersection_observer_fires_synthetically(void **state) {
     EXPECT(f, "var hit2=0; var io2=new IntersectionObserver(function(){hit2++;});"
               "io2.observe(document.body); io2.disconnect(); __fireDeferred(); hit2", "0");
     EXPECT(f, "var mh=0; var mo=new MutationObserver(function(){mh++;});"
-              "mo.observe(document.body,{childList:true}); __fireDeferred(); mh", "0");
+              "mo.observe(document.body,{childList:true}); __fireDeferred(); mh", "1");
+}
+
+/* 7j slice1 RED: style write-through + getComputedStyle inline + RO/MO synthetic. */
+static void test_style_write_through(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var el=document.createElement('div'); el.style.color='red';"
+              "el.getAttribute('style')", "color: red;");
+    EXPECT(f, "var el=document.createElement('div');"
+              "el.setAttribute('style','color: blue'); el.style.color", "blue");
+    EXPECT(f, "var el=document.createElement('div'); el.style.backgroundColor='green';"
+              "el.style.getPropertyValue('background-color')", "green");
+    EXPECT(f, "var el=document.createElement('div');"
+              "el.setAttribute('style','display: none'); el.style.display", "none");
+}
+
+static void test_get_computed_style_inline(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var el=document.createElement('div');"
+              "el.setAttribute('style','color: red; display: none');"
+              "getComputedStyle(el).color", "red");
+    EXPECT(f, "var el=document.createElement('div');"
+              "el.setAttribute('style','color: red');"
+              "getComputedStyle(el).getPropertyValue('color')", "red");
+    EXPECT(f, "var el=document.createElement('div');"
+              "getComputedStyle(el).getPropertyValue('color')", "");
+}
+
+static void test_resize_observer_fires_synthetically(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var hit=0, en=null;"
+              "var ro=new ResizeObserver(function(es){hit=es.length; en=es[0];});"
+              "ro.observe(document.body); __fireDeferred();"
+              "'' + hit + ',' + (en.target===document.body)", "1,true");
+    EXPECT(f, "var hit2=0; var ro2=new ResizeObserver(function(){hit2++;});"
+              "ro2.observe(document.body); ro2.disconnect(); __fireDeferred(); hit2", "0");
+}
+
+static void test_mutation_observer_fires_synthetically(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var mh=0; var mo=new MutationObserver(function(){mh++;});"
+              "mo.observe(document.body,{childList:true}); __fireDeferred(); mh", "1");
+    EXPECT(f, "var mh2=0; var mo2=new MutationObserver(function(){mh2++;});"
+              "mo2.observe(document.body,{childList:true}); mo2.disconnect();"
+              "__fireDeferred(); mh2", "0");
 }
 
 /* matchMedia evaluates for real against the normalized 1920x1080 desktop
@@ -2393,6 +2437,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_fragment_clone_chain_does_not_throw, setup, teardown),
         cmocka_unit_test_setup_teardown(test_modern_globals_do_not_throw, setup, teardown),
         cmocka_unit_test_setup_teardown(test_intersection_observer_fires_synthetically, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_style_write_through, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_get_computed_style_inline, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_resize_observer_fires_synthetically, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mutation_observer_fires_synthetically, setup, teardown),
         cmocka_unit_test_setup_teardown(test_match_media_normalized_viewport, setup, teardown),
         cmocka_unit_test_setup_teardown(test_document_node_identity, setup, teardown),
         cmocka_unit_test_setup_teardown(test_element_attributes_named_node_map, setup, teardown),

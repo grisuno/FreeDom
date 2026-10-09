@@ -736,9 +736,31 @@ static const char JD_DOCUMENT_SHIM[] =
     "          replace:function(a,b){ var t=toks(); var j=t.indexOf(String(a)); if(j>=0){t[j]=String(b);put(t);return true;} return false; },"
     "          get length(){ return toks().length; }, item:function(i){ return toks()[i]||null; },"
     "          toString:function(){ return dom.getAttribute(h,'class')||''; } }; },"
-    /* style: a plain settable object (el.style.color='x' works); values are kept
-     * but never rendered from JS (author style is gated separately). */
-    "      style:{ setProperty:function(k,v){ this[String(k)]=String(v); }, getPropertyValue:function(k){ var v=this[String(k)]; return v===undefined?'':v; }, removeProperty:function(k){ var v=this[String(k)]; delete this[String(k)]; return v===undefined?'':v; }, cssText:'' }"
+    /* style write-through (spec/js_dom.md 7j): el.style reads/writes the real
+     * `style` attribute via dom.getAttribute/setAttribute, so the next
+     * pv_build_styled sees JS mutations and OP_TICK/OP_EVENT repaints them.
+     * camelCase<->kebab-case converted. Cached per wrapper (same identity). */
+    "      get style(){ if(this._style) return this._style;"
+    "        function kebab(k){ return String(k).replace(/[A-Z]/g,function(m){return '-'+m.toLowerCase();}); }"
+    "        function parse(){ var s=null; try{ s=dom.getAttribute(h,'style'); }catch(e){} var m={}; if(!s) return m;"
+    "          var parts=s.split(';'); for(var i=0;i<parts.length;i++){ var d=parts[i], ix=d.indexOf(':');"
+    "            if(ix<0) continue; var k=d.slice(0,ix).trim().toLowerCase(), v=d.slice(ix+1).trim();"
+    "            if(k) m[k]=v; } return m; }"
+    "        function ser(m){ var a=[]; for(var k in m) if(Object.prototype.hasOwnProperty.call(m,k)) a.push(k+': '+m[k]);"
+    "          try{ dom.setAttribute(h,'style',a.length?a.join('; ')+';':''); }catch(e){} }"
+    "        var base={ setProperty:function(k,v){ var m=parse(); m[kebab(k).toLowerCase()]=String(v); ser(m); },"
+    "          getPropertyValue:function(k){ var m=parse(); var v=m[kebab(k).toLowerCase()]; return v===undefined?'':v; },"
+    "          removeProperty:function(k){ var m=parse(); var kk=kebab(k).toLowerCase(); var v=m[kk];"
+    "            if(v!==undefined){ delete m[kk]; ser(m); } return v===undefined?'':v; } };"
+    "        Object.defineProperty(base,'cssText',{get:function(){ var v=null; try{ v=dom.getAttribute(h,'style'); }catch(e){}"
+    "          return v===null?'':v; }, set:function(v){ try{ dom.setAttribute(h,'style',String(v)); }catch(e){} }});"
+    "        var px=new Proxy(base,{ get:function(t,p){ if(p in t) return t[p];"
+    "            if(typeof p==='string'){ var m=parse(); var v=m[kebab(p).toLowerCase()]; return v===undefined?'':v; }"
+    "            return undefined; },"
+    "          set:function(t,p,v){ if(p==='cssText'){ try{ dom.setAttribute(h,'style',String(v)); }catch(e){} return true; }"
+    "            if(typeof p==='string'){ var m=parse(); m[kebab(p).toLowerCase()]=String(v); ser(m); return true; }"
+    "            t[p]=v; return true; } });"
+    "        Object.defineProperty(this,'_style',{value:px,configurable:true}); return px; }"
     "    };"
     "    __G.__evHandlerProps(el,'n'+h,['click','submit','keydown','keyup','keypress','input','change','focus','blur',"
     "      'focusin','focusout','scroll','mousedown','mouseup','mouseover','mouseout','mousemove','mouseenter','mouseleave','wheel']);"
@@ -1191,9 +1213,11 @@ static const char JD_DOCUMENT_SHIM[] =
  * real site's scripts touch during startup, so they run without a ReferenceError
  * or "cannot read property of undefined" instead of aborting. Every value is
  * inert: DOM interface constructors are empty (instanceof yields false, harmless);
- * observers never fire (no observation -> no info leak); matchMedia never matches
- * and getComputedStyle returns "" (Zero Knowledge -- no viewport/layout/font
- * leak); the viewport reads a fixed normalized size (matches the 1920 width
+ * IntersectionObserver/ResizeObserver fire synthetically once per observe() with
+ * constant geometry (zero real leak); MutationObserver fires once with [] (v1);
+ * PerformanceObserver stays never-fire; matchMedia evaluates the normalized
+ * identity; getComputedStyle returns the element's inline style (v1, no sheet);
+ * the viewport reads a fixed normalized size (matches the 1920 width
  * anti_fp uses for @media, not the real window); window.open returns null and
  * postMessage is a no-op (no popups, single realm). performance/navigator/screen
  * are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
@@ -1409,10 +1433,40 @@ static const char JD_MODERN_SHIM[] =
     "    IO.prototype.disconnect=function(){ this._live=false; };"
     "    IO.prototype.takeRecords=function(){ return []; };"
     "    g.IntersectionObserver=IO; })();"
-    "  if(typeof g.getComputedStyle==='undefined') g.getComputedStyle=function(){"
-    "    var o={ getPropertyValue:function(){return '';}, getPropertyPriority:function(){return '';},"
-    "      length:0, item:function(){return '';} };"
-    "    return new Proxy(o,{ get:function(t,p){ if(p in t) return t[p]; return ''; } }); };"
+    "  (function(){ function RO(cb){ this._cb=cb; this._live=true; }"
+    "    RO.prototype.observe=function(el){ var self=this; if(el===null||el===undefined) return;"
+    "      setTimeout(function(){ if(!self._live) return;"
+    "        var r={x:0,y:0,top:0,left:0,right:0,bottom:0,width:0,height:0};"
+    "        try{ self._cb([{target:el,contentRect:r,"
+    "          borderBoxSize:[{inlineSize:0,blockSize:0}],"
+    "          contentBoxSize:[{inlineSize:0,blockSize:0}],"
+    "          devicePixelContentBoxSize:[{inlineSize:0,blockSize:0}]}"
+    "        ],self); }catch(e){} },0); };"
+    "    RO.prototype.unobserve=function(){};"
+    "    RO.prototype.disconnect=function(){ this._live=false; };"
+    "    RO.prototype.takeRecords=function(){ return []; };"
+    "    g.ResizeObserver=RO; })();"
+    "  (function(){ function MO(cb){ this._cb=cb; this._live=true; }"
+    "    MO.prototype.observe=function(){ var self=this;"
+    "      setTimeout(function(){ if(!self._live) return;"
+    "        try{ self._cb([],self); }catch(e){} },0); };"
+    "    MO.prototype.disconnect=function(){ this._live=false; };"
+    "    MO.prototype.unobserve=function(){};"
+    "    MO.prototype.takeRecords=function(){ return []; };"
+    "    g.MutationObserver=MO; })();"
+    "  g.getComputedStyle=function(el){"
+    "    function kebab(k){ return String(k).replace(/[A-Z]/g,function(m){return '-'+m.toLowerCase();}); }"
+    "    var map={}; try{ var s=(el&&el._h!==undefined)?dom.getAttribute(el._h,'style'):null;"
+    "      if(s){ var parts=s.split(';'); for(var i=0;i<parts.length;i++){ var d=parts[i], ix=d.indexOf(':');"
+    "        if(ix<0) continue; var k=d.slice(0,ix).trim().toLowerCase(), v=d.slice(ix+1).trim();"
+    "        if(k) map[k]=v; } } }catch(e){}"
+    "    var cs=''; try{ var sv=(el&&el._h!==undefined)?dom.getAttribute(el._h,'style'):null;"
+    "      cs=sv===null?'':sv; }catch(e2){}"
+    "    var o={ getPropertyValue:function(k){ var v=map[kebab(k).toLowerCase()]; return v===undefined?'':v; },"
+    "      getPropertyPriority:function(){return '';}, length:0, item:function(){return '';}, cssText:cs };"
+    "    return new Proxy(o,{ get:function(t,p){ if(p in t) return t[p];"
+    "      if(typeof p==='string'){ var v=map[kebab(p).toLowerCase()]; return v===undefined?'':v; }"
+    "      return undefined; } }); };"
     "  function ro(name,val){ if(typeof g[name]==='undefined'){ try{ Object.defineProperty(g,name,"
     "    {get:function(){return val;},configurable:true}); }catch(e){ try{ g[name]=val; }catch(e2){} } } }"
     /* Viewport/scroll: real only with installed geometry (trusted host), else the

@@ -448,6 +448,40 @@ que además exige WebGL) y el `TypeError` sin ubicación de github.
   sigue la misma frontera de confianza que el resto del runtime de apps (§7d–7h). Para un host no
   confiable `typeof Worker === 'undefined'`, como hoy.
 
+## 7j. `style` write-through + `getComputedStyle` inline + observadores sintéticos (2026-10-09)
+
+Motivo medido: `el.style` era un objeto plano desconectado del DOM — `el.style.color='red'`
+no tocaba el atributo `style`, así que el siguiente `pv_build_styled` no lo veía y el
+repaint por `OP_TICK`/`OP_EVENT` nunca reflejaba mutaciones de estilo desde JS.
+`getComputedStyle` devolvía `''` siempre, lo que quiebra CSS-in-JS que lee el token que
+acaba de escribir. `ResizeObserver`/`MutationObserver` nunca disparaban, así que
+reveal-on-scroll dependiente de resize quedaba oculto.
+
+- **`style` write-through:** `el.style` lee/escribe el atributo `style` real vía
+  `dom.getAttribute`/`dom.setAttribute`. `setProperty(k,v)` / asignación directa
+  (`el.style.color='red'`) / `cssText=` actualizan el atributo serializado;
+  `getPropertyValue(k)` / lectura directa / `cssText` leen del atributo parseado.
+  Conversión camelCase↔kebab-case (`backgroundColor`↔`background-color`).
+  Dado `el.style.color='red'` cuando se relee `el.getAttribute('style')`
+  entonces contiene `color: red`. Dado `el.setAttribute('style','color: blue')`
+  cuando se lee `el.style.color` entonces es `'blue'`.
+- **`getComputedStyle(el)` inline (v1):** lee el atributo `style` del elemento y
+  devuelve sus declaraciones (kebab y camel). Sin `style` o prop ausente ⇒ `''`.
+  `getPropertyValue`/`getPropertyPriority`/`length`/`item()` preservados.
+  No resuelve hoja externa (v2); no filtra geometría (solo strings del autor).
+  Dado `<div style="color: red; display: none">` cuando `getComputedStyle(div).color`
+  entonces `'red'`; y `getPropertyValue('display')` es `'none'`.
+- **`ResizeObserver` sintético:** `observe()` encola vía `setTimeout(...,0)` UNA
+  entrega `[{target, contentRect: rect 0, borderBoxSize:[{inlineSize:0,blockSize:0}]}]`.
+  `disconnect()` suprime; `unobserve()` no-op v1; `takeRecords()` ⇒ `[]`.
+  Valores sintéticos constantes, cero geometría real (igual que `IntersectionObserver`).
+- **`MutationObserver` sintético (v1):** `observe()` encola UNA entrega vacía
+  `[]` vía `setTimeout(...,0)` (desbloquea `await` de librerías, sin records reales).
+  `disconnect()` suprime; `takeRecords()` ⇒ `[]`. Records reales fuera de alcance.
+- **Seguridad:** solo atributo `style` del propio elemento (misma capacidad que
+  `setAttribute`, ya sellada). Sin red, sin geometría real, sin reloj. Presupuesto
+  de tiempo del intérprete acota loops.
+
 ## 8. Fuera de alcance
 
 - Eventos **interactivos** más allá del click (keydown/mousemove/submit; el click del
