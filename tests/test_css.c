@@ -2003,6 +2003,40 @@ static void test_pseudo_single_colon_before_class_tmp(void **state) {
     css_free(sh);
 }
 
+/* content: attr(name) resolves the originating element's attribute (CSS 2.1 §12.2).
+ * RED until expand_content + apply_decl implement it. */
+static void test_pseudo_content_attr_resolves(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("span::before{content:attr(data-browse)}", 0, &sh), CSS_OK);
+    static const css_attr at[] = { { "data-browse", "Next" } };
+    css_element el = el_attr_node("span", NULL, NULL, 0, at, 1, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_string_equal(out.content_before_str, "Next");
+    css_free(sh);
+}
+
+static void test_pseudo_content_attr_missing_is_empty(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("span::before{content:attr(data-missing)}", 0, &sh), CSS_OK);
+    css_element el = el_node("span", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_int_equal(out.content_before_on, 1);
+    assert_int_equal(out.content_before_str[0], 0);
+    css_free(sh);
+}
+
+static void test_pseudo_content_attr_fallback(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("span::before{content:attr(data-missing, \"FB\")}", 0, &sh), CSS_OK);
+    css_element el = el_node("span", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_string_equal(out.content_before_str, "FB");
+    css_free(sh);
+}
+
 static void test_pseudo_content_empty_without_pseudo(void **state) {
     (void)state;
     css_sheet *sh = NULL;
@@ -3240,6 +3274,22 @@ static void test_cursor(void **state) {
     assert_int_equal(css_parse_inline("cursor:default", 0).cursor, CSS_CUR_DEFAULT);
     assert_int_equal(css_parse_inline("cursor:not-allowed", 0).cursor, CSS_CUR_NOT_ALLOWED);
     assert_int_equal(css_parse_inline("cursor:zoom-in", 0).cursor, CSS_CUR_ZOOM_IN);
+    assert_int_equal(css_parse_inline("cursor:ew-resize", 0).cursor, CSS_CUR_EW_RESIZE);
+    assert_int_equal(css_parse_inline("cursor:ns-resize", 0).cursor, CSS_CUR_NS_RESIZE);
+    assert_int_equal(css_parse_inline("cursor:nesw-resize", 0).cursor, CSS_CUR_NESW_RESIZE);
+    assert_int_equal(css_parse_inline("cursor:nwse-resize", 0).cursor, CSS_CUR_NWSE_RESIZE);
+    assert_int_equal(css_parse_inline("cursor:col-resize", 0).cursor, CSS_CUR_COL_RESIZE);
+    assert_int_equal(css_parse_inline("cursor:row-resize", 0).cursor, CSS_CUR_ROW_RESIZE);
+    assert_int_equal(css_parse_inline("cursor:all-scroll", 0).cursor, CSS_CUR_ALL_SCROLL);
+    assert_int_equal(css_parse_inline("cursor:cell", 0).cursor, CSS_CUR_CELL);
+    assert_int_equal(css_parse_inline("cursor:copy", 0).cursor, CSS_CUR_COPY);
+    assert_int_equal(css_parse_inline("cursor:alias", 0).cursor, CSS_CUR_ALIAS);
+    assert_int_equal(css_parse_inline("cursor:context-menu", 0).cursor, CSS_CUR_CONTEXT_MENU);
+    assert_int_equal(css_parse_inline("cursor:progress", 0).cursor, CSS_CUR_PROGRESS);
+    assert_int_equal(css_parse_inline("cursor:no-drop", 0).cursor, CSS_CUR_NO_DROP);
+    assert_int_equal(css_parse_inline("cursor:vertical-text", 0).cursor, CSS_CUR_VERTICAL_TEXT);
+    assert_int_equal(css_parse_inline("cursor:zoom-out", 0).cursor, CSS_CUR_ZOOM_OUT);
+    assert_int_equal(css_parse_inline("cursor:grabbing", 0).cursor, CSS_CUR_GRABBING);
     assert_int_equal(css_parse_inline("cursor:bogus", 0).cursor, CSS_CUR_UNSET);
     assert_int_equal(css_parse_inline("color:red", 0).cursor, CSS_CUR_UNSET);
 
@@ -3248,6 +3298,93 @@ static void test_cursor(void **state) {
     const char *cls[] = { "btn" };
     assert_int_equal(css_resolve(sh, "a", NULL, cls, 1, NULL, 0).cursor, CSS_CUR_POINTER);
     css_free(sh);
+}
+
+/* animation shorthand (2026-10-09): name/duration/iters/timing from one decl. */
+static void test_animation_shorthand_basic(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("animation: spin 2s infinite linear", 0);
+    assert_int_equal(s.anim_duration_ms, 2000);
+    assert_int_equal(s.anim_iterations, -1);
+    assert_int_equal(s.anim_timing, 0);   /* linear */
+    assert_int_equal(s.anim_name[0], 's');
+}
+
+static void test_animation_shorthand_order_free(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("animation: 1s progress-bar-stripes linear infinite", 0);
+    assert_int_equal(s.anim_duration_ms, 1000);
+    assert_int_equal(s.anim_iterations, -1);
+    assert_int_equal(s.anim_timing, 0);
+    assert_int_equal(s.anim_name[0], 'p');
+}
+
+static void test_animation_shorthand_ignores_bezier(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("animation: x 1s cubic-bezier(0, 1, 1, 0)", 0);
+    assert_int_equal(s.anim_duration_ms, 1000);
+    assert_int_equal(s.anim_name[0], 'x');
+}
+
+static void test_animation_none_resets(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("animation: none", 0);
+    assert_int_equal(s.anim_name[0], '\0');
+}
+
+/* transition/animation longhands take the first top-level comma item. */
+static void test_transition_comma_takes_first(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("transition-duration: 0.125s, 0.5s", 0).transition_duration_ms, 125);
+    assert_int_equal(css_parse_inline("transition-delay: 0s, 0s", 0).transition_delay_ms, 0);
+    assert_int_equal(css_parse_inline("transition-timing-function: ease-out, ease-in", 0).transition_timing, 3);
+}
+
+/* 2012 tweener flexbox (2026-10-09): stripped -ms- names reuse modern slots. */
+static void test_tweener_flex_order(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("-ms-flex-order: -1", 0).order, -1);
+    assert_int_equal(css_parse_inline("-ms-flex-order: 2", 0).order, 2);
+}
+
+static void test_tweener_flex_factors(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("-ms-flex-positive: 1", 0).flex_grow, 100);
+    assert_int_equal(css_parse_inline("-ms-flex-negative: 0", 0).flex_shrink, 0);
+    assert_int_equal(css_parse_inline("-ms-flex-preferred-size: 0", 0).flex_basis, 0);
+    assert_int_equal(css_parse_inline("-ms-flex-preferred-size: auto", 0).flex_basis, CSS_LEN_AUTO);
+}
+
+static void test_tweener_pack_vocab(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("-ms-flex-pack: center", 0).justify, CSS_JUSTIFY_CENTER);
+    assert_int_equal(css_parse_inline("-ms-flex-pack: justify", 0).justify, CSS_JUSTIFY_SPACE_BETWEEN);
+    assert_int_equal(css_parse_inline("-ms-flex-pack: distribute", 0).justify, CSS_JUSTIFY_SPACE_AROUND);
+    assert_int_equal(css_parse_inline("-ms-flex-pack: start", 0).justify, CSS_JUSTIFY_START);
+    assert_int_equal(css_parse_inline("-webkit-box-pack: center", 0).justify, CSS_JUSTIFY_CENTER);
+    assert_int_equal(css_parse_inline("-ms-flex-pack: baseline", 0).justify, CSS_JUSTIFY_UNSET);
+}
+
+static void test_tweener_align(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("-ms-flex-align: center", 0).align_items, CSS_AK_CENTER);
+    assert_int_equal(css_parse_inline("-webkit-box-align: center", 0).align_items, CSS_AK_CENTER);
+    assert_int_equal(css_parse_inline("-ms-flex-item-align: auto", 0).align_self, CSS_AK_AUTO);
+    assert_int_equal(css_parse_inline("-ms-flex-line-pack: justify", 0).align_content, CSS_AK_SPACE_BETWEEN);
+    assert_int_equal(css_parse_inline("-ms-flex-line-pack: stretch", 0).align_content, CSS_AK_STRETCH);
+}
+
+/* ms-box-sizing without the leading dash is not a property (Firefox drops it too). */
+static void test_bare_ms_box_sizing_drops(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("ms-box-sizing: border-box", 0).box_sizing, CSS_BOXS_UNSET);
+}
+
+/* font without family is invalid (CSS Fonts 3 3.2; Firefox drops it too): lock it. */
+static void test_font_without_family_drops(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("font: normal 24px/1.5", 0).font_scale, 0);
+    assert_int_equal(css_parse_inline("font: 16px sans-serif", 0).font_scale, 100);
 }
 
 static void test_text_overflow_and_word_break(void **state) {
@@ -4146,7 +4283,10 @@ static void test_inline_touch_action(void **state) {
     assert_int_equal(css_parse_inline("touch-action:auto", 0).touch_action, CSS_TA_AUTO);
     assert_int_equal(css_parse_inline("touch-action:none", 0).touch_action, CSS_TA_NONE);
     assert_int_equal(css_parse_inline("touch-action:manipulation", 0).touch_action, CSS_TA_MANIPULATION);
-    assert_int_equal(css_parse_inline("touch-action:pan-x", 0).touch_action, CSS_TA_UNSET);
+    assert_int_equal(css_parse_inline("touch-action:pan-x", 0).touch_action, CSS_TA_AUTO);
+    assert_int_equal(css_parse_inline("touch-action:pan-y", 0).touch_action, CSS_TA_AUTO);
+    assert_int_equal(css_parse_inline("touch-action:pan-left", 0).touch_action, CSS_TA_AUTO);
+    assert_int_equal(css_parse_inline("touch-action:pinch-zoom", 0).touch_action, CSS_TA_AUTO);
     assert_int_equal(css_parse_inline("color:red", 0).touch_action, CSS_TA_UNSET);
 }
 
@@ -4805,8 +4945,9 @@ static void test_clip_auto(void **state) {
  * ~900 declarations in the parity corpus carry a -webkit-/-moz-/-o-/-ms-
  * prefix, and all of them were dropped whole. A prefixed property IS the
  * standard property; stripping the prefix and re-dispatching is the entire
- * rule, and it declines the IE10 tweener flexbox names for free (there is no
- * property called `flex-pack`), which is the correct fail-closed answer. */
+ * rule. Since 2026-10-09 the stripped 2012 tweener names (`flex-pack`,
+ * `flex-align`, ...) dispatch to the modern slots with their exact historical
+ * grammar (spec/css.md), so they parse instead of dropping. */
 static void test_vendor_prefixes(void **state) {
     (void)state;
     /* Layout-affecting: these change geometry, not just paint. */
@@ -4827,13 +4968,12 @@ static void test_vendor_prefixes(void **state) {
     assert_int_equal(css_parse_inline("-webkit-opacity:0.5", 0).opacity,
                      css_parse_inline("opacity:0.5", 0).opacity);
 
-    /* A prefixed name whose UNPREFIXED form is not a property stays dropped --
-     * the IE10 tweener flexbox syntax has different value grammars, so mapping
-     * it by name would be inventing a rule. */
+    /* The stripped 2012 tweener names map to the modern slots with their exact
+     * historical grammar (spec/css.md 2026-10-09): justify IS space-between. */
     assert_int_equal(css_parse_inline("-ms-flex-pack:justify", 0).justify,
-                     CSS_JUSTIFY_UNSET);
+                     CSS_JUSTIFY_SPACE_BETWEEN);
     assert_int_equal(css_parse_inline("-ms-flex-align:center", 0).align_items,
-                     CSS_AK_UNSET);
+                     CSS_AK_CENTER);
 
     /* A custom property is not a vendor prefix: `--x` must not be mistaken for
      * one and stripped down to `x`. */
@@ -4850,6 +4990,17 @@ int main(void) {
         cmocka_unit_test(test_visibility),
         cmocka_unit_test(test_overflow),
         cmocka_unit_test(test_cursor),
+        cmocka_unit_test(test_animation_shorthand_basic),
+        cmocka_unit_test(test_animation_shorthand_order_free),
+        cmocka_unit_test(test_animation_shorthand_ignores_bezier),
+        cmocka_unit_test(test_animation_none_resets),
+        cmocka_unit_test(test_transition_comma_takes_first),
+        cmocka_unit_test(test_tweener_flex_order),
+        cmocka_unit_test(test_tweener_flex_factors),
+        cmocka_unit_test(test_tweener_pack_vocab),
+        cmocka_unit_test(test_tweener_align),
+        cmocka_unit_test(test_bare_ms_box_sizing_drops),
+        cmocka_unit_test(test_font_without_family_drops),
         cmocka_unit_test(test_text_overflow_and_word_break),
         cmocka_unit_test(test_box_sizing),
         cmocka_unit_test(test_vendor_prefixes),
@@ -5011,6 +5162,9 @@ int main(void) {
         cmocka_unit_test(test_pseudo_content_none_parses_empty),
         cmocka_unit_test(test_pseudo_content_pool_survives_icon_font),
         cmocka_unit_test(test_pseudo_content_empty_without_pseudo),
+        cmocka_unit_test(test_pseudo_content_attr_resolves),
+        cmocka_unit_test(test_pseudo_content_attr_missing_is_empty),
+        cmocka_unit_test(test_pseudo_content_attr_fallback),
         cmocka_unit_test(test_pseudo_geometry_does_not_leak_to_element),
         cmocka_unit_test(test_pseudo_kind_survives_combinators),
         cmocka_unit_test(test_pseudo_does_not_claim_cascade_slot),

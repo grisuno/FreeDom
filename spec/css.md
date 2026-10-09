@@ -263,7 +263,17 @@ barra invertida literal (5 glifos de ancho por un icono) o el tokenizador lo pie
   `CSS_MAX_CONTENT_URLS` (256, igual que `CSS_MAX_BG_URLS`): una icon font trae
   cientos de reglas `content` de un glifo y pasado el techo cada regla posterior
   perdía su string en silencio. Heap de la sheet, se libera con ella.
-- Fuera de alcance: `attr()` sigue descartado (contrato aparte).
+- `content: attr(name)` (2026-10-09, v1): `attr()` con un solo identificador devuelve
+  el valor del atributo del elemento originante (CSS 2.1 §12.2, caso `content`).
+  Se almacena en el pool con marcador `\x01attr:NAME` y se resuelve por elemento en
+  `apply_decl` (que ya corre por elemento vía `cch_element_style`): atributo presente
+  ⇒ su valor (acotado a `CSS_URL_MAX`); ausente ⇒ `""` (o el fallback si hay
+  `attr(name, fallback)` con fallback entre comillas). Combinado
+  (`"[" attr(x) "]"`) y `type()` de CSS Values 4 fuera de alcance (fail closed).
+  **Dado** `<span data-browse="Next">` con `.x::before{content:attr(data-browse)}`
+  **cuando** se resuelve el estilo del `span` **entonces** `content_before_str` es
+  `"Next"`. **Dado** atributo ausente sin fallback **entonces** `""` (caja generada
+  vacía, no `none`). Lookup case-insensitive en el nombre (HTML).
 
 **Specificity** = sum over all compounds of `100*has_id + 10*(nclasses + nattrs +
 npseudo) + has_type` (an attribute selector and a pseudo-class each count as a
@@ -1824,3 +1834,112 @@ veces, sin ningún test que lo atara.
 - **Dado** `transform:perspective(5px)` o `transform:scale(2) bogus(1)`,
   **entonces** la declaración entera se descarta (fail-closed).
 - **Dado** más de 8 funciones, **entonces** se descarta (cota anti-DoS).
+
+## Shorthand `animation` y listas con coma (2026-10-09)
+
+Medido en el corpus: `animation` (shorthand) era `unknown-prop` — 18× en jkanime
+(`progress-bar-stripes 1s linear infinite`), 1× en slashdot (`spin 2s infinite
+linear`) más sus grafías `-webkit-`/`-moz-`/`-o-` (9+1+1) — mientras los longhands
+`animation-duration`/`-name`/... ya existían. Las listas con coma de
+`transition-delay`/`-duration`/`-timing-function` (`0s, 0s`; `0.125s, 0.125s`;
+`ease-out, ease-out`) se descartaban enteras. Todo lo anterior es CSS válido que
+Firefox acepta; en cambio **no** se toca lo que Firefox también tira (fail-closed
+compartido, verificado caso por caso): `font` sin familia (`font: normal 24px/1.5`
+es inválido por CSS Fonts 3 §3.2), `filter: progid:…`, `-webkit-gradient()`,
+`overflow: no-display`, typos (`margin-bo..ttom`, `font-weignt`, `-border-radius`
+con un guion), `padding-bottom: -50px` (padding negativo es inválido),
+`margin: -5px/2 0 0`, `background-position-x/-y` (Firefox no los soporta),
+`background: rgb(…/…)` sin `;` (sin punto y coma la declaración entera es el
+valor — error del autor, no del parser; la forma con `;` ya parseaba por
+`cc_split_args`).
+
+- **`animation` shorthand:** se parte en el primer `,` de nivel superior (parens/
+  comillas respetados) y se toma el primer item — un motor sin lista de
+  animaciones representa una sola (misma simplificación que `transition` v1).
+  Los tokens se parten por blanco **respetando parens** (para no romper
+  `cubic-bezier(0, 1, 1, 0)`) y se clasifican: tiempo (`2s`/`500ms`: el primero es
+  duration, el segundo delay), easing con nombre (`linear`, `ease`, …),
+  `infinite`/número (iterations), dirección (`normal`/`reverse`/`alternate`/
+  `alternate-reverse`), fill (`none`/`forwards`/`backwards`/`both`), y el primer
+  ident restante es el name (misma codificación primer-char+longitud que
+  `animation-name`). Lo no representable se **ignora laxamente** (precedente:
+  `filter`): un timing `cubic-bezier()`/`steps()` no tumba el name/duration
+  vecinos. `animation: none` reclama el slot con nombre vacío (resetea).
+  Las grafías con prefijo (`-webkit-animation`…) llegan por la regla
+  strip-prefix-and-ask-again sin código propio.
+- **Longhands con coma:** `transition-duration`/`-delay`/`-timing-function` toman
+  el primer item de nivel superior antes de interpretar (`0s, 0s` ⇒ `0s`).
+  `transition-property: background-color, color` sigue descartándose: el motor
+  solo interpola `none`/`all`/`opacity`/`transform` y un nombre que no puede
+  correr no debe reclamar el slot (fail-closed de capacidad, no de gramática).
+- **`cursor` extendido:** `ew-resize`/`ns-resize`/`nesw-resize`/`nwse-resize`/
+  `col-resize`/`row-resize`/`all-scroll`/`cell`/`copy`/`alias`/`context-menu`/
+  `progress`/`no-drop`/`vertical-text`/`zoom-in`/`zoom-out`/`grab`/`grabbing`
+  parsean a códigos nuevos (apéndice del enum: cruzan el IPC como int). Pintado
+  v1 sin cambios: solo `pointer` muestra la mano, el resto la flecha por defecto
+  (simplificación documentada, como `appearance`).
+- **`touch-action` extendido:** `pan-x`/`pan-y`/`pan-left`/`pan-right`/`pan-up`/
+  `pan-down`/`pinch-zoom` mapean a `AUTO` (el motor no tiene física táctil;
+  todo valor equivale al comportamiento por defecto — mismo precedente que los
+  keywords compat de `appearance`/`pointer-events`).
+
+**Contrato — Dado / Cuando / Entonces**
+
+- **Dado** `animation: spin 2s infinite linear`, **entonces** name=`spin`,
+  duration=2000, iters=infinito, timing=`linear`.
+- **Dado** `animation: progress-bar-stripes 1s linear infinite`, **entonces** los
+  mismos cuatro slots (el orden de los componentes no importa).
+- **Dado** `animation: x 1s cubic-bezier(0, 1, 1, 0)`, **entonces** name+duration
+  parsean y el timing se ignora (laxo, no tumba la declaración).
+- **Dado** `transition-delay: 0s, 0s`, **entonces** delay=0 (primer item).
+- **Dado** `cursor: ew-resize`, **entonces** parsea (pinta flecha, no mano).
+- **Dado** `font: normal 24px/1.5` (sin familia), **entonces** se descarta
+  (inválido en Firefox también — candado de no-regresión).
+- **Nota headless:** con `animation` shorthand parseado, el PNG de una página
+  animada depende del frame (como en Firefox headless); medido en jkanime, dos
+  capturas difieren en ~422px de una barra de progreso con score estructural
+  0.00 — ruido bajo el umbral, no regresión.
+
+## Flexbox 2012 (tweener `-ms-*`) y 2009 (`box-pack`/`box-align`) (2026-10-09)
+
+Medido: ~190 declaraciones `unknown-prop` en jkanime (Bootstrap autoprefijado:
+`-ms-flex-order` 60×, `-ms-flex-align` 41×, `-ms-flex-pack` 39×,
+`-ms-flex-line-pack` 24×, `-ms-flex-item-align` 24×, `-ms-flex-positive` 14×,
+`-ms-flex-negative` 11×, `-ms-flex-preferred-size` 10×, más `-webkit-box-align`/
+`-webkit-box-pack` 2×). Sin ellas cada `.row`/`.col` de Bootstrap pierde
+orden/alineación/reparto y la grilla colapsa. Revierte la decisión documentada
+en el comentario de strip-prefix ("tweener stays dropped"): esa cautela era
+contra *adivinar* gramáticas, y esto no adivina — es la correspondencia exacta
+del borrador Flexbox CR 2012 §8 (y 2009 §7 para `box-*`), la misma que aplica
+Firefox al `-ms-` que todavía acepta por compatibilidad.
+
+Alcance por la regla strip-prefix-and-ask-again (sin ramas prefijadas propias,
+como `box-orient`): el nombre desnudado cae en el dispatch y reutiliza los
+intérpretes modernos; solo el vocabulario `justify`/`distribute` necesita
+código propio porque no existe en `justify-content`.
+
+| Nombre desnudado | Slot moderno | Valores (tweener → slot) |
+| :-- | :-- | :-- |
+| `flex-order` | `order` | entero con signo (`interp_int`) |
+| `flex-positive` / `flex-negative` | `flex-grow` / `flex-shrink` | número ×100 (`interp_flex_factor`) |
+| `flex-preferred-size` | `flex-basis` | `auto`/`content`/longitud (`interp_flex_basis`) |
+| `flex-align` / `box-align` | `align-items` | `start`/`end`/`center`/`baseline`/`stretch` (ya en `interp_align_kw`) |
+| `flex-item-align` | `align-self` | `auto` + los 5 anteriores (`interp_align_kw(v,1,0)`) |
+| `flex-pack` / `box-pack` | `justify-content` | `start`/`end`/`center` + `justify`→`space-between`, `distribute`→`space-around` |
+| `flex-line-pack` | `align-content` | los de `flex-pack` + `stretch` |
+
+Fuera de alcance v1 (se siguen descartando, documentado): `-webkit-box-flex`
+(factor 2009, sin medir en el corpus), `ms-box-sizing`/`webkit-box-sizing`/
+`moz-box-sizing` **sin guion inicial** (no son propiedades — Firefox las tira
+como `unknown` también; aceptarlas sería inventar), y `-ms-flex-direction`/
+`-ms-flex-wrap` (cero ocurrencias medidas; cuando aparezcan, misma tabla).
+
+**Contrato — Dado / Cuando / Entonces**
+
+- **Dado** `-ms-flex-order: -1`, **entonces** `order == -1` (mismo slot que
+  `order`, misma cascada).
+- **Dado** `-ms-flex-pack: justify`, **entonces** `justify == SPACE_BETWEEN`;
+  **dado** `distribute`, **entonces** `SPACE_AROUND`.
+- **Dado** `-ms-flex-preferred-size: 0`, **entonces** `flex-basis == 0`.
+- **Dado** `ms-box-sizing: border-box` (typo sin guion del autor), **entonces** se
+  descarta (candado: Firefox tampoco la conoce).

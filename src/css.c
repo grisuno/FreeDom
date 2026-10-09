@@ -432,7 +432,23 @@ static int interp_cursor(const char *v) {
     if (csel_ci_eq(v, "wait"))        return CSS_CUR_WAIT;
     if (csel_ci_eq(v, "crosshair"))   return CSS_CUR_CROSSHAIR;
     if (csel_ci_eq(v, "grab"))        return CSS_CUR_GRAB;
+    if (csel_ci_eq(v, "grabbing"))    return CSS_CUR_GRABBING;
     if (csel_ci_eq(v, "zoom-in"))     return CSS_CUR_ZOOM_IN;
+    if (csel_ci_eq(v, "zoom-out"))    return CSS_CUR_ZOOM_OUT;
+    if (csel_ci_eq(v, "ew-resize"))   return CSS_CUR_EW_RESIZE;
+    if (csel_ci_eq(v, "ns-resize"))   return CSS_CUR_NS_RESIZE;
+    if (csel_ci_eq(v, "nesw-resize")) return CSS_CUR_NESW_RESIZE;
+    if (csel_ci_eq(v, "nwse-resize")) return CSS_CUR_NWSE_RESIZE;
+    if (csel_ci_eq(v, "col-resize"))  return CSS_CUR_COL_RESIZE;
+    if (csel_ci_eq(v, "row-resize"))  return CSS_CUR_ROW_RESIZE;
+    if (csel_ci_eq(v, "all-scroll"))  return CSS_CUR_ALL_SCROLL;
+    if (csel_ci_eq(v, "cell"))        return CSS_CUR_CELL;
+    if (csel_ci_eq(v, "copy"))        return CSS_CUR_COPY;
+    if (csel_ci_eq(v, "alias"))       return CSS_CUR_ALIAS;
+    if (csel_ci_eq(v, "context-menu")) return CSS_CUR_CONTEXT_MENU;
+    if (csel_ci_eq(v, "progress"))    return CSS_CUR_PROGRESS;
+    if (csel_ci_eq(v, "no-drop"))     return CSS_CUR_NO_DROP;
+    if (csel_ci_eq(v, "vertical-text")) return CSS_CUR_VERTICAL_TEXT;
     if (csel_ci_eq(v, "none"))        return CSS_CUR_NONE;
     return -1;
 }
@@ -771,11 +787,20 @@ static int interp_scroll_behavior(const char *v) {
     if (csel_ci_eq(v, "smooth")) return CSS_SB_SMOOTH;
     return -1;
 }
-/* touch-action: auto/none/manipulation. -1 unknown. */
+/* touch-action. Beyond auto/none/manipulation the property takes the pan and
+ * pinch keywords (pan-x/pan-y/pan-left/..., pinch-zoom), which select which
+ * gestures the browser handles itself. This engine has no touch physics at
+ * all, so every one of them behaves exactly like the default -- the same
+ * answer as `auto`. Only `none` (no default handling) is a different answer.
+ * Same precedent as the appearance/pointer-events compat mappings above. */
 static int interp_touch_action(const char *v) {
     if (csel_ci_eq(v, "auto"))         return CSS_TA_AUTO;
     if (csel_ci_eq(v, "none"))         return CSS_TA_NONE;
     if (csel_ci_eq(v, "manipulation")) return CSS_TA_MANIPULATION;
+    if (csel_ci_eq(v, "pan-x") || csel_ci_eq(v, "pan-y") ||
+        csel_ci_eq(v, "pan-left") || csel_ci_eq(v, "pan-right") ||
+        csel_ci_eq(v, "pan-up") || csel_ci_eq(v, "pan-down") ||
+        csel_ci_eq(v, "pinch-zoom"))   return CSS_TA_AUTO;
     return -1;
 }
 /* overscroll-behavior: auto/contain/none. -1 unknown. */
@@ -1098,6 +1123,197 @@ static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen) {
     return ep + 1;
 }
 
+/* Copies val up to its first top-level comma (parens depth and quotes
+ * respected, so cubic-bezier(0, 1) stays whole) into buf, trimmed of
+ * surrounding blanks. v1 represents a single animation/transition, so every
+ * timing list takes its first item (CSS Animations/Transitions 1: with one
+ * transition/animation running, extra items have nothing to apply to). */
+static void first_comma_item(const char *val, char *buf, size_t cap) {
+    size_t n = strlen(val);
+    int depth = 0;
+    char quote = 0;
+    size_t end = n;
+    for (size_t i = 0; i < n; ++i) {
+        char c = val[i];
+        if (quote != 0) {
+            if (c == '\\' && i + 1 < n) ++i;
+            else if (c == quote) quote = 0;
+        } else if (c == '\\' && i + 1 < n) {
+            ++i;
+        } else if (c == '"' || c == '\'') {
+            quote = c;
+        } else if (c == '(') {
+            ++depth;
+        } else if (c == ')') {
+            if (depth > 0) --depth;
+        } else if (c == ',' && depth == 0) {
+            end = i;
+            break;
+        }
+    }
+    while (end > 0 && (val[end - 1] == ' ' || val[end - 1] == '\t')) --end;
+    size_t st = 0;
+    while (st < end && (val[st] == ' ' || val[st] == '\t')) ++st;
+    size_t len = (end > st) ? end - st : 0;
+    if (cap > 0) {
+        if (len + 1 > cap) len = cap - 1;
+        memcpy(buf, val + st, len);
+        buf[len] = '\0';
+    }
+}
+
+/* Named easing shared by the animation/transition timing parsers (CSS Easing 1:
+ * the five keywords; cubic-bezier()/steps() need parametric slots this engine
+ * does not model, so they stay unrepresentable). Returns the ip_easing code. */
+static int anim_easing_iv(const char *tok) {
+    if (csel_ci_eq(tok, "linear")) return 0;
+    if (csel_ci_eq(tok, "ease")) return 1;
+    if (csel_ci_eq(tok, "ease-in")) return 2;
+    if (csel_ci_eq(tok, "ease-out")) return 3;
+    if (csel_ci_eq(tok, "ease-in-out")) return 4;
+    return -1;
+}
+
+/* True when tok is a CSS <custom-ident> (the shape an animation-name takes):
+ * starts with a letter, underscore, hyphen or non-ASCII byte; the rest adds
+ * digits. Anything with parens or quotes is a function or string, never a name. */
+static int is_anim_ident(const char *tok) {
+    unsigned char c0 = (unsigned char)tok[0];
+    if (!((c0 >= 'a' && c0 <= 'z') || (c0 >= 'A' && c0 <= 'Z') ||
+          c0 == '_' || c0 == '-' || c0 >= 0x80)) return 0;
+    for (const char *p = tok + 1; *p != '\0'; ++p) {
+        unsigned char c = (unsigned char)*p;
+        if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+              (c >= '0' && c <= '9') || c == '_' || c == '-' || c >= 0x80)) return 0;
+    }
+    return 1;
+}
+
+/* animation shorthand (CSS Animations 1 6.2): every longhand in any order in the
+ * first top-level comma item. Unrepresentable tokens (cubic-bezier()/steps()
+ * timing, a second name) are ignored laxly rather than failing the whole
+ * declaration (precedent: expand_filter); each slot keeps its first value. */
+static int expand_animation(const char *val, css_decl *dst, int cap) {
+    if (csel_ci_eq(val, "none")) {
+        if (cap < 1) return 0;
+        dst[0].prop = P_ANIM_NAME; dst[0].ival = 0; return 1;
+    }
+    char first[CSS_URL_MAX];
+    first_comma_item(val, first, sizeof first);
+    /* Blank-split keeping (...) groups whole. Over-long tokens truncate and
+     * then match nothing (fail closed per token, never the declaration). */
+    char toks[8][CSS_TOK_MAX];
+    int nt = 0;
+    {
+        const char *p = first;
+        while (*p != '\0' && nt < 8) {
+            while (*p == ' ' || *p == '\t') ++p;
+            if (*p == '\0') break;
+            size_t k = 0;
+            int depth = 0;
+            char quote = 0;
+            while (*p != '\0') {
+                char c = *p;
+                if (quote != 0) {
+                    if (k + 1 < CSS_TOK_MAX) toks[nt][k++] = c;
+                    ++p;
+                    if (c == '\\' && *p != '\0') {
+                        if (k + 1 < CSS_TOK_MAX) toks[nt][k++] = *p;
+                        ++p;
+                    } else if (c == quote) {
+                        quote = 0;
+                    }
+                } else if (c == '"' || c == '\'') {
+                    quote = c;
+                    if (k + 1 < CSS_TOK_MAX) toks[nt][k++] = c;
+                    ++p;
+                } else if (c == '(') {
+                    ++depth;
+                    if (k + 1 < CSS_TOK_MAX) toks[nt][k++] = c;
+                    ++p;
+                } else if (c == ')') {
+                    if (depth > 0) --depth;
+                    if (k + 1 < CSS_TOK_MAX) toks[nt][k++] = c;
+                    ++p;
+                } else if ((c == ' ' || c == '\t') && depth == 0) {
+                    break;
+                } else {
+                    if (k + 1 < CSS_TOK_MAX) toks[nt][k++] = c;
+                    ++p;
+                }
+            }
+            toks[nt][k] = '\0';
+            if (k > 0) ++nt;
+        }
+    }
+    int nout = 0;
+    int have_dur = 0, have_delay = 0, have_timing = 0, have_iters = 0;
+    int have_dir = 0, have_fill = 0, have_name = 0;
+    for (int i = 0; i < nt; ++i) {
+        const char *t = toks[i];
+        if (!have_dur || !have_delay) {
+            int ms = interp_time_ms(t);
+            if (ms >= 0) {
+                if (!have_dur) {
+                    if (nout < cap) { dst[nout].prop = P_ANIM_DURATION; dst[nout].ival = ms; ++nout; }
+                    have_dur = 1;
+                } else if (!have_delay) {
+                    if (nout < cap) { dst[nout].prop = P_ANIM_DELAY; dst[nout].ival = ms; ++nout; }
+                    have_delay = 1;
+                }
+                continue;
+            }
+        }
+        if (!have_timing) {
+            int iv = anim_easing_iv(t);
+            if (iv >= 0) {
+                if (nout < cap) { dst[nout].prop = P_ANIM_TIMING; dst[nout].ival = iv; ++nout; }
+                have_timing = 1;
+                continue;
+            }
+        }
+        if (!have_iters && csel_ci_eq(t, "infinite")) {
+            if (nout < cap) { dst[nout].prop = P_ANIM_ITERS; dst[nout].ival = -1; ++nout; }
+            have_iters = 1;
+            continue;
+        }
+        if (!have_iters) {
+            double d;
+            const char *e;
+            if (parse_num(t, &d, &e) && *e == '\0' && d >= 0.0) {
+                if (nout < cap) { dst[nout].prop = P_ANIM_ITERS; dst[nout].ival = (int)(d + 0.5); ++nout; }
+                have_iters = 1;
+                continue;
+            }
+        }
+        if (!have_dir && (csel_ci_eq(t, "normal") || csel_ci_eq(t, "reverse") ||
+                          csel_ci_eq(t, "alternate") || csel_ci_eq(t, "alternate-reverse"))) {
+            int iv = csel_ci_eq(t, "reverse") ? 1 : csel_ci_eq(t, "alternate") ? 2
+                     : csel_ci_eq(t, "alternate-reverse") ? 3 : 0;
+            if (nout < cap) { dst[nout].prop = P_ANIM_DIR; dst[nout].ival = iv; ++nout; }
+            have_dir = 1;
+            continue;
+        }
+        if (!have_fill && (csel_ci_eq(t, "none") || csel_ci_eq(t, "forwards") ||
+                           csel_ci_eq(t, "backwards") || csel_ci_eq(t, "both"))) {
+            int iv = csel_ci_eq(t, "forwards") ? 1 : csel_ci_eq(t, "backwards") ? 2
+                     : csel_ci_eq(t, "both") ? 3 : 0;
+            if (nout < cap) { dst[nout].prop = P_ANIM_FILL; dst[nout].ival = iv; ++nout; }
+            have_fill = 1;
+            continue;
+        }
+        if (!have_name && is_anim_ident(t)) {
+            size_t tl = strlen(t);
+            int enc = (int)(t[0]) | ((int)(tl > 63 ? 63 : tl) << 8);
+            if (nout < cap) { dst[nout].prop = P_ANIM_NAME; dst[nout].ival = enc; ++nout; }
+            have_name = 1;
+            continue;
+        }
+        /* Anything else (cubic-bezier()/steps() timing, a second name): ignored. */
+    }
+    return nout;
+}
+
 /* transition shorthand: "<property> <duration> <timing> <delay>". v1 handles
  * a single value set (non-comma). Returns the number of decls emitted. */
 static int expand_transition(const char *val, css_decl *dst, int cap) {
@@ -1105,10 +1321,12 @@ static int expand_transition(const char *val, css_decl *dst, int cap) {
     if (csel_ci_eq(val, "none")) {
         dst[0].prop = P_TRANSITION_PROPERTY; dst[0].ival = 0; return 1;
     }
+    char first[CSS_URL_MAX];
+    first_comma_item(val, first, sizeof first);
     char tok[CSS_TOK_MAX];
     char toks[4][CSS_TOK_MAX];
     int nt = 0;
-    const char *p = val;
+    const char *p = first;
     while (nt < 4 && next_ws_token(&p, tok, sizeof tok)) {
         size_t tl = strlen(tok);
         if (tl >= CSS_TOK_MAX) break;
@@ -1132,16 +1350,8 @@ static int expand_transition(const char *val, css_decl *dst, int cap) {
                 continue;
             }
         }
-        if (!has_timing && (csel_ci_eq(toks[i], "ease") ||
-            csel_ci_eq(toks[i], "linear") || csel_ci_eq(toks[i], "ease-in") ||
-            csel_ci_eq(toks[i], "ease-out") || csel_ci_eq(toks[i], "ease-in-out"))) {
-            int iv = -1;
-            if (csel_ci_eq(toks[i], "ease")) iv = 1;
-            else if (csel_ci_eq(toks[i], "linear")) iv = 0;
-            else if (csel_ci_eq(toks[i], "ease-in")) iv = 2;
-            else if (csel_ci_eq(toks[i], "ease-out")) iv = 3;
-            else if (csel_ci_eq(toks[i], "ease-in-out")) iv = 4;
-            dst[nout].prop = P_TRANSITION_TIMING; dst[nout].ival = iv;
+        if (!has_timing && anim_easing_iv(toks[i]) >= 0) {
+            dst[nout].prop = P_TRANSITION_TIMING; dst[nout].ival = anim_easing_iv(toks[i]);
             has_timing = 1; ++nout;
             continue;
         }
@@ -1398,6 +1608,96 @@ static int emit_content(css_decl *dst, int cap, const char *str,
 /* R8: escapes inside a quoted content value are decoded by csel_unescape
  * (css_select), the one CSS Syntax 4.3.7 decoder shared with selector idents. */
 
+/* content: attr(name[, fallback]) marker. Stored as "\x01attr:" + lowercased name
+ * + optional "\x1f" + fallback (unescaped). The 0x01 prefix can never start a real
+ * quoted string value (a control char + literal), so the marker is unambiguous. */
+#define CSS_ATTR_MARK "\x01" "attr:"
+#define CSS_ATTR_SEP  '\x1f'
+
+/* Parses attr(name[, fallback]) into the content pool. Returns 1 if parsed. */
+static int expand_content_attr(const char *val, css_decl *dst, int cap,
+                               char (*contenttab)[CSS_URL_MAX], size_t *ncontent,
+                               size_t contentcap) {
+    const char *p = val;
+    while (*p == ' ' || *p == '\t') ++p;
+    if (!( (p[0]=='a'||p[0]=='A') && (p[1]=='t'||p[1]=='T') && (p[2]=='t'||p[2]=='T')
+        && (p[3]=='r'||p[3]=='R') && p[4]=='(')) return 0;
+    size_t vlen = strlen(val);
+    while (vlen > 0 && (val[vlen-1]==' '||val[vlen-1]=='\t')) --vlen;
+    if (vlen == 0 || val[vlen-1] != ')') return 0;
+    const char *inner = p + 5;
+    size_t ilen = (val + vlen - 1) - inner;
+    /* Split on the first top-level comma (quotes respected) for the fallback. */
+    size_t comma = ilen + 1;
+    {
+        int qq = 0;
+        for (size_t i = 0; i < ilen; ++i) {
+            char c = inner[i];
+            if (qq) { if (c == qq) qq = 0; }
+            else if (c == '"' || c == '\'') qq = c;
+            else if (c == ',') { comma = i; break; }
+        }
+    }
+    const char *nstart = inner;
+    size_t nlen = (comma <= ilen) ? comma : ilen;
+    while (nlen > 0 && (*nstart==' '||*nstart=='\t')) { ++nstart; --nlen; }
+    while (nlen > 0 && (nstart[nlen-1]==' '||nstart[nlen-1]=='\t')) --nlen;
+    if (nlen == 0 || nlen >= 64) return 0;
+    for (size_t i = 0; i < nlen; ++i) {
+        char c = nstart[i];
+        if (!((c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='0'&&c<='9')
+              ||c=='-'||c=='_'||c==':'||c=='.'||((unsigned char)c>=0x80))) return 0;
+    }
+    char fb[CSS_URL_MAX];
+    size_t flen = 0;
+    if (comma <= ilen) {
+        const char *fstart = inner + comma + 1;
+        size_t rem = ilen - comma - 1;
+        while (rem > 0 && (*fstart==' '||*fstart=='\t')) { ++fstart; --rem; }
+        while (rem > 0 && (fstart[rem-1]==' '||fstart[rem-1]=='\t')) --rem;
+        if (rem >= 2 && ((fstart[0]=='"'&&fstart[rem-1]=='"')
+                      || (fstart[0]=='\''&&fstart[rem-1]=='\''))) {
+            size_t il = rem - 2;
+            if (il >= sizeof fb) il = sizeof fb - 1;
+            csel_unescape(fb, sizeof fb, fstart + 1, il);
+            flen = strlen(fb);
+        } else {
+            if (rem >= sizeof fb) rem = sizeof fb - 1;
+            memcpy(fb, fstart, rem);
+            fb[rem] = '\0';
+            flen = rem;
+        }
+    }
+    if (cap < 1) return 0;
+    /* Pool full degrades to explicit empty (ival -1), exactly like a quoted
+     * string past the cap (emit_content): a conforming declaration must not
+     * count as a discard just because an icon font ate the pool. */
+    if (*ncontent >= contentcap)
+        return emit_content(dst, cap, NULL, contenttab, ncontent, contentcap);
+    char *slot = contenttab[*ncontent];
+    size_t o = 0;
+    static const char mark[] = CSS_ATTR_MARK;
+    size_t mlen = sizeof mark - 1;
+    memcpy(slot, mark, mlen);
+    o = mlen;
+    for (size_t i = 0; i < nlen && o + 1 < (size_t)CSS_URL_MAX; ++i) {
+        char c = nstart[i];
+        slot[o++] = (c >= 'A' && c <= 'Z') ? (char)(c + 32) : c;
+    }
+    if (flen > 0 && o + 1 < (size_t)CSS_URL_MAX) {
+        slot[o++] = CSS_ATTR_SEP;
+        size_t room = (size_t)CSS_URL_MAX - 1 - o;
+        if (flen > room) flen = room;
+        memcpy(slot + o, fb, flen);
+        o += flen;
+    }
+    slot[o] = '\0';
+    dst[0].prop = P_CONTENT;
+    dst[0].ival = (int)*ncontent;
+    ++*ncontent;
+    return 1;
+}
+
 /* R8: content property. Extracts quoted string, stores in content pool, emits
  * P_CONTENT with pool index. Returns 1 if parsed. */
 static int expand_content(const char *val, css_decl *dst, int cap,
@@ -1410,6 +1710,13 @@ static int expand_content(const char *val, css_decl *dst, int cap,
     if (csel_ci_eq(val, "none") || csel_ci_eq(val, "normal"))
         return emit_content(dst, cap, NULL, contenttab, ncontent, contentcap);
     if (csel_substr(val, "url(", 1)) return 0;
+    {
+        const char *t = val;
+        while (*t == ' ' || *t == '\t') ++t;
+        if ((t[0]=='a'||t[0]=='A')&&(t[1]=='t'||t[1]=='T')&&(t[2]=='t'||t[2]=='T')
+            &&(t[3]=='r'||t[3]=='R')&&t[4]=='(')
+            return expand_content_attr(val, dst, cap, contenttab, ncontent, contentcap);
+    }
     int q = (val[0] == '"' || val[0] == '\'') ? val[0] : 0;
     if (!q) return 0;
     size_t len = strlen(val);
@@ -1705,6 +2012,37 @@ static int interp_flex_direction(const char *v) {
 static int interp_box_orient(const char *v) {
     if (csel_ci_eq(v, "horizontal") || csel_ci_eq(v, "inline-axis")) return CSS_FD_ROW;
     if (csel_ci_eq(v, "vertical") || csel_ci_eq(v, "block-axis")) return CSS_FD_COLUMN;
+    return -1;
+}
+
+/**
+ * 2012 tweener packing vocabulary (`flex-pack` / `box-pack`, Flexbox CR 2012
+ * 8.2): start/end/center shared with `justify-content`, plus the two names the
+ * final spec renamed -- `justify` IS `space-between`, `distribute` IS
+ * `space-around`. Reached via strip-prefix-and-ask-again (`-ms-flex-pack`,
+ * `-webkit-box-pack`), never dispatched prefixed directly. Anything else
+ * (notably `baseline`, which packs nothing) fails closed.
+ */
+static int interp_flex_pack(const char *v) {
+    if (csel_ci_eq(v, "start")) return CSS_JUSTIFY_START;
+    if (csel_ci_eq(v, "end")) return CSS_JUSTIFY_END;
+    if (csel_ci_eq(v, "center")) return CSS_JUSTIFY_CENTER;
+    if (csel_ci_eq(v, "justify")) return CSS_JUSTIFY_SPACE_BETWEEN;
+    if (csel_ci_eq(v, "distribute")) return CSS_JUSTIFY_SPACE_AROUND;
+    return -1;
+}
+
+/**
+ * `flex-line-pack` (2012 align-content): the `flex-pack` vocabulary plus
+ * `stretch`, mapped onto the css_align_kw slots `align-content` reads.
+ */
+static int interp_flex_line_pack(const char *v) {
+    if (csel_ci_eq(v, "start")) return CSS_AK_START;
+    if (csel_ci_eq(v, "end")) return CSS_AK_END;
+    if (csel_ci_eq(v, "center")) return CSS_AK_CENTER;
+    if (csel_ci_eq(v, "justify")) return CSS_AK_SPACE_BETWEEN;
+    if (csel_ci_eq(v, "distribute")) return CSS_AK_SPACE_AROUND;
+    if (csel_ci_eq(v, "stretch")) return CSS_AK_STRETCH;
     return -1;
 }
 
@@ -2734,11 +3072,12 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
      *
      * The rule is exactly "strip the prefix and ask again", ONCE, and the alias
      * table falls out of the dispatch below instead of being a second list that
-     * goes stale. What it deliberately does NOT do is map the IE10 tweener
-     * flexbox names: there is no property called `flex-pack`, so `-ms-flex-pack`
-     * finds nothing and stays dropped -- which is right, because its value
-     * grammar (`justify`/`distribute`) is not `justify-content`'s. Guessing
-     * there would be inventing a rule.
+     * goes stale. Since 2026-10-09 the stripped 2012 tweener names (`flex-pack`,
+     * `flex-order`, `flex-align`, `flex-line-pack`, `flex-item-align`,
+     * `flex-positive`, `flex-negative`, `flex-preferred-size`) and the 2009
+     * `box-pack`/`box-align` DO dispatch -- to the modern slots, with the exact
+     * historical value grammar (`justify` IS `space-between`, `distribute` IS
+     * `space-around`; Flexbox CR 2012 8.2), not a guess. See spec/css.md.
      *
      * `--x` is a custom property, not a vendor prefix, and is excluded by
      * requiring a letter after the leading '-'.
@@ -3046,6 +3385,27 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     else if (strcmp(prop, "justify-items") == 0)       { prop_id = P_JUSTIFY_ITEMS; ival = interp_align_kw(val, 0, 0); }
     else if (strcmp(prop, "flex-direction") == 0)      { prop_id = P_FLEX_DIR;      ival = interp_flex_direction(val); }
     else if (strcmp(prop, "box-orient") == 0)          { prop_id = P_FLEX_DIR;      ival = interp_box_orient(val); }
+    /* 2012 tweener item/container properties (spec/css.md 2026-10-09): the
+     * stripped -ms-/-webkit-box- names land here via strip-prefix-and-ask-again
+     * and reuse the modern interpreters and slots outright. */
+    else if (strcmp(prop, "flex-order") == 0) {
+        int o;
+        if (cap < 1 || !interp_int(val, &o)) return 0;
+        dst[0].prop = P_ORDER; dst[0].ival = o; return 1;
+    }
+    else if (strcmp(prop, "flex-positive") == 0)      { prop_id = P_FLEX_GROW;     ival = interp_flex_factor(val); }
+    else if (strcmp(prop, "flex-negative") == 0)      { prop_id = P_FLEX_SHRINK;   ival = interp_flex_factor(val); }
+    else if (strcmp(prop, "flex-preferred-size") == 0) {
+        int o;
+        if (cap < 1 || !interp_flex_basis(val, &o)) return 0;
+        dst[0].prop = P_FLEX_BASIS; dst[0].ival = o; return 1;
+    }
+    else if (strcmp(prop, "flex-align") == 0
+             || strcmp(prop, "box-align") == 0)       { prop_id = P_ALIGN_ITEMS;   ival = interp_align_kw(val, 0, 0); }
+    else if (strcmp(prop, "flex-item-align") == 0)   { prop_id = P_ALIGN_SELF;    ival = interp_align_kw(val, 1, 0); }
+    else if (strcmp(prop, "flex-pack") == 0
+             || strcmp(prop, "box-pack") == 0)        { prop_id = P_JUSTIFY;       ival = interp_flex_pack(val); }
+    else if (strcmp(prop, "flex-line-pack") == 0)    { prop_id = P_ALIGN_CONTENT; ival = interp_flex_line_pack(val); }
     else if (strcmp(prop, "flex-wrap") == 0)           { prop_id = P_FLEX_WRAP;     ival = interp_flex_wrap(val); }
     else if (strcmp(prop, "grid-template-rows") == 0)  { prop_id = P_GRID_ROWS;     ival = interp_gridcols(val); }
     else if (strcmp(prop, "row-gap") == 0)             { prop_id = P_ROW_GAP;       ival = interp_gap(val); }
@@ -3124,8 +3484,12 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     else if (strcmp(prop, "touch-action") == 0)         { prop_id = P_TOUCH_ACTION;     ival = interp_touch_action(val); }
     else if (strcmp(prop, "overscroll-behavior") == 0)  { prop_id = P_OVERSCROLL_BEHAVIOR; ival = interp_overscroll_behavior(val); }
     else if (strcmp(prop, "backface-visibility") == 0)  { prop_id = P_BACKFACE_VISIBILITY; ival = interp_backface_visibility(val); }
+    else if (strcmp(prop, "animation") == 0)
+        return expand_animation(val, dst, cap);
     else if (strcmp(prop, "animation-duration") == 0) {
-        int ms = interp_time_ms(val);
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        int ms = interp_time_ms(first);
         if (ms < 0) return 0;
         dst[0].prop = P_ANIM_DURATION; dst[0].ival = ms; return 1;
     }
@@ -3133,70 +3497,81 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         /* store name in ival as first-char encoding for cascade; the full
          * name string is recovered later from sheet->keyframes[] by matching
          * first character + length (see resolve_anim_keyframes). */
-        int enc = (int)(val[0]) | ((int)(strlen(val) > 63 ? 63 : strlen(val)) << 8);
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        if (first[0] == '\0') return 0;
+        int enc = (int)(first[0]) | ((int)(strlen(first) > 63 ? 63 : strlen(first)) << 8);
         dst[0].prop = P_ANIM_NAME; dst[0].ival = enc; return 1;
     }
     else if (strcmp(prop, "animation-iteration-count") == 0) {
-        if (csel_ci_eq(val, "infinite")) { dst[0].prop = P_ANIM_ITERS; dst[0].ival = -1; return 1; }
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        if (csel_ci_eq(first, "infinite")) { dst[0].prop = P_ANIM_ITERS; dst[0].ival = -1; return 1; }
         double d; const char *e;
-        if (!parse_num(val, &d, &e) || *e != '\0' || d < 0.0) return 0;
+        if (!parse_num(first, &d, &e) || *e != '\0' || d < 0.0) return 0;
         dst[0].prop = P_ANIM_ITERS; dst[0].ival = (int)(d + 0.5); return 1;
     }
     else if (strcmp(prop, "animation-direction") == 0) {
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
         int iv = -1;
-        if (csel_ci_eq(val, "normal")) iv = 0;
-        else if (csel_ci_eq(val, "reverse")) iv = 1;
-        else if (csel_ci_eq(val, "alternate")) iv = 2;
-        else if (csel_ci_eq(val, "alternate-reverse")) iv = 3;
+        if (csel_ci_eq(first, "normal")) iv = 0;
+        else if (csel_ci_eq(first, "reverse")) iv = 1;
+        else if (csel_ci_eq(first, "alternate")) iv = 2;
+        else if (csel_ci_eq(first, "alternate-reverse")) iv = 3;
         else return 0;
         dst[0].prop = P_ANIM_DIR; dst[0].ival = iv; return 1;
     }
     else if (strcmp(prop, "animation-fill-mode") == 0) {
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
         int iv = -1;
-        if (csel_ci_eq(val, "none")) iv = 0;
-        else if (csel_ci_eq(val, "forwards")) iv = 1;
-        else if (csel_ci_eq(val, "backwards")) iv = 2;
-        else if (csel_ci_eq(val, "both")) iv = 3;
+        if (csel_ci_eq(first, "none")) iv = 0;
+        else if (csel_ci_eq(first, "forwards")) iv = 1;
+        else if (csel_ci_eq(first, "backwards")) iv = 2;
+        else if (csel_ci_eq(first, "both")) iv = 3;
         else return 0;
         dst[0].prop = P_ANIM_FILL; dst[0].ival = iv; return 1;
     }
     else if (strcmp(prop, "animation-timing-function") == 0) {
-        int iv = -1;
-        if (csel_ci_eq(val, "ease")) iv = 1;
-        else if (csel_ci_eq(val, "linear")) iv = 0;
-        else if (csel_ci_eq(val, "ease-in")) iv = 2;
-        else if (csel_ci_eq(val, "ease-out")) iv = 3;
-        else if (csel_ci_eq(val, "ease-in-out")) iv = 4;
-        else return 0;
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        int iv = anim_easing_iv(first);
+        if (iv < 0) return 0;
         dst[0].prop = P_ANIM_TIMING; dst[0].ival = iv; return 1;
     }
     else if (strcmp(prop, "animation-delay") == 0) {
-        int ms = interp_time_ms(val);
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        int ms = interp_time_ms(first);
         if (ms < 0) return 0;
         dst[0].prop = P_ANIM_DELAY; dst[0].ival = ms; return 1;
     }
     else if (strcmp(prop, "transition-duration") == 0) {
-        int ms = interp_time_ms(val);
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        int ms = interp_time_ms(first);
         if (ms < 0) return 0;
         dst[0].prop = P_TRANSITION_DURATION; dst[0].ival = ms; return 1;
     }
     else if (strcmp(prop, "transition-property") == 0) {
-        int v = interp_transition_property(val);
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        int v = interp_transition_property(first);
         if (v < 0) return 0;
         dst[0].prop = P_TRANSITION_PROPERTY; dst[0].ival = v; return 1;
     }
     else if (strcmp(prop, "transition-timing-function") == 0) {
-        int iv = -1;
-        if (csel_ci_eq(val, "ease")) iv = 1;
-        else if (csel_ci_eq(val, "linear")) iv = 0;
-        else if (csel_ci_eq(val, "ease-in")) iv = 2;
-        else if (csel_ci_eq(val, "ease-out")) iv = 3;
-        else if (csel_ci_eq(val, "ease-in-out")) iv = 4;
-        else return 0;
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        int iv = anim_easing_iv(first);
+        if (iv < 0) return 0;
         dst[0].prop = P_TRANSITION_TIMING; dst[0].ival = iv; return 1;
     }
     else if (strcmp(prop, "transition-delay") == 0) {
-        int ms = interp_time_ms(val);
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        int ms = interp_time_ms(first);
         if (ms < 0) return 0;
         dst[0].prop = P_TRANSITION_DELAY; dst[0].ival = ms; return 1;
     }
@@ -4455,10 +4830,22 @@ void css_free(css_sheet *s) {
  * cascade is two-tiered: an !important declaration beats any non-important one
  * (regardless of specificity); within a tier the higher specificity wins, ties
  * broken by document order. wi/ws/wo track the winning tier/specificity/order so far. */
+/* Looks up an attribute value on the element being styled (names are stored
+ * lowercased by css_chain; the query is lowercased at parse). NULL when absent. */
+static const char *content_attr_of(const css_element *el, const char *name) {
+    if (el == NULL || name == NULL) return NULL;
+    for (size_t i = 0; i < el->nattrs; ++i) {
+        if (el->attrs[i].name != NULL && csel_ci_eq(el->attrs[i].name, name))
+            return el->attrs[i].value;
+    }
+    return NULL;
+}
+
 static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
                         const css_decl *d,
                         int spec, int layer, int ord, const char (*urltab)[CSS_URL_MAX],
-                        const char (*contenttab)[CSS_URL_MAX], int pseudo_kind) {
+                        const char (*contenttab)[CSS_URL_MAX], int pseudo_kind,
+                        const css_element *el) {
     /* CSS 2.1 §12.1: a ::before/::after rule styles the GENERATED box, never the
      * element it originates from. Only `content` crosses over, because that is how
      * the generated text reaches page_view (which materialises it as a synthetic
@@ -4756,19 +5143,47 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
                         o->content_on = 0;
                     }
                 } else if (contenttab != NULL) {
+                    const char *src = contenttab[d->ival];
+                    char resolved[CSS_URL_MAX];
+                    /* attr() marker resolves per element; anything else copies. */
+                    if (src[0] == '\x01' && strncmp(src, CSS_ATTR_MARK,
+                                                   sizeof CSS_ATTR_MARK - 1) == 0) {
+                        const char *nm = src + sizeof CSS_ATTR_MARK - 1;
+                        const char *sep = strchr(nm, CSS_ATTR_SEP);
+                        char aname[64];
+                        size_t alen = (sep != NULL) ? (size_t)(sep - nm) : strlen(nm);
+                        if (alen >= sizeof aname) alen = sizeof aname - 1;
+                        memcpy(aname, nm, alen);
+                        aname[alen] = '\0';
+                        const char *av = content_attr_of(el, aname);
+                        if (av != NULL) {
+                            size_t vl = strlen(av);
+                            if (vl >= sizeof resolved) vl = sizeof resolved - 1;
+                            memcpy(resolved, av, vl);
+                            resolved[vl] = '\0';
+                        } else if (sep != NULL) {
+                            size_t fl = strlen(sep + 1);
+                            if (fl >= sizeof resolved) fl = sizeof resolved - 1;
+                            memcpy(resolved, sep + 1, fl);
+                            resolved[fl] = '\0';
+                        } else {
+                            resolved[0] = '\0';
+                        }
+                        src = resolved;
+                    }
                     if (pseudo_kind == PSEUDO_BEFORE) o->content_before_on = 1;
                     else if (pseudo_kind == PSEUDO_AFTER) o->content_after_on = 1;
                     else o->content_on = 1;
                     if (pseudo_kind == PSEUDO_BEFORE) {
-                        memcpy(o->content_before_str, contenttab[d->ival], CSS_URL_MAX);
+                        memcpy(o->content_before_str, src, CSS_URL_MAX);
                         o->content_before_str[CSS_URL_MAX - 1] = '\0';
-                        memcpy(o->content_str, contenttab[d->ival], CSS_URL_MAX);
+                        memcpy(o->content_str, src, CSS_URL_MAX);
                         o->content_str[CSS_URL_MAX - 1] = '\0';
                     } else if (pseudo_kind == PSEUDO_AFTER) {
-                        memcpy(o->content_after_str, contenttab[d->ival], CSS_URL_MAX);
+                        memcpy(o->content_after_str, src, CSS_URL_MAX);
                         o->content_after_str[CSS_URL_MAX - 1] = '\0';
                     } else {
-                        memcpy(o->content_str, contenttab[d->ival], CSS_URL_MAX);
+                        memcpy(o->content_str, src, CSS_URL_MAX);
                         o->content_str[CSS_URL_MAX - 1] = '\0';
                     }
                 }
@@ -4911,7 +5326,8 @@ static void element_custom_props(const css_sheet *sheet, const css_match *mt, si
  * applies what it interprets to, exactly as the rule would have. */
 static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
                              const char *entry, int important, const cvr_scope *sc,
-                             int spec, int layer, int ord, int pseudo) {
+                             int spec, int layer, int ord, int pseudo,
+                             const css_element *el) {
     const char *prop = entry;
     const char *val = entry + strlen(entry) + 1;
     char resolved[CSS_URL_MAX];
@@ -4928,7 +5344,7 @@ static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, 
         tmp[i].important = important;
         apply_decl(o, wi, ws, wo, wem, wv, &tmp[i], spec, layer, ord,
                    (const char (*)[CSS_URL_MAX])urls, (const char (*)[CSS_URL_MAX])texts,
-                   pseudo);
+                   pseudo, el);
     }
 }
 
@@ -4937,7 +5353,7 @@ static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, 
  * against es and its span skipped. */
 static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
                        const css_sheet *sheet, const css_sel *sel, int pseudo,
-                       const cvr_scope *es) {
+                       const cvr_scope *es, const css_element *el) {
     const css_rule *r = &sheet->rules[sel->rule];
     for (size_t d = 0; d < r->count; ++d) {
         const css_decl *dc = &sheet->decls[r->start + d];
@@ -4947,13 +5363,13 @@ static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
                 if (dc->ival >= 0 && (size_t)dc->ival < sheet->nraw)
                     apply_var_source(o, wi, ws, wo, wem, wv, sheet->raw[dc->ival],
                                      dc->important, es, sel->spec, sel->layer,
-                                     sel->order, pseudo);
+                                     sel->order, pseudo, el);
                 d += (size_t)dc->span;
             }
             continue;
         }
         apply_decl(o, wi, ws, wo, wem, wv, dc, sel->spec, sel->layer, sel->order,
-                   sheet->bg_urls, sheet->content_urls, pseudo);
+                   sheet->bg_urls, sheet->content_urls, pseudo, el);
     }
 }
 
@@ -4998,7 +5414,7 @@ static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
         };
         if (folded.ival == wv[slot]) continue;   /* nothing moved */
         apply_decl(o, wi, ws, wo, NULL, NULL, &folded,
-                   ws[slot], -1, wo[slot], urltab, contenttab, -1);
+                   ws[slot], -1, wo[slot], urltab, contenttab, -1, el);
     }
 }
 
@@ -5203,12 +5619,12 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
                 if (pseudo_kind != wk) continue;
                 pseudo_kind = -1;
             }
-            apply_rule(&out, wi, ws, wo, wem, wv, sheet, sel, pseudo_kind, NULL);
+            apply_rule(&out, wi, ws, wo, wem, wv, sheet, sel, pseudo_kind, NULL, el);
         }
     }
     for (size_t k = 0; k < nm && !m_oom; ++k)
         apply_rule(&out, wi, ws, wo, wem, wv, sheet, mt[k].sel, mt[k].pseudo,
-                   per_element ? &es : NULL);
+                   per_element ? &es : NULL, el);
     free(mt);
 
     if (inline_style != NULL) {
@@ -5223,7 +5639,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
                                     NULL);
         for (size_t d = 0; d < dn; ++d)
             apply_decl(&out, wi, ws, wo, wem, wv, &tmp[d], CAR_INLINE_SPEC, -1, INT_MAX,
-                       inline_bg_urls, inline_content_urls, -1);
+                       inline_bg_urls, inline_content_urls, -1, el);
     }
     cvr_free(&local);
 

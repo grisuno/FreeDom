@@ -482,6 +482,25 @@ reveal-on-scroll dependiente de resize quedaba oculto.
   `setAttribute`, ya sellada). Sin red, sin geometría real, sin reloj. Presupuesto
   de tiempo del intérprete acota loops.
 
+## 7k. Shadow visible v1: `attachShadow` espeja a light DOM (2026-10-09)
+
+Motivo medido: `attachShadow` devolvía un fragmento JS (`SH[h]`) cuyos hijos son nodos
+detached — `pv_build` camina el árbol Lexbor desde `<body>` y nunca los visita, así que
+todo contenido shadow (YouTube `webcomponents-sd`, custom elements) quedaba invisible.
+Encapsulación real (shadow Oculta light sin slot, proyección en `<slot>`) fuera de alcance.
+
+- **Espejo:** cada mutación del shadow root (`appendChild`/`insertBefore`/`append`/
+  `prepend`/`innerHTML=`/`textContent=`) además hace `dom.appendChild/insertBefore/
+  setInnerHtml` equivalente sobre el host, así el siguiente `pv_build_styled`
+  (vía `OP_TICK`/`OP_EVENT`) lo pinta como light. `innerHTML=` parsea en un `div`
+  scratch y mueve hijos (no reemplaza light: append, fail-visible).
+  Dado `host.attachShadow({mode:'open'})` + `sr.appendChild(el)` cuando se relee
+  `host.firstChild` entonces es `el` (además de `sr.firstChild`).
+- **`<slot>` transparente:** `<slot>` vacío no genera caja ni texto (ya es unknown
+  inline sin hijos); light ya se emite en su posición original. Sin distribución real.
+- **Seguridad:** misma capacidad que `appendChild`/`setInnerHtml` (ya selladas, mismo
+  documento). Sin red, sin cross-tree. Cota de moves por op (100k, como `replaceChildren`).
+
 ## 8. Fuera de alcance
 
 - Eventos **interactivos** más allá del click (keydown/mousemove/submit; el click del

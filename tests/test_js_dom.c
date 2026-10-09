@@ -342,6 +342,22 @@ static void test_mutation_observer_fires_synthetically(void **state) {
               "__fireDeferred(); mh2", "0");
 }
 
+/* 7k slice2 RED: attachShadow mirrors into light DOM so pv_build paints it. */
+static void test_shadow_mirror_append(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var h=document.createElement('div'); document.body.appendChild(h);"
+              "var sr=h.attachShadow({mode:'open'});"
+              "var c=document.createElement('span'); c.textContent='hi'; sr.appendChild(c);"
+              "h.firstChild===c && sr.host===h && h.shadowRoot===sr && h.textContent", "hi");
+}
+
+static void test_shadow_mirror_inner_html(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var h=document.createElement('div'); document.body.appendChild(h);"
+              "var sr=h.attachShadow({mode:'open'}); sr.innerHTML='<b>bold</b>';"
+              "h.textContent", "bold");
+}
+
 /* matchMedia evaluates for real against the normalized 1920x1080 desktop
  * identity (the same one innerWidth and the CSS viewport units use); identity
  * signals are always normalized (light, no-preference, hover, fine). Unknown
@@ -2441,6 +2457,8 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_get_computed_style_inline, setup, teardown),
         cmocka_unit_test_setup_teardown(test_resize_observer_fires_synthetically, setup, teardown),
         cmocka_unit_test_setup_teardown(test_mutation_observer_fires_synthetically, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_shadow_mirror_append, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_shadow_mirror_inner_html, setup, teardown),
         cmocka_unit_test_setup_teardown(test_match_media_normalized_viewport, setup, teardown),
         cmocka_unit_test_setup_teardown(test_document_node_identity, setup, teardown),
         cmocka_unit_test_setup_teardown(test_element_attributes_named_node_map, setup, teardown),

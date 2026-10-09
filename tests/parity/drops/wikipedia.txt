@@ -1,5 +1,5 @@
 Web browser - Wikipedia
-CSS drops: 248 declaration(s) dropped, 22 distinct
+CSS drops: 247 declaration(s) dropped, 21 distinct
   count  cause         property                     first value
     101  unknown-prop  mask-image                   url(https://en.wikipedia.org/w/load.php?modules=skins.vector.icons&image=eye&format=original...
     100  unknown-prop  -webkit-mask-image           url(https://en.wikipedia.org/w/load.php?modules=skins.vector.icons&image=eye&format=original...
@@ -11,7 +11,6 @@ CSS drops: 248 declaration(s) dropped, 22 distinct
       2  bad-value     height                       min(50px,70%)
       2  bad-value     background-position          center right
       2  unknown-prop  quotes                       '"' '"' "'" "'"
-      1  unknown-prop  animation                    mw-tmh-player-progress-bar-slide 2s infinite linear
       1  unknown-prop  page-break-inside            avoid
       1  unknown-prop  clip-path                    inset(50%)
       1  unknown-prop  list-style-image             none

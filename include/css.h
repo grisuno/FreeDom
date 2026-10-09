@@ -206,11 +206,17 @@ typedef enum css_overflow {
 /* cursor (subset of the CSS keyword list). 0 unset. v1 paint only distinguishes
  * POINTER (shows the hand cursor already used for links) from every other value
  * (shows the default arrow); the rest are resolved for completeness/debug_dom and a
- * future milestone that loads more cursor theme shapes -- see spec/css.md. */
+ * future milestone that loads more cursor theme shapes -- see spec/css.md.
+ * APPEND only: the codes ride the render IPC as ints (pv_box_def), so existing
+ * codes never renumber. */
 typedef enum css_cursor {
     CSS_CUR_UNSET = 0, CSS_CUR_AUTO, CSS_CUR_DEFAULT, CSS_CUR_POINTER, CSS_CUR_TEXT,
     CSS_CUR_MOVE, CSS_CUR_NOT_ALLOWED, CSS_CUR_HELP, CSS_CUR_WAIT, CSS_CUR_CROSSHAIR,
-    CSS_CUR_GRAB, CSS_CUR_ZOOM_IN, CSS_CUR_NONE
+    CSS_CUR_GRAB, CSS_CUR_ZOOM_IN, CSS_CUR_NONE,
+    CSS_CUR_EW_RESIZE, CSS_CUR_NS_RESIZE, CSS_CUR_NESW_RESIZE, CSS_CUR_NWSE_RESIZE,
+    CSS_CUR_COL_RESIZE, CSS_CUR_ROW_RESIZE, CSS_CUR_ALL_SCROLL, CSS_CUR_CELL,
+    CSS_CUR_COPY, CSS_CUR_ALIAS, CSS_CUR_CONTEXT_MENU, CSS_CUR_PROGRESS,
+    CSS_CUR_NO_DROP, CSS_CUR_VERTICAL_TEXT, CSS_CUR_ZOOM_OUT, CSS_CUR_GRABBING
 } css_cursor;
 
 /* text-overflow. 0 unset; CLIP is the explicit default. ELLIPSIS only has a visible

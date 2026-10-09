@@ -175,6 +175,22 @@ static const char *dd_cursor_name(int c) {
         case CSS_CUR_GRAB:        return "grab";
         case CSS_CUR_ZOOM_IN:     return "zoom-in";
         case CSS_CUR_NONE:        return "none";
+        case CSS_CUR_EW_RESIZE:   return "ew-resize";
+        case CSS_CUR_NS_RESIZE:   return "ns-resize";
+        case CSS_CUR_NESW_RESIZE: return "nesw-resize";
+        case CSS_CUR_NWSE_RESIZE: return "nwse-resize";
+        case CSS_CUR_COL_RESIZE:  return "col-resize";
+        case CSS_CUR_ROW_RESIZE:  return "row-resize";
+        case CSS_CUR_ALL_SCROLL:  return "all-scroll";
+        case CSS_CUR_CELL:        return "cell";
+        case CSS_CUR_COPY:        return "copy";
+        case CSS_CUR_ALIAS:       return "alias";
+        case CSS_CUR_CONTEXT_MENU: return "context-menu";
+        case CSS_CUR_PROGRESS:    return "progress";
+        case CSS_CUR_NO_DROP:     return "no-drop";
+        case CSS_CUR_VERTICAL_TEXT: return "vertical-text";
+        case CSS_CUR_ZOOM_OUT:    return "zoom-out";
+        case CSS_CUR_GRABBING:    return "grabbing";
         default:                   return "auto";
     }
 }
