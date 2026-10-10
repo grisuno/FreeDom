@@ -100,6 +100,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->text_decoration_style = 0;
     b->text_decoration_thickness = -1;
     b->font_family = 0;
+    b->fontface = 0u;
     b->text_transform = 0;
     b->letter_spacing = PV_LEN_UNSET;
     b->word_spacing = PV_LEN_UNSET;
@@ -390,6 +391,10 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             rd_block *nb = &d->blocks[d->count - 1];
             if (r->kind == PV_IMAGE) nb->image_rendering = r->image_rendering;
             if (r->kind == PV_IMAGE) nb->object_fit = r->object_fit;
+            /* The element's own width % (used width, CSS 2.1 §10.3.2 -- not a
+             * cap, so only this half travels, never box_w). Without it a
+             * responsive `img{width:50%}` keeps its intrinsic size. */
+            if (r->kind == PV_IMAGE) nb->box_w_pct = r->box_w_pct;
             /* A replaced element is placed by the inherited text-align, like the
              * inline box it is (a centred logo used to be pinned to the left). */
             if (r->kind == PV_IMAGE || r->kind == PV_SVG) nb->text_align = r->text_align;
@@ -435,6 +440,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
              * off they keep their no-effect defaults (set by rd_push). */
             if (caps.css) {
                 lb->font_family = r->font_family;
+                lb->fontface = r->fontface;
                 lb->text_transform = r->text_transform;
                 lb->letter_spacing = r->letter_spacing;
                 lb->word_spacing = r->word_spacing;

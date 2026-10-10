@@ -26,11 +26,15 @@
 #endif
 
 /* Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags.
- * The engine matches the generic group only, never an exact author family. */
+ * The engine matches the generic group only, never an exact author family --
+ * unless wfh names a registered @font-face (spec/webfont.md): a wf_name_hash,
+ * 0 = none. A set-but-unregistered hash falls back to the bucket (fail-visible,
+ * never fail-hard). */
 typedef struct tsh_font {
     int family; /* css_font_family bucket */
     int bold;
     int italic;
+    unsigned wfh; /* @font-face hash, 0 = local bucket stack */
 } tsh_font;
 
 #define TSH_MAX_GLYPHS 4096u       /* anti-DoS cap on one shaped slice */
@@ -64,6 +68,19 @@ double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);
  * any other status means it did nothing and the caller must use the toy draw. */
 tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
                     double x, double baseline, const char *text, size_t len);
+
+/* Registers one fetched @font-face for this document (spec/webfont.md): name
+ * is the author family (hashed with wf_name_hash), bytes the validated font
+ * program (copied; caller keeps ownership). Re-registering a key replaces it.
+ * Returns 0 on success, -1 fail-closed (NULL/empty/oversize args, bad magic,
+ * unparseable bytes, table full). Trusted side only; never the worker. */
+int tsh_webfont_register(const char *name,
+                         const unsigned char *bytes, size_t nbytes,
+                         int bold, int italic);
+
+/* Drops every registered webfont (document teardown / navigation). Idempotent,
+ * NULL-safe by construction (no args). tsh_shutdown also clears the table. */
+void tsh_webfont_clear(void);
 
 /* Releases cached faces / blobs / FreeType library (leak hygiene; tests). */
 void tsh_shutdown(void);

@@ -12,6 +12,7 @@
 #include "css_gradient.h"
 #include "css_box.h"
 #include "css_text.h"
+#include "webfont.h"
 #include "flex_layout.h"  /* fx_grid_area_hash: an area name reduces to one int */
 #include "css_select.h"
 
@@ -1491,6 +1492,15 @@ static int expand_backdrop_filter(const char *val, css_decl *dst, int cap) {
  * rejecting real percentages was two mechanisms for one value type, and it dropped
  * `background-position: 50% 50%` -- the centring idiom -- entirely.
  *
+ * Since 2026-10-09 the 3-4 value form works too: a length after an edge keyword
+ * is THAT edge's offset (`right 10px` = free space minus 10px, i.e. pct 100% +
+ * px -10 under the painter's ox = px + pct*(area-img) -- no painter change), and
+ * keywords claim their axis by identity, so an explicit edge colliding with a
+ * bare center displaces it to the free axis (`center right` = x:right, y:center).
+ * Any other collision (`left right`, `10px left`, a third stray component)
+ * drops the whole declaration. `center` keeps its historical order-based claim
+ * (`center 10px` = x:center, y:10px), so only the colliding case is new.
+ *
  * Both axes are always emitted, px half and percentage half, like every other
  * <length-percentage> emitter: a partially written pair lets a lower-specificity
  * declaration survive underneath the winner on the half it did not write. */
@@ -1499,23 +1509,37 @@ static int expand_bg_position(const char *val, css_decl *dst, int cap) {
     int px[2] = { CSS_LEN_UNSET, CSS_LEN_UNSET };
     int pm[2] = { 0, 0 };
     int seen[2] = { 0, 0 };
+    int center_on[2] = { 0, 0 }; /* axis claimed by a bare center (yieldable) */
     const char *p = val;
     char tok[CSS_TOK_MAX];
     int order = 0;              /* next axis for an axis-agnostic component */
+    int pending = -1;           /* axis whose edge awaits its optional offset */
     int any = 0;
     while (next_ws_token(&p, tok, sizeof tok)) {
-        int axis = -1, kwpm = -1;
-        if (csel_ci_eq(tok, "left"))        { axis = 0; kwpm = 0; }
-        else if (csel_ci_eq(tok, "right"))  { axis = 0; kwpm = 1000; }
-        else if (csel_ci_eq(tok, "top"))    { axis = 1; kwpm = 0; }
-        else if (csel_ci_eq(tok, "bottom")) { axis = 1; kwpm = 1000; }
+        int axis = -1, kwpm = -1, is_edge = 0;
+        if (csel_ci_eq(tok, "left"))        { axis = 0; kwpm = 0; is_edge = 1; }
+        else if (csel_ci_eq(tok, "right"))  { axis = 0; kwpm = 1000; is_edge = 1; }
+        else if (csel_ci_eq(tok, "top"))    { axis = 1; kwpm = 0; is_edge = 1; }
+        else if (csel_ci_eq(tok, "bottom")) { axis = 1; kwpm = 1000; is_edge = 1; }
         else if (csel_ci_eq(tok, "center")) { kwpm = 500; }
         if (kwpm >= 0) {
-            if (axis < 0) { axis = (order < 2) ? order : 1; }
-            if (axis > 1 || seen[axis]) return 0;
+            pending = -1;   /* a keyword ends any open edge offset */
+            if (axis < 0) {
+                axis = (order < 2) ? order : 1;
+                if (axis > 1 || seen[axis]) return 0;
+            } else if (seen[axis]) {
+                int other = 1 - axis;
+                if (!is_edge || !center_on[axis] || seen[other]) return 0;
+                pm[other] = 500; px[other] = CSS_LEN_UNSET;
+                seen[other] = 1; center_on[other] = 1; center_on[axis] = 0;
+                seen[axis] = 0;
+                order = 2;
+            }
             seen[axis] = 1;
             pm[axis] = kwpm;
             px[axis] = CSS_LEN_UNSET;
+            if (!is_edge) center_on[axis] = 1;
+            else pending = axis;
             if (axis == order) ++order;
             any = 1;
             continue;
@@ -1526,12 +1550,46 @@ static int expand_bg_position(const char *val, css_decl *dst, int cap) {
          * size, so the non-negative rule that applies to widths never applied. */
         int lpx, lpm;
         if (!interp_lp(tok, AUTO_REJECT, 1, &lpx, &lpm)) return 0;
-        axis = (order < 2) ? order : -1;
-        if (axis < 0 || seen[axis]) return 0;
-        seen[axis] = 1;
-        px[axis] = lpx;
-        pm[axis] = lpm;
-        ++order;
+        /* A length after an edge keyword is that edge's offset when more
+         * components follow (`right 10px center`) or when the positional axis
+         * is already taken (`top X right Y`: the trailing Y can only belong
+         * to right). A trailing length with the positional axis free (`right
+         * 10px`, `top 10px`) keeps the historical positional reading -- first
+         * value horizontal unless top/bottom -- which is also what
+         * Backgrounds 4's simplified ordering gives. Peeking consumes nothing. */
+        int is_offset = 0;
+        int edge_axis = pending;
+        if (pending >= 0) {
+            const char *q = p;
+            char nx[CSS_TOK_MAX];
+            if (next_ws_token(&q, nx, sizeof nx)) {
+                is_offset = 1;
+            } else {
+                int oa = (order < 2) ? order : 1;
+                is_offset = seen[oa];
+            }
+            pending = -1;
+        }
+        if (is_offset) {
+            /* Offset of the edge: from the start edge it is a plain position;
+             * from the end edge it is the free space minus the offset
+             * (Backgrounds 3 3.6). The axis is the edge's own. */
+            axis = edge_axis;
+            if (pm[axis] == 1000) {
+                px[axis] = (lpx == CSS_LEN_UNSET) ? 0 : -lpx;
+                pm[axis] = 1000 - lpm;
+            } else {
+                px[axis] = lpx;
+                pm[axis] = lpm;
+            }
+        } else {
+            axis = (order < 2) ? order : -1;
+            if (axis < 0 || seen[axis]) return 0;
+            seen[axis] = 1;
+            px[axis] = lpx;
+            pm[axis] = lpm;
+            ++order;
+        }
         any = 1;
     }
     if (!any) return 0;
@@ -2393,9 +2451,13 @@ static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops
  * argument still validated as a length. Skew angles accumulate outside the
  * matrix: the painter applies shear innermost in a fixed order, so list-order
  * shear has no exact slot form, and the accumulator is exactly as correct as
- * any choice under that painter. A bare translateZ() list has no 2D effect
- * and fails closed. Unknown functions, bad arguments, more than TR_LIST_MAX
- * functions, or a singular coupled matrix reject the WHOLE declaration --
+ * any choice under that painter. A bare translateZ() list, and rotateX(0) /
+ * rotateY(0), are the identity projection: they emit tx = 0 (both halves, like
+ * every emitter) instead of failing closed, because Firefox DOES build a
+ * stacking context for them and the ubiquitous `translateZ(0)` GPU-layer hack
+ * must not lose its context. Unknown functions, bad arguments, more than
+ * TR_LIST_MAX functions, a NONZERO rotateX/rotateY (edge-on foreshortening has
+ * no 2D form), or a singular coupled matrix reject the WHOLE declaration --
  * fail closed, never a half-applied transform.
  */
 static int expand_transform_list(const char *val, css_decl *dst, int cap) {
@@ -2403,7 +2465,7 @@ static int expand_transform_list(const char *val, css_decl *dst, int cap) {
     int txp = 0, typ = 0;
     int acc_skx = 0, acc_sky = 0;
     unsigned spec = 0u;
-    int any2d = 0, seentr = 0;
+    int any2d = 0, seentr = 0, seenz = 0;
     const char *p = val;
     int nfns = 0;
     const double pi = 3.14159265358979323846;
@@ -2495,6 +2557,16 @@ static int expand_transform_list(const char *val, css_decl *dst, int cap) {
                 return 0;
             int zd, zm;
             if (!interp_lp(a, 0, 0, &zd, &zm)) return 0;
+            seenz = 1;   /* identity projection (see contract): context, no shift */
+        } else if (strcmp(name, "rotatex") == 0 || strcmp(name, "rotatey") == 0) {
+            if (split_top_args(ab, argn, starts, stops, 3) != 1) return 0;
+            if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
+                a[0] == '\0')
+                return 0;
+            int deg;
+            if (!parse_angle_deg(a, &deg)) return 0;
+            if (deg != 0) return 0;   /* edge-on tilt: no 2D form, fail closed */
+            seenz = 1;
         } else if (strcmp(name, "scalex") == 0 || strcmp(name, "scaley") == 0) {
             if (split_top_args(ab, argn, starts, stops, 3) != 1) return 0;
             if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
@@ -2578,7 +2650,14 @@ static int expand_transform_list(const char *val, css_decl *dst, int cap) {
         m[0] = acc[0]; m[1] = acc[1]; m[2] = acc[2];
         m[3] = acc[3]; m[4] = acc[4]; m[5] = acc[5];
     }
-    if (!any2d && txp == 0 && typ == 0) return 0;
+    if (!any2d && txp == 0 && typ == 0) {
+        if (!seenz) return 0;
+        /* Identity projection (translateZ/rotateX(0)/rotateY(0) alone): claim
+         * the tx slot at 0 with both halves, so the box still forms the
+         * stacking context Firefox builds for it. */
+        spec |= SPEC_TX;
+        seentr = 1;
+    }
     int tx, ty, rot, sx, sy, dskx;
     if (tr_decompose(m, &tx, &ty, &rot, &sx, &sy, &dskx)) {
     } else if (m[1] == 0.0 && m[2] == 0.0) {
@@ -2638,7 +2717,9 @@ static int expand_transform_list(const char *val, css_decl *dst, int cap) {
  * whole degrees); matrix(a,b,c,d,e,f) QR-decomposed at parse time into ALL
  * seven slots (M1.2c; singular matrices fail closed). Space-separated function
  * LISTS compose in order through expand_transform_list (CSS Transforms 1 3);
- * translate3d()/translateZ() flatten to their 2D projection. Any other
+ * translate3d()/translateZ() flatten to their 2D projection; a bare
+ * translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking
+ * context Firefox builds); rotateZ() aliases rotate(). Any other
  * transform function (perspective/rotate3d/...), or unparseable syntax,
  * rejects the WHOLE declaration (no decl emitted -> cascades
  * as unset, byte-identical to a page that never declared transform at all --
@@ -2672,7 +2753,7 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
     }
 
     enum { TR_X, TR_Y, TR_BOTH, TR_3D, TR_Z, SC_X, SC_Y, SC_BOTH, ROTATE,
-           SK_X, SK_Y, SK_BOTH, MATRIX } kind;
+           SK_X, SK_Y, SK_BOTH, MATRIX, RX, RY } kind;
     if (csel_span_eq(p, "translatex(", 11, 1))      { kind = TR_X;    p += 11; }
     else if (csel_span_eq(p, "translatey(", 11, 1)) { kind = TR_Y;    p += 11; }
     else if (csel_span_eq(p, "translate(", 10, 1))  { kind = TR_BOTH; p += 10; }
@@ -2682,6 +2763,11 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
     else if (csel_span_eq(p, "scaley(", 7, 1))      { kind = SC_Y;    p += 7; }
     else if (csel_span_eq(p, "scale(", 6, 1))       { kind = SC_BOTH; p += 6; }
     else if (csel_span_eq(p, "rotate(", 7, 1))      { kind = ROTATE;  p += 7; }
+    /* rotateZ() IS rotate() in 2D (same angle grammar); rotateX()/rotateY()
+     * take the list path, which accepts only the identity angle (spec/css.md). */
+    else if (csel_span_eq(p, "rotatez(", 8, 1))     { kind = ROTATE;  p += 8; }
+    else if (csel_span_eq(p, "rotatex(", 8, 1))     { kind = RX;      p += 8; }
+    else if (csel_span_eq(p, "rotatey(", 8, 1))     { kind = RY;      p += 8; }
     else if (csel_span_eq(p, "skewx(", 6, 1))       { kind = SK_X;    p += 6; }
     else if (csel_span_eq(p, "skewy(", 6, 1))       { kind = SK_Y;    p += 6; }
     else if (csel_span_eq(p, "skew(", 5, 1))        { kind = SK_BOTH; p += 5; }
@@ -2702,7 +2788,7 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
     while (*rest == ' ' || *rest == '\t') ++rest;
     /* A second function, or a 3D spelling, takes the list path: single
      * legacy functions continue below exactly as before. */
-    if (kind == TR_3D || kind == TR_Z || *rest != '\0')
+    if (kind == TR_3D || kind == TR_Z || kind == RX || kind == RY || *rest != '\0')
         return expand_transform_list(val, dst, cap);
 
     if (kind == MATRIX) {
@@ -2981,6 +3067,82 @@ static int expand_clip(const char *val, css_decl *dst, int cap) {
     return 4;
 }
 
+/* First family name of a font-family/font value: up to the first comma,
+ * trimmed, quotes stripped -- the same entry walk ct_interp_fontfamily
+ * (css_text.c) uses, so the name and the bucket agree about which entry is
+ * first. Returns 1 with the name in out (truncated to WF_FAMILY_MAX, the same
+ * cap the trusted scanner applies, so both sides hash the same bytes), 0 when
+ * there is no usable entry. */
+static int font_first_name(const char *val, char *out, size_t cap) {
+    if (cap == 0) return 0;
+    out[0] = '\0';
+    if (csel_substr(val, "url(", 1)) return 0;
+    const char *p = val;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t' || *p == ',') ++p;
+        if (*p == '\0') break;
+        const char *st = p;
+        while (*p != '\0' && *p != ',') ++p;
+        size_t e = (size_t)(p - st);
+        while (e > 0 && (st[e - 1] == ' ' || st[e - 1] == '\t')) --e;
+        size_t a = 0;
+        if (e >= 2 && (st[0] == '"' || st[0] == '\'') && st[e - 1] == st[0]) {
+            a = 1;
+            --e;
+        }
+        if (e > a) {
+            size_t n = e - a;
+            if (n + 1 > cap) n = cap - 1;
+            memcpy(out, st + a, n);
+            out[n] = '\0';
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/* font-family longhand: the bucket (today's behaviour, byte-identical) plus a
+ * P_FONTFACE companion carrying the first name in the shared content pool for
+ * @font-face matching at apply time (spec/webfont.md). A name with no bucket
+ * (an icon font the generic table never heard of) still emits its companion --
+ * that is the whole point -- while a valueless declaration still drops whole.
+ * Wide keywords claim BOTH slots without writing (inheritance then flows, as
+ * the tail does for single-slot properties). */
+static int expand_fontfamily(const char *val, css_decl *dst, int cap,
+                             char (*contenttab)[CSS_URL_MAX], size_t *ncontent,
+                             size_t contentcap) {
+    if (cap < 1) return 0;
+    if (css_wide_keyword(val)) {
+        if (cap < 2) return 0;
+        dst[0].prop = P_FONTFAMILY; dst[0].wide = 1;
+        dst[1].prop = P_FONTFACE; dst[1].wide = 1;
+        return 2;
+    }
+    int fam = interp_fontfamily(val);
+    char name[WF_FAMILY_MAX];
+    int have_name = font_first_name(val, name, sizeof name);
+    if (fam < 0 && !have_name) return 0;
+    int n = 0;
+    if (fam >= 0) { dst[n].prop = P_FONTFAMILY; dst[n].ival = fam; ++n; }
+    if (have_name && n < cap) {
+        /* Pool full degrades to explicit none (ival -1 -> fontface 0 at
+         * apply), exactly like a quoted content string past the cap: a
+         * conforming declaration must not count as a discard just because an
+         * icon font ate the pool (spec/webfont.md, slice2a doctrine). */
+        if (*ncontent >= contentcap) {
+            dst[n].prop = P_FONTFACE; dst[n].ival = -1;
+            ++n;
+            return n;
+        }
+        size_t nl = strlen(name);
+        memcpy(contenttab[*ncontent], name, nl + 1);
+        dst[n].prop = P_FONTFACE; dst[n].ival = (int)*ncontent;
+        ++*ncontent;
+        ++n;
+    }
+    return n;
+}
+
 /* font shorthand (2026-07-10): `[style|variant|weight|normal]* size[/line-height]
  * family...`. size and family are both required (per CSS); system keywords
  * (`font: caption` etc.) have no size token and drop the whole shorthand (fail
@@ -2988,7 +3150,9 @@ static int expand_clip(const char *val, css_decl *dst, int cap) {
  * reset-to-initial, a documented simplification. A family that maps to no
  * generic bucket keeps the rest of the shorthand (same net effect as the
  * font-family longhand dropping an unknown name). */
-static int expand_font(const char *val, css_decl *dst, int cap) {
+static int expand_font(const char *val, css_decl *dst, int cap,
+                       char (*contenttab)[CSS_URL_MAX], size_t *ncontent,
+                       size_t contentcap) {
     const char *p = val;
     char tok[CSS_TOK_MAX];
     int style = -1, weight = -1, variant = -1;
@@ -3039,6 +3203,25 @@ static int expand_font(const char *val, css_decl *dst, int cap) {
     dst[n].prop = P_FONTABS;  dst[n].ival = size_abs; ++n;
     if (line > 0)     { dst[n].prop = P_LINEHEIGHT;   dst[n].ival = line;    ++n; }
     if (fam > 0)      { dst[n].prop = P_FONTFAMILY;   dst[n].ival = fam;     ++n; }
+    /* The shorthand's first family name rides along for @font-face matching,
+     * like the longhand's companion (spec/webfont.md). No room left degrades
+     * to the bucket alone -- the 32-slot rule guarantee makes this unreachable
+     * in practice. */
+    if (n < cap) {
+        char name[WF_FAMILY_MAX];
+        if (font_first_name(p, name, sizeof name)) {
+            if (*ncontent >= contentcap) {
+                dst[n].prop = P_FONTFACE; dst[n].ival = -1;
+                ++n;
+            } else {
+                size_t nl = strlen(name);
+                memcpy(contenttab[*ncontent], name, nl + 1);
+                dst[n].prop = P_FONTFACE; dst[n].ival = (int)*ncontent;
+                ++*ncontent;
+                ++n;
+            }
+        }
+    }
     return n;
 }
 
@@ -3154,7 +3337,8 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     if (strcmp(prop, "place-items") == 0 || strcmp(prop, "place-content") == 0 ||
         strcmp(prop, "place-self") == 0)
         return expand_place(prop, val, dst, cap);
-    if (strcmp(prop, "font") == 0) return expand_font(val, dst, cap);
+    if (strcmp(prop, "font") == 0)
+        return expand_font(val, dst, cap, contenttab, ncontent, contentcap);
     if (strcmp(prop, "transform") == 0) return expand_transform(val, dst, cap);
     if (strcmp(prop, "transform-origin") == 0) return expand_transform_origin(val, dst, cap);
     if (strcmp(prop, "clip") == 0)   return expand_clip(val, dst, cap);
@@ -3337,7 +3521,8 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     else if (strcmp(prop, "display") == 0)           { prop_id = P_DISPLAY;  ival = interp_display(val); }
     else if (strcmp(prop, "column-gap") == 0)         { prop_id = P_GAP;      ival = interp_gap(val); }
     else if (strcmp(prop, "justify-content") == 0)    { prop_id = P_JUSTIFY;  ival = interp_justify(val); }
-    else if (strcmp(prop, "font-family") == 0)        { prop_id = P_FONTFAMILY;    ival = interp_fontfamily(val); }
+    else if (strcmp(prop, "font-family") == 0)
+        return expand_fontfamily(val, dst, cap, contenttab, ncontent, contentcap);
     else if (strcmp(prop, "text-transform") == 0)     { prop_id = P_TEXTTRANSFORM; ival = interp_texttransform(val); }
     else if (strcmp(prop, "opacity") == 0)            { prop_id = P_OPACITY;       ival = interp_opacity(val); }
     else if (strcmp(prop, "vertical-align") == 0)     return expand_valign(val, dst, cap);
@@ -3958,16 +4143,41 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
         size_t room = sh->decls_cap - dstart;
         if (room >= CSS_DECL_SLOTS_MIN) {
             /* The retry re-reads the same text, so the log has to be rewound with
-             * it or the same drop would be counted once per attempt. */
+             * it or the same drop would be counted once per attempt. Rewinding
+             * n/total alone is NOT enough: buckets that already existed keep the
+             * counts the failed attempt bumped (their rows never roll back), so a
+             * retried rule over-counts exactly those buckets -- measured as a
+             * transition-property 5->6 with the report total unchanged. Snapshot
+             * the pre-existing bucket counts (and the string-pool cursors, which
+             * leak slots the same way) and restore all of it. The scratch is
+             * heap (no VLA) and lives only on the rare retry path. */
             size_t log_n = (log != NULL) ? log->n : 0;
             size_t log_total = (log != NULL) ? log->total : 0;
+            int *log_counts = NULL;
+            if (log != NULL && log_n > 0) {
+                log_counts = (int *)malloc(log_n * sizeof *log_counts);
+                if (log_counts != NULL)
+                    for (size_t k = 0; k < log_n; ++k)
+                        log_counts[k] = log->items[k].count;
+            }
             size_t raw_n = sh->nraw;
+            size_t nbg = sh->nbg_urls;
+            size_t ncontent = sh->ncontent_urls;
             const cvr_scope vs = { &sh->vars, NULL, NULL, &sh->initial };
             dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart], room, &vs, sh,
                                  sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
                                  sh->content_urls, &sh->ncontent_urls, CSS_MAX_CONTENT_URLS, log);
-            if (room - dn >= CSS_DECL_SLOTS_MIN) break;   /* finished with slack */
-            if (log != NULL) { log->n = log_n; log->total = log_total; }
+            if (room - dn >= CSS_DECL_SLOTS_MIN) { free(log_counts); break; }
+            if (log != NULL) {
+                log->n = log_n;
+                log->total = log_total;
+                if (log_counts != NULL)
+                    for (size_t k = 0; k < log_n; ++k)
+                        log->items[k].count = log_counts[k];
+            }
+            free(log_counts);
+            sh->nbg_urls = nbg;
+            sh->ncontent_urls = ncontent;
             while (sh->nraw > raw_n) free(sh->raw[--sh->nraw]);
         }
         size_t nc = sh->decls_cap ? sh->decls_cap * 2 : CSS_INIT_DECLS;
@@ -4845,7 +5055,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
                         const css_decl *d,
                         int spec, int layer, int ord, const char (*urltab)[CSS_URL_MAX],
                         const char (*contenttab)[CSS_URL_MAX], int pseudo_kind,
-                        const css_element *el) {
+                        const css_element *el, const css_sheet *sheet) {
     /* CSS 2.1 §12.1: a ::before/::after rule styles the GENERATED box, never the
      * element it originates from. Only `content` crosses over, because that is how
      * the generated text reaches page_view (which materialises it as a synthetic
@@ -4966,6 +5176,22 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_MINHEIGHT:  o->min_height = d->ival; break;
             case P_MAXHEIGHT:  o->max_height = d->ival; break;
             case P_FONTFAMILY:    o->font_family = d->ival; break;
+            case P_FONTFACE:
+                /* First-name match against the sheet's @font-face families
+                 * (spec/webfont.md): the hash both sides agree on, or 0.
+                 * No sheet (inline-only resolve), no pool, or no match all
+                 * mean "no webfont" -- the bucket above still applies. */
+                o->fontface = 0;
+                if (d->ival >= 0 && contenttab != NULL && sheet != NULL) {
+                    const char *nm = contenttab[d->ival];
+                    for (size_t fi = 0; fi < sheet->nfont_faces; ++fi) {
+                        if (csel_ci_eq(sheet->font_faces[fi].family, nm)) {
+                            o->fontface = wf_name_hash(nm, strlen(nm));
+                            break;
+                        }
+                    }
+                }
+                break;
             case P_TEXTTRANSFORM: o->text_transform = d->ival; break;
             case P_LETTERSPACING: o->letter_spacing = d->ival; break;
             case P_WORDSPACING:   o->word_spacing = d->ival; break;
@@ -5327,7 +5553,7 @@ static void element_custom_props(const css_sheet *sheet, const css_match *mt, si
 static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
                              const char *entry, int important, const cvr_scope *sc,
                              int spec, int layer, int ord, int pseudo,
-                             const css_element *el) {
+                             const css_element *el, const css_sheet *sheet) {
     const char *prop = entry;
     const char *val = entry + strlen(entry) + 1;
     char resolved[CSS_URL_MAX];
@@ -5344,7 +5570,7 @@ static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, 
         tmp[i].important = important;
         apply_decl(o, wi, ws, wo, wem, wv, &tmp[i], spec, layer, ord,
                    (const char (*)[CSS_URL_MAX])urls, (const char (*)[CSS_URL_MAX])texts,
-                   pseudo, el);
+                   pseudo, el, sheet);
     }
 }
 
@@ -5363,13 +5589,13 @@ static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
                 if (dc->ival >= 0 && (size_t)dc->ival < sheet->nraw)
                     apply_var_source(o, wi, ws, wo, wem, wv, sheet->raw[dc->ival],
                                      dc->important, es, sel->spec, sel->layer,
-                                     sel->order, pseudo, el);
+                                     sel->order, pseudo, el, sheet);
                 d += (size_t)dc->span;
             }
             continue;
         }
         apply_decl(o, wi, ws, wo, wem, wv, dc, sel->spec, sel->layer, sel->order,
-                   sheet->bg_urls, sheet->content_urls, pseudo, el);
+                   sheet->bg_urls, sheet->content_urls, pseudo, el, sheet);
     }
 }
 
@@ -5393,7 +5619,8 @@ static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
                                const int *wem, const int *wv,
                                const css_element *el,
                                const char (*urltab)[CSS_URL_MAX],
-                               const char (*contenttab)[CSS_URL_MAX]) {
+                               const char (*contenttab)[CSS_URL_MAX],
+                               const css_sheet *sheet) {
     double fs = computed_font_size(o, el);
     if (!isfinite(fs) || fs <= 0.0 || fs == CL_INITIAL_FONT_SIZE) return;
 
@@ -5414,7 +5641,7 @@ static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
         };
         if (folded.ival == wv[slot]) continue;   /* nothing moved */
         apply_decl(o, wi, ws, wo, NULL, NULL, &folded,
-                   ws[slot], -1, wo[slot], urltab, contenttab, -1, el);
+                   ws[slot], -1, wo[slot], urltab, contenttab, -1, el, sheet);
     }
 }
 
@@ -5463,7 +5690,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
         .width = CSS_LEN_UNSET, .max_width = CSS_LEN_UNSET,
         .min_width = CSS_LEN_UNSET, .height = CSS_LEN_UNSET,
         .min_height = CSS_LEN_UNSET, .max_height = CSS_LEN_UNSET,
-        .font_family = CSS_FF_UNSET, .text_transform = CSS_TT_UNSET,
+        .font_family = CSS_FF_UNSET, .fontface = 0u, .text_transform = CSS_TT_UNSET,
         .letter_spacing = CSS_LEN_UNSET, .word_spacing = CSS_LEN_UNSET,
         .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
         .opacity = -1, .valign = CSS_VA_UNSET, .valign_shift = CSS_LEN_UNSET,
@@ -5639,13 +5866,14 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
                                     NULL);
         for (size_t d = 0; d < dn; ++d)
             apply_decl(&out, wi, ws, wo, wem, wv, &tmp[d], CAR_INLINE_SPEC, -1, INT_MAX,
-                       inline_bg_urls, inline_content_urls, -1, el);
+                       inline_bg_urls, inline_content_urls, -1, el, sheet);
     }
     cvr_free(&local);
 
     fold_font_relative(&out, wi, ws, wo, wem, wv, el,
                        sheet != NULL ? sheet->bg_urls : NULL,
-                       sheet != NULL ? sheet->content_urls : NULL);
+                       sheet != NULL ? sheet->content_urls : NULL,
+                       sheet);
 
     css_resolve_anim_keyframes(&out, sheet);
     return out;

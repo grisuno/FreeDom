@@ -129,6 +129,16 @@ fx_status fx_grid_columns(double avail, size_t ncols, double gap,
     return fx_grid_columns_weighted(avail, ncols, gap, NULL, 0, col_x, col_w);
 }
 
+size_t fx_autofill_count(double avail, double gap, double minw) {
+    if (!(avail >= 0.0) || !(gap >= 0.0) || !(minw > 0.0)) return 1;
+    double denom = minw + gap;
+    if (!(denom > 0.0)) return 1;
+    double fit = (avail + gap) / denom;
+    if (!(fit >= 1.0)) return 1;
+    if (fit > (double)FX_MAX_ITEMS) return FX_MAX_ITEMS;
+    return (size_t)fit;
+}
+
 fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
                                    const int *track, size_t ntrack,
                                    double *col_x, double *col_w) {

@@ -61,7 +61,7 @@ static void ignore_sigpipe(void);
  * Change requires same-diff in both functions; _Static_assert below enforces. */
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
-#define TAB_WIRE_B_N 57
+#define TAB_WIRE_B_N 58
 #define TAB_WIRE_BOX_F_N 222
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
 
@@ -431,6 +431,10 @@ static int write_view(int wfd, const pv_view *v) {
             /* max-width as its own <length-percentage>, tanda 40 (appended;
              * read_view mirrors this). See pv_run.box_mw. */
             (int32_t)r->box_mw, (int32_t)r->box_mw_pct,
+            /* Author @font-face match, spec/webfont.md (appended; read_view
+             * mirrors this). See pv_run.fontface. A wf_name_hash, 0 = none;
+             * bits ride the int32 channel untouched. */
+            (int32_t)r->fontface,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -2093,6 +2097,7 @@ static int read_view(int fd, pv_view **out) {
             e.font_variant = (int)tfvar; e.list_style_pos = (int)tlpos;
             e.image_rendering = (int)tirend; e.caret_color = (int)tcaret;
             e.object_fit = (int)tobject_fit;
+            e.fontface = (unsigned)b[57];
             pv_set_text_ext(v, &e);
             /* gradient text, 2026-07-19: already resolved at build time, so it
              * travels verbatim (block B tail) and lands via the direct setter. */

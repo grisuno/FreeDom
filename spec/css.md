@@ -1928,6 +1928,70 @@ código propio porque no existe en `justify-content`.
 | `flex-pack` / `box-pack` | `justify-content` | `start`/`end`/`center` + `justify`→`space-between`, `distribute`→`space-around` |
 | `flex-line-pack` | `align-content` | los de `flex-pack` + `stretch` |
 
+## Composición de valores: `background-position` con offset, `repeat(auto-fill)`, 3D inocuo (2026-10-09)
+
+Medido: el motor `calc()` (recursivo con `%` simbólico, `min/max/clamp`, anidado)
+ya funciona — las fallas de esta tanda están en la **asignación** de sus
+resultados, no en la aritmética. Verificado caso por caso contra spec/Firefox
+antes de tocar (varios drops son fail-closed correcto y se blinda con candado,
+no se "arreglan").
+
+- **`background-position` de 3–4 valores + `center` por identidad** (Backgrounds 3
+  §3.6). `right <len> center` = borde derecho menos offset + eje vertical; con
+  la fórmula del pintor (`ox = px + pct·(área−img)`) eso es pct 100% + px −len,
+  **sin tocar el pintor**. Reglas: `left/right/top/bottom` reclaman su eje por
+  identidad; una longitud tras un borde es SU offset **solo si la sigue otro
+  componente** (con lookahead sin consumo) — al final (`right 10px`, `top 10px`)
+  conserva la lectura posicional histórica (Backgrounds 4: primero horizontal
+  salvo top/bottom); desde el final: pct = 100%−q, px = −p; desde el inicio:
+  tal cual. `center` ocupa el eje libre al cierre; un borde explícito que
+  colisiona con un `center` lo desplaza al eje libre (`center right` = x:right,
+  y:center); cualquier otra colisión (`left right`, `10px left`, tercer valor
+  sobrante) descarta todo. `background-position: center right` de wikipedia
+  entra por la misma vía.
+- **`repeat(auto-fill, <patrón de 1 track>)`** (Grid 1 §7.2.3.2): el conteo
+  necesita el ancho del contenedor, que la cascada no conoce — viaja como
+  `grid_cols = −min_px` (negativo = marcador + mínimo; sin crecer structs ni
+  campos IPC) y `layout_container` (GUI, que sí conoce el ancho) cuenta
+  `clamp(floor((ancho+gap)/(min+gap)), 1, 64)` vía la pura `fx_autofill_count`
+  y repite el patrón (`col_w[0]`) sobre los slots; pasado `PV_GRID_TRACKS`, auto
+  = parte igual (exacto para el patrón dominante `1fr`, documentado para el
+  resto). Solo patrón de UN track con mínimo en px ≥ 1 (`minmax(14rem,1fr)` →
+  −224); multi-track, mínimo `fr`/`auto`/`%`/`min-content` o `0` fallan cerrado
+  como hoy. `auto-fit` ≡ `auto-fill` v1 (solo difieren con tracks vacíos).
+  `grid-template-rows` con `auto-fill` sigue inválido (es inválido en CSS).
+  `grid-template-areas` + `auto-fill`: ganan las áreas (grilla explícita).
+- **3D inocuo = identidad + stacking context.** `translateZ(<longitud válida>)`
+  (el cero sin unidad vale: es longitud) y `rotateX(0deg)`/`rotateY(0deg)` son
+  proyección identidad en un motor 2D (el propio comentario del expander ya lo
+  dice de `translateZ`), y en Firefox SÍ crean stacking context — así que emiten
+  `tx = 0` (ambas mitades, como todo emisor) en vez de descartarse: el hack GPU
+  ubicuo `translateZ(0)` (jkanime, slashdot) deja de perder su contexto.
+  `rotateX(90deg)` (no-cero), `rotateX(0)` sin unidad (un `<angle>` exige unidad,
+  igual que `rotate(0)` hoy), `perspective()`, `rotate3d`, `scaleZ` y sintaxis
+  rota siguen descartando TODO (fail-closed: un medio-aplicado sería peor).
+- **NO se toca (fail-closed correcto, con candado):** `calc()` que mezcla
+  longitud con número (`calc((calc(10px*.7)-2)*-1)` es inválido por Values 4
+  §8.1 — Firefox también lo tira); `%` dentro de `min/max/clamp`
+  (`min(50px,70%)` elegiría ancho CERO sin base — la trampa documentada en
+  `calc_mathfn`); `rgb(…/…)` sin `;` (error del autor; con `;` ya parseaba).
+
+**Contrato — Dado / Cuando / Entonces**
+
+- **Dado** `background-position: right 10px center`, **entonces** x = (px −10,
+  pct 100 %), y = pct 50 %; **dado** `top 5px right 10px`, **entonces**
+  x = (px −10, pct 100 %), y = (px 5, pct 0). Un `right 10px` final sin tercer
+  componente conserva la lectura posicional (x = borde, y = 10px).
+- **Dado** `background-position: center right`, **entonces** x = pct 100 %,
+  y = pct 50 % (sin regresión en `center 10px` = x 50 %, y 10px).
+- **Dado** `grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr))`,
+  **entonces** `grid_cols == −224` y `col_w[0]` = peso `1fr`.
+- **Dado** contenedor de 1000px, `gap` 10 y min 224, **entonces**
+  `fx_autofill_count` = 4.
+- **Dado** `transform: translateZ(0)`, **entonces** `tx == 0` (contexto creado);
+  **dado** `rotateX(0deg)`, **entonces** `tx == 0`; **dado** `rotateX(90deg)`,
+  **entonces** `tx` sin declarar (descartado).
+
 Fuera de alcance v1 (se siguen descartando, documentado): `-webkit-box-flex`
 (factor 2009, sin medir en el corpus), `ms-box-sizing`/`webkit-box-sizing`/
 `moz-box-sizing` **sin guion inicial** (no son propiedades — Firefox las tira

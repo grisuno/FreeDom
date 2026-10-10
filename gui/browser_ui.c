@@ -1142,6 +1142,17 @@ static int image_display_size(const browser_window *w, const rd_block *blk,
                               double box_w, double *dw, double *dh) {
     const ui_image *im = find_image(w, blk->href);
     if (im == NULL || im->surface == NULL || im->nat_w <= 0 || im->nat_h <= 0) return 0;
+    /* A specified % width IS the used width (CSS 2.1 §10.3.2), winning over the
+     * intrinsic bitmap; the aspect ratio carries the height (spec/box_engine.md
+     * tanda 42). A % height needs a definite container height this flat layout
+     * does not model, so it stays fail-closed. */
+    if (blk->box_w_pct != 0 && box_w > 0.0) {
+        double pw = box_w * (double)blk->box_w_pct / 1000.0;
+        if (!(pw >= 1.0)) return 0;
+        *dw = pw;
+        *dh = pw * (double)im->nat_h / (double)im->nat_w;
+        return 1;
+    }
     if (box_w < 1.0) box_w = 1.0;
     /* The markup's declared size wins over the decoded bitmap's: <img width="180">
      * asks for 180px, whatever the file happens to contain. One declared axis
@@ -4121,24 +4132,34 @@ static int replaced_is_inline_level(const rc_state *s, const rd_block *b) {
 static int block_leaves_flow(const rd_doc *doc, const rd_block *bk);
 
 /* The same atomic inline when it OPENS its block's first line: a replaced element
- * whose next in-flow run is text continuing the same line (no block break, same
- * float and container). A 16px avatar before " via author" is one line in every
- * browser; treating it as the block's own row put the text below it. Returns that
- * next run's index, or 0 when the element is not followed by inline text. */
+ * whose next in-flow run continues the same line (no block break, same float and
+ * container). A 16px avatar before " via author" is one line in every browser;
+ * treating it as the block's own row put the text below it. Since tanda 42 the
+ * next run may also be a replaced element without its own break: consecutive
+ * atomic inlines (`<img><img><img>`, collapsing blanks skipped) share one line
+ * and wrap like words (CSS 2.1 9.2.2) instead of stacking one row each. Returns
+ * that next run's index, or 0 when the element is not followed by inline flow. */
 static size_t replaced_opens_inline_line(const rd_doc *doc, size_t i) {
     const rd_block *b = rd_at(doc, i);
     if ((b->kind != RD_SVG && b->kind != RD_IMAGE) || !b->block_break) return 0;
     for (size_t k = i + 1; k < rd_count(doc); ++k) {
         const rd_block *n = rd_at(doc, k);
         if (block_leaves_flow(doc, n)) continue;
-        if (n->block_break || (n->kind != RD_PARAGRAPH && n->kind != RD_LINK)) return 0;
-        if (n->float_id != b->float_id || n->cont_id != b->cont_id) return 0;
-        /* Collapsible white space alone does not make a line: keep looking. */
-        int blank = 1;
-        for (const char *t = n->text; t != NULL && *t != '\0' && blank; ++t)
-            if (*t != ' ' && *t != '\t' && *t != '\n' && *t != '\r') blank = 0;
-        if (blank) continue;
-        return k;
+        if (n->block_break) return 0;
+        if (n->kind == RD_PARAGRAPH || n->kind == RD_LINK) {
+            if (n->float_id != b->float_id || n->cont_id != b->cont_id) return 0;
+            /* Collapsible white space alone does not make a line: keep looking. */
+            int blank = 1;
+            for (const char *t = n->text; t != NULL && *t != '\0' && blank; ++t)
+                if (*t != ' ' && *t != '\t' && *t != '\n' && *t != '\r') blank = 0;
+            if (blank) continue;
+            return k;
+        }
+        if (n->kind == RD_IMAGE || n->kind == RD_SVG) {
+            if (n->float_id != b->float_id || n->cont_id != b->cont_id) return 0;
+            return k;
+        }
+        return 0;
     }
     return 0;
 }
@@ -5198,7 +5219,29 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         }
         gstart[g] = end;
     }
-    size_t ncols = is_grid ? (size_t)cdv.cols : g;
+    /* repeat(auto-fill, minmax(min, max)) (spec/css.md 2026-10-09): cdv.cols
+     * carries -min_px (never 0 here) and cdv.col_w[0] the single pattern track.
+     * The count fits min-wide tracks into this container's own content width;
+     * the pattern repeats over the carried slots (past PV_GRID_TRACKS, auto is
+     * an equal share -- exact for the dominant 1fr pattern). cdv.cols comes
+     * from the confined worker over IPC, so the minimum is range-checked
+     * (long long: negating INT_MIN is well-defined) and the count re-clamped
+     * to BT_MAX_CHILDREN like every other path below. */
+    size_t ncols;
+    if (is_grid && cdv.cols < 0) {
+        long long m = (long long)cdv.cols;
+        double minw = (m < 0 && m > -1000000LL) ? (double)(-m) : 1.0;
+        double agap = (cdv.gap >= 0) ? (double)cdv.gap : 0.0;
+        ncols = fx_autofill_count(content_w, agap, minw);
+        if (ncols > BT_MAX_CHILDREN) ncols = BT_MAX_CHILDREN;
+        {
+            size_t lim = (ncols < (size_t)PV_GRID_TRACKS) ? ncols
+                                                         : (size_t)PV_GRID_TRACKS;
+            for (size_t t = 1; t < lim; ++t) cdv.col_w[t] = cdv.col_w[0];
+        }
+    } else {
+        ncols = is_grid ? (size_t)cdv.cols : g;
+    }
     if (ncols < 1) ncols = 1;
 
     /* A table's grid is SYNTHESISED, so page_view stamps no container box on its cell
@@ -7664,8 +7707,16 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         /* Replaced/atomic blocks (input/svg/image/video) emit their element-sized row
          * through the shared helper -- identical to the flex/grid item flow, so a
          * replaced element paints the same in flow and inside a column. */
-        if (inline_replaced && place_inline_replaced(L, &s, th, w, b, content_w))
-            continue;
+        if (inline_replaced) {
+            if (place_inline_replaced(L, &s, th, w, b, content_w))
+                continue;
+            /* Sizable-looking but unsizable (a broken image mid-line): the open
+             * line holds earlier frags that must paint FIRST -- emitting the row
+             * under an unflushed line swaps their order (tanda 42). Flushing an
+             * empty line is a no-op by construction (flush_line returns early
+             * when closed; an open-but-empty line keeps prior behaviour). */
+            flush_line(L, &s, th);
+        }
         if (emit_replaced_row(cr, w, L, &s, th, b, content_w, doc)) {
             /* A form control inside an open box must sit within that box's content
              * rect, exactly as the text rows do via s.indent_px. The row was emitted
@@ -8568,33 +8619,19 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
     cairo_restore(cr);
 }
 
-/* Paints one RD_IMAGE row inside the content rectangle: the decoded image blitted
- * and scaled to fit the content width (the bytes were fetched and decoded in the
- * confined worker), or, when no image is available (blocked / policy-rejected /
- * decode failed), a bordered placeholder box labelled with the render_policy
- * decision plus the alt text. The on-screen size comes from image_display_size, the
- * same source of truth the layout used to size this row, so paint and layout agree. */
-static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
-                            double left, double ry, double content_w, double row_h) {
-    const ui_theme *th = &w->theme;
-    const double pad = th->image_box_pad;
-    double box_w = content_w - 2.0 * pad;
-
-    double dw, dh;
-    if (image_display_size(w, blk, box_w, &dw, &dh)) {
-        const ui_image *im = find_image(w, blk->href);
+/* Blits a decoded image into the (x, y, dw, dh) rect with the block's object-fit,
+ * scaling filter and clipping. The size is the CALLER's (layout-resolved for rows,
+ * frag-recorded for atomic inlines): this function never re-resolves a % width,
+ * which would compound it against an already-resolved basis (tanda 42). */
+static void blit_image_box(cairo_t *cr, browser_window *w, const rd_block *blk,
+                           double x, double y, double dw, double dh) {
+    const ui_image *im = find_image(w, blk->href);
+    if (im == NULL || im->surface == NULL) return;
+    {
         int of = blk->object_fit;
         if (of == 0) of = CSS_OFI_FILL; /* unset = fill */
-        /* An image is an inline-level replaced element: the parent's text-align
-         * places it, exactly like a line of text (a centred logo was pinned left). */
-        double ax = 0.0;
-        double img_slack = box_w - dw;
-        if (img_slack > 0.0) {
-            if (blk->text_align == CSS_ALIGN_CENTER)     ax = img_slack / 2.0;
-            else if (blk->text_align == CSS_ALIGN_RIGHT) ax = img_slack;
-        }
         cairo_save(cr);
-        cairo_translate(cr, left + pad + ax, ry + pad);
+        cairo_translate(cr, x, y);
         cairo_rectangle(cr, 0.0, 0.0, dw, dh);
         cairo_clip(cr);
         switch (of) {
@@ -8642,6 +8679,34 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
                                  nearest ? CAIRO_FILTER_NEAREST : CAIRO_FILTER_GOOD);
         cairo_paint(cr);
         cairo_restore(cr);
+        return;
+    }
+}
+
+/* Paints one RD_IMAGE row inside the content rectangle: the decoded image blitted
+ * and scaled to fit the content width (the bytes were fetched and decoded in the
+ * confined worker), or, when no image is available (blocked / policy-rejected /
+ * decode failed), a bordered placeholder box labelled with the render_policy
+ * decision plus the alt text. The on-screen size comes from image_display_size, the
+ * same source of truth the layout used to size this row, so paint and layout agree. */
+static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
+                            double left, double ry, double content_w, double row_h) {
+    const ui_theme *th = &w->theme;
+    (void)row_h;
+    const double pad = th->image_box_pad;
+    double box_w = content_w - 2.0 * pad;
+
+    double dw, dh;
+    if (image_display_size(w, blk, box_w, &dw, &dh)) {
+        /* An image is an inline-level replaced element: the parent's text-align
+         * places it, exactly like a line of text (a centred logo was pinned left). */
+        double ax = 0.0;
+        double img_slack = box_w - dw;
+        if (img_slack > 0.0) {
+            if (blk->text_align == CSS_ALIGN_CENTER)     ax = img_slack / 2.0;
+            else if (blk->text_align == CSS_ALIGN_RIGHT) ax = img_slack;
+        }
+        blit_image_box(cr, w, blk, left + pad + ax, ry + pad, dw, dh);
         return;
     }
 
@@ -10013,13 +10078,10 @@ static void paint_inline_replaced(cairo_t *cr, browser_window *w,
         return;
     }
     if (blk->kind == RD_IMAGE) {
-        /* paint_image_row places the image inside a padded box; an atomic inline
-         * has no such box, so the rect is handed over exactly, with the padding
-         * cancelled out. */
-        const ui_theme *th = &w->theme;
-        paint_image_row(cr, w, blk, x - th->image_box_pad, y - th->image_box_pad,
-                        f->repl_w + 2.0 * th->image_box_pad,
-                        f->repl_h + 2.0 * th->image_box_pad);
+        /* The frag carries the layout-resolved size: blit it exactly (like the
+         * SVG path above). Routing through paint_image_row would re-resolve a %
+         * width against this width and compound it (tanda 42). */
+        blit_image_box(cr, w, blk, x, y, f->repl_w, f->repl_h);
     }
 }
 

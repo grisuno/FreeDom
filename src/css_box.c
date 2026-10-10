@@ -423,6 +423,122 @@ int cb_interp_gridcols(const char *v) {
     return n;
 }
 
+/* Minimum width of ONE track token for repeat(auto-fill): minmax(a,b) takes
+ * a's length; a plain track takes itself. fr/auto/%/min-content and anything
+ * unresolvable yield 0 (the count cannot be derived: fail closed). Only px>0
+ * (em/rem folded at the initial context, like every cascade length) counts. */
+static int track_min_of(const char *tok) {
+    size_t len = strlen(tok);
+    if (len > 7 && cb_starts_with_ci(tok, "minmax(") && tok[len - 1] == ')') {
+        size_t comma = 0;
+        int depth = 0;
+        for (size_t k = 7; k + 1 < len; ++k) {
+            if (tok[k] == '(') ++depth;
+            else if (tok[k] == ')') --depth;
+            else if (tok[k] == ',' && depth == 0) { comma = k; break; }
+        }
+        if (comma == 0) return 0;
+        size_t a = 7, b = comma;
+        while (a < b && (tok[a] == ' ' || tok[a] == '\t')) ++a;
+        while (b > a && (tok[b - 1] == ' ' || tok[b - 1] == '\t')) --b;
+        if (a >= b || b - a >= CSS_TOK_MAX) return 0;
+        char mn[CSS_TOK_MAX];
+        memcpy(mn, tok + a, b - a);
+        mn[b - a] = '\0';
+        /* NOTE: mn dies at scope end; resolve before leaving. */
+        int px;
+        if (!cb_interp_len(mn, 0, &px) || px < 1) return 0;
+        if (px > CSS_LEN_MAX) px = CSS_LEN_MAX;
+        return px;
+    }
+    {
+        int px;
+        if (!cb_interp_len(tok, 0, &px) || px < 1) return 0;
+        if (px > CSS_LEN_MAX) px = CSS_LEN_MAX;
+        return px;
+    }
+}
+
+/* repeat(auto-fill|auto-fit, <single-track pattern>) tried as a whole value:
+ * returns 1 and emits grid_cols = -min_px (the layout counts tracks itself)
+ * with the pattern's max-size in col_w[0]; returns 0 when val is not that form
+ * (the caller falls through to the fixed-count walker, which still refuses any
+ * auto-fill inside). Multi-track patterns, unresolvable minimums and rows all
+ * fail closed by construction here. */
+static int expand_auto_fill(const char *val, css_decl *dst, int cap) {
+    size_t n = strlen(val);
+    size_t i = 0;
+    while (i < n && (val[i] == ' ' || val[i] == '\t')) ++i;
+    if (!cb_starts_with_ci(val + i, "repeat(")) return 0;
+    /* The whole value must be exactly one repeat(...) group. */
+    size_t start = i;
+    int depth = 0;
+    size_t j = start;
+    while (j < n) {
+        if (val[j] == '(') ++depth;
+        else if (val[j] == ')') {
+            --depth;
+            if (depth == 0) { ++j; break; }
+        }
+        ++j;
+    }
+    if (depth != 0) return 0;
+    {
+        size_t k = j;
+        while (k < n && (val[k] == ' ' || val[k] == '\t')) ++k;
+        if (k != n) return 0;   /* trailing second track list: out of v1 scope */
+    }
+    size_t inner_a = start + 7, inner_b = j - 1;
+    size_t comma = inner_b;
+    {
+        int d2 = 0;
+        for (size_t k = inner_a; k < inner_b; ++k) {
+            if (val[k] == '(') ++d2;
+            else if (val[k] == ')') --d2;
+            else if (val[k] == ',' && d2 == 0) { comma = k; break; }
+        }
+    }
+    if (comma >= inner_b) return 0;
+    size_t ca = inner_a, cb = comma;
+    while (ca < cb && (val[ca] == ' ' || val[ca] == '\t')) ++ca;
+    while (cb > ca && (val[cb - 1] == ' ' || val[cb - 1] == '\t')) --cb;
+    {
+        char cbuf[16];
+        size_t clen = cb - ca;
+        if (clen == 0 || clen >= sizeof cbuf) return 0;
+        memcpy(cbuf, val + ca, clen);
+        cbuf[clen] = '\0';
+        if (!csel_ci_eq(cbuf, "auto-fill") && !csel_ci_eq(cbuf, "auto-fit")) return 0;
+    }
+    /* The pattern must be exactly ONE track token (top-level blanks split). */
+    size_t pa = comma + 1, pb = inner_b;
+    while (pa < pb && (val[pa] == ' ' || val[pa] == '\t')) ++pa;
+    while (pb > pa && (val[pb - 1] == ' ' || val[pb - 1] == '\t')) --pb;
+    {
+        int d3 = 0;
+        for (size_t k = pa; k < pb; ++k) {
+            if (val[k] == '(') ++d3;
+            else if (val[k] == ')') --d3;
+            else if ((val[k] == ' ' || val[k] == '\t') && d3 == 0) return 0;
+        }
+    }
+    if (pa >= pb || pb - pa >= CSS_TOK_MAX) return 0;
+    char pat[CSS_TOK_MAX];
+    memcpy(pat, val + pa, pb - pa);
+    pat[pb - pa] = '\0';
+    int minw = track_min_of(pat);
+    if (minw < 1) return 0;
+    if (cap < 1 + CSS_GRID_TRACKS_MAX) return 0;
+    dst[0].prop = P_GRIDCOLS;
+    dst[0].ival = -minw;
+    for (int k = 0; k < CSS_GRID_TRACKS_MAX; ++k) {
+        dst[1 + k].prop = P_GRID_TRACK0 + k;
+        dst[1 + k].ival = 0;
+    }
+    dst[1].ival = track_size_of(pat);
+    return 1 + CSS_GRID_TRACKS_MAX;
+}
+
 /* grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track
  * sizes, emitted in lock-step (P_GRIDCOLS + P_GRID_TRACK0..7; unsized slots emit
  * 0 = auto so a higher-tier declaration fully resets a lower-tier one).
@@ -430,6 +546,11 @@ int cb_interp_gridcols(const char *v) {
 int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap) {
     if (csel_substr(val, "url(", 1)) return 0;
     if (csel_ci_eq(val, "none")) return 0;
+    if (csel_substr(val, "auto-fill", 1) || csel_substr(val, "auto-fit", 1)) {
+        int r = expand_auto_fill(val, dst, cap);
+        if (r > 0) return r;
+        return 0;   /* auto-fill present but not v1-shaped: still refused */
+    }
     int sizes[CSS_GRID_TRACKS_MAX] = { 0 };
     int pos = 0;
     int n = walk_tracks(val, strlen(val), sizes, CSS_GRID_TRACKS_MAX, &pos);

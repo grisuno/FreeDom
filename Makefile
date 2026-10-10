@@ -121,9 +121,10 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
                $(BUILD_DIR)/test_block_flow $(BUILD_DIR)/test_css_values $(BUILD_DIR)/test_css_gradient $(BUILD_DIR)/test_css_box $(BUILD_DIR)/test_css_text \
                $(BUILD_DIR)/test_css_vars $(BUILD_DIR)/test_css_atrule $(BUILD_DIR)/test_css_mq \
                $(BUILD_DIR)/test_js_geom $(BUILD_DIR)/test_ws_hub \
-               $(BUILD_DIR)/test_web_storage $(BUILD_DIR)/test_import_map
+               $(BUILD_DIR)/test_web_storage $(BUILD_DIR)/test_import_map \
+               $(BUILD_DIR)/test_webfont $(BUILD_DIR)/test_webfont_load
 
-.PHONY: parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-wst fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-afl \
+.PHONY: parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-wst fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -360,6 +361,19 @@ $(BUILD_DIR)/test_web_storage: $(TEST_DIR)/test_web_storage.c $(BUILD_DIR)/web_s
 $(BUILD_DIR)/test_import_map: $(TEST_DIR)/test_import_map.c $(BUILD_DIR)/import_map.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Pure @font-face lookahead scanner (spec/webfont.md). No I/O deps; hostile CSS
+# in, bounded refs out. See also fuzz-wf.
+$(BUILD_DIR)/test_webfont: $(TEST_DIR)/test_webfont.c $(BUILD_DIR)/webfont.o $(BUILD_DIR)/data_url.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# @font-face fetch-and-register pass (spec/webfont.md b3). Links the URL/data-URL
+# helpers and the shaping registry; the fetcher stays a caller-owned callback.
+$(BUILD_DIR)/webfont_load.o: $(SRC_DIR)/webfont_load.c include/webfont_load.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(TSH_CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/test_webfont_load: $(TEST_DIR)/test_webfont_load.c $(BUILD_DIR)/webfont_load.o $(BUILD_DIR)/webfont.o $(BUILD_DIR)/url.o $(BUILD_DIR)/data_url.o $(BUILD_DIR)/text_shape.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(TSH_CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(TSH_LIBS) $(CMOCKA_LIBS) -lm
+
 $(BUILD_DIR)/test_ws_hub: $(TEST_DIR)/test_ws_hub.c $(BUILD_DIR)/ws_hub.o $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(SF_LIBS) $(CMOCKA_LIBS)
 
@@ -516,6 +530,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o $(BUILD_DIR)/pdf_export.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
                       $(BUILD_DIR)/freebug.o $(BUILD_DIR)/text_shape.o \
+                       $(BUILD_DIR)/webfont.o $(BUILD_DIR)/webfont_load.o \
                        $(BUILD_DIR)/dom_debug.o $(BUILD_DIR)/prefetch.o \
                        $(BUILD_DIR)/perf_trace.o \
                        $(BUILD_DIR)/prefs.o $(BUILD_DIR)/profile.o \
@@ -679,7 +694,7 @@ fuzz-dd: $(PSL_OBJ) | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
 	  $(FUZZ_DIR)/fuzz_dom_debug.c $(SRC_DIR)/dom_debug.c $(SRC_DIR)/render_doc.c \
-  $(SRC_DIR)/render_policy.c $(SRC_DIR)/request_policy.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c \
+  $(SRC_DIR)/render_policy.c $(SRC_DIR)/request_policy.c $(SRC_DIR)/data_url.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c \
   $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_values.c $(SRC_DIR)/css_vars.c $(SRC_DIR)/css_atrule.c $(SRC_DIR)/css_mq.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c $(SRC_DIR)/box_style.c \
   $(SRC_DIR)/html_parse.c $(SRC_DIR)/url.c $(PSL_OBJ) \
 	  -o $(BUILD_DIR)/fuzz_dom_debug $(HP_LIBS)
@@ -717,6 +732,17 @@ fuzz-du: | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_data_url.c $(SRC_DIR)/data_url.c \
 	  -o $(BUILD_DIR)/fuzz_data_url
 	./$(BUILD_DIR)/fuzz_data_url -max_total_time=30 -rss_limit_mb=2048
+
+# Coverage-guided fuzzing of the webfont lookahead scanner (clang + libFuzzer).
+# Hostile CSS through wf_scan must never crash/leak/UB, must stay within
+# WF_MAX_REFS with NUL-terminated fields, and must never perform I/O.
+# data_url.c rides along: data: font URLs decode at scan time.
+fuzz-wf: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_webfont.c $(SRC_DIR)/webfont.c $(SRC_DIR)/data_url.c \
+	  -o $(BUILD_DIR)/fuzz_webfont
+	./$(BUILD_DIR)/fuzz_webfont -max_total_time=60 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of the prefetch lookahead scanner (clang + libFuzzer).
 # The scanned HTML is hostile remote content read on the TRUSTED side: arbitrary
@@ -1229,11 +1255,11 @@ drops-update: $(BUILD_DIR)/freedom
 drift:
 	@grep -q "TAB_WIRE_HEAD_N 6" src/tab.c || (echo "drift: HEAD const missing"; exit 1)
 	@grep -q "TAB_WIRE_A_N 38" src/tab.c || (echo "drift: A const missing"; exit 1)
-	@grep -q "TAB_WIRE_B_N 57" src/tab.c || (echo "drift: B const missing"; exit 1)
+	@grep -q "TAB_WIRE_B_N 58" src/tab.c || (echo "drift: B const missing"; exit 1)
 	@grep -q "TAB_WIRE_BOX_F_N 222" src/tab.c || (echo "drift: BOX const missing"; exit 1)
 	@grep -q "int32_t head\[TAB_WIRE_HEAD_N\]\|int32_t head\[6\]" src/tab.c || (echo "drift: head array drift"; exit 1)
 	@grep -q "int32_t a\[TAB_WIRE_A_N\]\|int32_t a\[38\]" src/tab.c || (echo "drift: A array drift"; exit 1)
-	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[57\]" src/tab.c || (echo "drift: B array drift"; exit 1)
+	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[58\]" src/tab.c || (echo "drift: B array drift"; exit 1)
 	@grep -q "int32_t f\[TAB_WIRE_BOX_F_N\]\|int32_t f\[222\]" src/tab.c || (echo "drift: box array drift"; exit 1)
 	@grep -q "FC_UI_FONT_SIZE\|FC_FONT_FALLBACK_PX" include/freedom_config.h || (echo "drift: FC font const missing"; exit 1)
 	@! grep -rn "cairo_set_font_size.*16\.0" gui/ --include="*.c" | grep -v FC_ || (echo "drift: raw 16.0 literal in gui"; exit 1)

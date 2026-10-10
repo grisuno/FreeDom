@@ -955,3 +955,30 @@ Dado-Cuando-Entonces:
 - Dado `<body>` con fondo y un `<img style=float:right>` sin caja en medio de los
   resultados (ddg), cuando se maqueta, entonces la caja raíz es UNA sola y cubre
   toda la página (antes terminaba en 167 px y reabría un segundo fragmento).
+
+## Reemplazados en línea consecutivos + ancho % (tanda 42)
+
+Un `<img>` (o `<svg>` en línea) sin `block_break` entre corridas de texto es un
+átomo inline (CSS 2.1 §9.2.2, R7) — pero cuando ABRE el bloque, la línea solo se
+formaba si lo seguía TEXTO: una fila de íconos o miniaturas (`<img><img><img>`,
+el idioma de cada grilla social y de cada tile) caía en una fila por imagen.
+`replaced_opens_inline_line` acepta ahora como compañero al siguiente
+`RD_IMAGE`/`RD_SVG` sin break (mismo float y contenedor, saltando blancos):
+los tres comparten línea y envuelven como palabras. Un roto (`invalid.invalid`,
+sin bytes) sigue en su propia fila v1 — su `alt` como texto inline es otro hito.
+
+Un `width` en `%` sobre un reemplazado es SU ancho (CSS 2.1 §10.3.2), no un tope:
+`img{width:50%}` con bytes disponibles pinta al 50 % del ancho disponible
+(conservando aspecto por el intrínseco), en vez de colapsar al natural. Viaja en
+`box_w_pct` (mitad ya existente del IPC: el px queda 0/ninguno, sin campo nuevo)
+y se combina en `image_display_size` con `bx_lp_px`, como todo `<length-percentage>`.
+`height` en `%` (necesita alto definido del contenedor) y `max-width` sobre
+reemplazados quedan fuera de alcance v1.
+
+Dado-Cuando-Entonces:
+- Dado `<img><img><img>` sin blancos entre ellos, cuando se maqueta, entonces
+  los tres comparten UNA fila (antes: tres filas).
+- Dado `<img style="width:50%">` de 60×60 natural en contenido de 900px, cuando
+  se maqueta, entonces pinta 450×450 (antes: 60×60).
+- Dado un `<img>` roto entre dos imágenes sanas, cuando se maqueta, entonces las
+  sanas comparten línea y el roto conserva su fila (documentado, no regresión).

@@ -102,6 +102,9 @@ typedef struct rd_block {
      * their no-effect defaults (font_family 0, text_transform 0, letter/word/indent
      * PV_LEN_UNSET, shadow_color -1, opacity -1, valign 0, white_space 0). */
     int              font_family;
+    /* Author @font-face match (spec/webfont.md): wf_name_hash, 0 = none.
+     * Set only with caps.css, like font_family. */
+    unsigned         fontface;
     int              text_transform;
     int              letter_spacing;
     int              word_spacing;

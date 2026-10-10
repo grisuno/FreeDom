@@ -318,6 +318,41 @@ static void test_load_carries_flex_wrap_align_row_gap(void **state) {
     tab_close(t);
 }
 
+/* webfont.md over IPC: the @font-face match hash survives the worker
+ * round-trip (write_view/read_view serialize b[57] on both sides). */
+static void test_load_carries_fontface(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>F</title>"
+        "<style>@font-face{font-family:'X';src:url(x.woff);}"
+        ".a{font-family:'X',serif;}</style></head><body>"
+        "<div class=\"a\">faced</div><div>plain</div></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int saw_faced = 0, saw_plain = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text == NULL) continue;
+        if (strcmp(r->text, "faced") == 0) {
+            assert_true(r->fontface != 0);
+            saw_faced = 1;
+        }
+        if (strcmp(r->text, "plain") == 0) {
+            assert_int_equal(r->fontface, 0);
+            saw_plain = 1;
+        }
+    }
+    assert_true(saw_faced);
+    assert_true(saw_plain);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* float.md over IPC: float_side/float_id/float_clear survive the worker round-trip
  * (write_view/read_view serialize them in the same order on both sides). */
 static void test_load_carries_float(void **state) {
@@ -2889,6 +2924,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_carries_flex_item),
         cmocka_unit_test(test_load_carries_flex_auto_margins),
         cmocka_unit_test(test_load_carries_flex_wrap_align_row_gap),
+        cmocka_unit_test(test_load_carries_fontface),
         cmocka_unit_test(test_load_carries_float),
         cmocka_unit_test(test_load_carries_visibility_overflow_cursor_and_text_wrap),
         cmocka_unit_test(test_load_carries_cont_item),

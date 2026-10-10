@@ -21,6 +21,7 @@
 #include "css.h"
 #include "css_select.h"
 #include "css_vars.h"
+#include "webfont.h"
 
 /* --- inline declarations --- */
 
@@ -465,17 +466,6 @@ static void test_grid_minmax_counts_as_one_track(void **state) {
         css_parse_inline("grid-template-columns: minmax(100px, 1fr) 1fr", 0).grid_cols, 2);
     assert_int_equal(
         css_parse_inline("grid-template-columns: repeat(2, minmax(50px, 1fr))", 0).grid_cols, 2);
-}
-
-static void test_grid_repeat_autofill_fails_closed(void **state) {
-    (void)state;
-    /* auto-fill/auto-fit need an available width this pure parser does not have:
-     * fail closed (unset), never a wrong guess. */
-    assert_int_equal(
-        css_parse_inline("grid-template-columns: repeat(auto-fill, 100px)", 0).grid_cols, 0);
-    assert_int_equal(
-        css_parse_inline("grid-template-columns: repeat(auto-fit, minmax(100px,1fr))", 0)
-            .grid_cols, 0);
 }
 
 static void test_grid_repeat_malformed_fails_closed(void **state) {
@@ -2037,6 +2027,53 @@ static void test_pseudo_content_attr_fallback(void **state) {
     css_free(sh);
 }
 
+/* add_rule retry rewinds the drop log COMPLETELY (spec/css_drops.md): a rule
+ * that parses, fails the headroom slack and reparses must not double-count.
+ * The rewind used to restore n/total but not pre-existing bucket counts, so a
+ * retried rule over-counted exactly those buckets (wikipedia's
+ * transition-property 5->6 with the report total unchanged -- the total IS
+ * restored, the rows are not). Layout: 980 filler decls leave room=44; the
+ * 40-decl retry rule leaves 4 < 32 and reparses. */
+static void test_drops_retry_rewinds_buckets(void **state) {
+    (void)state;
+    static char css[65536];
+    size_t o = 0;
+    o += (size_t)snprintf(css + o, sizeof css - o,
+                          ".pre{transition-property:color;}");
+    /* One decl per filler rule (color:red is always exactly one): 980 decls
+     * leave room=44 of the initial 1024 cap, so the 40-decl retry rule below
+     * finishes with 4 < 32 slack and deterministically reparses. A multi-decl
+     * filler (background:...) would regrow early and defuse the trap. */
+    for (int i = 0; i < 980; ++i)
+        o += (size_t)snprintf(css + o, sizeof css - o,
+                              ".f%d{color:red;}", i);
+    assert_true(o + 1024 < sizeof css);
+    /* The drop goes FIRST: attempt 1 (room=44) records it before filling the
+     * room with margin decls, fails slack and retries; without a full rewind
+     * the failed attempt's bump survives and the reparse bumps again. A drop
+     * placed last would never be reached by attempt 1 (truncated at room) and
+     * the test would pass vacantly. */
+    o += (size_t)snprintf(css + o, sizeof css - o,
+                          ".retry{transition-property:color;"
+                          "margin:1px 2px 3px 4px;margin:1px 2px 3px 4px;"
+                          "margin:1px 2px 3px 4px;margin:1px 2px 3px 4px;"
+                          "margin:1px 2px 3px 4px;margin:1px 2px 3px 4px;"
+                          "margin:1px 2px 3px 4px;margin:1px 2px 3px 4px;"
+                          "margin:1px 2px 3px 4px;margin:1px 2px 3px 4px;}");
+    assert_true(o < sizeof css);
+    css_sheet *sh = NULL;
+    css_drop items[8];
+    css_drop_log log = { items, 8, 0, 0 };
+    assert_int_equal(css_parse_logged(css, 0, NULL, NULL, &sh, &log), CSS_OK);
+    /* Exactly two drop events (pre + retry), one bucket, count two -- no stale
+     * bump from the failed first attempt. */
+    assert_int_equal(log.total, 2);
+    assert_int_equal(log.n, 1);
+    assert_string_equal(log.items[0].prop, "transition-property");
+    assert_int_equal(log.items[0].count, 2);
+    css_free(sh);
+}
+
 static void test_pseudo_content_empty_without_pseudo(void **state) {
     (void)state;
     css_sheet *sh = NULL;
@@ -3372,6 +3409,151 @@ static void test_tweener_align(void **state) {
     assert_int_equal(css_parse_inline("-ms-flex-item-align: auto", 0).align_self, CSS_AK_AUTO);
     assert_int_equal(css_parse_inline("-ms-flex-line-pack: justify", 0).align_content, CSS_AK_SPACE_BETWEEN);
     assert_int_equal(css_parse_inline("-ms-flex-line-pack: stretch", 0).align_content, CSS_AK_STRETCH);
+}
+
+/* background-position with an edge offset (2026-10-09, Backgrounds 3 3.6). */
+static void test_bg_position_edge_offset(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("background-position: right 10px center", 0);
+    assert_int_equal(s.bg_pos_x, -10);
+    assert_int_equal(s.pct[CSS_PCT_BG_POS_X], 1000);
+    assert_int_equal(s.pct[CSS_PCT_BG_POS_Y], 500);
+    /* Trailing: positional reading preserved (`left` then y = 10px). */
+    css_style l = css_parse_inline("background-position: left 10px", 0);
+    assert_int_equal(l.pct[CSS_PCT_BG_POS_X], 0);
+    assert_int_equal(l.bg_pos_y, 10);
+}
+
+static void test_bg_position_center_by_identity(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("background-position: center right", 0);
+    assert_int_equal(s.pct[CSS_PCT_BG_POS_X], 1000);
+    assert_int_equal(s.pct[CSS_PCT_BG_POS_Y], 500);
+    /* No regression: center-first still claims x (Backgrounds 4 ordering). */
+    css_style c = css_parse_inline("background-position: center 10px", 0);
+    assert_int_equal(c.pct[CSS_PCT_BG_POS_X], 500);
+    assert_int_equal(c.bg_pos_y, 10);
+}
+
+static void test_bg_position_four_value(void **state) {
+    (void)state;
+    /* `top X right Y`: each offset belongs to its own edge. */
+    css_style s = css_parse_inline("background-position: top 5px right 10px", 0);
+    assert_int_equal(s.bg_pos_x, -10);
+    assert_int_equal(s.pct[CSS_PCT_BG_POS_X], 1000);
+    assert_int_equal(s.bg_pos_y, 5);
+    assert_int_equal(s.pct[CSS_PCT_BG_POS_Y], 0);
+}
+
+static void test_bg_position_collision_drops(void **state) {
+    (void)state;
+    /* `left right` fight over one axis: the whole declaration drops, so even the
+     * y-defaults-to-center tail never runs (Y stays 0, not 500). */
+    css_style s = css_parse_inline("background-position: left right", 0);
+    assert_int_equal(s.pct[CSS_PCT_BG_POS_X], 0);
+    assert_int_equal(s.pct[CSS_PCT_BG_POS_Y], 0);
+}
+
+/* repeat(auto-fill, single px-min pattern) -> negative-cols marker (2026-10-09). */
+static void test_grid_autofill_marker(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr))", 0);
+    assert_int_equal(s.grid_cols, -224);
+    assert_int_equal(s.grid_col_w[0], -100);
+    /* Multi-track patterns, fr-min and rows stay dropped (v1 scope). */
+    assert_int_equal(css_parse_inline("grid-template-columns: repeat(auto-fill, 100px 1fr)", 0).grid_cols, 0);
+    assert_int_equal(css_parse_inline("grid-template-columns: repeat(auto-fill, 1fr)", 0).grid_cols, 0);
+    assert_int_equal(css_parse_inline("grid-template-rows: repeat(auto-fill, 100px)", 0).grid_rows, 0);
+}
+
+/* @font-face first-name match (spec/webfont.md): the winning font-family's
+ * first name against the sheet's @font-face families resolves to its hash. */
+static void test_fontface_matches_sheet_face(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("@font-face{font-family:'X';src:url(x.woff);}"
+                               "span{font-family:'X',serif;}", 0, &sh), CSS_OK);
+    css_element el = el_node("span", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_int_equal(out.fontface, wf_name_hash("X", 1));
+    assert_int_equal(out.font_family, CSS_FF_SERIF);
+    css_free(sh);
+}
+
+static void test_fontface_no_match_is_zero(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("@font-face{font-family:'X';src:url(x.woff);}"
+                               "span{font-family:'Y',serif;}", 0, &sh), CSS_OK);
+    css_element el = el_node("span", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_int_equal(out.fontface, 0);
+    css_free(sh);
+}
+
+static void test_fontface_case_insensitive(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("@font-face{font-family:'Oswald';src:url(o.woff);}"
+                               "p{font-family:OSWALD;}", 0, &sh), CSS_OK);
+    css_element el = el_node("p", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_int_equal(out.fontface, wf_name_hash("Oswald", 6));
+    css_free(sh);
+}
+
+static void test_fontface_icon_only_family(void **state) {
+    (void)state;
+    /* An icon font the generic table never heard of still matches by name. */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("@font-face{font-family:'tabler-icons';src:url(t.woff);}"
+                               "i{font-family:'tabler-icons';}", 0, &sh), CSS_OK);
+    css_element el = el_node("i", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_int_equal(out.fontface, wf_name_hash("tabler-icons", 12));
+    css_free(sh);
+}
+
+static void test_fontface_inline_has_no_sheet(void **state) {
+    (void)state;
+    /* Inline-only resolve (no sheet): the bucket applies, the hash stays 0. */
+    assert_int_equal(css_parse_inline("font-family:'X',serif", 0).font_family,
+                     CSS_FF_SERIF);
+    assert_int_equal(css_parse_inline("font-family:'X',serif", 0).fontface, 0);
+}
+
+static void test_fontface_later_rule_clears(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("@font-face{font-family:'X';src:url(x.woff);}"
+                               "span{font-family:'X';}span{font-family:serif;}",
+                               0, &sh), CSS_OK);
+    css_element el = el_node("span", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_int_equal(out.fontface, 0);
+    css_free(sh);
+}
+
+/* Harmless 3D = identity + stacking context (2026-10-09). */
+static void test_transform_z_identity(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("transform: translateZ(0)", 0).transform_tx, 0);
+    assert_int_equal(css_parse_inline("-webkit-transform: translateZ(0)", 0).transform_tx, 0);
+    assert_int_equal(css_parse_inline("transform: rotateX(0deg)", 0).transform_tx, 0);
+    assert_int_equal(css_parse_inline("transform: rotateY(0deg)", 0).transform_tx, 0);
+    /* A unitless angle is invalid (same as rotate(0) today): angles need units. */
+    assert_int_equal(css_parse_inline("transform: rotateX(0)", 0).transform_tx, CSS_LEN_UNSET);
+    /* Non-zero 3D still drops the whole declaration (fail closed). */
+    assert_int_equal(css_parse_inline("transform: rotateX(90deg)", 0).transform_tx, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("transform: perspective(5px)", 0).transform_tx, CSS_LEN_UNSET);
+}
+
+/* Correct fail-closed locks (2026-10-09): invalid per spec, Firefox drops too. */
+static void test_calc_shape_mismatch_drops(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("margin-right: calc((calc(10px * .7) - 2) * -1)", 0).margin_right,
+                     CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("height: min(50px,70%)", 0).height, CSS_LEN_UNSET);
 }
 
 /* ms-box-sizing without the leading dash is not a property (Firefox drops it too). */
@@ -5000,6 +5182,19 @@ int main(void) {
         cmocka_unit_test(test_tweener_pack_vocab),
         cmocka_unit_test(test_tweener_align),
         cmocka_unit_test(test_bare_ms_box_sizing_drops),
+        cmocka_unit_test(test_fontface_matches_sheet_face),
+        cmocka_unit_test(test_fontface_no_match_is_zero),
+        cmocka_unit_test(test_fontface_case_insensitive),
+        cmocka_unit_test(test_fontface_icon_only_family),
+        cmocka_unit_test(test_fontface_inline_has_no_sheet),
+        cmocka_unit_test(test_fontface_later_rule_clears),
+        cmocka_unit_test(test_bg_position_edge_offset),
+        cmocka_unit_test(test_bg_position_four_value),
+        cmocka_unit_test(test_bg_position_center_by_identity),
+        cmocka_unit_test(test_bg_position_collision_drops),
+        cmocka_unit_test(test_grid_autofill_marker),
+        cmocka_unit_test(test_transform_z_identity),
+        cmocka_unit_test(test_calc_shape_mismatch_drops),
         cmocka_unit_test(test_font_without_family_drops),
         cmocka_unit_test(test_text_overflow_and_word_break),
         cmocka_unit_test(test_box_sizing),
@@ -5066,7 +5261,6 @@ int main(void) {
         cmocka_unit_test(test_grid_track_sizes_resolved),
         cmocka_unit_test(test_grid_repeat_expands_count),
         cmocka_unit_test(test_grid_minmax_counts_as_one_track),
-        cmocka_unit_test(test_grid_repeat_autofill_fails_closed),
         cmocka_unit_test(test_grid_repeat_malformed_fails_closed),
         cmocka_unit_test(test_grid_repeat_clamped_anti_dos),
         cmocka_unit_test(test_container_unset),
@@ -5161,6 +5355,7 @@ int main(void) {
         cmocka_unit_test(test_pseudo_content_escapes_fail_closed),
         cmocka_unit_test(test_pseudo_content_none_parses_empty),
         cmocka_unit_test(test_pseudo_content_pool_survives_icon_font),
+        cmocka_unit_test(test_drops_retry_rewinds_buckets),
         cmocka_unit_test(test_pseudo_content_empty_without_pseudo),
         cmocka_unit_test(test_pseudo_content_attr_resolves),
         cmocka_unit_test(test_pseudo_content_attr_missing_is_empty),

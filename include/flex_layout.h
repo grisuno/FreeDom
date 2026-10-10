@@ -100,6 +100,13 @@ fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
                               const int *fixed_row, const int *fixed_col,
                               size_t *out_row, size_t *out_col);
 
+/* repeat(auto-fill, minmax(min, max)): how many min-wide tracks fit in avail
+ * (CSS Grid 1 7.2.3.2; one gap between tracks). Pure: floor((avail+gap)/(min+gap))
+ * clamped to [1, FX_MAX_ITEMS]. Non-positive/NaN inputs fail safe to 1 (never 0:
+ * a grid with zero columns places nothing). The caller still caps to its own
+ * BT_MAX_CHILDREN. See spec/css.md (2026-10-09). */
+size_t fx_autofill_count(double avail, double gap, double minw);
+
 /* --- grid-template-areas: named placement (CSS Grid 1 sections 7.3 + 8.4) ------
  * Full contract, error table and out-of-scope list: spec/grid_areas.md. */
 

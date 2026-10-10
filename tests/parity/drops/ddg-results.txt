@@ -1,15 +1,14 @@
 linux kernel at DuckDuckGo
-CSS drops: 44 declaration(s) dropped, 12 distinct
+CSS drops: 39 declaration(s) dropped, 11 distinct
   count  cause         property                     first value
       9  unknown-prop  -webkit-font-smoothing       antialiased
       7  unknown-prop  -moz-osx-font-smoothing      grayscale
       6  unknown-prop  speak                        none
-      5  bad-value     font-family                  "ddg-serp-icons"
       4  unknown-prop  -webkit-tap-highlight-color  rgba(0,0,0,0)
       3  unknown-prop  -khtml-user-select           none
       3  unknown-prop  -ms-overflow-style           none
       3  unknown-prop  scrollbar-width              none
-      1  unknown-prop  -webkit-text-size-adjust     100%
-      1  unknown-prop  quotes                       none
-      1  unknown-prop  text-underline-offset        1.5px
       1  unknown-prop  object-position              top
+      1  unknown-prop  -webkit-text-size-adjust     100%
+      1  unknown-prop  text-underline-offset        1.5px
+      1  unknown-prop  quotes                       none

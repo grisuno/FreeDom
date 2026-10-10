@@ -138,6 +138,17 @@ static void test_negative_fields_clamped(void **state) {
     assert_item(out[1], 100.0, 200.0);
 }
 
+/* repeat(auto-fill, minmax(min, max)): fit of min-wide tracks (2026-10-09). */
+static void test_autofill_count(void **state) {
+    (void)state;
+    assert_int_equal(fx_autofill_count(1000.0, 10.0, 224.0), 4);
+    assert_int_equal(fx_autofill_count(1000.0, 10.0, 2000.0), 1);
+    assert_int_equal(fx_autofill_count(0.0, 10.0, 224.0), 1);
+    assert_int_equal(fx_autofill_count(1000.0, 0.0, 250.0), 4);
+    assert_int_equal(fx_autofill_count(1000.0, 10.0, 0.0), 1);
+    assert_int_equal(fx_autofill_count(100000.0, 0.0, 1.0), FX_MAX_ITEMS);
+}
+
 static void test_flex_zero_items_is_noop(void **state) {
     (void)state;
     assert_int_equal(fx_flex_line(NULL, 0, 300, 0, FX_JUSTIFY_START, NULL), FX_OK);
@@ -1095,6 +1106,7 @@ int main(void) {
         cmocka_unit_test(test_grid_place_explicit_out_of_range_clamps),
         cmocka_unit_test(test_multicol_balance),
         cmocka_unit_test(test_auto_margins_push_right_and_center),
+        cmocka_unit_test(test_autofill_count),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

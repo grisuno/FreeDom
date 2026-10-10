@@ -22,6 +22,7 @@
 #include "flex_layout.h"
 #include "html_parse.h"
 #include "page_view.h"
+#include "webfont.h"
 
 /* Parse helper: aborts the test on parse failure. Caller frees *doc. */
 static hp_document *parse(const char *html) {
@@ -1882,6 +1883,48 @@ static void test_build_grid_container(void **state) {
     assert_int_equal(a->cont_cols, 3);
     assert_true(a->cont_id >= 0);
 
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* repeat(auto-fill) marker (2026-10-09): the negative cols survive the whole
+ * worker pipeline to the runs, so layout_container counts tracks itself. */
+static void test_build_grid_autofill_marker(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='display:grid;grid-template-columns:repeat(auto-fill, minmax(14rem, 1fr))'>"
+        "<span>a</span><span>b</span></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *a = find_text(v, "a");
+    assert_non_null(a);
+    assert_int_equal(a->cont_display, BX_DISPLAY_GRID);
+    assert_int_equal(a->cont_cols, -224);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* @font-face match rides the run (spec/webfont.md): the sheet's face family
+ * against the winning first family name resolves to its hash; a non-face
+ * family and a face-less sheet both read 0. */
+static void test_build_fontface_hash(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>"
+        "@font-face{font-family:'X';src:url(x.woff);}"
+        ".a{font-family:'X',serif;}.b{font-family:serif;}"
+        "</style></head><body>"
+        "<p class=\"a\">faced</p><p class=\"b\">plain</p></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *a = find_text(v, "faced");
+    assert_non_null(a);
+    assert_int_equal(a->fontface, wf_name_hash("X", 1));
+    const pv_run *b = find_text(v, "plain");
+    assert_non_null(b);
+    assert_int_equal(b->fontface, 0);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -4400,6 +4443,8 @@ int main(void) {
         cmocka_unit_test(test_build_table_cells_distinct_items),
         cmocka_unit_test(test_build_table_colspan_rowspan),
         cmocka_unit_test(test_build_grid_container),
+        cmocka_unit_test(test_build_grid_autofill_marker),
+        cmocka_unit_test(test_build_fontface_hash),
         cmocka_unit_test(test_build_root_element_style_inherits),
         cmocka_unit_test(test_build_root_font_size_is_overridable),
         cmocka_unit_test(test_build_abs_child_is_not_a_flex_item),

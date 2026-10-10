@@ -177,6 +177,7 @@ static void run_init_common(pv_run *r) {
     r->line_scale = 0;
     r->text_decoration = -1;
     r->font_family = 0;
+    r->fontface = 0u;
     r->text_transform = 0;
     r->letter_spacing = PV_LEN_UNSET;
     r->word_spacing = PV_LEN_UNSET;
@@ -546,6 +547,7 @@ void pv_set_text_ext(pv_view *v, const pv_text_ext *e) {
     if (v == NULL || v->count == 0 || e == NULL) return;
     pv_run *r = &v->runs[v->count - 1];
     r->font_family = e->font_family;
+    r->fontface = e->fontface;
     r->text_transform = e->text_transform;
     r->letter_spacing = e->letter_spacing;
     r->word_spacing = e->word_spacing;
@@ -1218,7 +1220,7 @@ int pv_content_hidden(int box_hidden, int run_visibility) {
 
 void pv_text_ext_reset(pv_text_ext *e) {
     if (e == NULL) return;
-    e->font_family = 0; e->text_transform = 0;
+    e->font_family = 0; e->fontface = 0u; e->text_transform = 0;
     e->letter_spacing = PV_LEN_UNSET; e->word_spacing = PV_LEN_UNSET;
     e->shadow_dx = 0; e->shadow_dy = 0; e->shadow_color = -1;
     e->opacity = -1; e->valign = 0; e->text_indent = PV_LEN_UNSET;
@@ -1244,6 +1246,7 @@ void pv_text_ext_reset(pv_text_ext *e) {
  * already set is not overwritten — keeps the nearest, matching inheritance). */
 static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
     if (e->font_family == 0 && cs->font_family != CSS_FF_UNSET) e->font_family = cs->font_family;
+    if (e->fontface == 0u && cs->fontface != 0u) e->fontface = cs->fontface;
     if (e->text_transform == 0 && cs->text_transform != CSS_TT_UNSET) e->text_transform = cs->text_transform;
     if (e->letter_spacing == PV_LEN_UNSET && cs->letter_spacing != CSS_LEN_UNSET)
         e->letter_spacing = cs->letter_spacing;
@@ -3077,8 +3080,12 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                                                                         : BX_DISPLAY_GRID;
                             cd->gap = (cs.gap >= 0) ? cs.gap : 0;
                             cd->justify = css_to_fx_justify(cs.justify);
+                            /* grid_cols < 0 is the repeat(auto-fill) marker
+                             * (-min_px, spec/css.md 2026-10-09): it MUST survive
+                             * to layout_container, which counts tracks itself.
+                             * Clamping it to 1 here would silently unmark it. */
                             cd->cols = (cs.display == CSS_DISP_GRID)
-                                       ? (cs.grid_cols > 0 ? cs.grid_cols : 1) : 0;
+                                       ? (cs.grid_cols != 0 ? cs.grid_cols : 1) : 0;
                             if (cs.display == CSS_DISP_GRID) {
                                 for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
                                     cd->col_w[gk] = cs.grid_col_w[gk];
@@ -5165,6 +5172,18 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     css_style rcs = cached_element_style(el, sheet, &cache);
                     if (css_has_boxdeco(&rcs))
                         bdeco = box_reg_id(&box_reg, n, &rcs, pv_cached_font_px(&cache, n));
+                }
+                /* The element's OWN width in % is its used width (CSS 2.1
+                 * §10.3.2), not a cap: without this half an `img{width:50%}`
+                 * keeps its intrinsic bitmap and every responsive thumbnail
+                 * mis-sizes (spec/box_engine.md tanda 42). px widths already
+                 * ride img_w/img_h via apply_css_replaced_size; only the
+                 * symbolic half travels here, like every <length-percentage>.
+                 * Memoized by the style cache, so one resolve per element. */
+                {
+                    css_style ics = cached_element_style(el, sheet, &cache);
+                    if (ics.pct[CSS_PCT_WIDTH] != 0)
+                        pv_set_box_pct(v, ics.pct[CSS_PCT_WIDTH], 0, 0, 0, 0);
                 }
                 annotate_replaced_run(v, &reg, &items, &img_cont, &img_ext,
                                       unused_align, unused_fs, unused_fs_abs,

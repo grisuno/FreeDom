@@ -13,6 +13,7 @@
 
 #include "text_shape.h"
 #include "css.h"
+#include "webfont.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -161,6 +162,151 @@ static tsh_entry *get_entry(int family, int bold, int italic) {
     return NULL;
 }
 
+/* Per-document @font-face table (spec/webfont.md): registered by the trusted
+ * parent from policy-gated fetches, keyed by (name hash, bold, italic). Memory
+ * only, freed by tsh_webfont_clear (navigation) and tsh_shutdown. Never the
+ * worker: shaping a registered face runs on the painter side like every face. */
+#define TSH_WEB_SLOTS 16
+
+typedef struct tsh_web {
+    int       used;
+    unsigned  hash;
+    int       bold;
+    int       italic;
+    tsh_entry e;
+} tsh_web;
+
+static tsh_web g_web[TSH_WEB_SLOTS];
+
+static void web_entry_free(tsh_web *w) {
+    if (w->e.hbfont != NULL) hb_font_destroy(w->e.hbfont);
+    if (w->e.hbface != NULL) hb_face_destroy(w->e.hbface);
+    if (w->e.blob != NULL) hb_blob_destroy(w->e.blob);
+    if (w->e.cface != NULL) cairo_font_face_destroy(w->e.cface);
+    if (w->e.ftface != NULL) FT_Done_Face(w->e.ftface);
+    free(w->e.bytes);
+    memset(w, 0, sizeof *w);
+}
+
+/* True for font programs FreeType parses without new decoders: wOFF/TrueType/
+ * CFF-OpenType (and the mac aliases). wOF2 is deliberately refused until the
+ * woff2 slice (spec/webfont.md); eot/svg are never faces in any engine. */
+static int web_magic_ok(const unsigned char *b, size_t n) {
+    if (b == NULL || n < 4) return 0;
+    if (b[0] == 'w' && b[1] == 'O' && b[2] == 'F' && b[3] == 'F') return 1;
+    if (b[0] == 0 && b[1] == 1 && b[2] == 0 && b[3] == 0) return 1;
+    if (b[0] == 'O' && b[1] == 'T' && b[2] == 'T' && b[3] == 'O') return 1;
+    if (b[0] == 't' && b[1] == 'r' && b[2] == 'u' && b[3] == 'e') return 1;
+    if (b[0] == 't' && b[1] == 'y' && b[2] == 'p' && b[3] == '1') return 1;
+    return 0;
+}
+
+/* Builds the shaping faces over an OWNED copy of bytes[0,nbytes) into e
+ * (shared tail with load_entry's file path: same objects, same order, same
+ * failure discipline -- free the copy on any failure, never half-register). */
+static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes) {
+    unsigned char *copy = (unsigned char *)malloc(nbytes);
+    if (copy == NULL) return 0;
+    memcpy(copy, bytes, nbytes);
+    FT_Face ft = NULL;
+    if (FT_New_Memory_Face(g_ft, copy, (FT_Long)nbytes, 0, &ft) != 0) {
+        free(copy);
+        return 0;
+    }
+    cairo_font_face_t *cf = cairo_ft_font_face_create_for_ft_face(ft, 0);
+    if (cf == NULL || cairo_font_face_status(cf) != CAIRO_STATUS_SUCCESS) {
+        if (cf != NULL) cairo_font_face_destroy(cf);
+        FT_Done_Face(ft);
+        free(copy);
+        return 0;
+    }
+    hb_blob_t *blob = hb_blob_create((const char *)copy, (unsigned)nbytes,
+                                     HB_MEMORY_MODE_READONLY, NULL, NULL);
+    hb_face_t *hf = hb_face_create(blob, 0);
+    hb_font_t *hfont = hb_font_create(hf);
+    if (hfont == NULL || hf == NULL) {
+        if (hfont != NULL) hb_font_destroy(hfont);
+        if (hf != NULL) hb_face_destroy(hf);
+        hb_blob_destroy(blob);
+        cairo_font_face_destroy(cf);
+        FT_Done_Face(ft);
+        free(copy);
+        return 0;
+    }
+    e->bytes = copy;
+    e->nbytes = (long)nbytes;
+    e->ftface = ft;
+    e->cface = cf;
+    e->blob = blob;
+    e->hbface = hf;
+    e->hbfont = hfont;
+    e->loaded = 1;
+    return 1;
+}
+
+int tsh_webfont_register(const char *name,
+                         const unsigned char *bytes, size_t nbytes,
+                         int bold, int italic) {
+    if (name == NULL || name[0] == '\0') return -1;
+    if (bytes == NULL || nbytes == 0 || nbytes > WF_MAX_FACE_BYTES) return -1;
+    if (!web_magic_ok(bytes, nbytes)) return -1;
+    if (!backend_init()) return -1;
+    unsigned h = wf_name_hash(name, strlen(name));
+    if (h == 0) return -1;
+    int bb = bold ? 1 : 0;
+    int it = italic ? 1 : 0;
+    tsh_web *slot = NULL;
+    for (int i = 0; i < TSH_WEB_SLOTS; ++i) {
+        if (g_web[i].used && g_web[i].hash == h
+            && g_web[i].bold == bb && g_web[i].italic == it) {
+            slot = &g_web[i];
+            break;
+        }
+        if (slot == NULL && !g_web[i].used) slot = &g_web[i];
+    }
+    if (slot == NULL) return -1;   /* table full: fail closed */
+    if (slot->used) web_entry_free(slot);
+    memset(slot, 0, sizeof *slot);
+    if (!web_make_entry(&slot->e, bytes, nbytes)) {
+        memset(slot, 0, sizeof *slot);
+        return -1;
+    }
+    slot->used = 1;
+    slot->hash = h;
+    slot->bold = bb;
+    slot->italic = it;
+    return 0;
+}
+
+void tsh_webfont_clear(void) {
+    for (int i = 0; i < TSH_WEB_SLOTS; ++i)
+        if (g_web[i].used) web_entry_free(&g_web[i]);
+}
+
+static tsh_entry *web_find(unsigned h, int bold, int italic) {
+    if (h == 0) return NULL;
+    for (int i = 0; i < TSH_WEB_SLOTS; ++i) {
+        if (g_web[i].used && g_web[i].hash == h
+            && g_web[i].bold == (bold ? 1 : 0)
+            && g_web[i].italic == (italic ? 1 : 0)
+            && g_web[i].e.loaded == 1)
+            return &g_web[i].e;
+    }
+    return NULL;
+}
+
+/* Entry for a full font selector: a registered @font-face wins over the local
+ * bucket stack; a set-but-unregistered hash falls through to it (the face may
+ * belong to another document -- the table is per-document, cleared on
+ * navigation -- so missing is routine, never an error). */
+static tsh_entry *get_entry_ex(const tsh_font *f) {
+    if (f->wfh != 0) {
+        tsh_entry *w = web_find(f->wfh, f->bold, f->italic);
+        if (w != NULL) return w;
+    }
+    return get_entry(f->family, f->bold, f->italic);
+}
+
 int tsh_ready(void) {
     /* Backend usable iff the default (sans) face resolves. */
     return get_entry(CSS_FF_SANS, 0, 0) != NULL;
@@ -179,7 +325,7 @@ tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
     *out_adv = 0.0;
     if (len == 0) return TSH_OK;
 
-    tsh_entry *e = get_entry(f->family, f->bold, f->italic);
+    tsh_entry *e = get_entry_ex(f);
     if (e == NULL) return TSH_ERR_UNAVAIL;
 
     int scale = (int)(px * 64.0 + 0.5);
@@ -227,7 +373,7 @@ tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
     if (st != TSH_OK) return st;
     if (n == 0) return TSH_OK;
 
-    tsh_entry *e = get_entry(f->family, f->bold, f->italic);
+    tsh_entry *e = get_entry_ex(f);
     if (e == NULL) return TSH_ERR_UNAVAIL;
 
     cairo_set_font_face(cr, e->cface);
@@ -241,6 +387,7 @@ tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
 }
 
 void tsh_shutdown(void) {
+    tsh_webfont_clear();
     for (int i = 0; i < TSH_CACHE_SLOTS; ++i) {
         tsh_entry *e = &g_cache[i];
         if (e->loaded != 1) { e->loaded = 0; continue; }

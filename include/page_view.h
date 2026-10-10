@@ -161,6 +161,9 @@ typedef struct pv_run {
      * PV_LEN_UNSET, shadow_dx/dy 0 + shadow_color -1 (no shadow), opacity -1 (opaque),
      * valign 0 (baseline), white_space 0 (normal/wrap). */
     int     font_family;     /* css_font_family */
+    /* Author @font-face match (spec/webfont.md): wf_name_hash, 0 = none.
+     * Presentation (caps.css-gated downstream) like font_family. */
+    unsigned fontface;
     int     text_transform;  /* css_text_transform */
     int     letter_spacing;  /* signed px, PV_LEN_UNSET unset */
     int     word_spacing;    /* signed px, PV_LEN_UNSET unset */
@@ -892,6 +895,9 @@ void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,
  * (every field to its "unset" sentinel), then set what the caller resolved. */
 typedef struct pv_text_ext {
     int font_family, text_transform, letter_spacing, word_spacing;
+    /* Author @font-face match (spec/webfont.md): wf_name_hash of the winning
+     * first family name, 0 = none. Inherits exactly like font_family. */
+    unsigned fontface;
     int shadow_dx, shadow_dy, shadow_color;
     int opacity, valign, text_indent, white_space;
     int list_style;

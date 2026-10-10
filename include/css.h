@@ -649,6 +649,11 @@ typedef struct css_style {
      * flat model the caller takes the nearest ancestor that sets each. Like the other
      * author presentation, they are gated behind caps.css downstream. */
     int         font_family;     /* css_font_family, 0 (unset) */
+    /* Author @font-face match (spec/webfont.md): wf_name_hash of the winning
+     * font-family's FIRST name when it names a @font-face family of the sheet,
+     * else 0. Inherits like font_family; gated behind caps.css downstream.
+     * 0 also when there is no sheet (inline-only resolve) or no match. */
+    unsigned    fontface;
     int         text_transform;  /* css_text_transform, 0 (unset) */
     int         letter_spacing;  /* px (signed), 0 = normal, CSS_LEN_UNSET (unset) */
     int         word_spacing;    /* px (signed), 0 = normal, CSS_LEN_UNSET (unset) */

@@ -1045,11 +1045,177 @@ static void test_inline_run_boundary_collapses_runs_of_space(void **state) {
     assert_true(w_many < w_one + 1.0 && w_many > w_one - 1.0);
 }
 
+/* Consecutive atomic inlines share one line (CSS 2.1 §9.2.2, spec/box_engine.md
+ * tanda 42): three adjacent inline SVGs used to take one row each because the
+ * line only formed ahead of TEXT. The red ink must span >100px wide inside a
+ * <60px tall band (one 30px row); stacked it would span ~90px tall. */
+static void test_download_png_inline_replaced_share_row(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;padding:0;}</style></head><body>"
+        "<svg width=\"40\" height=\"30\"><rect width=\"40\" height=\"30\" fill=\"#ff0000\"/></svg>"
+        "<svg width=\"40\" height=\"30\"><rect width=\"40\" height=\"30\" fill=\"#ff0000\"/></svg>"
+        "<svg width=\"40\" height=\"30\"><rect width=\"40\" height=\"30\" fill=\"#ff0000\"/></svg>"
+        "</body></html>";
+    const char *path = "__freedom_imgrow_page.html";
+    const char *png = "__freedom_imgrow_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+    size_t min_x = px.width, max_x = 0, min_y = px.height, max_y = 0, n = 0;
+    for (size_t y = 0; y < px.height; ++y) {
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            uint8_t r = (uint8_t)(p >> 16), g = (uint8_t)(p >> 8), b = (uint8_t)p;
+            if (r >= 200 && g <= 80 && b <= 80) {
+                if (x < min_x) min_x = x;
+                if (x > max_x) max_x = x;
+                if (y < min_y) min_y = y;
+                if (y > max_y) max_y = y;
+                ++n;
+            }
+        }
+    }
+    assert_true(n > 100);                 /* the three rects painted */
+    assert_true(max_x > 100);             /* third rect reached (one row) */
+    assert_true(max_y - min_y < 60);      /* one 30px band, not three rows */
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
+/* An unsizable replaced element mid-line must not swap row order (spec/box_engine.md
+ * tanda 42): text, then a broken image, then text. The open text line flushes
+ * first, so the red row paints strictly above the blue row; emitting the broken
+ * row under the unflushed line overlaps them instead. */
+static void test_download_png_broken_image_keeps_row_order(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;padding:0;}#a{color:#ff0000;}#b{color:#0000ff;}</style></head><body>"
+        "<p><span id=\"a\">ab</span><img src=\"https://invalid.invalid/x.png\" alt=\"\"><span id=\"b\">cd</span></p>"
+        "</body></html>";
+    const char *path = "__freedom_imgorder_page.html";
+    const char *png = "__freedom_imgorder_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+    size_t red_max_y = 0, blue_min_y = px.height;
+    int nred = 0, nblue = 0;
+    for (size_t y = 0; y < px.height; ++y) {
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            uint8_t r = (uint8_t)(p >> 16), g = (uint8_t)(p >> 8), b = (uint8_t)p;
+            if (r >= 200 && g <= 80 && b <= 80) { if (y > red_max_y) red_max_y = y; ++nred; }
+            if (b >= 200 && r <= 80 && g <= 80) { if (y < blue_min_y) blue_min_y = y; ++nblue; }
+        }
+    }
+    assert_true(nred > 5 && nblue > 5);
+    assert_true(red_max_y < blue_min_y);
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
+/* A % width on a replaced element IS its width (CSS 2.1 §10.3.2, spec/box_engine.md
+ * tanda 42): a 20x20 data: image with width:50% in a 1000px viewport paints
+ * 500x500, not its 20px natural size. */
+static void test_download_png_replaced_pct_width(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;padding:0;}img{width:50%;}</style></head><body>"
+        "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAG0lEQVR4nGP8z0A+YKJA76jmUc2jmkc1U0EzACKcASc1hNCeAAAAAElFTkSuQmCC\" alt=\"\">"
+        "</body></html>";
+    const char *path = "__freedom_imgpct_page.html";
+    const char *png = "__freedom_imgpct_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --images --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+    size_t min_x = px.width, max_x = 0, n = 0;
+    for (size_t y = 0; y < px.height; ++y) {
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            uint8_t r = (uint8_t)(p >> 16), g = (uint8_t)(p >> 8), b = (uint8_t)p;
+            if (r >= 200 && g <= 80 && b <= 80) {
+                if (x < min_x) min_x = x;
+                if (x > max_x) max_x = x;
+                ++n;
+            }
+        }
+    }
+    assert_true(n > 1000);                /* a big red square painted */
+    assert_true(max_x - min_x > 400);     /* 50% of 1000, not 20px natural */
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
 /* CSS 2.1 §10.8 line-box regression (Wikipedia headings): the line takes the MAX
  * leading of its fragments. A trailing `line-height:0` run (the vector skin's
- * `.mw-editsection` after every section heading) used to overwrite the whole
- * line's spacing -- the heading row flushed at near-zero height and the next
- * paragraph painted THROUGH the heading glyphs. The red paragraph must start
+ * `.mw-editsection` after every section heading) is what collapses the heading
+ * line and the next paragraph painted through the glyphs. The red paragraph must start
  * strictly below the lowest dark heading pixel. */
 static void test_download_png_line_height_zero_does_not_shrink_line(void **state) {
     (void)state;
@@ -2548,6 +2714,9 @@ int main(void) {
         cmocka_unit_test(test_author_font_size_on_heading_replaces_ua_scale),
         cmocka_unit_test(test_inline_run_boundary_does_not_invent_space),
         cmocka_unit_test(test_inline_run_boundary_collapses_runs_of_space),
+        cmocka_unit_test(test_download_png_inline_replaced_share_row),
+        cmocka_unit_test(test_download_png_replaced_pct_width),
+        cmocka_unit_test(test_download_png_broken_image_keeps_row_order),
         cmocka_unit_test(test_download_png_mix_blend_multiply_uses_cairo_operator),
         cmocka_unit_test(test_download_png_transform_translate_moves_paint_position),
         cmocka_unit_test(test_download_png_transform_rotate_changes_paint_shape),

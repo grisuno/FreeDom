@@ -12,6 +12,8 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -19,6 +21,7 @@
 
 #include "text_shape.h"
 #include "css.h"
+#include "webfont.h"
 
 static const tsh_font SANS = { .family = CSS_FF_SANS, .bold = 0, .italic = 0 };
 
@@ -140,6 +143,90 @@ static void test_draw_paints(void **state) {
     cairo_surface_destroy(s);
 }
 
+/* --- @font-face registry (spec/webfont.md; needs no system font) --- */
+
+static void test_webfont_rejects_bad_input(void **state) {
+    (void)state;
+    static const unsigned char ok[8] = { 0, 1, 0, 0, 'A', 'B', 'C', 'D' };
+    unsigned char big = 0;
+    assert_int_equal(tsh_webfont_register(NULL, ok, sizeof ok, 0, 0), -1);
+    assert_int_equal(tsh_webfont_register("", ok, sizeof ok, 0, 0), -1);
+    assert_int_equal(tsh_webfont_register("X", NULL, 8, 0, 0), -1);
+    assert_int_equal(tsh_webfont_register("X", ok, 0, 0, 0), -1);
+    assert_int_equal(tsh_webfont_register("X", ok, WF_MAX_FACE_BYTES + 1, 0, 0), -1);
+    assert_int_equal(tsh_webfont_register("X", &big, 1, 0, 0), -1);   /* short */
+    static const unsigned char wof2[8] = { 'w', 'O', 'F', '2', 0, 0, 0, 0 };
+    assert_int_equal(tsh_webfont_register("X", wof2, sizeof wof2, 0, 0), -1);
+    static const unsigned char junk[8] = { 'J', 'U', 'N', 'K', 0, 0, 0, 0 };
+    assert_int_equal(tsh_webfont_register("X", junk, sizeof junk, 0, 0), -1);
+    /* Unparseable-but-magic bytes fail at FT_New_Memory_Face, never register. */
+    static const unsigned char fake[64] = { 0, 1, 0, 0 };
+    assert_int_equal(tsh_webfont_register("X", fake, sizeof fake, 0, 0), -1);
+    tsh_webfont_clear();
+}
+
+/* Reads a host TrueType file when one exists (same philosophy as the shaping
+ * invariants above: local fonts only, skip-free -- absence just narrows). */
+static unsigned char *read_host_font(const char *path, size_t *out_n) {
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) return NULL;
+    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return NULL; }
+    long sz = ftell(f);
+    if (sz <= 0 || (size_t)sz > WF_MAX_FACE_BYTES) { fclose(f); return NULL; }
+    if (fseek(f, 0, SEEK_SET) != 0) { fclose(f); return NULL; }
+    unsigned char *b = (unsigned char *)malloc((size_t)sz);
+    if (b == NULL) { fclose(f); return NULL; }
+    if (fread(b, 1, (size_t)sz, f) != (size_t)sz) { free(b); fclose(f); return NULL; }
+    fclose(f);
+    *out_n = (size_t)sz;
+    return b;
+}
+
+static void test_webfont_register_find_clear(void **state) {
+    (void)state;
+    static const char *paths[] = {
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans.ttf",
+    };
+    unsigned char *bytes = NULL;
+    size_t nbytes = 0;
+    for (size_t i = 0; i < sizeof paths / sizeof *paths && bytes == NULL; ++i)
+        bytes = read_host_font(paths[i], &nbytes);
+    if (bytes == NULL || !tsh_ready()) {
+        /* No host font (or no backend): registration still fails closed, and
+         * shaping through a set-but-missing hash falls back to the bucket. */
+        tsh_webfont_clear();
+        return;
+    }
+    assert_int_equal(tsh_webfont_register("TestFace", bytes, nbytes, 0, 0), 0);
+    /* Same key twice replaces instead of duplicating. */
+    assert_int_equal(tsh_webfont_register("TestFace", bytes, nbytes, 0, 0), 0);
+    /* Bold is a different key. */
+    assert_int_equal(tsh_webfont_register("TestFace", bytes, nbytes, 1, 0), 0);
+
+    tsh_font wf = { .family = CSS_FF_SERIF, .bold = 0, .italic = 0,
+                    .wfh = wf_name_hash("TestFace", 8) };
+    assert_true(wf.wfh != 0);
+    cairo_glyph_t g[64];
+    size_t n = 0;
+    double adv = 0.0;
+    assert_int_equal(tsh_shape(&wf, 16.0, "ABCD", 4, g, 64, &n, &adv), TSH_OK);
+    assert_int_equal((int)n, 4);
+    assert_true(adv > 0.0);
+
+    /* Case-insensitive: the registry hashes the same way both sides do. */
+    tsh_font wf2 = { .family = CSS_FF_SERIF, .bold = 0, .italic = 0,
+                     .wfh = wf_name_hash("TESTFACE", 8) };
+    assert_int_equal(wf2.wfh, wf.wfh);
+    assert_true(tsh_measure(&wf2, 16.0, "A", 1) > 0.0);
+
+    tsh_webfont_clear();
+    /* After clear the hash misses and shaping falls back to the local bucket. */
+    assert_int_equal(tsh_shape(&wf, 16.0, "ABCD", 4, g, 64, &n, &adv), TSH_OK);
+    free(bytes);
+}
+
 static int teardown(void **state) {
     (void)state;
     tsh_shutdown();
@@ -155,6 +242,8 @@ int main(void) {
         cmocka_unit_test(test_measure_matches_shape),
         cmocka_unit_test(test_overflow_cap),
         cmocka_unit_test(test_draw_paints),
+        cmocka_unit_test(test_webfont_rejects_bad_input),
+        cmocka_unit_test(test_webfont_register_find_clear),
     };
     return cmocka_run_group_tests(tests, NULL, teardown);
 }

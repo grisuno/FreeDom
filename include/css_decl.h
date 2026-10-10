@@ -176,6 +176,12 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
          * cannot also hold a signed length, and the cascade has to be able to let
          * a later keyword clear an earlier length. */
         P_BG_SIZE_W, P_BG_SIZE_H, P_VALIGN_SHIFT,
+        /* First family name of a font-family/font declaration, as an INDEX into
+         * the shared content string pool (spec/webfont.md): at apply time it
+         * resolves against the sheet's @font-face families into
+         * css_style.fontface (a wf_name_hash, 0 = no webfont). -1 = none/normal.
+         * APPEND only: cascade slots are compared by index, never renumbered. */
+        P_FONTFACE,
         P_NSLOTS };
 
 typedef struct css_decl {

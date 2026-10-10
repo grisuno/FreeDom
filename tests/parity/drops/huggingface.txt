@@ -1,8 +1,7 @@
 Hugging Face – The AI community building the future.
-CSS drops: 552 declaration(s) dropped, 79 distinct
+CSS drops: 503 declaration(s) dropped, 78 distinct
   count  cause         property                     first value
      69  unknown-prop  translate                    0 0
-     48  bad-value     font-family                  KaTeX_Main
      35  bad-value     filter                       grayscale()
      27  unknown-prop  stroke                       currentColor
      24  bad-value     transition-timing-function   initial
@@ -35,24 +34,23 @@ CSS drops: 552 declaration(s) dropped, 79 distinct
       3  unknown-prop  justify-self                 center
       3  bad-value     grid-row                     span 3/span 3
       3  unknown-prop  font-variation-settings      normal
-      3  unknown-prop  scroll-snap-align            center
       3  unknown-prop  font-feature-settings        normal
+      3  unknown-prop  scroll-snap-align            center
       2  unknown-prop  container                    header/inline-size
       2  unknown-prop  grid-column-start            1
       2  unknown-prop  border-inline-start-width    calc(1px * 0)
       2  unknown-prop  border-inline-end-width      calc(1px * calc(1 - 0))
       2  unknown-prop  scroll-padding-inline        calc(.25rem * 4)
       2  unknown-prop  overscroll-behavior-x        contain
-      2  unknown-prop  -ms-overflow-style           none
+      2  bad-value     border-color                 inherit
       2  bad-value     background                   radial-gradient(150% 100% at 50% 68%, transparent 60%, #0000 100%)
-      2  bad-value     background-position          right .5rem center
+      2  unknown-prop  -ms-overflow-style           none
       2  unknown-prop  font-variant-numeric         initial initial initial initial initial
       2  bad-value     outline                      1px solid buttontext
       2  unknown-prop  clip-path                    inset(50%)
       2  unknown-prop  -webkit-mask                 radial-gradient(6px at 13px 5px,#0000 98%,#000)
       2  bad-value     background-color             oklab(29.7163% -4.47035e-8 2.98023e-8/.7)
       2  unknown-prop  -ms-high-contrast-adjust     none
-      2  bad-value     border-color                 inherit
       2  unknown-prop  fill-rule                    nonzero
       2  unknown-prop  fill-opacity                 1
       2  unknown-prop  stroke-width                 1
@@ -62,21 +60,22 @@ CSS drops: 552 declaration(s) dropped, 79 distinct
       2  unknown-prop  stroke-dasharray             none
       2  unknown-prop  stroke-dashoffset            0
       2  unknown-prop  stroke-opacity               1
+      1  unknown-prop  border-block-width           1px
       1  unknown-prop  will-change                  transform
       1  unknown-prop  border-inline-color          #0000
       1  unknown-prop  contain-intrinsic-size       auto 150px
       1  unknown-prop  overflow-clip-margin         3rem
       1  bad-value     list-style-type              "•"
       1  unknown-prop  mask                         radial-gradient(farthest-side,#0000 calc(100% - 2px),#000 calc(100% - 1px))
-      1  unknown-prop  scroll-snap-stop             always
+      1  unknown-prop  -webkit-tap-highlight-color  transparent
+      1  bad-value     background-position          0 0,10px 10px
       1  unknown-prop  grid-row-start               1
       1  unknown-prop  scrollbar-gutter             stable
-      1  unknown-prop  -webkit-tap-highlight-color  transparent
       1  unknown-prop  break-inside                 avoid
+      1  unknown-prop  scroll-snap-stop             always
       1  unknown-prop  container-type               inline-size
       1  unknown-prop  -webkit-text-size-adjust     100%
       1  unknown-prop  scroll-padding-right         calc(.25rem * 12)
       1  unknown-prop  border-block-style           solid
       1  bad-value     touch-action                 initial initial initial
       1  unknown-prop  scroll-snap-type             x proximity
-      1  unknown-prop  border-block-width           1px

@@ -1,5 +1,5 @@
 Slashdot: News for nerds, stuff that matters, & software
-CSS drops: 35 declaration(s) dropped, 29 distinct
+CSS drops: 33 declaration(s) dropped, 27 distinct
   count  cause         property                     first value
       3  bad-value     font                         normal 24px/1.5
       2  unknown-prop  -border-radius               2px
@@ -24,8 +24,6 @@ CSS drops: 35 declaration(s) dropped, 29 distinct
       1  bad-value     transition-property          background-color, color
       1  unknown-prop  -o-bottom-right-radius       4px
       1  unknown-prop  text-wrap                    nowrap
-      1  bad-value     -webkit-transform            translateZ(0)
-      1  bad-value     font-family                  "sdicon"
       1  unknown-prop  speak                        none
       1  bad-value     border-style                 0
       1  unknown-prop  font-weignt                  normal
