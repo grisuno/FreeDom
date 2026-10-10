@@ -1,0 +1,79 @@
+# freedom-0.0.3
+
+> Static analysis knowledge base for freedom-0.0.3: 10 communities, 262 files, 1481 imports, 4 languages, 6235 symbols.
+
+Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
+
+## Agent Docs
+
+- [readmenator-agent/INDEX.md](md/readmenator-agent/INDEX.md)
+- [readmenator-agent/GOTCHAS.md](md/readmenator-agent/GOTCHAS.md): These files have the most connections. Changes here have high blast radius.
+- [readmenator-agent/API.md](md/readmenator-agent/API.md): readfuzzstats (function) app.py:30 def readfuzzstats() -- Reads the current status of the active AFL++ fuzzing session.
+- [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/blockflow.h, include/boxstyle.h, include/boxtree.h, include/browser.h, include/compositor.h, include/css.h...
+- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): datadevicedrop (function) gui/browserui.c:14959 static void datadevicedrop(void d, struct wldatadevice dev)
+- [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Depends on: include/jssandbox.h
+- [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Depends on: include/boxstyle.h, include/boxtree.h, include/compositor.h, include/css.h
+- [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/csslength.h, include/cssmq.h
+- [readmenator-agent/API_p7.md](md/readmenator-agent/API_p7.md): Depends on: include/importmap.h
+- [readmenator-agent/API_p8.md](md/readmenator-agent/API_p8.md): Depends on: include/boxstyle.h, include/boxtree.h, include/css.h, include/csschain.h, include/csscolor.h, include/csslength.h, include/cssvars.h...
+- [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/csscolor.h, include/svgrender.h
+- [readmenator-agent/ARCHITECTURE.md](md/readmenator-agent/ARCHITECTURE.md): fuzz/fuzzcss.c -> include/css.h
+- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testwebcaps.c -> include/webcaps.h
+- [readmenator-agent/CONCEPTS.md](md/readmenator-agent/CONCEPTS.md): Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
+- [readmenator-agent/KB_fuzz.md](md/readmenator-agent/KB_fuzz.md): Doc: fuzzrootmatch: Root matcher for the attribute-scoped custom-property path: a fixed <html...
+- [readmenator-agent/KB_gui.md](md/readmenator-agent/KB_gui.md): Doc: uiinputstate: Live editable state for one form text control, aliasing a block of the current...
+- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): keyrepeatfire (function, line 15686) static void keyrepeatfire(browserwindow w)
+- [readmenator-agent/KB_include.md](md/readmenator-agent/KB_include.md): Doc: fpacceptlanguageheader: #define FPSECFETCHDESTNAV "document" #define...
+- [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: cssattrmatch: Sub-selector for :not()/:is()/:where(): a simple compound with only...
+- [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: jginit: typedef struct jgrect { domnodeid node; int32t x, y, w, h; / document...
+- [readmenator-agent/KB_include_p4.md](md/readmenator-agent/KB_include_p4.md): Doc: sfchaininfo: Minimal view of the verified certificate chain, used by sfcheckchainpolicy. ...
+- [readmenator-agent/KB_root.md](md/readmenator-agent/KB_root.md): Doc: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL...
+- [readmenator-agent/KB_src.md](md/readmenator-agent/KB_src.md): fpcoarsentimems (function, line 17) uint64t fpcoarsentimems(uint64t rawms)
+- [readmenator-agent/KB_src_p2.md](md/readmenator-agent/KB_src_p2.md): Doc: keywordat: Scratch size for one declaration or selector handed to the caller.
+- [readmenator-agent/KB_src_p3.md](md/readmenator-agent/KB_src_p3.md): Doc: ddcursor: Bounded write cursor: pos bytes are committed to out (always leaving room for the...
+- [readmenator-agent/KB_src_p4.md](md/readmenator-agent/KB_src_p4.md): run (function, line 366) static int run(JSContext ctx, const char src, sizet len, const char name)
+- [readmenator-agent/KB_src_p5.md](md/readmenator-agent/KB_src_p5.md): cipherfor (function, line 728) static const EVPCIPHER cipherfor(lsaead aead)
+- [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): Doc: pvcontinfo: Nearest-container info attached to a run, plus the flex per-item values (Stage 3)...
+- [readmenator-agent/KB_src_p7.md](md/readmenator-agent/KB_src_p7.md): Doc: tlscapture: Snapshot of the negotiated TLS state. curl exposes the live SSL only while a...
+- [readmenator-agent/KB_src_p8.md](md/readmenator-agent/KB_src_p8.md): Doc: whjob: One open, owned by its thread until handed over through the pipe.
+- [readmenator-agent/KB_tests.md](md/readmenator-agent/KB_tests.md): main (function, line 26) int main(void)
+- [readmenator-agent/KB_tests_p2.md](md/readmenator-agent/KB_tests_p2.md): Doc: testinlinefontsizeabsoluteflag: 2026-07-31: a font-size carries whether its percent is OF...
+- [readmenator-agent/KB_tests_p3.md](md/readmenator-agent/KB_tests_p3.md): Doc: testunitless: static double pxof(const char value, const clctx ctx) { double px = -12345.0...
+- [readmenator-agent/KB_tests_p4.md](md/readmenator-agent/KB_tests_p4.md): testfreenullidempotent (function, line 32) static void testfreenullidempotent(void state)
+- [readmenator-agent/KB_tests_p5.md](md/readmenator-agent/KB_tests_p5.md): Doc: testresolvelongbundletarget: Modern bundle URLs exceed the old 4096 target cap (google's xjs...
+- [readmenator-agent/KB_tests_p6.md](md/readmenator-agent/KB_tests_p6.md): Doc: testimageallowdataurl: A data: URI embeds its bytes inline: no socket opens, so it skips the...
+- [readmenator-agent/KB_tests_p7.md](md/readmenator-agent/KB_tests_p7.md): testclampbounds (function, line 17) static void testclampbounds(void state)
+- [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: ffgeom -- Firefox geometry as TEXT, no image reading.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 262 files at commit 606250e9e794. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
+- [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
+- [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)
+- [readmenator-agent/SYMBOLS_p11.md](md/readmenator-agent/SYMBOLS_p11.md)
+- [readmenator-agent/SYMBOLS_p12.md](md/readmenator-agent/SYMBOLS_p12.md)
+- [readmenator-agent/SYMBOLS_p13.md](md/readmenator-agent/SYMBOLS_p13.md)
+- [readmenator-agent/SYMBOLS_p2.md](md/readmenator-agent/SYMBOLS_p2.md)
+- [readmenator-agent/SYMBOLS_p3.md](md/readmenator-agent/SYMBOLS_p3.md)
+- [readmenator-agent/SYMBOLS_p4.md](md/readmenator-agent/SYMBOLS_p4.md)
+- [readmenator-agent/SYMBOLS_p5.md](md/readmenator-agent/SYMBOLS_p5.md)
+- [readmenator-agent/SYMBOLS_p6.md](md/readmenator-agent/SYMBOLS_p6.md)
+- [readmenator-agent/SYMBOLS_p7.md](md/readmenator-agent/SYMBOLS_p7.md)
+- [readmenator-agent/SYMBOLS_p8.md](md/readmenator-agent/SYMBOLS_p8.md)
+- [readmenator-agent/SYMBOLS_p9.md](md/readmenator-agent/SYMBOLS_p9.md)
+- [readmenator-agent/recipes/add-function.md](md/readmenator-agent/recipes/add-function.md): Find the target file by purpose: grep -in '<topic>' readmenator-agent/INDEX.md
+- [readmenator-agent/recipes/change-impact.md](md/readmenator-agent/recipes/change-impact.md): Riskiest file: include/csscolor.h (53 dependents)
+- [readmenator-agent/recipes/fix-cycle.md](md/readmenator-agent/recipes/fix-cycle.md): Target cycle: include/jsdom.h -> include/jslocation.h -> include/jsdom.h
+- [readmenator-agent/recipes/fix-security.md](md/readmenator-agent/recipes/fix-security.md): Read findings: grep -n '<file>' readmenator-agent/SECURITY.md
+
+## Project Docs
+
+- [KNOWLEDGE_BASE.md](md/KNOWLEDGE_BASE.md): Start here: Statistics Dashboard for scope, God Nodes for blast radius, Architecture Reference for per-file API. Agents: prefer readmenator-agent/INDEX.md +...
+- [README.md](md/README.md): From the creators of LazyOwn Redteam Framework comes a free and open-source minimal web
+- [SECURITY.md](md/SECURITY.md): We prioritize security patches on the active development branch. Due to the independent, local-first research nature of this project, only the latest major...
+
+## Optional
+
+- [Runtime Architecture](architecture.html): Components, services, storage, and boundaries across layers. (interactive HTML)
+- [Data Flow](dataflow.html): Movement of data from sources through transforms to stores. (interactive HTML)
+- [Change Lifecycle](lifecycle.html): States, transitions, waits, and retry paths of change. (interactive HTML)
+- [Request Sequence](sequence.html): Ordered interaction between top participants over time. (interactive HTML)
+- [Delivery Workflow](workflow.html): Delivery path across lanes from entry to terminal outcomes. (interactive HTML)

@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 59 file(s) rooted at `src` with dominant language c (cohesion 0.75). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (169 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
+This community groups 59 file(s) rooted at `src` with dominant language c (cohesion 0.75). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (175 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
 
 ## Files
 
@@ -15,8 +15,8 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 | `src/dom.c` | c | utility | 72 | no |
 | `src/freebug.c` | c | utility | 9 | no |
 | `src/html_parse.c` | c | utility | 29 | no |
-| `src/js_dom.c` | c | utility | 55 | no |
-| `src/js_dom_ext.c` | c | utility | 2 | no |
+| `src/js_dom.c` | c | utility | 56 | no |
+| `src/js_dom_ext.c` | c | utility | 3 | no |
 
 ### `include` (16 files)
 
@@ -35,7 +35,7 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 | `tests/test_dom.c` | c | testing | 41 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
-| `tests/test_js_dom.c` | c | testing | 169 | no |
+| `tests/test_js_dom.c` | c | testing | 175 | no |
 | `tests/test_js_env.c` | c | testing | 26 | no |
 
 ### `fuzz` (8 files)
@@ -87,18 +87,17 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 130
-- Cross-boundary resolved imports (EXTRACTED): 42
+- Cross-boundary resolved imports (EXTRACTED): 43
 
 ## Connections
 
 - [EXTRACTED] depends_on community 3 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.
-- [EXTRACTED] depends_on community 5 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/html_parse.h.
+- [EXTRACTED] depends_on community 6 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/html_parse.h.
 - [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
-- [EXTRACTED] depends_on community 4 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
+- [EXTRACTED] depends_on community 5 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
 - [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
-- [EXTRACTED] depends_on community 0 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/js_env.c imports include/anti_fp.h.
-- [EXTRACTED] depends_on community 0 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/tab.c imports include/data_url.h.
-- [EXTRACTED] depends_on community 0 <-> 9 (strength 0.9): Extracted import edge crosses communities: src/tab.c imports include/import_map.h.
+- [EXTRACTED] depends_on community 0 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/js_env.c imports include/anti_fp.h.
+- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/tab.c imports include/data_url.h.
 
 ## Risks
 

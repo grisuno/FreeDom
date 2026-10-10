@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 47 file(s) rooted at `tests` with dominant language c (cohesion 0.54). Central symbols: `ABSENT`, `ALIVE`, `BROWSER_STATUS_DURATION_MS`, `BROWSER_STATUS_MAX`, `BROWSER_URL_MAX`, `BUI_CONIC_SLICES`, `ERR_FILE`, `FBW_COPY_BTN_H`. Core file: `gui/browser_ui.c` (525 symbols). Documented purpose: libFuzzer harness for the prefetch lookahead scanner (Hito 29). The scanned.
+This community groups 47 file(s) rooted at `tests` with dominant language c (cohesion 0.54). Central symbols: `ABSENT`, `ALIVE`, `BROWSER_STATUS_DURATION_MS`, `BROWSER_STATUS_MAX`, `BROWSER_URL_MAX`, `BUI_CONIC_SLICES`, `ERR_FILE`, `FBW_COPY_BTN_H`. Core file: `gui/browser_ui.c` (526 symbols). Documented purpose: libFuzzer harness for the prefetch lookahead scanner (Hito 29). The scanned.
 
 ## Files
 
@@ -16,7 +16,7 @@ This community groups 47 file(s) rooted at `tests` with dominant language c (coh
 | `tests/test_browser.c` | c | testing | 17 | no |
 | `tests/test_form.c` | c | testing | 20 | no |
 | `tests/test_frame_clock.c` | c | testing | 4 | no |
-| `tests/test_freedom.c` | c | testing | 67 | no |
+| `tests/test_freedom.c` | c | testing | 70 | no |
 | `tests/test_hls.c` | c | testing | 16 | no |
 
 ### `include` (14 files)
@@ -51,7 +51,7 @@ This community groups 47 file(s) rooted at `tests` with dominant language c (coh
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `gui/browser_ui.c` | c | presentation | 525 | no |
+| `gui/browser_ui.c` | c | presentation | 526 | no |
 
 *... and 27 more files in this community.*
 
@@ -98,30 +98,30 @@ This community groups 47 file(s) rooted at `tests` with dominant language c (coh
 
 - [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
 - [EXTRACTED] depends_on community 1 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/compositor.h.
-- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
-- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
+- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
+- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
 - [EXTRACTED] depends_on community 1 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/download.h.
 - [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
-- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefs.h.
-- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/secure_fetch.h.
+- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefs.h.
+- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/secure_fetch.h.
 
 ## Risks
 
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
-- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1435` `gui_subresource_fetch` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:3894` `flow_text` `space_w`: `space_w` assigned at line 3894 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:3896` `flow_text` `i`: `i` assigned at line 3896 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:7066` `layout_float_band` `base_top`: `base_top` assigned at line 7066 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:8556` `button_box_width` `cx`: `cx` assigned at line 8556 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:9595` `paint_box_decoration` `bt`: `bt` assigned at line 9595 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:9596` `paint_box_decoration` `bb`: `bb` assigned at line 9596 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:9755` `layer` `on`: `on` assigned at line 9755 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:9798` `cairo_set_dash` `on`: `on` assigned at line 9798 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:9833` `convention` `nr`: `nr` assigned at line 9833 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:9834` `convention` `ng`: `ng` assigned at line 9834 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:9835` `convention` `nb`: `nb` assigned at line 9835 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:9859` `set_rgb` `on`: `on` assigned at line 9859 but never read afterwards.
+- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1446` `gui_subresource_fetch` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:3905` `flow_text` `space_w`: `space_w` assigned at line 3905 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:3907` `flow_text` `i`: `i` assigned at line 3907 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:7109` `layout_float_band` `base_top`: `base_top` assigned at line 7109 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:8607` `button_box_width` `cx`: `cx` assigned at line 8607 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:9660` `paint_box_decoration` `bt`: `bt` assigned at line 9660 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:9661` `paint_box_decoration` `bb`: `bb` assigned at line 9661 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:9820` `layer` `on`: `on` assigned at line 9820 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:9863` `cairo_set_dash` `on`: `on` assigned at line 9863 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:9898` `convention` `nr`: `nr` assigned at line 9898 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:9899` `convention` `ng`: `ng` assigned at line 9899 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:9900` `convention` `nb`: `nb` assigned at line 9900 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:9924` `set_rgb` `on`: `on` assigned at line 9924 but never read afterwards.
 
 ## Open Questions
 

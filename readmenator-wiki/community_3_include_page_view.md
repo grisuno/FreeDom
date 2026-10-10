@@ -1,10 +1,10 @@
 # include: page_view
 
-*Community 3 | 31 files | cohesion 0.52*
+*Community 3 | 31 files | cohesion 0.51*
 
 ## Definition
 
-This community groups 31 file(s) rooted at `include` with dominant language c (cohesion 0.52). Central symbols: `BLOCK`, `BLOCKED`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`. Core file: `src/page_view.c` (222 symbols).
+This community groups 31 file(s) rooted at `include` with dominant language c (cohesion 0.51). Central symbols: `BLOCK`, `BLOCKED`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`. Core file: `src/page_view.c` (222 symbols).
 
 ## Files
 
@@ -15,7 +15,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | `include/box_style.h` | h | utility | 25 | no |
 | `include/box_tree.h` | h | utility | 32 | no |
 | `include/dom_debug.h` | h | utility | 4 | no |
-| `include/flex_layout.h` | h | presentation | 34 | no |
+| `include/flex_layout.h` | h | presentation | 35 | no |
 | `include/js_policy.h` | h | business_logic | 7 | no |
 | `include/page_view.h` | h | presentation | 72 | no |
 | `include/perf_trace.h` | h | utility | 17 | no |
@@ -27,7 +27,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | `src/box_style.c` | c | utility | 41 | no |
 | `src/box_tree.c` | c | utility | 22 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
-| `src/flex_layout.c` | c | presentation | 23 | no |
+| `src/flex_layout.c` | c | presentation | 24 | no |
 | `src/freedom.c` | c | utility | 39 | no |
 | `src/js_policy.c` | c | business_logic | 6 | no |
 
@@ -38,9 +38,9 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | `tests/test_box_style.c` | c | testing | 42 | no |
 | `tests/test_box_tree.c` | c | testing | 57 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
-| `tests/test_flex_layout.c` | c | testing | 66 | no |
+| `tests/test_flex_layout.c` | c | testing | 67 | no |
 | `tests/test_js_policy.c` | c | testing | 5 | no |
-| `tests/test_page_view.c` | c | testing | 179 | no |
+| `tests/test_page_view.c` | c | testing | 181 | no |
 
 ### `fuzz` (1 files)
 
@@ -87,16 +87,16 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 58
-- Cross-boundary resolved imports (EXTRACTED): 54
+- Cross-boundary resolved imports (EXTRACTED): 55
 
 ## Connections
 
 - [EXTRACTED] depends_on community 3 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.
-- [EXTRACTED] depends_on community 5 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/page_view.h.
+- [EXTRACTED] depends_on community 6 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/page_view.h.
 - [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
 - [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
-- [EXTRACTED] depends_on community 3 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/request_policy.h.
-- [EXTRACTED] depends_on community 3 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/secure_fetch.h.
+- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/request_policy.h.
+- [EXTRACTED] depends_on community 3 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/secure_fetch.h.
 
 ## Risks
 
@@ -120,7 +120,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 
 - Why do 31 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom_debug.c`)? What purpose do they serve?
 - What would break if the most connected file in include: page_view changed?
-- Should include: page_view be split, given cohesion 0.52?
+- Should include: page_view be split, given cohesion 0.51?
 
 ## Sources
 

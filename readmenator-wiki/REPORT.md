@@ -1,6 +1,6 @@
 # Audit Report
 
-*Project: readmenator_FreeDom_wx9txdod | 2026-10-07 | offline, deterministic*
+*Project: freedom-0.0.3 | 2026-10-10 | offline, deterministic*
 
 ## Confidence Trail
 
@@ -8,19 +8,19 @@ Every edge is tagged. Extracted means parsed from source; inferred means derived
 
 | Confidence | Count | Meaning |
 |------------|-------|---------|
-| EXTRACTED | 484 | Resolved import edges parsed from source |
-| EXTRACTED | 1436 | Raw import statements (may include externals) |
+| EXTRACTED | 502 | Resolved import edges parsed from source |
+| EXTRACTED | 1481 | Raw import statements (may include externals) |
 | INFERRED | 5 | Surprising cross-community bridges |
 | AMBIGUOUS | 0 | No uncertain edges are emitted by the static scanner |
 
 ## Coverage
 
-- Files: 255, communities: 11
-- File doc coverage: 26/255
+- Files: 262, communities: 11
+- File doc coverage: 27/262
 - Orphans (no docs at any level): 63
 - Layers detected: 6
 - Security findings: 0
-- Large files (>256KB, maybe generated): 3 (browser_ui.c, css.c, page_view.c)
+- Large files (>256KB, maybe generated): 4 (browser_ui.c, css.c, page_view.c, test_css.c)
 
 ## Limits
 
@@ -31,7 +31,7 @@ Every edge is tagged. Extracted means parsed from source; inferred means derived
 
 ## Token Benchmark
 
-- Wiki index plus community pages estimate: ~176320 tokens (chars/4).
+- Wiki index plus community pages estimate: ~181404 tokens (chars/4).
 - Full re-read of every source file would cost strictly more on any non-trivial project; this wiki is the cheaper entry point.
 - Generation cost: $0, offline, no network calls.
 

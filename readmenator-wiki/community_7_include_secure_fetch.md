@@ -1,6 +1,6 @@
 # include: secure_fetch
 
-*Community 6 | 10 files | cohesion 0.62*
+*Community 7 | 10 files | cohesion 0.62*
 
 ## Definition
 
@@ -61,9 +61,9 @@ This community groups 10 file(s) rooted at `tests` with dominant language c (coh
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/secure_fetch.h.
-- [EXTRACTED] depends_on community 3 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/secure_fetch.h.
-- [EXTRACTED] depends_on community 0 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/js_env.c imports include/anti_fp.h.
+- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/secure_fetch.h.
+- [EXTRACTED] depends_on community 3 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/secure_fetch.h.
+- [EXTRACTED] depends_on community 0 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/js_env.c imports include/anti_fp.h.
 
 ## Risks
 

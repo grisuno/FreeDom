@@ -55,7 +55,7 @@ This community groups 4 file(s) rooted at `include` with dominant language c (co
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 9 (strength 0.9): Extracted import edge crosses communities: src/tab.c imports include/import_map.h.
+- No cross-community bridges recorded. This community is self-contained.
 
 ## Risks
 
