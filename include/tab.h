@@ -185,6 +185,19 @@ typedef int (*tab_fetch_fn)(void *ctx, const char *method, const char *url,
  * refused). fn/ctx must outlive any tab_load_full call that may trigger a subresource. */
 void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);
 
+/* Installs a served-stylesheet sink (NULL clears it): after the parent serves a
+ * 2xx subresource whose content type is CSS, tab calls fn(url, body, len, ctype)
+ * so the parent can retain the bytes (spec/webfont.md b3b feeds them to the
+ * @font-face loader as extern sheets). url is the RAW worker-requested URL
+ * (possibly relative: resolve it against the page yourself); only 2xx CSS
+ * bodies arrive. Opaque and optional: the worker protocol is unchanged, and a
+ * NULL sink changes nothing. fn/ctx must outlive the load. The bytes alias the
+ * pipe buffer only for the call: copy what you keep. */
+typedef void (*tab_css_sink_fn)(void *ctx, const char *url,
+                                const char *body, size_t len,
+                                const char *ctype);
+void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);
+
 /* Grants/revokes page-JS network access (XMLHttpRequest/fetch) for the NEXT load. Set it
  * true ONLY when the page's host is in BOTH allow.conf AND js.conf (the sovereignty
  * boundary); false (default) keeps XHR/fetch undefined (Same-Origin-by-construction). */

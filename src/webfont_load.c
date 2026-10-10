@@ -229,7 +229,10 @@ static void scan_inline(const char *html, size_t len, const char *page_url,
 int wf_load_document(wf_fetch_fn fetch, void *fctx, const char *page_url,
                      const wf_sheet *extern_sheets, size_t nextern,
                      const char *html, size_t html_len) {
-    if (fetch == NULL || page_url == NULL) return -1;
+    /* Untrusted pages pass no fetcher: no-op. A NULL page (local file) still
+     * runs in data:-only mode: data: faces decode locally while relative URLs
+     * have no base and absolute https still goes through the fetch gate. */
+    if (fetch == NULL) return -1;
     wf_cursor cur;
     cur.fetch = fetch;
     cur.fctx = fctx;

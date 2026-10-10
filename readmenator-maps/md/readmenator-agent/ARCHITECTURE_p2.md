@@ -2,6 +2,11 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_textfield.c` -> `include/textfield.h`
+- `tests/test_tls_impersonate.c` -> `include/tls_impersonate.h`
+- `tests/test_ui.c` -> `include/ui.h`
+- `tests/test_url.c` -> `include/url.h`
+- `tests/test_web_storage.c` -> `include/web_storage.h`
 - `tests/test_webcaps.c` -> `include/webcaps.h`
 - `tests/test_webfont.c` -> `include/webfont.h`
 - `tests/test_webfont_load.c` -> `include/css.h`

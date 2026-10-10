@@ -1,10 +1,10 @@
 # include: text_shape
 
-*Community 4 | 20 files | cohesion 0.62*
+*Community 4 | 20 files | cohesion 0.55*
 
 ## Definition
 
-This community groups 20 file(s) rooted at `include` with dominant language c (cohesion 0.62). Central symbols: `DU_MAX_ENCODED_LEN`, `FREEDOM_DATA_URL_H`, `FREEDOM_PSL_DATA_H`, `FREEDOM_REQUEST_POLICY_H`, `FREEDOM_TEXT_SHAPE_H`, `FREEDOM_WEBFONT_H`, `FREEDOM_WEBFONT_LOAD_H`, `FZ_CAP`. Core file: `src/text_shape.c` (26 symbols). Documented purpose: libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). The.
+This community groups 20 file(s) rooted at `include` with dominant language c (cohesion 0.55). Central symbols: `DU_MAX_ENCODED_LEN`, `FREEDOM_DATA_URL_H`, `FREEDOM_PSL_DATA_H`, `FREEDOM_REQUEST_POLICY_H`, `FREEDOM_TEXT_SHAPE_H`, `FREEDOM_WEBFONT_H`, `FREEDOM_WEBFONT_LOAD_H`, `FZ_CAP`. Core file: `src/text_shape.c` (26 symbols). Documented purpose: libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). The.
 
 ## Files
 
@@ -29,7 +29,7 @@ This community groups 20 file(s) rooted at `include` with dominant language c (c
 | `tests/test_request_policy.c` | c | testing | 12 | no |
 | `tests/test_text_shape.c` | c | testing | 12 | no |
 | `tests/test_webfont.c` | c | testing | 13 | no |
-| `tests/test_webfont_load.c` | c | testing | 15 | no |
+| `tests/test_webfont_load.c` | c | testing | 16 | no |
 
 ## Key Symbols
 
@@ -67,7 +67,7 @@ This community groups 20 file(s) rooted at `include` with dominant language c (c
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 24
-- Cross-boundary resolved imports (EXTRACTED): 15
+- Cross-boundary resolved imports (EXTRACTED): 20
 
 ## Connections
 
@@ -86,7 +86,7 @@ This community groups 20 file(s) rooted at `include` with dominant language c (c
 
 - Why do 19 file(s) lack file-level docs (e.g. `fuzz/fuzz_data_url.c`)? What purpose do they serve?
 - What would break if the most connected file in include: text_shape changed?
-- Should include: text_shape be split, given cohesion 0.62?
+- Should include: text_shape be split, given cohesion 0.55?
 
 ## Sources
 

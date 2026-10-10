@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 40 file(s) rooted at `include` with dominant language c (cohesion 0.73). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (332 symbols). Documented purpose: Bound for the ::before/::after content string pool (and the grid-template.
+This community groups 40 file(s) rooted at `include` with dominant language c (cohesion 0.73). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (333 symbols). Documented purpose: Bound for the ::before/::after content string pool (and the grid-template.
 
 ## Files
 
@@ -25,7 +25,7 @@ This community groups 40 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `src/compositor.c` | c | utility | 5 | no |
-| `src/css.c` | c | utility | 230 | no |
+| `src/css.c` | c | utility | 231 | no |
 | `src/css_atrule.c` | c | utility | 11 | no |
 | `src/css_box.c` | c | utility | 49 | no |
 | `src/css_chain.c` | c | utility | 17 | no |
@@ -36,7 +36,7 @@ This community groups 40 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `tests/test_compositor.c` | c | testing | 21 | no |
-| `tests/test_css.c` | c | testing | 332 | no |
+| `tests/test_css.c` | c | testing | 333 | no |
 | `tests/test_css_atrule.c` | c | testing | 10 | yes |
 | `tests/test_css_box.c` | c | testing | 9 | no |
 | `tests/test_css_color.c` | c | testing | 36 | no |

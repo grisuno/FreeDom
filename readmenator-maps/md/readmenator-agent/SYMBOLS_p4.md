@@ -3,6 +3,11 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `pv_status` | enum | `include/page_view.h:34` | `` |
+| `pv_text_ext` | struct | `include/page_view.h:896` | `` |
+| `pv_text_ext_reset` | function | `include/page_view.h:930` | `void pv_text_ext_reset(pv_text_ext *e);` |
+| `pv_view` | struct | `include/page_view.h:735` | `` |
+| `resolved` | function | `include/page_view.h:767` | `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...` |
 | `run` | function | `include/page_view.h:954` | `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...` |
 | `scale` | function | `include/page_view.h:557` | `* scale(1)) and rotate in whole degrees (transform_rotate);` |
 | `word_spacing` | type_alias | `include/page_view.h:896` | `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;` |
@@ -196,42 +201,44 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `verb` | type_alias | `include/svg_render.h:64` | `typedef struct sv_seg { int verb;` |
 | `FREEDOM_TAB_H` | macro | `include/tab.h:2` | `#define FREEDOM_TAB_H` |
 | `TAB_MAX_INPUT` | macro | `include/tab.h:148` | `#define TAB_MAX_INPUT` |
-| `decode` | function | `include/tab.h:325` | `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...` |
-| `exclusively` | function | `include/tab.h:209` | `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...` |
-| `granted` | function | `include/tab.h:299` | `* granted (allow.conf AND js.conf);` |
-| `jar` | function | `include/tab.h:194` | `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...` |
+| `bytes` | function | `include/tab.h:190` | `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....` |
+| `decode` | function | `include/tab.h:338` | `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...` |
+| `exclusively` | function | `include/tab.h:222` | `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...` |
+| `granted` | function | `include/tab.h:312` | `* granted (allow.conf AND js.conf);` |
+| `jar` | function | `include/tab.h:207` | `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...` |
 | `kind` | type_alias | `include/tab.h:67` | `typedef struct tab_ws_op { int kind;` |
-| `origin` | function | `include/tab.h:201` | `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);` |
+| `origin` | function | `include/tab.h:214` | `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);` |
 | `out_status` | function | `include/tab.h:175` | `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...` |
-| `popstate` | function | `include/tab.h:306` | `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...` |
+| `popstate` | function | `include/tab.h:319` | `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...` |
 | `replace` | type_alias | `include/tab.h:53` | `typedef struct tab_hist_op { int replace;` |
-| `returned` | function | `include/tab.h:300` | `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...` |
-| `string` | function | `include/tab.h:250` | `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...` |
+| `returned` | function | `include/tab.h:313` | `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...` |
+| `string` | function | `include/tab.h:263` | `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...` |
 | `tab` | type_alias | `include/tab.h:45` | `typedef struct tab tab;` |
-| `tab_alive` | function | `include/tab.h:338` | `int tab_alive(const tab *t);` |
-| `tab_child_pid` | function | `include/tab.h:341` | `pid_t tab_child_pid(const tab *t);` |
-| `tab_close` | function | `include/tab.h:344` | `void tab_close(tab *t);` |
+| `tab_alive` | function | `include/tab.h:351` | `int tab_alive(const tab *t);` |
+| `tab_child_pid` | function | `include/tab.h:354` | `pid_t tab_child_pid(const tab *t);` |
+| `tab_close` | function | `include/tab.h:357` | `void tab_close(tab *t);` |
 | `tab_eval_result` | struct | `include/tab.h:127` | `` |
-| `tab_eval_result_free` | function | `include/tab.h:348` | `void tab_eval_result_free(tab_eval_result *r);` |
+| `tab_eval_result_free` | function | `include/tab.h:361` | `void tab_eval_result_free(tab_eval_result *r);` |
 | `tab_hist_op` | struct | `include/tab.h:53` | `` |
 | `tab_image` | struct | `include/tab.h:140` | `` |
-| `tab_image_free` | function | `include/tab.h:349` | `void tab_image_free(tab_image *img);` |
+| `tab_image_free` | function | `include/tab.h:362` | `void tab_image_free(tab_image *img);` |
 | `tab_open` | function | `include/tab.h:156` | `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...` |
 | `tab_page` | struct | `include/tab.h:75` | `` |
-| `tab_page_free` | function | `include/tab.h:347` | `void tab_page_free(tab_page *p);` |
+| `tab_page_free` | function | `include/tab.h:360` | `void tab_page_free(tab_page *p);` |
 | `tab_parse_worker_args` | function | `include/tab.h:163` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` |
-| `tab_set_cookies` | function | `include/tab.h:198` | `void tab_set_cookies(tab *t, const char *cookies);` |
+| `tab_set_cookies` | function | `include/tab.h:211` | `void tab_set_cookies(tab *t, const char *cookies);` |
+| `tab_set_css_sink` | function | `include/tab.h:199` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);` |
 | `tab_set_fetcher` | function | `include/tab.h:186` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` |
-| `tab_set_net_allowed` | function | `include/tab.h:191` | `void tab_set_net_allowed(tab *t, int allowed);` |
-| `tab_set_storage` | function | `include/tab.h:203` | `void tab_set_storage(tab *t, const char *blob, size_t len);` |
-| `tab_set_viewport_w` | function | `include/tab.h:217` | `void tab_set_viewport_w(tab *t, int px);` |
+| `tab_set_net_allowed` | function | `include/tab.h:204` | `void tab_set_net_allowed(tab *t, int allowed);` |
+| `tab_set_storage` | function | `include/tab.h:216` | `void tab_set_storage(tab *t, const char *blob, size_t len);` |
+| `tab_set_viewport_w` | function | `include/tab.h:230` | `void tab_set_viewport_w(tab *t, int px);` |
 | `tab_status` | enum | `include/tab.h:31` | `` |
-| `tab_subreq_permitted` | function | `include/tab.h:222` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
+| `tab_subreq_permitted` | function | `include/tab.h:235` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
 | `tab_worker_dispatch` | function | `include/tab.h:152` | `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...` |
 | `tab_ws_event_kind` | enum | `include/tab.h:64` | `` |
 | `tab_ws_kind` | enum | `include/tab.h:60` | `` |
 | `tab_ws_op` | struct | `include/tab.h:68` | `` |
-| `view` | function | `include/tab.h:230` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
+| `view` | function | `include/tab.h:243` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
 | `width` | type_alias | `include/tab.h:140` | `typedef struct tab_image { uint32_t width;` |
 | `FREEDOM_TEXT_SHAPE_H` | macro | `include/text_shape.h:19` | `#define FREEDOM_TEXT_SHAPE_H` |
 | `TSH_MAX_GLYPHS` | macro | `include/text_shape.h:40` | `#define TSH_MAX_GLYPHS` |
@@ -357,11 +364,11 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `wf_scan` | function | `include/webfont.h:52` | `int wf_scan(const char *css, size_t len, wf_list *out);` |
 | `wf_supported_format` | function | `include/webfont.h:60` | `int wf_supported_format(const char *fmt);` |
 | `FREEDOM_WEBFONT_LOAD_H` | macro | `include/webfont_load.h:2` | `#define FREEDOM_WEBFONT_LOAD_H` |
-| `WF_LOAD_MAX_FETCHES` | macro | `include/webfont_load.h:52` | `#define WF_LOAD_MAX_FETCHES` |
-| `WF_LOAD_MAX_KEYS` | macro | `include/webfont_load.h:51` | `#define WF_LOAD_MAX_KEYS` |
-| `WF_LOAD_TRIES_PER_KEY` | macro | `include/webfont_load.h:50` | `#define WF_LOAD_TRIES_PER_KEY` |
+| `WF_LOAD_MAX_FETCHES` | macro | `include/webfont_load.h:54` | `#define WF_LOAD_MAX_FETCHES` |
+| `WF_LOAD_MAX_KEYS` | macro | `include/webfont_load.h:53` | `#define WF_LOAD_MAX_KEYS` |
+| `WF_LOAD_TRIES_PER_KEY` | macro | `include/webfont_load.h:52` | `#define WF_LOAD_TRIES_PER_KEY` |
 | `free` | function | `include/webfont_load.h:31` | `* free()), *out_status the HTTP status. Nonzero on refusal/error (fail-closed: * the face is skipped, never the...` |
-| `wf_load_document` | function | `include/webfont_load.h:46` | `int wf_load_document(wf_fetch_fn fetch, void *fctx, const char *page_url, const wf_sheet *extern_sheets, size_t...` |
+| `skipped` | function | `include/webfont_load.h:47` | `* URLs are skipped (no base). Returns faces registered (>= 0) otherwise. */ int wf_load_document(wf_fetch_fn fetch...` |
 | `wf_sheet` | struct | `include/webfont_load.h:24` | `` |
 | `FREEDOM_WS_HUB_H` | macro | `include/ws_hub.h:2` | `#define FREEDOM_WS_HUB_H` |
 | `WH_CLOSE_ABNORMAL` | macro | `include/ws_hub.h:27` | `#define WH_CLOSE_ABNORMAL` |
@@ -489,12 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `browser_entry_doc` | function | `src/browser.c:255` | `int browser_entry_doc(const browser_state *bs, size_t pos)` |
 | `browser_forward` | function | `src/browser.c:280` | `browser_status browser_forward(browser_state *bs)` |
 | `browser_free` | function | `src/browser.c:167` | `void browser_free(browser_state *bs)` |
-| `browser_init` | function | `src/browser.c:156` | `browser_status browser_init(browser_state *bs)` |
-| `browser_is_exception` | function | `src/browser.c:464` | `int browser_is_exception(const browser_state *bs, const char *host)` |
-| `browser_navigate` | function | `src/browser.c:224` | `browser_status browser_navigate(browser_state *bs, const char *url)` |
-| `browser_push_state` | function | `src/browser.c:236` | `browser_status browser_push_state(browser_state *bs, const char *url)` |
-| `browser_replace_state` | function | `src/browser.c:243` | `browser_status browser_replace_state(browser_state *bs, const char *url)` |
-| `browser_set_page` | function | `src/browser.c:409` | `browser_status browser_set_page(browser_state *bs, const char *title,                            ...` |
-| `browser_set_status` | function | `src/browser.c:431` | `browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms)` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

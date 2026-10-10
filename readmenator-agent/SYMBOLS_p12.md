@@ -3,6 +3,25 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_memory_limit_is_enforced` | function | `tests/test_js_sandbox.c:180` | `static void test_memory_limit_is_enforced(void **state)` |
+| `test_module_errors_are_reported` | function | `tests/test_js_sandbox.c:404` | `static void test_module_errors_are_reported(void **state)` |
+| `test_module_imports_resolve_and_run` | function | `tests/test_js_sandbox.c:383` | `static void test_module_imports_resolve_and_run(void **state)` |
+| `test_module_self_await_teardown` | function | `tests/test_js_sandbox.c:465` | `static void test_module_self_await_teardown(void **state)` |
+| `test_module_without_host_cannot_import` | function | `tests/test_js_sandbox.c:433` | `static void test_module_without_host_cannot_import(void **state)` |
+| `test_no_io_globals` | function | `tests/test_js_sandbox.c:124` | `static void test_no_io_globals(void **state)` |
+| `test_realm_shares_time_budget` | function | `tests/test_js_sandbox.c:533` | `static void test_realm_shares_time_budget(void **state)` |
+| `test_realms_isolate_and_clone` | function | `tests/test_js_sandbox.c:502` | `static void test_realms_isolate_and_clone(void **state)` |
+| `test_result_free_on_zeroed` | function | `tests/test_js_sandbox.c:196` | `static void test_result_free_on_zeroed(void **state)` |
+| `test_set_time_budget_applies` | function | `tests/test_js_sandbox.c:163` | `static void test_set_time_budget_applies(void **state)` |
+| `test_validate_accepts_within_cap` | function | `tests/test_js_sandbox.c:53` | `static void test_validate_accepts_within_cap(void **state)` |
+| `test_validate_rejects_empty` | function | `tests/test_js_sandbox.c:41` | `static void test_validate_rejects_empty(void **state)` |
+| `test_validate_rejects_null` | function | `tests/test_js_sandbox.c:36` | `static void test_validate_rejects_null(void **state)` |
+| `test_validate_rejects_oversize` | function | `tests/test_js_sandbox.c:46` | `static void test_validate_rejects_oversize(void **state)` |
+| `main` | function | `tests/test_link_nav.c:273` | `int main(void)` |
+| `test_block_reason_text` | function | `tests/test_link_nav.c:234` | `static void test_block_reason_text(void **state)` |
+| `test_block_reasons` | function | `tests/test_link_nav.c:207` | `static void test_block_reasons(void **state)` |
+| `test_file_absolute_path` | function | `tests/test_link_nav.c:141` | `static void test_file_absolute_path(void **state)` |
+| `test_file_base_blocks_schemes_and_scheme_relative` | function | `tests/test_link_nav.c:165` | `static void test_file_base_blocks_schemes_and_scheme_relative(void **state)` |
 | `test_file_base_to_https` | function | `tests/test_link_nav.c:157` | `static void test_file_base_to_https(void **state)` |
 | `test_file_drops_fragment` | function | `tests/test_link_nav.c:149` | `static void test_file_drops_fragment(void **state)` |
 | `test_file_parent` | function | `tests/test_link_nav.c:133` | `static void test_file_parent(void **state)` |
@@ -477,24 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_dimensions_and_viewbox` | function | `tests/test_svg_render.c:50` | `static void test_dimensions_and_viewbox(void **state)` |
 | `test_empty_and_garbage_do_not_parse` | function | `tests/test_svg_render.c:38` | `static void test_empty_and_garbage_do_not_parse(void **state)` |
 | `test_fit_uniform_and_centered` | function | `tests/test_svg_render.c:304` | `static void test_fit_uniform_and_centered(void **state)` |
-| `test_group_inheritance_and_transform` | function | `tests/test_svg_render.c:118` | `static void test_group_inheritance_and_transform(void **state)` |
-| `test_malformed_values_degrade` | function | `tests/test_svg_render.c:269` | `static void test_malformed_values_degrade(void **state)` |
-| `test_null_args` | function | `tests/test_svg_render.c:30` | `static void test_null_args(void **state)` |
-| `test_paint_attributes` | function | `tests/test_svg_render.c:96` | `static void test_paint_attributes(void **state)` |
-| `test_path_arc_reaches_endpoint` | function | `tests/test_svg_render.c:192` | `static void test_path_arc_reaches_endpoint(void **state)` |
-| `test_path_commands` | function | `tests/test_svg_render.c:159` | `static void test_path_commands(void **state)` |
-| `test_polygon_points` | function | `tests/test_svg_render.c:140` | `static void test_polygon_points(void **state)` |
-| `test_text_element` | function | `tests/test_svg_render.c:288` | `static void test_text_element(void **state)` |
-| `test_url_bearing_elements_are_dropped` | function | `tests/test_svg_render.c:208` | `static void test_url_bearing_elements_are_dropped(void **state)` |
-| `CSS_PAGE` | macro | `tests/test_tab.c:1774` | `#define CSS_PAGE(HREF)` |
-| `EXT_PAGE` | macro | `tests/test_tab.c:1647` | `#define EXT_PAGE(SRC)` |
-| `XHR_PAGE` | macro | `tests/test_tab.c:1552` | `#define XHR_PAGE(URL)` |
-| `_POSIX_C_SOURCE` | macro | `tests/test_tab.c:14` | `#define _POSIX_C_SOURCE` |
-| `console_find` | function | `tests/test_tab.c:1200` | `static const fb_entry *console_find(const fb_buffer *log, int level, const char *needle)` |
-| `document` | function | `tests/test_tab.c:1866` | `* listener is on document (the React/jQuery-delegation shape);` |
-| `expect_eval` | function | `tests/test_tab.c:66` | `static void expect_eval(tab *t, const char *js, const char *expected)` |
-| `fixture` | struct | `tests/test_tab.c:43` | `` |
-| `geom_load_and_measure` | function | `tests/test_tab.c:1926` | `static int geom_load_and_measure(int net, char *out, size_t outsz)` |
-| `load` | function | `tests/test_tab.c:1916` | `* table only for a trusted load (net granted: allow.conf AND js.conf);` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

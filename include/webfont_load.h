@@ -41,8 +41,10 @@ typedef int (*wf_fetch_fn)(void *ctx, const char *url,
  * (up to WF_LOAD_TRIES_PER_KEY URLs per key), resolves each URL (data: decoded
  * locally, https absolute or https-resolved; anything else skipped), GETs it
  * through fetch, checks status/ctype/size caps and registers the magic-valid
- * bytes. fetch == NULL (untrusted page) or page_url == NULL: no-op, returns -1
- * without touching anything. Returns faces registered (>= 0) otherwise. */
+ * bytes. fetch == NULL (untrusted page): no-op, returns -1 without touching
+ * anything. page_url == NULL (local file) still runs in data:-only mode: data:
+ * faces decode locally, absolute https goes through the fetch gate, relative
+ * URLs are skipped (no base). Returns faces registered (>= 0) otherwise. */
 int wf_load_document(wf_fetch_fn fetch, void *fctx, const char *page_url,
                      const wf_sheet *extern_sheets, size_t nextern,
                      const char *html, size_t html_len);

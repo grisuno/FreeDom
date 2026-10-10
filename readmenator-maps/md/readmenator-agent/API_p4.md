@@ -1,6 +1,20 @@
 # API (page 4 of 9)
 Previous: [API_p3.md](API_p3.md)
 
+## include/js_dom.h
+Depends on: `include/dom.h`, `include/freebug.h`, `include/js_geom.h`, `include/js_location.h`, `include/js_sandbox.h`, `include/url.h`
+Imported by: `fuzz/fuzz_js_dom.c`, `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`
+- `opaque` (function) `include/js_dom.h:64` `* the engine runtime opaque (unreachable from script);`
+- `jd_click_state_free` (function) `include/js_dom.h:78` `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);`
+- `run` (function) `include/js_dom.h:87` `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...`
+- `preventDefault` (function) `include/js_dom.h:94` `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...`
+- `host` (function) `include/js_dom.h:123` `* for a trusted host (allow.conf AND js.conf);`
+- `jd_get_cookies` (function) `include/js_dom.h:134` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` -- Serialises the page's current cookie jar ("name=value; ...") into buf (bounded, NUL-terminated) and returns its...
+- `out_status` (function) `include/js_dom.h:142` `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
+- `jd_process_iframes` (function) `include/js_dom.h:163` `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
+- `URLs` (function) `include/js_dom.h:170` `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
+- `jd_video_from_scripts` (function) `include/js_dom.h:184` `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` -- Creates <iframe> elements in the DOM from video data (`video[N]` / `video_data`) found in inline script text...
+
 ## include/js_env.h
 Depends on: `include/js_sandbox.h`
 Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`
@@ -269,29 +283,31 @@ Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tab.c`, `tests/test_tab.c
 - `tab_parse_worker_args` (function) `include/tab.h:163` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` -- Pure validator of the worker handoff arguments (the security-relevant surface of the exec): returns nonzero and...
 - `out_status` (function) `include/tab.h:175` `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
 - `tab_set_fetcher` (function) `include/tab.h:186` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` -- Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests are then * refused). fn/ctx must...
-- `tab_set_net_allowed` (function) `include/tab.h:191` `void tab_set_net_allowed(tab *t, int allowed);` -- Grants/revokes page-JS network access (XMLHttpRequest/fetch) for the NEXT load.
-- `jar` (function) `include/tab.h:194` `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
-- `tab_set_cookies` (function) `include/tab.h:198` `void tab_set_cookies(tab *t, const char *cookies);` -- Seeds the page's document.cookie jar for the NEXT load with cookies ("name=value; ...") the trusted parent read from...
-- `origin` (function) `include/tab.h:201` `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
-- `tab_set_storage` (function) `include/tab.h:203` `void tab_set_storage(tab *t, const char *blob, size_t len);` -- Seeds localStorage for the next load from the parent's in-memory store for the page origin (web_storage snapshot...
-- `exclusively` (function) `include/tab.h:209` `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
-- `tab_set_viewport_w` (function) `include/tab.h:217` `void tab_set_viewport_w(tab *t, int px);` -- Sets the render viewport width (px) used to evaluate @media width queries on the NEXT load, so a responsive page...
-- `tab_subreq_permitted` (function) `include/tab.h:222` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` -- Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants for this load, never the worker's...
-- `view` (function) `include/tab.h:230` `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
-- `string` (function) `include/tab.h:250` `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
-- `granted` (function) `include/tab.h:299` `* granted (allow.conf AND js.conf);`
-- `returned` (function) `include/tab.h:300` `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
-- `popstate` (function) `include/tab.h:306` `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
-- `decode` (function) `include/tab.h:325` `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
-- `tab_alive` (function) `include/tab.h:338` `int tab_alive(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
-- `tab_child_pid` (function) `include/tab.h:341` `pid_t tab_child_pid(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
-- `tab_close` (function) `include/tab.h:344` `void tab_close(tab *t);` -- variant): data_url slices the base64 payload out of `data_url` (no allocation, no network -- the bytes are already...
-- `tab_page_free` (function) `include/tab.h:347` `void tab_page_free(tab_page *p);` -- malformed data: URI is not a transport error: *out stays zeroed, same as an * undecodable format, and the caller...
-- `tab_eval_result_free` (function) `include/tab.h:348` `void tab_eval_result_free(tab_eval_result *r);`
-- `tab_image_free` (function) `include/tab.h:349` `void tab_image_free(tab_image *img);`
+- `bytes` (function) `include/tab.h:190` `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
+- `tab_set_css_sink` (function) `include/tab.h:199` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
+- `tab_set_net_allowed` (function) `include/tab.h:204` `void tab_set_net_allowed(tab *t, int allowed);` -- Grants/revokes page-JS network access (XMLHttpRequest/fetch) for the NEXT load.
+- `jar` (function) `include/tab.h:207` `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
+- `tab_set_cookies` (function) `include/tab.h:211` `void tab_set_cookies(tab *t, const char *cookies);` -- Seeds the page's document.cookie jar for the NEXT load with cookies ("name=value; ...") the trusted parent read from...
+- `origin` (function) `include/tab.h:214` `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
+- `tab_set_storage` (function) `include/tab.h:216` `void tab_set_storage(tab *t, const char *blob, size_t len);` -- Seeds localStorage for the next load from the parent's in-memory store for the page origin (web_storage snapshot...
+- `exclusively` (function) `include/tab.h:222` `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
+- `tab_set_viewport_w` (function) `include/tab.h:230` `void tab_set_viewport_w(tab *t, int px);` -- Sets the render viewport width (px) used to evaluate @media width queries on the NEXT load, so a responsive page...
+- `tab_subreq_permitted` (function) `include/tab.h:235` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` -- Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants for this load, never the worker's...
+- `view` (function) `include/tab.h:243` `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
+- `string` (function) `include/tab.h:263` `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
+- `granted` (function) `include/tab.h:312` `* granted (allow.conf AND js.conf);`
+- `returned` (function) `include/tab.h:313` `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
+- `popstate` (function) `include/tab.h:319` `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
+- `decode` (function) `include/tab.h:338` `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
+- `tab_alive` (function) `include/tab.h:351` `int tab_alive(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
+- `tab_child_pid` (function) `include/tab.h:354` `pid_t tab_child_pid(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
+- `tab_close` (function) `include/tab.h:357` `void tab_close(tab *t);` -- variant): data_url slices the base64 payload out of `data_url` (no allocation, no network -- the bytes are already...
+- `tab_page_free` (function) `include/tab.h:360` `void tab_page_free(tab_page *p);` -- malformed data: URI is not a transport error: *out stays zeroed, same as an * undecodable format, and the caller...
+- `tab_eval_result_free` (function) `include/tab.h:361` `void tab_eval_result_free(tab_eval_result *r);`
+- `tab_image_free` (function) `include/tab.h:362` `void tab_image_free(tab_image *img);`
 
 ## include/text_shape.h
-Imported by: `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
+Imported by: `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 - `content` (function) `include/text_shape.h:11` `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);`
 - `tsh_ready` (function) `include/text_shape.h:52` `int tsh_ready(void);` -- 1 once a fallback (sans) font resolves; lazily initialises on first call. * 0 means no font backend: the caller must...
 - `origin` (function) `include/text_shape.h:55` `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...`
@@ -367,7 +383,7 @@ Imported by: `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_web_storage.c`, `gui/browser_ui.c`
 - `wst_origin_bytes` (function) `include/web_storage.h:59` `size_t wst_origin_bytes(const wst_db *db, const char *origin);` -- Builds a snapshot from n pairs into an owned *out.
 
 ## include/webfont.h
-Imported by: `fuzz/fuzz_webfont.c`, `src/css.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
+Imported by: `fuzz/fuzz_webfont.c`, `gui/browser_ui.c`, `src/css.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
 - `here` (function) `include/webfont.h:38` `* set with the decoded bytes owned here (freed by wf_list_free);`
 - `wf_scan` (function) `include/webfont.h:52` `int wf_scan(const char *css, size_t len, wf_list *out);`
 - `wf_list_free` (function) `include/webfont.h:53` `void wf_list_free(wf_list *l);`
@@ -376,9 +392,9 @@ Imported by: `fuzz/fuzz_webfont.c`, `src/css.c`, `src/text_shape.c`, `src/webfon
 - `wf_name_hash` (function) `include/webfont.h:69` `static inline unsigned wf_name_hash(const char *s, size_t n)` -- FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names.
 
 ## include/webfont_load.h
-Imported by: `src/webfont_load.c`, `tests/test_webfont_load.c`
+Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/webfont_load.c`, `tests/test_webfont_load.c`
 - `free` (function) `include/webfont_load.h:31` `* free()), *out_status the HTTP status. Nonzero on refusal/error (fail-closed: * the face is skipped, never the...`
-- `wf_load_document` (function) `include/webfont_load.h:46` `int wf_load_document(wf_fetch_fn fetch, void *fctx, const char *page_url, const wf_sheet *extern_sheets, size_t...` -- Full document pass.
+- `skipped` (function) `include/webfont_load.h:47` `* URLs are skipped (no base). Returns faces registered (>= 0) otherwise. */ int wf_load_document(wf_fetch_fn fetch...`
 
 ## include/ws_hub.h
 Depends on: `include/secure_fetch.h`

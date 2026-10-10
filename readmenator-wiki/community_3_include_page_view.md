@@ -1,10 +1,10 @@
 # include: page_view
 
-*Community 3 | 31 files | cohesion 0.51*
+*Community 3 | 31 files | cohesion 0.50*
 
 ## Definition
 
-This community groups 31 file(s) rooted at `include` with dominant language c (cohesion 0.51). Central symbols: `BLOCK`, `BLOCKED`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`. Core file: `src/page_view.c` (222 symbols).
+This community groups 31 file(s) rooted at `include` with dominant language c (cohesion 0.50). Central symbols: `BLOCK`, `BLOCKED`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`. Core file: `src/page_view.c` (222 symbols).
 
 ## Files
 
@@ -28,7 +28,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | `src/box_tree.c` | c | utility | 22 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 24 | no |
-| `src/freedom.c` | c | utility | 39 | no |
+| `src/freedom.c` | c | utility | 46 | no |
 | `src/js_policy.c` | c | business_logic | 6 | no |
 
 ### `tests` (10 files)
@@ -87,7 +87,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 58
-- Cross-boundary resolved imports (EXTRACTED): 55
+- Cross-boundary resolved imports (EXTRACTED): 58
 
 ## Connections
 
@@ -120,7 +120,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 
 - Why do 31 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom_debug.c`)? What purpose do they serve?
 - What would break if the most connected file in include: page_view changed?
-- Should include: page_view be split, given cohesion 0.51?
+- Should include: page_view be split, given cohesion 0.50?
 
 ## Sources
 

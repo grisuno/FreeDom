@@ -81,6 +81,8 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/url.h`
 - `gui/browser_ui.c` -> `include/web_storage.h`
 - `gui/browser_ui.c` -> `include/webcaps.h`
+- `gui/browser_ui.c` -> `include/webfont.h`
+- `gui/browser_ui.c` -> `include/webfont_load.h`
 - `gui/browser_ui.c` -> `include/ws_hub.h`
 - `gui/browser_ui.c` -> `include/zoom.h`
 - `gui/browser_ui_internal.h` -> `include/freedom_config.h`
@@ -239,10 +241,13 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/freedom.c` -> `include/request_policy.h`
 - `src/freedom.c` -> `include/secure_fetch.h`
 - `src/freedom.c` -> `include/tab.h`
+- `src/freedom.c` -> `include/text_shape.h`
 - `src/freedom.c` -> `include/tls_impersonate.h`
 - `src/freedom.c` -> `include/ui.h`
 - `src/freedom.c` -> `include/url.h`
 - `src/freedom.c` -> `include/webcaps.h`
+- `src/freedom.c` -> `include/webfont.h`
+- `src/freedom.c` -> `include/webfont_load.h`
 - `src/hls.c` -> `include/hls.h`
 - `src/hostblock.c` -> `include/hostblock.h`
 - `src/hostblock.c` -> `include/util.h`
@@ -491,10 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_text_shape.c` -> `include/css.h`
 - `tests/test_text_shape.c` -> `include/text_shape.h`
 - `tests/test_text_shape.c` -> `include/webfont.h`
-- `tests/test_textfield.c` -> `include/textfield.h`
-- `tests/test_tls_impersonate.c` -> `include/tls_impersonate.h`
-- `tests/test_ui.c` -> `include/ui.h`
-- `tests/test_url.c` -> `include/url.h`
-- `tests/test_web_storage.c` -> `include/web_storage.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

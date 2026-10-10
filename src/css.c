@@ -147,7 +147,10 @@ struct css_sheet {
     /* @font-face declarations (v1: font-family name + src URL). No I/O, no
      * network — the caller resolves and downloads the URL against the page
      * origin, same as background-image. url() is the only source format that
-     * is not discarded (other formats like local() are ignored). */
+     * is not discarded (other formats like local() are ignored). The family
+     * registers even with an empty src_url (data: URLs overflow the capture
+     * cap): element matching is by family hash, and only the trusted parent
+     * ever resolves a src (spec/webfont.md b3b). */
 #define CSS_MAX_FONT_FACES 16
     struct {
         char family[CSS_TOK_MAX];
@@ -4609,8 +4612,13 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                         }
                         j = (vend < bend) ? vend + 1 : bend;
                     }
-                    if (fam[0] != '\0' && surl[0] != '\0'
-                        && sh->nfont_faces < CSS_MAX_FONT_FACES) {
+                    /* The family registers even when no src bytes were kept
+                     * (data: URLs exceed the capture cap by design, local()
+                     * yields none): the painter matches elements by family
+                     * hash, and the trusted parent rescans the same bytes for
+                     * the download (spec/webfont.md b3b). An empty src_url
+                     * simply never resolves worker-side. */
+                    if (fam[0] != '\0' && sh->nfont_faces < CSS_MAX_FONT_FACES) {
                         memcpy(sh->font_faces[sh->nfont_faces].family, fam, sizeof fam);
                         memcpy(sh->font_faces[sh->nfont_faces].src_url, surl, sizeof surl);
                         sh->nfont_faces++;

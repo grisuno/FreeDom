@@ -3514,6 +3514,28 @@ static void test_fontface_icon_only_family(void **state) {
     css_free(sh);
 }
 
+static void test_fontface_data_url_family_matches(void **state) {
+    (void)state;
+    /* A data: src exceeds the captured-URL cap, so no src bytes are kept --
+     * but the FAMILY still registers: the parent rescans the same bytes and
+     * the painter matches by family hash (spec/webfont.md b3b). */
+    /* A real embedded font is ~1 MB of base64: far past the captured-URL cap. */
+    static char pad[2048];
+    memset(pad, 'A', sizeof pad - 1);
+    pad[sizeof pad - 1] = '\0';
+    char css[4096];
+    assert_true((size_t)snprintf(css, sizeof css,
+                 "@font-face{font-family:'X';"
+                 "src:url(data:font/woff;base64,%s);}"
+                 "span{font-family:'X',serif;}", pad) < sizeof css);
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(css, 0, &sh), CSS_OK);
+    css_element el = el_node("span", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_int_equal(out.fontface, wf_name_hash("X", 1));
+    css_free(sh);
+}
+
 static void test_fontface_inline_has_no_sheet(void **state) {
     (void)state;
     /* Inline-only resolve (no sheet): the bucket applies, the hash stays 0. */
@@ -5186,6 +5208,7 @@ int main(void) {
         cmocka_unit_test(test_fontface_no_match_is_zero),
         cmocka_unit_test(test_fontface_case_insensitive),
         cmocka_unit_test(test_fontface_icon_only_family),
+        cmocka_unit_test(test_fontface_data_url_family_matches),
         cmocka_unit_test(test_fontface_inline_has_no_sheet),
         cmocka_unit_test(test_fontface_later_rule_clears),
         cmocka_unit_test(test_bg_position_edge_offset),

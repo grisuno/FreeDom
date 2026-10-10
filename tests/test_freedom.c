@@ -1212,6 +1212,172 @@ static void test_download_png_replaced_pct_width(void **state) {
     unlink(png);
 }
 
+/* @font-face end to end (spec/webfont.md b3b): two data: faces from real host
+ * files (Bold as 'X', Regular as 'Y') shape the same string differently. Both
+ * go through the webfont path, so no host fallback can conspire to equalise
+ * them: with the hook broken both fall back to one sans and the widths match.
+ * The bold row must come out strictly wider (DejaVu Bold advances exceed
+ * Regular by several percent on a long mixed string). Needs --js=on (the
+ * headless trust signal for fetching/registering faces). */
+static char *wf_test_b64(const unsigned char *in, size_t n) {
+    static const char tab[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    size_t o = ((n + 2) / 3) * 4;
+    char *s = (char *)malloc(o + 1);
+    if (s == NULL) return NULL;
+    size_t w = 0;
+    for (size_t i = 0; i < n; i += 3) {
+        unsigned a = in[i];
+        unsigned b = (i + 1 < n) ? in[i + 1] : 0;
+        unsigned c = (i + 2 < n) ? in[i + 2] : 0;
+        unsigned v = (a << 16) | (b << 8) | c;
+        s[w++] = tab[(v >> 18) & 63];
+        s[w++] = tab[(v >> 12) & 63];
+        s[w++] = (i + 1 < n) ? tab[(v >> 6) & 63] : '=';
+        s[w++] = (i + 2 < n) ? tab[v & 63] : '=';
+    }
+    s[w] = '\0';
+    return s;
+}
+
+static uint8_t *wf_test_host_font(const char *name, size_t *out_n) {
+    static const char *dirs[] = {
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans%s.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans%s-Regular.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans%s.ttf",
+    };
+    for (size_t i = 0; i < sizeof dirs / sizeof *dirs; ++i) {
+        char path[256];
+        if ((size_t)snprintf(path, sizeof path, dirs[i], name) >= sizeof path)
+            continue;
+        size_t len = 0;
+        uint8_t *b = read_file_all(path, &len);
+        if (b != NULL && len > 0 && len <= (1u << 20)) {
+            *out_n = len;
+            return b;
+        }
+        free(b);
+    }
+    return NULL;
+}
+
+static void test_download_png_webfont_shapes(void **state) {
+    (void)state;
+    size_t nb = 0, nr = 0;
+    uint8_t *bold = wf_test_host_font("-Bold", &nb);
+    uint8_t *reg = wf_test_host_font("", &nr);
+    if (bold == NULL || reg == NULL) {
+        free(bold);
+        free(reg);
+        return;   /* no host fonts: nothing to register, still green */
+    }
+    char *b64b = wf_test_b64(bold, nb);
+    char *b64r = wf_test_b64(reg, nr);
+    free(bold);
+    free(reg);
+    if (b64b == NULL || b64r == NULL) {
+        free(b64b);
+        free(b64r);
+        return;
+    }
+    /* Single line per paragraph: at 28px the pangram is ~850px in bold,
+     * fitting the 1000px canvas unwrapped, so each band's ink width IS its
+     * face's advance (a wrapped line would measure the canvas, not the font). */
+    const char *text =
+        "Pack my box with five dozen liquor jugs 0123456789";
+    size_t hlen = strlen(b64b) + strlen(b64r) + strlen(text) * 2 + 1024;
+    char *html = (char *)malloc(hlen);
+    if (html == NULL) {
+        free(b64b);
+        free(b64r);
+        return;
+    }
+    snprintf(html, hlen,
+             "<html><head><style>"
+             "body{margin:0;padding:0;font-size:28px;}"
+             "@font-face{font-family:'X';src:url(data:font/ttf;base64,%s);}"
+             "@font-face{font-family:'Y';src:url(data:font/ttf;base64,%s);}"
+             ".a{font-family:'X';}.b{font-family:'Y';}"
+             "</style></head><body><p class=\"a\">%s</p><p class=\"b\">%s</p></body></html>",
+             b64b, b64r, text, text);
+    free(b64b);
+    free(b64r);
+    const char *path = "__freedom_wf_page.html";
+    const char *png = "__freedom_wf_out.png";
+    FILE *f = fopen(path, "w");
+    if (f == NULL) {
+        free(html);
+        return;
+    }
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    free(html);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --js=on --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    /* Ink width of the upper (bold-face) band vs the lower (regular) band:
+     * split at the widest empty horizontal gap. */
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+    size_t split = px.height;
+    {
+        size_t best_gap = 0, best_y = 0, cur = 0;
+        for (size_t y = 0; y < px.height; ++y) {
+            int ink = 0;
+            for (size_t x = 0; x < px.width; ++x) {
+                uint32_t p = rowpx[y * stride + x];
+                uint8_t r = (uint8_t)(p >> 16), g = (uint8_t)(p >> 8), bb = (uint8_t)p;
+                if ((int)r + g + bb < 380) { ink = 1; break; }
+            }
+            if (!ink) {
+                ++cur;
+                if (cur > best_gap) { best_gap = cur; best_y = y; }
+            } else {
+                cur = 0;
+            }
+        }
+        if (best_gap > 0) split = best_y;
+    }
+    double wa = 0.0, wb = 0.0;
+    for (size_t y = 0; y < px.height; ++y) {
+        size_t min_x = px.width, max_x = 0;
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            uint8_t r = (uint8_t)(p >> 16), g = (uint8_t)(p >> 8), bb = (uint8_t)p;
+            if ((int)r + g + bb < 380) {
+                if (x < min_x) min_x = x;
+                if (x > max_x) max_x = x;
+            }
+        }
+        if (max_x > min_x) {
+            double w = (double)(max_x - min_x);
+            if (y < split && w > wa) wa = w;
+            if (y >= split && w > wb) wb = w;
+        }
+    }
+    assert_true(wa > 0.0 && wb > 0.0);
+    /* Bold advances exceed regular on this string by several percent. */
+    assert_true(wa > wb * 1.02);
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
 /* CSS 2.1 §10.8 line-box regression (Wikipedia headings): the line takes the MAX
  * leading of its fragments. A trailing `line-height:0` run (the vector skin's
  * `.mw-editsection` after every section heading) is what collapses the heading
@@ -2717,6 +2883,7 @@ int main(void) {
         cmocka_unit_test(test_download_png_inline_replaced_share_row),
         cmocka_unit_test(test_download_png_replaced_pct_width),
         cmocka_unit_test(test_download_png_broken_image_keeps_row_order),
+        cmocka_unit_test(test_download_png_webfont_shapes),
         cmocka_unit_test(test_download_png_mix_blend_multiply_uses_cairo_operator),
         cmocka_unit_test(test_download_png_transform_translate_moves_paint_position),
         cmocka_unit_test(test_download_png_transform_rotate_changes_paint_shape),

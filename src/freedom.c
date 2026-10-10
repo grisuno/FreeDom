@@ -33,6 +33,9 @@
 #include "hls.h"
 #include "ui.h"
 #include "url.h"
+#include "webfont.h"
+#include "webfont_load.h"
+#include "text_shape.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -529,6 +532,79 @@ static void print_css_drops(const char *html, size_t len) {
     }
 }
 
+/* @font-face stash for one headless render (spec/webfont.md b3b): the served
+ * extern sheets retained via the tab css sink, freed right after the font
+ * pass. Same 16-sheet / 2 MiB bounds as the GUI stash (anti-DoS). */
+#define HL_FONT_MAX_SHEETS 16
+#define HL_FONT_MAX_BYTES  ((size_t)(2u * 1024u * 1024u))
+
+typedef struct {
+    const char *top_url;   /* resolution base, NULL for a local file */
+    char       *url[HL_FONT_MAX_SHEETS];
+    char       *text[HL_FONT_MAX_SHEETS];
+    size_t      len[HL_FONT_MAX_SHEETS];
+    size_t      n, bytes;
+} hl_font_stash;
+
+static void hl_font_stash_free(hl_font_stash *s) {
+    if (s == NULL) return;
+    for (size_t i = 0; i < s->n; ++i) {
+        free(s->url[i]);
+        free(s->text[i]);
+    }
+    s->n = 0;
+    s->bytes = 0;
+}
+
+/* tab_css_sink_fn for headless: retains served 2xx CSS bodies (serial and pool
+ * paths alike) with an absolute https sheet URL, or "" when unresolvable (only
+ * absolute/data: font URLs stay usable). Over the caps the sheet is dropped. */
+static void hl_css_sink(void *vctx, const char *url,
+                        const char *body, size_t len,
+                        const char *ctype) {
+    hl_font_stash *s = (hl_font_stash *)vctx;
+    (void)ctype;   /* tab_serve_subreq only calls us for 2xx CSS bodies */
+    if (s == NULL || url == NULL || body == NULL || len == 0) return;
+    if (s->n >= HL_FONT_MAX_SHEETS) return;
+    if (len > HL_FONT_MAX_BYTES - s->bytes) return;
+
+    char abs[URL_MAX_LEN];
+    abs[0] = '\0';
+    if (strncmp(url, "https://", 8) == 0) {
+        size_t ul = strlen(url);
+        if (ul >= sizeof abs) return;
+        memcpy(abs, url, ul + 1);
+    } else if (strncmp(url, "data:", 5) != 0 && s->top_url != NULL) {
+        ln_result ln;
+        if (ln_resolve(s->top_url, url, &ln) != LN_OK
+            || ln.action != LN_NAVIGATE || ln.kind != LN_TARGET_HTTPS) return;
+        size_t tl = strlen(ln.target);
+        if (tl >= sizeof abs) return;
+        memcpy(abs, ln.target, tl + 1);
+    }
+    char *ucopy = strdup(abs);
+    char *bcopy = (char *)malloc(len + 1);
+    if (ucopy == NULL || bcopy == NULL) { free(ucopy); free(bcopy); return; }
+    memcpy(bcopy, body, len);
+    bcopy[len] = '\0';
+    s->url[s->n] = ucopy;
+    s->text[s->n] = bcopy;
+    s->len[s->n] = len;
+    s->n++;
+    s->bytes += len;
+}
+
+/* wf_fetch_fn around the headless policy gate (font bytes download like any
+ * other subresource of this page). data: faces never reach here. */
+static int hl_font_fetch(void *vctx, const char *url,
+                         int *out_status, char **out_body, size_t *out_len,
+                         char **out_ctype) {
+    hl_font_stash *s = (hl_font_stash *)vctx;
+    const char *top = (s != NULL) ? s->top_url : NULL;
+    return headless_fetch((void *)(uintptr_t)top, "GET", url, NULL, 0,
+                          out_status, out_body, out_len, out_ctype);
+}
+
 static int render_page(const char *html, size_t len, const char *top_url,
                        char **out_nav) {
     tab *t = NULL;
@@ -568,6 +644,12 @@ static int render_page(const char *html, size_t len, const char *top_url,
             gated.pool = &subpool;
     }
     tab_set_fetcher(t, pf_pooled_fetch, &gated);
+    /* @font-face stash (spec/webfont.md b3b): fresh per render; the sink
+     * observes every served CSS body (serial and pool paths alike). */
+    hl_font_stash fstash;
+    memset(&fstash, 0, sizeof fstash);
+    fstash.top_url = top_url;
+    if (g_headless_js) tab_set_css_sink(t, hl_css_sink, &fstash);
 
     /* Session cookies (trusted host only, --js=on here): seed document.cookie from the
      * ephemeral network jar so the page's consent/session JS can read existing cookies. */
@@ -597,8 +679,27 @@ static int render_page(const char *html, size_t len, const char *top_url,
     if (ts != TAB_OK) {
         fprintf(stderr, "freedom: failed to load page (status %d)\n", (int)ts);
         tab_close(t);
+        hl_font_stash_free(&fstash);
         return EXIT_ERROR;
     }
+
+    /* Author webfonts (spec/webfont.md b3b): with --js=on (the headless trust
+     * signal) register the page's faces from the stashed extern sheets + the
+     * inline HTML, before layout/paint. The registry is per render, so it is
+     * always cleared first (fetch_and_render may paint several pages per
+     * process). A NULL top_url (local file) still loads data: faces. */
+    if (g_headless_js) {
+        tsh_webfont_clear();
+        wf_sheet sheets[HL_FONT_MAX_SHEETS];
+        for (size_t i = 0; i < fstash.n; ++i) {
+            sheets[i].text = fstash.text[i];
+            sheets[i].len = fstash.len[i];
+            sheets[i].url = fstash.url[i];
+        }
+        (void)wf_load_document(hl_font_fetch, &fstash, top_url,
+                               sheets, fstash.n, html, len);
+    }
+    hl_font_stash_free(&fstash);
 
     /* Real async timers (2026-07-11): pump up to HL_TICK_MAX virtual ticks so a
      * page that renders via setTimeout/setInterval shows its final state in the

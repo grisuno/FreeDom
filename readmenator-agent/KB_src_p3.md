@@ -147,51 +147,61 @@ Previous: [KB_src_p2.md](KB_src_p2.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `print_usage` (function, line 47) `static void print_usage(FILE *fp, const char *prog)`
-  - `is_https_url` (function, line 73) `static int is_https_url(const char *s)`
-  - `is_http_url` (function, line 77) `static int is_http_url(const char *s)`
-  - `is_overlay_http` (function, line 82) `static int is_overlay_http(const char *s)`
-  - `now_us` (function, line 136) `static uint64_t now_us(void)`
-  - `timings_ensure_init` (function, line 142) `static void timings_ensure_init(void)`
-  - `timings_enabled` (function, line 146) `static int timings_enabled(void)`
-  - `timings_dump` (function, line 150) `static void timings_dump(void)`
-  - `user_impersonate_enabled` (function, line 198) `static int user_impersonate_enabled(void)`
-  - `read_file` (function, line 205) `static char *read_file(const char *path, size_t *out_len)`
-  - `headless_load_hosts` (function, line 223) `static void headless_load_hosts(void)`
-  - `is_blank_text` (function, line 253) `static int is_blank_text(const char *s)`
-  - `print_doc` (function, line 266) `static void print_doc(const rd_doc *doc)`
-  - `print_console` (function, line 359) `static void print_console(const fb_buffer *log)`
-  - `print_dom` (function, line 376) `static void print_dom(const rd_doc *doc)`
-  - `print_dom_css` (function, line 391) `static void print_dom_css(const rd_doc *doc)`
-  - `headless_fetch` (function, line 415) `static int headless_fetch(void *ctx, const char *method, const char *url,
+  - `hl_font_stash` (struct, line 541)
+  - `print_usage` (function, line 50) `static void print_usage(FILE *fp, const char *prog)`
+  - `is_https_url` (function, line 76) `static int is_https_url(const char *s)`
+  - `is_http_url` (function, line 80) `static int is_http_url(const char *s)`
+  - `is_overlay_http` (function, line 85) `static int is_overlay_http(const char *s)`
+  - `now_us` (function, line 139) `static uint64_t now_us(void)`
+  - `timings_ensure_init` (function, line 145) `static void timings_ensure_init(void)`
+  - `timings_enabled` (function, line 149) `static int timings_enabled(void)`
+  - `timings_dump` (function, line 153) `static void timings_dump(void)`
+  - `user_impersonate_enabled` (function, line 201) `static int user_impersonate_enabled(void)`
+  - `read_file` (function, line 208) `static char *read_file(const char *path, size_t *out_len)`
+  - `headless_load_hosts` (function, line 226) `static void headless_load_hosts(void)`
+  - `is_blank_text` (function, line 256) `static int is_blank_text(const char *s)`
+  - `print_doc` (function, line 269) `static void print_doc(const rd_doc *doc)`
+  - `print_console` (function, line 362) `static void print_console(const fb_buffer *log)`
+  - `print_dom` (function, line 379) `static void print_dom(const rd_doc *doc)`
+  - `print_dom_css` (function, line 394) `static void print_dom_css(const rd_doc *doc)`
+  - `headless_fetch` (function, line 418) `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...`
-  - `foldback_cookies` (function, line 477) `static void foldback_cookies(const char *url, const char *jar)`
-  - `print_css_drops` (function, line 501) `static void print_css_drops(const char *html, size_t len)`
-  - `render_page` (function, line 532) `static int render_page(const char *html, size_t len, const char *top_url,
+  - `foldback_cookies` (function, line 480) `static void foldback_cookies(const char *url, const char *jar)`
+  - `print_css_drops` (function, line 504) `static void print_css_drops(const char *html, size_t len)`
+  - `hl_font_stash_free` (function, line 549) `static void hl_font_stash_free(hl_font_stash *s)`
+  - `hl_css_sink` (function, line 562) `static void hl_css_sink(void *vctx, const char *url,
+                        const char *body, si...`
+  - `hl_font_fetch` (function, line 599) `static int hl_font_fetch(void *vctx, const char *url,
+                         int *out_status, c...`
+  - `render_page` (function, line 608) `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-  - `sf_reason` (function, line 757) `static const char *sf_reason(sf_status ss)`
-  - `fetch_and_render_one` (function, line 776) `static int fetch_and_render_one(const char *url, char **out_nav)`
-  - `elsewhere` (function, line 837) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+  - `first` (function, line 689) `* always cleared first (fetch_and_render may paint several pages per
+     * process). A NULL top_...`
+  - `sf_reason` (function, line 858) `static const char *sf_reason(sf_status ss)`
+  - `fetch_and_render_one` (function, line 877) `static int fetch_and_render_one(const char *url, char **out_nav)`
+  - `elsewhere` (function, line 938) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-  - `parent` (function, line 863) `* gated by the parent (ln_resolve: a local target stays under the document's
+  - `parent` (function, line 964) `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-  - `run_headless` (function, line 900) `static int run_headless(const char *target)`
-  - `video_fetch_with_fallback` (function, line 936) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+  - `run_headless` (function, line 1001) `static int run_headless(const char *target)`
+  - `video_fetch_with_fallback` (function, line 1037) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
-  - `run_dump_video` (function, line 1047) `static int run_dump_video(const char *url)`
-  - `main` (function, line 1066) `int main(int argc, char **argv)`
-  - `gets` (function, line 411) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-  - `pool` (function, line 592) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-  - `only` (function, line 645) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-  - `BLOCKED` (function, line 802) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+  - `run_dump_video` (function, line 1148) `static int run_dump_video(const char *url)`
+  - `main` (function, line 1167) `int main(int argc, char **argv)`
+  - `gets` (function, line 414) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
+  - `pool` (function, line 674) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+  - `only` (function, line 746) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+  - `BLOCKED` (function, line 903) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
   - `_DEFAULT_SOURCE` (macro, line 10) `#define _DEFAULT_SOURCE`
-  - `EXIT_OK` (macro, line 43) `#define EXIT_OK`
-  - `EXIT_ERROR` (macro, line 44) `#define EXIT_ERROR`
-  - `EXIT_USAGE` (macro, line 45) `#define EXIT_USAGE`
-  - `CSS_DROPS_REPORT_MAX` (macro, line 161) `#define CSS_DROPS_REPORT_MAX`
-  - `HL_JS_NAV_MAX` (macro, line 772) `#define HL_JS_NAV_MAX`
-- Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
+  - `EXIT_OK` (macro, line 46) `#define EXIT_OK`
+  - `EXIT_ERROR` (macro, line 47) `#define EXIT_ERROR`
+  - `EXIT_USAGE` (macro, line 48) `#define EXIT_USAGE`
+  - `CSS_DROPS_REPORT_MAX` (macro, line 164) `#define CSS_DROPS_REPORT_MAX`
+  - `HL_FONT_MAX_SHEETS` (macro, line 538) `#define HL_FONT_MAX_SHEETS`
+  - `HL_FONT_MAX_BYTES` (macro, line 539) `#define HL_FONT_MAX_BYTES`
+  - `HL_JS_NAV_MAX` (macro, line 873) `#define HL_JS_NAV_MAX`
+- Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`
 
 ## src/hls.c
 - Doc: last_char: Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not...
@@ -397,99 +407,6 @@ Previous: [KB_src_p2.md](KB_src_p2.md)
   - `ip_anim_current` (function, line 282) `double ip_anim_current(const ip_anim *a)`
   - `ip_anim_done` (function, line 320) `int ip_anim_done(const ip_anim *a)`
 - Depends on: `include/interp.h`
-
-## src/js_dom.c
-- Doc: jd_handle: Coerces a JS argument to a node handle.
-- Layer: utility
-- Language: c
-- Symbols:
-  - `jd_method` (struct, line 428)
-  - `jd_opaque_get` (function, line 27) `jd_opaque *jd_opaque_get(JSContext *ctx)`
-  - `jd_idx` (function, line 31) `dom_index *jd_idx(JSContext *ctx)`
-  - `jd_handle` (function, line 40) `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out)`
-  - `jd_handle_or_null` (function, line 47) `JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)`
-  - `m_node_count` (function, line 53) `static JSValue m_node_count(JSContext *ctx, JSValueConst this_val,
-                            in...`
-  - `m_get_element_by_id` (function, line 59) `static JSValue m_get_element_by_id(JSContext *ctx, JSValueConst this_val,
-                       ...`
-  - `jd_query_list` (function, line 70) `static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class)`
-  - `m_get_by_tag` (function, line 100) `static JSValue m_get_by_tag(JSContext *ctx, JSValueConst this_val,
-                            in...`
-  - `m_get_by_class` (function, line 106) `static JSValue m_get_by_class(JSContext *ctx, JSValueConst this_val,
-                            ...`
-  - `m_tag_name` (function, line 112) `static JSValue m_tag_name(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-  - `m_get_attribute` (function, line 122) `static JSValue m_get_attribute(JSContext *ctx, JSValueConst this_val,
-                           ...`
-  - `m_parent` (function, line 135) `static JSValue m_parent(JSContext *ctx, JSValueConst this_val,
-                        int argc, ...`
-  - `m_first_child` (function, line 143) `static JSValue m_first_child(JSContext *ctx, JSValueConst this_val,
-                             ...`
-  - `m_node_kind` (function, line 152) `static JSValue m_node_kind(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_child_node` (function, line 159) `static JSValue m_child_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_sibling_node` (function, line 166) `static JSValue m_sibling_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_create_char` (function, line 174) `static JSValue m_create_char(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_next_sibling` (function, line 188) `static JSValue m_next_sibling(JSContext *ctx, JSValueConst this_val,
-                            ...`
-  - `m_precedes` (function, line 196) `static JSValue m_precedes(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-  - `m_text_content` (function, line 207) `static JSValue m_text_content(JSContext *ctx, JSValueConst this_val,
-                            ...`
-  - `m_set_text` (function, line 217) `static JSValue m_set_text(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-  - `m_get_title` (function, line 231) `static JSValue m_get_title(JSContext *ctx, JSValueConst this_val,
-                           int ...`
-  - `m_set_title` (function, line 239) `static JSValue m_set_title(JSContext *ctx, JSValueConst this_val,
-                           int ...`
-  - `m_create_element` (function, line 252) `static JSValue m_create_element(JSContext *ctx, JSValueConst this_val,
-                          ...`
-  - `m_append_child` (function, line 264) `static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,
-                            ...`
-  - `m_move_children` (function, line 275) `static JSValue m_move_children(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_clone_node` (function, line 289) `static JSValue m_clone_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_insert_before` (function, line 299) `static JSValue m_insert_before(JSContext *ctx, JSValueConst this_val,
-                           ...`
-  - `m_remove_child` (function, line 311) `static JSValue m_remove_child(JSContext *ctx, JSValueConst this_val,
-                            ...`
-  - `m_set_attribute` (function, line 320) `static JSValue m_set_attribute(JSContext *ctx, JSValueConst this_val,
-                           ...`
-  - `m_remove_attribute` (function, line 336) `static JSValue m_remove_attribute(JSContext *ctx, JSValueConst this_val,
-                        ...`
-  - `m_set_inner_html` (function, line 348) `static JSValue m_set_inner_html(JSContext *ctx, JSValueConst this_val,
-                          ...`
-  - `m_get_inner_html` (function, line 364) `static JSValue m_get_inner_html(JSContext *ctx, JSValueConst this_val,
-                          ...`
-  - `m_rect` (function, line 396) `static JSValue m_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_query_selector` (function, line 437) `static JSValue m_query_selector(JSContext *ctx, JSValueConst this_val,
-                          ...`
-  - `m_query_selector_all` (function, line 450) `static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,
-                      ...`
-  - `m_matches` (function, line 479) `static JSValue m_matches(JSContext *ctx, JSValueConst this_val,
-                         int argc...`
-  - `m_closest` (function, line 491) `static JSValue m_closest(JSContext *ctx, JSValueConst this_val,
-                         int argc...`
-  - `m_attr_names` (function, line 503) `static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,
-                            in...`
-  - `attrNames` (function, line 610) `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
-     * a missing '...`
-  - `js_env` (function, line 1223) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
- * document shim (uses...`
-  - `jd_install` (function, line 1775) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-  - `fails` (function, line 1852) `* cap is reached or an allocation fails (caller stops), else 0. */
-static int cb_append(char **bu...`
-  - `jd_install_console` (function, line 1966) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-  - `jd_set_cookies` (function, line 2003) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-  - `jd_get_cookies` (function, line 2023) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-  - `jd_set_geometry` (function, line 2046) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
-  - `table` (function, line 571) `* a table (dom.viewport() non-null);`
-  - `scripts` (function, line 768) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
-  - `enough` (function, line 931) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-  - `ms` (function, line 1067) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-  - `empty` (function, line 1215) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-  - `geometry` (function, line 1217) `* constant geometry (zero real leak);`
-  - `size` (function, line 1220) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
-  - `_GNU_SOURCE` (macro, line 10) `#define _GNU_SOURCE`
-- Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `include/web_storage.h`, `src/js_dom_ext.h`, `src/js_dom_internal.h`, `src/js_location_internal.h`
 
 
 Next: [KB_src_p4.md](KB_src_p4.md)

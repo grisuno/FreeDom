@@ -2,163 +2,171 @@
 Previous: [KB_gui.md](KB_gui.md)
 
 ## gui/browser_ui.c (continued)
-  - `key_repeat_fire` (function, line 15686) `static void key_repeat_fire(browser_window *w)`
-  - `keyboard_key` (function, line 15700) `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
+  - `handle_key_press` (function, line 15485) `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
+             ...`
+  - `key_is_repeatable` (function, line 15815) `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)`
+  - `key_repeat_arm` (function, line 15831) `static void key_repeat_arm(browser_window *w, uint32_t key)`
+  - `key_repeat_stop` (function, line 15844) `static void key_repeat_stop(browser_window *w)`
+  - `key_repeat_fire` (function, line 15855) `static void key_repeat_fire(browser_window *w)`
+  - `keyboard_key` (function, line 15869) `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                   ...`
-  - `keyboard_modifiers` (function, line 15740) `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
+  - `keyboard_modifiers` (function, line 15909) `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                  ...`
-  - `keyboard_repeat_info` (function, line 15749) `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
-  - `seat_caps` (function, line 15768) `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
-  - `seat_name` (function, line 15779) `static void seat_name(void *d, struct wl_seat *s, const char *name)`
-  - `registry_global` (function, line 15786) `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
+  - `keyboard_repeat_info` (function, line 15918) `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
+  - `seat_caps` (function, line 15937) `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
+  - `seat_name` (function, line 15948) `static void seat_name(void *d, struct wl_seat *s, const char *name)`
+  - `registry_global` (function, line 15955) `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...`
-  - `registry_remove` (function, line 15806) `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
-  - `ui_run_browser` (function, line 15816) `ui_status ui_run_browser(const char *start_url)`
-  - `cost` (function, line 16211) `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
+  - `registry_remove` (function, line 15975) `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
+  - `ui_run_browser` (function, line 15985) `ui_status ui_run_browser(const char *start_url)`
+  - `cost` (function, line 16380) `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
              * cheap pages paint at...`
-  - `offset` (function, line 158) `* offset (labels and the flag live in one place, no magic indices);`
-  - `fields` (function, line 265) `* fields (so the 200+ render/event call sites stay unchanged);`
-  - `delay` (function, line 359) `* timer delay (tab_page.next_timer_ms);`
-  - `main` (function, line 491) `* * Feeder thread: downloads TS segments and writes them to the decoder pipe * so the main (Wayland) thread never...`
-  - `proxy` (function, line 994) `* and enable each proxy ("1" => the default port);`
-  - `video_feeder_thread` (function, line 1049) `static void *video_feeder_thread(void *arg);`
-  - `page_trusted` (function, line 1396) `static int page_trusted(const browser_window *w);`
-  - `hb_is_allowlisted` (function, line 1484) `&& hb_is_allowlisted(w->hosts, ihost);`
-  - `proceed` (function, line 1527) `* may proceed (cfg and pr->allowlisted are then set);`
-  - `secure_fetch` (function, line 1778) `* through secure_fetch (Zero Trust);`
-  - `string` (function, line 1926) `* or an empty string (unset, blocked, or off by caps.images), so there is no * decision to re-check, unlike...`
-  - `do_load` (function, line 1968) `static void do_load(browser_window *w, const char *url);`
-  - `tab_new` (function, line 1973) `static void tab_new(browser_window *w, const char *url);`
-  - `toggle` (function, line 1983) `* No network: a capability toggle (images/CSS) re-renders from cache. Does nothing * when there is no cached source...`
-  - `stylesheets` (function, line 2133) `* External stylesheets (Hito 27) follow the author-styles opt-in -- or the * trusted-host doctrine (Hito 28)...`
-  - `ALIVE` (function, line 2274) `* keep the worker ALIVE (tab_worker) so the console REPL can tab_eval against this * live page. The next render (or...`
-  - `resolve` (function, line 2462) `* origin so its relative references and local images resolve (confined to the * document's directory) -- a local...`
-  - `smaller` (function, line 3026) `* size when the content is smaller (height) or wider (min-width);`
-  - `HarfBuzz` (function, line 3419) `* descriptor via HarfBuzz (text_shape);`
-  - `produced` (function, line 3827) `* href tags every fragment produced (NULL for non-link runs) so a later hit-test * can recover the click target...`
-  - `line` (function, line 3911) `* its neighbours on the line (spec/page_view.md "Colapso de espacio en el borde * entre runs"). Read from src, the...`
-  - `block_leaves_flow` (function, line 4132) `static int block_leaves_flow(const rd_doc *doc, const rd_block *bk);`
-  - `way` (function, line 4793) `* intrinsic box either way (it does not wrap below its own size). */ static int block_leaves_flow(const rd_doc *doc...`
-  - `close_all_boxes` (function, line 5005) `static void close_all_boxes(rc_layout *L, rc_state *s, const ui_theme *th);`
-  - `deepest_open_on_path` (function, line 5011) `static int deepest_open_on_path(const rc_state *outer, const rd_doc *doc, int block_id);`
-  - `TABLE` (function, line 5073) `* container TABLE (rd_cont_at) rather than from the head run, because a container * whose children are all...`
-  - `axis` (function, line 5282) `* differs: items stack on the vertical main axis (fx_column_place) and align on * the horizontal cross axis...`
-  - `struct` (function, line 5451) `* struct (0 = auto);`
-  - `own` (function, line 5721) `* root box of its own (rb < 0) the walk must still stop at the * container's box, or it re-opens the container (and...`
-  - `items` (function, line 5783) `* items (Flexbox 4.2);`
-  - `multicol_fragment` (function, line 5890) `static double multicol_fragment(rc_layout *L, const rc_open_box *ob, double content_bottom);`
-  - `behind` (function, line 6089) `* previous block left behind (CSS 2.1 8.3.1) -- read from the element's cascade, * never a theme constant. The old...`
-  - `context` (function, line 6610) `* side by side inside the current box context (spec/float.md). Blocks are grouped by * float_id into items (document...`
-  - `x` (function, line 6895) `* reported x is already the BORDER x (the §7c.2 rule);`
-  - `chain` (function, line 7489) `* chain (the box that left the normal flow at this pen position);`
-  - `first` (function, line 7556) `* flush first (no-op when nothing is deferred). */ /* The open line beside the float is committed where it is BEFORE...`
-  - `anchor` (function, line 7581) `* anchor (spec/float.md §7d.3) exactly like a text block. An * empty/hidden one leaves cur_top untouched, so this is...`
-  - `key` (function, line 7641) `* founders splits by key (stories, rail, footer nav each take * their column);`
-  - `have` (function, line 7655) `* as they always have (spec/float.md §6b.3). The line still open beside * the previous float is committed first, at...`
-  - `standalone` (function, line 7676) `* must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */...`
-  - `it` (function, line 7736) `* column: flush first so the column lands above it (source order), * then move the anchor — the image bottom is the...`
-  - `margin` (function, line 7987) `* own left margin (the margin box starts at the anchor point), a right- * anchored one ends at it. Same for the...`
-  - `rd_build` (function, line 8611) `* rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr...`
-  - `descriptors` (function, line 8860) `* descriptors (especially the Wayland display fd) so the sink does * not corrupt the Wayland protocol connection —...`
-  - `again` (function, line 8941) `* before a respawn opens it again (the WNOHANG reap left the old * process alive long enough to make the new one...`
-  - `blocking` (function, line 9228) `* are blocking (POLLIN guaranteed data is available). */ int flags = fcntl(out_fd, F_GETFL, 0);`
-  - `rect` (function, line 9498) `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops...`
-  - `layer` (function, line 9771) `* first layer (CSS multi-background: the first declared URL is the topmost) * and OVER bg_rgb/gradient, UNDER the...`
-  - `convention` (function, line 9887) `* on the 3D bevel convention (light top/left, dark right/bottom). */ int is_3d = (style == CSS_BST_GROOVE || style...`
-  - `row_owner_block_id` (function, line 10037) `static int row_owner_block_id(const rc_layout *L, const rc_row *r);`
-  - `bg` (function, line 10141) `* its own DISTINCT bg (an inline span highlight) still paints. */ int own_bid = row_owner_block_id(L, r);`
-  - `rows` (function, line 10347) `* RC_IMAGE rows (see its declaration);`
-  - `the` (function, line 10919) `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset...`
-  - `fill` (function, line 11095) `* fill (paint_content_row's r->bg_rgb branch) cascades the SAME author * background-color as the box, but paints in...`
-  - `compositing` (function, line 11188) `* * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context * (box_forms_stacking_context...`
-  - `origin` (function, line 12171) `* top_url is the page origin (https or file://);`
-  - `in` (function, line 12249) `* a line landed in (Stage 3), which no other dump shows. Text stays out (it is * --dump-dom's job);`
-  - `sf_ws_url_check` (function, line 12621) `&& sf_ws_url_check(op->data) == SF_OK && rp_host_of(op->data, host, sizeof host) == 0 && hb_check(w->hosts, host) !=...`
-  - `presentation` (function, line 13101) `* affect presentation (a repaint, which re-runs layout, suffices);`
-  - `resizes` (function, line 13803) `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);`
-  - `down` (function, line 14472) `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void...`
-  - `loop` (function, line 15050) `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately...`
-  - `saving` (function, line 15831) `* disables saving (never clobber);`
-  - `redraws` (function, line 15910) `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
-  - `applies` (function, line 15980) `* persisted choice applies (prefs_parse already clamped it to a valid mode). */ const char *js_env =...`
-  - `flow` (function, line 16189) `* flow (counting them starved aplay). A video frame read while * overdue overwrites the held slot (standard player...`
+  - `offset` (function, line 160) `* offset (labels and the flag live in one place, no magic indices);`
+  - `fields` (function, line 267) `* fields (so the 200+ render/event call sites stay unchanged);`
+  - `delay` (function, line 361) `* timer delay (tab_page.next_timer_ms);`
+  - `main` (function, line 504) `* * Feeder thread: downloads TS segments and writes them to the decoder pipe * so the main (Wayland) thread never...`
+  - `proxy` (function, line 1007) `* and enable each proxy ("1" => the default port);`
+  - `video_feeder_thread` (function, line 1062) `static void *video_feeder_thread(void *arg);`
+  - `page_trusted` (function, line 1409) `static int page_trusted(const browser_window *w);`
+  - `only` (function, line 1490) `* Trusted pages only (untrusted CSS is still applied by the worker, but its * fonts never reach the parent...`
+  - `hb_is_allowlisted` (function, line 1627) `&& hb_is_allowlisted(w->hosts, ihost);`
+  - `proceed` (function, line 1670) `* may proceed (cfg and pr->allowlisted are then set);`
+  - `secure_fetch` (function, line 1921) `* through secure_fetch (Zero Trust);`
+  - `string` (function, line 2069) `* or an empty string (unset, blocked, or off by caps.images), so there is no * decision to re-check, unlike...`
+  - `do_load` (function, line 2111) `static void do_load(browser_window *w, const char *url);`
+  - `tab_new` (function, line 2116) `static void tab_new(browser_window *w, const char *url);`
+  - `toggle` (function, line 2126) `* No network: a capability toggle (images/CSS) re-renders from cache. Does nothing * when there is no cached source...`
+  - `stylesheets` (function, line 2276) `* External stylesheets (Hito 27) follow the author-styles opt-in -- or the * trusted-host doctrine (Hito 28)...`
+  - `body` (function, line 2319) `* every served CSS body (serial and pool paths alike). */ font_stash_reset(w);`
+  - `ALIVE` (function, line 2427) `* keep the worker ALIVE (tab_worker) so the console REPL can tab_eval against this * live page. The next render (or...`
+  - `resolve` (function, line 2615) `* origin so its relative references and local images resolve (confined to the * document's directory) -- a local...`
+  - `smaller` (function, line 3184) `* size when the content is smaller (height) or wider (min-width);`
+  - `HarfBuzz` (function, line 3577) `* descriptor via HarfBuzz (text_shape);`
+  - `produced` (function, line 3995) `* href tags every fragment produced (NULL for non-link runs) so a later hit-test * can recover the click target...`
+  - `line` (function, line 4079) `* its neighbours on the line (spec/page_view.md "Colapso de espacio en el borde * entre runs"). Read from src, the...`
+  - `block_leaves_flow` (function, line 4300) `static int block_leaves_flow(const rd_doc *doc, const rd_block *bk);`
+  - `way` (function, line 4962) `* intrinsic box either way (it does not wrap below its own size). */ static int block_leaves_flow(const rd_doc *doc...`
+  - `close_all_boxes` (function, line 5174) `static void close_all_boxes(rc_layout *L, rc_state *s, const ui_theme *th);`
+  - `deepest_open_on_path` (function, line 5180) `static int deepest_open_on_path(const rc_state *outer, const rd_doc *doc, int block_id);`
+  - `TABLE` (function, line 5242) `* container TABLE (rd_cont_at) rather than from the head run, because a container * whose children are all...`
+  - `axis` (function, line 5451) `* differs: items stack on the vertical main axis (fx_column_place) and align on * the horizontal cross axis...`
+  - `struct` (function, line 5620) `* struct (0 = auto);`
+  - `own` (function, line 5890) `* root box of its own (rb < 0) the walk must still stop at the * container's box, or it re-opens the container (and...`
+  - `items` (function, line 5952) `* items (Flexbox 4.2);`
+  - `multicol_fragment` (function, line 6059) `static double multicol_fragment(rc_layout *L, const rc_open_box *ob, double content_bottom);`
+  - `behind` (function, line 6258) `* previous block left behind (CSS 2.1 8.3.1) -- read from the element's cascade, * never a theme constant. The old...`
+  - `context` (function, line 6779) `* side by side inside the current box context (spec/float.md). Blocks are grouped by * float_id into items (document...`
+  - `x` (function, line 7064) `* reported x is already the BORDER x (the §7c.2 rule);`
+  - `chain` (function, line 7658) `* chain (the box that left the normal flow at this pen position);`
+  - `anchor` (function, line 7750) `* anchor (spec/float.md §7d.3) exactly like a text block. An * empty/hidden one leaves cur_top untouched, so this is...`
+  - `key` (function, line 7810) `* founders splits by key (stories, rail, footer nav each take * their column);`
+  - `have` (function, line 7824) `* as they always have (spec/float.md §6b.3). The line still open beside * the previous float is committed first, at...`
+  - `standalone` (function, line 7845) `* must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */...`
+  - `it` (function, line 7905) `* column: flush first so the column lands above it (source order), * then move the anchor — the image bottom is the...`
+  - `margin` (function, line 8156) `* own left margin (the margin box starts at the anchor point), a right- * anchored one ends at it. Same for the...`
+  - `rd_build` (function, line 8780) `* rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr...`
+  - `descriptors` (function, line 9029) `* descriptors (especially the Wayland display fd) so the sink does * not corrupt the Wayland protocol connection —...`
+  - `again` (function, line 9110) `* before a respawn opens it again (the WNOHANG reap left the old * process alive long enough to make the new one...`
+  - `blocking` (function, line 9397) `* are blocking (POLLIN guaranteed data is available). */ int flags = fcntl(out_fd, F_GETFL, 0);`
+  - `rect` (function, line 9667) `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops...`
+  - `layer` (function, line 9940) `* first layer (CSS multi-background: the first declared URL is the topmost) * and OVER bg_rgb/gradient, UNDER the...`
+  - `convention` (function, line 10056) `* on the 3D bevel convention (light top/left, dark right/bottom). */ int is_3d = (style == CSS_BST_GROOVE || style...`
+  - `row_owner_block_id` (function, line 10206) `static int row_owner_block_id(const rc_layout *L, const rc_row *r);`
+  - `bg` (function, line 10310) `* its own DISTINCT bg (an inline span highlight) still paints. */ int own_bid = row_owner_block_id(L, r);`
+  - `rows` (function, line 10516) `* RC_IMAGE rows (see its declaration);`
+  - `the` (function, line 11088) `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset...`
+  - `fill` (function, line 11264) `* fill (paint_content_row's r->bg_rgb branch) cascades the SAME author * background-color as the box, but paints in...`
+  - `compositing` (function, line 11357) `* * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context * (box_forms_stacking_context...`
+  - `origin` (function, line 12340) `* top_url is the page origin (https or file://);`
+  - `in` (function, line 12418) `* a line landed in (Stage 3), which no other dump shows. Text stays out (it is * --dump-dom's job);`
+  - `sf_ws_url_check` (function, line 12790) `&& sf_ws_url_check(op->data) == SF_OK && rp_host_of(op->data, host, sizeof host) == 0 && hb_check(w->hosts, host) !=...`
+  - `presentation` (function, line 13270) `* affect presentation (a repaint, which re-runs layout, suffices);`
+  - `resizes` (function, line 13972) `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);`
+  - `down` (function, line 14641) `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void...`
+  - `loop` (function, line 15219) `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately...`
+  - `saving` (function, line 16000) `* disables saving (never clobber);`
+  - `redraws` (function, line 16079) `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
+  - `applies` (function, line 16149) `* persisted choice applies (prefs_parse already clamped it to a valid mode). */ const char *js_env =...`
+  - `flow` (function, line 16358) `* flow (counting them starved aplay). A video frame read while * overdue overwrites the held slot (standard player...`
   - `_GNU_SOURCE` (macro, line 12) `#define _GNU_SOURCE`
-  - `UI_TOOLBAR_H` (macro, line 81) `#define UI_TOOLBAR_H`
-  - `UI_TITLEBAR_H` (macro, line 82) `#define UI_TITLEBAR_H`
-  - `UI_TABBAR_H` (macro, line 83) `#define UI_TABBAR_H`
-  - `UI_TAB_MIN_W` (macro, line 84) `#define UI_TAB_MIN_W`
-  - `UI_TAB_MAX_W` (macro, line 85) `#define UI_TAB_MAX_W`
-  - `UI_TAB_NEW_W` (macro, line 86) `#define UI_TAB_NEW_W`
-  - `UI_TAB_CLOSE_W` (macro, line 87) `#define UI_TAB_CLOSE_W`
-  - `UI_BTN_W` (macro, line 88) `#define UI_BTN_W`
-  - `UI_WIN_BTN_W` (macro, line 89) `#define UI_WIN_BTN_W`
-  - `UI_MARGIN` (macro, line 90) `#define UI_MARGIN`
-  - `UI_BTN_LEFT` (macro, line 91) `#define UI_BTN_LEFT`
-  - `UI_LIST_INDENT` (macro, line 95) `#define UI_LIST_INDENT`
-  - `UI_SCROLLBAR_W` (macro, line 100) `#define UI_SCROLLBAR_W`
-  - `UI_SCROLLBAR_MIN` (macro, line 101) `#define UI_SCROLLBAR_MIN`
-  - `UI_SCROLLBAR_PAD` (macro, line 102) `#define UI_SCROLLBAR_PAD`
-  - `UI_RESIZE_MARGIN` (macro, line 106) `#define UI_RESIZE_MARGIN`
-  - `UI_MENU_W` (macro, line 111) `#define UI_MENU_W`
-  - `UI_MENU_ITEM_H` (macro, line 112) `#define UI_MENU_ITEM_H`
-  - `UI_MENU_PAD` (macro, line 113) `#define UI_MENU_PAD`
-  - `UI_CHECK_SZ` (macro, line 114) `#define UI_CHECK_SZ`
-  - `UI_MENU_LABEL_H` (macro, line 115) `#define UI_MENU_LABEL_H`
-  - `UI_MENU_INPUT_H` (macro, line 116) `#define UI_MENU_INPUT_H`
-  - `UI_HAMBURGER_W` (macro, line 117) `#define UI_HAMBURGER_W`
-  - `UI_HAMBURGER_GAP` (macro, line 118) `#define UI_HAMBURGER_GAP`
-  - `UI_CURSOR_SIZE` (macro, line 119) `#define UI_CURSOR_SIZE`
-  - `UI_TOAST_PAD` (macro, line 120) `#define UI_TOAST_PAD`
-  - `OMNI_MAX_SUGG` (macro, line 121) `#define OMNI_MAX_SUGG`
-  - `UI_OMNI_ROW_H` (macro, line 122) `#define UI_OMNI_ROW_H`
-  - `UI_TWO_PI` (macro, line 123) `#define UI_TWO_PI`
-  - `UI_INPUT_PAD` (macro, line 127) `#define UI_INPUT_PAD`
-  - `UI_INPUT_MEASURE_W` (macro, line 130) `#define UI_INPUT_MEASURE_W`
-  - `UI_INPUT_WIDTH` (macro, line 131) `#define UI_INPUT_WIDTH`
-  - `UI_BUTTON_HPAD` (macro, line 132) `#define UI_BUTTON_HPAD`
-  - `UI_FORM_FIELDS_MAX` (macro, line 133) `#define UI_FORM_FIELDS_MAX`
-  - `UI_UNDERLINE_OFFSET` (macro, line 138) `#define UI_UNDERLINE_OFFSET`
-  - `UI_UNDERLINE_THICK` (macro, line 139) `#define UI_UNDERLINE_THICK`
-  - `UI_STRIKE_OFFSET` (macro, line 140) `#define UI_STRIKE_OFFSET`
-  - `UI_OVERLINE_OFFSET` (macro, line 141) `#define UI_OVERLINE_OFFSET`
-  - `UI_SLICE_MAX` (macro, line 145) `#define UI_SLICE_MAX`
-  - `UI_MENU_COUNT` (macro, line 204) `#define UI_MENU_COUNT`
-  - `UI_IMAGE_MAX_BODY` (macro, line 222) `#define UI_IMAGE_MAX_BODY`
-  - `UI_MAX_TABS` (macro, line 261) `#define UI_MAX_TABS`
-  - `UI_READER_COLUMN_W` (macro, line 569) `#define UI_READER_COLUMN_W`
-  - `JS_NAV_MAX` (macro, line 1978) `#define JS_NAV_MAX`
-  - `HIST_STEP_DEPTH_MAX` (macro, line 1980) `#define HIST_STEP_DEPTH_MAX`
-  - `JS_TICKS_PER_LOAD` (macro, line 2098) `#define JS_TICKS_PER_LOAD`
-  - `UI_RELOAD_X` (macro, line 2835) `#define UI_RELOAD_X`
-  - `RC_BOX_STACK_MAX` (macro, line 3150) `#define RC_BOX_STACK_MAX`
-  - `RC_FLOAT_MAX` (macro, line 3154) `#define RC_FLOAT_MAX`
-  - `RC_FLOAT_FIT_MIN` (macro, line 3161) `#define RC_FLOAT_FIT_MIN`
-  - `FLEX_MEASURE_W` (macro, line 4739) `#define FLEX_MEASURE_W`
-  - `FLEX_MIN_MEASURE_W` (macro, line 4744) `#define FLEX_MIN_MEASURE_W`
-  - `RC_MAX_OUT_OF_FLOW` (macro, line 6537) `#define RC_MAX_OUT_OF_FLOW`
-  - `RC_DEFER_COLS` (macro, line 6645) `#define RC_DEFER_COLS`
-  - `RC_DEFER_RANGES` (macro, line 6646) `#define RC_DEFER_RANGES`
-  - `RC_DEFER_BAND_RUNS` (macro, line 6728) `#define RC_DEFER_BAND_RUNS`
-  - `BUI_CONIC_SLICES` (macro, line 9571) `#define BUI_CONIC_SLICES`
-  - `OV_MAX_DEPTH` (macro, line 10272) `#define OV_MAX_DEPTH`
-  - `H2R` (macro, line 10875) `#define H2R(p,q,t)`
-  - `PDF_PAGE_W` (macro, line 11749) `#define PDF_PAGE_W`
-  - `PDF_PAGE_H` (macro, line 11750) `#define PDF_PAGE_H`
-  - `PDF_MARGIN` (macro, line 11751) `#define PDF_MARGIN`
-  - `PNG_PAGE_W` (macro, line 11913) `#define PNG_PAGE_W`
-  - `PNG_MARGIN` (macro, line 11926) `#define PNG_MARGIN`
-  - `PNG_MAX_H` (macro, line 11927) `#define PNG_MAX_H`
-  - `FBW_W` (macro, line 13904) `#define FBW_W`
-  - `FBW_H` (macro, line 13905) `#define FBW_H`
-  - `FBW_HEADER` (macro, line 13906) `#define FBW_HEADER`
-  - `FBW_PAD` (macro, line 13907) `#define FBW_PAD`
-  - `FBW_LINE` (macro, line 13908) `#define FBW_LINE`
-  - `FBW_GUTTER` (macro, line 13909) `#define FBW_GUTTER`
-  - `FBW_MIN_SPLIT` (macro, line 13910) `#define FBW_MIN_SPLIT`
-  - `FBW_MAX_SPLIT` (macro, line 13911) `#define FBW_MAX_SPLIT`
-  - `FBW_COPY_BTN_W` (macro, line 13912) `#define FBW_COPY_BTN_W`
-  - `FBW_COPY_BTN_H` (macro, line 13913) `#define FBW_COPY_BTN_H`
-- Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/web_storage.h`, `include/webcaps.h`, `include/ws_hub.h`, `include/zoom.h`
+  - `UI_TOOLBAR_H` (macro, line 83) `#define UI_TOOLBAR_H`
+  - `UI_TITLEBAR_H` (macro, line 84) `#define UI_TITLEBAR_H`
+  - `UI_TABBAR_H` (macro, line 85) `#define UI_TABBAR_H`
+  - `UI_TAB_MIN_W` (macro, line 86) `#define UI_TAB_MIN_W`
+  - `UI_TAB_MAX_W` (macro, line 87) `#define UI_TAB_MAX_W`
+  - `UI_TAB_NEW_W` (macro, line 88) `#define UI_TAB_NEW_W`
+  - `UI_TAB_CLOSE_W` (macro, line 89) `#define UI_TAB_CLOSE_W`
+  - `UI_BTN_W` (macro, line 90) `#define UI_BTN_W`
+  - `UI_WIN_BTN_W` (macro, line 91) `#define UI_WIN_BTN_W`
+  - `UI_MARGIN` (macro, line 92) `#define UI_MARGIN`
+  - `UI_BTN_LEFT` (macro, line 93) `#define UI_BTN_LEFT`
+  - `UI_LIST_INDENT` (macro, line 97) `#define UI_LIST_INDENT`
+  - `UI_SCROLLBAR_W` (macro, line 102) `#define UI_SCROLLBAR_W`
+  - `UI_SCROLLBAR_MIN` (macro, line 103) `#define UI_SCROLLBAR_MIN`
+  - `UI_SCROLLBAR_PAD` (macro, line 104) `#define UI_SCROLLBAR_PAD`
+  - `UI_RESIZE_MARGIN` (macro, line 108) `#define UI_RESIZE_MARGIN`
+  - `UI_MENU_W` (macro, line 113) `#define UI_MENU_W`
+  - `UI_MENU_ITEM_H` (macro, line 114) `#define UI_MENU_ITEM_H`
+  - `UI_MENU_PAD` (macro, line 115) `#define UI_MENU_PAD`
+  - `UI_CHECK_SZ` (macro, line 116) `#define UI_CHECK_SZ`
+  - `UI_MENU_LABEL_H` (macro, line 117) `#define UI_MENU_LABEL_H`
+  - `UI_MENU_INPUT_H` (macro, line 118) `#define UI_MENU_INPUT_H`
+  - `UI_HAMBURGER_W` (macro, line 119) `#define UI_HAMBURGER_W`
+  - `UI_HAMBURGER_GAP` (macro, line 120) `#define UI_HAMBURGER_GAP`
+  - `UI_CURSOR_SIZE` (macro, line 121) `#define UI_CURSOR_SIZE`
+  - `UI_TOAST_PAD` (macro, line 122) `#define UI_TOAST_PAD`
+  - `OMNI_MAX_SUGG` (macro, line 123) `#define OMNI_MAX_SUGG`
+  - `UI_OMNI_ROW_H` (macro, line 124) `#define UI_OMNI_ROW_H`
+  - `UI_TWO_PI` (macro, line 125) `#define UI_TWO_PI`
+  - `UI_INPUT_PAD` (macro, line 129) `#define UI_INPUT_PAD`
+  - `UI_INPUT_MEASURE_W` (macro, line 132) `#define UI_INPUT_MEASURE_W`
+  - `UI_INPUT_WIDTH` (macro, line 133) `#define UI_INPUT_WIDTH`
+  - `UI_BUTTON_HPAD` (macro, line 134) `#define UI_BUTTON_HPAD`
+  - `UI_FORM_FIELDS_MAX` (macro, line 135) `#define UI_FORM_FIELDS_MAX`
+  - `UI_UNDERLINE_OFFSET` (macro, line 140) `#define UI_UNDERLINE_OFFSET`
+  - `UI_UNDERLINE_THICK` (macro, line 141) `#define UI_UNDERLINE_THICK`
+  - `UI_STRIKE_OFFSET` (macro, line 142) `#define UI_STRIKE_OFFSET`
+  - `UI_OVERLINE_OFFSET` (macro, line 143) `#define UI_OVERLINE_OFFSET`
+  - `UI_SLICE_MAX` (macro, line 147) `#define UI_SLICE_MAX`
+  - `UI_MENU_COUNT` (macro, line 206) `#define UI_MENU_COUNT`
+  - `UI_IMAGE_MAX_BODY` (macro, line 224) `#define UI_IMAGE_MAX_BODY`
+  - `UI_MAX_TABS` (macro, line 263) `#define UI_MAX_TABS`
+  - `UI_READER_COLUMN_W` (macro, line 582) `#define UI_READER_COLUMN_W`
+  - `FONT_STASH_MAX_SHEETS` (macro, line 1467) `#define FONT_STASH_MAX_SHEETS`
+  - `FONT_STASH_MAX_BYTES` (macro, line 1468) `#define FONT_STASH_MAX_BYTES`
+  - `JS_NAV_MAX` (macro, line 2121) `#define JS_NAV_MAX`
+  - `HIST_STEP_DEPTH_MAX` (macro, line 2123) `#define HIST_STEP_DEPTH_MAX`
+  - `JS_TICKS_PER_LOAD` (macro, line 2241) `#define JS_TICKS_PER_LOAD`
+  - `UI_RELOAD_X` (macro, line 2990) `#define UI_RELOAD_X`
+  - `RC_BOX_STACK_MAX` (macro, line 3308) `#define RC_BOX_STACK_MAX`
+  - `RC_FLOAT_MAX` (macro, line 3312) `#define RC_FLOAT_MAX`
+  - `RC_FLOAT_FIT_MIN` (macro, line 3319) `#define RC_FLOAT_FIT_MIN`
+  - `FLEX_MEASURE_W` (macro, line 4908) `#define FLEX_MEASURE_W`
+  - `FLEX_MIN_MEASURE_W` (macro, line 4913) `#define FLEX_MIN_MEASURE_W`
+  - `RC_MAX_OUT_OF_FLOW` (macro, line 6706) `#define RC_MAX_OUT_OF_FLOW`
+  - `RC_DEFER_COLS` (macro, line 6814) `#define RC_DEFER_COLS`
+  - `RC_DEFER_RANGES` (macro, line 6815) `#define RC_DEFER_RANGES`
+  - `RC_DEFER_BAND_RUNS` (macro, line 6897) `#define RC_DEFER_BAND_RUNS`
+  - `BUI_CONIC_SLICES` (macro, line 9740) `#define BUI_CONIC_SLICES`
+  - `OV_MAX_DEPTH` (macro, line 10441) `#define OV_MAX_DEPTH`
+  - `H2R` (macro, line 11044) `#define H2R(p,q,t)`
+  - `PDF_PAGE_W` (macro, line 11918) `#define PDF_PAGE_W`
+  - `PDF_PAGE_H` (macro, line 11919) `#define PDF_PAGE_H`
+  - `PDF_MARGIN` (macro, line 11920) `#define PDF_MARGIN`
+  - `PNG_PAGE_W` (macro, line 12082) `#define PNG_PAGE_W`
+  - `PNG_MARGIN` (macro, line 12095) `#define PNG_MARGIN`
+  - `PNG_MAX_H` (macro, line 12096) `#define PNG_MAX_H`
+  - `FBW_W` (macro, line 14073) `#define FBW_W`
+  - `FBW_H` (macro, line 14074) `#define FBW_H`
+  - `FBW_HEADER` (macro, line 14075) `#define FBW_HEADER`
+  - `FBW_PAD` (macro, line 14076) `#define FBW_PAD`
+  - `FBW_LINE` (macro, line 14077) `#define FBW_LINE`
+  - `FBW_GUTTER` (macro, line 14078) `#define FBW_GUTTER`
+  - `FBW_MIN_SPLIT` (macro, line 14079) `#define FBW_MIN_SPLIT`
+  - `FBW_MAX_SPLIT` (macro, line 14080) `#define FBW_MAX_SPLIT`
+  - `FBW_COPY_BTN_W` (macro, line 14081) `#define FBW_COPY_BTN_W`
+  - `FBW_COPY_BTN_H` (macro, line 14082) `#define FBW_COPY_BTN_H`
+- Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/data_url.h`, `include/download.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/hostedit.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/web_storage.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/ws_hub.h`, `include/zoom.h`
 
 ## gui/browser_ui_internal.h
 - Doc: ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb...

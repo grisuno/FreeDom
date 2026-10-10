@@ -3,6 +3,14 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `cvr_reset` | function | `src/css_vars.c:102` | `void cvr_reset(cvr_table *t)` |
+| `cvr_resolve` | function | `src/css_vars.c:230` | `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)` |
+| `cvr_set` | function | `src/css_vars.c:67` | `int cvr_set(cvr_table *t, const char *name, size_t nlen, const char *value, size_t vlen)` |
+| `dup_n` | function | `src/css_vars.c:21` | `static char *dup_n(const char *s, size_t n)` |
+| `find_slot` | function | `src/css_vars.c:32` | `static size_t find_slot(const cvr_table *t, const char *name, size_t nlen)` |
+| `grow` | function | `src/css_vars.c:45` | `static int grow(cvr_table *t)` |
+| `is_ws` | function | `src/css_vars.c:120` | `static int is_ws(char c)` |
+| `name_hash` | function | `src/css_vars.c:12` | `static size_t name_hash(const char *s, size_t n)` |
 | `resolve_rec` | function | `src/css_vars.c:178` | `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,                   ...` |
 | `scope_get` | function | `src/css_vars.c:164` | `static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen)` |
 | `without_important` | function | `src/css_vars.c:124` | `static size_t without_important(const char *val, size_t n)` |
@@ -175,45 +183,52 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `fb_buffer_reset` | function | `src/freebug.c:78` | `void fb_buffer_reset(fb_buffer *b)` |
 | `fb_level_name` | function | `src/freebug.c:110` | `const char *fb_level_name(int level)` |
 | `whole` | function | `src/freebug.c:5` | `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);` |
-| `BLOCKED` | function | `src/freedom.c:802` | `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);` |
-| `CSS_DROPS_REPORT_MAX` | macro | `src/freedom.c:161` | `#define CSS_DROPS_REPORT_MAX` |
-| `EXIT_ERROR` | macro | `src/freedom.c:44` | `#define EXIT_ERROR` |
-| `EXIT_OK` | macro | `src/freedom.c:43` | `#define EXIT_OK` |
-| `EXIT_USAGE` | macro | `src/freedom.c:45` | `#define EXIT_USAGE` |
-| `HL_JS_NAV_MAX` | macro | `src/freedom.c:772` | `#define HL_JS_NAV_MAX` |
+| `BLOCKED` | function | `src/freedom.c:903` | `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);` |
+| `CSS_DROPS_REPORT_MAX` | macro | `src/freedom.c:164` | `#define CSS_DROPS_REPORT_MAX` |
+| `EXIT_ERROR` | macro | `src/freedom.c:47` | `#define EXIT_ERROR` |
+| `EXIT_OK` | macro | `src/freedom.c:46` | `#define EXIT_OK` |
+| `EXIT_USAGE` | macro | `src/freedom.c:48` | `#define EXIT_USAGE` |
+| `HL_FONT_MAX_BYTES` | macro | `src/freedom.c:539` | `#define HL_FONT_MAX_BYTES` |
+| `HL_FONT_MAX_SHEETS` | macro | `src/freedom.c:538` | `#define HL_FONT_MAX_SHEETS` |
+| `HL_JS_NAV_MAX` | macro | `src/freedom.c:873` | `#define HL_JS_NAV_MAX` |
 | `_DEFAULT_SOURCE` | macro | `src/freedom.c:10` | `#define _DEFAULT_SOURCE` |
 | `_POSIX_C_SOURCE` | macro | `src/freedom.c:9` | `#define _POSIX_C_SOURCE` |
-| `elsewhere` | function | `src/freedom.c:837` | `* page whose script immediately forwards elsewhere (e.g. a search engine's  * JS-capability inter...` |
-| `fetch_and_render_one` | function | `src/freedom.c:776` | `static int fetch_and_render_one(const char *url, char **out_nav)` |
-| `foldback_cookies` | function | `src/freedom.c:477` | `static void foldback_cookies(const char *url, const char *jar)` |
-| `gets` | function | `src/freedom.c:411` | `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...` |
-| `headless_fetch` | function | `src/freedom.c:415` | `static int headless_fetch(void *ctx, const char *method, const char *url,                        ...` |
-| `headless_load_hosts` | function | `src/freedom.c:223` | `static void headless_load_hosts(void)` |
-| `is_blank_text` | function | `src/freedom.c:253` | `static int is_blank_text(const char *s)` |
-| `is_http_url` | function | `src/freedom.c:77` | `static int is_http_url(const char *s)` |
-| `is_https_url` | function | `src/freedom.c:73` | `static int is_https_url(const char *s)` |
-| `is_overlay_http` | function | `src/freedom.c:82` | `static int is_overlay_http(const char *s)` |
-| `main` | function | `src/freedom.c:1066` | `int main(int argc, char **argv)` |
-| `now_us` | function | `src/freedom.c:136` | `static uint64_t now_us(void)` |
-| `only` | function | `src/freedom.c:645` | `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...` |
-| `parent` | function | `src/freedom.c:863` | `* gated by the parent (ln_resolve: a local target stays under the document's  * directory, a remo...` |
-| `pool` | function | `src/freedom.c:592` | `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...` |
-| `print_console` | function | `src/freedom.c:359` | `static void print_console(const fb_buffer *log)` |
-| `print_css_drops` | function | `src/freedom.c:501` | `static void print_css_drops(const char *html, size_t len)` |
-| `print_doc` | function | `src/freedom.c:266` | `static void print_doc(const rd_doc *doc)` |
-| `print_dom` | function | `src/freedom.c:376` | `static void print_dom(const rd_doc *doc)` |
-| `print_dom_css` | function | `src/freedom.c:391` | `static void print_dom_css(const rd_doc *doc)` |
-| `print_usage` | function | `src/freedom.c:47` | `static void print_usage(FILE *fp, const char *prog)` |
-| `read_file` | function | `src/freedom.c:205` | `static char *read_file(const char *path, size_t *out_len)` |
-| `render_page` | function | `src/freedom.c:532` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
-| `run_dump_video` | function | `src/freedom.c:1047` | `static int run_dump_video(const char *url)` |
-| `run_headless` | function | `src/freedom.c:900` | `static int run_headless(const char *target)` |
-| `sf_reason` | function | `src/freedom.c:757` | `static const char *sf_reason(sf_status ss)` |
-| `timings_dump` | function | `src/freedom.c:150` | `static void timings_dump(void)` |
-| `timings_enabled` | function | `src/freedom.c:146` | `static int timings_enabled(void)` |
-| `timings_ensure_init` | function | `src/freedom.c:142` | `static void timings_ensure_init(void)` |
-| `user_impersonate_enabled` | function | `src/freedom.c:198` | `static int user_impersonate_enabled(void)` |
-| `video_fetch_with_fallback` | function | `src/freedom.c:936` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,                      ...` |
+| `elsewhere` | function | `src/freedom.c:938` | `* page whose script immediately forwards elsewhere (e.g. a search engine's  * JS-capability inter...` |
+| `fetch_and_render_one` | function | `src/freedom.c:877` | `static int fetch_and_render_one(const char *url, char **out_nav)` |
+| `first` | function | `src/freedom.c:689` | `* always cleared first (fetch_and_render may paint several pages per      * process). A NULL top_...` |
+| `foldback_cookies` | function | `src/freedom.c:480` | `static void foldback_cookies(const char *url, const char *jar)` |
+| `gets` | function | `src/freedom.c:414` | `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...` |
+| `headless_fetch` | function | `src/freedom.c:418` | `static int headless_fetch(void *ctx, const char *method, const char *url,                        ...` |
+| `headless_load_hosts` | function | `src/freedom.c:226` | `static void headless_load_hosts(void)` |
+| `hl_css_sink` | function | `src/freedom.c:562` | `static void hl_css_sink(void *vctx, const char *url,                         const char *body, si...` |
+| `hl_font_fetch` | function | `src/freedom.c:599` | `static int hl_font_fetch(void *vctx, const char *url,                          int *out_status, c...` |
+| `hl_font_stash` | struct | `src/freedom.c:541` | `` |
+| `hl_font_stash_free` | function | `src/freedom.c:549` | `static void hl_font_stash_free(hl_font_stash *s)` |
+| `is_blank_text` | function | `src/freedom.c:256` | `static int is_blank_text(const char *s)` |
+| `is_http_url` | function | `src/freedom.c:80` | `static int is_http_url(const char *s)` |
+| `is_https_url` | function | `src/freedom.c:76` | `static int is_https_url(const char *s)` |
+| `is_overlay_http` | function | `src/freedom.c:85` | `static int is_overlay_http(const char *s)` |
+| `main` | function | `src/freedom.c:1167` | `int main(int argc, char **argv)` |
+| `now_us` | function | `src/freedom.c:139` | `static uint64_t now_us(void)` |
+| `only` | function | `src/freedom.c:746` | `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...` |
+| `parent` | function | `src/freedom.c:964` | `* gated by the parent (ln_resolve: a local target stays under the document's  * directory, a remo...` |
+| `pool` | function | `src/freedom.c:674` | `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...` |
+| `print_console` | function | `src/freedom.c:362` | `static void print_console(const fb_buffer *log)` |
+| `print_css_drops` | function | `src/freedom.c:504` | `static void print_css_drops(const char *html, size_t len)` |
+| `print_doc` | function | `src/freedom.c:269` | `static void print_doc(const rd_doc *doc)` |
+| `print_dom` | function | `src/freedom.c:379` | `static void print_dom(const rd_doc *doc)` |
+| `print_dom_css` | function | `src/freedom.c:394` | `static void print_dom_css(const rd_doc *doc)` |
+| `print_usage` | function | `src/freedom.c:50` | `static void print_usage(FILE *fp, const char *prog)` |
+| `read_file` | function | `src/freedom.c:208` | `static char *read_file(const char *path, size_t *out_len)` |
+| `render_page` | function | `src/freedom.c:608` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
+| `run_dump_video` | function | `src/freedom.c:1148` | `static int run_dump_video(const char *url)` |
+| `run_headless` | function | `src/freedom.c:1001` | `static int run_headless(const char *target)` |
+| `sf_reason` | function | `src/freedom.c:858` | `static const char *sf_reason(sf_status ss)` |
+| `timings_dump` | function | `src/freedom.c:153` | `static void timings_dump(void)` |
+| `timings_enabled` | function | `src/freedom.c:149` | `static int timings_enabled(void)` |
+| `timings_ensure_init` | function | `src/freedom.c:145` | `static void timings_ensure_init(void)` |
+| `user_impersonate_enabled` | function | `src/freedom.c:201` | `static int user_impersonate_enabled(void)` |
+| `video_fetch_with_fallback` | function | `src/freedom.c:1037` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,                      ...` |
 | `_GNU_SOURCE` | macro | `src/hls.c:21` | `#define _GNU_SOURCE` |
 | `_POSIX_C_SOURCE` | macro | `src/hls.c:22` | `#define _POSIX_C_SOURCE` |
 | `hls_parse` | function | `src/hls.c:80` | `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)` |
@@ -481,20 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `jg_aggregate` | function | `src/js_geom.c:124` | `int jg_aggregate(jg_table *t, dom_node_id (*parent)(void *ctx, dom_node_id node), void *ctx)` |
 | `jg_decode` | function | `src/js_geom.c:186` | `int jg_decode(const int32_t *in, size_t n, jg_table *out)` |
 | `jg_encode` | function | `src/js_geom.c:167` | `int jg_encode(const jg_table *t, int32_t *out, size_t cap)` |
-| `jg_find` | function | `src/js_geom.c:96` | `const jg_rect *jg_find(const jg_table *t, dom_node_id node)` |
-| `jg_finish` | function | `src/js_geom.c:83` | `int jg_finish(jg_table *t)` |
-| `jg_free` | function | `src/js_geom.c:21` | `void jg_free(jg_table *t)` |
-| `jg_hash` | function | `src/js_geom.c:221` | `uint64_t jg_hash(const jg_table *t)` |
-| `jg_init` | function | `src/js_geom.c:17` | `void jg_init(jg_table *t)` |
-| `jg_wire_len` | function | `src/js_geom.c:163` | `size_t jg_wire_len(const jg_table *t)` |
-| `push` | function | `src/js_geom.c:45` | `static int push(jg_table *t, dom_node_id node, int32_t x, int32_t y, int32_t w, int32_t h)` |
-| `slot_of` | function | `src/js_geom.c:102` | `static uint32_t slot_of(dom_node_id n)` |
-| `unite` | function | `src/js_geom.c:63` | `static int unite(jg_rect *a, const jg_rect *b)` |
-| `jd_lp_set` | function | `src/js_location.c:24` | `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,                       const ...` |
-| `jd_pop_state` | function | `src/js_location.c:250` | `int jd_pop_state(js_context *ctx, int index)` |
-| `jd_set_location` | function | `src/js_location.c:139` | `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)` |
-| `jd_take_history` | function | `src/js_location.c:219` | `char *jd_take_history(js_context *ctx, int *go)` |
-| `jd_take_nav_request` | function | `src/js_location.c:173` | `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)` |
-| `jl_m_hist_target` | function | `src/js_location.c:35` | `JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

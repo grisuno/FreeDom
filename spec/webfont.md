@@ -132,6 +132,36 @@ order as the worker sheet, extern-then-inline, so first-wins agrees).
 5. **Dado** `url()` de más de `WF_URL_MAX` **entonces** esa entrada se descarta (fail closed), el resto sobrevive.
 6. **Dado** el mismo texto con y sin escaneo **entonces** el render sin caras registradas es byte-idéntico (el scanner no cambia nada por sí solo).
 
+## Wiring GUI/headless + hook del pintor (b3b)
+
+- **Acumulación sin cambio de protocolo:** `tab_set_css_sink` observa cada body
+  CSS servido (2xx) en el único punto de servicio (`tab_serve_subreq`: cubre
+  serial + pool de prefetch + XHR-a-CSS; un wrapper del fetcher perdería lo
+  servido desde el pool). El sink retiene (url absoluta + bytes, topes de
+  conteo y tamaño) solo en página trusted. El inline `<style>` sale del HTML
+  que el padre ya retiene (`cur_html` / `html` headless). El wire worker→padre
+  no cambia: el sink es observador opaco, NULL por defecto.
+- **Cuándo:** tras `tab_load_full` (vista lista) y antes del layout/paint;
+  `tsh_webfont_clear()` solo cuando cambia la URL del documento (las caras son
+  por documento; un re-render misma-URL reutiliza el registro y no refetchea).
+  Solo si la página es trusted (`page_trusted(w)` en GUI, `--js=on` en
+  headless): sin fetch se pasa `fetch == NULL` y el loader es no-op — el
+  render queda byte-idéntico al actual.
+- **Página local (page_url NULL):** el pase corre igual con fetch válido:
+  solo caras `data:` (autocontenidas, sin red) y https absolutas; las
+  relativas se omiten (sin base). Untrusted (`fetch == NULL`) sigue no-op.
+- **Hook del pintor:** `rd_block.fontface` → `rc_ext.webfont` (construcción por
+  bloque, junto a `family`) → `rc_frag.webfont` (en la creación, junto a
+  `family`; `rc_add_frag` zero-init + inicializadores designados lo dejan en 0
+  donde no aplica) → `content_font(..., wfh)` en los 2 sitios de autor
+  (medición `flow_text` y pintado de frags); los ~19 sitios de chrome pasan 0.
+  `g_cur_font.wfh` alimenta `tsh_shape/measure/draw` vía `get_entry_ex`:
+  cara registrada gana, miss ⇒ bucket (fail-visible, nunca fail-hard).
+- **Medición honesta:** el worker maqueta con métricas fallback (cero bytes de
+  fuente cruzan el sandbox); el pintor puede diferir donde los advances
+  difieran. Para iconos/glifos sueltos la deriva es ~0; para texto corrido es
+  la aproximación v1 documentada.
+
 ## Tabla de errores
 
 | Condición | Resultado |

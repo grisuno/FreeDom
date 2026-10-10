@@ -28,7 +28,7 @@
 | `fuzz/fuzz_url.c` | - | fuzz | 2 | 0 |
 | `fuzz/fuzz_web_storage.c` | - | fuzz | 0 | 0 |
 | `fuzz/fuzz_webfont.c` | libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). | fuzz | 1 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 526 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 531 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 10 | 2 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -96,8 +96,8 @@
 | `include/secure_fetch.h` | sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *... | include | 38 | 6 |
 | `include/svg_paint.h` | svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred... | include | 2 | 2 |
 | `include/svg_render.h` | sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>... | include | 19 | 6 |
-| `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 39 | 4 |
-| `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 13 | 6 |
+| `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 41 | 4 |
+| `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 13 | 7 |
 | `include/textfield.h` | tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at... | include | 15 | 3 |
 | `include/tls_impersonate.h` | ti_req: Request: parent -> helper. | include | 23 | 5 |
 | `include/ui.h` | ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no... | include | 17 | 6 |
@@ -105,8 +105,8 @@
 | `include/util.h` | — shared pure helpers (no I/O except where noted). | include | 6 | 10 |
 | `include/web_storage.h` | wst_new: web_storage — in-MEMORY localStorage for trusted hosts (owner decision: nothing... | include | 13 | 10 |
 | `include/webcaps.h` | wc_caps: Full capability table for one page. | include | 5 | 4 |
-| `include/webfont.h` | wf_name_hash: FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names. | include | 17 | 10 |
-| `include/webfont_load.h` | wf_sheet: One collected stylesheet: text plus the URL it was fetched from (the * resolution base... | include | 7 | 2 |
+| `include/webfont.h` | wf_name_hash: FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names. | include | 17 | 12 |
+| `include/webfont_load.h` | wf_sheet: One collected stylesheet: text plus the URL it was fetched from (the * resolution base... | include | 7 | 4 |
 | `include/ws_hub.h` | wh_new: #define WH_MAX 8   /* == JD_WS_MAX: sockets per page /* Event kinds delivered to the... | include | 15 | 3 |
 | `include/zoom.h` | zm_clamp: stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser. | include | 10 | 5 |
 | `install.sh` | Exit immediately if a command exits with a non-zero status, | root | 0 | 0 |
@@ -117,7 +117,7 @@
 | `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 22 | 0 |
 | `src/browser.c` | clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {... | src | 41 | 0 |
 | `src/compositor.c` | eff_z: Not a stacking context: a positioned box with z:auto still paints in the *... | src | 5 | 0 |
-| `src/css.c` | css_match: if (!(inherited_px > 0.0)) inherited_px = CL_INITIAL_FONT_SIZE; if (o->font_scale ==... | src | 230 | 0 |
+| `src/css.c` | css_match: if (!(inherited_px > 0.0)) inherited_px = CL_INITIAL_FONT_SIZE; if (o->font_scale ==... | src | 231 | 0 |
 | `src/css_atrule.c` | keyword_at: Scratch size for one declaration or selector handed to the caller. | src | 11 | 0 |
 | `src/css_box.c` | calc_val: `pct` is the percentage component, carried through the arithmetic exactly like `em`... | src | 49 | 0 |
 | `src/css_chain.c` | cch_node: One element's selector inputs (tag/id/classes) plus its css_element view, with *... | src | 17 | 0 |
@@ -138,7 +138,7 @@
 | `src/form.c` | put_char: No I/O, no global state. | src | 8 | 0 |
 | `src/frame_clock.c` | - | src | 4 | 0 |
 | `src/freebug.c` | - | src | 9 | 0 |
-| `src/freedom.c` | is_overlay_http: fprintf(fp, "  --dump-video-url: headless, print the first detected video... | src | 39 | 0 |
+| `src/freedom.c` | is_overlay_http: fprintf(fp, "  --dump-video-url: headless, print the first detected video... | src | 46 | 0 |
 | `src/hls.c` | last_char: Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not... | src | 10 | 0 |
 | `src/hostblock.c` | table_probe: Finds the slot for key (length klen) in t, which must have a free slot. | src | 18 | 0 |
 | `src/hostedit.c` | valid_host: #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c... | src | 13 | 0 |
@@ -177,7 +177,7 @@
 | `src/request_policy.c` | public_suffix_labels: Number of labels of the public suffix (eTLD) of a lowercased host... | src | 11 | 0 |
 | `src/secure_fetch.c` | tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a... | src | 61 | 0 |
 | `src/svg_render.c` | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | src | 33 | 0 |
-| `src/tab.c` | write_field: Writes one length-prefixed string field (the write mirror of read_field): a size_t... | src | 119 | 0 |
+| `src/tab.c` | write_field: Writes one length-prefixed string field (the write mirror of read_field): a size_t... | src | 120 | 0 |
 | `src/text_shape.c` | web_magic_ok: True for font programs FreeType parses without new decoders: wOFF/TrueType/... | src | 26 | 0 |
 | `src/textfield.c` | - | src | 12 | 0 |
 | `src/tls_impersonate.c` | get_bytes: \| ((uint32_t)r->p[r->off + 3] << 24); r->off += 4; return v; } static uint64_t... | src | 20 | 0 |
@@ -196,7 +196,7 @@
 | `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 57 | 0 |
 | `tests/test_browser.c` | test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete... | tests | 17 | 0 |
 | `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 21 | 0 |
-| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 332 | 0 |
+| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 333 | 0 |
 | `tests/test_css_atrule.c` | test_css_atrule -- @supports evaluation and @layer ranks (spec/css_atrule.md). | tests | 10 | 0 |
 | `tests/test_css_box.c` | - | tests | 9 | 0 |
 | `tests/test_css_color.c` | test_hsl_fractional_hue: A fractional hue is a <number> too (and hsl() takes an <angle>, whose... | tests | 36 | 0 |
@@ -216,7 +216,7 @@
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
 | `tests/test_freebug.c` | - | tests | 13 | 0 |
-| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 70 | 0 |
+| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 72 | 0 |
 | `tests/test_hls.c` | - | tests | 16 | 0 |
 | `tests/test_hostblock.c` | - | tests | 22 | 0 |
 | `tests/test_hostedit.c` | - | tests | 11 | 0 |
@@ -246,7 +246,7 @@
 | `tests/test_request_policy.c` | test_site_of_psl: } static void test_site_of_multi_suffix(void **state) { (void)state; char... | tests | 12 | 0 |
 | `tests/test_secure_fetch.c` | test_enforce_allowlisted_insecure: The allowlist override: the user's sovereign per-host escape... | tests | 50 | 0 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 16 | 0 |
-| `tests/test_tab.c` | expect_eval: state = f; return 0; } static int teardown(void **state) { fixture *f = (fixture... | tests | 115 | 0 |
+| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 120 | 0 |
 | `tests/test_text_shape.c` | read_host_font: Reads a host TrueType file when one exists (same philosophy as the shaping *... | tests | 12 | 0 |
 | `tests/test_textfield.c` | - | tests | 8 | 0 |
 | `tests/test_tls_impersonate.c` | - | tests | 11 | 0 |
@@ -255,7 +255,7 @@
 | `tests/test_web_storage.c` | - | tests | 9 | 0 |
 | `tests/test_webcaps.c` | mk: projection, and the headless operator-flag path.  #include <setjmp.h> #include <stdarg.h>... | tests | 11 | 0 |
 | `tests/test_webfont.c` | - | tests | 13 | 0 |
-| `tests/test_webfont_load.c` | test_b64: if (b == NULL) { fclose(f); return NULL; } if (fread(b, 1, (size_t)sz, f) !=... | tests | 15 | 0 |
+| `tests/test_webfont_load.c` | test_b64: if (b == NULL) { fclose(f); return NULL; } if (fread(b, 1, (size_t)sz, f) !=... | tests | 16 | 0 |
 | `tests/test_ws_hub.c` | wait_notify: #include <string.h> #include <cmocka.h> #include "ws_hub.h" typedef struct rec {... | tests | 13 | 0 |
 | `tests/test_zoom.c` | - | tests | 11 | 0 |
 | `tools/ffgeom.py` | ffgeom -- Firefox geometry as TEXT, no image reading. | tools | 12 | 0 |

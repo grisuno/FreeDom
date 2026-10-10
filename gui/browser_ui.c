@@ -40,6 +40,8 @@
 #include "render_policy.h"
 #include "request_policy.h"
 #include "text_shape.h"
+#include "webfont.h"
+#include "webfont_load.h"
 #include "textfield.h"
 #include "webcaps.h"
 #include "ui.h"
@@ -396,6 +398,17 @@ typedef struct browser_window {
     char  *cur_html;
     size_t cur_html_len;
     char  *cur_top;
+
+    /* @font-face pass (spec/webfont.md b3b): stash of served external CSS
+     * (rebuilt every load via the tab css sink, freed after the font pass),
+     * plus font_done_for naming the URL whose faces sit registered in the
+     * text shaper (NULL = none; a re-render for the same URL skips the pass
+     * and reuses the registry, a navigation clears and re-runs it). */
+    char   **font_css_url;    /* owned absolute sheet URLs ("" = no base) */
+    char   **font_css_text;   /* owned sheet bodies */
+    size_t  *font_css_len;
+    size_t   nfont_css, font_css_bytes;
+    char    *font_done_for;
 
     uint32_t            pointer_serial; /* last pointer-enter serial, for set_cursor */
     struct wl_cursor_theme *cursor_theme;
@@ -1448,6 +1461,136 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     return 0;
 }
 
+/* @font-face stash bounds (spec/webfont.md b3b, anti-DoS): at most 16 served
+ * sheets and 2 MiB retained per load. Real pages name a handful of stylesheets;
+ * beyond the caps the pass still runs on what fit (fail-visible, never the page). */
+#define FONT_STASH_MAX_SHEETS 16
+#define FONT_STASH_MAX_BYTES  ((size_t)(2u * 1024u * 1024u))
+
+/* Frees the served-CSS stash (every render frees what its load retained). The
+ * registry guard (font_done_for) survives: a same-URL re-render skips the pass
+ * and keeps painting with the registered faces. */
+static void font_stash_reset(browser_window *w) {
+    if (w == NULL) return;
+    for (size_t i = 0; i < w->nfont_css; ++i) {
+        free(w->font_css_url[i]);
+        free(w->font_css_text[i]);
+    }
+    free(w->font_css_url);
+    free(w->font_css_text);
+    free(w->font_css_len);
+    w->font_css_url = NULL;
+    w->font_css_text = NULL;
+    w->font_css_len = NULL;
+    w->nfont_css = 0;
+    w->font_css_bytes = 0;
+}
+
+/* tab_css_sink_fn: retains each served 2xx CSS body for the @font-face pass.
+ * Trusted pages only (untrusted CSS is still applied by the worker, but its
+ * fonts never reach the parent registry). The raw worker URL is resolved to an
+ * absolute https sheet URL here (the loader's resolution base); unresolvable
+ * keeps "" (only absolute/data: font URLs stay usable). Bounded: over the caps
+ * the sheet is dropped, the pass still runs on the rest. */
+static void gui_css_sink(void *vctx, const char *url,
+                         const char *body, size_t len,
+                         const char *ctype) {
+    browser_window *w = (browser_window *)vctx;
+    (void)ctype;   /* tab_serve_subreq only calls us for 2xx CSS bodies */
+    if (w == NULL || url == NULL || body == NULL || len == 0) return;
+    if (!page_trusted(w) || w->cur_top == NULL) return;
+    if (w->nfont_css >= FONT_STASH_MAX_SHEETS) return;
+    if (len > FONT_STASH_MAX_BYTES - w->font_css_bytes) return;
+
+    char abs[URL_MAX_LEN];
+    abs[0] = '\0';
+    if (strncmp(url, "https://", 8) == 0) {
+        size_t ul = strlen(url);
+        if (ul >= sizeof abs) return;
+        memcpy(abs, url, ul + 1);
+    } else if (strncmp(url, "data:", 5) != 0) {
+        ln_result ln;
+        if (ln_resolve(w->cur_top, url, &ln) != LN_OK
+            || ln.action != LN_NAVIGATE || ln.kind != LN_TARGET_HTTPS) return;
+        size_t tl = strlen(ln.target);
+        if (tl >= sizeof abs) return;
+        memcpy(abs, ln.target, tl + 1);
+    }
+    char *ucopy = strdup(abs);
+    char *bcopy = (char *)malloc(len + 1);
+    if (ucopy == NULL || bcopy == NULL) { free(ucopy); free(bcopy); return; }
+    memcpy(bcopy, body, len);
+    bcopy[len] = '\0';
+
+    size_t n = w->nfont_css + 1;
+    char **nu = (char **)realloc(w->font_css_url, n * sizeof *nu);
+    char **nt = (char **)realloc(w->font_css_text, n * sizeof *nt);
+    size_t *nl = (size_t *)realloc(w->font_css_len, n * sizeof *nl);
+    if (nu == NULL || nt == NULL || nl == NULL) {
+        /* realloc failure leaves the old arrays valid: only release the custody
+         * of the slot we failed to append (never touch w->font_css_* here). */
+        if (nu != NULL) w->font_css_url = nu;
+        if (nt != NULL) w->font_css_text = nt;
+        if (nl != NULL) w->font_css_len = nl;
+        free(ucopy);
+        free(bcopy);
+        return;
+    }
+    w->font_css_url = nu;
+    w->font_css_text = nt;
+    w->font_css_len = nl;
+    w->font_css_url[w->nfont_css] = ucopy;
+    w->font_css_text[w->nfont_css] = bcopy;
+    w->font_css_len[w->nfont_css] = len;
+    w->nfont_css = n;
+    w->font_css_bytes += len;
+}
+
+/* wf_fetch_fn around the page's own policy gate: font bytes download exactly
+ * like any other subresource of this page (blocklist, realm, TLS). data: faces
+ * never reach here (the loader decodes them in place). */
+static int gui_font_fetch(void *vctx, const char *url,
+                          int *out_status, char **out_body, size_t *out_len,
+                          char **out_ctype) {
+    browser_window *w = (browser_window *)vctx;
+    return gui_subresource_fetch(w, "GET", url, NULL, 0,
+                                 out_status, out_body, out_len, out_ctype);
+}
+
+/* Runs the @font-face pass after a successful load, before layout: registers
+ * the page's faces from the stashed extern sheets + the retained inline HTML,
+ * then drops the stash. Same-URL re-render: skip (registry still valid).
+ * Navigation: clear the registry first (faces are per document). Untrusted:
+ * no-op (fetch NULL) -- the render stays byte-identical. */
+static void run_font_pass(browser_window *w) {
+    if (w == NULL) return;
+    if (!page_trusted(w)) { font_stash_reset(w); return; }
+    const char *key = (w->cur_top != NULL) ? w->cur_top : "";
+    if (w->font_done_for != NULL && strcmp(w->font_done_for, key) == 0) {
+        font_stash_reset(w);
+        return;
+    }
+    tsh_webfont_clear();
+    wf_sheet *sheets = NULL;
+    if (w->nfont_css != 0) {
+        sheets = (wf_sheet *)calloc(w->nfont_css, sizeof *sheets);
+        if (sheets != NULL) {
+            for (size_t i = 0; i < w->nfont_css; ++i) {
+                sheets[i].text = w->font_css_text[i];
+                sheets[i].len = w->font_css_len[i];
+                sheets[i].url = w->font_css_url[i];
+            }
+        }
+    }
+    (void)wf_load_document(gui_font_fetch, w, w->cur_top,
+                           sheets, (sheets != NULL) ? w->nfont_css : 0,
+                           w->cur_html, w->cur_html_len);
+    free(sheets);
+    font_stash_reset(w);
+    free(w->font_done_for);
+    w->font_done_for = strdup(key);
+}
+
 /* pf_fetch_fn for page images (Hito 29): resolves the raw src against the page
  * origin and fetches it under the SAME gates as the serial image loop always
  * applied (auth, realm routing fail-closed, body cap, per-host allowlist
@@ -2172,6 +2315,10 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
             gated.pool = &subpool;
     }
     tab_set_fetcher(t, pf_pooled_fetch, &gated);
+    /* @font-face stash (spec/webfont.md b3b): fresh per load; the sink observes
+     * every served CSS body (serial and pool paths alike). */
+    font_stash_reset(w);
+    tab_set_css_sink(t, gui_css_sink, w);
 
     tab_page page;
     memset(&page, 0, sizeof page);
@@ -2195,8 +2342,14 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     if (load_ts != TAB_OK) {
         browser_set_page(&w->bs, NULL, "Failed to render page in sandbox.", 1);
         tab_close(t);
+        font_stash_reset(w);
         return;
     }
+
+    /* Author webfonts (spec/webfont.md b3b): register the page's faces from
+     * the stashed extern sheets + retained inline HTML, before layout/paint.
+     * Trusted pages only; untrusted renders byte-identical. */
+    run_font_pass(w);
 
     /* Fold JS-set session cookies back into the ephemeral network jar before any
      * JS-driven navigation, so a consent/redirect hop carries them (trusted host only). */
@@ -2522,6 +2675,8 @@ static void tab_restore(browser_window *w) {
 /* Frees the LIVE page's owned state (used when closing the foreground tab). */
 static void free_live_page(browser_window *w) {
     clear_doc(w);                 /* inputs, images, doc, hover_href */
+    font_stash_reset(w);          /* served-CSS stash never outlives its load */
+    free(w->font_done_for); w->font_done_for = NULL;
     free(w->cur_html); w->cur_html = NULL;
     free(w->cur_top);  w->cur_top = NULL;
     browser_free(&w->bs);
@@ -2942,6 +3097,9 @@ typedef struct rc_frag {
      * (sans), transform 0 (none), letter_spacing 0, valign_dy 0, shadow_color -1
      * (no shadow), opacity -1 (opaque). */
     int         family;       /* css_font_family */
+    /* Author @font-face match (spec/webfont.md b3b): wf_name_hash, 0 = none.
+     * rc_add_frag zeroes it; the flow_text copy below sets it from rc_ext. */
+    unsigned    webfont;
     int         transform;    /* css_text_transform */
     double      letter_spacing;/* px between clusters */
     double      valign_dy;    /* baseline shift px (sub/super) */
@@ -3423,7 +3581,12 @@ static const char *family_face(int family) {
 static tsh_font g_cur_font;
 static double    g_cur_px;
 
-static void content_font(cairo_t *cr, double size, int bold, int italic, int family) {
+/* Selects the slice font: the toy face (for the fallback path and chrome) plus
+ * the HarfBuzz descriptor the shapers measure/draw with. wfh names a registered
+ * @font-face (spec/webfont.md b3b), 0 = local bucket stack. Author call sites
+ * pass their frag/block hash; every chrome call site passes 0. */
+static void content_font(cairo_t *cr, double size, int bold, int italic, int family,
+                         unsigned wfh) {
     cairo_select_font_face(cr, family_face(family),
                            italic ? CAIRO_FONT_SLANT_ITALIC : CAIRO_FONT_SLANT_NORMAL,
                            bold ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL);
@@ -3431,6 +3594,7 @@ static void content_font(cairo_t *cr, double size, int bold, int italic, int fam
     g_cur_font.family = family;
     g_cur_font.bold = bold;
     g_cur_font.italic = italic;
+    g_cur_font.wfh = wfh;
     g_cur_px = size;
 }
 
@@ -3747,6 +3911,9 @@ static void open_line(rc_layout *L, rc_state *s) {
  * gated by caps.css upstream) and handed to flow_text. */
 typedef struct rc_ext {
     int    family;        /* css_font_family */
+    /* Author @font-face match (spec/webfont.md b3b): wf_name_hash, 0 = none.
+     * Rides beside family everywhere it does (block -> frag -> content_font). */
+    unsigned webfont;
     int    transform;     /* css_text_transform */
     double letter_spacing;/* px between clusters */
     double word_spacing;  /* px added to each inter-word gap */
@@ -3792,7 +3959,8 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
          * inline highlight across the whole line (they do not). */
         if (s->line_first == L->nfrag - 1) { s->line_bg = s->bg_rgb; s->line_bg_mixed = 0; }
         else if (s->bg_rgb != s->line_bg) s->line_bg_mixed = 1;
-        f->family = x->family; f->transform = x->transform;
+        f->family = x->family; f->webfont = x->webfont;
+        f->transform = x->transform;
         f->letter_spacing = x->letter_spacing; f->valign_dy = x->valign_dy;
         f->shadow_dx = x->shadow_dx; f->shadow_dy = x->shadow_dy;
         f->shadow_color = x->shadow_color; f->opacity = x->opacity;
@@ -3898,7 +4066,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         src_len = o;
     }
 
-    content_font(cr, size, bold, italic, x->family);
+    content_font(cr, size, bold, italic, x->family, x->webfont);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
     double space_w = measure_slice(cr, " ", 1) + x->word_spacing;
@@ -4240,7 +4408,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
                              rc_state *s, const ui_theme *th, const rd_block *b,
                              double content_w, const rd_doc *doc) {
     if (b->kind == RD_INPUT) {
-        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         double h = fe.height + 2.0 * UI_INPUT_PAD;
@@ -4275,7 +4443,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         return 1;
     }
     if (b->kind == RD_IMAGE) {
-        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         double dw, dh;
@@ -4311,7 +4479,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         return 1;
     }
     if (b->kind == RD_VIDEO) {
-        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         /* A <video> is a replaced element and its declared width/height ARE its
@@ -4377,6 +4545,7 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
      * nowrap/pre suppresses wrapping. */
     rc_ext x = (rc_ext){ 0 };
     x.family = b->font_family;
+    x.webfont = b->fontface;
     x.transform = b->text_transform;
     x.letter_spacing = (b->letter_spacing != PV_LEN_UNSET) ? (double)b->letter_spacing : 0.0;
     x.word_spacing = (b->word_spacing != PV_LEN_UNSET) ? (double)b->word_spacing : 0.0;
@@ -8073,7 +8242,7 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
      * text blocks, the image-display size for image blocks, the input height
      * for inputs, and a reasonable default otherwise. */
     const ui_theme *th = &w->theme;
-    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
     double default_h = fe.height;
@@ -8215,7 +8384,7 @@ static double select_box_width(double content_w) {
 /* Width of a painted button: its label plus horizontal padding, clamped. */
 static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
                                double content_w) {
-    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
     const char *label = (b->text != NULL && b->text[0] != '\0') ? b->text
                         : rd_input_label(b->input_type);
     double bw = measure_slice(cr, label, strlen(label)) + 2.0 * UI_BUTTON_HPAD;
@@ -8247,7 +8416,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         cairo_rectangle(cr, left, ry, bw, height);
         cairo_clip(cr);
         set_rgb(cr, th->button_text);
-        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
         draw_slice(cr, left + UI_BUTTON_HPAD, ry + ascent + UI_INPUT_PAD, label, strlen(label));
         cairo_restore(cr);
         return;
@@ -8284,7 +8453,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         /* Label after the widget */
         if (b->text != NULL && b->text[0] != '\0') {
             set_rgb(cr, th->input_text);
-            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
             draw_slice(cr, bx + 18.0, ry + ascent + UI_INPUT_PAD, b->text, strlen(b->text));
         }
         return;
@@ -8332,7 +8501,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         } else {
             set_rgb(cr, th->input_text);
         }
-        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
         cairo_save(cr);
         cairo_rectangle(cr, left + 2.0, ry + 1.0, bw - 24.0, height - 2.0);
         cairo_clip(cr);
@@ -8414,7 +8583,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
             /* Label: value/max */
             char label[64];
             cairo_save(cr);
-            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
             cairo_font_extents_t fe;
             cairo_font_extents(cr, &fe);
             int nw = snprintf(label, sizeof label, "%.*g/%.*g",
@@ -8457,7 +8626,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         /* Label: value / max */
         char label[64];
         cairo_save(cr);
-        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         int nw = snprintf(label, sizeof label, "%.*g / %.*g",
@@ -8527,7 +8696,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         /* Value label */
         char label[32];
         cairo_save(cr);
-        content_font(cr, th->body_font - 2.0, 0, 0, CSS_FF_UNSET);
+        content_font(cr, th->body_font - 2.0, 0, 0, CSS_FF_UNSET, 0);
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         int nw = snprintf(label, sizeof label, "%.*g",
@@ -8546,7 +8715,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
                            : (b->value != NULL ? b->value : "");
         if (legend[0] == '\0') return;
         cairo_save(cr);
-        content_font(cr, th->body_font, 1, 0, CSS_FF_UNSET); /* bold */
+        content_font(cr, th->body_font, 1, 0, CSS_FF_UNSET, 0); /* bold */
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         double lx = left + 4.0;
@@ -8574,7 +8743,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
     ui_input_state *st = find_input_state(w, b);
     const char *val = (st != NULL) ? tf_text(&st->field) : (b->value != NULL ? b->value : "");
 
-    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
     cairo_save(cr);
     cairo_rectangle(cr, left + 2.0, ry + 1.0, bw - 4.0, height - 2.0);
     cairo_clip(cr);
@@ -8740,7 +8909,7 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
         const char *alt = (blk->text != NULL) ? blk->text : "";
         if (alt[0] != '\0') {
             set_rgb(cr, blk->fg_rgb >= 0 ? rgb_from_packed(blk->fg_rgb) : th->text);
-            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
             cairo_font_extents_t fe2;
             cairo_font_extents(cr, &fe2);
             cairo_save(cr);
@@ -8775,7 +8944,7 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
      * (author colour when caps.css allowed one, otherwise the theme's text
      * colour) -- not the "blocked" accent the border above uses. */
     set_rgb(cr, blk->fg_rgb >= 0 ? rgb_from_packed(blk->fg_rgb) : th->text);
-    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
     cairo_save(cr);
     cairo_rectangle(cr, left + pad, ry, content_w - 2.0 * pad, row_h);
     cairo_clip(cr);
@@ -9395,7 +9564,7 @@ static void *video_feeder_thread(void *arg) {
      cairo_fill(cr);
 
      /* Label: video URL or alt text */
-     content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+     content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
      cairo_font_extents_t fe;
      cairo_font_extents(cr, &fe);
      const char *label = (blk->text != NULL && blk->text[0] != '\0')
@@ -9965,7 +10134,7 @@ after_borders:
         double cw = w - bl - br;
         if (cw > 4.0 && bx->h > bt + bb + 2.0) {
             double fs = (double)th->body_font;
-            content_font(cr, fs, 0, 0, CSS_FF_UNSET);
+            content_font(cr, fs, 0, 0, CSS_FF_UNSET, 0);
             set_rgb(cr, th->text);
             cairo_save(cr);
             cairo_rectangle(cr, cx, cy, cw, bx->h - bt - bb);
@@ -10209,7 +10378,7 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
             cairo_rectangle(cr, fx, ry, f->width, r->height);
             cairo_fill(cr);
         }
-        content_font(cr, f->font_size, f->bold, f->italic, f->family);
+        content_font(cr, f->font_size, f->bold, f->italic, f->family, f->webfont);
         /* vertical-align sub/super shifts this fragment's baseline (and the
          * decorations below); default valign_dy 0 keeps it on the line. */
         double fbaseline = baseline + f->valign_dy;
@@ -11377,7 +11546,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
                 if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
                 draw_input_row(cr, w, b, left + cx, cw, origin + cy, 0, pb->h);
                 if (needs_group) cairo_restore(cr);
-                content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+                content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
                 cairo_font_extents_t fei;
                 cairo_font_extents(cr, &fei);
                 cy += fei.height + 2.0 * UI_INPUT_PAD;
@@ -11399,7 +11568,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
                 seen = 1;
                 continue;
             }
-            content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
+            content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET, 0);
             cairo_font_extents_t fe;
             cairo_font_extents(cr, &fe);
             /* A continuation run (no break) shares the previous block's line and
@@ -16277,6 +16446,8 @@ ui_status ui_run_browser(const char *start_url) {
     }
 
     clear_doc(&w);
+    font_stash_reset(&w);
+    free(w.font_done_for);
     hb_free(w.hosts);
     hb_free(w.js_hosts);
     /* impersonate_optin is a plain int flag: nothing to free. */

@@ -3,6 +3,11 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `csel_unescape` | function | `include/css_select.h:177` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` |
+| `css_attr_match` | struct | `include/css_select.h:85` | `` |
+| `css_compound` | struct | `include/css_select.h:119` | `` |
+| `css_pseudo_match` | struct | `include/css_select.h:109` | `` |
+| `css_sel` | struct | `include/css_select.h:136` | `` |
 | `css_sub_sel` | struct | `include/css_select.h:92` | `` |
 | `identifier` | function | `include/css_select.h:163` | `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...` |
 | `kind` | type_alias | `include/css_select.h:109` | `typedef struct css_pseudo_match { int kind;` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `pv_set_text_ext` | function | `include/page_view.h:945` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);` |
 | `pv_set_text_style` | function | `include/page_view.h:880` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` |
 | `pv_set_ua_tag` | function | `include/page_view.h:977` | `void pv_set_ua_tag(pv_view *v, int ua_tag);` |
-| `pv_status` | enum | `include/page_view.h:34` | `` |
-| `pv_text_ext` | struct | `include/page_view.h:896` | `` |
-| `pv_text_ext_reset` | function | `include/page_view.h:930` | `void pv_text_ext_reset(pv_text_ext *e);` |
-| `pv_view` | struct | `include/page_view.h:735` | `` |
-| `resolved` | function | `include/page_view.h:767` | `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

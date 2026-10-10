@@ -3,6 +3,21 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `in_boilerplate_subtree` | function | `src/page_view.c:4282` | `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
+| `in_closed_details_subtree` | function | `src/page_view.c:4297` | `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
+| `in_flow_table_cell` | function | `src/page_view.c:4164` | `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,            ...` |
+| `in_hidden_subtree` | function | `src/page_view.c:4265` | `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,                ...` |
+| `in_mixed_line` | function | `src/page_view.c:2403` | `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,                        ...` |
+| `in_skipped_subtree` | function | `src/page_view.c:1027` | `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,               ...` |
+| `is_block_like` | function | `src/page_view.c:860` | `static int is_block_like(lxb_tag_id_t t, css_display display)` |
+| `is_block_like_style` | function | `src/page_view.c:899` | `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)` |
+| `is_block_tag` | function | `src/page_view.c:835` | `static int is_block_tag(lxb_tag_id_t t)` |
+| `is_bold_tag` | function | `src/page_view.c:2353` | `static int is_bold_tag(lxb_tag_id_t t)` |
+| `is_inline_level_style` | function | `src/page_view.c:2395` | `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)` |
+| `is_italic_tag` | function | `src/page_view.c:2358` | `static int is_italic_tag(lxb_tag_id_t t)` |
+| `is_layout_container` | function | `src/page_view.c:2505` | `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,                    ...` |
+| `is_skipped_tag` | function | `src/page_view.c:998` | `static int is_skipped_tag(lxb_tag_id_t t)` |
+| `it` | function | `src/page_view.c:1211` | `* it (they inherit in CSS). list_style drives the <li> marker (structural);` |
 | `item_ordinal` | function | `src/page_view.c:1183` | `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` |
 | `item_sizes_itself` | function | `src/page_view.c:2519` | `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,                      ...` |
 | `li_is_list_item` | function | `src/page_view.c:2541` | `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,                     ...` |
@@ -361,7 +376,7 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `TAB_WIRE_HEAD_N` | macro | `src/tab.c:62` | `#define TAB_WIRE_HEAD_N` |
 | `WHERE` | function | `src/tab.c:1181` | `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...` |
 | `_GNU_SOURCE` | macro | `src/tab.c:14` | `#define _GNU_SOURCE` |
-| `answered` | function | `src/tab.c:2596` | `* A refused frame is still consumed and answered (status 0), so the protocol never  * desyncs. Re...` |
+| `answered` | function | `src/tab.c:2604` | `* A refused frame is still consumed and answered (status 0), so the protocol never  * desyncs. Re...` |
 | `blocks` | function | `src/tab.c:330` | `*  * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the  * grid arr...` |
 | `budget_remaining_ms` | function | `src/tab.c:732` | `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` |
 | `buffer` | function | `src/tab.c:272` | `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of...` |
@@ -379,73 +394,74 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `child_next_timer_ms` | function | `src/tab.c:1353` | `static int32_t child_next_timer_ms(child_state *cs)` |
 | `child_reset_page` | function | `src/tab.c:155` | `static void child_reset_page(child_state *cs)` |
 | `child_state` | struct | `src/tab.c:124` | `` |
-| `column` | function | `src/tab.c:2149` | `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...` |
+| `column` | function | `src/tab.c:2151` | `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...` |
 | `content` | function | `src/tab.c:1214` | `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...` |
 | `ctype_is_css` | function | `src/tab.c:755` | `static int ctype_is_css(const char *ctype)` |
 | `ctype_is_javascript` | function | `src/tab.c:746` | `static int ctype_is_javascript(const char *ctype)` |
 | `depth` | function | `src/tab.c:1715` | `* defense in depth (seccomp already excludes open/socket/exec);` |
-| `exec_worker_child` | function | `src/tab.c:2486` | `static void exec_worker_child(int rfd, int wfd)` |
+| `exec_worker_child` | function | `src/tab.c:2488` | `static void exec_worker_child(int rfd, int wfd)` |
 | `fallback` | function | `src/tab.c:1023` | `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it...` |
-| `gate_js_nav` | function | `src/tab.c:2823` | `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` |
+| `gate_js_nav` | function | `src/tab.c:2838` | `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` |
 | `gen_session_key` | function | `src/tab.c:1672` | `static uint64_t gen_session_key(void)` |
 | `geom_parent` | function | `src/tab.c:1539` | `static dom_node_id geom_parent(void *ctx, dom_node_id n)` |
-| `hist_ops_free` | function | `src/tab.c:2632` | `static void hist_ops_free(tab_hist_op *ops, size_t n)` |
+| `hist_ops_free` | function | `src/tab.c:2647` | `static void hist_ops_free(tab_hist_op *ops, size_t n)` |
 | `host` | function | `src/tab.c:284` | `* granted net access for this host (allow.conf AND js.conf). Otherwise they stay * undefined...` |
-| `ignore_sigpipe` | function | `src/tab.c:1946` | `static void ignore_sigpipe(void)` |
-| `io_failure` | function | `src/tab.c:2478` | `static tab_status io_failure(tab *t)` |
-| `is_activation_event` | function | `src/tab.c:2697` | `static int is_activation_event(const char *type)` |
-| `layout` | function | `src/tab.c:2138` | `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....` |
+| `ignore_sigpipe` | function | `src/tab.c:1948` | `static void ignore_sigpipe(void)` |
+| `io_failure` | function | `src/tab.c:2480` | `static tab_status io_failure(tab *t)` |
+| `is_activation_event` | function | `src/tab.c:2712` | `static int is_activation_event(const char *type)` |
+| `layout` | function | `src/tab.c:2140` | `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....` |
 | `load` | function | `src/tab.c:1929` | `* subresource requests this load (set per page: host in allow.conf AND js.conf);` |
 | `log_external_skip` | function | `src/tab.c:763` | `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,                 ...` |
 | `once` | function | `src/tab.c:1259` | `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);` |
-| `open_urls_free` | function | `src/tab.c:2706` | `static void open_urls_free(char **u, size_t n)` |
+| `open_urls_free` | function | `src/tab.c:2721` | `static void open_urls_free(char **u, size_t n)` |
 | `parse_worker_fd` | function | `src/tab.c:1890` | `static int parse_worker_fd(const char *s, int *out)` |
 | `policy` | function | `src/tab.c:175` | `* policy (host blocklist/tracker filter, realm routing, TLS-PQ) before fetching, so a  * compromi...` |
-| `read_console` | function | `src/tab.c:2431` | `static int read_console(int fd, fb_buffer *out)` |
-| `read_field` | function | `src/tab.c:1972` | `static int read_field(int fd, char **out, size_t *out_len)` |
-| `read_opens` | function | `src/tab.c:2716` | `static tab_status read_opens(tab *t, const char *page_url, int gesture,                          ...` |
-| `read_view` | function | `src/tab.c:1988` | `static int read_view(int fd, pv_view **out)` |
-| `read_ws` | function | `src/tab.c:2754` | `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` |
+| `read_console` | function | `src/tab.c:2433` | `static int read_console(int fd, fb_buffer *out)` |
+| `read_field` | function | `src/tab.c:1974` | `static int read_field(int fd, char **out, size_t *out_len)` |
+| `read_opens` | function | `src/tab.c:2731` | `static tab_status read_opens(tab *t, const char *page_url, int gesture,                          ...` |
+| `read_view` | function | `src/tab.c:1990` | `static int read_view(int fd, pv_view **out)` |
+| `read_ws` | function | `src/tab.c:2769` | `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` |
 | `run` | function | `src/tab.c:781` | `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).  * Call after every ...` |
 | `run_js` | function | `src/tab.c:229` | `* regardless of run_js (a no-JS load simply never records a request). */ static int child_load(ch...` |
-| `send_request` | function | `src/tab.c:2468` | `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` |
+| `send_request` | function | `src/tab.c:2470` | `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` |
 | `swap` | function | `src/tab.c:1268` | `* display:none hiding an element via class swap (CSS, not      * DOM removal). */     if (ok && v...` |
 | `tab` | struct | `src/tab.c:1922` | `` |
-| `tab_alive` | function | `src/tab.c:3354` | `int tab_alive(const tab *t)` |
-| `tab_child_pid` | function | `src/tab.c:3360` | `pid_t tab_child_pid(const tab *t)` |
-| `tab_click` | function | `src/tab.c:3027` | `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)` |
-| `tab_close` | function | `src/tab.c:3364` | `void tab_close(tab *t)` |
-| `tab_decode_image` | function | `src/tab.c:3330` | `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)` |
-| `tab_decode_image_data_url` | function | `src/tab.c:3336` | `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)` |
-| `tab_decode_image_op` | function | `src/tab.c:3288` | `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,         ...` |
-| `tab_eval` | function | `src/tab.c:3248` | `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)` |
-| `tab_eval_result_free` | function | `src/tab.c:3409` | `void tab_eval_result_free(tab_eval_result *r)` |
-| `tab_image_free` | function | `src/tab.c:3418` | `void tab_image_free(tab_image *img)` |
-| `tab_load` | function | `src/tab.c:2833` | `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)` |
-| `tab_load_ex` | function | `src/tab.c:2837` | `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)` |
-| `tab_load_full` | function | `src/tab.c:2841` | `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,             ...` |
+| `tab_alive` | function | `src/tab.c:3369` | `int tab_alive(const tab *t)` |
+| `tab_child_pid` | function | `src/tab.c:3375` | `pid_t tab_child_pid(const tab *t)` |
+| `tab_click` | function | `src/tab.c:3042` | `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)` |
+| `tab_close` | function | `src/tab.c:3379` | `void tab_close(tab *t)` |
+| `tab_decode_image` | function | `src/tab.c:3345` | `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)` |
+| `tab_decode_image_data_url` | function | `src/tab.c:3351` | `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)` |
+| `tab_decode_image_op` | function | `src/tab.c:3303` | `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,         ...` |
+| `tab_eval` | function | `src/tab.c:3263` | `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)` |
+| `tab_eval_result_free` | function | `src/tab.c:3424` | `void tab_eval_result_free(tab_eval_result *r)` |
+| `tab_image_free` | function | `src/tab.c:3433` | `void tab_image_free(tab_image *img)` |
+| `tab_load` | function | `src/tab.c:2848` | `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)` |
+| `tab_load_ex` | function | `src/tab.c:2852` | `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)` |
+| `tab_load_full` | function | `src/tab.c:2856` | `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,             ...` |
 | `tab_mod_fetch` | function | `src/tab.c:861` | `static char *tab_mod_fetch(void *host, const char *url, size_t *len)` |
 | `tab_mod_resolve` | function | `src/tab.c:839` | `static int tab_mod_resolve(void *host, const char *base, const char *spec,                       ...` |
-| `tab_page_free` | function | `src/tab.c:3379` | `void tab_page_free(tab_page *p)` |
+| `tab_page_free` | function | `src/tab.c:3394` | `void tab_page_free(tab_page *p)` |
 | `tab_parse_worker_args` | function | `src/tab.c:1902` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)` |
-| `tab_popstate` | function | `src/tab.c:3454` | `tab_status tab_popstate(tab *t, int index, tab_page *out)` |
-| `tab_read_view` | function | `src/tab.c:3148` | `tab_status tab_read_view(tab *t, tab_page *out)` |
-| `tab_read_view_ex` | function | `src/tab.c:3152` | `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)` |
-| `tab_refresh_alive` | function | `src/tab.c:1953` | `static void tab_refresh_alive(tab *t)` |
-| `tab_set_cookies` | function | `src/tab.c:2578` | `void tab_set_cookies(tab *t, const char *cookies)` |
-| `tab_set_css_allowed` | function | `src/tab.c:2568` | `void tab_set_css_allowed(tab *t, int allowed)` |
-| `tab_set_fetcher` | function | `src/tab.c:2557` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)` |
-| `tab_set_geometry` | function | `src/tab.c:3428` | `tab_status tab_set_geometry(tab *t, const jg_table *g)` |
-| `tab_set_net_allowed` | function | `src/tab.c:2563` | `void tab_set_net_allowed(tab *t, int allowed)` |
-| `tab_set_storage` | function | `src/tab.c:3479` | `void tab_set_storage(tab *t, const char *blob, size_t len)` |
-| `tab_set_viewport_w` | function | `src/tab.c:2573` | `void tab_set_viewport_w(tab *t, int px)` |
-| `tab_submit` | function | `src/tab.c:3043` | `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` |
-| `tab_subreq_permitted` | function | `src/tab.c:2584` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)` |
-| `tab_tick` | function | `src/tab.c:3034` | `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)` |
+| `tab_popstate` | function | `src/tab.c:3469` | `tab_status tab_popstate(tab *t, int index, tab_page *out)` |
+| `tab_read_view` | function | `src/tab.c:3163` | `tab_status tab_read_view(tab *t, tab_page *out)` |
+| `tab_read_view_ex` | function | `src/tab.c:3167` | `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)` |
+| `tab_refresh_alive` | function | `src/tab.c:1955` | `static void tab_refresh_alive(tab *t)` |
+| `tab_set_cookies` | function | `src/tab.c:2586` | `void tab_set_cookies(tab *t, const char *cookies)` |
+| `tab_set_css_allowed` | function | `src/tab.c:2576` | `void tab_set_css_allowed(tab *t, int allowed)` |
+| `tab_set_css_sink` | function | `src/tab.c:2565` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)` |
+| `tab_set_fetcher` | function | `src/tab.c:2559` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)` |
+| `tab_set_geometry` | function | `src/tab.c:3443` | `tab_status tab_set_geometry(tab *t, const jg_table *g)` |
+| `tab_set_net_allowed` | function | `src/tab.c:2571` | `void tab_set_net_allowed(tab *t, int allowed)` |
+| `tab_set_storage` | function | `src/tab.c:3494` | `void tab_set_storage(tab *t, const char *blob, size_t len)` |
+| `tab_set_viewport_w` | function | `src/tab.c:2581` | `void tab_set_viewport_w(tab *t, int px)` |
+| `tab_submit` | function | `src/tab.c:3058` | `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` |
+| `tab_subreq_permitted` | function | `src/tab.c:2592` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)` |
+| `tab_tick` | function | `src/tab.c:3049` | `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)` |
 | `tab_url_resolve` | function | `src/tab.c:830` | `static int tab_url_resolve(void *ctx, const char *base, const char *ref,                         ...` |
 | `tab_worker_dispatch` | function | `src/tab.c:1912` | `void tab_worker_dispatch(int argc, char **argv)` |
 | `tab_worker_run` | function | `src/tab.c:1692` | `static void tab_worker_run(int rfd, int wfd)` |
-| `tab_ws_event` | function | `src/tab.c:3460` | `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,        ...` |
+| `tab_ws_event` | function | `src/tab.c:3475` | `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,        ...` |
 | `tzset` | function | `src/tab.c:1710` | `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);` |
 | `window` | function | `src/tab.c:902` | `* net window (cs->net_active). */ static void child_fetch_stylesheets(child_state *cs)` |
 | `write_field` | function | `src/tab.c:296` | `static int write_field(int fd, const char *s)` |
@@ -454,7 +470,7 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `write_opens` | function | `src/tab.c:1341` | `static int write_opens(int wfd, child_state *cs)` |
 | `write_storage` | function | `src/tab.c:1327` | `static int write_storage(int wfd, child_state *cs)` |
 | `write_ws` | function | `src/tab.c:1310` | `static int write_ws(int wfd, child_state *cs)` |
-| `ws_ops_free` | function | `src/tab.c:2745` | `static void ws_ops_free(tab_ws_op *ops, size_t n)` |
+| `ws_ops_free` | function | `src/tab.c:2760` | `static void ws_ops_free(tab_ws_op *ops, size_t n)` |
 | `TSH_CACHE_SLOTS` | macro | `src/text_shape.c:33` | `#define TSH_CACHE_SLOTS` |
 | `TSH_MAX_FONT_BYTES` | macro | `src/text_shape.c:29` | `#define TSH_MAX_FONT_BYTES` |
 | `TSH_WEB_SLOTS` | macro | `src/text_shape.c:169` | `#define TSH_WEB_SLOTS` |
@@ -480,21 +496,5 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `web_entry_free` | function | `src/text_shape.c:181` | `static void web_entry_free(tsh_web *w)` |
 | `web_find` | function | `src/text_shape.c:286` | `static tsh_entry *web_find(unsigned h, int bold, int italic)` |
 | `web_magic_ok` | function | `src/text_shape.c:194` | `static int web_magic_ok(const unsigned char *b, size_t n)` |
-| `web_make_entry` | function | `src/text_shape.c:207` | `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)` |
-| `tf_backspace` | function | `src/textfield.c:47` | `void tf_backspace(tf_field *f)` |
-| `tf_clear` | function | `src/textfield.c:20` | `void tf_clear(tf_field *f)` |
-| `tf_cursor` | function | `src/textfield.c:91` | `size_t tf_cursor(const tf_field *f)` |
-| `tf_delete` | function | `src/textfield.c:55` | `void tf_delete(tf_field *f)` |
-| `tf_end` | function | `src/textfield.c:78` | `void tf_end(tf_field *f)` |
-| `tf_home` | function | `src/textfield.c:73` | `void tf_home(tf_field *f)` |
-| `tf_insert` | function | `src/textfield.c:35` | `tf_status tf_insert(tf_field *f, char c)` |
-| `tf_len` | function | `src/textfield.c:87` | `size_t tf_len(const tf_field *f)` |
-| `tf_move` | function | `src/textfield.c:62` | `void tf_move(tf_field *f, long delta)` |
-| `tf_set` | function | `src/textfield.c:24` | `tf_status tf_set(tf_field *f, const char *s)` |
-| `tf_text` | function | `src/textfield.c:83` | `const char *tf_text(const tf_field *f)` |
-| `whole` | function | `src/textfield.c:6` | `* the buffer is rejected whole (fail closed), never applied partially.  */  #include "textfield.h...` |
-| `bounded_len` | function | `src/tls_impersonate.c:25` | `static size_t bounded_len(const char *s, size_t max)` |
-| `get_bytes` | function | `src/tls_impersonate.c:89` | `static void get_bytes(ti_rd *r, size_t cap, uint8_t **out, size_t *out_len)` |
-| `get_str` | function | `src/tls_impersonate.c:103` | `static char *get_str(ti_rd *r, size_t cap)` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

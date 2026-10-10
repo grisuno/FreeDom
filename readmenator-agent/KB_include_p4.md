@@ -105,26 +105,28 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `tab_parse_worker_args` (function, line 163) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);`
   - `out_status` (function, line 175) `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
   - `tab_set_fetcher` (function, line 186) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);`
-  - `tab_set_net_allowed` (function, line 191) `void tab_set_net_allowed(tab *t, int allowed);`
-  - `jar` (function, line 194) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
-  - `tab_set_cookies` (function, line 198) `void tab_set_cookies(tab *t, const char *cookies);`
-  - `origin` (function, line 201) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
-  - `tab_set_storage` (function, line 203) `void tab_set_storage(tab *t, const char *blob, size_t len);`
-  - `exclusively` (function, line 209) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
-  - `tab_set_viewport_w` (function, line 217) `void tab_set_viewport_w(tab *t, int px);`
-  - `tab_subreq_permitted` (function, line 222) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
-  - `view` (function, line 230) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
-  - `string` (function, line 250) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
-  - `granted` (function, line 299) `* granted (allow.conf AND js.conf);`
-  - `returned` (function, line 300) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
-  - `popstate` (function, line 306) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
-  - `decode` (function, line 325) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
-  - `tab_alive` (function, line 338) `int tab_alive(const tab *t);`
-  - `tab_child_pid` (function, line 341) `pid_t tab_child_pid(const tab *t);`
-  - `tab_close` (function, line 344) `void tab_close(tab *t);`
-  - `tab_page_free` (function, line 347) `void tab_page_free(tab_page *p);`
-  - `tab_eval_result_free` (function, line 348) `void tab_eval_result_free(tab_eval_result *r);`
-  - `tab_image_free` (function, line 349) `void tab_image_free(tab_image *img);`
+  - `bytes` (function, line 190) `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
+  - `tab_set_css_sink` (function, line 199) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
+  - `tab_set_net_allowed` (function, line 204) `void tab_set_net_allowed(tab *t, int allowed);`
+  - `jar` (function, line 207) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
+  - `tab_set_cookies` (function, line 211) `void tab_set_cookies(tab *t, const char *cookies);`
+  - `origin` (function, line 214) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
+  - `tab_set_storage` (function, line 216) `void tab_set_storage(tab *t, const char *blob, size_t len);`
+  - `exclusively` (function, line 222) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
+  - `tab_set_viewport_w` (function, line 230) `void tab_set_viewport_w(tab *t, int px);`
+  - `tab_subreq_permitted` (function, line 235) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
+  - `view` (function, line 243) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
+  - `string` (function, line 263) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
+  - `granted` (function, line 312) `* granted (allow.conf AND js.conf);`
+  - `returned` (function, line 313) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
+  - `popstate` (function, line 319) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
+  - `decode` (function, line 338) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
+  - `tab_alive` (function, line 351) `int tab_alive(const tab *t);`
+  - `tab_child_pid` (function, line 354) `pid_t tab_child_pid(const tab *t);`
+  - `tab_close` (function, line 357) `void tab_close(tab *t);`
+  - `tab_page_free` (function, line 360) `void tab_page_free(tab_page *p);`
+  - `tab_eval_result_free` (function, line 361) `void tab_eval_result_free(tab_eval_result *r);`
+  - `tab_image_free` (function, line 362) `void tab_image_free(tab_image *img);`
   - `FREEDOM_TAB_H` (macro, line 2) `#define FREEDOM_TAB_H`
   - `TAB_MAX_INPUT` (macro, line 148) `#define TAB_MAX_INPUT`
 - Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
@@ -148,7 +150,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `FREEDOM_TEXT_SHAPE_H` (macro, line 19) `#define FREEDOM_TEXT_SHAPE_H`
   - `TSH_MAX_GLYPHS` (macro, line 40) `#define TSH_MAX_GLYPHS`
   - `TSH_MAX_TEXT` (macro, line 41) `#define TSH_MAX_TEXT`
-- Imported by: `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
+- Imported by: `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 
 ## include/textfield.h
 - Doc: tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at...
@@ -315,7 +317,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `WF_MAX_FACE_BYTES` (macro, line 24) `#define WF_MAX_FACE_BYTES`
   - `WF_MAX_TOTAL_BYTES` (macro, line 25) `#define WF_MAX_TOTAL_BYTES`
   - `WF_DATA_URL_MAX` (macro, line 29) `#define WF_DATA_URL_MAX`
-- Imported by: `fuzz/fuzz_webfont.c`, `src/css.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
+- Imported by: `fuzz/fuzz_webfont.c`, `gui/browser_ui.c`, `src/css.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
 
 ## include/webfont_load.h
 - Doc: wf_sheet: One collected stylesheet: text plus the URL it was fetched from (the * resolution base...
@@ -324,12 +326,12 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Symbols:
   - `wf_sheet` (struct, line 24)
   - `free` (function, line 31) `* free()), *out_status the HTTP status. Nonzero on refusal/error (fail-closed: * the face is skipped, never the...`
-  - `wf_load_document` (function, line 46) `int wf_load_document(wf_fetch_fn fetch, void *fctx, const char *page_url, const wf_sheet *extern_sheets, size_t...`
+  - `skipped` (function, line 47) `* URLs are skipped (no base). Returns faces registered (>= 0) otherwise. */ int wf_load_document(wf_fetch_fn fetch...`
   - `FREEDOM_WEBFONT_LOAD_H` (macro, line 2) `#define FREEDOM_WEBFONT_LOAD_H`
-  - `WF_LOAD_TRIES_PER_KEY` (macro, line 50) `#define WF_LOAD_TRIES_PER_KEY`
-  - `WF_LOAD_MAX_KEYS` (macro, line 51) `#define WF_LOAD_MAX_KEYS`
-  - `WF_LOAD_MAX_FETCHES` (macro, line 52) `#define WF_LOAD_MAX_FETCHES`
-- Imported by: `src/webfont_load.c`, `tests/test_webfont_load.c`
+  - `WF_LOAD_TRIES_PER_KEY` (macro, line 52) `#define WF_LOAD_TRIES_PER_KEY`
+  - `WF_LOAD_MAX_KEYS` (macro, line 53) `#define WF_LOAD_MAX_KEYS`
+  - `WF_LOAD_MAX_FETCHES` (macro, line 54) `#define WF_LOAD_MAX_FETCHES`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/webfont_load.c`, `tests/test_webfont_load.c`
 
 ## include/ws_hub.h
 - Doc: wh_new: #define WH_MAX 8   /* == JD_WS_MAX: sockets per page /* Event kinds delivered to the...

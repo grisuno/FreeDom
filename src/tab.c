@@ -1939,6 +1939,8 @@ struct tab {
     char          *cookies_in;   /* seeds document.cookie for the next load (owned) */
     tab_fetch_fn   fetcher;
     void          *fetcher_ctx;
+    tab_css_sink_fn css_sink;    /* served-stylesheet observer, NULL = none */
+    void          *css_sink_ctx;
 };
 
 /* A write to a dead child must not kill the parent with SIGPIPE. Idempotent;
@@ -2560,6 +2562,12 @@ void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx) {
     t->fetcher_ctx = ctx;
 }
 
+void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx) {
+    if (t == NULL) return;
+    t->css_sink = fn;
+    t->css_sink_ctx = ctx;
+}
+
 void tab_set_net_allowed(tab *t, int allowed) {
     if (t == NULL) return;
     t->net_allowed = allowed ? 1 : 0;
@@ -2615,6 +2623,13 @@ static int tab_serve_subreq(tab *t, int net_granted, int css_granted) {
     if (rlen > TAB_MAX_SUBRESOURCE) { rlen = 0; status = 0; } /* defensive cap */
     size_t clen = (ok && rctype != NULL) ? strlen(rctype) : 0;
     if (clen > 256) clen = 256;
+    /* Served-stylesheet observer (spec/webfont.md b3b): the parent may retain
+     * served CSS (extern sheets for the @font-face loader). Only 2xx CSS
+     * bodies, only while a sink is installed; the sink copies what it keeps
+     * (rbody is freed below). The worker protocol is untouched. */
+    if (ok && status >= 200 && status < 300 && rlen > 0 && rbody != NULL
+        && t->css_sink != NULL && ctype_is_css(rctype))
+        t->css_sink(t->css_sink_ctx, url, rbody, rlen, rctype);
 
     /* The reply goes back on req_fd (the worker reads it from its rfd, the same fd it
      * blocks on inside child_fetch). */

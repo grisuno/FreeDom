@@ -115,8 +115,9 @@ static void test_null_args(void **state) {
     stub s;
     memset(&s, 0, sizeof s);
     assert_int_equal(wf_load_document(NULL, &s, "https://x/", NULL, 0, "", 0), -1);
+    /* No page URL (local file): data:-only mode, empty input registers none. */
     assert_int_equal(
-        wf_load_document(stub_fetch, &s, NULL, NULL, 0, "", 0), -1);
+        wf_load_document(stub_fetch, &s, NULL, NULL, 0, "", 0), 0);
     /* Untrusted pages pass no fetcher: nothing happens, nothing registered. */
     assert_int_equal(
         wf_load_document(NULL, NULL, "https://x/", NULL, 0, "", 0), -1);
@@ -281,6 +282,39 @@ static void test_data_url_registers(void **state) {
     free(bytes);
 }
 
+/* Local file (page_url NULL) with a trusted fetcher: a data: face registers
+ * from the inline <style> with no fetch, while a relative-URL face is skipped
+ * (no base to resolve against) without touching the network. */
+static void test_null_page_data_only(void **state) {
+    (void)state;
+    size_t n = 0;
+    unsigned char *bytes = read_host_font(&n);
+    if (bytes == NULL) { skip(); }
+    char *b64 = test_b64(bytes, n);
+    free(bytes);
+    if (b64 == NULL) { skip(); }
+    size_t hlen = strlen(b64) + 320;
+    char *html = (char *)malloc(hlen);
+    if (html == NULL) { free(b64); skip(); }
+    snprintf(html, hlen,
+             "<html><head><style>"
+             "@font-face{font-family:'Nn';src:url(data:font/woff;base64,%s);}"
+             "@font-face{font-family:'Rr';src:url(fonts/r.woff) format('woff');}"
+             "</style></head><body></body></html>",
+             b64);
+    free(b64);
+    stub s;
+    memset(&s, 0, sizeof s);
+    int rc = wf_load_document(stub_fetch, &s, NULL, NULL, 0, html, strlen(html));
+    assert_int_equal(rc, 1);
+    assert_int_equal(s.calls, 0);   /* local decode only; relative never fetched */
+    tsh_font wf = { .family = CSS_FF_SERIF, .bold = 0, .italic = 0,
+                    .wfh = wf_name_hash("Nn", 2) };
+    assert_true(tsh_measure(&wf, 16.0, "A", 1) > 0.0);
+    tsh_webfont_clear();
+    free(html);
+}
+
 static int teardown(void **state) {
     (void)state;
     tsh_webfont_clear();
@@ -298,6 +332,7 @@ int main(void) {
         cmocka_unit_test(test_extern_sheet_relative_url),
         cmocka_unit_test(test_data_url_bad_bytes_skipped),
         cmocka_unit_test(test_data_url_registers),
+        cmocka_unit_test(test_null_page_data_only),
     };
     return cmocka_run_group_tests(tests, NULL, teardown);
 }

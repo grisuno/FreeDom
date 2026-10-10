@@ -1805,6 +1805,70 @@ static void test_external_css_applied_when_allowed(void **state) {
     tab_close(t);
 }
 
+/* Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served
+ * 2xx CSS body -- the @font-face pass input. Fires for the stylesheet, never
+ * for a non-CSS body served on the same path. */
+typedef struct sink_cap { int n; char url[256]; char head[32]; } sink_cap;
+
+static void sink_capture(void *ctx, const char *url,
+                         const char *body, size_t len,
+                         const char *ctype) {
+    sink_cap *c = (sink_cap *)ctx;
+    (void)ctype;   /* tab_serve_subreq only calls us for 2xx CSS bodies */
+    if (c->n != 0) return;   /* keep the first */
+    c->n = 1;
+    if (url != NULL) snprintf(c->url, sizeof c->url, "%s", url);
+    if (body != NULL && len != 0) {
+        size_t k = (len < sizeof c->head - 1) ? len : sizeof c->head - 1;
+        memcpy(c->head, body, k);
+        c->head[k] = '\0';
+    }
+}
+
+static void test_css_sink_observes_served_stylesheet(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_css_fetch, NULL);
+    tab_set_css_allowed(t, 1);
+    sink_cap c;
+    memset(&c, 0, sizeof c);
+    tab_set_css_sink(t, sink_capture, &c);
+    static const char H[] = CSS_PAGE("https://cdn.test/center.css");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 0, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    assert_int_equal(c.n, 1);
+    assert_string_equal(c.url, "https://cdn.test/center.css");
+    assert_string_equal(c.head, "p{text-align:center}");
+    /* Clearing the sink silences it while the load itself is unchanged. */
+    tab_set_css_sink(t, NULL, NULL);
+    memset(&c, 0, sizeof c);
+    tab_page p2;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 0, 0, 0, &p2), TAB_OK);
+    tab_page_free(&p2);
+    assert_int_equal(c.n, 0);
+    tab_close(t);
+}
+
+static void test_css_sink_ignores_non_css_body(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    /* html-not-css serves 200/text/html: parsed nowhere, observed nowhere. */
+    tab_set_fetcher(t, stub_css_fetch, NULL);
+    tab_set_css_allowed(t, 1);
+    sink_cap c;
+    memset(&c, 0, sizeof c);
+    tab_set_css_sink(t, sink_capture, &c);
+    static const char H[] = CSS_PAGE("https://cdn.test/html-not-css");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 0, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    assert_int_equal(c.n, 0);
+    tab_close(t);
+}
+
 /* Default (no grant): zero subresource requests and no external styling --
  * Privacy by Default holds, byte-identical to the pre-Hito-27 view. */
 static void test_external_css_skipped_without_grant(void **state) {
@@ -2968,6 +3032,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_external_script_bad_ctype_not_executed),
         cmocka_unit_test(test_external_script_blocked_host_refused),
         cmocka_unit_test(test_external_css_applied_when_allowed),
+        cmocka_unit_test(test_css_sink_observes_served_stylesheet),
+        cmocka_unit_test(test_css_sink_ignores_non_css_body),
         cmocka_unit_test(test_external_css_skipped_without_grant),
         cmocka_unit_test(test_external_css_bad_ctype_not_parsed),
         cmocka_unit_test(test_external_css_blocked_host_refused),
