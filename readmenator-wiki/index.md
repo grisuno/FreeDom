@@ -1,6 +1,6 @@
 # Second Brain
 
-*Last synthesized: 2026-10-10 | 262 files | 11 concept pages | offline, zero tokens*
+*Last synthesized: 2026-10-13 | 262 files | 11 concept pages | offline, zero tokens*
 
 > Raw sources -> readmenator wiki -> links (Karpathy LLM Wiki Pattern, deterministic).
 > Start here, then open one community page. Prefer grep over full reads.

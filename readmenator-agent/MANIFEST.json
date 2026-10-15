@@ -1,10 +1,10 @@
 {
   "tool": "readmenator",
   "schema_version": 2,
-  "generated_at": "2026-10-10T06:02:22Z",
+  "generated_at": "2026-10-13T12:05:38Z",
   "project_root": ".",
   "project_name": "freedom-0.0.3",
-  "git_commit": "315943dfd077d3f42857f89b6914642e4e65d6e1",
+  "git_commit": "a97699dc3a85d8a8e03e69eb236a7af5647c4324",
   "git_branch": "main",
   "source_fingerprint": "238d312b5ea2ff825e8328b6d33f1ee6c8407e2ff83874b4b7ff2eceeaa744dc",
   "freshness_check": "readmenator . fresh  # exit 0 = docs match sources, exit 1 = run: readmenator . --rebuild",
@@ -322,7 +322,7 @@
     {
       "path": "recipes/change-impact.md",
       "lines": 9,
-      "approx_tokens": 108
+      "approx_tokens": 106
     },
     {
       "path": "recipes/fix-cycle.md",

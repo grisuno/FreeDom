@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Component Diagrams | Component diagrams</title>
+<style>
+:root{--cb-bg:#020617;--cb-stage:#030a1c;--cb-panel:#0b1224;--cb-panel2:#111c33;--cb-ink:#f8fafc;--cb-muted:#94a3b8;--cb-faint:#475569;--cb-border:#1e293b;--cb-accent:#22d3ee;--cb-accent2:#f472b6;--cb-chip:#111c33;--cb-glow:rgba(34,211,238,.16)}
+html[data-theme="light"]{--cb-bg:#f8fafc;--cb-stage:#eef2f7;--cb-panel:#ffffff;--cb-panel2:#f1f5f9;--cb-ink:#0f172a;--cb-muted:#475569;--cb-faint:#94a3b8;--cb-border:#e2e8f0;--cb-accent:#0891b2;--cb-accent2:#db2777;--cb-chip:#f1f5f9;--cb-glow:rgba(8,145,178,.10)}
+*{box-sizing:border-box}
+body{margin:0 auto;max-width:1240px;padding:20px;background:var(--cb-bg);color:var(--cb-ink);font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.6}
+a{color:var(--cb-accent)}
+.topbar{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.brand{font-weight:700;background:linear-gradient(90deg,var(--cb-ink),var(--cb-accent) 70%,var(--cb-accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.spacer{flex:1}
+.home,.topbar button{font:inherit;font-size:12px;text-decoration:none;border:1px solid var(--cb-border);border-radius:9px;padding:6px 10px;color:var(--cb-ink);background:var(--cb-panel);cursor:pointer}
+.home:hover,.topbar button:hover{border-color:var(--cb-accent)}
+h1{margin:.4em 0 .2em;font-size:22px}
+h2{font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-muted);margin:26px 0 8px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
+.chips span{background:var(--cb-chip);border:1px solid var(--cb-border);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--cb-muted)}
+.chips span b{color:var(--cb-accent)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:10px 0 2px;font-size:12px;color:var(--cb-muted)}
+.legend-title{letter-spacing:.12em;text-transform:uppercase;font-size:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;box-shadow:0 0 8px currentColor}
+.diagram-controls{margin:10px 0;text-align:center}
+.diagram-controls button{font:inherit;margin:0 5px;padding:8px 16px;background:var(--cb-panel);color:var(--cb-ink);border:1px solid var(--cb-border);border-radius:9px;cursor:pointer}
+.diagram-controls button:hover{border-color:var(--cb-accent)}
+.cb-wrap{border:1px solid var(--cb-border);border-radius:12px;background:radial-gradient(900px 400px at 20% 0%,var(--cb-glow),transparent 70%),var(--cb-stage);overflow:hidden}
+svg.cb-diagram{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+.cb-node rect{fill:var(--cb-panel2)}
+.cb-node:hover rect{stroke:var(--cb-accent)!important;stroke-width:3}
+.cb-node.hub rect{filter:drop-shadow(0 0 10px var(--cb-glow))}
+.cb-node a{text-decoration:none}
+.cb-node-label{fill:var(--cb-ink);font-size:13px;font-weight:700}
+.cb-node-sub{fill:var(--cb-muted);font-size:10px}
+.cb-node-layer{fill:var(--cb-muted);font-size:10px}
+.cb-node-sym{fill:var(--cb-accent);font-size:10.5px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.cb-node-hub{fill:var(--cb-accent2);font-size:9px;font-weight:700;text-anchor:end;letter-spacing:.1em}
+.cb-edge{fill:none;stroke:#38bdf8;stroke-opacity:.75}
+.cb-arrow{fill:#38bdf8;fill-opacity:.9}
+.cb-edge-label{fill:var(--cb-ink);font-size:10.5px;text-anchor:middle;paint-order:stroke;stroke:var(--cb-stage);stroke-width:4px}
+.cb-edge-sub{fill:var(--cb-muted);font-size:9px;text-anchor:middle;paint-order:stroke;stroke:var(--cb-stage);stroke-width:4px}
+.component{border:1px solid var(--cb-border);border-left:3px solid var(--cb-accent);background:var(--cb-panel);padding:15px;border-radius:10px;margin-bottom:20px}
+.component h3{color:var(--cb-ink);margin-top:0}
+.component h4{color:var(--cb-muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.rellist{list-style:none;padding-left:0}
+.rellist li{background:var(--cb-panel);border:1px solid var(--cb-border);border-radius:8px;padding:8px 12px;margin:6px 0;font-size:12px}
+.rellist b{color:var(--cb-accent)}
+.references{list-style:none;padding-left:0;margin:10px 0}
+.references li{margin:4px 0}
+code{background:var(--cb-chip);border:1px solid var(--cb-border);padding:1px 6px;border-radius:6px;font-size:12px}
+.muted{color:var(--cb-muted)}
+footer{color:var(--cb-muted);font-size:12px;margin:24px 0}
+#cb-tip{position:fixed;z-index:50;pointer-events:none;display:none;max-width:340px;background:var(--cb-panel);color:var(--cb-ink);border:1px solid var(--cb-border);border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><span class="brand">Component diagrams</span>
+
+<span class="spacer"></span>
+<button type="button" id="cb-theme" title="Toggle light and dark theme">Theme</button></div>
+<main>
+<h1>Component Diagrams</h1>
+<div class="chips"><span>10 components</span><span>47 relations</span><span>262 files</span></div>
+<div class="legend"><span class="legend-title">Layer</span><span><i style="background:#22d3ee"></i>presentation</span><span><i style="background:#94a3b8"></i>utility</span></div>
+<div class="diagram-controls"><button type="button" id="cb-reset" title="Reset pan and zoom">Reset Layout</button><button type="button" id="cb-fit" title="Fit the diagram to the view">Fit to View</button><button type="button" id="cb-png" title="Export the diagram as PNG">Export PNG</button></div>
+<div class="cb-wrap"><svg id="cb-diagram" class="cb-diagram" viewBox="0 0 32030 1006" role="img" aria-label="Component diagram"><defs><marker id="cb-diagram-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="cb-arrow"/></marker></defs><path d="M31990.0 107.0 C32040.0 107.0 31670.0 305.0 31720.0 305.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:4.8"/><text x="31855.0" y="198.0" class="cb-edge-label">calls into</text><text x="31855.0" y="212.0" class="cb-edge-sub">8 calls · 1 imports</text><path d="M31990.0 107.0 C32040.0 107.0 31670.0 503.0 31720.0 503.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="297.0" class="cb-edge-label">calls into</text><text x="31855.0" y="311.0" class="cb-edge-sub">121 calls · 1 imports</text><path d="M31990.0 107.0 C32040.0 107.0 31670.0 701.0 31720.0 701.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="396.0" class="cb-edge-label">calls into</text><text x="31855.0" y="410.0" class="cb-edge-sub">735 calls · 4 imports</text><path d="M31990.0 107.0 C32040.0 107.0 31670.0 899.0 31720.0 899.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="495.0" class="cb-edge-label">calls into</text><text x="31855.0" y="509.0" class="cb-edge-sub">147 calls · 3 imports</text><path d="M31990.0 107.0 C32040.0 107.0 31190.0 206.0 31240.0 206.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31615.0" y="148.5" class="cb-edge-label">calls into</text><text x="31615.0" y="162.5" class="cb-edge-sub">59 calls · 2 imports</text><path d="M31990.0 107.0 C32040.0 107.0 31190.0 404.0 31240.0 404.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:2.5"/><text x="31615.0" y="247.5" class="cb-edge-label">depends on</text><text x="31615.0" y="261.5" class="cb-edge-sub">0 calls · 1 imports</text><path d="M31990.0 107.0 C32040.0 107.0 31190.0 602.0 31240.0 602.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31615.0" y="346.5" class="cb-edge-label">calls into</text><text x="31615.0" y="360.5" class="cb-edge-sub">23 calls · 2 imports</text><path d="M31990.0 305.0 C32040.0 305.0 31670.0 503.0 31720.0 503.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:4.7"/><text x="31855.0" y="396.0" class="cb-edge-label">calls into</text><text x="31855.0" y="410.0" class="cb-edge-sub">8 calls · 0 imports</text><path d="M31990.0 305.0 C32040.0 305.0 31670.0 701.0 31720.0 701.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:4.7"/><text x="31855.0" y="495.0" class="cb-edge-label">calls into</text><text x="31855.0" y="509.0" class="cb-edge-sub">8 calls · 0 imports</text><path d="M31990.0 503.0 C32040.0 503.0 31670.0 107.0 31720.0 107.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="297.0" class="cb-edge-label">calls into</text><text x="31855.0" y="311.0" class="cb-edge-sub">80 calls · 9 imports</text><path d="M31990.0 503.0 C32040.0 503.0 31670.0 701.0 31720.0 701.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="594.0" class="cb-edge-label">calls into</text><text x="31855.0" y="608.0" class="cb-edge-sub">16 calls · 3 imports</text><path d="M31990.0 503.0 C32040.0 503.0 31670.0 899.0 31720.0 899.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="693.0" class="cb-edge-label">calls into</text><text x="31855.0" y="707.0" class="cb-edge-sub">162 calls · 6 imports</text><path d="M31990.0 503.0 C32040.0 503.0 31190.0 206.0 31240.0 206.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31615.0" y="346.5" class="cb-edge-label">calls into</text><text x="31615.0" y="360.5" class="cb-edge-sub">17 calls · 5 imports</text><path d="M31990.0 503.0 C32040.0 503.0 30230.0 503.0 30280.0 503.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31135.0" y="495.0" class="cb-edge-label">calls into</text><text x="31135.0" y="509.0" class="cb-edge-sub">78 calls · 3 imports</text><path d="M31990.0 503.0 C32040.0 503.0 31190.0 404.0 31240.0 404.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:4.7"/><text x="31615.0" y="445.5" class="cb-edge-label">calls into</text><text x="31615.0" y="459.5" class="cb-edge-sub">4 calls · 4 imports</text><path d="M31990.0 503.0 C32040.0 503.0 31190.0 602.0 31240.0 602.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31615.0" y="544.5" class="cb-edge-label">calls into</text><text x="31615.0" y="558.5" class="cb-edge-sub">27 calls · 2 imports</text><path d="M31990.0 503.0 C32040.0 503.0 31190.0 800.0 31240.0 800.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:3.1"/><text x="31615.0" y="643.5" class="cb-edge-label">depends on</text><text x="31615.0" y="657.5" class="cb-edge-sub">0 calls · 2 imports</text><path d="M31990.0 701.0 C32040.0 701.0 31670.0 107.0 31720.0 107.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="396.0" class="cb-edge-label">calls into</text><text x="31855.0" y="410.0" class="cb-edge-sub">47 calls · 0 imports</text><path d="M31990.0 701.0 C32040.0 701.0 31670.0 503.0 31720.0 503.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="594.0" class="cb-edge-label">calls into</text><text x="31855.0" y="608.0" class="cb-edge-sub">201 calls · 0 imports</text><path d="M31990.0 701.0 C32040.0 701.0 31670.0 899.0 31720.0 899.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="792.0" class="cb-edge-label">calls into</text><text x="31855.0" y="806.0" class="cb-edge-sub">15 calls · 1 imports</text><path d="M31990.0 701.0 C32040.0 701.0 31190.0 206.0 31240.0 206.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:3.1"/><text x="31615.0" y="445.5" class="cb-edge-label">depends on</text><text x="31615.0" y="459.5" class="cb-edge-sub">0 calls · 2 imports</text><path d="M31990.0 899.0 C32040.0 899.0 31670.0 107.0 31720.0 107.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="495.0" class="cb-edge-label">calls into</text><text x="31855.0" y="509.0" class="cb-edge-sub">182 calls · 15 imports</text><path d="M31990.0 899.0 C32040.0 899.0 31670.0 305.0 31720.0 305.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:3.1"/><text x="31855.0" y="594.0" class="cb-edge-label">calls into</text><text x="31855.0" y="608.0" class="cb-edge-sub">2 calls · 0 imports</text><path d="M31990.0 899.0 C32040.0 899.0 31670.0 503.0 31720.0 503.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="693.0" class="cb-edge-label">calls into</text><text x="31855.0" y="707.0" class="cb-edge-sub">94 calls · 6 imports</text><path d="M31990.0 899.0 C32040.0 899.0 31670.0 701.0 31720.0 701.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31855.0" y="792.0" class="cb-edge-label">calls into</text><text x="31855.0" y="806.0" class="cb-edge-sub">52 calls · 15 imports</text><path d="M31990.0 899.0 C32040.0 899.0 31190.0 206.0 31240.0 206.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31615.0" y="544.5" class="cb-edge-label">calls into</text><text x="31615.0" y="558.5" class="cb-edge-sub">88 calls · 6 imports</text><path d="M31990.0 899.0 C32040.0 899.0 31190.0 404.0 31240.0 404.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:4.3"/><text x="31615.0" y="643.5" class="cb-edge-label">calls into</text><text x="31615.0" y="657.5" class="cb-edge-sub">3 calls · 3 imports</text><path d="M31990.0 899.0 C32040.0 899.0 31190.0 602.0 31240.0 602.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31615.0" y="742.5" class="cb-edge-label">calls into</text><text x="31615.0" y="756.5" class="cb-edge-sub">28 calls · 1 imports</text><path d="M31990.0 899.0 C32040.0 899.0 31190.0 800.0 31240.0 800.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:3.1"/><text x="31615.0" y="841.5" class="cb-edge-label">calls into</text><text x="31615.0" y="855.5" class="cb-edge-sub">2 calls · 0 imports</text><path d="M31510.0 206.0 C31615.0 206.0 31615.0 107.0 31720.0 107.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31615.0" y="148.5" class="cb-edge-label">calls into</text><text x="31615.0" y="162.5" class="cb-edge-sub">28 calls · 1 imports</text><path d="M31510.0 206.0 C31615.0 206.0 31615.0 305.0 31720.0 305.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31615.0" y="247.5" class="cb-edge-label">calls into</text><text x="31615.0" y="261.5" class="cb-edge-sub">12 calls · 0 imports</text><path d="M31510.0 206.0 C31615.0 206.0 31615.0 503.0 31720.0 503.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:3.8"/><text x="31615.0" y="346.5" class="cb-edge-label">calls into</text><text x="31615.0" y="360.5" class="cb-edge-sub">4 calls · 0 imports</text><path d="M31510.0 206.0 C31615.0 206.0 31615.0 701.0 31720.0 701.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:4.5"/><text x="31615.0" y="445.5" class="cb-edge-label">calls into</text><text x="31615.0" y="459.5" class="cb-edge-sub">4 calls · 3 imports</text><path d="M31510.0 206.0 C31615.0 206.0 31615.0 899.0 31720.0 899.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:4.8"/><text x="31615.0" y="544.5" class="cb-edge-label">calls into</text><text x="31615.0" y="558.5" class="cb-edge-sub">8 calls · 1 imports</text><path d="M30550.0 503.0 C31135.0 503.0 31135.0 107.0 31720.0 107.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:3.8"/><text x="31135.0" y="297.0" class="cb-edge-label">calls into</text><text x="31135.0" y="311.0" class="cb-edge-sub">3 calls · 1 imports</text><path d="M30550.0 503.0 C31135.0 503.0 31135.0 503.0 31720.0 503.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31135.0" y="495.0" class="cb-edge-label">calls into</text><text x="31135.0" y="509.0" class="cb-edge-sub">24 calls · 0 imports</text><path d="M30550.0 503.0 C31135.0 503.0 31135.0 899.0 31720.0 899.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:4.3"/><text x="31135.0" y="693.0" class="cb-edge-label">calls into</text><text x="31135.0" y="707.0" class="cb-edge-sub">6 calls · 0 imports</text><path d="M31510.0 404.0 C31615.0 404.0 31615.0 107.0 31720.0 107.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31615.0" y="247.5" class="cb-edge-label">calls into</text><text x="31615.0" y="261.5" class="cb-edge-sub">10 calls · 2 imports</text><path d="M31510.0 404.0 C31615.0 404.0 31615.0 503.0 31720.0 503.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31615.0" y="445.5" class="cb-edge-label">calls into</text><text x="31615.0" y="459.5" class="cb-edge-sub">10 calls · 0 imports</text><path d="M31510.0 404.0 C31615.0 404.0 31615.0 701.0 31720.0 701.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:4.5"/><text x="31615.0" y="544.5" class="cb-edge-label">calls into</text><text x="31615.0" y="558.5" class="cb-edge-sub">4 calls · 3 imports</text><path d="M31510.0 404.0 C31615.0 404.0 31615.0 899.0 31720.0 899.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:4.5"/><text x="31615.0" y="643.5" class="cb-edge-label">calls into</text><text x="31615.0" y="657.5" class="cb-edge-sub">6 calls · 1 imports</text><path d="M31510.0 602.0 C31615.0 602.0 31615.0 107.0 31720.0 107.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:5.0"/><text x="31615.0" y="346.5" class="cb-edge-label">calls into</text><text x="31615.0" y="360.5" class="cb-edge-sub">9 calls · 1 imports</text><path d="M31510.0 602.0 C31615.0 602.0 31615.0 503.0 31720.0 503.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:3.1"/><text x="31615.0" y="544.5" class="cb-edge-label">calls into</text><text x="31615.0" y="558.5" class="cb-edge-sub">2 calls · 0 imports</text><path d="M31510.0 602.0 C31615.0 602.0 31615.0 701.0 31720.0 701.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:3.8"/><text x="31615.0" y="643.5" class="cb-edge-label">calls into</text><text x="31615.0" y="657.5" class="cb-edge-sub">4 calls · 0 imports</text><path d="M31510.0 602.0 C31615.0 602.0 31615.0 899.0 31720.0 899.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:3.1"/><text x="31615.0" y="742.5" class="cb-edge-label">calls into</text><text x="31615.0" y="756.5" class="cb-edge-sub">2 calls · 0 imports</text><path d="M31510.0 800.0 C31615.0 800.0 31615.0 503.0 31720.0 503.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:3.1"/><text x="31615.0" y="643.5" class="cb-edge-label">calls into</text><text x="31615.0" y="657.5" class="cb-edge-sub">2 calls · 0 imports</text><path d="M31510.0 800.0 C31615.0 800.0 31615.0 701.0 31720.0 701.0" class="cb-edge" marker-end="url(#cb-diagram-arrow)" style="stroke-width:3.5"/><text x="31615.0" y="742.5" class="cb-edge-label">calls into</text><text x="31615.0" y="756.5" class="cb-edge-sub">3 calls · 0 imports</text><g class="cb-node linked hub" data-desc="src groups 59 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document."><a href="#comp-1"><rect x="31720.0" y="40.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="3"/><text x="31734.0" y="64.0" class="cb-node-label">src</text><text x="31734.0" y="80.0" class="cb-node-sub">59 files · 1358 symbols</text><circle cx="31740.0" cy="92.0" r="4" fill="#94a3b8"/><text x="31750.0" y="96.0" class="cb-node-layer">utility</text><text x="31734.0" y="112.0" class="cb-node-sym">FREEDOM_HTML_PARSE_H</text><text x="31734.0" y="126.0" class="cb-node-sym">hp_status</text><text x="31734.0" y="140.0" class="cb-node-sym">max_bytes</text><text x="31734.0" y="154.0" class="cb-node-sub">+1174 more</text><text x="31976.0" y="60.0" class="cb-node-hub">HUB</text></a></g><g class="cb-node" data-desc="include: import_map groups 4 files (c, h) around FREEDOM_IMPORT_MAP_H, algorithm, IM_MAX_TEXT, IM_MAX_ENTRIES, IM_MAX_SCOPES. im_resolve: Resolves specifier as imported from base (the importing module&#x27;s URL)."><a href="#comp-10"><rect x="31720.0" y="238.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="31734.0" y="262.0" class="cb-node-label">include: import_map</text><text x="31734.0" y="278.0" class="cb-node-sub">4 files · 42 symbols</text><circle cx="31740.0" cy="290.0" r="4" fill="#94a3b8"/><text x="31750.0" y="294.0" class="cb-node-layer">utility</text><text x="31734.0" y="310.0" class="cb-node-sym">FREEDOM_IMPORT_MAP_H</text><text x="31734.0" y="324.0" class="cb-node-sym">algorithm</text><text x="31734.0" y="338.0" class="cb-node-sym">IM_MAX_TEXT</text><text x="31734.0" y="352.0" class="cb-node-sub">+35 more</text></a></g><g class="cb-node linked" data-desc="include: browser_ui groups 47 files (c, h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. poke_and_free: Touch every claimed pixel corner so the sanitizer flags an..."><a href="#comp-2"><rect x="31720.0" y="436.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="3"/><text x="31734.0" y="460.0" class="cb-node-label">include: browser_ui</text><text x="31734.0" y="476.0" class="cb-node-sub">47 files · 1227 symbols</text><circle cx="31740.0" cy="488.0" r="4" fill="#94a3b8"/><text x="31750.0" y="492.0" class="cb-node-layer">utility</text><text x="31734.0" y="508.0" class="cb-node-sym">FREEDOM_IMAGE_DECODE_H</text><text x="31734.0" y="522.0" class="cb-node-sym">guards</text><text x="31734.0" y="536.0" class="cb-node-sym">img_format</text><text x="31734.0" y="550.0" class="cb-node-sub">+1107 more</text></a></g><g class="cb-node linked" data-desc="include: css groups 40 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed..."><a href="#comp-3"><rect x="31720.0" y="634.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="3"/><text x="31734.0" y="658.0" class="cb-node-label">include: css</text><text x="31734.0" y="674.0" class="cb-node-sub">40 files · 1283 symbols</text><circle cx="31740.0" cy="686.0" r="4" fill="#94a3b8"/><text x="31750.0" y="690.0" class="cb-node-layer">utility</text><text x="31734.0" y="706.0" class="cb-node-sym">FREEDOM_CSS_COLOR_H</text><text x="31734.0" y="720.0" class="cb-node-sym">b</text><text x="31734.0" y="734.0" class="cb-node-sym">cc_rgb</text><text x="31734.0" y="748.0" class="cb-node-sub">+1159 more</text></a></g><g class="cb-node linked" data-desc="include: page_view groups 31 files (c, h) around FREEDOM_RENDER_POLICY_H, RDP_TRACKER_MAX_DIM, images, rdp_caps, rdp_img_decision. bx_edges: anything longer fails closed instead of truncating into a wrong match...."><a href="#comp-4"><rect x="31720.0" y="832.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="3"/><text x="31734.0" y="856.0" class="cb-node-label">include: page_view</text><text x="31734.0" y="872.0" class="cb-node-sub">31 files · 1097 symbols</text><circle cx="31740.0" cy="884.0" r="4" fill="#94a3b8"/><text x="31750.0" y="888.0" class="cb-node-layer">utility</text><text x="31734.0" y="904.0" class="cb-node-sym">FREEDOM_RENDER_POLICY_H</text><text x="31734.0" y="918.0" class="cb-node-sym">RDP_TRACKER_MAX_DIM</text><text x="31734.0" y="932.0" class="cb-node-sym">images</text><text x="31734.0" y="946.0" class="cb-node-sub">+976 more</text></a></g><g class="cb-node linked" data-desc="include: text_shape groups 20 files (c, h) around FREEDOM_DATA_URL_H, allocation, du_status, DU_MAX_ENCODED_LEN, du_is_data_url. libFuzzer harness for the webfont lookahead scanner (spec/webfont.md)."><a href="#comp-5"><rect x="31240.0" y="139.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="3"/><text x="31254.0" y="163.0" class="cb-node-label">include: text_shape</text><text x="31254.0" y="179.0" class="cb-node-sub">20 files · 216 symbols</text><circle cx="31260.0" cy="191.0" r="4" fill="#94a3b8"/><text x="31270.0" y="195.0" class="cb-node-layer">utility</text><text x="31254.0" y="211.0" class="cb-node-sym">FREEDOM_DATA_URL_H</text><text x="31254.0" y="225.0" class="cb-node-sym">allocation</text><text x="31254.0" y="239.0" class="cb-node-sym">du_status</text><text x="31254.0" y="253.0" class="cb-node-sub">+187 more</text></a></g><g class="cb-node linked" data-desc="include: local_store groups 16 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. ds_free: Reads and decrypts path."><a href="#comp-6"><rect x="30280.0" y="436.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="3"/><text x="30294.0" y="460.0" class="cb-node-label">include: local_store</text><text x="30294.0" y="476.0" class="cb-node-sub">16 files · 448 symbols</text><circle cx="30300.0" cy="488.0" r="4" fill="#94a3b8"/><text x="30310.0" y="492.0" class="cb-node-layer">utility</text><text x="30294.0" y="508.0" class="cb-node-sym">FREEDOM_LOCAL_STORE_H</text><text x="30294.0" y="522.0" class="cb-node-sym">LS_KEY_LEN</text><text x="30294.0" y="536.0" class="cb-node-sym">LS_SALT_LEN</text><text x="30294.0" y="550.0" class="cb-node-sub">+172 more</text></a></g><g class="cb-node linked" data-desc="gui groups 15 files (c, h) around FREEDOM_SVG_RENDER_H, sv_status, SV_MAX_SHAPES, SV_MAX_POINTS, SV_MAX_SEGS. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb..."><a href="#comp-7"><rect x="31240.0" y="337.0" width="270" height="134" rx="10" stroke="#22d3ee" stroke-width="3"/><text x="31254.0" y="361.0" class="cb-node-label">gui</text><text x="31254.0" y="377.0" class="cb-node-sub">15 files · 169 symbols</text><circle cx="31260.0" cy="389.0" r="4" fill="#22d3ee"/><text x="31270.0" y="393.0" class="cb-node-layer">presentation</text><text x="31254.0" y="409.0" class="cb-node-sym">FREEDOM_SVG_RENDER_H</text><text x="31254.0" y="423.0" class="cb-node-sym">sv_status</text><text x="31254.0" y="437.0" class="cb-node-sym">SV_MAX_SHAPES</text><text x="31254.0" y="451.0" class="cb-node-sub">+158 more</text></a></g><g class="cb-node linked" data-desc="include: secure_fetch groups 10 files (c, h) around FREEDOM_ANTI_FP_H, FP_TIMER_RESOLUTION_MS, FP_USER_AGENT, FP_ACCEPT_LANGUAGE, FP_ACCEPT_LANGUAGE_HEADER. fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  &quot;document&quot; #define..."><a href="#comp-8"><rect x="31240.0" y="535.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="3"/><text x="31254.0" y="559.0" class="cb-node-label">include: secure_fetch</text><text x="31254.0" y="575.0" class="cb-node-sub">10 files · 279 symbols</text><circle cx="31260.0" cy="587.0" r="4" fill="#94a3b8"/><text x="31270.0" y="591.0" class="cb-node-layer">utility</text><text x="31254.0" y="607.0" class="cb-node-sym">FREEDOM_ANTI_FP_H</text><text x="31254.0" y="621.0" class="cb-node-sym">FP_TIMER_RESOLUTION_MS</text><text x="31254.0" y="635.0" class="cb-node-sym">FP_USER_AGENT</text><text x="31254.0" y="649.0" class="cb-node-sub">+227 more</text></a></g><g class="cb-node linked" data-desc="include: download groups 8 files (c, h) around FREEDOM_PDF_EXPORT_H, PE_NAME_MAX, PE_EXT, PE_EXT_PNG, PE_FALLBACK_NAME. dl_should_download: 1 if the response should be saved (attachment, or a non-renderable..."><a href="#comp-9"><rect x="31240.0" y="733.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="3"/><text x="31254.0" y="757.0" class="cb-node-label">include: download</text><text x="31254.0" y="773.0" class="cb-node-sub">8 files · 88 symbols</text><circle cx="31260.0" cy="785.0" r="4" fill="#94a3b8"/><text x="31270.0" y="789.0" class="cb-node-layer">utility</text><text x="31254.0" y="805.0" class="cb-node-sym">FREEDOM_PDF_EXPORT_H</text><text x="31254.0" y="819.0" class="cb-node-sym">PE_NAME_MAX</text><text x="31254.0" y="833.0" class="cb-node-sym">PE_EXT</text><text x="31254.0" y="847.0" class="cb-node-sub">+77 more</text></a></g></svg></div>
+<h2>Details</h2>
+<p>Static architecture map of 262 files (c, h, py, sh) in 10 components: src, include: browser_ui, include: css, include: page_view, include: text_shape, include: local_store, gui, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.</p>
+<h2>Relations</h2>
+<ul class="rellist">
+<li><b>src</b> calls into <b>include: import_map</b> — 1 imports, 8 calls across the boundary
+<br><code>src/js_dom.c::scripts@913 → src/import_map.c::match</code> · <code>src/js_dom.c::scripts@914 → src/import_map.c::match</code> · <code>src/js_embed.c::jd_video_from_scripts@233 → src/import_map.c::match</code>
+</li>
+<li><b>src</b> calls into <b>include: browser_ui</b> — 1 imports, 121 calls across the boundary
+<br><code>fuzz/fuzz_js_sandbox.c::fz_fetch@37 → gui/browser_ui.c::strcmp</code> · <code>fuzz/fuzz_js_sandbox.c::fz_fetch@38 → gui/browser_ui.c::strcmp</code> · <code>include/link_nav.h::ln_action@42 → gui/browser_ui.c::fragment</code>
+</li>
+<li><b>src</b> calls into <b>include: css</b> — 4 imports, 735 calls across the boundary
+<br><code>fuzz/fuzz_js_sandbox.c::fz_resolve@25 → src/css_color.c::strncmp</code> · <code>fuzz/fuzz_url.c::LLVMFuzzerTestOneInput@81 → src/css_color.c::strncmp</code> · <code>src/dom.c::parse_selector_list@411 → include/css_select.h::csel_parse</code>
+</li>
+<li><b>src</b> calls into <b>include: page_view</b> — 3 imports, 147 calls across the boundary
+<br><code>include/html_parse.h::hp_config@34 → include/page_view.h::nonzero</code> · <code>include/html_parse.h::hp_config@35 → include/page_view.h::nonzero</code> · <code>include/tab.h::tab_status@35 → include/page_view.h::itself</code>
+</li>
+<li><b>src</b> calls into <b>include: text_shape</b> — 2 imports, 59 calls across the boundary
+<br><code>include/dom.h::dom_place@185 → src/webfont_load.c::ref</code> · <code>include/dom.h::dom_place@186 → src/webfont_load.c::ref</code> · <code>src/js_dom.c::table@575 → src/text_shape.c::slice</code>
+</li>
+<li><b>src</b> depends on <b>gui</b> — 1 imports, 0 calls across the boundary
+</li>
+<li><b>src</b> calls into <b>include: secure_fetch</b> — 2 imports, 23 calls across the boundary
+<br><code>src/js_env.c::m_date_now@52 → include/anti_fp.h::fp_coarsen_time_ms</code> · <code>src/js_env.c::m_perf_now@65 → include/anti_fp.h::fp_coarsen_time_ms</code> · <code>src/js_env.c::build_languages@178 → include/anti_fp.h::fp_accept_language</code>
+</li>
+<li><b>include: import_map</b> calls into <b>include: browser_ui</b> — 0 imports, 8 calls across the boundary
+<br><code>src/import_map.c::add@191 → gui/browser_ui.c::resolve</code> · <code>src/import_map.c::add@194 → gui/browser_ui.c::resolve</code> · <code>src/import_map.c::im_parse@235 → gui/browser_ui.c::strcmp</code>
+</li>
+<li><b>include: import_map</b> calls into <b>include: css</b> — 0 imports, 8 calls across the boundary
+<br><code>fuzz/fuzz_import_map.c::fres@19 → src/css_color.c::strncmp</code> · <code>src/import_map.c::url_like@157 → src/css_color.c::strncmp</code> · <code>src/import_map.c::url_like@157 → src/css_color.c::strncmp</code>
+</li>
+<li><b>include: browser_ui</b> calls into <b>src</b> — 9 imports, 80 calls across the boundary
+<br><code>gui/browser_ui.c::ui_menu_action@170 → include/link_nav.h::action</code> · <code>gui/browser_ui.c::ui_menu_action@171 → include/link_nav.h::action</code> · <code>gui/browser_ui.c::delay@407 → include/js_dom.h::URLs</code>
+</li>
+<li><b>include: browser_ui</b> calls into <b>include: css</b> — 3 imports, 16 calls across the boundary
+<br><code>gui/browser_ui.c::tab_ctx@273 → src/css.c::NULL</code> · <code>gui/browser_ui.c::remember_visit@966 → src/css_color.c::strncmp</code> · <code>gui/browser_ui.c::bookmark_toggle_current@974 → src/css_color.c::strncmp</code>
+</li>
+<li><b>include: browser_ui</b> calls into <b>include: page_view</b> — 6 imports, 162 calls across the boundary
+<br><code>gui/browser_ui.c::ui_menu_action@174 → include/box_style.h::page</code> · <code>gui/browser_ui.c::ui_menu_item@182 → include/render_policy.h::rdp_caps</code> · <code>gui/browser_ui.c::ui_menu_item@193 → include/box_style.h::page</code>
+</li>
+<li><b>include: browser_ui</b> calls into <b>include: text_shape</b> — 5 imports, 17 calls across the boundary
+<br><code>gui/browser_ui.c::ui_menu_item@202 → include/webfont.h::here</code> · <code>gui/browser_ui.c::add_current_host_to_list@807 → include/request_policy.h::rp_host_of</code> · <code>gui/browser_ui.c::surface_from_pixels@1313 → include/request_policy.h::rp_host_of</code>
+</li>
+<li><b>include: browser_ui</b> calls into <b>include: local_store</b> — 3 imports, 78 calls across the boundary
+<br><code>gui/browser_ui.c::ui_menu_action@164 → include/prefs.h::theme_mode</code> · <code>gui/browser_ui.c::ui_menu_action@169 → include/prefs.h::free</code> · <code>gui/browser_ui.c::ui_menu_item@192 → include/prefs.h::free</code>
+</li>
+<li><b>include: browser_ui</b> calls into <b>gui</b> — 4 imports, 4 calls across the boundary
+<br><code>gui/browser_ui.c::UI_READER_COLUMN_W@585 → gui/bui_theme.c::ui_theme_for</code> · <code>gui/browser_ui.c::smaller@3188 → include/svg_render.h::height</code> · <code>gui/browser_ui.c::line@4241 → src/svg_render.c::sv_parse</code>
+</li>
+<li><b>include: browser_ui</b> calls into <b>include: secure_fetch</b> — 2 imports, 27 calls across the boundary
+<br><code>gui/browser_ui.c::ui_menu_action@168 → include/secure_fetch.h::policy</code> · <code>gui/browser_ui.c::browser_window@348 → include/secure_fetch.h::policy</code> · <code>gui/browser_ui.c::fetch_follow_navigable@1343 → src/secure_fetch.c::sf_get_follow</code>
+</li>
+<li><b>include: browser_ui</b> depends on <b>include: download</b> — 2 imports, 0 calls across the boundary
+</li>
+<li><b>include: css</b> calls into <b>src</b> — 0 imports, 47 calls across the boundary
+<br><code>src/css.c::css_sheet@126 → include/url.h::url</code> · <code>src/css.c::interp_bc_tok@955 → include/url.h::url</code> · <code>src/css.c::expand_animation@1379 → include/url.h::url</code>
+</li>
+<li><b>include: css</b> calls into <b>include: browser_ui</b> — 0 imports, 201 calls across the boundary
+<br><code>src/css.c::interp_time_ms@881 → gui/browser_ui.c::strcmp</code> · <code>src/css.c::interp_time_ms@881 → gui/browser_ui.c::strcmp</code> · <code>src/css.c::interp_time_ms@883 → gui/browser_ui.c::strcmp</code>
+</li>
+<li><b>include: css</b> calls into <b>include: page_view</b> — 1 imports, 15 calls across the boundary
+<br><code>src/css.c::expand_grid_areas@1852 → include/flex_layout.h::fx_grid_area_hash</code> · <code>src/css.c::function@2767 → include/page_view.h::scale</code> · <code>tests/test_css.c::assert_int_equal@1697 → src/page_view.c::child</code>
+</li>
+<li><b>include: css</b> depends on <b>include: text_shape</b> — 2 imports, 0 calls across the boundary
+</li>
+<li><b>include: page_view</b> calls into <b>src</b> — 15 imports, 182 calls across the boundary
+<br><code>fuzz/fuzz_dom_debug.c::pass@24 → src/html_parse.c::hp_config_default</code> · <code>fuzz/fuzz_dom_debug.c::pass@26 → src/html_parse.c::hp_parse</code> · <code>fuzz/fuzz_dom_debug.c::pass@27 → include/html_parse.h::hp_document_free</code>
+</li>
+<li><b>include: page_view</b> calls into <b>include: import_map</b> — 0 imports, 2 calls across the boundary
+<br><code>src/freedom.c::sf_reason@862 → include/import_map.h::algorithm</code> · <code>tests/test_page_view.c::test_build_two_forms_distinct_groups@3219 → src/import_map.c::match</code>
+</li>
+<li><b>include: page_view</b> calls into <b>include: browser_ui</b> — 6 imports, 94 calls across the boundary
+<br><code>include/box_tree.h::bt_node@73 → gui/browser_ui.c::children</code> · <code>include/box_tree.h::bt_node@75 → gui/browser_ui.c::columns</code> · <code>include/box_tree.h::line@116 → gui/browser_ui.c::children</code>
+</li>
+<li><b>include: page_view</b> calls into <b>include: css</b> — 15 imports, 52 calls across the boundary
+<br><code>include/page_view.h::pv_run@183 → include/css.h::css_font_variant</code> · <code>include/page_view.h::pv_run@184 → include/css.h::css_list_pos</code> · <code>include/page_view.h::pv_box_def@421 → include/css.h::declared</code>
+</li>
+<li><b>include: page_view</b> calls into <b>include: text_shape</b> — 6 imports, 88 calls across the boundary
+<br><code>fuzz/fuzz_dom_debug.c::pass@33 → src/render_policy.c::rdp_caps_safe</code> · <code>include/render_policy.h::rdp_img_decision@48 → src/render_policy.c::rdp_caps_safe</code> · <code>include/render_policy.h::size@59 → src/render_policy.c::rdp_image_decision</code>
+</li>
+<li><b>include: page_view</b> calls into <b>gui</b> — 3 imports, 3 calls across the boundary
+<br><code>include/webcaps.h::wc_caps@46 → include/ui.h::disk</code> · <code>src/freedom.c::print_css_drops@514 → include/ui.h::ui_render_viewport_w</code> · <code>src/freedom.c::render_page@667 → include/ui.h::ui_render_viewport_w</code>
+</li>
+<li><b>include: page_view</b> calls into <b>include: secure_fetch</b> — 1 imports, 28 calls across the boundary
+<br><code>src/freedom.c::headless_fetch@433 → src/secure_fetch.c::sf_config_default</code> · <code>src/freedom.c::headless_fetch@459 → src/secure_fetch.c::sf_post</code> · <code>src/freedom.c::headless_fetch@460 → src/secure_fetch.c::sf_get_follow</code>
+</li>
+<li><b>include: page_view</b> calls into <b>include: download</b> — 0 imports, 2 calls across the boundary
+<br><code>src/box_style.c::BX_DISPLAY_MAX@25 → src/download.c::lc</code> · <code>src/box_style.c::copy_lower_trim@41 → src/download.c::lc</code>
+</li>
+<li><b>include: text_shape</b> calls into <b>src</b> — 1 imports, 28 calls across the boundary
+<br><code>src/webfont_load.c::key_find@78 → include/url.h::url_is_https</code> · <code>src/webfont_load.c::key_find@84 → include/url.h::url_has_scheme</code> · <code>src/webfont_load.c::key_find@84 → include/url.h::url_is_https</code>
+</li>
+<li><b>include: text_shape</b> calls into <b>include: import_map</b> — 0 imports, 12 calls across the boundary
+<br><code>tests/test_text_shape.c::test_determinism@97 → src/import_map.c::skip</code> · <code>tests/test_text_shape.c::test_measure_matches_shape@113 → src/import_map.c::skip</code> · <code>tests/test_text_shape.c::test_overflow_cap@125 → src/import_map.c::skip</code>
+</li>
+<li><b>include: text_shape</b> calls into <b>include: browser_ui</b> — 0 imports, 4 calls across the boundary
+<br><code>src/request_policy.c::psl_cmp@37 → gui/browser_ui.c::strcmp</code> · <code>src/request_policy.c::rp_same_site@140 → gui/browser_ui.c::strcmp</code> · <code>src/request_policy.c::rp_evaluate@157 → gui/browser_ui.c::strcmp</code>
+</li>
+<li><b>include: text_shape</b> calls into <b>include: css</b> — 3 imports, 4 calls across the boundary
+<br><code>include/text_shape.h::tsh_status@47 → src/css.c::cap</code> · <code>src/webfont.c::ci_eq_span@39 → src/css.c::copy_trim</code> · <code>src/webfont.c::scan_face_block@230 → src/css.c::copy_trim</code>
+</li>
+<li><b>include: text_shape</b> calls into <b>include: page_view</b> — 1 imports, 8 calls across the boundary
+<br><code>tests/test_data_url.c::test_payload_basic@51 → tests/test_webcaps.c::assert_memory_equal</code> · <code>tests/test_data_url.c::test_decode_no_padding_needed@167 → tests/test_webcaps.c::assert_memory_equal</code> · <code>tests/test_data_url.c::test_decode_multi_group@179 → tests/test_webcaps.c::assert_memory_equal</code>
+</li>
+<li><b>include: local_store</b> calls into <b>src</b> — 1 imports, 3 calls across the boundary
+<br><code>src/disk_store.c::ds_write@89 → include/util.h::write_full</code> · <code>src/disk_store.c::ds_read@124 → include/util.h::read_full</code> · <code>src/profile.c::profile_open@85 → tests/test_tab.c::read</code>
+</li>
+<li><b>include: local_store</b> calls into <b>include: browser_ui</b> — 0 imports, 24 calls across the boundary
+<br><code>include/profile.h::profile_status@41 → gui/browser_ui.c::key</code> · <code>src/prefs.c::history_push_back@112 → gui/browser_ui.c::strcmp</code> · <code>src/prefs.c::prefs_bookmark_index@128 → gui/browser_ui.c::strcmp</code>
+</li>
+<li><b>include: local_store</b> calls into <b>include: page_view</b> — 0 imports, 6 calls across the boundary
+<br><code>tests/test_disk_store.c::test_roundtrip@85 → tests/test_webcaps.c::assert_memory_equal</code> · <code>tests/test_disk_store.c::test_roundtrip_chacha@95 → tests/test_webcaps.c::assert_memory_equal</code> · <code>tests/test_disk_store.c::test_overwrite@134 → tests/test_webcaps.c::assert_memory_equal</code>
+</li>
+<li><b>gui</b> calls into <b>src</b> — 2 imports, 10 calls across the boundary
+<br><code>fuzz/fuzz_page_view.c@20 → src/html_parse.c::hp_config_default</code> · <code>fuzz/fuzz_page_view.c@23 → src/html_parse.c::hp_parse</code> · <code>fuzz/fuzz_page_view.c@49 → include/html_parse.h::hp_document_free</code>
+</li>
+<li><b>gui</b> calls into <b>include: browser_ui</b> — 0 imports, 10 calls across the boundary
+<br><code>gui/ui_render.c::registry_global@387 → gui/browser_ui.c::strcmp</code> · <code>gui/ui_render.c::registry_global@389 → gui/browser_ui.c::strcmp</code> · <code>gui/ui_render.c::registry_global@391 → gui/browser_ui.c::strcmp</code>
+</li>
+<li><b>gui</b> calls into <b>include: css</b> — 3 imports, 4 calls across the boundary
+<br><code>gui/bui_theme.c::rgb_from_packed@181 → src/css_color.c::cc_unpack</code> · <code>src/svg_render.c::sv_attr_num@140 → src/css_color.c::cc_parse</code> · <code>src/svg_render.c::sv_attr_num@141 → include/css_color.h::cc_pack</code>
+</li>
+<li><b>gui</b> calls into <b>include: page_view</b> — 1 imports, 6 calls across the boundary
+<br><code>fuzz/fuzz_page_view.c@34 → src/page_view.c::pv_build_styled</code> · <code>fuzz/fuzz_page_view.c@35 → include/page_view.h::pv_count</code> · <code>fuzz/fuzz_page_view.c@37 → include/page_view.h::pv_at</code>
+</li>
+<li><b>include: secure_fetch</b> calls into <b>src</b> — 1 imports, 9 calls across the boundary
+<br><code>include/secure_fetch.h::sf_config@87 → include/url.h::password</code> · <code>src/secure_fetch.c::sf_url_host_path@154 → src/url.c::url_split</code> · <code>src/secure_fetch.c::sf_validate_url@252 → src/url.c::url_validate_https</code>
+</li>
+<li><b>include: secure_fetch</b> calls into <b>include: browser_ui</b> — 0 imports, 2 calls across the boundary
+<br><code>include/secure_fetch.h::sf_proxy_type@72 → gui/browser_ui.c::proxy</code> · <code>tests/itest_secure_fetch.c::main@44 → gui/browser_ui.c::strcmp</code>
+</li>
+<li><b>include: secure_fetch</b> calls into <b>include: css</b> — 0 imports, 4 calls across the boundary
+<br><code>src/secure_fetch.c::sf_cookie_line_matches@119 → src/css_color.c::strncmp</code> · <code>src/secure_fetch.c::sf_cookie_line_matches@121 → src/css_color.c::strncmp</code> · <code>src/secure_fetch.c::sf_cookie_line_matches@124 → src/css_color.c::strncmp</code>
+</li>
+<li><b>include: secure_fetch</b> calls into <b>include: page_view</b> — 0 imports, 2 calls across the boundary
+<br><code>tests/test_anti_fp.c::test_perturb_deterministic@108 → tests/test_webcaps.c::assert_memory_equal</code> · <code>tests/test_anti_fp.c::test_origin_key_unlinks_readback@194 → tests/test_webcaps.c::assert_memory_equal</code>
+</li>
+<li><b>include: download</b> calls into <b>include: browser_ui</b> — 0 imports, 2 calls across the boundary
+<br><code>src/download.c::dl_should_download@54 → gui/browser_ui.c::strcmp</code> · <code>src/download.c::dl_ext_for_type@79 → gui/browser_ui.c::strcmp</code>
+</li>
+<li><b>include: download</b> calls into <b>include: css</b> — 0 imports, 3 calls across the boundary
+<br><code>fuzz/fuzz_download.c::LLVMFuzzerTestOneInput@55 → src/css_color.c::strncmp</code> · <code>fuzz/fuzz_pdf_export.c::LLVMFuzzerTestOneInput@50 → src/css_color.c::strncmp</code> · <code>src/download.c::dl_should_download@53 → src/css_color.c::strncmp</code>
+</li>
+</ul>
+<section class="component" id="comp-1">
+<h3>src (1)
+ <a href="#comp-1-children">[Expand]</a>
+</h3>
+<p>src groups 59 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document.</p>
+<h4>Related Classes/Methods:</h4>
+<ul class="references">
+<li><a href="../include/html_parse.h#L2-L21"><code>include/html_parse.h::FREEDOM_HTML_PARSE_H</code></a></li>
+<li><a href="../include/html_parse.h#L22-L30"><code>include/html_parse.h::hp_status</code></a></li>
+<li><a href="../include/html_parse.h"><code>include/html_parse.h::max_bytes</code></a></li>
+<li><a href="../include/html_parse.h#L32-L38"><code>include/html_parse.h::hp_config</code></a></li>
+<li><a href="../include/html_parse.h#L39-L40"><code>include/html_parse.h::hp_document</code></a></li>
+<li><a href="../include/html_parse.h#L41-L46"><code>include/html_parse.h::HP_DEFAULT_MAX_BYTES</code></a></li>
+<li><a href="../include/html_parse.h"><code>include/html_parse.h::dropped</code></a></li>
+<li><a href="../include/html_parse.h#L48-L56"><code>include/html_parse.h::HP_MAX_SCRIPTS</code></a></li>
+</ul>
+<h4 id="comp-1-children">Sub-components</h4>
+<div class="cb-wrap"><svg id="cb-sub-comp-1" class="cb-diagram" viewBox="0 0 5630 412" role="img" aria-label="Component diagram"><defs><marker id="cb-sub-comp-1-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="cb-arrow"/></marker></defs><path d="M310.0 206.0 C2815.0 206.0 2815.0 107.0 5320.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-1-arrow)" style="stroke-width:5.0"/><text x="2815.0" y="148.5" class="cb-edge-label">calls into</text><text x="2815.0" y="162.5" class="cb-edge-sub">72 calls · 17 imports</text><path d="M310.0 206.0 C2815.0 206.0 2815.0 305.0 5320.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-1-arrow)" style="stroke-width:5.0"/><text x="2815.0" y="247.5" class="cb-edge-label">calls into</text><text x="2815.0" y="261.5" class="cb-edge-sub">41 calls · 0 imports</text><path d="M5590.0 107.0 C5640.0 107.0 5270.0 305.0 5320.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-1-arrow)" style="stroke-width:5.0"/><text x="5455.0" y="198.0" class="cb-edge-label">calls into</text><text x="5455.0" y="212.0" class="cb-edge-sub">92 calls · 0 imports</text><path d="M5590.0 107.0 C5640.0 107.0 4790.0 206.0 4840.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-1-arrow)" style="stroke-width:2.5"/><text x="5215.0" y="148.5" class="cb-edge-label">calls into</text><text x="5215.0" y="162.5" class="cb-edge-sub">1 calls · 0 imports</text><path d="M5590.0 305.0 C5640.0 305.0 5270.0 107.0 5320.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-1-arrow)" style="stroke-width:5.0"/><text x="5455.0" y="198.0" class="cb-edge-label">calls into</text><text x="5455.0" y="212.0" class="cb-edge-sub">230 calls · 61 imports</text><path d="M5110.0 206.0 C5215.0 206.0 5215.0 107.0 5320.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-1-arrow)" style="stroke-width:5.0"/><text x="5215.0" y="148.5" class="cb-edge-label">calls into</text><text x="5215.0" y="162.5" class="cb-edge-sub">937 calls · 28 imports</text><path d="M5110.0 206.0 C5215.0 206.0 5215.0 305.0 5320.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-1-arrow)" style="stroke-width:5.0"/><text x="5215.0" y="247.5" class="cb-edge-label">calls into</text><text x="5215.0" y="261.5" class="cb-edge-sub">900 calls · 0 imports</text><g class="cb-node" data-desc="fuzz groups 8 files (c) around ensure_built, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput, fz_dom_parent, FUZZ_JSDOM_MAX_NODES."><a href="#comp-1-1"><rect x="40.0" y="139.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="54.0" y="163.0" class="cb-node-label">fuzz</text><text x="54.0" y="179.0" class="cb-node-sub">8 files · 16 symbols</text><circle cx="60.0" cy="191.0" r="4" fill="#94a3b8"/><text x="70.0" y="195.0" class="cb-node-layer">utility</text><text x="54.0" y="211.0" class="cb-node-sym">ensure_built</text><text x="54.0" y="225.0" class="cb-node-sym">LLVMFuzzerTestOneInput</text><text x="54.0" y="239.0" class="cb-node-sym">LLVMFuzzerTestOneInput</text><text x="54.0" y="253.0" class="cb-node-sub">+8 more</text></a></g><g class="cb-node" data-desc="include groups 16 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all..."><a href="#comp-1-2"><rect x="5320.0" y="40.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="5334.0" y="64.0" class="cb-node-label">include</text><text x="5334.0" y="80.0" class="cb-node-sub">16 files · 259 symbols</text><circle cx="5340.0" cy="92.0" r="4" fill="#94a3b8"/><text x="5350.0" y="96.0" class="cb-node-layer">utility</text><text x="5334.0" y="112.0" class="cb-node-sym">FREEDOM_HTML_PARSE_H</text><text x="5334.0" y="126.0" class="cb-node-sym">hp_status</text><text x="5334.0" y="140.0" class="cb-node-sym">max_bytes</text><text x="5334.0" y="154.0" class="cb-node-sub">+251 more</text></a></g><g class="cb-node" data-desc="src groups 22 files (c, h) around FREEDOM_JS_DOM_EXT_H, jdx_install, FREEDOM_JS_DOM_INTERNAL_H, jd_opaque_get, jd_idx. to_lower_buf: #include &lt;stdint.h&gt; #include &lt;stdlib.h&gt; #include &lt;string.h&gt; #include..."><a href="#comp-1-3"><rect x="5320.0" y="238.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="5334.0" y="262.0" class="cb-node-label">src</text><text x="5334.0" y="278.0" class="cb-node-sub">22 files · 524 symbols</text><circle cx="5340.0" cy="290.0" r="4" fill="#94a3b8"/><text x="5350.0" y="294.0" class="cb-node-layer">utility</text><text x="5334.0" y="310.0" class="cb-node-sym">FREEDOM_JS_DOM_EXT_H</text><text x="5334.0" y="324.0" class="cb-node-sym">jdx_install</text><text x="5334.0" y="338.0" class="cb-node-sym">FREEDOM_JS_DOM_INTERNAL…</text><text x="5334.0" y="352.0" class="cb-node-sub">+493 more</text></a></g><g class="cb-node" data-desc="tests groups 13 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_null_args. setup_doc: #include &quot;dom.h&quot; #include &quot;html_parse.h&quot; static const char HTML[] =..."><a href="#comp-1-4"><rect x="4840.0" y="139.0" width="270" height="134" rx="10" stroke="#fb923c" stroke-width="2.5"/><text x="4854.0" y="163.0" class="cb-node-label">tests</text><text x="4854.0" y="179.0" class="cb-node-sub">13 files · 559 symbols</text><circle cx="4860.0" cy="191.0" r="4" fill="#fb923c"/><text x="4870.0" y="195.0" class="cb-node-layer">testing</text><text x="4854.0" y="211.0" class="cb-node-sym">setup_doc</text><text x="4854.0" y="225.0" class="cb-node-sym">teardown_doc</text><text x="4854.0" y="239.0" class="cb-node-sym">DOC</text><text x="4854.0" y="253.0" class="cb-node-sub">+520 more</text></a></g></svg></div>
+<h5 id="comp-1-1">fuzz (1.1)</h5>
+<p>fuzz groups 8 files (c) around ensure_built, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput, fz_dom_parent, FUZZ_JSDOM_MAX_NODES.</p>
+<h5 id="comp-1-2">include (1.2)</h5>
+<p>include groups 16 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...</p>
+<h5 id="comp-1-3">src (1.3)</h5>
+<p>src groups 22 files (c, h) around FREEDOM_JS_DOM_EXT_H, jdx_install, FREEDOM_JS_DOM_INTERNAL_H, jd_opaque_get, jd_idx. to_lower_buf: #include &lt;stdint.h&gt; #include &lt;stdlib.h&gt; #include &lt;string.h&gt; #include...</p>
+<h5 id="comp-1-4">tests (1.4)</h5>
+<p>tests groups 13 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_null_args. setup_doc: #include &quot;dom.h&quot; #include &quot;html_parse.h&quot; static const char HTML[] =...</p>
+<h4>Files</h4>
+<ul class="references">
+<li><code>fuzz/fuzz_dom.c</code></li>
+<li><code>fuzz/fuzz_freebug.c</code></li>
+<li><code>fuzz/fuzz_html_parse.c</code></li>
+<li><code>fuzz/fuzz_js_dom.c</code></li>
+<li><code>fuzz/fuzz_js_geom.c</code></li>
+<li><code>fuzz/fuzz_js_sandbox.c</code></li>
+<li><code>fuzz/fuzz_url.c</code></li>
+<li><code>fuzz/fuzz_web_storage.c</code></li>
+<li><code>include/dom.h</code></li>
+<li><code>include/freebug.h</code></li>
+<li><code>include/html_parse.h</code></li>
+<li><code>include/js_dom.h</code></li>
+<li><code>include/js_env.h</code></li>
+<li><code>include/js_geom.h</code></li>
+<li><code>include/js_location.h</code></li>
+<li><code>include/js_sandbox.h</code></li>
+<li><code>include/js_trusted.h</code></li>
+<li><code>include/link_nav.h</code></li>
+<li><code>include/os_sandbox.h</code></li>
+<li><code>include/renderer.h</code></li>
+<li><code>include/tab.h</code></li>
+<li><code>include/url.h</code></li>
+<li><code>include/util.h</code></li>
+<li><code>include/web_storage.h</code></li>
+<li><code>src/dom.c</code></li>
+<li><code>src/freebug.c</code></li>
+<li><code>src/html_parse.c</code></li>
+<li><code>src/js_dom.c</code></li>
+<li><code>src/js_dom_ext.c</code></li>
+<li><code>src/js_dom_ext.h</code></li>
+<li><code>src/js_dom_internal.h</code></li>
+<li><code>src/js_embed.c</code></li>
+<li><code>src/js_env.c</code></li>
+<li><code>src/js_events.c</code></li>
+<li><code>src/js_fetch.c</code></li>
+<li><code>src/js_geom.c</code></li>
+<li><code>src/js_location.c</code></li>
+<li><code>src/js_location_internal.h</code></li>
+<li><code>src/js_sandbox.c</code></li>
+<li><code>src/js_trusted.c</code></li>
+<li><code>src/link_nav.c</code></li>
+<li><code>src/os_sandbox.c</code></li>
+<li><code>src/renderer.c</code></li>
+<li><code>src/tab.c</code></li>
+<li><code>src/url.c</code></li>
+<li><code>src/web_storage.c</code></li>
+<li><code>tests/test_dom.c</code></li>
+<li><code>tests/test_freebug.c</code></li>
+<li><code>tests/test_html_parse.c</code></li>
+<li><code>tests/test_js_dom.c</code></li>
+<li><code>tests/test_js_env.c</code></li>
+<li><code>tests/test_js_geom.c</code></li>
+<li><code>tests/test_js_sandbox.c</code></li>
+<li><code>tests/test_link_nav.c</code></li>
+<li><code>tests/test_os_sandbox.c</code></li>
+<li><code>tests/test_renderer.c</code></li>
+<li><code>tests/test_tab.c</code></li>
+<li><code>tests/test_url.c</code></li>
+<li><code>tests/test_web_storage.c</code></li>
+</ul>
+</section>
+<section class="component" id="comp-2">
+<h3>include: browser_ui (2)
+ <a href="#comp-2-children">[Expand]</a>
+</h3>
+<p>include: browser_ui groups 47 files (c, h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. poke_and_free: Touch every claimed pixel corner so the sanitizer flags an...</p>
+<h4>Related Classes/Methods:</h4>
+<ul class="references">
+<li><a href="../include/image_decode.h#L2-L24"><code>include/image_decode.h::FREEDOM_IMAGE_DECODE_H</code></a></li>
+<li><a href="../include/image_decode.h#L25-L32"><code>include/image_decode.h::guards</code></a></li>
+<li><a href="../include/image_decode.h#L33-L40"><code>include/image_decode.h::img_format</code></a></li>
+<li><a href="../include/image_decode.h#L41-L55"><code>include/image_decode.h::img_status</code></a></li>
+<li><a href="../include/image_decode.h"><code>include/image_decode.h::img_pixels</code></a></li>
+<li><a href="../include/image_decode.h#L56-L64"><code>include/image_decode.h::width</code></a></li>
+<li><a href="../include/image_decode.h"><code>include/image_decode.h::IMG_MAX_DIM</code></a></li>
+<li><a href="../include/image_decode.h#L66-L77"><code>include/image_decode.h::IMG_MAX_PIXELS</code></a></li>
+</ul>
+<h4 id="comp-2-children">Sub-components</h4>
+<div class="cb-wrap"><svg id="cb-sub-comp-2" class="cb-diagram" viewBox="0 0 8990 412" role="img" aria-label="Component diagram"><defs><marker id="cb-sub-comp-2-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="cb-arrow"/></marker></defs><path d="M310.0 107.0 C4495.0 107.0 4495.0 305.0 8680.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-2-arrow)" style="stroke-width:5.0"/><text x="4495.0" y="198.0" class="cb-edge-label">calls into</text><text x="4495.0" y="212.0" class="cb-edge-sub">12 calls · 3 imports</text><path d="M310.0 107.0 C4255.0 107.0 4255.0 206.0 8200.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-2-arrow)" style="stroke-width:4.1"/><text x="4255.0" y="148.5" class="cb-edge-label">calls into</text><text x="4255.0" y="162.5" class="cb-edge-sub">5 calls · 0 imports</text><path d="M8950.0 107.0 C9000.0 107.0 8630.0 305.0 8680.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-2-arrow)" style="stroke-width:5.0"/><text x="8815.0" y="198.0" class="cb-edge-label">calls into</text><text x="8815.0" y="212.0" class="cb-edge-sub">44 calls · 14 imports</text><path d="M8950.0 107.0 C9000.0 107.0 8150.0 206.0 8200.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-2-arrow)" style="stroke-width:5.0"/><text x="8575.0" y="148.5" class="cb-edge-label">calls into</text><text x="8575.0" y="162.5" class="cb-edge-sub">35 calls · 0 imports</text><path d="M8950.0 305.0 C9000.0 305.0 8630.0 107.0 8680.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-2-arrow)" style="stroke-width:3.1"/><text x="8815.0" y="198.0" class="cb-edge-label">calls into</text><text x="8815.0" y="212.0" class="cb-edge-sub">2 calls · 0 imports</text><path d="M8950.0 305.0 C9000.0 305.0 8150.0 206.0 8200.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-2-arrow)" style="stroke-width:5.0"/><text x="8575.0" y="247.5" class="cb-edge-label">calls into</text><text x="8575.0" y="261.5" class="cb-edge-sub">40 calls · 0 imports</text><path d="M8470.0 206.0 C8575.0 206.0 8575.0 107.0 8680.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-2-arrow)" style="stroke-width:3.8"/><text x="8575.0" y="148.5" class="cb-edge-label">calls into</text><text x="8575.0" y="162.5" class="cb-edge-sub">4 calls · 0 imports</text><path d="M8470.0 206.0 C8575.0 206.0 8575.0 305.0 8680.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-2-arrow)" style="stroke-width:5.0"/><text x="8575.0" y="247.5" class="cb-edge-label">depends on</text><text x="8575.0" y="261.5" class="cb-edge-sub">4 calls · 14 imports</text><path d="M310.0 305.0 C4495.0 305.0 4495.0 107.0 8680.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-2-arrow)" style="stroke-width:2.5"/><text x="4495.0" y="198.0" class="cb-edge-label">calls into</text><text x="4495.0" y="212.0" class="cb-edge-sub">1 calls · 0 imports</text><path d="M310.0 305.0 C4495.0 305.0 4495.0 305.0 8680.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-2-arrow)" style="stroke-width:5.0"/><text x="4495.0" y="297.0" class="cb-edge-label">calls into</text><text x="4495.0" y="311.0" class="cb-edge-sub">500 calls · 15 imports</text><path d="M310.0 305.0 C4255.0 305.0 4255.0 206.0 8200.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-2-arrow)" style="stroke-width:5.0"/><text x="4255.0" y="247.5" class="cb-edge-label">calls into</text><text x="4255.0" y="261.5" class="cb-edge-sub">316 calls · 0 imports</text><g class="cb-node" data-desc="fuzz groups 3 files (c) around poke_and_free, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput. poke_and_free: Touch every claimed pixel corner so the sanitizer flags an..."><a href="#comp-2-1"><rect x="40.0" y="40.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="54.0" y="64.0" class="cb-node-label">fuzz</text><text x="54.0" y="80.0" class="cb-node-sub">3 files · 3 symbols</text><circle cx="60.0" cy="92.0" r="4" fill="#94a3b8"/><text x="70.0" y="96.0" class="cb-node-layer">utility</text><text x="54.0" y="112.0" class="cb-node-sym">poke_and_free</text><text x="54.0" y="126.0" class="cb-node-sym">LLVMFuzzerTestOneInput</text><text x="54.0" y="140.0" class="cb-node-sym">LLVMFuzzerTestOneInput</text></a></g><g class="cb-node" data-desc="gui groups 1 files (c) around _GNU_SOURCE, UI_TOOLBAR_H, UI_TITLEBAR_H, UI_TABBAR_H, UI_TAB_MIN_W. ui_input_state: Live editable state for one form text control, aliasing a block of the..."><a href="#comp-2-2"><rect x="8680.0" y="40.0" width="270" height="134" rx="10" stroke="#22d3ee" stroke-width="2.5"/><text x="8694.0" y="64.0" class="cb-node-label">gui</text><text x="8694.0" y="80.0" class="cb-node-sub">1 files · 531 symbols</text><circle cx="8700.0" cy="92.0" r="4" fill="#22d3ee"/><text x="8710.0" y="96.0" class="cb-node-layer">presentation</text><text x="8694.0" y="112.0" class="cb-node-sym">_GNU_SOURCE</text><text x="8694.0" y="126.0" class="cb-node-sym">UI_TOOLBAR_H</text><text x="8694.0" y="140.0" class="cb-node-sym">UI_TITLEBAR_H</text><text x="8694.0" y="154.0" class="cb-node-sub">+516 more</text></a></g><g class="cb-node" data-desc="include groups 14 files (h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. block_flow (bf_) -- vertical margin collapsing for block-level boxes."><a href="#comp-2-3"><rect x="8680.0" y="238.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="8694.0" y="262.0" class="cb-node-label">include</text><text x="8694.0" y="278.0" class="cb-node-sub">14 files · 181 symbols</text><circle cx="8700.0" cy="290.0" r="4" fill="#94a3b8"/><text x="8710.0" y="294.0" class="cb-node-layer">utility</text><text x="8694.0" y="310.0" class="cb-node-sym">FREEDOM_IMAGE_DECODE_H</text><text x="8694.0" y="324.0" class="cb-node-sym">guards</text><text x="8694.0" y="338.0" class="cb-node-sym">img_format</text><text x="8694.0" y="352.0" class="cb-node-sub">+176 more</text></a></g><g class="cb-node" data-desc="src groups 14 files (c) around finite_or_zero, bf_collapse_n, bf_collapse, bf_margins_adjoin, _POSIX_C_SOURCE. block_flow (bf_) -- vertical margin collapsing."><a href="#comp-2-4"><rect x="8200.0" y="139.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="8214.0" y="163.0" class="cb-node-label">src</text><text x="8214.0" y="179.0" class="cb-node-sub">14 files · 218 symbols</text><circle cx="8220.0" cy="191.0" r="4" fill="#94a3b8"/><text x="8230.0" y="195.0" class="cb-node-layer">utility</text><text x="8214.0" y="211.0" class="cb-node-sym">finite_or_zero</text><text x="8214.0" y="225.0" class="cb-node-sym">bf_collapse_n</text><text x="8214.0" y="239.0" class="cb-node-sym">bf_collapse</text><text x="8214.0" y="253.0" class="cb-node-sub">+205 more</text></a></g><g class="cb-node" data-desc="tests groups 15 files (c) around dbl_eq, test_two_positive_collapse_to_max, test_two_negative_take_the_most_negative, test_non_finite_is_absent, test_collapse_n_matches_binary. test_two_positive_collapse_to_max: Two positive margins collapse to the LARGER, never..."><a href="#comp-2-5"><rect x="40.0" y="238.0" width="270" height="134" rx="10" stroke="#fb923c" stroke-width="2.5"/><text x="54.0" y="262.0" class="cb-node-label">tests</text><text x="54.0" y="278.0" class="cb-node-sub">15 files · 294 symbols</text><circle cx="60.0" cy="290.0" r="4" fill="#fb923c"/><text x="70.0" y="294.0" class="cb-node-layer">testing</text><text x="54.0" y="310.0" class="cb-node-sym">dbl_eq</text><text x="54.0" y="324.0" class="cb-node-sym">test_two_positive_colla…</text><text x="54.0" y="338.0" class="cb-node-sym">test_two_negative_take_…</text><text x="54.0" y="352.0" class="cb-node-sub">+270 more</text></a></g></svg></div>
+<h5 id="comp-2-1">fuzz (2.1)</h5>
+<p>fuzz groups 3 files (c) around poke_and_free, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput. poke_and_free: Touch every claimed pixel corner so the sanitizer flags an...</p>
+<h5 id="comp-2-2">gui (2.2)</h5>
+<p>gui groups 1 files (c) around _GNU_SOURCE, UI_TOOLBAR_H, UI_TITLEBAR_H, UI_TABBAR_H, UI_TAB_MIN_W. ui_input_state: Live editable state for one form text control, aliasing a block of the...</p>
+<h5 id="comp-2-3">include (2.3)</h5>
+<p>include groups 14 files (h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. block_flow (bf_) -- vertical margin collapsing for block-level boxes.</p>
+<h5 id="comp-2-4">src (2.4)</h5>
+<p>src groups 14 files (c) around finite_or_zero, bf_collapse_n, bf_collapse, bf_margins_adjoin, _POSIX_C_SOURCE. block_flow (bf_) -- vertical margin collapsing.</p>
+<h5 id="comp-2-5">tests (2.5)</h5>
+<p>tests groups 15 files (c) around dbl_eq, test_two_positive_collapse_to_max, test_two_negative_take_the_most_negative, test_non_finite_is_absent, test_collapse_n_matches_binary. test_two_positive_collapse_to_max: Two positive margins collapse to the LARGER, never...</p>
+<h4>Files</h4>
+<ul class="references">
+<li><code>fuzz/fuzz_image_decode.c</code></li>
+<li><code>fuzz/fuzz_prefetch.c</code></li>
+<li><code>fuzz/fuzz_tls_impersonate.c</code></li>
+<li><code>gui/browser_ui.c</code></li>
+<li><code>include/block_flow.h</code></li>
+<li><code>include/browser.h</code></li>
+<li><code>include/form.h</code></li>
+<li><code>include/frame_clock.h</code></li>
+<li><code>include/hls.h</code></li>
+<li><code>include/hostblock.h</code></li>
+<li><code>include/hostedit.h</code></li>
+<li><code>include/image_decode.h</code></li>
+<li><code>include/interp.h</code></li>
+<li><code>include/media_decoder.h</code></li>
+<li><code>include/net_realm.h</code></li>
+<li><code>include/prefetch.h</code></li>
+<li><code>include/textfield.h</code></li>
+<li><code>include/tls_impersonate.h</code></li>
+<li><code>src/block_flow.c</code></li>
+<li><code>src/browser.c</code></li>
+<li><code>src/form.c</code></li>
+<li><code>src/frame_clock.c</code></li>
+<li><code>src/hls.c</code></li>
+<li><code>src/hostblock.c</code></li>
+<li><code>src/hostedit.c</code></li>
+<li><code>src/image_decode.c</code></li>
+<li><code>src/interp.c</code></li>
+<li><code>src/media_decoder.c</code></li>
+<li><code>src/net_realm.c</code></li>
+<li><code>src/prefetch.c</code></li>
+<li><code>src/textfield.c</code></li>
+<li><code>src/tls_impersonate.c</code></li>
+<li><code>tests/test_block_flow.c</code></li>
+<li><code>tests/test_browser.c</code></li>
+<li><code>tests/test_form.c</code></li>
+<li><code>tests/test_frame_clock.c</code></li>
+<li><code>tests/test_freedom.c</code></li>
+<li><code>tests/test_hls.c</code></li>
+<li><code>tests/test_hostblock.c</code></li>
+<li><code>tests/test_hostedit.c</code></li>
+<li><code>tests/test_image_decode.c</code></li>
+<li><code>tests/test_interp.c</code></li>
+<li><code>tests/test_media_decoder.c</code></li>
+<li><code>tests/test_net_realm.c</code></li>
+<li><code>tests/test_prefetch.c</code></li>
+<li><code>tests/test_textfield.c</code></li>
+<li><code>tests/test_tls_impersonate.c</code></li>
+</ul>
+</section>
+<section class="component" id="comp-3">
+<h3>include: css (3)
+ <a href="#comp-3-children">[Expand]</a>
+</h3>
+<p>include: css groups 40 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...</p>
+<h4>Related Classes/Methods:</h4>
+<ul class="references">
+<li><a href="../include/css_color.h#L2-L25"><code>include/css_color.h::FREEDOM_CSS_COLOR_H</code></a></li>
+<li><a href="../include/css_color.h"><code>include/css_color.h::b</code></a></li>
+<li><a href="../include/css_color.h#L27-L30"><code>include/css_color.h::cc_rgb</code></a></li>
+<li><a href="../include/css_color.h#L31-L48"><code>include/css_color.h::cc_status</code></a></li>
+<li><a href="../include/css_color.h#L49-L58"><code>include/css_color.h::cc_pack</code></a></li>
+<li><a href="../include/css_color.h"><code>include/css_color.h::CC_COLOR_CURRENT</code></a></li>
+<li><a href="../include/css_color.h#L60-L62"><code>include/css_color.h::CC_COLOR_TRANSPARENT</code></a></li>
+<li><a href="../include/css.h#L2-L27"><code>include/css.h::FREEDOM_CSS_H</code></a></li>
+</ul>
+<h4 id="comp-3-children">Sub-components</h4>
+<div class="cb-wrap"><svg id="cb-sub-comp-3" class="cb-diagram" viewBox="0 0 8030 412" role="img" aria-label="Component diagram"><defs><marker id="cb-sub-comp-3-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="cb-arrow"/></marker></defs><path d="M310.0 206.0 C4015.0 206.0 4015.0 107.0 7720.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-3-arrow)" style="stroke-width:4.1"/><text x="4015.0" y="148.5" class="cb-edge-label">calls into</text><text x="4015.0" y="162.5" class="cb-edge-sub">3 calls · 2 imports</text><path d="M310.0 206.0 C4015.0 206.0 4015.0 305.0 7720.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-3-arrow)" style="stroke-width:5.0"/><text x="4015.0" y="247.5" class="cb-edge-label">calls into</text><text x="4015.0" y="261.5" class="cb-edge-sub">11 calls · 0 imports</text><path d="M7990.0 107.0 C8040.0 107.0 7670.0 305.0 7720.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-3-arrow)" style="stroke-width:5.0"/><text x="7855.0" y="198.0" class="cb-edge-label">calls into</text><text x="7855.0" y="212.0" class="cb-edge-sub">24 calls · 0 imports</text><path d="M7990.0 305.0 C8040.0 305.0 7670.0 107.0 7720.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-3-arrow)" style="stroke-width:5.0"/><text x="7855.0" y="198.0" class="cb-edge-label">calls into</text><text x="7855.0" y="212.0" class="cb-edge-sub">723 calls · 53 imports</text><path d="M7990.0 305.0 C8040.0 305.0 7190.0 206.0 7240.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-3-arrow)" style="stroke-width:3.5"/><text x="7615.0" y="247.5" class="cb-edge-label">calls into</text><text x="7615.0" y="261.5" class="cb-edge-sub">3 calls · 0 imports</text><path d="M7510.0 206.0 C7615.0 206.0 7615.0 107.0 7720.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-3-arrow)" style="stroke-width:5.0"/><text x="7615.0" y="148.5" class="cb-edge-label">calls into</text><text x="7615.0" y="162.5" class="cb-edge-sub">326 calls · 21 imports</text><path d="M7510.0 206.0 C7615.0 206.0 7615.0 305.0 7720.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-3-arrow)" style="stroke-width:5.0"/><text x="7615.0" y="247.5" class="cb-edge-label">calls into</text><text x="7615.0" y="261.5" class="cb-edge-sub">900 calls · 0 imports</text><g class="cb-node" data-desc="fuzz groups 1 files (c) around fuzz_root_match, LLVMFuzzerTestOneInput. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed..."><a href="#comp-3-1"><rect x="40.0" y="139.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="54.0" y="163.0" class="cb-node-label">fuzz</text><text x="54.0" y="179.0" class="cb-node-sub">1 files · 2 symbols</text><circle cx="60.0" cy="191.0" r="4" fill="#94a3b8"/><text x="70.0" y="195.0" class="cb-node-layer">utility</text><text x="54.0" y="211.0" class="cb-node-sym">fuzz_root_match</text><text x="54.0" y="225.0" class="cb-node-sym">LLVMFuzzerTestOneInput</text></a></g><g class="cb-node" data-desc="include groups 14 files (h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. cx_style: A box&#x27;s resolved style, in the SAME value-spaces as css.h: position uses..."><a href="#comp-3-2"><rect x="7720.0" y="40.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="7734.0" y="64.0" class="cb-node-label">include</text><text x="7734.0" y="80.0" class="cb-node-sub">14 files · 307 symbols</text><circle cx="7740.0" cy="92.0" r="4" fill="#94a3b8"/><text x="7750.0" y="96.0" class="cb-node-layer">utility</text><text x="7734.0" y="112.0" class="cb-node-sym">FREEDOM_CSS_COLOR_H</text><text x="7734.0" y="126.0" class="cb-node-sym">b</text><text x="7734.0" y="140.0" class="cb-node-sym">cc_rgb</text><text x="7734.0" y="154.0" class="cb-node-sub">+296 more</text></a></g><g class="cb-node" data-desc="src groups 13 files (c) around cx_forms_stacking_context, cx_box_layer, eff_z, cx_item_compare, cx_sort. eff_z: Not a stacking context: a positioned box with z:auto still paints in the *..."><a href="#comp-3-3"><rect x="7720.0" y="238.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="7734.0" y="262.0" class="cb-node-label">src</text><text x="7734.0" y="278.0" class="cb-node-sub">13 files · 474 symbols</text><circle cx="7740.0" cy="290.0" r="4" fill="#94a3b8"/><text x="7750.0" y="294.0" class="cb-node-layer">utility</text><text x="7734.0" y="310.0" class="cb-node-sym">cx_forms_stacking_conte…</text><text x="7734.0" y="324.0" class="cb-node-sym">cx_box_layer</text><text x="7734.0" y="338.0" class="cb-node-sym">eff_z</text><text x="7734.0" y="352.0" class="cb-node-sub">+462 more</text></a></g><g class="cb-node" data-desc="tests groups 12 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already..."><a href="#comp-3-4"><rect x="7240.0" y="139.0" width="270" height="134" rx="10" stroke="#fb923c" stroke-width="2.5"/><text x="7254.0" y="163.0" class="cb-node-label">tests</text><text x="7254.0" y="179.0" class="cb-node-sub">12 files · 500 symbols</text><circle cx="7260.0" cy="191.0" r="4" fill="#fb923c"/><text x="7270.0" y="195.0" class="cb-node-layer">testing</text><text x="7254.0" y="211.0" class="cb-node-sym">test_sc_opacity</text><text x="7254.0" y="225.0" class="cb-node-sym">test_sc_mix_blend</text><text x="7254.0" y="239.0" class="cb-node-sym">test_sc_isolation</text><text x="7254.0" y="253.0" class="cb-node-sub">+470 more</text></a></g></svg></div>
+<h5 id="comp-3-1">fuzz (3.1)</h5>
+<p>fuzz groups 1 files (c) around fuzz_root_match, LLVMFuzzerTestOneInput. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...</p>
+<h5 id="comp-3-2">include (3.2)</h5>
+<p>include groups 14 files (h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. cx_style: A box&#x27;s resolved style, in the SAME value-spaces as css.h: position uses...</p>
+<h5 id="comp-3-3">src (3.3)</h5>
+<p>src groups 13 files (c) around cx_forms_stacking_context, cx_box_layer, eff_z, cx_item_compare, cx_sort. eff_z: Not a stacking context: a positioned box with z:auto still paints in the *...</p>
+<h5 id="comp-3-4">tests (3.4)</h5>
+<p>tests groups 12 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...</p>
+<h4>Files</h4>
+<ul class="references">
+<li><code>fuzz/fuzz_css.c</code></li>
+<li><code>include/compositor.h</code></li>
+<li><code>include/css.h</code></li>
+<li><code>include/css_atrule.h</code></li>
+<li><code>include/css_box.h</code></li>
+<li><code>include/css_chain.h</code></li>
+<li><code>include/css_color.h</code></li>
+<li><code>include/css_decl.h</code></li>
+<li><code>include/css_gradient.h</code></li>
+<li><code>include/css_length.h</code></li>
+<li><code>include/css_mq.h</code></li>
+<li><code>include/css_select.h</code></li>
+<li><code>include/css_text.h</code></li>
+<li><code>include/css_values.h</code></li>
+<li><code>include/css_vars.h</code></li>
+<li><code>src/compositor.c</code></li>
+<li><code>src/css.c</code></li>
+<li><code>src/css_atrule.c</code></li>
+<li><code>src/css_box.c</code></li>
+<li><code>src/css_chain.c</code></li>
+<li><code>src/css_color.c</code></li>
+<li><code>src/css_gradient.c</code></li>
+<li><code>src/css_length.c</code></li>
+<li><code>src/css_mq.c</code></li>
+<li><code>src/css_select.c</code></li>
+<li><code>src/css_text.c</code></li>
+<li><code>src/css_values.c</code></li>
+<li><code>src/css_vars.c</code></li>
+<li><code>tests/test_compositor.c</code></li>
+<li><code>tests/test_css.c</code></li>
+<li><code>tests/test_css_atrule.c</code></li>
+<li><code>tests/test_css_box.c</code></li>
+<li><code>tests/test_css_color.c</code></li>
+<li><code>tests/test_css_drops.c</code></li>
+<li><code>tests/test_css_gradient.c</code></li>
+<li><code>tests/test_css_length.c</code></li>
+<li><code>tests/test_css_mq.c</code></li>
+<li><code>tests/test_css_text.c</code></li>
+<li><code>tests/test_css_values.c</code></li>
+<li><code>tests/test_css_vars.c</code></li>
+</ul>
+</section>
+<section class="component" id="comp-4">
+<h3>include: page_view (4)
+ <a href="#comp-4-children">[Expand]</a>
+</h3>
+<p>include: page_view groups 31 files (c, h) around FREEDOM_RENDER_POLICY_H, RDP_TRACKER_MAX_DIM, images, rdp_caps, rdp_img_decision. bx_edges: anything longer fails closed instead of truncating into a wrong match....</p>
+<h4>Related Classes/Methods:</h4>
+<ul class="references">
+<li><a href="../include/render_policy.h#L2-L26"><code>include/render_policy.h::FREEDOM_RENDER_POLICY_H</code></a></li>
+<li><a href="../include/render_policy.h#L27-L31"><code>include/render_policy.h::RDP_TRACKER_MAX_DIM</code></a></li>
+<li><a href="../include/render_policy.h"><code>include/render_policy.h::images</code></a></li>
+<li><a href="../include/render_policy.h#L32-L38"><code>include/render_policy.h::rdp_caps</code></a></li>
+<li><a href="../include/render_policy.h#L39-L52"><code>include/render_policy.h::rdp_img_decision</code></a></li>
+<li><a href="../include/render_policy.h#L53-L55"><code>include/render_policy.h::rdp_is_tracking_pixel</code></a></li>
+<li><a href="../include/render_policy.h#L56-L65"><code>include/render_policy.h::size</code></a></li>
+<li><a href="../include/render_policy.h#L66-L68"><code>include/render_policy.h::rdp_img_reason</code></a></li>
+</ul>
+<h4 id="comp-4-children">Sub-components</h4>
+<div class="cb-wrap"><svg id="cb-sub-comp-4" class="cb-diagram" viewBox="0 0 5630 412" role="img" aria-label="Component diagram"><defs><marker id="cb-sub-comp-4-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="cb-arrow"/></marker></defs><path d="M310.0 206.0 C2815.0 206.0 2815.0 107.0 5320.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-4-arrow)" style="stroke-width:4.7"/><text x="2815.0" y="148.5" class="cb-edge-label">calls into</text><text x="2815.0" y="162.5" class="cb-edge-sub">4 calls · 4 imports</text><path d="M310.0 206.0 C2815.0 206.0 2815.0 305.0 5320.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-4-arrow)" style="stroke-width:2.5"/><text x="2815.0" y="247.5" class="cb-edge-label">calls into</text><text x="2815.0" y="261.5" class="cb-edge-sub">1 calls · 0 imports</text><path d="M5590.0 107.0 C5640.0 107.0 5270.0 305.0 5320.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-4-arrow)" style="stroke-width:5.0"/><text x="5455.0" y="198.0" class="cb-edge-label">calls into</text><text x="5455.0" y="212.0" class="cb-edge-sub">52 calls · 0 imports</text><path d="M5590.0 107.0 C5640.0 107.0 4790.0 206.0 4840.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-4-arrow)" style="stroke-width:2.5"/><text x="5215.0" y="148.5" class="cb-edge-label">calls into</text><text x="5215.0" y="162.5" class="cb-edge-sub">1 calls · 0 imports</text><path d="M5590.0 305.0 C5640.0 305.0 5270.0 107.0 5320.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-4-arrow)" style="stroke-width:5.0"/><text x="5455.0" y="198.0" class="cb-edge-label">calls into</text><text x="5455.0" y="212.0" class="cb-edge-sub">35 calls · 24 imports</text><path d="M5110.0 206.0 C5215.0 206.0 5215.0 107.0 5320.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-4-arrow)" style="stroke-width:5.0"/><text x="5215.0" y="148.5" class="cb-edge-label">calls into</text><text x="5215.0" y="162.5" class="cb-edge-sub">724 calls · 22 imports</text><path d="M5110.0 206.0 C5215.0 206.0 5215.0 305.0 5320.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-4-arrow)" style="stroke-width:5.0"/><text x="5215.0" y="247.5" class="cb-edge-label">calls into</text><text x="5215.0" y="261.5" class="cb-edge-sub">560 calls · 0 imports</text><g class="cb-node" data-desc="fuzz groups 1 files (c) around pass."><a href="#comp-4-1"><rect x="40.0" y="139.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="54.0" y="163.0" class="cb-node-label">fuzz</text><text x="54.0" y="179.0" class="cb-node-sub">1 files · 1 symbols</text><circle cx="60.0" cy="191.0" r="4" fill="#94a3b8"/><text x="70.0" y="195.0" class="cb-node-layer">utility</text><text x="54.0" y="211.0" class="cb-node-sym">pass</text></a></g><g class="cb-node" data-desc="include groups 10 files (h) around FREEDOM_RENDER_POLICY_H, RDP_TRACKER_MAX_DIM, images, rdp_caps, rdp_img_decision. bx_edges: anything longer fails closed instead of truncating into a wrong match...."><a href="#comp-4-2"><rect x="5320.0" y="40.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="5334.0" y="64.0" class="cb-node-label">include</text><text x="5334.0" y="80.0" class="cb-node-sub">10 files · 232 symbols</text><circle cx="5340.0" cy="92.0" r="4" fill="#94a3b8"/><text x="5350.0" y="96.0" class="cb-node-layer">utility</text><text x="5334.0" y="112.0" class="cb-node-sym">FREEDOM_RENDER_POLICY_H</text><text x="5334.0" y="126.0" class="cb-node-sym">RDP_TRACKER_MAX_DIM</text><text x="5334.0" y="140.0" class="cb-node-sym">images</text><text x="5334.0" y="154.0" class="cb-node-sub">+219 more</text></a></g><g class="cb-node" data-desc="src groups 10 files (c) around BX_TAG_MAX, BX_DISPLAY_MAX, is_ws, copy_lower_trim, name_cmp. tag_row: One row of the user-agent sheet."><a href="#comp-4-3"><rect x="5320.0" y="238.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="5334.0" y="262.0" class="cb-node-label">src</text><text x="5334.0" y="278.0" class="cb-node-sub">10 files · 421 symbols</text><circle cx="5340.0" cy="290.0" r="4" fill="#94a3b8"/><text x="5350.0" y="294.0" class="cb-node-layer">utility</text><text x="5334.0" y="310.0" class="cb-node-sym">BX_TAG_MAX</text><text x="5334.0" y="324.0" class="cb-node-sym">BX_DISPLAY_MAX</text><text x="5334.0" y="338.0" class="cb-node-sym">is_ws</text><text x="5334.0" y="352.0" class="cb-node-sub">+414 more</text></a></g><g class="cb-node" data-desc="tests groups 10 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, test_paragraph, test_heading_ladder. dbl_eq: the display-name helper.  #include &lt;setjmp.h&gt; #include &lt;stdarg.h&gt; #include..."><a href="#comp-4-4"><rect x="4840.0" y="139.0" width="270" height="134" rx="10" stroke="#fb923c" stroke-width="2.5"/><text x="4854.0" y="163.0" class="cb-node-label">tests</text><text x="4854.0" y="179.0" class="cb-node-sub">10 files · 443 symbols</text><circle cx="4860.0" cy="191.0" r="4" fill="#fb923c"/><text x="4870.0" y="195.0" class="cb-node-layer">testing</text><text x="4854.0" y="211.0" class="cb-node-sym">dbl_eq</text><text x="4854.0" y="225.0" class="cb-node-sym">assert_edges</text><text x="4854.0" y="239.0" class="cb-node-sym">test_body_has_no_margin</text><text x="4854.0" y="253.0" class="cb-node-sub">+427 more</text></a></g></svg></div>
+<h5 id="comp-4-1">fuzz (4.1)</h5>
+<p>fuzz groups 1 files (c) around pass.</p>
+<h5 id="comp-4-2">include (4.2)</h5>
+<p>include groups 10 files (h) around FREEDOM_RENDER_POLICY_H, RDP_TRACKER_MAX_DIM, images, rdp_caps, rdp_img_decision. bx_edges: anything longer fails closed instead of truncating into a wrong match....</p>
+<h5 id="comp-4-3">src (4.3)</h5>
+<p>src groups 10 files (c) around BX_TAG_MAX, BX_DISPLAY_MAX, is_ws, copy_lower_trim, name_cmp. tag_row: One row of the user-agent sheet.</p>
+<h5 id="comp-4-4">tests (4.4)</h5>
+<p>tests groups 10 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, test_paragraph, test_heading_ladder. dbl_eq: the display-name helper.  #include &lt;setjmp.h&gt; #include &lt;stdarg.h&gt; #include...</p>
+<h4>Files</h4>
+<ul class="references">
+<li><code>fuzz/fuzz_dom_debug.c</code></li>
+<li><code>include/box_style.h</code></li>
+<li><code>include/box_tree.h</code></li>
+<li><code>include/dom_debug.h</code></li>
+<li><code>include/flex_layout.h</code></li>
+<li><code>include/js_policy.h</code></li>
+<li><code>include/page_view.h</code></li>
+<li><code>include/perf_trace.h</code></li>
+<li><code>include/render_doc.h</code></li>
+<li><code>include/render_policy.h</code></li>
+<li><code>include/webcaps.h</code></li>
+<li><code>src/box_style.c</code></li>
+<li><code>src/box_tree.c</code></li>
+<li><code>src/dom_debug.c</code></li>
+<li><code>src/flex_layout.c</code></li>
+<li><code>src/freedom.c</code></li>
+<li><code>src/js_policy.c</code></li>
+<li><code>src/page_view.c</code></li>
+<li><code>src/perf_trace.c</code></li>
+<li><code>src/render_doc.c</code></li>
+<li><code>src/webcaps.c</code></li>
+<li><code>tests/test_box_style.c</code></li>
+<li><code>tests/test_box_tree.c</code></li>
+<li><code>tests/test_dom_debug.c</code></li>
+<li><code>tests/test_flex_layout.c</code></li>
+<li><code>tests/test_js_policy.c</code></li>
+<li><code>tests/test_page_view.c</code></li>
+<li><code>tests/test_perf_trace.c</code></li>
+<li><code>tests/test_render_doc.c</code></li>
+<li><code>tests/test_render_policy.c</code></li>
+<li><code>tests/test_webcaps.c</code></li>
+</ul>
+</section>
+<section class="component" id="comp-5">
+<h3>include: text_shape (5)
+ <a href="#comp-5-children">[Expand]</a>
+</h3>
+<p>include: text_shape groups 20 files (c, h) around FREEDOM_DATA_URL_H, allocation, du_status, DU_MAX_ENCODED_LEN, du_is_data_url. libFuzzer harness for the webfont lookahead scanner (spec/webfont.md).</p>
+<h4>Related Classes/Methods:</h4>
+<ul class="references">
+<li><a href="../include/data_url.h#L2-L20"><code>include/data_url.h::FREEDOM_DATA_URL_H</code></a></li>
+<li><a href="../include/data_url.h#L21-L26"><code>include/data_url.h::allocation</code></a></li>
+<li><a href="../include/data_url.h#L27-L42"><code>include/data_url.h::du_status</code></a></li>
+<li><a href="../include/data_url.h#L43-L45"><code>include/data_url.h::DU_MAX_ENCODED_LEN</code></a></li>
+<li><a href="../include/data_url.h#L46-L58"><code>include/data_url.h::du_is_data_url</code></a></li>
+<li><a href="../include/data_url.h#L59-L72"><code>include/data_url.h::closed</code></a></li>
+<li><a href="../include/webfont.h#L2-L19"><code>include/webfont.h::FREEDOM_WEBFONT_H</code></a></li>
+<li><a href="../include/webfont.h"><code>include/webfont.h::WF_FAMILY_MAX</code></a></li>
+</ul>
+<h4 id="comp-5-children">Sub-components</h4>
+<div class="cb-wrap"><svg id="cb-sub-comp-5" class="cb-diagram" viewBox="0 0 5630 412" role="img" aria-label="Component diagram"><defs><marker id="cb-sub-comp-5-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="cb-arrow"/></marker></defs><path d="M310.0 107.0 C2815.0 107.0 2815.0 206.0 5320.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-5-arrow)" style="stroke-width:4.5"/><text x="2815.0" y="148.5" class="cb-edge-label">calls into</text><text x="2815.0" y="162.5" class="cb-edge-sub">4 calls · 3 imports</text><path d="M310.0 107.0 C2575.0 107.0 2575.0 206.0 4840.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-5-arrow)" style="stroke-width:4.3"/><text x="2575.0" y="148.5" class="cb-edge-label">calls into</text><text x="2575.0" y="162.5" class="cb-edge-sub">6 calls · 0 imports</text><path d="M5590.0 206.0 C5640.0 206.0 4790.0 206.0 4840.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-5-arrow)" style="stroke-width:4.7"/><text x="5215.0" y="198.0" class="cb-edge-label">calls into</text><text x="5215.0" y="212.0" class="cb-edge-sub">8 calls · 0 imports</text><path d="M5110.0 206.0 C5215.0 206.0 5215.0 206.0 5320.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-5-arrow)" style="stroke-width:5.0"/><text x="5215.0" y="198.0" class="cb-edge-label">calls into</text><text x="5215.0" y="212.0" class="cb-edge-sub">14 calls · 13 imports</text><path d="M310.0 305.0 C2815.0 305.0 2815.0 206.0 5320.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-5-arrow)" style="stroke-width:5.0"/><text x="2815.0" y="247.5" class="cb-edge-label">calls into</text><text x="2815.0" y="261.5" class="cb-edge-sub">140 calls · 8 imports</text><path d="M310.0 305.0 C2575.0 305.0 2575.0 206.0 4840.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-5-arrow)" style="stroke-width:5.0"/><text x="2575.0" y="247.5" class="cb-edge-label">calls into</text><text x="2575.0" y="261.5" class="cb-edge-sub">77 calls · 0 imports</text><g class="cb-node" data-desc="fuzz groups 3 files (c) around worker, FZ_CAP, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput. libFuzzer harness for the webfont lookahead scanner (spec/webfont.md)."><a href="#comp-5-1"><rect x="40.0" y="40.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="54.0" y="64.0" class="cb-node-label">fuzz</text><text x="54.0" y="80.0" class="cb-node-sub">3 files · 4 symbols</text><circle cx="60.0" cy="92.0" r="4" fill="#94a3b8"/><text x="70.0" y="96.0" class="cb-node-layer">utility</text><text x="54.0" y="112.0" class="cb-node-sym">worker</text><text x="54.0" y="126.0" class="cb-node-sym">FZ_CAP</text><text x="54.0" y="140.0" class="cb-node-sym">LLVMFuzzerTestOneInput</text></a></g><g class="cb-node" data-desc="include groups 6 files (h) around FREEDOM_DATA_URL_H, allocation, du_status, DU_MAX_ENCODED_LEN, du_is_data_url. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real..."><a href="#comp-5-2"><rect x="5320.0" y="139.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="5334.0" y="163.0" class="cb-node-label">include</text><text x="5334.0" y="179.0" class="cb-node-sub">6 files · 55 symbols</text><circle cx="5340.0" cy="191.0" r="4" fill="#94a3b8"/><text x="5350.0" y="195.0" class="cb-node-layer">utility</text><text x="5334.0" y="211.0" class="cb-node-sym">FREEDOM_DATA_URL_H</text><text x="5334.0" y="225.0" class="cb-node-sym">allocation</text><text x="5334.0" y="239.0" class="cb-node-sym">du_status</text><text x="5334.0" y="253.0" class="cb-node-sub">+51 more</text></a></g><g class="cb-node" data-desc="src groups 6 files (c) around lower, ci_starts_with, du_is_data_url, du_base64_payload, b64_val. b64_val: 0-63 for a base64 alphabet character, -1 otherwise."><a href="#comp-5-3"><rect x="4840.0" y="139.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="4854.0" y="163.0" class="cb-node-label">src</text><text x="4854.0" y="179.0" class="cb-node-sub">6 files · 78 symbols</text><circle cx="4860.0" cy="191.0" r="4" fill="#94a3b8"/><text x="4870.0" y="195.0" class="cb-node-layer">utility</text><text x="4854.0" y="211.0" class="cb-node-sym">lower</text><text x="4854.0" y="225.0" class="cb-node-sym">ci_starts_with</text><text x="4854.0" y="239.0" class="cb-node-sym">du_is_data_url</text><text x="4854.0" y="253.0" class="cb-node-sub">+72 more</text></a></g><g class="cb-node" data-desc="tests groups 5 files (c) around test_is_data_url_true, test_is_data_url_false, test_payload_basic, test_payload_no_mediatype, test_payload_empty. test_site_of_psl: } static void test_site_of_multi_suffix(void **state) { (void)state..."><a href="#comp-5-4"><rect x="40.0" y="238.0" width="270" height="134" rx="10" stroke="#fb923c" stroke-width="2.5"/><text x="54.0" y="262.0" class="cb-node-label">tests</text><text x="54.0" y="278.0" class="cb-node-sub">5 files · 79 symbols</text><circle cx="60.0" cy="290.0" r="4" fill="#fb923c"/><text x="70.0" y="294.0" class="cb-node-layer">testing</text><text x="54.0" y="310.0" class="cb-node-sym">test_is_data_url_true</text><text x="54.0" y="324.0" class="cb-node-sym">test_is_data_url_false</text><text x="54.0" y="338.0" class="cb-node-sym">test_payload_basic</text><text x="54.0" y="352.0" class="cb-node-sub">+70 more</text></a></g></svg></div>
+<h5 id="comp-5-1">fuzz (5.1)</h5>
+<p>fuzz groups 3 files (c) around worker, FZ_CAP, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput. libFuzzer harness for the webfont lookahead scanner (spec/webfont.md).</p>
+<h5 id="comp-5-2">include (5.2)</h5>
+<p>include groups 6 files (h) around FREEDOM_DATA_URL_H, allocation, du_status, DU_MAX_ENCODED_LEN, du_is_data_url. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...</p>
+<h5 id="comp-5-3">src (5.3)</h5>
+<p>src groups 6 files (c) around lower, ci_starts_with, du_is_data_url, du_base64_payload, b64_val. b64_val: 0-63 for a base64 alphabet character, -1 otherwise.</p>
+<h5 id="comp-5-4">tests (5.4)</h5>
+<p>tests groups 5 files (c) around test_is_data_url_true, test_is_data_url_false, test_payload_basic, test_payload_no_mediatype, test_payload_empty. test_site_of_psl: } static void test_site_of_multi_suffix(void **state) { (void)state...</p>
+<h4>Files</h4>
+<ul class="references">
+<li><code>fuzz/fuzz_data_url.c</code></li>
+<li><code>fuzz/fuzz_text_shape.c</code></li>
+<li><code>fuzz/fuzz_webfont.c</code></li>
+<li><code>include/data_url.h</code></li>
+<li><code>include/psl_data.h</code></li>
+<li><code>include/request_policy.h</code></li>
+<li><code>include/text_shape.h</code></li>
+<li><code>include/webfont.h</code></li>
+<li><code>include/webfont_load.h</code></li>
+<li><code>src/data_url.c</code></li>
+<li><code>src/render_policy.c</code></li>
+<li><code>src/request_policy.c</code></li>
+<li><code>src/text_shape.c</code></li>
+<li><code>src/webfont.c</code></li>
+<li><code>src/webfont_load.c</code></li>
+<li><code>tests/test_data_url.c</code></li>
+<li><code>tests/test_request_policy.c</code></li>
+<li><code>tests/test_text_shape.c</code></li>
+<li><code>tests/test_webfont.c</code></li>
+<li><code>tests/test_webfont_load.c</code></li>
+</ul>
+</section>
+<section class="component" id="comp-6">
+<h3>include: local_store (6)
+ <a href="#comp-6-children">[Expand]</a>
+</h3>
+<p>include: local_store groups 16 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. ds_free: Reads and decrypts path.</p>
+<h4>Related Classes/Methods:</h4>
+<ul class="references">
+<li><a href="../include/local_store.h#L2-L25"><code>include/local_store.h::FREEDOM_LOCAL_STORE_H</code></a></li>
+<li><a href="../include/local_store.h"><code>include/local_store.h::LS_KEY_LEN</code></a></li>
+<li><a href="../include/local_store.h"><code>include/local_store.h::LS_SALT_LEN</code></a></li>
+<li><a href="../include/local_store.h"><code>include/local_store.h::LS_NONCE_LEN</code></a></li>
+<li><a href="../include/local_store.h"><code>include/local_store.h::LS_TAG_LEN</code></a></li>
+<li><a href="../include/local_store.h"><code>include/local_store.h::LS_HEADER_LEN</code></a></li>
+<li><a href="../include/local_store.h"><code>include/local_store.h::LS_OVERHEAD</code></a></li>
+<li><a href="../include/local_store.h#L32-L33"><code>include/local_store.h::LS_MAX_PLAINTEXT</code></a></li>
+</ul>
+<h4 id="comp-6-children">Sub-components</h4>
+<div class="cb-wrap"><svg id="cb-sub-comp-6" class="cb-diagram" viewBox="0 0 5630 412" role="img" aria-label="Component diagram"><defs><marker id="cb-sub-comp-6-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="cb-arrow"/></marker></defs><path d="M310.0 107.0 C2815.0 107.0 2815.0 206.0 5320.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-6-arrow)" style="stroke-width:5.0"/><text x="2815.0" y="148.5" class="cb-edge-label">calls into</text><text x="2815.0" y="162.5" class="cb-edge-sub">9 calls · 1 imports</text><path d="M310.0 107.0 C2575.0 107.0 2575.0 206.0 4840.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-6-arrow)" style="stroke-width:4.7"/><text x="2575.0" y="148.5" class="cb-edge-label">calls into</text><text x="2575.0" y="162.5" class="cb-edge-sub">8 calls · 0 imports</text><path d="M5590.0 206.0 C5640.0 206.0 4790.0 206.0 4840.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-6-arrow)" style="stroke-width:5.0"/><text x="5215.0" y="198.0" class="cb-edge-label">calls into</text><text x="5215.0" y="212.0" class="cb-edge-sub">15 calls · 0 imports</text><path d="M5110.0 206.0 C5215.0 206.0 5215.0 206.0 5320.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-6-arrow)" style="stroke-width:5.0"/><text x="5215.0" y="198.0" class="cb-edge-label">calls into</text><text x="5215.0" y="212.0" class="cb-edge-sub">22 calls · 8 imports</text><path d="M310.0 305.0 C2815.0 305.0 2815.0 206.0 5320.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-6-arrow)" style="stroke-width:5.0"/><text x="2815.0" y="247.5" class="cb-edge-label">calls into</text><text x="2815.0" y="261.5" class="cb-edge-sub">132 calls · 8 imports</text><path d="M310.0 305.0 C2575.0 305.0 2575.0 206.0 4840.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-6-arrow)" style="stroke-width:5.0"/><text x="2575.0" y="247.5" class="cb-edge-label">calls into</text><text x="2575.0" y="261.5" class="cb-edge-sub">118 calls · 0 imports</text><g class="cb-node" data-desc="fuzz groups 1 files (c) around LLVMFuzzerTestOneInput."><a href="#comp-6-1"><rect x="40.0" y="40.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="54.0" y="64.0" class="cb-node-label">fuzz</text><text x="54.0" y="80.0" class="cb-node-sub">1 files · 1 symbols</text><circle cx="60.0" cy="92.0" r="4" fill="#94a3b8"/><text x="70.0" y="96.0" class="cb-node-layer">utility</text><text x="54.0" y="112.0" class="cb-node-sym">LLVMFuzzerTestOneInput</text></a></g><g class="cb-node" data-desc="include groups 5 files (h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. ds_free: Reads and decrypts path."><a href="#comp-6-2"><rect x="5320.0" y="139.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="5334.0" y="163.0" class="cb-node-label">include</text><text x="5334.0" y="179.0" class="cb-node-sub">5 files · 51 symbols</text><circle cx="5340.0" cy="191.0" r="4" fill="#94a3b8"/><text x="5350.0" y="195.0" class="cb-node-layer">utility</text><text x="5334.0" y="211.0" class="cb-node-sym">FREEDOM_LOCAL_STORE_H</text><text x="5334.0" y="225.0" class="cb-node-sym">LS_KEY_LEN</text><text x="5334.0" y="239.0" class="cb-node-sym">LS_SALT_LEN</text><text x="5334.0" y="253.0" class="cb-node-sub">+48 more</text></a></g><g class="cb-node" data-desc="src groups 5 files (c) around _POSIX_C_SOURCE, fsync_dir, map_ls, ds_write, ds_read. fsync_dir: Best-effort fsync of the directory holding path, for crash durability of..."><a href="#comp-6-3"><rect x="4840.0" y="139.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="4854.0" y="163.0" class="cb-node-label">src</text><text x="4854.0" y="179.0" class="cb-node-sub">5 files · 319 symbols</text><circle cx="4860.0" cy="191.0" r="4" fill="#94a3b8"/><text x="4870.0" y="195.0" class="cb-node-layer">utility</text><text x="4854.0" y="211.0" class="cb-node-sym">_POSIX_C_SOURCE</text><text x="4854.0" y="225.0" class="cb-node-sym">fsync_dir</text><text x="4854.0" y="239.0" class="cb-node-sym">map_ls</text><text x="4854.0" y="253.0" class="cb-node-sub">+71 more</text></a></g><g class="cb-node" data-desc="tests groups 5 files (c) around _POSIX_C_SOURCE, dir, fixture, setup, teardown."><a href="#comp-6-4"><rect x="40.0" y="238.0" width="270" height="134" rx="10" stroke="#fb923c" stroke-width="2.5"/><text x="54.0" y="262.0" class="cb-node-label">tests</text><text x="54.0" y="278.0" class="cb-node-sub">5 files · 77 symbols</text><circle cx="60.0" cy="290.0" r="4" fill="#fb923c"/><text x="70.0" y="294.0" class="cb-node-layer">testing</text><text x="54.0" y="310.0" class="cb-node-sym">_POSIX_C_SOURCE</text><text x="54.0" y="324.0" class="cb-node-sym">dir</text><text x="54.0" y="338.0" class="cb-node-sym">fixture</text><text x="54.0" y="352.0" class="cb-node-sub">+62 more</text></a></g></svg></div>
+<h5 id="comp-6-1">fuzz (6.1)</h5>
+<p>fuzz groups 1 files (c) around LLVMFuzzerTestOneInput.</p>
+<h5 id="comp-6-2">include (6.2)</h5>
+<p>include groups 5 files (h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. ds_free: Reads and decrypts path.</p>
+<h5 id="comp-6-3">src (6.3)</h5>
+<p>src groups 5 files (c) around _POSIX_C_SOURCE, fsync_dir, map_ls, ds_write, ds_read. fsync_dir: Best-effort fsync of the directory holding path, for crash durability of...</p>
+<h5 id="comp-6-4">tests (6.4)</h5>
+<p>tests groups 5 files (c) around _POSIX_C_SOURCE, dir, fixture, setup, teardown.</p>
+<h4>Files</h4>
+<ul class="references">
+<li><code>fuzz/fuzz_prefs.c</code></li>
+<li><code>include/disk_store.h</code></li>
+<li><code>include/local_store.h</code></li>
+<li><code>include/prefs.h</code></li>
+<li><code>include/profile.h</code></li>
+<li><code>include/zoom.h</code></li>
+<li><code>src/disk_store.c</code></li>
+<li><code>src/local_store.c</code></li>
+<li><code>src/prefs.c</code></li>
+<li><code>src/profile.c</code></li>
+<li><code>src/zoom.c</code></li>
+<li><code>tests/test_disk_store.c</code></li>
+<li><code>tests/test_local_store.c</code></li>
+<li><code>tests/test_prefs.c</code></li>
+<li><code>tests/test_profile.c</code></li>
+<li><code>tests/test_zoom.c</code></li>
+</ul>
+</section>
+<section class="component" id="comp-7">
+<h3>gui (7)
+ <a href="#comp-7-children">[Expand]</a>
+</h3>
+<p>gui groups 15 files (c, h) around FREEDOM_SVG_RENDER_H, sv_status, SV_MAX_SHAPES, SV_MAX_POINTS, SV_MAX_SEGS. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...</p>
+<h4>Related Classes/Methods:</h4>
+<ul class="references">
+<li><a href="../include/svg_render.h#L2-L24"><code>include/svg_render.h::FREEDOM_SVG_RENDER_H</code></a></li>
+<li><a href="../include/svg_render.h#L25-L31"><code>include/svg_render.h::sv_status</code></a></li>
+<li><a href="../include/svg_render.h"><code>include/svg_render.h::SV_MAX_SHAPES</code></a></li>
+<li><a href="../include/svg_render.h"><code>include/svg_render.h::SV_MAX_POINTS</code></a></li>
+<li><a href="../include/svg_render.h"><code>include/svg_render.h::SV_MAX_SEGS</code></a></li>
+<li><a href="../include/svg_render.h"><code>include/svg_render.h::SV_MAX_DEPTH</code></a></li>
+<li><a href="../include/svg_render.h"><code>include/svg_render.h::SV_TEXT_MAX</code></a></li>
+<li><a href="../include/svg_render.h#L37-L40"><code>include/svg_render.h::SV_MAX_INPUT</code></a></li>
+</ul>
+<h4 id="comp-7-children">Sub-components</h4>
+<div class="cb-wrap"><svg id="cb-sub-comp-7" class="cb-diagram" viewBox="0 0 6590 412" role="img" aria-label="Component diagram"><defs><marker id="cb-sub-comp-7-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="cb-arrow"/></marker></defs><path d="M310.0 107.0 C3295.0 107.0 3295.0 206.0 6280.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-7-arrow)" style="stroke-width:3.5"/><text x="3295.0" y="148.5" class="cb-edge-label">depends on</text><text x="3295.0" y="162.5" class="cb-edge-sub">1 calls · 2 imports</text><path d="M310.0 107.0 C3055.0 107.0 3055.0 305.0 5800.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-7-arrow)" style="stroke-width:2.5"/><text x="3055.0" y="198.0" class="cb-edge-label">calls into</text><text x="3055.0" y="212.0" class="cb-edge-sub">1 calls · 0 imports</text><path d="M6070.0 107.0 C6175.0 107.0 6175.0 206.0 6280.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-7-arrow)" style="stroke-width:4.7"/><text x="6175.0" y="148.5" class="cb-edge-label">depends on</text><text x="6175.0" y="162.5" class="cb-edge-sub">2 calls · 6 imports</text><path d="M6070.0 107.0 C6120.0 107.0 5750.0 305.0 5800.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-7-arrow)" style="stroke-width:2.5"/><text x="5935.0" y="198.0" class="cb-edge-label">calls into</text><text x="5935.0" y="212.0" class="cb-edge-sub">1 calls · 0 imports</text><path d="M6550.0 206.0 C6600.0 206.0 5750.0 107.0 5800.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-7-arrow)" style="stroke-width:2.5"/><text x="6175.0" y="148.5" class="cb-edge-label">calls into</text><text x="6175.0" y="162.5" class="cb-edge-sub">1 calls · 0 imports</text><path d="M6550.0 206.0 C6600.0 206.0 5750.0 305.0 5800.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-7-arrow)" style="stroke-width:3.5"/><text x="6175.0" y="247.5" class="cb-edge-label">calls into</text><text x="6175.0" y="261.5" class="cb-edge-sub">3 calls · 0 imports</text><path d="M6070.0 305.0 C6175.0 305.0 6175.0 206.0 6280.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-7-arrow)" style="stroke-width:3.1"/><text x="6175.0" y="247.5" class="cb-edge-label">depends on</text><text x="6175.0" y="261.5" class="cb-edge-sub">0 calls · 2 imports</text><path d="M310.0 305.0 C3295.0 305.0 3295.0 206.0 6280.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-7-arrow)" style="stroke-width:5.0"/><text x="3295.0" y="247.5" class="cb-edge-label">calls into</text><text x="3295.0" y="261.5" class="cb-edge-sub">17 calls · 2 imports</text><path d="M310.0 305.0 C3055.0 305.0 3055.0 305.0 5800.0 305.0" class="cb-edge" marker-end="url(#cb-sub-comp-7-arrow)" style="stroke-width:5.0"/><text x="3055.0" y="297.0" class="cb-edge-label">calls into</text><text x="3055.0" y="311.0" class="cb-edge-sub">16 calls · 0 imports</text><g class="cb-node" data-desc="fuzz groups 2 files (c) around LLVMFuzzerTestOneInput."><a href="#comp-7-1"><rect x="40.0" y="40.0" width="270" height="134" rx="10" stroke="#22d3ee" stroke-width="2.5"/><text x="54.0" y="64.0" class="cb-node-label">fuzz</text><text x="54.0" y="80.0" class="cb-node-sub">2 files · 1 symbols</text><circle cx="60.0" cy="92.0" r="4" fill="#22d3ee"/><text x="70.0" y="96.0" class="cb-node-layer">presentation</text><text x="54.0" y="112.0" class="cb-node-sym">LLVMFuzzerTestOneInput</text></a></g><g class="cb-node" data-desc="gui groups 5 files (c, h) around FREEDOM_BROWSER_UI_INTERNAL_H, UI_FONT_SIZE, UI_TEXT_MARGIN, UI_HEADING_LEVELS, b. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb..."><a href="#comp-7-2"><rect x="5800.0" y="40.0" width="270" height="134" rx="10" stroke="#22d3ee" stroke-width="2.5"/><text x="5814.0" y="64.0" class="cb-node-label">gui</text><text x="5814.0" y="80.0" class="cb-node-sub">5 files · 52 symbols</text><circle cx="5820.0" cy="92.0" r="4" fill="#22d3ee"/><text x="5830.0" y="96.0" class="cb-node-layer">presentation</text><text x="5814.0" y="112.0" class="cb-node-sym">FREEDOM_BROWSER_UI_INTE…</text><text x="5814.0" y="126.0" class="cb-node-sym">UI_FONT_SIZE</text><text x="5814.0" y="140.0" class="cb-node-sym">UI_TEXT_MARGIN</text><text x="5814.0" y="154.0" class="cb-node-sub">+47 more</text></a></g><g class="cb-node" data-desc="include groups 4 files (h) around FREEDOM_SVG_RENDER_H, sv_status, SV_MAX_SHAPES, SV_MAX_POINTS, SV_MAX_SEGS. svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and..."><a href="#comp-7-3"><rect x="6280.0" y="139.0" width="270" height="134" rx="10" stroke="#22d3ee" stroke-width="2.5"/><text x="6294.0" y="163.0" class="cb-node-label">include</text><text x="6294.0" y="179.0" class="cb-node-sub">4 files · 51 symbols</text><circle cx="6300.0" cy="191.0" r="4" fill="#22d3ee"/><text x="6310.0" y="195.0" class="cb-node-layer">presentation</text><text x="6294.0" y="211.0" class="cb-node-sym">FREEDOM_SVG_RENDER_H</text><text x="6294.0" y="225.0" class="cb-node-sym">sv_status</text><text x="6294.0" y="239.0" class="cb-node-sym">SV_MAX_SHAPES</text><text x="6294.0" y="253.0" class="cb-node-sub">+48 more</text></a></g><g class="cb-node" data-desc="src groups 2 files (c) around sv_is_space, sv_is_digit, sv_lower, sv_span_eq, sv_sep. svg_render — inline &lt;svg&gt; markup -&gt; a bounded list of geometric shapes."><a href="#comp-7-4"><rect x="5800.0" y="238.0" width="270" height="134" rx="10" stroke="#22d3ee" stroke-width="2.5"/><text x="5814.0" y="262.0" class="cb-node-label">src</text><text x="5814.0" y="278.0" class="cb-node-sub">2 files · 37 symbols</text><circle cx="5820.0" cy="290.0" r="4" fill="#22d3ee"/><text x="5830.0" y="294.0" class="cb-node-layer">presentation</text><text x="5814.0" y="310.0" class="cb-node-sym">sv_is_space</text><text x="5814.0" y="324.0" class="cb-node-sym">sv_is_digit</text><text x="5814.0" y="338.0" class="cb-node-sym">sv_lower</text><text x="5814.0" y="352.0" class="cb-node-sub">+34 more</text></a></g><g class="cb-node" data-desc="tests groups 2 files (c) around parse, test_null_args, test_empty_and_garbage_do_not_parse, test_dimensions_and_viewbox, test_basic_shapes. tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_)."><a href="#comp-7-5"><rect x="40.0" y="238.0" width="270" height="134" rx="10" stroke="#fb923c" stroke-width="2.5"/><text x="54.0" y="262.0" class="cb-node-label">tests</text><text x="54.0" y="278.0" class="cb-node-sub">2 files · 28 symbols</text><circle cx="60.0" cy="290.0" r="4" fill="#fb923c"/><text x="70.0" y="294.0" class="cb-node-layer">testing</text><text x="54.0" y="310.0" class="cb-node-sym">parse</text><text x="54.0" y="324.0" class="cb-node-sym">test_null_args</text><text x="54.0" y="338.0" class="cb-node-sym">test_empty_and_garbage_…</text><text x="54.0" y="352.0" class="cb-node-sub">+24 more</text></a></g></svg></div>
+<h5 id="comp-7-1">fuzz (7.1)</h5>
+<p>fuzz groups 2 files (c) around LLVMFuzzerTestOneInput.</p>
+<h5 id="comp-7-2">gui (7.2)</h5>
+<p>gui groups 5 files (c, h) around FREEDOM_BROWSER_UI_INTERNAL_H, UI_FONT_SIZE, UI_TEXT_MARGIN, UI_HEADING_LEVELS, b. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...</p>
+<h5 id="comp-7-3">include (7.3)</h5>
+<p>include groups 4 files (h) around FREEDOM_SVG_RENDER_H, sv_status, SV_MAX_SHAPES, SV_MAX_POINTS, SV_MAX_SEGS. svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and...</p>
+<h5 id="comp-7-4">src (7.4)</h5>
+<p>src groups 2 files (c) around sv_is_space, sv_is_digit, sv_lower, sv_span_eq, sv_sep. svg_render — inline &lt;svg&gt; markup -&gt; a bounded list of geometric shapes.</p>
+<h5 id="comp-7-5">tests (7.5)</h5>
+<p>tests groups 2 files (c) around parse, test_null_args, test_empty_and_garbage_do_not_parse, test_dimensions_and_viewbox, test_basic_shapes. tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_).</p>
+<h4>Files</h4>
+<ul class="references">
+<li><code>fuzz/fuzz_page_view.c</code></li>
+<li><code>fuzz/fuzz_svg_render.c</code></li>
+<li><code>gui/browser_ui_internal.h</code></li>
+<li><code>gui/bui_theme.c</code></li>
+<li><code>gui/freedom_view.c</code></li>
+<li><code>gui/svg_paint.c</code></li>
+<li><code>gui/ui_render.c</code></li>
+<li><code>include/freedom_config.h</code></li>
+<li><code>include/svg_paint.h</code></li>
+<li><code>include/svg_render.h</code></li>
+<li><code>include/ui.h</code></li>
+<li><code>src/svg_render.c</code></li>
+<li><code>src/ui_layout.c</code></li>
+<li><code>tests/test_svg_render.c</code></li>
+<li><code>tests/test_ui.c</code></li>
+</ul>
+</section>
+<section class="component" id="comp-8">
+<h3>include: secure_fetch (8)
+ <a href="#comp-8-children">[Expand]</a>
+</h3>
+<p>include: secure_fetch groups 10 files (c, h) around FREEDOM_ANTI_FP_H, FP_TIMER_RESOLUTION_MS, FP_USER_AGENT, FP_ACCEPT_LANGUAGE, FP_ACCEPT_LANGUAGE_HEADER. fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  &quot;document&quot; #define...</p>
+<h4>Related Classes/Methods:</h4>
+<ul class="references">
+<li><a href="../include/anti_fp.h#L2-L21"><code>include/anti_fp.h::FREEDOM_ANTI_FP_H</code></a></li>
+<li><a href="../include/anti_fp.h#L22-L30"><code>include/anti_fp.h::FP_TIMER_RESOLUTION_MS</code></a></li>
+<li><a href="../include/anti_fp.h#L31-L32"><code>include/anti_fp.h::FP_USER_AGENT</code></a></li>
+<li><a href="../include/anti_fp.h"><code>include/anti_fp.h::FP_ACCEPT_LANGUAGE</code></a></li>
+<li><a href="../include/anti_fp.h#L34-L39"><code>include/anti_fp.h::FP_ACCEPT_LANGUAGE_HEADER</code></a></li>
+<li><a href="../include/anti_fp.h#L40-L44"><code>include/anti_fp.h::FP_ACCEPT_HEADER_NAV</code></a></li>
+<li><a href="../include/anti_fp.h"><code>include/anti_fp.h::FP_SEC_FETCH_DEST_NAV</code></a></li>
+<li><a href="../include/anti_fp.h"><code>include/anti_fp.h::FP_SEC_FETCH_MODE_NAV</code></a></li>
+</ul>
+<h4 id="comp-8-children">Sub-components</h4>
+<div class="cb-wrap"><svg id="cb-sub-comp-8" class="cb-diagram" viewBox="0 0 4190 214" role="img" aria-label="Component diagram"><defs><marker id="cb-sub-comp-8-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="cb-arrow"/></marker></defs><path d="M4150.0 107.0 C4200.0 107.0 3350.0 107.0 3400.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-8-arrow)" style="stroke-width:5.0"/><text x="3775.0" y="99.0" class="cb-edge-label">calls into</text><text x="3775.0" y="113.0" class="cb-edge-sub">16 calls · 0 imports</text><path d="M3670.0 107.0 C3775.0 107.0 3775.0 107.0 3880.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-8-arrow)" style="stroke-width:4.1"/><text x="3775.0" y="99.0" class="cb-edge-label">depends on</text><text x="3775.0" y="113.0" class="cb-edge-sub">1 calls · 4 imports</text><path d="M310.0 107.0 C2095.0 107.0 2095.0 107.0 3880.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-8-arrow)" style="stroke-width:5.0"/><text x="2095.0" y="99.0" class="cb-edge-label">calls into</text><text x="2095.0" y="113.0" class="cb-edge-sub">139 calls · 4 imports</text><path d="M310.0 107.0 C1855.0 107.0 1855.0 107.0 3400.0 107.0" class="cb-edge" marker-end="url(#cb-sub-comp-8-arrow)" style="stroke-width:5.0"/><text x="1855.0" y="99.0" class="cb-edge-label">calls into</text><text x="1855.0" y="113.0" class="cb-edge-sub">99 calls · 0 imports</text><g class="cb-node" data-desc="include groups 3 files (h) around FREEDOM_ANTI_FP_H, FP_TIMER_RESOLUTION_MS, FP_USER_AGENT, FP_ACCEPT_LANGUAGE, FP_ACCEPT_LANGUAGE_HEADER. fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  &quot;document&quot; #define..."><a href="#comp-8-1"><rect x="3880.0" y="40.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="3894.0" y="64.0" class="cb-node-label">include</text><text x="3894.0" y="80.0" class="cb-node-sub">3 files · 88 symbols</text><circle cx="3900.0" cy="92.0" r="4" fill="#94a3b8"/><text x="3910.0" y="96.0" class="cb-node-layer">utility</text><text x="3894.0" y="112.0" class="cb-node-sym">FREEDOM_ANTI_FP_H</text><text x="3894.0" y="126.0" class="cb-node-sym">FP_TIMER_RESOLUTION_MS</text><text x="3894.0" y="140.0" class="cb-node-sym">FP_USER_AGENT</text><text x="3894.0" y="154.0" class="cb-node-sub">+85 more</text></a></g><g class="cb-node" data-desc="src groups 3 files (c) around fp_coarsen_time_ms, fp_user_agent, fp_accept_language, fp_accept_language_header, fp_timezone. tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only..."><a href="#comp-8-2"><rect x="3400.0" y="40.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="3414.0" y="64.0" class="cb-node-label">src</text><text x="3414.0" y="80.0" class="cb-node-sub">3 files · 111 symbols</text><circle cx="3420.0" cy="92.0" r="4" fill="#94a3b8"/><text x="3430.0" y="96.0" class="cb-node-layer">utility</text><text x="3414.0" y="112.0" class="cb-node-sym">fp_coarsen_time_ms</text><text x="3414.0" y="126.0" class="cb-node-sym">fp_user_agent</text><text x="3414.0" y="140.0" class="cb-node-sym">fp_accept_language</text><text x="3414.0" y="154.0" class="cb-node-sub">+107 more</text></a></g><g class="cb-node" data-desc="tests groups 4 files (c) around CHECK, main, test_coarsen_time, test_identity_is_fixed, test_legacy_identity_fixed. test_origin_key_unlinks_readback: The property that actually matters: the same canvas..."><a href="#comp-8-3"><rect x="40.0" y="40.0" width="270" height="134" rx="10" stroke="#fb923c" stroke-width="2.5"/><text x="54.0" y="64.0" class="cb-node-label">tests</text><text x="54.0" y="80.0" class="cb-node-sub">4 files · 80 symbols</text><circle cx="60.0" cy="92.0" r="4" fill="#fb923c"/><text x="70.0" y="96.0" class="cb-node-layer">testing</text><text x="54.0" y="112.0" class="cb-node-sym">CHECK</text><text x="54.0" y="126.0" class="cb-node-sym">main</text><text x="54.0" y="140.0" class="cb-node-sym">test_coarsen_time</text><text x="54.0" y="154.0" class="cb-node-sub">+74 more</text></a></g></svg></div>
+<h5 id="comp-8-1">include (8.1)</h5>
+<p>include groups 3 files (h) around FREEDOM_ANTI_FP_H, FP_TIMER_RESOLUTION_MS, FP_USER_AGENT, FP_ACCEPT_LANGUAGE, FP_ACCEPT_LANGUAGE_HEADER. fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  &quot;document&quot; #define...</p>
+<h5 id="comp-8-2">src (8.2)</h5>
+<p>src groups 3 files (c) around fp_coarsen_time_ms, fp_user_agent, fp_accept_language, fp_accept_language_header, fp_timezone. tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only...</p>
+<h5 id="comp-8-3">tests (8.3)</h5>
+<p>tests groups 4 files (c) around CHECK, main, test_coarsen_time, test_identity_is_fixed, test_legacy_identity_fixed. test_origin_key_unlinks_readback: The property that actually matters: the same canvas...</p>
+<h4>Files</h4>
+<ul class="references">
+<li><code>include/anti_fp.h</code></li>
+<li><code>include/secure_fetch.h</code></li>
+<li><code>include/ws_hub.h</code></li>
+<li><code>src/anti_fp.c</code></li>
+<li><code>src/secure_fetch.c</code></li>
+<li><code>src/ws_hub.c</code></li>
+<li><code>tests/itest_secure_fetch.c</code></li>
+<li><code>tests/test_anti_fp.c</code></li>
+<li><code>tests/test_secure_fetch.c</code></li>
+<li><code>tests/test_ws_hub.c</code></li>
+</ul>
+</section>
+<section class="component" id="comp-9">
+<h3>include: download (9)
+ <a href="#comp-9-children">[Expand]</a>
+</h3>
+<p>include: download groups 8 files (c, h) around FREEDOM_PDF_EXPORT_H, PE_NAME_MAX, PE_EXT, PE_EXT_PNG, PE_FALLBACK_NAME. dl_should_download: 1 if the response should be saved (attachment, or a non-renderable...</p>
+<h4>Related Classes/Methods:</h4>
+<ul class="references">
+<li><a href="../include/pdf_export.h#L2-L27"><code>include/pdf_export.h::FREEDOM_PDF_EXPORT_H</code></a></li>
+<li><a href="../include/pdf_export.h"><code>include/pdf_export.h::PE_NAME_MAX</code></a></li>
+<li><a href="../include/pdf_export.h"><code>include/pdf_export.h::PE_EXT</code></a></li>
+<li><a href="../include/pdf_export.h"><code>include/pdf_export.h::PE_EXT_PNG</code></a></li>
+<li><a href="../include/pdf_export.h#L31-L32"><code>include/pdf_export.h::PE_FALLBACK_NAME</code></a></li>
+<li><a href="../include/pdf_export.h#L33-L45"><code>include/pdf_export.h::pe_status</code></a></li>
+<li><a href="../include/pdf_export.h#L46-L50"><code>include/pdf_export.h::fallback</code></a></li>
+<li><a href="../include/pdf_export.h"><code>include/pdf_export.h::trusted</code></a></li>
+</ul>
+<h4 id="comp-9-children">Sub-components</h4>
+<div class="cb-wrap"><svg id="cb-sub-comp-9" class="cb-diagram" viewBox="0 0 5630 412" role="img" aria-label="Component diagram"><defs><marker id="cb-sub-comp-9-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="cb-arrow"/></marker></defs><path d="M310.0 107.0 C2815.0 107.0 2815.0 206.0 5320.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-9-arrow)" style="stroke-width:3.5"/><text x="2815.0" y="148.5" class="cb-edge-label">depends on</text><text x="2815.0" y="162.5" class="cb-edge-sub">1 calls · 2 imports</text><path d="M310.0 107.0 C2575.0 107.0 2575.0 206.0 4840.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-9-arrow)" style="stroke-width:4.1"/><text x="2575.0" y="148.5" class="cb-edge-label">calls into</text><text x="2575.0" y="162.5" class="cb-edge-sub">5 calls · 0 imports</text><path d="M5590.0 206.0 C5640.0 206.0 4790.0 206.0 4840.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-9-arrow)" style="stroke-width:4.5"/><text x="5215.0" y="198.0" class="cb-edge-label">calls into</text><text x="5215.0" y="212.0" class="cb-edge-sub">7 calls · 0 imports</text><path d="M5110.0 206.0 C5215.0 206.0 5215.0 206.0 5320.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-9-arrow)" style="stroke-width:3.5"/><text x="5215.0" y="198.0" class="cb-edge-label">depends on</text><text x="5215.0" y="212.0" class="cb-edge-sub">0 calls · 3 imports</text><path d="M310.0 305.0 C2815.0 305.0 2815.0 206.0 5320.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-9-arrow)" style="stroke-width:5.0"/><text x="2815.0" y="247.5" class="cb-edge-label">calls into</text><text x="2815.0" y="261.5" class="cb-edge-sub">25 calls · 2 imports</text><path d="M310.0 305.0 C2575.0 305.0 2575.0 206.0 4840.0 206.0" class="cb-edge" marker-end="url(#cb-sub-comp-9-arrow)" style="stroke-width:5.0"/><text x="2575.0" y="247.5" class="cb-edge-label">calls into</text><text x="2575.0" y="261.5" class="cb-edge-sub">60 calls · 0 imports</text><g class="cb-node" data-desc="fuzz groups 2 files (c) around LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput."><a href="#comp-9-1"><rect x="40.0" y="40.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="54.0" y="64.0" class="cb-node-label">fuzz</text><text x="54.0" y="80.0" class="cb-node-sub">2 files · 2 symbols</text><circle cx="60.0" cy="92.0" r="4" fill="#94a3b8"/><text x="70.0" y="96.0" class="cb-node-layer">utility</text><text x="54.0" y="112.0" class="cb-node-sym">LLVMFuzzerTestOneInput</text><text x="54.0" y="126.0" class="cb-node-sym">LLVMFuzzerTestOneInput</text></a></g><g class="cb-node" data-desc="include groups 2 files (h) around FREEDOM_PDF_EXPORT_H, PE_NAME_MAX, PE_EXT, PE_EXT_PNG, PE_FALLBACK_NAME. dl_should_download: 1 if the response should be saved (attachment, or a non-renderable..."><a href="#comp-9-2"><rect x="5320.0" y="139.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="5334.0" y="163.0" class="cb-node-label">include</text><text x="5334.0" y="179.0" class="cb-node-sub">2 files · 19 symbols</text><circle cx="5340.0" cy="191.0" r="4" fill="#94a3b8"/><text x="5350.0" y="195.0" class="cb-node-layer">utility</text><text x="5334.0" y="211.0" class="cb-node-sym">FREEDOM_PDF_EXPORT_H</text><text x="5334.0" y="225.0" class="cb-node-sym">PE_NAME_MAX</text><text x="5334.0" y="239.0" class="cb-node-sym">PE_EXT</text><text x="5334.0" y="253.0" class="cb-node-sub">+15 more</text></a></g><g class="cb-node" data-desc="src groups 2 files (c) around lc, ci_find, media_type, dl_should_download, dl_ext_for_type. lc: download — pure helpers for &quot;save this resource to disk&quot;."><a href="#comp-9-3"><rect x="4840.0" y="139.0" width="270" height="134" rx="10" stroke="#94a3b8" stroke-width="2.5"/><text x="4854.0" y="163.0" class="cb-node-label">src</text><text x="4854.0" y="179.0" class="cb-node-sub">2 files · 16 symbols</text><circle cx="4860.0" cy="191.0" r="4" fill="#94a3b8"/><text x="4870.0" y="195.0" class="cb-node-layer">utility</text><text x="4854.0" y="211.0" class="cb-node-sym">lc</text><text x="4854.0" y="225.0" class="cb-node-sym">ci_find</text><text x="4854.0" y="239.0" class="cb-node-sym">media_type</text><text x="4854.0" y="253.0" class="cb-node-sub">+13 more</text></a></g><g class="cb-node" data-desc="tests groups 2 files (c) around builder, test_should_renderable_types, test_should_binary_types, test_ext_known_types, test_ext_unknown_type."><a href="#comp-9-4"><rect x="40.0" y="238.0" width="270" height="134" rx="10" stroke="#fb923c" stroke-width="2.5"/><text x="54.0" y="262.0" class="cb-node-label">tests</text><text x="54.0" y="278.0" class="cb-node-sub">2 files · 51 symbols</text><circle cx="60.0" cy="290.0" r="4" fill="#fb923c"/><text x="70.0" y="294.0" class="cb-node-layer">testing</text><text x="54.0" y="310.0" class="cb-node-sym">builder</text><text x="54.0" y="324.0" class="cb-node-sym">test_should_renderable_…</text><text x="54.0" y="338.0" class="cb-node-sym">test_should_binary_types</text><text x="54.0" y="352.0" class="cb-node-sub">+44 more</text></a></g></svg></div>
+<h5 id="comp-9-1">fuzz (9.1)</h5>
+<p>fuzz groups 2 files (c) around LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput.</p>
+<h5 id="comp-9-2">include (9.2)</h5>
+<p>include groups 2 files (h) around FREEDOM_PDF_EXPORT_H, PE_NAME_MAX, PE_EXT, PE_EXT_PNG, PE_FALLBACK_NAME. dl_should_download: 1 if the response should be saved (attachment, or a non-renderable...</p>
+<h5 id="comp-9-3">src (9.3)</h5>
+<p>src groups 2 files (c) around lc, ci_find, media_type, dl_should_download, dl_ext_for_type. lc: download — pure helpers for &quot;save this resource to disk&quot;.</p>
+<h5 id="comp-9-4">tests (9.4)</h5>
+<p>tests groups 2 files (c) around builder, test_should_renderable_types, test_should_binary_types, test_ext_known_types, test_ext_unknown_type.</p>
+<h4>Files</h4>
+<ul class="references">
+<li><code>fuzz/fuzz_download.c</code></li>
+<li><code>fuzz/fuzz_pdf_export.c</code></li>
+<li><code>include/download.h</code></li>
+<li><code>include/pdf_export.h</code></li>
+<li><code>src/download.c</code></li>
+<li><code>src/pdf_export.c</code></li>
+<li><code>tests/test_download.c</code></li>
+<li><code>tests/test_pdf_export.c</code></li>
+</ul>
+</section>
+<section class="component" id="comp-10">
+<h3>include: import_map (10)
+</h3>
+<p>include: import_map groups 4 files (c, h) around FREEDOM_IMPORT_MAP_H, algorithm, IM_MAX_TEXT, IM_MAX_ENTRIES, IM_MAX_SCOPES. im_resolve: Resolves specifier as imported from base (the importing module&#x27;s URL).</p>
+<h4>Related Classes/Methods:</h4>
+<ul class="references">
+<li><a href="../include/import_map.h#L2-L12"><code>include/import_map.h::FREEDOM_IMPORT_MAP_H</code></a></li>
+<li><a href="../include/import_map.h#L13-L16"><code>include/import_map.h::algorithm</code></a></li>
+<li><a href="../include/import_map.h"><code>include/import_map.h::IM_MAX_TEXT</code></a></li>
+<li><a href="../include/import_map.h"><code>include/import_map.h::IM_MAX_ENTRIES</code></a></li>
+<li><a href="../include/import_map.h#L19-L22"><code>include/import_map.h::IM_MAX_SCOPES</code></a></li>
+<li><a href="../include/import_map.h#L23-L27"><code>include/import_map.h::im_map</code></a></li>
+<li><a href="../include/import_map.h#L28-L32"><code>include/import_map.h::map</code></a></li>
+<li><a href="../include/import_map.h#L33-L36"><code>include/import_map.h::im_resolve</code></a></li>
+</ul>
+<h4>Files</h4>
+<ul class="references">
+<li><code>fuzz/fuzz_import_map.c</code></li>
+<li><code>include/import_map.h</code></li>
+<li><code>src/import_map.c</code></li>
+<li><code>tests/test_import_map.c</code></li>
+</ul>
+</section>
+<footer>Generated offline from static analysis &middot; 238d312b5ea2</footer>
+</main>
+<div id="cb-tip" role="tooltip"></div>
+<script>
+(function(){
+"use strict";
+try{var s=localStorage.getItem("readmenator-theme");if(s==="light"||s==="dark")document.documentElement.setAttribute("data-theme",s);}catch(e){}
+document.getElementById("cb-theme").addEventListener("click",function(){
+  var r=document.documentElement,n=r.getAttribute("data-theme")==="light"?"dark":"light";
+  r.setAttribute("data-theme",n);try{localStorage.setItem("readmenator-theme",n);}catch(e){}
+});
+var tip=document.getElementById("cb-tip");
+document.querySelectorAll(".cb-node").forEach(function(g){
+  g.addEventListener("mousemove",function(ev){
+    var d=g.getAttribute("data-desc");
+    if(!d){tip.style.display="none";return;}
+    tip.textContent=d;tip.style.display="block";
+    tip.style.left=Math.min(window.innerWidth-330,ev.clientX+12)+"px";
+    tip.style.top=(ev.clientY+14)+"px";
+  });
+  g.addEventListener("mouseleave",function(){tip.style.display="none";});
+});
+document.querySelectorAll("svg.cb-diagram").forEach(function(svg){
+  var vb=svg.viewBox.baseVal,home={x:vb.x,y:vb.y,w:vb.width,h:vb.height},drag=null;
+  function set(x,y,w,h){svg.setAttribute("viewBox",x+" "+y+" "+w+" "+h);}
+  function cur(){var v=svg.viewBox.baseVal;return {x:v.x,y:v.y,w:v.width,h:v.height};}
+  svg.addEventListener("pointerdown",function(ev){drag={x:ev.clientX,y:ev.clientY,v:cur()};svg.setPointerCapture(ev.pointerId);});
+  svg.addEventListener("pointermove",function(ev){
+    if(!drag)return;
+    var r=svg.getBoundingClientRect(),k=drag.v.w/r.width;
+    set(drag.v.x-(ev.clientX-drag.x)*k,drag.v.y-(ev.clientY-drag.y)*k,drag.v.w,drag.v.h);
+  });
+  svg.addEventListener("pointerup",function(){drag=null;});
+  svg.addEventListener("wheel",function(ev){
+    ev.preventDefault();
+    var v=cur(),r=svg.getBoundingClientRect(),f=Math.exp(ev.deltaY*0.0012);
+    var mx=v.x+(ev.clientX-r.left)/r.width*v.w,my=v.y+(ev.clientY-r.top)/r.height*v.h;
+    var w=Math.min(home.w*4,Math.max(home.w/8,v.w*f)),h=w*v.h/v.w;
+    set(mx-(mx-v.x)*w/v.w,my-(my-v.y)*h/v.h,w,h);
+  },{passive:false});
+  svg._home=home;svg._set=set;
+});
+document.getElementById("cb-reset").addEventListener("click",function(){
+  var svg=document.getElementById("cb-diagram");if(!svg)return;var h=svg._home;svg._set(h.x,h.y,h.w,h.h);
+});
+document.getElementById("cb-fit").addEventListener("click",function(){
+  var svg=document.getElementById("cb-diagram");if(!svg)return;var h=svg._home;svg._set(h.x,h.y,h.w,h.h);
+});
+document.getElementById("cb-png").addEventListener("click",function(){
+  var svg=document.getElementById("cb-diagram");if(!svg)return;
+  try{
+    var data=new XMLSerializer().serializeToString(svg);
+    var img=new Image();
+    img.onload=function(){
+      var c=document.createElement("canvas"),k=2;
+      c.width=svg.viewBox.baseVal.width*k;c.height=svg.viewBox.baseVal.height*k;
+      var x=c.getContext("2d");x.fillStyle="#020617";x.fillRect(0,0,c.width,c.height);
+      x.drawImage(img,0,0,c.width,c.height);
+      var a=document.createElement("a");a.download="component-diagram.png";a.href=c.toDataURL("image/png");a.click();
+    };
+    img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(data);
+  }catch(e){}
+});
+})();
+</script>
+
+</body>
+</html>

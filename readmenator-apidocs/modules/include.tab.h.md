@@ -1,0 +1,789 @@
+# `include/tab.h`
+
+> Source: [include/tab.h:1](../../include/tab.h#L1) | language `h` | coverage 43.9% | [API index](../index.md)
+
+## Contents
+
+- **Structs:** [`tab_hist_op`](#tab_hist_op), [`tab_ws_op`](#tab_ws_op), [`tab_page`](#tab_page), [`tab_eval_result`](#tab_eval_result), [`tab_image`](#tab_image)
+- **Enums:** [`tab_status`](#tab_status), [`tab_ws_kind`](#tab_ws_kind), [`tab_ws_event_kind`](#tab_ws_event_kind)
+- **Type Aliases:** [`tab`](#tab), [`replace`](#replace), [`kind`](#kind)
+- **Functions:** [`tab_worker_dispatch`](#tab_worker_dispatch), [`tab_open`](#tab_open), [`tab_parse_worker_args`](#tab_parse_worker_args), [`out_status`](#out_status), [`tab_set_fetcher`](#tab_set_fetcher), [`bytes`](#bytes), [`tab_set_css_sink`](#tab_set_css_sink), [`tab_set_net_allowed`](#tab_set_net_allowed), [`jar`](#jar), [`tab_set_cookies`](#tab_set_cookies), [`origin`](#origin), [`tab_set_storage`](#tab_set_storage), [`exclusively`](#exclusively), [`tab_set_viewport_w`](#tab_set_viewport_w), [`tab_subreq_permitted`](#tab_subreq_permitted), [`view`](#view), [`string`](#string), [`granted`](#granted), [`returned`](#returned), [`popstate`](#popstate), [`decode`](#decode), [`tab_alive`](#tab_alive), [`tab_child_pid`](#tab_child_pid), [`tab_close`](#tab_close), [`tab_page_free`](#tab_page_free), [`tab_eval_result_free`](#tab_eval_result_free), [`tab_image_free`](#tab_image_free)
+- **Macros:** [`TAB_MAX_INPUT`](#tab_max_input)
+
+## Type Diagram
+
+```mermaid
+classDiagram
+    direction LR
+    class tab_status
+    <<enum>> tab_status
+    class tab
+    <<type_alias>> tab
+    class replace
+    <<type_alias>> replace
+    class tab_hist_op
+    <<struct>> tab_hist_op
+    class tab_ws_kind
+    <<enum>> tab_ws_kind
+    class tab_ws_event_kind
+    <<enum>> tab_ws_event_kind
+    class kind
+    <<type_alias>> kind
+    class tab_ws_op
+    <<struct>> tab_ws_op
+    class tab_page
+    <<struct>> tab_page
+    class tab_eval_result
+    <<struct>> tab_eval_result
+    class tab_image
+    <<struct>> tab_image
+    class tab_image_width
+    <<type_alias>> tab_image_width
+```
+
+## Structs
+
+<a id="tab_hist_op"></a>
+
+### `tab_hist_op`
+
+`struct` | [include/tab.h:53](../../include/tab.h#L53)
+
+```c
+typedef struct tab_hist_op
+```
+
+One history operation the page's JS performed (spec/js_dom.md 7e): pushState (replace == 0) or replaceState (replace == 1) to url, an absolute same-origin URL the parent re-validated against the page URL.
+
+Owned by the tab_page.
+
+---
+
+<a id="tab_ws_op"></a>
+
+### `tab_ws_op`
+
+`struct` | [include/tab.h:68](../../include/tab.h#L68)
+
+```c
+typedef struct tab_ws_op
+```
+
+---
+
+<a id="tab_page"></a>
+
+### `tab_page`
+
+`struct` | [include/tab.h:75](../../include/tab.h#L75)
+
+```c
+typedef struct tab_page
+```
+
+---
+
+<a id="tab_eval_result"></a>
+
+### `tab_eval_result`
+
+`struct` | [include/tab.h:127](../../include/tab.h#L127)
+
+```c
+typedef struct tab_eval_result
+```
+
+Result of evaluating script: the value, or a JS error message.
+
+---
+
+<a id="tab_image"></a>
+
+### `tab_image`
+
+`struct` | [include/tab.h:140](../../include/tab.h#L140)
+
+```c
+typedef struct tab_image
+```
+
+Pixels of a decoded image, produced inside the confined worker. data is owned and holds premultiplied ARGB32 (Cairo's CAIRO_FORMAT_ARGB32 layout: bytes B,G,R,A; stride == width*4). data == NULL means the worker could not decode the bytes (not a PNG, corrupt, or out of bounds): the caller shows the placeholder.
+
+**Members**
+
+| Member | Kind | Summary |
+|---|---|---|
+| [`width`](#tab_image-width) | type_alias | Pixels of a decoded image, produced inside the confined worker. data is owned and holds premultiplied ARGB32 (Cairo's CAIRO_FORMAT_ARGB32 layout: bytes... |
+
+<a id="tab_image-width"></a>
+
+#### `tab_image.width`
+
+`type_alias` | [include/tab.h:140](../../include/tab.h#L140)
+
+```c
+typedef struct tab_image { uint32_t width;
+```
+
+Pixels of a decoded image, produced inside the confined worker. data is owned and holds premultiplied ARGB32 (Cairo's CAIRO_FORMAT_ARGB32 layout: bytes B,G,R,A; stride == width*4). data == NULL means the worker could not decode the bytes (not a PNG, corrupt, or out of bounds): the caller shows the placeholder.
+
+---
+
+## Enums
+
+<a id="tab_status"></a>
+
+### `tab_status`
+
+`enum` | [include/tab.h:31](../../include/tab.h#L31)
+
+```c
+typedef enum tab_status
+```
+
+---
+
+<a id="tab_ws_kind"></a>
+
+### `tab_ws_kind`
+
+`enum` | [include/tab.h:60](../../include/tab.h#L60)
+
+```c
+typedef enum tab_ws_kind
+```
+
+One WebSocket operation a trusted page's JS recorded (spec/js_dom.md 7f); the trusted parent owns the socket.
+
+Kinds mirror jd_ws_kind. Owned by the tab_page.
+
+---
+
+<a id="tab_ws_event_kind"></a>
+
+### `tab_ws_event_kind`
+
+`enum` | [include/tab.h:64](../../include/tab.h#L64)
+
+```c
+typedef enum tab_ws_event_kind
+```
+
+---
+
+## Type Aliases
+
+<a id="tab"></a>
+
+### `tab`
+
+`type_alias` | [include/tab.h:45](../../include/tab.h#L45)
+
+```c
+typedef struct tab tab;
+```
+
+Opaque parent-side handle to a tab worker.
+
+---
+
+<a id="replace"></a>
+
+### `replace`
+
+`type_alias` | [include/tab.h:53](../../include/tab.h#L53)
+
+```c
+typedef struct tab_hist_op { int replace;
+```
+
+One history operation the page's JS performed (spec/js_dom.md 7e): pushState (replace == 0) or replaceState (replace == 1) to url, an absolute same-origin URL the parent re-validated against the page URL.
+
+Owned by the tab_page.
+
+---
+
+<a id="kind"></a>
+
+### `kind`
+
+`type_alias` | [include/tab.h:67](../../include/tab.h#L67)
+
+```c
+typedef struct tab_ws_op { int kind;
+```
+
+---
+
+## Functions
+
+<a id="tab_worker_dispatch"></a>
+
+### `tab_worker_dispatch`
+
+`function` | [include/tab.h:152](../../include/tab.h#L152)
+
+```c
+* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd> <wfd>" invocation it runs the confined worker loop on * those pipe fds and never retu
+```
+
+**Returns:** `* Call`
+
+*Called by:* [`main`](src.freedom.c.md#main)
+
+---
+
+<a id="tab_open"></a>
+
+### `tab_open`
+
+`function` | [include/tab.h:156](../../include/tab.h#L156)
+
+```c
+* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc, char **argv);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `harness` | `the app and the test` |  |  |
+
+**Returns:** `* and reaches`
+
+---
+
+<a id="tab_parse_worker_args"></a>
+
+### `tab_parse_worker_args`
+
+`function` | [include/tab.h:163](../../include/tab.h#L163)
+
+```c
+int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);
+```
+
+Pure validator of the worker handoff arguments (the security-relevant surface of the exec): returns nonzero and writes the two fds iff argv is exactly "<prog> --tab-worker <rfd> <wfd>" with both fds non-negative decimal integers within a sane bound.
+
+No side effects; fail-closed (any malformation => 0).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `argc` | `int` |  |  |
+| `argv` | `char *const *` |  |  |
+| `rfd` | `int *` |  |  |
+| `wfd` | `int *` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="out_status"></a>
+
+### `out_status`
+
+`function` | [include/tab.h:175](../../include/tab.h#L175)
+
+```c
+* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab frees with free()), *out_ctype (malloc'd Content-Type, * may be NULL). Return non-zer
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `status` | `HTTP` |  |  |
+
+**Returns:** `* On success return 0 and set *`
+
+---
+
+<a id="tab_set_fetcher"></a>
+
+### `tab_set_fetcher`
+
+`function` | [include/tab.h:186](../../include/tab.h#L186)
+
+```c
+void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);
+```
+
+Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests are then refused). fn/ctx must outlive any tab_load_full call that may trigger a subresource.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `t` | `tab *` |  |  |
+| `fn` | `tab_fetch_fn` |  |  |
+| `ctx` | `void *` |  |  |
+
+---
+
+<a id="bytes"></a>
+
+### `bytes`
+
+`function` | [include/tab.h:190](../../include/tab.h#L190)
+
+```c
+* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets). url is the RAW worker-requested URL * (possibly relative: resolve it against the page
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `sheets` | `spec/webfont.md b3b feeds them to the * @font-face loader as extern` |  |  |
+
+**Returns:** `* so the parent can retain the`
+
+---
+
+<a id="tab_set_css_sink"></a>
+
+### `tab_set_css_sink`
+
+`function` | [include/tab.h:199](../../include/tab.h#L199)
+
+```c
+void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `t` | `tab *` |  |  |
+| `fn` | `tab_css_sink_fn` |  |  |
+| `ctx` | `void *` |  |  |
+
+---
+
+<a id="tab_set_net_allowed"></a>
+
+### `tab_set_net_allowed`
+
+`function` | [include/tab.h:204](../../include/tab.h#L204)
+
+```c
+void tab_set_net_allowed(tab *t, int allowed);
+```
+
+Grants/revokes page-JS network access (XMLHttpRequest/fetch) for the NEXT load.
+
+Set it true ONLY when the page's host is in BOTH allow.conf AND js.conf (the sovereignty boundary); false (default) keeps XHR/fetch undefined (Same-Origin-by-construction).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `t` | `tab *` |  |  |
+| `allowed` | `int` |  |  |
+
+---
+
+<a id="jar"></a>
+
+### `jar`
+
+`function` | [include/tab.h:207](../../include/tab.h#L207)
+
+```c
+* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted host (allow.conf AND js.conf);
+```
+
+**Returns:** `* the trusted parent read from its ephemeral network`
+
+---
+
+<a id="tab_set_cookies"></a>
+
+### `tab_set_cookies`
+
+`function` | [include/tab.h:211](../../include/tab.h#L211)
+
+```c
+void tab_set_cookies(tab *t, const char *cookies);
+```
+
+Seeds the page's document.cookie jar for the NEXT load with cookies ("name=value; ...") the trusted parent read from its ephemeral network jar (sf_cookie_header_for).
+
+Only meaningful for a trusted host (allow.conf AND js.conf); pass NULL/"" otherwise so the jar stays disabled (untrusted sites see no cookies -- Zero Knowledge). The bytes are copied. In-memory only; never persisted.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `t` | `tab *` |  |  |
+| `cookies` | `char *` |  |  |
+
+---
+
+<a id="origin"></a>
+
+### `origin`
+
+`function` | [include/tab.h:214](../../include/tab.h#L214)
+
+```c
+* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `snapshot` | `web_storage` |  |  |
+
+**Returns:** `* page`
+
+---
+
+<a id="tab_set_storage"></a>
+
+### `tab_set_storage`
+
+`function` | [include/tab.h:216](../../include/tab.h#L216)
+
+```c
+void tab_set_storage(tab *t, const char *blob, size_t len);
+```
+
+Seeds localStorage for the next load from the parent's in-memory store for the page origin (web_storage snapshot, copied).
+
+Used only when the load is trusted (net granted); NULL/0 clears it. See spec/web_storage.md.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `t` | `tab *` |  |  |
+| `blob` | `char *` |  |  |
+| `len` | `size_t` |  |  |
+
+---
+
+<a id="exclusively"></a>
+
+### `exclusively`
+
+`function` | [include/tab.h:222](../../include/tab.h#L222)
+
+```c
+* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab *t, int allowed);
+```
+
+**Returns:** `*`
+
+---
+
+<a id="tab_set_viewport_w"></a>
+
+### `tab_set_viewport_w`
+
+`function` | [include/tab.h:230](../../include/tab.h#L230)
+
+```c
+void tab_set_viewport_w(tab *t, int px);
+```
+
+Sets the render viewport width (px) used to evaluate @media width queries on the NEXT load, so a responsive page selects the same breakpoint the paint width would (the page is painted at this width). <= 0 restores the normalized default.
+
+Only the @media width query sees it; viewport UNITS (vw/vh) still resolve against the fixed normalized desktop, so no real geometry leaks into computed lengths.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `t` | `tab *` |  |  |
+| `px` | `int` |  |  |
+
+---
+
+<a id="tab_subreq_permitted"></a>
+
+### `tab_subreq_permitted`
+
+`function` | [include/tab.h:235](../../include/tab.h#L235)
+
+```c
+int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);
+```
+
+Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants for this load, never the worker's claims): net_allowed permits any well-formed method; css_allowed alone permits exactly "GET"; a NULL/empty method or no grant is refused.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `net_allowed` | `int` |  |  |
+| `css_allowed` | `int` |  |  |
+| `method` | `char *` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="view"></a>
+
+### `view`
+
+`function` | [include/tab.h:243](../../include/tab.h#L243)
+
+```c
+* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted page-script execution will hook in (live-DOM milestone). * tab_load is tab_load_ex with run
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `shown` | `off => fallback` |  |  |
+| `suppressed` | `on =>` |  |  |
+
+**Returns:** `* <noscript> handling in the built`
+
+---
+
+<a id="string"></a>
+
+### `string`
+
+`function` | [include/tab.h:263](../../include/tab.h#L263)
+
+```c
+* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be NULL). * key_code is the numeric keyCode/key value. * value is the element's current
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `keydown` | `e.g. " "` |  |  |
+| `input` |  |  |  |
+| `change` |  |  |  |
+
+**Returns:** `* event_type is a JS event`
+
+---
+
+<a id="granted"></a>
+
+### `granted`
+
+`function` | [include/tab.h:312](../../include/tab.h#L312)
+
+```c
+* granted (allow.conf AND js.conf);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `conf` | `allow.conf AND js.` |  |  |
+
+**Returns:** `*`
+
+---
+
+<a id="returned"></a>
+
+### `returned`
+
+`function` | [include/tab.h:313](../../include/tab.h#L313)
+
+```c
+* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */ tab_status tab_set_geometry(tab *t, const jg_table *g);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `zeros` | `the page keeps its` |  |  |
+
+**Returns:** `*`
+
+---
+
+<a id="popstate"></a>
+
+### `popstate`
+
+`function` | [include/tab.h:319](../../include/tab.h#L319)
+
+```c
+* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index, tab_page *out);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `hashchange` |  |  |  |
+
+**Returns:** `*`
+
+---
+
+<a id="decode"></a>
+
+### `decode`
+
+`function` | [include/tab.h:338](../../include/tab.h#L338)
+
+```c
+* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for transport/worker failures. */ tab_status tab_decode_image(tab *t, const uint8_t *bytes, s
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `placeholder` | `caller shows the` |  |  |
+
+**Returns:** `* could not`
+
+---
+
+<a id="tab_alive"></a>
+
+### `tab_alive`
+
+`function` | [include/tab.h:351](../../include/tab.h#L351)
+
+```c
+int tab_alive(const tab *t);
+```
+
+Nonzero while the worker process is believed alive.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `t` | `tab *` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="tab_child_pid"></a>
+
+### `tab_child_pid`
+
+`function` | [include/tab.h:354](../../include/tab.h#L354)
+
+```c
+pid_t tab_child_pid(const tab *t);
+```
+
+The worker's process id (for monitoring), or -1.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `t` | `tab *` |  |  |
+
+**Returns:** `pid_t`
+
+---
+
+<a id="tab_close"></a>
+
+### `tab_close`
+
+`function` | [include/tab.h:357](../../include/tab.h#L357)
+
+```c
+void tab_close(tab *t);
+```
+
+Terminates the worker and frees the handle.
+
+Safe on NULL.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `t` | `tab *` |  |  |
+
+---
+
+<a id="tab_page_free"></a>
+
+### `tab_page_free`
+
+`function` | [include/tab.h:360](../../include/tab.h#L360)
+
+```c
+void tab_page_free(tab_page *p);
+```
+
+Idempotent releasers for the result structs.
+
+Safe on NULL / zeroed structs.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `p` | `tab_page *` |  |  |
+
+---
+
+<a id="tab_eval_result_free"></a>
+
+### `tab_eval_result_free`
+
+`function` | [include/tab.h:361](../../include/tab.h#L361)
+
+```c
+void tab_eval_result_free(tab_eval_result *r);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `r` | `tab_eval_result *` |  |  |
+
+---
+
+<a id="tab_image_free"></a>
+
+### `tab_image_free`
+
+`function` | [include/tab.h:362](../../include/tab.h#L362)
+
+```c
+void tab_image_free(tab_image *img);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `img` | `tab_image *` |  |  |
+
+---
+
+## Macros
+
+<a id="tab_max_input"></a>
+
+### `TAB_MAX_INPUT`
+
+`macro` | [include/tab.h:148](../../include/tab.h#L148)
+
+```c
+#define TAB_MAX_INPUT
+```
+
+---

@@ -1,0 +1,2016 @@
+{
+ "schema_version": 1,
+ "format": "jsonl",
+ "meta": {
+  "modules": 193,
+  "entities": 3008,
+  "languages": {
+   "c": 104,
+   "h": 79,
+   "py": 5,
+   "sh": 5
+  },
+  "kinds": {
+   "constant": 10,
+   "enum": 147,
+   "function": 1519,
+   "macro": 782,
+   "method": 21,
+   "module": 193,
+   "struct": 213,
+   "type_alias": 116,
+   "variable": 7
+  },
+  "truncated": false,
+  "skipped_files": 69,
+  "privacy_mode": false
+ },
+ "coverage": {
+  "overall": {
+   "documented": 1169,
+   "total": 2991,
+   "percent": 39.1
+  },
+  "by_kind": {
+   "enum": {
+    "documented": 79,
+    "total": 147,
+    "percent": 53.7
+   },
+   "function": {
+    "documented": 621,
+    "total": 1519,
+    "percent": 40.9
+   },
+   "macro": {
+    "documented": 264,
+    "total": 782,
+    "percent": 33.8
+   },
+   "method": {
+    "documented": 0,
+    "total": 21,
+    "percent": 0.0
+   },
+   "module": {
+    "documented": 22,
+    "total": 193,
+    "percent": 11.4
+   },
+   "struct": {
+    "documented": 96,
+    "total": 213,
+    "percent": 45.1
+   },
+   "type_alias": {
+    "documented": 87,
+    "total": 116,
+    "percent": 75.0
+   }
+  },
+  "by_module": {
+   "app.py": {
+    "documented": 4,
+    "total": 4,
+    "percent": 100.0
+   },
+   "docker-entrypoint.sh": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "docker_run.sh": {
+    "documented": 1,
+    "total": 1,
+    "percent": 100.0
+   },
+   "fuzz.sh": {
+    "documented": 1,
+    "total": 1,
+    "percent": 100.0
+   },
+   "fuzz/fuzz_css.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_data_url.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_dom.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_dom_debug.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_download.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_freebug.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_html_parse.c": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_image_decode.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_import_map.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_js_dom.c": {
+    "documented": 1,
+    "total": 3,
+    "percent": 33.3
+   },
+   "fuzz/fuzz_js_geom.c": {
+    "documented": 0,
+    "total": 3,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_js_sandbox.c": {
+    "documented": 1,
+    "total": 4,
+    "percent": 25.0
+   },
+   "fuzz/fuzz_page_view.c": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_pdf_export.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_prefetch.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_prefs.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_svg_render.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_text_shape.c": {
+    "documented": 0,
+    "total": 3,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_tls_impersonate.c": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_url.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_web_storage.c": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_webfont.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "gui/browser_ui.c": {
+    "documented": 68,
+    "total": 213,
+    "percent": 31.9
+   },
+   "gui/browser_ui_internal.h": {
+    "documented": 5,
+    "total": 10,
+    "percent": 50.0
+   },
+   "gui/bui_theme.c": {
+    "documented": 6,
+    "total": 7,
+    "percent": 85.7
+   },
+   "gui/freedom_view.c": {
+    "documented": 0,
+    "total": 3,
+    "percent": 0.0
+   },
+   "gui/svg_paint.c": {
+    "documented": 2,
+    "total": 2,
+    "percent": 100.0
+   },
+   "gui/ui_render.c": {
+    "documented": 3,
+    "total": 8,
+    "percent": 37.5
+   },
+   "include/anti_fp.h": {
+    "documented": 21,
+    "total": 35,
+    "percent": 60.0
+   },
+   "include/block_flow.h": {
+    "documented": 2,
+    "total": 4,
+    "percent": 50.0
+   },
+   "include/box_style.h": {
+    "documented": 16,
+    "total": 25,
+    "percent": 64.0
+   },
+   "include/box_tree.h": {
+    "documented": 11,
+    "total": 32,
+    "percent": 34.4
+   },
+   "include/browser.h": {
+    "documented": 9,
+    "total": 19,
+    "percent": 47.4
+   },
+   "include/compositor.h": {
+    "documented": 8,
+    "total": 9,
+    "percent": 88.9
+   },
+   "include/css.h": {
+    "documented": 98,
+    "total": 131,
+    "percent": 74.8
+   },
+   "include/css_atrule.h": {
+    "documented": 7,
+    "total": 10,
+    "percent": 70.0
+   },
+   "include/css_box.h": {
+    "documented": 0,
+    "total": 25,
+    "percent": 0.0
+   },
+   "include/css_chain.h": {
+    "documented": 2,
+    "total": 8,
+    "percent": 25.0
+   },
+   "include/css_color.h": {
+    "documented": 3,
+    "total": 7,
+    "percent": 42.9
+   },
+   "include/css_decl.h": {
+    "documented": 3,
+    "total": 12,
+    "percent": 25.0
+   },
+   "include/css_gradient.h": {
+    "documented": 0,
+    "total": 3,
+    "percent": 0.0
+   },
+   "include/css_length.h": {
+    "documented": 11,
+    "total": 20,
+    "percent": 55.0
+   },
+   "include/css_mq.h": {
+    "documented": 3,
+    "total": 6,
+    "percent": 50.0
+   },
+   "include/css_select.h": {
+    "documented": 21,
+    "total": 34,
+    "percent": 61.8
+   },
+   "include/css_text.h": {
+    "documented": 0,
+    "total": 17,
+    "percent": 0.0
+   },
+   "include/css_values.h": {
+    "documented": 1,
+    "total": 6,
+    "percent": 16.7
+   },
+   "include/css_vars.h": {
+    "documented": 14,
+    "total": 19,
+    "percent": 73.7
+   },
+   "include/data_url.h": {
+    "documented": 2,
+    "total": 6,
+    "percent": 33.3
+   },
+   "include/disk_store.h": {
+    "documented": 1,
+    "total": 3,
+    "percent": 33.3
+   },
+   "include/dom.h": {
+    "documented": 18,
+    "total": 28,
+    "percent": 64.3
+   },
+   "include/dom_debug.h": {
+    "documented": 3,
+    "total": 4,
+    "percent": 75.0
+   },
+   "include/download.h": {
+    "documented": 1,
+    "total": 9,
+    "percent": 11.1
+   },
+   "include/flex_layout.h": {
+    "documented": 19,
+    "total": 35,
+    "percent": 54.3
+   },
+   "include/form.h": {
+    "documented": 3,
+    "total": 11,
+    "percent": 27.3
+   },
+   "include/frame_clock.h": {
+    "documented": 1,
+    "total": 7,
+    "percent": 14.3
+   },
+   "include/freebug.h": {
+    "documented": 13,
+    "total": 18,
+    "percent": 72.2
+   },
+   "include/freedom_config.h": {
+    "documented": 10,
+    "total": 11,
+    "percent": 90.9
+   },
+   "include/hls.h": {
+    "documented": 5,
+    "total": 8,
+    "percent": 62.5
+   },
+   "include/hostblock.h": {
+    "documented": 5,
+    "total": 10,
+    "percent": 50.0
+   },
+   "include/hostedit.h": {
+    "documented": 3,
+    "total": 5,
+    "percent": 60.0
+   },
+   "include/html_parse.h": {
+    "documented": 12,
+    "total": 24,
+    "percent": 50.0
+   },
+   "include/image_decode.h": {
+    "documented": 6,
+    "total": 13,
+    "percent": 46.2
+   },
+   "include/import_map.h": {
+    "documented": 3,
+    "total": 10,
+    "percent": 30.0
+   },
+   "include/interp.h": {
+    "documented": 7,
+    "total": 22,
+    "percent": 31.8
+   },
+   "include/js_dom.h": {
+    "documented": 6,
+    "total": 17,
+    "percent": 35.3
+   },
+   "include/js_env.h": {
+    "documented": 0,
+    "total": 3,
+    "percent": 0.0
+   },
+   "include/js_geom.h": {
+    "documented": 15,
+    "total": 19,
+    "percent": 78.9
+   },
+   "include/js_location.h": {
+    "documented": 3,
+    "total": 6,
+    "percent": 50.0
+   },
+   "include/js_policy.h": {
+    "documented": 3,
+    "total": 7,
+    "percent": 42.9
+   },
+   "include/js_sandbox.h": {
+    "documented": 13,
+    "total": 24,
+    "percent": 54.2
+   },
+   "include/js_trusted.h": {
+    "documented": 6,
+    "total": 16,
+    "percent": 37.5
+   },
+   "include/link_nav.h": {
+    "documented": 4,
+    "total": 11,
+    "percent": 36.4
+   },
+   "include/local_store.h": {
+    "documented": 2,
+    "total": 11,
+    "percent": 18.2
+   },
+   "include/media_decoder.h": {
+    "documented": 9,
+    "total": 12,
+    "percent": 75.0
+   },
+   "include/net_realm.h": {
+    "documented": 2,
+    "total": 10,
+    "percent": 20.0
+   },
+   "include/os_sandbox.h": {
+    "documented": 6,
+    "total": 12,
+    "percent": 50.0
+   },
+   "include/page_view.h": {
+    "documented": 44,
+    "total": 72,
+    "percent": 61.1
+   },
+   "include/pdf_export.h": {
+    "documented": 3,
+    "total": 10,
+    "percent": 30.0
+   },
+   "include/perf_trace.h": {
+    "documented": 9,
+    "total": 17,
+    "percent": 52.9
+   },
+   "include/prefetch.h": {
+    "documented": 10,
+    "total": 21,
+    "percent": 47.6
+   },
+   "include/prefs.h": {
+    "documented": 7,
+    "total": 18,
+    "percent": 38.9
+   },
+   "include/profile.h": {
+    "documented": 2,
+    "total": 9,
+    "percent": 22.2
+   },
+   "include/psl_data.h": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "include/render_doc.h": {
+    "documented": 12,
+    "total": 26,
+    "percent": 46.2
+   },
+   "include/render_policy.h": {
+    "documented": 7,
+    "total": 9,
+    "percent": 77.8
+   },
+   "include/renderer.h": {
+    "documented": 1,
+    "total": 7,
+    "percent": 14.3
+   },
+   "include/request_policy.h": {
+    "documented": 3,
+    "total": 5,
+    "percent": 60.0
+   },
+   "include/secure_fetch.h": {
+    "documented": 19,
+    "total": 38,
+    "percent": 50.0
+   },
+   "include/svg_paint.h": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "include/svg_render.h": {
+    "documented": 7,
+    "total": 18,
+    "percent": 38.9
+   },
+   "include/tab.h": {
+    "documented": 18,
+    "total": 41,
+    "percent": 43.9
+   },
+   "include/text_shape.h": {
+    "documented": 8,
+    "total": 13,
+    "percent": 61.5
+   },
+   "include/textfield.h": {
+    "documented": 8,
+    "total": 15,
+    "percent": 53.3
+   },
+   "include/tls_impersonate.h": {
+    "documented": 7,
+    "total": 23,
+    "percent": 30.4
+   },
+   "include/ui.h": {
+    "documented": 5,
+    "total": 17,
+    "percent": 29.4
+   },
+   "include/url.h": {
+    "documented": 7,
+    "total": 14,
+    "percent": 50.0
+   },
+   "include/util.h": {
+    "documented": 2,
+    "total": 6,
+    "percent": 33.3
+   },
+   "include/web_storage.h": {
+    "documented": 8,
+    "total": 13,
+    "percent": 61.5
+   },
+   "include/webcaps.h": {
+    "documented": 4,
+    "total": 5,
+    "percent": 80.0
+   },
+   "include/webfont.h": {
+    "documented": 3,
+    "total": 17,
+    "percent": 17.6
+   },
+   "include/webfont_load.h": {
+    "documented": 1,
+    "total": 7,
+    "percent": 14.3
+   },
+   "include/ws_hub.h": {
+    "documented": 11,
+    "total": 15,
+    "percent": 73.3
+   },
+   "include/zoom.h": {
+    "documented": 6,
+    "total": 10,
+    "percent": 60.0
+   },
+   "install.sh": {
+    "documented": 1,
+    "total": 1,
+    "percent": 100.0
+   },
+   "run_freedom.sh": {
+    "documented": 1,
+    "total": 1,
+    "percent": 100.0
+   },
+   "src/anti_fp.c": {
+    "documented": 17,
+    "total": 23,
+    "percent": 73.9
+   },
+   "src/block_flow.c": {
+    "documented": 2,
+    "total": 4,
+    "percent": 50.0
+   },
+   "src/box_style.c": {
+    "documented": 10,
+    "total": 38,
+    "percent": 26.3
+   },
+   "src/box_tree.c": {
+    "documented": 4,
+    "total": 13,
+    "percent": 30.8
+   },
+   "src/browser.c": {
+    "documented": 8,
+    "total": 31,
+    "percent": 25.8
+   },
+   "src/compositor.c": {
+    "documented": 3,
+    "total": 5,
+    "percent": 60.0
+   },
+   "src/css.c": {
+    "documented": 15,
+    "total": 72,
+    "percent": 20.8
+   },
+   "src/css_atrule.c": {
+    "documented": 4,
+    "total": 5,
+    "percent": 80.0
+   },
+   "src/css_box.c": {
+    "documented": 16,
+    "total": 29,
+    "percent": 55.2
+   },
+   "src/css_chain.c": {
+    "documented": 5,
+    "total": 14,
+    "percent": 35.7
+   },
+   "src/css_color.c": {
+    "documented": 5,
+    "total": 13,
+    "percent": 38.5
+   },
+   "src/css_gradient.c": {
+    "documented": 0,
+    "total": 7,
+    "percent": 0.0
+   },
+   "src/css_length.c": {
+    "documented": 3,
+    "total": 12,
+    "percent": 25.0
+   },
+   "src/css_mq.c": {
+    "documented": 2,
+    "total": 11,
+    "percent": 18.2
+   },
+   "src/css_select.c": {
+    "documented": 9,
+    "total": 14,
+    "percent": 64.3
+   },
+   "src/css_text.c": {
+    "documented": 11,
+    "total": 15,
+    "percent": 73.3
+   },
+   "src/css_values.c": {
+    "documented": 0,
+    "total": 6,
+    "percent": 0.0
+   },
+   "src/css_vars.c": {
+    "documented": 5,
+    "total": 9,
+    "percent": 55.6
+   },
+   "src/data_url.c": {
+    "documented": 1,
+    "total": 5,
+    "percent": 20.0
+   },
+   "src/disk_store.c": {
+    "documented": 1,
+    "total": 5,
+    "percent": 20.0
+   },
+   "src/dom.c": {
+    "documented": 13,
+    "total": 49,
+    "percent": 26.5
+   },
+   "src/dom_debug.c": {
+    "documented": 3,
+    "total": 4,
+    "percent": 75.0
+   },
+   "src/download.c": {
+    "documented": 1,
+    "total": 6,
+    "percent": 16.7
+   },
+   "src/flex_layout.c": {
+    "documented": 7,
+    "total": 22,
+    "percent": 31.8
+   },
+   "src/form.c": {
+    "documented": 0,
+    "total": 3,
+    "percent": 0.0
+   },
+   "src/frame_clock.c": {
+    "documented": 0,
+    "total": 5,
+    "percent": 0.0
+   },
+   "src/freebug.c": {
+    "documented": 7,
+    "total": 10,
+    "percent": 70.0
+   },
+   "src/freedom.c": {
+    "documented": 3,
+    "total": 19,
+    "percent": 15.8
+   },
+   "src/hls.c": {
+    "documented": 2,
+    "total": 8,
+    "percent": 25.0
+   },
+   "src/hostblock.c": {
+    "documented": 5,
+    "total": 11,
+    "percent": 45.5
+   },
+   "src/hostedit.c": {
+    "documented": 2,
+    "total": 5,
+    "percent": 40.0
+   },
+   "src/html_parse.c": {
+    "documented": 9,
+    "total": 19,
+    "percent": 47.4
+   },
+   "src/image_decode.c": {
+    "documented": 6,
+    "total": 17,
+    "percent": 35.3
+   },
+   "src/import_map.c": {
+    "documented": 5,
+    "total": 11,
+    "percent": 45.5
+   },
+   "src/interp.c": {
+    "documented": 10,
+    "total": 14,
+    "percent": 71.4
+   },
+   "src/js_dom.c": {
+    "documented": 2,
+    "total": 22,
+    "percent": 9.1
+   },
+   "src/js_dom_ext.c": {
+    "documented": 0,
+    "total": 3,
+    "percent": 0.0
+   },
+   "src/js_dom_ext.h": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "src/js_dom_internal.h": {
+    "documented": 2,
+    "total": 4,
+    "percent": 50.0
+   },
+   "src/js_embed.c": {
+    "documented": 2,
+    "total": 5,
+    "percent": 40.0
+   },
+   "src/js_env.c": {
+    "documented": 0,
+    "total": 8,
+    "percent": 0.0
+   },
+   "src/js_events.c": {
+    "documented": 2,
+    "total": 9,
+    "percent": 22.2
+   },
+   "src/js_fetch.c": {
+    "documented": 1,
+    "total": 5,
+    "percent": 20.0
+   },
+   "src/js_geom.c": {
+    "documented": 11,
+    "total": 13,
+    "percent": 84.6
+   },
+   "src/js_location.c": {
+    "documented": 3,
+    "total": 6,
+    "percent": 50.0
+   },
+   "src/js_location_internal.h": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "src/js_policy.c": {
+    "documented": 3,
+    "total": 6,
+    "percent": 50.0
+   },
+   "src/js_sandbox.c": {
+    "documented": 10,
+    "total": 23,
+    "percent": 43.5
+   },
+   "src/js_trusted.c": {
+    "documented": 4,
+    "total": 12,
+    "percent": 33.3
+   },
+   "src/link_nav.c": {
+    "documented": 1,
+    "total": 3,
+    "percent": 33.3
+   },
+   "src/local_store.c": {
+    "documented": 5,
+    "total": 266,
+    "percent": 1.9
+   },
+   "src/media_decoder.c": {
+    "documented": 3,
+    "total": 10,
+    "percent": 30.0
+   },
+   "src/net_realm.c": {
+    "documented": 2,
+    "total": 8,
+    "percent": 25.0
+   },
+   "src/os_sandbox.c": {
+    "documented": 9,
+    "total": 27,
+    "percent": 33.3
+   },
+   "src/page_view.c": {
+    "documented": 52,
+    "total": 119,
+    "percent": 43.7
+   },
+   "src/pdf_export.c": {
+    "documented": 1,
+    "total": 5,
+    "percent": 20.0
+   },
+   "src/perf_trace.c": {
+    "documented": 9,
+    "total": 12,
+    "percent": 75.0
+   },
+   "src/prefetch.c": {
+    "documented": 4,
+    "total": 10,
+    "percent": 40.0
+   },
+   "src/prefs.c": {
+    "documented": 4,
+    "total": 13,
+    "percent": 30.8
+   },
+   "src/profile.c": {
+    "documented": 1,
+    "total": 7,
+    "percent": 14.3
+   },
+   "src/render_doc.c": {
+    "documented": 8,
+    "total": 17,
+    "percent": 47.1
+   },
+   "src/render_policy.c": {
+    "documented": 3,
+    "total": 6,
+    "percent": 50.0
+   },
+   "src/renderer.c": {
+    "documented": 1,
+    "total": 5,
+    "percent": 20.0
+   },
+   "src/request_policy.c": {
+    "documented": 4,
+    "total": 7,
+    "percent": 57.1
+   },
+   "src/secure_fetch.c": {
+    "documented": 10,
+    "total": 39,
+    "percent": 25.6
+   },
+   "src/svg_render.c": {
+    "documented": 5,
+    "total": 9,
+    "percent": 55.6
+   },
+   "src/tab.c": {
+    "documented": 27,
+    "total": 74,
+    "percent": 36.5
+   },
+   "src/text_shape.c": {
+    "documented": 10,
+    "total": 17,
+    "percent": 58.8
+   },
+   "src/textfield.c": {
+    "documented": 6,
+    "total": 13,
+    "percent": 46.2
+   },
+   "src/tls_impersonate.c": {
+    "documented": 1,
+    "total": 10,
+    "percent": 10.0
+   },
+   "src/ui_layout.c": {
+    "documented": 2,
+    "total": 4,
+    "percent": 50.0
+   },
+   "src/url.c": {
+    "documented": 4,
+    "total": 17,
+    "percent": 23.5
+   },
+   "src/web_storage.c": {
+    "documented": 6,
+    "total": 12,
+    "percent": 50.0
+   },
+   "src/webcaps.c": {
+    "documented": 0,
+    "total": 5,
+    "percent": 0.0
+   },
+   "src/webfont.c": {
+    "documented": 0,
+    "total": 7,
+    "percent": 0.0
+   },
+   "src/webfont_load.c": {
+    "documented": 5,
+    "total": 9,
+    "percent": 55.6
+   },
+   "src/ws_hub.c": {
+    "documented": 14,
+    "total": 20,
+    "percent": 70.0
+   },
+   "src/zoom.c": {
+    "documented": 6,
+    "total": 8,
+    "percent": 75.0
+   },
+   "tools/ffgeom.py": {
+    "documented": 2,
+    "total": 8,
+    "percent": 25.0
+   },
+   "tools/gen_psl.c": {
+    "documented": 0,
+    "total": 4,
+    "percent": 0.0
+   },
+   "tools/mutate.py": {
+    "documented": 1,
+    "total": 7,
+    "percent": 14.3
+   },
+   "tools/pngdiff.c": {
+    "documented": 4,
+    "total": 9,
+    "percent": 44.4
+   },
+   "tools/pngprof.py": {
+    "documented": 1,
+    "total": 5,
+    "percent": 20.0
+   },
+   "tools/snapshot.py": {
+    "documented": 2,
+    "total": 5,
+    "percent": 40.0
+   }
+  }
+ },
+ "modules": [
+  {
+   "uid": "app.py",
+   "path": "modules/app.py.jsonl",
+   "entities": 4
+  },
+  {
+   "uid": "docker-entrypoint.sh",
+   "path": "modules/docker-entrypoint.sh.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "docker_run.sh",
+   "path": "modules/docker_run.sh.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz.sh",
+   "path": "modules/fuzz.sh.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_css.c",
+   "path": "modules/fuzz.fuzz_css.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_data_url.c",
+   "path": "modules/fuzz.fuzz_data_url.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_dom.c",
+   "path": "modules/fuzz.fuzz_dom.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_dom_debug.c",
+   "path": "modules/fuzz.fuzz_dom_debug.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_download.c",
+   "path": "modules/fuzz.fuzz_download.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_freebug.c",
+   "path": "modules/fuzz.fuzz_freebug.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_html_parse.c",
+   "path": "modules/fuzz.fuzz_html_parse.c.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_image_decode.c",
+   "path": "modules/fuzz.fuzz_image_decode.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_import_map.c",
+   "path": "modules/fuzz.fuzz_import_map.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_js_dom.c",
+   "path": "modules/fuzz.fuzz_js_dom.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "fuzz/fuzz_js_geom.c",
+   "path": "modules/fuzz.fuzz_js_geom.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "fuzz/fuzz_js_sandbox.c",
+   "path": "modules/fuzz.fuzz_js_sandbox.c.jsonl",
+   "entities": 4
+  },
+  {
+   "uid": "fuzz/fuzz_page_view.c",
+   "path": "modules/fuzz.fuzz_page_view.c.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_pdf_export.c",
+   "path": "modules/fuzz.fuzz_pdf_export.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_prefetch.c",
+   "path": "modules/fuzz.fuzz_prefetch.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_prefs.c",
+   "path": "modules/fuzz.fuzz_prefs.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_svg_render.c",
+   "path": "modules/fuzz.fuzz_svg_render.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_text_shape.c",
+   "path": "modules/fuzz.fuzz_text_shape.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "fuzz/fuzz_tls_impersonate.c",
+   "path": "modules/fuzz.fuzz_tls_impersonate.c.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_url.c",
+   "path": "modules/fuzz.fuzz_url.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_web_storage.c",
+   "path": "modules/fuzz.fuzz_web_storage.c.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_webfont.c",
+   "path": "modules/fuzz.fuzz_webfont.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "gui/browser_ui.c",
+   "path": "modules/gui.browser_ui.c.jsonl",
+   "entities": 213
+  },
+  {
+   "uid": "gui/browser_ui_internal.h",
+   "path": "modules/gui.browser_ui_internal.h.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "gui/bui_theme.c",
+   "path": "modules/gui.bui_theme.c.jsonl",
+   "entities": 7
+  },
+  {
+   "uid": "gui/freedom_view.c",
+   "path": "modules/gui.freedom_view.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "gui/svg_paint.c",
+   "path": "modules/gui.svg_paint.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "gui/ui_render.c",
+   "path": "modules/gui.ui_render.c.jsonl",
+   "entities": 8
+  },
+  {
+   "uid": "include/anti_fp.h",
+   "path": "modules/include.anti_fp.h.jsonl",
+   "entities": 35
+  },
+  {
+   "uid": "include/block_flow.h",
+   "path": "modules/include.block_flow.h.jsonl",
+   "entities": 4
+  },
+  {
+   "uid": "include/box_style.h",
+   "path": "modules/include.box_style.h.jsonl",
+   "entities": 25
+  },
+  {
+   "uid": "include/box_tree.h",
+   "path": "modules/include.box_tree.h.jsonl",
+   "entities": 32
+  },
+  {
+   "uid": "include/browser.h",
+   "path": "modules/include.browser.h.jsonl",
+   "entities": 19
+  },
+  {
+   "uid": "include/compositor.h",
+   "path": "modules/include.compositor.h.jsonl",
+   "entities": 9
+  },
+  {
+   "uid": "include/css.h",
+   "path": "modules/include.css.h.jsonl",
+   "entities": 131
+  },
+  {
+   "uid": "include/css_atrule.h",
+   "path": "modules/include.css_atrule.h.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "include/css_box.h",
+   "path": "modules/include.css_box.h.jsonl",
+   "entities": 25
+  },
+  {
+   "uid": "include/css_chain.h",
+   "path": "modules/include.css_chain.h.jsonl",
+   "entities": 8
+  },
+  {
+   "uid": "include/css_color.h",
+   "path": "modules/include.css_color.h.jsonl",
+   "entities": 7
+  },
+  {
+   "uid": "include/css_decl.h",
+   "path": "modules/include.css_decl.h.jsonl",
+   "entities": 12
+  },
+  {
+   "uid": "include/css_gradient.h",
+   "path": "modules/include.css_gradient.h.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "include/css_length.h",
+   "path": "modules/include.css_length.h.jsonl",
+   "entities": 20
+  },
+  {
+   "uid": "include/css_mq.h",
+   "path": "modules/include.css_mq.h.jsonl",
+   "entities": 6
+  },
+  {
+   "uid": "include/css_select.h",
+   "path": "modules/include.css_select.h.jsonl",
+   "entities": 34
+  },
+  {
+   "uid": "include/css_text.h",
+   "path": "modules/include.css_text.h.jsonl",
+   "entities": 17
+  },
+  {
+   "uid": "include/css_values.h",
+   "path": "modules/include.css_values.h.jsonl",
+   "entities": 6
+  },
+  {
+   "uid": "include/css_vars.h",
+   "path": "modules/include.css_vars.h.jsonl",
+   "entities": 19
+  },
+  {
+   "uid": "include/data_url.h",
+   "path": "modules/include.data_url.h.jsonl",
+   "entities": 6
+  },
+  {
+   "uid": "include/disk_store.h",
+   "path": "modules/include.disk_store.h.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "include/dom.h",
+   "path": "modules/include.dom.h.jsonl",
+   "entities": 28
+  },
+  {
+   "uid": "include/dom_debug.h",
+   "path": "modules/include.dom_debug.h.jsonl",
+   "entities": 4
+  },
+  {
+   "uid": "include/download.h",
+   "path": "modules/include.download.h.jsonl",
+   "entities": 9
+  },
+  {
+   "uid": "include/flex_layout.h",
+   "path": "modules/include.flex_layout.h.jsonl",
+   "entities": 35
+  },
+  {
+   "uid": "include/form.h",
+   "path": "modules/include.form.h.jsonl",
+   "entities": 12
+  },
+  {
+   "uid": "include/frame_clock.h",
+   "path": "modules/include.frame_clock.h.jsonl",
+   "entities": 7
+  },
+  {
+   "uid": "include/freebug.h",
+   "path": "modules/include.freebug.h.jsonl",
+   "entities": 18
+  },
+  {
+   "uid": "include/freedom_config.h",
+   "path": "modules/include.freedom_config.h.jsonl",
+   "entities": 11
+  },
+  {
+   "uid": "include/hls.h",
+   "path": "modules/include.hls.h.jsonl",
+   "entities": 8
+  },
+  {
+   "uid": "include/hostblock.h",
+   "path": "modules/include.hostblock.h.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "include/hostedit.h",
+   "path": "modules/include.hostedit.h.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "include/html_parse.h",
+   "path": "modules/include.html_parse.h.jsonl",
+   "entities": 24
+  },
+  {
+   "uid": "include/image_decode.h",
+   "path": "modules/include.image_decode.h.jsonl",
+   "entities": 13
+  },
+  {
+   "uid": "include/import_map.h",
+   "path": "modules/include.import_map.h.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "include/interp.h",
+   "path": "modules/include.interp.h.jsonl",
+   "entities": 22
+  },
+  {
+   "uid": "include/js_dom.h",
+   "path": "modules/include.js_dom.h.jsonl",
+   "entities": 17
+  },
+  {
+   "uid": "include/js_env.h",
+   "path": "modules/include.js_env.h.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "include/js_geom.h",
+   "path": "modules/include.js_geom.h.jsonl",
+   "entities": 19
+  },
+  {
+   "uid": "include/js_location.h",
+   "path": "modules/include.js_location.h.jsonl",
+   "entities": 6
+  },
+  {
+   "uid": "include/js_policy.h",
+   "path": "modules/include.js_policy.h.jsonl",
+   "entities": 7
+  },
+  {
+   "uid": "include/js_sandbox.h",
+   "path": "modules/include.js_sandbox.h.jsonl",
+   "entities": 24
+  },
+  {
+   "uid": "include/js_trusted.h",
+   "path": "modules/include.js_trusted.h.jsonl",
+   "entities": 16
+  },
+  {
+   "uid": "include/link_nav.h",
+   "path": "modules/include.link_nav.h.jsonl",
+   "entities": 11
+  },
+  {
+   "uid": "include/local_store.h",
+   "path": "modules/include.local_store.h.jsonl",
+   "entities": 11
+  },
+  {
+   "uid": "include/media_decoder.h",
+   "path": "modules/include.media_decoder.h.jsonl",
+   "entities": 12
+  },
+  {
+   "uid": "include/net_realm.h",
+   "path": "modules/include.net_realm.h.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "include/os_sandbox.h",
+   "path": "modules/include.os_sandbox.h.jsonl",
+   "entities": 12
+  },
+  {
+   "uid": "include/page_view.h",
+   "path": "modules/include.page_view.h.jsonl",
+   "entities": 72
+  },
+  {
+   "uid": "include/pdf_export.h",
+   "path": "modules/include.pdf_export.h.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "include/perf_trace.h",
+   "path": "modules/include.perf_trace.h.jsonl",
+   "entities": 17
+  },
+  {
+   "uid": "include/prefetch.h",
+   "path": "modules/include.prefetch.h.jsonl",
+   "entities": 21
+  },
+  {
+   "uid": "include/prefs.h",
+   "path": "modules/include.prefs.h.jsonl",
+   "entities": 18
+  },
+  {
+   "uid": "include/profile.h",
+   "path": "modules/include.profile.h.jsonl",
+   "entities": 9
+  },
+  {
+   "uid": "include/psl_data.h",
+   "path": "modules/include.psl_data.h.jsonl",
+   "entities": 7
+  },
+  {
+   "uid": "include/render_doc.h",
+   "path": "modules/include.render_doc.h.jsonl",
+   "entities": 26
+  },
+  {
+   "uid": "include/render_policy.h",
+   "path": "modules/include.render_policy.h.jsonl",
+   "entities": 9
+  },
+  {
+   "uid": "include/renderer.h",
+   "path": "modules/include.renderer.h.jsonl",
+   "entities": 7
+  },
+  {
+   "uid": "include/request_policy.h",
+   "path": "modules/include.request_policy.h.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "include/secure_fetch.h",
+   "path": "modules/include.secure_fetch.h.jsonl",
+   "entities": 38
+  },
+  {
+   "uid": "include/svg_paint.h",
+   "path": "modules/include.svg_paint.h.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "include/svg_render.h",
+   "path": "modules/include.svg_render.h.jsonl",
+   "entities": 18
+  },
+  {
+   "uid": "include/tab.h",
+   "path": "modules/include.tab.h.jsonl",
+   "entities": 41
+  },
+  {
+   "uid": "include/text_shape.h",
+   "path": "modules/include.text_shape.h.jsonl",
+   "entities": 13
+  },
+  {
+   "uid": "include/textfield.h",
+   "path": "modules/include.textfield.h.jsonl",
+   "entities": 15
+  },
+  {
+   "uid": "include/tls_impersonate.h",
+   "path": "modules/include.tls_impersonate.h.jsonl",
+   "entities": 23
+  },
+  {
+   "uid": "include/ui.h",
+   "path": "modules/include.ui.h.jsonl",
+   "entities": 17
+  },
+  {
+   "uid": "include/url.h",
+   "path": "modules/include.url.h.jsonl",
+   "entities": 14
+  },
+  {
+   "uid": "include/util.h",
+   "path": "modules/include.util.h.jsonl",
+   "entities": 6
+  },
+  {
+   "uid": "include/web_storage.h",
+   "path": "modules/include.web_storage.h.jsonl",
+   "entities": 13
+  },
+  {
+   "uid": "include/webcaps.h",
+   "path": "modules/include.webcaps.h.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "include/webfont.h",
+   "path": "modules/include.webfont.h.jsonl",
+   "entities": 17
+  },
+  {
+   "uid": "include/webfont_load.h",
+   "path": "modules/include.webfont_load.h.jsonl",
+   "entities": 7
+  },
+  {
+   "uid": "include/ws_hub.h",
+   "path": "modules/include.ws_hub.h.jsonl",
+   "entities": 15
+  },
+  {
+   "uid": "include/zoom.h",
+   "path": "modules/include.zoom.h.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "install.sh",
+   "path": "modules/install.sh.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "run_freedom.sh",
+   "path": "modules/run_freedom.sh.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "src/anti_fp.c",
+   "path": "modules/src.anti_fp.c.jsonl",
+   "entities": 23
+  },
+  {
+   "uid": "src/block_flow.c",
+   "path": "modules/src.block_flow.c.jsonl",
+   "entities": 4
+  },
+  {
+   "uid": "src/box_style.c",
+   "path": "modules/src.box_style.c.jsonl",
+   "entities": 38
+  },
+  {
+   "uid": "src/box_tree.c",
+   "path": "modules/src.box_tree.c.jsonl",
+   "entities": 13
+  },
+  {
+   "uid": "src/browser.c",
+   "path": "modules/src.browser.c.jsonl",
+   "entities": 31
+  },
+  {
+   "uid": "src/compositor.c",
+   "path": "modules/src.compositor.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "src/css.c",
+   "path": "modules/src.css.c.jsonl",
+   "entities": 72
+  },
+  {
+   "uid": "src/css_atrule.c",
+   "path": "modules/src.css_atrule.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "src/css_box.c",
+   "path": "modules/src.css_box.c.jsonl",
+   "entities": 29
+  },
+  {
+   "uid": "src/css_chain.c",
+   "path": "modules/src.css_chain.c.jsonl",
+   "entities": 14
+  },
+  {
+   "uid": "src/css_color.c",
+   "path": "modules/src.css_color.c.jsonl",
+   "entities": 13
+  },
+  {
+   "uid": "src/css_gradient.c",
+   "path": "modules/src.css_gradient.c.jsonl",
+   "entities": 7
+  },
+  {
+   "uid": "src/css_length.c",
+   "path": "modules/src.css_length.c.jsonl",
+   "entities": 12
+  },
+  {
+   "uid": "src/css_mq.c",
+   "path": "modules/src.css_mq.c.jsonl",
+   "entities": 11
+  },
+  {
+   "uid": "src/css_select.c",
+   "path": "modules/src.css_select.c.jsonl",
+   "entities": 14
+  },
+  {
+   "uid": "src/css_text.c",
+   "path": "modules/src.css_text.c.jsonl",
+   "entities": 15
+  },
+  {
+   "uid": "src/css_values.c",
+   "path": "modules/src.css_values.c.jsonl",
+   "entities": 6
+  },
+  {
+   "uid": "src/css_vars.c",
+   "path": "modules/src.css_vars.c.jsonl",
+   "entities": 9
+  },
+  {
+   "uid": "src/data_url.c",
+   "path": "modules/src.data_url.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "src/disk_store.c",
+   "path": "modules/src.disk_store.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "src/dom.c",
+   "path": "modules/src.dom.c.jsonl",
+   "entities": 49
+  },
+  {
+   "uid": "src/dom_debug.c",
+   "path": "modules/src.dom_debug.c.jsonl",
+   "entities": 4
+  },
+  {
+   "uid": "src/download.c",
+   "path": "modules/src.download.c.jsonl",
+   "entities": 6
+  },
+  {
+   "uid": "src/flex_layout.c",
+   "path": "modules/src.flex_layout.c.jsonl",
+   "entities": 22
+  },
+  {
+   "uid": "src/form.c",
+   "path": "modules/src.form.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "src/frame_clock.c",
+   "path": "modules/src.frame_clock.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "src/freebug.c",
+   "path": "modules/src.freebug.c.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "src/freedom.c",
+   "path": "modules/src.freedom.c.jsonl",
+   "entities": 19
+  },
+  {
+   "uid": "src/hls.c",
+   "path": "modules/src.hls.c.jsonl",
+   "entities": 8
+  },
+  {
+   "uid": "src/hostblock.c",
+   "path": "modules/src.hostblock.c.jsonl",
+   "entities": 11
+  },
+  {
+   "uid": "src/hostedit.c",
+   "path": "modules/src.hostedit.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "src/html_parse.c",
+   "path": "modules/src.html_parse.c.jsonl",
+   "entities": 19
+  },
+  {
+   "uid": "src/image_decode.c",
+   "path": "modules/src.image_decode.c.jsonl",
+   "entities": 17
+  },
+  {
+   "uid": "src/import_map.c",
+   "path": "modules/src.import_map.c.jsonl",
+   "entities": 11
+  },
+  {
+   "uid": "src/interp.c",
+   "path": "modules/src.interp.c.jsonl",
+   "entities": 14
+  },
+  {
+   "uid": "src/js_dom.c",
+   "path": "modules/src.js_dom.c.jsonl",
+   "entities": 22
+  },
+  {
+   "uid": "src/js_dom_ext.c",
+   "path": "modules/src.js_dom_ext.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "src/js_dom_ext.h",
+   "path": "modules/src.js_dom_ext.h.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "src/js_dom_internal.h",
+   "path": "modules/src.js_dom_internal.h.jsonl",
+   "entities": 4
+  },
+  {
+   "uid": "src/js_embed.c",
+   "path": "modules/src.js_embed.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "src/js_env.c",
+   "path": "modules/src.js_env.c.jsonl",
+   "entities": 8
+  },
+  {
+   "uid": "src/js_events.c",
+   "path": "modules/src.js_events.c.jsonl",
+   "entities": 9
+  },
+  {
+   "uid": "src/js_fetch.c",
+   "path": "modules/src.js_fetch.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "src/js_geom.c",
+   "path": "modules/src.js_geom.c.jsonl",
+   "entities": 13
+  },
+  {
+   "uid": "src/js_location.c",
+   "path": "modules/src.js_location.c.jsonl",
+   "entities": 6
+  },
+  {
+   "uid": "src/js_location_internal.h",
+   "path": "modules/src.js_location_internal.h.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "src/js_policy.c",
+   "path": "modules/src.js_policy.c.jsonl",
+   "entities": 6
+  },
+  {
+   "uid": "src/js_sandbox.c",
+   "path": "modules/src.js_sandbox.c.jsonl",
+   "entities": 23
+  },
+  {
+   "uid": "src/js_trusted.c",
+   "path": "modules/src.js_trusted.c.jsonl",
+   "entities": 12
+  },
+  {
+   "uid": "src/link_nav.c",
+   "path": "modules/src.link_nav.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "src/local_store.c",
+   "path": "modules/src.local_store.c.jsonl",
+   "entities": 266
+  },
+  {
+   "uid": "src/media_decoder.c",
+   "path": "modules/src.media_decoder.c.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "src/net_realm.c",
+   "path": "modules/src.net_realm.c.jsonl",
+   "entities": 8
+  },
+  {
+   "uid": "src/os_sandbox.c",
+   "path": "modules/src.os_sandbox.c.jsonl",
+   "entities": 27
+  },
+  {
+   "uid": "src/page_view.c",
+   "path": "modules/src.page_view.c.jsonl",
+   "entities": 119
+  },
+  {
+   "uid": "src/pdf_export.c",
+   "path": "modules/src.pdf_export.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "src/perf_trace.c",
+   "path": "modules/src.perf_trace.c.jsonl",
+   "entities": 12
+  },
+  {
+   "uid": "src/prefetch.c",
+   "path": "modules/src.prefetch.c.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "src/prefs.c",
+   "path": "modules/src.prefs.c.jsonl",
+   "entities": 13
+  },
+  {
+   "uid": "src/profile.c",
+   "path": "modules/src.profile.c.jsonl",
+   "entities": 7
+  },
+  {
+   "uid": "src/render_doc.c",
+   "path": "modules/src.render_doc.c.jsonl",
+   "entities": 17
+  },
+  {
+   "uid": "src/render_policy.c",
+   "path": "modules/src.render_policy.c.jsonl",
+   "entities": 6
+  },
+  {
+   "uid": "src/renderer.c",
+   "path": "modules/src.renderer.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "src/request_policy.c",
+   "path": "modules/src.request_policy.c.jsonl",
+   "entities": 7
+  },
+  {
+   "uid": "src/secure_fetch.c",
+   "path": "modules/src.secure_fetch.c.jsonl",
+   "entities": 39
+  },
+  {
+   "uid": "src/svg_render.c",
+   "path": "modules/src.svg_render.c.jsonl",
+   "entities": 9
+  },
+  {
+   "uid": "src/tab.c",
+   "path": "modules/src.tab.c.jsonl",
+   "entities": 74
+  },
+  {
+   "uid": "src/text_shape.c",
+   "path": "modules/src.text_shape.c.jsonl",
+   "entities": 17
+  },
+  {
+   "uid": "src/textfield.c",
+   "path": "modules/src.textfield.c.jsonl",
+   "entities": 13
+  },
+  {
+   "uid": "src/tls_impersonate.c",
+   "path": "modules/src.tls_impersonate.c.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "src/ui_layout.c",
+   "path": "modules/src.ui_layout.c.jsonl",
+   "entities": 4
+  },
+  {
+   "uid": "src/url.c",
+   "path": "modules/src.url.c.jsonl",
+   "entities": 17
+  },
+  {
+   "uid": "src/web_storage.c",
+   "path": "modules/src.web_storage.c.jsonl",
+   "entities": 12
+  },
+  {
+   "uid": "src/webcaps.c",
+   "path": "modules/src.webcaps.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "src/webfont.c",
+   "path": "modules/src.webfont.c.jsonl",
+   "entities": 7
+  },
+  {
+   "uid": "src/webfont_load.c",
+   "path": "modules/src.webfont_load.c.jsonl",
+   "entities": 9
+  },
+  {
+   "uid": "src/ws_hub.c",
+   "path": "modules/src.ws_hub.c.jsonl",
+   "entities": 20
+  },
+  {
+   "uid": "src/zoom.c",
+   "path": "modules/src.zoom.c.jsonl",
+   "entities": 8
+  },
+  {
+   "uid": "tools/ffgeom.py",
+   "path": "modules/tools.ffgeom.py.jsonl",
+   "entities": 10
+  },
+  {
+   "uid": "tools/gen_psl.c",
+   "path": "modules/tools.gen_psl.c.jsonl",
+   "entities": 4
+  },
+  {
+   "uid": "tools/mutate.py",
+   "path": "modules/tools.mutate.py.jsonl",
+   "entities": 11
+  },
+  {
+   "uid": "tools/pngdiff.c",
+   "path": "modules/tools.pngdiff.c.jsonl",
+   "entities": 9
+  },
+  {
+   "uid": "tools/pngprof.py",
+   "path": "modules/tools.pngprof.py.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "tools/snapshot.py",
+   "path": "modules/tools.snapshot.py.jsonl",
+   "entities": 9
+  }
+ ],
+ "warnings": {
+  "path": "warnings.jsonl",
+  "total": 1823
+ },
+ "usage": [
+  "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",
+  "grep -h '\"qualname\":\"<Owner.method>\"' readmenator-apidocs/api/modules/*.jsonl",
+  "cat readmenator-apidocs/api/modules/<module-slug>.jsonl",
+  "grep -h '\"code\":\"DOC001\"' readmenator-apidocs/api/warnings.jsonl"
+ ]
+}

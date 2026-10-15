@@ -1,0 +1,452 @@
+# `src/js_dom.c`
+
+> Source: [src/js_dom.c:1](../../src/js_dom.c#L1) | language `c` | coverage 9.1% | [API index](../index.md)
+
+## Contents
+
+- **Structs:** [`jd_method`](#jd_method)
+- **Functions:** [`jd_opaque_get`](#jd_opaque_get), [`jd_idx`](#jd_idx), [`jd_handle`](#jd_handle), [`jd_handle_or_null`](#jd_handle_or_null), [`table`](#table), [`attrNames`](#attrnames), [`scripts`](#scripts), [`enough`](#enough), [`ms`](#ms), [`empty`](#empty), [`geometry`](#geometry), [`size`](#size), [`js_env`](#js_env), [`jd_install`](#jd_install), [`fails`](#fails), [`jd_install_console`](#jd_install_console), [`jd_set_cookies`](#jd_set_cookies), [`jd_get_cookies`](#jd_get_cookies), [`jd_set_geometry`](#jd_set_geometry)
+- **Macros:** [`_GNU_SOURCE`](#_gnu_source)
+
+## Call Graph
+
+Solid arrows stay in this module, dashed arrows leave it.
+
+```mermaid
+flowchart LR
+    n_src_js_dom_c__jd_idx(["jd_idx"])
+    n_src_js_dom_c__jd_opaque_get(["jd_opaque_get"])
+    n_src_js_dom_c__jd_idx --> n_src_js_dom_c__jd_opaque_get
+```
+
+## Structs
+
+<a id="jd_method"></a>
+
+### `jd_method`
+
+`struct` | [src/js_dom.c:428](../../src/js_dom.c#L428)
+
+```c
+typedef struct jd_method
+```
+
+---
+
+## Functions
+
+<a id="jd_opaque_get"></a>
+
+### `jd_opaque_get`
+
+`function` | [src/js_dom.c:27](../../src/js_dom.c#L27)
+
+```c
+jd_opaque *jd_opaque_get(JSContext *ctx)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `JSContext *` |  |  |
+
+**Returns:** `jd_opaque *`
+
+*Called by:* [`jd_idx`](#jd_idx)
+
+---
+
+<a id="jd_idx"></a>
+
+### `jd_idx`
+
+`function` | [src/js_dom.c:31](../../src/js_dom.c#L31)
+
+```c
+dom_index *jd_idx(JSContext *ctx)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `JSContext *` |  |  |
+
+**Returns:** `dom_index *`
+
+*Calls:* [`jd_opaque_get`](#jd_opaque_get)
+
+---
+
+<a id="jd_handle"></a>
+
+### `jd_handle`
+
+`function` | [src/js_dom.c:40](../../src/js_dom.c#L40)
+
+```c
+int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out)
+```
+
+Coerces a JS argument to a node handle.
+
+Returns -1 with a pending exception if coercion threw; otherwise stores the handle (out-of-range values stay out of range and are rejected later by the dom validators).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `JSContext *` |  |  |
+| `v` | `JSValueConst` |  |  |
+| `out` | `dom_node_id *` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="jd_handle_or_null"></a>
+
+### `jd_handle_or_null`
+
+`function` | [src/js_dom.c:47](../../src/js_dom.c#L47)
+
+```c
+JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `JSContext *` |  |  |
+| `h` | `dom_node_id` |  |  |
+
+**Returns:** `JSValue`
+
+---
+
+<a id="table"></a>
+
+### `table`
+
+`function` | [src/js_dom.c:571](../../src/js_dom.c#L571)
+
+```c
+* a table (dom.viewport() non-null);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `null` | `dom.viewport() non-` |  |  |
+
+**Returns:** `* a`
+
+---
+
+<a id="attrnames"></a>
+
+### `attrNames`
+
+`function` | [src/js_dom.c:610](../../src/js_dom.c#L610)
+
+```c
+* native attrNames(). jQuery's feature detection reads attrs[name].expando, so * a missing '...
+```
+
+**Returns:** `*`
+
+---
+
+<a id="scripts"></a>
+
+### `scripts`
+
+`function` | [src/js_dom.c:768](../../src/js_dom.c#L768)
+
+```c
+* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without throwing. No network, no real * playback in the worker -- actual decoding happens in
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `detection` | `canPlayType feature-` |  |  |
+| `pause` | `play/` |  |  |
+| `reflection` | `muted/loop *` |  |  |
+| `ranges` | `buffered` |  |  |
+
+**Returns:** `* player`
+
+---
+
+<a id="enough"></a>
+
+### `enough`
+
+`function` | [src/js_dom.c:931](../../src/js_dom.c#L931)
+
+```c
+* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery clones a fragment twice and reads .lastChild * (b.checkClone);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `insertBefore` | `cloneNode/lastChild/removeChild/` |  |  |
+
+**Returns:** `*`
+
+---
+
+<a id="ms"></a>
+
+### `ms`
+
+`function` `virtual` | [src/js_dom.c:1067](../../src/js_dom.c#L1067)
+
+```c
+* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `elapsed` | `the trusted parent advances the clock via * OP_TICK -> __tickTimers( );` |  |  |
+
+**Returns:** `* due is the remaining`
+
+---
+
+<a id="empty"></a>
+
+### `empty`
+
+`function` | [src/js_dom.c:1215](../../src/js_dom.c#L1215)
+
+```c
+* inert: DOM interface constructors are empty (instanceof yields false, harmless);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `false` | `instanceof yields` |  |  |
+
+**Returns:** `* inert: DOM constructors are`
+
+---
+
+<a id="geometry"></a>
+
+### `geometry`
+
+`function` | [src/js_dom.c:1217](../../src/js_dom.c#L1217)
+
+```c
+* constant geometry (zero real leak);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `leak` | `zero real` |  |  |
+
+**Returns:** `* constant`
+
+---
+
+<a id="size"></a>
+
+### `size`
+
+`function` | [src/js_dom.c:1220](../../src/js_dom.c#L1220)
+
+```c
+* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `media` | `matches the 1920 width * anti_fp uses for @` |  |  |
+| `window` | `not the real` |  |  |
+
+**Returns:** `* the viewport reads a fixed normalized`
+
+---
+
+<a id="js_env"></a>
+
+### `js_env`
+
+`function` | [src/js_dom.c:1223](../../src/js_dom.c#L1223)
+
+```c
+* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the * document shim (uses...
+```
+
+**Returns:** `* are owned by`
+
+---
+
+<a id="jd_install"></a>
+
+### `jd_install`
+
+`function` | [src/js_dom.c:1775](../../src/js_dom.c#L1775)
+
+```c
+jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `idx` | `dom_index *` |  |  |
+| `opaque` | `jd_opaque *` |  |  |
+
+**Returns:** `jd_status`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`run_js`](src.tab.c.md#run_js)
+
+---
+
+<a id="fails"></a>
+
+### `fails`
+
+`function` | [src/js_dom.c:1852](../../src/js_dom.c#L1852)
+
+```c
+* cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `stops` | `caller` |  |  |
+
+**Returns:** `* cap is reached or an allocation`
+
+---
+
+<a id="jd_install_console"></a>
+
+### `jd_install_console`
+
+`function` | [src/js_dom.c:1966](../../src/js_dom.c#L1966)
+
+```c
+jd_status jd_install_console(js_context *ctx, fb_buffer *log)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `log` | `fb_buffer *` |  |  |
+
+**Returns:** `jd_status`
+
+*Called by:* [`run_js`](src.tab.c.md#run_js)
+
+---
+
+<a id="jd_set_cookies"></a>
+
+### `jd_set_cookies`
+
+`function` | [src/js_dom.c:2003](../../src/js_dom.c#L2003)
+
+```c
+jd_status jd_set_cookies(js_context *ctx, const char *cookies)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `cookies` | `char *` |  |  |
+
+**Returns:** `jd_status`
+
+---
+
+<a id="jd_get_cookies"></a>
+
+### `jd_get_cookies`
+
+`function` | [src/js_dom.c:2023](../../src/js_dom.c#L2023)
+
+```c
+int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)
+```
+
+Serialises the page's current cookie jar ("name=value; ...") into buf (bounded, NUL-terminated) and returns its length, so the trusted parent can fold JS-set cookies back into its ephemeral network jar.
+
+Returns 0 when the jar is disabled/empty or on any error. Never throws into the page.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `buf` | `char *` |  |  |
+| `bufsz` | `size_t` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`jd_get_cookies`](#jd_get_cookies) (include/js_dom.h:134).
+
+---
+
+<a id="jd_set_geometry"></a>
+
+### `jd_set_geometry`
+
+`function` | [src/js_dom.c:2046](../../src/js_dom.c#L2046)
+
+```c
+jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `geom` | `jg_table *` |  |  |
+
+**Returns:** `jd_status`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
+
+---
+
+## Macros
+
+<a id="_gnu_source"></a>
+
+### `_GNU_SOURCE`
+
+`macro` | [src/js_dom.c:10](../../src/js_dom.c#L10)
+
+```c
+#define _GNU_SOURCE
+```
+
+---

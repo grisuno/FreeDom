@@ -1,0 +1,2606 @@
+# `src/page_view.c`
+
+> Source: [src/page_view.c:1](../../src/page_view.c#L1) | language `c` | coverage 43.7% | [API index](../index.md)
+
+## Contents
+
+- **Structs:** [`pv_node_map`](#pv_node_map), [`pv_cont_info`](#pv_cont_info), [`pv_item_track`](#pv_item_track), [`pv_box_info`](#pv_box_info), [`pv_container_reg`](#pv_container_reg), [`pv_box_reg`](#pv_box_reg), [`pv_ptrmap`](#pv_ptrmap), [`pv_var_node`](#pv_var_node), [`pv_style_cache`](#pv_style_cache), [`pv_flow_reg`](#pv_flow_reg), [`sz_fill`](#sz_fill), [`pv_root_els`](#pv_root_els), [`form_rec`](#form_rec), [`form_table`](#form_table), [`pv_flow_reg`](#pv_flow_reg)
+- **Type Aliases:** [`cols`](#cols), [`mb`](#mb), [`chain`](#chain)
+- **Functions:** [`positions`](#positions), [`pv_new`](#pv_new), [`pv_append`](#pv_append), [`pv_append_image`](#pv_append_image), [`pv_append_input`](#pv_append_input), [`pv_append_video`](#pv_append_video), [`pv_append_svg`](#pv_append_svg), [`pv_set_emphasis`](#pv_set_emphasis), [`pv_set_indent`](#pv_set_indent), [`pv_set_color`](#pv_set_color), [`pv_set_bgcolor`](#pv_set_bgcolor), [`pv_set_text_style`](#pv_set_text_style), [`pv_set_grad_text`](#pv_set_grad_text), [`pv_set_text_ext`](#pv_set_text_ext), [`ignored`](#ignored), [`pv_set_container`](#pv_set_container), [`pv_set_row_span`](#pv_set_row_span), [`pv_set_grid_area`](#pv_set_grid_area), [`pv_set_grid`](#pv_set_grid), [`pv_set_grid_rows`](#pv_set_grid_rows), [`pv_set_cont_box`](#pv_set_cont_box), [`pv_set_flex`](#pv_set_flex), [`pv_set_flex_mauto`](#pv_set_flex_mauto), [`pv_set_cont_item`](#pv_set_cont_item), [`pv_set_float`](#pv_set_float), [`pv_set_box`](#pv_set_box), [`pv_set_box_pct`](#pv_set_box_pct), [`pv_set_box_maxw`](#pv_set_box_maxw), [`pv_set_ua_tag`](#pv_set_ua_tag), [`pv_set_node_id`](#pv_set_node_id), [`pv_set_block_id`](#pv_set_block_id), [`pv_set_own_box`](#pv_set_own_box), [`pv_set_oof`](#pv_set_oof), [`pv_set_input_checked`](#pv_set_input_checked), [`pv_set_input_select_opts`](#pv_set_input_select_opts), [`pv_add_cont_def`](#pv_add_cont_def), [`pv_cont_count`](#pv_cont_count), [`pv_cont_at`](#pv_cont_at), [`pv_add_box_def`](#pv_add_box_def), [`pv_free`](#pv_free), [`pv_count`](#pv_count), [`pv_at`](#pv_at), [`pv_box_count`](#pv_box_count), [`pv_box_at`](#pv_box_at), [`resolves`](#resolves), [`paints`](#paints), [`content`](#content), [`address`](#address), [`child`](#child), [`it`](#it), [`pv_content_hidden`](#pv_content_hidden), [`pv_text_ext_reset`](#pv_text_ext_reset), [`trying`](#trying), [`here`](#here), [`glyphs`](#glyphs), [`size`](#size), [`builder`](#builder), [`paints`](#paints), [`outermost`](#outermost), [`opens`](#opens), [`margins`](#margins), [`container`](#container), [`walk`](#walk), [`float`](#float), [`present`](#present), [`dimensions`](#dimensions), [`attributes`](#attributes), [`string`](#string), [`links`](#links), [`table`](#table), [`pv_build`](#pv_build), [`pv_build_ex`](#pv_build_ex), [`pv_build_full`](#pv_build_full), [`pv_build_styled`](#pv_build_styled), [`control`](#control), [`px`](#px), [`height`](#height), [`block_id`](#block_id), [`URL`](#url), [`flow`](#flow), [`engine`](#engine), [`line`](#line), [`appended`](#appended), [`pv_css_drops`](#pv_css_drops)
+- **Macros:** [`_POSIX_C_SOURCE`](#_posix_c_source), [`PV_MAX_DIM`](#pv_max_dim), [`PV_FONT_REL_MIN`](#pv_font_rel_min), [`PV_FONT_REL_MAX`](#pv_font_rel_max), [`PV_FONT_CHAIN_MAX`](#pv_font_chain_max), [`PV_FONT_PCT_MIN`](#pv_font_pct_min), [`PV_FONT_PCT_MAX`](#pv_font_pct_max), [`PV_NODE_MAP_INIT_CAP`](#pv_node_map_init_cap), [`PV_COLOR_TOKEN_MAX`](#pv_color_token_max), [`PV_MAX_CONTAINERS`](#pv_max_containers), [`PV_MAX_GRID_COLS`](#pv_max_grid_cols), [`PV_MAX_BOXES`](#pv_max_boxes), [`PV_MAX_INLINE_ROW_ITEMS`](#pv_max_inline_row_items), [`PV_TEXTLESS_DEPTH_MAX`](#pv_textless_depth_max), [`PV_MAX_STYLE_BYTES`](#pv_max_style_bytes)
+
+## Type Diagram
+
+```mermaid
+classDiagram
+    direction LR
+    class pv_node_map
+    <<struct>> pv_node_map
+    class cols
+    <<type_alias>> cols
+    class pv_cont_info
+    <<struct>> pv_cont_info
+    pv_cont_info : id()
+    class pv_item_track
+    <<struct>> pv_item_track
+    class mb
+    <<type_alias>> mb
+    class pv_box_info
+    <<struct>> pv_box_info
+    class pv_container_reg
+    <<struct>> pv_container_reg
+    class pv_box_reg
+    <<struct>> pv_box_reg
+    class pv_ptrmap
+    <<struct>> pv_ptrmap
+    class chain
+    <<type_alias>> chain
+    class pv_var_node
+    <<struct>> pv_var_node
+    class pv_style_cache
+    <<struct>> pv_style_cache
+    class pv_flow_reg
+    <<struct>> pv_flow_reg
+    class sz_fill
+    <<struct>> sz_fill
+    class pv_root_els
+    <<struct>> pv_root_els
+    class form_rec
+    <<struct>> form_rec
+    class form_table
+    <<struct>> form_table
+    class pv_flow_reg
+    <<struct>> pv_flow_reg
+```
+
+## Call Graph
+
+Solid arrows stay in this module, dashed arrows leave it.
+
+```mermaid
+flowchart LR
+    n_src_page_view_c__pv_build(["pv_build"])
+    n_src_page_view_c__pv_build_full(["pv_build_full"])
+    n_src_page_view_c__pv_build_ex(["pv_build_ex"])
+    n_src_page_view_c__pv_build_styled(["pv_build_styled"])
+    n_src_page_view_c__pv_add_box_def(["pv_add_box_def"])
+    n_src_page_view_c__pv_add_cont_def(["pv_add_cont_def"])
+    n_src_page_view_c__pv_append(["pv_append"])
+    n_src_page_view_c__pv_append_image(["pv_append_image"])
+    n_src_page_view_c__pv_append_input(["pv_append_input"])
+    n_src_page_view_c__pv_append_svg(["pv_append_svg"])
+    n_src_page_view_c__pv_append_video(["pv_append_video"])
+    n_src_page_view_c__pv_free(["pv_free"])
+    n_src_page_view_c__pv_new(["pv_new"])
+    n_src_page_view_c__pv_set_bgcolor(["pv_set_bgcolor"])
+    n_src_page_view_c__pv_set_block_id(["pv_set_block_id"])
+    n_src_page_view_c__pv_set_box(["pv_set_box"])
+    n_src_page_view_c__pv_set_box_maxw(["pv_set_box_maxw"])
+    n_src_page_view_c__pv_set_box_pct(["pv_set_box_pct"])
+    n_src_page_view_c__pv_set_color(["pv_set_color"])
+    n_src_page_view_c__pv_set_cont_box(["pv_set_cont_box"])
+    n_src_page_view_c__pv_set_cont_item(["pv_set_cont_item"])
+    n_src_page_view_c__pv_set_container(["pv_set_container"])
+    n_src_page_view_c__pv_set_emphasis(["pv_set_emphasis"])
+    n_src_page_view_c__pv_set_flex(["pv_set_flex"])
+    n_src_page_view_c__pv_set_flex_mauto(["pv_set_flex_mauto"])
+    n_src_page_view_c__pv_build --> n_src_page_view_c__pv_build_full
+    n_src_page_view_c__pv_build_ex --> n_src_page_view_c__pv_build_full
+    n_src_page_view_c__pv_build_full --> n_src_page_view_c__pv_build_styled
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_add_box_def
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_add_cont_def
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_append
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_append_image
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_append_input
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_append_svg
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_append_video
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_free
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_new
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_bgcolor
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_block_id
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_box
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_box_maxw
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_box_pct
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_color
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_cont_box
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_cont_item
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_container
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_emphasis
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_flex
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_flex_mauto
+```
+
+## Structs
+
+<a id="pv_node_map"></a>
+
+### `pv_node_map`
+
+`struct` | [src/page_view.c:273](../../src/page_view.c#L273)
+
+```c
+typedef struct pv_node_map
+```
+
+---
+
+<a id="pv_cont_info"></a>
+
+### `pv_cont_info`
+
+`struct` | [src/page_view.c:1102](../../src/page_view.c#L1102)
+
+```c
+typedef struct pv_cont_info
+```
+
+Nearest-container info attached to a run, plus the flex per-item values (Stage 3): grow/shrink/basis/order come from the ITEM element (the container's direct child on the run's ancestor chain); direction from the container itself.
+
+Unset sentinels: grow/shrink -1, basis/order CSS_LEN_UNSET, direction 0. [`item`](src.css.c.md#item) is that same direct child (NULL = anonymous item: text directly inside the container); pv_build maps it to the run's cont_item ordinal so inline fragments of one child share one item.
+
+**Members**
+
+| Member | Kind | Summary |
+|---|---|---|
+| [`id`](#pv_cont_info-id) | method |  |
+
+<a id="pv_cont_info-id"></a>
+
+#### `pv_cont_info.id`
+
+`method` | [src/page_view.c:1120](../../src/page_view.c#L1120)
+
+```c
+* group id (-1 = the nearest IS the outermost: single-level float, the * painter's old path);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `-1` |  | `the nearest IS the outermost: single-level float` |  |
+| `path` | `the * painter's old` |  |  |
+
+**Returns:** `* group`
+
+---
+
+<a id="pv_item_track"></a>
+
+### `pv_item_track`
+
+`struct` | [src/page_view.c:1176](../../src/page_view.c#L1176)
+
+```c
+typedef struct pv_item_track
+```
+
+Per-container item-ordinal tracker: ord[cid] is the ordinal last handed out for container cid, node[cid] the direct-child element it belongs to.
+
+A run whose item differs from the tracked one (or is NULL = anonymous) opens the next ordinal, so consecutive runs of one child share it and nested-container interruptions do not break the outer container's item continuity.
+
+---
+
+<a id="pv_box_info"></a>
+
+### `pv_box_info`
+
+`struct` | [src/page_view.c:1195](../../src/page_view.c#L1195)
+
+```c
+typedef struct pv_box_info
+```
+
+Author box model resolved for a run: horizontal placement (l/r insets, w cap, centered) from the nearest block ancestor that declares a box, plus the leaf block's own vertical-margin override (mt/mb, or PV_LEN_UNSET).
+
+---
+
+<a id="pv_container_reg"></a>
+
+### `pv_container_reg`
+
+`struct` | [src/page_view.c:1513](../../src/page_view.c#L1513)
+
+```c
+typedef struct pv_container_reg
+```
+
+Document-order registry of flex/grid container nodes, so the runs of one container share a stable id.
+
+---
+
+<a id="pv_box_reg"></a>
+
+### `pv_box_reg`
+
+`struct` | [src/page_view.c:1613](../../src/page_view.c#L1613)
+
+```c
+typedef struct pv_box_reg
+```
+
+Box engine (Hito 23b-8 Step D): document-order registry of box-carrying block nodes plus each box's resolved definition (decoration + parent link).
+
+A box's block_id is its index here, so the painter can reconstruct the box tree.
+
+---
+
+<a id="pv_ptrmap"></a>
+
+### `pv_ptrmap`
+
+`struct` | [src/page_view.c:1965](../../src/page_view.c#L1965)
+
+```c
+typedef struct pv_ptrmap
+```
+
+A small open-addressed map pointer -> int: the per-element verdict on a generated box (-2 display:none, -1 no box, >= 0 its box id), so the pseudo's cascade runs ONCE per element even though every text node of it asks.
+
+Grows by doubling at half load; OOM leaves it as is (the answer is recomputed).
+
+---
+
+<a id="pv_var_node"></a>
+
+### `pv_var_node`
+
+`struct` | [src/page_view.c:2031](../../src/page_view.c#L2031)
+
+```c
+typedef struct pv_var_node
+```
+
+One element's custom-property node: its own winning `--name` table and the chain it inherited.
+
+Allocated only for elements that declare something; every other element shares its parent's chain pointer.
+
+---
+
+<a id="pv_style_cache"></a>
+
+### `pv_style_cache`
+
+`struct` | [src/page_view.c:2036](../../src/page_view.c#L2036)
+
+```c
+typedef struct pv_style_cache
+```
+
+---
+
+<a id="pv_flow_reg"></a>
+
+### `pv_flow_reg`
+
+`struct` | [src/page_view.c:2650](../../src/page_view.c#L2650)
+
+```c
+struct pv_flow_reg;
+```
+
+Nonzero when cell (a td/th) is a WALKED cell of a FLOW table (defined after the flow-table machinery below): such a cell's content shares its ROW's line, so the cell must not carry its own box (the painter flushes the line at every box transition -- a per-cell box would split the row).
+
+---
+
+<a id="sz_fill"></a>
+
+### `sz_fill`
+
+`struct` | [src/page_view.c:3301](../../src/page_view.c#L3301)
+
+```c
+typedef struct sz_fill
+```
+
+---
+
+<a id="pv_root_els"></a>
+
+### `pv_root_els`
+
+`struct` | [src/page_view.c:3557](../../src/page_view.c#L3557)
+
+```c
+typedef struct pv_root_els
+```
+
+The document's <html> and <body> elements (either may be NULL): the roots a custom-property rule must match to feed the page-global var() table.
+
+---
+
+<a id="form_rec"></a>
+
+### `form_rec`
+
+`struct` | [src/page_view.c:3623](../../src/page_view.c#L3623)
+
+```c
+typedef struct form_rec
+```
+
+One <form> seen in document order: its grouping id is its index. action is an owned NUL-terminated copy of the raw action attribute (or NULL); method is GET unless method="post".
+
+---
+
+<a id="form_table"></a>
+
+### `form_table`
+
+`struct` | [src/page_view.c:3629](../../src/page_view.c#L3629)
+
+```c
+typedef struct form_table
+```
+
+---
+
+<a id="pv_flow_reg"></a>
+
+### `pv_flow_reg`
+
+`struct` | [src/page_view.c:3985](../../src/page_view.c#L3985)
+
+```c
+typedef struct pv_flow_reg
+```
+
+Cache of the per-table flow decision (a table subtree is scanned at most once, anti-DoS) PLUS the style context the table machinery needs to answer "what role does this element play".
+
+Registry full => grid (the previous behaviour), bounded fail-closed.
+
+sheet/cache ride here rather than as two more parameters on nine helpers: the
+table role of an element is its computed `display` (CSS 2.1 17.2), so resolving it
+needs the cascade, and the memo cache is what keeps that from being quadratic.
+
+---
+
+## Type Aliases
+
+<a id="cols"></a>
+
+### `cols`
+
+`type_alias` | [src/page_view.c:1102](../../src/page_view.c#L1102)
+
+```c
+typedef struct pv_cont_info { int id, display, gap, justify, cols;
+```
+
+Nearest-container info attached to a run, plus the flex per-item values (Stage 3): grow/shrink/basis/order come from the ITEM element (the container's direct child on the run's ancestor chain); direction from the container itself.
+
+Unset sentinels: grow/shrink -1, basis/order CSS_LEN_UNSET, direction 0. [`item`](src.css.c.md#item) is that same direct child (NULL = anonymous item: text directly inside the container); pv_build maps it to the run's cont_item ordinal so inline fragments of one child share one item.
+
+---
+
+<a id="mb"></a>
+
+### `mb`
+
+`type_alias` | [src/page_view.c:1195](../../src/page_view.c#L1195)
+
+```c
+typedef struct pv_box_info { int l, r, w, center, mt, mb;
+```
+
+Author box model resolved for a run: horizontal placement (l/r insets, w cap, centered) from the nearest block ancestor that declares a box, plus the leaf block's own vertical-margin override (mt/mb, or PV_LEN_UNSET).
+
+---
+
+<a id="chain"></a>
+
+### `chain`
+
+`type_alias` | [src/page_view.c:2031](../../src/page_view.c#L2031)
+
+```c
+typedef struct pv_var_node { cvr_chain chain;
+```
+
+One element's custom-property node: its own winning `--name` table and the chain it inherited.
+
+Allocated only for elements that declare something; every other element shares its parent's chain pointer.
+
+---
+
+## Functions
+
+<a id="positions"></a>
+
+### `positions`
+
+`function` | [src/page_view.c:134](../../src/page_view.c#L134)
+
+```c
+* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);
+```
+
+**Returns:** `*`
+
+---
+
+<a id="pv_new"></a>
+
+### `pv_new`
+
+`function` | [src/page_view.c:332](../../src/page_view.c#L332)
+
+```c
+pv_view *pv_new(void)
+```
+
+Allocates an empty view (used by the IPC deserialiser to rebuild a view on the receiving side).
+
+Returns NULL on allocation failure.
+
+**Returns:** `pv_view *`
+
+> **Inherited:** Documentation from [`pv_new`](#pv_new) (include/page_view.h:805).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_append"></a>
+
+### `pv_append`
+
+`function` | [src/page_view.c:336](../../src/page_view.c#L336)
+
+```c
+pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break, const char *text, const char *href)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `kind` | `pv_kind` |  |  |
+| `heading` | `int` |  |  |
+| `block_break` | `int` |  |  |
+| `text` | `char *` |  |  |
+| `href` | `char *` |  |  |
+
+**Returns:** `pv_status`
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_append_image"></a>
+
+### `pv_append_image`
+
+`function` | [src/page_view.c:370](../../src/page_view.c#L370)
+
+```c
+pv_status pv_append_image(pv_view *v, int heading, int block_break, const char *alt, const char *src, int w, int h)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `heading` | `int` |  |  |
+| `block_break` | `int` |  |  |
+| `alt` | `char *` |  |  |
+| `src` | `char *` |  |  |
+| `w` | `int` |  |  |
+| `h` | `int` |  |  |
+
+**Returns:** `pv_status`
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_append_input"></a>
+
+### `pv_append_input`
+
+`function` | [src/page_view.c:400](../../src/page_view.c#L400)
+
+```c
+pv_status pv_append_input(pv_view *v, int heading, int block_break, pv_input_type input_type, const char *text, const char *name, const char *value, const char *action, int form_id, int method)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `heading` | `int` |  |  |
+| `block_break` | `int` |  |  |
+| `input_type` | `pv_input_type` |  |  |
+| `text` | `char *` |  |  |
+| `name` | `char *` |  |  |
+| `value` | `char *` |  |  |
+| `action` | `char *` |  |  |
+| `form_id` | `int` |  |  |
+| `method` | `int` |  |  |
+
+**Returns:** `pv_status`
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_append_video"></a>
+
+### `pv_append_video`
+
+`function` | [src/page_view.c:440](../../src/page_view.c#L440)
+
+```c
+pv_status pv_append_video(pv_view *v, int heading, int block_break, const char *alt, const char *src, const char *poster, int w, int h)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `heading` | `int` |  |  |
+| `block_break` | `int` |  |  |
+| `alt` | `char *` |  |  |
+| `src` | `char *` |  |  |
+| `poster` | `char *` |  |  |
+| `w` | `int` |  |  |
+| `h` | `int` |  |  |
+
+**Returns:** `pv_status`
+
+*Called by:* [`pv_build_styled`](#pv_build_styled), [`run`](src.tab.c.md#run)
+
+---
+
+<a id="pv_append_svg"></a>
+
+### `pv_append_svg`
+
+`function` | [src/page_view.c:476](../../src/page_view.c#L476)
+
+```c
+pv_status pv_append_svg(pv_view *v, int heading, int block_break, const char *markup, int w, int h)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `heading` | `int` |  |  |
+| `block_break` | `int` |  |  |
+| `markup` | `char *` |  |  |
+| `w` | `int` |  |  |
+| `h` | `int` |  |  |
+
+**Returns:** `pv_status`
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_emphasis"></a>
+
+### `pv_set_emphasis`
+
+`function` | [src/page_view.c:505](../../src/page_view.c#L505)
+
+```c
+void pv_set_emphasis(pv_view *v, int bold, int italic)
+```
+
+Sets the inline emphasis flags (bold from <b>/<strong>/<th>, italic from <i>/<em>) on the most recently appended run.
+
+No-op on an empty or NULL view. Both append helpers default a new run to bold=0, italic=0. Emphasis is structure (which glyph weight/slant), not author styling, so it is carried by default and is not gated by caps.css.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `bold` | `int` |  |  |
+| `italic` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_emphasis`](#pv_set_emphasis) (include/page_view.h:856).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_indent"></a>
+
+### `pv_set_indent`
+
+`function` | [src/page_view.c:512](../../src/page_view.c#L512)
+
+```c
+void pv_set_indent(pv_view *v, int indent)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `indent` | `int` |  |  |
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_color"></a>
+
+### `pv_set_color`
+
+`function` | [src/page_view.c:517](../../src/page_view.c#L517)
+
+```c
+void pv_set_color(pv_view *v, int fg_rgb)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `fg_rgb` | `int` |  |  |
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_bgcolor"></a>
+
+### `pv_set_bgcolor`
+
+`function` | [src/page_view.c:522](../../src/page_view.c#L522)
+
+```c
+void pv_set_bgcolor(pv_view *v, int bg_rgb)
+```
+
+Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most recently appended run.
+
+No-op when the view is empty or NULL. Both append helpers default a new run's bg_rgb to -1. background-color does not inherit in CSS; in this flat model pv_build resolves it from the nearest ancestor that sets one, so a block's background shows behind its text runs.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `bg_rgb` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_bgcolor`](#pv_set_bgcolor) (include/page_view.h:871).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_text_style"></a>
+
+### `pv_set_text_style`
+
+`function` | [src/page_view.c:527](../../src/page_view.c#L527)
+
+```c
+void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration)
+```
+
+Sets the author text presentation (text_align as a css_align, font_scale as a font-size percent or 0, font_abs as 1 when that percent is of the 16px root, line_scale as a line-height percent or 0, text_decoration as an OR of CSS_DECO_* / 0 none / -1 unset) on the most recently appended run.
+
+No-op on an empty or NULL view. The append helpers default text_align/font_scale/ font_abs/line_scale to 0 and text_decoration to -1. Like author colors, render_doc applies these only with caps.css.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `text_align` | `int` |  |  |
+| `font_scale` | `int` |  |  |
+| `font_abs` | `int` |  |  |
+| `line_scale` | `int` |  |  |
+| `text_decoration` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_text_style`](#pv_set_text_style) (include/page_view.h:880).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_grad_text"></a>
+
+### `pv_set_grad_text`
+
+`function` | [src/page_view.c:538](../../src/page_view.c#L538)
+
+```c
+void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)
+```
+
+Sets the gradient-text fill (grad_text_*) verbatim on the most recently appended run. n < 2 is a no-op (no gradient).
+
+Used by the IPC read path, which receives the already-resolved fields; the build path engages gradient text through pv_set_text_ext's bg-clip:text + transparent-fill rule.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `n` | `int` |  |  |
+| `angle` | `int` |  |  |
+| `c4` | `int *` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_grad_text`](#pv_set_grad_text) (include/page_view.h:951).
+
+---
+
+<a id="pv_set_text_ext"></a>
+
+### `pv_set_text_ext`
+
+`function` | [src/page_view.c:546](../../src/page_view.c#L546)
+
+```c
+void pv_set_text_ext(pv_view *v, const pv_text_ext *e)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `e` | `pv_text_ext *` |  |  |
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="ignored"></a>
+
+### `ignored`
+
+`function` | [src/page_view.c:579](../../src/page_view.c#L579)
+
+```c
+* source is ignored (fail-visible: never invisible text from half a * pattern). A real text-...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `pattern` | `fail-visible: never invisible text from half a *` |  |  |
+
+**Returns:** `* source is`
+
+---
+
+<a id="pv_set_container"></a>
+
+### `pv_set_container`
+
+`function` | [src/page_view.c:594](../../src/page_view.c#L594)
+
+```c
+void pv_set_container(pv_view *v, int cont_id, int cont_display, int cont_gap, int cont_justify, int cont_cols, int cont_wrap, int cont_row_gap, int cont_align_items)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `cont_id` | `int` |  |  |
+| `cont_display` | `int` |  |  |
+| `cont_gap` | `int` |  |  |
+| `cont_justify` | `int` |  |  |
+| `cont_cols` | `int` |  |  |
+| `cont_wrap` | `int` |  |  |
+| `cont_row_gap` | `int` |  |  |
+| `cont_align_items` | `int` |  |  |
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_row_span"></a>
+
+### `pv_set_row_span`
+
+`function` | [src/page_view.c:609](../../src/page_view.c#L609)
+
+```c
+void pv_set_row_span(pv_view *v, int row_span)
+```
+
+Sets the container's grid track sizes and this run's ITEM column span on the most recently appended run (2026-07-11). col_w points at up to PV_GRID_TRACKS encoded sizes (0 auto / >0 px / <0 fr x100; NULL or n <= 0 leaves all-auto); col_span is the item's `grid-column: span N` (<= 0 = 1).
+
+No-op on an empty or NULL view. The append helpers default everything to 0.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `row_span` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_row_span`](#pv_set_row_span) (include/page_view.h:967).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_grid_area"></a>
+
+### `pv_set_grid_area`
+
+`function` | [src/page_view.c:613](../../src/page_view.c#L613)
+
+```c
+void pv_set_grid_area(pv_view *v, int row_start, int col_start)
+```
+
+Sets the last run's RESOLVED named-grid cell (-1, -1 = auto-placed).
+
+See spec/grid_areas.md; the name matching happens in pv_build, never downstream.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `row_start` | `int` |  |  |
+| `col_start` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_grid_area`](#pv_set_grid_area) (include/page_view.h:971).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_grid"></a>
+
+### `pv_set_grid`
+
+`function` | [src/page_view.c:620](../../src/page_view.c#L620)
+
+```c
+void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `col_w` | `int *` |  |  |
+| `n` | `int` |  |  |
+| `col_span` | `int` |  |  |
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_grid_rows"></a>
+
+### `pv_set_grid_rows`
+
+`function` | [src/page_view.c:630](../../src/page_view.c#L630)
+
+```c
+void pv_set_grid_rows(pv_view *v, int grid_rows)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `grid_rows` | `int` |  |  |
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_cont_box"></a>
+
+### `pv_set_cont_box`
+
+`function` | [src/page_view.c:634](../../src/page_view.c#L634)
+
+```c
+void pv_set_cont_box(pv_view *v, int cont_box_id)
+```
+
+Sets the last run's cont_box_id (the box enclosing its container's items; -1 = none).
+
+No-op on an empty view.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `cont_box_id` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_cont_box`](#pv_set_cont_box) (include/page_view.h:981).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_flex"></a>
+
+### `pv_set_flex`
+
+`function` | [src/page_view.c:638](../../src/page_view.c#L638)
+
+```c
+void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int flex_align_self)
+```
+
+Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1 unset), basis (px / CSS_LEN_AUTO / CSS_LEN_UNSET), order (CSS_LEN_UNSET unset) and align-self (css_align_kw, 0 unset), plus the CONTAINER's flex-direction (css_flex_direction, 0 unset -> row).
+
+No-op on an empty or NULL view. The append helpers default them to the unset sentinels.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `flex_grow` | `int` |  |  |
+| `flex_shrink` | `int` |  |  |
+| `flex_basis` | `int` |  |  |
+| `flex_order` | `int` |  |  |
+| `flex_direction` | `int` |  |  |
+| `flex_align_self` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_flex`](#pv_set_flex) (include/page_view.h:990).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_flex_mauto"></a>
+
+### `pv_set_flex_mauto`
+
+`function` | [src/page_view.c:650](../../src/page_view.c#L650)
+
+```c
+void pv_set_flex_mauto(pv_view *v, int mauto)
+```
+
+Stamps the last run's PV_MAUTO_* bits (other bits dropped).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `mauto` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_flex_mauto`](#pv_set_flex_mauto) (include/page_view.h:993).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_cont_item"></a>
+
+### `pv_set_cont_item`
+
+`function` | [src/page_view.c:656](../../src/page_view.c#L656)
+
+```c
+void pv_set_cont_item(pv_view *v, int cont_item)
+```
+
+Sets the container-item ordinal on the most recently appended run (-1 = none).
+
+No-op on an empty or NULL view; the append helpers default cont_item to -1.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `cont_item` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_cont_item`](#pv_set_cont_item) (include/page_view.h:997).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_float"></a>
+
+### `pv_set_float`
+
+`function` | [src/page_view.c:661](../../src/page_view.c#L661)
+
+```c
+void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int float_mr, int float_mr_pct, int float_oid, int float_oside, int float_oml, int float_oml_pct, int float_omr, int float_omr_pct)
+```
+
+Float layout setter for the most recently appended run (spec/float.md): float_side (css_float), float_id (floated-element group id, -1 = none), float_clear (css_clear), plus the float FOUNDER's own horizontal margins (float_ml/ml_pct/mr/mr_pct, signed; spec/float.md §7c.1), plus the OUTERMOST founder (float_oid/oside/oml/oml_pct/ omr/omr_pct; float_oid -1 = nearest IS outermost; spec/float.md §7d.1).
+
+No-op on an empty or NULL view; the append helpers default to 0 / -1 / 0 / 0 / 0 / 0 / 0 and -1 / 0 / 0 / 0 / 0 / 0.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `float_side` | `int` |  |  |
+| `float_id` | `int` |  |  |
+| `float_clear` | `int` |  |  |
+| `float_ml` | `int` |  |  |
+| `float_ml_pct` | `int` |  |  |
+| `float_mr` | `int` |  |  |
+| `float_mr_pct` | `int` |  |  |
+| `float_oid` | `int` |  |  |
+| `float_oside` | `int` |  |  |
+| `float_oml` | `int` |  |  |
+| `float_oml_pct` | `int` |  |  |
+| `float_omr` | `int` |  |  |
+| `float_omr_pct` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_float`](#pv_set_float) (include/page_view.h:1006).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_box"></a>
+
+### `pv_set_box`
+
+`function` | [src/page_view.c:683](../../src/page_view.c#L683)
+
+```c
+void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb)
+```
+
+Sets the author box model on the most recently appended run (left/right insets, width cap, centered flag, and top/bottom margin overrides in px; box_mt/box_mb may be PV_LEN_UNSET).
+
+No-op on an empty or NULL view. The append helpers default box_l/r/w/center to 0 and box_mt/box_mb to PV_LEN_UNSET.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `box_l` | `int` |  |  |
+| `box_r` | `int` |  |  |
+| `box_w` | `int` |  |  |
+| `box_center` | `int` |  |  |
+| `box_mt` | `int` |  |  |
+| `box_mb` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_box`](#pv_set_box) (include/page_view.h:1016).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_box_pct"></a>
+
+### `pv_set_box_pct`
+
+`function` | [src/page_view.c:695](../../src/page_view.c#L695)
+
+```c
+void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct)
+```
+
+Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the most recently appended run.
+
+No-op on an empty or NULL view; the append helpers default box_w_pct to 0.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `box_w_pct` | `int` |  |  |
+| `box_l_pct` | `int` |  |  |
+| `box_r_pct` | `int` |  |  |
+| `box_mt_pct` | `int` |  |  |
+| `box_mb_pct` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_box_pct`](#pv_set_box_pct) (include/page_view.h:1022).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_box_maxw"></a>
+
+### `pv_set_box_maxw`
+
+`function` | [src/page_view.c:706](../../src/page_view.c#L706)
+
+```c
+void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct)
+```
+
+Sets the max-width cap (px half, 0 = none; per-mille half, 0 = none) on the most recently appended run.
+
+No-op on an empty or NULL view; appends default to 0/0.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `box_mw` | `int` |  |  |
+| `box_mw_pct` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_box_maxw`](#pv_set_box_maxw) (include/page_view.h:1027).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_ua_tag"></a>
+
+### `pv_set_ua_tag`
+
+`function` | [src/page_view.c:713](../../src/page_view.c#L713)
+
+```c
+void pv_set_ua_tag(pv_view *v, int ua_tag)
+```
+
+Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its nearest block-level ancestor).
+
+Out-of-range values fail closed to BX_UA_NONE, i.e. no user-agent margin. No-op on an empty view. spec/box_style.md 4d.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `ua_tag` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_ua_tag`](#pv_set_ua_tag) (include/page_view.h:977).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_node_id"></a>
+
+### `pv_set_node_id`
+
+`function` | [src/page_view.c:719](../../src/page_view.c#L719)
+
+```c
+void pv_set_node_id(pv_view *v, dom_node_id node_id)
+```
+
+Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of the source element.
+
+No-op on an empty or NULL view; the append helpers default node_id to DOM_NODE_NONE.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `node_id` | `dom_node_id` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_node_id`](#pv_set_node_id) (include/page_view.h:1032).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_block_id"></a>
+
+### `pv_set_block_id`
+
+`function` | [src/page_view.c:724](../../src/page_view.c#L724)
+
+```c
+void pv_set_block_id(pv_view *v, int block_id)
+```
+
+Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of the box-carrying block it belongs to (-1 = none).
+
+No-op on an empty or NULL view; the append helpers default block_id to -1. The box's decoration is on pv_box_def.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `block_id` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_block_id`](#pv_set_block_id) (include/page_view.h:1037).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_own_box"></a>
+
+### `pv_set_own_box`
+
+`function` | [src/page_view.c:729](../../src/page_view.c#L729)
+
+```c
+void pv_set_own_box(pv_view *v, int box_id)
+```
+
+Records the replaced element's own box def index on the last appended run.
+
+See pv_run.own_box_id for why this is separate from pv_set_block_id.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `box_id` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_own_box`](#pv_set_own_box) (include/page_view.h:1041).
+
+---
+
+<a id="pv_set_oof"></a>
+
+### `pv_set_oof`
+
+`function` | [src/page_view.c:734](../../src/page_view.c#L734)
+
+```c
+void pv_set_oof(pv_view *v, int oof)
+```
+
+Records out-of-flow subtree membership on the last appended run (see pv_run.oof_subtree).
+
+No-op on an empty or NULL view.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `oof` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_oof`](#pv_set_oof) (include/page_view.h:1045).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_input_checked"></a>
+
+### `pv_set_input_checked`
+
+`function` | [src/page_view.c:739](../../src/page_view.c#L739)
+
+```c
+void pv_set_input_checked(pv_view *v, int checked)
+```
+
+Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most recently appended run.
+
+No-op on an empty or NULL view.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `checked` | `int` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_input_checked`](#pv_set_input_checked) (include/page_view.h:1065).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_set_input_select_opts"></a>
+
+### `pv_set_input_select_opts`
+
+`function` | [src/page_view.c:744](../../src/page_view.c#L744)
+
+```c
+void pv_set_input_select_opts(pv_view *v, const char *select_opts)
+```
+
+Sets the <select> options string ("opt||label||opt||label") on the most recently appended run, taking an owned copy.
+
+No-op on a NULL view or empty cap.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `select_opts` | `char *` |  |  |
+
+> **Inherited:** Documentation from [`pv_set_input_select_opts`](#pv_set_input_select_opts) (include/page_view.h:1069).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_add_cont_def"></a>
+
+### `pv_add_cont_def`
+
+`function` | [src/page_view.c:752](../../src/page_view.c#L752)
+
+```c
+pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `d` | `pv_cont_def *` |  |  |
+
+**Returns:** `pv_status`
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_cont_count"></a>
+
+### `pv_cont_count`
+
+`function` | [src/page_view.c:765](../../src/page_view.c#L765)
+
+```c
+size_t pv_cont_count(const pv_view *v)
+```
+
+pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] (i == a cont_id) or NULL when out of range / NULL view.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+
+**Returns:** `size_t`
+
+> **Inherited:** Documentation from [`pv_cont_count`](#pv_cont_count) (include/page_view.h:1060).
+
+---
+
+<a id="pv_cont_at"></a>
+
+### `pv_cont_at`
+
+`function` `const` | [src/page_view.c:769](../../src/page_view.c#L769)
+
+```c
+const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `i` | `size_t` |  |  |
+
+**Returns:** `pv_cont_def *`
+
+---
+
+<a id="pv_add_box_def"></a>
+
+### `pv_add_box_def`
+
+`function` | [src/page_view.c:774](../../src/page_view.c#L774)
+
+```c
+pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `d` | `pv_box_def *` |  |  |
+
+**Returns:** `pv_status`
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_free"></a>
+
+### `pv_free`
+
+`function` | [src/page_view.c:787](../../src/page_view.c#L787)
+
+```c
+void pv_free(pv_view *v)
+```
+
+Idempotent; safe on NULL and safe to call twice.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+
+> **Inherited:** Documentation from [`pv_free`](#pv_free) (include/page_view.h:1072).
+
+*Called by:* [`pv_build_styled`](#pv_build_styled)
+
+---
+
+<a id="pv_count"></a>
+
+### `pv_count`
+
+`function` | [src/page_view.c:804](../../src/page_view.c#L804)
+
+```c
+size_t pv_count(const pv_view *v)
+```
+
+Read accessors.
+
+NULL-safe.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+
+**Returns:** `size_t`
+
+> **Inherited:** Documentation from [`pv_count`](#pv_count) (include/page_view.h:1075).
+
+---
+
+<a id="pv_at"></a>
+
+### `pv_at`
+
+`function` `const` | [src/page_view.c:808](../../src/page_view.c#L808)
+
+```c
+const pv_run *pv_at(const pv_view *v, size_t i)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `i` | `size_t` |  |  |
+
+**Returns:** `pv_run *`
+
+---
+
+<a id="pv_box_count"></a>
+
+### `pv_box_count`
+
+`function` | [src/page_view.c:813](../../src/page_view.c#L813)
+
+```c
+size_t pv_box_count(const pv_view *v)
+```
+
+Box tree accessors (Step D). pv_box_count is the number of box definitions; pv_box_at returns boxes[i] (i == a block_id) or NULL when out of range / NULL.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+
+**Returns:** `size_t`
+
+> **Inherited:** Documentation from [`pv_box_count`](#pv_box_count) (include/page_view.h:1080).
+
+---
+
+<a id="pv_box_at"></a>
+
+### `pv_box_at`
+
+`function` `const` | [src/page_view.c:817](../../src/page_view.c#L817)
+
+```c
+const pv_box_def *pv_box_at(const pv_view *v, size_t i)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `pv_view *` |  |  |
+| `i` | `size_t` |  |  |
+
+**Returns:** `pv_box_def *`
+
+---
+
+<a id="resolves"></a>
+
+### `resolves`
+
+`function` | [src/page_view.c:889](../../src/page_view.c#L889)
+
+```c
+* box_tree already resolves (R4/R8) had nothing to place -- every badge/close * button/tooltip w...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `R8` | `R4/` |  |  |
+
+**Returns:** `* box_tree already`
+
+---
+
+<a id="paints"></a>
+
+### `paints`
+
+`function` | [src/page_view.c:939](../../src/page_view.c#L939)
+
+```c
+* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas * vacías"). Comment a...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `vacías` | `spec/page_view.md §4 "Cajas * "` |  |  |
+
+**Returns:** `* for it so its box reserves space and`
+
+---
+
+<a id="content"></a>
+
+### `content`
+
+`function` | [src/page_view.c:1024](../../src/page_view.c#L1024)
+
+```c
+* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `run` | `the script would` |  |  |
+| `hidden` | `so the * fallback is` |  |  |
+
+**Returns:** `* a <noscript> ancestor also suppresses`
+
+---
+
+<a id="address"></a>
+
+### `address`
+
+`function` | [src/page_view.c:1092](../../src/page_view.c#L1092)
+
+```c
+* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <= BT_MAX_POSITIONED, "PV_MAX_BOXES must fit the out-of-flow solver's per-box arrays");
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `h` | `include/box_tree.` |  |  |
+
+**Returns:** `* registry accepts must be one the solver can`
+
+---
+
+<a id="child"></a>
+
+### `child`
+
+`function` | [src/page_view.c:1100](../../src/page_view.c#L1100)
+
+```c
+* child (NULL = anonymous item: text directly inside the container);
+```
+
+**Returns:** `*`
+
+---
+
+<a id="it"></a>
+
+### `it`
+
+`function` | [src/page_view.c:1211](../../src/page_view.c#L1211)
+
+```c
+* it (they inherit in CSS). list_style drives the <li> marker (structural);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `CSS` | `they inherit in` |  |  |
+
+**Returns:** `*`
+
+---
+
+<a id="pv_content_hidden"></a>
+
+### `pv_content_hidden`
+
+`function` | [src/page_view.c:1215](../../src/page_view.c#L1215)
+
+```c
+int pv_content_hidden(int box_hidden, int run_visibility)
+```
+
+CSS 2.1 11.2, pure: see the contract in page_view.h.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `box_hidden` | `int` |  |  |
+| `run_visibility` | `int` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="pv_text_ext_reset"></a>
+
+### `pv_text_ext_reset`
+
+`function` | [src/page_view.c:1221](../../src/page_view.c#L1221)
+
+```c
+void pv_text_ext_reset(pv_text_ext *e)
+```
+
+Initialises every field of *e to its "unset" sentinel.
+
+NULL-safe.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `e` | `pv_text_ext *` |  |  |
+
+> **Inherited:** Documentation from [`pv_text_ext_reset`](#pv_text_ext_reset) (include/page_view.h:930).
+
+---
+
+<a id="trying"></a>
+
+### `trying`
+
+`function` | [src/page_view.c:1623](../../src/page_view.c#L1623)
+
+```c
+* a real page passes without trying (slashdot's front page saturates it), and past * it box_reg_...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `it` | `slashdot's front page saturates` |  |  |
+
+**Returns:** `* a real page passes without`
+
+---
+
+<a id="here"></a>
+
+### `here`
+
+`function` | [src/page_view.c:1752](../../src/page_view.c#L1752)
+
+```c
+* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3 section 5.1) is content height * with indefinite available space, i.e. `auto`: letting
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `content` | `the engine sizes boxes by their` |  |  |
+
+**Returns:** `* always 0`
+
+---
+
+<a id="glyphs"></a>
+
+### `glyphs`
+
+`function` | [src/page_view.c:1790](../../src/page_view.c#L1790)
+
+```c
+* glyphs (the runs carry it as their fill source);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `source` | `the runs carry it as their fill` |  |  |
+
+**Returns:** `*`
+
+---
+
+<a id="size"></a>
+
+### `size`
+
+`function` | [src/page_view.c:2285](../../src/page_view.c#L2285)
+
+```c
+* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */ static void app...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `px` |  |  |  |
+
+**Returns:** `* viewBox natural`
+
+---
+
+<a id="builder"></a>
+
+### `builder`
+
+`function` | [src/page_view.c:2305](../../src/page_view.c#L2305)
+
+```c
+* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box * (the ...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `hand` | `no containing width in` |  |  |
+
+**Returns:** `* unresolvable in this flat`
+
+---
+
+<a id="paints"></a>
+
+### `paints`
+
+`function` | [src/page_view.c:2568](../../src/page_view.c#L2568)
+
+```c
+* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas vacías"). * * A chil...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `vacías` | `spec/page_view.md §4 "Cajas "` |  |  |
+
+**Returns:** `* for it so its box reserves space and`
+
+---
+
+<a id="outermost"></a>
+
+### `outermost`
+
+`function` | [src/page_view.c:2874](../../src/page_view.c#L2874)
+
+```c
+* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `float` | `single-level` |  |  |
+| `path` | `old` |  |  |
+
+**Returns:** `* nearest IS the`
+
+---
+
+<a id="opens"></a>
+
+### `opens`
+
+`function` | [src/page_view.c:2923](../../src/page_view.c#L2923)
+
+```c
+* painter applies it when the box opens (band/shared context) — seeding * it onto ru...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `context` | `band/shared` |  |  |
+
+**Returns:** `* painter applies it when the box`
+
+---
+
+<a id="margins"></a>
+
+### `margins`
+
+`function` | [src/page_view.c:2951](../../src/page_view.c#L2951)
+
+```c
+* margins (boxdef_from_style) and the painter applies them when * it ope...
+```
+
+**Returns:** `*`
+
+---
+
+<a id="container"></a>
+
+### `container`
+
+`function` | [src/page_view.c:3069](../../src/page_view.c#L3069)
+
+```c
+* membership in this container (and none in any container further out, * since it is out of flow with respect to those too), while the * container itself is still registered by the in-flow siblings that DO * belong to it. Without this an absolutely positioned sibling ate a * full item share and starved the growing items beside it. */ if (reg != NULL && (is_real || is_anon) && !oof_below)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `out` | `and none in any container further` |  |  |
+| `too` | `* since it is out of flow with respect to those` |  |  |
+
+**Returns:** `* membership in this`
+
+*Calls:* [`fx_grid_areas_parse`](src.flex_layout.c.md#fx_grid_areas_parse)
+
+---
+
+<a id="walk"></a>
+
+### `walk`
+
+`function` | [src/page_view.c:3157](../../src/page_view.c#L3157)
+
+```c
+* far on this walk (they are all inside this element). */ /* The innermo...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `element` | `they are all inside this` |  |  |
+
+**Returns:** `* far on this`
+
+*Calls:* [`fx_grid_area_rect`](src.flex_layout.c.md#fx_grid_area_rect), [`fx_grid_areas_parse`](src.flex_layout.c.md#fx_grid_areas_parse)
+
+---
+
+<a id="float"></a>
+
+### `float`
+
+`function` | [src/page_view.c:3250](../../src/page_view.c#L3250)
+
+```c
+* genuinely nested float (oid != id) takes the deferred-column path. */ if (cont->float_oid =...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `oid` |  | `id` |  |
+
+**Returns:** `* genuinely nested`
+
+---
+
+<a id="present"></a>
+
+### `present`
+
+`function` | [src/page_view.c:3375](../../src/page_view.c#L3375)
+
+```c
+* when no width descriptors are present (density-only or bare URLs). */ static void srcset_best_u...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `URLs` | `density-only or bare` |  |  |
+
+**Returns:** `* when no width descriptors are`
+
+---
+
+<a id="dimensions"></a>
+
+### `dimensions`
+
+`function` | [src/page_view.c:3516](../../src/page_view.c#L3516)
+
+```c
+* viewport dimensions (data: inline detection, <picture> <source> scanning). */ static void srcse...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `detection` | `data: inline` |  |  |
+| `scanning` | `<picture> <source>` |  |  |
+
+**Returns:** `* viewport`
+
+*Called by:* [`BX_TAG_NAME_MAX`](include.box_style.h.md#bx_tag_name_max)
+
+---
+
+<a id="attributes"></a>
+
+### `attributes`
+
+`function` | [src/page_view.c:3575](../../src/page_view.c#L3575)
+
+```c
+* carries those attributes (spec/css.md, "Root matcher"). */ static int root_els_match(void *ctx,...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `md` | `spec/css.` |  |  |
+| `matcher` | `"Root "` |  |  |
+
+**Returns:** `* carries those`
+
+*Calls:* [`cch_element_matches`](include.css_chain.h.md#cch_element_matches)
+
+---
+
+<a id="string"></a>
+
+### `string`
+
+`function` | [src/page_view.c:3586](../../src/page_view.c#L3586)
+
+```c
+* Returns a heap string (caller frees) or NULL when neither carries a class — * NULL simply mean...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `frees` | `caller` |  |  |
+
+**Returns:** `* Returns a heap`
+
+---
+
+<a id="links"></a>
+
+### `links`
+
+`function` | [src/page_view.c:4131](../../src/page_view.c#L4131)
+
+```c
+* its links (the Hacker News case: every story link lives inside a <td>), so the * caller flows ...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `td` | `the Hacker News case: every story link lives inside a < >` |  |  |
+
+**Returns:** `* its`
+
+---
+
+<a id="table"></a>
+
+### `table`
+
+`function` | [src/page_view.c:4173](../../src/page_view.c#L4173)
+
+```c
+* FLOW table (multi-link: walked so its links survive) do NOT suppress their * content -- their ...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `survive` | `multi-link: walked so its links` |  |  |
+
+**Returns:** `* FLOW`
+
+---
+
+<a id="pv_build"></a>
+
+### `pv_build`
+
+`function` | [src/page_view.c:4317](../../src/page_view.c#L4317)
+
+```c
+pv_status pv_build(const hp_document *doc, pv_view **out)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `doc` | `hp_document *` |  |  |
+| `out` | `pv_view **` |  |  |
+
+**Returns:** `pv_status`
+
+*Calls:* [`pv_build_full`](#pv_build_full)
+
+---
+
+<a id="pv_build_ex"></a>
+
+### `pv_build_ex`
+
+`function` | [src/page_view.c:4321](../../src/page_view.c#L4321)
+
+```c
+pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `doc` | `hp_document *` |  |  |
+| `js_enabled` | `int` |  |  |
+| `out` | `pv_view **` |  |  |
+
+**Returns:** `pv_status`
+
+*Calls:* [`pv_build_full`](#pv_build_full)
+
+---
+
+<a id="pv_build_full"></a>
+
+### `pv_build_full`
+
+`function` | [src/page_view.c:4325](../../src/page_view.c#L4325)
+
+```c
+pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader, int prefers_dark, pv_view **out)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `doc` | `hp_document *` |  |  |
+| `js_enabled` | `int` |  |  |
+| `reader` | `int` |  |  |
+| `prefers_dark` | `int` |  |  |
+| `out` | `pv_view **` |  |  |
+
+**Returns:** `pv_status`
+
+*Calls:* [`pv_build_styled`](#pv_build_styled)
+
+*Called by:* [`pv_build`](#pv_build), [`pv_build_ex`](#pv_build_ex)
+
+---
+
+<a id="pv_build_styled"></a>
+
+### `pv_build_styled`
+
+`function` | [src/page_view.c:4442](../../src/page_view.c#L4442)
+
+```c
+pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, int prefers_dark, const char *extern_css, size_t extern_len, int viewport_w, pv_view **out)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `doc` | `hp_document *` |  |  |
+| `js_enabled` | `int` |  |  |
+| `reader` | `int` |  |  |
+| `prefers_dark` | `int` |  |  |
+| `extern_css` | `char *` |  |  |
+| `extern_len` | `size_t` |  |  |
+| `viewport_w` | `int` |  |  |
+| `out` | `pv_view **` |  |  |
+
+**Returns:** `pv_status`
+
+*Calls:* [`css_style.element`](include.css.h.md#css_style-element), [`hp_document_root`](include.html_parse.h.md#hp_document_root), [`mem_contains_ci`](include.util.h.md#mem_contains_ci), [`css_parse_scoped`](src.css.c.md#css_parse_scoped), [`cch_element_style`](src.css_chain.c.md#cch_element_style), [`pv_add_box_def`](#pv_add_box_def), [`pv_add_cont_def`](#pv_add_cont_def), [`pv_append`](#pv_append), [`pv_append_image`](#pv_append_image), [`pv_append_input`](#pv_append_input), [`pv_append_svg`](#pv_append_svg), [`pv_append_video`](#pv_append_video) and 27 more
+
+*Called by:* [`pv_build_full`](#pv_build_full)
+
+---
+
+<a id="control"></a>
+
+### `control`
+
+`function` | [src/page_view.c:4864](../../src/page_view.c#L4864)
+
+```c
+* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `2026-07-10` |  |  |  |
+
+**Returns:** `* caret_color tints the caret of the focused`
+
+*Called by:* [`PV_BG_URL_MAX`](include.page_view.h.md#pv_bg_url_max)
+
+---
+
+<a id="px"></a>
+
+### `px`
+
+`function` | [src/page_view.c:5015](../../src/page_view.c#L5015)
+
+```c
+* the viewBox extent for intrinsic px (slashdot social-icon balloon). */ if (iw <...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `balloon` | `slashdot social-icon` |  |  |
+
+**Returns:** `* the viewBox extent for intrinsic`
+
+---
+
+<a id="height"></a>
+
+### `height`
+
+`function` | [src/page_view.c:5082](../../src/page_view.c#L5082)
+
+```c
+* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `panes` | `jkanime's donghuas/ovas` |  |  |
+
+**Returns:** `* times its`
+
+---
+
+<a id="block_id"></a>
+
+### `block_id`
+
+`function` | [src/page_view.c:5192](../../src/page_view.c#L5192)
+
+```c
+* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it falls * into flow as a full-width row. Gated on img_oof, so every * in-flow image keep
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `d` | `spec/float.md §7` |  |  |
+| `rail` | `slashdot` |  |  |
+
+**Returns:** `without an * anchor the layout layer cannot position it and it falls * into flow as a full-width row. Gated on img_oof, so every * in-flow image keep`
+
+---
+
+<a id="url"></a>
+
+### `URL`
+
+`function` | [src/page_view.c:5323](../../src/page_view.c#L5323)
+
+```c
+* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);
+```
+
+**Returns:** `* path resolves it against the page`
+
+---
+
+<a id="flow"></a>
+
+### `flow`
+
+`function` | [src/page_view.c:5745](../../src/page_view.c#L5745)
+
+```c
+* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through it. Subtree-wide: the run * may sit deep inside an undecorated abspos wrapper, where
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `CSS` |  |  |  |
+
+**Returns:** `* it is removed from`
+
+---
+
+<a id="engine"></a>
+
+### `engine`
+
+`function` | [src/page_view.c:5845](../../src/page_view.c#L5845)
+
+```c
+* layout engine (contiguous item gather) drops every cell onto its own row and * a 2-col...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `gather` | `contiguous item` |  |  |
+
+**Returns:** `* layout`
+
+---
+
+<a id="line"></a>
+
+### `line`
+
+`function` | [src/page_view.c:5854](../../src/page_view.c#L5854)
+
+```c
+* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `runs` | `Wikipedia: 412 such` | `~11000px of blank page` |  |
+
+**Returns:** `* to paint an empty`
+
+---
+
+<a id="appended"></a>
+
+### `appended`
+
+`function` | [src/page_view.c:5900](../../src/page_view.c#L5900)
+
+```c
+* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */ if (cont.fl...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `stays` | `so THIS run's brk` |  |  |
+
+**Returns:** `* AFTER the run is`
+
+---
+
+<a id="pv_css_drops"></a>
+
+### `pv_css_drops`
+
+`function` | [src/page_view.c:5980](../../src/page_view.c#L5980)
+
+```c
+pv_status pv_css_drops(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len, int viewport_w, css_drop_log *log)
+```
+
+Diagnostic counterpart to pv_build_styled: same document, same collected CSS text, same @media/root-scope context -- but the sheet is thrown away and only the parser's drop log is kept.
+
+Nothing here can influence a render; see spec/css_drops.md for why the cause split (unknown property vs rejected value) is the whole point of the instrument.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `doc` | `hp_document *` |  |  |
+| `prefers_dark` | `int` |  |  |
+| `extern_css` | `char *` |  |  |
+| `extern_len` | `size_t` |  |  |
+| `viewport_w` | `int` |  |  |
+| `log` | `css_drop_log *` |  |  |
+
+**Returns:** `pv_status`
+
+---
+
+## Macros
+
+<a id="_posix_c_source"></a>
+
+### `_POSIX_C_SOURCE`
+
+`macro` | [src/page_view.c:10](../../src/page_view.c#L10)
+
+```c
+#define _POSIX_C_SOURCE
+```
+
+---
+
+<a id="pv_max_dim"></a>
+
+### `PV_MAX_DIM`
+
+`macro` | [src/page_view.c:46](../../src/page_view.c#L46)
+
+```c
+#define PV_MAX_DIM
+```
+
+Upper bound for a parsed <img> declared dimension.
+
+A declared size only feeds the tracking-pixel heuristic and the layout hint, so absurd values are clamped rather than trusted; this also keeps parse_dim free of integer overflow.
+
+---
+
+<a id="pv_font_rel_min"></a>
+
+### `PV_FONT_REL_MIN`
+
+`macro` | [src/page_view.c:51](../../src/page_view.c#L51)
+
+```c
+#define PV_FONT_REL_MIN
+```
+
+Bounds for the font-size relative chain (spec/css.md "font-size: absolute vs relative").
+
+Same window the css module clamps a single declaration to (percent 10..1000), so a chain can never resolve outside what one declaration could.
+
+---
+
+<a id="pv_font_rel_max"></a>
+
+### `PV_FONT_REL_MAX`
+
+`macro` | [src/page_view.c:52](../../src/page_view.c#L52)
+
+```c
+#define PV_FONT_REL_MAX
+```
+
+---
+
+<a id="pv_font_chain_max"></a>
+
+### `PV_FONT_CHAIN_MAX`
+
+`macro` | [src/page_view.c:58](../../src/page_view.c#L58)
+
+```c
+#define PV_FONT_CHAIN_MAX
+```
+
+Deepest ancestor chain walked to compute an inherited font-size.
+
+Bounds a stack buffer against an attacker-chosen nesting depth; past it the walk falls back to the CSS initial size (a wrong `em` very deep inside a pathological document, never a stack overflow).
+
+---
+
+<a id="pv_font_pct_min"></a>
+
+### `PV_FONT_PCT_MIN`
+
+`macro` | [src/page_view.c:59](../../src/page_view.c#L59)
+
+```c
+#define PV_FONT_PCT_MIN
+```
+
+---
+
+<a id="pv_font_pct_max"></a>
+
+### `PV_FONT_PCT_MAX`
+
+`macro` | [src/page_view.c:60](../../src/page_view.c#L60)
+
+```c
+#define PV_FONT_PCT_MAX
+```
+
+---
+
+<a id="pv_node_map_init_cap"></a>
+
+### `PV_NODE_MAP_INIT_CAP`
+
+`macro` | [src/page_view.c:271](../../src/page_view.c#L271)
+
+```c
+#define PV_NODE_MAP_INIT_CAP
+```
+
+Keystone (Stage 0): document-order element identity. page_view builds the same pre-order element walk that dom_build uses, mapping each element pointer to its 0-based id.
+
+Runs then stamp the id of their source element so the GUI can map a painted block back to the live DOM node for event dispatch.
+
+---
+
+<a id="pv_color_token_max"></a>
+
+### `PV_COLOR_TOKEN_MAX`
+
+`macro` | [src/page_view.c:1042](../../src/page_view.c#L1042)
+
+```c
+#define PV_COLOR_TOKEN_MAX
+```
+
+Largest color token value extracted from markup.
+
+A longer value is not a valid color and is ignored (fail closed).
+
+*Calls:* [`cc_pack`](include.css_color.h.md#cc_pack), [`cc_parse`](src.css_color.c.md#cc_parse)
+
+---
+
+<a id="pv_max_containers"></a>
+
+### `PV_MAX_CONTAINERS`
+
+`macro` | [src/page_view.c:1080](../../src/page_view.c#L1080)
+
+```c
+#define PV_MAX_CONTAINERS
+```
+
+---
+
+<a id="pv_max_grid_cols"></a>
+
+### `PV_MAX_GRID_COLS`
+
+`macro` | [src/page_view.c:1081](../../src/page_view.c#L1081)
+
+```c
+#define PV_MAX_GRID_COLS
+```
+
+---
+
+<a id="pv_max_boxes"></a>
+
+### `PV_MAX_BOXES`
+
+`macro` | [src/page_view.c:1089](../../src/page_view.c#L1089)
+
+```c
+#define PV_MAX_BOXES
+```
+
+Anti-DoS bound on the BOX registry (spec/page_view.md).
+
+Distinct from PV_MAX_CONTAINERS: a flex/grid container is a rare element, while a box is generated by anything with a border, a background, padding or a vertical margin, which on a real page is most of the document. Sized so no ordinary page is truncated -- the front page of a news site registers a few hundred -- while a page built to exhaust memory still stops.
+
+---
+
+<a id="pv_max_inline_row_items"></a>
+
+### `PV_MAX_INLINE_ROW_ITEMS`
+
+`macro` | [src/page_view.c:2391](../../src/page_view.c#L2391)
+
+```c
+#define PV_MAX_INLINE_ROW_ITEMS
+```
+
+True iff element `p` lays its children out as a ROW of inline-level boxes: it has at least one element child, EVERY element child is display:inline-block, and it carries no text of its own beyond whitespace.
+
+Such a parent -- a nav bar, a badge strip, a button group, a tag list -- flows its children side by side shrink-wrapped to their content, which is exactly the flex-row model the presentation layer already implements, so page_view stamps it as an ANONYMOUS flex container. Without this every inline-block child opened a full-width block box and they stacked vertically, one per line.
+
+Deliberately narrow: MIXED content (text sitting next to an inline-block) is left
+alone, because that needs real inline layout inside a line box, not a flex row --
+turning it into a row would reflow the surrounding sentence. Bounded so a hostile
+page cannot build an unbounded row; past the cap the presentation layer would
+degrade the container to plain flow anyway.
+
+---
+
+<a id="pv_textless_depth_max"></a>
+
+### `PV_TEXTLESS_DEPTH_MAX`
+
+`macro` | [src/page_view.c:2594](../../src/page_view.c#L2594)
+
+```c
+#define PV_TEXTLESS_DEPTH_MAX
+```
+
+Depth cap for subtree_has_own_text: attacker-controlled nesting fails open to "has text", i.e. the pre-existing behavior (no entry emission).
+
+---
+
+<a id="pv_max_style_bytes"></a>
+
+### `PV_MAX_STYLE_BYTES`
+
+`macro` | [src/page_view.c:4218](../../src/page_view.c#L4218)
+
+```c
+#define PV_MAX_STYLE_BYTES
+```
+
+Upper bound on concatenated <style> text (anti-DoS): a pathological document cannot make the parser allocate without limit.
+
+One value for inline and fetched sheets alike (freedom_config.h explains why it is not smaller).
+
+---

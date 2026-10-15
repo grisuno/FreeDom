@@ -12,34 +12,36 @@
 **Total Files Parsed:** 262 | **Total Symbols Extracted:** 6260 | **Total Imports:** 1486
  | **Resolved Imports:** 507
 
-<!-- ranking_model: v1.0 | weights: {ppr:0.45,auth:0.2,test:0.15,doc:0.1,fresh:0.1} | alpha:0.85 | commit:82e48da | date:2026-07-18 -->
+<!-- ranking_model: v1.0 | weights: {ppr:0.45,auth:0.2,test:0.15,doc:0.1,fresh:0.1} | alpha:0.85 | commit:4f3af6c | date:2026-07-18 -->
 
 
 ## Table of Contents
 
 1. [Statistics Dashboard](#statistics-dashboard)
 2. [Architectural Layers](#architectural-layers)
-3. [Ranked Context](#ranked-context)
-4. [God Nodes](#god-nodes)
-5. [Community Analysis](#community-analysis)
-6. [Surprising Connections](#surprising-connections)
-7. [Suggested Questions](#suggested-questions)
-8. [Force-Graph Explorer](#force-graph-explorer)
-9. [Corpus Analytics](#corpus-analytics)
-10. [Taint Propagation Map](#taint-propagation-map)
-11. [Hotspot Analysis](#hotspot-analysis)
-12. [Dependency Cycles](#dependency-cycles)
-13. [Change Impact Analysis](#change-impact-analysis)
-14. [Architecture Violations](#architecture-violations)
-15. [Suggested Linting Rules](#suggested-linting-rules)
-16. [Dataflow Analysis](#dataflow-analysis)
-17. [Concept Graph](#concept-graph)
-18. [Orphans](#orphans)
-19. [Query Recipes](#query-recipes)
-20. [Structural Knowledge Map](#structural-knowledge-map)
-21. [UML Class Diagram](#uml-class-diagram)
-22. [Code Property Graph](#code-property-graph)
-23. [Architecture Reference](#architecture-reference)
+3. [Architecture Overview](#architecture-overview)
+4. [Execution Flows](#execution-flows)
+5. [Ranked Context](#ranked-context)
+6. [God Nodes](#god-nodes)
+7. [Community Analysis](#community-analysis)
+8. [Surprising Connections](#surprising-connections)
+9. [Suggested Questions](#suggested-questions)
+10. [Force-Graph Explorer](#force-graph-explorer)
+11. [Corpus Analytics](#corpus-analytics)
+12. [Taint Propagation Map](#taint-propagation-map)
+13. [Hotspot Analysis](#hotspot-analysis)
+14. [Dependency Cycles](#dependency-cycles)
+15. [Change Impact Analysis](#change-impact-analysis)
+16. [Architecture Violations](#architecture-violations)
+17. [Suggested Linting Rules](#suggested-linting-rules)
+18. [Dataflow Analysis](#dataflow-analysis)
+19. [Concept Graph](#concept-graph)
+20. [Orphans](#orphans)
+21. [Query Recipes](#query-recipes)
+22. [Structural Knowledge Map](#structural-knowledge-map)
+23. [UML Class Diagram](#uml-class-diagram)
+24. [Code Property Graph](#code-property-graph)
+25. [Architecture Reference](#architecture-reference)
     - [C (173 files)](#c-173-files)
     - [H (79 files)](#h-79-files)
     - [PY (5 files)](#py-5-files)
@@ -175,6 +177,413 @@ Auto-detected from path patterns, naming conventions, and imported frameworks.
 - `test_css_length.c` (c, 25 symbols)
 - `test_css_mq.c` (c, 7 symbols)
 - *... and 54 more*
+
+---
+
+## Architecture Overview
+
+12 components stacked in 7 dependency tiers (weighted Eades-Lin-Smyth ordering: arrows point from dependent to dependency, top to bottom). Labels are import counts, thick arrows the top quartile; 12 transitively implied edges are omitted. Dashed red arrows are upward dependencies: the smallest set of imports that closes every cycle and breaks the layering. Cyan components hold entry points. Interactive version: `readmenator-apidocs/index.html#/flows`.
+
+Upward dependencies to fix first: `include: browser_ui` -> `include: page_view` (6 imports); `src` -> `include: page_view` (3 imports); `gui` -> `src` (2 imports); `src` -> `include: browser_ui` (1 imports); `include: css` -> `include: page_view` (1 imports); `include: text_shape` -> `src` (1 imports); `include: text_shape` -> `include: css` (1 imports); `include: text_shape` -> `include: page_view` (1 imports); `gui` -> `include: page_view` (1 imports); `include: secure_fetch` -> `src` (1 imports)
+
+```mermaid
+flowchart TB
+    classDef cycle fill:#1f1530,stroke:#f472b6,color:#fce7f3,stroke-width:2px;
+    classDef default fill:#111827,stroke:#38bdf8,color:#e5e7eb;
+    classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
+    subgraph lane_0["Tier 1 - entry / orchestration"]
+        direction LR
+        n_c3["include: page_view<br/>21 files, 654 symbols<br/>Core / utility"]:::cycle
+        n_d_tools["tools<br/>6 files, 50 symbols<br/>Core / utility"]:::default
+        n_d__root_["(root)<br/>6 files, 3 symbols<br/>Core / utility"]:::entry
+    end
+    subgraph lane_1["Tier 2"]
+        direction LR
+        n_c1["include: browser_ui<br/>32 files, 933 symbols<br/>Core / utility"]:::cycle
+    end
+    subgraph lane_2["Tier 3"]
+        direction LR
+        n_c5["include: local_store<br/>11 files, 371 symbols<br/>Core / utility"]:::cycle
+        n_c8["include: download<br/>6 files, 37 symbols<br/>Core / utility"]:::default
+    end
+    subgraph lane_3["Tier 4"]
+        direction LR
+        n_c0["src<br/>46 files, 799 symbols<br/>Core / utility"]:::cycle
+    end
+    subgraph lane_4["Tier 5"]
+        direction LR
+        n_c6["gui<br/>13 files, 141 symbols<br/>Presentation / entry"]:::cycle
+        n_c7["include: secure_fetch<br/>6 files, 199 symbols<br/>Core / utility"]:::cycle
+        n_c9["include: import_map<br/>3 files, 34 symbols<br/>Core / utility"]:::default
+    end
+    subgraph lane_5["Tier 6"]
+        direction LR
+        n_c2["include: css<br/>28 files, 783 symbols<br/>Core / utility"]:::cycle
+    end
+    subgraph lane_6["Tier 7 - foundation"]
+        direction LR
+        n_c4["include: text_shape<br/>15 files, 137 symbols<br/>Core / utility"]:::cycle
+    end
+    n_c0 -->|"1"| n_c6
+    n_c0 -->|"2"| n_c7
+    n_c0 -->|"1"| n_c9
+    n_c1 ==>|"3"| n_c5
+    n_c1 -->|"2"| n_c8
+    n_c2 -->|"1"| n_c4
+    n_c3 ==>|"6"| n_c1
+    n_c5 -->|"1"| n_c0
+    n_c6 ==>|"3"| n_c2
+    n_c1 <-.-|"1 upward"| n_c0
+    n_c3 <-.-|"3 upward"| n_c0
+    n_c3 <-.-|"6 upward"| n_c1
+    n_c3 <-.-|"1 upward"| n_c2
+    n_c0 <-.-|"1 upward"| n_c4
+    n_c2 <-.-|"1 upward"| n_c4
+    n_c3 <-.-|"1 upward"| n_c4
+    n_c0 <-.-|"2 upward"| n_c6
+    n_c3 <-.-|"1 upward"| n_c6
+    n_c0 <-.-|"1 upward"| n_c7
+    linkStyle 9,10,11,12,13,14,15,16,17,18 stroke:#f87171,stroke-width:2px;
+    n_c3 ~~~ n_c1
+    n_c1 ~~~ n_c5
+    n_c5 ~~~ n_c0
+    n_c0 ~~~ n_c6
+    n_c6 ~~~ n_c2
+    n_c2 ~~~ n_c4
+```
+
+---
+
+## Execution Flows
+
+Entry points are scored from `__main__` guards, `main` functions, entry-style names and files, and call-graph sources. Each flow walks resolved calls in call-site order (depth <= 4, <= 40 steps); numbers give the call order, dashed arrows revisit an already expanded callee, red arrows are recursion. Interactive version with zoom and per-node docs: `readmenator-apidocs/index.html#/flows`.
+
+### `freedom_view.main`
+
+`gui/freedom_view.c:37`, score 11: `main` in a compiled-language file; entry-style name `main`.
+
+Call tree:
+
+```mermaid
+flowchart LR
+    classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
+    classDef external fill:#1a1530,stroke:#a78bfa,color:#ede9fe;
+    n_gui_freedom_view_c__main["freedom_view.main<br/>freedom_view.c:37"]:::entry
+    n_src_html_parse_c__hp_parse["html_parse.hp_parse<br/>html_parse.c:375"]:::external
+    n_src_html_parse_c__hp_config_default["html_parse.hp_config_default<br/>html_parse.c:357"]:::external
+    n_src_html_parse_c__hp_validate_input["html_parse.hp_validate_input<br/>html_parse.c:365"]:::external
+    n_src_html_parse_c__strip_scripts["html_parse.strip_scripts<br/>html_parse.c:60"]:::external
+    n_src_html_parse_c__node_next["html_parse.node_next<br/>}#59; /* --- helpers --- static char *dup_bytes(...<br/>html_parse.c:37"]:::external
+    n_src_html_parse_c__node_is_script["html_parse.node_is_script<br/>html_parse.c:54"]:::external
+    n_src_html_parse_c__strip_event_handlers["html_parse.strip_event_handlers<br/>html_parse.c:334"]:::external
+    n_src_html_parse_c__attr_is_event_handler["html_parse.attr_is_event_handler<br/>html_parse.c:47"]:::external
+    n_include_html_parse_h__hp_get_title["html_parse.hp_get_title<br/>html_parse.h:70"]:::external
+    n_include_html_parse_h__hp_extract_text["html_parse.hp_extract_text<br/>Owned, NUL-terminated buffers#59; release with h...<br/>html_parse.h:69"]:::external
+    n_include_html_parse_h__hp_document_free["html_parse.hp_document_free<br/>(ASCII case-insensitive) and NOT the token #quot;a...<br/>html_parse.h:136"]:::external
+    n_gui_ui_render_c__ui_run_text_view["ui_render.ui_run_text_view<br/>ui_render.c:410"]:::external
+    n_gui_ui_render_c__destroy_buffer["ui_render.destroy_buffer<br/>ui_render.c:122"]:::external
+    n_include_html_parse_h__hp_free["html_parse.hp_free<br/>number found.<br/>html_parse.h:133"]:::external
+    n_gui_freedom_view_c__main -.->|"recursion"| n_gui_freedom_view_c__main
+    n_gui_freedom_view_c__main -->|"1"| n_src_html_parse_c__hp_parse
+    n_src_html_parse_c__hp_parse -.->|"recursion"| n_src_html_parse_c__hp_parse
+    n_src_html_parse_c__hp_parse -->|"1"| n_src_html_parse_c__hp_config_default
+    n_src_html_parse_c__hp_config_default -.->|"recursion"| n_src_html_parse_c__hp_config_default
+    n_src_html_parse_c__hp_parse -->|"2"| n_src_html_parse_c__hp_validate_input
+    n_src_html_parse_c__hp_validate_input -.->|"recursion"| n_src_html_parse_c__hp_validate_input
+    n_src_html_parse_c__hp_parse -->|"3"| n_src_html_parse_c__strip_scripts
+    n_src_html_parse_c__strip_scripts -->|"1"| n_src_html_parse_c__node_next
+    n_src_html_parse_c__strip_scripts -->|"2"| n_src_html_parse_c__node_is_script
+    n_src_html_parse_c__hp_parse -->|"4"| n_src_html_parse_c__strip_event_handlers
+    n_src_html_parse_c__strip_event_handlers -.-> n_src_html_parse_c__node_next
+    n_src_html_parse_c__strip_event_handlers -->|"1"| n_src_html_parse_c__attr_is_event_handler
+    n_gui_freedom_view_c__main -->|"2"| n_include_html_parse_h__hp_get_title
+    n_include_html_parse_h__hp_get_title -.->|"recursion"| n_include_html_parse_h__hp_get_title
+    n_gui_freedom_view_c__main -->|"3"| n_include_html_parse_h__hp_extract_text
+    n_include_html_parse_h__hp_extract_text -.->|"recursion"| n_include_html_parse_h__hp_extract_text
+    n_gui_freedom_view_c__main -->|"4"| n_include_html_parse_h__hp_document_free
+    n_include_html_parse_h__hp_document_free -.->|"recursion"| n_include_html_parse_h__hp_document_free
+    n_gui_freedom_view_c__main -->|"5"| n_gui_ui_render_c__ui_run_text_view
+    n_gui_ui_render_c__ui_run_text_view -.->|"recursion"| n_gui_ui_render_c__ui_run_text_view
+    n_gui_ui_render_c__ui_run_text_view -->|"1"| n_gui_ui_render_c__destroy_buffer
+    n_gui_freedom_view_c__main -->|"6"| n_include_html_parse_h__hp_free
+    n_include_html_parse_h__hp_free -.->|"recursion"| n_include_html_parse_h__hp_free
+    linkStyle 0,2,4,6,14,16,18,20,23 stroke:#f87171,stroke-width:2px;
+```
+
+Cross-file sequence:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant p_gui_freedom_view_c as freedom_view.c
+    participant p_src_html_parse_c as html_parse.c
+    participant p_include_html_parse_h as html_parse.h
+    participant p_gui_ui_render_c as ui_render.c
+    p_gui_freedom_view_c->>p_src_html_parse_c: hp_parse()
+    p_gui_freedom_view_c->>p_include_html_parse_h: hp_get_title()
+    p_gui_freedom_view_c->>p_include_html_parse_h: hp_extract_text()
+    p_gui_freedom_view_c->>p_include_html_parse_h: hp_document_free()
+    p_gui_freedom_view_c->>p_gui_ui_render_c: ui_run_text_view()
+    p_gui_freedom_view_c->>p_include_html_parse_h: hp_free()
+```
+
+### `freedom.main`
+
+`src/freedom.c:1167`, score 11: `main` in a compiled-language file; entry-style name `main`.
+
+Call tree:
+
+```mermaid
+flowchart LR
+    classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
+    classDef external fill:#1a1530,stroke:#a78bfa,color:#ede9fe;
+    n_src_freedom_c__main["freedom.main<br/>freedom.c:1167"]:::entry
+    n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2581"]:::external
+    n_include_prefs_h__free["prefs.free<br/>prefs.h:71"]:::external
+    n_src_prefs_c__prefs_format["prefs.prefs_format<br/>prefs.c:183"]:::external
+    n_src_prefs_c__prefs_parse["prefs.prefs_parse<br/>prefs.c:241"]:::external
+    n_src_prefs_c__prefs_free["prefs.prefs_free<br/>prefs.c:74"]:::external
+    n_src_prefs_c__prefs_init["prefs.prefs_init<br/>prefs.c:66"]:::external
+    n_src_prefs_c__url_valid["prefs.url_valid<br/>A representable URL: 1..PREFS_MAX_URL-1 bytes...<br/>prefs.c:26"]:::external
+    n_src_prefs_c__bookmark_push["prefs.bookmark_push<br/>Appends a cleaned bookmark.<br/>prefs.c:91"]:::external
+    n_src_prefs_c__history_push_back["prefs.history_push_back<br/>Appends a history entry at the BACK preservin...<br/>prefs.c:109"]:::external
+    n_src_prefs_c__apply_kv["prefs.apply_kv<br/>} for (size_t i = 0#59; i #lt; p-#gt;history_len#59; ++i)...<br/>prefs.c:225"]:::external
+    n_gui_browser_ui_c__prepare_fetch["browser_ui.prepare_fetch<br/>Builds cfg for url and applies the pre-fetch...<br/>browser_ui.c:1673"]:::external
+    n_include_textfield_h__tf_text["textfield.tf_text<br/>/* Deletes the byte before the cursor (no-op...<br/>textfield.h:66"]:::external
+    n_gui_browser_ui_c__host_from_url["browser_ui.host_from_url<br/>A plain-http URL whose realm self-authenticat...<br/>browser_ui.c:1035"]:::external
+    n_gui_browser_ui_c__is_https_url["browser_ui.is_https_url<br/>browser_ui.c:1020"]:::external
+    n_src_hostblock_c__hb_check["hostblock.hb_check<br/>hostblock.c:193"]:::external
+    n_src_hostblock_c__lower["hostblock.lower<br/>hostblock.c:107"]:::external
+    n_src_hostblock_c__table_contains["hostblock.table_contains<br/>hostblock.c:92"]:::external
+    n_include_anti_fp_h__domain["anti_fp.domain<br/>anti_fp.h:91"]:::external
+    n_include_browser_h__browser_is_exception["browser.browser_is_exception<br/>Index of the current entry within its documen...<br/>browser.h:99"]:::external
+    n_src_browser_c__browser_add_exception["browser.browser_add_exception<br/>browser.c:472"]:::external
+    n_src_browser_c__browser_set_url_bar["browser.browser_set_url_bar<br/>browser.c:178"]:::external
+    n_src_browser_c__browser_commit_url_bar["browser.browser_commit_url_bar<br/>browser.c:190"]:::external
+    n_src_browser_c__browser_url_bar_insert["browser.browser_url_bar_insert<br/>browser.c:326"]:::external
+    n_src_browser_c__browser_url_bar_backspace["browser.browser_url_bar_backspace<br/>browser.c:341"]:::external
+    n_src_browser_c__browser_url_bar_delete["browser.browser_url_bar_delete<br/>browser.c:355"]:::external
+    n_src_browser_c__browser_url_bar_move_cursor["browser.browser_url_bar_move_cursor<br/>browser.c:366"]:::external
+    n_src_browser_c__browser_url_bar_clear["browser.browser_url_bar_clear<br/>browser.c:400"]:::external
+    n_src_browser_c__browser_url_bar_extend_cursor["browser.browser_url_bar_extend_cursor<br/>browser.c:376"]:::external
+    n_src_browser_c__browser_url_bar_set_cursor["browser.browser_url_bar_set_cursor<br/>browser.c:385"]:::external
+    n_src_browser_c__browser_url_bar_select_all["browser.browser_url_bar_select_all<br/>browser.c:393"]:::external
+    n_gui_browser_ui_c__hb_is_allowlisted["browser_ui.hb_is_allowlisted<br/>browser_ui.c:1627"]:::external
+    n_include_request_policy_h__rp_host_of["request_policy.rp_host_of<br/>Lowercased host of an absolute URL into out.<br/>request_policy.h:30"]:::external
+    n_src_freedom_c__main -.->|"recursion"| n_src_freedom_c__main
+    n_src_freedom_c__main -->|"1"| n_gui_browser_ui_c__strcmp
+    n_gui_browser_ui_c__strcmp -.->|"recursion"| n_gui_browser_ui_c__strcmp
+    n_gui_browser_ui_c__strcmp -->|"1"| n_include_prefs_h__free
+    n_include_prefs_h__free -->|"1"| n_src_prefs_c__prefs_format
+    n_src_prefs_c__prefs_format -.->|"recursion"| n_src_prefs_c__prefs_format
+    n_include_prefs_h__free -->|"2"| n_src_prefs_c__prefs_parse
+    n_src_prefs_c__prefs_parse -.->|"recursion"| n_src_prefs_c__prefs_parse
+    n_src_prefs_c__prefs_parse -->|"1"| n_src_prefs_c__prefs_free
+    n_src_prefs_c__prefs_parse -->|"2"| n_src_prefs_c__prefs_init
+    n_src_prefs_c__prefs_parse -->|"3"| n_src_prefs_c__url_valid
+    n_src_prefs_c__prefs_parse -->|"4"| n_src_prefs_c__bookmark_push
+    n_src_prefs_c__prefs_parse -->|"5"| n_src_prefs_c__history_push_back
+    n_src_prefs_c__prefs_parse -->|"6"| n_src_prefs_c__apply_kv
+    n_gui_browser_ui_c__strcmp -->|"2"| n_gui_browser_ui_c__prepare_fetch
+    n_gui_browser_ui_c__prepare_fetch -->|"1"| n_include_textfield_h__tf_text
+    n_include_textfield_h__tf_text -.->|"recursion"| n_include_textfield_h__tf_text
+    n_gui_browser_ui_c__prepare_fetch -->|"2"| n_gui_browser_ui_c__host_from_url
+    n_gui_browser_ui_c__host_from_url -->|"1"| n_gui_browser_ui_c__is_https_url
+    n_gui_browser_ui_c__prepare_fetch -->|"3"| n_src_hostblock_c__hb_check
+    n_src_hostblock_c__hb_check -.->|"recursion"| n_src_hostblock_c__hb_check
+    n_src_hostblock_c__hb_check -->|"1"| n_src_hostblock_c__lower
+    n_src_hostblock_c__hb_check -->|"2"| n_src_hostblock_c__table_contains
+    n_gui_browser_ui_c__prepare_fetch -->|"4"| n_include_anti_fp_h__domain
+    n_gui_browser_ui_c__prepare_fetch -->|"5"| n_include_browser_h__browser_is_exception
+    n_include_browser_h__browser_is_exception -.->|"recursion"| n_include_browser_h__browser_is_exception
+    n_include_browser_h__browser_is_exception -->|"1"| n_src_browser_c__browser_add_exception
+    n_include_browser_h__browser_is_exception -->|"2"| n_src_browser_c__browser_set_url_bar
+    n_include_browser_h__browser_is_exception -->|"3"| n_src_browser_c__browser_commit_url_bar
+    n_include_browser_h__browser_is_exception -->|"4"| n_src_browser_c__browser_url_bar_insert
+    n_include_browser_h__browser_is_exception -->|"5"| n_src_browser_c__browser_url_bar_backspace
+    n_include_browser_h__browser_is_exception -->|"6"| n_src_browser_c__browser_url_bar_delete
+    n_include_browser_h__browser_is_exception -->|"7"| n_src_browser_c__browser_url_bar_move_cursor
+    n_include_browser_h__browser_is_exception -->|"8"| n_src_browser_c__browser_url_bar_clear
+    n_include_browser_h__browser_is_exception -->|"9"| n_src_browser_c__browser_url_bar_extend_cursor
+    n_include_browser_h__browser_is_exception -->|"10"| n_src_browser_c__browser_url_bar_set_cursor
+    n_include_browser_h__browser_is_exception -->|"11"| n_src_browser_c__browser_url_bar_select_all
+    n_gui_browser_ui_c__prepare_fetch -->|"6"| n_gui_browser_ui_c__hb_is_allowlisted
+    n_gui_browser_ui_c__hb_is_allowlisted -.->|"recursion"| n_gui_browser_ui_c__hb_is_allowlisted
+    n_gui_browser_ui_c__hb_is_allowlisted -->|"1"| n_include_request_policy_h__rp_host_of
+    linkStyle 0,2,5,7,16,20,25,38 stroke:#f87171,stroke-width:2px;
+```
+
+Cross-file sequence:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant p_src_freedom_c as freedom.c
+    participant p_gui_browser_ui_c as browser_ui.c
+    participant p_include_prefs_h as prefs.h
+    participant p_src_prefs_c as prefs.c
+    participant p_include_textfield_h as textfield.h
+    participant p_src_hostblock_c as hostblock.c
+    participant p_include_anti_fp_h as anti_fp.h
+    participant p_include_browser_h as browser.h
+    participant p_src_browser_c as browser.c
+    participant p_include_request_policy_h as request_policy.h
+    p_src_freedom_c->>p_gui_browser_ui_c: strcmp()
+    p_gui_browser_ui_c->>p_include_prefs_h: free()
+    p_include_prefs_h->>p_src_prefs_c: prefs_format()
+    p_include_prefs_h->>p_src_prefs_c: prefs_parse()
+    p_gui_browser_ui_c->>p_include_textfield_h: tf_text()
+    p_gui_browser_ui_c->>p_src_hostblock_c: hb_check()
+    p_gui_browser_ui_c->>p_include_anti_fp_h: domain()
+    p_gui_browser_ui_c->>p_include_browser_h: browser_is_exception()
+    p_include_browser_h->>p_src_browser_c: browser_add_exception()
+    p_include_browser_h->>p_src_browser_c: browser_set_url_bar()
+    p_include_browser_h->>p_src_browser_c: browser_commit_url_bar()
+    p_include_browser_h->>p_src_browser_c: browser_url_bar_insert()
+    p_include_browser_h->>p_src_browser_c: browser_url_bar_backspace()
+    p_include_browser_h->>p_src_browser_c: browser_url_bar_delete()
+    p_include_browser_h->>p_src_browser_c: browser_url_bar_move_cursor()
+    p_include_browser_h->>p_src_browser_c: browser_url_bar_clear()
+    p_include_browser_h->>p_src_browser_c: browser_url_bar_extend_cursor()
+    p_include_browser_h->>p_src_browser_c: browser_url_bar_set_cursor()
+    p_include_browser_h->>p_src_browser_c: browser_url_bar_select_all()
+    p_gui_browser_ui_c->>p_include_request_policy_h: rp_host_of()
+```
+
+### `gen_psl.main`
+
+`tools/gen_psl.c:67`, score 11: `main` in a compiled-language file; entry-style name `main`.
+
+Call tree:
+
+```mermaid
+flowchart LR
+    classDef default fill:#111827,stroke:#38bdf8,color:#e5e7eb;
+    classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
+    classDef external fill:#1a1530,stroke:#a78bfa,color:#ede9fe;
+    n_tools_gen_psl_c__main["gen_psl.main<br/>gen_psl.c:67"]:::entry
+    n_tools_gen_psl_c__ascii_lower["gen_psl.ascii_lower<br/>/* Sorts then drops adjacent duplicates in pl...<br/>gen_psl.c:55"]:::default
+    n_tools_gen_psl_c__vec_push["gen_psl.vec_push<br/>gen_psl.c:27"]:::default
+    n_tools_gen_psl_c__sort_unique["gen_psl.sort_unique<br/>v-#gt;cap = v-#gt;cap ?<br/>gen_psl.c:43"]:::default
+    n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2581"]:::external
+    n_include_prefs_h__free["prefs.free<br/>prefs.h:71"]:::external
+    n_src_prefs_c__prefs_format["prefs.prefs_format<br/>prefs.c:183"]:::external
+    n_src_prefs_c__prefs_parse["prefs.prefs_parse<br/>prefs.c:241"]:::external
+    n_gui_browser_ui_c__prepare_fetch["browser_ui.prepare_fetch<br/>Builds cfg for url and applies the pre-fetch...<br/>browser_ui.c:1673"]:::external
+    n_include_textfield_h__tf_text["textfield.tf_text<br/>/* Deletes the byte before the cursor (no-op...<br/>textfield.h:66"]:::external
+    n_gui_browser_ui_c__host_from_url["browser_ui.host_from_url<br/>A plain-http URL whose realm self-authenticat...<br/>browser_ui.c:1035"]:::external
+    n_src_hostblock_c__hb_check["hostblock.hb_check<br/>hostblock.c:193"]:::external
+    n_include_anti_fp_h__domain["anti_fp.domain<br/>anti_fp.h:91"]:::external
+    n_include_browser_h__browser_is_exception["browser.browser_is_exception<br/>Index of the current entry within its documen...<br/>browser.h:99"]:::external
+    n_gui_browser_ui_c__hb_is_allowlisted["browser_ui.hb_is_allowlisted<br/>browser_ui.c:1627"]:::external
+    n_include_tls_impersonate_h__ti_should_impersonate["tls_impersonate.ti_should_impersonate<br/>The double opt-in + user-flag gate (pure).<br/>tls_impersonate.h:56"]:::external
+    n_src_net_realm_c__nr_classify_url["net_realm.nr_classify_url<br/>net_realm.c:68"]:::external
+    n_include_net_realm_h__nr_realm_name["net_realm.nr_realm_name<br/>1 iff plain http:// is acceptable for this re...<br/>net_realm.h:69"]:::external
+    n_gui_browser_ui_c__clear_doc["browser_ui.clear_doc<br/>Releases the structured render of the previou...<br/>browser_ui.c:1246"]:::external
+    n_gui_browser_ui_c__free_inputs["browser_ui.free_inputs<br/>are not text-editable -- they are tracked via...<br/>browser_ui.c:1094"]:::external
+    n_gui_browser_ui_c__free_images["browser_ui.free_images<br/>static int input_is_editable(int input_type)...<br/>browser_ui.c:1102"]:::external
+    n_include_render_doc_h__rd_free["render_doc.rd_free<br/>Builds the paint-ready document from an inert...<br/>render_doc.h:292"]:::external
+    n_gui_browser_ui_c__set_cache["browser_ui.set_cache<br/>Releases the structured render of the previou...<br/>browser_ui.c:1256"]:::external
+    n_include_browser_h__browser_set_page["browser.browser_set_page<br/>browser.h:71"]:::external
+    n_src_browser_c__browser_navigate["browser.browser_navigate<br/>browser.c:224"]:::external
+    n_src_browser_c__browser_back["browser.browser_back<br/>browser.c:268"]:::external
+    n_src_browser_c__browser_forward["browser.browser_forward<br/>browser.c:280"]:::external
+    n_src_browser_c__browser_push_state["browser.browser_push_state<br/>browser.c:236"]:::external
+    n_src_browser_c__browser_replace_state["browser.browser_replace_state<br/>browser.c:243"]:::external
+    n_gui_browser_ui_c__fetch_launch["browser_ui.fetch_launch<br/>Spawns a detached worker to fetch url under c...<br/>browser_ui.c:1869"]:::external
+    n_gui_browser_ui_c__fetch_job_free["browser_ui.fetch_job_free<br/>browser_ui.c:1777"]:::external
+    n_gui_browser_ui_c__remember_visit["browser_ui.remember_visit<br/>Records a committed navigation in the persist...<br/>browser_ui.c:964"]:::external
+    n_src_css_color_c__strncmp["css_color.strncmp<br/>css_color.c:598"]:::external
+    n_src_prefs_c__prefs_history_add["prefs.prefs_history_add<br/>prefs.c:152"]:::external
+    n_src_profile_c__profile_save["profile.profile_save<br/>profile.c:133"]:::external
+    n_gui_browser_ui_c__show_busy["browser_ui.show_busy<br/>Marks a request in flight and paints a frame...<br/>browser_ui.c:2453"]:::external
+    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:13938"]:::external
+    n_tools_gen_psl_c__emit["gen_psl.emit<br/>gen_psl.c:61"]:::default
+    n_tools_gen_psl_c__main -.->|"recursion"| n_tools_gen_psl_c__main
+    n_tools_gen_psl_c__main -->|"1"| n_tools_gen_psl_c__ascii_lower
+    n_tools_gen_psl_c__main -->|"2"| n_tools_gen_psl_c__vec_push
+    n_tools_gen_psl_c__main -->|"3"| n_tools_gen_psl_c__sort_unique
+    n_tools_gen_psl_c__sort_unique -->|"1"| n_gui_browser_ui_c__strcmp
+    n_gui_browser_ui_c__strcmp -.->|"recursion"| n_gui_browser_ui_c__strcmp
+    n_gui_browser_ui_c__strcmp -->|"1"| n_include_prefs_h__free
+    n_include_prefs_h__free -->|"1"| n_src_prefs_c__prefs_format
+    n_include_prefs_h__free -->|"2"| n_src_prefs_c__prefs_parse
+    n_gui_browser_ui_c__strcmp -->|"2"| n_gui_browser_ui_c__prepare_fetch
+    n_gui_browser_ui_c__prepare_fetch -->|"1"| n_include_textfield_h__tf_text
+    n_gui_browser_ui_c__prepare_fetch -->|"2"| n_gui_browser_ui_c__host_from_url
+    n_gui_browser_ui_c__prepare_fetch -->|"3"| n_src_hostblock_c__hb_check
+    n_gui_browser_ui_c__prepare_fetch -->|"4"| n_include_anti_fp_h__domain
+    n_gui_browser_ui_c__prepare_fetch -->|"5"| n_include_browser_h__browser_is_exception
+    n_gui_browser_ui_c__prepare_fetch -->|"6"| n_gui_browser_ui_c__hb_is_allowlisted
+    n_gui_browser_ui_c__prepare_fetch -->|"7"| n_include_tls_impersonate_h__ti_should_impersonate
+    n_gui_browser_ui_c__prepare_fetch -->|"8"| n_src_net_realm_c__nr_classify_url
+    n_gui_browser_ui_c__prepare_fetch -->|"9"| n_include_net_realm_h__nr_realm_name
+    n_gui_browser_ui_c__strcmp -->|"3"| n_gui_browser_ui_c__clear_doc
+    n_gui_browser_ui_c__clear_doc -->|"1"| n_gui_browser_ui_c__free_inputs
+    n_gui_browser_ui_c__clear_doc -->|"2"| n_gui_browser_ui_c__free_images
+    n_gui_browser_ui_c__clear_doc -->|"3"| n_include_render_doc_h__rd_free
+    n_gui_browser_ui_c__strcmp -->|"4"| n_gui_browser_ui_c__set_cache
+    n_gui_browser_ui_c__set_cache -.-> n_include_prefs_h__free
+    n_gui_browser_ui_c__strcmp -->|"5"| n_include_browser_h__browser_set_page
+    n_include_browser_h__browser_set_page -->|"1"| n_src_browser_c__browser_navigate
+    n_include_browser_h__browser_set_page -->|"2"| n_src_browser_c__browser_back
+    n_include_browser_h__browser_set_page -->|"3"| n_src_browser_c__browser_forward
+    n_include_browser_h__browser_set_page -->|"4"| n_src_browser_c__browser_push_state
+    n_include_browser_h__browser_set_page -->|"5"| n_src_browser_c__browser_replace_state
+    n_gui_browser_ui_c__strcmp -->|"6"| n_gui_browser_ui_c__fetch_launch
+    n_gui_browser_ui_c__fetch_launch -->|"1"| n_gui_browser_ui_c__fetch_job_free
+    n_gui_browser_ui_c__strcmp -->|"7"| n_gui_browser_ui_c__remember_visit
+    n_gui_browser_ui_c__remember_visit -->|"1"| n_src_css_color_c__strncmp
+    n_gui_browser_ui_c__remember_visit -->|"2"| n_src_prefs_c__prefs_history_add
+    n_gui_browser_ui_c__remember_visit -->|"3"| n_src_profile_c__profile_save
+    n_gui_browser_ui_c__strcmp -->|"8"| n_gui_browser_ui_c__show_busy
+    n_gui_browser_ui_c__show_busy -->|"1"| n_gui_browser_ui_c__redraw
+    n_tools_gen_psl_c__main -->|"4"| n_tools_gen_psl_c__emit
+    linkStyle 0,5 stroke:#f87171,stroke-width:2px;
+```
+
+Cross-file sequence:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant p_tools_gen_psl_c as gen_psl.c
+    participant p_gui_browser_ui_c as browser_ui.c
+    participant p_include_prefs_h as prefs.h
+    participant p_src_prefs_c as prefs.c
+    participant p_include_textfield_h as textfield.h
+    participant p_src_hostblock_c as hostblock.c
+    participant p_include_anti_fp_h as anti_fp.h
+    participant p_include_browser_h as browser.h
+    participant p_include_tls_impersonate_h as tls_impersonate.h
+    participant p_src_net_realm_c as net_realm.c
+    participant p_include_net_realm_h as net_realm.h
+    participant p_include_render_doc_h as render_doc.h
+    participant p_src_browser_c as browser.c
+    participant p_src_css_color_c as css_color.c
+    participant p_src_profile_c as profile.c
+    p_tools_gen_psl_c->>p_gui_browser_ui_c: strcmp()
+    p_gui_browser_ui_c->>p_include_prefs_h: free()
+    p_include_prefs_h->>p_src_prefs_c: prefs_format()
+    p_include_prefs_h->>p_src_prefs_c: prefs_parse()
+    p_gui_browser_ui_c->>p_include_textfield_h: tf_text()
+    p_gui_browser_ui_c->>p_src_hostblock_c: hb_check()
+    p_gui_browser_ui_c->>p_include_anti_fp_h: domain()
+    p_gui_browser_ui_c->>p_include_browser_h: browser_is_exception()
+    p_gui_browser_ui_c->>p_include_tls_impersonate_h: ti_should_impersonate()
+    p_gui_browser_ui_c->>p_src_net_realm_c: nr_classify_url()
+    p_gui_browser_ui_c->>p_include_net_realm_h: nr_realm_name()
+    p_gui_browser_ui_c->>p_include_render_doc_h: rd_free()
+    p_gui_browser_ui_c->>p_include_browser_h: browser_set_page()
+    p_include_browser_h->>p_src_browser_c: browser_navigate()
+    p_include_browser_h->>p_src_browser_c: browser_back()
+    p_include_browser_h->>p_src_browser_c: browser_forward()
+    p_include_browser_h->>p_src_browser_c: browser_push_state()
+    p_include_browser_h->>p_src_browser_c: browser_replace_state()
+    p_gui_browser_ui_c->>p_src_css_color_c: strncmp()
+    p_gui_browser_ui_c->>p_src_prefs_c: prefs_history_add()
+    p_gui_browser_ui_c->>p_src_profile_c: profile_save()
+```
 
 ---
 
@@ -689,8 +1098,8 @@ Files sorted by how many other files would be affected if they changed. High-imp
 
 | File | Direct Dependents | Transitive Dependents | Total Impact |
 |------|------------------|----------------------|--------------|
-| `css_color.h` | 13 | 39 | 52 |
 | `css.h` | 33 | 18 | 51 |
+| `css_color.h` | 13 | 37 | 50 |
 | `html_parse.h` | 23 | 22 | 45 |
 | `dom.h` | 18 | 22 | 40 |
 | `url.h` | 17 | 10 | 27 |
@@ -809,8 +1218,10 @@ Results include score decomposition and justification paths for each ranked item
 
 ## Structural Knowledge Map
 
+> **Note:** The visual graph below has been intelligently pruned to the top 300 most relevant nodes to prevent rendering crashes. Full details of all files are documented in the Architecture Reference.
+
 ```mermaid
-graph TD
+graph LR
     classDef mod fill:#1e1e1e,stroke:#ff6666,stroke-width:2px,color:#fff;
     classDef cls fill:#2d2d2d,stroke:#4ec9b0,stroke-width:2px,color:#fff;
     classDef fn fill:#333,stroke:#dcdcaa,stroke-width:1px,color:#dcdcaa;
@@ -1374,6 +1785,204 @@ graph TD
     run_freedom_sh["run_freedom.sh (sh)"]
     class run_freedom_sh mod;
     end
+    gui_browser_ui_c ~~~ tests_test_image_decode_c
+    src_media_decoder_c ~~~ tests_test_interp_c
+    tests_test_freedom_c ~~~ src_image_decode_c
+    tests_test_prefetch_c ~~~ tests_test_hostblock_c
+    tests_test_browser_c ~~~ tests_test_form_c
+    tests_test_tls_impersonate_c ~~~ tests_test_net_realm_c
+    tests_test_image_decode_c ~~~ tests_test_hostedit_c
+    tests_test_interp_c ~~~ tests_test_block_flow_c
+    src_image_decode_c ~~~ tests_test_textfield_c
+    tests_test_hostblock_c ~~~ src_hostblock_c
+    tests_test_form_c ~~~ tests_test_hls_c
+    tests_test_net_realm_c ~~~ tests_test_media_decoder_c
+    tests_test_hostedit_c ~~~ tests_test_frame_clock_c
+    tests_test_block_flow_c ~~~ src_browser_c
+    tests_test_textfield_c ~~~ fuzz_fuzz_tls_impersonate_c
+    src_hostblock_c ~~~ src_tls_impersonate_c
+    tests_test_hls_c ~~~ src_interp_c
+    tests_test_media_decoder_c ~~~ src_prefetch_c
+    tests_test_frame_clock_c ~~~ src_hls_c
+    src_browser_c ~~~ src_net_realm_c
+    fuzz_fuzz_tls_impersonate_c ~~~ fuzz_fuzz_image_decode_c
+    src_tls_impersonate_c ~~~ fuzz_fuzz_prefetch_c
+    src_interp_c ~~~ src_hostedit_c
+    src_prefetch_c ~~~ include_form_h
+    src_hls_c ~~~ include_media_decoder_h
+    src_net_realm_c ~~~ src_textfield_c
+    fuzz_fuzz_image_decode_c ~~~ src_form_c
+    fuzz_fuzz_prefetch_c ~~~ src_block_flow_c
+    src_hostedit_c ~~~ include_tls_impersonate_h
+    include_form_h ~~~ include_prefetch_h
+    include_media_decoder_h ~~~ include_browser_h
+    src_textfield_c ~~~ include_image_decode_h
+    src_form_c ~~~ src_frame_clock_c
+    src_block_flow_c ~~~ include_interp_h
+    include_tls_impersonate_h ~~~ include_textfield_h
+    include_prefetch_h ~~~ include_hostblock_h
+    include_browser_h ~~~ include_hls_h
+    include_image_decode_h ~~~ include_hostedit_h
+    src_frame_clock_c ~~~ include_block_flow_h
+    include_interp_h ~~~ include_net_realm_h
+    include_textfield_h ~~~ include_frame_clock_h
+    src_tab_c ~~~ tests_test_js_env_c
+    tests_test_js_dom_c ~~~ src_os_sandbox_c
+    tests_test_os_sandbox_c ~~~ src_js_events_c
+    tests_test_tab_c ~~~ src_js_fetch_c
+    src_js_dom_c ~~~ src_js_embed_c
+    fuzz_fuzz_js_dom_c ~~~ src_dom_c
+    tests_test_js_env_c ~~~ src_renderer_c
+    src_os_sandbox_c ~~~ src_js_env_c
+    src_js_events_c ~~~ include_js_dom_h
+    src_js_fetch_c ~~~ tests_test_dom_c
+    src_js_embed_c ~~~ src_js_location_c
+    src_dom_c ~~~ tests_test_js_sandbox_c
+    src_renderer_c ~~~ src_html_parse_c
+    src_js_env_c ~~~ tests_test_html_parse_c
+    include_js_dom_h ~~~ tests_test_js_geom_c
+    tests_test_dom_c ~~~ tests_test_web_storage_c
+    src_js_location_c ~~~ tests_test_url_c
+    tests_test_js_sandbox_c ~~~ include_tab_h
+    src_html_parse_c ~~~ tests_test_freebug_c
+    tests_test_html_parse_c ~~~ tests_test_renderer_c
+    tests_test_js_geom_c ~~~ tests_test_link_nav_c
+    tests_test_web_storage_c ~~~ src_js_trusted_c
+    tests_test_url_c ~~~ fuzz_fuzz_dom_c
+    include_tab_h ~~~ fuzz_fuzz_url_c
+    tests_test_freebug_c ~~~ src_js_sandbox_c
+    tests_test_renderer_c ~~~ include_js_location_h
+    tests_test_link_nav_c ~~~ fuzz_fuzz_js_sandbox_c
+    src_js_trusted_c ~~~ src_url_c
+    fuzz_fuzz_dom_c ~~~ src_js_geom_c
+    fuzz_fuzz_url_c ~~~ src_web_storage_c
+    src_js_sandbox_c ~~~ include_js_trusted_h
+    include_js_location_h ~~~ src_link_nav_c
+    fuzz_fuzz_js_sandbox_c ~~~ include_util_h
+    src_url_c ~~~ src_js_dom_internal_h
+    src_js_geom_c ~~~ fuzz_fuzz_js_geom_c
+    src_web_storage_c ~~~ fuzz_fuzz_freebug_c
+    include_js_trusted_h ~~~ fuzz_fuzz_web_storage_c
+    src_link_nav_c ~~~ include_dom_h
+    include_util_h ~~~ include_js_geom_h
+    src_js_dom_internal_h ~~~ src_freebug_c
+    fuzz_fuzz_js_geom_c ~~~ fuzz_fuzz_html_parse_c
+    fuzz_fuzz_freebug_c ~~~ include_html_parse_h
+    fuzz_fuzz_web_storage_c ~~~ include_js_sandbox_h
+    include_dom_h ~~~ include_js_env_h
+    include_js_geom_h ~~~ src_js_dom_ext_c
+    src_freebug_c ~~~ include_freebug_h
+    fuzz_fuzz_html_parse_c ~~~ include_url_h
+    include_html_parse_h ~~~ include_web_storage_h
+    include_js_sandbox_h ~~~ include_os_sandbox_h
+    include_js_env_h ~~~ include_link_nav_h
+    src_js_dom_ext_c ~~~ include_renderer_h
+    include_freebug_h ~~~ src_js_dom_ext_h
+    include_url_h ~~~ src_js_location_internal_h
+    src_freedom_c ~~~ src_dom_debug_c
+    src_page_view_c ~~~ fuzz_fuzz_dom_debug_c
+    tests_test_page_view_c ~~~ tests_test_box_tree_c
+    tests_test_dom_debug_c ~~~ tests_test_flex_layout_c
+    tests_test_render_doc_c ~~~ src_box_tree_c
+    src_render_doc_c ~~~ include_page_view_h
+    src_dom_debug_c ~~~ tests_test_box_style_c
+    fuzz_fuzz_dom_debug_c ~~~ tests_test_render_policy_c
+    tests_test_box_tree_c ~~~ tests_test_perf_trace_c
+    tests_test_flex_layout_c ~~~ tests_test_webcaps_c
+    src_box_tree_c ~~~ tests_test_js_policy_c
+    include_page_view_h ~~~ include_box_tree_h
+    tests_test_box_style_c ~~~ src_box_style_c
+    tests_test_render_policy_c ~~~ include_render_doc_h
+    tests_test_perf_trace_c ~~~ src_perf_trace_c
+    tests_test_webcaps_c ~~~ include_webcaps_h
+    tests_test_js_policy_c ~~~ src_flex_layout_c
+    include_box_tree_h ~~~ src_js_policy_c
+    src_box_style_c ~~~ include_dom_debug_h
+    include_render_doc_h ~~~ include_box_style_h
+    src_perf_trace_c ~~~ include_perf_trace_h
+    include_webcaps_h ~~~ src_webcaps_c
+    src_flex_layout_c ~~~ include_flex_layout_h
+    src_js_policy_c ~~~ include_render_policy_h
+    include_dom_debug_h ~~~ include_js_policy_h
+    src_css_c ~~~ tests_test_css_length_c
+    src_css_text_c ~~~ tests_test_css_vars_c
+    src_css_box_c ~~~ tests_test_css_atrule_c
+    tests_test_css_c ~~~ tests_test_css_text_c
+    src_css_gradient_c ~~~ tests_test_css_drops_c
+    src_css_values_c ~~~ tests_test_compositor_c
+    tests_test_css_length_c ~~~ tests_test_css_color_c
+    tests_test_css_vars_c ~~~ tests_test_css_box_c
+    tests_test_css_atrule_c ~~~ tests_test_css_gradient_c
+    tests_test_css_text_c ~~~ tests_test_css_mq_c
+    tests_test_css_drops_c ~~~ tests_test_css_values_c
+    tests_test_compositor_c ~~~ src_css_vars_c
+    tests_test_css_color_c ~~~ fuzz_fuzz_css_c
+    tests_test_css_box_c ~~~ src_css_length_c
+    tests_test_css_gradient_c ~~~ src_css_mq_c
+    tests_test_css_mq_c ~~~ src_css_color_c
+    tests_test_css_values_c ~~~ src_css_chain_c
+    src_css_vars_c ~~~ src_css_atrule_c
+    fuzz_fuzz_css_c ~~~ include_css_chain_h
+    src_css_length_c ~~~ include_css_select_h
+    src_css_mq_c ~~~ src_css_select_c
+    src_css_color_c ~~~ include_css_decl_h
+    src_css_chain_c ~~~ src_compositor_c
+    src_css_atrule_c ~~~ include_css_h
+    include_css_chain_h ~~~ include_css_gradient_h
+    include_css_select_h ~~~ include_css_box_h
+    src_css_select_c ~~~ include_css_text_h
+    include_css_decl_h ~~~ include_css_length_h
+    src_compositor_c ~~~ include_css_vars_h
+    include_css_h ~~~ include_css_atrule_h
+    include_css_gradient_h ~~~ include_compositor_h
+    include_css_box_h ~~~ include_css_mq_h
+    include_css_text_h ~~~ include_css_color_h
+    include_css_length_h ~~~ include_css_values_h
+    src_secure_fetch_c ~~~ include_ws_hub_h
+    src_ws_hub_c ~~~ tests_itest_secure_fetch_c
+    tests_test_ws_hub_c ~~~ include_anti_fp_h
+    tests_test_secure_fetch_c ~~~ src_anti_fp_c
+    tests_test_profile_c ~~~ tests_test_local_store_c
+    tests_test_disk_store_c ~~~ src_prefs_c
+    src_disk_store_c ~~~ tests_test_zoom_c
+    src_profile_c ~~~ fuzz_fuzz_prefs_c
+    tests_test_prefs_c ~~~ include_profile_h
+    src_local_store_c ~~~ include_disk_store_h
+    tests_test_local_store_c ~~~ include_local_store_h
+    src_prefs_c ~~~ src_zoom_c
+    tests_test_zoom_c ~~~ include_prefs_h
+    fuzz_fuzz_prefs_c ~~~ include_zoom_h
+    tests_test_webfont_load_c ~~~ tests_test_request_policy_c
+    tests_test_text_shape_c ~~~ src_webfont_c
+    src_text_shape_c ~~~ src_request_policy_c
+    src_webfont_load_c ~~~ src_render_policy_c
+    tests_test_webfont_c ~~~ fuzz_fuzz_text_shape_c
+    tests_test_data_url_c ~~~ fuzz_fuzz_data_url_c
+    tests_test_request_policy_c ~~~ src_data_url_c
+    src_webfont_c ~~~ fuzz_fuzz_webfont_c
+    src_request_policy_c ~~~ include_text_shape_h
+    src_render_policy_c ~~~ include_data_url_h
+    fuzz_fuzz_text_shape_c ~~~ include_webfont_h
+    fuzz_fuzz_data_url_c ~~~ include_psl_data_h
+    src_data_url_c ~~~ include_webfont_load_h
+    fuzz_fuzz_webfont_c ~~~ include_request_policy_h
+    gui_ui_render_c ~~~ gui_freedom_view_c
+    tests_test_svg_render_c ~~~ fuzz_fuzz_svg_render_c
+    tests_test_ui_c ~~~ gui_bui_theme_c
+    gui_svg_paint_c ~~~ gui_browser_ui_internal_h
+    fuzz_fuzz_page_view_c ~~~ src_ui_layout_c
+    src_svg_render_c ~~~ include_svg_paint_h
+    gui_freedom_view_c ~~~ include_svg_render_h
+    fuzz_fuzz_svg_render_c ~~~ include_ui_h
+    gui_bui_theme_c ~~~ include_freedom_config_h
+    tests_test_pdf_export_c ~~~ include_pdf_export_h
+    tests_test_download_c ~~~ include_download_h
+    tools_pngdiff_c ~~~ tools_pngprof_py
+    tools_ffgeom_py ~~~ docker_entrypoint_sh
+    tools_mutate_py ~~~ docker_run_sh
+    app_py ~~~ fuzz_sh
+    tools_snapshot_py ~~~ install_sh
+    tools_gen_psl_c ~~~ run_freedom_sh
     fuzz_fuzz_css_c -- resolved_imports --> include_css_h
     fuzz_fuzz_css_c -- resolved_imports --> include_css_select_h
     fuzz_fuzz_data_url_c -- resolved_imports --> include_data_url_h
@@ -1572,1734 +2181,19 @@ graph TD
     ext_js_dom_h["js_dom.h"]
     class ext_js_dom_h ext;
     fuzz_fuzz_js_dom_c -.->|imports| ext_js_dom_h
-    ext_js_trusted_h["js_trusted.h"]
-    class ext_js_trusted_h ext;
-    fuzz_fuzz_js_dom_c -.->|imports| ext_js_trusted_h
-    ext_js_geom_h["js_geom.h"]
-    class ext_js_geom_h ext;
-    fuzz_fuzz_js_dom_c -.->|imports| ext_js_geom_h
-    ext_web_storage_h["web_storage.h"]
-    class ext_web_storage_h ext;
-    fuzz_fuzz_js_dom_c -.->|imports| ext_web_storage_h
-    ext_js_sandbox_h["js_sandbox.h"]
-    class ext_js_sandbox_h ext;
-    fuzz_fuzz_js_dom_c -.->|imports| ext_js_sandbox_h
-    ext_url_h["url.h"]
-    class ext_url_h ext;
-    fuzz_fuzz_js_dom_c -.->|imports| ext_url_h
-    fuzz_fuzz_js_dom_c -.->|imports| ext_stddef_h
-    fuzz_fuzz_js_dom_c -.->|imports| ext_stdlib_h
-    fuzz_fuzz_js_dom_c -.->|imports| ext_stdint_h
-    fuzz_fuzz_js_dom_c -.->|imports| ext_string_h
-    fuzz_fuzz_js_geom_c -.->|imports| ext_js_geom_h
-    fuzz_fuzz_js_geom_c -.->|imports| ext_stdint_h
-    fuzz_fuzz_js_geom_c -.->|imports| ext_stdlib_h
-    fuzz_fuzz_js_geom_c -.->|imports| ext_string_h
-    fuzz_fuzz_js_sandbox_c -.->|imports| ext_js_sandbox_h
-    fuzz_fuzz_js_sandbox_c -.->|imports| ext_stddef_h
-    fuzz_fuzz_js_sandbox_c -.->|imports| ext_stdint_h
-    fuzz_fuzz_js_sandbox_c -.->|imports| ext_stdlib_h
-    fuzz_fuzz_js_sandbox_c -.->|imports| ext_string_h
-    fuzz_fuzz_page_view_c -.->|imports| ext_html_parse_h
-    fuzz_fuzz_page_view_c -.->|imports| ext_page_view_h
-    ext_freedom_config_h["freedom_config.h"]
-    class ext_freedom_config_h ext;
-    fuzz_fuzz_page_view_c -.->|imports| ext_freedom_config_h
-    fuzz_fuzz_page_view_c -.->|imports| ext_stddef_h
-    fuzz_fuzz_page_view_c -.->|imports| ext_stdint_h
-    ext_pdf_export_h["pdf_export.h"]
-    class ext_pdf_export_h ext;
-    fuzz_fuzz_pdf_export_c -.->|imports| ext_pdf_export_h
-    fuzz_fuzz_pdf_export_c -.->|imports| ext_stdint_h
-    fuzz_fuzz_pdf_export_c -.->|imports| ext_stdlib_h
-    fuzz_fuzz_pdf_export_c -.->|imports| ext_string_h
-    fuzz_fuzz_prefetch_c -.->|imports| ext_stddef_h
-    fuzz_fuzz_prefetch_c -.->|imports| ext_stdint_h
-    ext_prefetch_h["prefetch.h"]
-    class ext_prefetch_h ext;
-    fuzz_fuzz_prefetch_c -.->|imports| ext_prefetch_h
-    fuzz_fuzz_prefs_c -.->|imports| ext_stddef_h
-    fuzz_fuzz_prefs_c -.->|imports| ext_stdint_h
-    fuzz_fuzz_prefs_c -.->|imports| ext_stdio_h
-    fuzz_fuzz_prefs_c -.->|imports| ext_stdlib_h
-    fuzz_fuzz_prefs_c -.->|imports| ext_string_h
-    ext_prefs_h["prefs.h"]
-    class ext_prefs_h ext;
-    fuzz_fuzz_prefs_c -.->|imports| ext_prefs_h
-    ext_svg_render_h["svg_render.h"]
-    class ext_svg_render_h ext;
-    fuzz_fuzz_svg_render_c -.->|imports| ext_svg_render_h
-    ext_math_h["math.h"]
-    class ext_math_h ext;
-    fuzz_fuzz_svg_render_c -.->|imports| ext_math_h
-    fuzz_fuzz_svg_render_c -.->|imports| ext_stdint_h
-    fuzz_fuzz_svg_render_c -.->|imports| ext_stdlib_h
-    fuzz_fuzz_svg_render_c -.->|imports| ext_string_h
-    ext_text_shape_h["text_shape.h"]
-    class ext_text_shape_h ext;
-    fuzz_fuzz_text_shape_c -.->|imports| ext_text_shape_h
-    fuzz_fuzz_text_shape_c -.->|imports| ext_stdint_h
-    fuzz_fuzz_text_shape_c -.->|imports| ext_stddef_h
-    fuzz_fuzz_text_shape_c -.->|imports| ext_stdlib_h
-    fuzz_fuzz_tls_impersonate_c -.->|imports| ext_stdint_h
-    fuzz_fuzz_tls_impersonate_c -.->|imports| ext_stdlib_h
-    fuzz_fuzz_tls_impersonate_c -.->|imports| ext_string_h
-    ext_tls_impersonate_h["tls_impersonate.h"]
-    class ext_tls_impersonate_h ext;
-    fuzz_fuzz_tls_impersonate_c -.->|imports| ext_tls_impersonate_h
-    ext_link_nav_h["link_nav.h"]
-    class ext_link_nav_h ext;
-    fuzz_fuzz_url_c -.->|imports| ext_link_nav_h
-    fuzz_fuzz_url_c -.->|imports| ext_url_h
-    fuzz_fuzz_url_c -.->|imports| ext_stdint_h
-    fuzz_fuzz_url_c -.->|imports| ext_stdlib_h
-    fuzz_fuzz_url_c -.->|imports| ext_string_h
-    ext_strings_h["strings.h"]
-    class ext_strings_h ext;
-    fuzz_fuzz_url_c -.->|imports| ext_strings_h
-    fuzz_fuzz_web_storage_c -.->|imports| ext_web_storage_h
-    fuzz_fuzz_web_storage_c -.->|imports| ext_stdint_h
-    fuzz_fuzz_web_storage_c -.->|imports| ext_stdlib_h
-    fuzz_fuzz_web_storage_c -.->|imports| ext_string_h
-    fuzz_fuzz_webfont_c -.->|imports| ext_stddef_h
-    fuzz_fuzz_webfont_c -.->|imports| ext_stdint_h
-    ext_webfont_h["webfont.h"]
-    class ext_webfont_h ext;
-    fuzz_fuzz_webfont_c -.->|imports| ext_webfont_h
-    ext_browser_h["browser.h"]
-    class ext_browser_h ext;
-    gui_browser_ui_c -.->|imports| ext_browser_h
-    ext_block_flow_h["block_flow.h"]
-    class ext_block_flow_h ext;
-    gui_browser_ui_c -.->|imports| ext_block_flow_h
-    ext_box_style_h["box_style.h"]
-    class ext_box_style_h ext;
-    gui_browser_ui_c -.->|imports| ext_box_style_h
-    ext_box_tree_h["box_tree.h"]
-    class ext_box_tree_h ext;
-    gui_browser_ui_c -.->|imports| ext_box_tree_h
-    ext_compositor_h["compositor.h"]
-    class ext_compositor_h ext;
-    gui_browser_ui_c -.->|imports| ext_compositor_h
-    gui_browser_ui_c -.->|imports| ext_css_h
-    ext_svg_paint_h["svg_paint.h"]
-    class ext_svg_paint_h ext;
-    gui_browser_ui_c -.->|imports| ext_svg_paint_h
-    gui_browser_ui_c -.->|imports| ext_svg_render_h
-    ext_css_color_h["css_color.h"]
-    class ext_css_color_h ext;
-    gui_browser_ui_c -.->|imports| ext_css_color_h
-    gui_browser_ui_c -.->|imports| ext_data_url_h
-    gui_browser_ui_c -.->|imports| ext_download_h
-    ext_frame_clock_h["frame_clock.h"]
-    class ext_frame_clock_h ext;
-    gui_browser_ui_c -.->|imports| ext_frame_clock_h
-    gui_browser_ui_c -.->|imports| ext_freebug_h
-    ext_hostblock_h["hostblock.h"]
-    class ext_hostblock_h ext;
-    gui_browser_ui_c -.->|imports| ext_hostblock_h
-    ext_hostedit_h["hostedit.h"]
-    class ext_hostedit_h ext;
-    gui_browser_ui_c -.->|imports| ext_hostedit_h
-    gui_browser_ui_c -.->|imports| ext_image_decode_h
-    ext_interp_h["interp.h"]
-    class ext_interp_h ext;
-    gui_browser_ui_c -.->|imports| ext_interp_h
-    ext_js_policy_h["js_policy.h"]
-    class ext_js_policy_h ext;
-    gui_browser_ui_c -.->|imports| ext_js_policy_h
-    gui_browser_ui_c -.->|imports| ext_link_nav_h
-    ext_media_decoder_h["media_decoder.h"]
-    class ext_media_decoder_h ext;
-    gui_browser_ui_c -.->|imports| ext_media_decoder_h
-    ext_net_realm_h["net_realm.h"]
-    class ext_net_realm_h ext;
-    gui_browser_ui_c -.->|imports| ext_net_realm_h
-    gui_browser_ui_c -.->|imports| ext_pdf_export_h
-    gui_browser_ui_c -.->|imports| ext_prefetch_h
-    gui_browser_ui_c -.->|imports| ext_prefs_h
-    ext_profile_h["profile.h"]
-    class ext_profile_h ext;
-    gui_browser_ui_c -.->|imports| ext_profile_h
-    gui_browser_ui_c -.->|imports| ext_render_doc_h
-    gui_browser_ui_c -.->|imports| ext_render_policy_h
-    ext_request_policy_h["request_policy.h"]
-    class ext_request_policy_h ext;
-    gui_browser_ui_c -.->|imports| ext_request_policy_h
-    gui_browser_ui_c -.->|imports| ext_text_shape_h
-    gui_browser_ui_c -.->|imports| ext_webfont_h
-    ext_webfont_load_h["webfont_load.h"]
-    class ext_webfont_load_h ext;
-    gui_browser_ui_c -.->|imports| ext_webfont_load_h
-    ext_textfield_h["textfield.h"]
-    class ext_textfield_h ext;
-    gui_browser_ui_c -.->|imports| ext_textfield_h
-    ext_webcaps_h["webcaps.h"]
-    class ext_webcaps_h ext;
-    gui_browser_ui_c -.->|imports| ext_webcaps_h
-    ext_ui_h["ui.h"]
-    class ext_ui_h ext;
-    gui_browser_ui_c -.->|imports| ext_ui_h
-    gui_browser_ui_c -.->|imports| ext_url_h
-    ext_zoom_h["zoom.h"]
-    class ext_zoom_h ext;
-    gui_browser_ui_c -.->|imports| ext_zoom_h
-    gui_browser_ui_c -.->|imports| ext_math_h
-    gui_browser_ui_c -.->|imports| ext_stddef_h
-    gui_browser_ui_c -.->|imports| ext_stdint_h
-    gui_browser_ui_c -.->|imports| ext_stdio_h
-    gui_browser_ui_c -.->|imports| ext_stdlib_h
-    gui_browser_ui_c -.->|imports| ext_string_h
-    ext_time_h["time.h"]
-    class ext_time_h ext;
-    gui_browser_ui_c -.->|imports| ext_time_h
-    ext_unistd_h["unistd.h"]
-    class ext_unistd_h ext;
-    gui_browser_ui_c -.->|imports| ext_unistd_h
-    ext_poll_h["poll.h"]
-    class ext_poll_h ext;
-    gui_browser_ui_c -.->|imports| ext_poll_h
-    ext_sys_mman_h["mman.h"]
-    class ext_sys_mman_h ext;
-    gui_browser_ui_c -.->|imports| ext_sys_mman_h
-    ext_sys_wait_h["wait.h"]
-    class ext_sys_wait_h ext;
-    gui_browser_ui_c -.->|imports| ext_sys_wait_h
-    ext_sys_stat_h["stat.h"]
-    class ext_sys_stat_h ext;
-    gui_browser_ui_c -.->|imports| ext_sys_stat_h
-    ext_sys_eventfd_h["eventfd.h"]
-    class ext_sys_eventfd_h ext;
-    gui_browser_ui_c -.->|imports| ext_sys_eventfd_h
-    ext_sys_timerfd_h["timerfd.h"]
-    class ext_sys_timerfd_h ext;
-    gui_browser_ui_c -.->|imports| ext_sys_timerfd_h
-    ext_errno_h["errno.h"]
-    class ext_errno_h ext;
-    gui_browser_ui_c -.->|imports| ext_errno_h
-    ext_signal_h["signal.h"]
-    class ext_signal_h ext;
-    gui_browser_ui_c -.->|imports| ext_signal_h
-    ext_fcntl_h["fcntl.h"]
-    class ext_fcntl_h ext;
-    gui_browser_ui_c -.->|imports| ext_fcntl_h
-    ext_limits_h["limits.h"]
-    class ext_limits_h ext;
-    gui_browser_ui_c -.->|imports| ext_limits_h
-    ext_pthread_h["pthread.h"]
-    class ext_pthread_h ext;
-    gui_browser_ui_c -.->|imports| ext_pthread_h
-    ext_wayland_client_h["wayland-client.h"]
-    class ext_wayland_client_h ext;
-    gui_browser_ui_c -.->|imports| ext_wayland_client_h
-    ext_wayland_cursor_h["wayland-cursor.h"]
-    class ext_wayland_cursor_h ext;
-    gui_browser_ui_c -.->|imports| ext_wayland_cursor_h
-    ext_cairo_cairo_h["cairo.h"]
-    class ext_cairo_cairo_h ext;
-    gui_browser_ui_c -.->|imports| ext_cairo_cairo_h
-    ext_cairo_cairo_pdf_h["cairo-pdf.h"]
-    class ext_cairo_cairo_pdf_h ext;
-    gui_browser_ui_c -.->|imports| ext_cairo_cairo_pdf_h
-    ext_fontconfig_fontconfig_h["fontconfig.h"]
-    class ext_fontconfig_fontconfig_h ext;
-    gui_browser_ui_c -.->|imports| ext_fontconfig_fontconfig_h
-    ext_xkbcommon_xkbcommon_h["xkbcommon.h"]
-    class ext_xkbcommon_xkbcommon_h ext;
-    gui_browser_ui_c -.->|imports| ext_xkbcommon_xkbcommon_h
-    ext_xdg_shell_client_protocol_h["xdg-shell-client-protocol.h"]
-    class ext_xdg_shell_client_protocol_h ext;
-    gui_browser_ui_c -.->|imports| ext_xdg_shell_client_protocol_h
-    ext_xdg_decoration_client_protocol_h["xdg-decoration-client-protocol.h"]
-    class ext_xdg_decoration_client_protocol_h ext;
-    gui_browser_ui_c -.->|imports| ext_xdg_decoration_client_protocol_h
-    ext_browser_ui_internal_h["browser_ui_internal.h"]
-    class ext_browser_ui_internal_h ext;
-    gui_browser_ui_c -.->|imports| ext_browser_ui_internal_h
-    ext_hls_h["hls.h"]
-    class ext_hls_h ext;
-    gui_browser_ui_c -.->|imports| ext_hls_h
-    ext_form_h["form.h"]
-    class ext_form_h ext;
-    gui_browser_ui_c -.->|imports| ext_form_h
-    ext_secure_fetch_h["secure_fetch.h"]
-    class ext_secure_fetch_h ext;
-    gui_browser_ui_c -.->|imports| ext_secure_fetch_h
-    ext_tab_h["tab.h"]
-    class ext_tab_h ext;
-    gui_browser_ui_c -.->|imports| ext_tab_h
-    ext_ws_hub_h["ws_hub.h"]
-    class ext_ws_hub_h ext;
-    gui_browser_ui_c -.->|imports| ext_ws_hub_h
-    gui_browser_ui_c -.->|imports| ext_web_storage_h
-    gui_browser_ui_c -.->|imports| ext_tls_impersonate_h
-    gui_browser_ui_internal_h -.->|imports| ext_cairo_cairo_h
-    gui_browser_ui_internal_h -.->|imports| ext_freedom_config_h
-    gui_bui_theme_c -.->|imports| ext_browser_ui_internal_h
-    gui_bui_theme_c -.->|imports| ext_css_color_h
-    gui_freedom_view_c -.->|imports| ext_html_parse_h
-    gui_freedom_view_c -.->|imports| ext_ui_h
-    gui_freedom_view_c -.->|imports| ext_stdio_h
-    gui_freedom_view_c -.->|imports| ext_stdlib_h
-    gui_freedom_view_c -.->|imports| ext_string_h
-    gui_svg_paint_c -.->|imports| ext_svg_paint_h
-    gui_svg_paint_c -.->|imports| ext_math_h
-    gui_svg_paint_c -.->|imports| ext_string_h
-    gui_svg_paint_c -.->|imports| ext_css_color_h
-    gui_svg_paint_c -.->|imports| ext_freedom_config_h
-    gui_ui_render_c -.->|imports| ext_ui_h
-    gui_ui_render_c -.->|imports| ext_stdio_h
-    gui_ui_render_c -.->|imports| ext_stdlib_h
-    gui_ui_render_c -.->|imports| ext_string_h
-    gui_ui_render_c -.->|imports| ext_unistd_h
-    gui_ui_render_c -.->|imports| ext_sys_mman_h
-    gui_ui_render_c -.->|imports| ext_wayland_client_h
-    gui_ui_render_c -.->|imports| ext_cairo_cairo_h
-    gui_ui_render_c -.->|imports| ext_xdg_shell_client_protocol_h
-    gui_ui_render_c -.->|imports| ext_xdg_decoration_client_protocol_h
-    gui_ui_render_c -.->|imports| ext_freedom_config_h
-    include_anti_fp_h -.->|imports| ext_stddef_h
-    include_anti_fp_h -.->|imports| ext_stdint_h
-    include_block_flow_h -.->|imports| ext_stddef_h
-    include_box_style_h -.->|imports| ext_css_h
-    include_box_tree_h -.->|imports| ext_stddef_h
-    include_box_tree_h -.->|imports| ext_box_style_h
-    ext_flex_layout_h["flex_layout.h"]
-    class ext_flex_layout_h ext;
-    include_box_tree_h -.->|imports| ext_flex_layout_h
-    include_box_tree_h -.->|imports| ext_page_view_h
-    include_browser_h -.->|imports| ext_stddef_h
-    include_browser_h -.->|imports| ext_stdint_h
-    include_compositor_h -.->|imports| ext_stddef_h
-    include_css_h -.->|imports| ext_stddef_h
-    include_css_h -.->|imports| ext_css_color_h
-    include_css_atrule_h -.->|imports| ext_stddef_h
-    ext_css_decl_h["css_decl.h"]
-    class ext_css_decl_h ext;
-    include_css_box_h -.->|imports| ext_css_decl_h
-    ext_lexbor_html_html_h["html.h"]
-    class ext_lexbor_html_html_h ext;
-    include_css_chain_h -.->|imports| ext_lexbor_html_html_h
-    include_css_chain_h -.->|imports| ext_css_h
-    include_css_chain_h -.->|imports| ext_css_select_h
-    include_css_decl_h -.->|imports| ext_css_h
-    include_css_decl_h -.->|imports| ext_css_select_h
-    include_css_gradient_h -.->|imports| ext_stddef_h
-    include_css_gradient_h -.->|imports| ext_css_decl_h
-    include_css_length_h -.->|imports| ext_stddef_h
-    include_css_mq_h -.->|imports| ext_stddef_h
-    include_css_select_h -.->|imports| ext_stddef_h
-    include_css_select_h -.->|imports| ext_string_h
-    include_css_select_h -.->|imports| ext_css_h
-    include_css_text_h -.->|imports| ext_css_decl_h
-    include_css_vars_h -.->|imports| ext_stddef_h
-    include_data_url_h -.->|imports| ext_stddef_h
-    include_data_url_h -.->|imports| ext_stdint_h
-    include_disk_store_h -.->|imports| ext_stddef_h
-    include_disk_store_h -.->|imports| ext_stdint_h
-    ext_local_store_h["local_store.h"]
-    class ext_local_store_h ext;
-    include_disk_store_h -.->|imports| ext_local_store_h
-    include_dom_h -.->|imports| ext_stddef_h
-    include_dom_h -.->|imports| ext_stdint_h
-    include_dom_h -.->|imports| ext_html_parse_h
-    include_dom_debug_h -.->|imports| ext_stddef_h
-    include_dom_debug_h -.->|imports| ext_render_doc_h
-    include_download_h -.->|imports| ext_stddef_h
-    include_flex_layout_h -.->|imports| ext_stddef_h
-    include_form_h -.->|imports| ext_stddef_h
-    include_form_h -.->|imports| ext_url_h
-    include_freebug_h -.->|imports| ext_stddef_h
-    include_hls_h -.->|imports| ext_stddef_h
-    include_hostblock_h -.->|imports| ext_stddef_h
-    include_hostedit_h -.->|imports| ext_stddef_h
-    include_html_parse_h -.->|imports| ext_stddef_h
-    include_html_parse_h -.->|imports| ext_stdint_h
-    include_image_decode_h -.->|imports| ext_stddef_h
-    include_image_decode_h -.->|imports| ext_stdint_h
-    include_import_map_h -.->|imports| ext_stddef_h
-    include_interp_h -.->|imports| ext_stdint_h
-    include_js_dom_h -.->|imports| ext_dom_h
-    include_js_dom_h -.->|imports| ext_freebug_h
-    include_js_dom_h -.->|imports| ext_js_geom_h
-    include_js_dom_h -.->|imports| ext_js_sandbox_h
-    include_js_dom_h -.->|imports| ext_url_h
-    ext_js_location_h["js_location.h"]
-    class ext_js_location_h ext;
-    include_js_dom_h -.->|imports| ext_js_location_h
-    include_js_env_h -.->|imports| ext_js_sandbox_h
-    include_js_geom_h -.->|imports| ext_stddef_h
-    include_js_geom_h -.->|imports| ext_stdint_h
-    include_js_geom_h -.->|imports| ext_dom_h
-    include_js_location_h -.->|imports| ext_stddef_h
-    include_js_location_h -.->|imports| ext_js_dom_h
-    include_js_location_h -.->|imports| ext_js_sandbox_h
-    include_js_location_h -.->|imports| ext_url_h
-    ext_stdbool_h["stdbool.h"]
-    class ext_stdbool_h ext;
-    include_js_policy_h -.->|imports| ext_stdbool_h
-    include_js_sandbox_h -.->|imports| ext_stddef_h
-    include_js_sandbox_h -.->|imports| ext_stdint_h
-    include_js_trusted_h -.->|imports| ext_stddef_h
-    include_js_trusted_h -.->|imports| ext_js_dom_h
-    include_js_trusted_h -.->|imports| ext_js_sandbox_h
-    include_link_nav_h -.->|imports| ext_stddef_h
-    include_local_store_h -.->|imports| ext_stddef_h
-    include_local_store_h -.->|imports| ext_stdint_h
-    include_media_decoder_h -.->|imports| ext_stddef_h
-    include_media_decoder_h -.->|imports| ext_stdint_h
-    ext_sys_types_h["types.h"]
-    class ext_sys_types_h ext;
-    include_media_decoder_h -.->|imports| ext_sys_types_h
-    include_os_sandbox_h -.->|imports| ext_stddef_h
-    include_page_view_h -.->|imports| ext_stddef_h
-    include_page_view_h -.->|imports| ext_stdint_h
-    include_page_view_h -.->|imports| ext_dom_h
-    include_page_view_h -.->|imports| ext_html_parse_h
-    include_page_view_h -.->|imports| ext_css_h
-    include_pdf_export_h -.->|imports| ext_stddef_h
-    include_perf_trace_h -.->|imports| ext_stddef_h
-    include_perf_trace_h -.->|imports| ext_stdint_h
-    include_prefetch_h -.->|imports| ext_stddef_h
-    include_prefetch_h -.->|imports| ext_pthread_h
-    include_prefs_h -.->|imports| ext_stddef_h
-    include_profile_h -.->|imports| ext_stddef_h
-    include_profile_h -.->|imports| ext_stdint_h
-    include_profile_h -.->|imports| ext_local_store_h
-    include_profile_h -.->|imports| ext_prefs_h
-    include_psl_data_h -.->|imports| ext_stddef_h
-    include_render_doc_h -.->|imports| ext_stddef_h
-    include_render_doc_h -.->|imports| ext_page_view_h
-    include_render_doc_h -.->|imports| ext_render_policy_h
-    include_render_policy_h -.->|imports| ext_stdbool_h
-    include_renderer_h -.->|imports| ext_stddef_h
-    include_request_policy_h -.->|imports| ext_stddef_h
-    include_secure_fetch_h -.->|imports| ext_stddef_h
-    include_secure_fetch_h -.->|imports| ext_stdint_h
-    ext_anti_fp_h["anti_fp.h"]
-    class ext_anti_fp_h ext;
-    include_secure_fetch_h -.->|imports| ext_anti_fp_h
-    ext_cairo_h["cairo.h"]
-    class ext_cairo_h ext;
-    include_svg_paint_h -.->|imports| ext_cairo_h
-    include_svg_paint_h -.->|imports| ext_svg_render_h
-    include_svg_render_h -.->|imports| ext_stddef_h
-    include_tab_h -.->|imports| ext_stddef_h
-    include_tab_h -.->|imports| ext_stdint_h
-    include_tab_h -.->|imports| ext_sys_types_h
-    include_tab_h -.->|imports| ext_freebug_h
-    include_tab_h -.->|imports| ext_js_geom_h
-    include_tab_h -.->|imports| ext_page_view_h
-    include_text_shape_h -.->|imports| ext_cairo_cairo_h
-    include_text_shape_h -.->|imports| ext_stddef_h
-    include_textfield_h -.->|imports| ext_stddef_h
-    include_tls_impersonate_h -.->|imports| ext_stddef_h
-    include_tls_impersonate_h -.->|imports| ext_stdint_h
-    include_ui_h -.->|imports| ext_stddef_h
-    include_url_h -.->|imports| ext_stddef_h
-    include_util_h -.->|imports| ext_stddef_h
-    include_util_h -.->|imports| ext_stdint_h
-    include_util_h -.->|imports| ext_string_h
-    include_util_h -.->|imports| ext_unistd_h
-    include_util_h -.->|imports| ext_errno_h
-    include_web_storage_h -.->|imports| ext_stddef_h
-    include_webcaps_h -.->|imports| ext_stdbool_h
-    include_webcaps_h -.->|imports| ext_js_policy_h
-    include_webcaps_h -.->|imports| ext_render_policy_h
-    include_webfont_h -.->|imports| ext_stddef_h
-    include_webfont_load_h -.->|imports| ext_stddef_h
-    include_ws_hub_h -.->|imports| ext_poll_h
-    include_ws_hub_h -.->|imports| ext_stddef_h
-    include_ws_hub_h -.->|imports| ext_secure_fetch_h
-    src_anti_fp_c -.->|imports| ext_anti_fp_h
-    src_block_flow_c -.->|imports| ext_block_flow_h
-    src_block_flow_c -.->|imports| ext_math_h
-    src_box_style_c -.->|imports| ext_box_style_h
-    src_box_style_c -.->|imports| ext_stddef_h
-    src_box_style_c -.->|imports| ext_stdlib_h
-    src_box_style_c -.->|imports| ext_string_h
-    src_box_tree_c -.->|imports| ext_box_tree_h
-    src_box_tree_c -.->|imports| ext_compositor_h
-    src_box_tree_c -.->|imports| ext_css_h
-    src_box_tree_c -.->|imports| ext_box_style_h
-    src_box_tree_c -.->|imports| ext_stddef_h
-    src_browser_c -.->|imports| ext_browser_h
-    ext_util_h["util.h"]
-    class ext_util_h ext;
-    src_browser_c -.->|imports| ext_util_h
-    src_browser_c -.->|imports| ext_stdlib_h
-    src_browser_c -.->|imports| ext_string_h
-    src_compositor_c -.->|imports| ext_compositor_h
-    src_compositor_c -.->|imports| ext_css_h
-    src_css_c -.->|imports| ext_css_h
-    src_css_c -.->|imports| ext_css_color_h
-    ext_css_length_h["css_length.h"]
-    class ext_css_length_h ext;
-    src_css_c -.->|imports| ext_css_length_h
-    ext_css_values_h["css_values.h"]
-    class ext_css_values_h ext;
-    src_css_c -.->|imports| ext_css_values_h
-    ext_css_gradient_h["css_gradient.h"]
-    class ext_css_gradient_h ext;
-    src_css_c -.->|imports| ext_css_gradient_h
-    ext_css_box_h["css_box.h"]
-    class ext_css_box_h ext;
-    src_css_c -.->|imports| ext_css_box_h
-    ext_css_text_h["css_text.h"]
-    class ext_css_text_h ext;
-    src_css_c -.->|imports| ext_css_text_h
-    src_css_c -.->|imports| ext_webfont_h
-    src_css_c -.->|imports| ext_flex_layout_h
-    src_css_c -.->|imports| ext_css_select_h
-    src_css_c -.->|imports| ext_limits_h
-    src_css_c -.->|imports| ext_math_h
-    src_css_c -.->|imports| ext_stdint_h
-    src_css_c -.->|imports| ext_stdio_h
-    src_css_c -.->|imports| ext_stdlib_h
-    src_css_c -.->|imports| ext_string_h
-    ext_css_vars_h["css_vars.h"]
-    class ext_css_vars_h ext;
-    src_css_c -.->|imports| ext_css_vars_h
-    ext_css_atrule_h["css_atrule.h"]
-    class ext_css_atrule_h ext;
-    src_css_c -.->|imports| ext_css_atrule_h
-    ext_css_mq_h["css_mq.h"]
-    class ext_css_mq_h ext;
-    src_css_c -.->|imports| ext_css_mq_h
-    src_css_c -.->|imports| ext_css_decl_h
-    src_css_atrule_c -.->|imports| ext_css_atrule_h
-    src_css_atrule_c -.->|imports| ext_css_select_h
-    src_css_atrule_c -.->|imports| ext_string_h
-    src_css_box_c -.->|imports| ext_css_box_h
-    src_css_box_c -.->|imports| ext_css_decl_h
-    src_css_box_c -.->|imports| ext_css_h
-    src_css_box_c -.->|imports| ext_css_color_h
-    src_css_box_c -.->|imports| ext_css_length_h
-    src_css_box_c -.->|imports| ext_css_select_h
-    src_css_box_c -.->|imports| ext_css_values_h
-    src_css_box_c -.->|imports| ext_string_h
-    src_css_box_c -.->|imports| ext_stdlib_h
-    src_css_box_c -.->|imports| ext_math_h
-    ext_css_chain_h["css_chain.h"]
-    class ext_css_chain_h ext;
-    src_css_chain_c -.->|imports| ext_css_chain_h
-    src_css_chain_c -.->|imports| ext_css_select_h
-    src_css_chain_c -.->|imports| ext_string_h
-    src_css_color_c -.->|imports| ext_css_color_h
-    src_css_color_c -.->|imports| ext_math_h
-    src_css_color_c -.->|imports| ext_stdlib_h
-    src_css_color_c -.->|imports| ext_string_h
-    src_css_gradient_c -.->|imports| ext_css_gradient_h
-    src_css_gradient_c -.->|imports| ext_css_decl_h
-    src_css_gradient_c -.->|imports| ext_css_color_h
-    src_css_gradient_c -.->|imports| ext_css_length_h
-    src_css_gradient_c -.->|imports| ext_css_select_h
-    src_css_gradient_c -.->|imports| ext_css_values_h
-    ext_ctype_h["ctype.h"]
-    class ext_ctype_h ext;
-    src_css_gradient_c -.->|imports| ext_ctype_h
-    src_css_gradient_c -.->|imports| ext_string_h
-    src_css_gradient_c -.->|imports| ext_stdlib_h
-    src_css_length_c -.->|imports| ext_css_length_h
-    src_css_length_c -.->|imports| ext_math_h
-    src_css_length_c -.->|imports| ext_string_h
-    src_css_length_c -.->|imports| ext_css_h
-    src_css_mq_c -.->|imports| ext_css_mq_h
-    src_css_mq_c -.->|imports| ext_css_length_h
-    src_css_mq_c -.->|imports| ext_string_h
-    src_css_select_c -.->|imports| ext_css_select_h
-    src_css_select_c -.->|imports| ext_lexbor_html_html_h
-    src_css_select_c -.->|imports| ext_string_h
-    src_css_text_c -.->|imports| ext_css_text_h
-    src_css_text_c -.->|imports| ext_css_decl_h
-    src_css_text_c -.->|imports| ext_css_h
-    src_css_text_c -.->|imports| ext_css_box_h
-    src_css_text_c -.->|imports| ext_css_color_h
-    src_css_text_c -.->|imports| ext_css_length_h
-    src_css_text_c -.->|imports| ext_css_select_h
-    src_css_text_c -.->|imports| ext_css_values_h
-    src_css_text_c -.->|imports| ext_string_h
-    src_css_text_c -.->|imports| ext_stdlib_h
-    src_css_values_c -.->|imports| ext_css_values_h
-    src_css_values_c -.->|imports| ext_css_h
-    src_css_values_c -.->|imports| ext_css_decl_h
-    src_css_values_c -.->|imports| ext_css_color_h
-    src_css_values_c -.->|imports| ext_css_length_h
-    src_css_values_c -.->|imports| ext_css_select_h
-    src_css_values_c -.->|imports| ext_ctype_h
-    src_css_values_c -.->|imports| ext_string_h
-    src_css_vars_c -.->|imports| ext_css_vars_h
-    src_css_vars_c -.->|imports| ext_css_select_h
-    src_css_vars_c -.->|imports| ext_stdint_h
-    src_css_vars_c -.->|imports| ext_stdlib_h
-    src_css_vars_c -.->|imports| ext_string_h
-    src_data_url_c -.->|imports| ext_data_url_h
-    src_data_url_c -.->|imports| ext_stdlib_h
-    src_data_url_c -.->|imports| ext_string_h
-    ext_disk_store_h["disk_store.h"]
-    class ext_disk_store_h ext;
-    src_disk_store_c -.->|imports| ext_disk_store_h
-    src_disk_store_c -.->|imports| ext_local_store_h
-    src_disk_store_c -.->|imports| ext_errno_h
-    src_disk_store_c -.->|imports| ext_fcntl_h
-    src_disk_store_c -.->|imports| ext_stdint_h
-    src_disk_store_c -.->|imports| ext_stdio_h
-    src_disk_store_c -.->|imports| ext_stdlib_h
-    src_disk_store_c -.->|imports| ext_string_h
-    src_disk_store_c -.->|imports| ext_unistd_h
-    src_disk_store_c -.->|imports| ext_sys_stat_h
-    src_disk_store_c -.->|imports| ext_util_h
-    src_dom_c -.->|imports| ext_dom_h
-    src_dom_c -.->|imports| ext_html_parse_h
-    src_dom_c -.->|imports| ext_css_chain_h
-    src_dom_c -.->|imports| ext_css_select_h
-    src_dom_c -.->|imports| ext_util_h
-    src_dom_c -.->|imports| ext_stdint_h
-    src_dom_c -.->|imports| ext_stdlib_h
-    src_dom_c -.->|imports| ext_string_h
-    ext_lexbor_dom_dom_h["dom.h"]
-    class ext_lexbor_dom_dom_h ext;
-    src_dom_c -.->|imports| ext_lexbor_dom_dom_h
-    src_dom_c -.->|imports| ext_lexbor_html_html_h
-    src_dom_debug_c -.->|imports| ext_dom_debug_h
-    ext_stdarg_h["stdarg.h"]
-    class ext_stdarg_h ext;
-    src_dom_debug_c -.->|imports| ext_stdarg_h
-    src_dom_debug_c -.->|imports| ext_stddef_h
-    src_dom_debug_c -.->|imports| ext_stdio_h
-    src_dom_debug_c -.->|imports| ext_box_style_h
-    src_dom_debug_c -.->|imports| ext_css_h
-    src_dom_debug_c -.->|imports| ext_flex_layout_h
-    src_dom_debug_c -.->|imports| ext_page_view_h
-    src_download_c -.->|imports| ext_download_h
-    src_download_c -.->|imports| ext_pdf_export_h
-    src_download_c -.->|imports| ext_ctype_h
-    src_download_c -.->|imports| ext_string_h
-    src_flex_layout_c -.->|imports| ext_flex_layout_h
-    src_flex_layout_c -.->|imports| ext_stddef_h
-    src_form_c -.->|imports| ext_form_h
-    src_form_c -.->|imports| ext_string_h
-    src_frame_clock_c -.->|imports| ext_frame_clock_h
-    src_freebug_c -.->|imports| ext_freebug_h
-    src_freebug_c -.->|imports| ext_stdlib_h
-    src_freebug_c -.->|imports| ext_string_h
-    src_freedom_c -.->|imports| ext_stdlib_h
-    src_freedom_c -.->|imports| ext_unistd_h
-    src_freedom_c -.->|imports| ext_dom_debug_h
-    src_freedom_c -.->|imports| ext_html_parse_h
-    src_freedom_c -.->|imports| ext_freebug_h
-    src_freedom_c -.->|imports| ext_hostblock_h
-    src_freedom_c -.->|imports| ext_js_policy_h
-    src_freedom_c -.->|imports| ext_link_nav_h
-    src_freedom_c -.->|imports| ext_net_realm_h
-    ext_perf_trace_h["perf_trace.h"]
-    class ext_perf_trace_h ext;
-    src_freedom_c -.->|imports| ext_perf_trace_h
-    src_freedom_c -.->|imports| ext_prefetch_h
-    src_freedom_c -.->|imports| ext_render_doc_h
-    src_freedom_c -.->|imports| ext_render_policy_h
-    src_freedom_c -.->|imports| ext_request_policy_h
-    src_freedom_c -.->|imports| ext_secure_fetch_h
-    src_freedom_c -.->|imports| ext_tab_h
-    src_freedom_c -.->|imports| ext_webcaps_h
-    src_freedom_c -.->|imports| ext_page_view_h
-    src_freedom_c -.->|imports| ext_media_decoder_h
-    src_freedom_c -.->|imports| ext_tls_impersonate_h
-    src_freedom_c -.->|imports| ext_hls_h
-    src_freedom_c -.->|imports| ext_ui_h
-    src_freedom_c -.->|imports| ext_url_h
-    src_freedom_c -.->|imports| ext_webfont_h
-    src_freedom_c -.->|imports| ext_webfont_load_h
-    src_freedom_c -.->|imports| ext_text_shape_h
-    src_freedom_c -.->|imports| ext_stdio_h
-    src_freedom_c -.->|imports| ext_string_h
-    src_freedom_c -.->|imports| ext_limits_h
-    src_freedom_c -.->|imports| ext_time_h
-    src_hls_c -.->|imports| ext_hls_h
-    src_hls_c -.->|imports| ext_stdlib_h
-    src_hls_c -.->|imports| ext_string_h
-    src_hostblock_c -.->|imports| ext_hostblock_h
-    src_hostblock_c -.->|imports| ext_util_h
-    src_hostblock_c -.->|imports| ext_stdint_h
-    src_hostblock_c -.->|imports| ext_stdlib_h
-    src_hostblock_c -.->|imports| ext_string_h
-    src_hostedit_c -.->|imports| ext_hostedit_h
-    src_hostedit_c -.->|imports| ext_string_h
-    src_html_parse_c -.->|imports| ext_html_parse_h
-    src_html_parse_c -.->|imports| ext_util_h
-    src_html_parse_c -.->|imports| ext_stdlib_h
-    src_html_parse_c -.->|imports| ext_string_h
-    src_html_parse_c -.->|imports| ext_lexbor_html_html_h
-    src_html_parse_c -.->|imports| ext_lexbor_dom_dom_h
-    ext_lexbor_tag_const_h["const.h"]
-    class ext_lexbor_tag_const_h ext;
-    src_html_parse_c -.->|imports| ext_lexbor_tag_const_h
-    src_image_decode_c -.->|imports| ext_image_decode_h
-    ext_setjmp_h["setjmp.h"]
-    class ext_setjmp_h ext;
-    src_image_decode_c -.->|imports| ext_setjmp_h
-    src_image_decode_c -.->|imports| ext_stdlib_h
-    src_image_decode_c -.->|imports| ext_string_h
-    ext_png_h["png.h"]
-    class ext_png_h ext;
-    src_image_decode_c -.->|imports| ext_png_h
-    ext_jpeglib_h["jpeglib.h"]
-    class ext_jpeglib_h ext;
-    src_image_decode_c -.->|imports| ext_jpeglib_h
-    ext_webp_decode_h["decode.h"]
-    class ext_webp_decode_h ext;
-    src_image_decode_c -.->|imports| ext_webp_decode_h
-    src_import_map_c -.->|imports| ext_import_map_h
-    src_import_map_c -.->|imports| ext_stdint_h
-    src_import_map_c -.->|imports| ext_stdlib_h
-    src_import_map_c -.->|imports| ext_string_h
-    src_interp_c -.->|imports| ext_interp_h
-    src_interp_c -.->|imports| ext_math_h
-    ext_float_h["float.h"]
-    class ext_float_h ext;
-    src_interp_c -.->|imports| ext_float_h
-    src_js_dom_c -.->|imports| ext_js_dom_h
-    src_js_dom_c -.->|imports| ext_dom_h
-    src_js_dom_c -.->|imports| ext_freebug_h
-    src_js_dom_c -.->|imports| ext_html_parse_h
-    src_js_dom_c -.->|imports| ext_js_sandbox_h
-    src_js_dom_c -.->|imports| ext_stdint_h
-    src_js_dom_c -.->|imports| ext_stdlib_h
-    src_js_dom_c -.->|imports| ext_string_h
-    ext_quickjs_h["quickjs.h"]
-    class ext_quickjs_h ext;
-    src_js_dom_c -.->|imports| ext_quickjs_h
-    src_js_dom_c -.->|imports| ext_web_storage_h
-    ext_js_dom_internal_h["js_dom_internal.h"]
-    class ext_js_dom_internal_h ext;
-    src_js_dom_c -.->|imports| ext_js_dom_internal_h
-    ext_js_location_internal_h["js_location_internal.h"]
-    class ext_js_location_internal_h ext;
-    src_js_dom_c -.->|imports| ext_js_location_internal_h
-    ext_js_dom_ext_h["js_dom_ext.h"]
-    class ext_js_dom_ext_h ext;
-    src_js_dom_c -.->|imports| ext_js_dom_ext_h
-    src_js_dom_ext_c -.->|imports| ext_js_dom_ext_h
-    src_js_dom_ext_h -.->|imports| ext_quickjs_h
-    src_js_dom_internal_h -.->|imports| ext_dom_h
-    src_js_dom_internal_h -.->|imports| ext_js_dom_h
-    src_js_dom_internal_h -.->|imports| ext_quickjs_h
-    src_js_embed_c -.->|imports| ext_js_dom_h
-    src_js_embed_c -.->|imports| ext_dom_h
-    src_js_embed_c -.->|imports| ext_freebug_h
-    src_js_embed_c -.->|imports| ext_html_parse_h
-    src_js_embed_c -.->|imports| ext_js_sandbox_h
-    src_js_embed_c -.->|imports| ext_stdint_h
-    src_js_embed_c -.->|imports| ext_stdio_h
-    src_js_embed_c -.->|imports| ext_stdlib_h
-    src_js_embed_c -.->|imports| ext_string_h
-    src_js_embed_c -.->|imports| ext_quickjs_h
-    src_js_embed_c -.->|imports| ext_js_dom_internal_h
-    ext_js_env_h["js_env.h"]
-    class ext_js_env_h ext;
-    src_js_env_c -.->|imports| ext_js_env_h
-    src_js_env_c -.->|imports| ext_anti_fp_h
-    src_js_env_c -.->|imports| ext_js_sandbox_h
-    src_js_env_c -.->|imports| ext_stdint_h
-    src_js_env_c -.->|imports| ext_stdio_h
-    src_js_env_c -.->|imports| ext_stdlib_h
-    src_js_env_c -.->|imports| ext_string_h
-    ext_sys_random_h["random.h"]
-    class ext_sys_random_h ext;
-    src_js_env_c -.->|imports| ext_sys_random_h
-    src_js_env_c -.->|imports| ext_time_h
-    src_js_env_c -.->|imports| ext_quickjs_h
-    src_js_events_c -.->|imports| ext_js_dom_h
-    src_js_events_c -.->|imports| ext_dom_h
-    src_js_events_c -.->|imports| ext_freebug_h
-    src_js_events_c -.->|imports| ext_html_parse_h
-    src_js_events_c -.->|imports| ext_js_sandbox_h
-    src_js_events_c -.->|imports| ext_stdint_h
-    src_js_events_c -.->|imports| ext_stdio_h
-    src_js_events_c -.->|imports| ext_stdlib_h
-    src_js_events_c -.->|imports| ext_string_h
-    src_js_events_c -.->|imports| ext_quickjs_h
-    src_js_events_c -.->|imports| ext_js_dom_internal_h
-    src_js_fetch_c -.->|imports| ext_js_dom_h
-    src_js_fetch_c -.->|imports| ext_dom_h
-    src_js_fetch_c -.->|imports| ext_freebug_h
-    src_js_fetch_c -.->|imports| ext_html_parse_h
-    src_js_fetch_c -.->|imports| ext_js_sandbox_h
-    src_js_fetch_c -.->|imports| ext_stdint_h
-    src_js_fetch_c -.->|imports| ext_stdio_h
-    src_js_fetch_c -.->|imports| ext_stdlib_h
-    src_js_fetch_c -.->|imports| ext_string_h
-    src_js_fetch_c -.->|imports| ext_quickjs_h
-    src_js_fetch_c -.->|imports| ext_js_dom_internal_h
-    src_js_geom_c -.->|imports| ext_js_geom_h
-    src_js_geom_c -.->|imports| ext_math_h
-    src_js_geom_c -.->|imports| ext_stdlib_h
-    src_js_geom_c -.->|imports| ext_string_h
-    src_js_location_c -.->|imports| ext_js_dom_h
-    src_js_location_c -.->|imports| ext_js_location_internal_h
-    src_js_location_c -.->|imports| ext_stdint_h
-    src_js_location_c -.->|imports| ext_stdio_h
-    src_js_location_c -.->|imports| ext_stdlib_h
-    src_js_location_c -.->|imports| ext_string_h
-    src_js_location_c -.->|imports| ext_quickjs_h
-    src_js_location_c -.->|imports| ext_url_h
-    src_js_location_internal_h -.->|imports| ext_quickjs_h
-    src_js_policy_c -.->|imports| ext_js_policy_h
-    src_js_policy_c -.->|imports| ext_string_h
-    src_js_sandbox_c -.->|imports| ext_js_sandbox_h
-    ext_malloc_h["malloc.h"]
-    class ext_malloc_h ext;
-    src_js_sandbox_c -.->|imports| ext_malloc_h
-    src_js_sandbox_c -.->|imports| ext_stdlib_h
-    src_js_sandbox_c -.->|imports| ext_string_h
-    src_js_sandbox_c -.->|imports| ext_time_h
-    src_js_sandbox_c -.->|imports| ext_quickjs_h
-    src_js_trusted_c -.->|imports| ext_js_trusted_h
-    src_js_trusted_c -.->|imports| ext_stdint_h
-    src_js_trusted_c -.->|imports| ext_stdlib_h
-    src_js_trusted_c -.->|imports| ext_string_h
-    src_js_trusted_c -.->|imports| ext_quickjs_h
-    src_js_trusted_c -.->|imports| ext_web_storage_h
-    src_link_nav_c -.->|imports| ext_link_nav_h
-    src_link_nav_c -.->|imports| ext_url_h
-    src_link_nav_c -.->|imports| ext_string_h
-    ext_openssl_kdf_h["kdf.h"]
-    class ext_openssl_kdf_h ext;
-    src_local_store_c -.->|imports| ext_openssl_kdf_h
-    src_local_store_c -.->|imports| ext_local_store_h
-    src_local_store_c -.->|imports| ext_stdlib_h
-    src_local_store_c -.->|imports| ext_string_h
-    ext_openssl_core_names_h["core_names.h"]
-    class ext_openssl_core_names_h ext;
-    src_local_store_c -.->|imports| ext_openssl_core_names_h
-    ext_openssl_crypto_h["crypto.h"]
-    class ext_openssl_crypto_h ext;
-    src_local_store_c -.->|imports| ext_openssl_crypto_h
-    ext_openssl_evp_h["evp.h"]
-    class ext_openssl_evp_h ext;
-    src_local_store_c -.->|imports| ext_openssl_evp_h
-    ext_openssl_params_h["params.h"]
-    class ext_openssl_params_h ext;
-    src_local_store_c -.->|imports| ext_openssl_params_h
-    ext_openssl_rand_h["rand.h"]
-    class ext_openssl_rand_h ext;
-    src_local_store_c -.->|imports| ext_openssl_rand_h
-    src_media_decoder_c -.->|imports| ext_media_decoder_h
-    src_media_decoder_c -.->|imports| ext_util_h
-    src_media_decoder_c -.->|imports| ext_errno_h
-    src_media_decoder_c -.->|imports| ext_signal_h
-    src_media_decoder_c -.->|imports| ext_stdint_h
-    src_media_decoder_c -.->|imports| ext_stdio_h
-    src_media_decoder_c -.->|imports| ext_stdlib_h
-    src_media_decoder_c -.->|imports| ext_string_h
-    src_media_decoder_c -.->|imports| ext_unistd_h
-    ext_libavcodec_avcodec_h["avcodec.h"]
-    class ext_libavcodec_avcodec_h ext;
-    src_media_decoder_c -.->|imports| ext_libavcodec_avcodec_h
-    ext_libavformat_avformat_h["avformat.h"]
-    class ext_libavformat_avformat_h ext;
-    src_media_decoder_c -.->|imports| ext_libavformat_avformat_h
-    ext_libavutil_avutil_h["avutil.h"]
-    class ext_libavutil_avutil_h ext;
-    src_media_decoder_c -.->|imports| ext_libavutil_avutil_h
-    ext_libavutil_imgutils_h["imgutils.h"]
-    class ext_libavutil_imgutils_h ext;
-    src_media_decoder_c -.->|imports| ext_libavutil_imgutils_h
-    ext_libswscale_swscale_h["swscale.h"]
-    class ext_libswscale_swscale_h ext;
-    src_media_decoder_c -.->|imports| ext_libswscale_swscale_h
-    src_net_realm_c -.->|imports| ext_net_realm_h
-    src_net_realm_c -.->|imports| ext_stddef_h
-    src_net_realm_c -.->|imports| ext_string_h
-    ext_os_sandbox_h["os_sandbox.h"]
-    class ext_os_sandbox_h ext;
-    src_os_sandbox_c -.->|imports| ext_os_sandbox_h
-    src_os_sandbox_c -.->|imports| ext_errno_h
-    ext_sched_h["sched.h"]
-    class ext_sched_h ext;
-    src_os_sandbox_c -.->|imports| ext_sched_h
-    src_os_sandbox_c -.->|imports| ext_sys_mman_h
-    ext_sys_prctl_h["prctl.h"]
-    class ext_sys_prctl_h ext;
-    src_os_sandbox_c -.->|imports| ext_sys_prctl_h
-    ext_sys_resource_h["resource.h"]
-    class ext_sys_resource_h ext;
-    src_os_sandbox_c -.->|imports| ext_sys_resource_h
-    ext_sys_syscall_h["syscall.h"]
-    class ext_sys_syscall_h ext;
-    src_os_sandbox_c -.->|imports| ext_sys_syscall_h
-    src_os_sandbox_c -.->|imports| ext_stddef_h
-    ext_linux_audit_h["audit.h"]
-    class ext_linux_audit_h ext;
-    src_os_sandbox_c -.->|imports| ext_linux_audit_h
-    ext_linux_filter_h["filter.h"]
-    class ext_linux_filter_h ext;
-    src_os_sandbox_c -.->|imports| ext_linux_filter_h
-    ext_linux_seccomp_h["seccomp.h"]
-    class ext_linux_seccomp_h ext;
-    src_os_sandbox_c -.->|imports| ext_linux_seccomp_h
-    src_os_sandbox_c -.->|imports| ext_fcntl_h
-    src_os_sandbox_c -.->|imports| ext_stdint_h
-    src_os_sandbox_c -.->|imports| ext_string_h
-    src_os_sandbox_c -.->|imports| ext_unistd_h
-    ext_linux_landlock_h["landlock.h"]
-    class ext_linux_landlock_h ext;
-    src_os_sandbox_c -.->|imports| ext_linux_landlock_h
-    src_page_view_c -.->|imports| ext_page_view_h
-    src_page_view_c -.->|imports| ext_freedom_config_h
-    src_page_view_c -.->|imports| ext_box_tree_h
-    src_page_view_c -.->|imports| ext_box_style_h
-    src_page_view_c -.->|imports| ext_css_h
-    src_page_view_c -.->|imports| ext_css_chain_h
-    src_page_view_c -.->|imports| ext_css_vars_h
-    src_page_view_c -.->|imports| ext_css_length_h
-    src_page_view_c -.->|imports| ext_css_color_h
-    src_page_view_c -.->|imports| ext_flex_layout_h
-    src_page_view_c -.->|imports| ext_html_parse_h
-    src_page_view_c -.->|imports| ext_svg_render_h
-    src_page_view_c -.->|imports| ext_util_h
-    src_page_view_c -.->|imports| ext_stdint_h
-    src_page_view_c -.->|imports| ext_stdio_h
-    src_page_view_c -.->|imports| ext_stdlib_h
-    src_page_view_c -.->|imports| ext_string_h
-    src_page_view_c -.->|imports| ext_ctype_h
-    src_page_view_c -.->|imports| ext_lexbor_dom_dom_h
-    src_page_view_c -.->|imports| ext_lexbor_html_html_h
-    src_page_view_c -.->|imports| ext_lexbor_tag_const_h
-    src_pdf_export_c -.->|imports| ext_pdf_export_h
-    src_pdf_export_c -.->|imports| ext_string_h
-    src_perf_trace_c -.->|imports| ext_perf_trace_h
-    src_perf_trace_c -.->|imports| ext_stdio_h
-    src_perf_trace_c -.->|imports| ext_stdlib_h
-    src_perf_trace_c -.->|imports| ext_string_h
-    src_prefetch_c -.->|imports| ext_prefetch_h
-    src_prefetch_c -.->|imports| ext_stdlib_h
-    src_prefetch_c -.->|imports| ext_string_h
-    src_prefs_c -.->|imports| ext_prefs_h
-    src_prefs_c -.->|imports| ext_zoom_h
-    src_prefs_c -.->|imports| ext_stdio_h
-    src_prefs_c -.->|imports| ext_stdlib_h
-    src_prefs_c -.->|imports| ext_string_h
-    src_profile_c -.->|imports| ext_profile_h
-    src_profile_c -.->|imports| ext_disk_store_h
-    src_profile_c -.->|imports| ext_errno_h
-    src_profile_c -.->|imports| ext_fcntl_h
-    src_profile_c -.->|imports| ext_stdio_h
-    src_profile_c -.->|imports| ext_stdlib_h
-    src_profile_c -.->|imports| ext_string_h
-    src_profile_c -.->|imports| ext_sys_stat_h
-    src_profile_c -.->|imports| ext_unistd_h
-    src_profile_c -.->|imports| ext_openssl_crypto_h
-    src_profile_c -.->|imports| ext_openssl_rand_h
-    src_render_doc_c -.->|imports| ext_render_doc_h
-    src_render_doc_c -.->|imports| ext_box_style_h
-    src_render_doc_c -.->|imports| ext_css_h
-    src_render_doc_c -.->|imports| ext_data_url_h
-    src_render_doc_c -.->|imports| ext_url_h
-    src_render_doc_c -.->|imports| ext_util_h
-    src_render_doc_c -.->|imports| ext_stdlib_h
-    src_render_doc_c -.->|imports| ext_string_h
-    src_render_policy_c -.->|imports| ext_render_policy_h
-    src_render_policy_c -.->|imports| ext_data_url_h
-    src_render_policy_c -.->|imports| ext_request_policy_h
-    ext_renderer_h["renderer.h"]
-    class ext_renderer_h ext;
-    src_renderer_c -.->|imports| ext_renderer_h
-    src_renderer_c -.->|imports| ext_html_parse_h
-    src_renderer_c -.->|imports| ext_os_sandbox_h
-    src_renderer_c -.->|imports| ext_util_h
-    src_renderer_c -.->|imports| ext_errno_h
-    src_renderer_c -.->|imports| ext_stdint_h
-    src_renderer_c -.->|imports| ext_stdlib_h
-    src_renderer_c -.->|imports| ext_string_h
-    src_renderer_c -.->|imports| ext_unistd_h
-    src_renderer_c -.->|imports| ext_sys_wait_h
-    src_request_policy_c -.->|imports| ext_request_policy_h
-    ext_psl_data_h["psl_data.h"]
-    class ext_psl_data_h ext;
-    src_request_policy_c -.->|imports| ext_psl_data_h
-    src_request_policy_c -.->|imports| ext_stdlib_h
-    src_request_policy_c -.->|imports| ext_string_h
-    src_secure_fetch_c -.->|imports| ext_secure_fetch_h
-    src_secure_fetch_c -.->|imports| ext_anti_fp_h
-    src_secure_fetch_c -.->|imports| ext_url_h
-    src_secure_fetch_c -.->|imports| ext_stdlib_h
-    src_secure_fetch_c -.->|imports| ext_string_h
-    src_secure_fetch_c -.->|imports| ext_strings_h
-    src_secure_fetch_c -.->|imports| ext_pthread_h
-    src_secure_fetch_c -.->|imports| ext_time_h
-    ext_inttypes_h["inttypes.h"]
-    class ext_inttypes_h ext;
-    src_secure_fetch_c -.->|imports| ext_inttypes_h
-    ext_curl_curl_h["curl.h"]
-    class ext_curl_curl_h ext;
-    src_secure_fetch_c -.->|imports| ext_curl_curl_h
-    ext_openssl_ssl_h["ssl.h"]
-    class ext_openssl_ssl_h ext;
-    src_secure_fetch_c -.->|imports| ext_openssl_ssl_h
-    ext_openssl_x509_h["x509.h"]
-    class ext_openssl_x509_h ext;
-    src_secure_fetch_c -.->|imports| ext_openssl_x509_h
-    ext_openssl_objects_h["objects.h"]
-    class ext_openssl_objects_h ext;
-    src_secure_fetch_c -.->|imports| ext_openssl_objects_h
-    src_svg_render_c -.->|imports| ext_svg_render_h
-    src_svg_render_c -.->|imports| ext_math_h
-    src_svg_render_c -.->|imports| ext_stddef_h
-    src_svg_render_c -.->|imports| ext_string_h
-    src_svg_render_c -.->|imports| ext_css_color_h
-    src_tab_c -.->|imports| ext_tab_h
-    src_tab_c -.->|imports| ext_anti_fp_h
-    src_tab_c -.->|imports| ext_box_tree_h
-    src_tab_c -.->|imports| ext_css_h
-    src_tab_c -.->|imports| ext_data_url_h
-    src_tab_c -.->|imports| ext_dom_h
-    src_tab_c -.->|imports| ext_freebug_h
-    src_tab_c -.->|imports| ext_freedom_config_h
-    src_tab_c -.->|imports| ext_html_parse_h
-    src_tab_c -.->|imports| ext_image_decode_h
-    src_tab_c -.->|imports| ext_js_dom_h
-    src_tab_c -.->|imports| ext_js_trusted_h
-    src_tab_c -.->|imports| ext_js_env_h
-    src_tab_c -.->|imports| ext_js_sandbox_h
-    src_tab_c -.->|imports| ext_link_nav_h
-    src_tab_c -.->|imports| ext_os_sandbox_h
-    src_tab_c -.->|imports| ext_page_view_h
-    src_tab_c -.->|imports| ext_request_policy_h
-    src_tab_c -.->|imports| ext_url_h
-    src_tab_c -.->|imports| ext_web_storage_h
-    src_tab_c -.->|imports| ext_import_map_h
-    src_tab_c -.->|imports| ext_util_h
-    src_tab_c -.->|imports| ext_errno_h
-    src_tab_c -.->|imports| ext_fcntl_h
-    src_tab_c -.->|imports| ext_signal_h
-    src_tab_c -.->|imports| ext_stdint_h
-    src_tab_c -.->|imports| ext_stdio_h
-    src_tab_c -.->|imports| ext_stdlib_h
-    src_tab_c -.->|imports| ext_string_h
-    src_tab_c -.->|imports| ext_time_h
-    src_tab_c -.->|imports| ext_unistd_h
-    ext_linux_close_range_h["close_range.h"]
-    class ext_linux_close_range_h ext;
-    src_tab_c -.->|imports| ext_linux_close_range_h
-    src_tab_c -.->|imports| ext_sys_random_h
-    src_tab_c -.->|imports| ext_sys_wait_h
-    src_text_shape_c -.->|imports| ext_text_shape_h
-    src_text_shape_c -.->|imports| ext_css_h
-    src_text_shape_c -.->|imports| ext_webfont_h
-    src_text_shape_c -.->|imports| ext_stdio_h
-    src_text_shape_c -.->|imports| ext_stdlib_h
-    src_text_shape_c -.->|imports| ext_string_h
-    ext_cairo_cairo_ft_h["cairo-ft.h"]
-    class ext_cairo_cairo_ft_h ext;
-    src_text_shape_c -.->|imports| ext_cairo_cairo_ft_h
-    ext_ft2build_h["ft2build.h"]
-    class ext_ft2build_h ext;
-    src_text_shape_c -.->|imports| ext_ft2build_h
-    ext_harfbuzz_hb_h["hb.h"]
-    class ext_harfbuzz_hb_h ext;
-    src_text_shape_c -.->|imports| ext_harfbuzz_hb_h
-    src_text_shape_c -.->|imports| ext_fontconfig_fontconfig_h
-    src_textfield_c -.->|imports| ext_textfield_h
-    src_textfield_c -.->|imports| ext_string_h
-    src_tls_impersonate_c -.->|imports| ext_tls_impersonate_h
-    src_tls_impersonate_c -.->|imports| ext_stdlib_h
-    src_tls_impersonate_c -.->|imports| ext_string_h
-    src_ui_layout_c -.->|imports| ext_ui_h
-    src_ui_layout_c -.->|imports| ext_stdlib_h
-    src_url_c -.->|imports| ext_url_h
-    src_url_c -.->|imports| ext_stdlib_h
-    src_url_c -.->|imports| ext_string_h
-    src_url_c -.->|imports| ext_strings_h
-    src_web_storage_c -.->|imports| ext_web_storage_h
-    src_web_storage_c -.->|imports| ext_stdint_h
-    src_web_storage_c -.->|imports| ext_stdlib_h
-    src_web_storage_c -.->|imports| ext_string_h
-    src_webcaps_c -.->|imports| ext_webcaps_h
-    src_webfont_c -.->|imports| ext_webfont_h
-    src_webfont_c -.->|imports| ext_data_url_h
-    src_webfont_c -.->|imports| ext_stdint_h
-    src_webfont_c -.->|imports| ext_stdlib_h
-    src_webfont_c -.->|imports| ext_string_h
-    src_webfont_load_c -.->|imports| ext_webfont_load_h
-    src_webfont_load_c -.->|imports| ext_webfont_h
-    src_webfont_load_c -.->|imports| ext_text_shape_h
-    src_webfont_load_c -.->|imports| ext_url_h
-    src_webfont_load_c -.->|imports| ext_data_url_h
-    src_webfont_load_c -.->|imports| ext_stdlib_h
-    src_webfont_load_c -.->|imports| ext_string_h
-    src_ws_hub_c -.->|imports| ext_ws_hub_h
-    src_ws_hub_c -.->|imports| ext_curl_curl_h
-    src_ws_hub_c -.->|imports| ext_errno_h
-    src_ws_hub_c -.->|imports| ext_fcntl_h
-    src_ws_hub_c -.->|imports| ext_pthread_h
-    ext_sys_socket_h["socket.h"]
-    class ext_sys_socket_h ext;
-    src_ws_hub_c -.->|imports| ext_sys_socket_h
-    src_ws_hub_c -.->|imports| ext_stdint_h
-    src_ws_hub_c -.->|imports| ext_stdlib_h
-    src_ws_hub_c -.->|imports| ext_string_h
-    src_ws_hub_c -.->|imports| ext_unistd_h
-    src_zoom_c -.->|imports| ext_zoom_h
-    tests_itest_secure_fetch_c -.->|imports| ext_secure_fetch_h
-    tests_itest_secure_fetch_c -.->|imports| ext_stdio_h
-    tests_itest_secure_fetch_c -.->|imports| ext_string_h
-    tests_test_anti_fp_c -.->|imports| ext_stdarg_h
-    tests_test_anti_fp_c -.->|imports| ext_stddef_h
-    tests_test_anti_fp_c -.->|imports| ext_stdint_h
-    tests_test_anti_fp_c -.->|imports| ext_setjmp_h
-    tests_test_anti_fp_c -.->|imports| ext_string_h
-    ext_cmocka_h["cmocka.h"]
-    class ext_cmocka_h ext;
-    tests_test_anti_fp_c -.->|imports| ext_cmocka_h
-    tests_test_anti_fp_c -.->|imports| ext_anti_fp_h
-    tests_test_block_flow_c -.->|imports| ext_math_h
-    tests_test_block_flow_c -.->|imports| ext_setjmp_h
-    tests_test_block_flow_c -.->|imports| ext_stdarg_h
-    tests_test_block_flow_c -.->|imports| ext_stddef_h
-    tests_test_block_flow_c -.->|imports| ext_stdint_h
-    tests_test_block_flow_c -.->|imports| ext_cmocka_h
-    tests_test_block_flow_c -.->|imports| ext_block_flow_h
-    tests_test_box_style_c -.->|imports| ext_setjmp_h
-    tests_test_box_style_c -.->|imports| ext_stdarg_h
-    tests_test_box_style_c -.->|imports| ext_stddef_h
-    tests_test_box_style_c -.->|imports| ext_stdint_h
-    tests_test_box_style_c -.->|imports| ext_string_h
-    tests_test_box_style_c -.->|imports| ext_cmocka_h
-    tests_test_box_style_c -.->|imports| ext_box_style_h
-    tests_test_box_tree_c -.->|imports| ext_setjmp_h
-    tests_test_box_tree_c -.->|imports| ext_stdarg_h
-    tests_test_box_tree_c -.->|imports| ext_stddef_h
-    tests_test_box_tree_c -.->|imports| ext_stdint_h
-    tests_test_box_tree_c -.->|imports| ext_string_h
-    tests_test_box_tree_c -.->|imports| ext_cmocka_h
-    tests_test_box_tree_c -.->|imports| ext_box_tree_h
-    tests_test_box_tree_c -.->|imports| ext_page_view_h
-    tests_test_box_tree_c -.->|imports| ext_css_h
-    tests_test_browser_c -.->|imports| ext_stdarg_h
-    tests_test_browser_c -.->|imports| ext_stddef_h
-    tests_test_browser_c -.->|imports| ext_stdint_h
-    tests_test_browser_c -.->|imports| ext_stdlib_h
-    tests_test_browser_c -.->|imports| ext_setjmp_h
-    tests_test_browser_c -.->|imports| ext_string_h
-    tests_test_browser_c -.->|imports| ext_cmocka_h
-    tests_test_browser_c -.->|imports| ext_browser_h
-    tests_test_compositor_c -.->|imports| ext_stdarg_h
-    tests_test_compositor_c -.->|imports| ext_stddef_h
-    tests_test_compositor_c -.->|imports| ext_setjmp_h
-    tests_test_compositor_c -.->|imports| ext_stdint_h
-    tests_test_compositor_c -.->|imports| ext_cmocka_h
-    tests_test_compositor_c -.->|imports| ext_compositor_h
-    tests_test_compositor_c -.->|imports| ext_css_h
-    tests_test_css_c -.->|imports| ext_setjmp_h
-    tests_test_css_c -.->|imports| ext_stdarg_h
-    tests_test_css_c -.->|imports| ext_stddef_h
-    tests_test_css_c -.->|imports| ext_stdint_h
-    tests_test_css_c -.->|imports| ext_stdio_h
-    tests_test_css_c -.->|imports| ext_stdlib_h
-    tests_test_css_c -.->|imports| ext_string_h
-    tests_test_css_c -.->|imports| ext_cmocka_h
-    tests_test_css_c -.->|imports| ext_css_h
-    tests_test_css_c -.->|imports| ext_css_select_h
-    tests_test_css_c -.->|imports| ext_css_vars_h
-    tests_test_css_c -.->|imports| ext_webfont_h
-    tests_test_css_atrule_c -.->|imports| ext_setjmp_h
-    tests_test_css_atrule_c -.->|imports| ext_stdarg_h
-    tests_test_css_atrule_c -.->|imports| ext_stddef_h
-    tests_test_css_atrule_c -.->|imports| ext_stdint_h
-    tests_test_css_atrule_c -.->|imports| ext_stdio_h
-    tests_test_css_atrule_c -.->|imports| ext_stdlib_h
-    tests_test_css_atrule_c -.->|imports| ext_string_h
-    tests_test_css_atrule_c -.->|imports| ext_cmocka_h
-    tests_test_css_atrule_c -.->|imports| ext_css_atrule_h
-    tests_test_css_box_c -.->|imports| ext_stdarg_h
-    tests_test_css_box_c -.->|imports| ext_stddef_h
-    tests_test_css_box_c -.->|imports| ext_setjmp_h
-    tests_test_css_box_c -.->|imports| ext_cmocka_h
-    tests_test_css_box_c -.->|imports| ext_css_box_h
-    tests_test_css_box_c -.->|imports| ext_css_decl_h
-    tests_test_css_color_c -.->|imports| ext_setjmp_h
-    tests_test_css_color_c -.->|imports| ext_stdarg_h
-    tests_test_css_color_c -.->|imports| ext_stddef_h
-    tests_test_css_color_c -.->|imports| ext_stdint_h
-    tests_test_css_color_c -.->|imports| ext_string_h
-    tests_test_css_color_c -.->|imports| ext_cmocka_h
-    tests_test_css_color_c -.->|imports| ext_css_color_h
-    tests_test_css_drops_c -.->|imports| ext_stdarg_h
-    tests_test_css_drops_c -.->|imports| ext_stddef_h
-    tests_test_css_drops_c -.->|imports| ext_setjmp_h
-    tests_test_css_drops_c -.->|imports| ext_cmocka_h
-    tests_test_css_drops_c -.->|imports| ext_string_h
-    tests_test_css_drops_c -.->|imports| ext_stdlib_h
-    tests_test_css_drops_c -.->|imports| ext_stdio_h
-    tests_test_css_drops_c -.->|imports| ext_css_h
-    tests_test_css_gradient_c -.->|imports| ext_stdarg_h
-    tests_test_css_gradient_c -.->|imports| ext_stddef_h
-    tests_test_css_gradient_c -.->|imports| ext_setjmp_h
-    tests_test_css_gradient_c -.->|imports| ext_cmocka_h
-    tests_test_css_gradient_c -.->|imports| ext_css_gradient_h
-    tests_test_css_gradient_c -.->|imports| ext_css_h
-    tests_test_css_length_c -.->|imports| ext_setjmp_h
-    tests_test_css_length_c -.->|imports| ext_stdarg_h
-    tests_test_css_length_c -.->|imports| ext_stddef_h
-    tests_test_css_length_c -.->|imports| ext_stdint_h
-    tests_test_css_length_c -.->|imports| ext_math_h
-    tests_test_css_length_c -.->|imports| ext_cmocka_h
-    tests_test_css_length_c -.->|imports| ext_css_length_h
-    tests_test_css_length_c -.->|imports| ext_css_h
-    tests_test_css_mq_c -.->|imports| ext_setjmp_h
-    tests_test_css_mq_c -.->|imports| ext_stdarg_h
-    tests_test_css_mq_c -.->|imports| ext_stddef_h
-    tests_test_css_mq_c -.->|imports| ext_stdint_h
-    tests_test_css_mq_c -.->|imports| ext_string_h
-    tests_test_css_mq_c -.->|imports| ext_cmocka_h
-    tests_test_css_mq_c -.->|imports| ext_css_mq_h
-    tests_test_css_text_c -.->|imports| ext_stdarg_h
-    tests_test_css_text_c -.->|imports| ext_stddef_h
-    tests_test_css_text_c -.->|imports| ext_setjmp_h
-    tests_test_css_text_c -.->|imports| ext_cmocka_h
-    tests_test_css_text_c -.->|imports| ext_css_text_h
-    tests_test_css_text_c -.->|imports| ext_css_decl_h
-    tests_test_css_text_c -.->|imports| ext_css_h
-    tests_test_css_values_c -.->|imports| ext_stdarg_h
-    tests_test_css_values_c -.->|imports| ext_stddef_h
-    tests_test_css_values_c -.->|imports| ext_setjmp_h
-    tests_test_css_values_c -.->|imports| ext_cmocka_h
-    tests_test_css_values_c -.->|imports| ext_css_values_h
-    tests_test_css_values_c -.->|imports| ext_css_h
-    tests_test_css_vars_c -.->|imports| ext_setjmp_h
-    tests_test_css_vars_c -.->|imports| ext_stdarg_h
-    tests_test_css_vars_c -.->|imports| ext_stddef_h
-    tests_test_css_vars_c -.->|imports| ext_stdint_h
-    tests_test_css_vars_c -.->|imports| ext_stdio_h
-    tests_test_css_vars_c -.->|imports| ext_stdlib_h
-    tests_test_css_vars_c -.->|imports| ext_string_h
-    tests_test_css_vars_c -.->|imports| ext_cmocka_h
-    tests_test_css_vars_c -.->|imports| ext_css_vars_h
-    tests_test_data_url_c -.->|imports| ext_setjmp_h
-    tests_test_data_url_c -.->|imports| ext_stdarg_h
-    tests_test_data_url_c -.->|imports| ext_stddef_h
-    tests_test_data_url_c -.->|imports| ext_stdint_h
-    tests_test_data_url_c -.->|imports| ext_stdlib_h
-    tests_test_data_url_c -.->|imports| ext_string_h
-    tests_test_data_url_c -.->|imports| ext_cmocka_h
-    tests_test_data_url_c -.->|imports| ext_data_url_h
-    tests_test_disk_store_c -.->|imports| ext_stdarg_h
-    tests_test_disk_store_c -.->|imports| ext_stddef_h
-    tests_test_disk_store_c -.->|imports| ext_stdint_h
-    tests_test_disk_store_c -.->|imports| ext_stdio_h
-    tests_test_disk_store_c -.->|imports| ext_stdlib_h
-    tests_test_disk_store_c -.->|imports| ext_setjmp_h
-    tests_test_disk_store_c -.->|imports| ext_string_h
-    tests_test_disk_store_c -.->|imports| ext_cmocka_h
-    ext_dirent_h["dirent.h"]
-    class ext_dirent_h ext;
-    tests_test_disk_store_c -.->|imports| ext_dirent_h
-    tests_test_disk_store_c -.->|imports| ext_fcntl_h
-    tests_test_disk_store_c -.->|imports| ext_sys_stat_h
-    tests_test_disk_store_c -.->|imports| ext_unistd_h
-    tests_test_disk_store_c -.->|imports| ext_disk_store_h
-    tests_test_disk_store_c -.->|imports| ext_local_store_h
-    tests_test_dom_c -.->|imports| ext_stdarg_h
-    tests_test_dom_c -.->|imports| ext_stddef_h
-    tests_test_dom_c -.->|imports| ext_stdint_h
-    tests_test_dom_c -.->|imports| ext_stdlib_h
-    tests_test_dom_c -.->|imports| ext_setjmp_h
-    tests_test_dom_c -.->|imports| ext_string_h
-    tests_test_dom_c -.->|imports| ext_cmocka_h
-    tests_test_dom_c -.->|imports| ext_dom_h
-    tests_test_dom_c -.->|imports| ext_html_parse_h
-    tests_test_dom_debug_c -.->|imports| ext_stdarg_h
-    tests_test_dom_debug_c -.->|imports| ext_stddef_h
-    tests_test_dom_debug_c -.->|imports| ext_stdint_h
-    tests_test_dom_debug_c -.->|imports| ext_stdlib_h
-    tests_test_dom_debug_c -.->|imports| ext_setjmp_h
-    tests_test_dom_debug_c -.->|imports| ext_string_h
-    tests_test_dom_debug_c -.->|imports| ext_cmocka_h
-    tests_test_dom_debug_c -.->|imports| ext_box_style_h
-    tests_test_dom_debug_c -.->|imports| ext_flex_layout_h
-    tests_test_dom_debug_c -.->|imports| ext_css_h
-    tests_test_dom_debug_c -.->|imports| ext_dom_debug_h
-    tests_test_dom_debug_c -.->|imports| ext_page_view_h
-    tests_test_dom_debug_c -.->|imports| ext_render_doc_h
-    tests_test_dom_debug_c -.->|imports| ext_render_policy_h
-    tests_test_download_c -.->|imports| ext_setjmp_h
-    tests_test_download_c -.->|imports| ext_stdarg_h
-    tests_test_download_c -.->|imports| ext_stddef_h
-    tests_test_download_c -.->|imports| ext_stdint_h
-    tests_test_download_c -.->|imports| ext_string_h
-    tests_test_download_c -.->|imports| ext_cmocka_h
-    tests_test_download_c -.->|imports| ext_download_h
-    tests_test_flex_layout_c -.->|imports| ext_setjmp_h
-    tests_test_flex_layout_c -.->|imports| ext_stdarg_h
-    tests_test_flex_layout_c -.->|imports| ext_stddef_h
-    tests_test_flex_layout_c -.->|imports| ext_stdint_h
-    tests_test_flex_layout_c -.->|imports| ext_stdio_h
-    tests_test_flex_layout_c -.->|imports| ext_string_h
-    tests_test_flex_layout_c -.->|imports| ext_cmocka_h
-    tests_test_flex_layout_c -.->|imports| ext_flex_layout_h
-    tests_test_form_c -.->|imports| ext_setjmp_h
-    tests_test_form_c -.->|imports| ext_stdarg_h
-    tests_test_form_c -.->|imports| ext_stddef_h
-    tests_test_form_c -.->|imports| ext_stdint_h
-    tests_test_form_c -.->|imports| ext_string_h
-    tests_test_form_c -.->|imports| ext_cmocka_h
-    tests_test_form_c -.->|imports| ext_form_h
-    tests_test_frame_clock_c -.->|imports| ext_stdarg_h
-    tests_test_frame_clock_c -.->|imports| ext_stddef_h
-    tests_test_frame_clock_c -.->|imports| ext_setjmp_h
-    tests_test_frame_clock_c -.->|imports| ext_stdint_h
-    tests_test_frame_clock_c -.->|imports| ext_cmocka_h
-    tests_test_frame_clock_c -.->|imports| ext_frame_clock_h
-    tests_test_freebug_c -.->|imports| ext_setjmp_h
-    tests_test_freebug_c -.->|imports| ext_stdarg_h
-    tests_test_freebug_c -.->|imports| ext_stddef_h
-    tests_test_freebug_c -.->|imports| ext_stdint_h
-    tests_test_freebug_c -.->|imports| ext_string_h
-    tests_test_freebug_c -.->|imports| ext_stdlib_h
-    tests_test_freebug_c -.->|imports| ext_cmocka_h
-    tests_test_freebug_c -.->|imports| ext_freebug_h
-    tests_test_freedom_c -.->|imports| ext_stdarg_h
-    tests_test_freedom_c -.->|imports| ext_stddef_h
-    tests_test_freedom_c -.->|imports| ext_stdint_h
-    tests_test_freedom_c -.->|imports| ext_stdlib_h
-    tests_test_freedom_c -.->|imports| ext_setjmp_h
-    tests_test_freedom_c -.->|imports| ext_string_h
-    tests_test_freedom_c -.->|imports| ext_stdio_h
-    tests_test_freedom_c -.->|imports| ext_sys_wait_h
-    tests_test_freedom_c -.->|imports| ext_unistd_h
-    tests_test_freedom_c -.->|imports| ext_cmocka_h
-    tests_test_freedom_c -.->|imports| ext_image_decode_h
-    tests_test_hls_c -.->|imports| ext_stddef_h
-    tests_test_hls_c -.->|imports| ext_stdlib_h
-    tests_test_hls_c -.->|imports| ext_string_h
-    tests_test_hls_c -.->|imports| ext_setjmp_h
-    tests_test_hls_c -.->|imports| ext_cmocka_h
-    tests_test_hls_c -.->|imports| ext_hls_h
-    tests_test_hostblock_c -.->|imports| ext_setjmp_h
-    tests_test_hostblock_c -.->|imports| ext_stdarg_h
-    tests_test_hostblock_c -.->|imports| ext_stddef_h
-    tests_test_hostblock_c -.->|imports| ext_stdint_h
-    tests_test_hostblock_c -.->|imports| ext_string_h
-    tests_test_hostblock_c -.->|imports| ext_cmocka_h
-    tests_test_hostblock_c -.->|imports| ext_hostblock_h
-    tests_test_hostedit_c -.->|imports| ext_setjmp_h
-    tests_test_hostedit_c -.->|imports| ext_stdarg_h
-    tests_test_hostedit_c -.->|imports| ext_stddef_h
-    tests_test_hostedit_c -.->|imports| ext_stdint_h
-    tests_test_hostedit_c -.->|imports| ext_string_h
-    tests_test_hostedit_c -.->|imports| ext_cmocka_h
-    tests_test_hostedit_c -.->|imports| ext_hostedit_h
-    tests_test_html_parse_c -.->|imports| ext_stdarg_h
-    tests_test_html_parse_c -.->|imports| ext_stddef_h
-    tests_test_html_parse_c -.->|imports| ext_stdint_h
-    tests_test_html_parse_c -.->|imports| ext_stdio_h
-    tests_test_html_parse_c -.->|imports| ext_stdlib_h
-    tests_test_html_parse_c -.->|imports| ext_setjmp_h
-    tests_test_html_parse_c -.->|imports| ext_string_h
-    tests_test_html_parse_c -.->|imports| ext_cmocka_h
-    tests_test_html_parse_c -.->|imports| ext_html_parse_h
-    tests_test_image_decode_c -.->|imports| ext_stdarg_h
-    tests_test_image_decode_c -.->|imports| ext_stddef_h
-    tests_test_image_decode_c -.->|imports| ext_stdint_h
-    tests_test_image_decode_c -.->|imports| ext_setjmp_h
-    tests_test_image_decode_c -.->|imports| ext_string_h
-    tests_test_image_decode_c -.->|imports| ext_cmocka_h
-    tests_test_image_decode_c -.->|imports| ext_image_decode_h
-    tests_test_import_map_c -.->|imports| ext_stdarg_h
-    tests_test_import_map_c -.->|imports| ext_stddef_h
-    tests_test_import_map_c -.->|imports| ext_stdint_h
-    tests_test_import_map_c -.->|imports| ext_setjmp_h
-    tests_test_import_map_c -.->|imports| ext_stdio_h
-    tests_test_import_map_c -.->|imports| ext_string_h
-    tests_test_import_map_c -.->|imports| ext_cmocka_h
-    tests_test_import_map_c -.->|imports| ext_import_map_h
-    tests_test_interp_c -.->|imports| ext_stdarg_h
-    tests_test_interp_c -.->|imports| ext_stddef_h
-    tests_test_interp_c -.->|imports| ext_setjmp_h
-    tests_test_interp_c -.->|imports| ext_stdint_h
-    tests_test_interp_c -.->|imports| ext_cmocka_h
-    tests_test_interp_c -.->|imports| ext_math_h
-    tests_test_interp_c -.->|imports| ext_interp_h
-    tests_test_js_dom_c -.->|imports| ext_stdarg_h
-    tests_test_js_dom_c -.->|imports| ext_stddef_h
-    tests_test_js_dom_c -.->|imports| ext_stdint_h
-    tests_test_js_dom_c -.->|imports| ext_stdio_h
-    tests_test_js_dom_c -.->|imports| ext_stdlib_h
-    tests_test_js_dom_c -.->|imports| ext_setjmp_h
-    tests_test_js_dom_c -.->|imports| ext_string_h
-    tests_test_js_dom_c -.->|imports| ext_cmocka_h
-    tests_test_js_dom_c -.->|imports| ext_dom_h
-    tests_test_js_dom_c -.->|imports| ext_html_parse_h
-    tests_test_js_dom_c -.->|imports| ext_js_dom_h
-    tests_test_js_dom_c -.->|imports| ext_js_trusted_h
-    tests_test_js_dom_c -.->|imports| ext_js_geom_h
-    tests_test_js_dom_c -.->|imports| ext_web_storage_h
-    tests_test_js_dom_c -.->|imports| ext_js_sandbox_h
-    tests_test_js_dom_c -.->|imports| ext_url_h
-    tests_test_js_env_c -.->|imports| ext_stdarg_h
-    tests_test_js_env_c -.->|imports| ext_stddef_h
-    tests_test_js_env_c -.->|imports| ext_stdint_h
-    tests_test_js_env_c -.->|imports| ext_stdio_h
-    tests_test_js_env_c -.->|imports| ext_stdlib_h
-    tests_test_js_env_c -.->|imports| ext_setjmp_h
-    tests_test_js_env_c -.->|imports| ext_string_h
-    tests_test_js_env_c -.->|imports| ext_cmocka_h
-    tests_test_js_env_c -.->|imports| ext_dom_h
-    tests_test_js_env_c -.->|imports| ext_html_parse_h
-    tests_test_js_env_c -.->|imports| ext_js_dom_h
-    tests_test_js_env_c -.->|imports| ext_js_env_h
-    tests_test_js_env_c -.->|imports| ext_js_sandbox_h
-    tests_test_js_geom_c -.->|imports| ext_stdarg_h
-    tests_test_js_geom_c -.->|imports| ext_stddef_h
-    tests_test_js_geom_c -.->|imports| ext_stdint_h
-    tests_test_js_geom_c -.->|imports| ext_setjmp_h
-    tests_test_js_geom_c -.->|imports| ext_math_h
-    tests_test_js_geom_c -.->|imports| ext_stdlib_h
-    tests_test_js_geom_c -.->|imports| ext_string_h
-    tests_test_js_geom_c -.->|imports| ext_cmocka_h
-    tests_test_js_geom_c -.->|imports| ext_js_geom_h
-    tests_test_js_policy_c -.->|imports| ext_setjmp_h
-    tests_test_js_policy_c -.->|imports| ext_stdarg_h
-    tests_test_js_policy_c -.->|imports| ext_stddef_h
-    tests_test_js_policy_c -.->|imports| ext_stdint_h
-    tests_test_js_policy_c -.->|imports| ext_string_h
-    tests_test_js_policy_c -.->|imports| ext_cmocka_h
-    tests_test_js_policy_c -.->|imports| ext_js_policy_h
-    tests_test_js_sandbox_c -.->|imports| ext_stdarg_h
-    tests_test_js_sandbox_c -.->|imports| ext_stddef_h
-    tests_test_js_sandbox_c -.->|imports| ext_stdint_h
-    tests_test_js_sandbox_c -.->|imports| ext_setjmp_h
-    tests_test_js_sandbox_c -.->|imports| ext_string_h
-    tests_test_js_sandbox_c -.->|imports| ext_cmocka_h
-    tests_test_js_sandbox_c -.->|imports| ext_stdio_h
-    tests_test_js_sandbox_c -.->|imports| ext_stdlib_h
-    tests_test_js_sandbox_c -.->|imports| ext_js_sandbox_h
-    tests_test_link_nav_c -.->|imports| ext_setjmp_h
-    tests_test_link_nav_c -.->|imports| ext_stdarg_h
-    tests_test_link_nav_c -.->|imports| ext_stddef_h
-    tests_test_link_nav_c -.->|imports| ext_stdint_h
-    tests_test_link_nav_c -.->|imports| ext_string_h
-    tests_test_link_nav_c -.->|imports| ext_cmocka_h
-    tests_test_link_nav_c -.->|imports| ext_link_nav_h
-    tests_test_local_store_c -.->|imports| ext_stdarg_h
-    tests_test_local_store_c -.->|imports| ext_stddef_h
-    tests_test_local_store_c -.->|imports| ext_stdint_h
-    tests_test_local_store_c -.->|imports| ext_stdlib_h
-    tests_test_local_store_c -.->|imports| ext_setjmp_h
-    tests_test_local_store_c -.->|imports| ext_string_h
-    tests_test_local_store_c -.->|imports| ext_cmocka_h
-    tests_test_local_store_c -.->|imports| ext_local_store_h
-    tests_test_media_decoder_c -.->|imports| ext_stdarg_h
-    tests_test_media_decoder_c -.->|imports| ext_stddef_h
-    tests_test_media_decoder_c -.->|imports| ext_setjmp_h
-    tests_test_media_decoder_c -.->|imports| ext_stdint_h
-    tests_test_media_decoder_c -.->|imports| ext_cmocka_h
-    tests_test_media_decoder_c -.->|imports| ext_media_decoder_h
-    tests_test_net_realm_c -.->|imports| ext_setjmp_h
-    tests_test_net_realm_c -.->|imports| ext_stdarg_h
-    tests_test_net_realm_c -.->|imports| ext_stddef_h
-    tests_test_net_realm_c -.->|imports| ext_stdint_h
-    tests_test_net_realm_c -.->|imports| ext_string_h
-    tests_test_net_realm_c -.->|imports| ext_cmocka_h
-    tests_test_net_realm_c -.->|imports| ext_net_realm_h
-    tests_test_os_sandbox_c -.->|imports| ext_stdarg_h
-    tests_test_os_sandbox_c -.->|imports| ext_stddef_h
-    tests_test_os_sandbox_c -.->|imports| ext_stdint_h
-    tests_test_os_sandbox_c -.->|imports| ext_setjmp_h
-    tests_test_os_sandbox_c -.->|imports| ext_string_h
-    tests_test_os_sandbox_c -.->|imports| ext_cmocka_h
-    tests_test_os_sandbox_c -.->|imports| ext_errno_h
-    tests_test_os_sandbox_c -.->|imports| ext_fcntl_h
-    tests_test_os_sandbox_c -.->|imports| ext_sched_h
-    tests_test_os_sandbox_c -.->|imports| ext_signal_h
-    tests_test_os_sandbox_c -.->|imports| ext_stdio_h
-    tests_test_os_sandbox_c -.->|imports| ext_stdlib_h
-    tests_test_os_sandbox_c -.->|imports| ext_linux_audit_h
-    tests_test_os_sandbox_c -.->|imports| ext_sys_mman_h
-    tests_test_os_sandbox_c -.->|imports| ext_sys_prctl_h
-    tests_test_os_sandbox_c -.->|imports| ext_sys_resource_h
-    tests_test_os_sandbox_c -.->|imports| ext_sys_socket_h
-    tests_test_os_sandbox_c -.->|imports| ext_sys_stat_h
-    tests_test_os_sandbox_c -.->|imports| ext_sys_syscall_h
-    tests_test_os_sandbox_c -.->|imports| ext_sys_wait_h
-    tests_test_os_sandbox_c -.->|imports| ext_unistd_h
-    tests_test_os_sandbox_c -.->|imports| ext_os_sandbox_h
-    tests_test_page_view_c -.->|imports| ext_stdarg_h
-    tests_test_page_view_c -.->|imports| ext_stddef_h
-    tests_test_page_view_c -.->|imports| ext_stdint_h
-    tests_test_page_view_c -.->|imports| ext_stdlib_h
-    tests_test_page_view_c -.->|imports| ext_setjmp_h
-    tests_test_page_view_c -.->|imports| ext_string_h
-    tests_test_page_view_c -.->|imports| ext_cmocka_h
-    tests_test_page_view_c -.->|imports| ext_box_style_h
-    tests_test_page_view_c -.->|imports| ext_css_h
-    tests_test_page_view_c -.->|imports| ext_dom_h
-    tests_test_page_view_c -.->|imports| ext_flex_layout_h
-    tests_test_page_view_c -.->|imports| ext_html_parse_h
-    tests_test_page_view_c -.->|imports| ext_page_view_h
-    tests_test_page_view_c -.->|imports| ext_webfont_h
-    tests_test_pdf_export_c -.->|imports| ext_setjmp_h
-    tests_test_pdf_export_c -.->|imports| ext_stdarg_h
-    tests_test_pdf_export_c -.->|imports| ext_stddef_h
-    tests_test_pdf_export_c -.->|imports| ext_stdint_h
-    tests_test_pdf_export_c -.->|imports| ext_string_h
-    tests_test_pdf_export_c -.->|imports| ext_cmocka_h
-    tests_test_pdf_export_c -.->|imports| ext_pdf_export_h
-    tests_test_perf_trace_c -.->|imports| ext_stdarg_h
-    tests_test_perf_trace_c -.->|imports| ext_stddef_h
-    tests_test_perf_trace_c -.->|imports| ext_setjmp_h
-    tests_test_perf_trace_c -.->|imports| ext_stdint_h
-    tests_test_perf_trace_c -.->|imports| ext_string_h
-    tests_test_perf_trace_c -.->|imports| ext_cmocka_h
-    tests_test_perf_trace_c -.->|imports| ext_perf_trace_h
-    tests_test_prefetch_c -.->|imports| ext_stdarg_h
-    tests_test_prefetch_c -.->|imports| ext_stddef_h
-    tests_test_prefetch_c -.->|imports| ext_setjmp_h
-    tests_test_prefetch_c -.->|imports| ext_stdint_h
-    tests_test_prefetch_c -.->|imports| ext_cmocka_h
-    tests_test_prefetch_c -.->|imports| ext_pthread_h
-    tests_test_prefetch_c -.->|imports| ext_stdlib_h
-    tests_test_prefetch_c -.->|imports| ext_string_h
-    tests_test_prefetch_c -.->|imports| ext_stdio_h
-    tests_test_prefetch_c -.->|imports| ext_prefetch_h
-    tests_test_prefs_c -.->|imports| ext_stdarg_h
-    tests_test_prefs_c -.->|imports| ext_stddef_h
-    tests_test_prefs_c -.->|imports| ext_stdint_h
-    tests_test_prefs_c -.->|imports| ext_stdio_h
-    tests_test_prefs_c -.->|imports| ext_stdlib_h
-    tests_test_prefs_c -.->|imports| ext_setjmp_h
-    tests_test_prefs_c -.->|imports| ext_string_h
-    tests_test_prefs_c -.->|imports| ext_cmocka_h
-    tests_test_prefs_c -.->|imports| ext_prefs_h
-    tests_test_prefs_c -.->|imports| ext_zoom_h
-    tests_test_profile_c -.->|imports| ext_stdarg_h
-    tests_test_profile_c -.->|imports| ext_stddef_h
-    tests_test_profile_c -.->|imports| ext_stdint_h
-    tests_test_profile_c -.->|imports| ext_stdio_h
-    tests_test_profile_c -.->|imports| ext_stdlib_h
-    tests_test_profile_c -.->|imports| ext_setjmp_h
-    tests_test_profile_c -.->|imports| ext_string_h
-    tests_test_profile_c -.->|imports| ext_cmocka_h
-    tests_test_profile_c -.->|imports| ext_dirent_h
-    tests_test_profile_c -.->|imports| ext_fcntl_h
-    tests_test_profile_c -.->|imports| ext_sys_stat_h
-    tests_test_profile_c -.->|imports| ext_unistd_h
-    tests_test_profile_c -.->|imports| ext_prefs_h
-    tests_test_profile_c -.->|imports| ext_profile_h
-    tests_test_render_doc_c -.->|imports| ext_stdarg_h
-    tests_test_render_doc_c -.->|imports| ext_stddef_h
-    tests_test_render_doc_c -.->|imports| ext_stdint_h
-    tests_test_render_doc_c -.->|imports| ext_stdlib_h
-    tests_test_render_doc_c -.->|imports| ext_setjmp_h
-    tests_test_render_doc_c -.->|imports| ext_string_h
-    tests_test_render_doc_c -.->|imports| ext_cmocka_h
-    tests_test_render_doc_c -.->|imports| ext_box_style_h
-    tests_test_render_doc_c -.->|imports| ext_css_h
-    tests_test_render_doc_c -.->|imports| ext_flex_layout_h
-    tests_test_render_doc_c -.->|imports| ext_page_view_h
-    tests_test_render_doc_c -.->|imports| ext_render_doc_h
-    tests_test_render_doc_c -.->|imports| ext_render_policy_h
-    tests_test_render_policy_c -.->|imports| ext_stdarg_h
-    tests_test_render_policy_c -.->|imports| ext_stddef_h
-    tests_test_render_policy_c -.->|imports| ext_stdint_h
-    tests_test_render_policy_c -.->|imports| ext_setjmp_h
-    tests_test_render_policy_c -.->|imports| ext_string_h
-    tests_test_render_policy_c -.->|imports| ext_cmocka_h
-    tests_test_render_policy_c -.->|imports| ext_render_policy_h
-    tests_test_renderer_c -.->|imports| ext_stdarg_h
-    tests_test_renderer_c -.->|imports| ext_stddef_h
-    tests_test_renderer_c -.->|imports| ext_stdint_h
-    tests_test_renderer_c -.->|imports| ext_stdlib_h
-    tests_test_renderer_c -.->|imports| ext_setjmp_h
-    tests_test_renderer_c -.->|imports| ext_string_h
-    tests_test_renderer_c -.->|imports| ext_cmocka_h
-    tests_test_renderer_c -.->|imports| ext_renderer_h
-    tests_test_request_policy_c -.->|imports| ext_stdarg_h
-    tests_test_request_policy_c -.->|imports| ext_stddef_h
-    tests_test_request_policy_c -.->|imports| ext_stdint_h
-    tests_test_request_policy_c -.->|imports| ext_setjmp_h
-    tests_test_request_policy_c -.->|imports| ext_string_h
-    tests_test_request_policy_c -.->|imports| ext_cmocka_h
-    tests_test_request_policy_c -.->|imports| ext_request_policy_h
-    tests_test_secure_fetch_c -.->|imports| ext_stdarg_h
-    tests_test_secure_fetch_c -.->|imports| ext_stddef_h
-    tests_test_secure_fetch_c -.->|imports| ext_stdint_h
-    tests_test_secure_fetch_c -.->|imports| ext_setjmp_h
-    tests_test_secure_fetch_c -.->|imports| ext_stdlib_h
-    tests_test_secure_fetch_c -.->|imports| ext_string_h
-    tests_test_secure_fetch_c -.->|imports| ext_cmocka_h
-    tests_test_secure_fetch_c -.->|imports| ext_secure_fetch_h
-    tests_test_svg_render_c -.->|imports| ext_setjmp_h
-    tests_test_svg_render_c -.->|imports| ext_stdarg_h
-    tests_test_svg_render_c -.->|imports| ext_stddef_h
-    tests_test_svg_render_c -.->|imports| ext_stdint_h
-    tests_test_svg_render_c -.->|imports| ext_stdio_h
-    tests_test_svg_render_c -.->|imports| ext_stdlib_h
-    tests_test_svg_render_c -.->|imports| ext_string_h
-    tests_test_svg_render_c -.->|imports| ext_math_h
-    tests_test_svg_render_c -.->|imports| ext_cmocka_h
-    tests_test_svg_render_c -.->|imports| ext_svg_render_h
-    tests_test_tab_c -.->|imports| ext_stdarg_h
-    tests_test_tab_c -.->|imports| ext_stddef_h
-    tests_test_tab_c -.->|imports| ext_stdint_h
-    tests_test_tab_c -.->|imports| ext_stdio_h
-    tests_test_tab_c -.->|imports| ext_stdlib_h
-    tests_test_tab_c -.->|imports| ext_setjmp_h
-    tests_test_tab_c -.->|imports| ext_signal_h
-    tests_test_tab_c -.->|imports| ext_string_h
-    tests_test_tab_c -.->|imports| ext_time_h
-    tests_test_tab_c -.->|imports| ext_unistd_h
-    tests_test_tab_c -.->|imports| ext_sys_types_h
-    tests_test_tab_c -.->|imports| ext_cmocka_h
-    tests_test_tab_c -.->|imports| ext_css_h
-    tests_test_tab_c -.->|imports| ext_tab_h
-    tests_test_tab_c -.->|imports| ext_url_h
-    tests_test_tab_c -.->|imports| ext_js_geom_h
-    tests_test_tab_c -.->|imports| ext_web_storage_h
-    tests_test_text_shape_c -.->|imports| ext_setjmp_h
-    tests_test_text_shape_c -.->|imports| ext_stdarg_h
-    tests_test_text_shape_c -.->|imports| ext_stddef_h
-    tests_test_text_shape_c -.->|imports| ext_stdint_h
-    tests_test_text_shape_c -.->|imports| ext_stdio_h
-    tests_test_text_shape_c -.->|imports| ext_stdlib_h
-    tests_test_text_shape_c -.->|imports| ext_math_h
-    tests_test_text_shape_c -.->|imports| ext_string_h
-    tests_test_text_shape_c -.->|imports| ext_cmocka_h
-    tests_test_text_shape_c -.->|imports| ext_text_shape_h
-    tests_test_text_shape_c -.->|imports| ext_css_h
-    tests_test_text_shape_c -.->|imports| ext_webfont_h
-    tests_test_textfield_c -.->|imports| ext_setjmp_h
-    tests_test_textfield_c -.->|imports| ext_stdarg_h
-    tests_test_textfield_c -.->|imports| ext_stddef_h
-    tests_test_textfield_c -.->|imports| ext_stdint_h
-    tests_test_textfield_c -.->|imports| ext_string_h
-    tests_test_textfield_c -.->|imports| ext_cmocka_h
-    tests_test_textfield_c -.->|imports| ext_textfield_h
-    tests_test_tls_impersonate_c -.->|imports| ext_setjmp_h
-    tests_test_tls_impersonate_c -.->|imports| ext_stdarg_h
-    tests_test_tls_impersonate_c -.->|imports| ext_stddef_h
-    tests_test_tls_impersonate_c -.->|imports| ext_stdint_h
-    tests_test_tls_impersonate_c -.->|imports| ext_string_h
-    tests_test_tls_impersonate_c -.->|imports| ext_stdlib_h
-    tests_test_tls_impersonate_c -.->|imports| ext_cmocka_h
-    tests_test_tls_impersonate_c -.->|imports| ext_tls_impersonate_h
-    tests_test_ui_c -.->|imports| ext_stdarg_h
-    tests_test_ui_c -.->|imports| ext_stddef_h
-    tests_test_ui_c -.->|imports| ext_stdint_h
-    tests_test_ui_c -.->|imports| ext_setjmp_h
-    tests_test_ui_c -.->|imports| ext_string_h
-    tests_test_ui_c -.->|imports| ext_cmocka_h
-    tests_test_ui_c -.->|imports| ext_ui_h
-    tests_test_url_c -.->|imports| ext_setjmp_h
-    tests_test_url_c -.->|imports| ext_stdarg_h
-    tests_test_url_c -.->|imports| ext_stddef_h
-    tests_test_url_c -.->|imports| ext_stdint_h
-    tests_test_url_c -.->|imports| ext_stdlib_h
-    tests_test_url_c -.->|imports| ext_string_h
-    tests_test_url_c -.->|imports| ext_cmocka_h
-    tests_test_url_c -.->|imports| ext_url_h
-    tests_test_web_storage_c -.->|imports| ext_stdarg_h
-    tests_test_web_storage_c -.->|imports| ext_stddef_h
-    tests_test_web_storage_c -.->|imports| ext_stdint_h
-    tests_test_web_storage_c -.->|imports| ext_setjmp_h
-    tests_test_web_storage_c -.->|imports| ext_stdio_h
-    tests_test_web_storage_c -.->|imports| ext_stdlib_h
-    tests_test_web_storage_c -.->|imports| ext_string_h
-    tests_test_web_storage_c -.->|imports| ext_cmocka_h
-    tests_test_web_storage_c -.->|imports| ext_web_storage_h
-    tests_test_webcaps_c -.->|imports| ext_setjmp_h
-    tests_test_webcaps_c -.->|imports| ext_stdarg_h
-    tests_test_webcaps_c -.->|imports| ext_stddef_h
-    tests_test_webcaps_c -.->|imports| ext_stdint_h
-    tests_test_webcaps_c -.->|imports| ext_string_h
-    tests_test_webcaps_c -.->|imports| ext_cmocka_h
-    tests_test_webcaps_c -.->|imports| ext_webcaps_h
-    tests_test_webfont_c -.->|imports| ext_stdarg_h
-    tests_test_webfont_c -.->|imports| ext_stddef_h
-    tests_test_webfont_c -.->|imports| ext_setjmp_h
-    tests_test_webfont_c -.->|imports| ext_stdint_h
-    tests_test_webfont_c -.->|imports| ext_stdlib_h
-    tests_test_webfont_c -.->|imports| ext_string_h
-    tests_test_webfont_c -.->|imports| ext_cmocka_h
-    tests_test_webfont_c -.->|imports| ext_stdio_h
-    tests_test_webfont_c -.->|imports| ext_webfont_h
-    tests_test_webfont_load_c -.->|imports| ext_setjmp_h
-    tests_test_webfont_load_c -.->|imports| ext_stdarg_h
-    tests_test_webfont_load_c -.->|imports| ext_stddef_h
-    tests_test_webfont_load_c -.->|imports| ext_stdint_h
-    tests_test_webfont_load_c -.->|imports| ext_stdio_h
-    tests_test_webfont_load_c -.->|imports| ext_stdlib_h
-    tests_test_webfont_load_c -.->|imports| ext_string_h
-    tests_test_webfont_load_c -.->|imports| ext_cmocka_h
-    tests_test_webfont_load_c -.->|imports| ext_webfont_load_h
-    tests_test_webfont_load_c -.->|imports| ext_webfont_h
-    tests_test_webfont_load_c -.->|imports| ext_text_shape_h
-    tests_test_webfont_load_c -.->|imports| ext_css_h
-    tests_test_ws_hub_c -.->|imports| ext_stdarg_h
-    tests_test_ws_hub_c -.->|imports| ext_stddef_h
-    tests_test_ws_hub_c -.->|imports| ext_stdint_h
-    tests_test_ws_hub_c -.->|imports| ext_setjmp_h
-    tests_test_ws_hub_c -.->|imports| ext_poll_h
-    tests_test_ws_hub_c -.->|imports| ext_time_h
-    tests_test_ws_hub_c -.->|imports| ext_string_h
-    tests_test_ws_hub_c -.->|imports| ext_cmocka_h
-    tests_test_ws_hub_c -.->|imports| ext_ws_hub_h
-    tests_test_zoom_c -.->|imports| ext_setjmp_h
-    tests_test_zoom_c -.->|imports| ext_stdarg_h
-    tests_test_zoom_c -.->|imports| ext_stddef_h
-    tests_test_zoom_c -.->|imports| ext_stdint_h
-    tests_test_zoom_c -.->|imports| ext_cmocka_h
-    tests_test_zoom_c -.->|imports| ext_zoom_h
-    tools_ffgeom_py -.->|imports| ext_subprocess
-    tools_ffgeom_py -.->|imports| ext_sys
-    ext_struct["struct"]
-    class ext_struct ext;
-    tools_ffgeom_py -.->|imports| ext_struct
-    ext_zlib["zlib"]
-    class ext_zlib ext;
-    tools_ffgeom_py -.->|imports| ext_zlib
-    ext_re["re"]
-    class ext_re ext;
-    tools_ffgeom_py -.->|imports| ext_re
-    tools_ffgeom_py -.->|imports| ext_re
-    tools_gen_psl_c -.->|imports| ext_stdio_h
-    tools_gen_psl_c -.->|imports| ext_stdlib_h
-    tools_gen_psl_c -.->|imports| ext_string_h
-    tools_mutate_py -.->|imports| ext_os
-    tools_mutate_py -.->|imports| ext_re
-    ext_shutil["shutil"]
-    class ext_shutil ext;
-    tools_mutate_py -.->|imports| ext_shutil
-    tools_mutate_py -.->|imports| ext_subprocess
-    tools_mutate_py -.->|imports| ext_sys
-    tools_pngdiff_c -.->|imports| ext_math_h
-    tools_pngdiff_c -.->|imports| ext_stdint_h
-    tools_pngdiff_c -.->|imports| ext_stdio_h
-    tools_pngdiff_c -.->|imports| ext_stdlib_h
-    tools_pngdiff_c -.->|imports| ext_string_h
-    tools_pngdiff_c -.->|imports| ext_png_h
-    tools_pngprof_py -.->|imports| ext_sys
-    tools_pngprof_py -.->|imports| ext_zlib
-    tools_pngprof_py -.->|imports| ext_struct
-    tools_snapshot_py -.->|imports| ext_re
-    tools_snapshot_py -.->|imports| ext_sys
-    ext_urllib_parse["urllib.parse"]
-    class ext_urllib_parse ext;
-    tools_snapshot_py -.->|imports| ext_urllib_parse
-    ext_urllib_request["urllib.request"]
-    class ext_urllib_request ext;
-    tools_snapshot_py -.->|imports| ext_urllib_request
 ```
 
 ---
 
 ## UML Class Diagram
 
-Auto-generated Mermaid class diagram from parsed class-level symbols. Shows classes, structs, interfaces, traits, and their methods with inheritance and dependency relationships.
+Auto-generated Mermaid class diagrams from parsed class-level symbols, split into groups of at most 6 classes so each diagram stays readable. Per-module class diagrams with exact members live in `readmenator-apidocs/modules/`.
+
+#### `fuzz/fuzz_js_geom.c`, `fuzz/fuzz_js_sandbox.c`
 
 ```mermaid
 classDiagram
+  direction LR
   class fuzz_js_geom_c_fz_parent {
     <<struct>>
     +fz_parent_of(void *ctx, dom_node_id n)
@@ -3312,6 +2206,13 @@ classDiagram
     +LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     +js_sandbox(Hito 3). * * Goal: arbitrary bytes treated as untrusted script through the full * eval + result + free pipeline must never crash, leak, or trigger UB on the * host.
   }
+```
+
+#### `gui/browser_ui.c`
+
+```mermaid
+classDiagram
+  direction LR
   class browser_ui_c_ui_menu_item {
     <<struct>>
     +now_ms(void)
@@ -3648,6 +2549,13 @@ classDiagram
     +load_host_file(hb_set *s, const char *dir, const char *name, hb_list list)
     +build_host_filter(void)
   }
+```
+
+#### `gui/browser_ui_internal.h`, `gui/ui_render.c`
+
+```mermaid
+classDiagram
+  direction LR
   class browser_ui_internal_h_ui_rgb {
     <<struct>>
     +set_rgb(cairo_t *cr, ui_rgb c);
@@ -3674,6 +2582,13 @@ classDiagram
     +toplevel_configure(void *data, struct xdg_toplevel *t,
                               ...
   }
+```
+
+#### `include/box_style.h`
+
+```mermaid
+classDiagram
+  direction LR
   class box_style_h_bx_edges {
     <<struct>>
     +box(zero margin), keeping items tight. A heading * escapes this, per 4d. * ua identity of the nearest BLOCK-LEVEL an
@@ -3778,6 +2693,13 @@ classDiagram
     +bx_lp_px(int px_val, int pct_pm, double basis);
     +bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);
   }
+```
+
+#### `include/box_tree.h`, `include/browser.h`
+
+```mermaid
+classDiagram
+  direction LR
   class box_tree_h_bt_node {
     <<struct>>
     +closed(BT_ERR_RANGE) instead of overflowing the stack. */ #define BT_MAX_DEPTH 64u #define BT_MAX_CHILDREN 128u /* Stage 2: the out-of-flow solver's arrays are indexed BY BOX ID, so this boun
@@ -3843,6 +2765,13 @@ classDiagram
     +browser_is_exception(const browser_state *bs, const char *host);
     +browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len);
   }
+```
+
+#### `include/compositor.h`
+
+```mermaid
+classDiagram
+  direction LR
   class compositor_h_cx_style {
     <<struct>>
     +cx_forms_stacking_context(const cx_style *s);
@@ -3861,6 +2790,13 @@ classDiagram
     +cx_item_compare(const cx_item *a, const cx_item *b);
     +cx_sort(cx_item *items, size_t n);
   }
+```
+
+#### `include/css.h`
+
+```mermaid
+classDiagram
+  direction LR
   class css_h_css_style {
     <<struct>>
     +verbatim(flex_layout parses them);
@@ -3902,6 +2838,604 @@ classDiagram
   }
   class css_h_css_drop {
     <<struct>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_drop_log {
+    <<struct>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_attr {
+    <<struct>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_element {
+    <<struct>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_cvr_table {
+    <<struct>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_status {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_align {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_display {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_justify {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_font_family {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_text_transform {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_valign {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_white_space {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_list_style {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_position {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_box_sizing {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_border_style {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_flex_direction {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_flex_wrap {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_align_kw {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_grid_flow {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_float {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_clear {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_visibility {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_overflow {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_cursor {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_text_overflow {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_word_break {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_text_decoration_style {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_direction {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_border_collapse {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_empty_cells {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_caption_side {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_table_layout {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_font_variant {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_hyphens {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_user_select {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_appearance {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_pointer_events {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_bg_repeat {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_bg_size {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_bg_clip {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_bg_origin {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_bg_attachment {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_isolation {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_content_visibility {
+    <<enum>>
+    +verbatim(flex_layout parses them);
+    +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
+    +translate()/translateX()/translateY();
+    +scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
+    +declared(identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
+    +element(e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
+    +slots(singular matrices fail closed);
+    +palette(a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
+    +css_free(css_sheet *s);
+    +order(specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
+  }
+  class css_h_css_image_rendering {
+    <<enum>>
     +verbatim(flex_layout parses them);
     +POINTER(shows the hand cursor already used for links) from every other value * (shows the default arrow);
     +translate()/translateX()/translateY();
