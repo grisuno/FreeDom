@@ -97,9 +97,11 @@ For more information, visit the [GitHub repository](https://github.com/grisuno/F
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y2Z73AV)
 ---
-### Intelligence and Analysis Ecosystem
-- [QC](https://github.com/grisuno/QC): OSINT analysis.
+### Ecosystem
+
 - [ReadMenator](https://github.com/grisuno/ReadMenator): Offline codebase analysis.
+- [Deploynator](https://github.com/grisuno/deploynator): Offline codebase deployer.
+
 
 <!-- readmenator-kb-link -->
 ## Knowledge Base
