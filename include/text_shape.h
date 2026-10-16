@@ -35,7 +35,44 @@ typedef struct tsh_font {
     int bold;
     int italic;
     unsigned wfh; /* @font-face hash, 0 = local bucket stack */
+    int local;    /* tsh_local_handle of the author family list, 0 = none */
 } tsh_font;
+
+/* --- Named LOCAL families (spec/text_shape.md section 7) ---------------------
+ * The author's font-family list (normalized by the cascade: unquoted names,
+ * comma-separated) resolves to the first name fontconfig really provides --
+ * installed, or a STRONG substitute such as Arial -> Liberation Sans -- the way
+ * Firefox does on Linux. A generic name stops the walk (the bucket applies). */
+#define TSH_LOCAL_LISTS    64   /* distinct lists resolved per process */
+#define TSH_LOCAL_FAMILIES 16   /* distinct local families loaded (x4 styles) */
+#define TSH_FAMILY_MAX     128  /* bytes of one family name, NUL included */
+
+/* 1 for a CSS generic family keyword (serif, sans-serif, monospace, cursive,
+ * fantasy, system-ui, ui-*, emoji, math, fangsong), case-insensitive. Pure. */
+int tsh_family_is_generic(const char *name);
+
+/* Resolves one name: 1 and the family in out[cap], or 0 when unavailable. */
+typedef int (*tsh_name_resolver)(const char *name, char *out, size_t cap, void *ctx);
+
+/* Walks the comma-separated list in order: a generic name stops (returns 0);
+ * the first name the resolver accepts wins (returns 1, family in out). Pure: the
+ * resolver is injected (fontconfig in production, a table in tests). */
+int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
+                       char *out, size_t cap);
+
+/* The acceptance rule for one requested name given fontconfig's substituted
+ * family list subs[0..n) and their bindings (strong[k] != 0 for a strong/same
+ * binding): req itself when installed, else the first INSTALLED entry of the
+ * leading run of strong substitutes; a weak substitute ends the run. Returns the
+ * chosen name or NULL. Pure (installed is injected). */
+const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
+                            size_t n, int (*installed)(const char *name, void *ctx),
+                            void *ctx);
+
+/* Handle (>0) for an author family list that resolves to a local family, cached
+ * per list; 0 when nothing resolves, the list is NULL/empty, or a cap is hit (the
+ * caller then uses the bucket). Trusted side only. */
+int tsh_local_handle(const char *list);
 
 #define TSH_MAX_GLYPHS 4096u       /* anti-DoS cap on one shaped slice */
 #define TSH_MAX_TEXT   (1u << 20)  /* 1 MiB cap on one shaped slice    */
@@ -81,6 +118,13 @@ int tsh_webfont_register(const char *name,
 /* Drops every registered webfont (document teardown / navigation). Idempotent,
  * NULL-safe by construction (no args). tsh_shutdown also clears the table. */
 void tsh_webfont_clear(void);
+
+/* The cairo face tsh_draw paints f with (webfont, local family or bucket), or
+ * NULL when no face resolves. Borrowed: owned by the cache, valid until
+ * tsh_shutdown / tsh_webfont_clear. The painter selects it so cairo's font
+ * extents -- line-height: normal, ascent, descent -- are the metrics of the face
+ * that is actually drawn, not of the generic stand-in (CSS 2.1 10.8.1). */
+cairo_font_face_t *tsh_face(const tsh_font *f);
 
 /* Releases cached faces / blobs / FreeType library (leak hygiene; tests). */
 void tsh_shutdown(void);

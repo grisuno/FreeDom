@@ -156,8 +156,8 @@ paint draw call the same shaper on the same slice, so positions stay consistent.
 - **Font fallback chains** for missing glyphs (one face per generic bucket; a
   codepoint absent from that face renders as `.notdef`/tofu, as today). A
   fontconfig fallback walk is a follow-up.
-- **Exact author family matching** and web fonts (`@font-face`) — forbidden by
-  Privacy by Default; the CSS layer already drops them.
+- ~~Exact author family matching~~ — **hecho (tanda 43, §7)**, solo con fuentes
+  LOCALES; las web fonts las cubre `spec/webfont.md` (solo trusted).
 - **Shaping in the headless flat renderers** (`gui/ui_render.c`, the
   `renderer.c` confined parser produces no pixels). The box-aware painter
   (`browser_ui.c`) — the one reused by `--download-pdf` and the GUI — is the
@@ -178,3 +178,52 @@ paint draw call the same shaper on the same slice, so positions stay consistent.
 7. Visual review: `--download-pdf` of a page with Latin + a ligating pair +
    (if a font is present) an Arabic/Hebrew word, rasterised to PNG and read.
 8. Docs: this spec, `CLAUDE.md` hito, `docs/index.html`, `README.md`, memory.
+
+## 7. Familias por nombre, locales (tanda 43, 2026-10-15)
+
+**Por qué:** el motor ignoraba el nombre de `font-family` y pintaba todo con el
+cubo genérico (`sans-serif` → Noto Sans aquí). Firefox en Linux pregunta a
+fontconfig por cada nombre de la lista, en orden, y acepta el primero que existe:
+`Arial` → Liberation Sans (alias **fuerte**, métrica compatible), `Helvetica` →
+Nimbus Sans, `Times New Roman` → Liberation Serif, `Courier New` → Liberation
+Mono. Toda página con la pila clásica `Helvetica, Arial, sans-serif` salía con otra
+fuente y otro ancho de línea.
+
+**Flujo:** la cascada (worker, sin fontconfig) guarda la lista normalizada en
+`css_style.font_list` (nombres sin comillas, separados por `,`, en minúsculas,
+espacios colapsados, acotada a `CSS_FONT_LIST_MAX`); hereda como `font_family`
+(el ancestro más cercano que la declara). Cruza como string por run
+(`pv_run.font_list` → códec → `rd_block.font_list`, gate `caps.css` como toda
+presentación de autor). El pintor la convierte en un *handle* con
+`tsh_local_handle(list)` y el `tsh_font` lleva el handle, nunca un puntero (un
+fragmento no puede apuntar a un documento liberado).
+
+**Regla de aceptación (pura, `tsh_pick_family`):** para cada nombre, en orden:
+- genérico (`serif`, `sans-serif`, `monospace`, `cursive`, `fantasy`,
+  `system-ui`, `ui-*`, `emoji`, `math`, `fangsong`) ⇒ **se detiene**: manda el
+  cubo genérico, como hoy.
+- el nombre está instalado ⇒ esa familia.
+- si no, las sustituciones de fontconfig se recorren mientras sean **fuertes**
+  (`FcValueBindingStrong`/`Same`): la primera instalada gana. Una sustitución
+  **débil** (la cadena de fallback por defecto) NO cuenta como "existe": se pasa
+  al nombre siguiente de la lista, como Firefox.
+- ningún nombre resuelve ⇒ cubo genérico.
+
+Un `@font-face` registrado sigue ganando (webfont.md); la familia local es el
+siguiente escalón y el cubo el último. Fallo = cubo (fail-visible, nunca
+fail-hard).
+
+**Garantías:** solo archivos locales (los mismos que fontconfig ya abría), cero
+red, solo lado confiable. Caché acotado: `TSH_LOCAL_LISTS` listas distintas por
+proceso y `TSH_LOCAL_FAMILIES` familias × 4 estilos cargados; pasado el tope ⇒
+cubo. **Anti-fingerprinting:** la elección depende de las fuentes instaladas
+(igual que en Firefox). Solo es observable midiendo geometría, y la geometría
+real solo la ve JS en allow∩js (`js_geom`); un host no confiable ve ceros.
+
+**Dado-Cuando-Entonces:**
+- Dado `font-family:"Helvetica Neue",Arial,sans-serif` y un sistema sin Helvetica
+  Neue pero con alias fuerte Arial→Liberation Sans, entonces se pinta con
+  Liberation Sans.
+- Dado `font-family:monospace,Arial`, entonces el cubo monospace (genérico primero).
+- Dado `font-family:NoExiste`, entonces el cubo (sans por defecto).
+- Dado un hijo sin `font-family` bajo un padre `font-family:Arial`, hereda la lista.

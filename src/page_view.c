@@ -166,6 +166,8 @@ static void run_init_common(pv_run *r) {
     r->poster_src = NULL;
     r->img_w = -1;
     r->img_h = -1;
+    r->img_h_css = 0;
+    r->img_inline = 0;
     r->bold = 0;
     r->italic = 0;
     r->indent = 0;
@@ -188,6 +190,7 @@ static void run_init_common(pv_run *r) {
     r->valign = 0;
     r->text_indent = PV_LEN_UNSET;
     r->white_space = 0;
+    r->text_balance = 0;
     r->tab_size = 0;
     r->direction = 0;
     r->font_variant = 0;
@@ -252,6 +255,7 @@ static void run_init_common(pv_run *r) {
     r->oof_subtree = 0;
     r->block_id = -1;
     r->own_box_id = -1;
+    r->ph_color = PV_PH_THEME;
     r->input_type = 0;
     r->name = NULL;
     r->value = NULL;
@@ -259,6 +263,7 @@ static void run_init_common(pv_run *r) {
     r->form_method = PV_METHOD_GET;
     r->checked = -1;
     r->select_opts = NULL;
+    r->font_list = NULL;
 }
 
 /* Forward declaration: the iterative pre-order successor is defined below. */
@@ -364,6 +369,7 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     r->poster_src = NULL;
     r->img_w = -1;
     r->img_h = -1;
+    r->img_h_css = 0;
     return PV_OK;
 }
 
@@ -548,6 +554,13 @@ void pv_set_text_ext(pv_view *v, const pv_text_ext *e) {
     pv_run *r = &v->runs[v->count - 1];
     r->font_family = e->font_family;
     r->fontface = e->fontface;
+    free(r->font_list);
+    r->font_list = NULL;
+    if (e->font_list[0] != '\0') {
+        size_t fl = 0;
+        while (fl + 1 < sizeof e->font_list && e->font_list[fl] != '\0') ++fl;
+        r->font_list = dup_n(e->font_list, fl);
+    }
     r->text_transform = e->text_transform;
     r->letter_spacing = e->letter_spacing;
     r->word_spacing = e->word_spacing;
@@ -558,6 +571,7 @@ void pv_set_text_ext(pv_view *v, const pv_text_ext *e) {
     r->valign = e->valign;
     r->text_indent = e->text_indent;
     r->white_space = e->white_space;
+    r->text_balance = (e->text_balance == 1);
     r->text_overflow = e->text_overflow;
     r->word_break = e->word_break;
     r->visibility = e->visibility;
@@ -741,6 +755,48 @@ void pv_set_input_checked(pv_view *v, int checked) {
     v->runs[v->count - 1].checked = checked;
 }
 
+void pv_set_input_placeholder(pv_view *v, int ph_color) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].ph_color = ph_color;
+}
+
+char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs,
+                               size_t *out_len) {
+    if (markup == NULL || attrs == NULL || out_len == NULL) return NULL;
+    size_t i = 0;
+    while (i < len && markup[i] != '<') ++i;
+    if (i >= len) return NULL;
+    /* The end of the root start tag: the first '>' outside a quoted value. */
+    char q = 0;
+    size_t gt = len;
+    for (size_t k = i + 1; k < len; ++k) {
+        char c = markup[k];
+        if (q != 0) { if (c == q) q = 0; continue; }
+        if (c == '"' || c == '\'') { q = c; continue; }
+        if (c == '>') { gt = k; break; }
+    }
+    if (gt >= len) return NULL;
+    size_t at = (gt > i && markup[gt - 1] == '/') ? gt - 1 : gt;
+    size_t al = strlen(attrs);
+    if (len > SIZE_MAX - al - 1) return NULL;
+    char *out = (char *)malloc(len + al + 1);
+    if (out == NULL) return NULL;
+    memcpy(out, markup, at);
+    memcpy(out + at, attrs, al);
+    memcpy(out + at + al, markup + at, len - at);
+    out[len + al] = '\0';
+    *out_len = len + al;
+    return out;
+}
+
+int pv_placeholder_color(const css_style *ph) {
+    if (ph == NULL) return PV_PH_THEME;
+    if (ph->opacity == 0) return PV_PH_HIDDEN;
+    if (ph->color == CC_COLOR_TRANSPARENT) return PV_PH_HIDDEN;
+    if (ph->color >= 0 && ph->color <= 0xffffff) return ph->color;
+    return PV_PH_THEME;
+}
+
 void pv_set_input_select_opts(pv_view *v, const char *select_opts) {
     if (v == NULL || v->count == 0 || select_opts == NULL) return;
     char *cp = dup_n(select_opts, strlen(select_opts));
@@ -794,6 +850,7 @@ void pv_free(pv_view *v) {
         free(v->runs[i].name);
         free(v->runs[i].value);
         free(v->runs[i].select_opts);
+        free(v->runs[i].font_list);
     }
     free(v->runs);
     free(v->boxes);
@@ -1165,6 +1222,9 @@ int anc_item_basis[PV_CONT_DEPTH];
 int anc_item_order[PV_CONT_DEPTH];
 int anc_item_align[PV_CONT_DEPTH];
 int anc_item_mauto[PV_CONT_DEPTH];
+/* anc_item[k]'s raw grid placement sides (FX_GL_*), resolved against the PARENT's
+ * tracks when the link is written (spec/grid_areas.md 6). */
+int anc_item_gl[PV_CONT_DEPTH][4];
 int anc_n;
 } pv_cont_info;
 
@@ -1220,11 +1280,11 @@ int pv_content_hidden(int box_hidden, int run_visibility) {
 
 void pv_text_ext_reset(pv_text_ext *e) {
     if (e == NULL) return;
-    e->font_family = 0; e->fontface = 0u; e->text_transform = 0;
+    e->font_family = 0; e->fontface = 0u; e->font_list[0] = '\0'; e->text_transform = 0;
     e->letter_spacing = PV_LEN_UNSET; e->word_spacing = PV_LEN_UNSET;
     e->shadow_dx = 0; e->shadow_dy = 0; e->shadow_color = -1;
     e->opacity = -1; e->valign = 0; e->text_indent = PV_LEN_UNSET;
-    e->white_space = 0; e->list_style = 0;
+    e->white_space = 0; e->list_style = 0; e->text_balance = -1;
     e->text_overflow = 0; e->word_break = 0;
     e->visibility = 0;
     e->text_decoration_color = -1;
@@ -1247,6 +1307,8 @@ void pv_text_ext_reset(pv_text_ext *e) {
 static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
     if (e->font_family == 0 && cs->font_family != CSS_FF_UNSET) e->font_family = cs->font_family;
     if (e->fontface == 0u && cs->fontface != 0u) e->fontface = cs->fontface;
+    if (e->font_list[0] == '\0' && cs->font_list[0] != '\0')
+        memcpy(e->font_list, cs->font_list, sizeof e->font_list);
     if (e->text_transform == 0 && cs->text_transform != CSS_TT_UNSET) e->text_transform = cs->text_transform;
     if (e->letter_spacing == PV_LEN_UNSET && cs->letter_spacing != CSS_LEN_UNSET)
         e->letter_spacing = cs->letter_spacing;
@@ -1261,6 +1323,7 @@ static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
     if (e->text_indent == PV_LEN_UNSET && cs->text_indent != CSS_LEN_UNSET)
         e->text_indent = cs->text_indent;
     if (e->white_space == 0 && cs->white_space != CSS_WS_UNSET) e->white_space = cs->white_space;
+    if (e->text_balance < 0 && cs->text_balance >= 0) e->text_balance = cs->text_balance;
     if (e->list_style == 0 && cs->list_style != CSS_LS_UNSET) e->list_style = cs->list_style;
     if (e->text_overflow == 0 && cs->text_overflow != CSS_TO_UNSET)
         e->text_overflow = cs->text_overflow;
@@ -1532,6 +1595,8 @@ static void cont_def_reset(pv_cont_def *d) {
     d->item_order = CSS_LEN_UNSET;
     d->item_align_self = CSS_AK_UNSET;
     d->item_mauto = 0;
+    d->item_col_start = -1;
+    d->item_row_start = -1;
 }
 
 /* Id of node in reg, registering it on first sight. -1 when reg is full. */
@@ -1572,6 +1637,15 @@ static void link_cont_chain(pv_container_reg *reg, pv_item_track *tr,
         reg->def[inner].item_order      = cont->anc_item_order[k + 1];
         reg->def[inner].item_align_self = cont->anc_item_align[k + 1];
         reg->def[inner].item_mauto      = cont->anc_item_mauto[k + 1];
+        const int *gl = cont->anc_item_gl[k + 1];
+        const pv_cont_def *od = &reg->def[outer];
+        int pos, span;
+        fx_grid_line_resolve(gl[0], gl[1], od->cols > 0 ? od->cols : 0, &pos, &span);
+        reg->def[inner].item_col_start = pos;
+        reg->def[inner].item_col_span  = (span > 1) ? span : 0;
+        fx_grid_line_resolve(gl[2], gl[3], od->rows > 0 ? od->rows : 0, &pos, &span);
+        reg->def[inner].item_row_start = pos;
+        reg->def[inner].item_row_span  = (span > 1) ? span : 0;
     }
 }
 
@@ -1760,6 +1834,12 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->box_min_h = (cs->min_height > 0) ? cs->min_height : 0;
     d->box_max_h = (cs->max_height > 0) ? cs->max_height : 0;
     d->box_min_w = (cs->min_width > 0) ? cs->min_width : 0;
+    d->box_min_w_set = ((cs->min_width >= 0 && !CSS_LEN_IS_INTRINSIC(cs->min_width)) ||
+                        cs->pct[CSS_PCT_MIN_WIDTH] > 0) ? 1 : 0;
+    /* width:max-content|fit-content (CSS Sizing 3 3.1): the box shrink-wraps its
+     * content, exactly the inline-block measurement; fit-content is that clamped
+     * to the available width, which the shrink path already does. */
+    d->box_w_intrinsic = (cs->width == CSS_LEN_MAX_CONTENT || cs->width == CSS_LEN_FIT_CONTENT);
     d->grad_n = (cs->bg_grad_n >= 2) ? cs->bg_grad_n : 0;
     d->grad_angle = cs->bg_grad_angle;
     d->grad_c0 = cs->bg_grad_c[0]; d->grad_c1 = cs->bg_grad_c[1];
@@ -2240,6 +2320,72 @@ static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sh
     return cs;
 }
 
+/* The SVG paint the CSS resolved for an inline <svg>, from the element or its
+ * nearest declaring ancestor (fill and stroke inherit, SVG 2 13.2), written as
+ * root attributes. Empty when nothing is declared, so a plain icon's markup is
+ * byte-identical. */
+static void svg_css_paint_attrs(lxb_dom_element_t *el, const css_sheet *sheet,
+                                pv_style_cache *cache, char *out, size_t cap) {
+    int fill_none = 0, stroke = -1, stroke_w = -1;
+    int got_fill = 0, got_stroke = 0, got_w = 0;
+    lxb_dom_element_t *p = el;
+    for (int k = 0; p != NULL && k < PV_FONT_CHAIN_MAX; ++k, p = pv_parent_element(p)) {
+        css_style cs = cached_element_style(p, sheet, cache);
+        if (!got_fill && cs.svg_fill != -1) { fill_none = (cs.svg_fill == CSS_SVG_PAINT_NONE); got_fill = 1; }
+        if (!got_stroke && cs.svg_stroke != -1) { stroke = cs.svg_stroke; got_stroke = 1; }
+        if (!got_w && cs.svg_stroke_w >= 0) { stroke_w = cs.svg_stroke_w; got_w = 1; }
+        if (got_fill && got_stroke && got_w) break;
+    }
+    out[0] = '\0';
+    size_t n = 0;
+    int r;
+    if (fill_none) {
+        r = snprintf(out + n, cap - n, " fill=\"none\"");
+        if (r < 0 || (size_t)r >= cap - n) { out[0] = '\0'; return; }
+        n += (size_t)r;
+    }
+    if (got_stroke) {
+        if (stroke == CSS_SVG_PAINT_NONE) r = snprintf(out + n, cap - n, " stroke=\"none\"");
+        else if (stroke == CC_COLOR_CURRENT) r = snprintf(out + n, cap - n, " stroke=\"currentColor\"");
+        else if (stroke >= 0) r = snprintf(out + n, cap - n, " stroke=\"#%06x\"", (unsigned)stroke);
+        else r = 0;
+        if (r < 0 || (size_t)r >= cap - n) { out[0] = '\0'; return; }
+        n += (size_t)r;
+    }
+    if (got_w) {
+        r = snprintf(out + n, cap - n, " stroke-width=\"%g\"", stroke_w / 100.0);
+        if (r < 0 || (size_t)r >= cap - n) { out[0] = '\0'; return; }
+        n += (size_t)r;
+    }
+}
+
+
+/* The text-align of the line an inline-level element sits on: its nearest
+ * ancestor that declares one (text-align inherits), 0 (start) at the root.
+ * Bounded by the DOM depth and by PV_FONT_CHAIN_MAX. */
+static int inherited_line_align(const lxb_dom_node_t *node, const css_sheet *sheet,
+                                pv_style_cache *cache) {
+    lxb_dom_element_t *p = (node != NULL && node->type == LXB_DOM_NODE_TYPE_ELEMENT)
+        ? pv_parent_element(lxb_dom_interface_element((lxb_dom_node_t *)node)) : NULL;
+    for (int k = 0; p != NULL && k < PV_FONT_CHAIN_MAX; ++k, p = pv_parent_element(p)) {
+        css_style ps = cached_element_style(p, sheet, cache);
+        if (ps.text_align != CSS_ALIGN_UNSET) return (int)ps.text_align;
+    }
+    return 0;
+}
+
+/* box_reg_id plus the line alignment an inline-level box needs (see
+ * pv_box_def.line_align). */
+static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
+                         double font_px, const css_sheet *sheet, pv_style_cache *cache) {
+    size_t before = r->count;
+    int id = box_reg_id(r, node, cs, font_px);
+    if (id >= 0 && r->count > before && cs->display == CSS_DISP_INLINE_BLOCK)
+        r->def[id].line_align = inherited_line_align(node, sheet, cache);
+    return id;
+}
+
+
 /* The ::before/::after generated box's style of el (spec/page_view.md "Cajas
  * generadas"): resolved against el's computed font-size and custom properties,
  * which the generated box inherits. Not memoized -- only elements whose cascade
@@ -2288,6 +2434,13 @@ static void apply_css_replaced_size(lxb_dom_element_t *el, const css_sheet *shee
     css_style own = cached_element_style(el, sheet, cache);
     if (own.width  > 0 && own.width  <= CSS_LEN_MAX) *iw = own.width;
     if (own.height > 0 && own.height <= CSS_LEN_MAX) *ih = own.height;
+}
+
+/* 1 when the element's height is a CSS px length (apply_css_replaced_size took it). */
+static int css_replaced_h_fixed(lxb_dom_element_t *el, const css_sheet *sheet,
+                                pv_style_cache *cache) {
+    css_style own = cached_element_style(el, sheet, cache);
+    return own.height > 0 && own.height <= CSS_LEN_MAX;
 }
 
 /* Content width (px) of the containing block for a replaced element that has NO
@@ -2425,6 +2578,12 @@ static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *s
         } else if (c->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *ce = lxb_dom_interface_element((lxb_dom_node_t *)c);
             css_style ccs = cached_element_style(ce, sheet, cache);
+            /* Not part of the line at all (CSS 2.1 9.7 / display:none): an
+             * absolute overlay beside the inline-blocks does not stop them
+             * forming their row. */
+            if (ccs.display == CSS_DISP_NONE || ccs.position == CSS_POS_ABSOLUTE
+                || ccs.position == CSS_POS_FIXED)
+                continue;
             if (ccs.display != CSS_DISP_INLINE_BLOCK) return 0;
             if (++nel > PV_MAX_INLINE_ROW_ITEMS) return 0;
         }
@@ -2516,18 +2675,32 @@ static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
  * runs but let a decorated child box span the whole page; and a flex item's size
  * (`.meter{width:280px}` in a centring column) had nowhere to be read from
  * (spec/page_view.md, tanda 40). */
+/* A flex/grid ITEM: its parent element is a layout container. Such an item is
+ * blockified whatever its display says (CSS Display 3 2.7, Flexbox 4). */
+static int is_layout_item(const lxb_dom_node_t *el, const css_sheet *sheet,
+                          pv_style_cache *cache) {
+    const lxb_dom_node_t *par = el->parent;
+    if (par == NULL || par->type != LXB_DOM_NODE_TYPE_ELEMENT) return 0;
+    css_style pcs = cached_element_style(
+        lxb_dom_interface_element((lxb_dom_node_t *)par), sheet, cache);
+    return is_layout_container(par, &pcs, sheet, cache);
+}
+
+/* A non-zero horizontal margin, either half. */
+static int css_has_hmargin(const css_style *cs) {
+    return (cs->margin_left != CSS_LEN_UNSET && cs->margin_left != CSS_LEN_AUTO &&
+            cs->margin_left != 0) ||
+           (cs->margin_right != CSS_LEN_UNSET && cs->margin_right != CSS_LEN_AUTO &&
+            cs->margin_right != 0) ||
+           cs->pct[CSS_PCT_MARGIN_LEFT] != 0 || cs->pct[CSS_PCT_MARGIN_RIGHT] != 0;
+}
+
 static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,
                              const css_sheet *sheet, pv_style_cache *cache) {
     if (!(cs->width > 0 || cs->pct[CSS_PCT_WIDTH] > 0 ||
           cs->max_width > 0 || cs->pct[CSS_PCT_MAX_WIDTH] > 0))
         return 0;
-    /* A flex/grid item is blockified whatever its display says. */
-    const lxb_dom_node_t *par = el->parent;
-    if (par != NULL && par->type == LXB_DOM_NODE_TYPE_ELEMENT) {
-        css_style pcs = cached_element_style(
-            lxb_dom_interface_element((lxb_dom_node_t *)par), sheet, cache);
-        if (is_layout_container(par, &pcs, sheet, cache)) return 1;
-    }
+    if (is_layout_item(el, sheet, cache)) return 1;
     /* Otherwise only a BLOCK-level box: an inline-block with a width is an atom of
      * its line, sized on its run, and a box here would break the line around it. */
     if (cs->display == CSS_DISP_INLINE_BLOCK || cs->display == CSS_DISP_INLINE)
@@ -2706,6 +2879,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
     int color_inherits = 0;   /* an element on the walk said `color:inherit|currentColor` */
     int got_align = 0, got_fs = 0, got_lh = 0, got_deco = 0, got_hbox = 0, got_boxdeco = 0;
+    /* The text-align the run's anonymous inline-block row inherits (see below). */
+    int row_align = CSS_ALIGN_UNSET, row_align_seek = 0, row_align_found = 0;
     /* font-size chaining (spec/css.md "font-size: absolute vs relative"): a RELATIVE
      * declaration (em/%/smaller/larger) does not end the search -- it multiplies into
      * fs_rel and the walk continues outward until an ABSOLUTE one anchors the chain
@@ -2747,8 +2922,10 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     int prev_basis = CSS_LEN_UNSET, prev_order = CSS_LEN_UNSET;
     int prev_align_self = CSS_AK_UNSET;
     int prev_mauto = 0;
-    int prev_col_span = 0;
-    int prev_row_span = 0;
+    /* The item's raw placement sides (FX_GL_*): resolved only at its container,
+     * the one place that knows how many tracks a negative line counts back from. */
+    int prev_gcs = FX_GL_AUTO, prev_gce = FX_GL_AUTO;
+    int prev_grs = FX_GL_AUTO, prev_gre = FX_GL_AUTO;
     unsigned prev_area_name = 0u;
     int have_prev_el = 0;
     const lxb_dom_node_t *prev_el = NULL;
@@ -2935,11 +3112,31 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * structure; the decoration (on the box def) is author presentation that
              * render_doc gates behind caps.css. */
             int this_box = -1;   /* box registered for THIS ancestor, or -1 */
-            if (box_reg != NULL && generates_box_style(t, &cs)
-                && (css_has_boxdeco(&cs) || item_sizes_itself(p, &cs, sheet, style_cache))
+            /* A flex/grid item is blockified (CSS Display 3 2.7): `li{display:inline}`
+             * in a flex nav is still a box, and a horizontal margin is reason enough
+             * for one -- the item's box is the only place its margin can live, so
+             * without it a Bootstrap footer's links ran together. Asked only for an
+             * element that would otherwise not get a box, so the item lookup stays
+             * off the common path. */
+            int want_box = 0;
+            if (box_reg != NULL) {
+                int gen = generates_box_style(t, &cs);
+                int has_deco = css_has_boxdeco(&cs);
+                if (gen && has_deco) {
+                    want_box = 1;
+                } else {
+                    /* item_sizes_itself already blockifies an item with a width. */
+                    int sized = item_sizes_itself(p, &cs, sheet, style_cache);
+                    want_box = sized ||
+                               ((has_deco || css_has_hmargin(&cs)) &&
+                                is_layout_item(p, sheet, style_cache));
+                }
+            }
+            if (want_box
                 && !((t == LXB_TAG_TD || t == LXB_TAG_TH)
                      && in_flow_table_cell(p, base, flowreg))) {
-                int bid = box_reg_id(box_reg, p, &cs, pv_cached_font_px(style_cache, p));
+                int bid = box_reg_id_ex(box_reg, p, &cs, pv_cached_font_px(style_cache, p),
+                                         sheet, style_cache);
                 if (bid >= 0) {
                     if (!got_boxdeco) {
                         *block_id_out = bid;
@@ -3008,6 +3205,9 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             }
             if (!got_align && cs.text_align != CSS_ALIGN_UNSET) {
                 *align = (int)cs.text_align; got_align = 1;
+            }
+            if (row_align_seek && !row_align_found && cs.text_align != CSS_ALIGN_UNSET) {
+                row_align = (int)cs.text_align; row_align_found = 1;
             }
             if (!got_fs && cs.font_scale != 0) {
                 if (heading_here) heading_fs_own = 1;
@@ -3145,6 +3345,10 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             cont->anc_item_order[a]  = have_prev_el ? prev_order      : CSS_LEN_UNSET;
                             cont->anc_item_align[a]  = have_prev_el ? prev_align_self : CSS_AK_UNSET;
                             cont->anc_item_mauto[a]  = have_prev_el ? prev_mauto      : 0;
+                            cont->anc_item_gl[a][0]  = have_prev_el ? prev_gcs : FX_GL_AUTO;
+                            cont->anc_item_gl[a][1]  = have_prev_el ? prev_gce : FX_GL_AUTO;
+                            cont->anc_item_gl[a][2]  = have_prev_el ? prev_grs : FX_GL_AUTO;
+                            cont->anc_item_gl[a][3]  = have_prev_el ? prev_gre : FX_GL_AUTO;
                             cont->anc_n++;
                         }
 
@@ -3158,6 +3362,16 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
 
                         /* The innermost container is also the run's own annotation. */
                         if (!got_cont && cont != NULL) {
+                            /* An anonymous inline-block row is aligned by the
+                             * text-align its OWN element inherits -- found from here
+                             * outward -- never by one declared inside an item (a
+                             * <button>'s UA text-align:center). */
+                            if (cd->anon_row) {
+                                row_align_seek = 1;
+                                if (cs.text_align != CSS_ALIGN_UNSET) {
+                                    row_align = (int)cs.text_align; row_align_found = 1;
+                                }
+                            }
                             cont->id = cid_here;
                             cont->display = cd->display;
                             cont->gap = cd->gap;
@@ -3182,8 +3396,19 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                                 cont->align_self = prev_align_self;
                                 cont->mauto = prev_mauto;
                                 if (is_real) {
-                                    cont->col_span = prev_col_span;
-                                    cont->row_span = prev_row_span;
+                                    /* Line placement (CSS Grid 1 8.3, spec/grid_areas.md
+                                     * 6): resolved against THIS container's explicit
+                                     * tracks; an auto-fill count (negative marker) is
+                                     * only known at layout, so it passes as unknown. */
+                                    int lcol, lcsp, lrow, lrsp;
+                                    fx_grid_line_resolve(prev_gcs, prev_gce,
+                                                         cd->cols > 0 ? cd->cols : 0,
+                                                         &lcol, &lcsp);
+                                    fx_grid_line_resolve(prev_grs, prev_gre,
+                                                         cd->rows > 0 ? cd->rows : 0,
+                                                         &lrow, &lrsp);
+                                    cont->col_span = (lcsp > 1) ? lcsp : 0;
+                                    cont->row_span = (lrsp > 1) ? lrsp : 0;
                                     /* Named placement (CSS Grid 1 8.4): the item's
                                      * `grid-area: <name>` resolved against THIS
                                      * container's template. Resolved here, on the
@@ -3202,6 +3427,15 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                                             cont->col_span = acs;
                                             cont->row_span = ars;
                                         }
+                                    }
+                                    /* A definite line on an axis overrides that axis. */
+                                    if (lcol >= 0) {
+                                        cont->grid_col_start = lcol;
+                                        cont->col_span = (lcsp > 1) ? lcsp : 0;
+                                    }
+                                    if (lrow >= 0) {
+                                        cont->grid_row_start = lrow;
+                                        cont->row_span = (lrsp > 1) ? lrsp : 0;
                                     }
                                 }
                                 cont->item = prev_el;
@@ -3225,8 +3459,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             prev_basis = cs.flex_basis; prev_order = cs.order;
             prev_align_self = cs.align_self;
             prev_mauto = pv_mauto_of(&cs);
-            prev_col_span = (cs.grid_col_span > 0) ? cs.grid_col_span : 0;
-            prev_row_span = (cs.grid_row_span > 0) ? cs.grid_row_span : 0;
+            prev_gcs = cs.grid_col_start; prev_gce = cs.grid_col_end;
+            prev_grs = cs.grid_row_start; prev_gre = cs.grid_row_end;
             prev_area_name = cs.grid_area_name;
             have_prev_el = 1;
             prev_el = p;
@@ -3271,8 +3505,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
      * inheritance. The resolved value is only known now that the walk has finished,
      * so the row adopts it here. A real flex container keeps its justify-content. */
     if (cont != NULL && cont->anon_row && cont->justify == FX_JUSTIFY_START) {
-        if (*align == CSS_ALIGN_CENTER)     cont->justify = FX_JUSTIFY_CENTER;
-        else if (*align == CSS_ALIGN_RIGHT) cont->justify = FX_JUSTIFY_END;
+        if (row_align == CSS_ALIGN_CENTER)     cont->justify = FX_JUSTIFY_CENTER;
+        else if (row_align == CSS_ALIGN_RIGHT) cont->justify = FX_JUSTIFY_END;
         /* The DESCRIPTOR must learn it too: the presentation layer lays a container
          * out from the table, so leaving the inherited alignment only on the run
          * annotation put every centred call-to-action button back on the left. */
@@ -4391,7 +4625,7 @@ static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
  * the layer order). */
 static const char PV_UA_CSS[] =
     "@layer freedom-ua{"
-    "button{display:inline-block;padding:1px 6px;border:1px solid #8f8f9d;border-radius:4px;"
+    "button{display:inline-block;box-sizing:border-box;padding:1px 6px;border:1px solid #8f8f9d;border-radius:4px;"
     "background-color:#e9e9ed;color:#000;font-size:13.3333px;text-align:center}"
     "}\n";
 
@@ -4408,6 +4642,16 @@ static char *prepend_ua_css(const char *text, size_t *len) {
     out[ul + tl] = '\0';
     *len = ul + tl;
     return out;
+}
+
+void pv_root_insets(const css_style *body, int out[4]) {
+    if (out == NULL) return;
+    const int side[4] = { body->margin_top, body->margin_right,
+                          body->margin_bottom, body->margin_left };
+    const int pct[4] = { body->pct[CSS_PCT_MARGIN_TOP], body->pct[CSS_PCT_MARGIN_RIGHT],
+                         body->pct[CSS_PCT_MARGIN_BOTTOM], body->pct[CSS_PCT_MARGIN_LEFT] };
+    for (int k = 0; k < 4; ++k)
+        out[k] = (side[k] == CSS_LEN_UNSET && pct[k] == 0) ? PV_UA_BODY_MARGIN : 0;
 }
 
 static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
@@ -4548,6 +4792,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             v->canvas_bg = body_cs.background;
         if (v->html_margin_top < 0 && body_cs.margin_top != CSS_LEN_UNSET)
             v->html_margin_top = body_cs.margin_top;
+        /* The UA `body{margin:8px}` (HTML Rendering 15.3.1), per side. A side the
+         * author declared is the author's -- a non-zero one generates the body's
+         * box, which applies it like any margin, and `margin:0` means 0. A side
+         * left alone is the UA 8px, carried as a ROOT inset the painter lays the
+         * page inside (the top one collapses with the first child's margin), so a
+         * margin-only body stays box-less. */
+        pv_root_insets(&body_cs, v->root_m);
     }
 
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {
@@ -4828,7 +5079,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 if (bdeco < 0 && !is_btn) {
                     css_style cs = cached_element_style(el, sheet, &cache);
                     if (css_has_boxdeco(&cs))
-                        bdeco = box_reg_id(&box_reg, n, &cs, pv_cached_font_px(&cache, n));
+                        bdeco = box_reg_id_ex(&box_reg, n, &cs, pv_cached_font_px(&cache, n), sheet, &cache);
                 }
                 if (ictl_checked >= 0) pv_set_input_checked(v, ictl_checked);
                 if (ictl_opts != NULL) {
@@ -4864,6 +5115,22 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * caret_color tints the caret of the focused control (2026-07-10). */
                 pv_set_text_ext(v, &ctl_ext);
                 pv_set_block_id(v, bdeco);
+                /* The UA identity of the control's BLOCK (a <p>, an <li>...): when the
+                 * control opens that block's first line, the block's UA margin is
+                 * the one the line takes -- without it a <p> starting with a field
+                 * lost its 1em margins. */
+                pv_set_ua_tag(v, (int)unused_box.ua);
+                /* The control's OWN box (its author decoration), so the painter can
+                 * drop the native chrome the way Firefox does once the author
+                 * styles the control's background or border. */
+                if (bdeco >= 0 && (size_t)bdeco < box_reg.count && box_reg.node[bdeco] == n)
+                    pv_set_own_box(v, bdeco);
+                if (itype != PV_IN_SUBMIT && itype != PV_IN_BUTTON && itype != PV_IN_SUBMIT_BOX
+                    && itype != PV_IN_CHECKBOX && itype != PV_IN_RADIO) {
+                    css_style ph = cch_pseudo_style(el, sheet, CSS_PSEUDO_PLACEHOLDER,
+                                                    pv_cached_font_px(&cache, n), NULL);
+                    pv_set_input_placeholder(v, pv_placeholder_color(&ph));
+                }
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;
             }
@@ -5008,6 +5275,15 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int iw = parse_dim(ws, wl);
                 int ih = parse_dim(hs, hl);
                 apply_css_replaced_size(el, sheet, &cache, &iw, &ih);
+                {
+                    char pa[96];
+                    svg_css_paint_attrs(el, sheet, &cache, pa, sizeof pa);
+                    if (pa[0] != '\0') {
+                        size_t nl = 0;
+                        char *nm = pv_svg_append_root_attrs(markup, mlen, pa, &nl);
+                        if (nm != NULL) { free(markup); markup = nm; mlen = nl; }
+                    }
+                }
                 /* A viewBox-only <svg> (no width/height, attr or CSS) has no intrinsic
                  * pixel size: it fills its containing block. Seed the width from the
                  * nearest definite-width ancestor so svg_intrinsic_size derives the
@@ -5037,9 +5313,21 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &svg_cont, &svg_box, &svg_ext,
                                 &box_reg, &float_reg, &bdeco, &cache, &flowreg);
-                int brk = pending_break || (block != prev_block);
+                /* An absolutely positioned <svg> (a decorative overlay: github's tab
+                 * selection, every icon badge) is out of flow exactly like an
+                 * <img> (CSS 2.1 9.7): no line break, its own box as the anchor,
+                 * the oof flag. In flow it split the inline-block row it overlays,
+                 * stacking every tab on its own line. */
+                int svg_oof = subtree_is_oof(n, sheet, &cache);
+                int brk = (pending_break || (block != prev_block)) && !svg_oof;
                 pending_break = 0;
                 prev_block = block;
+                if (svg_oof) {
+                    css_style ocs = cached_element_style(el, sheet, &cache);
+                    if (css_has_boxdeco(&ocs))
+                        bdeco = box_reg_id_ex(&box_reg, n, &ocs, pv_cached_font_px(&cache, n),
+                                              sheet, &cache);
+                }
 
                 pv_status st = pv_append_svg(v, heading, brk, markup, iw, ih);
                 free(markup);
@@ -5052,7 +5340,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * fill and currentColor from it. */
                 {
                     css_style svg_own = cached_element_style(el, sheet, &cache);
-                    int svg_fg = (svg_own.svg_fill != -1) ? svg_own.svg_fill : unused_fg;
+                    int svg_fg = (svg_own.svg_fill != -1 && svg_own.svg_fill != CSS_SVG_PAINT_NONE)
+                                 ? svg_own.svg_fill : unused_fg;
                     pv_set_color(v, svg_fg);
                 }
                 pv_set_text_ext(v, &svg_ext);
@@ -5065,6 +5354,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 link_cont_chain(&reg, &items, &svg_cont);
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
+                pv_set_oof(v, svg_oof);
                 continue;
             }
 
@@ -5161,6 +5451,14 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 free(src_dup);
                 free(alt_dup);
                 if (st != PV_OK) { rc = st; goto cleanup; }
+                v->runs[v->count - 1].img_h_css = css_replaced_h_fixed(el, sheet, &cache);
+                {
+                    css_style dcs = cached_element_style(el, sheet, &cache);
+                    v->runs[v->count - 1].img_inline =
+                        (dcs.display == CSS_DISP_UNSET || dcs.display == CSS_DISP_INLINE)
+                        && !is_out_of_flow(&dcs) && dcs.float_side != CSS_FLOAT_LEFT
+                        && dcs.float_side != CSS_FLOAT_RIGHT;
+                }
                 /* resolve_context tracks the innermost box-generating ANCESTOR, not
                  * the replaced element itself, so an <img> that carries its own box
                  * (a declared width, an aspect-ratio, a border/radius) had no way to
@@ -5168,10 +5466,14 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * box its author reserved and collapsed to a text-height bar. Same
                  * registration the form-control path above already does, for the same
                  * reason. */
+                /* The nearest ANCESTOR box, before the element's own is registered:
+                 * an in-flow image is content of that box exactly like a text run,
+                 * so the box (a card) opens before the image instead of after it. */
+                int img_anc_box = bdeco;
                 if (bdeco < 0) {
                     css_style rcs = cached_element_style(el, sheet, &cache);
                     if (css_has_boxdeco(&rcs))
-                        bdeco = box_reg_id(&box_reg, n, &rcs, pv_cached_font_px(&cache, n));
+                        bdeco = box_reg_id_ex(&box_reg, n, &rcs, pv_cached_font_px(&cache, n), sheet, &cache);
                 }
                 /* The element's OWN width in % is its used width (CSS 2.1
                  * §10.3.2), not a cap: without this half an `img{width:50%}`
@@ -5194,6 +5496,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * into flow as a full-width row. Gated on img_oof, so every
                  * in-flow image keeps block_id == -1 byte-identically. */
                 if (img_oof) pv_set_block_id(v, bdeco);
+                else if (img_anc_box >= 0) pv_set_block_id(v, img_anc_box);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 pv_set_oof(v, img_oof);
             } else if ((t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO)
@@ -5307,7 +5610,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 if (bdeco < 0) {
                     css_style rcs = cached_element_style(el, sheet, &cache);
                     if (css_has_boxdeco(&rcs))
-                        bdeco = box_reg_id(&box_reg, n, &rcs, pv_cached_font_px(&cache, n));
+                        bdeco = box_reg_id_ex(&box_reg, n, &rcs, pv_cached_font_px(&cache, n), sheet, &cache);
                 }
                 annotate_replaced_run(v, &reg, &items, &vid_cont, &vid_ext,
                                       unused_align, unused_fs, unused_fs_abs,

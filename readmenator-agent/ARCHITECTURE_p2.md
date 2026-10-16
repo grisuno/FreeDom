@@ -2,6 +2,15 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_svg_render.c` -> `include/svg_render.h`
+- `tests/test_tab.c` -> `include/css.h`
+- `tests/test_tab.c` -> `include/js_geom.h`
+- `tests/test_tab.c` -> `include/tab.h`
+- `tests/test_tab.c` -> `include/url.h`
+- `tests/test_tab.c` -> `include/web_storage.h`
+- `tests/test_text_shape.c` -> `include/css.h`
+- `tests/test_text_shape.c` -> `include/text_shape.h`
+- `tests/test_text_shape.c` -> `include/webfont.h`
 - `tests/test_textfield.c` -> `include/textfield.h`
 - `tests/test_tls_impersonate.c` -> `include/tls_impersonate.h`
 - `tests/test_ui.c` -> `include/ui.h`
@@ -33,7 +42,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `fuzz/fuzz_js_sandbox.c` -> stddef.h, stdint.h, stdlib.h, string.h
 - `fuzz/fuzz_page_view.c` -> stddef.h, stdint.h
 - `fuzz/fuzz_pdf_export.c` -> stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_prefetch.c` -> stddef.h, stdint.h
+- `fuzz/fuzz_prefetch.c` -> stddef.h, stdint.h, string.h
 - `fuzz/fuzz_prefs.c` -> stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `fuzz/fuzz_svg_render.c` -> math.h, stdint.h, stdlib.h, string.h
 - `fuzz/fuzz_text_shape.c` -> stddef.h, stdint.h, stdlib.h
@@ -55,6 +64,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/css_atrule.h` -> stddef.h
 - `include/css_chain.h` -> lexbor/html/html.h
 - `include/css_gradient.h` -> stddef.h
+- `include/css_index.h` -> stddef.h, stdint.h
 - `include/css_length.h` -> stddef.h
 - `include/css_mq.h` -> stddef.h
 - `include/css_select.h` -> stddef.h, string.h
@@ -110,15 +120,16 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/webfont_load.h` -> stddef.h
 - `include/ws_hub.h` -> poll.h, stddef.h
 - `src/block_flow.c` -> math.h
-- `src/box_style.c` -> stddef.h, stdlib.h, string.h
+- `src/box_style.c` -> math.h, stddef.h, stdlib.h, string.h
 - `src/box_tree.c` -> stddef.h
 - `src/browser.c` -> stdlib.h, string.h
 - `src/css.c` -> limits.h, math.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/css_atrule.c` -> string.h
 - `src/css_box.c` -> math.h, stdlib.h, string.h
-- `src/css_chain.c` -> string.h
+- `src/css_chain.c` -> stdlib.h, string.h
 - `src/css_color.c` -> math.h, stdlib.h, string.h
 - `src/css_gradient.c` -> ctype.h, stdlib.h, string.h
+- `src/css_index.c` -> stdlib.h, string.h
 - `src/css_length.c` -> math.h, string.h
 - `src/css_mq.c` -> string.h
 - `src/css_select.c` -> lexbor/html/html.h, string.h
@@ -130,7 +141,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/dom.c` -> lexbor/html/html.h, stdint.h, stdlib.h, string.h
 - `src/dom_debug.c` -> stdarg.h, stddef.h, stdio.h
 - `src/download.c` -> ctype.h, string.h
-- `src/flex_layout.c` -> stddef.h
+- `src/flex_layout.c` -> stddef.h, string.h
 - `src/form.c` -> string.h
 - `src/freebug.c` -> stdlib.h, string.h
 - `src/freedom.c` -> limits.h, stdio.h, stdlib.h, string.h, time.h, unistd.h
@@ -162,7 +173,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/page_view.c` -> ctype.h, lexbor/html/html.h, lexbor/tag/const.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/pdf_export.c` -> string.h
 - `src/perf_trace.c` -> stdio.h, stdlib.h, string.h
-- `src/prefetch.c` -> stdlib.h, string.h
+- `src/prefetch.c` -> stdlib.h, string.h, strings.h
 - `src/prefs.c` -> stdio.h, stdlib.h, string.h
 - `src/profile.c` -> errno.h, fcntl.h, openssl/crypto.h, openssl/rand.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
 - `src/render_doc.c` -> stdlib.h, string.h
@@ -183,7 +194,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/itest_secure_fetch.c` -> stdio.h, string.h
 - `tests/test_anti_fp.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_block_flow.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h
-- `tests/test_box_style.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_box_style.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_box_tree.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_browser.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_compositor.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
@@ -193,6 +204,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_css_color.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_css_drops.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_gradient.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
+- `tests/test_css_index.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_length.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tests/test_css_mq.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_css_text.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
@@ -225,7 +237,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_media_decoder.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tests/test_net_realm.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_os_sandbox.c` -> cmocka.h, errno.h, fcntl.h, linux/audit.h, sched.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/mman.h, sys/prctl.h, sys/resource.h, sys/socket.h, sys/stat.h, sys/syscall.h, sys/wait.h, unistd.h
-- `tests/test_page_view.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_page_view.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_pdf_export.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_perf_trace.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_prefetch.c` -> cmocka.h, pthread.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h

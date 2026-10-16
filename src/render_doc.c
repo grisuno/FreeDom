@@ -101,6 +101,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->text_decoration_thickness = -1;
     b->font_family = 0;
     b->fontface = 0u;
+    b->font_list = NULL;
     b->text_transform = 0;
     b->letter_spacing = PV_LEN_UNSET;
     b->word_spacing = PV_LEN_UNSET;
@@ -111,6 +112,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->valign = 0;
     b->text_indent = PV_LEN_UNSET;
     b->white_space = 0;
+    b->text_balance = 0;
     /* 2026-07-10 batch (text-ext): tab_size, direction, font_variant, list_style_pos.
      * All gated by caps.css downstream like the rest of the text extensions. */
     b->tab_size = 0;
@@ -170,6 +172,8 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->box_mt = PV_LEN_UNSET;
     b->box_mb = PV_LEN_UNSET;
     b->box_w_pct = 0;
+    b->img_h_css = 0;
+    b->img_inline = 0;
     b->box_mw = 0;
     b->box_mw_pct = 0;
     b->box_l_pct = 0;
@@ -188,6 +192,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->form_method = 0;
     b->checked = -1;
     b->select_opts = NULL;
+    b->ph_color = PV_PH_THEME;
     return 0;
 }
 
@@ -209,6 +214,7 @@ static int rd_push_input(rd_doc *d, int block_break, const pv_run *r) {
         if (b->value == NULL) return -1;
     }
     b->checked = r->checked;
+    b->own_box_id = r->own_box_id;   /* the control's own decoration (native-chrome test) */
     if (r->select_opts != NULL) {
         b->select_opts = utf8_sanitized_dup(r->select_opts);
         if (b->select_opts == NULL) return -1;
@@ -261,6 +267,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
     d->canvas_bg = (view != NULL) ? view->canvas_bg : -1;
     d->html_max_width = (view != NULL) ? view->html_max_width : -1;
     d->html_margin_top = (view != NULL) ? view->html_margin_top : 0;
+    for (int k = 0; k < 4; ++k) d->root_m[k] = (view != NULL) ? view->root_m[k] : 0;
     d->html_center = (view != NULL) ? view->html_center : 0;
 
     size_t n = pv_count(view);
@@ -350,6 +357,8 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                     rd_block *ib = &d->blocks[d->count - 1];
                     ib->video_w = r->img_w;
                     ib->video_h = r->img_h;
+                    ib->img_h_css = r->img_h_css;
+                    ib->img_inline = r->img_inline;
                 }
                 break;
             }
@@ -370,6 +379,8 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             }
             case PV_INPUT:
                 rc = rd_push_input(d, r->block_break, r);
+                /* ::placeholder is author presentation: caps.css-gated. */
+                if (rc == 0 && caps.css) d->blocks[d->count - 1].ph_color = r->ph_color;
                 break;
             case PV_LINK:
                 rc = rd_push(d, RD_LINK, r->heading, r->block_break, r->text, r->href,
@@ -441,6 +452,10 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             if (caps.css) {
                 lb->font_family = r->font_family;
                 lb->fontface = r->fontface;
+                if (r->font_list != NULL && lb->font_list == NULL) {
+                    lb->font_list = utf8_sanitized_dup(r->font_list);
+                    if (lb->font_list == NULL) { rd_free(d); return RD_ERR_OOM; }
+                }
                 lb->text_transform = r->text_transform;
                 lb->letter_spacing = r->letter_spacing;
                 lb->word_spacing = r->word_spacing;
@@ -451,6 +466,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->valign = r->valign;
                 lb->text_indent = r->text_indent;
                 lb->white_space = r->white_space;
+                lb->text_balance = r->text_balance;
                 /* 2026-07-10 text-extension batch. */
                 lb->tab_size = r->tab_size;
                 lb->direction = r->direction;
@@ -696,6 +712,7 @@ void rd_free(rd_doc *d) {
         free(d->blocks[i].name);
         free(d->blocks[i].value);
         free(d->blocks[i].select_opts);
+        free(d->blocks[i].font_list);
     }
     free(d->blocks);
     free(d->boxes);

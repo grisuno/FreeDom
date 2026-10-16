@@ -126,12 +126,18 @@
 
 /* Form control geometry: inner padding of a text box, the preferred text-box width
  * (clamped to the content width), and the horizontal padding of a button. */
-#define UI_INPUT_PAD     6.0
-/* Conventional main-axis width a form control reserves as a flex item until a real
- * intrinsic-width model lands (roadmap R11). Roughly a browser's default text input. */
-#define UI_INPUT_MEASURE_W 175.0
-#define UI_INPUT_WIDTH   360.0
-#define UI_BUTTON_HPAD   14.0
+#define UI_INPUT_PAD     3.0   /* Firefox field: 1px border + 2px padding */
+/* The form-control font: Firefox's `font: -moz-field` is 13.333px whatever the
+ * page's body size (HTML Rendering 15.5.x via the UA sheet). */
+#define UI_CONTROL_FONT  13.333
+/* The default width of a text field: Firefox's `size=20` field at its 13.33px
+ * control font, measured border box (180px). ONE value for both the width a flex
+ * item reserves and the width the field paints -- they were 175 and 360, so a
+ * measured item overflowed its own slot. A real intrinsic-width model (size, font)
+ * is roadmap R11. */
+#define UI_INPUT_MEASURE_W 180.0
+#define UI_INPUT_WIDTH   UI_INPUT_MEASURE_W
+#define UI_BUTTON_HPAD   7.0   /* Firefox button: 6px padding + 1px border */
 #define UI_FORM_FIELDS_MAX 64  /* matches FM_MAX_FIELDS; cap gathered controls */
 
 /* Link/author text-decoration geometry, expressed relative to the run's font so it
@@ -1197,10 +1203,33 @@ static int image_display_size(const browser_window *w, const rd_block *blk,
  * informative full-width labelled bar as before. Privacy by Default makes this the
  * common path -- images are off unless opted in -- so most pages depend on it to keep
  * their layout intact. */
+/* An image that HAS a source which is not available (blocked, failed, offline)
+ * and a non-empty `alt` is rendered as its alt text, an inline non-replaced box:
+ * its declared size does not apply (HTML Rendering 15.4.2, measured on Firefox:
+ * andreagrandi's 2160x720 + `height:250px` cover is one 18px line of alt). An image
+ * with NO source keeps the box it declares (tanda 30, jkanime-tile, also measured). */
+static int image_is_alt_text(const rd_block *blk) {
+    /* Inline-level only: Gecko keeps a block-level broken image's box (the
+     * `display:block; aspect-ratio` card cover of broken-img-card, measured). */
+    return blk->kind == RD_IMAGE && blk->img_inline
+        && blk->href != NULL && blk->href[0] != '\0'
+        && blk->text != NULL && blk->text[0] != '\0';
+}
+
 static int placeholder_display_size(const rd_block *blk, double box_w,
                                     double *dw, double *dh) {
+    if (image_is_alt_text(blk)) return 0;
     if (blk->video_w <= 0 || blk->video_h <= 0) return 0;
     if (box_w < 1.0) box_w = 1.0;
+    /* A percentage width is the used width (CSS 2.1 10.3.2); a CSS px height is
+     * kept as is -- both are definite, so the aspect ratio does not apply (the
+     * card cover `img{width:100%;height:150px}`); an attribute height scales. */
+    if (blk->box_w_pct > 0) {
+        *dw = box_w * (double)blk->box_w_pct / 1000.0;
+        *dh = blk->img_h_css ? (double)blk->video_h
+                             : *dw * (double)blk->video_h / (double)blk->video_w;
+        return *dw >= 1.0 && *dh >= 1.0;
+    }
     double base_w = (double)blk->video_w, base_h = (double)blk->video_h;
     double scale = (base_w > box_w) ? box_w / base_w : 1.0;
     *dw = base_w * scale;
@@ -2298,22 +2327,11 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
      * parses. Protocol and policy are unchanged: a pool hit only changes WHEN
      * the bytes were fetched; a miss falls back to the serial path. Each kind
      * is queued only under the grant that would let the worker request it. */
-    pf_list scanned;
-    scanned.count = 0;
     pf_pool subpool;
     pf_gated_fetch gated = { gui_subresource_fetch, w, NULL };
-    if ((css_grant || js_grant)
-        && pf_scan(w->cur_html, w->cur_html_len, &scanned) == 0) {
-        const char *urls[PF_MAX_REFS];
-        size_t nurl = 0;
-        for (size_t i = 0; i < scanned.count; ++i) {
-            int want = (scanned.refs[i].kind == PF_STYLESHEET) ? css_grant : js_grant;
-            if (want) urls[nurl++] = scanned.refs[i].url;
-        }
-        if (nurl > 0
-            && pf_pool_start(&subpool, urls, nurl, gui_subresource_fetch, w) == 0)
-            gated.pool = &subpool;
-    }
+    if (pf_pool_start_page(&subpool, w->cur_html, w->cur_html_len, w->cur_top,
+                           css_grant, js_grant, gui_subresource_fetch, w) == 0)
+        gated.pool = &subpool;
     tab_set_fetcher(t, pf_pooled_fetch, &gated);
     /* @font-face stash (spec/webfont.md b3b): fresh per load; the sink observes
      * every served CSS body (serial and pool paths alike). */
@@ -2337,7 +2355,6 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
      * pool -- unconsumed results are freed, in-flight fetches are joined. */
     tab_set_fetcher(t, gui_subresource_fetch, w);
     if (gated.pool != NULL) pf_pool_finish(&subpool);
-    pf_list_free(&scanned);
 
     if (load_ts != TAB_OK) {
         browser_set_page(&w->bs, NULL, "Failed to render page in sandbox.", 1);
@@ -2863,8 +2880,21 @@ static void content_geometry(const browser_window *w, double *top, double *heigh
  * content in a fixed reading column (UI_READER_COLUMN_W). This is HORIZONTAL only --
  * the vertical margin stays w->theme.content_margin (see content_geometry), so reader
  * centering never shrinks the vertical viewport. */
+/* A rendered document gets no chrome gutter: its margin is the <body>'s -- the
+ * author's, or the UA 8px carried as root insets (rd_doc.root_m, laid out by
+ * layout_doc) -- exactly as in Firefox, where the two used to stack. Only the
+ * plain-text viewer (no document) keeps the theme's breathing room. side is
+ * 1 = right, 3 = left (rd_doc.root_m order). */
+static double page_gutter(const browser_window *w) {
+    return (w->doc != NULL) ? 0.0 : w->theme.content_margin;
+}
+
+static double page_side(const browser_window *w, int side) {
+    return (w->doc != NULL) ? (double)w->doc->root_m[side] : w->theme.content_margin;
+}
+
 static double content_margin_x(const browser_window *w) {
-    double m = w->theme.content_margin;
+    double m = page_side(w, 3);
     if (w->reader) {
         double avail = (double)w->width - UI_SCROLLBAR_W;
         double margin = (avail - UI_READER_COLUMN_W) / 2.0;
@@ -2873,8 +2903,14 @@ static double content_margin_x(const browser_window *w) {
     return m;
 }
 
+/* Left + right page margins (reader centering is symmetric). */
+static double content_margins_x(const browser_window *w) {
+    double l = content_margin_x(w);
+    return w->reader ? 2.0 * l : l + page_side(w, 1);
+}
+
 static double content_width(const browser_window *w) {
-    double cw = (double)w->width - 2.0 * content_margin_x(w) - UI_SCROLLBAR_W;
+    double cw = (double)w->width - content_margins_x(w) - UI_SCROLLBAR_W;
     if (cw < 1.0) cw = 1.0;
     if (w->doc != NULL && w->doc->html_max_width > 0) {
         double cap = (double)w->doc->html_max_width;
@@ -2886,7 +2922,7 @@ static double content_width(const browser_window *w) {
 static double html_center_offset(const browser_window *w) {
     if (w->doc == NULL || !w->doc->html_center || w->doc->html_max_width <= 0)
         return 0.0;
-    double avail = (double)w->width - 2.0 * content_margin_x(w) - UI_SCROLLBAR_W;
+    double avail = (double)w->width - content_margins_x(w) - UI_SCROLLBAR_W;
     if (avail < 1.0) return 0.0;
     double cap = (double)w->doc->html_max_width;
     if (cap >= avail) return 0.0;
@@ -3100,6 +3136,7 @@ typedef struct rc_frag {
     /* Author @font-face match (spec/webfont.md b3b): wf_name_hash, 0 = none.
      * rc_add_frag zeroes it; the flow_text copy below sets it from rc_ext. */
     unsigned    webfont;
+    int         localfont;    /* tsh_local_handle of the author list, 0 = none */
     int         transform;    /* css_text_transform */
     double      letter_spacing;/* px between clusters */
     double      valign_dy;    /* baseline shift px (sub/super) */
@@ -3136,6 +3173,7 @@ typedef struct rc_frag {
      * three lines instead of one. */
     const rd_block *repl;
     double      repl_w, repl_h;
+    double      repl_asc;  /* part above the baseline; 0 = all of it (an image) */
 } rc_frag;
 
 typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT, RC_VIDEO, RC_SVG } rc_rowkind;
@@ -3320,6 +3358,7 @@ typedef struct rc_open_box {
 
 typedef struct rc_state {
     double cur_top, pending_gap, pen_x, line_asc, line_desc;
+    double wrap_cap;   /* text-wrap:balance break width, 0 = none */
     double prev_bottom;  /* bottom margin (px) of the last block, for CSS margin collapsing */
     double indent_px;    /* left indent of the current line (list nesting), applied as row x_off */
     int    line_open, banner;
@@ -3501,6 +3540,9 @@ static void rc_float_fit_line(rc_state *s, double line_h) {
  * float wider than its container still leaves a line to wrap into. */
 static double line_limit(const rc_state *s, double content_w) {
     double lim = content_w - s->float_r;
+    /* text-wrap: balance narrows where lines BREAK, never the line box they are
+     * aligned in (balanced_wrap_width). */
+    if (s->wrap_cap > 0.0 && s->wrap_cap < lim) lim = s->wrap_cap;
     return (lim < FX_FLOAT_MIN_LINE) ? FX_FLOAT_MIN_LINE : lim;
 }
 
@@ -3585,17 +3627,31 @@ static double    g_cur_px;
  * the HarfBuzz descriptor the shapers measure/draw with. wfh names a registered
  * @font-face (spec/webfont.md b3b), 0 = local bucket stack. Author call sites
  * pass their frag/block hash; every chrome call site passes 0. */
-static void content_font(cairo_t *cr, double size, int bold, int italic, int family,
-                         unsigned wfh) {
+static void content_font_ex(cairo_t *cr, double size, int bold, int italic, int family,
+                            unsigned wfh, int local) {
     cairo_select_font_face(cr, family_face(family),
                            italic ? CAIRO_FONT_SLANT_ITALIC : CAIRO_FONT_SLANT_NORMAL,
                            bold ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr, size);
     g_cur_font.family = family;
     g_cur_font.bold = bold;
     g_cur_font.italic = italic;
     g_cur_font.wfh = wfh;
+    g_cur_font.local = local;
+    /* Metrics come from the face that is DRAWN (a named local family or a
+     * webfont), not the generic toy stand-in: line-height:normal of Arial is
+     * Liberation Sans' ascent+descent, not Noto's (CSS 2.1 10.8.1). Chrome call
+     * sites (wfh 0, local 0) get the bucket face, which is the toy face's twin. */
+    if (wfh != 0u || local > 0) {
+        cairo_font_face_t *ff = tsh_face(&g_cur_font);
+        if (ff != NULL) cairo_set_font_face(cr, ff);
+    }
+    cairo_set_font_size(cr, size);
     g_cur_px = size;
+}
+
+static void content_font(cairo_t *cr, double size, int bold, int italic, int family,
+                         unsigned wfh) {
+    content_font_ex(cr, size, bold, italic, family, wfh, 0);
 }
 
 /* Sets the source color, applying an author opacity (0..100) as an alpha when set
@@ -3806,19 +3862,6 @@ static void leave_inline_box(rc_layout *L, rc_state *s, int block_id) {
     s->pen_x += s->inline_box_pad_r;
 }
 
-/* Has any in-flow content been placed on the page yet?
- *
- * The gap before the very first block has nothing to collapse against and is
- * dropped (this engine's stand-in for a margin collapsing through the root). The
- * test used to be "a text ROW exists", which silently answers "the page is empty"
- * for a page built out of decorated boxes -- a separator, a spacer, an icon tile,
- * an empty card, a rule. On such a page NO block ever received a margin: three
- * 20px divs with margin-bottom:30px stacked at 0/20/40 where Firefox puts
- * 0/50/100. A box is content exactly as much as a line of text is. */
-static int rc_has_content(const rc_layout *L) {
-    return L->nrow > 0 || L->nbox > 0;
-}
-
 static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (!s->line_open) return;
     /* The line takes the MAX leading of its fragments (CSS 2.1 §10.8): the last
@@ -3892,7 +3935,9 @@ static double open_line_height(const rc_state *s, const ui_theme *th) {
 
 static void open_line(rc_layout *L, rc_state *s) {
     if (s->line_open) return;
-    if (rc_has_content(L)) s->cur_top += s->pending_gap;  /* no leading gap at the very top */
+    /* The first block's margin applies too: it collapses with the root top inset
+     * (the UA body margin) through prev_bottom, never with the canvas. */
+    s->cur_top += s->pending_gap;
     s->pending_gap = 0;
     s->line_open = 1;
     /* This line's float insets, measured at its own top: a line overlapping a float
@@ -3914,6 +3959,7 @@ typedef struct rc_ext {
     /* Author @font-face match (spec/webfont.md b3b): wf_name_hash, 0 = none.
      * Rides beside family everywhere it does (block -> frag -> content_font). */
     unsigned webfont;
+    int    localfont;     /* tsh_local_handle of the author family list, 0 = none */
     int    transform;     /* css_text_transform */
     double letter_spacing;/* px between clusters */
     double word_spacing;  /* px added to each inter-word gap */
@@ -3959,7 +4005,7 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
          * inline highlight across the whole line (they do not). */
         if (s->line_first == L->nfrag - 1) { s->line_bg = s->bg_rgb; s->line_bg_mixed = 0; }
         else if (s->bg_rgb != s->line_bg) s->line_bg_mixed = 1;
-        f->family = x->family; f->webfont = x->webfont;
+        f->family = x->family; f->webfont = x->webfont; f->localfont = x->localfont;
         f->transform = x->transform;
         f->letter_spacing = x->letter_spacing; f->valign_dy = x->valign_dy;
         f->shadow_dx = x->shadow_dx; f->shadow_dy = x->shadow_dy;
@@ -3972,8 +4018,13 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
         f->hidden = pv_content_hidden(s->hidden_from != 0, x->visibility);
     }
     s->pen_x += width;
-    if (fe->ascent  > s->line_asc)  s->line_asc  = fe->ascent;
-    if (fe->descent > s->line_desc) s->line_desc = fe->descent;
+    /* line-height:normal is the face's ascent + descent + line gap (what Gecko
+     * uses), the gap split as half-leading above and below. Noto's gap is 0, so
+     * the generic faces are unchanged; Liberation Sans (Arial) has one. */
+    double half_gap = (fe->height - fe->ascent - fe->descent) / 2.0;
+    if (!(half_gap > 0.0)) half_gap = 0.0;
+    if (fe->ascent + half_gap  > s->line_asc)  s->line_asc  = fe->ascent + half_gap;
+    if (fe->descent + half_gap > s->line_desc) s->line_desc = fe->descent + half_gap;
     /* CSS 2.1 10.8.1: an author `line-height` is a multiple of THIS fragment's
      * font-size, so the leading it contributes is computed here, where that size is
      * known, and carried in px. A fragment with no author value contributes the
@@ -4066,7 +4117,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         src_len = o;
     }
 
-    content_font(cr, size, bold, italic, x->family, x->webfont);
+    content_font_ex(cr, size, bold, italic, x->family, x->webfont, x->localfont);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
     double space_w = measure_slice(cr, " ", 1) + x->word_spacing;
@@ -4261,8 +4312,56 @@ static void svg_intrinsic_size(const rd_block *b, double *out_w, double *out_h) 
 /* Intrinsic size of an inline-level replaced block, in px, or 0 when the block is
  * not one this engine can size without laying it out. Shared by the inline placer
  * and the row emitter so the two cannot disagree about how big an <img>/<svg> is. */
-static int replaced_inline_size(const browser_window *w, const rd_block *b,
-                                double avail_w, double *out_w, double *out_h) {
+static double input_box_width(double content_w);
+static double select_box_width(double content_w);
+static void box_path4(cairo_t *cr, double x, double y, double w, double h, const double *rc);
+static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
+                               double content_w);
+
+/* A native form control (no author box of its own -- one with a box goes through the
+ * box engine) is an inline-level atom of its line, like an <img> (HTML Rendering
+ * 15.5: input/button/select are inline-block). Invisible and structural controls
+ * (hidden, legend, the submit proxy of a <button>) never are. */
+static int input_inline_eligible(const rd_block *b) {
+    if (b->kind != RD_INPUT || b->own_box_id >= 0) return 0;
+    if (rd_input_invisible(b->input_type)) return 0;
+    switch (b->input_type) {
+        case PV_IN_LEGEND: case PV_IN_SUBMIT_BOX: case PV_IN_PROGRESS:
+        case PV_IN_METER: case PV_IN_RANGE:
+            return 0;
+        default:
+            return 1;
+    }
+}
+
+/* The size of a native control in its line: the same widths draw_input_row paints
+ * and the field height the row path uses. */
+static int input_inline_size(cairo_t *cr, const ui_theme *th, const rd_block *b,
+                             double avail_w, double *out_w, double *out_h) {
+    if (cr == NULL) return 0;
+    content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    double wv;
+    if (b->input_type == PV_IN_SUBMIT || b->input_type == PV_IN_BUTTON)
+        wv = button_box_width(cr, th, b, avail_w);
+    else if (b->input_type == PV_IN_CHECKBOX || b->input_type == PV_IN_RADIO)
+        wv = 14.0 + ((b->text != NULL && b->text[0] != '\0')
+                     ? 4.0 + measure_slice(cr, b->text, strlen(b->text)) : 0.0);
+    else if (b->input_type == PV_IN_SELECT)
+        wv = select_box_width(avail_w);
+    else
+        wv = input_box_width(avail_w);
+    if (wv <= 0.0) return 0;
+    *out_w = wv;
+    *out_h = fe.height + 2.0 * UI_INPUT_PAD;
+    return 1;
+}
+
+static int replaced_inline_size(cairo_t *cr, const browser_window *w, const ui_theme *th,
+                                const rd_block *b, double avail_w,
+                                double *out_w, double *out_h) {
+    if (b->kind == RD_INPUT) return input_inline_size(cr, th, b, avail_w, out_w, out_h);
     if (b->kind == RD_SVG) {
         double sw, sh;
         svg_intrinsic_size(b, &sw, &sh);
@@ -4292,7 +4391,7 @@ static int replaced_inline_size(const browser_window *w, const rd_block *b,
  * 2.1 9.2.2). `<p>text <img> text</p>` flows; `<div><img></div>` still gets its
  * own row, because there the image opens the block. */
 static int replaced_is_inline_level(const rc_state *s, const rd_block *b) {
-    if (b->kind != RD_SVG && b->kind != RD_IMAGE) return 0;
+    if (b->kind != RD_SVG && b->kind != RD_IMAGE && !input_inline_eligible(b)) return 0;
     if (b->block_break) return 0;
     return s->line_open;
 }
@@ -4309,7 +4408,8 @@ static int block_leaves_flow(const rd_doc *doc, const rd_block *bk);
  * that next run's index, or 0 when the element is not followed by inline flow. */
 static size_t replaced_opens_inline_line(const rd_doc *doc, size_t i) {
     const rd_block *b = rd_at(doc, i);
-    if ((b->kind != RD_SVG && b->kind != RD_IMAGE) || !b->block_break) return 0;
+    if ((b->kind != RD_SVG && b->kind != RD_IMAGE && !input_inline_eligible(b))
+        || !b->block_break) return 0;
     for (size_t k = i + 1; k < rd_count(doc); ++k) {
         const rd_block *n = rd_at(doc, k);
         if (block_leaves_flow(doc, n)) continue;
@@ -4323,7 +4423,7 @@ static size_t replaced_opens_inline_line(const rd_doc *doc, size_t i) {
             if (blank) continue;
             return k;
         }
-        if (n->kind == RD_IMAGE || n->kind == RD_SVG) {
+        if (n->kind == RD_IMAGE || n->kind == RD_SVG || input_inline_eligible(n)) {
             if (n->float_id != b->float_id || n->cont_id != b->cont_id) return 0;
             return k;
         }
@@ -4339,15 +4439,22 @@ static size_t replaced_opens_inline_line(const rd_doc *doc, size_t i) {
  * same way a word does; it never silently overflows.
  *
  * Returns 1 when it took the block. */
-static int place_inline_replaced(rc_layout *L, rc_state *s, const ui_theme *th,
+static int place_inline_replaced(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                                  const browser_window *w, const rd_block *b,
                                  double content_w) {
     double avail = content_w - s->indent_px;
     if (avail < 1.0) avail = 1.0;
     double rw, rh;
-    if (!replaced_inline_size(w, b, avail, &rw, &rh)) return 0;
+    if (!replaced_inline_size(cr, w, th, b, avail, &rw, &rh)) return 0;
     open_line(L, s);   /* no-op mid-line; opens it when the element starts one */
 
+    /* The collapsible space the previous run ended with separates it from the
+     * atom, exactly as it would separate the next word ("Name: <input>"). */
+    if (cr != NULL && L->nfrag > s->line_first && s->prev_ended_ws) {
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
+        s->pen_x += measure_slice(cr, " ", 1);
+    }
+    s->prev_ended_ws = 0;
     /* Wrap like a word when the rest of the line cannot hold it. */
     if (s->pen_x > 0.0 && s->pen_x + rw > avail) {
         flush_line(L, s, th);
@@ -4369,13 +4476,26 @@ static int place_inline_replaced(rc_layout *L, rc_state *s, const ui_theme *th,
     f->repl = b;
     f->repl_w = rw;
     f->repl_h = rh;
+    /* A form control's baseline is the text inside it (CSS 2.1 10.8.1 for an
+     * inline-block: its last line box), so it rises only its padding + ascent
+     * above the line's baseline and hangs the rest below. */
+    double rasc = rh;
+    if (b->kind == RD_INPUT && cr != NULL) {
+        content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
+        cairo_font_extents_t cfe;
+        cairo_font_extents(cr, &cfe);
+        rasc = UI_INPUT_PAD + cfe.ascent;
+        if (rasc > rh) rasc = rh;
+        f->repl_asc = rasc;
+        if (rh - rasc > s->line_desc) s->line_desc = rh - rasc;
+    }
     f->hidden = pv_content_hidden(s->hidden_from != 0, b->visibility);
     if (s->line_first == L->nfrag - 1) { s->line_bg = -1; s->line_bg_mixed = 0; }
     else if (s->line_bg != -1) s->line_bg_mixed = 1;
 
     s->pen_x += rw;
     /* An atomic inline sits on the baseline, so its whole height is ascent. */
-    if (rh > s->line_asc) s->line_asc = rh;
+    if (rasc > s->line_asc) s->line_asc = rasc;
     s->line_any_theme = 1;
     return 1;
 }
@@ -4397,7 +4517,7 @@ static int place_inline_replaced(rc_layout *L, rc_state *s, const ui_theme *th,
  * pure and unit-tested; this only fetches its inputs. */
 static int css_replaced_box(const rd_doc *doc, const rd_block *b, double avail_w,
                             double *dw, double *dh) {
-    if (b->own_box_id < 0) return 0;
+    if (b->own_box_id < 0 || image_is_alt_text(b)) return 0;
     const pv_box_def *d = rd_box_at(doc, (size_t)b->own_box_id);
     if (d == NULL) return 0;
     return bx_replaced_box(d->box_w, d->box_w_pct, d->aspect_num, d->aspect_den,
@@ -4408,11 +4528,11 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
                              rc_state *s, const ui_theme *th, const rd_block *b,
                              double content_w, const rd_doc *doc) {
     if (b->kind == RD_INPUT) {
-        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
+        content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         double h = fe.height + 2.0 * UI_INPUT_PAD;
-        double top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
+        double top = s->cur_top + s->pending_gap;
         s->pending_gap = 0;
         rc_row *r = rc_add_row(L);
         if (r != NULL) {
@@ -4429,7 +4549,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         svg_intrinsic_size(b, &sw, &sh);
         double avail = content_w;
         if (sw > avail && sw > 0.0) { sh *= avail / sw; sw = avail; }
-        double top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
+        double top = s->cur_top + s->pending_gap;
         s->pending_gap = 0;
         rc_row *r = rc_add_row(L);
         if (r != NULL) {
@@ -4466,7 +4586,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         } else {
             h = fe.height + 2.0 * th->image_box_pad;
         }
-        double top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
+        double top = s->cur_top + s->pending_gap;
         s->pending_gap = 0;
         rc_row *r = rc_add_row(L);
         if (r != NULL) {
@@ -4492,7 +4612,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         double vw = (b->video_w > 0) ? (double)b->video_w : content_w;
         double vh = (b->video_h > 0) ? (double)b->video_h : fe.height * 6.0;
         if (vw > content_w && vw > 0.0) { vh *= content_w / vw; vw = content_w; }
-        double top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
+        double top = s->cur_top + s->pending_gap;
         s->pending_gap = 0;
         rc_row *r = rc_add_row(L);
         if (r != NULL) {
@@ -4546,6 +4666,9 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     rc_ext x = (rc_ext){ 0 };
     x.family = b->font_family;
     x.webfont = b->fontface;
+    /* Named LOCAL family (spec/text_shape.md section 7): resolved through
+     * fontconfig on the trusted side, cached per list; 0 keeps the bucket. */
+    x.localfont = tsh_local_handle(b->font_list);
     x.transform = b->text_transform;
     x.letter_spacing = (b->letter_spacing != PV_LEN_UNSET) ? (double)b->letter_spacing : 0.0;
     x.word_spacing = (b->word_spacing != PV_LEN_UNSET) ? (double)b->word_spacing : 0.0;
@@ -4620,13 +4743,16 @@ static int band_common_box(const rd_doc *doc, size_t start, size_t end);
 static void rc_box_context(const rc_state *s, double content_w,
                            double *out_l, double *out_w);
 
-static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox) {
+static int item_root_box_pass(const rd_doc *doc, size_t b0, size_t b1, int cbox,
+                              int skip_oof, int *any) {
     int best = -1;
     int best_depth = 1 << 30;
     int distinct = 0;   /* two different candidates at the shallowest depth */
+    *any = 0;
     for (size_t k = b0; k < b1; ++k) {
         int bid = rd_at(doc, k)->block_id;
         if (bid < 0) continue;
+        if (skip_oof && block_leaves_flow(doc, rd_at(doc, k))) continue;
         /* Walk out to the box that is a CHILD of the container box (or, with no
          * container box, to the outermost box). Any box at or above the container
          * belongs to the container, not to this item. */
@@ -4651,6 +4777,7 @@ static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox) {
             const pv_box_def *d = rd_box_at(doc, (size_t)id);
             id = (d != NULL) ? d->parent_id : -1;
         }
+        *any = 1;
         if (depth < best_depth) { best_depth = depth; best = cur; distinct = 0; }
         else if (depth == best_depth && cur != best) distinct = 1;
     }
@@ -4659,6 +4786,17 @@ static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox) {
      * holding two decorated bars) has none: taking the first child as "the item's
      * box" made it the stop for every later child, which then never opened. */
     return distinct ? -1 : best;
+}
+
+/* The in-flow runs decide the item's box: an out-of-flow run inside the item (an
+ * absolute ::before, a corner badge) is not it, and taking it measured the item as
+ * that generated box. Only an item whose every boxed run is out of flow falls back
+ * to them (jkanime's badge-only tiles keep their box). */
+static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox) {
+    int any = 0;
+    int r = item_root_box_pass(doc, b0, b1, cbox, 1, &any);
+    if (any) return r;
+    return item_root_box_pass(doc, b0, b1, cbox, 0, &any);
 }
 
 /* Root box of a flex/grid item, bounded by the container box page_view stamped on
@@ -4836,6 +4974,8 @@ static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
  * The container used to close every open box, which lost BOTH: its own backdrop
  * never painted, and a flex row inside a `max-width; margin:0 auto` wrapper escaped
  * to full page width. */
+static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid);
+
 static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid) {
     /* The box to resolve is the one enclosing the container LEVEL being laid out, so
      * ask that level's descriptor first. The per-run `cont_box_id` stamp answers for
@@ -4864,8 +5004,13 @@ static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid
             int seen = 0;
             for (size_t k = start; k < end; ) {
                 size_t j = k + 1;
-                int item = rd_at(doc, k)->cont_item;
-                while (j < end && rd_at(doc, j)->cont_item == item && item >= 0) ++j;
+                /* Items OF THIS LEVEL: a run's cont_item answers for its innermost
+                 * container, so buttons of an anonymous row nested in this
+                 * container's single item looked like two items whose common parent
+                 * was that item's own box -- which then opened full-width as if it
+                 * were the container (github's tab pill). */
+                int item = item_at_level(doc, rd_at(doc, k), cid);
+                while (j < end && item >= 0 && item_at_level(doc, rd_at(doc, j), cid) == item) ++j;
                 int rb = item_root_box(doc, k, j);
                 if (rb >= 0) {
                     const pv_box_def *d = rd_box_at(doc, (size_t)rb);
@@ -4928,6 +5073,10 @@ static double replaced_item_width(const browser_window *w, const ui_theme *th,
     }
     if (b->kind == RD_IMAGE) {
         double dw, dh;
+        /* A percentage width is cyclic in an intrinsic measurement and a replaced
+         * element is compressible: it contributes nothing (CSS Sizing 3 5.2.2),
+         * so a 100%-wide cover does not inflate its column's flex base. */
+        if (b->box_w_pct > 0) return 0.0;
         if (image_display_size(w, b, FLEX_MEASURE_W, &dw, &dh))
             return dw + 2.0 * th->image_box_pad;
         /* An unavailable image with declared dimensions still reserves that box
@@ -5006,6 +5155,40 @@ static double measure_item_w_at(cairo_t *cr, const browser_window *w,
     return maxw;
 }
 
+/* Lines block b takes when flowed alone at width W (scratch layout, the real
+ * flow_text_block -- so the count cannot drift from the layout). */
+static size_t lines_at(cairo_t *cr, const browser_window *w, const ui_theme *th,
+                       const rd_block *b, double W) {
+    rc_layout M;
+    rc_state si;
+    memset(&M, 0, sizeof M);
+    memset(&si, 0, sizeof si);
+    si.bg_rgb = -1;
+    flow_text_block(cr, w, &M, &si, th, b, W);
+    flush_line(&M, &si, th);
+    size_t n = M.nrow;
+    rc_free(&M);
+    return n;
+}
+
+/* text-wrap: balance: the narrowest width (to 1px) that keeps the line count the
+ * block has at W, for 2..BALANCE_MAX_LINES lines (Gecko balances up to 10). 0 =
+ * leave the block alone. */
+#define BALANCE_MAX_LINES 10
+static double balanced_wrap_width(cairo_t *cr, const browser_window *w, const ui_theme *th,
+                                  const rd_block *b, double W) {
+    if (cr == NULL || W <= 1.0) return 0.0;
+    size_t n = lines_at(cr, w, th, b, W);
+    if (n < 2 || n > BALANCE_MAX_LINES) return 0.0;
+    double lo = W / (double)n, hi = W;
+    if (lines_at(cr, w, th, b, lo) == n) return lo;
+    for (int it = 0; it < 16 && hi - lo > 1.0; ++it) {
+        double mid = (lo + hi) / 2.0;
+        if (lines_at(cr, w, th, b, mid) == n) hi = mid; else lo = mid;
+    }
+    return hi;
+}
+
 static double measure_item_content_w(cairo_t *cr, const browser_window *w,
                                      const ui_theme *th, const rd_doc *doc,
                                      size_t b0, size_t b1) {
@@ -5071,7 +5254,7 @@ static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
 static double nested_cont_basis(cairo_t *cr, const browser_window *w,
                                 const ui_theme *th, const rd_doc *doc,
                                 size_t b0, size_t b1, int cid, double content_w,
-                                int depth) {
+                                int depth, int cyclic) {
     const pv_cont_def *cd = rd_cont_at(doc, (size_t)cid);
     if (cd == NULL || depth > PV_CONT_DEPTH) return 0.0;
     /* CSS Sizing 3 5.1-5.2: a COLUMN container stacks its items, so its
@@ -5092,15 +5275,39 @@ static double nested_cont_basis(cairo_t *cr, const browser_window *w,
         item_sides isd = item_sides_at_level(doc, k, e, cid, cd->box_id, content_w);
         int child = child_cont_at_level(doc, rd_at(doc, k), cid);
         double base;
+        /* This container's width is what is being measured, so an item's
+         * PERCENTAGE width is cyclic here and behaves as auto (CSS Sizing 3
+         * 5.2.1): resolving it against the page made a `width:100%` wrapper
+         * inside a shrink-to-fit pill measure the whole page. Only a px width
+         * (resolved against a zero basis) counts. */
+        const pv_box_def *ibd = (isd.box >= 0) ? rd_box_at(doc, (size_t)isd.box) : NULL;
+        /* Only a SHRINK-TO-FIT measurement (cyclic != 0) makes the percentage
+         * cyclic; a flex basis inside a definite row resolves it normally. */
+        int pct_only = cyclic && ibd != NULL && ibd->box_w_pct != 0 && ibd->box_w <= 0;
         if (child >= 0) {
-            double decl = item_declared_basis(doc, &isd, content_w);
+            double decl = item_declared_basis(doc, &isd, cyclic ? 0.0 : content_w);
             base = (decl > 0.0)
                  ? decl + isd.ml + isd.mr
-                 : nested_cont_basis(cr, w, th, doc, k, e, child, content_w, depth + 1)
+                 : nested_cont_basis(cr, w, th, doc, k, e, child, content_w, depth + 1, cyclic)
+                   + isd.pl + isd.pr + isd.bl + isd.br + isd.ml + isd.mr;
+        } else if (cyclic) {
+            /* An intrinsic size contribution is the item's max-content, not its
+             * flex-basis (Flexbox 9.9.1): a `flex:1 1 0` link contributes its
+             * text. A px width still is the item's width. */
+            double decl = item_declared_basis(doc, &isd, 0.0);
+            base = (decl > 0.0 && !pct_only)
+                 ? decl + isd.ml + isd.mr
+                 : measure_item_content_w(cr, w, th, doc, k, e)
                    + isd.pl + isd.pr + isd.bl + isd.br + isd.ml + isd.mr;
         } else {
             base = flex_item_basis(cr, w, th, doc, k, e, &isd, content_w);
         }
+        /* The item's min-width floors its contribution exactly as it floors its
+         * hypothetical size in the real layout (Flexbox 9.2.3). */
+        if (ibd != NULL && ibd->box_min_w > 0)
+            base = bx_flex_min_clamp(base, (double)ibd->box_min_w,
+                                     ibd->box_sizing == CSS_BOXS_BORDER,
+                                     isd.pl + isd.pr + isd.bl + isd.br, isd.ml + isd.mr);
         total = is_column ? ((base > total) ? base : total) : total + base;
         ++n_items;
         k = e;
@@ -5154,7 +5361,10 @@ static double flex_item_min_main(cairo_t *cr, const browser_window *w,
                                  size_t b0, size_t b1, const item_sides *sd,
                                  double basis) {
     const pv_box_def *d = (sd->box >= 0) ? rd_box_at(doc, (size_t)sd->box) : NULL;
-    double author_min = (d != NULL && d->box_min_w > 0) ? (double)d->box_min_w : -1.0;
+    /* box_min_w_set, not box_min_w > 0: `min-width:0` is a declared minimum that
+     * switches the automatic one off (Flexbox 4.5) -- the idiom that lets a
+     * `flex:1` column shrink beside a fixed sidebar. */
+    double author_min = (d != NULL && d->box_min_w_set) ? (double)d->box_min_w : -1.0;
     int scroll = (d != NULL) ? ov_box_clips(d) : 0;
     double mc = 0.0;
     if (author_min < 0.0 && !scroll) {
@@ -5214,6 +5424,24 @@ static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid) {
 /* Root of a run's container chain: the outermost container that encloses it. That is
  * the container the main layout loop groups and lays out; the nested ones are reached
  * by recursion from inside it. */
+/* Whether container cid belongs to the layout being built: always on the page; in a
+ * Stage-2f sub-view only when its box is inside the out-of-flow subtree (the view
+ * cuts the anchor's parent link, so the walk reaches the anchor or runs out). A
+ * box-less container is kept (fail-open: its items still lay out). */
+static int cont_in_view(const rd_doc *doc, int cid) {
+    if (doc->oof_view_root <= 0) return 1;
+    const pv_cont_def *cd = rd_cont_at(doc, (size_t)cid);
+    if (cd == NULL || cd->box_id < 0) return 1;
+    size_t nbox = rd_box_count(doc);
+    int root = doc->oof_view_root - 1;
+    int cur = cd->box_id;
+    for (size_t steps = 0; cur >= 0 && (size_t)cur < nbox && steps <= nbox; ++steps) {
+        if (cur == root) return 1;
+        cur = rd_box_at(doc, (size_t)cur)->parent_id;
+    }
+    return 0;
+}
+
 static int root_cont_of(const rd_doc *doc, int cid) {
     int c = cid;
     for (int guard = 0; c >= 0 && guard < PV_CONT_DEPTH + 2; ++guard) {
@@ -5369,7 +5597,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                     (void)in_w;
                     L->oof_sx[sbid] = in_l;
                     L->oof_sy[sbid] = s->cur_top
-                        + (rc_has_content(L) ? s->pending_gap : 0.0)
+                        + s->pending_gap
                         + open_line_height(s, th);
                     L->oof_static_set[sbid] = 1;
                 }
@@ -5454,7 +5682,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                               cdv.direction == CSS_FD_COLUMN_REVERSE);
 
     flush_line(L, s, th);
-    double base_top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
+    double base_top = s->cur_top + s->pending_gap;
     s->pending_gap = 0;
 
     /* Stage 3: per-item flex. pos_of[j] is the layout slot of document item j —
@@ -5578,8 +5806,10 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                      * outranks measuring what the nested container holds. */
                     b = decl_w + sd.ml + sd.mr;
                 } else {
+                    /* In a column this base is only the item's shrink-to-fit
+                     * CROSS width, where an inner percentage is cyclic. */
                     b = nested_cont_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
-                                          nb_child, content_w, 0)
+                                          nb_child, content_w, 0, is_col)
                       + sd.pl + sd.pr + sd.bl + sd.br + sd.ml + sd.mr;
                 }
                 if (b > content_w) b = content_w;
@@ -5588,6 +5818,22 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             } else {
                 kid->basis = flex_item_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
                                              &sd, content_w);
+            }
+            /* Hypothetical main size (Flexbox 9.2.3): the base clamped by the item's
+             * max-width, on BOTH branches -- a flex-shrink:0 sidebar with max-width:25%
+             * kept its max-content base and pushed the main column off the canvas. */
+            if (!is_col && sd.box >= 0) {
+                const pv_box_def *ibd = rd_box_at(doc, (size_t)sd.box);
+                if (ibd != NULL && (ibd->box_mw > 0 || ibd->box_mw_pct > 0))
+                    kid->basis = bx_flex_max_clamp(
+                        kid->basis, bx_width_cap(ibd->box_mw, ibd->box_mw_pct, content_w),
+                        ibd->box_sizing == CSS_BOXS_BORDER,
+                        sd.pl + sd.pr + sd.bl + sd.br, sd.ml + sd.mr);
+                if (ibd != NULL && ibd->box_min_w > 0)
+                    kid->basis = bx_flex_min_clamp(
+                        kid->basis, (double)ibd->box_min_w,
+                        ibd->box_sizing == CSS_BOXS_BORDER,
+                        sd.pl + sd.pr + sd.bl + sd.br, sd.ml + sd.mr);
             }
             kid->min_main = flex_item_min_main(cr, w, th, doc, gstart[j],
                                                gstart[j + 1], &sd, kid->basis);
@@ -5623,6 +5869,20 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                     (bk->grid_row_start >= 0) ? bk->grid_row_start + 1 : 0;
                 kids[pos_of[j]].grid_col_start =
                     (bk->grid_col_start >= 0) ? bk->grid_col_start + 1 : 0;
+                /* An item that is itself a container: bk is a run INSIDE it and
+                 * carries the inner level's placement; the wrapper's own line
+                 * placement rides the nested descriptor (spec/grid_areas.md 6). */
+                int nbc = child_cont_at_level(doc, bk, cid);
+                const pv_cont_def *ncd = (nbc >= 0) ? rd_cont_at(doc, (size_t)nbc) : NULL;
+                if (ncd != NULL && (ncd->item_col_start >= 0 || ncd->item_col_span > 0 ||
+                                    ncd->item_row_start >= 0 || ncd->item_row_span > 0)) {
+                    kids[pos_of[j]].grid_span = ncd->item_col_span;
+                    kids[pos_of[j]].grid_row_span = ncd->item_row_span;
+                    kids[pos_of[j]].grid_col_start =
+                        (ncd->item_col_start >= 0) ? ncd->item_col_start + 1 : 0;
+                    kids[pos_of[j]].grid_row_start =
+                        (ncd->item_row_start >= 0) ? ncd->item_row_start + 1 : 0;
+                }
             }
         }
         /* Automatic table layout (CSS 2.1 §17.5.2): a table's columns are as wide as
@@ -5869,7 +6129,22 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                  * instead of flowing its runs as plain text. layout_container emits
                  * rows/boxes into L in item-local coordinates and advances si.cur_top.
                  * spec/page_view.md "Contenedores flex/grid ANIDADOS". */
-                layout_container(cr, w, L, &si, th, 0.0, inner_w, doc,
+                /* Open the boxes between the item's root and the nested
+                 * container's own box first -- the same reconcile the top level
+                 * does before laying a container out -- so its padding, border
+                 * and background (a card's `.article-details{padding:25px}`) are
+                 * there, and lay the container out inside that box. Without it
+                 * the nested container's box never opened and its items sat on
+                 * the item's edge. */
+                const pv_cont_def *scd = rd_cont_at(doc, (size_t)seg_cont);
+                double sl = 0.0, sw = inner_w;
+                if (scd != NULL && scd->box_id >= 0 && scd->box_id != rb) {
+                    flush_line(L, &si, th);
+                    int stop_at = (rb >= 0) ? rb : nested_stop(s, doc, scd->box_id, item_cbox);
+                    reconcile_boxes_below(cr, w, L, &si, th, doc, inner_w, scd->box_id, k, stop_at);
+                    rc_box_context(&si, inner_w, &sl, &sw);
+                }
+                layout_container(cr, w, L, &si, th, sl, sw, doc,
                                  k, seg_end, seg_cont);
                 flush_line(L, &si, th);
                 item_nested[j] = 1;
@@ -6299,7 +6574,10 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
          * "a text row has been emitted" -- so on a page whose content is decorated
          * boxes (a spacer, a separator, an icon tile, an empty card) no box ever got
          * a margin at all. */
-        double gap = rc_has_content(L) ? bf_collapse(s->prev_bottom, my_mt) : 0.0;
+        /* The first box of the page keeps its margin too: the root is a block
+         * formatting context and nothing collapses with the canvas (CSS 2.1
+         * 8.3.1), so `body{margin:8px}` puts the page 8px down, as in Firefox. */
+        double gap = bf_collapse(s->prev_bottom, my_mt);
         s->cur_top += gap;
         chain_margin = gap;
     }
@@ -6321,23 +6599,30 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
     double pr = box_pad_px(def->pad_r, def->pad_r_pct, avail_w);
     double pt = box_pad_px(def->pad_t, def->pad_t_pct, avail_w);
     double pb = box_pad_px(def->pad_b, def->pad_b_pct, avail_w);
-    /* box-sizing: border-box (2026-07-11): the declared width includes the
-     * horizontal padding + border, so the CONTENT cap shrinks by those edges. */
-    double wcap = bx_content_cap(def_width_cap(def, avail_w),
+    /* hp.content_w below is the border-inclusive span (inner_w takes the borders
+     * back out), so a declared width converts to THAT span per box-sizing:
+     * content-box W + borders, border-box W - padding (bx_border_span). */
+    double wcap = bx_border_span(def_width_cap(def, avail_w),
                                  def->box_sizing == CSS_BOXS_BORDER, pl, pr, bl, br);
     /* An inline-level box with `width:auto` SHRINK-WRAPS to its content instead of
      * filling the line (CSS 2.2 §10.3.9): shrink_w is that measured content width,
      * passed in by the caller. Without it a centred `display:inline-block` button
      * painted as a full-page-width bar. */
     if (shrink_w > 0.0 && wcap <= 0.0) {
-        wcap = shrink_w;
-        double room = avail_w - pl - pr - bl - br;
+        /* shrink_w is the CONTENT width; the span carries the borders too. */
+        wcap = shrink_w + bl + br;
+        double room = avail_w - pl - pr;
         if (wcap > room) wcap = room;
         if (wcap < 1.0) wcap = 1.0;
     }
-    bx_hplace hp = bx_place(bx_lp_px(def->box_l, def->box_l_pct, avail_w),
-                            bx_lp_px(def->box_r, def->box_r_pct, avail_w),
-                            wcap, def->box_center, avail_w);
+    /* A declared width overflows its containing block rather than being squeezed
+     * into it (CSS 2.1 10.3.3; bx_place_ex). Only `width`, never max-width, and
+     * never the shrink-to-fit measurement above. */
+    int decl_w = (shrink_w <= 0.0 || def_declared_width(def, avail_w) > 0.0) &&
+                 bx_width_cap(def->box_w, def->box_w_pct, avail_w) > 0.0;
+    bx_hplace hp = bx_place_ex(bx_lp_px(def->box_l, def->box_l_pct, avail_w),
+                               bx_lp_px(def->box_r, def->box_r_pct, avail_w),
+                               wcap, def->box_center, avail_w, decl_w);
     /* A shrink-wrapped box with no author margin is placed by the parent's
      * text-align, exactly like the inline box it is. page_view packs the box's
      * horizontal inset as padding + margin, so the author margin is what is left
@@ -6594,7 +6879,38 @@ static double box_shrink_width(cairo_t *cr, const browser_window *w,
     size_t j = start;
     while (j < rd_count(doc) && box_path_has(doc, rd_at(doc, j)->block_id, box_id)) ++j;
     if (j <= start) return 0.0;
-    return measure_item_content_w(cr, w, th, doc, start, j);
+    double tw = measure_item_content_w(cr, w, th, doc, start, j);
+    /* Boxes contribute too (CSS Sizing 3 5.1): a descendant with a declared px
+     * width adds that width plus the horizontal padding/border/margin of every box
+     * between it and this one. Without it a max-content wrapper around a sized
+     * tile measured 0 and filled the page. */
+    double bw = 0.0;
+    size_t nbox = rd_box_count(doc);
+    for (size_t k = start; k < j; ++k) {
+        double acc = 0.0;
+        int seen_w = 0;
+        int id = rd_at(doc, k)->block_id;
+        for (size_t steps = 0; id >= 0 && id != box_id && (size_t)id < nbox && steps <= nbox;
+             ++steps) {
+            const pv_box_def *d = rd_box_at(doc, (size_t)id);
+            double pl = box_pad_px(d->pad_l, d->pad_l_pct, 0.0);
+            double pr = box_pad_px(d->pad_r, d->pad_r_pct, 0.0);
+            double bl = box_edge_px(d->bord_lw), br = box_edge_px(d->bord_rw);
+            double ml = bx_lp_px(d->box_l, 0, 0.0) - pl;
+            double mr = bx_lp_px(d->box_r, 0, 0.0) - pr;
+            if (!seen_w && d->box_w > 0) {
+                acc = bx_border_span((double)d->box_w, d->box_sizing == CSS_BOXS_BORDER,
+                                     pl, pr, bl, br) + pl + pr;
+                seen_w = 1;
+            } else if (seen_w) {
+                acc += pl + pr + bl + br;
+            }
+            if (seen_w) acc += (ml > 0.0 ? ml : 0.0) + (mr > 0.0 ? mr : 0.0);
+            id = d->parent_id;
+        }
+        if (seen_w && acc > bw) bw = acc;
+    }
+    return (bw > tw) ? bw : tw;
 }
 
 static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
@@ -6671,9 +6987,12 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
         rc_box_context(s, content_w, &ctx_left, &ctx_w);
         double shrink = 0.0;
         int align = CSS_ALIGN_UNSET;
-        if (d->display == CSS_DISP_INLINE_BLOCK && cr != NULL && run_i < rd_count(doc)) {
+        if ((d->display == CSS_DISP_INLINE_BLOCK || d->box_w_intrinsic)
+            && cr != NULL && run_i < rd_count(doc)) {
             shrink = box_shrink_width(cr, w, th, doc, run_i, path[k]);
-            align = rd_at(doc, run_i)->text_align;
+            /* Placed by the LINE's text-align (its parent's), not by its own: a
+             * button's UA text-align:center centres its label, not the button. */
+            align = d->line_align;
         }
         open_box(L, s, th, path[k], d, ctx_left, ctx_w, shrink, align);
     }
@@ -7275,7 +7594,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         return;
     }
 
-    double base_top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
+    double base_top = s->cur_top + s->pending_gap;
     s->pending_gap = 0;
 
     /* Item widths + sides: explicit author width (px or % of the band context,
@@ -7440,7 +7759,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                     (void)in_w;
                     L->oof_sx[sbid] = in_l;
                     L->oof_sy[sbid] = si.cur_top
-                        + (rc_has_content(L) ? si.pending_gap : 0.0)
+                        + si.pending_gap
                         + open_line_height(&si, th);
                     L->oof_static_set[sbid] = 1;
                     if (getenv("FREEDOM_DEFER_DEBUG") != NULL)
@@ -7615,6 +7934,10 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
     memset(&s, 0, sizeof s);
     s.bg_rgb = -1;  /* 0 is opaque black; no background until a block sets one */
     /* s.box_depth starts 0 (memset): no open box -> default flat flow. */
+    /* The root top inset (UA body margin, rd_doc.root_m) is a margin left behind
+     * above the first block: it collapses with that block's own margin-top
+     * (CSS 2.1 8.3.1; the body has no border or padding of its own here). */
+    s.prev_bottom = (double)doc->root_m[0];
     /* Pull-up pre-pass (spec/float.md §7d.2): the set of outermost float
      * founder ids in the whole document. A band whose groups name one of
      * these — directly (its own id) or via float_oid — belongs to that outer
@@ -7667,7 +7990,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                     rc_box_context(&s, content_w, &in_l, &in_w);
                     (void)in_w;
                     L->oof_sx[sbid] = in_l;
-                    L->oof_sy[sbid] = s.cur_top + (rc_has_content(L) ? s.pending_gap : 0.0)
+                    L->oof_sy[sbid] = s.cur_top + s.pending_gap
                         + open_line_height(&s, th);
                     L->oof_static_set[sbid] = 1;
                 }
@@ -7679,7 +8002,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * by default; layout is structure, not gated by caps.css) is laid out in
          * columns and then skipped. */
         if (b->cont_id >= 0 &&
-            (b->cont_display == BX_DISPLAY_FLEX || b->cont_display == BX_DISPLAY_GRID)) {
+            (b->cont_display == BX_DISPLAY_FLEX || b->cont_display == BX_DISPLAY_GRID) &&
+            cont_in_view(doc, b->cont_id)) {
             /* The group is the OUTERMOST container's subtree, not the innermost:
              * a flex header holding a flex <nav> is ONE container to lay out, and
              * the nested one is reached by recursion from inside it. Grouping by the
@@ -7877,7 +8201,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * through the shared helper -- identical to the flex/grid item flow, so a
          * replaced element paints the same in flow and inside a column. */
         if (inline_replaced) {
-            if (place_inline_replaced(L, &s, th, w, b, content_w))
+            if (place_inline_replaced(cr, L, &s, th, w, b, content_w))
                 continue;
             /* Sizable-looking but unsizable (a broken image mid-line): the open
              * line holds earlier frags that must paint FIRST -- emitting the row
@@ -7886,7 +8210,16 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * when closed; an open-but-empty line keeps prior behaviour). */
             flush_line(L, &s, th);
         }
-        if (emit_replaced_row(cr, w, L, &s, th, b, content_w, doc)) {
+        /* A replaced element inside an open box is sized against that box's
+         * content width (an img{width:100%} in a card is the card's width) and
+         * placed at its content edge below; at top level ctx is the page. */
+        double rep_l = 0.0, rep_w = content_w;
+        if (b->kind == RD_IMAGE && s.box_depth > 0) rc_box_context(&s, content_w, &rep_l, &rep_w);
+        if (emit_replaced_row(cr, w, L, &s, th, b, rep_w, doc)) {
+            if (b->kind == RD_IMAGE && s.box_depth > 0 && L->nrow > 0) {
+                rc_row *ir = &L->rows[L->nrow - 1];
+                ir->x_off += rep_l;
+            }
             /* A form control inside an open box must sit within that box's content
              * rect, exactly as the text rows do via s.indent_px. The row was emitted
              * with x_off 0 / bg_w content_w (page width), so a width:100% <input>
@@ -7962,7 +8295,12 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             inner_w = hp.content_w;
         }
         if (inner_w < 1.0) inner_w = 1.0;
+        /* text-wrap: balance (CSS Text 4 6.4.2) on a block that is one run: the
+         * narrowest break width that keeps the same number of lines. */
+        if (b->text_balance && (i + 1 >= rd_count(doc) || rd_at(doc, i + 1)->block_break))
+            s.wrap_cap = balanced_wrap_width(cr, w, th, b, inner_w);
         flow_text_block(cr, w, L, &s, th, b, inner_w);
+        s.wrap_cap = 0.0;
         /* Pull-up anchor (spec/float.md §7d.3): the bottom of the last
          * in-flow, non-whitespace block. Float bands never reach here (they
          * continue above) and OOF blocks never reach here either (Stage 2d),
@@ -8069,6 +8407,9 @@ static void oof_sublayouts(cairo_t *cr, const browser_window *w, double content_
     vd.html_max_width = -1;
     vd.html_margin_top = 0;
     vd.html_center = 0;
+    /* The root insets (UA body margin) are the page's too: a subtree laid out
+     * with them started every absolute box 8px down. */
+    for (int k = 0; k < 4; ++k) vd.root_m[k] = 0;
     vw->doc = &vd;
 
     for (int depth = 0; depth <= maxd && depth < (int)BT_MAX_DEPTH; ++depth) {
@@ -8124,6 +8465,7 @@ static void oof_sublayouts(cairo_t *cr, const browser_window *w, double content_
             }
             vd.blocks = doc->blocks + first[a];
             vd.count = endb[a] - first[a];
+            vd.oof_view_root = (int)a + 1;
 
             rc_layout *Ls = (rc_layout *)malloc(sizeof *Ls);
             if (Ls == NULL) { vboxes[a] = *bd; continue; }
@@ -8384,7 +8726,8 @@ static double select_box_width(double content_w) {
 /* Width of a painted button: its label plus horizontal padding, clamped. */
 static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
                                double content_w) {
-    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
+    (void)th;   /* the control font is fixed (UI_CONTROL_FONT), not the theme body size */
+    content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
     const char *label = (b->text != NULL && b->text[0] != '\0') ? b->text
                         : rd_input_label(b->input_type);
     double bw = measure_slice(cr, label, strlen(label)) + 2.0 * UI_BUTTON_HPAD;
@@ -8409,14 +8752,29 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         const char *label = (b->text != NULL && b->text[0] != '\0') ? b->text
                             : rd_input_label(b->input_type);
         double bw = button_box_width(cr, th, b, content_w);
-        set_rgb(cr, th->button_bg);
-        cairo_rectangle(cr, left, ry, bw, height);
-        cairo_fill(cr);
+        /* Firefox's UA face for a non-native button -- the same values PV_UA_CSS
+         * gives <button> -- unless the user forced the theme. */
+        if (!w->force_theme) {
+            ui_rgb face = { 0xe9 / 255.0, 0xe9 / 255.0, 0xed / 255.0 };
+            ui_rgb edge = { 0x8f / 255.0, 0x8f / 255.0, 0x9d / 255.0 };
+            const double rc4[4] = { 4.0, 4.0, 4.0, 4.0 };
+            box_path4(cr, left + 0.5, ry + 0.5, bw - 1.0, height - 1.0, rc4);
+            set_rgb(cr, face);
+            cairo_fill_preserve(cr);
+            set_rgb(cr, edge);
+            cairo_set_line_width(cr, 1.0);
+            cairo_stroke(cr);
+        } else {
+            set_rgb(cr, th->button_bg);
+            cairo_rectangle(cr, left, ry, bw, height);
+            cairo_fill(cr);
+        }
         cairo_save(cr);
         cairo_rectangle(cr, left, ry, bw, height);
         cairo_clip(cr);
-        set_rgb(cr, th->button_text);
-        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
+        if (!w->force_theme) cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+        else set_rgb(cr, th->button_text);
+        content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
         draw_slice(cr, left + UI_BUTTON_HPAD, ry + ascent + UI_INPUT_PAD, label, strlen(label));
         cairo_restore(cr);
         return;
@@ -8453,7 +8811,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         /* Label after the widget */
         if (b->text != NULL && b->text[0] != '\0') {
             set_rgb(cr, th->input_text);
-            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
+            content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
             draw_slice(cr, bx + 18.0, ry + ascent + UI_INPUT_PAD, b->text, strlen(b->text));
         }
         return;
@@ -8501,7 +8859,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         } else {
             set_rgb(cr, th->input_text);
         }
-        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
+        content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
         cairo_save(cr);
         cairo_rectangle(cr, left + 2.0, ry + 1.0, bw - 24.0, height - 2.0);
         cairo_clip(cr);
@@ -8583,7 +8941,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
             /* Label: value/max */
             char label[64];
             cairo_save(cr);
-            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
+            content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
             cairo_font_extents_t fe;
             cairo_font_extents(cr, &fe);
             int nw = snprintf(label, sizeof label, "%.*g/%.*g",
@@ -8626,7 +8984,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         /* Label: value / max */
         char label[64];
         cairo_save(cr);
-        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
+        content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         int nw = snprintf(label, sizeof label, "%.*g / %.*g",
@@ -8696,7 +9054,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         /* Value label */
         char label[32];
         cairo_save(cr);
-        content_font(cr, th->body_font - 2.0, 0, 0, CSS_FF_UNSET, 0);
+        content_font(cr, UI_CONTROL_FONT - 2.0, 0, 0, CSS_FF_UNSET, 0);
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         int nw = snprintf(label, sizeof label, "%.*g",
@@ -8715,7 +9073,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
                            : (b->value != NULL ? b->value : "");
         if (legend[0] == '\0') return;
         cairo_save(cr);
-        content_font(cr, th->body_font, 1, 0, CSS_FF_UNSET, 0); /* bold */
+        content_font(cr, UI_CONTROL_FONT, 1, 0, CSS_FF_UNSET, 0); /* bold */
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         double lx = left + 4.0;
@@ -8731,23 +9089,34 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         return;
     }
 
-    double bw = input_box_width(content_w);
-    set_rgb(cr, focused ? th->input_bg_focused : th->input_bg);
-    cairo_rectangle(cr, left, ry, bw, height);
-    cairo_fill(cr);
-    set_rgb(cr, focused ? th->link : th->input_border);
-    cairo_set_line_width(cr, 1.0);
-    cairo_rectangle(cr, left, ry, bw, height);
-    cairo_stroke(cr);
+    /* An author background or border on the control's OWN box replaces the native
+     * chrome (what Firefox does for a styled text field): the box engine already
+     * painted that decoration around this row, so only the text is drawn, across
+     * the box's content width. Otherwise the theme's field. */
+    const pv_box_def *own = (b->own_box_id >= 0)
+                          ? rd_box_at(w->doc, (size_t)b->own_box_id) : NULL;
+    int author_face = own != NULL && !w->force_theme &&
+                      (own->bg_rgb >= 0 || own->grad_n > 0 || own->bord_tw > 0 ||
+                       own->bord_rw > 0 || own->bord_bw > 0 || own->bord_lw > 0);
+    double bw = author_face ? content_w : input_box_width(content_w);
+    if (!author_face) {
+        set_rgb(cr, focused ? th->input_bg_focused : th->input_bg);
+        cairo_rectangle(cr, left, ry, bw, height);
+        cairo_fill(cr);
+        set_rgb(cr, focused ? th->link : th->input_border);
+        cairo_set_line_width(cr, 1.0);
+        cairo_rectangle(cr, left, ry, bw, height);
+        cairo_stroke(cr);
+    }
 
     ui_input_state *st = find_input_state(w, b);
     const char *val = (st != NULL) ? tf_text(&st->field) : (b->value != NULL ? b->value : "");
 
-    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
+    content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
     cairo_save(cr);
     cairo_rectangle(cr, left + 2.0, ry + 1.0, bw - 4.0, height - 2.0);
     cairo_clip(cr);
-    double tx = left + UI_INPUT_PAD;
+    double tx = author_face ? left : left + UI_INPUT_PAD;
     double ty = ry + ascent + UI_INPUT_PAD;
 
     /* A password is shown as a run of '*' (one per value byte). */
@@ -8762,8 +9131,15 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
     }
 
     if (shown[0] == '\0' && b->text != NULL && b->text[0] != '\0') {
-        set_rgb(cr, th->input_placeholder);
-        draw_slice(cr, tx, ty, b->text, strlen(b->text));
+        /* ::placeholder: hidden (opacity 0 / transparent), the author's color, or
+         * the theme's (rd_block.ph_color, caps.css-gated upstream). */
+        if (b->ph_color != PV_PH_HIDDEN || w->force_theme) {
+            if (b->ph_color >= 0 && !w->force_theme)
+                set_rgb(cr, rgb_from_packed(b->ph_color));
+            else
+                set_rgb(cr, th->input_placeholder);
+            draw_slice(cr, tx, ty, b->text, strlen(b->text));
+        }
     } else {
         set_rgb(cr, th->input_text);
         draw_slice(cr, tx, ty, shown, strlen(shown));
@@ -10251,6 +10627,15 @@ static void paint_inline_replaced(cairo_t *cr, browser_window *w,
          * SVG path above). Routing through paint_image_row would re-resolve a %
          * width against this width and compound it (tanda 42). */
         blit_image_box(cr, w, blk, x, y, f->repl_w, f->repl_h);
+        return;
+    }
+    if (blk->kind == RD_INPUT) {
+        /* A native control in its line: the field the row path draws, at the
+         * frag's width (draw_input_row clamps its box to that width). */
+        content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
+        cairo_font_extents_t fe;
+        cairo_font_extents(cr, &fe);
+        draw_input_row(cr, w, blk, x, f->repl_w, y, fe.ascent, f->repl_h);
     }
 }
 
@@ -10349,7 +10734,8 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
         /* An atomic inline replaced element (R7): paints inside the line box,
          * sitting on the baseline, instead of owning a row. */
         if (f->repl != NULL) {
-            paint_inline_replaced(cr, w, f, fx, baseline - f->repl_h);
+            paint_inline_replaced(cr, w, f, fx,
+                                  baseline - ((f->repl_asc > 0.0) ? f->repl_asc : f->repl_h));
             continue;
         }
         /* Inline background (<code>, <mark>, a highlighted <span>): fills behind
@@ -10378,7 +10764,8 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
             cairo_rectangle(cr, fx, ry, f->width, r->height);
             cairo_fill(cr);
         }
-        content_font(cr, f->font_size, f->bold, f->italic, f->family, f->webfont);
+        content_font_ex(cr, f->font_size, f->bold, f->italic, f->family, f->webfont,
+                        f->localfont);
         /* vertical-align sub/super shifts this fragment's baseline (and the
          * decorations below); default valign_dy 0 keeps it on the line. */
         double fbaseline = baseline + f->valign_dy;
@@ -11546,7 +11933,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
                 if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
                 draw_input_row(cr, w, b, left + cx, cw, origin + cy, 0, pb->h);
                 if (needs_group) cairo_restore(cr);
-                content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET, 0);
+                content_font(cr, UI_CONTROL_FONT, 0, 0, CSS_FF_UNSET, 0);
                 cairo_font_extents_t fei;
                 cairo_font_extents(cr, &fei);
                 cy += fei.height + 2.0 * UI_INPUT_PAD;
@@ -11694,7 +12081,7 @@ static void geom_from_layout(const rd_doc *doc, const rc_layout *L, double left,
 static void publish_geometry(browser_window *w, const rc_layout *L, double left,
                              double content_w, double content_h) {
     if (w->tab_worker == NULL || !page_trusted(w)) return;
-    double top0 = w->theme.content_margin;
+    double top0 = page_gutter(w);
     jg_table g;
     jg_init(&g);
     g.scroll_y = (int32_t)lround(w->scroll);
@@ -11728,7 +12115,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     if (max_scroll < 0.0) max_scroll = 0.0;
     if (w->scroll < 0.0) w->scroll = 0.0;
     if (w->scroll > max_scroll) w->scroll = max_scroll;
-    double origin = content_top + th->content_margin - w->scroll;
+    double origin = content_top + page_gutter(w) - w->scroll;
     publish_geometry(w, &L, left, content_w, content_h);
 
     /* R4: sticky positioning for OUT-OF-FLOW boxes — clamp to viewport top
@@ -12104,10 +12491,14 @@ static long write_doc_png(browser_window *w, const char *path) {
     ui_theme saved = w->theme;
     w->theme = ui_theme_for(UI_THEME_LIGHT);
     const ui_theme *th = &w->theme;
-    double png_margin = (w->doc != NULL && w->doc->html_margin_top >= 0)
-                            ? (double)w->doc->html_margin_top : PNG_MARGIN;
-    double png_left = png_margin;
-    double content_w = PNG_PAGE_W - 2.0 * png_margin;
+    /* The page sits inside the root insets (the UA body margin on undeclared
+     * sides); the author's body margin is the body box's own. html_margin_top used
+     * to be taken here as a margin on all four sides, which doubled a declared
+     * body margin horizontally. */
+    double png_margin = PNG_MARGIN;
+    double png_left = png_margin + ((w->doc != NULL) ? (double)w->doc->root_m[3] : 0.0);
+    double content_w = PNG_PAGE_W - 2.0 * png_margin
+                     - ((w->doc != NULL) ? (double)(w->doc->root_m[1] + w->doc->root_m[3]) : 0.0);
     if (w->doc != NULL && w->doc->html_max_width > 0) {
         double cap = (double)w->doc->html_max_width;
         if (cap < content_w) {
@@ -12306,9 +12697,9 @@ ui_status ui_page_geometry(const rd_doc *doc, jg_table *out) {
     w.theme = ui_theme_for(UI_THEME_LIGHT);
     w.doc = (rd_doc *)doc;
     w.focused_input = -1;
-    double margin = (doc->html_margin_top >= 0) ? (double)doc->html_margin_top : PNG_MARGIN;
-    double left = margin;
-    double content_w = PNG_PAGE_W - 2.0 * margin;
+    double margin = PNG_MARGIN;
+    double left = margin + (double)doc->root_m[3];
+    double content_w = PNG_PAGE_W - 2.0 * margin - (double)(doc->root_m[1] + doc->root_m[3]);
     if (doc->html_max_width > 0 && (double)doc->html_max_width < content_w) {
         if (doc->html_center) left += (content_w - (double)doc->html_max_width) / 2.0;
         content_w = (double)doc->html_max_width;
@@ -12472,7 +12863,6 @@ static const char *link_at_point(browser_window *w, double px, double py) {
     content_geometry(w, &content_top, &content_h);
     if (py < content_top || py > content_top + content_h) return NULL;
 
-    const ui_theme *th = &w->theme;
     double left = content_margin_x(w);
     double content_w = content_width(w);
 
@@ -12485,7 +12875,7 @@ static const char *link_at_point(browser_window *w, double px, double py) {
     double scroll = w->scroll;
     if (scroll < 0.0) scroll = 0.0;
     if (scroll > max_scroll) scroll = max_scroll;
-    double origin = content_top + th->content_margin - scroll;
+    double origin = content_top + page_gutter(w) - scroll;
 
     const char *hit = NULL;
     for (size_t i = 0; i < L.nrow && hit == NULL; ++i) {
@@ -12522,7 +12912,6 @@ static const char *video_at_point(browser_window *w, double px, double py) {
     content_geometry(w, &content_top, &content_h);
     if (py < content_top || py > content_top + content_h) return NULL;
 
-    const ui_theme *th = &w->theme;
     double left = content_margin_x(w);
     double content_w = content_width(w);
 
@@ -12535,7 +12924,7 @@ static const char *video_at_point(browser_window *w, double px, double py) {
     double scroll = w->scroll;
     if (scroll < 0.0) scroll = 0.0;
     if (scroll > max_scroll) scroll = max_scroll;
-    double origin = content_top + th->content_margin - scroll;
+    double origin = content_top + page_gutter(w) - scroll;
 
     (void)left;
     (void)px;
@@ -12595,7 +12984,6 @@ static int cursor_at_point(browser_window *w, double px, double py) {
     content_geometry(w, &content_top, &content_h);
     if (py < content_top || py > content_top + content_h) return CSS_CUR_UNSET;
 
-    const ui_theme *th = &w->theme;
     double left = content_margin_x(w);
     double content_w = content_width(w);
 
@@ -12608,7 +12996,7 @@ static int cursor_at_point(browser_window *w, double px, double py) {
     double scroll = w->scroll;
     if (scroll < 0.0) scroll = 0.0;
     if (scroll > max_scroll) scroll = max_scroll;
-    double origin = content_top + th->content_margin - scroll;
+    double origin = content_top + page_gutter(w) - scroll;
 
     int cur = CSS_CUR_UNSET;
     for (size_t i = 0; i < L.nrow && cur == CSS_CUR_UNSET; ++i) {
@@ -12702,7 +13090,7 @@ static dom_node_id frag_at_point(browser_window *w, double px, double py,
     double scroll = w->scroll;
     if (scroll < 0.0) scroll = 0.0;
     if (scroll > max_scroll) scroll = max_scroll;
-    double origin = content_top + w->theme.content_margin - scroll;
+    double origin = content_top + page_gutter(w) - scroll;
 
     dom_node_id hit = DOM_NODE_NONE;
     for (size_t i = 0; i < L.nrow && hit == DOM_NODE_NONE; ++i) {
@@ -12967,19 +13355,30 @@ static const rd_block *input_at_point(browser_window *w, double px, double py) {
     double scroll = w->scroll;
     if (scroll < 0.0) scroll = 0.0;
     if (scroll > max_scroll) scroll = max_scroll;
-    double origin = content_top + th->content_margin - scroll;
+    double origin = content_top + page_gutter(w) - scroll;
 
     const rd_block *hit = NULL;
     for (size_t i = 0; i < L.nrow && hit == NULL; ++i) {
         const rc_row *r = &L.rows[i];
-        if (r->kind != RC_INPUT || r->blk == NULL) continue;
         double ry = origin + r->top;
         if (py < ry || py > ry + r->height) continue;
+        /* A control flowing INSIDE a line: its fragment's own rect. */
+        for (size_t k = r->first; r->kind != RC_INPUT && k < r->first + r->count && k < L.nfrag; ++k) {
+            const rc_frag *f = &L.frags[k];
+            if (f->repl == NULL || f->repl->kind != RD_INPUT) continue;
+            double fx = left + r->x_off + f->x;
+            if (px >= fx && px <= fx + f->repl_w) { hit = f->repl; break; }
+        }
+        if (r->kind != RC_INPUT || r->blk == NULL) continue;
         const rd_block *b = r->blk;
+        double rw = (r->bg_w > 0.0) ? r->bg_w : content_w;
         double bw = (b->input_type == PV_IN_SUBMIT || b->input_type == PV_IN_BUTTON)
-                    ? button_box_width(cr, th, b, content_w)
-                    : input_box_width(content_w);
-        if (px >= left && px <= left + bw) hit = b;
+                    ? button_box_width(cr, th, b, rw)
+                    : input_box_width(rw);
+        /* The row's own x offset: a control re-seated inside a box is there, not
+         * at the page's left edge. */
+        double bx = left + r->x_off;
+        if (px >= bx && px <= bx + bw) hit = b;
     }
 
     rc_free(&L);

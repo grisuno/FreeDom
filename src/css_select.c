@@ -316,6 +316,12 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
         pename[nk] = '\0';
         if (csel_ci_eq(pename, "before"))       pm->kind = PSEUDO_BEFORE;
         else if (csel_ci_eq(pename, "after"))   pm->kind = PSEUDO_AFTER;
+        /* The vendor spellings are the same pseudo-element (one selector list
+         * with an unknown one is dropped whole, which is why authors split them). */
+        else if (csel_ci_eq(pename, "placeholder") ||
+                 csel_ci_eq(pename, "-webkit-input-placeholder") ||
+                 csel_ci_eq(pename, "-moz-placeholder"))
+            pm->kind = PSEUDO_PLACEHOLDER;
         else return 0;  /* unsupported pseudo-element */
         *ip = i;
         return 1;
@@ -968,7 +974,8 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
             return 0;  /* no matching descendant found */
         }
         case PSEUDO_BEFORE:
-        case PSEUDO_AFTER:        return allow_pseudo_el;  /* R8: match only in CSS cascade */
+        case PSEUDO_AFTER:
+        case PSEUDO_PLACEHOLDER:  return allow_pseudo_el;  /* R8: match only in CSS cascade */
         default:                  return 0;
     }
 }
@@ -1000,7 +1007,7 @@ static int compound_matches(const css_compound *c, const css_element *el,
         if (!pseudo_matches(&c->pseudos[i], el, sel, target_id, allow_pseudo_el)) return 0;
         if (allow_pseudo_el) {
             int k = c->pseudos[i].kind;
-            if (k == PSEUDO_BEFORE || k == PSEUDO_AFTER) pk = k;
+            if (k == PSEUDO_BEFORE || k == PSEUDO_AFTER || k == PSEUDO_PLACEHOLDER) pk = k;
         }
     }
     if (pseudo_kind != NULL) *pseudo_kind = pk;

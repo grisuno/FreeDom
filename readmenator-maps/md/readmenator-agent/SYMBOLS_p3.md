@@ -1,20 +1,51 @@
-# Symbols (page 3 of 13)
+# Symbols (page 3 of 14)
 Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `csel_unescape` | function | `include/css_select.h:177` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` |
-| `css_attr_match` | struct | `include/css_select.h:85` | `` |
-| `css_compound` | struct | `include/css_select.h:119` | `` |
-| `css_pseudo_match` | struct | `include/css_select.h:109` | `` |
-| `css_sel` | struct | `include/css_select.h:136` | `` |
-| `css_sub_sel` | struct | `include/css_select.h:92` | `` |
-| `identifier` | function | `include/css_select.h:163` | `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...` |
-| `kind` | type_alias | `include/css_select.h:109` | `typedef struct css_pseudo_match { int kind;` |
-| `name` | type_alias | `include/css_select.h:85` | `typedef struct css_attr_match { char name[CSS_TOK_MAX];` |
-| `parts` | type_alias | `include/css_select.h:136` | `typedef struct css_sel { css_compound parts[CSS_MAX_COMPOUNDS];` |
-| `tag` | type_alias | `include/css_select.h:91` | `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];` |
-| `tag` | type_alias | `include/css_select.h:119` | `typedef struct css_compound { char tag[CSS_TOK_MAX];` |
+| `length` | function | `include/css_length.h:206` | `* * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute...` |
+| `prelude` | function | `include/css_length.h:99` | `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the...` |
+| `px` | type_alias | `include/css_length.h:132` | `typedef struct cl_lp { double px;` |
+| `CMQ_MAX_DEPTH` | macro | `include/css_mq.h:16` | `#define CMQ_MAX_DEPTH` |
+| `CMQ_TOK_MAX` | macro | `include/css_mq.h:17` | `#define CMQ_TOK_MAX` |
+| `FREEDOM_CSS_MQ_H` | macro | `include/css_mq.h:2` | `#define FREEDOM_CSS_MQ_H` |
+| `cmq_env` | struct | `include/css_mq.h:19` | `` |
+| `cmq_matches` | function | `include/css_mq.h:28` | `int cmq_matches(const char *s, size_t len, const cmq_env *env);` |
+| `width_px` | type_alias | `include/css_mq.h:18` | `typedef struct cmq_env { int width_px;` |
+| `CSEL_FOLD_MARK` | macro | `include/css_select.h:174` | `#define CSEL_FOLD_MARK` |
+| `CSEL_FOLD_PREFIX` | macro | `include/css_select.h:173` | `#define CSEL_FOLD_PREFIX` |
+| `CSEL_IDENT_SCRATCH` | macro | `include/css_select.h:175` | `#define CSEL_IDENT_SCRATCH` |
+| `CSS_MAX_CLASSES_PER_SEL` | macro | `include/css_select.h:28` | `#define CSS_MAX_CLASSES_PER_SEL` |
+| `CSS_MAX_SUB_SELS` | macro | `include/css_select.h:83` | `#define CSS_MAX_SUB_SELS` |
+| `CSS_SUB_MAX_ATTRS` | macro | `include/css_select.h:84` | `#define CSS_SUB_MAX_ATTRS` |
+| `CSS_SUB_MAX_PSEUDOS` | macro | `include/css_select.h:85` | `#define CSS_SUB_MAX_PSEUDOS` |
+| `CSS_TOK_MAX` | macro | `include/css_select.h:27` | `#define CSS_TOK_MAX` |
+| `FREEDOM_CSS_SELECT_H` | macro | `include/css_select.h:2` | `#define FREEDOM_CSS_SELECT_H` |
+| `csel_ci_eq` | function | `include/css_select.h:202` | `static inline int csel_ci_eq(const char *a, const char *b)` |
+| `csel_decl_end` | function | `include/css_select.h:194` | `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` |
+| `csel_emit_utf8` | function | `include/css_select.h:178` | `size_t csel_emit_utf8(unsigned int cp, char *out);` |
+| `csel_escape_len` | function | `include/css_select.h:182` | `size_t csel_escape_len(const char *s, size_t i, size_t b);` |
+| `csel_ident_ch` | function | `include/css_select.h:230` | `static inline int csel_ident_ch(char c)` |
+| `csel_ident_eq` | function | `include/css_select.h:186` | `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` |
+| `csel_ident_fold` | function | `include/css_select.h:184` | `void csel_ident_fold(const char *src, size_t len, char *dst);` |
+| `csel_lower_ch` | function | `include/css_select.h:198` | `static inline char csel_lower_ch(char c)` |
+| `csel_matches` | function | `include/css_select.h:162` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` |
+| `csel_parse` | function | `include/css_select.h:153` | `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` |
+| `csel_read_ident` | function | `include/css_select.h:189` | `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` |
+| `csel_span_eq` | function | `include/css_select.h:211` | `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` |
+| `csel_substr` | function | `include/css_select.h:222` | `static inline int csel_substr(const char *hay, const char *needle, int ci)` |
+| `csel_unescape` | function | `include/css_select.h:180` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` |
+| `css_attr_match` | struct | `include/css_select.h:88` | `` |
+| `css_compound` | struct | `include/css_select.h:122` | `` |
+| `css_pseudo_match` | struct | `include/css_select.h:112` | `` |
+| `css_sel` | struct | `include/css_select.h:139` | `` |
+| `css_sub_sel` | struct | `include/css_select.h:95` | `` |
+| `identifier` | function | `include/css_select.h:166` | `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...` |
+| `kind` | type_alias | `include/css_select.h:112` | `typedef struct css_pseudo_match { int kind;` |
+| `name` | type_alias | `include/css_select.h:88` | `typedef struct css_attr_match { char name[CSS_TOK_MAX];` |
+| `parts` | type_alias | `include/css_select.h:139` | `typedef struct css_sel { css_compound parts[CSS_MAX_COMPOUNDS];` |
+| `tag` | type_alias | `include/css_select.h:94` | `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];` |
+| `tag` | type_alias | `include/css_select.h:122` | `typedef struct css_compound { char tag[CSS_TOK_MAX];` |
 | `FREEDOM_CSS_TEXT_H` | macro | `include/css_text.h:2` | `#define FREEDOM_CSS_TEXT_H` |
 | `ct_emit_spacing` | function | `include/css_text.h:24` | `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val);` |
 | `ct_expand_shadow` | function | `include/css_text.h:25` | `int ct_expand_shadow(const char *val, css_decl *dst, int cap);` |
@@ -108,40 +139,47 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `dl_status` | enum | `include/download.h:33` | `` |
 | `literal` | function | `include/download.h:47` | `* a static string literal (never freed). */ const char *dl_ext_for_type(const char *content_type);` |
 | `FREEDOM_FLEX_LAYOUT_H` | macro | `include/flex_layout.h:2` | `#define FREEDOM_FLEX_LAYOUT_H` |
-| `FX_AREA_MAX_CELLS` | macro | `include/flex_layout.h:117` | `#define FX_AREA_MAX_CELLS` |
-| `FX_AREA_MAX_COLS` | macro | `include/flex_layout.h:116` | `#define FX_AREA_MAX_COLS` |
-| `FX_AREA_MAX_ROWS` | macro | `include/flex_layout.h:115` | `#define FX_AREA_MAX_ROWS` |
-| `FX_AREA_NAME_MAX` | macro | `include/flex_layout.h:118` | `#define FX_AREA_NAME_MAX` |
-| `FX_ERR_NULL_ARG` | function | `include/flex_layout.h:207` | `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);` |
-| `FX_FLOAT_MIN_LINE` | macro | `include/flex_layout.h:187` | `#define FX_FLOAT_MIN_LINE` |
-| `FX_MAUTO_BOTTOM` | macro | `include/flex_layout.h:315` | `#define FX_MAUTO_BOTTOM` |
-| `FX_MAUTO_TOP` | macro | `include/flex_layout.h:314` | `#define FX_MAUTO_TOP` |
-| `FX_MAX_COLUMNS` | macro | `include/flex_layout.h:247` | `#define FX_MAX_COLUMNS` |
+| `FX_AREA_MAX_CELLS` | macro | `include/flex_layout.h:138` | `#define FX_AREA_MAX_CELLS` |
+| `FX_AREA_MAX_COLS` | macro | `include/flex_layout.h:137` | `#define FX_AREA_MAX_COLS` |
+| `FX_AREA_MAX_ROWS` | macro | `include/flex_layout.h:136` | `#define FX_AREA_MAX_ROWS` |
+| `FX_AREA_NAME_MAX` | macro | `include/flex_layout.h:139` | `#define FX_AREA_NAME_MAX` |
+| `FX_ERR_NULL_ARG` | function | `include/flex_layout.h:228` | `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);` |
+| `FX_FLOAT_MIN_LINE` | macro | `include/flex_layout.h:208` | `#define FX_FLOAT_MIN_LINE` |
+| `FX_GL_AUTO` | macro | `include/flex_layout.h:107` | `#define FX_GL_AUTO` |
+| `FX_GL_LINE_MAX` | macro | `include/flex_layout.h:110` | `#define FX_GL_LINE_MAX` |
+| `FX_GL_SPAN_BASE` | macro | `include/flex_layout.h:108` | `#define FX_GL_SPAN_BASE` |
+| `FX_GL_SPAN_MAX` | macro | `include/flex_layout.h:109` | `#define FX_GL_SPAN_MAX` |
+| `FX_MAUTO_BOTTOM` | macro | `include/flex_layout.h:336` | `#define FX_MAUTO_BOTTOM` |
+| `FX_MAUTO_TOP` | macro | `include/flex_layout.h:335` | `#define FX_MAUTO_TOP` |
+| `FX_MAX_COLUMNS` | macro | `include/flex_layout.h:268` | `#define FX_MAX_COLUMNS` |
 | `FX_MAX_ITEMS` | macro | `include/flex_layout.h:28` | `#define FX_MAX_ITEMS` |
 | `basis` | type_alias | `include/flex_layout.h:40` | `typedef struct fx_item { double basis;` |
-| `bottom` | type_alias | `include/flex_layout.h:193` | `typedef struct fx_float_rect { double top, bottom;` |
-| `cols` | type_alias | `include/flex_layout.h:123` | `typedef struct fx_area_map { int rows, cols;` |
-| `fx_area_map` | struct | `include/flex_layout.h:123` | `` |
-| `fx_auto_min_size` | function | `include/flex_layout.h:242` | `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` |
-| `fx_autofill_count` | function | `include/flex_layout.h:108` | `size_t fx_autofill_count(double avail, double gap, double minw);` |
-| `fx_cross_offset` | function | `include/flex_layout.h:323` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` |
-| `fx_float_rect` | struct | `include/flex_layout.h:193` | `` |
-| `fx_grid_area_hash` | function | `include/flex_layout.h:132` | `unsigned fx_grid_area_hash(const char *name);` |
+| `bottom` | type_alias | `include/flex_layout.h:214` | `typedef struct fx_float_rect { double top, bottom;` |
+| `cols` | type_alias | `include/flex_layout.h:144` | `typedef struct fx_area_map { int rows, cols;` |
+| `fx_area_map` | struct | `include/flex_layout.h:144` | `` |
+| `fx_auto_min_size` | function | `include/flex_layout.h:263` | `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` |
+| `fx_autofill_count` | function | `include/flex_layout.h:129` | `size_t fx_autofill_count(double avail, double gap, double minw);` |
+| `fx_cross_offset` | function | `include/flex_layout.h:344` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` |
+| `fx_float_rect` | struct | `include/flex_layout.h:214` | `` |
+| `fx_grid_area_hash` | function | `include/flex_layout.h:153` | `unsigned fx_grid_area_hash(const char *name);` |
 | `fx_grid_cell` | function | `include/flex_layout.h:74` | `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);` |
+| `fx_grid_line_parse` | function | `include/flex_layout.h:117` | `int fx_grid_line_parse(const char *v, int *start, int *end);` |
+| `fx_grid_line_resolve` | function | `include/flex_layout.h:122` | `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span);` |
 | `fx_item` | struct | `include/flex_layout.h:40` | `` |
 | `fx_justify` | enum | `include/flex_layout.h:30` | `` |
-| `fx_justify_name` | function | `include/flex_layout.h:298` | `const char *fx_justify_name(fx_justify j);` |
+| `fx_justify_name` | function | `include/flex_layout.h:319` | `const char *fx_justify_name(fx_justify j);` |
 | `fx_result` | struct | `include/flex_layout.h:48` | `` |
 | `fx_status` | enum | `include/flex_layout.h:53` | `` |
-| `height` | function | `include/flex_layout.h:304` | `* used height (h_out);` |
-| `offset` | function | `include/flex_layout.h:150` | `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...` |
+| `height` | function | `include/flex_layout.h:325` | `* used height (h_out);` |
+| `number` | function | `include/flex_layout.h:106` | `* line number (negative counts from the end). */ #define FX_GL_AUTO 0 #define FX_GL_SPAN_BASE (1 << 20) #define...` |
+| `offset` | function | `include/flex_layout.h:171` | `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...` |
 | `out` | function | `include/flex_layout.h:62` | `* fx_result to out (caller-owned). n == 0 is a no-op (out may be NULL). */ fx_status fx_flex_line(const fx_item...` |
 | `pos` | type_alias | `include/flex_layout.h:48` | `typedef struct fx_result { double pos;` |
-| `required` | function | `include/flex_layout.h:163` | `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);` |
+| `required` | function | `include/flex_layout.h:184` | `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);` |
 | `size` | function | `include/flex_layout.h:60` | `* content size (px);` |
-| `space` | function | `include/flex_layout.h:213` | `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...` |
-| `widths` | function | `include/flex_layout.h:173` | `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...` |
-| `win` | function | `include/flex_layout.h:321` | `* margins win (both = centre, left only = end);` |
+| `space` | function | `include/flex_layout.h:234` | `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...` |
+| `widths` | function | `include/flex_layout.h:194` | `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...` |
+| `win` | function | `include/flex_layout.h:342` | `* margins win (both = centre, left only = end);` |
 | `FM_BODY_MAX` | macro | `include/form.h:30` | `#define FM_BODY_MAX` |
 | `FM_CONTENT_TYPE_URLENCODED` | variable | `include/form.h:68` | `extern const char FM_CONTENT_TYPE_URLENCODED[];` |
 | `FM_MAX_FIELDS` | macro | `include/form.h:31` | `#define FM_MAX_FIELDS` |
@@ -432,7 +470,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `os_prot_allowed` | function | `include/os_sandbox.h:52` | `int os_prot_allowed(long syscall_nr, unsigned long prot);` |
 | `os_status` | enum | `include/os_sandbox.h:21` | `` |
 | `os_violation` | enum | `include/os_sandbox.h:30` | `` |
-| `CSS_LEN_UNSET` | function | `include/page_view.h:482` | `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...` |
+| `CSS_LEN_UNSET` | function | `include/page_view.h:503` | `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...` |
 | `FREEDOM_PAGE_VIEW_H` | macro | `include/page_view.h:2` | `#define FREEDOM_PAGE_VIEW_H` |
 | `PV_BG_URL_MAX` | macro | `include/page_view.h:66` | `#define PV_BG_URL_MAX` |
 | `PV_CONT_DEPTH` | macro | `include/page_view.h:60` | `#define PV_CONT_DEPTH` |
@@ -444,57 +482,19 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `PV_MAUTO_LEFT` | macro | `include/page_view.h:43` | `#define PV_MAUTO_LEFT` |
 | `PV_MAUTO_RIGHT` | macro | `include/page_view.h:44` | `#define PV_MAUTO_RIGHT` |
 | `PV_MAUTO_TOP` | macro | `include/page_view.h:45` | `#define PV_MAUTO_TOP` |
-| `ancestors` | function | `include/page_view.h:935` | `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...` |
-| `bx_display` | function | `include/page_view.h:221` | `* bx_display (flex/grid);` |
-| `cause` | function | `include/page_view.h:793` | `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...` |
-| `container` | function | `include/page_view.h:220` | `* cont_id groups runs of one container (-1 = none);` |
-| `default` | function | `include/page_view.h:861` | `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);` |
-| `form` | function | `include/page_view.h:824` | `* form (-1 if none);` |
-| `itself` | function | `include/page_view.h:336` | `* by itself (bx_width_cap2);` |
+| `PV_PH_HIDDEN` | macro | `include/page_view.h:1108` | `#define PV_PH_HIDDEN` |
+| `PV_PH_THEME` | macro | `include/page_view.h:1107` | `#define PV_PH_THEME` |
+| `PV_UA_BODY_MARGIN` | macro | `include/page_view.h:781` | `#define PV_UA_BODY_MARGIN` |
+| `ancestors` | function | `include/page_view.h:976` | `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...` |
+| `bx_display` | function | `include/page_view.h:226` | `* bx_display (flex/grid);` |
+| `cause` | function | `include/page_view.h:829` | `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...` |
+| `container` | function | `include/page_view.h:225` | `* cont_id groups runs of one container (-1 = none);` |
+| `declare` | function | `include/page_view.h:784` | `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...` |
+| `default` | function | `include/page_view.h:897` | `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);` |
+| `form` | function | `include/page_view.h:860` | `* form (-1 if none);` |
+| `itself` | function | `include/page_view.h:341` | `* by itself (bx_width_cap2);` |
 | `kind` | type_alias | `include/page_view.h:118` | `typedef struct pv_run { pv_kind kind;` |
-| `nonzero` | function | `include/page_view.h:760` | `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...` |
-| `order` | function | `include/page_view.h:285` | `* groups the runs of ONE floated element in document order (-1 = not in a float);` |
-| `parent_id` | type_alias | `include/page_view.h:409` | `typedef struct pv_box_def { int parent_id;` |
-| `parent_id` | type_alias | `include/page_view.h:698` | `typedef struct pv_cont_def { int parent_id;` |
-| `policy` | function | `include/page_view.h:775` | `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...` |
-| `pv_at` | function | `include/page_view.h:1076` | `const pv_run *pv_at(const pv_view *v, size_t i);` |
-| `pv_box_at` | function | `include/page_view.h:1081` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i);` |
-| `pv_box_count` | function | `include/page_view.h:1080` | `size_t pv_box_count(const pv_view *v);` |
-| `pv_box_def` | struct | `include/page_view.h:409` | `` |
-| `pv_cont_at` | function | `include/page_view.h:1061` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);` |
-| `pv_cont_count` | function | `include/page_view.h:1060` | `size_t pv_cont_count(const pv_view *v);` |
-| `pv_cont_def` | struct | `include/page_view.h:698` | `` |
-| `pv_count` | function | `include/page_view.h:1075` | `size_t pv_count(const pv_view *v);` |
-| `pv_form_method` | enum | `include/page_view.h:104` | `` |
-| `pv_free` | function | `include/page_view.h:1072` | `void pv_free(pv_view *v);` |
-| `pv_input_type` | enum | `include/page_view.h:84` | `` |
-| `pv_kind` | enum | `include/page_view.h:68` | `` |
-| `pv_new` | function | `include/page_view.h:805` | `pv_view *pv_new(void);` |
-| `pv_run` | struct | `include/page_view.h:118` | `` |
-| `pv_set_bgcolor` | function | `include/page_view.h:871` | `void pv_set_bgcolor(pv_view *v, int bg_rgb);` |
-| `pv_set_block_id` | function | `include/page_view.h:1037` | `void pv_set_block_id(pv_view *v, int block_id);` |
-| `pv_set_box` | function | `include/page_view.h:1016` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` |
-| `pv_set_box_maxw` | function | `include/page_view.h:1027` | `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` |
-| `pv_set_box_pct` | function | `include/page_view.h:1022` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` |
-| `pv_set_color` | function | `include/page_view.h:864` | `void pv_set_color(pv_view *v, int fg_rgb);` |
-| `pv_set_cont_box` | function | `include/page_view.h:981` | `void pv_set_cont_box(pv_view *v, int cont_box_id);` |
-| `pv_set_cont_item` | function | `include/page_view.h:997` | `void pv_set_cont_item(pv_view *v, int cont_item);` |
-| `pv_set_emphasis` | function | `include/page_view.h:856` | `void pv_set_emphasis(pv_view *v, int bold, int italic);` |
-| `pv_set_flex` | function | `include/page_view.h:990` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` |
-| `pv_set_flex_mauto` | function | `include/page_view.h:993` | `void pv_set_flex_mauto(pv_view *v, int mauto);` |
-| `pv_set_float` | function | `include/page_view.h:1006` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...` |
-| `pv_set_grad_text` | function | `include/page_view.h:951` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` |
-| `pv_set_grid` | function | `include/page_view.h:982` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);` |
-| `pv_set_grid_area` | function | `include/page_view.h:971` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` |
-| `pv_set_grid_rows` | function | `include/page_view.h:972` | `void pv_set_grid_rows(pv_view *v, int grid_rows);` |
-| `pv_set_input_checked` | function | `include/page_view.h:1065` | `void pv_set_input_checked(pv_view *v, int checked);` |
-| `pv_set_input_select_opts` | function | `include/page_view.h:1069` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` |
-| `pv_set_node_id` | function | `include/page_view.h:1032` | `void pv_set_node_id(pv_view *v, dom_node_id node_id);` |
-| `pv_set_oof` | function | `include/page_view.h:1045` | `void pv_set_oof(pv_view *v, int oof);` |
-| `pv_set_own_box` | function | `include/page_view.h:1041` | `void pv_set_own_box(pv_view *v, int box_id);` |
-| `pv_set_row_span` | function | `include/page_view.h:967` | `void pv_set_row_span(pv_view *v, int row_span);` |
-| `pv_set_text_ext` | function | `include/page_view.h:945` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);` |
-| `pv_set_text_style` | function | `include/page_view.h:880` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` |
-| `pv_set_ua_tag` | function | `include/page_view.h:977` | `void pv_set_ua_tag(pv_view *v, int ua_tag);` |
+| `nonzero` | function | `include/page_view.h:796` | `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...` |
+| `order` | function | `include/page_view.h:290` | `* groups the runs of ONE floated element in document order (-1 = not in a float);` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

@@ -227,6 +227,103 @@ static void test_webfont_register_find_clear(void **state) {
     free(bytes);
 }
 
+
+/* --- Named local families (spec/text_shape.md section 7) --- */
+
+static void test_generic_keywords(void **state) {
+    (void)state;
+    assert_int_equal(tsh_family_is_generic("sans-serif"), 1);
+    assert_int_equal(tsh_family_is_generic("Monospace"), 1);
+    assert_int_equal(tsh_family_is_generic("system-ui"), 1);
+    assert_int_equal(tsh_family_is_generic("ui-monospace"), 1);
+    assert_int_equal(tsh_family_is_generic("arial"), 0);
+    assert_int_equal(tsh_family_is_generic("-apple-system"), 0);
+    assert_int_equal(tsh_family_is_generic(""), 0);
+    assert_int_equal(tsh_family_is_generic(NULL), 0);
+}
+
+static int table_resolve(const char *name, char *out, size_t cap, void *ctx) {
+    const char *const *tab = ctx;
+    for (size_t i = 0; tab[i] != NULL; i += 2)
+        if (strcmp(tab[i], name) == 0) {
+            snprintf(out, cap, "%s", tab[i + 1]);
+            return 1;
+        }
+    return 0;
+}
+
+static void test_pick_from_list_order_and_generic_stop(void **state) {
+    (void)state;
+    const char *tab[] = { "arial", "Liberation Sans", "courier new", "Liberation Mono", NULL };
+    char out[TSH_FAMILY_MAX];
+    assert_int_equal(tsh_pick_from_list("helvetica neue,arial,sans-serif",
+                                        table_resolve, tab, out, sizeof out), 1);
+    assert_string_equal(out, "Liberation Sans");
+    /* A generic first stops the walk: the bucket applies. */
+    assert_int_equal(tsh_pick_from_list("monospace,arial", table_resolve, tab,
+                                        out, sizeof out), 0);
+    assert_int_equal(tsh_pick_from_list("nope,other", table_resolve, tab,
+                                        out, sizeof out), 0);
+    assert_int_equal(tsh_pick_from_list("", table_resolve, tab, out, sizeof out), 0);
+    assert_int_equal(tsh_pick_from_list(NULL, table_resolve, tab, out, sizeof out), 0);
+    /* Whitespace around names is ignored. */
+    assert_int_equal(tsh_pick_from_list(" nope , courier new ", table_resolve, tab,
+                                        out, sizeof out), 1);
+    assert_string_equal(out, "Liberation Mono");
+}
+
+static int set_installed(const char *name, void *ctx) {
+    const char *const *set = ctx;
+    for (size_t i = 0; set[i] != NULL; ++i)
+        if (strcmp(set[i], name) == 0) return 1;
+    return 0;
+}
+
+static void test_pick_family_strong_vs_weak(void **state) {
+    (void)state;
+    const char *inst[] = { "Liberation Sans", "Noto Sans", "Cantarell", "Inter", NULL };
+    /* Installed itself. */
+    const char *s0[] = { "Inter", "Noto Sans" };
+    const int b0[] = { 1, 0 };
+    assert_string_equal(tsh_pick_family("Inter", s0, b0, 2, set_installed, inst), "Inter");
+    /* Strong alias (Arial -> Liberation Sans). */
+    const char *s1[] = { "Arial", "Liberation Sans", "Noto Sans" };
+    const int b1[] = { 1, 1, 0 };
+    assert_string_equal(tsh_pick_family("Arial", s1, b1, 3, set_installed, inst),
+                        "Liberation Sans");
+    /* Only weak substitutes: not available. */
+    const char *s2[] = { "Segoe UI", "Cantarell", "Noto Sans" };
+    const int b2[] = { 1, 0, 0 };
+    assert_null(tsh_pick_family("Segoe UI", s2, b2, 3, set_installed, inst));
+    /* A strong but uninstalled alias is skipped; the strong run continues. */
+    const char *s3[] = { "Helvetica", "Nimbus Sans", "Liberation Sans", "Noto Sans" };
+    const int b3[] = { 1, 1, 1, 0 };
+    assert_string_equal(tsh_pick_family("Helvetica", s3, b3, 4, set_installed, inst),
+                        "Liberation Sans");
+    assert_null(tsh_pick_family(NULL, s3, b3, 4, set_installed, inst));
+}
+
+static void test_local_handle_real_fontconfig(void **state) {
+    (void)state;
+    assert_int_equal(tsh_local_handle(NULL), 0);
+    assert_int_equal(tsh_local_handle(""), 0);
+    assert_int_equal(tsh_local_handle("sans-serif"), 0);
+    assert_int_equal(tsh_local_handle("no-such-family-xyz"), 0);
+    if (!tsh_ready()) return;
+    int h = tsh_local_handle("no-such-family-xyz,arial,sans-serif");
+    if (h == 0) return;   /* host without an Arial alias: nothing to assert */
+    assert_int_equal(tsh_local_handle("no-such-family-xyz,arial,sans-serif"), h);
+    tsh_font f = { .family = CSS_FF_SANS, .local = h };
+    tsh_font g = { .family = CSS_FF_SANS, .local = 0 };
+    double a = tsh_measure(&f, 16.0, "The quick brown fox", 19);
+    double b = tsh_measure(&g, 16.0, "The quick brown fox", 19);
+    assert_true(a > 0.0 && b > 0.0);
+    /* The face the painter selects for metrics is the one that is drawn. */
+    assert_non_null(tsh_face(&f));
+    assert_non_null(tsh_face(&g));
+    assert_ptr_not_equal(tsh_face(&f), tsh_face(&g));
+}
+
 static int teardown(void **state) {
     (void)state;
     tsh_shutdown();
@@ -244,6 +341,10 @@ int main(void) {
         cmocka_unit_test(test_draw_paints),
         cmocka_unit_test(test_webfont_rejects_bad_input),
         cmocka_unit_test(test_webfont_register_find_clear),
+        cmocka_unit_test(test_generic_keywords),
+        cmocka_unit_test(test_pick_from_list_order_and_generic_stop),
+        cmocka_unit_test(test_pick_family_strong_vs_weak),
+        cmocka_unit_test(test_local_handle_real_fontconfig),
     };
     return cmocka_run_group_tests(tests, NULL, teardown);
 }

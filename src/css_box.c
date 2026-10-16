@@ -67,6 +67,8 @@ int cb_interp_align(const char *v) {
  * The distinction is load-bearing, not cosmetic: without it the painter multiplied
  * an absolute `font-size: 40px` onto the user-agent heading scale and every author-
  * styled <h1> came out at 80px. See spec/css.md "font-size: absolute vs relative". */
+static int math_eval_whole(const char *v, double *px, double *em, double *pct);
+
 int cb_interp_fontsize_ex(const char *v, int *abs_out) {
     *abs_out = 1;
     if (csel_ci_eq(v, "medium")) return 100;
@@ -79,6 +81,33 @@ int cb_interp_fontsize_ex(const char *v, int *abs_out) {
     /* smaller/larger step off the INHERITED size, so they stay relative. */
     if (csel_ci_eq(v, "smaller")) { *abs_out = 0; return 85; }
     if (csel_ci_eq(v, "larger"))  { *abs_out = 0; return 120; }
+
+    /* calc()/min()/max()/clamp() (CSS Values 4 section 10): Bootstrap 5's
+     * responsive headings are `calc(1.375rem + 1.5vw)`. A purely absolute result
+     * (px/rem/vw...) is an absolute size; a purely font-relative one (em/%) is a
+     * multiple of the inherited size. A mix of both is not representable by the
+     * (scale, absolute) pair this property travels as, so it fails closed. */
+    {
+        double mpx, mem, mpct;
+        int m = math_eval_whole(v, &mpx, &mem, &mpct);
+        if (m == 0) { *abs_out = 0; return -1; }
+        if (m == 1) {
+            /* px carries the em term already evaluated at the initial size (em is
+             * its derivative), so the absolute part is what remains. */
+            double abs_px = mpx - mem * CL_INITIAL_FONT_SIZE;
+            if (abs_px > -1e-9 && abs_px < 1e-9) abs_px = 0.0;
+            if (mem == 0.0 && mpct == 0.0) {
+                *abs_out = 1;
+                return css_round_clamp(mpx / CL_INITIAL_FONT_SIZE * 100.0, 10, 1000);
+            }
+            if (abs_px == 0.0) {
+                *abs_out = 0;
+                return css_round_clamp(mem * 100.0 + mpct, 10, 1000);
+            }
+            *abs_out = 0;
+            return -1;
+        }
+    }
 
     double num;
     const char *end;
@@ -373,6 +402,14 @@ static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)
     while (i < n) {
         while (i < n && (s[i] == ' ' || s[i] == '\t')) ++i;
         if (i >= n) break;
+        /* `[name ...]` is a set of LINE NAMES between tracks (CSS Grid 1 7.2), never
+         * a track -- and it may hold spaces. Unterminated: the value is malformed. */
+        if (s[i] == '[') {
+            while (i < n && s[i] != ']') ++i;
+            if (i >= n) return -1;
+            ++i;
+            continue;
+        }
         size_t start = i;
         int depth = 0;
         while (i < n) {
@@ -826,15 +863,6 @@ static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *ou
     return 1;
 }
 
-/* The pure-length entry point: a percentage in the expression makes the result a
- * <length-percentage>, which this caller's property does not accept, so it fails
- * closed here rather than silently dropping the percentage term. */
-static int calc_eval(const char *v, size_t vlen, double *out_px) {
-    double pct = 0.0;
-    if (!calc_eval_full(v, vlen, out_px, NULL, &pct)) return 0;
-    return pct == 0.0;
-}
-
 /* The font-size derivative of a calc() body, for value_em_milli. */
 static int calc_eval_em(const char *v, size_t vlen, double *out_em) {
     double px;
@@ -862,18 +890,17 @@ static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len) {
  * and bare non-zero numbers outside calc() (fail closed: they need a containing
  * block the parser does not have). Returns 1 with *out = CSS_LEN_AUTO or a
  * signed px clamped to [-CSS_LEN_MAX, CSS_LEN_MAX]; 0 if unsupported. */
-int cb_interp_len(const char *v, int allow_auto, int *out) {
-    if (allow_auto && csel_ci_eq(v, "auto")) { *out = CSS_LEN_AUTO; return 1; }
-
+/* A whole value that is ONE math function -- calc(...), or a bare min()/max()/
+ * clamp() -- evaluated to its three components (px, font-size coefficient, %).
+ * Returns 1 when v is such a value and evaluates to a length, 0 when it is one but
+ * does not (fail closed), -1 when v is not a math function at all. */
+static int math_eval_whole(const char *v, double *px, double *em, double *pct) {
     size_t cs, cl;
-    if (calc_unwrap(v, &cs, &cl)) {
-        double px;
-        if (!calc_eval(v + cs, cl, &px)) return 0;
-        *out = css_round_clamp(px, -CSS_LEN_MAX, CSS_LEN_MAX);
-        return 1;
-    }
-    /* A bare math-function value (min()/max()/clamp() without a calc() wrapper).
-     * The m/c prefix check keeps plain lengths off the calc machinery; the whole
+    *em = 0.0;
+    *pct = 0.0;
+    if (calc_unwrap(v, &cs, &cl))
+        return calc_eval_full(v + cs, cl, px, em, pct) ? 1 : 0;
+    /* The m/c prefix check keeps plain lengths off the calc machinery; the whole
      * value must be exactly one function call whose result is a length. */
     if (csel_lower_ch(v[0]) == 'm' || csel_lower_ch(v[0]) == 'c') {
         size_t n = strlen(v);
@@ -887,9 +914,27 @@ int cb_interp_len(const char *v, int allow_auto, int *out) {
             if (!calc_mathfn(&p, &r, 0, kind)) return 0;
             calc_skip_ws(&p);
             if (p.i != n || !r.is_length) return 0;
-            *out = css_round_clamp(r.px, -CSS_LEN_MAX, CSS_LEN_MAX);
+            *px = r.px;
+            *em = r.em;
+            *pct = r.pct;
             return 1;
         }
+    }
+    return -1;
+}
+
+int cb_interp_len(const char *v, int allow_auto, int *out) {
+    if (allow_auto && csel_ci_eq(v, "auto")) { *out = CSS_LEN_AUTO; return 1; }
+
+    double mpx, mem, mpct;
+    int m = math_eval_whole(v, &mpx, &mem, &mpct);
+    if (m == 0) return 0;
+    if (m == 1) {
+        /* This caller's property is a pure <length>: a percentage term would be
+         * silently dropped, so it fails closed instead. */
+        if (mpct != 0.0) return 0;
+        *out = css_round_clamp(mpx, -CSS_LEN_MAX, CSS_LEN_MAX);
+        return 1;
     }
 
     /* Every unit CSS defines as a <length>, through the one canonical resolver.

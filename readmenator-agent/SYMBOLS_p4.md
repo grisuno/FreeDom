@@ -1,16 +1,61 @@
-# Symbols (page 4 of 13)
+# Symbols (page 4 of 14)
 Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `parent_id` | type_alias | `include/page_view.h:421` | `typedef struct pv_box_def { int parent_id;` |
+| `parent_id` | type_alias | `include/page_view.h:719` | `typedef struct pv_cont_def { int parent_id;` |
+| `policy` | function | `include/page_view.h:811` | `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...` |
+| `pv_at` | function | `include/page_view.h:1130` | `const pv_run *pv_at(const pv_view *v, size_t i);` |
+| `pv_box_at` | function | `include/page_view.h:1135` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i);` |
+| `pv_box_count` | function | `include/page_view.h:1134` | `size_t pv_box_count(const pv_view *v);` |
+| `pv_box_def` | struct | `include/page_view.h:421` | `` |
+| `pv_cont_at` | function | `include/page_view.h:1102` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);` |
+| `pv_cont_count` | function | `include/page_view.h:1101` | `size_t pv_cont_count(const pv_view *v);` |
+| `pv_cont_def` | struct | `include/page_view.h:719` | `` |
+| `pv_count` | function | `include/page_view.h:1129` | `size_t pv_count(const pv_view *v);` |
+| `pv_form_method` | enum | `include/page_view.h:104` | `` |
+| `pv_free` | function | `include/page_view.h:1126` | `void pv_free(pv_view *v);` |
+| `pv_input_type` | enum | `include/page_view.h:84` | `` |
+| `pv_kind` | enum | `include/page_view.h:68` | `` |
+| `pv_new` | function | `include/page_view.h:841` | `pv_view *pv_new(void);` |
+| `pv_placeholder_color` | function | `include/page_view.h:1119` | `int pv_placeholder_color(const css_style *ph);` |
+| `pv_run` | struct | `include/page_view.h:118` | `` |
+| `pv_set_bgcolor` | function | `include/page_view.h:907` | `void pv_set_bgcolor(pv_view *v, int bg_rgb);` |
+| `pv_set_block_id` | function | `include/page_view.h:1078` | `void pv_set_block_id(pv_view *v, int block_id);` |
+| `pv_set_box` | function | `include/page_view.h:1057` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` |
+| `pv_set_box_maxw` | function | `include/page_view.h:1068` | `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` |
+| `pv_set_box_pct` | function | `include/page_view.h:1063` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` |
+| `pv_set_color` | function | `include/page_view.h:900` | `void pv_set_color(pv_view *v, int fg_rgb);` |
+| `pv_set_cont_box` | function | `include/page_view.h:1022` | `void pv_set_cont_box(pv_view *v, int cont_box_id);` |
+| `pv_set_cont_item` | function | `include/page_view.h:1038` | `void pv_set_cont_item(pv_view *v, int cont_item);` |
+| `pv_set_emphasis` | function | `include/page_view.h:892` | `void pv_set_emphasis(pv_view *v, int bold, int italic);` |
+| `pv_set_flex` | function | `include/page_view.h:1031` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` |
+| `pv_set_flex_mauto` | function | `include/page_view.h:1034` | `void pv_set_flex_mauto(pv_view *v, int mauto);` |
+| `pv_set_float` | function | `include/page_view.h:1047` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...` |
+| `pv_set_grad_text` | function | `include/page_view.h:992` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` |
+| `pv_set_grid` | function | `include/page_view.h:1023` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);` |
+| `pv_set_grid_area` | function | `include/page_view.h:1012` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` |
+| `pv_set_grid_rows` | function | `include/page_view.h:1013` | `void pv_set_grid_rows(pv_view *v, int grid_rows);` |
+| `pv_set_input_checked` | function | `include/page_view.h:1106` | `void pv_set_input_checked(pv_view *v, int checked);` |
+| `pv_set_input_placeholder` | function | `include/page_view.h:1110` | `void pv_set_input_placeholder(pv_view *v, int ph_color);` |
+| `pv_set_input_select_opts` | function | `include/page_view.h:1123` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` |
+| `pv_set_node_id` | function | `include/page_view.h:1073` | `void pv_set_node_id(pv_view *v, dom_node_id node_id);` |
+| `pv_set_oof` | function | `include/page_view.h:1086` | `void pv_set_oof(pv_view *v, int oof);` |
+| `pv_set_own_box` | function | `include/page_view.h:1082` | `void pv_set_own_box(pv_view *v, int box_id);` |
+| `pv_set_row_span` | function | `include/page_view.h:1008` | `void pv_set_row_span(pv_view *v, int row_span);` |
+| `pv_set_text_ext` | function | `include/page_view.h:986` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);` |
+| `pv_set_text_style` | function | `include/page_view.h:916` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` |
+| `pv_set_ua_tag` | function | `include/page_view.h:1018` | `void pv_set_ua_tag(pv_view *v, int ua_tag);` |
 | `pv_status` | enum | `include/page_view.h:34` | `` |
-| `pv_text_ext` | struct | `include/page_view.h:896` | `` |
-| `pv_text_ext_reset` | function | `include/page_view.h:930` | `void pv_text_ext_reset(pv_text_ext *e);` |
-| `pv_view` | struct | `include/page_view.h:735` | `` |
-| `resolved` | function | `include/page_view.h:767` | `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...` |
-| `run` | function | `include/page_view.h:954` | `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...` |
-| `scale` | function | `include/page_view.h:557` | `* scale(1)) and rotate in whole degrees (transform_rotate);` |
-| `word_spacing` | type_alias | `include/page_view.h:896` | `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;` |
+| `pv_svg_append_root_attrs` | function | `include/page_view.h:1116` | `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` |
+| `pv_text_ext` | struct | `include/page_view.h:932` | `` |
+| `pv_text_ext_reset` | function | `include/page_view.h:971` | `void pv_text_ext_reset(pv_text_ext *e);` |
+| `pv_view` | struct | `include/page_view.h:760` | `` |
+| `resolved` | function | `include/page_view.h:803` | `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...` |
+| `run` | function | `include/page_view.h:995` | `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...` |
+| `scale` | function | `include/page_view.h:578` | `* scale(1)) and rotate in whole degrees (transform_rotate);` |
+| `word_spacing` | type_alias | `include/page_view.h:932` | `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;` |
 | `FREEDOM_PDF_EXPORT_H` | macro | `include/pdf_export.h:2` | `#define FREEDOM_PDF_EXPORT_H` |
 | `PE_EXT` | macro | `include/pdf_export.h:29` | `#define PE_EXT` |
 | `PE_EXT_PNG` | macro | `include/pdf_export.h:30` | `#define PE_EXT_PNG` |
@@ -39,26 +84,33 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `samples` | type_alias | `include/perf_trace.h:33` | `typedef struct pt_stage_stats { uint64_t samples[PT_MAX_SAMPLES];` |
 | `stage` | type_alias | `include/perf_trace.h:40` | `typedef struct pt_trace { pt_stage_stats stage[PT_STAGE_COUNT];` |
 | `FREEDOM_PREFETCH_H` | macro | `include/prefetch.h:2` | `#define FREEDOM_PREFETCH_H` |
+| `PF_MAX_IMPORTS` | macro | `include/prefetch.h:50` | `#define PF_MAX_IMPORTS` |
+| `PF_MAX_JOBS` | macro | `include/prefetch.h:49` | `#define PF_MAX_JOBS` |
 | `PF_MAX_REFS` | macro | `include/prefetch.h:47` | `#define PF_MAX_REFS` |
 | `PF_MAX_THREADS` | macro | `include/prefetch.h:48` | `#define PF_MAX_THREADS` |
-| `fetch` | function | `include/prefetch.h:102` | `* claiming jobs and running fetch(ctx, "GET", url, ...). Returns 0 on success or * -1 when no thread could start...` |
-| `inner` | type_alias | `include/prefetch.h:129` | `typedef struct pf_gated_fetch { pf_fetch_fn inner;` |
-| `jobs` | type_alias | `include/prefetch.h:86` | `typedef struct pf_pool { pf_job jobs[PF_MAX_REFS];` |
+| `PF_SPEC_MAX` | macro | `include/prefetch.h:51` | `#define PF_SPEC_MAX` |
+| `fetch` | function | `include/prefetch.h:132` | `* claiming jobs and running fetch(ctx, "GET", url, ...). Returns 0 on success or * -1 when no thread could start...` |
+| `inner` | type_alias | `include/prefetch.h:159` | `typedef struct pf_gated_fetch { pf_fetch_fn inner;` |
+| `jobs` | type_alias | `include/prefetch.h:89` | `typedef struct pf_pool { pf_job jobs[PF_MAX_JOBS];` |
 | `kind` | type_alias | `include/prefetch.h:42` | `typedef struct pf_ref { pf_kind kind;` |
-| `pf_gated_fetch` | struct | `include/prefetch.h:129` | `` |
-| `pf_job` | struct | `include/prefetch.h:77` | `` |
-| `pf_job_state` | enum | `include/prefetch.h:70` | `` |
+| `pf_find_importmap` | function | `include/prefetch.h:115` | `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n);` |
+| `pf_gated_fetch` | struct | `include/prefetch.h:159` | `` |
+| `pf_job` | struct | `include/prefetch.h:80` | `` |
+| `pf_job_state` | enum | `include/prefetch.h:73` | `` |
 | `pf_kind` | enum | `include/prefetch.h:35` | `` |
-| `pf_list` | struct | `include/prefetch.h:50` | `` |
-| `pf_list_free` | function | `include/prefetch.h:60` | `void pf_list_free(pf_list *l);` |
-| `pf_pool` | struct | `include/prefetch.h:87` | `` |
-| `pf_pool_finish` | function | `include/prefetch.h:121` | `void pf_pool_finish(pf_pool *p);` |
-| `pf_pool_take` | function | `include/prefetch.h:115` | `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body, size_t *len, char **ctype);` |
-| `pf_pooled_fetch` | function | `include/prefetch.h:135` | `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int...` |
+| `pf_list` | struct | `include/prefetch.h:53` | `` |
+| `pf_list_free` | function | `include/prefetch.h:63` | `void pf_list_free(pf_list *l);` |
+| `pf_pool` | struct | `include/prefetch.h:90` | `` |
+| `pf_pool_add` | function | `include/prefetch.h:127` | `int pf_pool_add(pf_pool *p, const char *url);` |
+| `pf_pool_finish` | function | `include/prefetch.h:151` | `void pf_pool_finish(pf_pool *p);` |
+| `pf_pool_take` | function | `include/prefetch.h:145` | `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body, size_t *len, char **ctype);` |
+| `pf_pooled_fetch` | function | `include/prefetch.h:165` | `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int...` |
 | `pf_ref` | struct | `include/prefetch.h:42` | `` |
-| `pf_scan` | function | `include/prefetch.h:59` | `int pf_scan(const char *html, size_t len, pf_list *out);` |
-| `pool` | function | `include/prefetch.h:125` | `* whose URL is pooled is served from the pool (a failed prefetch propagates the * failure -- never refetched);` |
-| `refs` | type_alias | `include/prefetch.h:49` | `typedef struct pf_list { pf_ref refs[PF_MAX_REFS];` |
+| `pf_scan` | function | `include/prefetch.h:62` | `int pf_scan(const char *html, size_t len, pf_list *out);` |
+| `pool` | function | `include/prefetch.h:155` | `* whose URL is pooled is served from the pool (a failed prefetch propagates the * failure -- never refetched);` |
+| `refs` | type_alias | `include/prefetch.h:52` | `typedef struct pf_list { pf_ref refs[PF_MAX_REFS];` |
+| `specifiers` | function | `include/prefetch.h:110` | `* specifiers (each < PF_SPEC_MAX) into out[k] and returns how many. Pure. */ size_t pf_scan_imports(const char *js...` |
+| `started` | function | `include/prefetch.h:121` | `* to fetch or no thread started (the caller fetches serially). */ int pf_pool_start_page(pf_pool *p, const char...` |
 | `FREEDOM_PREFS_H` | macro | `include/prefs.h:2` | `#define FREEDOM_PREFS_H` |
 | `PREFS_MAX_BOOKMARKS` | macro | `include/prefs.h:29` | `#define PREFS_MAX_BOOKMARKS` |
 | `PREFS_MAX_HISTORY` | macro | `include/prefs.h:30` | `#define PREFS_MAX_HISTORY` |
@@ -94,31 +146,31 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `psl_wildcards` | variable | `include/psl_data.h:23` | `extern const char *const psl_wildcards[];` |
 | `psl_wildcards_n` | variable | `include/psl_data.h:24` | `extern const size_t psl_wildcards_n;` |
 | `FREEDOM_RENDER_DOC_H` | macro | `include/render_doc.h:2` | `#define FREEDOM_RENDER_DOC_H` |
-| `IMG_FAIL_OK` | function | `include/render_doc.h:327` | `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);` |
+| `IMG_FAIL_OK` | function | `include/render_doc.h:339` | `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);` |
 | `RD_IMAGE` | function | `include/render_doc.h:59` | `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);` |
-| `decision` | function | `include/render_doc.h:321` | `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...` |
-| `default` | function | `include/render_doc.h:145` | `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...` |
+| `decision` | function | `include/render_doc.h:333` | `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...` |
+| `default` | function | `include/render_doc.h:150` | `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...` |
 | `form` | function | `include/render_doc.h:63` | `* form (-1 = none);` |
 | `img_fail_reason` | enum | `include/render_doc.h:34` | `` |
 | `kind` | type_alias | `include/render_doc.h:64` | `typedef struct rd_block { rd_kind kind;` |
 | `list` | function | `include/render_doc.h:18` | `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...` |
-| `rd_at` | function | `include/render_doc.h:296` | `const rd_block *rd_at(const rd_doc *d, size_t i);` |
+| `rd_at` | function | `include/render_doc.h:308` | `const rd_block *rd_at(const rd_doc *d, size_t i);` |
 | `rd_block` | struct | `include/render_doc.h:64` | `` |
-| `rd_block_tag` | function | `include/render_doc.h:318` | `const char *rd_block_tag(const rd_block *b);` |
-| `rd_box_at` | function | `include/render_doc.h:301` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);` |
-| `rd_box_count` | function | `include/render_doc.h:300` | `size_t rd_box_count(const rd_doc *d);` |
-| `rd_cont_at` | function | `include/render_doc.h:306` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);` |
-| `rd_cont_count` | function | `include/render_doc.h:305` | `size_t rd_cont_count(const rd_doc *d);` |
-| `rd_count` | function | `include/render_doc.h:295` | `size_t rd_count(const rd_doc *d);` |
-| `rd_doc` | struct | `include/render_doc.h:247` | `` |
-| `rd_free` | function | `include/render_doc.h:292` | `void rd_free(rd_doc *d);` |
-| `rd_input_invisible` | function | `include/render_doc.h:337` | `int rd_input_invisible(int input_type);` |
-| `rd_input_label` | function | `include/render_doc.h:332` | `const char *rd_input_label(int input_type);` |
+| `rd_block_tag` | function | `include/render_doc.h:330` | `const char *rd_block_tag(const rd_block *b);` |
+| `rd_box_at` | function | `include/render_doc.h:313` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);` |
+| `rd_box_count` | function | `include/render_doc.h:312` | `size_t rd_box_count(const rd_doc *d);` |
+| `rd_cont_at` | function | `include/render_doc.h:318` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);` |
+| `rd_cont_count` | function | `include/render_doc.h:317` | `size_t rd_cont_count(const rd_doc *d);` |
+| `rd_count` | function | `include/render_doc.h:307` | `size_t rd_count(const rd_doc *d);` |
+| `rd_doc` | struct | `include/render_doc.h:254` | `` |
+| `rd_free` | function | `include/render_doc.h:304` | `void rd_free(rd_doc *d);` |
+| `rd_input_invisible` | function | `include/render_doc.h:349` | `int rd_input_invisible(int input_type);` |
+| `rd_input_label` | function | `include/render_doc.h:344` | `const char *rd_input_label(int input_type);` |
 | `rd_kind` | enum | `include/render_doc.h:42` | `` |
-| `rd_kind_name` | function | `include/render_doc.h:310` | `const char *rd_kind_name(rd_kind k);` |
-| `rd_status` | enum | `include/render_doc.h:273` | `` |
-| `rdp_images_warning` | function | `include/render_doc.h:282` | `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...` |
-| `to` | function | `include/render_doc.h:233` | `* belongs to (-1 = none);` |
+| `rd_kind_name` | function | `include/render_doc.h:322` | `const char *rd_kind_name(rd_kind k);` |
+| `rd_status` | enum | `include/render_doc.h:285` | `` |
+| `rdp_images_warning` | function | `include/render_doc.h:294` | `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...` |
+| `to` | function | `include/render_doc.h:240` | `* belongs to (-1 = none);` |
 | `FREEDOM_RENDER_POLICY_H` | macro | `include/render_policy.h:2` | `#define FREEDOM_RENDER_POLICY_H` |
 | `RDP_TRACKER_MAX_DIM` | macro | `include/render_policy.h:27` | `#define RDP_TRACKER_MAX_DIM` |
 | `images` | type_alias | `include/render_policy.h:32` | `typedef struct rdp_caps { bool images;` |
@@ -202,29 +254,30 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `FREEDOM_TAB_H` | macro | `include/tab.h:2` | `#define FREEDOM_TAB_H` |
 | `TAB_MAX_INPUT` | macro | `include/tab.h:148` | `#define TAB_MAX_INPUT` |
 | `bytes` | function | `include/tab.h:190` | `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....` |
-| `decode` | function | `include/tab.h:338` | `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...` |
+| `decode` | function | `include/tab.h:344` | `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...` |
 | `exclusively` | function | `include/tab.h:222` | `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...` |
-| `granted` | function | `include/tab.h:312` | `* granted (allow.conf AND js.conf);` |
+| `granted` | function | `include/tab.h:318` | `* granted (allow.conf AND js.conf);` |
 | `jar` | function | `include/tab.h:207` | `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...` |
 | `kind` | type_alias | `include/tab.h:67` | `typedef struct tab_ws_op { int kind;` |
 | `origin` | function | `include/tab.h:214` | `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);` |
 | `out_status` | function | `include/tab.h:175` | `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...` |
-| `popstate` | function | `include/tab.h:319` | `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...` |
+| `popstate` | function | `include/tab.h:325` | `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...` |
 | `replace` | type_alias | `include/tab.h:53` | `typedef struct tab_hist_op { int replace;` |
-| `returned` | function | `include/tab.h:313` | `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...` |
-| `string` | function | `include/tab.h:263` | `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...` |
+| `returned` | function | `include/tab.h:319` | `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...` |
+| `string` | function | `include/tab.h:269` | `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...` |
 | `tab` | type_alias | `include/tab.h:45` | `typedef struct tab tab;` |
-| `tab_alive` | function | `include/tab.h:351` | `int tab_alive(const tab *t);` |
-| `tab_child_pid` | function | `include/tab.h:354` | `pid_t tab_child_pid(const tab *t);` |
-| `tab_close` | function | `include/tab.h:357` | `void tab_close(tab *t);` |
+| `tab_alive` | function | `include/tab.h:357` | `int tab_alive(const tab *t);` |
+| `tab_child_pid` | function | `include/tab.h:360` | `pid_t tab_child_pid(const tab *t);` |
+| `tab_close` | function | `include/tab.h:363` | `void tab_close(tab *t);` |
 | `tab_eval_result` | struct | `include/tab.h:127` | `` |
-| `tab_eval_result_free` | function | `include/tab.h:361` | `void tab_eval_result_free(tab_eval_result *r);` |
+| `tab_eval_result_free` | function | `include/tab.h:367` | `void tab_eval_result_free(tab_eval_result *r);` |
 | `tab_hist_op` | struct | `include/tab.h:53` | `` |
 | `tab_image` | struct | `include/tab.h:140` | `` |
-| `tab_image_free` | function | `include/tab.h:362` | `void tab_image_free(tab_image *img);` |
+| `tab_image_free` | function | `include/tab.h:368` | `void tab_image_free(tab_image *img);` |
+| `tab_last_subreq_stats` | function | `include/tab.h:236` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` |
 | `tab_open` | function | `include/tab.h:156` | `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...` |
 | `tab_page` | struct | `include/tab.h:75` | `` |
-| `tab_page_free` | function | `include/tab.h:360` | `void tab_page_free(tab_page *p);` |
+| `tab_page_free` | function | `include/tab.h:366` | `void tab_page_free(tab_page *p);` |
 | `tab_parse_worker_args` | function | `include/tab.h:163` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` |
 | `tab_set_cookies` | function | `include/tab.h:211` | `void tab_set_cookies(tab *t, const char *cookies);` |
 | `tab_set_css_sink` | function | `include/tab.h:199` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);` |
@@ -233,26 +286,34 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `tab_set_storage` | function | `include/tab.h:216` | `void tab_set_storage(tab *t, const char *blob, size_t len);` |
 | `tab_set_viewport_w` | function | `include/tab.h:230` | `void tab_set_viewport_w(tab *t, int px);` |
 | `tab_status` | enum | `include/tab.h:31` | `` |
-| `tab_subreq_permitted` | function | `include/tab.h:235` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
+| `tab_subreq_permitted` | function | `include/tab.h:241` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
 | `tab_worker_dispatch` | function | `include/tab.h:152` | `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...` |
 | `tab_ws_event_kind` | enum | `include/tab.h:64` | `` |
 | `tab_ws_kind` | enum | `include/tab.h:60` | `` |
 | `tab_ws_op` | struct | `include/tab.h:68` | `` |
-| `view` | function | `include/tab.h:243` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
+| `view` | function | `include/tab.h:249` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
 | `width` | type_alias | `include/tab.h:140` | `typedef struct tab_image { uint32_t width;` |
 | `FREEDOM_TEXT_SHAPE_H` | macro | `include/text_shape.h:19` | `#define FREEDOM_TEXT_SHAPE_H` |
-| `TSH_MAX_GLYPHS` | macro | `include/text_shape.h:40` | `#define TSH_MAX_GLYPHS` |
-| `TSH_MAX_TEXT` | macro | `include/text_shape.h:41` | `#define TSH_MAX_TEXT` |
+| `TSH_FAMILY_MAX` | macro | `include/text_shape.h:48` | `#define TSH_FAMILY_MAX` |
+| `TSH_LOCAL_FAMILIES` | macro | `include/text_shape.h:47` | `#define TSH_LOCAL_FAMILIES` |
+| `TSH_LOCAL_LISTS` | macro | `include/text_shape.h:46` | `#define TSH_LOCAL_LISTS` |
+| `TSH_MAX_GLYPHS` | macro | `include/text_shape.h:77` | `#define TSH_MAX_GLYPHS` |
+| `TSH_MAX_TEXT` | macro | `include/text_shape.h:78` | `#define TSH_MAX_TEXT` |
 | `content` | function | `include/text_shape.h:11` | `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);` |
 | `family` | type_alias | `include/text_shape.h:33` | `typedef struct tsh_font { int family;` |
-| `origin` | function | `include/text_shape.h:55` | `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...` |
+| `origin` | function | `include/text_shape.h:92` | `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...` |
+| `tsh_face` | function | `include/text_shape.h:127` | `cairo_font_face_t *tsh_face(const tsh_font *f);` |
+| `tsh_family_is_generic` | function | `include/text_shape.h:52` | `int tsh_family_is_generic(const char *name);` |
 | `tsh_font` | struct | `include/text_shape.h:33` | `` |
-| `tsh_measure` | function | `include/text_shape.h:64` | `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);` |
-| `tsh_ready` | function | `include/text_shape.h:52` | `int tsh_ready(void);` |
-| `tsh_shutdown` | function | `include/text_shape.h:86` | `void tsh_shutdown(void);` |
-| `tsh_status` | enum | `include/text_shape.h:43` | `` |
-| `tsh_webfont_clear` | function | `include/text_shape.h:83` | `void tsh_webfont_clear(void);` |
-| `tsh_webfont_register` | function | `include/text_shape.h:77` | `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);` |
+| `tsh_local_handle` | function | `include/text_shape.h:75` | `int tsh_local_handle(const char *list);` |
+| `tsh_measure` | function | `include/text_shape.h:101` | `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);` |
+| `tsh_pick_family` | function | `include/text_shape.h:68` | `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...` |
+| `tsh_ready` | function | `include/text_shape.h:89` | `int tsh_ready(void);` |
+| `tsh_shutdown` | function | `include/text_shape.h:130` | `void tsh_shutdown(void);` |
+| `tsh_status` | enum | `include/text_shape.h:80` | `` |
+| `tsh_webfont_clear` | function | `include/text_shape.h:120` | `void tsh_webfont_clear(void);` |
+| `tsh_webfont_register` | function | `include/text_shape.h:114` | `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);` |
+| `wins` | function | `include/text_shape.h:58` | `* the first name the resolver accepts wins (returns 1, family in out). Pure: the * resolver is injected (fontconfig...` |
 | `FREEDOM_TEXTFIELD_H` | macro | `include/textfield.h:2` | `#define FREEDOM_TEXTFIELD_H` |
 | `TF_CAP` | macro | `include/textfield.h:23` | `#define TF_CAP` |
 | `buf` | type_alias | `include/textfield.h:24` | `typedef struct tf_field { char buf[TF_CAP];` |
@@ -422,79 +483,18 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `bf_collapse_n` | function | `src/block_flow.c:15` | `double bf_collapse_n(const double *m, size_t n)` |
 | `bf_margins_adjoin` | function | `src/block_flow.c:35` | `int bf_margins_adjoin(double border_px, double padding_px)` |
 | `finite_or_zero` | function | `src/block_flow.c:11` | `static double finite_or_zero(double v)` |
-| `BLOCK` | macro | `src/box_style.c:65` | `#define BLOCK` |
-| `BX_DISPLAY_MAX` | macro | `src/box_style.c:23` | `#define BX_DISPLAY_MAX` |
-| `BX_TAG_MAX` | macro | `src/box_style.c:22` | `#define BX_TAG_MAX` |
-| `DISP_N` | macro | `src/box_style.c:257` | `#define DISP_N` |
-| `EDG` | macro | `src/box_style.c:70` | `#define EDG(t, r, b, l)` |
-| `IBLOCK` | macro | `src/box_style.c:67` | `#define IBLOCK` |
-| `INLINE` | macro | `src/box_style.c:66` | `#define INLINE` |
-| `LITEM` | macro | `src/box_style.c:68` | `#define LITEM` |
-| `NONE` | macro | `src/box_style.c:69` | `#define NONE` |
-| `TAG_N` | macro | `src/box_style.c:159` | `#define TAG_N` |
-| `T_CAP` | macro | `src/box_style.c:78` | `#define T_CAP` |
-| `T_CELL` | macro | `src/box_style.c:77` | `#define T_CELL` |
-| `T_COL` | macro | `src/box_style.c:79` | `#define T_COL` |
-| `T_GRP` | macro | `src/box_style.c:75` | `#define T_GRP` |
-| `T_NO` | macro | `src/box_style.c:73` | `#define T_NO` |
-| `T_ROW` | macro | `src/box_style.c:76` | `#define T_ROW` |
-| `T_TBL` | macro | `src/box_style.c:74` | `#define T_TBL` |
-| `ZERO` | macro | `src/box_style.c:71` | `#define ZERO` |
-| `bg_size_component` | function | `src/box_style.c:375` | `static double bg_size_component(int px_val, int pct_pm, double area)` |
-| `bx_background_layer` | function | `src/box_style.c:382` | `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h,                     ...` |
-| `bx_block_ua_box` | function | `src/box_style.c:223` | `bx_box bx_block_ua_box(int heading_level, int in_list, bx_ua_tag ua)` |
-| `bx_border_box_h` | function | `src/box_style.c:333` | `double bx_border_box_h(double declared_h, int border_box,                        double pad_t, do...` |
-| `bx_content_cap` | function | `src/box_style.c:361` | `double bx_content_cap(double width_cap, int border_box,                       double pad_l, doubl...` |
-| `bx_content_clipped` | function | `src/box_style.c:344` | `int bx_content_clipped(int overflow_x, int overflow_y)` |
-| `bx_default_for_tag` | function | `src/box_style.c:161` | `bx_box bx_default_for_tag(const char *tag)` |
-| `bx_default_for_ua` | function | `src/box_style.c:217` | `bx_box bx_default_for_ua(bx_ua_tag id)` |
-| `bx_display_name` | function | `src/box_style.c:421` | `const char *bx_display_name(bx_display d)` |
-| `bx_lp_px` | function | `src/box_style.c:350` | `double bx_lp_px(int px_val, int pct_pm, double basis)` |
-| `bx_parse_display` | function | `src/box_style.c:259` | `bx_status bx_parse_display(const char *token, bx_display *out)` |
-| `bx_place` | function | `src/box_style.c:269` | `bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,                 ...` |
-| `bx_replaced_box` | function | `src/box_style.c:319` | `int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den,                     doub...` |
-| `bx_table_role_of` | function | `src/box_style.c:169` | `bx_table_role bx_table_role_of(const char *tag, css_display display)` |
-| `bx_ua_of_tag` | function | `src/box_style.c:208` | `bx_ua_tag bx_ua_of_tag(const char *tag)` |
-| `bx_width_cap` | function | `src/box_style.c:286` | `double bx_width_cap(int w_px, int w_pct, double avail_w)` |
-| `bx_width_cap2` | function | `src/box_style.c:311` | `double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w)` |
-| `copy_lower_trim` | function | `src/box_style.c:35` | `static int copy_lower_trim(const char *in, char *out, size_t out_size)` |
-| `disp_row` | struct | `src/box_style.c:239` | `` |
-| `is_ws` | function | `src/box_style.c:29` | `static int is_ws(char c)` |
-| `name_cmp` | function | `src/box_style.c:48` | `static int name_cmp(const void *key, const void *elem)` |
-| `tag_row` | struct | `src/box_style.c:59` | `` |
-| `take` | function | `src/box_style.c:293` | `* caller has to take (Sizing 3 section 5.1), so to a resolver that only sums a * px and a percentage half they read...` |
-| `BT_LEN_AUTO` | macro | `src/box_tree.c:31` | `#define BT_LEN_AUTO` |
-| `BT_WRAP_EPS` | macro | `src/box_tree.c:62` | `#define BT_WRAP_EPS` |
-| `assign_doc_order` | function | `src/box_tree.c:412` | `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,                   ...` |
-| `block` | function | `src/box_tree.c:473` | `* true block (same flow neighbourhood), strictly better than zeros. NULL      * placed keeps lega...` |
-| `bt_box_hidden` | function | `src/box_tree.c:683` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)` |
-| `bt_containing_block` | function | `src/box_tree.c:462` | `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,                         ...` |
-| `bt_layout` | function | `src/box_tree.c:372` | `bt_status bt_layout(bt_node *root, double avail_w)` |
-| `bt_nn` | function | `src/box_tree.c:58` | `static double bt_nn(double v)` |
-| `bt_oof_anchor` | function | `src/box_tree.c:675` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)` |
-| `bt_oof_avail` | function | `src/box_tree.c:696` | `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)` |
-| `bt_oof_root` | function | `src/box_tree.c:679` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)` |
-| `bt_resolve_positioning` | function | `src/box_tree.c:492` | `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,                           ...` |
-| `bt_resolve_positioning_ex` | function | `src/box_tree.c:503` | `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,                        ...` |
-| `find_positioned_ancestor` | function | `src/box_tree.c:429` | `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,                        ...` |
-| `inset_unset` | function | `src/box_tree.c:458` | `static int inset_unset(int v, int pct_pm)` |
-| `layout_block` | function | `src/box_tree.c:37` | `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,                    ...` |
-| `layout_flex` | function | `src/box_tree.c:97` | `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,                     ...` |
-| `layout_grid` | function | `src/box_tree.c:220` | `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,                     ...` |
-| `layout_node` | function | `src/box_tree.c:327` | `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)` |
-| `oof_walk` | function | `src/box_tree.c:658` | `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` |
-| `resolve_inset` | function | `src/box_tree.c:449` | `static double resolve_inset(int v, int pct_pm, double basis)` |
-| `wrap_reverse` | function | `src/box_tree.c:79` | `*  * wrap_reverse (node->wrap_reverse): when node->wrap is active and node->wrap_reverse  * is no...` |
-| `_POSIX_C_SOURCE` | macro | `src/browser.c:7` | `#define _POSIX_C_SOURCE` |
-| `browser_add_exception` | function | `src/browser.c:472` | `browser_status browser_add_exception(browser_state *bs, const char *host)` |
-| `browser_back` | function | `src/browser.c:268` | `browser_status browser_back(browser_state *bs)` |
-| `browser_can_back` | function | `src/browser.c:292` | `int browser_can_back(const browser_state *bs)` |
-| `browser_can_forward` | function | `src/browser.c:296` | `int browser_can_forward(const browser_state *bs)` |
-| `browser_commit_url_bar` | function | `src/browser.c:190` | `browser_status browser_commit_url_bar(browser_state *bs)` |
-| `browser_current_url` | function | `src/browser.c:300` | `const char *browser_current_url(const browser_state *bs)` |
-| `browser_doc_index` | function | `src/browser.c:260` | `int browser_doc_index(const browser_state *bs)` |
-| `browser_entry_doc` | function | `src/browser.c:255` | `int browser_entry_doc(const browser_state *bs, size_t pos)` |
-| `browser_forward` | function | `src/browser.c:280` | `browser_status browser_forward(browser_state *bs)` |
-| `browser_free` | function | `src/browser.c:167` | `void browser_free(browser_state *bs)` |
+| `BLOCK` | macro | `src/box_style.c:67` | `#define BLOCK` |
+| `BX_DISPLAY_MAX` | macro | `src/box_style.c:25` | `#define BX_DISPLAY_MAX` |
+| `BX_TAG_MAX` | macro | `src/box_style.c:24` | `#define BX_TAG_MAX` |
+| `DISP_N` | macro | `src/box_style.c:259` | `#define DISP_N` |
+| `EDG` | macro | `src/box_style.c:72` | `#define EDG(t, r, b, l)` |
+| `IBLOCK` | macro | `src/box_style.c:69` | `#define IBLOCK` |
+| `INLINE` | macro | `src/box_style.c:68` | `#define INLINE` |
+| `LITEM` | macro | `src/box_style.c:70` | `#define LITEM` |
+| `NONE` | macro | `src/box_style.c:71` | `#define NONE` |
+| `TAG_N` | macro | `src/box_style.c:161` | `#define TAG_N` |
+| `T_CAP` | macro | `src/box_style.c:80` | `#define T_CAP` |
+| `T_CELL` | macro | `src/box_style.c:79` | `#define T_CELL` |
+| `T_COL` | macro | `src/box_style.c:81` | `#define T_COL` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

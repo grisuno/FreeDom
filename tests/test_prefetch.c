@@ -152,7 +152,13 @@ static int fake_fetch(void *vctx, const char *method, const char *url,
 
 static void test_pool_parallel_fetch_and_take(void **state) {
     (void)state;
-    const char *urls[PF_MAX_THREADS] = { "a.css", "b.css", "c.css", "d.css" };
+    /* One URL per thread, however many threads the pool runs. */
+    char names[PF_MAX_THREADS][16];
+    const char *urls[PF_MAX_THREADS];
+    for (int k = 0; k < PF_MAX_THREADS; ++k) {
+        snprintf(names[k], sizeof names[k], "%c.css", 'a' + k);
+        urls[k] = names[k];
+    }
     fake_ctx c;
     memset(&c, 0, sizeof c);
     pthread_mutex_init(&c.lock, NULL);
@@ -286,6 +292,106 @@ static void test_pooled_fetch_adapter(void **state) {
     pthread_mutex_destroy(&c.lock);
 }
 
+
+/* --- ES module graph (spec/prefetch.md section 8) ----------------------- */
+
+static void test_scan_imports_static_only(void **state) {
+    (void)state;
+    char out[8][PF_SPEC_MAX];
+    const char *js = "import{a}from\"./a.js\";export*from'../b.mjs';"
+                     "import \"https://x.example/c.js\";\n"
+                     "import x from \"react\";const l=import(\"./lazy.js\");"
+                     "// import \"./no1.js\"\n/* import \"./no2.js\" */"
+                     "import def, {b as c} from \"/abs/d.js\"";
+    size_t n = pf_scan_imports(js, strlen(js), out, 8);
+    /* Bare specifiers are returned too: the pool resolves them through the
+     * page's import map (or drops them when there is none). */
+    assert_int_equal(n, 5);
+    assert_string_equal(out[0], "./a.js");
+    assert_string_equal(out[1], "../b.mjs");
+    assert_string_equal(out[2], "https://x.example/c.js");
+    assert_string_equal(out[3], "react");
+    assert_string_equal(out[4], "/abs/d.js");
+    assert_int_equal(pf_scan_imports(NULL, 3, out, 8), 0);
+    assert_int_equal(pf_scan_imports("import \"./x.js\"", 16, out, 0), 0);
+}
+
+/* A fake fetcher serving a two-module graph: a.js imports ./b.js. */
+static int graph_fetch(void *ctx, const char *method, const char *url,
+                       const char *body, size_t body_len,
+                       int *out_status, char **out_body, size_t *out_len,
+                       char **out_ctype) {
+    (void)ctx; (void)method; (void)body; (void)body_len;
+    const char *src = strstr(url, "/a.js") ? "import\"./b.js\";" : "export const b=1;";
+    *out_status = 200;
+    *out_body = strdup(src);
+    *out_len = strlen(src);
+    *out_ctype = strdup("text/javascript");
+    return 0;
+}
+
+static int bare_fetch(void *ctx, const char *method, const char *url,
+                      const char *body, size_t body_len,
+                      int *out_status, char **out_body, size_t *out_len,
+                      char **out_ctype) {
+    (void)ctx; (void)method; (void)body; (void)body_len;
+    const char *src = strstr(url, "/a2.js") ? "import{x}from\"lib\";" : "export const x=1;";
+    *out_status = 200;
+    *out_body = strdup(src);
+    *out_len = strlen(src);
+    *out_ctype = strdup("text/javascript");
+    return 0;
+}
+
+static void test_pool_follows_module_graph(void **state) {
+    (void)state;
+    pf_pool p;
+    const char *urls[] = { "https://h.example/js/a.js" };
+    assert_int_equal(pf_pool_start(&p, urls, 1, graph_fetch, NULL), 0);
+    int rc = -1, st = 0;
+    char *b = NULL, *ct = NULL;
+    size_t l = 0;
+    assert_int_equal(pf_pool_take(&p, "https://h.example/js/a.js", &rc, &st, &b, &l, &ct), 1);
+    free(b); free(ct);
+    /* b.js was queued by the pool thread that fetched a.js. */
+    assert_int_equal(pf_pool_take(&p, "https://h.example/js/b.js", &rc, &st, &b, &l, &ct), 1);
+    assert_int_equal(rc, 0);
+    assert_string_equal(b, "export const b=1;");
+    free(b); free(ct);
+    assert_int_equal(pf_pool_add(&p, "https://h.example/js/a.js"), 0);   /* dedupe */
+    pf_pool_finish(&p);
+}
+
+
+static void test_find_importmap(void **state) {
+    (void)state;
+    const char *h = "<html><script src=a.js></script><SCRIPT type=\"importmap\">"
+                    "{\"imports\":{\"react\":\"/r.js\"}}</script></html>";
+    size_t st = 0, n = 0;
+    assert_int_equal(pf_find_importmap(h, strlen(h), &st, &n), 1);
+    assert_int_equal(n, strlen("{\"imports\":{\"react\":\"/r.js\"}}"));
+    assert_int_equal(memcmp(h + st, "{\"imports\"", 10), 0);
+    assert_int_equal(pf_find_importmap("<script>x</script>", 18, &st, &n), 0);
+}
+
+/* A bare specifier resolves through the page's import map. */
+static void test_pool_start_page_import_map(void **state) {
+    (void)state;
+    const char *h = "<html><script type=importmap>{\"imports\":{\"lib\":\"/js/b.js\"}}"
+                    "</script><script type=module src=\"/js/a2.js\"></script></html>";
+    pf_pool p;
+    assert_int_equal(pf_pool_start_page(&p, h, strlen(h), "https://h.example/page", 0, 1,
+                                        bare_fetch, NULL), 0);
+    int rc = -1, st = 0;
+    char *b = NULL, *ct = NULL;
+    size_t l = 0;
+    assert_int_equal(pf_pool_take(&p, "https://h.example/js/a2.js", &rc, &st, &b, &l, &ct), 1);
+    free(b); free(ct);
+    assert_int_equal(pf_pool_take(&p, "https://h.example/js/b.js", &rc, &st, &b, &l, &ct), 1);
+    free(b); free(ct);
+    pf_pool_finish(&p);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_scan_null_args),
@@ -298,6 +404,10 @@ int main(void) {
         cmocka_unit_test(test_pool_miss_consume_and_failure),
         cmocka_unit_test(test_pool_finish_unconsumed_and_empty),
         cmocka_unit_test(test_pooled_fetch_adapter),
+        cmocka_unit_test(test_scan_imports_static_only),
+        cmocka_unit_test(test_pool_follows_module_graph),
+        cmocka_unit_test(test_find_importmap),
+        cmocka_unit_test(test_pool_start_page_import_map),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -14,6 +14,7 @@
  */
 
 #include "css.h"
+#include "flex_layout.h"
 #include "css_select.h"
 
 #include <stdint.h>
@@ -21,9 +22,11 @@
 #include <string.h>
 
 static void check_style(css_style s) {
-    /* Resolved colors are either unset (-1) or a packed 0xRRGGBB. */
-    if (s.color != -1 && (s.color < 0 || s.color > 0xffffff)) abort();
-    if (s.background != -1 && (s.background < 0 || s.background > 0xffffff)) abort();
+    /* Resolved colors are unset (-1), one of the value sentinels currentColor (-2)
+     * / transparent (-3) -- `color:inherit` IS currentColor for `color`, and
+     * page_view inherits on it -- or a packed 0xRRGGBB. */
+    if (s.color < -3 || s.color > 0xffffff) abort();
+    if (s.background < -3 || s.background > 0xffffff) abort();
     /* font_scale is unset (0) or within the clamp the interpreter enforces. */
     if (s.font_scale != 0 && (s.font_scale < 10 || s.font_scale > 1000)) abort();
 
@@ -47,8 +50,15 @@ static void check_style(css_style s) {
         (s.flex_basis < 0 || s.flex_basis > CSS_LEN_MAX)) abort();
     if (s.z_index != CSS_LEN_UNSET && (s.z_index < -CSS_LEN_MAX || s.z_index > CSS_LEN_MAX)) abort();
     if (s.order != CSS_LEN_UNSET && (s.order < -CSS_LEN_MAX || s.order > CSS_LEN_MAX)) abort();
-    if (s.grid_col_span != 0 && (s.grid_col_span < 1 || s.grid_col_span > CSS_GRID_SPAN_MAX)) abort();
-    if (s.grid_row_span != 0 && (s.grid_row_span < 1 || s.grid_row_span > CSS_GRID_SPAN_MAX)) abort();
+    {   /* every placement side decodes: auto, a bounded line, or a bounded span */
+        const int gl[4] = { s.grid_col_start, s.grid_col_end, s.grid_row_start, s.grid_row_end };
+        for (int k = 0; k < 4; ++k) {
+            int v = gl[k];
+            if (v > FX_GL_SPAN_BASE) { if (v - FX_GL_SPAN_BASE > FX_GL_SPAN_MAX) abort(); }
+            else if (v < -FX_GL_LINE_MAX || (v > FX_GL_LINE_MAX && v != FX_GL_SPAN_BASE)) abort();
+            else if (v == FX_GL_SPAN_BASE) abort();
+        }
+    }
     if (s.row_gap != -1 && (s.row_gap < 0 || s.row_gap > CSS_GAP_MAX)) abort();
     if (s.float_side < CSS_FLOAT_UNSET || s.float_side > CSS_FLOAT_RIGHT) abort();
     if (s.clear < CSS_CLEAR_UNSET || s.clear > CSS_CLEAR_BOTH) abort();
@@ -132,6 +142,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     if (css_parse_media(sheet_text, 0, &media, &sm) == CSS_OK) {
         check_style(css_resolve(sm, "p", NULL, NULL, 0, NULL, 0));
         check_style(css_resolve(sm, "body", NULL, NULL, 0, NULL, 0));
+        /* the inline text rides the sheet's unit rewrite (len_rebase) */
+        check_style(css_resolve(sm, "a", "main", NULL, 0, inl, 0));
         css_free(sm);
     }
 

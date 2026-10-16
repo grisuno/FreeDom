@@ -79,7 +79,11 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
        P_FLEX_GROW, P_FLEX_SHRINK, P_FLEX_BASIS,
        P_ORDER, P_ALIGN_ITEMS, P_ALIGN_SELF, P_ALIGN_CONTENT, P_JUSTIFY_ITEMS,
        P_FLEX_DIR, P_FLEX_WRAP,
-       P_GRID_ROWS, P_ROW_GAP, P_GRID_FLOW, P_GRID_COL_SPAN, P_GRID_ROW_SPAN,
+       P_GRID_ROWS, P_ROW_GAP, P_GRID_FLOW,
+       /* grid-{column,row}-{start,end} (spec/grid_areas.md section 6): one encoded
+        * placement SIDE each (flex_layout.h FX_GL_*). The shorthands write BOTH
+        * sides of their axis so a later `span 2` clears an earlier end line. */
+       P_GRID_COL_START, P_GRID_COL_END, P_GRID_ROW_START, P_GRID_ROW_END,
        P_FLOAT, P_CLEAR,
         P_VISIBILITY, P_OVERFLOW_X, P_OVERFLOW_Y, P_CURSOR,
         P_TEXT_OVERFLOW, P_WORD_BREAK,
@@ -138,6 +142,10 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
         /* SVG `fill` presentation property: colours inline-<svg> shapes without
          * their own fill (the .social svg{fill:#fff} icon-tint pattern). */
         P_SVG_FILL,
+        /* SVG `stroke` / `stroke-width` (tanda 43): line icons are painted by them. */
+        P_SVG_STROKE, P_SVG_STROKE_W,
+        /* text-wrap(-style): balance (CSS Text 4 6.4.2, tanda 43). */
+        P_TEXT_BALANCE,
         /* backdrop-filter: blur(Npx) (2026-07-19, glassmorphism v1). */
         P_BACKDROP_BLUR,
         /* Background alpha percent from rgba()/hsla() (2026-07-19). */

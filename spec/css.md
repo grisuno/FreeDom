@@ -983,6 +983,25 @@ pixel-perfect geometry. `font-size` in viewport units (responsive typography,
 e.g. `font-size:4vw`) converts through the same normalized pixels into the
 percent-of-base channel.
 
+**Enmienda 2026-10-15 (decisión del dueño): el eje de ANCHO va contra el ancho de
+render.** Desde la tanda 12 `@media (min/max-width)` ya se evalúa contra el ancho
+REAL de render, así que una hoja ya podía conocerlo por CSS: resolver `vw` contra
+1920 no ocultaba nada y sí rompía la geometría (ipinfo.io: un slider
+`width:calc(100vw * 4)` medía 7680 px en una página pintada a 1000; todo "full-bleed"
+`margin-left:calc(50% - 50vw)` desbordaba). Ahora `vw`/`vi` (y sus variantes
+`s`/`l`/`d`) valen el ancho de render / 100, y `vmin`/`vmax` toman el menor/mayor
+de ese ancho y la altura normalizada. **`vh`/`vb` siguen contra 1080**, igual que el
+`@media` de altura. Mecanismo: `len_rebase` reescribe el TEXTO de la hoja una vez
+antes de parsear (el mismo choke point que el rebase de `rem`), así que shorthands,
+`calc()` y valores de custom properties lo reciben sin hilar un contexto por los
+emisores; solo toca VALORES de declaración (nunca preludios de at-rule, selectores
+como `.w-100vw`, strings ni `url()`). La hoja recuerda las escalas usadas
+(`rw_rem_px`/`rw_vw_px`/`rw_vh_px`) y el `style=""` inline del elemento recibe la
+misma reescritura — antes ni siquiera recibía el rebase de `rem`. Con el ancho por
+defecto (1920, p. ej. `css_parse` sin contexto) no se reescribe nada: byte-idéntico.
+Dado `css_media.width_px = 1000` cuando se parsea `.a{width:100vw;height:10vh}`
+entonces `width` = 1000 y `height` = 108 (`test_vw_resolves_against_render_width`).
+
 **Gradient text, conic-gradient, drop-shadow (2026-07-19).** Three
 presentation features closing the highest-visual-impact gaps against modern
 browsers. All fail closed, none can fetch (no URL anywhere in the accepted
@@ -1134,6 +1153,21 @@ Lo que se cerró, cada uno con su regla citable:
   desactualizaría. La declaración **reclama su slot de cascada y no escribe**: dejar
   el campo en su valor sin-poner es lo que le da su significado (la fusión con el
   ancestro rellena una propiedad heredada; una no heredada se queda en su inicial).
+  **Corrección 2026-10-15:** reclamar no basta cuando un PERDEDOR ganó el slot
+  antes y ya escribió el campo (la cascada aplica en orden de documento): el
+  `column` de `.flex.on-phone--column` sobrevivía al `flex-direction:unset` de su
+  `@media`, y la barra lateral de Hugo Stack se apilaba sobre los posts. Si una
+  palabra CSS-wide gana un slot que ya tenía ganador, `apply_decl` lo marca
+  (`CSS_WIDE_RESET`) y `resolve_core` re-ejecuta la pasada UNA vez desde el estilo
+  inicial con esos slots pre-reclamados a la precedencia de la palabra: el perdedor
+  ya no escribe y la palabra (misma precedencia, `ord >=`) vuelve a ganar sin
+  escribir. Sin marca, una sola pasada (sin costo). Límite conocido: dos
+  declaraciones del mismo slot en la MISMA regla comparten `ord`.
+- **Nombres de línea en una lista de pistas** (`[callout] 1fr [sidebar] 250px`,
+  CSS Grid 1 §7.2): un `[...]` (que puede contener espacios) es un conjunto de
+  nombres ENTRE pistas, nunca una pista. Se contaba como pista y duplicaba las
+  columnas de toda plantilla con nombres (animate.style: 4 columnas en vez de 2, la
+  barra de 250 px en el medio de la página). `[` sin cerrar ⇒ valor inválido.
   Descartarla le regalaba el slot a una regla de MENOR especificidad, así que
   `a{color:#333} a.x{color:inherit}` pintaba `#333`.
 - **`transparent` y `currentColor` son VALORES, no fallos.** Los centinelas son
@@ -2007,3 +2041,27 @@ como `unknown` también; aceptarlas sería inventar), y `-ms-flex-direction`/
 - **Dado** `-ms-flex-preferred-size: 0`, **entonces** `flex-basis == 0`.
 - **Dado** `ms-box-sizing: border-box` (typo sin guion del autor), **entonces** se
   descarta (candado: Firefox tampoco la conoce).
+
+## Tanda 43 (2026-10-16) — valores que se descartaban y familias por nombre
+
+- **`font-size` con `calc()`/`min()`/`max()`/`clamp()`** (CSS Values 4 §10): un
+  resultado puramente absoluto (px/rem/vw…) es un tamaño absoluto; uno puramente
+  relativo a la fuente (em/%) es un múltiplo del heredado; una mezcla de ambos no es
+  representable por el par (escala, absoluto) y se descarta (fail-closed). Bootstrap 5
+  escribe sus titulares `calc(1.375rem + 1.5vw)`. Un único evaluador
+  (`math_eval_whole`) sirve a `font-size` y a las longitudes.
+- **`filter`**: una declaración es dueña de TODOS sus slots (Filter Effects 1 §5): lo
+  que la lista no nombra vuelve a su valor inicial, así que `filter:none` RESETEA un
+  filtro de una regla anterior; las palabras CSS-wide reclaman todos los slots; una
+  función sin argumento toma su default (`grayscale()` = 1, `blur()` = 0).
+- **`<angle>` cero sin unidad** en funciones de `transform` (CSS Transforms 1:
+  `[ <angle> | <zero> ]`): `rotate(0)`.
+- **Bordes lógicos** (CSS Logical 1 §6): `border-{block,inline}[-{start,end}][-{width,
+  style,color}]` se RENOMBRAN al lado físico (horizontal-tb LTR, como los márgenes
+  lógicos) y se preguntan de nuevo una vez; `border-block`/`border-inline` escriben
+  los dos lados, sus longhands aceptan `inicio [fin]`.
+- **`::placeholder`** (y `::-webkit-input-placeholder`/`::-moz-placeholder`): sus
+  reglas nunca estilan el control; `css_resolve_pseudo(…, CSS_PSEUDO_PLACEHOLDER)` las
+  resuelve. `page_view` lo baja a `pv_run.ph_color` (tema / oculto / color).
+- **`css_style.font_list`**: la lista `font-family` normalizada viaja hasta el pintor
+  (`spec/text_shape.md` §7).

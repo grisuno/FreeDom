@@ -2,16 +2,16 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 262 files at commit `a97699dc3a85`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 265 files at commit `580bb5dea7b9`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of LazyOwn Redteam Framework comes a free and open-source minimal web (`README.md:6`)
-- Domain vocabulary (term, files): `null` (136), `one` (110), `max` (108), `not` (103), `include` (103), `size` (100), `out` (98), `free` (95), `freedom` (91), `char` (85), `const` (83), `css` (81), `text` (79), `url` (79), `static` (79)
+- Domain vocabulary (term, files): `null` (138), `one` (111), `max` (109), `size` (106), `include` (105), `not` (104), `out` (99), `free` (98), `freedom` (92), `char` (88), `const` (87), `css` (84), `static` (82), `text` (79), `url` (79)
 - Subsystem `src`: 59 files, core `src/tab.c`: write_field: Writes one length-prefixed string field (the write mirror of read_field): a size_t...
-- Subsystem `include: browser_ui`: 47 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
-- Subsystem `include: css`: 40 files, core `src/css.c`: css_match: if (!(inherited_px > 0.0)) inherited_px = CL_INITIAL_FONT_SIZE; if (o->font_scale ==...
-- Subsystem `include: page_view`: 31 files, core `src/page_view.c`: pv_cont_info: Nearest-container info attached to a run, plus the flex per-item values (Stage 3)...
+- Subsystem `include: browser_ui`: 51 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
+- Subsystem `include: css`: 44 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
+- Subsystem `include: page_view`: 30 files, core `src/page_view.c`: pv_cont_info: Nearest-container info attached to a run, plus the flex per-item values (Stage 3)...
 - Subsystem `include: text_shape`: 20 files, core `src/text_shape.c`: web_magic_ok: True for font programs FreeType parses without new decoders: wOFF/TrueType/...
 - Subsystem `include: local_store`: 16 files, core `src/local_store.c`
 - Subsystem `gui`: 15 files, core `src/svg_render.c`: svg_render — inline <svg> markup -> a bounded list of geometric shapes.
@@ -60,7 +60,7 @@ Declared:
 
 Measured baseline:
 - Security findings at medium or above: 0 (see `readmenator-agent/SECURITY.md`); do not add new ones.
-- Dependency cycles: 1; layer violations: 20 (see `readmenator-agent/GOTCHAS.md`).
+- Dependency cycles: 1; layer violations: 21 (see `readmenator-agent/GOTCHAS.md`).
 
 ## 4. Style norms
 
@@ -68,11 +68,11 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 173 files, 4958 symbols; docstrings on 27% of symbols; functions snake_case (99%); types PascalCase (0%); median file 238 lines, max 16472.
-- h: 79 files, 1271 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 81 lines, max 1164.
-- py: 5 files, 31 symbols; docstrings on 23% of symbols; functions snake_case (100%); median file 170 lines, max 328.
+- c: 175 files, 5111 symbols; docstrings on 27% of symbols; functions snake_case (99%); types PascalCase (0%); median file 237 lines, max 16871.
+- h: 80 files, 1315 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 81 lines, max 1183.
+- py: 5 files, 31 symbols; docstrings on 23% of symbols; functions snake_case (100%); median file 170 lines, max 341.
 - sh: 5 files, 0 symbols; median file 11 lines, max 91.
-- Tests: 69 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
+- Tests: 70 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
 
 ## 5. Minimum deliverables
 
@@ -81,7 +81,7 @@ Declared:
 
 Measured baseline:
 - Tests pass: `python -m pytest -q`.
-- Docstring coverage stays at or above 29%.
+- Docstring coverage stays at or above 30%.
 - No new security findings at medium or above (current: 0).
 - No new dependency cycles (current: 1).
 - Files stay under 300 lines where possible (`readmenator . lint`).
@@ -89,7 +89,7 @@ Measured baseline:
 
 ## 6. Risks to respect
 
-- God nodes (changes ripple widely): `gui/browser_ui.c`, `include/css.h`, `src/tab.c`, `src/freedom.c`, `src/css.c`
+- God nodes (changes ripple widely): `gui/browser_ui.c`, `include/css.h`, `src/tab.c`, `src/css.c`, `src/freedom.c`
 - Hotspots (complex and central): `gui/browser_ui.c`, `src/tab.c`, `src/css.c`, `src/page_view.c`, `tests/test_css.c`
 - Cycle: `include/js_dom.h` -> `include/js_location.h` -> `include/js_dom.h`
 - Full blast radius: `readmenator-agent/GOTCHAS.md`; findings: `readmenator-agent/SECURITY.md`.

@@ -95,9 +95,16 @@ static unsigned char *read_font_file(const char *path, long *out_n) {
     return b;
 }
 
-static int load_entry(tsh_entry *e, int family, int bold, int italic) {
-    FcPattern *pat = FcNameParse((const FcChar8 *)generic_name(family));
+/* Loads the face fontconfig matches for family name fam (a generic keyword or
+ * an exact local family). FcPatternAddString, not FcNameParse: a family name may
+ * hold characters ('-', ':') that the pattern syntax treats specially. */
+static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic) {
+    FcPattern *pat = FcPatternCreate();
     if (pat == NULL) return 0;
+    if (!FcPatternAddString(pat, FC_FAMILY, (const FcChar8 *)fam)) {
+        FcPatternDestroy(pat);
+        return 0;
+    }
     FcPatternAddInteger(pat, FC_WEIGHT, bold ? FC_WEIGHT_BOLD : FC_WEIGHT_NORMAL);
     FcPatternAddInteger(pat, FC_SLANT, italic ? FC_SLANT_ITALIC : FC_SLANT_ROMAN);
     FcConfigSubstitute(NULL, pat, FcMatchPattern);
@@ -148,6 +155,10 @@ static int load_entry(tsh_entry *e, int family, int bold, int italic) {
     e->bytes = bytes; e->nbytes = nbytes; e->ftface = ft; e->cface = cf;
     e->blob = blob; e->hbface = hf; e->hbfont = hfont;
     return 1;
+}
+
+static int load_entry(tsh_entry *e, int family, int bold, int italic) {
+    return load_entry_named(e, generic_name(family), bold, italic);
 }
 
 static tsh_entry *get_entry(int family, int bold, int italic) {
@@ -295,6 +306,187 @@ static tsh_entry *web_find(unsigned h, int bold, int italic) {
     return NULL;
 }
 
+static void entry_free(tsh_entry *e) {
+    if (e->loaded != 1) { memset(e, 0, sizeof *e); return; }
+    if (e->hbfont != NULL) hb_font_destroy(e->hbfont);
+    if (e->hbface != NULL) hb_face_destroy(e->hbface);
+    if (e->blob != NULL) hb_blob_destroy(e->blob);
+    if (e->cface != NULL) cairo_font_face_destroy(e->cface);
+    if (e->ftface != NULL) FT_Done_Face(e->ftface);
+    free(e->bytes);
+    memset(e, 0, sizeof *e);
+}
+
+/* --- Named local families (spec/text_shape.md section 7) --- */
+
+static int ascii_ieq(const char *a, const char *b) {
+    for (; *a != '\0' && *b != '\0'; ++a, ++b) {
+        char x = (*a >= 'A' && *a <= 'Z') ? (char)(*a + 32) : *a;
+        char y = (*b >= 'A' && *b <= 'Z') ? (char)(*b + 32) : *b;
+        if (x != y) return 0;
+    }
+    return *a == '\0' && *b == '\0';
+}
+
+int tsh_family_is_generic(const char *name) {
+    static const char *const kw[] = {
+        "serif", "sans-serif", "monospace", "cursive", "fantasy", "system-ui",
+        "emoji", "math", "fangsong",
+    };
+    if (name == NULL || name[0] == '\0') return 0;
+    for (size_t i = 0; i < sizeof kw / sizeof *kw; ++i)
+        if (ascii_ieq(name, kw[i])) return 1;
+    return (name[0] == 'u' || name[0] == 'U') && (name[1] == 'i' || name[1] == 'I')
+           && name[2] == '-';
+}
+
+int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
+                       char *out, size_t cap) {
+    if (list == NULL || resolve == NULL || out == NULL || cap == 0) return 0;
+    const char *p = list;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t' || *p == ',') ++p;
+        if (*p == '\0') break;
+        const char *st = p;
+        while (*p != '\0' && *p != ',') ++p;
+        size_t n = (size_t)(p - st);
+        while (n > 0 && (st[n - 1] == ' ' || st[n - 1] == '\t')) --n;
+        char name[TSH_FAMILY_MAX];
+        if (n == 0 || n >= sizeof name) continue;
+        memcpy(name, st, n);
+        name[n] = '\0';
+        if (tsh_family_is_generic(name)) return 0;
+        if (resolve(name, out, cap, ctx)) return 1;
+    }
+    return 0;
+}
+
+const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
+                            size_t n, int (*installed)(const char *name, void *ctx),
+                            void *ctx) {
+    if (req == NULL || installed == NULL) return NULL;
+    if (installed(req, ctx)) return req;
+    if (subs == NULL || strong == NULL) return NULL;
+    /* subs[0] is the request itself; the run of strong substitutes follows. */
+    for (size_t k = 1; k < n && strong[k]; ++k)
+        if (subs[k] != NULL && installed(subs[k], ctx)) return subs[k];
+    return NULL;
+}
+
+/* An exact (case-insensitive) family that fontconfig really has on disk. */
+static int fc_installed(const char *name, void *ctx) {
+    (void)ctx;
+    FcPattern *p = FcPatternCreate();
+    if (p == NULL) return 0;
+    FcPatternAddString(p, FC_FAMILY, (const FcChar8 *)name);
+    FcObjectSet *os = FcObjectSetBuild(FC_FAMILY, (char *)NULL);
+    FcFontSet *fs = (os != NULL) ? FcFontList(NULL, p, os) : NULL;
+    int ok = fs != NULL && fs->nfont > 0;
+    if (fs != NULL) FcFontSetDestroy(fs);
+    if (os != NULL) FcObjectSetDestroy(os);
+    FcPatternDestroy(p);
+    return ok;
+}
+
+#define TSH_SUBS_MAX 16
+
+static int fc_resolve(const char *name, char *out, size_t cap, void *ctx) {
+    (void)ctx;
+    FcPattern *p = FcPatternCreate();
+    if (p == NULL) return 0;
+    FcPatternAddString(p, FC_FAMILY, (const FcChar8 *)name);
+    FcConfigSubstitute(NULL, p, FcMatchPattern);
+    const char *subs[TSH_SUBS_MAX];
+    int strong[TSH_SUBS_MAX];
+    size_t n = 0;
+    for (int id = 0; n < TSH_SUBS_MAX; ++id) {
+        FcValue v;
+        FcValueBinding b;
+        if (FcPatternGetWithBinding(p, FC_FAMILY, id, &v, &b) != FcResultMatch) break;
+        if (v.type != FcTypeString) continue;
+        subs[n] = (const char *)v.u.s;
+        strong[n] = (b == FcValueBindingStrong || b == FcValueBindingSame);
+        ++n;
+    }
+    const char *pick = tsh_pick_family(name, subs, strong, n, fc_installed, NULL);
+    int ok = 0;
+    if (pick != NULL && strlen(pick) < cap) {
+        memcpy(out, pick, strlen(pick) + 1);
+        ok = 1;
+    }
+    FcPatternDestroy(p);
+    return ok;
+}
+
+typedef struct tsh_lfam {
+    char      name[TSH_FAMILY_MAX];
+    tsh_entry e[4];   /* bold*2 + italic */
+    int       tried[4];
+} tsh_lfam;
+
+typedef struct tsh_llist {
+    char *list;       /* owned copy, the cache key */
+    int   fam;        /* index into g_lfam, -1 = resolves to nothing */
+} tsh_llist;
+
+static tsh_lfam  g_lfam[TSH_LOCAL_FAMILIES];
+static size_t    g_nlfam;
+static tsh_llist g_llist[TSH_LOCAL_LISTS];
+static size_t    g_nllist;
+
+static void local_clear(void) {
+    for (size_t i = 0; i < g_nlfam; ++i)
+        for (int k = 0; k < 4; ++k) entry_free(&g_lfam[i].e[k]);
+    for (size_t i = 0; i < g_nllist; ++i) free(g_llist[i].list);
+    memset(g_lfam, 0, sizeof g_lfam);
+    memset(g_llist, 0, sizeof g_llist);
+    g_nlfam = 0;
+    g_nllist = 0;
+}
+
+static int lfam_index(const char *fam) {
+    for (size_t i = 0; i < g_nlfam; ++i)
+        if (ascii_ieq(g_lfam[i].name, fam)) return (int)i;
+    if (g_nlfam >= TSH_LOCAL_FAMILIES || strlen(fam) >= TSH_FAMILY_MAX) return -1;
+    memcpy(g_lfam[g_nlfam].name, fam, strlen(fam) + 1);
+    return (int)g_nlfam++;
+}
+
+int tsh_local_handle(const char *list) {
+    if (list == NULL || list[0] == '\0') return 0;
+    for (size_t i = 0; i < g_nllist; ++i)
+        if (strcmp(g_llist[i].list, list) == 0)
+            return g_llist[i].fam >= 0 ? (int)i + 1 : 0;
+    if (g_nllist >= TSH_LOCAL_LISTS || !backend_init()) return 0;
+    size_t n = strlen(list);
+    if (n == (size_t)-1) return 0;
+    char *copy = malloc(n + 1);
+    if (copy == NULL) return 0;
+    memcpy(copy, list, n + 1);
+    char fam[TSH_FAMILY_MAX];
+    int fi = tsh_pick_from_list(list, fc_resolve, NULL, fam, sizeof fam) ? lfam_index(fam) : -1;
+    g_llist[g_nllist].list = copy;
+    g_llist[g_nllist].fam = fi;
+    ++g_nllist;
+    return fi >= 0 ? (int)g_nllist : 0;
+}
+
+static tsh_entry *local_entry(int handle, int bold, int italic) {
+    if (handle <= 0 || (size_t)handle > g_nllist) return NULL;
+    int fi = g_llist[handle - 1].fam;
+    if (fi < 0 || (size_t)fi >= g_nlfam) return NULL;
+    tsh_lfam *lf = &g_lfam[fi];
+    int k = (bold ? 2 : 0) + (italic ? 1 : 0);
+    if (lf->e[k].loaded == 1) return &lf->e[k];
+    if (lf->tried[k]) return NULL;
+    lf->tried[k] = 1;
+    if (load_entry_named(&lf->e[k], lf->name, bold, italic)) {
+        lf->e[k].loaded = 1;
+        return &lf->e[k];
+    }
+    return NULL;
+}
+
 /* Entry for a full font selector: a registered @font-face wins over the local
  * bucket stack; a set-but-unregistered hash falls through to it (the face may
  * belong to another document -- the table is per-document, cleared on
@@ -303,6 +495,10 @@ static tsh_entry *get_entry_ex(const tsh_font *f) {
     if (f->wfh != 0) {
         tsh_entry *w = web_find(f->wfh, f->bold, f->italic);
         if (w != NULL) return w;
+    }
+    if (f->local > 0) {
+        tsh_entry *l = local_entry(f->local, f->bold, f->italic);
+        if (l != NULL) return l;
     }
     return get_entry(f->family, f->bold, f->italic);
 }
@@ -386,19 +582,16 @@ tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
     return TSH_OK;
 }
 
+cairo_font_face_t *tsh_face(const tsh_font *f) {
+    if (f == NULL || !backend_init()) return NULL;
+    tsh_entry *e = get_entry_ex(f);
+    return (e != NULL) ? e->cface : NULL;
+}
+
 void tsh_shutdown(void) {
     tsh_webfont_clear();
-    for (int i = 0; i < TSH_CACHE_SLOTS; ++i) {
-        tsh_entry *e = &g_cache[i];
-        if (e->loaded != 1) { e->loaded = 0; continue; }
-        if (e->hbfont != NULL) hb_font_destroy(e->hbfont);
-        if (e->hbface != NULL) hb_face_destroy(e->hbface);
-        if (e->blob != NULL) hb_blob_destroy(e->blob);
-        if (e->cface != NULL) cairo_font_face_destroy(e->cface);
-        if (e->ftface != NULL) FT_Done_Face(e->ftface);
-        free(e->bytes);
-        memset(e, 0, sizeof *e);
-    }
+    for (int i = 0; i < TSH_CACHE_SLOTS; ++i) entry_free(&g_cache[i]);
+    local_clear();
     if (g_buf != NULL) { hb_buffer_destroy(g_buf); g_buf = NULL; }
     if (g_backend_ok) FT_Done_FreeType(g_ft);
     g_backend_ok = 0;

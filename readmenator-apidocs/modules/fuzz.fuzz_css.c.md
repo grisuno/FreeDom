@@ -33,7 +33,7 @@ flowchart LR
 
 ### `LLVMFuzzerTestOneInput`
 
-`function` | [fuzz/fuzz_css.c:80](../../fuzz/fuzz_css.c#L80)
+`function` | [fuzz/fuzz_css.c:90](../../fuzz/fuzz_css.c#L90)
 
 ```c
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

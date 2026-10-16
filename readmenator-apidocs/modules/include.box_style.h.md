@@ -1,13 +1,13 @@
 # `include/box_style.h`
 
-> Source: [include/box_style.h:1](../../include/box_style.h#L1) | language `h` | coverage 64.0% | [API index](../index.md)
+> Source: [include/box_style.h:1](../../include/box_style.h#L1) | language `h` | coverage 67.9% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`bx_edges`](#bx_edges), [`bx_box`](#bx_box), [`bx_hplace`](#bx_hplace), [`bx_bg_layer`](#bx_bg_layer)
 - **Enums:** [`bx_display`](#bx_display), [`bx_status`](#bx_status), [`bx_ua_tag`](#bx_ua_tag), [`bx_table_role`](#bx_table_role)
 - **Type Aliases:** [`display`](#display)
-- **Functions:** [`box`](#box), [`BX_TROLE_NONE`](#bx_trole_none), [`bx_display_name`](#bx_display_name), [`bx_width_cap`](#bx_width_cap), [`bx_width_cap2`](#bx_width_cap2), [`bx_replaced_box`](#bx_replaced_box), [`bx_border_box_h`](#bx_border_box_h), [`page`](#page), [`bx_lp_px`](#bx_lp_px), [`bx_content_cap`](#bx_content_cap), [`bx_background_layer`](#bx_background_layer)
+- **Functions:** [`box`](#box), [`BX_TROLE_NONE`](#bx_trole_none), [`bx_display_name`](#bx_display_name), [`bx_width_cap`](#bx_width_cap), [`bx_width_cap2`](#bx_width_cap2), [`bx_replaced_box`](#bx_replaced_box), [`bx_border_box_h`](#bx_border_box_h), [`page`](#page), [`bx_lp_px`](#bx_lp_px), [`bx_content_cap`](#bx_content_cap), [`bx_border_span`](#bx_border_span), [`bx_flex_max_clamp`](#bx_flex_max_clamp), [`bx_flex_min_clamp`](#bx_flex_min_clamp), [`bx_background_layer`](#bx_background_layer)
 - **Macros:** [`BX_TAG_NAME_MAX`](#bx_tag_name_max)
 
 ## Type Diagram
@@ -134,7 +134,7 @@ Horizontal placement of an author box inside an available width (px).
 
 ### `bx_bg_layer`
 
-`struct` | [include/box_style.h:267](../../include/box_style.h#L267)
+`struct` | [include/box_style.h:300](../../include/box_style.h#L300)
 
 ```c
 typedef struct bx_bg_layer
@@ -170,7 +170,7 @@ caller skips the layer instead of dividing by it. Pure.
 
 #### `bx_bg_layer.nat_h`
 
-`type_alias` | [include/box_style.h:267](../../include/box_style.h#L267)
+`type_alias` | [include/box_style.h:300](../../include/box_style.h#L300)
 
 ```c
 typedef struct bx_bg_layer { double nat_w, nat_h;
@@ -343,7 +343,7 @@ Never NULL; an unknown enum value yields "inline".
 
 ### `bx_width_cap`
 
-`function` | [include/box_style.h:172](../../include/box_style.h#L172)
+`function` | [include/box_style.h:182](../../include/box_style.h#L182)
 
 ```c
 double bx_width_cap(int w_px, int w_pct, double avail_w);
@@ -369,7 +369,7 @@ Never negative. Pure.
 
 ### `bx_width_cap2`
 
-`function` | [include/box_style.h:177](../../include/box_style.h#L177)
+`function` | [include/box_style.h:187](../../include/box_style.h#L187)
 
 ```c
 double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w);
@@ -397,7 +397,7 @@ Pure.
 
 ### `bx_replaced_box`
 
-`function` | [include/box_style.h:196](../../include/box_style.h#L196)
+`function` | [include/box_style.h:206](../../include/box_style.h#L206)
 
 ```c
 int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den, double avail_w, double *out_w, double *out_h);
@@ -440,7 +440,7 @@ caller's own fallback in place rather than inventing a height. Pure.
 
 ### `bx_border_box_h`
 
-`function` | [include/box_style.h:210](../../include/box_style.h#L210)
+`function` | [include/box_style.h:220](../../include/box_style.h#L220)
 
 ```c
 double bx_border_box_h(double declared_h, int border_box, double pad_t, double pad_b, double bord_t, double bord_b);
@@ -473,7 +473,7 @@ capped and heights are set. Pure.
 
 ### `page`
 
-`function` | [include/box_style.h:214](../../include/box_style.h#L214)
+`function` | [include/box_style.h:224](../../include/box_style.h#L224)
 
 ```c
 * instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That * is the case unless BOTH overflow axes are visible-or-unset: one non-visible * axis computes the other to auto (CSS Overf
@@ -495,7 +495,7 @@ capped and heights are set. Pure.
 
 ### `bx_lp_px`
 
-`function` | [include/box_style.h:236](../../include/box_style.h#L236)
+`function` | [include/box_style.h:246](../../include/box_style.h#L246)
 
 ```c
 double bx_lp_px(int px_val, int pct_pm, double basis);
@@ -531,7 +531,7 @@ usable length contributes nothing while the absolute half survives. Pure.
 
 ### `bx_content_cap`
 
-`function` | [include/box_style.h:244](../../include/box_style.h#L244)
+`function` | [include/box_style.h:254](../../include/box_style.h#L254)
 
 ```c
 double bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);
@@ -556,11 +556,94 @@ With border_box set, the declared width includes the horizontal padding and bord
 
 ---
 
+<a id="bx_border_span"></a>
+
+### `bx_border_span`
+
+`function` | [include/box_style.h:265](../../include/box_style.h#L265)
+
+```c
+double bx_border_span(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);
+```
+
+The border-inclusive span the painter lays a box out with (its content plus left/right border; padding sits outside it).
+
+CSS 2.1 10.3.3 / CSS Sizing 3 box-sizing: a content-box `width` sizes the CONTENT, so the span is W + bl + br; a border-box `width` already holds padding and border, so the span is W - pl - pr. Without it a content-box box with a border painted its declared width as the border box (300 for `width:300px;border:1px`, Firefox 302) and a border-box one lost its border twice. width_cap <= 0 (no cap) is returned as is. Negative edges count as 0. Pure.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `width_cap` | `double` |  |  |
+| `border_box` | `int` |  |  |
+| `pad_l` | `double` |  |  |
+| `pad_r` | `double` |  |  |
+| `bord_l` | `double` |  |  |
+| `bord_r` | `double` |  |  |
+
+**Returns:** `double`
+
+---
+
+<a id="bx_flex_max_clamp"></a>
+
+### `bx_flex_max_clamp`
+
+`function` | [include/box_style.h:271](../../include/box_style.h#L271)
+
+```c
+double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, double pad_bord_h, double margin_h);
+```
+
+Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hypothetical main size). mw_cap <= 0 = no max-width (base returned as is); border_box says whether mw_cap already includes padding+border (pad_bord_h).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `outer_basis` | `double` |  |  |
+| `mw_cap` | `double` |  |  |
+| `border_box` | `int` |  |  |
+| `pad_bord_h` | `double` |  |  |
+| `margin_h` | `double` |  |  |
+
+**Returns:** `double`
+
+---
+
+<a id="bx_flex_min_clamp"></a>
+
+### `bx_flex_min_clamp`
+
+`function` | [include/box_style.h:277](../../include/box_style.h#L277)
+
+```c
+double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, double pad_bord_h, double margin_h);
+```
+
+The min-width half of the same clamp (Flexbox 9.2.3): an outer base below the item's min-width (converted to the outer size per box-sizing, plus margins) is raised to it. min_w <= 0 (unset) returns the base unchanged.
+
+Pure.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `outer_basis` | `double` |  |  |
+| `min_w` | `double` |  |  |
+| `border_box` | `int` |  |  |
+| `pad_bord_h` | `double` |  |  |
+| `margin_h` | `double` |  |  |
+
+**Returns:** `double`
+
+---
+
 <a id="bx_background_layer"></a>
 
 ### `bx_background_layer`
 
-`function` | [include/box_style.h:277](../../include/box_style.h#L277)
+`function` | [include/box_style.h:310](../../include/box_style.h#L310)
 
 ```c
 int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, double *out_x, double *out_y);

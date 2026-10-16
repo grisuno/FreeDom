@@ -39,7 +39,7 @@ typedef enum pf_kind { PF_STYLESHEET = 0, PF_SCRIPT } pf_kind;
 typedef struct pf_ref { pf_kind kind; char *url; } pf_ref;   /* url: dueño la lista */
 
 #define PF_MAX_REFS    64          /* tope anti-DoS del scanner y del pool */
-#define PF_MAX_THREADS 4           /* descargas simultáneas máximas */
+#define PF_MAX_THREADS 6           /* descargas simultáneas (límite por host de Firefox) */
 
 /* Scanner lookahead. html/len es contenido HOSTIL. Rellena out (dueño de las URLs);
  * out->count <= PF_MAX_REFS. Devuelve 0 (incluso con 0 refs); -1 solo con argumentos
@@ -152,3 +152,41 @@ Fuzz: `fuzz/fuzz_prefetch.c` sobre `pf_scan` (bytes arbitrarios; sin crash/leak/
 - Prefetch de imágenes desde el scanner: las imágenes se paralelizan con la lista YA
   decidida por política tras `rd_build` (jamás antes de la decisión por-imagen).
 - HTTP/2/3 multiplexing (transporte de libcurl; ortogonal al pool).
+
+## 8. Grafo de módulos ES (tanda 43, 2026-10-15)
+
+**Por qué (medido):** github.com con JS vivo tardaba 15.5 s en el worker, de los
+cuales **11.3 s eran 99 subrecursos servidos en serie** (`stage=subreq`,
+`FREEDOM_PERF=1`): el cargador de módulos pide cada `import` recién cuando el módulo
+que lo contiene llegó, así que la latencia de red se suma módulo tras módulo. El
+pool solo conocía los `<script src>` del HTML.
+
+**Contrato:**
+- `pf_scan_imports(js, len, out, cap)` — puro: extrae los especificadores de las
+  importaciones **estáticas** de un módulo (`import … from "x"`, `import "x"`,
+  `export … from "x"`), con o sin espacios (código minificado), saltando
+  comentarios. Solo especificadores de URL: `./`, `../`, `/` o `https://`. Un
+  especificador desnudo (`"react"`) necesita el import map y se ignora. Los
+  `import()` dinámicos **no** se escanean: el cargador podría no pedirlos nunca, y
+  el prefetch cambia **cuándo** se busca algo, jamás **qué**. Tope `PF_MAX_IMPORTS`
+  por cuerpo.
+- `pf_pool_add(p, url)` — encola una URL más en un pool en marcha (dedupe, tope
+  `PF_MAX_JOBS`); un hilo libre la toma.
+- Un hilo del pool que baja un cuerpo JavaScript (`ctype` `*javascript*` o URL
+  `.js`/`.mjs`) escanea sus imports, los resuelve contra la URL del módulo
+  (`url_resolve_https`) y los encola: el grafo entero se baja en paralelo delante
+  del worker, que luego lo toma del pool (`pf_pool_take`).
+- Los hilos viven hasta `pf_pool_finish` (esperan trabajo nuevo en vez de salir).
+
+**Garantías:** misma función de fetch gateada (política completa por pedido), mismo
+conjunto de URLs que el cargador pediría, topes anti-DoS (jobs, imports por cuerpo,
+bytes por el fetcher). Falla abierto en rendimiento: sin hilos o pool lleno ⇒ el
+worker busca en serie como antes.
+
+**Dado–Cuando–Entonces:**
+- Dado `import{a}from"./a.js";export*from'../b.mjs';import "https://x/c.js"`,
+  entonces los especificadores son `./a.js`, `../b.mjs`, `https://x/c.js`.
+- Dado `import("./lazy.js")` o `import x from "react"`, entonces nada.
+- Dado `// import "./no.js"` o `/* import "./no.js" */`, entonces nada.
+- Dado un pool con `a.js` cuyo cuerpo importa `./b.js`, cuando termina, entonces
+  `b.js` ya está en el pool y un `pf_pool_take` de `b.js` es un acierto.

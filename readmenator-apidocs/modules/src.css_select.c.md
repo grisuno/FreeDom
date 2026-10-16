@@ -111,7 +111,7 @@ Decodes CSS escapes in src[0,n) into dst (cap bytes, NUL-terminated, truncates).
 | `src` | `char *` |  |  |
 | `n` | `size_t` |  |  |
 
-> **Inherited:** Documentation from [`csel_unescape`](#csel_unescape) (include/css_select.h:177).
+> **Inherited:** Documentation from [`csel_unescape`](#csel_unescape) (include/css_select.h:180).
 
 *Calls:* [`csel_emit_utf8`](#csel_emit_utf8), [`csel_hex_val`](#csel_hex_val)
 
@@ -141,7 +141,7 @@ Bytes the escape starting at s[i] occupies (0 when s[i] does not start one).
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`csel_escape_len`](#csel_escape_len) (include/css_select.h:179).
+> **Inherited:** Documentation from [`csel_escape_len`](#csel_escape_len) (include/css_select.h:182).
 
 *Calls:* [`csel_hex_val`](#csel_hex_val)
 
@@ -172,7 +172,7 @@ Index of the ';' ending the declaration that starts at s[i] (or of a '}' when st
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`csel_decl_end`](#csel_decl_end) (include/css_select.h:191).
+> **Inherited:** Documentation from [`csel_decl_end`](#csel_decl_end) (include/css_select.h:194).
 
 ---
 
@@ -196,7 +196,7 @@ dst (CSS_TOK_MAX bytes) receives src[0,len) as-is, or folded when too long.
 | `len` | `size_t` |  |  |
 | `dst` | `char *` |  |  |
 
-> **Inherited:** Documentation from [`csel_ident_fold`](#csel_ident_fold) (include/css_select.h:181).
+> **Inherited:** Documentation from [`csel_ident_fold`](#csel_ident_fold) (include/css_select.h:184).
 
 *Called by:* [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident)
 
@@ -224,7 +224,7 @@ A stored (possibly folded) identifier against an element token of tlen bytes.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_ident_eq`](#csel_ident_eq) (include/css_select.h:183).
+> **Inherited:** Documentation from [`csel_ident_eq`](#csel_ident_eq) (include/css_select.h:186).
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`csel_ident_fold`](#csel_ident_fold)
 
@@ -256,7 +256,7 @@ Returns 0, *ip untouched, when none.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_read_ident`](#csel_read_ident) (include/css_select.h:186).
+> **Inherited:** Documentation from [`csel_read_ident`](#csel_read_ident) (include/css_select.h:189).
 
 *Calls:* [`csel_ident_ch`](include.css_select.h.md#csel_ident_ch), [`csel_lower_ch`](include.css_select.h.md#csel_lower_ch), [`csel_escape_len`](#csel_escape_len), [`csel_ident_fold`](#csel_ident_fold), [`csel_unescape`](#csel_unescape)
 
@@ -266,7 +266,7 @@ Returns 0, *ip untouched, when none.
 
 ### `between`
 
-`function` | [src/css_select.c:376](../../src/css_select.c#L376)
+`function` | [src/css_select.c:382](../../src/css_select.c#L382)
 
 ```c
 * between ( and ) is split on commas (not inside [] or ());
@@ -280,7 +280,7 @@ Returns 0, *ip untouched, when none.
 
 ### `selector`
 
-`function` | [src/css_select.c:559](../../src/css_select.c#L559)
+`function` | [src/css_select.c:565](../../src/css_select.c#L565)
 
 ```c
 * the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is * dropped. Whitespa...
@@ -302,7 +302,7 @@ Returns 0, *ip untouched, when none.
 
 ### `built`
 
-`function` | [src/css_select.c:1014](../../src/css_select.c#L1014)
+`function` | [src/css_select.c:1021](../../src/css_select.c#L1021)
 
 ```c
 * chains the caller built (an element without parent/prev links never matches * through that combinator — fail closed). When pseudo_kind is non-NULL and the * subject compound (rightmost, index k) matches via PSEUDO_BEFORE or * PSEUDO_AFTER, *pseudo_kind is set to that kind. */ static int complex_matches(const css_sel *sel, int k, const css_element *el, const char *target_id, int allow_pseudo_el, int *pseudo_kind)
@@ -322,7 +322,7 @@ Returns 0, *ip untouched, when none.
 
 ### `csel_matches`
 
-`function` | [src/css_select.c:1055](../../src/css_select.c#L1055)
+`function` | [src/css_select.c:1062](../../src/css_select.c#L1062)
 
 ```c
 int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int *pseudo_kind)
@@ -342,7 +342,7 @@ True if *sel matches element *el against its ancestor chain. target_id (optional
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_matches`](#csel_matches) (include/css_select.h:159).
+> **Inherited:** Documentation from [`csel_matches`](#csel_matches) (include/css_select.h:162).
 
 ---
 
@@ -352,7 +352,7 @@ True if *sel matches element *el against its ancestor chain. target_id (optional
 
 ### `HAS_MAX_DEPTH`
 
-`macro` | [src/css_select.c:839](../../src/css_select.c#L839)
+`macro` | [src/css_select.c:845](../../src/css_select.c#L845)
 
 ```c
 #define HAS_MAX_DEPTH

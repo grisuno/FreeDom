@@ -1,8 +1,176 @@
-# Symbols (page 11 of 13)
+# Symbols (page 11 of 14)
 Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_missing_and_null` | function | `tests/test_disk_store.c:168` | `static void test_missing_and_null(void **state)` |
+| `test_no_temp_left` | function | `tests/test_disk_store.c:117` | `static void test_no_temp_left(void **state)` |
+| `test_overwrite` | function | `tests/test_disk_store.c:124` | `static void test_overwrite(void **state)` |
+| `test_permissions` | function | `tests/test_disk_store.c:108` | `static void test_permissions(void **state)` |
+| `test_roundtrip` | function | `tests/test_disk_store.c:78` | `static void test_roundtrip(void **state)` |
+| `test_roundtrip_chacha` | function | `tests/test_disk_store.c:89` | `static void test_roundtrip_chacha(void **state)` |
+| `test_tamper_on_disk` | function | `tests/test_disk_store.c:150` | `static void test_tamper_on_disk(void **state)` |
+| `test_wrong_key` | function | `tests/test_disk_store.c:138` | `static void test_wrong_key(void **state)` |
+| `DOC` | macro | `tests/test_dom.c:55` | `#define DOC(state)` |
+| `IDX` | macro | `tests/test_dom.c:56` | `#define IDX(state)` |
+| `main` | function | `tests/test_dom.c:636` | `int main(void)` |
+| `rule` | function | `tests/test_dom.c:405` | `* silently drops the whole rule (fail closed), so the title read black-on-teal  * instead of the ...` |
+| `setup_doc` | function | `tests/test_dom.c:32` | `static int setup_doc(void **state)` |
+| `teardown_doc` | function | `tests/test_dom.c:45` | `static int teardown_doc(void **state)` |
+| `test_append_rejects_cycle` | function | `tests/test_dom.c:259` | `static void test_append_rejects_cycle(void **state)` |
+| `test_attributes` | function | `tests/test_dom.c:171` | `static void test_attributes(void **state)` |
+| `test_build_null_args` | function | `tests/test_dom.c:60` | `static void test_build_null_args(void **state)` |
+| `test_by_class` | function | `tests/test_dom.c:109` | `static void test_by_class(void **state)` |
+| `test_by_tag` | function | `tests/test_dom.c:118` | `static void test_by_tag(void **state)` |
+| `test_by_tag_results_in_document_order` | function | `tests/test_dom.c:127` | `static void test_by_tag_results_in_document_order(void **state)` |
+| `test_char_nodes` | function | `tests/test_dom.c:589` | `static void test_char_nodes(void **state)` |
+| `test_clone_node` | function | `tests/test_dom.c:525` | `static void test_clone_node(void **state)` |
+| `test_construction_invalid_args` | function | `tests/test_dom.c:327` | `static void test_construction_invalid_args(void **state)` |
+| `test_create_and_append` | function | `tests/test_dom.c:241` | `static void test_create_and_append(void **state)` |
+| `test_document_order` | function | `tests/test_dom.c:137` | `static void test_document_order(void **state)` |
+| `test_free_null_and_double` | function | `tests/test_dom.c:70` | `static void test_free_null_and_double(void **state)` |
+| `test_get_by_id` | function | `tests/test_dom.c:88` | `static void test_get_by_id(void **state)` |
+| `test_get_by_id_absent` | function | `tests/test_dom.c:102` | `static void test_get_by_id_absent(void **state)` |
+| `test_get_inner_html` | function | `tests/test_dom.c:335` | `static void test_get_inner_html(void **state)` |
+| `test_insert_before` | function | `tests/test_dom.c:493` | `static void test_insert_before(void **state)` |
+| `test_matches_and_closest` | function | `tests/test_dom.c:460` | `static void test_matches_and_closest(void **state)` |
+| `test_move_children` | function | `tests/test_dom.c:548` | `static void test_move_children(void **state)` |
+| `test_navigation` | function | `tests/test_dom.c:151` | `static void test_navigation(void **state)` |
+| `test_node_count` | function | `tests/test_dom.c:81` | `static void test_node_count(void **state)` |
+| `test_query_selector_all_counts` | function | `tests/test_dom.c:377` | `static void test_query_selector_all_counts(void **state)` |
+| `test_query_selector_combinators` | function | `tests/test_dom.c:388` | `static void test_query_selector_combinators(void **state)` |
+| `test_query_selector_fail_closed` | function | `tests/test_dom.c:473` | `static void test_query_selector_fail_closed(void **state)` |
+| `test_query_selector_nth_and_structural` | function | `tests/test_dom.c:435` | `static void test_query_selector_nth_and_structural(void **state)` |
+| `test_query_selector_scope_is_descendants_only` | function | `tests/test_dom.c:448` | `static void test_query_selector_scope_is_descendants_only(void **state)` |
+| `test_query_selector_type_class_id` | function | `tests/test_dom.c:363` | `static void test_query_selector_type_class_id(void **state)` |
+| `test_remove_attribute` | function | `tests/test_dom.c:294` | `static void test_remove_attribute(void **state)` |
+| `test_remove_child` | function | `tests/test_dom.c:269` | `static void test_remove_child(void **state)` |
+| `test_set_and_get_document_title` | function | `tests/test_dom.c:229` | `static void test_set_and_get_document_title(void **state)` |
+| `test_set_attribute_reindexes_id` | function | `tests/test_dom.c:281` | `static void test_set_attribute_reindexes_id(void **state)` |
+| `test_set_inner_html` | function | `tests/test_dom.c:311` | `static void test_set_inner_html(void **state)` |
+| `test_set_text_content_changes_tree` | function | `tests/test_dom.c:196` | `static void test_set_text_content_changes_tree(void **state)` |
+| `test_set_text_content_empty_clears` | function | `tests/test_dom.c:214` | `static void test_set_text_content_empty_clears(void **state)` |
+| `test_set_text_content_invalid_node` | function | `tests/test_dom.c:224` | `static void test_set_text_content_invalid_node(void **state)` |
+| `test_text_content_read` | function | `tests/test_dom.c:185` | `static void test_text_content_read(void **state)` |
+| `build` | function | `tests/test_dom_debug.c:36` | `static rd_doc *build(pv_view *v, rdp_caps caps)` |
+| `caps_css_on` | function | `tests/test_dom_debug.c:29` | `static rdp_caps caps_css_on(void)` |
+| `main` | function | `tests/test_dom_debug.c:269` | `int main(void)` |
+| `test_box_tree_width_cap` | function | `tests/test_dom_debug.c:116` | `static void test_box_tree_width_cap(void **state)` |
+| `test_control_bytes_kept_on_one_line` | function | `tests/test_dom_debug.c:245` | `static void test_control_bytes_kept_on_one_line(void **state)` |
+| `test_grid_container_annotation` | function | `tests/test_dom_debug.c:92` | `static void test_grid_container_annotation(void **state)` |
+| `test_heading_paragraph_link` | function | `tests/test_dom_debug.c:59` | `static void test_heading_paragraph_link(void **state)` |
+| `test_no_box_tree_without_css` | function | `tests/test_dom_debug.c:197` | `static void test_no_box_tree_without_css(void **state)` |
+| `test_null_doc_is_empty_header` | function | `tests/test_dom_debug.c:45` | `static void test_null_doc_is_empty_header(void **state)` |
+| `test_truncation_no_overflow` | function | `tests/test_dom_debug.c:217` | `static void test_truncation_no_overflow(void **state)` |
+| `test_visibility_overflow_cursor_and_text_wrap` | function | `tests/test_dom_debug.c:154` | `static void test_visibility_overflow_cursor_and_text_wrap(void **state)` |
+| `builder` | function | `tests/test_download.c:8` | `* builder (join, separator rejection, overflow, NULL), and the size cap.  */  #include <setjmp.h>...` |
+| `main` | function | `tests/test_download.c:204` | `int main(void)` |
+| `test_build_path_basic` | function | `tests/test_download.c:158` | `static void test_build_path_basic(void **state)` |
+| `test_build_path_null_args` | function | `tests/test_download.c:186` | `static void test_build_path_null_args(void **state)` |
+| `test_build_path_overflow` | function | `tests/test_download.c:179` | `static void test_build_path_overflow(void **state)` |
+| `test_build_path_rejects_separator_in_name` | function | `tests/test_download.c:172` | `static void test_build_path_rejects_separator_in_name(void **state)` |
+| `test_build_path_trailing_slash` | function | `tests/test_download.c:165` | `static void test_build_path_trailing_slash(void **state)` |
+| `test_check_size` | function | `tests/test_download.c:197` | `static void test_check_size(void **state)` |
+| `test_ext_known_types` | function | `tests/test_download.c:52` | `static void test_ext_known_types(void **state)` |
+| `test_ext_unknown_type` | function | `tests/test_download.c:63` | `static void test_ext_unknown_type(void **state)` |
+| `test_pick_appends_extension_when_missing` | function | `tests/test_download.c:99` | `static void test_pick_appends_extension_when_missing(void **state)` |
+| `test_pick_fallback_when_empty` | function | `tests/test_download.c:129` | `static void test_pick_fallback_when_empty(void **state)` |
+| `test_pick_from_disposition_ext_form` | function | `tests/test_download.c:81` | `static void test_pick_from_disposition_ext_form(void **state)` |
+| `test_pick_from_disposition_quoted` | function | `tests/test_download.c:72` | `static void test_pick_from_disposition_quoted(void **state)` |
+| `test_pick_from_url_segment` | function | `tests/test_download.c:91` | `static void test_pick_from_url_segment(void **state)` |
+| `test_pick_keeps_existing_extension` | function | `tests/test_download.c:108` | `static void test_pick_keeps_existing_extension(void **state)` |
+| `test_pick_null_out` | function | `tests/test_download.c:141` | `static void test_pick_null_out(void **state)` |
+| `test_pick_overflow_fails_closed` | function | `tests/test_download.c:148` | `static void test_pick_overflow_fails_closed(void **state)` |
+| `test_pick_traversal_contained` | function | `tests/test_download.c:117` | `static void test_pick_traversal_contained(void **state)` |
+| `test_should_binary_types` | function | `tests/test_download.c:41` | `static void test_should_binary_types(void **state)` |
+| `test_should_renderable_types` | function | `tests/test_download.c:30` | `static void test_should_renderable_types(void **state)` |
+| `article` | function | `tests/test_flex_layout.c:362` | `* article (slashdot-cols probe: score 13.41). */  static void test_float_pack_m_holy_grail_pull_u...` |
+| `assert_item` | function | `tests/test_flex_layout.c:26` | `static void assert_item(fx_result r, double pos, double size)` |
+| `main` | function | `tests/test_flex_layout.c:1150` | `int main(void)` |
+| `test_area_hash_basics` | function | `tests/test_flex_layout.c:786` | `static void test_area_hash_basics(void **state)` |
+| `test_areas_non_rectangular_is_rejected` | function | `tests/test_flex_layout.c:864` | `static void test_areas_non_rectangular_is_rejected(void **state)` |
+| `test_areas_null_cell` | function | `tests/test_flex_layout.c:832` | `static void test_areas_null_cell(void **state)` |
+| `test_areas_parse_and_resolve` | function | `tests/test_flex_layout.c:798` | `static void test_areas_parse_and_resolve(void **state)` |
+| `test_areas_parse_bounds` | function | `tests/test_flex_layout.c:896` | `static void test_areas_parse_bounds(void **state)` |
+| `test_areas_parse_fails_closed` | function | `tests/test_flex_layout.c:878` | `static void test_areas_parse_fails_closed(void **state)` |
+| `test_areas_rect_spans_rows_and_cols` | function | `tests/test_flex_layout.c:847` | `static void test_areas_rect_spans_rows_and_cols(void **state)` |
+| `test_auto_margins_push_right_and_center` | function | `tests/test_flex_layout.c:1057` | `static void test_auto_margins_push_right_and_center(void **state)` |
+| `test_auto_min_size_is_min_content` | function | `tests/test_flex_layout.c:653` | `static void test_auto_min_size_is_min_content(void **state)` |
+| `test_autofill_count` | function | `tests/test_flex_layout.c:142` | `static void test_autofill_count(void **state)` |
+| `test_column_place_auto_margins` | function | `tests/test_flex_layout.c:1133` | `static void test_column_place_auto_margins(void **state)` |
+| `test_column_place_stack_and_justify` | function | `tests/test_flex_layout.c:1090` | `static void test_column_place_stack_and_justify(void **state)` |
+| `test_cross_offset` | function | `tests/test_flex_layout.c:1119` | `static void test_cross_offset(void **state)` |
+| `test_flex_errors` | function | `tests/test_flex_layout.c:157` | `static void test_flex_errors(void **state)` |
+| `test_flex_zero_items_is_noop` | function | `tests/test_flex_layout.c:152` | `static void test_flex_zero_items_is_noop(void **state)` |
+| `test_float_insets_both_sides_take_the_tightest` | function | `tests/test_flex_layout.c:495` | `static void test_float_insets_both_sides_take_the_tightest(void **state)` |
+| `test_float_insets_edges` | function | `tests/test_flex_layout.c:532` | `static void test_float_insets_edges(void **state)` |
+| `test_float_insets_left_overlapping_line` | function | `tests/test_flex_layout.c:458` | `static void test_float_insets_left_overlapping_line(void **state)` |
+| `test_float_insets_line_past_bottom_is_full_width` | function | `tests/test_flex_layout.c:468` | `static void test_float_insets_line_past_bottom_is_full_width(void **state)` |
+| `test_float_insets_never_starve_the_line` | function | `tests/test_flex_layout.c:510` | `static void test_float_insets_never_starve_the_line(void **state)` |
+| `test_float_insets_right` | function | `tests/test_flex_layout.c:485` | `static void test_float_insets_right(void **state)` |
+| `test_float_pack_edges` | function | `tests/test_flex_layout.c:552` | `static void test_float_pack_edges(void **state)` |
+| `test_float_pack_left` | function | `tests/test_flex_layout.c:322` | `static void test_float_pack_left(void **state)` |
+| `test_float_pack_left_and_right` | function | `tests/test_flex_layout.c:333` | `static void test_float_pack_left_and_right(void **state)` |
+| `test_float_pack_m_errors` | function | `tests/test_flex_layout.c:433` | `static void test_float_pack_m_errors(void **state)` |
+| `test_float_pack_m_positive_margin_widens` | function | `tests/test_flex_layout.c:401` | `static void test_float_pack_m_positive_margin_widens(void **state)` |
+| `test_float_pack_m_right_float_negative_margin` | function | `tests/test_flex_layout.c:417` | `static void test_float_pack_m_right_float_negative_margin(void **state)` |
+| `test_float_pack_m_zero_margins_match_wrap` | function | `tests/test_flex_layout.c:381` | `static void test_float_pack_m_zero_margins_match_wrap(void **state)` |
+| `test_float_pack_two_right` | function | `tests/test_flex_layout.c:345` | `static void test_float_pack_two_right(void **state)` |
+| `test_float_pack_wrap_errors` | function | `tests/test_flex_layout.c:628` | `static void test_float_pack_wrap_errors(void **state)` |
+| `test_float_pack_wrap_fits_matches_v1` | function | `tests/test_flex_layout.c:582` | `static void test_float_pack_wrap_fits_matches_v1(void **state)` |
+| `test_float_pack_wrap_full_width_stack` | function | `tests/test_flex_layout.c:568` | `static void test_float_pack_wrap_full_width_stack(void **state)` |
+| `test_float_pack_wrap_partial` | function | `tests/test_flex_layout.c:605` | `static void test_float_pack_wrap_partial(void **state)` |
+| `test_gap_start` | function | `tests/test_flex_layout.c:68` | `static void test_gap_start(void **state)` |
+| `test_grid_cell` | function | `tests/test_flex_layout.c:198` | `static void test_grid_cell(void **state)` |
+| `test_grid_columns` | function | `tests/test_flex_layout.c:169` | `static void test_grid_columns(void **state)` |
+| `test_grid_columns_edges` | function | `tests/test_flex_layout.c:188` | `static void test_grid_columns_edges(void **state)` |
+| `test_grid_columns_too_narrow_clamps_to_zero` | function | `tests/test_flex_layout.c:181` | `static void test_grid_columns_too_narrow_clamps_to_zero(void **state)` |
+| `test_grid_line_parse` | function | `tests/test_flex_layout.c:953` | `static void test_grid_line_parse(void **state)` |
+| `test_grid_line_resolve_table` | function | `tests/test_flex_layout.c:972` | `static void test_grid_line_resolve_table(void **state)` |
+| `test_grid_line_side` | function | `tests/test_flex_layout.c:925` | `static void test_grid_line_side(void **state)` |
+| `test_grid_place_explicit_out_of_range_clamps` | function | `tests/test_flex_layout.c:1046` | `static void test_grid_place_explicit_out_of_range_clamps(void **state)` |
+| `test_grid_place_fixed_col_auto_row` | function | `tests/test_flex_layout.c:1003` | `static void test_grid_place_fixed_col_auto_row(void **state)` |
+| `test_grid_place_null_fixed_is_unchanged` | function | `tests/test_flex_layout.c:1034` | `static void test_grid_place_null_fixed_is_unchanged(void **state)` |
+| `test_grid_place_rowspan` | function | `tests/test_flex_layout.c:305` | `static void test_grid_place_rowspan(void **state)` |
+| `test_grid_place_span_basic` | function | `tests/test_flex_layout.c:266` | `static void test_grid_place_span_basic(void **state)` |
+| `test_grid_place_span_clamps_and_defaults` | function | `tests/test_flex_layout.c:289` | `static void test_grid_place_span_clamps_and_defaults(void **state)` |
+| `test_grid_place_span_wraps_when_it_does_not_fit` | function | `tests/test_flex_layout.c:277` | `static void test_grid_place_span_wraps_when_it_does_not_fit(void **state)` |
+| `test_grid_weighted_all_auto_matches_equal` | function | `tests/test_flex_layout.c:233` | `static void test_grid_weighted_all_auto_matches_equal(void **state)` |
+| `test_grid_weighted_errors` | function | `tests/test_flex_layout.c:256` | `static void test_grid_weighted_errors(void **state)` |
+| `test_grid_weighted_fixed_overflow_zeroes_fr` | function | `tests/test_flex_layout.c:246` | `static void test_grid_weighted_fixed_overflow_zeroes_fr(void **state)` |
+| `test_grid_weighted_fixed_px_reserved_first` | function | `tests/test_flex_layout.c:221` | `static void test_grid_weighted_fixed_px_reserved_first(void **state)` |
+| `test_grid_weighted_fr` | function | `tests/test_flex_layout.c:209` | `static void test_grid_weighted_fr(void **state)` |
+| `test_grow_equal` | function | `tests/test_flex_layout.c:31` | `static void test_grow_equal(void **state)` |
+| `test_grow_weighted` | function | `tests/test_flex_layout.c:40` | `static void test_grow_weighted(void **state)` |
+| `test_justify_center` | function | `tests/test_flex_layout.c:77` | `static void test_justify_center(void **state)` |
+| `test_justify_end` | function | `tests/test_flex_layout.c:86` | `static void test_justify_end(void **state)` |
+| `test_justify_name` | function | `tests/test_flex_layout.c:637` | `static void test_justify_name(void **state)` |
+| `test_justify_space_around` | function | `tests/test_flex_layout.c:104` | `static void test_justify_space_around(void **state)` |
+| `test_justify_space_between` | function | `tests/test_flex_layout.c:95` | `static void test_justify_space_between(void **state)` |
+| `test_justify_space_evenly` | function | `tests/test_flex_layout.c:113` | `static void test_justify_space_evenly(void **state)` |
+| `test_multicol_used_counts` | function | `tests/test_flex_layout.c:680` | `static void test_multicol_used_counts(void **state)` |
+| `test_multicol_used_edges` | function | `tests/test_flex_layout.c:717` | `static void test_multicol_used_edges(void **state)` |
+| `test_negative_fields_clamped` | function | `tests/test_flex_layout.c:131` | `static void test_negative_fields_clamped(void **state)` |
+| `test_shrink_equal` | function | `tests/test_flex_layout.c:49` | `static void test_shrink_equal(void **state)` |
+| `test_shrink_with_min_clamp` | function | `tests/test_flex_layout.c:58` | `static void test_shrink_with_min_clamp(void **state)` |
+| `test_space_between_single_item_is_start` | function | `tests/test_flex_layout.c:123` | `static void test_space_between_single_item_is_start(void **state)` |
+| `to` | function | `tests/test_flex_layout.c:280` | `* jumps to (1,0);` |
+| `main` | function | `tests/test_form.c:207` | `int main(void)` |
+| `test_block_foreign_scheme` | function | `tests/test_form.c:155` | `static void test_block_foreign_scheme(void **state)` |
+| `test_block_http_downgrade` | function | `tests/test_form.c:145` | `static void test_block_http_downgrade(void **state)` |
+| `test_block_null_field_name` | function | `tests/test_form.c:183` | `static void test_block_null_field_name(void **state)` |
+| `test_block_relative_action_on_local_base` | function | `tests/test_form.c:164` | `static void test_block_relative_action_on_local_base(void **state)` |
+| `test_block_too_many_fields` | function | `tests/test_form.c:173` | `static void test_block_too_many_fields(void **state)` |
+| `test_build_null_args` | function | `tests/test_form.c:192` | `static void test_build_null_args(void **state)` |
+| `test_encode_basic` | function | `tests/test_form.c:24` | `static void test_encode_basic(void **state)` |
+| `test_encode_empty_and_nameless` | function | `tests/test_form.c:51` | `static void test_encode_empty_and_nameless(void **state)` |
+| `test_encode_null_args` | function | `tests/test_form.c:67` | `static void test_encode_null_args(void **state)` |
+| `test_encode_overflow_fails_closed` | function | `tests/test_form.c:59` | `static void test_encode_overflow_fails_closed(void **state)` |
+| `test_encode_space_and_reserved` | function | `tests/test_form.c:34` | `static void test_encode_space_and_reserved(void **state)` |
+| `test_encode_unreserved_kept` | function | `tests/test_form.c:43` | `static void test_encode_unreserved_kept(void **state)` |
+| `test_get_absolute_https_action_ignores_base` | function | `tests/test_form.c:89` | `static void test_get_absolute_https_action_ignores_base(void **state)` |
+| `test_get_action_cleaned_of_whitespace` | function | `tests/test_form.c:119` | `static void test_get_action_cleaned_of_whitespace(void **state)` |
+| `test_get_empty_action_submits_to_base` | function | `tests/test_form.c:100` | `static void test_get_empty_action_submits_to_base(void **state)` |
 | `test_get_no_fields_still_navigates` | function | `tests/test_form.c:199` | `static void test_get_no_fields_still_navigates(void **state)` |
 | `test_get_relative_action_on_https_base` | function | `tests/test_form.c:78` | `static void test_get_relative_action_on_https_base(void **state)` |
 | `test_get_replaces_existing_query` | function | `tests/test_form.c:109` | `static void test_get_replaces_existing_query(void **state)` |
@@ -29,7 +197,7 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `OUT_FILE` | macro | `tests/test_freedom.c:27` | `#define OUT_FILE` |
 | `_POSIX_C_SOURCE` | macro | `tests/test_freedom.c:11` | `#define _POSIX_C_SOURCE` |
 | `ballooned` | function | `tests/test_freedom.c:1858` | `* ballooned (body + wrapper re-opened per child) and the LAST wrapper piece  * became the contain...` |
-| `band` | function | `tests/test_freedom.c:2366` | `* band (which already recurses into nested containers) owns it. */ static void test_dump_layout_c...` |
+| `band` | function | `tests/test_freedom.c:2367` | `* band (which already recurses into nested containers) owns it. */ static void test_dump_layout_c...` |
 | `blend` | function | `tests/test_freedom.c:491` | `* not some other blend (double-composited or wrong alpha). */ static void test_download_png_group...` |
 | `blend` | function | `tests/test_freedom.c:1517` | `* visibly different from either input color or an OVER blend (which would show  * opaque blue). E...` |
 | `bottom` | function | `tests/test_freedom.c:2150` | `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ /* (Each sized float now has a box of...` |
@@ -37,7 +205,7 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `ink_width` | function | `tests/test_freedom.c:630` | `static double ink_width(const char *html)` |
 | `is_pdf_file` | function | `tests/test_freedom.c:64` | `static int is_pdf_file(const char *path)` |
 | `is_png_file` | function | `tests/test_freedom.c:74` | `static int is_png_file(const char *path)` |
-| `main` | function | `tests/test_freedom.c:2855` | `int main(void)` |
+| `main` | function | `tests/test_freedom.c:2917` | `int main(void)` |
 | `markup` | function | `tests/test_freedom.c:1647` | `* against an unrotated control render of the identical markup (a 50-char-wide box  * at x:[24,975...` |
 | `markup` | function | `tests/test_freedom.c:1706` | `* unscaled control render of the identical markup (box y:[24,49] at x=500,  * center y~36.5): y=2...` |
 | `read_file_all` | function | `tests/test_freedom.c:90` | `static uint8_t *read_file_all(const char *path, size_t *out_len)` |
@@ -52,13 +220,13 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_download_pdf_requires_path` | function | `tests/test_freedom.c:272` | `static void test_download_pdf_requires_path(void **state)` |
 | `test_download_png_absolute_shrinks_and_anchors_right` | function | `tests/test_freedom.c:556` | `static void test_download_png_absolute_shrinks_and_anchors_right(void **state)` |
 | `test_download_png_broken_image_keeps_row_order` | function | `tests/test_freedom.c:1112` | `static void test_download_png_broken_image_keeps_row_order(void **state)` |
-| `test_download_png_flex_container_paints_one_band` | function | `tests/test_freedom.c:2750` | `static void test_download_png_flex_container_paints_one_band(void **state)` |
-| `test_download_png_gradient_box_text_keeps_gradient` | function | `tests/test_freedom.c:2725` | `static void test_download_png_gradient_box_text_keeps_gradient(void **state)` |
+| `test_download_png_flex_container_paints_one_band` | function | `tests/test_freedom.c:2752` | `static void test_download_png_flex_container_paints_one_band(void **state)` |
+| `test_download_png_gradient_box_text_keeps_gradient` | function | `tests/test_freedom.c:2727` | `static void test_download_png_gradient_box_text_keeps_gradient(void **state)` |
 | `test_download_png_images_local` | function | `tests/test_freedom.c:313` | `static void test_download_png_images_local(void **state)` |
 | `test_download_png_inline_block_flows_in_line` | function | `tests/test_freedom.c:938` | `static void test_download_png_inline_block_flows_in_line(void **state)` |
-| `test_download_png_inline_block_shrinks_and_centers` | function | `tests/test_freedom.c:2770` | `static void test_download_png_inline_block_shrinks_and_centers(void **state)` |
+| `test_download_png_inline_block_shrinks_and_centers` | function | `tests/test_freedom.c:2772` | `static void test_download_png_inline_block_shrinks_and_centers(void **state)` |
 | `test_download_png_inline_replaced_share_row` | function | `tests/test_freedom.c:1052` | `static void test_download_png_inline_replaced_share_row(void **state)` |
-| `test_download_png_inline_svg_path_and_drops_image` | function | `tests/test_freedom.c:2814` | `static void test_download_png_inline_svg_path_and_drops_image(void **state)` |
+| `test_download_png_inline_svg_path_and_drops_image` | function | `tests/test_freedom.c:2816` | `static void test_download_png_inline_svg_path_and_drops_image(void **state)` |
 | `test_download_png_line_height_zero_does_not_shrink_line` | function | `tests/test_freedom.c:1386` | `static void test_download_png_line_height_zero_does_not_shrink_line(void **state)` |
 | `test_download_png_local` | function | `tests/test_freedom.c:281` | `static void test_download_png_local(void **state)` |
 | `test_download_png_negative_zindex_paints_behind_inflow` | function | `tests/test_freedom.c:390` | `static void test_download_png_negative_zindex_paints_behind_inflow(void **state)` |
@@ -69,18 +237,20 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_download_png_webfont_shapes` | function | `tests/test_freedom.c:1264` | `static void test_download_png_webfont_shapes(void **state)` |
 | `test_dump_console_shows_output_and_error` | function | `tests/test_freedom.c:1765` | `static void test_dump_console_shows_output_and_error(void **state)` |
 | `test_dump_dom_prints_render_tree` | function | `tests/test_freedom.c:1825` | `static void test_dump_dom_prints_render_tree(void **state)` |
-| `test_dump_layout_band_flushes_line_before_clear` | function | `tests/test_freedom.c:2435` | `static void test_dump_layout_band_flushes_line_before_clear(void **state)` |
-| `test_dump_layout_flex_auto_margin_push_right` | function | `tests/test_freedom.c:2475` | `static void test_dump_layout_flex_auto_margin_push_right(void **state)` |
+| `test_dump_layout_band_flushes_line_before_clear` | function | `tests/test_freedom.c:2436` | `static void test_dump_layout_band_flushes_line_before_clear(void **state)` |
+| `test_dump_layout_flex_auto_margin_push_right` | function | `tests/test_freedom.c:2476` | `static void test_dump_layout_flex_auto_margin_push_right(void **state)` |
 | `test_dump_layout_flex_item_sibling_boxes` | function | `tests/test_freedom.c:1968` | `static void test_dump_layout_flex_item_sibling_boxes(void **state)` |
-| `test_dump_layout_inline_box_second_run_stays` | function | `tests/test_freedom.c:2337` | `static void test_dump_layout_inline_box_second_run_stays(void **state)` |
-| `test_dump_layout_line_opening_image_is_inline` | function | `tests/test_freedom.c:2409` | `static void test_dump_layout_line_opening_image_is_inline(void **state)` |
-| `test_dump_layout_nested_column_takes_max` | function | `tests/test_freedom.c:2518` | `static void test_dump_layout_nested_column_takes_max(void **state)` |
+| `test_dump_layout_inline_box_second_run_stays` | function | `tests/test_freedom.c:2338` | `static void test_dump_layout_inline_box_second_run_stays(void **state)` |
+| `test_dump_layout_inline_input_shares_line` | function | `tests/test_freedom.c:2899` | `static void test_dump_layout_inline_input_shares_line(void **state)` |
+| `test_dump_layout_line_opening_image_is_inline` | function | `tests/test_freedom.c:2410` | `static void test_dump_layout_line_opening_image_is_inline(void **state)` |
+| `test_dump_layout_nested_column_takes_max` | function | `tests/test_freedom.c:2519` | `static void test_dump_layout_nested_column_takes_max(void **state)` |
 | `test_dump_layout_oof_subtree_real_layout` | function | `tests/test_freedom.c:1927` | `static void test_dump_layout_oof_subtree_real_layout(void **state)` |
 | `test_dump_layout_pulled_rail_single_margin` | function | `tests/test_freedom.c:2170` | `static void test_dump_layout_pulled_rail_single_margin(void **state)` |
 | `test_dump_layout_root_box_survives_replaced_run` | function | `tests/test_freedom.c:2077` | `static void test_dump_layout_root_box_survives_replaced_run(void **state)` |
-| `test_dump_layout_row_nested_in_column` | function | `tests/test_freedom.c:2286` | `static void test_dump_layout_row_nested_in_column(void **state)` |
+| `test_dump_layout_row_nested_in_column` | function | `tests/test_freedom.c:2287` | `static void test_dump_layout_row_nested_in_column(void **state)` |
+| `test_dump_layout_shrink_pill_nested_container` | function | `tests/test_freedom.c:2862` | `static void test_dump_layout_shrink_pill_nested_container(void **state)` |
 | `test_dump_layout_sticky_footer` | function | `tests/test_freedom.c:2042` | `static void test_dump_layout_sticky_footer(void **state)` |
-| `test_dump_timings_prints_stages` | function | `tests/test_freedom.c:2830` | `static void test_dump_timings_prints_stages(void **state)` |
+| `test_dump_timings_prints_stages` | function | `tests/test_freedom.c:2832` | `static void test_dump_timings_prints_stages(void **state)` |
 | `test_heading_colour_matches_body_text` | function | `tests/test_freedom.c:715` | `static void test_heading_colour_matches_body_text(void **state)` |
 | `test_headless_js_measures_real_geometry` | function | `tests/test_freedom.c:161` | `static void test_headless_js_measures_real_geometry(void **state)` |
 | `test_headless_timer_navigation_followed` | function | `tests/test_freedom.c:187` | `static void test_headless_timer_navigation_followed(void **state)` |
@@ -92,10 +262,10 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_missing_file` | function | `tests/test_freedom.c:236` | `static void test_missing_file(void **state)` |
 | `test_no_args` | function | `tests/test_freedom.c:125` | `static void test_no_args(void **state)` |
 | `test_no_dump_console_without_flag` | function | `tests/test_freedom.c:1800` | `static void test_no_dump_console_without_flag(void **state)` |
-| `test_rejects_http_url` | function | `tests/test_freedom.c:2567` | `static void test_rejects_http_url(void **state)` |
+| `test_rejects_http_url` | function | `tests/test_freedom.c:2569` | `static void test_rejects_http_url(void **state)` |
 | `test_version` | function | `tests/test_freedom.c:116` | `static void test_version(void **state)` |
 | `wf_test_host_font` | function | `tests/test_freedom.c:1243` | `static uint8_t *wf_test_host_font(const char *name, size_t *out_n)` |
-| `white` | function | `tests/test_freedom.c:2629` | `* and not white (the old behaviour where only text rows got background fills). */ static void tes...` |
+| `white` | function | `tests/test_freedom.c:2631` | `* and not white (the old behaviour where only text rows got background fills). */ static void tes...` |
 | `main` | function | `tests/test_hls.c:219` | `int main(void)` |
 | `test_empty_m3u8_is_ok` | function | `tests/test_hls.c:22` | `static void test_empty_m3u8_is_ok(void **state)` |
 | `test_handles_windows_line_endings` | function | `tests/test_hls.c:209` | `static void test_handles_windows_line_endings(void **state)` |
@@ -326,175 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_event_once` | function | `tests/test_js_dom.c:1502` | `static void test_event_once(void **state)` |
 | `test_event_onkeydown_fires` | function | `tests/test_js_dom.c:955` | `static void test_event_onkeydown_fires(void **state)` |
 | `test_event_prevent_default_suppresses` | function | `tests/test_js_dom.c:991` | `static void test_event_prevent_default_suppresses(void **state)` |
-| `test_event_remove_listener` | function | `tests/test_js_dom.c:1488` | `static void test_event_remove_listener(void **state)` |
-| `test_event_script_dispatch_custom_event` | function | `tests/test_js_dom.c:1572` | `static void test_event_script_dispatch_custom_event(void **state)` |
-| `test_event_stop_immediate_propagation` | function | `tests/test_js_dom.c:1463` | `static void test_event_stop_immediate_propagation(void **state)` |
-| `test_event_stop_propagation` | function | `tests/test_js_dom.c:1450` | `static void test_event_stop_propagation(void **state)` |
-| `test_event_submit_bubbles_to_document` | function | `tests/test_js_dom.c:1524` | `static void test_event_submit_bubbles_to_document(void **state)` |
-| `test_ext_blob_family` | function | `tests/test_js_dom.c:2025` | `static void test_ext_blob_family(void **state)` |
-| `test_ext_compare_document_position` | function | `tests/test_js_dom.c:1937` | `static void test_ext_compare_document_position(void **state)` |
-| `test_ext_document_helpers` | function | `tests/test_js_dom.c:1967` | `static void test_ext_document_helpers(void **state)` |
-| `test_ext_insert_adjacent` | function | `tests/test_js_dom.c:2044` | `static void test_ext_insert_adjacent(void **state)` |
-| `test_ext_is_equal_node` | function | `tests/test_js_dom.c:2146` | `static void test_ext_is_equal_node(void **state)` |
-| `test_ext_prototype_delegation` | function | `tests/test_js_dom.c:2059` | `static void test_ext_prototype_delegation(void **state)` |
-| `test_ext_shadow_root` | function | `tests/test_js_dom.c:1946` | `static void test_ext_shadow_root(void **state)` |
-| `test_ext_tree_navigation` | function | `tests/test_js_dom.c:1926` | `static void test_ext_tree_navigation(void **state)` |
-| `test_ext_tree_walker_terminates` | function | `tests/test_js_dom.c:1957` | `static void test_ext_tree_walker_terminates(void **state)` |
-| `test_focus_add_event_listener_fires` | function | `tests/test_js_dom.c:1027` | `static void test_focus_add_event_listener_fires(void **state)` |
-| `test_focus_blur_scroll_no_handler_allows_default` | function | `tests/test_js_dom.c:1121` | `static void test_focus_blur_scroll_no_handler_allows_default(void **state)` |
-| `test_focus_blur_scroll_null_args` | function | `tests/test_js_dom.c:1129` | `static void test_focus_blur_scroll_null_args(void **state)` |
-| `test_focus_blur_scroll_prevent_default` | function | `tests/test_js_dom.c:1093` | `static void test_focus_blur_scroll_prevent_default(void **state)` |
-| `test_geom_absent_is_zero` | function | `tests/test_js_dom.c:1624` | `static void test_geom_absent_is_zero(void **state)` |
-| `test_geom_installed_is_real` | function | `tests/test_js_dom.c:1631` | `static void test_geom_installed_is_real(void **state)` |
-| `test_geom_null_ctx` | function | `tests/test_js_dom.c:1669` | `static void test_geom_null_ctx(void **state)` |
-| `test_get_computed_style_inline` | function | `tests/test_js_dom.c:314` | `static void test_get_computed_style_inline(void **state)` |
-| `test_get_element_by_id` | function | `tests/test_js_dom.c:99` | `static void test_get_element_by_id(void **state)` |
-| `test_history_cross_origin_is_security_error` | function | `tests/test_js_dom.c:1702` | `static void test_history_cross_origin_is_security_error(void **state)` |
-| `test_history_go_records_delta` | function | `tests/test_js_dom.c:1728` | `static void test_history_go_records_delta(void **state)` |
-| `test_history_is_bounded` | function | `tests/test_js_dom.c:1738` | `static void test_history_is_bounded(void **state)` |
-| `test_history_popstate_restores_entry` | function | `tests/test_js_dom.c:1713` | `static void test_history_popstate_restores_entry(void **state)` |
-| `test_history_push_replace_update_location` | function | `tests/test_js_dom.c:1682` | `static void test_history_push_replace_update_location(void **state)` |
-| `test_inner_html_builds_and_queryable` | function | `tests/test_js_dom.c:642` | `static void test_inner_html_builds_and_queryable(void **state)` |
-| `test_inner_html_getter_serializes` | function | `tests/test_js_dom.c:652` | `static void test_inner_html_getter_serializes(void **state)` |
-| `test_install_null_args` | function | `tests/test_js_dom.c:88` | `static void test_install_null_args(void **state)` |
-| `test_interfaces_window_and_canvas` | function | `tests/test_js_dom.c:2008` | `static void test_interfaces_window_and_canvas(void **state)` |
-| `test_intersection_observer_fires_synthetically` | function | `tests/test_js_dom.c:288` | `static void test_intersection_observer_fires_synthetically(void **state)` |
-| `test_intl_stub_does_not_throw` | function | `tests/test_js_dom.c:430` | `static void test_intl_stub_does_not_throw(void **state)` |
-| `test_intl_surface` | function | `tests/test_js_dom.c:2075` | `static void test_intl_surface(void **state)` |
-| `test_invalid_handles` | function | `tests/test_js_dom.c:146` | `static void test_invalid_handles(void **state)` |
-| `test_lifecycle_listeners_get_event` | function | `tests/test_js_dom.c:2089` | `static void test_lifecycle_listeners_get_event(void **state)` |
-| `test_local_page_captures_nav` | function | `tests/test_js_dom.c:797` | `static void test_local_page_captures_nav(void **state)` |
-| `test_location_assign_and_window_last_wins` | function | `tests/test_js_dom.c:776` | `static void test_location_assign_and_window_last_wins(void **state)` |
-| `test_location_href_set_captures_raw` | function | `tests/test_js_dom.c:750` | `static void test_location_href_set_captures_raw(void **state)` |
-| `test_location_pathname_defaults_slash` | function | `tests/test_js_dom.c:742` | `static void test_location_pathname_defaults_slash(void **state)` |
-| `test_location_reads_real_components` | function | `tests/test_js_dom.c:725` | `static void test_location_reads_real_components(void **state)` |
-| `test_location_replace_sets_replace_flag` | function | `tests/test_js_dom.c:764` | `static void test_location_replace_sets_replace_flag(void **state)` |
-| `test_methods_are_frozen` | function | `tests/test_js_dom.c:156` | `static void test_methods_are_frozen(void **state)` |
-| `test_modern_globals_do_not_throw` | function | `tests/test_js_dom.c:265` | `static void test_modern_globals_do_not_throw(void **state)` |
-| `test_mouse_add_event_listener_fires` | function | `tests/test_js_dom.c:1139` | `static void test_mouse_add_event_listener_fires(void **state)` |
-| `test_mouse_mousemove_sees_coords` | function | `tests/test_js_dom.c:1172` | `static void test_mouse_mousemove_sees_coords(void **state)` |
-| `test_mouse_multi_event_fires` | function | `tests/test_js_dom.c:1189` | `static void test_mouse_multi_event_fires(void **state)` |
-| `test_mouse_no_handler_allows_default` | function | `tests/test_js_dom.c:1239` | `static void test_mouse_no_handler_allows_default(void **state)` |
-| `test_mouse_null_args` | function | `tests/test_js_dom.c:1246` | `static void test_mouse_null_args(void **state)` |
-| `test_mouse_onmouseout_fires` | function | `tests/test_js_dom.c:1156` | `static void test_mouse_onmouseout_fires(void **state)` |
-| `test_mouse_prevent_default_suppresses` | function | `tests/test_js_dom.c:1223` | `static void test_mouse_prevent_default_suppresses(void **state)` |
-| `test_mutation_observer_fires_synthetically` | function | `tests/test_js_dom.c:336` | `static void test_mutation_observer_fires_synthetically(void **state)` |
-| `test_navigation` | function | `tests/test_js_dom.c:120` | `static void test_navigation(void **state)` |
-| `test_no_io_with_dom` | function | `tests/test_js_dom.c:167` | `static void test_no_io_with_dom(void **state)` |
-| `test_no_nav_request_when_idle` | function | `tests/test_js_dom.c:788` | `static void test_no_nav_request_when_idle(void **state)` |
-| `test_node_count` | function | `tests/test_js_dom.c:107` | `static void test_node_count(void **state)` |
-| `test_node_identity_is_cached` | function | `tests/test_js_dom.c:206` | `static void test_node_identity_is_cached(void **state)` |
-| `test_onload_runs_and_mutates` | function | `tests/test_js_dom.c:621` | `static void test_onload_runs_and_mutates(void **state)` |
-| `test_query_selector_from_js` | function | `tests/test_js_dom.c:182` | `static void test_query_selector_from_js(void **state)` |
-| `test_resize_observer_fires_synthetically` | function | `tests/test_js_dom.c:326` | `static void test_resize_observer_fires_synthetically(void **state)` |
-| `test_scroll_add_event_listener_fires` | function | `tests/test_js_dom.c:1060` | `static void test_scroll_add_event_listener_fires(void **state)` |
-| `test_scroll_onscroll_fires` | function | `tests/test_js_dom.c:1077` | `static void test_scroll_onscroll_fires(void **state)` |
-| `test_set_attribute_makes_queryable` | function | `tests/test_js_dom.c:563` | `static void test_set_attribute_makes_queryable(void **state)` |
-| `test_set_location_null_ctx` | function | `tests/test_js_dom.c:809` | `static void test_set_location_null_ctx(void **state)` |
-| `test_set_text_content_detach_is_memory_safe` | function | `tests/test_js_dom.c:523` | `static void test_set_text_content_detach_is_memory_safe(void **state)` |
-| `test_set_text_content_reflects_in_tree` | function | `tests/test_js_dom.c:512` | `static void test_set_text_content_reflects_in_tree(void **state)` |
-| `test_settimeout_chains_across_rounds` | function | `tests/test_js_dom.c:491` | `static void test_settimeout_chains_across_rounds(void **state)` |
-| `test_settimeout_flushed_by_pump` | function | `tests/test_js_dom.c:634` | `static void test_settimeout_flushed_by_pump(void **state)` |
-| `test_shadow_mirror_append` | function | `tests/test_js_dom.c:346` | `static void test_shadow_mirror_append(void **state)` |
-| `test_shadow_mirror_inner_html` | function | `tests/test_js_dom.c:354` | `static void test_shadow_mirror_inner_html(void **state)` |
-| `test_shims_survive_globalthis_rebinding` | function | `tests/test_js_dom.c:1981` | `static void test_shims_survive_globalthis_rebinding(void **state)` |
-| `test_storage_is_ephemeral` | function | `tests/test_js_dom.c:662` | `static void test_storage_is_ephemeral(void **state)` |
-| `test_storage_quota_exceeded` | function | `tests/test_js_dom.c:1859` | `static void test_storage_quota_exceeded(void **state)` |
-| `test_storage_seeded_and_dirty_snapshot` | function | `tests/test_js_dom.c:1828` | `static void test_storage_seeded_and_dirty_snapshot(void **state)` |
-| `test_storage_untrusted_stays_ephemeral` | function | `tests/test_js_dom.c:1819` | `static void test_storage_untrusted_stays_ephemeral(void **state)` |
-| `test_style_write_through` | function | `tests/test_js_dom.c:302` | `static void test_style_write_through(void **state)` |
-| `test_submit_add_event_listener_fires` | function | `tests/test_js_dom.c:1346` | `static void test_submit_add_event_listener_fires(void **state)` |
-| `test_submit_no_handler_allows_default` | function | `tests/test_js_dom.c:1403` | `static void test_submit_no_handler_allows_default(void **state)` |
-| `test_submit_onsubmit_fires` | function | `tests/test_js_dom.c:1365` | `static void test_submit_onsubmit_fires(void **state)` |
-| `test_submit_prevent_default` | function | `tests/test_js_dom.c:1384` | `static void test_submit_prevent_default(void **state)` |
-| `test_trusted_fetch_request_response` | function | `tests/test_js_dom.c:2125` | `static void test_trusted_fetch_request_response(void **state)` |
-| `test_trusted_send_beacon` | function | `tests/test_js_dom.c:2187` | `static void test_trusted_send_beacon(void **state)` |
-| `test_trusted_worker` | function | `tests/test_js_dom.c:2211` | `static void test_trusted_worker(void **state)` |
-| `test_url_constructor_parses_components` | function | `tests/test_js_dom.c:443` | `static void test_url_constructor_parses_components(void **state)` |
-| `test_url_search_params` | function | `tests/test_js_dom.c:466` | `static void test_url_search_params(void **state)` |
-| `test_video_from_scripts_no_video` | function | `tests/test_js_dom.c:2412` | `static void test_video_from_scripts_no_video(void **state)` |
-| `test_video_from_scripts_null_args` | function | `tests/test_js_dom.c:2423` | `static void test_video_from_scripts_null_args(void **state)` |
-| `test_video_from_scripts_relative_resolved` | function | `tests/test_js_dom.c:2377` | `static void test_video_from_scripts_relative_resolved(void **state)` |
-| `test_video_from_scripts_video_data_is_variable` | function | `tests/test_js_dom.c:2362` | `static void test_video_from_scripts_video_data_is_variable(void **state)` |
-| `test_video_from_scripts_video_data_string` | function | `tests/test_js_dom.c:2395` | `static void test_video_from_scripts_video_data_string(void **state)` |
-| `test_video_shim_empty_html` | function | `tests/test_js_dom.c:2318` | `static void test_video_shim_empty_html(void **state)` |
-| `test_video_shim_no_video` | function | `tests/test_js_dom.c:2244` | `static void test_video_shim_no_video(void **state)` |
-| `test_video_shim_null_ctx` | function | `tests/test_js_dom.c:2330` | `static void test_video_shim_null_ctx(void **state)` |
-| `test_video_shim_relative_url_resolved` | function | `tests/test_js_dom.c:2300` | `static void test_video_shim_relative_url_resolved(void **state)` |
-| `test_video_shim_uses_index_1` | function | `tests/test_js_dom.c:2252` | `static void test_video_shim_uses_index_1(void **state)` |
-| `test_video_shim_video_data_wins` | function | `tests/test_js_dom.c:2276` | `static void test_video_shim_video_data_wins(void **state)` |
-| `test_ws_absent_until_enabled` | function | `tests/test_js_dom.c:1754` | `static void test_ws_absent_until_enabled(void **state)` |
-| `test_ws_lifecycle_records_ops_and_fires_events` | function | `tests/test_js_dom.c:1759` | `static void test_ws_lifecycle_records_ops_and_fires_events(void **state)` |
-| `test_ws_rejects_plaintext_and_caps` | function | `tests/test_js_dom.c:1803` | `static void test_ws_rejects_plaintext_and_caps(void **state)` |
-| `EXPECT` | macro | `tests/test_js_env.c:51` | `#define EXPECT(f, src, expected)` |
-| `fixture` | struct | `tests/test_js_env.c:25` | `` |
-| `main` | function | `tests/test_js_env.c:355` | `int main(void)` |
-| `readback_checksum` | function | `tests/test_js_env.c:279` | `static void readback_checksum(uint64_t key, char *out, size_t out_size)` |
-| `run` | function | `tests/test_js_env.c:47` | `static js_status run(fixture *f, const char *src, js_result *r)` |
-| `setup` | function | `tests/test_js_env.c:29` | `static int setup(void **state)` |
-| `teardown` | function | `tests/test_js_env.c:38` | `static int teardown(void **state)` |
-| `test_bool_nav_props` | function | `tests/test_js_env.c:103` | `static void test_bool_nav_props(void **state)` |
-| `test_canvas_readback` | function | `tests/test_js_env.c:239` | `static void test_canvas_readback(void **state)` |
-| `test_canvas_unforgeable` | function | `tests/test_js_env.c:303` | `static void test_canvas_unforgeable(void **state)` |
-| `test_canvas_unlinkable` | function | `tests/test_js_env.c:295` | `static void test_canvas_unlinkable(void **state)` |
-| `test_clocks_coarse` | function | `tests/test_js_env.c:178` | `static void test_clocks_coarse(void **state)` |
-| `test_coexists_with_dom` | function | `tests/test_js_env.c:326` | `static void test_coexists_with_dom(void **state)` |
-| `test_crypto_present` | function | `tests/test_js_env.c:129` | `static void test_crypto_present(void **state)` |
-| `test_crypto_random_uuid` | function | `tests/test_js_env.c:137` | `static void test_crypto_random_uuid(void **state)` |
-| `test_crypto_random_values` | function | `tests/test_js_env.c:146` | `static void test_crypto_random_values(void **state)` |
-| `test_install_null_args` | function | `tests/test_js_env.c:62` | `static void test_install_null_args(void **state)` |
-| `test_legacy_nav_props` | function | `tests/test_js_env.c:92` | `static void test_legacy_nav_props(void **state)` |
-| `test_navigator_identity` | function | `tests/test_js_env.c:74` | `static void test_navigator_identity(void **state)` |
-| `test_navigator_mime_types` | function | `tests/test_js_env.c:120` | `static void test_navigator_mime_types(void **state)` |
-| `test_navigator_plugins` | function | `tests/test_js_env.c:112` | `static void test_navigator_plugins(void **state)` |
-| `test_performance_timing_identity_safe` | function | `tests/test_js_env.c:190` | `static void test_performance_timing_identity_safe(void **state)` |
-| `test_screen_bucketed` | function | `tests/test_js_env.c:166` | `static void test_screen_bucketed(void **state)` |
-| `test_screen_edges` | function | `tests/test_js_env.c:220` | `static void test_screen_edges(void **state)` |
-| `test_screen_orientation` | function | `tests/test_js_env.c:156` | `static void test_screen_orientation(void **state)` |
-| `test_unforgeable` | function | `tests/test_js_env.c:206` | `static void test_unforgeable(void **state)` |
-| `chain_parent` | function | `tests/test_js_geom.c:97` | `static dom_node_id chain_parent(void *ctx, dom_node_id n)` |
-| `cyclic_parent` | function | `tests/test_js_geom.c:132` | `static dom_node_id cyclic_parent(void *ctx, dom_node_id n)` |
-| `main` | function | `tests/test_js_geom.c:213` | `int main(void)` |
-| `test_add_and_find` | function | `tests/test_js_geom.c:29` | `static void test_add_and_find(void **state)` |
-| `test_add_rejects_and_clamps` | function | `tests/test_js_geom.c:65` | `static void test_add_rejects_and_clamps(void **state)` |
-| `test_aggregate_cycle_terminates` | function | `tests/test_js_geom.c:137` | `static void test_aggregate_cycle_terminates(void **state)` |
-| `test_aggregate_unions_into_ancestors` | function | `tests/test_js_geom.c:108` | `static void test_aggregate_unions_into_ancestors(void **state)` |
-| `test_capacity_bound` | function | `tests/test_js_geom.c:85` | `static void test_capacity_bound(void **state)` |
-| `test_decode_fails_closed` | function | `tests/test_js_geom.c:179` | `static void test_decode_fails_closed(void **state)` |
-| `test_same_node_unions` | function | `tests/test_js_geom.c:48` | `static void test_same_node_unions(void **state)` |
-| `test_wire_roundtrip` | function | `tests/test_js_geom.c:149` | `static void test_wire_roundtrip(void **state)` |
-| `main` | function | `tests/test_js_policy.c:89` | `int main(void)` |
-| `test_enabled_fail_closed_on_bad_mode` | function | `tests/test_js_policy.c:31` | `static void test_enabled_fail_closed_on_bad_mode(void **state)` |
-| `test_mode_from_str` | function | `tests/test_js_policy.c:36` | `static void test_mode_from_str(void **state)` |
-| `test_mode_str_roundtrip` | function | `tests/test_js_policy.c:53` | `static void test_mode_str_roundtrip(void **state)` |
-| `test_trusted_requires_both_signals` | function | `tests/test_js_policy.c:68` | `static void test_trusted_requires_both_signals(void **state)` |
-| `assert_int_equal` | function | `tests/test_js_sandbox.c:156` | `assert_int_equal(js_eval_once("while(true)` |
-| `assert_int_equal` | function | `tests/test_js_sandbox.c:171` | `assert_int_equal(js_eval(ctx, "while(true)` |
-| `fetches` | type_alias | `tests/test_js_sandbox.c:343` | `typedef struct mod_host { int fetches;` |
-| `main` | function | `tests/test_js_sandbox.c:547` | `int main(void)` |
-| `mh_fetch` | function | `tests/test_js_sandbox.c:361` | `static char *mh_fetch(void *host, const char *url, size_t *len)` |
-| `mh_resolve` | function | `tests/test_js_sandbox.c:346` | `static int mh_resolve(void *host, const char *base, const char *spec, char *out, size_t outsz)` |
-| `mod_host` | struct | `tests/test_js_sandbox.c:344` | `` |
-| `realm_expect` | function | `tests/test_js_sandbox.c:494` | `static void realm_expect(js_context *ctx, const char *src, const char *want)` |
-| `self_fetch` | function | `tests/test_js_sandbox.c:455` | `static char *self_fetch(void *host, const char *url, size_t *len)` |
-| `test_context_free_null_and_double` | function | `tests/test_js_sandbox.c:205` | `static void test_context_free_null_and_double(void **state)` |
-| `test_context_new_and_free` | function | `tests/test_js_sandbox.c:60` | `static void test_context_new_and_free(void **state)` |
-| `test_context_new_null_out` | function | `tests/test_js_sandbox.c:68` | `static void test_context_new_null_out(void **state)` |
-| `test_eval_arithmetic` | function | `tests/test_js_sandbox.c:75` | `static void test_eval_arithmetic(void **state)` |
-| `test_eval_named_captures_location` | function | `tests/test_js_sandbox.c:290` | `static void test_eval_named_captures_location(void **state)` |
-| `test_eval_named_null_filename_defaults` | function | `tests/test_js_sandbox.c:311` | `static void test_eval_named_null_filename_defaults(void **state)` |
-| `test_eval_null_args` | function | `tests/test_js_sandbox.c:213` | `static void test_eval_null_args(void **state)` |
-| `test_eval_runtime_exception` | function | `tests/test_js_sandbox.c:110` | `static void test_eval_runtime_exception(void **state)` |
-| `test_eval_string_concat` | function | `tests/test_js_sandbox.c:89` | `static void test_eval_string_concat(void **state)` |
-| `test_eval_syntax_error` | function | `tests/test_js_sandbox.c:101` | `static void test_eval_syntax_error(void **state)` |
-| `test_eval_thrown_primitive_has_no_location` | function | `tests/test_js_sandbox.c:326` | `static void test_eval_thrown_primitive_has_no_location(void **state)` |
-| `test_filesystem_access_is_reference_error` | function | `tests/test_js_sandbox.c:137` | `static void test_filesystem_access_is_reference_error(void **state)` |
-| `test_infinite_loop_times_out` | function | `tests/test_js_sandbox.c:150` | `static void test_infinite_loop_times_out(void **state)` |
-| `test_loc_file_may_contain_colons` | function | `tests/test_js_sandbox.c:247` | `static void test_loc_file_may_contain_colons(void **state)` |
-| `test_loc_line_only_sets_col_zero` | function | `tests/test_js_sandbox.c:258` | `static void test_loc_line_only_sets_col_zero(void **state)` |
-| `test_loc_parses_bare_frame` | function | `tests/test_js_sandbox.c:238` | `static void test_loc_parses_bare_frame(void **state)` |
-| `test_loc_parses_named_frame` | function | `tests/test_js_sandbox.c:227` | `static void test_loc_parses_named_frame(void **state)` |
-| `test_loc_rejects_garbage_and_null` | function | `tests/test_js_sandbox.c:275` | `static void test_loc_rejects_garbage_and_null(void **state)` |
-| `test_loc_truncates_to_cap` | function | `tests/test_js_sandbox.c:267` | `static void test_loc_truncates_to_cap(void **state)` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

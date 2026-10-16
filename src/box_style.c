@@ -11,6 +11,8 @@
 
 #include "box_style.h"
 
+#include <math.h>
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -369,6 +371,22 @@ double bx_content_cap(double width_cap, int border_box,
     return (w < 1.0) ? 1.0 : w;
 }
 
+double bx_flex_min_clamp(double outer_basis, double min_w, int border_box,
+                         double pad_bord_h, double margin_h) {
+    if (!(min_w > 0.0)) return outer_basis;
+    double floor = min_w + (border_box ? 0.0 : pad_bord_h) + margin_h;
+    return (outer_basis < floor) ? floor : outer_basis;
+}
+
+double bx_border_span(double width_cap, int border_box,
+                      double pad_l, double pad_r, double bord_l, double bord_r) {
+    if (width_cap <= 0.0) return width_cap;
+    if (bord_l < 0.0) bord_l = 0.0;
+    if (bord_r < 0.0) bord_r = 0.0;
+    return bx_content_cap(width_cap, border_box, pad_l, pad_r, bord_l, bord_r)
+           + bord_l + bord_r;
+}
+
 /* One background-size component in px, or -1 when it is `auto` (Backgrounds 3
  * section 3.9). `auto` is both the explicit keyword and the absence of a
  * declaration, which are the same thing for sizing. */
@@ -429,4 +447,21 @@ const char *bx_display_name(bx_display d) {
         case BX_DISPLAY_NONE:         return "none";
     }
     return "inline";
+}
+
+double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box,
+                         double pad_bord_h, double margin_h) {
+    if (!(mw_cap > 0.0)) return outer_basis;            /* none, negative or NaN */
+    double cap = mw_cap + (border_box ? 0.0 : pad_bord_h) + margin_h;
+    return (outer_basis > cap) ? cap : outer_basis;
+}
+
+bx_hplace bx_place_ex(double inset_l, double inset_r, double width_cap, int center,
+                      double avail_w, int has_decl_width) {
+    bx_hplace p = bx_place(inset_l, inset_r, width_cap, center, avail_w);
+    if (has_decl_width && width_cap > p.content_w && isfinite(width_cap)) {
+        p.content_w = width_cap;
+        p.x_off = (inset_l > 0.0) ? inset_l : 0.0;
+    }
+    return p;
 }

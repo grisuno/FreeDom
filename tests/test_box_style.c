@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include <cmocka.h>
+#include <math.h>
 
 #include "box_style.h"
 
@@ -605,8 +606,71 @@ static void test_replaced_box_from_aspect_ratio(void **state) {
     assert_false(bx_replaced_box(CSS_LEN_UNSET, 1000, 1000, 1500, 0.0, &w, &h));
 }
 
+
+/* Flexbox 9.2.3: max-width clamps the flex base size (spec/box_engine.md). */
+static void test_flex_max_clamp(void **state) {
+    (void)state;
+    /* content-box: cap 240 + padding/border 20 + margin 10 */
+    assert_true(fabs(bx_flex_max_clamp(780.0, 240.0, 0, 20.0, 10.0) - 270.0) < 1e-9);
+    /* border-box: the cap already holds padding/border */
+    assert_true(fabs(bx_flex_max_clamp(780.0, 240.0, 1, 20.0, 10.0) - 250.0) < 1e-9);
+    /* under the cap: untouched */
+    assert_true(fabs(bx_flex_max_clamp(100.0, 240.0, 0, 20.0, 10.0) - 100.0) < 1e-9);
+    /* no max-width: untouched, and NaN never leaks */
+    assert_true(fabs(bx_flex_max_clamp(780.0, 0.0, 0, 20.0, 10.0) - 780.0) < 1e-9);
+    assert_true(fabs(bx_flex_max_clamp(780.0, -5.0, 0, 20.0, 10.0) - 780.0) < 1e-9);
+    assert_true(fabs(bx_flex_max_clamp(780.0, NAN, 0, 20.0, 10.0) - 780.0) < 1e-9);
+}
+
+
+/* CSS 2.1 10.3.3: a declared width wider than the containing block overflows. */
+static void test_place_declared_width_overflows(void **state) {
+    (void)state;
+    bx_hplace p = bx_place_ex(0, 0, 4000.0, 0, 960.0, 1);
+    assert_true(fabs(p.content_w - 4000.0) < 1e-9);
+    assert_true(fabs(p.x_off) < 1e-9);
+    /* centring needs slack: an overflowing auto-margin box starts at the inset */
+    p = bx_place_ex(10.0, 10.0, 4000.0, 1, 960.0, 1);
+    assert_true(fabs(p.content_w - 4000.0) < 1e-9);
+    assert_true(fabs(p.x_off - 10.0) < 1e-9);
+    /* a max-width alone never enlarges a box */
+    p = bx_place_ex(0, 0, 4000.0, 0, 960.0, 0);
+    assert_true(fabs(p.content_w - 960.0) < 1e-9);
+    /* under the room: identical to bx_place */
+    bx_hplace a = bx_place_ex(40.0, 20.0, 500.0, 1, 800.0, 1);
+    bx_hplace b = bx_place(40.0, 20.0, 500.0, 1, 800.0);
+    assert_true(fabs(a.content_w - b.content_w) < 1e-9 && fabs(a.x_off - b.x_off) < 1e-9);
+}
+
+
+static void test_border_span(void **state) {
+    (void)state;
+    /* content-box: the declared width is the content; borders sit outside it. */
+    assert_true(dbl_eq(bx_border_span(300.0, 0, 20.0, 20.0, 1.0, 1.0), 302.0));
+    /* border-box: padding and border are inside; the span drops only padding. */
+    assert_true(dbl_eq(bx_border_span(300.0, 1, 20.0, 20.0, 2.0, 2.0), 260.0));
+    /* No cap stays no cap. */
+    assert_true(dbl_eq(bx_border_span(0.0, 0, 20.0, 20.0, 2.0, 2.0), 0.0));
+    /* Negative edges are 0. */
+    assert_true(dbl_eq(bx_border_span(300.0, 0, 0.0, 0.0, -3.0, 2.0), 302.0));
+}
+
+
+static void test_flex_min_clamp(void **state) {
+    (void)state;
+    /* A 66px button with min-width:104px, border-box (the UA button), no margin. */
+    assert_true(dbl_eq(bx_flex_min_clamp(66.0, 104.0, 1, 34.0, 0.0), 104.0));
+    /* content-box: padding+border sit outside the min. */
+    assert_true(dbl_eq(bx_flex_min_clamp(66.0, 104.0, 0, 34.0, 4.0), 142.0));
+    /* Already wider, or no min: unchanged. */
+    assert_true(dbl_eq(bx_flex_min_clamp(200.0, 104.0, 1, 34.0, 0.0), 200.0));
+    assert_true(dbl_eq(bx_flex_min_clamp(66.0, 0.0, 1, 34.0, 0.0), 66.0));
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_flex_min_clamp),
+        cmocka_unit_test(test_border_span),
         cmocka_unit_test(test_place_no_box_is_identity),
         cmocka_unit_test(test_place_max_width_caps),
         cmocka_unit_test(test_place_centering),
@@ -649,6 +713,8 @@ int main(void) {
         cmocka_unit_test(test_lp_used_value),
         cmocka_unit_test(test_border_box_height),
         cmocka_unit_test(test_content_clipped),
+        cmocka_unit_test(test_flex_max_clamp),
+        cmocka_unit_test(test_place_declared_width_overflows),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

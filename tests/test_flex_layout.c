@@ -921,6 +921,114 @@ static void test_grid_place_explicit_cells(void **state) {
     assert_int_equal(row[3], 1); assert_int_equal(col[3], 1);
 }
 
+/* grid-column / grid-row line placement (spec/grid_areas.md section 6). */
+static void test_grid_line_side(void **state) {
+    (void)state;
+    int v = 77;
+    assert_int_equal(fx_grid_line_side("auto", &v), 1);   assert_int_equal(v, FX_GL_AUTO);
+    assert_int_equal(fx_grid_line_side(" 3 ", &v), 1);    assert_int_equal(v, 3);
+    assert_int_equal(fx_grid_line_side("-1", &v), 1);     assert_int_equal(v, -1);
+    assert_int_equal(fx_grid_line_side("span 12", &v), 1);
+    assert_int_equal(v, FX_GL_SPAN_BASE + 12);
+    assert_int_equal(fx_grid_line_side("SPAN  2", &v), 1);
+    assert_int_equal(v, FX_GL_SPAN_BASE + 2);
+    v = 77;
+    /* fail closed, *out untouched */
+    assert_int_equal(fx_grid_line_side("0", &v), 0);
+    assert_int_equal(fx_grid_line_side("span 0", &v), 0);
+    assert_int_equal(fx_grid_line_side("span", &v), 0);
+    assert_int_equal(fx_grid_line_side("main-start", &v), 0);
+    assert_int_equal(fx_grid_line_side("2 main", &v), 0);
+    assert_int_equal(fx_grid_line_side("1.5", &v), 0);
+    assert_int_equal(fx_grid_line_side("", &v), 0);
+    assert_int_equal(fx_grid_line_side(NULL, &v), 0);
+    assert_int_equal(v, 77);
+    /* anti-DoS: an absurd count clamps (like every other CSS factor), never wraps */
+    assert_int_equal(fx_grid_line_side("span 99999999999999999999", &v), 1);
+    assert_int_equal(v, FX_GL_SPAN_BASE + FX_GL_SPAN_MAX);
+    assert_int_equal(fx_grid_line_side("-99999", &v), 1);
+    assert_int_equal(v, -FX_GL_LINE_MAX);
+}
+
+static void test_grid_line_parse(void **state) {
+    (void)state;
+    int s = 9, e = 9;
+    assert_int_equal(fx_grid_line_parse("auto/span 12", &s, &e), 1);
+    assert_int_equal(s, FX_GL_AUTO); assert_int_equal(e, FX_GL_SPAN_BASE + 12);
+    assert_int_equal(fx_grid_line_parse("1 / -1", &s, &e), 1);
+    assert_int_equal(s, 1); assert_int_equal(e, -1);
+    assert_int_equal(fx_grid_line_parse("2", &s, &e), 1);
+    assert_int_equal(s, 2); assert_int_equal(e, FX_GL_AUTO);
+    assert_int_equal(fx_grid_line_parse("span 3", &s, &e), 1);
+    assert_int_equal(s, FX_GL_SPAN_BASE + 3); assert_int_equal(e, FX_GL_AUTO);
+    s = e = 9;
+    assert_int_equal(fx_grid_line_parse("1/2/3", &s, &e), 0);
+    assert_int_equal(fx_grid_line_parse("1/", &s, &e), 0);
+    assert_int_equal(fx_grid_line_parse("/2", &s, &e), 0);
+    assert_int_equal(fx_grid_line_parse("a/b", &s, &e), 0);
+    assert_int_equal(s, 9); assert_int_equal(e, 9);
+}
+
+static void test_grid_line_resolve_table(void **state) {
+    (void)state;
+    const int S = FX_GL_SPAN_BASE;
+    static const struct { int s, e, n, pos, span; } t[] = {
+        { 0, 0, 12, -1, 1 },        /* auto / auto */
+        { S + 6, 0, 12, -1, 6 },    /* span 6 */
+        { 0, S + 6, 12, -1, 6 },    /* auto / span 6 */
+        { 2, 0, 12, 1, 1 },
+        { 1, 3, 12, 0, 2 },
+        { 1, -1, 12, 0, 12 },
+        { 3, 1, 12, 0, 2 },         /* swapped */
+        { 2, 2, 12, 1, 1 },         /* equal => span 1 */
+        { 2, S + 3, 12, 1, 3 },
+        { S + 2, 5, 12, 2, 2 },     /* span counts TOWARD the line */
+        { S + 2, S + 7, 12, -1, 2 },/* two spans: start wins */
+        { -1, 0, 4, 4, 1 },         /* -1 is line 5 of a 4-track grid */
+        { 1, -1, 0, 0, FX_GL_SPAN_MAX }, /* -1, tracks unknown: to the last line */
+        { 1, -2, 0, 0, 1 },         /* other negatives unknown: that side is auto */
+        { -1, 0, 0, -1, 1 },
+        { S + 9, 2, 12, 0, 1 },     /* span past line 1 clamps at line 1 */
+    };
+    for (size_t i = 0; i < sizeof t / sizeof t[0]; ++i) {
+        int pos = 42, span = 42;
+        fx_grid_line_resolve(t[i].s, t[i].e, t[i].n, &pos, &span);
+        assert_int_equal(pos, t[i].pos);
+        assert_int_equal(span, t[i].span);
+    }
+}
+
+/* A fixed column with an AUTO row is placed with the cursor (CSS Grid 1 8.5 step
+ * 4), not pinned to row 0 -- three `grid-column: 1 / -1` banners stack. */
+static void test_grid_place_fixed_col_auto_row(void **state) {
+    (void)state;
+    size_t row[4], col[4];
+    const int span[4] = { 3, 1, 1, 3 };
+    const int frow[4] = { -1, -1, -1, -1 };
+    const int fcol[4] = { 0, -1, -1, 0 };
+    assert_int_equal(fx_grid_place_span(4, 3, span, NULL, frow, fcol, row, col), FX_OK);
+    assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
+    assert_int_equal(row[1], 1); assert_int_equal(col[1], 0);
+    assert_int_equal(row[2], 1); assert_int_equal(col[2], 1);
+    assert_int_equal(row[3], 2); assert_int_equal(col[3], 0);
+}
+
+/* Fixed row + auto column takes the first free column of that row; the tab-stack
+ * idiom (every panel at 1/1) puts all of them in the same cell. */
+static void test_grid_place_fixed_row_auto_col_and_stack(void **state) {
+    (void)state;
+    size_t row[3], col[3];
+    const int frow[3] = { 0, 0, -1 };
+    const int fcol[3] = { -1, -1, -1 };
+    assert_int_equal(fx_grid_place_span(3, 3, NULL, NULL, frow, fcol, row, col), FX_OK);
+    assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
+    assert_int_equal(row[1], 0); assert_int_equal(col[1], 1);
+    const int srow[3] = { 0, 0, 0 };
+    const int scol[3] = { 0, 0, 0 };
+    assert_int_equal(fx_grid_place_span(3, 4, NULL, NULL, srow, scol, row, col), FX_OK);
+    for (int i = 0; i < 3; ++i) { assert_int_equal(row[i], 0); assert_int_equal(col[i], 0); }
+}
+
 /* Both arrays NULL must reproduce the old contract exactly, so no grid without
  * named areas changes. */
 static void test_grid_place_null_fixed_is_unchanged(void **state) {
@@ -1107,6 +1215,11 @@ int main(void) {
         cmocka_unit_test(test_multicol_balance),
         cmocka_unit_test(test_auto_margins_push_right_and_center),
         cmocka_unit_test(test_autofill_count),
+        cmocka_unit_test(test_grid_line_side),
+        cmocka_unit_test(test_grid_line_parse),
+        cmocka_unit_test(test_grid_line_resolve_table),
+        cmocka_unit_test(test_grid_place_fixed_col_auto_row),
+        cmocka_unit_test(test_grid_place_fixed_row_auto_col_and_stack),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

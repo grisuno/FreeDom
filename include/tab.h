@@ -229,6 +229,12 @@ void tab_set_css_allowed(tab *t, int allowed);
  * normalized desktop, so no real geometry leaks into computed lengths. */
 void tab_set_viewport_w(tab *t, int px);
 
+/* Subresources the parent served for the LAST load (the worker's TAG_SUBREQ: XHR,
+ * fetch, external scripts, ES modules): how many, and the total wall time the
+ * worker spent blocked on them, in microseconds. A diagnostic (FREEDOM_PERF): it
+ * separates "the page's JS is slow" from "the page waited on the network". */
+void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);
+
 /* Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants for
  * this load, never the worker's claims): net_allowed permits any well-formed method;
  * css_allowed alone permits exactly "GET"; a NULL/empty method or no grant is refused. */

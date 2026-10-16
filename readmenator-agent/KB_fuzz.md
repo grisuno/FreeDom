@@ -5,9 +5,9 @@
 - Layer: utility
 - Language: c
 - Symbols:
-  - `fuzz_root_match` (function, line 66) `static int fuzz_root_match(void *ctx, const css_sel *sel)`
-  - `LLVMFuzzerTestOneInput` (function, line 80) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-- Depends on: `include/css.h`, `include/css_select.h`
+  - `fuzz_root_match` (function, line 76) `static int fuzz_root_match(void *ctx, const css_sel *sel)`
+  - `LLVMFuzzerTestOneInput` (function, line 90) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- Depends on: `include/css.h`, `include/css_select.h`, `include/flex_layout.h`
 
 ## fuzz/fuzz_data_url.c
 - Layer: data_access
@@ -118,7 +118,7 @@
 - Layer: utility
 - Language: c
 - Symbols:
-  - `LLVMFuzzerTestOneInput` (function, line 10) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+  - `LLVMFuzzerTestOneInput` (function, line 14) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 - Depends on: `include/prefetch.h`
 
 ## fuzz/fuzz_prefs.c

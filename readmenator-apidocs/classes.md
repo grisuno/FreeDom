@@ -42,6 +42,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`cch_node`](modules/src.css_chain.c.md#cch_node) struct in `src/css_chain.c`
 - [`chain`](modules/src.page_view.c.md#chain) type_alias in `src/page_view.c`
 - [`child_state`](modules/src.tab.c.md#child_state) struct in `src/tab.c`
+- [`cix_entry`](modules/include.css_index.h.md#cix_entry) struct in `include/css_index.h`
+- [`cix_index`](modules/include.css_index.h.md#cix_index) struct in `include/css_index.h`
 - [`cl_ctx`](modules/include.css_length.h.md#cl_ctx) struct in `include/css_length.h`
 - [`cl_lp`](modules/include.css_length.h.md#cl_lp) struct in `include/css_length.h`
 - [`cl_status`](modules/include.css_length.h.md#cl_status) enum in `include/css_length.h`
@@ -256,6 +258,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`jt_ws_kind`](modules/include.js_trusted.h.md#jt_ws_kind) enum in `include/js_trusted.h`
 - [`jt_ws_op`](modules/include.js_trusted.h.md#jt_ws_op) struct in `include/js_trusted.h`
 - [`key`](modules/gui.browser_ui.c.md#key) type_alias in `gui/browser_ui.c`
+- [`key`](modules/include.css_index.h.md#key) type_alias in `include/css_index.h`
 - [`key_ref`](modules/src.web_storage.c.md#key_ref) struct in `src/web_storage.c`
 - [`kind`](modules/gui.browser_ui.c.md#kind) type_alias in `gui/browser_ui.c`
 - [`css_pseudo_match.kind`](modules/include.css_select.h.md#css_pseudo_match-kind) type_alias in `include/css_select.h`
@@ -270,6 +273,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`kind`](modules/src.css_mq.c.md#kind) type_alias in `src/css_mq.c`
 - [`cx_item.layer`](modules/include.compositor.h.md#cx_item-layer) type_alias in `include/compositor.h`
 - [`bx_edges.left`](modules/include.box_style.h.md#bx_edges-left) type_alias in `include/box_style.h`
+- [`len_rebase_ctx`](modules/src.css.c.md#len_rebase_ctx) struct in `src/css.c`
 - [`fb_entry.level`](modules/include.freebug.h.md#fb_entry-level) type_alias in `include/freebug.h`
 - [`js_mem_state.limit`](modules/src.js_sandbox.c.md#js_mem_state-limit) type_alias in `src/js_sandbox.c`
 - [`line_desc`](modules/gui.browser_ui.c.md#line_desc) type_alias in `gui/browser_ui.c`
@@ -290,6 +294,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`mq_cur`](modules/src.css_mq.c.md#mq_cur) struct in `src/css_mq.c`
 - [`item_sides.mr`](modules/gui.browser_ui.c.md#item_sides-mr) type_alias in `gui/browser_ui.c`
 - [`css_attr_match.name`](modules/include.css_select.h.md#css_attr_match-name) type_alias in `include/css_select.h`
+- [`name`](modules/src.text_shape.c.md#name) type_alias in `src/text_shape.c`
 - [`bx_bg_layer.nat_h`](modules/include.box_style.h.md#bx_bg_layer-nat_h) type_alias in `include/box_style.h`
 - [`node`](modules/include.js_geom.h.md#node) type_alias in `include/js_geom.h`
 - [`nr_config`](modules/include.net_realm.h.md#nr_config) struct in `include/net_realm.h`
@@ -377,6 +382,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`rdp_caps`](modules/include.render_policy.h.md#rdp_caps) struct in `include/render_policy.h`
 - [`rdp_img_decision`](modules/include.render_policy.h.md#rdp_img_decision) enum in `include/render_policy.h`
 - [`refs`](modules/include.prefetch.h.md#refs) type_alias in `include/prefetch.h`
+- [`len_rebase_ctx.rem_px`](modules/src.css.c.md#len_rebase_ctx-rem_px) type_alias in `src/css.c`
 - [`replace`](modules/include.tab.h.md#replace) type_alias in `include/tab.h`
 - [`rp_decision`](modules/include.request_policy.h.md#rp_decision) enum in `include/request_policy.h`
 - [`samples`](modules/include.perf_trace.h.md#samples) type_alias in `include/perf_trace.h`
@@ -437,6 +443,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`tor_enabled`](modules/include.net_realm.h.md#tor_enabled) type_alias in `include/net_realm.h`
 - [`tsh_entry`](modules/src.text_shape.c.md#tsh_entry) struct in `src/text_shape.c`
 - [`tsh_font`](modules/include.text_shape.h.md#tsh_font) struct in `include/text_shape.h`
+- [`tsh_lfam`](modules/src.text_shape.c.md#tsh_lfam) struct in `src/text_shape.c`
+- [`tsh_llist`](modules/src.text_shape.c.md#tsh_llist) struct in `src/text_shape.c`
 - [`tsh_status`](modules/include.text_shape.h.md#tsh_status) enum in `include/text_shape.h`
 - [`tsh_web`](modules/src.text_shape.c.md#tsh_web) struct in `src/text_shape.c`
 - [`ui_bg_image`](modules/gui.browser_ui.c.md#ui_bg_image) struct in `gui/browser_ui.c`

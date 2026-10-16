@@ -128,6 +128,10 @@ typedef struct pv_run {
     char   *poster_src;   /* PV_VIDEO only: poster image URL; NULL otherwise */
     int     img_w;        /* PV_IMAGE/PV_VIDEO declared width in px, or -1 if unknown */
     int     img_h;        /* PV_IMAGE/PV_VIDEO declared height in px, or -1 if unknown */
+    int     img_h_css;    /* 1 when img_h is the element's CSS px height (not an
+                           * attribute): with a % width it is kept, not scaled */
+    int     img_inline;   /* 1 when the <img> is inline-level (display unset/inline):
+                           * unavailable with an alt, it renders as that text */
     int     fg_rgb;       /* author color packed 0xRRGGBB, or -1 if none */
     int     bg_rgb;       /* author background-color packed 0xRRGGBB, or -1 if none */
     /* Author text presentation resolved from <style> + inline style= (the css
@@ -173,6 +177,7 @@ typedef struct pv_run {
     int     valign;          /* css_valign */
     int     text_indent;     /* signed px first-line indent, PV_LEN_UNSET unset */
     int     white_space;     /* css_white_space */
+    int     text_balance;    /* text-wrap-style: balance (1), else 0; inherits */
     /* More text-presentation extensions (this batch, 2026-07-10): each resolved from
      * the nearest ancestor that sets it (they inherit). Presentation: render_doc
      * applies them only with caps.css. Defaults: tab_size 0 (unset -> 8 in <pre>),
@@ -392,7 +397,14 @@ typedef struct pv_run {
     int     form_id;      /* owning-form group id in document order, or -1 */
     int     form_method;  /* pv_form_method of the owning form */
     int     checked;       /* -1=n/a, 0=unchecked, 1=checked (checkbox/radio) */
+    /* ::placeholder of a text control (CSS Pseudo 4 4.5): PV_PH_THEME (-1) = the
+     * theme's placeholder color, PV_PH_HIDDEN (-2) = opacity 0 or transparent, else
+     * the author's 0xRRGGBB. */
+    int     ph_color;
     char   *select_opts;   /* NULL or "optval||lbl||optval||lbl" for <select> */
+    /* Author font-family list, normalized (css_style.font_list), owned; NULL =
+     * none. The painter resolves it to a local family (spec/text_shape.md 7). */
+    char   *font_list;
 } pv_run;
 
 /* Box engine (Hito 23b-8 Step D): one entry of the box-definition TREE. The box
@@ -424,6 +436,15 @@ typedef struct pv_box_def {
     int box_min_h;      /* min-height (px >= 0), or 0 unset */
     int box_max_h;      /* max-height (px > 0), or 0 unset */
     int box_min_w;      /* min-width  (px >= 0), or 0 unset */
+    /* text-align of the LINE an inline-level box sits on (its parent's inherited
+     * text-align, css_align; 0 = start). An inline-block is placed by its parent's
+     * alignment, never by its own -- a <button>'s UA text-align:center used to
+     * centre the button itself on the parent's line. */
+    int line_align;
+    int box_w_intrinsic;  /* width:max-content|fit-content: shrink-to-fit (tanda 43) */
+    int box_min_w_set;  /* 1 when the author DECLARED min-width (incl. 0): `0` above
+                         * cannot tell `min-width:0` (no automatic minimum, Flexbox
+                         * 4.5) from no declaration at all */
     /* Percentage halves (per-mille of the containing block WIDTH, 0 = none),
      * one per px field. See the pv_run block for why even the vertical padding
      * resolves against the width (CSS 2.1 8.4). */
@@ -730,6 +751,10 @@ typedef struct pv_cont_def {
      * item never grew. Set only when parent_id >= 0. */
     int item_grow, item_shrink, item_basis, item_order, item_align_self;
     int item_mauto;     /* PV_MAUTO_* of that wrapper element (0 unset) */
+    /* That wrapper's GRID placement in the parent (spec/grid_areas.md 6), already
+     * resolved against the parent's tracks: 0-based start or -1 = auto-place, span
+     * 0 = 1 track. Same reason as item_*: the wrapper has no run of its own. */
+    int item_col_start, item_col_span, item_row_start, item_row_span;
 } pv_cont_def;
 
 typedef struct pv_view {
@@ -747,7 +772,18 @@ typedef struct pv_view {
     int         html_max_width;  /* root <html> max-width in px, or -1 unset */
     int         html_margin_top; /* root <html> margin-top in px, or 0 */
     int         html_center;     /* 1 if root has margin-left:auto && margin-right:auto */
+    /* Root insets (top, right, bottom, left) in px: the UA body margin on every
+     * side the author left undeclared (pv_root_insets), 0 elsewhere. */
+    int         root_m[4];
 } pv_view;
+
+/* The UA stylesheet's body margin (HTML Rendering 15.3.1). */
+#define PV_UA_BODY_MARGIN 8
+
+/* Root insets for the resolved <body> style: PV_UA_BODY_MARGIN on each side whose
+ * margin the author did not declare (px or %), 0 on a declared side (the body's
+ * own box, or nothing for 0, owns it). Order top, right, bottom, left. Pure. */
+void pv_root_insets(const css_style *body, int out[4]);
 
 /* Builds the display list from an already-parsed, sanitised document.
  * doc == NULL / out == NULL => PV_ERR_NULL_ARG.
@@ -898,8 +934,13 @@ typedef struct pv_text_ext {
     /* Author @font-face match (spec/webfont.md): wf_name_hash of the winning
      * first family name, 0 = none. Inherits exactly like font_family. */
     unsigned fontface;
+    /* Normalized font-family list, "" = none (a copy: the ancestor walk resolves
+     * each style into a reused local). Inherits like font_family: the nearest
+     * ancestor that declares one. */
+    char font_list[CSS_FONT_LIST_MAX];
     int shadow_dx, shadow_dy, shadow_color;
     int opacity, valign, text_indent, white_space;
+    int text_balance;    /* 1 balance, 0 explicit other, -1 unset (inherits) */
     int list_style;
     int text_overflow, word_break;
     int visibility;      /* css_visibility, 0 unset -- inherits (CSS 2.1 11.2) */
@@ -1063,6 +1104,19 @@ const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);
 /* Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most
  * recently appended run. No-op on an empty or NULL view. */
 void pv_set_input_checked(pv_view *v, int checked);
+#define PV_PH_THEME  (-1)
+#define PV_PH_HIDDEN (-2)
+/* Sets the last run's ph_color (PV_PH_THEME, PV_PH_HIDDEN or 0xRRGGBB). */
+void pv_set_input_placeholder(pv_view *v, int ph_color);
+/* Appends attrs (e.g. ` stroke="#ff0000"`) to the END of the root <svg> start tag
+ * of markup[0,len): the SVG parser applies attributes in order, so the CSS value
+ * the cascade resolved wins over the author's attribute, as CSS does. A new
+ * NUL-terminated string (caller frees) with its length in *out_len, or NULL on OOM
+ * or when markup has no start tag. Pure. */
+char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs,
+                               size_t *out_len);
+/* ph_color for a resolved ::placeholder style (pure). */
+int pv_placeholder_color(const css_style *ph);
 
 /* Sets the <select> options string ("opt||label||opt||label") on the most recently
  * appended run, taking an owned copy. No-op on a NULL view or empty cap. */

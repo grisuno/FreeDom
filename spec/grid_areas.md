@@ -91,12 +91,64 @@ descartarse: el ítem se ve en el borde, que es preferible a que desaparezca.
 
 ## 4. Fuera de alcance (v1)
 
-- Colocación por **número de línea** (`grid-column: 2 / 4`, `1 / -1`) y por
-  **nombre de línea** (`[main-start]`): el corpus medido no las usa; el punto de
-  extensión es el mismo par `fixed_row`/`fixed_col`.
+- Colocación por **nombre de línea** (`[main-start]`, `<integer> <ident>`): falla
+  cerrado a auto-colocación (§6). La colocación por **número** ya está (§6).
 - `grid-auto-flow: column` y `dense`.
 - Filas implícitas creadas por un área que excede la plantilla (se recorta, §3).
 - Alineación por ítem dentro de su área (`justify-self`/`align-self` en grid).
+
+## 6. Colocación por número de línea (2026-10-15, CSS Grid 1 §8.3)
+
+**Por qué:** medido en el corpus del allowlist. github.com declara ~700
+`grid-column: auto/span N` (Primer Brand: la grilla de 12 columnas de TODA tarjeta)
+y ipinfo.io apila sus pestañas con `grid-column:1; grid-row:1`. El parser solo
+aceptaba `span N`, así que cada declaración era `bad-value`, cada tarjeta caía en
+UNA pista de 1/12 y su texto envolvía un carácter por línea (github: 440 filas de
+1 px, la página 1.5× más alta que en Firefox).
+
+**Codificación de un lado** (`grid-column-start` y compañía), un `int`:
+`FX_GL_AUTO` (0) = `auto`; `FX_GL_SPAN_BASE + n` = `span n` (n en
+`[1, CSS_GRID_SPAN_MAX]`); cualquier otro valor no nulo = número de línea `n`
+(negativo cuenta desde el final; `|n| <= FX_GL_LINE_MAX`). Un número cero, un
+nombre o `<integer> <ident>` no son representables ⇒ la declaración se descarta.
+
+### `int fx_grid_line_side(const char *s, int *out)`
+Un lado: `auto` | `<integer>` | `span <integer>` (y `<integer>` antes de `span`
+**no**). Devuelve 1 y escribe `*out`, o 0 sin tocarlo.
+
+### `int fx_grid_line_parse(const char *v, int *start, int *end)`
+El shorthand `grid-column`/`grid-row`: `<lado> [ / <lado> ]`. Sin barra el fin es
+`auto`. Una sola barra de nivel superior; dos ⇒ 0.
+
+### `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
+Resuelve contra las `ntracks` pistas explícitas (§8.3.1): línea negativa
+`-k` ⇒ `ntracks + 2 - k`; `span` + línea ⇒ el span cuenta HACIA la línea; dos
+spans ⇒ gana el de inicio; fin <= inicio ⇒ se intercambian (iguales ⇒ span 1).
+`*pos0` es la pista de inicio en base 0, o **-1** = auto-colocar (posición no
+definida). `*span` >= 1. Una línea negativa sin `ntracks` conocido (0, p. ej. `repeat(auto-fill,…)`, cuyo
+conteo solo existe en el layout) ⇒ ese lado es `auto` (fail-closed, nunca una celda
+inventada), salvo `<n> / -1`, que significa "hasta la última línea" y se resuelve
+como `span FX_GL_SPAN_MAX`: el colocador lo recorta a las pistas reales.
+
+| start | end | `pos0` | `span` |
+| :-- | :-- | :-- | :-- |
+| `auto` | `auto` | -1 | 1 |
+| `span 6` | `auto` | -1 | 6 |
+| `auto` | `span 6` | -1 | 6 |
+| `2` | `auto` | 1 | 1 |
+| `1` | `3` | 0 | 2 |
+| `1` | `-1` (12 pistas) | 0 | 12 |
+| `1` | `-1` (pistas desconocidas) | 0 | `FX_GL_SPAN_MAX` |
+| `3` | `1` | 0 | 2 |
+| `2` | `span 3` | 1 | 3 |
+| `span 2` | `5` | 2 | 2 |
+
+### Colocación (`fx_grid_place_span`)
+Un ítem con **columna fija y fila auto** ya no se clava en la fila 0 (todos los
+`1 / -1` se superponían): va en la pasada automática, con el cursor (§8.5 paso 4):
+cursor de columna a su columna, si eso retrocede se baja una fila, y se baja hasta
+que no se superponga. Fila fija + columna auto: primera columna libre de esa fila.
+Con ambos fijos, comportamiento previo (byte-idéntico para `grid-area: <nombre>`).
 
 ## 5. Seguridad
 

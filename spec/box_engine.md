@@ -142,8 +142,21 @@
 > - `flex-wrap` / multi-line flex; `align-items`/`-self`/`-content` (cross axis).
 > - Grid per-item: `grid-column`/`grid-row: span N`, `grid-template-rows`,
 >   `row-gap` distinct from `column-gap`, `grid-auto-flow: column`.
-> - `min-width`/`min-height`/`max-width` per-item clamps.
+> - `min-width`/`min-height` per-item clamps (`max-width` is in: see below).
 > - `order` re-sorting.
+
+### Hypothetical main size: `max-width` clamps the flex base size (2026-10-15)
+
+Flexbox 1 §9.2.3: the *hypothetical main size* is the flex base size clamped by
+the item's min/max main size. `bx_flex_max_clamp(outer_basis, mw_cap, border_box,
+pad_bord_h, margin_h)` — pure, in `box_style` — caps an item's OUTER base at its
+`max-width` converted to the same outer edge (content-box adds padding+border;
+`border-box` already contains them; both add the horizontal margins). `mw_cap <= 0`
+= no max-width ⇒ the base is returned untouched (byte-identical for every item
+without one). Applied on BOTH item branches, the plain block and the item that is
+itself a container: measured on Hugo Stack (andreagrandi.it), whose sidebar is a
+`display:flex` column with `flex-shrink:0; max-width:25%` — its max-content base
+(780 px) never shrank, and the post column was pushed off the canvas.
 
 ## Security posture (non-negotiable)
 
@@ -982,3 +995,40 @@ Dado-Cuando-Entonces:
   se maqueta, entonces pinta 450×450 (antes: 60×60).
 - Dado un `<img>` roto entre dos imágenes sanas, cuando se maqueta, entonces las
   sanas comparten línea y el roto conserva su fila (documentado, no regresión).
+
+## Tanda 43 (2026-10-16)
+
+- `bx_border_span`: el `content_w` con que `open_box` coloca una caja incluye los
+  bordes (`inner_w` los resta después); un `width` content-box es W + bordes y uno
+  border-box W − padding. Antes un `width:300px;border:1px` pintaba 300 de borde a
+  borde (Firefox 302) y un border-box perdía el borde dos veces.
+- `bx_flex_min_clamp`: el tamaño hipotético de un ítem flex se acota también por su
+  `min-width` (Flexbox §9.2.3), no solo por `max-width`.
+- Un subárbol fuera de flujo (Stage 2f) se maqueta sin los insets raíz y sin los
+  contenedores cuya caja queda fuera del subárbol (`rd_doc.oof_view_root`); la caja de
+  un ítem la deciden sus runs EN flujo (los fuera de flujo solo si no hay otros).
+- `line-height: normal` = ascent + descent + line gap de la cara realmente dibujada
+  (half-leading), con las métricas de esa cara (`tsh_face`).
+- **Medida intrínseca de contenedores anidados** (`nested_cont_basis`, modo `cyclic`
+  solo para el ancho shrink-to-fit del eje transversal de una columna): un `%` de un
+  ítem es cíclico y vale `auto` (CSS Sizing 3 §5.2.1), un ítem contribuye su
+  max-content y no su `flex-basis` (Flexbox §9.9.1) y su `min-width` lo acota.
+- `container_box_of` agrupa por ítems DEL NIVEL (`item_at_level`), no por el ítem del
+  contenedor más interno: los botones de una fila anónima dentro del único ítem de una
+  columna ya no hacen de la caja de ese ítem la "caja del contenedor".
+- Dentro de un ítem, un segmento que es contenedor abre primero su caja y las
+  intermedias (`reconcile_boxes_below`) y se maqueta dentro de ella (padding de
+  `.article-details` en una tarjeta).
+- `width:max-content|fit-content`: la medida shrink-to-fit cuenta también las cajas
+  descendientes con ancho px declarado + padding/borde/margen intermedios.
+- Una imagen dentro de una caja se dimensiona contra el ancho de contenido de esa caja.
+- **Imagen no disponible** (HTML Rendering §15.4.2, medido en Firefox): con fuente,
+  `alt` no vacío y de nivel INLINE se pinta como su texto (sin su tamaño declarado);
+  sin fuente, o de nivel bloque (`display:block` + `aspect-ratio`), conserva la caja.
+  Con `%` de ancho y alto CSS px, el alto se conserva (no se escala por aspecto). En
+  una medida intrínseca un `%` de ancho contribuye 0 (comprimible, §5.2.2).
+- **Controles de formulario nativos** (sin caja de autor) son átomos inline de su
+  línea (HTML Rendering §15.5): `place_inline_replaced`, alineados por su texto
+  interior (`repl_asc`), fuente de control 13.333 px (`-moz-field`), padding 3 px,
+  `type=submit|button` con la cara UA de `<button>`; el hit-test considera su
+  fragmento y el `x_off` de su fila. El espacio colapsable previo separa el átomo.

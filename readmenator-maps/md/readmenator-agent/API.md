@@ -7,9 +7,9 @@ Pages: [API.md](API.md), [API_p2.md](API_p2.md), [API_p3.md](API_p3.md), [API_p4
 - `run_freedom_headless` (function) `app.py:47` `def run_freedom_headless(payload_path)` -- Executes the FreeDom browser in headless mode against a specific file input or mutated seed.
 
 ## fuzz/fuzz_css.c
-Depends on: `include/css.h`, `include/css_select.h`
-- `fuzz_root_match` (function) `fuzz/fuzz_css.c:66` `static int fuzz_root_match(void *ctx, const css_sel *sel)` -- Root matcher for the attribute-scoped custom-property path: a fixed <html class="theme-dark" data-color-mode="dark">...
-- `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_css.c:80` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+Depends on: `include/css.h`, `include/css_select.h`, `include/flex_layout.h`
+- `fuzz_root_match` (function) `fuzz/fuzz_css.c:76` `static int fuzz_root_match(void *ctx, const css_sel *sel)` -- Root matcher for the attribute-scoped custom-property path: a fixed <html class="theme-dark" data-color-mode="dark">...
+- `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_css.c:90` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 
 ## fuzz/fuzz_data_url.c
 Depends on: `include/data_url.h`
@@ -68,7 +68,7 @@ Depends on: `include/pdf_export.h`
 
 ## fuzz/fuzz_prefetch.c
 Depends on: `include/prefetch.h`
-- `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_prefetch.c:10` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_prefetch.c:14` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 
 ## fuzz/fuzz_prefs.c
 Depends on: `include/prefs.h`

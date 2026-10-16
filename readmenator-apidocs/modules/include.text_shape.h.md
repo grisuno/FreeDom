@@ -1,14 +1,14 @@
 # `include/text_shape.h`
 
-> Source: [include/text_shape.h:1](../../include/text_shape.h#L1) | language `h` | coverage 61.5% | [API index](../index.md)
+> Source: [include/text_shape.h:1](../../include/text_shape.h#L1) | language `h` | coverage 71.4% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`tsh_font`](#tsh_font)
 - **Enums:** [`tsh_status`](#tsh_status)
 - **Type Aliases:** [`family`](#family)
-- **Functions:** [`content`](#content), [`tsh_ready`](#tsh_ready), [`origin`](#origin), [`tsh_measure`](#tsh_measure), [`tsh_webfont_register`](#tsh_webfont_register), [`tsh_webfont_clear`](#tsh_webfont_clear), [`tsh_shutdown`](#tsh_shutdown)
-- **Macros:** [`TSH_MAX_GLYPHS`](#tsh_max_glyphs), [`TSH_MAX_TEXT`](#tsh_max_text)
+- **Functions:** [`content`](#content), [`tsh_family_is_generic`](#tsh_family_is_generic), [`wins`](#wins), [`tsh_pick_family`](#tsh_pick_family), [`tsh_local_handle`](#tsh_local_handle), [`tsh_ready`](#tsh_ready), [`origin`](#origin), [`tsh_measure`](#tsh_measure), [`tsh_webfont_register`](#tsh_webfont_register), [`tsh_webfont_clear`](#tsh_webfont_clear), [`tsh_face`](#tsh_face), [`tsh_shutdown`](#tsh_shutdown)
+- **Macros:** [`TSH_LOCAL_LISTS`](#tsh_local_lists), [`TSH_LOCAL_FAMILIES`](#tsh_local_families), [`TSH_FAMILY_MAX`](#tsh_family_max), [`TSH_MAX_GLYPHS`](#tsh_max_glyphs), [`TSH_MAX_TEXT`](#tsh_max_text)
 
 ## Type Diagram
 
@@ -58,7 +58,7 @@ The engine matches the generic group only, never an exact author family -- unles
 
 ### `tsh_status`
 
-`enum` | [include/text_shape.h:43](../../include/text_shape.h#L43)
+`enum` | [include/text_shape.h:80](../../include/text_shape.h#L80)
 
 ```c
 typedef enum tsh_status
@@ -106,11 +106,109 @@ The engine matches the generic group only, never an exact author family -- unles
 
 ---
 
+<a id="tsh_family_is_generic"></a>
+
+### `tsh_family_is_generic`
+
+`function` | [include/text_shape.h:52](../../include/text_shape.h#L52)
+
+```c
+int tsh_family_is_generic(const char *name);
+```
+
+1 for a CSS generic family keyword (serif, sans-serif, monospace, cursive, fantasy, system-ui, ui-*, emoji, math, fangsong), case-insensitive.
+
+Pure.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `name` | `char *` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="wins"></a>
+
+### `wins`
+
+`function` | [include/text_shape.h:58](../../include/text_shape.h#L58)
+
+```c
+* the first name the resolver accepts wins (returns 1, family in out). Pure: the * resolver is injected (fontconfig in production, a table in tests). */ int tsh_pick_from_list(const char *list, tsh_na
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `returns` |  |  |  |
+| `out` | `family in` |  |  |
+
+**Returns:** `* the first name the resolver accepts`
+
+---
+
+<a id="tsh_pick_family"></a>
+
+### `tsh_pick_family`
+
+`function` `const` | [include/text_shape.h:68](../../include/text_shape.h#L68)
+
+```c
+const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int (*installed)(const char *name, void *ctx), void *ctx);
+```
+
+The acceptance rule for one requested name given fontconfig's substituted family list subs[0..n) and their bindings (strong[k] != 0 for a strong/same binding): req itself when installed, else the first INSTALLED entry of the leading run of strong substitutes; a weak substitute ends the run.
+
+Returns the chosen name or NULL. Pure (installed is injected).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `req` | `char *` |  |  |
+| `subs` | `char *const *` |  |  |
+| `strong` | `int *` |  |  |
+| `n` | `size_t` |  |  |
+| `ctx` | `int (*installed)(const char *name, void * )` |  |  |
+| `ctx` | `void *` |  |  |
+
+**Returns:** `char *`
+
+---
+
+<a id="tsh_local_handle"></a>
+
+### `tsh_local_handle`
+
+`function` | [include/text_shape.h:75](../../include/text_shape.h#L75)
+
+```c
+int tsh_local_handle(const char *list);
+```
+
+Handle (>0) for an author family list that resolves to a local family, cached per list; 0 when nothing resolves, the list is NULL/empty, or a cap is hit (the caller then uses the bucket).
+
+Trusted side only.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `list` | `char *` |  |  |
+
+**Returns:** `int`
+
+---
+
 <a id="tsh_ready"></a>
 
 ### `tsh_ready`
 
-`function` | [include/text_shape.h:52](../../include/text_shape.h#L52)
+`function` | [include/text_shape.h:89](../../include/text_shape.h#L89)
 
 ```c
 int tsh_ready(void);
@@ -128,7 +226,7 @@ int tsh_ready(void);
 
 ### `origin`
 
-`function` | [include/text_shape.h:55](../../include/text_shape.h#L55)
+`function` | [include/text_shape.h:92](../../include/text_shape.h#L92)
 
 ```c
 * glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen advance in pixels. Fail-closed on every other * status (see spec): the caller must not
@@ -149,7 +247,7 @@ int tsh_ready(void);
 
 ### `tsh_measure`
 
-`function` | [include/text_shape.h:64](../../include/text_shape.h#L64)
+`function` | [include/text_shape.h:101](../../include/text_shape.h#L101)
 
 ```c
 double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);
@@ -178,7 +276,7 @@ Returns < 0.0 on any failure so the caller can fall back to the toy-API measurem
 
 ### `tsh_webfont_register`
 
-`function` | [include/text_shape.h:77](../../include/text_shape.h#L77)
+`function` | [include/text_shape.h:114](../../include/text_shape.h#L114)
 
 ```c
 int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);
@@ -208,7 +306,7 @@ Re-registering a key replaces it. Returns 0 on success, -1 fail-closed (NULL/emp
 
 ### `tsh_webfont_clear`
 
-`function` | [include/text_shape.h:83](../../include/text_shape.h#L83)
+`function` | [include/text_shape.h:120](../../include/text_shape.h#L120)
 
 ```c
 void tsh_webfont_clear(void);
@@ -222,11 +320,37 @@ Idempotent, NULL-safe by construction (no args). tsh_shutdown also clears the ta
 
 ---
 
+<a id="tsh_face"></a>
+
+### `tsh_face`
+
+`function` | [include/text_shape.h:127](../../include/text_shape.h#L127)
+
+```c
+cairo_font_face_t *tsh_face(const tsh_font *f);
+```
+
+The cairo face tsh_draw paints f with (webfont, local family or bucket), or NULL when no face resolves.
+
+Borrowed: owned by the cache, valid until tsh_shutdown / tsh_webfont_clear. The painter selects it so cairo's font extents -- line-height: normal, ascent, descent -- are the metrics of the face that is actually drawn, not of the generic stand-in (CSS 2.1 10.8.1).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `f` | `tsh_font *` |  |  |
+
+**Returns:** `cairo_font_face_t *`
+
+*Called by:* [`sites`](gui.browser_ui.c.md#sites)
+
+---
+
 <a id="tsh_shutdown"></a>
 
 ### `tsh_shutdown`
 
-`function` | [include/text_shape.h:86](../../include/text_shape.h#L86)
+`function` | [include/text_shape.h:130](../../include/text_shape.h#L130)
 
 ```c
 void tsh_shutdown(void);
@@ -238,11 +362,57 @@ Releases cached faces / blobs / FreeType library (leak hygiene; tests).
 
 ## Macros
 
+<a id="tsh_local_lists"></a>
+
+### `TSH_LOCAL_LISTS`
+
+`macro` | [include/text_shape.h:46](../../include/text_shape.h#L46)
+
+```c
+#define TSH_LOCAL_LISTS
+```
+
+--- Named LOCAL families (spec/text_shape.md section 7) ---------------------
+The author's font-family list (normalized by the cascade: unquoted names,
+comma-separated) resolves to the first name fontconfig really provides --
+installed, or a STRONG substitute such as Arial -> Liberation Sans -- the way
+Firefox does on Linux. A generic name stops the walk (the bucket applies).
+
+---
+
+<a id="tsh_local_families"></a>
+
+### `TSH_LOCAL_FAMILIES`
+
+`macro` | [include/text_shape.h:47](../../include/text_shape.h#L47)
+
+```c
+#define TSH_LOCAL_FAMILIES
+```
+
+distinct lists resolved per process
+
+---
+
+<a id="tsh_family_max"></a>
+
+### `TSH_FAMILY_MAX`
+
+`macro` | [include/text_shape.h:48](../../include/text_shape.h#L48)
+
+```c
+#define TSH_FAMILY_MAX
+```
+
+distinct local families loaded (x4 styles)
+
+---
+
 <a id="tsh_max_glyphs"></a>
 
 ### `TSH_MAX_GLYPHS`
 
-`macro` | [include/text_shape.h:40](../../include/text_shape.h#L40)
+`macro` | [include/text_shape.h:77](../../include/text_shape.h#L77)
 
 ```c
 #define TSH_MAX_GLYPHS
@@ -254,7 +424,7 @@ Releases cached faces / blobs / FreeType library (leak hygiene; tests).
 
 ### `TSH_MAX_TEXT`
 
-`macro` | [include/text_shape.h:41](../../include/text_shape.h#L41)
+`macro` | [include/text_shape.h:78](../../include/text_shape.h#L78)
 
 ```c
 #define TSH_MAX_TEXT

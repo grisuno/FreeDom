@@ -138,7 +138,7 @@ NULL is a no-op.
 |---|---|---|---|
 | `m` | `im_map *` |  |  |
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_import_map.c.md#llvmfuzzertestoneinput)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_import_map.c.md#llvmfuzzertestoneinput), [`pf_pool_finish`](src.prefetch.c.md#pf_pool_finish), [`pf_pool_start_page`](src.prefetch.c.md#pf_pool_start_page)
 
 ---
 

@@ -1,6 +1,23 @@
 # Subsystem: tests (page 3 of 7)
 Previous: [KB_tests_p2.md](KB_tests_p2.md)
 
+## tests/test_css_index.c
+- Doc: test_css_index -- cascade rule index (spec/css_index.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `parse_all` (function, line 14) `static css_sel *parse_all(const char *const *src, size_t n)`
+  - `elem` (function, line 24) `static css_element elem(const char *tag, const char *id,
+                        const char *cons...`
+  - `has` (function, line 35) `static int has(const uint32_t *v, size_t n, uint32_t x)`
+  - `test_buckets_and_order` (function, line 40) `static void test_buckets_and_order(void **state)`
+  - `test_id_key` (function, line 61) `static void test_id_key(void **state)`
+  - `test_long_class_folds` (function, line 82) `static void test_long_class_folds(void **state)`
+  - `test_matching_implies_candidate` (function, line 105) `static void test_matching_implies_candidate(void **state)`
+  - `test_invalid_index_reports_fallback` (function, line 140) `static void test_invalid_index_reports_fallback(void **state)`
+  - `main` (function, line 153) `int main(void)`
+- Depends on: `include/css_index.h`
+
 ## tests/test_css_length.c
 - Doc: test_unitless: static double px_of(const char *value, const cl_ctx *ctx) { double px = -12345.0...
 - Layer: testing
@@ -309,13 +326,17 @@ static void test_float_pack_m_holy_grail_pull_u...`
   - `test_areas_non_rectangular_is_rejected` (function, line 864) `static void test_areas_non_rectangular_is_rejected(void **state)`
   - `test_areas_parse_fails_closed` (function, line 878) `static void test_areas_parse_fails_closed(void **state)`
   - `test_areas_parse_bounds` (function, line 896) `static void test_areas_parse_bounds(void **state)`
-  - `test_grid_place_null_fixed_is_unchanged` (function, line 926) `static void test_grid_place_null_fixed_is_unchanged(void **state)`
-  - `test_grid_place_explicit_out_of_range_clamps` (function, line 938) `static void test_grid_place_explicit_out_of_range_clamps(void **state)`
-  - `test_auto_margins_push_right_and_center` (function, line 949) `static void test_auto_margins_push_right_and_center(void **state)`
-  - `test_column_place_stack_and_justify` (function, line 982) `static void test_column_place_stack_and_justify(void **state)`
-  - `test_cross_offset` (function, line 1011) `static void test_cross_offset(void **state)`
-  - `test_column_place_auto_margins` (function, line 1025) `static void test_column_place_auto_margins(void **state)`
-  - `main` (function, line 1042) `int main(void)`
+  - `test_grid_line_side` (function, line 925) `static void test_grid_line_side(void **state)`
+  - `test_grid_line_parse` (function, line 953) `static void test_grid_line_parse(void **state)`
+  - `test_grid_line_resolve_table` (function, line 972) `static void test_grid_line_resolve_table(void **state)`
+  - `test_grid_place_fixed_col_auto_row` (function, line 1003) `static void test_grid_place_fixed_col_auto_row(void **state)`
+  - `test_grid_place_null_fixed_is_unchanged` (function, line 1034) `static void test_grid_place_null_fixed_is_unchanged(void **state)`
+  - `test_grid_place_explicit_out_of_range_clamps` (function, line 1046) `static void test_grid_place_explicit_out_of_range_clamps(void **state)`
+  - `test_auto_margins_push_right_and_center` (function, line 1057) `static void test_auto_margins_push_right_and_center(void **state)`
+  - `test_column_place_stack_and_justify` (function, line 1090) `static void test_column_place_stack_and_justify(void **state)`
+  - `test_cross_offset` (function, line 1119) `static void test_cross_offset(void **state)`
+  - `test_column_place_auto_margins` (function, line 1133) `static void test_column_place_auto_margins(void **state)`
+  - `main` (function, line 1150) `int main(void)`
   - `to` (function, line 280) `* jumps to (1,0);`
 - Depends on: `include/flex_layout.h`
 
@@ -435,23 +456,25 @@ static void test_download_png_group...`
   - `test_dump_layout_sticky_footer` (function, line 2042) `static void test_dump_layout_sticky_footer(void **state)`
   - `test_dump_layout_root_box_survives_replaced_run` (function, line 2077) `static void test_dump_layout_root_box_survives_replaced_run(void **state)`
   - `test_dump_layout_pulled_rail_single_margin` (function, line 2170) `static void test_dump_layout_pulled_rail_single_margin(void **state)`
-  - `test_dump_layout_row_nested_in_column` (function, line 2286) `static void test_dump_layout_row_nested_in_column(void **state)`
-  - `test_dump_layout_inline_box_second_run_stays` (function, line 2337) `static void test_dump_layout_inline_box_second_run_stays(void **state)`
-  - `band` (function, line 2366) `* band (which already recurses into nested containers) owns it. */
+  - `test_dump_layout_row_nested_in_column` (function, line 2287) `static void test_dump_layout_row_nested_in_column(void **state)`
+  - `test_dump_layout_inline_box_second_run_stays` (function, line 2338) `static void test_dump_layout_inline_box_second_run_stays(void **state)`
+  - `band` (function, line 2367) `* band (which already recurses into nested containers) owns it. */
 static void test_dump_layout_c...`
-  - `test_dump_layout_line_opening_image_is_inline` (function, line 2409) `static void test_dump_layout_line_opening_image_is_inline(void **state)`
-  - `test_dump_layout_band_flushes_line_before_clear` (function, line 2435) `static void test_dump_layout_band_flushes_line_before_clear(void **state)`
-  - `test_dump_layout_flex_auto_margin_push_right` (function, line 2475) `static void test_dump_layout_flex_auto_margin_push_right(void **state)`
-  - `test_dump_layout_nested_column_takes_max` (function, line 2518) `static void test_dump_layout_nested_column_takes_max(void **state)`
-  - `test_rejects_http_url` (function, line 2567) `static void test_rejects_http_url(void **state)`
-  - `white` (function, line 2629) `* and not white (the old behaviour where only text rows got background fills). */
+  - `test_dump_layout_line_opening_image_is_inline` (function, line 2410) `static void test_dump_layout_line_opening_image_is_inline(void **state)`
+  - `test_dump_layout_band_flushes_line_before_clear` (function, line 2436) `static void test_dump_layout_band_flushes_line_before_clear(void **state)`
+  - `test_dump_layout_flex_auto_margin_push_right` (function, line 2476) `static void test_dump_layout_flex_auto_margin_push_right(void **state)`
+  - `test_dump_layout_nested_column_takes_max` (function, line 2519) `static void test_dump_layout_nested_column_takes_max(void **state)`
+  - `test_rejects_http_url` (function, line 2569) `static void test_rejects_http_url(void **state)`
+  - `white` (function, line 2631) `* and not white (the old behaviour where only text rows got background fills). */
 static void tes...`
-  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 2725) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
-  - `test_download_png_flex_container_paints_one_band` (function, line 2750) `static void test_download_png_flex_container_paints_one_band(void **state)`
-  - `test_download_png_inline_block_shrinks_and_centers` (function, line 2770) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
-  - `test_download_png_inline_svg_path_and_drops_image` (function, line 2814) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
-  - `test_dump_timings_prints_stages` (function, line 2830) `static void test_dump_timings_prints_stages(void **state)`
-  - `main` (function, line 2855) `int main(void)`
+  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 2727) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
+  - `test_download_png_flex_container_paints_one_band` (function, line 2752) `static void test_download_png_flex_container_paints_one_band(void **state)`
+  - `test_download_png_inline_block_shrinks_and_centers` (function, line 2772) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
+  - `test_download_png_inline_svg_path_and_drops_image` (function, line 2816) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
+  - `test_dump_timings_prints_stages` (function, line 2832) `static void test_dump_timings_prints_stages(void **state)`
+  - `test_dump_layout_shrink_pill_nested_container` (function, line 2862) `static void test_dump_layout_shrink_pill_nested_container(void **state)`
+  - `test_dump_layout_inline_input_shares_line` (function, line 2899) `static void test_dump_layout_inline_input_shares_line(void **state)`
+  - `main` (function, line 2917) `int main(void)`
   - `rows` (function, line 992) `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);`
   - `bottom` (function, line 2150) `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ /* (Each sized float now has a box of...`
   - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
@@ -459,28 +482,6 @@ static void tes...`
   - `OUT_FILE` (macro, line 27) `#define OUT_FILE`
   - `ERR_FILE` (macro, line 28) `#define ERR_FILE`
 - Depends on: `include/image_decode.h`
-
-## tests/test_hls.c
-- Layer: testing
-- Language: c
-- Symbols:
-  - `test_not_m3u8_returns_parse_error` (function, line 15) `static void test_not_m3u8_returns_parse_error(void **state)`
-  - `test_empty_m3u8_is_ok` (function, line 22) `static void test_empty_m3u8_is_ok(void **state)`
-  - `test_single_segment` (function, line 31) `static void test_single_segment(void **state)`
-  - `test_multiple_segments` (function, line 46) `static void test_multiple_segments(void **state)`
-  - `test_target_duration_is_parsed` (function, line 68) `static void test_target_duration_is_parsed(void **state)`
-  - `test_variant_playlist_detected` (function, line 83) `static void test_variant_playlist_detected(void **state)`
-  - `test_variant_playlist_collects_variants` (function, line 97) `static void test_variant_playlist_collects_variants(void **state)`
-  - `test_multi_variant_collects_all` (function, line 114) `static void test_multi_variant_collects_all(void **state)`
-  - `test_select_variant_highest_bandwidth_no_limit` (function, line 135) `static void test_select_variant_highest_bandwidth_no_limit(void **state)`
-  - `test_select_variant_respects_max_dimensions` (function, line 152) `static void test_select_variant_respects_max_dimensions(void **state)`
-  - `test_select_variant_empty_returns_error` (function, line 170) `static void test_select_variant_empty_returns_error(void **state)`
-  - `test_resolve_url_absolute_passthrough` (function, line 180) `static void test_resolve_url_absolute_passthrough(void **state)`
-  - `test_resolve_url_relative` (function, line 190) `static void test_resolve_url_relative(void **state)`
-  - `test_resolve_url_deep_relative` (function, line 200) `static void test_resolve_url_deep_relative(void **state)`
-  - `test_handles_windows_line_endings` (function, line 209) `static void test_handles_windows_line_endings(void **state)`
-  - `main` (function, line 219) `int main(void)`
-- Depends on: `include/hls.h`
 
 
 Next: [KB_tests_p4.md](KB_tests_p4.md)

@@ -1,10 +1,10 @@
 # `src/flex_layout.c`
 
-> Source: [src/flex_layout.c:1](../../src/flex_layout.c#L1) | language `c` | coverage 31.8% | [API index](../index.md)
+> Source: [src/flex_layout.c:1](../../src/flex_layout.c#L1) | language `c` | coverage 36.0% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`fx_flex_line`](#fx_flex_line), [`fx_grid_columns`](#fx_grid_columns), [`fx_autofill_count`](#fx_autofill_count), [`fx_grid_columns_weighted`](#fx_grid_columns_weighted), [`fx_grid_place_span`](#fx_grid_place_span), [`fx_grid_area_hash`](#fx_grid_area_hash), [`fx_grid_areas_parse`](#fx_grid_areas_parse), [`fx_grid_area_rect`](#fx_grid_area_rect), [`fx_float_insets`](#fx_float_insets), [`fx_float_pack`](#fx_float_pack), [`fx_float_pack_wrap`](#fx_float_pack_wrap), [`fx_grid_cell`](#fx_grid_cell), [`fx_auto_margins`](#fx_auto_margins), [`fx_auto_min_size`](#fx_auto_min_size), [`fx_multicol_used`](#fx_multicol_used), [`fx_multicol_balance`](#fx_multicol_balance), [`fx_justify_name`](#fx_justify_name), [`fx_column_place`](#fx_column_place), [`fx_column_place_m`](#fx_column_place_m), [`fx_cross_offset`](#fx_cross_offset)
+- **Functions:** [`fx_flex_line`](#fx_flex_line), [`fx_grid_columns`](#fx_grid_columns), [`fx_autofill_count`](#fx_autofill_count), [`fx_grid_columns_weighted`](#fx_grid_columns_weighted), [`fx_grid_place_span`](#fx_grid_place_span), [`fx_grid_area_hash`](#fx_grid_area_hash), [`fx_grid_areas_parse`](#fx_grid_areas_parse), [`fx_grid_area_rect`](#fx_grid_area_rect), [`fx_float_insets`](#fx_float_insets), [`fx_float_pack`](#fx_float_pack), [`fx_float_pack_wrap`](#fx_float_pack_wrap), [`fx_grid_cell`](#fx_grid_cell), [`fx_auto_margins`](#fx_auto_margins), [`fx_auto_min_size`](#fx_auto_min_size), [`fx_multicol_used`](#fx_multicol_used), [`fx_multicol_balance`](#fx_multicol_balance), [`fx_justify_name`](#fx_justify_name), [`fx_column_place`](#fx_column_place), [`fx_column_place_m`](#fx_column_place_m), [`fx_cross_offset`](#fx_cross_offset), [`fx_grid_line_side`](#fx_grid_line_side), [`fx_grid_line_parse`](#fx_grid_line_parse), [`fx_grid_line_resolve`](#fx_grid_line_resolve)
 - **Macros:** [`FX_EPS`](#fx_eps)
 
 ## Call Graph
@@ -30,7 +30,7 @@ flowchart LR
 
 ### `fx_flex_line`
 
-`function` | [src/flex_layout.c:22](../../src/flex_layout.c#L22)
+`function` | [src/flex_layout.c:23](../../src/flex_layout.c#L23)
 
 ```c
 fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap, fx_justify justify, fx_result *out)
@@ -55,7 +55,7 @@ fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,
 
 ### `fx_grid_columns`
 
-`function` | [src/flex_layout.c:127](../../src/flex_layout.c#L127)
+`function` | [src/flex_layout.c:128](../../src/flex_layout.c#L128)
 
 ```c
 fx_status fx_grid_columns(double avail, size_t ncols, double gap, double *col_x, double *col_w)
@@ -81,7 +81,7 @@ fx_status fx_grid_columns(double avail, size_t ncols, double gap, double *col_x,
 
 ### `fx_autofill_count`
 
-`function` | [src/flex_layout.c:132](../../src/flex_layout.c#L132)
+`function` | [src/flex_layout.c:133](../../src/flex_layout.c#L133)
 
 ```c
 size_t fx_autofill_count(double avail, double gap, double minw)
@@ -101,7 +101,7 @@ Pure: floor((avail+gap)/(min+gap)) clamped to [1, FX_MAX_ITEMS]. Non-positive/Na
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`fx_autofill_count`](#fx_autofill_count) (include/flex_layout.h:108).
+> **Inherited:** Documentation from [`fx_autofill_count`](#fx_autofill_count) (include/flex_layout.h:129).
 
 ---
 
@@ -109,7 +109,7 @@ Pure: floor((avail+gap)/(min+gap)) clamped to [1, FX_MAX_ITEMS]. Non-positive/Na
 
 ### `fx_grid_columns_weighted`
 
-`function` | [src/flex_layout.c:142](../../src/flex_layout.c#L142)
+`function` | [src/flex_layout.c:143](../../src/flex_layout.c#L143)
 
 ```c
 fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap, const int *track, size_t ntrack, double *col_x, double *col_w)
@@ -137,7 +137,7 @@ fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap, const
 
 ### `fx_grid_place_span`
 
-`function` | [src/flex_layout.c:176](../../src/flex_layout.c#L176)
+`function` | [src/flex_layout.c:177](../../src/flex_layout.c#L177)
 
 ```c
 fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span, const int *row_span, const int *fixed_row, const int *fixed_col, size_t *out_row, size_t *out_col)
@@ -164,7 +164,7 @@ fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span, const
 
 ### `fx_grid_area_hash`
 
-`function` | [src/flex_layout.c:280](../../src/flex_layout.c#L280)
+`function` | [src/flex_layout.c:319](../../src/flex_layout.c#L319)
 
 ```c
 unsigned fx_grid_area_hash(const char *name)
@@ -182,7 +182,7 @@ NULL/empty/blank -> 0. Comparing hashes rather than strings is what lets an item
 
 **Returns:** `unsigned`
 
-> **Inherited:** Documentation from [`fx_grid_area_hash`](#fx_grid_area_hash) (include/flex_layout.h:132).
+> **Inherited:** Documentation from [`fx_grid_area_hash`](#fx_grid_area_hash) (include/flex_layout.h:153).
 
 *Called by:* [`fx_grid_areas_parse`](#fx_grid_areas_parse)
 
@@ -192,7 +192,7 @@ NULL/empty/blank -> 0. Comparing hashes rather than strings is what lets an item
 
 ### `fx_grid_areas_parse`
 
-`function` | [src/flex_layout.c:310](../../src/flex_layout.c#L310)
+`function` | [src/flex_layout.c:349](../../src/flex_layout.c#L349)
 
 ```c
 fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)
@@ -217,7 +217,7 @@ fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)
 
 ### `fx_grid_area_rect`
 
-`function` | [src/flex_layout.c:385](../../src/flex_layout.c#L385)
+`function` | [src/flex_layout.c:424](../../src/flex_layout.c#L424)
 
 ```c
 fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name, int *row, int *col, int *row_span, int *col_span)
@@ -244,7 +244,7 @@ fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name, int *row, int *
 
 ### `fx_float_insets`
 
-`function` | [src/flex_layout.c:467](../../src/flex_layout.c#L467)
+`function` | [src/flex_layout.c:506](../../src/flex_layout.c#L506)
 
 ```c
 fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h, double avail, double *out_l, double *out_r)
@@ -270,7 +270,7 @@ fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h, 
 
 ### `fx_float_pack`
 
-`function` | [src/flex_layout.c:507](../../src/flex_layout.c#L507)
+`function` | [src/flex_layout.c:546](../../src/flex_layout.c#L546)
 
 ```c
 fx_status fx_float_pack(const double *width, const int *side, size_t n, double avail, double gap, double *out_x)
@@ -295,7 +295,7 @@ fx_status fx_float_pack(const double *width, const int *side, size_t n, double a
 
 ### `fx_float_pack_wrap`
 
-`function` | [src/flex_layout.c:512](../../src/flex_layout.c#L512)
+`function` | [src/flex_layout.c:551](../../src/flex_layout.c#L551)
 
 ```c
 fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n, double avail, double gap, double *out_x, size_t *out_row)
@@ -321,7 +321,7 @@ fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n, dou
 
 ### `fx_grid_cell`
 
-`function` | [src/flex_layout.c:554](../../src/flex_layout.c#L554)
+`function` | [src/flex_layout.c:593](../../src/flex_layout.c#L593)
 
 ```c
 void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)
@@ -346,7 +346,7 @@ Row and column of the index-th item placed row-major into ncols columns. ncols =
 
 ### `fx_auto_margins`
 
-`function` | [src/flex_layout.c:566](../../src/flex_layout.c#L566)
+`function` | [src/flex_layout.c:605](../../src/flex_layout.c#L605)
 
 ```c
 fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l, const unsigned char *auto_r, double avail, double gap)
@@ -377,7 +377,7 @@ See the contract in flex_layout.h.
 
 ### `fx_auto_min_size`
 
-`function` | [src/flex_layout.c:589](../../src/flex_layout.c#L589)
+`function` | [src/flex_layout.c:628](../../src/flex_layout.c#L628)
 
 ```c
 double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container)
@@ -413,7 +413,7 @@ Pure, total, no allocation. The result is never negative.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`fx_auto_min_size`](#fx_auto_min_size) (include/flex_layout.h:242).
+> **Inherited:** Documentation from [`fx_auto_min_size`](#fx_auto_min_size) (include/flex_layout.h:263).
 
 ---
 
@@ -421,7 +421,7 @@ Pure, total, no allocation. The result is never negative.
 
 ### `fx_multicol_used`
 
-`function` | [src/flex_layout.c:603](../../src/flex_layout.c#L603)
+`function` | [src/flex_layout.c:642](../../src/flex_layout.c#L642)
 
 ```c
 fx_status fx_multicol_used(double avail_w, int column_count, double column_width, double gap, int *out_n, double *out_w)
@@ -446,7 +446,7 @@ fx_status fx_multicol_used(double avail_w, int column_count, double column_width
 
 ### `fx_multicol_balance`
 
-`function` | [src/flex_layout.c:640](../../src/flex_layout.c#L640)
+`function` | [src/flex_layout.c:679](../../src/flex_layout.c#L679)
 
 ```c
 fx_status fx_multicol_balance(const double *heights, size_t n, int ncol, int *out_col, double *out_colh)
@@ -470,7 +470,7 @@ fx_status fx_multicol_balance(const double *heights, size_t n, int ncol, int *ou
 
 ### `fx_justify_name`
 
-`function` `const` | [src/flex_layout.c:671](../../src/flex_layout.c#L671)
+`function` `const` | [src/flex_layout.c:710](../../src/flex_layout.c#L710)
 
 ```c
 const char *fx_justify_name(fx_justify j)
@@ -488,7 +488,7 @@ Never NULL; an unknown enum value yields "start".
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`fx_justify_name`](#fx_justify_name) (include/flex_layout.h:298).
+> **Inherited:** Documentation from [`fx_justify_name`](#fx_justify_name) (include/flex_layout.h:319).
 
 ---
 
@@ -496,7 +496,7 @@ Never NULL; an unknown enum value yields "start".
 
 ### `fx_column_place`
 
-`function` | [src/flex_layout.c:683](../../src/flex_layout.c#L683)
+`function` | [src/flex_layout.c:722](../../src/flex_layout.c#L722)
 
 ```c
 fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap, double inner_h, int justify, int reverse, double *y_out, double *h_out, double *extent)
@@ -527,7 +527,7 @@ fx_status fx_column_place(const double *h, const double *grow, size_t n, double 
 
 ### `fx_column_place_m`
 
-`function` | [src/flex_layout.c:690](../../src/flex_layout.c#L690)
+`function` | [src/flex_layout.c:729](../../src/flex_layout.c#L729)
 
 ```c
 fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto, size_t n, double gap, double inner_h, int justify, int reverse, double *y_out, double *h_out, double *extent)
@@ -559,7 +559,7 @@ fx_status fx_column_place_m(const double *h, const double *grow, const int *maut
 
 ### `fx_cross_offset`
 
-`function` | [src/flex_layout.c:751](../../src/flex_layout.c#L751)
+`function` | [src/flex_layout.c:790](../../src/flex_layout.c#L790)
 
 ```c
 double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)
@@ -581,7 +581,84 @@ Never negative.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`fx_cross_offset`](#fx_cross_offset) (include/flex_layout.h:323).
+> **Inherited:** Documentation from [`fx_cross_offset`](#fx_cross_offset) (include/flex_layout.h:344).
+
+---
+
+<a id="fx_grid_line_side"></a>
+
+### `fx_grid_line_side`
+
+`function` | [src/flex_layout.c:857](../../src/flex_layout.c#L857)
+
+```c
+int fx_grid_line_side(const char *s, int *out)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `s` | `char *` |  |  |
+| `out` | `int *` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="fx_grid_line_parse"></a>
+
+### `fx_grid_line_parse`
+
+`function` | [src/flex_layout.c:865](../../src/flex_layout.c#L865)
+
+```c
+int fx_grid_line_parse(const char *v, int *start, int *end)
+```
+
+The shorthand `<side> [ / <side> ]` (no slash => end is auto).
+
+1 or 0 (both outputs untouched on 0).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `char *` |  |  |
+| `start` | `int *` |  |  |
+| `end` | `int *` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`fx_grid_line_parse`](#fx_grid_line_parse) (include/flex_layout.h:117).
+
+---
+
+<a id="fx_grid_line_resolve"></a>
+
+### `fx_grid_line_resolve`
+
+`function` | [src/flex_layout.c:885](../../src/flex_layout.c#L885)
+
+```c
+void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)
+```
+
+Resolves a start/end pair against ntracks explicit tracks: *pos0 = 0-based start track or -1 (auto-place), *span >= 1.
+
+Never fails: anything unresolvable falls back to auto placement.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `start` | `int` |  |  |
+| `end` | `int` |  |  |
+| `ntracks` | `int` |  |  |
+| `pos0` | `int *` |  |  |
+| `span` | `int *` |  |  |
+
+> **Inherited:** Documentation from [`fx_grid_line_resolve`](#fx_grid_line_resolve) (include/flex_layout.h:122).
 
 ---
 
@@ -591,7 +668,7 @@ Never negative.
 
 ### `FX_EPS`
 
-`macro` | [src/flex_layout.c:15](../../src/flex_layout.c#L15)
+`macro` | [src/flex_layout.c:16](../../src/flex_layout.c#L16)
 
 ```c
 #define FX_EPS

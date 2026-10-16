@@ -14,7 +14,9 @@
 #include "css_text.h"
 #include "webfont.h"
 #include "flex_layout.h"  /* fx_grid_area_hash: an area name reduces to one int */
+_Static_assert(FX_GL_SPAN_MAX == CSS_GRID_SPAN_MAX, "grid span caps must agree");
 #include "css_select.h"
+#include "css_index.h"
 
 #include <limits.h>
 #include <math.h>
@@ -109,6 +111,9 @@ struct css_sheet {
     css_sel  *sels;
     size_t    sels_cap;
     size_t    nsels;
+    /* Rule index over sels[] (spec/css_index.md): rebuilt after every full parse,
+     * dropped by sheet_rewind. Stale or invalid means a linear scan. */
+    cix_index idx;
 
     cvr_table       vars;   /* --name table, page-global (css_vars) */
     /* @layer registry and the layer the parser is currently inside (0 = none).
@@ -121,6 +126,10 @@ struct css_sheet {
     /* @property initial values: the base of every var() lookup. */
     cvr_table       initial;
     car_layers      layers;
+    /* The unit scales the sheet text was rewritten with (len_rebase), 0 = that unit
+     * was left alone. Kept so an element's inline style gets the SAME rewrite:
+     * `style="width:30vw"` must agree with `.x{width:30vw}`. */
+    double          rw_rem_px, rw_vw_px, rw_vh_px;
     int             cur_layer;
     char            cur_layer_path[CAR_LAYER_NAME_MAX];
     char            bg_urls[CSS_MAX_BG_URLS][CSS_URL_MAX]; /* background-image url() pool */
@@ -203,6 +212,10 @@ static int color_ok(int c) { return cv_color_ok(c); }
  * origin and a UA sheet expressed as per-tag defaults rather than as declarations,
  * "the previous origin" IS the unset default here, so they collapse onto the same
  * handling -- correct by construction rather than by approximation. */
+/* wv[] marker: a CSS-wide keyword won a slot some earlier declaration had already
+ * won (and possibly written). Distinct from every length sentinel. */
+#define CSS_WIDE_RESET (INT_MIN + 64)   /* clear of CSS_LEN_* sentinels (INT_MIN..+5) */
+
 static int css_wide_keyword(const char *v) {
     return csel_ci_eq(v, "initial") || csel_ci_eq(v, "inherit") ||
            csel_ci_eq(v, "unset")   || csel_ci_eq(v, "revert")  ||
@@ -1376,64 +1389,57 @@ static int expand_transition(const char *val, css_decl *dst, int cap) {
  * hue-rotate(Ndeg). Unknown functions and chained filters beyond the first few
  * are ignored (fail closed). url() never accepted. */
 static int expand_filter(const char *val, css_decl *dst, int cap) {
+    /* ONE filter value owns ALL its slots (Filter Effects 1 section 5): a function
+     * the list does not name is back at its initial value, so `filter:none` RESETS
+     * a lower rule's grayscale instead of leaving it on, and two rules' lists never
+     * mix. A CSS-wide keyword claims every slot without writing. */
+    enum { F_BLUR, F_GRAY, F_BRIGHT, F_CONTRAST, F_SEPIA, F_INVERT, F_SAT, F_HUE,
+           F_DDX, F_DDY, F_DBLUR, F_DCOLOR, F_N };
+    static const int slot[F_N] = {
+        P_FILTER_BLUR, P_FILTER_GRAYSCALE, P_FILTER_BRIGHTNESS, P_FILTER_CONTRAST,
+        P_FILTER_SEPIA, P_FILTER_INVERT, P_FILTER_SATURATE, P_FILTER_HUE_ROTATE,
+        P_FILTER_DROP_DX, P_FILTER_DROP_DY, P_FILTER_DROP_BLUR, P_FILTER_DROP_COLOR,
+    };
+    if (cap < F_N) return 0;
+    if (css_wide_keyword(val)) {
+        for (int k = 0; k < F_N; ++k) { dst[k].prop = slot[k]; dst[k].wide = 1; }
+        return F_N;
+    }
     if (csel_substr(val, "url(", 1)) return 0;
-    if (csel_ci_eq(val, "none")) return 0;
-    const char *p = val;
-    char tok[CSS_TOK_MAX];
-    int n = 0;
-    while (n + 2 <= cap && next_ws_token(&p, tok, sizeof tok)) {
-        if (strncmp(tok, "blur(", 5) == 0) {
-            const char *body = filter_paren_body(tok, "blur(", 5);
-            if (!body) continue;
-            int px;
-            if (interp_len(body, 0, &px) && px >= 0) {
-                dst[n].prop = P_FILTER_BLUR; dst[n].ival = px; ++n;
+    int v[F_N] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1 };
+    if (!csel_ci_eq(val, "none")) {
+        const char *p = val;
+        char tok[CSS_TOK_MAX];
+        int any = 0;
+        while (next_ws_token(&p, tok, sizeof tok)) {
+            /* Each function with its default for an empty argument (`grayscale()`
+             * is grayscale(1), `blur()` is blur(0)). */
+            static const struct { const char *name; size_t n; int idx; int kind; int dflt; } fn[] = {
+                { "blur(", 5, F_BLUR, 0, 0 },          { "grayscale(", 10, F_GRAY, 1, 100 },
+                { "brightness(", 11, F_BRIGHT, 1, 100 }, { "contrast(", 9, F_CONTRAST, 1, 100 },
+                { "sepia(", 6, F_SEPIA, 1, 100 },       { "invert(", 7, F_INVERT, 1, 100 },
+                { "saturate(", 9, F_SAT, 1, 100 },      { "hue-rotate(", 11, F_HUE, 2, 0 },
+            };
+            int matched = 0;
+            for (size_t f = 0; f < sizeof fn / sizeof *fn && !matched; ++f) {
+                if (strncmp(tok, fn[f].name, fn[f].n) != 0) continue;
+                matched = 1;
+                const char *body = filter_paren_body(tok, fn[f].name, fn[f].n);
+                if (body == NULL) continue;
+                int r = -1;
+                if (body[0] == '\0') r = fn[f].dflt;
+                else if (fn[f].kind == 0) { int px; if (interp_len(body, 0, &px) && px >= 0) r = px; }
+                else if (fn[f].kind == 1) r = interp_filter_pct(body);
+                else r = interp_filter_deg(body);
+                if (r >= 0) { v[fn[f].idx] = r; any = 1; }
             }
-        } else if (strncmp(tok, "grayscale(", 10) == 0) {
-            const char *body = filter_paren_body(tok, "grayscale(", 10);
-            if (!body) continue;
-            int pct = interp_filter_pct(body);
-            if (pct >= 0) { dst[n].prop = P_FILTER_GRAYSCALE; dst[n].ival = pct; ++n; }
-        } else if (strncmp(tok, "brightness(", 11) == 0) {
-            const char *body = filter_paren_body(tok, "brightness(", 11);
-            if (!body) continue;
-            int pct = interp_filter_pct(body);
-            if (pct >= 0) { dst[n].prop = P_FILTER_BRIGHTNESS; dst[n].ival = pct; ++n; }
-        } else if (strncmp(tok, "contrast(", 9) == 0) {
-            const char *body = filter_paren_body(tok, "contrast(", 9);
-            if (!body) continue;
-            int pct = interp_filter_pct(body);
-            if (pct >= 0) { dst[n].prop = P_FILTER_CONTRAST; dst[n].ival = pct; ++n; }
-        } else if (strncmp(tok, "sepia(", 6) == 0) {
-            const char *body = filter_paren_body(tok, "sepia(", 6);
-            if (!body) continue;
-            int pct = interp_filter_pct(body);
-            if (pct >= 0) { dst[n].prop = P_FILTER_SEPIA; dst[n].ival = pct; ++n; }
-        } else if (strncmp(tok, "invert(", 7) == 0) {
-            const char *body = filter_paren_body(tok, "invert(", 7);
-            if (!body) continue;
-            int pct = interp_filter_pct(body);
-            if (pct >= 0) { dst[n].prop = P_FILTER_INVERT; dst[n].ival = pct; ++n; }
-        } else if (strncmp(tok, "saturate(", 9) == 0) {
-            const char *body = filter_paren_body(tok, "saturate(", 9);
-            if (!body) continue;
-            int pct = interp_filter_pct(body);
-            if (pct >= 0) { dst[n].prop = P_FILTER_SATURATE; dst[n].ival = pct; ++n; }
-        } else if (strncmp(tok, "hue-rotate(", 11) == 0) {
-            const char *body = filter_paren_body(tok, "hue-rotate(", 11);
-            if (!body) continue;
-            int deg = interp_filter_deg(body);
-            if (deg >= 0) { dst[n].prop = P_FILTER_HUE_ROTATE; dst[n].ival = deg; ++n; }
-        } else if (strncmp(tok, "drop-shadow(", 12) == 0) {
-            /* drop-shadow(<dx> <dy> [<blur>] [<color>]) (2026-07-19). The
-             * outer tokenizer is paren-aware, so the whole call is one token.
-             * Lengths in declaration order (dx, dy, optional blur >= 0); one
-             * optional color anywhere among them. Malformed drops only this
-             * function (the rest of the list still applies). Emits the whole
-             * 4-decl group in lock-step or nothing. */
+            if (matched || strncmp(tok, "drop-shadow(", 12) != 0) continue;
+            /* drop-shadow(<dx> <dy> [<blur>] [<color>]) (2026-07-19). The outer
+             * tokenizer is paren-aware, so the whole call is one token. Lengths in
+             * declaration order (dx, dy, optional blur >= 0); one optional color
+             * anywhere among them. Malformed drops only this function. */
             const char *body = filter_paren_body(tok, "drop-shadow(", 12);
-            if (!body) continue;
-            if (cap - n < 4) continue;
+            if (body == NULL) continue;
             int lens[3], nl = 0, color = -1, ok = 1;
             const char *q = body;
             char arg[CSS_TOK_MAX];
@@ -1451,13 +1457,16 @@ static int expand_filter(const char *val, css_decl *dst, int cap) {
             }
             if (!ok || nl < 2) continue;
             if (nl >= 3 && lens[2] < 0) continue;   /* negative blur invalid */
-            dst[n].prop = P_FILTER_DROP_DX;    dst[n].ival = lens[0]; ++n;
-            dst[n].prop = P_FILTER_DROP_DY;    dst[n].ival = lens[1]; ++n;
-            dst[n].prop = P_FILTER_DROP_BLUR;  dst[n].ival = nl >= 3 ? lens[2] : 0; ++n;
-            dst[n].prop = P_FILTER_DROP_COLOR; dst[n].ival = color == -1 ? 0x000000 : color; ++n;
+            v[F_DDX] = lens[0];
+            v[F_DDY] = lens[1];
+            v[F_DBLUR] = (nl >= 3) ? lens[2] : 0;
+            v[F_DCOLOR] = (color == -1) ? 0x000000 : color;
+            any = 1;
         }
+        if (!any) return 0;   /* nothing recognised: the declaration is invalid */
     }
-    return n;
+    for (int k = 0; k < F_N; ++k) { dst[k].prop = slot[k]; dst[k].ival = v[k]; }
+    return F_N;
 }
 
 /* backdrop-filter / -webkit-backdrop-filter (2026-07-19, glassmorphism v1):
@@ -1826,21 +1835,54 @@ static int expand_grid_areas(const char *val, css_decl *dst, int cap,
 }
 
 /* grid-area on an ITEM. CSS Grid 1 8.3 gives the property two shapes: a single
- * <custom-ident> naming an area, and a slash-separated list of grid lines. Only the
- * first is interpreted here (spec/grid_areas.md 4 lists line placement as the
- * explicit out-of-scope point, and the measured corpus uses only names), and the
- * value is reduced to its hash on the spot so an item's placement is one int all
- * the way to the painter. A value containing `/` or a digit is a line-placement
- * form: dropped rather than mistaken for a name. */
-static int expand_grid_area(const char *val, css_decl *dst, int cap) {
-    if (cap < 1) return 0;
-    if (csel_substr(val, "url(", 1)) return 0;
-    if (csel_ci_eq(val, "auto") || csel_ci_eq(val, "none")) {
-        dst[0].prop = P_GRID_AREA_NAME;
-        dst[0].ival = 0;
-        return 1;
+ * <custom-ident> naming an area (reduced to its hash on the spot, so an item's
+ * placement is one int all the way to the painter), and up to four slash-separated
+ * lines `row-start / column-start / row-end / column-end` (spec/grid_areas.md 6).
+ * As a shorthand it writes ALL its longhands, so a name clears earlier lines and
+ * lines clear an earlier name. A named LINE (`main-start / 2`) is not representable
+ * and drops the whole declaration. */
+static int expand_grid_area_lines(const char *val, css_decl *dst, int cap) {
+    if (cap < 5) return 0;
+    int side[4] = { FX_GL_AUTO, FX_GL_AUTO, FX_GL_AUTO, FX_GL_AUTO };
+    char part[64];
+    const char *p = val;
+    for (int k = 0; k < 4; ++k) {
+        const char *slash = strchr(p, '/');
+        size_t n = (slash != NULL) ? (size_t)(slash - p) : strlen(p);
+        if (n + 1 > sizeof part) return 0;
+        memcpy(part, p, n);
+        part[n] = '\0';
+        if (!fx_grid_line_side(part, &side[k])) return 0;
+        if (slash == NULL) break;
+        p = slash + 1;
+        if (k == 3) return 0;          /* a fifth side */
     }
-    if (strchr(val, '/') != NULL) return 0;   /* line placement: out of scope */
+    static const int slot[4] = { P_GRID_ROW_START, P_GRID_COL_START,
+                                 P_GRID_ROW_END, P_GRID_COL_END };
+    for (int k = 0; k < 4; ++k) { dst[k].prop = slot[k]; dst[k].ival = side[k]; }
+    dst[4].prop = P_GRID_AREA_NAME;
+    dst[4].ival = 0;
+    return 5;
+}
+
+/* grid-column / grid-row: `<side> [ / <side> ]` into the axis's two longhands. */
+static int expand_grid_line(const char *val, css_decl *dst, int cap, int p_start, int p_end) {
+    if (cap < 2) return 0;
+    int a, b;
+    if (!fx_grid_line_parse(val, &a, &b)) return 0;
+    dst[0].prop = p_start; dst[0].ival = a;
+    dst[1].prop = p_end;   dst[1].ival = b;
+    return 2;
+}
+
+static int expand_grid_area(const char *val, css_decl *dst, int cap) {
+    if (cap < 5) return 0;
+    if (csel_substr(val, "url(", 1)) return 0;
+    if (csel_ci_eq(val, "none")) return expand_grid_area_lines("auto", dst, cap);
+    /* `auto`, a line number, `span n` or any slash form: the line shape. */
+    int one;
+    if (strchr(val, '/') != NULL || fx_grid_line_side(val, &one))
+        return expand_grid_area_lines(val, dst, cap);
     const char *p = val;
     while (*p == ' ' || *p == '\t') ++p;
     /* A CSS custom-ident starts with a letter, underscore or a non-ASCII byte; a
@@ -1851,9 +1893,10 @@ static int expand_grid_area(const char *val, css_decl *dst, int cap) {
     if (len >= FX_AREA_NAME_MAX) return 0;
     unsigned h = fx_grid_area_hash(val);
     if (h == 0u) return 0;
-    dst[0].prop = P_GRID_AREA_NAME;
-    dst[0].ival = (int)h;
-    return 1;
+    if (expand_grid_area_lines("auto", dst, cap) != 5) return 0;   /* lines reset */
+    dst[4].prop = P_GRID_AREA_NAME;
+    dst[4].ival = (int)h;
+    return 5;
 }
 
 /* The `grid-template` shorthand (CSS Grid 1 7.4). Two forms reach a real page:
@@ -2131,33 +2174,6 @@ static int interp_grid_flow(const char *v) {
     return -1;
 }
 
-/* True if s begins with the NUL-terminated prefix pre (case-insensitive), stopping at
- * the first NUL (no out-of-bounds read past a short s). */
-static int starts_with_ci(const char *s, const char *pre) {
-    for (; *pre != '\0'; ++s, ++pre)
-        if (csel_lower_ch(*s) != csel_lower_ch(*pre)) return 0;
-    return 1;
-}
-
-/* grid-column / grid-row: only the `span N` form is supported -> N (clamped to
- * [1, CSS_GRID_SPAN_MAX]). Line-number / named-line placement is out of scope (-1). */
-static int interp_grid_span(const char *v) {
-    const char *p = v;
-    while (*p == ' ' || *p == '\t') ++p;
-    if (!starts_with_ci(p, "span")) return -1;
-    p += 4;
-    if (*p != ' ' && *p != '\t') return -1;   /* "span" must be followed by a count */
-    while (*p == ' ' || *p == '\t') ++p;
-    double num;
-    const char *end;
-    if (!parse_num(p, &num, &end)) return -1;
-    while (*end == ' ' || *end == '\t') ++end;
-    if (*end != '\0') return -1;
-    int n = css_round_clamp(num, 0, CSS_GRID_SPAN_MAX);
-    if (n < 1) return -1;
-    return n;
-}
-
 /* Copies s[a,b) into dst (bounded, NUL-terminated), trimming ASCII whitespace from
  * both ends. Returns the trimmed length, or SIZE_MAX if it does not fit dst. */
 static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap) {
@@ -2323,6 +2339,9 @@ static int parse_angle_deg(const char *s, int *out) {
     else if (csel_ci_eq(end, "grad")) deg = num * 0.9;
     else if (csel_ci_eq(end, "rad")) deg = num * (180.0 / 3.14159265358979323846);
     else if (csel_ci_eq(end, "turn")) deg = num * 360.0;
+    /* A unitless ZERO is an angle in the transform functions (CSS Transforms 1:
+     * `[ <angle> | <zero> ]`): `rotate(0)` is everywhere in reset sheets. */
+    else if (end[0] == '\0' && num == 0.0) deg = 0.0;
     else return 0;
     if (neg) deg = -deg;
     *out = css_round_clamp(deg, -CSS_LEN_MAX, CSS_LEN_MAX);
@@ -3076,10 +3095,16 @@ static int expand_clip(const char *val, css_decl *dst, int cap) {
  * first. Returns 1 with the name in out (truncated to WF_FAMILY_MAX, the same
  * cap the trusted scanner applies, so both sides hash the same bytes), 0 when
  * there is no usable entry. */
-static int font_first_name(const char *val, char *out, size_t cap) {
+/* The font-family list in the form the painter resolves (spec/text_shape.md
+ * section 7): each name unquoted, trimmed, inner whitespace collapsed to one
+ * space, lowercased (fontconfig and @font-face matching are case-insensitive),
+ * joined by ','. A name that would not fit ends the list at a name boundary
+ * (never half a name). Returns 1 when at least one name was written. */
+static int font_list_norm(const char *val, char *out, size_t cap) {
     if (cap == 0) return 0;
     out[0] = '\0';
     if (csel_substr(val, "url(", 1)) return 0;
+    size_t w = 0;
     const char *p = val;
     while (*p != '\0') {
         while (*p == ' ' || *p == '\t' || *p == ',') ++p;
@@ -3093,15 +3118,25 @@ static int font_first_name(const char *val, char *out, size_t cap) {
             a = 1;
             --e;
         }
-        if (e > a) {
-            size_t n = e - a;
-            if (n + 1 > cap) n = cap - 1;
-            memcpy(out, st + a, n);
-            out[n] = '\0';
-            return 1;
+        char name[CSS_FONT_LIST_MAX];
+        size_t n = 0;
+        int sp = 0;
+        for (size_t k = a; k < e && n + 1 < sizeof name; ++k) {
+            char c = st[k];
+            if (c == ' ' || c == '\t') { sp = 1; continue; }
+            if (sp && n > 0) name[n++] = ' ';
+            sp = 0;
+            if (n + 1 < sizeof name) name[n++] = csel_lower_ch(c);
         }
+        if (n == 0) continue;
+        size_t need = n + (w > 0 ? 1 : 0);
+        if (w + need + 1 > cap) break;
+        if (w > 0) out[w++] = ',';
+        memcpy(out + w, name, n);
+        w += n;
+        out[w] = '\0';
     }
-    return 0;
+    return w > 0;
 }
 
 /* font-family longhand: the bucket (today's behaviour, byte-identical) plus a
@@ -3122,8 +3157,8 @@ static int expand_fontfamily(const char *val, css_decl *dst, int cap,
         return 2;
     }
     int fam = interp_fontfamily(val);
-    char name[WF_FAMILY_MAX];
-    int have_name = font_first_name(val, name, sizeof name);
+    char name[CSS_FONT_LIST_MAX];
+    int have_name = font_list_norm(val, name, sizeof name);
     if (fam < 0 && !have_name) return 0;
     int n = 0;
     if (fam >= 0) { dst[n].prop = P_FONTFAMILY; dst[n].ival = fam; ++n; }
@@ -3211,8 +3246,8 @@ static int expand_font(const char *val, css_decl *dst, int cap,
      * to the bucket alone -- the 32-slot rule guarantee makes this unreachable
      * in practice. */
     if (n < cap) {
-        char name[WF_FAMILY_MAX];
-        if (font_first_name(p, name, sizeof name)) {
+        char name[CSS_FONT_LIST_MAX];
+        if (font_list_norm(p, name, sizeof name)) {
             if (*ncontent >= contentcap) {
                 dst[n].prop = P_FONTFACE; dst[n].ival = -1;
                 ++n;
@@ -3282,6 +3317,52 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         }
         if (known != NULL) *known = 0;
         return 0;   /* an unknown vendor prefix: fail closed */
+    }
+
+    /* Logical BORDERS (CSS Logical 1 section 6), in the same horizontal-tb LTR
+     * mapping the logical margins/paddings below use: block-start = top,
+     * block-end = bottom, inline-start = left, inline-end = right. Like a vendor
+     * prefix this is a RENAME, asked again once, so every border longhand grammar
+     * is the physical one's. ~500 declarations of github's design system alone. */
+    if (strncmp(prop, "border-block", 12) == 0 || strncmp(prop, "border-inline", 13) == 0) {
+        static const struct { const char *lg; const char *a; const char *b; } LB[] = {
+            { "border-block-start",  "border-top",    NULL },
+            { "border-block-end",    "border-bottom", NULL },
+            { "border-inline-start", "border-left",   NULL },
+            { "border-inline-end",   "border-right",  NULL },
+            { "border-block",        "border-top",    "border-bottom" },
+            { "border-inline",       "border-left",   "border-right" },
+        };
+        for (size_t k = 0; k < sizeof LB / sizeof *LB; ++k) {
+            size_t ll = strlen(LB[k].lg);
+            if (strncmp(prop, LB[k].lg, ll) != 0) continue;
+            const char *rest = prop + ll;   /* "", "-width", "-style" or "-color" */
+            if (rest[0] != '\0' && strcmp(rest, "-width") != 0 && strcmp(rest, "-style") != 0
+                && strcmp(rest, "-color") != 0)
+                continue;
+            char pa[40], pb[40];
+            if (snprintf(pa, sizeof pa, "%s%s", LB[k].a, rest) >= (int)sizeof pa) return 0;
+            if (LB[k].b == NULL)
+                return interpret_prop(pa, val, dst, cap, urltab, nurl, urlcap,
+                                      contenttab, ncontent, contentcap, known);
+            if (snprintf(pb, sizeof pb, "%s%s", LB[k].b, rest) >= (int)sizeof pb) return 0;
+            /* The two-sided shorthand: a longhand takes `start [end]`, the
+             * border shorthand one value for both sides. */
+            char v1[CSS_TOK_MAX], v2[CSS_TOK_MAX];
+            const char *va = val, *vb = val;
+            if (rest[0] != '\0') {
+                const char *q = val;
+                if (!next_ws_token(&q, v1, sizeof v1)) return 0;
+                va = v1;
+                vb = next_ws_token(&q, v2, sizeof v2) ? v2 : v1;
+            }
+            int n1 = interpret_prop(pa, va, dst, cap, urltab, nurl, urlcap,
+                                    contenttab, ncontent, contentcap, known);
+            if (n1 <= 0) return 0;
+            int n2 = interpret_prop(pb, vb, dst + n1, cap - n1, urltab, nurl, urlcap,
+                                    contenttab, ncontent, contentcap, known);
+            return (n2 > 0) ? n1 + n2 : 0;
+        }
     }
 
     /* Box model: margins allow 'auto' and negatives; padding/width neither. The
@@ -3530,6 +3611,17 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     else if (strcmp(prop, "opacity") == 0)            { prop_id = P_OPACITY;       ival = interp_opacity(val); }
     else if (strcmp(prop, "vertical-align") == 0)     return expand_valign(val, dst, cap);
     else if (strcmp(prop, "white-space") == 0)        { prop_id = P_WHITESPACE;    ival = interp_whitespace(val); }
+    else if (strcmp(prop, "text-wrap") == 0 || strcmp(prop, "text-wrap-style") == 0) {
+        /* Only the balance style changes layout here; every other keyword is a
+         * real value that resets an inherited balance. `nowrap` (a text-wrap-mode)
+         * also turns balancing off; the mode itself still rides white-space. */
+        prop_id = P_TEXT_BALANCE;
+        if (csel_ci_eq(val, "balance")) ival = 1;
+        else if (csel_ci_eq(val, "wrap") || csel_ci_eq(val, "nowrap") ||
+                 csel_ci_eq(val, "pretty") || csel_ci_eq(val, "stable") ||
+                 csel_ci_eq(val, "auto")) ival = 0;
+        else ival = -1;
+    }
     else if (strcmp(prop, "tab-size") == 0)            { prop_id = P_TABSIZE;       ival = interp_tabsize(val); }
     else if (strcmp(prop, "direction") == 0)           { prop_id = P_DIRECTION;     ival = interp_direction(val); }
     else if (strcmp(prop, "list-style-type") == 0 ||
@@ -3595,11 +3687,19 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
              || strcmp(prop, "box-pack") == 0)        { prop_id = P_JUSTIFY;       ival = interp_flex_pack(val); }
     else if (strcmp(prop, "flex-line-pack") == 0)    { prop_id = P_ALIGN_CONTENT; ival = interp_flex_line_pack(val); }
     else if (strcmp(prop, "flex-wrap") == 0)           { prop_id = P_FLEX_WRAP;     ival = interp_flex_wrap(val); }
+    else if (strcmp(prop, "grid-column-start") == 0 || strcmp(prop, "grid-column-end") == 0 ||
+             strcmp(prop, "grid-row-start") == 0 || strcmp(prop, "grid-row-end") == 0) {
+        prop_id = (prop[5] == 'c') ? ((prop[12] == 's') ? P_GRID_COL_START : P_GRID_COL_END)
+                                   : ((prop[9] == 's') ? P_GRID_ROW_START : P_GRID_ROW_END);
+        int side;
+        if (!fx_grid_line_side(val, &side)) return 0;
+        dst[0].prop = prop_id;
+        dst[0].ival = side;
+        return 1;
+    }
     else if (strcmp(prop, "grid-template-rows") == 0)  { prop_id = P_GRID_ROWS;     ival = interp_gridcols(val); }
     else if (strcmp(prop, "row-gap") == 0)             { prop_id = P_ROW_GAP;       ival = interp_gap(val); }
     else if (strcmp(prop, "grid-auto-flow") == 0)      { prop_id = P_GRID_FLOW;     ival = interp_grid_flow(val); }
-    else if (strcmp(prop, "grid-column") == 0)         { prop_id = P_GRID_COL_SPAN; ival = interp_grid_span(val); }
-    else if (strcmp(prop, "grid-row") == 0)            { prop_id = P_GRID_ROW_SPAN; ival = interp_grid_span(val); }
     else if (strcmp(prop, "float") == 0)               { prop_id = P_FLOAT;         ival = interp_float(val); }
     else if (strcmp(prop, "clear") == 0)               { prop_id = P_CLEAR;         ival = interp_clear(val); }
     else if (strcmp(prop, "visibility") == 0)          { prop_id = P_VISIBILITY;    ival = interp_visibility(val); }
@@ -3643,9 +3743,31 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         /* SVG `fill` on an element tints its inline-<svg> shapes that carry no fill
          * of their own. currentColor stays a sentinel (the painter substitutes the
          * element colour); junk/none fail closed to unset (the SVG default black). */
-        int o = interp_color(val);
+        int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);
         if (o == -1) return 0;
         prop_id = P_SVG_FILL; ival = o;
+    }
+    else if (strcmp(prop, "stroke") == 0) {
+        /* SVG 2 13.2: <paint> -- a colour, currentColor, or none. url() paint
+         * servers have no form here (fail closed). */
+        int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);
+        if (o == -1) return 0;
+        prop_id = P_SVG_STROKE; ival = o;
+    }
+    else if (strcmp(prop, "stroke-width") == 0) {
+        /* A <length> or a bare number (user units = px for an inline icon), kept in
+         * hundredths so `1.5` survives; negative is invalid. */
+        double num;
+        const char *end;
+        int o = -1;
+        if (parse_num(val, &num, &end) && num >= 0.0) {
+            while (*end == ' ') ++end;
+            if (*end == '\0') o = (int)(num * 100.0 + 0.5);
+            else { int px; if (interp_len(val, 0, &px) && px >= 0) o = px * 100; }
+            if (csel_ci_eq(end, "px")) o = (int)(num * 100.0 + 0.5);
+        }
+        if (o < 0 || o > 100000) return 0;
+        prop_id = P_SVG_STROKE_W; ival = o;
     }
     else if (strcmp(prop, "background-origin") == 0)    { prop_id = P_BG_ORIGIN;     ival = interp_bg_origin(val); }
     else if (strcmp(prop, "background-attachment") == 0){ prop_id = P_BG_ATTACHMENT; ival = interp_bg_attachment(val); }
@@ -3774,6 +3896,10 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     else if (strcmp(prop, "grid-template-areas") == 0)
         return expand_grid_areas(val, dst, cap, contenttab, ncontent, contentcap);
     else if (strcmp(prop, "grid-area") == 0)              return expand_grid_area(val, dst, cap);
+    else if (strcmp(prop, "grid-column") == 0)
+        return expand_grid_line(val, dst, cap, P_GRID_COL_START, P_GRID_COL_END);
+    else if (strcmp(prop, "grid-row") == 0)
+        return expand_grid_line(val, dst, cap, P_GRID_ROW_START, P_GRID_ROW_END);
     else if (strcmp(prop, "grid-template") == 0 || strcmp(prop, "grid") == 0)
         return expand_grid_template(val, dst, cap, contenttab, ncontent, contentcap);
     else { if (known != NULL) *known = 0; return 0; }
@@ -3783,7 +3909,8 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
      * below used to eat every one. `background-color:transparent` is how a page
      * clears an inherited or UA background, so dropping it left the old paint in
      * place -- 65 declarations in the measured corpus, on every page in it. */
-    if (ival == CC_COLOR_CURRENT || ival == CC_COLOR_TRANSPARENT) {
+    if (ival == CC_COLOR_CURRENT || ival == CC_COLOR_TRANSPARENT ||
+        (ival == CSS_SVG_PAINT_NONE && (prop_id == P_SVG_FILL || prop_id == P_SVG_STROKE))) {
         dst[0].prop = prop_id;
         dst[0].ival = ival;
         return 1;
@@ -4781,21 +4908,51 @@ static int rem_emit_px(char *out, size_t cap, size_t *o, double px) {
     return 1;
 }
 
-/* Rewrites every `<number>rem` length in s[0,n) into `<number x rem_px>px`. Pure:
- * text in, freshly malloc'd NUL-terminated text out (*outlen excludes the NUL).
- * Returns NULL on OOM or an unrepresentable size; the caller then keeps the
- * unrebased sheet, so a failure costs correctness on rem and nothing else.
+/* Unit scales for len_rebase; a scale <= 0 leaves that unit family untouched. */
+typedef struct len_rebase_ctx {
+    double rem_px;    /* 1rem in px (the author's root font-size) */
+    double vw_px;     /* 1vw in px: the RENDER width / 100 (what @media sees) */
+    double vh_px;     /* 1vh in px: the normalized height / 100 (anti-fp) */
+    int    in_block;  /* 1: s is a declaration list (inline style), not a sheet */
+} len_rebase_ctx;
+
+/* px per unit for a unit identifier u[0,len) under c, or 0 when c leaves it alone.
+ * The viewport WIDTH family is vw/vi (inline axis = width, horizontal writing) with
+ * the s/l/d variants of CSS Values 4 6.1.2 -- no toolbars here, so all three are
+ * the same viewport. vmin/vmax take both axes, so they are rewritten too; vh/vb
+ * are not: they already resolve against the normalized height. */
+static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c) {
+    char k[8];
+    if (len == 0 || len >= sizeof k) return 0.0;
+    for (size_t i = 0; i < len; ++i) k[i] = (char)csel_lower_ch(u[i]);
+    k[len] = '\0';
+    if (c->rem_px > 0.0 && strcmp(k, "rem") == 0) return c->rem_px;
+    if (c->vw_px <= 0.0) return 0.0;
+    const char *b = k;
+    if ((k[0] == 's' || k[0] == 'l' || k[0] == 'd') && k[1] == 'v') b = k + 1;
+    if (strcmp(b, "vw") == 0 || strcmp(b, "vi") == 0) return c->vw_px;
+    if (strcmp(b, "vmin") == 0) return (c->vw_px < c->vh_px) ? c->vw_px : c->vh_px;
+    if (strcmp(b, "vmax") == 0) return (c->vw_px > c->vh_px) ? c->vw_px : c->vh_px;
+    return 0.0;
+}
+
+/* Rewrites every `<number><unit>` length whose unit c scales (rem, and the viewport
+ * width family) in s[0,n) into `<number x scale>px`. Pure: text in, freshly malloc'd
+ * NUL-terminated text out (*outlen excludes the NUL). Returns NULL on OOM or an
+ * unrepresentable size; the caller then keeps the original text, so a failure costs
+ * correctness on those units and nothing else.
  *
  * Only DECLARATION VALUES are touched -- the scan tracks brace depth and rewrites
  * solely between a ':' inside a block and the next ';'/'{'/'}'. That single rule is
  * what keeps three classes of text safe at once:
  *   - at-rule preludes (`@media (min-width: 48rem)`), which sit at depth 0 and where
  *     rem means the INITIAL 16px, never the author's root (spec/css_mq.md);
- *   - selectors, including a class that merely spells a unit (`.mt-1rem`);
+ *   - selectors, including a class that merely spells a unit (`.mt-1rem`, `.w-100vw`);
  *   - quoted strings and url(...), skipped explicitly since `content: "5rem"` is
- *     text and a data: URI is opaque. */
-static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen) {
-    /* V-001: a rebased token is at most ~3x its source ("1rem" -> "10.08px" plus
+ *     text and a data: URI is opaque.
+ * An inline style is a bare declaration list, so c->in_block starts it at depth 1. */
+static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen) {
+    /* V-001: a rebased token is at most ~3x its source ("1vw" -> "10.08px" plus
      * headroom for the widest finite product), and the multiply must not wrap. */
     if (n > (SIZE_MAX - 64) / 3) return NULL;
     size_t cap = 3 * n + 64;
@@ -4803,12 +4960,12 @@ static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen) 
     if (out == NULL) return NULL;
 
     size_t o = 0, i = 0;
-    int depth = 0, in_value = 0;
+    int depth = c->in_block ? 1 : 0, in_value = 0;
     while (i < n && o + 1 < cap) {
-        char c = s[i];
+        char ch = s[i];
 
-        if (c == '"' || c == '\'') {                 /* quoted text: verbatim */
-            char q = c;
+        if (ch == '"' || ch == '\'') {               /* quoted text: verbatim */
+            char q = ch;
             out[o++] = s[i++];
             while (i < n && o + 2 < cap) {
                 if (s[i] == '\\' && i + 1 < n) { out[o++] = s[i++]; out[o++] = s[i++]; continue; }
@@ -4818,7 +4975,7 @@ static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen) 
             }
             continue;
         }
-        if (in_value && (c == 'u' || c == 'U') && i + 4 <= n
+        if (in_value && (ch == 'u' || ch == 'U') && i + 4 <= n
             && csel_lower_ch(s[i + 1]) == 'r' && csel_lower_ch(s[i + 2]) == 'l'
             && s[i + 3] == '(') {                    /* url(...): opaque */
             while (i < n && o + 1 < cap) {
@@ -4828,25 +4985,26 @@ static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen) 
             }
             continue;
         }
-        if (c == '{')      { ++depth; in_value = 0; out[o++] = s[i++]; continue; }
-        if (c == '}')      { if (depth > 0) --depth; in_value = 0; out[o++] = s[i++]; continue; }
-        if (c == ';')      { in_value = 0; out[o++] = s[i++]; continue; }
-        if (c == ':')      { if (depth > 0) in_value = 1; out[o++] = s[i++]; continue; }
+        if (ch == '{')      { ++depth; in_value = 0; out[o++] = s[i++]; continue; }
+        if (ch == '}')      { if (depth > 0) --depth; in_value = 0; out[o++] = s[i++]; continue; }
+        if (ch == ';')      { in_value = 0; out[o++] = s[i++]; continue; }
+        if (ch == ':')      { if (depth > 0) in_value = 1; out[o++] = s[i++]; continue; }
 
-        /* A `<number>rem` unit token, and only in a declaration value. */
-        if (in_value && (c == '.' || (c >= '0' && c <= '9'))
+        /* A `<number><unit>` token, and only in a declaration value. */
+        if (in_value && (ch == '.' || (ch >= '0' && ch <= '9'))
             && (i == 0 || rem_num_starts_after(s[i - 1]))
             && !(i >= 2 && s[i - 1] == '-' && s[i - 2] == '-')) {
             double num;
             const char *endp;
             if (parse_num(s + i, &num, &endp)) {
                 size_t nlen = (size_t)(endp - (s + i));
-                size_t u = i + nlen;
-                if (u + 3 <= n && csel_lower_ch(s[u]) == 'r' && csel_lower_ch(s[u + 1]) == 'e'
-                    && csel_lower_ch(s[u + 2]) == 'm'
-                    && (u + 3 >= n || !rem_ident_ch(s[u + 3]))
-                    && rem_emit_px(out, cap, &o, num * rem_px)) {
-                    i = u + 3;
+                size_t u = i + nlen, ue = u;
+                while (ue < n && ((s[ue] >= 'a' && s[ue] <= 'z') || (s[ue] >= 'A' && s[ue] <= 'Z')))
+                    ++ue;
+                double per = (ue > u && (ue >= n || !rem_ident_ch(s[ue])))
+                             ? len_unit_px(s + u, ue - u, c) : 0.0;
+                if (per > 0.0 && rem_emit_px(out, cap, &o, num * per)) {
+                    i = ue;
                     continue;
                 }
             }
@@ -4859,8 +5017,19 @@ static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen) 
     return out;
 }
 
+static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen) {
+    const len_rebase_ctx c = { rem_px, 0.0, 0.0, 0 };
+    return len_rebase(s, n, &c, outlen);
+}
+
 /* Rewinds a sheet to empty while keeping every allocation, so the text can be
  * re-parsed in place. Caps are preserved; only the counters move. */
+/* (Re)builds the rule index once a full parse has filled sels[]. */
+static void sheet_index(css_sheet *sh) {
+    cix_free(&sh->idx);
+    cix_build(sh->sels, sh->nsels, &sh->idx);
+}
+
 static void sheet_rewind(css_sheet *sh) {
     /* V-002: the declaration slots are RECYCLED by the re-parse, and a property
      * emitter only writes the fields its property has. Without this, a slot that
@@ -4872,6 +5041,7 @@ static void sheet_rewind(css_sheet *sh) {
     sh->ndecls = 0;
     sh->nrules = 0;
     sh->nsels = 0;
+    cix_free(&sh->idx);
     cvr_reset(&sh->vars);
     sh->nbg_urls = 0;
     sh->ncontent_urls = 0;
@@ -4899,6 +5069,7 @@ static void sheet_reparse(css_sheet *sh, const char *s, size_t n,
     sheet_rewind(sh);
     collect_custom_props_scoped(s, 0, n, m, root_scope, &sh->vars, &sh->initial, 0);
     parse_block(sh, s, 0, n, m, 0, log);
+    sheet_index(sh);
 }
 
 /* The root element's font-size in px, as the cascade resolves it (16px when the
@@ -4992,9 +5163,29 @@ css_status css_parse_logged(const char *text, size_t len, const css_media *media
         size_t clen = 0;
         char *clean = strip_comments(text, len, &clen);
         if (clean == NULL) { css_free(sh); return CSS_ERR_OOM; }
+        /* Viewport WIDTH units resolve against the render width @media already sees
+         * (owner decision 2026-10-15): a computed length then leaks nothing a width
+         * query did not. Rewritten once in the text, like rem below, so every
+         * consumer (shorthands, calc(), var() values) gets it with no context
+         * threaded through the emitters. The default width skips it entirely, so
+         * that path stays byte-identical. vh keeps the normalized 1080. */
+        if (m->width_px > 0 && m->width_px != CSS_MEDIA_DEFAULT_WIDTH) {
+            const len_rebase_ctx vc = { 0.0, (double)m->width_px / 100.0,
+                                        (double)CSS_MEDIA_DEFAULT_HEIGHT / 100.0, 0 };
+            size_t vlen = 0;
+            char *v = len_rebase(clean, clen, &vc, &vlen);
+            if (v != NULL) {
+                free(clean);
+                clean = v;
+                clen = vlen;
+                sh->rw_vw_px = vc.vw_px;
+                sh->rw_vh_px = vc.vh_px;
+            }
+        }
         collect_custom_props_scoped(clean, 0, clen, m, root_scope, &sh->vars,
                                     &sh->initial, 0);
         parse_block(sh, clean, 0, clen, m, 0, log);
+        sheet_index(sh);
 
         /* Second pass, only when the sheet redefines the root font-size: `rem` is
          * the ROOT em, so `html{font-size:62.5%}` makes 1rem 10px and not 16px.
@@ -5021,6 +5212,8 @@ css_status css_parse_logged(const char *text, size_t len, const css_media *media
                 if (sheet_root_font_px(sh) != rem_px) {
                     if (log != NULL) { log->n = 0; log->total = 0; }
                     sheet_reparse(sh, clean, clen, m, root_scope, log);
+                } else {
+                    sh->rw_rem_px = rem_px;
                 }
                 free(rebased);
             }
@@ -5036,6 +5229,7 @@ void css_free(css_sheet *s) {
     free(s->decls);
     free(s->rules);
     free(s->sels);
+    cix_free(&s->idx);
     cvr_free(&s->vars);
     cvr_free(&s->initial);
     for (size_t i = 0; i < s->nraw; ++i) free(s->raw[i]);
@@ -5091,6 +5285,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
     int win = imp > wi[slot] ||
               (imp == wi[slot] && (spec > ws[slot] || (spec == ws[slot] && ord >= wo[slot])));
     if (win) {
+        int had_winner = (wi[slot] >= 0);
         wi[slot] = imp;
         ws[slot] = spec;
         wo[slot] = ord;
@@ -5107,7 +5302,11 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
          * coefficient belonging to the declaration this one just beat. */
         if (d->wide) {
             if (wem != NULL) wem[slot] = 0;
-            if (wv  != NULL) wv[slot]  = CSS_LEN_UNSET;
+            /* A LOSER that won the slot earlier may already have written the field,
+             * and this keyword cannot undo it here (it has no value to write). Flag
+             * the slot: resolve_core re-runs the cascade with it pre-claimed, so the
+             * loser never writes and the field keeps its initial value. */
+            if (wv  != NULL) wv[slot]  = had_winner ? CSS_WIDE_RESET : CSS_LEN_UNSET;
             /* wide == 1 cannot write: the generic tail claims slots for properties
              * whose unset default it does not know. wide == 2 comes from an emitter
              * that does know it and carries it in ival, so it falls through to the
@@ -5124,6 +5323,8 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
         switch (d->prop) {
             case P_COLOR:    o->color = d->ival; break;
             case P_SVG_FILL: o->svg_fill = d->ival; break;
+            case P_SVG_STROKE: o->svg_stroke = d->ival; break;
+            case P_SVG_STROKE_W: o->svg_stroke_w = d->ival; break;
             case P_BG:       o->background = d->ival; break;
             case P_BG_ALPHA: o->bg_alpha = d->ival; break;
             case P_BG_GRAD_ANGLE: o->bg_grad_angle = d->ival; break;
@@ -5190,12 +5391,24 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
                  * No sheet (inline-only resolve), no pool, or no match all
                  * mean "no webfont" -- the bucket above still applies. */
                 o->fontface = 0;
-                if (d->ival >= 0 && contenttab != NULL && sheet != NULL) {
-                    const char *nm = contenttab[d->ival];
-                    for (size_t fi = 0; fi < sheet->nfont_faces; ++fi) {
-                        if (csel_ci_eq(sheet->font_faces[fi].family, nm)) {
-                            o->fontface = wf_name_hash(nm, strlen(nm));
-                            break;
+                o->font_list[0] = '\0';
+                if (d->ival >= 0 && contenttab != NULL) {
+                    const char *ls = contenttab[d->ival];
+                    size_t ln = 0;
+                    while (ln + 1 < sizeof o->font_list && ls[ln] != '\0') ++ln;
+                    memcpy(o->font_list, ls, ln);
+                    o->font_list[ln] = '\0';
+                    /* @font-face matches the FIRST name of the list. */
+                    char nm[WF_FAMILY_MAX];
+                    size_t fl = strcspn(ls, ",");
+                    if (sheet != NULL && fl > 0 && fl < sizeof nm) {
+                        memcpy(nm, ls, fl);
+                        nm[fl] = '\0';
+                        for (size_t fi = 0; fi < sheet->nfont_faces; ++fi) {
+                            if (csel_ci_eq(sheet->font_faces[fi].family, nm)) {
+                                o->fontface = wf_name_hash(nm, fl);
+                                break;
+                            }
                         }
                     }
                 }
@@ -5210,6 +5423,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_VALIGN:        o->valign = d->ival; break;
             case P_TEXTINDENT:    o->text_indent = d->ival; break;
             case P_WHITESPACE:    o->white_space = d->ival; break;
+            case P_TEXT_BALANCE:  o->text_balance = d->ival; break;
             case P_TABSIZE:       o->tab_size = d->ival; break;
             case P_LISTSTYLE:     o->list_style = d->ival; break;
             case P_DIRECTION:     o->direction = d->ival; break;
@@ -5259,8 +5473,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_GRID_ROWS:     o->grid_rows = d->ival; break;
             case P_ROW_GAP:       o->row_gap = d->ival; break;
             case P_GRID_FLOW:     o->grid_auto_flow = d->ival; break;
-            case P_GRID_COL_SPAN: o->grid_col_span = d->ival; break;
-            case P_GRID_ROW_SPAN: o->grid_row_span = d->ival; break;
+            case P_GRID_COL_START: o->grid_col_start = d->ival; break;
+            case P_GRID_COL_END:   o->grid_col_end = d->ival; break;
+            case P_GRID_ROW_START: o->grid_row_start = d->ival; break;
+            case P_GRID_ROW_END:   o->grid_row_end = d->ival; break;
             case P_FLOAT:         o->float_side = d->ival; break;
             case P_CLEAR:         o->clear = d->ival; break;
             case P_VISIBILITY:    o->visibility = d->ival; break;
@@ -5637,7 +5853,8 @@ static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
         /* CSS_LEN_AUTO/UNSET are sentinels, not lengths: scaling them would turn
          * `width:auto` into a number. The emitter already refuses to record a
          * coefficient for auto; this is the belt to that braces. */
-        if (wv[slot] == CSS_LEN_AUTO || wv[slot] == CSS_LEN_UNSET) continue;
+        if (wv[slot] == CSS_LEN_AUTO || wv[slot] == CSS_LEN_UNSET ||
+            wv[slot] == CSS_WIDE_RESET) continue;
 
         double px = cl_em_refit((double)wv[slot], (double)wem[slot] / 1000.0,
                                 CL_INITIAL_FONT_SIZE, fs);
@@ -5668,8 +5885,19 @@ css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
     return resolve_core(sheet, el, inline_style, inline_len, own_out, 0);
 }
 
+/* The selector engine's pseudo-element kind for a css_resolve_pseudo `which`. */
+static int pseudo_of(int which) {
+    switch (which) {
+        case CSS_PSEUDO_BEFORE:      return PSEUDO_BEFORE;
+        case CSS_PSEUDO_AFTER:       return PSEUDO_AFTER;
+        case CSS_PSEUDO_PLACEHOLDER: return PSEUDO_PLACEHOLDER;
+        default:                     return -1;
+    }
+}
+
 css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which) {
-    if (which != CSS_PSEUDO_BEFORE && which != CSS_PSEUDO_AFTER) {
+    if (which != CSS_PSEUDO_BEFORE && which != CSS_PSEUDO_AFTER &&
+        which != CSS_PSEUDO_PLACEHOLDER) {
         return resolve_core(NULL, NULL, NULL, 0, NULL, 0);   /* all-unset style */
     }
     return resolve_core(sheet, el, NULL, 0, NULL, which);
@@ -5684,7 +5912,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
     /* Designated initializers: robust against field insertion/reordering (every
      * "unset" sentinel is named, so a new field cannot silently default to 0). */
     css_style out = {
-        .color = -1, .svg_fill = -1, .background = -1, .bg_alpha = CSS_LEN_UNSET, .text_align = CSS_ALIGN_UNSET,
+        .color = -1, .svg_fill = -1, .svg_stroke = -1, .svg_stroke_w = -1, .text_balance = -1, .background = -1, .bg_alpha = CSS_LEN_UNSET, .text_align = CSS_ALIGN_UNSET,
         .font_scale = 0, .font_abs = 0, .line_scale = 0, .text_decoration = -1, .text_decoration_color = -1,
         .text_decoration_style = CSS_TDS_UNSET,
         .bold = -1, .italic = -1, .display = CSS_DISP_UNSET,
@@ -5698,7 +5926,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
         .width = CSS_LEN_UNSET, .max_width = CSS_LEN_UNSET,
         .min_width = CSS_LEN_UNSET, .height = CSS_LEN_UNSET,
         .min_height = CSS_LEN_UNSET, .max_height = CSS_LEN_UNSET,
-        .font_family = CSS_FF_UNSET, .fontface = 0u, .text_transform = CSS_TT_UNSET,
+        .font_family = CSS_FF_UNSET, .fontface = 0u, .font_list = "", .text_transform = CSS_TT_UNSET,
         .letter_spacing = CSS_LEN_UNSET, .word_spacing = CSS_LEN_UNSET,
         .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
         .opacity = -1, .valign = CSS_VA_UNSET, .valign_shift = CSS_LEN_UNSET,
@@ -5728,7 +5956,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
         .align_content = CSS_AK_UNSET, .justify_items = CSS_AK_UNSET,
         .flex_direction = CSS_FD_UNSET, .flex_wrap = CSS_FW_UNSET,
         .grid_rows = 0, .row_gap = -1, .grid_auto_flow = CSS_GF_UNSET,
-        .grid_col_span = 0, .grid_row_span = 0,
+        .grid_col_start = 0, .grid_col_end = 0, .grid_row_start = 0, .grid_row_end = 0,
         .float_side = CSS_FLOAT_UNSET, .clear = CSS_CLEAR_UNSET,
         .visibility = CSS_VIS_UNSET,
         .overflow_x = CSS_OF_UNSET, .overflow_y = CSS_OF_UNSET,
@@ -5801,14 +6029,25 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
     size_t nm = 0, mcap = 0;
     int m_oom = 0;
     if (sheet != NULL && el != NULL) {
-        for (size_t si = 0; si < sheet->nsels; ++si) {
+        /* Only the selectors the rule index says CAN match, in document order; a
+         * missing, stale or OOM index scans them all (same answer, slower). */
+        uint32_t *cand = NULL;
+        size_t ccap = 0, ncand = (size_t)-1;
+        if (sheet->idx.valid && sheet->idx.nsels == sheet->nsels)
+            ncand = cix_candidates(&sheet->idx, el, &cand, &ccap);
+        const int scan_all = (ncand == (size_t)-1);
+        const size_t nloop = scan_all ? sheet->nsels : ncand;
+        for (size_t ci = 0; ci < nloop; ++ci) {
+            const size_t si = scan_all ? ci : (size_t)cand[ci];
+            if (si >= sheet->nsels) continue;
             const css_sel *sel = &sheet->sels[si];
             int pseudo_kind = -1;
             if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;
             if (want_pseudo != 0) {
-                int wk = (want_pseudo == CSS_PSEUDO_BEFORE) ? PSEUDO_BEFORE : PSEUDO_AFTER;
-                if (pseudo_kind != wk) continue;
+                if (pseudo_kind != pseudo_of(want_pseudo)) continue;
                 pseudo_kind = -1;   /* the generated box takes every declaration */
+            } else if (pseudo_kind == PSEUDO_PLACEHOLDER) {
+                continue;   /* styles the placeholder text, never the control */
             }
             if (nm == mcap) {
                 size_t nc = mcap ? mcap * 2 : 32;
@@ -5821,6 +6060,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
             mt[nm].pseudo = pseudo_kind;
             ++nm;
         }
+        free(cand);
     }
 
     /* Pass 2: the element's own custom properties (spec/css_vars.md, "Alcance por
@@ -5843,16 +6083,47 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
 
     /* Pass 3: the declarations. A var() source marker is re-resolved against the
      * element's scope when it has one, replacing the page-global declarations it
-     * spans; otherwise the marker is skipped and they apply as always. */
+     * spans; otherwise the marker is skipped and they apply as always.
+     *
+     * Run at most twice. A CSS-wide keyword that won a slot after a loser had
+     * already written it (wv == CSS_WIDE_RESET) re-runs the pass from the initial
+     * style with exactly those slots pre-claimed at the keyword's precedence: the
+     * loser then cannot write, and the keyword (equal precedence, `ord >=`) wins
+     * again without writing. Every other slot replays identically. */
+    /* The inline declarations get the unit rewrite their sheet got. Done ONCE,
+     * before the (possibly repeated) pass below, which reads it on every run. */
+    char *inl_rw = NULL;
+    if (inline_style != NULL && sheet != NULL &&
+        (sheet->rw_rem_px > 0.0 || sheet->rw_vw_px > 0.0)) {
+        const len_rebase_ctx ic = { sheet->rw_rem_px, sheet->rw_vw_px,
+                                    sheet->rw_vh_px, 1 };
+        size_t il = (inline_len != 0) ? inline_len : strlen(inline_style), ol = 0;
+        inl_rw = len_rebase(inline_style, il, &ic, &ol);
+        if (inl_rw != NULL) { inline_style = inl_rw; inline_len = ol; }
+    }
+    const css_style initial = out;
+    for (int cpass = 0; cpass < 2; ++cpass) {
+    if (cpass == 1) {
+        int need = 0;
+        for (int k = 0; k < P_NSLOTS; ++k) if (wv[k] == CSS_WIDE_RESET) { need = 1; break; }
+        if (!need) break;
+        out = initial;
+        for (int k = 0; k < P_NSLOTS; ++k) {
+            if (wv[k] != CSS_WIDE_RESET) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }
+            wem[k] = 0;
+            wv[k] = 0;
+        }
+    }
     if (m_oom && sheet != NULL && el != NULL) {
         for (size_t si = 0; si < sheet->nsels; ++si) {
             const css_sel *sel = &sheet->sels[si];
             int pseudo_kind = -1;
             if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;
             if (want_pseudo != 0) {
-                int wk = (want_pseudo == CSS_PSEUDO_BEFORE) ? PSEUDO_BEFORE : PSEUDO_AFTER;
-                if (pseudo_kind != wk) continue;
+                if (pseudo_kind != pseudo_of(want_pseudo)) continue;
                 pseudo_kind = -1;
+            } else if (pseudo_kind == PSEUDO_PLACEHOLDER) {
+                continue;
             }
             apply_rule(&out, wi, ws, wo, wem, wv, sheet, sel, pseudo_kind, NULL, el);
         }
@@ -5860,7 +6131,6 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
     for (size_t k = 0; k < nm && !m_oom; ++k)
         apply_rule(&out, wi, ws, wo, wem, wv, sheet, mt[k].sel, mt[k].pseudo,
                    per_element ? &es : NULL, el);
-    free(mt);
 
     if (inline_style != NULL) {
         css_decl tmp[CSS_INLINE_DECLS] = { { 0 } };  /* V-002, as above */
@@ -5876,6 +6146,9 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
             apply_decl(&out, wi, ws, wo, wem, wv, &tmp[d], CAR_INLINE_SPEC, -1, INT_MAX,
                        inline_bg_urls, inline_content_urls, -1, el, sheet);
     }
+    }
+    free(inl_rw);
+    free(mt);
     cvr_free(&local);
 
     fold_font_relative(&out, wi, ws, wo, wem, wv, el,

@@ -23,17 +23,6 @@ classDiagram
     <<struct>> profile_ctx
 ```
 
-## Call Graph
-
-Solid arrows stay in this module, dashed arrows leave it.
-
-```mermaid
-flowchart LR
-    n_include_profile_h__PROFILE_PREFS_FILE(["PROFILE_PREFS_FILE"])
-    n_gui_browser_ui_c__key["browser_ui.key"]
-    n_include_profile_h__PROFILE_PREFS_FILE -.-> n_gui_browser_ui_c__key
-```
-
 ## Structs
 
 <a id="profile_ctx"></a>
@@ -166,7 +155,5 @@ Idempotent; NULL-safe.
 ```
 
 16B salt + 32B secret, 0600
-
-*Calls:* [`key`](gui.browser_ui.c.md#key)
 
 ---

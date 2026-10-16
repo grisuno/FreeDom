@@ -1,0 +1,4 @@
+olduse.net
+CSS drops: 1 declaration(s) dropped, 1 distinct
+  count  cause         property                     first value
+      1  bad-value     text-decoration              blink

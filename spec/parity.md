@@ -222,3 +222,23 @@ cada hoja; una condición de medios del import se vuelve `@media`), y quita los
 entera de lobste.rs vive en un `@import`. Primer sitio del allow∩js congelado:
 `lobsters` (42.60 → 1.44 en la tanda 32).
 
+
+## Alto del documento de referencia: ventana de 1080 y contenido corto (2026-10-15)
+
+Dos correcciones del ARNÉS, ninguna del motor (misma lección que la tanda 20):
+
+- **El probe de alto corre a 1000×1080.** Freedom resuelve `vh` contra el 1080
+  normalizado (doctrina anti-fp); Firefox, con `--window-size=1000`, usa ~768. Todo
+  `height:100vh` puntuaba la política: old.reddit pasó de 16.90 a **0.70** sin tocar
+  el motor. SOLO el probe toma la altura (`PARITY_WINDOW`): con alto, `--screenshot`
+  se recorta al viewport (verificado: 1000×1080 para una página de 1835 px), así que
+  la captura de perfiles y `make geom` siguen solo-ancho. Residual: los perfiles de
+  una página con `vh` se comparan a ~768.
+- **Un documento más corto que la ventana mide su contenido, no la ventana.**
+  `scrollHeight` nunca baja del viewport; cuando no lo excede, el probe toma la
+  extensión real (el `bottom` más bajo de los elementos), que es lo que hace Freedom
+  al dimensionar el lienzo por la caja más baja.
+- **Corpus del allowlist (`site-*`)**: los sitios de `allow.conf` congelados con
+  `make parity-snapshot` entran al corpus (antes vivían en un scratchpad y se
+  perdieron). `exploit.in` se excluye (sirve un captcha), y `antjs.org` es un SPA vacío
+  sin JS.

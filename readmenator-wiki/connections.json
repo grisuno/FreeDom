@@ -1,5 +1,13 @@
 [
   {
+    "community_a": 2,
+    "community_b": 3,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: fuzz/fuzz_css.c imports include/flex_layout.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
     "community_a": 3,
     "community_b": 0,
     "connection_type": "depends_on",
@@ -57,17 +65,17 @@
   },
   {
     "community_a": 1,
-    "community_b": 8,
+    "community_b": 0,
     "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/download.h.",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
     "community_a": 1,
-    "community_b": 0,
+    "community_b": 8,
     "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
@@ -92,14 +100,6 @@
     "community_b": 2,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/bui_theme.c imports include/css_color.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 3,
-    "community_b": 2,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: include/box_style.h imports include/css.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
@@ -129,6 +129,14 @@
   },
   {
     "community_a": 3,
+    "community_b": 8,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 3,
     "community_b": 4,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: src/freedom.c imports include/request_policy.h.",
@@ -148,14 +156,6 @@
     "community_b": 7,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: src/js_env.c imports include/anti_fp.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 0,
-    "community_b": 4,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: src/tab.c imports include/data_url.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   }

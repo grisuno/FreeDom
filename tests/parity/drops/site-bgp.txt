@@ -1,0 +1,5 @@
+Hurricane Electric BGP Toolkit
+CSS drops: 2 declaration(s) dropped, 2 distinct
+  count  cause         property                     first value
+      1  bad-value     margin                       none
+      1  bad-value     padding                      none

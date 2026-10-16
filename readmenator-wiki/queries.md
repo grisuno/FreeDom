@@ -12,7 +12,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: What does tab.c depend on, and what depends on it? (22 connections)
+### Q: What does tab.c depend on, and what depends on it? (23 connections)
 
 - Status: unanswered
 
@@ -20,7 +20,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: Why are fuzz_download.c and test_renderer.c connected through 8 hops across 4 communities?
+### Q: Why are fuzz_download.c and test_renderer.c connected through 8 hops across 3 communities?
 
 - Status: unanswered
 

@@ -7,14 +7,18 @@
 #include "css_chain.h"
 #include "css_select.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 /* Bounds for the element selector inputs handed to css_resolve (anti-DoS; an
  * over-long token simply does not match, which fails closed). */
 #define CCH_TAG_MAX     64u
 #define CCH_ID_MAX      128u
-#define CCH_CLASS_BUF   256u
-#define CCH_MAX_CLASSES 16
+#define CCH_CLASS_BUF   256u   /* inline class storage; longer lists spill to the heap */
+#define CCH_MAX_CLASSES 16     /* inline class slots; more spill to the heap */
+/* Anti-DoS bound on one element's class list once it spills: a real page tops out
+ * in the low thousands of bytes (CSS Modules, Tailwind), never this. */
+#define CCH_CLASS_SPILL_MAX (64u * 1024u)
 #define CCH_MAX_ATTRS   16     /* attributes captured per element for [attr] selectors */
 #define CCH_ATTR_BUF    512u   /* bytes for all captured attr names+values of one element */
 
@@ -25,10 +29,70 @@ typedef struct cch_node {
     char        idbuf[CCH_ID_MAX];
     char        clsbuf[CCH_CLASS_BUF];
     const char *clsptr[CCH_MAX_CLASSES];
+    /* A class attribute too long for clsbuf, or with more than CCH_MAX_CLASSES
+     * tokens, lives here instead: one owned block holding the pointer array and a
+     * copy of the string. NULL when the inline storage sufficed. Freed by
+     * cch_release once the resolve is done. */
+    void       *spill;
     char        attrbuf[CCH_ATTR_BUF];
     css_attr    attrs[CCH_MAX_ATTRS];
     css_element el;
 } cch_node;
+
+static int cls_space(char c) {
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f';
+}
+
+/* Splits a class attribute into the node's selector view (el.classes/nclasses).
+ * The common case fits the inline clsbuf/clsptr; a longer list or one with more
+ * tokens spills into ONE owned heap block (pointer array + string copy), so no
+ * class is ever dropped for being late in a long attribute -- the old fixed
+ * storage dropped EVERY class of an attribute >= 256 bytes. OOM degrades to the
+ * inline prefix (fail closed: a missing class does not match). */
+static void split_classes(cch_node *node, const char *v, size_t n) {
+    size_t ntok = 0;
+    for (size_t i = 0; i < n; ) {
+        while (i < n && cls_space(v[i])) ++i;
+        if (i >= n) break;
+        ++ntok;
+        while (i < n && !cls_space(v[i])) ++i;
+    }
+    if (ntok == 0) return;
+    char *buf = node->clsbuf;
+    const char **ptr = node->clsptr;
+    size_t cap_tok = CCH_MAX_CLASSES;
+    if (n >= CCH_CLASS_BUF || ntok > CCH_MAX_CLASSES) {
+        size_t bytes = ntok * sizeof(char *) + n + 1;
+        void *blk = malloc(bytes);
+        if (blk != NULL) {
+            node->spill = blk;
+            ptr = (const char **)blk;
+            buf = (char *)blk + ntok * sizeof(char *);
+            cap_tok = ntok;
+        } else if (n >= CCH_CLASS_BUF) {
+            return;
+        }
+    }
+    memcpy(buf, v, n);
+    buf[n] = '\0';
+    size_t nc = 0;
+    for (size_t i = 0; i < n && nc < cap_tok; ) {
+        while (i < n && cls_space(buf[i])) buf[i++] = '\0';
+        if (i >= n) break;
+        ptr[nc++] = &buf[i];
+        while (i < n && !cls_space(buf[i])) ++i;
+    }
+    node->el.classes = ptr;
+    node->el.nclasses = nc;
+}
+
+/* Releases what fill_css_node spilled to the heap for the first n nodes. */
+static void release_nodes(cch_node *nodes, int n) {
+    for (int i = 0; i < n; ++i) {
+        free(nodes[i].spill);
+        nodes[i].spill = NULL;
+    }
+}
 
 /* Fills *node with element e's tag/id/class tokens (no style=, no parent link yet).
  * Over-long tokens are simply absent, which fails closed (does not match). */
@@ -62,26 +126,12 @@ static void fill_css_node(lxb_dom_element_t *e, cch_node *node) {
         node->el.id = node->idbuf;
     }
 
-    size_t nc = 0, cl = 0;
+    size_t cl = 0;
     const lxb_char_t *clv =
         lxb_dom_element_get_attribute(e, (const lxb_char_t *)"class", 5, &cl);
-    if (clv != NULL && cl > 0 && cl < sizeof node->clsbuf) {
-        memcpy(node->clsbuf, clv, cl);
-        node->clsbuf[cl] = '\0';
-        size_t i = 0;
-        while (i < cl && nc < CCH_MAX_CLASSES) {
-            while (i < cl && (node->clsbuf[i] == ' ' || node->clsbuf[i] == '\t' ||
-                              node->clsbuf[i] == '\n' || node->clsbuf[i] == '\r' ||
-                              node->clsbuf[i] == '\f'))
-                node->clsbuf[i++] = '\0';
-            if (i >= cl) break;
-            node->clsptr[nc++] = &node->clsbuf[i];
-            while (i < cl && !(node->clsbuf[i] == ' ' || node->clsbuf[i] == '\t' ||
-                               node->clsbuf[i] == '\n' || node->clsbuf[i] == '\r' ||
-                               node->clsbuf[i] == '\f'))
-                ++i;
-        }
-    }
+    node->spill = NULL;
+    if (clv != NULL && cl > 0 && cl < CCH_CLASS_SPILL_MAX)
+        split_classes(node, (const char *)clv, cl);
 
     /* Capture all attributes (name lowercased) for [attr] selectors, packed into one
      * bounded buffer. Over-long sets are truncated (anti-DoS): a missing attribute just
@@ -113,8 +163,6 @@ static void fill_css_node(lxb_dom_element_t *e, cch_node *node) {
     }
 
     node->el.tag = (tn > 0) ? node->tag : NULL;
-    node->el.classes = node->clsptr;
-    node->el.nclasses = nc;
     node->el.attrs = (nat > 0) ? node->attrs : NULL;
     node->el.nattrs = nat;
     node->el.parent = NULL;  /* linked by the caller once the chain is built */
@@ -194,7 +242,8 @@ static int count_children(lxb_dom_node_t *n) {
 static const css_element *build_chain(lxb_dom_element_t *el,
                                       cch_node chain[CCH_CHAIN_MAX],
                                       cch_node sibs[CCH_SIB_MAX],
-                                      lxb_dom_node_t *nodes[CCH_CHAIN_MAX]) {
+                                      lxb_dom_node_t *nodes[CCH_CHAIN_MAX],
+                                      int *out_n, int *out_ns) {
     int n = 0;
     for (lxb_dom_node_t *p = (lxb_dom_node_t *)el;
          p != NULL && p->type == LXB_DOM_NODE_TYPE_ELEMENT && n < CCH_CHAIN_MAX;
@@ -230,6 +279,8 @@ static const css_element *build_chain(lxb_dom_element_t *el,
         for (int i = 0; i + 1 < ns; ++i)
             sibs[i].el.prev = &sibs[i + 1].el;
     }
+    *out_n = n;
+    *out_ns = ns;
     return (n > 0) ? &chain[0].el : NULL;
 }
 
@@ -250,7 +301,8 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
     cch_node chain[CCH_CHAIN_MAX];
     cch_node sibs[CCH_SIB_MAX];
     lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
-    const css_element *subject = build_chain(el, chain, sibs, nodes);
+    int nfill = 0, nsfill = 0;
+    const css_element *subject = build_chain(el, chain, sibs, nodes, &nfill, &nsfill);
 
     /* The inherited font-size is an ENGINE INPUT, like `state`: the cascade
      * cannot discover it (font-size is computed before every other property),
@@ -267,7 +319,10 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
     const lxb_char_t *st =
         lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
 
-    return css_resolve_el_ex(sheet, subject, (const char *)st, sl, own_out);
+    css_style out = css_resolve_el_ex(sheet, subject, (const char *)st, sl, own_out);
+    release_nodes(chain, nfill);
+    release_nodes(sibs, nsfill);
+    return out;
 }
 
 css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
@@ -275,14 +330,18 @@ css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int wh
     cch_node chain[CCH_CHAIN_MAX];
     cch_node sibs[CCH_SIB_MAX];
     lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
-    const css_element *subject = build_chain(el, chain, sibs, nodes);
+    int nfill = 0, nsfill = 0;
+    const css_element *subject = build_chain(el, chain, sibs, nodes, &nfill, &nsfill);
     if (subject != NULL) {
         /* The generated box inherits from its element: the element's computed
          * size is the "parent" size its own em lengths resolve against. */
         chain[0].el.font_size = font_size;
         chain[0].el.vars = inherited;
     }
-    return css_resolve_pseudo(sheet, subject, which);
+    css_style out = css_resolve_pseudo(sheet, subject, which);
+    release_nodes(chain, nfill);
+    release_nodes(sibs, nsfill);
+    return out;
 }
 
 css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet) {
@@ -294,6 +353,10 @@ int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel) {
     cch_node chain[CCH_CHAIN_MAX];
     cch_node sibs[CCH_SIB_MAX];
     lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
-    const css_element *subject = build_chain(el, chain, sibs, nodes);
-    return (subject != NULL) ? csel_matches(sel, subject, NULL, 0, NULL) : 0;
+    int nfill = 0, nsfill = 0;
+    const css_element *subject = build_chain(el, chain, sibs, nodes, &nfill, &nsfill);
+    int m = (subject != NULL) ? csel_matches(sel, subject, NULL, 0, NULL) : 0;
+    release_nodes(chain, nfill);
+    release_nodes(sibs, nsfill);
+    return m;
 }

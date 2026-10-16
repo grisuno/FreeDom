@@ -5,6 +5,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 
 - `fuzz/fuzz_css.c` -> `include/css.h`
 - `fuzz/fuzz_css.c` -> `include/css_select.h`
+- `fuzz/fuzz_css.c` -> `include/flex_layout.h`
 - `fuzz/fuzz_data_url.c` -> `include/data_url.h`
 - `fuzz/fuzz_dom.c` -> `include/dom.h`
 - `fuzz/fuzz_dom.c` -> `include/html_parse.h`
@@ -106,6 +107,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/css_decl.h` -> `include/css.h`
 - `include/css_decl.h` -> `include/css_select.h`
 - `include/css_gradient.h` -> `include/css_decl.h`
+- `include/css_index.h` -> `include/css_select.h`
 - `include/css_select.h` -> `include/css.h`
 - `include/css_text.h` -> `include/css_decl.h`
 - `include/disk_store.h` -> `include/local_store.h`
@@ -157,6 +159,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/css.c` -> `include/css_color.h`
 - `src/css.c` -> `include/css_decl.h`
 - `src/css.c` -> `include/css_gradient.h`
+- `src/css.c` -> `include/css_index.h`
 - `src/css.c` -> `include/css_length.h`
 - `src/css.c` -> `include/css_mq.h`
 - `src/css.c` -> `include/css_select.h`
@@ -183,6 +186,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/css_gradient.c` -> `include/css_length.h`
 - `src/css_gradient.c` -> `include/css_select.h`
 - `src/css_gradient.c` -> `include/css_values.h`
+- `src/css_index.c` -> `include/css_index.h`
 - `src/css_length.c` -> `include/css.h`
 - `src/css_length.c` -> `include/css_length.h`
 - `src/css_mq.c` -> `include/css_length.h`
@@ -322,7 +326,9 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/page_view.c` -> `include/util.h`
 - `src/pdf_export.c` -> `include/pdf_export.h`
 - `src/perf_trace.c` -> `include/perf_trace.h`
+- `src/prefetch.c` -> `include/import_map.h`
 - `src/prefetch.c` -> `include/prefetch.h`
+- `src/prefetch.c` -> `include/url.h`
 - `src/prefs.c` -> `include/prefs.h`
 - `src/prefs.c` -> `include/zoom.h`
 - `src/profile.c` -> `include/disk_store.h`
@@ -352,6 +358,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/tab.c` -> `include/css.h`
 - `src/tab.c` -> `include/data_url.h`
 - `src/tab.c` -> `include/dom.h`
+- `src/tab.c` -> `include/flex_layout.h`
 - `src/tab.c` -> `include/freebug.h`
 - `src/tab.c` -> `include/freedom_config.h`
 - `src/tab.c` -> `include/html_parse.h`
@@ -400,6 +407,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_css.c` -> `include/css.h`
 - `tests/test_css.c` -> `include/css_select.h`
 - `tests/test_css.c` -> `include/css_vars.h`
+- `tests/test_css.c` -> `include/flex_layout.h`
 - `tests/test_css.c` -> `include/webfont.h`
 - `tests/test_css_atrule.c` -> `include/css_atrule.h`
 - `tests/test_css_box.c` -> `include/css_box.h`
@@ -408,6 +416,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_css_drops.c` -> `include/css.h`
 - `tests/test_css_gradient.c` -> `include/css.h`
 - `tests/test_css_gradient.c` -> `include/css_gradient.h`
+- `tests/test_css_index.c` -> `include/css_index.h`
 - `tests/test_css_length.c` -> `include/css.h`
 - `tests/test_css_length.c` -> `include/css_length.h`
 - `tests/test_css_mq.c` -> `include/css_mq.h`
@@ -487,14 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_renderer.c` -> `include/renderer.h`
 - `tests/test_request_policy.c` -> `include/request_policy.h`
 - `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
-- `tests/test_svg_render.c` -> `include/svg_render.h`
-- `tests/test_tab.c` -> `include/css.h`
-- `tests/test_tab.c` -> `include/js_geom.h`
-- `tests/test_tab.c` -> `include/tab.h`
-- `tests/test_tab.c` -> `include/url.h`
-- `tests/test_tab.c` -> `include/web_storage.h`
-- `tests/test_text_shape.c` -> `include/css.h`
-- `tests/test_text_shape.c` -> `include/text_shape.h`
-- `tests/test_text_shape.c` -> `include/webfont.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

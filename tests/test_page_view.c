@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <setjmp.h>
+#include <stdio.h>
 #include <string.h>
 #include <cmocka.h>
 
@@ -1929,6 +1930,229 @@ static void test_build_fontface_hash(void **state) {
     hp_document_free(doc);
 }
 
+
+
+/* A long class attribute (CSS Modules, Tailwind) keeps every class: the selector
+ * view used to drop ALL classes of an attribute >= 256 bytes and every class past
+ * the 16th, so github's hero <h1> (5 classes, 275 bytes) lost all its rules. */
+static void test_build_long_class_attribute_keeps_classes(void **state) {
+    (void)state;
+    char html[4096];
+    char cls[2048];
+    size_t w = 0;
+    for (int k = 0; k < 30 && w + 64 < sizeof cls; ++k)
+        w += (size_t)snprintf(cls + w, sizeof cls - w,
+                              "Primer_Brand__Module__Long_class_name_%02d ", k);
+    snprintf(cls + w, sizeof cls - w, "target");
+    snprintf(html, sizeof html,
+             "<html><head><style>.target{color:#ff0000}"
+             ".Primer_Brand__Module__Long_class_name_25{font-weight:bold}</style>"
+             "</head><body><p class=\"%s\">long</p></body></html>", cls);
+    hp_document *doc = parse(html);
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_text(v, "long");
+    assert_non_null(r);
+    assert_int_equal(r->fg_rgb, 0xff0000);
+    assert_int_equal(r->bold, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+
+/* The UA body margin (HTML Rendering 15.3.1) per side: undeclared sides are root
+ * insets, declared ones (incl. 0) belong to the author. */
+static void test_root_insets(void **state) {
+    (void)state;
+    css_style cs;
+    memset(&cs, 0, sizeof cs);
+    cs.margin_top = cs.margin_right = cs.margin_bottom = cs.margin_left = CSS_LEN_UNSET;
+    int m[4];
+    pv_root_insets(&cs, m);
+    for (int k = 0; k < 4; ++k) assert_int_equal(m[k], PV_UA_BODY_MARGIN);
+    cs.margin_top = 0;
+    cs.pct[CSS_PCT_MARGIN_LEFT] = 50;
+    pv_root_insets(&cs, m);
+    assert_int_equal(m[0], 0);
+    assert_int_equal(m[1], PV_UA_BODY_MARGIN);
+    assert_int_equal(m[2], PV_UA_BODY_MARGIN);
+    assert_int_equal(m[3], 0);
+}
+
+/* An anonymous inline-block row is aligned by the text-align its OWN element
+ * inherits, never by the UA text-align:center inside a <button>; the button's box
+ * records its line's alignment for the same reason. */
+static void test_build_inline_block_row_alignment(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><body><div><button>A</button><button>B</button></div>"
+        "<section style=\"text-align:right\"><div><button>C</button></div></section>"
+        "</body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *a = find_text(v, "A");
+    const pv_run *c = find_text(v, "C");
+    assert_non_null(a);
+    assert_non_null(c);
+    assert_true(a->cont_id >= 0 && c->cont_id >= 0);
+    assert_int_equal(pv_cont_at(v, (size_t)a->cont_id)->justify, FX_JUSTIFY_START);
+    assert_int_equal(pv_cont_at(v, (size_t)c->cont_id)->justify, FX_JUSTIFY_END);
+    assert_true(a->block_id >= 0 && c->block_id >= 0);
+    assert_int_equal(pv_box_at(v, (size_t)a->block_id)->line_align, 0);
+    assert_int_equal(pv_box_at(v, (size_t)c->block_id)->line_align, CSS_ALIGN_RIGHT);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A styled text field records its own box and its ::placeholder style. */
+static void test_build_input_own_box_and_placeholder(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>.i{border:1px solid #888;width:260px}"
+        ".i::placeholder{opacity:0}.j::placeholder{color:#ff0000}</style></head><body>"
+        "<p><input class=\"i\" placeholder=\"hid\"></p>"
+        "<p><input class=\"j\" placeholder=\"red\"></p>"
+        "<p><input placeholder=\"plain\"></p></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *h = find_text(v, "hid");
+    const pv_run *r = find_text(v, "red");
+    const pv_run *p = find_text(v, "plain");
+    assert_non_null(h); assert_non_null(r); assert_non_null(p);
+    assert_true(h->own_box_id >= 0);
+    assert_int_equal(h->ph_color, PV_PH_HIDDEN);
+    assert_int_equal(r->ph_color, 0xff0000);
+    assert_int_equal(p->ph_color, PV_PH_THEME);
+    assert_int_equal(p->own_box_id, -1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+
+/* An out-of-flow child (github's absolute <svg> tab-selection overlay) or a
+ * display:none one is not part of the line: the inline-block row of its siblings
+ * still forms. It used to disqualify the row and stack every tab vertically. */
+static void test_build_inline_block_row_ignores_oof_child(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>.s{position:absolute;top:0;left:0}.h{display:none}"
+        ".b{display:inline-block}</style></head><body><div>"
+        "<svg class=\"s\" width=\"10\" height=\"10\"><rect width=\"1\" height=\"1\"/></svg>"
+        "<span class=\"h\">x</span>"
+        "<span class=\"b\">A</span><span class=\"b\">B</span></div></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *a = find_text(v, "A");
+    const pv_run *b = find_text(v, "B");
+    assert_non_null(a); assert_non_null(b);
+    assert_true(a->cont_id >= 0);
+    assert_int_equal(a->cont_id, b->cont_id);
+    assert_int_equal(pv_cont_at(v, (size_t)a->cont_id)->anon_row, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+
+/* width:max-content|fit-content reaches the box as a shrink-to-fit request. */
+static void test_build_intrinsic_width_flag(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><body><div style=\"width:max-content;border:1px solid #000\">m</div>"
+        "<div style=\"width:fit-content;border:1px solid #000\">f</div>"
+        "<div style=\"width:200px;border:1px solid #000\">p</div></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *m = find_text(v, "m"), *f = find_text(v, "f"), *p = find_text(v, "p");
+    assert_non_null(m); assert_non_null(f); assert_non_null(p);
+    assert_int_equal(pv_box_at(v, (size_t)m->block_id)->box_w_intrinsic, 1);
+    assert_int_equal(pv_box_at(v, (size_t)f->block_id)->box_w_intrinsic, 1);
+    assert_int_equal(pv_box_at(v, (size_t)p->block_id)->box_w_intrinsic, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+
+/* CSS stroke / stroke-width / fill:none reach an inline icon as root attributes
+ * appended AFTER the author's, so the cascade wins (SVG 2 6.7 presentation
+ * attributes lose to author CSS). */
+static void test_svg_append_root_attrs(void **state) {
+    (void)state;
+    size_t n = 0;
+    const char *m1 = "<svg viewBox=\"0 0 1 1\" stroke=\"#000\"><path d=\"\"/></svg>";
+    char *a = pv_svg_append_root_attrs(m1, strlen(m1), " stroke=\"#ff0000\"", &n);
+    assert_non_null(a);
+    assert_string_equal(a, "<svg viewBox=\"0 0 1 1\" stroke=\"#000\" stroke=\"#ff0000\"><path d=\"\"/></svg>");
+    assert_int_equal(n, strlen(a));
+    free(a);
+    const char *m2 = "<svg a=\">\"/>";
+    char *b = pv_svg_append_root_attrs(m2, strlen(m2), " x=\"1\"", &n);
+    assert_non_null(b);
+    assert_string_equal(b, "<svg a=\">\" x=\"1\"/>");
+    free(b);
+    assert_null(pv_svg_append_root_attrs("no tag", 6, " x=\"1\"", &n));
+}
+
+static void test_build_svg_css_stroke_inherited(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>.ic{stroke:#00ff00;stroke-width:2;fill:none}</style></head>"
+        "<body><span class=\"ic\"><svg width=\"10\" height=\"10\"><path d=\"M0 0L9 9\"/></svg>"
+        "</span></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *svg = NULL;
+    for (size_t i = 0; i < pv_count(v); ++i)
+        if (pv_at(v, i)->kind == PV_SVG) svg = pv_at(v, i);
+    assert_non_null(svg);
+    assert_non_null(strstr(svg->text, "stroke=\"#00ff00\""));
+    assert_non_null(strstr(svg->text, "stroke-width=\"2\""));
+    assert_non_null(strstr(svg->text, "fill=\"none\""));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+
+/* text-wrap-style inherits; an explicit other style resets it. */
+static void test_build_text_balance_inherits(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>body{text-wrap:balance}.n{text-wrap:wrap}</style></head>"
+        "<body><h1>bal</h1><p class=\"n\">plain</p></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_int_equal(find_text(v, "bal")->text_balance, 1);
+    assert_int_equal(find_text(v, "plain")->text_balance, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Named local families (spec/text_shape.md section 7): the normalized list rides
+ * the run, inherited from the nearest ancestor that declares one. */
+static void test_build_font_list_inherits(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>"
+        "body{font-family:Helvetica,Arial,sans-serif}.m{font-family:monospace}"
+        "</style></head><body>"
+        "<p>plain <b>bold</b></p><p class=\"m\">mono</p></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *a = find_text(v, "plain ");
+    assert_non_null(a);
+    assert_non_null(a->font_list);
+    assert_string_equal(a->font_list, "helvetica,arial,sans-serif");
+    const pv_run *b = find_text(v, "bold");
+    assert_non_null(b);
+    assert_non_null(b->font_list);
+    assert_string_equal(b->font_list, "helvetica,arial,sans-serif");
+    const pv_run *m = find_text(v, "mono");
+    assert_non_null(m);
+    assert_non_null(m->font_list);
+    assert_string_equal(m->font_list, "monospace");
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* Hito 23b-2: the flex/grid container params now come from the cascade, so a
  * <style> rule (not only inline style=) feeds gap/justify/columns. */
 /* CSS inheritance starts at the ROOT element. The context walk used to stop at the
@@ -2977,6 +3201,109 @@ static void test_button_ua_face_loses_to_author(void **state) {
     hp_document_free(doc);
 }
 
+
+/* --- grid line placement (spec/grid_areas.md section 6) --- */
+
+/* A plain item: its sides resolve against THIS container's 12 tracks. */
+static void test_grid_line_placement_plain_item(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='g'><div class='w'>W</div>"
+                             "<div class='a'>A</div></div></body>");
+    static const char CSS[] =
+        ".g{display:grid;grid-template-columns:repeat(12,minmax(0,1fr))}"
+        ".w{grid-column:1/-1}.a{grid-column:auto/span 6}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *w = find_text(v, "W");
+    const pv_run *a = find_text(v, "A");
+    assert_non_null(w);
+    assert_non_null(a);
+    assert_int_equal(w->grid_col_start, 0);
+    assert_int_equal(w->grid_span, 12);
+    assert_int_equal(a->grid_col_start, -1);
+    assert_int_equal(a->grid_span, 6);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* An item that is ITSELF a container (Primer's grid column holding a grid): its
+ * placement in the PARENT rides the nested container's descriptor, like its flex
+ * props do -- runs inside it carry the inner level's values. Measured on github.com:
+ * every such card fell into one 1/12 track. */
+static void test_grid_line_placement_nested_container_item(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='g'>"
+                             "<div class='c'><p>A</p></div>"
+                             "<div class='d'><p>B</p></div></div></body>");
+    static const char CSS[] =
+        ".g{display:grid;grid-template-columns:repeat(12,minmax(0,1fr))}"
+        ".c{display:grid;grid-column:auto/span 6}"
+        ".d{display:flex;grid-column:2 / 4;grid-row:3}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *a = find_text(v, "A");
+    const pv_run *b = find_text(v, "B");
+    assert_non_null(a);
+    assert_non_null(b);
+    const pv_cont_def *ca = pv_cont_at(v, (size_t)a->cont_id);
+    const pv_cont_def *cb = pv_cont_at(v, (size_t)b->cont_id);
+    assert_non_null(ca);
+    assert_non_null(cb);
+    assert_true(ca->parent_id >= 0);
+    assert_int_equal(ca->item_col_start, -1);
+    assert_int_equal(ca->item_col_span, 6);
+    assert_int_equal(cb->item_col_start, 1);
+    assert_int_equal(cb->item_col_span, 2);
+    assert_int_equal(cb->item_row_start, 2);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* `min-width:0` is a DECLARED minimum (Flexbox 4.5: it switches off the automatic
+ * minimum), not the "unset" 0 of box_min_w. Hugo Stack's `main.main{min-width:0}`
+ * is what lets the post column shrink beside the sidebar. */
+static void test_box_min_width_zero_is_declared(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='m'>M</div><div class='n'>N</div></body>");
+    static const char CSS[] = ".m{min-width:0;padding:1px}.n{padding:1px}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *m = find_text(v, "M");
+    const pv_run *n = find_text(v, "N");
+    assert_non_null(m);
+    assert_non_null(n);
+    assert_true(m->block_id >= 0 && n->block_id >= 0);
+    assert_int_equal(pv_box_at(v, (size_t)m->block_id)->box_min_w_set, 1);
+    assert_int_equal(pv_box_at(v, (size_t)n->block_id)->box_min_w_set, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A flex/grid item is BLOCKIFIED (CSS Display 3 2.7): `li{display:inline}` inside a
+ * `display:flex` nav still gets a box, and its horizontal margin lives there.
+ * Measured on justpaste.it's Bootstrap footer: "AccountTermsPrivacy" ran together. */
+static void test_flex_item_inline_is_blockified(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><ul class='n'><li>Account</li><li>Terms</li></ul>"
+                             "<p><span class='s'>Inline</span></p></body>");
+    static const char CSS[] = ".n{display:flex}.n li{display:inline;margin-right:10px}"
+                              ".s{margin-right:10px}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *a = find_text(v, "Account");
+    assert_non_null(a);
+    assert_true(a->block_id >= 0);
+    const pv_box_def *d = pv_box_at(v, (size_t)a->block_id);
+    assert_non_null(d);
+    assert_int_equal(d->box_r, 10);
+    /* a plain inline that is NOT an item stays boxless (no line break around it) */
+    const pv_run *in = find_text(v, "Inline");
+    assert_non_null(in);
+    const pv_box_def *di = (in->block_id >= 0) ? pv_box_at(v, (size_t)in->block_id) : NULL;
+    assert_true(di == NULL || di->box_r != 10);
+    pv_free(v);
+    hp_document_free(doc);
+}
 
 /* --- ::before / ::after generated BOXES (spec/page_view.md "Cajas generadas") --- */
 
@@ -4445,6 +4772,16 @@ int main(void) {
         cmocka_unit_test(test_build_grid_container),
         cmocka_unit_test(test_build_grid_autofill_marker),
         cmocka_unit_test(test_build_fontface_hash),
+        cmocka_unit_test(test_build_font_list_inherits),
+        cmocka_unit_test(test_build_long_class_attribute_keeps_classes),
+        cmocka_unit_test(test_root_insets),
+        cmocka_unit_test(test_build_inline_block_row_alignment),
+        cmocka_unit_test(test_build_input_own_box_and_placeholder),
+        cmocka_unit_test(test_build_inline_block_row_ignores_oof_child),
+        cmocka_unit_test(test_build_intrinsic_width_flag),
+        cmocka_unit_test(test_svg_append_root_attrs),
+        cmocka_unit_test(test_build_svg_css_stroke_inherited),
+        cmocka_unit_test(test_build_text_balance_inherits),
         cmocka_unit_test(test_build_root_element_style_inherits),
         cmocka_unit_test(test_build_root_font_size_is_overridable),
         cmocka_unit_test(test_build_abs_child_is_not_a_flex_item),
@@ -4540,6 +4877,10 @@ int main(void) {
         cmocka_unit_test(test_build_content_visibility_hidden_folds),
         cmocka_unit_test(test_build_image_rendering_inherited),
         cmocka_unit_test(test_build_caret_color_inherited),
+        cmocka_unit_test(test_grid_line_placement_plain_item),
+        cmocka_unit_test(test_grid_line_placement_nested_container_item),
+        cmocka_unit_test(test_box_min_width_zero_is_declared),
+        cmocka_unit_test(test_flex_item_inline_is_blockified),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

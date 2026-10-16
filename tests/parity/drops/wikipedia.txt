@@ -1,5 +1,5 @@
 Web browser - Wikipedia
-CSS drops: 245 declaration(s) dropped, 20 distinct
+CSS drops: 244 declaration(s) dropped, 19 distinct
   count  cause         property                     first value
     101  unknown-prop  mask-image                   url(https://en.wikipedia.org/w/load.php?modules=skins.vector.icons&image=eye&format=original...
     100  unknown-prop  -webkit-mask-image           url(https://en.wikipedia.org/w/load.php?modules=skins.vector.icons&image=eye&format=original...
@@ -14,7 +14,6 @@ CSS drops: 245 declaration(s) dropped, 20 distinct
       1  unknown-prop  clip-path                    inset(50%)
       1  unknown-prop  list-style-image             none
       1  bad-value     list-style-type              myanmar_with_period
-      1  bad-value     filter                       none
       1  unknown-prop  scroll-padding-top           3.125rem
       1  unknown-prop  scroll-margin-top            75px
       1  unknown-prop  mask-size                    0.875rem

@@ -1,6 +1,6 @@
 # include: css
 
-include: css groups 40 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...
+include: css groups 44 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...
 
 ```mermaid
 graph LR
@@ -23,15 +23,15 @@ fuzz groups 1 files (c) around fuzz_root_match, LLVMFuzzerTestOneInput. fuzz_roo
 
 ## include (3.2)
 
-include groups 14 files (h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
+include groups 15 files (h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
 
 ## src (3.3)
 
-src groups 13 files (c) around cx_forms_stacking_context, cx_box_layer, eff_z, cx_item_compare, cx_sort. eff_z: Not a stacking context: a positioned box with z:auto still paints in the *...
+src groups 15 files (c) around BT_LEN_AUTO, layout_block, bt_nn, BT_WRAP_EPS, wrap_reverse. layout_block: Block container: stack non-none children vertically, collapsing each...
 
 ## tests (3.4)
 
-tests groups 12 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
+tests groups 13 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
 
 **Files**:
 
@@ -44,12 +44,14 @@ tests groups 12 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - include/css_color.h
 - include/css_decl.h
 - include/css_gradient.h
+- include/css_index.h
 - include/css_length.h
 - include/css_mq.h
 - include/css_select.h
 - include/css_text.h
 - include/css_values.h
 - include/css_vars.h
+- src/box_tree.c
 - src/compositor.c
 - src/css.c
 - src/css_atrule.c
@@ -57,6 +59,7 @@ tests groups 12 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - src/css_chain.c
 - src/css_color.c
 - src/css_gradient.c
+- src/css_index.c
 - src/css_length.c
 - src/css_mq.c
 - src/css_select.c
@@ -70,6 +73,7 @@ tests groups 12 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - tests/test_css_color.c
 - tests/test_css_drops.c
 - tests/test_css_gradient.c
+- tests/test_css_index.c
 - tests/test_css_length.c
 - tests/test_css_mq.c
 - tests/test_css_text.c

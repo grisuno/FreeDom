@@ -28,7 +28,7 @@ classDiagram
 
 ### `css_decl`
 
-`struct` | [include/css_decl.h:187](../../include/css_decl.h#L187)
+`struct` | [include/css_decl.h:195](../../include/css_decl.h#L195)
 
 ```c
 typedef struct css_decl
@@ -42,7 +42,7 @@ typedef struct css_decl
 
 ### `prop`
 
-`type_alias` | [include/css_decl.h:186](../../include/css_decl.h#L186)
+`type_alias` | [include/css_decl.h:194](../../include/css_decl.h#L194)
 
 ```c
 typedef struct css_decl { int prop;

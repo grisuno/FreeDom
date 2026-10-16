@@ -1,12 +1,12 @@
 # `src/css_chain.c`
 
-> Source: [src/css_chain.c:1](../../src/css_chain.c#L1) | language `c` | coverage 35.7% | [API index](../index.md)
+> Source: [src/css_chain.c:1](../../src/css_chain.c#L1) | language `c` | coverage 46.7% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`cch_node`](#cch_node)
 - **Functions:** [`inputs`](#inputs), [`cch_element_style_vars`](#cch_element_style_vars), [`cch_pseudo_style`](#cch_pseudo_style), [`cch_element_style`](#cch_element_style), [`cch_element_matches`](#cch_element_matches)
-- **Macros:** [`CCH_TAG_MAX`](#cch_tag_max), [`CCH_ID_MAX`](#cch_id_max), [`CCH_CLASS_BUF`](#cch_class_buf), [`CCH_MAX_CLASSES`](#cch_max_classes), [`CCH_MAX_ATTRS`](#cch_max_attrs), [`CCH_ATTR_BUF`](#cch_attr_buf)
+- **Macros:** [`CCH_TAG_MAX`](#cch_tag_max), [`CCH_ID_MAX`](#cch_id_max), [`CCH_CLASS_BUF`](#cch_class_buf), [`CCH_MAX_CLASSES`](#cch_max_classes), [`CCH_CLASS_SPILL_MAX`](#cch_class_spill_max), [`CCH_MAX_ATTRS`](#cch_max_attrs), [`CCH_ATTR_BUF`](#cch_attr_buf)
 
 ## Type Diagram
 
@@ -42,7 +42,7 @@ flowchart LR
 
 ### `cch_node`
 
-`struct` | [src/css_chain.c:23](../../src/css_chain.c#L23)
+`struct` | [src/css_chain.c:27](../../src/css_chain.c#L27)
 
 ```c
 typedef struct cch_node
@@ -60,7 +60,7 @@ One element's selector inputs (tag/id/classes) plus its css_element view, with b
 
 #### `cch_node.tag`
 
-`type_alias` | [src/css_chain.c:23](../../src/css_chain.c#L23)
+`type_alias` | [src/css_chain.c:27](../../src/css_chain.c#L27)
 
 ```c
 typedef struct cch_node { char tag[CCH_TAG_MAX];
@@ -76,7 +76,7 @@ One element's selector inputs (tag/id/classes) plus its css_element view, with b
 
 ### `inputs`
 
-`function` | [src/css_chain.c:193](../../src/css_chain.c#L193)
+`function` | [src/css_chain.c:241](../../src/css_chain.c#L241)
 
 ```c
 * identical inputs (single source of truth). */ static const css_element *build_chain(lxb_dom_ele...
@@ -96,7 +96,7 @@ One element's selector inputs (tag/id/classes) plus its css_element view, with b
 
 ### `cch_element_style_vars`
 
-`function` | [src/css_chain.c:246](../../src/css_chain.c#L246)
+`function` | [src/css_chain.c:297](../../src/css_chain.c#L297)
 
 ```c
 css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet, double parent_font_size, const struct cvr_chain *inherited, struct cvr_table *own_out)
@@ -122,7 +122,7 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet, 
 
 ### `cch_pseudo_style`
 
-`function` | [src/css_chain.c:273](../../src/css_chain.c#L273)
+`function` | [src/css_chain.c:328](../../src/css_chain.c#L328)
 
 ```c
 css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which, double font_size, const struct cvr_chain *inherited)
@@ -142,13 +142,15 @@ css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int wh
 
 *Calls:* [`css_resolve_pseudo`](src.css.c.md#css_resolve_pseudo)
 
+*Called by:* [`pv_build_styled`](src.page_view.c.md#pv_build_styled)
+
 ---
 
 <a id="cch_element_style"></a>
 
 ### `cch_element_style`
 
-`function` | [src/css_chain.c:288](../../src/css_chain.c#L288)
+`function` | [src/css_chain.c:347](../../src/css_chain.c#L347)
 
 ```c
 css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
@@ -171,7 +173,7 @@ css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
 
 ### `cch_element_matches`
 
-`function` | [src/css_chain.c:292](../../src/css_chain.c#L292)
+`function` | [src/css_chain.c:351](../../src/css_chain.c#L351)
 
 ```c
 int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)
@@ -202,7 +204,7 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 ### `CCH_TAG_MAX`
 
-`macro` | [src/css_chain.c:14](../../src/css_chain.c#L14)
+`macro` | [src/css_chain.c:15](../../src/css_chain.c#L15)
 
 ```c
 #define CCH_TAG_MAX
@@ -216,7 +218,7 @@ Bounds for the element selector inputs handed to css_resolve (anti-DoS; an over-
 
 ### `CCH_ID_MAX`
 
-`macro` | [src/css_chain.c:15](../../src/css_chain.c#L15)
+`macro` | [src/css_chain.c:16](../../src/css_chain.c#L16)
 
 ```c
 #define CCH_ID_MAX
@@ -228,7 +230,7 @@ Bounds for the element selector inputs handed to css_resolve (anti-DoS; an over-
 
 ### `CCH_CLASS_BUF`
 
-`macro` | [src/css_chain.c:16](../../src/css_chain.c#L16)
+`macro` `inline` | [src/css_chain.c:17](../../src/css_chain.c#L17)
 
 ```c
 #define CCH_CLASS_BUF
@@ -240,11 +242,27 @@ Bounds for the element selector inputs handed to css_resolve (anti-DoS; an over-
 
 ### `CCH_MAX_CLASSES`
 
-`macro` | [src/css_chain.c:17](../../src/css_chain.c#L17)
+`macro` `inline` | [src/css_chain.c:18](../../src/css_chain.c#L18)
 
 ```c
 #define CCH_MAX_CLASSES
 ```
+
+inline class storage; longer lists spill to the heap
+
+---
+
+<a id="cch_class_spill_max"></a>
+
+### `CCH_CLASS_SPILL_MAX`
+
+`macro` | [src/css_chain.c:21](../../src/css_chain.c#L21)
+
+```c
+#define CCH_CLASS_SPILL_MAX
+```
+
+Anti-DoS bound on one element's class list once it spills: a real page tops out in the low thousands of bytes (CSS Modules, Tailwind), never this.
 
 ---
 
@@ -252,7 +270,7 @@ Bounds for the element selector inputs handed to css_resolve (anti-DoS; an over-
 
 ### `CCH_MAX_ATTRS`
 
-`macro` | [src/css_chain.c:18](../../src/css_chain.c#L18)
+`macro` | [src/css_chain.c:22](../../src/css_chain.c#L22)
 
 ```c
 #define CCH_MAX_ATTRS
@@ -264,7 +282,7 @@ Bounds for the element selector inputs handed to css_resolve (anti-DoS; an over-
 
 ### `CCH_ATTR_BUF`
 
-`macro` | [src/css_chain.c:19](../../src/css_chain.c#L19)
+`macro` | [src/css_chain.c:23](../../src/css_chain.c#L23)
 
 ```c
 #define CCH_ATTR_BUF

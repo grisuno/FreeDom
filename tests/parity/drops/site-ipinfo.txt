@@ -1,0 +1,55 @@
+IP Data Intelligence for Developers & Enterprises | IPinfo
+CSS drops: 259 declaration(s) dropped, 52 distinct
+  count  cause         property                     first value
+     66  bad-value     transition-timing-function   cubic-bezier(.4,0,.2,1)
+     26  bad-value     transition-property          color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,tra...
+     18  unknown-prop  scroll-margin-top            6rem
+     12  unknown-prop  justify-self                 end
+      8  unknown-prop  scrollbar-width              thin
+      8  unknown-prop  object-position              center
+      8  unknown-prop  text-underline-offset        1px
+      6  bad-value     transform                    var(--explainer-from)
+      6  unknown-prop  font-feature-settings        normal
+      6  unknown-prop  font-variation-settings      normal
+      5  bad-value     background                   radial-gradient(70% 45% at 95% 0,rgba(74,134,197,.35),transparent 70%),radial-gradient(45% 3...
+      4  bad-value     border-color                 inherit
+      4  bad-value     outline                      1px solid ButtonText
+      4  unknown-prop  scrollbar-color              auto
+      4  unknown-prop  perspective                  1400px
+      3  unknown-prop  mask-image                   radial-gradient(120% 80% at 50% 100%,black,transparent 70%)
+      3  unknown-prop  mask                         linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0)
+      3  unknown-prop  -webkit-mask                 linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0)
+      3  unknown-prop  -webkit-mask-composite       xor
+      3  unknown-prop  mask-composite               exclude
+      3  unknown-prop  container-type               inline-size
+      3  unknown-prop  -webkit-text-size-adjust     100%
+      3  unknown-prop  all                          unset
+      3  unknown-prop  -webkit-mask-image           radial-gradient(120% 80% at 50% 100%,black,transparent 70%)
+      3  unknown-prop  scroll-snap-align            start start
+      3  unknown-prop  scroll-snap-type             x mandatory
+      2  bad-value     margin                       bs
+      2  bad-value     width                        max(100%,2.75rem)
+      2  bad-value     height                       max(100%,2.75rem)
+      2  unknown-prop  scroll-padding-top           .25rem
+      2  unknown-prop  scroll-padding-bottom        .25rem
+      2  bad-value     justify-content              stretch
+      2  unknown-prop  -webkit-font-smoothing       antialiased
+      2  bad-value     padding-bottom               max(2rem,env(safe-area-inset-bottom))
+      2  bad-value     color                        ##1B1F23
+      2  bad-value     outline-color                transparent
+      2  unknown-prop  -moz-osx-font-smoothing      grayscale
+      2  unknown-prop  will-change                  transform
+      2  unknown-prop  stroke-dashoffset            600
+      2  unknown-prop  transform-style              preserve-3d
+      2  unknown-prop  -webkit-tap-highlight-color  transparent
+      1  bad-value     background-size              100% 100%,48px 100%,100% 48px
+      1  unknown-prop  stroke-dasharray             600
+      1  bad-value     overscroll-behavior          auto contain
+      1  bad-value     background-position          0 0,0 0,0 -1px
+      1  unknown-prop  scrollbar-gutter             stable
+      1  unknown-prop  animation-play-state         paused
+      1  bad-value     background-repeat            no-repeat,repeat,repeat
+      1  unknown-prop  -ms-overflow-style           none
+      1  bad-value     overflow-y                   overlay
+      1  unknown-prop  grid-auto-columns            minmax(0,1fr)
+      1  unknown-prop  scroll-snap-stop             always

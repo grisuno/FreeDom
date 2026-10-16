@@ -39,6 +39,19 @@ HEIGHT_SCRIPT = """
 window.addEventListener("load", function () {
   var sh = document.documentElement.scrollHeight;
   if (sh <= 0) sh = document.body.scrollHeight;
+  // scrollHeight never drops below the viewport, so a document SHORTER than the
+  // window reported the window. Freedom sizes its canvas to the lowest box; use the
+  // same content extent here, or every short page scores the window, not the page.
+  if (sh <= window.innerHeight) {
+    var all = document.body.getElementsByTagName("*"), ext = 0;
+    for (var i = 0; i < all.length; ++i) {
+      var b = all[i].getBoundingClientRect().bottom + window.scrollY;
+      if (b > ext) ext = b;
+    }
+    var hb = document.documentElement.getBoundingClientRect().bottom + window.scrollY;
+    if (hb > ext) ext = hb;
+    if (ext > 0) sh = Math.ceil(ext);
+  }
   var d = document.createElement("div");
   d.id = "__ffh";
   d.style.cssText = "position:absolute;left:0;top:0;width:1px;height:" + sh + "px";

@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 20 file(s) rooted at `include` with dominant language c (cohesion 0.55). Central symbols: `DU_MAX_ENCODED_LEN`, `FREEDOM_DATA_URL_H`, `FREEDOM_PSL_DATA_H`, `FREEDOM_REQUEST_POLICY_H`, `FREEDOM_TEXT_SHAPE_H`, `FREEDOM_WEBFONT_H`, `FREEDOM_WEBFONT_LOAD_H`, `FZ_CAP`. Core file: `src/text_shape.c` (26 symbols). Documented purpose: libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). The.
+This community groups 20 file(s) rooted at `include` with dominant language c (cohesion 0.55). Central symbols: `DU_MAX_ENCODED_LEN`, `FREEDOM_DATA_URL_H`, `FREEDOM_PSL_DATA_H`, `FREEDOM_REQUEST_POLICY_H`, `FREEDOM_TEXT_SHAPE_H`, `FREEDOM_WEBFONT_H`, `FREEDOM_WEBFONT_LOAD_H`, `FZ_CAP`. Core file: `src/text_shape.c` (42 symbols). Documented purpose: libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). The.
 
 ## Files
 
@@ -16,18 +16,18 @@ This community groups 20 file(s) rooted at `include` with dominant language c (c
 | `include/data_url.h` | h | data_access | 6 | no |
 | `include/psl_data.h` | h | data_access | 7 | no |
 | `include/request_policy.h` | h | business_logic | 5 | no |
-| `include/text_shape.h` | h | utility | 13 | no |
+| `include/text_shape.h` | h | utility | 21 | no |
 | `include/webfont.h` | h | utility | 17 | no |
 | `include/webfont_load.h` | h | utility | 7 | no |
 | `src/data_url.c` | c | data_access | 10 | no |
 | `src/render_policy.c` | c | presentation | 5 | no |
 | `src/request_policy.c` | c | business_logic | 11 | no |
-| `src/text_shape.c` | c | utility | 26 | no |
+| `src/text_shape.c` | c | utility | 42 | no |
 | `src/webfont.c` | c | utility | 15 | no |
 | `src/webfont_load.c` | c | utility | 11 | no |
 | `tests/test_data_url.c` | c | testing | 26 | no |
 | `tests/test_request_policy.c` | c | testing | 12 | no |
-| `tests/test_text_shape.c` | c | testing | 12 | no |
+| `tests/test_text_shape.c` | c | testing | 18 | no |
 | `tests/test_webfont.c` | c | testing | 13 | no |
 | `tests/test_webfont_load.c` | c | testing | 16 | no |
 
@@ -59,10 +59,10 @@ This community groups 20 file(s) rooted at `include` with dominant language c (c
 - `FREEDOM_TEXT_SHAPE_H` (macro, `include/text_shape.h:19`) `#define FREEDOM_TEXT_SHAPE_H`
 - `tsh_font` (struct, `include/text_shape.h:33`) - Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. The engine matches the g
 - `family` (type_alias, `include/text_shape.h:33`) `typedef struct tsh_font { int family;` - Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. The engine matches the g
-- `TSH_MAX_GLYPHS` (macro, `include/text_shape.h:40`) `#define TSH_MAX_GLYPHS`
-- `TSH_MAX_TEXT` (macro, `include/text_shape.h:41`) `#define TSH_MAX_TEXT`
-- `tsh_status` (enum, `include/text_shape.h:43`)
-- `tsh_ready` (function, `include/text_shape.h:52`) `int tsh_ready(void);` - 1 once a fallback (sans) font resolves; lazily initialises on first call. * 0 means no font backend:
+- `TSH_LOCAL_LISTS` (macro, `include/text_shape.h:46`) `#define TSH_LOCAL_LISTS`
+- `TSH_LOCAL_FAMILIES` (macro, `include/text_shape.h:47`) `#define TSH_LOCAL_FAMILIES`
+- `TSH_FAMILY_MAX` (macro, `include/text_shape.h:48`) `#define TSH_FAMILY_MAX`
+- `tsh_family_is_generic` (function, `include/text_shape.h:52`) `int tsh_family_is_generic(const char *name);` - 1 for a CSS generic family keyword (serif, sans-serif, monospace, cursive, * fantasy, system-ui, ui-
 
 ## Internal vs External Edges
 
@@ -74,7 +74,6 @@ This community groups 20 file(s) rooted at `include` with dominant language c (c
 - [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
 - [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
 - [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/request_policy.h.
-- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/tab.c imports include/data_url.h.
 
 ## Risks
 

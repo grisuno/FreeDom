@@ -14,6 +14,7 @@
 #define _GNU_SOURCE
 
 #include "tab.h"
+#include "flex_layout.h"
 
 #include "anti_fp.h"
 #include "box_tree.h"
@@ -61,8 +62,8 @@ static void ignore_sigpipe(void);
  * Change requires same-diff in both functions; _Static_assert below enforces. */
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
-#define TAB_WIRE_B_N 58
-#define TAB_WIRE_BOX_F_N 222
+#define TAB_WIRE_B_N 61
+#define TAB_WIRE_BOX_F_N 225
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
 
 /* Anti-amplification cap on the number of display-list runs the parent will
@@ -435,6 +436,13 @@ static int write_view(int wfd, const pv_view *v) {
              * mirrors this). See pv_run.fontface. A wf_name_hash, 0 = none;
              * bits ride the int32 channel untouched. */
             (int32_t)r->fontface,
+            /* ::placeholder color of a text control, tanda 43 (appended;
+             * read_view mirrors this). See pv_run.ph_color. */
+            (int32_t)r->ph_color,
+            /* text-wrap-style: balance, tanda 43 (appended). */
+            (int32_t)r->text_balance,
+            /* the image's height is its CSS px height, tanda 43 (appended). */
+            (int32_t)(r->img_h_css | (r->img_inline << 1)),
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -448,7 +456,8 @@ static int write_view(int wfd, const pv_view *v) {
          || write_full(wfd, b, sizeof b) != 0
          || write_field(wfd, r->select_opts) != 0
          || write_field(wfd, r->name) != 0
-         || write_field(wfd, r->value) != 0)
+         || write_field(wfd, r->value) != 0
+         || write_field(wfd, r->font_list) != 0)
             return -1;
     }
 
@@ -627,6 +636,11 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->node_id,
             /* max-width as its own <length-percentage>, tanda 40 (appended). */
             (int32_t)bd->box_mw, (int32_t)bd->box_mw_pct,
+            /* explicit min-width (incl. 0), 2026-10-15 (read_view mirrors). */
+            (int32_t)bd->box_min_w_set,
+            /* the line's text-align for an inline-level box, tanda 43. */
+            (int32_t)bd->line_align,
+            (int32_t)bd->box_w_intrinsic,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -654,7 +668,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nc, sizeof nc) != 0) return -1;
     for (size_t ci = 0; ci < nc; ++ci) {
         const pv_cont_def *cd = pv_cont_at(v, ci);
-        int32_t cf[23 + PV_GRID_TRACKS];
+        int32_t cf[27 + PV_GRID_TRACKS];
         size_t k = 0;
         cf[k++] = (int32_t)cd->parent_id;
         cf[k++] = (int32_t)cd->parent_item;
@@ -680,6 +694,10 @@ static int write_view(int wfd, const pv_view *v) {
         cf[k++] = (int32_t)cd->item_order;
         cf[k++] = (int32_t)cd->item_align_self;
         cf[k++] = (int32_t)cd->item_mauto;
+        cf[k++] = (int32_t)cd->item_col_start;
+        cf[k++] = (int32_t)cd->item_col_span;
+        cf[k++] = (int32_t)cd->item_row_start;
+        cf[k++] = (int32_t)cd->item_row_span;
         for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cf[k++] = (int32_t)cd->col_w[gk];
         if (write_full(wfd, cf, sizeof cf) != 0) return -1;
     }
@@ -687,9 +705,11 @@ static int write_view(int wfd, const pv_view *v) {
      * are pv_view-level fields (not per-run or per-box). Written after the box
      * tree; read_view reads them in the same order. */
     {
-        int32_t view_hdr[4] = {
+        int32_t view_hdr[8] = {
             (int32_t)v->canvas_bg, (int32_t)v->html_max_width,
             (int32_t)v->html_margin_top, (int32_t)v->html_center,
+            (int32_t)v->root_m[0], (int32_t)v->root_m[1],
+            (int32_t)v->root_m[2], (int32_t)v->root_m[3],
         };
         if (write_full(wfd, view_hdr, sizeof view_hdr) != 0) return -1;
     }
@@ -1932,6 +1952,8 @@ struct tab {
     int            net_allowed;
     int            css_allowed;
     int            viewport_w;    /* @media render width for the next load (0 => default) */
+    size_t         subreq_n;      /* subresources served during the last load */
+    uint64_t       subreq_us;     /* wall time spent serving them (microseconds) */
     int            last_net_granted; /* the current page was loaded with net granted */
     char          *storage_in;    /* localStorage seed for the next load (owned) */
     size_t         storage_in_len;
@@ -2045,14 +2067,26 @@ static int read_view(int fd, pv_view **out) {
         if (read_field(fd, &value, &vl) != 0) {
             free(text); free(href); free(src); free(poster); free(name); free(opts); pv_free(v); return -1;
         }
+        char *fontl = NULL;
+        size_t fll = 0;
+        if (read_field(fd, &fontl, &fll) != 0) {
+            free(text); free(href); free(src); free(poster); free(name); free(value);
+            free(opts); pv_free(v); return -1;
+        }
 
         pv_status st;
         if (kind == PV_INPUT) {
             st = pv_append_input(v, heading, brk, (pv_input_type)itype, text,
                                  (nl > 0) ? name : NULL, (vl > 0) ? value : NULL,
                                  (hl > 0) ? href : NULL, (int)fid, (int)method);
-        } else if (kind == PV_IMAGE && sl > 0) {
-            st = pv_append_image(v, heading, brk, text, src, img_w, img_h);
+        } else if (kind == PV_IMAGE) {
+            /* An EMPTY src is a broken image (HTML 4.8.3), not text: page_view emits
+             * it for an <img> with alt or a declared box and no usable source, and
+             * every downstream decision blocks the "" without a fetch. Demoting it
+             * here lost the reserved box in the real browser while the page_view
+             * tests (which never cross the pipe) stayed green. */
+            st = pv_append_image(v, heading, brk, text, (src != NULL) ? src : "",
+                                 img_w, img_h);
         } else if (kind == PV_VIDEO && sl > 0) {
             st = pv_append_video(v, heading, brk, text, src,
                                  (pl > 0) ? poster : NULL, img_w, img_h);
@@ -2072,12 +2106,20 @@ static int read_view(int fd, pv_view **out) {
         free(poster);
         free(name);
         free(value);
-        if (st != PV_OK) { free(opts); pv_free(v); return -1; }
+        if (st != PV_OK) { free(opts); free(fontl); pv_free(v); return -1; }
         /* Input-specific: checked and select options from the wire. */
         if (kind == PV_INPUT) {
             pv_set_input_checked(v, (int)ckd);
+            /* Hostile worker: only the three representable shapes survive. */
+            int32_t ph = b[58];
+            pv_set_input_placeholder(v, (ph == PV_PH_HIDDEN || (ph >= 0 && ph <= 0xffffff))
+                                        ? (int)ph : PV_PH_THEME);
             if (ol > 0 && opts != NULL)
                 pv_set_input_select_opts(v, opts);
+        }
+        if (kind == PV_IMAGE) {
+            v->runs[v->count - 1].img_h_css = (b[60] & 1) != 0;
+            v->runs[v->count - 1].img_inline = (b[60] & 2) != 0;
         }
         free(opts);
         /* The text extensions ride every run kind (an input's caret_color and an
@@ -2100,7 +2142,15 @@ static int read_view(int fd, pv_view **out) {
             e.image_rendering = (int)tirend; e.caret_color = (int)tcaret;
             e.object_fit = (int)tobject_fit;
             e.fontface = (unsigned)b[57];
+            e.text_balance = (b[59] == 1) ? 1 : 0;
+            /* A hostile worker's list is bounded like the cascade's own (anything
+             * longer is not something css_style could have produced): fail closed
+             * to the generic bucket. */
+            if (fll > 0 && fll < sizeof e.font_list && fontl != NULL)
+                memcpy(e.font_list, fontl, fll + 1);
             pv_set_text_ext(v, &e);
+            free(fontl);
+            fontl = NULL;
             /* gradient text, 2026-07-19: already resolved at build time, so it
              * travels verbatim (block B tail) and lands via the direct setter. */
             {
@@ -2314,6 +2364,9 @@ static int read_view(int fd, pv_view **out) {
             .bg_size_w_pct = f[217], .bg_size_h_pct = f[218],
             .node_id = (dom_node_id)(uint32_t)f[219],
             .box_mw = f[220], .box_mw_pct = f[221],
+            .box_min_w_set = (f[222] != 0),
+            .line_align = (f[223] >= 0 && f[223] <= 8) ? f[223] : 0,
+            .box_w_intrinsic = (f[224] != 0),
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;
@@ -2369,7 +2422,7 @@ static int read_view(int fd, pv_view **out) {
         if (read_full(fd, &nc, sizeof nc) != 0) { pv_free(v); return -1; }
         if (nc > PV_MAX_CONTAINERS_WIRE) { pv_free(v); return -1; }
         for (size_t ci = 0; ci < nc; ++ci) {
-            int32_t cf[23 + PV_GRID_TRACKS];
+            int32_t cf[27 + PV_GRID_TRACKS];
             if (read_full(fd, cf, sizeof cf) != 0) { pv_free(v); return -1; }
             pv_cont_def cd;
             memset(&cd, 0, sizeof cd);
@@ -2397,6 +2450,16 @@ static int read_view(int fd, pv_view **out) {
             cd.item_order      = cf[k++];
             cd.item_align_self = cf[k++];
             cd.item_mauto      = cf[k++] & (PV_MAUTO_LEFT | PV_MAUTO_RIGHT);
+            /* Grid placement from a hostile worker: a start outside [-1, FX_MAX_ITEMS)
+             * degrades to auto, a span outside [0, FX_GL_SPAN_MAX] to one track. */
+            cd.item_col_start  = cf[k++];
+            cd.item_col_span   = cf[k++];
+            cd.item_row_start  = cf[k++];
+            cd.item_row_span   = cf[k++];
+            if (cd.item_col_start < -1 || cd.item_col_start >= (int)FX_MAX_ITEMS) cd.item_col_start = -1;
+            if (cd.item_row_start < -1 || cd.item_row_start >= (int)FX_MAX_ITEMS) cd.item_row_start = -1;
+            if (cd.item_col_span < 0 || cd.item_col_span > FX_GL_SPAN_MAX) cd.item_col_span = 0;
+            if (cd.item_row_span < 0 || cd.item_row_span > FX_GL_SPAN_MAX) cd.item_row_span = 0;
             for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cd.col_w[gk] = cf[k++];
             /* A hostile worker cannot make the parent chain point outside the
              * table: an out-of-range parent degrades the container to top level
@@ -2413,13 +2476,19 @@ static int read_view(int fd, pv_view **out) {
      * by write_view after the box tree. On EOF or mismatch, use defaults (no
      * canvas bg, no html constraints). Bounded against hostile worker. */
     {
-        int32_t view_hdr[4];
+        int32_t view_hdr[8];
         ssize_t rv = read_full(fd, view_hdr, sizeof view_hdr);
         if (rv == 0) {
             v->canvas_bg      = view_hdr[0];
             v->html_max_width  = view_hdr[1];
             v->html_margin_top = view_hdr[2];
             v->html_center     = view_hdr[3];
+            /* Root insets: a hostile worker gets at most the UA margin per side
+             * (anything else is not something pv_root_insets produces). */
+            for (int k = 0; k < 4; ++k) {
+                int32_t m = view_hdr[4 + k];
+                v->root_m[k] = (m == PV_UA_BODY_MARGIN) ? PV_UA_BODY_MARGIN : 0;
+            }
         }
     }
 
@@ -2576,6 +2645,11 @@ void tab_set_net_allowed(tab *t, int allowed) {
 void tab_set_css_allowed(tab *t, int allowed) {
     if (t == NULL) return;
     t->css_allowed = allowed ? 1 : 0;
+}
+
+void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us) {
+    if (count != NULL) *count = (t != NULL) ? t->subreq_n : 0;
+    if (total_us != NULL) *total_us = (t != NULL) ? t->subreq_us : 0;
 }
 
 void tab_set_viewport_w(tab *t, int px) {
@@ -2904,12 +2978,21 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     /* While the worker runs the page's scripts it may issue subresource (XHR/fetch)
      * requests, each a TAG_SUBREQ frame the trusted parent services in policy. Loop
      * until TAG_RESULT, which precedes the page result. */
+    t->subreq_n = 0;
+    t->subreq_us = 0;
     for (;;) {
         uint8_t tag = 0;
         if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);
         if (tag == TAG_RESULT) break;
         if (tag != TAG_SUBREQ) return io_failure(t);   /* desync */
+        struct timespec s0, s1;
+        clock_gettime(CLOCK_MONOTONIC, &s0);
         if (tab_serve_subreq(t, nflag, cflag) != 0) return io_failure(t);
+        clock_gettime(CLOCK_MONOTONIC, &s1);
+        int64_t d = (int64_t)(s1.tv_sec - s0.tv_sec) * 1000000
+                  + (s1.tv_nsec - s0.tv_nsec) / 1000;
+        if (d > 0) t->subreq_us += (uint64_t)d;
+        ++t->subreq_n;
     }
 
     int32_t ok = 0;

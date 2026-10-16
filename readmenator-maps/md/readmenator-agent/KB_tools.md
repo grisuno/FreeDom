@@ -5,18 +5,18 @@
 - Layer: utility
 - Language: py
 - Symbols:
-  - `load_rows` (function, line 99) `def load_rows(path)`
-  - `lum` (function, line 152) `def lum(p)`
-  - `_word_reader` (function, line 156) `def _word_reader(path)`
-  - `decode` (function, line 222) `def decode(path)`
-  - `_append_probe` (function, line 237) `def _append_probe(src, script)`
-  - `probe` (function, line 248) `def probe(page, selector, out_html)`
-  - `height_probe` (function, line 262) `def height_probe(page, out_html)`
-  - `height` (function, line 275) `def height(path)`
-  - `main` (function, line 284) `def main(argv)`
-  - `lum_at` (function, line 164) `def lum_at(x, y)`
-  - `bit` (function, line 189) `def bit(grid_row, cell, origin)`
-  - `word` (function, line 192) `def word(grid_row, origin)`
+  - `load_rows` (function, line 112) `def load_rows(path)`
+  - `lum` (function, line 165) `def lum(p)`
+  - `_word_reader` (function, line 169) `def _word_reader(path)`
+  - `decode` (function, line 235) `def decode(path)`
+  - `_append_probe` (function, line 250) `def _append_probe(src, script)`
+  - `probe` (function, line 261) `def probe(page, selector, out_html)`
+  - `height_probe` (function, line 275) `def height_probe(page, out_html)`
+  - `height` (function, line 288) `def height(path)`
+  - `main` (function, line 297) `def main(argv)`
+  - `lum_at` (function, line 177) `def lum_at(x, y)`
+  - `bit` (function, line 202) `def bit(grid_row, cell, origin)`
+  - `word` (function, line 205) `def word(grid_row, origin)`
 
 ## tools/gen_psl.c
 - Doc: sort_unique: v->cap = v->cap ? v->cap * 2 : 1024; v->items = (char **)realloc(v->items, v->cap *...

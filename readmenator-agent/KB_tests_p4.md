@@ -1,6 +1,28 @@
 # Subsystem: tests (page 4 of 7)
 Previous: [KB_tests_p3.md](KB_tests_p3.md)
 
+## tests/test_hls.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_not_m3u8_returns_parse_error` (function, line 15) `static void test_not_m3u8_returns_parse_error(void **state)`
+  - `test_empty_m3u8_is_ok` (function, line 22) `static void test_empty_m3u8_is_ok(void **state)`
+  - `test_single_segment` (function, line 31) `static void test_single_segment(void **state)`
+  - `test_multiple_segments` (function, line 46) `static void test_multiple_segments(void **state)`
+  - `test_target_duration_is_parsed` (function, line 68) `static void test_target_duration_is_parsed(void **state)`
+  - `test_variant_playlist_detected` (function, line 83) `static void test_variant_playlist_detected(void **state)`
+  - `test_variant_playlist_collects_variants` (function, line 97) `static void test_variant_playlist_collects_variants(void **state)`
+  - `test_multi_variant_collects_all` (function, line 114) `static void test_multi_variant_collects_all(void **state)`
+  - `test_select_variant_highest_bandwidth_no_limit` (function, line 135) `static void test_select_variant_highest_bandwidth_no_limit(void **state)`
+  - `test_select_variant_respects_max_dimensions` (function, line 152) `static void test_select_variant_respects_max_dimensions(void **state)`
+  - `test_select_variant_empty_returns_error` (function, line 170) `static void test_select_variant_empty_returns_error(void **state)`
+  - `test_resolve_url_absolute_passthrough` (function, line 180) `static void test_resolve_url_absolute_passthrough(void **state)`
+  - `test_resolve_url_relative` (function, line 190) `static void test_resolve_url_relative(void **state)`
+  - `test_resolve_url_deep_relative` (function, line 200) `static void test_resolve_url_deep_relative(void **state)`
+  - `test_handles_windows_line_endings` (function, line 209) `static void test_handles_windows_line_endings(void **state)`
+  - `main` (function, line 219) `int main(void)`
+- Depends on: `include/hls.h`
+
 ## tests/test_hostblock.c
 - Layer: testing
 - Language: c
@@ -433,55 +455,6 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_trusted_requires_both_signals` (function, line 68) `static void test_trusted_requires_both_signals(void **state)`
   - `main` (function, line 89) `int main(void)`
 - Depends on: `include/js_policy.h`
-
-## tests/test_js_sandbox.c
-- Doc: test_set_time_budget_applies: js_set_time_budget lowers the wall-clock cap armed on subsequent...
-- Layer: testing
-- Language: c
-- Symbols:
-  - `mod_host` (struct, line 344)
-  - `fetches` (type_alias, line 343) `typedef struct mod_host { int fetches;`
-  - `test_validate_rejects_null` (function, line 36) `static void test_validate_rejects_null(void **state)`
-  - `test_validate_rejects_empty` (function, line 41) `static void test_validate_rejects_empty(void **state)`
-  - `test_validate_rejects_oversize` (function, line 46) `static void test_validate_rejects_oversize(void **state)`
-  - `test_validate_accepts_within_cap` (function, line 53) `static void test_validate_accepts_within_cap(void **state)`
-  - `test_context_new_and_free` (function, line 60) `static void test_context_new_and_free(void **state)`
-  - `test_context_new_null_out` (function, line 68) `static void test_context_new_null_out(void **state)`
-  - `test_eval_arithmetic` (function, line 75) `static void test_eval_arithmetic(void **state)`
-  - `test_eval_string_concat` (function, line 89) `static void test_eval_string_concat(void **state)`
-  - `test_eval_syntax_error` (function, line 101) `static void test_eval_syntax_error(void **state)`
-  - `test_eval_runtime_exception` (function, line 110) `static void test_eval_runtime_exception(void **state)`
-  - `test_no_io_globals` (function, line 124) `static void test_no_io_globals(void **state)`
-  - `test_filesystem_access_is_reference_error` (function, line 137) `static void test_filesystem_access_is_reference_error(void **state)`
-  - `test_infinite_loop_times_out` (function, line 150) `static void test_infinite_loop_times_out(void **state)`
-  - `assert_int_equal` (function, line 156) `assert_int_equal(js_eval_once("while(true)`
-  - `test_set_time_budget_applies` (function, line 163) `static void test_set_time_budget_applies(void **state)`
-  - `assert_int_equal` (function, line 171) `assert_int_equal(js_eval(ctx, "while(true)`
-  - `test_memory_limit_is_enforced` (function, line 180) `static void test_memory_limit_is_enforced(void **state)`
-  - `test_result_free_on_zeroed` (function, line 196) `static void test_result_free_on_zeroed(void **state)`
-  - `test_context_free_null_and_double` (function, line 205) `static void test_context_free_null_and_double(void **state)`
-  - `test_eval_null_args` (function, line 213) `static void test_eval_null_args(void **state)`
-  - `test_loc_parses_named_frame` (function, line 227) `static void test_loc_parses_named_frame(void **state)`
-  - `test_loc_parses_bare_frame` (function, line 238) `static void test_loc_parses_bare_frame(void **state)`
-  - `test_loc_file_may_contain_colons` (function, line 247) `static void test_loc_file_may_contain_colons(void **state)`
-  - `test_loc_line_only_sets_col_zero` (function, line 258) `static void test_loc_line_only_sets_col_zero(void **state)`
-  - `test_loc_truncates_to_cap` (function, line 267) `static void test_loc_truncates_to_cap(void **state)`
-  - `test_loc_rejects_garbage_and_null` (function, line 275) `static void test_loc_rejects_garbage_and_null(void **state)`
-  - `test_eval_named_captures_location` (function, line 290) `static void test_eval_named_captures_location(void **state)`
-  - `test_eval_named_null_filename_defaults` (function, line 311) `static void test_eval_named_null_filename_defaults(void **state)`
-  - `test_eval_thrown_primitive_has_no_location` (function, line 326) `static void test_eval_thrown_primitive_has_no_location(void **state)`
-  - `mh_resolve` (function, line 346) `static int mh_resolve(void *host, const char *base, const char *spec, char *out, size_t outsz)`
-  - `mh_fetch` (function, line 361) `static char *mh_fetch(void *host, const char *url, size_t *len)`
-  - `test_module_imports_resolve_and_run` (function, line 383) `static void test_module_imports_resolve_and_run(void **state)`
-  - `test_module_errors_are_reported` (function, line 404) `static void test_module_errors_are_reported(void **state)`
-  - `test_module_without_host_cannot_import` (function, line 433) `static void test_module_without_host_cannot_import(void **state)`
-  - `self_fetch` (function, line 455) `static char *self_fetch(void *host, const char *url, size_t *len)`
-  - `test_module_self_await_teardown` (function, line 465) `static void test_module_self_await_teardown(void **state)`
-  - `realm_expect` (function, line 494) `static void realm_expect(js_context *ctx, const char *src, const char *want)`
-  - `test_realms_isolate_and_clone` (function, line 502) `static void test_realms_isolate_and_clone(void **state)`
-  - `test_realm_shares_time_budget` (function, line 533) `static void test_realm_shares_time_budget(void **state)`
-  - `main` (function, line 547) `int main(void)`
-- Depends on: `include/js_sandbox.h`
 
 
 Next: [KB_tests_p5.md](KB_tests_p5.md)

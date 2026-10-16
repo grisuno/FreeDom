@@ -1,6 +1,55 @@
 # Subsystem: tests (page 5 of 7)
 Previous: [KB_tests_p4.md](KB_tests_p4.md)
 
+## tests/test_js_sandbox.c
+- Doc: test_set_time_budget_applies: js_set_time_budget lowers the wall-clock cap armed on subsequent...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `mod_host` (struct, line 344)
+  - `fetches` (type_alias, line 343) `typedef struct mod_host { int fetches;`
+  - `test_validate_rejects_null` (function, line 36) `static void test_validate_rejects_null(void **state)`
+  - `test_validate_rejects_empty` (function, line 41) `static void test_validate_rejects_empty(void **state)`
+  - `test_validate_rejects_oversize` (function, line 46) `static void test_validate_rejects_oversize(void **state)`
+  - `test_validate_accepts_within_cap` (function, line 53) `static void test_validate_accepts_within_cap(void **state)`
+  - `test_context_new_and_free` (function, line 60) `static void test_context_new_and_free(void **state)`
+  - `test_context_new_null_out` (function, line 68) `static void test_context_new_null_out(void **state)`
+  - `test_eval_arithmetic` (function, line 75) `static void test_eval_arithmetic(void **state)`
+  - `test_eval_string_concat` (function, line 89) `static void test_eval_string_concat(void **state)`
+  - `test_eval_syntax_error` (function, line 101) `static void test_eval_syntax_error(void **state)`
+  - `test_eval_runtime_exception` (function, line 110) `static void test_eval_runtime_exception(void **state)`
+  - `test_no_io_globals` (function, line 124) `static void test_no_io_globals(void **state)`
+  - `test_filesystem_access_is_reference_error` (function, line 137) `static void test_filesystem_access_is_reference_error(void **state)`
+  - `test_infinite_loop_times_out` (function, line 150) `static void test_infinite_loop_times_out(void **state)`
+  - `assert_int_equal` (function, line 156) `assert_int_equal(js_eval_once("while(true)`
+  - `test_set_time_budget_applies` (function, line 163) `static void test_set_time_budget_applies(void **state)`
+  - `assert_int_equal` (function, line 171) `assert_int_equal(js_eval(ctx, "while(true)`
+  - `test_memory_limit_is_enforced` (function, line 180) `static void test_memory_limit_is_enforced(void **state)`
+  - `test_result_free_on_zeroed` (function, line 196) `static void test_result_free_on_zeroed(void **state)`
+  - `test_context_free_null_and_double` (function, line 205) `static void test_context_free_null_and_double(void **state)`
+  - `test_eval_null_args` (function, line 213) `static void test_eval_null_args(void **state)`
+  - `test_loc_parses_named_frame` (function, line 227) `static void test_loc_parses_named_frame(void **state)`
+  - `test_loc_parses_bare_frame` (function, line 238) `static void test_loc_parses_bare_frame(void **state)`
+  - `test_loc_file_may_contain_colons` (function, line 247) `static void test_loc_file_may_contain_colons(void **state)`
+  - `test_loc_line_only_sets_col_zero` (function, line 258) `static void test_loc_line_only_sets_col_zero(void **state)`
+  - `test_loc_truncates_to_cap` (function, line 267) `static void test_loc_truncates_to_cap(void **state)`
+  - `test_loc_rejects_garbage_and_null` (function, line 275) `static void test_loc_rejects_garbage_and_null(void **state)`
+  - `test_eval_named_captures_location` (function, line 290) `static void test_eval_named_captures_location(void **state)`
+  - `test_eval_named_null_filename_defaults` (function, line 311) `static void test_eval_named_null_filename_defaults(void **state)`
+  - `test_eval_thrown_primitive_has_no_location` (function, line 326) `static void test_eval_thrown_primitive_has_no_location(void **state)`
+  - `mh_resolve` (function, line 346) `static int mh_resolve(void *host, const char *base, const char *spec, char *out, size_t outsz)`
+  - `mh_fetch` (function, line 361) `static char *mh_fetch(void *host, const char *url, size_t *len)`
+  - `test_module_imports_resolve_and_run` (function, line 383) `static void test_module_imports_resolve_and_run(void **state)`
+  - `test_module_errors_are_reported` (function, line 404) `static void test_module_errors_are_reported(void **state)`
+  - `test_module_without_host_cannot_import` (function, line 433) `static void test_module_without_host_cannot_import(void **state)`
+  - `self_fetch` (function, line 455) `static char *self_fetch(void *host, const char *url, size_t *len)`
+  - `test_module_self_await_teardown` (function, line 465) `static void test_module_self_await_teardown(void **state)`
+  - `realm_expect` (function, line 494) `static void realm_expect(js_context *ctx, const char *src, const char *want)`
+  - `test_realms_isolate_and_clone` (function, line 502) `static void test_realms_isolate_and_clone(void **state)`
+  - `test_realm_shares_time_budget` (function, line 533) `static void test_realm_shares_time_budget(void **state)`
+  - `main` (function, line 547) `int main(void)`
+- Depends on: `include/js_sandbox.h`
+
 ## tests/test_link_nav.c
 - Doc: test_resolve_long_bundle_target: Modern bundle URLs exceed the old 4096 target cap (google's xjs...
 - Layer: testing
@@ -115,197 +164,211 @@ Previous: [KB_tests_p4.md](KB_tests_p4.md)
 - Depends on: `include/os_sandbox.h`
 
 ## tests/test_page_view.c
-- Doc: parse: #include <stdlib.h> #include <setjmp.h> #include <string.h> #include <cmocka.h> #include...
+- Doc: parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include...
 - Layer: testing
 - Language: c
 - Symbols:
-  - `parse` (function, line 28) `static hp_document *parse(const char *html)`
-  - `find_text` (function, line 36) `static const pv_run *find_text(const pv_view *v, const char *text)`
-  - `find_sub` (function, line 45) `static const pv_run *find_sub(const pv_view *v, const char *sub)`
-  - `find_image` (function, line 54) `static const pv_run *find_image(const pv_view *v, const char *src)`
-  - `find_video` (function, line 63) `static const pv_run *find_video(const pv_view *v, const char *src)`
-  - `find_link` (function, line 72) `static const pv_run *find_link(const pv_view *v, const char *href)`
-  - `find_svg` (function, line 80) `static const pv_run *find_svg(const pv_view *v)`
-  - `test_new_is_empty` (function, line 90) `static void test_new_is_empty(void **state)`
-  - `test_append_copies_fields` (function, line 99) `static void test_append_copies_fields(void **state)`
-  - `test_append_image_copies_fields` (function, line 126) `static void test_append_image_copies_fields(void **state)`
-  - `test_append_image_null_args` (function, line 142) `static void test_append_image_null_args(void **state)`
-  - `test_append_transcodes_latin1` (function, line 157) `static void test_append_transcodes_latin1(void **state)`
-  - `test_append_transcodes_word` (function, line 167) `static void test_append_transcodes_word(void **state)`
-  - `test_append_transcodes_cp1252_quotes` (function, line 178) `static void test_append_transcodes_cp1252_quotes(void **state)`
-  - `test_append_undefined_cp1252_is_qmark` (function, line 188) `static void test_append_undefined_cp1252_is_qmark(void **state)`
-  - `test_append_valid_utf8_passthrough` (function, line 198) `static void test_append_valid_utf8_passthrough(void **state)`
-  - `test_append_null_args` (function, line 206) `static void test_append_null_args(void **state)`
-  - `test_free_null_and_double` (function, line 214) `static void test_free_null_and_double(void **state)`
-  - `test_build_null_args` (function, line 223) `static void test_build_null_args(void **state)`
-  - `test_build_plain_text` (function, line 232) `static void test_build_plain_text(void **state)`
-  - `test_build_heading_level` (function, line 245) `static void test_build_heading_level(void **state)`
-  - `test_build_inline_emphasis` (function, line 262) `static void test_build_inline_emphasis(void **state)`
-  - `test_build_unordered_list` (function, line 303) `static void test_build_unordered_list(void **state)`
-  - `test_build_ordered_and_nested_list` (function, line 321) `static void test_build_ordered_and_nested_list(void **state)`
-  - `test_build_table_grid` (function, line 344) `static void test_build_table_grid(void **state)`
-  - `test_build_table_intercell_whitespace_dropped` (function, line 384) `static void test_build_table_intercell_whitespace_dropped(void **state)`
-  - `dropped` (function, line 426) `* either flank is dropped (the inter-cell rule above stays). */
+  - `parse` (function, line 29) `static hp_document *parse(const char *html)`
+  - `find_text` (function, line 37) `static const pv_run *find_text(const pv_view *v, const char *text)`
+  - `find_sub` (function, line 46) `static const pv_run *find_sub(const pv_view *v, const char *sub)`
+  - `find_image` (function, line 55) `static const pv_run *find_image(const pv_view *v, const char *src)`
+  - `find_video` (function, line 64) `static const pv_run *find_video(const pv_view *v, const char *src)`
+  - `find_link` (function, line 73) `static const pv_run *find_link(const pv_view *v, const char *href)`
+  - `find_svg` (function, line 81) `static const pv_run *find_svg(const pv_view *v)`
+  - `test_new_is_empty` (function, line 91) `static void test_new_is_empty(void **state)`
+  - `test_append_copies_fields` (function, line 100) `static void test_append_copies_fields(void **state)`
+  - `test_append_image_copies_fields` (function, line 127) `static void test_append_image_copies_fields(void **state)`
+  - `test_append_image_null_args` (function, line 143) `static void test_append_image_null_args(void **state)`
+  - `test_append_transcodes_latin1` (function, line 158) `static void test_append_transcodes_latin1(void **state)`
+  - `test_append_transcodes_word` (function, line 168) `static void test_append_transcodes_word(void **state)`
+  - `test_append_transcodes_cp1252_quotes` (function, line 179) `static void test_append_transcodes_cp1252_quotes(void **state)`
+  - `test_append_undefined_cp1252_is_qmark` (function, line 189) `static void test_append_undefined_cp1252_is_qmark(void **state)`
+  - `test_append_valid_utf8_passthrough` (function, line 199) `static void test_append_valid_utf8_passthrough(void **state)`
+  - `test_append_null_args` (function, line 207) `static void test_append_null_args(void **state)`
+  - `test_free_null_and_double` (function, line 215) `static void test_free_null_and_double(void **state)`
+  - `test_build_null_args` (function, line 224) `static void test_build_null_args(void **state)`
+  - `test_build_plain_text` (function, line 233) `static void test_build_plain_text(void **state)`
+  - `test_build_heading_level` (function, line 246) `static void test_build_heading_level(void **state)`
+  - `test_build_inline_emphasis` (function, line 263) `static void test_build_inline_emphasis(void **state)`
+  - `test_build_unordered_list` (function, line 304) `static void test_build_unordered_list(void **state)`
+  - `test_build_ordered_and_nested_list` (function, line 322) `static void test_build_ordered_and_nested_list(void **state)`
+  - `test_build_table_grid` (function, line 345) `static void test_build_table_grid(void **state)`
+  - `test_build_table_intercell_whitespace_dropped` (function, line 385) `static void test_build_table_intercell_whitespace_dropped(void **state)`
+  - `dropped` (function, line 427) `* either flank is dropped (the inter-cell rule above stays). */
 static void test_build_table_inli...`
-  - `test_build_table_flattens_cell` (function, line 452) `static void test_build_table_flattens_cell(void **state)`
-  - `test_build_bgcolor_attr_fallback` (function, line 586) `static void test_build_bgcolor_attr_fallback(void **state)`
-  - `test_build_nested_table_not_flattened` (function, line 602) `static void test_build_nested_table_not_flattened(void **state)`
-  - `test_build_link_with_href` (function, line 651) `static void test_build_link_with_href(void **state)`
-  - `test_build_block_break_between_paragraphs` (function, line 670) `static void test_build_block_break_between_paragraphs(void **state)`
-  - `test_build_skips_script_and_style` (function, line 682) `static void test_build_skips_script_and_style(void **state)`
-  - `test_build_inline_link_no_break_within_paragraph` (function, line 696) `static void test_build_inline_link_no_break_within_paragraph(void **state)`
-  - `test_build_image_with_dims` (function, line 714) `static void test_build_image_with_dims(void **state)`
-  - `test_build_image_unknown_dims` (function, line 731) `static void test_build_image_unknown_dims(void **state)`
-  - `test_build_image_px_and_tracking_dims` (function, line 746) `static void test_build_image_px_and_tracking_dims(void **state)`
-  - `size` (function, line 771) `* size (~100px) instead of the CSS 40px, blowing up flex rows (slashdot socials). */
+  - `test_build_table_flattens_cell` (function, line 453) `static void test_build_table_flattens_cell(void **state)`
+  - `test_build_bgcolor_attr_fallback` (function, line 587) `static void test_build_bgcolor_attr_fallback(void **state)`
+  - `test_build_nested_table_not_flattened` (function, line 603) `static void test_build_nested_table_not_flattened(void **state)`
+  - `test_build_link_with_href` (function, line 652) `static void test_build_link_with_href(void **state)`
+  - `test_build_block_break_between_paragraphs` (function, line 671) `static void test_build_block_break_between_paragraphs(void **state)`
+  - `test_build_skips_script_and_style` (function, line 683) `static void test_build_skips_script_and_style(void **state)`
+  - `test_build_inline_link_no_break_within_paragraph` (function, line 697) `static void test_build_inline_link_no_break_within_paragraph(void **state)`
+  - `test_build_image_with_dims` (function, line 715) `static void test_build_image_with_dims(void **state)`
+  - `test_build_image_unknown_dims` (function, line 732) `static void test_build_image_unknown_dims(void **state)`
+  - `test_build_image_px_and_tracking_dims` (function, line 747) `static void test_build_image_px_and_tracking_dims(void **state)`
+  - `size` (function, line 772) `* size (~100px) instead of the CSS 40px, blowing up flex rows (slashdot socials). */
 static void ...`
-  - `unset` (function, line 793) `* unset (-1) so the render step derives it from the viewBox aspect. */
+  - `unset` (function, line 794) `* unset (-1) so the render step derives it from the viewBox aspect. */
 static void test_build_svg...`
-  - `test_build_svg_fills_border_box_ancestor` (function, line 813) `static void test_build_svg_fills_border_box_ancestor(void **state)`
-  - `test_build_svg_no_ancestor_width_unset` (function, line 833) `static void test_build_svg_no_ancestor_width_unset(void **state)`
-  - `test_build_float_widthless_stays_unset` (function, line 874) `static void test_build_float_widthless_stays_unset(void **state)`
-  - `test_build_image_css_size_overrides_attr` (function, line 893) `static void test_build_image_css_size_overrides_attr(void **state)`
-  - `test_build_image_auto_size_keeps_attr` (function, line 910) `static void test_build_image_auto_size_keeps_attr(void **state)`
-  - `test_build_empty_flex_grow_spacer` (function, line 930) `static void test_build_empty_flex_grow_spacer(void **state)`
-  - `test_build_image_in_skipped_subtree_ignored` (function, line 948) `static void test_build_image_in_skipped_subtree_ignored(void **state)`
-  - `test_build_noscript_shown_when_js_off` (function, line 964) `static void test_build_noscript_shown_when_js_off(void **state)`
-  - `test_build_noscript_hidden_when_js_on` (function, line 977) `static void test_build_noscript_hidden_when_js_on(void **state)`
-  - `test_build_image_without_src_ignored` (function, line 990) `static void test_build_image_without_src_ignored(void **state)`
-  - `test_build_image_without_src_dims_emit_broken` (function, line 1021) `static void test_build_image_without_src_dims_emit_broken(void **state)`
-  - `test_build_image_srcset_fallback_when_no_src` (function, line 1038) `static void test_build_image_srcset_fallback_when_no_src(void **state)`
-  - `test_build_image_plain_src_wins_over_srcset` (function, line 1054) `static void test_build_image_plain_src_wins_over_srcset(void **state)`
-  - `test_build_image_srcset_single_no_descriptor` (function, line 1069) `static void test_build_image_srcset_single_no_descriptor(void **state)`
-  - `test_build_image_srcset_data_url_not_truncated_at_comma` (function, line 1082) `static void test_build_image_srcset_data_url_not_truncated_at_comma(void **state)`
-  - `test_build_image_no_src_and_no_srcset_ignored` (function, line 1097) `static void test_build_image_no_src_and_no_srcset_ignored(void **state)`
-  - `test_build_empty_document` (function, line 1112) `static void test_build_empty_document(void **state)`
-  - `test_set_color_model` (function, line 1126) `static void test_set_color_model(void **state)`
-  - `test_build_author_color` (function, line 1148) `static void test_build_author_color(void **state)`
-  - `test_gradient_text_runs` (function, line 1196) `static void test_gradient_text_runs(void **state)`
-  - `test_text_fill_color_runs` (function, line 1228) `static void test_text_fill_color_runs(void **state)`
-  - `test_build_combinator_selectors` (function, line 1274) `static void test_build_combinator_selectors(void **state)`
-  - `test_build_flex_container` (function, line 1312) `static void test_build_flex_container(void **state)`
-  - `wrapping` (function, line 1352) `* sideways instead of wrapping (spec/page_view.md, 2026-08-11 correction). */
+  - `test_build_svg_fills_border_box_ancestor` (function, line 814) `static void test_build_svg_fills_border_box_ancestor(void **state)`
+  - `test_build_svg_no_ancestor_width_unset` (function, line 834) `static void test_build_svg_no_ancestor_width_unset(void **state)`
+  - `test_build_float_widthless_stays_unset` (function, line 875) `static void test_build_float_widthless_stays_unset(void **state)`
+  - `test_build_image_css_size_overrides_attr` (function, line 894) `static void test_build_image_css_size_overrides_attr(void **state)`
+  - `test_build_image_auto_size_keeps_attr` (function, line 911) `static void test_build_image_auto_size_keeps_attr(void **state)`
+  - `test_build_empty_flex_grow_spacer` (function, line 931) `static void test_build_empty_flex_grow_spacer(void **state)`
+  - `test_build_image_in_skipped_subtree_ignored` (function, line 949) `static void test_build_image_in_skipped_subtree_ignored(void **state)`
+  - `test_build_noscript_shown_when_js_off` (function, line 965) `static void test_build_noscript_shown_when_js_off(void **state)`
+  - `test_build_noscript_hidden_when_js_on` (function, line 978) `static void test_build_noscript_hidden_when_js_on(void **state)`
+  - `test_build_image_without_src_ignored` (function, line 991) `static void test_build_image_without_src_ignored(void **state)`
+  - `test_build_image_without_src_dims_emit_broken` (function, line 1022) `static void test_build_image_without_src_dims_emit_broken(void **state)`
+  - `test_build_image_srcset_fallback_when_no_src` (function, line 1039) `static void test_build_image_srcset_fallback_when_no_src(void **state)`
+  - `test_build_image_plain_src_wins_over_srcset` (function, line 1055) `static void test_build_image_plain_src_wins_over_srcset(void **state)`
+  - `test_build_image_srcset_single_no_descriptor` (function, line 1070) `static void test_build_image_srcset_single_no_descriptor(void **state)`
+  - `test_build_image_srcset_data_url_not_truncated_at_comma` (function, line 1083) `static void test_build_image_srcset_data_url_not_truncated_at_comma(void **state)`
+  - `test_build_image_no_src_and_no_srcset_ignored` (function, line 1098) `static void test_build_image_no_src_and_no_srcset_ignored(void **state)`
+  - `test_build_empty_document` (function, line 1113) `static void test_build_empty_document(void **state)`
+  - `test_set_color_model` (function, line 1127) `static void test_set_color_model(void **state)`
+  - `test_build_author_color` (function, line 1149) `static void test_build_author_color(void **state)`
+  - `test_gradient_text_runs` (function, line 1197) `static void test_gradient_text_runs(void **state)`
+  - `test_text_fill_color_runs` (function, line 1229) `static void test_text_fill_color_runs(void **state)`
+  - `test_build_combinator_selectors` (function, line 1275) `static void test_build_combinator_selectors(void **state)`
+  - `test_build_flex_container` (function, line 1313) `static void test_build_flex_container(void **state)`
+  - `wrapping` (function, line 1353) `* sideways instead of wrapping (spec/page_view.md, 2026-08-11 correction). */
 static void test_bu...`
-  - `test_build_flex_wrap_align_row_gap` (function, line 1384) `static void test_build_flex_wrap_align_row_gap(void **state)`
-  - `test_build_flex_item_values` (function, line 1425) `static void test_build_flex_item_values(void **state)`
-  - `test_build_float_threading` (function, line 1489) `static void test_build_float_threading(void **state)`
-  - `test_build_float_outermost_founder` (function, line 1535) `static void test_build_float_outermost_founder(void **state)`
-  - `test_build_oof_image_carries_block_id` (function, line 1567) `static void test_build_oof_image_carries_block_id(void **state)`
-  - `test_build_hbox_margin_above_container_merges` (function, line 1603) `static void test_build_hbox_margin_above_container_merges(void **state)`
-  - `test_build_hbox_container_width_never_seeds_items` (function, line 1623) `static void test_build_hbox_container_width_never_seeds_items(void **state)`
-  - `test_build_absolute_inside_float_escapes` (function, line 1652) `static void test_build_absolute_inside_float_escapes(void **state)`
-  - `test_build_flex_whitespace_not_item` (function, line 1682) `static void test_build_flex_whitespace_not_item(void **state)`
-  - `test_build_inline_whitespace_kept` (function, line 1738) `static void test_build_inline_whitespace_kept(void **state)`
-  - `test_build_cont_item_identity` (function, line 1760) `static void test_build_cont_item_identity(void **state)`
-  - `test_build_table_colspan_rowspan` (function, line 1826) `static void test_build_table_colspan_rowspan(void **state)`
-  - `test_build_grid_container` (function, line 1872) `static void test_build_grid_container(void **state)`
-  - `test_build_grid_autofill_marker` (function, line 1892) `static void test_build_grid_autofill_marker(void **state)`
-  - `test_build_fontface_hash` (function, line 1912) `static void test_build_fontface_hash(void **state)`
-  - `test_build_root_element_style_inherits` (function, line 1939) `static void test_build_root_element_style_inherits(void **state)`
-  - `test_build_root_font_size_is_overridable` (function, line 1957) `static void test_build_root_font_size_is_overridable(void **state)`
-  - `test_build_abs_child_is_not_a_flex_item` (function, line 1977) `static void test_build_abs_child_is_not_a_flex_item(void **state)`
-  - `test_build_oof_flag_via_cascade` (function, line 2034) `static void test_build_oof_flag_via_cascade(void **state)`
-  - `test_build_oof_flag_badges_idiom` (function, line 2058) `static void test_build_oof_flag_badges_idiom(void **state)`
-  - `test_build_flex_container_from_sheet` (function, line 2078) `static void test_build_flex_container_from_sheet(void **state)`
-  - `test_build_grid_columns_from_sheet` (function, line 2100) `static void test_build_grid_columns_from_sheet(void **state)`
-  - `test_container_defaults` (function, line 2139) `static void test_container_defaults(void **state)`
-  - `test_build_box_leaf_inline` (function, line 2190) `static void test_build_box_leaf_inline(void **state)`
-  - `test_box_defaults_and_setter` (function, line 2225) `static void test_box_defaults_and_setter(void **state)`
-  - `test_build_boxdeco_h_margin_alone_creates_box` (function, line 2256) `static void test_build_boxdeco_h_margin_alone_creates_box(void **state)`
-  - `test_build_boxdeco_h_margin_zero_auto_no_box` (function, line 2276) `static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state)`
-  - `test_build_boxdef_carries_node_id` (function, line 2300) `static void test_build_boxdef_carries_node_id(void **state)`
-  - `test_build_boxdeco_fit_content_height_is_auto` (function, line 2317) `static void test_build_boxdeco_fit_content_height_is_auto(void **state)`
-  - `test_build_boxdeco_min_content_height_is_auto` (function, line 2339) `static void test_build_boxdeco_min_content_height_is_auto(void **state)`
-  - `test_build_boxdeco_border_padding` (function, line 2357) `static void test_build_boxdeco_border_padding(void **state)`
-  - `test_build_empty_box_gets_run_and_box` (function, line 2388) `static void test_build_empty_box_gets_run_and_box(void **state)`
-  - `test_build_zero_padding_is_not_a_box` (function, line 2413) `static void test_build_zero_padding_is_not_a_box(void **state)`
-  - `test_build_flow_table_row_is_one_block` (function, line 2430) `static void test_build_flow_table_row_is_one_block(void **state)`
-  - `test_build_boxdeco_shadow_outline` (function, line 2465) `static void test_build_boxdeco_shadow_outline(void **state)`
-  - `test_build_boxdeco_visibility_overflow_cursor` (function, line 2488) `static void test_build_boxdeco_visibility_overflow_cursor(void **state)`
-  - `test_build_cursor_alone_triggers_box` (function, line 2512) `static void test_build_cursor_alone_triggers_box(void **state)`
-  - `test_build_boxdeco_dims_alone_trigger_box` (function, line 2567) `static void test_build_boxdeco_dims_alone_trigger_box(void **state)`
-  - `test_build_text_overflow_and_word_break` (function, line 2612) `static void test_build_text_overflow_and_word_break(void **state)`
-  - `test_build_boxdeco_defaults_no_box` (function, line 2672) `static void test_build_boxdeco_defaults_no_box(void **state)`
-  - `test_build_boxdeco_sibling_blocks_distinct_ids` (function, line 2686) `static void test_build_boxdeco_sibling_blocks_distinct_ids(void **state)`
-  - `test_build_boxdeco_shared_id_within_block` (function, line 2704) `static void test_build_boxdeco_shared_id_within_block(void **state)`
-  - `test_build_box_tree_textless_wrapper` (function, line 2766) `static void test_build_box_tree_textless_wrapper(void **state)`
-  - `test_build_box_tree_empty_no_box` (function, line 2791) `static void test_build_box_tree_empty_no_box(void **state)`
-  - `find_input` (function, line 2803) `static const pv_run *find_input(const pv_view *v, const char *name)`
-  - `test_build_search_form_get` (function, line 2813) `static void test_build_search_form_get(void **state)`
-  - `test_build_form_post_and_hidden` (function, line 2846) `static void test_build_form_post_and_hidden(void **state)`
-  - `test_build_textarea_value` (function, line 2882) `static void test_build_textarea_value(void **state)`
-  - `count_inputs` (function, line 2901) `static size_t count_inputs(const pv_view *v, int type)`
-  - `test_button_icon_invents_no_label` (function, line 2908) `static void test_button_icon_invents_no_label(void **state)`
-  - `test_button_content_flows` (function, line 2923) `static void test_button_content_flows(void **state)`
-  - `test_button_submit_proxy` (function, line 2937) `static void test_button_submit_proxy(void **state)`
-  - `test_button_ua_face_loses_to_author` (function, line 2962) `static void test_button_ua_face_loses_to_author(void **state)`
-  - `box_of_run_with_bg` (function, line 2983) `static const pv_box_def *box_of_run_with_bg(const pv_view *v, int bg)`
-  - `test_link_color_inherit` (function, line 3000) `static void test_link_color_inherit(void **state)`
-  - `test_pct_padding_generates_box` (function, line 3014) `static void test_pct_padding_generates_box(void **state)`
-  - `test_before_box_on_empty_element` (function, line 3027) `static void test_before_box_on_empty_element(void **state)`
-  - `test_before_box_before_text` (function, line 3043) `static void test_before_box_before_text(void **state)`
-  - `test_pseudo_display_none_generates_nothing` (function, line 3059) `static void test_pseudo_display_none_generates_nothing(void **state)`
-  - `test_inline_pseudo_registers_no_box` (function, line 3076) `static void test_inline_pseudo_registers_no_box(void **state)`
-  - `test_after_box_on_empty_element` (function, line 3088) `static void test_after_box_on_empty_element(void **state)`
-  - `test_build_select_shows_selected_option` (function, line 3105) `static void test_build_select_shows_selected_option(void **state)`
-  - `test_build_select_defaults_to_first_option` (function, line 3144) `static void test_build_select_defaults_to_first_option(void **state)`
-  - `test_build_control_without_form` (function, line 3161) `static void test_build_control_without_form(void **state)`
-  - `test_build_two_forms_distinct_groups` (function, line 3174) `static void test_build_two_forms_distinct_groups(void **state)`
-  - `test_build_pseudo_classes_and_siblings` (function, line 3233) `static void test_build_pseudo_classes_and_siblings(void **state)`
-  - `test_build_table_cell_author_styles` (function, line 3296) `static void test_build_table_cell_author_styles(void **state)`
-  - `test_build_style_cache_distinct_siblings` (function, line 3356) `static void test_build_style_cache_distinct_siblings(void **state)`
-  - `test_build_text_align_and_font_size` (function, line 3398) `static void test_build_text_align_and_font_size(void **state)`
-  - `test_build_text_decoration` (function, line 3445) `static void test_build_text_decoration(void **state)`
-  - `test_build_css_bold_and_inline_wins` (function, line 3468) `static void test_build_css_bold_and_inline_wins(void **state)`
-  - `scales` (function, line 3491) `* value the UA rule scales (tanda 19). */
+  - `test_build_flex_wrap_align_row_gap` (function, line 1385) `static void test_build_flex_wrap_align_row_gap(void **state)`
+  - `test_build_flex_item_values` (function, line 1426) `static void test_build_flex_item_values(void **state)`
+  - `test_build_float_threading` (function, line 1490) `static void test_build_float_threading(void **state)`
+  - `test_build_float_outermost_founder` (function, line 1536) `static void test_build_float_outermost_founder(void **state)`
+  - `test_build_oof_image_carries_block_id` (function, line 1568) `static void test_build_oof_image_carries_block_id(void **state)`
+  - `test_build_hbox_margin_above_container_merges` (function, line 1604) `static void test_build_hbox_margin_above_container_merges(void **state)`
+  - `test_build_hbox_container_width_never_seeds_items` (function, line 1624) `static void test_build_hbox_container_width_never_seeds_items(void **state)`
+  - `test_build_absolute_inside_float_escapes` (function, line 1653) `static void test_build_absolute_inside_float_escapes(void **state)`
+  - `test_build_flex_whitespace_not_item` (function, line 1683) `static void test_build_flex_whitespace_not_item(void **state)`
+  - `test_build_inline_whitespace_kept` (function, line 1739) `static void test_build_inline_whitespace_kept(void **state)`
+  - `test_build_cont_item_identity` (function, line 1761) `static void test_build_cont_item_identity(void **state)`
+  - `test_build_table_colspan_rowspan` (function, line 1827) `static void test_build_table_colspan_rowspan(void **state)`
+  - `test_build_grid_container` (function, line 1873) `static void test_build_grid_container(void **state)`
+  - `test_build_grid_autofill_marker` (function, line 1893) `static void test_build_grid_autofill_marker(void **state)`
+  - `test_build_fontface_hash` (function, line 1913) `static void test_build_fontface_hash(void **state)`
+  - `test_build_long_class_attribute_keeps_classes` (function, line 1938) `static void test_build_long_class_attribute_keeps_classes(void **state)`
+  - `test_root_insets` (function, line 1965) `static void test_root_insets(void **state)`
+  - `test_build_inline_block_row_alignment` (function, line 1985) `static void test_build_inline_block_row_alignment(void **state)`
+  - `test_build_input_own_box_and_placeholder` (function, line 2008) `static void test_build_input_own_box_and_placeholder(void **state)`
+  - `test_build_inline_block_row_ignores_oof_child` (function, line 2035) `static void test_build_inline_block_row_ignores_oof_child(void **state)`
+  - `test_build_intrinsic_width_flag` (function, line 2057) `static void test_build_intrinsic_width_flag(void **state)`
+  - `test_svg_append_root_attrs` (function, line 2078) `static void test_svg_append_root_attrs(void **state)`
+  - `test_build_svg_css_stroke_inherited` (function, line 2095) `static void test_build_svg_css_stroke_inherited(void **state)`
+  - `test_build_text_balance_inherits` (function, line 2116) `static void test_build_text_balance_inherits(void **state)`
+  - `test_build_font_list_inherits` (function, line 2131) `static void test_build_font_list_inherits(void **state)`
+  - `test_build_root_element_style_inherits` (function, line 2163) `static void test_build_root_element_style_inherits(void **state)`
+  - `test_build_root_font_size_is_overridable` (function, line 2181) `static void test_build_root_font_size_is_overridable(void **state)`
+  - `test_build_abs_child_is_not_a_flex_item` (function, line 2201) `static void test_build_abs_child_is_not_a_flex_item(void **state)`
+  - `test_build_oof_flag_via_cascade` (function, line 2258) `static void test_build_oof_flag_via_cascade(void **state)`
+  - `test_build_oof_flag_badges_idiom` (function, line 2282) `static void test_build_oof_flag_badges_idiom(void **state)`
+  - `test_build_flex_container_from_sheet` (function, line 2302) `static void test_build_flex_container_from_sheet(void **state)`
+  - `test_build_grid_columns_from_sheet` (function, line 2324) `static void test_build_grid_columns_from_sheet(void **state)`
+  - `test_container_defaults` (function, line 2363) `static void test_container_defaults(void **state)`
+  - `test_build_box_leaf_inline` (function, line 2414) `static void test_build_box_leaf_inline(void **state)`
+  - `test_box_defaults_and_setter` (function, line 2449) `static void test_box_defaults_and_setter(void **state)`
+  - `test_build_boxdeco_h_margin_alone_creates_box` (function, line 2480) `static void test_build_boxdeco_h_margin_alone_creates_box(void **state)`
+  - `test_build_boxdeco_h_margin_zero_auto_no_box` (function, line 2500) `static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state)`
+  - `test_build_boxdef_carries_node_id` (function, line 2524) `static void test_build_boxdef_carries_node_id(void **state)`
+  - `test_build_boxdeco_fit_content_height_is_auto` (function, line 2541) `static void test_build_boxdeco_fit_content_height_is_auto(void **state)`
+  - `test_build_boxdeco_min_content_height_is_auto` (function, line 2563) `static void test_build_boxdeco_min_content_height_is_auto(void **state)`
+  - `test_build_boxdeco_border_padding` (function, line 2581) `static void test_build_boxdeco_border_padding(void **state)`
+  - `test_build_empty_box_gets_run_and_box` (function, line 2612) `static void test_build_empty_box_gets_run_and_box(void **state)`
+  - `test_build_zero_padding_is_not_a_box` (function, line 2637) `static void test_build_zero_padding_is_not_a_box(void **state)`
+  - `test_build_flow_table_row_is_one_block` (function, line 2654) `static void test_build_flow_table_row_is_one_block(void **state)`
+  - `test_build_boxdeco_shadow_outline` (function, line 2689) `static void test_build_boxdeco_shadow_outline(void **state)`
+  - `test_build_boxdeco_visibility_overflow_cursor` (function, line 2712) `static void test_build_boxdeco_visibility_overflow_cursor(void **state)`
+  - `test_build_cursor_alone_triggers_box` (function, line 2736) `static void test_build_cursor_alone_triggers_box(void **state)`
+  - `test_build_boxdeco_dims_alone_trigger_box` (function, line 2791) `static void test_build_boxdeco_dims_alone_trigger_box(void **state)`
+  - `test_build_text_overflow_and_word_break` (function, line 2836) `static void test_build_text_overflow_and_word_break(void **state)`
+  - `test_build_boxdeco_defaults_no_box` (function, line 2896) `static void test_build_boxdeco_defaults_no_box(void **state)`
+  - `test_build_boxdeco_sibling_blocks_distinct_ids` (function, line 2910) `static void test_build_boxdeco_sibling_blocks_distinct_ids(void **state)`
+  - `test_build_boxdeco_shared_id_within_block` (function, line 2928) `static void test_build_boxdeco_shared_id_within_block(void **state)`
+  - `test_build_box_tree_textless_wrapper` (function, line 2990) `static void test_build_box_tree_textless_wrapper(void **state)`
+  - `test_build_box_tree_empty_no_box` (function, line 3015) `static void test_build_box_tree_empty_no_box(void **state)`
+  - `find_input` (function, line 3027) `static const pv_run *find_input(const pv_view *v, const char *name)`
+  - `test_build_search_form_get` (function, line 3037) `static void test_build_search_form_get(void **state)`
+  - `test_build_form_post_and_hidden` (function, line 3070) `static void test_build_form_post_and_hidden(void **state)`
+  - `test_build_textarea_value` (function, line 3106) `static void test_build_textarea_value(void **state)`
+  - `count_inputs` (function, line 3125) `static size_t count_inputs(const pv_view *v, int type)`
+  - `test_button_icon_invents_no_label` (function, line 3132) `static void test_button_icon_invents_no_label(void **state)`
+  - `test_button_content_flows` (function, line 3147) `static void test_button_content_flows(void **state)`
+  - `test_button_submit_proxy` (function, line 3161) `static void test_button_submit_proxy(void **state)`
+  - `test_button_ua_face_loses_to_author` (function, line 3186) `static void test_button_ua_face_loses_to_author(void **state)`
+  - `test_grid_line_placement_plain_item` (function, line 3208) `static void test_grid_line_placement_plain_item(void **state)`
+  - `test_grid_line_placement_nested_container_item` (function, line 3233) `static void test_grid_line_placement_nested_container_item(void **state)`
+  - `test_box_min_width_zero_is_declared` (function, line 3265) `static void test_box_min_width_zero_is_declared(void **state)`
+  - `test_flex_item_inline_is_blockified` (function, line 3285) `static void test_flex_item_inline_is_blockified(void **state)`
+  - `box_of_run_with_bg` (function, line 3310) `static const pv_box_def *box_of_run_with_bg(const pv_view *v, int bg)`
+  - `test_link_color_inherit` (function, line 3327) `static void test_link_color_inherit(void **state)`
+  - `test_pct_padding_generates_box` (function, line 3341) `static void test_pct_padding_generates_box(void **state)`
+  - `test_before_box_on_empty_element` (function, line 3354) `static void test_before_box_on_empty_element(void **state)`
+  - `test_before_box_before_text` (function, line 3370) `static void test_before_box_before_text(void **state)`
+  - `test_pseudo_display_none_generates_nothing` (function, line 3386) `static void test_pseudo_display_none_generates_nothing(void **state)`
+  - `test_inline_pseudo_registers_no_box` (function, line 3403) `static void test_inline_pseudo_registers_no_box(void **state)`
+  - `test_after_box_on_empty_element` (function, line 3415) `static void test_after_box_on_empty_element(void **state)`
+  - `test_build_select_shows_selected_option` (function, line 3432) `static void test_build_select_shows_selected_option(void **state)`
+  - `test_build_select_defaults_to_first_option` (function, line 3471) `static void test_build_select_defaults_to_first_option(void **state)`
+  - `test_build_control_without_form` (function, line 3488) `static void test_build_control_without_form(void **state)`
+  - `test_build_two_forms_distinct_groups` (function, line 3501) `static void test_build_two_forms_distinct_groups(void **state)`
+  - `test_build_pseudo_classes_and_siblings` (function, line 3560) `static void test_build_pseudo_classes_and_siblings(void **state)`
+  - `test_build_table_cell_author_styles` (function, line 3623) `static void test_build_table_cell_author_styles(void **state)`
+  - `test_build_style_cache_distinct_siblings` (function, line 3683) `static void test_build_style_cache_distinct_siblings(void **state)`
+  - `test_build_text_align_and_font_size` (function, line 3725) `static void test_build_text_align_and_font_size(void **state)`
+  - `test_build_text_decoration` (function, line 3772) `static void test_build_text_decoration(void **state)`
+  - `test_build_css_bold_and_inline_wins` (function, line 3795) `static void test_build_css_bold_and_inline_wins(void **state)`
+  - `scales` (function, line 3818) `* value the UA rule scales (tanda 19). */
 static void test_build_heading_own_relative_size_replac...`
-  - `test_build_component_custom_props` (function, line 3524) `static void test_build_component_custom_props(void **state)`
-  - `test_build_display_none_hidden` (function, line 3563) `static void test_build_display_none_hidden(void **state)`
-  - `height` (function, line 3589) `* real height (jkanime's donghuas/ovas panes are display:none, yet all their
+  - `test_build_component_custom_props` (function, line 3851) `static void test_build_component_custom_props(void **state)`
+  - `test_build_display_none_hidden` (function, line 3890) `static void test_build_display_none_hidden(void **state)`
+  - `height` (function, line 3916) `* real height (jkanime's donghuas/ovas panes are display:none, yet all their
  * thumbnails flowed...`
-  - `test_build_styled_external_css` (function, line 3619) `static void test_build_styled_external_css(void **state)`
-  - `test_author_list_padding_replaces_ua_indent` (function, line 3648) `static void test_author_list_padding_replaces_ua_indent(void **state)`
-  - `test_before_rides_float_and_container` (function, line 3673) `static void test_before_rides_float_and_container(void **state)`
-  - `test_inline_level_tag_list_stays_in_line` (function, line 3704) `static void test_inline_level_tag_list_stays_in_line(void **state)`
-  - `test_marker_only_for_list_item_display` (function, line 3732) `static void test_marker_only_for_list_item_display(void **state)`
-  - `test_block_inside_inline_block_in_line` (function, line 3771) `static void test_block_inside_inline_block_in_line(void **state)`
-  - `test_pseudo_before_on_empty` (function, line 3819) `static void test_pseudo_before_on_empty(void **state)`
-  - `test_pseudo_before_on_element_with_children` (function, line 3832) `static void test_pseudo_before_on_element_with_children(void **state)`
-  - `test_pseudo_after_on_element_with_children` (function, line 3847) `static void test_pseudo_after_on_element_with_children(void **state)`
-  - `test_pseudo_both_before_and_after` (function, line 3862) `static void test_pseudo_both_before_and_after(void **state)`
-  - `test_pseudo_before_on_textless_subtree` (function, line 3896) `static void test_pseudo_before_on_textless_subtree(void **state)`
-  - `test_pseudo_before_escape_end_to_end` (function, line 3912) `static void test_pseudo_before_escape_end_to_end(void **state)`
-  - `test_pseudo_after_on_whitespace_only_no_run` (function, line 3925) `static void test_pseudo_after_on_whitespace_only_no_run(void **state)`
-  - `test_pseudo_before_fires_with_nested_text` (function, line 3939) `static void test_pseudo_before_fires_with_nested_text(void **state)`
-  - `test_pseudo_no_content_no_run` (function, line 3952) `static void test_pseudo_no_content_no_run(void **state)`
-  - `test_build_reader_skips_boilerplate` (function, line 3966) `static void test_build_reader_skips_boilerplate(void **state)`
-  - `test_set_node_id_model` (function, line 3994) `static void test_set_node_id_model(void **state)`
-  - `test_build_node_id_matches_dom_index` (function, line 4010) `static void test_build_node_id_matches_dom_index(void **state)`
-  - `test_set_text_style_model` (function, line 4049) `static void test_set_text_style_model(void **state)`
-  - `test_build_pointer_events_on_box` (function, line 4080) `static void test_build_pointer_events_on_box(void **state)`
-  - `test_build_content_visibility_hidden_folds` (function, line 4099) `static void test_build_content_visibility_hidden_folds(void **state)`
-  - `test_build_image_rendering_inherited` (function, line 4125) `static void test_build_image_rendering_inherited(void **state)`
-  - `test_build_caret_color_inherited` (function, line 4144) `static void test_build_caret_color_inherited(void **state)`
-  - `test_append_video_copies_fields` (function, line 4168) `static void test_append_video_copies_fields(void **state)`
-  - `test_append_video_no_poster` (function, line 4187) `static void test_append_video_no_poster(void **state)`
-  - `test_append_video_null_args` (function, line 4203) `static void test_append_video_null_args(void **state)`
-  - `test_build_video_with_source` (function, line 4213) `static void test_build_video_with_source(void **state)`
-  - `test_build_video_uses_source_child` (function, line 4233) `static void test_build_video_uses_source_child(void **state)`
-  - `test_build_video_source_type_preference` (function, line 4253) `static void test_build_video_source_type_preference(void **state)`
-  - `test_build_video_fallback_suppressed` (function, line 4271) `static void test_build_video_fallback_suppressed(void **state)`
-  - `test_build_video_without_src_ignored` (function, line 4286) `static void test_build_video_without_src_ignored(void **state)`
-  - `test_build_audio_as_video_kind` (function, line 4297) `static void test_build_audio_as_video_kind(void **state)`
-  - `test_build_iframe_emits_navigable_link` (function, line 4311) `static void test_build_iframe_emits_navigable_link(void **state)`
-  - `test_build_iframe_without_src_ignored` (function, line 4329) `static void test_build_iframe_without_src_ignored(void **state)`
-  - `test_build_iframe_display_none_hidden` (function, line 4342) `static void test_build_iframe_display_none_hidden(void **state)`
-  - `main` (function, line 4355) `int main(void)`
-  - `it` (function, line 633) `* the rest of the row share it (so an overflowing table degrades to one row per * line, not one blob). */...`
-  - `break` (function, line 702) `* block break (from entering <p>);`
-  - `float_id` (function, line 1532) `* A run inside a float nested in another float reports the inner element as * float_id (unchanged) plus the outer...`
-  - `ordinal` (function, line 1758) `* cont_item ordinal (they are one flex/grid item and must flow together in one * cell);`
-  - `form` (function, line 2869) `* invisible PV_IN_SUBMIT_BOX proxy carries the form (spec/page_view.md). */ assert_non_null(find_text(v, "Log in"));`
-  - `reverted` (function, line 3575) `* behavior of treating inline display:none as visible when JS is off * was reverted (commit 897f414 regression)...`
-  - `applies` (function, line 3615) `* <style>: an extern rule applies (presentation and display:none alike);`
+  - `test_build_styled_external_css` (function, line 3946) `static void test_build_styled_external_css(void **state)`
+  - `test_author_list_padding_replaces_ua_indent` (function, line 3975) `static void test_author_list_padding_replaces_ua_indent(void **state)`
+  - `test_before_rides_float_and_container` (function, line 4000) `static void test_before_rides_float_and_container(void **state)`
+  - `test_inline_level_tag_list_stays_in_line` (function, line 4031) `static void test_inline_level_tag_list_stays_in_line(void **state)`
+  - `test_marker_only_for_list_item_display` (function, line 4059) `static void test_marker_only_for_list_item_display(void **state)`
+  - `test_block_inside_inline_block_in_line` (function, line 4098) `static void test_block_inside_inline_block_in_line(void **state)`
+  - `test_pseudo_before_on_empty` (function, line 4146) `static void test_pseudo_before_on_empty(void **state)`
+  - `test_pseudo_before_on_element_with_children` (function, line 4159) `static void test_pseudo_before_on_element_with_children(void **state)`
+  - `test_pseudo_after_on_element_with_children` (function, line 4174) `static void test_pseudo_after_on_element_with_children(void **state)`
+  - `test_pseudo_both_before_and_after` (function, line 4189) `static void test_pseudo_both_before_and_after(void **state)`
+  - `test_pseudo_before_on_textless_subtree` (function, line 4223) `static void test_pseudo_before_on_textless_subtree(void **state)`
+  - `test_pseudo_before_escape_end_to_end` (function, line 4239) `static void test_pseudo_before_escape_end_to_end(void **state)`
+  - `test_pseudo_after_on_whitespace_only_no_run` (function, line 4252) `static void test_pseudo_after_on_whitespace_only_no_run(void **state)`
+  - `test_pseudo_before_fires_with_nested_text` (function, line 4266) `static void test_pseudo_before_fires_with_nested_text(void **state)`
+  - `test_pseudo_no_content_no_run` (function, line 4279) `static void test_pseudo_no_content_no_run(void **state)`
+  - `test_build_reader_skips_boilerplate` (function, line 4293) `static void test_build_reader_skips_boilerplate(void **state)`
+  - `test_set_node_id_model` (function, line 4321) `static void test_set_node_id_model(void **state)`
+  - `test_build_node_id_matches_dom_index` (function, line 4337) `static void test_build_node_id_matches_dom_index(void **state)`
+  - `test_set_text_style_model` (function, line 4376) `static void test_set_text_style_model(void **state)`
+  - `test_build_pointer_events_on_box` (function, line 4407) `static void test_build_pointer_events_on_box(void **state)`
+  - `test_build_content_visibility_hidden_folds` (function, line 4426) `static void test_build_content_visibility_hidden_folds(void **state)`
+  - `test_build_image_rendering_inherited` (function, line 4452) `static void test_build_image_rendering_inherited(void **state)`
+  - `test_build_caret_color_inherited` (function, line 4471) `static void test_build_caret_color_inherited(void **state)`
+  - `test_append_video_copies_fields` (function, line 4495) `static void test_append_video_copies_fields(void **state)`
+  - `test_append_video_no_poster` (function, line 4514) `static void test_append_video_no_poster(void **state)`
+  - `test_append_video_null_args` (function, line 4530) `static void test_append_video_null_args(void **state)`
+  - `test_build_video_with_source` (function, line 4540) `static void test_build_video_with_source(void **state)`
+  - `test_build_video_uses_source_child` (function, line 4560) `static void test_build_video_uses_source_child(void **state)`
+  - `test_build_video_source_type_preference` (function, line 4580) `static void test_build_video_source_type_preference(void **state)`
+  - `test_build_video_fallback_suppressed` (function, line 4598) `static void test_build_video_fallback_suppressed(void **state)`
+  - `test_build_video_without_src_ignored` (function, line 4613) `static void test_build_video_without_src_ignored(void **state)`
+  - `test_build_audio_as_video_kind` (function, line 4624) `static void test_build_audio_as_video_kind(void **state)`
+  - `test_build_iframe_emits_navigable_link` (function, line 4638) `static void test_build_iframe_emits_navigable_link(void **state)`
+  - `test_build_iframe_without_src_ignored` (function, line 4656) `static void test_build_iframe_without_src_ignored(void **state)`
+  - `test_build_iframe_display_none_hidden` (function, line 4669) `static void test_build_iframe_display_none_hidden(void **state)`
+  - `main` (function, line 4682) `int main(void)`
+  - `it` (function, line 634) `* the rest of the row share it (so an overflowing table degrades to one row per * line, not one blob). */...`
+  - `break` (function, line 703) `* block break (from entering <p>);`
+  - `float_id` (function, line 1533) `* A run inside a float nested in another float reports the inner element as * float_id (unchanged) plus the outer...`
+  - `ordinal` (function, line 1759) `* cont_item ordinal (they are one flex/grid item and must flow together in one * cell);`
+  - `form` (function, line 3093) `* invisible PV_IN_SUBMIT_BOX proxy carries the form (spec/page_view.md). */ assert_non_null(find_text(v, "Log in"));`
+  - `reverted` (function, line 3902) `* behavior of treating inline display:none as visible when JS is off * was reverted (commit 897f414 regression)...`
+  - `applies` (function, line 3942) `* <style>: an extern rule applies (presentation and display:none alike);`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/webfont.h`
 
 ## tests/test_pdf_export.c
@@ -376,10 +439,18 @@ static void test_build_heading_own_relative_size_replac...`
   - `fake_fetch` (function, line 135) `static int fake_fetch(void *vctx, const char *method, const char *url,
                       cons...`
   - `test_pool_parallel_fetch_and_take` (function, line 153) `static void test_pool_parallel_fetch_and_take(void **state)`
-  - `test_pool_miss_consume_and_failure` (function, line 185) `static void test_pool_miss_consume_and_failure(void **state)`
-  - `test_pool_finish_unconsumed_and_empty` (function, line 228) `static void test_pool_finish_unconsumed_and_empty(void **state)`
-  - `test_pooled_fetch_adapter` (function, line 249) `static void test_pooled_fetch_adapter(void **state)`
-  - `main` (function, line 289) `int main(void)`
+  - `test_pool_miss_consume_and_failure` (function, line 191) `static void test_pool_miss_consume_and_failure(void **state)`
+  - `test_pool_finish_unconsumed_and_empty` (function, line 234) `static void test_pool_finish_unconsumed_and_empty(void **state)`
+  - `test_pooled_fetch_adapter` (function, line 255) `static void test_pooled_fetch_adapter(void **state)`
+  - `test_scan_imports_static_only` (function, line 298) `static void test_scan_imports_static_only(void **state)`
+  - `graph_fetch` (function, line 320) `static int graph_fetch(void *ctx, const char *method, const char *url,
+                       con...`
+  - `bare_fetch` (function, line 333) `static int bare_fetch(void *ctx, const char *method, const char *url,
+                      const...`
+  - `test_pool_follows_module_graph` (function, line 346) `static void test_pool_follows_module_graph(void **state)`
+  - `test_find_importmap` (function, line 366) `static void test_find_importmap(void **state)`
+  - `test_pool_start_page_import_map` (function, line 378) `static void test_pool_start_page_import_map(void **state)`
+  - `main` (function, line 395) `int main(void)`
   - `_POSIX_C_SOURCE` (macro, line 5) `#define _POSIX_C_SOURCE`
 - Depends on: `include/prefetch.h`
 
@@ -403,73 +474,6 @@ static void test_build_heading_own_relative_size_replac...`
   - `main` (function, line 394) `int main(void)`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
 - Depends on: `include/prefs.h`, `include/zoom.h`
-
-## tests/test_profile.c
-- Doc: dir: include "prefs.h" include "profile.h"
-- Layer: testing
-- Language: c
-- Symbols:
-  - `fixture` (struct, line 28)
-  - `dir` (type_alias, line 27) `typedef struct fixture { char dir[64];`
-  - `setup` (function, line 30) `static int setup(void **state)`
-  - `teardown` (function, line 39) `static int teardown(void **state)`
-  - `path_of` (function, line 60) `static void path_of(const fixture *f, const char *name, char *out, size_t cap)`
-  - `file_size` (function, line 64) `static size_t file_size(const char *path)`
-  - `test_open_creates_keyfile` (function, line 72) `static void test_open_creates_keyfile(void **state)`
-  - `test_open_rejects_corrupt_keyfile` (function, line 89) `static void test_open_rejects_corrupt_keyfile(void **state)`
-  - `test_open_bad_dir` (function, line 103) `static void test_open_bad_dir(void **state)`
-  - `test_first_launch_defaults` (function, line 115) `static void test_first_launch_defaults(void **state)`
-  - `test_save_load_roundtrip_two_ctx` (function, line 128) `static void test_save_load_roundtrip_two_ctx(void **state)`
-  - `test_nothing_readable_on_disk` (function, line 174) `static void test_nothing_readable_on_disk(void **state)`
-  - `test_tampered_blob_auth_fails` (function, line 204) `static void test_tampered_blob_auth_fails(void **state)`
-  - `test_foreign_key_auth_fails` (function, line 236) `static void test_foreign_key_auth_fails(void **state)`
-  - `test_null_and_not_ready` (function, line 261) `static void test_null_and_not_ready(void **state)`
-  - `main` (function, line 278) `int main(void)`
-  - `_GNU_SOURCE` (macro, line 9) `#define _GNU_SOURCE`
-- Depends on: `include/prefs.h`, `include/profile.h`
-
-## tests/test_render_doc.c
-- Doc: first_kind: #include "flex_layout.h" #include "page_view.h" #include "render_doc.h" #include...
-- Layer: testing
-- Language: c
-- Symbols:
-  - `caps_images_on` (function, line 28) `static rdp_caps caps_images_on(void)`
-  - `first_kind` (function, line 35) `static const rd_block *first_kind(const rd_doc *d, rd_kind k)`
-  - `test_build_null_out` (function, line 44) `static void test_build_null_out(void **state)`
-  - `test_build_null_view_is_empty` (function, line 51) `static void test_build_null_view_is_empty(void **state)`
-  - `test_heading_paragraph_link` (function, line 64) `static void test_heading_paragraph_link(void **state)`
-  - `test_emphasis_propagates` (function, line 94) `static void test_emphasis_propagates(void **state)`
-  - `test_image_off_emits_notice_and_blocked` (function, line 125) `static void test_image_off_emits_notice_and_blocked(void **state)`
-  - `test_no_images_no_notice` (function, line 150) `static void test_no_images_no_notice(void **state)`
-  - `test_image_on_allows_normal` (function, line 164) `static void test_image_on_allows_normal(void **state)`
-  - `test_image_on_resolves_relative_src` (function, line 182) `static void test_image_on_resolves_relative_src(void **state)`
-  - `test_image_on_resolves_doc_relative_src` (function, line 198) `static void test_image_on_resolves_doc_relative_src(void **state)`
-  - `test_image_on_blocks_tracker` (function, line 212) `static void test_image_on_blocks_tracker(void **state)`
-  - `test_image_on_blocks_non_https` (function, line 225) `static void test_image_on_blocks_non_https(void **state)`
-  - `test_image_data_url_allowed_remote_top` (function, line 260) `static void test_image_data_url_allowed_remote_top(void **state)`
-  - `test_image_data_url_allowed_no_top` (function, line 278) `static void test_image_data_url_allowed_no_top(void **state)`
-  - `test_image_data_url_disabled_by_default` (function, line 291) `static void test_image_data_url_disabled_by_default(void **state)`
-  - `test_image_data_url_percent_encoded_blocked_invalid` (function, line 306) `static void test_image_data_url_percent_encoded_blocked_invalid(void **state)`
-  - `test_href_sanitised` (function, line 322) `static void test_href_sanitised(void **state)`
-  - `test_kind_name_total` (function, line 339) `static void test_kind_name_total(void **state)`
-  - `test_image_label_total` (function, line 349) `static void test_image_label_total(void **state)`
-  - `test_free_null_and_double` (function, line 362) `static void test_free_null_and_double(void **state)`
-  - `test_author_color_gated_by_css` (function, line 372) `static void test_author_color_gated_by_css(void **state)`
-  - `test_text_overflow_word_break_gated_by_css` (function, line 402) `static void test_text_overflow_word_break_gated_by_css(void **state)`
-  - `test_text_ext_2026_07_10_batch_gated_by_css` (function, line 437) `static void test_text_ext_2026_07_10_batch_gated_by_css(void **state)`
-  - `test_image_rendering_gated_on_image` (function, line 477) `static void test_image_rendering_gated_on_image(void **state)`
-  - `test_caret_color_gated_on_input` (function, line 506) `static void test_caret_color_gated_on_input(void **state)`
-  - `test_input_passthrough` (function, line 536) `static void test_input_passthrough(void **state)`
-  - `test_input_label_total` (function, line 571) `static void test_input_label_total(void **state)`
-  - `test_container_carried_by_default` (function, line 596) `static void test_container_carried_by_default(void **state)`
-  - `test_cont_item_carried_by_default` (function, line 628) `static void test_cont_item_carried_by_default(void **state)`
-  - `test_float_carried_by_default` (function, line 661) `static void test_float_carried_by_default(void **state)`
-  - `test_flex_item_carried_by_default` (function, line 697) `static void test_flex_item_carried_by_default(void **state)`
-  - `test_flex_wrap_align_row_gap_carried_by_default` (function, line 745) `static void test_flex_wrap_align_row_gap_carried_by_default(void **state)`
-  - `test_block_tag_total` (function, line 777) `static void test_block_tag_total(void **state)`
-  - `test_node_id_carried_by_default` (function, line 813) `static void test_node_id_carried_by_default(void **state)`
-  - `main` (function, line 826) `int main(void)`
-- Depends on: `include/box_style.h`, `include/css.h`, `include/flex_layout.h`, `include/page_view.h`, `include/render_doc.h`, `include/render_policy.h`
 
 
 Next: [KB_tests_p6.md](KB_tests_p6.md)

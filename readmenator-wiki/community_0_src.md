@@ -1,10 +1,10 @@
 # src
 
-*Community 0 | 59 files | cohesion 0.75*
+*Community 0 | 59 files | cohesion 0.74*
 
 ## Definition
 
-This community groups 59 file(s) rooted at `src` with dominant language c (cohesion 0.75). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (175 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
+This community groups 59 file(s) rooted at `src` with dominant language c (cohesion 0.74). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (175 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
 
 ## Files
 
@@ -87,7 +87,7 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 130
-- Cross-boundary resolved imports (EXTRACTED): 43
+- Cross-boundary resolved imports (EXTRACTED): 45
 
 ## Connections
 
@@ -97,7 +97,6 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 - [EXTRACTED] depends_on community 5 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
 - [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
 - [EXTRACTED] depends_on community 0 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/js_env.c imports include/anti_fp.h.
-- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/tab.c imports include/data_url.h.
 
 ## Risks
 
@@ -114,7 +113,7 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 - Why do 55 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom.c`)? What purpose do they serve?
 - Can the cycle `include/js_dom.h` -> `include/js_location.h` be broken with an interface?
 - What would break if the most connected file in src changed?
-- Should src be split, given cohesion 0.75?
+- Should src be split, given cohesion 0.74?
 
 ## Sources
 

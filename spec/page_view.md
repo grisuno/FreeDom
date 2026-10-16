@@ -1230,3 +1230,60 @@ padre es la caja del elemento, y el run del pseudo lleva ese `block_id`.
 Dado `.thumb::before{content:"";display:block;padding-top:56.25%}`, entonces la caja
 generada existe con el padding porcentual y la miniatura reserva el alto 16:9
 (youtube.com: 43.30 → 7.31 en `make parity`).
+
+## Ítems flex/grid: blockificación, `min-width:0` y la imagen sin fuente (2026-10-15, tanda 42)
+
+- **Un ítem flex/grid es BLOCKIFICADO** (CSS Display 3 §2.7, Flexbox §4): su
+  `display:inline` no le quita la caja. `is_layout_item` (el padre es contenedor)
+  entra en la decisión de registrar caja, y un **margen horizontal** basta para que
+  un ítem la tenga — es el único lugar donde puede vivir ese margen. Medido en el pie
+  Bootstrap de justpaste.it (`.nav{display:flex} li{display:inline!important;
+  margin-right:10px}`): "AccountTermsPrivacy" salía pegado. Un inline que NO es ítem
+  sigue sin caja (no rompe su línea). `test_flex_item_inline_is_blockified`.
+- **`min-width:0` es un mínimo DECLARADO**, no el `0 = sin poner` de `box_min_w`:
+  apaga el mínimo automático (Flexbox §4.5), que es lo que deja encoger una columna
+  `flex:1` junto a una barra lateral fija. Viaja como `pv_box_def.box_min_w_set`
+  (códec: `TAB_WIRE_BOX_F_N` 222 → 223). `test_box_min_width_zero_is_declared`.
+- **Colocación por línea de un ítem que ES contenedor**: la del envoltorio viaja en
+  `pv_cont_def.item_{col,row}_{start,span}`, resueltos contra las pistas del PADRE
+  en `link_cont_chain` (`spec/grid_areas.md` §6), igual que sus props flex.
+- **Una `<img>` sin fuente cruza el IPC como imagen.** La tanda 30 la emitía como
+  `PV_IMAGE` con `src ""`, pero `read_view` la degradaba a `PV_TEXT` cuando `src`
+  venía vacío: en el navegador real (que siempre cruza el pipe) la tarjeta perdía su
+  caja de 200×280 y el `alt` fluía como párrafo, mientras los tests de `page_view`
+  (que no cruzan el pipe) seguían verdes. `test_load_srcless_image_stays_image` en
+  `test_tab` es el candado del lado del códec.
+
+## Tanda 43 (2026-10-16)
+
+- **Margen UA del `<body>` (HTML Rendering §15.3.1) como insets raíz:**
+  `pv_root_insets` da `PV_UA_BODY_MARGIN` (8 px) en cada lado cuyo margen el autor no
+  declaró; un lado declarado (incl. 0) es del autor (su margen no-cero genera la caja
+  del body). Viajan en `pv_view.root_m` (cabecera de vista 4 → 8 enteros) y el pintor
+  maqueta la página dentro de ellos: el inset superior es `prev_bottom` inicial, así
+  que colapsa con el margen del primer bloque (el raíz no colapsa con el lienzo). Se
+  borró el atajo que tomaba `html_margin_top` como margen en los cuatro lados.
+- **Clases**: el atributo `class` de ≥ 256 bytes ya no pierde TODAS sus clases, ni las
+  posteriores a la 16ª: el nodo de selector derrama a un bloque propio en el heap
+  (`split_classes`, tope anti-DoS 64 KiB), liberado al terminar cada resolución.
+- **Fila anónima de inline-blocks**: un hijo `position:absolute|fixed` o
+  `display:none` no la descalifica; su `justify` sale del `text-align` que hereda el
+  propio contenedor, nunca de uno declarado dentro de un ítem (el `center` UA de un
+  `<button>`). La caja de un inline-level guarda `line_align` (BOX 223 → 224).
+- **`<svg>` fuera de flujo**: como `<img>`: sin corte de línea, su propia caja como
+  ancla, `oof`.
+- **Controles**: el `<input>` registra su caja propia en `own_box_id`; con fondo o
+  borde de autor el pintor no dibuja el chrome nativo. `button` lleva
+  `box-sizing:border-box` en la hoja UA (como Firefox).
+- **`width:max-content|fit-content`** → `pv_box_def.box_w_intrinsic` (BOX 224 → 225):
+  la caja se encoge a su contenido de texto (falta: contenido solo de cajas).
+- **SVG `stroke`/`stroke-width`/`fill:none` de CSS** (heredan, SVG 2 §13.2): se
+  escriben como atributos al FINAL de la etiqueta raíz del `<svg>`
+  (`pv_svg_append_root_attrs`, pura): el parser aplica en orden, así que el valor de
+  la cascada gana al atributo del autor. Nada nuevo cruza el IPC.
+- **`text-wrap(-style): balance`** → `pv_run.text_balance` (hereda; BOX B 59 → 60).
+- **Imagen en flujo**: lleva como `block_id` su caja ANCESTRA más cercana (antes -1):
+  la caja de una tarjeta abre antes que su portada. La caja PROPIA sigue en
+  `own_box_id`. `img_h_css` / `img_inline` (B 60 → 61, bits) dicen si su alto es CSS
+  px y si es de nivel inline.
+- La UA identity (`ua_tag`) del bloque viaja también en los runs de controles.

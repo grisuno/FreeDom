@@ -105,6 +105,9 @@ typedef struct rd_block {
     /* Author @font-face match (spec/webfont.md): wf_name_hash, 0 = none.
      * Set only with caps.css, like font_family. */
     unsigned         fontface;
+    /* Author font-family list (pv_run.font_list), owned, NULL = none. Set only
+     * with caps.css, like font_family (spec/text_shape.md section 7). */
+    char            *font_list;
     int              text_transform;
     int              letter_spacing;
     int              word_spacing;
@@ -113,6 +116,7 @@ typedef struct rd_block {
     int              valign;
     int              text_indent;
     int              white_space;
+    int              text_balance;  /* text-wrap-style: balance; caps.css only */
     /* 2026-07-10 text-extension batch (set only with caps.css, else their
      * no-effect defaults set by rd_push): tab_size (0 -> 8 in <pre>), direction
      * (css_direction), font_variant (css_font_variant), list_style_pos (css_list_pos). */
@@ -135,6 +139,7 @@ typedef struct rd_block {
      * caret; -1 = theme caret). */
     int              image_rendering; /* css_image_rendering; set only with caps.css, else 0 */
     int              caret_color;     /* 0xRRGGBB; set only with caps.css, else -1 */
+    int              ph_color;        /* pv_run.ph_color with caps.css, else PV_PH_THEME */
     int              object_fit;      /* css_object_fit; set only with caps.css, else 0 */
     /* Gradient text (2026-07-19): glyph fill gradient from the nearest
      * background-clip:text ancestor. Set only with caps.css, else n = 0. */
@@ -212,6 +217,8 @@ typedef struct rd_block {
      * are the vertical margins, which CSS 2.1 8.3 also resolves against the
      * containing WIDTH. Gated by caps.css like their px halves. */
     int              box_w_pct;
+    int              img_h_css;   /* pv_run.img_h_css: video_h is a CSS px height */
+    int              img_inline;  /* pv_run.img_inline */
     int              box_mw, box_mw_pct;  /* max-width cap (its own value) */
     int              box_l_pct, box_r_pct, box_mt_pct, box_mb_pct;
     /* User-agent box identity of the block this came from (a bx_ua_tag code).
@@ -252,6 +259,11 @@ typedef struct rd_doc {
                             * Packed 0xRRGGBB, or -1 (theme default). Copied from view. */
     int       html_max_width;  /* root <html> max-width in px (layout cap), or -1 */
     int       html_margin_top; /* root <html> margin-top in px (content offset), or 0 */
+    int       root_m[4];       /* pv_view.root_m: UA body margin insets (t, r, b, l) */
+    /* Painter-only: box id + 1 of the out-of-flow subtree a Stage-2f sub-view lays
+     * out, 0 = the whole page. A container whose box lies outside that subtree is
+     * not laid out inside it (its items are elsewhere). Never set by rd_build. */
+    int       oof_view_root;
     int       html_center;     /* 1 if root has margin-left:auto && margin-right:auto */
     int       has_images;  /* the page declared at least one image */
     /* Box engine (Hito 23b-8 Step D): the box-definition TREE. boxes[block_id]

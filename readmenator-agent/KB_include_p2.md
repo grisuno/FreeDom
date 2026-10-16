@@ -6,42 +6,42 @@ Previous: [KB_include.md](KB_include.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `css_attr_match` (struct, line 85)
-  - `css_sub_sel` (struct, line 92)
-  - `css_pseudo_match` (struct, line 109)
-  - `css_compound` (struct, line 119)
-  - `css_sel` (struct, line 136)
-  - `name` (type_alias, line 85) `typedef struct css_attr_match { char name[CSS_TOK_MAX];`
-  - `tag` (type_alias, line 91) `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];`
-  - `kind` (type_alias, line 109) `typedef struct css_pseudo_match { int kind;`
-  - `tag` (type_alias, line 119) `typedef struct css_compound { char tag[CSS_TOK_MAX];`
-  - `parts` (type_alias, line 136) `typedef struct css_sel { css_compound parts[CSS_MAX_COMPOUNDS];`
-  - `csel_lower_ch` (function, line 195) `static inline char csel_lower_ch(char c)`
-  - `csel_ci_eq` (function, line 199) `static inline int csel_ci_eq(const char *a, const char *b)`
-  - `csel_span_eq` (function, line 208) `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
-  - `csel_substr` (function, line 219) `static inline int csel_substr(const char *hay, const char *needle, int ci)`
-  - `csel_ident_ch` (function, line 227) `static inline int csel_ident_ch(char c)`
-  - `csel_parse` (function, line 150) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);`
-  - `csel_matches` (function, line 159) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...`
-  - `identifier` (function, line 163) `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
-  - `csel_emit_utf8` (function, line 175) `size_t csel_emit_utf8(unsigned int cp, char *out);`
-  - `csel_unescape` (function, line 177) `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);`
-  - `csel_escape_len` (function, line 179) `size_t csel_escape_len(const char *s, size_t i, size_t b);`
-  - `csel_ident_fold` (function, line 181) `void csel_ident_fold(const char *src, size_t len, char *dst);`
-  - `csel_ident_eq` (function, line 183) `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);`
-  - `csel_read_ident` (function, line 186) `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);`
-  - `csel_decl_end` (function, line 191) `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);`
+  - `css_attr_match` (struct, line 88)
+  - `css_sub_sel` (struct, line 95)
+  - `css_pseudo_match` (struct, line 112)
+  - `css_compound` (struct, line 122)
+  - `css_sel` (struct, line 139)
+  - `name` (type_alias, line 88) `typedef struct css_attr_match { char name[CSS_TOK_MAX];`
+  - `tag` (type_alias, line 94) `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];`
+  - `kind` (type_alias, line 112) `typedef struct css_pseudo_match { int kind;`
+  - `tag` (type_alias, line 122) `typedef struct css_compound { char tag[CSS_TOK_MAX];`
+  - `parts` (type_alias, line 139) `typedef struct css_sel { css_compound parts[CSS_MAX_COMPOUNDS];`
+  - `csel_lower_ch` (function, line 198) `static inline char csel_lower_ch(char c)`
+  - `csel_ci_eq` (function, line 202) `static inline int csel_ci_eq(const char *a, const char *b)`
+  - `csel_span_eq` (function, line 211) `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
+  - `csel_substr` (function, line 222) `static inline int csel_substr(const char *hay, const char *needle, int ci)`
+  - `csel_ident_ch` (function, line 230) `static inline int csel_ident_ch(char c)`
+  - `csel_parse` (function, line 153) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);`
+  - `csel_matches` (function, line 162) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...`
+  - `identifier` (function, line 166) `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
+  - `csel_emit_utf8` (function, line 178) `size_t csel_emit_utf8(unsigned int cp, char *out);`
+  - `csel_unescape` (function, line 180) `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);`
+  - `csel_escape_len` (function, line 182) `size_t csel_escape_len(const char *s, size_t i, size_t b);`
+  - `csel_ident_fold` (function, line 184) `void csel_ident_fold(const char *src, size_t len, char *dst);`
+  - `csel_ident_eq` (function, line 186) `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);`
+  - `csel_read_ident` (function, line 189) `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);`
+  - `csel_decl_end` (function, line 194) `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);`
   - `FREEDOM_CSS_SELECT_H` (macro, line 2) `#define FREEDOM_CSS_SELECT_H`
   - `CSS_TOK_MAX` (macro, line 27) `#define CSS_TOK_MAX`
   - `CSS_MAX_CLASSES_PER_SEL` (macro, line 28) `#define CSS_MAX_CLASSES_PER_SEL`
-  - `CSS_MAX_SUB_SELS` (macro, line 80) `#define CSS_MAX_SUB_SELS`
-  - `CSS_SUB_MAX_ATTRS` (macro, line 81) `#define CSS_SUB_MAX_ATTRS`
-  - `CSS_SUB_MAX_PSEUDOS` (macro, line 82) `#define CSS_SUB_MAX_PSEUDOS`
-  - `CSEL_FOLD_PREFIX` (macro, line 170) `#define CSEL_FOLD_PREFIX`
-  - `CSEL_FOLD_MARK` (macro, line 171) `#define CSEL_FOLD_MARK`
-  - `CSEL_IDENT_SCRATCH` (macro, line 172) `#define CSEL_IDENT_SCRATCH`
+  - `CSS_MAX_SUB_SELS` (macro, line 83) `#define CSS_MAX_SUB_SELS`
+  - `CSS_SUB_MAX_ATTRS` (macro, line 84) `#define CSS_SUB_MAX_ATTRS`
+  - `CSS_SUB_MAX_PSEUDOS` (macro, line 85) `#define CSS_SUB_MAX_PSEUDOS`
+  - `CSEL_FOLD_PREFIX` (macro, line 173) `#define CSEL_FOLD_PREFIX`
+  - `CSEL_FOLD_MARK` (macro, line 174) `#define CSEL_FOLD_MARK`
+  - `CSEL_IDENT_SCRATCH` (macro, line 175) `#define CSEL_IDENT_SCRATCH`
 - Depends on: `include/css.h`
-- Imported by: `fuzz/fuzz_css.c`, `include/css_chain.h`, `include/css_decl.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `tests/test_css.c`
+- Imported by: `fuzz/fuzz_css.c`, `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `tests/test_css.c`
 
 ## include/css_text.h
 - Layer: utility
@@ -201,40 +201,47 @@ Previous: [KB_include.md](KB_include.md)
 - Symbols:
   - `fx_item` (struct, line 40)
   - `fx_result` (struct, line 48)
-  - `fx_area_map` (struct, line 123)
-  - `fx_float_rect` (struct, line 193)
+  - `fx_area_map` (struct, line 144)
+  - `fx_float_rect` (struct, line 214)
   - `fx_justify` (enum, line 30)
   - `fx_status` (enum, line 53)
   - `basis` (type_alias, line 40) `typedef struct fx_item { double basis;`
   - `pos` (type_alias, line 48) `typedef struct fx_result { double pos;`
-  - `cols` (type_alias, line 123) `typedef struct fx_area_map { int rows, cols;`
-  - `bottom` (type_alias, line 193) `typedef struct fx_float_rect { double top, bottom;`
+  - `cols` (type_alias, line 144) `typedef struct fx_area_map { int rows, cols;`
+  - `bottom` (type_alias, line 214) `typedef struct fx_float_rect { double top, bottom;`
   - `size` (function, line 60) `* content size (px);`
   - `out` (function, line 62) `* fx_result to out (caller-owned). n == 0 is a no-op (out may be NULL). */ fx_status fx_flex_line(const fx_item...`
   - `fx_grid_cell` (function, line 74) `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);`
-  - `fx_autofill_count` (function, line 108) `size_t fx_autofill_count(double avail, double gap, double minw);`
-  - `fx_grid_area_hash` (function, line 132) `unsigned fx_grid_area_hash(const char *name);`
-  - `offset` (function, line 150) `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...`
-  - `required` (function, line 163) `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);`
-  - `widths` (function, line 173) `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...`
-  - `FX_ERR_NULL_ARG` (function, line 207) `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);`
-  - `space` (function, line 213) `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...`
-  - `fx_auto_min_size` (function, line 242) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
-  - `fx_justify_name` (function, line 298) `const char *fx_justify_name(fx_justify j);`
-  - `height` (function, line 304) `* used height (h_out);`
-  - `win` (function, line 321) `* margins win (both = centre, left only = end);`
-  - `fx_cross_offset` (function, line 323) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);`
+  - `number` (function, line 106) `* line number (negative counts from the end). */ #define FX_GL_AUTO 0 #define FX_GL_SPAN_BASE (1 << 20) #define...`
+  - `fx_grid_line_parse` (function, line 117) `int fx_grid_line_parse(const char *v, int *start, int *end);`
+  - `fx_grid_line_resolve` (function, line 122) `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span);`
+  - `fx_autofill_count` (function, line 129) `size_t fx_autofill_count(double avail, double gap, double minw);`
+  - `fx_grid_area_hash` (function, line 153) `unsigned fx_grid_area_hash(const char *name);`
+  - `offset` (function, line 171) `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...`
+  - `required` (function, line 184) `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);`
+  - `widths` (function, line 194) `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...`
+  - `FX_ERR_NULL_ARG` (function, line 228) `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);`
+  - `space` (function, line 234) `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...`
+  - `fx_auto_min_size` (function, line 263) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
+  - `fx_justify_name` (function, line 319) `const char *fx_justify_name(fx_justify j);`
+  - `height` (function, line 325) `* used height (h_out);`
+  - `win` (function, line 342) `* margins win (both = centre, left only = end);`
+  - `fx_cross_offset` (function, line 344) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);`
   - `FREEDOM_FLEX_LAYOUT_H` (macro, line 2) `#define FREEDOM_FLEX_LAYOUT_H`
   - `FX_MAX_ITEMS` (macro, line 28) `#define FX_MAX_ITEMS`
-  - `FX_AREA_MAX_ROWS` (macro, line 115) `#define FX_AREA_MAX_ROWS`
-  - `FX_AREA_MAX_COLS` (macro, line 116) `#define FX_AREA_MAX_COLS`
-  - `FX_AREA_MAX_CELLS` (macro, line 117) `#define FX_AREA_MAX_CELLS`
-  - `FX_AREA_NAME_MAX` (macro, line 118) `#define FX_AREA_NAME_MAX`
-  - `FX_FLOAT_MIN_LINE` (macro, line 187) `#define FX_FLOAT_MIN_LINE`
-  - `FX_MAX_COLUMNS` (macro, line 247) `#define FX_MAX_COLUMNS`
-  - `FX_MAUTO_TOP` (macro, line 314) `#define FX_MAUTO_TOP`
-  - `FX_MAUTO_BOTTOM` (macro, line 315) `#define FX_MAUTO_BOTTOM`
-- Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+  - `FX_GL_AUTO` (macro, line 107) `#define FX_GL_AUTO`
+  - `FX_GL_SPAN_BASE` (macro, line 108) `#define FX_GL_SPAN_BASE`
+  - `FX_GL_SPAN_MAX` (macro, line 109) `#define FX_GL_SPAN_MAX`
+  - `FX_GL_LINE_MAX` (macro, line 110) `#define FX_GL_LINE_MAX`
+  - `FX_AREA_MAX_ROWS` (macro, line 136) `#define FX_AREA_MAX_ROWS`
+  - `FX_AREA_MAX_COLS` (macro, line 137) `#define FX_AREA_MAX_COLS`
+  - `FX_AREA_MAX_CELLS` (macro, line 138) `#define FX_AREA_MAX_CELLS`
+  - `FX_AREA_NAME_MAX` (macro, line 139) `#define FX_AREA_NAME_MAX`
+  - `FX_FLOAT_MIN_LINE` (macro, line 208) `#define FX_FLOAT_MIN_LINE`
+  - `FX_MAX_COLUMNS` (macro, line 268) `#define FX_MAX_COLUMNS`
+  - `FX_MAUTO_TOP` (macro, line 335) `#define FX_MAUTO_TOP`
+  - `FX_MAUTO_BOTTOM` (macro, line 336) `#define FX_MAUTO_BOTTOM`
+- Imported by: `fuzz/fuzz_css.c`, `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ## include/form.h
 - Doc: fm_field: One named control. value == NULL is treated as the empty value; name == NULL is *...
@@ -424,7 +431,7 @@ Previous: [KB_include.md](KB_include.md)
   - `IM_MAX_TEXT` (macro, line 17) `#define IM_MAX_TEXT`
   - `IM_MAX_ENTRIES` (macro, line 18) `#define IM_MAX_ENTRIES`
   - `IM_MAX_SCOPES` (macro, line 19) `#define IM_MAX_SCOPES`
-- Imported by: `fuzz/fuzz_import_map.c`, `src/import_map.c`, `src/tab.c`, `tests/test_import_map.c`
+- Imported by: `fuzz/fuzz_import_map.c`, `src/import_map.c`, `src/prefetch.c`, `src/tab.c`, `tests/test_import_map.c`
 
 ## include/interp.h
 - Doc: ip_ease: Compute eased t for normalized t ∈ [0,1].
@@ -479,16 +486,6 @@ Previous: [KB_include.md](KB_include.md)
   - `JD_IFRAME_TRACK_MAX` (macro, line 40) `#define JD_IFRAME_TRACK_MAX`
 - Depends on: `include/dom.h`, `include/freebug.h`, `include/js_geom.h`, `include/js_location.h`, `include/js_sandbox.h`, `include/url.h`
 - Imported by: `fuzz/fuzz_js_dom.c`, `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`
-
-## include/js_env.h
-- Layer: infrastructure
-- Language: h
-- Symbols:
-  - `je_status` (enum, line 27)
-  - `poisoned` (function, line 43) `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...`
-  - `FREEDOM_JS_ENV_H` (macro, line 2) `#define FREEDOM_JS_ENV_H`
-- Depends on: `include/js_sandbox.h`
-- Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`
 
 
 Next: [KB_include_p3.md](KB_include_p3.md)

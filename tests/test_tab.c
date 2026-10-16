@@ -164,6 +164,39 @@ static void test_load_returns_image_run(void **state) {
     tab_close(t);
 }
 
+/* An <img> with NO usable source but something to show (alt / declared box) is a
+ * broken image, not an absence (HTML 4.8.3, spec/page_view.md tanda 30): it must
+ * cross the IPC as PV_IMAGE with an empty src. The codec used to demote it to
+ * PV_TEXT whenever src was empty, so in the real browser the card lost its
+ * reserved 200x280 box and the alt flowed as a paragraph (jkanime tiles). */
+static void test_load_srcless_image_stays_image(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>I</title></head><body>"
+        "<img alt=\"Poster\" width=\"200\" height=\"280\">"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+    int saw = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text != NULL && strcmp(r->text, "Poster") == 0) {
+            assert_int_equal(r->kind, PV_IMAGE);
+            assert_non_null(r->src);
+            assert_string_equal(r->src, "");
+            assert_int_equal(r->img_w, 200);
+            assert_int_equal(r->img_h, 280);
+            saw = 1;
+        }
+    }
+    assert_true(saw);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* An author color extracted in the confined child must survive the IPC round-trip
  * as the run's fg_rgb (so the parent can apply it once CSS is enabled). */
 static void test_load_carries_author_color(void **state) {
@@ -2984,6 +3017,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_basic),
         cmocka_unit_test(test_load_returns_view_with_link),
         cmocka_unit_test(test_load_returns_image_run),
+        cmocka_unit_test(test_load_srcless_image_stays_image),
         cmocka_unit_test(test_load_carries_author_color),
         cmocka_unit_test(test_load_carries_flex_item),
         cmocka_unit_test(test_load_carries_flex_auto_margins),

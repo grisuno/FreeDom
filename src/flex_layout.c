@@ -11,6 +11,7 @@
 #include "flex_layout.h"
 
 #include <stddef.h>
+#include <string.h>
 
 #define FX_EPS 1e-9
 
@@ -180,6 +181,10 @@ fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
     if (nitems == 0) return FX_OK;
     if (ncols == 0 || nitems > FX_MAX_ITEMS) return FX_ERR_RANGE;
     if (out_row == NULL || out_col == NULL) return FX_ERR_NULL_ARG;
+    /* Occupancy is one 64-bit mask per row, and `1ull << sp` with sp >= 64 is UB.
+     * repeat(auto-fill) can reach BT_MAX_CHILDREN (128) tracks, so cap the column
+     * count the masks address; a grid that wide places on its first 63 tracks. */
+    if (ncols > 63) ncols = 63;
 
     /* Track columns occupied by row-spanning items from previous rows.
      * occ[r] bitmask: bit c set = column c is taken by a spanning item. */
@@ -196,7 +201,10 @@ fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
     for (size_t i = 0; i < nitems; ++i) {
         int fr = (fixed_row != NULL) ? fixed_row[i] : -1;
         int fc = (fixed_col != NULL) ? fixed_col[i] : -1;
-        if (fr < 0 && fc < 0) continue;
+        /* Only a definite ROW is placed up front (8.5 step 2). A definite column
+         * with an auto row rides the cursor in pass 2 (step 4): pinning it to row 0
+         * stacked every `grid-column: 1 / -1` banner on top of each other. */
+        if (fr < 0) continue;
         size_t sp = 1;
         if (span != NULL && span[i] > 1)
             sp = ((size_t)span[i] > ncols) ? ncols : (size_t)span[i];
@@ -205,14 +213,20 @@ fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
             rsp = (size_t)row_span[i];
         /* A cell outside the grid is CLAMPED, not dropped: an item at the edge is
          * a smaller error than an item that disappears. */
-        size_t pr = (fr > 0) ? (size_t)fr : 0;
-        size_t pc = (fc > 0) ? (size_t)fc : 0;
-        if (pc >= ncols) pc = ncols - 1;
-        if (pc + sp > ncols) sp = ncols - pc;
+        size_t pr = (size_t)fr;
         /* The row is NOT bounded by the item count: a named area may legitimately
          * sit in the fourth row of a template with one item in it. The only real
          * bound is the occupancy array. */
         if (pr >= FX_MAX_ITEMS) pr = FX_MAX_ITEMS - 1;
+        while (nocc <= pr) { occ[nocc] = 0; ++nocc; }
+        size_t pc = (fc > 0) ? (size_t)fc : 0;
+        if (pc >= ncols) pc = ncols - 1;
+        if (pc + sp > ncols) sp = ncols - pc;
+        if (fc < 0) {
+            /* Definite row, auto column: the first span-wide gap in that row. */
+            for (size_t k = 0; k + sp <= ncols; ++k)
+                if (!(occ[pr] & (((1ull << sp) - 1ull) << k))) { pc = k; break; }
+        }
         out_row[i] = pr;
         out_col[i] = pc;
         size_t mask = ((1ull << sp) - 1ull) << pc;
@@ -225,14 +239,38 @@ fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
     /* Pass 2 -- AUTOMATIC placement over whatever cells are left. */
     size_t r = 0, c = 0;
     for (size_t i = 0; i < nitems; ++i) {
-        if ((fixed_row != NULL && fixed_row[i] >= 0) ||
-            (fixed_col != NULL && fixed_col[i] >= 0)) continue;   /* placed above */
+        if (fixed_row != NULL && fixed_row[i] >= 0) continue;   /* placed above */
         size_t sp = 1;
         if (span != NULL && span[i] > 1)
             sp = ((size_t)span[i] > ncols) ? ncols : (size_t)span[i];
         size_t rsp = 1;
         if (row_span != NULL && row_span[i] > 1)
             rsp = (size_t)row_span[i];
+        int fc = (fixed_col != NULL) ? fixed_col[i] : -1;
+        if (fc >= 0) {
+            /* 8.5 step 4, definite column: move the cursor to that column (a step
+             * back means the next row), then down until the cells are free. */
+            size_t pc = ((size_t)fc >= ncols) ? ncols - 1 : (size_t)fc;
+            if (pc + sp > ncols) sp = ncols - pc;
+            if (pc < c) ++r;
+            c = pc;
+            size_t mask = ((1ull << sp) - 1ull) << pc;
+            for (;;) {
+                if (r >= FX_MAX_ITEMS) return FX_ERR_RANGE;
+                while (nocc <= r) { occ[nocc] = 0; ++nocc; }
+                if (!(occ[r] & mask)) break;
+                ++r;
+            }
+            out_row[i] = r;
+            out_col[i] = pc;
+            for (size_t kr = r + 1; kr < r + rsp && kr < FX_MAX_ITEMS; ++kr) {
+                while (nocc <= kr) { occ[nocc] = 0; ++nocc; }
+                occ[kr] |= mask;
+            }
+            c = pc + sp;
+            if (c >= ncols) { ++r; c = 0; }
+            continue;
+        }
 
         /* Find the first row where `sp` consecutive columns are free,
          * accounting for occupied cells from row-spanning items above.
@@ -265,7 +303,8 @@ fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
          * the subsequent (rsp - 1) rows so later items skip them. */
         if (rsp > 1) {
             size_t mask = ((1ull << sp) - 1ull) << out_col[i];
-            for (size_t kr = r + 1; kr < r + rsp; ++kr) {
+            /* From the item's OWN row: the cursor may already have wrapped. */
+            for (size_t kr = out_row[i] + 1; kr < out_row[i] + rsp && kr < FX_MAX_ITEMS; ++kr) {
                 while (nocc <= kr) { occ[nocc] = 0; ++nocc; }
                 occ[kr] |= mask;
             }
@@ -757,4 +796,130 @@ double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto
     if (align == 1) return room / 2.0;
     if (align == 2) return room;
     return 0.0;
+}
+
+/* ASCII whitespace per CSS Syntax (tab, LF, FF, CR, space). */
+static int gl_ws(char c) {
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f';
+}
+
+static int gl_lower(char c) { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; }
+
+/* Case-insensitive keyword at [p, p+n) followed by end or whitespace. */
+static int gl_kw(const char *p, const char *end, const char *kw) {
+    size_t k = 0;
+    for (; kw[k] != '\0'; ++k)
+        if (p + k >= end || gl_lower(p[k]) != kw[k]) return 0;
+    return (p + k == end) || gl_ws(p[k]);
+}
+
+/* A CSS <integer> (optional sign, digits only) filling exactly [p, end). The
+ * magnitude SATURATES at cap (anti-DoS clamp like every other CSS factor; it also
+ * keeps the accumulation overflow-free on a hostile digit string). */
+static int gl_int(const char *p, const char *end, long cap, long *out) {
+    int neg = 0;
+    if (p < end && (*p == '+' || *p == '-')) { neg = (*p == '-'); ++p; }
+    if (p >= end) return 0;
+    long v = 0;
+    for (; p < end; ++p) {
+        if (*p < '0' || *p > '9') return 0;
+        if (v < cap) v = v * 10 + (*p - '0');
+        if (v > cap) v = cap;
+    }
+    *out = neg ? -v : v;
+    return 1;
+}
+
+/* One side over [p, end), trimmed by the caller or not. */
+static int gl_side_range(const char *p, const char *end, int *out) {
+    while (p < end && gl_ws(*p)) ++p;
+    while (end > p && gl_ws(end[-1])) --end;
+    if (p >= end) return 0;
+    if (gl_kw(p, end, "auto")) {
+        if (p + 4 != end) return 0;
+        *out = FX_GL_AUTO;
+        return 1;
+    }
+    if (gl_kw(p, end, "span")) {
+        const char *q = p + 4;
+        while (q < end && gl_ws(*q)) ++q;
+        long n;
+        if (!gl_int(q, end, FX_GL_SPAN_MAX, &n) || n < 1) return 0;
+        *out = FX_GL_SPAN_BASE + (int)n;
+        return 1;
+    }
+    long n;
+    if (!gl_int(p, end, FX_GL_LINE_MAX, &n) || n == 0) return 0;   /* line 0: invalid (8.3) */
+    *out = (int)n;
+    return 1;
+}
+
+int fx_grid_line_side(const char *s, int *out) {
+    if (s == NULL || out == NULL) return 0;
+    int v;
+    if (!gl_side_range(s, s + strlen(s), &v)) return 0;
+    *out = v;
+    return 1;
+}
+
+int fx_grid_line_parse(const char *v, int *start, int *end) {
+    if (v == NULL || start == NULL || end == NULL) return 0;
+    const char *slash = strchr(v, '/');
+    const char *stop = v + strlen(v);
+    int s, e = FX_GL_AUTO;
+    if (slash == NULL) {
+        if (!gl_side_range(v, stop, &s)) return 0;
+    } else {
+        if (strchr(slash + 1, '/') != NULL) return 0;
+        if (!gl_side_range(v, slash, &s) || !gl_side_range(slash + 1, stop, &e))
+            return 0;
+    }
+    *start = s;
+    *end = e;
+    return 1;
+}
+
+static int gl_is_span(int v) { return v > FX_GL_SPAN_BASE; }
+static int gl_is_line(int v) { return v != FX_GL_AUTO && !gl_is_span(v); }
+
+void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span) {
+    *pos0 = -1;
+    *span = 1;
+    /* Negative lines count from the explicit grid's end (8.3.1): -1 is the line
+     * after the last track. Unknown track count: the line is unresolvable, so the
+     * side degrades to auto rather than inventing a cell. */
+    if (gl_is_line(start) && start < 0)
+        start = (ntracks > 0 && ntracks + 2 + start >= 1) ? ntracks + 2 + start : FX_GL_AUTO;
+    if (gl_is_line(end) && end < 0) {
+        /* `1 / -1` under repeat(auto-fill) (count only known at layout) still
+         * means "to the last line": the placer clamps an oversized span to it. */
+        if (ntracks <= 0 && end == -1 && gl_is_line(start) && start > 0) {
+            *pos0 = start - 1;
+            *span = FX_GL_SPAN_MAX;
+            return;
+        }
+        end = (ntracks > 0 && ntracks + 2 + end >= 1) ? ntracks + 2 + end : FX_GL_AUTO;
+    }
+
+    if (gl_is_line(start) && gl_is_line(end)) {
+        if (end == start) end = start + 1;
+        if (end < start) { int t = start; start = end; end = t; }
+        *pos0 = start - 1;
+        *span = end - start;
+    } else if (gl_is_line(start)) {
+        *pos0 = start - 1;
+        if (gl_is_span(end)) *span = end - FX_GL_SPAN_BASE;
+    } else if (gl_is_line(end)) {
+        int n = gl_is_span(start) ? start - FX_GL_SPAN_BASE : 1;
+        int s = end - n;
+        if (s < 1) s = 1;              /* no implicit tracks before line 1 */
+        *pos0 = s - 1;
+        *span = end - s;
+        if (*span < 1) { *span = 1; }
+    } else if (gl_is_span(start)) {
+        *span = start - FX_GL_SPAN_BASE;   /* two spans: the end one is ignored */
+    } else if (gl_is_span(end)) {
+        *span = end - FX_GL_SPAN_BASE;
+    }
+    if (*span > FX_GL_SPAN_MAX) *span = FX_GL_SPAN_MAX;
 }

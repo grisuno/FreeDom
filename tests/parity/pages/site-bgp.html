@@ -1,0 +1,698 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<!-- rmosher 2010 - 2016 -->
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="canonical" href="https://bgp.he.net" />
+
+
+
+
+
+<style media="all">
+*
+{
+    padding: 0px;
+    margin: 0px;
+	box-sizing: border-box;
+}
+
+body
+{
+	/* width: 950px; */
+	font-family: arial,sans-serif;
+    background-color: #ffffff;
+}
+
+table {
+    border-collapse: collapse;
+    border: 1px solid #666666;
+}
+td {
+    padding: 5px;
+    border: 1px solid #666666;
+
+}
+th {
+    padding: 5px;
+    border: 1px solid #666666;
+}
+
+.clear {
+        clear: both;
+}
+
+#content {
+	padding: 0px;
+	/* margin-left: 5px; */
+	flex-grow: 2;
+	/* display: flex; */
+	justify-content: center;
+	/* margin-top: 0px;
+	margin-right: 0px;
+	padding-right: 0px;
+	padding-top: 0px; */
+}
+
+
+
+/* .tabdata.hidden {
+    visibility: hidden;
+    display: none;
+} */
+.tabdata {
+    border-top: 1px solid #000066;
+    padding: 15px;
+    min-width: 742px;
+	display: flex;
+	flex-flow: column wrap;
+	align-items: center;
+}
+.tabdata pre {
+	white-space: pre-wrap;
+}
+.tabmenu {
+    margin-left: 10px;
+    list-style: none;
+}
+.boundedcontent {
+	width: max-content;
+	/* max-width: 1200px; */
+}
+.chartcontainer {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: center;
+	max-width: 750px;
+}
+.tabmenuli {
+    float: left;
+    margin-bottom: -1px;
+    margin-right: 10px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    border-top: 1px solid #000066;
+    border-left: 1px solid #000066;
+    border-right: 1px solid #000066;
+    border-bottom: 1px solid #000066;
+    background-color: #aaaaaa;
+    position: relative;
+    cursor: pointer;
+	font-size: 18px;
+	/* font-family: sans-serif; */
+	/* font-weight: bold; */
+	color: #141414;
+	/* border-top-left-radius: 5px; */
+	/* border-top-right-radius: 5px; */
+	
+	/* font-weight: 600; */
+
+}
+
+.tabmenuselected {
+    border-bottom: 1px solid white;
+    background-color: #ffffff;
+	
+    cursor: auto;
+	color: #000066;
+
+}
+.notice
+{
+    width: 50%;
+    padding: 3px;
+    border: 1px solid #33ff33;
+    background-color: #ccffcc;
+    text-align: center;
+    margin: 5px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.error
+{
+    width: 50%;
+    padding: 3px;
+    border: 1px solid #ff3333;
+    background-color: #ffcccc;
+    text-align: center;
+    margin: 5px;
+    margin-left: auto;
+    margin-right: auto;
+}
+img
+{
+	border: 0;
+}
+
+a:visited, a:active, a:link
+{
+        color: #000000;
+        /* text-decoration: none; */
+}
+
+a:hover
+{
+	text-decoration: underline;
+}
+
+.underline {
+	text-decoration: underline;
+}
+.floatleft {
+	float: left;
+}
+.floatright {
+	float: right;
+}
+h1 a:visited, h1 a:active, h1 a:link {
+	color: #000066;
+}
+
+h1 {
+	text-decoration: underline;
+	font-size: 20px;
+	font-weight: bold;
+	padding: 0px;
+	margin: 0px;
+	/* margin-left: 110px; */
+	/* margin-bottom: 10px; */
+	/* margin-top: -20px; */
+}
+html, body {
+	height: 100%;
+}
+#centerbody {
+	display: flex;
+	flex-direction: row;
+	flex-grow: 1;
+}
+#clipboard {
+	margin: none;
+	padding: none;
+	border: none;
+	background-color: #fff0;
+	font-size: 20px;
+	cursor: pointer;
+	display:none;
+}
+#searchform input[type=text] {
+	flex-grow: 1;  line-height: 30px;font-size: 20px;border: 1px solid #ccc; border-radius: 4px;
+	background-color: #fffd;
+}
+
+.searchbutton {
+	background-image:  linear-gradient(to bottom right,#000066, #0c0c36);
+	border:none;
+	color:white;
+	/* box-shadow: 5px 5px 5px #020296; */
+}
+h2 {
+	font-size: 1em;
+	text-decoration: underline;
+	font-weight: bold;
+}
+h3 {
+	font-size: 1em;
+	text-decoration: underline;
+	font-weight: bold;
+}
+.contentfiller {
+	border-top: 1px solid #000066;
+	border-left: 1px solid #00006666;
+	margin-top: 24px;
+	height: 100%;
+}
+.leftsidemenu a {
+	text-decoration: none;
+}
+.leftsidemenu {
+	max-width: 250px;
+	font-size: 18px;
+	height: 100%;
+	border-right: 1px solid #00006666;
+	border-top: 1px solid #000066;
+}
+.leftsidemenuitems {
+	list-style: none;
+	margin-left: 10px;
+	margin-right: 10px;
+	padding-bottom: 5px;
+	padding-top: 5px;
+}
+ul.leftsidemenuitems li {
+	padding-bottom: 5px;
+	text-decoration: none;
+	font-size: .9em;
+}
+ul.leftsidemenuitems li a:link {
+	color: #000066;
+}
+ul.leftsidemenuitems li a:visited {
+	color: #000066;
+}
+ul.leftsidemenuitems li a:active {
+	color: #000066;
+}
+.menuheader {
+	padding-top: 2px;
+	padding-bottom: 1px;
+	color: white;
+	padding-right: 10px;
+	background-color: #000066;
+	text-align: center;
+}
+a:link.underboldlink, a:visited.underboldlink, a:active.underboldlink {
+	text-decoration: underline;
+	font-weight: bold;
+}
+a:link.boldlink, a:visited.boldlink, a:active.boldlink {
+	font-weight: bold;
+}
+.search {
+	float: right;
+	margin-top: -60px;
+	margin-right: 350px;
+	height: 25px;
+	width: 180px;
+	display: inline;
+}
+div.search input[type=text] {
+	padding-top: 2px;
+	border: 1px solid #000066;
+	width: 115px;
+	height: 18px;
+	display: inline;
+	float: left;
+}
+div.search input[type=submit] {
+	border: 1px solid #000066;
+	height: 22px;
+	float: left;
+	margin-left: 8px;
+	padding-left: 3px;
+	padding-right: 3px;
+	cursor: pointer;
+	display: inline;
+}
+.irrbox {
+	border: 1px solid #000000;
+	margin-bottom: 20px;
+	clear: both;
+}
+.irrdata {
+	font-family: monospace;
+	padding: 10px;
+	float: left;
+	clear: both;
+	white-space: pre-wrap;
+}
+.irrsource {
+	padding-top: 2px;
+	padding-left: 7px;
+	padding-right: 7px;
+	padding-bottom: 1px;
+	color: #ffffff;
+	background-color: #000066;
+	border-right: 1px solid #000066;
+	border-bottom: 1px solid #000066;
+	float: left;
+	clear: both;
+	cursor: pointer;
+}
+.dnshead {
+	padding-left: 5px;
+	border-bottom: 1px solid #000066;
+	font-weight: bold;
+}
+.dnsdata {
+	padding-left: 10px;
+	margin-bottom: 15px;
+}
+.rblok:nth-child(odd) {
+	padding-left: 5px;
+	background-color: #00ee55;
+	width: 350px;
+
+}
+.rblok:nth-child(even) {
+	padding-left: 5px;
+	background-color: #00FF66;
+	width: 350px;
+
+}
+.rbllisted:nth-child(odd) {
+	padding-left: 5px;
+	background-color: #ee0000;
+	width: 350px;
+}
+.rbllisted:nth-child(even) {
+	padding-left: 5px;
+	background-color: #ff0000;
+	width: 350px;
+}
+.rbltext {
+	float: right;
+}
+.webthumb img {
+	padding: 10px;
+	border: 1px solid #000066;
+}
+#footer {
+	margin-left: 100px;
+	margin-bottom: 10px;
+	color: #666666;
+	font-size: 10px;
+	text-align: center;
+}
+.sortable th a {
+	text-decoration: none;
+}
+.stale {
+	padding: 20px;
+	text-align: center;
+	border: 1px solid #ff0000;
+	background-color: #ffcccc;
+	margin-left: 20px;
+	margin-right: 20px;
+	margin-top: 10px;
+	margin-bottom: 20px;
+}
+.privateasn {
+	padding: 20px;
+	text-align: center;
+	border: 1px solid #ff0000;
+	background-color: #ffcccc;
+	margin-left: 20px;
+	margin-right: 20px;
+	margin-top: 10px;
+	margin-bottom: 20px;
+}
+.bogon {
+	padding: 20px;
+	text-align: center;
+	border: 1px solid #ff0000;
+	background-color: #ffcccc;
+	margin-left: 20px;
+	margin-right: 20px;
+	margin-top: 10px;
+	margin-bottom: 20px;
+}
+.alignright {
+	text-align: right;
+}
+.flag {
+	padding: 0px;
+	margin: 0px;
+	width: 43px;
+	height: 20px;
+	max-height: 20px;
+	text-align: right;
+}
+
+.valigntop {
+        vertical-align: top;
+}
+.rpad5 {
+	padding-right: 5px;
+}
+.rmargin8 {
+	margin-right: 8px;
+}
+.h30 {
+	height: 30px;
+}
+.down2 {
+	position: relative;
+	top: 2px;
+}
+.rpad10 {
+	padding-right: 10px;
+}
+.centeralign {
+	text-align: center;
+}
+.dnsbool {
+	width: 50px;
+	max-width: 50px;
+}
+.nstests {
+	float: left;
+	width: 220px;
+}
+.nstestsresult {
+	float: left;
+	width: 30px;
+}
+.nscounts {
+	float: left;
+	width: 110px;
+}
+.nscountsnum {
+	float: right;
+	text-align: right;
+	width: 190px;
+}
+.tldleft {
+        width: 50%;
+}
+.tldright {
+        width: 50%;
+}
+.w100p {
+	width: 100%;
+}
+.w30 {
+	width: 30px;
+}
+.w50p {
+	width: 50%;
+}
+.lpad15 {
+	padding-left: 15px;
+}
+#showcontact {
+	cursor: pointer;
+	text-decoration: underline;
+}
+.red {
+	color: red;
+}
+.social {
+	margin-left: 10px;
+	width: 150px;
+}
+
+table.tinyfont td {
+	font-size: 0.7em;
+	text-align: right;
+}
+.announcedas {
+	height: 22px;
+}
+.nowrap {
+	white-space: nowrap;
+}
+.roakey {
+	padding: 0px;
+	margin: 0px;
+	height: 20px;
+	top: 0px;
+	right: 0px;
+	max-height: 20px;
+	text-align: right;
+	float: right;
+	width: 27px;
+}
+.irrimg {
+	padding: 0px;
+	margin: 0px;
+	height: 20px;
+	top: 0px;
+	right: 0px;
+	max-height: 20px;
+	text-align: right;
+	float: right;
+	width: 27px;
+}
+.irrimg + a, .roakey + a {
+    margin-right: 10px;
+}
+.font-small {
+	font-size: 0.75em;
+}
+.peerlinechart {
+    width: 740px;
+    height: 250px;
+}
+.prefixchart {
+    width: 740px;
+    height: 200px;
+}
+.graphtitle {
+	text-align: center;
+    font-weight: 500;
+    color: #555;
+    font-size: 15px;
+    font-family: sans-serif;
+}
+.barchart {
+    width: 360px;
+    height: 490px;
+}
+.realtime-indicator {
+	border: 2px solid #00888d;
+	border-radius: 5px;
+	color: #00888d;
+	font-weight: 900;
+}
+.peerchart {
+    width: 360px;
+    height: 250px;
+}
+.offpage {
+    position: absolute;
+    left: -999px;
+    top: -999px;
+}
+
+#exchangegraph {
+    width: 360px;
+    height: 490px;
+}
+.hidden {
+    visibility: hidden;
+    display: none;
+}
+</style>
+
+
+<title>Hurricane Electric BGP Toolkit</title>
+
+
+
+
+<!-- Global site tag (gtag.js) - Google Ads: 1068215855 -->
+
+
+</head>
+
+<body>
+	<div style='display: flex; flex-direction: column; height:100%; '>
+		<div id='header' style='display: flex;'>
+			<div style='display: flex; align-items:center;justify-content:center;flex-direction:column; position: relative;'>
+				<a href="//www.he.net/"><img alt='Hurricane Electric' src='/helogo.gif' /></a>
+				<div style='padding:10px;  display:flex; gap: 5px;'>
+					
+<h1><a href="/" rel="bookmark" title="BGP Toolkit Home">BGP Toolkit Home</a></h1>
+
+					<button id='clipboard' onclick='navigator.clipboard.writeText($(this).parent().find("a")[0].attributes["href"].baseURI);'>🔗</button>
+				</div>
+			</div>
+			<div id='header_search' style='flex-grow: 1; display: flex; align-items:center;justify-content:center;flex-direction:column;'>
+			
+			<form id='searchform' action="/search" method="get" style='width:80%; padding:10px; display: flex; justify-content:center;gap:5px;'>
+				<input name="search[search]" size="30" type="text">
+				<input name="commit" type="submit" value="Search" style='padding: 5px 10px;font-size: 22px;' class='searchbutton'>
+			</form>
+			</div>
+			<div style='flex-grow:1;' id='header_filler'> </div>
+
+			
+		</div>
+		<div id='centerbody'>
+			<div id='leftsidemenu' style='width:max-content;'>
+				<div class='leftsidemenu'>
+					<div class='menuheader'>Quick Links</div>
+					<ul class='leftsidemenuitems' style='width:max-content;'>
+						<li><a href='/'>BGP Toolkit Home</a></li>
+<li><a href="/report/prefixes">BGP Prefix Report</a></li>
+<li><a href="/report/peers">BGP Peer Report</a></li>
+<li><a href='//bgp.he.net/traceroute/'>Super Traceroute</a></li>
+<li><a href='/super-lg'>Super Looking Glass</a></li>
+<li><a href="/certs">Cert Search</a></li>
+<li><a href="/report/exchanges">Exchange Report</a></li>
+<li><a href="/report/bogons">Bogon Routes</a></li>
+<li><a href="/report/world">World Report</a></li>
+<li><a href="/report/multi-origin-routes">Multi Origin Routes</a></li>
+<li><a href="/report/dns">DNS Report</a></li>
+<li><a href="/report/tophosts">Top Host Report</a></li>
+<li><a href="/report/rpki_and_aspa">RPKI & ASPA Report</a></li>
+<li><a href="/report/netstats">Internet Statistics</a></li>
+<li><a href='//lg.he.net/'>Looking Glass</a></li>
+<li><a href='//networktools.he.net/'>Network Tools App</a></li>
+<li><a href='//ipv6.he.net/certification/'>IPv6 Certification</a></li>
+<li><a href='//bgp.he.net/ipv6-progress-report.cgi'>IPv6 Progress</a></li>
+<li><a href="/super-lg/contribute/">Contribute Data</a></li>
+<li><a href='/credits/'>Credits</a></li>
+<li><a href='//bgp.he.net/contact/'>Contact Us</a></li>
+
+					</ul>
+
+				</div>
+			</div>
+			<div id='content'>
+				
+
+				
+
+
+
+
+<ul class='tabmenu'>
+    <li id='tab_welcome'   class='tabmenuli'>Home</li>
+</ul>
+
+<div class='clear'></div>
+<div id='welcome' class='tabdata' style='gap:10px;'>
+	<div class='boundedcontent'>
+	<p>Welcome to the Hurricane Electric BGP Toolkit.</p>
+	<br/>
+	<br/>
+	<div>You are visiting from <a href="/ip/190.22.186.146" class="boldlink">190.22.186.146</a>
+	
+	
+		<div class="flag alignright floatright"><img alt="Chile" src="/images/flags/cl.gif?1282328045" title="Chile" /></div>
+	
+	</div>
+	<br/>
+	
+		
+		<div class='announcedas'>
+		Announced as 
+			
+			<a href="/net/190.22.0.0/16" class="boldlink">190.22.0.0/16</a> 
+				
+			
+		<div class="flag alignright floatright"><img alt="Chile" src="/images/flags/cl.gif?1282328045" title="Chile" /></div>
+		</div>
+		
+	
+	<br/>
+	
+		<div>
+		Your ISP is <a href="/AS7418" class="boldlink">AS7418</a> (TELEFÃNICA CHILE S.A.)
+		<div class="flag alignright floatright"><img alt="Chile" src="/images/flags/cl.gif?1282328045" title="Chile" /></div>
+		</div>
+	
+
+</div>
+</div>
+
+			</div>
+		</div>
+	
+		<div id='footer'>
+                
+                
+                  Updated 14 Oct 2026 15:11 PDT &copy; 2026 Hurricane Electric
+                
+		</div>
+	</div>
+	
+	
+	
+</body>
+</html>

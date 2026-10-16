@@ -57,7 +57,7 @@ flowchart LR
 
 ### `css_attr_match`
 
-`struct` | [include/css_select.h:85](../../include/css_select.h#L85)
+`struct` | [include/css_select.h:88](../../include/css_select.h#L88)
 
 ```c
 typedef struct css_attr_match
@@ -75,7 +75,7 @@ One attribute selector inside a compound: name OP value, with a case flag.
 
 #### `css_attr_match.name`
 
-`type_alias` | [include/css_select.h:85](../../include/css_select.h#L85)
+`type_alias` | [include/css_select.h:88](../../include/css_select.h#L88)
 
 ```c
 typedef struct css_attr_match { char name[CSS_TOK_MAX];
@@ -89,7 +89,7 @@ One attribute selector inside a compound: name OP value, with a case flag.
 
 ### `css_sub_sel`
 
-`struct` | [include/css_select.h:92](../../include/css_select.h#L92)
+`struct` | [include/css_select.h:95](../../include/css_select.h#L95)
 
 ```c
 typedef struct css_sub_sel
@@ -101,7 +101,7 @@ typedef struct css_sub_sel
 
 ### `css_pseudo_match`
 
-`struct` | [include/css_select.h:109](../../include/css_select.h#L109)
+`struct` | [include/css_select.h:112](../../include/css_select.h#L112)
 
 ```c
 typedef struct css_pseudo_match
@@ -119,7 +119,7 @@ One pseudo-class inside a compound. a/b are the An+B coefficients of the nth-chi
 
 #### `css_pseudo_match.kind`
 
-`type_alias` | [include/css_select.h:109](../../include/css_select.h#L109)
+`type_alias` | [include/css_select.h:112](../../include/css_select.h#L112)
 
 ```c
 typedef struct css_pseudo_match { int kind;
@@ -133,7 +133,7 @@ One pseudo-class inside a compound. a/b are the An+B coefficients of the nth-chi
 
 ### `css_compound`
 
-`struct` | [include/css_select.h:119](../../include/css_select.h#L119)
+`struct` | [include/css_select.h:122](../../include/css_select.h#L122)
 
 ```c
 typedef struct css_compound
@@ -151,7 +151,7 @@ One compound selector: optional type, optional id, zero+ classes, zero+ [attr], 
 
 #### `css_compound.tag`
 
-`type_alias` | [include/css_select.h:119](../../include/css_select.h#L119)
+`type_alias` | [include/css_select.h:122](../../include/css_select.h#L122)
 
 ```c
 typedef struct css_compound { char tag[CSS_TOK_MAX];
@@ -165,7 +165,7 @@ One compound selector: optional type, optional id, zero+ classes, zero+ [attr], 
 
 ### `css_sel`
 
-`struct` | [include/css_select.h:136](../../include/css_select.h#L136)
+`struct` | [include/css_select.h:139](../../include/css_select.h#L139)
 
 ```c
 typedef struct css_sel
@@ -185,7 +185,7 @@ A single compound is nparts == 1. subs[] holds sub-selectors for :not()/:is()/:w
 
 #### `css_sel.parts`
 
-`type_alias` | [include/css_select.h:136](../../include/css_select.h#L136)
+`type_alias` | [include/css_select.h:139](../../include/css_select.h#L139)
 
 ```c
 typedef struct css_sel { css_compound parts[CSS_MAX_COMPOUNDS];
@@ -203,7 +203,7 @@ A single compound is nparts == 1. subs[] holds sub-selectors for :not()/:is()/:w
 
 ### `tag`
 
-`type_alias` | [include/css_select.h:91](../../include/css_select.h#L91)
+`type_alias` | [include/css_select.h:94](../../include/css_select.h#L94)
 
 ```c
 typedef struct css_sub_sel { char tag[CSS_TOK_MAX];
@@ -217,7 +217,7 @@ typedef struct css_sub_sel { char tag[CSS_TOK_MAX];
 
 ### `csel_parse`
 
-`function` | [include/css_select.h:150](../../include/css_select.h#L150)
+`function` | [include/css_select.h:153](../../include/css_select.h#L153)
 
 ```c
 int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);
@@ -246,7 +246,7 @@ Returns 1 if supported, 0 to drop the selector (fail closed).
 
 ### `csel_matches`
 
-`function` | [include/css_select.h:159](../../include/css_select.h#L159)
+`function` | [include/css_select.h:162](../../include/css_select.h#L162)
 
 ```c
 int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int *pseudo_kind);
@@ -274,7 +274,7 @@ True if *sel matches element *el against its ancestor chain. target_id (optional
 
 ### `identifier`
 
-`function` | [include/css_select.h:163](../../include/css_select.h#L163)
+`function` | [include/css_select.h:166](../../include/css_select.h#L166)
 
 ```c
 * A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex") and stored in a CSS_TOK_MAX slot. One that * does not fit is FOLDED: its first CSEL_F
@@ -295,7 +295,7 @@ True if *sel matches element *el against its ancestor chain. target_id (optional
 
 ### `csel_emit_utf8`
 
-`function` | [include/css_select.h:175](../../include/css_select.h#L175)
+`function` | [include/css_select.h:178](../../include/css_select.h#L178)
 
 ```c
 size_t csel_emit_utf8(unsigned int cp, char *out);
@@ -316,7 +316,7 @@ size_t csel_emit_utf8(unsigned int cp, char *out);
 
 ### `csel_unescape`
 
-`function` | [include/css_select.h:177](../../include/css_select.h#L177)
+`function` | [include/css_select.h:180](../../include/css_select.h#L180)
 
 ```c
 void csel_unescape(char *dst, size_t cap, const char *src, size_t n);
@@ -341,7 +341,7 @@ Decodes CSS escapes in src[0,n) into dst (cap bytes, NUL-terminated, truncates).
 
 ### `csel_escape_len`
 
-`function` | [include/css_select.h:179](../../include/css_select.h#L179)
+`function` | [include/css_select.h:182](../../include/css_select.h#L182)
 
 ```c
 size_t csel_escape_len(const char *s, size_t i, size_t b);
@@ -365,7 +365,7 @@ Bytes the escape starting at s[i] occupies (0 when s[i] does not start one).
 
 ### `csel_ident_fold`
 
-`function` | [include/css_select.h:181](../../include/css_select.h#L181)
+`function` | [include/css_select.h:184](../../include/css_select.h#L184)
 
 ```c
 void csel_ident_fold(const char *src, size_t len, char *dst);
@@ -387,7 +387,7 @@ dst (CSS_TOK_MAX bytes) receives src[0,len) as-is, or folded when too long.
 
 ### `csel_ident_eq`
 
-`function` | [include/css_select.h:183](../../include/css_select.h#L183)
+`function` | [include/css_select.h:186](../../include/css_select.h#L186)
 
 ```c
 int csel_ident_eq(const char *stored, const char *tok, size_t tlen);
@@ -411,7 +411,7 @@ A stored (possibly folded) identifier against an element token of tlen bytes.
 
 ### `csel_read_ident`
 
-`function` | [include/css_select.h:186](../../include/css_select.h#L186)
+`function` | [include/css_select.h:189](../../include/css_select.h#L189)
 
 ```c
 int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);
@@ -439,7 +439,7 @@ Returns 0, *ip untouched, when none.
 
 ### `csel_decl_end`
 
-`function` | [include/css_select.h:191](../../include/css_select.h#L191)
+`function` | [include/css_select.h:194](../../include/css_select.h#L194)
 
 ```c
 size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);
@@ -466,7 +466,7 @@ Index of the ';' ending the declaration that starts at s[i] (or of a '}' when st
 
 ### `csel_lower_ch`
 
-`function` `inline` `static` | [include/css_select.h:195](../../include/css_select.h#L195)
+`function` `inline` `static` | [include/css_select.h:198](../../include/css_select.h#L198)
 
 ```c
 static inline char csel_lower_ch(char c)
@@ -480,7 +480,7 @@ static inline char csel_lower_ch(char c)
 
 **Returns:** `char`
 
-*Called by:* [`csel_ci_eq`](#csel_ci_eq), [`csel_span_eq`](#csel_span_eq), [`cb_interp_len`](src.css_box.c.md#cb_interp_len), [`gradient`](src.css_gradient.c.md#gradient), [`csel_read_ident`](src.css_select.c.md#csel_read_ident), [`cv_bg_alpha_of`](src.css_values.c.md#cv_bg_alpha_of)
+*Called by:* [`csel_ci_eq`](#csel_ci_eq), [`csel_span_eq`](#csel_span_eq), [`gradient`](src.css_gradient.c.md#gradient), [`csel_read_ident`](src.css_select.c.md#csel_read_ident), [`cv_bg_alpha_of`](src.css_values.c.md#cv_bg_alpha_of)
 
 ---
 
@@ -488,7 +488,7 @@ static inline char csel_lower_ch(char c)
 
 ### `csel_ci_eq`
 
-`function` `inline` `static` | [include/css_select.h:199](../../include/css_select.h#L199)
+`function` `inline` `static` | [include/css_select.h:202](../../include/css_select.h#L202)
 
 ```c
 static inline int csel_ci_eq(const char *a, const char *b)
@@ -505,7 +505,7 @@ static inline int csel_ci_eq(const char *a, const char *b)
 
 *Calls:* [`csel_lower_ch`](#csel_lower_ch)
 
-*Called by:* [`axis`](src.css.c.md#axis), [`blur`](src.css.c.md#blur), [`declaration`](src.css.c.md#declaration), [`function`](src.css.c.md#function), [`shorthand`](src.css.c.md#shorthand), [`through`](src.css.c.md#through), [`AUTO_RESET_NONE`](src.css_box.c.md#auto_reset_none), [`cb_expand_grid_template_cols`](src.css_box.c.md#cb_expand_grid_template_cols), [`cb_interp_align`](src.css_box.c.md#cb_interp_align), [`cb_interp_display`](src.css_box.c.md#cb_interp_display), [`cb_interp_gap`](src.css_box.c.md#cb_interp_gap), [`cb_interp_justify`](src.css_box.c.md#cb_interp_justify) and 17 more
+*Called by:* [`CSS_WIDE_RESET`](src.css.c.md#css_wide_reset), [`axis`](src.css.c.md#axis), [`blur`](src.css.c.md#blur), [`declaration`](src.css.c.md#declaration), [`function`](src.css.c.md#function), [`shorthand`](src.css.c.md#shorthand), [`AUTO_RESET_NONE`](src.css_box.c.md#auto_reset_none), [`cb_expand_grid_template_cols`](src.css_box.c.md#cb_expand_grid_template_cols), [`cb_interp_align`](src.css_box.c.md#cb_interp_align), [`cb_interp_display`](src.css_box.c.md#cb_interp_display), [`cb_interp_fontsize_ex`](src.css_box.c.md#cb_interp_fontsize_ex), [`cb_interp_gap`](src.css_box.c.md#cb_interp_gap) and 18 more
 
 ---
 
@@ -513,7 +513,7 @@ static inline int csel_ci_eq(const char *a, const char *b)
 
 ### `csel_span_eq`
 
-`function` `inline` `static` | [include/css_select.h:208](../../include/css_select.h#L208)
+`function` `inline` `static` | [include/css_select.h:211](../../include/css_select.h#L211)
 
 ```c
 static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)
@@ -542,7 +542,7 @@ True if a[0,n) equals b[0,n) up to n chars (b NUL-terminated), case-folded when 
 
 ### `csel_substr`
 
-`function` `inline` `static` | [include/css_select.h:219](../../include/css_select.h#L219)
+`function` `inline` `static` | [include/css_select.h:222](../../include/css_select.h#L222)
 
 ```c
 static inline int csel_substr(const char *hay, const char *needle, int ci)
@@ -572,7 +572,7 @@ A non-empty needle only; an empty one never matches.
 
 ### `csel_ident_ch`
 
-`function` `inline` `static` | [include/css_select.h:227](../../include/css_select.h#L227)
+`function` `inline` `static` | [include/css_select.h:230](../../include/css_select.h#L230)
 
 ```c
 static inline int csel_ident_ch(char c)
@@ -622,7 +622,7 @@ Bounds shared with the cascade side (css.c token buffers reuse CSS_TOK_MAX).
 
 ### `CSS_MAX_SUB_SELS`
 
-`macro` | [include/css_select.h:80](../../include/css_select.h#L80)
+`macro` | [include/css_select.h:83](../../include/css_select.h#L83)
 
 ```c
 #define CSS_MAX_SUB_SELS
@@ -638,7 +638,7 @@ Bounded: CSS_MAX_SUB_SELS per selector, one level deep.
 
 ### `CSS_SUB_MAX_ATTRS`
 
-`macro` | [include/css_select.h:81](../../include/css_select.h#L81)
+`macro` | [include/css_select.h:84](../../include/css_select.h#L84)
 
 ```c
 #define CSS_SUB_MAX_ATTRS
@@ -650,7 +650,7 @@ Bounded: CSS_MAX_SUB_SELS per selector, one level deep.
 
 ### `CSS_SUB_MAX_PSEUDOS`
 
-`macro` | [include/css_select.h:82](../../include/css_select.h#L82)
+`macro` | [include/css_select.h:85](../../include/css_select.h#L85)
 
 ```c
 #define CSS_SUB_MAX_PSEUDOS
@@ -662,7 +662,7 @@ Bounded: CSS_MAX_SUB_SELS per selector, one level deep.
 
 ### `CSEL_FOLD_PREFIX`
 
-`macro` | [include/css_select.h:170](../../include/css_select.h#L170)
+`macro` | [include/css_select.h:173](../../include/css_select.h#L173)
 
 ```c
 #define CSEL_FOLD_PREFIX
@@ -683,7 +683,7 @@ instead of being truncated and never matching.
 
 ### `CSEL_FOLD_MARK`
 
-`macro` | [include/css_select.h:171](../../include/css_select.h#L171)
+`macro` | [include/css_select.h:174](../../include/css_select.h#L174)
 
 ```c
 #define CSEL_FOLD_MARK
@@ -695,7 +695,7 @@ instead of being truncated and never matching.
 
 ### `CSEL_IDENT_SCRATCH`
 
-`macro` | [include/css_select.h:172](../../include/css_select.h#L172)
+`macro` | [include/css_select.h:175](../../include/css_select.h#L175)
 
 ```c
 #define CSEL_IDENT_SCRATCH

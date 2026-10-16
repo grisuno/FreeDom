@@ -165,6 +165,16 @@ const char *bx_display_name(bx_display d);
 bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
                    double avail_w);
 
+/* As bx_place, but a DECLARED width (has_decl_width != 0, i.e. width_cap comes from
+ * `width` and not from max-width alone) larger than the room between the insets is
+ * honoured instead of clamped: CSS 2.1 10.3.3 resolves the over-constrained case
+ * by ignoring margin-right, so the box overflows its containing block (a slider
+ * track `width: calc(100vw * 4)` inside an overflow:hidden frame). Centring needs
+ * slack, so an overflowing box starts at inset_l. has_decl_width == 0 is exactly
+ * bx_place. */
+bx_hplace bx_place_ex(double inset_l, double inset_r, double width_cap, int center,
+                      double avail_w, int has_decl_width);
+
 /* Effective width cap combining the px cap (w_px, 0 = none) with a symbolic
  * per-mille cap (w_pct, 0 = none; Hito 32) resolved against the real available
  * width: both set => the tighter wins; neither (or avail_w <= 0 for the pct)
@@ -243,6 +253,29 @@ double bx_lp_px(int px_val, int pct_pm, double basis);
  * edges are treated as 0. Pure. */
 double bx_content_cap(double width_cap, int border_box,
                       double pad_l, double pad_r, double bord_l, double bord_r);
+
+/* The border-inclusive span the painter lays a box out with (its content plus
+ * left/right border; padding sits outside it). CSS 2.1 10.3.3 / CSS Sizing 3
+ * box-sizing: a content-box `width` sizes the CONTENT, so the span is W + bl + br;
+ * a border-box `width` already holds padding and border, so the span is
+ * W - pl - pr. Without it a content-box box with a border painted its declared
+ * width as the border box (300 for `width:300px;border:1px`, Firefox 302) and a
+ * border-box one lost its border twice. width_cap <= 0 (no cap) is returned as is.
+ * Negative edges count as 0. Pure. */
+double bx_border_span(double width_cap, int border_box,
+                      double pad_l, double pad_r, double bord_l, double bord_r);
+
+/* Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the
+ * hypothetical main size). mw_cap <= 0 = no max-width (base returned as is);
+ * border_box says whether mw_cap already includes padding+border (pad_bord_h). */
+double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box,
+                         double pad_bord_h, double margin_h);
+
+/* The min-width half of the same clamp (Flexbox 9.2.3): an outer base below the
+ * item's min-width (converted to the outer size per box-sizing, plus margins) is
+ * raised to it. min_w <= 0 (unset) returns the base unchanged. Pure. */
+double bx_flex_min_clamp(double outer_basis, double min_w, int border_box,
+                         double pad_bord_h, double margin_h);
 
 /* One background-image layer's geometry (CSS Backgrounds 3 sections 3.6 + 3.9),
  * as a pure function of the layer's declared values and the two sizes involved.

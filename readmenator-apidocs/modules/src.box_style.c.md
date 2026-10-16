@@ -1,11 +1,11 @@
 # `src/box_style.c`
 
-> Source: [src/box_style.c:1](../../src/box_style.c#L1) | language `c` | coverage 26.3% | [API index](../index.md)
+> Source: [src/box_style.c:1](../../src/box_style.c#L1) | language `c` | coverage 31.0% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`tag_row`](#tag_row), [`disp_row`](#disp_row)
-- **Functions:** [`bx_default_for_tag`](#bx_default_for_tag), [`bx_table_role_of`](#bx_table_role_of), [`bx_ua_of_tag`](#bx_ua_of_tag), [`bx_default_for_ua`](#bx_default_for_ua), [`bx_block_ua_box`](#bx_block_ua_box), [`bx_parse_display`](#bx_parse_display), [`bx_place`](#bx_place), [`bx_width_cap`](#bx_width_cap), [`take`](#take), [`bx_width_cap2`](#bx_width_cap2), [`bx_replaced_box`](#bx_replaced_box), [`bx_border_box_h`](#bx_border_box_h), [`bx_content_clipped`](#bx_content_clipped), [`bx_lp_px`](#bx_lp_px), [`bx_content_cap`](#bx_content_cap), [`bx_background_layer`](#bx_background_layer), [`bx_display_name`](#bx_display_name)
+- **Functions:** [`bx_default_for_tag`](#bx_default_for_tag), [`bx_table_role_of`](#bx_table_role_of), [`bx_ua_of_tag`](#bx_ua_of_tag), [`bx_default_for_ua`](#bx_default_for_ua), [`bx_block_ua_box`](#bx_block_ua_box), [`bx_parse_display`](#bx_parse_display), [`bx_place`](#bx_place), [`bx_width_cap`](#bx_width_cap), [`take`](#take), [`bx_width_cap2`](#bx_width_cap2), [`bx_replaced_box`](#bx_replaced_box), [`bx_border_box_h`](#bx_border_box_h), [`bx_content_clipped`](#bx_content_clipped), [`bx_lp_px`](#bx_lp_px), [`bx_content_cap`](#bx_content_cap), [`bx_flex_min_clamp`](#bx_flex_min_clamp), [`bx_border_span`](#bx_border_span), [`bx_background_layer`](#bx_background_layer), [`bx_display_name`](#bx_display_name), [`bx_flex_max_clamp`](#bx_flex_max_clamp), [`bx_place_ex`](#bx_place_ex)
 - **Macros:** [`BX_TAG_MAX`](#bx_tag_max), [`BX_DISPLAY_MAX`](#bx_display_max), [`BLOCK`](#block), [`INLINE`](#inline), [`IBLOCK`](#iblock), [`LITEM`](#litem), [`NONE`](#none), [`EDG`](#edg), [`ZERO`](#zero), [`T_NO`](#t_no), [`T_TBL`](#t_tbl), [`T_GRP`](#t_grp), [`T_ROW`](#t_row), [`T_CELL`](#t_cell), [`T_CAP`](#t_cap), [`T_COL`](#t_col), [`TAG_N`](#tag_n), [`DISP_N`](#disp_n)
 
 ## Type Diagram
@@ -34,7 +34,11 @@ flowchart LR
     n_src_box_style_c__bx_lp_px(["bx_lp_px"])
     n_src_box_style_c__bx_width_cap2(["bx_width_cap2"])
     n_src_box_style_c__bx_replaced_box(["bx_replaced_box"])
+    n_src_box_style_c__bx_border_span(["bx_border_span"])
+    n_src_box_style_c__bx_content_cap(["bx_content_cap"])
     n_src_box_style_c__bx_background_layer(["bx_background_layer"])
+    n_src_box_style_c__bx_place_ex(["bx_place_ex"])
+    n_src_box_style_c__bx_place(["bx_place"])
     n_src_box_style_c__bx_ua_of_tag(["bx_ua_of_tag"])
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
     n_include_css_h__CSS_LEN_IS_INTRINSIC["css.CSS_LEN_IS_INTRINSIC"]
@@ -44,7 +48,9 @@ flowchart LR
     n_src_box_style_c__bx_width_cap --> n_src_box_style_c__bx_lp_px
     n_src_box_style_c__bx_width_cap2 --> n_src_box_style_c__bx_width_cap
     n_src_box_style_c__bx_replaced_box --> n_src_box_style_c__bx_width_cap
+    n_src_box_style_c__bx_border_span --> n_src_box_style_c__bx_content_cap
     n_src_box_style_c__bx_background_layer --> n_src_box_style_c__bx_lp_px
+    n_src_box_style_c__bx_place_ex --> n_src_box_style_c__bx_place
     n_src_box_style_c__bx_ua_of_tag -.-> n_gui_browser_ui_c__strcmp
     n_src_box_style_c__bx_width_cap -.-> n_include_css_h__CSS_LEN_IS_INTRINSIC
 ```
@@ -55,7 +61,7 @@ flowchart LR
 
 ### `tag_row`
 
-`struct` | [src/box_style.c:59](../../src/box_style.c#L59)
+`struct` | [src/box_style.c:61](../../src/box_style.c#L61)
 
 ```c
 typedef struct tag_row
@@ -71,7 +77,7 @@ One row of the user-agent sheet.
 
 ### `disp_row`
 
-`struct` | [src/box_style.c:239](../../src/box_style.c#L239)
+`struct` | [src/box_style.c:241](../../src/box_style.c#L241)
 
 ```c
 typedef struct disp_row
@@ -85,7 +91,7 @@ typedef struct disp_row
 
 ### `bx_default_for_tag`
 
-`function` | [src/box_style.c:161](../../src/box_style.c#L161)
+`function` | [src/box_style.c:163](../../src/box_style.c#L163)
 
 ```c
 bx_box bx_default_for_tag(const char *tag)
@@ -107,7 +113,7 @@ bx_box bx_default_for_tag(const char *tag)
 
 ### `bx_table_role_of`
 
-`function` | [src/box_style.c:169](../../src/box_style.c#L169)
+`function` | [src/box_style.c:171](../../src/box_style.c#L171)
 
 ```c
 bx_table_role bx_table_role_of(const char *tag, css_display display)
@@ -128,7 +134,7 @@ bx_table_role bx_table_role_of(const char *tag, css_display display)
 
 ### `bx_ua_of_tag`
 
-`function` | [src/box_style.c:208](../../src/box_style.c#L208)
+`function` | [src/box_style.c:210](../../src/box_style.c#L210)
 
 ```c
 bx_ua_tag bx_ua_of_tag(const char *tag)
@@ -150,7 +156,7 @@ bx_ua_tag bx_ua_of_tag(const char *tag)
 
 ### `bx_default_for_ua`
 
-`function` | [src/box_style.c:217](../../src/box_style.c#L217)
+`function` | [src/box_style.c:219](../../src/box_style.c#L219)
 
 ```c
 bx_box bx_default_for_ua(bx_ua_tag id)
@@ -174,7 +180,7 @@ bx_box bx_default_for_ua(bx_ua_tag id)
 
 ### `bx_block_ua_box`
 
-`function` | [src/box_style.c:223](../../src/box_style.c#L223)
+`function` | [src/box_style.c:225](../../src/box_style.c#L225)
 
 ```c
 bx_box bx_block_ua_box(int heading_level, int in_list, bx_ua_tag ua)
@@ -198,7 +204,7 @@ bx_box bx_block_ua_box(int heading_level, int in_list, bx_ua_tag ua)
 
 ### `bx_parse_display`
 
-`function` | [src/box_style.c:259](../../src/box_style.c#L259)
+`function` | [src/box_style.c:261](../../src/box_style.c#L261)
 
 ```c
 bx_status bx_parse_display(const char *token, bx_display *out)
@@ -219,7 +225,7 @@ bx_status bx_parse_display(const char *token, bx_display *out)
 
 ### `bx_place`
 
-`function` | [src/box_style.c:269](../../src/box_style.c#L269)
+`function` | [src/box_style.c:271](../../src/box_style.c#L271)
 
 ```c
 bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center, double avail_w)
@@ -237,13 +243,15 @@ bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
 
 **Returns:** `bx_hplace`
 
+*Called by:* [`bx_place_ex`](#bx_place_ex)
+
 ---
 
 <a id="bx_width_cap"></a>
 
 ### `bx_width_cap`
 
-`function` | [src/box_style.c:286](../../src/box_style.c#L286)
+`function` | [src/box_style.c:288](../../src/box_style.c#L288)
 
 ```c
 double bx_width_cap(int w_px, int w_pct, double avail_w)
@@ -263,7 +271,7 @@ Never negative. Pure.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`bx_width_cap`](#bx_width_cap) (include/box_style.h:172).
+> **Inherited:** Documentation from [`bx_width_cap`](#bx_width_cap) (include/box_style.h:182).
 
 *Calls:* [`CSS_LEN_IS_INTRINSIC`](include.css.h.md#css_len_is_intrinsic), [`bx_lp_px`](#bx_lp_px)
 
@@ -275,7 +283,7 @@ Never negative. Pure.
 
 ### `take`
 
-`function` | [src/box_style.c:293](../../src/box_style.c#L293)
+`function` | [src/box_style.c:295](../../src/box_style.c#L295)
 
 ```c
 * caller has to take (Sizing 3 section 5.1), so to a resolver that only sums a * px and a percentage half they read exactly like `auto` -- no declared width. * Letting the sentinel through would have
@@ -295,7 +303,7 @@ Never negative. Pure.
 
 ### `bx_width_cap2`
 
-`function` | [src/box_style.c:311](../../src/box_style.c#L311)
+`function` | [src/box_style.c:313](../../src/box_style.c#L313)
 
 ```c
 double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w)
@@ -317,7 +325,7 @@ Pure.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`bx_width_cap2`](#bx_width_cap2) (include/box_style.h:177).
+> **Inherited:** Documentation from [`bx_width_cap2`](#bx_width_cap2) (include/box_style.h:187).
 
 *Calls:* [`bx_width_cap`](#bx_width_cap)
 
@@ -327,7 +335,7 @@ Pure.
 
 ### `bx_replaced_box`
 
-`function` | [src/box_style.c:319](../../src/box_style.c#L319)
+`function` | [src/box_style.c:321](../../src/box_style.c#L321)
 
 ```c
 int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den, double avail_w, double *out_w, double *out_h)
@@ -364,7 +372,7 @@ caller's own fallback in place rather than inventing a height. Pure.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`bx_replaced_box`](#bx_replaced_box) (include/box_style.h:196).
+> **Inherited:** Documentation from [`bx_replaced_box`](#bx_replaced_box) (include/box_style.h:206).
 
 *Calls:* [`bx_width_cap`](#bx_width_cap)
 
@@ -374,7 +382,7 @@ caller's own fallback in place rather than inventing a height. Pure.
 
 ### `bx_border_box_h`
 
-`function` | [src/box_style.c:333](../../src/box_style.c#L333)
+`function` | [src/box_style.c:335](../../src/box_style.c#L335)
 
 ```c
 double bx_border_box_h(double declared_h, int border_box, double pad_t, double pad_b, double bord_t, double bord_b)
@@ -401,7 +409,7 @@ capped and heights are set. Pure.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`bx_border_box_h`](#bx_border_box_h) (include/box_style.h:210).
+> **Inherited:** Documentation from [`bx_border_box_h`](#bx_border_box_h) (include/box_style.h:220).
 
 ---
 
@@ -409,7 +417,7 @@ capped and heights are set. Pure.
 
 ### `bx_content_clipped`
 
-`function` | [src/box_style.c:344](../../src/box_style.c#L344)
+`function` | [src/box_style.c:346](../../src/box_style.c#L346)
 
 ```c
 int bx_content_clipped(int overflow_x, int overflow_y)
@@ -430,7 +438,7 @@ int bx_content_clipped(int overflow_x, int overflow_y)
 
 ### `bx_lp_px`
 
-`function` | [src/box_style.c:350](../../src/box_style.c#L350)
+`function` | [src/box_style.c:352](../../src/box_style.c#L352)
 
 ```c
 double bx_lp_px(int px_val, int pct_pm, double basis)
@@ -460,7 +468,7 @@ usable length contributes nothing while the absolute half survives. Pure.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`bx_lp_px`](#bx_lp_px) (include/box_style.h:236).
+> **Inherited:** Documentation from [`bx_lp_px`](#bx_lp_px) (include/box_style.h:246).
 
 *Called by:* [`bx_background_layer`](#bx_background_layer), [`bx_width_cap`](#bx_width_cap)
 
@@ -470,7 +478,7 @@ usable length contributes nothing while the absolute half survives. Pure.
 
 ### `bx_content_cap`
 
-`function` | [src/box_style.c:361](../../src/box_style.c#L361)
+`function` | [src/box_style.c:363](../../src/box_style.c#L363)
 
 ```c
 double bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r)
@@ -493,7 +501,72 @@ With border_box set, the declared width includes the horizontal padding and bord
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`bx_content_cap`](#bx_content_cap) (include/box_style.h:244).
+> **Inherited:** Documentation from [`bx_content_cap`](#bx_content_cap) (include/box_style.h:254).
+
+*Called by:* [`bx_border_span`](#bx_border_span)
+
+---
+
+<a id="bx_flex_min_clamp"></a>
+
+### `bx_flex_min_clamp`
+
+`function` | [src/box_style.c:374](../../src/box_style.c#L374)
+
+```c
+double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, double pad_bord_h, double margin_h)
+```
+
+The min-width half of the same clamp (Flexbox 9.2.3): an outer base below the item's min-width (converted to the outer size per box-sizing, plus margins) is raised to it. min_w <= 0 (unset) returns the base unchanged.
+
+Pure.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `outer_basis` | `double` |  |  |
+| `min_w` | `double` |  |  |
+| `border_box` | `int` |  |  |
+| `pad_bord_h` | `double` |  |  |
+| `margin_h` | `double` |  |  |
+
+**Returns:** `double`
+
+> **Inherited:** Documentation from [`bx_flex_min_clamp`](#bx_flex_min_clamp) (include/box_style.h:277).
+
+---
+
+<a id="bx_border_span"></a>
+
+### `bx_border_span`
+
+`function` | [src/box_style.c:381](../../src/box_style.c#L381)
+
+```c
+double bx_border_span(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r)
+```
+
+The border-inclusive span the painter lays a box out with (its content plus left/right border; padding sits outside it).
+
+CSS 2.1 10.3.3 / CSS Sizing 3 box-sizing: a content-box `width` sizes the CONTENT, so the span is W + bl + br; a border-box `width` already holds padding and border, so the span is W - pl - pr. Without it a content-box box with a border painted its declared width as the border box (300 for `width:300px;border:1px`, Firefox 302) and a border-box one lost its border twice. width_cap <= 0 (no cap) is returned as is. Negative edges count as 0. Pure.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `width_cap` | `double` |  |  |
+| `border_box` | `int` |  |  |
+| `pad_l` | `double` |  |  |
+| `pad_r` | `double` |  |  |
+| `bord_l` | `double` |  |  |
+| `bord_r` | `double` |  |  |
+
+**Returns:** `double`
+
+> **Inherited:** Documentation from [`bx_border_span`](#bx_border_span) (include/box_style.h:265).
+
+*Calls:* [`bx_content_cap`](#bx_content_cap)
 
 ---
 
@@ -501,7 +574,7 @@ With border_box set, the declared width includes the horizontal padding and bord
 
 ### `bx_background_layer`
 
-`function` | [src/box_style.c:382](../../src/box_style.c#L382)
+`function` | [src/box_style.c:400](../../src/box_style.c#L400)
 
 ```c
 int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, double *out_x, double *out_y)
@@ -527,7 +600,7 @@ int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, dou
 
 ### `bx_display_name`
 
-`function` `const` | [src/box_style.c:421](../../src/box_style.c#L421)
+`function` `const` | [src/box_style.c:439](../../src/box_style.c#L439)
 
 ```c
 const char *bx_display_name(bx_display d)
@@ -549,13 +622,68 @@ Never NULL; an unknown enum value yields "inline".
 
 ---
 
+<a id="bx_flex_max_clamp"></a>
+
+### `bx_flex_max_clamp`
+
+`function` | [src/box_style.c:452](../../src/box_style.c#L452)
+
+```c
+double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, double pad_bord_h, double margin_h)
+```
+
+Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hypothetical main size). mw_cap <= 0 = no max-width (base returned as is); border_box says whether mw_cap already includes padding+border (pad_bord_h).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `outer_basis` | `double` |  |  |
+| `mw_cap` | `double` |  |  |
+| `border_box` | `int` |  |  |
+| `pad_bord_h` | `double` |  |  |
+| `margin_h` | `double` |  |  |
+
+**Returns:** `double`
+
+> **Inherited:** Documentation from [`bx_flex_max_clamp`](#bx_flex_max_clamp) (include/box_style.h:271).
+
+---
+
+<a id="bx_place_ex"></a>
+
+### `bx_place_ex`
+
+`function` | [src/box_style.c:459](../../src/box_style.c#L459)
+
+```c
+bx_hplace bx_place_ex(double inset_l, double inset_r, double width_cap, int center, double avail_w, int has_decl_width)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `inset_l` | `double` |  |  |
+| `inset_r` | `double` |  |  |
+| `width_cap` | `double` |  |  |
+| `center` | `int` |  |  |
+| `avail_w` | `double` |  |  |
+| `has_decl_width` | `int` |  |  |
+
+**Returns:** `bx_hplace`
+
+*Calls:* [`bx_place`](#bx_place)
+
+---
+
 ## Macros
 
 <a id="bx_tag_max"></a>
 
 ### `BX_TAG_MAX`
 
-`macro` | [src/box_style.c:22](../../src/box_style.c#L22)
+`macro` | [src/box_style.c:24](../../src/box_style.c#L24)
 
 ```c
 #define BX_TAG_MAX
@@ -571,7 +699,7 @@ Both are generous, so a normal token always fits and anything longer fails close
 
 ### `BX_DISPLAY_MAX`
 
-`macro` | [src/box_style.c:23](../../src/box_style.c#L23)
+`macro` | [src/box_style.c:25](../../src/box_style.c#L25)
 
 ```c
 #define BX_DISPLAY_MAX
@@ -583,7 +711,7 @@ Both are generous, so a normal token always fits and anything longer fails close
 
 ### `BLOCK`
 
-`macro` | [src/box_style.c:65](../../src/box_style.c#L65)
+`macro` | [src/box_style.c:67](../../src/box_style.c#L67)
 
 ```c
 #define BLOCK
@@ -595,7 +723,7 @@ Both are generous, so a normal token always fits and anything longer fails close
 
 ### `INLINE`
 
-`macro` | [src/box_style.c:66](../../src/box_style.c#L66)
+`macro` | [src/box_style.c:68](../../src/box_style.c#L68)
 
 ```c
 #define INLINE
@@ -607,7 +735,7 @@ Both are generous, so a normal token always fits and anything longer fails close
 
 ### `IBLOCK`
 
-`macro` | [src/box_style.c:67](../../src/box_style.c#L67)
+`macro` | [src/box_style.c:69](../../src/box_style.c#L69)
 
 ```c
 #define IBLOCK
@@ -619,7 +747,7 @@ Both are generous, so a normal token always fits and anything longer fails close
 
 ### `LITEM`
 
-`macro` | [src/box_style.c:68](../../src/box_style.c#L68)
+`macro` | [src/box_style.c:70](../../src/box_style.c#L70)
 
 ```c
 #define LITEM
@@ -631,7 +759,7 @@ Both are generous, so a normal token always fits and anything longer fails close
 
 ### `NONE`
 
-`macro` | [src/box_style.c:69](../../src/box_style.c#L69)
+`macro` | [src/box_style.c:71](../../src/box_style.c#L71)
 
 ```c
 #define NONE
@@ -643,7 +771,7 @@ Both are generous, so a normal token always fits and anything longer fails close
 
 ### `EDG`
 
-`macro` | [src/box_style.c:70](../../src/box_style.c#L70)
+`macro` | [src/box_style.c:72](../../src/box_style.c#L72)
 
 ```c
 #define EDG(t, r, b, l)
@@ -657,7 +785,7 @@ Both are generous, so a normal token always fits and anything longer fails close
 
 ### `ZERO`
 
-`macro` | [src/box_style.c:71](../../src/box_style.c#L71)
+`macro` | [src/box_style.c:73](../../src/box_style.c#L73)
 
 ```c
 #define ZERO
@@ -669,7 +797,7 @@ Both are generous, so a normal token always fits and anything longer fails close
 
 ### `T_NO`
 
-`macro` | [src/box_style.c:73](../../src/box_style.c#L73)
+`macro` | [src/box_style.c:75](../../src/box_style.c#L75)
 
 ```c
 #define T_NO
@@ -683,7 +811,7 @@ Table roles, aliased like the display values above so a row stays one line.
 
 ### `T_TBL`
 
-`macro` | [src/box_style.c:74](../../src/box_style.c#L74)
+`macro` | [src/box_style.c:76](../../src/box_style.c#L76)
 
 ```c
 #define T_TBL
@@ -695,7 +823,7 @@ Table roles, aliased like the display values above so a row stays one line.
 
 ### `T_GRP`
 
-`macro` | [src/box_style.c:75](../../src/box_style.c#L75)
+`macro` | [src/box_style.c:77](../../src/box_style.c#L77)
 
 ```c
 #define T_GRP
@@ -707,7 +835,7 @@ Table roles, aliased like the display values above so a row stays one line.
 
 ### `T_ROW`
 
-`macro` | [src/box_style.c:76](../../src/box_style.c#L76)
+`macro` | [src/box_style.c:78](../../src/box_style.c#L78)
 
 ```c
 #define T_ROW
@@ -719,7 +847,7 @@ Table roles, aliased like the display values above so a row stays one line.
 
 ### `T_CELL`
 
-`macro` | [src/box_style.c:77](../../src/box_style.c#L77)
+`macro` | [src/box_style.c:79](../../src/box_style.c#L79)
 
 ```c
 #define T_CELL
@@ -731,7 +859,7 @@ Table roles, aliased like the display values above so a row stays one line.
 
 ### `T_CAP`
 
-`macro` | [src/box_style.c:78](../../src/box_style.c#L78)
+`macro` | [src/box_style.c:80](../../src/box_style.c#L80)
 
 ```c
 #define T_CAP
@@ -743,7 +871,7 @@ Table roles, aliased like the display values above so a row stays one line.
 
 ### `T_COL`
 
-`macro` | [src/box_style.c:79](../../src/box_style.c#L79)
+`macro` | [src/box_style.c:81](../../src/box_style.c#L81)
 
 ```c
 #define T_COL
@@ -757,7 +885,7 @@ Table roles, aliased like the display values above so a row stays one line.
 
 ### `TAG_N`
 
-`macro` | [src/box_style.c:159](../../src/box_style.c#L159)
+`macro` | [src/box_style.c:161](../../src/box_style.c#L161)
 
 ```c
 #define TAG_N
@@ -769,7 +897,7 @@ Table roles, aliased like the display values above so a row stays one line.
 
 ### `DISP_N`
 
-`macro` | [src/box_style.c:257](../../src/box_style.c#L257)
+`macro` | [src/box_style.c:259](../../src/box_style.c#L259)
 
 ```c
 #define DISP_N

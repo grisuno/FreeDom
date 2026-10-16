@@ -72,7 +72,10 @@ enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_HOVER, PSEUDO_ROOT,
         /* :has() relational pseudo-class (descendant walk) */
         PSEUDO_HAS,
         /* Remaining dynamic pseudos, each driven by its own CSEL_STATE_* bit. */
-        PSEUDO_ACTIVE, PSEUDO_FOCUS, PSEUDO_FOCUS_WITHIN, PSEUDO_FOCUS_VISIBLE };
+        PSEUDO_ACTIVE, PSEUDO_FOCUS, PSEUDO_FOCUS_WITHIN, PSEUDO_FOCUS_VISIBLE,
+        /* ::placeholder (CSS Pseudo 4 4.5): styles a text control's placeholder,
+         * never the control itself. */
+        PSEUDO_PLACEHOLDER };
 
 /* Sub-selector for :not()/:is()/:where(): a simple compound with only
  * tag/.class/#id/[attr] (no combinators, no pseudo-classes inside

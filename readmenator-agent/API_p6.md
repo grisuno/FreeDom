@@ -1,6 +1,67 @@
 # API (page 6 of 9)
 Previous: [API_p5.md](API_p5.md)
 
+## src/css_gradient.c
+Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
+- `cg_parse_num` (function) `src/css_gradient.c:12` `static int cg_parse_num(const char *s, double *out, const char **endp)`
+- `cg_wide_keyword` (function) `src/css_gradient.c:17` `static int cg_wide_keyword(const char *v)`
+- `gradient` (function) `src/css_gradient.c:27` `* or fewer than 2 stops drop the gradient (and, for the `background` shorthand,
+ * the whole decl...`
+- `find_gradient_call` (function) `src/css_gradient.c:76` `static int find_gradient_call(const char *v, const char *fn, size_t *start,
+                     ...` -- Locates a gradient function call `fn` (e.g. "linear-gradient(") in v (case-insensitive; an occurrence that is the...
+- `conic_prelude` (function) `src/css_gradient.c:110` `static int conic_prelude(const char *seg, int *angle)` -- conic-gradient prelude: `from <int>deg`, optionally followed by `at <pos>` (position accepted and ignored -- always...
+- `grad_stop_pos` (function) `src/css_gradient.c:152` `static int grad_stop_pos(const char *pp, int conic, const char **endp)` -- One stop position after a color: `N%` -> 0-1000 (x10); conic also accepts `Ndeg` -> the same 0-1000 turn fraction...
+- `CSS_GRAD_STOPS_MAX` (function) `src/css_gradient.c:183` `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
+ * the gradient fai...`
+- `emit_gradient` (function) `src/css_gradient.c:290` `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
+                         ...` -- Emits the gradient decl group. nstops == 0 emits only the explicit reset * (P_BG_GRAD_N = 0), which is how a...
+- `find_radial_gradient` (function) `src/css_gradient.c:347` `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
+                      ...` -- R5c: detects radial-gradient(circle at center, color1, color2).
+- `pool` (function) `src/css_gradient.c:388` `* pool (gradient explicitly reset);`
+- `downstream` (function) `src/css_gradient.c:392` `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
+int cg_expand_bg_imag...`
+- `declaration` (function) `src/css_gradient.c:451` `* declaration (fail closed);`
+- `bg_layer_tokens_ok` (function) `src/css_gradient.c:458` `static int bg_layer_tokens_ok(const char *s)` -- True iff every token of s (split on whitespace, '/' and ',') is a valid non-colour component of a background layer...
+- `cg_expand_background` (function) `src/css_gradient.c:498` `int cg_expand_background(const char *val, css_decl *dst, int cap,
+                             ch...`
+
+## src/css_index.c
+Depends on: `include/css_index.h`
+- `key_of` (function) `src/css_index.c:11` `static uint64_t key_of(int kind, const char *s, size_t n, int lower)` -- FNV-1a over the kind byte then the name; the tag is hashed lowercased because * compound_matches compares it with...
+- `key_of_token` (function) `src/css_index.c:26` `static uint64_t key_of_token(int kind, const char *tok)` -- An element token in the canonical form csel_ident_eq compares against: as-is * when it fits CSS_TOK_MAX, folded...
+- `entry_cmp` (function) `src/css_index.c:34` `static int entry_cmp(const void *a, const void *b)`
+- `u32_cmp` (function) `src/css_index.c:40` `static int u32_cmp(const void *a, const void *b)`
+- `cix_free` (function) `src/css_index.c:45` `void cix_free(cix_index *idx)`
+- `cix_build` (function) `src/css_index.c:52` `void cix_build(const css_sel *sels, size_t n, cix_index *idx)`
+- `lower_bound` (function) `src/css_index.c:90` `static size_t lower_bound(const cix_index *idx, uint64_t k)` -- keyed[nk].key = k; keyed[nk].sel = (uint32_t)i; ++nk; } qsort(keyed, nk, sizeof *keyed, entry_cmp); idx->keyed =...
+- `push` (function) `src/css_index.c:100` `static int push(uint32_t **buf, size_t *cap, size_t *n, uint32_t v)`
+- `push_bucket` (function) `src/css_index.c:113` `static int push_bucket(const cix_index *idx, uint64_t k,
+                       uint32_t **buf, s...`
+- `cix_candidates` (function) `src/css_index.c:120` `size_t cix_candidates(const cix_index *idx, const css_element *el,
+                      uint32_t...`
+
+## src/css_length.c
+Depends on: `include/css.h`, `include/css_length.h`
+- `know` (function) `src/css_length.c:7` `* this module cannot know (real font metrics, the viewport) arrives through
+ * cl_ctx rather than...`
+- `cl_unit_eq` (function) `src/css_length.c:30` `static int cl_unit_eq(const char *unit, size_t len, const char *lit)` -- ASCII case-insensitive compare of a possibly-unterminated unit slice against a lowercase literal.
+- `cl_font_size` (function) `src/css_length.c:56` `static double cl_font_size(const cl_ctx *ctx)` -- The element's font-size, falling back to the CSS initial value when the caller left it unset.
+- `cl_root_font_size` (function) `src/css_length.c:60` `static double cl_root_font_size(const cl_ctx *ctx)`
+- `cl_metric_or` (function) `src/css_length.c:67` `static double cl_metric_or(double measured, double ratio, const cl_ctx *ctx)` -- A font metric, or the fallback the spec itself names for when that metric is unavailable -- expressed as a ratio of...
+- `cl_viewport_scale` (function) `src/css_length.c:80` `static int cl_viewport_scale(const char *u, size_t len, const cl_ctx *ctx, double *per)` -- Viewport-relative units (section 6.2).
+- `cl_ctx_initial` (function) `src/css_length.c:100` `cl_ctx cl_ctx_initial(void)`
+- `cl_unit_scale` (function) `src/css_length.c:117` `cl_status cl_unit_scale(const char *unit, size_t unit_len,
+                        const cl_ctx *...`
+- `cl_is_length_unit` (function) `src/css_length.c:167` `int cl_is_length_unit(const char *unit, size_t unit_len)`
+- `cl_unit_is_font_relative` (function) `src/css_length.c:174` `int cl_unit_is_font_relative(const char *unit, size_t unit_len)`
+- `cl_em_refit` (function) `src/css_length.c:219` `double cl_em_refit(double px, double em, double from_font_size, double font_size)`
+- `cl_parse_number` (function) `src/css_length.c:233` `static int cl_parse_number(const char **pp, const char *end, double *out)` -- Parses a CSS <number> (CSS Syntax 4.3.12) without strtod -- strtod is locale-dependent, and a locale whose decimal...
+- `cl_number` (function) `src/css_length.c:292` `int cl_number(const char *s, double *out, const char **endp)`
+- `cl_resolve_core` (function) `src/css_length.c:309` `static cl_status cl_resolve_core(const char *value, const cl_ctx *ctx, cl_lp *out)` -- The shared core of cl_resolve and cl_resolve_lp: tokenize <number><unit> and resolve it into the two components of a...
+- `cl_resolve` (function) `src/css_length.c:377` `cl_status cl_resolve(const char *value, const cl_ctx *ctx, double *out_px)`
+- `cl_resolve_lp` (function) `src/css_length.c:391` `cl_status cl_resolve_lp(const char *value, const cl_ctx *ctx, cl_lp *out)`
+- `cl_lp_used` (function) `src/css_length.c:395` `double cl_lp_used(cl_lp lp, double basis)`
+
 ## src/css_mq.c
 Depends on: `include/css_length.h`, `include/css_mq.h`
 - `lower_ch` (function) `src/css_mq.c:31` `static char lower_ch(char c)`
@@ -42,26 +103,26 @@ Depends on: `include/css_select.h`
 - `parse_attr_sel` (function) `src/css_select.c:184` `static int parse_attr_sel(const char *s, size_t *ip, size_t b, css_attr_match *am)` -- Parses one attribute selector starting at s[*ip] == '[' (within s[.,b)) into *am.
 - `parse_nth_arg` (function) `src/css_select.c:241` `static int parse_nth_arg(const char *s, size_t a, size_t b, int *A, int *B)` -- Parses the An+B argument of the nth-child family, s[a,b) (surrounding space trimmed here).
 - `take_sub_arg` (function) `src/css_select.c:293` `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);`
-- `between` (function) `src/css_select.c:376` `* between ( and ) is split on commas (not inside [] or ());`
-- `simple_pseudo_kind` (function) `src/css_select.c:431` `static int simple_pseudo_kind(const char *nm)` -- The PSEUDO_* kind of an argument-less pseudo-class usable inside a * sub-selector, or -1.
-- `parse_sub_compound` (function) `src/css_select.c:452` `static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub)` -- Parses one SIMPLE sub-selector span s[a,b) for :not()/:is()/:where(): only tag name, .class, #id, or [attr] (no...
-- `parse_compound` (function) `src/css_select.c:517` `static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
+- `between` (function) `src/css_select.c:382` `* between ( and ) is split on commas (not inside [] or ());`
+- `simple_pseudo_kind` (function) `src/css_select.c:437` `static int simple_pseudo_kind(const char *nm)` -- The PSEUDO_* kind of an argument-less pseudo-class usable inside a * sub-selector, or -1.
+- `parse_sub_compound` (function) `src/css_select.c:458` `static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub)` -- Parses one SIMPLE sub-selector span s[a,b) for :not()/:is()/:where(): only tag name, .class, #id, or [attr] (no...
+- `parse_compound` (function) `src/css_select.c:523` `static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
                   ...` -- Parses one COMPOUND selector span s[a,b) (no combinators, no surrounding space) into *cp. sel holds the sub-selector...
-- `selector` (function) `src/css_select.c:559` `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
+- `selector` (function) `src/css_select.c:565` `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
  * dropped. Whitespa...`
-- `el_attr_value` (function) `src/css_select.c:655` `static const char *el_attr_value(const css_element *el, const char *name)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
-- `ends_with` (function) `src/css_select.c:665` `static int ends_with(const char *v, const char *suf, int ci)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
-- `has_word` (function) `src/css_select.c:673` `static int has_word(const char *v, const char *w, int ci)` -- True if `v` is a whitespace-separated list containing the word `w` (non-empty), * case-folded when ci (the `~=`...
-- `attr_matches` (function) `src/css_select.c:688` `static int attr_matches(const css_attr_match *am, const css_element *el)` -- size_t wl = strlen(w); if (wl == 0) return 0; const char *p = v; while (*p != '\0') { while (*p == ' ' || *p == '\t'...
-- `nth_matches` (function) `src/css_select.c:708` `static int nth_matches(int A, int B, int idx)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
-- `is_form_control` (function) `src/css_select.c:717` `static int is_form_control(const char *tag)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
-- `pseudo_matches` (function) `src/css_select.c:726` `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...` -- if (A > 0) return d >= 0 && d % A == 0; return d <= 0 && (-d) % (long)(-A) == 0; } /* Form controls for :enabled...
-- `sub_sel_matches` (function) `src/css_select.c:730` `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
-- `compound_matches` (function) `src/css_select.c:979` `static int compound_matches(const css_compound *c, const css_element *el,
+- `el_attr_value` (function) `src/css_select.c:661` `static const char *el_attr_value(const css_element *el, const char *name)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
+- `ends_with` (function) `src/css_select.c:671` `static int ends_with(const char *v, const char *suf, int ci)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
+- `has_word` (function) `src/css_select.c:679` `static int has_word(const char *v, const char *w, int ci)` -- True if `v` is a whitespace-separated list containing the word `w` (non-empty), * case-folded when ci (the `~=`...
+- `attr_matches` (function) `src/css_select.c:694` `static int attr_matches(const css_attr_match *am, const css_element *el)` -- size_t wl = strlen(w); if (wl == 0) return 0; const char *p = v; while (*p != '\0') { while (*p == ' ' || *p == '\t'...
+- `nth_matches` (function) `src/css_select.c:714` `static int nth_matches(int A, int B, int idx)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
+- `is_form_control` (function) `src/css_select.c:723` `static int is_form_control(const char *tag)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
+- `pseudo_matches` (function) `src/css_select.c:732` `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...` -- if (A > 0) return d >= 0 && d % A == 0; return d <= 0 && (-d) % (long)(-A) == 0; } /* Form controls for :enabled...
+- `sub_sel_matches` (function) `src/css_select.c:736` `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
+- `compound_matches` (function) `src/css_select.c:986` `static int compound_matches(const css_compound *c, const css_element *el,
                        ...` -- True if one compound matches one element (no ancestor context).
-- `built` (function) `src/css_select.c:1014` `* chains the caller built (an element without parent/prev links never matches
+- `built` (function) `src/css_select.c:1021` `* chains the caller built (an element without parent/prev links never matches
  * through that com...`
-- `csel_matches` (function) `src/css_select.c:1055` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+- `csel_matches` (function) `src/css_select.c:1062` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
               ...`
 
 ## src/css_text.c
@@ -261,44 +322,54 @@ Depends on: `include/download.h`, `include/pdf_export.h`
 
 ## src/flex_layout.c
 Depends on: `include/flex_layout.h`
-- `nn` (function) `src/flex_layout.c:18` `static double nn(double v)` -- No I/O, no global state, no dynamic allocation: fixed-size stack scratch buffers bounded by FX_MAX_ITEMS (no VLAs).
-- `fx_flex_line` (function) `src/flex_layout.c:22` `fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,
+- `nn` (function) `src/flex_layout.c:19` `static double nn(double v)` -- bounded by FX_MAX_ITEMS (no VLAs).
+- `fx_flex_line` (function) `src/flex_layout.c:23` `fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,
                 ...`
-- `fx_grid_columns` (function) `src/flex_layout.c:127` `fx_status fx_grid_columns(double avail, size_t ncols, double gap,
+- `fx_grid_columns` (function) `src/flex_layout.c:128` `fx_status fx_grid_columns(double avail, size_t ncols, double gap,
                           doubl...`
-- `fx_autofill_count` (function) `src/flex_layout.c:132` `size_t fx_autofill_count(double avail, double gap, double minw)`
-- `fx_grid_columns_weighted` (function) `src/flex_layout.c:142` `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
+- `fx_autofill_count` (function) `src/flex_layout.c:133` `size_t fx_autofill_count(double avail, double gap, double minw)`
+- `fx_grid_columns_weighted` (function) `src/flex_layout.c:143` `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
                       ...`
-- `fx_grid_place_span` (function) `src/flex_layout.c:176` `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
+- `fx_grid_place_span` (function) `src/flex_layout.c:177` `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
                       ...`
-- `fx_grid_area_hash` (function) `src/flex_layout.c:280` `unsigned fx_grid_area_hash(const char *name)`
-- `area_token_is_null_cell` (function) `src/flex_layout.c:304` `static int area_token_is_null_cell(const char *tok, size_t len)` -- 0 is reserved for "no name" (the null cell token), so a name that hashes to * it is nudged; the alternative is a...
-- `fx_grid_areas_parse` (function) `src/flex_layout.c:310` `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)`
-- `fx_grid_area_rect` (function) `src/flex_layout.c:385` `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,
+- `fx_grid_area_hash` (function) `src/flex_layout.c:319` `unsigned fx_grid_area_hash(const char *name)`
+- `area_token_is_null_cell` (function) `src/flex_layout.c:343` `static int area_token_is_null_cell(const char *tok, size_t len)` -- 0 is reserved for "no name" (the null cell token), so a name that hashes to * it is nudged; the alternative is a...
+- `fx_grid_areas_parse` (function) `src/flex_layout.c:349` `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)`
+- `fx_grid_area_rect` (function) `src/flex_layout.c:424` `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,
                             int ...`
-- `float_pack_impl` (function) `src/flex_layout.c:427` `static fx_status float_pack_impl(const double *width, const int *side, size_t n,
+- `float_pack_impl` (function) `src/flex_layout.c:466` `static fx_status float_pack_impl(const double *width, const int *side, size_t n,
                 ...` -- Shared packer: wrap == 0 is the single-row v1 contract (overflow clamps in place); wrap != 0 starts a new row...
-- `fx_float_insets` (function) `src/flex_layout.c:467` `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
+- `fx_float_insets` (function) `src/flex_layout.c:506` `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
                  ...`
-- `fx_float_pack` (function) `src/flex_layout.c:507` `fx_status fx_float_pack(const double *width, const int *side, size_t n,
+- `fx_float_pack` (function) `src/flex_layout.c:546` `fx_status fx_float_pack(const double *width, const int *side, size_t n,
                         d...`
-- `fx_float_pack_wrap` (function) `src/flex_layout.c:512` `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
+- `fx_float_pack_wrap` (function) `src/flex_layout.c:551` `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
                     ...`
-- `fx_grid_cell` (function) `src/flex_layout.c:554` `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)`
-- `fx_auto_margins` (function) `src/flex_layout.c:566` `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
+- `fx_grid_cell` (function) `src/flex_layout.c:593` `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)`
+- `fx_auto_margins` (function) `src/flex_layout.c:605` `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
                 ...` -- } void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col) { if (row == NULL || col == NULL) return...
-- `fx_auto_min_size` (function) `src/flex_layout.c:589` `double fx_auto_min_size(double min_content, double basis, double author_min,
+- `fx_auto_min_size` (function) `src/flex_layout.c:628` `double fx_auto_min_size(double min_content, double basis, double author_min,
                     ...`
-- `fx_multicol_used` (function) `src/flex_layout.c:603` `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
+- `fx_multicol_used` (function) `src/flex_layout.c:642` `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
                ...`
-- `fx_multicol_balance` (function) `src/flex_layout.c:640` `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
+- `fx_multicol_balance` (function) `src/flex_layout.c:679` `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
                         ...`
-- `fx_justify_name` (function) `src/flex_layout.c:671` `const char *fx_justify_name(fx_justify j)`
-- `fx_column_place` (function) `src/flex_layout.c:683` `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
+- `fx_justify_name` (function) `src/flex_layout.c:710` `const char *fx_justify_name(fx_justify j)`
+- `fx_column_place` (function) `src/flex_layout.c:722` `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
             ...`
-- `fx_column_place_m` (function) `src/flex_layout.c:690` `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
+- `fx_column_place_m` (function) `src/flex_layout.c:729` `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
               ...`
-- `fx_cross_offset` (function) `src/flex_layout.c:751` `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)`
+- `fx_cross_offset` (function) `src/flex_layout.c:790` `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)`
+- `gl_ws` (function) `src/flex_layout.c:802` `static int gl_ws(char c)` -- } double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r) { double room = avail - w; if...
+- `gl_lower` (function) `src/flex_layout.c:806` `static int gl_lower(char c)`
+- `gl_kw` (function) `src/flex_layout.c:809` `static int gl_kw(const char *p, const char *end, const char *kw)` -- if (mauto_r) return 0.0; if (align == 1) return room / 2.0; if (align == 2) return room; return 0.0; } /* ASCII...
+- `gl_int` (function) `src/flex_layout.c:819` `static int gl_int(const char *p, const char *end, long cap, long *out)` -- A CSS <integer> (optional sign, digits only) filling exactly [p, end).
+- `gl_side_range` (function) `src/flex_layout.c:834` `static int gl_side_range(const char *p, const char *end, int *out)` -- int neg = 0; if (p < end && (*p == '+' || *p == '-')) { neg = (*p == '-'); ++p; } if (p >= end) return 0; long v =...
+- `fx_grid_line_side` (function) `src/flex_layout.c:857` `int fx_grid_line_side(const char *s, int *out)`
+- `fx_grid_line_parse` (function) `src/flex_layout.c:865` `int fx_grid_line_parse(const char *v, int *start, int *end)`
+- `gl_is_span` (function) `src/flex_layout.c:882` `static int gl_is_span(int v)`
+- `gl_is_line` (function) `src/flex_layout.c:883` `static int gl_is_line(int v)`
+- `fx_grid_line_resolve` (function) `src/flex_layout.c:885` `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
 
 ## src/form.c
 Depends on: `include/form.h`
@@ -363,22 +434,22 @@ Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `includ
                          int *out_status, c...` -- wf_fetch_fn around the headless policy gate (font bytes download like any * other subresource of this page). data...
 - `render_page` (function) `src/freedom.c:608` `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-- `pool` (function) `src/freedom.c:674` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-- `first` (function) `src/freedom.c:689` `* always cleared first (fetch_and_render may paint several pages per
+- `pool` (function) `src/freedom.c:669` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+- `first` (function) `src/freedom.c:683` `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
-- `only` (function) `src/freedom.c:746` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-- `sf_reason` (function) `src/freedom.c:858` `static const char *sf_reason(sf_status ss)`
-- `fetch_and_render_one` (function) `src/freedom.c:877` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
-- `BLOCKED` (function) `src/freedom.c:903` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
-- `elsewhere` (function) `src/freedom.c:938` `* page whose script immediately forwards elsewhere (e.g. a search engine's
+- `only` (function) `src/freedom.c:740` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+- `sf_reason` (function) `src/freedom.c:852` `static const char *sf_reason(sf_status ss)`
+- `fetch_and_render_one` (function) `src/freedom.c:871` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
+- `BLOCKED` (function) `src/freedom.c:897` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+- `elsewhere` (function) `src/freedom.c:932` `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-- `parent` (function) `src/freedom.c:964` `* gated by the parent (ln_resolve: a local target stays under the document's
+- `parent` (function) `src/freedom.c:958` `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-- `run_headless` (function) `src/freedom.c:1001` `static int run_headless(const char *target)`
-- `video_fetch_with_fallback` (function) `src/freedom.c:1037` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+- `run_headless` (function) `src/freedom.c:995` `static int run_headless(const char *target)`
+- `video_fetch_with_fallback` (function) `src/freedom.c:1031` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...` -- Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as...
-- `run_dump_video` (function) `src/freedom.c:1148` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
-- `main` (function) `src/freedom.c:1167` `int main(int argc, char **argv)`
+- `run_dump_video` (function) `src/freedom.c:1142` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
+- `main` (function) `src/freedom.c:1161` `int main(int argc, char **argv)`
 
 ## src/hls.c
 Depends on: `include/hls.h`
@@ -410,82 +481,6 @@ Depends on: `include/hostblock.h`, `include/util.h`
 - `hb_check` (function) `src/hostblock.c:193` `hb_decision hb_check(const hb_set *s, const char *host)`
 - `hb_is_allowlisted` (function) `src/hostblock.c:218` `int hb_is_allowlisted(const hb_set *s, const char *host)`
 - `hb_count` (function) `src/hostblock.c:238` `size_t hb_count(const hb_set *s, hb_list list)`
-
-## src/hostedit.c
-Depends on: `include/hostedit.h`
-- `he_lower` (function) `src/hostedit.c:12` `static char he_lower(char c)`
-- `is_label_char` (function) `src/hostedit.c:16` `static int is_label_char(char c)`
-- `valid_host` (function) `src/hostedit.c:22` `static int valid_host(const char *host, size_t n)` -- #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c >= 'A' && c <= 'Z') ?
-- `he_make_line` (function) `src/hostedit.c:41` `he_status he_make_line(const char *host, char *out, size_t cap)`
-- `is_ip_token` (function) `src/hostedit.c:67` `static int is_ip_token(const char *ts, const char *te)` -- True if the token looks like an IPv4 dotted-quad / contains only digits and dots * (matches hostblock's is_ip_token...
-- `he_scan` (function) `src/hostedit.c:80` `static int he_scan(const char *text, int (*fn)(const char *, size_t, void *), void *ctx)` -- Visits each domain token (non-comment, non-IP) of a hosts-format text in document order, calling fn(ts, tl, ctx).
-- `has_host_cb` (function) `src/hostedit.c:105` `static int has_host_cb(const char *ts, size_t tl, void *ctx)`
-- `he_text_has_host` (function) `src/hostedit.c:109` `int he_text_has_host(const char *text, const char *host)`
-- `contains_ci` (function) `src/hostedit.c:115` `static int contains_ci(const char *hs, size_t hl, const char *needle)` -- } return 0; } static int has_host_cb(const char *ts, size_t tl, void *ctx) { return token_eq_host(ts, ts + tl...
-- `starts_with_ci` (function) `src/hostedit.c:128` `static int starts_with_ci(const char *hs, size_t hl, const char *pfx)`
-- `suggest_cb` (function) `src/hostedit.c:144` `static int suggest_cb(const char *ts, size_t tl, void *vctx)`
-- `he_suggest` (function) `src/hostedit.c:164` `int he_suggest(const char *text, const char *query,
-               char results[][HE_MAX_HOST + 1...`
-
-## src/html_parse.c
-Depends on: `include/dom.h`, `include/html_parse.h`, `include/util.h`
-- `dup_bytes` (function) `src/html_parse.c:27` `static char *dup_bytes(const lxb_char_t *src, size_t len)`
-- `node_next` (function) `src/html_parse.c:37` `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` -- }; /* --- helpers --- static char *dup_bytes(const lxb_char_t *src, size_t len) { if (len == (size_t)-1) return...
-- `attr_is_event_handler` (function) `src/html_parse.c:47` `static int attr_is_event_handler(const lxb_dom_attr_t *attr)`
-- `node_is_script` (function) `src/html_parse.c:54` `static int node_is_script(const lxb_dom_node_t *node)`
-- `strip_scripts` (function) `src/html_parse.c:60` `static void strip_scripts(lxb_html_document_t *document)`
-- `type_is` (function) `src/html_parse.c:100` `static int type_is(const lxb_char_t *t, size_t len, const char *word)` -- HTML "the script element": type="module" (ASCII case-insensitive, whitespace * stripped) is an ES module; nothing...
-- `type_is_module` (function) `src/html_parse.c:117` `static int type_is_module(const lxb_char_t *t, size_t len)`
-- `script_classify` (function) `src/html_parse.c:121` `static int script_classify(const lxb_dom_node_t *n,
-                           const lxb_char_t *...`
-- `hp_extract_script_list` (function) `src/html_parse.c:164` `hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count)` -- Collects each executable <script> as its own entry, in document order: inline source for classic inline scripts, the...
-- `lxb_dom_element_has_attribute` (function) `src/html_parse.c:230` `&& lxb_dom_element_has_attribute(sel, (const lxb_char_t *)"nomodule", 8);`
-- `hp_free_scripts` (function) `src/html_parse.c:238` `void hp_free_scripts(hp_script *scripts, size_t count)`
-- `attr_has_token_ci` (function) `src/html_parse.c:251` `static int attr_has_token_ci(const lxb_char_t *val, size_t vlen, const char *needle)` -- Whitespace-separated token test over a length-delimited attribute value, ASCII case-insensitive: rel="preload...
-- `link_is_active_stylesheet` (function) `src/html_parse.c:272` `static int link_is_active_stylesheet(lxb_dom_element_t *el,
-                                     ...` -- An applicable stylesheet <link>: rel token "stylesheet" and not "alternate"; a non-empty href; media absent/empty or...
-- `hp_extract_stylesheet_hrefs` (function) `src/html_parse.c:294` `char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count)`
-- `hp_free_stylesheet_hrefs` (function) `src/html_parse.c:328` `void hp_free_stylesheet_hrefs(char **hrefs, size_t count)`
-- `strip_event_handlers` (function) `src/html_parse.c:334` `static void strip_event_handlers(lxb_html_document_t *document)`
-- `hp_config_default` (function) `src/html_parse.c:357` `hp_config hp_config_default(void)`
-- `hp_validate_input` (function) `src/html_parse.c:365` `hp_status hp_validate_input(const char *html, size_t len, const hp_config *cfg)`
-- `hp_parse` (function) `src/html_parse.c:375` `hp_status hp_parse(const char *html, size_t len, const hp_config *cfg, hp_document **out)`
-- `hp_element_count` (function) `src/html_parse.c:409` `size_t hp_element_count(const hp_document *doc)`
-- `hp_script_count` (function) `src/html_parse.c:419` `size_t hp_script_count(const hp_document *doc)`
-- `hp_event_handler_count` (function) `src/html_parse.c:429` `size_t hp_event_handler_count(const hp_document *doc)`
-- `hp_extract_text` (function) `src/html_parse.c:445` `char *hp_extract_text(const hp_document *doc, size_t *out_len)`
-- `hp_get_title` (function) `src/html_parse.c:464` `char *hp_get_title(const hp_document *doc, size_t *out_len)`
-- `hp_free` (function) `src/html_parse.c:479` `void hp_free(char *buf)`
-- `hp_document_free` (function) `src/html_parse.c:483` `void hp_document_free(hp_document *doc)`
-- `hp_document_root` (function) `src/html_parse.c:489` `const void *hp_document_root(const hp_document *doc)`
-
-## src/image_decode.c
-Depends on: `include/image_decode.h`
-- `exit` (function) `src/image_decode.c:6` `* malformed stream fails closed instead of calling exit(). GIF uses an own pure-C * bounded LZW decoder (no giflib)....`
-- `read_be32` (function) `src/image_decode.c:52` `static uint32_t read_be32(const uint8_t *p)`
-- `img_png_dimensions` (function) `src/image_decode.c:57` `img_status img_png_dimensions(const uint8_t *bytes, size_t len,
-                              uin...`
-- `img_dimensions_ok` (function) `src/image_decode.c:68` `int img_dimensions_ok(uint32_t w, uint32_t h)`
-- `img_fit` (function) `src/image_decode.c:76` `void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h,
-             double *out_w, do...`
-- `premultiply` (function) `src/image_decode.c:90` `static void premultiply(uint8_t *data, size_t pixels)` -- void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h, double *out_w, double *out_h) { if (out_w == NULL...
-- `img_decode_png` (function) `src/image_decode.c:102` `img_status img_decode_png(const uint8_t *bytes, size_t len, img_pixels *out)`
-- `jpeg_error_longjmp` (function) `src/image_decode.c:158` `static void jpeg_error_longjmp(j_common_ptr cinfo)`
-- `jpeg_silence` (function) `src/image_decode.c:164` `static void jpeg_silence(j_common_ptr cinfo)` -- libjpeg error manager that longjmps instead of calling exit(), so a hostile JPEG * fails closed (IMG_ERR_DECODE)...
-- `img_decode_jpeg` (function) `src/image_decode.c:166` `img_status img_decode_jpeg(const uint8_t *bytes, size_t len, img_pixels *out)`
-- `gr_u8` (function) `src/image_decode.c:260` `static int gr_u8(gif_reader *r, uint8_t *out)`
-- `gr_u16le` (function) `src/image_decode.c:266` `static int gr_u16le(gif_reader *r, uint16_t *out)`
-- `gr_skip` (function) `src/image_decode.c:273` `static int gr_skip(gif_reader *r, size_t n)`
-- `gr_skip_subblocks` (function) `src/image_decode.c:280` `static int gr_skip_subblocks(gif_reader *r)` -- static int gr_u16le(gif_reader *r, uint16_t *out) { if (r->pos + 2u > r->len) return 0; out =...
-- `gb_next_code` (function) `src/image_decode.c:298` `static int gb_next_code(gif_bits *b, unsigned width, unsigned *out)`
-- `gif_deinterlace_row` (function) `src/image_decode.c:319` `static uint32_t gif_deinterlace_row(uint32_t r, uint32_t fh)` -- } uint8_t byte; if (!gr_u8(b->r, &byte)) return 0; b->block_left--; b->acc |= (uint32_t)byte << b->nbits; b->nbits...
-- `gif_put_pixel` (function) `src/image_decode.c:334` `static void gif_put_pixel(uint32_t *canvas, uint32_t cw, uint32_t ch,
-                          u...` -- Writes one palette pixel into the canvas at frame-relative index i (clipped to * the canvas; transparent index ->...
-- `img_decode_gif` (function) `src/image_decode.c:354` `img_status img_decode_gif(const uint8_t *bytes, size_t len, img_pixels *out)`
-- `img_decode_webp` (function) `src/image_decode.c:520` `img_status img_decode_webp(const uint8_t *bytes, size_t len, img_pixels *out)`
-- `img_decode` (function) `src/image_decode.c:553` `img_status img_decode(const uint8_t *bytes, size_t len, img_pixels *out)`
-- `img_pixels_free` (function) `src/image_decode.c:566` `void img_pixels_free(img_pixels *p)`
-- `img_format_name` (function) `src/image_decode.c:575` `const char *img_format_name(img_format f)`
 
 
 Next: [API_p7.md](API_p7.md)

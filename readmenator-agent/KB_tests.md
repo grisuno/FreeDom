@@ -47,53 +47,57 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
 - Depends on: `include/block_flow.h`
 
 ## tests/test_box_style.c
-- Doc: dbl_eq: the display-name helper.  #include <setjmp.h> #include <stdarg.h> #include <stddef.h>...
+- Doc: dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include...
 - Layer: testing
 - Language: c
 - Symbols:
-  - `dbl_eq` (function, line 22) `static int dbl_eq(double a, double b)`
-  - `assert_edges` (function, line 27) `static void assert_edges(bx_edges e, double t, double r, double b, double l)`
-  - `test_body_has_no_margin` (function, line 34) `static void test_body_has_no_margin(void **state)`
-  - `test_paragraph` (function, line 42) `static void test_paragraph(void **state)`
-  - `test_heading_ladder` (function, line 49) `static void test_heading_ladder(void **state)`
-  - `test_lists` (function, line 65) `static void test_lists(void **state)`
-  - `test_blockquote` (function, line 76) `static void test_blockquote(void **state)`
-  - `test_hr` (function, line 83) `static void test_hr(void **state)`
-  - `test_inline_and_inline_block` (function, line 90) `static void test_inline_and_inline_block(void **state)`
-  - `test_display_none_for_non_rendered` (function, line 101) `static void test_display_none_for_non_rendered(void **state)`
-  - `test_case_insensitive` (function, line 110) `static void test_case_insensitive(void **state)`
-  - `test_unknown_and_null_are_neutral_inline` (function, line 118) `static void test_unknown_and_null_are_neutral_inline(void **state)`
-  - `test_div_is_block` (function, line 133) `static void test_div_is_block(void **state)`
-  - `test_ua_structural_wrappers_have_no_margin` (function, line 144) `static void test_ua_structural_wrappers_have_no_margin(void **state)`
-  - `test_ua_spaced_tags_round_trip` (function, line 161) `static void test_ua_spaced_tags_round_trip(void **state)`
-  - `test_ua_list_item_is_distinct_but_unspaced` (function, line 181) `static void test_ua_list_item_is_distinct_but_unspaced(void **state)`
-  - `test_block_ua_box_is_content_independent` (function, line 194) `static void test_block_ua_box_is_content_independent(void **state)`
-  - `test_block_ua_box_heading_level_wins` (function, line 205) `static void test_block_ua_box_heading_level_wins(void **state)`
-  - `test_block_ua_box_list_item_wins_over_ancestor` (function, line 218) `static void test_block_ua_box_list_item_wins_over_ancestor(void **state)`
-  - `test_block_ua_box_is_total` (function, line 227) `static void test_block_ua_box_is_total(void **state)`
-  - `test_table_role_from_tag` (function, line 242) `static void test_table_role_from_tag(void **state)`
-  - `test_table_role_is_total` (function, line 272) `static void test_table_role_is_total(void **state)`
-  - `test_ua_case_insensitive_and_trimmed` (function, line 282) `static void test_ua_case_insensitive_and_trimmed(void **state)`
-  - `test_ua_fails_closed` (function, line 290) `static void test_ua_fails_closed(void **state)`
-  - `test_ua_code_space_is_total` (function, line 308) `static void test_ua_code_space_is_total(void **state)`
-  - `test_parse_display_keywords` (function, line 319) `static void test_parse_display_keywords(void **state)`
-  - `test_parse_display_inline_aliases` (function, line 338) `static void test_parse_display_inline_aliases(void **state)`
-  - `test_parse_display_case_and_trim` (function, line 347) `static void test_parse_display_case_and_trim(void **state)`
-  - `test_parse_display_errors` (function, line 356) `static void test_parse_display_errors(void **state)`
-  - `test_display_name` (function, line 374) `static void test_display_name(void **state)`
-  - `test_place_no_box_is_identity` (function, line 389) `static void test_place_no_box_is_identity(void **state)`
-  - `test_place_max_width_caps` (function, line 396) `static void test_place_max_width_caps(void **state)`
-  - `test_place_centering` (function, line 407) `static void test_place_centering(void **state)`
-  - `test_place_insets` (function, line 419) `static void test_place_insets(void **state)`
-  - `test_place_failclosed_bounds` (function, line 431) `static void test_place_failclosed_bounds(void **state)`
-  - `test_border_box_height` (function, line 474) `static void test_border_box_height(void **state)`
-  - `test_content_clipped` (function, line 492) `static void test_content_clipped(void **state)`
-  - `test_width_cap_pct` (function, line 508) `static void test_width_cap_pct(void **state)`
-  - `test_width_cap2_is_min_of_two_values` (function, line 523) `static void test_width_cap2_is_min_of_two_values(void **state)`
-  - `percentage` (function, line 542) `* percentage (a plain `width:50%` leaves the px half UNSET, a plain `width:300px`
+  - `dbl_eq` (function, line 23) `static int dbl_eq(double a, double b)`
+  - `assert_edges` (function, line 28) `static void assert_edges(bx_edges e, double t, double r, double b, double l)`
+  - `test_body_has_no_margin` (function, line 35) `static void test_body_has_no_margin(void **state)`
+  - `test_paragraph` (function, line 43) `static void test_paragraph(void **state)`
+  - `test_heading_ladder` (function, line 50) `static void test_heading_ladder(void **state)`
+  - `test_lists` (function, line 66) `static void test_lists(void **state)`
+  - `test_blockquote` (function, line 77) `static void test_blockquote(void **state)`
+  - `test_hr` (function, line 84) `static void test_hr(void **state)`
+  - `test_inline_and_inline_block` (function, line 91) `static void test_inline_and_inline_block(void **state)`
+  - `test_display_none_for_non_rendered` (function, line 102) `static void test_display_none_for_non_rendered(void **state)`
+  - `test_case_insensitive` (function, line 111) `static void test_case_insensitive(void **state)`
+  - `test_unknown_and_null_are_neutral_inline` (function, line 119) `static void test_unknown_and_null_are_neutral_inline(void **state)`
+  - `test_div_is_block` (function, line 134) `static void test_div_is_block(void **state)`
+  - `test_ua_structural_wrappers_have_no_margin` (function, line 145) `static void test_ua_structural_wrappers_have_no_margin(void **state)`
+  - `test_ua_spaced_tags_round_trip` (function, line 162) `static void test_ua_spaced_tags_round_trip(void **state)`
+  - `test_ua_list_item_is_distinct_but_unspaced` (function, line 182) `static void test_ua_list_item_is_distinct_but_unspaced(void **state)`
+  - `test_block_ua_box_is_content_independent` (function, line 195) `static void test_block_ua_box_is_content_independent(void **state)`
+  - `test_block_ua_box_heading_level_wins` (function, line 206) `static void test_block_ua_box_heading_level_wins(void **state)`
+  - `test_block_ua_box_list_item_wins_over_ancestor` (function, line 219) `static void test_block_ua_box_list_item_wins_over_ancestor(void **state)`
+  - `test_block_ua_box_is_total` (function, line 228) `static void test_block_ua_box_is_total(void **state)`
+  - `test_table_role_from_tag` (function, line 243) `static void test_table_role_from_tag(void **state)`
+  - `test_table_role_is_total` (function, line 273) `static void test_table_role_is_total(void **state)`
+  - `test_ua_case_insensitive_and_trimmed` (function, line 283) `static void test_ua_case_insensitive_and_trimmed(void **state)`
+  - `test_ua_fails_closed` (function, line 291) `static void test_ua_fails_closed(void **state)`
+  - `test_ua_code_space_is_total` (function, line 309) `static void test_ua_code_space_is_total(void **state)`
+  - `test_parse_display_keywords` (function, line 320) `static void test_parse_display_keywords(void **state)`
+  - `test_parse_display_inline_aliases` (function, line 339) `static void test_parse_display_inline_aliases(void **state)`
+  - `test_parse_display_case_and_trim` (function, line 348) `static void test_parse_display_case_and_trim(void **state)`
+  - `test_parse_display_errors` (function, line 357) `static void test_parse_display_errors(void **state)`
+  - `test_display_name` (function, line 375) `static void test_display_name(void **state)`
+  - `test_place_no_box_is_identity` (function, line 390) `static void test_place_no_box_is_identity(void **state)`
+  - `test_place_max_width_caps` (function, line 397) `static void test_place_max_width_caps(void **state)`
+  - `test_place_centering` (function, line 408) `static void test_place_centering(void **state)`
+  - `test_place_insets` (function, line 420) `static void test_place_insets(void **state)`
+  - `test_place_failclosed_bounds` (function, line 432) `static void test_place_failclosed_bounds(void **state)`
+  - `test_border_box_height` (function, line 475) `static void test_border_box_height(void **state)`
+  - `test_content_clipped` (function, line 493) `static void test_content_clipped(void **state)`
+  - `test_width_cap_pct` (function, line 509) `static void test_width_cap_pct(void **state)`
+  - `test_width_cap2_is_min_of_two_values` (function, line 524) `static void test_width_cap2_is_min_of_two_values(void **state)`
+  - `percentage` (function, line 543) `* percentage (a plain `width:50%` leaves the px half UNSET, a plain `width:300px`
  * leaves the p...`
-  - `main` (function, line 608) `int main(void)`
-  - `width` (function, line 552) `* a negative width (CSS Values 4 section 10.1: out-of-range calc() results are * clamped at used-value time). */...`
+  - `test_flex_max_clamp` (function, line 611) `static void test_flex_max_clamp(void **state)`
+  - `test_place_declared_width_overflows` (function, line 627) `static void test_place_declared_width_overflows(void **state)`
+  - `test_border_span` (function, line 646) `static void test_border_span(void **state)`
+  - `test_flex_min_clamp` (function, line 659) `static void test_flex_min_clamp(void **state)`
+  - `main` (function, line 670) `int main(void)`
+  - `width` (function, line 553) `* a negative width (CSS Values 4 section 10.1: out-of-range calc() results are * clamped at used-value time). */...`
 - Depends on: `include/box_style.h`
 
 ## tests/test_box_tree.c

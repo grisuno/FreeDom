@@ -19,6 +19,7 @@
 #include <cmocka.h>
 
 #include "css.h"
+#include "flex_layout.h"
 #include "css_select.h"
 #include "css_vars.h"
 #include "webfont.h"
@@ -3556,6 +3557,140 @@ static void test_fontface_later_rule_clears(void **state) {
     css_free(sh);
 }
 
+
+/* Named local families (spec/text_shape.md section 7): the cascade keeps the
+ * whole normalized font-family list so the painter can resolve it locally. */
+static void test_font_list_normalized(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("span{font-family:\"Helvetica  Neue\",  Arial ,sans-serif}"
+                               "p{font:14px/1.2 Verdana, 'Geneva'}"
+                               "b{font-family:monospace}", 0, &sh), CSS_OK);
+    css_element sp = el_node("span", NULL, NULL, 0, NULL);
+    assert_string_equal(css_resolve_el(sh, &sp, NULL, 0).font_list,
+                        "helvetica neue,arial,sans-serif");
+    css_element pp = el_node("p", NULL, NULL, 0, NULL);
+    assert_string_equal(css_resolve_el(sh, &pp, NULL, 0).font_list, "verdana,geneva");
+    css_element bb = el_node("b", NULL, NULL, 0, NULL);
+    assert_string_equal(css_resolve_el(sh, &bb, NULL, 0).font_list, "monospace");
+    css_element ii = el_node("i", NULL, NULL, 0, NULL);
+    assert_string_equal(css_resolve_el(sh, &ii, NULL, 0).font_list, "");
+    css_free(sh);
+}
+
+static void test_font_list_inline_and_fontface_first_name(void **state) {
+    (void)state;
+    assert_string_equal(css_parse_inline("font-family:Arial", 0).font_list, "arial");
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("@font-face{font-family:'X';src:url(x.woff);}"
+                               "span{font-family:'X',Arial,serif;}", 0, &sh), CSS_OK);
+    css_element el = el_node("span", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_int_equal(out.fontface, wf_name_hash("X", 1));
+    assert_string_equal(out.font_list, "x,arial,serif");
+    css_free(sh);
+}
+
+
+/* ::placeholder (CSS Pseudo 4 section 4.5) styles the placeholder text, never the
+ * input: a floating-label form hides it with opacity:0 (github's sign-up box). */
+static void test_placeholder_pseudo_element(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("input::placeholder{opacity:0;color:#ff0000}"
+                               "input{color:#00ff00}"
+                               "textarea::-webkit-input-placeholder{color:#0000ff}", 0, &sh),
+                     CSS_OK);
+    css_element in = el_node("input", NULL, NULL, 0, NULL);
+    css_style el = css_resolve_el(sh, &in, NULL, 0);
+    assert_int_equal(el.color, 0x00ff00);
+    assert_int_equal(el.opacity, -1);
+    css_style ph = css_resolve_pseudo(sh, &in, CSS_PSEUDO_PLACEHOLDER);
+    assert_int_equal(ph.opacity, 0);
+    assert_int_equal(ph.color, 0xff0000);
+    css_element ta = el_node("textarea", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_pseudo(sh, &ta, CSS_PSEUDO_PLACEHOLDER).color, 0x0000ff);
+    /* ::before rules do not leak into the placeholder. */
+    css_free(sh);
+}
+
+
+/* font-size through calc()/min(): Bootstrap 5's responsive headings are
+ * `calc(1.375rem + 1.5vw)`, which the vw rewrite turns into rem + px. A purely
+ * absolute result is an absolute size, a purely font-relative one a multiple of the
+ * inherited size; a mix of the two is not representable and stays dropped. */
+static void test_font_size_math_functions(void **state) {
+    (void)state;
+    css_style a = css_parse_inline("font-size:calc(1.375rem + 15px)", 0);
+    assert_int_equal(a.font_scale, 231);   /* (22 + 15) / 16 */
+    assert_int_equal(a.font_abs, 1);
+    css_style b = css_parse_inline("font-size:min(140px, 72px)", 0);
+    assert_int_equal(b.font_scale, 450);
+    assert_int_equal(b.font_abs, 1);
+    css_style c = css_parse_inline("font-size:calc(1.5em)", 0);
+    assert_int_equal(c.font_scale, 150);
+    assert_int_equal(c.font_abs, 0);
+    css_style d = css_parse_inline("font-size:calc(1em + 2px)", 0);
+    assert_int_equal(d.font_scale, 0);     /* mixed: dropped, fail closed */
+}
+
+/* filter: none / unset / grayscale() are valid (Filter Effects 1 section 5: a
+ * filter function with no argument takes its default, 1 for grayscale). */
+static void test_filter_none_and_default_argument(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("filter:grayscale()", 0).filter_grayscale, 100);
+    css_sheet *sh = NULL;
+    css_drop_log log = { 0 };
+    const char *src = ".a{filter:none}.b{filter:unset}.c{transform:rotate(0)}";
+    assert_int_equal(css_parse_logged(src, strlen(src), NULL, NULL, &sh, &log), CSS_OK);
+    assert_int_equal((int)log.total, 0);
+    css_free(sh);
+}
+
+
+/* Logical borders map to the physical sides (CSS Logical 1 section 6, horizontal-tb
+ * LTR, like the logical margins). */
+static void test_logical_borders(void **state) {
+    (void)state;
+    css_style a = css_parse_inline("border-block-end:2px solid #ff0000", 0);
+    assert_int_equal(a.border_bottom_width, 2);
+    assert_int_equal(a.border_bottom_color, 0xff0000);
+    css_style b = css_parse_inline("border-inline-start-width:3px", 0);
+    assert_int_equal(b.border_left_width, 3);
+    css_style c = css_parse_inline("border-block:1px solid #00ff00", 0);
+    assert_int_equal(c.border_top_width, 1);
+    assert_int_equal(c.border_bottom_width, 1);
+    css_style d = css_parse_inline("border-inline-width:4px 5px", 0);
+    assert_int_equal(d.border_left_width, 4);
+    assert_int_equal(d.border_right_width, 5);
+    assert_int_equal(css_parse_inline("border-block-bogus:1px", 0).border_top_width, CSS_LEN_UNSET);
+}
+
+
+/* SVG paint properties: stroke, stroke-width, fill:none (SVG 2 13.2). */
+static void test_svg_stroke_and_fill_none(void **state) {
+    (void)state;
+    css_style a = css_parse_inline("stroke:#ff0000;stroke-width:2", 0);
+    assert_int_equal(a.svg_stroke, 0xff0000);
+    assert_int_equal(a.svg_stroke_w, 200);
+    css_style b = css_parse_inline("stroke:currentColor;stroke-width:1.5px;fill:none", 0);
+    assert_int_equal(b.svg_stroke, CC_COLOR_CURRENT);
+    assert_int_equal(b.svg_stroke_w, 150);
+    assert_int_equal(b.svg_fill, CSS_SVG_PAINT_NONE);
+    assert_int_equal(css_parse_inline("stroke:none", 0).svg_stroke, CSS_SVG_PAINT_NONE);
+    assert_int_equal(css_parse_inline("color:red", 0).svg_stroke, -1);
+    assert_int_equal(css_parse_inline("stroke-width:-1px", 0).svg_stroke_w, -1);
+}
+
+
+static void test_text_wrap_balance(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("text-wrap:balance", 0).text_balance, 1);
+    assert_int_equal(css_parse_inline("text-wrap-style:balance", 0).text_balance, 1);
+    assert_int_equal(css_parse_inline("text-wrap:pretty", 0).text_balance, 0);
+    assert_int_equal(css_parse_inline("color:red", 0).text_balance, -1);
+}
+
 /* Harmless 3D = identity + stacking context (2026-10-09). */
 static void test_transform_z_identity(void **state) {
     (void)state;
@@ -3563,8 +3698,9 @@ static void test_transform_z_identity(void **state) {
     assert_int_equal(css_parse_inline("-webkit-transform: translateZ(0)", 0).transform_tx, 0);
     assert_int_equal(css_parse_inline("transform: rotateX(0deg)", 0).transform_tx, 0);
     assert_int_equal(css_parse_inline("transform: rotateY(0deg)", 0).transform_tx, 0);
-    /* A unitless angle is invalid (same as rotate(0) today): angles need units. */
-    assert_int_equal(css_parse_inline("transform: rotateX(0)", 0).transform_tx, CSS_LEN_UNSET);
+    /* A unitless ZERO is a valid angle in transform functions (CSS Transforms 1
+     * `[ <angle> | <zero> ]`; Firefox accepts it): identity, like rotateX(0deg). */
+    assert_int_equal(css_parse_inline("transform: rotateX(0)", 0).transform_tx, 0);
     /* Non-zero 3D still drops the whole declaration (fail closed). */
     assert_int_equal(css_parse_inline("transform: rotateX(90deg)", 0).transform_tx, CSS_LEN_UNSET);
     assert_int_equal(css_parse_inline("transform: perspective(5px)", 0).transform_tx, CSS_LEN_UNSET);
@@ -3810,6 +3946,62 @@ static void test_box_orient_maps_to_flex_direction(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).flex_direction, CSS_FD_UNSET);
 }
 
+/* A CSS-wide keyword that WINS a slot must leave it at its initial value even when
+ * a LOSING declaration was applied first (Cascade 5 7.3). Measured on Hugo Stack
+ * (andreagrandi.it): `@media(min-width:768px){.flex.on-phone--column{flex-direction:
+ * unset}}` kept the earlier `column`, so the sidebar stacked over the posts. */
+static void test_wide_keyword_resets_earlier_loser(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".f{flex-direction:column;text-align:right;margin-top:7px}"
+                               ".f.g{flex-direction:unset;text-align:inherit}"
+                               ".h{margin-top:initial}", 0, &sh), CSS_OK);
+    const char *two[] = { "f", "g" };
+    css_style r = css_resolve(sh, "div", NULL, two, 2, NULL, 0);
+    assert_int_equal(r.flex_direction, CSS_FD_UNSET);
+    assert_int_equal(r.text_align, CSS_ALIGN_UNSET);
+    assert_int_equal(r.margin_top, 7);            /* untouched slots keep their winner */
+    const char *three[] = { "f", "g", "h" };
+    r = css_resolve(sh, "div", NULL, three, 3, NULL, 0);
+    assert_int_equal(r.margin_top, CSS_LEN_UNSET);  /* later equal-spec `initial` */
+    /* An inline wide keyword beats the sheet the same way. */
+    const char *one[] = { "f" };
+    r = css_resolve(sh, "div", NULL, one, 1, "flex-direction:revert", 0);
+    assert_int_equal(r.flex_direction, CSS_FD_UNSET);
+    /* A wide keyword that LOSES changes nothing. */
+    css_sheet *sh2 = NULL;
+    assert_int_equal(css_parse(".f{flex-direction:unset} .f.g{flex-direction:column}", 0, &sh2),
+                     CSS_OK);
+    r = css_resolve(sh2, "div", NULL, two, 2, NULL, 0);
+    assert_int_equal(r.flex_direction, CSS_FD_COLUMN);
+    css_free(sh2);
+    css_free(sh);
+}
+
+/* `[name]` in a track list is a LINE NAME, not a track (CSS Grid 1 7.2). Counting
+ * it doubled the column count of every named-line template: animate.style's
+ * `[callout] 1fr [sidebar] 250px` laid out as four columns and its 250px sidebar
+ * landed in the middle of the page. */
+static void test_grid_line_names_are_not_tracks(void **state) {
+    (void)state;
+    css_style g = css_parse_inline("grid-template-columns:[callout] 1fr [sidebar] 250px", 0);
+    assert_int_equal(g.grid_cols, 2);
+    assert_int_equal(g.grid_col_w[0], -100);
+    assert_int_equal(g.grid_col_w[1], 250);
+    g = css_parse_inline("grid-template-columns:[full-start] minmax(1rem,1fr) [main-start] "
+                         "600px [main-end] minmax(1rem,1fr) [full-end]", 0);
+    assert_int_equal(g.grid_cols, 3);
+    assert_int_equal(g.grid_col_w[1], 600);
+    g = css_parse_inline("grid-template-columns:[a b] 1fr [c]", 0);
+    assert_int_equal(g.grid_cols, 1);
+    g = css_parse_inline("grid-template-columns:repeat(2, [x] 1fr [y])", 0);
+    assert_int_equal(g.grid_cols, 2);
+    assert_int_equal(css_parse_inline("grid-template-rows:[top] auto [mid] 1fr [end]", 0).grid_rows, 2);
+    /* names alone are no track list */
+    assert_int_equal(css_parse_inline("grid-template-columns:[a]", 0).grid_cols, 0);
+    assert_int_equal(css_parse_inline("grid-template-columns:[a 1fr", 0).grid_cols, 0);
+}
+
 static void test_grid_extras(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("grid-template-rows:1fr 1fr 1fr", 0).grid_rows, 3);
@@ -3818,10 +4010,47 @@ static void test_grid_extras(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).row_gap, -1);
     assert_int_equal(css_parse_inline("grid-auto-flow:column", 0).grid_auto_flow, CSS_GF_COLUMN);
     assert_int_equal(css_parse_inline("grid-auto-flow:row dense", 0).grid_auto_flow, CSS_GF_ROW);
-    assert_int_equal(css_parse_inline("grid-column:span 2", 0).grid_col_span, 2);
-    assert_int_equal(css_parse_inline("grid-row:span 3", 0).grid_row_span, 3);
-    assert_int_equal(css_parse_inline("grid-column:1 / 3", 0).grid_col_span, 0); /* line nums dropped */
-    assert_int_equal(css_parse_inline("color:red", 0).grid_col_span, 0);
+    /* Line placement (spec/grid_areas.md section 6): each side one encoded int. */
+    css_style gs = css_parse_inline("grid-column:span 2", 0);
+    assert_int_equal(gs.grid_col_start, FX_GL_SPAN_BASE + 2);
+    assert_int_equal(gs.grid_col_end, FX_GL_AUTO);
+    assert_int_equal(css_parse_inline("grid-row:span 3", 0).grid_row_start, FX_GL_SPAN_BASE + 3);
+    gs = css_parse_inline("grid-column:1 / 3", 0);
+    assert_int_equal(gs.grid_col_start, 1);
+    assert_int_equal(gs.grid_col_end, 3);
+    gs = css_parse_inline("grid-column:auto/span 12", 0);
+    assert_int_equal(gs.grid_col_start, FX_GL_AUTO);
+    assert_int_equal(gs.grid_col_end, FX_GL_SPAN_BASE + 12);
+    gs = css_parse_inline("grid-row:1; grid-column-start:2; grid-column-end:-1", 0);
+    assert_int_equal(gs.grid_row_start, 1);
+    assert_int_equal(gs.grid_row_end, FX_GL_AUTO);
+    assert_int_equal(gs.grid_col_start, 2);
+    assert_int_equal(gs.grid_col_end, -1);
+    gs = css_parse_inline("grid-area:1/2", 0);          /* row-start / column-start */
+    assert_int_equal(gs.grid_row_start, 1);
+    assert_int_equal(gs.grid_col_start, 2);
+    assert_int_equal(gs.grid_row_end, FX_GL_AUTO);
+    assert_int_equal(gs.grid_col_end, FX_GL_AUTO);
+    gs = css_parse_inline("grid-area:1 / 2 / 3 / span 2", 0);
+    assert_int_equal(gs.grid_row_start, 1);
+    assert_int_equal(gs.grid_col_start, 2);
+    assert_int_equal(gs.grid_row_end, 3);
+    assert_int_equal(gs.grid_col_end, FX_GL_SPAN_BASE + 2);
+    /* A named line is not representable: dropped, nothing written. */
+    assert_int_equal(css_parse_inline("grid-column:main-start/2", 0).grid_col_start, FX_GL_AUTO);
+    assert_int_equal(css_parse_inline("grid-column:main-start/2", 0).grid_col_end, FX_GL_AUTO);
+    assert_int_equal(css_parse_inline("color:red", 0).grid_col_start, FX_GL_AUTO);
+    /* The shorthand writes BOTH longhands: a later `span 2` clears an earlier end. */
+    {
+        css_sheet *gsh = NULL;
+        assert_int_equal(css_parse(".a{grid-column:1/3} .a.b{grid-column:span 2}", 0, &gsh),
+                         CSS_OK);
+        const char *gcls[] = { "a", "b" };
+        css_style r = css_resolve(gsh, "div", NULL, gcls, 2, NULL, 0);
+        assert_int_equal(r.grid_col_start, FX_GL_SPAN_BASE + 2);
+        assert_int_equal(r.grid_col_end, FX_GL_AUTO);
+        css_free(gsh);
+    }
     /* column-gap still feeds `gap` (unchanged); row-gap is separate. */
     css_style g = css_parse_inline("gap:10px; row-gap:20px", 0);
     assert_int_equal(g.gap, 10);
@@ -3859,8 +4088,8 @@ static void test_layout_sheet_cascade_and_unset(void **state) {
     css_free(sh);
     /* Anti-DoS clamp on a flex factor and span. */
     assert_int_equal(css_parse_inline("flex-grow:99999", 0).flex_grow, CSS_FLEX_FACTOR_MAX);
-    assert_int_equal(css_parse_inline("grid-column:span 99999", 0).grid_col_span,
-                     CSS_GRID_SPAN_MAX);
+    assert_int_equal(css_parse_inline("grid-column:span 99999", 0).grid_col_start,
+                     FX_GL_SPAN_BASE + CSS_GRID_SPAN_MAX);
 }
 
 /* --- Outline longhands (outline-width/outline-style/outline-color) --- */
@@ -4991,6 +5220,51 @@ static void test_keyframes_overflow_skips_block_not_sheet(void **state) {
  * the root font-size". A 50% root is used wherever the assertion must be exact:
  * it round-trips through the integer font_scale percent without quantization. */
 
+/* Viewport WIDTH units resolve against the render width @media already sees
+ * (owner decision 2026-10-15, spec/css.md "Viewport units"); vh/vb stay on the
+ * normalized 1080. Measured on ipinfo.io: a `calc(100vw * 4)` slider came out
+ * 7680px wide on a page painted at 1000. */
+static void test_vw_resolves_against_render_width(void **state) {
+    (void)state;
+    css_media m = { 0, 0, 1000, NULL, NULL };
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse_media(
+        ".a{width:100vw;height:10vh;margin-left:calc(50% - 50vw)}"
+        ".b{width:50vmin;max-width:50vmax;padding-left:10dvw}"
+        ".c{width:calc(100vw * 4)}"
+        ".w-100vw{content:\"100vw\";width:20vi}", 0, &m, &sh), CSS_OK);
+    css_style a = css_resolve(sh, "div", NULL, (const char *[]){ "a" }, 1, NULL, 0);
+    assert_int_equal(a.width, 1000);
+    assert_int_equal(a.height, 108);                 /* vh: normalized 1080 */
+    assert_int_equal(a.margin_left, -500);           /* px half of calc() */
+    css_style b = css_resolve(sh, "div", NULL, (const char *[]){ "b" }, 1, NULL, 0);
+    assert_int_equal(b.width, 500);                  /* vmin = min(1000, 1080) */
+    assert_int_equal(b.max_width, 540);              /* vmax = max(1000, 1080) */
+    assert_int_equal(b.pad_left, 100);
+    css_style c = css_resolve(sh, "div", NULL, (const char *[]){ "c" }, 1, NULL, 0);
+    assert_int_equal(c.width, 4000);
+    /* a selector that spells a unit is untouched; so is quoted text */
+    css_style w = css_resolve(sh, "div", NULL, (const char *[]){ "w-100vw" }, 1, NULL, 0);
+    assert_int_equal(w.width, 200);
+    /* inline style goes through the same rewrite as the sheet */
+    css_style in = css_resolve(sh, "div", NULL, NULL, 0, "width:30vw", 0);
+    assert_int_equal(in.width, 300);
+    css_free(sh);
+    /* ...including when a CSS-wide keyword makes the cascade run twice: the
+     * rewritten inline text must outlive both passes (ASan pins this). */
+    assert_int_equal(css_parse_media(".f{flex-direction:column}.f.g{flex-direction:unset}",
+                                     0, &m, &sh), CSS_OK);
+    in = css_resolve(sh, "div", NULL, (const char *[]){ "f", "g" }, 2, "width:30vw", 0);
+    assert_int_equal(in.width, 300);
+    assert_int_equal(in.flex_direction, CSS_FD_UNSET);
+    css_free(sh);
+    /* default context (no render width given): the normalized desktop, unchanged */
+    assert_int_equal(css_parse(".a{width:100vw}", 0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "div", NULL, (const char *[]){ "a" }, 1, NULL, 0).width,
+                     1920);
+    css_free(sh);
+}
+
 static void test_rem_rebased_on_root_font_size(void **state) {
     (void)state;
     css_sheet *sh = NULL;
@@ -5211,6 +5485,14 @@ int main(void) {
         cmocka_unit_test(test_fontface_data_url_family_matches),
         cmocka_unit_test(test_fontface_inline_has_no_sheet),
         cmocka_unit_test(test_fontface_later_rule_clears),
+        cmocka_unit_test(test_font_list_normalized),
+        cmocka_unit_test(test_font_list_inline_and_fontface_first_name),
+        cmocka_unit_test(test_placeholder_pseudo_element),
+        cmocka_unit_test(test_font_size_math_functions),
+        cmocka_unit_test(test_filter_none_and_default_argument),
+        cmocka_unit_test(test_logical_borders),
+        cmocka_unit_test(test_svg_stroke_and_fill_none),
+        cmocka_unit_test(test_text_wrap_balance),
         cmocka_unit_test(test_bg_position_edge_offset),
         cmocka_unit_test(test_bg_position_four_value),
         cmocka_unit_test(test_bg_position_center_by_identity),
@@ -5229,6 +5511,8 @@ int main(void) {
         cmocka_unit_test(test_flex_align),
         cmocka_unit_test(test_box_orient_maps_to_flex_direction),
         cmocka_unit_test(test_grid_extras),
+        cmocka_unit_test(test_grid_line_names_are_not_tracks),
+        cmocka_unit_test(test_wide_keyword_resets_earlier_loser),
         cmocka_unit_test(test_layout_sheet_cascade_and_unset),
         cmocka_unit_test(test_inline_box_longhands),
         cmocka_unit_test(test_box_shorthand_expansion),
@@ -5490,6 +5774,7 @@ int main(void) {
         cmocka_unit_test(test_anim_transform_keyframes_from_sheet),
         cmocka_unit_test(test_clip_rect),
         cmocka_unit_test(test_clip_auto),
+        cmocka_unit_test(test_vw_resolves_against_render_width),
         cmocka_unit_test(test_rem_rebased_on_root_font_size),
         cmocka_unit_test(test_rem_rebase_applies_to_box_lengths),
         cmocka_unit_test(test_rem_rebase_absent_root_declaration_is_byte_identical),

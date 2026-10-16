@@ -45,7 +45,10 @@ typedef struct pf_ref {
 } pf_ref;
 
 #define PF_MAX_REFS    64   /* anti-DoS cap for the scanner and the pool */
-#define PF_MAX_THREADS 4    /* maximum simultaneous downloads */
+#define PF_MAX_THREADS 6    /* simultaneous downloads: Firefox's per-host connection limit */
+#define PF_MAX_JOBS    256  /* pool jobs: the HTML refs plus the ES module graph */
+#define PF_MAX_IMPORTS 64   /* static imports taken from one module body */
+#define PF_SPEC_MAX    1024 /* bytes of one import specifier, NUL included */
 
 typedef struct pf_list {
     pf_ref refs[PF_MAX_REFS];
@@ -85,7 +88,7 @@ typedef struct pf_job {
 } pf_job;
 
 typedef struct pf_pool {
-    pf_job          jobs[PF_MAX_REFS];
+    pf_job          jobs[PF_MAX_JOBS];
     size_t          count;
     pf_fetch_fn     fetch;
     void           *ctx;
@@ -95,10 +98,37 @@ typedef struct pf_pool {
     pthread_cond_t  done_cv;
     size_t          next;    /* next job index a worker thread claims */
     int             started;
+    int             closing; /* pf_pool_finish: idle threads exit */
+    struct im_map  *imap;    /* the page's import map (owned), NULL = none */
+    char           *page_url;/* owned; keys are absolute against it (NULL = raw keys) */
+    pthread_cond_t  work_cv; /* signalled when a job is added or the pool closes */
 } pf_pool;
 
+/* Static import specifiers of an ES module body (spec/prefetch.md section 8):
+ * `import ... from "x"`, `import "x"`, `export ... from "x"`, comments skipped,
+ * only URL-shaped specifiers (./ ../ / https://). Writes up to cap NUL-terminated
+ * specifiers (each < PF_SPEC_MAX) into out[k] and returns how many. Pure. */
+size_t pf_scan_imports(const char *js, size_t len, char (*out)[PF_SPEC_MAX], size_t cap);
+
+/* Span of the first <script type=importmap> body in html (pure, bounded): 1 with
+ * [*start, *start + *n) set, or 0 when there is none. */
+int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n);
+
+/* The page-level pool every frontend starts (DRY): scans html, queues the
+ * stylesheets under css_grant and the scripts under js_grant, parses the page's
+ * import map (so a module's bare specifiers resolve exactly as the loader will
+ * resolve them), and starts the pool. 0 when started; -1 when there was nothing
+ * to fetch or no thread started (the caller fetches serially). */
+int pf_pool_start_page(pf_pool *p, const char *html, size_t len, const char *page_url,
+                       int css_grant, int js_grant, pf_fetch_fn fetch, void *ctx);
+
+/* Queues one more URL on a started pool (deduplicated, bounded by PF_MAX_JOBS).
+ * Returns 1 when added, 0 when already known, full, or the pool is not running. */
+int pf_pool_add(pf_pool *p, const char *url);
+
 /* Starts the pool over urls[0..nurls) (deep-copied; duplicates and entries past
- * PF_MAX_REFS are dropped) with min(PF_MAX_THREADS, jobs) worker threads, each
+ * PF_MAX_JOBS are dropped) with PF_MAX_THREADS worker threads (they wait for jobs the
+ * module graph adds until pf_pool_finish), each
  * claiming jobs and running fetch(ctx, "GET", url, ...). Returns 0 on success or
  * -1 when no thread could start (the caller just falls back to serial fetching:
  * performance fails open, policy is unaffected). */

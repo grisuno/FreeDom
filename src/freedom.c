@@ -627,22 +627,11 @@ static int render_page(const char *html, size_t len, const char *top_url,
     /* Hito 29 (lookahead prefetch): pre-scan the HTML and download the external
      * stylesheets/scripts the worker will request in parallel, through the same
      * policy-gated headless_fetch. A miss falls back to the serial path. */
-    pf_list scanned;
-    scanned.count = 0;
     pf_pool subpool;
     pf_gated_fetch gated = { headless_fetch, (void *)(uintptr_t)top_url, NULL };
-    if ((wc.net || wc.css) && pf_scan(html, len, &scanned) == 0) {
-        const char *urls[PF_MAX_REFS];
-        size_t nurl = 0;
-        for (size_t i = 0; i < scanned.count; ++i) {
-            int want = (scanned.refs[i].kind == PF_STYLESHEET) ? wc.css : wc.net;
-            if (want) urls[nurl++] = scanned.refs[i].url;
-        }
-        if (nurl > 0
-            && pf_pool_start(&subpool, urls, nurl, headless_fetch,
-                             (void *)(uintptr_t)top_url) == 0)
-            gated.pool = &subpool;
-    }
+    if (pf_pool_start_page(&subpool, html, len, top_url, wc.css, wc.net, headless_fetch,
+                           (void *)(uintptr_t)top_url) == 0)
+        gated.pool = &subpool;
     tab_set_fetcher(t, pf_pooled_fetch, &gated);
     /* @font-face stash (spec/webfont.md b3b): fresh per render; the sink
      * observes every served CSS body (serial and pool paths alike). */
@@ -669,12 +658,17 @@ static int render_page(const char *html, size_t len, const char *top_url,
     uint64_t ipc_t0 = now_us();
     ts = tab_load_full(t, html, len, top_url, wc.js, 0, 0, &page);
     pt_record(&g_timings, PT_IPC, pt_elapsed_us(ipc_t0, now_us()));
+    if (timings_enabled()) {
+        size_t sn = 0;
+        uint64_t sus = 0;
+        tab_last_subreq_stats(t, &sn, &sus);
+        fprintf(stderr, "stage=subreq n=%zu total_us=%llu\n", sn, (unsigned long long)sus);
+    }
 
     /* The prefetch window ends with the load: rebind the direct fetcher and drop
      * the pool (unconsumed results freed, in-flight fetches joined). */
     tab_set_fetcher(t, headless_fetch, (void *)(uintptr_t)top_url);
     if (gated.pool != NULL) pf_pool_finish(&subpool);
-    pf_list_free(&scanned);
 
     if (ts != TAB_OK) {
         fprintf(stderr, "freedom: failed to load page (status %d)\n", (int)ts);

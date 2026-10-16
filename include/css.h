@@ -84,6 +84,8 @@ typedef enum css_justify {  /* justify-content (flex/grid main axis) */
 #define CSS_GRAD_STOPS_MAX 4     /* cap on linear-gradient color stops (extra kept out) */
 #define CSS_LINE_MIN      50     /* line-height clamp floor (percent) */
 #define CSS_LINE_MAX      400    /* line-height clamp ceiling (percent, anti-DoS) */
+#define CSS_SVG_PAINT_NONE (-5)  /* fill/stroke: none (distinct from every CC_COLOR_* sentinel) */
+#define CSS_FONT_LIST_MAX 192    /* bytes of a normalized font-family list (truncated at a name boundary) */
 #define CSS_URL_MAX       1024   /* cap on a captured background-image url() text (anti-DoS; longer -> dropped, fail closed, never truncated-and-fetched). Sized to comfortably hold the RESOLVED absolute URL too (render_doc.c resolves in place against the page origin), not just the raw author-CSS token -- real CDN asset URLs with hashed filenames/query strings routinely exceed a bare 256-byte cap. */
 
 /* text-decoration line bits, OR-combined into css_style.text_decoration. The field
@@ -570,7 +572,12 @@ typedef struct css_style {
     int         color;       /* 0xRRGGBB or -1 (unset) */
     int         svg_fill;    /* SVG `fill` presentation property: 0xRRGGBB, -1 unset,
                               * CC_COLOR_CURRENT for currentColor. Colours inline-<svg>
-                              * shapes that declare no fill of their own. */
+                              * shapes that declare no fill of their own.
+                              * CSS_SVG_PAINT_NONE for `fill:none`. */
+    /* SVG `stroke` (same encoding as svg_fill, CSS_SVG_PAINT_NONE = none) and
+     * `stroke-width` in hundredths of a px (-1 unset). Both inherit (SVG 2 13.2). */
+    int         svg_stroke;
+    int         svg_stroke_w;
     int         background;  /* 0xRRGGBB or -1 (unset) */
     /* Background alpha (2026-07-19): the 4th component of an rgba()/hsla()
      * background color as a percent 0..100; CSS_LEN_UNSET = opaque. The color
@@ -654,6 +661,10 @@ typedef struct css_style {
      * else 0. Inherits like font_family; gated behind caps.css downstream.
      * 0 also when there is no sheet (inline-only resolve) or no match. */
     unsigned    fontface;
+    /* The winning font-family list, normalized (unquoted, lowercased, spaces
+     * collapsed, comma-separated), "" = undeclared. The painter resolves it to a
+     * LOCAL family (spec/text_shape.md section 7); the worker never sees a font. */
+    char        font_list[CSS_FONT_LIST_MAX];
     int         text_transform;  /* css_text_transform, 0 (unset) */
     int         letter_spacing;  /* px (signed), 0 = normal, CSS_LEN_UNSET (unset) */
     int         word_spacing;    /* px (signed), 0 = normal, CSS_LEN_UNSET (unset) */
@@ -672,6 +683,9 @@ typedef struct css_style {
     int         valign_shift;
     int         text_indent;     /* px (signed), CSS_LEN_UNSET (unset) */
     int         white_space;     /* css_white_space, 0 (unset) */
+    /* text-wrap-style: 1 balance, 0 an explicit other style (wrap/pretty/stable/
+     * nowrap), -1 unset. Inherits (CSS Text 4 6.4.2). */
+    int         text_balance;
     int         tab_size;        /* number of spaces for tab, 0 (unset) */
     int         list_style;      /* css_list_style, 0 (unset) */
     int         direction;       /* css_direction, 0 (unset) */
@@ -721,7 +735,11 @@ typedef struct css_style {
     int         grid_rows;
     int         row_gap;
     int         grid_auto_flow;  /* css_grid_flow */
-    int         grid_col_span, grid_row_span; /* `span N`, 0 unset */
+    /* grid-{column,row}-{start,end}: one placement SIDE each, encoded as in
+     * flex_layout.h (FX_GL_AUTO = 0 = unset/auto, FX_GL_SPAN_BASE + n = span n,
+     * else a line number). Resolved against the container's tracks in page_view.
+     * spec/grid_areas.md section 6. */
+    int         grid_col_start, grid_col_end, grid_row_start, grid_row_end;
     /* Float layout (spec/float.md). NOT inherited (read from the element's own resolved
      * style, like the box model). Layout structure, applied regardless of caps.css. */
     int         float_side;      /* css_float, 0 (unset) */
@@ -1123,6 +1141,7 @@ css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
 /* Which generated box css_resolve_pseudo resolves (CSS 2.1 12.1). */
 #define CSS_PSEUDO_BEFORE 1
 #define CSS_PSEUDO_AFTER  2
+#define CSS_PSEUDO_PLACEHOLDER 3   /* ::placeholder of a text control */
 
 /* The computed style of el's ::before (CSS_PSEUDO_BEFORE) or ::after
  * (CSS_PSEUDO_AFTER) generated box: only the rules whose subject carries that

@@ -100,6 +100,27 @@ fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
                               const int *fixed_row, const int *fixed_col,
                               size_t *out_row, size_t *out_col);
 
+/* --- grid-column / grid-row line placement (CSS Grid 1 8.3) --------------------
+ * Full contract and resolution table: spec/grid_areas.md section 6. One SIDE of a
+ * placement is one int: FX_GL_AUTO, FX_GL_SPAN_BASE + n for `span n`, or a non-zero
+ * line number (negative counts from the end). */
+#define FX_GL_AUTO      0
+#define FX_GL_SPAN_BASE (1 << 20)
+#define FX_GL_SPAN_MAX  1000   /* == CSS_GRID_SPAN_MAX (checked in css.c) */
+#define FX_GL_LINE_MAX  1000
+
+/* `auto` | <integer> | span <integer>. 1 + *out written, or 0 with *out untouched. */
+int fx_grid_line_side(const char *s, int *out);
+
+/* The shorthand `<side> [ / <side> ]` (no slash => end is auto). 1 or 0 (both
+ * outputs untouched on 0). */
+int fx_grid_line_parse(const char *v, int *start, int *end);
+
+/* Resolves a start/end pair against ntracks explicit tracks: *pos0 = 0-based start
+ * track or -1 (auto-place), *span >= 1. Never fails: anything unresolvable falls
+ * back to auto placement. */
+void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span);
+
 /* repeat(auto-fill, minmax(min, max)): how many min-wide tracks fit in avail
  * (CSS Grid 1 7.2.3.2; one gap between tracks). Pure: floor((avail+gap)/(min+gap))
  * clamped to [1, FX_MAX_ITEMS]. Non-positive/NaN inputs fail safe to 1 (never 0:

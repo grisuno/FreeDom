@@ -2171,6 +2171,7 @@ static void test_dump_layout_pulled_rail_single_margin(void **state) {
     (void)state;
     const char *html =
         "<html><head><style>"
+        "body{margin:0}"
         ".main-wrap { float:left; width:100%; }"
         ".main-wrap > .main-content { margin-right:320px; }"
         "article.story { float:left; width:100%; }"
@@ -2519,6 +2520,7 @@ static void test_dump_layout_nested_column_takes_max(void **state) {
     (void)state;
     const char *html =
         "<html><head><style>"
+        "body{margin:0}"
         ".row{display:flex;flex-wrap:wrap;}"
         ".card{position:relative;display:flex;flex-direction:column;"
         "background:#fff;border:1px solid #ddd;}"
@@ -2852,8 +2854,70 @@ static void test_dump_timings_prints_stages(void **state) {
 
 /* --- suite --- */
 
+
+/* A shrink-to-fit item whose content is a nested container (github's tab pill):
+ * (1) the container's enclosing box is not the item's own box, (2) a width:100%
+ * wrapper inside is cyclic and measures as auto, (3) min-width floors it. Firefox:
+ * a 3 x 104px pill centred, not a full-width bar. */
+static void test_dump_layout_shrink_pill_nested_container(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        ".w{display:flex;flex-direction:column;align-items:center}"
+        ".c{display:flex;border:1px solid #000}.t{width:100%;padding:8px}"
+        ".b{min-width:104px;padding:8px 16px}"
+        "</style></head><body><div class=\"w\"><div class=\"c\"><div class=\"t\">"
+        "<button class=\"b\">Code</button><button class=\"b\">Plan</button>"
+        "<button class=\"b\">Collab</button></div></div></div></body></html>";
+    const char *path = "__freedom_pill.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_pill.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    /* The pill's box (the widest) is about 3*104 + 2*8 + 2, centred. */
+    double maxw = 0.0, x_at = -1.0;
+    for (char *p = out; (p = strstr(p, "box[")) != NULL; p += 4) {
+        double x = 0.0, wv = 0.0;
+        char *xp = strstr(p, " x="), *wp = strstr(p, " w=");
+        if (xp && wp && sscanf(xp, " x=%lf", &x) == 1 && sscanf(wp, " w=%lf", &wv) == 1 && wv > maxw) {
+            maxw = wv; x_at = x;
+        }
+    }
+    assert_true(maxw > 320.0 && maxw < 340.0);
+    assert_true(x_at > 300.0);
+    unlink(path);
+}
+
+
+/* A native form control is an inline-block atom of its line (HTML Rendering 15.5):
+ * "Name: <input> more" is ONE line, as in Firefox, not three stacked rows. */
+static void test_dump_layout_inline_input_shares_line(void **state) {
+    (void)state;
+    const char *html = "<html><body><p>Name: <input placeholder=\"x\"> and more text.</p>"
+                       "</body></html>";
+    const char *path = "__freedom_inlinput.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_inlinput.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "nrow=1 "));
+    unlink(path);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_dump_layout_inline_input_shares_line),
+        cmocka_unit_test(test_dump_layout_shrink_pill_nested_container),
         cmocka_unit_test(test_help),
         cmocka_unit_test(test_version),
         cmocka_unit_test(test_no_args),

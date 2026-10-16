@@ -1,6 +1,18 @@
 # Subsystem: include (page 4 of 4)
 Previous: [KB_include_p3.md](KB_include_p3.md)
 
+## include/request_policy.h
+- Doc: rp_host_of: Lowercased host of an absolute URL into out.
+- Layer: business_logic
+- Language: h
+- Symbols:
+  - `rp_decision` (enum, line 21)
+  - `rp_host_of` (function, line 30) `int rp_host_of(const char *url, char *out, size_t out_size);`
+  - `rp_site_of` (function, line 34) `int rp_site_of(const char *host, char *out, size_t out_size);`
+  - `rp_same_site` (function, line 37) `int rp_same_site(const char *top_level_url, const char *request_url);`
+  - `FREEDOM_REQUEST_POLICY_H` (macro, line 2) `#define FREEDOM_REQUEST_POLICY_H`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/request_policy.c`, `src/tab.c`, `tests/test_request_policy.c`
+
 ## include/secure_fetch.h
 - Doc: sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *...
 - Layer: utility
@@ -114,19 +126,20 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `tab_set_storage` (function, line 216) `void tab_set_storage(tab *t, const char *blob, size_t len);`
   - `exclusively` (function, line 222) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
   - `tab_set_viewport_w` (function, line 230) `void tab_set_viewport_w(tab *t, int px);`
-  - `tab_subreq_permitted` (function, line 235) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
-  - `view` (function, line 243) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
-  - `string` (function, line 263) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
-  - `granted` (function, line 312) `* granted (allow.conf AND js.conf);`
-  - `returned` (function, line 313) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
-  - `popstate` (function, line 319) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
-  - `decode` (function, line 338) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
-  - `tab_alive` (function, line 351) `int tab_alive(const tab *t);`
-  - `tab_child_pid` (function, line 354) `pid_t tab_child_pid(const tab *t);`
-  - `tab_close` (function, line 357) `void tab_close(tab *t);`
-  - `tab_page_free` (function, line 360) `void tab_page_free(tab_page *p);`
-  - `tab_eval_result_free` (function, line 361) `void tab_eval_result_free(tab_eval_result *r);`
-  - `tab_image_free` (function, line 362) `void tab_image_free(tab_image *img);`
+  - `tab_last_subreq_stats` (function, line 236) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);`
+  - `tab_subreq_permitted` (function, line 241) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
+  - `view` (function, line 249) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
+  - `string` (function, line 269) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
+  - `granted` (function, line 318) `* granted (allow.conf AND js.conf);`
+  - `returned` (function, line 319) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
+  - `popstate` (function, line 325) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
+  - `decode` (function, line 344) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
+  - `tab_alive` (function, line 357) `int tab_alive(const tab *t);`
+  - `tab_child_pid` (function, line 360) `pid_t tab_child_pid(const tab *t);`
+  - `tab_close` (function, line 363) `void tab_close(tab *t);`
+  - `tab_page_free` (function, line 366) `void tab_page_free(tab_page *p);`
+  - `tab_eval_result_free` (function, line 367) `void tab_eval_result_free(tab_eval_result *r);`
+  - `tab_image_free` (function, line 368) `void tab_image_free(tab_image *img);`
   - `FREEDOM_TAB_H` (macro, line 2) `#define FREEDOM_TAB_H`
   - `TAB_MAX_INPUT` (macro, line 148) `#define TAB_MAX_INPUT`
 - Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
@@ -138,18 +151,26 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Language: h
 - Symbols:
   - `tsh_font` (struct, line 33)
-  - `tsh_status` (enum, line 43)
+  - `tsh_status` (enum, line 80)
   - `family` (type_alias, line 33) `typedef struct tsh_font { int family;`
   - `content` (function, line 11) `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);`
-  - `tsh_ready` (function, line 52) `int tsh_ready(void);`
-  - `origin` (function, line 55) `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...`
-  - `tsh_measure` (function, line 64) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);`
-  - `tsh_webfont_register` (function, line 77) `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);`
-  - `tsh_webfont_clear` (function, line 83) `void tsh_webfont_clear(void);`
-  - `tsh_shutdown` (function, line 86) `void tsh_shutdown(void);`
+  - `tsh_family_is_generic` (function, line 52) `int tsh_family_is_generic(const char *name);`
+  - `wins` (function, line 58) `* the first name the resolver accepts wins (returns 1, family in out). Pure: the * resolver is injected (fontconfig...`
+  - `tsh_pick_family` (function, line 68) `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...`
+  - `tsh_local_handle` (function, line 75) `int tsh_local_handle(const char *list);`
+  - `tsh_ready` (function, line 89) `int tsh_ready(void);`
+  - `origin` (function, line 92) `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...`
+  - `tsh_measure` (function, line 101) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);`
+  - `tsh_webfont_register` (function, line 114) `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);`
+  - `tsh_webfont_clear` (function, line 120) `void tsh_webfont_clear(void);`
+  - `tsh_face` (function, line 127) `cairo_font_face_t *tsh_face(const tsh_font *f);`
+  - `tsh_shutdown` (function, line 130) `void tsh_shutdown(void);`
   - `FREEDOM_TEXT_SHAPE_H` (macro, line 19) `#define FREEDOM_TEXT_SHAPE_H`
-  - `TSH_MAX_GLYPHS` (macro, line 40) `#define TSH_MAX_GLYPHS`
-  - `TSH_MAX_TEXT` (macro, line 41) `#define TSH_MAX_TEXT`
+  - `TSH_LOCAL_LISTS` (macro, line 46) `#define TSH_LOCAL_LISTS`
+  - `TSH_LOCAL_FAMILIES` (macro, line 47) `#define TSH_LOCAL_FAMILIES`
+  - `TSH_FAMILY_MAX` (macro, line 48) `#define TSH_FAMILY_MAX`
+  - `TSH_MAX_GLYPHS` (macro, line 77) `#define TSH_MAX_GLYPHS`
+  - `TSH_MAX_TEXT` (macro, line 78) `#define TSH_MAX_TEXT`
 - Imported by: `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 
 ## include/textfield.h
@@ -247,7 +268,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `FREEDOM_URL_H` (macro, line 2) `#define FREEDOM_URL_H`
   - `URL_MAX_LEN` (macro, line 30) `#define URL_MAX_LEN`
   - `URL_SEARCH_ENDPOINT` (macro, line 76) `#define URL_SEARCH_ENDPOINT`
-- Imported by: `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_url.c`, `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
+- Imported by: `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_url.c`, `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
 
 ## include/util.h
 - Doc: — shared pure helpers (no I/O except where noted).
