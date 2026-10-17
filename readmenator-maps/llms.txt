@@ -45,7 +45,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p6.md](md/readmenator-agent/KB_tests_p6.md): Doc: dir: include "prefs.h" include "profile.h"
 - [readmenator-agent/KB_tests_p7.md](md/readmenator-agent/KB_tests_p7.md): Doc: mk: projection, and the headless operator-flag path. #include <setjmp.h> #include <stdarg.h>...
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: ffgeom -- Firefox geometry as TEXT, no image reading.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 268 files at commit 4719f4569d3b. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 268 files at commit 53c7b9d8228f. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)
@@ -62,7 +62,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/SYMBOLS_p8.md](md/readmenator-agent/SYMBOLS_p8.md)
 - [readmenator-agent/SYMBOLS_p9.md](md/readmenator-agent/SYMBOLS_p9.md)
 - [readmenator-agent/recipes/add-function.md](md/readmenator-agent/recipes/add-function.md): Find the target file by purpose: grep -in '<topic>' readmenator-agent/INDEX.md
-- [readmenator-agent/recipes/change-impact.md](md/readmenator-agent/recipes/change-impact.md): Riskiest file: include/csscolor.h (52 dependents)
+- [readmenator-agent/recipes/change-impact.md](md/readmenator-agent/recipes/change-impact.md): Riskiest file: include/css.h (52 dependents)
 
 ## Project Docs
 
