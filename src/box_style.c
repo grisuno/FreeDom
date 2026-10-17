@@ -480,3 +480,16 @@ bx_hplace bx_place_ex(double inset_l, double inset_r, double width_cap, int cent
     }
     return p;
 }
+
+double bx_line_height_px(int line_scale, double font_px) {
+    if (line_scale <= 0) return 0.0;
+    /* Out-of-range values (only a hostile worker can send them) clamp to the
+     * same bounds the parser enforces. */
+    if (line_scale >= CSS_LINE_ABS_BASE) {
+        long t = (long)line_scale - CSS_LINE_ABS_BASE;
+        if (t > (long)CSS_LINE_ABS_MAX_PX * 10) t = (long)CSS_LINE_ABS_MAX_PX * 10;
+        return (double)t / 10.0;
+    }
+    int pct = (line_scale > CSS_LINE_MAX) ? CSS_LINE_MAX : line_scale;
+    return (font_px > 0.0) ? font_px * (double)pct / 100.0 : 0.0;
+}

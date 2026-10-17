@@ -3,126 +3,137 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `render_current_ex` | function | `gui/browser_ui.c:2286` | `static void render_current_ex(browser_window *w, int allow_js_nav)` |
-| `render_doc_images` | function | `gui/browser_ui.c:13119` | `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,               ...` |
-| `replaced_current_color` | function | `gui/browser_ui.c:10925` | `static int replaced_current_color(const browser_window *w, const rd_block *blk)` |
-| `replaced_inline_size` | function | `gui/browser_ui.c:4376` | `static int replaced_inline_size(cairo_t *cr, const browser_window *w, const ui_theme *th,        ...` |
-| `replaced_is_inline_level` | function | `gui/browser_ui.c:4408` | `static int replaced_is_inline_level(const rc_state *s, const rd_block *b)` |
-| `resizes` | function | `gui/browser_ui.c:14755` | `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);` |
-| `resolve` | function | `gui/browser_ui.c:2633` | `* origin so its relative references and local images resolve (confined to the * document's directory) -- a local...` |
-| `resolve_box_cursor` | function | `gui/browser_ui.c:13334` | `static int resolve_box_cursor(const rd_doc *doc, int block_id)` |
-| `root_cont_in` | function | `gui/browser_ui.c:5491` | `static int root_cont_in(const rd_doc *doc, int cid, int float_box)` |
-| `root_cont_of` | function | `gui/browser_ui.c:5463` | `static int root_cont_of(const rd_doc *doc, int cid)` |
-| `row` | function | `gui/browser_ui.c:5084` | `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */ static d...` |
-| `row_align_offset` | function | `gui/browser_ui.c:10237` | `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` |
-| `row_line_slack` | function | `gui/browser_ui.c:10225` | `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)` |
-| `row_owner_block_id` | function | `gui/browser_ui.c:10900` | `static int row_owner_block_id(const rc_layout *L, const rc_row *r);` |
-| `rows` | function | `gui/browser_ui.c:11260` | `* RC_IMAGE rows (see its declaration);` |
-| `run` | function | `gui/browser_ui.c:3868` | `* continuation run (block_id < 0 with no block break) deliberately skips reconcile  * to stay on ...` |
-| `run_width_cap` | function | `gui/browser_ui.c:5243` | `static double run_width_cap(const rd_block *b, double avail_w)` |
-| `save_current_page` | function | `gui/browser_ui.c:13882` | `static void save_current_page(browser_window *w)` |
-| `save_download` | function | `gui/browser_ui.c:13849` | `static void save_download(browser_window *w, const char *url, const char *bytes,                 ...` |
-| `saving` | function | `gui/browser_ui.c:16783` | `* disables saving (never clobber);` |
-| `schedule_js_tick` | function | `gui/browser_ui.c:2276` | `static void schedule_js_tick(browser_window *w, int next_ms)` |
-| `scroll_line_px` | function | `gui/browser_ui.c:15795` | `static double scroll_line_px(const browser_window *w)` |
-| `scrollbar_drag_to` | function | `gui/browser_ui.c:2965` | `static void scrollbar_drag_to(browser_window *w)` |
-| `scrollbar_metrics` | function | `gui/browser_ui.c:2937` | `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,          ...` |
-| `seat_caps` | function | `gui/browser_ui.c:16720` | `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` |
-| `seat_name` | function | `gui/browser_ui.c:16731` | `static void seat_name(void *d, struct wl_seat *s, const char *name)` |
-| `secure_fetch` | function | `gui/browser_ui.c:1951` | `* through secure_fetch (Zero Trust);` |
-| `seed_local_storage` | function | `gui/browser_ui.c:2211` | `static void seed_local_storage(browser_window *w, tab *t, int trusted)` |
-| `seed_session_cookies` | function | `gui/browser_ui.c:2187` | `static void seed_session_cookies(tab *t, int trusted, const char *url)` |
-| `select_box_width` | function | `gui/browser_ui.c:8987` | `static double select_box_width(double content_w)` |
-| `set_cache` | function | `gui/browser_ui.c:1286` | `static void set_cache(browser_window *w, char *html, size_t len, const char *top)` |
-| `set_cursor` | function | `gui/browser_ui.c:14790` | `static void set_cursor(browser_window *w, int cur_kind)` |
-| `set_page_url` | function | `gui/browser_ui.c:13529` | `static void set_page_url(browser_window *w, const char *url)` |
-| `set_rgb` | function | `gui/browser_ui.c:10764` | `set_rgb(cr, (ui_rgb)` |
-| `set_rgb_alpha` | function | `gui/browser_ui.c:3674` | `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)` |
-| `sf_ws_url_check` | function | `gui/browser_ui.c:13562` | `&& sf_ws_url_check(op->data) == SF_OK && rp_host_of(op->data, host, sizeof host) == 0 && hb_check(w->hosts, host) !=...` |
-| `show_busy` | function | `gui/browser_ui.c:2471` | `static void show_busy(browser_window *w)` |
-| `show_fetch_error` | function | `gui/browser_ui.c:2480` | `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,                   ...` |
-| `sites` | function | `gui/browser_ui.c:3658` | `* sites (wfh 0, local 0) get the bucket face, which is the toy face's twin. */     if (wfh != 0u ...` |
-| `slot` | function | `gui/browser_ui.c:5829` | `* layout slot (item 0 → rightmost, last item → leftmost). */     if (use_flex && cdv.direction ==...` |
-| `smaller` | function | `gui/browser_ui.c:3229` | `* size when the content is smaller (height) or wider (min-width);` |
-| `spaced` | function | `gui/browser_ui.c:10470` | `* or evenly spaced (bui_grad_color_at). */ static void bui_paint_conic(cairo_t *cr, double x, dou...` |
-| `standalone` | function | `gui/browser_ui.c:8434` | `* must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */...` |
-| `strcmp` | function | `gui/browser_ui.c:2599` | `&& strcmp(auth_host_buf, w->auth_host) != 0)` |
-| `stream_progress_cb` | function | `gui/browser_ui.c:1827` | `static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata)` |
-| `string` | function | `gui/browser_ui.c:2099` | `* or an empty string (unset, blocked, or off by caps.images), so there is no * decision to re-check, unlike...` |
-| `struct` | function | `gui/browser_ui.c:5972` | `* struct (0 = auto);` |
-| `styled_advance` | function | `gui/browser_ui.c:3743` | `static double styled_advance(cairo_t *cr, const rc_frag *f)` |
-| `styled_draw` | function | `gui/browser_ui.c:3759` | `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)` |
-| `stylesheets` | function | `gui/browser_ui.c:2306` | `* External stylesheets (Hito 27) follow the author-styles opt-in -- or the * trusted-host doctrine (Hito 28)...` |
-| `surface_from_pixels` | function | `gui/browser_ui.c:1297` | `static cairo_surface_t *surface_from_pixels(const tab_image *img)` |
-| `tab_ctx` | struct | `gui/browser_ui.c:278` | `` |
-| `tab_ctx_release` | function | `gui/browser_ui.c:2705` | `static void tab_ctx_release(tab_ctx *c)` |
-| `tab_new` | function | `gui/browser_ui.c:2146` | `static void tab_new(browser_window *w, const char *url);` |
-| `tab_restore` | function | `gui/browser_ui.c:2677` | `static void tab_restore(browser_window *w)` |
-| `tab_save` | function | `gui/browser_ui.c:2660` | `static void tab_save(browser_window *w)` |
-| `tab_switch` | function | `gui/browser_ui.c:2729` | `static void tab_switch(browser_window *w, int idx)` |
-| `tab_title` | function | `gui/browser_ui.c:2838` | `static const char *tab_title(const browser_window *w, int i)` |
-| `tabbar_top` | function | `gui/browser_ui.c:2854` | `static double tabbar_top(const browser_window *w)` |
-| `table` | function | `gui/browser_ui.c:5019` | `* synthesised table (no descriptors to disagree) keeps the stamp. */         if (cd != NULL && !c...` |
-| `text` | function | `gui/browser_ui.c:10395` | `* fill and gradient text (2026-07-19). */ static cairo_pattern_t *bui_linear_grad(double x, doubl...` |
-| `the` | function | `gui/browser_ui.c:11842` | `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset...` |
-| `them` | function | `gui/browser_ui.c:4809` | `* to them (jkanime's badge-only tiles keep their box). */ static int item_root_box_in(const rd_do...` |
-| `toggle` | function | `gui/browser_ui.c:2156` | `* No network: a capability toggle (images/CSS) re-renders from cache. Does nothing * when there is no cached source...` |
+| `redraw` | function | `gui/browser_ui.c:15023` | `static void redraw(browser_window *w)` |
+| `redraws` | function | `gui/browser_ui.c:17164` | `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...` |
+| `reference` | function | `gui/browser_ui.c:13812` | `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:  * hostile content...` |
+| `registry_global` | function | `gui/browser_ui.c:17040` | `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,                  ...` |
+| `registry_remove` | function | `gui/browser_ui.c:17060` | `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)` |
+| `remember_visit` | function | `gui/browser_ui.c:971` | `static void remember_visit(browser_window *w, const char *url)` |
+| `render_current` | function | `gui/browser_ui.c:2544` | `static void render_current(browser_window *w)` |
+| `render_current_ex` | function | `gui/browser_ui.c:2366` | `static void render_current_ex(browser_window *w, int allow_js_nav)` |
+| `render_doc_images` | function | `gui/browser_ui.c:13421` | `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,               ...` |
+| `repl_edges` | struct | `gui/browser_ui.c:1165` | `` |
+| `repl_edges_x` | function | `gui/browser_ui.c:1196` | `static double repl_edges_x(const repl_edges *e)` |
+| `repl_edges_y` | function | `gui/browser_ui.c:1200` | `static double repl_edges_y(const repl_edges *e)` |
+| `replaced_current_color` | function | `gui/browser_ui.c:11222` | `static int replaced_current_color(const browser_window *w, const rd_block *blk)` |
+| `replaced_edges` | function | `gui/browser_ui.c:1172` | `static repl_edges replaced_edges(const rd_doc *doc, const rd_block *b, double cb_w)` |
+| `replaced_inline_size` | function | `gui/browser_ui.c:4516` | `static int replaced_inline_size(cairo_t *cr, const browser_window *w, const ui_theme *th,        ...` |
+| `replaced_is_inline_level` | function | `gui/browser_ui.c:4548` | `static int replaced_is_inline_level(const rc_state *s, const rd_block *b)` |
+| `resizes` | function | `gui/browser_ui.c:15057` | `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);` |
+| `resolve` | function | `gui/browser_ui.c:2713` | `* origin so its relative references and local images resolve (confined to the * document's directory) -- a local...` |
+| `resolve_box_cursor` | function | `gui/browser_ui.c:13636` | `static int resolve_box_cursor(const rd_doc *doc, int block_id)` |
+| `root_cont_in` | function | `gui/browser_ui.c:5703` | `static int root_cont_in(const rd_doc *doc, int cid, int float_box)` |
+| `root_cont_of` | function | `gui/browser_ui.c:5675` | `static int root_cont_of(const rd_doc *doc, int cid)` |
+| `row` | function | `gui/browser_ui.c:5292` | `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */ static d...` |
+| `row_align_offset` | function | `gui/browser_ui.c:10534` | `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` |
+| `row_line_slack` | function | `gui/browser_ui.c:10522` | `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)` |
+| `row_owner_block_id` | function | `gui/browser_ui.c:11197` | `static int row_owner_block_id(const rc_layout *L, const rc_row *r);` |
+| `rows` | function | `gui/browser_ui.c:11563` | `* RC_IMAGE rows (see its declaration);` |
+| `run` | function | `gui/browser_ui.c:3959` | `* continuation run (block_id < 0 with no block break) deliberately skips reconcile  * to stay on ...` |
+| `run_width_cap` | function | `gui/browser_ui.c:5455` | `static double run_width_cap(const rd_block *b, double avail_w)` |
+| `save_current_page` | function | `gui/browser_ui.c:14184` | `static void save_current_page(browser_window *w)` |
+| `save_download` | function | `gui/browser_ui.c:14151` | `static void save_download(browser_window *w, const char *url, const char *bytes,                 ...` |
+| `saving` | function | `gui/browser_ui.c:17085` | `* disables saving (never clobber);` |
+| `schedule_js_tick` | function | `gui/browser_ui.c:2356` | `static void schedule_js_tick(browser_window *w, int next_ms)` |
+| `scroll_line_px` | function | `gui/browser_ui.c:16097` | `static double scroll_line_px(const browser_window *w)` |
+| `scrollbar_drag_to` | function | `gui/browser_ui.c:3045` | `static void scrollbar_drag_to(browser_window *w)` |
+| `scrollbar_metrics` | function | `gui/browser_ui.c:3017` | `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,          ...` |
+| `seat_caps` | function | `gui/browser_ui.c:17022` | `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` |
+| `seat_name` | function | `gui/browser_ui.c:17033` | `static void seat_name(void *d, struct wl_seat *s, const char *name)` |
+| `secure_fetch` | function | `gui/browser_ui.c:2031` | `* through secure_fetch (Zero Trust);` |
+| `seed_local_storage` | function | `gui/browser_ui.c:2291` | `static void seed_local_storage(browser_window *w, tab *t, int trusted)` |
+| `seed_session_cookies` | function | `gui/browser_ui.c:2267` | `static void seed_session_cookies(tab *t, int trusted, const char *url)` |
+| `select_box_width` | function | `gui/browser_ui.c:9276` | `static double select_box_width(double content_w)` |
+| `set_cache` | function | `gui/browser_ui.c:1366` | `static void set_cache(browser_window *w, char *html, size_t len, const char *top)` |
+| `set_cursor` | function | `gui/browser_ui.c:15092` | `static void set_cursor(browser_window *w, int cur_kind)` |
+| `set_page_url` | function | `gui/browser_ui.c:13831` | `static void set_page_url(browser_window *w, const char *url)` |
+| `set_rgb` | function | `gui/browser_ui.c:11061` | `set_rgb(cr, (ui_rgb)` |
+| `set_rgb_alpha` | function | `gui/browser_ui.c:3754` | `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)` |
+| `sf_ws_url_check` | function | `gui/browser_ui.c:13864` | `&& sf_ws_url_check(op->data) == SF_OK && rp_host_of(op->data, host, sizeof host) == 0 && hb_check(w->hosts, host) !=...` |
+| `show_busy` | function | `gui/browser_ui.c:2551` | `static void show_busy(browser_window *w)` |
+| `show_fetch_error` | function | `gui/browser_ui.c:2560` | `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,                   ...` |
+| `sites` | function | `gui/browser_ui.c:3738` | `* sites (wfh 0, local 0) get the bucket face, which is the toy face's twin. */     if (wfh != 0u ...` |
+| `slot` | function | `gui/browser_ui.c:6046` | `* layout slot (item 0 → rightmost, last item → leftmost). */     if (use_flex && cdv.direction ==...` |
+| `smaller` | function | `gui/browser_ui.c:3309` | `* size when the content is smaller (height) or wider (min-width);` |
+| `spaced` | function | `gui/browser_ui.c:10767` | `* or evenly spaced (bui_grad_color_at). */ static void bui_paint_conic(cairo_t *cr, double x, dou...` |
+| `standalone` | function | `gui/browser_ui.c:8713` | `* must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */...` |
+| `strcmp` | function | `gui/browser_ui.c:2679` | `&& strcmp(auth_host_buf, w->auth_host) != 0)` |
+| `stream_progress_cb` | function | `gui/browser_ui.c:1907` | `static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata)` |
+| `string` | function | `gui/browser_ui.c:2179` | `* or an empty string (unset, blocked, or off by caps.images), so there is no * decision to re-check, unlike...` |
+| `struct` | function | `gui/browser_ui.c:6192` | `* struct (0 = auto);` |
+| `styled_advance` | function | `gui/browser_ui.c:3816` | `static double styled_advance(cairo_t *cr, const rc_frag *f)` |
+| `styled_draw` | function | `gui/browser_ui.c:3838` | `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)` |
+| `stylesheets` | function | `gui/browser_ui.c:2386` | `* External stylesheets (Hito 27) follow the author-styles opt-in -- or the * trusted-host doctrine (Hito 28)...` |
+| `surface_from_pixels` | function | `gui/browser_ui.c:1377` | `static cairo_surface_t *surface_from_pixels(const tab_image *img)` |
+| `tab_ctx` | struct | `gui/browser_ui.c:279` | `` |
+| `tab_ctx_release` | function | `gui/browser_ui.c:2785` | `static void tab_ctx_release(tab_ctx *c)` |
+| `tab_new` | function | `gui/browser_ui.c:2226` | `static void tab_new(browser_window *w, const char *url);` |
+| `tab_restore` | function | `gui/browser_ui.c:2757` | `static void tab_restore(browser_window *w)` |
+| `tab_save` | function | `gui/browser_ui.c:2740` | `static void tab_save(browser_window *w)` |
+| `tab_switch` | function | `gui/browser_ui.c:2809` | `static void tab_switch(browser_window *w, int idx)` |
+| `tab_title` | function | `gui/browser_ui.c:2918` | `static const char *tab_title(const browser_window *w, int i)` |
+| `tabbar_top` | function | `gui/browser_ui.c:2934` | `static double tabbar_top(const browser_window *w)` |
+| `table` | function | `gui/browser_ui.c:5227` | `* synthesised table (no descriptors to disagree) keeps the stamp. */         if (cd != NULL && !c...` |
+| `text` | function | `gui/browser_ui.c:10692` | `* fill and gradient text (2026-07-19). */ static cairo_pattern_t *bui_linear_grad(double x, doubl...` |
+| `the` | function | `gui/browser_ui.c:12145` | `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset...` |
+| `them` | function | `gui/browser_ui.c:5011` | `* to them (jkanime's badge-only tiles keep their box). */ static int item_root_box_in(const rd_do...` |
+| `toggle` | function | `gui/browser_ui.c:2236` | `* No network: a capability toggle (images/CSS) re-renders from cache. Does nothing * when there is no cached source...` |
 | `toggle_fullscreen` | function | `gui/browser_ui.c:1074` | `static void toggle_fullscreen(browser_window *w)` |
-| `toggle_reader` | function | `gui/browser_ui.c:14022` | `static void toggle_reader(browser_window *w)` |
-| `toolbar_button_at` | function | `gui/browser_ui.c:3044` | `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)` |
-| `toolbar_rects` | function | `gui/browser_ui.c:3029` | `static void toolbar_rects(const browser_window *w,                           double *back_x, doub...` |
-| `toolbar_top` | function | `gui/browser_ui.c:2860` | `static double toolbar_top(const browser_window *w)` |
-| `toplevel_close` | function | `gui/browser_ui.c:14769` | `static void toplevel_close(void *data, struct xdg_toplevel *t)` |
-| `toplevel_configure` | function | `gui/browser_ui.c:14747` | `static void toplevel_configure(void *data, struct xdg_toplevel *t,                               ...` |
-| `treatment` | function | `gui/browser_ui.c:7177` | `* block treatment (shrink-wrapped and placed by text-align), which is what a          * standalon...` |
-| `ua_box_rect` | function | `gui/browser_ui.c:3087` | `static void ua_box_rect(const browser_window *w, double *x, double *y,                         do...` |
-| `ui_bg_image` | struct | `gui/browser_ui.c:261` | `` |
-| `ui_dump_layout` | function | `gui/browser_ui.c:13171` | `ui_status ui_dump_layout(const rd_doc *doc)` |
-| `ui_hot` | enum | `gui/browser_ui.c:217` | `` |
-| `ui_image` | struct | `gui/browser_ui.c:248` | `` |
-| `ui_input_state` | struct | `gui/browser_ui.c:224` | `` |
-| `ui_menu_action` | enum | `gui/browser_ui.c:169` | `` |
-| `ui_menu_item` | struct | `gui/browser_ui.c:186` | `` |
-| `ui_render_pdf_images` | function | `gui/browser_ui.c:13156` | `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,                   ...` |
-| `ui_render_png` | function | `gui/browser_ui.c:13059` | `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` |
-| `ui_render_png_images` | function | `gui/browser_ui.c:13150` | `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,                   ...` |
-| `ui_run_browser` | function | `gui/browser_ui.c:16768` | `ui_status ui_run_browser(const char *start_url)` |
-| `uitab_close` | function | `gui/browser_ui.c:2789` | `static void uitab_close(browser_window *w, int idx)` |
-| `upstream` | function | `gui/browser_ui.c:10265` | `* upstream (see spec/css.md). */ static void box_path4(cairo_t *cr, double x, double y, double w,...` |
-| `utf8_clen` | function | `gui/browser_ui.c:3683` | `static size_t utf8_clen(const char *s, size_t n)` |
-| `v_read` | function | `gui/browser_ui.c:9619` | `static int v_read(int fd, void *buf, size_t n)` |
+| `toggle_reader` | function | `gui/browser_ui.c:14324` | `static void toggle_reader(browser_window *w)` |
+| `toolbar_button_at` | function | `gui/browser_ui.c:3124` | `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)` |
+| `toolbar_rects` | function | `gui/browser_ui.c:3109` | `static void toolbar_rects(const browser_window *w,                           double *back_x, doub...` |
+| `toolbar_top` | function | `gui/browser_ui.c:2940` | `static double toolbar_top(const browser_window *w)` |
+| `toplevel_close` | function | `gui/browser_ui.c:15071` | `static void toplevel_close(void *data, struct xdg_toplevel *t)` |
+| `toplevel_configure` | function | `gui/browser_ui.c:15049` | `static void toplevel_configure(void *data, struct xdg_toplevel *t,                               ...` |
+| `treatment` | function | `gui/browser_ui.c:7432` | `* block treatment (shrink-wrapped and placed by text-align), which is what a          * standalon...` |
+| `ua_box_rect` | function | `gui/browser_ui.c:3167` | `static void ua_box_rect(const browser_window *w, double *x, double *y,                         do...` |
+| `ui_bg_image` | struct | `gui/browser_ui.c:262` | `` |
+| `ui_dump_layout` | function | `gui/browser_ui.c:13473` | `ui_status ui_dump_layout(const rd_doc *doc)` |
+| `ui_hot` | enum | `gui/browser_ui.c:218` | `` |
+| `ui_image` | struct | `gui/browser_ui.c:249` | `` |
+| `ui_input_state` | struct | `gui/browser_ui.c:225` | `` |
+| `ui_menu_action` | enum | `gui/browser_ui.c:170` | `` |
+| `ui_menu_item` | struct | `gui/browser_ui.c:187` | `` |
+| `ui_render_pdf_images` | function | `gui/browser_ui.c:13458` | `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,                   ...` |
+| `ui_render_png` | function | `gui/browser_ui.c:13361` | `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` |
+| `ui_render_png_images` | function | `gui/browser_ui.c:13452` | `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,                   ...` |
+| `ui_run_browser` | function | `gui/browser_ui.c:17070` | `ui_status ui_run_browser(const char *start_url)` |
+| `uitab_close` | function | `gui/browser_ui.c:2869` | `static void uitab_close(browser_window *w, int idx)` |
+| `upstream` | function | `gui/browser_ui.c:10562` | `* upstream (see spec/css.md). */ static void box_path4(cairo_t *cr, double x, double y, double w,...` |
+| `utf8_clen` | function | `gui/browser_ui.c:3763` | `static size_t utf8_clen(const char *s, size_t n)` |
+| `v_read` | function | `gui/browser_ui.c:9916` | `static int v_read(int fd, void *buf, size_t n)` |
 | `video_feeder_thread` | function | `gui/browser_ui.c:1069` | `static void *video_feeder_thread(void *arg);` |
-| `video_fetch` | function | `gui/browser_ui.c:9940` | `static sf_status video_fetch(const char *url, browser_window *w,                               sf...` |
-| `video_play` | function | `gui/browser_ui.c:9957` | `static int video_play(browser_window *w, const char *m3u8_url)` |
-| `video_stop` | function | `gui/browser_ui.c:9762` | `static void video_stop(browser_window *w)` |
-| `video_stop` | function | `gui/browser_ui.c:10059` | `* each segment loop so a video_stop() in the main thread (which sets it to 0  * then calls pthrea...` |
-| `way` | function | `gui/browser_ui.c:5129` | `* intrinsic box either way (it does not wrap below its own size). */ static int block_leaves_flow(const rd_doc *doc...` |
-| `window_button_rects` | function | `gui/browser_ui.c:3019` | `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...` |
-| `wl_array_for_each` | function | `gui/browser_ui.c:14763` | `wl_array_for_each(st, states)` |
-| `wm_base_ping` | function | `gui/browser_ui.c:14733` | `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)` |
-| `write_doc_pdf` | function | `gui/browser_ui.c:12703` | `static long write_doc_pdf(browser_window *w, const char *path)` |
-| `write_doc_png` | function | `gui/browser_ui.c:12874` | `static long write_doc_png(browser_window *w, const char *path)` |
-| `write_file_atomic` | function | `gui/browser_ui.c:13827` | `static int write_file_atomic(const char *path, const void *bytes, size_t len)` |
-| `ws_apply_ops` | function | `gui/browser_ui.c:13554` | `static void ws_apply_ops(browser_window *w, const tab_page *page)` |
-| `x` | function | `gui/browser_ui.c:7593` | `* reported x is already the BORDER x (the §7c.2 rule);` |
-| `xdg_surface_configure` | function | `gui/browser_ui.c:14739` | `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)` |
-| `yet` | function | `gui/browser_ui.c:8181` | `* does not carry yet (WPT flex-abspos-staticpos-*). */ static int runs_share_float(const rd_doc *...` |
+| `video_fetch` | function | `gui/browser_ui.c:10237` | `static sf_status video_fetch(const char *url, browser_window *w,                               sf...` |
+| `video_play` | function | `gui/browser_ui.c:10254` | `static int video_play(browser_window *w, const char *m3u8_url)` |
+| `video_stop` | function | `gui/browser_ui.c:10059` | `static void video_stop(browser_window *w)` |
+| `video_stop` | function | `gui/browser_ui.c:10356` | `* each segment loop so a video_stop() in the main thread (which sets it to 0  * then calls pthrea...` |
+| `way` | function | `gui/browser_ui.c:5337` | `* intrinsic box either way (it does not wrap below its own size). */ static int block_leaves_flow(const rd_doc *doc...` |
+| `window_button_rects` | function | `gui/browser_ui.c:3099` | `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...` |
+| `wl_array_for_each` | function | `gui/browser_ui.c:15065` | `wl_array_for_each(st, states)` |
+| `wm_base_ping` | function | `gui/browser_ui.c:15035` | `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)` |
+| `write_doc_pdf` | function | `gui/browser_ui.c:13005` | `static long write_doc_pdf(browser_window *w, const char *path)` |
+| `write_doc_png` | function | `gui/browser_ui.c:13176` | `static long write_doc_png(browser_window *w, const char *path)` |
+| `write_file_atomic` | function | `gui/browser_ui.c:14129` | `static int write_file_atomic(const char *path, const void *bytes, size_t len)` |
+| `ws_apply_ops` | function | `gui/browser_ui.c:13856` | `static void ws_apply_ops(browser_window *w, const tab_page *page)` |
+| `x` | function | `gui/browser_ui.c:7848` | `* reported x is already the BORDER x (the §7c.2 rule);` |
+| `xdg_surface_configure` | function | `gui/browser_ui.c:15041` | `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)` |
+| `yet` | function | `gui/browser_ui.c:8446` | `* does not carry yet (WPT flex-abspos-staticpos-*). */ static int runs_share_float(const rd_doc *...` |
 | `FREEDOM_BROWSER_UI_INTERNAL_H` | macro | `gui/browser_ui_internal.h:2` | `#define FREEDOM_BROWSER_UI_INTERNAL_H` |
 | `UI_FONT_SIZE` | macro | `gui/browser_ui_internal.h:30` | `#define UI_FONT_SIZE` |
 | `UI_HEADING_LEVELS` | macro | `gui/browser_ui_internal.h:32` | `#define UI_HEADING_LEVELS` |
 | `UI_TEXT_MARGIN` | macro | `gui/browser_ui_internal.h:31` | `#define UI_TEXT_MARGIN` |
 | `b` | type_alias | `gui/browser_ui_internal.h:40` | `typedef struct ui_rgb { double r, g, b;` |
 | `body_font` | type_alias | `gui/browser_ui_internal.h:42` | `typedef struct ui_theme { double body_font;` |
-| `set_rgb` | function | `gui/browser_ui_internal.h:106` | `void set_rgb(cairo_t *cr, ui_rgb c);` |
+| `set_rgb` | function | `gui/browser_ui_internal.h:105` | `void set_rgb(cairo_t *cr, ui_rgb c);` |
 | `ui_rgb` | struct | `gui/browser_ui_internal.h:41` | `` |
 | `ui_theme` | struct | `gui/browser_ui_internal.h:43` | `` |
-| `ui_theme_mode` | enum | `gui/browser_ui_internal.h:93` | `` |
-| `rgb_from_packed` | function | `gui/bui_theme.c:180` | `ui_rgb rgb_from_packed(int packed)` |
-| `set_rgb` | function | `gui/bui_theme.c:185` | `void set_rgb(cairo_t *cr, ui_rgb c)` |
-| `ui_theme_dark` | function | `gui/bui_theme.c:84` | `ui_theme ui_theme_dark(void)` |
+| `ui_theme_mode` | enum | `gui/browser_ui_internal.h:92` | `` |
+| `rgb_from_packed` | function | `gui/bui_theme.c:179` | `ui_rgb rgb_from_packed(int packed)` |
+| `set_rgb` | function | `gui/bui_theme.c:184` | `void set_rgb(cairo_t *cr, ui_rgb c)` |
+| `ui_theme_dark` | function | `gui/bui_theme.c:83` | `ui_theme ui_theme_dark(void)` |
 | `ui_theme_default` | function | `gui/bui_theme.c:14` | `ui_theme ui_theme_default(void)` |
-| `ui_theme_for` | function | `gui/bui_theme.c:171` | `ui_theme ui_theme_for(int mode)` |
-| `ui_theme_sepia` | function | `gui/bui_theme.c:129` | `ui_theme ui_theme_sepia(void)` |
+| `ui_theme_for` | function | `gui/bui_theme.c:170` | `ui_theme ui_theme_for(int mode)` |
+| `ui_theme_sepia` | function | `gui/bui_theme.c:128` | `ui_theme ui_theme_sepia(void)` |
 | `_POSIX_C_SOURCE` | macro | `gui/freedom_view.c:10` | `#define _POSIX_C_SOURCE` |
 | `main` | function | `gui/freedom_view.c:37` | `int main(int argc, char **argv)` |
 | `svp_alpha` | function | `gui/svg_paint.c:31` | `static double svp_alpha(int opacity, int paint_opacity)` |
@@ -207,20 +218,21 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 | `FREEDOM_BOX_STYLE_H` | macro | `include/box_style.h:2` | `#define FREEDOM_BOX_STYLE_H` |
 | `block` | function | `include/box_style.h:226` | `* indefinite containing block (cb_h < 0) the value behaves as auto: -1. * Without a percentage it is px_val...` |
 | `box` | function | `include/box_style.h:115` | `* in_list nonzero when the block sits inside a list item: it then takes * the <li> box (zero margin), keeping items...` |
-| `bx_background_layer` | function | `include/box_style.h:325` | `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, double *out_x, double *out_y);` |
-| `bx_bg_layer` | struct | `include/box_style.h:315` | `` |
+| `bx_background_layer` | function | `include/box_style.h:331` | `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, double *out_x, double *out_y);` |
+| `bx_bg_layer` | struct | `include/box_style.h:321` | `` |
 | `bx_border_box_h` | function | `include/box_style.h:220` | `double bx_border_box_h(double declared_h, int border_box, double pad_t, double pad_b, double bord_t, double bord_b);` |
-| `bx_border_span` | function | `include/box_style.h:280` | `double bx_border_span(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);` |
+| `bx_border_span` | function | `include/box_style.h:286` | `double bx_border_span(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);` |
 | `bx_box` | struct | `include/box_style.h:50` | `` |
-| `bx_content_cap` | function | `include/box_style.h:269` | `double bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);` |
-| `bx_definite_content_h` | function | `include/box_style.h:235` | `double bx_definite_content_h(double h, double min_h, double max_h, int border_box, double v_edges);` |
+| `bx_content_cap` | function | `include/box_style.h:275` | `double bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);` |
+| `bx_definite_content_h` | function | `include/box_style.h:241` | `double bx_definite_content_h(double h, double min_h, double max_h, int border_box, double v_edges);` |
 | `bx_display` | enum | `include/box_style.h:35` | `` |
 | `bx_display_name` | function | `include/box_style.h:156` | `const char *bx_display_name(bx_display d);` |
 | `bx_edges` | struct | `include/box_style.h:46` | `` |
-| `bx_flex_max_clamp` | function | `include/box_style.h:286` | `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, double pad_bord_h, double margin_h);` |
-| `bx_flex_min_clamp` | function | `include/box_style.h:292` | `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, double pad_bord_h, double margin_h);` |
+| `bx_flex_max_clamp` | function | `include/box_style.h:292` | `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, double pad_bord_h, double margin_h);` |
+| `bx_flex_min_clamp` | function | `include/box_style.h:298` | `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, double pad_bord_h, double margin_h);` |
 | `bx_hplace` | struct | `include/box_style.h:63` | `` |
-| `bx_lp_px` | function | `include/box_style.h:261` | `double bx_lp_px(int px_val, int pct_pm, double basis);` |
+| `bx_line_height_px` | function | `include/box_style.h:239` | `double bx_line_height_px(int line_scale, double font_px);` |
+| `bx_lp_px` | function | `include/box_style.h:267` | `double bx_lp_px(int px_val, int pct_pm, double basis);` |
 | `bx_replaced_box` | function | `include/box_style.h:206` | `int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den, double avail_w, double *out_w, double *out_h);` |
 | `bx_status` | enum | `include/box_style.h:56` | `` |
 | `bx_table_role` | enum | `include/box_style.h:127` | `` |
@@ -229,8 +241,8 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 | `bx_width_cap2` | function | `include/box_style.h:187` | `double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w);` |
 | `display` | type_alias | `include/box_style.h:49` | `typedef struct bx_box { bx_display display;` |
 | `left` | type_alias | `include/box_style.h:46` | `typedef struct bx_edges { double top, right, bottom, left;` |
-| `nat_h` | type_alias | `include/box_style.h:315` | `typedef struct bx_bg_layer { double nat_w, nat_h;` |
-| `page` | function | `include/box_style.h:239` | `* instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That * is the case unless BOTH overflow...` |
+| `nat_h` | type_alias | `include/box_style.h:321` | `typedef struct bx_bg_layer { double nat_w, nat_h;` |
+| `page` | function | `include/box_style.h:245` | `* instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That * is the case unless BOTH overflow...` |
 | `x_off` | type_alias | `include/box_style.h:63` | `typedef struct bx_hplace { double x_off;` |
 | `BT_ALIGN_CENTER` | macro | `include/box_tree.h:59` | `#define BT_ALIGN_CENTER` |
 | `BT_ALIGN_END` | macro | `include/box_tree.h:60` | `#define BT_ALIGN_END` |
@@ -247,23 +259,23 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 | `BT_POS_STATIC` | macro | `include/box_tree.h:47` | `#define BT_POS_STATIC` |
 | `BT_POS_STICKY` | macro | `include/box_tree.h:51` | `#define BT_POS_STICKY` |
 | `FREEDOM_BOX_TREE_H` | macro | `include/box_tree.h:2` | `#define FREEDOM_BOX_TREE_H` |
-| `bottom` | function | `include/box_tree.h:199` | `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in...` |
-| `box_index` | type_alias | `include/box_tree.h:137` | `typedef struct bt_positioned { size_t box_index;` |
-| `bt_box_hidden` | function | `include/box_tree.h:224` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);` |
-| `bt_containing_block` | function | `include/box_tree.h:253` | `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y...` |
+| `bottom` | function | `include/box_tree.h:208` | `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in...` |
+| `box_index` | type_alias | `include/box_tree.h:146` | `typedef struct bt_positioned { size_t box_index;` |
+| `bt_box_hidden` | function | `include/box_tree.h:233` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);` |
+| `bt_containing_block` | function | `include/box_tree.h:262` | `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y...` |
 | `bt_node` | struct | `include/box_tree.h:67` | `` |
-| `bt_oof_anchor` | function | `include/box_tree.h:238` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);` |
-| `bt_oof_root` | function | `include/box_tree.h:239` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);` |
-| `bt_positioned` | struct | `include/box_tree.h:137` | `` |
-| `bt_status` | enum | `include/box_tree.h:144` | `` |
+| `bt_oof_anchor` | function | `include/box_tree.h:247` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);` |
+| `bt_oof_root` | function | `include/box_tree.h:248` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);` |
+| `bt_positioned` | struct | `include/box_tree.h:146` | `` |
+| `bt_status` | enum | `include/box_tree.h:153` | `` |
 | `closed` | function | `include/box_tree.h:34` | `* fails closed (BT_ERR_RANGE) instead of overflowing the stack. */ #define BT_MAX_DEPTH 64u #define BT_MAX_CHILDREN...` |
 | `display` | type_alias | `include/box_tree.h:66` | `typedef struct bt_node { bx_display display;` |
-| `flow` | function | `include/box_tree.h:192` | `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);` |
-| `insets` | function | `include/box_tree.h:243` | `* minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may...` |
-| `line` | function | `include/box_tree.h:106` | `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a...` |
-| `node` | function | `include/box_tree.h:153` | `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller...` |
-| `one` | function | `include/box_tree.h:90` | `* of forcing them all onto one (flex-wrap);` |
-| `placed` | function | `include/box_tree.h:206` | `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour)....` |
+| `flow` | function | `include/box_tree.h:201` | `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);` |
+| `insets` | function | `include/box_tree.h:252` | `* minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may...` |
+| `line` | function | `include/box_tree.h:115` | `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a...` |
+| `node` | function | `include/box_tree.h:162` | `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller...` |
+| `one` | function | `include/box_tree.h:99` | `* of forcing them all onto one (flex-wrap);` |
+| `placed` | function | `include/box_tree.h:215` | `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour)....` |
 | `BROWSER_STATUS_DURATION_MS` | macro | `include/browser.h:25` | `#define BROWSER_STATUS_DURATION_MS` |
 | `BROWSER_STATUS_MAX` | macro | `include/browser.h:24` | `#define BROWSER_STATUS_MAX` |
 | `BROWSER_URL_MAX` | macro | `include/browser.h:21` | `#define BROWSER_URL_MAX` |
@@ -292,141 +304,143 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 | `cx_style` | struct | `include/compositor.h:46` | `` |
 | `layer` | type_alias | `include/compositor.h:69` | `typedef struct cx_item { cx_layer layer;` |
 | `position` | type_alias | `include/compositor.h:46` | `typedef struct cx_style { int position;` |
-| `CSS_BORDER_SPACING_MAX` | macro | `include/css.h:431` | `#define CSS_BORDER_SPACING_MAX` |
-| `CSS_BORDER_W_MAX` | macro | `include/css.h:430` | `#define CSS_BORDER_W_MAX` |
-| `CSS_BSHADOW_LAYERS` | macro | `include/css.h:439` | `#define CSS_BSHADOW_LAYERS` |
-| `CSS_COLUMN_COUNT_MAX` | macro | `include/css.h:498` | `#define CSS_COLUMN_COUNT_MAX` |
-| `CSS_CONTAIN_LAYOUT` | macro | `include/css.h:341` | `#define CSS_CONTAIN_LAYOUT` |
-| `CSS_CONTAIN_PAINT` | macro | `include/css.h:343` | `#define CSS_CONTAIN_PAINT` |
-| `CSS_CONTAIN_SIZE` | macro | `include/css.h:340` | `#define CSS_CONTAIN_SIZE` |
-| `CSS_CONTAIN_STYLE` | macro | `include/css.h:342` | `#define CSS_CONTAIN_STYLE` |
-| `CSS_DECO_LINE_THROUGH` | macro | `include/css.h:95` | `#define CSS_DECO_LINE_THROUGH` |
-| `CSS_DECO_OVERLINE` | macro | `include/css.h:96` | `#define CSS_DECO_OVERLINE` |
-| `CSS_DECO_UNDERLINE` | macro | `include/css.h:94` | `#define CSS_DECO_UNDERLINE` |
-| `CSS_DROP_PROP_MAX` | macro | `include/css.h:1022` | `#define CSS_DROP_PROP_MAX` |
-| `CSS_DROP_VAL_MAX` | macro | `include/css.h:1023` | `#define CSS_DROP_VAL_MAX` |
-| `CSS_EM_MILLI_MAX` | macro | `include/css.h:488` | `#define CSS_EM_MILLI_MAX` |
-| `CSS_FLEX_FACTOR_MAX` | macro | `include/css.h:432` | `#define CSS_FLEX_FACTOR_MAX` |
-| `CSS_FONT_LIST_MAX` | macro | `include/css.h:88` | `#define CSS_FONT_LIST_MAX` |
-| `CSS_FONT_SIZE_MAX` | macro | `include/css.h:494` | `#define CSS_FONT_SIZE_MAX` |
+| `CSS_BORDER_SPACING_MAX` | macro | `include/css.h:437` | `#define CSS_BORDER_SPACING_MAX` |
+| `CSS_BORDER_W_MAX` | macro | `include/css.h:436` | `#define CSS_BORDER_W_MAX` |
+| `CSS_BSHADOW_LAYERS` | macro | `include/css.h:445` | `#define CSS_BSHADOW_LAYERS` |
+| `CSS_COLUMN_COUNT_MAX` | macro | `include/css.h:504` | `#define CSS_COLUMN_COUNT_MAX` |
+| `CSS_CONTAIN_LAYOUT` | macro | `include/css.h:347` | `#define CSS_CONTAIN_LAYOUT` |
+| `CSS_CONTAIN_PAINT` | macro | `include/css.h:349` | `#define CSS_CONTAIN_PAINT` |
+| `CSS_CONTAIN_SIZE` | macro | `include/css.h:346` | `#define CSS_CONTAIN_SIZE` |
+| `CSS_CONTAIN_STYLE` | macro | `include/css.h:348` | `#define CSS_CONTAIN_STYLE` |
+| `CSS_DECO_LINE_THROUGH` | macro | `include/css.h:101` | `#define CSS_DECO_LINE_THROUGH` |
+| `CSS_DECO_OVERLINE` | macro | `include/css.h:102` | `#define CSS_DECO_OVERLINE` |
+| `CSS_DECO_UNDERLINE` | macro | `include/css.h:100` | `#define CSS_DECO_UNDERLINE` |
+| `CSS_DROP_PROP_MAX` | macro | `include/css.h:1029` | `#define CSS_DROP_PROP_MAX` |
+| `CSS_DROP_VAL_MAX` | macro | `include/css.h:1030` | `#define CSS_DROP_VAL_MAX` |
+| `CSS_EM_MILLI_MAX` | macro | `include/css.h:494` | `#define CSS_EM_MILLI_MAX` |
+| `CSS_FLEX_FACTOR_MAX` | macro | `include/css.h:438` | `#define CSS_FLEX_FACTOR_MAX` |
+| `CSS_FONT_LIST_MAX` | macro | `include/css.h:94` | `#define CSS_FONT_LIST_MAX` |
+| `CSS_FONT_SIZE_MAX` | macro | `include/css.h:500` | `#define CSS_FONT_SIZE_MAX` |
 | `CSS_GAP_MAX` | macro | `include/css.h:75` | `#define CSS_GAP_MAX` |
 | `CSS_GRAD_STOPS_MAX` | macro | `include/css.h:84` | `#define CSS_GRAD_STOPS_MAX` |
 | `CSS_GRID_AREAS_MAX` | macro | `include/css.h:83` | `#define CSS_GRID_AREAS_MAX` |
 | `CSS_GRID_COLS_MAX` | macro | `include/css.h:76` | `#define CSS_GRID_COLS_MAX` |
-| `CSS_GRID_SPAN_MAX` | macro | `include/css.h:433` | `#define CSS_GRID_SPAN_MAX` |
+| `CSS_GRID_SPAN_MAX` | macro | `include/css.h:439` | `#define CSS_GRID_SPAN_MAX` |
 | `CSS_GRID_TRACKS_MAX` | macro | `include/css.h:77` | `#define CSS_GRID_TRACKS_MAX` |
-| `CSS_LEN_AUTO` | macro | `include/css.h:446` | `#define CSS_LEN_AUTO` |
-| `CSS_LEN_END` | macro | `include/css.h:447` | `#define CSS_LEN_END` |
-| `CSS_LEN_FIT_CONTENT` | macro | `include/css.h:456` | `#define CSS_LEN_FIT_CONTENT` |
-| `CSS_LEN_IS_INTRINSIC` | macro | `include/css.h:459` | `#define CSS_LEN_IS_INTRINSIC(v)` |
-| `CSS_LEN_MAX` | macro | `include/css.h:444` | `#define CSS_LEN_MAX` |
-| `CSS_LEN_MAX_CONTENT` | macro | `include/css.h:455` | `#define CSS_LEN_MAX_CONTENT` |
-| `CSS_LEN_MIN_CONTENT` | macro | `include/css.h:454` | `#define CSS_LEN_MIN_CONTENT` |
-| `CSS_LEN_UNSET` | macro | `include/css.h:445` | `#define CSS_LEN_UNSET` |
+| `CSS_LEN_AUTO` | macro | `include/css.h:452` | `#define CSS_LEN_AUTO` |
+| `CSS_LEN_END` | macro | `include/css.h:453` | `#define CSS_LEN_END` |
+| `CSS_LEN_FIT_CONTENT` | macro | `include/css.h:462` | `#define CSS_LEN_FIT_CONTENT` |
+| `CSS_LEN_IS_INTRINSIC` | macro | `include/css.h:465` | `#define CSS_LEN_IS_INTRINSIC(v)` |
+| `CSS_LEN_MAX` | macro | `include/css.h:450` | `#define CSS_LEN_MAX` |
+| `CSS_LEN_MAX_CONTENT` | macro | `include/css.h:461` | `#define CSS_LEN_MAX_CONTENT` |
+| `CSS_LEN_MIN_CONTENT` | macro | `include/css.h:460` | `#define CSS_LEN_MIN_CONTENT` |
+| `CSS_LEN_UNSET` | macro | `include/css.h:451` | `#define CSS_LEN_UNSET` |
+| `CSS_LINE_ABS_BASE` | macro | `include/css.h:91` | `#define CSS_LINE_ABS_BASE` |
+| `CSS_LINE_ABS_MAX_PX` | macro | `include/css.h:92` | `#define CSS_LINE_ABS_MAX_PX` |
 | `CSS_LINE_MAX` | macro | `include/css.h:86` | `#define CSS_LINE_MAX` |
 | `CSS_LINE_MIN` | macro | `include/css.h:85` | `#define CSS_LINE_MIN` |
-| `CSS_MAX_ATTR_SEL` | macro | `include/css.h:557` | `#define CSS_MAX_ATTR_SEL` |
-| `CSS_MAX_COMPOUNDS` | macro | `include/css.h:553` | `#define CSS_MAX_COMPOUNDS` |
-| `CSS_MAX_KF_STOPS` | macro | `include/css.h:875` | `#define CSS_MAX_KF_STOPS` |
-| `CSS_MAX_PSEUDO_SEL` | macro | `include/css.h:561` | `#define CSS_MAX_PSEUDO_SEL` |
-| `CSS_MEDIA_DEFAULT_HEIGHT` | macro | `include/css.h:983` | `#define CSS_MEDIA_DEFAULT_HEIGHT` |
-| `CSS_MEDIA_DEFAULT_WIDTH` | macro | `include/css.h:978` | `#define CSS_MEDIA_DEFAULT_WIDTH` |
-| `CSS_NTH_MAX` | macro | `include/css.h:565` | `#define CSS_NTH_MAX` |
-| `CSS_PCT_MAX` | macro | `include/css.h:482` | `#define CSS_PCT_MAX` |
-| `CSS_PSEUDO_AFTER` | macro | `include/css.h:1153` | `#define CSS_PSEUDO_AFTER` |
-| `CSS_PSEUDO_BEFORE` | macro | `include/css.h:1152` | `#define CSS_PSEUDO_BEFORE` |
-| `CSS_PSEUDO_PLACEHOLDER` | macro | `include/css.h:1154` | `#define CSS_PSEUDO_PLACEHOLDER` |
-| `CSS_SHADOW_MAX` | macro | `include/css.h:438` | `#define CSS_SHADOW_MAX` |
-| `CSS_SPACING_MAX` | macro | `include/css.h:437` | `#define CSS_SPACING_MAX` |
-| `CSS_SVG_PAINT_NONE` | macro | `include/css.h:87` | `#define CSS_SVG_PAINT_NONE` |
-| `CSS_URL_MAX` | macro | `include/css.h:89` | `#define CSS_URL_MAX` |
+| `CSS_MAX_ATTR_SEL` | macro | `include/css.h:563` | `#define CSS_MAX_ATTR_SEL` |
+| `CSS_MAX_COMPOUNDS` | macro | `include/css.h:559` | `#define CSS_MAX_COMPOUNDS` |
+| `CSS_MAX_KF_STOPS` | macro | `include/css.h:882` | `#define CSS_MAX_KF_STOPS` |
+| `CSS_MAX_PSEUDO_SEL` | macro | `include/css.h:567` | `#define CSS_MAX_PSEUDO_SEL` |
+| `CSS_MEDIA_DEFAULT_HEIGHT` | macro | `include/css.h:990` | `#define CSS_MEDIA_DEFAULT_HEIGHT` |
+| `CSS_MEDIA_DEFAULT_WIDTH` | macro | `include/css.h:985` | `#define CSS_MEDIA_DEFAULT_WIDTH` |
+| `CSS_NTH_MAX` | macro | `include/css.h:571` | `#define CSS_NTH_MAX` |
+| `CSS_PCT_MAX` | macro | `include/css.h:488` | `#define CSS_PCT_MAX` |
+| `CSS_PSEUDO_AFTER` | macro | `include/css.h:1160` | `#define CSS_PSEUDO_AFTER` |
+| `CSS_PSEUDO_BEFORE` | macro | `include/css.h:1159` | `#define CSS_PSEUDO_BEFORE` |
+| `CSS_PSEUDO_PLACEHOLDER` | macro | `include/css.h:1161` | `#define CSS_PSEUDO_PLACEHOLDER` |
+| `CSS_SHADOW_MAX` | macro | `include/css.h:444` | `#define CSS_SHADOW_MAX` |
+| `CSS_SPACING_MAX` | macro | `include/css.h:443` | `#define CSS_SPACING_MAX` |
+| `CSS_SVG_PAINT_NONE` | macro | `include/css.h:93` | `#define CSS_SVG_PAINT_NONE` |
+| `CSS_URL_MAX` | macro | `include/css.h:95` | `#define CSS_URL_MAX` |
 | `FREEDOM_CSS_H` | macro | `include/css.h:2` | `#define FREEDOM_CSS_H` |
-| `POINTER` | function | `include/css.h:209` | `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);` |
-| `color` | type_alias | `include/css.h:572` | `typedef struct css_style { int color;` |
+| `POINTER` | function | `include/css.h:215` | `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);` |
+| `color` | type_alias | `include/css.h:578` | `typedef struct css_style { int color;` |
 | `css_align` | enum | `include/css.h:34` | `` |
-| `css_align_kw` | enum | `include/css.h:168` | `` |
-| `css_appearance` | enum | `include/css.h:303` | `` |
-| `css_attr` | struct | `include/css.h:1071` | `` |
-| `css_backface` | enum | `include/css.h:423` | `` |
-| `css_bg_attachment` | enum | `include/css.h:332` | `` |
-| `css_bg_clip` | enum | `include/css.h:323` | `` |
-| `css_bg_origin` | enum | `include/css.h:328` | `` |
-| `css_bg_repeat` | enum | `include/css.h:314` | `` |
-| `css_bg_size` | enum | `include/css.h:319` | `` |
-| `css_border_collapse` | enum | `include/css.h:261` | `` |
-| `css_border_style` | enum | `include/css.h:149` | `` |
-| `css_box_sizing` | enum | `include/css.h:142` | `` |
-| `css_caption_side` | enum | `include/css.h:273` | `` |
-| `css_clear` | enum | `include/css.h:187` | `` |
-| `css_color_scheme` | enum | `include/css.h:353` | `` |
-| `css_column_fill` | enum | `include/css.h:414` | `` |
-| `css_column_span` | enum | `include/css.h:419` | `` |
-| `css_content_visibility` | enum | `include/css.h:345` | `` |
-| `css_cursor` | enum | `include/css.h:214` | `` |
-| `css_direction` | enum | `include/css.h:255` | `` |
+| `css_align_kw` | enum | `include/css.h:174` | `` |
+| `css_appearance` | enum | `include/css.h:309` | `` |
+| `css_attr` | struct | `include/css.h:1078` | `` |
+| `css_backface` | enum | `include/css.h:429` | `` |
+| `css_bg_attachment` | enum | `include/css.h:338` | `` |
+| `css_bg_clip` | enum | `include/css.h:329` | `` |
+| `css_bg_origin` | enum | `include/css.h:334` | `` |
+| `css_bg_repeat` | enum | `include/css.h:320` | `` |
+| `css_bg_size` | enum | `include/css.h:325` | `` |
+| `css_border_collapse` | enum | `include/css.h:267` | `` |
+| `css_border_style` | enum | `include/css.h:155` | `` |
+| `css_box_sizing` | enum | `include/css.h:148` | `` |
+| `css_caption_side` | enum | `include/css.h:279` | `` |
+| `css_clear` | enum | `include/css.h:193` | `` |
+| `css_color_scheme` | enum | `include/css.h:359` | `` |
+| `css_column_fill` | enum | `include/css.h:420` | `` |
+| `css_column_span` | enum | `include/css.h:425` | `` |
+| `css_content_visibility` | enum | `include/css.h:351` | `` |
+| `css_cursor` | enum | `include/css.h:220` | `` |
+| `css_direction` | enum | `include/css.h:261` | `` |
 | `css_display` | enum | `include/css.h:42` | `` |
-| `css_drop` | struct | `include/css.h:1030` | `` |
-| `css_drop_cause` | enum | `include/css.h:1017` | `` |
-| `css_drop_log` | struct | `include/css.h:1042` | `` |
-| `css_element` | struct | `include/css.h:1081` | `` |
-| `css_empty_cells` | enum | `include/css.h:267` | `` |
-| `css_flex_direction` | enum | `include/css.h:156` | `` |
-| `css_flex_wrap` | enum | `include/css.h:162` | `` |
-| `css_float` | enum | `include/css.h:181` | `` |
-| `css_font_face_at` | function | `include/css.h:1183` | `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);` |
-| `css_font_face_count` | function | `include/css.h:1182` | `size_t css_font_face_count(const css_sheet *sheet);` |
-| `css_font_family` | enum | `include/css.h:100` | `` |
-| `css_font_kerning` | enum | `include/css.h:382` | `` |
-| `css_font_stretch` | enum | `include/css.h:391` | `` |
-| `css_font_variant` | enum | `include/css.h:285` | `` |
-| `css_forced_color_adjust` | enum | `include/css.h:361` | `` |
-| `css_free` | function | `include/css.h:1057` | `void css_free(css_sheet *s);` |
-| `css_grid_flow` | enum | `include/css.h:175` | `` |
-| `css_hyphens` | enum | `include/css.h:291` | `` |
-| `css_image_rendering` | enum | `include/css.h:349` | `` |
-| `css_isolation` | enum | `include/css.h:336` | `` |
+| `css_drop` | struct | `include/css.h:1037` | `` |
+| `css_drop_cause` | enum | `include/css.h:1024` | `` |
+| `css_drop_log` | struct | `include/css.h:1049` | `` |
+| `css_element` | struct | `include/css.h:1088` | `` |
+| `css_empty_cells` | enum | `include/css.h:273` | `` |
+| `css_flex_direction` | enum | `include/css.h:162` | `` |
+| `css_flex_wrap` | enum | `include/css.h:168` | `` |
+| `css_float` | enum | `include/css.h:187` | `` |
+| `css_font_face_at` | function | `include/css.h:1190` | `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);` |
+| `css_font_face_count` | function | `include/css.h:1189` | `size_t css_font_face_count(const css_sheet *sheet);` |
+| `css_font_family` | enum | `include/css.h:106` | `` |
+| `css_font_kerning` | enum | `include/css.h:388` | `` |
+| `css_font_stretch` | enum | `include/css.h:397` | `` |
+| `css_font_variant` | enum | `include/css.h:291` | `` |
+| `css_forced_color_adjust` | enum | `include/css.h:367` | `` |
+| `css_free` | function | `include/css.h:1064` | `void css_free(css_sheet *s);` |
+| `css_grid_flow` | enum | `include/css.h:181` | `` |
+| `css_hyphens` | enum | `include/css.h:297` | `` |
+| `css_image_rendering` | enum | `include/css.h:355` | `` |
+| `css_isolation` | enum | `include/css.h:342` | `` |
 | `css_justify` | enum | `include/css.h:64` | `` |
-| `css_list_pos` | enum | `include/css.h:378` | `` |
-| `css_list_style` | enum | `include/css.h:123` | `` |
-| `css_media` | struct | `include/css.h:966` | `` |
-| `css_mix_blend` | enum | `include/css.h:366` | `` |
-| `css_object_fit` | enum | `include/css.h:373` | `` |
-| `css_overflow` | enum | `include/css.h:204` | `` |
-| `css_overscroll` | enum | `include/css.h:409` | `` |
-| `css_pct_slot` | enum | `include/css.h:500` | `` |
-| `css_pointer_events` | enum | `include/css.h:309` | `` |
-| `css_position` | enum | `include/css.h:135` | `` |
-| `css_print_color_adjust` | enum | `include/css.h:357` | `` |
-| `css_resize` | enum | `include/css.h:397` | `` |
-| `css_resolve_anim_keyframes` | function | `include/css.h:1191` | `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);` |
-| `css_scroll_behavior` | enum | `include/css.h:401` | `` |
-| `css_sel` | struct | `include/css.h:964` | `` |
-| `css_sheet` | type_alias | `include/css.h:958` | `typedef struct css_sheet css_sheet;` |
+| `css_list_pos` | enum | `include/css.h:384` | `` |
+| `css_list_style` | enum | `include/css.h:129` | `` |
+| `css_media` | struct | `include/css.h:973` | `` |
+| `css_mix_blend` | enum | `include/css.h:372` | `` |
+| `css_object_fit` | enum | `include/css.h:379` | `` |
+| `css_overflow` | enum | `include/css.h:210` | `` |
+| `css_overscroll` | enum | `include/css.h:415` | `` |
+| `css_pct_slot` | enum | `include/css.h:506` | `` |
+| `css_pointer_events` | enum | `include/css.h:315` | `` |
+| `css_position` | enum | `include/css.h:141` | `` |
+| `css_print_color_adjust` | enum | `include/css.h:363` | `` |
+| `css_resize` | enum | `include/css.h:403` | `` |
+| `css_resolve_anim_keyframes` | function | `include/css.h:1198` | `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);` |
+| `css_scroll_behavior` | enum | `include/css.h:407` | `` |
+| `css_sel` | struct | `include/css.h:971` | `` |
+| `css_sheet` | type_alias | `include/css.h:965` | `typedef struct css_sheet css_sheet;` |
 | `css_status` | enum | `include/css.h:28` | `` |
-| `css_style` | struct | `include/css.h:572` | `` |
-| `css_table_layout` | enum | `include/css.h:279` | `` |
-| `css_text_decoration_style` | enum | `include/css.h:248` | `` |
-| `css_text_overflow` | enum | `include/css.h:227` | `` |
-| `css_text_rendering` | enum | `include/css.h:386` | `` |
-| `css_text_transform` | enum | `include/css.h:106` | `` |
-| `css_touch_action` | enum | `include/css.h:405` | `` |
-| `css_user_select` | enum | `include/css.h:297` | `` |
-| `css_valign` | enum | `include/css.h:111` | `` |
-| `css_visibility` | enum | `include/css.h:195` | `` |
-| `css_white_space` | enum | `include/css.h:117` | `` |
-| `css_word_break` | enum | `include/css.h:241` | `` |
-| `cvr_table` | struct | `include/css.h:1142` | `` |
-| `declared` | function | `include/css.h:840` | `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...` |
-| `element` | function | `include/css.h:845` | `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...` |
-| `family` | function | `include/css.h:670` | `* LOCAL family (spec/text_shape.md section 7);` |
-| `inherited_px` | function | `include/css.h:1166` | `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...` |
-| `order` | function | `include/css.h:1060` | `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....` |
-| `palette` | function | `include/css.h:1007` | `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...` |
-| `prefers_dark` | type_alias | `include/css.h:965` | `typedef struct css_media { int prefers_dark;` |
-| `prop` | type_alias | `include/css.h:1030` | `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];` |
-| `scaleY` | function | `include/css.h:836` | `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);` |
-| `slots` | function | `include/css.h:852` | `* parse time into ALL seven slots (singular matrices fail closed);` |
-| `translate` | function | `include/css.h:835` | `* translate()/translateX()/translateY();` |
+| `css_style` | struct | `include/css.h:578` | `` |
+| `css_table_layout` | enum | `include/css.h:285` | `` |
+| `css_text_decoration_style` | enum | `include/css.h:254` | `` |
+| `css_text_overflow` | enum | `include/css.h:233` | `` |
+| `css_text_rendering` | enum | `include/css.h:392` | `` |
+| `css_text_transform` | enum | `include/css.h:112` | `` |
+| `css_touch_action` | enum | `include/css.h:411` | `` |
+| `css_user_select` | enum | `include/css.h:303` | `` |
+| `css_valign` | enum | `include/css.h:117` | `` |
+| `css_visibility` | enum | `include/css.h:201` | `` |
+| `css_white_space` | enum | `include/css.h:123` | `` |
+| `css_word_break` | enum | `include/css.h:247` | `` |
+| `cvr_table` | struct | `include/css.h:1149` | `` |
+| `declared` | function | `include/css.h:847` | `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...` |
+| `element` | function | `include/css.h:852` | `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...` |
+| `family` | function | `include/css.h:676` | `* LOCAL family (spec/text_shape.md section 7);` |
+| `inherited_px` | function | `include/css.h:1173` | `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...` |
+| `order` | function | `include/css.h:1067` | `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....` |
+| `palette` | function | `include/css.h:1014` | `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...` |
+| `prefers_dark` | type_alias | `include/css.h:972` | `typedef struct css_media { int prefers_dark;` |
+| `prop` | type_alias | `include/css.h:1037` | `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];` |
+| `scaleY` | function | `include/css.h:843` | `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);` |
+| `slots` | function | `include/css.h:859` | `* parse time into ALL seven slots (singular matrices fail closed);` |
+| `translate` | function | `include/css.h:842` | `* translate()/translateX()/translateY();` |
 | `verbatim` | function | `include/css.h:79` | `* the quoted row strings verbatim (flex_layout parses them);` |
 | `CAR_INLINE_SPEC` | macro | `include/css_atrule.h:18` | `#define CAR_INLINE_SPEC` |
 | `CAR_LAYER_NAME_MAX` | macro | `include/css_atrule.h:17` | `#define CAR_LAYER_NAME_MAX` |
@@ -479,22 +493,8 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 | `cc_pack` | function | `include/css_color.h:49` | `int cc_pack(cc_rgb c);` |
 | `cc_rgb` | struct | `include/css_color.h:27` | `` |
 | `cc_status` | enum | `include/css_color.h:31` | `` |
-| `CSS_INLINE_BG_URLS` | macro | `include/css_decl.h:23` | `#define CSS_INLINE_BG_URLS` |
-| `CSS_MAX_BG_URLS` | macro | `include/css_decl.h:11` | `#define CSS_MAX_BG_URLS` |
-| `CSS_MAX_CONTENT_URLS` | macro | `include/css_decl.h:18` | `#define CSS_MAX_CONTENT_URLS` |
-| `CSS_MAX_KEYFRAMES` | macro | `include/css_decl.h:20` | `#define CSS_MAX_KEYFRAMES` |
-| `CSS_MAX_KEYFRAME_DECLS` | macro | `include/css_decl.h:22` | `#define CSS_MAX_KEYFRAME_DECLS` |
-| `CSS_MAX_KEYFRAME_STOPS` | macro | `include/css_decl.h:21` | `#define CSS_MAX_KEYFRAME_STOPS` |
-| `CSS_WIDE_PROBE_DECLS` | macro | `include/css_decl.h:30` | `#define CSS_WIDE_PROBE_DECLS` |
-| `FREEDOM_CSS_DECL_H` | macro | `include/css_decl.h:2` | `#define FREEDOM_CSS_DECL_H` |
-| `contiguous` | function | `include/css_decl.h:60` | `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...` |
-| `css_decl` | struct | `include/css_decl.h:205` | `` |
-| `order` | function | `include/css_decl.h:45` | `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);` |
-| `prop` | type_alias | `include/css_decl.h:204` | `typedef struct css_decl { int prop;` |
-| `FREEDOM_CSS_GRADIENT_H` | macro | `include/css_gradient.h:2` | `#define FREEDOM_CSS_GRADIENT_H` |
-| `cg_expand_background` | function | `include/css_gradient.h:13` | `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
-| `cg_expand_bg_image` | function | `include/css_gradient.h:11` | `int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
-| `FREEDOM_CSS_INDEX_H` | macro | `include/css_index.h:11` | `#define FREEDOM_CSS_INDEX_H` |
-| `cix_build` | function | `include/css_index.h:34` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx);` |
+| `CSS_INLINE_BG_URLS` | macro | `include/css_decl.h:28` | `#define CSS_INLINE_BG_URLS` |
+| `CSS_MAX_BG_URLS` | macro | `include/css_decl.h:22` | `#define CSS_MAX_BG_URLS` |
+| `CSS_MAX_CONTENT_URLS` | macro | `include/css_decl.h:23` | `#define CSS_MAX_CONTENT_URLS` |
 
 Next: [SYMBOLS_p3.md](SYMBOLS_p3.md)

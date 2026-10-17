@@ -232,6 +232,12 @@ double bx_pct_block_size(int px_val, int pct_pm, double cb_h);
  * wins over max, CSS 2.1 10.7), minus v_edges (vertical padding + border) under
  * border-box, never negative. -1 when h < 0 (auto): a min-height alone does not
  * make a height definite. Pure. */
+/* The used line-height in px of text at font_px for a css line_scale value
+ * (spec/box_style.md 4c): 0 = normal (returns 0, the caller uses the font's
+ * natural line), a percentage multiple of the font-size below
+ * CSS_LINE_ABS_BASE, an absolute length at or above it. */
+double bx_line_height_px(int line_scale, double font_px);
+
 double bx_definite_content_h(double h, double min_h, double max_h,
                              int border_box, double v_edges);
 

@@ -698,6 +698,17 @@ static void test_definite_content_h(void **state) {
     assert_true(dbl_eq(bx_definite_content_h(10.0, -1.0, -1.0, 1, 40.0), 0.0));
 }
 
+static void test_line_height_px(void **state) {
+    (void)state;
+    assert_true(bx_line_height_px(0, 20.0) == 0.0);
+    assert_true(fabs(bx_line_height_px(150, 20.0) - 30.0) < 1e-9);
+    assert_true(fabs(bx_line_height_px(CSS_LINE_ABS_BASE + 224, 11.0) - 22.4) < 1e-9);
+    assert_true(fabs(bx_line_height_px(CSS_LINE_ABS_BASE + 224, 40.0) - 22.4) < 1e-9);
+    assert_true(bx_line_height_px(-5, 20.0) == 0.0);
+    assert_true(fabs(bx_line_height_px(2147483647, 10.0) - CSS_LINE_ABS_MAX_PX) < 1e-9);
+    assert_true(fabs(bx_line_height_px(99999, 10.0) - CSS_LINE_MAX / 10.0) < 1e-9);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_flex_min_clamp),
@@ -748,6 +759,7 @@ int main(void) {
         cmocka_unit_test(test_place_declared_width_overflows),
         cmocka_unit_test(test_pct_block_size),
         cmocka_unit_test(test_definite_content_h),
+        cmocka_unit_test(test_line_height_px),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

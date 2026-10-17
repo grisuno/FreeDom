@@ -27,7 +27,6 @@
 - [`anchor`](modules/gui.browser_ui.c.md#anchor) function in `gui/browser_ui.c`
 - [`answered`](modules/src.tab.c.md#answered) function in `src/tab.c`
 - [`anyway`](modules/include.prefs.h.md#anyway) function in `include/prefs.h`
-- [`appended`](modules/src.page_view.c.md#appended) function in `src/page_view.c`
 - [`applies`](modules/gui.browser_ui.c.md#applies) function in `gui/browser_ui.c`
 - [`approximation`](modules/gui.browser_ui.c.md#approximation) function in `gui/browser_ui.c`
 - [`arrives`](modules/gui.browser_ui.c.md#arrives) function in `gui/browser_ui.c`
@@ -72,9 +71,11 @@
 - [`bf_margins_adjoin`](modules/src.block_flow.c.md#bf_margins_adjoin) function in `src/block_flow.c`
 - [`bg`](modules/gui.browser_ui.c.md#bg) function in `gui/browser_ui.c`
 - [`bits`](modules/include.secure_fetch.h.md#bits) function in `include/secure_fetch.h`
+- [`black`](modules/include.css_values.h.md#black) function in `include/css_values.h`
 - [`BLOCK`](modules/src.box_style.c.md#block) macro in `src/box_style.c`
 - [`block`](modules/include.box_style.h.md#block) function in `include/box_style.h`
 - [`block`](modules/src.box_tree.c.md#block) function in `src/box_tree.c`
+- [`block`](modules/src.page_view.c.md#block) function in `src/page_view.c`
 - [`block_id`](modules/gui.browser_ui.c.md#block_id) type_alias in `gui/browser_ui.c`
 - [`block_id`](modules/src.page_view.c.md#block_id) function in `src/page_view.c`
 - [`BLOCKED`](modules/src.freedom.c.md#blocked) function in `src/freedom.c`
@@ -202,6 +203,8 @@
 - [`bx_flex_min_clamp`](modules/include.box_style.h.md#bx_flex_min_clamp) function in `include/box_style.h`
 - [`bx_flex_min_clamp`](modules/src.box_style.c.md#bx_flex_min_clamp) function in `src/box_style.c`
 - [`bx_hplace`](modules/include.box_style.h.md#bx_hplace) struct in `include/box_style.h`
+- [`bx_line_height_px`](modules/include.box_style.h.md#bx_line_height_px) function in `include/box_style.h`
+- [`bx_line_height_px`](modules/src.box_style.c.md#bx_line_height_px) function in `src/box_style.c`
 - [`bx_lp_px`](modules/include.box_style.h.md#bx_lp_px) function in `include/box_style.h`
 - [`bx_lp_px`](modules/src.box_style.c.md#bx_lp_px) function in `src/box_style.c`
 - [`bx_parse_display`](modules/src.box_style.c.md#bx_parse_display) function in `src/box_style.c`
@@ -410,6 +413,7 @@
 - [`count`](modules/gui.browser_ui.c.md#count) function in `gui/browser_ui.c`
 - [`count`](modules/include.dom.h.md#count) function in `include/dom.h`
 - [`count`](modules/src.dom.c.md#count) function in `src/dom.c`
+- [`cp`](modules/include.text_case.h.md#cp) function in `include/text_case.h`
 - [`csel_ci_eq`](modules/include.css_select.h.md#csel_ci_eq) function in `include/css_select.h`
 - [`csel_decl_end`](modules/include.css_select.h.md#csel_decl_end) function in `include/css_select.h`
 - [`csel_decl_end`](modules/src.css_select.c.md#csel_decl_end) function in `src/css_select.c`
@@ -532,6 +536,8 @@
 - [`CSS_LEN_MIN_CONTENT`](modules/include.css.h.md#css_len_min_content) macro in `include/css.h`
 - [`CSS_LEN_UNSET`](modules/include.css.h.md#css_len_unset) macro in `include/css.h`
 - [`CSS_LEN_UNSET`](modules/include.page_view.h.md#pv_box_def-css_len_unset) method of `pv_box_def` in `include/page_view.h`
+- [`CSS_LINE_ABS_BASE`](modules/include.css.h.md#css_line_abs_base) macro in `include/css.h`
+- [`CSS_LINE_ABS_MAX_PX`](modules/include.css.h.md#css_line_abs_max_px) macro in `include/css.h`
 - [`CSS_LINE_MAX`](modules/include.css.h.md#css_line_max) macro in `include/css.h`
 - [`CSS_LINE_MIN`](modules/include.css.h.md#css_line_min) macro in `include/css.h`
 - [`css_list_pos`](modules/include.css.h.md#css_list_pos) enum in `include/css.h`
@@ -568,6 +574,8 @@
 - [`CSS_PCT_MAX`](modules/include.css.h.md#css_pct_max) macro in `include/css.h`
 - [`css_pct_slot`](modules/include.css.h.md#css_pct_slot) enum in `include/css.h`
 - [`css_pointer_events`](modules/include.css.h.md#css_pointer_events) enum in `include/css.h`
+- [`CSS_POOL_HEADROOM`](modules/include.css_decl.h.md#css_pool_headroom) macro in `include/css_decl.h`
+- [`CSS_POOL_INIT`](modules/include.css_decl.h.md#css_pool_init) macro in `include/css_decl.h`
 - [`css_position`](modules/include.css.h.md#css_position) enum in `include/css.h`
 - [`css_print_color_adjust`](modules/include.css.h.md#css_print_color_adjust) enum in `include/css.h`
 - [`CSS_PSEUDO_AFTER`](modules/include.css.h.md#css_pseudo_after) macro in `include/css.h`
@@ -653,6 +661,7 @@
 - [`cv_parse_color`](modules/src.css_values.c.md#cv_parse_color) function in `src/css_values.c`
 - [`cv_parse_color_t7`](modules/include.css_values.h.md#cv_parse_color_t7) function in `include/css_values.h`
 - [`cv_parse_color_t7`](modules/src.css_values.c.md#cv_parse_color_t7) function in `src/css_values.c`
+- [`cv_text_color`](modules/src.css_values.c.md#cv_text_color) function in `src/css_values.c`
 - [`cvr_chain`](modules/include.css_chain.h.md#cvr_chain) struct in `include/css_chain.h`
 - [`cvr_chain`](modules/include.css_vars.h.md#cvr_chain) struct in `include/css_vars.h`
 - [`CVR_CHAIN_MAX`](modules/include.css_vars.h.md#cvr_chain_max) macro in `include/css_vars.h`
@@ -837,6 +846,7 @@
 - [`enough`](modules/src.js_dom.c.md#enough) function in `src/js_dom.c`
 - [`EPIPE`](modules/src.tab.c.md#epipe) function in `src/tab.c`
 - [`epoch_ms`](modules/include.media_decoder.h.md#epoch_ms) type_alias in `include/media_decoder.h`
+- [`exactly`](modules/gui.browser_ui.c.md#exactly) function in `gui/browser_ui.c`
 - [`EXCLUDED`](modules/include.secure_fetch.h.md#excluded) function in `include/secure_fetch.h`
 - [`excluded`](modules/src.os_sandbox.c.md#excluded) function in `src/os_sandbox.c`
 - [`exclusively`](modules/include.tab.h.md#exclusively) function in `include/tab.h`
@@ -1203,6 +1213,7 @@
 - [`headroom`](modules/src.os_sandbox.c.md#headroom) function in `src/os_sandbox.c`
 - [`height`](modules/include.flex_layout.h.md#height) function in `include/flex_layout.h`
 - [`height`](modules/include.svg_render.h.md#height) type_alias in `include/svg_render.h`
+- [`height`](modules/src.box_tree.c.md#height) function in `src/box_tree.c`
 - [`height`](modules/src.page_view.c.md#height) function in `src/page_view.c`
 - [`height`](modules/tools.ffgeom.py.md#height) function in `tools.ffgeom`
 - [`height`](modules/tools.pngdiff.c.md#height) type_alias in `tools/pngdiff.c`
@@ -1274,7 +1285,6 @@
 - [`identifier`](modules/include.css_select.h.md#identifier) function in `include/css_select.h`
 - [`identity`](modules/src.js_dom_ext.c.md#identity) function in `src/js_dom_ext.c`
 - [`idx`](modules/src.css.c.md#css_cand-idx) type_alias of `css_cand` in `src/css.c`
-- [`ignored`](modules/src.css.c.md#ignored) function in `src/css.c`
 - [`ignored`](modules/src.page_view.c.md#ignored) function in `src/page_view.c`
 - [`ih_acc`](modules/src.dom.c.md#ih_acc) struct in `src/dom.c`
 - [`ih_block`](modules/src.dom.c.md#ih_block) struct in `src/dom.c`
@@ -1367,6 +1377,7 @@
 - [`item`](modules/src.css.c.md#item) function in `src/css.c`
 - [`item_sides`](modules/gui.browser_ui.c.md#item_sides) struct in `gui/browser_ui.c`
 - [`items`](modules/gui.browser_ui.c.md#items) function in `gui/browser_ui.c`
+- [`itself`](modules/gui.browser_ui.c.md#itself) function in `gui/browser_ui.c`
 - [`itself`](modules/include.page_view.h.md#pv_run-itself) method of `pv_run` in `include/page_view.h`
 
 <a id="j"></a>
@@ -1589,6 +1600,7 @@
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_prefetch.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_prefetch.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_prefs.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_svg_render.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_svg_render.c`
+- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_text_case.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_text_case.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_text_shape.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_text_shape.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_url.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_url.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_webfont.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_webfont.c`
@@ -2046,6 +2058,7 @@
 - [`pf_scan`](modules/src.prefetch.c.md#pf_scan) function in `src/prefetch.c`
 - [`pf_scan_imports`](modules/src.prefetch.c.md#pf_scan_imports) function in `src/prefetch.c`
 - [`PF_SPEC_MAX`](modules/include.prefetch.h.md#pf_spec_max) macro in `include/prefetch.h`
+- [`pl`](modules/gui.browser_ui.c.md#pl) type_alias in `gui/browser_ui.c`
 - [`place`](modules/src.render_doc.c.md#place) function in `src/render_doc.c`
 - [`placed`](modules/include.box_tree.h.md#placed) function in `include/box_tree.h`
 - [`placeholders`](modules/include.ui.h.md#placeholders) function in `include/ui.h`
@@ -2187,6 +2200,8 @@
 - [`pv_box_def`](modules/include.page_view.h.md#pv_box_def) struct in `include/page_view.h`
 - [`pv_box_info`](modules/src.page_view.c.md#pv_box_info) struct in `src/page_view.c`
 - [`pv_box_reg`](modules/src.page_view.c.md#pv_box_reg) struct in `src/page_view.c`
+- [`PV_BR_CONT`](modules/include.page_view.h.md#pv_br_cont) macro in `include/page_view.h`
+- [`PV_BR_EMPTY`](modules/include.page_view.h.md#pv_br_empty) macro in `include/page_view.h`
 - [`PV_BSHADOW_LAYERS`](modules/include.page_view.h.md#pv_bshadow_layers) macro in `include/page_view.h`
 - [`pv_build`](modules/src.page_view.c.md#pv_build) function in `src/page_view.c`
 - [`pv_build_ex`](modules/src.page_view.c.md#pv_build_ex) function in `src/page_view.c`
@@ -2249,12 +2264,16 @@
 - [`pv_set_bgcolor`](modules/src.page_view.c.md#pv_set_bgcolor) function in `src/page_view.c`
 - [`pv_set_block_id`](modules/include.page_view.h.md#pv_set_block_id) function in `include/page_view.h`
 - [`pv_set_block_id`](modules/src.page_view.c.md#pv_set_block_id) function in `src/page_view.c`
+- [`pv_set_block_node`](modules/include.page_view.h.md#pv_set_block_node) function in `include/page_view.h`
+- [`pv_set_block_node`](modules/src.page_view.c.md#pv_set_block_node) function in `src/page_view.c`
 - [`pv_set_box`](modules/include.page_view.h.md#pv_set_box) function in `include/page_view.h`
 - [`pv_set_box`](modules/src.page_view.c.md#pv_set_box) function in `src/page_view.c`
 - [`pv_set_box_maxw`](modules/include.page_view.h.md#pv_set_box_maxw) function in `include/page_view.h`
 - [`pv_set_box_maxw`](modules/src.page_view.c.md#pv_set_box_maxw) function in `src/page_view.c`
 - [`pv_set_box_pct`](modules/include.page_view.h.md#pv_set_box_pct) function in `include/page_view.h`
 - [`pv_set_box_pct`](modules/src.page_view.c.md#pv_set_box_pct) function in `src/page_view.c`
+- [`pv_set_br_line`](modules/include.page_view.h.md#pv_set_br_line) function in `include/page_view.h`
+- [`pv_set_br_line`](modules/src.page_view.c.md#pv_set_br_line) function in `src/page_view.c`
 - [`pv_set_color`](modules/include.page_view.h.md#pv_set_color) function in `include/page_view.h`
 - [`pv_set_color`](modules/src.page_view.c.md#pv_set_color) function in `src/page_view.c`
 - [`pv_set_cont_box`](modules/include.page_view.h.md#pv_set_cont_box) function in `include/page_view.h`
@@ -2287,6 +2306,8 @@
 - [`pv_set_input_placeholder`](modules/src.page_view.c.md#pv_set_input_placeholder) function in `src/page_view.c`
 - [`pv_set_input_select_opts`](modules/include.page_view.h.md#pv_set_input_select_opts) function in `include/page_view.h`
 - [`pv_set_input_select_opts`](modules/src.page_view.c.md#pv_set_input_select_opts) function in `src/page_view.c`
+- [`pv_set_justify_self`](modules/include.page_view.h.md#pv_set_justify_self) function in `include/page_view.h`
+- [`pv_set_justify_self`](modules/src.page_view.c.md#pv_set_justify_self) function in `src/page_view.c`
 - [`pv_set_node_id`](modules/include.page_view.h.md#pv_set_node_id) function in `include/page_view.h`
 - [`pv_set_node_id`](modules/src.page_view.c.md#pv_set_node_id) function in `src/page_view.c`
 - [`pv_set_oof`](modules/include.page_view.h.md#pv_set_oof) function in `include/page_view.h`
@@ -2405,6 +2426,7 @@
 - [`rem_px`](modules/src.css.c.md#len_rebase_ctx-rem_px) type_alias of `len_rebase_ctx` in `src/css.c`
 - [`render_glyph`](modules/tools.pngprof.py.md#render_glyph) function in `tools.pngprof`
 - [`repeat`](modules/src.css_box.c.md#repeat) function in `src/css_box.c`
+- [`repl_edges`](modules/gui.browser_ui.c.md#repl_edges) struct in `gui/browser_ui.c`
 - [`replace`](modules/include.tab.h.md#replace) type_alias in `include/tab.h`
 - [`required`](modules/include.flex_layout.h.md#required) function in `include/flex_layout.h`
 - [`resizes`](modules/gui.browser_ui.c.md#resizes) function in `gui/browser_ui.c`
@@ -2514,6 +2536,7 @@
 - [`sf_ws_send`](modules/src.secure_fetch.c.md#sf_ws_send) function in `src/secure_fetch.c`
 - [`sf_ws_url_check`](modules/gui.browser_ui.c.md#sf_ws_url_check) function in `gui/browser_ui.c`
 - [`sf_ws_url_check`](modules/src.secure_fetch.c.md#sf_ws_url_check) function in `src/secure_fetch.c`
+- [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
 - [`sink`](modules/src.secure_fetch.c.md#sink) type_alias in `src/secure_fetch.c`
 - [`sites`](modules/gui.browser_ui.c.md#sites) function in `gui/browser_ui.c`
@@ -2683,6 +2706,17 @@
 - [`tag_row`](modules/src.box_style.c.md#tag_row) struct in `src/box_style.c`
 - [`take`](modules/src.box_style.c.md#take) function in `src/box_style.c`
 - [`task`](modules/src.js_fetch.c.md#task) function in `src/js_fetch.c`
+- [`tc_is_lower`](modules/include.text_case.h.md#tc_is_lower) function in `include/text_case.h`
+- [`tc_is_lower`](modules/src.text_case.c.md#tc_is_lower) function in `src/text_case.c`
+- [`tc_lower`](modules/include.text_case.h.md#tc_lower) function in `include/text_case.h`
+- [`tc_lower`](modules/src.text_case.c.md#tc_lower) function in `src/text_case.c`
+- [`tc_run`](modules/include.text_case.h.md#tc_run) struct in `include/text_case.h`
+- [`tc_smallcaps_runs`](modules/include.text_case.h.md#tc_smallcaps_runs) function in `include/text_case.h`
+- [`tc_smallcaps_runs`](modules/src.text_case.c.md#tc_smallcaps_runs) function in `src/text_case.c`
+- [`TC_SMALLCAPS_SCALE`](modules/include.text_case.h.md#tc_smallcaps_scale) macro in `include/text_case.h`
+- [`tc_transform`](modules/include.text_case.h.md#tc_transform) function in `include/text_case.h`
+- [`tc_transform`](modules/src.text_case.c.md#tc_transform) function in `src/text_case.c`
+- [`tc_upper`](modules/src.text_case.c.md#tc_upper) function in `src/text_case.c`
 - [`term`](modules/src.css_box.c.md#term) function in `src/css_box.c`
 - [`tests`](modules/src.tab.c.md#tests) function in `src/tab.c`
 - [`text`](modules/gui.browser_ui.c.md#text) function in `gui/browser_ui.c`
@@ -3008,7 +3042,6 @@
 - [`wl_array_for_each`](modules/gui.browser_ui.c.md#wl_array_for_each) function in `gui/browser_ui.c`
 - [`word_spacing`](modules/include.page_view.h.md#pv_text_ext-word_spacing) type_alias of `pv_text_ext` in `include/page_view.h`
 - [`worker`](modules/fuzz.fuzz_data_url.c.md#worker) function in `fuzz/fuzz_data_url.c`
-- [`wrap_reverse`](modules/src.box_tree.c.md#wrap_reverse) function in `src/box_tree.c`
 - [`write_full`](modules/include.util.h.md#write_full) function in `include/util.h`
 - [`write_full`](modules/src.renderer.c.md#write_full) function in `src/renderer.c`
 - [`write_full`](modules/src.tab.c.md#write_full) function in `src/tab.c`

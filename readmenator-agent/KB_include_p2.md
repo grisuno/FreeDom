@@ -1,6 +1,19 @@
 # Subsystem: include (page 2 of 4)
 Previous: [KB_include.md](KB_include.md)
 
+## include/css_mq.h
+- Doc: cmq_matches: 1 iff the media query list s[0,len) matches env; malformed/unknown parts fail * closed.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `cmq_env` (struct, line 19)
+  - `width_px` (type_alias, line 18) `typedef struct cmq_env { int width_px;`
+  - `cmq_matches` (function, line 28) `int cmq_matches(const char *s, size_t len, const cmq_env *env);`
+  - `FREEDOM_CSS_MQ_H` (macro, line 2) `#define FREEDOM_CSS_MQ_H`
+  - `CMQ_MAX_DEPTH` (macro, line 16) `#define CMQ_MAX_DEPTH`
+  - `CMQ_TOK_MAX` (macro, line 17) `#define CMQ_TOK_MAX`
+- Imported by: `src/css.c`, `src/css_mq.c`, `tests/test_css_mq.c`
+
 ## include/css_select.h
 - Doc: css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only...
 - Layer: utility
@@ -77,7 +90,8 @@ Previous: [KB_include.md](KB_include.md)
   - `cv_color_ok` (function, line 14) `int cv_color_ok(int c);`
   - `cv_bg_alpha_of` (function, line 15) `int cv_bg_alpha_of(const char *v);`
   - `cv_parse_color_t7` (function, line 19) `int cv_parse_color_t7(const char *v);`
-  - `cv_interp_bg` (function, line 20) `int cv_interp_bg(const char *v);`
+  - `black` (function, line 22) `* transparent black (127 << 24) -- text that paints nothing, not an absent * value. CC_COLOR_CURRENT and -1...`
+  - `cv_interp_bg` (function, line 25) `int cv_interp_bg(const char *v);`
   - `FREEDOM_CSS_VALUES_H` (macro, line 2) `#define FREEDOM_CSS_VALUES_H`
 - Imported by: `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `tests/test_css_values.c`
 
@@ -463,31 +477,6 @@ Previous: [KB_include.md](KB_include.md)
   - `IP_MAX_KEYFRAMES` (macro, line 68) `#define IP_MAX_KEYFRAMES`
   - `IP_ITERATION_INFINITE` (macro, line 85) `#define IP_ITERATION_INFINITE`
 - Imported by: `gui/browser_ui.c`, `src/interp.c`, `tests/test_interp.c`
-
-## include/js_dom.h
-- Doc: jd_iframe_track: Tracks iframes already processed by jd_process_iframes, to avoid re-fetching...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `jd_iframe_track` (struct, line 41)
-  - `jd_opaque` (struct, line 46)
-  - `jd_status` (enum, line 25)
-  - `jd_click_state` (type_alias, line 35) `typedef struct jd_click_state jd_click_state;`
-  - `processed` (type_alias, line 41) `typedef struct jd_iframe_track { dom_node_id processed[JD_IFRAME_TRACK_MAX];`
-  - `opaque` (function, line 64) `* the engine runtime opaque (unreachable from script);`
-  - `jd_click_state_free` (function, line 78) `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);`
-  - `run` (function, line 87) `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...`
-  - `preventDefault` (function, line 94) `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...`
-  - `host` (function, line 123) `* for a trusted host (allow.conf AND js.conf);`
-  - `jd_get_cookies` (function, line 134) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);`
-  - `out_status` (function, line 142) `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
-  - `jd_process_iframes` (function, line 163) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
-  - `URLs` (function, line 170) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
-  - `jd_video_from_scripts` (function, line 184) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
-  - `FREEDOM_JS_DOM_H` (macro, line 2) `#define FREEDOM_JS_DOM_H`
-  - `JD_IFRAME_TRACK_MAX` (macro, line 40) `#define JD_IFRAME_TRACK_MAX`
-- Depends on: `include/dom.h`, `include/freebug.h`, `include/js_geom.h`, `include/js_location.h`, `include/js_sandbox.h`, `include/url.h`
-- Imported by: `fuzz/fuzz_js_dom.c`, `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`
 
 
 Next: [KB_include_p3.md](KB_include_p3.md)

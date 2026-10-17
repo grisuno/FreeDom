@@ -238,6 +238,11 @@ typedef struct rd_block {
      * gated): the presentation layer skips such blocks in grouping/flow and
      * Stage 2 positions them separately. See pv_run.oof_subtree. */
     int              oof;
+    /* The empty line box a <br> leaves (pv_run.br_line; STRUCTURE, never gated). */
+    int              br_line;
+    /* The run's block element (pv_run.block_node; STRUCTURE, never gated). */
+    dom_node_id      block_node;
+    int              justify_self;   /* pv_run.justify_self (structure) */
     /* Box engine (Hito 23b-8 Step D). block_id says which block-level box this block
      * belongs to (-1 = none); the box's decoration and parent_id live on the box-def
      * tree (rd_doc.boxes[block_id]), not here. block_id is gated by caps.css (like the

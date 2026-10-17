@@ -323,6 +323,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`pf_list`](modules/include.prefetch.h.md#pf_list) struct in `include/prefetch.h`
 - [`pf_pool`](modules/include.prefetch.h.md#pf_pool) struct in `include/prefetch.h`
 - [`pf_ref`](modules/include.prefetch.h.md#pf_ref) struct in `include/prefetch.h`
+- [`pl`](modules/gui.browser_ui.c.md#pl) type_alias in `gui/browser_ui.c`
 - [`pm_entry`](modules/src.dom.c.md#pm_entry) struct in `src/dom.c`
 - [`policy`](modules/include.secure_fetch.h.md#policy) type_alias in `include/secure_fetch.h`
 - [`fx_result.pos`](modules/include.flex_layout.h.md#fx_result-pos) type_alias in `include/flex_layout.h`
@@ -385,6 +386,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`rdp_img_decision`](modules/include.render_policy.h.md#rdp_img_decision) enum in `include/render_policy.h`
 - [`refs`](modules/include.prefetch.h.md#refs) type_alias in `include/prefetch.h`
 - [`len_rebase_ctx.rem_px`](modules/src.css.c.md#len_rebase_ctx-rem_px) type_alias in `src/css.c`
+- [`repl_edges`](modules/gui.browser_ui.c.md#repl_edges) struct in `gui/browser_ui.c`
 - [`replace`](modules/include.tab.h.md#replace) type_alias in `include/tab.h`
 - [`rp_decision`](modules/include.request_policy.h.md#rp_decision) enum in `include/request_policy.h`
 - [`samples`](modules/include.perf_trace.h.md#samples) type_alias in `include/perf_trace.h`
@@ -433,6 +435,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`tag`](modules/include.css_select.h.md#tag) type_alias in `include/css_select.h`
 - [`cch_node.tag`](modules/src.css_chain.c.md#cch_node-tag) type_alias in `src/css_chain.c`
 - [`tag_row`](modules/src.box_style.c.md#tag_row) struct in `src/box_style.c`
+- [`tc_run`](modules/include.text_case.h.md#tc_run) struct in `include/text_case.h`
 - [`tf_field`](modules/include.textfield.h.md#tf_field) struct in `include/textfield.h`
 - [`tf_status`](modules/include.textfield.h.md#tf_status) enum in `include/textfield.h`
 - [`theme_mode`](modules/include.prefs.h.md#theme_mode) type_alias in `include/prefs.h`

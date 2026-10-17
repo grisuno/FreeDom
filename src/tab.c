@@ -62,7 +62,7 @@ static void ignore_sigpipe(void);
  * Change requires same-diff in both functions; _Static_assert below enforces. */
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
-#define TAB_WIRE_B_N 64
+#define TAB_WIRE_B_N 67
 #define TAB_WIRE_BOX_F_N 246
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
 
@@ -445,6 +445,12 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)(r->img_h_css | (r->img_inline << 1)),
             /* the float founder's own width halves, tanda 44 (appended). */
             (int32_t)r->float_w, (int32_t)r->float_w_pct, (int32_t)r->float_box,
+            /* the empty line a <br> leaves, br-line tanda (appended). */
+            (int32_t)r->br_line,
+            /* the run's block element, br-line tanda (appended). */
+            (int32_t)r->block_node,
+            /* the item's justify-self (appended). */
+            (int32_t)r->justify_self,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -680,7 +686,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nc, sizeof nc) != 0) return -1;
     for (size_t ci = 0; ci < nc; ++ci) {
         const pv_cont_def *cd = pv_cont_at(v, ci);
-        int32_t cf[28 + 2 * PV_GRID_TRACKS];
+        int32_t cf[30 + 2 * PV_GRID_TRACKS];
         size_t k = 0;
         cf[k++] = (int32_t)cd->parent_id;
         cf[k++] = (int32_t)cd->parent_item;
@@ -711,6 +717,8 @@ static int write_view(int wfd, const pv_view *v) {
         cf[k++] = (int32_t)cd->item_col_span;
         cf[k++] = (int32_t)cd->item_row_start;
         cf[k++] = (int32_t)cd->item_row_span;
+        cf[k++] = (int32_t)cd->node_id;
+        cf[k++] = (int32_t)cd->item_justify_self;
         for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cf[k++] = (int32_t)cd->col_w[gk];
         for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cf[k++] = (int32_t)cd->row_h[gk];
         if (write_full(wfd, cf, sizeof cf) != 0) return -1;
@@ -2252,6 +2260,9 @@ static int read_view(int fd, pv_view **out) {
         /* Out-of-flow subtree membership, in the shared tail: structure for
          * every run kind. */
         pv_set_oof(v, (int)b[43]);
+        pv_set_br_line(v, (int)b[64]);
+        pv_set_block_node(v, (dom_node_id)(uint32_t)b[65]);
+        pv_set_justify_self(v, (int)b[66]);
     }
 
     /* Box engine (Step D): the box tree, same order/shape as write_view. Bounded by
@@ -2443,7 +2454,7 @@ static int read_view(int fd, pv_view **out) {
         if (read_full(fd, &nc, sizeof nc) != 0) { pv_free(v); return -1; }
         if (nc > PV_MAX_CONTAINERS_WIRE) { pv_free(v); return -1; }
         for (size_t ci = 0; ci < nc; ++ci) {
-            int32_t cf[28 + 2 * PV_GRID_TRACKS];
+            int32_t cf[30 + 2 * PV_GRID_TRACKS];
             if (read_full(fd, cf, sizeof cf) != 0) { pv_free(v); return -1; }
             pv_cont_def cd;
             memset(&cd, 0, sizeof cd);
@@ -2483,6 +2494,8 @@ static int read_view(int fd, pv_view **out) {
             if (cd.item_row_start < -1 || cd.item_row_start >= (int)FX_MAX_ITEMS) cd.item_row_start = -1;
             if (cd.item_col_span < 0 || cd.item_col_span > FX_GL_SPAN_MAX) cd.item_col_span = 0;
             if (cd.item_row_span < 0 || cd.item_row_span > FX_GL_SPAN_MAX) cd.item_row_span = 0;
+            cd.node_id = (dom_node_id)(uint32_t)cf[k++];
+            cd.item_justify_self = cf[k++];
             for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cd.col_w[gk] = cf[k++];
             for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cd.row_h[gk] = cf[k++];
             /* A hostile worker cannot make the parent chain point outside the

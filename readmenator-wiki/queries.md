@@ -4,11 +4,11 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 ## Suggested
 
-### Q: What does browser_ui.c depend on, and what depends on it? (45 connections)
+### Q: What does browser_ui.c depend on, and what depends on it? (46 connections)
 
 - Status: unanswered
 
-### Q: What does css.h depend on, and what depends on it? (34 connections)
+### Q: What does css.h depend on, and what depends on it? (37 connections)
 
 - Status: unanswered
 

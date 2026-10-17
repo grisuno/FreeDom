@@ -8,14 +8,19 @@
 #include "css.h"
 #include "css_select.h"
 
-#define CSS_MAX_BG_URLS 256u
-
-/* Bound for the ::before/::after content string pool (and the grid-template
- * rows that share it). Same budget as background URLs: an icon font ships
- * hundreds of one-glyph `content` rules (a real page carried 400+), and past
- * the cap every later rule loses its string in silence. Heap sheet, freed
- * with it: 256 KiB transient per page parse, same as the bg pool. */
-#define CSS_MAX_CONTENT_URLS 256u
+/* The sheet's two string pools -- background url()s, and the ::before/::after
+ * content strings that font-family names and grid-area rows share -- live on
+ * the heap and grow by doubling from CSS_POOL_INIT slots, so a sheet only pays
+ * for what it holds. They were fixed at 256 slots, and a page reaches that: an
+ * icon font ships hundreds of one-glyph `content` rules (slashdot ~350), and
+ * every rule past the cap lost its string in silence. The hard caps below are
+ * the anti-DoS bound (4096 x CSS_URL_MAX = 4 MiB per pool at worst).
+ * CSS_POOL_HEADROOM free slots are guaranteed before each rule's declarations
+ * are interpreted, more than one declaration block can consume. */
+#define CSS_POOL_INIT        64u
+#define CSS_POOL_HEADROOM    32u
+#define CSS_MAX_BG_URLS      4096u
+#define CSS_MAX_CONTENT_URLS 4096u
 
 #define CSS_MAX_KEYFRAMES 4
 #define CSS_MAX_KEYFRAME_STOPS 8
@@ -83,7 +88,7 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
        P_BSHADOW_X_LAST = P_BSHADOW_X_FIRST + (CSS_BSHADOW_LAYERS - 1) * 6 - 1,
        P_OUTLINE_W, P_OUTLINE_S, P_OUTLINE_C, P_OUTLINE_OFFSET,
        P_FLEX_GROW, P_FLEX_SHRINK, P_FLEX_BASIS,
-       P_ORDER, P_ALIGN_ITEMS, P_ALIGN_SELF, P_ALIGN_CONTENT, P_JUSTIFY_ITEMS,
+       P_ORDER, P_ALIGN_ITEMS, P_ALIGN_SELF, P_ALIGN_CONTENT, P_JUSTIFY_ITEMS, P_JUSTIFY_SELF,
        P_FLEX_DIR, P_FLEX_WRAP,
        P_GRID_ROWS, P_ROW_GAP, P_GRID_FLOW,
        /* grid-{column,row}-{start,end} (spec/grid_areas.md section 6): one encoded

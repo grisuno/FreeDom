@@ -3,6 +3,22 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `CSS_MAX_KEYFRAMES` | macro | `include/css_decl.h:25` | `#define CSS_MAX_KEYFRAMES` |
+| `CSS_MAX_KEYFRAME_DECLS` | macro | `include/css_decl.h:27` | `#define CSS_MAX_KEYFRAME_DECLS` |
+| `CSS_MAX_KEYFRAME_STOPS` | macro | `include/css_decl.h:26` | `#define CSS_MAX_KEYFRAME_STOPS` |
+| `CSS_POOL_HEADROOM` | macro | `include/css_decl.h:21` | `#define CSS_POOL_HEADROOM` |
+| `CSS_POOL_INIT` | macro | `include/css_decl.h:20` | `#define CSS_POOL_INIT` |
+| `CSS_WIDE_PROBE_DECLS` | macro | `include/css_decl.h:35` | `#define CSS_WIDE_PROBE_DECLS` |
+| `FREEDOM_CSS_DECL_H` | macro | `include/css_decl.h:2` | `#define FREEDOM_CSS_DECL_H` |
+| `contiguous` | function | `include/css_decl.h:65` | `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...` |
+| `css_decl` | struct | `include/css_decl.h:210` | `` |
+| `order` | function | `include/css_decl.h:50` | `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);` |
+| `prop` | type_alias | `include/css_decl.h:209` | `typedef struct css_decl { int prop;` |
+| `FREEDOM_CSS_GRADIENT_H` | macro | `include/css_gradient.h:2` | `#define FREEDOM_CSS_GRADIENT_H` |
+| `cg_expand_background` | function | `include/css_gradient.h:13` | `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
+| `cg_expand_bg_image` | function | `include/css_gradient.h:11` | `int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
+| `FREEDOM_CSS_INDEX_H` | macro | `include/css_index.h:11` | `#define FREEDOM_CSS_INDEX_H` |
+| `cix_build` | function | `include/css_index.h:34` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx);` |
 | `cix_entry` | struct | `include/css_index.h:18` | `` |
 | `cix_free` | function | `include/css_index.h:37` | `void cix_free(cix_index *idx);` |
 | `cix_index` | struct | `include/css_index.h:23` | `` |
@@ -86,9 +102,10 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `ct_interp_valign` | function | `include/css_text.h:13` | `int ct_interp_valign(const char *v);` |
 | `ct_interp_whitespace` | function | `include/css_text.h:16` | `int ct_interp_whitespace(const char *v);` |
 | `FREEDOM_CSS_VALUES_H` | macro | `include/css_values.h:2` | `#define FREEDOM_CSS_VALUES_H` |
+| `black` | function | `include/css_values.h:22` | `* transparent black (127 << 24) -- text that paints nothing, not an absent * value. CC_COLOR_CURRENT and -1...` |
 | `cv_bg_alpha_of` | function | `include/css_values.h:15` | `int cv_bg_alpha_of(const char *v);` |
 | `cv_color_ok` | function | `include/css_values.h:14` | `int cv_color_ok(int c);` |
-| `cv_interp_bg` | function | `include/css_values.h:20` | `int cv_interp_bg(const char *v);` |
+| `cv_interp_bg` | function | `include/css_values.h:25` | `int cv_interp_bg(const char *v);` |
 | `cv_interp_color` | function | `include/css_values.h:13` | `int cv_interp_color(const char *v);` |
 | `cv_parse_color` | function | `include/css_values.h:12` | `int cv_parse_color(const char *v);` |
 | `cv_parse_color_t7` | function | `include/css_values.h:19` | `int cv_parse_color_t7(const char *v);` |
@@ -479,22 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `nr_realm` | enum | `include/net_realm.h:29` | `` |
 | `nr_realm_allows_http` | function | `include/net_realm.h:66` | `int nr_realm_allows_http(nr_realm r);` |
 | `nr_realm_name` | function | `include/net_realm.h:69` | `const char *nr_realm_name(nr_realm r);` |
-| `nr_route` | enum | `include/net_realm.h:35` | `` |
-| `nr_route_name` | function | `include/net_realm.h:70` | `const char *nr_route_name(nr_route r);` |
-| `tor_enabled` | type_alias | `include/net_realm.h:41` | `typedef struct nr_config { int tor_enabled;` |
-| `FREEDOM_OS_SANDBOX_H` | macro | `include/os_sandbox.h:2` | `#define FREEDOM_OS_SANDBOX_H` |
-| `denied` | function | `include/os_sandbox.h:59` | `* request PROT_EXEC are denied (see os_prot_allowed). * Returns OS_ERR_UNSUPPORTED on platforms without seccomp-bpf...` |
-| `flags` | function | `include/os_sandbox.h:39` | `* permission also depends on the protection flags (see os_prot_allowed / W^X). */ int os_policy_allows(long syscall_nr);` |
-| `namespace` | function | `include/os_sandbox.h:75` | `* namespace (the unprivileged enabler), network (the worker never needs the * network -- the parent fetches and...` |
-| `os_fs_access` | enum | `include/os_sandbox.h:102` | `` |
-| `os_fs_rule` | struct | `include/os_sandbox.h:108` | `` |
-| `os_landlock_abi` | function | `include/os_sandbox.h:114` | `int os_landlock_abi(void);` |
-| `os_namespace_flags` | function | `include/os_sandbox.h:81` | `int os_namespace_flags(void);` |
-| `os_policy_size` | function | `include/os_sandbox.h:43` | `size_t os_policy_size(void);` |
-| `os_prot_allowed` | function | `include/os_sandbox.h:52` | `int os_prot_allowed(long syscall_nr, unsigned long prot);` |
-| `os_status` | enum | `include/os_sandbox.h:21` | `` |
-| `os_violation` | enum | `include/os_sandbox.h:30` | `` |
-| `CSS_LEN_UNSET` | function | `include/page_view.h:523` | `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...` |
-| `FREEDOM_PAGE_VIEW_H` | macro | `include/page_view.h:2` | `#define FREEDOM_PAGE_VIEW_H` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

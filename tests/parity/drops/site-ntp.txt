@@ -1,0 +1,21 @@
+pool.ntp.org: the internet cluster of ntp servers
+CSS drops: 36 declaration(s) dropped, 18 distinct
+  count  cause         property                     first value
+      5  unknown-prop  stroke-dasharray             2,2,2,2
+      4  bad-value     z-index                      auto
+      4  unknown-prop  -webkit-overflow-scrolling   touch
+      4  unknown-prop  text-underline-offset        .25em
+      4  unknown-prop  shape-rendering              crispEdges
+      2  bad-value     background-position          right .75rem center,center right 2.25rem
+      2  bad-value     background-size              16px 12px,calc(.75em + .375rem) calc(.75em + .375rem)
+      1  unknown-prop  -webkit-tap-highlight-color  rgba(0,0,0,0)
+      1  unknown-prop  text-decoration-skip-ink     none
+      1  unknown-prop  counter-reset                section
+      1  bad-value     content                      counters(section,".") ". "
+      1  unknown-prop  counter-increment            section
+      1  bad-value     text-align                   -webkit-match-parent
+      1  bad-value     padding                      .6rem .75rem .5reml .5rem
+      1  unknown-prop  stroke-linecap               round
+      1  unknown-prop  stroke-linejoin              round
+      1  bad-value     border-color                 inherit
+      1  unknown-prop  -webkit-text-size-adjust     100%

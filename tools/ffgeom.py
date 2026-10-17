@@ -85,6 +85,10 @@ window.addEventListener("load", function () {
   }
   var cv = document.createElement("canvas");
   cv.id = "ffgeom-grid";
+  // Pinned to the viewport's top-left whatever the page does to <body>
+  // (flex/grid, padding, transforms): decode() reads the grid at (0,0).
+  cv.style.cssText = "position:fixed;left:0;top:0;z-index:2147483647;" +
+                     "margin:0;border:0;padding:0;transform:none;display:block";
   var rowsN = rows.length * 8 + 3;
   cv.width = 64;
   cv.height = rowsN * 4;

@@ -93,9 +93,9 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 
 - [EXTRACTED] depends_on community 3 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.
 - [EXTRACTED] depends_on community 6 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/html_parse.h.
-- [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
+- [EXTRACTED] depends_on community 2 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
 - [EXTRACTED] depends_on community 5 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
-- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
+- [EXTRACTED] depends_on community 0 <-> 1 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
 
 ## Risks
 

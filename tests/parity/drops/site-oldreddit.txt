@@ -1,5 +1,5 @@
 Welcome to Reddit
-CSS drops: 107 declaration(s) dropped, 43 distinct
+CSS drops: 105 declaration(s) dropped, 42 distinct
   count  cause         property                     first value
      15  bad-value     transition-timing-function   cubic-bezier(.4,0,.2,1)
       8  bad-value     font                         normal -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Apple Colo...
@@ -21,26 +21,25 @@ CSS drops: 107 declaration(s) dropped, 43 distinct
       2  unknown-prop  container-type               inline-size
       2  unknown-prop  scroll-margin-top            4rem
       2  unknown-prop  text-underline-position      under
-      2  unknown-prop  justify-self                 start
       2  bad-value     padding-bottom               calc(2rem + env(safe-area-inset-bottom))
       2  bad-value     outline-color                transparent
       2  unknown-prop  -ms-overflow-style           none
       2  bad-value     text-align                   -webkit-match-parent
+      1  unknown-prop  scroll-padding-top           1.5rem
       1  bad-value     max-height                   min(230px,100%)
       1  bad-value     justify-content              stretch
       1  bad-value     gap                          15%
-      1  unknown-prop  scroll-snap-align            start
       1  unknown-prop  overscroll-behavior-y        contain
       1  unknown-prop  overscroll-behavior-x        contain
       1  unknown-prop  -webkit-tap-highlight-color  transparent
-      1  unknown-prop  -webkit-font-smoothing       antialiased
+      1  unknown-prop  scroll-snap-align            start
       1  bad-value     font-weight                  normal -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Apple Colo...
       1  bad-value     caret-color                  transparent
-      1  unknown-prop  scrollbar-gutter             stable
+      1  unknown-prop  -webkit-font-smoothing       antialiased
       1  unknown-prop  all                          revert
-      1  unknown-prop  scroll-padding-bottom        2rem
+      1  unknown-prop  scrollbar-gutter             stable
       1  unknown-prop  will-change                  transform
-      1  unknown-prop  scroll-padding-top           1.5rem
+      1  unknown-prop  scroll-padding-bottom        2rem
       1  unknown-prop  perspective                  1000px
       1  unknown-prop  transform-style              preserve-3d
       1  bad-value     transform                    rotateY(180deg)

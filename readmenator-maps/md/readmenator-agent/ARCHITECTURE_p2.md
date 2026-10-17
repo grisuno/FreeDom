@@ -2,6 +2,11 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_render_doc.c` -> `include/css.h`
+- `tests/test_render_doc.c` -> `include/flex_layout.h`
+- `tests/test_render_doc.c` -> `include/page_view.h`
+- `tests/test_render_doc.c` -> `include/render_doc.h`
+- `tests/test_render_doc.c` -> `include/render_policy.h`
 - `tests/test_render_policy.c` -> `include/render_policy.h`
 - `tests/test_renderer.c` -> `include/renderer.h`
 - `tests/test_request_policy.c` -> `include/request_policy.h`
@@ -12,6 +17,8 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_tab.c` -> `include/tab.h`
 - `tests/test_tab.c` -> `include/url.h`
 - `tests/test_tab.c` -> `include/web_storage.h`
+- `tests/test_text_case.c` -> `include/css.h`
+- `tests/test_text_case.c` -> `include/text_case.h`
 - `tests/test_text_shape.c` -> `include/css.h`
 - `tests/test_text_shape.c` -> `include/text_shape.h`
 - `tests/test_text_shape.c` -> `include/webfont.h`
@@ -49,6 +56,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `fuzz/fuzz_prefetch.c` -> stddef.h, stdint.h, string.h
 - `fuzz/fuzz_prefs.c` -> stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `fuzz/fuzz_svg_render.c` -> math.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_text_case.c` -> stddef.h, stdint.h, stdlib.h, string.h
 - `fuzz/fuzz_text_shape.c` -> stddef.h, stdint.h, stdlib.h
 - `fuzz/fuzz_tls_impersonate.c` -> stdint.h, stdlib.h, string.h
 - `fuzz/fuzz_url.c` -> stdint.h, stdlib.h, string.h, strings.h
@@ -112,6 +120,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/svg_paint.h` -> cairo.h
 - `include/svg_render.h` -> stddef.h
 - `include/tab.h` -> stddef.h, stdint.h, sys/types.h
+- `include/text_case.h` -> stddef.h, stdint.h
 - `include/text_shape.h` -> cairo/cairo.h, stddef.h
 - `include/textfield.h` -> stddef.h
 - `include/tls_impersonate.h` -> stddef.h, stdint.h
@@ -175,7 +184,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/media_decoder.c` -> errno.h, libavcodec/avcodec.h, libavformat/avformat.h, libavutil/avutil.h, libavutil/imgutils.h, libswscale/swscale.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, unistd.h
 - `src/net_realm.c` -> stddef.h, string.h
 - `src/os_sandbox.c` -> errno.h, fcntl.h, linux/audit.h, linux/filter.h, linux/landlock.h, linux/seccomp.h, sched.h, stddef.h, stdint.h, string.h, sys/mman.h, sys/prctl.h, sys/resource.h, sys/syscall.h, unistd.h
-- `src/page_view.c` -> ctype.h, lexbor/html/html.h, lexbor/tag/const.h, stdint.h, stdio.h, stdlib.h, string.h
+- `src/page_view.c` -> ctype.h, lexbor/html/html.h, lexbor/tag/const.h, limits.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/pdf_export.c` -> string.h
 - `src/perf_trace.c` -> stdio.h, stdlib.h, string.h
 - `src/prefetch.c` -> stdlib.h, string.h, strings.h
@@ -256,6 +265,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_secure_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_svg_render.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_tab.c` -> cmocka.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/types.h, time.h, unistd.h
+- `tests/test_text_case.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_text_shape.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_textfield.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_tls_impersonate.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h

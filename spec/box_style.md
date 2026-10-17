@@ -342,3 +342,10 @@ tiene por bloque contenedor el ICB, cuya altura es el viewport normalizado (la m
   sumo, un `display` en línea gateado por el llamante.
 - `table`/`table-*`, `ruby`, `contents`, `flow-root` y demás valores de `display` raros.
 - Extraer el token desde el atributo `style`/la hoja del autor: lo hace `page_view`/`render_doc`.
+
+## 4aa — `bx_line_height_px` (tanda 45)
+
+`bx_line_height_px(line_scale, font_px)`: 0 = normal; `< CSS_LINE_ABS_BASE` =
+porcentaje del `font-size` (acotado a `CSS_LINE_MAX`); `>= CSS_LINE_ABS_BASE` =
+longitud absoluta en décimas de px (acotada a `CSS_LINE_ABS_MAX_PX`). Puro; valores
+fuera de rango de un worker hostil se acotan.

@@ -81,6 +81,21 @@ static void test_fit_content_trim(void **state)
     assert_int_equal(cb_emit_len(d, 8, P_WIDTH, "fit-content()", CB_AUTO_RESET, 0), 0);
 }
 
+/* line-height (CSS 2.1 10.8.1): a number, a percentage and an em scale with the
+ * font; an absolute length does not (it is that many px, and inherits so). */
+static void test_lineheight_abs_vs_scale(void **state) {
+    (void)state;
+    assert_int_equal(cb_interp_lineheight("normal"), 0);
+    assert_int_equal(cb_interp_lineheight("1.5"), 150);
+    assert_int_equal(cb_interp_lineheight("150%"), 150);
+    assert_int_equal(cb_interp_lineheight("1.5em"), 150);
+    assert_int_equal(cb_interp_lineheight("22.4px"), CSS_LINE_ABS_BASE + 224);
+    assert_int_equal(cb_interp_lineheight("12pt"), CSS_LINE_ABS_BASE + 160);
+    assert_int_equal(cb_interp_lineheight("9999px"), CSS_LINE_ABS_BASE + CSS_LINE_ABS_MAX_PX * 10);
+    assert_int_equal(cb_interp_lineheight("-2px"), -1);
+    assert_int_equal(cb_interp_lineheight("bogus"), -1);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -92,6 +107,7 @@ int main(void)
         cmocka_unit_test(test_align_display_gap),
         cmocka_unit_test(test_grid_repeat_autofill_dropped),
         cmocka_unit_test(test_fit_content_trim),
+        cmocka_unit_test(test_lineheight_abs_vs_scale),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

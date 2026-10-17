@@ -1,10 +1,10 @@
 # include: page_view
 
-*Community 3 | 30 files | cohesion 0.47*
+*Community 3 | 31 files | cohesion 0.48*
 
 ## Definition
 
-This community groups 30 file(s) rooted at `include` with dominant language c (cohesion 0.47). Central symbols: `BLOCK`, `BLOCKED`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (233 symbols).
+This community groups 31 file(s) rooted at `include` with dominant language c (cohesion 0.48). Central symbols: `BLOCK`, `BLOCKED`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`. Core file: `src/page_view.c` (236 symbols).
 
 ## Files
 
@@ -12,35 +12,35 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `include/box_style.h` | h | utility | 30 | no |
+| `include/box_style.h` | h | utility | 31 | no |
 | `include/box_tree.h` | h | utility | 32 | no |
 | `include/dom_debug.h` | h | utility | 4 | no |
 | `include/flex_layout.h` | h | presentation | 43 | no |
 | `include/js_policy.h` | h | business_logic | 7 | no |
-| `include/page_view.h` | h | presentation | 81 | no |
+| `include/page_view.h` | h | presentation | 86 | no |
 | `include/perf_trace.h` | h | utility | 17 | no |
+
+### `src` (10 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `src/box_style.c` | c | utility | 48 | no |
+| `src/box_tree.c` | c | utility | 23 | no |
+| `src/dom_debug.c` | c | utility | 24 | no |
+| `src/flex_layout.c` | c | presentation | 35 | no |
+| `src/freedom.c` | c | utility | 46 | no |
+| `src/js_policy.c` | c | business_logic | 6 | no |
 
 ### `tests` (10 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `tests/test_box_style.c` | c | testing | 48 | no |
-| `tests/test_box_tree.c` | c | testing | 59 | no |
+| `tests/test_box_style.c` | c | testing | 49 | no |
+| `tests/test_box_tree.c` | c | testing | 61 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 71 | no |
 | `tests/test_js_policy.c` | c | testing | 5 | no |
-| `tests/test_page_view.c` | c | testing | 196 | no |
-
-### `src` (9 files)
-
-| File | Language | Layer | Symbols | Doc |
-|------|----------|-------|---------|-----|
-| `src/box_style.c` | c | utility | 47 | no |
-| `src/dom_debug.c` | c | utility | 24 | no |
-| `src/flex_layout.c` | c | presentation | 35 | no |
-| `src/freedom.c` | c | utility | 46 | no |
-| `src/js_policy.c` | c | business_logic | 6 | no |
-| `src/page_view.c` | c | presentation | 233 | no |
+| `tests/test_page_view.c` | c | testing | 201 | no |
 
 ### `fuzz` (1 files)
 
@@ -48,7 +48,7 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 |------|----------|-------|---------|-----|
 | `fuzz/fuzz_dom_debug.c` | c | utility | 1 | no |
 
-*... and 10 more files in this community.*
+*... and 11 more files in this community.*
 
 
 ## Key Symbols
@@ -74,27 +74,27 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 - `bx_replaced_box` (function, `include/box_style.h:206`) `int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den, double` - CSS Sizing 4 section 4: when one axis is definite and an aspect-ratio is present, the ratio supplies
 - `bx_border_box_h` (function, `include/box_style.h:220`) `double bx_border_box_h(double declared_h, int border_box, double pad_t, double p` - Border-box height for a DECLARED height under box-sizing (CSS 2.1 10.6.3, CSS Box Sizing 3 section 4
 - `block` (function, `include/box_style.h:226`) `* indefinite containing block (cb_h < 0) the value behaves as auto: -1. * Withou`
-- `bx_definite_content_h` (function, `include/box_style.h:235`) `double bx_definite_content_h(double h, double min_h, double max_h, int border_bo` - The definite CONTENT height an element hands its children as their percentage basis: its used height
-- `page` (function, `include/box_style.h:239`) `* instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That *`
-- `bx_lp_px` (function, `include/box_style.h:261`) `double bx_lp_px(int px_val, int pct_pm, double basis);` - half plus pct_pm per-mille of `basis`. This is the ONLY place the engine turns a percentage into pix
-- `bx_content_cap` (function, `include/box_style.h:269`) `double bx_content_cap(double width_cap, int border_box, double pad_l, double pad` - Content-width cap adjusted for box-sizing (2026-07-11). With border_box set, the declared width incl
-- `bx_border_span` (function, `include/box_style.h:280`) `double bx_border_span(double width_cap, int border_box, double pad_l, double pad` - The border-inclusive span the painter lays a box out with (its content plus left/right border; paddi
-- `bx_flex_max_clamp` (function, `include/box_style.h:286`) `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, doub` - Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hypothetical main size
-- `bx_flex_min_clamp` (function, `include/box_style.h:292`) `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, doubl` - The min-width half of the same clamp (Flexbox 9.2.3): an outer base below the item's min-width (conv
-- `bx_bg_layer` (struct, `include/box_style.h:315`) - the explicit form, each component is a px value (CSS_LEN_AUTO = auto, CSS_LEN_UNSET = not declared,
-- `nat_h` (type_alias, `include/box_style.h:315`) `typedef struct bx_bg_layer { double nat_w, nat_h;` - the explicit form, each component is a px value (CSS_LEN_AUTO = auto, CSS_LEN_UNSET = not declared,
+- `bx_line_height_px` (function, `include/box_style.h:239`) `double bx_line_height_px(int line_scale, double font_px);` - The used line-height in px of text at font_px for a css line_scale value (spec/box_style.md 4c): 0 =
+- `bx_definite_content_h` (function, `include/box_style.h:241`) `double bx_definite_content_h(double h, double min_h, double max_h, int border_bo`
+- `page` (function, `include/box_style.h:245`) `* instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That *`
+- `bx_lp_px` (function, `include/box_style.h:267`) `double bx_lp_px(int px_val, int pct_pm, double basis);` - half plus pct_pm per-mille of `basis`. This is the ONLY place the engine turns a percentage into pix
+- `bx_content_cap` (function, `include/box_style.h:275`) `double bx_content_cap(double width_cap, int border_box, double pad_l, double pad` - Content-width cap adjusted for box-sizing (2026-07-11). With border_box set, the declared width incl
+- `bx_border_span` (function, `include/box_style.h:286`) `double bx_border_span(double width_cap, int border_box, double pad_l, double pad` - The border-inclusive span the painter lays a box out with (its content plus left/right border; paddi
+- `bx_flex_max_clamp` (function, `include/box_style.h:292`) `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, doub` - Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hypothetical main size
+- `bx_flex_min_clamp` (function, `include/box_style.h:298`) `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, doubl` - The min-width half of the same clamp (Flexbox 9.2.3): an outer base below the item's min-width (conv
+- `bx_bg_layer` (struct, `include/box_style.h:321`) - the explicit form, each component is a px value (CSS_LEN_AUTO = auto, CSS_LEN_UNSET = not declared,
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 56
+- Internal resolved imports (EXTRACTED): 58
 - Cross-boundary resolved imports (EXTRACTED): 62
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_css.c imports include/flex_layout.h.
+- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_css.c imports include/flex_layout.h.
 - [EXTRACTED] depends_on community 3 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.
 - [EXTRACTED] depends_on community 6 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/page_view.h.
-- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
 - [EXTRACTED] depends_on community 3 <-> 9 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
 - [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/request_policy.h.
 - [EXTRACTED] depends_on community 3 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/secure_fetch.h.
@@ -119,9 +119,9 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 
 ## Open Questions
 
-- Why do 30 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom_debug.c`)? What purpose do they serve?
+- Why do 31 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom_debug.c`)? What purpose do they serve?
 - What would break if the most connected file in include: page_view changed?
-- Should include: page_view be split, given cohesion 0.47?
+- Should include: page_view be split, given cohesion 0.48?
 
 ## Sources
 
@@ -137,6 +137,7 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 - `include/render_policy.h`
 - `include/webcaps.h`
 - `src/box_style.c`
+- `src/box_tree.c`
 - `src/dom_debug.c`
 - `src/flex_layout.c`
 - `src/freedom.c`
@@ -144,5 +145,4 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 - `src/page_view.c`
 - `src/perf_trace.c`
 - `src/render_doc.c`
-- `src/webcaps.c`
-- *... and 10 more*
+- *... and 11 more*

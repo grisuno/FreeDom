@@ -1,15 +1,13 @@
 # `include/css_decl.h`
 
-> Source: [include/css_decl.h:1](../../include/css_decl.h#L1) | language `h` | coverage 25.0% | [API index](../index.md)
-
-Bound for the ::before/::after content string pool (and the grid-template
+> Source: [include/css_decl.h:1](../../include/css_decl.h#L1) | language `h` | coverage 14.3% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`css_decl`](#css_decl)
 - **Type Aliases:** [`prop`](#prop)
 - **Functions:** [`order`](#order), [`contiguous`](#contiguous)
-- **Macros:** [`CSS_MAX_BG_URLS`](#css_max_bg_urls), [`CSS_MAX_CONTENT_URLS`](#css_max_content_urls), [`CSS_MAX_KEYFRAMES`](#css_max_keyframes), [`CSS_MAX_KEYFRAME_STOPS`](#css_max_keyframe_stops), [`CSS_MAX_KEYFRAME_DECLS`](#css_max_keyframe_decls), [`CSS_INLINE_BG_URLS`](#css_inline_bg_urls), [`CSS_WIDE_PROBE_DECLS`](#css_wide_probe_decls)
+- **Macros:** [`CSS_POOL_INIT`](#css_pool_init), [`CSS_POOL_HEADROOM`](#css_pool_headroom), [`CSS_MAX_BG_URLS`](#css_max_bg_urls), [`CSS_MAX_CONTENT_URLS`](#css_max_content_urls), [`CSS_MAX_KEYFRAMES`](#css_max_keyframes), [`CSS_MAX_KEYFRAME_STOPS`](#css_max_keyframe_stops), [`CSS_MAX_KEYFRAME_DECLS`](#css_max_keyframe_decls), [`CSS_INLINE_BG_URLS`](#css_inline_bg_urls), [`CSS_WIDE_PROBE_DECLS`](#css_wide_probe_decls)
 
 ## Type Diagram
 
@@ -28,7 +26,7 @@ classDiagram
 
 ### `css_decl`
 
-`struct` | [include/css_decl.h:205](../../include/css_decl.h#L205)
+`struct` | [include/css_decl.h:210](../../include/css_decl.h#L210)
 
 ```c
 typedef struct css_decl
@@ -42,7 +40,7 @@ typedef struct css_decl
 
 ### `prop`
 
-`type_alias` | [include/css_decl.h:204](../../include/css_decl.h#L204)
+`type_alias` | [include/css_decl.h:209](../../include/css_decl.h#L209)
 
 ```c
 typedef struct css_decl { int prop;
@@ -56,7 +54,7 @@ typedef struct css_decl { int prop;
 
 ### `order`
 
-`function` | [include/css_decl.h:45](../../include/css_decl.h#L45)
+`function` | [include/css_decl.h:50](../../include/css_decl.h#L50)
 
 ```c
 * The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);
@@ -76,7 +74,7 @@ typedef struct css_decl { int prop;
 
 ### `contiguous`
 
-`function` | [include/css_decl.h:60](../../include/css_decl.h#L60)
+`function` | [include/css_decl.h:65](../../include/css_decl.h#L65)
 
 ```c
 * contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM, P_LETTERSPACING, P_WORDSPACING, P_SHADOW_DX, P_SHADOW_DY, P_SHADOW_COLOR, P_OPACITY, P_VALIGN, P_T
@@ -88,11 +86,39 @@ typedef struct css_decl { int prop;
 
 ## Macros
 
+<a id="css_pool_init"></a>
+
+### `CSS_POOL_INIT`
+
+`macro` | [include/css_decl.h:20](../../include/css_decl.h#L20)
+
+```c
+#define CSS_POOL_INIT
+```
+
+The sheet's two string pools -- background url()s, and the ::before/::after content strings that font-family names and grid-area rows share -- live on the heap and grow by doubling from CSS_POOL_INIT slots, so a sheet only pays for what it holds.
+
+They were fixed at 256 slots, and a page reaches that: an icon font ships hundreds of one-glyph `content` rules (slashdot ~350), and every rule past the cap lost its string in silence. The hard caps below are the anti-DoS bound (4096 x CSS_URL_MAX = 4 MiB per pool at worst). CSS_POOL_HEADROOM free slots are guaranteed before each rule's declarations are interpreted, more than one declaration block can consume.
+
+---
+
+<a id="css_pool_headroom"></a>
+
+### `CSS_POOL_HEADROOM`
+
+`macro` | [include/css_decl.h:21](../../include/css_decl.h#L21)
+
+```c
+#define CSS_POOL_HEADROOM
+```
+
+---
+
 <a id="css_max_bg_urls"></a>
 
 ### `CSS_MAX_BG_URLS`
 
-`macro` | [include/css_decl.h:11](../../include/css_decl.h#L11)
+`macro` | [include/css_decl.h:22](../../include/css_decl.h#L22)
 
 ```c
 #define CSS_MAX_BG_URLS
@@ -104,15 +130,11 @@ typedef struct css_decl { int prop;
 
 ### `CSS_MAX_CONTENT_URLS`
 
-`macro` | [include/css_decl.h:18](../../include/css_decl.h#L18)
+`macro` | [include/css_decl.h:23](../../include/css_decl.h#L23)
 
 ```c
 #define CSS_MAX_CONTENT_URLS
 ```
-
-Bound for the ::before/::after content string pool (and the grid-template rows that share it).
-
-Same budget as background URLs: an icon font ships hundreds of one-glyph `content` rules (a real page carried 400+), and past the cap every later rule loses its string in silence. Heap sheet, freed with it: 256 KiB transient per page parse, same as the bg pool.
 
 ---
 
@@ -120,7 +142,7 @@ Same budget as background URLs: an icon font ships hundreds of one-glyph `conten
 
 ### `CSS_MAX_KEYFRAMES`
 
-`macro` | [include/css_decl.h:20](../../include/css_decl.h#L20)
+`macro` | [include/css_decl.h:25](../../include/css_decl.h#L25)
 
 ```c
 #define CSS_MAX_KEYFRAMES
@@ -132,7 +154,7 @@ Same budget as background URLs: an icon font ships hundreds of one-glyph `conten
 
 ### `CSS_MAX_KEYFRAME_STOPS`
 
-`macro` | [include/css_decl.h:21](../../include/css_decl.h#L21)
+`macro` | [include/css_decl.h:26](../../include/css_decl.h#L26)
 
 ```c
 #define CSS_MAX_KEYFRAME_STOPS
@@ -144,7 +166,7 @@ Same budget as background URLs: an icon font ships hundreds of one-glyph `conten
 
 ### `CSS_MAX_KEYFRAME_DECLS`
 
-`macro` | [include/css_decl.h:22](../../include/css_decl.h#L22)
+`macro` | [include/css_decl.h:27](../../include/css_decl.h#L27)
 
 ```c
 #define CSS_MAX_KEYFRAME_DECLS
@@ -156,7 +178,7 @@ Same budget as background URLs: an icon font ships hundreds of one-glyph `conten
 
 ### `CSS_INLINE_BG_URLS`
 
-`macro` | [include/css_decl.h:23](../../include/css_decl.h#L23)
+`macro` | [include/css_decl.h:28](../../include/css_decl.h#L28)
 
 ```c
 #define CSS_INLINE_BG_URLS
@@ -168,7 +190,7 @@ Same budget as background URLs: an icon font ships hundreds of one-glyph `conten
 
 ### `CSS_WIDE_PROBE_DECLS`
 
-`macro` | [include/css_decl.h:30](../../include/css_decl.h#L30)
+`macro` | [include/css_decl.h:35](../../include/css_decl.h#L35)
 
 ```c
 #define CSS_WIDE_PROBE_DECLS

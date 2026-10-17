@@ -1317,3 +1317,29 @@ generada existe con el padding porcentual y la miniatura reserva el alto 16:9
   su `max-width` contra el bloque contenedor).
 - **Caras UA de contenido de frase** en `PV_UA_CSS`: `u, ins` subrayado,
   `s, strike, del` tachado, `mark` resaltado, `abbr[title]` punteado.
+
+## Tanda 45 — saltos de línea, `hidden`, flotantes e identidad de bloque
+
+- **Saltos de línea** (`pv_run.br_line`, flags `PV_BR_*`). Un `<br>` que ABRE una
+  línea (primer contenido de su bloque, tras un bloque, o tras otro `<br>`) deja una
+  línea vacía del alto de su strut (CSS 2.1 §9.4.2): un run vacío con
+  `PV_BR_EMPTY`. El run que consume la ruptura de un `<br>` dentro del MISMO bloque
+  lleva `PV_BR_CONT`: el pintor abre línea sin volver a colapsar los márgenes del
+  bloque (antes cada `<br>` en un `<p>` metía 16 px fantasma). Un `<br>` con
+  `display:block` sigue siendo un salto, no un bloque vacío. Un `<br>` oculto
+  (`display:none`, `hidden`) no rompe nada.
+- **Atributo `hidden`** = `display:none` de la hoja UA (HTML Rendering §15.3.1):
+  estructura, vale con CSS de autor apagado, y un `display` de autor en el elemento
+  lo anula.
+- **Dentro de un flotante no se suprime ningún `block_break`**: `float_id` nombra UN
+  elemento, y la supresión aplanaba todos sus párrafos en una línea.
+- **`pv_run.block_node`** (y `pv_cont_def.node_id`): id DOM del elemento de BLOQUE del
+  run y del contenedor. `block_id` responde por la caja decorada más cercana; esto
+  responde "¿el bloque de este run ES el contenedor/ítem?", que decide de quién son
+  los márgenes (Flexbox 3/4: ítems y contenedores no colapsan márgenes entre sí).
+  Cruza el códec (B[65], cf[]). `pv_node_map_id` pasa a O(1) (índice hash).
+- **Caja propia de `<img>`**: solo la de su propia decoración (borde, margen, ancho);
+  nunca la del ancestro. Un `<img>` hijo directo de un contenedor flex/grid está
+  blockificado (`img_inline = 0`).
+- **`pv_run.justify_self`** / `pv_cont_def.item_justify_self`: `justify-self` del
+  ítem (B[66]).

@@ -73,8 +73,9 @@ static double bt_nn(double v) {
  * a child that would overflow the line starts a new one. Lines stack vertically
  * with the cross-axis gap (row_gap if set, else gap, matching a plain CSS
  * `gap: R C` shorthand). Within a line, a child is positioned per its resolved
- * align (start/center/end; stretch is v1-approximated as start -- see
- * spec/box_engine.md), never affecting the line height itself.
+ * align (start/center/end; stretch fills the line), never affecting the line
+ * height itself. A single-line container with a definite inner_h has a line of
+ * exactly that height (Flexbox 9.4 step 15).
  *
  * wrap_reverse (node->wrap_reverse): when node->wrap is active and node->wrap_reverse
  * is nonzero, the cross-axis line order is reversed: the first line packs at the
@@ -193,10 +194,16 @@ static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
                 kids[a + k]->x = pl + res[k].pos;
                 if (kids[a + k]->h > lineh) lineh = kids[a + k]->h;
             }
+            /* A single-line container with a definite cross size: the line IS
+             * that size (Flexbox 9.4 step 15). */
+            if (!node->wrap && node->inner_h > lineh) lineh = node->inner_h;
             for (size_t k = 0; k < ln; ++k) {
                 bt_node *c = kids[a + k];
                 double extra = lineh - c->h;
                 double dy = 0.0;
+                /* stretch fills the line (9.4 step 11); the caller downgrades it
+                 * to start for an item with a definite height. */
+                if (c->align == BT_ALIGN_STRETCH && extra > 0.0) { c->h = lineh; extra = 0.0; }
                 if (c->align == BT_ALIGN_CENTER) dy = extra / 2.0;
                 else if (c->align == BT_ALIGN_END) dy = extra;
                 c->y = ytop + dy;
@@ -232,7 +239,7 @@ static void grid_size_rows(const bt_node *node, double *rowh, size_t nrows, doub
         else if (t < 0) frsum += (double)(-t);
         else { fixed += rowh[r]; ++nauto; }
     }
-    double inner = node->grid_inner_h;
+    double inner = node->inner_h;
     if (!(inner > 0.0)) return;
     double free_px = inner - fixed - rgap * (double)(nrows > 0 ? nrows - 1 : 0);
     if (frsum > 0.0) {
@@ -291,7 +298,7 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
     /* Explicit cells from `grid-area: <name>` (spec/grid_areas.md), -1 = auto.
      * An all-auto grid passes the same values it always did, so its placement is
      * byte-identical. */
-    int    frow[BT_MAX_CHILDREN], fcol[BT_MAX_CHILDREN];
+    int    frow[BT_MAX_CHILDREN] = { 0 }, fcol[BT_MAX_CHILDREN] = { 0 };
     size_t prow[BT_MAX_CHILDREN], pcol[BT_MAX_CHILDREN];
     for (size_t i = 0; i < nk; ++i) {
         span[i] = kids[i]->grid_span;
@@ -322,12 +329,21 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
     double rowh[BT_MAX_CHILDREN];
     for (size_t r = 0; r < nrows; ++r) rowh[r] = 0.0;
     int tracked = (node->grid_row_track != NULL && node->grid_nrow_track > 0);
+    /* Inline-axis slack of each item in its area: an item that does not stretch
+     * (fit_w, justify-self) is narrower than its columns (CSS Box Alignment 6.1). */
+    double jx[BT_MAX_CHILDREN] = { 0 };
 
     for (size_t i = 0; i < nk; ++i) {
         size_t sp = (span[i] > 1) ? ((size_t)span[i] > cols ? cols : (size_t)span[i]) : 1;
         double iw = 0.0;
         for (size_t c = pcol[i]; c < pcol[i] + sp && c < cols; ++c) iw += col_w[c];
         iw += node->gap * (double)(sp - 1);
+        if (kids[i]->fit_w > 0.0 && kids[i]->fit_w < iw) {
+            double slack = iw - kids[i]->fit_w;
+            if (kids[i]->justify_self == BT_ALIGN_CENTER)   jx[i] = slack / 2.0;
+            else if (kids[i]->justify_self == BT_ALIGN_END) jx[i] = slack;
+            iw = kids[i]->fit_w;
+        }
         bt_status r = layout_node(kids[i], iw, depth + 1);
         if (r != BT_OK) return r;
         /* With sized row tracks a SPANNING item contributes to its rows only after
@@ -372,7 +388,7 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
         yy += rowh[r] + rgap;
     }
     for (size_t i = 0; i < nk; ++i) {
-        kids[i]->x = pl + col_x[pcol[i]];
+        kids[i]->x = pl + col_x[pcol[i]] + jx[i];
         kids[i]->y = rowy[prow[i]];
         /* Block-axis alignment inside the item's grid area (CSS Box Alignment
          * 6.1): only once rows are sized by tracks, so a content-sized grid --

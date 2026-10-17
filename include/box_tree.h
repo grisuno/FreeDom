@@ -80,9 +80,18 @@ typedef struct bt_node {
     const int      *grid_row_track;  /* GRID: per-ROW sizes, same encoding as grid_track;
                                       * NULL (default) = every row content-sized */
     size_t          grid_nrow_track; /* valid entries in grid_row_track */
-    double          grid_inner_h;    /* GRID: definite content height the rows fill
-                                      * (fr rows share the rest, CSS Grid 1 11.7);
-                                      * <= 0 (default) = indefinite */
+    double          inner_h;     /* definite content height of the container, <= 0
+                                  * (default) = indefinite. GRID: the rows fill it
+                                  * (fr rows share the rest, CSS Grid 1 11.7).
+                                  * single-line FLEX: the line's cross size
+                                  * (Flexbox 9.4 step 15), so align-items centers/
+                                  * ends/stretches against it. */
+    double          fit_w;           /* GRID item: > 0 = it does not stretch across its
+                                      * column (justify-self start/center/end, CSS Box
+                                      * Alignment 6.1): it is this wide (clamped to the
+                                      * column) and placed by `justify_self`. 0 (default) =
+                                      * the column's width, unchanged. */
+    int             justify_self;    /* GRID item: BT_ALIGN_* used with fit_w */
     int             grid_align;      /* GRID: 1 = place each item in its grid area by
                                       * its `align` (Box Alignment 6.1; stretch fills
                                       * the area). 0 (default) = top, content height. */

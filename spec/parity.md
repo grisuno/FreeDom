@@ -242,3 +242,11 @@ Dos correcciones del ARNÉS, ninguna del motor (misma lección que la tanda 20):
   `make parity-snapshot` entran al corpus (antes vivían en un scratchpad y se
   perdieron). `exploit.in` se excluye (sirve un captcha), y `antjs.org` es un SPA vacío
   sin JS.
+
+## Tanda 45 — probe de altura fijo
+
+El lienzo de bits del probe (`tools/ffgeom.py`) se fija con `position:fixed` en
+(0,0): en páginas cuyo `<body>` es flex/alto 100 % (justpaste, lobsters) quedaba
+desplazado, el decodificador fallaba y el arnés caía en silencio a la captura de
+1000×768. La captura sigue sin alto explícito (con alto, Firefox captura solo el
+viewport).

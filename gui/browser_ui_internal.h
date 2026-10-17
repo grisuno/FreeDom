@@ -46,7 +46,6 @@ typedef struct ui_theme {
     double line_spacing;                       /* multiplier of font height per line */
     double paragraph_gap;                      /* extra px above a new paragraph block */
     double content_margin;                     /* left/right/top padding of the content area */
-    double image_box_pad;                      /* padding inside an image placeholder box */
     double scroll_step_lines;                  /* wheel/arrow scroll step, in body lines */
     double page_step_lines;                    /* Page Up/Down scroll step, in body lines */
 

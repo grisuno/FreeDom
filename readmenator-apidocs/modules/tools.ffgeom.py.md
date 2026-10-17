@@ -60,7 +60,7 @@ flowchart LR
 
 ### `load_rows`
 
-`function` | [tools/ffgeom.py:112](../../tools/ffgeom.py#L112)
+`function` | [tools/ffgeom.py:116](../../tools/ffgeom.py#L116)
 
 ```python
 def load_rows(path)
@@ -82,7 +82,7 @@ def load_rows(path)
 
 ### `lum`
 
-`function` | [tools/ffgeom.py:165](../../tools/ffgeom.py#L165)
+`function` | [tools/ffgeom.py:169](../../tools/ffgeom.py#L169)
 
 ```python
 def lum(p)
@@ -100,7 +100,7 @@ def lum(p)
 
 ### `decode`
 
-`function` | [tools/ffgeom.py:235](../../tools/ffgeom.py#L235)
+`function` | [tools/ffgeom.py:239](../../tools/ffgeom.py#L239)
 
 ```python
 def decode(path)
@@ -120,7 +120,7 @@ def decode(path)
 
 ### `probe`
 
-`function` | [tools/ffgeom.py:261](../../tools/ffgeom.py#L261)
+`function` | [tools/ffgeom.py:265](../../tools/ffgeom.py#L265)
 
 ```python
 def probe(page, selector, out_html)
@@ -142,7 +142,7 @@ def probe(page, selector, out_html)
 
 ### `height_probe`
 
-`function` | [tools/ffgeom.py:275](../../tools/ffgeom.py#L275)
+`function` | [tools/ffgeom.py:279](../../tools/ffgeom.py#L279)
 
 ```python
 def height_probe(page, out_html)
@@ -163,7 +163,7 @@ def height_probe(page, out_html)
 
 ### `height`
 
-`function` | [tools/ffgeom.py:288](../../tools/ffgeom.py#L288)
+`function` | [tools/ffgeom.py:292](../../tools/ffgeom.py#L292)
 
 ```python
 def height(path)
@@ -191,7 +191,7 @@ Decodes the scrollHeight carried by the #__ffh sentinel: the probe encodes one r
 
 ### `main`
 
-`function` | [tools/ffgeom.py:297](../../tools/ffgeom.py#L297)
+`function` | [tools/ffgeom.py:301](../../tools/ffgeom.py#L301)
 
 ```python
 def main(argv)

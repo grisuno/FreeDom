@@ -1,12 +1,12 @@
 # `include/css_values.h`
 
-> Source: [include/css_values.h:1](../../include/css_values.h#L1) | language `h` | coverage 28.6% | [API index](../index.md)
+> Source: [include/css_values.h:1](../../include/css_values.h#L1) | language `h` | coverage 25.0% | [API index](../index.md)
 
 Single owner of CSS value interpretation for colors and backgrounds.
 
 ## Contents
 
-- **Functions:** [`cv_parse_color`](#cv_parse_color), [`cv_interp_color`](#cv_interp_color), [`cv_color_ok`](#cv_color_ok), [`cv_bg_alpha_of`](#cv_bg_alpha_of), [`cv_parse_color_t7`](#cv_parse_color_t7), [`cv_interp_bg`](#cv_interp_bg)
+- **Functions:** [`cv_parse_color`](#cv_parse_color), [`cv_interp_color`](#cv_interp_color), [`cv_color_ok`](#cv_color_ok), [`cv_bg_alpha_of`](#cv_bg_alpha_of), [`cv_parse_color_t7`](#cv_parse_color_t7), [`black`](#black), [`cv_interp_bg`](#cv_interp_bg)
 
 ## Functions
 
@@ -122,11 +122,31 @@ Sentinels (-1 invalid, CC_COLOR_CURRENT, CC_COLOR_TRANSPARENT) pass through unch
 
 ---
 
+<a id="black"></a>
+
+### `black`
+
+`function` | [include/css_values.h:22](../../include/css_values.h#L22)
+
+```c
+* transparent black (127 << 24) -- text that paints nothing, not an absent * value. CC_COLOR_CURRENT and -1 (invalid) pass through. */ int cv_text_color(const char *v);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `127 << 24` |  |  |  |
+
+**Returns:** `* transparent`
+
+---
+
 <a id="cv_interp_bg"></a>
 
 ### `cv_interp_bg`
 
-`function` | [include/css_values.h:20](../../include/css_values.h#L20)
+`function` | [include/css_values.h:25](../../include/css_values.h#L25)
 
 ```c
 int cv_interp_bg(const char *v);

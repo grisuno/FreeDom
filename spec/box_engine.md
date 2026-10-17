@@ -1032,3 +1032,21 @@ Dado-Cuando-Entonces:
   interior (`repl_asc`), fuente de control 13.333 px (`-moz-field`), padding 3 px,
   `type=submit|button` con la cara UA de `<button>`; el hit-test considera su
   fragmento y el `x_off` de su fila. El espacio colapsable previo separa el átomo.
+
+## Tanda 45 — márgenes en BFC, bordes del reemplazado, `alt` en línea
+
+- **Ítems flex/grid y columnas flotantes son BFC**: los bloques de adentro colapsan
+  márgenes entre sí como en el flujo principal y el margen inferior del último queda
+  adentro. Un ítem sin caja no "presta" márgenes hacia afuera. El margen del
+  contenedor solo es el del primer run si el bloque de ese run ES el contenedor
+  (`block_node`).
+- **Un contenedor anidado es el ítem** solo si cubre todos sus runs.
+- **Bordes propios del reemplazado** (`replaced_edges`): margen + borde + relleno de
+  `own_box_id` se suman a la medida, a la fila y al átomo en línea, y se pintan
+  (fondo + bordes sólidos). Eliminado `theme.image_box_pad` (6 px inventados).
+- **Imagen no disponible con `alt` en línea**: su `alt` fluye como texto en la fuente
+  del elemento (`image_alt_flows`), no como fila propia.
+- **Margen UA en em del tamaño COMPUTADO** (`block_margins` aplica el `font-size` de
+  autor).
+- **Reemplazado en línea dentro de ítems/flotantes** (`flow_nested_block`): misma regla
+  que el flujo principal; la medida del ítem lo suma a su línea.

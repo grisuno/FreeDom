@@ -1,6 +1,19 @@
 # API (page 4 of 10)
 Previous: [API_p3.md](API_p3.md)
 
+## include/hostblock.h
+Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/hostblock.c`, `tests/test_hostblock.c`
+- `hb_new` (function) `include/hostblock.h:49` `hb_set *hb_new(void);` -- } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted HB_BLOCK       /* the host is on...
+- `hb_free` (function) `include/hostblock.h:52` `void hb_free(hb_set *s);` -- HB_ALLOW = 0,  /* the host may be contacted HB_BLOCK       /* the host is on the blocklist (and not re-enabled) }...
+- `walked` (function) `include/hostblock.h:65` `* walked (the host, then without its first label, ...): any suffix on the allowlist * => HB_ALLOW (allow wins...`
+- `hb_is_allowlisted` (function) `include/hostblock.h:75` `int hb_is_allowlisted(const hb_set *s, const char *host);` -- 1 iff a domain suffix of host is explicitly on the allowlist (covers subdomains), else 0.
+- `hb_count` (function) `include/hostblock.h:79` `size_t hb_count(const hb_set *s, hb_list list);` -- Number of unique domains on the given list (for tests/diagnostics).
+
+## include/hostedit.h
+Imported by: `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
+- `he_text_has_host` (function) `include/hostedit.h:46` `int he_text_has_host(const char *text, const char *host);` -- Returns 1 if text (the body of a hosts-format file) already lists host as a domain token on a non-comment line...
+- `he_suggest` (function) `include/hostedit.h:55` `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);` -- Omnibar autocomplete: treats allow.conf (a hosts-format text) as a favorites list.
+
 ## include/html_parse.h
 Imported by: `fuzz/fuzz_dom.c`, `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_html_parse.c`, `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_page_view.c`, `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
 - `dropped` (function) `include/html_parse.h:47` `* dropped (not executed). */ #define HP_MAX_SCRIPTS ((size_t)4096) /* Returns a configuration with the secure...`
@@ -162,55 +175,58 @@ Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree
 - `bx_display` (function) `include/page_view.h:229` `* bx_display (flex/grid);`
 - `order` (function) `include/page_view.h:293` `* groups the runs of ONE floated element in document order (-1 = not in a float);`
 - `itself` (function) `include/page_view.h:351` `* by itself (bx_width_cap2);`
-- `CSS_LEN_UNSET` (function) `include/page_view.h:523` `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
-- `scale` (function) `include/page_view.h:598` `* scale(1)) and rotate in whole degrees (transform_rotate);`
-- `declare` (function) `include/page_view.h:809` `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
-- `nonzero` (function) `include/page_view.h:821` `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
-- `resolved` (function) `include/page_view.h:828` `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
-- `policy` (function) `include/page_view.h:836` `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
-- `cause` (function) `include/page_view.h:854` `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
-- `pv_new` (function) `include/page_view.h:866` `pv_view *pv_new(void);` -- Allocates an empty view (used by the IPC deserialiser to rebuild a view on the * receiving side).
-- `form` (function) `include/page_view.h:885` `* form (-1 if none);`
-- `pv_set_emphasis` (function) `include/page_view.h:917` `void pv_set_emphasis(pv_view *v, int bold, int italic);` -- Sets the inline emphasis flags (bold from <b>/<strong>/<th>, italic from <i>/<em>) on the most recently appended run.
-- `default` (function) `include/page_view.h:922` `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
-- `pv_set_color` (function) `include/page_view.h:925` `void pv_set_color(pv_view *v, int fg_rgb);`
-- `pv_set_bgcolor` (function) `include/page_view.h:932` `void pv_set_bgcolor(pv_view *v, int bg_rgb);` -- Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most recently appended run.
-- `pv_set_text_style` (function) `include/page_view.h:941` `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` -- Sets the author text presentation (text_align as a css_align, font_scale as a font-size percent or 0, font_abs as 1...
-- `pv_text_ext_reset` (function) `include/page_view.h:996` `void pv_text_ext_reset(pv_text_ext *e);` -- Gradient text (2026-07-19). text_fill: -webkit-text-fill-color from the nearest ancestor that sets it (packed /...
-- `ancestors` (function) `include/page_view.h:1001` `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
-- `pv_set_text_ext` (function) `include/page_view.h:1011` `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
-- `pv_set_grad_text` (function) `include/page_view.h:1017` `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` -- Sets the gradient-text fill (grad_text_*) verbatim on the most recently appended run. n < 2 is a no-op (no gradient).
-- `run` (function) `include/page_view.h:1020` `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
-- `pv_set_row_span` (function) `include/page_view.h:1033` `void pv_set_row_span(pv_view *v, int row_span);` -- Sets the container's grid track sizes and this run's ITEM column span on the most recently appended run...
-- `pv_set_grid_area` (function) `include/page_view.h:1037` `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` -- Sets the last run's RESOLVED named-grid cell (-1, -1 = auto-placed).
-- `pv_set_grid_rows` (function) `include/page_view.h:1038` `void pv_set_grid_rows(pv_view *v, int grid_rows);`
-- `pv_set_ua_tag` (function) `include/page_view.h:1043` `void pv_set_ua_tag(pv_view *v, int ua_tag);` -- Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its nearest block-level ancestor).
-- `pv_set_cont_box` (function) `include/page_view.h:1047` `void pv_set_cont_box(pv_view *v, int cont_box_id);` -- Sets the last run's cont_box_id (the box enclosing its container's items; -1 = * none).
-- `pv_set_grid` (function) `include/page_view.h:1048` `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
-- `pv_set_flex` (function) `include/page_view.h:1056` `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
-- `pv_set_flex_mauto` (function) `include/page_view.h:1059` `void pv_set_flex_mauto(pv_view *v, int mauto);` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
-- `pv_set_cont_item` (function) `include/page_view.h:1063` `void pv_set_cont_item(pv_view *v, int cont_item);` -- Sets the container-item ordinal on the most recently appended run (-1 = none). * No-op on an empty or NULL view; the...
-- `pv_set_float_w` (function) `include/page_view.h:1074` `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box);` -- Stamps the float founder's own declared width halves (pv_run.float_w) on the * most recently appended run.
-- `pv_set_float` (function) `include/page_view.h:1076` `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
-- `pv_set_box` (function) `include/page_view.h:1086` `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` -- Sets the author box model on the most recently appended run (left/right insets, width cap, centered flag, and...
-- `pv_set_box_pct` (function) `include/page_view.h:1092` `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` -- Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the most recently appended run.
-- `pv_set_box_maxw` (function) `include/page_view.h:1097` `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` -- Sets the max-width cap (px half, 0 = none; per-mille half, 0 = none) on the most * recently appended run.
-- `pv_set_node_id` (function) `include/page_view.h:1102` `void pv_set_node_id(pv_view *v, dom_node_id node_id);` -- Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of the source element.
-- `pv_set_block_id` (function) `include/page_view.h:1107` `void pv_set_block_id(pv_view *v, int block_id);` -- Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of the box-carrying block it belongs...
-- `pv_set_own_box` (function) `include/page_view.h:1111` `void pv_set_own_box(pv_view *v, int box_id);` -- Records the replaced element's own box def index on the last appended run.
-- `pv_set_oof` (function) `include/page_view.h:1115` `void pv_set_oof(pv_view *v, int oof);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
-- `pv_cont_count` (function) `include/page_view.h:1130` `size_t pv_cont_count(const pv_view *v);` -- pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] * (i == a cont_id) or NULL when out of...
-- `pv_cont_at` (function) `include/page_view.h:1131` `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
-- `pv_set_input_checked` (function) `include/page_view.h:1135` `void pv_set_input_checked(pv_view *v, int checked);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
-- `pv_set_input_placeholder` (function) `include/page_view.h:1139` `void pv_set_input_placeholder(pv_view *v, int ph_color);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
-- `pv_svg_append_root_attrs` (function) `include/page_view.h:1145` `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` -- Appends attrs (e.g.
-- `pv_placeholder_color` (function) `include/page_view.h:1148` `int pv_placeholder_color(const css_style *ph);` -- Appends attrs (e.g.
-- `pv_set_input_select_opts` (function) `include/page_view.h:1152` `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_free` (function) `include/page_view.h:1155` `void pv_free(pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_count` (function) `include/page_view.h:1158` `size_t pv_count(const pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_at` (function) `include/page_view.h:1159` `const pv_run *pv_at(const pv_view *v, size_t i);`
-- `pv_box_count` (function) `include/page_view.h:1163` `size_t pv_box_count(const pv_view *v);` -- Box tree accessors (Step D). pv_box_count is the number of box definitions; * pv_box_at returns boxes[i] (i == a...
-- `pv_box_at` (function) `include/page_view.h:1164` `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
+- `CSS_LEN_UNSET` (function) `include/page_view.h:541` `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
+- `scale` (function) `include/page_view.h:616` `* scale(1)) and rotate in whole degrees (transform_rotate);`
+- `declare` (function) `include/page_view.h:831` `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
+- `nonzero` (function) `include/page_view.h:843` `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
+- `resolved` (function) `include/page_view.h:850` `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
+- `policy` (function) `include/page_view.h:858` `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
+- `cause` (function) `include/page_view.h:876` `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
+- `pv_new` (function) `include/page_view.h:888` `pv_view *pv_new(void);` -- Allocates an empty view (used by the IPC deserialiser to rebuild a view on the * receiving side).
+- `form` (function) `include/page_view.h:907` `* form (-1 if none);`
+- `pv_set_emphasis` (function) `include/page_view.h:939` `void pv_set_emphasis(pv_view *v, int bold, int italic);` -- Sets the inline emphasis flags (bold from <b>/<strong>/<th>, italic from <i>/<em>) on the most recently appended run.
+- `default` (function) `include/page_view.h:944` `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
+- `pv_set_color` (function) `include/page_view.h:947` `void pv_set_color(pv_view *v, int fg_rgb);`
+- `pv_set_bgcolor` (function) `include/page_view.h:954` `void pv_set_bgcolor(pv_view *v, int bg_rgb);` -- Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most recently appended run.
+- `pv_set_text_style` (function) `include/page_view.h:963` `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` -- Sets the author text presentation (text_align as a css_align, font_scale as a font-size percent or 0, font_abs as 1...
+- `pv_text_ext_reset` (function) `include/page_view.h:1018` `void pv_text_ext_reset(pv_text_ext *e);` -- Gradient text (2026-07-19). text_fill: -webkit-text-fill-color from the nearest ancestor that sets it (packed /...
+- `ancestors` (function) `include/page_view.h:1023` `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
+- `pv_set_text_ext` (function) `include/page_view.h:1033` `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
+- `pv_set_grad_text` (function) `include/page_view.h:1039` `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` -- Sets the gradient-text fill (grad_text_*) verbatim on the most recently appended run. n < 2 is a no-op (no gradient).
+- `run` (function) `include/page_view.h:1042` `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
+- `pv_set_row_span` (function) `include/page_view.h:1055` `void pv_set_row_span(pv_view *v, int row_span);` -- Sets the container's grid track sizes and this run's ITEM column span on the most recently appended run...
+- `pv_set_grid_area` (function) `include/page_view.h:1059` `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` -- Sets the last run's RESOLVED named-grid cell (-1, -1 = auto-placed).
+- `pv_set_grid_rows` (function) `include/page_view.h:1060` `void pv_set_grid_rows(pv_view *v, int grid_rows);`
+- `pv_set_ua_tag` (function) `include/page_view.h:1065` `void pv_set_ua_tag(pv_view *v, int ua_tag);` -- Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its nearest block-level ancestor).
+- `pv_set_cont_box` (function) `include/page_view.h:1069` `void pv_set_cont_box(pv_view *v, int cont_box_id);` -- Sets the last run's cont_box_id (the box enclosing its container's items; -1 = * none).
+- `pv_set_grid` (function) `include/page_view.h:1070` `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
+- `pv_set_flex` (function) `include/page_view.h:1078` `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
+- `pv_set_flex_mauto` (function) `include/page_view.h:1081` `void pv_set_flex_mauto(pv_view *v, int mauto);` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
+- `pv_set_cont_item` (function) `include/page_view.h:1085` `void pv_set_cont_item(pv_view *v, int cont_item);` -- Sets the container-item ordinal on the most recently appended run (-1 = none). * No-op on an empty or NULL view; the...
+- `pv_set_float_w` (function) `include/page_view.h:1096` `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box);` -- Stamps the float founder's own declared width halves (pv_run.float_w) on the * most recently appended run.
+- `pv_set_float` (function) `include/page_view.h:1098` `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
+- `pv_set_box` (function) `include/page_view.h:1108` `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` -- Sets the author box model on the most recently appended run (left/right insets, width cap, centered flag, and...
+- `pv_set_box_pct` (function) `include/page_view.h:1114` `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` -- Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the most recently appended run.
+- `pv_set_box_maxw` (function) `include/page_view.h:1119` `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` -- Sets the max-width cap (px half, 0 = none; per-mille half, 0 = none) on the most * recently appended run.
+- `pv_set_node_id` (function) `include/page_view.h:1124` `void pv_set_node_id(pv_view *v, dom_node_id node_id);` -- Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of the source element.
+- `pv_set_block_id` (function) `include/page_view.h:1129` `void pv_set_block_id(pv_view *v, int block_id);` -- Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of the box-carrying block it belongs...
+- `pv_set_own_box` (function) `include/page_view.h:1133` `void pv_set_own_box(pv_view *v, int box_id);` -- Records the replaced element's own box def index on the last appended run.
+- `pv_set_oof` (function) `include/page_view.h:1137` `void pv_set_oof(pv_view *v, int oof);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_justify_self` (function) `include/page_view.h:1140` `void pv_set_justify_self(pv_view *v, int justify_self);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_block_node` (function) `include/page_view.h:1143` `void pv_set_block_node(pv_view *v, dom_node_id id);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_br_line` (function) `include/page_view.h:1151` `void pv_set_br_line(pv_view *v, int br_line);` -- Sets the last appended run's PV_BR_* flags (see pv_run.br_line); other bits * are dropped.
+- `pv_cont_count` (function) `include/page_view.h:1166` `size_t pv_cont_count(const pv_view *v);` -- pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] * (i == a cont_id) or NULL when out of...
+- `pv_cont_at` (function) `include/page_view.h:1167` `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
+- `pv_set_input_checked` (function) `include/page_view.h:1171` `void pv_set_input_checked(pv_view *v, int checked);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
+- `pv_set_input_placeholder` (function) `include/page_view.h:1175` `void pv_set_input_placeholder(pv_view *v, int ph_color);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
+- `pv_svg_append_root_attrs` (function) `include/page_view.h:1181` `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` -- Appends attrs (e.g.
+- `pv_placeholder_color` (function) `include/page_view.h:1184` `int pv_placeholder_color(const css_style *ph);` -- Appends attrs (e.g.
+- `pv_set_input_select_opts` (function) `include/page_view.h:1188` `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_free` (function) `include/page_view.h:1191` `void pv_free(pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_count` (function) `include/page_view.h:1194` `size_t pv_count(const pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_at` (function) `include/page_view.h:1195` `const pv_run *pv_at(const pv_view *v, size_t i);`
+- `pv_box_count` (function) `include/page_view.h:1199` `size_t pv_box_count(const pv_view *v);` -- Box tree accessors (Step D). pv_box_count is the number of box definitions; * pv_box_at returns boxes[i] (i == a...
+- `pv_box_at` (function) `include/page_view.h:1200` `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
 
 ## include/pdf_export.h
 Imported by: `fuzz/fuzz_pdf_export.c`, `gui/browser_ui.c`, `src/download.c`, `src/pdf_export.c`, `tests/test_pdf_export.c`
@@ -269,21 +285,21 @@ Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`,
 - `RD_IMAGE` (function) `include/render_doc.h:59` `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
 - `form` (function) `include/render_doc.h:63` `* form (-1 = none);`
 - `default` (function) `include/render_doc.h:150` `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
-- `to` (function) `include/render_doc.h:242` `* belongs to (-1 = none);`
-- `rdp_images_warning` (function) `include/render_doc.h:296` `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
-- `rd_free` (function) `include/render_doc.h:306` `void rd_free(rd_doc *d);` -- Builds the paint-ready document from an inert display list and the page's capabilities. view == NULL is treated as...
-- `rd_count` (function) `include/render_doc.h:309` `size_t rd_count(const rd_doc *d);` -- images and caps.images is false, a single RD_NOTICE block carrying rdp_images_warning() is prepended so the user is...
-- `rd_at` (function) `include/render_doc.h:310` `const rd_block *rd_at(const rd_doc *d, size_t i);`
-- `rd_box_count` (function) `include/render_doc.h:314` `size_t rd_box_count(const rd_doc *d);` -- Box tree accessors (Step D). rd_box_count is the number of box definitions (0 when * caps.css is off); rd_box_at...
-- `rd_box_at` (function) `include/render_doc.h:315` `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-- `rd_cont_count` (function) `include/render_doc.h:319` `size_t rd_cont_count(const rd_doc *d);` -- Container table accessors. rd_cont_count is the number of containers; rd_cont_at * returns conts[i] (i == a run's...
-- `rd_cont_at` (function) `include/render_doc.h:320` `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-- `rd_kind_name` (function) `include/render_doc.h:324` `const char *rd_kind_name(rd_kind k);` -- Stable, short English name of a block kind for structured/agent output.
-- `rd_block_tag` (function) `include/render_doc.h:332` `const char *rd_block_tag(const rd_block *b);` -- Canonical HTML tag name for a block, so the presentation layer can look up its user-agent box (box_style) without...
-- `decision` (function) `include/render_doc.h:335` `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
-- `IMG_FAIL_OK` (function) `include/render_doc.h:341` `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-- `rd_input_label` (function) `include/render_doc.h:346` `const char *rd_input_label(int input_type);` -- Stable, short English name of a form control type (a pv_input_type value), e.g. * "text" / "password" / "submit".
-- `rd_input_invisible` (function) `include/render_doc.h:351` `int rd_input_invisible(int input_type);` -- Nonzero iff a control of this type has no face of its own and is therefore never laid out or painted: a hidden...
+- `to` (function) `include/render_doc.h:247` `* belongs to (-1 = none);`
+- `rdp_images_warning` (function) `include/render_doc.h:301` `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
+- `rd_free` (function) `include/render_doc.h:311` `void rd_free(rd_doc *d);` -- Builds the paint-ready document from an inert display list and the page's capabilities. view == NULL is treated as...
+- `rd_count` (function) `include/render_doc.h:314` `size_t rd_count(const rd_doc *d);` -- images and caps.images is false, a single RD_NOTICE block carrying rdp_images_warning() is prepended so the user is...
+- `rd_at` (function) `include/render_doc.h:315` `const rd_block *rd_at(const rd_doc *d, size_t i);`
+- `rd_box_count` (function) `include/render_doc.h:319` `size_t rd_box_count(const rd_doc *d);` -- Box tree accessors (Step D). rd_box_count is the number of box definitions (0 when * caps.css is off); rd_box_at...
+- `rd_box_at` (function) `include/render_doc.h:320` `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+- `rd_cont_count` (function) `include/render_doc.h:324` `size_t rd_cont_count(const rd_doc *d);` -- Container table accessors. rd_cont_count is the number of containers; rd_cont_at * returns conts[i] (i == a run's...
+- `rd_cont_at` (function) `include/render_doc.h:325` `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+- `rd_kind_name` (function) `include/render_doc.h:329` `const char *rd_kind_name(rd_kind k);` -- Stable, short English name of a block kind for structured/agent output.
+- `rd_block_tag` (function) `include/render_doc.h:337` `const char *rd_block_tag(const rd_block *b);` -- Canonical HTML tag name for a block, so the presentation layer can look up its user-agent box (box_style) without...
+- `decision` (function) `include/render_doc.h:340` `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+- `IMG_FAIL_OK` (function) `include/render_doc.h:346` `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+- `rd_input_label` (function) `include/render_doc.h:351` `const char *rd_input_label(int input_type);` -- Stable, short English name of a form control type (a pv_input_type value), e.g. * "text" / "password" / "submit".
+- `rd_input_invisible` (function) `include/render_doc.h:356` `int rd_input_invisible(int input_type);` -- Nonzero iff a control of this type has no face of its own and is therefore never laid out or painted: a hidden...
 
 ## include/render_policy.h
 Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
@@ -362,6 +378,14 @@ Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tab.c`, `tests/test_tab.c
 - `tab_page_free` (function) `include/tab.h:366` `void tab_page_free(tab_page *p);` -- malformed data: URI is not a transport error: *out stays zeroed, same as an * undecodable format, and the caller...
 - `tab_eval_result_free` (function) `include/tab.h:367` `void tab_eval_result_free(tab_eval_result *r);`
 - `tab_image_free` (function) `include/tab.h:368` `void tab_image_free(tab_image *img);`
+
+## include/text_case.h
+Imported by: `fuzz/fuzz_text_case.c`, `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`
+- `cp` (function) `include/text_case.h:19` `* cp (identity otherwise), so a transformed text keeps its length. */ uint32_t tc_upper(uint32_t cp);`
+- `tc_lower` (function) `include/text_case.h:21` `uint32_t tc_lower(uint32_t cp);`
+- `tc_is_lower` (function) `include/text_case.h:24` `int tc_is_lower(uint32_t cp);` -- Simple 1:1 case mapping for ASCII, Latin-1, Latin Extended-A, basic Greek and basic Cyrillic.
+- `tc_transform` (function) `include/text_case.h:29` `size_t tc_transform(const char *s, size_t n, int transform, int word_start, char *out, size_t cap);` -- Copies s[0,n) to out applying transform (CSS_TT_UPPERCASE / _LOWERCASE / _CAPITALIZE; any other value copies...
+- `tc_smallcaps_runs` (function) `include/text_case.h:41` `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap);` -- Splits s[0,n) into consecutive maximal runs of lowercase letters vs the rest, covering the whole text in order.
 
 ## include/text_shape.h
 Imported by: `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
@@ -458,30 +482,6 @@ Imported by: `fuzz/fuzz_webfont.c`, `gui/browser_ui.c`, `src/css.c`, `src/freedo
 Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/webfont_load.c`, `tests/test_webfont_load.c`
 - `free` (function) `include/webfont_load.h:31` `* free()), *out_status the HTTP status. Nonzero on refusal/error (fail-closed: * the face is skipped, never the...`
 - `skipped` (function) `include/webfont_load.h:47` `* URLs are skipped (no base). Returns faces registered (>= 0) otherwise. */ int wf_load_document(wf_fetch_fn fetch...`
-
-## include/ws_hub.h
-Depends on: `include/secure_fetch.h`
-Imported by: `gui/browser_ui.c`, `src/ws_hub.c`, `tests/test_ws_hub.c`
-- `wh_new` (function) `include/ws_hub.h:34` `wh_hub *wh_new(void);` -- #define WH_MAX 8   /* == JD_WS_MAX: sockets per page /* Event kinds delivered to the page; values match...
-- `wh_free` (function) `include/ws_hub.h:38` `void wh_free(wh_hub *h);` -- Closes every connection and frees the hub.
-- `wh_notify_fd` (function) `include/ws_hub.h:41` `int wh_notify_fd(const wh_hub *h);` -- Closes every connection and frees the hub.
-- `wh_open_async` (function) `include/ws_hub.h:46` `int wh_open_async(wh_hub *h, int id, const char *url, const sf_config *cfg);` -- Starts opening url for page socket id on a thread (cfg and all its strings are copied).
-- `generation` (function) `include/ws_hub.h:50` `* previous generation (before wh_close_all) are closed and dropped silently. */ void wh_on_notify(wh_hub *h...`
-- `wh_send` (function) `include/ws_hub.h:54` `int wh_send(wh_hub *h, int id, const void *data, size_t len, int binary);` -- Drains finished opens: success => the connection joins the hub and WH_EV_OPEN is emitted; failure => WH_EV_ERROR...
-- `wh_close` (function) `include/ws_hub.h:58` `void wh_close(wh_hub *h, int id);` -- The page closed socket id: sends a close frame and frees it (also cancels a * pending open for that id: its result...
-- `wh_close_all` (function) `include/ws_hub.h:61` `void wh_close_all(wh_hub *h);` -- The page closed socket id: sends a close frame and frees it (also cancels a * pending open for that id: its result...
-- `wh_poll_fds` (function) `include/ws_hub.h:65` `size_t wh_poll_fds(const wh_hub *h, struct pollfd *out, int *ids, size_t cap);` -- Fills up to cap pollfds (POLLIN) and the matching page ids for the open * connections.
-- `wh_on_readable` (function) `include/ws_hub.h:70` `void wh_on_readable(wh_hub *h, int id, wh_emit_fn emit, void *ctx);` -- Reads everything pending on socket id without blocking, emitting each complete message; a close frame emits...
-- `wh_count` (function) `include/ws_hub.h:73` `size_t wh_count(const wh_hub *h);` -- Reads everything pending on socket id without blocking, emitting each complete message; a close frame emits...
-
-## include/zoom.h
-Imported by: `gui/browser_ui.c`, `src/prefs.c`, `src/zoom.c`, `tests/test_prefs.c`, `tests/test_zoom.c`
-- `zm_clamp` (function) `include/zoom.h:26` `int zm_clamp(int pct);` -- stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser.
-- `zm_zoom_in` (function) `include/zoom.h:29` `int zm_zoom_in(int pct);` -- never escape the bounds.
-- `zm_zoom_out` (function) `include/zoom.h:32` `int zm_zoom_out(int pct);` -- only calls these.
-- `zm_reset` (function) `include/zoom.h:35` `int zm_reset(void);` -- #define ZM_MIN_PCT     50 #define ZM_MAX_PCT     300 #define ZM_DEFAULT_PCT 100 /* Clamp pct to [ZM_MIN_PCT...
-- `zm_scale` (function) `include/zoom.h:38` `double zm_scale(int pct);` -- /* Clamp pct to [ZM_MIN_PCT, ZM_MAX_PCT]. int zm_clamp(int pct); /* Smallest ladder stop strictly greater than...
-- `zm_apply` (function) `include/zoom.h:42` `double zm_apply(double base_px, int pct);` -- base_px * zm_scale(pct), floored to 1.0 when base_px > 0 so a font can never * scale away to nothing. base_px <= 0...
 
 
 Next: [API_p5.md](API_p5.md)

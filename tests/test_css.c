@@ -89,9 +89,11 @@ static void test_inline_line_height(void **state) {
     assert_int_equal(css_parse_inline("line-height:2", 0).line_scale, 200);
     assert_int_equal(css_parse_inline("line-height:160%", 0).line_scale, 160); /* percent */
     assert_int_equal(css_parse_inline("line-height:normal", 0).line_scale, 0); /* unset */
-    assert_int_equal(css_parse_inline("line-height:24px", 0).line_scale, 150);  /* px: 24/16*100 */
+    /* An absolute <length> is that many px, not a multiple of the font-size
+     * (CSS 2.1 10.8.1): it travels as CSS_LINE_ABS_BASE + tenths of px. */
+    assert_int_equal(css_parse_inline("line-height:24px", 0).line_scale, CSS_LINE_ABS_BASE + 240);
     assert_int_equal(css_parse_inline("line-height:1.5em", 0).line_scale, 150); /* em: 1.5*100 */
-    assert_int_equal(css_parse_inline("line-height:2rem", 0).line_scale, 200);  /* rem: 2*100 */
+    assert_int_equal(css_parse_inline("line-height:2rem", 0).line_scale, CSS_LINE_ABS_BASE + 320);
     assert_int_equal(css_parse_inline("color:red", 0).line_scale, 0);          /* unset */
     /* Clamped to the anti-DoS range [CSS_LINE_MIN, CSS_LINE_MAX]. */
     assert_int_equal(css_parse_inline("line-height:99", 0).line_scale, CSS_LINE_MAX);
@@ -1936,6 +1938,64 @@ static void test_pseudo_content_pool_survives_icon_font(void **state) {
     css_style out = css_resolve_el(sh, &el, NULL, 0);
     assert_string_equal(out.content_before_str, "T");
     css_free(sh);
+}
+
+/* The string pools grow with the sheet: slashdot's icon font ships ~350
+ * `content` rules and the matching one sits past the old fixed 256 slots, so
+ * its glyph was dropped in silence (spec/css.md "pools de cadenas"). Same for
+ * background url()s. */
+static void test_string_pools_grow_past_256(void **state) {
+    (void)state;
+    size_t cap = 64 * 1024;
+    char *css = (char *)malloc(cap);
+    assert_non_null(css);
+    size_t o = 0;
+    for (int i = 0; i < 600; ++i) {
+        o += (size_t)snprintf(css + o, cap - o, ".i%d::before{content:\"g%d\"}", i, i);
+        assert_true(o + 128 < cap);
+    }
+    for (int i = 0; i < 300; ++i) {
+        o += (size_t)snprintf(css + o, cap - o, ".b%d{background-image:url(b%d.png)}", i, i);
+        assert_true(o + 128 < cap);
+    }
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(css, o, &sh), CSS_OK);
+    static const char *c1[] = { "i599" };
+    css_element e1 = el_node("span", NULL, c1, 1, NULL);
+    css_style s1 = css_resolve_el(sh, &e1, NULL, 0);
+    assert_string_equal(s1.content_before_str, "g599");
+    static const char *c2[] = { "b299" };
+    css_element e2 = el_node("div", NULL, c2, 1, NULL);
+    css_style s2 = css_resolve_el(sh, &e2, NULL, 0);
+    assert_non_null(strstr(s2.bg_image_url, "b299.png"));
+    css_free(sh);
+    free(css);
+}
+
+/* `color` keeps its alpha (CSS Color 4 5.1): as transparency in bits 24..30,
+ * the encoding backgrounds and gradients already use; opaque stays 0xRRGGBB and
+ * `transparent` is fully transparent black. */
+static void test_color_keeps_alpha(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("color:red", 0).color, 0xff0000);
+    assert_int_equal(css_parse_inline("color:rgba(255,0,0,.4)", 0).color,
+                     0xff0000 | (76 << 24));
+    assert_int_equal(css_parse_inline("color:rgb(0 0 255 / 59%)", 0).color,
+                     0x0000ff | (52 << 24));
+    assert_int_equal(css_parse_inline("color:transparent", 0).color, 127 << 24);
+    assert_int_equal(css_parse_inline("color:currentColor", 0).color, CC_COLOR_CURRENT);
+}
+
+/* justify-self (CSS Box Alignment 6.1) and the justify half of place-self. */
+static void test_justify_self_parsed(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("justify-self:center", 0).justify_self, CSS_AK_CENTER);
+    assert_int_equal(css_parse_inline("justify-self:end", 0).justify_self, CSS_AK_END);
+    assert_int_equal(css_parse_inline("color:red", 0).justify_self, CSS_AK_UNSET);
+    css_style ps = css_parse_inline("place-self:start center", 0);
+    assert_int_equal(ps.align_self, CSS_AK_START);
+    assert_int_equal(ps.justify_self, CSS_AK_CENTER);
+    assert_int_equal(css_parse_inline("place-self:end", 0).justify_self, CSS_AK_END);
 }
 
 /* Invalid codepoints fail closed to U+FFFD (never NUL, never a bare
@@ -5747,6 +5807,9 @@ int main(void) {
         cmocka_unit_test(test_pseudo_content_escapes_fail_closed),
         cmocka_unit_test(test_pseudo_content_none_parses_empty),
         cmocka_unit_test(test_pseudo_content_pool_survives_icon_font),
+        cmocka_unit_test(test_string_pools_grow_past_256),
+        cmocka_unit_test(test_color_keeps_alpha),
+        cmocka_unit_test(test_justify_self_parsed),
         cmocka_unit_test(test_drops_retry_rewinds_buckets),
         cmocka_unit_test(test_pseudo_content_empty_without_pseudo),
         cmocka_unit_test(test_pseudo_content_attr_resolves),

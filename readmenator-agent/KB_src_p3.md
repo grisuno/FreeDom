@@ -1,6 +1,25 @@
 # Subsystem: src (page 3 of 8)
 Previous: [KB_src_p2.md](KB_src_p2.md)
 
+## src/css_index.c
+- Doc: css_index -- see include/css_index.h and spec/css_index.md.
+- Layer: utility
+- Language: c
+- Symbols:
+  - `key_of` (function, line 11) `static uint64_t key_of(int kind, const char *s, size_t n, int lower)`
+  - `key_of_token` (function, line 26) `static uint64_t key_of_token(int kind, const char *tok)`
+  - `entry_cmp` (function, line 34) `static int entry_cmp(const void *a, const void *b)`
+  - `u32_cmp` (function, line 40) `static int u32_cmp(const void *a, const void *b)`
+  - `cix_free` (function, line 45) `void cix_free(cix_index *idx)`
+  - `cix_build` (function, line 52) `void cix_build(const css_sel *sels, size_t n, cix_index *idx)`
+  - `lower_bound` (function, line 90) `static size_t lower_bound(const cix_index *idx, uint64_t k)`
+  - `push` (function, line 100) `static int push(uint32_t **buf, size_t *cap, size_t *n, uint32_t v)`
+  - `push_bucket` (function, line 113) `static int push_bucket(const cix_index *idx, uint64_t k,
+                       uint32_t **buf, s...`
+  - `cix_candidates` (function, line 120) `size_t cix_candidates(const cix_index *idx, const css_element *el,
+                      uint32_t...`
+- Depends on: `include/css_index.h`
+
 ## src/css_length.c
 - Doc: cl_unit_eq: ASCII case-insensitive compare of a possibly-unterminated unit slice against a...
 - Layer: utility
@@ -145,6 +164,7 @@ Previous: [KB_src_p2.md](KB_src_p2.md)
   - `cv_bg_alpha_of` (function, line 46) `int cv_bg_alpha_of(const char *v)`
   - `cv_interp_bg` (function, line 160) `int cv_interp_bg(const char *v)`
   - `cv_parse_color_t7` (function, line 205) `int cv_parse_color_t7(const char *v)`
+  - `cv_text_color` (function, line 222) `int cv_text_color(const char *v)`
 - Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/css_vars.c

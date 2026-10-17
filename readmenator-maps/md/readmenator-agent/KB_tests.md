@@ -111,7 +111,8 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_flex_min_clamp` (function, line 659) `static void test_flex_min_clamp(void **state)`
   - `test_pct_block_size` (function, line 672) `static void test_pct_block_size(void **state)`
   - `test_definite_content_h` (function, line 688) `static void test_definite_content_h(void **state)`
-  - `main` (function, line 701) `int main(void)`
+  - `test_line_height_px` (function, line 701) `static void test_line_height_px(void **state)`
+  - `main` (function, line 712) `int main(void)`
   - `width` (function, line 553) `* a negative width (CSS Values 4 section 10.1: out-of-range calc() results are * clamped at used-value time). */...`
 - Depends on: `include/box_style.h`
 
@@ -176,7 +177,9 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_oof_avail_stretch_and_shrink` (function, line 913) `static void test_oof_avail_stretch_and_shrink(void **state)`
   - `test_grid_row_tracks_definite_height` (function, line 934) `static void test_grid_row_tracks_definite_height(void **state)`
   - `test_grid_spanning_item_fits_tracked_rows` (function, line 973) `static void test_grid_spanning_item_fits_tracked_rows(void **state)`
-  - `main` (function, line 993) `int main(void)`
+  - `test_flex_single_line_definite_height` (function, line 997) `static void test_flex_single_line_definite_height(void **state)`
+  - `test_grid_justify_self` (function, line 1024) `static void test_grid_justify_self(void **state)`
+  - `main` (function, line 1049) `int main(void)`
   - `card` (function, line 769) `* containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */ assert_true(dbl_eq(out[2].x, 100));`
   - `UNSET4` (macro, line 630) `#define UNSET4`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`

@@ -38,6 +38,7 @@ _Static_assert(PV_GRID_TRACKS == CSS_GRID_TRACKS_MAX,
 _Static_assert(PV_BG_URL_MAX == CSS_URL_MAX,
                "PV_BG_URL_MAX must mirror CSS_URL_MAX");
 #include <string.h>
+#include <limits.h>
 #include <ctype.h>
 
 #include <lexbor/dom/dom.h>
@@ -258,6 +259,9 @@ static void run_init_common(pv_run *r) {
     r->ua_tag = BX_UA_NONE;
     r->node_id = DOM_NODE_NONE;
     r->oof_subtree = 0;
+    r->br_line = 0;
+    r->block_node = DOM_NODE_NONE;
+    r->justify_self = CSS_AK_UNSET;
     r->block_id = -1;
     r->own_box_id = -1;
     r->ph_color = PV_PH_THEME;
@@ -278,12 +282,69 @@ static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *roo
  * pre-order element walk that dom_build uses, mapping each element pointer to its
  * 0-based id. Runs then stamp the id of their source element so the GUI can map a
  * painted block back to the live DOM node for event dispatch. */
+/* A small open-addressed map pointer -> int: the per-element verdict on a
+ * generated box (-2 display:none, -1 no box, >= 0 its box id), so the pseudo's
+ * cascade runs ONCE per element even though every text node of it asks. Grows
+ * by doubling at half load; OOM leaves it as is (the answer is recomputed). */
+typedef struct pv_ptrmap {
+    const void **key;
+    int         *val;
+    size_t       cap, n;
+} pv_ptrmap;
+
+static size_t pv_ptrmap_slot(const pv_ptrmap *m, const void *k) {
+    uintptr_t x = (uintptr_t)k;
+    x ^= x >> 17;
+    x *= (uintptr_t)0x9E3779B97F4A7C15ull;
+    x ^= x >> 29;
+    size_t i = (size_t)x & (m->cap - 1);
+    while (m->key[i] != NULL && m->key[i] != k) i = (i + 1) & (m->cap - 1);
+    return i;
+}
+
+static int pv_ptrmap_get(const pv_ptrmap *m, const void *k, int *out) {
+    if (m->cap == 0) return 0;
+    size_t i = pv_ptrmap_slot(m, k);
+    if (m->key[i] == NULL) return 0;
+    *out = m->val[i];
+    return 1;
+}
+
+static void pv_ptrmap_put(pv_ptrmap *m, const void *k, int v) {
+    if ((m->n + 1) * 2 > m->cap) {
+        size_t nc = m->cap ? m->cap * 2 : 64;
+        pv_ptrmap g = { (const void **)calloc(nc, sizeof(void *)),
+                        (int *)calloc(nc, sizeof(int)), nc, 0 };
+        if (g.key == NULL || g.val == NULL) { free(g.key); free(g.val); return; }
+        for (size_t i = 0; i < m->cap; ++i) {
+            if (m->key[i] == NULL) continue;
+            size_t j = pv_ptrmap_slot(&g, m->key[i]);
+            g.key[j] = m->key[i];
+            g.val[j] = m->val[i];
+            ++g.n;
+        }
+        free(m->key);
+        free(m->val);
+        *m = g;
+    }
+    size_t i = pv_ptrmap_slot(m, k);
+    if (m->key[i] == NULL) { m->key[i] = k; ++m->n; }
+    m->val[i] = v;
+}
+
+static void pv_ptrmap_free(pv_ptrmap *m) {
+    free(m->key);
+    free(m->val);
+    m->key = NULL; m->val = NULL; m->cap = 0; m->n = 0;
+}
+
 #define PV_NODE_MAP_INIT_CAP 64
 
 typedef struct pv_node_map {
     const lxb_dom_node_t **nodes;
     size_t count;
     size_t cap;
+    pv_ptrmap index;   /* node -> id, so a lookup is O(1) instead of a scan */
 } pv_node_map;
 
 static int pv_node_map_init(pv_node_map *m) {
@@ -291,6 +352,7 @@ static int pv_node_map_init(pv_node_map *m) {
     if (m->nodes == NULL) return -1;
     m->count = 0;
     m->cap = PV_NODE_MAP_INIT_CAP;
+    m->index = (pv_ptrmap){ NULL, NULL, 0, 0 };
     return 0;
 }
 
@@ -299,6 +361,7 @@ static void pv_node_map_free(pv_node_map *m) {
     free(m->nodes);
     m->nodes = NULL;
     m->count = m->cap = 0;
+    pv_ptrmap_free(&m->index);
 }
 
 /* Records an element node in document order. Returns its id, or DOM_NODE_NONE on
@@ -315,6 +378,7 @@ static dom_node_id pv_node_map_add(pv_node_map *m, const lxb_dom_node_t *node) {
     }
     dom_node_id id = (dom_node_id)m->count;
     m->nodes[m->count++] = node;
+    if (m->count <= (size_t)INT_MAX) pv_ptrmap_put(&m->index, node, (int)id);
     return id;
 }
 
@@ -322,6 +386,10 @@ static dom_node_id pv_node_map_add(pv_node_map *m, const lxb_dom_node_t *node) {
  * node was not recorded (e.g. overflow or a node from outside the indexed tree). */
 static dom_node_id pv_node_map_id(const pv_node_map *m, const lxb_dom_node_t *node) {
     if (m == NULL || node == NULL) return DOM_NODE_NONE;
+    int id = -1;
+    if (pv_ptrmap_get(&m->index, node, &id)) return (dom_node_id)id;
+    /* The index is complete unless an insert hit OOM; only then scan. */
+    if (m->index.n == m->count) return DOM_NODE_NONE;
     for (size_t i = 0; i < m->count; ++i) {
         if (m->nodes[i] == node) return (dom_node_id)i;
     }
@@ -762,6 +830,21 @@ void pv_set_oof(pv_view *v, int oof) {
     v->runs[v->count - 1].oof_subtree = (oof != 0);
 }
 
+void pv_set_justify_self(pv_view *v, int justify_self) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].justify_self = justify_self;
+}
+
+void pv_set_block_node(pv_view *v, dom_node_id id) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].block_node = id;
+}
+
+void pv_set_br_line(pv_view *v, int br_line) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].br_line = br_line & (PV_BR_EMPTY | PV_BR_CONT);
+}
+
 void pv_set_input_checked(pv_view *v, int checked) {
     if (v == NULL || v->count == 0) return;
     v->runs[v->count - 1].checked = checked;
@@ -1200,6 +1283,7 @@ typedef struct pv_cont_info {
  * align_content / justify_items (CONTAINER), grid_rows / grid_flow (grid
  * container), row_span (ITEM) — 2026-07-12 batch. */
 int wrap, row_gap, align_items, align_self;
+int justify_self;   /* the ITEM's justify-self (css_align_kw) */
 /* Main-axis auto margins of the ITEM (Flexbox 8.1): bit 1 = margin-left:auto,
  * bit 2 = margin-right:auto (PV_MAUTO_*). */
 int mauto;
@@ -1235,6 +1319,7 @@ int anc_item_shrink[PV_CONT_DEPTH];
 int anc_item_basis[PV_CONT_DEPTH];
 int anc_item_order[PV_CONT_DEPTH];
 int anc_item_align[PV_CONT_DEPTH];
+int anc_item_jself[PV_CONT_DEPTH];
 int anc_item_mauto[PV_CONT_DEPTH];
 /* anc_item[k]'s raw grid placement sides (FX_GL_*), resolved against the PARENT's
  * tracks when the link is written (spec/grid_areas.md 6). */
@@ -1278,6 +1363,7 @@ typedef struct pv_box_info {
      * margins against the width). 0 = none. Appended for the same reason. */
     int l_pct, r_pct, mt_pct, mb_pct;
     int mw, mw_pct;  /* max-width, its own <length-percentage> (tanda 40) */
+    dom_node_id block_node;  /* the block element these placements belong to */
 } pv_box_info;
 
 /* The author text-presentation extensions struct (pv_text_ext) is public now
@@ -1594,6 +1680,7 @@ typedef struct pv_container_reg {
      * so it is also the one place that describes it. See pv_cont_def. */
     pv_cont_def           def[PV_MAX_CONTAINERS];
     size_t count;
+    const struct pv_node_map *nodes;  /* element ids (block_node), or NULL */
 } pv_container_reg;
 
 /* Resets a descriptor to "registered but undescribed": no parent, no parameters. */
@@ -1608,9 +1695,11 @@ static void cont_def_reset(pv_cont_def *d) {
     d->item_basis = CSS_LEN_UNSET;
     d->item_order = CSS_LEN_UNSET;
     d->item_align_self = CSS_AK_UNSET;
+    d->item_justify_self = CSS_AK_UNSET;
     d->item_mauto = 0;
     d->item_col_start = -1;
     d->item_row_start = -1;
+    d->node_id = DOM_NODE_NONE;
 }
 
 /* Id of node in reg, registering it on first sight. -1 when reg is full. */
@@ -1620,6 +1709,7 @@ static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node) {
     if (reg->count >= PV_MAX_CONTAINERS) return -1;
     reg->node[reg->count] = node;
     cont_def_reset(&reg->def[reg->count]);
+    reg->def[reg->count].node_id = pv_node_map_id(reg->nodes, node);
     return (int)reg->count++;
 }
 
@@ -1650,6 +1740,7 @@ static void link_cont_chain(pv_container_reg *reg, pv_item_track *tr,
         reg->def[inner].item_basis      = cont->anc_item_basis[k + 1];
         reg->def[inner].item_order      = cont->anc_item_order[k + 1];
         reg->def[inner].item_align_self = cont->anc_item_align[k + 1];
+        reg->def[inner].item_justify_self = cont->anc_item_jself[k + 1];
         reg->def[inner].item_mauto      = cont->anc_item_mauto[k + 1];
         const int *gl = cont->anc_item_gl[k + 1];
         const pv_cont_def *od = &reg->def[outer];
@@ -1681,6 +1772,7 @@ static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *
     pv_set_flex(v, cont->grow, cont->shrink, cont->basis, cont->order, cont->direction,
                 cont->align_self);
     pv_set_flex_mauto(v, cont->mauto);
+    pv_set_justify_self(v, cont->justify_self);
     pv_set_cont_item(v, item_ordinal(items, cont->id, cont->item));
     link_cont_chain(reg, items, cont);
     pv_set_float(v, cont->float_side, cont->float_id, cont->float_clear,
@@ -1694,6 +1786,7 @@ static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *
     pv_set_ua_tag(v, box->ua);
     pv_set_box_pct(v, box->w_pct, box->l_pct, box->r_pct, box->mt_pct, box->mb_pct);
     pv_set_box_maxw(v, box->mw, box->mw_pct);
+    pv_set_block_node(v, box->block_node);
 }
 
 /* Box engine (Hito 23b-8 Step D): document-order registry of box-carrying block
@@ -2062,61 +2155,6 @@ static const void *pseudo_key(const lxb_dom_node_t *el, int which) {
     return (const void *)((uintptr_t)el | (uintptr_t)which);
 }
 
-/* A small open-addressed map pointer -> int: the per-element verdict on a
- * generated box (-2 display:none, -1 no box, >= 0 its box id), so the pseudo's
- * cascade runs ONCE per element even though every text node of it asks. Grows
- * by doubling at half load; OOM leaves it as is (the answer is recomputed). */
-typedef struct pv_ptrmap {
-    const void **key;
-    int         *val;
-    size_t       cap, n;
-} pv_ptrmap;
-
-static size_t pv_ptrmap_slot(const pv_ptrmap *m, const void *k) {
-    uintptr_t x = (uintptr_t)k;
-    x ^= x >> 17;
-    x *= (uintptr_t)0x9E3779B97F4A7C15ull;
-    x ^= x >> 29;
-    size_t i = (size_t)x & (m->cap - 1);
-    while (m->key[i] != NULL && m->key[i] != k) i = (i + 1) & (m->cap - 1);
-    return i;
-}
-
-static int pv_ptrmap_get(const pv_ptrmap *m, const void *k, int *out) {
-    if (m->cap == 0) return 0;
-    size_t i = pv_ptrmap_slot(m, k);
-    if (m->key[i] == NULL) return 0;
-    *out = m->val[i];
-    return 1;
-}
-
-static void pv_ptrmap_put(pv_ptrmap *m, const void *k, int v) {
-    if ((m->n + 1) * 2 > m->cap) {
-        size_t nc = m->cap ? m->cap * 2 : 64;
-        pv_ptrmap g = { (const void **)calloc(nc, sizeof(void *)),
-                        (int *)calloc(nc, sizeof(int)), nc, 0 };
-        if (g.key == NULL || g.val == NULL) { free(g.key); free(g.val); return; }
-        for (size_t i = 0; i < m->cap; ++i) {
-            if (m->key[i] == NULL) continue;
-            size_t j = pv_ptrmap_slot(&g, m->key[i]);
-            g.key[j] = m->key[i];
-            g.val[j] = m->val[i];
-            ++g.n;
-        }
-        free(m->key);
-        free(m->val);
-        *m = g;
-    }
-    size_t i = pv_ptrmap_slot(m, k);
-    if (m->key[i] == NULL) { m->key[i] = k; ++m->n; }
-    m->val[i] = v;
-}
-
-static void pv_ptrmap_free(pv_ptrmap *m) {
-    free(m->key);
-    free(m->val);
-    m->key = NULL; m->val = NULL; m->cap = 0; m->n = 0;
-}
 
 /* Per-document memo of cch_element_style() results, keyed by element pointer.
  * resolve_context()/in_hidden_subtree() call cch_element_style once per ANCESTOR
@@ -2968,6 +3006,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->float_oml = 0; cont->float_oml_pct = 0;
     cont->float_omr = 0; cont->float_omr_pct = 0;
     cont->wrap = 0; cont->row_gap = -1; cont->align_items = 0; cont->align_self = 0;
+    cont->justify_self = CSS_AK_UNSET;
     cont->mauto = 0;
     cont->align_content = 0; cont->justify_items = 0;
     cont->grid_rows = 0; cont->grid_flow = 0; cont->row_span = 0;
@@ -3035,6 +3074,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     int prev_grow = -1, prev_shrink = -1;
     int prev_basis = CSS_LEN_UNSET, prev_order = CSS_LEN_UNSET;
     int prev_align_self = CSS_AK_UNSET;
+    int prev_justify_self = CSS_AK_UNSET;
     int prev_mauto = 0;
     /* The item's raw placement sides (FX_GL_*): resolved only at its container,
      * the one place that knows how many tracks a negative line counts back from. */
@@ -3480,6 +3520,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             cont->anc_item_basis[a]  = have_prev_el ? prev_basis      : CSS_LEN_UNSET;
                             cont->anc_item_order[a]  = have_prev_el ? prev_order      : CSS_LEN_UNSET;
                             cont->anc_item_align[a]  = have_prev_el ? prev_align_self : CSS_AK_UNSET;
+                            cont->anc_item_jself[a]  = have_prev_el ? prev_justify_self : CSS_AK_UNSET;
                             cont->anc_item_mauto[a]  = have_prev_el ? prev_mauto      : 0;
                             cont->anc_item_gl[a][0]  = have_prev_el ? prev_gcs : FX_GL_AUTO;
                             cont->anc_item_gl[a][1]  = have_prev_el ? prev_gce : FX_GL_AUTO;
@@ -3530,6 +3571,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                                 cont->grow = prev_grow; cont->shrink = prev_shrink;
                                 cont->basis = prev_basis; cont->order = prev_order;
                                 cont->align_self = prev_align_self;
+                                cont->justify_self = prev_justify_self;
                                 cont->mauto = prev_mauto;
                                 if (is_real) {
                                     /* Line placement (CSS Grid 1 8.3, spec/grid_areas.md
@@ -3594,6 +3636,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             prev_grow = cs.flex_grow; prev_shrink = cs.flex_shrink;
             prev_basis = cs.flex_basis; prev_order = cs.order;
             prev_align_self = cs.align_self;
+            prev_justify_self = cs.justify_self;
             prev_mauto = pv_mauto_of(&cs);
             prev_gcs = cs.grid_col_start; prev_gce = cs.grid_col_end;
             prev_grs = cs.grid_row_start; prev_gre = cs.grid_row_end;
@@ -3649,6 +3692,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
         if (reg != NULL && cont->id >= 0 && (size_t)cont->id < reg->count)
             reg->def[cont->id].justify = cont->justify;
     }
+    if (box != NULL)
+        box->block_node = (reg != NULL) ? pv_node_map_id(reg->nodes, *block) : DOM_NODE_NONE;
 }
 
 /* Serialises an element subtree (the element itself included) into a fresh
@@ -4639,7 +4684,14 @@ static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base
     for (const lxb_dom_node_t *p = n; p != NULL; p = p->parent) {
         if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
-            if (cached_element_style(el, sheet, style_cache).display == CSS_DISP_NONE) return 1;
+            int disp = cached_element_style(el, sheet, style_cache).display;
+            if (disp == CSS_DISP_NONE) return 1;
+            /* HTML Rendering 15.3.1: `[hidden]{display:none}` is a UA rule, so
+             * an author `display` on the element wins over it -- and it is
+             * structure, so it holds with author CSS off too. */
+            if (disp == CSS_DISP_UNSET &&
+                lxb_dom_element_has_attribute(el, (const lxb_char_t *)"hidden", 6))
+                return 1;
         }
         if (p == base) break;
     }
@@ -4742,6 +4794,7 @@ static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
     pv_set_flex(v, cont->grow, cont->shrink, cont->basis,
                 cont->order, cont->direction, cont->align_self);
     pv_set_flex_mauto(v, cont->mauto);
+    pv_set_justify_self(v, cont->justify_self);
     pv_set_cont_item(v, item_ordinal(items, cont->id, cont->item));
     link_cont_chain(reg, items, cont);
     pv_set_float(v, cont->float_side, cont->float_id, cont->float_clear,
@@ -4871,11 +4924,15 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     const lxb_dom_node_t *prev_block = NULL;
     const lxb_dom_node_t *prev_li = NULL;  /* last <li> seen, to mark each item once */
     int pending_break = 0;
-    int prev_float_id = -1;  /* adjacent floats in the same group suppress block_break */
+    /* The pending break came from a <br> in br_block (spec/page_view.md "Saltos
+     * de linea"): the run that consumes it in that same block continues it. */
+    int br_pending = 0;
+    const lxb_dom_node_t *br_block = NULL;
     form_table forms = { NULL, 0, 0 };
     pv_status rc = PV_OK;
-    pv_container_reg reg = { { NULL }, { { 0 } }, 0 };  /* flex/grid containers + defs */
-    pv_container_reg float_reg = { { NULL }, { { 0 } }, 0 };  /* floated elements */
+    pv_container_reg reg = { { NULL }, { { 0 } }, 0, NULL };  /* flex/grid containers + defs */
+    pv_container_reg float_reg = { { NULL }, { { 0 } }, 0, NULL };  /* floated elements */
+    reg.nodes = &node_map;
     pv_box_reg box_reg = { NULL, NULL, 0, 0 };  /* box-carrying blocks + their defs (heap, grows) */
     pv_item_track items = { { NULL }, { 0 } };  /* per-container item ordinals */
     int last_was_gap = 0;  /* dedupe for inter-cell separator runs of flowed tables */
@@ -4975,9 +5032,14 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 after_pending_box = -1;
             }
         }
-        if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+        /* A <br> takes the text path: whether it only ends the current line or
+         * also leaves an empty line of its own depends on its block and on what
+         * came before it, which that path resolves (see `br_line` below). */
+        const int br_line = n->type == LXB_DOM_NODE_TYPE_ELEMENT
+                            && node_tag(n) == LXB_TAG_BR;
+        if (n->type == LXB_DOM_NODE_TYPE_ELEMENT && !br_line) {
             lxb_tag_id_t t = node_tag(n);
-            if (t == LXB_TAG_BR || t == LXB_TAG_HR) { pending_break = 1; continue; }
+            if (t == LXB_TAG_HR) { pending_break = 1; br_pending = 0; continue; }
 
             if (t == LXB_TAG_FORM) {
                 if (forms_add(&forms, n) != 0) { rc = PV_ERR_OOM; goto cleanup; }
@@ -5246,6 +5308,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_flex(v, ictl_cont.grow, ictl_cont.shrink, ictl_cont.basis,
                             ictl_cont.order, ictl_cont.direction, ictl_cont.align_self);
                 pv_set_flex_mauto(v, ictl_cont.mauto);
+                pv_set_justify_self(v, ictl_cont.justify_self);
                 pv_set_cont_item(v, item_ordinal(&items, ictl_cont.id, ictl_cont.item));
                 link_cont_chain(&reg, &items, &ictl_cont);
                 pv_set_float(v, ictl_cont.float_side, ictl_cont.float_id, ictl_cont.float_clear,
@@ -5598,10 +5661,14 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 v->runs[v->count - 1].img_h_css = css_replaced_h_fixed(el, sheet, &cache);
                 {
                     css_style dcs = cached_element_style(el, sheet, &cache);
+                    /* A flex/grid item is blockified (CSS Display 3 2.7), so an
+                     * <img> that is one keeps its box like a display:block one. */
+                    int img_item = img_cont.id >= 0 && (size_t)img_cont.id < reg.count
+                                   && n->parent == reg.node[img_cont.id];
                     v->runs[v->count - 1].img_inline =
                         (dcs.display == CSS_DISP_UNSET || dcs.display == CSS_DISP_INLINE)
                         && !is_out_of_flow(&dcs) && dcs.float_side != CSS_FLOAT_LEFT
-                        && dcs.float_side != CSS_FLOAT_RIGHT;
+                        && dcs.float_side != CSS_FLOAT_RIGHT && !img_item;
                 }
                 /* resolve_context tracks the innermost box-generating ANCESTOR, not
                  * the replaced element itself, so an <img> that carries its own box
@@ -5614,11 +5681,19 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * an in-flow image is content of that box exactly like a text run,
                  * so the box (a card) opens before the image instead of after it. */
                 int img_anc_box = bdeco;
-                if (bdeco < 0) {
+                /* The image's OWN box is its own decoration's (a border, a margin,
+                 * a declared width) or none -- never the ancestor's: inside a
+                 * decorated <figure> the old fallback handed the image the
+                 * figure's box, so its own `border:1px;margin:3px` frame (the
+                 * wikipedia thumbnail) was never registered. */
+                int img_own_box = -1;
+                {
                     css_style rcs = cached_element_style(el, sheet, &cache);
                     if (css_has_boxdeco(&rcs))
-                        bdeco = box_reg_id_ex(&box_reg, n, &rcs, pv_cached_font_px(&cache, n), sheet, &cache);
+                        img_own_box = box_reg_id_ex(&box_reg, n, &rcs,
+                                                    pv_cached_font_px(&cache, n), sheet, &cache);
                 }
+                if (bdeco < 0) bdeco = img_own_box;
                 /* The element's OWN width in % is its used width (CSS 2.1
                  * §10.3.2), not a cap: without this half an `img{width:50%}`
                  * keeps its intrinsic bitmap and every responsive thumbnail
@@ -5633,7 +5708,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 }
                 annotate_replaced_run(v, &reg, &items, &img_cont, &img_ext,
                                       unused_align, unused_fs, unused_fs_abs,
-                                      unused_lh, unused_deco, bdeco);
+                                      unused_lh, unused_deco, img_own_box);
                 /* An image inside an out-of-flow subtree carries its nearest
                  * box block_id (spec/float.md §7d, slashdot rail): without an
                  * anchor the layout layer cannot position it and it falls
@@ -5641,6 +5716,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * in-flow image keeps block_id == -1 byte-identically. */
                 if (img_oof) pv_set_block_id(v, bdeco);
                 else if (img_anc_box >= 0) pv_set_block_id(v, img_anc_box);
+                /* An unavailable image renders its alt as inline text in the
+                 * element's colour and emphasis (HTML Rendering 15.4.2). */
+                pv_set_color(v, unused_fg);
+                pv_set_emphasis(v, unused_bold > 0, unused_italic > 0);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 pv_set_oof(v, img_oof);
             } else if ((t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO)
@@ -5947,6 +6026,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     pv_set_flex(v, econt.grow, econt.shrink, econt.basis, econt.order,
                                 econt.direction, econt.align_self);
                     pv_set_flex_mauto(v, econt.mauto);
+                    pv_set_justify_self(v, econt.justify_self);
                     pv_set_cont_item(v, item_ordinal(&items, econt.id, econt.item));
                     link_cont_chain(&reg, &items, &econt);
                     pv_set_float(v, econt.float_side, econt.float_id, econt.float_clear,
@@ -5999,17 +6079,21 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             }
             continue;
         }
-        if (n->type != LXB_DOM_NODE_TYPE_TEXT) continue;
+        if (n->type != LXB_DOM_NODE_TYPE_TEXT && !br_line) continue;
         if (in_skipped_subtree(n, base, js_enabled)) continue;
         if (in_collected_cell(n, base, &flowreg)) continue; /* emitted as a collected cell run */
         if (in_hidden_subtree(n, base, sheet, &cache, js_enabled)) continue; /* display:none */
         if (in_closed_details_subtree(n, base)) continue; /* collapsed <details> */
         if (reader && in_boilerplate_subtree(n, base)) continue; /* distraction-free */
 
-        lxb_dom_text_t *txt = lxb_dom_interface_text(n);
-        const char *raw = (const char *)txt->char_data.data.data;
-        size_t raw_len = txt->char_data.data.length;
-        if (raw == NULL || raw_len == 0) continue;
+        const char *raw = "";
+        size_t raw_len = 0;
+        if (!br_line) {
+            lxb_dom_text_t *txt = lxb_dom_interface_text(n);
+            raw = (const char *)txt->char_data.data.data;
+            raw_len = txt->char_data.data.length;
+            if (raw == NULL || raw_len == 0) continue;
+        }
 
         const char *href = NULL;
         size_t href_len = 0;
@@ -6029,6 +6113,26 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                         &li, &list_depth, &ordered, &reg, &cont, &box, &ext,
                         &box_reg, &float_reg, &bdeco, &cache, &flowreg);
 
+        /* A <br> ends the current line (HTML Rendering 15.3.6). When that line
+         * holds nothing yet -- the <br> is its block's first content, follows a
+         * block, or follows another <br> -- the line it ends is an EMPTY line box
+         * with the height of its strut (CSS 2.1 9.4.2, 10.8), emitted as an empty
+         * run that opens a line; the content after it starts a new one either way.
+         * A <br> directly in a flex/grid container or out of flow leaves no line. */
+        if (br_line) {
+            int br_oof = subtree_is_oof(n->parent, sheet, &cache);
+            int br_in_cont = cont.id >= 0 && (size_t)cont.id < reg.count &&
+                             n->parent == reg.node[cont.id];
+            /* A <br> styled display:block is still a line break, not an empty
+             * block (Gecko): it never resolves as its own block here. */
+            int opens_line = block != n && (pending_break || block != prev_block);
+            if (!opens_line || br_oof || br_in_cont) {
+                pending_break = 1; br_pending = 1;
+                br_block = (block == n) ? prev_block : block;
+                continue;
+            }
+        }
+
         /* Pre-like blocks (white-space: pre / pre-wrap / pre-line) preserve
          * whitespace: the HTML parser keeps the source tabs and newlines, and
          * page_view must NOT collapse them. CSS tab-size then expands the tabs
@@ -6042,7 +6146,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                            (block != NULL && node_tag(block) == LXB_TAG_PRE));
         char *collapsed = is_pre_like ? dup_n(raw, raw_len) : collapse_ws(raw, raw_len);
         if (collapsed == NULL) { rc = PV_ERR_OOM; goto cleanup; }
-        if (collapsed[0] == '\0') { free(collapsed); continue; }
+        if (collapsed[0] == '\0' && !br_line) { free(collapsed); continue; }
 
         /* UA-defaults for <pre>: white-space:pre to preserve whitespace,
          * font-family:monospace as required by the HTML spec. */
@@ -6063,7 +6167,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
          * With real text anywhere under the parent the first text node (even a
          * leading gap) still triggers, so position is preserved; fully textless
          * subtrees belong to the entry emission, never here. */
-        if (n->parent != NULL && n->parent->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+        if (!br_line && n->parent != NULL && n->parent->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *pel = lxb_dom_interface_element(n->parent);
             css_style pcs = cached_element_style(pel, sheet, &cache);
             /* A ::before / ::after with a generated BOX of its own (spec/page_view.md
@@ -6196,6 +6300,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
          * marks the out-of-flow region. */
         int own_oof = subtree_is_oof(n->parent, sheet, &cache);
         int brk = (pending_break || (block != prev_block)) && !own_oof;
+        int br_cont = brk && pending_break && br_pending
+                      && block == br_block && block == prev_block;
         pending_break = 0;
         prev_block = block;
 
@@ -6203,7 +6309,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
          * block_break, so ASCII art and code blocks render line-by-line.
          * The UA white-space:pre preserves the raw \n chars; here they become
          * structural breaks instead of flowing as one long nowrap line. */
-        int is_pre_tag = (is_pre_like && block != NULL && node_tag(block) == LXB_TAG_PRE);
+        int is_pre_tag = !br_line &&
+                         (is_pre_like && block != NULL && node_tag(block) == LXB_TAG_PRE);
         if (is_pre_tag) {
             char *start = collapsed;
             int first = 1;
@@ -6242,6 +6349,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
                            cont.align_self);
                 pv_set_flex_mauto(v, cont.mauto);
+                pv_set_justify_self(v, cont.justify_self);
                 pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
                 link_cont_chain(&reg, &items, &cont);
                 pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear,
@@ -6256,6 +6364,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_box_pct(v, box.w_pct, box.l_pct, box.r_pct,
                                box.mt_pct, box.mb_pct);
                 pv_set_box_maxw(v, box.mw, box.mw_pct);
+                pv_set_block_node(v, box.block_node);
                 pv_set_text_ext(v, &ext);
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
@@ -6274,7 +6383,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
          * style and needs no special painting; the GUI indents the whole item by
          * list_depth. A run that is only whitespace (e.g. between a nested </ul> and
          * its </li>) carries no content, so it never claims the marker. */
-        int has_content = 0;
+        int has_content = br_line;
         for (const char *c = collapsed; *c != '\0'; ++c) {
             if (*c != ' ') { has_content = 1; break; }
         }
@@ -6343,17 +6452,11 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         free(href_dup);
         if (st != PV_OK) { rc = st; goto cleanup; }
         last_was_gap = 0;
-        /* Adjacent floated elements in the same float group (e.g. <li> links in a
-         * navigation bar) flow side-by-side as one float column; suppress the block
-         * break so the next one does not stack as a separate vertical block. Applied
-         * AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
-        if (cont.float_id >= 0) {
-            if (cont.float_id == prev_float_id)
-                v->runs[v->count - 1].block_break = 0;
-            prev_float_id = cont.float_id;
-        } else {
-            prev_float_id = -1;
-        }
+        /* No block break is suppressed inside a float: float_id names ONE floated
+         * element, so the blocks inside it (paragraphs, a quote, a trailing <br>
+         * line) keep breaking exactly as in flow -- dropping them folded every
+         * paragraph of a floated column into one line. Sibling floats are kept
+         * side by side by the band layout, not by erasing breaks. */
         pv_set_emphasis(v, bold, italic);
         pv_set_indent(v, list_depth);
         pv_set_color(v, fg);
@@ -6364,6 +6467,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
                 pv_set_oof(v, own_oof);
+                pv_set_br_line(v, (br_line ? PV_BR_EMPTY : 0) | (br_cont ? PV_BR_CONT : 0));
+                br_pending = 0;
+                if (br_line) { pending_break = 1; br_pending = 1; br_block = block; }
             }
 
     /* Box engine (Step D): publish the box tree. box_reg holds one def per

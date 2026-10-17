@@ -84,6 +84,12 @@ typedef enum css_justify {  /* justify-content (flex/grid main axis) */
 #define CSS_GRAD_STOPS_MAX 4     /* cap on linear-gradient color stops (extra kept out) */
 #define CSS_LINE_MIN      50     /* line-height clamp floor (percent) */
 #define CSS_LINE_MAX      400    /* line-height clamp ceiling (percent, anti-DoS) */
+/* A line-height that is an absolute <length> (px, pt, rem, ...) is NOT a
+ * multiple of the font-size (CSS 2.1 10.8.1) and inherits as that length: it
+ * travels as CSS_LINE_ABS_BASE + tenths of px, up to CSS_LINE_ABS_MAX_PX.
+ * bx_line_height_px is the one place that reads either encoding. */
+#define CSS_LINE_ABS_BASE   100000
+#define CSS_LINE_ABS_MAX_PX 4000
 #define CSS_SVG_PAINT_NONE (-5)  /* fill/stroke: none (distinct from every CC_COLOR_* sentinel) */
 #define CSS_FONT_LIST_MAX 192    /* bytes of a normalized font-family list (truncated at a name boundary) */
 #define CSS_URL_MAX       1024   /* cap on a captured background-image url() text (anti-DoS; longer -> dropped, fail closed, never truncated-and-fetched). Sized to comfortably hold the RESOLVED absolute URL too (render_doc.c resolves in place against the page origin), not just the raw author-CSS token -- real CDN asset URLs with hashed filenames/query strings routinely exceed a bare 256-byte cap. */
@@ -739,6 +745,7 @@ typedef struct css_style {
     int         flex_grow, flex_shrink, flex_basis;
     int         order;           /* signed, or CSS_LEN_UNSET */
     int         align_items, align_self, align_content, justify_items; /* css_align_kw */
+    int         justify_self;    /* css_align_kw: the item's inline-axis alignment in its grid area */
     int         flex_direction;  /* css_flex_direction */
     int         flex_wrap;       /* css_flex_wrap */
     /* Grid extras. grid_rows: track count, 0 unset. row_gap: px or -1 unset. */

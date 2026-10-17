@@ -132,10 +132,10 @@ struct css_sheet {
     double          rw_rem_px, rw_vw_px, rw_vh_px;
     int             cur_layer;
     char            cur_layer_path[CAR_LAYER_NAME_MAX];
-    char            bg_urls[CSS_MAX_BG_URLS][CSS_URL_MAX]; /* background-image url() pool */
-    size_t          nbg_urls;
-    char            content_urls[CSS_MAX_CONTENT_URLS][CSS_URL_MAX];  /* R8: ::before/::after content strings */
-    size_t          ncontent_urls;
+    char          (*bg_urls)[CSS_URL_MAX];      /* background-image url() pool (heap) */
+    size_t          nbg_urls, bg_cap;
+    char          (*content_urls)[CSS_URL_MAX]; /* ::before/::after content strings (heap) */
+    size_t          ncontent_urls, content_cap;
     /* @keyframes animation blocks (R1b). Bounded anti-DoS. */
     struct {
         char name[CSS_TOK_MAX];
@@ -3065,10 +3065,8 @@ static int expand_gap(const char *val, css_decl *dst, int cap) {
 
 /* place-items / place-content / place-self (2026-07-10): `<align> [<justify>]`,
  * the justify half defaulting to the align token. place-content's justify half
- * feeds justify-content (its own keyword set). place-self's justify half has no
- * engine slot and is ignored (documented simplification, like list-style's
- * ignored tokens). An uninterpretable align token (or, where a slot exists, an
- * uninterpretable justify token) drops the whole shorthand (fail closed). */
+ * feeds justify-content (its own keyword set); place-self's feeds justify-self.
+ * An uninterpretable token drops the whole shorthand (fail closed). */
 static int expand_place(const char *prop, const char *val, css_decl *dst, int cap) {
     char a[CSS_TOK_MAX], b[CSS_TOK_MAX], extra[CSS_TOK_MAX];
     const char *p = val;
@@ -3078,9 +3076,11 @@ static int expand_place(const char *prop, const char *val, css_decl *dst, int ca
 
     if (strcmp(prop, "place-self") == 0) {
         int av = interp_align_kw(a, 1, 0);
-        if (av < 0 || cap < 1) return 0;
-        dst[0].prop = P_ALIGN_SELF; dst[0].ival = av;
-        return 1;
+        int jv = interp_align_kw(has_b ? b : a, 1, 0);
+        if (av < 0 || jv < 0 || cap < 2) return 0;
+        dst[0].prop = P_ALIGN_SELF;   dst[0].ival = av;
+        dst[1].prop = P_JUSTIFY_SELF; dst[1].ival = jv;
+        return 2;
     }
     if (strcmp(prop, "place-items") == 0) {
         int av = interp_align_kw(a, 0, 0);
@@ -3646,7 +3646,7 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
             dst[0].wide = 2;
             return 1;
         }
-        prop_id = P_COLOR;    ival = interp_color(val);
+        prop_id = P_COLOR;    ival = cv_text_color(val);
     }
     else if (strcmp(prop, "text-align") == 0)        { prop_id = P_ALIGN;    ival = interp_align(val); }
     /* font-size emits TWO pairs (percent + absolute flag) so the cascade keeps them
@@ -3752,6 +3752,7 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     else if (strcmp(prop, "align-self") == 0)          { prop_id = P_ALIGN_SELF;    ival = interp_align_kw(val, 1, 0); }
     else if (strcmp(prop, "align-content") == 0)       { prop_id = P_ALIGN_CONTENT; ival = interp_align_kw(val, 0, 1); }
     else if (strcmp(prop, "justify-items") == 0)       { prop_id = P_JUSTIFY_ITEMS; ival = interp_align_kw(val, 0, 0); }
+    else if (strcmp(prop, "justify-self") == 0)        { prop_id = P_JUSTIFY_SELF;  ival = interp_align_kw(val, 1, 0); }
     else if (strcmp(prop, "flex-direction") == 0)      { prop_id = P_FLEX_DIR;      ival = interp_flex_direction(val); }
     else if (strcmp(prop, "box-orient") == 0)          { prop_id = P_FLEX_DIR;      ival = interp_box_orient(val); }
     /* 2012 tweener item/container properties (spec/css.md 2026-10-09): the
@@ -4338,6 +4339,26 @@ static size_t sel_list_comma(const char *s, size_t i, size_t end) {
     return end;
 }
 
+/* Grows one string pool so at least CSS_POOL_HEADROOM slots are free, by
+ * doubling up to hard_cap (spec/css.md "pools de cadenas"). On OOM or at the
+ * cap the pool stays as it is: the emitters then fail closed on a full pool,
+ * which is the old behaviour, never a write past it. */
+static void pool_reserve(char (**pool)[CSS_URL_MAX], size_t n, size_t *cap, size_t hard_cap) {
+    if (*cap >= hard_cap || *cap - n >= CSS_POOL_HEADROOM) return;
+    size_t nc = (*cap == 0) ? CSS_POOL_INIT : *cap * 2;
+    while (nc - n < CSS_POOL_HEADROOM && nc < hard_cap) nc *= 2;
+    if (nc > hard_cap) nc = hard_cap;
+    char (*g)[CSS_URL_MAX] = (char (*)[CSS_URL_MAX])realloc(*pool, nc * sizeof *g);
+    if (g == NULL) return;
+    *pool = g;
+    *cap = nc;
+}
+
+static void sheet_pools_reserve(css_sheet *sh) {
+    pool_reserve(&sh->bg_urls, sh->nbg_urls, &sh->bg_cap, CSS_MAX_BG_URLS);
+    pool_reserve(&sh->content_urls, sh->ncontent_urls, &sh->content_cap, CSS_MAX_CONTENT_URLS);
+}
+
 /* Adds a rule: selector list s[ss,se), declaration block s[ds,de). */
 static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
                      size_t ds, size_t de, css_drop_log *log) {
@@ -4384,9 +4405,10 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
             size_t nbg = sh->nbg_urls;
             size_t ncontent = sh->ncontent_urls;
             const cvr_scope vs = { &sh->vars, NULL, NULL, &sh->initial };
+            sheet_pools_reserve(sh);
             dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart], room, &vs, sh,
-                                 sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
-                                 sh->content_urls, &sh->ncontent_urls, CSS_MAX_CONTENT_URLS, log);
+                                 sh->bg_urls, &sh->nbg_urls, sh->bg_cap,
+                                 sh->content_urls, &sh->ncontent_urls, sh->content_cap, log);
             if (room - dn >= CSS_DECL_SLOTS_MIN) { free(log_counts); break; }
             if (log != NULL) {
                 log->n = log_n;
@@ -4918,9 +4940,10 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                                  * counter makes `content` fail closed. A NULL one
                                  * was dereferenced (SIGSEGV on hostile CSS). */
                                 size_t kncontent = 0;
+                                sheet_pools_reserve(sh);
                                 int nd = interpret_decls(s + db, de2 - db,
                                     kdecls, CSS_MAX_KEYFRAME_DECLS, &kvs, NULL,
-                                    sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
+                                    sh->bg_urls, &sh->nbg_urls, sh->bg_cap,
                                     NULL, &kncontent, 0, log);
                                 int kop = -1, kbg = -1, kfg = -1, ktx = CSS_LEN_UNSET, kty = CSS_LEN_UNSET, ksx = 0, ksy = 0, krot = 0;
                                 for (int dd = 0; dd < nd; ++dd) {
@@ -5354,6 +5377,8 @@ void css_free(css_sheet *s) {
     cvr_free(&s->initial);
     for (size_t i = 0; i < s->nraw; ++i) free(s->raw[i]);
     free(s->raw);
+    free(s->bg_urls);
+    free(s->content_urls);
     free(s);
 }
 
@@ -5590,6 +5615,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_ALIGN_SELF:    o->align_self = d->ival; break;
             case P_ALIGN_CONTENT: o->align_content = d->ival; break;
             case P_JUSTIFY_ITEMS: o->justify_items = d->ival; break;
+            case P_JUSTIFY_SELF:  o->justify_self = d->ival; break;
             case P_FLEX_DIR:      o->flex_direction = d->ival; break;
             case P_FLEX_WRAP:     o->flex_wrap = d->ival; break;
             case P_GRID_ROWS:     o->grid_rows = d->ival; break;
@@ -6080,6 +6106,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
         .order = CSS_LEN_UNSET,
         .align_items = CSS_AK_UNSET, .align_self = CSS_AK_UNSET,
         .align_content = CSS_AK_UNSET, .justify_items = CSS_AK_UNSET,
+        .justify_self = CSS_AK_UNSET,
         .flex_direction = CSS_FD_UNSET, .flex_wrap = CSS_FW_UNSET,
         .grid_rows = 0, .row_gap = -1, .grid_auto_flow = CSS_GF_UNSET,
         .grid_col_start = 0, .grid_col_end = 0, .grid_row_start = 0, .grid_row_end = 0,

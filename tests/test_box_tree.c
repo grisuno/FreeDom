@@ -941,7 +941,7 @@ static void test_grid_row_tracks_definite_height(void **state) {
     bt_node root = {
         .display = BX_DISPLAY_GRID, .grid_cols = 1, .gap = 0,
         .grid_rows = 2, .grid_row_track = rtrack, .grid_nrow_track = 2,
-        .grid_inner_h = 300,
+        .inner_h = 300,
         .children = kids, .child_count = 2,
     };
     assert_int_equal(bt_layout(&root, 100), BT_OK);
@@ -956,7 +956,7 @@ static void test_grid_row_tracks_definite_height(void **state) {
     /* A px row is that size whatever its content. */
     int ptrack[2] = { 50, 0 };
     root.grid_row_track = ptrack;
-    root.grid_inner_h = 0;
+    root.inner_h = 0;
     kids[0].align = 0;
     assert_int_equal(bt_layout(&root, 100), BT_OK);
     assert_rect(&kids[1], 0, 50, 100, 20);
@@ -982,7 +982,7 @@ static void test_grid_spanning_item_fits_tracked_rows(void **state) {
     bt_node root = {
         .display = BX_DISPLAY_GRID, .grid_cols = 2, .gap = 0,
         .grid_rows = 2, .grid_row_track = rtrack, .grid_nrow_track = 2,
-        .grid_inner_h = 300,
+        .inner_h = 300,
         .children = kids, .child_count = 3,
     };
     assert_int_equal(bt_layout(&root, 200), BT_OK);
@@ -990,8 +990,66 @@ static void test_grid_spanning_item_fits_tracked_rows(void **state) {
     assert_true(dbl_eq(root.h, 300));
 }
 
+/* A single-line flex row with a definite height (Flexbox 9.4 step 15): the
+ * line is the container's inner height, so a centered item sits in its middle,
+ * a stretched one fills it, and the container is that tall. Wrapping lines and
+ * an indefinite height keep content-sized lines. */
+static void test_flex_single_line_definite_height(void **state) {
+    (void)state;
+    bt_node kids[2] = {
+        { .display = BX_DISPLAY_BLOCK, .basis = 50, .content_h = 40, .align = BT_ALIGN_CENTER },
+        { .display = BX_DISPLAY_BLOCK, .basis = 50, .content_h = 20, .align = BT_ALIGN_STRETCH },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_FLEX, .gap = 0, .inner_h = 300,
+        .children = kids, .child_count = 2,
+    };
+    assert_int_equal(bt_layout(&root, 200), BT_OK);
+    assert_rect(&kids[0], 0, 130, 50, 40);
+    assert_rect(&kids[1], 50, 0, 50, 300);
+    assert_true(dbl_eq(root.h, 300));
+    root.inner_h = 0;
+    assert_int_equal(bt_layout(&root, 200), BT_OK);
+    assert_rect(&kids[0], 0, 0, 50, 40);
+    assert_rect(&kids[1], 50, 0, 50, 40);
+    root.inner_h = 300;
+    root.wrap = 1;
+    assert_int_equal(bt_layout(&root, 200), BT_OK);
+    assert_rect(&kids[0], 0, 0, 50, 40);
+}
+
+/* justify-self in a grid area (Box Alignment 6.1): an item with a fit width
+ * narrower than its column sits at the start, centre or end of it; without a
+ * fit width it stretches across the column as before. */
+static void test_grid_justify_self(void **state) {
+    (void)state;
+    bt_node kids[4] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .fit_w = 50, .justify_self = BT_ALIGN_CENTER },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .fit_w = 30, .justify_self = BT_ALIGN_END },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .fit_w = 40, .justify_self = BT_ALIGN_START },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20 },
+    };
+    int track[2] = { 200, 200 };
+    bt_node root = {
+        .display = BX_DISPLAY_GRID, .grid_cols = 2, .gap = 0,
+        .grid_track = track, .grid_ntrack = 2,
+        .children = kids, .child_count = 4,
+    };
+    assert_int_equal(bt_layout(&root, 400), BT_OK);
+    assert_rect(&kids[0], 75, 0, 50, 20);
+    assert_rect(&kids[1], 370, 0, 30, 20);
+    assert_rect(&kids[2], 0, 20, 40, 20);
+    assert_rect(&kids[3], 200, 20, 200, 20);
+    /* A fit width wider than the column is clamped to it. */
+    kids[0].fit_w = 500;
+    assert_int_equal(bt_layout(&root, 400), BT_OK);
+    assert_rect(&kids[0], 0, 0, 200, 20);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_grid_justify_self),
+        cmocka_unit_test(test_flex_single_line_definite_height),
         cmocka_unit_test(test_null_root),
         cmocka_unit_test(test_leaf),
         cmocka_unit_test(test_leaf_with_padding),

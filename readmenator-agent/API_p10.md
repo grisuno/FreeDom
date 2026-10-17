@@ -33,16 +33,16 @@ Depends on: `include/zoom.h`
 - `zm_apply` (function) `src/zoom.c:44` `double zm_apply(double base_px, int pct)`
 
 ## tools/ffgeom.py
-- `load_rows` (function) `tools/ffgeom.py:112` `def load_rows(path)`
-- `lum` (function) `tools/ffgeom.py:165` `def lum(p)`
-- `lum_at` (function) `tools/ffgeom.py:177` `def lum_at(x, y)`
-- `bit` (function) `tools/ffgeom.py:202` `def bit(grid_row, cell, origin)`
-- `word` (function) `tools/ffgeom.py:205` `def word(grid_row, origin)`
-- `decode` (function) `tools/ffgeom.py:235` `def decode(path)`
-- `probe` (function) `tools/ffgeom.py:261` `def probe(page, selector, out_html)`
-- `height_probe` (function) `tools/ffgeom.py:275` `def height_probe(page, out_html)`
-- `height` (function) `tools/ffgeom.py:288` `def height(path)` -- Decodes the scrollHeight carried by the #__ffh sentinel: the probe encodes one rect (its height), which decode()...
-- `main` (function) `tools/ffgeom.py:297` `def main(argv)`
+- `load_rows` (function) `tools/ffgeom.py:116` `def load_rows(path)`
+- `lum` (function) `tools/ffgeom.py:169` `def lum(p)`
+- `lum_at` (function) `tools/ffgeom.py:181` `def lum_at(x, y)`
+- `bit` (function) `tools/ffgeom.py:206` `def bit(grid_row, cell, origin)`
+- `word` (function) `tools/ffgeom.py:209` `def word(grid_row, origin)`
+- `decode` (function) `tools/ffgeom.py:239` `def decode(path)`
+- `probe` (function) `tools/ffgeom.py:265` `def probe(page, selector, out_html)`
+- `height_probe` (function) `tools/ffgeom.py:279` `def height_probe(page, out_html)`
+- `height` (function) `tools/ffgeom.py:292` `def height(path)` -- Decodes the scrollHeight carried by the #__ffh sentinel: the probe encodes one rect (its height), which decode()...
+- `main` (function) `tools/ffgeom.py:301` `def main(argv)`
 
 ## tools/gen_psl.c
 - `vec_push` (function) `tools/gen_psl.c:27` `static void vec_push(vec *v, const char *s)`

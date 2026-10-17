@@ -3,6 +3,71 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_decode_rejects_truncated` | function | `tests/test_tls_impersonate.c:144` | `static void test_decode_rejects_truncated(void **state)` |
+| `test_encode_decode_req_empty_body` | function | `tests/test_tls_impersonate.c:65` | `static void test_encode_decode_req_empty_body(void **state)` |
+| `test_encode_decode_req_roundtrip` | function | `tests/test_tls_impersonate.c:39` | `static void test_encode_decode_req_roundtrip(void **state)` |
+| `test_encode_decode_resp_roundtrip` | function | `tests/test_tls_impersonate.c:89` | `static void test_encode_decode_resp_roundtrip(void **state)` |
+| `test_encode_fails_when_no_room` | function | `tests/test_tls_impersonate.c:192` | `static void test_encode_fails_when_no_room(void **state)` |
+| `test_encode_rejects_oversize_url` | function | `tests/test_tls_impersonate.c:203` | `static void test_encode_rejects_oversize_url(void **state)` |
+| `test_gate_requires_all_three_signals` | function | `tests/test_tls_impersonate.c:22` | `static void test_gate_requires_all_three_signals(void **state)` |
+| `test_resp_no_chain_ok` | function | `tests/test_tls_impersonate.c:121` | `static void test_resp_no_chain_ok(void **state)` |
+| `assert_line` | function | `tests/test_ui.c:20` | `static void assert_line(const char *text, const ui_layout *lay, size_t n,                        ...` |
+| `main` | function | `tests/test_ui.c:130` | `int main(void)` |
+| `test_clamp_scroll` | function | `tests/test_ui.c:113` | `static void test_clamp_scroll(void **state)` |
+| `test_layout_free_null_and_double` | function | `tests/test_ui.c:121` | `static void test_layout_free_null_and_double(void **state)` |
+| `test_wrap_breaks_at_space` | function | `tests/test_ui.c:53` | `static void test_wrap_breaks_at_space(void **state)` |
+| `test_wrap_does_not_split_utf8` | function | `tests/test_ui.c:76` | `static void test_wrap_does_not_split_utf8(void **state)` |
+| `test_wrap_empty` | function | `tests/test_ui.c:35` | `static void test_wrap_empty(void **state)` |
+| `test_wrap_hard_breaks_long_word` | function | `tests/test_ui.c:64` | `static void test_wrap_hard_breaks_long_word(void **state)` |
+| `test_wrap_null_args` | function | `tests/test_ui.c:28` | `static void test_wrap_null_args(void **state)` |
+| `test_wrap_respects_newline` | function | `tests/test_ui.c:90` | `static void test_wrap_respects_newline(void **state)` |
+| `test_wrap_short_single_line` | function | `tests/test_ui.c:43` | `static void test_wrap_short_single_line(void **state)` |
+| `test_wrap_zero_cols_is_sanitised` | function | `tests/test_ui.c:101` | `static void test_wrap_zero_cols_is_sanitised(void **state)` |
+| `assert_span` | function | `tests/test_url.c:449` | `static void assert_span(const char *p, size_t len, const char *expect)` |
+| `main` | function | `tests/test_url.c:701` | `int main(void)` |
+| `test_authority_len` | function | `tests/test_url.c:86` | `static void test_authority_len(void **state)` |
+| `test_extract_userinfo_at_authority_start` | function | `tests/test_url.c:589` | `static void test_extract_userinfo_at_authority_start(void **state)` |
+| `test_extract_userinfo_basic` | function | `tests/test_url.c:516` | `static void test_extract_userinfo_basic(void **state)` |
+| `test_extract_userinfo_empty_password` | function | `tests/test_url.c:615` | `static void test_extract_userinfo_empty_password(void **state)` |
+| `test_extract_userinfo_https_subresource_no_auth` | function | `tests/test_url.c:566` | `static void test_extract_userinfo_https_subresource_no_auth(void **state)` |
+| `test_extract_userinfo_no_at_sign` | function | `tests/test_url.c:602` | `static void test_extract_userinfo_no_at_sign(void **state)` |
+| `test_extract_userinfo_no_userinfo` | function | `tests/test_url.c:542` | `static void test_extract_userinfo_no_userinfo(void **state)` |
+| `test_extract_userinfo_non_https_passthrough` | function | `tests/test_url.c:554` | `static void test_extract_userinfo_non_https_passthrough(void **state)` |
+| `test_extract_userinfo_nulls` | function | `tests/test_url.c:579` | `static void test_extract_userinfo_nulls(void **state)` |
+| `test_extract_userinfo_user_only` | function | `tests/test_url.c:529` | `static void test_extract_userinfo_user_only(void **state)` |
+| `test_has_scheme` | function | `tests/test_url.c:69` | `static void test_has_scheme(void **state)` |
+| `test_history_target_bad_args` | function | `tests/test_url.c:690` | `static void test_history_target_bad_args(void **state)` |
+| `test_history_target_cross_origin_rejected` | function | `tests/test_url.c:662` | `static void test_history_target_cross_origin_rejected(void **state)` |
+| `test_history_target_file_query_fragment_only` | function | `tests/test_url.c:677` | `static void test_history_target_file_query_fragment_only(void **state)` |
+| `test_history_target_same_origin` | function | `tests/test_url.c:641` | `static void test_history_target_same_origin(void **state)` |
+| `test_is_file_and_path` | function | `tests/test_url.c:379` | `static void test_is_file_and_path(void **state)` |
+| `test_is_https` | function | `tests/test_url.c:23` | `static void test_is_https(void **state)` |
+| `test_omnibox_bare_host_gets_https` | function | `tests/test_url.c:251` | `static void test_omnibox_bare_host_gets_https(void **state)` |
+| `test_omnibox_foreign_scheme_is_searched_not_executed` | function | `tests/test_url.c:298` | `static void test_omnibox_foreign_scheme_is_searched_not_executed(void **state)` |
+| `test_omnibox_http_upgraded_to_https` | function | `tests/test_url.c:268` | `static void test_omnibox_http_upgraded_to_https(void **state)` |
+| `test_omnibox_navigate_https` | function | `tests/test_url.c:238` | `static void test_omnibox_navigate_https(void **state)` |
+| `test_omnibox_nulls_and_empty` | function | `tests/test_url.c:311` | `static void test_omnibox_nulls_and_empty(void **state)` |
+| `test_omnibox_search_for_queries` | function | `tests/test_url.c:278` | `static void test_omnibox_search_for_queries(void **state)` |
+| `test_remove_dot_segments` | function | `tests/test_url.c:98` | `static void test_remove_dot_segments(void **state)` |
+| `test_remove_dot_segments_nulls` | function | `tests/test_url.c:127` | `static void test_remove_dot_segments_nulls(void **state)` |
+| `test_resolve_absolute` | function | `tests/test_url.c:138` | `static void test_resolve_absolute(void **state)` |
+| `test_resolve_absolute_path` | function | `tests/test_url.c:169` | `static void test_resolve_absolute_path(void **state)` |
+| `test_resolve_dot_segments` | function | `tests/test_url.c:193` | `static void test_resolve_dot_segments(void **state)` |
+| `test_resolve_fail_closed_on_bad_base` | function | `tests/test_url.c:210` | `static void test_resolve_fail_closed_on_bad_base(void **state)` |
+| `test_resolve_file_confinement_fail_closed` | function | `tests/test_url.c:411` | `static void test_resolve_file_confinement_fail_closed(void **state)` |
+| `test_resolve_file_nulls` | function | `tests/test_url.c:437` | `static void test_resolve_file_nulls(void **state)` |
+| `test_resolve_file_relative` | function | `tests/test_url.c:391` | `static void test_resolve_file_relative(void **state)` |
+| `test_resolve_null_and_overflow` | function | `tests/test_url.c:222` | `static void test_resolve_null_and_overflow(void **state)` |
+| `test_resolve_rejects_downgrade_and_schemes` | function | `tests/test_url.c:146` | `static void test_resolve_rejects_downgrade_and_schemes(void **state)` |
+| `test_resolve_relative_path` | function | `tests/test_url.c:181` | `static void test_resolve_relative_path(void **state)` |
+| `test_resolve_scheme_relative` | function | `tests/test_url.c:161` | `static void test_resolve_scheme_relative(void **state)` |
+| `test_search_rewrite_ddg_spa` | function | `tests/test_url.c:327` | `static void test_search_rewrite_ddg_spa(void **state)` |
+| `test_search_rewrite_leaves_others_alone` | function | `tests/test_url.c:344` | `static void test_search_rewrite_leaves_others_alone(void **state)` |
+| `test_search_rewrite_nulls` | function | `tests/test_url.c:364` | `static void test_search_rewrite_nulls(void **state)` |
+| `test_split_fail_closed_non_https` | function | `tests/test_url.c:628` | `static void test_split_fail_closed_non_https(void **state)` |
+| `test_split_fragment_without_query` | function | `tests/test_url.c:495` | `static void test_split_fragment_without_query(void **state)` |
+| `test_split_full_url` | function | `tests/test_url.c:454` | `static void test_split_full_url(void **state)` |
+| `test_split_ipv6_literal_with_port` | function | `tests/test_url.c:504` | `static void test_split_ipv6_literal_with_port(void **state)` |
 | `test_split_no_port_no_path` | function | `tests/test_url.c:473` | `static void test_split_no_port_no_path(void **state)` |
 | `test_split_query_without_fragment` | function | `tests/test_url.c:486` | `static void test_split_query_without_fragment(void **state)` |
 | `test_validate_https` | function | `tests/test_url.c:36` | `static void test_validate_https(void **state)` |
@@ -80,18 +145,18 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `test_step_snaps_off_ladder` | function | `tests/test_zoom.c:49` | `static void test_step_snaps_off_ladder(void **state)` |
 | `test_zoom_in_steps_ladder` | function | `tests/test_zoom.c:33` | `static void test_zoom_in_steps_ladder(void **state)` |
 | `test_zoom_out_steps_ladder` | function | `tests/test_zoom.c:41` | `static void test_zoom_out_steps_ladder(void **state)` |
-| `_append_probe` | function | `tools/ffgeom.py:250` | `def _append_probe(src, script)` |
-| `_word_reader` | function | `tools/ffgeom.py:169` | `def _word_reader(path)` |
-| `bit` | function | `tools/ffgeom.py:202` | `def bit(grid_row, cell, origin)` |
-| `decode` | function | `tools/ffgeom.py:235` | `def decode(path)` |
-| `height` | function | `tools/ffgeom.py:288` | `def height(path)` |
-| `height_probe` | function | `tools/ffgeom.py:275` | `def height_probe(page, out_html)` |
-| `load_rows` | function | `tools/ffgeom.py:112` | `def load_rows(path)` |
-| `lum` | function | `tools/ffgeom.py:165` | `def lum(p)` |
-| `lum_at` | function | `tools/ffgeom.py:177` | `def lum_at(x, y)` |
-| `main` | function | `tools/ffgeom.py:297` | `def main(argv)` |
-| `probe` | function | `tools/ffgeom.py:261` | `def probe(page, selector, out_html)` |
-| `word` | function | `tools/ffgeom.py:205` | `def word(grid_row, origin)` |
+| `_append_probe` | function | `tools/ffgeom.py:254` | `def _append_probe(src, script)` |
+| `_word_reader` | function | `tools/ffgeom.py:173` | `def _word_reader(path)` |
+| `bit` | function | `tools/ffgeom.py:206` | `def bit(grid_row, cell, origin)` |
+| `decode` | function | `tools/ffgeom.py:239` | `def decode(path)` |
+| `height` | function | `tools/ffgeom.py:292` | `def height(path)` |
+| `height_probe` | function | `tools/ffgeom.py:279` | `def height_probe(page, out_html)` |
+| `load_rows` | function | `tools/ffgeom.py:116` | `def load_rows(path)` |
+| `lum` | function | `tools/ffgeom.py:169` | `def lum(p)` |
+| `lum_at` | function | `tools/ffgeom.py:181` | `def lum_at(x, y)` |
+| `main` | function | `tools/ffgeom.py:301` | `def main(argv)` |
+| `probe` | function | `tools/ffgeom.py:265` | `def probe(page, selector, out_html)` |
+| `word` | function | `tools/ffgeom.py:209` | `def word(grid_row, origin)` |
 | `_POSIX_C_SOURCE` | macro | `tools/gen_psl.c:15` | `#define _POSIX_C_SOURCE` |
 | `ascii_lower` | function | `tools/gen_psl.c:55` | `static void ascii_lower(char *s)` |
 | `cmp_str` | function | `tools/gen_psl.c:38` | `static int cmp_str(const void *a, const void *b)` |

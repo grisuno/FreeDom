@@ -1,11 +1,11 @@
 # `src/box_style.c`
 
-> Source: [src/box_style.c:1](../../src/box_style.c#L1) | language `c` | coverage 31.8% | [API index](../index.md)
+> Source: [src/box_style.c:1](../../src/box_style.c#L1) | language `c` | coverage 31.1% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`tag_row`](#tag_row), [`disp_row`](#disp_row)
-- **Functions:** [`bx_default_for_tag`](#bx_default_for_tag), [`bx_table_role_of`](#bx_table_role_of), [`bx_ua_of_tag`](#bx_ua_of_tag), [`bx_default_for_ua`](#bx_default_for_ua), [`bx_block_ua_box`](#bx_block_ua_box), [`bx_parse_display`](#bx_parse_display), [`bx_place`](#bx_place), [`bx_width_cap`](#bx_width_cap), [`take`](#take), [`bx_width_cap2`](#bx_width_cap2), [`bx_replaced_box`](#bx_replaced_box), [`bx_border_box_h`](#bx_border_box_h), [`bx_pct_block_size`](#bx_pct_block_size), [`bx_definite_content_h`](#bx_definite_content_h), [`bx_content_clipped`](#bx_content_clipped), [`bx_lp_px`](#bx_lp_px), [`bx_content_cap`](#bx_content_cap), [`bx_flex_min_clamp`](#bx_flex_min_clamp), [`bx_border_span`](#bx_border_span), [`bx_background_layer`](#bx_background_layer), [`bx_display_name`](#bx_display_name), [`bx_flex_max_clamp`](#bx_flex_max_clamp), [`bx_place_ex`](#bx_place_ex)
+- **Functions:** [`bx_default_for_tag`](#bx_default_for_tag), [`bx_table_role_of`](#bx_table_role_of), [`bx_ua_of_tag`](#bx_ua_of_tag), [`bx_default_for_ua`](#bx_default_for_ua), [`bx_block_ua_box`](#bx_block_ua_box), [`bx_parse_display`](#bx_parse_display), [`bx_place`](#bx_place), [`bx_width_cap`](#bx_width_cap), [`take`](#take), [`bx_width_cap2`](#bx_width_cap2), [`bx_replaced_box`](#bx_replaced_box), [`bx_border_box_h`](#bx_border_box_h), [`bx_pct_block_size`](#bx_pct_block_size), [`bx_definite_content_h`](#bx_definite_content_h), [`bx_content_clipped`](#bx_content_clipped), [`bx_lp_px`](#bx_lp_px), [`bx_content_cap`](#bx_content_cap), [`bx_flex_min_clamp`](#bx_flex_min_clamp), [`bx_border_span`](#bx_border_span), [`bx_background_layer`](#bx_background_layer), [`bx_display_name`](#bx_display_name), [`bx_flex_max_clamp`](#bx_flex_max_clamp), [`bx_place_ex`](#bx_place_ex), [`bx_line_height_px`](#bx_line_height_px)
 - **Macros:** [`BX_TAG_MAX`](#bx_tag_max), [`BX_DISPLAY_MAX`](#bx_display_max), [`BLOCK`](#block), [`INLINE`](#inline), [`IBLOCK`](#iblock), [`LITEM`](#litem), [`NONE`](#none), [`EDG`](#edg), [`ZERO`](#zero), [`T_NO`](#t_no), [`T_TBL`](#t_tbl), [`T_GRP`](#t_grp), [`T_ROW`](#t_row), [`T_CELL`](#t_cell), [`T_CAP`](#t_cap), [`T_COL`](#t_col), [`TAG_N`](#tag_n), [`DISP_N`](#disp_n)
 
 ## Type Diagram
@@ -445,10 +445,6 @@ double bx_pct_block_size(int px_val, int pct_pm, double cb_h)
 double bx_definite_content_h(double h, double min_h, double max_h, int border_box, double v_edges)
 ```
 
-The definite CONTENT height an element hands its children as their percentage basis: its used height h clamped by min_h/max_h (< 0 = none; min wins over max, CSS 2.1 10.7), minus v_edges (vertical padding + border) under border-box, never negative. -1 when h < 0 (auto): a min-height alone does not make a height definite.
-
-Pure.
-
 **Parameters**
 
 | Name | Type | Default | Description |
@@ -460,8 +456,6 @@ Pure.
 | `v_edges` | `double` |  |  |
 
 **Returns:** `double`
-
-> **Inherited:** Documentation from [`bx_definite_content_h`](#bx_definite_content_h) (include/box_style.h:235).
 
 ---
 
@@ -520,7 +514,7 @@ usable length contributes nothing while the absolute half survives. Pure.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`bx_lp_px`](#bx_lp_px) (include/box_style.h:261).
+> **Inherited:** Documentation from [`bx_lp_px`](#bx_lp_px) (include/box_style.h:267).
 
 *Called by:* [`bx_background_layer`](#bx_background_layer), [`bx_width_cap`](#bx_width_cap)
 
@@ -553,7 +547,7 @@ With border_box set, the declared width includes the horizontal padding and bord
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`bx_content_cap`](#bx_content_cap) (include/box_style.h:269).
+> **Inherited:** Documentation from [`bx_content_cap`](#bx_content_cap) (include/box_style.h:275).
 
 *Called by:* [`bx_border_span`](#bx_border_span)
 
@@ -585,7 +579,7 @@ Pure.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`bx_flex_min_clamp`](#bx_flex_min_clamp) (include/box_style.h:292).
+> **Inherited:** Documentation from [`bx_flex_min_clamp`](#bx_flex_min_clamp) (include/box_style.h:298).
 
 ---
 
@@ -616,7 +610,7 @@ CSS 2.1 10.3.3 / CSS Sizing 3 box-sizing: a content-box `width` sizes the CONTEN
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`bx_border_span`](#bx_border_span) (include/box_style.h:280).
+> **Inherited:** Documentation from [`bx_border_span`](#bx_border_span) (include/box_style.h:286).
 
 *Calls:* [`bx_content_cap`](#bx_content_cap)
 
@@ -698,7 +692,7 @@ Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hy
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`bx_flex_max_clamp`](#bx_flex_max_clamp) (include/box_style.h:286).
+> **Inherited:** Documentation from [`bx_flex_max_clamp`](#bx_flex_max_clamp) (include/box_style.h:292).
 
 ---
 
@@ -726,6 +720,31 @@ bx_hplace bx_place_ex(double inset_l, double inset_r, double width_cap, int cent
 **Returns:** `bx_hplace`
 
 *Calls:* [`bx_place`](#bx_place)
+
+---
+
+<a id="bx_line_height_px"></a>
+
+### `bx_line_height_px`
+
+`function` | [src/box_style.c:484](../../src/box_style.c#L484)
+
+```c
+double bx_line_height_px(int line_scale, double font_px)
+```
+
+The used line-height in px of text at font_px for a css line_scale value (spec/box_style.md 4c): 0 = normal (returns 0, the caller uses the font's natural line), a percentage multiple of the font-size below CSS_LINE_ABS_BASE, an absolute length at or above it.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `line_scale` | `int` |  |  |
+| `font_px` | `double` |  |  |
+
+**Returns:** `double`
+
+> **Inherited:** Documentation from [`bx_line_height_px`](#bx_line_height_px) (include/box_style.h:239).
 
 ---
 

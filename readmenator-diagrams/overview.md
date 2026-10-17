@@ -1,8 +1,8 @@
 ```mermaid
 graph LR
     src["src"]
-    include_browser_ui["include: browser_ui"]
     include_css["include: css"]
+    include_browser_ui["include: browser_ui"]
     include_page_view["include: page_view"]
     include_text_shape["include: text_shape"]
     include_local_store["include: local_store"]
@@ -11,15 +11,19 @@ graph LR
     include_download["include: download"]
     include_prefetch["include: prefetch"]
     src -- "calls into" --> include_prefetch
-    src -- "calls into" --> include_browser_ui
     src -- "calls into" --> include_css
+    src -- "calls into" --> include_browser_ui
     src -- "calls into" --> include_page_view
     src -- "calls into" --> include_text_shape
     src -- "depends on" --> gui
     src -- "calls into" --> include_secure_fetch
     include_prefetch -- "calls into" --> src
-    include_prefetch -- "calls into" --> include_browser_ui
     include_prefetch -- "calls into" --> include_css
+    include_prefetch -- "calls into" --> include_browser_ui
+    include_css -- "calls into" --> src
+    include_css -- "calls into" --> include_browser_ui
+    include_css -- "calls into" --> include_page_view
+    include_css -- "depends on" --> include_text_shape
     include_browser_ui -- "calls into" --> src
     include_browser_ui -- "calls into" --> include_prefetch
     include_browser_ui -- "calls into" --> include_css
@@ -29,39 +33,35 @@ graph LR
     include_browser_ui -- "calls into" --> gui
     include_browser_ui -- "calls into" --> include_secure_fetch
     include_browser_ui -- "depends on" --> include_download
-    include_css -- "calls into" --> src
-    include_css -- "calls into" --> include_browser_ui
-    include_css -- "calls into" --> include_page_view
-    include_css -- "depends on" --> include_text_shape
     include_page_view -- "calls into" --> src
     include_page_view -- "calls into" --> include_prefetch
-    include_page_view -- "calls into" --> include_browser_ui
     include_page_view -- "calls into" --> include_css
+    include_page_view -- "calls into" --> include_browser_ui
     include_page_view -- "calls into" --> include_text_shape
     include_page_view -- "calls into" --> gui
     include_page_view -- "calls into" --> include_secure_fetch
     include_page_view -- "calls into" --> include_download
     include_text_shape -- "calls into" --> src
     include_text_shape -- "calls into" --> include_prefetch
-    include_text_shape -- "calls into" --> include_browser_ui
     include_text_shape -- "calls into" --> include_css
+    include_text_shape -- "calls into" --> include_browser_ui
     include_text_shape -- "calls into" --> include_page_view
     include_local_store -- "calls into" --> src
     include_local_store -- "calls into" --> include_browser_ui
     include_local_store -- "calls into" --> include_page_view
     gui -- "calls into" --> src
-    gui -- "calls into" --> include_browser_ui
     gui -- "calls into" --> include_css
+    gui -- "calls into" --> include_browser_ui
     gui -- "calls into" --> include_page_view
     include_secure_fetch -- "calls into" --> src
-    include_secure_fetch -- "calls into" --> include_browser_ui
     include_secure_fetch -- "calls into" --> include_css
+    include_secure_fetch -- "calls into" --> include_browser_ui
     include_secure_fetch -- "calls into" --> include_page_view
-    include_download -- "calls into" --> include_browser_ui
     include_download -- "calls into" --> include_css
+    include_download -- "calls into" --> include_browser_ui
     click src href "./src.md" "Details"
-    click include_browser_ui href "./include_browser_ui.md" "Details"
     click include_css href "./include_css.md" "Details"
+    click include_browser_ui href "./include_browser_ui.md" "Details"
     click include_page_view href "./include_page_view.md" "Details"
     click include_text_shape href "./include_text_shape.md" "Details"
     click include_local_store href "./include_local_store.md" "Details"
@@ -73,7 +73,7 @@ graph LR
 
 ## Details
 
-Static architecture map of 268 files (c, h, py, sh) in 10 components: src, include: browser_ui, include: css, include: page_view, include: text_shape, include: local_store, gui, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 272 files (c, h, py, sh) in 10 components: src, include: css, include: browser_ui, include: page_view, include: text_shape, include: local_store, gui, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
 ### src (1)
 
@@ -90,7 +90,22 @@ src groups 59 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp
 - <a href="../include/html_parse.h">include/html_parse.h::dropped</a>
 - <a href="../include/html_parse.h#L48-L56">include/html_parse.h::HP_MAX_SCRIPTS</a>
 
-### include: browser_ui (2)
+### include: css (2)
+
+include: css groups 47 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...
+
+**Related Classes/Methods**:
+
+- <a href="../include/css_color.h#L2-L25">include/css_color.h::FREEDOM_CSS_COLOR_H</a>
+- <a href="../include/css_color.h">include/css_color.h::b</a>
+- <a href="../include/css_color.h#L27-L30">include/css_color.h::cc_rgb</a>
+- <a href="../include/css_color.h#L31-L48">include/css_color.h::cc_status</a>
+- <a href="../include/css_color.h#L49-L58">include/css_color.h::cc_pack</a>
+- <a href="../include/css_color.h">include/css_color.h::CC_COLOR_CURRENT</a>
+- <a href="../include/css_color.h#L60-L62">include/css_color.h::CC_COLOR_TRANSPARENT</a>
+- <a href="../include/css.h#L2-L27">include/css.h::FREEDOM_CSS_H</a>
+
+### include: browser_ui (3)
 
 include: browser_ui groups 46 files (c, h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. poke_and_free: Touch every claimed pixel corner so the sanitizer flags an...
 
@@ -105,24 +120,9 @@ include: browser_ui groups 46 files (c, h) around FREEDOM_IMAGE_DECODE_H, guards
 - <a href="../include/image_decode.h">include/image_decode.h::IMG_MAX_DIM</a>
 - <a href="../include/image_decode.h#L66-L77">include/image_decode.h::IMG_MAX_PIXELS</a>
 
-### include: css (3)
-
-include: css groups 44 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...
-
-**Related Classes/Methods**:
-
-- <a href="../include/css_color.h#L2-L25">include/css_color.h::FREEDOM_CSS_COLOR_H</a>
-- <a href="../include/css_color.h">include/css_color.h::b</a>
-- <a href="../include/css_color.h#L27-L30">include/css_color.h::cc_rgb</a>
-- <a href="../include/css_color.h#L31-L48">include/css_color.h::cc_status</a>
-- <a href="../include/css_color.h#L49-L58">include/css_color.h::cc_pack</a>
-- <a href="../include/css_color.h">include/css_color.h::CC_COLOR_CURRENT</a>
-- <a href="../include/css_color.h#L60-L62">include/css_color.h::CC_COLOR_TRANSPARENT</a>
-- <a href="../include/css.h#L2-L27">include/css.h::FREEDOM_CSS_H</a>
-
 ### include: page_view (4)
 
-include: page_view groups 30 files (c, h) around FREEDOM_RENDER_POLICY_H, RDP_TRACKER_MAX_DIM, images, rdp_caps, rdp_img_decision. bx_edges: anything longer fails closed instead of truncating into a wrong match....
+include: page_view groups 31 files (c, h) around FREEDOM_RENDER_POLICY_H, RDP_TRACKER_MAX_DIM, images, rdp_caps, rdp_img_decision. bx_edges: anything longer fails closed instead of truncating into a wrong match....
 
 **Related Classes/Methods**:
 

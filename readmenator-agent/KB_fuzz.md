@@ -135,6 +135,14 @@
   - `LLVMFuzzerTestOneInput` (function, line 24) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 - Depends on: `include/svg_render.h`
 
+## fuzz/fuzz_text_case.c
+- Doc: libFuzzer harness for text_case (spec/text_case.md): case mapping and the
+- Layer: utility
+- Language: c
+- Symbols:
+  - `LLVMFuzzerTestOneInput` (function, line 13) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- Depends on: `include/css.h`, `include/text_case.h`
+
 ## fuzz/fuzz_text_shape.c
 - Layer: utility
 - Language: c

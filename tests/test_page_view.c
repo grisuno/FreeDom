@@ -3222,6 +3222,141 @@ static void test_phrasing_ua_faces(void **state) {
     hp_document_free(doc);
 }
 
+/* A <br> that begins a line (after a block, after another <br>, or as the
+ * block's first content) leaves an EMPTY line box of its own (CSS 2.1 9.4.2,
+ * HTML Rendering 15.3.6); one that ends a line with content does not. */
+static int count_empty_lines(const pv_view *v) {
+    int n = 0;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->kind == PV_TEXT && r->text != NULL && r->text[0] == '\0') {
+            assert_int_equal(r->block_break, 1);
+            ++n;
+        }
+    }
+    return n;
+}
+
+static void test_br_opening_line_is_empty_line(void **state) {
+    (void)state;
+    static const struct { const char *html; int lines; } CASES[] = {
+        { "<body><div>a<br><br>b</div></body>", 1 },
+        { "<body><div><div>blk</div><br>c</div></body>", 1 },
+        { "<body><div><div>blk</div>\n<br>\n</div></body>", 1 },
+        { "<body><div><br></div><p>end</p></body>", 1 },
+        { "<body><div>x<br></div><p>end</p></body>", 0 },
+        { "<body><div>x<br>y</div></body>", 0 },
+        { "<body><p>a <br style=\"display:block\"> b</p></body>", 0 },
+        { "<body><p>a <br style=\"display:none\"><br style=\"display:none\"> b</p></body>", 0 },
+    };
+    for (size_t k = 0; k < sizeof CASES / sizeof CASES[0]; ++k) {
+        hp_document *doc = parse(CASES[k].html);
+        pv_view *v = NULL;
+        assert_int_equal(pv_build_styled(doc, 0, 0, 0, "", 0, 0, &v), PV_OK);
+        assert_int_equal(count_empty_lines(v), CASES[k].lines);
+        pv_free(v);
+        hp_document_free(doc);
+    }
+    hp_document *doc = parse("<body><div>a<br><br>b</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, "", 0, 0, &v), PV_OK);
+    assert_int_equal(find_text(v, "b")->block_break, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* The run after a <br> continues the SAME block: PV_BR_CONT, so the painter
+ * opens a line without collapsing the block's margins again. A run that starts
+ * a new block never carries it. */
+static void test_br_continuation_flag(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>a<br>b</p><p>c</p><div><div>d</div><br>e</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, "", 0, 0, &v), PV_OK);
+    assert_int_equal(find_text(v, "a")->br_line, 0);
+    assert_int_equal(find_text(v, "b")->br_line, PV_BR_CONT);
+    assert_int_equal(find_text(v, "b")->block_break, 1);
+    assert_int_equal(find_text(v, "c")->br_line, 0);
+    assert_int_equal(find_text(v, "e")->br_line, PV_BR_CONT);
+    int empty = 0;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text != NULL && r->text[0] == '\0') {
+            assert_int_equal(r->br_line, PV_BR_EMPTY);   /* opened by the block change */
+            ++empty;
+        }
+    }
+    assert_int_equal(empty, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Every run names its BLOCK element (pv_run.block_node) and every container
+ * its element (pv_cont_def.node_id): a run inside a block inside a flex item is
+ * not the container's block, a run of the container's own block is. */
+static void test_block_node_identity(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='f'><div><p>a</p></div></div>"
+                             "<p class='g'>b</p></body>");
+    static const char CSS[] = ".f{display:flex}.g{display:flex}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *a = find_text(v, "a");
+    const pv_run *b = find_text(v, "b");
+    assert_non_null(a);
+    assert_non_null(b);
+    assert_int_not_equal(a->block_node, DOM_NODE_NONE);
+    assert_int_not_equal(b->block_node, DOM_NODE_NONE);
+    assert_int_not_equal(a->block_node, b->block_node);
+    const pv_cont_def *fa = pv_cont_at(v, (size_t)a->cont_id);
+    const pv_cont_def *fb = pv_cont_at(v, (size_t)b->cont_id);
+    assert_non_null(fa);
+    assert_non_null(fb);
+    assert_int_not_equal(fa->node_id, a->block_node);   /* a's block is the <p> */
+    assert_int_equal(fb->node_id, b->block_node);       /* b's block IS the container */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* The blocks inside ONE float keep their breaks: a floated column of
+ * paragraphs is paragraphs, not one line (Firefox: aaa/bbb/ccc stacked). */
+static void test_float_inner_blocks_keep_breaks(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='f'><p>aaa</p><p>bbb</p><div>ccc</div></div></body>");
+    static const char CSS[] = ".f{float:left;width:300px}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_int_equal(find_text(v, "aaa")->block_break, 1);
+    assert_int_equal(find_text(v, "bbb")->block_break, 1);
+    assert_int_equal(find_text(v, "ccc")->block_break, 1);
+    assert_true(find_text(v, "bbb")->float_id >= 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* The `hidden` attribute is display:none in the UA sheet (HTML Rendering
+ * 15.3.1) -- structure, so it holds with author CSS off -- and an author
+ * `display` on the element overrides it like any UA rule. */
+static void test_hidden_attribute_is_display_none(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>a</p><p hidden>secret</p><div hidden><p>also</p></div>"
+                             "<p hidden class='s'>shown</p><img hidden src='x.png' alt='px'></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_non_null(find_text(v, "a"));
+    assert_null(find_text(v, "secret"));
+    assert_null(find_text(v, "also"));
+    assert_null(find_text(v, "shown"));
+    for (size_t i = 0; i < pv_count(v); ++i) assert_int_not_equal(pv_at(v, i)->kind, PV_IMAGE);
+    pv_free(v);
+    static const char CSS[] = ".s{display:block}";
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_null(find_text(v, "secret"));
+    assert_non_null(find_text(v, "shown"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* --- grid line placement (spec/grid_areas.md section 6) --- */
 
 /* A plain item: its sides resolve against THIS container's 12 tracks. */
@@ -4902,6 +5037,11 @@ int main(void) {
         cmocka_unit_test(test_grid_line_placement_nested_container_item),
         cmocka_unit_test(test_box_min_width_zero_is_declared),
         cmocka_unit_test(test_flex_item_inline_is_blockified),
+        cmocka_unit_test(test_br_opening_line_is_empty_line),
+        cmocka_unit_test(test_br_continuation_flag),
+        cmocka_unit_test(test_block_node_identity),
+        cmocka_unit_test(test_float_inner_blocks_keep_breaks),
+        cmocka_unit_test(test_hidden_attribute_is_display_none),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

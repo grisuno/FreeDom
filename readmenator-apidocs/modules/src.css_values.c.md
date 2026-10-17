@@ -1,10 +1,10 @@
 # `src/css_values.c`
 
-> Source: [src/css_values.c:1](../../src/css_values.c#L1) | language `c` | coverage 14.3% | [API index](../index.md)
+> Source: [src/css_values.c:1](../../src/css_values.c#L1) | language `c` | coverage 12.5% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`cv_parse_color`](#cv_parse_color), [`cv_interp_color`](#cv_interp_color), [`cv_color_ok`](#cv_color_ok), [`cv_bg_alpha_of`](#cv_bg_alpha_of), [`cv_interp_bg`](#cv_interp_bg), [`cv_parse_color_t7`](#cv_parse_color_t7)
+- **Functions:** [`cv_parse_color`](#cv_parse_color), [`cv_interp_color`](#cv_interp_color), [`cv_color_ok`](#cv_color_ok), [`cv_bg_alpha_of`](#cv_bg_alpha_of), [`cv_interp_bg`](#cv_interp_bg), [`cv_parse_color_t7`](#cv_parse_color_t7), [`cv_text_color`](#cv_text_color)
 
 ## Call Graph
 
@@ -17,6 +17,7 @@ flowchart LR
     n_src_css_values_c__cv_interp_bg(["cv_interp_bg"])
     n_src_css_values_c__cv_parse_color_t7(["cv_parse_color_t7"])
     n_src_css_values_c__cv_bg_alpha_of(["cv_bg_alpha_of"])
+    n_src_css_values_c__cv_text_color(["cv_text_color"])
     n_include_css_color_h__cc_pack["css_color.cc_pack"]
     n_src_css_color_c__cc_parse["css_color.cc_parse"]
     n_include_css_select_h__csel_lower_ch["css_select.csel_lower_ch"]
@@ -24,6 +25,7 @@ flowchart LR
     n_src_css_values_c__cv_interp_bg --> n_src_css_values_c__cv_parse_color
     n_src_css_values_c__cv_parse_color_t7 --> n_src_css_values_c__cv_bg_alpha_of
     n_src_css_values_c__cv_parse_color_t7 --> n_src_css_values_c__cv_parse_color
+    n_src_css_values_c__cv_text_color --> n_src_css_values_c__cv_parse_color_t7
     n_src_css_values_c__cv_parse_color -.-> n_include_css_color_h__cc_pack
     n_src_css_values_c__cv_parse_color -.-> n_src_css_color_c__cc_parse
     n_src_css_values_c__cv_bg_alpha_of -.-> n_include_css_select_h__csel_lower_ch
@@ -168,5 +170,29 @@ Sentinels (-1 invalid, CC_COLOR_CURRENT, CC_COLOR_TRANSPARENT) pass through unch
 > **Inherited:** Documentation from [`cv_parse_color_t7`](#cv_parse_color_t7) (include/css_values.h:19).
 
 *Calls:* [`cv_bg_alpha_of`](#cv_bg_alpha_of), [`cv_parse_color`](#cv_parse_color)
+
+*Called by:* [`cv_text_color`](#cv_text_color)
+
+---
+
+<a id="cv_text_color"></a>
+
+### `cv_text_color`
+
+`function` | [src/css_values.c:222](../../src/css_values.c#L222)
+
+```c
+int cv_text_color(const char *v)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `char *` |  |  |
+
+**Returns:** `int`
+
+*Calls:* [`cv_parse_color_t7`](#cv_parse_color_t7)
 
 ---

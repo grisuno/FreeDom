@@ -23,12 +23,13 @@
 | `fuzz/fuzz_prefetch.c` | libFuzzer harness for the prefetch lookahead scanner (Hito 29). | fuzz | 1 | 0 |
 | `fuzz/fuzz_prefs.c` | - | fuzz | 1 | 0 |
 | `fuzz/fuzz_svg_render.c` | - | fuzz | 1 | 0 |
+| `fuzz/fuzz_text_case.c` | libFuzzer harness for text_case (spec/text_case.md): case mapping and the | fuzz | 1 | 0 |
 | `fuzz/fuzz_text_shape.c` | - | fuzz | 4 | 0 |
 | `fuzz/fuzz_tls_impersonate.c` | - | fuzz | 0 | 0 |
 | `fuzz/fuzz_url.c` | - | fuzz | 2 | 0 |
 | `fuzz/fuzz_web_storage.c` | - | fuzz | 0 | 0 |
 | `fuzz/fuzz_webfont.c` | libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). | fuzz | 1 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 560 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 570 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 10 | 2 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -37,23 +38,23 @@
 | `include/anti_fp.h` | fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  "document" #define... | include | 35 | 6 |
 | `include/block_flow.h` | block_flow (bf_) -- vertical margin collapsing for block-level boxes. | include | 4 | 3 |
 | `include/box_blur.h` | Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md). | include | 4 | 3 |
-| `include/box_style.h` | bx_edges: anything longer fails closed instead of truncating into a wrong match. #define... | include | 30 | 11 |
+| `include/box_style.h` | bx_edges: anything longer fails closed instead of truncating into a wrong match. #define... | include | 31 | 11 |
 | `include/box_tree.h` | bt_positioned: Stage 2: one positioned box in the final paint order. | include | 32 | 5 |
 | `include/browser.h` | browser_free: Zero-initialise or reset a state. | include | 19 | 3 |
 | `include/compositor.h` | cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position... | include | 9 | 4 |
-| `include/css.h` | css_style: A resolved presentation. | include | 136 | 33 |
+| `include/css.h` | css_style: A resolved presentation. | include | 138 | 36 |
 | `include/css_atrule.h` | car_ops: The questions @supports asks the caller's own engine. prop is lowercased and * both... | include | 10 | 3 |
 | `include/css_box.h` | - | include | 26 | 4 |
 | `include/css_chain.h` | cch_element_matches: Nonzero iff the parsed selector *sel matches element `el`, built against... | include | 8 | 3 |
 | `include/css_color.h` | cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for... | include | 7 | 13 |
-| `include/css_decl.h` | Bound for the ::before/::after content string pool (and the grid-template | include | 12 | 11 |
+| `include/css_decl.h` | The sheet's two string pools -- background url()s, and the ::before/::after | include | 14 | 11 |
 | `include/css_gradient.h` | - | include | 3 | 3 |
 | `include/css_index.h` | cix_build: Builds the index over sels[0,n) into *idx, overwriting it (a built index must be *... | include | 7 | 3 |
 | `include/css_length.h` | cl_ctx: The state a <length> is measured against. | include | 20 | 9 |
 | `include/css_mq.h` | cmq_matches: 1 iff the media query list s[0,len) matches env; malformed/unknown parts fail * closed. | include | 6 | 3 |
 | `include/css_select.h` | css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only... | include | 34 | 15 |
 | `include/css_text.h` | - | include | 17 | 3 |
-| `include/css_values.h` | Single owner of CSS value interpretation for colors and backgrounds. | include | 7 | 6 |
+| `include/css_values.h` | Single owner of CSS value interpretation for colors and backgrounds. | include | 8 | 6 |
 | `include/css_vars.h` | cvr_table: Zero-initialise ({0}) before first use. | include | 19 | 5 |
 | `include/data_url.h` | du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real inline icon/... | include | 6 | 9 |
 | `include/disk_store.h` | ds_free: Reads and decrypts path. | include | 3 | 3 |
@@ -84,7 +85,7 @@
 | `include/media_decoder.h` | md_cmd: Communicates with the parent over two pipes: out_fd: decoder → parent (frames, stream... | include | 12 | 4 |
 | `include/net_realm.h` | nr_realm_allows_http: 1 iff plain http:// is acceptable for this realm. | include | 10 | 4 |
 | `include/os_sandbox.h` | os_violation: function (os_policy_allows) that mirrors the installed BPF program. | include | 12 | 4 |
-| `include/page_view.h` | pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt... | include | 81 | 13 |
+| `include/page_view.h` | pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt... | include | 86 | 13 |
 | `include/pdf_export.h` | pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order)... | include | 10 | 5 |
 | `include/perf_trace.h` | pt_init: #define PT_MAX_SAMPLES 256 typedef struct pt_stage_stats { uint64_t... | include | 17 | 3 |
 | `include/prefetch.h` | pf_ref: One scanned reference. url is the RAW attribute value (the policy-gated fetcher *... | include | 28 | 5 |
@@ -99,6 +100,7 @@
 | `include/svg_paint.h` | svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred... | include | 2 | 2 |
 | `include/svg_render.h` | sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>... | include | 19 | 6 |
 | `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 42 | 4 |
+| `include/text_case.h` | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | include | 8 | 4 |
 | `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 24 | 7 |
 | `include/textfield.h` | tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at... | include | 15 | 3 |
 | `include/tls_impersonate.h` | ti_req: Request: parent -> helper. | include | 23 | 5 |
@@ -116,11 +118,11 @@
 | `src/anti_fp.c` | - | src | 23 | 0 |
 | `src/block_flow.c` | block_flow (bf_) -- vertical margin collapsing. | src | 4 | 0 |
 | `src/box_blur.c` | box_line: One box pass of odd width bw over n samples spaced `step` apart, through tmp * (n bytes). | src | 4 | 0 |
-| `src/box_style.c` | tag_row: One row of the user-agent sheet. | src | 47 | 0 |
+| `src/box_style.c` | tag_row: One row of the user-agent sheet. | src | 48 | 0 |
 | `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 23 | 0 |
 | `src/browser.c` | clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {... | src | 41 | 0 |
 | `src/compositor.c` | eff_z: Not a stacking context: a positioned box with z:auto still paints in the *... | src | 5 | 0 |
-| `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 243 | 0 |
+| `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 244 | 0 |
 | `src/css_atrule.c` | keyword_at: Scratch size for one declaration or selector handed to the caller. | src | 11 | 0 |
 | `src/css_box.c` | calc_val: `pct` is the percentage component, carried through the arithmetic exactly like `em`... | src | 51 | 0 |
 | `src/css_chain.c` | cch_node: One element's selector inputs (tag/id/classes) plus its css_element view, with *... | src | 20 | 0 |
@@ -131,7 +133,7 @@
 | `src/css_mq.c` | read_word: static int is_space(char c) { return c == ' ' \|\| c == '\t' \|\| c == '\n' \|\| c == '\r'... | src | 34 | 0 |
 | `src/css_select.c` | csel_hex_val: CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted content... | src | 29 | 0 |
 | `src/css_text.c` | --- text-presentation extensions (Hito 23b-6) --- | src | 17 | 0 |
-| `src/css_values.c` | - | src | 7 | 0 |
+| `src/css_values.c` | - | src | 8 | 0 |
 | `src/css_vars.c` | find_slot: Index into t->slot where name lives, or the empty slot where it would go. * Requires... | src | 16 | 0 |
 | `src/data_url.c` | b64_val: 0-63 for a base64 alphabet character, -1 otherwise. | src | 10 | 0 |
 | `src/disk_store.c` | fsync_dir: Best-effort fsync of the directory holding path, for crash durability of the * rename. | src | 6 | 0 |
@@ -169,7 +171,7 @@
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
-| `src/page_view.c` | pv_cont_info: Nearest-container info attached to a run, plus the flex per-item values (Stage 3)... | src | 233 | 0 |
+| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 236 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
 | `src/prefetch.c` | ci_starts: static int is_ws(char c) { return c == ' ' \|\| c == '\t' \|\| c == '\n' \|\| c == '\r' \|\|... | src | 30 | 0 |
@@ -182,6 +184,7 @@
 | `src/secure_fetch.c` | tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a... | src | 61 | 0 |
 | `src/svg_render.c` | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | src | 33 | 0 |
 | `src/tab.c` | write_field: Writes one length-prefixed string field (the write mirror of read_field): a size_t... | src | 122 | 0 |
+| `src/text_case.c` | Latin Extended-A and the Cyrillic historic block pair letters on adjacent code | src | 9 | 0 |
 | `src/text_shape.c` | load_entry_file: Loads face `index` of the font file at `path` into e (FreeType + cairo + *... | src | 59 | 0 |
 | `src/textfield.c` | - | src | 12 | 0 |
 | `src/tls_impersonate.c` | get_bytes: \| ((uint32_t)r->p[r->off + 3] << 24); r->off += 4; return v; } static uint64_t... | src | 20 | 0 |
@@ -197,13 +200,13 @@
 | `tests/test_anti_fp.c` | test_origin_key_unlinks_readback: The property that actually matters: the same canvas buffer... | tests | 15 | 0 |
 | `tests/test_block_flow.c` | test_two_positive_collapse_to_max: Two positive margins collapse to the LARGER, never to their... | tests | 8 | 0 |
 | `tests/test_box_blur.c` | - | tests | 7 | 0 |
-| `tests/test_box_style.c` | dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include... | tests | 48 | 0 |
-| `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 59 | 0 |
+| `tests/test_box_style.c` | dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include... | tests | 49 | 0 |
+| `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 61 | 0 |
 | `tests/test_browser.c` | test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete... | tests | 17 | 0 |
 | `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 21 | 0 |
-| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 349 | 0 |
+| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 351 | 0 |
 | `tests/test_css_atrule.c` | test_css_atrule -- @supports evaluation and @layer ranks (spec/css_atrule.md). | tests | 10 | 0 |
-| `tests/test_css_box.c` | - | tests | 9 | 0 |
+| `tests/test_css_box.c` | test_lineheight_abs_vs_scale: line-height (CSS 2.1 10.8.1): a number, a percentage and an em... | tests | 10 | 0 |
 | `tests/test_css_color.c` | test_hsl_fractional_hue: A fractional hue is a <number> too (and hsl() takes an <angle>, whose... | tests | 36 | 0 |
 | `tests/test_css_drops.c` | Suite for the parser drop log (spec/css_drops.md). | tests | 25 | 0 |
 | `tests/test_css_gradient.c` | - | tests | 7 | 0 |
@@ -222,7 +225,7 @@
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
 | `tests/test_freebug.c` | - | tests | 13 | 0 |
-| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 74 | 0 |
+| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 79 | 0 |
 | `tests/test_hls.c` | - | tests | 16 | 0 |
 | `tests/test_hostblock.c` | - | tests | 22 | 0 |
 | `tests/test_hostedit.c` | - | tests | 11 | 0 |
@@ -240,7 +243,7 @@
 | `tests/test_media_decoder.c` | test_pacer_paces_by_pts_delta: #include "media_decoder.h" /* First frame anchors the epoch and... | tests | 6 | 0 |
 | `tests/test_net_realm.c` | test_classify_host_lookalikes: static void test_classify_host_i2p(void **state) { (void)state... | tests | 13 | 0 |
 | `tests/test_os_sandbox.c` | test_policy_denies_io_uring: io_uring is a seccomp-bypass primitive (its IORING_OP_* operations... | tests | 19 | 0 |
-| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 196 | 0 |
+| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 201 | 0 |
 | `tests/test_pdf_export.c` | - | tests | 30 | 0 |
 | `tests/test_perf_trace.c` | - | tests | 12 | 0 |
 | `tests/test_prefetch.c` | Tests for prefetch (Hito 29): pure lookahead scanner + parallel download pool. | tests | 18 | 0 |
@@ -253,6 +256,7 @@
 | `tests/test_secure_fetch.c` | test_enforce_allowlisted_insecure: The allowlist override: the user's sovereign per-host escape... | tests | 50 | 0 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 16 | 0 |
 | `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 121 | 0 |
+| `tests/test_text_case.c` | - | tests | 4 | 0 |
 | `tests/test_text_shape.c` | read_host_font: Reads a host TrueType file when one exists (same philosophy as the shaping *... | tests | 21 | 0 |
 | `tests/test_textfield.c` | - | tests | 8 | 0 |
 | `tests/test_tls_impersonate.c` | - | tests | 11 | 0 |

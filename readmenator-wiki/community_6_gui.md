@@ -37,14 +37,14 @@ This community groups 15 file(s) rooted at `gui` with dominant language c (cohes
 - `ui_rgb` (struct, `gui/browser_ui_internal.h:41`)
 - `body_font` (type_alias, `gui/browser_ui_internal.h:42`) `typedef struct ui_theme { double body_font;`
 - `ui_theme` (struct, `gui/browser_ui_internal.h:43`)
-- `ui_theme_mode` (enum, `gui/browser_ui_internal.h:93`) - ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb check_border; ui_rg
-- `set_rgb` (function, `gui/browser_ui_internal.h:106`) `void set_rgb(cairo_t *cr, ui_rgb c);` - /* Selectable palettes for the options menu. typedef enum ui_theme_mode { UI_THEME_LIGHT = 0, UI_THE
+- `ui_theme_mode` (enum, `gui/browser_ui_internal.h:92`) - ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb check_border; ui_rg
+- `set_rgb` (function, `gui/browser_ui_internal.h:105`) `void set_rgb(cairo_t *cr, ui_rgb c);` - /* Selectable palettes for the options menu. typedef enum ui_theme_mode { UI_THEME_LIGHT = 0, UI_THE
 - `ui_theme_default` (function, `gui/bui_theme.c:14`) `ui_theme ui_theme_default(void)` - bui_theme — presentation palettes for the Wayland/Cairo GUI.  Carved out of browser_ui.c: the light/
-- `ui_theme_dark` (function, `gui/bui_theme.c:84`) `ui_theme ui_theme_dark(void)` - Dark reading palette. Shares all the metrics (font sizes, spacing) with the * default theme; only th
-- `ui_theme_sepia` (function, `gui/bui_theme.c:129`) `ui_theme ui_theme_sepia(void)` - Sepia reading palette: warm paper background and dark-brown ink, easier on the eyes for long-form te
-- `ui_theme_for` (function, `gui/bui_theme.c:171`) `ui_theme ui_theme_for(int mode)` - t.menu_bg        = (ui_rgb){ 0.95, 0.90, 0.80 }; t.menu_border    = (ui_rgb){ 0.55, 0.46, 0.32 }; t.
-- `rgb_from_packed` (function, `gui/bui_theme.c:180`) `ui_rgb rgb_from_packed(int packed)` - t.scrollbar_thumb_hot = (ui_rgb){ 0.44, 0.35, 0.22 }; return t; } /* The single place that maps the
-- `set_rgb` (function, `gui/bui_theme.c:185`) `void set_rgb(cairo_t *cr, ui_rgb c)`
+- `ui_theme_dark` (function, `gui/bui_theme.c:83`) `ui_theme ui_theme_dark(void)` - Dark reading palette. Shares all the metrics (font sizes, spacing) with the * default theme; only th
+- `ui_theme_sepia` (function, `gui/bui_theme.c:128`) `ui_theme ui_theme_sepia(void)` - Sepia reading palette: warm paper background and dark-brown ink, easier on the eyes for long-form te
+- `ui_theme_for` (function, `gui/bui_theme.c:170`) `ui_theme ui_theme_for(int mode)` - t.menu_bg        = (ui_rgb){ 0.95, 0.90, 0.80 }; t.menu_border    = (ui_rgb){ 0.55, 0.46, 0.32 }; t.
+- `rgb_from_packed` (function, `gui/bui_theme.c:179`) `ui_rgb rgb_from_packed(int packed)` - t.scrollbar_thumb_hot = (ui_rgb){ 0.44, 0.35, 0.22 }; return t; } /* The single place that maps the
+- `set_rgb` (function, `gui/bui_theme.c:184`) `void set_rgb(cairo_t *cr, ui_rgb c)`
 - `_POSIX_C_SOURCE` (macro, `gui/freedom_view.c:10`) `#define _POSIX_C_SOURCE`
 - `main` (function, `gui/freedom_view.c:37`) `int main(int argc, char **argv)`
 - `svp_alpha` (function, `gui/svg_paint.c:31`) `static double svp_alpha(int opacity, int paint_opacity)` - Resolves a shape's packed paint into an RGB triple. Returns 0 when the shape * asked for no paint at
@@ -68,8 +68,8 @@ This community groups 15 file(s) rooted at `gui` with dominant language c (cohes
 
 - [EXTRACTED] depends_on community 6 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/html_parse.h.
 - [EXTRACTED] depends_on community 6 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/page_view.h.
-- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
-- [EXTRACTED] depends_on community 6 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/bui_theme.c imports include/css_color.h.
+- [EXTRACTED] depends_on community 2 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
+- [EXTRACTED] depends_on community 6 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/bui_theme.c imports include/css_color.h.
 
 ## Risks
 

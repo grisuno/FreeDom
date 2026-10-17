@@ -36,6 +36,8 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `fuzz/fuzz_prefetch.c` -> `include/prefetch.h`
 - `fuzz/fuzz_prefs.c` -> `include/prefs.h`
 - `fuzz/fuzz_svg_render.c` -> `include/svg_render.h`
+- `fuzz/fuzz_text_case.c` -> `include/css.h`
+- `fuzz/fuzz_text_case.c` -> `include/text_case.h`
 - `fuzz/fuzz_text_shape.c` -> `include/text_shape.h`
 - `fuzz/fuzz_tls_impersonate.c` -> `include/tls_impersonate.h`
 - `fuzz/fuzz_url.c` -> `include/link_nav.h`
@@ -76,6 +78,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/svg_paint.h`
 - `gui/browser_ui.c` -> `include/svg_render.h`
 - `gui/browser_ui.c` -> `include/tab.h`
+- `gui/browser_ui.c` -> `include/text_case.h`
 - `gui/browser_ui.c` -> `include/text_shape.h`
 - `gui/browser_ui.c` -> `include/textfield.h`
 - `gui/browser_ui.c` -> `include/tls_impersonate.h`
@@ -379,6 +382,8 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/tab.c` -> `include/url.h`
 - `src/tab.c` -> `include/util.h`
 - `src/tab.c` -> `include/web_storage.h`
+- `src/text_case.c` -> `include/css.h`
+- `src/text_case.c` -> `include/text_case.h`
 - `src/text_shape.c` -> `include/css.h`
 - `src/text_shape.c` -> `include/text_shape.h`
 - `src/text_shape.c` -> `include/webfont.h`
@@ -491,10 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_profile.c` -> `include/prefs.h`
 - `tests/test_profile.c` -> `include/profile.h`
 - `tests/test_render_doc.c` -> `include/box_style.h`
-- `tests/test_render_doc.c` -> `include/css.h`
-- `tests/test_render_doc.c` -> `include/flex_layout.h`
-- `tests/test_render_doc.c` -> `include/page_view.h`
-- `tests/test_render_doc.c` -> `include/render_doc.h`
-- `tests/test_render_doc.c` -> `include/render_policy.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

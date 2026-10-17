@@ -1,6 +1,77 @@
 # Subsystem: tests (page 7 of 7)
 Previous: [KB_tests_p6.md](KB_tests_p6.md)
 
+## tests/test_url.c
+- Doc: test_validate_long_bundle_url: Modern bundle URLs exceed 2048 bytes (google.com's xjs script URL...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_is_https` (function, line 23) `static void test_is_https(void **state)`
+  - `test_validate_https` (function, line 36) `static void test_validate_https(void **state)`
+  - `test_validate_long_bundle_url` (function, line 49) `static void test_validate_long_bundle_url(void **state)`
+  - `test_has_scheme` (function, line 69) `static void test_has_scheme(void **state)`
+  - `test_authority_len` (function, line 86) `static void test_authority_len(void **state)`
+  - `test_remove_dot_segments` (function, line 98) `static void test_remove_dot_segments(void **state)`
+  - `test_remove_dot_segments_nulls` (function, line 127) `static void test_remove_dot_segments_nulls(void **state)`
+  - `test_resolve_absolute` (function, line 138) `static void test_resolve_absolute(void **state)`
+  - `test_resolve_rejects_downgrade_and_schemes` (function, line 146) `static void test_resolve_rejects_downgrade_and_schemes(void **state)`
+  - `test_resolve_scheme_relative` (function, line 161) `static void test_resolve_scheme_relative(void **state)`
+  - `test_resolve_absolute_path` (function, line 169) `static void test_resolve_absolute_path(void **state)`
+  - `test_resolve_relative_path` (function, line 181) `static void test_resolve_relative_path(void **state)`
+  - `test_resolve_dot_segments` (function, line 193) `static void test_resolve_dot_segments(void **state)`
+  - `test_resolve_fail_closed_on_bad_base` (function, line 210) `static void test_resolve_fail_closed_on_bad_base(void **state)`
+  - `test_resolve_null_and_overflow` (function, line 222) `static void test_resolve_null_and_overflow(void **state)`
+  - `test_omnibox_navigate_https` (function, line 238) `static void test_omnibox_navigate_https(void **state)`
+  - `test_omnibox_bare_host_gets_https` (function, line 251) `static void test_omnibox_bare_host_gets_https(void **state)`
+  - `test_omnibox_http_upgraded_to_https` (function, line 268) `static void test_omnibox_http_upgraded_to_https(void **state)`
+  - `test_omnibox_search_for_queries` (function, line 278) `static void test_omnibox_search_for_queries(void **state)`
+  - `test_omnibox_foreign_scheme_is_searched_not_executed` (function, line 298) `static void test_omnibox_foreign_scheme_is_searched_not_executed(void **state)`
+  - `test_omnibox_nulls_and_empty` (function, line 311) `static void test_omnibox_nulls_and_empty(void **state)`
+  - `test_search_rewrite_ddg_spa` (function, line 327) `static void test_search_rewrite_ddg_spa(void **state)`
+  - `test_search_rewrite_leaves_others_alone` (function, line 344) `static void test_search_rewrite_leaves_others_alone(void **state)`
+  - `test_search_rewrite_nulls` (function, line 364) `static void test_search_rewrite_nulls(void **state)`
+  - `test_is_file_and_path` (function, line 379) `static void test_is_file_and_path(void **state)`
+  - `test_resolve_file_relative` (function, line 391) `static void test_resolve_file_relative(void **state)`
+  - `test_resolve_file_confinement_fail_closed` (function, line 411) `static void test_resolve_file_confinement_fail_closed(void **state)`
+  - `test_resolve_file_nulls` (function, line 437) `static void test_resolve_file_nulls(void **state)`
+  - `assert_span` (function, line 449) `static void assert_span(const char *p, size_t len, const char *expect)`
+  - `test_split_full_url` (function, line 454) `static void test_split_full_url(void **state)`
+  - `test_split_no_port_no_path` (function, line 473) `static void test_split_no_port_no_path(void **state)`
+  - `test_split_query_without_fragment` (function, line 486) `static void test_split_query_without_fragment(void **state)`
+  - `test_split_fragment_without_query` (function, line 495) `static void test_split_fragment_without_query(void **state)`
+  - `test_split_ipv6_literal_with_port` (function, line 504) `static void test_split_ipv6_literal_with_port(void **state)`
+  - `test_extract_userinfo_basic` (function, line 516) `static void test_extract_userinfo_basic(void **state)`
+  - `test_extract_userinfo_user_only` (function, line 529) `static void test_extract_userinfo_user_only(void **state)`
+  - `test_extract_userinfo_no_userinfo` (function, line 542) `static void test_extract_userinfo_no_userinfo(void **state)`
+  - `test_extract_userinfo_non_https_passthrough` (function, line 554) `static void test_extract_userinfo_non_https_passthrough(void **state)`
+  - `test_extract_userinfo_https_subresource_no_auth` (function, line 566) `static void test_extract_userinfo_https_subresource_no_auth(void **state)`
+  - `test_extract_userinfo_nulls` (function, line 579) `static void test_extract_userinfo_nulls(void **state)`
+  - `test_extract_userinfo_at_authority_start` (function, line 589) `static void test_extract_userinfo_at_authority_start(void **state)`
+  - `test_extract_userinfo_no_at_sign` (function, line 602) `static void test_extract_userinfo_no_at_sign(void **state)`
+  - `test_extract_userinfo_empty_password` (function, line 615) `static void test_extract_userinfo_empty_password(void **state)`
+  - `test_split_fail_closed_non_https` (function, line 628) `static void test_split_fail_closed_non_https(void **state)`
+  - `test_history_target_same_origin` (function, line 641) `static void test_history_target_same_origin(void **state)`
+  - `test_history_target_cross_origin_rejected` (function, line 662) `static void test_history_target_cross_origin_rejected(void **state)`
+  - `test_history_target_file_query_fragment_only` (function, line 677) `static void test_history_target_file_query_fragment_only(void **state)`
+  - `test_history_target_bad_args` (function, line 690) `static void test_history_target_bad_args(void **state)`
+  - `main` (function, line 701) `int main(void)`
+- Depends on: `include/url.h`
+
+## tests/test_web_storage.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `build` (function, line 24) `static size_t build(char *b, const char *const *kv, uint32_t n)`
+  - `test_unknown_origin_encodes_empty` (function, line 34) `static void test_unknown_origin_encodes_empty(void **state)`
+  - `test_replace_then_encode_roundtrip` (function, line 49) `static void test_replace_then_encode_roundtrip(void **state)`
+  - `test_hostile_snapshots_rejected_and_db_unchanged` (function, line 73) `static void test_hostile_snapshots_rejected_and_db_unchanged(void **state)`
+  - `test_quota_enforced` (function, line 112) `static void test_quota_enforced(void **state)`
+  - `test_origin_table_is_bounded_lru` (function, line 129) `static void test_origin_table_is_bounded_lru(void **state)`
+  - `count_pair` (function, line 147) `static void count_pair(void *ctx, const char *k, size_t kl, const char *v, size_t vl)`
+  - `test_pack_foreach_roundtrip` (function, line 154) `static void test_pack_foreach_roundtrip(void **state)`
+  - `main` (function, line 182) `int main(void)`
+- Depends on: `include/web_storage.h`
+
 ## tests/test_webcaps.c
 - Doc: mk: projection, and the headless operator-flag path.  #include <setjmp.h> #include <stdarg.h>...
 - Layer: testing

@@ -2065,3 +2065,20 @@ como `unknown` también; aceptarlas sería inventar), y `-ms-flex-direction`/
   resuelve. `page_view` lo baja a `pv_run.ph_color` (tema / oculto / color).
 - **`css_style.font_list`**: la lista `font-family` normalizada viaja hasta el pintor
   (`spec/text_shape.md` §7).
+
+## Tanda 45
+
+- **`line-height` con longitud absoluta** (`px`, `pt`, `rem`, unidades de viewport)
+  viaja como `CSS_LINE_ABS_BASE + décimas de px`: es esa longitud, no un múltiplo del
+  `font-size` (CSS 2.1 §10.8.1), y se hereda así. Número, `%` y unidades relativas a
+  la fuente siguen siendo escala. `bx_line_height_px` es el único lector. Negativo =
+  inválido.
+- **`color` conserva su alfa** (transparencia en bits 24–30, `cv_text_color`);
+  `transparent` = negro totalmente transparente. El pintor lo pliega en la opacidad
+  del fragmento (no en texto con degradado).
+- **Pools de cadenas** (`url()` de fondos; `content`, familias y áreas de grilla):
+  heap, crecen por duplicación desde `CSS_POOL_INIT` hasta 4096 con
+  `CSS_POOL_HEADROOM` libre garantizado antes de cada regla. El tope fijo de 256
+  descartaba en silencio el `content` de los íconos de slashdot (~350 reglas) y
+  `grid-template-areas` en github/youtube.
+- **`justify-self`** y la mitad justify de `place-self` (`P_JUSTIFY_SELF`).

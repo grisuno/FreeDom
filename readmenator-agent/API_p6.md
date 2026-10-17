@@ -11,44 +11,44 @@ Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `includ
 - `RELATIVE` (function) `src/css_box.c:63` `* or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the * absolute keywords. Relative: em...`
 - `cb_interp_fontsize_ex` (function) `src/css_box.c:72` `int cb_interp_fontsize_ex(const char *v, int *abs_out)`
 - `cb_interp_lineheight` (function) `src/css_box.c:145` `int cb_interp_lineheight(const char *v)` -- line-height as a percent of the natural line box.
-- `cb_interp_weight` (function) `src/css_box.c:166` `int cb_interp_weight(const char *v)`
-- `cb_interp_style` (function) `src/css_box.c:175` `int cb_interp_style(const char *v)`
-- `cb_interp_textdeco` (function) `src/css_box.c:185` `int cb_interp_textdeco(const char *v)` -- text-decoration / text-decoration-line: OR of the line keywords underline / overline / line-through found in the...
-- `cb_interp_display` (function) `src/css_box.c:205` `int cb_interp_display(const char *v)`
-- `cb_interp_gap` (function) `src/css_box.c:280` `int cb_interp_gap(const char *v)` -- One gap length.
-- `cb_interp_justify` (function) `src/css_box.c:287` `int cb_interp_justify(const char *v)`
-- `repeat` (function) `src/css_box.c:301` `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill|...) /...`
-- `cb_starts_with_ci` (function) `src/css_box.c:312` `static int cb_starts_with_ci(const char *s, const char *pre)`
-- `count_tracks` (function) `src/css_box.c:318` `static int count_tracks(const char *s, size_t n)`
-- `track_size_of` (function) `src/css_box.c:326` `static int track_size_of(const char *tok)` -- Size of ONE track token: `<N>fr` -> -(N*100); a px/em/rem length -> px (> 0); minmax(a,b) -> the size of its max...
-- `count_one_repeat` (function) `src/css_box.c:356` `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,
+- `cb_interp_weight` (function) `src/css_box.c:174` `int cb_interp_weight(const char *v)`
+- `cb_interp_style` (function) `src/css_box.c:183` `int cb_interp_style(const char *v)`
+- `cb_interp_textdeco` (function) `src/css_box.c:193` `int cb_interp_textdeco(const char *v)` -- text-decoration / text-decoration-line: OR of the line keywords underline / overline / line-through found in the...
+- `cb_interp_display` (function) `src/css_box.c:213` `int cb_interp_display(const char *v)`
+- `cb_interp_gap` (function) `src/css_box.c:288` `int cb_interp_gap(const char *v)` -- One gap length.
+- `cb_interp_justify` (function) `src/css_box.c:295` `int cb_interp_justify(const char *v)`
+- `repeat` (function) `src/css_box.c:309` `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill|...) /...`
+- `cb_starts_with_ci` (function) `src/css_box.c:320` `static int cb_starts_with_ci(const char *s, const char *pre)`
+- `count_tracks` (function) `src/css_box.c:326` `static int count_tracks(const char *s, size_t n)`
+- `track_size_of` (function) `src/css_box.c:334` `static int track_size_of(const char *tok)` -- Size of ONE track token: `<N>fr` -> -(N*100); a px/em/rem length -> px (> 0); minmax(a,b) -> the size of its max...
+- `count_one_repeat` (function) `src/css_box.c:364` `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,
                       ...`
-- `walk_tracks` (function) `src/css_box.c:399` `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)`
-- `track_min_of` (function) `src/css_box.c:467` `static int track_min_of(const char *tok)` -- Minimum width of ONE track token for repeat(auto-fill): minmax(a,b) takes a's length; a plain track takes itself....
-- `expand_auto_fill` (function) `src/css_box.c:505` `static int expand_auto_fill(const char *val, css_decl *dst, int cap)` -- repeat(auto-fill|auto-fit, <single-track pattern>) tried as a whole value: returns 1 and emits grid_cols = -min_px...
-- `cb_expand_grid_template_cols` (function) `src/css_box.c:583` `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)` -- grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track sizes, emitted in lock-step (P_GRIDCOLS...
-- `cb_expand_grid_template_rows` (function) `src/css_box.c:606` `int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)`
-- `accepts` (function) `src/css_box.c:662` `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...`
-- `calc_skip_ws` (function) `src/css_box.c:692` `static void calc_skip_ws(calc_parser *p)`
-- `calc_match_fn` (function) `src/css_box.c:699` `static int calc_match_fn(calc_parser *p, const char *name)` -- symbolically to bx_lp_px, the one place a percentage becomes pixels.
-- `calc_piecewise` (function) `src/css_box.c:726` `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` -- Shared by BOTH symbolic components: the percentage is piecewise for exactly the same reason the em derivative is...
-- `calc_mathfn` (function) `src/css_box.c:741` `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` -- min()/max()/clamp() (2026-07-10): comma-separated full expressions, every argument the same shape (all lengths or...
-- `min` (function) `src/css_box.c:760` `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...`
-- `calc_term` (function) `src/css_box.c:862` `static int calc_term(calc_parser *p, calc_val *out, int depth)` -- out->em = 0.0; out->pct = num; out->is_length = 1;   /* a <percentage> is dimensional, like a length ++p->i; return...
-- `calc_expr` (function) `src/css_box.c:886` `static int calc_expr(calc_parser *p, calc_val *out, int depth)`
-- `calc_eval_full` (function) `src/css_box.c:905` `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,
+- `walk_tracks` (function) `src/css_box.c:407` `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)`
+- `track_min_of` (function) `src/css_box.c:475` `static int track_min_of(const char *tok)` -- Minimum width of ONE track token for repeat(auto-fill): minmax(a,b) takes a's length; a plain track takes itself....
+- `expand_auto_fill` (function) `src/css_box.c:513` `static int expand_auto_fill(const char *val, css_decl *dst, int cap)` -- repeat(auto-fill|auto-fit, <single-track pattern>) tried as a whole value: returns 1 and emits grid_cols = -min_px...
+- `cb_expand_grid_template_cols` (function) `src/css_box.c:591` `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)` -- grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track sizes, emitted in lock-step (P_GRIDCOLS...
+- `cb_expand_grid_template_rows` (function) `src/css_box.c:614` `int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)`
+- `accepts` (function) `src/css_box.c:670` `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...`
+- `calc_skip_ws` (function) `src/css_box.c:700` `static void calc_skip_ws(calc_parser *p)`
+- `calc_match_fn` (function) `src/css_box.c:707` `static int calc_match_fn(calc_parser *p, const char *name)` -- symbolically to bx_lp_px, the one place a percentage becomes pixels.
+- `calc_piecewise` (function) `src/css_box.c:734` `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` -- Shared by BOTH symbolic components: the percentage is piecewise for exactly the same reason the em derivative is...
+- `calc_mathfn` (function) `src/css_box.c:749` `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` -- min()/max()/clamp() (2026-07-10): comma-separated full expressions, every argument the same shape (all lengths or...
+- `min` (function) `src/css_box.c:768` `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...`
+- `calc_term` (function) `src/css_box.c:870` `static int calc_term(calc_parser *p, calc_val *out, int depth)` -- out->em = 0.0; out->pct = num; out->is_length = 1;   /* a <percentage> is dimensional, like a length ++p->i; return...
+- `calc_expr` (function) `src/css_box.c:894` `static int calc_expr(calc_parser *p, calc_val *out, int depth)`
+- `calc_eval_full` (function) `src/css_box.c:913` `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,
            ...` -- Evaluates the inside of a calc(...) (v[0,vlen), the "calc(" prefix and matching ")" already stripped by the caller).
-- `calc_eval_em` (function) `src/css_box.c:919` `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` -- static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em, double *out_pct) { calc_parser...
-- `calc_unwrap` (function) `src/css_box.c:927` `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` -- True if s (already trimmed) is a "calc(...)" call spanning the whole string (case-insensitive keyword, balanced...
-- `cb_interp_len` (function) `src/css_box.c:978` `int cb_interp_len(const char *v, int allow_auto, int *out)`
-- `pct_slot_of` (function) `src/css_box.c:1007` `static int pct_slot_of(int slot)` -- The css_pct_slot mirroring a px length slot, or -1 when the property does not accept the <length-percentage> type.
-- `cb_value_em_milli` (function) `src/css_box.c:1057` `int cb_value_em_milli(const char *v)` -- The font-relative derivative of `v`, in thousandths of an em, saturating at CSS_EM_MILLI_MAX.
-- `cb_interp_lp` (function) `src/css_box.c:1077` `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,
+- `calc_eval_em` (function) `src/css_box.c:927` `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` -- static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em, double *out_pct) { calc_parser...
+- `calc_unwrap` (function) `src/css_box.c:935` `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` -- True if s (already trimmed) is a "calc(...)" call spanning the whole string (case-insensitive keyword, balanced...
+- `cb_interp_len` (function) `src/css_box.c:986` `int cb_interp_len(const char *v, int allow_auto, int *out)`
+- `pct_slot_of` (function) `src/css_box.c:1015` `static int pct_slot_of(int slot)` -- The css_pct_slot mirroring a px length slot, or -1 when the property does not accept the <length-percentage> type.
+- `cb_value_em_milli` (function) `src/css_box.c:1065` `int cb_value_em_milli(const char *v)` -- The font-relative derivative of `v`, in thousandths of an em, saturating at CSS_EM_MILLI_MAX.
+- `cb_interp_lp` (function) `src/css_box.c:1085` `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,
                      int *out_px, ...`
-- `term` (function) `src/css_box.c:1084` `* the same expression and failed closed on the percentage term (its property * may not accept one);`
-- `interp_len` (function) `src/css_box.c:1253` `* this file that might hand a token to interp_len (transitively: margin/padding/
+- `term` (function) `src/css_box.c:1092` `* the same expression and failed closed on the percentage term (its property * may not accept one);`
+- `interp_len` (function) `src/css_box.c:1261` `* this file that might hand a token to interp_len (transitively: margin/padding/
  * inset, flex-b...`
-- `cb_expand_box2` (function) `src/css_box.c:1324` `int cb_expand_box2(const char *val, int slot_start, int slot_end,
+- `cb_expand_box2` (function) `src/css_box.c:1332` `int cb_expand_box2(const char *val, int slot_start, int slot_end,
                        int allo...` -- Expands a two-slot logical shorthand (margin-inline / padding-block / inset-inline: one value sets both sides, two...
 
 ## src/css_chain.c
@@ -245,6 +245,7 @@ Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `inclu
 - `cv_bg_alpha_of` (function) `src/css_values.c:46` `int cv_bg_alpha_of(const char *v)`
 - `cv_interp_bg` (function) `src/css_values.c:160` `int cv_interp_bg(const char *v)`
 - `cv_parse_color_t7` (function) `src/css_values.c:205` `int cv_parse_color_t7(const char *v)`
+- `cv_text_color` (function) `src/css_values.c:222` `int cv_text_color(const char *v)`
 
 ## src/css_vars.c
 Depends on: `include/css_select.h`, `include/css_vars.h`

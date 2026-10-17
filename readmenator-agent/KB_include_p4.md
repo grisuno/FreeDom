@@ -1,6 +1,56 @@
 # Subsystem: include (page 4 of 4)
 Previous: [KB_include_p3.md](KB_include_p3.md)
 
+## include/render_doc.h
+- Doc: rd_block: One paint-ready block in document order. text is owned, NUL-terminated and valid...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `rd_block` (struct, line 64)
+  - `rd_doc` (struct, line 261)
+  - `img_fail_reason` (enum, line 34)
+  - `rd_kind` (enum, line 42)
+  - `rd_status` (enum, line 292)
+  - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
+  - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
+  - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
+  - `form` (function, line 63) `* form (-1 = none);`
+  - `default` (function, line 150) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
+  - `to` (function, line 247) `* belongs to (-1 = none);`
+  - `rdp_images_warning` (function, line 301) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
+  - `rd_free` (function, line 311) `void rd_free(rd_doc *d);`
+  - `rd_count` (function, line 314) `size_t rd_count(const rd_doc *d);`
+  - `rd_at` (function, line 315) `const rd_block *rd_at(const rd_doc *d, size_t i);`
+  - `rd_box_count` (function, line 319) `size_t rd_box_count(const rd_doc *d);`
+  - `rd_box_at` (function, line 320) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+  - `rd_cont_count` (function, line 324) `size_t rd_cont_count(const rd_doc *d);`
+  - `rd_cont_at` (function, line 325) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+  - `rd_kind_name` (function, line 329) `const char *rd_kind_name(rd_kind k);`
+  - `rd_block_tag` (function, line 337) `const char *rd_block_tag(const rd_block *b);`
+  - `decision` (function, line 340) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+  - `IMG_FAIL_OK` (function, line 346) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 351) `const char *rd_input_label(int input_type);`
+  - `rd_input_invisible` (function, line 356) `int rd_input_invisible(int input_type);`
+  - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
+- Depends on: `include/page_view.h`, `include/render_policy.h`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
+
+## include/render_policy.h
+- Doc: rdp_caps: Render capabilities for a page.
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `rdp_caps` (struct, line 32)
+  - `rdp_img_decision` (enum, line 39)
+  - `images` (type_alias, line 32) `typedef struct rdp_caps { bool images;`
+  - `rdp_is_tracking_pixel` (function, line 53) `int rdp_is_tracking_pixel(int w, int h);`
+  - `size` (function, line 56) `* announced size (e.g. <img width height>);`
+  - `rdp_img_reason` (function, line 66) `const char *rdp_img_reason(rdp_img_decision d);`
+  - `rdp_images_warning` (function, line 69) `const char *rdp_images_warning(void);`
+  - `FREEDOM_RENDER_POLICY_H` (macro, line 2) `#define FREEDOM_RENDER_POLICY_H`
+  - `RDP_TRACKER_MAX_DIM` (macro, line 27) `#define RDP_TRACKER_MAX_DIM`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
+
 ## include/renderer.h
 - Doc: rd_result_free: Renders untrusted HTML out-of-process and returns an inert title + text. html ==...
 - Layer: presentation
@@ -158,6 +208,21 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `TAB_MAX_INPUT` (macro, line 148) `#define TAB_MAX_INPUT`
 - Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tab.c`, `tests/test_tab.c`
+
+## include/text_case.h
+- Doc: Case mapping for text-transform and synthesized small caps (spec/text_case.md).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `tc_run` (struct, line 33)
+  - `cp` (function, line 19) `* cp (identity otherwise), so a transformed text keeps its length. */ uint32_t tc_upper(uint32_t cp);`
+  - `tc_lower` (function, line 21) `uint32_t tc_lower(uint32_t cp);`
+  - `tc_is_lower` (function, line 24) `int tc_is_lower(uint32_t cp);`
+  - `tc_transform` (function, line 29) `size_t tc_transform(const char *s, size_t n, int transform, int word_start, char *out, size_t cap);`
+  - `tc_smallcaps_runs` (function, line 41) `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap);`
+  - `FREEDOM_TEXT_CASE_H` (macro, line 2) `#define FREEDOM_TEXT_CASE_H`
+  - `TC_SMALLCAPS_SCALE` (macro, line 15) `#define TC_SMALLCAPS_SCALE`
+- Imported by: `fuzz/fuzz_text_case.c`, `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`
 
 ## include/text_shape.h
 - Doc: tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags.

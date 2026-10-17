@@ -218,3 +218,12 @@ int cv_parse_color_t7(const char *v)
     }
     return cv;
 }
+
+int cv_text_color(const char *v)
+{
+    int c = cv_parse_color_t7(v);
+    if (c == CC_COLOR_TRANSPARENT) {
+        return 127 << 24;
+    }
+    return c;
+}

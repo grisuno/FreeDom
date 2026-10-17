@@ -59,7 +59,7 @@ This community groups 8 file(s) rooted at `include` with dominant language c (co
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
+- [EXTRACTED] depends_on community 2 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
 - [EXTRACTED] depends_on community 3 <-> 9 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
 
 ## Risks

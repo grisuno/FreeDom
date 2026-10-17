@@ -4,7 +4,7 @@
 
 ## Contents
 
-- **Functions:** [`wrap_reverse`](#wrap_reverse), [`sized`](#sized), [`bt_layout`](#bt_layout), [`bt_containing_block`](#bt_containing_block), [`block`](#block), [`bt_resolve_positioning`](#bt_resolve_positioning), [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`bt_box_hidden`](#bt_box_hidden), [`bt_oof_avail`](#bt_oof_avail)
+- **Functions:** [`height`](#height), [`sized`](#sized), [`bt_layout`](#bt_layout), [`bt_containing_block`](#bt_containing_block), [`block`](#block), [`bt_resolve_positioning`](#bt_resolve_positioning), [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`bt_box_hidden`](#bt_box_hidden), [`bt_oof_avail`](#bt_oof_avail)
 - **Macros:** [`BT_LEN_AUTO`](#bt_len_auto), [`BT_WRAP_EPS`](#bt_wrap_eps)
 
 ## Call Graph
@@ -16,36 +16,36 @@ flowchart LR
     n_src_box_tree_c__bt_resolve_positioning(["bt_resolve_positioning"])
     n_src_box_tree_c__bt_resolve_positioning_ex(["bt_resolve_positioning_ex"])
     n_src_box_tree_c__bt_containing_block(["bt_containing_block"])
-    n_src_box_tree_c__wrap_reverse(["wrap_reverse"])
+    n_src_box_tree_c__height(["height"])
     n_src_flex_layout_c__fx_auto_margins["flex_layout.fx_auto_margins"]
     n_include_compositor_h__cx_sort["compositor.cx_sort"]
     n_src_compositor_c__cx_box_layer["compositor.cx_box_layer"]
     n_src_box_tree_c__bt_resolve_positioning --> n_src_box_tree_c__bt_resolve_positioning_ex
     n_src_box_tree_c__bt_resolve_positioning_ex --> n_src_box_tree_c__bt_containing_block
-    n_src_box_tree_c__wrap_reverse -.-> n_src_flex_layout_c__fx_auto_margins
+    n_src_box_tree_c__height -.-> n_src_flex_layout_c__fx_auto_margins
     n_src_box_tree_c__bt_resolve_positioning_ex -.-> n_include_compositor_h__cx_sort
     n_src_box_tree_c__bt_resolve_positioning_ex -.-> n_src_compositor_c__cx_box_layer
 ```
 
 ## Functions
 
-<a id="wrap_reverse"></a>
+<a id="height"></a>
 
-### `wrap_reverse`
+### `height`
 
-`function` | [src/box_tree.c:79](../../src/box_tree.c#L79)
+`function` | [src/box_tree.c:78](../../src/box_tree.c#L78)
 
 ```c
-* * wrap_reverse (node->wrap_reverse): when node->wrap is active and node->wrap_reverse * is no...
+* exactly that height (Flexbox 9.4 step 15). * * wrap_reverse (node->wrap_reverse): when node->...
 ```
 
 **Parameters**
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `wrap_reverse` | `node->` |  |  |
+| `step` | `Flexbox 9.4 15` |  |  |
 
-**Returns:** `when node->wrap is active and node->wrap_reverse * is no...`
+**Returns:** `* exactly that`
 
 *Calls:* [`fx_auto_margins`](src.flex_layout.c.md#fx_auto_margins)
 
@@ -55,7 +55,7 @@ flowchart LR
 
 ### `sized`
 
-`function` | [src/box_tree.c:334](../../src/box_tree.c#L334)
+`function` | [src/box_tree.c:350](../../src/box_tree.c#L350)
 
 ```c
 * the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);
@@ -76,7 +76,7 @@ flowchart LR
 
 ### `bt_layout`
 
-`function` | [src/box_tree.c:449](../../src/box_tree.c#L449)
+`function` | [src/box_tree.c:465](../../src/box_tree.c#L465)
 
 ```c
 bt_status bt_layout(bt_node *root, double avail_w)
@@ -97,7 +97,7 @@ bt_status bt_layout(bt_node *root, double avail_w)
 
 ### `bt_containing_block`
 
-`function` | [src/box_tree.c:539](../../src/box_tree.c#L539)
+`function` | [src/box_tree.c:555](../../src/box_tree.c#L555)
 
 ```c
 void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y, const double *box_w, const double *box_h, const char *placed, double viewport_w, double viewport_h, double *cb_x, double *cb_y, double *cb_w, double *cb_h)
@@ -126,7 +126,7 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 | `cb_w` | `double *` |  |  |
 | `cb_h` | `double *` |  |  |
 
-> **Inherited:** Documentation from [`bt_containing_block`](#bt_containing_block) (include/box_tree.h:253).
+> **Inherited:** Documentation from [`bt_containing_block`](#bt_containing_block) (include/box_tree.h:262).
 
 *Called by:* [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex)
 
@@ -136,7 +136,7 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 
 ### `block`
 
-`function` | [src/box_tree.c:550](../../src/box_tree.c#L550)
+`function` | [src/box_tree.c:566](../../src/box_tree.c#L566)
 
 ```c
 * true block (same flow neighbourhood), strictly better than zeros. NULL * placed keeps lega...
@@ -156,7 +156,7 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 
 ### `bt_resolve_positioning`
 
-`function` | [src/box_tree.c:569](../../src/box_tree.c#L569)
+`function` | [src/box_tree.c:585](../../src/box_tree.c#L585)
 
 ```c
 bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox, const double *box_x, const double *box_y, const double *box_w, const double *box_h, double viewport_w, double viewport_h, bt_positioned *out, size_t out_cap, size_t *out_count)
@@ -188,7 +188,7 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox, const dou
 
 ### `bt_resolve_positioning_ex`
 
-`function` | [src/box_tree.c:580](../../src/box_tree.c#L580)
+`function` | [src/box_tree.c:596](../../src/box_tree.c#L596)
 
 ```c
 bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const double *box_x, const double *box_y, const double *box_w, const double *box_h, const double *static_x, const double *static_y, const char *placed, double viewport_w, double viewport_h, bt_positioned *out, size_t out_cap, size_t *out_count)
@@ -225,7 +225,7 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const 
 
 ### `bt_oof_anchor`
 
-`function` | [src/box_tree.c:752](../../src/box_tree.c#L752)
+`function` | [src/box_tree.c:768](../../src/box_tree.c#L768)
 
 ```c
 int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)
@@ -245,7 +245,7 @@ Both walk the parent_id chain from `bid` (self first) looking for a box whose po
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`bt_oof_anchor`](#bt_oof_anchor) (include/box_tree.h:238).
+> **Inherited:** Documentation from [`bt_oof_anchor`](#bt_oof_anchor) (include/box_tree.h:247).
 
 ---
 
@@ -253,7 +253,7 @@ Both walk the parent_id chain from `bid` (self first) looking for a box whose po
 
 ### `bt_oof_root`
 
-`function` | [src/box_tree.c:756](../../src/box_tree.c#L756)
+`function` | [src/box_tree.c:772](../../src/box_tree.c#L772)
 
 ```c
 int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)
@@ -275,7 +275,7 @@ int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)
 
 ### `bt_box_hidden`
 
-`function` | [src/box_tree.c:760](../../src/box_tree.c#L760)
+`function` | [src/box_tree.c:776](../../src/box_tree.c#L776)
 
 ```c
 int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)
@@ -295,7 +295,7 @@ The walk is bounded by nbox links and fails closed (returns 1, hidden) on NULL b
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`bt_box_hidden`](#bt_box_hidden) (include/box_tree.h:224).
+> **Inherited:** Documentation from [`bt_box_hidden`](#bt_box_hidden) (include/box_tree.h:233).
 
 ---
 
@@ -303,7 +303,7 @@ The walk is bounded by nbox links and fails closed (returns 1, hidden) on NULL b
 
 ### `bt_oof_avail`
 
-`function` | [src/box_tree.c:773](../../src/box_tree.c#L773)
+`function` | [src/box_tree.c:789](../../src/box_tree.c#L789)
 
 ```c
 double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)

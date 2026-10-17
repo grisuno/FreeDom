@@ -59,7 +59,7 @@ typedef struct ui_theme
 
 ### `ui_theme_mode`
 
-`enum` | [gui/browser_ui_internal.h:93](../../gui/browser_ui_internal.h#L93)
+`enum` | [gui/browser_ui_internal.h:92](../../gui/browser_ui_internal.h#L92)
 
 ```c
 typedef enum ui_theme_mode
@@ -108,7 +108,7 @@ typedef struct ui_theme { double body_font;
 
 ### `set_rgb`
 
-`function` | [gui/browser_ui_internal.h:106](../../gui/browser_ui_internal.h#L106)
+`function` | [gui/browser_ui_internal.h:105](../../gui/browser_ui_internal.h#L105)
 
 ```c
 void set_rgb(cairo_t *cr, ui_rgb c);

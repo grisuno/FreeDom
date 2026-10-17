@@ -148,17 +148,25 @@ int cb_interp_lineheight(const char *v) {
     const char *end;
     if (!cb_parse_num(v, &num, &end)) return -1;
     while (*end == ' ' || *end == '\t') ++end;
+    if (num < 0.0) return -1;   /* negative values are invalid (CSS 2.1 10.8.1) */
     double pct;
     if (end[0] == '\0')                       pct = num * 100.0; /* unitless */
     else if (end[0] == '%' && end[1] == '\0') pct = num;
     else {
-        /* Any real <length> -- including pt/pc/cm/ex/ch, all of which used to be
-         * dropped here while px and em were accepted. Stored as a percentage of
-         * the CSS initial font-size; layout re-multiplies it by the fragment's
-         * own font-size (CSS 2.1 section 10.8.1). */
         double px;
         if (!cb_length_px(v, &px)) return -1;
-        pct = px / CL_INITIAL_FONT_SIZE * 100.0;
+        /* A font-relative length is a multiple of the element's font-size and is
+         * kept as one (layout multiplies it by the font-size). Any other <length>
+         * -- px, pt, rem (already rebased to px), viewport units -- is absolute:
+         * that many px whatever the font-size, inherited as such. */
+        if (csel_ci_eq(end, "em") || csel_ci_eq(end, "ex") || csel_ci_eq(end, "ch") ||
+            csel_ci_eq(end, "cap") || csel_ci_eq(end, "ic") || csel_ci_eq(end, "lh")) {
+            pct = px / CL_INITIAL_FONT_SIZE * 100.0;
+        } else {
+            double tenths = px * 10.0;
+            if (tenths > (double)CSS_LINE_ABS_MAX_PX * 10.0) tenths = (double)CSS_LINE_ABS_MAX_PX * 10.0;
+            return CSS_LINE_ABS_BASE + (int)lround(tenths);
+        }
     }
     return css_round_clamp(pct, CSS_LINE_MIN, CSS_LINE_MAX);
 }

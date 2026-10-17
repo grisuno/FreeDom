@@ -369,7 +369,7 @@ See the contract in flex_layout.h.
 
 **Returns:** `fx_status`
 
-*Called by:* [`wrap_reverse`](src.box_tree.c.md#wrap_reverse)
+*Called by:* [`height`](src.box_tree.c.md#height)
 
 ---
 

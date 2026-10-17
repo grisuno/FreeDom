@@ -59,7 +59,7 @@ This community groups 8 file(s) rooted at `include` with dominant language c (co
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/download.h.
+- [EXTRACTED] depends_on community 2 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/download.h.
 
 ## Risks
 

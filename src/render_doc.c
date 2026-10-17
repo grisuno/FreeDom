@@ -186,6 +186,9 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->ua_tag = BX_UA_NONE;
     b->node_id = DOM_NODE_NONE;
     b->oof = 0;
+    b->br_line = 0;
+    b->block_node = DOM_NODE_NONE;
+    b->justify_self = CSS_AK_UNSET;
     b->block_id = -1;
     b->own_box_id = -1;
     b->input_type = 0;
@@ -351,7 +354,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                                                                r->img_w, r->img_h,
                                                                resolved, sizeof resolved,
                                                                &img_url);
-                rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, img_url, dec, -1, -1);
+                rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, img_url, dec, fg, -1);
                 if (rc == 0 && d->count > 0) {
                     /* The DECLARED <img width height> ride the block: a browser
                      * lays an image out at the size the markup asked for, not at
@@ -409,6 +412,15 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
              * cap, so only this half travels, never box_w). Without it a
              * responsive `img{width:50%}` keeps its intrinsic size. */
             if (r->kind == PV_IMAGE) nb->box_w_pct = r->box_w_pct;
+            /* An unavailable image shows its alt as text: it needs the font size,
+             * family and decoration of its context like any text run. */
+            if (r->kind == PV_IMAGE) {
+                nb->font_scale = (r->font_scale > 0) ? r->font_scale : 0;
+                nb->font_abs = (r->font_scale > 0) ? r->font_abs : 0;
+                nb->text_decoration = r->text_decoration;
+                nb->bold = r->bold;
+                nb->italic = r->italic;
+            }
             /* A replaced element is placed by the inherited text-align, like the
              * inline box it is (a centred logo used to be pinned to the left). */
             if (r->kind == PV_IMAGE || r->kind == PV_SVG) nb->text_align = r->text_align;
@@ -555,6 +567,9 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
              * gated: without it the presentation layer cannot tell an overlay
              * run from flow content. */
             lb->oof = r->oof_subtree;
+            lb->br_line = r->br_line;
+            lb->block_node = r->block_node;
+            lb->justify_self = r->justify_self;
             /* ua_tag rides OUTSIDE the caps.css gate above on purpose: box_mt/box_mb are
              * the AUTHOR's margins (presentation, gated), ua_tag is which user-agent
              * margin applies when the author sets none -- the UA sheet, i.e. structure.

@@ -95,6 +95,7 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
                      ...`
   - `bx_place_ex` (function, line 474) `bx_hplace bx_place_ex(double inset_l, double inset_r, double width_cap, int center,
              ...`
+  - `bx_line_height_px` (function, line 484) `double bx_line_height_px(int line_scale, double font_px)`
   - `take` (function, line 295) `* caller has to take (Sizing 3 section 5.1), so to a resolver that only sums a * px and a percentage half they read...`
   - `BX_TAG_MAX` (macro, line 24) `#define BX_TAG_MAX`
   - `BX_DISPLAY_MAX` (macro, line 25) `#define BX_DISPLAY_MAX`
@@ -124,35 +125,35 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
   - `layout_block` (function, line 37) `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,
                    ...`
   - `bt_nn` (function, line 58) `static double bt_nn(double v)`
-  - `wrap_reverse` (function, line 79) `*
- * wrap_reverse (node->wrap_reverse): when node->wrap is active and node->wrap_reverse
- * is no...`
-  - `layout_flex` (function, line 97) `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
+  - `height` (function, line 78) `* exactly that height (Flexbox 9.4 step 15).
+ *
+ * wrap_reverse (node->wrap_reverse): when node->...`
+  - `layout_flex` (function, line 98) `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
                     ...`
-  - `layout_grid` (function, line 273) `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
+  - `layout_grid` (function, line 280) `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
                     ...`
-  - `layout_node` (function, line 404) `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)`
-  - `bt_layout` (function, line 449) `bt_status bt_layout(bt_node *root, double avail_w)`
-  - `assign_doc_order` (function, line 489) `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
+  - `layout_node` (function, line 420) `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)`
+  - `bt_layout` (function, line 465) `bt_status bt_layout(bt_node *root, double avail_w)`
+  - `assign_doc_order` (function, line 505) `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
                   ...`
-  - `find_positioned_ancestor` (function, line 506) `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
+  - `find_positioned_ancestor` (function, line 522) `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
                        ...`
-  - `resolve_inset` (function, line 526) `static double resolve_inset(int v, int pct_pm, double basis)`
-  - `inset_unset` (function, line 535) `static int inset_unset(int v, int pct_pm)`
-  - `bt_containing_block` (function, line 539) `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
+  - `resolve_inset` (function, line 542) `static double resolve_inset(int v, int pct_pm, double basis)`
+  - `inset_unset` (function, line 551) `static int inset_unset(int v, int pct_pm)`
+  - `bt_containing_block` (function, line 555) `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
                         ...`
-  - `block` (function, line 550) `* true block (same flow neighbourhood), strictly better than zeros. NULL
+  - `block` (function, line 566) `* true block (same flow neighbourhood), strictly better than zeros. NULL
      * placed keeps lega...`
-  - `bt_resolve_positioning` (function, line 569) `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
+  - `bt_resolve_positioning` (function, line 585) `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                           ...`
-  - `bt_resolve_positioning_ex` (function, line 580) `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
+  - `bt_resolve_positioning_ex` (function, line 596) `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
                        ...`
-  - `oof_walk` (function, line 735) `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)`
-  - `bt_oof_anchor` (function, line 752) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
-  - `bt_oof_root` (function, line 756) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
-  - `bt_box_hidden` (function, line 760) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
-  - `bt_oof_avail` (function, line 773) `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
-  - `sized` (function, line 334) `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);`
+  - `oof_walk` (function, line 751) `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)`
+  - `bt_oof_anchor` (function, line 768) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
+  - `bt_oof_root` (function, line 772) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
+  - `bt_box_hidden` (function, line 776) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
+  - `bt_oof_avail` (function, line 789) `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
+  - `sized` (function, line 350) `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);`
   - `BT_LEN_AUTO` (macro, line 31) `#define BT_LEN_AUTO`
   - `BT_WRAP_EPS` (macro, line 62) `#define BT_WRAP_EPS`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`

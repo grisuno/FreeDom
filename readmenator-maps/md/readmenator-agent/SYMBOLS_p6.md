@@ -3,6 +3,38 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `CC_CHANNEL_MAX` | macro | `src/css_color.c:22` | `#define CC_CHANNEL_MAX` |
+| `CC_HSL_SCALE` | macro | `src/css_color.c:31` | `#define CC_HSL_SCALE` |
+| `CC_NUMBER_MAX_DIGITS` | macro | `src/css_color.c:28` | `#define CC_NUMBER_MAX_DIGITS` |
+| `CC_PERCENT_MAX` | macro | `src/css_color.c:23` | `#define CC_PERCENT_MAX` |
+| `CC_PI` | macro | `src/css_color.c:463` | `#define CC_PI` |
+| `CC_TOKEN_MAX` | macro | `src/css_color.c:19` | `#define CC_TOKEN_MAX` |
+| `ascii_lower` | function | `src/css_color.c:118` | `static int ascii_lower(int c)` |
+| `cc_named` | struct | `src/css_color.c:33` | `` |
+| `cc_pack` | function | `src/css_color.c:623` | `int cc_pack(cc_rgb c)` |
+| `cc_parse` | function | `src/css_color.c:583` | `cc_status cc_parse(const char *token, cc_rgb *out)` |
+| `cc_round` | function | `src/css_color.c:215` | `static long cc_round(double v)` |
+| `cc_unpack` | function | `src/css_color.c:627` | `cc_rgb cc_unpack(int packed)` |
+| `hex_val` | function | `src/css_color.c:122` | `static int hex_val(int c)` |
+| `lab_comp` | function | `src/css_color.c:467` | `static int lab_comp(const char *b, const char *e, double pct_ref, int is_hue, double *out)` |
+| `lab_to_rgb` | function | `src/css_color.c:513` | `static void lab_to_rgb(double L, double a, double b, cc_rgb *out)` |
+| `named_cmp` | function | `src/css_color.c:567` | `static int named_cmp(const void *key, const void *element)` |
+| `normalize` | function | `src/css_color.c:131` | `static int normalize(const char *token, char *out)` |
+| `oklab_to_rgb` | function | `src/css_color.c:502` | `static void oklab_to_rgb(double L, double a, double b, cc_rgb *out)` |
+| `parse_component` | function | `src/css_color.c:220` | `static int parse_component(const char *b, const char *e, int is_alpha, int *out)` |
+| `parse_func` | function | `src/css_color.c:397` | `static int parse_func(const char *s, cc_rgb *out)` |
+| `parse_hex` | function | `src/css_color.c:145` | `static int parse_hex(const char *s, cc_rgb *out)` |
+| `parse_hsl_comp` | function | `src/css_color.c:253` | `static int parse_hsl_comp(const char *b, const char *e, int is_hue, int *out)` |
+| `parse_lab_family` | function | `src/css_color.c:529` | `static int parse_lab_family(const char *s, cc_rgb *out)` |
+| `parse_named` | function | `src/css_color.c:573` | `static int parse_named(const char *s, cc_rgb *out)` |
+| `span` | function | `src/css_color.c:325` | `* span (when a slash is present) into ab/ae, and returns the component count,  * or -1. Bounded: ...` |
+| `srgb_encode` | function | `src/css_color.c:495` | `static unsigned char srgb_encode(double lin)` |
+| `strncmp` | function | `src/css_color.c:598` | `strncmp(buf, "oklab(", 6) == 0 \|\| strncmp(buf, "oklch(", 6) == 0)` |
+| `CSS_GRAD_STOPS_MAX` | function | `src/css_gradient.c:183` | `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when  * the gradient fai...` |
+| `bg_layer_tokens_ok` | function | `src/css_gradient.c:450` | `static int bg_layer_tokens_ok(const char *s)` |
+| `cg_expand_background` | function | `src/css_gradient.c:490` | `int cg_expand_background(const char *val, css_decl *dst, int cap,                              ch...` |
+| `cg_parse_num` | function | `src/css_gradient.c:12` | `static int cg_parse_num(const char *s, double *out, const char **endp)` |
+| `cg_wide_keyword` | function | `src/css_gradient.c:17` | `static int cg_wide_keyword(const char *v)` |
 | `conic_prelude` | function | `src/css_gradient.c:110` | `static int conic_prelude(const char *seg, int *angle)` |
 | `declaration` | function | `src/css_gradient.c:443` | `* declaration (fail closed);` |
 | `downstream` | function | `src/css_gradient.c:384` | `* happens downstream (render_doc.c), gated by caps.images like an <img>. */ int cg_expand_bg_imag...` |
@@ -127,6 +159,7 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `cv_parse_color` | function | `src/css_values.c:16` | `int cv_parse_color(const char *v)` |
 | `cv_parse_color_t7` | function | `src/css_values.c:205` | `int cv_parse_color_t7(const char *v)` |
 | `cv_parse_num` | function | `src/css_values.c:11` | `static int cv_parse_num(const char *s, double *out, const char **endp)` |
+| `cv_text_color` | function | `src/css_values.c:222` | `int cv_text_color(const char *v)` |
 | `cvr_collect_decls` | function | `src/css_vars.c:139` | `void cvr_collect_decls(cvr_table *t, const char *s, size_t a, size_t b)` |
 | `cvr_count` | function | `src/css_vars.c:100` | `size_t cvr_count(const cvr_table *t)` |
 | `cvr_free` | function | `src/css_vars.c:112` | `void cvr_free(cvr_table *t)` |
@@ -463,38 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `img_png_dimensions` | function | `src/image_decode.c:57` | `img_status img_png_dimensions(const uint8_t *bytes, size_t len,                               uin...` |
 | `jpeg_err_ctx` | struct | `src/image_decode.c:153` | `` |
 | `jpeg_error_longjmp` | function | `src/image_decode.c:158` | `static void jpeg_error_longjmp(j_common_ptr cinfo)` |
-| `jpeg_silence` | function | `src/image_decode.c:164` | `static void jpeg_silence(j_common_ptr cinfo)` |
-| `premultiply` | function | `src/image_decode.c:90` | `static void premultiply(uint8_t *data, size_t pixels)` |
-| `read_be32` | function | `src/image_decode.c:52` | `static uint32_t read_be32(const uint8_t *p)` |
-| `IM_MAX_DEPTH` | macro | `src/import_map.c:16` | `#define IM_MAX_DEPTH` |
-| `IM_URL_MAX` | macro | `src/import_map.c:17` | `#define IM_URL_MAX` |
-| `add` | function | `src/import_map.c:185` | `static int add(im_map *m, int scope, const char *key, const char *addr, const char *doc_url,     ...` |
-| `clear` | function | `src/import_map.c:175` | `static void clear(im_map *m)` |
-| `dup_s` | function | `src/import_map.c:168` | `static char *dup_s(const char *s)` |
-| `eat` | function | `src/import_map.c:44` | `static int eat(jr *r, char c)` |
-| `hex4` | function | `src/import_map.c:50` | `static int hex4(const char *s, uint32_t *out)` |
-| `im_count` | function | `src/import_map.c:339` | `size_t im_count(const im_map *m)` |
-| `im_entry` | struct | `src/import_map.c:19` | `` |
-| `im_free` | function | `src/import_map.c:343` | `void im_free(im_map *m)` |
-| `im_map` | struct | `src/import_map.c:25` | `` |
-| `im_parse` | function | `src/import_map.c:225` | `im_map *im_parse(const char *json, size_t len, const char *doc_url, im_url_fn resolve, void *ctx)` |
-| `im_resolve` | function | `src/import_map.c:301` | `int im_resolve(const im_map *m, const char *base, const char *specifier,                im_url_fn...` |
-| `jr` | struct | `src/import_map.c:34` | `` |
-| `match` | function | `src/import_map.c:272` | `static int match(const im_map *m, int scope, const char *key, char *out, size_t outsz)` |
-| `put_utf8` | function | `src/import_map.c:64` | `static size_t put_utf8(char *o, uint32_t cp)` |
-| `scope` | type_alias | `src/import_map.c:18` | `typedef struct im_entry { int scope;` |
-| `skip` | function | `src/import_map.c:128` | `static void skip(jr *r, int depth)` |
-| `specifier_map` | function | `src/import_map.c:209` | `static void specifier_map(jr *r, im_map *m, int scope, const char *doc_url,                      ...` |
-| `str` | function | `src/import_map.c:78` | `static char *str(jr *r)` |
-| `url_like` | function | `src/import_map.c:156` | `static int url_like(const char *s)` |
-| `ws` | function | `src/import_map.c:39` | `static void ws(jr *r)` |
-| `anim_effective_dir` | function | `src/interp.c:232` | `static int anim_effective_dir(const ip_anim *a)` |
-| `anim_effective_dir_for` | function | `src/interp.c:222` | `static int anim_effective_dir_for(const ip_anim *a, int iter)` |
-| `ip_anim_current` | function | `src/interp.c:282` | `double ip_anim_current(const ip_anim *a)` |
-| `ip_anim_done` | function | `src/interp.c:320` | `int ip_anim_done(const ip_anim *a)` |
-| `ip_anim_init` | function | `src/interp.c:196` | `void ip_anim_init(ip_anim *a, ip_val_kind vk, const ip_ease_fn *ease,                   const ip_...` |
-| `ip_anim_tick` | function | `src/interp.c:236` | `int ip_anim_tick(ip_anim *a, double dt_ms)` |
-| `ip_ease` | function | `src/interp.c:55` | `double ip_ease(double t, const ip_ease_fn *fn)` |
-| `ip_ease` | function | `src/interp.c:64` | `case IP_EASE_EASE:         return ip_ease(t, &(ip_ease_fn)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

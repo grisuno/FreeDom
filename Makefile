@@ -123,9 +123,10 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
                $(BUILD_DIR)/test_js_geom $(BUILD_DIR)/test_ws_hub \
                $(BUILD_DIR)/test_web_storage $(BUILD_DIR)/test_import_map \
                $(BUILD_DIR)/test_webfont $(BUILD_DIR)/test_webfont_load \
-               $(BUILD_DIR)/test_css_index $(BUILD_DIR)/test_box_blur
+               $(BUILD_DIR)/test_css_index $(BUILD_DIR)/test_box_blur \
+               $(BUILD_DIR)/test_text_case
 
-.PHONY: parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-wst fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
+.PHONY: parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-wst fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -353,6 +354,10 @@ $(BUILD_DIR)/test_css_length: $(TEST_DIR)/test_css_length.c $(BUILD_DIR)/css_len
 $(BUILD_DIR)/test_box_blur: $(TEST_DIR)/test_box_blur.c $(BUILD_DIR)/box_blur.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
+# Case mapping + synthesized small caps (spec/text_case.md). Pure, no deps.
+$(BUILD_DIR)/test_text_case: $(TEST_DIR)/test_text_case.c $(BUILD_DIR)/text_case.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 $(BUILD_DIR)/test_block_flow: $(TEST_DIR)/test_block_flow.c $(BUILD_DIR)/block_flow.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
@@ -533,7 +538,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/net_realm.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
                       $(BUILD_DIR)/js_policy.o $(BUILD_DIR)/webcaps.o \
-                       $(BUILD_DIR)/compositor.o $(BUILD_DIR)/box_blur.o \
+                       $(BUILD_DIR)/compositor.o $(BUILD_DIR)/box_blur.o $(BUILD_DIR)/text_case.o \
                        $(BUILD_DIR)/interp.o $(BUILD_DIR)/frame_clock.o \
                        $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o $(BUILD_DIR)/pdf_export.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
@@ -806,6 +811,15 @@ fuzz-tsh: | $(BUILD_DIR)
 	  -o $(BUILD_DIR)/fuzz_text_shape $(TSH_LIBS)
 	LSAN_OPTIONS=suppressions=tests/asan.supp \
 	  ./$(BUILD_DIR)/fuzz_text_shape -max_total_time=30 -rss_limit_mb=2048
+
+# Case mapping + small-caps split (spec/text_case.md): runs on page text in the
+# painter. Must preserve length and cover the text, never crash/UB.
+fuzz-tc: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_text_case.c $(SRC_DIR)/text_case.c \
+	  -o $(BUILD_DIR)/fuzz_text_case
+	./$(BUILD_DIR)/fuzz_text_case -max_total_time=30 -rss_limit_mb=2048
 
 # ====================================================================== #
 #  Developer / packaging targets centralised from the old *.sh scripts.  #
@@ -1274,11 +1288,11 @@ drops-update: $(BUILD_DIR)/freedom
 drift:
 	@grep -q "TAB_WIRE_HEAD_N 6" src/tab.c || (echo "drift: HEAD const missing"; exit 1)
 	@grep -q "TAB_WIRE_A_N 38" src/tab.c || (echo "drift: A const missing"; exit 1)
-	@grep -q "TAB_WIRE_B_N 64" src/tab.c || (echo "drift: B const missing"; exit 1)
+	@grep -q "TAB_WIRE_B_N 67" src/tab.c || (echo "drift: B const missing"; exit 1)
 	@grep -q "TAB_WIRE_BOX_F_N 246" src/tab.c || (echo "drift: BOX const missing"; exit 1)
 	@grep -q "int32_t head\[TAB_WIRE_HEAD_N\]\|int32_t head\[6\]" src/tab.c || (echo "drift: head array drift"; exit 1)
 	@grep -q "int32_t a\[TAB_WIRE_A_N\]\|int32_t a\[38\]" src/tab.c || (echo "drift: A array drift"; exit 1)
-	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[64\]" src/tab.c || (echo "drift: B array drift"; exit 1)
+	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[67\]" src/tab.c || (echo "drift: B array drift"; exit 1)
 	@grep -q "int32_t f\[TAB_WIRE_BOX_F_N\]\|int32_t f\[246\]" src/tab.c || (echo "drift: box array drift"; exit 1)
 	@grep -q "FC_UI_FONT_SIZE\|FC_FONT_FALLBACK_PX" include/freedom_config.h || (echo "drift: FC font const missing"; exit 1)
 	@! grep -rn "cairo_set_font_size.*16\.0" gui/ --include="*.c" | grep -v FC_ || (echo "drift: raw 16.0 literal in gui"; exit 1)

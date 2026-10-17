@@ -32,7 +32,6 @@ ui_theme ui_theme_default(void) {
     t.line_spacing = 1.0;
     t.paragraph_gap = 8.0;
     t.content_margin = UI_TEXT_MARGIN;
-    t.image_box_pad = 6.0;
     t.scroll_step_lines = 3.0;
     t.page_step_lines = 10.0;
 

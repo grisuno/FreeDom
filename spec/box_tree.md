@@ -197,3 +197,13 @@ el resultado es byte-idéntico al de antes.
   y=120, el segundo en y=280.
 - Dado un ítem de 300 que abarca `1fr auto` en 300 px: el `auto` queda en su
   contenido y la grilla mide 300.
+
+## Tanda 45
+
+- `inner_h` (antes `grid_inner_h`): alto interior definido del contenedor. En flex de
+  UNA línea es el alto de la línea (Flexbox §9.4 paso 15): `align-items` centra/termina
+  contra él. `BT_ALIGN_STRETCH` llena la línea (ya no se aproxima como start); el
+  llamador lo baja a start si el ítem declara alto.
+- `fit_w` + `justify_self` (grilla): un ítem con `justify-self` start/center/end mide
+  `fit_w` (acotado a su área) y se coloca dentro de ella (Box Alignment §6.1).
+  `fit_w == 0` = estirado, como antes.

@@ -2,34 +2,34 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 197,
-  "entities": 3138,
+  "modules": 200,
+  "entities": 3174,
   "languages": {
-   "c": 106,
-   "h": 81,
+   "c": 108,
+   "h": 82,
    "py": 5,
    "sh": 5
   },
   "kinds": {
    "constant": 10,
    "enum": 147,
-   "function": 1600,
-   "macro": 813,
+   "function": 1623,
+   "macro": 820,
    "method": 22,
-   "module": 197,
-   "struct": 221,
-   "type_alias": 121,
+   "module": 200,
+   "struct": 223,
+   "type_alias": 122,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 71,
+  "skipped_files": 72,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1239,
-   "total": 3121,
-   "percent": 39.7
+   "documented": 1256,
+   "total": 3157,
+   "percent": 39.8
   },
   "by_kind": {
    "enum": {
@@ -38,14 +38,14 @@
     "percent": 53.7
    },
    "function": {
-    "documented": 661,
-    "total": 1600,
-    "percent": 41.3
+    "documented": 673,
+    "total": 1623,
+    "percent": 41.5
    },
    "macro": {
-    "documented": 286,
-    "total": 813,
-    "percent": 35.2
+    "documented": 287,
+    "total": 820,
+    "percent": 35.0
    },
    "method": {
     "documented": 0,
@@ -53,19 +53,19 @@
     "percent": 0.0
    },
    "module": {
-    "documented": 24,
-    "total": 197,
-    "percent": 12.2
+    "documented": 25,
+    "total": 200,
+    "percent": 12.5
    },
    "struct": {
-    "documented": 98,
-    "total": 221,
-    "percent": 44.3
+    "documented": 100,
+    "total": 223,
+    "percent": 44.8
    },
    "type_alias": {
-    "documented": 91,
-    "total": 121,
-    "percent": 75.2
+    "documented": 92,
+    "total": 122,
+    "percent": 75.4
    }
   },
   "by_module": {
@@ -174,6 +174,11 @@
     "total": 2,
     "percent": 0.0
    },
+   "fuzz/fuzz_text_case.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
    "fuzz/fuzz_text_shape.c": {
     "documented": 0,
     "total": 5,
@@ -200,9 +205,9 @@
     "percent": 50.0
    },
    "gui/browser_ui.c": {
-    "documented": 73,
-    "total": 224,
-    "percent": 32.6
+    "documented": 75,
+    "total": 228,
+    "percent": 32.9
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -246,8 +251,8 @@
    },
    "include/box_style.h": {
     "documented": 20,
-    "total": 30,
-    "percent": 66.7
+    "total": 31,
+    "percent": 64.5
    },
    "include/box_tree.h": {
     "documented": 11,
@@ -266,8 +271,8 @@
    },
    "include/css.h": {
     "documented": 101,
-    "total": 136,
-    "percent": 74.3
+    "total": 138,
+    "percent": 73.2
    },
    "include/css_atrule.h": {
     "documented": 7,
@@ -290,9 +295,9 @@
     "percent": 42.9
    },
    "include/css_decl.h": {
-    "documented": 3,
-    "total": 12,
-    "percent": 25.0
+    "documented": 2,
+    "total": 14,
+    "percent": 14.3
    },
    "include/css_gradient.h": {
     "documented": 0,
@@ -326,8 +331,8 @@
    },
    "include/css_values.h": {
     "documented": 2,
-    "total": 7,
-    "percent": 28.6
+    "total": 8,
+    "percent": 25.0
    },
    "include/css_vars.h": {
     "documented": 14,
@@ -480,9 +485,9 @@
     "percent": 50.0
    },
    "include/page_view.h": {
-    "documented": 48,
-    "total": 81,
-    "percent": 59.3
+    "documented": 52,
+    "total": 86,
+    "percent": 60.5
    },
    "include/pdf_export.h": {
     "documented": 3,
@@ -553,6 +558,11 @@
     "documented": 19,
     "total": 42,
     "percent": 45.2
+   },
+   "include/text_case.h": {
+    "documented": 6,
+    "total": 8,
+    "percent": 75.0
    },
    "include/text_shape.h": {
     "documented": 17,
@@ -641,8 +651,8 @@
    },
    "src/box_style.c": {
     "documented": 14,
-    "total": 44,
-    "percent": 31.8
+    "total": 45,
+    "percent": 31.1
    },
    "src/box_tree.c": {
     "documented": 4,
@@ -716,8 +726,8 @@
    },
    "src/css_values.c": {
     "documented": 1,
-    "total": 7,
-    "percent": 14.3
+    "total": 8,
+    "percent": 12.5
    },
    "src/css_vars.c": {
     "documented": 5,
@@ -905,9 +915,9 @@
     "percent": 33.3
    },
    "src/page_view.c": {
-    "documented": 55,
-    "total": 125,
-    "percent": 44.0
+    "documented": 57,
+    "total": 128,
+    "percent": 44.5
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -968,6 +978,11 @@
     "documented": 28,
     "total": 76,
     "percent": 36.8
+   },
+   "src/text_case.c": {
+    "documented": 3,
+    "total": 6,
+    "percent": 50.0
    },
    "src/text_shape.c": {
     "documented": 16,
@@ -1163,6 +1178,11 @@
    "entities": 2
   },
   {
+   "uid": "fuzz/fuzz_text_case.c",
+   "path": "modules/fuzz.fuzz_text_case.c.jsonl",
+   "entities": 2
+  },
+  {
    "uid": "fuzz/fuzz_text_shape.c",
    "path": "modules/fuzz.fuzz_text_shape.c.jsonl",
    "entities": 5
@@ -1190,7 +1210,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 224
+   "entities": 228
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1235,7 +1255,7 @@
   {
    "uid": "include/box_style.h",
    "path": "modules/include.box_style.h.jsonl",
-   "entities": 30
+   "entities": 31
   },
   {
    "uid": "include/box_tree.h",
@@ -1255,7 +1275,7 @@
   {
    "uid": "include/css.h",
    "path": "modules/include.css.h.jsonl",
-   "entities": 136
+   "entities": 138
   },
   {
    "uid": "include/css_atrule.h",
@@ -1280,7 +1300,7 @@
   {
    "uid": "include/css_decl.h",
    "path": "modules/include.css_decl.h.jsonl",
-   "entities": 12
+   "entities": 14
   },
   {
    "uid": "include/css_gradient.h",
@@ -1315,7 +1335,7 @@
   {
    "uid": "include/css_values.h",
    "path": "modules/include.css_values.h.jsonl",
-   "entities": 7
+   "entities": 8
   },
   {
    "uid": "include/css_vars.h",
@@ -1470,7 +1490,7 @@
   {
    "uid": "include/page_view.h",
    "path": "modules/include.page_view.h.jsonl",
-   "entities": 81
+   "entities": 86
   },
   {
    "uid": "include/pdf_export.h",
@@ -1541,6 +1561,11 @@
    "uid": "include/tab.h",
    "path": "modules/include.tab.h.jsonl",
    "entities": 42
+  },
+  {
+   "uid": "include/text_case.h",
+   "path": "modules/include.text_case.h.jsonl",
+   "entities": 8
   },
   {
    "uid": "include/text_shape.h",
@@ -1630,7 +1655,7 @@
   {
    "uid": "src/box_style.c",
    "path": "modules/src.box_style.c.jsonl",
-   "entities": 44
+   "entities": 45
   },
   {
    "uid": "src/box_tree.c",
@@ -1705,7 +1730,7 @@
   {
    "uid": "src/css_values.c",
    "path": "modules/src.css_values.c.jsonl",
-   "entities": 7
+   "entities": 8
   },
   {
    "uid": "src/css_vars.c",
@@ -1895,7 +1920,7 @@
   {
    "uid": "src/page_view.c",
    "path": "modules/src.page_view.c.jsonl",
-   "entities": 125
+   "entities": 128
   },
   {
    "uid": "src/pdf_export.c",
@@ -1956,6 +1981,11 @@
    "uid": "src/tab.c",
    "path": "modules/src.tab.c.jsonl",
    "entities": 76
+  },
+  {
+   "uid": "src/text_case.c",
+   "path": "modules/src.text_case.c.jsonl",
+   "entities": 6
   },
   {
    "uid": "src/text_shape.c",
@@ -2045,7 +2075,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 1883
+  "total": 1902
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

@@ -78,6 +78,10 @@ Depends on: `include/prefs.h`
 Depends on: `include/svg_render.h`
 - `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_svg_render.c:24` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 
+## fuzz/fuzz_text_case.c
+Depends on: `include/css.h`, `include/text_case.h`
+- `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_text_case.c:13` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+
 ## fuzz/fuzz_text_shape.c
 Depends on: `include/text_shape.h`
 - `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_text_shape.c:25` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`

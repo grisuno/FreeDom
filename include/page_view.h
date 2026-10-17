@@ -380,6 +380,24 @@ typedef struct pv_run {
      * positions them separately) and page_view emits them without
      * block_break. spec/page_view.md. */
     int     oof_subtree;
+    /* <br> line structure, PV_BR_* flags (spec/page_view.md "Saltos de linea").
+     * PV_BR_EMPTY: this empty run is the empty line box a <br> leaves when it
+     * begins a line (CSS 2.1 9.4.2: after a block, after another <br>, or as its
+     * block's first content) -- one strut-high line, not a skipped placeholder.
+     * PV_BR_CONT: this run's block_break is a FORCED LINE BREAK inside the same
+     * block as the run before it, not the start of a new block -- the painter
+     * starts a new line without collapsing the block's margins again.
+     * STRUCTURE like oof_subtree, never gated. */
+    int     br_line;
+    /* The dom_node_id of the BLOCK element this run's placement (box_mt/mb,
+     * ua_tag) belongs to, DOM_NODE_NONE when unknown. block_id names the nearest
+     * DECORATED box; this names the nearest block, decorated or not, so the
+     * painter can tell a flex item's own margins from those of a block inside it
+     * (Flexbox 4: an item is a formatting context). STRUCTURE, never gated. */
+    dom_node_id block_node;
+    /* justify-self of the flex/grid ITEM this run belongs to (css_align_kw,
+     * CSS_AK_UNSET = none declared): its inline-axis place in its grid area. */
+    int     justify_self;
     /* Box engine (Hito 23b-8): block_id groups the runs of one block-level box in
      * document order (-1 = no box-carrying block). It is STRUCTURE, carried by
      * render_doc regardless of caps.css (like cont_id). The box's decoration and
@@ -758,6 +776,9 @@ typedef struct pv_cont_def {
      * enclosing box further out (a container without decoration of its own). Only
      * an own box's declared height is the container's definite height. */
     int box_own;
+    /* dom_node_id of the container element (DOM_NODE_NONE when unknown): with
+     * pv_run.block_node it tells whether a run's block IS the container. */
+    dom_node_id node_id;
     int anon_row;       /* 1 = anonymous row synthesised for an inline-block parent */
     /* 1 = this grid container was SYNTHESISED from a <table>, not declared by the
      * author. A table sizes its columns to their content (CSS 2.1 section 17.5.2
@@ -775,6 +796,7 @@ typedef struct pv_cont_def {
      * fell back to a run INSIDE the nested container -- the wrong element -- so the
      * item never grew. Set only when parent_id >= 0. */
     int item_grow, item_shrink, item_basis, item_order, item_align_self;
+    int item_justify_self;  /* that wrapper's justify-self (css_align_kw) */
     int item_mauto;     /* PV_MAUTO_* of that wrapper element (0 unset) */
     /* That wrapper's GRID placement in the parent (spec/grid_areas.md 6), already
      * resolved against the parent's tracks: 0-based start or -1 = auto-place, span
@@ -1113,6 +1135,20 @@ void pv_set_own_box(pv_view *v, int box_id);
 /* Records out-of-flow subtree membership on the last appended run (see
  * pv_run.oof_subtree). No-op on an empty or NULL view. */
 void pv_set_oof(pv_view *v, int oof);
+
+/* Sets the last appended run's justify_self (see pv_run.justify_self). */
+void pv_set_justify_self(pv_view *v, int justify_self);
+
+/* Sets the last appended run's block_node (see pv_run.block_node). */
+void pv_set_block_node(pv_view *v, dom_node_id id);
+
+/* pv_run.br_line flags. */
+#define PV_BR_EMPTY 1
+#define PV_BR_CONT  2
+
+/* Sets the last appended run's PV_BR_* flags (see pv_run.br_line); other bits
+ * are dropped. No-op on an empty or NULL view. */
+void pv_set_br_line(pv_view *v, int br_line);
 
 /* Box engine (Hito 23b-8 Step D): appends one box definition to the box tree,
  * taking an owned copy of *d. The append order IS the block_id order (callers append

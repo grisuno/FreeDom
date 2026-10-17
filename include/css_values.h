@@ -17,6 +17,11 @@ int cv_bg_alpha_of(const char *v);
  * 127 clear): an opaque color is exactly cv_parse_color's 0xRRGGBB. Sentinels
  * (-1 invalid, CC_COLOR_CURRENT, CC_COLOR_TRANSPARENT) pass through unchanged. */
 int cv_parse_color_t7(const char *v);
+
+/* The `color` property's value: cv_parse_color_t7, and `transparent` as fully
+ * transparent black (127 << 24) -- text that paints nothing, not an absent
+ * value. CC_COLOR_CURRENT and -1 (invalid) pass through. */
+int cv_text_color(const char *v);
 int cv_interp_bg(const char *v);
 
 #endif

@@ -2965,8 +2965,192 @@ static void test_dump_layout_inline_input_shares_line(void **state) {
     unlink(path);
 }
 
+/* An inline <svg> followed by text inside a flex item is an atom of the item's
+ * line (CSS 2.1 9.2.2), and the item's max-content width counts it: two items,
+ * one line each. Before tanda 45 the icon took a row and the text another. */
+static void test_dump_layout_flex_item_inline_svg_shares_line(void **state) {
+    (void)state;
+    const char *html = "<html><body><ul style=\"display:flex;list-style:none\">"
+                       "<li><a href=\"#\" style=\"display:block\"><svg viewBox=\"0 0 24 24\" "
+                       "style=\"width:30px;height:30px\"><circle cx=\"12\" cy=\"12\" r=\"8\"/>"
+                       "</svg> join one</a></li><li>use two</li></ul></body></html>";
+    const char *path = "__freedom_itemsvg.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_itemsvg.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "nrow=2 "));
+    unlink(path);
+}
+
+/* A <br> that begins a line leaves an empty line box (CSS 2.1 9.4.2): block,
+ * empty line, text = three rows. */
+static void test_dump_layout_br_after_block_is_a_line(void **state) {
+    (void)state;
+    const char *html = "<html><body><div><div>a</div><br>b</div></body></html>";
+    const char *path = "__freedom_brline.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_brline.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "nrow=3 "));
+    unlink(path);
+}
+
+/* A flex item is a formatting context: the margins of the blocks inside it
+ * collapse between themselves and stay inside it; the container takes none of
+ * them. Firefox: a at 17, b at 56, the item 96 tall, c at 112. */
+static void test_dump_layout_flex_item_contains_block_margins(void **state) {
+    (void)state;
+    const char *html = "<html><body style=\"margin:0\"><div style=\"display:flex\">"
+                       "<div style=\"border:1px solid\"><p>a</p><p>b</p></div></div>"
+                       "<p>c</p></body></html>";
+    const char *path = "__freedom_itemmargins.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_itemmargins.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "row[0] top=17.0 "));
+    assert_non_null(strstr(out, "row[1] top=56.0 "));
+    assert_non_null(strstr(out, "row[2] top=112.0 "));
+    assert_non_null(strstr(out, "h=96.0"));
+    unlink(path);
+}
+
+/* A single-line flex container with a definite height centres its item in it
+ * (Flexbox 9.4 step 15), and the content after it starts below that height --
+ * also when the container sits inside a wrapping item with more content. */
+static void test_dump_layout_flex_definite_height_centres_item(void **state) {
+    (void)state;
+    const char *html = "<html><body style=\"margin:0\"><div style=\"display:flex;flex-wrap:wrap\">"
+                       "<div style=\"width:100%\"><div style=\"display:flex;align-items:center;"
+                       "height:300px;background:#eee\"><div>L</div></div><div>after</div>"
+                       "</div></div></body></html>";
+    const char *path = "__freedom_flexcenter.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_flexcenter.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    /* 16px text: a 23px line centred in 300 -> 138.5; "after" at 300. */
+    assert_non_null(strstr(out, "row[0] top=138.5 "));
+    assert_non_null(strstr(out, "row[1] top=300.0 "));
+    unlink(path);
+}
+
+/* A text colour's alpha blends the glyphs with what is under them (CSS Color 4
+ * 5.1): rgba(255,0,0,.4) over white paints (255,153,153), not opaque red. */
+static void test_download_png_text_color_alpha_blends(void **state) {
+    (void)state;
+    const char *html = "<html><body style=\"margin:0\"><p style=\"margin:0;font-size:80px;"
+                       "line-height:1;color:rgba(255,0,0,.4)\">\xE2\x96\x88\xE2\x96\x88</p>"
+                       "<p>filler</p></body></html>";
+    const char *path = "__freedom_textalpha.html";
+    const char *png = "__freedom_textalpha.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+    assert_true(px.width > 60 && px.height > 50);
+    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[40 * (px.stride / 4) + 30];
+    uint8_t r = (uint8_t)(pixel >> 16), g = (uint8_t)(pixel >> 8), b = (uint8_t)pixel;
+    assert_true(r >= 250);
+    assert_true(g >= 145 && g <= 160);
+    assert_true(b >= 145 && b <= 160);
+    img_pixels_free(&px);
+    unlink(png);
+    unlink(path);
+}
+
+/* A UA margin is in em of the block's COMPUTED font-size: `p{margin:1em 0}` on
+ * 30px text is 30px (Firefox: the second paragraph 70px below the first). */
+static void test_dump_layout_ua_margin_scales_with_font_size(void **state) {
+    (void)state;
+    const char *html = "<html><body style=\"margin:0;font-size:30px;line-height:40px\">"
+                       "<p>a</p><p>b</p></body></html>";
+    const char *path = "__freedom_uaem.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_uaem.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "row[0] top=30.1 "));
+    assert_non_null(strstr(out, "row[1] top=100.2 "));
+    unlink(path);
+}
+
+/* justify-self / justify-items place a grid item in its area at its content
+ * width (Firefox: "center" 48px at x 176 in a 400px column). */
+static void test_dump_layout_grid_justify_self(void **state) {
+    (void)state;
+    const char *html = "<html><head><style>body{margin:0;font:16px sans-serif}"
+                       ".g{display:grid;grid-template-columns:400px 400px}"
+                       ".g div{background:#9cf}.c{justify-self:center}"
+                       ".h{display:grid;grid-template-columns:400px;justify-items:end}"
+                       ".h div{background:#fc9}</style></head><body>"
+                       "<div class=\"g\"><div class=\"c\">center</div><div>stretch</div></div>"
+                       "<div class=\"h\"><div>end</div></div></body></html>";
+    const char *path = "__freedom_jself.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_jself.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "x=176.0 top=0.0 w=48.0"));
+    assert_non_null(strstr(out, "x=400.0 top=0.0 w=400.0"));
+    assert_non_null(strstr(out, "x=371.2 top=23.0 w=28.8"));
+    unlink(path);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_dump_layout_grid_justify_self),
+        cmocka_unit_test(test_dump_layout_ua_margin_scales_with_font_size),
+        cmocka_unit_test(test_download_png_text_color_alpha_blends),
+        cmocka_unit_test(test_dump_layout_flex_item_contains_block_margins),
+        cmocka_unit_test(test_dump_layout_flex_definite_height_centres_item),
+        cmocka_unit_test(test_dump_layout_flex_item_inline_svg_shares_line),
+        cmocka_unit_test(test_dump_layout_br_after_block_is_a_line),
         cmocka_unit_test(test_dump_layout_inline_input_shares_line),
         cmocka_unit_test(test_dump_layout_shrink_pill_nested_container),
         cmocka_unit_test(test_help),
