@@ -227,3 +227,28 @@ real solo la ve JS en allow∩js (`js_geom`); un host no confiable ve ceros.
 - Dado `font-family:monospace,Arial`, entonces el cubo monospace (genérico primero).
 - Dado `font-family:NoExiste`, entonces el cubo (sans por defecto).
 - Dado un hijo sin `font-family` bajo un padre `font-family:Arial`, hereda la lista.
+
+## 8. Fallback por glifo (tanda 44)
+
+Medido en pool.ntp.org: los nombres de idioma en hebreo, árabe, hindi, tailandés,
+coreano, chino y japonés salían como cajitas `.notdef`, porque una cadena se daba
+forma y se pintaba con UNA sola cara. Firefox busca, carácter a carácter, otra fuente
+instalada que tenga el glifo (CSS Fonts 4 §5, *system font fallback*).
+
+- `tsh_segment(text, len, cover, ctx, runs, cap)` (puro): parte el texto en tramos
+  máximos de la misma cara. `cover(cp, ctx)` devuelve el id de cara de cada punto de
+  código (0 = la cara pedida). Los caracteres que no eligen cara propia — controles,
+  marcas combinantes (U+0300–036F, U+1AB0–1AFF, U+20D0–20FF, U+FE20–FE2F), selectores
+  de variación y ZWJ/ZWNJ — se quedan en el tramo anterior (una marca nunca se separa
+  de su base). Devuelve la cantidad de tramos, o -1 si no caben (el llamador pinta
+  con la cara pedida, como antes).
+- La cara de *fallback* de un carácter que la cara pedida no cubre la elige
+  fontconfig (`FcFontMatch` con el `charset` del carácter, misma familia genérica y
+  peso), cacheada por bloque de 256 puntos de código. Solo fuentes LOCALES: nunca red.
+- `tsh_measure`/`tsh_draw` dan forma y pintan tramo por tramo; `tsh_shape` (API
+  pública de una sola cara) no cambia.
+- **Dado** `"Hola עברית"` con una cara latina **entonces** dos tramos: `Hola ` en la
+  cara pedida y `עברית` en una cara que tenga hebreo.
+- **Dado** texto que la cara pedida cubre entero **entonces** un tramo: el camino
+  rápido es byte-idéntico al de antes.
+

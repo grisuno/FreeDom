@@ -50,12 +50,19 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
             /* No NaN positions escape (would corrupt the painter). */
             if (out[i].x != out[i].x || out[i].y != out[i].y) abort();
         }
-        /* Same shaper, same slice: measure must equal the shaped advance. */
+        /* tsh_measure shapes run by run with a fallback face where the requested
+         * one lacks a glyph (spec/text_shape.md 8); tsh_shape is the single-face
+         * API. So: the measure is always finite and non-negative, and on
+         * printable ASCII (one run, the requested face) the two must agree. */
         double m = tsh_measure(&f, px, text, len);
         if (m >= 0.0) {
+            if (m != m || m > 1e12) abort();
+            int ascii = 1;
+            for (size_t i = 0; i < len; ++i)
+                if ((unsigned char)text[i] < 0x20 || (unsigned char)text[i] > 0x7e) ascii = 0;
             double d = m - adv;
             if (d < 0.0) d = -d;
-            if (d > 1e-3) abort();
+            if (ascii && d > 1e-3) abort();
         }
     }
 

@@ -223,7 +223,7 @@ The pointer aliases s (not owned).
 
 **Returns:** `* Every field ALIASES the input`
 
-*Called by:* [`blur`](src.css.c.md#blur), [`cb_expand_grid_template_cols`](src.css_box.c.md#cb_expand_grid_template_cols), [`ct_expand_shadow`](src.css_text.c.md#ct_expand_shadow), [`ct_interp_fontfamily`](src.css_text.c.md#ct_interp_fontfamily), [`ct_interp_liststyle`](src.css_text.c.md#ct_interp_liststyle)
+*Called by:* [`blur`](src.css.c.md#blur), [`declaration`](src.css.c.md#declaration), [`cb_expand_grid_template_cols`](src.css_box.c.md#cb_expand_grid_template_cols), [`cb_expand_grid_template_rows`](src.css_box.c.md#cb_expand_grid_template_rows), [`ct_expand_shadow`](src.css_text.c.md#ct_expand_shadow), [`ct_interp_fontfamily`](src.css_text.c.md#ct_interp_fontfamily), [`ct_interp_liststyle`](src.css_text.c.md#ct_interp_liststyle)
 
 ---
 

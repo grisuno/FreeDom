@@ -4,7 +4,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 ## Suggested
 
-### Q: What does browser_ui.c depend on, and what depends on it? (44 connections)
+### Q: What does browser_ui.c depend on, and what depends on it? (45 connections)
 
 - Status: unanswered
 
@@ -20,7 +20,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: Why are fuzz_download.c and test_renderer.c connected through 8 hops across 3 communities?
+### Q: Why are fuzz_download.c and test_renderer.c connected through 8 hops across 4 communities?
 
 - Status: unanswered
 

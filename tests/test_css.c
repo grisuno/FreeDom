@@ -5461,6 +5461,87 @@ static void test_vendor_prefixes(void **state) {
     assert_int_equal(css_parse_inline("-webkit--moz-color:red", 0).color, -1);
 }
 
+/* @font-face whose only source is local(NAME) (the metric-matched fallback every
+ * next/font page ships: `src:local("Arial")`) is an ALIAS of that local family:
+ * its name in a font-family list stands for NAME, resolved by the same
+ * installed-or-strong-alias rule as any named family (spec/webfont.md 2c). */
+static void test_fontface_local_only_is_alias(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("@font-face{font-family:pnf;src:local(\"Arial\");"
+                               "size-adjust:99.88%}"
+                               "p{font-family:proxima-nova,pnf,sans-serif}", 0, &sh), CSS_OK);
+    css_element el = el_node("p", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_string_equal(out.font_list, "proxima-nova,=arial,sans-serif");
+    /* local() is never a URL: nothing to fetch. */
+    char fam[64], url[256];
+    assert_int_equal(css_font_face_at(sh, 0, fam, sizeof fam, url, sizeof url), 0);
+    assert_string_equal(url, "");
+    css_free(sh);
+}
+
+/* With a url() source the face is a real webfont: the list is untouched and the
+ * captured src is the url, never the local() argument. */
+static void test_fontface_local_then_url_keeps_url(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("@font-face{font-family:W;src:local(\"W Regular\"),"
+                               "url(w.woff2) format(\"woff2\")}"
+                               "p{font-family:W,serif}", 0, &sh), CSS_OK);
+    css_element el = el_node("p", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_string_equal(out.font_list, "w,serif");
+    char fam[64], url[256];
+    assert_int_equal(css_font_face_at(sh, 0, fam, sizeof fam, url, sizeof url), 0);
+    assert_string_equal(url, "w.woff2");
+    css_free(sh);
+}
+
+/* box-shadow is a LIST (CSS Backgrounds 3 7.1): every layer survives, each color
+ * keeps its alpha as transparency in bits 24..30 (opaque = the plain 0xRRGGBB),
+ * and a later single-layer value clears the extra layers. */
+static void test_box_shadow_layers_and_alpha(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("box-shadow:0px 4px 8px rgba(0, 0, 0, 0.04), "
+                                   "0px 0px 2px rgba(0,0,0,.06), 0 0 1px #000", 0);
+    assert_int_equal(s.box_shadow_n, 3);
+    assert_int_equal(s.shadow2_dy, 4);
+    assert_int_equal(s.shadow2_blur, 8);
+    /* 4% opacity -> transparency 96% of 127 = 122, black. */
+    assert_int_equal(s.box_shadow_color & 0xffffff, 0);
+    assert_int_equal((s.box_shadow_color >> 24) & 0x7f, 122);
+    assert_int_equal(s.box_shadow_x[0][2], 2);              /* layer 2 blur */
+    assert_int_equal((s.box_shadow_x[0][4] >> 24) & 0x7f, 119);
+    assert_int_equal(s.box_shadow_x[1][2], 1);              /* layer 3 blur */
+    assert_int_equal(s.box_shadow_x[1][4], 0x000000);       /* opaque black */
+    css_style one = css_parse_inline("box-shadow:0 0 1px red,0 0 2px blue;"
+                                     "box-shadow:0 0 3px green", 0);
+    assert_int_equal(one.box_shadow_n, 1);
+    assert_int_equal(one.shadow2_blur, 3);
+    /* An unparseable layer drops the whole declaration (fail closed). */
+    assert_int_equal(css_parse_inline("box-shadow:0 0 1px red, nonsense", 0).box_shadow_n, 0);
+    assert_int_equal(css_parse_inline("box-shadow:none", 0).box_shadow_n, 0);
+}
+
+/* grid-template-rows carries its track SIZES (same encoding as the columns: 0 auto,
+ * >0 px, <0 fr x100), not only their count; the grid-template shorthand too. */
+static void test_grid_template_rows_tracks(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("grid-template-rows:auto 1fr 40px", 0);
+    assert_int_equal(s.grid_rows, 3);
+    assert_int_equal(s.grid_row_h[0], 0);
+    assert_int_equal(s.grid_row_h[1], -100);
+    assert_int_equal(s.grid_row_h[2], 40);
+    css_style t = css_parse_inline("grid-template:\"a\" auto \"b\" 2fr / 1fr", 0);
+    assert_int_equal(t.grid_rows, 2);
+    assert_int_equal(t.grid_row_h[1], -200);
+    /* A later declaration resets every row slot. */
+    css_style u = css_parse_inline("grid-template-rows:1fr 1fr;grid-template-rows:auto", 0);
+    assert_int_equal(u.grid_rows, 1);
+    assert_int_equal(u.grid_row_h[1], 0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -5485,6 +5566,10 @@ int main(void) {
         cmocka_unit_test(test_fontface_data_url_family_matches),
         cmocka_unit_test(test_fontface_inline_has_no_sheet),
         cmocka_unit_test(test_fontface_later_rule_clears),
+        cmocka_unit_test(test_fontface_local_only_is_alias),
+        cmocka_unit_test(test_box_shadow_layers_and_alpha),
+        cmocka_unit_test(test_grid_template_rows_tracks),
+        cmocka_unit_test(test_fontface_local_then_url_keeps_url),
         cmocka_unit_test(test_font_list_normalized),
         cmocka_unit_test(test_font_list_inline_and_fontface_first_name),
         cmocka_unit_test(test_placeholder_pseudo_element),

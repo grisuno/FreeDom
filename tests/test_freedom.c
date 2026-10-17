@@ -435,6 +435,57 @@ static void test_download_png_negative_zindex_paints_behind_inflow(void **state)
     unlink(png);
 }
 
+/* A non-invertible transform (`scaleX(0)`, the empty state of every progress bar)
+ * means the element is not rendered (CSS Transforms 1 section 6) -- and nothing
+ * else changes. Handing that matrix to Cairo puts the context into a sticky
+ * error state and silently dropped every later paint: ipinfo.io lost all its
+ * text. A blue box painted AFTER the degenerate one must still reach the PNG. */
+static void test_download_png_degenerate_transform_paints_rest(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;padding:0;background:#fff}"
+        ".bar{position:relative;height:10px;background:#f00;transform:scaleX(0)}"
+        ".bar2{height:10px;background:#f00;opacity:.5;transform:scale(0,1)}"
+        "#after{height:40px;background:#0000ff}"
+        "</style></head><body><div class=\"bar\"></div><div class=\"bar2\"></div>"
+        "<svg width=\"10\" height=\"0.5\" style=\"display:block\"><rect width=\"5\" height=\"5\" "
+        "fill=\"#f00\" transform=\"scale(0)\"/></svg>"
+        "<div id=\"after\"></div></body></html>";
+    const char *path = "__freedom_degen_page.html";
+    const char *png = "__freedom_degen_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+    assert_true(px.width > 500 && px.height > 40);
+    /* y=35: inside #after (20..60), x=300. */
+    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[35 * (px.stride / 4) + 300];
+    uint8_t r = (uint8_t)(pixel >> 16), b = (uint8_t)pixel;
+    assert_true(b > 200);
+    assert_true(r < 50);
+    /* y=5: the scaled-to-nothing bar paints nothing (white page shows). */
+    pixel = ((const uint32_t *)(const void *)px.data)[5 * (px.stride / 4) + 300];
+    assert_true((uint8_t)(pixel >> 8) > 200);
+    img_pixels_free(&px);
+    unlink(path);
+    unlink(png);
+}
+
 /* An absolutely positioned box with overflow:hidden clips its OWN content (CSS
  * Overflow 3 2.2). The visually-hidden idiom (`.sr-only{position:absolute;width:1px;
  * height:1px;overflow:hidden}`, on nearly every modern site) painted its whole label
@@ -2981,6 +3032,7 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_container_inside_float),
         cmocka_unit_test(test_dump_layout_inline_box_second_run_stays),
         cmocka_unit_test(test_dump_layout_nested_column_takes_max),
+        cmocka_unit_test(test_download_png_degenerate_transform_paints_rest),
         cmocka_unit_test(test_rejects_http_url),
     };
     int rc = cmocka_run_group_tests(tests, NULL, NULL);

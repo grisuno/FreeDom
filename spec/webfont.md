@@ -132,6 +132,27 @@ order as the worker sheet, extern-then-inline, so first-wins agrees).
 5. **Dado** `url()` de más de `WF_URL_MAX` **entonces** esa entrada se descarta (fail closed), el resto sobrevive.
 6. **Dado** el mismo texto con y sin escaneo **entonces** el render sin caras registradas es byte-idéntico (el scanner no cambia nada por sí solo).
 
+## `local()` como alias por nombre completo (2c, tanda 44)
+
+`@font-face{font-family:F; src:local("NAME")}` -- el *fallback* de métricas que emite
+todo sitio con `next/font` -- no es una descarga: el scanner sigue sin generar refs
+(punto 3 arriba, nada viaja a la red). Lo que cambia es la **cascada**: un nombre de la
+lista `font-family` que coincide con una cara cuyas fuentes son SOLO `local()` se
+reescribe como `=name` en `css_style.font_list` (`font_list_alias`), y el resolvedor del
+pintor (`text_shape`) lo busca por **nombre completo o PostScript exacto** de una cara
+instalada (CSS Fonts 4 §4.3), nunca por alias de fontconfig.
+
+- **Dado** `pnf{src:local("Arial")}` y `font-family:x,pnf,sans-serif` **entonces**
+  `font_list` es `x,=arial,sans-serif`.
+- **Dado** un host sin Arial real (solo el alias Liberation Sans) **entonces** `=arial` no
+  resuelve y la lista sigue, igual que Firefox (medido en ipinfo.io).
+- **Dado** `src:local("W"),url(w.woff2)` **entonces** es una webfont real: la lista no se
+  toca y el `src` capturado es `w.woff2` (antes se capturaba el argumento del PRIMER
+  paréntesis, o sea `"W"`, como si fuera una URL).
+- **Anti-fp:** no abre superficie nueva. Resolver un nombre contra las caras instaladas
+  es exactamente lo que ya hace `font-family:Arial` desde la tanda 43; el canal que mide
+  el JS (`document.fonts`) sigue sin existir.
+
 ## Wiring GUI/headless + hook del pintor (b3b)
 
 - **Acumulación sin cambio de protocolo:** `tab_set_css_sink` observa cada body

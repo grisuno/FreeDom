@@ -1,5 +1,61 @@
-# API (page 9 of 9)
+# API (page 9 of 10)
 Previous: [API_p8.md](API_p8.md)
+
+## src/render_doc.c
+Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
+- `utf8_sanitized_dup` (function) `src/render_doc.c:28` `static char *utf8_sanitized_dup(const char *s)`
+- `rd_push` (function) `src/render_doc.c:60` `static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
+                 ...` -- Appends one block, taking owned copies of text (required) and href (optional). * Returns 0 on success, -1 on...
+- `rd_push_input` (function) `src/render_doc.c:204` `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` -- Appends an RD_INPUT block, copying text (placeholder/label), the form action * (href), and the control name/value.
+- `place` (function) `src/render_doc.c:230` `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...`
+- `resolve_image_decision` (function) `src/render_doc.c:240` `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
+        ...` -- Resolves raw_src (possibly relative, or a data: URI) against top_level_url and judges it under the exact same policy...
+- `rd_build` (function) `src/render_doc.c:262` `rd_status rd_build(const pv_view *view, rdp_caps caps,
+                   const char *top_level_u...`
+- `unset` (function) `src/render_doc.c:650` `* background paints as if unset (no border/box-shadow-style
+                 * "broken image" pla...`
+- `rd_free` (function) `src/render_doc.c:715` `void rd_free(rd_doc *d)`
+- `rd_count` (function) `src/render_doc.c:732` `size_t rd_count(const rd_doc *d)`
+- `rd_at` (function) `src/render_doc.c:736` `const rd_block *rd_at(const rd_doc *d, size_t i)`
+- `rd_box_count` (function) `src/render_doc.c:741` `size_t rd_box_count(const rd_doc *d)`
+- `rd_box_at` (function) `src/render_doc.c:745` `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
+- `rd_cont_count` (function) `src/render_doc.c:750` `size_t rd_cont_count(const rd_doc *d)`
+- `rd_cont_at` (function) `src/render_doc.c:754` `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
+- `rd_kind_name` (function) `src/render_doc.c:759` `const char *rd_kind_name(rd_kind k)`
+- `rd_block_tag` (function) `src/render_doc.c:773` `const char *rd_block_tag(const rd_block *b)`
+- `rd_input_label` (function) `src/render_doc.c:804` `const char *rd_input_label(int input_type)`
+- `rd_input_invisible` (function) `src/render_doc.c:824` `int rd_input_invisible(int input_type)`
+- `rd_image_label` (function) `src/render_doc.c:828` `const char *rd_image_label(rdp_img_decision d)`
+- `rd_image_fail_label` (function) `src/render_doc.c:839` `const char *rd_image_fail_label(img_fail_reason reason)`
+
+## src/render_policy.c
+Depends on: `include/data_url.h`, `include/render_policy.h`, `include/request_policy.h`
+- `rdp_caps_safe` (function) `src/render_policy.c:17` `rdp_caps rdp_caps_safe(void)`
+- `rdp_is_tracking_pixel` (function) `src/render_policy.c:22` `int rdp_is_tracking_pixel(int w, int h)`
+- `rdp_image_decision` (function) `src/render_policy.c:28` `rdp_img_decision rdp_image_decision(rdp_caps caps,
+                                    const char...`
+- `rdp_img_reason` (function) `src/render_policy.c:63` `const char *rdp_img_reason(rdp_img_decision d)`
+- `rdp_images_warning` (function) `src/render_policy.c:74` `const char *rdp_images_warning(void)`
+
+## src/renderer.c
+Depends on: `include/html_parse.h`, `include/os_sandbox.h`, `include/renderer.h`, `include/util.h`
+- `child_render` (function) `src/renderer.c:25` `static void child_render(int wfd, const char *html, size_t len)`
+- `write_full` (function) `src/renderer.c:40` `&& write_full(wfd, &tl, sizeof tl) == 0 && (tl == 0 || write_full(wfd, title, tl) == 0) && write_full(wfd, &xl...`
+- `read_field` (function) `src/renderer.c:53` `static int read_field(int fd, char **out, size_t *out_len)`
+- `rd_render_html` (function) `src/renderer.c:70` `rd_status rd_render_html(const char *html, size_t len, rd_result *out)`
+- `rd_result_free` (function) `src/renderer.c:120` `void rd_result_free(rd_result *out)`
+
+## src/request_policy.c
+Depends on: `include/psl_data.h`, `include/request_policy.h`
+- `lower` (function) `src/request_policy.c:22` `static char lower(char c)`
+- `ci_starts_with` (function) `src/request_policy.c:26` `static int ci_starts_with(const char *s, const char *prefix)`
+- `psl_cmp` (function) `src/request_policy.c:36` `static int psl_cmp(const void *key, const void *elem)`
+- `psl_in` (function) `src/request_policy.c:40` `static int psl_in(const char *const *arr, size_t n, const char *key)`
+- `public_suffix_labels` (function) `src/request_policy.c:48` `static size_t public_suffix_labels(const char *host, const size_t *off, size_t n)` -- Number of labels of the public suffix (eTLD) of a lowercased host, applying the full PSL algorithm: exception rules...
+- `rp_host_of` (function) `src/request_policy.c:76` `int rp_host_of(const char *url, char *out, size_t out_size)`
+- `rp_site_of` (function) `src/request_policy.c:102` `int rp_site_of(const char *host, char *out, size_t out_size)`
+- `rp_same_site` (function) `src/request_policy.c:134` `int rp_same_site(const char *top_level_url, const char *request_url)`
+- `rp_evaluate` (function) `src/request_policy.c:143` `rp_decision rp_evaluate(const char *top_level_url, const char *request_url)`
 
 ## src/secure_fetch.c
 Depends on: `include/anti_fp.h`, `include/secure_fetch.h`, `include/url.h`
@@ -120,150 +176,164 @@ static int child_load(ch...`
 - `blocks` (function) `src/tab.c:331` `*
  * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the
  * grid arr...`
-- `FB_MAX_FILE_BYTES` (function) `src/tab.c:722` `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
+- `FB_MAX_FILE_BYTES` (function) `src/tab.c:736` `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
  * the stream. ...`
-- `budget_remaining_ms` (function) `src/tab.c:752` `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` -- Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent. * Used to share one page-wide JS...
-- `ctype_is_javascript` (function) `src/tab.c:766` `static int ctype_is_javascript(const char *ctype)` -- Content-Type gate for an external script's response (anti type-confusion, fail closed for real content types)...
-- `ctype_is_css` (function) `src/tab.c:775` `static int ctype_is_css(const char *ctype)` -- Content-Type gate for an external stylesheet (Hito 27), same shape as the script gate: a missing/empty type is...
-- `log_external_skip` (function) `src/tab.c:783` `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
+- `budget_remaining_ms` (function) `src/tab.c:766` `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` -- Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent. * Used to share one page-wide JS...
+- `ctype_is_javascript` (function) `src/tab.c:780` `static int ctype_is_javascript(const char *ctype)` -- Content-Type gate for an external script's response (anti type-confusion, fail closed for real content types)...
+- `ctype_is_css` (function) `src/tab.c:789` `static int ctype_is_css(const char *ctype)` -- Content-Type gate for an external stylesheet (Hito 27), same shape as the script gate: a missing/empty type is...
+- `log_external_skip` (function) `src/tab.c:797` `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
                 ...` -- Freebug note about an external subresource (script/stylesheet) that was not used (skipped or refused).
-- `run` (function) `src/tab.c:801` `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
+- `run` (function) `src/tab.c:815` `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
  * Call after every ...`
-- `tab_url_resolve` (function) `src/tab.c:850` `static int tab_url_resolve(void *ctx, const char *base, const char *ref,
+- `tab_url_resolve` (function) `src/tab.c:864` `static int tab_url_resolve(void *ctx, const char *base, const char *ref,
                         ...` -- Plain URL resolution of ref against base (https, or a local file confined to its * document's directory): the...
-- `tab_mod_resolve` (function) `src/tab.c:859` `static int tab_mod_resolve(void *host, const char *base, const char *spec,
+- `tab_mod_resolve` (function) `src/tab.c:873` `static int tab_mod_resolve(void *host, const char *base, const char *spec,
                       ...`
-- `tab_mod_fetch` (function) `src/tab.c:881` `static char *tab_mod_fetch(void *host, const char *url, size_t *len)` -- Loads a module's source through the trusted parent (TAG_SUBREQ: the full network policy applies), only inside a...
-- `write_history` (function) `src/tab.c:903` `static int write_history(int wfd, child_state *cs)` -- Writes the history block of a response: [len][ops "K url\n"...][go:int32] * (spec/js_dom.md 7e).
-- `window` (function) `src/tab.c:922` `* net window (cs->net_active). */
+- `tab_mod_fetch` (function) `src/tab.c:895` `static char *tab_mod_fetch(void *host, const char *url, size_t *len)` -- Loads a module's source through the trusted parent (TAG_SUBREQ: the full network policy applies), only inside a...
+- `write_history` (function) `src/tab.c:917` `static int write_history(int wfd, child_state *cs)` -- Writes the history block of a response: [len][ops "K url\n"...][go:int32] * (spec/js_dom.md 7e).
+- `window` (function) `src/tab.c:936` `* net window (cs->net_active). */
 static void child_fetch_stylesheets(child_state *cs)`
-- `child_handle_load` (function) `src/tab.c:967` `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
+- `child_handle_load` (function) `src/tab.c:981` `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
            ...`
-- `fallback` (function) `src/tab.c:1043` `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it...`
-- `WHERE` (function) `src/tab.c:1201` `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...`
-- `content` (function) `src/tab.c:1234` `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...`
-- `once` (function) `src/tab.c:1279` `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);`
-- `swap` (function) `src/tab.c:1288` `* display:none hiding an element via class swap (CSS, not
+- `fallback` (function) `src/tab.c:1057` `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it...`
+- `WHERE` (function) `src/tab.c:1215` `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...`
+- `content` (function) `src/tab.c:1248` `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...`
+- `once` (function) `src/tab.c:1293` `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);`
+- `swap` (function) `src/tab.c:1302` `* display:none hiding an element via class swap (CSS, not
      * DOM removal). */
     if (ok && v...`
-- `write_full` (function) `src/tab.c:1308` `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd...`
-- `write_ws` (function) `src/tab.c:1330` `static int write_ws(int wfd, child_state *cs)` -- Writes the WebSocket block of a response: [n:int32] then per op * [kind:int32][id:int32][len][bytes] (spec/js_dom.md...
-- `write_storage` (function) `src/tab.c:1347` `static int write_storage(int wfd, child_state *cs)` -- int32_t cnt = (int32_t)n; int rc = (write_full(wfd, &cnt, sizeof cnt) == 0) ?
-- `write_opens` (function) `src/tab.c:1361` `static int write_opens(int wfd, child_state *cs)` -- static int write_storage(int wfd, child_state *cs) { char *blob = NULL; size_t len = 0; int32_t dirty = (cs->js !=...
-- `child_next_timer_ms` (function) `src/tab.c:1373` `static int32_t child_next_timer_ms(child_state *cs)` -- Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the * eval fails, or nothing is pending.
-- `child_handle_mutation` (function) `src/tab.c:1388` `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
+- `write_full` (function) `src/tab.c:1322` `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd...`
+- `write_ws` (function) `src/tab.c:1344` `static int write_ws(int wfd, child_state *cs)` -- Writes the WebSocket block of a response: [n:int32] then per op * [kind:int32][id:int32][len][bytes] (spec/js_dom.md...
+- `write_storage` (function) `src/tab.c:1361` `static int write_storage(int wfd, child_state *cs)` -- int32_t cnt = (int32_t)n; int rc = (write_full(wfd, &cnt, sizeof cnt) == 0) ?
+- `write_opens` (function) `src/tab.c:1375` `static int write_opens(int wfd, child_state *cs)` -- static int write_storage(int wfd, child_state *cs) { char *blob = NULL; size_t len = 0; int32_t dirty = (cs->js !=...
+- `child_next_timer_ms` (function) `src/tab.c:1387` `static int32_t child_next_timer_ms(child_state *cs)` -- Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the * eval fails, or nothing is pending.
+- `child_handle_mutation` (function) `src/tab.c:1402` `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                         ...` -- Fire click handlers for node_id (OP_CLICK) or advance the virtual timer clock (OP_TICK), then re-derive the view so...
-- `child_handle_click` (function) `src/tab.c:1467` `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
-- `child_handle_tick` (function) `src/tab.c:1471` `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
-- `child_handle_event` (function) `src/tab.c:1481` `static void child_handle_event(int wfd, child_state *cs)`
-- `child_handle_mouse` (function) `src/tab.c:1529` `static void child_handle_mouse(int wfd, child_state *cs)` -- Handles a mouse DOM event (OP_MOUSE).
-- `geom_parent` (function) `src/tab.c:1559` `static dom_node_id geom_parent(void *ctx, dom_node_id n)`
-- `child_handle_geom` (function) `src/tab.c:1567` `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)` -- OP_GEOM (spec/js_geom.md): installs the parent's laid-out geometry into the page's JS, aggregated into ancestors...
-- `child_handle_submit` (function) `src/tab.c:1591` `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)` -- Fires a submit event on the form enclosing node_id.
-- `child_handle_eval` (function) `src/tab.c:1625` `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` -- Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a...
-- `child_handle_decode_image` (function) `src/tab.c:1658` `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` -- Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data].
-- `child_handle_decode_image_b64` (function) `src/tab.c:1680` `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)` -- data: URI images: the parent only sliced the base64 payload (pure pointer arithmetic, no interpretation); the base64...
-- `gen_session_key` (function) `src/tab.c:1692` `static uint64_t gen_session_key(void)`
-- `tab_worker_run` (function) `src/tab.c:1712` `static void tab_worker_run(int rfd, int wfd)` -- The confined request loop.
-- `EPIPE` (function) `src/tab.c:1714` `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();`
-- `tzset` (function) `src/tab.c:1730` `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);`
-- `depth` (function) `src/tab.c:1735` `* defense in depth (seccomp already excludes open/socket/exec);`
-- `parse_worker_fd` (function) `src/tab.c:1910` `static int parse_worker_fd(const char *s, int *out)` -- free(buf); free(url); free(cookies); free(storage); } child_reset_page(&cs); fb_buffer_free(&cs.log); _exit(0); } /*...
-- `tab_parse_worker_args` (function) `src/tab.c:1922` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
-- `tab_worker_dispatch` (function) `src/tab.c:1932` `void tab_worker_dispatch(int argc, char **argv)`
-- `load` (function) `src/tab.c:1949` `* subresource requests this load (set per page: host in allow.conf AND js.conf);`
-- `ignore_sigpipe` (function) `src/tab.c:1970` `static void ignore_sigpipe(void)` -- A write to a dead child must not kill the parent with SIGPIPE.
-- `tab_refresh_alive` (function) `src/tab.c:1977` `static void tab_refresh_alive(tab *t)`
-- `read_field` (function) `src/tab.c:1996` `static int read_field(int fd, char **out, size_t *out_len)` -- Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.
-- `read_view` (function) `src/tab.c:2012` `static int read_view(int fd, pv_view **out)` -- Reads a display list serialised by write_view into a fresh pv_view.
-- `tests` (function) `src/tab.c:2087` `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...`
-- `layout` (function) `src/tab.c:2190` `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....`
-- `column` (function) `src/tab.c:2201` `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...`
-- `read_console` (function) `src/tab.c:2502` `static int read_console(int fd, fb_buffer *out)` -- Reads the console section written by write_console into out (a zero-initialised fb_buffer).
-- `send_request` (function) `src/tab.c:2539` `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` -- if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt...
-- `io_failure` (function) `src/tab.c:2549` `static tab_status io_failure(tab *t)`
-- `exec_worker_child` (function) `src/tab.c:2557` `static void exec_worker_child(int rfd, int wfd)` -- Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other...
-- `tab_set_fetcher` (function) `src/tab.c:2628` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-- `tab_set_css_sink` (function) `src/tab.c:2634` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
-- `tab_set_net_allowed` (function) `src/tab.c:2640` `void tab_set_net_allowed(tab *t, int allowed)`
-- `tab_set_css_allowed` (function) `src/tab.c:2645` `void tab_set_css_allowed(tab *t, int allowed)`
-- `tab_last_subreq_stats` (function) `src/tab.c:2650` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
-- `tab_set_viewport_w` (function) `src/tab.c:2655` `void tab_set_viewport_w(tab *t, int px)`
-- `tab_set_cookies` (function) `src/tab.c:2660` `void tab_set_cookies(tab *t, const char *cookies)`
-- `tab_subreq_permitted` (function) `src/tab.c:2666` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-- `answered` (function) `src/tab.c:2678` `* A refused frame is still consumed and answered (status 0), so the protocol never
+- `child_handle_click` (function) `src/tab.c:1481` `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
+- `child_handle_tick` (function) `src/tab.c:1485` `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
+- `child_handle_event` (function) `src/tab.c:1495` `static void child_handle_event(int wfd, child_state *cs)`
+- `child_handle_mouse` (function) `src/tab.c:1543` `static void child_handle_mouse(int wfd, child_state *cs)` -- Handles a mouse DOM event (OP_MOUSE).
+- `geom_parent` (function) `src/tab.c:1573` `static dom_node_id geom_parent(void *ctx, dom_node_id n)`
+- `child_handle_geom` (function) `src/tab.c:1581` `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)` -- OP_GEOM (spec/js_geom.md): installs the parent's laid-out geometry into the page's JS, aggregated into ancestors...
+- `child_handle_submit` (function) `src/tab.c:1605` `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)` -- Fires a submit event on the form enclosing node_id.
+- `child_handle_eval` (function) `src/tab.c:1639` `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` -- Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a...
+- `child_handle_decode_image` (function) `src/tab.c:1672` `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` -- Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data].
+- `child_handle_decode_image_b64` (function) `src/tab.c:1694` `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)` -- data: URI images: the parent only sliced the base64 payload (pure pointer arithmetic, no interpretation); the base64...
+- `gen_session_key` (function) `src/tab.c:1706` `static uint64_t gen_session_key(void)`
+- `tab_worker_run` (function) `src/tab.c:1726` `static void tab_worker_run(int rfd, int wfd)` -- The confined request loop.
+- `EPIPE` (function) `src/tab.c:1728` `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();`
+- `tzset` (function) `src/tab.c:1744` `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);`
+- `depth` (function) `src/tab.c:1749` `* defense in depth (seccomp already excludes open/socket/exec);`
+- `parse_worker_fd` (function) `src/tab.c:1924` `static int parse_worker_fd(const char *s, int *out)` -- free(buf); free(url); free(cookies); free(storage); } child_reset_page(&cs); fb_buffer_free(&cs.log); _exit(0); } /*...
+- `tab_parse_worker_args` (function) `src/tab.c:1936` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
+- `tab_worker_dispatch` (function) `src/tab.c:1946` `void tab_worker_dispatch(int argc, char **argv)`
+- `load` (function) `src/tab.c:1963` `* subresource requests this load (set per page: host in allow.conf AND js.conf);`
+- `ignore_sigpipe` (function) `src/tab.c:1984` `static void ignore_sigpipe(void)` -- A write to a dead child must not kill the parent with SIGPIPE.
+- `tab_refresh_alive` (function) `src/tab.c:1991` `static void tab_refresh_alive(tab *t)`
+- `read_field` (function) `src/tab.c:2010` `static int read_field(int fd, char **out, size_t *out_len)` -- Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.
+- `read_view` (function) `src/tab.c:2026` `static int read_view(int fd, pv_view **out)` -- Reads a display list serialised by write_view into a fresh pv_view.
+- `tests` (function) `src/tab.c:2101` `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...`
+- `layout` (function) `src/tab.c:2205` `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....`
+- `column` (function) `src/tab.c:2216` `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...`
+- `read_console` (function) `src/tab.c:2526` `static int read_console(int fd, fb_buffer *out)` -- Reads the console section written by write_console into out (a zero-initialised fb_buffer).
+- `send_request` (function) `src/tab.c:2563` `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` -- if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt...
+- `io_failure` (function) `src/tab.c:2573` `static tab_status io_failure(tab *t)`
+- `exec_worker_child` (function) `src/tab.c:2581` `static void exec_worker_child(int rfd, int wfd)` -- Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other...
+- `tab_set_fetcher` (function) `src/tab.c:2652` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
+- `tab_set_css_sink` (function) `src/tab.c:2658` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
+- `tab_set_net_allowed` (function) `src/tab.c:2664` `void tab_set_net_allowed(tab *t, int allowed)`
+- `tab_set_css_allowed` (function) `src/tab.c:2669` `void tab_set_css_allowed(tab *t, int allowed)`
+- `tab_last_subreq_stats` (function) `src/tab.c:2674` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
+- `tab_set_viewport_w` (function) `src/tab.c:2679` `void tab_set_viewport_w(tab *t, int px)`
+- `tab_set_cookies` (function) `src/tab.c:2684` `void tab_set_cookies(tab *t, const char *cookies)`
+- `tab_subreq_permitted` (function) `src/tab.c:2690` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
+- `answered` (function) `src/tab.c:2702` `* A refused frame is still consumed and answered (status 0), so the protocol never
  * desyncs. Re...`
-- `hist_ops_free` (function) `src/tab.c:2721` `static void hist_ops_free(tab_hist_op *ops, size_t n)`
-- `is_activation_event` (function) `src/tab.c:2786` `static int is_activation_event(const char *type)` -- HTML 6.4.2 activation-triggering input events: only these let a page open a * window.
-- `open_urls_free` (function) `src/tab.c:2795` `static void open_urls_free(char **u, size_t n)`
-- `read_opens` (function) `src/tab.c:2805` `static tab_status read_opens(tab *t, const char *page_url, int gesture,
+- `hist_ops_free` (function) `src/tab.c:2745` `static void hist_ops_free(tab_hist_op *ops, size_t n)`
+- `is_activation_event` (function) `src/tab.c:2810` `static int is_activation_event(const char *type)` -- HTML 6.4.2 activation-triggering input events: only these let a page open a * window.
+- `open_urls_free` (function) `src/tab.c:2819` `static void open_urls_free(char **u, size_t n)`
+- `read_opens` (function) `src/tab.c:2829` `static tab_status read_opens(tab *t, const char *page_url, int gesture,
                          ...` -- Reads the window.open block (see write_opens).
-- `ws_ops_free` (function) `src/tab.c:2834` `static void ws_ops_free(tab_ws_op *ops, size_t n)`
-- `read_ws` (function) `src/tab.c:2843` `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` -- Reads the WebSocket block (see write_ws), bounded by JT_WS_MAX_OPS ops and JT_WS_MAX_BYTES of payload.
-- `gate_js_nav` (function) `src/tab.c:2912` `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` -- Gates a raw JS navigation request against the page URL in the trusted parent (Zero Trust: a compromised worker...
-- `tab_load` (function) `src/tab.c:2922` `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-- `tab_load_ex` (function) `src/tab.c:2926` `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-- `tab_load_full` (function) `src/tab.c:2930` `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+- `ws_ops_free` (function) `src/tab.c:2858` `static void ws_ops_free(tab_ws_op *ops, size_t n)`
+- `read_ws` (function) `src/tab.c:2867` `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` -- Reads the WebSocket block (see write_ws), bounded by JT_WS_MAX_OPS ops and JT_WS_MAX_BYTES of payload.
+- `gate_js_nav` (function) `src/tab.c:2936` `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` -- Gates a raw JS navigation request against the page URL in the trusted parent (Zero Trust: a compromised worker...
+- `tab_load` (function) `src/tab.c:2946` `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
+- `tab_load_ex` (function) `src/tab.c:2950` `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
+- `tab_load_full` (function) `src/tab.c:2954` `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...`
-- `tab_click` (function) `src/tab.c:3125` `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-- `tab_tick` (function) `src/tab.c:3132` `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-- `tab_submit` (function) `src/tab.c:3141` `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` -- Dispatches a submit event on the form enclosing node_id.
-- `tab_read_view` (function) `src/tab.c:3246` `tab_status tab_read_view(tab *t, tab_page *out)` -- Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console). * Used by tab_mutation_request...
-- `tab_read_view_ex` (function) `src/tab.c:3250` `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
-- `tab_eval` (function) `src/tab.c:3346` `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-- `tab_decode_image_op` (function) `src/tab.c:3386` `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
+- `tab_click` (function) `src/tab.c:3149` `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
+- `tab_tick` (function) `src/tab.c:3156` `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
+- `tab_submit` (function) `src/tab.c:3165` `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` -- Dispatches a submit event on the form enclosing node_id.
+- `tab_read_view` (function) `src/tab.c:3270` `tab_status tab_read_view(tab *t, tab_page *out)` -- Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console). * Used by tab_mutation_request...
+- `tab_read_view_ex` (function) `src/tab.c:3274` `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
+- `tab_eval` (function) `src/tab.c:3370` `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
+- `tab_decode_image_op` (function) `src/tab.c:3410` `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
         ...` -- Shared by tab_decode_image and tab_decode_image_data_url: sends `bytes` under opcode `op` and parses the...
-- `tab_decode_image` (function) `src/tab.c:3428` `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-- `tab_decode_image_data_url` (function) `src/tab.c:3434` `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
-- `tab_alive` (function) `src/tab.c:3452` `int tab_alive(const tab *t)`
-- `tab_child_pid` (function) `src/tab.c:3458` `pid_t tab_child_pid(const tab *t)`
-- `tab_close` (function) `src/tab.c:3462` `void tab_close(tab *t)`
-- `tab_page_free` (function) `src/tab.c:3477` `void tab_page_free(tab_page *p)`
-- `tab_eval_result_free` (function) `src/tab.c:3507` `void tab_eval_result_free(tab_eval_result *r)`
-- `tab_image_free` (function) `src/tab.c:3516` `void tab_image_free(tab_image *img)`
-- `tab_set_geometry` (function) `src/tab.c:3526` `tab_status tab_set_geometry(tab *t, const jg_table *g)`
-- `tab_popstate` (function) `src/tab.c:3552` `tab_status tab_popstate(tab *t, int index, tab_page *out)`
-- `tab_ws_event` (function) `src/tab.c:3558` `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
+- `tab_decode_image` (function) `src/tab.c:3452` `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
+- `tab_decode_image_data_url` (function) `src/tab.c:3458` `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
+- `tab_alive` (function) `src/tab.c:3476` `int tab_alive(const tab *t)`
+- `tab_child_pid` (function) `src/tab.c:3482` `pid_t tab_child_pid(const tab *t)`
+- `tab_close` (function) `src/tab.c:3486` `void tab_close(tab *t)`
+- `tab_page_free` (function) `src/tab.c:3501` `void tab_page_free(tab_page *p)`
+- `tab_eval_result_free` (function) `src/tab.c:3531` `void tab_eval_result_free(tab_eval_result *r)`
+- `tab_image_free` (function) `src/tab.c:3540` `void tab_image_free(tab_image *img)`
+- `tab_set_geometry` (function) `src/tab.c:3550` `tab_status tab_set_geometry(tab *t, const jg_table *g)`
+- `tab_popstate` (function) `src/tab.c:3576` `tab_status tab_popstate(tab *t, int index, tab_page *out)`
+- `tab_ws_event` (function) `src/tab.c:3582` `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
        ...`
-- `tab_set_storage` (function) `src/tab.c:3577` `void tab_set_storage(tab *t, const char *blob, size_t len)`
+- `tab_set_storage` (function) `src/tab.c:3601` `void tab_set_storage(tab *t, const char *blob, size_t len)`
 
 ## src/text_shape.c
 Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
 - `generic_name` (function) `src/text_shape.c:55` `static const char *generic_name(int family)`
 - `backend_init` (function) `src/text_shape.c:65` `static int backend_init(void)`
 - `read_font_file` (function) `src/text_shape.c:82` `static unsigned char *read_font_file(const char *path, long *out_n)`
-- `load_entry` (function) `src/text_shape.c:160` `static int load_entry(tsh_entry *e, int family, int bold, int italic)`
-- `get_entry` (function) `src/text_shape.c:164` `static tsh_entry *get_entry(int family, int bold, int italic)`
-- `web_entry_free` (function) `src/text_shape.c:192` `static void web_entry_free(tsh_web *w)`
-- `slice` (function) `src/text_shape.c:204` `* woff2 slice (spec/webfont.md);`
-- `web_magic_ok` (function) `src/text_shape.c:205` `static int web_magic_ok(const unsigned char *b, size_t n)` -- True for font programs FreeType parses without new decoders: wOFF/TrueType/ CFF-OpenType (and the mac aliases). wOF2...
-- `web_make_entry` (function) `src/text_shape.c:218` `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)` -- Builds the shaping faces over an OWNED copy of bytes[0,nbytes) into e (shared tail with load_entry's file path: same...
-- `tsh_webfont_register` (function) `src/text_shape.c:258` `int tsh_webfont_register(const char *name,
+- `characters` (function) `src/text_shape.c:100` `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...`
+- `load_entry_named` (function) `src/text_shape.c:103` `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)`
+- `load_entry_file` (function) `src/text_shape.c:133` `static int load_entry_file(tsh_entry *e, const char *path, int index)` -- Loads face `index` of the font file at `path` into e (FreeType + cairo + * HarfBuzz over one owned copy of the bytes).
+- `load_entry` (function) `src/text_shape.c:169` `static int load_entry(tsh_entry *e, int family, int bold, int italic)`
+- `get_entry` (function) `src/text_shape.c:173` `static tsh_entry *get_entry(int family, int bold, int italic)`
+- `web_entry_free` (function) `src/text_shape.c:201` `static void web_entry_free(tsh_web *w)`
+- `slice` (function) `src/text_shape.c:213` `* woff2 slice (spec/webfont.md);`
+- `web_magic_ok` (function) `src/text_shape.c:214` `static int web_magic_ok(const unsigned char *b, size_t n)` -- True for font programs FreeType parses without new decoders: wOFF/TrueType/ CFF-OpenType (and the mac aliases). wOF2...
+- `web_make_entry` (function) `src/text_shape.c:227` `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)` -- Builds the shaping faces over an OWNED copy of bytes[0,nbytes) into e (shared tail with load_entry's file path: same...
+- `tsh_webfont_register` (function) `src/text_shape.c:267` `int tsh_webfont_register(const char *name,
                          const unsigned char *bytes, s...`
-- `tsh_webfont_clear` (function) `src/text_shape.c:292` `void tsh_webfont_clear(void)`
-- `web_find` (function) `src/text_shape.c:297` `static tsh_entry *web_find(unsigned h, int bold, int italic)`
-- `entry_free` (function) `src/text_shape.c:309` `static void entry_free(tsh_entry *e)`
-- `ascii_ieq` (function) `src/text_shape.c:322` `static int ascii_ieq(const char *a, const char *b)`
-- `tsh_family_is_generic` (function) `src/text_shape.c:331` `int tsh_family_is_generic(const char *name)`
-- `tsh_pick_from_list` (function) `src/text_shape.c:343` `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
+- `tsh_webfont_clear` (function) `src/text_shape.c:301` `void tsh_webfont_clear(void)`
+- `web_find` (function) `src/text_shape.c:306` `static tsh_entry *web_find(unsigned h, int bold, int italic)`
+- `entry_free` (function) `src/text_shape.c:318` `static void entry_free(tsh_entry *e)`
+- `ascii_ieq` (function) `src/text_shape.c:331` `static int ascii_ieq(const char *a, const char *b)`
+- `tsh_family_is_generic` (function) `src/text_shape.c:340` `int tsh_family_is_generic(const char *name)`
+- `tsh_pick_from_list` (function) `src/text_shape.c:352` `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
                   ...`
-- `tsh_pick_family` (function) `src/text_shape.c:364` `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
+- `tsh_pick_family` (function) `src/text_shape.c:373` `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
         ...`
-- `fc_installed` (function) `src/text_shape.c:377` `static int fc_installed(const char *name, void *ctx)` -- const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...
-- `fc_resolve` (function) `src/text_shape.c:393` `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
-- `local_clear` (function) `src/text_shape.c:437` `static void local_clear(void)`
-- `lfam_index` (function) `src/text_shape.c:447` `static int lfam_index(const char *fam)`
-- `tsh_local_handle` (function) `src/text_shape.c:455` `int tsh_local_handle(const char *list)`
-- `local_entry` (function) `src/text_shape.c:474` `static tsh_entry *local_entry(int handle, int bold, int italic)`
-- `get_entry_ex` (function) `src/text_shape.c:494` `static tsh_entry *get_entry_ex(const tsh_font *f)` -- Entry for a full font selector: a registered @font-face wins over the local bucket stack; a set-but-unregistered...
-- `tsh_ready` (function) `src/text_shape.c:506` `int tsh_ready(void)`
-- `tsh_shape` (function) `src/text_shape.c:511` `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
+- `fc_installed` (function) `src/text_shape.c:386` `static int fc_installed(const char *name, void *ctx)` -- const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...
+- `fc_resolve` (function) `src/text_shape.c:429` `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
+- `local_clear` (function) `src/text_shape.c:474` `static void local_clear(void)`
+- `lfam_index` (function) `src/text_shape.c:484` `static int lfam_index(const char *fam)`
+- `tsh_local_handle` (function) `src/text_shape.c:492` `int tsh_local_handle(const char *list)`
+- `local_entry` (function) `src/text_shape.c:511` `static tsh_entry *local_entry(int handle, int bold, int italic)`
+- `get_entry_ex` (function) `src/text_shape.c:531` `static tsh_entry *get_entry_ex(const tsh_font *f)` -- Entry for a full font selector: a registered @font-face wins over the local bucket stack; a set-but-unregistered...
+- `tsh_ready` (function) `src/text_shape.c:543` `int tsh_ready(void)`
+- `tsh_shape` (function) `src/text_shape.c:548` `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
                 ...`
-- `tsh_measure` (function) `src/text_shape.c:556` `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
-- `tsh_draw` (function) `src/text_shape.c:563` `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
+- `utf8_next` (function) `src/text_shape.c:597` `static unsigned utf8_next(const char *s, size_t n, size_t *len)` -- Decodes one UTF-8 sequence at s[0..n): the code point (U+FFFD for a malformed * sequence) and its byte length (>= 1...
+- `rides_previous` (function) `src/text_shape.c:614` `static int rides_previous(unsigned cp)` -- size_t l = (c < 0x80) ?
+- `tsh_segment` (function) `src/text_shape.c:622` `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
+                tsh_...`
+- `fb_clear` (function) `src/text_shape.c:662` `static void fb_clear(void)`
+- `fb_entry` (function) `src/text_shape.c:672` `static tsh_entry *fb_entry(unsigned cp, int bold)` -- The fallback entry covering cp (bold or regular), or NULL.
+- `cover_cp` (function) `src/text_shape.c:743` `static int cover_cp(unsigned cp, void *vctx)` -- cover callback: 0 when the requested face has the glyph (or nothing else * does), else the id of the fallback face...
+- `shape_entry` (function) `src/text_shape.c:756` `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
+            ...` -- does), else the id of the fallback face that has it. static int cover_cp(unsigned cp, void *vctx) { tsh_cover_ctx *c...
+- `shape_runs` (function) `src/text_shape.c:787` `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
+               ...` -- Measures (cr == NULL) or draws [text,len) run by run, each with the face that * has its glyphs.
+- `tsh_measure` (function) `src/text_shape.c:829` `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
+- `tsh_draw` (function) `src/text_shape.c:835` `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
                     double x, doub...`
-- `tsh_face` (function) `src/text_shape.c:585` `cairo_font_face_t *tsh_face(const tsh_font *f)`
-- `tsh_shutdown` (function) `src/text_shape.c:591` `void tsh_shutdown(void)`
+- `tsh_face` (function) `src/text_shape.c:842` `cairo_font_face_t *tsh_face(const tsh_font *f)`
+- `tsh_shutdown` (function) `src/text_shape.c:848` `void tsh_shutdown(void)`
 
 ## src/textfield.c
 Depends on: `include/textfield.h`
@@ -406,86 +476,5 @@ Depends on: `include/data_url.h`, `include/text_shape.h`, `include/url.h`, `incl
 - `wf_load_document` (function) `src/webfont_load.c:229` `int wf_load_document(wf_fetch_fn fetch, void *fctx, const char *page_url,
                      co...`
 
-## src/ws_hub.c
-Depends on: `include/ws_hub.h`
-- `dup_str` (function) `src/ws_hub.c:54` `static char *dup_str(const char *s)`
-- `job_free` (function) `src/ws_hub.c:63` `static void job_free(wh_job *j)`
-- `job_str` (function) `src/ws_hub.c:71` `static int job_str(wh_job *j, size_t slot, const char **field)` -- if (n == (size_t)-1) return NULL; char *d = (char *)malloc(n + 1); if (d != NULL) memcpy(d, s, n + 1); return d; }...
-- `open_thread` (function) `src/ws_hub.c:79` `static void *open_thread(void *arg)`
-- `conn_clear` (function) `src/ws_hub.c:98` `static void conn_clear(wh_conn *c)`
-- `find_id` (function) `src/ws_hub.c:104` `static wh_conn *find_id(wh_hub *h, int id)`
-- `find_token` (function) `src/ws_hub.c:110` `static wh_conn *find_token(wh_hub *h, uint64_t token)`
-- `wh_new` (function) `src/ws_hub.c:116` `wh_hub *wh_new(void)`
-- `wh_free` (function) `src/ws_hub.c:129` `void wh_free(wh_hub *h)`
-- `wh_notify_fd` (function) `src/ws_hub.c:144` `int wh_notify_fd(const wh_hub *h)`
-- `wh_open_async` (function) `src/ws_hub.c:148` `int wh_open_async(wh_hub *h, int id, const char *url, const sf_config *cfg)`
-- `wh_on_notify` (function) `src/ws_hub.c:192` `void wh_on_notify(wh_hub *h, wh_emit_fn emit, void *ctx)`
-- `wh_send` (function) `src/ws_hub.c:221` `int wh_send(wh_hub *h, int id, const void *data, size_t len, int binary)`
-- `wh_close` (function) `src/ws_hub.c:228` `void wh_close(wh_hub *h, int id)`
-- `wh_close_all` (function) `src/ws_hub.c:234` `void wh_close_all(wh_hub *h)`
-- `wh_poll_fds` (function) `src/ws_hub.c:240` `size_t wh_poll_fds(const wh_hub *h, struct pollfd *out, int *ids, size_t cap)`
-- `fail_conn` (function) `src/ws_hub.c:258` `static void fail_conn(wh_conn *c, int id, wh_emit_fn emit, void *ctx)` -- const wh_conn *c = &h->c[i]; if (!c->used || c->pending || c->ws == NULL) continue; int fd = sf_ws_fd(c->ws); if (fd...
-- `wh_on_readable` (function) `src/ws_hub.c:266` `void wh_on_readable(wh_hub *h, int id, wh_emit_fn emit, void *ctx)`
-- `wh_count` (function) `src/ws_hub.c:314` `size_t wh_count(const wh_hub *h)`
 
-## src/zoom.c
-Depends on: `include/zoom.h`
-- `zm_clamp` (function) `src/zoom.c:14` `int zm_clamp(int pct)`
-- `zm_zoom_in` (function) `src/zoom.c:20` `int zm_zoom_in(int pct)`
-- `zm_zoom_out` (function) `src/zoom.c:28` `int zm_zoom_out(int pct)`
-- `zm_reset` (function) `src/zoom.c:36` `int zm_reset(void)`
-- `zm_scale` (function) `src/zoom.c:40` `double zm_scale(int pct)`
-- `zm_apply` (function) `src/zoom.c:44` `double zm_apply(double base_px, int pct)`
-
-## tools/ffgeom.py
-- `load_rows` (function) `tools/ffgeom.py:112` `def load_rows(path)`
-- `lum` (function) `tools/ffgeom.py:165` `def lum(p)`
-- `lum_at` (function) `tools/ffgeom.py:177` `def lum_at(x, y)`
-- `bit` (function) `tools/ffgeom.py:202` `def bit(grid_row, cell, origin)`
-- `word` (function) `tools/ffgeom.py:205` `def word(grid_row, origin)`
-- `decode` (function) `tools/ffgeom.py:235` `def decode(path)`
-- `probe` (function) `tools/ffgeom.py:261` `def probe(page, selector, out_html)`
-- `height_probe` (function) `tools/ffgeom.py:275` `def height_probe(page, out_html)`
-- `height` (function) `tools/ffgeom.py:288` `def height(path)` -- Decodes the scrollHeight carried by the #__ffh sentinel: the probe encodes one rect (its height), which decode()...
-- `main` (function) `tools/ffgeom.py:297` `def main(argv)`
-
-## tools/gen_psl.c
-- `vec_push` (function) `tools/gen_psl.c:27` `static void vec_push(vec *v, const char *s)`
-- `cmp_str` (function) `tools/gen_psl.c:38` `static int cmp_str(const void *a, const void *b)`
-- `sort_unique` (function) `tools/gen_psl.c:43` `static void sort_unique(vec *v)` -- v->cap = v->cap ? v->cap * 2 : 1024; v->items = (char **)realloc(v->items, v->cap * sizeof *v->items); if (v->items...
-- `ascii_lower` (function) `tools/gen_psl.c:55` `static void ascii_lower(char *s)` -- /* Sorts then drops adjacent duplicates in place. static void sort_unique(vec *v) { qsort(v->items, v->len, sizeof...
-- `emit` (function) `tools/gen_psl.c:61` `static void emit(const char *name, vec *v)`
-- `main` (function) `tools/gen_psl.c:67` `int main(int argc, char **argv)`
-
-## tools/mutate.py
-- `line_sites` (function) `tools/mutate.py:41` `def line_sites(text)`
-- `mutate_line` (function) `tools/mutate.py:75` `def mutate_line(line, op)`
-- `find_modules` (function) `tools/mutate.py:107` `def find_modules(root)`
-- `run_make` (function) `tools/mutate.py:116` `def run_make(root, target)`
-- `run_bin` (function) `tools/mutate.py:125` `def run_bin(path)`
-- `main` (function) `tools/mutate.py:137` `def main(argv)`
-
-## tools/pngdiff.c
-- `pd_reader_close` (function) `tools/pngdiff.c:79` `static void pd_reader_close(pd_reader *r)`
-- `pd_reader_open` (function) `tools/pngdiff.c:88` `static int pd_reader_open(pd_reader *r, const char *path)` -- Opens `path` and normalises whatever colour type it carries into 8-bit RGB, so * the two passes below can assume...
-- `png_set_background` (function) `tools/pngdiff.c:116` `png_set_background(r->png, &(png_color_16)` -- Compose against white rather than dropping alpha: a transparent region of a screenshot is what the viewer would see...
-- `pd_lum` (function) `tools/pngdiff.c:141` `static double pd_lum(const png_byte *p)`
-- `pd_background` (function) `tools/pngdiff.c:147` `static int pd_background(const char *path, double *out_bg)` -- Pass 1: the modal luminance IS the page background.
-- `pd_profile_of` (function) `tools/pngdiff.c:175` `static int pd_profile_of(const char *path, pd_profile *out)` -- int b = (int)(pd_lum(&r.row[(size_t)x * 3u]) + 0.5); if (b < 0) b = 0; if (b > 255) b = 255; hist[b]++; } } int best...
-- `pd_mae` (function) `tools/pngdiff.c:227` `static double pd_mae(const double *a, const double *b, size_t n)`
-- `main` (function) `tools/pngdiff.c:233` `int main(int argc, char **argv)`
-
-## tools/pngprof.py
-- `load_rows` (function) `tools/pngprof.py:41` `def load_rows(path)`
-- `lum` (function) `tools/pngprof.py:95` `def lum(p)`
-- `render_glyph` (function) `tools/pngprof.py:99` `def render_glyph(v)`
-- `main` (function) `tools/pngprof.py:109` `def main(argv)`
-
-## tools/snapshot.py
-- `fetch` (function) `tools/snapshot.py:17` `def fetch(url)`
-- `expand_imports` (function) `tools/snapshot.py:31` `def expand_imports(css, base, depth)` -- Replace each @import with the imported text (wrapped in @media when the import carries a media condition), resolved...
-- `repl` (function) `tools/snapshot.py:34` `def repl(m)`
-- `inline_css` (function) `tools/snapshot.py:48` `def inline_css(html, base)`
-- `repl` (function) `tools/snapshot.py:49` `def repl(m)`
-- `main` (function) `tools/snapshot.py:69` `def main()`
-
+Next: [API_p10.md](API_p10.md)

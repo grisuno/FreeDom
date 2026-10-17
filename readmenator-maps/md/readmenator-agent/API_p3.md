@@ -1,76 +1,85 @@
-# API (page 3 of 9)
+# API (page 3 of 10)
 Previous: [API_p2.md](API_p2.md)
 
 ## gui/browser_ui.c (continued)
-- `freebug_pointer_button` (function) `gui/browser_ui.c:14987` `static void freebug_pointer_button(browser_window *w, uint32_t serial,
+- `freebug_show` (function) `gui/browser_ui.c:15205` `static void freebug_show(browser_window *w)`
+- `freebug_toggle` (function) `gui/browser_ui.c:15235` `static void freebug_toggle(browser_window *w)`
+- `freebug_destroy` (function) `gui/browser_ui.c:15240` `static void freebug_destroy(browser_window *w)`
+- `freebug_owns_surface` (function) `gui/browser_ui.c:15247` `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
+- `freebug_is_open` (function) `gui/browser_ui.c:15251` `static int freebug_is_open(const browser_window *w)`
+- `freebug_repl_worker` (function) `gui/browser_ui.c:15258` `static tab *freebug_repl_worker(browser_window *w)` -- Returns the live page worker for the REPL, lazily (re)opening one bound to the active page's cache if none is kept...
+- `freebug_eval` (function) `gui/browser_ui.c:15296` `static void freebug_eval(browser_window *w)`
+- `freebug_handle_key` (function) `gui/browser_ui.c:15336` `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
+                             ...`
+- `freebug_pointer_button` (function) `gui/browser_ui.c:15371` `static void freebug_pointer_button(browser_window *w, uint32_t serial,
                           ...`
-- `freebug_pointer_motion` (function) `gui/browser_ui.c:15006` `static void freebug_pointer_motion(browser_window *w)`
-- `freebug_pointer_axis` (function) `gui/browser_ui.c:15028` `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
-- `down` (function) `gui/browser_ui.c:15040` `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void...`
-- `ptr_enter` (function) `gui/browser_ui.c:15046` `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
+- `freebug_pointer_motion` (function) `gui/browser_ui.c:15390` `static void freebug_pointer_motion(browser_window *w)`
+- `freebug_pointer_axis` (function) `gui/browser_ui.c:15412` `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
+- `down` (function) `gui/browser_ui.c:15424` `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void...`
+- `ptr_enter` (function) `gui/browser_ui.c:15430` `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_...`
-- `ptr_leave` (function) `gui/browser_ui.c:15064` `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
-- `ptr_motion` (function) `gui/browser_ui.c:15081` `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
-- `load_current` (function) `gui/browser_ui.c:15106` `static void load_current(browser_window *w)`
-- `go_omnibox` (function) `gui/browser_ui.c:15119` `static void go_omnibox(browser_window *w)` -- Commits the URL bar like a real omnibox: an existing local file is opened as before; otherwise url_omnibox (pure)...
-- `ptr_button` (function) `gui/browser_ui.c:15164` `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
+- `ptr_leave` (function) `gui/browser_ui.c:15448` `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
+- `ptr_motion` (function) `gui/browser_ui.c:15465` `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
+- `load_current` (function) `gui/browser_ui.c:15490` `static void load_current(browser_window *w)`
+- `go_omnibox` (function) `gui/browser_ui.c:15503` `static void go_omnibox(browser_window *w)` -- Commits the URL bar like a real omnibox: an existing local file is opened as before; otherwise url_omnibox (pure)...
+- `ptr_button` (function) `gui/browser_ui.c:15548` `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
               ...`
-- `scroll_line_px` (function) `gui/browser_ui.c:15411` `static double scroll_line_px(const browser_window *w)` -- const rd_block *again = NULL; for (size_t i = 0; w->doc != NULL && i < rd_count(w->doc); ++i) { const rd_block *b =...
-- `ptr_axis` (function) `gui/browser_ui.c:15415` `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
+- `scroll_line_px` (function) `gui/browser_ui.c:15795` `static double scroll_line_px(const browser_window *w)` -- const rd_block *again = NULL; for (size_t i = 0; w->doc != NULL && i < rd_count(w->doc); ++i) { const rd_block *b =...
+- `ptr_axis` (function) `gui/browser_ui.c:15799` `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32...`
-- `ptr_frame` (function) `gui/browser_ui.c:15439` `static void ptr_frame(void *d, struct wl_pointer *p)`
-- `mime_is_text` (function) `gui/browser_ui.c:15455` `static int mime_is_text(const char *mime)` -- } static const struct wl_pointer_listener pointer_listener = { .enter = ptr_enter, .leave = ptr_leave, .motion =...
-- `data_offer_source_actions` (function) `gui/browser_ui.c:15473` `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
-- `data_offer_action` (function) `gui/browser_ui.c:15476` `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
-- `data_device_data_offer` (function) `gui/browser_ui.c:15486` `static void data_device_data_offer(void *data, struct wl_data_device *dev,
+- `ptr_frame` (function) `gui/browser_ui.c:15823` `static void ptr_frame(void *d, struct wl_pointer *p)`
+- `mime_is_text` (function) `gui/browser_ui.c:15839` `static int mime_is_text(const char *mime)` -- } static const struct wl_pointer_listener pointer_listener = { .enter = ptr_enter, .leave = ptr_leave, .motion =...
+- `data_offer_source_actions` (function) `gui/browser_ui.c:15857` `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
+- `data_offer_action` (function) `gui/browser_ui.c:15860` `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
+- `data_device_data_offer` (function) `gui/browser_ui.c:15870` `static void data_device_data_offer(void *data, struct wl_data_device *dev,
                       ...` -- } static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a) { (void)d; (void)o; (void)a; }...
-- `data_device_selection` (function) `gui/browser_ui.c:15498` `static void data_device_selection(void *data, struct wl_data_device *dev,
+- `data_device_selection` (function) `gui/browser_ui.c:15882` `static void data_device_selection(void *data, struct wl_data_device *dev,
                        ...` -- The clipboard selection changed.
-- `data_device_enter` (function) `gui/browser_ui.c:15517` `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
+- `data_device_enter` (function) `gui/browser_ui.c:15901` `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
              ...` -- wl_data_offer_destroy(w->selection_offer); if (offer == NULL) { w->selection_offer = NULL...
-- `data_device_leave` (function) `gui/browser_ui.c:15522` `static void data_device_leave(void *d, struct wl_data_device *dev)`
-- `data_device_motion` (function) `gui/browser_ui.c:15523` `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
+- `data_device_leave` (function) `gui/browser_ui.c:15906` `static void data_device_leave(void *d, struct wl_data_device *dev)`
+- `data_device_motion` (function) `gui/browser_ui.c:15907` `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
                  ...`
-- `data_device_drop` (function) `gui/browser_ui.c:15527` `static void data_device_drop(void *d, struct wl_data_device *dev)`
-- `data_source_cancelled` (function) `gui/browser_ui.c:15538` `static void data_source_cancelled(void *data, struct wl_data_source *src)` -- wl_fixed_t x, wl_fixed_t y) { (void)d; (void)dev; (void)t; (void)x; (void)y; } static void data_device_drop(void *d...
-- `data_source_send` (function) `gui/browser_ui.c:15544` `static void data_source_send(void *data, struct wl_data_source *src,
+- `data_device_drop` (function) `gui/browser_ui.c:15911` `static void data_device_drop(void *d, struct wl_data_device *dev)`
+- `data_source_cancelled` (function) `gui/browser_ui.c:15922` `static void data_source_cancelled(void *data, struct wl_data_source *src)` -- wl_fixed_t x, wl_fixed_t y) { (void)d; (void)dev; (void)t; (void)x; (void)y; } static void data_device_drop(void *d...
+- `data_source_send` (function) `gui/browser_ui.c:15928` `static void data_source_send(void *data, struct wl_data_source *src,
                             ...` -- .enter = data_device_enter, .leave = data_device_leave, .motion = data_device_motion, .drop = data_device_drop...
-- `data_source_target` (function) `gui/browser_ui.c:15557` `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
-- `freebug_copy_console` (function) `gui/browser_ui.c:15569` `static void freebug_copy_console(browser_window *w)` -- Formats the entire Freebug console buffer and places it on the Wayland clipboard, so the user can paste the...
-- `loop` (function) `gui/browser_ui.c:15618` `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately...`
-- `insert_pasted_text` (function) `gui/browser_ui.c:15627` `static void insert_pasted_text(browser_window *w, const char *text, size_t len)` -- Inserts pasted bytes into whichever text target currently has focus (page input, User-Agent box, or the URL bar).
-- `clipboard_copy` (function) `gui/browser_ui.c:15691` `static void clipboard_copy(browser_window *w)` -- Ctrl+C: copy the focused field's text (or, with nothing focused, the page address) * to the clipboard by owning a...
-- `keyboard_keymap` (function) `gui/browser_ui.c:15739` `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
+- `data_source_target` (function) `gui/browser_ui.c:15941` `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
+- `freebug_copy_console` (function) `gui/browser_ui.c:15953` `static void freebug_copy_console(browser_window *w)` -- Formats the entire Freebug console buffer and places it on the Wayland clipboard, so the user can paste the...
+- `loop` (function) `gui/browser_ui.c:16002` `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately...`
+- `insert_pasted_text` (function) `gui/browser_ui.c:16011` `static void insert_pasted_text(browser_window *w, const char *text, size_t len)` -- Inserts pasted bytes into whichever text target currently has focus (page input, User-Agent box, or the URL bar).
+- `clipboard_copy` (function) `gui/browser_ui.c:16075` `static void clipboard_copy(browser_window *w)` -- Ctrl+C: copy the focused field's text (or, with nothing focused, the page address) * to the clipboard by owning a...
+- `keyboard_keymap` (function) `gui/browser_ui.c:16123` `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
                             uint...`
-- `keyboard_enter` (function) `gui/browser_ui.c:15760` `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
+- `keyboard_enter` (function) `gui/browser_ui.c:16144` `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                         ...`
-- `keyboard_leave` (function) `gui/browser_ui.c:15767` `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
-- `key_sym_to_js_key` (function) `gui/browser_ui.c:15775` `static const char *key_sym_to_js_key(xkb_keysym_t sym)` -- Maps an xkb keysym to a JS event.key string.
-- `key_sym_to_keycode` (function) `gui/browser_ui.c:15801` `static int key_sym_to_keycode(xkb_keysym_t sym)` -- Maps an xkb keysym to a JS keyCode number.
-- `dispatch_js_event` (function) `gui/browser_ui.c:15826` `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
+- `keyboard_leave` (function) `gui/browser_ui.c:16151` `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
+- `key_sym_to_js_key` (function) `gui/browser_ui.c:16159` `static const char *key_sym_to_js_key(xkb_keysym_t sym)` -- Maps an xkb keysym to a JS event.key string.
+- `key_sym_to_keycode` (function) `gui/browser_ui.c:16185` `static int key_sym_to_keycode(xkb_keysym_t sym)` -- Maps an xkb keysym to a JS keyCode number.
+- `dispatch_js_event` (function) `gui/browser_ui.c:16210` `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
                            ...` -- Dispatches a JS DOM event to the worker for the given node_id.
-- `handle_key_press` (function) `gui/browser_ui.c:15884` `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
+- `handle_key_press` (function) `gui/browser_ui.c:16268` `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
              ...` -- Performs the effect of a single key press.
-- `key_is_repeatable` (function) `gui/browser_ui.c:16214` `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)` -- Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion and scrolling.
-- `key_repeat_arm` (function) `gui/browser_ui.c:16230` `static void key_repeat_arm(browser_window *w, uint32_t key)` -- Arms the repeat timer for key: first fire after repeat_delay ms, then every * 1/repeat_rate s.
-- `key_repeat_stop` (function) `gui/browser_ui.c:16243` `static void key_repeat_stop(browser_window *w)` -- 1/repeat_rate s.
-- `key_repeat_fire` (function) `gui/browser_ui.c:16254` `static void key_repeat_fire(browser_window *w)` -- Re-fires the currently held key.
-- `keyboard_key` (function) `gui/browser_ui.c:16268` `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
+- `key_is_repeatable` (function) `gui/browser_ui.c:16598` `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)` -- Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion and scrolling.
+- `key_repeat_arm` (function) `gui/browser_ui.c:16614` `static void key_repeat_arm(browser_window *w, uint32_t key)` -- Arms the repeat timer for key: first fire after repeat_delay ms, then every * 1/repeat_rate s.
+- `key_repeat_stop` (function) `gui/browser_ui.c:16627` `static void key_repeat_stop(browser_window *w)` -- 1/repeat_rate s.
+- `key_repeat_fire` (function) `gui/browser_ui.c:16638` `static void key_repeat_fire(browser_window *w)` -- Re-fires the currently held key.
+- `keyboard_key` (function) `gui/browser_ui.c:16652` `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                   ...`
-- `keyboard_modifiers` (function) `gui/browser_ui.c:16308` `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
+- `keyboard_modifiers` (function) `gui/browser_ui.c:16692` `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                  ...`
-- `keyboard_repeat_info` (function) `gui/browser_ui.c:16317` `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
-- `seat_caps` (function) `gui/browser_ui.c:16336` `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
-- `seat_name` (function) `gui/browser_ui.c:16347` `static void seat_name(void *d, struct wl_seat *s, const char *name)`
-- `registry_global` (function) `gui/browser_ui.c:16354` `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
+- `keyboard_repeat_info` (function) `gui/browser_ui.c:16701` `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
+- `seat_caps` (function) `gui/browser_ui.c:16720` `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
+- `seat_name` (function) `gui/browser_ui.c:16731` `static void seat_name(void *d, struct wl_seat *s, const char *name)`
+- `registry_global` (function) `gui/browser_ui.c:16738` `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...`
-- `registry_remove` (function) `gui/browser_ui.c:16374` `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
-- `ui_run_browser` (function) `gui/browser_ui.c:16384` `ui_status ui_run_browser(const char *start_url)`
-- `saving` (function) `gui/browser_ui.c:16399` `* disables saving (never clobber);`
-- `redraws` (function) `gui/browser_ui.c:16478` `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
-- `applies` (function) `gui/browser_ui.c:16548` `* persisted choice applies (prefs_parse already clamped it to a valid mode). */ const char *js_env =...`
-- `flow` (function) `gui/browser_ui.c:16757` `* flow (counting them starved aplay). A video frame read while * overdue overwrites the held slot (standard player...`
-- `cost` (function) `gui/browser_ui.c:16779` `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
+- `registry_remove` (function) `gui/browser_ui.c:16758` `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
+- `ui_run_browser` (function) `gui/browser_ui.c:16768` `ui_status ui_run_browser(const char *start_url)`
+- `saving` (function) `gui/browser_ui.c:16783` `* disables saving (never clobber);`
+- `redraws` (function) `gui/browser_ui.c:16862` `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
+- `applies` (function) `gui/browser_ui.c:16932` `* persisted choice applies (prefs_parse already clamped it to a valid mode). */ const char *js_env =...`
+- `flow` (function) `gui/browser_ui.c:17141` `* flow (counting them starved aplay). A video frame read while * overdue overwrites the held slot (standard player...`
+- `cost` (function) `gui/browser_ui.c:17163` `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
              * cheap pages paint at...`
 
 ## gui/browser_ui_internal.h
@@ -164,6 +173,11 @@ Imported by: `gui/browser_ui.c`, `src/block_flow.c`, `tests/test_block_flow.c`
 - `bf_collapse_n` (function) `include/block_flow.h:33` `* bf_collapse_n((double[])`
 - `bf_margins_adjoin` (function) `include/block_flow.h:43` `int bf_margins_adjoin(double border_px, double padding_px);` -- Whether two vertical margins separated by this much border and padding ADJOIN, i.e. whether they collapse at all...
 
+## include/box_blur.h
+Imported by: `gui/browser_ui.c`, `src/box_blur.c`, `tests/test_box_blur.c`
+- `bb_box_sizes` (function) `include/box_blur.h:16` `int bb_box_sizes(double sigma, int sizes[3]);` -- The three odd box widths approximating a Gaussian of standard deviation sigma. * Returns 0 (sizes untouched) when...
+- `BB_MAX_PIXELS` (function) `include/box_blur.h:20` `* arguments or a mask larger than BB_MAX_PIXELS (buffer untouched). */ int bb_blur_a8(unsigned char *buf, int w, int...`
+
 ## include/box_style.h
 Depends on: `include/css.h`
 Imported by: `gui/browser_ui.c`, `include/box_tree.h`, `src/box_style.c`, `src/box_tree.c`, `src/dom_debug.c`, `src/page_view.c`, `src/render_doc.c`, `tests/test_box_style.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
@@ -174,29 +188,31 @@ Imported by: `gui/browser_ui.c`, `include/box_tree.h`, `src/box_style.c`, `src/b
 - `bx_width_cap2` (function) `include/box_style.h:187` `double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w);` -- The used width cap of an element: the tighter of its `width` (w_px, w_pct) and its `max-width` (mw_px, mw_pct), each...
 - `bx_replaced_box` (function) `include/box_style.h:206` `int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den, double avail_w, double *out_w, double *out_h);` -- CSS Sizing 4 section 4: when one axis is definite and an aspect-ratio is present, the ratio supplies the other.
 - `bx_border_box_h` (function) `include/box_style.h:220` `double bx_border_box_h(double declared_h, int border_box, double pad_t, double pad_b, double bord_t, double bord_b);` -- Border-box height for a DECLARED height under box-sizing (CSS 2.1 10.6.3, CSS Box Sizing 3 section 4).
-- `page` (function) `include/box_style.h:224` `* instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That * is the case unless BOTH overflow...`
-- `bx_lp_px` (function) `include/box_style.h:246` `double bx_lp_px(int px_val, int pct_pm, double basis);` -- half plus pct_pm per-mille of `basis`.
-- `bx_content_cap` (function) `include/box_style.h:254` `double bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);` -- Content-width cap adjusted for box-sizing (2026-07-11).
-- `bx_border_span` (function) `include/box_style.h:265` `double bx_border_span(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);` -- The border-inclusive span the painter lays a box out with (its content plus left/right border; padding sits outside it).
-- `bx_flex_max_clamp` (function) `include/box_style.h:271` `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, double pad_bord_h, double margin_h);` -- Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hypothetical main size). mw_cap <= 0 =...
-- `bx_flex_min_clamp` (function) `include/box_style.h:277` `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, double pad_bord_h, double margin_h);` -- The min-width half of the same clamp (Flexbox 9.2.3): an outer base below the item's min-width (converted to the...
-- `bx_background_layer` (function) `include/box_style.h:310` `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, double *out_x, double *out_y);`
+- `block` (function) `include/box_style.h:226` `* indefinite containing block (cb_h < 0) the value behaves as auto: -1. * Without a percentage it is px_val...`
+- `bx_definite_content_h` (function) `include/box_style.h:235` `double bx_definite_content_h(double h, double min_h, double max_h, int border_box, double v_edges);` -- The definite CONTENT height an element hands its children as their percentage basis: its used height h clamped by...
+- `page` (function) `include/box_style.h:239` `* instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That * is the case unless BOTH overflow...`
+- `bx_lp_px` (function) `include/box_style.h:261` `double bx_lp_px(int px_val, int pct_pm, double basis);` -- half plus pct_pm per-mille of `basis`.
+- `bx_content_cap` (function) `include/box_style.h:269` `double bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);` -- Content-width cap adjusted for box-sizing (2026-07-11).
+- `bx_border_span` (function) `include/box_style.h:280` `double bx_border_span(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);` -- The border-inclusive span the painter lays a box out with (its content plus left/right border; padding sits outside it).
+- `bx_flex_max_clamp` (function) `include/box_style.h:286` `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, double pad_bord_h, double margin_h);` -- Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hypothetical main size). mw_cap <= 0 =...
+- `bx_flex_min_clamp` (function) `include/box_style.h:292` `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, double pad_bord_h, double margin_h);` -- The min-width half of the same clamp (Flexbox 9.2.3): an outer base below the item's min-width (converted to the...
+- `bx_background_layer` (function) `include/box_style.h:325` `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, double *out_x, double *out_y);`
 
 ## include/box_tree.h
 Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 - `closed` (function) `include/box_tree.h:34` `* fails closed (BT_ERR_RANGE) instead of overflowing the stack. */ #define BT_MAX_DEPTH 64u #define BT_MAX_CHILDREN...`
-- `one` (function) `include/box_tree.h:81` `* of forcing them all onto one (flex-wrap);`
-- `line` (function) `include/box_tree.h:97` `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a...`
-- `node` (function) `include/box_tree.h:144` `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller...`
-- `flow` (function) `include/box_tree.h:183` `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);`
-- `bottom` (function) `include/box_tree.h:190` `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in...`
-- `placed` (function) `include/box_tree.h:197` `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour)....`
-- `bt_box_hidden` (function) `include/box_tree.h:215` `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);` -- Stage 2b visibility gate: 1 when the box at `bid` or any ancestor on the parent_id chain has visibility...
-- `bt_oof_anchor` (function) `include/box_tree.h:229` `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);` -- Stage 2d out-of-flow subtree classification (spec/box_engine.md).
-- `bt_oof_root` (function) `include/box_tree.h:230` `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);`
-- `insets` (function) `include/box_tree.h:234` `* minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may...`
-- `bt_containing_block` (function) `include/box_tree.h:244` `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y...` -- The containing block of box i as the positioning solver resolves it: the viewport for FIXED (and for ABSOLUTE with...
+- `one` (function) `include/box_tree.h:90` `* of forcing them all onto one (flex-wrap);`
+- `line` (function) `include/box_tree.h:106` `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a...`
+- `node` (function) `include/box_tree.h:153` `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller...`
+- `flow` (function) `include/box_tree.h:192` `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);`
+- `bottom` (function) `include/box_tree.h:199` `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in...`
+- `placed` (function) `include/box_tree.h:206` `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour)....`
+- `bt_box_hidden` (function) `include/box_tree.h:224` `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);` -- Stage 2b visibility gate: 1 when the box at `bid` or any ancestor on the parent_id chain has visibility...
+- `bt_oof_anchor` (function) `include/box_tree.h:238` `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);` -- Stage 2d out-of-flow subtree classification (spec/box_engine.md).
+- `bt_oof_root` (function) `include/box_tree.h:239` `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);`
+- `insets` (function) `include/box_tree.h:243` `* minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may...`
+- `bt_containing_block` (function) `include/box_tree.h:253` `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y...` -- The containing block of box i as the positioning solver resolves it: the viewport for FIXED (and for ABSOLUTE with...
 
 ## include/browser.h
 Imported by: `gui/browser_ui.c`, `src/browser.c`, `tests/test_browser.c`
@@ -225,19 +241,19 @@ Depends on: `include/css_color.h`
 Imported by: `fuzz/fuzz_css.c`, `gui/browser_ui.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 - `verbatim` (function) `include/css.h:79` `* the quoted row strings verbatim (flex_layout parses them);`
 - `POINTER` (function) `include/css.h:209` `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);`
-- `family` (function) `include/css.h:666` `* LOCAL family (spec/text_shape.md section 7);`
-- `translate` (function) `include/css.h:825` `* translate()/translateX()/translateY();`
-- `scaleY` (function) `include/css.h:826` `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
-- `declared` (function) `include/css.h:830` `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
-- `element` (function) `include/css.h:835` `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
-- `slots` (function) `include/css.h:842` `* parse time into ALL seven slots (singular matrices fail closed);`
-- `palette` (function) `include/css.h:997` `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
-- `css_free` (function) `include/css.h:1047` `void css_free(css_sheet *s);` -- As css_parse_scoped, plus the drop sink. log == NULL is exactly css_parse_scoped: same path, same sheet, same cost.
-- `order` (function) `include/css.h:1050` `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
-- `inherited_px` (function) `include/css.h:1156` `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
-- `css_font_face_count` (function) `include/css.h:1172` `size_t css_font_face_count(const css_sheet *sheet);` -- Web font access: returns the number of @font-face declarations parsed into the sheet, and copies the i-th...
-- `css_font_face_at` (function) `include/css.h:1173` `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
-- `css_resolve_anim_keyframes` (function) `include/css.h:1181` `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);` -- Resolve @keyframes: scans sheet->keyframes[] for a name matching s->anim_name (first-char match).
+- `family` (function) `include/css.h:670` `* LOCAL family (spec/text_shape.md section 7);`
+- `translate` (function) `include/css.h:835` `* translate()/translateX()/translateY();`
+- `scaleY` (function) `include/css.h:836` `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
+- `declared` (function) `include/css.h:840` `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
+- `element` (function) `include/css.h:845` `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
+- `slots` (function) `include/css.h:852` `* parse time into ALL seven slots (singular matrices fail closed);`
+- `palette` (function) `include/css.h:1007` `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
+- `css_free` (function) `include/css.h:1057` `void css_free(css_sheet *s);` -- As css_parse_scoped, plus the drop sink. log == NULL is exactly css_parse_scoped: same path, same sheet, same cost.
+- `order` (function) `include/css.h:1060` `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
+- `inherited_px` (function) `include/css.h:1166` `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
+- `css_font_face_count` (function) `include/css.h:1182` `size_t css_font_face_count(const css_sheet *sheet);` -- Web font access: returns the number of @font-face declarations parsed into the sheet, and copies the i-th...
+- `css_font_face_at` (function) `include/css.h:1183` `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
+- `css_resolve_anim_keyframes` (function) `include/css.h:1191` `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);` -- Resolve @keyframes: scans sheet->keyframes[] for a name matching s->anim_name (first-char match).
 
 ## include/css_atrule.h
 Imported by: `src/css.c`, `src/css_atrule.c`, `tests/test_css_atrule.c`
@@ -268,6 +284,7 @@ Imported by: `src/css.c`, `src/css_box.c`, `src/css_text.c`, `tests/test_css_box
 - `cb_interp_justify` (function) `include/css_box.h:36` `int cb_interp_justify(const char *v);`
 - `cb_interp_gridcols` (function) `include/css_box.h:37` `int cb_interp_gridcols(const char *v);`
 - `cb_expand_grid_template_cols` (function) `include/css_box.h:38` `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);`
+- `strings` (function) `include/css_box.h:40` `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...`
 
 ## include/css_chain.h
 Depends on: `include/css.h`, `include/css_select.h`
@@ -281,9 +298,9 @@ Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/
 
 ## include/css_decl.h
 Depends on: `include/css.h`, `include/css_select.h`
-Imported by: `include/css_box.h`, `include/css_gradient.h`, `include/css_text.h`, `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `tests/test_css_box.c`, `tests/test_css_text.c`
-- `order` (function) `include/css_decl.h:44` `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);`
-- `contiguous` (function) `include/css_decl.h:59` `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...`
+Imported by: `include/css_box.h`, `include/css_gradient.h`, `include/css_text.h`, `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `tests/test_css_box.c`, `tests/test_css_text.c`
+- `order` (function) `include/css_decl.h:45` `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);`
+- `contiguous` (function) `include/css_decl.h:60` `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...`
 
 ## include/css_gradient.h
 Depends on: `include/css_decl.h`
@@ -357,7 +374,8 @@ Imported by: `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c
 - `cv_interp_color` (function) `include/css_values.h:13` `int cv_interp_color(const char *v);`
 - `cv_color_ok` (function) `include/css_values.h:14` `int cv_color_ok(int c);`
 - `cv_bg_alpha_of` (function) `include/css_values.h:15` `int cv_bg_alpha_of(const char *v);`
-- `cv_interp_bg` (function) `include/css_values.h:16` `int cv_interp_bg(const char *v);`
+- `cv_parse_color_t7` (function) `include/css_values.h:19` `int cv_parse_color_t7(const char *v);` -- cv_parse_color with the color's alpha as TRANSPARENCY in bits 24..30 (0 opaque, 127 clear): an opaque color is...
+- `cv_interp_bg` (function) `include/css_values.h:20` `int cv_interp_bg(const char *v);`
 
 ## include/css_vars.h
 Imported by: `src/css.c`, `src/css_vars.c`, `src/page_view.c`, `tests/test_css.c`, `tests/test_css_vars.c`
@@ -433,8 +451,9 @@ Imported by: `fuzz/fuzz_css.c`, `include/box_tree.h`, `src/css.c`, `src/dom_debu
 - `fx_auto_min_size` (function) `include/flex_layout.h:263` `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` -- min_content  the item's min-content size (its longest unbreakable word, or a replaced element's intrinsic size), in...
 - `fx_justify_name` (function) `include/flex_layout.h:319` `const char *fx_justify_name(fx_justify j);` -- Stable, short English name of a justify mode for structured/agent output.
 - `height` (function) `include/flex_layout.h:325` `* used height (h_out);`
-- `win` (function) `include/flex_layout.h:342` `* margins win (both = centre, left only = end);`
-- `fx_cross_offset` (function) `include/flex_layout.h:344` `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` -- Cross-axis (horizontal) offset of a column item of width w in avail px. auto margins win (both = centre, left only =...
+- `it` (function) `include/flex_layout.h:342` `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...`
+- `win` (function) `include/flex_layout.h:350` `* margins win (both = centre, left only = end);`
+- `fx_cross_offset` (function) `include/flex_layout.h:352` `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` -- Cross-axis (horizontal) offset of a column item of width w in avail px. auto margins win (both = centre, left only =...
 
 ## include/frame_clock.h
 Imported by: `gui/browser_ui.c`, `src/frame_clock.c`, `tests/test_frame_clock.c`
@@ -473,24 +492,6 @@ Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/hostblock.c`, `tests/test
 Imported by: `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
 - `he_text_has_host` (function) `include/hostedit.h:46` `int he_text_has_host(const char *text, const char *host);` -- Returns 1 if text (the body of a hosts-format file) already lists host as a domain token on a non-comment line...
 - `he_suggest` (function) `include/hostedit.h:55` `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);` -- Omnibar autocomplete: treats allow.conf (a hosts-format text) as a favorites list.
-
-## include/html_parse.h
-Imported by: `fuzz/fuzz_dom.c`, `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_html_parse.c`, `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_page_view.c`, `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
-- `dropped` (function) `include/html_parse.h:47` `* dropped (not executed). */ #define HP_MAX_SCRIPTS ((size_t)4096) /* Returns a configuration with the secure...`
-- `cfg` (function) `include/html_parse.h:57` `* policy in cfg (cfg == NULL => secure defaults). No script is ever executed. * html == NULL or out == NULL =>...`
-- `hp_element_count` (function) `include/html_parse.h:63` `size_t hp_element_count(const hp_document *doc);` -- Parses untrusted HTML into an inert document and applies the sanitisation policy in cfg (cfg == NULL => secure...
-- `hp_script_count` (function) `include/html_parse.h:64` `size_t hp_script_count(const hp_document *doc);`
-- `hp_event_handler_count` (function) `include/html_parse.h:65` `size_t hp_event_handler_count(const hp_document *doc);`
-- `hp_extract_text` (function) `include/html_parse.h:69` `char *hp_extract_text(const hp_document *doc, size_t *out_len);` -- Owned, NUL-terminated buffers; release with hp_free. *out_len (optional) * excludes the trailing NUL.
-- `hp_get_title` (function) `include/html_parse.h:70` `char *hp_get_title(const hp_document *doc, size_t *out_len);`
-- `src` (function) `include/html_parse.h:90` `* carry their raw src (a <script src> with an inline body lists ONLY the src -- * browser rule: when src is present...`
-- `modules` (function) `include/html_parse.h:94` `* ES modules (import/export cannot run as a classic script), and template blocks * (text/x-jquery-tmpl, text/html...`
-- `hp_free_scripts` (function) `include/html_parse.h:111` `void hp_free_scripts(hp_script *scripts, size_t count);` -- Releases an array returned by hp_extract_script_list (each text/src and the * array).
-- `hp_extract_stylesheet_hrefs` (function) `include/html_parse.h:127` `char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count);` -- Returns the RAW href of every applicable <link rel=stylesheet>, in document order, as an owned array of...
-- `hp_free_stylesheet_hrefs` (function) `include/html_parse.h:130` `void hp_free_stylesheet_hrefs(char **hrefs, size_t count);` -- Returns the RAW href of every applicable <link rel=stylesheet>, in document order, as an owned array of...
-- `hp_free` (function) `include/html_parse.h:133` `void hp_free(char *buf);` -- number found.
-- `hp_document_free` (function) `include/html_parse.h:136` `void hp_document_free(hp_document *doc);` -- (ASCII case-insensitive) and NOT the token "alternate"; href is present and non-empty; and media is absent/empty or...
-- `hp_document_root` (function) `include/html_parse.h:142` `const void *hp_document_root(const hp_document *doc);` -- Internal seam for the dom layer: returns the document's root node as an opaque handle (so html_parse.h stays free of...
 
 
 Next: [API_p4.md](API_p4.md)

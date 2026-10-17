@@ -217,6 +217,59 @@ static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
  * `row-gap`, distinct from `column-gap`), else it falls back to `gap` too (a plain
  * `gap: N` applies to both axes) -- has_row_gap defaults to 0 under zero-init, so
  * every caller that predates row-gap keeps its exact geometry. */
+/* Row track sizing (CSS Grid 1 11.4-11.8, the parts this engine models): a px
+ * row is that size; with a definite inner height the fr rows share what the other
+ * rows and the gaps leave (never below their content), and with no fr row the
+ * auto rows stretch equally into it (align-content: normal). rowh holds each
+ * row's content height on entry. No tracks: untouched. */
+static void grid_size_rows(const bt_node *node, double *rowh, size_t nrows, double rgap) {
+    if (node->grid_row_track == NULL || node->grid_nrow_track == 0) return;
+    double fixed = 0.0, frsum = 0.0;
+    size_t nauto = 0;
+    for (size_t r = 0; r < nrows; ++r) {
+        int t = (r < node->grid_nrow_track) ? node->grid_row_track[r] : 0;
+        if (t > 0) { rowh[r] = (double)t; fixed += rowh[r]; }
+        else if (t < 0) frsum += (double)(-t);
+        else { fixed += rowh[r]; ++nauto; }
+    }
+    double inner = node->grid_inner_h;
+    if (!(inner > 0.0)) return;
+    double free_px = inner - fixed - rgap * (double)(nrows > 0 ? nrows - 1 : 0);
+    if (frsum > 0.0) {
+        /* A fr row whose content needs more than its share keeps its content and
+         * leaves the flexible pool (11.7.1, find the size of an fr). */
+        double pool = free_px, fs = frsum;
+        for (int pass = 0; pass < 4; ++pass) {
+            int changed = 0;
+            double unit = (fs > 0.0 && pool > 0.0) ? pool / fs : 0.0;
+            for (size_t r = 0; r < nrows; ++r) {
+                int t = (r < node->grid_nrow_track) ? node->grid_row_track[r] : 0;
+                if (t >= 0 || rowh[r] < 0.0) continue;
+                if (rowh[r] > unit * (double)(-t)) {
+                    pool -= rowh[r];
+                    fs -= (double)(-t);
+                    rowh[r] = -rowh[r] - 1.0;   /* mark inflexible (restored below) */
+                    changed = 1;
+                }
+            }
+            if (!changed) break;
+        }
+        double unit = (fs > 0.0 && pool > 0.0) ? pool / fs : 0.0;
+        for (size_t r = 0; r < nrows; ++r) {
+            int t = (r < node->grid_nrow_track) ? node->grid_row_track[r] : 0;
+            if (t >= 0) continue;
+            if (rowh[r] < 0.0) rowh[r] = -rowh[r] - 1.0;
+            else rowh[r] = unit * (double)(-t);
+        }
+    } else if (nauto > 0 && free_px > 0.0) {
+        double each = free_px / (double)nauto;
+        for (size_t r = 0; r < nrows; ++r) {
+            int t = (r < node->grid_nrow_track) ? node->grid_row_track[r] : 0;
+            if (t == 0) rowh[r] += each;
+        }
+    }
+}
+
 static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
                              double pl, double pt, double pb, double cw, unsigned depth) {
     size_t cols = node->grid_cols;
@@ -233,8 +286,8 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
 
     /* Place every child (row, start column) honouring its span. Each row index
      * holds at least one item, so nrows <= nk <= BT_MAX_CHILDREN. */
-    int    span[BT_MAX_CHILDREN];
-    int    row_span[BT_MAX_CHILDREN];
+    int    span[BT_MAX_CHILDREN] = { 0 };
+    int    row_span[BT_MAX_CHILDREN] = { 0 };
     /* Explicit cells from `grid-area: <name>` (spec/grid_areas.md), -1 = auto.
      * An all-auto grid passes the same values it always did, so its placement is
      * byte-identical. */
@@ -268,6 +321,7 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
     if (nrows > BT_MAX_CHILDREN) return BT_ERR_RANGE;
     double rowh[BT_MAX_CHILDREN];
     for (size_t r = 0; r < nrows; ++r) rowh[r] = 0.0;
+    int tracked = (node->grid_row_track != NULL && node->grid_nrow_track > 0);
 
     for (size_t i = 0; i < nk; ++i) {
         size_t sp = (span[i] > 1) ? ((size_t)span[i] > cols ? cols : (size_t)span[i]) : 1;
@@ -276,8 +330,13 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
         iw += node->gap * (double)(sp - 1);
         bt_status r = layout_node(kids[i], iw, depth + 1);
         if (r != BT_OK) return r;
+        /* With sized row tracks a SPANNING item contributes to its rows only after
+         * the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come
+         * last); without them it keeps the historical first-row contribution. */
+        if (tracked && row_span[i] > 1) continue;
         if (kids[i]->h > rowh[prow[i]]) rowh[prow[i]] = kids[i]->h;
     }
+    if (tracked) grid_size_rows(node, rowh, nrows, rgap);
 
     double rowy[BT_MAX_CHILDREN];
     double yy = pt;
@@ -297,8 +356,14 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
         if (r1 <= r0) continue;
         double sum_h = 0.0;
         for (size_t r = r0; r <= r1; ++r) sum_h += rowh[r];
+        if (tracked) sum_h += rgap * (double)(r1 - r0);
         double cell_h = kids[i]->h;
-        if (cell_h > sum_h) rowh[r1] += cell_h - sum_h;
+        /* The deficit goes to the last spanned FLEXIBLE row when there is one. */
+        size_t grow_r = r1;
+        if (tracked)
+            for (size_t r = r0; r <= r1; ++r)
+                if (r < node->grid_nrow_track && node->grid_row_track[r] < 0) grow_r = r;
+        if (cell_h > sum_h) rowh[grow_r] += cell_h - sum_h;
     }
     /* Recompute row y-positions after the height adjustments above. */
     yy = pt;
@@ -309,6 +374,18 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
     for (size_t i = 0; i < nk; ++i) {
         kids[i]->x = pl + col_x[pcol[i]];
         kids[i]->y = rowy[prow[i]];
+        /* Block-axis alignment inside the item's grid area (CSS Box Alignment
+         * 6.1): only once rows are sized by tracks, so a content-sized grid --
+         * every row as tall as its tallest item -- keeps its exact placement. */
+        if (node->grid_align || (node->grid_row_track != NULL && node->grid_nrow_track > 0)) {
+            size_t r1 = prow[i] + ((row_span[i] > 1) ? (size_t)row_span[i] : 1) - 1;
+            if (r1 >= nrows) r1 = nrows - 1;
+            double area = rowy[r1] + rowh[r1] - rowy[prow[i]];
+            double slack = area - kids[i]->h;
+            if (kids[i]->align == BT_ALIGN_STRETCH && slack > 0.0) kids[i]->h = area;
+            else if (kids[i]->align == BT_ALIGN_CENTER && slack > 0.0) kids[i]->y += slack / 2.0;
+            else if (kids[i]->align == BT_ALIGN_END && slack > 0.0) kids[i]->y += slack;
+        }
         /* For rowspanning cells, set height to the cumulative spanned rows' height
          * so the paint rect (background/border) covers the full spanned area. */
         int rsp = row_span[i];

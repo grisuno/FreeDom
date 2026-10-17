@@ -41,6 +41,17 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
   - `bf_margins_adjoin` (function, line 35) `int bf_margins_adjoin(double border_px, double padding_px)`
 - Depends on: `include/block_flow.h`
 
+## src/box_blur.c
+- Doc: box_line: One box pass of odd width bw over n samples spaced `step` apart, through tmp * (n bytes).
+- Layer: utility
+- Language: c
+- Symbols:
+  - `bb_box_sizes` (function, line 7) `int bb_box_sizes(double sigma, int sizes[3])`
+  - `box_line` (function, line 28) `static void box_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp)`
+  - `bb_blur_a8` (function, line 41) `int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)`
+  - `variance` (function, line 10) `* width w has variance (w^2 - 1) / 12): the ideal common width, rounded down * to an odd wl and up to wu = wl + 2...`
+- Depends on: `include/box_blur.h`
+
 ## src/box_style.c
 - Doc: tag_row: One row of the user-agent sheet.
 - Layer: utility
@@ -65,21 +76,24 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
                     doub...`
   - `bx_border_box_h` (function, line 335) `double bx_border_box_h(double declared_h, int border_box,
                        double pad_t, do...`
-  - `bx_content_clipped` (function, line 346) `int bx_content_clipped(int overflow_x, int overflow_y)`
-  - `bx_lp_px` (function, line 352) `double bx_lp_px(int px_val, int pct_pm, double basis)`
-  - `bx_content_cap` (function, line 363) `double bx_content_cap(double width_cap, int border_box,
+  - `bx_pct_block_size` (function, line 346) `double bx_pct_block_size(int px_val, int pct_pm, double cb_h)`
+  - `bx_definite_content_h` (function, line 352) `double bx_definite_content_h(double h, double min_h, double max_h,
+                             i...`
+  - `bx_content_clipped` (function, line 361) `int bx_content_clipped(int overflow_x, int overflow_y)`
+  - `bx_lp_px` (function, line 367) `double bx_lp_px(int px_val, int pct_pm, double basis)`
+  - `bx_content_cap` (function, line 378) `double bx_content_cap(double width_cap, int border_box,
                       double pad_l, doubl...`
-  - `bx_flex_min_clamp` (function, line 374) `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box,
+  - `bx_flex_min_clamp` (function, line 389) `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box,
                       ...`
-  - `bx_border_span` (function, line 381) `double bx_border_span(double width_cap, int border_box,
+  - `bx_border_span` (function, line 396) `double bx_border_span(double width_cap, int border_box,
                       double pad_l, doubl...`
-  - `bg_size_component` (function, line 393) `static double bg_size_component(int px_val, int pct_pm, double area)`
-  - `bx_background_layer` (function, line 400) `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h,
+  - `bg_size_component` (function, line 408) `static double bg_size_component(int px_val, int pct_pm, double area)`
+  - `bx_background_layer` (function, line 415) `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h,
                     ...`
-  - `bx_display_name` (function, line 439) `const char *bx_display_name(bx_display d)`
-  - `bx_flex_max_clamp` (function, line 452) `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box,
+  - `bx_display_name` (function, line 454) `const char *bx_display_name(bx_display d)`
+  - `bx_flex_max_clamp` (function, line 467) `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box,
                      ...`
-  - `bx_place_ex` (function, line 459) `bx_hplace bx_place_ex(double inset_l, double inset_r, double width_cap, int center,
+  - `bx_place_ex` (function, line 474) `bx_hplace bx_place_ex(double inset_l, double inset_r, double width_cap, int center,
              ...`
   - `take` (function, line 295) `* caller has to take (Sizing 3 section 5.1), so to a resolver that only sums a * px and a percentage half they read...`
   - `BX_TAG_MAX` (macro, line 24) `#define BX_TAG_MAX`
@@ -115,29 +129,30 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
  * is no...`
   - `layout_flex` (function, line 97) `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
                     ...`
-  - `layout_grid` (function, line 220) `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
+  - `layout_grid` (function, line 273) `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
                     ...`
-  - `layout_node` (function, line 327) `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)`
-  - `bt_layout` (function, line 372) `bt_status bt_layout(bt_node *root, double avail_w)`
-  - `assign_doc_order` (function, line 412) `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
+  - `layout_node` (function, line 404) `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)`
+  - `bt_layout` (function, line 449) `bt_status bt_layout(bt_node *root, double avail_w)`
+  - `assign_doc_order` (function, line 489) `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
                   ...`
-  - `find_positioned_ancestor` (function, line 429) `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
+  - `find_positioned_ancestor` (function, line 506) `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
                        ...`
-  - `resolve_inset` (function, line 449) `static double resolve_inset(int v, int pct_pm, double basis)`
-  - `inset_unset` (function, line 458) `static int inset_unset(int v, int pct_pm)`
-  - `bt_containing_block` (function, line 462) `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
+  - `resolve_inset` (function, line 526) `static double resolve_inset(int v, int pct_pm, double basis)`
+  - `inset_unset` (function, line 535) `static int inset_unset(int v, int pct_pm)`
+  - `bt_containing_block` (function, line 539) `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
                         ...`
-  - `block` (function, line 473) `* true block (same flow neighbourhood), strictly better than zeros. NULL
+  - `block` (function, line 550) `* true block (same flow neighbourhood), strictly better than zeros. NULL
      * placed keeps lega...`
-  - `bt_resolve_positioning` (function, line 492) `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
+  - `bt_resolve_positioning` (function, line 569) `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                           ...`
-  - `bt_resolve_positioning_ex` (function, line 503) `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
+  - `bt_resolve_positioning_ex` (function, line 580) `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
                        ...`
-  - `oof_walk` (function, line 658) `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)`
-  - `bt_oof_anchor` (function, line 675) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
-  - `bt_oof_root` (function, line 679) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
-  - `bt_box_hidden` (function, line 683) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
-  - `bt_oof_avail` (function, line 696) `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
+  - `oof_walk` (function, line 735) `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)`
+  - `bt_oof_anchor` (function, line 752) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
+  - `bt_oof_root` (function, line 756) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
+  - `bt_box_hidden` (function, line 760) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
+  - `bt_oof_avail` (function, line 773) `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
+  - `sized` (function, line 334) `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);`
   - `BT_LEN_AUTO` (macro, line 31) `#define BT_LEN_AUTO`
   - `BT_WRAP_EPS` (macro, line 62) `#define BT_WRAP_EPS`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`

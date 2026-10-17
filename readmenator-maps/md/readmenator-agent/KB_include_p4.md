@@ -1,6 +1,20 @@
 # Subsystem: include (page 4 of 4)
 Previous: [KB_include_p3.md](KB_include_p3.md)
 
+## include/renderer.h
+- Doc: rd_result_free: Renders untrusted HTML out-of-process and returns an inert title + text. html ==...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `rd_result` (struct, line 29)
+  - `rd_status` (enum, line 20)
+  - `status` (type_alias, line 28) `typedef struct rd_result { rd_status status;`
+  - `rd_result_free` (function, line 46) `void rd_result_free(rd_result *out);`
+  - `FREEDOM_RENDERER_H` (macro, line 2) `#define FREEDOM_RENDERER_H`
+  - `RD_MAX_INPUT` (macro, line 37) `#define RD_MAX_INPUT`
+  - `RD_MAX_FIELD` (macro, line 38) `#define RD_MAX_FIELD`
+- Imported by: `src/renderer.c`, `tests/test_renderer.c`
+
 ## include/request_policy.h
 - Doc: rp_host_of: Lowercased host of an absolute URL into out.
 - Layer: business_logic
@@ -151,8 +165,10 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Language: h
 - Symbols:
   - `tsh_font` (struct, line 33)
+  - `tsh_run` (struct, line 132)
   - `tsh_status` (enum, line 80)
   - `family` (type_alias, line 33) `typedef struct tsh_font { int family;`
+  - `end` (type_alias, line 132) `typedef struct tsh_run { size_t start, end;`
   - `content` (function, line 11) `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);`
   - `tsh_family_is_generic` (function, line 52) `int tsh_family_is_generic(const char *name);`
   - `wins` (function, line 58) `* the first name the resolver accepts wins (returns 1, family in out). Pure: the * resolver is injected (fontconfig...`
@@ -164,7 +180,8 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `tsh_webfont_register` (function, line 114) `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);`
   - `tsh_webfont_clear` (function, line 120) `void tsh_webfont_clear(void);`
   - `tsh_face` (function, line 127) `cairo_font_face_t *tsh_face(const tsh_font *f);`
-  - `tsh_shutdown` (function, line 130) `void tsh_shutdown(void);`
+  - `own` (function, line 136) `* face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ) * stay in the run before them....`
+  - `tsh_shutdown` (function, line 143) `void tsh_shutdown(void);`
   - `FREEDOM_TEXT_SHAPE_H` (macro, line 19) `#define FREEDOM_TEXT_SHAPE_H`
   - `TSH_LOCAL_LISTS` (macro, line 46) `#define TSH_LOCAL_LISTS`
   - `TSH_LOCAL_FAMILIES` (macro, line 47) `#define TSH_LOCAL_FAMILIES`

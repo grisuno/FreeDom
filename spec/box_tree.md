@@ -181,3 +181,19 @@ bt_status bt_layout(bt_node *root, double avail_w);
 - Colapso de márgenes padre-hijo y a través de cajas vacías (solo se colapsan hermanos adyacentes).
 - Porcentajes, `width`/`height` de autor, posicionamiento absoluto/flotantes.
 - Construir el árbol desde el DOM y aplicar los rectángulos a Cairo: eso es el orquestador (la GUI).
+
+## Pistas de fila de grilla y alineación en el área (tanda 44, 2026-10-17)
+
+`bt_node.grid_row_track/grid_nrow_track` (mismo código que las columnas: 0 auto,
+>0 px, <0 fr×100) y `grid_inner_h` (alto interior definido, <= 0 indefinido).
+`grid_size_rows` (CSS Grid 1 §11.4–11.8, lo modelado): una fila px mide eso; con
+alto definido las `fr` reparten lo que dejan las demás y los gaps (nunca por debajo
+de su contenido, §11.7.1); sin `fr` las `auto` se estiran por igual. Con pistas, un
+ítem que abarca varias filas contribuye DESPUÉS de dimensionarlas y su déficit va a
+la última fila flexible abarcada. `grid_align` = 1 coloca cada ítem en su área por
+su `align` (stretch llena el área; center/end desplazan). Sin pistas ni `grid_align`
+el resultado es byte-idéntico al de antes.
+- Dado `1fr auto` en 300 px, ítems de 40 (center) y 20: filas 280/20, el centrado en
+  y=120, el segundo en y=280.
+- Dado un ítem de 300 que abarca `1fr auto` en 300 px: el `auto` queda en su
+  contenido y la grilla mide 300.

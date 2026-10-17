@@ -330,6 +330,68 @@ static int teardown(void **state) {
     return 0;
 }
 
+/* `=NAME` is an @font-face local(NAME) source (spec/webfont.md 2c): it matches a
+ * face by its exact FULL or PostScript name (CSS Fonts 4 4.3), never through a
+ * fontconfig family alias -- local("Arial") on a host with only Liberation Sans
+ * resolves to nothing, exactly as Firefox treats it. */
+static void test_local_handle_exact_full_name(void **state) {
+    (void)state;
+    assert_int_equal(tsh_local_handle("=no such face xyz"), 0);
+    if (!tsh_ready()) return;
+    /* "Liberation Sans" is a family AND a full name; "Arial" is only an alias. */
+    if (tsh_local_handle("liberation sans") == 0) return;   /* host without it */
+    assert_true(tsh_local_handle("=liberation sans") != 0);
+    assert_true(tsh_local_handle("=LiberationSans-Bold") != 0);
+    if (tsh_local_handle("=arial") != 0) return;   /* a host with real Arial */
+    assert_int_equal(tsh_local_handle("=arial"), 0);
+    /* A failed local() is skipped and the list goes on. */
+    assert_true(tsh_local_handle("=arial,liberation sans") != 0);
+}
+
+/* A fake coverage: ASCII is face 0, Hebrew (U+05D0..05EA) face 2, CJK face 3. */
+static int fake_cover(unsigned cp, void *ctx) {
+    (void)ctx;
+    if (cp >= 0x5D0 && cp <= 0x5EA) return 2;
+    if (cp >= 0x4E00 && cp <= 0x9FFF) return 3;
+    return 0;
+}
+
+static void test_segment_runs(void **state) {
+    (void)state;
+    tsh_run r[8];
+    const char *t = "Hola \xd7\xa2\xd7\x91 x\xe4\xb8\xad";
+    int n = tsh_segment(t, strlen(t), fake_cover, NULL, r, 8);
+    assert_int_equal(n, 4);
+    assert_int_equal(r[0].start, 0); assert_int_equal(r[0].end, 5); assert_int_equal(r[0].face, 0);
+    assert_int_equal(r[1].face, 2);  assert_int_equal(r[1].end, 9);
+    assert_int_equal(r[2].face, 0);  assert_int_equal(r[2].end, 11);
+    assert_int_equal(r[3].face, 3);  assert_int_equal(r[3].end, strlen(t));
+    /* A combining mark stays with its base run. */
+    const char *m = "\xd7\xa2\xcc\x81" "a";
+    n = tsh_segment(m, strlen(m), fake_cover, NULL, r, 8);
+    assert_int_equal(n, 2);
+    assert_int_equal(r[0].end, 4);
+    /* Fully covered: one run. Empty: zero. Too many runs: -1. */
+    assert_int_equal(tsh_segment("abc", 3, fake_cover, NULL, r, 8), 1);
+    assert_int_equal(tsh_segment("", 0, fake_cover, NULL, r, 8), 0);
+    assert_int_equal(tsh_segment(t, strlen(t), fake_cover, NULL, r, 2), -1);
+    assert_int_equal(tsh_segment(NULL, 3, fake_cover, NULL, r, 8), -1);
+}
+
+/* Real fontconfig: text the bucket face cannot cover still measures as real glyphs
+ * (a fallback face drew it), not as the zero/notdef advance. Skipped on a host
+ * without a CJK-capable font. */
+static void test_measure_uses_fallback_face(void **state) {
+    (void)state;
+    if (!tsh_ready()) return;
+    tsh_font f = { .family = CSS_FF_SANS };
+    const char *cjk = "\xe4\xb8\xad\xe6\x96\x87";   /* two CJK ideographs */
+    double a = tsh_measure(&f, 20.0, cjk, strlen(cjk));
+    assert_true(a > 0.0);
+    /* An ideograph is about one em wide in any CJK face. */
+    assert_true(a > 2.0 * 20.0 * 0.7 && a < 2.0 * 20.0 * 1.3);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_null_and_bad_inputs),
@@ -345,6 +407,9 @@ int main(void) {
         cmocka_unit_test(test_pick_from_list_order_and_generic_stop),
         cmocka_unit_test(test_pick_family_strong_vs_weak),
         cmocka_unit_test(test_local_handle_real_fontconfig),
+        cmocka_unit_test(test_local_handle_exact_full_name),
+        cmocka_unit_test(test_segment_runs),
+        cmocka_unit_test(test_measure_uses_fallback_face),
     };
     return cmocka_run_group_tests(tests, NULL, teardown);
 }

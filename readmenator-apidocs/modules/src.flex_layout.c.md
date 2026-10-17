@@ -1,10 +1,10 @@
 # `src/flex_layout.c`
 
-> Source: [src/flex_layout.c:1](../../src/flex_layout.c#L1) | language `c` | coverage 36.0% | [API index](../index.md)
+> Source: [src/flex_layout.c:1](../../src/flex_layout.c#L1) | language `c` | coverage 34.6% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`fx_flex_line`](#fx_flex_line), [`fx_grid_columns`](#fx_grid_columns), [`fx_autofill_count`](#fx_autofill_count), [`fx_grid_columns_weighted`](#fx_grid_columns_weighted), [`fx_grid_place_span`](#fx_grid_place_span), [`fx_grid_area_hash`](#fx_grid_area_hash), [`fx_grid_areas_parse`](#fx_grid_areas_parse), [`fx_grid_area_rect`](#fx_grid_area_rect), [`fx_float_insets`](#fx_float_insets), [`fx_float_pack`](#fx_float_pack), [`fx_float_pack_wrap`](#fx_float_pack_wrap), [`fx_grid_cell`](#fx_grid_cell), [`fx_auto_margins`](#fx_auto_margins), [`fx_auto_min_size`](#fx_auto_min_size), [`fx_multicol_used`](#fx_multicol_used), [`fx_multicol_balance`](#fx_multicol_balance), [`fx_justify_name`](#fx_justify_name), [`fx_column_place`](#fx_column_place), [`fx_column_place_m`](#fx_column_place_m), [`fx_cross_offset`](#fx_cross_offset), [`fx_grid_line_side`](#fx_grid_line_side), [`fx_grid_line_parse`](#fx_grid_line_parse), [`fx_grid_line_resolve`](#fx_grid_line_resolve)
+- **Functions:** [`fx_flex_line`](#fx_flex_line), [`fx_grid_columns`](#fx_grid_columns), [`fx_autofill_count`](#fx_autofill_count), [`fx_grid_columns_weighted`](#fx_grid_columns_weighted), [`fx_grid_place_span`](#fx_grid_place_span), [`fx_grid_area_hash`](#fx_grid_area_hash), [`fx_grid_areas_parse`](#fx_grid_areas_parse), [`fx_grid_area_rect`](#fx_grid_area_rect), [`fx_float_insets`](#fx_float_insets), [`fx_float_pack`](#fx_float_pack), [`fx_float_pack_wrap`](#fx_float_pack_wrap), [`fx_grid_cell`](#fx_grid_cell), [`fx_auto_margins`](#fx_auto_margins), [`fx_auto_min_size`](#fx_auto_min_size), [`fx_multicol_used`](#fx_multicol_used), [`fx_multicol_balance`](#fx_multicol_balance), [`fx_justify_name`](#fx_justify_name), [`fx_column_place`](#fx_column_place), [`fx_column_place_m`](#fx_column_place_m), [`fx_cross_offset`](#fx_cross_offset), [`fx_grid_line_side`](#fx_grid_line_side), [`fx_grid_line_parse`](#fx_grid_line_parse), [`fx_grid_line_resolve`](#fx_grid_line_resolve), [`fx_col_free_split`](#fx_col_free_split)
 - **Macros:** [`FX_EPS`](#fx_eps)
 
 ## Call Graph
@@ -396,7 +396,7 @@ min_content  the item's min-content size (its longest unbreakable word, or a
   author_min   the author's own `min-width` in px when they set one (min-width is
                then NOT `auto` and wins outright, larger OR smaller), or < 0 when
                unset.
-  scroll_container  non-zero when the item's `overflow` is anything but `visible`.
+  scroll_container  non-zero when the item's [`overflow`](gui.browser_ui.c.md#overflow) is anything but `visible`.
                Such an item has an automatic minimum size of ZERO -- this is what
                makes the near-universal `overflow:hidden` truncation idiom work.
 
@@ -581,7 +581,7 @@ Never negative.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`fx_cross_offset`](#fx_cross_offset) (include/flex_layout.h:344).
+> **Inherited:** Documentation from [`fx_cross_offset`](#fx_cross_offset) (include/flex_layout.h:352).
 
 ---
 
@@ -659,6 +659,32 @@ Never fails: anything unresolvable falls back to auto placement.
 | `span` | `int *` |  |  |
 
 > **Inherited:** Documentation from [`fx_grid_line_resolve`](#fx_grid_line_resolve) (include/flex_layout.h:122).
+
+---
+
+<a id="fx_col_free_split"></a>
+
+### `fx_col_free_split`
+
+`function` | [src/flex_layout.c:927](../../src/flex_layout.c#L927)
+
+```c
+fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n, double *before, double *grow_px, double *after)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `free_px` | `double` |  |  |
+| `grow` | `int *` |  |  |
+| `mauto` | `int *` |  |  |
+| `n` | `size_t` |  |  |
+| `before` | `double *` |  |  |
+| `grow_px` | `double *` |  |  |
+| `after` | `double *` |  |  |
+
+**Returns:** `fx_status`
 
 ---
 

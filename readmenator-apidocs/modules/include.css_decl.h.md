@@ -28,7 +28,7 @@ classDiagram
 
 ### `css_decl`
 
-`struct` | [include/css_decl.h:195](../../include/css_decl.h#L195)
+`struct` | [include/css_decl.h:205](../../include/css_decl.h#L205)
 
 ```c
 typedef struct css_decl
@@ -42,7 +42,7 @@ typedef struct css_decl
 
 ### `prop`
 
-`type_alias` | [include/css_decl.h:194](../../include/css_decl.h#L194)
+`type_alias` | [include/css_decl.h:204](../../include/css_decl.h#L204)
 
 ```c
 typedef struct css_decl { int prop;
@@ -56,7 +56,7 @@ typedef struct css_decl { int prop;
 
 ### `order`
 
-`function` | [include/css_decl.h:44](../../include/css_decl.h#L44)
+`function` | [include/css_decl.h:45](../../include/css_decl.h#L45)
 
 ```c
 * The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);
@@ -76,7 +76,7 @@ typedef struct css_decl { int prop;
 
 ### `contiguous`
 
-`function` | [include/css_decl.h:59](../../include/css_decl.h#L59)
+`function` | [include/css_decl.h:60](../../include/css_decl.h#L60)
 
 ```c
 * contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM, P_LETTERSPACING, P_WORDSPACING, P_SHADOW_DX, P_SHADOW_DY, P_SHADOW_COLOR, P_OPACITY, P_VALIGN, P_T
@@ -168,7 +168,7 @@ Same budget as background URLs: an icon font ships hundreds of one-glyph `conten
 
 ### `CSS_WIDE_PROBE_DECLS`
 
-`macro` | [include/css_decl.h:29](../../include/css_decl.h#L29)
+`macro` | [include/css_decl.h:30](../../include/css_decl.h#L30)
 
 ```c
 #define CSS_WIDE_PROBE_DECLS
@@ -176,6 +176,6 @@ Same budget as background URLs: an icon font ships hundreds of one-glyph `conten
 
 Scratch size for the CSS-wide-keyword probe (wide_claim).
 
-Bounds the widest shorthand expansion in the dispatch: the four-side length shorthands emit a px and a percentage slot per side (8), grid-template-columns emits one slot per track plus the count (9), and matrix() emits seven.
+Bounds the widest shorthand expansion in the dispatch: the four-side length shorthands emit a px and a percentage slot per side (8), grid-template-columns emits one slot per track plus the count (9), matrix() emits seven, and box-shadow writes its whole layer group (7 + 6 per extra layer = 25).
 
 ---

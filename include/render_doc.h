@@ -200,6 +200,8 @@ typedef struct rd_block {
      * (never gated); the band packer resolves them with bx_lp_px against the
      * band width. Defaults: 0 / 0 / 0 / 0. */
     int              float_ml, float_ml_pct, float_mr, float_mr_pct;
+    int              float_w, float_w_pct;   /* pv_run.float_w: the founder's own width */
+    int              float_box;              /* pv_run.float_box, -1 = none */
     /* The OUTERMOST float founder (spec/float.md §7d.1): group id (-1 = the
      * nearest IS the outermost), side (css_float), and its own horizontal
      * margins (same halves). Structure like float_id (never gated).

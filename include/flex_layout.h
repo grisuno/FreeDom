@@ -338,6 +338,14 @@ fx_status fx_column_place_m(const double *h, const double *grow, const int *maut
                             size_t n, double gap, double inner_h, int justify,
                             int reverse, double *y_out, double *h_out, double *extent);
 
+/* The free space of a flex column that flows as block, split among the n
+ * children that claim it (spec/flex_layout.md, tanda 44): proportionally to
+ * grow[i] (x100) when any grows, else equally among the auto margins in
+ * mauto[i] (FX_MAUTO_TOP -> before[i], FX_MAUTO_BOTTOM -> after[i]). free <= 0
+ * writes zeros. FX_ERR_NULL_ARG on a NULL array with n > 0. Pure. */
+fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
+                            double *before, double *grow_px, double *after);
+
 /* Cross-axis (horizontal) offset of a column item of width w in avail px. auto
  * margins win (both = centre, left only = end); else align (BT-style 0 start,
  * 1 center, 2 end, 3 stretch) places it. Never negative. */

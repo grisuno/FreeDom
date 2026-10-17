@@ -1,9 +1,9 @@
 Andrea Grandi
-CSS drops: 15 declaration(s) dropped, 13 distinct
+CSS drops: 16 declaration(s) dropped, 13 distinct
   count  cause         property                     first value
       2  bad-value     transition-timing-function   cubic-bezier(.55,.055,.675,.19)
       2  bad-value     border-inline-start          4pxsolid #34495e
-      1  unknown-prop  -webkit-font-smoothing       antialiased
+      2  bad-value     box-shadow                   0 -2px rgba(189, 195, 199,0.5)inset
       1  unknown-prop  -moz-osx-font-smoothing      grayscale
       1  unknown-prop  scrollbar-width              auto
       1  unknown-prop  scrollbar-color              hsl(0, 0%, 85%)transparent
@@ -13,4 +13,4 @@ CSS drops: 15 declaration(s) dropped, 13 distinct
       1  bad-value     content                      counters(item,".")". "
       1  bad-value     border-left                  4pxsolid #34495e
       1  unknown-prop  -webkit-text-size-adjust     100%
-      1  bad-value     box-shadow                   0 calc(-10.08px * 1.85)rgba(189, 195, 199,0.7)inset
+      1  unknown-prop  -webkit-font-smoothing       antialiased

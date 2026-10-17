@@ -77,6 +77,15 @@ typedef struct bt_node {
     const int      *grid_track;  /* GRID: per-track sizes (0 auto / >0 px / <0 fr x100);
                                   * NULL (zero-init default) = equal columns, unchanged */
     size_t          grid_ntrack; /* valid entries in grid_track (tracks past it are auto) */
+    const int      *grid_row_track;  /* GRID: per-ROW sizes, same encoding as grid_track;
+                                      * NULL (default) = every row content-sized */
+    size_t          grid_nrow_track; /* valid entries in grid_row_track */
+    double          grid_inner_h;    /* GRID: definite content height the rows fill
+                                      * (fr rows share the rest, CSS Grid 1 11.7);
+                                      * <= 0 (default) = indefinite */
+    int             grid_align;      /* GRID: 1 = place each item in its grid area by
+                                      * its `align` (Box Alignment 6.1; stretch fills
+                                      * the area). 0 (default) = top, content height. */
     int             wrap;        /* FLEX: nonzero packs items onto multiple lines instead
                                   * of forcing them all onto one (flex-wrap); 0 (default)
                                   * is the original single-line behaviour, unchanged. */

@@ -928,6 +928,68 @@ static void test_oof_avail_stretch_and_shrink(void **state) {
     assert_true(bt_oof_avail(0, 0, 0, 0, 20.0, NULL) == 20.0);
 }
 
+/* Row tracks against a DEFINITE grid height (CSS Grid 1 11.7): `1fr auto` in a
+ * 300px-tall grid gives the auto row its content and the fr row the rest; an
+ * item aligned center sits in the middle of its row, a stretched one fills it. */
+static void test_grid_row_tracks_definite_height(void **state) {
+    (void)state;
+    int rtrack[2] = { -100, 0 };
+    bt_node kids[2] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 40, .align = BT_ALIGN_CENTER },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_GRID, .grid_cols = 1, .gap = 0,
+        .grid_rows = 2, .grid_row_track = rtrack, .grid_nrow_track = 2,
+        .grid_inner_h = 300,
+        .children = kids, .child_count = 2,
+    };
+    assert_int_equal(bt_layout(&root, 100), BT_OK);
+    /* row 0 = 300 - 20 = 280; the centered item: (280 - 40) / 2 = 120. */
+    assert_rect(&kids[0], 0, 120, 100, 40);
+    assert_rect(&kids[1], 0, 280, 100, 20);
+    assert_true(dbl_eq(root.h, 300));
+    /* Stretch fills the row area. */
+    kids[0].align = BT_ALIGN_STRETCH;
+    assert_int_equal(bt_layout(&root, 100), BT_OK);
+    assert_rect(&kids[0], 0, 0, 100, 280);
+    /* A px row is that size whatever its content. */
+    int ptrack[2] = { 50, 0 };
+    root.grid_row_track = ptrack;
+    root.grid_inner_h = 0;
+    kids[0].align = 0;
+    assert_int_equal(bt_layout(&root, 100), BT_OK);
+    assert_rect(&kids[1], 0, 50, 100, 20);
+    /* No definite height: rows are content-sized exactly as before. */
+    root.grid_row_track = NULL;
+    root.grid_nrow_track = 0;
+    assert_int_equal(bt_layout(&root, 100), BT_OK);
+    assert_rect(&kids[1], 0, 40, 100, 20);
+}
+
+/* An item spanning a flexible row and an auto row (a full-height sidebar beside
+ * `1fr auto`) neither inflates the auto row nor pushes the grid past its height
+ * when it fits the span. */
+static void test_grid_spanning_item_fits_tracked_rows(void **state) {
+    (void)state;
+    int rtrack[2] = { -100, 0 };
+    bt_node kids[3] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 40 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 300, .grid_row_span = 2,
+          .grid_row_start = 1, .grid_col_start = 2 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_GRID, .grid_cols = 2, .gap = 0,
+        .grid_rows = 2, .grid_row_track = rtrack, .grid_nrow_track = 2,
+        .grid_inner_h = 300,
+        .children = kids, .child_count = 3,
+    };
+    assert_int_equal(bt_layout(&root, 200), BT_OK);
+    assert_rect(&kids[2], 0, 280, 100, 20);
+    assert_true(dbl_eq(root.h, 300));
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_null_root),
@@ -946,6 +1008,8 @@ int main(void) {
         cmocka_unit_test(test_grid),
         cmocka_unit_test(test_grid_weighted_tracks),
         cmocka_unit_test(test_grid_column_span),
+        cmocka_unit_test(test_grid_row_tracks_definite_height),
+        cmocka_unit_test(test_grid_spanning_item_fits_tracked_rows),
         cmocka_unit_test(test_nested_flex_in_block),
         cmocka_unit_test(test_display_none_skipped),
         cmocka_unit_test(test_grid_bad_columns),

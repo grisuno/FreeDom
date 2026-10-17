@@ -574,3 +574,22 @@ medido (WPT `flex-abspos-staticpos-*`, 3 regresiones revertidas): el `clear` de 
 `<br style="clear:both">` no viaja en ningún run (el `<br>` no es el bloque del run), así
 que la banda juntaba en una fila floats que Firefox separa. **Brecha abierta:** `clear`
 sobre `<br>`.
+
+## Flotantes dentro de ítems flex/grid y ancho del fundador (tanda 44, 2026-10-17)
+
+- Un flotante cuyo fundador vive DENTRO de un ítem (no es el ítem: `float` no
+  aplica a un ítem flex) se maqueta como banda en el flujo del ítem, y el texto del
+  ítem lo rodea (pool.ntp.org: "Active Servers" a la derecha del texto, 9.12 → 1.38).
+- La raíz de un contenedor dentro de la columna se busca solo DENTRO del flotante
+  (`root_cont_in`): subir hasta el shell de la página re-maquetaba el flotante sin fin.
+- La banda de un ítem no reabre cajas por encima del ítem (`fstop`): un envoltorio
+  `height:100%` reabierto empujaba todo un viewport hacia abajo.
+- Ancho de un flotante solitario: el `width` PROPIO del fundador
+  (`pv_run.float_w`); si es `auto`, shrink-to-fit del contenido (contenedores
+  internos medidos con `nested_cont_basis`) + padding/borde del fundador, acotado
+  por su `max-width`; dentro de la columna la caja del fundador ocupa la columna
+  (`rc_state.col_founder_box`) sin reaplicar márgenes ni anchos.
+- Pintado: las bandas de fondo de fila se pintan en una pasada previa
+  (`ROW_PAINT_BAND`) para que los fondos de bloque queden DEBAJO de los flotantes
+  (CSS 2.1 Apéndice E).
+- Residual: las figuras de wikipedia salen ~8 px más anchas que en Firefox.

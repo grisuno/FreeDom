@@ -126,6 +126,19 @@ void tsh_webfont_clear(void);
  * that is actually drawn, not of the generic stand-in (CSS 2.1 10.8.1). */
 cairo_font_face_t *tsh_face(const tsh_font *f);
 
+/* Per-glyph font fallback (spec/text_shape.md 8). One maximal run of [text,len)
+ * drawn with one face: bytes [start, end), face id as returned by the cover
+ * callback (0 = the requested face). */
+typedef struct tsh_run { size_t start, end; int face; } tsh_run;
+typedef int (*tsh_cover_fn)(unsigned cp, void *ctx);
+
+/* Splits [text,len) into maximal runs of one face. Characters that never pick a
+ * face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ)
+ * stay in the run before them. Returns the run count, 0 for empty text, -1 when
+ * more than cap runs would be needed or on NULL args. Pure (cover is injected). */
+int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
+                tsh_run *runs, size_t cap);
+
 /* Releases cached faces / blobs / FreeType library (leak hygiene; tests). */
 void tsh_shutdown(void);
 

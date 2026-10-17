@@ -2,6 +2,10 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_render_policy.c` -> `include/render_policy.h`
+- `tests/test_renderer.c` -> `include/renderer.h`
+- `tests/test_request_policy.c` -> `include/request_policy.h`
+- `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
 - `tests/test_svg_render.c` -> `include/svg_render.h`
 - `tests/test_tab.c` -> `include/css.h`
 - `tests/test_tab.c` -> `include/js_geom.h`
@@ -120,6 +124,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/webfont_load.h` -> stddef.h
 - `include/ws_hub.h` -> poll.h, stddef.h
 - `src/block_flow.c` -> math.h
+- `src/box_blur.c` -> math.h, stdlib.h, string.h
 - `src/box_style.c` -> math.h, stddef.h, stdlib.h, string.h
 - `src/box_tree.c` -> stddef.h
 - `src/browser.c` -> stdlib.h, string.h
@@ -194,6 +199,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/itest_secure_fetch.c` -> stdio.h, string.h
 - `tests/test_anti_fp.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_block_flow.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tests/test_box_blur.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_box_style.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_box_tree.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_browser.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h

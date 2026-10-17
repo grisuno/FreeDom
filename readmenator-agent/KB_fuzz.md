@@ -140,6 +140,8 @@
 - Language: c
 - Symbols:
   - `LLVMFuzzerTestOneInput` (function, line 25) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+  - `glyph` (function, line 54) `* one lacks a glyph (spec/text_shape.md 8);`
+  - `ASCII` (function, line 56) `* printable ASCII (one run, the requested face) the two must agree. */ double m = tsh_measure(&f, px, text, len);`
   - `FZ_CAP` (macro, line 23) `#define FZ_CAP`
 - Depends on: `include/text_shape.h`
 

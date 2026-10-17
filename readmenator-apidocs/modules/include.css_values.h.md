@@ -1,12 +1,12 @@
 # `include/css_values.h`
 
-> Source: [include/css_values.h:1](../../include/css_values.h#L1) | language `h` | coverage 16.7% | [API index](../index.md)
+> Source: [include/css_values.h:1](../../include/css_values.h#L1) | language `h` | coverage 28.6% | [API index](../index.md)
 
 Single owner of CSS value interpretation for colors and backgrounds.
 
 ## Contents
 
-- **Functions:** [`cv_parse_color`](#cv_parse_color), [`cv_interp_color`](#cv_interp_color), [`cv_color_ok`](#cv_color_ok), [`cv_bg_alpha_of`](#cv_bg_alpha_of), [`cv_interp_bg`](#cv_interp_bg)
+- **Functions:** [`cv_parse_color`](#cv_parse_color), [`cv_interp_color`](#cv_interp_color), [`cv_color_ok`](#cv_color_ok), [`cv_bg_alpha_of`](#cv_bg_alpha_of), [`cv_parse_color_t7`](#cv_parse_color_t7), [`cv_interp_bg`](#cv_interp_bg)
 
 ## Functions
 
@@ -28,7 +28,7 @@ int cv_parse_color(const char *v);
 
 **Returns:** `int`
 
-*Called by:* [`CSS_GRAD_STOPS_MAX`](src.css_gradient.c.md#css_grad_stops_max), [`ct_expand_shadow`](src.css_text.c.md#ct_expand_shadow)
+*Called by:* [`ct_expand_shadow`](src.css_text.c.md#ct_expand_shadow)
 
 ---
 
@@ -92,7 +92,33 @@ int cv_bg_alpha_of(const char *v);
 
 **Returns:** `int`
 
-*Called by:* [`CSS_GRAD_STOPS_MAX`](src.css_gradient.c.md#css_grad_stops_max), [`cg_expand_background`](src.css_gradient.c.md#cg_expand_background)
+*Called by:* [`cg_expand_background`](src.css_gradient.c.md#cg_expand_background)
+
+---
+
+<a id="cv_parse_color_t7"></a>
+
+### `cv_parse_color_t7`
+
+`function` | [include/css_values.h:19](../../include/css_values.h#L19)
+
+```c
+int cv_parse_color_t7(const char *v);
+```
+
+cv_parse_color with the color's alpha as TRANSPARENCY in bits 24..30 (0 opaque, 127 clear): an opaque color is exactly cv_parse_color's 0xRRGGBB.
+
+Sentinels (-1 invalid, CC_COLOR_CURRENT, CC_COLOR_TRANSPARENT) pass through unchanged.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `v` | `char *` |  |  |
+
+**Returns:** `int`
+
+*Called by:* [`CSS_GRAD_STOPS_MAX`](src.css_gradient.c.md#css_grad_stops_max)
 
 ---
 
@@ -100,7 +126,7 @@ int cv_bg_alpha_of(const char *v);
 
 ### `cv_interp_bg`
 
-`function` | [include/css_values.h:16](../../include/css_values.h#L16)
+`function` | [include/css_values.h:20](../../include/css_values.h#L20)
 
 ```c
 int cv_interp_bg(const char *v);

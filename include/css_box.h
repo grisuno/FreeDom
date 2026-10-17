@@ -36,5 +36,8 @@ int cb_interp_gap(const char *v);
 int cb_interp_justify(const char *v);
 int cb_interp_gridcols(const char *v);
 int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);
+/* grid-template-rows: P_GRID_ROWS (count) + P_GRID_RTRACK0..7 (sizes) in lock-step.
+ * Quoted area strings (the grid-template shorthand's row half) are skipped. */
+int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap);
 
 #endif

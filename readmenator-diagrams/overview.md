@@ -8,38 +8,44 @@ graph LR
     include_local_store["include: local_store"]
     gui["gui"]
     include_secure_fetch["include: secure_fetch"]
+    include_download["include: download"]
     include_prefetch["include: prefetch"]
+    src -- "calls into" --> include_prefetch
     src -- "calls into" --> include_browser_ui
     src -- "calls into" --> include_css
     src -- "calls into" --> include_page_view
     src -- "calls into" --> include_text_shape
     src -- "depends on" --> gui
     src -- "calls into" --> include_secure_fetch
-    src -- "calls into" --> include_prefetch
+    include_prefetch -- "calls into" --> src
+    include_prefetch -- "calls into" --> include_browser_ui
+    include_prefetch -- "calls into" --> include_css
     include_browser_ui -- "calls into" --> src
+    include_browser_ui -- "calls into" --> include_prefetch
     include_browser_ui -- "calls into" --> include_css
     include_browser_ui -- "calls into" --> include_page_view
     include_browser_ui -- "calls into" --> include_text_shape
     include_browser_ui -- "calls into" --> include_local_store
     include_browser_ui -- "calls into" --> gui
     include_browser_ui -- "calls into" --> include_secure_fetch
-    include_browser_ui -- "calls into" --> include_prefetch
+    include_browser_ui -- "depends on" --> include_download
     include_css -- "calls into" --> src
     include_css -- "calls into" --> include_browser_ui
     include_css -- "calls into" --> include_page_view
     include_css -- "depends on" --> include_text_shape
     include_page_view -- "calls into" --> src
+    include_page_view -- "calls into" --> include_prefetch
     include_page_view -- "calls into" --> include_browser_ui
     include_page_view -- "calls into" --> include_css
     include_page_view -- "calls into" --> include_text_shape
     include_page_view -- "calls into" --> gui
     include_page_view -- "calls into" --> include_secure_fetch
-    include_page_view -- "calls into" --> include_prefetch
+    include_page_view -- "calls into" --> include_download
     include_text_shape -- "calls into" --> src
+    include_text_shape -- "calls into" --> include_prefetch
     include_text_shape -- "calls into" --> include_browser_ui
     include_text_shape -- "calls into" --> include_css
     include_text_shape -- "calls into" --> include_page_view
-    include_text_shape -- "calls into" --> include_prefetch
     include_local_store -- "calls into" --> src
     include_local_store -- "calls into" --> include_browser_ui
     include_local_store -- "calls into" --> include_page_view
@@ -51,9 +57,8 @@ graph LR
     include_secure_fetch -- "calls into" --> include_browser_ui
     include_secure_fetch -- "calls into" --> include_css
     include_secure_fetch -- "calls into" --> include_page_view
-    include_prefetch -- "calls into" --> src
-    include_prefetch -- "calls into" --> include_browser_ui
-    include_prefetch -- "calls into" --> include_css
+    include_download -- "calls into" --> include_browser_ui
+    include_download -- "calls into" --> include_css
     click src href "./src.md" "Details"
     click include_browser_ui href "./include_browser_ui.md" "Details"
     click include_css href "./include_css.md" "Details"
@@ -62,12 +67,13 @@ graph LR
     click include_local_store href "./include_local_store.md" "Details"
     click gui href "./gui.md" "Details"
     click include_secure_fetch href "./include_secure_fetch.md" "Details"
+    click include_download href "./include_download.md" "Details"
     click include_prefetch href "./include_prefetch.md" "Details"
 ```
 
 ## Details
 
-Static architecture map of 265 files (c, h, py, sh) in 9 components: src, include: browser_ui, include: css, include: page_view, include: text_shape, include: local_store, gui, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 268 files (c, h, py, sh) in 10 components: src, include: browser_ui, include: css, include: page_view, include: text_shape, include: local_store, gui, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
 ### src (1)
 
@@ -86,7 +92,7 @@ src groups 59 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp
 
 ### include: browser_ui (2)
 
-include: browser_ui groups 51 files (c, h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. poke_and_free: Touch every claimed pixel corner so the sanitizer flags an...
+include: browser_ui groups 46 files (c, h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. poke_and_free: Touch every claimed pixel corner so the sanitizer flags an...
 
 **Related Classes/Methods**:
 
@@ -189,7 +195,22 @@ include: secure_fetch groups 10 files (c, h) around FREEDOM_ANTI_FP_H, FP_TIMER_
 - <a href="../include/anti_fp.h">include/anti_fp.h::FP_SEC_FETCH_DEST_NAV</a>
 - <a href="../include/anti_fp.h">include/anti_fp.h::FP_SEC_FETCH_MODE_NAV</a>
 
-### include: prefetch (9)
+### include: download (9)
+
+include: download groups 8 files (c, h) around FREEDOM_PDF_EXPORT_H, PE_NAME_MAX, PE_EXT, PE_EXT_PNG, PE_FALLBACK_NAME. dl_should_download: 1 if the response should be saved (attachment, or a non-renderable...
+
+**Related Classes/Methods**:
+
+- <a href="../include/pdf_export.h#L2-L27">include/pdf_export.h::FREEDOM_PDF_EXPORT_H</a>
+- <a href="../include/pdf_export.h">include/pdf_export.h::PE_NAME_MAX</a>
+- <a href="../include/pdf_export.h">include/pdf_export.h::PE_EXT</a>
+- <a href="../include/pdf_export.h">include/pdf_export.h::PE_EXT_PNG</a>
+- <a href="../include/pdf_export.h#L31-L32">include/pdf_export.h::PE_FALLBACK_NAME</a>
+- <a href="../include/pdf_export.h#L33-L45">include/pdf_export.h::pe_status</a>
+- <a href="../include/pdf_export.h#L46-L50">include/pdf_export.h::fallback</a>
+- <a href="../include/pdf_export.h">include/pdf_export.h::trusted</a>
+
+### include: prefetch (10)
 
 include: prefetch groups 8 files (c, h) around FREEDOM_IMPORT_MAP_H, algorithm, IM_MAX_TEXT, IM_MAX_ENTRIES, IM_MAX_SCOPES. libFuzzer harness for the prefetch lookahead scanner (Hito 29).
 

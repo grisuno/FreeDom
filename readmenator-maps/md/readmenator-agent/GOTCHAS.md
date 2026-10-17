@@ -4,22 +4,22 @@
 
 These files have the most connections. Changes here have high blast radius.
 
-- `gui/browser_ui.c` (score: 142.80)
-- `include/css.h` (score: 81.50, imported by 33 files)
+- `gui/browser_ui.c` (score: 146.00)
+- `include/css.h` (score: 81.60, imported by 33 files)
 - `src/tab.c` (score: 58.20)
-- `src/css.c` (score: 54.20)
+- `src/css.c` (score: 54.30)
+- `src/page_view.c` (score: 53.30)
 - `src/freedom.c` (score: 52.60)
-- `src/page_view.c` (score: 51.00)
 - `include/html_parse.h` (score: 48.40, imported by 23 files)
 - `include/dom.h` (score: 40.80, imported by 18 files)
-- `include/page_view.h` (score: 39.90, imported by 13 files)
+- `include/page_view.h` (score: 40.10, imported by 13 files)
 
 ## Blast Radius (change impact)
 
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
-- `include/css_color.h` -- 13 direct, 54 total dependents
-- `include/css.h` -- 33 direct, 52 total dependents
+- `include/css_color.h` -- 13 direct, 52 total dependents
+- `include/css.h` -- 33 direct, 50 total dependents
 - `include/html_parse.h` -- 23 direct, 45 total dependents
 - `include/dom.h` -- 18 direct, 40 total dependents
 - `include/url.h` -- 18 direct, 28 total dependents
@@ -63,13 +63,13 @@ Circular dependencies. Refactor to break the cycle.
 
 ## Dataflow Issues (INFERRED, review each lead)
 
-- `gui/browser_ui.c:1488` `gui_subresource_fetch` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- `gui/browser_ui.c:1653` `first` [DEAD_STORE] `dg`: `dg` assigned at line 1653 but never read afterwards.
-- `gui/browser_ui.c:4124` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 4124 but never read afterwards.
-- `gui/browser_ui.c:4126` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 4126 but never read afterwards.
-- `gui/browser_ui.c:5003` `table` [DEAD_STORE] `parent`: `parent` assigned at line 5003 but never read afterwards.
-- `gui/browser_ui.c:5004` `table` [DEAD_STORE] `seen`: `seen` assigned at line 5004 but never read afterwards.
-- `gui/browser_ui.c:5006` `table` [DEAD_STORE] `j`: `j` assigned at line 5006 but never read afterwards.
-- `gui/browser_ui.c:7597` `layout_float_band` [DEAD_STORE] `base_top`: `base_top` assigned at line 7597 but never read afterwards.
-- `gui/browser_ui.c:9152` `button_box_width` [DEAD_STORE] `cx`: `cx` assigned at line 9152 but never read afterwards.
-- `gui/browser_ui.c:10205` `paint_box_decoration` [DEAD_STORE] `bt`: `bt` assigned at line 10205 but never read afterwards.
+- `gui/browser_ui.c:1489` `gui_subresource_fetch` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- `gui/browser_ui.c:1654` `first` [DEAD_STORE] `dg`: `dg` assigned at line 1654 but never read afterwards.
+- `gui/browser_ui.c:4139` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 4139 but never read afterwards.
+- `gui/browser_ui.c:4141` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 4141 but never read afterwards.
+- `gui/browser_ui.c:5021` `table` [DEAD_STORE] `parent`: `parent` assigned at line 5021 but never read afterwards.
+- `gui/browser_ui.c:5022` `table` [DEAD_STORE] `seen`: `seen` assigned at line 5022 but never read afterwards.
+- `gui/browser_ui.c:5024` `table` [DEAD_STORE] `j`: `j` assigned at line 5024 but never read afterwards.
+- `gui/browser_ui.c:9417` `button_box_width` [DEAD_STORE] `cx`: `cx` assigned at line 9417 but never read afterwards.
+- `gui/browser_ui.c:10553` `paint_box_decoration` [DEAD_STORE] `bt`: `bt` assigned at line 10553 but never read afterwards.
+- `gui/browser_ui.c:10554` `paint_box_decoration` [DEAD_STORE] `bb`: `bb` assigned at line 10554 but never read afterwards.

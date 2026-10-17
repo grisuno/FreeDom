@@ -4,30 +4,30 @@
 
 ## Definition
 
-This community groups 20 file(s) rooted at `include` with dominant language c (cohesion 0.55). Central symbols: `DU_MAX_ENCODED_LEN`, `FREEDOM_DATA_URL_H`, `FREEDOM_PSL_DATA_H`, `FREEDOM_REQUEST_POLICY_H`, `FREEDOM_TEXT_SHAPE_H`, `FREEDOM_WEBFONT_H`, `FREEDOM_WEBFONT_LOAD_H`, `FZ_CAP`. Core file: `src/text_shape.c` (42 symbols). Documented purpose: libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). The.
+This community groups 20 file(s) rooted at `include` with dominant language c (cohesion 0.55). Central symbols: `ASCII`, `DU_MAX_ENCODED_LEN`, `FREEDOM_DATA_URL_H`, `FREEDOM_PSL_DATA_H`, `FREEDOM_REQUEST_POLICY_H`, `FREEDOM_TEXT_SHAPE_H`, `FREEDOM_WEBFONT_H`, `FREEDOM_WEBFONT_LOAD_H`. Core file: `src/text_shape.c` (59 symbols). Documented purpose: libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). The.
 
 ## Files
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `fuzz/fuzz_data_url.c` | c | data_access | 1 | no |
-| `fuzz/fuzz_text_shape.c` | c | utility | 2 | no |
+| `fuzz/fuzz_text_shape.c` | c | utility | 4 | no |
 | `fuzz/fuzz_webfont.c` | c | utility | 1 | yes |
 | `include/data_url.h` | h | data_access | 6 | no |
 | `include/psl_data.h` | h | data_access | 7 | no |
 | `include/request_policy.h` | h | business_logic | 5 | no |
-| `include/text_shape.h` | h | utility | 21 | no |
+| `include/text_shape.h` | h | utility | 24 | no |
 | `include/webfont.h` | h | utility | 17 | no |
 | `include/webfont_load.h` | h | utility | 7 | no |
 | `src/data_url.c` | c | data_access | 10 | no |
 | `src/render_policy.c` | c | presentation | 5 | no |
 | `src/request_policy.c` | c | business_logic | 11 | no |
-| `src/text_shape.c` | c | utility | 42 | no |
+| `src/text_shape.c` | c | utility | 59 | no |
 | `src/webfont.c` | c | utility | 15 | no |
 | `src/webfont_load.c` | c | utility | 11 | no |
 | `tests/test_data_url.c` | c | testing | 26 | no |
 | `tests/test_request_policy.c` | c | testing | 12 | no |
-| `tests/test_text_shape.c` | c | testing | 18 | no |
+| `tests/test_text_shape.c` | c | testing | 21 | no |
 | `tests/test_webfont.c` | c | testing | 13 | no |
 | `tests/test_webfont_load.c` | c | testing | 16 | no |
 
@@ -36,6 +36,8 @@ This community groups 20 file(s) rooted at `include` with dominant language c (c
 - `worker` (function, `fuzz/fuzz_data_url.c:6`) `* confined tab worker (OP_DECODE_IMAGE_B64) on bytes the parent only sliced, nev`
 - `FZ_CAP` (macro, `fuzz/fuzz_text_shape.c:23`) `#define FZ_CAP`
 - `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_text_shape.c:25`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- `glyph` (function, `fuzz/fuzz_text_shape.c:54`) `* one lacks a glyph (spec/text_shape.md 8);`
+- `ASCII` (function, `fuzz/fuzz_text_shape.c:56`) `* printable ASCII (one run, the requested face) the two must agree. */ double m`
 - `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_webfont.c:11`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 - `FREEDOM_DATA_URL_H` (macro, `include/data_url.h:2`) `#define FREEDOM_DATA_URL_H`
 - `allocation` (function, `include/data_url.h:21`) `* * du_base64_payload does no allocation (it only slices the caller's url string`
@@ -61,8 +63,6 @@ This community groups 20 file(s) rooted at `include` with dominant language c (c
 - `family` (type_alias, `include/text_shape.h:33`) `typedef struct tsh_font { int family;` - Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. The engine matches the g
 - `TSH_LOCAL_LISTS` (macro, `include/text_shape.h:46`) `#define TSH_LOCAL_LISTS`
 - `TSH_LOCAL_FAMILIES` (macro, `include/text_shape.h:47`) `#define TSH_LOCAL_FAMILIES`
-- `TSH_FAMILY_MAX` (macro, `include/text_shape.h:48`) `#define TSH_FAMILY_MAX`
-- `tsh_family_is_generic` (function, `include/text_shape.h:52`) `int tsh_family_is_generic(const char *name);` - 1 for a CSS generic family keyword (serif, sans-serif, monospace, cursive, * fantasy, system-ui, ui-
 
 ## Internal vs External Edges
 

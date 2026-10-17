@@ -343,6 +343,21 @@ double bx_border_box_h(double declared_h, int border_box,
     return declared_h + pad_t + pad_b + bord_t + bord_b;
 }
 
+double bx_pct_block_size(int px_val, int pct_pm, double cb_h) {
+    if (pct_pm != 0 && cb_h < 0.0) return -1.0;
+    double v = (double)px_val + (pct_pm != 0 ? (double)pct_pm * cb_h / 1000.0 : 0.0);
+    return (v < 0.0) ? 0.0 : v;
+}
+
+double bx_definite_content_h(double h, double min_h, double max_h,
+                             int border_box, double v_edges) {
+    if (h < 0.0) return -1.0;
+    if (max_h >= 0.0 && h > max_h) h = max_h;
+    if (min_h >= 0.0 && h < min_h) h = min_h;
+    if (border_box && v_edges > 0.0) h -= v_edges;
+    return (h < 0.0) ? 0.0 : h;
+}
+
 int bx_content_clipped(int overflow_x, int overflow_y) {
     return (overflow_x == CSS_OF_HIDDEN || overflow_x == CSS_OF_SCROLL ||
             overflow_x == CSS_OF_AUTO || overflow_y == CSS_OF_HIDDEN ||

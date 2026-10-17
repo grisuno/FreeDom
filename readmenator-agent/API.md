@@ -1,5 +1,5 @@
-# API (page 1 of 9)
-Pages: [API.md](API.md), [API_p2.md](API_p2.md), [API_p3.md](API_p3.md), [API_p4.md](API_p4.md), [API_p5.md](API_p5.md), [API_p6.md](API_p6.md), [API_p7.md](API_p7.md), [API_p8.md](API_p8.md), [API_p9.md](API_p9.md)
+# API (page 1 of 10)
+Pages: [API.md](API.md), [API_p2.md](API_p2.md), [API_p3.md](API_p3.md), [API_p4.md](API_p4.md), [API_p5.md](API_p5.md), [API_p6.md](API_p6.md), [API_p7.md](API_p7.md), [API_p8.md](API_p8.md), [API_p9.md](API_p9.md), [API_p10.md](API_p10.md)
 
 ## app.py
 - `read_fuzz_stats` (function) `app.py:30` `def read_fuzz_stats()` -- Reads the current status of the active AFL++ fuzzing session.
@@ -81,6 +81,8 @@ Depends on: `include/svg_render.h`
 ## fuzz/fuzz_text_shape.c
 Depends on: `include/text_shape.h`
 - `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_text_shape.c:25` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- `glyph` (function) `fuzz/fuzz_text_shape.c:54` `* one lacks a glyph (spec/text_shape.md 8);`
+- `ASCII` (function) `fuzz/fuzz_text_shape.c:56` `* printable ASCII (one run, the requested face) the two must agree. */ double m = tsh_measure(&f, px, text, len);`
 
 ## fuzz/fuzz_url.c
 Depends on: `include/link_nav.h`, `include/url.h`

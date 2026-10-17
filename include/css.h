@@ -436,6 +436,7 @@ typedef enum css_backface {
  * reuses the box-model CSS_LEN_MAX clamp (below). */
 #define CSS_SPACING_MAX 200      /* letter-spacing / word-spacing */
 #define CSS_SHADOW_MAX  100      /* text-shadow offsets */
+#define CSS_BSHADOW_LAYERS 4     /* box-shadow layers kept (CSS Backgrounds 3 7.1); more are dropped */
 
 /* Box-model lengths (margin/padding/width/max-width), in px. Two out-of-band
  * sentinels distinguish "not declared" and the 'auto' keyword from a real length;
@@ -630,6 +631,9 @@ typedef struct css_style {
      * minmax(a,b) resolves to its max component; %/unknown fall to auto. Tracks
      * past the cap lay out as auto. Only meaningful when grid_cols > 0. */
     int         grid_col_w[CSS_GRID_TRACKS_MAX];
+    /* grid-template-rows sizes, encoded like grid_col_w (0 auto / >0 px / <0 fr
+     * x100); grid_rows is their count. */
+    int         grid_row_h[CSS_GRID_TRACKS_MAX];
     /* Named grid placement (2026-08-14, CSS Grid 1 7.3 + 8.4). On a CONTAINER,
      * grid_areas is the raw `grid-template-areas` value (the quoted row strings);
      * "" = not declared. On an ITEM, grid_area_name is its `grid-area: <name>`
@@ -720,6 +724,12 @@ typedef struct css_style {
     int         shadow2_dx, shadow2_dy, shadow2_blur, shadow2_spread;
     int         box_shadow_color;
     int         box_shadow_inset;
+    /* box-shadow layers 2..CSS_BSHADOW_LAYERS, each {dx, dy, blur, spread, color,
+     * inset} exactly like the first layer above; box_shadow_n counts ALL layers
+     * (0 = none declared). A color carries its alpha as transparency in bits
+     * 24..30 (cv_parse_color_t7), so an opaque color is the plain 0xRRGGBB. */
+    int         box_shadow_n;
+    int         box_shadow_x[CSS_BSHADOW_LAYERS - 1][6];
     int         outline_width;   /* px >= 0, or CSS_LEN_UNSET */
     int         outline_style;   /* css_border_style */
     int         outline_color;   /* 0xRRGGBB or -1 */

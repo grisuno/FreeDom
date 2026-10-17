@@ -2,33 +2,33 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 195,
-  "entities": 3097,
+  "modules": 197,
+  "entities": 3138,
   "languages": {
-   "c": 105,
-   "h": 80,
+   "c": 106,
+   "h": 81,
    "py": 5,
    "sh": 5
   },
   "kinds": {
    "constant": 10,
    "enum": 147,
-   "function": 1576,
-   "macro": 803,
+   "function": 1600,
+   "macro": 813,
    "method": 22,
-   "module": 195,
-   "struct": 218,
-   "type_alias": 119,
+   "module": 197,
+   "struct": 221,
+   "type_alias": 121,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 70,
+  "skipped_files": 71,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1223,
-   "total": 3080,
+   "documented": 1239,
+   "total": 3121,
    "percent": 39.7
   },
   "by_kind": {
@@ -38,14 +38,14 @@
     "percent": 53.7
    },
    "function": {
-    "documented": 654,
-    "total": 1576,
-    "percent": 41.5
+    "documented": 661,
+    "total": 1600,
+    "percent": 41.3
    },
    "macro": {
-    "documented": 281,
-    "total": 803,
-    "percent": 35.0
+    "documented": 286,
+    "total": 813,
+    "percent": 35.2
    },
    "method": {
     "documented": 0,
@@ -53,19 +53,19 @@
     "percent": 0.0
    },
    "module": {
-    "documented": 23,
-    "total": 195,
-    "percent": 11.8
+    "documented": 24,
+    "total": 197,
+    "percent": 12.2
    },
    "struct": {
-    "documented": 97,
-    "total": 218,
-    "percent": 44.5
+    "documented": 98,
+    "total": 221,
+    "percent": 44.3
    },
    "type_alias": {
-    "documented": 89,
-    "total": 119,
-    "percent": 74.8
+    "documented": 91,
+    "total": 121,
+    "percent": 75.2
    }
   },
   "by_module": {
@@ -176,7 +176,7 @@
    },
    "fuzz/fuzz_text_shape.c": {
     "documented": 0,
-    "total": 3,
+    "total": 5,
     "percent": 0.0
    },
    "fuzz/fuzz_tls_impersonate.c": {
@@ -200,9 +200,9 @@
     "percent": 50.0
    },
    "gui/browser_ui.c": {
-    "documented": 71,
-    "total": 219,
-    "percent": 32.4
+    "documented": 73,
+    "total": 224,
+    "percent": 32.6
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -239,10 +239,15 @@
     "total": 4,
     "percent": 50.0
    },
+   "include/box_blur.h": {
+    "documented": 4,
+    "total": 4,
+    "percent": 100.0
+   },
    "include/box_style.h": {
-    "documented": 19,
-    "total": 28,
-    "percent": 67.9
+    "documented": 20,
+    "total": 30,
+    "percent": 66.7
    },
    "include/box_tree.h": {
     "documented": 11,
@@ -260,9 +265,9 @@
     "percent": 88.9
    },
    "include/css.h": {
-    "documented": 100,
-    "total": 135,
-    "percent": 74.1
+    "documented": 101,
+    "total": 136,
+    "percent": 74.3
    },
    "include/css_atrule.h": {
     "documented": 7,
@@ -271,7 +276,7 @@
    },
    "include/css_box.h": {
     "documented": 0,
-    "total": 25,
+    "total": 26,
     "percent": 0.0
    },
    "include/css_chain.h": {
@@ -320,9 +325,9 @@
     "percent": 0.0
    },
    "include/css_values.h": {
-    "documented": 1,
-    "total": 6,
-    "percent": 16.7
+    "documented": 2,
+    "total": 7,
+    "percent": 28.6
    },
    "include/css_vars.h": {
     "documented": 14,
@@ -356,8 +361,8 @@
    },
    "include/flex_layout.h": {
     "documented": 23,
-    "total": 42,
-    "percent": 54.8
+    "total": 43,
+    "percent": 53.5
    },
    "include/form.h": {
     "documented": 3,
@@ -476,8 +481,8 @@
    },
    "include/page_view.h": {
     "documented": 48,
-    "total": 79,
-    "percent": 60.8
+    "total": 81,
+    "percent": 59.3
    },
    "include/pdf_export.h": {
     "documented": 3,
@@ -550,9 +555,9 @@
     "percent": 45.2
    },
    "include/text_shape.h": {
-    "documented": 15,
-    "total": 21,
-    "percent": 71.4
+    "documented": 17,
+    "total": 24,
+    "percent": 70.8
    },
    "include/textfield.h": {
     "documented": 8,
@@ -629,15 +634,20 @@
     "total": 4,
     "percent": 50.0
    },
+   "src/box_blur.c": {
+    "documented": 1,
+    "total": 4,
+    "percent": 25.0
+   },
    "src/box_style.c": {
-    "documented": 13,
-    "total": 42,
-    "percent": 31.0
+    "documented": 14,
+    "total": 44,
+    "percent": 31.8
    },
    "src/box_tree.c": {
     "documented": 4,
-    "total": 13,
-    "percent": 30.8
+    "total": 14,
+    "percent": 28.6
    },
    "src/browser.c": {
     "documented": 8,
@@ -661,8 +671,8 @@
    },
    "src/css_box.c": {
     "documented": 15,
-    "total": 31,
-    "percent": 48.4
+    "total": 32,
+    "percent": 46.9
    },
    "src/css_chain.c": {
     "documented": 7,
@@ -705,9 +715,9 @@
     "percent": 73.3
    },
    "src/css_values.c": {
-    "documented": 0,
-    "total": 6,
-    "percent": 0.0
+    "documented": 1,
+    "total": 7,
+    "percent": 14.3
    },
    "src/css_vars.c": {
     "documented": 5,
@@ -741,8 +751,8 @@
    },
    "src/flex_layout.c": {
     "documented": 9,
-    "total": 25,
-    "percent": 36.0
+    "total": 26,
+    "percent": 34.6
    },
    "src/form.c": {
     "documented": 0,
@@ -896,8 +906,8 @@
    },
    "src/page_view.c": {
     "documented": 55,
-    "total": 124,
-    "percent": 44.4
+    "total": 125,
+    "percent": 44.0
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -960,9 +970,9 @@
     "percent": 36.8
    },
    "src/text_shape.c": {
-    "documented": 14,
-    "total": 26,
-    "percent": 53.8
+    "documented": 16,
+    "total": 34,
+    "percent": 47.1
    },
    "src/textfield.c": {
     "documented": 6,
@@ -1155,7 +1165,7 @@
   {
    "uid": "fuzz/fuzz_text_shape.c",
    "path": "modules/fuzz.fuzz_text_shape.c.jsonl",
-   "entities": 3
+   "entities": 5
   },
   {
    "uid": "fuzz/fuzz_tls_impersonate.c",
@@ -1180,7 +1190,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 219
+   "entities": 224
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1218,9 +1228,14 @@
    "entities": 4
   },
   {
+   "uid": "include/box_blur.h",
+   "path": "modules/include.box_blur.h.jsonl",
+   "entities": 4
+  },
+  {
    "uid": "include/box_style.h",
    "path": "modules/include.box_style.h.jsonl",
-   "entities": 28
+   "entities": 30
   },
   {
    "uid": "include/box_tree.h",
@@ -1240,7 +1255,7 @@
   {
    "uid": "include/css.h",
    "path": "modules/include.css.h.jsonl",
-   "entities": 135
+   "entities": 136
   },
   {
    "uid": "include/css_atrule.h",
@@ -1250,7 +1265,7 @@
   {
    "uid": "include/css_box.h",
    "path": "modules/include.css_box.h.jsonl",
-   "entities": 25
+   "entities": 26
   },
   {
    "uid": "include/css_chain.h",
@@ -1300,7 +1315,7 @@
   {
    "uid": "include/css_values.h",
    "path": "modules/include.css_values.h.jsonl",
-   "entities": 6
+   "entities": 7
   },
   {
    "uid": "include/css_vars.h",
@@ -1335,7 +1350,7 @@
   {
    "uid": "include/flex_layout.h",
    "path": "modules/include.flex_layout.h.jsonl",
-   "entities": 42
+   "entities": 43
   },
   {
    "uid": "include/form.h",
@@ -1455,7 +1470,7 @@
   {
    "uid": "include/page_view.h",
    "path": "modules/include.page_view.h.jsonl",
-   "entities": 79
+   "entities": 81
   },
   {
    "uid": "include/pdf_export.h",
@@ -1530,7 +1545,7 @@
   {
    "uid": "include/text_shape.h",
    "path": "modules/include.text_shape.h.jsonl",
-   "entities": 21
+   "entities": 24
   },
   {
    "uid": "include/textfield.h",
@@ -1608,14 +1623,19 @@
    "entities": 4
   },
   {
+   "uid": "src/box_blur.c",
+   "path": "modules/src.box_blur.c.jsonl",
+   "entities": 4
+  },
+  {
    "uid": "src/box_style.c",
    "path": "modules/src.box_style.c.jsonl",
-   "entities": 42
+   "entities": 44
   },
   {
    "uid": "src/box_tree.c",
    "path": "modules/src.box_tree.c.jsonl",
-   "entities": 13
+   "entities": 14
   },
   {
    "uid": "src/browser.c",
@@ -1640,7 +1660,7 @@
   {
    "uid": "src/css_box.c",
    "path": "modules/src.css_box.c.jsonl",
-   "entities": 31
+   "entities": 32
   },
   {
    "uid": "src/css_chain.c",
@@ -1685,7 +1705,7 @@
   {
    "uid": "src/css_values.c",
    "path": "modules/src.css_values.c.jsonl",
-   "entities": 6
+   "entities": 7
   },
   {
    "uid": "src/css_vars.c",
@@ -1720,7 +1740,7 @@
   {
    "uid": "src/flex_layout.c",
    "path": "modules/src.flex_layout.c.jsonl",
-   "entities": 25
+   "entities": 26
   },
   {
    "uid": "src/form.c",
@@ -1875,7 +1895,7 @@
   {
    "uid": "src/page_view.c",
    "path": "modules/src.page_view.c.jsonl",
-   "entities": 124
+   "entities": 125
   },
   {
    "uid": "src/pdf_export.c",
@@ -1940,7 +1960,7 @@
   {
    "uid": "src/text_shape.c",
    "path": "modules/src.text_shape.c.jsonl",
-   "entities": 26
+   "entities": 34
   },
   {
    "uid": "src/textfield.c",
@@ -2025,7 +2045,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 1858
+  "total": 1883
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

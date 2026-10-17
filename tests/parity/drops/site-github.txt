@@ -1,5 +1,5 @@
 GitHub · Change is constant. GitHub keeps you ahead. · GitHub · GitHub
-CSS drops: 1208 declaration(s) dropped, 104 distinct
+CSS drops: 1210 declaration(s) dropped, 104 distinct
   count  cause         property                     first value
      68  unknown-prop  -webkit-font-smoothing       subpixel-antialiased
      62  unknown-prop  clip-path                    rect(0 0 0 0)
@@ -30,10 +30,10 @@ CSS drops: 1208 declaration(s) dropped, 104 distinct
      16  unknown-prop  box-decoration-break         clone
      16  unknown-prop  text-underline-position      under
      15  unknown-prop  text-underline-offset        .2rem
-     14  unknown-prop  mask-composite               exclude
-     14  unknown-prop  -webkit-overflow-scrolling   touch
      14  unknown-prop  animation-play-state         paused
      14  unknown-prop  mask-position                50%
+     14  unknown-prop  mask-composite               exclude
+     14  unknown-prop  -webkit-overflow-scrolling   touch
      12  bad-value     right                        anchor(right)
      12  unknown-prop  contain-intrinsic-size       auto 32px
      12  unknown-prop  overflow-clip-margin         .5rem
@@ -44,20 +44,20 @@ CSS drops: 1208 declaration(s) dropped, 104 distinct
       9  unknown-prop  object-position              left
       9  unknown-prop  scroll-margin-top            64px
       9  bad-value     animation-timing-function    cubic-bezier(.2,0,.13,1.5)
-      8  unknown-prop  grid-column-gap              2rem
       8  bad-value     transition-timing-function   cubic-bezier(.5,1,.89,1)
+      8  unknown-prop  grid-column-gap              2rem
       8  unknown-prop  scale                        1.05
       8  unknown-prop  all                          unset
-      7  unknown-prop  shape-rendering              crispedges
       7  unknown-prop  container                    controlbox/inline-size
+      7  unknown-prop  shape-rendering              crispedges
       6  bad-value     background                   linktext
       6  unknown-prop  position-visibility          anchors-visible
       6  bad-value     bottom                       anchor(top)
       6  unknown-prop  field-sizing                 content
       6  unknown-prop  anchor-name                  --segmented-control-current-item
+      5  bad-value     line-height                  calc(1.25rem - .0625rem*2)
       5  bad-value     justify-content              left
       5  unknown-prop  fill-opacity                 1
-      5  bad-value     line-height                  calc(1.25rem - .0625rem*2)
       5  unknown-prop  border-image                 linear-gradient(#191f1b, #191f1b) 1
       5  unknown-prop  border-image-outset          0 1000px
       5  unknown-prop  text-decoration-skip-ink     none
@@ -69,7 +69,7 @@ CSS drops: 1208 declaration(s) dropped, 104 distinct
       4  unknown-prop  scroll-padding-block         1.5rem
       4  bad-value     border-color                 color-mix(in srgb, #0d6731, #000 35%)
       4  bad-value     stroke                       color-mix(in srgb, #08872b, #000 20%)
-      4  unknown-prop  scrollbar-width              thin
+      4  bad-value     box-shadow                   inset 0 0 0 1px #0000 #1f6feb
       4  unknown-prop  transform-style              preserve-3d
       4  bad-value     content                      counter(li) "."
       4  unknown-prop  counter-increment            li
@@ -78,30 +78,30 @@ CSS drops: 1208 declaration(s) dropped, 104 distinct
       4  unknown-prop  list-style-image             url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' aria-hidden=...
       4  unknown-prop  font-variation-settings      "ital" 10
       4  unknown-prop  font-synthesis               none
-      3  bad-value     z-index                      auto
+      4  unknown-prop  scrollbar-width              thin
       3  bad-value     mix-blend-mode               plus-lighter
-      3  unknown-prop  stroke-opacity               1
       3  bad-value     flex                         0 100 max-content
-      2  bad-value     height                       1.5
-      2  bad-value     box-shadow                   0
+      3  bad-value     z-index                      auto
+      3  unknown-prop  stroke-opacity               1
       2  unknown-prop  font-variant-numeric         lining-nums tabular-nums
+      2  bad-value     height                       1.5
       2  bad-value     max-height                   1.5
       2  unknown-prop  transform-box                fill-box
       2  bad-value     grid-template-columns        repeat(auto-fit,160px 160px)
-      1  bad-value     font-variant                 tabular-nums
-      1  unknown-prop  text-anchor                  end
+      1  unknown-prop  grid-auto-columns            max-content
       1  unknown-prop  offset                       2px
-      1  unknown-prop  -moz-text-size-adjust        100%
-      1  unknown-prop  text-size-adjust             100%
-      1  unknown-prop  line-break                   anywhere
-      1  bad-value     min-height                   2rem 2rem
-      1  unknown-prop  font-variant-ligatures       contextual
-      1  unknown-prop  background-blend-mode        normal
-      1  bad-value     align-items                  top
-      1  unknown-prop  -webkit-text-size-adjust     100%
-      1  bad-value     visibility                   none
       1  unknown-prop  -ms-text-size-adjust         100%
+      1  unknown-prop  background-blend-mode        normal
+      1  bad-value     visibility                   none
+      1  unknown-prop  font-variant-ligatures       contextual
+      1  bad-value     font-variant                 tabular-nums
+      1  bad-value     min-height                   2rem 2rem
+      1  unknown-prop  line-break                   anywhere
+      1  unknown-prop  -moz-text-size-adjust        100%
+      1  unknown-prop  -webkit-text-size-adjust     100%
+      1  bad-value     align-items                  top
+      1  unknown-prop  text-size-adjust             100%
       1  unknown-prop  scrollbar-gutter             stable
       1  unknown-prop  scrollbar-color              #a4aea6 transparent
-      1  unknown-prop  grid-auto-columns            max-content
+      1  unknown-prop  text-anchor                  end
       1  unknown-prop  stroke-linecap               round

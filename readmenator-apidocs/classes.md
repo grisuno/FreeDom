@@ -49,6 +49,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`cl_status`](modules/include.css_length.h.md#cl_status) enum in `include/css_length.h`
 - [`cmq_env`](modules/include.css_mq.h.md#cmq_env) struct in `include/css_mq.h`
 - [`col`](modules/gui.browser_ui.c.md#col) type_alias in `gui/browser_ui.c`
+- [`col_founder_box`](modules/gui.browser_ui.c.md#col_founder_box) type_alias in `gui/browser_ui.c`
 - [`color`](modules/include.css.h.md#color) type_alias in `include/css.h`
 - [`cols`](modules/include.flex_layout.h.md#cols) type_alias in `include/flex_layout.h`
 - [`cols`](modules/src.page_view.c.md#cols) type_alias in `src/page_view.c`
@@ -155,6 +156,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`dom_status`](modules/include.dom.h.md#dom_status) enum in `include/dom.h`
 - [`ds_status`](modules/include.disk_store.h.md#ds_status) enum in `include/disk_store.h`
 - [`du_status`](modules/include.data_url.h.md#du_status) enum in `include/data_url.h`
+- [`end`](modules/include.text_shape.h.md#end) type_alias in `include/text_shape.h`
 - [`epoch_ms`](modules/include.media_decoder.h.md#epoch_ms) type_alias in `include/media_decoder.h`
 - [`family`](modules/gui.browser_ui.c.md#family) type_alias in `gui/browser_ui.c`
 - [`family`](modules/include.text_shape.h.md#family) type_alias in `include/text_shape.h`
@@ -167,6 +169,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`fetch_ctx`](modules/src.secure_fetch.c.md#fetch_ctx) struct in `src/secure_fetch.c`
 - [`fetch_job`](modules/gui.browser_ui.c.md#fetch_job) struct in `gui/browser_ui.c`
 - [`fetch_prep`](modules/gui.browser_ui.c.md#fetch_prep) struct in `gui/browser_ui.c`
+- [`file`](modules/src.text_shape.c.md#file) type_alias in `src/text_shape.c`
 - [`fm_block_reason`](modules/include.form.h.md#fm_block_reason) enum in `include/form.h`
 - [`fm_field`](modules/include.form.h.md#fm_field) struct in `include/form.h`
 - [`fm_kind`](modules/include.form.h.md#fm_kind) enum in `include/form.h`
@@ -276,7 +279,6 @@ Project types nested under the project types they derive from. External bases ar
 - [`len_rebase_ctx`](modules/src.css.c.md#len_rebase_ctx) struct in `src/css.c`
 - [`fb_entry.level`](modules/include.freebug.h.md#fb_entry-level) type_alias in `include/freebug.h`
 - [`js_mem_state.limit`](modules/src.js_sandbox.c.md#js_mem_state-limit) type_alias in `src/js_sandbox.c`
-- [`line_desc`](modules/gui.browser_ui.c.md#line_desc) type_alias in `gui/browser_ui.c`
 - [`ln_action`](modules/include.link_nav.h.md#ln_action) enum in `include/link_nav.h`
 - [`ln_block_reason`](modules/include.link_nav.h.md#ln_block_reason) enum in `include/link_nav.h`
 - [`ln_result`](modules/include.link_nav.h.md#ln_result) struct in `include/link_nav.h`
@@ -441,10 +443,13 @@ Project types nested under the project types they derive from. External bases ar
 - [`ti_wr`](modules/src.tls_impersonate.c.md#ti_wr) struct in `src/tls_impersonate.c`
 - [`tls_capture`](modules/src.secure_fetch.c.md#tls_capture) struct in `src/secure_fetch.c`
 - [`tor_enabled`](modules/include.net_realm.h.md#tor_enabled) type_alias in `include/net_realm.h`
+- [`tsh_cover_ctx`](modules/src.text_shape.c.md#tsh_cover_ctx) struct in `src/text_shape.c`
 - [`tsh_entry`](modules/src.text_shape.c.md#tsh_entry) struct in `src/text_shape.c`
+- [`tsh_fb`](modules/src.text_shape.c.md#tsh_fb) struct in `src/text_shape.c`
 - [`tsh_font`](modules/include.text_shape.h.md#tsh_font) struct in `include/text_shape.h`
 - [`tsh_lfam`](modules/src.text_shape.c.md#tsh_lfam) struct in `src/text_shape.c`
 - [`tsh_llist`](modules/src.text_shape.c.md#tsh_llist) struct in `src/text_shape.c`
+- [`tsh_run`](modules/include.text_shape.h.md#tsh_run) struct in `include/text_shape.h`
 - [`tsh_status`](modules/include.text_shape.h.md#tsh_status) enum in `include/text_shape.h`
 - [`tsh_web`](modules/src.text_shape.c.md#tsh_web) struct in `src/text_shape.c`
 - [`ui_bg_image`](modules/gui.browser_ui.c.md#ui_bg_image) struct in `gui/browser_ui.c`

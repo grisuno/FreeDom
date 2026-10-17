@@ -1,13 +1,13 @@
 # `include/flex_layout.h`
 
-> Source: [include/flex_layout.h:1](../../include/flex_layout.h#L1) | language `h` | coverage 54.8% | [API index](../index.md)
+> Source: [include/flex_layout.h:1](../../include/flex_layout.h#L1) | language `h` | coverage 53.5% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`fx_item`](#fx_item), [`fx_result`](#fx_result), [`fx_area_map`](#fx_area_map), [`fx_float_rect`](#fx_float_rect)
 - **Enums:** [`fx_justify`](#fx_justify), [`fx_status`](#fx_status)
 - **Type Aliases:** [`basis`](#basis), [`cols`](#cols), [`bottom`](#bottom)
-- **Functions:** [`size`](#size), [`out`](#out), [`fx_grid_cell`](#fx_grid_cell), [`number`](#number), [`fx_grid_line_parse`](#fx_grid_line_parse), [`fx_grid_line_resolve`](#fx_grid_line_resolve), [`fx_autofill_count`](#fx_autofill_count), [`fx_grid_area_hash`](#fx_grid_area_hash), [`offset`](#offset), [`required`](#required), [`widths`](#widths), [`FX_ERR_NULL_ARG`](#fx_err_null_arg), [`space`](#space), [`fx_auto_min_size`](#fx_auto_min_size), [`fx_justify_name`](#fx_justify_name), [`height`](#height), [`win`](#win), [`fx_cross_offset`](#fx_cross_offset)
+- **Functions:** [`size`](#size), [`out`](#out), [`fx_grid_cell`](#fx_grid_cell), [`number`](#number), [`fx_grid_line_parse`](#fx_grid_line_parse), [`fx_grid_line_resolve`](#fx_grid_line_resolve), [`fx_autofill_count`](#fx_autofill_count), [`fx_grid_area_hash`](#fx_grid_area_hash), [`offset`](#offset), [`required`](#required), [`widths`](#widths), [`FX_ERR_NULL_ARG`](#fx_err_null_arg), [`space`](#space), [`fx_auto_min_size`](#fx_auto_min_size), [`fx_justify_name`](#fx_justify_name), [`height`](#height), [`it`](#it), [`win`](#win), [`fx_cross_offset`](#fx_cross_offset)
 - **Macros:** [`FX_MAX_ITEMS`](#fx_max_items), [`FX_GL_AUTO`](#fx_gl_auto), [`FX_GL_SPAN_BASE`](#fx_gl_span_base), [`FX_GL_SPAN_MAX`](#fx_gl_span_max), [`FX_GL_LINE_MAX`](#fx_gl_line_max), [`FX_AREA_MAX_ROWS`](#fx_area_max_rows), [`FX_AREA_MAX_COLS`](#fx_area_max_cols), [`FX_AREA_MAX_CELLS`](#fx_area_max_cells), [`FX_AREA_NAME_MAX`](#fx_area_name_max), [`FX_FLOAT_MIN_LINE`](#fx_float_min_line), [`FX_MAX_COLUMNS`](#fx_max_columns), [`FX_MAUTO_TOP`](#fx_mauto_top), [`FX_MAUTO_BOTTOM`](#fx_mauto_bottom)
 
 ## Type Diagram
@@ -504,7 +504,7 @@ min_content  the item's min-content size (its longest unbreakable word, or a
   author_min   the author's own `min-width` in px when they set one (min-width is
                then NOT `auto` and wins outright, larger OR smaller), or < 0 when
                unset.
-  scroll_container  non-zero when the item's `overflow` is anything but `visible`.
+  scroll_container  non-zero when the item's [`overflow`](gui.browser_ui.c.md#overflow) is anything but `visible`.
                Such an item has an automatic minimum size of ZERO -- this is what
                makes the near-universal `overflow:hidden` truncation idiom work.
 
@@ -561,11 +561,32 @@ Never NULL; an unknown enum value yields "start".
 
 ---
 
+<a id="it"></a>
+
+### `it`
+
+`function` | [include/flex_layout.h:342](../../include/flex_layout.h#L342)
+
+```c
+* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else equally among the auto margins in * mauto[i] (FX_MAUTO_TOP -> before[i], FX_MAUTO_BOTT
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `md` | `spec/flex_layout.` |  |  |
+| `tanda` |  |  |  |
+
+**Returns:** `proportionally to * grow[i] (x100) when any grows, else equally among the auto margins in * mauto[i] (FX_MAUTO_TOP -> before[i], FX_MAUTO_BOTT`
+
+---
+
 <a id="win"></a>
 
 ### `win`
 
-`function` | [include/flex_layout.h:342](../../include/flex_layout.h#L342)
+`function` | [include/flex_layout.h:350](../../include/flex_layout.h#L350)
 
 ```c
 * margins win (both = centre, left only = end);
@@ -585,7 +606,7 @@ Never NULL; an unknown enum value yields "start".
 
 ### `fx_cross_offset`
 
-`function` | [include/flex_layout.h:344](../../include/flex_layout.h#L344)
+`function` | [include/flex_layout.h:352](../../include/flex_layout.h#L352)
 
 ```c
 double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);

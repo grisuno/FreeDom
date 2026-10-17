@@ -4,7 +4,7 @@
 
 ## Contents
 
-- **Functions:** [`cb_length_px`](#cb_length_px), [`cb_interp_len`](#cb_interp_len), [`cb_emit_len`](#cb_emit_len), [`cb_expand_box4`](#cb_expand_box4), [`cb_expand_box2`](#cb_expand_box2), [`cb_interp_lp`](#cb_interp_lp), [`cb_value_em_milli`](#cb_value_em_milli), [`cb_lp_can_be_nonneg`](#cb_lp_can_be_nonneg), [`cb_next_ws_token`](#cb_next_ws_token), [`cb_interp_align`](#cb_interp_align), [`cb_interp_fontsize_ex`](#cb_interp_fontsize_ex), [`cb_interp_lineheight`](#cb_interp_lineheight), [`cb_interp_weight`](#cb_interp_weight), [`cb_interp_style`](#cb_interp_style), [`cb_interp_textdeco`](#cb_interp_textdeco), [`cb_interp_display`](#cb_interp_display), [`cb_interp_gap`](#cb_interp_gap), [`cb_interp_justify`](#cb_interp_justify), [`cb_interp_gridcols`](#cb_interp_gridcols), [`cb_expand_grid_template_cols`](#cb_expand_grid_template_cols)
+- **Functions:** [`cb_length_px`](#cb_length_px), [`cb_interp_len`](#cb_interp_len), [`cb_emit_len`](#cb_emit_len), [`cb_expand_box4`](#cb_expand_box4), [`cb_expand_box2`](#cb_expand_box2), [`cb_interp_lp`](#cb_interp_lp), [`cb_value_em_milli`](#cb_value_em_milli), [`cb_lp_can_be_nonneg`](#cb_lp_can_be_nonneg), [`cb_next_ws_token`](#cb_next_ws_token), [`cb_interp_align`](#cb_interp_align), [`cb_interp_fontsize_ex`](#cb_interp_fontsize_ex), [`cb_interp_lineheight`](#cb_interp_lineheight), [`cb_interp_weight`](#cb_interp_weight), [`cb_interp_style`](#cb_interp_style), [`cb_interp_textdeco`](#cb_interp_textdeco), [`cb_interp_display`](#cb_interp_display), [`cb_interp_gap`](#cb_interp_gap), [`cb_interp_justify`](#cb_interp_justify), [`cb_interp_gridcols`](#cb_interp_gridcols), [`cb_expand_grid_template_cols`](#cb_expand_grid_template_cols), [`strings`](#strings)
 - **Macros:** [`CB_AUTO_REJECT`](#cb_auto_reject), [`CB_AUTO_VALUE`](#cb_auto_value), [`CB_AUTO_RESET`](#cb_auto_reset), [`CB_AUTO_RESET_NONE`](#cb_auto_reset_none)
 
 ## Functions
@@ -447,6 +447,26 @@ int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);
 | `cap` | `int` |  |  |
 
 **Returns:** `int`
+
+---
+
+<a id="strings"></a>
+
+### `strings`
+
+`function` | [include/css_box.h:40](../../include/css_box.h#L40)
+
+```c
+* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `half` | `the grid-template shorthand's row` |  |  |
+
+**Returns:** `* Quoted area`
 
 ---
 

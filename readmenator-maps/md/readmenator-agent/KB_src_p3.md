@@ -144,6 +144,7 @@ Previous: [KB_src_p2.md](KB_src_p2.md)
   - `cv_color_ok` (function, line 41) `int cv_color_ok(int c)`
   - `cv_bg_alpha_of` (function, line 46) `int cv_bg_alpha_of(const char *v)`
   - `cv_interp_bg` (function, line 160) `int cv_interp_bg(const char *v)`
+  - `cv_parse_color_t7` (function, line 205) `int cv_parse_color_t7(const char *v)`
 - Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/css_vars.c
@@ -401,6 +402,8 @@ static dom_node_id qs_walk(const dom_inde...`
   - `gl_is_span` (function, line 882) `static int gl_is_span(int v)`
   - `gl_is_line` (function, line 883) `static int gl_is_line(int v)`
   - `fx_grid_line_resolve` (function, line 885) `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
+  - `fx_col_free_split` (function, line 927) `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
+        ...`
   - `FX_EPS` (macro, line 16) `#define FX_EPS`
 - Depends on: `include/flex_layout.h`
 

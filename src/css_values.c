@@ -201,3 +201,20 @@ int cv_interp_bg(const char *v)
     }
     return -1;
 }
+
+int cv_parse_color_t7(const char *v)
+{
+    int cv = cv_parse_color(v);
+    if (cv < 0) {
+        return cv;
+    }
+    int sa = cv_bg_alpha_of(v);   /* percent, or CSS_LEN_UNSET */
+    if (sa != CSS_LEN_UNSET && sa < 100) {
+        if (sa < 0) {
+            sa = 0;
+        }
+        int t7 = (int)((double)(100 - sa) * 127.0 / 100.0 + 0.5);
+        cv = (cv & 0xffffff) | (t7 << 24);
+    }
+    return cv;
+}

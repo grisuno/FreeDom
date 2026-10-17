@@ -3,6 +3,44 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `conic_prelude` | function | `src/css_gradient.c:110` | `static int conic_prelude(const char *seg, int *angle)` |
+| `declaration` | function | `src/css_gradient.c:443` | `* declaration (fail closed);` |
+| `downstream` | function | `src/css_gradient.c:384` | `* happens downstream (render_doc.c), gated by caps.images like an <img>. */ int cg_expand_bg_imag...` |
+| `emit_gradient` | function | `src/css_gradient.c:282` | `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,                          ...` |
+| `find_gradient_call` | function | `src/css_gradient.c:76` | `static int find_gradient_call(const char *v, const char *fn, size_t *start,                      ...` |
+| `find_radial_gradient` | function | `src/css_gradient.c:339` | `static int find_radial_gradient(const char *v, size_t *start, size_t *end,                       ...` |
+| `grad_stop_pos` | function | `src/css_gradient.c:152` | `static int grad_stop_pos(const char *pp, int conic, const char **endp)` |
+| `gradient` | function | `src/css_gradient.c:27` | `* or fewer than 2 stops drop the gradient (and, for the `background` shorthand,  * the whole decl...` |
+| `pool` | function | `src/css_gradient.c:380` | `* pool (gradient explicitly reset);` |
+| `cix_build` | function | `src/css_index.c:52` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx)` |
+| `cix_candidates` | function | `src/css_index.c:120` | `size_t cix_candidates(const cix_index *idx, const css_element *el,                       uint32_t...` |
+| `cix_free` | function | `src/css_index.c:45` | `void cix_free(cix_index *idx)` |
+| `entry_cmp` | function | `src/css_index.c:34` | `static int entry_cmp(const void *a, const void *b)` |
+| `key_of` | function | `src/css_index.c:11` | `static uint64_t key_of(int kind, const char *s, size_t n, int lower)` |
+| `key_of_token` | function | `src/css_index.c:26` | `static uint64_t key_of_token(int kind, const char *tok)` |
+| `lower_bound` | function | `src/css_index.c:90` | `static size_t lower_bound(const cix_index *idx, uint64_t k)` |
+| `push` | function | `src/css_index.c:100` | `static int push(uint32_t **buf, size_t *cap, size_t *n, uint32_t v)` |
+| `push_bucket` | function | `src/css_index.c:113` | `static int push_bucket(const cix_index *idx, uint64_t k,                        uint32_t **buf, s...` |
+| `u32_cmp` | function | `src/css_index.c:40` | `static int u32_cmp(const void *a, const void *b)` |
+| `CL_PX_PER_IN` | macro | `src/css_length.c:21` | `#define CL_PX_PER_IN` |
+| `cl_ctx_initial` | function | `src/css_length.c:100` | `cl_ctx cl_ctx_initial(void)` |
+| `cl_em_refit` | function | `src/css_length.c:219` | `double cl_em_refit(double px, double em, double from_font_size, double font_size)` |
+| `cl_font_size` | function | `src/css_length.c:56` | `static double cl_font_size(const cl_ctx *ctx)` |
+| `cl_is_length_unit` | function | `src/css_length.c:167` | `int cl_is_length_unit(const char *unit, size_t unit_len)` |
+| `cl_lp_used` | function | `src/css_length.c:395` | `double cl_lp_used(cl_lp lp, double basis)` |
+| `cl_metric_or` | function | `src/css_length.c:67` | `static double cl_metric_or(double measured, double ratio, const cl_ctx *ctx)` |
+| `cl_number` | function | `src/css_length.c:292` | `int cl_number(const char *s, double *out, const char **endp)` |
+| `cl_parse_number` | function | `src/css_length.c:233` | `static int cl_parse_number(const char **pp, const char *end, double *out)` |
+| `cl_resolve` | function | `src/css_length.c:377` | `cl_status cl_resolve(const char *value, const cl_ctx *ctx, double *out_px)` |
+| `cl_resolve_core` | function | `src/css_length.c:309` | `static cl_status cl_resolve_core(const char *value, const cl_ctx *ctx, cl_lp *out)` |
+| `cl_resolve_lp` | function | `src/css_length.c:391` | `cl_status cl_resolve_lp(const char *value, const cl_ctx *ctx, cl_lp *out)` |
+| `cl_root_font_size` | function | `src/css_length.c:60` | `static double cl_root_font_size(const cl_ctx *ctx)` |
+| `cl_unit_eq` | function | `src/css_length.c:30` | `static int cl_unit_eq(const char *unit, size_t len, const char *lit)` |
+| `cl_unit_is_font_relative` | function | `src/css_length.c:174` | `int cl_unit_is_font_relative(const char *unit, size_t unit_len)` |
+| `cl_unit_scale` | function | `src/css_length.c:117` | `cl_status cl_unit_scale(const char *unit, size_t unit_len,                         const cl_ctx *...` |
+| `cl_viewport_scale` | function | `src/css_length.c:80` | `static int cl_viewport_scale(const char *u, size_t len, const cl_ctx *ctx, double *per)` |
+| `know` | function | `src/css_length.c:7` | `* this module cannot know (real font metrics, the viewport) arrives through  * cl_ctx rather than...` |
+| `CMQ_CM_PER_IN` | macro | `src/css_mq.c:23` | `#define CMQ_CM_PER_IN` |
 | `CMQ_COLOR_BITS` | macro | `src/css_mq.c:21` | `#define CMQ_COLOR_BITS` |
 | `CMQ_DEVICE_H` | macro | `src/css_mq.c:19` | `#define CMQ_DEVICE_H` |
 | `CMQ_DEVICE_W` | macro | `src/css_mq.c:18` | `#define CMQ_DEVICE_W` |
@@ -87,6 +125,7 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `cv_interp_bg` | function | `src/css_values.c:160` | `int cv_interp_bg(const char *v)` |
 | `cv_interp_color` | function | `src/css_values.c:36` | `int cv_interp_color(const char *v)` |
 | `cv_parse_color` | function | `src/css_values.c:16` | `int cv_parse_color(const char *v)` |
+| `cv_parse_color_t7` | function | `src/css_values.c:205` | `int cv_parse_color_t7(const char *v)` |
 | `cv_parse_num` | function | `src/css_values.c:11` | `static int cv_parse_num(const char *s, double *out, const char **endp)` |
 | `cvr_collect_decls` | function | `src/css_vars.c:139` | `void cvr_collect_decls(cvr_table *t, const char *s, size_t a, size_t b)` |
 | `cvr_count` | function | `src/css_vars.c:100` | `size_t cvr_count(const cvr_table *t)` |
@@ -234,6 +273,7 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `fx_auto_margins` | function | `src/flex_layout.c:605` | `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,                 ...` |
 | `fx_auto_min_size` | function | `src/flex_layout.c:628` | `double fx_auto_min_size(double min_content, double basis, double author_min,                     ...` |
 | `fx_autofill_count` | function | `src/flex_layout.c:133` | `size_t fx_autofill_count(double avail, double gap, double minw)` |
+| `fx_col_free_split` | function | `src/flex_layout.c:927` | `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,         ...` |
 | `fx_column_place` | function | `src/flex_layout.c:722` | `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,             ...` |
 | `fx_column_place_m` | function | `src/flex_layout.c:729` | `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,               ...` |
 | `fx_cross_offset` | function | `src/flex_layout.c:790` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)` |
@@ -456,45 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `ip_anim_tick` | function | `src/interp.c:236` | `int ip_anim_tick(ip_anim *a, double dt_ms)` |
 | `ip_ease` | function | `src/interp.c:55` | `double ip_ease(double t, const ip_ease_fn *fn)` |
 | `ip_ease` | function | `src/interp.c:64` | `case IP_EASE_EASE:         return ip_ease(t, &(ip_ease_fn)` |
-| `ip_ease` | function | `src/interp.c:70` | `case IP_EASE_EASE_IN:         return ip_ease(t, &(ip_ease_fn)` |
-| `ip_ease` | function | `src/interp.c:76` | `case IP_EASE_EASE_OUT:         return ip_ease(t, &(ip_ease_fn)` |
-| `ip_ease` | function | `src/interp.c:82` | `case IP_EASE_EASE_IN_OUT:         return ip_ease(t, &(ip_ease_fn)` |
-| `ip_interp` | function | `src/interp.c:162` | `double ip_interp(ip_val_kind kind, double a, double b, double t)` |
-| `ip_kf_interp` | function | `src/interp.c:175` | `double ip_kf_interp(ip_val_kind val_kind, const ip_keyframe *kf,                     int n_kf, do...` |
-| `ip_lerp` | function | `src/interp.c:134` | `double ip_lerp(double a, double b, double t)` |
-| `ip_lerp_color` | function | `src/interp.c:139` | `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t)` |
-| `sample_bezier_dx` | function | `src/interp.c:23` | `static double sample_bezier_dx(double t, double cx1, double cx2)` |
-| `sample_bezier_x` | function | `src/interp.c:18` | `static double sample_bezier_x(double t, double cx1, double cx2)` |
-| `sample_bezier_y` | function | `src/interp.c:29` | `static double sample_bezier_y(double t, double cy1, double cy2)` |
-| `solve_bezier_t` | function | `src/interp.c:35` | `static double solve_bezier_t(double x, double cx1, double cx2)` |
-| `_GNU_SOURCE` | macro | `src/js_dom.c:10` | `#define _GNU_SOURCE` |
-| `attrNames` | function | `src/js_dom.c:610` | `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so      * a missing '...` |
-| `empty` | function | `src/js_dom.c:1215` | `* inert: DOM interface constructors are empty (instanceof yields false, harmless);` |
-| `enough` | function | `src/js_dom.c:931` | `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...` |
-| `fails` | function | `src/js_dom.c:1852` | `* cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...` |
-| `geometry` | function | `src/js_dom.c:1217` | `* constant geometry (zero real leak);` |
-| `jd_get_cookies` | function | `src/js_dom.c:2023` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)` |
-| `jd_handle` | function | `src/js_dom.c:40` | `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out)` |
-| `jd_handle_or_null` | function | `src/js_dom.c:47` | `JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)` |
-| `jd_idx` | function | `src/js_dom.c:31` | `dom_index *jd_idx(JSContext *ctx)` |
-| `jd_install` | function | `src/js_dom.c:1775` | `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)` |
-| `jd_install_console` | function | `src/js_dom.c:1966` | `jd_status jd_install_console(js_context *ctx, fb_buffer *log)` |
-| `jd_method` | struct | `src/js_dom.c:428` | `` |
-| `jd_opaque_get` | function | `src/js_dom.c:27` | `jd_opaque *jd_opaque_get(JSContext *ctx)` |
-| `jd_query_list` | function | `src/js_dom.c:70` | `static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class)` |
-| `jd_set_cookies` | function | `src/js_dom.c:2003` | `jd_status jd_set_cookies(js_context *ctx, const char *cookies)` |
-| `jd_set_geometry` | function | `src/js_dom.c:2046` | `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)` |
-| `js_env` | function | `src/js_dom.c:1223` | `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the  * document shim (uses...` |
-| `m_append_child` | function | `src/js_dom.c:264` | `static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,                             ...` |
-| `m_attr_names` | function | `src/js_dom.c:503` | `static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,                             in...` |
-| `m_child_node` | function | `src/js_dom.c:159` | `static JSValue m_child_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `m_clone_node` | function | `src/js_dom.c:289` | `static JSValue m_clone_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `m_closest` | function | `src/js_dom.c:491` | `static JSValue m_closest(JSContext *ctx, JSValueConst this_val,                          int argc...` |
-| `m_create_char` | function | `src/js_dom.c:174` | `static JSValue m_create_char(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `m_create_element` | function | `src/js_dom.c:252` | `static JSValue m_create_element(JSContext *ctx, JSValueConst this_val,                           ...` |
-| `m_first_child` | function | `src/js_dom.c:143` | `static JSValue m_first_child(JSContext *ctx, JSValueConst this_val,                              ...` |
-| `m_get_attribute` | function | `src/js_dom.c:122` | `static JSValue m_get_attribute(JSContext *ctx, JSValueConst this_val,                            ...` |
-| `m_get_by_class` | function | `src/js_dom.c:106` | `static JSValue m_get_by_class(JSContext *ctx, JSValueConst this_val,                             ...` |
-| `m_get_by_tag` | function | `src/js_dom.c:100` | `static JSValue m_get_by_tag(JSContext *ctx, JSValueConst this_val,                             in...` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

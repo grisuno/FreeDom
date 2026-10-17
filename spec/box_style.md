@@ -301,6 +301,28 @@ factor del autor sobre la caja natural—, así que **todo** `line-height` de au
   la arregla esto. Medido en `make parity`: −25.32 puntos, con `slashdot` pasando de
   `h_ratio` 1.27 a **1.04**.
 
+## 4z. Alturas porcentuales y altura definida (`bx_pct_block_size`, `bx_definite_content_h`)
+
+CSS 2.1 §10.5 / §10.7, CSS Sizing 3 §5.1: un porcentaje en `height`/`min-height`/`max-height`
+se resuelve contra la altura del bloque contenedor **solo si esa altura es definida**; si no,
+`height:%` computa a `auto`, `min-height:%` a `0` y `max-height:%` a `none`. La raíz (`<html>`)
+tiene por bloque contenedor el ICB, cuya altura es el viewport normalizado (la misma que usa
+`vh`, `CSS_MEDIA_DEFAULT_HEIGHT`).
+
+- **Dado** `px_val`/`pct_pm` (las dos mitades del `<length-percentage>`) y `cb_h` (altura
+  definida del contenedor, `< 0` = indefinida), **cuando** se pide `bx_pct_block_size`,
+  **entonces** devuelve `px_val + pct_pm·cb_h/1000` acotado a `>= 0`, o `-1` (= `auto`) si hay
+  porcentaje y `cb_h < 0`. Sin porcentaje es `px_val` y no depende de `cb_h`.
+- **Dado** el alto usado de un elemento (`h < 0` = `auto`), sus topes `min`/`max` (`< 0` =
+  sin tope), `box-sizing` y la suma de padding+borde verticales, **cuando** se pide
+  `bx_definite_content_h`, **entonces** devuelve la altura de CONTENIDO que hereda como base
+  porcentual su hijo: `clamp(h, min, max)` (min gana a max, §10.7), menos las aristas si es
+  `border-box`, nunca negativa; y `-1` si `h < 0` (un `min-height` NO hace definida la altura:
+  `body{min-height:100vh}` deja a su hijo `height:100%` en `auto`, como en Firefox).
+- **Fuera de alcance:** la altura post-flex de un ítem (Flexbox §9.8) y el bloque contenedor de
+  un absoluto (padding box del ancestro posicionado). Un absoluto con `%` contra un padre
+  indefinido conserva el comportamiento previo (no se reescribe).
+
 ## 5. Tabla de estados (`bx_parse_display`)
 
 | `bx_status` | Condición |

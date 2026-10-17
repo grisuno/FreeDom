@@ -164,6 +164,9 @@ struct css_sheet {
     struct {
         char family[CSS_TOK_MAX];
         char src_url[CSS_URL_MAX];
+        /* The first local(NAME) source, lowercased; "" when none. A face whose
+         * ONLY sources are local() is an alias of NAME (spec/webfont.md 2c). */
+        char local_name[CSS_TOK_MAX];
     } font_faces[CSS_MAX_FONT_FACES];
     size_t          nfont_faces;
 };
@@ -338,10 +341,6 @@ static int interp_gap(const char *v) {
 
 static int interp_justify(const char *v) {
     return cb_interp_justify(v);
-}
-
-static int interp_gridcols(const char *v) {
-    return cb_interp_gridcols(v);
 }
 
 static int expand_grid_template_cols(const char *val, css_decl *dst, int cap) {
@@ -1951,44 +1950,95 @@ static int expand_grid_template(const char *val, css_decl *dst, int cap,
     int n = 0;
     if (cols[0] != '\0' && cap - n >= 1 + CSS_GRID_TRACKS_MAX)
         n += expand_grid_template_cols(cols, dst + n, cap - n);
-    if (rows[0] != '\0' && cap - n >= 1) {
-        int nrows = interp_gridcols(rows);
-        if (nrows > 0) { dst[n].prop = P_GRID_ROWS; dst[n].ival = nrows; ++n; }
-    }
+    if (rows[0] != '\0' && cap - n >= 1 + CSS_GRID_TRACKS_MAX)
+        n += cb_expand_grid_template_rows(rows, dst + n, cap - n);
     /* Quoted strings in the row half ARE the areas template (7.4). */
     if ((strchr(rows, '\'') != NULL || strchr(rows, '"') != NULL) && cap - n >= 1)
         n += expand_grid_areas(rows, dst + n, cap - n, contenttab, ncontent, contentcap);
     return n;
 }
 
-/* box-shadow (single layer): up to four lengths in order dx, dy, blur, spread, an
- * optional color, and an optional `inset` keyword, in any order. Needs >= 2 lengths
- * (dx, dy) or the whole declaration is dropped (fail closed). `none` is an explicit
- * no-shadow. url() dropped: never fetch. Writes the six contiguous P_BSHADOW_* slots. */
-static int expand_box_shadow(const char *val, css_decl *dst, int cap) {
-    if (cap < 6) return 0;
-    if (csel_substr(val, "url(", 1)) return 0;
-    int lens[4], nlen = 0, color = 0, have_color = 0, inset = 0;
-    if (!csel_ci_eq(val, "none")) {
-        const char *p = val;
-        char tok[CSS_TOK_MAX];
-        while (next_ws_token(&p, tok, sizeof tok)) {
-            if (csel_ci_eq(tok, "inset")) { inset = 1; continue; }
-            int px;
-            if (interp_len(tok, 0, &px)) { if (nlen < 4) lens[nlen++] = px; }
-            else if (!have_color) { int cv = parse_color(tok); if (cv != -1) { color = cv; have_color = 1; } }
-            /* else: unknown token ignored */
+static size_t sel_list_comma(const char *s, size_t i, size_t end);
+
+/* One box-shadow layer: up to four lengths in order dx, dy, blur, spread, an
+ * optional color, and an optional `inset` keyword, in any order (CSS Backgrounds
+ * 3 7.1). Needs >= 2 lengths or the layer -- and with it the declaration -- is
+ * invalid. The color keeps its alpha (cv_parse_color_t7); absent, it is
+ * currentColor. Writes out[6] = {dx, dy, blur, spread, color, inset}. */
+static int box_shadow_layer(const char *val, size_t len, int out[6]) {
+    char buf[256];
+    if (len >= sizeof buf) return 0;
+    memcpy(buf, val, len);
+    buf[len] = '\0';
+    int lens[4], nlen = 0, color = CC_COLOR_CURRENT, have_color = 0, inset = 0;
+    const char *p = buf;
+    char tok[CSS_TOK_MAX];
+    while (next_ws_token(&p, tok, sizeof tok)) {
+        if (csel_ci_eq(tok, "inset")) { inset = 1; continue; }
+        int px;
+        if (interp_len(tok, 0, &px)) {
+            if (nlen >= 4) return 0;
+            lens[nlen++] = px;
+        } else if (!have_color) {
+            int cv = cv_parse_color_t7(tok);
+            if (cv == -1) return 0;
+            color = cv;
+            have_color = 1;
+        } else {
+            return 0;
         }
-        if (nlen < 2) return 0;   /* need both offsets */
     }
-    dst[0].prop = P_BSHADOW_DX;     dst[0].ival = nlen > 0 ? lens[0] : 0;
-    dst[1].prop = P_BSHADOW_DY;     dst[1].ival = nlen > 1 ? lens[1] : 0;
-    dst[2].prop = P_BSHADOW_BLUR;   dst[2].ival = nlen > 2 ? lens[2] : 0;
-    dst[3].prop = P_BSHADOW_SPREAD; dst[3].ival = nlen > 3 ? lens[3] : 0;
-    dst[4].prop = P_BSHADOW_COLOR;  dst[4].ival = csel_ci_eq(val, "none") ? -1
-                                                : (have_color ? color : CC_COLOR_CURRENT);
-    dst[5].prop = P_BSHADOW_INSET;  dst[5].ival = inset;
-    return 6;
+    if (nlen < 2) return 0;
+    out[0] = lens[0];
+    out[1] = lens[1];
+    out[2] = (nlen > 2) ? lens[2] : 0;
+    out[3] = (nlen > 3) ? lens[3] : 0;
+    out[4] = color;
+    out[5] = inset;
+    return 1;
+}
+
+/* box-shadow: a comma list of layers, the first painted on top. The first layer
+ * rides the six P_BSHADOW_* slots, the next CSS_BSHADOW_LAYERS-1 the P_BSHADOW_X
+ * group, and P_BSHADOW_N counts them; layers past the cap are dropped. Any
+ * invalid layer drops the whole declaration (fail closed). `none` is an explicit
+ * no-shadow. url() dropped: never fetch. The whole group is always written, so a
+ * later single-layer value clears an earlier list's extra layers. */
+static int expand_box_shadow(const char *val, css_decl *dst, int cap) {
+    const int nslot = 7 + (CSS_BSHADOW_LAYERS - 1) * 6;
+    if (cap < nslot) return 0;
+    if (csel_substr(val, "url(", 1)) return 0;
+    int layer[CSS_BSHADOW_LAYERS][6];
+    int n = 0;
+    memset(layer, 0, sizeof layer);
+    int none = csel_ci_eq(val, "none");
+    if (!none) {
+        size_t len = strlen(val), i = 0;
+        while (i <= len) {
+            size_t j = sel_list_comma(val, i, len);
+            size_t a = i, b = j;
+            while (a < b && (val[a] == ' ' || val[a] == '\t')) ++a;
+            while (b > a && (val[b - 1] == ' ' || val[b - 1] == '\t')) --b;
+            if (a == b) return 0;
+            if (n < CSS_BSHADOW_LAYERS) {
+                if (!box_shadow_layer(val + a, b - a, layer[n])) return 0;
+                ++n;
+            }
+            i = j + 1;
+        }
+    }
+    dst[0].prop = P_BSHADOW_DX;     dst[0].ival = layer[0][0];
+    dst[1].prop = P_BSHADOW_DY;     dst[1].ival = layer[0][1];
+    dst[2].prop = P_BSHADOW_BLUR;   dst[2].ival = layer[0][2];
+    dst[3].prop = P_BSHADOW_SPREAD; dst[3].ival = layer[0][3];
+    dst[4].prop = P_BSHADOW_COLOR;  dst[4].ival = none ? -1 : layer[0][4];
+    dst[5].prop = P_BSHADOW_INSET;  dst[5].ival = layer[0][5];
+    dst[6].prop = P_BSHADOW_N;      dst[6].ival = n;
+    for (int k = 0; k < (CSS_BSHADOW_LAYERS - 1) * 6; ++k) {
+        dst[7 + k].prop = P_BSHADOW_X_FIRST + k;
+        dst[7 + k].ival = layer[1 + k / 6][k % 6];
+    }
+    return nslot;
 }
 
 /* flex-grow / flex-shrink: a non-negative number stored x100 (0.5 -> 50), clamped to
@@ -3100,6 +3150,45 @@ static int expand_clip(const char *val, css_decl *dst, int cap) {
  * space, lowercased (fontconfig and @font-face matching are case-insensitive),
  * joined by ','. A name that would not fit ends the list at a name boundary
  * (never half a name). Returns 1 when at least one name was written. */
+/* Copies the normalized family list `ls` into out, replacing every name that
+ * matches a local()-only @font-face of the sheet by that face's local() name,
+ * marked '=' (spec/webfont.md 2c): `pnf{src:local("Arial")}` makes `x,pnf,serif`
+ * read `x,=arial,serif`, and the font resolver matches `=arial` only against an
+ * installed face whose FULL name is Arial. Truncation keeps whole names only. */
+static void font_list_alias(const css_sheet *sheet, const char *ls, char *out, size_t cap) {
+    size_t n = 0;
+    out[0] = '\0';
+    while (*ls != '\0') {
+        size_t fl = strcspn(ls, ",");
+        const char *nm = ls;
+        size_t nl = fl;
+        for (size_t fi = 0; sheet != NULL && fi < sheet->nfont_faces; ++fi) {
+            const char *fam = sheet->font_faces[fi].family;
+            if (sheet->font_faces[fi].local_name[0] == '\0' ||
+                sheet->font_faces[fi].src_url[0] != '\0' || strlen(fam) != fl)
+                continue;
+            size_t q = 0;
+            while (q < fl && csel_lower_ch(fam[q]) == csel_lower_ch(ls[q])) ++q;
+            if (q == fl) {
+                nm = sheet->font_faces[fi].local_name;
+                nl = strlen(nm);
+                break;
+            }
+        }
+        /* A local() name is marked '=': it matches a face by exact full name,
+         * never a family alias (CSS Fonts 4 4.3; text_shape resolves it). */
+        int exact = (nm != ls);
+        if (n + (n > 0) + (size_t)exact + nl + 1 > cap) break;
+        if (n > 0) out[n++] = ',';
+        if (exact) out[n++] = '=';
+        memcpy(out + n, nm, nl);
+        n += nl;
+        out[n] = '\0';
+        ls += fl;
+        if (*ls == ',') ++ls;
+    }
+}
+
 static int font_list_norm(const char *val, char *out, size_t cap) {
     if (cap == 0) return 0;
     out[0] = '\0';
@@ -3697,7 +3786,8 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         dst[0].ival = side;
         return 1;
     }
-    else if (strcmp(prop, "grid-template-rows") == 0)  { prop_id = P_GRID_ROWS;     ival = interp_gridcols(val); }
+    else if (strcmp(prop, "grid-template-rows") == 0)
+        return cb_expand_grid_template_rows(val, dst, cap);
     else if (strcmp(prop, "row-gap") == 0)             { prop_id = P_ROW_GAP;       ival = interp_gap(val); }
     else if (strcmp(prop, "grid-auto-flow") == 0)      { prop_id = P_GRID_FLOW;     ival = interp_grid_flow(val); }
     else if (strcmp(prop, "float") == 0)               { prop_id = P_FLOAT;         ival = interp_float(val); }
@@ -4693,6 +4783,7 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                     size_t bend = (be > bstart) ? be - 1 : bstart;
                     char fam[CSS_TOK_MAX] = "";
                     char surl[CSS_URL_MAX] = "";
+                    char lname[CSS_TOK_MAX] = "";
                     /* Manually scan for font-family: and src: url(...). */
                     size_t j = bstart;
                     while (j < bend) {
@@ -4726,15 +4817,43 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                                 fam[fl] = '\0';
                             }
                         } else if (pnlen == 3 && memcmp(s + pstart, "src", 3) == 0) {
-                            /* Extract URL inside url(...). */
-                            size_t us = vstart;
-                            while (us < vend && s[us] != '(') ++us;
-                            if (us < vend) ++us;
-                            size_t ue = us;
-                            while (ue < vend && s[ue] != ')') ++ue;
-                            if (us < ue && ue - us < CSS_URL_MAX) {
-                                memcpy(surl, s + us, ue - us);
-                                surl[ue - us] = '\0';
+                            /* The first url(...) is the download; the first
+                             * local(...) names a local family. Each function is
+                             * matched by NAME: taking whatever sat in the first
+                             * parenthesis captured local("Arial")'s argument as
+                             * if it were a URL. */
+                            for (size_t k = vstart; k < vend; ++k) {
+                                int is_url = (k + 4 <= vend &&
+                                              csel_lower_ch(s[k]) == 'u' &&
+                                              csel_lower_ch(s[k + 1]) == 'r' &&
+                                              csel_lower_ch(s[k + 2]) == 'l' && s[k + 3] == '(');
+                                int is_loc = (k + 6 <= vend &&
+                                              csel_lower_ch(s[k]) == 'l' &&
+                                              csel_lower_ch(s[k + 1]) == 'o' &&
+                                              csel_lower_ch(s[k + 2]) == 'c' &&
+                                              csel_lower_ch(s[k + 3]) == 'a' &&
+                                              csel_lower_ch(s[k + 4]) == 'l' && s[k + 5] == '(');
+                                if (!is_url && !is_loc) continue;
+                                if (k > vstart && (csel_ident_ch(s[k - 1]) || s[k - 1] == '-'))
+                                    continue;
+                                size_t us = k + (is_url ? 4 : 6);
+                                size_t ue = us;
+                                while (ue < vend && s[ue] != ')') ++ue;
+                                size_t a = us, b = ue;
+                                while (a < b && (s[a] == ' ' || s[a] == '\t')) ++a;
+                                while (b > a && (s[b - 1] == ' ' || s[b - 1] == '\t')) --b;
+                                if (is_loc && b - a >= 2 && (s[a] == '"' || s[a] == '\''))
+                                    { ++a; --b; }
+                                if (is_url && surl[0] == '\0' && a < b && ue - us < CSS_URL_MAX) {
+                                    memcpy(surl, s + us, ue - us);
+                                    surl[ue - us] = '\0';
+                                } else if (is_loc && lname[0] == '\0' && a < b &&
+                                           b - a < CSS_TOK_MAX) {
+                                    for (size_t q = 0; q < b - a; ++q)
+                                        lname[q] = (char)csel_lower_ch(s[a + q]);
+                                    lname[b - a] = '\0';
+                                }
+                                k = ue;
                             }
                         }
                         j = (vend < bend) ? vend + 1 : bend;
@@ -4748,6 +4867,7 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                     if (fam[0] != '\0' && sh->nfont_faces < CSS_MAX_FONT_FACES) {
                         memcpy(sh->font_faces[sh->nfont_faces].family, fam, sizeof fam);
                         memcpy(sh->font_faces[sh->nfont_faces].src_url, surl, sizeof surl);
+                        memcpy(sh->font_faces[sh->nfont_faces].local_name, lname, sizeof lname);
                         sh->nfont_faces++;
                     }
                     i = be;
@@ -5369,6 +5489,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_GRID_TRACK3: case P_GRID_TRACK4: case P_GRID_TRACK5:
             case P_GRID_TRACK6: case P_GRID_TRACK7:
                 o->grid_col_w[d->prop - P_GRID_TRACK0] = d->ival; break;
+            case P_GRID_RTRACK0: case P_GRID_RTRACK1: case P_GRID_RTRACK2:
+            case P_GRID_RTRACK3: case P_GRID_RTRACK4: case P_GRID_RTRACK5:
+            case P_GRID_RTRACK6: case P_GRID_RTRACK7:
+                o->grid_row_h[d->prop - P_GRID_RTRACK0] = d->ival; break;
             case P_MARGIN_TOP:    o->margin_top = d->ival; break;
             case P_MARGIN_RIGHT:  o->margin_right = d->ival; break;
             case P_MARGIN_BOTTOM: o->margin_bottom = d->ival; break;
@@ -5394,10 +5518,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
                 o->font_list[0] = '\0';
                 if (d->ival >= 0 && contenttab != NULL) {
                     const char *ls = contenttab[d->ival];
-                    size_t ln = 0;
-                    while (ln + 1 < sizeof o->font_list && ls[ln] != '\0') ++ln;
-                    memcpy(o->font_list, ls, ln);
-                    o->font_list[ln] = '\0';
+                    font_list_alias(sheet, ls, o->font_list, sizeof o->font_list);
                     /* @font-face matches the FIRST name of the list. */
                     char nm[WF_FAMILY_MAX];
                     size_t fl = strcspn(ls, ",");
@@ -5455,6 +5576,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_BSHADOW_BLUR:   o->shadow2_blur = d->ival; break;
             case P_BSHADOW_SPREAD: o->shadow2_spread = d->ival; break;
             case P_BSHADOW_COLOR:  o->box_shadow_color = d->ival; break;
+            case P_BSHADOW_N:      o->box_shadow_n = d->ival; break;
             case P_BSHADOW_INSET:  o->box_shadow_inset = d->ival; break;
             case P_OUTLINE_W:     o->outline_width = d->ival; break;
             case P_OUTLINE_S:     o->outline_style = d->ival; break;
@@ -5668,6 +5790,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
                  * percentage-capable property needs no case of its own here. */
                 if (d->prop >= P_PCT_FIRST && d->prop <= P_PCT_LAST)
                     o->pct[d->prop - P_PCT_FIRST] = d->ival;
+                if (d->prop >= P_BSHADOW_X_FIRST && d->prop <= P_BSHADOW_X_LAST) {
+                    int k = d->prop - P_BSHADOW_X_FIRST;
+                    o->box_shadow_x[k / 6][k % 6] = d->ival;
+                }
                 break;
         }
     }

@@ -923,3 +923,30 @@ void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)
     }
     if (*span > FX_GL_SPAN_MAX) *span = FX_GL_SPAN_MAX;
 }
+
+fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
+                            double *before, double *grow_px, double *after) {
+    if (n == 0) return FX_OK;
+    if (grow == NULL || mauto == NULL || before == NULL || grow_px == NULL || after == NULL)
+        return FX_ERR_NULL_ARG;
+    double gsum = 0.0;
+    int na = 0;
+    for (size_t i = 0; i < n; ++i) {
+        before[i] = grow_px[i] = after[i] = 0.0;
+        if (grow[i] > 0) gsum += (double)grow[i];
+        na += ((mauto[i] & FX_MAUTO_TOP) != 0) + ((mauto[i] & FX_MAUTO_BOTTOM) != 0);
+    }
+    if (!(free_px > 0.0)) return FX_OK;
+    if (gsum > 0.0) {
+        for (size_t i = 0; i < n; ++i)
+            if (grow[i] > 0) grow_px[i] = free_px * (double)grow[i] / gsum;
+        return FX_OK;
+    }
+    if (na == 0) return FX_OK;
+    double per = free_px / (double)na;
+    for (size_t i = 0; i < n; ++i) {
+        if (mauto[i] & FX_MAUTO_TOP) before[i] = per;
+        if (mauto[i] & FX_MAUTO_BOTTOM) after[i] = per;
+    }
+    return FX_OK;
+}

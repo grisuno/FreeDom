@@ -54,6 +54,17 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `FREEDOM_BLOCK_FLOW_H` (macro, line 11) `#define FREEDOM_BLOCK_FLOW_H`
 - Imported by: `gui/browser_ui.c`, `src/block_flow.c`, `tests/test_block_flow.c`
 
+## include/box_blur.h
+- Doc: Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `bb_box_sizes` (function, line 16) `int bb_box_sizes(double sigma, int sizes[3]);`
+  - `BB_MAX_PIXELS` (function, line 20) `* arguments or a mask larger than BB_MAX_PIXELS (buffer untouched). */ int bb_blur_a8(unsigned char *buf, int w, int...`
+  - `FREEDOM_BOX_BLUR_H` (macro, line 2) `#define FREEDOM_BOX_BLUR_H`
+  - `BB_MAX_PIXELS` (macro, line 12) `#define BB_MAX_PIXELS`
+- Imported by: `gui/browser_ui.c`, `src/box_blur.c`, `tests/test_box_blur.c`
+
 ## include/box_style.h
 - Doc: bx_edges: anything longer fails closed instead of truncating into a wrong match. #define...
 - Layer: utility
@@ -62,7 +73,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `bx_edges` (struct, line 46)
   - `bx_box` (struct, line 50)
   - `bx_hplace` (struct, line 63)
-  - `bx_bg_layer` (struct, line 300)
+  - `bx_bg_layer` (struct, line 315)
   - `bx_display` (enum, line 35)
   - `bx_status` (enum, line 56)
   - `bx_ua_tag` (enum, line 84)
@@ -70,7 +81,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `left` (type_alias, line 46) `typedef struct bx_edges { double top, right, bottom, left;`
   - `display` (type_alias, line 49) `typedef struct bx_box { bx_display display;`
   - `x_off` (type_alias, line 63) `typedef struct bx_hplace { double x_off;`
-  - `nat_h` (type_alias, line 300) `typedef struct bx_bg_layer { double nat_w, nat_h;`
+  - `nat_h` (type_alias, line 315) `typedef struct bx_bg_layer { double nat_w, nat_h;`
   - `box` (function, line 115) `* in_list nonzero when the block sits inside a list item: it then takes * the <li> box (zero margin), keeping items...`
   - `BX_TROLE_NONE` (function, line 144) `* BX_TROLE_NONE (an unrecognised element joins no table -- fail closed). */ bx_table_role bx_table_role_of(const...`
   - `bx_display_name` (function, line 156) `const char *bx_display_name(bx_display d);`
@@ -78,13 +89,15 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `bx_width_cap2` (function, line 187) `double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w);`
   - `bx_replaced_box` (function, line 206) `int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den, double avail_w, double *out_w, double *out_h);`
   - `bx_border_box_h` (function, line 220) `double bx_border_box_h(double declared_h, int border_box, double pad_t, double pad_b, double bord_t, double bord_b);`
-  - `page` (function, line 224) `* instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That * is the case unless BOTH overflow...`
-  - `bx_lp_px` (function, line 246) `double bx_lp_px(int px_val, int pct_pm, double basis);`
-  - `bx_content_cap` (function, line 254) `double bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);`
-  - `bx_border_span` (function, line 265) `double bx_border_span(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);`
-  - `bx_flex_max_clamp` (function, line 271) `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, double pad_bord_h, double margin_h);`
-  - `bx_flex_min_clamp` (function, line 277) `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, double pad_bord_h, double margin_h);`
-  - `bx_background_layer` (function, line 310) `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, double *out_x, double *out_y);`
+  - `block` (function, line 226) `* indefinite containing block (cb_h < 0) the value behaves as auto: -1. * Without a percentage it is px_val...`
+  - `bx_definite_content_h` (function, line 235) `double bx_definite_content_h(double h, double min_h, double max_h, int border_box, double v_edges);`
+  - `page` (function, line 239) `* instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That * is the case unless BOTH overflow...`
+  - `bx_lp_px` (function, line 261) `double bx_lp_px(int px_val, int pct_pm, double basis);`
+  - `bx_content_cap` (function, line 269) `double bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);`
+  - `bx_border_span` (function, line 280) `double bx_border_span(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);`
+  - `bx_flex_max_clamp` (function, line 286) `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, double pad_bord_h, double margin_h);`
+  - `bx_flex_min_clamp` (function, line 292) `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, double pad_bord_h, double margin_h);`
+  - `bx_background_layer` (function, line 325) `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, double *out_x, double *out_y);`
   - `FREEDOM_BOX_STYLE_H` (macro, line 2) `#define FREEDOM_BOX_STYLE_H`
   - `BX_TAG_NAME_MAX` (macro, line 33) `#define BX_TAG_NAME_MAX`
 - Depends on: `include/css.h`
@@ -96,22 +109,22 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Language: h
 - Symbols:
   - `bt_node` (struct, line 67)
-  - `bt_positioned` (struct, line 128)
-  - `bt_status` (enum, line 135)
+  - `bt_positioned` (struct, line 137)
+  - `bt_status` (enum, line 144)
   - `display` (type_alias, line 66) `typedef struct bt_node { bx_display display;`
-  - `box_index` (type_alias, line 128) `typedef struct bt_positioned { size_t box_index;`
+  - `box_index` (type_alias, line 137) `typedef struct bt_positioned { size_t box_index;`
   - `closed` (function, line 34) `* fails closed (BT_ERR_RANGE) instead of overflowing the stack. */ #define BT_MAX_DEPTH 64u #define BT_MAX_CHILDREN...`
-  - `one` (function, line 81) `* of forcing them all onto one (flex-wrap);`
-  - `line` (function, line 97) `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a...`
-  - `node` (function, line 144) `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller...`
-  - `flow` (function, line 183) `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);`
-  - `bottom` (function, line 190) `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in...`
-  - `placed` (function, line 197) `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour)....`
-  - `bt_box_hidden` (function, line 215) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);`
-  - `bt_oof_anchor` (function, line 229) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);`
-  - `bt_oof_root` (function, line 230) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);`
-  - `insets` (function, line 234) `* minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may...`
-  - `bt_containing_block` (function, line 244) `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y...`
+  - `one` (function, line 90) `* of forcing them all onto one (flex-wrap);`
+  - `line` (function, line 106) `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a...`
+  - `node` (function, line 153) `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller...`
+  - `flow` (function, line 192) `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);`
+  - `bottom` (function, line 199) `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in...`
+  - `placed` (function, line 206) `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour)....`
+  - `bt_box_hidden` (function, line 224) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);`
+  - `bt_oof_anchor` (function, line 238) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);`
+  - `bt_oof_root` (function, line 239) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);`
+  - `insets` (function, line 243) `* minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may...`
+  - `bt_containing_block` (function, line 253) `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y...`
   - `FREEDOM_BOX_TREE_H` (macro, line 2) `#define FREEDOM_BOX_TREE_H`
   - `BT_MAX_DEPTH` (macro, line 35) `#define BT_MAX_DEPTH`
   - `BT_MAX_CHILDREN` (macro, line 36) `#define BT_MAX_CHILDREN`
@@ -177,14 +190,14 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Layer: utility
 - Language: h
 - Symbols:
-  - `css_style` (struct, line 571)
-  - `css_sel` (struct, line 954)
-  - `css_media` (struct, line 956)
-  - `css_drop` (struct, line 1020)
-  - `css_drop_log` (struct, line 1032)
-  - `css_attr` (struct, line 1061)
-  - `css_element` (struct, line 1071)
-  - `cvr_table` (struct, line 1132)
+  - `css_style` (struct, line 572)
+  - `css_sel` (struct, line 964)
+  - `css_media` (struct, line 966)
+  - `css_drop` (struct, line 1030)
+  - `css_drop_log` (struct, line 1042)
+  - `css_attr` (struct, line 1071)
+  - `css_element` (struct, line 1081)
+  - `cvr_table` (struct, line 1142)
   - `css_status` (enum, line 28)
   - `css_align` (enum, line 34)
   - `css_display` (enum, line 42)
@@ -243,27 +256,27 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `css_column_fill` (enum, line 414)
   - `css_column_span` (enum, line 419)
   - `css_backface` (enum, line 423)
-  - `css_pct_slot` (enum, line 499)
-  - `css_drop_cause` (enum, line 1007)
-  - `color` (type_alias, line 571) `typedef struct css_style { int color;`
-  - `css_sheet` (type_alias, line 948) `typedef struct css_sheet css_sheet;`
-  - `prefers_dark` (type_alias, line 955) `typedef struct css_media { int prefers_dark;`
-  - `prop` (type_alias, line 1020) `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];`
+  - `css_pct_slot` (enum, line 500)
+  - `css_drop_cause` (enum, line 1017)
+  - `color` (type_alias, line 572) `typedef struct css_style { int color;`
+  - `css_sheet` (type_alias, line 958) `typedef struct css_sheet css_sheet;`
+  - `prefers_dark` (type_alias, line 965) `typedef struct css_media { int prefers_dark;`
+  - `prop` (type_alias, line 1030) `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];`
   - `verbatim` (function, line 79) `* the quoted row strings verbatim (flex_layout parses them);`
   - `POINTER` (function, line 209) `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);`
-  - `family` (function, line 666) `* LOCAL family (spec/text_shape.md section 7);`
-  - `translate` (function, line 825) `* translate()/translateX()/translateY();`
-  - `scaleY` (function, line 826) `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
-  - `declared` (function, line 830) `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
-  - `element` (function, line 835) `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
-  - `slots` (function, line 842) `* parse time into ALL seven slots (singular matrices fail closed);`
-  - `palette` (function, line 997) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
-  - `css_free` (function, line 1047) `void css_free(css_sheet *s);`
-  - `order` (function, line 1050) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
-  - `inherited_px` (function, line 1156) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
-  - `css_font_face_count` (function, line 1172) `size_t css_font_face_count(const css_sheet *sheet);`
-  - `css_font_face_at` (function, line 1173) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
-  - `css_resolve_anim_keyframes` (function, line 1181) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
+  - `family` (function, line 670) `* LOCAL family (spec/text_shape.md section 7);`
+  - `translate` (function, line 835) `* translate()/translateX()/translateY();`
+  - `scaleY` (function, line 836) `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
+  - `declared` (function, line 840) `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
+  - `element` (function, line 845) `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
+  - `slots` (function, line 852) `* parse time into ALL seven slots (singular matrices fail closed);`
+  - `palette` (function, line 1007) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
+  - `css_free` (function, line 1057) `void css_free(css_sheet *s);`
+  - `order` (function, line 1060) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
+  - `inherited_px` (function, line 1166) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
+  - `css_font_face_count` (function, line 1182) `size_t css_font_face_count(const css_sheet *sheet);`
+  - `css_font_face_at` (function, line 1183) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
+  - `css_resolve_anim_keyframes` (function, line 1191) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
   - `FREEDOM_CSS_H` (macro, line 2) `#define FREEDOM_CSS_H`
   - `CSS_GAP_MAX` (macro, line 75) `#define CSS_GAP_MAX`
   - `CSS_GRID_COLS_MAX` (macro, line 76) `#define CSS_GRID_COLS_MAX`
@@ -288,30 +301,31 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CSS_GRID_SPAN_MAX` (macro, line 433) `#define CSS_GRID_SPAN_MAX`
   - `CSS_SPACING_MAX` (macro, line 437) `#define CSS_SPACING_MAX`
   - `CSS_SHADOW_MAX` (macro, line 438) `#define CSS_SHADOW_MAX`
-  - `CSS_LEN_MAX` (macro, line 443) `#define CSS_LEN_MAX`
-  - `CSS_LEN_UNSET` (macro, line 444) `#define CSS_LEN_UNSET`
-  - `CSS_LEN_AUTO` (macro, line 445) `#define CSS_LEN_AUTO`
-  - `CSS_LEN_END` (macro, line 446) `#define CSS_LEN_END`
-  - `CSS_LEN_MIN_CONTENT` (macro, line 453) `#define CSS_LEN_MIN_CONTENT`
-  - `CSS_LEN_MAX_CONTENT` (macro, line 454) `#define CSS_LEN_MAX_CONTENT`
-  - `CSS_LEN_FIT_CONTENT` (macro, line 455) `#define CSS_LEN_FIT_CONTENT`
-  - `CSS_LEN_IS_INTRINSIC` (macro, line 458) `#define CSS_LEN_IS_INTRINSIC(v)`
-  - `CSS_PCT_MAX` (macro, line 481) `#define CSS_PCT_MAX`
-  - `CSS_EM_MILLI_MAX` (macro, line 487) `#define CSS_EM_MILLI_MAX`
-  - `CSS_FONT_SIZE_MAX` (macro, line 493) `#define CSS_FONT_SIZE_MAX`
-  - `CSS_COLUMN_COUNT_MAX` (macro, line 497) `#define CSS_COLUMN_COUNT_MAX`
-  - `CSS_MAX_COMPOUNDS` (macro, line 552) `#define CSS_MAX_COMPOUNDS`
-  - `CSS_MAX_ATTR_SEL` (macro, line 556) `#define CSS_MAX_ATTR_SEL`
-  - `CSS_MAX_PSEUDO_SEL` (macro, line 560) `#define CSS_MAX_PSEUDO_SEL`
-  - `CSS_NTH_MAX` (macro, line 564) `#define CSS_NTH_MAX`
-  - `CSS_MAX_KF_STOPS` (macro, line 865) `#define CSS_MAX_KF_STOPS`
-  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 968) `#define CSS_MEDIA_DEFAULT_WIDTH`
-  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 973) `#define CSS_MEDIA_DEFAULT_HEIGHT`
-  - `CSS_DROP_PROP_MAX` (macro, line 1012) `#define CSS_DROP_PROP_MAX`
-  - `CSS_DROP_VAL_MAX` (macro, line 1013) `#define CSS_DROP_VAL_MAX`
-  - `CSS_PSEUDO_BEFORE` (macro, line 1142) `#define CSS_PSEUDO_BEFORE`
-  - `CSS_PSEUDO_AFTER` (macro, line 1143) `#define CSS_PSEUDO_AFTER`
-  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1144) `#define CSS_PSEUDO_PLACEHOLDER`
+  - `CSS_BSHADOW_LAYERS` (macro, line 439) `#define CSS_BSHADOW_LAYERS`
+  - `CSS_LEN_MAX` (macro, line 444) `#define CSS_LEN_MAX`
+  - `CSS_LEN_UNSET` (macro, line 445) `#define CSS_LEN_UNSET`
+  - `CSS_LEN_AUTO` (macro, line 446) `#define CSS_LEN_AUTO`
+  - `CSS_LEN_END` (macro, line 447) `#define CSS_LEN_END`
+  - `CSS_LEN_MIN_CONTENT` (macro, line 454) `#define CSS_LEN_MIN_CONTENT`
+  - `CSS_LEN_MAX_CONTENT` (macro, line 455) `#define CSS_LEN_MAX_CONTENT`
+  - `CSS_LEN_FIT_CONTENT` (macro, line 456) `#define CSS_LEN_FIT_CONTENT`
+  - `CSS_LEN_IS_INTRINSIC` (macro, line 459) `#define CSS_LEN_IS_INTRINSIC(v)`
+  - `CSS_PCT_MAX` (macro, line 482) `#define CSS_PCT_MAX`
+  - `CSS_EM_MILLI_MAX` (macro, line 488) `#define CSS_EM_MILLI_MAX`
+  - `CSS_FONT_SIZE_MAX` (macro, line 494) `#define CSS_FONT_SIZE_MAX`
+  - `CSS_COLUMN_COUNT_MAX` (macro, line 498) `#define CSS_COLUMN_COUNT_MAX`
+  - `CSS_MAX_COMPOUNDS` (macro, line 553) `#define CSS_MAX_COMPOUNDS`
+  - `CSS_MAX_ATTR_SEL` (macro, line 557) `#define CSS_MAX_ATTR_SEL`
+  - `CSS_MAX_PSEUDO_SEL` (macro, line 561) `#define CSS_MAX_PSEUDO_SEL`
+  - `CSS_NTH_MAX` (macro, line 565) `#define CSS_NTH_MAX`
+  - `CSS_MAX_KF_STOPS` (macro, line 875) `#define CSS_MAX_KF_STOPS`
+  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 978) `#define CSS_MEDIA_DEFAULT_WIDTH`
+  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 983) `#define CSS_MEDIA_DEFAULT_HEIGHT`
+  - `CSS_DROP_PROP_MAX` (macro, line 1022) `#define CSS_DROP_PROP_MAX`
+  - `CSS_DROP_VAL_MAX` (macro, line 1023) `#define CSS_DROP_VAL_MAX`
+  - `CSS_PSEUDO_BEFORE` (macro, line 1152) `#define CSS_PSEUDO_BEFORE`
+  - `CSS_PSEUDO_AFTER` (macro, line 1153) `#define CSS_PSEUDO_AFTER`
+  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1154) `#define CSS_PSEUDO_PLACEHOLDER`
 - Depends on: `include/css_color.h`
 - Imported by: `fuzz/fuzz_css.c`, `gui/browser_ui.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 
@@ -356,6 +370,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `cb_interp_justify` (function, line 36) `int cb_interp_justify(const char *v);`
   - `cb_interp_gridcols` (function, line 37) `int cb_interp_gridcols(const char *v);`
   - `cb_expand_grid_template_cols` (function, line 38) `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);`
+  - `strings` (function, line 40) `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...`
   - `FREEDOM_CSS_BOX_H` (macro, line 2) `#define FREEDOM_CSS_BOX_H`
   - `CB_AUTO_REJECT` (macro, line 10) `#define CB_AUTO_REJECT`
   - `CB_AUTO_VALUE` (macro, line 11) `#define CB_AUTO_VALUE`
@@ -399,10 +414,10 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Layer: utility
 - Language: h
 - Symbols:
-  - `css_decl` (struct, line 195)
-  - `prop` (type_alias, line 194) `typedef struct css_decl { int prop;`
-  - `order` (function, line 44) `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);`
-  - `contiguous` (function, line 59) `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...`
+  - `css_decl` (struct, line 205)
+  - `prop` (type_alias, line 204) `typedef struct css_decl { int prop;`
+  - `order` (function, line 45) `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);`
+  - `contiguous` (function, line 60) `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...`
   - `FREEDOM_CSS_DECL_H` (macro, line 2) `#define FREEDOM_CSS_DECL_H`
   - `CSS_MAX_BG_URLS` (macro, line 11) `#define CSS_MAX_BG_URLS`
   - `CSS_MAX_CONTENT_URLS` (macro, line 18) `#define CSS_MAX_CONTENT_URLS`
@@ -410,9 +425,9 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CSS_MAX_KEYFRAME_STOPS` (macro, line 21) `#define CSS_MAX_KEYFRAME_STOPS`
   - `CSS_MAX_KEYFRAME_DECLS` (macro, line 22) `#define CSS_MAX_KEYFRAME_DECLS`
   - `CSS_INLINE_BG_URLS` (macro, line 23) `#define CSS_INLINE_BG_URLS`
-  - `CSS_WIDE_PROBE_DECLS` (macro, line 29) `#define CSS_WIDE_PROBE_DECLS`
+  - `CSS_WIDE_PROBE_DECLS` (macro, line 30) `#define CSS_WIDE_PROBE_DECLS`
 - Depends on: `include/css.h`, `include/css_select.h`
-- Imported by: `include/css_box.h`, `include/css_gradient.h`, `include/css_text.h`, `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `tests/test_css_box.c`, `tests/test_css_text.c`
+- Imported by: `include/css_box.h`, `include/css_gradient.h`, `include/css_text.h`, `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `tests/test_css_box.c`, `tests/test_css_text.c`
 
 ## include/css_gradient.h
 - Layer: utility

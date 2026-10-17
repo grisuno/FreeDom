@@ -220,6 +220,21 @@ int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den,
 double bx_border_box_h(double declared_h, int border_box,
                        double pad_t, double pad_b, double bord_t, double bord_b);
 
+/* A <length-percentage> block size (height/min-height/max-height) resolved
+ * against the containing block's DEFINITE height cb_h (CSS 2.1 10.5): px_val +
+ * pct_pm per-mille of cb_h, never negative. With a percentage and an
+ * indefinite containing block (cb_h < 0) the value behaves as auto: -1.
+ * Without a percentage it is px_val, whatever cb_h is. Pure. */
+double bx_pct_block_size(int px_val, int pct_pm, double cb_h);
+
+/* The definite CONTENT height an element hands its children as their
+ * percentage basis: its used height h clamped by min_h/max_h (< 0 = none; min
+ * wins over max, CSS 2.1 10.7), minus v_edges (vertical padding + border) under
+ * border-box, never negative. -1 when h < 0 (auto): a min-height alone does not
+ * make a height definite. Pure. */
+double bx_definite_content_h(double h, double min_h, double max_h,
+                             int border_box, double v_edges);
+
 /* True (nonzero) when a height-capped box clips overflowing content vertically
  * instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That
  * is the case unless BOTH overflow axes are visible-or-unset: one non-visible

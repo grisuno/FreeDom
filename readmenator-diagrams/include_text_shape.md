@@ -18,7 +18,7 @@ graph LR
 
 ## fuzz (5.1)
 
-fuzz groups 3 files (c) around worker, FZ_CAP, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput. libFuzzer harness for the webfont lookahead scanner (spec/webfont.md).
+fuzz groups 3 files (c) around worker, FZ_CAP, LLVMFuzzerTestOneInput, glyph, ASCII. libFuzzer harness for the webfont lookahead scanner (spec/webfont.md).
 
 ## include (5.2)
 

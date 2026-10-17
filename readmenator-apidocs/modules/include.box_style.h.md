@@ -1,13 +1,13 @@
 # `include/box_style.h`
 
-> Source: [include/box_style.h:1](../../include/box_style.h#L1) | language `h` | coverage 67.9% | [API index](../index.md)
+> Source: [include/box_style.h:1](../../include/box_style.h#L1) | language `h` | coverage 66.7% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`bx_edges`](#bx_edges), [`bx_box`](#bx_box), [`bx_hplace`](#bx_hplace), [`bx_bg_layer`](#bx_bg_layer)
 - **Enums:** [`bx_display`](#bx_display), [`bx_status`](#bx_status), [`bx_ua_tag`](#bx_ua_tag), [`bx_table_role`](#bx_table_role)
 - **Type Aliases:** [`display`](#display)
-- **Functions:** [`box`](#box), [`BX_TROLE_NONE`](#bx_trole_none), [`bx_display_name`](#bx_display_name), [`bx_width_cap`](#bx_width_cap), [`bx_width_cap2`](#bx_width_cap2), [`bx_replaced_box`](#bx_replaced_box), [`bx_border_box_h`](#bx_border_box_h), [`page`](#page), [`bx_lp_px`](#bx_lp_px), [`bx_content_cap`](#bx_content_cap), [`bx_border_span`](#bx_border_span), [`bx_flex_max_clamp`](#bx_flex_max_clamp), [`bx_flex_min_clamp`](#bx_flex_min_clamp), [`bx_background_layer`](#bx_background_layer)
+- **Functions:** [`box`](#box), [`BX_TROLE_NONE`](#bx_trole_none), [`bx_display_name`](#bx_display_name), [`bx_width_cap`](#bx_width_cap), [`bx_width_cap2`](#bx_width_cap2), [`bx_replaced_box`](#bx_replaced_box), [`bx_border_box_h`](#bx_border_box_h), [`block`](#block), [`bx_definite_content_h`](#bx_definite_content_h), [`page`](#page), [`bx_lp_px`](#bx_lp_px), [`bx_content_cap`](#bx_content_cap), [`bx_border_span`](#bx_border_span), [`bx_flex_max_clamp`](#bx_flex_max_clamp), [`bx_flex_min_clamp`](#bx_flex_min_clamp), [`bx_background_layer`](#bx_background_layer)
 - **Macros:** [`BX_TAG_NAME_MAX`](#bx_tag_name_max)
 
 ## Type Diagram
@@ -134,7 +134,7 @@ Horizontal placement of an author box inside an available width (px).
 
 ### `bx_bg_layer`
 
-`struct` | [include/box_style.h:300](../../include/box_style.h#L300)
+`struct` | [include/box_style.h:315](../../include/box_style.h#L315)
 
 ```c
 typedef struct bx_bg_layer
@@ -170,7 +170,7 @@ caller skips the layer instead of dividing by it. Pure.
 
 #### `bx_bg_layer.nat_h`
 
-`type_alias` | [include/box_style.h:300](../../include/box_style.h#L300)
+`type_alias` | [include/box_style.h:315](../../include/box_style.h#L315)
 
 ```c
 typedef struct bx_bg_layer { double nat_w, nat_h;
@@ -469,11 +469,61 @@ capped and heights are set. Pure.
 
 ---
 
+<a id="block"></a>
+
+### `block`
+
+`function` | [include/box_style.h:226](../../include/box_style.h#L226)
+
+```c
+* indefinite containing block (cb_h < 0) the value behaves as auto: -1. * Without a percentage it is px_val, whatever cb_h is. Pure. */ double bx_pct_block_size(int px_val, int pct_pm, double cb_h);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `cb_h` |  |  |  |
+
+**Returns:** `* indefinite containing`
+
+*Called by:* [`RC_FLOAT_FIT_MIN`](gui.browser_ui.c.md#rc_float_fit_min)
+
+---
+
+<a id="bx_definite_content_h"></a>
+
+### `bx_definite_content_h`
+
+`function` | [include/box_style.h:235](../../include/box_style.h#L235)
+
+```c
+double bx_definite_content_h(double h, double min_h, double max_h, int border_box, double v_edges);
+```
+
+The definite CONTENT height an element hands its children as their percentage basis: its used height h clamped by min_h/max_h (< 0 = none; min wins over max, CSS 2.1 10.7), minus v_edges (vertical padding + border) under border-box, never negative. -1 when h < 0 (auto): a min-height alone does not make a height definite.
+
+Pure.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `h` | `double` |  |  |
+| `min_h` | `double` |  |  |
+| `max_h` | `double` |  |  |
+| `border_box` | `int` |  |  |
+| `v_edges` | `double` |  |  |
+
+**Returns:** `double`
+
+---
+
 <a id="page"></a>
 
 ### `page`
 
-`function` | [include/box_style.h:224](../../include/box_style.h#L224)
+`function` | [include/box_style.h:239](../../include/box_style.h#L239)
 
 ```c
 * instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That * is the case unless BOTH overflow axes are visible-or-unset: one non-visible * axis computes the other to auto (CSS Overf
@@ -495,7 +545,7 @@ capped and heights are set. Pure.
 
 ### `bx_lp_px`
 
-`function` | [include/box_style.h:246](../../include/box_style.h#L246)
+`function` | [include/box_style.h:261](../../include/box_style.h#L261)
 
 ```c
 double bx_lp_px(int px_val, int pct_pm, double basis);
@@ -531,7 +581,7 @@ usable length contributes nothing while the absolute half survives. Pure.
 
 ### `bx_content_cap`
 
-`function` | [include/box_style.h:254](../../include/box_style.h#L254)
+`function` | [include/box_style.h:269](../../include/box_style.h#L269)
 
 ```c
 double bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);
@@ -560,7 +610,7 @@ With border_box set, the declared width includes the horizontal padding and bord
 
 ### `bx_border_span`
 
-`function` | [include/box_style.h:265](../../include/box_style.h#L265)
+`function` | [include/box_style.h:280](../../include/box_style.h#L280)
 
 ```c
 double bx_border_span(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);
@@ -589,7 +639,7 @@ CSS 2.1 10.3.3 / CSS Sizing 3 box-sizing: a content-box `width` sizes the CONTEN
 
 ### `bx_flex_max_clamp`
 
-`function` | [include/box_style.h:271](../../include/box_style.h#L271)
+`function` | [include/box_style.h:286](../../include/box_style.h#L286)
 
 ```c
 double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, double pad_bord_h, double margin_h);
@@ -615,7 +665,7 @@ Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hy
 
 ### `bx_flex_min_clamp`
 
-`function` | [include/box_style.h:277](../../include/box_style.h#L277)
+`function` | [include/box_style.h:292](../../include/box_style.h#L292)
 
 ```c
 double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, double pad_bord_h, double margin_h);
@@ -643,7 +693,7 @@ Pure.
 
 ### `bx_background_layer`
 
-`function` | [include/box_style.h:310](../../include/box_style.h#L310)
+`function` | [include/box_style.h:325](../../include/box_style.h#L325)
 
 ```c
 int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, double *out_x, double *out_y);

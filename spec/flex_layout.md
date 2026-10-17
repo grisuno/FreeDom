@@ -299,5 +299,22 @@ la columna. `mauto == NULL` es exactamente `fx_column_place`.
 - Dado h={20}, mauto={TOP|BOTTOM}, inner_h 100, entonces y=40 (centrado).
 - Dado mauto sin altura definida (inner_h 0), entonces apilado normal.
 
+### Espacio libre de una columna que fluye como bloque: `fx_col_free_split` (tanda 44)
+
+Una columna flex con la geometría inicial se maqueta como flujo de bloques
+(`spec/page_view.md` "Flex en COLUMNA"); con altura definida (`height`, o `%`
+resuelto contra una cadena definida, o `min-height`) le queda espacio libre
+`free = alto interior − contenido`. `fx_col_free_split(free, grow, mauto, n,
+before, grow_px, after)` lo reparte entre los `n` hijos que lo reclaman, con la misma
+regla que `fx_column_place_m`: primero `flex-grow` (proporcional, `grow` en x100),
+y solo si nadie crece, en partes iguales entre los márgenes `auto` (`before` = el
+`margin-top:auto` del hijo, `after` = su `margin-bottom:auto`). El pintor desplaza
+todo lo que sigue a cada hijo por esas cantidades al cerrar la caja de la columna.
+
+- Dado free 100, grow={100,300}, entonces grow_px={25,75} y ningún margen.
+- Dado free 100, grow={0,0}, mauto={TOP,0}, entonces before={100,0}.
+- Dado free 100, mauto={TOP,BOTTOM}, entonces before[0]=50, after[1]=50.
+- Dado free <= 0, entonces todo cero.
+
 Una columna con `align-items` inicial estira sus ítems al ancho (Flexbox §9.4,
 `stretch` es el valor inicial): el pie toma el ancho completo.

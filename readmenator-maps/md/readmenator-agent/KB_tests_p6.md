@@ -367,7 +367,10 @@ static void tes...`
   - `test_pick_family_strong_vs_weak` (function, line 282) `static void test_pick_family_strong_vs_weak(void **state)`
   - `test_local_handle_real_fontconfig` (function, line 306) `static void test_local_handle_real_fontconfig(void **state)`
   - `teardown` (function, line 327) `static int teardown(void **state)`
-  - `main` (function, line 333) `int main(void)`
+  - `fake_cover` (function, line 352) `static int fake_cover(unsigned cp, void *ctx)`
+  - `test_segment_runs` (function, line 359) `static void test_segment_runs(void **state)`
+  - `test_measure_uses_fallback_face` (function, line 384) `static void test_measure_uses_fallback_face(void **state)`
+  - `main` (function, line 395) `int main(void)`
 - Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
 
 ## tests/test_textfield.c

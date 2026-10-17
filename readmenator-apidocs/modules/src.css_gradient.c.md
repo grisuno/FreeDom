@@ -19,10 +19,10 @@ flowchart LR
     n_include_css_select_h__csel_ci_eq["css_select.csel_ci_eq"]
     n_include_css_select_h__csel_lower_ch["css_select.csel_lower_ch"]
     n_src_css_gradient_c__CSS_GRAD_STOPS_MAX(["CSS_GRAD_STOPS_MAX"])
-    n_include_css_values_h__cv_bg_alpha_of["css_values.cv_bg_alpha_of"]
-    n_include_css_values_h__cv_parse_color["css_values.cv_parse_color"]
+    n_include_css_values_h__cv_parse_color_t7["css_values.cv_parse_color_t7"]
     n_include_css_gradient_h__cg_expand_bg_image["css_gradient.cg_expand_bg_image"]
     n_src_css_gradient_c__declaration(["declaration"])
+    n_include_css_values_h__cv_bg_alpha_of["css_values.cv_bg_alpha_of"]
     n_include_css_values_h__cv_color_ok["css_values.cv_color_ok"]
     n_include_css_values_h__cv_interp_bg["css_values.cv_interp_bg"]
     n_src_css_gradient_c__downstream --> n_src_css_gradient_c__gradient
@@ -30,8 +30,7 @@ flowchart LR
     n_src_css_gradient_c__gradient -.-> n_gui_browser_ui_c__strcmp
     n_src_css_gradient_c__gradient -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_gradient_c__gradient -.-> n_include_css_select_h__csel_lower_ch
-    n_src_css_gradient_c__CSS_GRAD_STOPS_MAX -.-> n_include_css_values_h__cv_bg_alpha_of
-    n_src_css_gradient_c__CSS_GRAD_STOPS_MAX -.-> n_include_css_values_h__cv_parse_color
+    n_src_css_gradient_c__CSS_GRAD_STOPS_MAX -.-> n_include_css_values_h__cv_parse_color_t7
     n_src_css_gradient_c__downstream -.-> n_include_css_gradient_h__cg_expand_bg_image
     n_src_css_gradient_c__declaration -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_gradient_c__cg_expand_background -.-> n_include_css_select_h__csel_ci_eq
@@ -85,7 +84,7 @@ flowchart LR
 
 **Returns:** `*`
 
-*Calls:* [`cv_bg_alpha_of`](include.css_values.h.md#cv_bg_alpha_of), [`cv_parse_color`](include.css_values.h.md#cv_parse_color)
+*Calls:* [`cv_parse_color_t7`](include.css_values.h.md#cv_parse_color_t7)
 
 ---
 
@@ -93,7 +92,7 @@ flowchart LR
 
 ### `pool`
 
-`function` | [src/css_gradient.c:388](../../src/css_gradient.c#L388)
+`function` | [src/css_gradient.c:380](../../src/css_gradient.c#L380)
 
 ```c
 * pool (gradient explicitly reset);
@@ -113,7 +112,7 @@ flowchart LR
 
 ### `downstream`
 
-`function` | [src/css_gradient.c:392](../../src/css_gradient.c#L392)
+`function` | [src/css_gradient.c:384](../../src/css_gradient.c#L384)
 
 ```c
 * happens downstream (render_doc.c), gated by caps.images like an <img>. */ int cg_expand_bg_imag...
@@ -135,7 +134,7 @@ flowchart LR
 
 ### `declaration`
 
-`function` | [src/css_gradient.c:451](../../src/css_gradient.c#L451)
+`function` | [src/css_gradient.c:443](../../src/css_gradient.c#L443)
 
 ```c
 * declaration (fail closed);
@@ -157,7 +156,7 @@ flowchart LR
 
 ### `cg_expand_background`
 
-`function` | [src/css_gradient.c:498](../../src/css_gradient.c#L498)
+`function` | [src/css_gradient.c:490](../../src/css_gradient.c#L490)
 
 ```c
 int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap)

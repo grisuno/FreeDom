@@ -65,7 +65,7 @@ typedef struct bt_node
 
 #### `bt_node.one`
 
-`method` | [include/box_tree.h:81](../../include/box_tree.h#L81)
+`method` | [include/box_tree.h:90](../../include/box_tree.h#L90)
 
 ```c
 * of forcing them all onto one (flex-wrap);
@@ -83,7 +83,7 @@ typedef struct bt_node
 
 #### `bt_node.line`
 
-`method` | [include/box_tree.h:97](../../include/box_tree.h#L97)
+`method` | [include/box_tree.h:106](../../include/box_tree.h#L106)
 
 ```c
 * its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a grid item of its GRID parent (2026-07-11): columns it spans * (grid-column: span N);
@@ -103,7 +103,7 @@ typedef struct bt_node
 
 ### `bt_positioned`
 
-`struct` | [include/box_tree.h:128](../../include/box_tree.h#L128)
+`struct` | [include/box_tree.h:137](../../include/box_tree.h#L137)
 
 ```c
 typedef struct bt_positioned
@@ -121,7 +121,7 @@ The GUI paints the in-flow rc_layout.rows first, then the bt_positioned list in 
 
 ### `bt_status`
 
-`enum` | [include/box_tree.h:135](../../include/box_tree.h#L135)
+`enum` | [include/box_tree.h:144](../../include/box_tree.h#L144)
 
 ```c
 typedef enum bt_status
@@ -151,7 +151,7 @@ Cross-axis alignment of a node as a flex item of its FLEX parent (bt_node.align)
 
 ### `box_index`
 
-`type_alias` | [include/box_tree.h:128](../../include/box_tree.h#L128)
+`type_alias` | [include/box_tree.h:137](../../include/box_tree.h#L137)
 
 ```c
 typedef struct bt_positioned { size_t box_index;
@@ -183,7 +183,7 @@ The GUI paints the in-flow rc_layout.rows first, then the bt_positioned list in 
 
 ### `node`
 
-`function` | [include/box_tree.h:144](../../include/box_tree.h#L144)
+`function` | [include/box_tree.h:153](../../include/box_tree.h#L153)
 
 ```c
 * node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller composes absolute coordinates by accumulating parent * origins. */ bt_status bt_layout(
@@ -204,7 +204,7 @@ The GUI paints the in-flow rc_layout.rows first, then the bt_positioned list in 
 
 ### `flow`
 
-`function` | [include/box_tree.h:183](../../include/box_tree.h#L183)
+`function` | [include/box_tree.h:192](../../include/box_tree.h#L192)
 
 ```c
 * position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);
@@ -224,7 +224,7 @@ The GUI paints the in-flow rc_layout.rows first, then the bt_positioned list in 
 
 ### `bottom`
 
-`function` | [include/box_tree.h:190](../../include/box_tree.h#L190)
+`function` | [include/box_tree.h:199](../../include/box_tree.h#L199)
 
 ```c
 * bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in box_x/y/w/h: * an absolutely positioned box whose containing block was never placed
@@ -238,7 +238,7 @@ The GUI paints the in-flow rc_layout.rows first, then the bt_positioned list in 
 
 ### `placed`
 
-`function` | [include/box_tree.h:197](../../include/box_tree.h#L197)
+`function` | [include/box_tree.h:206](../../include/box_tree.h#L206)
 
 ```c
 * box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour). */ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const do
@@ -258,7 +258,7 @@ The GUI paints the in-flow rc_layout.rows first, then the bt_positioned list in 
 
 ### `bt_box_hidden`
 
-`function` | [include/box_tree.h:215](../../include/box_tree.h#L215)
+`function` | [include/box_tree.h:224](../../include/box_tree.h#L224)
 
 ```c
 int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);
@@ -284,7 +284,7 @@ The walk is bounded by nbox links and fails closed (returns 1, hidden) on NULL b
 
 ### `bt_oof_anchor`
 
-`function` | [include/box_tree.h:229](../../include/box_tree.h#L229)
+`function` | [include/box_tree.h:238](../../include/box_tree.h#L238)
 
 ```c
 int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);
@@ -310,7 +310,7 @@ Both walk the parent_id chain from `bid` (self first) looking for a box whose po
 
 ### `bt_oof_root`
 
-`function` | [include/box_tree.h:230](../../include/box_tree.h#L230)
+`function` | [include/box_tree.h:239](../../include/box_tree.h#L239)
 
 ```c
 int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);
@@ -334,7 +334,7 @@ int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);
 
 ### `insets`
 
-`function` | [include/box_tree.h:234](../../include/box_tree.h#L234)
+`function` | [include/box_tree.h:243](../../include/box_tree.h#L243)
 
 ```c
 * minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may be NULL) is 1 iff both insets were * declared -- the box then stretches between the
@@ -354,7 +354,7 @@ int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);
 
 ### `bt_containing_block`
 
-`function` | [include/box_tree.h:244](../../include/box_tree.h#L244)
+`function` | [include/box_tree.h:253](../../include/box_tree.h#L253)
 
 ```c
 void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y, const double *box_w, const double *box_h, const char *placed, double viewport_w, double viewport_h, double *cb_x, double *cb_y, double *cb_w, double *cb_h)

@@ -3202,6 +3202,26 @@ static void test_button_ua_face_loses_to_author(void **state) {
 }
 
 
+/* HTML Rendering 15.3.4 phrasing-content faces through the same UA layer as the
+ * button: <u>/<ins> underline, <s>/<strike>/<del> strike through, <mark> paints
+ * its background -- each one still overridable by any author rule. */
+static void test_phrasing_ua_faces(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>a <u>U</u> <ins>I</ins> <s>S</s> <del>D</del> "
+                             "<mark>M</mark> <u class='n'>N</u></p></body>");
+    static const char CSS[] = ".n{text-decoration:none}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_int_equal(find_text(v, "U")->text_decoration, CSS_DECO_UNDERLINE);
+    assert_int_equal(find_text(v, "I")->text_decoration, CSS_DECO_UNDERLINE);
+    assert_int_equal(find_text(v, "S")->text_decoration, CSS_DECO_LINE_THROUGH);
+    assert_int_equal(find_text(v, "D")->text_decoration, CSS_DECO_LINE_THROUGH);
+    assert_int_equal(find_text(v, "M")->bg_rgb, 0xffff00);
+    assert_true(find_text(v, "N")->text_decoration <= 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* --- grid line placement (spec/grid_areas.md section 6) --- */
 
 /* A plain item: its sides resolve against THIS container's 12 tracks. */
@@ -4824,6 +4844,7 @@ int main(void) {
         cmocka_unit_test(test_button_content_flows),
         cmocka_unit_test(test_button_submit_proxy),
         cmocka_unit_test(test_button_ua_face_loses_to_author),
+        cmocka_unit_test(test_phrasing_ua_faces),
         cmocka_unit_test(test_link_color_inherit),
         cmocka_unit_test(test_pct_padding_generates_box),
         cmocka_unit_test(test_before_box_on_empty_element),

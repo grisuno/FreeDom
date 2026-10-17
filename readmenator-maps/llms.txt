@@ -1,6 +1,6 @@
 # freedom-0.0.3
 
-> Static analysis knowledge base for freedom-0.0.3: 9 communities, 265 files, 1514 imports, 4 languages, 6457 symbols.
+> Static analysis knowledge base for freedom-0.0.3: 10 communities, 268 files, 1528 imports, 4 languages, 6536 symbols.
 
 Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
 
@@ -9,24 +9,25 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/INDEX.md](md/readmenator-agent/INDEX.md)
 - [readmenator-agent/GOTCHAS.md](md/readmenator-agent/GOTCHAS.md): These files have the most connections. Changes here have high blast radius.
 - [readmenator-agent/API.md](md/readmenator-agent/API.md): readfuzzstats (function) app.py:30 def readfuzzstats() -- Reads the current status of the active AFL++ fuzzing session.
-- [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/blockflow.h, include/boxstyle.h, include/boxtree.h, include/browser.h, include/compositor.h, include/css.h...
-- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): freebugpointerbutton (function) gui/browserui.c:14987 static void freebugpointerbutton(browserwindow w, uint32t serial,
-- [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Imported by: fuzz/fuzzimagedecode.c, gui/browserui.c, src/imagedecode.c, src/tab.c, tests/testfreedom.c, tests/testimagedecode.c
-- [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Depends on: include/boxstyle.h
-- [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/csscolor.h, include/cssdecl.h, include/cssgradient.h, include/csslength.h, include/cssselect.h, include/cssvalues.h
-- [readmenator-agent/API_p7.md](md/readmenator-agent/API_p7.md): Depends on: include/hostedit.h
-- [readmenator-agent/API_p8.md](md/readmenator-agent/API_p8.md): Depends on: include/ossandbox.h
-- [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/antifp.h, include/securefetch.h, include/url.h
+- [readmenator-agent/API_p10.md](md/readmenator-agent/API_p10.md): Depends on: include/wshub.h
+- [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/blockflow.h, include/boxblur.h, include/boxstyle.h, include/boxtree.h, include/browser.h, include/compositor.h...
+- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): freebugshow (function) gui/browserui.c:15205 static void freebugshow(browserwindow w)
+- [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Imported by: fuzz/fuzzdom.c, fuzz/fuzzdomdebug.c, fuzz/fuzzhtmlparse.c, fuzz/fuzzjsdom.c, fuzz/fuzzpageview.c, gui/freedomview.c, include/dom.h...
+- [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Depends on: include/antifp.h
+- [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/css.h, include/cssbox.h, include/csscolor.h, include/cssdecl.h, include/csslength.h, include/cssselect.h, include/cssvalues.h
+- [readmenator-agent/API_p7.md](md/readmenator-agent/API_p7.md): Depends on: include/freebug.h
+- [readmenator-agent/API_p8.md](md/readmenator-agent/API_p8.md): Depends on: include/jstrusted.h, include/webstorage.h
+- [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/boxstyle.h, include/css.h, include/dataurl.h, include/renderdoc.h, include/url.h, include/util.h
 - [readmenator-agent/ARCHITECTURE.md](md/readmenator-agent/ARCHITECTURE.md): fuzz/fuzzcss.c -> include/css.h
-- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testsvgrender.c -> include/svgrender.h
+- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testrenderpolicy.c -> include/renderpolicy.h
 - [readmenator-agent/CONCEPTS.md](md/readmenator-agent/CONCEPTS.md): Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 - [readmenator-agent/KB_fuzz.md](md/readmenator-agent/KB_fuzz.md): Doc: fuzzrootmatch: Root matcher for the attribute-scoped custom-property path: a fixed <html...
 - [readmenator-agent/KB_gui.md](md/readmenator-agent/KB_gui.md): Doc: uiinputstate: Live editable state for one form text control, aliasing a block of the current...
-- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): datadeviceleave (function, line 15522) static void datadeviceleave(void d, struct wldatadevice dev)
+- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): datadevicedataoffer (function, line 15870) static void datadevicedataoffer(void data, struct wldatadevice dev,
 - [readmenator-agent/KB_include.md](md/readmenator-agent/KB_include.md): Doc: fpacceptlanguageheader: #define FPSECFETCHDESTNAV "document" #define...
 - [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: cssattrmatch: Sub-selector for :not()/:is()/:where(): a simple compound with only...
 - [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): jestatus (enum, line 27)
-- [readmenator-agent/KB_include_p4.md](md/readmenator-agent/KB_include_p4.md): Doc: rphostof: Lowercased host of an absolute URL into out.
+- [readmenator-agent/KB_include_p4.md](md/readmenator-agent/KB_include_p4.md): Doc: rdresultfree: Renders untrusted HTML out-of-process and returns an inert title + text. html ==...
 - [readmenator-agent/KB_root.md](md/readmenator-agent/KB_root.md): Doc: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL...
 - [readmenator-agent/KB_src.md](md/readmenator-agent/KB_src.md): fpcoarsentimems (function, line 17) uint64t fpcoarsentimems(uint64t rawms)
 - [readmenator-agent/KB_src_p2.md](md/readmenator-agent/KB_src_p2.md): Doc: lenrebasectx: int r = snprintf(out + o, space, "%.4f", px); if (r < 0 || (sizet)r >= space)...
@@ -44,7 +45,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p6.md](md/readmenator-agent/KB_tests_p6.md): Doc: dir: include "prefs.h" include "profile.h"
 - [readmenator-agent/KB_tests_p7.md](md/readmenator-agent/KB_tests_p7.md): Doc: mk: projection, and the headless operator-flag path. #include <setjmp.h> #include <stdarg.h>...
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: ffgeom -- Firefox geometry as TEXT, no image reading.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 265 files at commit 580bb5dea7b9. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 268 files at commit 4719f4569d3b. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)
@@ -61,13 +62,12 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/SYMBOLS_p8.md](md/readmenator-agent/SYMBOLS_p8.md)
 - [readmenator-agent/SYMBOLS_p9.md](md/readmenator-agent/SYMBOLS_p9.md)
 - [readmenator-agent/recipes/add-function.md](md/readmenator-agent/recipes/add-function.md): Find the target file by purpose: grep -in '<topic>' readmenator-agent/INDEX.md
-- [readmenator-agent/recipes/change-impact.md](md/readmenator-agent/recipes/change-impact.md): Riskiest file: include/csscolor.h (54 dependents)
-- [readmenator-agent/recipes/fix-cycle.md](md/readmenator-agent/recipes/fix-cycle.md): Target cycle: include/jsdom.h -> include/jslocation.h -> include/jsdom.h
+- [readmenator-agent/recipes/change-impact.md](md/readmenator-agent/recipes/change-impact.md): Riskiest file: include/csscolor.h (52 dependents)
 
 ## Project Docs
 
 - [KNOWLEDGE_BASE.md](md/KNOWLEDGE_BASE.md): Start here: Statistics Dashboard for scope, God Nodes for blast radius, Architecture Reference for per-file API. Agents: prefer readmenator-agent/INDEX.md +...
-- [README.md](md/README.md): From the creators of LazyOwn Redteam Framework comes a free and open-source minimal web
+- [README.md](md/README.md): !Freedom vs Firefox on lobste.rs
 - [SECURITY.md](md/SECURITY.md): We prioritize security patches on the active development branch. Due to the independent, local-first research nature of this project, only the latest major...
 
 ## Optional

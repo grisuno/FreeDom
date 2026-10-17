@@ -44,6 +44,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `fuzz/fuzz_webfont.c` -> `include/webfont.h`
 - `gui/browser_ui.c` -> `gui/browser_ui_internal.h`
 - `gui/browser_ui.c` -> `include/block_flow.h`
+- `gui/browser_ui.c` -> `include/box_blur.h`
 - `gui/browser_ui.c` -> `include/box_style.h`
 - `gui/browser_ui.c` -> `include/box_tree.h`
 - `gui/browser_ui.c` -> `include/browser.h`
@@ -144,6 +145,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/ws_hub.h` -> `include/secure_fetch.h`
 - `src/anti_fp.c` -> `include/anti_fp.h`
 - `src/block_flow.c` -> `include/block_flow.h`
+- `src/box_blur.c` -> `include/box_blur.h`
 - `src/box_style.c` -> `include/box_style.h`
 - `src/box_tree.c` -> `include/box_style.h`
 - `src/box_tree.c` -> `include/box_tree.h`
@@ -315,6 +317,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/page_view.c` -> `include/css.h`
 - `src/page_view.c` -> `include/css_chain.h`
 - `src/page_view.c` -> `include/css_color.h`
+- `src/page_view.c` -> `include/css_decl.h`
 - `src/page_view.c` -> `include/css_length.h`
 - `src/page_view.c` -> `include/css_vars.h`
 - `src/page_view.c` -> `include/dom.h`
@@ -397,6 +400,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/itest_secure_fetch.c` -> `include/secure_fetch.h`
 - `tests/test_anti_fp.c` -> `include/anti_fp.h`
 - `tests/test_block_flow.c` -> `include/block_flow.h`
+- `tests/test_box_blur.c` -> `include/box_blur.h`
 - `tests/test_box_style.c` -> `include/box_style.h`
 - `tests/test_box_tree.c` -> `include/box_tree.h`
 - `tests/test_box_tree.c` -> `include/css.h`
@@ -492,9 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_render_doc.c` -> `include/page_view.h`
 - `tests/test_render_doc.c` -> `include/render_doc.h`
 - `tests/test_render_doc.c` -> `include/render_policy.h`
-- `tests/test_render_policy.c` -> `include/render_policy.h`
-- `tests/test_renderer.c` -> `include/renderer.h`
-- `tests/test_request_policy.c` -> `include/request_policy.h`
-- `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

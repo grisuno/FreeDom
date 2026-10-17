@@ -603,6 +603,58 @@ int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap) {
     return 1 + CSS_GRID_TRACKS_MAX;
 }
 
+int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap) {
+    if (csel_substr(val, "url(", 1)) return 0;
+    if (csel_ci_eq(val, "none")) return 0;
+    if (csel_substr(val, "auto-fill", 1) || csel_substr(val, "auto-fit", 1)) return 0;
+    /* The grid-template shorthand interleaves area strings with the row sizes
+     * ("a" auto "b" 1fr): blank the strings out so only the tracks remain. A row
+     * string with no size after it is an `auto` row. */
+    char buf[CSS_GRID_AREAS_MAX];
+    size_t n = strlen(val);
+    if (n >= sizeof buf) return 0;
+    int strings = 0, sized_since = 1;
+    size_t o = 0;
+    for (size_t i = 0; i < n; ++i) {
+        char c = val[i];
+        if (c == '"' || c == '\'') {
+            if (strings > 0 && !sized_since && o + 6 < sizeof buf) {
+                memcpy(buf + o, " auto ", 6);
+                o += 6;
+            }
+            size_t j = i + 1;
+            while (j < n && val[j] != c) ++j;
+            if (j >= n) return 0;
+            i = j;
+            ++strings;
+            sized_since = 0;
+            buf[o++] = ' ';
+            continue;
+        }
+        if (c != ' ' && c != '\t') sized_since = 1;
+        buf[o++] = c;
+    }
+    if (strings > 0 && !sized_since) {
+        if (o + 5 >= sizeof buf) return 0;
+        memcpy(buf + o, " auto", 5);
+        o += 5;
+    }
+    buf[o] = '\0';
+    int sizes[CSS_GRID_TRACKS_MAX] = { 0 };
+    int pos = 0;
+    int cnt = walk_tracks(buf, o, sizes, CSS_GRID_TRACKS_MAX, &pos);
+    if (cnt < 1) return 0;
+    if (cnt > CSS_GRID_COLS_MAX) cnt = CSS_GRID_COLS_MAX;
+    if (cap < 1 + CSS_GRID_TRACKS_MAX) return 0;
+    dst[0].prop = P_GRID_ROWS;
+    dst[0].ival = cnt;
+    for (int k = 0; k < CSS_GRID_TRACKS_MAX; ++k) {
+        dst[1 + k].prop = P_GRID_RTRACK0 + k;
+        dst[1 + k].ival = sizes[k];
+    }
+    return 1 + CSS_GRID_TRACKS_MAX;
+}
+
 /* --- calc() for length values -------------------------------------------------
  *
  * A small recursive-descent evaluator over +, -, *, / and parens. Operands are

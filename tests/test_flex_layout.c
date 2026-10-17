@@ -1147,11 +1147,36 @@ static void test_column_place_auto_margins(void **state) {
     assert_true(h[0] == 80.0 && y[1] == 80.0);
 }
 
+/* fx_col_free_split: grow first, proportionally; auto margins only when nothing
+ * grows (Flexbox 9.7 then 8.1). */
+static void test_col_free_split(void **state) {
+    (void)state;
+    double b[2], g[2], a[2];
+    int grow1[2] = { 100, 300 }, m0[2] = { 0, 0 };
+    assert_int_equal(fx_col_free_split(100.0, grow1, m0, 2, b, g, a), FX_OK);
+    assert_true(g[0] > 24.99 && g[0] < 25.01 && g[1] > 74.99 && g[1] < 75.01);
+    assert_true(b[0] == 0.0 && b[1] == 0.0 && a[0] == 0.0 && a[1] == 0.0);
+    int grow0[2] = { 0, 0 }, mt[2] = { FX_MAUTO_TOP, 0 };
+    assert_int_equal(fx_col_free_split(100.0, grow0, mt, 2, b, g, a), FX_OK);
+    assert_true(b[0] > 99.99 && b[1] == 0.0 && g[0] == 0.0 && a[0] == 0.0);
+    int mtb[2] = { FX_MAUTO_TOP, FX_MAUTO_BOTTOM };
+    assert_int_equal(fx_col_free_split(100.0, grow0, mtb, 2, b, g, a), FX_OK);
+    assert_true(b[0] > 49.99 && b[0] < 50.01 && a[1] > 49.99 && a[1] < 50.01);
+    /* A grower takes everything: the auto margins get nothing. */
+    int grow2[2] = { 0, 100 };
+    assert_int_equal(fx_col_free_split(100.0, grow2, mt, 2, b, g, a), FX_OK);
+    assert_true(b[0] == 0.0 && g[1] > 99.99);
+    assert_int_equal(fx_col_free_split(-5.0, grow1, mt, 2, b, g, a), FX_OK);
+    assert_true(g[0] == 0.0 && g[1] == 0.0 && b[0] == 0.0);
+    assert_int_equal(fx_col_free_split(10.0, grow1, mt, 2, NULL, g, a), FX_ERR_NULL_ARG);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_column_place_stack_and_justify),
         cmocka_unit_test(test_cross_offset),
         cmocka_unit_test(test_column_place_auto_margins),
+        cmocka_unit_test(test_col_free_split),
         cmocka_unit_test(test_grow_equal),
         cmocka_unit_test(test_grow_weighted),
         cmocka_unit_test(test_shrink_equal),

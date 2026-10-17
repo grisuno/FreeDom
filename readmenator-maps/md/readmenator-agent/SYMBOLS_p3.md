@@ -3,6 +3,28 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `cix_entry` | struct | `include/css_index.h:18` | `` |
+| `cix_free` | function | `include/css_index.h:37` | `void cix_free(cix_index *idx);` |
+| `cix_index` | struct | `include/css_index.h:23` | `` |
+| `index` | function | `include/css_index.h:41` | `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...` |
+| `key` | type_alias | `include/css_index.h:17` | `typedef struct cix_entry { uint64_t key;` |
+| `CL_FALLBACK_CAP_RATIO` | macro | `include/css_length.h:58` | `#define CL_FALLBACK_CAP_RATIO` |
+| `CL_FALLBACK_CH_RATIO` | macro | `include/css_length.h:57` | `#define CL_FALLBACK_CH_RATIO` |
+| `CL_FALLBACK_EX_RATIO` | macro | `include/css_length.h:56` | `#define CL_FALLBACK_EX_RATIO` |
+| `CL_FALLBACK_IC_RATIO` | macro | `include/css_length.h:59` | `#define CL_FALLBACK_IC_RATIO` |
+| `CL_INITIAL_FONT_SIZE` | macro | `include/css_length.h:39` | `#define CL_INITIAL_FONT_SIZE` |
+| `CL_MAX_TOKEN` | macro | `include/css_length.h:33` | `#define CL_MAX_TOKEN` |
+| `CL_NORMAL_LINE_RATIO` | macro | `include/css_length.h:45` | `#define CL_NORMAL_LINE_RATIO` |
+| `FREEDOM_CSS_LENGTH_H` | macro | `include/css_length.h:2` | `#define FREEDOM_CSS_LENGTH_H` |
+| `cl_ctx` | struct | `include/css_length.h:84` | `` |
+| `cl_is_length_unit` | function | `include/css_length.h:246` | `int cl_is_length_unit(const char *unit, size_t unit_len);` |
+| `cl_lp` | struct | `include/css_length.h:132` | `` |
+| `cl_number` | function | `include/css_length.h:230` | `int cl_number(const char *s, double *out, const char **endp);` |
+| `cl_status` | enum | `include/css_length.h:61` | `` |
+| `cl_unit_font_ratio` | function | `include/css_length.h:182` | `double cl_unit_font_ratio(const char *unit, size_t unit_len);` |
+| `cl_unit_is_font_relative` | function | `include/css_length.h:157` | `* cl_unit_is_font_relative() draws. */ /* * Re-fits a resolved length to a different font-size: * * used = px + em *...` |
+| `font_size` | type_alias | `include/css_length.h:84` | `typedef struct cl_ctx { double font_size;` |
+| `here` | function | `include/css_length.h:186` | `* Every input cl_resolve accepts resolves identically here (with has_pct 0);` |
 | `length` | function | `include/css_length.h:206` | `* * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute...` |
 | `prelude` | function | `include/css_length.h:99` | `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the...` |
 | `px` | type_alias | `include/css_length.h:132` | `typedef struct cl_lp { double px;` |
@@ -66,9 +88,10 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `FREEDOM_CSS_VALUES_H` | macro | `include/css_values.h:2` | `#define FREEDOM_CSS_VALUES_H` |
 | `cv_bg_alpha_of` | function | `include/css_values.h:15` | `int cv_bg_alpha_of(const char *v);` |
 | `cv_color_ok` | function | `include/css_values.h:14` | `int cv_color_ok(int c);` |
-| `cv_interp_bg` | function | `include/css_values.h:16` | `int cv_interp_bg(const char *v);` |
+| `cv_interp_bg` | function | `include/css_values.h:20` | `int cv_interp_bg(const char *v);` |
 | `cv_interp_color` | function | `include/css_values.h:13` | `int cv_interp_color(const char *v);` |
 | `cv_parse_color` | function | `include/css_values.h:12` | `int cv_parse_color(const char *v);` |
+| `cv_parse_color_t7` | function | `include/css_values.h:19` | `int cv_parse_color_t7(const char *v);` |
 | `CVR_CHAIN_MAX` | macro | `include/css_vars.h:45` | `#define CVR_CHAIN_MAX` |
 | `CVR_MAX_DEPTH` | macro | `include/css_vars.h:22` | `#define CVR_MAX_DEPTH` |
 | `CVR_MAX_ENTRIES` | macro | `include/css_vars.h:21` | `#define CVR_MAX_ENTRIES` |
@@ -159,7 +182,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `fx_area_map` | struct | `include/flex_layout.h:144` | `` |
 | `fx_auto_min_size` | function | `include/flex_layout.h:263` | `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` |
 | `fx_autofill_count` | function | `include/flex_layout.h:129` | `size_t fx_autofill_count(double avail, double gap, double minw);` |
-| `fx_cross_offset` | function | `include/flex_layout.h:344` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` |
+| `fx_cross_offset` | function | `include/flex_layout.h:352` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` |
 | `fx_float_rect` | struct | `include/flex_layout.h:214` | `` |
 | `fx_grid_area_hash` | function | `include/flex_layout.h:153` | `unsigned fx_grid_area_hash(const char *name);` |
 | `fx_grid_cell` | function | `include/flex_layout.h:74` | `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);` |
@@ -171,6 +194,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `fx_result` | struct | `include/flex_layout.h:48` | `` |
 | `fx_status` | enum | `include/flex_layout.h:53` | `` |
 | `height` | function | `include/flex_layout.h:325` | `* used height (h_out);` |
+| `it` | function | `include/flex_layout.h:342` | `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...` |
 | `number` | function | `include/flex_layout.h:106` | `* line number (negative counts from the end). */ #define FX_GL_AUTO 0 #define FX_GL_SPAN_BASE (1 << 20) #define...` |
 | `offset` | function | `include/flex_layout.h:171` | `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...` |
 | `out` | function | `include/flex_layout.h:62` | `* fx_result to out (caller-owned). n == 0 is a no-op (out may be NULL). */ fx_status fx_flex_line(const fx_item...` |
@@ -179,7 +203,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `size` | function | `include/flex_layout.h:60` | `* content size (px);` |
 | `space` | function | `include/flex_layout.h:234` | `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...` |
 | `widths` | function | `include/flex_layout.h:194` | `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...` |
-| `win` | function | `include/flex_layout.h:342` | `* margins win (both = centre, left only = end);` |
+| `win` | function | `include/flex_layout.h:350` | `* margins win (both = centre, left only = end);` |
 | `FM_BODY_MAX` | macro | `include/form.h:30` | `#define FM_BODY_MAX` |
 | `FM_CONTENT_TYPE_URLENCODED` | variable | `include/form.h:68` | `extern const char FM_CONTENT_TYPE_URLENCODED[];` |
 | `FM_MAX_FIELDS` | macro | `include/form.h:31` | `#define FM_MAX_FIELDS` |
@@ -470,31 +494,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `os_prot_allowed` | function | `include/os_sandbox.h:52` | `int os_prot_allowed(long syscall_nr, unsigned long prot);` |
 | `os_status` | enum | `include/os_sandbox.h:21` | `` |
 | `os_violation` | enum | `include/os_sandbox.h:30` | `` |
-| `CSS_LEN_UNSET` | function | `include/page_view.h:503` | `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...` |
+| `CSS_LEN_UNSET` | function | `include/page_view.h:523` | `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...` |
 | `FREEDOM_PAGE_VIEW_H` | macro | `include/page_view.h:2` | `#define FREEDOM_PAGE_VIEW_H` |
-| `PV_BG_URL_MAX` | macro | `include/page_view.h:66` | `#define PV_BG_URL_MAX` |
-| `PV_CONT_DEPTH` | macro | `include/page_view.h:60` | `#define PV_CONT_DEPTH` |
-| `PV_GRID_TRACKS` | macro | `include/page_view.h:55` | `#define PV_GRID_TRACKS` |
-| `PV_LEN_AUTO` | macro | `include/page_view.h:51` | `#define PV_LEN_AUTO` |
-| `PV_LEN_END` | macro | `include/page_view.h:52` | `#define PV_LEN_END` |
-| `PV_LEN_UNSET` | macro | `include/page_view.h:50` | `#define PV_LEN_UNSET` |
-| `PV_MAUTO_BOTTOM` | macro | `include/page_view.h:46` | `#define PV_MAUTO_BOTTOM` |
-| `PV_MAUTO_LEFT` | macro | `include/page_view.h:43` | `#define PV_MAUTO_LEFT` |
-| `PV_MAUTO_RIGHT` | macro | `include/page_view.h:44` | `#define PV_MAUTO_RIGHT` |
-| `PV_MAUTO_TOP` | macro | `include/page_view.h:45` | `#define PV_MAUTO_TOP` |
-| `PV_PH_HIDDEN` | macro | `include/page_view.h:1108` | `#define PV_PH_HIDDEN` |
-| `PV_PH_THEME` | macro | `include/page_view.h:1107` | `#define PV_PH_THEME` |
-| `PV_UA_BODY_MARGIN` | macro | `include/page_view.h:781` | `#define PV_UA_BODY_MARGIN` |
-| `ancestors` | function | `include/page_view.h:976` | `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...` |
-| `bx_display` | function | `include/page_view.h:226` | `* bx_display (flex/grid);` |
-| `cause` | function | `include/page_view.h:829` | `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...` |
-| `container` | function | `include/page_view.h:225` | `* cont_id groups runs of one container (-1 = none);` |
-| `declare` | function | `include/page_view.h:784` | `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...` |
-| `default` | function | `include/page_view.h:897` | `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);` |
-| `form` | function | `include/page_view.h:860` | `* form (-1 if none);` |
-| `itself` | function | `include/page_view.h:341` | `* by itself (bx_width_cap2);` |
-| `kind` | type_alias | `include/page_view.h:118` | `typedef struct pv_run { pv_kind kind;` |
-| `nonzero` | function | `include/page_view.h:796` | `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...` |
-| `order` | function | `include/page_view.h:290` | `* groups the runs of ONE floated element in document order (-1 = not in a float);` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

@@ -360,7 +360,11 @@ static void test_backg...`
   - `test_clip_auto` (function, line 5411) `static void test_clip_auto(void **state)`
   - `grammar` (function, line 5428) `* grammar (spec/css.md), so they parse instead of dropping. */
 static void test_vendor_prefixes(v...`
-  - `main` (function, line 5464) `int main(void)`
+  - `test_fontface_local_only_is_alias` (function, line 5468) `static void test_fontface_local_only_is_alias(void **state)`
+  - `test_fontface_local_then_url_keeps_url` (function, line 5486) `static void test_fontface_local_then_url_keeps_url(void **state)`
+  - `test_box_shadow_layers_and_alpha` (function, line 5504) `static void test_box_shadow_layers_and_alpha(void **state)`
+  - `test_grid_template_rows_tracks` (function, line 5529) `static void test_grid_template_rows_tracks(void **state)`
+  - `main` (function, line 5545) `int main(void)`
   - `box` (function, line 231) `* box (CSS 2.1 section 10.8.1). With one line box per line and no separate * parent content edge, they land on the...`
   - `downstream` (function, line 654) `* and deciding whether to fetch happens downstream (render_doc.c) */ assert_string_equal(css_parse_inline(...`
   - `invalid` (function, line 756) `* invalid (fail closed), not silently coerced into some default. */ css_style s = css_parse_inline("color...`

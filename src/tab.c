@@ -62,8 +62,8 @@ static void ignore_sigpipe(void);
  * Change requires same-diff in both functions; _Static_assert below enforces. */
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
-#define TAB_WIRE_B_N 61
-#define TAB_WIRE_BOX_F_N 225
+#define TAB_WIRE_B_N 64
+#define TAB_WIRE_BOX_F_N 246
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
 
 /* Anti-amplification cap on the number of display-list runs the parent will
@@ -443,6 +443,8 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)r->text_balance,
             /* the image's height is its CSS px height, tanda 43 (appended). */
             (int32_t)(r->img_h_css | (r->img_inline << 1)),
+            /* the float founder's own width halves, tanda 44 (appended). */
+            (int32_t)r->float_w, (int32_t)r->float_w_pct, (int32_t)r->float_box,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -641,6 +643,16 @@ static int write_view(int wfd, const pv_view *v) {
             /* the line's text-align for an inline-level box, tanda 43. */
             (int32_t)bd->line_align,
             (int32_t)bd->box_w_intrinsic,
+            /* flex-column free-space share (read_view mirrors). */
+            (int32_t)bd->col_grow, (int32_t)bd->col_mauto,
+            /* box-shadow layer count + layers 2..4 (read_view mirrors). */
+            (int32_t)bd->bsh_n,
+            (int32_t)bd->bsh_x[0][0], (int32_t)bd->bsh_x[0][1], (int32_t)bd->bsh_x[0][2],
+            (int32_t)bd->bsh_x[0][3], (int32_t)bd->bsh_x[0][4], (int32_t)bd->bsh_x[0][5],
+            (int32_t)bd->bsh_x[1][0], (int32_t)bd->bsh_x[1][1], (int32_t)bd->bsh_x[1][2],
+            (int32_t)bd->bsh_x[1][3], (int32_t)bd->bsh_x[1][4], (int32_t)bd->bsh_x[1][5],
+            (int32_t)bd->bsh_x[2][0], (int32_t)bd->bsh_x[2][1], (int32_t)bd->bsh_x[2][2],
+            (int32_t)bd->bsh_x[2][3], (int32_t)bd->bsh_x[2][4], (int32_t)bd->bsh_x[2][5],
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -668,7 +680,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nc, sizeof nc) != 0) return -1;
     for (size_t ci = 0; ci < nc; ++ci) {
         const pv_cont_def *cd = pv_cont_at(v, ci);
-        int32_t cf[27 + PV_GRID_TRACKS];
+        int32_t cf[28 + 2 * PV_GRID_TRACKS];
         size_t k = 0;
         cf[k++] = (int32_t)cd->parent_id;
         cf[k++] = (int32_t)cd->parent_item;
@@ -687,6 +699,7 @@ static int write_view(int wfd, const pv_view *v) {
         cf[k++] = (int32_t)cd->box_id;
         cf[k++] = (int32_t)cd->anon_row;
         cf[k++] = (int32_t)cd->is_table;
+        cf[k++] = (int32_t)cd->box_own;
         /* item flex props of a nested container (2026-08-01; read_view mirrors). */
         cf[k++] = (int32_t)cd->item_grow;
         cf[k++] = (int32_t)cd->item_shrink;
@@ -699,6 +712,7 @@ static int write_view(int wfd, const pv_view *v) {
         cf[k++] = (int32_t)cd->item_row_start;
         cf[k++] = (int32_t)cd->item_row_span;
         for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cf[k++] = (int32_t)cd->col_w[gk];
+        for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cf[k++] = (int32_t)cd->row_h[gk];
         if (write_full(wfd, cf, sizeof cf) != 0) return -1;
     }
     /* CSS 2.1 §14.2: canvas background + root <html> layout properties. These
@@ -2185,6 +2199,7 @@ static int read_view(int fd, pv_view **out) {
                          (int)flml, (int)flmlpct, (int)flmr, (int)flmrpct,
                          (int)floid, (int)floside,
                          (int)floml, (int)flomlpct, (int)flomr, (int)flomrpct);
+            pv_set_float_w(v, (int)b[61], (int)b[62], (b[63] >= -1) ? (int)b[63] : -1);
             pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);
             /* Both halves of the box placement travel together, and are combined
              * only at layout (bx_lp_px): setting one without the other would make
@@ -2220,6 +2235,7 @@ static int read_view(int fd, pv_view **out) {
                          (int)flml, (int)flmlpct, (int)flmr, (int)flmrpct,
                          (int)floid, (int)floside,
                          (int)floml, (int)flomlpct, (int)flomr, (int)flomrpct);
+            pv_set_float_w(v, (int)b[61], (int)b[62], (b[63] >= -1) ? (int)b[63] : -1);
         }
         /* block_id/node_id ride EVERY run kind: an input's own box (position:
          * absolute, opacity:0 -- the checkbox-hack pattern) travelled on the
@@ -2367,7 +2383,12 @@ static int read_view(int fd, pv_view **out) {
             .box_min_w_set = (f[222] != 0),
             .line_align = (f[223] >= 0 && f[223] <= 8) ? f[223] : 0,
             .box_w_intrinsic = (f[224] != 0),
+            .col_grow = (f[225] > 0 && f[225] <= CSS_LEN_MAX) ? f[225] : 0,
+            .col_mauto = f[226] & (PV_MAUTO_TOP | PV_MAUTO_BOTTOM),
+            .bsh_n = (f[227] >= 0 && f[227] <= PV_BSHADOW_LAYERS) ? f[227] : 0,
         };
+        for (int k = 0; k < (PV_BSHADOW_LAYERS - 1) * 6; ++k)
+            bd.bsh_x[k / 6][k % 6] = f[228 + k];
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -2422,7 +2443,7 @@ static int read_view(int fd, pv_view **out) {
         if (read_full(fd, &nc, sizeof nc) != 0) { pv_free(v); return -1; }
         if (nc > PV_MAX_CONTAINERS_WIRE) { pv_free(v); return -1; }
         for (size_t ci = 0; ci < nc; ++ci) {
-            int32_t cf[27 + PV_GRID_TRACKS];
+            int32_t cf[28 + 2 * PV_GRID_TRACKS];
             if (read_full(fd, cf, sizeof cf) != 0) { pv_free(v); return -1; }
             pv_cont_def cd;
             memset(&cd, 0, sizeof cd);
@@ -2444,12 +2465,14 @@ static int read_view(int fd, pv_view **out) {
             cd.box_id        = cf[k++];
             cd.anon_row      = cf[k++];
             cd.is_table      = cf[k++];
+            cd.box_own       = (cf[k++] != 0) ? 1 : 0;
             cd.item_grow       = cf[k++];
             cd.item_shrink     = cf[k++];
             cd.item_basis      = cf[k++];
             cd.item_order      = cf[k++];
             cd.item_align_self = cf[k++];
-            cd.item_mauto      = cf[k++] & (PV_MAUTO_LEFT | PV_MAUTO_RIGHT);
+            cd.item_mauto      = cf[k++] & (PV_MAUTO_LEFT | PV_MAUTO_RIGHT |
+                                           PV_MAUTO_TOP | PV_MAUTO_BOTTOM);
             /* Grid placement from a hostile worker: a start outside [-1, FX_MAX_ITEMS)
              * degrades to auto, a span outside [0, FX_GL_SPAN_MAX] to one track. */
             cd.item_col_start  = cf[k++];
@@ -2461,6 +2484,7 @@ static int read_view(int fd, pv_view **out) {
             if (cd.item_col_span < 0 || cd.item_col_span > FX_GL_SPAN_MAX) cd.item_col_span = 0;
             if (cd.item_row_span < 0 || cd.item_row_span > FX_GL_SPAN_MAX) cd.item_row_span = 0;
             for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cd.col_w[gk] = cf[k++];
+            for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cd.row_h[gk] = cf[k++];
             /* A hostile worker cannot make the parent chain point outside the
              * table: an out-of-range parent degrades the container to top level
              * (flat layout, exactly today's behaviour) instead of indexing wild. */

@@ -4,7 +4,7 @@
 
 ## Contents
 
-- **Functions:** [`LLVMFuzzerTestOneInput`](#llvmfuzzertestoneinput)
+- **Functions:** [`LLVMFuzzerTestOneInput`](#llvmfuzzertestoneinput), [`glyph`](#glyph), [`ASCII`](#ascii)
 - **Macros:** [`FZ_CAP`](#fz_cap)
 
 ## Call Graph
@@ -44,6 +44,47 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 **Returns:** `int`
 
 *Calls:* [`tsh_measure`](include.text_shape.h.md#tsh_measure), [`tsh_draw`](src.text_shape.c.md#tsh_draw), [`tsh_shape`](src.text_shape.c.md#tsh_shape)
+
+---
+
+<a id="glyph"></a>
+
+### `glyph`
+
+`function` | [fuzz/fuzz_text_shape.c:54](../../fuzz/fuzz_text_shape.c#L54)
+
+```c
+* one lacks a glyph (spec/text_shape.md 8);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `md` | `spec/text_shape. 8` |  |  |
+
+**Returns:** `* one lacks a`
+
+---
+
+<a id="ascii"></a>
+
+### `ASCII`
+
+`function` | [fuzz/fuzz_text_shape.c:56](../../fuzz/fuzz_text_shape.c#L56)
+
+```c
+* printable ASCII (one run, the requested face) the two must agree. */ double m = tsh_measure(&f, px, text, len);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `run` | `one` |  |  |
+| `face` | `the requested` |  |  |
+
+**Returns:** `* printable`
 
 ---
 

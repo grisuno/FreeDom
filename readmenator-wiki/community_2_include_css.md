@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 44 file(s) rooted at `include` with dominant language c (cohesion 0.73). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `BT_LEN_AUTO`, `BT_WRAP_EPS`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`. Core file: `tests/test_css.c` (345 symbols). Documented purpose: Bound for the ::before/::after content string pool (and the grid-template.
+This community groups 44 file(s) rooted at `include` with dominant language c (cohesion 0.73). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `BT_LEN_AUTO`, `BT_WRAP_EPS`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`. Core file: `tests/test_css.c` (349 symbols). Documented purpose: Bound for the ::before/::after content string pool (and the grid-template.
 
 ## Files
 
@@ -13,9 +13,9 @@ This community groups 44 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/compositor.h` | h | utility | 9 | no |
-| `include/css.h` | h | utility | 135 | no |
+| `include/css.h` | h | utility | 136 | no |
 | `include/css_atrule.h` | h | utility | 10 | no |
-| `include/css_box.h` | h | utility | 25 | no |
+| `include/css_box.h` | h | utility | 26 | no |
 | `include/css_chain.h` | h | utility | 8 | no |
 | `include/css_color.h` | h | utility | 7 | no |
 | `include/css_decl.h` | h | utility | 12 | yes |
@@ -24,11 +24,11 @@ This community groups 44 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `src/box_tree.c` | c | utility | 22 | no |
+| `src/box_tree.c` | c | utility | 23 | no |
 | `src/compositor.c` | c | utility | 5 | no |
-| `src/css.c` | c | utility | 242 | no |
+| `src/css.c` | c | utility | 243 | no |
 | `src/css_atrule.c` | c | utility | 11 | no |
-| `src/css_box.c` | c | utility | 50 | no |
+| `src/css_box.c` | c | utility | 51 | no |
 | `src/css_chain.c` | c | utility | 20 | no |
 
 ### `tests` (13 files)
@@ -36,7 +36,7 @@ This community groups 44 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `tests/test_compositor.c` | c | testing | 21 | no |
-| `tests/test_css.c` | c | testing | 345 | no |
+| `tests/test_css.c` | c | testing | 349 | no |
 | `tests/test_css_atrule.c` | c | testing | 10 | yes |
 | `tests/test_css_box.c` | c | testing | 9 | no |
 | `tests/test_css_color.c` | c | testing | 36 | no |
@@ -87,7 +87,7 @@ This community groups 44 file(s) rooted at `include` with dominant language c (c
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 91
-- Cross-boundary resolved imports (EXTRACTED): 33
+- Cross-boundary resolved imports (EXTRACTED): 34
 
 ## Connections
 
@@ -100,11 +100,13 @@ This community groups 44 file(s) rooted at `include` with dominant language c (c
 ## Risks
 
 - [layer strict] `tests/test_css.c` (testing) -> `include/flex_layout.h` (presentation)
-- [dataflow UNINIT_USE] `src/box_tree.c:231` `layout_grid` `col_x`: `col_x` may be read before initialization (declared line 228).
-- [dataflow UNINIT_USE] `src/box_tree.c:231` `layout_grid` `col_w`: `col_w` may be read before initialization (declared line 229).
-- [dataflow DEAD_STORE] `src/box_tree.c:469` `bt_containing_block` `ancestor`: `ancestor` assigned at line 469 but never read afterwards.
-- [dataflow DEAD_STORE] `src/box_tree.c:623` `bt_resolve_positioning_ex` `z_auto`: `z_auto` assigned at line 623 but never read afterwards.
-- [dataflow DEAD_STORE] `src/css.c:5288` `page_view` `had_winner`: `had_winner` assigned at line 5288 but never read afterwards.
+- [dataflow DEAD_STORE] `src/box_tree.c:279` `layout_grid` `rgap`: `rgap` assigned at line 279 but never read afterwards.
+- [dataflow UNINIT_USE] `src/box_tree.c:284` `layout_grid` `col_x`: `col_x` may be read before initialization (declared line 281).
+- [dataflow UNINIT_USE] `src/box_tree.c:284` `layout_grid` `col_w`: `col_w` may be read before initialization (declared line 282).
+- [dataflow DEAD_STORE] `src/box_tree.c:324` `layout_grid` `tracked`: `tracked` assigned at line 324 but never read afterwards.
+- [dataflow DEAD_STORE] `src/box_tree.c:546` `bt_containing_block` `ancestor`: `ancestor` assigned at line 546 but never read afterwards.
+- [dataflow DEAD_STORE] `src/box_tree.c:700` `bt_resolve_positioning_ex` `z_auto`: `z_auto` assigned at line 700 but never read afterwards.
+- [dataflow DEAD_STORE] `src/css.c:5408` `page_view` `had_winner`: `had_winner` assigned at line 5408 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:155` `parse_hex` `r`: `r` assigned at line 155 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:156` `parse_hex` `g`: `g` assigned at line 156 but never read afterwards.
 

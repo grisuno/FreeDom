@@ -46,6 +46,19 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `main` (function, line 105) `int main(void)`
 - Depends on: `include/block_flow.h`
 
+## tests/test_box_blur.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `mass` (function, line 11) `static long mass(const unsigned char *b, int n)`
+  - `test_box_sizes` (function, line 17) `static void test_box_sizes(void **state)`
+  - `test_impulse_conserves_mass_and_is_symmetric` (function, line 34) `static void test_impulse_conserves_mass_and_is_symmetric(void **state)`
+  - `test_zero_sigma_is_identity` (function, line 50) `static void test_zero_sigma_is_identity(void **state)`
+  - `test_uniform_interior_unchanged` (function, line 58) `static void test_uniform_interior_unchanged(void **state)`
+  - `test_invalid_arguments` (function, line 69) `static void test_invalid_arguments(void **state)`
+  - `main` (function, line 78) `int main(void)`
+- Depends on: `include/box_blur.h`
+
 ## tests/test_box_style.c
 - Doc: dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include...
 - Layer: testing
@@ -96,7 +109,9 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_place_declared_width_overflows` (function, line 627) `static void test_place_declared_width_overflows(void **state)`
   - `test_border_span` (function, line 646) `static void test_border_span(void **state)`
   - `test_flex_min_clamp` (function, line 659) `static void test_flex_min_clamp(void **state)`
-  - `main` (function, line 670) `int main(void)`
+  - `test_pct_block_size` (function, line 672) `static void test_pct_block_size(void **state)`
+  - `test_definite_content_h` (function, line 688) `static void test_definite_content_h(void **state)`
+  - `main` (function, line 701) `int main(void)`
   - `width` (function, line 553) `* a negative width (CSS Values 4 section 10.1: out-of-range calc() results are * clamped at used-value time). */...`
 - Depends on: `include/box_style.h`
 
@@ -159,7 +174,9 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_oof_relative_does_not_anchor` (function, line 877) `static void test_oof_relative_does_not_anchor(void **state)`
   - `test_oof_fail_open` (function, line 891) `static void test_oof_fail_open(void **state)`
   - `test_oof_avail_stretch_and_shrink` (function, line 913) `static void test_oof_avail_stretch_and_shrink(void **state)`
-  - `main` (function, line 931) `int main(void)`
+  - `test_grid_row_tracks_definite_height` (function, line 934) `static void test_grid_row_tracks_definite_height(void **state)`
+  - `test_grid_spanning_item_fits_tracked_rows` (function, line 973) `static void test_grid_spanning_item_fits_tracked_rows(void **state)`
+  - `main` (function, line 993) `int main(void)`
   - `card` (function, line 769) `* containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */ assert_true(dbl_eq(out[2].x, 100));`
   - `UNSET4` (macro, line 630) `#define UNSET4`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`

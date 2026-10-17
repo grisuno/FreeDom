@@ -1,10 +1,10 @@
 # `src/box_tree.c`
 
-> Source: [src/box_tree.c:1](../../src/box_tree.c#L1) | language `c` | coverage 30.8% | [API index](../index.md)
+> Source: [src/box_tree.c:1](../../src/box_tree.c#L1) | language `c` | coverage 28.6% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`wrap_reverse`](#wrap_reverse), [`bt_layout`](#bt_layout), [`bt_containing_block`](#bt_containing_block), [`block`](#block), [`bt_resolve_positioning`](#bt_resolve_positioning), [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`bt_box_hidden`](#bt_box_hidden), [`bt_oof_avail`](#bt_oof_avail)
+- **Functions:** [`wrap_reverse`](#wrap_reverse), [`sized`](#sized), [`bt_layout`](#bt_layout), [`bt_containing_block`](#bt_containing_block), [`block`](#block), [`bt_resolve_positioning`](#bt_resolve_positioning), [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`bt_box_hidden`](#bt_box_hidden), [`bt_oof_avail`](#bt_oof_avail)
 - **Macros:** [`BT_LEN_AUTO`](#bt_len_auto), [`BT_WRAP_EPS`](#bt_wrap_eps)
 
 ## Call Graph
@@ -51,11 +51,32 @@ flowchart LR
 
 ---
 
+<a id="sized"></a>
+
+### `sized`
+
+`function` | [src/box_tree.c:334](../../src/box_tree.c#L334)
+
+```c
+* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `Grid` | `CSS 1 11.5` |  |  |
+| `last` | `items spanning several tracks come *` |  |  |
+
+**Returns:** `* the tracks are`
+
+---
+
 <a id="bt_layout"></a>
 
 ### `bt_layout`
 
-`function` | [src/box_tree.c:372](../../src/box_tree.c#L372)
+`function` | [src/box_tree.c:449](../../src/box_tree.c#L449)
 
 ```c
 bt_status bt_layout(bt_node *root, double avail_w)
@@ -76,7 +97,7 @@ bt_status bt_layout(bt_node *root, double avail_w)
 
 ### `bt_containing_block`
 
-`function` | [src/box_tree.c:462](../../src/box_tree.c#L462)
+`function` | [src/box_tree.c:539](../../src/box_tree.c#L539)
 
 ```c
 void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y, const double *box_w, const double *box_h, const char *placed, double viewport_w, double viewport_h, double *cb_x, double *cb_y, double *cb_w, double *cb_h)
@@ -105,7 +126,7 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 | `cb_w` | `double *` |  |  |
 | `cb_h` | `double *` |  |  |
 
-> **Inherited:** Documentation from [`bt_containing_block`](#bt_containing_block) (include/box_tree.h:244).
+> **Inherited:** Documentation from [`bt_containing_block`](#bt_containing_block) (include/box_tree.h:253).
 
 *Called by:* [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex)
 
@@ -115,7 +136,7 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 
 ### `block`
 
-`function` | [src/box_tree.c:473](../../src/box_tree.c#L473)
+`function` | [src/box_tree.c:550](../../src/box_tree.c#L550)
 
 ```c
 * true block (same flow neighbourhood), strictly better than zeros. NULL * placed keeps lega...
@@ -129,15 +150,13 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 
 **Returns:** `* true`
 
-*Called by:* [`RC_FLOAT_FIT_MIN`](gui.browser_ui.c.md#rc_float_fit_min)
-
 ---
 
 <a id="bt_resolve_positioning"></a>
 
 ### `bt_resolve_positioning`
 
-`function` | [src/box_tree.c:492](../../src/box_tree.c#L492)
+`function` | [src/box_tree.c:569](../../src/box_tree.c#L569)
 
 ```c
 bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox, const double *box_x, const double *box_y, const double *box_w, const double *box_h, double viewport_w, double viewport_h, bt_positioned *out, size_t out_cap, size_t *out_count)
@@ -169,7 +188,7 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox, const dou
 
 ### `bt_resolve_positioning_ex`
 
-`function` | [src/box_tree.c:503](../../src/box_tree.c#L503)
+`function` | [src/box_tree.c:580](../../src/box_tree.c#L580)
 
 ```c
 bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const double *box_x, const double *box_y, const double *box_w, const double *box_h, const double *static_x, const double *static_y, const char *placed, double viewport_w, double viewport_h, bt_positioned *out, size_t out_cap, size_t *out_count)
@@ -206,7 +225,7 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const 
 
 ### `bt_oof_anchor`
 
-`function` | [src/box_tree.c:675](../../src/box_tree.c#L675)
+`function` | [src/box_tree.c:752](../../src/box_tree.c#L752)
 
 ```c
 int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)
@@ -226,7 +245,7 @@ Both walk the parent_id chain from `bid` (self first) looking for a box whose po
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`bt_oof_anchor`](#bt_oof_anchor) (include/box_tree.h:229).
+> **Inherited:** Documentation from [`bt_oof_anchor`](#bt_oof_anchor) (include/box_tree.h:238).
 
 ---
 
@@ -234,7 +253,7 @@ Both walk the parent_id chain from `bid` (self first) looking for a box whose po
 
 ### `bt_oof_root`
 
-`function` | [src/box_tree.c:679](../../src/box_tree.c#L679)
+`function` | [src/box_tree.c:756](../../src/box_tree.c#L756)
 
 ```c
 int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)
@@ -256,7 +275,7 @@ int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)
 
 ### `bt_box_hidden`
 
-`function` | [src/box_tree.c:683](../../src/box_tree.c#L683)
+`function` | [src/box_tree.c:760](../../src/box_tree.c#L760)
 
 ```c
 int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)
@@ -276,7 +295,7 @@ The walk is bounded by nbox links and fails closed (returns 1, hidden) on NULL b
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`bt_box_hidden`](#bt_box_hidden) (include/box_tree.h:215).
+> **Inherited:** Documentation from [`bt_box_hidden`](#bt_box_hidden) (include/box_tree.h:224).
 
 ---
 
@@ -284,7 +303,7 @@ The walk is bounded by nbox links and fails closed (returns 1, hidden) on NULL b
 
 ### `bt_oof_avail`
 
-`function` | [src/box_tree.c:696](../../src/box_tree.c#L696)
+`function` | [src/box_tree.c:773](../../src/box_tree.c#L773)
 
 ```c
 double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)

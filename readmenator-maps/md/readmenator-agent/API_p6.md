@@ -1,5 +1,96 @@
-# API (page 6 of 9)
+# API (page 6 of 10)
 Previous: [API_p5.md](API_p5.md)
+
+## src/css_box.c
+Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
+- `cb_parse_num` (function) `src/css_box.c:13` `static int cb_parse_num(const char *s, double *out, const char **endp)`
+- `cb_wide_keyword` (function) `src/css_box.c:18` `static int cb_wide_keyword(const char *v)`
+- `cb_copy_trim` (function) `src/css_box.c:25` `static size_t cb_copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
+- `cb_length_px` (function) `src/css_box.c:49` `int cb_length_px(const char *v, double *px)` -- Resolves a NUL-terminated <length> token to px through the canonical resolver.
+- `cb_interp_align` (function) `src/css_box.c:54` `int cb_interp_align(const char *v)`
+- `RELATIVE` (function) `src/css_box.c:63` `* or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the * absolute keywords. Relative: em...`
+- `cb_interp_fontsize_ex` (function) `src/css_box.c:72` `int cb_interp_fontsize_ex(const char *v, int *abs_out)`
+- `cb_interp_lineheight` (function) `src/css_box.c:145` `int cb_interp_lineheight(const char *v)` -- line-height as a percent of the natural line box.
+- `cb_interp_weight` (function) `src/css_box.c:166` `int cb_interp_weight(const char *v)`
+- `cb_interp_style` (function) `src/css_box.c:175` `int cb_interp_style(const char *v)`
+- `cb_interp_textdeco` (function) `src/css_box.c:185` `int cb_interp_textdeco(const char *v)` -- text-decoration / text-decoration-line: OR of the line keywords underline / overline / line-through found in the...
+- `cb_interp_display` (function) `src/css_box.c:205` `int cb_interp_display(const char *v)`
+- `cb_interp_gap` (function) `src/css_box.c:280` `int cb_interp_gap(const char *v)` -- One gap length.
+- `cb_interp_justify` (function) `src/css_box.c:287` `int cb_interp_justify(const char *v)`
+- `repeat` (function) `src/css_box.c:301` `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill|...) /...`
+- `cb_starts_with_ci` (function) `src/css_box.c:312` `static int cb_starts_with_ci(const char *s, const char *pre)`
+- `count_tracks` (function) `src/css_box.c:318` `static int count_tracks(const char *s, size_t n)`
+- `track_size_of` (function) `src/css_box.c:326` `static int track_size_of(const char *tok)` -- Size of ONE track token: `<N>fr` -> -(N*100); a px/em/rem length -> px (> 0); minmax(a,b) -> the size of its max...
+- `count_one_repeat` (function) `src/css_box.c:356` `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,
+                      ...`
+- `walk_tracks` (function) `src/css_box.c:399` `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)`
+- `track_min_of` (function) `src/css_box.c:467` `static int track_min_of(const char *tok)` -- Minimum width of ONE track token for repeat(auto-fill): minmax(a,b) takes a's length; a plain track takes itself....
+- `expand_auto_fill` (function) `src/css_box.c:505` `static int expand_auto_fill(const char *val, css_decl *dst, int cap)` -- repeat(auto-fill|auto-fit, <single-track pattern>) tried as a whole value: returns 1 and emits grid_cols = -min_px...
+- `cb_expand_grid_template_cols` (function) `src/css_box.c:583` `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)` -- grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track sizes, emitted in lock-step (P_GRIDCOLS...
+- `cb_expand_grid_template_rows` (function) `src/css_box.c:606` `int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)`
+- `accepts` (function) `src/css_box.c:662` `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...`
+- `calc_skip_ws` (function) `src/css_box.c:692` `static void calc_skip_ws(calc_parser *p)`
+- `calc_match_fn` (function) `src/css_box.c:699` `static int calc_match_fn(calc_parser *p, const char *name)` -- symbolically to bx_lp_px, the one place a percentage becomes pixels.
+- `calc_piecewise` (function) `src/css_box.c:726` `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` -- Shared by BOTH symbolic components: the percentage is piecewise for exactly the same reason the em derivative is...
+- `calc_mathfn` (function) `src/css_box.c:741` `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` -- min()/max()/clamp() (2026-07-10): comma-separated full expressions, every argument the same shape (all lengths or...
+- `min` (function) `src/css_box.c:760` `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...`
+- `calc_term` (function) `src/css_box.c:862` `static int calc_term(calc_parser *p, calc_val *out, int depth)` -- out->em = 0.0; out->pct = num; out->is_length = 1;   /* a <percentage> is dimensional, like a length ++p->i; return...
+- `calc_expr` (function) `src/css_box.c:886` `static int calc_expr(calc_parser *p, calc_val *out, int depth)`
+- `calc_eval_full` (function) `src/css_box.c:905` `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,
+           ...` -- Evaluates the inside of a calc(...) (v[0,vlen), the "calc(" prefix and matching ")" already stripped by the caller).
+- `calc_eval_em` (function) `src/css_box.c:919` `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` -- static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em, double *out_pct) { calc_parser...
+- `calc_unwrap` (function) `src/css_box.c:927` `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` -- True if s (already trimmed) is a "calc(...)" call spanning the whole string (case-insensitive keyword, balanced...
+- `cb_interp_len` (function) `src/css_box.c:978` `int cb_interp_len(const char *v, int allow_auto, int *out)`
+- `pct_slot_of` (function) `src/css_box.c:1007` `static int pct_slot_of(int slot)` -- The css_pct_slot mirroring a px length slot, or -1 when the property does not accept the <length-percentage> type.
+- `cb_value_em_milli` (function) `src/css_box.c:1057` `int cb_value_em_milli(const char *v)` -- The font-relative derivative of `v`, in thousandths of an em, saturating at CSS_EM_MILLI_MAX.
+- `cb_interp_lp` (function) `src/css_box.c:1077` `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,
+                     int *out_px, ...`
+- `term` (function) `src/css_box.c:1084` `* the same expression and failed closed on the percentage term (its property * may not accept one);`
+- `interp_len` (function) `src/css_box.c:1253` `* this file that might hand a token to interp_len (transitively: margin/padding/
+ * inset, flex-b...`
+- `cb_expand_box2` (function) `src/css_box.c:1324` `int cb_expand_box2(const char *val, int slot_start, int slot_end,
+                       int allo...` -- Expands a two-slot logical shorthand (margin-inline / padding-block / inset-inline: one value sets both sides, two...
+
+## src/css_chain.c
+Depends on: `include/css_chain.h`, `include/css_select.h`
+- `cls_space` (function) `src/css_chain.c:42` `static int cls_space(char c)`
+- `release_nodes` (function) `src/css_chain.c:90` `static void release_nodes(cch_node *nodes, int n)` -- memcpy(buf, v, n); buf[n] = '\0'; size_t nc = 0; for (size_t i = 0; i < n && nc < cap_tok; ) { while (i < n &&...
+- `fill_css_node` (function) `src/css_chain.c:99` `static void fill_css_node(lxb_dom_element_t *e, cch_node *node)` -- Fills *node with element e's tag/id/class tokens (no style=, no parent link yet). * Over-long tokens are simply...
+- `sibling_position` (function) `src/css_chain.c:181` `static void sibling_position(lxb_dom_node_t *n, int *nth, int *nsib)` -- Computes the 1-based index of n among its ELEMENT siblings and the total element-sibling count (both walks bounded...
+- `sibling_type_position` (function) `src/css_chain.c:199` `static void sibling_type_position(lxb_dom_node_t *n, int *nth, int *nsib)` -- Like sibling_position but only counts siblings with the SAME local name as n. * R2: for :nth-of-type() /...
+- `count_children` (function) `src/css_chain.c:227` `static int count_children(lxb_dom_node_t *n)` -- Counts ALL child nodes (elements, text, comments) of the DOM element n. * R2: for :empty matching.
+- `inputs` (function) `src/css_chain.c:241` `* identical inputs (single source of truth). */
+static const css_element *build_chain(lxb_dom_ele...`
+- `cch_element_style_vars` (function) `src/css_chain.c:297` `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
+                 ...`
+- `cch_pseudo_style` (function) `src/css_chain.c:328` `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
+            ...`
+- `cch_element_style` (function) `src/css_chain.c:347` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
+- `cch_element_matches` (function) `src/css_chain.c:351` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
+
+## src/css_color.c
+Depends on: `include/css_color.h`
+- `ascii_lower` (function) `src/css_color.c:118` `static int ascii_lower(int c)`
+- `hex_val` (function) `src/css_color.c:122` `static int hex_val(int c)`
+- `normalize` (function) `src/css_color.c:131` `static int normalize(const char *token, char *out)` -- Trims surrounding ASCII spaces and lowercases into out (CC_TOKEN_MAX bytes). * Returns 0, or -1 if the trimmed token...
+- `parse_hex` (function) `src/css_color.c:145` `static int parse_hex(const char *s, cc_rgb *out)` -- static int normalize(const char *token, char *out) { size_t start = 0; while (token[start] == ' ' || token[start] ==...
+- `cc_round` (function) `src/css_color.c:215` `static long cc_round(double v)` -- fp += (double)(*b - '0') / scale; ++b; ++frac_digits; if (frac_digits > CC_NUMBER_MAX_DIGITS) return -1; } } if...
+- `parse_component` (function) `src/css_color.c:220` `static int parse_component(const char *b, const char *e, int is_alpha, int *out)` -- Parses one rgb() component in [b, e).
+- `parse_hsl_comp` (function) `src/css_color.c:253` `static int parse_hsl_comp(const char *b, const char *e, int is_hue, int *out)` -- Parses one hsl() component: H is integer 0..360, S/L are 0%..100%. * Returns 0 / -1.
+- `span` (function) `src/css_color.c:325` `* span (when a slash is present) into ab/ae, and returns the component count,
+ * or -1. Bounded: ...`
+- `parse_func` (function) `src/css_color.c:397` `static int parse_func(const char *s, cc_rgb *out)` -- Parses the functional rgb()/rgba()/hsl()/hsla() form (lowercased token).
+- `lab_comp` (function) `src/css_color.c:467` `static int lab_comp(const char *b, const char *e, double pct_ref, int is_hue, double *out)` -- One component: a <number>, a <percentage> (scaled so 100% == pct_ref), `none` * (0), or -- when is_hue -- an <angle>...
+- `srgb_encode` (function) `src/css_color.c:495` `static unsigned char srgb_encode(double lin)`
+- `oklab_to_rgb` (function) `src/css_color.c:502` `static void oklab_to_rgb(double L, double a, double b, cc_rgb *out)`
+- `lab_to_rgb` (function) `src/css_color.c:513` `static void lab_to_rgb(double L, double a, double b, cc_rgb *out)` -- return (unsigned char)cc_round(v * 255.0); } static void oklab_to_rgb(double L, double a, double b, cc_rgb *out) {...
+- `parse_lab_family` (function) `src/css_color.c:529` `static int parse_lab_family(const char *s, cc_rgb *out)` -- double fy = (L + 16.0) / 116.0, fx = a / 500.0 + fy, fz = fy - b / 200.0; double xr = (fx * fx * fx > e) ? fx * fx *...
+- `named_cmp` (function) `src/css_color.c:567` `static int named_cmp(const void *key, const void *element)`
+- `parse_named` (function) `src/css_color.c:573` `static int parse_named(const char *s, cc_rgb *out)`
+- `cc_parse` (function) `src/css_color.c:583` `cc_status cc_parse(const char *token, cc_rgb *out)`
+- `strncmp` (function) `src/css_color.c:598` `strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)`
+- `cc_pack` (function) `src/css_color.c:623` `int cc_pack(cc_rgb c)`
+- `cc_unpack` (function) `src/css_color.c:627` `cc_rgb cc_unpack(int packed)`
 
 ## src/css_gradient.c
 Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
@@ -13,16 +104,16 @@ Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h
 - `grad_stop_pos` (function) `src/css_gradient.c:152` `static int grad_stop_pos(const char *pp, int conic, const char **endp)` -- One stop position after a color: `N%` -> 0-1000 (x10); conic also accepts `Ndeg` -> the same 0-1000 turn fraction...
 - `CSS_GRAD_STOPS_MAX` (function) `src/css_gradient.c:183` `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
  * the gradient fai...`
-- `emit_gradient` (function) `src/css_gradient.c:290` `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
+- `emit_gradient` (function) `src/css_gradient.c:282` `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
                          ...` -- Emits the gradient decl group. nstops == 0 emits only the explicit reset * (P_BG_GRAD_N = 0), which is how a...
-- `find_radial_gradient` (function) `src/css_gradient.c:347` `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
+- `find_radial_gradient` (function) `src/css_gradient.c:339` `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
                       ...` -- R5c: detects radial-gradient(circle at center, color1, color2).
-- `pool` (function) `src/css_gradient.c:388` `* pool (gradient explicitly reset);`
-- `downstream` (function) `src/css_gradient.c:392` `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
+- `pool` (function) `src/css_gradient.c:380` `* pool (gradient explicitly reset);`
+- `downstream` (function) `src/css_gradient.c:384` `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
 int cg_expand_bg_imag...`
-- `declaration` (function) `src/css_gradient.c:451` `* declaration (fail closed);`
-- `bg_layer_tokens_ok` (function) `src/css_gradient.c:458` `static int bg_layer_tokens_ok(const char *s)` -- True iff every token of s (split on whitespace, '/' and ',') is a valid non-colour component of a background layer...
-- `cg_expand_background` (function) `src/css_gradient.c:498` `int cg_expand_background(const char *val, css_decl *dst, int cap,
+- `declaration` (function) `src/css_gradient.c:443` `* declaration (fail closed);`
+- `bg_layer_tokens_ok` (function) `src/css_gradient.c:450` `static int bg_layer_tokens_ok(const char *s)` -- True iff every token of s (split on whitespace, '/' and ',') is a valid non-colour component of a background layer...
+- `cg_expand_background` (function) `src/css_gradient.c:490` `int cg_expand_background(const char *val, css_decl *dst, int cap,
                              ch...`
 
 ## src/css_index.c
@@ -153,6 +244,7 @@ Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `inclu
 - `cv_color_ok` (function) `src/css_values.c:41` `int cv_color_ok(int c)`
 - `cv_bg_alpha_of` (function) `src/css_values.c:46` `int cv_bg_alpha_of(const char *v)`
 - `cv_interp_bg` (function) `src/css_values.c:160` `int cv_interp_bg(const char *v)`
+- `cv_parse_color_t7` (function) `src/css_values.c:205` `int cv_parse_color_t7(const char *v)`
 
 ## src/css_vars.c
 Depends on: `include/css_select.h`, `include/css_vars.h`
@@ -370,6 +462,8 @@ Depends on: `include/flex_layout.h`
 - `gl_is_span` (function) `src/flex_layout.c:882` `static int gl_is_span(int v)`
 - `gl_is_line` (function) `src/flex_layout.c:883` `static int gl_is_line(int v)`
 - `fx_grid_line_resolve` (function) `src/flex_layout.c:885` `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
+- `fx_col_free_split` (function) `src/flex_layout.c:927` `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
+        ...`
 
 ## src/form.c
 Depends on: `include/form.h`
@@ -390,97 +484,6 @@ Depends on: `include/frame_clock.h`
 - `fc_set_active` (function) `src/frame_clock.c:16` `void fc_set_active(fc_clock *c, int active)`
 - `fc_needs_tick` (function) `src/frame_clock.c:21` `int fc_needs_tick(const fc_clock *c)`
 - `fc_interval_ms` (function) `src/frame_clock.c:26` `int fc_interval_ms(const fc_clock *c)`
-
-## src/freebug.c
-Depends on: `include/freebug.h`
-- `whole` (function) `src/freebug.c:5` `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);`
-- `fb_buffer_init` (function) `src/freebug.c:15` `void fb_buffer_init(fb_buffer *b)`
-- `fb_buffer_push` (function) `src/freebug.c:19` `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)`
-- `fb_buffer_push_loc` (function) `src/freebug.c:23` `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,
-                   ...`
-- `fb_buffer_reset` (function) `src/freebug.c:78` `void fb_buffer_reset(fb_buffer *b)`
-- `fb_buffer_free` (function) `src/freebug.c:91` `void fb_buffer_free(fb_buffer *b)`
-- `fb_buffer_count` (function) `src/freebug.c:101` `size_t fb_buffer_count(const fb_buffer *b)`
-- `fb_buffer_at` (function) `src/freebug.c:105` `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)`
-- `fb_level_name` (function) `src/freebug.c:110` `const char *fb_level_name(int level)`
-
-## src/freedom.c
-Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`
-- `print_usage` (function) `src/freedom.c:50` `static void print_usage(FILE *fp, const char *prog)`
-- `is_https_url` (function) `src/freedom.c:76` `static int is_https_url(const char *s)`
-- `is_http_url` (function) `src/freedom.c:80` `static int is_http_url(const char *s)`
-- `is_overlay_http` (function) `src/freedom.c:85` `static int is_overlay_http(const char *s)` -- fprintf(fp, "  --dump-video-url: headless, print the first detected video source URL to stdout (no truncation)\n")...
-- `now_us` (function) `src/freedom.c:139` `static uint64_t now_us(void)`
-- `timings_ensure_init` (function) `src/freedom.c:145` `static void timings_ensure_init(void)`
-- `timings_enabled` (function) `src/freedom.c:149` `static int timings_enabled(void)`
-- `timings_dump` (function) `src/freedom.c:153` `static void timings_dump(void)`
-- `user_impersonate_enabled` (function) `src/freedom.c:201` `static int user_impersonate_enabled(void)`
-- `read_file` (function) `src/freedom.c:208` `static char *read_file(const char *path, size_t *out_len)` -- User opt-in for TLS-impersonation blend: --impersonate or FREEDOM_IMPERSONATE=1.
-- `headless_load_hosts` (function) `src/freedom.c:226` `static void headless_load_hosts(void)`
-- `is_blank_text` (function) `src/freedom.c:256` `static int is_blank_text(const char *s)` -- No impersonate.conf: third signal is the user flag (--impersonate / * FREEDOM_IMPERSONATE=1). impersonate.conf on...
-- `print_doc` (function) `src/freedom.c:269` `static void print_doc(const rd_doc *doc)` -- Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data...
-- `print_console` (function) `src/freedom.c:362` `static void print_console(const fb_buffer *log)` -- Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed...
-- `print_dom` (function) `src/freedom.c:379` `static void print_dom(const rd_doc *doc)` -- Prints the paint-ready render tree (dom_debug) to stdout.
-- `print_dom_css` (function) `src/freedom.c:394` `static void print_dom_css(const rd_doc *doc)` -- Prints the CSS property inspector (dd_format_css) to stdout.
-- `gets` (function) `src/freedom.c:414` `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-- `headless_fetch` (function) `src/freedom.c:418` `static int headless_fetch(void *ctx, const char *method, const char *url,
-                       ...` -- tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page XHR/fetch and external <script...
-- `foldback_cookies` (function) `src/freedom.c:480` `static void foldback_cookies(const char *url, const char *jar)` -- Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network * jar, one pair at a time, so JS-set...
-- `print_css_drops` (function) `src/freedom.c:504` `static void print_css_drops(const char *html, size_t len)` -- Prints the author-CSS drop report for `html`, sorted by occurrence count.
-- `hl_font_stash_free` (function) `src/freedom.c:549` `static void hl_font_stash_free(hl_font_stash *s)`
-- `hl_css_sink` (function) `src/freedom.c:562` `static void hl_css_sink(void *vctx, const char *url,
-                        const char *body, si...` -- tab_css_sink_fn for headless: retains served 2xx CSS bodies (serial and pool paths alike) with an absolute https...
-- `hl_font_fetch` (function) `src/freedom.c:599` `static int hl_font_fetch(void *vctx, const char *url,
-                         int *out_status, c...` -- wf_fetch_fn around the headless policy gate (font bytes download like any * other subresource of this page). data...
-- `render_page` (function) `src/freedom.c:608` `static int render_page(const char *html, size_t len, const char *top_url,
-                       ...`
-- `pool` (function) `src/freedom.c:669` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-- `first` (function) `src/freedom.c:683` `* always cleared first (fetch_and_render may paint several pages per
-     * process). A NULL top_...`
-- `only` (function) `src/freedom.c:740` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-- `sf_reason` (function) `src/freedom.c:852` `static const char *sf_reason(sf_status ss)`
-- `fetch_and_render_one` (function) `src/freedom.c:871` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
-- `BLOCKED` (function) `src/freedom.c:897` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
-- `elsewhere` (function) `src/freedom.c:932` `* page whose script immediately forwards elsewhere (e.g. a search engine's
- * JS-capability inter...`
-- `parent` (function) `src/freedom.c:958` `* gated by the parent (ln_resolve: a local target stays under the document's
- * directory, a remo...`
-- `run_headless` (function) `src/freedom.c:995` `static int run_headless(const char *target)`
-- `video_fetch_with_fallback` (function) `src/freedom.c:1031` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
-                     ...` -- Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as...
-- `run_dump_video` (function) `src/freedom.c:1142` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
-- `main` (function) `src/freedom.c:1161` `int main(int argc, char **argv)`
-
-## src/hls.c
-Depends on: `include/hls.h`
-- `last_char` (function) `src/hls.c:38` `static const char *last_char(const char *s, size_t n, int c)` -- Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not found.
-- `name` (function) `src/hls.c:46` `* attr is the attribute name (e.g. "BANDWIDTH=");`
-- `parse_attr_long` (function) `src/hls.c:48` `static int parse_attr_long(const char *attrs, const char *end,
-                           const c...` -- Extracts a named attribute value from an #EXT-X-STREAM-INF attribute string. attr is the attribute name (e.g....
-- `parse_attr_resolution` (function) `src/hls.c:62` `static void parse_attr_resolution(const char *attrs, const char *end,
-                           ...` -- static int parse_attr_long(const char *attrs, const char *end, const char *attr, long *val) { size_t alen =...
-- `hls_parse` (function) `src/hls.c:80` `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)`
-- `hls_select_variant` (function) `src/hls.c:202` `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h)`
-- `hls_resolve_url` (function) `src/hls.c:223` `size_t hls_resolve_url(const char *base_url, const char *segment_url,
-                       char...`
-- `hls_playlist_free` (function) `src/hls.c:253` `void hls_playlist_free(hls_playlist *pl)`
-
-## src/hostblock.c
-Depends on: `include/hostblock.h`, `include/util.h`
-- `table_probe` (function) `src/hostblock.c:38` `static size_t table_probe(const hb_table *t, const char *key, size_t klen)` -- Finds the slot for key (length klen) in t, which must have a free slot.
-- `table_grow` (function) `src/hostblock.c:49` `static int table_grow(hb_table *t, size_t newcap)` -- Finds the slot for key (length klen) in t, which must have a free slot.
-- `table_insert` (function) `src/hostblock.c:71` `static int table_insert(hb_table *t, const char *key, size_t klen)` -- Inserts key (length klen) into t, deduping.
-- `table_contains` (function) `src/hostblock.c:92` `static int table_contains(const hb_table *t, const char *key)`
-- `table_free` (function) `src/hostblock.c:98` `static void table_free(hb_table *t)`
-- `lower` (function) `src/hostblock.c:107` `static char lower(char c)`
-- `is_ip_token` (function) `src/hostblock.c:113` `static int is_ip_token(const char *s, size_t n)` -- A token made only of digits, '.' and ':' is an IP literal (v4 or v6), not a * domain.
-- `is_domain_char` (function) `src/hostblock.c:122` `static int is_domain_char(char c)` -- A token made only of digits, '.' and ':' is an IP literal (v4 or v6), not a * domain.
-- `hb_new` (function) `src/hostblock.c:144` `hb_set *hb_new(void)`
-- `hb_free` (function) `src/hostblock.c:149` `void hb_free(hb_set *s)`
-- `hb_load` (function) `src/hostblock.c:156` `hb_status hb_load(hb_set *s, const char *text, hb_list list)`
-- `hb_check` (function) `src/hostblock.c:193` `hb_decision hb_check(const hb_set *s, const char *host)`
-- `hb_is_allowlisted` (function) `src/hostblock.c:218` `int hb_is_allowlisted(const hb_set *s, const char *host)`
-- `hb_count` (function) `src/hostblock.c:238` `size_t hb_count(const hb_set *s, hb_list list)`
 
 
 Next: [API_p7.md](API_p7.md)

@@ -98,6 +98,8 @@ static unsigned char *read_font_file(const char *path, long *out_n) {
 /* Loads the face fontconfig matches for family name fam (a generic keyword or
  * an exact local family). FcPatternAddString, not FcNameParse: a family name may
  * hold characters ('-', ':') that the pattern syntax treats specially. */
+static int load_entry_file(tsh_entry *e, const char *path, int index);
+
 static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic) {
     FcPattern *pat = FcPatternCreate();
     if (pat == NULL) return 0;
@@ -121,9 +123,16 @@ static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)
     }
     int index = 0;
     FcPatternGetInteger(match, FC_INDEX, 0, &index);
-    long nbytes = 0;
-    unsigned char *bytes = read_font_file((const char *)file, &nbytes);
+    int ok = load_entry_file(e, (const char *)file, index);
     FcPatternDestroy(match);
+    return ok;
+}
+
+/* Loads face `index` of the font file at `path` into e (FreeType + cairo +
+ * HarfBuzz over one owned copy of the bytes). 1 on success. */
+static int load_entry_file(tsh_entry *e, const char *path, int index) {
+    long nbytes = 0;
+    unsigned char *bytes = read_font_file(path, &nbytes);
     if (bytes == NULL) return 0;
 
     FT_Face ft = NULL;
@@ -390,8 +399,36 @@ static int fc_installed(const char *name, void *ctx) {
 
 #define TSH_SUBS_MAX 16
 
+/* An @font-face local(NAME) source, marked '=NAME' by the cascade: a face whose
+ * exact full name or PostScript name is NAME (CSS Fonts 4 4.3), answered with
+ * its family. Never a fontconfig substitute: local("Arial") is not Liberation. */
+static int fc_resolve_full_name(const char *name, char *out, size_t cap) {
+    static const char *const keys[] = { FC_FULLNAME, FC_POSTSCRIPT_NAME };
+    for (size_t k = 0; k < sizeof keys / sizeof keys[0]; ++k) {
+        FcPattern *p = FcPatternCreate();
+        if (p == NULL) return 0;
+        FcPatternAddString(p, keys[k], (const FcChar8 *)name);
+        FcObjectSet *os = FcObjectSetBuild(FC_FAMILY, (char *)NULL);
+        FcFontSet *fs = (os != NULL) ? FcFontList(NULL, p, os) : NULL;
+        int ok = 0;
+        FcChar8 *fam = NULL;
+        if (fs != NULL && fs->nfont > 0 &&
+            FcPatternGetString(fs->fonts[0], FC_FAMILY, 0, &fam) == FcResultMatch &&
+            fam != NULL && strlen((const char *)fam) < cap) {
+            memcpy(out, fam, strlen((const char *)fam) + 1);
+            ok = 1;
+        }
+        if (fs != NULL) FcFontSetDestroy(fs);
+        if (os != NULL) FcObjectSetDestroy(os);
+        FcPatternDestroy(p);
+        if (ok) return 1;
+    }
+    return 0;
+}
+
 static int fc_resolve(const char *name, char *out, size_t cap, void *ctx) {
     (void)ctx;
+    if (name[0] == '=') return fc_resolve_full_name(name + 1, out, cap);
     FcPattern *p = FcPatternCreate();
     if (p == NULL) return 0;
     FcPatternAddString(p, FC_FAMILY, (const FcChar8 *)name);
@@ -553,33 +590,253 @@ tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
     return TSH_OK;
 }
 
+/* --- Per-glyph font fallback (spec/text_shape.md section 8) --- */
+
+/* Decodes one UTF-8 sequence at s[0..n): the code point (U+FFFD for a malformed
+ * sequence) and its byte length (>= 1, <= n). */
+static unsigned utf8_next(const char *s, size_t n, size_t *len) {
+    const unsigned char *u = (const unsigned char *)s;
+    unsigned c = u[0];
+    size_t l = (c < 0x80) ? 1 : ((c >> 5) == 0x6) ? 2 : ((c >> 4) == 0xe) ? 3
+             : ((c >> 3) == 0x1e) ? 4 : 1;
+    if (l > n) l = 1;
+    if (l == 1) { *len = 1; return (c < 0x80) ? c : 0xFFFDu; }
+    unsigned cp = c & (0x7fu >> l);
+    for (size_t k = 1; k < l; ++k) {
+        if ((u[k] & 0xc0) != 0x80) { *len = 1; return 0xFFFDu; }
+        cp = (cp << 6) | (u[k] & 0x3fu);
+    }
+    *len = l;
+    return cp;
+}
+
+/* A character that never chooses a face of its own: it rides the run before it. */
+static int rides_previous(unsigned cp) {
+    return cp < 0x20 || cp == 0x7f ||
+           (cp >= 0x300 && cp <= 0x36f) || (cp >= 0x1ab0 && cp <= 0x1aff) ||
+           (cp >= 0x20d0 && cp <= 0x20ff) || (cp >= 0xfe20 && cp <= 0xfe2f) ||
+           (cp >= 0xfe00 && cp <= 0xfe0f) || cp == 0x200c || cp == 0x200d ||
+           (cp >= 0xe0100 && cp <= 0xe01ef);
+}
+
+int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
+                tsh_run *runs, size_t cap) {
+    if (text == NULL || cover == NULL || runs == NULL) return -1;
+    size_t n = 0, i = 0;
+    while (i < len) {
+        size_t cl;
+        unsigned cp = utf8_next(text + i, len - i, &cl);
+        int face = (n > 0 && rides_previous(cp)) ? runs[n - 1].face
+                 : (rides_previous(cp) ? 0 : cover(cp, ctx));
+        if (n > 0 && runs[n - 1].face == face) {
+            runs[n - 1].end = i + cl;
+        } else {
+            if (n >= cap) return -1;
+            runs[n].start = i;
+            runs[n].end = i + cl;
+            runs[n].face = face;
+            ++n;
+        }
+        i += cl;
+    }
+    return (int)n;
+}
+
+/* Fallback faces, one per font file fontconfig picked (bold/italic folded into
+ * the match). The block cache maps (code point >> 8, bold) to a slot + 1, or -1
+ * for "no installed face covers this block" (0 = not asked yet). */
+#define TSH_FB_SLOTS 24
+#define TSH_FB_BLOCKS (0x110000u >> 8)
+
+typedef struct tsh_fb {
+    char      file[512];
+    int       index;
+    int       bold;
+    tsh_entry e;
+} tsh_fb;
+
+static tsh_fb g_fb[TSH_FB_SLOTS];
+static size_t g_nfb;
+static short  g_fb_block[2][TSH_FB_BLOCKS];
+
+static void fb_clear(void) {
+    for (size_t i = 0; i < g_nfb; ++i) entry_free(&g_fb[i].e);
+    memset(g_fb, 0, sizeof g_fb);
+    memset(g_fb_block, 0, sizeof g_fb_block);
+    g_nfb = 0;
+}
+
+/* The fallback entry covering cp (bold or regular), or NULL. Looks up
+ * fontconfig once per 256-code-point block: scripts live in blocks, so one
+ * match serves a whole language. */
+static tsh_entry *fb_entry(unsigned cp, int bold) {
+    if (cp >= 0x110000u || !backend_init()) return NULL;
+    short *slot = &g_fb_block[bold ? 1 : 0][cp >> 8];
+    if (*slot > 0) {
+        tsh_entry *e = &g_fb[*slot - 1].e;
+        FT_UInt g = FT_Get_Char_Index(e->ftface, cp);
+        if (g != 0) return e;
+    } else if (*slot < 0) {
+        return NULL;
+    }
+    FcPattern *pat = FcPatternCreate();
+    FcCharSet *cs = FcCharSetCreate();
+    if (pat == NULL || cs == NULL) {
+        if (pat != NULL) FcPatternDestroy(pat);
+        if (cs != NULL) FcCharSetDestroy(cs);
+        return NULL;
+    }
+    FcCharSetAddChar(cs, cp);
+    FcPatternAddString(pat, FC_FAMILY, (const FcChar8 *)"sans-serif");
+    FcPatternAddCharSet(pat, FC_CHARSET, cs);
+    FcPatternAddInteger(pat, FC_WEIGHT, bold ? FC_WEIGHT_BOLD : FC_WEIGHT_NORMAL);
+    FcConfigSubstitute(NULL, pat, FcMatchPattern);
+    FcDefaultSubstitute(pat);
+    FcResult res;
+    FcPattern *match = FcFontMatch(NULL, pat, &res);
+    FcPatternDestroy(pat);
+    FcCharSetDestroy(cs);
+    tsh_entry *found = NULL;
+    FcChar8 *file = NULL;
+    FcCharSet *mcs = NULL;
+    int index = 0;
+    if (match != NULL &&
+        FcPatternGetString(match, FC_FILE, 0, &file) == FcResultMatch && file != NULL &&
+        FcPatternGetCharSet(match, FC_CHARSET, 0, &mcs) == FcResultMatch &&
+        mcs != NULL && FcCharSetHasChar(mcs, cp) &&
+        strlen((const char *)file) < sizeof g_fb[0].file) {
+        FcPatternGetInteger(match, FC_INDEX, 0, &index);
+        for (size_t i = 0; i < g_nfb; ++i)
+            if (g_fb[i].index == index && g_fb[i].bold == bold &&
+                strcmp(g_fb[i].file, (const char *)file) == 0) {
+                found = &g_fb[i].e;
+                *slot = (short)(i + 1);
+                break;
+            }
+        if (found == NULL && g_nfb < TSH_FB_SLOTS) {
+            tsh_fb *fb = &g_fb[g_nfb];
+            memset(fb, 0, sizeof *fb);
+            memcpy(fb->file, file, strlen((const char *)file) + 1);
+            fb->index = index;
+            fb->bold = bold;
+            if (load_entry_file(&fb->e, (const char *)file, index)) {
+                fb->e.loaded = 1;
+                found = &fb->e;
+                *slot = (short)(++g_nfb);
+            }
+        }
+    }
+    if (match != NULL) FcPatternDestroy(match);
+    if (found == NULL && *slot <= 0) *slot = -1;
+    return found;
+}
+
+typedef struct tsh_cover_ctx {
+    tsh_entry *primary;
+    int        bold;
+    tsh_entry *faces[16];  /* face id k -> entry (k = 0 is the primary) */
+    int        nfaces;
+} tsh_cover_ctx;
+
+/* cover callback: 0 when the requested face has the glyph (or nothing else
+ * does), else the id of the fallback face that has it. */
+static int cover_cp(unsigned cp, void *vctx) {
+    tsh_cover_ctx *c = (tsh_cover_ctx *)vctx;
+    hb_codepoint_t g;
+    if (cp == ' ' || hb_font_get_nominal_glyph(c->primary->hbfont, cp, &g)) return 0;
+    tsh_entry *e = fb_entry(cp, c->bold);
+    if (e == NULL || e == c->primary) return 0;
+    for (int k = 1; k < c->nfaces; ++k) if (c->faces[k] == e) return k;
+    if (c->nfaces >= (int)(sizeof c->faces / sizeof c->faces[0])) return 0;
+    c->faces[c->nfaces] = e;
+    return c->nfaces++;
+}
+
+/* Shapes one run with one entry into g_scratch (n glyphs, advance adv). */
+static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
+                              size_t *out_n, double *out_adv) {
+    int scale = (int)(px * 64.0 + 0.5);
+    if (scale < 1) scale = 1;
+    hb_font_set_scale(e->hbfont, scale, scale);
+    hb_buffer_reset(g_buf);
+    hb_buffer_add_utf8(g_buf, text, (int)len, 0, (int)len);
+    hb_buffer_guess_segment_properties(g_buf);
+    hb_shape(e->hbfont, g_buf, NULL, 0);
+    unsigned gn = hb_buffer_get_length(g_buf);
+    if (gn > TSH_MAX_GLYPHS) return TSH_ERR_OVERFLOW;
+    const hb_glyph_info_t     *info = hb_buffer_get_glyph_infos(g_buf, NULL);
+    const hb_glyph_position_t  *pos  = hb_buffer_get_glyph_positions(g_buf, NULL);
+    if (gn != 0 && (info == NULL || pos == NULL)) return TSH_ERR_UNAVAIL;
+    double penx = 0.0, peny = 0.0;
+    for (unsigned i = 0; i < gn; ++i) {
+        g_scratch[i].index = info[i].codepoint;
+        g_scratch[i].x = penx + (double)pos[i].x_offset / 64.0;
+        g_scratch[i].y = peny - (double)pos[i].y_offset / 64.0;
+        penx += (double)pos[i].x_advance / 64.0;
+        peny -= (double)pos[i].y_advance / 64.0;
+    }
+    *out_n = gn;
+    *out_adv = penx;
+    return TSH_OK;
+}
+
+#define TSH_MAX_RUNS 64
+
+/* Measures (cr == NULL) or draws [text,len) run by run, each with the face that
+ * has its glyphs. Returns the status and the total advance. */
+static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
+                             double baseline, const char *text, size_t len,
+                             double *out_adv) {
+    *out_adv = 0.0;
+    if (f == NULL || text == NULL || !(px > 0.0) || px > 1.0e9) return TSH_ERR_INPUT;
+    if (len > (size_t)TSH_MAX_TEXT) return TSH_ERR_INPUT;
+    if (len == 0) return TSH_OK;
+    tsh_entry *e = get_entry_ex(f);
+    if (e == NULL) return TSH_ERR_UNAVAIL;
+    tsh_cover_ctx cc;
+    memset(&cc, 0, sizeof cc);
+    cc.primary = e;
+    cc.bold = f->bold;
+    cc.faces[0] = e;
+    cc.nfaces = 1;
+    tsh_run runs[TSH_MAX_RUNS];
+    int nr = tsh_segment(text, len, cover_cp, &cc, runs, TSH_MAX_RUNS);
+    if (nr <= 0) { nr = 1; runs[0].start = 0; runs[0].end = len; runs[0].face = 0; }
+    double pen = 0.0;
+    for (int r = 0; r < nr; ++r) {
+        tsh_entry *re = (runs[r].face > 0 && runs[r].face < cc.nfaces) ? cc.faces[runs[r].face] : e;
+        size_t n = 0;
+        double adv = 0.0;
+        tsh_status st = shape_entry(re, px, text + runs[r].start,
+                                    runs[r].end - runs[r].start, &n, &adv);
+        if (st != TSH_OK) return st;
+        if (cr != NULL && n > 0) {
+            cairo_set_font_face(cr, re->cface);
+            cairo_set_font_size(cr, px);
+            for (size_t i = 0; i < n; ++i) {
+                g_scratch[i].x += x + pen;
+                g_scratch[i].y += baseline;
+            }
+            cairo_show_glyphs(cr, g_scratch, (int)n);
+        }
+        pen += adv;
+    }
+    if (cr != NULL) cairo_set_font_face(cr, e->cface);
+    *out_adv = pen;
+    return TSH_OK;
+}
+
 double tsh_measure(const tsh_font *f, double px, const char *text, size_t len) {
-    size_t n = 0;
     double adv = 0.0;
-    tsh_status st = tsh_shape(f, px, text, len, g_scratch, TSH_MAX_GLYPHS, &n, &adv);
+    tsh_status st = shape_runs(NULL, f, px, 0.0, 0.0, text, len, &adv);
     return (st == TSH_OK) ? adv : -1.0;
 }
 
 tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
                     double x, double baseline, const char *text, size_t len) {
     if (cr == NULL) return TSH_ERR_INPUT;
-    size_t n = 0;
     double adv = 0.0;
-    tsh_status st = tsh_shape(f, px, text, len, g_scratch, TSH_MAX_GLYPHS, &n, &adv);
-    if (st != TSH_OK) return st;
-    if (n == 0) return TSH_OK;
-
-    tsh_entry *e = get_entry_ex(f);
-    if (e == NULL) return TSH_ERR_UNAVAIL;
-
-    cairo_set_font_face(cr, e->cface);
-    cairo_set_font_size(cr, px);
-    for (size_t i = 0; i < n; ++i) {
-        g_scratch[i].x += x;
-        g_scratch[i].y += baseline;
-    }
-    cairo_show_glyphs(cr, g_scratch, (int)n);
-    return TSH_OK;
+    return shape_runs(cr, f, px, x, baseline, text, len, &adv);
 }
 
 cairo_font_face_t *tsh_face(const tsh_font *f) {
@@ -590,6 +847,7 @@ cairo_font_face_t *tsh_face(const tsh_font *f) {
 
 void tsh_shutdown(void) {
     tsh_webfont_clear();
+    fb_clear();
     for (int i = 0; i < TSH_CACHE_SLOTS; ++i) entry_free(&g_cache[i]);
     local_clear();
     if (g_buf != NULL) { hb_buffer_destroy(g_buf); g_buf = NULL; }

@@ -40,6 +40,9 @@ typedef enum pv_status {
 
 /* pv_run.flex_mauto / pv_cont_def.item_mauto bits: which horizontal margins of a
  * flex item are `auto` (Flexbox 8.1). */
+/* box-shadow layers a box carries (mirrors CSS_BSHADOW_LAYERS). */
+#define PV_BSHADOW_LAYERS 4
+
 #define PV_MAUTO_LEFT  1
 #define PV_MAUTO_RIGHT 2
 #define PV_MAUTO_TOP   4   /* vertical auto margins: the main axis of a column */
@@ -304,6 +307,13 @@ typedef struct pv_run {
     int     float_ml_pct;
     int     float_mr;
     int     float_mr_pct;
+    /* The float FOUNDER's own declared `width` (both <length-percentage> halves;
+     * 0/0 = auto). Distinct from box_w, which answers for the run's NEAREST
+     * sized box -- a descendant's `width:80px` must not become the float's
+     * width (a width:auto float shrinks to fit, CSS 2.1 10.3.5). */
+    int     float_w;
+    int     float_w_pct;
+    int     float_box;   /* the founder's OWN box id, -1 = it carries none */
     /* The OUTERMOST float founder (spec/float.md §7d.1): the highest floated
      * self-or-ancestor block on this run's chain. float_oid is its group id
      * (-1 = the nearest IS the outermost: single-level float, old path);
@@ -442,6 +452,12 @@ typedef struct pv_box_def {
      * centre the button itself on the parent's line. */
     int line_align;
     int box_w_intrinsic;  /* width:max-content|fit-content: shrink-to-fit (tanda 43) */
+    /* Free-space share of a child of a flex COLUMN that flows as block (spec/
+     * page_view.md "Flex en COLUMNA"): col_grow = its flex-grow x100 (0 none),
+     * col_mauto = PV_MAUTO_TOP/BOTTOM for a vertical auto margin. Only set when
+     * the column has a definite height to distribute; 0 everywhere else. */
+    int col_grow;
+    int col_mauto;
     int box_min_w_set;  /* 1 when the author DECLARED min-width (incl. 0): `0` above
                          * cannot tell `min-width:0` (no automatic minimum, Flexbox
                          * 4.5) from no declaration at all */
@@ -493,6 +509,10 @@ typedef struct pv_box_def {
      * width and y against its height (CSS Transforms 1 section 8). */
     int transform_tx_pct, transform_ty_pct;
     int bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
+    /* box-shadow layers 2..PV_BSHADOW_LAYERS ({dx,dy,blur,spread,color,inset},
+     * color with transparency in bits 24..30) and the layer count (0 = none). */
+    int bsh_n;
+    int bsh_x[PV_BSHADOW_LAYERS - 1][6];
     int outline_w, outline_style, outline_color;
     /* outline-offset: distance in px between the border edge and the outline (CSS:
      * 0 by default, or any length). -1 = unset. Painted as an outset of the outline
@@ -724,6 +744,7 @@ typedef struct pv_cont_def {
     int justify;        /* fx_justify */
     int cols;           /* grid column count (>= 1 for grid), else 0 */
     int rows;           /* explicit grid-template-rows count, else 0 */
+    int row_h[PV_GRID_TRACKS];  /* grid-template-rows sizes (encoded like col_w) */
     int direction;      /* css_flex_direction */
     int col_w[PV_GRID_TRACKS];  /* grid track sizes (0 auto / >0 px / <0 fr x100) */
     int wrap;           /* css_flex_wrap */
@@ -733,6 +754,10 @@ typedef struct pv_cont_def {
     int justify_items;  /* css_align_kw */
     int grid_flow;      /* css_grid_auto_flow */
     int box_id;         /* box enclosing this container's items, or -1 */
+    /* 1 = box_id is the container element's OWN box; 0 = it is the nearest
+     * enclosing box further out (a container without decoration of its own). Only
+     * an own box's declared height is the container's definite height. */
+    int box_own;
     int anon_row;       /* 1 = anonymous row synthesised for an inline-block parent */
     /* 1 = this grid container was SYNTHESISED from a <table>, not declared by the
      * author. A table sizes its columns to their content (CSS 2.1 section 17.5.2
@@ -1044,6 +1069,10 @@ void pv_set_cont_item(pv_view *v, int cont_item);
  * omr/omr_pct; float_oid -1 = nearest IS outermost; spec/float.md §7d.1). No-op on
  * an empty or NULL view; the append helpers default to 0 / -1 / 0 / 0 / 0 / 0 / 0
  * and -1 / 0 / 0 / 0 / 0 / 0. */
+/* Stamps the float founder's own declared width halves (pv_run.float_w) on the
+ * most recently appended run. */
+void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box);
+
 void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
                   int float_ml, int float_ml_pct, int float_mr, int float_mr_pct,
                   int float_oid, int float_oside,

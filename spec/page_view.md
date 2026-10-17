@@ -1287,3 +1287,33 @@ generada existe con el padding porcentual y la miniatura reserva el alto 16:9
   `own_box_id`. `img_h_css` / `img_inline` (B 60 → 61, bits) dicen si su alto es CSS
   px y si es de nivel inline.
 - La UA identity (`ua_tag`) del bloque viaja también en los runs de controles.
+
+## Tanda 44 (2026-10-17): alturas `%`, espacio libre de columnas, grid de filas, caras UA
+
+- **Altura porcentual** (`spec/box_style.md` §4z): se resuelve en la MISMA cadena
+  raíz→abajo memoizada que el `font-size` (`pv_style_cache.def_h`): cada elemento
+  guarda su altura de contenido definida (-1 = indefinida) y su hijo resuelve
+  `height`/`min-height`/`max-height` en `%` contra ella. La raíz tiene el ICB
+  (`CSS_MEDIA_DEFAULT_HEIGHT`, el mismo de `vh`); `fixed` también; un `absolute` con
+  padre indefinido no se reescribe. Contra un bloque indefinido `height:%` queda
+  **sin declarar** (no `auto` armado a 0). Medido: sticky footer de justpaste/bgp/osm.
+- **Espacio libre de una columna flex que fluye como bloque**: con alto definido
+  (`height` o `min-height`), cada hijo con `flex-grow` o `margin-top/bottom:auto`
+  recibe `pv_box_def.col_grow/col_mauto` (y caja propia); el pintor reparte
+  `fx_col_free_split` al cerrar la caja de la columna. La columna ya NO se vuelve
+  contenedor real por eso: conserva todo el motor de bloques.
+- **Contenedor sin caja propia**: `pv_cont_def.box_own` (cruza el códec); solo la
+  caja propia aporta el alto definido de un contenedor (una caja prestada es de
+  un ancestro: el `<form>` de bgp heredaba 1080 px).
+- **Ítem de layout con solo fondo** genera caja (para poder estirarse).
+- **Grid**: `grid-template-rows` lleva tamaños (`css_style.grid_row_h`,
+  `pv_cont_def.row_h`); ver `spec/box_tree.md`/`box_tree.c` `grid_size_rows` y
+  alineación de bloque en el área (stretch por defecto: tarjetas de igual alto).
+- **Flotante dentro de un ítem flex/grid** (no el ítem mismo): se maqueta como
+  banda en el flujo del ítem (`float_inside_item`, `root_cont_in`); las filas de
+  la banda llevan `rc_row.x_local`. `pv_run.float_w/float_w_pct/float_box`: el
+  ancho y la caja PROPIOS del fundador (un `width` de descendiente no es el del
+  flotante: un flotante `auto` encoge a su contenido + padding/borde, acotado por
+  su `max-width` contra el bloque contenedor).
+- **Caras UA de contenido de frase** en `PV_UA_CSS`: `u, ins` subrayado,
+  `s, strike, del` tachado, `mark` resaltado, `abbr[title]` punteado.

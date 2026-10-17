@@ -5,7 +5,7 @@
 ## Contents
 
 - **Structs:** [`css_rule`](#css_rule), [`css_sheet`](#css_sheet), [`len_rebase_ctx`](#len_rebase_ctx), [`css_match`](#css_match), [`css_cand`](#css_cand)
-- **Functions:** [`emit`](#emit), [`css_decl`](#css_decl), [`through`](#through), [`text`](#text), [`number`](#number), [`item`](#item), [`declaration`](#declaration), [`order`](#order), [`blur`](#blur), [`axis`](#axis), [`cap`](#cap), [`empty`](#empty), [`column`](#column), [`var`](#var), [`matrix`](#matrix), [`LIST`](#list), [`translate3d`](#translate3d), [`translateX`](#translatex), [`parse_angle_deg`](#parse_angle_deg), [`expand_transform_list`](#expand_transform_list), [`translateZ`](#translatez), [`function`](#function), [`ignored`](#ignored), [`property`](#property), [`writing`](#writing), [`shorthand`](#shorthand), [`caller`](#caller), [`slots`](#slots), [`sentinel`](#sentinel), [`here`](#here), [`csel_substr`](#csel_substr), [`download`](#download), [`var`](#var), [`css_parse`](#css_parse), [`css_parse_media`](#css_parse_media), [`css_parse_scoped`](#css_parse_scoped), [`css_parse_logged`](#css_parse_logged), [`consumer`](#consumer), [`css_free`](#css_free), [`page_view`](#page_view), [`parent`](#parent), [`css_resolve_el`](#css_resolve_el), [`css_resolve_el_ex`](#css_resolve_el_ex), [`css_resolve_pseudo`](#css_resolve_pseudo), [`css_resolve`](#css_resolve), [`NULL`](#null), [`css_font_face_count`](#css_font_face_count), [`css_font_face_at`](#css_font_face_at), [`css_parse_inline`](#css_parse_inline)
+- **Functions:** [`emit`](#emit), [`css_decl`](#css_decl), [`through`](#through), [`text`](#text), [`number`](#number), [`item`](#item), [`order`](#order), [`blur`](#blur), [`axis`](#axis), [`cap`](#cap), [`empty`](#empty), [`declaration`](#declaration), [`column`](#column), [`var`](#var), [`matrix`](#matrix), [`LIST`](#list), [`translate3d`](#translate3d), [`translateX`](#translatex), [`parse_angle_deg`](#parse_angle_deg), [`expand_transform_list`](#expand_transform_list), [`translateZ`](#translatez), [`function`](#function), [`ignored`](#ignored), [`property`](#property), [`writing`](#writing), [`shorthand`](#shorthand), [`caller`](#caller), [`slots`](#slots), [`sentinel`](#sentinel), [`here`](#here), [`csel_substr`](#csel_substr), [`download`](#download), [`var`](#var), [`css_parse`](#css_parse), [`css_parse_media`](#css_parse_media), [`css_parse_scoped`](#css_parse_scoped), [`css_parse_logged`](#css_parse_logged), [`consumer`](#consumer), [`css_free`](#css_free), [`page_view`](#page_view), [`parent`](#parent), [`css_resolve_el`](#css_resolve_el), [`css_resolve_el_ex`](#css_resolve_el_ex), [`css_resolve_pseudo`](#css_resolve_pseudo), [`css_resolve`](#css_resolve), [`NULL`](#null), [`css_font_face_count`](#css_font_face_count), [`css_font_face_at`](#css_font_face_at), [`css_parse_inline`](#css_parse_inline)
 - **Macros:** [`CSS_INIT_SELS`](#css_init_sels), [`CSS_INIT_DECLS`](#css_init_decls), [`CSS_DECL_SLOTS_MIN`](#css_decl_slots_min), [`CSS_INIT_RULES`](#css_init_rules), [`CSS_SELS_PER_GROUP`](#css_sels_per_group), [`CSS_INLINE_DECLS`](#css_inline_decls), [`P_META_CUSTOM`](#p_meta_custom), [`P_META_VARSRC`](#p_meta_varsrc), [`CSS_MAX_RAW`](#css_max_raw), [`CSS_WIDE_RESET`](#css_wide_reset), [`AUTO_REJECT`](#auto_reject), [`AUTO_VALUE`](#auto_value), [`AUTO_RESET`](#auto_reset), [`AUTO_RESET_NONE`](#auto_reset_none), [`CSS_ATTR_MARK`](#css_attr_mark), [`CSS_ATTR_SEP`](#css_attr_sep), [`CSS_MEDIA_MAX_DEPTH`](#css_media_max_depth), [`CSS_VAR_POOL`](#css_var_pool)
 
 ## Type Diagram
@@ -40,6 +40,7 @@ Solid arrows stay in this module, dashed arrows leave it.
 flowchart LR
     n_src_css_c__blur(["blur"])
     n_src_css_c__csel_substr(["csel_substr"])
+    n_src_css_c__declaration(["declaration"])
     n_src_css_c__function(["function"])
     n_src_css_c__expand_transform_list(["expand_transform_list"])
     n_src_css_c__matrix(["matrix"])
@@ -51,7 +52,6 @@ flowchart LR
     n_include_css_box_h__cb_emit_len["css_box.cb_emit_len"]
     n_src_css_c__number(["number"])
     n_src_css_box_c__interp_len["css_box.interp_len"]
-    n_src_css_c__declaration(["declaration"])
     n_include_url_h__url["url.url"]
     n_src_css_color_c__strncmp["css_color.strncmp"]
     n_src_css_c__axis(["axis"])
@@ -66,6 +66,7 @@ flowchart LR
     n_gui_browser_ui_c__rect["browser_ui.rect"]
     n_src_css_c__shorthand(["shorthand"])
     n_src_css_c__blur --> n_src_css_c__csel_substr
+    n_src_css_c__declaration --> n_src_css_c__csel_substr
     n_src_css_c__function --> n_src_css_c__expand_transform_list
     n_src_css_c__function --> n_src_css_c__matrix
     n_src_css_c__function --> n_src_css_c__parse_angle_deg
@@ -73,13 +74,14 @@ flowchart LR
     n_src_css_c__CSS_WIDE_RESET -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_c__AUTO_RESET_NONE -.-> n_include_css_box_h__cb_emit_len
     n_src_css_c__number -.-> n_src_css_box_c__interp_len
-    n_src_css_c__declaration -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_c__blur -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_c__blur -.-> n_include_url_h__url
     n_src_css_c__blur -.-> n_src_css_box_c__interp_len
     n_src_css_c__blur -.-> n_src_css_color_c__strncmp
     n_src_css_c__axis -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_c__CSS_ATTR_SEP -.-> n_include_css_select_h__csel_unescape
+    n_src_css_c__declaration -.-> n_include_css_select_h__csel_ci_eq
+    n_src_css_c__declaration -.-> n_include_url_h__url
     n_src_css_c__function -.-> n_include_css_h__css_style_translate
     n_src_css_c__function -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_c__function -.-> n_include_css_select_h__csel_span_eq
@@ -150,7 +152,7 @@ No I/O, no network — the caller resolves and downloads the URL against the pag
 
 ### `len_rebase_ctx`
 
-`struct` | [src/css.c:4912](../../src/css.c#L4912)
+`struct` | [src/css.c:5032](../../src/css.c#L5032)
 
 ```c
 typedef struct len_rebase_ctx
@@ -168,7 +170,7 @@ Unit scales for len_rebase; a scale <= 0 leaves that unit family untouched.
 
 #### `len_rebase_ctx.rem_px`
 
-`type_alias` | [src/css.c:4912](../../src/css.c#L4912)
+`type_alias` | [src/css.c:5032](../../src/css.c#L5032)
 
 ```c
 typedef struct len_rebase_ctx { double rem_px;
@@ -182,7 +184,7 @@ Unit scales for len_rebase; a scale <= 0 leaves that unit family untouched.
 
 ### `css_match`
 
-`struct` | [src/css.c:5701](../../src/css.c#L5701)
+`struct` | [src/css.c:5827](../../src/css.c#L5827)
 
 ```c
 typedef struct css_match
@@ -196,7 +198,7 @@ One matched selector, remembered between the passes of the element cascade.
 
 ### `css_cand`
 
-`struct` | [src/css.c:5707](../../src/css.c#L5707)
+`struct` | [src/css.c:5833](../../src/css.c#L5833)
 
 ```c
 typedef struct css_cand
@@ -214,7 +216,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 #### `css_cand.idx`
 
-`type_alias` | [src/css.c:5707](../../src/css.c#L5707)
+`type_alias` | [src/css.c:5833](../../src/css.c#L5833)
 
 ```c
 typedef struct css_cand { int imp, espec, ord, idx;
@@ -273,7 +275,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `through`
 
-`function` | [src/css.c:207](../../src/css.c#L207)
+`function` | [src/css.c:210](../../src/css.c#L210)
 
 ```c
 * at the two SHARED chokepoints every property funnels through (the generic * dispatch tail, and emit_len for the <length-percentage> family) rather than in a * per-property table that would go stale on the next property added. * * `revert`/`revert-layer` roll back to the previous cascade origin. With one author * origin and a UA sheet expressed as per-tag defaults rather than as declarations, * "the previous origin" IS the unset default here, so they collapse onto the same * handling -- correct by construction rather than by approximation. */ /* wv[] marker: a CSS-wide keyword won a slot some earlier declaration had already * won (and possibly written). Distinct from every length sentinel. */ #define CSS_WIDE_RESET (INT_MIN + 64) /* clear of CSS_LEN_* sentinels (INT_MIN..+5) */
@@ -294,7 +296,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `text`
 
-`function` | [src/css.c:260](../../src/css.c#L260)
+`function` | [src/css.c:263](../../src/css.c#L263)
 
 ```c
 * source text (rem_rebase, see below) rather than by threading a context here. * * Viewport uni...
@@ -314,7 +316,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `number`
 
-`function` | [src/css.c:504](../../src/css.c#L504)
+`function` | [src/css.c:503](../../src/css.c#L503)
 
 ```c
 * number (no unit) as px (common in shorthand context like "10 5"). */ static int interp_border_s...
@@ -336,7 +338,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `item`
 
-`function` | [src/css.c:1146](../../src/css.c#L1146)
+`function` | [src/css.c:1145](../../src/css.c#L1145)
 
 ```c
 * timing list takes its first item (CSS Animations/Transitions 1: with one * transition/animation running, extra items have nothing to apply to). */ static void first_comma_item(const char *val, char *buf, size_t cap)
@@ -353,33 +355,11 @@ A competing `--name` declaration: cascade key, then its text.
 
 ---
 
-<a id="declaration"></a>
-
-### `declaration`
-
-`function` | [src/css.c:1212](../../src/css.c#L1212)
-
-```c
-* declaration (precedent: expand_filter);
-```
-
-**Parameters**
-
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `expand_filter` | `precedent:` |  |  |
-
-**Returns:** `*`
-
-*Calls:* [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq)
-
----
-
 <a id="order"></a>
 
 ### `order`
 
-`function` | [src/css.c:1439](../../src/css.c#L1439)
+`function` | [src/css.c:1438](../../src/css.c#L1438)
 
 ```c
 * declaration order (dx, dy, optional blur >= 0);
@@ -399,7 +379,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `blur`
 
-`function` | [src/css.c:1474](../../src/css.c#L1474)
+`function` | [src/css.c:1473](../../src/css.c#L1473)
 
 ```c
 * consumes ONLY blur(Npx);
@@ -415,7 +395,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `axis`
 
-`function` | [src/css.c:1511](../../src/css.c#L1511)
+`function` | [src/css.c:1510](../../src/css.c#L1510)
 
 ```c
 * bare center displaces it to the free axis (`center right` = x:right, y:center). * Any other co...
@@ -438,7 +418,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `cap`
 
-`function` | [src/css.c:1743](../../src/css.c#L1743)
+`function` | [src/css.c:1742](../../src/css.c#L1742)
 
 ```c
 * string past the cap (emit_content): a conforming declaration must not * count as a discard just because an icon font ate the pool. */ if (*ncontent >= contentcap) return emit_content(dst, cap, NULL,
@@ -454,7 +434,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `empty`
 
-`function` | [src/css.c:1777](../../src/css.c#L1777)
+`function` | [src/css.c:1776](../../src/css.c#L1776)
 
 ```c
 * the slot with an explicit empty (ival -1) instead of dropping, or a * lower-priority string would leak through and the drops gate would count * a conforming declaration as a discard. */ if (csel_ci_
@@ -470,11 +450,33 @@ A competing `--name` declaration: cascade key, then its text.
 
 ---
 
+<a id="declaration"></a>
+
+### `declaration`
+
+`function` | [src/css.c:2004](../../src/css.c#L2004)
+
+```c
+* invalid layer drops the whole declaration (fail closed). `none` is an explicit * no-shadow. ur...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `closed` | `fail` |  |  |
+
+**Returns:** `* invalid layer drops the whole`
+
+*Calls:* [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`url`](include.url.h.md#url), [`csel_substr`](#csel_substr)
+
+---
+
 <a id="column"></a>
 
 ### `column`
 
-`function` | [src/css.c:2019](../../src/css.c#L2019)
+`function` | [src/css.c:2069](../../src/css.c#L2069)
 
 ```c
 * column (`flex: 1 1 0%`);
@@ -494,7 +496,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `var`
 
-`function` | [src/css.c:2217](../../src/css.c#L2217)
+`function` | [src/css.c:2267](../../src/css.c#L2267)
 
 ```c
 * cvr_resolve then substitutes var() references when a declaration's value is * interpreted (par...
@@ -508,7 +510,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `matrix`
 
-`function` | [src/css.c:2379](../../src/css.c#L2379)
+`function` | [src/css.c:2429](../../src/css.c#L2429)
 
 ```c
 * * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands on skx only (the decomposition * convention: a shear pair has a family of factoriza
@@ -524,7 +526,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `LIST`
 
-`function` | [src/css.c:2464](../../src/css.c#L2464)
+`function` | [src/css.c:2514](../../src/css.c#L2514)
 
 ```c
 * transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose into one * affine matrix, QR-decomposed into the seven slots (shared with matrix()).
@@ -544,7 +546,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `translate3d`
 
-`function` | [src/css.c:2471](../../src/css.c#L2471)
+`function` | [src/css.c:2521](../../src/css.c#L2521)
 
 ```c
 * translate3d()/translateZ() flatten to their 2D projection (a 2D engine * renders z as nothing,...
@@ -560,7 +562,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `translateX`
 
-`function` | [src/css.c:2734](../../src/css.c#L2734)
+`function` | [src/css.c:2784](../../src/css.c#L2784)
 
 ```c
 * translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc numbers all fail closed, same as any other * box-model length here);
@@ -574,7 +576,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `parse_angle_deg`
 
-`function` | [src/css.c:2738](../../src/css.c#L2738)
+`function` | [src/css.c:2788](../../src/css.c#L2788)
 
 ```c
 * parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);
@@ -598,7 +600,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `expand_transform_list`
 
-`function` | [src/css.c:2741](../../src/css.c#L2741)
+`function` | [src/css.c:2791](../../src/css.c#L2791)
 
 ```c
 * LISTS compose in order through expand_transform_list (CSS Transforms 1 3);
@@ -620,7 +622,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `translateZ`
 
-`function` | [src/css.c:2743](../../src/css.c#L2743)
+`function` | [src/css.c:2793](../../src/css.c#L2793)
 
 ```c
 * translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking * context Firefox builds);
@@ -634,7 +636,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `function`
 
-`function` | [src/css.c:2745](../../src/css.c#L2745)
+`function` | [src/css.c:2795](../../src/css.c#L2795)
 
 ```c
 * transform function (perspective/rotate3d/...), or unparseable syntax, * rejects the WHOLE decl...
@@ -656,7 +658,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `ignored`
 
-`function` | [src/css.c:3019](../../src/css.c#L3019)
+`function` | [src/css.c:3069](../../src/css.c#L3069)
 
 ```c
 * engine slot and is ignored (documented simplification, like list-style's * ignored tokens). An...
@@ -679,7 +681,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `property`
 
-`function` | [src/css.c:3054](../../src/css.c#L3054)
+`function` | [src/css.c:3104](../../src/css.c#L3104)
 
 ```c
 * error drops the whole property (fail closed). */ static int expand_clip(const char *val, css_de...
@@ -701,7 +703,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `writing`
 
-`function` | [src/css.c:3147](../../src/css.c#L3147)
+`function` | [src/css.c:3236](../../src/css.c#L3236)
 
 ```c
 * Wide keywords claim BOTH slots without writing (inheritance then flows, as * the tail does for single-slot properties). */ static int expand_fontfamily(const char *val, css_decl *dst, int cap, char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap)
@@ -722,7 +724,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `shorthand`
 
-`function` | [src/css.c:3189](../../src/css.c#L3189)
+`function` | [src/css.c:3278](../../src/css.c#L3278)
 
 ```c
 * generic bucket keeps the rest of the shorthand (same net effect as the * font-family longhand dropping an unknown name). */ static int expand_font(const char *val, css_decl *dst, int cap, char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap)
@@ -744,7 +746,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `caller`
 
-`function` | [src/css.c:3269](../../src/css.c#L3269)
+`function` | [src/css.c:3358](../../src/css.c#L3358)
 
 ```c
 * left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached a branch of the * dispatch below, which is what separates "not implemented" from "im
@@ -764,7 +766,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `slots`
 
-`function` | [src/css.c:3439](../../src/css.c#L3439)
+`function` | [src/css.c:3528](../../src/css.c#L3528)
 
 ```c
 * expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return emit_len(dst, cap, P_INSET_TOP, val, 1, 1);
@@ -784,7 +786,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `sentinel`
 
-`function` | [src/css.c:3551](../../src/css.c#L3551)
+`function` | [src/css.c:3640](../../src/css.c#L3640)
 
 ```c
 * cascade carries as the currentColor sentinel (in `color` the two are the * same thing);
@@ -804,7 +806,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `here`
 
-`function` | [src/css.c:3752](../../src/css.c#L3752)
+`function` | [src/css.c:3842](../../src/css.c#L3842)
 
 ```c
 * servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);
@@ -824,7 +826,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `csel_substr`
 
-`function` | [src/css.c:4435](../../src/css.c#L4435)
+`function` | [src/css.c:4525](../../src/css.c#L4525)
 
 ```c
 return known && csel_substr(val, "var(", 1);
@@ -845,7 +847,7 @@ A non-empty needle only; an empty one never matches.
 
 > **Inherited:** Documentation from [`csel_substr`](#csel_substr) (include/css_select.h:222).
 
-*Called by:* [`blur`](#blur)
+*Called by:* [`blur`](#blur), [`declaration`](#declaration)
 
 ---
 
@@ -853,7 +855,7 @@ A non-empty needle only; an empty one never matches.
 
 ### `download`
 
-`function` | [src/css.c:4746](../../src/css.c#L4746)
+`function` | [src/css.c:4865](../../src/css.c#L4865)
 
 ```c
 * the download (spec/webfont.md b3b). An empty src_url * simply never resolv...
@@ -873,7 +875,7 @@ A non-empty needle only; an empty one never matches.
 
 ### `var`
 
-`function` | [src/css.c:5096](../../src/css.c#L5096)
+`function` | [src/css.c:5216](../../src/css.c#L5216)
 
 ```c
 * collected and forty var() declarations -- font sizes, widths, radii, the * whole theme -- ...
@@ -887,7 +889,7 @@ A non-empty needle only; an empty one never matches.
 
 ### `css_parse`
 
-`function` | [src/css.c:5121](../../src/css.c#L5121)
+`function` | [src/css.c:5241](../../src/css.c#L5241)
 
 ```c
 css_status css_parse(const char *text, size_t len, css_sheet **out)
@@ -911,7 +913,7 @@ css_status css_parse(const char *text, size_t len, css_sheet **out)
 
 ### `css_parse_media`
 
-`function` | [src/css.c:5125](../../src/css.c#L5125)
+`function` | [src/css.c:5245](../../src/css.c#L5245)
 
 ```c
 css_status css_parse_media(const char *text, size_t len, const css_media *media, css_sheet **out)
@@ -936,7 +938,7 @@ css_status css_parse_media(const char *text, size_t len, const css_media *media,
 
 ### `css_parse_scoped`
 
-`function` | [src/css.c:5130](../../src/css.c#L5130)
+`function` | [src/css.c:5250](../../src/css.c#L5250)
 
 ```c
 css_status css_parse_scoped(const char *text, size_t len, const css_media *media, const char *root_scope, css_sheet **out)
@@ -962,7 +964,7 @@ css_status css_parse_scoped(const char *text, size_t len, const css_media *media
 
 ### `css_parse_logged`
 
-`function` | [src/css.c:5135](../../src/css.c#L5135)
+`function` | [src/css.c:5255](../../src/css.c#L5255)
 
 ```c
 css_status css_parse_logged(const char *text, size_t len, const css_media *media, const char *root_scope, css_sheet **out, css_drop_log *log)
@@ -987,7 +989,7 @@ css_status css_parse_logged(const char *text, size_t len, const css_media *media
 
 ### `consumer`
 
-`function` | [src/css.c:5169](../../src/css.c#L5169)
+`function` | [src/css.c:5289](../../src/css.c#L5289)
 
 ```c
 * consumer (shorthands, calc(), var() values) gets it with no context * threaded through...
@@ -1008,7 +1010,7 @@ css_status css_parse_logged(const char *text, size_t len, const css_media *media
 
 ### `css_free`
 
-`function` | [src/css.c:5227](../../src/css.c#L5227)
+`function` | [src/css.c:5347](../../src/css.c#L5347)
 
 ```c
 void css_free(css_sheet *s)
@@ -1022,7 +1024,7 @@ Idempotent; NULL-safe.
 |---|---|---|---|
 | `s` | `css_sheet *` |  |  |
 
-> **Inherited:** Documentation from [`css_free`](#css_free) (include/css.h:1047).
+> **Inherited:** Documentation from [`css_free`](#css_free) (include/css.h:1057).
 
 ---
 
@@ -1030,7 +1032,7 @@ Idempotent; NULL-safe.
 
 ### `page_view`
 
-`function` | [src/css.c:5263](../../src/css.c#L5263)
+`function` | [src/css.c:5383](../../src/css.c#L5383)
 
 ```c
 * the generated text reaches page_view (which materialises it as a synthetic * run);
@@ -1050,7 +1052,7 @@ Idempotent; NULL-safe.
 
 ### `parent`
 
-`function` | [src/css.c:5296](../../src/css.c#L5296)
+`function` | [src/css.c:5416](../../src/css.c#L5416)
 
 ```c
 * property from the parent (`inherit`), and an unset non-inherited one * stands at its i...
@@ -1070,7 +1072,7 @@ Idempotent; NULL-safe.
 
 ### `css_resolve_el`
 
-`function` | [src/css.c:5873](../../src/css.c#L5873)
+`function` | [src/css.c:5999](../../src/css.c#L5999)
 
 ```c
 css_style css_resolve_el(const css_sheet *sheet, const css_element *el, const char *inline_style, size_t inline_len)
@@ -1095,7 +1097,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el, const ch
 
 ### `css_resolve_el_ex`
 
-`function` | [src/css.c:5882](../../src/css.c#L5882)
+`function` | [src/css.c:6008](../../src/css.c#L6008)
 
 ```c
 css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el, const char *inline_style, size_t inline_len, cvr_table *own_out)
@@ -1121,7 +1123,7 @@ css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el, const
 
 ### `css_resolve_pseudo`
 
-`function` | [src/css.c:5898](../../src/css.c#L5898)
+`function` | [src/css.c:6024](../../src/css.c#L6024)
 
 ```c
 css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)
@@ -1145,7 +1147,7 @@ css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int 
 
 ### `css_resolve`
 
-`function` | [src/css.c:6163](../../src/css.c#L6163)
+`function` | [src/css.c:6289](../../src/css.c#L6289)
 
 ```c
 css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, const char *const *classes, size_t nclasses, const char *inline_style, size_t inline_len)
@@ -1173,7 +1175,7 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, c
 
 ### `NULL`
 
-`function` | [src/css.c:6187](../../src/css.c#L6187)
+`function` | [src/css.c:6313](../../src/css.c#L6313)
 
 ```c
 * Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...
@@ -1196,7 +1198,7 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, c
 
 ### `css_font_face_count`
 
-`function` | [src/css.c:6219](../../src/css.c#L6219)
+`function` | [src/css.c:6345](../../src/css.c#L6345)
 
 ```c
 size_t css_font_face_count(const css_sheet *sheet)
@@ -1214,7 +1216,7 @@ Returns 0 on success, -1 if i is out of range.
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`css_font_face_count`](#css_font_face_count) (include/css.h:1172).
+> **Inherited:** Documentation from [`css_font_face_count`](#css_font_face_count) (include/css.h:1182).
 
 ---
 
@@ -1222,7 +1224,7 @@ Returns 0 on success, -1 if i is out of range.
 
 ### `css_font_face_at`
 
-`function` | [src/css.c:6223](../../src/css.c#L6223)
+`function` | [src/css.c:6349](../../src/css.c#L6349)
 
 ```c
 int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap)
@@ -1247,7 +1249,7 @@ int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_
 
 ### `css_parse_inline`
 
-`function` | [src/css.c:6233](../../src/css.c#L6233)
+`function` | [src/css.c:6359](../../src/css.c#L6359)
 
 ```c
 css_style css_parse_inline(const char *style, size_t len)
@@ -1403,7 +1405,7 @@ Raw-pool entries per sheet (anti-DoS); past it a declaration keeps only its page
 
 ### `CSS_WIDE_RESET`
 
-`macro` | [src/css.c:217](../../src/css.c#L217)
+`macro` | [src/css.c:220](../../src/css.c#L220)
 
 ```c
 #define CSS_WIDE_RESET
@@ -1421,7 +1423,7 @@ Distinct from every length sentinel.
 
 ### `AUTO_REJECT`
 
-`macro` | [src/css.c:270](../../src/css.c#L270)
+`macro` | [src/css.c:273](../../src/css.c#L273)
 
 ```c
 #define AUTO_REJECT
@@ -1437,7 +1439,7 @@ Thin wrappers keep existing call sites stable while the cascade decomposes. See 
 
 ### `AUTO_VALUE`
 
-`macro` | [src/css.c:271](../../src/css.c#L271)
+`macro` | [src/css.c:274](../../src/css.c#L274)
 
 ```c
 #define AUTO_VALUE
@@ -1449,7 +1451,7 @@ Thin wrappers keep existing call sites stable while the cascade decomposes. See 
 
 ### `AUTO_RESET`
 
-`macro` | [src/css.c:272](../../src/css.c#L272)
+`macro` | [src/css.c:275](../../src/css.c#L275)
 
 ```c
 #define AUTO_RESET
@@ -1461,7 +1463,7 @@ Thin wrappers keep existing call sites stable while the cascade decomposes. See 
 
 ### `AUTO_RESET_NONE`
 
-`macro` | [src/css.c:273](../../src/css.c#L273)
+`macro` | [src/css.c:276](../../src/css.c#L276)
 
 ```c
 #define AUTO_RESET_NONE
@@ -1475,7 +1477,7 @@ Thin wrappers keep existing call sites stable while the cascade decomposes. See 
 
 ### `CSS_ATTR_MARK`
 
-`macro` | [src/css.c:1684](../../src/css.c#L1684)
+`macro` | [src/css.c:1683](../../src/css.c#L1683)
 
 ```c
 #define CSS_ATTR_MARK
@@ -1491,7 +1493,7 @@ Stored as "\x01attr:" + lowercased name + optional "\x1f" + fallback (unescaped)
 
 ### `CSS_ATTR_SEP`
 
-`macro` | [src/css.c:1685](../../src/css.c#L1685)
+`macro` | [src/css.c:1684](../../src/css.c#L1684)
 
 ```c
 #define CSS_ATTR_SEP
@@ -1505,7 +1507,7 @@ Stored as "\x01attr:" + lowercased name + optional "\x1f" + fallback (unescaped)
 
 ### `CSS_MEDIA_MAX_DEPTH`
 
-`macro` | [src/css.c:4535](../../src/css.c#L4535)
+`macro` | [src/css.c:4625](../../src/css.c#L4625)
 
 ```c
 #define CSS_MEDIA_MAX_DEPTH
@@ -1519,7 +1521,7 @@ Nesting bound for conditional group rules (@media, @supports, @layer) -- they ne
 
 ### `CSS_VAR_POOL`
 
-`macro` | [src/css.c:5773](../../src/css.c#L5773)
+`macro` | [src/css.c:5899](../../src/css.c#L5899)
 
 ```c
 #define CSS_VAR_POOL

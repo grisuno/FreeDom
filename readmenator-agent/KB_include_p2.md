@@ -76,7 +76,8 @@ Previous: [KB_include.md](KB_include.md)
   - `cv_interp_color` (function, line 13) `int cv_interp_color(const char *v);`
   - `cv_color_ok` (function, line 14) `int cv_color_ok(int c);`
   - `cv_bg_alpha_of` (function, line 15) `int cv_bg_alpha_of(const char *v);`
-  - `cv_interp_bg` (function, line 16) `int cv_interp_bg(const char *v);`
+  - `cv_parse_color_t7` (function, line 19) `int cv_parse_color_t7(const char *v);`
+  - `cv_interp_bg` (function, line 20) `int cv_interp_bg(const char *v);`
   - `FREEDOM_CSS_VALUES_H` (macro, line 2) `#define FREEDOM_CSS_VALUES_H`
 - Imported by: `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `tests/test_css_values.c`
 
@@ -225,8 +226,9 @@ Previous: [KB_include.md](KB_include.md)
   - `fx_auto_min_size` (function, line 263) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
   - `fx_justify_name` (function, line 319) `const char *fx_justify_name(fx_justify j);`
   - `height` (function, line 325) `* used height (h_out);`
-  - `win` (function, line 342) `* margins win (both = centre, left only = end);`
-  - `fx_cross_offset` (function, line 344) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);`
+  - `it` (function, line 342) `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...`
+  - `win` (function, line 350) `* margins win (both = centre, left only = end);`
+  - `fx_cross_offset` (function, line 352) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);`
   - `FREEDOM_FLEX_LAYOUT_H` (macro, line 2) `#define FREEDOM_FLEX_LAYOUT_H`
   - `FX_MAX_ITEMS` (macro, line 28) `#define FX_MAX_ITEMS`
   - `FX_GL_AUTO` (macro, line 107) `#define FX_GL_AUTO`

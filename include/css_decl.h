@@ -25,8 +25,9 @@
 /* Scratch size for the CSS-wide-keyword probe (wide_claim). Bounds the widest
  * shorthand expansion in the dispatch: the four-side length shorthands emit a px
  * and a percentage slot per side (8), grid-template-columns emits one slot per
- * track plus the count (9), and matrix() emits seven. */
-#define CSS_WIDE_PROBE_DECLS 24
+ * track plus the count (9), matrix() emits seven, and box-shadow writes its
+ * whole layer group (7 + 6 per extra layer = 25). */
+#define CSS_WIDE_PROBE_DECLS 32
 
 /* Rounds v to the nearest int, clamped to [lo, hi]. Single owner of the
  * helper formerly copied per-module (css.c/css_values.c/css_box.c/css_text.c).
@@ -75,6 +76,11 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
        P_BORDER_RADIUS, P_RADIUS_TR, P_RADIUS_BR, P_RADIUS_BL,
        P_BSHADOW_DX, P_BSHADOW_DY, P_BSHADOW_BLUR, P_BSHADOW_SPREAD,
        P_BSHADOW_COLOR, P_BSHADOW_INSET,
+       /* box-shadow layer count + the extra layers, 6 slots each, contiguous:
+        * one declaration writes the whole group so a later single-layer value
+        * clears the extra layers of an earlier list. */
+       P_BSHADOW_N, P_BSHADOW_X_FIRST,
+       P_BSHADOW_X_LAST = P_BSHADOW_X_FIRST + (CSS_BSHADOW_LAYERS - 1) * 6 - 1,
        P_OUTLINE_W, P_OUTLINE_S, P_OUTLINE_C, P_OUTLINE_OFFSET,
        P_FLEX_GROW, P_FLEX_SHRINK, P_FLEX_BASIS,
        P_ORDER, P_ALIGN_ITEMS, P_ALIGN_SELF, P_ALIGN_CONTENT, P_JUSTIFY_ITEMS,
@@ -110,6 +116,10 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
          * CSS_GRID_TRACKS_MAX slots emitted in lock-step with P_GRIDCOLS. */
         P_GRID_TRACK0, P_GRID_TRACK1, P_GRID_TRACK2, P_GRID_TRACK3,
         P_GRID_TRACK4, P_GRID_TRACK5, P_GRID_TRACK6, P_GRID_TRACK7,
+        /* grid-template-rows track sizes, same encoding and lock-step as the
+         * column group (written with P_GRID_ROWS). */
+        P_GRID_RTRACK0, P_GRID_RTRACK1, P_GRID_RTRACK2, P_GRID_RTRACK3,
+        P_GRID_RTRACK4, P_GRID_RTRACK5, P_GRID_RTRACK6, P_GRID_RTRACK7,
         /* transform (M1.2): translate()/translateX()/translateY() px offsets.
          * M1.2b adds scale()/scaleX()/scaleY() (percent) and rotate() (degrees),
          * each its own independent-cascade slot (see css.h). */

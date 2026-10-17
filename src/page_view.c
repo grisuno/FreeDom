@@ -16,6 +16,10 @@
 #include "css.h"
 #include "css_chain.h"
 #include "css_vars.h"
+#include "css_decl.h"   /* css_round_clamp */
+
+_Static_assert(PV_BSHADOW_LAYERS == CSS_BSHADOW_LAYERS,
+               "box-shadow layers must match between the cascade and the box def");
 #include "css_length.h"   /* CL_INITIAL_FONT_SIZE: the inherited-size base case */
 #include "css_color.h"
 #include "flex_layout.h"
@@ -231,6 +235,7 @@ static void run_init_common(pv_run *r) {
     r->float_clear = 0;
     r->float_ml = 0;
     r->float_ml_pct = 0;
+    r->float_box = -1;
     r->float_mr = 0;
     r->float_mr_pct = 0;
     r->float_oid = -1;
@@ -670,6 +675,13 @@ void pv_set_flex_mauto(pv_view *v, int mauto) {
 void pv_set_cont_item(pv_view *v, int cont_item) {
     if (v == NULL || v->count == 0) return;
     v->runs[v->count - 1].cont_item = cont_item;
+}
+
+void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].float_w = float_w;
+    v->runs[v->count - 1].float_w_pct = float_w_pct;
+    v->runs[v->count - 1].float_box = float_box;
 }
 
 void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
@@ -1172,6 +1184,8 @@ typedef struct pv_cont_info {
      * signed, pct halves per-mille signed, 0 = none. Stamped when the founder is
      * found, so the band packer sizes outer (margin) boxes, not borders. */
     int float_ml, float_ml_pct, float_mr, float_mr_pct;
+    int float_w, float_w_pct;   /* the founder's own declared width (pv_run.float_w) */
+    int float_box;              /* the founder's own box id (pv_run.float_box), -1 none */
     /* The OUTERMOST float founder (spec/float.md §7d.1): the last (highest)
      * floated self-or-ancestor block on this run's chain. float_oid is its
      * group id (-1 = the nearest IS the outermost: single-level float, the
@@ -1675,6 +1689,7 @@ static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *
                  cont->float_oid, cont->float_oside,
                  cont->float_oml, cont->float_oml_pct,
                  cont->float_omr, cont->float_omr_pct);
+    pv_set_float_w(v, cont->float_w, cont->float_w_pct, cont->float_box);
     pv_set_box(v, box->l, box->r, box->w, box->center, box->mt, box->mb);
     pv_set_ua_tag(v, box->ua);
     pv_set_box_pct(v, box->w_pct, box->l_pct, box->r_pct, box->mt_pct, box->mb_pct);
@@ -1789,6 +1804,15 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->bsh_dx = cs->shadow2_dx; d->bsh_dy = cs->shadow2_dy;
     d->bsh_blur = cs->shadow2_blur; d->bsh_spread = cs->shadow2_spread;
     d->bsh_color = cs->box_shadow_color; d->bsh_inset = cs->box_shadow_inset;
+    d->bsh_n = (cs->box_shadow_n > 0 && cs->box_shadow_n <= PV_BSHADOW_LAYERS)
+             ? cs->box_shadow_n : (cs->box_shadow_color != -1 ? 1 : 0);
+    for (int k = 0; k < PV_BSHADOW_LAYERS - 1; ++k)
+        for (int f = 0; f < 6; ++f) d->bsh_x[k][f] = cs->box_shadow_x[k][f];
+    /* An omitted shadow color is currentColor (CSS Backgrounds 3 7.1): the
+     * element's own color, black when it inherits none here. */
+    if (d->bsh_color == CC_COLOR_CURRENT) d->bsh_color = (cs->color >= 0) ? cs->color : 0;
+    for (int k = 0; k < PV_BSHADOW_LAYERS - 1; ++k)
+        if (d->bsh_x[k][4] == CC_COLOR_CURRENT) d->bsh_x[k][4] = (cs->color >= 0) ? cs->color : 0;
     d->outline_w = cs->outline_width; d->outline_style = cs->outline_style;
     d->outline_color = cs->outline_color;
     d->outline_offset = cs->outline_offset;
@@ -2124,6 +2148,9 @@ typedef struct pv_style_cache {
     /* The element's computed custom-property chain (what its children inherit),
      * memoised for the same reason. NULL = none. */
     const cvr_chain      **vars;
+    /* The element's definite CONTENT height in px (-1 = indefinite): the basis
+     * its children resolve a percentage height against (CSS 2.1 10.5). */
+    double                *def_h;
     size_t                 count, cap;
     /* Open-addressed index over node[]: slot holds entry index + 1, 0 = empty.
      * A linear scan here made style resolution quadratic in the element count. */
@@ -2159,10 +2186,12 @@ static int pv_style_cache_init(pv_style_cache *c) {
     c->style = (css_style *)calloc(c->cap, sizeof *c->style);
     c->font_size = (double *)calloc(c->cap, sizeof *c->font_size);
     c->vars = (const cvr_chain **)calloc(c->cap, sizeof *c->vars);
+    c->def_h = (double *)calloc(c->cap, sizeof *c->def_h);
     c->hidx = (size_t *)calloc(c->hcap, sizeof *c->hidx);
     if (c->node == NULL || c->style == NULL || c->font_size == NULL || c->vars == NULL ||
-        c->hidx == NULL) {
-        free(c->node); free(c->style); free(c->font_size); free(c->vars); free(c->hidx);
+        c->def_h == NULL || c->hidx == NULL) {
+        free(c->node); free(c->style); free(c->font_size); free(c->vars); free(c->def_h);
+        free(c->hidx);
         memset(c, 0, sizeof *c);
         return -1;
     }
@@ -2170,7 +2199,8 @@ static int pv_style_cache_init(pv_style_cache *c) {
 }
 
 static void pv_style_cache_free(pv_style_cache *c) {
-    free(c->node); free(c->style); free(c->font_size); free(c->vars); free(c->hidx);
+    free(c->node); free(c->style); free(c->font_size); free(c->vars); free(c->def_h);
+    free(c->hidx);
     for (size_t k = 0; k < c->nvn; ++k) {
         cvr_free(&c->vn[k]->own);
         free(c->vn[k]);
@@ -2204,7 +2234,8 @@ static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_
 }
 
 static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
-                         const css_style *cs, double font_size, const cvr_chain *vars) {
+                         const css_style *cs, double font_size, const cvr_chain *vars,
+                         double def_h) {
     if (cache == NULL || cache->hidx == NULL) return;
     if (cache->count == cache->cap) {
         size_t ncap = cache->cap * 2;
@@ -2217,7 +2248,10 @@ static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
         if (nf != NULL) cache->font_size = nf;
         const cvr_chain **nv = (const cvr_chain **)realloc(cache->vars, ncap * sizeof *nv);
         if (nv != NULL) cache->vars = nv;
-        if (nn != NULL && ns != NULL && nf != NULL && nv != NULL) cache->cap = ncap;
+        double *nd = (double *)realloc(cache->def_h, ncap * sizeof *nd);
+        if (nd != NULL) cache->def_h = nd;
+        if (nn != NULL && ns != NULL && nf != NULL && nv != NULL && nd != NULL)
+            cache->cap = ncap;
     }
     if (cache->count >= cache->cap) return;
     /* Keep the index at most half full. */
@@ -2235,6 +2269,7 @@ static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
     cache->style[k] = *cs;
     cache->font_size[k] = font_size;
     cache->vars[k] = vars;
+    cache->def_h[k] = def_h;
     size_t h = pv_ptr_hash(node) & (cache->hcap - 1);
     while (cache->hidx[h] != 0) h = (h + 1) & (cache->hcap - 1);
     cache->hidx[h] = k + 1;
@@ -2283,6 +2318,46 @@ static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el) {
  *
  * A NULL cache (OOM at init) still resolves correctly, just without memoising.
  */
+/* Rewrites the percentage halves of height/min-height/max-height of *cs into
+ * px against cb_h, the containing block's definite height (< 0 = indefinite),
+ * and returns the element's own definite content height (-1 = indefinite).
+ * spec/box_style.md 4z. An absolutely positioned box's containing block is its
+ * positioned ancestor, not its parent: with an indefinite parent its
+ * percentages are left as they were (fixed boxes resolve against the viewport). */
+static double pv_resolve_block_sizes(css_style *cs, double cb_h) {
+    if (cs->position == CSS_POS_FIXED) cb_h = (double)CSS_MEDIA_DEFAULT_HEIGHT;
+    int keep = (cs->position == CSS_POS_ABSOLUTE && cb_h < 0.0);
+    if (!keep && cs->pct[CSS_PCT_HEIGHT] != 0 && !CSS_LEN_IS_INTRINSIC(cs->height)) {
+        int px = (cs->height == CSS_LEN_UNSET || cs->height == CSS_LEN_AUTO) ? 0 : cs->height;
+        double v = bx_pct_block_size(px, cs->pct[CSS_PCT_HEIGHT], cb_h);
+        /* Against an indefinite block it computes to auto: undeclared here
+         * (the cascade is done), so no height box is armed at zero. */
+        cs->height = (v < 0.0) ? CSS_LEN_UNSET : css_round_clamp(v, 0, CSS_LEN_MAX);
+        cs->pct[CSS_PCT_HEIGHT] = 0;
+    }
+    if (!keep && cs->pct[CSS_PCT_MIN_HEIGHT] != 0) {
+        int px = (cs->min_height > 0) ? cs->min_height : 0;
+        double v = bx_pct_block_size(px, cs->pct[CSS_PCT_MIN_HEIGHT], cb_h);
+        cs->min_height = (v < 0.0) ? 0 : css_round_clamp(v, 0, CSS_LEN_MAX);
+        cs->pct[CSS_PCT_MIN_HEIGHT] = 0;
+    }
+    if (!keep && cs->pct[CSS_PCT_MAX_HEIGHT] != 0) {
+        int px = (cs->max_height > 0) ? cs->max_height : 0;
+        double v = bx_pct_block_size(px, cs->pct[CSS_PCT_MAX_HEIGHT], cb_h);
+        cs->max_height = (v < 0.0) ? CSS_LEN_UNSET : css_round_clamp(v, 0, CSS_LEN_MAX);
+        cs->pct[CSS_PCT_MAX_HEIGHT] = 0;
+    }
+    double h = (cs->height >= 0 && cs->pct[CSS_PCT_HEIGHT] == 0) ? (double)cs->height : -1.0;
+    double edges = 0.0;
+    if (cs->pad_top > 0) edges += cs->pad_top;
+    if (cs->pad_bottom > 0) edges += cs->pad_bottom;
+    if (cs->border_top_width > 0) edges += cs->border_top_width;
+    if (cs->border_bottom_width > 0) edges += cs->border_bottom_width;
+    return bx_definite_content_h(h, cs->min_height > 0 ? (double)cs->min_height : -1.0,
+                                 cs->max_height > 0 ? (double)cs->max_height : -1.0,
+                                 cs->box_sizing == CSS_BOXS_BORDER, edges);
+}
+
 static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
                                       pv_style_cache *cache) {
     const lxb_dom_node_t *node = (const lxb_dom_node_t *)el;
@@ -2295,13 +2370,20 @@ static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sh
     size_t n = 0;
     double inherited = CL_INITIAL_FONT_SIZE;
     const cvr_chain *vars = NULL;   /* the inherited custom-property chain */
+    double cb_h = -1.0;             /* the parent's definite content height */
     lxb_dom_element_t *cur = el;
     while (cur != NULL && n < PV_FONT_CHAIN_MAX) {
         long h = pv_cache_find(cache, (const lxb_dom_node_t *)cur);
-        if (h >= 0) { inherited = cache->font_size[h]; vars = cache->vars[h]; break; }
+        if (h >= 0) {
+            inherited = cache->font_size[h]; vars = cache->vars[h]; cb_h = cache->def_h[h];
+            break;
+        }
         stack[n++] = cur;
         cur = pv_parent_element(cur);
     }
+    /* Reached the root element: its containing block is the initial one, whose
+     * height is the normalized viewport -- the same one `vh` resolves against. */
+    if (cur == NULL) cb_h = (double)CSS_MEDIA_DEFAULT_HEIGHT;
 
     /* n is at least 1 (el itself was not cached, so it was pushed) unless the
      * bound was already exhausted; resolve directly in that degenerate case. */
@@ -2314,8 +2396,9 @@ static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sh
         cvr_table own = { 0 };
         cs = cch_element_style_vars(stack[k], sheet, inherited, vars, &own);
         inherited = css_computed_font_size(&cs, inherited);
+        cb_h = pv_resolve_block_sizes(&cs, cb_h);
         vars = pv_var_push(cache, &own, vars);
-        pv_cache_put(cache, (const lxb_dom_node_t *)stack[k], &cs, inherited, vars);
+        pv_cache_put(cache, (const lxb_dom_node_t *)stack[k], &cs, inherited, vars, cb_h);
     }
     return cs;
 }
@@ -2376,12 +2459,20 @@ static int inherited_line_align(const lxb_dom_node_t *node, const css_sheet *she
 
 /* box_reg_id plus the line alignment an inline-level box needs (see
  * pv_box_def.line_align). */
+static int col_free_share(const lxb_dom_node_t *el, const css_style *cs,
+                          const css_sheet *sheet, pv_style_cache *cache, int *grow);
+
 static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
                          double font_px, const css_sheet *sheet, pv_style_cache *cache) {
     size_t before = r->count;
     int id = box_reg_id(r, node, cs, font_px);
     if (id >= 0 && r->count > before && cs->display == CSS_DISP_INLINE_BLOCK)
         r->def[id].line_align = inherited_line_align(node, sheet, cache);
+    if (id >= 0 && r->count > before) {
+        int grow = 0;
+        r->def[id].col_mauto = col_free_share(node, cs, sheet, cache, &grow);
+        r->def[id].col_grow = grow;
+    }
     return id;
 }
 
@@ -2622,14 +2713,35 @@ static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style 
         if (ccs.order != CSS_LEN_UNSET && ccs.order != 0) return 0;
         if (ccs.align_self != CSS_AK_UNSET && ccs.align_self != CSS_AK_AUTO &&
             ccs.align_self != CSS_AK_STRETCH) return 0;
-        /* A growing item or a vertical auto margin distributes the column's free
-         * space (the sticky footer: `main{flex:1}`, `footer{margin-top:auto}`) --
-         * block flow has none to distribute. */
-        if ((ccs.margin_top == CSS_LEN_AUTO || ccs.margin_bottom == CSS_LEN_AUTO)
-            && col_has_free_space(cs))
-            return 0;
+        /* A growing item or a vertical auto margin (the sticky footer) does NOT
+         * leave block flow: the column's free space is handed to the painter as
+         * each child's share (col_free_share) and spent when the column's box
+         * closes, so the page keeps the full block engine. */
     }
     return 1;
+}
+
+/* The share of its parent column's free space a child takes, when the parent is a
+ * flex column that flows as block (above) with a definite height to distribute:
+ * returns its PV_MAUTO_TOP/BOTTOM bits and stores its flex-grow (x100) in *grow.
+ * 0 and *grow 0 for anything else. The painter spends that space when the
+ * column's box closes (Flexbox 9.7 flexible lengths, then 8.1 auto margins). */
+static int col_free_share(const lxb_dom_node_t *el, const css_style *cs,
+                          const css_sheet *sheet, pv_style_cache *cache, int *grow) {
+    *grow = 0;
+    if (el == NULL || el->type != LXB_DOM_NODE_TYPE_ELEMENT) return 0;
+    if (cs->position == CSS_POS_ABSOLUTE || cs->position == CSS_POS_FIXED) return 0;
+    const lxb_dom_node_t *par = el->parent;
+    if (par == NULL || par->type != LXB_DOM_NODE_TYPE_ELEMENT) return 0;
+    css_style pcs = cached_element_style(lxb_dom_interface_element((lxb_dom_node_t *)par),
+                                         sheet, cache);
+    if (pcs.display != CSS_DISP_FLEX || pcs.flex_direction != CSS_FD_COLUMN ||
+        !col_has_free_space(&pcs) || !flex_column_flows_as_block(par, &pcs, sheet, cache))
+        return 0;
+    int m = ((cs->margin_top == CSS_LEN_AUTO) ? PV_MAUTO_TOP : 0)
+          | ((cs->margin_bottom == CSS_LEN_AUTO) ? PV_MAUTO_BOTTOM : 0);
+    if (cs->flex_grow > 0) *grow = cs->flex_grow;
+    return m;
 }
 
 /* The gap of a column that flows as block (above) is the space BETWEEN its items
@@ -2851,6 +2963,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->float_side = 0; cont->float_id = -1; cont->float_clear = 0;
     cont->float_ml = 0; cont->float_ml_pct = 0;
     cont->float_mr = 0; cont->float_mr_pct = 0;
+    cont->float_w = 0; cont->float_w_pct = 0; cont->float_box = -1;
     cont->float_oid = -1; cont->float_oside = 0;
     cont->float_oml = 0; cont->float_oml_pct = 0;
     cont->float_omr = 0; cont->float_omr_pct = 0;
@@ -2894,6 +3007,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
      * apply the UA heading scale on top of it. */
     int heading_fs_own = 0;
     int got_li = 0, got_list_kind = 0, got_float = 0;
+    const lxb_dom_node_t *float_el = NULL;   /* the nearest float founder */
     /* Set once the walk passes through (or starts at) an absolutely/fixed positioned
      * element. Per CSS 2.2 section 9.7 such an element computes `float` to none and is
      * taken out of flow, so it does NOT join an ancestor float's column -- the OOF
@@ -3063,6 +3177,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                     cont->float_side = cs.float_side;
                     cont->float_id = container_id(float_reg, p);
                     got_float = 1;
+                    float_el = p;
                     /* The founder's OWN margins travel with the float context
                      * (spec/float.md §7c.1): the band packer positions outer
                      * (margin) boxes, and only the founder's style answers that —
@@ -3077,6 +3192,9 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                     if (cs.margin_right != CSS_LEN_UNSET && cs.margin_right != CSS_LEN_AUTO)
                         cont->float_mr = cs.margin_right;
                     cont->float_mr_pct = cs.pct[CSS_PCT_MARGIN_RIGHT];
+                    cont->float_w = (cs.width > 0 && !CSS_LEN_IS_INTRINSIC(cs.width))
+                                   ? cs.width : 0;
+                    cont->float_w_pct = (cs.pct[CSS_PCT_WIDTH] > 0) ? cs.pct[CSS_PCT_WIDTH] : 0;
                     /* The float COLUMN is sized by the floated element's own width, which
                      * the nearest-hbox search misses whenever a width-less inner wrapper
                      * (a padding-only <header>/<div>) claimed the hbox first. Seed the box
@@ -3122,13 +3240,25 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             if (box_reg != NULL) {
                 int gen = generates_box_style(t, &cs);
                 int has_deco = css_has_boxdeco(&cs);
+                int cgrow = 0;
                 if (gen && has_deco) {
+                    want_box = 1;
+                } else if (col_free_share(p, &cs, sheet, style_cache, &cgrow) != 0 ||
+                           cgrow > 0) {
+                    /* A share of a column's free space moves or grows this child:
+                     * only a box can carry that to the painter. */
                     want_box = 1;
                 } else {
                     /* item_sizes_itself already blockifies an item with a width. */
                     int sized = item_sizes_itself(p, &cs, sheet, style_cache);
+                    /* A layout item's BACKGROUND alone needs a box too: in flow
+                     * the row background paints the same rect, but an item is
+                     * sized by its line or grid area (stretch), not by its text. */
+                    int has_bg = (cs.background >= 0 &&
+                                  (cs.bg_alpha == CSS_LEN_UNSET || cs.bg_alpha > 0)) ||
+                                 cs.bg_grad_n >= 2 || cs.bg_image_url[0] != '\0';
                     want_box = sized ||
-                               ((has_deco || css_has_hmargin(&cs)) &&
+                               ((has_deco || has_bg || css_has_hmargin(&cs)) &&
                                 is_layout_item(p, sheet, style_cache));
                 }
             }
@@ -3161,6 +3291,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                     this_box = bid;
                 }
             }
+            if (cont != NULL && float_el == p && this_box >= 0) cont->float_box = this_box;
             /* The container found one step in carried no box of its own: the first
              * box further out is the rect its items lay out in. */
             if (cont != NULL && cont->box_pending && this_box >= 0) {
@@ -3290,6 +3421,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                                 for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
                                     cd->col_w[gk] = cs.grid_col_w[gk];
                                 cd->rows = (cs.grid_rows > 0) ? cs.grid_rows : 0;
+                                for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
+                                    cd->row_h[gk] = cs.grid_row_h[gk];
                                 cd->grid_flow = (cs.grid_auto_flow != CSS_GF_UNSET)
                                                 ? cs.grid_auto_flow : 0;
                                 /* grid-template-areas defines the EXPLICIT grid just
@@ -3331,7 +3464,10 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                                         : (cs.text_align == CSS_ALIGN_RIGHT)  ? FX_JUSTIFY_END
                                                                               : FX_JUSTIFY_START;
                         }
-                        if (this_box >= 0 && cd->box_id < 0) cd->box_id = this_box;
+                        if (this_box >= 0 && cd->box_id < 0) {
+                            cd->box_id = this_box;
+                            cd->box_own = 1;
+                        }
                         if (cont != NULL && cont->anc_n < PV_CONT_DEPTH) {
                             int a = cont->anc_n;
                             cont->anc_id[a] = cid_here;
@@ -4614,11 +4750,12 @@ static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
                          cont->float_oid, cont->float_oside,
                          cont->float_oml, cont->float_oml_pct,
                          cont->float_omr, cont->float_omr_pct);
+    pv_set_float_w(v, cont->float_w, cont->float_w_pct, cont->float_box);
     if (ext != NULL) pv_set_text_ext(v, ext);
 }
 
 /* The presentational part of the UA stylesheet that the engine expresses as real
- * CSS (spec/page_view.md, tanda 40). It is a layer declared BEFORE every author
+ * CSS (spec/page_view.md, tandas 40 and 44). It is a layer declared BEFORE every author
  * sheet, so by CSS Cascade 5 6.4 it loses to every later layer and to all unlayered
  * author rules -- the precedence of the UA origin for normal declarations. Values
  * are Firefox's for a non-native button face. Never !important (that would invert
@@ -4627,6 +4764,11 @@ static const char PV_UA_CSS[] =
     "@layer freedom-ua{"
     "button{display:inline-block;box-sizing:border-box;padding:1px 6px;border:1px solid #8f8f9d;border-radius:4px;"
     "background-color:#e9e9ed;color:#000;font-size:13.3333px;text-align:center}"
+    /* HTML Rendering 15.3.4: the phrasing-content faces. */
+    "u,ins{text-decoration:underline}"
+    "s,strike,del{text-decoration:line-through}"
+    "mark{background-color:#ff0;color:#000}"
+    "abbr[title],acronym[title]{text-decoration:underline dotted}"
     "}\n";
 
 /* Returns a fresh "UA + text" buffer (NUL-terminated) and updates *len, or NULL
@@ -5003,6 +5145,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          cu_cont.float_oid, cu_cont.float_oside,
                          cu_cont.float_oml, cu_cont.float_oml_pct,
                          cu_cont.float_omr, cu_cont.float_omr_pct);
+                pv_set_float_w(v, cu_cont.float_w, cu_cont.float_w_pct, cu_cont.float_box);
                 /* The cell's own box (`td { border: 1px solid; padding: 5px }`).
                  * resolve_context registered it, but the id was resolved and then
                  * dropped, so the cell's border/padding/background never reached the
@@ -5111,6 +5254,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          ictl_cont.float_oid, ictl_cont.float_oside,
                          ictl_cont.float_oml, ictl_cont.float_oml_pct,
                          ictl_cont.float_omr, ictl_cont.float_omr_pct);
+                pv_set_float_w(v, ictl_cont.float_w, ictl_cont.float_w_pct, ictl_cont.float_box);
                 /* The resolved inherited text extensions ride the input run too:
                  * caret_color tints the caret of the focused control (2026-07-10). */
                 pv_set_text_ext(v, &ctl_ext);
@@ -5811,6 +5955,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          econt.float_oid, econt.float_oside,
                          econt.float_oml, econt.float_oml_pct,
                          econt.float_omr, econt.float_omr_pct);
+                    pv_set_float_w(v, econt.float_w, econt.float_w_pct, econt.float_box);
                     pv_set_box(v, ebox.l, ebox.r, ebox.w, ebox.center, ebox.mt, ebox.mb);
                     pv_set_ua_tag(v, ebox.ua);
                     pv_set_box_pct(v, ebox.w_pct, ebox.l_pct, ebox.r_pct,
@@ -6105,6 +6250,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          cont.float_oid, cont.float_oside,
                          cont.float_oml, cont.float_oml_pct,
                          cont.float_omr, cont.float_omr_pct);
+                pv_set_float_w(v, cont.float_w, cont.float_w_pct, cont.float_box);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
                 pv_set_ua_tag(v, box.ua);
                 pv_set_box_pct(v, box.w_pct, box.l_pct, box.r_pct,

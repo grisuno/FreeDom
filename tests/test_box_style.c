@@ -667,6 +667,37 @@ static void test_flex_min_clamp(void **state) {
     assert_true(dbl_eq(bx_flex_min_clamp(66.0, 0.0, 1, 34.0, 0.0), 66.0));
 }
 
+/* bx_pct_block_size: CSS 2.1 10.5 -- a percentage height resolves against a
+ * DEFINITE containing block height and behaves as auto against an indefinite one. */
+static void test_pct_block_size(void **state) {
+    (void)state;
+    assert_true(dbl_eq(bx_pct_block_size(0, 1000, 1080.0), 1080.0));
+    assert_true(dbl_eq(bx_pct_block_size(0, 500, 400.0), 200.0));
+    /* calc(100% - 50px) keeps both halves. */
+    assert_true(dbl_eq(bx_pct_block_size(-50, 1000, 400.0), 350.0));
+    /* Indefinite containing block: the percentage is auto. */
+    assert_true(dbl_eq(bx_pct_block_size(0, 1000, -1.0), -1.0));
+    /* No percentage: the px half alone, independent of the containing block. */
+    assert_true(dbl_eq(bx_pct_block_size(120, 0, -1.0), 120.0));
+    /* Never negative. */
+    assert_true(dbl_eq(bx_pct_block_size(-500, 100, 100.0), 0.0));
+}
+
+/* bx_definite_content_h: the content height a child resolves its own percentage
+ * against. min wins over max (10.7), border-box subtracts the edges, auto is -1. */
+static void test_definite_content_h(void **state) {
+    (void)state;
+    assert_true(dbl_eq(bx_definite_content_h(1080.0, -1.0, -1.0, 0, 16.0), 1080.0));
+    assert_true(dbl_eq(bx_definite_content_h(1080.0, -1.0, -1.0, 1, 16.0), 1064.0));
+    assert_true(dbl_eq(bx_definite_content_h(100.0, 300.0, -1.0, 0, 0.0), 300.0));
+    assert_true(dbl_eq(bx_definite_content_h(500.0, -1.0, 200.0, 0, 0.0), 200.0));
+    assert_true(dbl_eq(bx_definite_content_h(500.0, 300.0, 200.0, 0, 0.0), 300.0));
+    /* An auto height is indefinite even with a min-height. */
+    assert_true(dbl_eq(bx_definite_content_h(-1.0, 1080.0, -1.0, 0, 0.0), -1.0));
+    /* Edges larger than the border box clamp the content to zero. */
+    assert_true(dbl_eq(bx_definite_content_h(10.0, -1.0, -1.0, 1, 40.0), 0.0));
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_flex_min_clamp),
@@ -715,6 +746,8 @@ int main(void) {
         cmocka_unit_test(test_content_clipped),
         cmocka_unit_test(test_flex_max_clamp),
         cmocka_unit_test(test_place_declared_width_overflows),
+        cmocka_unit_test(test_pct_block_size),
+        cmocka_unit_test(test_definite_content_h),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
