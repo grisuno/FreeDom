@@ -1,10 +1,10 @@
 {
   "tool": "readmenator",
   "schema_version": 2,
-  "generated_at": "2026-10-17T19:16:31Z",
+  "generated_at": "2026-10-17T19:44:10Z",
   "project_root": ".",
   "project_name": "freedom-0.0.3",
-  "git_commit": "dab9ed3d55f649d28ab4bae9ecdf4ebec2883131",
+  "git_commit": "4261c1e6112dc7bd66708171f03a3b638d37015c",
   "git_branch": "main",
   "source_fingerprint": "2f2364f1bbd7d4de4ad389d2418992f99eab56503e701cbaf4de19d77038a514",
   "freshness_check": "readmenator . fresh  # exit 0 = docs match sources, exit 1 = run: readmenator . --rebuild",
