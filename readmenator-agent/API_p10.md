@@ -44,6 +44,12 @@ Depends on: `include/zoom.h`
 - `height` (function) `tools/ffgeom.py:292` `def height(path)` -- Decodes the scrollHeight carried by the #__ffh sentinel: the probe encodes one rect (its height), which decode()...
 - `main` (function) `tools/ffgeom.py:301` `def main(argv)`
 
+## tools/ffq.py
+- `main` (function) `tools/ffq.py:22` `def main()`
+
+## tools/ffshot.py
+- `main` (function) `tools/ffshot.py:24` `def main()`
+
 ## tools/gen_psl.c
 - `vec_push` (function) `tools/gen_psl.c:27` `static void vec_push(vec *v, const char *s)`
 - `cmp_str` (function) `tools/gen_psl.c:38` `static int cmp_str(const void *a, const void *b)`
@@ -75,6 +81,9 @@ Depends on: `include/zoom.h`
 - `lum` (function) `tools/pngprof.py:95` `def lum(p)`
 - `render_glyph` (function) `tools/pngprof.py:99` `def render_glyph(v)`
 - `main` (function) `tools/pngprof.py:109` `def main(argv)`
+
+## tools/prune.py
+- `main` (function) `tools/prune.py:21` `def main()`
 
 ## tools/snapshot.py
 - `fetch` (function) `tools/snapshot.py:17` `def fetch(url)`

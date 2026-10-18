@@ -1343,3 +1343,77 @@ generada existe con el padding porcentual y la miniatura reserva el alto 16:9
   blockificado (`img_inline = 0`).
 - **`pv_run.justify_self`** / `pv_cont_def.item_justify_self`: `justify-self` del
   ítem (B[66]).
+
+### Cajas de nivel inline: elementos `display:inline` con modelo de caja (2026-10-18)
+
+Padding, borde y margen horizontales **sí aplican** a un elemento en línea (CSS 2.1 8.1,
+10.3.1): un `<a style="padding:0 15px">` empuja el texto vecino 15 px a cada lado, y un
+`<span>` con fondo, borde y radio es una píldora. `display:inline` no registraba caja
+(`generates_box`), así que el padding se perdía y el fondo pintaba pegado al texto.
+
+**Dado** un elemento en línea (`display` sin declarar o `inline`, no flotante ni
+posicionado, no ítem flex/grid) con padding/borde/margen horizontal, o con fondo y además
+radio, borde o padding vertical (`css_inline_boxdeco`)
+**entonces** `page_view` registra su caja y estampa `pv_box_def.display = CSS_DISP_INLINE_BOX`
+(valor interno, nunca producido por el parser; cruza el IPC como entero crudo).
+
+**Dado** un run cuya caja más profunda es `CSS_DISP_INLINE_BOX`
+**entonces** el pintor la trata siempre como caja de nivel inline (abre la línea si hace
+falta; nunca `open_box`), con el modelo de `rc_ibox`: arreglo `rc_state.ibx[]` (varias cajas
+inline por línea; antes una sola y la segunda partía la línea), margen izquierdo + padding +
+borde delante del texto, padding + borde + margen derecho al salir de la caja.
+
+**Dado** que el espacio entre palabras que separa la caja del texto anterior llega al abrirla
+**entonces** el espacio queda **fuera** de la caja (`ibx_advance` mueve `pen0` con el pen).
+
+**Dado** `flush_line` con cajas inline abiertas
+**entonces** una `INLINE_BOX` cubre el **área de contenido** (ascent + descent de la fuente,
+más padding y borde verticales, CSS 2.1 10.6.1) centrada en la línea base; un `inline-block`
+conserva el alto de la fila completa.
+
+**Fuera de alcance:** una caja inline que cruza un salto de línea termina en el salto; cajas
+inline anidadas dentro de otra caja inline abierta no abren la interior.
+
+### Interlineado: el *leading* se parte en dos (2026-10-18)
+
+CSS 2.1 10.8.1: el espacio que un `line-height` agrega sobre ascent + descent se reparte
+mitad arriba y mitad abajo, así que el texto queda en el **medio** de su línea. El pintor
+ponía la línea base en `top + ascent` y dejaba todo el leading debajo (texto "pegado arriba"
+con `line-height:1.5`). `flush_line` fija `row.ascent = line_asc + (h - (line_asc+line_desc))/2`
+(negativo si la línea es más baja que la fuente).
+
+### Un run fuera de flujo no es ítem ni suma ancho (2026-10-18)
+
+`nested_cont_basis` (max-content de un contenedor anidado) agrupaba cada run por ítem y un
+run fuera de flujo (`sr-only` de 1 px con texto "1 of 9", insignia de esquina) quedaba como
+ítem propio, sumando su texto: el menú de Discord medía ~150 px de más y apretaba a su
+vecino ("Log in" en dos líneas). Un run con `item_at_level < 0` y `block_leaves_flow` se salta.
+
+### La caja raíz del ítem encierra TODO su contenido (2026-10-18)
+
+`item_root_box_pass` elegía como caja del ítem la caja más cercana al contenedor entre los
+runs que **tenían** caja, ignorando los que no. Un ítem con `<p>Hola</p><pre decorado>` tomaba
+la caja del `<pre>` como suya y la abría al inicio del ítem, **encima** del párrafo. Un run con
+contenido real (texto no blanco, o reemplazado) que ninguna caja candidata encierra ahora hace
+que el ítem **no tenga** caja raíz (`run_is_content`: el placeholder vacío de una caja
+decorada no cuenta). Las filas de un ítem plano **suman** su origen de columna en vez de
+asignarlo (`x_off +=`), y el run dentro de una caja anidada fluye en su rect de contenido
+(`indent_px`, `bg_w`): el texto de un bloque con padding dentro de una tarjeta pegaba al borde.
+
+### `white-space:pre` conserva la sangría inicial (2026-10-18)
+
+`flow_text` avanzaba `pen_x` por los espacios iniciales de una línea de `<pre>` **antes** de
+`open_line`, que resetea el pen: cada línea de código perdía su sangría (y, con el clip, sus
+primeros caracteres). Ahora se abre la línea antes de avanzar.
+
+### `width:fit-content` en una grilla de pistas fijas (2026-10-18)
+
+El max-content de una grilla es la suma de sus pistas más los huecos (CSS Sizing 3 5.1);
+`box_shrink_width` medía solo la línea de texto más ancha. Y los márgenes `auto` centran un
+ancho intrínseco (`css_hbox_resolve`: `center` también con `fit-content`/`max-content`).
+
+### `background-color: currentColor` (2026-10-18)
+
+El fondo `currentColor` es el `color` computado del elemento, heredado si no declara uno
+(cada barra de hamburguesa y cada divisor). `box_reg_id_ex` lo resuelve con
+`inherited_text_color` al registrar la caja; antes caía a "sin fondo".

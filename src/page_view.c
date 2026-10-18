@@ -1527,8 +1527,11 @@ static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
     out->w_pct = wp;
     out->l_pct = (lp > 0) ? lp : 0;
     out->r_pct = (rp > 0) ? rp : 0;
+    /* An intrinsic width (fit-content / max-content) is a definite shrink-wrapped
+     * width once measured, so auto margins centre it like any other declared one. */
     out->center = (ml == CSS_LEN_AUTO && mr == CSS_LEN_AUTO &&
-                   (out->w > 0 || wp > 0 || out->mw > 0 || out->mw_pct > 0)) ? 1 : 0;
+                   (out->w > 0 || wp > 0 || out->mw > 0 || out->mw_pct > 0 ||
+                    cs->width == CSS_LEN_FIT_CONTENT || cs->width == CSS_LEN_MAX_CONTENT)) ? 1 : 0;
 }
 
 /* True if the resolved style declares any paintable box (border/padding/radius/
@@ -2500,10 +2503,29 @@ static int inherited_line_align(const lxb_dom_node_t *node, const css_sheet *she
 static int col_free_share(const lxb_dom_node_t *el, const css_style *cs,
                           const css_sheet *sheet, pv_style_cache *cache, int *grow);
 
+/* The computed `color` of an element: its own declaration, else its nearest
+ * ancestor's (`color` inherits). -1 when no ancestor declares one, which leaves
+ * the theme's text colour to the painter. Bounded by PV_FONT_CHAIN_MAX. */
+static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,
+                                pv_style_cache *cache) {
+    lxb_dom_element_t *p = (node != NULL && node->type == LXB_DOM_NODE_TYPE_ELEMENT)
+        ? lxb_dom_interface_element((lxb_dom_node_t *)node) : NULL;
+    for (int k = 0; p != NULL && k < PV_FONT_CHAIN_MAX; ++k, p = pv_parent_element(p)) {
+        css_style ps = cached_element_style(p, sheet, cache);
+        if (ps.color >= 0) return ps.color;
+    }
+    return -1;
+}
+
 static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
                          double font_px, const css_sheet *sheet, pv_style_cache *cache) {
     size_t before = r->count;
     int id = box_reg_id(r, node, cs, font_px);
+    /* `background-color: currentColor` is the element's own computed colour --
+     * inherited when it declares none (every hamburger bar and divider drawn as
+     * a coloured empty box). A box cannot know it from its style alone. */
+    if (id >= 0 && r->count > before && cs->background == CC_COLOR_CURRENT)
+        r->def[id].bg_rgb = inherited_text_color(node, sheet, cache);
     if (id >= 0 && r->count > before && cs->display == CSS_DISP_INLINE_BLOCK)
         r->def[id].line_align = inherited_line_align(node, sheet, cache);
     if (id >= 0 && r->count > before) {
@@ -2843,6 +2865,27 @@ static int css_has_hmargin(const css_style *cs) {
            (cs->margin_right != CSS_LEN_UNSET && cs->margin_right != CSS_LEN_AUTO &&
             cs->margin_right != 0) ||
            cs->pct[CSS_PCT_MARGIN_LEFT] != 0 || cs->pct[CSS_PCT_MARGIN_RIGHT] != 0;
+}
+
+/* An INLINE element whose box model changes the line: horizontal padding, border or
+ * margin (CSS 2.1 8.1, 10.3.1 -- they apply to inline boxes and move the text around
+ * them), or a background that needs a shape (radius, vertical padding, a border).
+ * A bare background alone stays on the per-fragment fill, which is the common
+ * `<code>`/`<mark>` case and needs no box. */
+static int css_inline_boxdeco(const css_style *cs) {
+    int hpad = (cs->pad_left != CSS_LEN_UNSET && cs->pad_left > 0) ||
+               (cs->pad_right != CSS_LEN_UNSET && cs->pad_right > 0) ||
+               cs->pct[CSS_PCT_PAD_LEFT] > 0 || cs->pct[CSS_PCT_PAD_RIGHT] > 0;
+    int vpad = (cs->pad_top != CSS_LEN_UNSET && cs->pad_top > 0) ||
+               (cs->pad_bottom != CSS_LEN_UNSET && cs->pad_bottom > 0);
+    int border = (cs->border_left_width != CSS_LEN_UNSET && cs->border_left_width > 0) ||
+                 (cs->border_right_width != CSS_LEN_UNSET && cs->border_right_width > 0) ||
+                 (cs->border_top_width != CSS_LEN_UNSET && cs->border_top_width > 0) ||
+                 (cs->border_bottom_width != CSS_LEN_UNSET && cs->border_bottom_width > 0);
+    int bg = (cs->background >= 0 && (cs->bg_alpha == CSS_LEN_UNSET || cs->bg_alpha > 0)) ||
+             cs->bg_grad_n >= 2;
+    int radius = cs->border_radius != CSS_LEN_UNSET && cs->border_radius > 0;
+    return hpad || css_has_hmargin(cs) || border || (bg && (vpad || radius));
 }
 
 static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,
@@ -3277,12 +3320,22 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * element that would otherwise not get a box, so the item lookup stays
              * off the common path. */
             int want_box = 0;
+            int inline_deco_box = 0;
             if (box_reg != NULL) {
                 int gen = generates_box_style(t, &cs);
                 int has_deco = css_has_boxdeco(&cs);
                 int cgrow = 0;
                 if (gen && has_deco) {
                     want_box = 1;
+                } else if (!gen && (cs.display == CSS_DISP_UNSET ||
+                                    cs.display == CSS_DISP_INLINE) &&
+                           css_inline_boxdeco(&cs) &&
+                           !is_layout_item(p, sheet, style_cache)) {
+                    /* An inline-level box: it flows in its line (the painter keeps it
+                     * off the box stack) but carries the padding/border/margin the
+                     * text must clear and the decoration painted around it. */
+                    want_box = 1;
+                    inline_deco_box = 1;
                 } else if (col_free_share(p, &cs, sheet, style_cache, &cgrow) != 0 ||
                            cgrow > 0) {
                     /* A share of a column's free space moves or grows this child:
@@ -3307,6 +3360,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                      && in_flow_table_cell(p, base, flowreg))) {
                 int bid = box_reg_id_ex(box_reg, p, &cs, pv_cached_font_px(style_cache, p),
                                          sheet, style_cache);
+                if (bid >= 0 && inline_deco_box) box_reg->def[bid].display = CSS_DISP_INLINE_BOX;
                 if (bid >= 0) {
                     if (!got_boxdeco) {
                         *block_id_out = bid;

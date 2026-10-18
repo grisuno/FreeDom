@@ -73,7 +73,7 @@ graph LR
 
 ## Details
 
-Static architecture map of 272 files (c, h, py, sh) in 10 components: src, include: css, include: browser_ui, include: page_view, include: text_shape, include: local_store, gui, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 275 files (c, h, py, sh) in 10 components: src, include: css, include: browser_ui, include: page_view, include: text_shape, include: local_store, gui, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
 ### src (1)
 

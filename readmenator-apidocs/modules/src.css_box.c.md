@@ -775,7 +775,7 @@ before) left the 200px in place. 90 declarations in the measured corpus.
 #define AUTO_RESET_NONE
 ```
 
-max-width/max-height take `none`, not `auto`, as their "no constraint" initial value (CSS 2.1 section 10.4).
+max-width/max-height take [`none`](src.page_view.c.md#none), not `auto`, as their "no constraint" initial value (CSS 2.1 section 10.4).
 
 Same reset semantics, different spelling -- kept a distinct mode so `width:none`, which is not valid CSS, still fails closed.
 

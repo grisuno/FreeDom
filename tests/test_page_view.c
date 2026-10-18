@@ -3451,11 +3451,15 @@ static void test_flex_item_inline_is_blockified(void **state) {
     const pv_box_def *d = pv_box_at(v, (size_t)a->block_id);
     assert_non_null(d);
     assert_int_equal(d->box_r, 10);
-    /* a plain inline that is NOT an item stays boxless (no line break around it) */
+    assert_true(d->display != CSS_DISP_INLINE_BOX);   /* the item is a block-level box */
+    /* a plain inline that is NOT an item carries its margin on an INLINE-level box:
+     * it flows in its line (no break around it) and the text clears the margin */
     const pv_run *in = find_text(v, "Inline");
     assert_non_null(in);
     const pv_box_def *di = (in->block_id >= 0) ? pv_box_at(v, (size_t)in->block_id) : NULL;
-    assert_true(di == NULL || di->box_r != 10);
+    assert_non_null(di);
+    assert_int_equal(di->display, CSS_DISP_INLINE_BOX);
+    assert_int_equal(di->box_r, 10);
     pv_free(v);
     hp_document_free(doc);
 }

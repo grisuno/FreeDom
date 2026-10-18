@@ -39,6 +39,6 @@ content_w=1000 total_h=1153.4 nbox=2 nrow=38 npositioned=0
   row[35] top=1042.9 h=23.0 x_off=116.0 w=51.0
   row[36] top=1084.6 h=27.0 x_off=0.0
   row[37] top=1130.4 h=23.0 x_off=0.0
-  box[0] bid=0 x=606.4 top=413.6 w=7.0 h=23.0
-  box[1] bid=0 x=1.0 top=452.6 w=88.3 h=19.0
+  box[0] bid=0 x=606.4 top=413.6 w=14.0 h=23.0
+  box[1] bid=0 x=4.5 top=452.6 w=84.8 h=19.0
   cont[0] disp=5 parent=-1 parent_item=-1 gap=0 justify=0 cols=3 box=-1

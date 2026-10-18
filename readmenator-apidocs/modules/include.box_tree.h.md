@@ -326,8 +326,6 @@ int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);
 
 **Returns:** `int`
 
-*Called by:* [`TABLE`](gui.browser_ui.c.md#table)
-
 ---
 
 <a id="insets"></a>

@@ -303,6 +303,315 @@ static void test_download_png_local(void **state) {
     unlink(png);
 }
 
+/* Leftmost dark pixel of the first dark row at or below y0, scanning a decoded PNG.
+ * Returns -1 when no ink is found. Helper for the <pre> indentation test. */
+static int png_leftmost_ink(const img_pixels *px, uint32_t y0, uint32_t y1, uint32_t *row) {
+    for (uint32_t y = y0; y < y1 && y < px->height; ++y) {
+        const uint32_t *line = (const uint32_t *)(px->data + (size_t)y * px->stride);
+        for (uint32_t x = 0; x < px->width; ++x) {
+            if ((line[x] & 0xFFu) < 0x60u && (line[x] & 0xFF00u) < 0x6000u) {
+                if (row) *row = y;
+                return (int)x;
+            }
+        }
+    }
+    return -1;
+}
+
+/* white-space:pre keeps leading spaces: the second line of a <pre> must start
+ * further right than the first. The painter advanced the pen for the leading
+ * spaces BEFORE opening the line, and open_line reset the pen, so the indent was
+ * lost (every code sample on animate.css lost its leading characters). */
+static void test_pre_leading_spaces_indent_ink(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><body style=\"margin:0;background:#fff\">"
+        "<pre style=\"margin:0;color:#000;font:16px monospace\">x\n        y</pre>"
+        "</body></html>";
+    const char *path = "__freedom_pre_indent.html";
+    const char *png = "__freedom_pre_indent.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args, "--author-css --download-png=%s %s", png, path)
+                < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    FILE *pf = fopen(png, "rb");
+    assert_non_null(pf);
+    static unsigned char buf[1 << 20];
+    size_t n = fread(buf, 1, sizeof buf, pf);
+    fclose(pf);
+    img_pixels px = {0};
+    assert_int_equal(img_decode(buf, n, &px), IMG_OK);
+    uint32_t r1 = 0, r2 = 0;
+    int x1 = png_leftmost_ink(&px, 0, px.height, &r1);
+    assert_true(x1 >= 0);
+    uint32_t y = r1;
+    while (y < px.height && png_leftmost_ink(&px, y, y + 1, NULL) >= 0) ++y;
+    int x2 = png_leftmost_ink(&px, y, px.height, &r2);
+    assert_true(x2 >= 0);
+    assert_true(x2 >= x1 + 40); /* 8 monospace columns of indent */
+    img_pixels_free(&px);
+    unlink(path);
+    unlink(png);
+}
+
+/* Renders `html` with author CSS to a PNG and returns the leftmost bright pixel
+ * inside the dark (#333) box that spans x=300, over the middle half of its rows.
+ * -1 when no such box or no text. Helper for the nested-box padding test. */
+static int render_leftmost_text_in_dark_box(const char *html, int *box_top) {
+    const char *path = "__freedom_nest_pad.html";
+    const char *png = "__freedom_nest_pad.png";
+    FILE *f = fopen(path, "w");
+    if (f == NULL) return -1;
+    fwrite(html, 1, strlen(html), f);
+    fclose(f);
+    (void)unlink(png);
+    char args[512];
+    snprintf(args, sizeof args, "--author-css --download-png=%s %s", png, path);
+    int rc = -1;
+    int out = -1;
+    if (run_freedom_raw(args, &rc) == 0 && rc == 0) {
+        FILE *pf = fopen(png, "rb");
+        static unsigned char buf[1 << 20];
+        size_t n = pf ? fread(buf, 1, sizeof buf, pf) : 0;
+        if (pf) fclose(pf);
+        img_pixels px = {0};
+        if (n > 0 && img_decode(buf, n, &px) == IMG_OK && px.width > 600) {
+            uint32_t y0 = px.height, y1 = 0;
+            for (uint32_t y = 0; y < px.height; ++y) {
+                const uint32_t *line = (const uint32_t *)(px.data + (size_t)y * px.stride);
+                uint32_t c = line[300];
+                if ((c & 0xFFu) < 0x50u && ((c >> 8) & 0xFFu) < 0x50u && ((c >> 16) & 0xFFu) < 0x50u) {
+                    if (y < y0) y0 = y;
+                    y1 = y;
+                }
+            }
+            if (box_top != NULL) *box_top = (y1 > y0) ? (int)y0 : -1;
+            if (y1 > y0) {
+                uint32_t span = y1 - y0;
+                for (uint32_t y = y0 + span / 4; y <= y1 - span / 4; ++y) {
+                    const uint32_t *line = (const uint32_t *)(px.data + (size_t)y * px.stride);
+                    for (uint32_t x = 1; x < 598; ++x) {
+                        uint32_t c = line[x];
+                        if ((c & 0xFFu) > 0xC0u && ((c >> 8) & 0xFFu) > 0xC0u) {
+                            if (out < 0 || (int)x < out) out = (int)x;
+                            break;
+                        }
+                    }
+                }
+            }
+            img_pixels_free(&px);
+        }
+    }
+    unlink(path);
+    unlink(png);
+    return out;
+}
+
+/* A padded block nested in a grid item, after a sibling paragraph, keeps its
+ * padding: the item path overwrote the rows' x_off (dropping the inset of the
+ * boxes opened inside the item), and an item whose runs are NOT all inside one
+ * box adopted that box as its own root, so it opened over the paragraph. */
+static void test_grid_item_nested_box_keeps_padding(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><head><style>"
+        "body{margin:0;font:16px sans-serif}"
+        ".c{display:grid;grid-template-columns:600px 300px}"
+        ".b{background:#333;color:#fff;padding:18px;margin-top:20px}"
+        "p{margin:0}"
+        "</style></head><body><div class=\"c\"><article><p>Hello</p>"
+        "<div class=\"b\">box text here</div></article><aside>side</aside></div>"
+        "</body></html>";
+    int top = -1;
+    int x = render_leftmost_text_in_dark_box(html, &top);
+    assert_true(x >= 17);   /* the 18px padding, not the box edge */
+    assert_true(x <= 24);
+    assert_true(top >= 40); /* below the paragraph + its 20px margin, not over it */
+}
+
+/* A `width:fit-content; margin:0 auto` grid of fixed tracks is as wide as its tracks
+ * (CSS Sizing 3 max-content of a grid = the sum of its track sizes) and is centred.
+ * The shrink measurement saw only the widest text line (a 291px box clipped to a
+ * quarter of its own tabs) and the auto margins did not centre an intrinsic width. */
+static void test_fit_content_grid_is_track_wide_and_centered(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><head><style>"
+        "body{margin:0;background:#fff}"
+        ".g{display:grid;grid-template-columns:repeat(4,100px);width:fit-content;"
+        "margin:0 auto;overflow:clip}"
+        ".c{height:30px;background:#000}"
+        "</style></head><body><div class=\"g\"><div class=\"c\"></div><div class=\"c\"></div>"
+        "<div class=\"c\"></div><div class=\"c\"></div></div></body></html>";
+    const char *path = "__freedom_fitgrid.html";
+    const char *png = "__freedom_fitgrid.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    fwrite(html, 1, strlen(html), f);
+    fclose(f);
+    (void)unlink(png);
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args, "--author-css --download-png=%s %s", png, path)
+                < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    FILE *pf = fopen(png, "rb");
+    assert_non_null(pf);
+    static unsigned char buf[1 << 20];
+    size_t n = fread(buf, 1, sizeof buf, pf);
+    fclose(pf);
+    img_pixels px = {0};
+    assert_int_equal(img_decode(buf, n, &px), IMG_OK);
+    const uint32_t *line = (const uint32_t *)(px.data + (size_t)15 * px.stride);
+    int first = -1, last = -1;
+    for (uint32_t x = 0; x < px.width; ++x) {
+        if ((line[x] & 0xFFu) < 0x40u) { if (first < 0) first = (int)x; last = (int)x; }
+    }
+    /* 4 x 100px centred in a 1000px page: [300, 700). */
+    assert_true(first >= 298 && first <= 302);
+    assert_true(last >= 697 && last <= 701);
+    img_pixels_free(&px);
+    unlink(path);
+    unlink(png);
+}
+
+/* CSS 2.1 10.8.1: the space a `line-height` adds beyond the glyphs (the leading) is
+ * split in two, half above and half below, so text sits in the MIDDLE of its line
+ * box. Freedom kept the baseline at the line top and left all the leading below, so
+ * every page with `line-height:1.5` painted its text half a leading too high. */
+static void test_line_height_leading_is_split_above_and_below(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><body style=\"margin:0;background:#fff;font:20px sans-serif\">"
+        "<p style=\"margin:0;line-height:100px;color:#000\">HHHH</p></body></html>";
+    const char *path = "__freedom_leading.html";
+    const char *png = "__freedom_leading.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    fwrite(html, 1, strlen(html), f);
+    fclose(f);
+    (void)unlink(png);
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args, "--author-css --download-png=%s %s", png, path)
+                < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    FILE *pf = fopen(png, "rb");
+    assert_non_null(pf);
+    static unsigned char buf[1 << 20];
+    size_t n = fread(buf, 1, sizeof buf, pf);
+    fclose(pf);
+    img_pixels px = {0};
+    assert_int_equal(img_decode(buf, n, &px), IMG_OK);
+    int top = -1, bot = -1;
+    for (uint32_t y = 0; y < px.height; ++y) {
+        const uint32_t *line = (const uint32_t *)(px.data + (size_t)y * px.stride);
+        for (uint32_t x = 0; x < 200; ++x)
+            if ((line[x] & 0xFFu) < 0x80u) { if (top < 0) top = (int)y; bot = (int)y; break; }
+    }
+    /* A 100px line box: the glyphs' vertical middle sits near its middle (y=50). */
+    assert_true(top >= 0);
+    int mid = (top + bot) / 2;
+    assert_true(mid >= 40 && mid <= 60);
+    img_pixels_free(&px);
+    unlink(path);
+    unlink(png);
+}
+
+/* Renders `html` with author CSS to a PNG and decodes it into `out` (caller frees
+ * with img_pixels_free). Returns 0 on success. */
+static int render_html_pixels(const char *html, img_pixels *out) {
+    const char *path = "__freedom_render_px.html";
+    const char *png = "__freedom_render_px.png";
+    FILE *f = fopen(path, "w");
+    if (f == NULL) return -1;
+    fwrite(html, 1, strlen(html), f);
+    fclose(f);
+    (void)unlink(png);
+    char args[512];
+    snprintf(args, sizeof args, "--author-css --download-png=%s %s", png, path);
+    int rc = -1;
+    int ok = -1;
+    if (run_freedom_raw(args, &rc) == 0 && rc == 0) {
+        FILE *pf = fopen(png, "rb");
+        static unsigned char buf[1 << 21];
+        size_t n = pf ? fread(buf, 1, sizeof buf, pf) : 0;
+        if (pf) fclose(pf);
+        *out = (img_pixels){0};
+        if (n > 0 && img_decode(buf, n, out) == IMG_OK) ok = 0;
+    }
+    unlink(path);
+    unlink(png);
+    return ok;
+}
+
+/* Number of pixels in row y whose 0xRRGGBB satisfies the test colour (exact match on
+ * the three channels), ignoring alpha. */
+static int count_color_in_row(const img_pixels *px, uint32_t y, uint32_t rgb) {
+    if (y >= px->height) return 0;
+    const uint32_t *line = (const uint32_t *)(px->data + (size_t)y * px->stride);
+    int n = 0;
+    for (uint32_t x = 0; x < px->width; ++x)
+        if ((line[x] & 0xFFFFFFu) == rgb) ++n;
+    return n;
+}
+
+/* Horizontal padding, border and margin apply to an INLINE element (CSS 2.1 10.3.1):
+ * `display:inline` boxes were never registered, so a link with `padding:0 30px`
+ * painted glued to its neighbours. The ink of "A" and "C" must end up further apart
+ * than the three glyphs alone span. */
+static void test_inline_horizontal_padding_spaces_neighbours(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><body style=\"margin:0;background:#fff;font:20px sans-serif;"
+        "color:#000\"><p style=\"margin:0\">A<a style=\"padding:0 30px;color:#000;"
+        "text-decoration:none\">B</a>C</p></body></html>";
+    img_pixels px;
+    assert_int_equal(render_html_pixels(html, &px), 0);
+    int first = -1, last = -1;
+    for (uint32_t y = 0; y < px.height && y < 60; ++y) {
+        const uint32_t *line = (const uint32_t *)(px.data + (size_t)y * px.stride);
+        for (uint32_t x = 0; x < px.width; ++x)
+            if ((line[x] & 0xFFu) < 0x80u) {
+                if (first < 0 || (int)x < first) first = (int)x;
+                if ((int)x > last) last = (int)x;
+            }
+    }
+    img_pixels_free(&px);
+    assert_true(first >= 0);
+    assert_true(last - first >= 85);    /* 3 glyphs (~40px) + 2 x 30px padding */
+}
+
+/* A decorated inline element paints its background, border and padding around its
+ * own text: `padding:4px 20px` on a blue span covers more than the glyph. */
+static void test_inline_box_paints_padding_around_text(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><body style=\"margin:0;background:#fff;font:20px sans-serif\">"
+        "<p style=\"margin:0;color:#000\">x <span style=\"background:#0000ff;color:#fff;"
+        "padding:4px 20px\">I</span> y</p></body></html>";
+    img_pixels px;
+    assert_int_equal(render_html_pixels(html, &px), 0);
+    int widest = 0;
+    for (uint32_t y = 0; y < px.height && y < 60; ++y) {
+        int c = count_color_in_row(&px, y, 0x0000FFu);
+        if (c > widest) widest = c;
+    }
+    img_pixels_free(&px);
+    assert_true(widest >= 40);   /* 2 x 20px padding around a narrow glyph */
+    assert_true(widest <= 80);   /* the span's box, not a full-width band */
+}
+
 /* --download-png --images decodes the page's local images through the confined worker
  * and paints the real bitmap instead of the "image (allowed)" placeholder. Exercises
  * the headless image pipeline end-to-end (render_doc_images -> load_images -> local
@@ -2988,6 +3297,44 @@ static void test_dump_layout_flex_item_inline_svg_shares_line(void **state) {
     unlink(path);
 }
 
+/* An out-of-flow run inside a flex item takes no width in the container's max-content
+ * measurement. A nav link carrying a visually-hidden "1 of 9" label (position:absolute,
+ * 1px) added its text to the nested container's basis, so the menu measured ~150px too
+ * wide and squeezed its neighbour: "Log in" wrapped onto two lines. Four rows (three
+ * links + one label) means nothing wrapped. */
+static void test_dump_layout_oof_label_does_not_widen_nested_container(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><head><style>"
+        "*{box-sizing:border-box}body{margin:0;font:16px sans-serif}"
+        ".w{display:flex;justify-content:space-between;width:210px}"
+        ".m{display:block;margin:0 auto}"
+        "ul{margin:0;padding:0;list-style:none;display:flex;flex-flow:wrap}"
+        ".l{display:flex;padding:0 4px;text-decoration:none}"
+        ".sr{position:absolute;width:1px;height:1px;overflow:hidden;white-space:nowrap}"
+        ".b{padding:0 4px}"
+        "</style></head><body><div class=\"w\"><div class=\"m\"><ul>"
+        "<li><a class=\"l\" href=\"#\">One<span class=\"sr\">1 of 9 hidden</span></a></li>"
+        "<li><a class=\"l\" href=\"#\">Two<span class=\"sr\">2 of 9 hidden</span></a></li>"
+        "<li><a class=\"l\" href=\"#\">Six<span class=\"sr\">3 of 9 hidden</span></a></li>"
+        "</ul></div><div class=\"b\">Log in</div></div></body></html>";
+    const char *path = "__freedom_oflabel.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[16384];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_oflabel.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    const char *nr = strstr(out, "nrow=");
+    assert_non_null(nr);
+    int rows = atoi(nr + 5);
+    assert_int_equal(rows, 4);
+    unlink(path);
+}
+
 /* A <br> that begins a line leaves an empty line box (CSS 2.1 9.4.2): block,
  * empty line, text = three rows. */
 static void test_dump_layout_br_after_block_is_a_line(void **state) {
@@ -3152,6 +3499,7 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_flex_item_inline_svg_shares_line),
         cmocka_unit_test(test_dump_layout_br_after_block_is_a_line),
         cmocka_unit_test(test_dump_layout_inline_input_shares_line),
+        cmocka_unit_test(test_dump_layout_oof_label_does_not_widen_nested_container),
         cmocka_unit_test(test_dump_layout_shrink_pill_nested_container),
         cmocka_unit_test(test_help),
         cmocka_unit_test(test_version),
@@ -3164,6 +3512,12 @@ int main(void) {
         cmocka_unit_test(test_download_pdf_local),
         cmocka_unit_test(test_download_pdf_requires_path),
         cmocka_unit_test(test_download_png_local),
+        cmocka_unit_test(test_pre_leading_spaces_indent_ink),
+        cmocka_unit_test(test_grid_item_nested_box_keeps_padding),
+        cmocka_unit_test(test_fit_content_grid_is_track_wide_and_centered),
+        cmocka_unit_test(test_line_height_leading_is_split_above_and_below),
+        cmocka_unit_test(test_inline_horizontal_padding_spaces_neighbours),
+        cmocka_unit_test(test_inline_box_paints_padding_around_text),
         cmocka_unit_test(test_download_png_images_local),
         cmocka_unit_test(test_download_png_negative_zindex_paints_behind_inflow),
         cmocka_unit_test(test_download_png_group_opacity_blends_with_background),

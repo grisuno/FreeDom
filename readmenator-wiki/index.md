@@ -1,30 +1,30 @@
 # Second Brain
 
-*Last synthesized: 2026-10-17 | 272 files | 11 concept pages | offline, zero tokens*
+*Last synthesized: 2026-10-18 | 275 files | 11 concept pages | offline, zero tokens*
 
 > Raw sources -> readmenator wiki -> links (Karpathy LLM Wiki Pattern, deterministic).
 > Start here, then open one community page. Prefer grep over full reads.
 
 ## Vault Overview
 
-The codebase centres on `browser_ui.c`, `css.h`, `tab.c`. Architecturally it is 6 layers, dominant utility (161 files) across 11 import-based communities. Recorded risk surface: 0 security findings and 1 dependency cycles.
+The codebase centres on `browser_ui.c`, `css.h`, `tab.c`. Architecturally it is 6 layers, dominant utility (164 files) across 11 import-based communities. Recorded risk surface: 0 security findings and 1 dependency cycles.
 
 Surprising tissue lives between src, include: css, include: browser_ui: 20 extracted cross-community imports and 0 inferred bridges. Follow `connections.json` sorted by strength before refactoring.
 
-Open work clusters around documentation (12% file coverage), 0 security findings, 4 taint paths, and 5 suggested exploration questions in `queries.md`.
+Open work clusters around documentation (13% file coverage), 0 security findings, 4 taint paths, and 5 suggested exploration questions in `queries.md`.
 
 ## Stats
 
 | Metric | Value |
 |--------|-------|
-| Files | 272 |
-| Symbols | 6601 |
+| Files | 275 |
+| Symbols | 6621 |
 | Resolved imports | 527 |
 | Languages | c, h, py, sh |
 | Communities | 11 |
-| Doc coverage | 12% (33/272 files) |
+| Doc coverage | 13% (36/275 files) |
 | Security findings | 0 |
-| Estimated read cost | ~193133 tokens (chars/4, offline so $0) |
+| Estimated read cost | ~194288 tokens (chars/4, offline so $0) |
 | Large files (>256KB, maybe generated) | 4: `browser_ui.c`, `css.c`, `page_view.c`, `test_css.c` |
 
 ## Reading Order
@@ -50,17 +50,17 @@ readmenator query "<question>" --target freedom-0.0.3
 - [include: secure_fetch (10 files, cohesion 0.62)](./community_7_include_secure_fetch.md)
 - [include: download (8 files, cohesion 0.78)](./community_8_include_download.md)
 - [include: prefetch (8 files, cohesion 0.64)](./community_9_include_prefetch.md)
-- [orphans (12 files, cohesion 0.00)](./community_10_orphans.md)
+- [orphans (15 files, cohesion 0.00)](./community_10_orphans.md)
 
 ## God Nodes
 
 | File | Score |
 |------|-------|
-| `gui/browser_ui.c` | 149.0 (large, maybe generated) |
+| `gui/browser_ui.c` | 149.4 (large, maybe generated) |
 | `include/css.h` | 87.8 |
 | `src/tab.c` | 58.2 |
 | `src/css.c` | 54.4 (large, maybe generated) |
-| `src/page_view.c` | 53.6 (large, maybe generated) |
+| `src/page_view.c` | 53.9 (large, maybe generated) |
 
 ## Strongest Connections
 

@@ -278,9 +278,12 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_ws_hub.c` -> cmocka.h, poll.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h, time.h
 - `tests/test_zoom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tools/ffgeom.py` -> re, struct, subprocess, sys, zlib
+- `tools/ffq.py` -> os, selenium, selenium.webdriver.firefox.options, selenium.webdriver.firefox.service, shutil, sys
+- `tools/ffshot.py` -> os, selenium, selenium.webdriver.firefox.options, selenium.webdriver.firefox.service, shutil, sys
 - `tools/gen_psl.c` -> stdio.h, stdlib.h, string.h
 - `tools/mutate.py` -> os, re, shutil, subprocess, sys
 - `tools/pngdiff.c` -> math.h, png.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tools/pngprof.py` -> struct, sys, zlib
+- `tools/prune.py` -> lxml, sys
 - `tools/snapshot.py` -> re, sys, urllib.parse, urllib.request
 

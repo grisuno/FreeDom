@@ -18,6 +18,20 @@
   - `bit` (function, line 206) `def bit(grid_row, cell, origin)`
   - `word` (function, line 209) `def word(grid_row, origin)`
 
+## tools/ffq.py
+- Doc: ffq -- ask Firefox what it computed, as TEXT.
+- Layer: utility
+- Language: py
+- Symbols:
+  - `main` (function, line 22) `def main()`
+
+## tools/ffshot.py
+- Doc: ffshot -- full-page Firefox screenshot at a FIXED viewport, for `make parity`/`make wpt`.
+- Layer: utility
+- Language: py
+- Symbols:
+  - `main` (function, line 24) `def main()`
+
 ## tools/gen_psl.c
 - Doc: sort_unique: v->cap = v->cap ? v->cap * 2 : 1024; v->items = (char **)realloc(v->items, v->cap *...
 - Layer: utility
@@ -73,6 +87,13 @@
   - `lum` (function, line 95) `def lum(p)`
   - `render_glyph` (function, line 99) `def render_glyph(v)`
   - `main` (function, line 109) `def main(argv)`
+
+## tools/prune.py
+- Doc: prune -- cut a corpus page down to ONE subtree, keeping its whole ancestor chain.
+- Layer: utility
+- Language: py
+- Symbols:
+  - `main` (function, line 21) `def main()`
 
 ## tools/snapshot.py
 - Doc: Freeze a live page into one self-contained HTML file for `make parity`.

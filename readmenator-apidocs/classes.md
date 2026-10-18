@@ -368,6 +368,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`rc_defer_col`](modules/gui.browser_ui.c.md#rc_defer_col) struct in `gui/browser_ui.c`
 - [`rc_ext`](modules/gui.browser_ui.c.md#rc_ext) struct in `gui/browser_ui.c`
 - [`rc_frag`](modules/gui.browser_ui.c.md#rc_frag) struct in `gui/browser_ui.c`
+- [`rc_ibox`](modules/gui.browser_ui.c.md#rc_ibox) struct in `gui/browser_ui.c`
 - [`rc_layout`](modules/gui.browser_ui.c.md#rc_layout) struct in `gui/browser_ui.c`
 - [`rc_oof_sub`](modules/gui.browser_ui.c.md#rc_oof_sub) struct in `gui/browser_ui.c`
 - [`rc_oof_sub`](modules/gui.browser_ui.c.md#rc_oof_sub) struct in `gui/browser_ui.c`

@@ -69,20 +69,20 @@ This community groups 47 file(s) rooted at `include` with dominant language c (c
 - `css_status` (enum, `include/css.h:28`)
 - `css_align` (enum, `include/css.h:34`)
 - `css_display` (enum, `include/css.h:42`)
-- `css_justify` (enum, `include/css.h:64`)
-- `CSS_GAP_MAX` (macro, `include/css.h:75`) `#define CSS_GAP_MAX`
-- `CSS_GRID_COLS_MAX` (macro, `include/css.h:76`) `#define CSS_GRID_COLS_MAX`
-- `CSS_GRID_TRACKS_MAX` (macro, `include/css.h:77`) `#define CSS_GRID_TRACKS_MAX`
-- `verbatim` (function, `include/css.h:79`) `* the quoted row strings verbatim (flex_layout parses them);`
-- `CSS_GRID_AREAS_MAX` (macro, `include/css.h:83`) `#define CSS_GRID_AREAS_MAX`
-- `CSS_GRAD_STOPS_MAX` (macro, `include/css.h:84`) `#define CSS_GRAD_STOPS_MAX`
-- `CSS_LINE_MIN` (macro, `include/css.h:85`) `#define CSS_LINE_MIN`
-- `CSS_LINE_MAX` (macro, `include/css.h:86`) `#define CSS_LINE_MAX`
-- `CSS_LINE_ABS_BASE` (macro, `include/css.h:91`) `#define CSS_LINE_ABS_BASE`
-- `CSS_LINE_ABS_MAX_PX` (macro, `include/css.h:92`) `#define CSS_LINE_ABS_MAX_PX`
-- `CSS_SVG_PAINT_NONE` (macro, `include/css.h:93`) `#define CSS_SVG_PAINT_NONE`
-- `CSS_FONT_LIST_MAX` (macro, `include/css.h:94`) `#define CSS_FONT_LIST_MAX`
-- `CSS_URL_MAX` (macro, `include/css.h:95`) `#define CSS_URL_MAX`
+- `css_justify` (enum, `include/css.h:69`)
+- `CSS_GAP_MAX` (macro, `include/css.h:80`) `#define CSS_GAP_MAX`
+- `CSS_GRID_COLS_MAX` (macro, `include/css.h:81`) `#define CSS_GRID_COLS_MAX`
+- `CSS_GRID_TRACKS_MAX` (macro, `include/css.h:82`) `#define CSS_GRID_TRACKS_MAX`
+- `verbatim` (function, `include/css.h:84`) `* the quoted row strings verbatim (flex_layout parses them);`
+- `CSS_GRID_AREAS_MAX` (macro, `include/css.h:88`) `#define CSS_GRID_AREAS_MAX`
+- `CSS_GRAD_STOPS_MAX` (macro, `include/css.h:89`) `#define CSS_GRAD_STOPS_MAX`
+- `CSS_LINE_MIN` (macro, `include/css.h:90`) `#define CSS_LINE_MIN`
+- `CSS_LINE_MAX` (macro, `include/css.h:91`) `#define CSS_LINE_MAX`
+- `CSS_LINE_ABS_BASE` (macro, `include/css.h:96`) `#define CSS_LINE_ABS_BASE`
+- `CSS_LINE_ABS_MAX_PX` (macro, `include/css.h:97`) `#define CSS_LINE_ABS_MAX_PX`
+- `CSS_SVG_PAINT_NONE` (macro, `include/css.h:98`) `#define CSS_SVG_PAINT_NONE`
+- `CSS_FONT_LIST_MAX` (macro, `include/css.h:99`) `#define CSS_FONT_LIST_MAX`
+- `CSS_URL_MAX` (macro, `include/css.h:100`) `#define CSS_URL_MAX`
 
 ## Internal vs External Edges
 

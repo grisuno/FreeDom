@@ -14,7 +14,6 @@
 - [`acting`](modules/include.js_location.h.md#acting) function in `include/js_location.h`
 - [`action`](modules/include.link_nav.h.md#action) type_alias in `include/link_nav.h`
 - [`active`](modules/include.frame_clock.h.md#active) type_alias in `include/frame_clock.h`
-- [`add`](modules/gui.browser_ui.c.md#add) function in `gui/browser_ui.c`
 - [`address`](modules/include.net_realm.h.md#address) function in `include/net_realm.h`
 - [`address`](modules/src.page_view.c.md#address) function in `src/page_view.c`
 - [`again`](modules/gui.browser_ui.c.md#again) function in `gui/browser_ui.c`
@@ -29,6 +28,7 @@
 - [`anyway`](modules/include.prefs.h.md#anyway) function in `include/prefs.h`
 - [`applies`](modules/gui.browser_ui.c.md#applies) function in `gui/browser_ui.c`
 - [`approximation`](modules/gui.browser_ui.c.md#approximation) function in `gui/browser_ui.c`
+- [`area`](modules/gui.browser_ui.c.md#area) function in `gui/browser_ui.c`
 - [`arrives`](modules/gui.browser_ui.c.md#arrives) function in `gui/browser_ui.c`
 - [`ASCII`](modules/fuzz.fuzz_text_shape.c.md#ascii) function in `fuzz/fuzz_text_shape.c`
 - [`assumed`](modules/src.url.c.md#assumed) function in `src/url.c`
@@ -523,6 +523,7 @@
 - [`CSS_INIT_RULES`](modules/src.css.c.md#css_init_rules) macro in `src/css.c`
 - [`CSS_INIT_SELS`](modules/src.css.c.md#css_init_sels) macro in `src/css.c`
 - [`CSS_INLINE_BG_URLS`](modules/include.css_decl.h.md#css_inline_bg_urls) macro in `include/css_decl.h`
+- [`css_inline_boxdeco`](modules/src.page_view.c.md#css_inline_boxdeco) function in `src/page_view.c`
 - [`CSS_INLINE_DECLS`](modules/src.css.c.md#css_inline_decls) macro in `src/css.c`
 - [`css_isolation`](modules/include.css.h.md#css_isolation) enum in `include/css.h`
 - [`css_justify`](modules/include.css.h.md#css_justify) enum in `include/css.h`
@@ -1655,10 +1656,13 @@
 - [`main`](modules/gui.freedom_view.c.md#main) function in `gui/freedom_view.c`
 - [`main`](modules/src.freedom.c.md#main) function in `src/freedom.c`
 - [`main`](modules/tools.ffgeom.py.md#main) function in `tools.ffgeom`
+- [`main`](modules/tools.ffq.py.md#main) function in `tools.ffq`
+- [`main`](modules/tools.ffshot.py.md#main) function in `tools.ffshot`
 - [`main`](modules/tools.gen_psl.c.md#main) function in `tools/gen_psl.c`
 - [`main`](modules/tools.mutate.py.md#main) function in `tools.mutate`
 - [`main`](modules/tools.pngdiff.c.md#main) function in `tools/pngdiff.c`
 - [`main`](modules/tools.pngprof.py.md#main) function in `tools.pngprof`
+- [`main`](modules/tools.prune.py.md#main) function in `tools.prune`
 - [`main`](modules/tools.snapshot.py.md#main) function in `tools.snapshot`
 - [`map`](modules/include.import_map.h.md#map) function in `include/import_map.h`
 - [`margin`](modules/gui.browser_ui.c.md#margin) function in `gui/browser_ui.c`
@@ -1709,6 +1713,7 @@
 - [`node`](modules/include.box_tree.h.md#node) function in `include/box_tree.h`
 - [`node`](modules/include.js_geom.h.md#node) type_alias in `include/js_geom.h`
 - [`NONE`](modules/src.box_style.c.md#none) macro in `src/box_style.c`
+- [`none`](modules/src.page_view.c.md#none) function in `src/page_view.c`
 - [`nonzero`](modules/include.page_view.h.md#nonzero) function in `include/page_view.h`
 - [`nr_classify_host`](modules/src.net_realm.c.md#nr_classify_host) function in `src/net_realm.c`
 - [`nr_classify_url`](modules/src.net_realm.c.md#nr_classify_url) function in `src/net_realm.c`
@@ -2353,6 +2358,8 @@
 - [`RC_FLOAT_FIT_MIN`](modules/gui.browser_ui.c.md#rc_float_fit_min) macro in `gui/browser_ui.c`
 - [`RC_FLOAT_MAX`](modules/gui.browser_ui.c.md#rc_float_max) macro in `gui/browser_ui.c`
 - [`rc_frag`](modules/gui.browser_ui.c.md#rc_frag) struct in `gui/browser_ui.c`
+- [`rc_ibox`](modules/gui.browser_ui.c.md#rc_ibox) struct in `gui/browser_ui.c`
+- [`RC_IBOX_MAX`](modules/gui.browser_ui.c.md#rc_ibox_max) macro in `gui/browser_ui.c`
 - [`rc_layout`](modules/gui.browser_ui.c.md#rc_layout) struct in `gui/browser_ui.c`
 - [`RC_MAX_OUT_OF_FLOW`](modules/gui.browser_ui.c.md#rc_max_out_of_flow) macro in `gui/browser_ui.c`
 - [`rc_oof_sub`](modules/gui.browser_ui.c.md#rc_oof_sub) struct in `gui/browser_ui.c`

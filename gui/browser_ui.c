@@ -3433,6 +3433,25 @@ typedef struct rc_open_box {
 
 /* Max box-nesting depth the painter composes (anti-DoS; deeper boxes are clamped to
  * the innermost open box, so a pathological tree never overflows the stack). */
+/* One inline-level box of the open line (see rc_state.ibx). */
+typedef struct rc_ibox {
+    const pv_box_def *def;
+    int    id;
+    size_t frag0;
+    /* Fragment index one past the box's last fragment, or (size_t)-1 while it is
+     * still open. Without it the rect was measured at flush_line over EVERY
+     * fragment on the line, so the badge's pill swallowed the rest of the sentence. */
+    size_t frag1;
+    double pen0;        /* pen at the border-box left edge */
+    double pad_l;       /* left padding + border: the text starts this far in */
+    double pad_r;       /* right padding + border, added once the box closes */
+    double mar_r;       /* right margin, spent after the box (outside its border box) */
+    /* Tallest font extents of the fragments it produced: an inline box's content
+     * area is the font's ascent + descent, not the whole line box (CSS 2.1 10.6.1). */
+    double max_asc, max_desc;
+} rc_ibox;
+#define RC_IBOX_MAX 16
+
 #define RC_BOX_STACK_MAX 16
 
 /* Live float exclusions one layout state tracks (anti-DoS). A ninth float is
@@ -3495,23 +3514,19 @@ typedef struct rc_state {
      * did not open a line, so `<strong>bold</strong>,` painted as `bold ,`.
      * spec/page_view.md "Colapso de espacio en el borde entre runs". */
     int    prev_ended_ws;
-    /* INLINE-LEVEL box currently spanning the open line (display:inline-block sitting
-     * in a line of text: a badge, a pill, a chip). It is deliberately NOT on
-     * box_stack: a block box flushes the line and insets the content rect, which is
-     * exactly what must not happen to something that flows inside a sentence. Its
-     * rect is materialised at flush_line from the fragments it produced.
-     * inline_box_def == NULL = none open -- a NULL sentinel, not an id, so the
-     * memset(0) every rc_state gets means "none" without a separate init.
+    /* INLINE-LEVEL boxes of the open line: a display:inline-block sitting in a line
+     * of text (a badge, a pill, a chip) or a display:inline element with box-model
+     * decoration (a link with padding, a tag with a border). They are deliberately
+     * NOT on box_stack: a block box flushes the line and insets the content rect,
+     * which is exactly what must not happen to something that flows inside a
+     * sentence. Each rect is materialised at flush_line from the fragments it
+     * produced. n_ibx == 0 means none -- a count, not a pointer, so the memset(0)
+     * every rc_state gets already means "none". ibx_open is the 1-based index of the
+     * box still collecting fragments (0 = every box on the line is closed).
      * spec/page_view.md "Cajas de nivel inline". */
-    const pv_box_def *inline_box_def;
-    int    inline_box_id;
-    size_t inline_box_frag0;
-    /* Fragment index one past the box's last fragment, or (size_t)-1 while it is
-     * still open. Without it the rect was measured at flush_line over EVERY
-     * fragment on the line, so the badge's pill swallowed the rest of the sentence. */
-    size_t inline_box_frag1;
-    double inline_box_pen0;
-    double inline_box_pad_r;   /* right padding+border to add once it closes */
+    rc_ibox ibx[RC_IBOX_MAX];
+    int    n_ibx;
+    int    ibx_open;
     size_t line_first;
     /* Box engine (Hito 23b-8 Step D) visibility: hidden_from is 0 (not hidden) or the
      * box_stack depth (1-based) at which a visibility:hidden box was opened -- every
@@ -3918,37 +3933,51 @@ static void block_margins(const ui_theme *th, const rd_block *b,
 
 static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def);
 
-/* Materialises the currently open inline-level box as an rc_box spanning the
- * fragments it produced on the open line, then clears it. The rect is known only
- * now: x/width come from the fragment extents, y/height from the row the caller is
- * about to add (top/h passed in). A box that survived a line wrap simply ends at the
- * wrap -- multi-line inline boxes are out of scope (v1). */
-static void close_inline_box(rc_layout *L, rc_state *s, double row_top, double row_h) {
-    const pv_box_def *d = s->inline_box_def;
-    if (d == NULL) return;
-    int bid = s->inline_box_id;
-    s->inline_box_def = NULL;
-    double x0 = s->inline_box_pen0;
-    double x1 = x0;
-    size_t fend = (s->inline_box_frag1 != (size_t)-1) ? s->inline_box_frag1 : L->nfrag;
-    if (fend > L->nfrag) fend = L->nfrag;
-    for (size_t i = s->inline_box_frag0; i < fend; ++i) {
-        double e = L->frags[i].x + L->frags[i].width;
-        if (e > x1) x1 = e;
+/* Materialises every inline-level box of the line as an rc_box spanning the
+ * fragments it produced, then clears them. The rect is known only now: x/width come
+ * from the fragment extents, y/height from the row the caller is about to add
+ * (top/h/baseline passed in). An inline-block spans the whole row; a display:inline
+ * box spans its CONTENT area (the font's ascent + descent plus its vertical padding
+ * and border), centred on the baseline, as in CSS 2.1 10.6.1. A box that survived a
+ * line wrap simply ends at the wrap -- multi-line inline boxes are out of scope. */
+static void close_inline_boxes(rc_layout *L, rc_state *s, double row_top, double row_h,
+                               double baseline) {
+    for (int bi = 0; bi < s->n_ibx; ++bi) {
+        const rc_ibox *ib = &s->ibx[bi];
+        const pv_box_def *d = ib->def;
+        if (d == NULL) continue;
+        double x0 = ib->pen0;
+        double x1 = x0 + ib->pad_l;
+        size_t fend = (ib->frag1 != (size_t)-1) ? ib->frag1 : L->nfrag;
+        if (fend > L->nfrag) fend = L->nfrag;
+        for (size_t i = ib->frag0; i < fend; ++i) {
+            double e = L->frags[i].x + L->frags[i].width;
+            if (e > x1) x1 = e;
+        }
+        x1 += ib->pad_r;
+        if (x1 <= x0) continue;               /* produced nothing: no box to paint */
+        rc_box *bx = rc_add_box(L);
+        if (bx == NULL) continue;
+        memset(bx, 0, sizeof *bx);
+        bx->block_id = ib->id;
+        bx->x = s->indent_px + x0;
+        bx->top = row_top;
+        bx->w = x1 - x0;
+        bx->h = row_h;
+        if (d->display == CSS_DISP_INLINE_BOX) {
+            double pt = box_pad_px(d->pad_t, d->pad_t_pct, 0.0) + box_edge_px(d->bord_tw);
+            double pb = box_pad_px(d->pad_b, d->pad_b_pct, 0.0) + box_edge_px(d->bord_bw);
+            double asc = (ib->max_asc > 0.0) ? ib->max_asc : 0.0;
+            double desc = (ib->max_desc > 0.0) ? ib->max_desc : 0.0;
+            bx->top = row_top + baseline - asc - pt;
+            bx->h = asc + desc + pt + pb;
+        }
+        rc_box_copy_decoration(bx, d);
+        bx->hidden = (s->hidden_from != 0) ||
+                     (d->visibility == CSS_VIS_HIDDEN || d->visibility == CSS_VIS_COLLAPSE);
     }
-    x1 += s->inline_box_pad_r;
-    if (x1 <= x0) return;                     /* produced nothing: no box to paint */
-    rc_box *bx = rc_add_box(L);
-    if (bx == NULL) return;
-    memset(bx, 0, sizeof *bx);
-    bx->block_id = bid;
-    bx->x = s->indent_px + x0;
-    bx->top = row_top;
-    bx->w = x1 - x0;
-    bx->h = row_h;
-    rc_box_copy_decoration(bx, d);
-    bx->hidden = (s->hidden_from != 0) ||
-                 (d->visibility == CSS_VIS_HIDDEN || d->visibility == CSS_VIS_COLLAPSE);
+    s->n_ibx = 0;
+    s->ibx_open = 0;
 }
 
 /* The flow left the open inline-level box (this block belongs to a different one):
@@ -3961,11 +3990,13 @@ static void close_inline_box(rc_layout *L, rc_state *s, double row_top, double r
  * paragraph -- so hanging the close off reconcile let the pill's rect swallow the
  * rest of the sentence. */
 static void leave_inline_box(rc_layout *L, rc_state *s, int block_id) {
-    if (s->inline_box_def == NULL) return;
-    if (block_id == s->inline_box_id) return;
-    if (s->inline_box_frag1 != (size_t)-1) return;
-    s->inline_box_frag1 = L->nfrag;
-    s->pen_x += s->inline_box_pad_r;
+    if (s->ibx_open <= 0) return;
+    rc_ibox *ib = &s->ibx[s->ibx_open - 1];
+    if (block_id == ib->id) return;
+    if (ib->frag1 != (size_t)-1) return;
+    ib->frag1 = L->nfrag;
+    s->pen_x += ib->pad_r + ib->mar_r;
+    s->ibx_open = 0;
 }
 
 static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
@@ -3988,12 +4019,19 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
             ? (s->line_asc + s->line_desc) * (double)s->line_scale / 100.0
             : natural;
     }
+    /* CSS 2.1 10.8.1: the leading (line box height minus the glyphs' ascent +
+     * descent) is split in half above and below, so the baseline sits half the
+     * leading lower than the glyph ascent alone puts it. Negative when the
+     * line-height is tighter than the font: the glyphs overflow both sides. */
+    double half_leading = (h - (s->line_asc + s->line_desc)) / 2.0;
+    double baseline_off = s->line_asc + half_leading;
     /* An inline-level box ends at the line end at the latest: its rect needs the
-     * row's top and height, which are only known now. */
-    close_inline_box(L, s, s->cur_top, h);
+     * row's top, height and baseline, which are only known now. */
+    close_inline_boxes(L, s, s->cur_top, h, baseline_off);
     rc_row *r = rc_add_row(L);
     if (r != NULL) {
-        r->kind = RC_TEXT; r->top = s->cur_top; r->height = h; r->ascent = s->line_asc;
+        r->kind = RC_TEXT; r->top = s->cur_top; r->height = h;
+        r->ascent = baseline_off;
         r->first = s->line_first; r->count = L->nfrag - s->line_first;
         r->banner = s->banner;
         /* Only a line whose fragments all share one background gets a full-width
@@ -4128,6 +4166,11 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
         f->hidden = pv_content_hidden(s->hidden_from != 0, x->visibility);
     }
     s->pen_x += width;
+    if (s->ibx_open > 0) {
+        rc_ibox *ib = &s->ibx[s->ibx_open - 1];
+        if (fe->ascent > ib->max_asc) ib->max_asc = fe->ascent;
+        if (fe->descent > ib->max_desc) ib->max_desc = fe->descent;
+    }
     /* line-height:normal is the face's ascent + descent + line gap (what Gecko
      * uses), the gap split as half-leading above and below. Noto's gap is 0, so
      * the generic faces are unchanged; Liberation Sans (Arial) has one. */
@@ -4203,6 +4246,18 @@ static const char FLOW_ELLIPSIS[] = "\xE2\x80\xA6";
  * is appended, and the rest of this call's text is dropped (single-line
  * truncation; text from a LATER sibling run on the same visual line, if any, is a
  * known v1 gap -- see spec/css.md). */
+/* Advances the pen by the inter-word space `adv` before a word. The space belongs
+ * to the text BEFORE an inline box that has not produced a fragment yet -- it
+ * separates the box from what precedes it -- so the box's left edge moves with it
+ * instead of keeping the gap inside its own padding. */
+static void ibx_advance(const rc_layout *L, rc_state *s, double adv) {
+    if (adv > 0.0 && s->ibx_open > 0) {
+        rc_ibox *ib = &s->ibx[s->ibx_open - 1];
+        if (ib->frag0 == L->nfrag) ib->pen0 += adv;
+    }
+    s->pen_x += adv;
+}
+
 static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                       const char *text, double size, int bold, int italic, int underline,
                       int strike, int overline,
@@ -4281,6 +4336,11 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
     int first_word = 1;
     while (i < n) {
         if (is_pre) {
+            /* The pen must advance on an OPEN line: open_line resets it to the line
+             * start, so indenting first and opening after threw the indent away. */
+            size_t k = i;
+            while (k < n && src[k] == ' ') ++k;
+            if (k > i && k < n) open_line(L, s);
             while (i < n && src[i] == ' ') { ++i; s->pen_x += space_w; }
             if (i >= n) break;
         } else {
@@ -4317,7 +4377,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
              * not: it wraps the whole word to the next line (the else branch) and only
              * splits it there if it is wider than a whole line -- see the block below. */
             if (s->break_words == 1 && content_w > 0.0) {
-                s->pen_x += adv;
+                ibx_advance(L, s, adv);
                 double budget = line_limit(s, content_w) - s->pen_x;
                 size_t p = ws;
                 double acc = 0.0;
@@ -4369,7 +4429,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
             s->pen_x + adv + ww > line_limit(s, content_w)) {
             double ell_w = measure_slice(cr, FLOW_ELLIPSIS, sizeof FLOW_ELLIPSIS - 1);
             double budget = line_limit(s, content_w) - s->pen_x - adv - ell_w;
-            s->pen_x += adv;
+            ibx_advance(L, s, adv);
             size_t take = 0;
             double acc = 0.0;
             size_t p = ws;
@@ -4393,7 +4453,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         }
 
         if (s->break_words && !line_has_frag && ww > line_limit(s, content_w) && content_w > 0.0) {
-            s->pen_x += adv;
+            ibx_advance(L, s, adv);
             size_t p = ws;
             while (p < ws + wl) {
                 size_t chunk_start = p;
@@ -4415,7 +4475,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
             continue;
         }
 
-        s->pen_x += adv;
+        ibx_advance(L, s, adv);
         if (smallcaps)
             (void)flow_smallcaps_word(cr, L, s, &fe, src + ws, wl, size, bold, italic,
                                       underline, strike, overline, color, href, node_id,
@@ -4960,16 +5020,31 @@ static int band_common_box(const rd_doc *doc, size_t start, size_t end);
 static void rc_box_context(const rc_state *s, double content_w,
                            double *out_l, double *out_w);
 
+/* Whether a run is real content, as opposed to the empty or whitespace-only
+ * placeholder a decorated box with nothing in it emits: only content makes a box
+ * that does not enclose it a poor candidate for the item's own box. */
+static int run_is_content(const rd_block *bk) {
+    if (bk->kind != RD_PARAGRAPH && bk->kind != RD_LINK && bk->kind != RD_HEADING &&
+        bk->kind != RD_NOTICE)
+        return 1;                               /* image, svg, control, video ... */
+    if (bk->text == NULL) return 0;
+    for (const char *c = bk->text; *c != '\0'; ++c)
+        if (*c != ' ' && *c != '\t' && *c != '\n' && *c != '\r') return 1;
+    return 0;
+}
+
 static int item_root_box_pass(const rd_doc *doc, size_t b0, size_t b1, int cbox,
                               int skip_oof, int *any) {
     int best = -1;
     int best_depth = 1 << 30;
     int distinct = 0;   /* two different candidates at the shallowest depth */
+    int unboxed = 0;    /* an in-flow run that no candidate box encloses */
     *any = 0;
     for (size_t k = b0; k < b1; ++k) {
         int bid = rd_at(doc, k)->block_id;
-        if (bid < 0) continue;
         if (skip_oof && block_leaves_flow(doc, rd_at(doc, k))) continue;
+        const int content = run_is_content(rd_at(doc, k));
+        if (bid < 0) { if (content) unboxed = 1; continue; }
         /* Walk out to the box that is a CHILD of the container box (or, with no
          * container box, to the outermost box). Any box at or above the container
          * belongs to the container, not to this item. */
@@ -4988,7 +5063,7 @@ static int item_root_box_pass(const rd_doc *doc, size_t b0, size_t b1, int cbox,
          * not inside any item box: the walk ran out to the ROOT, and taking <html>
          * as the item's box re-opened it (min-height:100vh) inside the card. */
         if (cbox >= 0 && !found) cur = -1;
-        if (cur < 0) continue;
+        if (cur < 0) { if (content) unboxed = 1; continue; }
         int depth = 0;
         for (int id = cur; id >= 0 && depth < 256; ++depth) {
             const pv_box_def *d = rd_box_at(doc, (size_t)id);
@@ -5002,7 +5077,10 @@ static int item_root_box_pass(const rd_doc *doc, size_t b0, size_t b1, int cbox,
      * with no box of its own whose children are SIBLING boxes (a `.txt` wrapper
      * holding two decorated bars) has none: taking the first child as "the item's
      * box" made it the stop for every later child, which then never opened. */
-    return distinct ? -1 : best;
+    /* A box only is the item's box when it encloses EVERY in-flow run: a paragraph
+     * before a decorated <pre> is outside that box, and taking the <pre>'s as the
+     * item's own opened it at the item's top, over the paragraph. */
+    return (distinct || unboxed) ? -1 : best;
 }
 
 /* The in-flow runs decide the item's box: an out-of-flow run inside the item (an
@@ -5499,6 +5577,13 @@ static double nested_cont_basis(cairo_t *cr, const browser_window *w,
     size_t n_items = 0;
     size_t k = b0;
     while (k < b1) {
+        /* An out-of-flow run (a visually-hidden `sr-only` label, a corner badge) is
+         * not an item of this container and takes no width in it: counting it as an
+         * item added its text to the container's max-content, so a nav of links
+         * each carrying a hidden "1 of 9" measured 150px too wide and squeezed
+         * its neighbours. */
+        if (item_at_level(doc, rd_at(doc, k), cid) < 0 &&
+            block_leaves_flow(doc, rd_at(doc, k))) { ++k; continue; }
         int it = item_at_level(doc, rd_at(doc, k), cid);
         size_t e = k + 1;
         while (e < b1 && it >= 0 && item_at_level(doc, rd_at(doc, e), cid) == it) ++e;
@@ -6588,7 +6673,20 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                  * emits its atomic row here, sized to the element, rather than flowing
                  * as zero-width text -- the same row the top-level path produces, so the
                  * translation pass places it in the column and the painter blits it. */
-                flow_nested_block(cr, w, L, &si, th, doc, m, seg_end, inner_w);
+                /* A box opened inside the item already placed its content rect
+                 * (padding, border, its own width cap): the run flows there, as the
+                 * top-level loop does, or the text of every padded block nested in a
+                 * card hugs the box's edge instead of its padding. */
+                double nest_w = inner_w;
+                si.indent_px = 0.0;
+                if (si.box_depth > 0) {
+                    double nest_l, nest_cw;
+                    rc_box_context(&si, inner_w, &nest_l, &nest_cw);
+                    si.indent_px = nest_l;
+                    si.bg_w = nest_cw;
+                    nest_w = (nest_cw < 1.0) ? 1.0 : nest_cw;
+                }
+                flow_nested_block(cr, w, L, &si, th, doc, m, seg_end, nest_w);
             }
             k = seg_end;
         }
@@ -6699,13 +6797,13 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         const bt_node *kid = &kids[pos_of[j]];
         for (size_t r = row_start[j]; r < row_start[j] + row_count[j]; ++r) {
             L->rows[r].top += base_top + kid->y + item_oy[j];
-            /* A recursed item's rows already carry the nested container's own x
-             * placement, so this level ADDS its column origin; a flat item has no
-             * x of its own and takes the column origin outright (unchanged). */
-            if (item_nested[j] || L->rows[r].x_local)
-                L->rows[r].x_off += origin_x + kid->x + item_ox[j];
-            else
-                L->rows[r].x_off  = origin_x + kid->x + item_ox[j];
+            /* Every row is item-local: a recursed item's rows carry the nested
+             * container's placement and a flat item's rows carry the inset of the
+             * boxes opened inside it (a padded <pre> after a paragraph), so this
+             * level ADDS its column origin. Taking it outright dropped that inset
+             * and the text of every nested padded box hugged its edge. */
+            (void)item_nested;
+            L->rows[r].x_off += origin_x + kid->x + item_ox[j];
         }
         /* Translate the boxes that opened inside this item into its column. */
         for (size_t bi = item_box_start[j]; bi < item_box_start[j] + item_box_count[j]
@@ -7344,6 +7442,23 @@ static double box_shrink_width(cairo_t *cr, const browser_window *w,
     size_t j = start;
     while (j < rd_count(doc) && box_path_has(doc, rd_at(doc, j)->block_id, box_id)) ++j;
     if (j <= start) return 0.0;
+    /* A grid container whose tracks are all fixed is as wide as them (CSS Sizing 3
+     * 5.1: the max-content of a grid is the sum of its track sizes plus gaps). The
+     * text measure below sees only the widest line, which sized a `fit-content`
+     * tab strip to a quarter of its own columns. */
+    for (size_t c = 0; c < rd_cont_count(doc); ++c) {
+        const pv_cont_def *cd = rd_cont_at(doc, c);
+        if (cd == NULL || cd->box_id != box_id || !cd->box_own ||
+            cd->display != BX_DISPLAY_GRID || cd->cols < 1 || cd->cols > PV_GRID_TRACKS)
+            continue;
+        double sum = 0.0;
+        int fixed = 1;
+        for (int t = 0; t < cd->cols; ++t) {
+            if (cd->col_w[t] > 0) sum += (double)cd->col_w[t];
+            else { fixed = 0; break; }
+        }
+        if (fixed) return sum + (double)(cd->gap > 0 ? cd->gap : 0) * (double)(cd->cols - 1);
+    }
     double tw = measure_item_content_w(cr, w, th, doc, start, j);
     /* Boxes contribute too (CSS Sizing 3 5.1): a descendant with a declared px
      * width adds that width plus the horizontal padding/border/margin of every box
@@ -7420,8 +7535,8 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
         /* The open inline-level box lives OFF the stack, so the common-prefix walk
          * cannot see it: a later run of the same box must continue it, not reopen it
          * as a block (which flushed the line after the first of two tags). */
-        if (s->inline_box_def != NULL && s->inline_box_id == path[k] &&
-            s->inline_box_frag1 == (size_t)-1)
+        if (s->ibx_open > 0 && s->ibx[s->ibx_open - 1].id == path[k] &&
+            s->ibx[s->ibx_open - 1].frag1 == (size_t)-1)
             break;
         /* An INLINE-LEVEL box sitting on a line that already has text (a badge, a
          * pill, a chip inside a sentence) must flow INSIDE that line: opening it as
@@ -7430,22 +7545,41 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
          * is tracked off the box stack and materialised at flush_line from the
          * fragments it produces. An inline-block that OPENS a line keeps the old
          * block treatment (shrink-wrapped and placed by text-align), which is what a
-         * standalone centred call-to-action button needs.
+         * standalone centred call-to-action button needs. A display:inline element
+         * is inline-level wherever it sits: it never opens a block, it opens the line
+         * it will flow on.
          * spec/page_view.md "Cajas de nivel inline". */
         /* Boxes INSIDE such an inline-block (a <summary> in lobste.rs' inline
          * `details.caches`) are internal to the atom and are not opened: opening
          * one as a block would flush the very line the atom sits on. */
-        if (d->display == CSS_DISP_INLINE_BLOCK &&
-            s->line_open && L->nfrag > s->line_first && s->inline_box_def == NULL) {
-            s->inline_box_def = d;
-            s->inline_box_id = path[k];
-            s->inline_box_frag0 = L->nfrag;
-            s->inline_box_frag1 = (size_t)-1;
-            s->inline_box_pen0 = s->pen_x;
-            double ipl = (d->pad_l > 0) ? (double)d->pad_l : 0.0;
-            double ipr = (d->pad_r > 0) ? (double)d->pad_r : 0.0;
-            s->inline_box_pad_r = ipr + box_edge_px(d->bord_rw);
-            s->pen_x += ipl + box_edge_px(d->bord_lw);
+        int ib_inline = (d->display == CSS_DISP_INLINE_BOX);
+        int ib_atom = (d->display == CSS_DISP_INLINE_BLOCK &&
+                       s->line_open && L->nfrag > s->line_first);
+        if ((ib_inline || ib_atom) && s->ibx_open == 0 && s->n_ibx < RC_IBOX_MAX) {
+            if (ib_inline) open_line(L, s);
+            double ictx_l, ictx_w;
+            rc_box_context(s, content_w, &ictx_l, &ictx_w);
+            double ipl = box_pad_px(d->pad_l, d->pad_l_pct, ictx_w);
+            double ipr = box_pad_px(d->pad_r, d->pad_r_pct, ictx_w);
+            /* page_view packs the horizontal inset as padding + margin, so the
+             * author margin is what is left once the padding is taken back out. */
+            double iml = bx_lp_px(d->box_l, d->box_l_pct, ictx_w) - ipl;
+            double imr = bx_lp_px(d->box_r, d->box_r_pct, ictx_w) - ipr;
+            if (iml < 0.0 || ib_atom) iml = 0.0;
+            if (imr < 0.0 || ib_atom) imr = 0.0;
+            s->pen_x += iml;
+            rc_ibox *ib = &s->ibx[s->n_ibx++];
+            memset(ib, 0, sizeof *ib);
+            ib->def = d;
+            ib->id = path[k];
+            ib->frag0 = L->nfrag;
+            ib->frag1 = (size_t)-1;
+            ib->pen0 = s->pen_x;
+            ib->pad_l = ipl + box_edge_px(d->bord_lw);
+            ib->pad_r = ipr + box_edge_px(d->bord_rw);
+            ib->mar_r = imr;
+            s->ibx_open = s->n_ibx;
+            s->pen_x += ib->pad_l;
             break;
         }
         double ctx_left, ctx_w;

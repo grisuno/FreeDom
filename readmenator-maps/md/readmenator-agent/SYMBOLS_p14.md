@@ -3,6 +3,23 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_pick_family_strong_vs_weak` | function | `tests/test_text_shape.c:282` | `static void test_pick_family_strong_vs_weak(void **state)` |
+| `test_pick_from_list_order_and_generic_stop` | function | `tests/test_text_shape.c:255` | `static void test_pick_from_list_order_and_generic_stop(void **state)` |
+| `test_segment_runs` | function | `tests/test_text_shape.c:359` | `static void test_segment_runs(void **state)` |
+| `test_shape_ascii` | function | `tests/test_text_shape.c:73` | `static void test_shape_ascii(void **state)` |
+| `test_webfont_register_find_clear` | function | `tests/test_text_shape.c:185` | `static void test_webfont_register_find_clear(void **state)` |
+| `test_webfont_rejects_bad_input` | function | `tests/test_text_shape.c:148` | `static void test_webfont_rejects_bad_input(void **state)` |
+| `main` | function | `tests/test_textfield.c:140` | `int main(void)` |
+| `test_backspace_delete` | function | `tests/test_textfield.c:76` | `static void test_backspace_delete(void **state)` |
+| `test_full_fails_closed` | function | `tests/test_textfield.c:113` | `static void test_full_fails_closed(void **state)` |
+| `test_init_and_accessors` | function | `tests/test_textfield.c:20` | `static void test_init_and_accessors(void **state)` |
+| `test_insert_sequence` | function | `tests/test_textfield.c:59` | `static void test_insert_sequence(void **state)` |
+| `test_move_saturates` | function | `tests/test_textfield.c:100` | `static void test_move_saturates(void **state)` |
+| `test_null_safe` | function | `tests/test_textfield.c:29` | `static void test_null_safe(void **state)` |
+| `test_set` | function | `tests/test_textfield.c:46` | `static void test_set(void **state)` |
+| `main` | function | `tests/test_tls_impersonate.c:218` | `int main(void)` |
+| `test_decode_rejects_bad_magic` | function | `tests/test_tls_impersonate.c:163` | `static void test_decode_rejects_bad_magic(void **state)` |
+| `test_decode_rejects_overlong_field` | function | `tests/test_tls_impersonate.c:177` | `static void test_decode_rejects_overlong_field(void **state)` |
 | `test_decode_rejects_truncated` | function | `tests/test_tls_impersonate.c:144` | `static void test_decode_rejects_truncated(void **state)` |
 | `test_encode_decode_req_empty_body` | function | `tests/test_tls_impersonate.c:65` | `static void test_encode_decode_req_empty_body(void **state)` |
 | `test_encode_decode_req_roundtrip` | function | `tests/test_tls_impersonate.c:39` | `static void test_encode_decode_req_roundtrip(void **state)` |
@@ -157,6 +174,8 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `main` | function | `tools/ffgeom.py:301` | `def main(argv)` |
 | `probe` | function | `tools/ffgeom.py:265` | `def probe(page, selector, out_html)` |
 | `word` | function | `tools/ffgeom.py:209` | `def word(grid_row, origin)` |
+| `main` | function | `tools/ffq.py:22` | `def main()` |
+| `main` | function | `tools/ffshot.py:24` | `def main()` |
 | `_POSIX_C_SOURCE` | macro | `tools/gen_psl.c:15` | `#define _POSIX_C_SOURCE` |
 | `ascii_lower` | function | `tools/gen_psl.c:55` | `static void ascii_lower(char *s)` |
 | `cmp_str` | function | `tools/gen_psl.c:38` | `static int cmp_str(const void *a, const void *b)` |
@@ -189,6 +208,7 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `lum` | function | `tools/pngprof.py:95` | `def lum(p)` |
 | `main` | function | `tools/pngprof.py:109` | `def main(argv)` |
 | `render_glyph` | function | `tools/pngprof.py:99` | `def render_glyph(v)` |
+| `main` | function | `tools/prune.py:21` | `def main()` |
 | `expand_imports` | function | `tools/snapshot.py:31` | `def expand_imports(css, base, depth)` |
 | `fetch` | function | `tools/snapshot.py:17` | `def fetch(url)` |
 | `inline_css` | function | `tools/snapshot.py:48` | `def inline_css(html, base)` |

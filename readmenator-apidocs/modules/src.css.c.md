@@ -1023,7 +1023,7 @@ Idempotent; NULL-safe.
 |---|---|---|---|
 | `s` | `css_sheet *` |  |  |
 
-> **Inherited:** Documentation from [`css_free`](#css_free) (include/css.h:1064).
+> **Inherited:** Documentation from [`css_free`](#css_free) (include/css.h:1069).
 
 ---
 
@@ -1215,7 +1215,7 @@ Returns 0 on success, -1 if i is out of range.
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`css_font_face_count`](#css_font_face_count) (include/css.h:1189).
+> **Inherited:** Documentation from [`css_font_face_count`](#css_font_face_count) (include/css.h:1194).
 
 ---
 

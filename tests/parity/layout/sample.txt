@@ -33,4 +33,4 @@ content_w=1000 total_h=1244.9 nbox=1 nrow=32 npositioned=0
   row[29] top=1143.9 h=23.0 x_off=0.0
   row[30] top=1182.9 h=23.0 x_off=0.0
   row[31] top=1221.9 h=23.0 x_off=0.0
-  box[0] bid=0 x=527.0 top=110.9 w=7.0 h=23.0
+  box[0] bid=0 x=527.0 top=110.9 w=14.0 h=23.0

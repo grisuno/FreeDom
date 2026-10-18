@@ -955,7 +955,9 @@ $(BUILD_DIR)/freedom-view: $(GUI_DIR)/freedom_view.c $(GUI_DIR)/ui_render.c \
 #     -profile plus --no-remote.
 # ---------------------------------------------------------------------------
 PARITY_DIR   := tests/parity
-PARITY_PAGES := $(sort $(wildcard $(PARITY_DIR)/pages/*.html))
+# `make parity PAGES="slashdot site-github"` scores just those pages (name without the
+# directory or .html), for the measure-fix-measure loop on one page.
+PARITY_PAGES := $(if $(PAGES),$(addprefix $(PARITY_DIR)/pages/,$(addsuffix .html,$(PAGES))),$(sort $(wildcard $(PARITY_DIR)/pages/*.html)))
 PARITY_OUT   := $(BUILD_DIR)/parity
 LAYOUT_PAGES := $(sort $(wildcard examples/*.html))
 LAYOUT_OUT   := $(BUILD_DIR)/layout
@@ -978,10 +980,11 @@ PARITY_WIDTH := 1000
 # vh against the normalized 1080 desktop (anti-fp doctrine), so a Firefox window of
 # the default ~768 made every `height:100vh` page (old.reddit, exploit.in) score the
 # policy instead of the layout -- the same trap as running Firefox with JS on.
-# ONLY the height probe takes it: a height also clamps --screenshot to the viewport
-# (verified: 1000x1080 bitmap for a 1835px page), so the profile screenshot and
-# `make geom` stay width-only. Residual: profiles of a vh page compare at ~768.
-PARITY_WINDOW := $(PARITY_WIDTH),1080
+# `firefox --screenshot` cannot take it (a height clamps the bitmap to the viewport),
+# so the profile screenshot goes through tools/ffshot.py: geckodriver with an exact
+# 1000x1080 viewport and a full-page capture, the same vh as Freedom's.
+PARITY_VIEW_H := 1080
+PARITY_WINDOW := $(PARITY_WIDTH),$(PARITY_VIEW_H)
 
 $(BUILD_DIR)/pngdiff: tools/pngdiff.c | $(BUILD_DIR)
 	$(CC) $(STD) -Wall -Wextra -Werror $(OPT) -o $@ $< $(PNG_CFLAGS) $(PNG_LIBS) -lm
@@ -1023,28 +1026,21 @@ parity: $(BUILD_DIR)/freedom $(BUILD_DIR)/pngdiff
 	      | sed -n 's/^Saved PNG (\([0-9]*\) px).*/\1/p'); \
 	  if [ -z "$$h" ]; then echo "$$name: freedom produced no PNG"; continue; fi; \
 	  rm -f $(PARITY_OUT)/$$name.ff.png; \
-	  rm -rf $(PARITY_OUT)/ffprof; mkdir -p $(PARITY_OUT)/ffprof; \
-	  printf '%s\n' 'user_pref("javascript.enabled", false);' \
-	                'user_pref("network.proxy.type", 1);' \
-	                'user_pref("network.proxy.http", "127.0.0.1");' \
-	                'user_pref("network.proxy.http_port", 1);' \
-	                'user_pref("network.proxy.ssl", "127.0.0.1");' \
-	                'user_pref("network.proxy.ssl_port", 1);' \
-	                'user_pref("network.proxy.allow_hijacking_localhost", true);' \
-	    > $(PARITY_OUT)/ffprof/user.js; \
-	  firefox --headless --no-remote -profile "$(CURDIR)/$(PARITY_OUT)/ffprof" \
-	          --screenshot "$(CURDIR)/$(PARITY_OUT)/$$name.ff.png" \
-	          --window-size=$(PARITY_WIDTH) \
-	          "file://$$(readlink -f $$f)" >/dev/null 2>&1; \
+	  python3 tools/ffshot.py "$$f" "$(CURDIR)/$(PARITY_OUT)/$$name.ff.png" \
+	          $(PARITY_WIDTH) $(PARITY_VIEW_H) 2>/dev/null; \
 	  if [ ! -f $(PARITY_OUT)/$$name.ff.png ]; then \
 	    echo "$$name: firefox produced no screenshot"; continue; fi; \
-	  ff_real=$$( { python3 tools/ffgeom.py height-probe "$$f" $(PARITY_OUT)/$$name.h.html \
+	  ff_real=$$(python3 -c 'import struct,sys;print(struct.unpack(">I",open(sys.argv[1],"rb").read(24)[20:24])[0])' \
+	        $(PARITY_OUT)/$$name.ff.png 2>/dev/null); \
+	  if [ -n "$$ff_real" ] && [ "$$ff_real" -le $(PARITY_VIEW_H) ] 2>/dev/null; then \
+	    ff_real=$$( { python3 tools/ffgeom.py height-probe "$$f" $(PARITY_OUT)/$$name.h.html \
 	        && rm -rf $(PARITY_OUT)/hprof && mkdir -p $(PARITY_OUT)/hprof \
 	        && firefox --headless --no-remote -profile "$(CURDIR)/$(PARITY_OUT)/hprof" \
 	             --screenshot "$(CURDIR)/$(PARITY_OUT)/$$name.h.png" \
 	             --window-size=$(PARITY_WINDOW) \
 	             "file://$$(readlink -f $(PARITY_OUT)/$$name.h.html)" >/dev/null 2>&1 \
 	        && python3 tools/ffgeom.py height $(PARITY_OUT)/$$name.h.png; } 2>/dev/null ); \
+	  fi; \
 	  if [ -n "$$ff_real" ] && [ "$$ff_real" -gt 0 ] 2>/dev/null; then \
 	    row=$$(./$(BUILD_DIR)/pngdiff $(PARITY_OUT)/$$name.fd.png \
 	                                  $(PARITY_OUT)/$$name.ff.png "$$ff_real") || continue; \

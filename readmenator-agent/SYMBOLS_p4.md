@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `nr_config` | struct | `include/net_realm.h:42` | `` |
+| `nr_realm` | enum | `include/net_realm.h:29` | `` |
+| `nr_realm_allows_http` | function | `include/net_realm.h:66` | `int nr_realm_allows_http(nr_realm r);` |
+| `nr_realm_name` | function | `include/net_realm.h:69` | `const char *nr_realm_name(nr_realm r);` |
 | `nr_route` | enum | `include/net_realm.h:35` | `` |
 | `nr_route_name` | function | `include/net_realm.h:70` | `const char *nr_route_name(nr_route r);` |
 | `tor_enabled` | type_alias | `include/net_realm.h:41` | `typedef struct nr_config { int tor_enabled;` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `wf_sheet` | struct | `include/webfont_load.h:24` | `` |
 | `FREEDOM_WS_HUB_H` | macro | `include/ws_hub.h:2` | `#define FREEDOM_WS_HUB_H` |
 | `WH_CLOSE_ABNORMAL` | macro | `include/ws_hub.h:27` | `#define WH_CLOSE_ABNORMAL` |
-| `WH_MAX` | macro | `include/ws_hub.h:21` | `#define WH_MAX` |
-| `generation` | function | `include/ws_hub.h:50` | `* previous generation (before wh_close_all) are closed and dropped silently. */ void wh_on_notify(wh_hub *h...` |
-| `wh_close` | function | `include/ws_hub.h:58` | `void wh_close(wh_hub *h, int id);` |
-| `wh_close_all` | function | `include/ws_hub.h:61` | `void wh_close_all(wh_hub *h);` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

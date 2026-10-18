@@ -15,14 +15,14 @@ flowchart TB
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     subgraph lane_0["Tier 1 - entry / orchestration"]
         direction LR
-        n_c2["include: browser_ui<br/>31 files, 941 symbols<br/>Core / utility"]:::cycle
-        n_d_tools["tools<br/>6 files, 50 symbols<br/>Core / utility"]:::default
+        n_c2["include: browser_ui<br/>31 files, 945 symbols<br/>Core / utility"]:::cycle
+        n_d_tools["tools<br/>9 files, 53 symbols<br/>Core / utility"]:::default
         n_d__root_["(root)<br/>6 files, 3 symbols<br/>Core / utility"]:::entry
     end
     subgraph lane_1["Tier 2"]
         direction LR
         n_c5["include: local_store<br/>11 files, 371 symbols<br/>Core / utility"]:::cycle
-        n_c3["include: page_view<br/>21 files, 715 symbols<br/>Core / utility"]:::cycle
+        n_c3["include: page_view<br/>21 files, 718 symbols<br/>Core / utility"]:::cycle
         n_c8["include: download<br/>6 files, 37 symbols<br/>Core / utility"]:::default
     end
     subgraph lane_2["Tier 3"]
@@ -317,7 +317,7 @@ flowchart LR
     n_src_prefs_c__prefs_history_add["prefs.prefs_history_add<br/>prefs.c:152"]:::external
     n_src_profile_c__profile_save["profile.profile_save<br/>profile.c:133"]:::external
     n_gui_browser_ui_c__show_busy["browser_ui.show_busy<br/>Marks a request in flight and paints a frame...<br/>browser_ui.c:2551"]:::external
-    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:15023"]:::external
+    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:15157"]:::external
     n_tools_gen_psl_c__emit["gen_psl.emit<br/>gen_psl.c:61"]:::default
     n_tools_gen_psl_c__main -.->|"recursion"| n_tools_gen_psl_c__main
     n_tools_gen_psl_c__main -->|"1"| n_tools_gen_psl_c__ascii_lower

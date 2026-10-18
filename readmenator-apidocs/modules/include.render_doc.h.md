@@ -353,7 +353,7 @@ Box tree accessors (Step D). rd_box_count is the number of box definitions (0 wh
 
 **Returns:** `size_t`
 
-*Called by:* [`TABLE`](gui.browser_ui.c.md#table), [`string`](gui.browser_ui.c.md#string)
+*Called by:* [`string`](gui.browser_ui.c.md#string)
 
 ---
 

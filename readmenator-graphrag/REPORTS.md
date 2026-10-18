@@ -1,12 +1,12 @@
 # GraphRAG Community Reports
 
-Entities: 7008 | Relationships: 12225 | Communities: 11 | Themes: 3 | Text units: 6582
+Entities: 7035 | Relationships: 12297 | Communities: 11 | Themes: 3 | Text units: 6605
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
 ## Project overview (`root`, root, rating 7.0)
 
-272 files in 11 communities and 3 themes. Highest-impact communities: include: css (7.0), src (6.9), include: browser_ui (4.0). God nodes: gui/browser_ui.c, include/css.h, src/tab.c, src/css.c, src/page_view.c.
+275 files in 11 communities and 3 themes. Highest-impact communities: include: css (7.0), src (6.9), include: browser_ui (4.0). God nodes: gui/browser_ui.c, include/css.h, src/tab.c, src/css.c, src/page_view.c.
 
 - [include: css] rating 7.0: `include/css_color.h` ranks 1 by PageRank, 13 importers, 7 symbols: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1).
 - [src] rating 6.9: `include/html_parse.h` ranks 1 by PageRank, 23 importers, 24 symbols: hp_script: One executable <script>.
@@ -52,9 +52,9 @@ Theme of 6 communities and 147 files: src (59 files, rating 6.9); include: brows
 - Children: c0, c2, c5, c7, c8, c9
 - Theme rating = highest child community rating.
 
-## unassigned files (`t2`, theme, rating 0.7)
+## unassigned files (`t2`, theme, rating 0.8)
 
-Theme of 1 communities and 12 files: unassigned files (12 files, rating 0.7).
+Theme of 1 communities and 15 files: unassigned files (15 files, rating 0.8).
 
 - [unassigned files] `app.py` ranks 1 by PageRank, 0 importers, 3 symbols: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and execute FreeDom in headless mode.
 - [unassigned files] `docker-entrypoint.sh` ranks 2 by PageRank, 0 importers, 0 symbols.
@@ -64,7 +64,7 @@ Theme of 1 communities and 12 files: unassigned files (12 files, rating 0.7).
 
 ## include: css (`c1`, community, rating 7.0)
 
-47 files under include (c 31, h 16), mostly utility. Core file include/css_color.h (PageRank 0.0509, imported by 13 files): cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1). Key abstractions: cc_rgb, cc_status, FREEDOM_CSS_COLOR_H, b, cc_pack, CC_COLOR_CURRENT. Depends on include: page_view (3), include: text_shape (2). Used by include: page_view (16), src (4), include: browser_ui (4).
+47 files under include (c 31, h 16), mostly utility. Core file include/css_color.h (PageRank 0.0506, imported by 13 files): cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1). Key abstractions: cc_rgb, cc_status, FREEDOM_CSS_COLOR_H, b, cc_pack, CC_COLOR_CURRENT. Depends on include: page_view (3), include: text_shape (2). Used by include: page_view (16), src (4), include: browser_ui (4).
 
 - `include/css_color.h` ranks 1 by PageRank, 13 importers, 7 symbols: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1).
 - `include/css.h` ranks 2 by PageRank, 36 importers, 138 symbols: css_style: A resolved presentation.
@@ -78,7 +78,7 @@ Theme of 1 communities and 12 files: unassigned files (12 files, rating 0.7).
 
 ## src (`c0`, community, rating 6.9)
 
-59 files under src (c 40, h 19), mostly utility. Core file include/html_parse.h (PageRank 0.0310, imported by 23 files): hp_script: One executable <script>. Key abstractions: hp_status, hp_config, hp_script, FREEDOM_HTML_PARSE_H, max_bytes, hp_document. Depends on include: css (4), include: page_view (4), include: text_shape (2). Used by include: page_view (15), include: browser_ui (9), gui (2).
+59 files under src (c 40, h 19), mostly utility. Core file include/html_parse.h (PageRank 0.0308, imported by 23 files): hp_script: One executable <script>. Key abstractions: hp_status, hp_config, hp_script, FREEDOM_HTML_PARSE_H, max_bytes, hp_document. Depends on include: css (4), include: page_view (4), include: text_shape (2). Used by include: page_view (15), include: browser_ui (9), gui (2).
 
 - `include/html_parse.h` ranks 1 by PageRank, 23 importers, 24 symbols: hp_script: One executable <script>.
 - `include/dom.h` ranks 2 by PageRank, 19 importers, 28 symbols: dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: * "after this node" and "first" cannot be expressed by an element-only reference).
@@ -93,13 +93,13 @@ Theme of 1 communities and 12 files: unassigned files (12 files, rating 0.7).
 
 ## include: browser_ui (`c2`, community, rating 4.0)
 
-46 files under tests (c 32, h 14), mostly utility. Core file include/image_decode.h (PageRank 0.0086, imported by 6 files): img_pixels: A decoded bitmap that owns its pixel buffer. Key abstractions: img_format, img_status, img_pixels, FREEDOM_IMAGE_DECODE_H, guards, width. Depends on src (9), include: page_view (6), include: text_shape (5). Used by include: page_view (5), src (1).
+46 files under tests (c 32, h 14), mostly utility. Core file include/image_decode.h (PageRank 0.0085, imported by 6 files): img_pixels: A decoded bitmap that owns its pixel buffer. Key abstractions: img_format, img_status, img_pixels, FREEDOM_IMAGE_DECODE_H, guards, width. Depends on src (9), include: page_view (6), include: text_shape (5). Used by include: page_view (5), src (1).
 
 - `include/image_decode.h` ranks 1 by PageRank, 6 importers, 13 symbols: img_pixels: A decoded bitmap that owns its pixel buffer.
 - `include/tls_impersonate.h` ranks 2 by PageRank, 5 importers, 23 symbols: ti_req: Request: parent -> helper.
 - `include/hls.h` ranks 3 by PageRank, 4 importers, 8 symbols: hls_segment: or variant info.
-- Hotspot `gui/browser_ui.c`: 570 symbols, 119 connections (score 1.00).
-- Hotspot `tests/test_freedom.c`: 79 symbols, 12 connections (score 0.12).
+- Hotspot `gui/browser_ui.c`: 574 symbols, 119 connections (score 1.00).
+- Hotspot `tests/test_freedom.c`: 88 symbols, 12 connections (score 0.12).
 - 2 layer violations, e.g. browser_ui.c (presentation) -> data_url.h (data_access).
 - Dataflow: 25 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
 - Surprising bridge: block_flow.c <-> test_renderer.c (8 hops across communities).
@@ -108,12 +108,12 @@ Theme of 1 communities and 12 files: unassigned files (12 files, rating 0.7).
 
 ## include: page_view (`c3`, community, rating 3.0)
 
-31 files under include (c 21, h 10), mostly utility. Core file include/render_policy.h (PageRank 0.0097, imported by 9 files): rdp_caps: Render capabilities for a page. Key abstractions: rdp_caps, rdp_img_decision, FREEDOM_RENDER_POLICY_H, RDP_TRACKER_MAX_DIM, images, rdp_is_tracking_pixel. Depends on include: css (16), src (15), include: text_shape (6). Used by include: browser_ui (6), src (4), include: css (3).
+31 files under include (c 21, h 10), mostly utility. Core file include/render_policy.h (PageRank 0.0096, imported by 9 files): rdp_caps: Render capabilities for a page. Key abstractions: rdp_caps, rdp_img_decision, FREEDOM_RENDER_POLICY_H, RDP_TRACKER_MAX_DIM, images, rdp_is_tracking_pixel. Depends on include: css (16), src (15), include: text_shape (6). Used by include: browser_ui (6), src (4), include: css (3).
 
 - `include/render_policy.h` ranks 1 by PageRank, 9 importers, 9 symbols: rdp_caps: Render capabilities for a page.
 - `include/page_view.h` ranks 2 by PageRank, 13 importers, 86 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
 - `include/flex_layout.h` ranks 3 by PageRank, 12 importers, 43 symbols: fx_item: Upper bound on items per flex line / grid columns.
-- Hotspot `src/page_view.c`: 236 symbols, 38 connections (score 0.36).
+- Hotspot `src/page_view.c`: 239 symbols, 38 connections (score 0.36).
 - Hotspot `src/freedom.c`: 46 symbols, 54 connections (score 0.30).
 - 14 layer violations, e.g. render_doc.c (presentation) -> data_url.h (data_access).
 - Dataflow: 18 INFERRED issues (first: DEAD_STORE in layout_grid).
@@ -135,7 +135,7 @@ Theme of 1 communities and 12 files: unassigned files (12 files, rating 0.7).
 
 ## include: local_store (`c5`, community, rating 1.6)
 
-16 files under include (c 11, h 5), mostly utility. Core file include/local_store.h (PageRank 0.0116, imported by 6 files): ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container so ls_open_passphrase can re-derive. ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len... Key abstractions: ls_aead, ls_status, FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN. Depends on src (1). Used by include: browser_ui (3).
+16 files under include (c 11, h 5), mostly utility. Core file include/local_store.h (PageRank 0.0115, imported by 6 files): ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container so ls_open_passphrase can re-derive. ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len... Key abstractions: ls_aead, ls_status, FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN. Depends on src (1). Used by include: browser_ui (3).
 
 - `include/local_store.h` ranks 1 by PageRank, 6 importers, 11 symbols: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container so ls_open_passphrase can re-derive. ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len...
 - `include/prefs.h` ranks 2 by PageRank, 6 importers, 18 symbols: prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
@@ -148,7 +148,7 @@ Theme of 1 communities and 12 files: unassigned files (12 files, rating 0.7).
 
 ## gui (`c6`, community, rating 1.3)
 
-15 files under gui (c 10, h 5), mostly presentation. Core file include/svg_render.h (PageRank 0.0083, imported by 6 files): sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g> chain, and `m` the flattened affine transform of that chain (a,b,c,d,e,f in Cairo order). Key abstractions: sv_status, sv_shape_kind, sv_verb, sv_seg, sv_shape, sv_image. Depends on include: css (3), src (2), include: page_view (1). Used by include: browser_ui (4), include: page_view (3), src (1).
+15 files under gui (c 10, h 5), mostly presentation. Core file include/svg_render.h (PageRank 0.0082, imported by 6 files): sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g> chain, and `m` the flattened affine transform of that chain (a,b,c,d,e,f in Cairo order). Key abstractions: sv_status, sv_shape_kind, sv_verb, sv_seg, sv_shape, sv_image. Depends on include: css (3), src (2), include: page_view (1). Used by include: browser_ui (4), include: page_view (3), src (1).
 
 - `include/svg_render.h` ranks 1 by PageRank, 6 importers, 19 symbols: sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g> chain, and `m` the flattened affine transform of that chain (a,b,c,d,e,f in Cairo order).
 - `include/ui.h` ranks 2 by PageRank, 6 importers, 17 symbols: ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no copy): render with text + offset over len bytes.
@@ -161,7 +161,7 @@ Theme of 1 communities and 12 files: unassigned files (12 files, rating 0.7).
 
 ## include: secure_fetch (`c7`, community, rating 1.3)
 
-10 files under tests (c 7, h 3), mostly utility. Core file include/anti_fp.h (PageRank 0.0151, imported by 6 files): fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  "document" #define FP_SEC_FETCH_MODE_NAV  "navigate" #define FP_SEC_FETCH_SITE_NONE "none" #define FP_SEC_FETCH_USER_ON   "?1" /* --- clocks: coarse granularity against... Key abstractions: FREEDOM_ANTI_FP_H, FP_TIMER_RESOLUTION_MS, FP_USER_AGENT, FP_ACCEPT_LANGUAGE, FP_ACCEPT_LANGUAGE_HEADER, FP_ACCEPT_HEADER_NAV. Depends on src (1). Used by src (2), include: browser_ui (2), include: page_view (1).
+10 files under tests (c 7, h 3), mostly utility. Core file include/anti_fp.h (PageRank 0.0150, imported by 6 files): fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  "document" #define FP_SEC_FETCH_MODE_NAV  "navigate" #define FP_SEC_FETCH_SITE_NONE "none" #define FP_SEC_FETCH_USER_ON   "?1" /* --- clocks: coarse granularity against... Key abstractions: FREEDOM_ANTI_FP_H, FP_TIMER_RESOLUTION_MS, FP_USER_AGENT, FP_ACCEPT_LANGUAGE, FP_ACCEPT_LANGUAGE_HEADER, FP_ACCEPT_HEADER_NAV. Depends on src (1). Used by src (2), include: browser_ui (2), include: page_view (1).
 
 - `include/anti_fp.h` ranks 1 by PageRank, 6 importers, 35 symbols: fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  "document" #define FP_SEC_FETCH_MODE_NAV  "navigate" #define FP_SEC_FETCH_SITE_NONE "none" #define FP_SEC_FETCH_USER_ON   "?1" /* --- clocks: coarse granularity against...
 - `include/secure_fetch.h` ranks 2 by PageRank, 6 importers, 38 symbols: sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. * Kept as plain data so the policy check is a pure, directly testable function.
@@ -171,9 +171,9 @@ Theme of 1 communities and 12 files: unassigned files (12 files, rating 0.7).
 - Key entities: file:src/secure_fetch.c, file:tests/test_secure_fetch.c, file:include/secure_fetch.h, file:include/anti_fp.h, file:src/ws_hub.c, file:src/anti_fp.c, file:include/ws_hub.h, file:tests/test_ws_hub.c
 - Rating 1.3/10 = 7 x PageRank share 0.18 + 3 x risk 0.00. Internal imports: 10.
 
-## unassigned files (`c10`, community, rating 0.7)
+## unassigned files (`c10`, community, rating 0.8)
 
-12 files under tools (py 5, sh 5, c 2), mostly utility. Core file app.py (PageRank 0.0019, imported by 0 files): Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and execute FreeDom in headless mode. Key abstractions: read_fuzz_stats, list_unique_crashes, run_freedom_headless, load_rows, lum, lum_at.
+15 files under tools (py 8, sh 5, c 2), mostly utility. Core file app.py (PageRank 0.0019, imported by 0 files): Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and execute FreeDom in headless mode. Key abstractions: read_fuzz_stats, list_unique_crashes, run_freedom_headless, load_rows, lum, lum_at.
 
 - `app.py` ranks 1 by PageRank, 0 importers, 3 symbols: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and execute FreeDom in headless mode.
 - `docker-entrypoint.sh` ranks 2 by PageRank, 0 importers, 0 symbols.
@@ -181,12 +181,12 @@ Theme of 1 communities and 12 files: unassigned files (12 files, rating 0.7).
 - Hotspot `tools/pngdiff.c`: 14 symbols, 6 connections (score 0.04).
 - Hotspot `tools/ffgeom.py`: 12 symbols, 6 connections (score 0.04).
 - Taint: 4 paths reach this group via subprocess, urllib.request.
-- Key entities: file:tools/pngdiff.c, file:tools/ffgeom.py, file:tools/gen_psl.c, file:tools/mutate.py, file:tools/snapshot.py, file:app.py, file:tools/pngprof.py, sym:tools/mutate.py::main@137
-- Rating 0.7/10 = 7 x PageRank share 0.10 + 3 x risk 0.00. Internal imports: 0.
+- Key entities: file:tools/pngdiff.c, file:tools/ffgeom.py, file:tools/gen_psl.c, file:tools/mutate.py, file:tools/snapshot.py, file:tools/ffshot.py, file:tools/ffq.py, file:tools/pngprof.py
+- Rating 0.8/10 = 7 x PageRank share 0.12 + 3 x risk 0.00. Internal imports: 0.
 
 ## include: download (`c8`, community, rating 0.7)
 
-8 files under include (c 6, h 2), mostly utility. Core file include/pdf_export.h (PageRank 0.0077, imported by 5 files): pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order) onto pages of usable height page_h without ever splitting a row. Key abstractions: pe_status, FREEDOM_PDF_EXPORT_H, PE_NAME_MAX, PE_EXT, PE_EXT_PNG, PE_FALLBACK_NAME. Used by include: browser_ui (2).
+8 files under include (c 6, h 2), mostly utility. Core file include/pdf_export.h (PageRank 0.0076, imported by 5 files): pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order) onto pages of usable height page_h without ever splitting a row. Key abstractions: pe_status, FREEDOM_PDF_EXPORT_H, PE_NAME_MAX, PE_EXT, PE_EXT_PNG, PE_FALLBACK_NAME. Used by include: browser_ui (2).
 
 - `include/pdf_export.h` ranks 1 by PageRank, 5 importers, 10 symbols: pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order) onto pages of usable height page_h without ever splitting a row.
 - `include/download.h` ranks 2 by PageRank, 4 importers, 9 symbols: dl_should_download: 1 if the response should be saved (attachment, or a non-renderable media type), 0 if it should be rendered.
@@ -199,7 +199,7 @@ Theme of 1 communities and 12 files: unassigned files (12 files, rating 0.7).
 
 ## include: prefetch (`c9`, community, rating 0.7)
 
-8 files under include (c 6, h 2), mostly utility. Core file include/import_map.h (PageRank 0.0075, imported by 5 files): im_resolve: Resolves specifier as imported from base (the importing module's URL). Key abstractions: FREEDOM_IMPORT_MAP_H, algorithm, IM_MAX_TEXT, IM_MAX_ENTRIES, IM_MAX_SCOPES, im_map. Depends on src (1). Used by src (1), include: browser_ui (1), include: page_view (1).
+8 files under include (c 6, h 2), mostly utility. Core file include/import_map.h (PageRank 0.0074, imported by 5 files): im_resolve: Resolves specifier as imported from base (the importing module's URL). Key abstractions: FREEDOM_IMPORT_MAP_H, algorithm, IM_MAX_TEXT, IM_MAX_ENTRIES, IM_MAX_SCOPES, im_map. Depends on src (1). Used by src (1), include: browser_ui (1), include: page_view (1).
 
 - `include/import_map.h` ranks 1 by PageRank, 5 importers, 10 symbols: im_resolve: Resolves specifier as imported from base (the importing module's URL).
 - `include/prefetch.h` ranks 2 by PageRank, 5 importers, 28 symbols: pf_ref: One scanned reference. url is the RAW attribute value (the policy-gated fetcher * resolves and validates it, exactly as it does for the worker's own request).

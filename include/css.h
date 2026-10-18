@@ -58,7 +58,12 @@ typedef enum css_display {
     CSS_DISP_TABLE_ROW,
     CSS_DISP_TABLE_CELL,
     CSS_DISP_TABLE_CAPTION,
-    CSS_DISP_TABLE_COLUMN
+    CSS_DISP_TABLE_COLUMN,
+    /* NOT a CSS value -- the parser never produces it. page_view stamps it on the
+     * pv_box_def of a display:inline element whose box model changes the line
+     * (padding/border/margin/radius): an inline-level box that flows in its line
+     * and is painted around its fragments, never opened as a block. */
+    CSS_DISP_INLINE_BOX
 } css_display;
 
 typedef enum css_justify {  /* justify-content (flex/grid main axis) */

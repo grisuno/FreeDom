@@ -1,10 +1,10 @@
 # orphans
 
-*Community 10 | 12 files | cohesion 0.00*
+*Community 10 | 15 files | cohesion 0.00*
 
 ## Definition
 
-This community groups 12 file(s) rooted at `tools` with dominant language py (cohesion 0.00). Central symbols: `PD_COLS`, `PD_INK_DELTA`, `PD_ROWS`, `_POSIX_C_SOURCE`, `_append_probe`, `_word_reader`, `ascii_lower`, `bit`. Core file: `tools/pngdiff.c` (14 symbols). Documented purpose: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and.
+This community groups 15 file(s) rooted at `tools` with dominant language py (cohesion 0.00). Central symbols: `PD_COLS`, `PD_INK_DELTA`, `PD_ROWS`, `_POSIX_C_SOURCE`, `_append_probe`, `_word_reader`, `ascii_lower`, `bit`. Core file: `tools/pngdiff.c` (14 symbols). Documented purpose: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and.
 
 ## Files
 
@@ -17,10 +17,13 @@ This community groups 12 file(s) rooted at `tools` with dominant language py (co
 | `install.sh` | sh | utility | 0 | yes |
 | `run_freedom.sh` | sh | utility | 0 | yes |
 | `tools/ffgeom.py` | py | utility | 12 | yes |
+| `tools/ffq.py` | py | utility | 1 | yes |
+| `tools/ffshot.py` | py | utility | 1 | yes |
 | `tools/gen_psl.c` | c | utility | 8 | no |
 | `tools/mutate.py` | py | utility | 6 | yes |
 | `tools/pngdiff.c` | c | utility | 14 | no |
 | `tools/pngprof.py` | py | utility | 4 | yes |
+| `tools/prune.py` | py | utility | 1 | yes |
 | `tools/snapshot.py` | py | utility | 6 | yes |
 
 ## Key Symbols
@@ -40,6 +43,8 @@ This community groups 12 file(s) rooted at `tools` with dominant language py (co
 - `height_probe` (function, `tools/ffgeom.py:279`) `def height_probe(page, out_html)`
 - `height` (function, `tools/ffgeom.py:292`) `def height(path)` - Decodes the scrollHeight carried by the #__ffh sentinel: the probe encodes
 - `main` (function, `tools/ffgeom.py:301`) `def main(argv)`
+- `main` (function, `tools/ffq.py:22`) `def main()`
+- `main` (function, `tools/ffshot.py:24`) `def main()`
 - `_POSIX_C_SOURCE` (macro, `tools/gen_psl.c:15`) `#define _POSIX_C_SOURCE`
 - `vec` (struct, `tools/gen_psl.c:21`)
 - `vec_push` (function, `tools/gen_psl.c:27`) `static void vec_push(vec *v, const char *s)`
@@ -53,8 +58,6 @@ This community groups 12 file(s) rooted at `tools` with dominant language py (co
 - `find_modules` (function, `tools/mutate.py:107`) `def find_modules(root)`
 - `run_make` (function, `tools/mutate.py:116`) `def run_make(root, target)`
 - `run_bin` (function, `tools/mutate.py:125`) `def run_bin(path)`
-- `main` (function, `tools/mutate.py:137`) `def main(argv)`
-- `PD_COLS` (macro, `tools/pngdiff.c:57`) `#define PD_COLS`
 
 ## Internal vs External Edges
 
@@ -88,8 +91,11 @@ This community groups 12 file(s) rooted at `tools` with dominant language py (co
 - `install.sh`
 - `run_freedom.sh`
 - `tools/ffgeom.py`
+- `tools/ffq.py`
+- `tools/ffshot.py`
 - `tools/gen_psl.c`
 - `tools/mutate.py`
 - `tools/pngdiff.c`
 - `tools/pngprof.py`
+- `tools/prune.py`
 - `tools/snapshot.py`
