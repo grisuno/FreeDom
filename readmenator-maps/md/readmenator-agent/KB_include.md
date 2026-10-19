@@ -126,6 +126,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `bt_oof_root` (function, line 248) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);`
   - `insets` (function, line 252) `* minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may...`
   - `bt_containing_block` (function, line 262) `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y...`
+  - `bt_defer_roots` (function, line 285) `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox, const bt_positioned *pos, size_t npos, const char...`
   - `FREEDOM_BOX_TREE_H` (macro, line 2) `#define FREEDOM_BOX_TREE_H`
   - `BT_MAX_DEPTH` (macro, line 35) `#define BT_MAX_DEPTH`
   - `BT_MAX_CHILDREN` (macro, line 36) `#define BT_MAX_CHILDREN`

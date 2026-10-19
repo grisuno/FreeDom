@@ -1,5 +1,17 @@
 # Subsystem: tools
 
+## tools/fbench.py
+- Doc: fbench -- turn the PNG pairs `make parity` leaves behind into something you can act on.
+- Layer: utility
+- Language: py
+- Symbols:
+  - `load_baseline` (function, line 29) `def load_baseline()`
+  - `load_current` (function, line 42) `def load_current()`
+  - `luma` (function, line 55) `def luma(img)`
+  - `bands` (function, line 59) `def bands(fd, ff, band)`
+  - `sbs` (function, line 70) `def sbs(name, start, nrows)`
+  - `main` (function, line 89) `def main()`
+
 ## tools/ffgeom.py
 - Doc: ffgeom -- Firefox geometry as TEXT, no image reading.
 - Layer: utility

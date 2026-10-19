@@ -265,4 +265,25 @@ void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
                          const char *placed, double viewport_w, double viewport_h,
                          double *cb_x, double *cb_y, double *cb_w, double *cb_h);
 
+/* CSS 2.1 Appendix E steps 8-9 (spec/box_engine.md, tanda 47): an in-flow
+ * position:relative|sticky box S paints its whole subtree in the POSITIONED layer,
+ * in tree order with the absolute/fixed boxes of z-index auto/0. When one of those
+ * (an absolute backdrop, say) comes EARLIER in the tree than S, S must paint above
+ * it -- but the painter draws all in-flow content first. This names the subtrees
+ * the painter has to defer.
+ *
+ * `pos` is the positioned list (out-of-flow boxes), `in_flow[i]` nonzero when box i
+ * was laid out in flow. S is deferred iff it is RELATIVE/STICKY, in flow, and some
+ * non-negative-z out-of-flow P with no out-of-flow ancestor has box_index < S and
+ * z(P) <= z(S) (an unset z counts 0), "earlier" meaning TREE order (a depth-first
+ * walk of the parent links: a child box can hold a lower id than its parent).
+ * order_of (nbox entries, may be NULL) receives that tree order so the painter can
+ * merge roots with the positioned list. root_of[i] (nbox entries, always written) gets
+ * the OUTERMOST deferred root that contains box i (self included) or -1. Returns
+ * the number of distinct roots. Pure; bounded by nbox links per box; NULL or
+ * malformed input fails OPEN: every entry -1, nothing deferred (normal paint). */
+size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
+                      const bt_positioned *pos, size_t npos,
+                      const char *in_flow, int *root_of, size_t *order_of);
+
 #endif /* FREEDOM_BOX_TREE_H */

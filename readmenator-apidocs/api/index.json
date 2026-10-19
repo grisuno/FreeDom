@@ -2,22 +2,22 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 203,
-  "entities": 3184,
+  "modules": 204,
+  "entities": 3199,
   "languages": {
    "c": 108,
    "h": 82,
-   "py": 8,
+   "py": 9,
    "sh": 5
   },
   "kinds": {
-   "constant": 10,
+   "constant": 12,
    "enum": 147,
-   "function": 1628,
+   "function": 1637,
    "macro": 821,
    "method": 22,
-   "module": 203,
-   "struct": 224,
+   "module": 204,
+   "struct": 227,
    "type_alias": 122,
    "variable": 7
   },
@@ -27,8 +27,8 @@
  },
  "coverage": {
   "overall": {
-   "documented": 1259,
-   "total": 3167,
+   "documented": 1265,
+   "total": 3180,
    "percent": 39.8
   },
   "by_kind": {
@@ -38,9 +38,9 @@
     "percent": 53.7
    },
    "function": {
-    "documented": 673,
-    "total": 1628,
-    "percent": 41.3
+    "documented": 675,
+    "total": 1637,
+    "percent": 41.2
    },
    "macro": {
     "documented": 286,
@@ -53,14 +53,14 @@
     "percent": 0.0
    },
    "module": {
-    "documented": 28,
-    "total": 203,
-    "percent": 13.8
+    "documented": 29,
+    "total": 204,
+    "percent": 14.2
    },
    "struct": {
-    "documented": 101,
-    "total": 224,
-    "percent": 45.1
+    "documented": 104,
+    "total": 227,
+    "percent": 45.8
    },
    "type_alias": {
     "documented": 92,
@@ -205,9 +205,9 @@
     "percent": 50.0
    },
    "gui/browser_ui.c": {
-    "documented": 75,
-    "total": 230,
-    "percent": 32.6
+    "documented": 77,
+    "total": 233,
+    "percent": 33.0
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -255,9 +255,9 @@
     "percent": 64.5
    },
    "include/box_tree.h": {
-    "documented": 11,
-    "total": 32,
-    "percent": 34.4
+    "documented": 12,
+    "total": 33,
+    "percent": 36.4
    },
    "include/browser.h": {
     "documented": 9,
@@ -655,9 +655,9 @@
     "percent": 31.1
    },
    "src/box_tree.c": {
-    "documented": 4,
-    "total": 14,
-    "percent": 28.6
+    "documented": 5,
+    "total": 15,
+    "percent": 33.3
    },
    "src/browser.c": {
     "documented": 8,
@@ -915,9 +915,9 @@
     "percent": 33.3
    },
    "src/page_view.c": {
-    "documented": 57,
-    "total": 130,
-    "percent": 43.8
+    "documented": 58,
+    "total": 131,
+    "percent": 44.3
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -1038,6 +1038,11 @@
     "documented": 6,
     "total": 8,
     "percent": 75.0
+   },
+   "tools/fbench.py": {
+    "documented": 1,
+    "total": 7,
+    "percent": 14.3
    },
    "tools/ffgeom.py": {
     "documented": 2,
@@ -1225,7 +1230,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 230
+   "entities": 233
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1275,7 +1280,7 @@
   {
    "uid": "include/box_tree.h",
    "path": "modules/include.box_tree.h.jsonl",
-   "entities": 32
+   "entities": 33
   },
   {
    "uid": "include/browser.h",
@@ -1675,7 +1680,7 @@
   {
    "uid": "src/box_tree.c",
    "path": "modules/src.box_tree.c.jsonl",
-   "entities": 14
+   "entities": 15
   },
   {
    "uid": "src/browser.c",
@@ -1935,7 +1940,7 @@
   {
    "uid": "src/page_view.c",
    "path": "modules/src.page_view.c.jsonl",
-   "entities": 130
+   "entities": 131
   },
   {
    "uid": "src/pdf_export.c",
@@ -2058,6 +2063,11 @@
    "entities": 8
   },
   {
+   "uid": "tools/fbench.py",
+   "path": "modules/tools.fbench.py.jsonl",
+   "entities": 9
+  },
+  {
    "uid": "tools/ffgeom.py",
    "path": "modules/tools.ffgeom.py.jsonl",
    "entities": 10
@@ -2105,7 +2115,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 1909
+  "total": 1916
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

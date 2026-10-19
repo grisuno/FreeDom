@@ -55,6 +55,7 @@
 - [`b`](modules/gui.browser_ui_internal.h.md#b) type_alias in `gui/browser_ui_internal.h`
 - [`b`](modules/include.css_color.h.md#b) type_alias in `include/css_color.h`
 - [`BALANCE_MAX_LINES`](modules/gui.browser_ui.c.md#balance_max_lines) macro in `gui/browser_ui.c`
+- [`bands`](modules/tools.fbench.py.md#bands) function in `tools.fbench`
 - [`basename`](modules/include.download.h.md#basename) function in `include/download.h`
 - [`basis`](modules/include.flex_layout.h.md#basis) type_alias in `include/flex_layout.h`
 - [`bb_blur_a8`](modules/src.box_blur.c.md#bb_blur_a8) function in `src/box_blur.c`
@@ -147,6 +148,8 @@
 - [`bt_box_hidden`](modules/src.box_tree.c.md#bt_box_hidden) function in `src/box_tree.c`
 - [`bt_containing_block`](modules/include.box_tree.h.md#bt_containing_block) function in `include/box_tree.h`
 - [`bt_containing_block`](modules/src.box_tree.c.md#bt_containing_block) function in `src/box_tree.c`
+- [`bt_defer_roots`](modules/include.box_tree.h.md#bt_defer_roots) function in `include/box_tree.h`
+- [`bt_defer_roots`](modules/src.box_tree.c.md#bt_defer_roots) function in `src/box_tree.c`
 - [`bt_layout`](modules/src.box_tree.c.md#bt_layout) function in `src/box_tree.c`
 - [`BT_LEN_AUTO`](modules/src.box_tree.c.md#bt_len_auto) macro in `src/box_tree.c`
 - [`BT_MAUTO_LEFT`](modules/include.box_tree.h.md#bt_mauto_left) macro in `include/box_tree.h`
@@ -1616,6 +1619,8 @@
 - [`ln_status`](modules/include.link_nav.h.md#ln_status) enum in `include/link_nav.h`
 - [`ln_target_kind`](modules/include.link_nav.h.md#ln_target_kind) enum in `include/link_nav.h`
 - [`load`](modules/src.tab.c.md#tab-load) method of `tab` in `src/tab.c`
+- [`load_baseline`](modules/tools.fbench.py.md#load_baseline) function in `tools.fbench`
+- [`load_current`](modules/tools.fbench.py.md#load_current) function in `tools.fbench`
 - [`load_rows`](modules/tools.ffgeom.py.md#load_rows) function in `tools.ffgeom`
 - [`load_rows`](modules/tools.pngprof.py.md#load_rows) function in `tools.pngprof`
 - [`loaded`](modules/include.js_sandbox.h.md#loaded) function in `include/js_sandbox.h`
@@ -1646,15 +1651,18 @@
 - [`LS_VERSION`](modules/src.local_store.c.md#ls_version) macro in `src/local_store.c`
 - [`lum`](modules/tools.ffgeom.py.md#lum) function in `tools.ffgeom`
 - [`lum`](modules/tools.pngprof.py.md#lum) function in `tools.pngprof`
+- [`luma`](modules/tools.fbench.py.md#luma) function in `tools.fbench`
 - [`lxb_dom_element_has_attribute`](modules/src.html_parse.c.md#lxb_dom_element_has_attribute) function in `src/html_parse.c`
 
 <a id="m"></a>
 
 ## M
 
+- [`made`](modules/gui.browser_ui.c.md#made) function in `gui/browser_ui.c`
 - [`main`](modules/gui.browser_ui.c.md#browser_window-main) method of `browser_window` in `gui/browser_ui.c`
 - [`main`](modules/gui.freedom_view.c.md#main) function in `gui/freedom_view.c`
 - [`main`](modules/src.freedom.c.md#main) function in `src/freedom.c`
+- [`main`](modules/tools.fbench.py.md#main) function in `tools.fbench`
 - [`main`](modules/tools.ffgeom.py.md#main) function in `tools.ffgeom`
 - [`main`](modules/tools.ffq.py.md#main) function in `tools.ffq`
 - [`main`](modules/tools.ffshot.py.md#main) function in `tools.ffshot`
@@ -1979,6 +1987,7 @@
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
+- [`OUT`](modules/tools.fbench.py.md#out) constant in `tools.fbench`
 - [`out`](modules/include.flex_layout.h.md#out) function in `include/flex_layout.h`
 - [`out`](modules/include.ui.h.md#out) function in `include/ui.h`
 - [`out_fd`](modules/src.media_decoder.c.md#out_fd) type_alias in `src/media_decoder.c`
@@ -2007,6 +2016,7 @@
 - [`parent`](modules/src.freedom.c.md#parent) function in `src/freedom.c`
 - [`parent_id`](modules/include.page_view.h.md#parent_id) type_alias in `include/page_view.h`
 - [`parent_id`](modules/include.page_view.h.md#parent_id) type_alias in `include/page_view.h`
+- [`PARITY`](modules/tools.fbench.py.md#parity) constant in `tools.fbench`
 - [`parse_angle_deg`](modules/src.css.c.md#parse_angle_deg) function in `src/css.c`
 - [`parts`](modules/include.css_select.h.md#css_sel-parts) type_alias of `css_sel` in `include/css_select.h`
 - [`pass`](modules/fuzz.fuzz_dom_debug.c.md#pass) function in `fuzz/fuzz_dom_debug.c`
@@ -2068,6 +2078,7 @@
 - [`placed`](modules/include.box_tree.h.md#placed) function in `include/box_tree.h`
 - [`placeholders`](modules/include.ui.h.md#placeholders) function in `include/ui.h`
 - [`pm_entry`](modules/src.dom.c.md#pm_entry) struct in `src/dom.c`
+- [`png_flow_ctx`](modules/gui.browser_ui.c.md#png_flow_ctx) struct in `gui/browser_ui.c`
 - [`PNG_IHDR_MIN`](modules/src.image_decode.c.md#png_ihdr_min) macro in `src/image_decode.c`
 - [`PNG_MARGIN`](modules/gui.browser_ui.c.md#png_margin) macro in `gui/browser_ui.c`
 - [`PNG_PAGE_W`](modules/gui.browser_ui.c.md#png_page_w) macro in `gui/browser_ui.c`
@@ -2225,6 +2236,7 @@
 - [`pv_count`](modules/include.page_view.h.md#pv_count) function in `include/page_view.h`
 - [`pv_count`](modules/src.page_view.c.md#pv_count) function in `src/page_view.c`
 - [`pv_css_drops`](modules/src.page_view.c.md#pv_css_drops) function in `src/page_view.c`
+- [`pv_def_h`](modules/src.page_view.c.md#pv_def_h) struct in `src/page_view.c`
 - [`pv_flow_reg`](modules/src.page_view.c.md#pv_flow_reg) struct in `src/page_view.c`
 - [`pv_flow_reg`](modules/src.page_view.c.md#pv_flow_reg) struct in `src/page_view.c`
 - [`PV_FONT_CHAIN_MAX`](modules/src.page_view.c.md#pv_font_chain_max) macro in `src/page_view.c`
@@ -2473,10 +2485,12 @@
 
 - [`samples`](modules/include.perf_trace.h.md#samples) type_alias in `include/perf_trace.h`
 - [`saving`](modules/gui.browser_ui.c.md#saving) function in `gui/browser_ui.c`
+- [`sbs`](modules/tools.fbench.py.md#sbs) function in `tools.fbench`
 - [`sbuf`](modules/src.prefs.c.md#sbuf) struct in `src/prefs.c`
 - [`scale`](modules/include.page_view.h.md#pv_box_def-scale) method of `pv_box_def` in `include/page_view.h`
 - [`scaleY`](modules/include.css.h.md#css_style-scaley) method of `css_style` in `include/css.h`
 - [`scope`](modules/src.import_map.c.md#scope) type_alias in `src/import_map.c`
+- [`screen_flow_ctx`](modules/gui.browser_ui.c.md#screen_flow_ctx) struct in `gui/browser_ui.c`
 - [`scripts`](modules/src.js_dom.c.md#scripts) function in `src/js_dom.c`
 - [`secure_fetch`](modules/gui.browser_ui.c.md#secure_fetch) function in `gui/browser_ui.c`
 - [`selector`](modules/src.css_select.c.md#selector) function in `src/css_select.c`

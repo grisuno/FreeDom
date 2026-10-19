@@ -29,7 +29,7 @@
 | `fuzz/fuzz_url.c` | - | fuzz | 2 | 0 |
 | `fuzz/fuzz_web_storage.c` | - | fuzz | 0 | 0 |
 | `fuzz/fuzz_webfont.c` | libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). | fuzz | 1 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 574 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 583 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 10 | 2 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -39,7 +39,7 @@
 | `include/block_flow.h` | block_flow (bf_) -- vertical margin collapsing for block-level boxes. | include | 4 | 3 |
 | `include/box_blur.h` | Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md). | include | 4 | 3 |
 | `include/box_style.h` | bx_edges: anything longer fails closed instead of truncating into a wrong match. #define... | include | 31 | 11 |
-| `include/box_tree.h` | bt_positioned: Stage 2: one positioned box in the final paint order. | include | 32 | 5 |
+| `include/box_tree.h` | bt_positioned: Stage 2: one positioned box in the final paint order. | include | 33 | 5 |
 | `include/browser.h` | browser_free: Zero-initialise or reset a state. | include | 19 | 3 |
 | `include/compositor.h` | cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position... | include | 9 | 4 |
 | `include/css.h` | css_style: A resolved presentation. | include | 138 | 36 |
@@ -119,7 +119,7 @@
 | `src/block_flow.c` | block_flow (bf_) -- vertical margin collapsing. | src | 4 | 0 |
 | `src/box_blur.c` | box_line: One box pass of odd width bw over n samples spaced `step` apart, through tmp * (n bytes). | src | 4 | 0 |
 | `src/box_style.c` | tag_row: One row of the user-agent sheet. | src | 48 | 0 |
-| `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 23 | 0 |
+| `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 24 | 0 |
 | `src/browser.c` | clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {... | src | 41 | 0 |
 | `src/compositor.c` | eff_z: Not a stacking context: a positioned box with z:auto still paints in the *... | src | 5 | 0 |
 | `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 244 | 0 |
@@ -171,7 +171,7 @@
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
-| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 239 | 0 |
+| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 240 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
 | `src/prefetch.c` | ci_starts: static int is_ws(char c) { return c == ' ' \|\| c == '\t' \|\| c == '\n' \|\| c == '\r' \|\|... | src | 30 | 0 |
@@ -201,7 +201,7 @@
 | `tests/test_block_flow.c` | test_two_positive_collapse_to_max: Two positive margins collapse to the LARGER, never to their... | tests | 8 | 0 |
 | `tests/test_box_blur.c` | - | tests | 7 | 0 |
 | `tests/test_box_style.c` | dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include... | tests | 49 | 0 |
-| `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 61 | 0 |
+| `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 68 | 0 |
 | `tests/test_browser.c` | test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete... | tests | 17 | 0 |
 | `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 21 | 0 |
 | `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 351 | 0 |
@@ -225,7 +225,7 @@
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
 | `tests/test_freebug.c` | - | tests | 13 | 0 |
-| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 88 | 0 |
+| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 89 | 0 |
 | `tests/test_hls.c` | - | tests | 16 | 0 |
 | `tests/test_hostblock.c` | - | tests | 22 | 0 |
 | `tests/test_hostedit.c` | - | tests | 11 | 0 |
@@ -268,6 +268,7 @@
 | `tests/test_webfont_load.c` | test_b64: if (b == NULL) { fclose(f); return NULL; } if (fread(b, 1, (size_t)sz, f) !=... | tests | 16 | 0 |
 | `tests/test_ws_hub.c` | wait_notify: #include <string.h> #include <cmocka.h> #include "ws_hub.h" typedef struct rec {... | tests | 13 | 0 |
 | `tests/test_zoom.c` | - | tests | 11 | 0 |
+| `tools/fbench.py` | fbench -- turn the PNG pairs `make parity` leaves behind into something you can act on. | tools | 6 | 0 |
 | `tools/ffgeom.py` | ffgeom -- Firefox geometry as TEXT, no image reading. | tools | 12 | 0 |
 | `tools/ffq.py` | ffq -- ask Firefox what it computed, as TEXT. | tools | 1 | 0 |
 | `tools/ffshot.py` | ffshot -- full-page Firefox screenshot at a FIXED viewport, for `make parity`/`make wpt`. | tools | 1 | 0 |

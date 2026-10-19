@@ -1596,6 +1596,35 @@ static void test_build_oof_image_carries_block_id(void **state) {
     hp_document_free(doc);
 }
 
+/* A <video> is a replaced element like an <img>: one that is position:absolute
+ * leaves the flow (CSS 2.1 9.7) instead of taking a full-width in-flow row. An
+ * in-flow video keeps its break and no oof flag. */
+static void test_build_oof_video_leaves_flow(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>.box{position:relative;width:400px;height:300px}"
+        ".abs{position:absolute;top:0;left:0;width:400px;height:300px}</style></head>"
+        "<body><div class='box'><video class='abs' src='https://example.com/a.mp4'></video>"
+        "<p>text</p></div>"
+        "<div><video src='https://example.com/b.mp4'></video></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *abs_v = NULL, *flow_v = NULL;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r == NULL || r->kind != PV_VIDEO) continue;
+        if (strstr(r->src, "a.mp4") != NULL) abs_v = r;
+        if (strstr(r->src, "b.mp4") != NULL) flow_v = r;
+    }
+    assert_non_null(abs_v);
+    assert_non_null(flow_v);
+    assert_true(abs_v->oof_subtree);
+    assert_false(abs_v->block_break);
+    assert_false(flow_v->oof_subtree);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* float.md §7d (slashdot main column): a margin-only wrapper's reservation
  * lives on its OWN box def (painter applies it when the box opens — band /
  * shared context), never on descendant runs: seeding it onto runs too counts
@@ -2534,6 +2563,26 @@ static void test_build_boxdef_carries_node_id(void **state) {
     assert_non_null(bx);
     assert_int_not_equal(bx->node_id, DOM_NODE_NONE);
     assert_int_equal(bx->node_id, r->node_id);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* CSS 2.1 10.5: an absolutely positioned box's percentage height resolves
+ * against the PADDING box of its containing block (the nearest positioned
+ * ancestor), not against that ancestor's content height. */
+static void test_build_abs_height_pct_uses_padding_box(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='position:relative;height:60px;padding:10px 0'>"
+        "<div style='position:absolute;top:0;height:100%;background:#f00'>X</div>"
+        "</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_text(v, "X");
+    assert_non_null(r);
+    const pv_box_def *bx = pv_box_at(v, (size_t)r->block_id);
+    assert_non_null(bx);
+    assert_int_equal(bx->box_h, 80);   /* 60 content + 2 x 10 padding */
     pv_free(v);
     hp_document_free(doc);
 }
@@ -4919,6 +4968,7 @@ int main(void) {
         cmocka_unit_test(test_build_float_threading),
         cmocka_unit_test(test_build_float_outermost_founder),
         cmocka_unit_test(test_build_oof_image_carries_block_id),
+        cmocka_unit_test(test_build_oof_video_leaves_flow),
         cmocka_unit_test(test_build_hbox_margin_above_container_merges),
         cmocka_unit_test(test_build_hbox_container_width_never_seeds_items),
         cmocka_unit_test(test_build_absolute_inside_float_escapes),
@@ -4958,6 +5008,7 @@ int main(void) {
         cmocka_unit_test(test_build_boxdeco_h_margin_alone_creates_box),
         cmocka_unit_test(test_build_boxdeco_h_margin_zero_auto_no_box),
         cmocka_unit_test(test_build_boxdeco_fit_content_height_is_auto),
+        cmocka_unit_test(test_build_abs_height_pct_uses_padding_box),
         cmocka_unit_test(test_build_boxdef_carries_node_id),
         cmocka_unit_test(test_build_boxdeco_min_content_height_is_auto),
         cmocka_unit_test(test_build_empty_box_gets_run_and_box),

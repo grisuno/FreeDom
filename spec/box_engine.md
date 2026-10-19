@@ -1050,3 +1050,27 @@ Dado-Cuando-Entonces:
   autor).
 - **Reemplazado en línea dentro de ítems/flotantes** (`flow_nested_block`): misma regla
   que el flujo principal; la medida del ítem lo suma a su línea.
+
+## Tanda 47 — el subárbol posicionado EN FLUJO se pinta en la capa posicionada
+
+**Contexto (CSS 2.1 Apéndice E, pasos 8–9).** Un elemento `position:relative|sticky`
+(con o sin `z-index`) pinta TODO su subárbol en la capa de los posicionados, en orden de
+árbol junto a los absolutos/fijos de `z-index` auto/0. El pintor pintaba todo el flujo
+primero y los absolutos encima, así que un fondo absoluto anterior (`#app{position:absolute;
+background:#fff}`) tapaba el contenido `position:relative` que le sigue en el árbol.
+
+**Dado** una caja absoluta/fija P (fuera de flujo, `z >= 0`, sin ancestro fuera de flujo) y
+una caja en flujo S con `position: relative|sticky`, `idx(P) < idx(S)` y `z(P) <= z(S)`
+(`z` sin declarar = 0), **cuando** se decide el orden de pintado, **entonces** S es una
+*raíz diferida*: su subárbol (cajas y filas cuyo propietario cuelga de S por `parent_id`) se
+retira del paso en flujo y se pinta en la capa posicionada, intercalado con P por
+`(z, índice de caja)`.
+
+- `bt_defer_roots(boxes, nbox, pos, npos, in_flow, root_of)` (pura): llena `root_of[i]` con
+  la raíz diferida MÁS EXTERNA que contiene a la caja `i` (o `-1`) y devuelve cuántas raíces
+  hay. Acotada por `nbox` enlaces; entradas inválidas (NULL, ciclos) fallan ABIERTO: `-1`,
+  o sea pintado normal en flujo.
+- Una página sin absolutos anteriores a un relativo (la inmensa mayoría) no difiere nada:
+  pintado byte-idéntico.
+- Fuera de alcance: contextos de apilamiento anidados con `z` propio dentro de una raíz
+  diferida (se pintan con ella, como bloque), `z-index` en ítems flex/grid.

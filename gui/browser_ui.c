@@ -3352,6 +3352,13 @@ typedef struct rc_layout {
      * in v1 (would need a two-pass painter to paint behind in-flow). */
     bt_positioned positioned[BT_MAX_POSITIONED];
     size_t        npositioned;
+    /* Tanda 47: the in-flow positioned subtrees the painter defers into the
+     * positioned layer (bt_defer_roots): defer_root[box id] = the outermost
+     * deferred root containing it, or -1. ndefer = box count it covers (0 = none:
+     * the array is unwritten and every box paints in the normal pass). */
+    int           defer_root[BT_MAX_POSITIONED];
+    size_t        defer_order[BT_MAX_POSITIONED];   /* tree order of every box */
+    size_t        ndefer;
     /* Stage 2b: static (hypothetical in-flow) position of each out-of-flow box,
      * recorded by layout_doc at the moment it skips the block — the pen position
      * where the box would have started in flow (CSS 2.2 §10.3.7: top/left:auto
@@ -4899,6 +4906,12 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
      * nowrap/pre suppresses wrapping. */
     rc_ext x = (rc_ext){ 0 };
     x.family = b->font_family;
+    /* A page that declares no font family at all gets the browser's default
+     * font, which in Firefox is a SERIF face (the `standard` font, Times-like).
+     * Only under author CSS: with it off the page is the reader's plain text and
+     * keeps the theme's sans. */
+    if (x.family == CSS_FF_UNSET && w->doc != NULL && w->doc->author_css && !w->force_theme)
+        x.family = CSS_FF_SERIF;
     x.webfont = b->fontface;
     /* Named LOCAL family (spec/text_shape.md section 7): resolved through
      * fontconfig on the trusted side, cached per list; 0 keeps the bucket. */
@@ -5250,8 +5263,12 @@ static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
      * item whose content continues after it (a loader box, then a paragraph)
      * is some ancestor of the container, and taking the container's box -- its
      * declared height -- cut the rest of the item off. */
-    for (size_t k = b0 + 1; child >= 0 && k < b1; ++k)
+    for (size_t k = b0 + 1; child >= 0 && k < b1; ++k) {
+        /* An out-of-flow run (an overlay link, a badge) is not part of the item's
+         * flow: it forms no item and sits in no container, so it must not veto
+         * the "the nested container holds the whole item" answer. */
         if (child_cont_at_level(doc, rd_at(doc, k), cid) != child) child = -1;
+    }
     if (child >= 0) {
         const pv_cont_def *ccd = rd_cont_at(doc, (size_t)child);
         int cbox = (ccd != NULL) ? ccd->box_id : -1;
@@ -5260,9 +5277,24 @@ static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
     }
     /* An explicit container box wins over the run's stamp: a synthesised table has
      * no stamp, and the caller computed the box every cell shares. */
-    return item_sides_from_box(doc,
-        (cont_box >= 0) ? item_root_box_in(doc, b0, b1, cont_box)
-                        : item_root_box(doc, b0, b1), cb_w);
+    int root = (cont_box >= 0) ? item_root_box_in(doc, b0, b1, cont_box)
+                               : item_root_box(doc, b0, b1);
+    /* A box that is the OWN box of a container nested DEEPER in this item (below the
+     * container that is the item itself) belongs to that container, which lays itself
+     * out inside it and is adopted one level down: adopting it here as well
+     * applied its padding twice (an undecorated <li> > flex <div> > padded flex
+     * <div>, plus an overlay link the nested container cannot hold, is the
+     * Webflow navbar). */
+    if (root >= 0) {
+        int c = rd_at(doc, b0)->cont_id;
+        for (int guard = 0; c >= 0 && c != cid && guard < PV_CONT_DEPTH + 2; ++guard) {
+            const pv_cont_def *cd = rd_cont_at(doc, (size_t)c);
+            if (cd == NULL || cd->parent_id == cid) break;   /* the item's own container */
+            if (cd->box_id == root) { root = -1; break; }
+            c = cd->parent_id;
+        }
+    }
+    return item_sides_from_box(doc, root, cb_w);
 }
 
 
@@ -9138,12 +9170,20 @@ static void oof_sublayouts(cairo_t *cr, const browser_window *w, double content_
             vboxes[a].parent_id = -1;
             /* height:auto between two declared insets is FORCED before layout
              * (CSS 2.1 10.6.4), so a flex column inside centres against it. */
-            if (both_h && bd->box_h == 0 && !bd->box_h_set) {
+            /* A `height: <percentage>` the style pass could not resolve (an
+             * absolute box whose containing block has no declared height) is
+             * resolved here against the containing block's laid-out height
+             * (CSS 2.1 10.5); the containing block is the positioned ancestor's
+             * padding box, which this uses as its border box (exact unless that
+             * ancestor has a border). */
+            int pct_h = (bd->box_h_pct != 0 && bd->box_h == 0 && !bd->box_h_set);
+            if ((both_h || pct_h) && bd->box_h == 0 && !bd->box_h_set) {
                 double mt = (bd->box_mt != PV_LEN_UNSET)
                             ? bx_lp_px(bd->box_mt, bd->box_mt_pct, cbw) : 0.0;
                 double mb = (bd->box_mb != PV_LEN_UNSET)
                             ? bx_lp_px(bd->box_mb, bd->box_mb_pct, cbw) : 0.0;
-                double H = avail_h - mt - mb;
+                double H = (pct_h ? cbh * (double)bd->box_h_pct / 1000.0 : avail_h)
+                           - (pct_h ? 0.0 : mt + mb);
                 if (bd->box_sizing != CSS_BOXS_BORDER)
                     H -= box_pad_px(bd->pad_t, bd->pad_t_pct, cbw)
                        + box_pad_px(bd->pad_b, bd->pad_b_pct, cbw)
@@ -9400,6 +9440,27 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
         L->positioned[keep++] = L->positioned[i];
     }
     L->npositioned = keep;
+
+    /* An in-flow positioned subtree that follows an out-of-flow box in the tree paints
+     * above it (CSS 2.1 App E step 8), not below as "all flow first" would draw it. */
+    L->ndefer = nbox;
+    if (bt_defer_roots(doc->boxes, nbox, L->positioned, L->npositioned, in_flow,
+                       L->defer_root, L->defer_order) == 0)
+        L->ndefer = 0;
+}
+
+/* The deferred root (see rc_layout.defer_root) of box `bid`, or -1. */
+static int defer_root_of(const rc_layout *L, int bid) {
+    if (bid < 0 || (size_t)bid >= L->ndefer) return -1;
+    return L->defer_root[bid];
+}
+
+/* Whether an in-flow item owned by box `bid` is painted in the pass that serves
+ * `only_root`: -1 is the normal in-flow pass (everything not deferred), a root
+ * is the deferred pass for exactly that subtree. */
+static int defer_wants(const rc_layout *L, int bid, int only_root) {
+    int r = defer_root_of(L, bid);
+    return (only_root < 0) ? (r < 0) : (r == only_root);
 }
 
 /* Width of a painted text-input box: the preferred width clamped to the content. */
@@ -12186,9 +12247,21 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
                 uint32_t *row = (uint32_t *)(data + y * stride);
                 for (int x = 0; x < fw; ++x) {
                     uint32_t px = row[x];
-                    double fr = (double)((px >> 16) & 0xff);
-                    double fg = (double)((px >> 8) & 0xff);
-                    double fb = (double)(px & 0xff);
+                    /* The surface is premultiplied ARGB: a transparent pixel has
+                     * no colour to filter, and running invert()/brightness() on
+                     * its zero channels made (255,255,255,alpha 0) -- an invalid
+                     * premultiplied value Cairo composites as ADDITIVE white over
+                     * everything behind the group. Filter the straight colour of
+                     * the pixels that have one and premultiply the result. */
+                    double fa = (double)(px >> 24);
+                    if (fa <= 0.0) continue;
+                    double un = 255.0 / fa;
+                    double fr = (double)((px >> 16) & 0xff) * un;
+                    double fg = (double)((px >> 8) & 0xff) * un;
+                    double fb = (double)(px & 0xff) * un;
+                    if (fr > 255.0) fr = 255.0;
+                    if (fg > 255.0) fg = 255.0;
+                    if (fb > 255.0) fb = 255.0;
                     /* 1. Grayscale */
                     if (gs_pct > 0) {
                         double gray = fr * 0.299 + fg * 0.587 + fb * 0.114;
@@ -12269,6 +12342,10 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
                     int nr = (int)(fr + 0.5); if (nr < 0) nr = 0; if (nr > 255) nr = 255;
                     int ng = (int)(fg + 0.5); if (ng < 0) ng = 0; if (ng > 255) ng = 255;
                     int nb = (int)(fb + 0.5); if (nb < 0) nb = 0; if (nb > 255) nb = 255;
+                    double pm = fa / 255.0;
+                    nr = (int)(nr * pm + 0.5);
+                    ng = (int)(ng * pm + 0.5);
+                    nb = (int)(nb * pm + 0.5);
                     row[x] = (px & 0xff000000) | ((uint32_t)nr << 16) | ((uint32_t)ng << 8) | (uint32_t)nb;
                 }
             }
@@ -12917,6 +12994,182 @@ static void publish_geometry(browser_window *w, const rc_layout *L, double left,
     jg_free(&g);
 }
 
+/* Paints one deferred in-flow subtree: the caller's in-flow pass restricted to the
+ * subtree rooted at box `root` (see paint_positioned_layer). */
+typedef void (*defer_paint_fn)(void *ctx, int root);
+
+/* The positioned layer (CSS 2.1 App E steps 8-9): the out-of-flow boxes with z >= 0
+ * and the in-flow positioned subtrees deferred behind them (bt_defer_roots), merged
+ * by (z, tree order) so an in-flow `position:relative` section that FOLLOWS an
+ * absolute backdrop paints above it. With nothing deferred this is exactly the
+ * plain loop it replaces. Overflow clips opened for the absolute boxes are closed
+ * before a deferred subtree paints, which manages its own. */
+static void paint_positioned_layer(cairo_t *cr, browser_window *w, const ui_theme *th,
+                                   rc_layout *L, double left, double origin,
+                                   double content_top, double content_h, double view_w,
+                                   defer_paint_fn paint_deferred, void *dctx) {
+    int pos_ov_stack[OV_MAX_DEPTH] = {0};
+    int pos_ov_depth = 0;
+    size_t next_root = 0;
+    const rd_doc *doc = w->doc;
+    for (size_t i = 0; i < L->npositioned; ++i) {
+        const bt_positioned *pb = &L->positioned[i];
+        if (pb->z_index < 0) continue;  /* already painted behind, above */
+        while (paint_deferred != NULL && L->ndefer > 0) {
+            while (next_root < L->ndefer && L->defer_root[next_root] != (int)next_root)
+                ++next_root;
+            if (next_root >= L->ndefer) break;
+            const pv_box_def *rd = rd_box_at(doc, next_root);
+            int zr = (rd == NULL || rd->z_index == PV_LEN_UNSET) ? 0 : rd->z_index;
+            if (zr > pb->z_index ||
+                (zr == pb->z_index && L->defer_order[next_root] > pb->doc_order)) break;
+            while (pos_ov_depth > 0) { cairo_restore(cr); pos_ov_depth--; }
+            paint_deferred(dctx, (int)next_root);
+            ++next_root;
+        }
+        paint_positioned_one(cr, w, th, pb, left, origin, content_top, content_h,
+                             view_w, pos_ov_stack, &pos_ov_depth, L);
+    }
+    while (pos_ov_depth > 0) { cairo_restore(cr); pos_ov_depth--; }
+    while (paint_deferred != NULL && L->ndefer > 0 && next_root < L->ndefer) {
+        if (L->defer_root[next_root] == (int)next_root)
+            paint_deferred(dctx, (int)next_root);
+        ++next_root;
+    }
+}
+
+/* The interactive painter's in-flow context: everything paint_structured has
+ * resolved that the in-flow pass needs, so the normal pass and each deferred
+ * subtree pass (see paint_positioned_layer) run the SAME code. */
+typedef struct screen_flow_ctx {
+    cairo_t *cr;
+    browser_window *w;
+    rc_layout *L;
+    double origin, left, content_top, content_h, content_w;
+    const double *sticky_off;
+    size_t nbox_total;
+} screen_flow_ctx;
+
+/* Paints the in-flow boxes and rows the pass `only_root` serves (see defer_wants):
+ * -1 = everything that is not deferred, else exactly one deferred subtree. */
+static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
+    cairo_t *cr = c->cr;
+    browser_window *w = c->w;
+    rc_layout *Lp = c->L;
+    const double origin = c->origin, left = c->left;
+    const double content_top = c->content_top, content_h = c->content_h;
+    const double content_w = c->content_w;
+    const double *sticky_off = c->sticky_off;
+    const size_t nbox_total = c->nbox_total;
+    /* Overflow clip state: stores block_id of each active overflow:hidden box
+     * whose content rect is applied as a cairo clip. clip_depth = number of
+     * active saves. Box decorations (borders/bg/shadow) are NOT clipped —
+     * CSS paints those outside the padding box; children are clipped inside. */
+    int ov_stack[OV_MAX_DEPTH] = {0};
+    int ov_depth = 0;
+
+    /* row_done marks rows already painted as part of a grouped box (M1.1
+     * increment 4, paint_box_and_direct_rows) so the row loop below doesn't
+     * paint them a second time. NULL (calloc(0) or OOM) degrades to "nothing
+     * grouped skips" -- every row falls through to the normal ungrouped path,
+     * same as before this feature existed. */
+    char *row_done = (Lp->nrow > 0) ? (char *)calloc(Lp->nrow, 1) : NULL;
+    /* R6: nested compositor — track which in-flow boxes have been painted
+     * as part of a parent's stacking-context group to avoid double paint. */
+    char *box_done = (Lp->nbox > 0) ? (char *)calloc(Lp->nbox, 1) : NULL;
+
+    if (box_done != NULL)
+        for (size_t i = 0; i < Lp->nbox; ++i)
+            if (!defer_wants(Lp, Lp->boxes[i].block_id, only_root)) box_done[i] = 1;
+    for (size_t i = 0; i < Lp->nbox; ++i) {
+        if (box_done != NULL && box_done[i]) continue;
+        const rc_box *orig_bx = &Lp->boxes[i];
+        int bid = orig_bx->block_id;
+        const pv_box_def *def = (bid >= 0) ? rd_box_at(w->doc, bid) : NULL;
+        int is_sc = def ? box_forms_stacking_context(def) : 0;
+        /* Sticky boxes: create a local copy with adjusted top so the box
+         * decoration shifts with the viewport clamp. The direct rows of the
+         * sticky box were already adjusted in Lp->rows[].top above. Nested
+         * children (paint_nested_children) paint at their natural layout
+         * positions — for v1 this is a known limitation (sticky boxes
+         * with complex children get their decoration + direct text rows right,
+         * child boxes inside a sticky bar are uncommon in practice). */
+        double sticky_delta = 0.0;
+        if (sticky_off && bid >= 0 && (size_t)bid < nbox_total)
+            sticky_delta = sticky_off[bid];
+        rc_box sticky_bx;
+        const rc_box *bx = orig_bx;
+        if (sticky_delta != 0.0) {
+            sticky_bx = *orig_bx;
+            sticky_bx.top += sticky_delta;
+            bx = &sticky_bx;
+        }
+        double by = origin + bx->top;
+        if (by + bx->h < content_top || by > content_top + content_h) continue;
+
+        if (is_sc) {
+            bui_paint_backdrop_blur(cr, def, left + bx->x, origin + bx->top,
+                                    bx->w, bx->h);
+            cairo_push_group(cr);
+            paint_box_and_direct_rows(cr, w, Lp, bx, left, origin, content_w,
+                                       (double)w->width, content_top, content_h,
+                                       1, row_done);
+            if (box_done != NULL) box_done[i] = 1;
+            paint_nested_children(cr, w, Lp, bid, left, origin, content_w,
+                                  content_top, content_h, box_done, row_done);
+            bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
+        } else {
+            paint_box_and_direct_rows(cr, w, Lp, bx, left, origin, content_w,
+                                       (double)w->width, content_top, content_h,
+                                       1, row_done);
+        }
+    }
+    for (int pass = ROW_PAINT_BAND; pass <= ROW_PAINT_CONTENT; ++pass)
+    for (size_t i = 0; i < Lp->nrow; ++i) {
+        if (row_done != NULL && row_done[i]) continue;
+        const rc_row *r = &Lp->rows[i];
+        int row_bid = row_owner_block_id(Lp, r);
+        if (!defer_wants(Lp, row_bid, only_root)) continue;
+        /* Skip rows that overflow past their OWN box's bottom when the box has
+         * overflow:hidden and a declared height (including 0px). The box's
+         * decoration still paints; only the content rows past the content edge
+         * are hidden. */
+        int skip_overflowed = 0;
+        if (row_bid >= 0) {
+            for (size_t bi = 0; bi < Lp->nbox; ++bi) {
+                const rc_box *bx = &Lp->boxes[bi];
+                if (bx->block_id != row_bid) continue;
+                if ((bx->box_h > 0 || bx->box_h_set) && bx->h >= 0.0) {
+                    const pv_box_def *bd = rd_box_at(w->doc, (size_t)row_bid);
+                    if (bd != NULL && bd->overflow_y != CSS_OF_VISIBLE
+                        && bd->overflow_y != CSS_OF_UNSET) {
+                        double box_bottom = bx->top + bx->h;
+                        if (r->top + r->height > box_bottom) skip_overflowed = 1;
+                    }
+                }
+                break;
+            }
+        }
+        if (skip_overflowed) continue;
+        /* Each row is clipped to the innermost overflow:hidden ancestor's
+         * padding-box (the content rect where children paint). */
+        ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, Lp, origin, left);
+        double ry = origin + r->top;
+        if (ry + r->height < content_top || ry > content_top + content_h)
+            continue;
+        paint_content_row_ex(cr, w, Lp, r, left, ry, content_w, (double)w->width, 1, pass);
+    }
+    free(row_done);
+    free(box_done);
+    /* Pop all overflow clips before painting positioned boxes. */
+    while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
+
+}
+
+static void paint_screen_deferred(void *ctx, int root) {
+    paint_screen_inflow((const screen_flow_ctx *)ctx, root);
+}
+
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                              double content_h) {
     const ui_theme *th = &w->theme;
@@ -12999,121 +13252,17 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         while (neg_ov_depth > 0) { cairo_restore(cr); neg_ov_depth--; }
     }
 
-    /* Overflow clip state: stores block_id of each active overflow:hidden box
-     * whose content rect is applied as a cairo clip. clip_depth = number of
-     * active saves. Box decorations (borders/bg/shadow) are NOT clipped —
-     * CSS paints those outside the padding box; children are clipped inside. */
-    int ov_stack[OV_MAX_DEPTH] = {0};
-    int ov_depth = 0;
-
-    /* row_done marks rows already painted as part of a grouped box (M1.1
-     * increment 4, paint_box_and_direct_rows) so the row loop below doesn't
-     * paint them a second time. NULL (calloc(0) or OOM) degrades to "nothing
-     * grouped skips" -- every row falls through to the normal ungrouped path,
-     * same as before this feature existed. */
-    char *row_done = (L.nrow > 0) ? (char *)calloc(L.nrow, 1) : NULL;
-    /* R6: nested compositor — track which in-flow boxes have been painted
-     * as part of a parent's stacking-context group to avoid double paint. */
-    char *box_done = (L.nbox > 0) ? (char *)calloc(L.nbox, 1) : NULL;
-
-    for (size_t i = 0; i < L.nbox; ++i) {
-        if (box_done != NULL && box_done[i]) continue;
-        const rc_box *orig_bx = &L.boxes[i];
-        int bid = orig_bx->block_id;
-        const pv_box_def *def = (bid >= 0) ? rd_box_at(w->doc, bid) : NULL;
-        int is_sc = def ? box_forms_stacking_context(def) : 0;
-        /* Sticky boxes: create a local copy with adjusted top so the box
-         * decoration shifts with the viewport clamp. The direct rows of the
-         * sticky box were already adjusted in L.rows[].top above. Nested
-         * children (paint_nested_children) paint at their natural layout
-         * positions — for v1 this is a known limitation (sticky boxes
-         * with complex children get their decoration + direct text rows right,
-         * child boxes inside a sticky bar are uncommon in practice). */
-        double sticky_delta = 0.0;
-        if (sticky_off && bid >= 0 && (size_t)bid < nbox_total)
-            sticky_delta = sticky_off[bid];
-        rc_box sticky_bx;
-        const rc_box *bx = orig_bx;
-        if (sticky_delta != 0.0) {
-            sticky_bx = *orig_bx;
-            sticky_bx.top += sticky_delta;
-            bx = &sticky_bx;
-        }
-        double by = origin + bx->top;
-        if (by + bx->h < content_top || by > content_top + content_h) continue;
-
-        if (is_sc) {
-            bui_paint_backdrop_blur(cr, def, left + bx->x, origin + bx->top,
-                                    bx->w, bx->h);
-            cairo_push_group(cr);
-            paint_box_and_direct_rows(cr, w, &L, bx, left, origin, content_w,
-                                       (double)w->width, content_top, content_h,
-                                       1, row_done);
-            if (box_done != NULL) box_done[i] = 1;
-            paint_nested_children(cr, w, &L, bid, left, origin, content_w,
-                                  content_top, content_h, box_done, row_done);
-            bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
-        } else {
-            paint_box_and_direct_rows(cr, w, &L, bx, left, origin, content_w,
-                                       (double)w->width, content_top, content_h,
-                                       1, row_done);
-        }
-    }
-    for (int pass = ROW_PAINT_BAND; pass <= ROW_PAINT_CONTENT; ++pass)
-    for (size_t i = 0; i < L.nrow; ++i) {
-        if (row_done != NULL && row_done[i]) continue;
-        const rc_row *r = &L.rows[i];
-        int row_bid = row_owner_block_id(&L, r);
-        /* Skip rows that overflow past their OWN box's bottom when the box has
-         * overflow:hidden and a declared height (including 0px). The box's
-         * decoration still paints; only the content rows past the content edge
-         * are hidden. */
-        int skip_overflowed = 0;
-        if (row_bid >= 0) {
-            for (size_t bi = 0; bi < L.nbox; ++bi) {
-                const rc_box *bx = &L.boxes[bi];
-                if (bx->block_id != row_bid) continue;
-                if ((bx->box_h > 0 || bx->box_h_set) && bx->h >= 0.0) {
-                    const pv_box_def *bd = rd_box_at(w->doc, (size_t)row_bid);
-                    if (bd != NULL && bd->overflow_y != CSS_OF_VISIBLE
-                        && bd->overflow_y != CSS_OF_UNSET) {
-                        double box_bottom = bx->top + bx->h;
-                        if (r->top + r->height > box_bottom) skip_overflowed = 1;
-                    }
-                }
-                break;
-            }
-        }
-        if (skip_overflowed) continue;
-        /* Each row is clipped to the innermost overflow:hidden ancestor's
-         * padding-box (the content rect where children paint). */
-        ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, &L, origin, left);
-        double ry = origin + r->top;
-        if (ry + r->height < content_top || ry > content_top + content_h)
-            continue;
-        paint_content_row_ex(cr, w, &L, r, left, ry, content_w, (double)w->width, 1, pass);
-    }
-    free(row_done);
-    free(box_done);
-    /* Pop all overflow clips before painting positioned boxes. */
-    while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
+    screen_flow_ctx sfc = { cr, w, &L, origin, left, content_top, content_h, content_w,
+                            sticky_off, nbox_total };
+    paint_screen_inflow(&sfc, -1);
 
     /* Stage 2, non-negative z-index PAINTS ABOVE in-flow content (App E layers
-     * ZERO_Z/POS_Z), honouring overflow:hidden ancestor clipping (ov_reconcile) —
+     * ZERO_Z/POS_Z), honouring overflow:hidden ancestor clipping (ov_reconcile) --
      * a positioned box inside e.g. a <div style="overflow:hidden"> is clipped to
-     * that ancestor's padding-box. */
-    {
-        int pos_ov_stack[OV_MAX_DEPTH] = {0};
-        int pos_ov_depth = 0;
-        for (size_t i = 0; i < L.npositioned; ++i) {
-            const bt_positioned *pb = &L.positioned[i];
-            if (pb->z_index < 0) continue;  /* already painted behind, above */
-            paint_positioned_one(cr, w, th, pb, left, origin,
-                                 content_top, content_h, (double)w->width,
-                                 pos_ov_stack, &pos_ov_depth, &L);
-        }
-        while (pos_ov_depth > 0) { cairo_restore(cr); pos_ov_depth--; }
-    }
+     * that ancestor's padding-box. In-flow positioned subtrees that follow an
+     * absolute box in the tree are interleaved by paint_positioned_layer. */
+    paint_positioned_layer(cr, w, th, &L, left, origin, content_top, content_h,
+                           (double)w->width, paint_screen_deferred, &sfc);
     free(sticky_off);
     rc_free(&L);
 }
@@ -13302,6 +13451,53 @@ int ui_render_viewport_w(void) { return (int)PNG_PAGE_W; }
 #define PNG_MARGIN   0.0
 #define PNG_MAX_H    30000   /* px; 1000 * 30000 * 4B ~= 120 MiB worst case */
 
+/* The headless PNG painter's in-flow context, shared by the normal pass and the
+ * deferred-subtree passes. */
+typedef struct png_flow_ctx {
+    cairo_t *cr;
+    browser_window *w;
+    rc_layout *L;
+    double left, margin, content_w;
+    double no_cull_top, no_cull_h;
+} png_flow_ctx;
+
+/* Paints the in-flow boxes and rows the pass `only_root` serves (see defer_wants):
+ * -1 = everything that is not deferred, else exactly one deferred subtree. Box
+ * decoration first (behind the rows), then the rows, at a constant origin (no
+ * pagination); row_done marks rows already painted as part of a grouped box. */
+static void paint_png_inflow(const png_flow_ctx *c, int only_root) {
+    cairo_t *cr = c->cr;
+    browser_window *w = c->w;
+    rc_layout *L = c->L;
+    char *row_done = (L->nrow > 0) ? (char *)calloc(L->nrow, 1) : NULL;
+    for (size_t bi = 0; bi < L->nbox; ++bi) {
+        if (!defer_wants(L, L->boxes[bi].block_id, only_root)) continue;
+        paint_box_and_direct_rows(cr, w, L, &L->boxes[bi], c->left, c->margin,
+                                  c->content_w, PNG_PAGE_W, c->no_cull_top, c->no_cull_h,
+                                  0, row_done);
+    }
+    for (int pass = ROW_PAINT_BAND; pass <= ROW_PAINT_CONTENT; ++pass) {
+        int ov_stack[OV_MAX_DEPTH] = {0};
+        int ov_depth = 0;
+        for (size_t i = 0; i < L->nrow; ++i) {
+            if (row_done != NULL && row_done[i]) continue;
+            const rc_row *r = &L->rows[i];
+            int row_bid = row_owner_block_id(L, r);
+            if (!defer_wants(L, row_bid, only_root)) continue;
+            ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, L,
+                         c->left, c->margin);
+            paint_content_row_ex(cr, w, L, r, c->left,
+                                 c->margin + r->top, c->content_w, PNG_PAGE_W, 0, pass);
+        }
+        while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
+    }
+    free(row_done);
+}
+
+static void paint_png_deferred(void *ctx, int root) {
+    paint_png_inflow((const png_flow_ctx *)ctx, root);
+}
+
 /* Writes the window's current laid-out document to a single full-height PNG at
  * `path` (the same layout/paint path as the screen and the PDF export, in a forced
  * light theme so it is dark-on-white). Returns the image height in px (0 when the
@@ -13389,43 +13585,13 @@ static long write_doc_png(browser_window *w, const char *path) {
         while (neg_ov_depth > 0) { cairo_restore(cr); neg_ov_depth--; }
     }
 
-    /* Box decoration first (behind the rows), then the rows, at a constant origin
-     * (no pagination): both use png_margin + their layout-space top. row_done (see
-     * paint_structured) marks rows already painted as part of a grouped box. */
-    char *row_done = (L.nrow > 0) ? (char *)calloc(L.nrow, 1) : NULL;
-    for (size_t bi = 0; bi < L.nbox; ++bi)
-        paint_box_and_direct_rows(cr, w, &L, &L.boxes[bi], png_left, png_margin,
-                                  content_w, PNG_PAGE_W, no_cull_top, no_cull_h,
-                                  0, row_done);
-    for (int pass = ROW_PAINT_BAND; pass <= ROW_PAINT_CONTENT; ++pass) {
-        int ov_stack[OV_MAX_DEPTH] = {0};
-        int ov_depth = 0;
-        for (size_t i = 0; i < L.nrow; ++i) {
-            if (row_done != NULL && row_done[i]) continue;
-            const rc_row *r = &L.rows[i];
-            int row_bid = row_owner_block_id(&L, r);
-            ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, &L,
-                         png_left, png_margin);
-            paint_content_row_ex(cr, w, &L, r, png_left,
-                                 png_margin + r->top, content_w, PNG_PAGE_W, 0, pass);
-        }
-        while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
-    }
-    free(row_done);
-    /* Stage 2, non-negative z-index PAINTS ABOVE in-flow content (same as
-     * paint_structured). Honours overflow:hidden ancestors via ov_reconcile. */
-    {
-        int pos_ov_stack[OV_MAX_DEPTH] = {0};
-        int pos_ov_depth = 0;
-        for (size_t pi = 0; pi < L.npositioned; ++pi) {
-            const bt_positioned *pb = &L.positioned[pi];
-            if (pb->z_index < 0) continue;  /* already painted behind, above */
-            paint_positioned_one(cr, w, th, pb, png_left, png_margin,
-                                 no_cull_top, no_cull_h, PNG_PAGE_W,
-                                 pos_ov_stack, &pos_ov_depth, &L);
-        }
-        while (pos_ov_depth > 0) { cairo_restore(cr); pos_ov_depth--; }
-    }
+    /* The normal in-flow pass, then the positioned layer: out-of-flow boxes and the
+     * in-flow positioned subtrees deferred behind them, merged by (z, tree order). */
+    png_flow_ctx pfc = { cr, w, &L, png_left, png_margin, content_w,
+                         no_cull_top, no_cull_h };
+    paint_png_inflow(&pfc, -1);
+    paint_positioned_layer(cr, w, th, &L, png_left, png_margin, no_cull_top, no_cull_h,
+                           PNG_PAGE_W, paint_png_deferred, &pfc);
 
     cairo_destroy(cr);
     cairo_status_t st = cairo_surface_write_to_png(surf, path);

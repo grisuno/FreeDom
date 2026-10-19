@@ -153,6 +153,8 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
   - `bt_oof_root` (function, line 772) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
   - `bt_box_hidden` (function, line 776) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
   - `bt_oof_avail` (function, line 789) `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
+  - `bt_defer_roots` (function, line 797) `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
+                      const bt_positi...`
   - `sized` (function, line 350) `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);`
   - `BT_LEN_AUTO` (macro, line 31) `#define BT_LEN_AUTO`
   - `BT_WRAP_EPS` (macro, line 62) `#define BT_WRAP_EPS`

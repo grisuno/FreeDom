@@ -3,9 +3,9 @@ CSS combinator demo
 content_w=1000 total_h=440.6 nbox=0 nrow=12 npositioned=0
   row[0] top=21.4 h=45.0 x_off=0.0
   row[1] top=87.9 h=34.0 x_off=0.0
-  row[2] top=141.8 h=23.0 x_off=0.0 w=43.0
-  row[3] top=141.8 h=23.0 x_off=75.0 w=34.2
-  row[4] top=141.8 h=23.0 x_off=141.2 w=59.5
+  row[2] top=141.8 h=23.0 x_off=0.0 w=45.2
+  row[3] top=141.8 h=23.0 x_off=77.2 w=33.7
+  row[4] top=141.8 h=23.0 x_off=142.9 w=59.7
   row[5] top=180.8 h=23.0 x_off=0.0
   row[6] top=219.8 h=23.0 x_off=0.0
   row[7] top=242.8 h=23.0 x_off=0.0

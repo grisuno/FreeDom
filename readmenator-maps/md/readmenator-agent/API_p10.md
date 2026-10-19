@@ -32,6 +32,14 @@ Depends on: `include/zoom.h`
 - `zm_scale` (function) `src/zoom.c:40` `double zm_scale(int pct)`
 - `zm_apply` (function) `src/zoom.c:44` `double zm_apply(double base_px, int pct)`
 
+## tools/fbench.py
+- `load_baseline` (function) `tools/fbench.py:29` `def load_baseline()`
+- `load_current` (function) `tools/fbench.py:42` `def load_current()`
+- `luma` (function) `tools/fbench.py:55` `def luma(img)`
+- `bands` (function) `tools/fbench.py:59` `def bands(fd, ff, band)`
+- `sbs` (function) `tools/fbench.py:70` `def sbs(name, start, nrows)`
+- `main` (function) `tools/fbench.py:89` `def main()`
+
 ## tools/ffgeom.py
 - `load_rows` (function) `tools/ffgeom.py:116` `def load_rows(path)`
 - `lum` (function) `tools/ffgeom.py:169` `def lum(p)`

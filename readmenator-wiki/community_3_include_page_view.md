@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 31 file(s) rooted at `include` with dominant language c (cohesion 0.48). Central symbols: `BLOCK`, `BLOCKED`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`. Core file: `src/page_view.c` (239 symbols).
+This community groups 31 file(s) rooted at `include` with dominant language c (cohesion 0.48). Central symbols: `BLOCK`, `BLOCKED`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`. Core file: `src/page_view.c` (240 symbols).
 
 ## Files
 
@@ -13,7 +13,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/box_style.h` | h | utility | 31 | no |
-| `include/box_tree.h` | h | utility | 32 | no |
+| `include/box_tree.h` | h | utility | 33 | no |
 | `include/dom_debug.h` | h | utility | 4 | no |
 | `include/flex_layout.h` | h | presentation | 43 | no |
 | `include/js_policy.h` | h | business_logic | 7 | no |
@@ -25,7 +25,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `src/box_style.c` | c | utility | 48 | no |
-| `src/box_tree.c` | c | utility | 23 | no |
+| `src/box_tree.c` | c | utility | 24 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 35 | no |
 | `src/freedom.c` | c | utility | 46 | no |
@@ -36,7 +36,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `tests/test_box_style.c` | c | testing | 49 | no |
-| `tests/test_box_tree.c` | c | testing | 61 | no |
+| `tests/test_box_tree.c` | c | testing | 68 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 71 | no |
 | `tests/test_js_policy.c` | c | testing | 5 | no |

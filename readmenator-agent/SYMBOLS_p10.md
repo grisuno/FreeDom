@@ -3,6 +3,25 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `card` | function | `tests/test_box_tree.c:769` | `* containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */ assert_true(dbl_eq(out[2].x, 100));` |
+| `dbox` | function | `tests/test_box_tree.c:1050` | `static pv_box_def dbox(int parent, int position, int z)` |
+| `main` | function | `tests/test_box_tree.c:1157` | `int main(void)` |
+| `test_abspos_resolves_against_placed_ancestor` | function | `tests/test_box_tree.c:744` | `static void test_abspos_resolves_against_placed_ancestor(void **state)` |
+| `test_abspos_unplaced_without_anchor_falls_to_viewport` | function | `tests/test_box_tree.c:774` | `static void test_abspos_unplaced_without_anchor_falls_to_viewport(void **state)` |
+| `test_block_stacking_with_collapse` | function | `tests/test_box_tree.c:62` | `static void test_block_stacking_with_collapse(void **state)` |
+| `test_box_hidden_ancestor` | function | `tests/test_box_tree.c:806` | `static void test_box_hidden_ancestor(void **state)` |
+| `test_box_hidden_fail_closed` | function | `tests/test_box_tree.c:819` | `static void test_box_hidden_fail_closed(void **state)` |
+| `test_box_hidden_self` | function | `tests/test_box_tree.c:794` | `static void test_box_hidden_self(void **state)` |
+| `test_children_cap` | function | `tests/test_box_tree.c:388` | `static void test_children_cap(void **state)` |
+| `test_defer_fails_open` | function | `tests/test_box_tree.c:1143` | `static void test_defer_fails_open(void **state)` |
+| `test_defer_outermost_root_and_negative_z` | function | `tests/test_box_tree.c:1103` | `static void test_defer_outermost_root_and_negative_z(void **state)` |
+| `test_defer_relative_after_abs` | function | `tests/test_box_tree.c:1059` | `static void test_defer_relative_after_abs(void **state)` |
+| `test_defer_relative_before_abs_is_not_deferred` | function | `tests/test_box_tree.c:1076` | `static void test_defer_relative_before_abs_is_not_deferred(void **state)` |
+| `test_defer_respects_z_order` | function | `tests/test_box_tree.c:1088` | `static void test_defer_respects_z_order(void **state)` |
+| `test_defer_uses_tree_order_not_index` | function | `tests/test_box_tree.c:1127` | `static void test_defer_uses_tree_order_not_index(void **state)` |
+| `test_depth_cap` | function | `tests/test_box_tree.c:398` | `static void test_depth_cap(void **state)` |
+| `test_display_none_skipped` | function | `tests/test_box_tree.c:353` | `static void test_display_none_skipped(void **state)` |
+| `test_flex_auto_margin_pushes_item` | function | `tests/test_box_tree.c:95` | `static void test_flex_auto_margin_pushes_item(void **state)` |
 | `test_flex_cross_axis_align` | function | `tests/test_box_tree.c:213` | `static void test_flex_cross_axis_align(void **state)` |
 | `test_flex_gap_and_justify_center` | function | `tests/test_box_tree.c:113` | `static void test_flex_gap_and_justify_center(void **state)` |
 | `test_flex_negative_gap` | function | `tests/test_box_tree.c:378` | `static void test_flex_negative_gap(void **state)` |
@@ -477,24 +496,5 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 | `test_hsl_fractional_hue` | function | `tests/test_css_color.c:256` | `static void test_hsl_fractional_hue(void **state)` |
 | `test_hsl_out_of_range` | function | `tests/test_css_color.c:160` | `static void test_hsl_out_of_range(void **state)` |
 | `test_hsl_space_separated` | function | `tests/test_css_color.c:310` | `static void test_hsl_space_separated(void **state)` |
-| `test_hsla` | function | `tests/test_css_color.c:154` | `static void test_hsla(void **state)` |
-| `test_lab_family_malformed` | function | `tests/test_css_color.c:211` | `static void test_lab_family_malformed(void **state)` |
-| `test_lab_lch` | function | `tests/test_css_color.c:203` | `static void test_lab_lch(void **state)` |
-| `test_leading_dot_number` | function | `tests/test_css_color.c:272` | `static void test_leading_dot_number(void **state)` |
-| `test_named` | function | `tests/test_css_color.c:100` | `static void test_named(void **state)` |
-| `test_named_bad` | function | `tests/test_css_color.c:118` | `static void test_named_bad(void **state)` |
-| `test_null_args` | function | `tests/test_css_color.c:22` | `static void test_null_args(void **state)` |
-| `test_oklch_oklab` | function | `tests/test_css_color.c:188` | `static void test_oklch_oklab(void **state)` |
-| `test_pack_unpack` | function | `tests/test_css_color.c:223` | `static void test_pack_unpack(void **state)` |
-| `test_rgb_fractional` | function | `tests/test_css_color.c:263` | `static void test_rgb_fractional(void **state)` |
-| `test_rgb_integer` | function | `tests/test_css_color.c:68` | `static void test_rgb_integer(void **state)` |
-| `test_rgb_out_of_range` | function | `tests/test_css_color.c:90` | `static void test_rgb_out_of_range(void **state)` |
-| `test_rgb_percent` | function | `tests/test_css_color.c:84` | `static void test_rgb_percent(void **state)` |
-| `test_rgb_space_separated` | function | `tests/test_css_color.c:292` | `static void test_rgb_space_separated(void **state)` |
-| `test_rgba_integer` | function | `tests/test_css_color.c:77` | `static void test_rgba_integer(void **state)` |
-| `test_space_separated_still_fails_closed` | function | `tests/test_css_color.c:323` | `static void test_space_separated_still_fails_closed(void **state)` |
-| `test_transparent_currentcolor` | function | `tests/test_css_color.c:126` | `static void test_transparent_currentcolor(void **state)` |
-| `test_unsupported_syntax` | function | `tests/test_css_color.c:168` | `static void test_unsupported_syntax(void **state)` |
-| `find_drop` | function | `tests/test_css_drops.c:31` | `static const css_drop *find_drop(const css_drop_log *log, const char *prop)` |
 
 Next: [SYMBOLS_p11.md](SYMBOLS_p11.md)

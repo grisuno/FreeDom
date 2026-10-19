@@ -8,8 +8,8 @@ content_w=1000 total_h=653.2 nbox=8 nrow=20 npositioned=0
   row[4] top=141.8 h=23.0 x_off=212.0 w=788.0
   row[5] top=164.8 h=23.0 x_off=212.0 w=788.0
   row[6] top=207.7 h=34.0 x_off=0.0
-  row[7] top=261.6 h=23.0 x_off=263.2 w=244.6
-  row[8] top=261.6 h=23.0 x_off=0.0 w=255.2
+  row[7] top=261.6 h=23.0 x_off=266.4 w=250.2
+  row[8] top=261.6 h=23.0 x_off=0.0 w=258.4
   row[9] top=304.6 h=34.0 x_off=0.0
   row[10] top=358.5 h=23.0 x_off=0.0
   row[11] top=397.5 h=23.0 x_off=0.0 w=1000.0
@@ -18,13 +18,13 @@ content_w=1000 total_h=653.2 nbox=8 nrow=20 npositioned=0
   row[14] top=533.3 h=23.0 x_off=0.0 w=658.7
   row[15] top=533.3 h=23.0 x_off=670.7 w=329.3
   row[16] top=576.2 h=34.0 x_off=0.0 w=1000.0
-  row[17] top=630.2 h=23.0 x_off=0.0 w=56.2
-  row[18] top=630.2 h=23.0 x_off=68.2 w=56.4
-  row[19] top=630.2 h=23.0 x_off=136.7 w=56.1
+  row[17] top=630.2 h=23.0 x_off=0.0 w=58.0
+  row[18] top=630.2 h=23.0 x_off=70.0 w=57.1
+  row[19] top=630.2 h=23.0 x_off=139.1 w=56.5
   box[0] bid=0 x=0.0 top=141.8 w=200.0 h=46.0
   box[1] bid=1 x=212.0 top=141.8 w=788.0 h=46.0
-  box[2] bid=2 x=263.2 top=261.6 w=244.6 h=23.0
-  box[3] bid=3 x=0.0 top=261.6 w=255.2 h=23.0
+  box[2] bid=2 x=266.4 top=261.6 w=250.2 h=23.0
+  box[3] bid=3 x=0.0 top=261.6 w=258.4 h=23.0
   box[4] bid=4 x=0.0 top=397.5 w=1000.0 h=23.0
   box[5] bid=5 x=0.0 top=436.5 w=1000.0 h=23.0
   box[6] bid=6 x=0.0 top=533.3 w=658.7 h=23.0

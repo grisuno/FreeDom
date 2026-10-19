@@ -793,3 +793,74 @@ double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both) {
                   - (ub ? 0.0 : resolve_inset(b, b_pct, cb));
     return (v > 0.0) ? v : 0.0;
 }
+
+size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
+                      const bt_positioned *pos, size_t npos,
+                      const char *in_flow, int *root_of, size_t *order_of) {
+    if (root_of == NULL) return 0;
+    for (size_t i = 0; i < nbox; ++i) root_of[i] = -1;
+    if (order_of != NULL)
+        for (size_t i = 0; i < nbox; ++i) order_of[i] = i;
+    if (boxes == NULL || pos == NULL || in_flow == NULL || nbox == 0 || npos == 0 ||
+        nbox > BT_MAX_POSITIONED)
+        return 0;
+
+    /* TREE order, not index order: a child box can be registered before its parent
+     * (a nested positioned box reserves its id first), so only the depth-first walk
+     * says which of two boxes comes first in the document. */
+    char visited[BT_MAX_POSITIONED] = {0};
+    size_t order[BT_MAX_POSITIONED] = {0};
+    size_t next_order = 0;
+    for (size_t i = 0; i < nbox; ++i)
+        if (!visited[i] && boxes[i].parent_id == -1)
+            assign_doc_order(boxes, nbox, i, visited, &next_order, order);
+    for (size_t i = 0; i < nbox; ++i)
+        if (!visited[i]) { visited[i] = 1; order[i] = next_order++; }
+    if (order_of != NULL)
+        for (size_t i = 0; i < nbox; ++i) order_of[i] = order[i];
+
+    size_t nroots = 0;
+    for (size_t s = 0; s < nbox; ++s) {
+        int position = boxes[s].position;
+        if (!in_flow[s] || (position != BT_POS_RELATIVE && position != BT_POS_STICKY))
+            continue;
+        if (bt_oof_root(boxes, nbox, (int)s) >= 0) continue;   /* inside an OOF subtree */
+        int zs = (boxes[s].z_index == PV_LEN_UNSET) ? 0 : boxes[s].z_index;
+        /* Some out-of-flow box that paints in the positioned layer UNDER s: it comes
+         * earlier in the tree, at a z no higher than s, is not nested in another
+         * out-of-flow box (that one is painted inside its own anchor's subtree) and
+         * does not sit inside s itself. */
+        int under = 0;
+        for (size_t k = 0; k < npos && !under; ++k) {
+            size_t p = pos[k].box_index;
+            if (p >= nbox || order[p] >= order[s]) continue;
+            int zp = (boxes[p].z_index == PV_LEN_UNSET) ? 0 : boxes[p].z_index;
+            if (zp < 0 || zp > zs) continue;
+            if (bt_oof_root(boxes, nbox, (int)p) != (int)p) continue;
+            under = 1;
+        }
+        if (!under) continue;
+        /* Outermost: skip when an ancestor is already a deferred root. Roots are met
+         * in index order, which is not tree order, so ancestors are settled below. */
+        root_of[s] = (int)s;
+        ++nroots;
+    }
+    /* Keep only the outermost roots, then propagate each down to its descendants. */
+    for (size_t s = 0; s < nbox; ++s) {
+        if (root_of[s] != (int)s) continue;
+        int cur = boxes[s].parent_id;
+        for (size_t hop = 0; cur >= 0 && (size_t)cur < nbox && hop < nbox; ++hop) {
+            if (root_of[cur] == cur) { root_of[s] = -1; --nroots; break; }
+            cur = boxes[cur].parent_id;
+        }
+    }
+    for (size_t i = 0; i < nbox; ++i) {
+        if (root_of[i] == (int)i) continue;
+        int cur = boxes[i].parent_id;
+        for (size_t hop = 0; cur >= 0 && (size_t)cur < nbox && hop < nbox; ++hop) {
+            if (root_of[cur] == cur) { root_of[i] = cur; break; }
+            cur = boxes[cur].parent_id;
+        }
+    }
+    return nroots;
+}

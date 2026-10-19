@@ -63,7 +63,7 @@ static void ignore_sigpipe(void);
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
 #define TAB_WIRE_B_N 67
-#define TAB_WIRE_BOX_F_N 246
+#define TAB_WIRE_BOX_F_N 247
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
 
 /* Anti-amplification cap on the number of display-list runs the parent will
@@ -659,6 +659,8 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->bsh_x[1][3], (int32_t)bd->bsh_x[1][4], (int32_t)bd->bsh_x[1][5],
             (int32_t)bd->bsh_x[2][0], (int32_t)bd->bsh_x[2][1], (int32_t)bd->bsh_x[2][2],
             (int32_t)bd->bsh_x[2][3], (int32_t)bd->bsh_x[2][4], (int32_t)bd->bsh_x[2][5],
+            /* unresolved height percentage of an absolute box (read_view mirrors). */
+            (int32_t)bd->box_h_pct,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -2397,6 +2399,7 @@ static int read_view(int fd, pv_view **out) {
             .col_grow = (f[225] > 0 && f[225] <= CSS_LEN_MAX) ? f[225] : 0,
             .col_mauto = f[226] & (PV_MAUTO_TOP | PV_MAUTO_BOTTOM),
             .bsh_n = (f[227] >= 0 && f[227] <= PV_BSHADOW_LAYERS) ? f[227] : 0,
+            .box_h_pct = (f[246] >= 0 && f[246] <= 100000) ? f[246] : 0,
         };
         for (int k = 0; k < (PV_BSHADOW_LAYERS - 1) * 6; ++k)
             bd.bsh_x[k / 6][k % 6] = f[228 + k];

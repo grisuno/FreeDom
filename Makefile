@@ -1109,6 +1109,13 @@ parity-snapshot:
 	@python3 tools/snapshot.py "$(URL)" $(PARITY_DIR)/pages/$(NAME).html
 	@echo "Froze $(URL) -> $(PARITY_DIR)/pages/$(NAME).html"
 
+# make fbench PAGES="a b" [FROM=y ROWS=n]: refresh the Freedom/Firefox PNG pair of the
+# named pages (make parity) and write a side-by-side crop plus a divergence report
+# (tools/fbench.py) -- the loop for fixing one page: measure, SEE, change, repeat.
+fbench:
+	@$(MAKE) --no-print-directory parity PAGES="$(PAGES)" | sed -n '/^PAGE/,/^TOTAL/p'
+	@python3 tools/fbench.py --from $(if $(FROM),$(FROM),0) --rows $(if $(ROWS),$(ROWS),1100) $(PAGES)
+
 parity-update: parity
 	@cp $(PARITY_OUT)/current.tsv $(PARITY_DIR)/baseline.tsv
 	@echo "Froze parity baseline in $(PARITY_DIR)/baseline.tsv"
@@ -1285,11 +1292,11 @@ drift:
 	@grep -q "TAB_WIRE_HEAD_N 6" src/tab.c || (echo "drift: HEAD const missing"; exit 1)
 	@grep -q "TAB_WIRE_A_N 38" src/tab.c || (echo "drift: A const missing"; exit 1)
 	@grep -q "TAB_WIRE_B_N 67" src/tab.c || (echo "drift: B const missing"; exit 1)
-	@grep -q "TAB_WIRE_BOX_F_N 246" src/tab.c || (echo "drift: BOX const missing"; exit 1)
+	@grep -q "TAB_WIRE_BOX_F_N 247" src/tab.c || (echo "drift: BOX const missing"; exit 1)
 	@grep -q "int32_t head\[TAB_WIRE_HEAD_N\]\|int32_t head\[6\]" src/tab.c || (echo "drift: head array drift"; exit 1)
 	@grep -q "int32_t a\[TAB_WIRE_A_N\]\|int32_t a\[38\]" src/tab.c || (echo "drift: A array drift"; exit 1)
 	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[67\]" src/tab.c || (echo "drift: B array drift"; exit 1)
-	@grep -q "int32_t f\[TAB_WIRE_BOX_F_N\]\|int32_t f\[246\]" src/tab.c || (echo "drift: box array drift"; exit 1)
+	@grep -q "int32_t f\[TAB_WIRE_BOX_F_N\]\|int32_t f\[247\]" src/tab.c || (echo "drift: box array drift"; exit 1)
 	@grep -q "FC_UI_FONT_SIZE\|FC_FONT_FALLBACK_PX" include/freedom_config.h || (echo "drift: FC font const missing"; exit 1)
 	@! grep -rn "cairo_set_font_size.*16\.0" gui/ --include="*.c" | grep -v FC_ || (echo "drift: raw 16.0 literal in gui"; exit 1)
 	@test -f include/css_values.h -a -f include/css_gradient.h -a -f include/css_box.h -a -f include/css_text.h -a -f include/css_decl.h || (echo "drift: css split header missing"; exit 1)

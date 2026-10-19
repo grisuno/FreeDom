@@ -1046,6 +1046,114 @@ static void test_grid_justify_self(void **state) {
     assert_rect(&kids[0], 0, 0, 200, 20);
 }
 
+/* Tanda 47: in-flow positioned subtrees paint in the positioned layer. */
+static pv_box_def dbox(int parent, int position, int z) {
+    pv_box_def b;
+    memset(&b, 0, sizeof b);
+    b.parent_id = parent;
+    b.position = position;
+    b.z_index = z;
+    return b;
+}
+
+static void test_defer_relative_after_abs(void **state) {
+    (void)state;
+    /* 0: abs backdrop, 1: wrapper (static), 2: relative section, 3: card inside it. */
+    pv_box_def bx[4] = {
+        dbox(-1, BT_POS_ABSOLUTE, PV_LEN_UNSET), dbox(-1, 0, PV_LEN_UNSET),
+        dbox(1, BT_POS_RELATIVE, PV_LEN_UNSET), dbox(2, 0, PV_LEN_UNSET),
+    };
+    bt_positioned pos[1] = { { .box_index = 0, .z_index = 0 } };
+    char in_flow[4] = { 0, 1, 1, 1 };
+    int root[4];
+    assert_int_equal(bt_defer_roots(bx, 4, pos, 1, in_flow, root, NULL), 1);
+    assert_int_equal(root[0], -1);
+    assert_int_equal(root[1], -1);
+    assert_int_equal(root[2], 2);
+    assert_int_equal(root[3], 2);   /* the descendant rides with its root */
+}
+
+static void test_defer_relative_before_abs_is_not_deferred(void **state) {
+    (void)state;
+    pv_box_def bx[2] = {
+        dbox(-1, BT_POS_RELATIVE, PV_LEN_UNSET), dbox(-1, BT_POS_ABSOLUTE, PV_LEN_UNSET),
+    };
+    bt_positioned pos[1] = { { .box_index = 1, .z_index = 0 } };
+    char in_flow[2] = { 1, 0 };
+    int root[2];
+    assert_int_equal(bt_defer_roots(bx, 2, pos, 1, in_flow, root, NULL), 0);
+    assert_int_equal(root[0], -1);
+}
+
+static void test_defer_respects_z_order(void **state) {
+    (void)state;
+    pv_box_def bx[2] = {
+        dbox(-1, BT_POS_ABSOLUTE, 5), dbox(-1, BT_POS_RELATIVE, PV_LEN_UNSET),
+    };
+    bt_positioned pos[1] = { { .box_index = 0, .z_index = 5 } };
+    char in_flow[2] = { 0, 1 };
+    int root[2];
+    /* z 5 paints above a z-auto relative whatever the tree order. */
+    assert_int_equal(bt_defer_roots(bx, 2, pos, 1, in_flow, root, NULL), 0);
+    bx[1].z_index = 7;               /* above P: now deferred */
+    assert_int_equal(bt_defer_roots(bx, 2, pos, 1, in_flow, root, NULL), 1);
+    assert_int_equal(root[1], 1);
+}
+
+static void test_defer_outermost_root_and_negative_z(void **state) {
+    (void)state;
+    pv_box_def bx[4] = {
+        dbox(-1, BT_POS_ABSOLUTE, PV_LEN_UNSET),
+        dbox(-1, BT_POS_RELATIVE, PV_LEN_UNSET),
+        dbox(1, BT_POS_RELATIVE, PV_LEN_UNSET),
+        dbox(-1, BT_POS_ABSOLUTE, -1),
+    };
+    bt_positioned pos[2] = { { .box_index = 0, .z_index = 0 },
+                             { .box_index = 3, .z_index = -1 } };
+    char in_flow[4] = { 0, 1, 1, 0 };
+    int root[4];
+    assert_int_equal(bt_defer_roots(bx, 4, pos, 2, in_flow, root, NULL), 1);
+    assert_int_equal(root[1], 1);
+    assert_int_equal(root[2], 1);    /* the inner relative rides with the outer */
+    /* Only a negative-z box earlier in the tree: nothing to defer behind. */
+    bt_positioned neg[1] = { { .box_index = 3, .z_index = -1 } };
+    pv_box_def b2[2] = { dbox(-1, BT_POS_ABSOLUTE, -1), dbox(-1, BT_POS_RELATIVE, PV_LEN_UNSET) };
+    char f2[2] = { 0, 1 };
+    int r2[2];
+    neg[0].box_index = 0;
+    assert_int_equal(bt_defer_roots(b2, 2, neg, 1, f2, r2, NULL), 0);
+}
+
+static void test_defer_uses_tree_order_not_index(void **state) {
+    (void)state;
+    /* The absolute box (id 0) is NESTED in the relative one (id 1): it holds the
+     * lower id but comes after its parent in the tree, so the parent is not
+     * "above an earlier absolute" and nothing is deferred. */
+    pv_box_def bx[2] = {
+        dbox(1, BT_POS_ABSOLUTE, PV_LEN_UNSET), dbox(-1, BT_POS_RELATIVE, PV_LEN_UNSET),
+    };
+    bt_positioned pos[1] = { { .box_index = 0, .z_index = 0 } };
+    char in_flow[2] = { 0, 1 };
+    int root[2];
+    size_t order[2];
+    assert_int_equal(bt_defer_roots(bx, 2, pos, 1, in_flow, root, order), 0);
+    assert_true(order[1] < order[0]);
+}
+
+static void test_defer_fails_open(void **state) {
+    (void)state;
+    int root[2] = { 7, 7 };
+    assert_int_equal(bt_defer_roots(NULL, 2, NULL, 0, NULL, root, NULL), 0);
+    assert_int_equal(root[0], -1);
+    assert_int_equal(root[1], -1);
+    assert_int_equal(bt_defer_roots(NULL, 0, NULL, 0, NULL, NULL, NULL), 0);
+    /* a parent cycle never loops */
+    pv_box_def bx[2] = { dbox(1, BT_POS_RELATIVE, PV_LEN_UNSET), dbox(0, BT_POS_ABSOLUTE, PV_LEN_UNSET) };
+    bt_positioned pos[1] = { { .box_index = 1, .z_index = 0 } };
+    char in_flow[2] = { 1, 0 };
+    (void)bt_defer_roots(bx, 2, pos, 1, in_flow, root, NULL);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_grid_justify_self),
@@ -1105,6 +1213,12 @@ int main(void) {
         cmocka_unit_test(test_oof_fail_open),
         cmocka_unit_test(test_flex_auto_margin_pushes_item),
         cmocka_unit_test(test_oof_avail_stretch_and_shrink),
+        cmocka_unit_test(test_defer_relative_after_abs),
+        cmocka_unit_test(test_defer_relative_before_abs_is_not_deferred),
+        cmocka_unit_test(test_defer_respects_z_order),
+        cmocka_unit_test(test_defer_outermost_root_and_negative_z),
+        cmocka_unit_test(test_defer_uses_tree_order_not_index),
+        cmocka_unit_test(test_defer_fails_open),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

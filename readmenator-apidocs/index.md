@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 203 modules, 3184 documented entities, documentation coverage 39.8% (1259/3167 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 204 modules, 3199 documented entities, documentation coverage 39.8% (1265/3180 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (108), h (82), py (8), sh (5)
+Languages: c (108), h (82), py (9), sh (5)
 
 ## Modules
 
@@ -51,7 +51,7 @@ Languages: c (108), h (82), py (8), sh (5)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 39 | 190 | 32.6% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 41 | 191 | 33.0% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 5 | 4 | 50.0% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) |  | 0 | 6 | 85.7% |
 | [`gui/freedom_view.c`](modules/gui.freedom_view.c.md) |  | 0 | 2 | 0.0% |
@@ -66,7 +66,7 @@ Languages: c (108), h (82), py (8), sh (5)
 | [`include/block_flow.h`](modules/include.block_flow.h.md) | block_flow (bf_) -- vertical margin collapsing for block-level boxes. | 0 | 3 | 50.0% |
 | [`include/box_blur.h`](modules/include.box_blur.h.md) | Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md). | 0 | 3 | 100.0% |
 | [`include/box_style.h`](modules/include.box_style.h.md) |  | 12 | 18 | 64.5% |
-| [`include/box_tree.h`](modules/include.box_tree.h.md) |  | 5 | 26 | 34.4% |
+| [`include/box_tree.h`](modules/include.box_tree.h.md) |  | 5 | 27 | 36.4% |
 | [`include/browser.h`](modules/include.browser.h.md) |  | 2 | 16 | 47.4% |
 | [`include/compositor.h`](modules/include.compositor.h.md) |  | 5 | 3 | 88.9% |
 | [`include/css.h`](modules/include.css.h.md) |  | 72 | 65 | 73.2% |
@@ -149,7 +149,7 @@ Languages: c (108), h (82), py (8), sh (5)
 | [`src/block_flow.c`](modules/src.block_flow.c.md) | block_flow (bf_) -- vertical margin collapsing. | 0 | 3 | 50.0% |
 | [`src/box_blur.c`](modules/src.box_blur.c.md) |  | 0 | 3 | 25.0% |
 | [`src/box_style.c`](modules/src.box_style.c.md) |  | 2 | 42 | 31.1% |
-| [`src/box_tree.c`](modules/src.box_tree.c.md) |  | 0 | 13 | 28.6% |
+| [`src/box_tree.c`](modules/src.box_tree.c.md) |  | 0 | 14 | 33.3% |
 | [`src/browser.c`](modules/src.browser.c.md) |  | 0 | 30 | 25.8% |
 | [`src/compositor.c`](modules/src.compositor.c.md) |  | 0 | 4 | 60.0% |
 | [`src/css.c`](modules/src.css.c.md) |  | 8 | 68 | 23.4% |
@@ -201,7 +201,7 @@ Languages: c (108), h (82), py (8), sh (5)
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
-| [`src/page_view.c`](modules/src.page_view.c.md) |  | 18 | 111 | 43.8% |
+| [`src/page_view.c`](modules/src.page_view.c.md) |  | 19 | 111 | 44.3% |
 | [`src/pdf_export.c`](modules/src.pdf_export.c.md) |  | 0 | 4 | 20.0% |
 | [`src/perf_trace.c`](modules/src.perf_trace.c.md) |  | 0 | 11 | 75.0% |
 | [`src/prefetch.c`](modules/src.prefetch.c.md) |  | 1 | 12 | 42.9% |
@@ -231,6 +231,7 @@ Languages: c (108), h (82), py (8), sh (5)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
+| [`tools.fbench`](modules/tools.fbench.py.md) | fbench -- turn the PNG pairs `make parity` leaves behind into something you can act on. | 0 | 6 | 14.3% |
 | [`tools.ffgeom`](modules/tools.ffgeom.py.md) | ffgeom -- Firefox geometry as TEXT, no image reading. | 0 | 7 | 25.0% |
 | [`tools.ffq`](modules/tools.ffq.py.md) | ffq -- ask Firefox what it computed, as TEXT. | 0 | 1 | 50.0% |
 | [`tools.ffshot`](modules/tools.ffshot.py.md) | ffshot -- full-page Firefox screenshot at a FIXED viewport, for `make parity`/`make wpt`. | 0 | 1 | 50.0% |

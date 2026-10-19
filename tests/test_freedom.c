@@ -2073,7 +2073,7 @@ static void test_download_png_transform_scale_grows_around_center(void **state) 
     (void)state;
     const char *html =
         "<html><head><style>"
-        "body{margin:0;padding:0;}"
+        "body{margin:0;padding:0;font-family:sans-serif;}"   /* the box height is a sans line */
         "#box{background:#0000ff;transform:scale(1.5);}"
         "</style></head><body>"
         "<div id=\"box\">XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div>"
@@ -2361,6 +2361,52 @@ static void test_dump_layout_flex_item_sibling_boxes(void **state) {
     unlink(path);
 }
 
+
+/* An undecorated flex <div> (a navbar dropdown wrapper) holding a PADDED flex <div>
+ * with an overlay link: the padded box must open exactly ONCE. The enclosing list
+ * item used to adopt it as its own root as well, applying its padding twice (the
+ * trigger drawn 7px right and 10px down of where it belongs). The overlay's
+ * `height:100%` resolves against the padded box's height (CSS 2.1 10.5). */
+static void test_dump_layout_nested_padded_item_opens_once(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>*{box-sizing:border-box;margin:0}"
+        "ul{display:flex;list-style:none;padding:0;height:38px;align-items:flex-start}"
+        ".dd{display:flex;align-items:center}"
+        ".t{display:flex;align-items:center;max-height:38px;padding:10px 4px 10px 7px;"
+        "font-size:14px;position:relative}"
+        ".ab{position:absolute;top:0;left:0;width:100%;height:100%}"
+        "</style></head><body><ul><li><div class=\"dd\"><div class=\"t\">"
+        "<div>Discover</div><a class=\"ab\"></a></div></div></li></ul>"
+        "<div style=\"height:900px\"></div></body></html>";
+    const char *path = "__freedom_nestpad.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_nestpad.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    int padded = 0;
+    for (char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, w, h;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &w, &h) == 6
+            && h == 38.0 && top < 40.0 && w < 200.0)
+            ++padded;
+    }
+    assert_int_equal(padded, 1);
+    /* The overlay fills the padded box: 38px, not the 18px of its content. */
+    char *p = strstr(out, "pos[0]");
+    assert_non_null(p);
+    double x = -1, y = -1, w = 0, h = 0;
+    assert_int_equal(sscanf(strstr(p, " x="), " x=%lf y=%lf w=%lf h=%lf", &x, &y, &w, &h), 4);
+    assert_true(h == 38.0);
+    unlink(path);
+}
 
 /* A flex item's vertical margins sit outside its border box (Flexbox 4.2): a
  * 36px avatar with margin-top:12px in a row starts 12px down, and the row is as
@@ -3558,6 +3604,7 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_flex_item_sibling_boxes),
         cmocka_unit_test(test_dump_layout_flex_row_item_vmargin),
         cmocka_unit_test(test_dump_layout_sticky_footer),
+        cmocka_unit_test(test_dump_layout_nested_padded_item_opens_once),
         cmocka_unit_test(test_dump_layout_root_box_survives_replaced_run),
         cmocka_unit_test(test_dump_layout_float_two_columns),
         cmocka_unit_test(test_dump_layout_pulled_rail_single_margin),

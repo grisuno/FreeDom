@@ -1,29 +1,31 @@
 Freedom — author stylesheet flex/grid demo
 === Freedom layout ===
-content_w=1000 total_h=683.4 nbox=0 nrow=23 npositioned=0
+content_w=1000 total_h=706.4 nbox=0 nrow=25 npositioned=0
   row[0] top=21.4 h=45.0 x_off=0.0
   row[1] top=87.9 h=23.0 x_off=0.0
   row[2] top=110.9 h=23.0 x_off=0.0
   row[3] top=133.9 h=23.0 x_off=0.0
   row[4] top=176.8 h=34.0 x_off=0.0
-  row[5] top=246.7 h=23.0 x_off=0.0 w=448.3
-  row[6] top=269.7 h=23.0 x_off=0.0 w=448.3
-  row[7] top=246.7 h=23.0 x_off=472.3 w=257.2
-  row[8] top=269.7 h=23.0 x_off=472.3 w=257.2
-  row[9] top=246.7 h=23.0 x_off=753.6 w=246.4
-  row[10] top=269.7 h=23.0 x_off=753.6 w=246.4
+  row[5] top=246.7 h=23.0 x_off=0.0 w=447.6
+  row[6] top=269.7 h=23.0 x_off=0.0 w=447.6
+  row[7] top=246.7 h=23.0 x_off=471.6 w=255.7
+  row[8] top=269.7 h=23.0 x_off=471.6 w=255.7
+  row[9] top=246.7 h=23.0 x_off=751.3 w=248.7
+  row[10] top=269.7 h=23.0 x_off=751.3 w=248.7
   row[11] top=328.6 h=34.0 x_off=0.0
   row[12] top=398.6 h=23.0 x_off=0.0 w=322.7
   row[13] top=421.6 h=23.0 x_off=0.0 w=322.7
   row[14] top=398.6 h=23.0 x_off=338.7 w=322.7
   row[15] top=421.6 h=23.0 x_off=338.7 w=322.7
   row[16] top=398.6 h=23.0 x_off=677.3 w=322.7
-  row[17] top=492.6 h=23.0 x_off=0.0 w=322.7
-  row[18] top=551.5 h=34.0 x_off=0.0
-  row[19] top=621.4 h=23.0 x_off=0.0 w=788.5
-  row[20] top=644.4 h=23.0 x_off=0.0 w=788.5
-  row[21] top=621.4 h=23.0 x_off=792.5 w=207.5
-  row[22] top=644.4 h=23.0 x_off=792.5 w=207.5
+  row[17] top=421.6 h=23.0 x_off=677.3 w=322.7
+  row[18] top=492.6 h=23.0 x_off=0.0 w=322.7
+  row[19] top=515.6 h=23.0 x_off=0.0 w=322.7
+  row[20] top=574.5 h=34.0 x_off=0.0
+  row[21] top=644.4 h=23.0 x_off=0.0 w=788.5
+  row[22] top=667.4 h=23.0 x_off=0.0 w=788.5
+  row[23] top=644.4 h=23.0 x_off=792.5 w=207.5
+  row[24] top=667.4 h=23.0 x_off=792.5 w=207.5
   cont[0] disp=4 parent=-1 parent_item=-1 gap=24 justify=3 cols=0 box=-1
   cont[1] disp=5 parent=-1 parent_item=-1 gap=16 justify=0 cols=3 box=-1
   cont[2] disp=4 parent=-1 parent_item=-1 gap=4 justify=3 cols=0 box=-1

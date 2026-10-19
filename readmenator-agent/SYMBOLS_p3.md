@@ -3,6 +3,16 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `box` | function | `include/css_chain.h:72` | `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...` |
+| `cch_element_matches` | function | `include/css_chain.h:69` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);` |
+| `cvr_chain` | struct | `include/css_chain.h:51` | `` |
+| `cvr_table` | struct | `include/css_chain.h:52` | `` |
+| `CC_COLOR_CURRENT` | macro | `include/css_color.h:59` | `#define CC_COLOR_CURRENT` |
+| `CC_COLOR_TRANSPARENT` | macro | `include/css_color.h:60` | `#define CC_COLOR_TRANSPARENT` |
+| `FREEDOM_CSS_COLOR_H` | macro | `include/css_color.h:2` | `#define FREEDOM_CSS_COLOR_H` |
+| `b` | type_alias | `include/css_color.h:26` | `typedef struct cc_rgb { unsigned char r, g, b;` |
+| `cc_pack` | function | `include/css_color.h:49` | `int cc_pack(cc_rgb c);` |
+| `cc_rgb` | struct | `include/css_color.h:27` | `` |
 | `cc_status` | enum | `include/css_color.h:31` | `` |
 | `CSS_INLINE_BG_URLS` | macro | `include/css_decl.h:28` | `#define CSS_INLINE_BG_URLS` |
 | `CSS_MAX_BG_URLS` | macro | `include/css_decl.h:22` | `#define CSS_MAX_BG_URLS` |
@@ -486,15 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `MD_MAX_SEGMENT_BYTES` | macro | `include/media_decoder.h:46` | `#define MD_MAX_SEGMENT_BYTES` |
 | `MD_PACE_MAX_LAG_MS` | macro | `include/media_decoder.h:58` | `#define MD_PACE_MAX_LAG_MS` |
 | `MD_PACE_MAX_STEP_MS` | macro | `include/media_decoder.h:62` | `#define MD_PACE_MAX_STEP_MS` |
-| `epoch_ms` | type_alias | `include/media_decoder.h:66` | `typedef struct md_pacer { uint64_t epoch_ms;` |
-| `md_cmd` | enum | `include/media_decoder.h:29` | `` |
-| `md_pace_due_ms` | function | `include/media_decoder.h:79` | `static inline uint64_t md_pace_due_ms(md_pacer *p, uint64_t now_ms,                              ...` |
-| `md_pacer` | struct | `include/media_decoder.h:67` | `` |
-| `md_resp` | enum | `include/media_decoder.h:38` | `` |
-| `media_decoder_run` | function | `include/media_decoder.h:99` | `void media_decoder_run(int out_fd, int cmd_fd);` |
-| `media_decoder_spawn` | function | `include/media_decoder.h:104` | `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd);` |
-| `FREEDOM_NET_REALM_H` | macro | `include/net_realm.h:2` | `#define FREEDOM_NET_REALM_H` |
-| `NR_ROUTE_BLOCKED` | function | `include/net_realm.h:57` | `* NR_ROUTE_BLOCKED (fail closed: never route what cannot be classified). A realm * whose proxy is not enabled =>...` |
-| `address` | function | `include/net_realm.h:62` | `* and encrypts by its address (the I2P destination / onion key), so http over it is * not a downgrade. Currently...` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

@@ -325,6 +325,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`pf_ref`](modules/include.prefetch.h.md#pf_ref) struct in `include/prefetch.h`
 - [`pl`](modules/gui.browser_ui.c.md#pl) type_alias in `gui/browser_ui.c`
 - [`pm_entry`](modules/src.dom.c.md#pm_entry) struct in `src/dom.c`
+- [`png_flow_ctx`](modules/gui.browser_ui.c.md#png_flow_ctx) struct in `gui/browser_ui.c`
 - [`policy`](modules/include.secure_fetch.h.md#policy) type_alias in `include/secure_fetch.h`
 - [`fx_result.pos`](modules/include.flex_layout.h.md#fx_result-pos) type_alias in `include/flex_layout.h`
 - [`cx_style.position`](modules/include.compositor.h.md#cx_style-position) type_alias in `include/compositor.h`
@@ -346,6 +347,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`pv_cont_def`](modules/include.page_view.h.md#pv_cont_def) struct in `include/page_view.h`
 - [`pv_cont_info`](modules/src.page_view.c.md#pv_cont_info) struct in `src/page_view.c`
 - [`pv_container_reg`](modules/src.page_view.c.md#pv_container_reg) struct in `src/page_view.c`
+- [`pv_def_h`](modules/src.page_view.c.md#pv_def_h) struct in `src/page_view.c`
 - [`pv_flow_reg`](modules/src.page_view.c.md#pv_flow_reg) struct in `src/page_view.c`
 - [`pv_flow_reg`](modules/src.page_view.c.md#pv_flow_reg) struct in `src/page_view.c`
 - [`pv_form_method`](modules/include.page_view.h.md#pv_form_method) enum in `include/page_view.h`
@@ -393,6 +395,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`samples`](modules/include.perf_trace.h.md#samples) type_alias in `include/perf_trace.h`
 - [`sbuf`](modules/src.prefs.c.md#sbuf) struct in `src/prefs.c`
 - [`scope`](modules/src.import_map.c.md#scope) type_alias in `src/import_map.c`
+- [`screen_flow_ctx`](modules/gui.browser_ui.c.md#screen_flow_ctx) struct in `gui/browser_ui.c`
 - [`sf_chain_info`](modules/include.secure_fetch.h.md#sf_chain_info) struct in `include/secure_fetch.h`
 - [`sf_config`](modules/include.secure_fetch.h.md#sf_config) struct in `include/secure_fetch.h`
 - [`sf_policy`](modules/include.secure_fetch.h.md#sf_policy) enum in `include/secure_fetch.h`

@@ -3,6 +3,26 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `view_find_text` | function | `tests/test_tab.c:1812` | `static const pv_run *view_find_text(const pv_view *v, const char *needle)` |
+| `main` | function | `tests/test_text_case.c:73` | `int main(void)` |
+| `test_smallcaps_runs` | function | `tests/test_text_case.c:55` | `static void test_smallcaps_runs(void **state)` |
+| `test_transform_keeps_length` | function | `tests/test_text_case.c:33` | `static void test_transform_keeps_length(void **state)` |
+| `test_upper_lower_ascii_latin` | function | `tests/test_text_case.c:10` | `static void test_upper_lower_ascii_latin(void **state)` |
+| `fake_cover` | function | `tests/test_text_shape.c:352` | `static int fake_cover(unsigned cp, void *ctx)` |
+| `main` | function | `tests/test_text_shape.c:395` | `int main(void)` |
+| `read_host_font` | function | `tests/test_text_shape.c:170` | `static unsigned char *read_host_font(const char *path, size_t *out_n)` |
+| `set_installed` | function | `tests/test_text_shape.c:275` | `static int set_installed(const char *name, void *ctx)` |
+| `table_resolve` | function | `tests/test_text_shape.c:245` | `static int table_resolve(const char *name, char *out, size_t cap, void *ctx)` |
+| `teardown` | function | `tests/test_text_shape.c:327` | `static int teardown(void **state)` |
+| `test_determinism` | function | `tests/test_text_shape.c:95` | `static void test_determinism(void **state)` |
+| `test_draw_paints` | function | `tests/test_text_shape.c:133` | `static void test_draw_paints(void **state)` |
+| `test_empty_slice_is_ok` | function | `tests/test_text_shape.c:60` | `static void test_empty_slice_is_ok(void **state)` |
+| `test_generic_keywords` | function | `tests/test_text_shape.c:233` | `static void test_generic_keywords(void **state)` |
+| `test_local_handle_real_fontconfig` | function | `tests/test_text_shape.c:306` | `static void test_local_handle_real_fontconfig(void **state)` |
+| `test_measure_matches_shape` | function | `tests/test_text_shape.c:111` | `static void test_measure_matches_shape(void **state)` |
+| `test_measure_uses_fallback_face` | function | `tests/test_text_shape.c:384` | `static void test_measure_uses_fallback_face(void **state)` |
+| `test_null_and_bad_inputs` | function | `tests/test_text_shape.c:30` | `static void test_null_and_bad_inputs(void **state)` |
+| `test_overflow_cap` | function | `tests/test_text_shape.c:123` | `static void test_overflow_cap(void **state)` |
 | `test_pick_family_strong_vs_weak` | function | `tests/test_text_shape.c:282` | `static void test_pick_family_strong_vs_weak(void **state)` |
 | `test_pick_from_list_order_and_generic_stop` | function | `tests/test_text_shape.c:255` | `static void test_pick_from_list_order_and_generic_stop(void **state)` |
 | `test_segment_runs` | function | `tests/test_text_shape.c:359` | `static void test_segment_runs(void **state)` |
@@ -162,6 +182,12 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `test_step_snaps_off_ladder` | function | `tests/test_zoom.c:49` | `static void test_step_snaps_off_ladder(void **state)` |
 | `test_zoom_in_steps_ladder` | function | `tests/test_zoom.c:33` | `static void test_zoom_in_steps_ladder(void **state)` |
 | `test_zoom_out_steps_ladder` | function | `tests/test_zoom.c:41` | `static void test_zoom_out_steps_ladder(void **state)` |
+| `bands` | function | `tools/fbench.py:59` | `def bands(fd, ff, band)` |
+| `load_baseline` | function | `tools/fbench.py:29` | `def load_baseline()` |
+| `load_current` | function | `tools/fbench.py:42` | `def load_current()` |
+| `luma` | function | `tools/fbench.py:55` | `def luma(img)` |
+| `main` | function | `tools/fbench.py:89` | `def main()` |
+| `sbs` | function | `tools/fbench.py:70` | `def sbs(name, start, nrows)` |
 | `_append_probe` | function | `tools/ffgeom.py:254` | `def _append_probe(src, script)` |
 | `_word_reader` | function | `tools/ffgeom.py:173` | `def _word_reader(path)` |
 | `bit` | function | `tools/ffgeom.py:206` | `def bit(grid_row, cell, origin)` |

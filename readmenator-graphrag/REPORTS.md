@@ -1,12 +1,12 @@
 # GraphRAG Community Reports
 
-Entities: 7035 | Relationships: 12297 | Communities: 11 | Themes: 3 | Text units: 6605
+Entities: 7064 | Relationships: 12353 | Communities: 11 | Themes: 3 | Text units: 6632
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
 ## Project overview (`root`, root, rating 7.0)
 
-275 files in 11 communities and 3 themes. Highest-impact communities: include: css (7.0), src (6.9), include: browser_ui (4.0). God nodes: gui/browser_ui.c, include/css.h, src/tab.c, src/css.c, src/page_view.c.
+276 files in 11 communities and 3 themes. Highest-impact communities: include: css (7.0), src (6.9), include: browser_ui (4.0). God nodes: gui/browser_ui.c, include/css.h, src/tab.c, src/css.c, src/page_view.c.
 
 - [include: css] rating 7.0: `include/css_color.h` ranks 1 by PageRank, 13 importers, 7 symbols: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1).
 - [src] rating 6.9: `include/html_parse.h` ranks 1 by PageRank, 23 importers, 24 symbols: hp_script: One executable <script>.
@@ -52,9 +52,9 @@ Theme of 6 communities and 147 files: src (59 files, rating 6.9); include: brows
 - Children: c0, c2, c5, c7, c8, c9
 - Theme rating = highest child community rating.
 
-## unassigned files (`t2`, theme, rating 0.8)
+## unassigned files (`t2`, theme, rating 0.9)
 
-Theme of 1 communities and 15 files: unassigned files (15 files, rating 0.8).
+Theme of 1 communities and 16 files: unassigned files (16 files, rating 0.9).
 
 - [unassigned files] `app.py` ranks 1 by PageRank, 0 importers, 3 symbols: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and execute FreeDom in headless mode.
 - [unassigned files] `docker-entrypoint.sh` ranks 2 by PageRank, 0 importers, 0 symbols.
@@ -64,13 +64,13 @@ Theme of 1 communities and 15 files: unassigned files (15 files, rating 0.8).
 
 ## include: css (`c1`, community, rating 7.0)
 
-47 files under include (c 31, h 16), mostly utility. Core file include/css_color.h (PageRank 0.0506, imported by 13 files): cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1). Key abstractions: cc_rgb, cc_status, FREEDOM_CSS_COLOR_H, b, cc_pack, CC_COLOR_CURRENT. Depends on include: page_view (3), include: text_shape (2). Used by include: page_view (16), src (4), include: browser_ui (4).
+47 files under include (c 31, h 16), mostly utility. Core file include/css_color.h (PageRank 0.0505, imported by 13 files): cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1). Key abstractions: cc_rgb, cc_status, FREEDOM_CSS_COLOR_H, b, cc_pack, CC_COLOR_CURRENT. Depends on include: page_view (3), include: text_shape (2). Used by include: page_view (16), src (4), include: browser_ui (4).
 
 - `include/css_color.h` ranks 1 by PageRank, 13 importers, 7 symbols: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1).
 - `include/css.h` ranks 2 by PageRank, 36 importers, 138 symbols: css_style: A resolved presentation.
 - `include/css_select.h` ranks 3 by PageRank, 15 importers, 34 symbols: css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only tag/.class/#id/[attr] (no combinators, no pseudo-classes inside * sub-selectors).
 - Hotspot `src/css.c`: 244 symbols, 36 connections (score 0.35).
-- Hotspot `tests/test_css.c`: 351 symbols, 18 connections (score 0.34).
+- Hotspot `tests/test_css.c`: 351 symbols, 18 connections (score 0.33).
 - 1 layer violations, e.g. test_css.c (testing) -> flex_layout.h (presentation).
 - Dataflow: 3 INFERRED issues (first: DEAD_STORE in page_view).
 - Key entities: file:tests/test_css.c, file:src/css.c, file:include/css.h, file:src/css_box.c, file:include/css_select.h, file:tests/test_css_color.c, file:src/css_mq.c, file:tests/test_css_drops.c
@@ -98,10 +98,10 @@ Theme of 1 communities and 15 files: unassigned files (15 files, rating 0.8).
 - `include/image_decode.h` ranks 1 by PageRank, 6 importers, 13 symbols: img_pixels: A decoded bitmap that owns its pixel buffer.
 - `include/tls_impersonate.h` ranks 2 by PageRank, 5 importers, 23 symbols: ti_req: Request: parent -> helper.
 - `include/hls.h` ranks 3 by PageRank, 4 importers, 8 symbols: hls_segment: or variant info.
-- Hotspot `gui/browser_ui.c`: 574 symbols, 119 connections (score 1.00).
-- Hotspot `tests/test_freedom.c`: 88 symbols, 12 connections (score 0.12).
+- Hotspot `gui/browser_ui.c`: 583 symbols, 119 connections (score 1.00).
+- Hotspot `tests/test_freedom.c`: 89 symbols, 12 connections (score 0.12).
 - 2 layer violations, e.g. browser_ui.c (presentation) -> data_url.h (data_access).
-- Dataflow: 25 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
+- Dataflow: 28 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
 - Surprising bridge: block_flow.c <-> test_renderer.c (8 hops across communities).
 - Key entities: file:gui/browser_ui.c, file:tests/test_freedom.c, file:src/browser.c, file:tests/test_interp.c, file:tests/test_image_decode.c, file:src/image_decode.c, file:include/tls_impersonate.h, file:include/interp.h
 - Rating 4.0/10 = 7 x PageRank share 0.57 + 3 x risk 0.00. Internal imports: 45.
@@ -113,16 +113,16 @@ Theme of 1 communities and 15 files: unassigned files (15 files, rating 0.8).
 - `include/render_policy.h` ranks 1 by PageRank, 9 importers, 9 symbols: rdp_caps: Render capabilities for a page.
 - `include/page_view.h` ranks 2 by PageRank, 13 importers, 86 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
 - `include/flex_layout.h` ranks 3 by PageRank, 12 importers, 43 symbols: fx_item: Upper bound on items per flex line / grid columns.
-- Hotspot `src/page_view.c`: 239 symbols, 38 connections (score 0.36).
+- Hotspot `src/page_view.c`: 240 symbols, 38 connections (score 0.36).
 - Hotspot `src/freedom.c`: 46 symbols, 54 connections (score 0.30).
 - 14 layer violations, e.g. render_doc.c (presentation) -> data_url.h (data_access).
-- Dataflow: 18 INFERRED issues (first: DEAD_STORE in layout_grid).
-- Key entities: file:src/page_view.c, file:tests/test_page_view.c, file:include/page_view.h, file:tests/test_flex_layout.c, file:src/freedom.c, file:tests/test_box_tree.c, file:tests/test_box_style.c, file:include/flex_layout.h
+- Dataflow: 15 INFERRED issues (first: DEAD_STORE in layout_grid).
+- Key entities: file:src/page_view.c, file:tests/test_page_view.c, file:include/page_view.h, file:tests/test_flex_layout.c, file:tests/test_box_tree.c, file:src/freedom.c, file:tests/test_box_style.c, file:include/flex_layout.h
 - Rating 3.0/10 = 7 x PageRank share 0.43 + 3 x risk 0.00. Internal imports: 58.
 
 ## include: text_shape (`c4`, community, rating 1.8)
 
-20 files under include (c 14, h 6), mostly utility. Core file include/data_url.h (PageRank 0.0089, imported by 9 files): du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real inline icon/ logo/image, bounding the allocation before decoding a payload whose size a * remote, hostile document controls. #define DU_MAX_ENCODED_LEN... Key abstractions: du_status, FREEDOM_DATA_URL_H, allocation, DU_MAX_ENCODED_LEN, du_is_data_url, closed. Depends on include: css (3), src (1), include: page_view (1). Used by include: page_view (6), include: browser_ui (5), src (2).
+20 files under include (c 14, h 6), mostly utility. Core file include/data_url.h (PageRank 0.0088, imported by 9 files): du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real inline icon/ logo/image, bounding the allocation before decoding a payload whose size a * remote, hostile document controls. #define DU_MAX_ENCODED_LEN... Key abstractions: du_status, FREEDOM_DATA_URL_H, allocation, DU_MAX_ENCODED_LEN, du_is_data_url, closed. Depends on include: css (3), src (1), include: page_view (1). Used by include: page_view (6), include: browser_ui (5), src (2).
 
 - `include/data_url.h` ranks 1 by PageRank, 9 importers, 6 symbols: du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real inline icon/ logo/image, bounding the allocation before decoding a payload whose size a * remote, hostile document controls. #define DU_MAX_ENCODED_LEN...
 - `include/webfont.h` ranks 2 by PageRank, 12 importers, 17 symbols: wf_name_hash: FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names.
@@ -171,9 +171,9 @@ Theme of 1 communities and 15 files: unassigned files (15 files, rating 0.8).
 - Key entities: file:src/secure_fetch.c, file:tests/test_secure_fetch.c, file:include/secure_fetch.h, file:include/anti_fp.h, file:src/ws_hub.c, file:src/anti_fp.c, file:include/ws_hub.h, file:tests/test_ws_hub.c
 - Rating 1.3/10 = 7 x PageRank share 0.18 + 3 x risk 0.00. Internal imports: 10.
 
-## unassigned files (`c10`, community, rating 0.8)
+## unassigned files (`c10`, community, rating 0.9)
 
-15 files under tools (py 8, sh 5, c 2), mostly utility. Core file app.py (PageRank 0.0019, imported by 0 files): Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and execute FreeDom in headless mode. Key abstractions: read_fuzz_stats, list_unique_crashes, run_freedom_headless, load_rows, lum, lum_at.
+16 files under tools (py 9, sh 5, c 2), mostly utility. Core file app.py (PageRank 0.0019, imported by 0 files): Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and execute FreeDom in headless mode. Key abstractions: read_fuzz_stats, list_unique_crashes, run_freedom_headless, load_baseline, load_current, luma.
 
 - `app.py` ranks 1 by PageRank, 0 importers, 3 symbols: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and execute FreeDom in headless mode.
 - `docker-entrypoint.sh` ranks 2 by PageRank, 0 importers, 0 symbols.
@@ -181,8 +181,8 @@ Theme of 1 communities and 15 files: unassigned files (15 files, rating 0.8).
 - Hotspot `tools/pngdiff.c`: 14 symbols, 6 connections (score 0.04).
 - Hotspot `tools/ffgeom.py`: 12 symbols, 6 connections (score 0.04).
 - Taint: 4 paths reach this group via subprocess, urllib.request.
-- Key entities: file:tools/pngdiff.c, file:tools/ffgeom.py, file:tools/gen_psl.c, file:tools/mutate.py, file:tools/snapshot.py, file:tools/ffshot.py, file:tools/ffq.py, file:tools/pngprof.py
-- Rating 0.8/10 = 7 x PageRank share 0.12 + 3 x risk 0.00. Internal imports: 0.
+- Key entities: file:tools/pngdiff.c, file:tools/ffgeom.py, file:tools/gen_psl.c, file:tools/mutate.py, file:tools/snapshot.py, file:tools/fbench.py, file:tools/ffshot.py, file:tools/ffq.py
+- Rating 0.9/10 = 7 x PageRank share 0.13 + 3 x risk 0.00. Internal imports: 0.
 
 ## include: download (`c8`, community, rating 0.7)
 
@@ -192,7 +192,7 @@ Theme of 1 communities and 15 files: unassigned files (15 files, rating 0.8).
 - `include/download.h` ranks 2 by PageRank, 4 importers, 9 symbols: dl_should_download: 1 if the response should be saved (attachment, or a non-renderable media type), 0 if it should be rendered.
 - `fuzz/fuzz_download.c` ranks 3 by PageRank, 0 importers, 1 symbols.
 - Hotspot `tests/test_pdf_export.c`: 30 symbols, 8 connections (score 0.06).
-- Hotspot `tests/test_download.c`: 21 symbols, 8 connections (score 0.06).
+- Hotspot `tests/test_download.c`: 21 symbols, 8 connections (score 0.05).
 - Surprising bridge: fuzz_download.c <-> test_renderer.c (8 hops across communities).
 - Key entities: file:tests/test_pdf_export.c, file:tests/test_download.c, file:src/download.c, file:include/pdf_export.h, file:include/download.h, file:src/pdf_export.c, file:fuzz/fuzz_download.c, file:fuzz/fuzz_pdf_export.c
 - Rating 0.7/10 = 7 x PageRank share 0.10 + 3 x risk 0.00. Internal imports: 7.

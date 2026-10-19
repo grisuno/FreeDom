@@ -1851,6 +1851,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->box_l = hb.l; d->box_r = hb.r; d->box_w = hb.w; d->box_center = hb.center;
     d->box_w_pct = hb.w_pct;
     d->box_mw = hb.mw; d->box_mw_pct = hb.mw_pct;
+    d->box_h_pct = (cs->position == CSS_POS_ABSOLUTE) ? cs->pct[CSS_PCT_HEIGHT] : 0;
     d->box_l_pct = hb.l_pct; d->box_r_pct = hb.r_pct;
     /* The box's own vertical margins, straight from its cascade. They are NOT
      * folded into box_l/box_r like the horizontal ones: a vertical margin has to
@@ -2178,6 +2179,15 @@ typedef struct pv_var_node {
     cvr_table own;
 } pv_var_node;
 
+/* The two heights a descendant resolves a percentage `height` against: its
+ * parent's definite CONTENT height (CSS 2.1 10.5), and the PADDING-box height of
+ * the nearest positioned ancestor, which is the containing block of an
+ * absolutely positioned box (10.1). -1 = indefinite. */
+typedef struct {
+    double content;
+    double padbox;
+} pv_def_h;
+
 typedef struct pv_style_cache {
     const lxb_dom_node_t **node;
     css_style             *style;
@@ -2191,7 +2201,7 @@ typedef struct pv_style_cache {
     const cvr_chain      **vars;
     /* The element's definite CONTENT height in px (-1 = indefinite): the basis
      * its children resolve a percentage height against (CSS 2.1 10.5). */
-    double                *def_h;
+    pv_def_h              *def_h;
     size_t                 count, cap;
     /* Open-addressed index over node[]: slot holds entry index + 1, 0 = empty.
      * A linear scan here made style resolution quadratic in the element count. */
@@ -2227,7 +2237,7 @@ static int pv_style_cache_init(pv_style_cache *c) {
     c->style = (css_style *)calloc(c->cap, sizeof *c->style);
     c->font_size = (double *)calloc(c->cap, sizeof *c->font_size);
     c->vars = (const cvr_chain **)calloc(c->cap, sizeof *c->vars);
-    c->def_h = (double *)calloc(c->cap, sizeof *c->def_h);
+    c->def_h = (pv_def_h *)calloc(c->cap, sizeof *c->def_h);
     c->hidx = (size_t *)calloc(c->hcap, sizeof *c->hidx);
     if (c->node == NULL || c->style == NULL || c->font_size == NULL || c->vars == NULL ||
         c->def_h == NULL || c->hidx == NULL) {
@@ -2276,7 +2286,7 @@ static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_
 
 static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
                          const css_style *cs, double font_size, const cvr_chain *vars,
-                         double def_h) {
+                         pv_def_h def_h) {
     if (cache == NULL || cache->hidx == NULL) return;
     if (cache->count == cache->cap) {
         size_t ncap = cache->cap * 2;
@@ -2289,7 +2299,7 @@ static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
         if (nf != NULL) cache->font_size = nf;
         const cvr_chain **nv = (const cvr_chain **)realloc(cache->vars, ncap * sizeof *nv);
         if (nv != NULL) cache->vars = nv;
-        double *nd = (double *)realloc(cache->def_h, ncap * sizeof *nd);
+        pv_def_h *nd = (pv_def_h *)realloc(cache->def_h, ncap * sizeof *nd);
         if (nd != NULL) cache->def_h = nd;
         if (nn != NULL && ns != NULL && nf != NULL && nv != NULL && nd != NULL)
             cache->cap = ncap;
@@ -2365,8 +2375,10 @@ static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el) {
  * spec/box_style.md 4z. An absolutely positioned box's containing block is its
  * positioned ancestor, not its parent: with an indefinite parent its
  * percentages are left as they were (fixed boxes resolve against the viewport). */
-static double pv_resolve_block_sizes(css_style *cs, double cb_h) {
+static pv_def_h pv_resolve_block_sizes(css_style *cs, pv_def_h in) {
+    double cb_h = in.content;
     if (cs->position == CSS_POS_FIXED) cb_h = (double)CSS_MEDIA_DEFAULT_HEIGHT;
+    else if (cs->position == CSS_POS_ABSOLUTE) cb_h = in.padbox;
     int keep = (cs->position == CSS_POS_ABSOLUTE && cb_h < 0.0);
     if (!keep && cs->pct[CSS_PCT_HEIGHT] != 0 && !CSS_LEN_IS_INTRINSIC(cs->height)) {
         int px = (cs->height == CSS_LEN_UNSET || cs->height == CSS_LEN_AUTO) ? 0 : cs->height;
@@ -2394,9 +2406,20 @@ static double pv_resolve_block_sizes(css_style *cs, double cb_h) {
     if (cs->pad_bottom > 0) edges += cs->pad_bottom;
     if (cs->border_top_width > 0) edges += cs->border_top_width;
     if (cs->border_bottom_width > 0) edges += cs->border_bottom_width;
-    return bx_definite_content_h(h, cs->min_height > 0 ? (double)cs->min_height : -1.0,
-                                 cs->max_height > 0 ? (double)cs->max_height : -1.0,
-                                 cs->box_sizing == CSS_BOXS_BORDER, edges);
+    pv_def_h out;
+    out.content = bx_definite_content_h(h, cs->min_height > 0 ? (double)cs->min_height : -1.0,
+                                        cs->max_height > 0 ? (double)cs->max_height : -1.0,
+                                        cs->box_sizing == CSS_BOXS_BORDER, edges);
+    /* A positioned element is the containing block of the absolutes below it;
+     * a static one passes its ancestor's through. */
+    out.padbox = in.padbox;
+    if (cs->position != CSS_POS_UNSET && cs->position != CSS_POS_STATIC) {
+        double pe = 0.0;
+        if (cs->pad_top > 0) pe += cs->pad_top;
+        if (cs->pad_bottom > 0) pe += cs->pad_bottom;
+        out.padbox = (out.content < 0.0) ? -1.0 : out.content + pe;
+    }
+    return out;
 }
 
 static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
@@ -2411,7 +2434,7 @@ static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sh
     size_t n = 0;
     double inherited = CL_INITIAL_FONT_SIZE;
     const cvr_chain *vars = NULL;   /* the inherited custom-property chain */
-    double cb_h = -1.0;             /* the parent's definite content height */
+    pv_def_h cb_h = { -1.0, -1.0 }; /* what the parent hands its children */
     lxb_dom_element_t *cur = el;
     while (cur != NULL && n < PV_FONT_CHAIN_MAX) {
         long h = pv_cache_find(cache, (const lxb_dom_node_t *)cur);
@@ -2424,7 +2447,10 @@ static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sh
     }
     /* Reached the root element: its containing block is the initial one, whose
      * height is the normalized viewport -- the same one `vh` resolves against. */
-    if (cur == NULL) cb_h = (double)CSS_MEDIA_DEFAULT_HEIGHT;
+    if (cur == NULL) {
+        cb_h.content = (double)CSS_MEDIA_DEFAULT_HEIGHT;
+        cb_h.padbox = (double)CSS_MEDIA_DEFAULT_HEIGHT;
+    }
 
     /* n is at least 1 (el itself was not cached, so it was pushed) unless the
      * bound was already exhausted; resolve directly in that degenerate case. */
@@ -5853,7 +5879,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &vid_cont, &unused_box, &vid_ext,
                                 &box_reg, &float_reg, &bdeco, &cache, &flowreg);
-                int brk = pending_break || (block != prev_block);
+                /* A positioned <video> leaves the flow exactly like an <img>
+                 * (CSS 2.1 9.7): a break before it would give it a row of its own. */
+                int vid_oof = subtree_is_oof(n, sheet, &cache);
+                int brk = (pending_break || (block != prev_block)) && !vid_oof;
                 pending_break = 0;
                 prev_block = block;
 
@@ -5892,7 +5921,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 annotate_replaced_run(v, &reg, &items, &vid_cont, &vid_ext,
                                       unused_align, unused_fs, unused_fs_abs,
                                       unused_lh, unused_deco, bdeco);
+                if (vid_oof) pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
+                pv_set_oof(v, vid_oof);
             } else if (t == LXB_TAG_IFRAME
                        && !in_skipped_subtree(n, base, js_enabled)
                        && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)

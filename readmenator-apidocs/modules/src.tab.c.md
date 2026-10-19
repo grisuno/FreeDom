@@ -97,7 +97,7 @@ typedef struct child_state
 
 ### `tab`
 
-`struct` | [src/tab.c:1964](../../src/tab.c#L1964)
+`struct` | [src/tab.c:1966](../../src/tab.c#L1966)
 
 ```c
 struct tab
@@ -113,7 +113,7 @@ struct tab
 
 #### `tab.load`
 
-`method` | [src/tab.c:1971](../../src/tab.c#L1971)
+`method` | [src/tab.c:1973](../../src/tab.c#L1973)
 
 ```c
 * subresource requests this load (set per page: host in allow.conf AND js.conf);
@@ -246,7 +246,7 @@ struct tab
 
 ### `FB_MAX_FILE_BYTES`
 
-`function` | [src/tab.c:744](../../src/tab.c#L744)
+`function` | [src/tab.c:746](../../src/tab.c#L746)
 
 ```c
 * FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify * the stream. ...
@@ -274,7 +274,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `run`
 
-`function` | [src/tab.c:823](../../src/tab.c#L823)
+`function` | [src/tab.c:825](../../src/tab.c#L825)
 
 ```c
 * already contains a PV_VIDEO run (avoids duplicates on repeated injection). * Call after every ...
@@ -296,7 +296,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `window`
 
-`function` | [src/tab.c:944](../../src/tab.c#L944)
+`function` | [src/tab.c:946](../../src/tab.c#L946)
 
 ```c
 * net window (cs->net_active). */ static void child_fetch_stylesheets(child_state *cs)
@@ -318,7 +318,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `fallback`
 
-`function` | [src/tab.c:1065](../../src/tab.c#L1065)
+`function` | [src/tab.c:1067](../../src/tab.c#L1067)
 
 ```c
 * <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it even with JS on. */ (void)pv_build_styled(cs->doc, run_js, reader, prefers_dark, cs->
@@ -338,7 +338,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `WHERE`
 
-`function` | [src/tab.c:1223](../../src/tab.c#L1223)
+`function` | [src/tab.c:1225](../../src/tab.c#L1225)
 
 ```c
 * the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value != NULL) fb_buffer_push_loc(&cs->log, FB_ERROR, r.value, r.value_len, r.file != NUL
@@ -358,7 +358,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `content`
 
-`function` | [src/tab.c:1256](../../src/tab.c#L1256)
+`function` | [src/tab.c:1258](../../src/tab.c#L1258)
 
 ```c
 * content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video> elements in the DOM for any * found. */ if (cs->idx != NULL) jd_process_iframes(cs->js, cs
@@ -378,7 +378,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `once`
 
-`function` | [src/tab.c:1301](../../src/tab.c#L1301)
+`function` | [src/tab.c:1303](../../src/tab.c#L1303)
 
 ```c
 * ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);
@@ -398,7 +398,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `swap`
 
-`function` | [src/tab.c:1310](../../src/tab.c#L1310)
+`function` | [src/tab.c:1312](../../src/tab.c#L1312)
 
 ```c
 * display:none hiding an element via class swap (CSS, not * DOM removal). */ if (ok && v...
@@ -420,7 +420,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `write_full`
 
-`function` | [src/tab.c:1330](../../src/tab.c#L1330)
+`function` | [src/tab.c:1332](../../src/tab.c#L1332)
 
 ```c
 && write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd, write_which) == 0 && write_full(wfd, &nlen, sizeof nlen) == 0 && (nlen == 0 || write_full(wfd,
@@ -443,7 +443,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `EPIPE`
 
-`function` | [src/tab.c:1736](../../src/tab.c#L1736)
+`function` | [src/tab.c:1738](../../src/tab.c#L1738)
 
 ```c
 * surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();
@@ -463,7 +463,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `tzset`
 
-`function` | [src/tab.c:1752](../../src/tab.c#L1752)
+`function` | [src/tab.c:1754](../../src/tab.c#L1754)
 
 ```c
 * tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);
@@ -477,7 +477,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `depth`
 
-`function` | [src/tab.c:1757](../../src/tab.c#L1757)
+`function` | [src/tab.c:1759](../../src/tab.c#L1759)
 
 ```c
 * defense in depth (seccomp already excludes open/socket/exec);
@@ -499,7 +499,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `tab_parse_worker_args`
 
-`function` | [src/tab.c:1944](../../src/tab.c#L1944)
+`function` | [src/tab.c:1946](../../src/tab.c#L1946)
 
 ```c
 int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)
@@ -532,7 +532,7 @@ No side effects; fail-closed (any malformation => 0).
 
 ### `tab_worker_dispatch`
 
-`function` | [src/tab.c:1954](../../src/tab.c#L1954)
+`function` | [src/tab.c:1956](../../src/tab.c#L1956)
 
 ```c
 void tab_worker_dispatch(int argc, char **argv)
@@ -553,7 +553,7 @@ void tab_worker_dispatch(int argc, char **argv)
 
 ### `tests`
 
-`function` | [src/tab.c:2109](../../src/tab.c#L2109)
+`function` | [src/tab.c:2111](../../src/tab.c#L2111)
 
 ```c
 * here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed green. */ st = pv_append_image(v, heading, brk, text, (src != NULL) ? src : "", img_w,
@@ -573,7 +573,7 @@ void tab_worker_dispatch(int argc, char **argv)
 
 ### `layout`
 
-`function` | [src/tab.c:2213](../../src/tab.c#L2213)
+`function` | [src/tab.c:2215](../../src/tab.c#L2215)
 
 ```c
 * only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property. */ pv_set_box_pct(v, (int)bwpct, (int)b[36], (int)b[37], (int)b[38], (int)b[39]);
@@ -587,7 +587,7 @@ void tab_worker_dispatch(int argc, char **argv)
 
 ### `column`
 
-`function` | [src/tab.c:2224](../../src/tab.c#L2224)
+`function` | [src/tab.c:2226](../../src/tab.c#L2226)
 
 ```c
 * a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation as text runs. */ pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (in
@@ -607,7 +607,7 @@ void tab_worker_dispatch(int argc, char **argv)
 
 ### `tab_set_fetcher`
 
-`function` | [src/tab.c:2665](../../src/tab.c#L2665)
+`function` | [src/tab.c:2668](../../src/tab.c#L2668)
 
 ```c
 void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)
@@ -631,7 +631,7 @@ Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests ar
 
 ### `tab_set_css_sink`
 
-`function` | [src/tab.c:2671](../../src/tab.c#L2671)
+`function` | [src/tab.c:2674](../../src/tab.c#L2674)
 
 ```c
 void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)
@@ -651,7 +651,7 @@ void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)
 
 ### `tab_set_net_allowed`
 
-`function` | [src/tab.c:2677](../../src/tab.c#L2677)
+`function` | [src/tab.c:2680](../../src/tab.c#L2680)
 
 ```c
 void tab_set_net_allowed(tab *t, int allowed)
@@ -676,7 +676,7 @@ Set it true ONLY when the page's host is in BOTH allow.conf AND js.conf (the sov
 
 ### `tab_set_css_allowed`
 
-`function` | [src/tab.c:2682](../../src/tab.c#L2682)
+`function` | [src/tab.c:2685](../../src/tab.c#L2685)
 
 ```c
 void tab_set_css_allowed(tab *t, int allowed)
@@ -695,7 +695,7 @@ void tab_set_css_allowed(tab *t, int allowed)
 
 ### `tab_last_subreq_stats`
 
-`function` | [src/tab.c:2687](../../src/tab.c#L2687)
+`function` | [src/tab.c:2690](../../src/tab.c#L2690)
 
 ```c
 void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)
@@ -721,7 +721,7 @@ A diagnostic (FREEDOM_PERF): it separates "the page's JS is slow" from "the page
 
 ### `tab_set_viewport_w`
 
-`function` | [src/tab.c:2692](../../src/tab.c#L2692)
+`function` | [src/tab.c:2695](../../src/tab.c#L2695)
 
 ```c
 void tab_set_viewport_w(tab *t, int px)
@@ -746,7 +746,7 @@ Only the @media width query sees it; viewport UNITS (vw/vh) still resolve agains
 
 ### `tab_set_cookies`
 
-`function` | [src/tab.c:2697](../../src/tab.c#L2697)
+`function` | [src/tab.c:2700](../../src/tab.c#L2700)
 
 ```c
 void tab_set_cookies(tab *t, const char *cookies)
@@ -771,7 +771,7 @@ Only meaningful for a trusted host (allow.conf AND js.conf); pass NULL/"" otherw
 
 ### `tab_subreq_permitted`
 
-`function` | [src/tab.c:2703](../../src/tab.c#L2703)
+`function` | [src/tab.c:2706](../../src/tab.c#L2706)
 
 ```c
 int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)
@@ -801,7 +801,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `answered`
 
-`function` | [src/tab.c:2715](../../src/tab.c#L2715)
+`function` | [src/tab.c:2718](../../src/tab.c#L2718)
 
 ```c
 * A refused frame is still consumed and answered (status 0), so the protocol never * desyncs. Re...
@@ -823,7 +823,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `tab_load`
 
-`function` | [src/tab.c:2959](../../src/tab.c#L2959)
+`function` | [src/tab.c:2962](../../src/tab.c#L2962)
 
 ```c
 tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)
@@ -848,7 +848,7 @@ tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)
 
 ### `tab_load_ex`
 
-`function` | [src/tab.c:2963](../../src/tab.c#L2963)
+`function` | [src/tab.c:2966](../../src/tab.c#L2966)
 
 ```c
 tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)
@@ -876,7 +876,7 @@ tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_pag
 
 ### `tab_load_full`
 
-`function` | [src/tab.c:2967](../../src/tab.c#L2967)
+`function` | [src/tab.c:2970](../../src/tab.c#L2970)
 
 ```c
 tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url, int run_js, int reader, int prefers_dark, tab_page *out)
@@ -907,7 +907,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
 
 ### `tab_click`
 
-`function` | [src/tab.c:3162](../../src/tab.c#L3162)
+`function` | [src/tab.c:3165](../../src/tab.c#L3165)
 
 ```c
 tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)
@@ -929,7 +929,7 @@ tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)
 
 ### `tab_tick`
 
-`function` | [src/tab.c:3169](../../src/tab.c#L3169)
+`function` | [src/tab.c:3172](../../src/tab.c#L3172)
 
 ```c
 tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)
@@ -951,7 +951,7 @@ tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)
 
 ### `tab_submit`
 
-`function` | [src/tab.c:3178](../../src/tab.c#L3178)
+`function` | [src/tab.c:3181](../../src/tab.c#L3181)
 
 ```c
 tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)
@@ -979,7 +979,7 @@ Simple response: [TAG_RESULT][ok:int32][prevented:int32]. No view re-derivation.
 
 ### `tab_read_view`
 
-`function` | [src/tab.c:3283](../../src/tab.c#L3283)
+`function` | [src/tab.c:3286](../../src/tab.c#L3286)
 
 ```c
 tab_status tab_read_view(tab *t, tab_page *out)
@@ -1004,7 +1004,7 @@ Used by tab_mutation_request, tab_subreq, tab_dispatch_event.
 
 ### `tab_eval`
 
-`function` | [src/tab.c:3383](../../src/tab.c#L3383)
+`function` | [src/tab.c:3386](../../src/tab.c#L3386)
 
 ```c
 tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)
@@ -1029,7 +1029,7 @@ tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)
 
 ### `tab_decode_image`
 
-`function` | [src/tab.c:3465](../../src/tab.c#L3465)
+`function` | [src/tab.c:3468](../../src/tab.c#L3468)
 
 ```c
 tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)
@@ -1052,7 +1052,7 @@ tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image 
 
 ### `tab_decode_image_data_url`
 
-`function` | [src/tab.c:3471](../../src/tab.c#L3471)
+`function` | [src/tab.c:3474](../../src/tab.c#L3474)
 
 ```c
 tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)
@@ -1076,7 +1076,7 @@ tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *ou
 
 ### `tab_alive`
 
-`function` | [src/tab.c:3489](../../src/tab.c#L3489)
+`function` | [src/tab.c:3492](../../src/tab.c#L3492)
 
 ```c
 int tab_alive(const tab *t)
@@ -1100,7 +1100,7 @@ Nonzero while the worker process is believed alive.
 
 ### `tab_child_pid`
 
-`function` | [src/tab.c:3495](../../src/tab.c#L3495)
+`function` | [src/tab.c:3498](../../src/tab.c#L3498)
 
 ```c
 pid_t tab_child_pid(const tab *t)
@@ -1124,7 +1124,7 @@ The worker's process id (for monitoring), or -1.
 
 ### `tab_close`
 
-`function` | [src/tab.c:3499](../../src/tab.c#L3499)
+`function` | [src/tab.c:3502](../../src/tab.c#L3502)
 
 ```c
 void tab_close(tab *t)
@@ -1148,7 +1148,7 @@ Safe on NULL.
 
 ### `tab_page_free`
 
-`function` | [src/tab.c:3514](../../src/tab.c#L3514)
+`function` | [src/tab.c:3517](../../src/tab.c#L3517)
 
 ```c
 void tab_page_free(tab_page *p)
@@ -1174,7 +1174,7 @@ Safe on NULL / zeroed structs.
 
 ### `tab_eval_result_free`
 
-`function` | [src/tab.c:3544](../../src/tab.c#L3544)
+`function` | [src/tab.c:3547](../../src/tab.c#L3547)
 
 ```c
 void tab_eval_result_free(tab_eval_result *r)
@@ -1194,7 +1194,7 @@ void tab_eval_result_free(tab_eval_result *r)
 
 ### `tab_image_free`
 
-`function` | [src/tab.c:3553](../../src/tab.c#L3553)
+`function` | [src/tab.c:3556](../../src/tab.c#L3556)
 
 ```c
 void tab_image_free(tab_image *img)
@@ -1212,7 +1212,7 @@ void tab_image_free(tab_image *img)
 
 ### `tab_set_geometry`
 
-`function` | [src/tab.c:3563](../../src/tab.c#L3563)
+`function` | [src/tab.c:3566](../../src/tab.c#L3566)
 
 ```c
 tab_status tab_set_geometry(tab *t, const jg_table *g)
@@ -1235,7 +1235,7 @@ tab_status tab_set_geometry(tab *t, const jg_table *g)
 
 ### `tab_popstate`
 
-`function` | [src/tab.c:3589](../../src/tab.c#L3589)
+`function` | [src/tab.c:3592](../../src/tab.c#L3592)
 
 ```c
 tab_status tab_popstate(tab *t, int index, tab_page *out)
@@ -1257,7 +1257,7 @@ tab_status tab_popstate(tab *t, int index, tab_page *out)
 
 ### `tab_ws_event`
 
-`function` | [src/tab.c:3595](../../src/tab.c#L3595)
+`function` | [src/tab.c:3598](../../src/tab.c#L3598)
 
 ```c
 tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len, tab_page *out)
@@ -1285,7 +1285,7 @@ tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, si
 
 ### `tab_set_storage`
 
-`function` | [src/tab.c:3614](../../src/tab.c#L3614)
+`function` | [src/tab.c:3617](../../src/tab.c#L3617)
 
 ```c
 void tab_set_storage(tab *t, const char *blob, size_t len)
@@ -1583,7 +1583,7 @@ matches SF_DEFAULT_MAX_BODY; modern app bundles (e.g. youtube main) exceed 8 MiB
 
 ### `TAB_MAX_EXTERN_CSS`
 
-`macro` | [src/tab.c:817](../../src/tab.c#L817)
+`macro` | [src/tab.c:819](../../src/tab.c#L819)
 
 ```c
 #define TAB_MAX_EXTERN_CSS

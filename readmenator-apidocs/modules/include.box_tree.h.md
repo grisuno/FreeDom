@@ -1,13 +1,13 @@
 # `include/box_tree.h`
 
-> Source: [include/box_tree.h:1](../../include/box_tree.h#L1) | language `h` | coverage 34.4% | [API index](../index.md)
+> Source: [include/box_tree.h:1](../../include/box_tree.h#L1) | language `h` | coverage 36.4% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`bt_node`](#bt_node), [`bt_positioned`](#bt_positioned)
 - **Enums:** [`bt_status`](#bt_status)
 - **Type Aliases:** [`display`](#display), [`box_index`](#box_index)
-- **Functions:** [`closed`](#closed), [`node`](#node), [`flow`](#flow), [`bottom`](#bottom), [`placed`](#placed), [`bt_box_hidden`](#bt_box_hidden), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`insets`](#insets), [`bt_containing_block`](#bt_containing_block)
+- **Functions:** [`closed`](#closed), [`node`](#node), [`flow`](#flow), [`bottom`](#bottom), [`placed`](#placed), [`bt_box_hidden`](#bt_box_hidden), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`insets`](#insets), [`bt_containing_block`](#bt_containing_block), [`bt_defer_roots`](#bt_defer_roots)
 - **Macros:** [`BT_MAX_DEPTH`](#bt_max_depth), [`BT_MAX_CHILDREN`](#bt_max_children), [`BT_MAX_POSITIONED`](#bt_max_positioned), [`BT_POS_STATIC`](#bt_pos_static), [`BT_POS_RELATIVE`](#bt_pos_relative), [`BT_POS_ABSOLUTE`](#bt_pos_absolute), [`BT_POS_FIXED`](#bt_pos_fixed), [`BT_POS_STICKY`](#bt_pos_sticky), [`BT_ALIGN_START`](#bt_align_start), [`BT_ALIGN_CENTER`](#bt_align_center), [`BT_ALIGN_END`](#bt_align_end), [`BT_ALIGN_STRETCH`](#bt_align_stretch), [`BT_MAUTO_LEFT`](#bt_mauto_left), [`BT_MAUTO_RIGHT`](#bt_mauto_right)
 
 ## Type Diagram
@@ -380,6 +380,47 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 | `cb_y` | `double *` |  |  |
 | `cb_w` | `double *` |  |  |
 | `cb_h` | `double *` |  |  |
+
+---
+
+<a id="bt_defer_roots"></a>
+
+### `bt_defer_roots`
+
+`function` | [include/box_tree.h:285](../../include/box_tree.h#L285)
+
+```c
+size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox, const bt_positioned *pos, size_t npos, const char *in_flow, int *root_of, size_t *order_of);
+```
+
+CSS 2.1 Appendix E steps 8-9 (spec/box_engine.md, tanda 47): an in-flow position:relative|sticky box S paints its whole subtree in the POSITIONED layer, in tree order with the absolute/fixed boxes of z-index auto/0.
+
+When one of those (an absolute backdrop, say) comes EARLIER in the tree than S, S must paint above it -- but the painter draws all in-flow content first. This names the subtrees the painter has to defer.
+
+[`pos`](include.flex_layout.h.md#fx_result-pos) is the positioned list (out-of-flow boxes), `in_flow[i]` nonzero when box i
+was laid out in flow. S is deferred iff it is RELATIVE/STICKY, in flow, and some
+non-negative-z out-of-flow P with no out-of-flow ancestor has box_index < S and
+z(P) <= z(S) (an unset z counts 0), "earlier" meaning TREE order (a depth-first
+walk of the parent links: a child box can hold a lower id than its parent).
+order_of (nbox entries, may be NULL) receives that tree order so the painter can
+merge roots with the positioned list. root_of[i] (nbox entries, always written) gets
+the OUTERMOST deferred root that contains box i (self included) or -1. Returns
+the number of distinct roots. Pure; bounded by nbox links per box; NULL or
+malformed input fails OPEN: every entry -1, nothing deferred (normal paint).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `boxes` | `pv_box_def *` |  |  |
+| `nbox` | `size_t` |  |  |
+| `pos` | `bt_positioned *` |  |  |
+| `npos` | `size_t` |  |  |
+| `in_flow` | `char *` |  |  |
+| `root_of` | `int *` |  |  |
+| `order_of` | `size_t *` |  |  |
+
+**Returns:** `size_t`
 
 ---
 

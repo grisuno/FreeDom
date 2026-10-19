@@ -504,6 +504,11 @@ typedef struct pv_box_def {
     int font_px;
     int box_w_pct;      /* width cap (per-mille half) */
     int box_mw, box_mw_pct;  /* max-width: its own <length-percentage> (tanda 40) */
+    /* height percentage (per-mille) an absolutely positioned box could not
+     * resolve at style time because its containing block's height was only
+     * known after layout (CSS 2.1 10.5: padding box of the positioned ancestor).
+     * 0 = none. */
+    int box_h_pct;
     int box_l_pct, box_r_pct;              /* the l/r insets (padding + margin) */
     int box_min_w_pct;                     /* min-width */
     int pad_t_pct, pad_r_pct, pad_b_pct, pad_l_pct;

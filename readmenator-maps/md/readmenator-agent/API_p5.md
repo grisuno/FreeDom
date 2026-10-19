@@ -140,6 +140,8 @@ Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`,
 - `bt_oof_root` (function) `src/box_tree.c:772` `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
 - `bt_box_hidden` (function) `src/box_tree.c:776` `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
 - `bt_oof_avail` (function) `src/box_tree.c:789` `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
+- `bt_defer_roots` (function) `src/box_tree.c:797` `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
+                      const bt_positi...`
 
 ## src/browser.c
 Depends on: `include/browser.h`, `include/util.h`

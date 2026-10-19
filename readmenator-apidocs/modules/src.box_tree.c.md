@@ -1,10 +1,10 @@
 # `src/box_tree.c`
 
-> Source: [src/box_tree.c:1](../../src/box_tree.c#L1) | language `c` | coverage 28.6% | [API index](../index.md)
+> Source: [src/box_tree.c:1](../../src/box_tree.c#L1) | language `c` | coverage 33.3% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`height`](#height), [`sized`](#sized), [`bt_layout`](#bt_layout), [`bt_containing_block`](#bt_containing_block), [`block`](#block), [`bt_resolve_positioning`](#bt_resolve_positioning), [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`bt_box_hidden`](#bt_box_hidden), [`bt_oof_avail`](#bt_oof_avail)
+- **Functions:** [`height`](#height), [`sized`](#sized), [`bt_layout`](#bt_layout), [`bt_containing_block`](#bt_containing_block), [`block`](#block), [`bt_resolve_positioning`](#bt_resolve_positioning), [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`bt_box_hidden`](#bt_box_hidden), [`bt_oof_avail`](#bt_oof_avail), [`bt_defer_roots`](#bt_defer_roots)
 - **Macros:** [`BT_LEN_AUTO`](#bt_len_auto), [`BT_WRAP_EPS`](#bt_wrap_eps)
 
 ## Call Graph
@@ -16,12 +16,15 @@ flowchart LR
     n_src_box_tree_c__bt_resolve_positioning(["bt_resolve_positioning"])
     n_src_box_tree_c__bt_resolve_positioning_ex(["bt_resolve_positioning_ex"])
     n_src_box_tree_c__bt_containing_block(["bt_containing_block"])
+    n_src_box_tree_c__bt_defer_roots(["bt_defer_roots"])
+    n_src_box_tree_c__bt_oof_root(["bt_oof_root"])
     n_src_box_tree_c__height(["height"])
     n_src_flex_layout_c__fx_auto_margins["flex_layout.fx_auto_margins"]
     n_include_compositor_h__cx_sort["compositor.cx_sort"]
     n_src_compositor_c__cx_box_layer["compositor.cx_box_layer"]
     n_src_box_tree_c__bt_resolve_positioning --> n_src_box_tree_c__bt_resolve_positioning_ex
     n_src_box_tree_c__bt_resolve_positioning_ex --> n_src_box_tree_c__bt_containing_block
+    n_src_box_tree_c__bt_defer_roots --> n_src_box_tree_c__bt_oof_root
     n_src_box_tree_c__height -.-> n_src_flex_layout_c__fx_auto_margins
     n_src_box_tree_c__bt_resolve_positioning_ex -.-> n_include_compositor_h__cx_sort
     n_src_box_tree_c__bt_resolve_positioning_ex -.-> n_src_compositor_c__cx_box_layer
@@ -269,6 +272,8 @@ int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)
 
 **Returns:** `int`
 
+*Called by:* [`bt_defer_roots`](#bt_defer_roots)
+
 ---
 
 <a id="bt_box_hidden"></a>
@@ -321,6 +326,51 @@ double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)
 | `both` | `int *` |  |  |
 
 **Returns:** `double`
+
+---
+
+<a id="bt_defer_roots"></a>
+
+### `bt_defer_roots`
+
+`function` | [src/box_tree.c:797](../../src/box_tree.c#L797)
+
+```c
+size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox, const bt_positioned *pos, size_t npos, const char *in_flow, int *root_of, size_t *order_of)
+```
+
+CSS 2.1 Appendix E steps 8-9 (spec/box_engine.md, tanda 47): an in-flow position:relative|sticky box S paints its whole subtree in the POSITIONED layer, in tree order with the absolute/fixed boxes of z-index auto/0.
+
+When one of those (an absolute backdrop, say) comes EARLIER in the tree than S, S must paint above it -- but the painter draws all in-flow content first. This names the subtrees the painter has to defer.
+
+[`pos`](include.flex_layout.h.md#fx_result-pos) is the positioned list (out-of-flow boxes), `in_flow[i]` nonzero when box i
+was laid out in flow. S is deferred iff it is RELATIVE/STICKY, in flow, and some
+non-negative-z out-of-flow P with no out-of-flow ancestor has box_index < S and
+z(P) <= z(S) (an unset z counts 0), "earlier" meaning TREE order (a depth-first
+walk of the parent links: a child box can hold a lower id than its parent).
+order_of (nbox entries, may be NULL) receives that tree order so the painter can
+merge roots with the positioned list. root_of[i] (nbox entries, always written) gets
+the OUTERMOST deferred root that contains box i (self included) or -1. Returns
+the number of distinct roots. Pure; bounded by nbox links per box; NULL or
+malformed input fails OPEN: every entry -1, nothing deferred (normal paint).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `boxes` | `pv_box_def *` |  |  |
+| `nbox` | `size_t` |  |  |
+| `pos` | `bt_positioned *` |  |  |
+| `npos` | `size_t` |  |  |
+| `in_flow` | `char *` |  |  |
+| `root_of` | `int *` |  |  |
+| `order_of` | `size_t *` |  |  |
+
+**Returns:** `size_t`
+
+> **Inherited:** Documentation from [`bt_defer_roots`](#bt_defer_roots) (include/box_tree.h:285).
+
+*Calls:* [`bt_oof_root`](#bt_oof_root)
 
 ---
 

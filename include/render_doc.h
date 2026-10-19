@@ -272,6 +272,7 @@ typedef struct rd_doc {
      * not laid out inside it (its items are elsewhere). Never set by rd_build. */
     int       oof_view_root;
     int       html_center;     /* 1 if root has margin-left:auto && margin-right:auto */
+    int       author_css;      /* the effective caps.css this document was built with */
     int       has_images;  /* the page declared at least one image */
     /* Box engine (Hito 23b-8 Step D): the box-definition TREE. boxes[block_id]
      * describes one block-level box (decoration + parent_id); a block finds its box

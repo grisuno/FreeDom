@@ -277,6 +277,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_webfont_load.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_ws_hub.c` -> cmocka.h, poll.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h, time.h
 - `tests/test_zoom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tools/fbench.py` -> PIL, numpy, os, sys
 - `tools/ffgeom.py` -> re, struct, subprocess, sys, zlib
 - `tools/ffq.py` -> os, selenium, selenium.webdriver.firefox.options, selenium.webdriver.firefox.service, shutil, sys
 - `tools/ffshot.py` -> os, selenium, selenium.webdriver.firefox.options, selenium.webdriver.firefox.service, shutil, sys
