@@ -5,12 +5,13 @@
 - Layer: utility
 - Language: py
 - Symbols:
-  - `load_baseline` (function, line 29) `def load_baseline()`
-  - `load_current` (function, line 42) `def load_current()`
-  - `luma` (function, line 55) `def luma(img)`
-  - `bands` (function, line 59) `def bands(fd, ff, band)`
-  - `sbs` (function, line 70) `def sbs(name, start, nrows)`
-  - `main` (function, line 89) `def main()`
+  - `load_baseline` (function, line 46) `def load_baseline()`
+  - `load_current` (function, line 59) `def load_current()`
+  - `luma` (function, line 72) `def luma(img)`
+  - `bands` (function, line 76) `def bands(fd, ff, band)`
+  - `sbs` (function, line 87) `def sbs(name, start, nrows)`
+  - `publish_readme` (function, line 106) `def publish_readme(name, score)`
+  - `main` (function, line 126) `def main()`
 
 ## tools/ffgeom.py
 - Doc: ffgeom -- Firefox geometry as TEXT, no image reading.

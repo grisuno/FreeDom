@@ -5529,6 +5529,40 @@ static double balanced_wrap_width(cairo_t *cr, const browser_window *w, const ui
     return hi;
 }
 
+/* The horizontal padding+border of the boxes that sit INSIDE a flex/grid item, between
+ * its text and the item's own root box (`root`, or the container box of the run when the
+ * item has none). measure_item_w_at sees only text, and the callers add the root's own
+ * sides, so a padded `<a style=display:block>` inside an inline-block `<li>` -- the
+ * shape of every navigation bar -- was measured as wide as its text alone and its label
+ * then wrapped inside its own padding. The widest such inset over the item's runs: exact
+ * for one line, an upper bound when lines nest at different depths. */
+static double item_inner_inset(const rd_doc *doc, size_t b0, size_t b1, int root) {
+    size_t nbox = rd_box_count(doc);
+    double best = 0.0;
+    for (size_t k = b0; k < b1; ++k) {
+        const rd_block *bk = rd_at(doc, k);
+        if (block_leaves_flow(doc, bk)) continue;
+        int stop = root;
+        if (stop < 0) {
+            const pv_cont_def *cd = (bk->cont_id >= 0) ? rd_cont_at(doc, (size_t)bk->cont_id) : NULL;
+            stop = (cd != NULL) ? cd->box_id : -1;
+        }
+        if (stop < 0) continue;
+        double acc = 0.0;
+        int reached = 0;
+        int id = bk->block_id;
+        for (size_t steps = 0; id >= 0 && (size_t)id < nbox && steps <= nbox; ++steps) {
+            if (id == stop) { reached = 1; break; }
+            const pv_box_def *d = rd_box_at(doc, (size_t)id);
+            acc += box_pad_px(d->pad_l, d->pad_l_pct, 0.0) + box_pad_px(d->pad_r, d->pad_r_pct, 0.0)
+                 + box_edge_px(d->bord_lw) + box_edge_px(d->bord_rw);
+            id = d->parent_id;
+        }
+        if (reached && acc > best) best = acc;
+    }
+    return best;
+}
+
 static double measure_item_content_w(cairo_t *cr, const browser_window *w,
                                      const ui_theme *th, const rd_doc *doc,
                                      size_t b0, size_t b1) {
@@ -5645,6 +5679,7 @@ static double nested_cont_basis(cairo_t *cr, const browser_window *w,
             base = (decl > 0.0 && !pct_only)
                  ? decl + isd.ml + isd.mr
                  : measure_item_content_w(cr, w, th, doc, k, e)
+                   + item_inner_inset(doc, k, e, isd.box)
                    + isd.pl + isd.pr + isd.bl + isd.br + isd.ml + isd.mr;
         } else {
             base = flex_item_basis(cr, w, th, doc, k, e, &isd, content_w);
@@ -5689,6 +5724,7 @@ static double flex_item_basis(cairo_t *cr, const browser_window *w,
                      ? run_width_cap(bk, content_w) : 0.0;
     if (explicit_w > 0.0) return explicit_w + edges;
     double basis = measure_item_content_w(cr, w, th, doc, b0, b1)
+                 + item_inner_inset(doc, b0, b1, sd->box)
                  + sd->pl + sd->pr + sd->bl + sd->br + edges;
     if (basis > content_w) basis = content_w;
     if (basis < 1.0) basis = 1.0;
@@ -5716,6 +5752,7 @@ static double flex_item_min_main(cairo_t *cr, const browser_window *w,
     double mc = 0.0;
     if (author_min < 0.0 && !scroll) {
         mc = measure_item_w_at(cr, w, th, doc, b0, b1, FLEX_MIN_MEASURE_W)
+           + item_inner_inset(doc, b0, b1, sd->box)
            + sd->pl + sd->pr + sd->bl + sd->br + sd->ml + sd->mr;
     }
     return fx_auto_min_size(mc, basis, author_min, scroll);
@@ -6676,6 +6713,16 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 int own_block = (rbd != NULL && bk->block_node != DOM_NODE_NONE)
                               ? (bk->block_node == rbd->node_id)
                               : (rb >= 0 && bk->block_id == rb);
+                /* A run directly in the item's root box whose element IS the box's
+                 * (same user-agent tag) is the box's own content even when it is not
+                 * the nearest block node -- an inline-block `<h2>` flattened into a
+                 * line of inline-blocks: its margin is the item's, already placed. */
+                if (!own_block && rbd != NULL && rb >= 0 && bk->block_id == rb &&
+                    rbd->display == CSS_DISP_INLINE_BLOCK &&
+                    ((bk->ua_tag != BX_UA_NONE && bk->ua_tag == rbd->ua_tag) ||
+                     (bk->kind == RD_HEADING && rbd->ua_tag >= BX_UA_H1 &&
+                      rbd->ua_tag <= BX_UA_H6)))
+                    own_block = 1;
                 if ((bk->block_break || m == gstart[j]) && !(bk->br_line & PV_BR_CONT)
                     && !own_block) {
                     double bmt, bmb;
@@ -6818,6 +6865,77 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             kid->y += item_mt[j];
             kid->h -= item_mt[j] + item_mb[j];
             if (kid->h < 0.0) kid->h = 0.0;
+        }
+        /* The items of an anonymous inline-block row sit on their LINE's baseline
+         * (CSS 2.1 10.8.1), not stretched or top-packed like flex items: the box of
+         * an inline-block rides on the baseline of its last line of text, so a
+         * 35px heading and a 28px button with differently-padded labels line their
+         * TEXT up, and the line is as tall as the tallest above-baseline part plus
+         * the tallest below-baseline part (or any top/bottom-aligned item). */
+        if (cdv.anon_row) {
+            /* An item's baseline, measured from its border-box top. */
+            double base_of[BT_MAX_CHILDREN];
+            int    va_of[BT_MAX_CHILDREN];
+            for (size_t j = 0; j < g; ++j) {
+                /* Stretch is not an inline-block's business: it keeps its own height. */
+                bt_node *kn = &kids[pos_of[j]];
+                double nat = kn->content_h - item_mt[j] - item_mb[j];
+                if (nat > 0.0) kn->h = nat;
+                const bt_node *kd = &kids[pos_of[j]];
+                double bl = kd->h;                       /* no text: the bottom edge */
+                if (row_count[j] > 0) {
+                    const rc_row *r0 = &L->rows[row_start[j]];
+                    bl = item_oy[j] + r0->top + ((r0->ascent > 0.0) ? r0->ascent : r0->height);
+                }
+                base_of[j] = bl;
+                int va = rd_at(doc, gstart[j])->valign;
+                va_of[j] = (va == CSS_VA_TOP || va == CSS_VA_BOTTOM) ? va : 0;
+            }
+            /* Lines: items that bt_layout put at the same y. */
+            double shift = 0.0;               /* growth of the lines above */
+            size_t done[BT_MAX_CHILDREN];
+            size_t ndone = 0;
+            for (size_t guard = 0; guard < g && ndone < g; ++guard) {
+                double ly = 1e30;
+                for (size_t j = 0; j < g; ++j) {
+                    int seen = 0;
+                    for (size_t d = 0; d < ndone; ++d) if (done[d] == j) seen = 1;
+                    if (!seen && kids[pos_of[j]].y < ly) ly = kids[pos_of[j]].y;
+                }
+                if (ly > 1e29) break;
+                double above = 0.0, below = 0.0, tall = 0.0, old_h = 0.0;
+                size_t members[BT_MAX_CHILDREN];
+                size_t nm = 0;
+                for (size_t j = 0; j < g; ++j) {
+                    int seen = 0;
+                    for (size_t d = 0; d < ndone; ++d) if (done[d] == j) seen = 1;
+                    if (seen || kids[pos_of[j]].y > ly + 0.5) continue;
+                    members[nm++] = j;
+                    const bt_node *kd = &kids[pos_of[j]];
+                    if (kd->h > old_h) old_h = kd->h;
+                    if (va_of[j] != 0) { if (kd->h > tall) tall = kd->h; continue; }
+                    if (base_of[j] > above) above = base_of[j];
+                    if (kd->h - base_of[j] > below) below = kd->h - base_of[j];
+                }
+                double line_h = above + below;
+                if (tall > line_h) line_h = tall;
+                for (size_t m = 0; m < nm; ++m) {
+                    size_t j = members[m];
+                    bt_node *kd = &kids[pos_of[j]];
+                    double dy = 0.0;
+                    if (va_of[j] == CSS_VA_BOTTOM) dy = line_h - kd->h;
+                    else if (va_of[j] == 0) dy = above - base_of[j];
+                    kd->y = ly + shift + dy;
+                    done[ndone++] = j;
+                }
+                shift += line_h - old_h;
+            }
+            double bottom = 0.0;
+            for (size_t j = 0; j < g; ++j) {
+                const bt_node *kd = &kids[pos_of[j]];
+                if (kd->y + kd->h + item_mb[j] > bottom) bottom = kd->y + kd->h + item_mb[j];
+            }
+            if (bottom > root.h) root.h = bottom;
         }
     }
 
@@ -7497,7 +7615,26 @@ static double box_shrink_width(cairo_t *cr, const browser_window *w,
      * between it and this one. Without it a max-content wrapper around a sized
      * tile measured 0 and filled the page. */
     double bw = 0.0;
+    /* The text is ALSO inset by the horizontal padding/border/margin of every box
+     * between its run and this one, whether or not any of them declares a width:
+     * a padded `<a style=display:block>` inside an inline-block `<li>` is as wide
+     * as its text PLUS that padding. The widest such inset is added to the text
+     * measure (exact for a single line; an upper bound when lines nest deeper). */
+    double inset_max = 0.0;
     size_t nbox = rd_box_count(doc);
+    for (size_t k = start; k < j; ++k) {
+        double ins = 0.0;
+        int iid = rd_at(doc, k)->block_id;
+        for (size_t steps = 0; iid >= 0 && iid != box_id && (size_t)iid < nbox && steps <= nbox;
+             ++steps) {
+            const pv_box_def *d = rd_box_at(doc, (size_t)iid);
+            ins += box_pad_px(d->pad_l, d->pad_l_pct, 0.0) + box_pad_px(d->pad_r, d->pad_r_pct, 0.0)
+                 + box_edge_px(d->bord_lw) + box_edge_px(d->bord_rw);
+            iid = d->parent_id;
+        }
+        if (ins > inset_max) inset_max = ins;
+    }
+    tw += inset_max;
     for (size_t k = start; k < j; ++k) {
         double acc = 0.0;
         int seen_w = 0;
@@ -8254,6 +8391,12 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
              * a wide abspos badge must not become the column's width. */
             if (block_leaves_flow(doc, bb)) continue;
             double c = run_width_cap(bb, ctx_w);
+            /* The founder's own declared width travels on its runs even when the
+             * founder has no text of its own (a `nav{float:left;width:70%}` whose
+             * content is a list): without it the float looked width-less and
+             * shrink-wrapped, and every ancestor wrapper shrank with it. */
+            double fc = bx_width_cap(bb->float_w, bb->float_w_pct, ctx_w);
+            if (fc > c) c = fc;
             if (c > capw) capw = c;
         }
         width[j] = (capw > 0.0) ? capw : -1.0;
@@ -8413,6 +8556,18 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         if (founder_box >= 0 && g == 1) {
             si.col_founder_set = 1;
             si.col_founder_box = founder_box;
+        } else {
+            /* Every column of a multi-float band is its own float's border box: the
+             * float's declared width (`width:70%`) sized the COLUMN, so the box it
+             * owns fills that column. Resolving the same percentage again inside it
+             * made two side-by-side floats 49% and 9% wide instead of 70% and 30%. */
+            const rd_block *fj = rd_at(doc, gstart[j]);
+            const pv_box_def *fjd = (fj->float_box >= 0 && (size_t)fj->float_box < rd_box_count(doc))
+                                    ? rd_box_at(doc, (size_t)fj->float_box) : NULL;
+            if (fjd != NULL && fj->float_id >= 0 && (fjd->box_w > 0 || fjd->box_w_pct != 0)) {
+                si.col_founder_set = 1;
+                si.col_founder_box = fj->float_box;
+            }
         }
         size_t sr = L->nrow;
         size_t sbx = L->nbox;
@@ -8518,6 +8673,9 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
              * bx_place. With no inner boxes and no author caps this answers
              * the raw column width, byte-identical to before. */
             double flow_w = cw;
+            /* The founder's own text fills the column: the float's declared width
+             * already sized it (see col_founder_set), so it is not a cap again. */
+            int fills_column = (si.col_founder_set && bk->block_id == si.col_founder_box);
             {
                 double base_l = (double)bk->indent * UI_LIST_INDENT;
                 if (si.box_depth > 0) {
@@ -8526,7 +8684,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                     double avail_in = in_w - base_l;
                     if (avail_in < 1.0) avail_in = 1.0;
                     bx_hplace hp_in = bx_place(0.0, 0.0,
-                                               run_width_cap(bk, avail_in),
+                                               fills_column ? 0.0 : run_width_cap(bk, avail_in),
                                                bk->box_center, avail_in);
                     si.indent_px = in_l + base_l + hp_in.x_off;
                     si.bg_w = hp_in.content_w;
@@ -8536,7 +8694,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                     if (avail_w < 1.0) avail_w = 1.0;
                     bx_hplace hp = bx_place(bx_lp_px(bk->box_l, bk->box_l_pct, avail_w),
                                             bx_lp_px(bk->box_r, bk->box_r_pct, avail_w),
-                                            run_width_cap(bk, avail_w),
+                                            fills_column ? 0.0 : run_width_cap(bk, avail_w),
                                             bk->box_center, avail_w);
                     si.indent_px = base_l + hp.x_off;
                     si.bg_w = hp.content_w;
@@ -8739,6 +8897,12 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                 const pv_cont_def *rcd = rd_cont_at(doc, (size_t)rootc);
                 if (rcd != NULL && rcd->node_id != DOM_NODE_NONE
                     && b->block_node != DOM_NODE_NONE && b->block_node != rcd->node_id) {
+                    mt = 0.0;
+                    mb = 0.0;
+                }
+                /* An ANONYMOUS row (inline-blocks gathered into a line) is no element:
+                 * the first item's margin is the item's, never the row's. */
+                if (rcd != NULL && rcd->anon_row) {
                     mt = 0.0;
                     mb = 0.0;
                 }

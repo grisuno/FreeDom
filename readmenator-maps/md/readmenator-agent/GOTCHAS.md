@@ -4,7 +4,7 @@
 
 These files have the most connections. Changes here have high blast radius.
 
-- `gui/browser_ui.c` (score: 150.30)
+- `gui/browser_ui.c` (score: 150.40)
 - `include/css.h` (score: 87.80, imported by 36 files)
 - `src/tab.c` (score: 58.20)
 - `src/css.c` (score: 54.40)
@@ -18,8 +18,8 @@ These files have the most connections. Changes here have high blast radius.
 
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
-- `include/css_color.h` -- 13 direct, 55 total dependents
-- `include/css.h` -- 36 direct, 53 total dependents
+- `include/css_color.h` -- 13 direct, 52 total dependents
+- `include/css.h` -- 36 direct, 51 total dependents
 - `include/html_parse.h` -- 23 direct, 45 total dependents
 - `include/dom.h` -- 18 direct, 40 total dependents
 - `include/url.h` -- 18 direct, 28 total dependents
@@ -70,6 +70,6 @@ Circular dependencies. Refactor to break the cycle.
 - `gui/browser_ui.c:5339` `table` [DEAD_STORE] `parent`: `parent` assigned at line 5339 but never read afterwards.
 - `gui/browser_ui.c:5340` `table` [DEAD_STORE] `seen`: `seen` assigned at line 5340 but never read afterwards.
 - `gui/browser_ui.c:5342` `table` [DEAD_STORE] `j`: `j` assigned at line 5342 but never read afterwards.
-- `gui/browser_ui.c:5608` `nested_cont_basis` [DEAD_STORE] `total`: `total` assigned at line 5608 but never read afterwards.
-- `gui/browser_ui.c:5609` `nested_cont_basis` [DEAD_STORE] `n_items`: `n_items` assigned at line 5609 but never read afterwards.
-- `gui/browser_ui.c:9901` `button_box_width` [DEAD_STORE] `cx`: `cx` assigned at line 9901 but never read afterwards.
+- `gui/browser_ui.c:5642` `nested_cont_basis` [DEAD_STORE] `total`: `total` assigned at line 5642 but never read afterwards.
+- `gui/browser_ui.c:5643` `nested_cont_basis` [DEAD_STORE] `n_items`: `n_items` assigned at line 5643 but never read afterwards.
+- `gui/browser_ui.c:8365` `layout_float_band` [DEAD_STORE] `base_top`: `base_top` assigned at line 8365 but never read afterwards.

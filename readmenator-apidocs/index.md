@@ -1,6 +1,6 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 204 modules, 3199 documented entities, documentation coverage 39.8% (1265/3180 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 204 modules, 3202 documented entities, documentation coverage 39.8% (1266/3181 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
@@ -231,7 +231,7 @@ Languages: c (108), h (82), py (9), sh (5)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`tools.fbench`](modules/tools.fbench.py.md) | fbench -- turn the PNG pairs `make parity` leaves behind into something you can act on. | 0 | 6 | 14.3% |
+| [`tools.fbench`](modules/tools.fbench.py.md) | fbench -- turn the PNG pairs `make parity` leaves behind into something you can act on. | 0 | 7 | 25.0% |
 | [`tools.ffgeom`](modules/tools.ffgeom.py.md) | ffgeom -- Firefox geometry as TEXT, no image reading. | 0 | 7 | 25.0% |
 | [`tools.ffq`](modules/tools.ffq.py.md) | ffq -- ask Firefox what it computed, as TEXT. | 0 | 1 | 50.0% |
 | [`tools.ffshot`](modules/tools.ffshot.py.md) | ffshot -- full-page Firefox screenshot at a FIXED viewport, for `make parity`/`make wpt`. | 0 | 1 | 50.0% |

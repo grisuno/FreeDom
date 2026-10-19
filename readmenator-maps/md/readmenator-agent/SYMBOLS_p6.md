@@ -3,6 +3,7 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `CCH_MAX_ATTRS` | macro | `src/css_chain.c:22` | `#define CCH_MAX_ATTRS` |
 | `CCH_MAX_CLASSES` | macro | `src/css_chain.c:18` | `#define CCH_MAX_CLASSES` |
 | `CCH_TAG_MAX` | macro | `src/css_chain.c:15` | `#define CCH_TAG_MAX` |
 | `cch_element_matches` | function | `src/css_chain.c:351` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)` |
@@ -495,6 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `gif_deinterlace_row` | function | `src/image_decode.c:319` | `static uint32_t gif_deinterlace_row(uint32_t r, uint32_t fh)` |
 | `gif_put_pixel` | function | `src/image_decode.c:334` | `static void gif_put_pixel(uint32_t *canvas, uint32_t cw, uint32_t ch,                           u...` |
 | `gif_reader` | struct | `src/image_decode.c:255` | `` |
-| `gr_skip` | function | `src/image_decode.c:273` | `static int gr_skip(gif_reader *r, size_t n)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

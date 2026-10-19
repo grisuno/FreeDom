@@ -269,7 +269,7 @@
         "tools/prune.py",
         "tools/snapshot.py"
       ],
-      "mentions": 517,
+      "mentions": 518,
       "confidence": "EXTRACTED"
     },
     {
@@ -1252,7 +1252,7 @@
         "tools/pngprof.py",
         "tools/prune.py"
       ],
-      "mentions": 334,
+      "mentions": 335,
       "confidence": "EXTRACTED"
     },
     {
@@ -1449,7 +1449,7 @@
         "tools/prune.py",
         "tools/snapshot.py"
       ],
-      "mentions": 326,
+      "mentions": 328,
       "confidence": "EXTRACTED"
     },
     {
@@ -1921,7 +1921,7 @@
         "tools/ffq.py",
         "tools/snapshot.py"
       ],
-      "mentions": 637,
+      "mentions": 640,
       "confidence": "EXTRACTED"
     },
     {
@@ -2098,12 +2098,13 @@
         "tests/test_svg_render.c",
         "tests/test_tab.c",
         "tests/test_ws_hub.c",
+        "tools/fbench.py",
         "tools/ffgeom.py",
         "tools/ffshot.py",
         "tools/pngdiff.c",
         "tools/prune.py"
       ],
-      "mentions": 475,
+      "mentions": 482,
       "confidence": "EXTRACTED"
     },
     {
@@ -2281,7 +2282,7 @@
         "tests/test_webfont.c",
         "tools/fbench.py"
       ],
-      "mentions": 311,
+      "mentions": 312,
       "confidence": "EXTRACTED"
     },
     {
@@ -2767,7 +2768,7 @@
         "tools/prune.py",
         "tools/snapshot.py"
       ],
-      "mentions": 239,
+      "mentions": 241,
       "confidence": "EXTRACTED"
     },
     {
@@ -3074,7 +3075,7 @@
         "tools/prune.py",
         "tools/snapshot.py"
       ],
-      "mentions": 376,
+      "mentions": 377,
       "confidence": "EXTRACTED"
     },
     {
@@ -3848,7 +3849,7 @@
         "tools/ffshot.py",
         "tools/mutate.py"
       ],
-      "mentions": 314,
+      "mentions": 315,
       "confidence": "EXTRACTED"
     },
     {
@@ -4045,7 +4046,7 @@
         "tools/pngdiff.c",
         "tools/prune.py"
       ],
-      "mentions": 344,
+      "mentions": 345,
       "confidence": "EXTRACTED"
     },
     {
@@ -6213,7 +6214,7 @@
     "Thesis: `all` centralizes 57 files; Antithesis: `caller` pulls 59 files with 27 shared (Jaccard 0.30); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `all` centralizes 57 files; Antithesis: `count` pulls 62 files with 29 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `all` centralizes 57 files; Antithesis: `every` pulls 70 files with 30 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
-    "Thesis: `all` centralizes 57 files; Antithesis: `its` pulls 83 files with 33 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `all` centralizes 57 files; Antithesis: `its` pulls 84 files with 33 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `all` centralizes 57 files; Antithesis: `never` pulls 85 files with 33 shared (Jaccard 0.30); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `all` centralizes 57 files; Antithesis: `non` pulls 66 files with 29 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `all` centralizes 57 files; Antithesis: `none` pulls 58 files with 31 shared (Jaccard 0.37); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",

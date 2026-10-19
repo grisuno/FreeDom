@@ -1,6 +1,6 @@
 # GraphRAG Community Reports
 
-Entities: 7064 | Relationships: 12353 | Communities: 11 | Themes: 3 | Text units: 6632
+Entities: 7067 | Relationships: 12362 | Communities: 11 | Themes: 3 | Text units: 6635
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
@@ -98,10 +98,10 @@ Theme of 1 communities and 16 files: unassigned files (16 files, rating 0.9).
 - `include/image_decode.h` ranks 1 by PageRank, 6 importers, 13 symbols: img_pixels: A decoded bitmap that owns its pixel buffer.
 - `include/tls_impersonate.h` ranks 2 by PageRank, 5 importers, 23 symbols: ti_req: Request: parent -> helper.
 - `include/hls.h` ranks 3 by PageRank, 4 importers, 8 symbols: hls_segment: or variant info.
-- Hotspot `gui/browser_ui.c`: 583 symbols, 119 connections (score 1.00).
-- Hotspot `tests/test_freedom.c`: 89 symbols, 12 connections (score 0.12).
+- Hotspot `gui/browser_ui.c`: 584 symbols, 119 connections (score 1.00).
+- Hotspot `tests/test_freedom.c`: 90 symbols, 12 connections (score 0.12).
 - 2 layer violations, e.g. browser_ui.c (presentation) -> data_url.h (data_access).
-- Dataflow: 28 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
+- Dataflow: 32 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
 - Surprising bridge: block_flow.c <-> test_renderer.c (8 hops across communities).
 - Key entities: file:gui/browser_ui.c, file:tests/test_freedom.c, file:src/browser.c, file:tests/test_interp.c, file:tests/test_image_decode.c, file:src/image_decode.c, file:include/tls_impersonate.h, file:include/interp.h
 - Rating 4.0/10 = 7 x PageRank share 0.57 + 3 x risk 0.00. Internal imports: 45.
@@ -116,7 +116,7 @@ Theme of 1 communities and 16 files: unassigned files (16 files, rating 0.9).
 - Hotspot `src/page_view.c`: 240 symbols, 38 connections (score 0.36).
 - Hotspot `src/freedom.c`: 46 symbols, 54 connections (score 0.30).
 - 14 layer violations, e.g. render_doc.c (presentation) -> data_url.h (data_access).
-- Dataflow: 15 INFERRED issues (first: DEAD_STORE in layout_grid).
+- Dataflow: 11 INFERRED issues (first: DEAD_STORE in layout_grid).
 - Key entities: file:src/page_view.c, file:tests/test_page_view.c, file:include/page_view.h, file:tests/test_flex_layout.c, file:tests/test_box_tree.c, file:src/freedom.c, file:tests/test_box_style.c, file:include/flex_layout.h
 - Rating 3.0/10 = 7 x PageRank share 0.43 + 3 x risk 0.00. Internal imports: 58.
 
@@ -181,7 +181,7 @@ Theme of 1 communities and 16 files: unassigned files (16 files, rating 0.9).
 - Hotspot `tools/pngdiff.c`: 14 symbols, 6 connections (score 0.04).
 - Hotspot `tools/ffgeom.py`: 12 symbols, 6 connections (score 0.04).
 - Taint: 4 paths reach this group via subprocess, urllib.request.
-- Key entities: file:tools/pngdiff.c, file:tools/ffgeom.py, file:tools/gen_psl.c, file:tools/mutate.py, file:tools/snapshot.py, file:tools/fbench.py, file:tools/ffshot.py, file:tools/ffq.py
+- Key entities: file:tools/pngdiff.c, file:tools/ffgeom.py, file:tools/gen_psl.c, file:tools/mutate.py, file:tools/fbench.py, file:tools/snapshot.py, file:tools/ffshot.py, file:tools/ffq.py
 - Rating 0.9/10 = 7 x PageRank share 0.13 + 3 x risk 0.00. Internal imports: 0.
 
 ## include: download (`c8`, community, rating 0.7)

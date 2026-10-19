@@ -3,6 +3,7 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `MD_PACE_MAX_STEP_MS` | macro | `include/media_decoder.h:62` | `#define MD_PACE_MAX_STEP_MS` |
 | `epoch_ms` | type_alias | `include/media_decoder.h:66` | `typedef struct md_pacer { uint64_t epoch_ms;` |
 | `md_cmd` | enum | `include/media_decoder.h:29` | `` |
 | `md_pace_due_ms` | function | `include/media_decoder.h:79` | `static inline uint64_t md_pace_due_ms(md_pacer *p, uint64_t now_ms,                              ...` |
@@ -495,6 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `wf_list_free` | function | `include/webfont.h:53` | `void wf_list_free(wf_list *l);` |
 | `wf_name_hash` | function | `include/webfont.h:69` | `static inline unsigned wf_name_hash(const char *s, size_t n)` |
 | `wf_ref` | struct | `include/webfont.h:31` | `` |
-| `wf_scan` | function | `include/webfont.h:52` | `int wf_scan(const char *css, size_t len, wf_list *out);` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

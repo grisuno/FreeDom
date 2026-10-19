@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 46 file(s) rooted at `tests` with dominant language c (cohesion 0.52). Central symbols: `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BROWSER_STATUS_DURATION_MS`, `BROWSER_STATUS_MAX`, `BROWSER_URL_MAX`, `BUI_CONIC_SLICES`. Core file: `gui/browser_ui.c` (583 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
+This community groups 46 file(s) rooted at `tests` with dominant language c (cohesion 0.52). Central symbols: `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BROWSER_STATUS_DURATION_MS`, `BROWSER_STATUS_MAX`, `BROWSER_URL_MAX`, `BUI_CONIC_SLICES`. Core file: `gui/browser_ui.c` (584 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
 
 ## Files
 
@@ -17,7 +17,7 @@ This community groups 46 file(s) rooted at `tests` with dominant language c (coh
 | `tests/test_browser.c` | c | testing | 17 | no |
 | `tests/test_form.c` | c | testing | 20 | no |
 | `tests/test_frame_clock.c` | c | testing | 4 | no |
-| `tests/test_freedom.c` | c | testing | 89 | no |
+| `tests/test_freedom.c` | c | testing | 90 | no |
 
 ### `include` (14 files)
 
@@ -51,7 +51,7 @@ This community groups 46 file(s) rooted at `tests` with dominant language c (coh
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `gui/browser_ui.c` | c | presentation | 583 | no |
+| `gui/browser_ui.c` | c | presentation | 584 | no |
 
 *... and 26 more files in this community.*
 
@@ -117,12 +117,12 @@ This community groups 46 file(s) rooted at `tests` with dominant language c (coh
 - [dataflow DEAD_STORE] `gui/browser_ui.c:5339` `table` `parent`: `parent` assigned at line 5339 but never read afterwards.
 - [dataflow DEAD_STORE] `gui/browser_ui.c:5340` `table` `seen`: `seen` assigned at line 5340 but never read afterwards.
 - [dataflow DEAD_STORE] `gui/browser_ui.c:5342` `table` `j`: `j` assigned at line 5342 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5608` `nested_cont_basis` `total`: `total` assigned at line 5608 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5609` `nested_cont_basis` `n_items`: `n_items` assigned at line 5609 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:9901` `button_box_width` `cx`: `cx` assigned at line 9901 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:11045` `paint_box_decoration` `bt`: `bt` assigned at line 11045 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:11046` `paint_box_decoration` `bb`: `bb` assigned at line 11046 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:11175` `layer` `on`: `on` assigned at line 11175 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5642` `nested_cont_basis` `total`: `total` assigned at line 5642 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5643` `nested_cont_basis` `n_items`: `n_items` assigned at line 5643 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:8365` `layout_float_band` `base_top`: `base_top` assigned at line 8365 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:8572` `layout_float_band` `sr`: `sr` assigned at line 8572 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:8573` `layout_float_band` `sbx`: `sbx` assigned at line 8573 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:8675` `layout_float_band` `flow_w`: `flow_w` assigned at line 8675 but never read afterwards.
 
 ## Open Questions
 

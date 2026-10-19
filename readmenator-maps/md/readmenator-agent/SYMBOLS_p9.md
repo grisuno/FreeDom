@@ -3,6 +3,7 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `sf_check_group_is_pq` | function | `src/secure_fetch.c:275` | `sf_status sf_check_group_is_pq(const char *negotiated_group)` |
 | `sf_check_tls_version` | function | `src/secure_fetch.c:270` | `sf_status sf_check_tls_version(const char *negotiated_version)` |
 | `sf_ci_prefix` | function | `src/secure_fetch.c:371` | `static int sf_ci_prefix(const char *s, const char *p)` |
 | `sf_config_default` | function | `src/secure_fetch.c:216` | `sf_config sf_config_default(void)` |
@@ -495,6 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `test_width_cap_pct` | function | `tests/test_box_style.c:509` | `static void test_width_cap_pct(void **state)` |
 | `width` | function | `tests/test_box_style.c:553` | `* a negative width (CSS Values 4 section 10.1: out-of-range calc() results are * clamped at used-value time). */...` |
 | `UNSET4` | macro | `tests/test_box_tree.c:630` | `#define UNSET4` |
-| `assert_rect` | function | `tests/test_box_tree.c:28` | `static void assert_rect(const bt_node *n, double x, double y, double w, double h)` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

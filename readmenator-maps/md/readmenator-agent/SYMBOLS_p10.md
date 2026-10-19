@@ -3,6 +3,7 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `assert_rect` | function | `tests/test_box_tree.c:28` | `static void assert_rect(const bt_node *n, double x, double y, double w, double h)` |
 | `card` | function | `tests/test_box_tree.c:769` | `* containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */ assert_true(dbl_eq(out[2].x, 100));` |
 | `dbox` | function | `tests/test_box_tree.c:1050` | `static pv_box_def dbox(int parent, int position, int z)` |
 | `main` | function | `tests/test_box_tree.c:1157` | `int main(void)` |
@@ -495,6 +496,5 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 | `test_hsl_240` | function | `tests/test_css_color.c:147` | `static void test_hsl_240(void **state)` |
 | `test_hsl_fractional_hue` | function | `tests/test_css_color.c:256` | `static void test_hsl_fractional_hue(void **state)` |
 | `test_hsl_out_of_range` | function | `tests/test_css_color.c:160` | `static void test_hsl_out_of_range(void **state)` |
-| `test_hsl_space_separated` | function | `tests/test_css_color.c:310` | `static void test_hsl_space_separated(void **state)` |
 
 Next: [SYMBOLS_p11.md](SYMBOLS_p11.md)

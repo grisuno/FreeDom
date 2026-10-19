@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_xhr_undefined_when_net_not_allowed` | function | `tests/test_tab.c:1616` | `static void test_xhr_undefined_when_net_not_allowed(void **state)` |
+| `test_xhr_works_when_net_allowed` | function | `tests/test_tab.c:1592` | `static void test_xhr_works_when_net_allowed(void **state)` |
 | `view_find_text` | function | `tests/test_tab.c:1812` | `static const pv_run *view_find_text(const pv_view *v, const char *needle)` |
 | `main` | function | `tests/test_text_case.c:73` | `int main(void)` |
 | `test_smallcaps_runs` | function | `tests/test_text_case.c:55` | `static void test_smallcaps_runs(void **state)` |
@@ -182,12 +184,13 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `test_step_snaps_off_ladder` | function | `tests/test_zoom.c:49` | `static void test_step_snaps_off_ladder(void **state)` |
 | `test_zoom_in_steps_ladder` | function | `tests/test_zoom.c:33` | `static void test_zoom_in_steps_ladder(void **state)` |
 | `test_zoom_out_steps_ladder` | function | `tests/test_zoom.c:41` | `static void test_zoom_out_steps_ladder(void **state)` |
-| `bands` | function | `tools/fbench.py:59` | `def bands(fd, ff, band)` |
-| `load_baseline` | function | `tools/fbench.py:29` | `def load_baseline()` |
-| `load_current` | function | `tools/fbench.py:42` | `def load_current()` |
-| `luma` | function | `tools/fbench.py:55` | `def luma(img)` |
-| `main` | function | `tools/fbench.py:89` | `def main()` |
-| `sbs` | function | `tools/fbench.py:70` | `def sbs(name, start, nrows)` |
+| `bands` | function | `tools/fbench.py:76` | `def bands(fd, ff, band)` |
+| `load_baseline` | function | `tools/fbench.py:46` | `def load_baseline()` |
+| `load_current` | function | `tools/fbench.py:59` | `def load_current()` |
+| `luma` | function | `tools/fbench.py:72` | `def luma(img)` |
+| `main` | function | `tools/fbench.py:126` | `def main()` |
+| `publish_readme` | function | `tools/fbench.py:106` | `def publish_readme(name, score)` |
+| `sbs` | function | `tools/fbench.py:87` | `def sbs(name, start, nrows)` |
 | `_append_probe` | function | `tools/ffgeom.py:254` | `def _append_probe(src, script)` |
 | `_word_reader` | function | `tools/ffgeom.py:173` | `def _word_reader(path)` |
 | `bit` | function | `tools/ffgeom.py:206` | `def bit(grid_row, cell, origin)` |

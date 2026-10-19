@@ -2408,6 +2408,82 @@ static void test_dump_layout_nested_padded_item_opens_once(void **state) {
     unlink(path);
 }
 
+/* Two side-by-side floats with percentage widths (`width:70%` / `width:30%`): the
+ * declared width sizes the COLUMN once. Resolving it again inside the column made the
+ * boxes 49% and 9% wide. */
+static void test_dump_layout_float_pct_widths_resolve_once(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;font:14px sans-serif}"
+        "nav.a{float:left;width:70%;min-height:40px;background:#9cf}"
+        "nav.b{float:right;width:30%;height:40px;background:#fc9}"
+        "</style></head><body><nav class=\"a\">one two three</nav><nav class=\"b\">B</nav>"
+        "<div style=\"clear:both;height:900px\"></div></body></html>";
+    const char *path = "__freedom_floatpct.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_floatpct.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    int a = 0, b = 0;
+    for (char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, w, h;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &w, &h) == 6) {
+            if (x == 0.0 && w == 700.0) a = 1;
+            if (x == 700.0 && w == 300.0) b = 1;
+        }
+    }
+    assert_true(a);
+    assert_true(b);
+    unlink(path);
+}
+
+/* Inline-blocks on one line sit on the line's BASELINE (CSS 2.1 10.8.1): a 35px
+ * heading with margin:0 starts 4px down (its text baseline meets the button's), the
+ * top-aligned box starts at 0, and the line is as tall as the tallest of them (40),
+ * not stretched or offset by the heading's UA margin. */
+static void test_dump_layout_inline_block_row_baseline(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;font:14px sans-serif}"
+        "h2{display:inline-block;width:167px;height:35px;margin:0;background:#eee;font-size:14px}"
+        ".b{display:inline-block;width:80px;height:40px;background:#cde;vertical-align:top}"
+        "a.btn{display:inline-block;padding:4px 8px;background:#2a2}"
+        "</style></head><body><div><h2>logo</h2><span class=\"b\">top</span>"
+        "<a class=\"btn\">Submit</a></div><div style=\"height:900px\"></div></body></html>";
+    const char *path = "__freedom_ibrow.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_ibrow.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    int heading = 0, tall = 0, after = 0;
+    for (char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, w, h;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &w, &h) == 6) {
+            if (w == 167.0 && h == 35.0 && top > 3.0 && top < 5.0) heading = 1;
+            if (w == 80.0 && h == 40.0 && top == 0.0) tall = 1;
+            if (w == 1000.0 && h == 900.0 && top > 39.5 && top < 40.5) after = 1;
+        }
+    }
+    assert_true(heading);
+    assert_true(tall);
+    assert_true(after);
+    unlink(path);
+}
+
 /* A flex item's vertical margins sit outside its border box (Flexbox 4.2): a
  * 36px avatar with margin-top:12px in a row starts 12px down, and the row is as
  * tall as its margin box (48), not its border box. */
@@ -3605,6 +3681,8 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_flex_row_item_vmargin),
         cmocka_unit_test(test_dump_layout_sticky_footer),
         cmocka_unit_test(test_dump_layout_nested_padded_item_opens_once),
+        cmocka_unit_test(test_dump_layout_float_pct_widths_resolve_once),
+        cmocka_unit_test(test_dump_layout_inline_block_row_baseline),
         cmocka_unit_test(test_dump_layout_root_box_survives_replaced_run),
         cmocka_unit_test(test_dump_layout_float_two_columns),
         cmocka_unit_test(test_dump_layout_pulled_rail_single_margin),

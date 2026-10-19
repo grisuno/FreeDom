@@ -1,7 +1,7 @@
 {
  "metadata": {
-  "generated_at": "2026-10-19T03:07:19.539023+00:00",
-  "source_tree_hash": "82ed5f502b9032706826630c856b0a227e05d18830c96290bd4dfd5168ad6ec1",
+  "generated_at": "2026-10-19T04:16:35.559209+00:00",
+  "source_tree_hash": "cf301915c635b058318269fdc0416df2a71488f8d4f77ae5dcd744d36592694b",
   "repo_name": "freedom-0.0.3",
   "depth_level": 2,
   "depth_cap": 3,
@@ -125,7 +125,7 @@
   },
   "gui/browser_ui.c": {
    "language": "c",
-   "symbols": 583
+   "symbols": 584
   },
   "gui/browser_ui_internal.h": {
    "language": "h",
@@ -909,7 +909,7 @@
   },
   "tests/test_freedom.c": {
    "language": "c",
-   "symbols": 89
+   "symbols": 90
   },
   "tests/test_hls.c": {
    "language": "c",
@@ -1081,7 +1081,7 @@
   },
   "tools/fbench.py": {
    "language": "py",
-   "symbols": 6
+   "symbols": 7
   },
   "tools/ffgeom.py": {
    "language": "py",
@@ -1892,10 +1892,10 @@
   "gui/browser_ui.c|gui/browser_ui.c::freebug_window": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_window",
-   "start_line": 15469,
-   "end_line": 15491,
+   "start_line": 15633,
+   "end_line": 15655,
    "type": "CLASS",
-   "content_hash": "09d9c3a350460d7f"
+   "content_hash": "9d9332207071c8ec"
   },
   "gui/browser_ui.c|gui/browser_ui.c::gutter": {
    "file_path": "gui/browser_ui.c",
@@ -2268,10 +2268,10 @@
   "gui/browser_ui.c|gui/browser_ui.c::GET": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::GET",
-   "start_line": 14380,
-   "end_line": 14413,
+   "start_line": 14544,
+   "end_line": 14577,
    "type": "FUNCTION",
-   "content_hash": "750f363f02a4bad9"
+   "content_hash": "53d4e7696403daa8"
   },
   "gui/browser_ui.c|gui/browser_ui.c::page_trusted": {
    "file_path": "gui/browser_ui.c",
@@ -3549,2449 +3549,2457 @@
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::balanced_wrap_width",
    "start_line": 5518,
-   "end_line": 5531,
+   "end_line": 5538,
    "type": "FUNCTION",
    "content_hash": "bd72c8983d100fb0"
+  },
+  "gui/browser_ui.c|gui/browser_ui.c::item_inner_inset": {
+   "file_path": "gui/browser_ui.c",
+   "qualified_name": "gui/browser_ui.c::item_inner_inset",
+   "start_line": 5539,
+   "end_line": 5565,
+   "type": "FUNCTION",
+   "content_hash": "73f00365bacc766f"
   },
   "gui/browser_ui.c|gui/browser_ui.c::measure_item_content_w": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::measure_item_content_w",
-   "start_line": 5532,
-   "end_line": 5564,
+   "start_line": 5566,
+   "end_line": 5598,
    "type": "FUNCTION",
-   "content_hash": "e7856e25ea0d44d1"
+   "content_hash": "4a2e3cdf1729e212"
   },
   "gui/browser_ui.c|gui/browser_ui.c::run_width_cap": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::run_width_cap",
-   "start_line": 5565,
-   "end_line": 5568,
+   "start_line": 5599,
+   "end_line": 5602,
    "type": "FUNCTION",
-   "content_hash": "23a88e409c12370f"
+   "content_hash": "6186986377a262ab"
   },
   "gui/browser_ui.c|gui/browser_ui.c::def_width_cap": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::def_width_cap",
-   "start_line": 5569,
-   "end_line": 5574,
+   "start_line": 5603,
+   "end_line": 5608,
    "type": "FUNCTION",
-   "content_hash": "a54679a54229fbc9"
+   "content_hash": "78c91df3f49e747c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::def_declared_width": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::def_declared_width",
-   "start_line": 5575,
-   "end_line": 5579,
+   "start_line": 5609,
+   "end_line": 5613,
    "type": "FUNCTION",
-   "content_hash": "b6164c9186736d8c"
+   "content_hash": "ae0ba45577d048fd"
   },
   "gui/browser_ui.c|gui/browser_ui.c::item_declared_basis": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::item_declared_basis",
-   "start_line": 5580,
-   "end_line": 5593,
+   "start_line": 5614,
+   "end_line": 5627,
    "type": "FUNCTION",
-   "content_hash": "7ac85a9af1544fe8"
+   "content_hash": "ae806b0eb2a86e10"
   },
   "gui/browser_ui.c|gui/browser_ui.c::nested_cont_basis": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::nested_cont_basis",
-   "start_line": 5594,
-   "end_line": 5652,
+   "start_line": 5628,
+   "end_line": 5687,
    "type": "FUNCTION",
-   "content_hash": "16ae7a3169aa199c"
+   "content_hash": "fe6feb31f407f21c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::layout": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::layout",
-   "start_line": 5653,
-   "end_line": 5666,
+   "start_line": 5688,
+   "end_line": 5701,
    "type": "FUNCTION",
-   "content_hash": "c8a0f243dce1d5dd"
+   "content_hash": "2fd6ed030a81a615"
   },
   "gui/browser_ui.c|gui/browser_ui.c::flex_item_basis": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::flex_item_basis",
-   "start_line": 5667,
-   "end_line": 5705,
+   "start_line": 5702,
+   "end_line": 5741,
    "type": "FUNCTION",
-   "content_hash": "1002b45c1864aa8b"
+   "content_hash": "930e76c1fe083073"
   },
   "gui/browser_ui.c|gui/browser_ui.c::flex_item_min_main": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::flex_item_min_main",
-   "start_line": 5706,
-   "end_line": 5730,
+   "start_line": 5742,
+   "end_line": 5767,
    "type": "FUNCTION",
-   "content_hash": "8504e40bef3b7e8f"
+   "content_hash": "91b2cc6d3bac961e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::close_all_boxes": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::close_all_boxes",
-   "start_line": 5731,
-   "end_line": 5736,
+   "start_line": 5768,
+   "end_line": 5773,
    "type": "FUNCTION",
-   "content_hash": "e08d7847da1614bc"
+   "content_hash": "2150999f2afe1526"
   },
   "gui/browser_ui.c|gui/browser_ui.c::deepest_open_on_path": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::deepest_open_on_path",
-   "start_line": 5737,
-   "end_line": 5743,
+   "start_line": 5774,
+   "end_line": 5780,
    "type": "FUNCTION",
-   "content_hash": "a5f9f1bf57c5b784"
+   "content_hash": "2c05369adabe8c22"
   },
   "gui/browser_ui.c|gui/browser_ui.c::item_at_level": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::item_at_level",
-   "start_line": 5744,
-   "end_line": 5758,
+   "start_line": 5781,
+   "end_line": 5795,
    "type": "FUNCTION",
-   "content_hash": "87ea5c753a2aef4e"
+   "content_hash": "084b8a745611b541"
   },
   "gui/browser_ui.c|gui/browser_ui.c::child_cont_at_level": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::child_cont_at_level",
-   "start_line": 5759,
-   "end_line": 5777,
+   "start_line": 5796,
+   "end_line": 5814,
    "type": "FUNCTION",
-   "content_hash": "525f0e1d722791e0"
+   "content_hash": "f4ceb3d47439c5c9"
   },
   "gui/browser_ui.c|gui/browser_ui.c::cont_in_view": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::cont_in_view",
-   "start_line": 5778,
-   "end_line": 5791,
+   "start_line": 5815,
+   "end_line": 5828,
    "type": "FUNCTION",
-   "content_hash": "0ea1951059dbefb6"
+   "content_hash": "46c1533c316137fd"
   },
   "gui/browser_ui.c|gui/browser_ui.c::root_cont_of": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::root_cont_of",
-   "start_line": 5792,
-   "end_line": 5802,
+   "start_line": 5829,
+   "end_line": 5839,
    "type": "FUNCTION",
-   "content_hash": "62748b1546efef52"
+   "content_hash": "7154ce0cae14bdbd"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box_under": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box_under",
-   "start_line": 5803,
-   "end_line": 5819,
+   "start_line": 5840,
+   "end_line": 5856,
    "type": "FUNCTION",
-   "content_hash": "cdf355503cabec77"
+   "content_hash": "7733cd4791c2279c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::root_cont_in": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::root_cont_in",
-   "start_line": 5820,
-   "end_line": 5851,
+   "start_line": 5857,
+   "end_line": 5888,
    "type": "FUNCTION",
-   "content_hash": "ba449e0b5e019924"
+   "content_hash": "5990d9ec56e9305f"
   },
   "gui/browser_ui.c|gui/browser_ui.c::TABLE": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::TABLE",
-   "start_line": 5852,
-   "end_line": 5863,
+   "start_line": 5889,
+   "end_line": 5900,
    "type": "FUNCTION",
-   "content_hash": "a0d91e141a942425"
+   "content_hash": "2ba627e137d88032"
   },
   "gui/browser_ui.c|gui/browser_ui.c::block_is_oof": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::block_is_oof",
-   "start_line": 5864,
-   "end_line": 5908,
+   "start_line": 5901,
+   "end_line": 5945,
    "type": "FUNCTION",
-   "content_hash": "cff9b65d594b439d"
+   "content_hash": "657d2b14767702f8"
   },
   "gui/browser_ui.c|gui/browser_ui.c::item_vmargins": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::item_vmargins",
-   "start_line": 5909,
-   "end_line": 5929,
+   "start_line": 5946,
+   "end_line": 5966,
    "type": "FUNCTION",
-   "content_hash": "9c9c055567a124f2"
+   "content_hash": "1a6f4579b1633c1c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::container_inner_h": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::container_inner_h",
-   "start_line": 5930,
-   "end_line": 5961,
+   "start_line": 5967,
+   "end_line": 5998,
    "type": "FUNCTION",
-   "content_hash": "320d0b0849e44c0f"
+   "content_hash": "163090349c7f4f0a"
   },
   "gui/browser_ui.c|gui/browser_ui.c::band_shared_box": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::band_shared_box",
-   "start_line": 5962,
-   "end_line": 5969,
+   "start_line": 5999,
+   "end_line": 6006,
    "type": "FUNCTION",
-   "content_hash": "f0881043b6557b54"
+   "content_hash": "191c89f1613ba962"
   },
   "gui/browser_ui.c|gui/browser_ui.c::layout_container": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::layout_container",
-   "start_line": 5970,
-   "end_line": 6109,
+   "start_line": 6007,
+   "end_line": 6146,
    "type": "FUNCTION",
-   "content_hash": "d39b7b8531607550"
+   "content_hash": "dd30cc3577268d4e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::axis": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::axis",
-   "start_line": 6110,
-   "end_line": 6162,
+   "start_line": 6147,
+   "end_line": 6199,
    "type": "FUNCTION",
-   "content_hash": "8cf5280ce15b0cd9"
+   "content_hash": "56b40e738e601eec"
   },
   "gui/browser_ui.c|gui/browser_ui.c::slot": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::slot",
-   "start_line": 6163,
-   "end_line": 6308,
+   "start_line": 6200,
+   "end_line": 6345,
    "type": "FUNCTION",
-   "content_hash": "dc3021500176fa2a"
+   "content_hash": "26f23a6e75abd340"
   },
   "gui/browser_ui.c|gui/browser_ui.c::struct": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::struct",
-   "start_line": 6309,
-   "end_line": 6316,
+   "start_line": 6346,
+   "end_line": 6353,
    "type": "FUNCTION",
-   "content_hash": "b29f85212823d239"
+   "content_hash": "37cbbd0aa16c213c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::descriptor": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::descriptor",
-   "start_line": 6317,
-   "end_line": 6361,
+   "start_line": 6354,
+   "end_line": 6398,
    "type": "FUNCTION",
-   "content_hash": "f1f7e8c76e23ccb8"
+   "content_hash": "555b20b0154b7056"
   },
   "gui/browser_ui.c|gui/browser_ui.c::path": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::path",
-   "start_line": 6362,
-   "end_line": 6595,
+   "start_line": 6399,
+   "end_line": 6632,
    "type": "FUNCTION",
-   "content_hash": "9452a9aeb0e7503d"
+   "content_hash": "db5be75acad310f9"
   },
   "gui/browser_ui.c|gui/browser_ui.c::builds": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::builds",
-   "start_line": 6596,
-   "end_line": 6672,
+   "start_line": 6633,
+   "end_line": 6709,
    "type": "FUNCTION",
-   "content_hash": "9bd7c08ca9587589"
+   "content_hash": "37be4702dce8dc32"
   },
   "gui/browser_ui.c|gui/browser_ui.c::flow": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::flow",
-   "start_line": 6673,
-   "end_line": 6694,
+   "start_line": 6710,
+   "end_line": 6741,
    "type": "FUNCTION",
-   "content_hash": "88842c88f780580d"
+   "content_hash": "ea8ba16bb4c2c05c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::own": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::own",
-   "start_line": 6695,
-   "end_line": 6775,
+   "start_line": 6742,
+   "end_line": 6822,
    "type": "FUNCTION",
-   "content_hash": "a8aea0159bdf8e36"
+   "content_hash": "e72b3077560c6b54"
   },
   "gui/browser_ui.c|gui/browser_ui.c::items": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::items",
-   "start_line": 6776,
-   "end_line": 6869,
+   "start_line": 6823,
+   "end_line": 6987,
    "type": "FUNCTION",
-   "content_hash": "539624f50f32199e"
+   "content_hash": "5782b2be6a3bd6c5"
   },
   "gui/browser_ui.c|gui/browser_ui.c::multicol_fragment": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::multicol_fragment",
-   "start_line": 6870,
-   "end_line": 6872,
+   "start_line": 6988,
+   "end_line": 6990,
    "type": "FUNCTION",
-   "content_hash": "fe70c27e85a087b8"
+   "content_hash": "8bc7d8c9d5d3acb4"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box_line_visible": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box_line_visible",
-   "start_line": 6873,
-   "end_line": 6885,
+   "start_line": 6991,
+   "end_line": 7003,
    "type": "FUNCTION",
-   "content_hash": "4f1220a4e2df7e55"
+   "content_hash": "f13d6011021eea3b"
   },
   "gui/browser_ui.c|gui/browser_ui.c::RC_COL_FREE_MAX": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::RC_COL_FREE_MAX",
-   "start_line": 6886,
-   "end_line": 6886,
+   "start_line": 7004,
+   "end_line": 7004,
    "type": "FUNCTION",
-   "content_hash": "2c88ceb3662afca6"
+   "content_hash": "0567ce1efeaf8e32"
   },
   "gui/browser_ui.c|gui/browser_ui.c::col_spend_free_space": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::col_spend_free_space",
-   "start_line": 6887,
-   "end_line": 6931,
+   "start_line": 7005,
+   "end_line": 7049,
    "type": "FUNCTION",
-   "content_hash": "92a5fa625b01eca0"
+   "content_hash": "8cabca660c3394c6"
   },
   "gui/browser_ui.c|gui/browser_ui.c::close_top_box": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::close_top_box",
-   "start_line": 6932,
-   "end_line": 7069,
+   "start_line": 7050,
+   "end_line": 7187,
    "type": "FUNCTION",
-   "content_hash": "dbab4046d4f1e146"
+   "content_hash": "3db8ec566e5fe346"
   },
   "gui/browser_ui.c|gui/browser_ui.c::rc_box_context": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::rc_box_context",
-   "start_line": 7070,
-   "end_line": 7096,
+   "start_line": 7188,
+   "end_line": 7214,
    "type": "FUNCTION",
-   "content_hash": "c8ad8a82fcabf887"
+   "content_hash": "a6d5c7e31787780b"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box_margin_top": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box_margin_top",
-   "start_line": 7097,
-   "end_line": 7103,
+   "start_line": 7215,
+   "end_line": 7221,
    "type": "FUNCTION",
-   "content_hash": "e5ff7ea546039e24"
+   "content_hash": "21555de4197d9373"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box_margin_bottom": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box_margin_bottom",
-   "start_line": 7104,
-   "end_line": 7113,
+   "start_line": 7222,
+   "end_line": 7231,
    "type": "FUNCTION",
-   "content_hash": "7578a45870cddc7a"
+   "content_hash": "072145cab5f692fe"
   },
   "gui/browser_ui.c|gui/browser_ui.c::children": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::children",
-   "start_line": 7114,
-   "end_line": 7122,
+   "start_line": 7232,
+   "end_line": 7240,
    "type": "FUNCTION",
-   "content_hash": "f16c137284851185"
+   "content_hash": "0acf2aed75d493b5"
   },
   "gui/browser_ui.c|gui/browser_ui.c::behind": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::behind",
-   "start_line": 7123,
-   "end_line": 7336,
+   "start_line": 7241,
+   "end_line": 7454,
    "type": "FUNCTION",
-   "content_hash": "b1e48ea82e9174a9"
+   "content_hash": "dff6811e0c8e1cf0"
   },
   "gui/browser_ui.c|gui/browser_ui.c::column": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::column",
-   "start_line": 7337,
-   "end_line": 7430,
+   "start_line": 7455,
+   "end_line": 7548,
    "type": "FUNCTION",
-   "content_hash": "0862a5290154afee"
+   "content_hash": "6ce7dff9f4bce3de"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box_path_has": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box_path_has",
-   "start_line": 7431,
-   "end_line": 7444,
+   "start_line": 7549,
+   "end_line": 7562,
    "type": "FUNCTION",
-   "content_hash": "d7c72fc9306d8912"
+   "content_hash": "768984023617c54b"
   },
   "gui/browser_ui.c|gui/browser_ui.c::columns": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::columns",
-   "start_line": 7445,
-   "end_line": 7458,
+   "start_line": 7563,
+   "end_line": 7576,
    "type": "FUNCTION",
-   "content_hash": "57bd134cd0b50391"
+   "content_hash": "275c76abdd463ebb"
   },
   "gui/browser_ui.c|gui/browser_ui.c::nested_stop": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::nested_stop",
-   "start_line": 7459,
-   "end_line": 7470,
+   "start_line": 7577,
+   "end_line": 7588,
    "type": "FUNCTION",
-   "content_hash": "9b009bfaf04e672d"
+   "content_hash": "adb0da71e8ee4b6c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box_shrink_width": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box_shrink_width",
-   "start_line": 7471,
-   "end_line": 7527,
+   "start_line": 7589,
+   "end_line": 7664,
    "type": "FUNCTION",
-   "content_hash": "4ef0ba9cb5c2f193"
+   "content_hash": "c54961157bdc4cdf"
   },
   "gui/browser_ui.c|gui/browser_ui.c::reconcile_boxes_below": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::reconcile_boxes_below",
-   "start_line": 7528,
-   "end_line": 7578,
+   "start_line": 7665,
+   "end_line": 7715,
    "type": "FUNCTION",
-   "content_hash": "c84bee2af4cf38b6"
+   "content_hash": "60810e676fee19d5"
   },
   "gui/browser_ui.c|gui/browser_ui.c::treatment": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::treatment",
-   "start_line": 7579,
-   "end_line": 7631,
+   "start_line": 7716,
+   "end_line": 7768,
    "type": "FUNCTION",
-   "content_hash": "51a863488e9f856f"
+   "content_hash": "7431833203549035"
   },
   "gui/browser_ui.c|gui/browser_ui.c::reconcile_boxes": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::reconcile_boxes",
-   "start_line": 7632,
-   "end_line": 7655,
+   "start_line": 7769,
+   "end_line": 7792,
    "type": "FUNCTION",
-   "content_hash": "8e281b3aa36e73de"
+   "content_hash": "18521d90ad4eae5c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::RC_MAX_OUT_OF_FLOW": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::RC_MAX_OUT_OF_FLOW",
-   "start_line": 7656,
-   "end_line": 7659,
+   "start_line": 7793,
+   "end_line": 7796,
    "type": "FUNCTION",
-   "content_hash": "91d9e0774e376a7a"
+   "content_hash": "ebf4110995669e66"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box_path_of": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box_path_of",
-   "start_line": 7660,
-   "end_line": 7675,
+   "start_line": 7797,
+   "end_line": 7812,
    "type": "FUNCTION",
-   "content_hash": "c35b4f49d39e2b1e"
+   "content_hash": "f5f48c7432740d56"
   },
   "gui/browser_ui.c|gui/browser_ui.c::band_common_box": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::band_common_box",
-   "start_line": 7676,
-   "end_line": 7728,
+   "start_line": 7813,
+   "end_line": 7865,
    "type": "FUNCTION",
-   "content_hash": "052c29f37b379f7d"
+   "content_hash": "5bdad14032912feb"
   },
   "gui/browser_ui.c|gui/browser_ui.c::context": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::context",
-   "start_line": 7729,
-   "end_line": 7739,
+   "start_line": 7866,
+   "end_line": 7876,
    "type": "FUNCTION",
-   "content_hash": "d5ea7e76428343f5"
+   "content_hash": "639b033d683ce55b"
   },
   "gui/browser_ui.c|gui/browser_ui.c::block_in_table_caption": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::block_in_table_caption",
-   "start_line": 7740,
-   "end_line": 7763,
+   "start_line": 7877,
+   "end_line": 7900,
    "type": "FUNCTION",
-   "content_hash": "5834e4d5e052e2c9"
+   "content_hash": "29521abd339e86f2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::RC_DEFER_COLS": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::RC_DEFER_COLS",
-   "start_line": 7764,
-   "end_line": 7764,
+   "start_line": 7901,
+   "end_line": 7901,
    "type": "FUNCTION",
-   "content_hash": "cded5fac5127f2c4"
+   "content_hash": "0c561c2008715ac9"
   },
   "gui/browser_ui.c|gui/browser_ui.c::RC_DEFER_RANGES": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::RC_DEFER_RANGES",
-   "start_line": 7765,
-   "end_line": 7775,
+   "start_line": 7902,
+   "end_line": 7912,
    "type": "FUNCTION",
-   "content_hash": "3841db14973e4c06"
+   "content_hash": "f405e7eed88059b1"
   },
   "gui/browser_ui.c|gui/browser_ui.c::key": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::key",
-   "start_line": 8844,
-   "end_line": 8857,
+   "start_line": 9008,
+   "end_line": 9021,
    "type": "FUNCTION",
-   "content_hash": "7fbb1fae1dacdd35"
+   "content_hash": "4a59a6f52ab09ba1"
   },
   "gui/browser_ui.c|gui/browser_ui.c::rc_defer_col": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::rc_defer_col",
-   "start_line": 7776,
-   "end_line": 7782,
+   "start_line": 7913,
+   "end_line": 7919,
    "type": "CLASS",
-   "content_hash": "21fe8b3966bd8484"
+   "content_hash": "77ede7704426c745"
   },
   "gui/browser_ui.c|gui/browser_ui.c::col": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::col",
-   "start_line": 7783,
-   "end_line": 7783,
+   "start_line": 7920,
+   "end_line": 7920,
    "type": "FUNCTION",
-   "content_hash": "77c9b6dfbfd4e7d5"
+   "content_hash": "4f9f1dd595043c97"
   },
   "gui/browser_ui.c|gui/browser_ui.c::rc_defer": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::rc_defer",
-   "start_line": 7783,
-   "end_line": 7803,
+   "start_line": 7920,
+   "end_line": 7940,
    "type": "CLASS",
-   "content_hash": "7ac915a86b5de2aa"
+   "content_hash": "db45cb8d15ab2572"
   },
   "gui/browser_ui.c|gui/browser_ui.c::defer_key_block": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::defer_key_block",
-   "start_line": 7804,
-   "end_line": 7846,
+   "start_line": 7941,
+   "end_line": 7983,
    "type": "FUNCTION",
-   "content_hash": "a80088be5076bccd"
+   "content_hash": "ddab31d39d2c53d9"
   },
   "gui/browser_ui.c|gui/browser_ui.c::RC_DEFER_BAND_RUNS": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::RC_DEFER_BAND_RUNS",
-   "start_line": 7847,
-   "end_line": 7926,
+   "start_line": 7984,
+   "end_line": 8063,
    "type": "FUNCTION",
-   "content_hash": "e7a8c12fe0dcda80"
+   "content_hash": "c386b6630b887eea"
   },
   "gui/browser_ui.c|gui/browser_ui.c::defer_append": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::defer_append",
-   "start_line": 7927,
-   "end_line": 7960,
+   "start_line": 8064,
+   "end_line": 8097,
    "type": "FUNCTION",
-   "content_hash": "e2a58ea5cb9274b4"
+   "content_hash": "270b9fbd304642fb"
   },
   "gui/browser_ui.c|gui/browser_ui.c::defer_flush": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::defer_flush",
-   "start_line": 7961,
-   "end_line": 8013,
+   "start_line": 8098,
+   "end_line": 8150,
    "type": "FUNCTION",
-   "content_hash": "6861c0fd8b0ab067"
+   "content_hash": "a0b3fca89e49ce9b"
   },
   "gui/browser_ui.c|gui/browser_ui.c::x": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::x",
-   "start_line": 8014,
-   "end_line": 8181,
+   "start_line": 8151,
+   "end_line": 8318,
    "type": "FUNCTION",
-   "content_hash": "40f699342b3244b4"
+   "content_hash": "c12b7c7cbdded180"
   },
   "gui/browser_ui.c|gui/browser_ui.c::layout_float_band": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::layout_float_band",
-   "start_line": 8182,
-   "end_line": 8611,
+   "start_line": 8319,
+   "end_line": 8676,
    "type": "FUNCTION",
-   "content_hash": "cafa27831af11c60"
-  },
-  "gui/browser_ui.c|gui/browser_ui.c::yet": {
-   "file_path": "gui/browser_ui.c",
-   "qualified_name": "gui/browser_ui.c::yet",
-   "start_line": 8612,
-   "end_line": 8623,
-   "type": "FUNCTION",
-   "content_hash": "95512353d811b524"
-  },
-  "gui/browser_ui.c|gui/browser_ui.c::layout_doc": {
-   "file_path": "gui/browser_ui.c",
-   "qualified_name": "gui/browser_ui.c::layout_doc",
-   "start_line": 8624,
-   "end_line": 8677,
-   "type": "FUNCTION",
-   "content_hash": "a2f3c54c4aa27796"
-  },
-  "gui/browser_ui.c|gui/browser_ui.c::chain": {
-   "file_path": "gui/browser_ui.c",
-   "qualified_name": "gui/browser_ui.c::chain",
-   "start_line": 8678,
-   "end_line": 8783,
-   "type": "FUNCTION",
-   "content_hash": "5f765bfc8a2781a0"
-  },
-  "gui/browser_ui.c|gui/browser_ui.c::anchor": {
-   "file_path": "gui/browser_ui.c",
-   "qualified_name": "gui/browser_ui.c::anchor",
-   "start_line": 8784,
-   "end_line": 8843,
-   "type": "FUNCTION",
-   "content_hash": "cf21098961ac16e9"
-  },
-  "gui/browser_ui.c|gui/browser_ui.c::have": {
-   "file_path": "gui/browser_ui.c",
-   "qualified_name": "gui/browser_ui.c::have",
-   "start_line": 8858,
-   "end_line": 8878,
-   "type": "FUNCTION",
-   "content_hash": "4095ea279148712e"
-  },
-  "gui/browser_ui.c|gui/browser_ui.c::standalone": {
-   "file_path": "gui/browser_ui.c",
-   "qualified_name": "gui/browser_ui.c::standalone",
-   "start_line": 8879,
-   "end_line": 8958,
-   "type": "FUNCTION",
-   "content_hash": "0c26f5ff6cfa9a57"
+   "content_hash": "255ee2c9cf70b8d0"
   },
   "gui/browser_ui.c|gui/browser_ui.c::it": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::it",
-   "start_line": 8959,
-   "end_line": 9059,
+   "start_line": 8677,
+   "end_line": 8769,
    "type": "FUNCTION",
-   "content_hash": "ee6a5fdaa1cc5baf"
+   "content_hash": "6ce6b04eaf88d4f9"
+  },
+  "gui/browser_ui.c|gui/browser_ui.c::yet": {
+   "file_path": "gui/browser_ui.c",
+   "qualified_name": "gui/browser_ui.c::yet",
+   "start_line": 8770,
+   "end_line": 8781,
+   "type": "FUNCTION",
+   "content_hash": "f3b989a155486bda"
+  },
+  "gui/browser_ui.c|gui/browser_ui.c::layout_doc": {
+   "file_path": "gui/browser_ui.c",
+   "qualified_name": "gui/browser_ui.c::layout_doc",
+   "start_line": 8782,
+   "end_line": 8835,
+   "type": "FUNCTION",
+   "content_hash": "3ef4e951747f227b"
+  },
+  "gui/browser_ui.c|gui/browser_ui.c::chain": {
+   "file_path": "gui/browser_ui.c",
+   "qualified_name": "gui/browser_ui.c::chain",
+   "start_line": 8836,
+   "end_line": 8947,
+   "type": "FUNCTION",
+   "content_hash": "13af1080ee7a9f45"
+  },
+  "gui/browser_ui.c|gui/browser_ui.c::anchor": {
+   "file_path": "gui/browser_ui.c",
+   "qualified_name": "gui/browser_ui.c::anchor",
+   "start_line": 8948,
+   "end_line": 9007,
+   "type": "FUNCTION",
+   "content_hash": "a4784336d9636614"
+  },
+  "gui/browser_ui.c|gui/browser_ui.c::have": {
+   "file_path": "gui/browser_ui.c",
+   "qualified_name": "gui/browser_ui.c::have",
+   "start_line": 9022,
+   "end_line": 9042,
+   "type": "FUNCTION",
+   "content_hash": "3dd063b78d63c208"
+  },
+  "gui/browser_ui.c|gui/browser_ui.c::standalone": {
+   "file_path": "gui/browser_ui.c",
+   "qualified_name": "gui/browser_ui.c::standalone",
+   "start_line": 9043,
+   "end_line": 9223,
+   "type": "FUNCTION",
+   "content_hash": "c102eac692ea055f"
   },
   "gui/browser_ui.c|gui/browser_ui.c::count": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::count",
-   "start_line": 9060,
-   "end_line": 9078,
+   "start_line": 9224,
+   "end_line": 9242,
    "type": "FUNCTION",
-   "content_hash": "61341c61854cad68"
+   "content_hash": "2c550d268a93b53d"
   },
   "gui/browser_ui.c|gui/browser_ui.c::approximation": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::approximation",
-   "start_line": 9079,
-   "end_line": 9226,
+   "start_line": 9243,
+   "end_line": 9390,
    "type": "FUNCTION",
-   "content_hash": "8a60a7a02822cfb5"
+   "content_hash": "0f8c83d06be2bcfb"
   },
   "gui/browser_ui.c|gui/browser_ui.c::margin": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::margin",
-   "start_line": 9227,
-   "end_line": 9279,
+   "start_line": 9391,
+   "end_line": 9443,
    "type": "FUNCTION",
-   "content_hash": "5d583afe4e8fb180"
+   "content_hash": "50b20dfd242e2719"
   },
   "gui/browser_ui.c|gui/browser_ui.c::position_doc": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::position_doc",
-   "start_line": 9280,
-   "end_line": 9452,
+   "start_line": 9444,
+   "end_line": 9616,
    "type": "FUNCTION",
-   "content_hash": "c79d478ef3c75d62"
+   "content_hash": "4f5bbef238d25cfb"
   },
   "gui/browser_ui.c|gui/browser_ui.c::defer_root_of": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::defer_root_of",
-   "start_line": 9453,
-   "end_line": 9460,
+   "start_line": 9617,
+   "end_line": 9624,
    "type": "FUNCTION",
-   "content_hash": "42367e6c24f8352e"
+   "content_hash": "54f1f3fdd6e160aa"
   },
   "gui/browser_ui.c|gui/browser_ui.c::defer_wants": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::defer_wants",
-   "start_line": 9461,
-   "end_line": 9466,
+   "start_line": 9625,
+   "end_line": 9630,
    "type": "FUNCTION",
-   "content_hash": "92a8eca74a776fa2"
+   "content_hash": "f8988b0c64ddb5af"
   },
   "gui/browser_ui.c|gui/browser_ui.c::input_box_width": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::input_box_width",
-   "start_line": 9467,
-   "end_line": 9470,
+   "start_line": 9631,
+   "end_line": 9634,
    "type": "FUNCTION",
-   "content_hash": "a23ded04f9bb483c"
+   "content_hash": "51430a3ed2f48e35"
   },
   "gui/browser_ui.c|gui/browser_ui.c::select_box_width": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::select_box_width",
-   "start_line": 9471,
-   "end_line": 9475,
+   "start_line": 9635,
+   "end_line": 9639,
    "type": "FUNCTION",
-   "content_hash": "3484196d7b41bbc9"
+   "content_hash": "0585f71a55c55bab"
   },
   "gui/browser_ui.c|gui/browser_ui.c::button_box_width": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::button_box_width",
-   "start_line": 9476,
-   "end_line": 9904,
+   "start_line": 9640,
+   "end_line": 10068,
    "type": "FUNCTION",
-   "content_hash": "9884a086bb42b220"
+   "content_hash": "555de42c31280606"
   },
   "gui/browser_ui.c|gui/browser_ui.c::rd_build": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::rd_build",
-   "start_line": 9905,
-   "end_line": 9919,
+   "start_line": 10069,
+   "end_line": 10083,
    "type": "FUNCTION",
-   "content_hash": "c44a5108e251a954"
+   "content_hash": "3cdbd29e7acd01e0"
   },
   "gui/browser_ui.c|gui/browser_ui.c::blit_image_box": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::blit_image_box",
-   "start_line": 9920,
-   "end_line": 10110,
+   "start_line": 10084,
+   "end_line": 10274,
    "type": "FUNCTION",
-   "content_hash": "53c7973fa9a61ceb"
+   "content_hash": "553e084dd097c3c9"
   },
   "gui/browser_ui.c|gui/browser_ui.c::v_read": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::v_read",
-   "start_line": 10111,
-   "end_line": 10138,
+   "start_line": 10275,
+   "end_line": 10302,
    "type": "FUNCTION",
-   "content_hash": "c057c5afb4eb2112"
+   "content_hash": "f5761cda0e3d8d34"
   },
   "gui/browser_ui.c|gui/browser_ui.c::dies": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::dies",
-   "start_line": 10139,
-   "end_line": 10147,
+   "start_line": 10303,
+   "end_line": 10311,
    "type": "FUNCTION",
-   "content_hash": "9ab96b74f0f159bd"
+   "content_hash": "e160791c2078edb0"
   },
   "gui/browser_ui.c|gui/browser_ui.c::audio_spawn": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::audio_spawn",
-   "start_line": 10148,
-   "end_line": 10161,
+   "start_line": 10312,
+   "end_line": 10325,
    "type": "FUNCTION",
-   "content_hash": "aba4d0985f039c77"
+   "content_hash": "9ee5beb3b369ddf5"
   },
   "gui/browser_ui.c|gui/browser_ui.c::descriptors": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::descriptors",
-   "start_line": 10162,
-   "end_line": 10201,
+   "start_line": 10326,
+   "end_line": 10365,
    "type": "FUNCTION",
-   "content_hash": "28bfddb49d7c00dd"
+   "content_hash": "0323f438f9ff0fb3"
   },
   "gui/browser_ui.c|gui/browser_ui.c::audio_mark_dead": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::audio_mark_dead",
-   "start_line": 10202,
-   "end_line": 10218,
+   "start_line": 10366,
+   "end_line": 10382,
    "type": "FUNCTION",
-   "content_hash": "5bb903b6a84e5c74"
+   "content_hash": "13bf90c415fbe4fa"
   },
   "gui/browser_ui.c|gui/browser_ui.c::audio_write": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::audio_write",
-   "start_line": 10219,
-   "end_line": 10233,
+   "start_line": 10383,
+   "end_line": 10397,
    "type": "FUNCTION",
-   "content_hash": "4285a3fd418822de"
+   "content_hash": "024a721584c67932"
   },
   "gui/browser_ui.c|gui/browser_ui.c::audio_stop": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::audio_stop",
-   "start_line": 10234,
-   "end_line": 10242,
+   "start_line": 10398,
+   "end_line": 10406,
    "type": "FUNCTION",
-   "content_hash": "5fa31d004e8cb6ce"
+   "content_hash": "82ee3281b74865b4"
   },
   "gui/browser_ui.c|gui/browser_ui.c::again": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::again",
-   "start_line": 10243,
-   "end_line": 10253,
+   "start_line": 10407,
+   "end_line": 10417,
    "type": "FUNCTION",
-   "content_hash": "e263a615907f253d"
+   "content_hash": "872d0d265a79a922"
   },
   "gui/browser_ui.c|gui/browser_ui.c::video_stop": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::video_stop",
-   "start_line": 10551,
-   "end_line": 10604,
+   "start_line": 10715,
+   "end_line": 10768,
    "type": "FUNCTION",
-   "content_hash": "f637f5a2fbef6e7d"
+   "content_hash": "655821fa6874d414"
   },
   "gui/browser_ui.c|gui/browser_ui.c::video_fetch": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::video_fetch",
-   "start_line": 10432,
-   "end_line": 10448,
+   "start_line": 10596,
+   "end_line": 10612,
    "type": "FUNCTION",
-   "content_hash": "114d7a16a32cadd8"
+   "content_hash": "e6b22019a750c01e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::video_play": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::video_play",
-   "start_line": 10449,
-   "end_line": 10529,
+   "start_line": 10613,
+   "end_line": 10693,
    "type": "FUNCTION",
-   "content_hash": "c3c3c791faf3a334"
+   "content_hash": "bbca8dc325832ed3"
   },
   "gui/browser_ui.c|gui/browser_ui.c::blocking": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::blocking",
-   "start_line": 10530,
-   "end_line": 10550,
+   "start_line": 10694,
+   "end_line": 10714,
    "type": "FUNCTION",
-   "content_hash": "a98db7d3f22a5b35"
+   "content_hash": "6f7466cb3c2c4cc0"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_video_row": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_video_row",
-   "start_line": 10605,
-   "end_line": 10716,
+   "start_line": 10769,
+   "end_line": 10880,
    "type": "FUNCTION",
-   "content_hash": "6712ea655bca36e7"
+   "content_hash": "d4ad63e086369b80"
   },
   "gui/browser_ui.c|gui/browser_ui.c::row_line_slack": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::row_line_slack",
-   "start_line": 10717,
-   "end_line": 10728,
+   "start_line": 10881,
+   "end_line": 10892,
    "type": "FUNCTION",
-   "content_hash": "539ac3ac4c15411c"
+   "content_hash": "f202c56ab5f3e2b4"
   },
   "gui/browser_ui.c|gui/browser_ui.c::row_align_offset": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::row_align_offset",
-   "start_line": 10729,
-   "end_line": 10756,
+   "start_line": 10893,
+   "end_line": 10920,
    "type": "FUNCTION",
-   "content_hash": "f9c3bb860b80597c"
+   "content_hash": "2ac9d50bccb48826"
   },
   "gui/browser_ui.c|gui/browser_ui.c::upstream": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::upstream",
-   "start_line": 10757,
-   "end_line": 10784,
+   "start_line": 10921,
+   "end_line": 10948,
    "type": "FUNCTION",
-   "content_hash": "47665142721609df"
+   "content_hash": "e29243f2c3ec8e2e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box_path": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box_path",
-   "start_line": 10785,
-   "end_line": 10795,
+   "start_line": 10949,
+   "end_line": 10959,
    "type": "FUNCTION",
-   "content_hash": "066810ca49bfe022"
+   "content_hash": "d90525c5df7cb95f"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_box_shadow_layer": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_box_shadow_layer",
-   "start_line": 10796,
-   "end_line": 10882,
+   "start_line": 10960,
+   "end_line": 11046,
    "type": "FUNCTION",
-   "content_hash": "8dde42374c679dd5"
+   "content_hash": "3c3402e8da4bbf72"
   },
   "gui/browser_ui.c|gui/browser_ui.c::rect": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::rect",
-   "start_line": 10883,
-   "end_line": 10886,
+   "start_line": 11047,
+   "end_line": 11050,
    "type": "FUNCTION",
-   "content_hash": "ecba514a9b7923c0"
+   "content_hash": "5010412f493b7f19"
   },
   "gui/browser_ui.c|gui/browser_ui.c::text": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::text",
-   "start_line": 10887,
-   "end_line": 10913,
+   "start_line": 11051,
+   "end_line": 11077,
    "type": "FUNCTION",
-   "content_hash": "df8f4cf890e5393b"
+   "content_hash": "7ec6eb9a1a6dce6b"
   },
   "gui/browser_ui.c|gui/browser_ui.c::grad_stop": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::grad_stop",
-   "start_line": 10914,
-   "end_line": 10928,
+   "start_line": 11078,
+   "end_line": 11092,
    "type": "FUNCTION",
-   "content_hash": "7c126254893c0734"
+   "content_hash": "ded7dbf1271e40e0"
   },
   "gui/browser_ui.c|gui/browser_ui.c::bui_grad_color_at": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::bui_grad_color_at",
-   "start_line": 10929,
-   "end_line": 10955,
+   "start_line": 11093,
+   "end_line": 11119,
    "type": "FUNCTION",
-   "content_hash": "e1140faca9eb2c84"
+   "content_hash": "62a57142c8434f71"
   },
   "gui/browser_ui.c|gui/browser_ui.c::BUI_CONIC_SLICES": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::BUI_CONIC_SLICES",
-   "start_line": 10956,
-   "end_line": 10961,
+   "start_line": 11120,
+   "end_line": 11125,
    "type": "FUNCTION",
-   "content_hash": "48559cb3e8979e1f"
+   "content_hash": "8c49b8d70704c63b"
   },
   "gui/browser_ui.c|gui/browser_ui.c::spaced": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::spaced",
-   "start_line": 10962,
-   "end_line": 10994,
+   "start_line": 11126,
+   "end_line": 11158,
    "type": "FUNCTION",
-   "content_hash": "d69f2509cff007eb"
+   "content_hash": "a0c5f0fb3ade75a2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_bg_layer": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_bg_layer",
-   "start_line": 10995,
-   "end_line": 11038,
+   "start_line": 11159,
+   "end_line": 11202,
    "type": "FUNCTION",
-   "content_hash": "a68ac90692110078"
+   "content_hash": "0969b7420a415b3f"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_box_decoration": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_box_decoration",
-   "start_line": 11039,
-   "end_line": 11125,
+   "start_line": 11203,
+   "end_line": 11289,
    "type": "FUNCTION",
-   "content_hash": "14115db1d69ac028"
+   "content_hash": "8a9b6ab4c4abc0bf"
   },
   "gui/browser_ui.c|gui/browser_ui.c::layer": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::layer",
-   "start_line": 11126,
-   "end_line": 11175,
+   "start_line": 11290,
+   "end_line": 11339,
    "type": "FUNCTION",
-   "content_hash": "5a164414369736b7"
+   "content_hash": "52eb262f1163690f"
   },
   "gui/browser_ui.c|gui/browser_ui.c::cairo_set_dash": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::cairo_set_dash",
-   "start_line": 11377,
-   "end_line": 11391,
+   "start_line": 11541,
+   "end_line": 11555,
    "type": "FUNCTION",
-   "content_hash": "3d9de96007a285d6"
+   "content_hash": "c680d74fe2322de8"
   },
   "gui/browser_ui.c|gui/browser_ui.c::convention": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::convention",
-   "start_line": 11242,
-   "end_line": 11255,
+   "start_line": 11406,
+   "end_line": 11419,
    "type": "FUNCTION",
-   "content_hash": "1976e6b91eea3486"
+   "content_hash": "086797631697db56"
   },
   "gui/browser_ui.c|gui/browser_ui.c::set_rgb": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::set_rgb",
-   "start_line": 11256,
-   "end_line": 11279,
+   "start_line": 11420,
+   "end_line": 11443,
    "type": "FUNCTION",
-   "content_hash": "22c5c8fb9db2c801"
+   "content_hash": "229a59d2d610aecf"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_deco_line": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_deco_line",
-   "start_line": 11341,
-   "end_line": 11374,
+   "start_line": 11505,
+   "end_line": 11538,
    "type": "FUNCTION",
-   "content_hash": "0d7bc94c674ff6f3"
+   "content_hash": "76855bde59f01277"
   },
   "gui/browser_ui.c|gui/browser_ui.c::row_owner_block_id": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::row_owner_block_id",
-   "start_line": 11392,
-   "end_line": 11396,
+   "start_line": 11556,
+   "end_line": 11560,
    "type": "FUNCTION",
-   "content_hash": "3b093dd55c2e9b93"
+   "content_hash": "bc603ac867776dae"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_svg_at": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_svg_at",
-   "start_line": 11397,
-   "end_line": 11416,
+   "start_line": 11561,
+   "end_line": 11580,
    "type": "FUNCTION",
-   "content_hash": "17c44ec4ffc08543"
+   "content_hash": "aeb380ce67e13844"
   },
   "gui/browser_ui.c|gui/browser_ui.c::replaced_current_color": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::replaced_current_color",
-   "start_line": 11417,
-   "end_line": 11425,
+   "start_line": 11581,
+   "end_line": 11589,
    "type": "FUNCTION",
-   "content_hash": "beb252494a04c1c0"
+   "content_hash": "3e31bc3591feefe1"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_inline_replaced": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_inline_replaced",
-   "start_line": 11426,
-   "end_line": 11437,
+   "start_line": 11590,
+   "end_line": 11601,
    "type": "FUNCTION",
-   "content_hash": "9c5d313f76456832"
+   "content_hash": "016b5daa5595c906"
   },
   "gui/browser_ui.c|gui/browser_ui.c::exactly": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::exactly",
-   "start_line": 11438,
-   "end_line": 11461,
+   "start_line": 11602,
+   "end_line": 11625,
    "type": "FUNCTION",
-   "content_hash": "2a07d26f971cd301"
+   "content_hash": "0ca65f44dc91b34e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ROW_PAINT_ALL": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ROW_PAINT_ALL",
-   "start_line": 11462,
-   "end_line": 11462,
+   "start_line": 11626,
+   "end_line": 11626,
    "type": "FUNCTION",
-   "content_hash": "a4dbc910f812d648"
+   "content_hash": "6799bd10830dda91"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ROW_PAINT_BAND": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ROW_PAINT_BAND",
-   "start_line": 11463,
-   "end_line": 11463,
+   "start_line": 11627,
+   "end_line": 11627,
    "type": "FUNCTION",
-   "content_hash": "749e01e0ca6ccd02"
+   "content_hash": "edbb4566bb809b1b"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ROW_PAINT_CONTENT": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ROW_PAINT_CONTENT",
-   "start_line": 11464,
-   "end_line": 11470,
+   "start_line": 11628,
+   "end_line": 11634,
    "type": "FUNCTION",
-   "content_hash": "47d85a10d2afc1d3"
+   "content_hash": "f5bc9a1a812521f4"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_content_row": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_content_row",
-   "start_line": 11471,
-   "end_line": 11477,
+   "start_line": 11635,
+   "end_line": 11641,
    "type": "FUNCTION",
-   "content_hash": "ae8ec6b7cba296a4"
+   "content_hash": "086121dcb918db8f"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_content_row_ex": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_content_row_ex",
-   "start_line": 11478,
-   "end_line": 11533,
+   "start_line": 11642,
+   "end_line": 11697,
    "type": "FUNCTION",
-   "content_hash": "9a5ee9a3fa7b6f93"
+   "content_hash": "07c398ea377eb9e2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::bg": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::bg",
-   "start_line": 11534,
-   "end_line": 11682,
+   "start_line": 11698,
+   "end_line": 11846,
    "type": "FUNCTION",
-   "content_hash": "01a6934f3783f4f2"
+   "content_hash": "67574857911316e7"
   },
   "gui/browser_ui.c|gui/browser_ui.c::OV_MAX_DEPTH": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::OV_MAX_DEPTH",
-   "start_line": 11683,
-   "end_line": 11686,
+   "start_line": 11847,
+   "end_line": 11850,
    "type": "FUNCTION",
-   "content_hash": "dffd3653ace17ddc"
+   "content_hash": "ab8003ced8ce3f23"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ov_box_clips": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ov_box_clips",
-   "start_line": 11687,
-   "end_line": 11693,
+   "start_line": 11851,
+   "end_line": 11857,
    "type": "FUNCTION",
-   "content_hash": "0293f1d957a0d4c2"
+   "content_hash": "01ab4acae7b3f8b3"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ov_collect_chain": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ov_collect_chain",
-   "start_line": 11694,
-   "end_line": 11714,
+   "start_line": 11858,
+   "end_line": 11878,
    "type": "FUNCTION",
-   "content_hash": "03d05b4b39ba4aec"
+   "content_hash": "4fec87829757389c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ov_box_bounds": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ov_box_bounds",
-   "start_line": 11715,
-   "end_line": 11738,
+   "start_line": 11879,
+   "end_line": 11902,
    "type": "FUNCTION",
-   "content_hash": "5eba9801e9e39e06"
+   "content_hash": "0b4e5d9432e01940"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ov_content_rect": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ov_content_rect",
-   "start_line": 11739,
-   "end_line": 11757,
+   "start_line": 11903,
+   "end_line": 11921,
    "type": "FUNCTION",
-   "content_hash": "ca62ab4beda1cd51"
+   "content_hash": "62060f63d1369681"
   },
   "gui/browser_ui.c|gui/browser_ui.c::rows": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::rows",
-   "start_line": 11758,
-   "end_line": 11758,
+   "start_line": 11922,
+   "end_line": 11922,
    "type": "FUNCTION",
-   "content_hash": "30bf96b1ec96ccc7"
+   "content_hash": "249d16623b769055"
   },
   "gui/browser_ui.c|gui/browser_ui.c::fragment": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::fragment",
-   "start_line": 11759,
-   "end_line": 11813,
+   "start_line": 11923,
+   "end_line": 11977,
    "type": "FUNCTION",
-   "content_hash": "88450df2a7814460"
+   "content_hash": "1f67009d030a55ff"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box_forms_stacking_context": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box_forms_stacking_context",
-   "start_line": 11814,
-   "end_line": 11856,
+   "start_line": 11978,
+   "end_line": 12020,
    "type": "FUNCTION",
-   "content_hash": "4491172588695a61"
+   "content_hash": "757937bad1a20a15"
   },
   "gui/browser_ui.c|gui/browser_ui.c::bui_skew_tan": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::bui_skew_tan",
-   "start_line": 11857,
-   "end_line": 11863,
+   "start_line": 12021,
+   "end_line": 12027,
    "type": "FUNCTION",
-   "content_hash": "3472e5113126ee39"
+   "content_hash": "f268419b4884548a"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box_transform_matrix": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box_transform_matrix",
-   "start_line": 11864,
-   "end_line": 11991,
+   "start_line": 12028,
+   "end_line": 12155,
    "type": "FUNCTION",
-   "content_hash": "196c8e1c7c923205"
+   "content_hash": "776dfb90fddeb16c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::bui_blend_operator": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::bui_blend_operator",
-   "start_line": 11992,
-   "end_line": 12129,
+   "start_line": 12156,
+   "end_line": 12293,
    "type": "FUNCTION",
-   "content_hash": "df8e046ac5910056"
+   "content_hash": "686c2a0816448cb2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::bui_paint_backdrop_blur": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::bui_paint_backdrop_blur",
-   "start_line": 12130,
-   "end_line": 12187,
+   "start_line": 12294,
+   "end_line": 12351,
    "type": "FUNCTION",
-   "content_hash": "f0faee9c64ba2925"
+   "content_hash": "279c21f05edaff27"
   },
   "gui/browser_ui.c|gui/browser_ui.c::bui_pop_group_composite": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::bui_pop_group_composite",
-   "start_line": 12188,
-   "end_line": 12251,
+   "start_line": 12352,
+   "end_line": 12415,
    "type": "FUNCTION",
-   "content_hash": "927875a1d31e2e88"
+   "content_hash": "f3e40252a891c822"
   },
   "gui/browser_ui.c|gui/browser_ui.c::made": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::made",
-   "start_line": 12252,
-   "end_line": 12307,
+   "start_line": 12416,
+   "end_line": 12471,
    "type": "FUNCTION",
-   "content_hash": "92d85ce8815e7ad6"
+   "content_hash": "b77255b384dac8ca"
   },
   "gui/browser_ui.c|gui/browser_ui.c::H2R": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::H2R",
-   "start_line": 12308,
-   "end_line": 12355,
+   "start_line": 12472,
+   "end_line": 12519,
    "type": "FUNCTION",
-   "content_hash": "3fa46573c0046281"
+   "content_hash": "7bf80d5f2d4187e2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::the": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::the",
-   "start_line": 12356,
-   "end_line": 12433,
+   "start_line": 12520,
+   "end_line": 12597,
    "type": "FUNCTION",
-   "content_hash": "eb051517aed54bc1"
+   "content_hash": "774c3d4f75fec5dd"
   },
   "gui/browser_ui.c|gui/browser_ui.c::limits": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::limits",
-   "start_line": 12434,
-   "end_line": 12502,
+   "start_line": 12598,
+   "end_line": 12666,
    "type": "FUNCTION",
-   "content_hash": "96cc2955a2274f81"
+   "content_hash": "1e97294bda1e7aa9"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_box_decoration_grouped": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_box_decoration_grouped",
-   "start_line": 12503,
-   "end_line": 12532,
+   "start_line": 12667,
+   "end_line": 12696,
    "type": "FUNCTION",
-   "content_hash": "d40e5fb8cd8725f6"
+   "content_hash": "4a78adb1e1ad9c29"
   },
   "gui/browser_ui.c|gui/browser_ui.c::fill": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::fill",
-   "start_line": 12533,
-   "end_line": 12543,
+   "start_line": 12697,
+   "end_line": 12707,
    "type": "FUNCTION",
-   "content_hash": "3d3084cb17868e47"
+   "content_hash": "0790e19035fe8da0"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_box_and_direct_rows": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_box_and_direct_rows",
-   "start_line": 12544,
-   "end_line": 12592,
+   "start_line": 12708,
+   "end_line": 12756,
    "type": "FUNCTION",
-   "content_hash": "76f9a23d4603d26a"
+   "content_hash": "dc95319b6a6cf69d"
   },
   "gui/browser_ui.c|gui/browser_ui.c::overflow": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::overflow",
-   "start_line": 12593,
-   "end_line": 12634,
+   "start_line": 12757,
+   "end_line": 12798,
    "type": "FUNCTION",
-   "content_hash": "4770053eb36202c8"
+   "content_hash": "e3244f3c789d6e2b"
   },
   "gui/browser_ui.c|gui/browser_ui.c::compositing": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::compositing",
-   "start_line": 12635,
-   "end_line": 12651,
+   "start_line": 12799,
+   "end_line": 12815,
    "type": "FUNCTION",
-   "content_hash": "45fa16dcda3d24ab"
+   "content_hash": "dd48c15fae2636fa"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_oof_sub": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_oof_sub",
-   "start_line": 12652,
-   "end_line": 12689,
+   "start_line": 12816,
+   "end_line": 12853,
    "type": "FUNCTION",
-   "content_hash": "c9d8b10fab6e050b"
+   "content_hash": "7d8dd237f7a85453"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_positioned_one": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_positioned_one",
-   "start_line": 12690,
-   "end_line": 12801,
+   "start_line": 12854,
+   "end_line": 12965,
    "type": "FUNCTION",
-   "content_hash": "3921d6dc7f9b817d"
+   "content_hash": "16f30b848218b9be"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box",
-   "start_line": 12802,
-   "end_line": 12906,
+   "start_line": 12966,
+   "end_line": 13070,
    "type": "FUNCTION",
-   "content_hash": "49478cff69789971"
+   "content_hash": "2856c253647ee5bc"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_nested_children": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_nested_children",
-   "start_line": 12907,
-   "end_line": 12943,
+   "start_line": 13071,
+   "end_line": 13107,
    "type": "FUNCTION",
-   "content_hash": "42afded404ab7a3b"
+   "content_hash": "5f0be22c303d1295"
   },
   "gui/browser_ui.c|gui/browser_ui.c::geom_from_layout": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::geom_from_layout",
-   "start_line": 12944,
-   "end_line": 12974,
+   "start_line": 13108,
+   "end_line": 13138,
    "type": "FUNCTION",
-   "content_hash": "deaa6beca80cc073"
+   "content_hash": "78947682bdefe6cf"
   },
   "gui/browser_ui.c|gui/browser_ui.c::publish_geometry": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::publish_geometry",
-   "start_line": 12975,
-   "end_line": 13043,
+   "start_line": 13139,
+   "end_line": 13207,
    "type": "FUNCTION",
-   "content_hash": "bc76fa7223b8e7c9"
+   "content_hash": "af2ca6eb2e4e21bf"
   },
   "gui/browser_ui.c|gui/browser_ui.c::screen_flow_ctx": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::screen_flow_ctx",
-   "start_line": 13044,
-   "end_line": 13054,
+   "start_line": 13208,
+   "end_line": 13218,
    "type": "CLASS",
-   "content_hash": "dedee9a70caf4785"
+   "content_hash": "a526e1376d609a42"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_screen_inflow": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_screen_inflow",
-   "start_line": 13055,
-   "end_line": 13168,
+   "start_line": 13219,
+   "end_line": 13332,
    "type": "FUNCTION",
-   "content_hash": "a3aa3590fd685fe9"
+   "content_hash": "96dd266708d6e294"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_screen_deferred": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_screen_deferred",
-   "start_line": 13169,
-   "end_line": 13172,
+   "start_line": 13333,
+   "end_line": 13336,
    "type": "FUNCTION",
-   "content_hash": "69cf936307d5bec9"
+   "content_hash": "15ecc1cb8a03395a"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_structured": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_structured",
-   "start_line": 13173,
-   "end_line": 13271,
+   "start_line": 13337,
+   "end_line": 13435,
    "type": "FUNCTION",
-   "content_hash": "cca56a29743cdf02"
+   "content_hash": "922c3087088e6197"
   },
   "gui/browser_ui.c|gui/browser_ui.c::PDF_PAGE_W": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::PDF_PAGE_W",
-   "start_line": 13272,
-   "end_line": 13272,
+   "start_line": 13436,
+   "end_line": 13436,
    "type": "FUNCTION",
-   "content_hash": "aac5412b7f11681c"
+   "content_hash": "3501720e6e423923"
   },
   "gui/browser_ui.c|gui/browser_ui.c::PDF_PAGE_H": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::PDF_PAGE_H",
-   "start_line": 13273,
-   "end_line": 13273,
+   "start_line": 13437,
+   "end_line": 13437,
    "type": "FUNCTION",
-   "content_hash": "96a830ac91b9de91"
+   "content_hash": "2f1b157c926431d8"
   },
   "gui/browser_ui.c|gui/browser_ui.c::PDF_MARGIN": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::PDF_MARGIN",
-   "start_line": 13274,
-   "end_line": 13287,
+   "start_line": 13438,
+   "end_line": 13451,
    "type": "FUNCTION",
-   "content_hash": "2c34e662887d59ea"
+   "content_hash": "206815ec2cb134a3"
   },
   "gui/browser_ui.c|gui/browser_ui.c::write_doc_pdf": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::write_doc_pdf",
-   "start_line": 13288,
-   "end_line": 13395,
+   "start_line": 13452,
+   "end_line": 13559,
    "type": "FUNCTION",
-   "content_hash": "faa9974647cc8393"
+   "content_hash": "6743ce1cb06b5ebb"
   },
   "gui/browser_ui.c|gui/browser_ui.c::export_pdf": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::export_pdf",
-   "start_line": 13396,
-   "end_line": 13437,
+   "start_line": 13560,
+   "end_line": 13601,
    "type": "FUNCTION",
-   "content_hash": "3702b8cbb057a30c"
+   "content_hash": "d91510a5c9048557"
   },
   "gui/browser_ui.c|gui/browser_ui.c::PNG_PAGE_W": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::PNG_PAGE_W",
-   "start_line": 13438,
-   "end_line": 13450,
+   "start_line": 13602,
+   "end_line": 13614,
    "type": "FUNCTION",
-   "content_hash": "ecd0dbd9a3696bb7"
+   "content_hash": "46305af5a860605d"
   },
   "gui/browser_ui.c|gui/browser_ui.c::PNG_MARGIN": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::PNG_MARGIN",
-   "start_line": 13451,
-   "end_line": 13451,
+   "start_line": 13615,
+   "end_line": 13615,
    "type": "FUNCTION",
-   "content_hash": "d46ee8869f69ffa3"
+   "content_hash": "d7f4324faad31b2c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::PNG_MAX_H": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::PNG_MAX_H",
-   "start_line": 13452,
-   "end_line": 13455,
+   "start_line": 13616,
+   "end_line": 13619,
    "type": "FUNCTION",
-   "content_hash": "2d78804f8a3a0808"
+   "content_hash": "451ee3e14c930344"
   },
   "gui/browser_ui.c|gui/browser_ui.c::png_flow_ctx": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::png_flow_ctx",
-   "start_line": 13456,
-   "end_line": 13467,
+   "start_line": 13620,
+   "end_line": 13631,
    "type": "CLASS",
-   "content_hash": "ac34e24acd61ea1f"
+   "content_hash": "0a5f2988f9d16974"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_png_inflow": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_png_inflow",
-   "start_line": 13468,
-   "end_line": 13496,
+   "start_line": 13632,
+   "end_line": 13660,
    "type": "FUNCTION",
-   "content_hash": "1461a503e152e21c"
+   "content_hash": "cb0d3b537b8f6470"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint_png_deferred": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint_png_deferred",
-   "start_line": 13497,
-   "end_line": 13505,
+   "start_line": 13661,
+   "end_line": 13669,
    "type": "FUNCTION",
-   "content_hash": "fb050ee99a82ac0f"
+   "content_hash": "203b355d1941054c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::write_doc_png": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::write_doc_png",
-   "start_line": 13506,
-   "end_line": 13603,
+   "start_line": 13670,
+   "end_line": 13767,
    "type": "FUNCTION",
-   "content_hash": "756067ba4bb6d84d"
+   "content_hash": "f1e1c8ea0c83e4b5"
   },
   "gui/browser_ui.c|gui/browser_ui.c::export_png": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::export_png",
-   "start_line": 13604,
-   "end_line": 13637,
+   "start_line": 13768,
+   "end_line": 13801,
    "type": "FUNCTION",
-   "content_hash": "f8b52e35b0287d82"
+   "content_hash": "2a07aac1ef68086f"
   },
   "gui/browser_ui.c|gui/browser_ui.c::caller": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::caller",
-   "start_line": 13638,
-   "end_line": 13660,
+   "start_line": 13802,
+   "end_line": 13824,
    "type": "FUNCTION",
-   "content_hash": "fd0e19f3693a473e"
+   "content_hash": "2ff8039ea59273df"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ui_render_png": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ui_render_png",
-   "start_line": 13661,
-   "end_line": 13716,
+   "start_line": 13825,
+   "end_line": 13880,
    "type": "FUNCTION",
-   "content_hash": "4a899ea8ab092b1a"
+   "content_hash": "37a2d683eb73dbf5"
   },
   "gui/browser_ui.c|gui/browser_ui.c::origin": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::origin",
-   "start_line": 13717,
-   "end_line": 13720,
+   "start_line": 13881,
+   "end_line": 13884,
    "type": "FUNCTION",
-   "content_hash": "1d87cc0c0f9f7615"
+   "content_hash": "369d4ecaae81f845"
   },
   "gui/browser_ui.c|gui/browser_ui.c::render_doc_images": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::render_doc_images",
-   "start_line": 13721,
-   "end_line": 13751,
+   "start_line": 13885,
+   "end_line": 13915,
    "type": "FUNCTION",
-   "content_hash": "a5a0a0753ca639cc"
+   "content_hash": "2dac4681a21eae19"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ui_render_png_images": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ui_render_png_images",
-   "start_line": 13752,
-   "end_line": 13757,
+   "start_line": 13916,
+   "end_line": 13921,
    "type": "FUNCTION",
-   "content_hash": "3d73a2241f579e6c"
+   "content_hash": "d387efe0e8d10c08"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ui_render_pdf_images": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ui_render_pdf_images",
-   "start_line": 13758,
-   "end_line": 13772,
+   "start_line": 13922,
+   "end_line": 13936,
    "type": "FUNCTION",
-   "content_hash": "e746bf8ff87b9178"
+   "content_hash": "616da53945bebca2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ui_dump_layout": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ui_dump_layout",
-   "start_line": 13773,
-   "end_line": 13794,
+   "start_line": 13937,
+   "end_line": 13958,
    "type": "FUNCTION",
-   "content_hash": "35813a07dd4b0358"
+   "content_hash": "4d8e9b84002ecdf2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::in": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::in",
-   "start_line": 13795,
-   "end_line": 13844,
+   "start_line": 13959,
+   "end_line": 14008,
    "type": "FUNCTION",
-   "content_hash": "2f1bf85134d213b6"
+   "content_hash": "8f97ff5a5fa947b4"
   },
   "gui/browser_ui.c|gui/browser_ui.c::link_at_point": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::link_at_point",
-   "start_line": 13845,
-   "end_line": 13935,
+   "start_line": 14009,
+   "end_line": 14099,
    "type": "FUNCTION",
-   "content_hash": "82d24f1ed0442265"
+   "content_hash": "535870f9e522223e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::resolve_box_cursor": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::resolve_box_cursor",
-   "start_line": 13936,
-   "end_line": 13949,
+   "start_line": 14100,
+   "end_line": 14113,
    "type": "FUNCTION",
-   "content_hash": "3cc51dc2c84af840"
+   "content_hash": "17dfdc9750966162"
   },
   "gui/browser_ui.c|gui/browser_ui.c::box_pointer_events_none": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::box_pointer_events_none",
-   "start_line": 13950,
-   "end_line": 13965,
+   "start_line": 14114,
+   "end_line": 14129,
    "type": "FUNCTION",
-   "content_hash": "5b63c014d9956a45"
+   "content_hash": "1eda500314529517"
   },
   "gui/browser_ui.c|gui/browser_ui.c::cursor_at_point": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::cursor_at_point",
-   "start_line": 13966,
-   "end_line": 14030,
+   "start_line": 14130,
+   "end_line": 14194,
    "type": "FUNCTION",
-   "content_hash": "10844b2b855fd3f4"
+   "content_hash": "cb79e063136ff16c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::node_at_point": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::node_at_point",
-   "start_line": 14031,
-   "end_line": 14038,
+   "start_line": 14195,
+   "end_line": 14202,
    "type": "FUNCTION",
-   "content_hash": "96f209bca5e1294a"
+   "content_hash": "20f88f4752b52ec5"
   },
   "gui/browser_ui.c|gui/browser_ui.c::Firefox": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::Firefox",
-   "start_line": 14039,
-   "end_line": 14057,
+   "start_line": 14203,
+   "end_line": 14221,
    "type": "FUNCTION",
-   "content_hash": "4ef72901329e3664"
+   "content_hash": "5d6ec43d615678dc"
   },
   "gui/browser_ui.c|gui/browser_ui.c::frag_at_point": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::frag_at_point",
-   "start_line": 14058,
-   "end_line": 14111,
+   "start_line": 14222,
+   "end_line": 14275,
    "type": "FUNCTION",
-   "content_hash": "b0aa2ddd75030154"
+   "content_hash": "8c98038e2e9f3a2f"
   },
   "gui/browser_ui.c|gui/browser_ui.c::reference": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::reference",
-   "start_line": 14112,
-   "end_line": 14130,
+   "start_line": 14276,
+   "end_line": 14294,
    "type": "FUNCTION",
-   "content_hash": "c8868f6f509b77a4"
+   "content_hash": "1186764a608d54e9"
   },
   "gui/browser_ui.c|gui/browser_ui.c::set_page_url": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::set_page_url",
-   "start_line": 14131,
-   "end_line": 14155,
+   "start_line": 14295,
+   "end_line": 14319,
    "type": "FUNCTION",
-   "content_hash": "a2633f8cc2b69527"
+   "content_hash": "c8ee2a89301e8d78"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ws_apply_ops": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ws_apply_ops",
-   "start_line": 14156,
-   "end_line": 14163,
+   "start_line": 14320,
+   "end_line": 14327,
    "type": "FUNCTION",
-   "content_hash": "a97dcf3e6d8b7822"
+   "content_hash": "7bf55f722ada64ca"
   },
   "gui/browser_ui.c|gui/browser_ui.c::sf_ws_url_check": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::sf_ws_url_check",
-   "start_line": 14164,
-   "end_line": 14190,
+   "start_line": 14328,
+   "end_line": 14354,
    "type": "FUNCTION",
-   "content_hash": "7a9f1b1bc8319c22"
+   "content_hash": "b06fc8eae4ff4dc5"
   },
   "gui/browser_ui.c|gui/browser_ui.c::apply_history_ops": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::apply_history_ops",
-   "start_line": 14191,
-   "end_line": 14202,
+   "start_line": 14355,
+   "end_line": 14366,
    "type": "FUNCTION",
-   "content_hash": "685513583bbe062c"
+   "content_hash": "9508ff0e8fc9a318"
   },
   "gui/browser_ui.c|gui/browser_ui.c::history_step": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::history_step",
-   "start_line": 14203,
-   "end_line": 14235,
+   "start_line": 14367,
+   "end_line": 14399,
    "type": "FUNCTION",
-   "content_hash": "6091235e4998f45e"
+   "content_hash": "12128db7e7453bd3"
   },
   "gui/browser_ui.c|gui/browser_ui.c::apply_click_result": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::apply_click_result",
-   "start_line": 14236,
-   "end_line": 14285,
+   "start_line": 14400,
+   "end_line": 14449,
    "type": "FUNCTION",
-   "content_hash": "72ce4942fd3d7bdd"
+   "content_hash": "0e8a3da9e1fd91ec"
   },
   "gui/browser_ui.c|gui/browser_ui.c::memory": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::memory",
-   "start_line": 14286,
-   "end_line": 14379,
+   "start_line": 14450,
+   "end_line": 14543,
    "type": "FUNCTION",
-   "content_hash": "107339651fe304a0"
+   "content_hash": "8d6cc3694d5a25fe"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ensure_download_dir": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ensure_download_dir",
-   "start_line": 14414,
-   "end_line": 14428,
+   "start_line": 14578,
+   "end_line": 14592,
    "type": "FUNCTION",
-   "content_hash": "23b0bc36fed5a564"
+   "content_hash": "03cb50dad4a432c4"
   },
   "gui/browser_ui.c|gui/browser_ui.c::write_file_atomic": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::write_file_atomic",
-   "start_line": 14429,
-   "end_line": 14450,
+   "start_line": 14593,
+   "end_line": 14614,
    "type": "FUNCTION",
-   "content_hash": "bc94dc1de61080e6"
+   "content_hash": "370525cbb7eb37d2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::save_download": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::save_download",
-   "start_line": 14451,
-   "end_line": 14483,
+   "start_line": 14615,
+   "end_line": 14647,
    "type": "FUNCTION",
-   "content_hash": "57b3a7cbf3ca4f37"
+   "content_hash": "328fe49fefe29d08"
   },
   "gui/browser_ui.c|gui/browser_ui.c::save_current_page": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::save_current_page",
-   "start_line": 14484,
-   "end_line": 14493,
+   "start_line": 14648,
+   "end_line": 14657,
    "type": "FUNCTION",
-   "content_hash": "a0ff02a724cf5be2"
+   "content_hash": "99f175a89701937b"
   },
   "gui/browser_ui.c|gui/browser_ui.c::deliver_fetch_result": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::deliver_fetch_result",
-   "start_line": 14494,
-   "end_line": 14547,
+   "start_line": 14658,
+   "end_line": 14711,
    "type": "FUNCTION",
-   "content_hash": "1958668dcfa3aa05"
+   "content_hash": "5e580df1e0ae36f9"
   },
   "gui/browser_ui.c|gui/browser_ui.c::drain_fetch_results": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::drain_fetch_results",
-   "start_line": 14548,
-   "end_line": 14623,
+   "start_line": 14712,
+   "end_line": 14787,
    "type": "FUNCTION",
-   "content_hash": "73521374de486aa7"
+   "content_hash": "9e3bd62d96143814"
   },
   "gui/browser_ui.c|gui/browser_ui.c::toggle_reader": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::toggle_reader",
-   "start_line": 14624,
-   "end_line": 14634,
+   "start_line": 14788,
+   "end_line": 14798,
    "type": "FUNCTION",
-   "content_hash": "a8742cdfcf6fc721"
+   "content_hash": "4ca5cda5e009b7e8"
   },
   "gui/browser_ui.c|gui/browser_ui.c::menu_item_checked": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::menu_item_checked",
-   "start_line": 14635,
-   "end_line": 14654,
+   "start_line": 14799,
+   "end_line": 14818,
    "type": "FUNCTION",
-   "content_hash": "73d0757a5713a482"
+   "content_hash": "071beb6a35492034"
   },
   "gui/browser_ui.c|gui/browser_ui.c::presentation": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::presentation",
-   "start_line": 14655,
-   "end_line": 14656,
+   "start_line": 14819,
+   "end_line": 14820,
    "type": "FUNCTION",
-   "content_hash": "00fe7cbe82becaa0"
+   "content_hash": "2919348c51bedf28"
   },
   "gui/browser_ui.c|gui/browser_ui.c::menu_item_toggle": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::menu_item_toggle",
-   "start_line": 14657,
-   "end_line": 14766,
+   "start_line": 14821,
+   "end_line": 14930,
    "type": "FUNCTION",
-   "content_hash": "d5e21e5fa073892c"
+   "content_hash": "e54a24199f8bf12e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::draw_clock": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::draw_clock",
-   "start_line": 14767,
-   "end_line": 14778,
+   "start_line": 14931,
+   "end_line": 14942,
    "type": "FUNCTION",
-   "content_hash": "672c5fbe68fc99c1"
+   "content_hash": "153bca6fc50550e5"
   },
   "gui/browser_ui.c|gui/browser_ui.c::draw_hamburger": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::draw_hamburger",
-   "start_line": 14779,
-   "end_line": 14794,
+   "start_line": 14943,
+   "end_line": 14958,
    "type": "FUNCTION",
-   "content_hash": "a3797126f735b17e"
+   "content_hash": "e3fc938fad4c5580"
   },
   "gui/browser_ui.c|gui/browser_ui.c::draw_reload": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::draw_reload",
-   "start_line": 14795,
-   "end_line": 14816,
+   "start_line": 14959,
+   "end_line": 14980,
    "type": "FUNCTION",
-   "content_hash": "5c9d6f17c1f908dd"
+   "content_hash": "45ea2c71f21f6908"
   },
   "gui/browser_ui.c|gui/browser_ui.c::draw_menu": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::draw_menu",
-   "start_line": 14817,
-   "end_line": 14927,
+   "start_line": 14981,
+   "end_line": 15091,
    "type": "FUNCTION",
-   "content_hash": "1b810a8e5bc2a012"
+   "content_hash": "168a8a1609a70862"
   },
   "gui/browser_ui.c|gui/browser_ui.c::draw_hover_url": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::draw_hover_url",
-   "start_line": 14928,
-   "end_line": 14959,
+   "start_line": 15092,
+   "end_line": 15123,
    "type": "FUNCTION",
-   "content_hash": "70d1417fa2bce439"
+   "content_hash": "cabdf839e7213a88"
   },
   "gui/browser_ui.c|gui/browser_ui.c::draw_toast": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::draw_toast",
-   "start_line": 14960,
-   "end_line": 14989,
+   "start_line": 15124,
+   "end_line": 15153,
    "type": "FUNCTION",
-   "content_hash": "f4f70e0af87568d6"
+   "content_hash": "b00fba4604e74cd3"
   },
   "gui/browser_ui.c|gui/browser_ui.c::draw_tabstrip": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::draw_tabstrip",
-   "start_line": 14990,
-   "end_line": 15044,
+   "start_line": 15154,
+   "end_line": 15208,
    "type": "FUNCTION",
-   "content_hash": "4bf8b48af87afc8b"
+   "content_hash": "1d5c8d658d4825de"
   },
   "gui/browser_ui.c|gui/browser_ui.c::draw_omnibox": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::draw_omnibox",
-   "start_line": 15045,
-   "end_line": 15078,
+   "start_line": 15209,
+   "end_line": 15242,
    "type": "FUNCTION",
-   "content_hash": "d2f140ed8080c6a6"
+   "content_hash": "4aae034176a28a8e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::paint": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::paint",
-   "start_line": 15079,
-   "end_line": 15322,
+   "start_line": 15243,
+   "end_line": 15486,
    "type": "FUNCTION",
-   "content_hash": "c7a8bb9e33d734e0"
+   "content_hash": "34a76125572658dd"
   },
   "gui/browser_ui.c|gui/browser_ui.c::redraw": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::redraw",
-   "start_line": 15323,
-   "end_line": 15334,
+   "start_line": 15487,
+   "end_line": 15498,
    "type": "FUNCTION",
-   "content_hash": "3d7b7422c5aaea33"
+   "content_hash": "5649f610a4b5b778"
   },
   "gui/browser_ui.c|gui/browser_ui.c::wm_base_ping": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::wm_base_ping",
-   "start_line": 15335,
-   "end_line": 15340,
+   "start_line": 15499,
+   "end_line": 15504,
    "type": "FUNCTION",
-   "content_hash": "4bb3d264e55179f0"
+   "content_hash": "46eab8dc652a7d1a"
   },
   "gui/browser_ui.c|gui/browser_ui.c::xdg_surface_configure": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::xdg_surface_configure",
-   "start_line": 15341,
-   "end_line": 15348,
+   "start_line": 15505,
+   "end_line": 15512,
    "type": "FUNCTION",
-   "content_hash": "042c498e4c632be8"
+   "content_hash": "54a5bd07591f3c2d"
   },
   "gui/browser_ui.c|gui/browser_ui.c::toplevel_configure": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::toplevel_configure",
-   "start_line": 15349,
-   "end_line": 15356,
+   "start_line": 15513,
+   "end_line": 15520,
    "type": "FUNCTION",
-   "content_hash": "1b2f17f0dd65fc64"
+   "content_hash": "49bb20bdf313528a"
   },
   "gui/browser_ui.c|gui/browser_ui.c::resizes": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::resizes",
-   "start_line": 15357,
-   "end_line": 15364,
+   "start_line": 15521,
+   "end_line": 15528,
    "type": "FUNCTION",
-   "content_hash": "7d0f5ede72a28e22"
+   "content_hash": "ac7e4ef00819c1bc"
   },
   "gui/browser_ui.c|gui/browser_ui.c::wl_array_for_each": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::wl_array_for_each",
-   "start_line": 15365,
-   "end_line": 15370,
+   "start_line": 15529,
+   "end_line": 15534,
    "type": "FUNCTION",
-   "content_hash": "3554f6140f86503a"
+   "content_hash": "4de924a880980377"
   },
   "gui/browser_ui.c|gui/browser_ui.c::toplevel_close": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::toplevel_close",
-   "start_line": 15371,
-   "end_line": 15379,
+   "start_line": 15535,
+   "end_line": 15543,
    "type": "FUNCTION",
-   "content_hash": "d7f26c3d0d8097a1"
+   "content_hash": "9ea93dabddf7646c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::deco_configure": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::deco_configure",
-   "start_line": 15380,
-   "end_line": 15391,
+   "start_line": 15544,
+   "end_line": 15555,
    "type": "FUNCTION",
-   "content_hash": "09c689c6ccc5f5c4"
+   "content_hash": "3cd1d92afa2be59f"
   },
   "gui/browser_ui.c|gui/browser_ui.c::set_cursor": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::set_cursor",
-   "start_line": 15392,
-   "end_line": 15421,
+   "start_line": 15556,
+   "end_line": 15585,
    "type": "FUNCTION",
-   "content_hash": "22b61250ba029de9"
+   "content_hash": "c0ddbee457d14868"
   },
   "gui/browser_ui.c|gui/browser_ui.c::element": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::element",
-   "start_line": 15422,
-   "end_line": 15457,
+   "start_line": 15586,
+   "end_line": 15621,
    "type": "FUNCTION",
-   "content_hash": "36706bf8aaf8e8fd"
+   "content_hash": "1864a21cf1499ca6"
   },
   "gui/browser_ui.c|gui/browser_ui.c::FBW_W": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::FBW_W",
-   "start_line": 15458,
-   "end_line": 15458,
+   "start_line": 15622,
+   "end_line": 15622,
    "type": "FUNCTION",
-   "content_hash": "25b9cca0bf6f4a20"
+   "content_hash": "72e525100bb2eefa"
   },
   "gui/browser_ui.c|gui/browser_ui.c::FBW_H": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::FBW_H",
-   "start_line": 15459,
-   "end_line": 15459,
+   "start_line": 15623,
+   "end_line": 15623,
    "type": "FUNCTION",
-   "content_hash": "465239dbc9c8459a"
+   "content_hash": "f5fbfc7886e10c95"
   },
   "gui/browser_ui.c|gui/browser_ui.c::FBW_HEADER": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::FBW_HEADER",
-   "start_line": 15460,
-   "end_line": 15460,
+   "start_line": 15624,
+   "end_line": 15624,
    "type": "FUNCTION",
-   "content_hash": "0448f07a5957bfc7"
+   "content_hash": "68cc8f45f800e6a1"
   },
   "gui/browser_ui.c|gui/browser_ui.c::FBW_PAD": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::FBW_PAD",
-   "start_line": 15461,
-   "end_line": 15461,
+   "start_line": 15625,
+   "end_line": 15625,
    "type": "FUNCTION",
-   "content_hash": "96dad75a364ee807"
+   "content_hash": "52f87c50374eae8e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::FBW_LINE": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::FBW_LINE",
-   "start_line": 15462,
-   "end_line": 15462,
+   "start_line": 15626,
+   "end_line": 15626,
    "type": "FUNCTION",
-   "content_hash": "5e30ea9e882c6028"
+   "content_hash": "c1f5c03fb796e506"
   },
   "gui/browser_ui.c|gui/browser_ui.c::FBW_GUTTER": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::FBW_GUTTER",
-   "start_line": 15463,
-   "end_line": 15463,
+   "start_line": 15627,
+   "end_line": 15627,
    "type": "FUNCTION",
-   "content_hash": "4461821c9f82c532"
+   "content_hash": "9aeb5f4d3e5ffecc"
   },
   "gui/browser_ui.c|gui/browser_ui.c::FBW_MIN_SPLIT": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::FBW_MIN_SPLIT",
-   "start_line": 15464,
-   "end_line": 15464,
+   "start_line": 15628,
+   "end_line": 15628,
    "type": "FUNCTION",
-   "content_hash": "67ba3af072ddbefb"
+   "content_hash": "fe11c0bd7ac1b08d"
   },
   "gui/browser_ui.c|gui/browser_ui.c::FBW_MAX_SPLIT": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::FBW_MAX_SPLIT",
-   "start_line": 15465,
-   "end_line": 15465,
+   "start_line": 15629,
+   "end_line": 15629,
    "type": "FUNCTION",
-   "content_hash": "df8eedc920ee1387"
+   "content_hash": "067b6a4410eae92f"
   },
   "gui/browser_ui.c|gui/browser_ui.c::FBW_COPY_BTN_W": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::FBW_COPY_BTN_W",
-   "start_line": 15466,
-   "end_line": 15466,
+   "start_line": 15630,
+   "end_line": 15630,
    "type": "FUNCTION",
-   "content_hash": "d26f70e27d9627f2"
+   "content_hash": "7fc9bec0c65c9cf5"
   },
   "gui/browser_ui.c|gui/browser_ui.c::FBW_COPY_BTN_H": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::FBW_COPY_BTN_H",
-   "start_line": 15467,
-   "end_line": 15468,
+   "start_line": 15631,
+   "end_line": 15632,
    "type": "FUNCTION",
-   "content_hash": "0e446d1636a0b669"
+   "content_hash": "9315c402ca74bd02"
   },
   "gui/browser_ui.c|gui/browser_ui.c::fbw_split_y": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::fbw_split_y",
-   "start_line": 15492,
-   "end_line": 15500,
+   "start_line": 15656,
+   "end_line": 15664,
    "type": "FUNCTION",
-   "content_hash": "90adcaac9bc0eda2"
+   "content_hash": "1203422a2af0bf4e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_ensure_buffer": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_ensure_buffer",
-   "start_line": 15501,
-   "end_line": 15527,
+   "start_line": 15665,
+   "end_line": 15691,
    "type": "FUNCTION",
-   "content_hash": "5d4f357b1723ad50"
+   "content_hash": "5bbb07ffa1d075e5"
   },
   "gui/browser_ui.c|gui/browser_ui.c::fbw_level_rgb": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::fbw_level_rgb",
-   "start_line": 15528,
-   "end_line": 15538,
+   "start_line": 15692,
+   "end_line": 15702,
    "type": "FUNCTION",
-   "content_hash": "d3016e4624bcdd0d"
+   "content_hash": "5b5c810f3bd1b31e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::fbw_console_lines": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::fbw_console_lines",
-   "start_line": 15539,
-   "end_line": 15551,
+   "start_line": 15703,
+   "end_line": 15715,
    "type": "FUNCTION",
-   "content_hash": "934809052833ce65"
+   "content_hash": "606704ab5fb0937e"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_paint": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_paint",
-   "start_line": 15552,
-   "end_line": 15750,
+   "start_line": 15716,
+   "end_line": 15914,
    "type": "FUNCTION",
-   "content_hash": "990c11b8ef2dfbc0"
+   "content_hash": "9a970fb71dc8fe54"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_redraw_fb": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_redraw_fb",
-   "start_line": 15751,
-   "end_line": 15759,
+   "start_line": 15915,
+   "end_line": 15923,
    "type": "FUNCTION",
-   "content_hash": "3fafc4c99a40477c"
+   "content_hash": "6d159714b6277493"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_redraw": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_redraw",
-   "start_line": 15760,
-   "end_line": 15763,
+   "start_line": 15924,
+   "end_line": 15927,
    "type": "FUNCTION",
-   "content_hash": "8c8f8f62e69145d2"
+   "content_hash": "b0f59c8dbfb82c58"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_hide": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_hide",
-   "start_line": 15764,
-   "end_line": 15779,
+   "start_line": 15928,
+   "end_line": 15943,
    "type": "FUNCTION",
-   "content_hash": "12f7a71ce20bf41c"
+   "content_hash": "877fe263ff8109d7"
   },
   "gui/browser_ui.c|gui/browser_ui.c::fbw_xdg_surface_configure": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::fbw_xdg_surface_configure",
-   "start_line": 15780,
-   "end_line": 15787,
+   "start_line": 15944,
+   "end_line": 15951,
    "type": "FUNCTION",
-   "content_hash": "87d85f3e7326e6e4"
+   "content_hash": "3b0248f5db19b9ee"
   },
   "gui/browser_ui.c|gui/browser_ui.c::fbw_toplevel_configure": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::fbw_toplevel_configure",
-   "start_line": 15788,
-   "end_line": 15796,
+   "start_line": 15952,
+   "end_line": 15960,
    "type": "FUNCTION",
-   "content_hash": "6d30ff540462a55d"
+   "content_hash": "1de28ac2ac16dac7"
   },
   "gui/browser_ui.c|gui/browser_ui.c::fbw_toplevel_close": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::fbw_toplevel_close",
-   "start_line": 15797,
-   "end_line": 15806,
+   "start_line": 15961,
+   "end_line": 15970,
    "type": "FUNCTION",
-   "content_hash": "65f6d2f58d074d60"
+   "content_hash": "6b2bbb1a2f30ad68"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_show": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_show",
-   "start_line": 15807,
-   "end_line": 15836,
+   "start_line": 15971,
+   "end_line": 16000,
    "type": "FUNCTION",
-   "content_hash": "7fe8078fa445f49e"
+   "content_hash": "dd5eb92aa66faac3"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_toggle": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_toggle",
-   "start_line": 15837,
-   "end_line": 15841,
+   "start_line": 16001,
+   "end_line": 16005,
    "type": "FUNCTION",
-   "content_hash": "d0999b9714d0dc28"
+   "content_hash": "dce2123029ea28f8"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_destroy": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_destroy",
-   "start_line": 15842,
-   "end_line": 15848,
+   "start_line": 16006,
+   "end_line": 16012,
    "type": "FUNCTION",
-   "content_hash": "5e9883dfa0d35458"
+   "content_hash": "9cbbc5d6373e1007"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_owns_surface": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_owns_surface",
-   "start_line": 15849,
-   "end_line": 15852,
+   "start_line": 16013,
+   "end_line": 16016,
    "type": "FUNCTION",
-   "content_hash": "bae00b1753384359"
+   "content_hash": "9c1f5cce90d50e9c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_is_open": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_is_open",
-   "start_line": 15853,
-   "end_line": 15859,
+   "start_line": 16017,
+   "end_line": 16023,
    "type": "FUNCTION",
-   "content_hash": "7f823f3d616f4633"
+   "content_hash": "e96971209a0838ce"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_repl_worker": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_repl_worker",
-   "start_line": 15860,
-   "end_line": 15897,
+   "start_line": 16024,
+   "end_line": 16061,
    "type": "FUNCTION",
-   "content_hash": "3060e4a3808f63ca"
+   "content_hash": "55a5697e86df8fa6"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_eval": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_eval",
-   "start_line": 15898,
-   "end_line": 15937,
+   "start_line": 16062,
+   "end_line": 16101,
    "type": "FUNCTION",
-   "content_hash": "963e1c4537484d44"
+   "content_hash": "1a7722797e6a4c30"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_handle_key": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_handle_key",
-   "start_line": 15938,
-   "end_line": 15972,
+   "start_line": 16102,
+   "end_line": 16136,
    "type": "FUNCTION",
-   "content_hash": "6e23fa85a79d56a3"
+   "content_hash": "84b2ef6bf0e08fa0"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_pointer_button": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_pointer_button",
-   "start_line": 15973,
-   "end_line": 15991,
+   "start_line": 16137,
+   "end_line": 16155,
    "type": "FUNCTION",
-   "content_hash": "f2dc0a468b6933f2"
+   "content_hash": "2202d2d92daf149c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_pointer_motion": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_pointer_motion",
-   "start_line": 15992,
-   "end_line": 16013,
+   "start_line": 16156,
+   "end_line": 16177,
    "type": "FUNCTION",
-   "content_hash": "c935d2787b7bbfc8"
+   "content_hash": "58f154e1ef99826c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_pointer_axis": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_pointer_axis",
-   "start_line": 16014,
-   "end_line": 16025,
+   "start_line": 16178,
+   "end_line": 16189,
    "type": "FUNCTION",
-   "content_hash": "74ed7d3d2177e08a"
+   "content_hash": "5dd07483f2eeacd9"
   },
   "gui/browser_ui.c|gui/browser_ui.c::down": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::down",
-   "start_line": 16026,
-   "end_line": 16031,
+   "start_line": 16190,
+   "end_line": 16195,
    "type": "FUNCTION",
-   "content_hash": "5b010775e2530c4e"
+   "content_hash": "06982aa27af46e0d"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ptr_enter": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ptr_enter",
-   "start_line": 16032,
-   "end_line": 16049,
+   "start_line": 16196,
+   "end_line": 16213,
    "type": "FUNCTION",
-   "content_hash": "baf80f8a7ca361e3"
+   "content_hash": "1889f270112fd192"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ptr_leave": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ptr_leave",
-   "start_line": 16050,
-   "end_line": 16066,
+   "start_line": 16214,
+   "end_line": 16230,
    "type": "FUNCTION",
-   "content_hash": "5d7b40a75206d60e"
+   "content_hash": "87ccc2d5286f2c3d"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ptr_motion": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ptr_motion",
-   "start_line": 16067,
-   "end_line": 16091,
+   "start_line": 16231,
+   "end_line": 16255,
    "type": "FUNCTION",
-   "content_hash": "269f954faa6b9552"
+   "content_hash": "3347803f538aad77"
   },
   "gui/browser_ui.c|gui/browser_ui.c::load_current": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::load_current",
-   "start_line": 16092,
-   "end_line": 16104,
+   "start_line": 16256,
+   "end_line": 16268,
    "type": "FUNCTION",
-   "content_hash": "74054f57d3365771"
+   "content_hash": "d6cd00a42ecab1b9"
   },
   "gui/browser_ui.c|gui/browser_ui.c::go_omnibox": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::go_omnibox",
-   "start_line": 16105,
-   "end_line": 16149,
+   "start_line": 16269,
+   "end_line": 16313,
    "type": "FUNCTION",
-   "content_hash": "26b884480f271355"
+   "content_hash": "21c5cc80ed3f8c5d"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ptr_button": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ptr_button",
-   "start_line": 16150,
-   "end_line": 16396,
+   "start_line": 16314,
+   "end_line": 16560,
    "type": "FUNCTION",
-   "content_hash": "7a8a53c4115ddc4c"
+   "content_hash": "cb9ccff28a006295"
   },
   "gui/browser_ui.c|gui/browser_ui.c::scroll_line_px": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::scroll_line_px",
-   "start_line": 16397,
-   "end_line": 16400,
+   "start_line": 16561,
+   "end_line": 16564,
    "type": "FUNCTION",
-   "content_hash": "8df749e7de647213"
+   "content_hash": "b79567289e79e585"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ptr_axis": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ptr_axis",
-   "start_line": 16401,
-   "end_line": 16424,
+   "start_line": 16565,
+   "end_line": 16588,
    "type": "FUNCTION",
-   "content_hash": "270982e4f6667ab7"
+   "content_hash": "d1111eed554fa1a1"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ptr_frame": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ptr_frame",
-   "start_line": 16425,
-   "end_line": 16440,
+   "start_line": 16589,
+   "end_line": 16604,
    "type": "FUNCTION",
-   "content_hash": "017c0a2d02e0f0fb"
+   "content_hash": "f19fa7783a352025"
   },
   "gui/browser_ui.c|gui/browser_ui.c::mime_is_text": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::mime_is_text",
-   "start_line": 16441,
-   "end_line": 16458,
+   "start_line": 16605,
+   "end_line": 16622,
    "type": "FUNCTION",
-   "content_hash": "daad716eeaa2f49b"
+   "content_hash": "4c8ca17a006d9f4d"
   },
   "gui/browser_ui.c|gui/browser_ui.c::data_offer_source_actions": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::data_offer_source_actions",
-   "start_line": 16459,
-   "end_line": 16461,
+   "start_line": 16623,
+   "end_line": 16625,
    "type": "FUNCTION",
-   "content_hash": "76a6aec1349fd0c3"
+   "content_hash": "87f763afc6ef087d"
   },
   "gui/browser_ui.c|gui/browser_ui.c::data_offer_action": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::data_offer_action",
-   "start_line": 16462,
-   "end_line": 16471,
+   "start_line": 16626,
+   "end_line": 16635,
    "type": "FUNCTION",
-   "content_hash": "8f973a04250367ef"
+   "content_hash": "c920c3da10b17b50"
   },
   "gui/browser_ui.c|gui/browser_ui.c::data_device_data_offer": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::data_device_data_offer",
-   "start_line": 16472,
-   "end_line": 16483,
+   "start_line": 16636,
+   "end_line": 16647,
    "type": "FUNCTION",
-   "content_hash": "c478026f81a72363"
+   "content_hash": "edea7b7bd1b484c8"
   },
   "gui/browser_ui.c|gui/browser_ui.c::data_device_selection": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::data_device_selection",
-   "start_line": 16484,
-   "end_line": 16502,
+   "start_line": 16648,
+   "end_line": 16666,
    "type": "FUNCTION",
-   "content_hash": "0a6f388c573b7fa5"
+   "content_hash": "85f615e122981aa2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::data_device_enter": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::data_device_enter",
-   "start_line": 16503,
-   "end_line": 16507,
+   "start_line": 16667,
+   "end_line": 16671,
    "type": "FUNCTION",
-   "content_hash": "0ae7525801e8c0f3"
+   "content_hash": "27d635379cdc5c61"
   },
   "gui/browser_ui.c|gui/browser_ui.c::data_device_leave": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::data_device_leave",
-   "start_line": 16508,
-   "end_line": 16508,
+   "start_line": 16672,
+   "end_line": 16672,
    "type": "FUNCTION",
-   "content_hash": "66bf3900ba7783d8"
+   "content_hash": "33d6415bcfadf871"
   },
   "gui/browser_ui.c|gui/browser_ui.c::data_device_motion": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::data_device_motion",
-   "start_line": 16509,
-   "end_line": 16512,
+   "start_line": 16673,
+   "end_line": 16676,
    "type": "FUNCTION",
-   "content_hash": "7379eda01be29912"
+   "content_hash": "24118af2290c19b9"
   },
   "gui/browser_ui.c|gui/browser_ui.c::data_device_drop": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::data_device_drop",
-   "start_line": 16513,
-   "end_line": 16523,
+   "start_line": 16677,
+   "end_line": 16687,
    "type": "FUNCTION",
-   "content_hash": "22ea737cf0642b21"
+   "content_hash": "39d228482a05e6ef"
   },
   "gui/browser_ui.c|gui/browser_ui.c::data_source_cancelled": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::data_source_cancelled",
-   "start_line": 16524,
-   "end_line": 16529,
+   "start_line": 16688,
+   "end_line": 16693,
    "type": "FUNCTION",
-   "content_hash": "9ee86af9dd4258d9"
+   "content_hash": "b24d144f63b94d73"
   },
   "gui/browser_ui.c|gui/browser_ui.c::data_source_send": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::data_source_send",
-   "start_line": 16530,
-   "end_line": 16542,
+   "start_line": 16694,
+   "end_line": 16706,
    "type": "FUNCTION",
-   "content_hash": "9380104f228d7ff9"
+   "content_hash": "e4c8010bc7ca3d15"
   },
   "gui/browser_ui.c|gui/browser_ui.c::data_source_target": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::data_source_target",
-   "start_line": 16543,
-   "end_line": 16554,
+   "start_line": 16707,
+   "end_line": 16718,
    "type": "FUNCTION",
-   "content_hash": "643a98517d4540b0"
+   "content_hash": "820b678c7969c31b"
   },
   "gui/browser_ui.c|gui/browser_ui.c::freebug_copy_console": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::freebug_copy_console",
-   "start_line": 16555,
-   "end_line": 16603,
+   "start_line": 16719,
+   "end_line": 16767,
    "type": "FUNCTION",
-   "content_hash": "bfb0f7aa894528fa"
+   "content_hash": "d577a70ddab0e414"
   },
   "gui/browser_ui.c|gui/browser_ui.c::loop": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::loop",
-   "start_line": 16604,
-   "end_line": 16612,
+   "start_line": 16768,
+   "end_line": 16776,
    "type": "FUNCTION",
-   "content_hash": "b056c02810cf5382"
+   "content_hash": "1dfc543def520d54"
   },
   "gui/browser_ui.c|gui/browser_ui.c::insert_pasted_text": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::insert_pasted_text",
-   "start_line": 16613,
-   "end_line": 16676,
+   "start_line": 16777,
+   "end_line": 16840,
    "type": "FUNCTION",
-   "content_hash": "5f078f844730ce6c"
+   "content_hash": "50df51134d3086c2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::clipboard_copy": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::clipboard_copy",
-   "start_line": 16677,
-   "end_line": 16724,
+   "start_line": 16841,
+   "end_line": 16888,
    "type": "FUNCTION",
-   "content_hash": "866bc701f1a09771"
+   "content_hash": "dec9d067a3be8293"
   },
   "gui/browser_ui.c|gui/browser_ui.c::keyboard_keymap": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::keyboard_keymap",
-   "start_line": 16725,
-   "end_line": 16745,
+   "start_line": 16889,
+   "end_line": 16909,
    "type": "FUNCTION",
-   "content_hash": "d7fe251e8ef9559d"
+   "content_hash": "52a70e912fd9f1f1"
   },
   "gui/browser_ui.c|gui/browser_ui.c::keyboard_enter": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::keyboard_enter",
-   "start_line": 16746,
-   "end_line": 16752,
+   "start_line": 16910,
+   "end_line": 16916,
    "type": "FUNCTION",
-   "content_hash": "cbe5787df7358178"
+   "content_hash": "cdc8717ec60f5d80"
   },
   "gui/browser_ui.c|gui/browser_ui.c::keyboard_leave": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::keyboard_leave",
-   "start_line": 16753,
-   "end_line": 16760,
+   "start_line": 16917,
+   "end_line": 16924,
    "type": "FUNCTION",
-   "content_hash": "6d14e2ff9af47748"
+   "content_hash": "4a8813f99d5bb9a4"
   },
   "gui/browser_ui.c|gui/browser_ui.c::key_sym_to_js_key": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::key_sym_to_js_key",
-   "start_line": 16761,
-   "end_line": 16786,
+   "start_line": 16925,
+   "end_line": 16950,
    "type": "FUNCTION",
-   "content_hash": "8f502cf20f6615a4"
+   "content_hash": "3505bfd4c3982efb"
   },
   "gui/browser_ui.c|gui/browser_ui.c::key_sym_to_keycode": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::key_sym_to_keycode",
-   "start_line": 16787,
-   "end_line": 16811,
+   "start_line": 16951,
+   "end_line": 16975,
    "type": "FUNCTION",
-   "content_hash": "ed6007ae1a4bf519"
+   "content_hash": "a4926ba2348a31ba"
   },
   "gui/browser_ui.c|gui/browser_ui.c::dispatch_js_event": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::dispatch_js_event",
-   "start_line": 16812,
-   "end_line": 16869,
+   "start_line": 16976,
+   "end_line": 17033,
    "type": "FUNCTION",
-   "content_hash": "255d9f17f37ad00e"
+   "content_hash": "62a31c439b1859f3"
   },
   "gui/browser_ui.c|gui/browser_ui.c::handle_key_press": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::handle_key_press",
-   "start_line": 16870,
-   "end_line": 17199,
+   "start_line": 17034,
+   "end_line": 17363,
    "type": "FUNCTION",
-   "content_hash": "94f0b7a24713bf4d"
+   "content_hash": "471de53e2c143692"
   },
   "gui/browser_ui.c|gui/browser_ui.c::key_is_repeatable": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::key_is_repeatable",
-   "start_line": 17200,
-   "end_line": 17215,
+   "start_line": 17364,
+   "end_line": 17379,
    "type": "FUNCTION",
-   "content_hash": "b32c1d8465d88c33"
+   "content_hash": "5e6bacd97e3d48af"
   },
   "gui/browser_ui.c|gui/browser_ui.c::key_repeat_arm": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::key_repeat_arm",
-   "start_line": 17216,
-   "end_line": 17228,
+   "start_line": 17380,
+   "end_line": 17392,
    "type": "FUNCTION",
-   "content_hash": "e0451c72c7ebc889"
+   "content_hash": "1d3d53e92219badf"
   },
   "gui/browser_ui.c|gui/browser_ui.c::key_repeat_stop": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::key_repeat_stop",
-   "start_line": 17229,
-   "end_line": 17239,
+   "start_line": 17393,
+   "end_line": 17403,
    "type": "FUNCTION",
-   "content_hash": "af2c4cdb4ce8cd6f"
+   "content_hash": "226b450baafde8a7"
   },
   "gui/browser_ui.c|gui/browser_ui.c::key_repeat_fire": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::key_repeat_fire",
-   "start_line": 17240,
-   "end_line": 17253,
+   "start_line": 17404,
+   "end_line": 17417,
    "type": "FUNCTION",
-   "content_hash": "2e212429f8616d4a"
+   "content_hash": "e0001b0082978037"
   },
   "gui/browser_ui.c|gui/browser_ui.c::keyboard_key": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::keyboard_key",
-   "start_line": 17254,
-   "end_line": 17293,
+   "start_line": 17418,
+   "end_line": 17457,
    "type": "FUNCTION",
-   "content_hash": "5ed364db50754ea3"
+   "content_hash": "4809d1baf1058838"
   },
   "gui/browser_ui.c|gui/browser_ui.c::keyboard_modifiers": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::keyboard_modifiers",
-   "start_line": 17294,
-   "end_line": 17302,
+   "start_line": 17458,
+   "end_line": 17466,
    "type": "FUNCTION",
-   "content_hash": "b7aa50275b2212ad"
+   "content_hash": "dd2f00724904d8e3"
   },
   "gui/browser_ui.c|gui/browser_ui.c::keyboard_repeat_info": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::keyboard_repeat_info",
-   "start_line": 17303,
-   "end_line": 17321,
+   "start_line": 17467,
+   "end_line": 17485,
    "type": "FUNCTION",
-   "content_hash": "c3b2071120bc928a"
+   "content_hash": "73c03bea757a650c"
   },
   "gui/browser_ui.c|gui/browser_ui.c::seat_caps": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::seat_caps",
-   "start_line": 17322,
-   "end_line": 17332,
+   "start_line": 17486,
+   "end_line": 17496,
    "type": "FUNCTION",
-   "content_hash": "a3071e1f3a714d0a"
+   "content_hash": "da49dac66ae32136"
   },
   "gui/browser_ui.c|gui/browser_ui.c::seat_name": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::seat_name",
-   "start_line": 17333,
-   "end_line": 17339,
+   "start_line": 17497,
+   "end_line": 17503,
    "type": "FUNCTION",
-   "content_hash": "f662f3deaa6558b8"
+   "content_hash": "6e3d89e01ae02738"
   },
   "gui/browser_ui.c|gui/browser_ui.c::registry_global": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::registry_global",
-   "start_line": 17340,
-   "end_line": 17359,
+   "start_line": 17504,
+   "end_line": 17523,
    "type": "FUNCTION",
-   "content_hash": "444fca95d6690453"
+   "content_hash": "546d9fbe473ec603"
   },
   "gui/browser_ui.c|gui/browser_ui.c::registry_remove": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::registry_remove",
-   "start_line": 17360,
-   "end_line": 17369,
+   "start_line": 17524,
+   "end_line": 17533,
    "type": "FUNCTION",
-   "content_hash": "d7c02345302cc094"
+   "content_hash": "2612dd36e840dbe2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::ui_run_browser": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::ui_run_browser",
-   "start_line": 17370,
-   "end_line": 17384,
+   "start_line": 17534,
+   "end_line": 17548,
    "type": "FUNCTION",
-   "content_hash": "197c2dfa1224e0b7"
+   "content_hash": "296838ed535a92c2"
   },
   "gui/browser_ui.c|gui/browser_ui.c::saving": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::saving",
-   "start_line": 17385,
-   "end_line": 17463,
+   "start_line": 17549,
+   "end_line": 17627,
    "type": "FUNCTION",
-   "content_hash": "927c35513caf7025"
+   "content_hash": "8aed29909381c90d"
   },
   "gui/browser_ui.c|gui/browser_ui.c::redraws": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::redraws",
-   "start_line": 17464,
-   "end_line": 17533,
+   "start_line": 17628,
+   "end_line": 17697,
    "type": "FUNCTION",
-   "content_hash": "7a66e3333808f098"
+   "content_hash": "e4fc637b119f06da"
   },
   "gui/browser_ui.c|gui/browser_ui.c::applies": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::applies",
-   "start_line": 17534,
-   "end_line": 17764,
+   "start_line": 17698,
+   "end_line": 17928,
    "type": "FUNCTION",
-   "content_hash": "ea0128a464e16a2d"
+   "content_hash": "67633e5e177510b3"
   },
   "gui/browser_ui.c|gui/browser_ui.c::cost": {
    "file_path": "gui/browser_ui.c",
    "qualified_name": "gui/browser_ui.c::cost",
-   "start_line": 17765,
-   "end_line": 17857,
+   "start_line": 17929,
+   "end_line": 18021,
    "type": "FUNCTION",
-   "content_hash": "dc1d410abd55bb87"
+   "content_hash": "28a35df003b927f3"
   },
   "gui/browser_ui_internal.h|gui/browser_ui_internal.h::FREEDOM_BROWSER_UI_INTERNAL_H": {
    "file_path": "gui/browser_ui_internal.h",
@@ -41429,225 +41437,233 @@
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_nested_padded_item_opens_once",
    "start_line": 2370,
-   "end_line": 2447,
+   "end_line": 2413,
    "type": "FUNCTION",
    "content_hash": "205ecf7b036c3d24"
+  },
+  "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_float_pct_widths_resolve_once": {
+   "file_path": "tests/test_freedom.c",
+   "qualified_name": "tests/test_freedom.c::test_dump_layout_float_pct_widths_resolve_once",
+   "start_line": 2414,
+   "end_line": 2523,
+   "type": "FUNCTION",
+   "content_hash": "38ae87238cc91839"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_sticky_footer": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_sticky_footer",
-   "start_line": 2448,
-   "end_line": 2482,
+   "start_line": 2524,
+   "end_line": 2558,
    "type": "FUNCTION",
-   "content_hash": "ff18a8ef8c43b2e6"
+   "content_hash": "f38b818bf7bb8ef4"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_root_box_survives_replaced_run": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_root_box_survives_replaced_run",
-   "start_line": 2483,
-   "end_line": 2555,
+   "start_line": 2559,
+   "end_line": 2631,
    "type": "FUNCTION",
-   "content_hash": "1c4dcaf296cf3981"
+   "content_hash": "603bef5ffde3133a"
   },
   "tests/test_freedom.c|tests/test_freedom.c::bottom": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::bottom",
-   "start_line": 2556,
-   "end_line": 2575,
+   "start_line": 2632,
+   "end_line": 2651,
    "type": "FUNCTION",
-   "content_hash": "3bc4321a00ec48e9"
+   "content_hash": "5f1663c31ae8d4c5"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_pulled_rail_single_margin": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_pulled_rail_single_margin",
-   "start_line": 2576,
-   "end_line": 2692,
+   "start_line": 2652,
+   "end_line": 2768,
    "type": "FUNCTION",
-   "content_hash": "b27ee485abac1f8a"
+   "content_hash": "c89562d56b303140"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_row_nested_in_column": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_row_nested_in_column",
-   "start_line": 2693,
-   "end_line": 2743,
+   "start_line": 2769,
+   "end_line": 2819,
    "type": "FUNCTION",
-   "content_hash": "c0952cb514b38f22"
+   "content_hash": "db7b4413c0fc3aa3"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_inline_box_second_run_stays": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_inline_box_second_run_stays",
-   "start_line": 2744,
-   "end_line": 2772,
+   "start_line": 2820,
+   "end_line": 2848,
    "type": "FUNCTION",
-   "content_hash": "f29ea0235c947f25"
+   "content_hash": "eaeb747d33629ab2"
   },
   "tests/test_freedom.c|tests/test_freedom.c::band": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::band",
-   "start_line": 2773,
-   "end_line": 2815,
+   "start_line": 2849,
+   "end_line": 2891,
    "type": "FUNCTION",
-   "content_hash": "05c36815b4029221"
+   "content_hash": "04fde8d1d0fc6999"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_line_opening_image_is_inline": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_line_opening_image_is_inline",
-   "start_line": 2816,
-   "end_line": 2841,
+   "start_line": 2892,
+   "end_line": 2917,
    "type": "FUNCTION",
-   "content_hash": "373b2fc36edde6e8"
+   "content_hash": "eb6528b8ed05b2c7"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_band_flushes_line_before_clear": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_band_flushes_line_before_clear",
-   "start_line": 2842,
-   "end_line": 2881,
+   "start_line": 2918,
+   "end_line": 2957,
    "type": "FUNCTION",
-   "content_hash": "43d8e9a41cd030c4"
+   "content_hash": "7a39a4ac7838a5c2"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_flex_auto_margin_push_right": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_flex_auto_margin_push_right",
-   "start_line": 2882,
-   "end_line": 2924,
+   "start_line": 2958,
+   "end_line": 3000,
    "type": "FUNCTION",
-   "content_hash": "ac76464831f3e519"
+   "content_hash": "305e4eddd927be11"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_nested_column_takes_max": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_nested_column_takes_max",
-   "start_line": 2925,
-   "end_line": 2974,
+   "start_line": 3001,
+   "end_line": 3050,
    "type": "FUNCTION",
-   "content_hash": "55c9983566dbd175"
+   "content_hash": "95a8996a80dfd10c"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_rejects_http_url": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_rejects_http_url",
-   "start_line": 2975,
-   "end_line": 3036,
+   "start_line": 3051,
+   "end_line": 3112,
    "type": "FUNCTION",
-   "content_hash": "51b880bb06234d56"
+   "content_hash": "fee0bfc61cbf2966"
   },
   "tests/test_freedom.c|tests/test_freedom.c::white": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::white",
-   "start_line": 3037,
-   "end_line": 3132,
+   "start_line": 3113,
+   "end_line": 3208,
    "type": "FUNCTION",
-   "content_hash": "f51e201d7e54f801"
+   "content_hash": "818522ad6a16ab70"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_download_png_gradient_box_text_keeps_gradient": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_download_png_gradient_box_text_keeps_gradient",
-   "start_line": 3133,
-   "end_line": 3157,
+   "start_line": 3209,
+   "end_line": 3233,
    "type": "FUNCTION",
-   "content_hash": "c7aa96a8cd1bf586"
+   "content_hash": "157642d6792cb350"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_download_png_flex_container_paints_one_band": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_download_png_flex_container_paints_one_band",
-   "start_line": 3158,
-   "end_line": 3177,
+   "start_line": 3234,
+   "end_line": 3253,
    "type": "FUNCTION",
-   "content_hash": "67166ce58e690cc3"
+   "content_hash": "834cc55276499de3"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_download_png_inline_block_shrinks_and_centers": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_download_png_inline_block_shrinks_and_centers",
-   "start_line": 3178,
-   "end_line": 3221,
+   "start_line": 3254,
+   "end_line": 3297,
    "type": "FUNCTION",
-   "content_hash": "065173e44c037afe"
+   "content_hash": "299c5092c0288f94"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_download_png_inline_svg_path_and_drops_image": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_download_png_inline_svg_path_and_drops_image",
-   "start_line": 3222,
-   "end_line": 3237,
+   "start_line": 3298,
+   "end_line": 3313,
    "type": "FUNCTION",
-   "content_hash": "ddfac85ddc23978e"
+   "content_hash": "533663985df70dda"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_timings_prints_stages": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_timings_prints_stages",
-   "start_line": 3238,
-   "end_line": 3267,
+   "start_line": 3314,
+   "end_line": 3343,
    "type": "FUNCTION",
-   "content_hash": "5343b8d5bbda8fd6"
+   "content_hash": "ce9bc8460be03dbf"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_shrink_pill_nested_container": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_shrink_pill_nested_container",
-   "start_line": 3268,
-   "end_line": 3304,
+   "start_line": 3344,
+   "end_line": 3380,
    "type": "FUNCTION",
-   "content_hash": "b7d2a9ef89faee67"
+   "content_hash": "e68c17e6dfe6ad2a"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_inline_input_shares_line": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_inline_input_shares_line",
-   "start_line": 3305,
-   "end_line": 3350,
+   "start_line": 3381,
+   "end_line": 3426,
    "type": "FUNCTION",
-   "content_hash": "d864141b70c27fe2"
+   "content_hash": "873c03401f08a3dc"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_oof_label_does_not_widen_nested_container": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_oof_label_does_not_widen_nested_container",
-   "start_line": 3351,
-   "end_line": 3385,
+   "start_line": 3427,
+   "end_line": 3461,
    "type": "FUNCTION",
-   "content_hash": "9a7116452ad964b9"
+   "content_hash": "2eb972b1c30a3afc"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_br_after_block_is_a_line": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_br_after_block_is_a_line",
-   "start_line": 3386,
-   "end_line": 3405,
+   "start_line": 3462,
+   "end_line": 3481,
    "type": "FUNCTION",
-   "content_hash": "4f1e6a384626cfda"
+   "content_hash": "04a1bf84d0a8a83f"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_flex_item_contains_block_margins": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_flex_item_contains_block_margins",
-   "start_line": 3406,
-   "end_line": 3430,
+   "start_line": 3482,
+   "end_line": 3506,
    "type": "FUNCTION",
-   "content_hash": "c20e1350e5ab04ee"
+   "content_hash": "45b4433668866b19"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_flex_definite_height_centres_item": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_flex_definite_height_centres_item",
-   "start_line": 3431,
-   "end_line": 3454,
+   "start_line": 3507,
+   "end_line": 3530,
    "type": "FUNCTION",
-   "content_hash": "e3fa61aed1e7729f"
+   "content_hash": "78ad513aa0c64f3e"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_download_png_text_color_alpha_blends": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_download_png_text_color_alpha_blends",
-   "start_line": 3455,
-   "end_line": 3491,
+   "start_line": 3531,
+   "end_line": 3567,
    "type": "FUNCTION",
-   "content_hash": "7927d37b475e9e49"
+   "content_hash": "dac6dc3b3279305b"
   },
   "tests/test_freedom.c|tests/test_freedom.c::test_dump_layout_ua_margin_scales_with_font_size": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::test_dump_layout_ua_margin_scales_with_font_size",
-   "start_line": 3492,
-   "end_line": 3537,
+   "start_line": 3568,
+   "end_line": 3613,
    "type": "FUNCTION",
-   "content_hash": "bc53c2af06ffbbd6"
+   "content_hash": "09d1495f7df38508"
   },
   "tests/test_freedom.c|tests/test_freedom.c::main": {
    "file_path": "tests/test_freedom.c",
    "qualified_name": "tests/test_freedom.c::main",
-   "start_line": 3538,
-   "end_line": 3626,
+   "start_line": 3614,
+   "end_line": 3704,
    "type": "FUNCTION",
-   "content_hash": "5e8ac6d9c9aee12e"
+   "content_hash": "61ad6e45b17c6d6b"
   },
   "tests/test_hls.c|tests/test_hls.c::test_not_m3u8_returns_parse_error": {
    "file_path": "tests/test_hls.c",
@@ -51428,50 +51444,58 @@
   "tools/fbench.py|tools/fbench.py::load_baseline": {
    "file_path": "tools/fbench.py",
    "qualified_name": "tools/fbench.py::load_baseline",
-   "start_line": 29,
-   "end_line": 41,
+   "start_line": 46,
+   "end_line": 58,
    "type": "FUNCTION",
-   "content_hash": "4f3c55a9b0e47523"
+   "content_hash": "2405dfecf38f7589"
   },
   "tools/fbench.py|tools/fbench.py::load_current": {
    "file_path": "tools/fbench.py",
    "qualified_name": "tools/fbench.py::load_current",
-   "start_line": 42,
-   "end_line": 54,
+   "start_line": 59,
+   "end_line": 71,
    "type": "FUNCTION",
-   "content_hash": "fbbe2fa79893db6a"
+   "content_hash": "8aabc7df81e3c684"
   },
   "tools/fbench.py|tools/fbench.py::luma": {
    "file_path": "tools/fbench.py",
    "qualified_name": "tools/fbench.py::luma",
-   "start_line": 55,
-   "end_line": 58,
+   "start_line": 72,
+   "end_line": 75,
    "type": "FUNCTION",
-   "content_hash": "97be30c42989f7a3"
+   "content_hash": "f7b1107516026cea"
   },
   "tools/fbench.py|tools/fbench.py::bands": {
    "file_path": "tools/fbench.py",
    "qualified_name": "tools/fbench.py::bands",
-   "start_line": 59,
-   "end_line": 69,
+   "start_line": 76,
+   "end_line": 86,
    "type": "FUNCTION",
-   "content_hash": "8a3c81cb8844240d"
+   "content_hash": "a092814a5ce752b2"
   },
   "tools/fbench.py|tools/fbench.py::sbs": {
    "file_path": "tools/fbench.py",
    "qualified_name": "tools/fbench.py::sbs",
-   "start_line": 70,
-   "end_line": 88,
+   "start_line": 87,
+   "end_line": 105,
    "type": "FUNCTION",
-   "content_hash": "689fa4412f6f4d1e"
+   "content_hash": "77501df759df617a"
+  },
+  "tools/fbench.py|tools/fbench.py::publish_readme": {
+   "file_path": "tools/fbench.py",
+   "qualified_name": "tools/fbench.py::publish_readme",
+   "start_line": 106,
+   "end_line": 125,
+   "type": "FUNCTION",
+   "content_hash": "d6571a66eff85b51"
   },
   "tools/fbench.py|tools/fbench.py::main": {
    "file_path": "tools/fbench.py",
    "qualified_name": "tools/fbench.py::main",
-   "start_line": 89,
-   "end_line": 130,
+   "start_line": 126,
+   "end_line": 172,
    "type": "FUNCTION",
-   "content_hash": "be5b98cb50a27f2b"
+   "content_hash": "1a594e7c25334125"
   },
   "tools/ffgeom.py|tools/ffgeom.py::load_rows": {
    "file_path": "tools/ffgeom.py",
@@ -66238,6 +66262,7 @@
       "gui/browser_ui.c::lines_at",
       "gui/browser_ui.c::BALANCE_MAX_LINES",
       "gui/browser_ui.c::balanced_wrap_width",
+      "gui/browser_ui.c::item_inner_inset",
       "gui/browser_ui.c::measure_item_content_w",
       "gui/browser_ui.c::run_width_cap",
       "gui/browser_ui.c::def_width_cap",
@@ -66305,6 +66330,7 @@
       "gui/browser_ui.c::defer_flush",
       "gui/browser_ui.c::x",
       "gui/browser_ui.c::layout_float_band",
+      "gui/browser_ui.c::it",
       "gui/browser_ui.c::yet",
       "gui/browser_ui.c::layout_doc",
       "gui/browser_ui.c::chain",
@@ -66312,7 +66338,6 @@
       "gui/browser_ui.c::key",
       "gui/browser_ui.c::have",
       "gui/browser_ui.c::standalone",
-      "gui/browser_ui.c::it",
       "gui/browser_ui.c::count",
       "gui/browser_ui.c::approximation",
       "gui/browser_ui.c::margin",
@@ -67211,6 +67236,7 @@
       "tests/test_freedom.c::test_dump_layout_oof_subtree_real_layout",
       "tests/test_freedom.c::test_dump_layout_flex_item_sibling_boxes",
       "tests/test_freedom.c::test_dump_layout_nested_padded_item_opens_once",
+      "tests/test_freedom.c::test_dump_layout_float_pct_widths_resolve_once",
       "tests/test_freedom.c::test_dump_layout_sticky_footer",
       "tests/test_freedom.c::test_dump_layout_root_box_survives_replaced_run",
       "tests/test_freedom.c::bottom",
@@ -67824,6 +67850,7 @@
         "gui/browser_ui.c::lines_at",
         "gui/browser_ui.c::BALANCE_MAX_LINES",
         "gui/browser_ui.c::balanced_wrap_width",
+        "gui/browser_ui.c::item_inner_inset",
         "gui/browser_ui.c::measure_item_content_w",
         "gui/browser_ui.c::run_width_cap",
         "gui/browser_ui.c::def_width_cap",
@@ -67891,6 +67918,7 @@
         "gui/browser_ui.c::defer_flush",
         "gui/browser_ui.c::x",
         "gui/browser_ui.c::layout_float_band",
+        "gui/browser_ui.c::it",
         "gui/browser_ui.c::yet",
         "gui/browser_ui.c::layout_doc",
         "gui/browser_ui.c::chain",
@@ -67898,7 +67926,6 @@
         "gui/browser_ui.c::key",
         "gui/browser_ui.c::have",
         "gui/browser_ui.c::standalone",
-        "gui/browser_ui.c::it",
         "gui/browser_ui.c::count",
         "gui/browser_ui.c::approximation",
         "gui/browser_ui.c::margin",
@@ -68148,7 +68175,7 @@
      "components": [],
      "components_relations": [],
      "layer": "presentation",
-     "symbol_count": 583,
+     "symbol_count": 584,
      "top_symbols": [
       {
        "n": "_GNU_SOURCE",
@@ -68163,7 +68190,7 @@
        "k": "macro"
       }
      ],
-     "top_symbols_more": 568
+     "top_symbols_more": 569
     },
     {
      "name": "include",
@@ -69031,6 +69058,7 @@
         "tests/test_freedom.c::test_dump_layout_oof_subtree_real_layout",
         "tests/test_freedom.c::test_dump_layout_flex_item_sibling_boxes",
         "tests/test_freedom.c::test_dump_layout_nested_padded_item_opens_once",
+        "tests/test_freedom.c::test_dump_layout_float_pct_widths_resolve_once",
         "tests/test_freedom.c::test_dump_layout_sticky_footer",
         "tests/test_freedom.c::test_dump_layout_root_box_survives_replaced_run",
         "tests/test_freedom.c::bottom",
@@ -69272,7 +69300,7 @@
      "components": [],
      "components_relations": [],
      "layer": "testing",
-     "symbol_count": 306,
+     "symbol_count": 307,
      "top_symbols": [
       {
        "n": "dbl_eq",
@@ -69287,7 +69315,7 @@
        "k": "function"
       }
      ],
-     "top_symbols_more": 283
+     "top_symbols_more": 284
     }
    ],
    "components_relations": [
@@ -72589,7 +72617,7 @@
     }
    ],
    "layer": "utility",
-   "symbol_count": 1260,
+   "symbol_count": 1262,
    "top_symbols": [
     {
      "n": "FREEDOM_IMAGE_DECODE_H",
@@ -72604,7 +72632,7 @@
      "k": "enum"
     }
    ],
-   "top_symbols_more": 1148,
+   "top_symbols_more": 1150,
    "hub": false
   },
   {
@@ -100043,7 +100071,7 @@
      "target": "src/css_gradient.c|src/css_gradient.c::gradient",
      "call_sites": [
       {
-       "line": 3138,
+       "line": 3214,
        "column": 46
       }
      ],
@@ -100054,7 +100082,7 @@
      "target": "tests/test_css_color.c|tests/test_css_color.c::rgba",
      "call_sites": [
       {
-       "line": 3458,
+       "line": 3534,
        "column": 44
       }
      ],
@@ -100066,9 +100094,9 @@
    "relation": "calls into",
    "src_name": "include: browser_ui",
    "dst_name": "include: page_view",
-   "evidence": "6 imports, 158 calls across the boundary",
+   "evidence": "6 imports, 162 calls across the boundary",
    "import_count": 6,
-   "call_count": 158,
+   "call_count": 162,
    "key_edges": [
     {
      "source": "gui/browser_ui.c|gui/browser_ui.c::ui_menu_action",

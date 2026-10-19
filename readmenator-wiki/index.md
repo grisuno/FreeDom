@@ -18,13 +18,13 @@ Open work clusters around documentation (13% file coverage), 0 security findings
 | Metric | Value |
 |--------|-------|
 | Files | 276 |
-| Symbols | 6647 |
+| Symbols | 6650 |
 | Resolved imports | 527 |
 | Languages | c, h, py, sh |
 | Communities | 11 |
 | Doc coverage | 13% (37/276 files) |
 | Security findings | 0 |
-| Estimated read cost | ~195455 tokens (chars/4, offline so $0) |
+| Estimated read cost | ~195749 tokens (chars/4, offline so $0) |
 | Large files (>256KB, maybe generated) | 4: `browser_ui.c`, `css.c`, `page_view.c`, `test_css.c` |
 
 ## Reading Order
@@ -56,7 +56,7 @@ readmenator query "<question>" --target freedom-0.0.3
 
 | File | Score |
 |------|-------|
-| `gui/browser_ui.c` | 150.3 (large, maybe generated) |
+| `gui/browser_ui.c` | 150.4 (large, maybe generated) |
 | `include/css.h` | 87.8 |
 | `src/tab.c` | 58.2 |
 | `src/css.c` | 54.4 (large, maybe generated) |

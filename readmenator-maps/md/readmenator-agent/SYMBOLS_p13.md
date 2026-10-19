@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_build_boxdeco_shadow_outline` | function | `tests/test_page_view.c:2738` | `static void test_build_boxdeco_shadow_outline(void **state)` |
+| `test_build_boxdeco_shared_id_within_block` | function | `tests/test_page_view.c:2977` | `static void test_build_boxdeco_shared_id_within_block(void **state)` |
 | `test_build_boxdeco_sibling_blocks_distinct_ids` | function | `tests/test_page_view.c:2959` | `static void test_build_boxdeco_sibling_blocks_distinct_ids(void **state)` |
 | `test_build_boxdeco_visibility_overflow_cursor` | function | `tests/test_page_view.c:2761` | `static void test_build_boxdeco_visibility_overflow_cursor(void **state)` |
 | `test_build_boxdef_carries_node_id` | function | `tests/test_page_view.c:2553` | `static void test_build_boxdef_carries_node_id(void **state)` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_worker_args_not_worker` | function | `tests/test_tab.c:2817` | `static void test_worker_args_not_worker(void **state)` |
 | `test_worker_args_null_safe` | function | `tests/test_tab.c:2839` | `static void test_worker_args_null_safe(void **state)` |
 | `test_worker_args_valid` | function | `tests/test_tab.c:2808` | `static void test_worker_args_valid(void **state)` |
-| `test_xhr_undefined_when_net_not_allowed` | function | `tests/test_tab.c:1616` | `static void test_xhr_undefined_when_net_not_allowed(void **state)` |
-| `test_xhr_works_when_net_allowed` | function | `tests/test_tab.c:1592` | `static void test_xhr_works_when_net_allowed(void **state)` |
 
 Next: [SYMBOLS_p14.md](SYMBOLS_p14.md)

@@ -59,15 +59,17 @@ the page. Both engines ran under the same rules: author CSS on, JavaScript off, 
 third-party network. Each pair shows the top of the page; the number is the
 `make parity` divergence (lower is better, 0 = identical geometry).
 
-| Hacker News (3.42) | Wikipedia (4.20) |
+| Hacker News (3.04) | Wikipedia (5.05) |
 | :-: | :-: |
 | ![Hacker News](docs/img/compare-hackernews.png) | ![Wikipedia](docs/img/compare-wikipedia.png) |
-| **andreagrandi.it (6.12)** | **Hugging Face (10.12)** |
+| **andreagrandi.it (3.80)** | **Hugging Face (5.16)** |
 | ![andreagrandi.it](docs/img/compare-site-andreagrandi.png) | ![Hugging Face](docs/img/compare-huggingface.png) |
-| **GitHub (13.39)** | **Slashdot (17.48): still the hardest page** |
+| **GitHub (9.36)** | **Slashdot (17.56): still the hardest page** |
 | ![GitHub](docs/img/compare-site-github.png) | ![Slashdot](docs/img/compare-slashdot.png) |
+| **Discord (1.93)** | **GitLab (6.78)** |
+| ![Discord](docs/img/compare-site-discord.png) | ![GitLab](docs/img/compare-site-gitlab.png) |
 
-These images are regenerated from `build/parity/*.{fd,ff}.png` after `make parity`. The
+These images and scores are regenerated automatically by `make fbench` (`tools/fbench.py`) from `build/parity/*.{fd,ff}.png`. The
 measurement method is in [spec/parity.md](spec/parity.md).
 
 ## Documentation

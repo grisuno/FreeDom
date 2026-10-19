@@ -3,7 +3,7 @@
  "format": "jsonl",
  "meta": {
   "modules": 204,
-  "entities": 3199,
+  "entities": 3202,
   "languages": {
    "c": 108,
    "h": 82,
@@ -11,9 +11,9 @@
    "sh": 5
   },
   "kinds": {
-   "constant": 12,
+   "constant": 14,
    "enum": 147,
-   "function": 1637,
+   "function": 1638,
    "macro": 821,
    "method": 22,
    "module": 204,
@@ -27,8 +27,8 @@
  },
  "coverage": {
   "overall": {
-   "documented": 1265,
-   "total": 3180,
+   "documented": 1266,
+   "total": 3181,
    "percent": 39.8
   },
   "by_kind": {
@@ -38,9 +38,9 @@
     "percent": 53.7
    },
    "function": {
-    "documented": 675,
-    "total": 1637,
-    "percent": 41.2
+    "documented": 676,
+    "total": 1638,
+    "percent": 41.3
    },
    "macro": {
     "documented": 286,
@@ -1040,9 +1040,9 @@
     "percent": 75.0
    },
    "tools/fbench.py": {
-    "documented": 1,
-    "total": 7,
-    "percent": 14.3
+    "documented": 2,
+    "total": 8,
+    "percent": 25.0
    },
    "tools/ffgeom.py": {
     "documented": 2,
@@ -2065,7 +2065,7 @@
   {
    "uid": "tools/fbench.py",
    "path": "modules/tools.fbench.py.jsonl",
-   "entities": 9
+   "entities": 12
   },
   {
    "uid": "tools/ffgeom.py",

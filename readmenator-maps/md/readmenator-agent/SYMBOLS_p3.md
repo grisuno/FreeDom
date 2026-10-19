@@ -3,6 +3,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `FREEDOM_CSS_CHAIN_H` | macro | `include/css_chain.h:2` | `#define FREEDOM_CSS_CHAIN_H` |
 | `box` | function | `include/css_chain.h:72` | `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...` |
 | `cch_element_matches` | function | `include/css_chain.h:69` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);` |
 | `cvr_chain` | struct | `include/css_chain.h:51` | `` |
@@ -495,6 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `MD_MAX_CATCHUP_READS` | macro | `include/media_decoder.h:65` | `#define MD_MAX_CATCHUP_READS` |
 | `MD_MAX_SEGMENT_BYTES` | macro | `include/media_decoder.h:46` | `#define MD_MAX_SEGMENT_BYTES` |
 | `MD_PACE_MAX_LAG_MS` | macro | `include/media_decoder.h:58` | `#define MD_PACE_MAX_LAG_MS` |
-| `MD_PACE_MAX_STEP_MS` | macro | `include/media_decoder.h:62` | `#define MD_PACE_MAX_STEP_MS` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

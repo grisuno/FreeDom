@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_extract_stylesheets_rel_tokens` | function | `tests/test_html_parse.c:337` | `static void test_extract_stylesheets_rel_tokens(void **state)` |
+| `test_free_null_and_double` | function | `tests/test_html_parse.c:443` | `static void test_free_null_and_double(void **state)` |
 | `test_parse_malformed_does_not_crash` | function | `tests/test_html_parse.c:431` | `static void test_parse_malformed_does_not_crash(void **state)` |
 | `test_parse_rejects_null_args` | function | `tests/test_html_parse.c:72` | `static void test_parse_rejects_null_args(void **state)` |
 | `test_parse_rejects_oversize` | function | `tests/test_html_parse.c:80` | `static void test_parse_rejects_oversize(void **state)` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_build_boxdeco_h_margin_alone_creates_box` | function | `tests/test_page_view.c:2509` | `static void test_build_boxdeco_h_margin_alone_creates_box(void **state)` |
 | `test_build_boxdeco_h_margin_zero_auto_no_box` | function | `tests/test_page_view.c:2529` | `static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state)` |
 | `test_build_boxdeco_min_content_height_is_auto` | function | `tests/test_page_view.c:2612` | `static void test_build_boxdeco_min_content_height_is_auto(void **state)` |
-| `test_build_boxdeco_shadow_outline` | function | `tests/test_page_view.c:2738` | `static void test_build_boxdeco_shadow_outline(void **state)` |
-| `test_build_boxdeco_shared_id_within_block` | function | `tests/test_page_view.c:2977` | `static void test_build_boxdeco_shared_id_within_block(void **state)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

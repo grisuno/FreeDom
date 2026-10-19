@@ -33,12 +33,13 @@ Depends on: `include/zoom.h`
 - `zm_apply` (function) `src/zoom.c:44` `double zm_apply(double base_px, int pct)`
 
 ## tools/fbench.py
-- `load_baseline` (function) `tools/fbench.py:29` `def load_baseline()`
-- `load_current` (function) `tools/fbench.py:42` `def load_current()`
-- `luma` (function) `tools/fbench.py:55` `def luma(img)`
-- `bands` (function) `tools/fbench.py:59` `def bands(fd, ff, band)`
-- `sbs` (function) `tools/fbench.py:70` `def sbs(name, start, nrows)`
-- `main` (function) `tools/fbench.py:89` `def main()`
+- `load_baseline` (function) `tools/fbench.py:46` `def load_baseline()`
+- `load_current` (function) `tools/fbench.py:59` `def load_current()`
+- `luma` (function) `tools/fbench.py:72` `def luma(img)`
+- `bands` (function) `tools/fbench.py:76` `def bands(fd, ff, band)`
+- `sbs` (function) `tools/fbench.py:87` `def sbs(name, start, nrows)`
+- `publish_readme` (function) `tools/fbench.py:106` `def publish_readme(name, score)` -- Rewrite the README picture of `name` and the score printed beside its label.
+- `main` (function) `tools/fbench.py:126` `def main()`
 
 ## tools/ffgeom.py
 - `load_rows` (function) `tools/ffgeom.py:116` `def load_rows(path)`

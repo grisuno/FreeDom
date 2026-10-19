@@ -29,7 +29,7 @@
 | `fuzz/fuzz_url.c` | - | fuzz | 2 | 0 |
 | `fuzz/fuzz_web_storage.c` | - | fuzz | 0 | 0 |
 | `fuzz/fuzz_webfont.c` | libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). | fuzz | 1 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 583 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 584 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 10 | 2 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -225,7 +225,7 @@
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
 | `tests/test_freebug.c` | - | tests | 13 | 0 |
-| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 89 | 0 |
+| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 90 | 0 |
 | `tests/test_hls.c` | - | tests | 16 | 0 |
 | `tests/test_hostblock.c` | - | tests | 22 | 0 |
 | `tests/test_hostedit.c` | - | tests | 11 | 0 |
@@ -268,7 +268,7 @@
 | `tests/test_webfont_load.c` | test_b64: if (b == NULL) { fclose(f); return NULL; } if (fread(b, 1, (size_t)sz, f) !=... | tests | 16 | 0 |
 | `tests/test_ws_hub.c` | wait_notify: #include <string.h> #include <cmocka.h> #include "ws_hub.h" typedef struct rec {... | tests | 13 | 0 |
 | `tests/test_zoom.c` | - | tests | 11 | 0 |
-| `tools/fbench.py` | fbench -- turn the PNG pairs `make parity` leaves behind into something you can act on. | tools | 6 | 0 |
+| `tools/fbench.py` | fbench -- turn the PNG pairs `make parity` leaves behind into something you can act on. | tools | 7 | 0 |
 | `tools/ffgeom.py` | ffgeom -- Firefox geometry as TEXT, no image reading. | tools | 12 | 0 |
 | `tools/ffq.py` | ffq -- ask Firefox what it computed, as TEXT. | tools | 1 | 0 |
 | `tools/ffshot.py` | ffshot -- full-page Firefox screenshot at a FIXED viewport, for `make parity`/`make wpt`. | tools | 1 | 0 |

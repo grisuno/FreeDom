@@ -2199,6 +2199,7 @@
 - [`pt_stage_stats`](modules/include.perf_trace.h.md#pt_stage_stats) struct in `include/perf_trace.h`
 - [`pt_trace`](modules/include.perf_trace.h.md#pt_trace) struct in `include/perf_trace.h`
 - [`ptrmap`](modules/src.dom.c.md#ptrmap) struct in `src/dom.c`
+- [`publish_readme`](modules/tools.fbench.py.md#publish_readme) function in `tools.fbench`
 - [`pv_add_box_def`](modules/src.page_view.c.md#pv_add_box_def) function in `src/page_view.c`
 - [`pv_add_cont_def`](modules/src.page_view.c.md#pv_add_cont_def) function in `src/page_view.c`
 - [`pv_append`](modules/src.page_view.c.md#pv_append) function in `src/page_view.c`
@@ -2433,6 +2434,8 @@
 - [`RDP_TRACKER_MAX_DIM`](modules/include.render_policy.h.md#rdp_tracker_max_dim) macro in `include/render_policy.h`
 - [`read_full`](modules/include.util.h.md#read_full) function in `include/util.h`
 - [`read_fuzz_stats`](modules/app.py.md#read_fuzz_stats) function in `app`
+- [`README_PAGES`](modules/tools.fbench.py.md#readme_pages) constant in `tools.fbench`
+- [`README_ROWS`](modules/tools.fbench.py.md#readme_rows) constant in `tools.fbench`
 - [`reads`](modules/include.js_location.h.md#reads) function in `include/js_location.h`
 - [`realm`](modules/include.js_trusted.h.md#realm) function in `include/js_trusted.h`
 - [`rect`](modules/gui.browser_ui.c.md#rect) function in `gui/browser_ui.c`
