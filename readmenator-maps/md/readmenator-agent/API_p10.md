@@ -37,9 +37,9 @@ Depends on: `include/zoom.h`
 - `load_current` (function) `tools/fbench.py:59` `def load_current()`
 - `luma` (function) `tools/fbench.py:72` `def luma(img)`
 - `bands` (function) `tools/fbench.py:76` `def bands(fd, ff, band)`
-- `sbs` (function) `tools/fbench.py:87` `def sbs(name, start, nrows)`
-- `publish_readme` (function) `tools/fbench.py:106` `def publish_readme(name, score)` -- Rewrite the README picture of `name` and the score printed beside its label.
-- `main` (function) `tools/fbench.py:126` `def main()`
+- `sbs` (function) `tools/fbench.py:88` `def sbs(name, start, nrows)`
+- `publish_readme` (function) `tools/fbench.py:107` `def publish_readme(name, score)` -- Rewrite the README picture of `name` and the score printed beside its label.
+- `main` (function) `tools/fbench.py:127` `def main()`
 
 ## tools/ffgeom.py
 - `load_rows` (function) `tools/ffgeom.py:116` `def load_rows(path)`

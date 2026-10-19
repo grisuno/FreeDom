@@ -188,9 +188,9 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `load_baseline` | function | `tools/fbench.py:46` | `def load_baseline()` |
 | `load_current` | function | `tools/fbench.py:59` | `def load_current()` |
 | `luma` | function | `tools/fbench.py:72` | `def luma(img)` |
-| `main` | function | `tools/fbench.py:126` | `def main()` |
-| `publish_readme` | function | `tools/fbench.py:106` | `def publish_readme(name, score)` |
-| `sbs` | function | `tools/fbench.py:87` | `def sbs(name, start, nrows)` |
+| `main` | function | `tools/fbench.py:127` | `def main()` |
+| `publish_readme` | function | `tools/fbench.py:107` | `def publish_readme(name, score)` |
+| `sbs` | function | `tools/fbench.py:88` | `def sbs(name, start, nrows)` |
 | `_append_probe` | function | `tools/ffgeom.py:254` | `def _append_probe(src, script)` |
 | `_word_reader` | function | `tools/ffgeom.py:173` | `def _word_reader(path)` |
 | `bit` | function | `tools/ffgeom.py:206` | `def bit(grid_row, cell, origin)` |

@@ -1757,6 +1757,37 @@ static void link_cont_chain(pv_container_reg *reg, pv_item_track *tr,
     }
 }
 
+/* A data table's grid container is synthesised from its cells, so resolve_context never
+ * sees it on a run's ancestor chain. Link it as an item of the container that encloses
+ * the cell (chain[0]): the chain with the table prepended is exactly what
+ * link_cont_chain consumes, with every per-item array shifted by one. Written once per
+ * table (parent_id is the "already linked" mark). */
+static void link_table_cont(pv_container_reg *reg, pv_item_track *tr, int cid,
+                            const pv_cont_info *cont) {
+    if (reg == NULL || tr == NULL || cont == NULL || cont->anc_n < 1) return;
+    if (cid < 0 || (size_t)cid >= reg->count || reg->def[cid].parent_id >= 0) return;
+    if (cont->anc_id[0] == cid) return;
+    pv_cont_info ext = *cont;
+    int n = cont->anc_n < PV_CONT_DEPTH ? cont->anc_n : PV_CONT_DEPTH - 1;
+    for (int a = n; a > 0; --a) {
+        ext.anc_id[a] = cont->anc_id[a - 1];
+        ext.anc_item[a] = cont->anc_item[a - 1];
+        ext.anc_item_grow[a] = cont->anc_item_grow[a - 1];
+        ext.anc_item_shrink[a] = cont->anc_item_shrink[a - 1];
+        ext.anc_item_basis[a] = cont->anc_item_basis[a - 1];
+        ext.anc_item_order[a] = cont->anc_item_order[a - 1];
+        ext.anc_item_align[a] = cont->anc_item_align[a - 1];
+        ext.anc_item_jself[a] = cont->anc_item_jself[a - 1];
+        ext.anc_item_mauto[a] = cont->anc_item_mauto[a - 1];
+        memcpy(ext.anc_item_gl[a], cont->anc_item_gl[a - 1], sizeof ext.anc_item_gl[a]);
+    }
+    ext.anc_id[0] = cid;
+    ext.anc_item[0] = NULL;
+    ext.anc_n = n + 1;
+    link_cont_chain(reg, tr, &ext);
+}
+
+
 
 /* Stamps the last run with its element's layout annotation: container membership
  * and item slot, flex/grid item properties, float band and author box. Shared by a
@@ -4513,6 +4544,11 @@ static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_do
                                            const pv_flow_reg *fr) {
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
         if (node_table_role(p, fr) == BX_TROLE_TABLE) return p;
+        /* `table{display:block}` blockifies the element, but its rows and cells still
+         * form an anonymous table (CSS 2.1 17.2.1): the element is the table's identity. */
+        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT &&
+            lxb_dom_element_tag_id(lxb_dom_interface_element((lxb_dom_node_t *)p)) == LXB_TAG_TABLE)
+            return p;
         if (p == base) break;
     }
     return NULL;
@@ -5281,6 +5317,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 /* Every collected cell is its own grid item (the cell node is the
                  * item identity), so item-grouping downstream never merges cells. */
                 pv_set_cont_item(v, item_ordinal(&items, cid, n));
+                link_table_cont(&reg, &items, cid, &cu_cont);
                 pv_set_float(v, cu_cont.float_side, cu_cont.float_id, cu_cont.float_clear,
                          cu_cont.float_ml, cu_cont.float_ml_pct,
                          cu_cont.float_mr, cu_cont.float_mr_pct,

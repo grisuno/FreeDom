@@ -973,6 +973,16 @@ salto (no se parte en dos rects), y su rect no sigue el desplazamiento que `text
 aplica a la línea al pintar — el caso centrado frecuente (todos los hijos `inline-block`) ya
 lo cubre la fila anónima.
 
+### Tabla de datos dentro de un contenedor (2026-10-19)
+
+**Dado** un `div.container{display:grid}` cuyo ítem contiene una `<table>` de datos
+(el grid sintetizado de la tabla es un contenedor más), **cuando** se construye la vista,
+**entonces** el descriptor de la tabla lleva `parent_id` = el contenedor que la encierra y
+`parent_item` = la ranura de ítem del ancestro que la contiene. Sin ese enlace el grid
+externo ve a la tabla como un contenedor **hermano**, parte su banda en cada tabla y el
+`aside` de la segunda columna cae a la banda final (animate.style: sidebar 15 000 px más
+abajo, 564 px de altura de más). Verificado contra Firefox con la sonda `grid-calc-aside`.
+
 ### Contenedores flex/grid ANIDADOS (2026-07-31)
 
 Un `header{display:flex}` que contiene `nav > ul{display:flex}` se maqueta como **un**

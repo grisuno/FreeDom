@@ -1,7 +1,7 @@
 {
  "metadata": {
-  "generated_at": "2026-10-19T04:16:35.559209+00:00",
-  "source_tree_hash": "cf301915c635b058318269fdc0416df2a71488f8d4f77ae5dcd744d36592694b",
+  "generated_at": "2026-10-19T20:21:58.865991+00:00",
+  "source_tree_hash": "d662719fce9cc8703bf9ad9396015cacda26b77fcbe0b778b78146355ad7accc",
   "repo_name": "freedom-0.0.3",
   "depth_level": 2,
   "depth_cap": 3,
@@ -28084,10 +28084,10 @@
   "src/page_view.c|src/page_view.c::paints": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::paints",
-   "start_line": 2960,
-   "end_line": 2985,
+   "start_line": 2991,
+   "end_line": 3016,
    "type": "FUNCTION",
-   "content_hash": "fc167e520cec3b85"
+   "content_hash": "ef33429ad1ce2777"
   },
   "src/page_view.c|src/page_view.c::ua_tag_of": {
    "file_path": "src/page_view.c",
@@ -28349,993 +28349,993 @@
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::container_id",
    "start_line": 1709,
-   "end_line": 1765,
+   "end_line": 1796,
    "type": "FUNCTION",
    "content_hash": "f7cda4149ca261fc"
   },
   "src/page_view.c|src/page_view.c::annotate_flow_run": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::annotate_flow_run",
-   "start_line": 1766,
-   "end_line": 1797,
+   "start_line": 1797,
+   "end_line": 1828,
    "type": "FUNCTION",
-   "content_hash": "2dc4d8bbb45d7d95"
+   "content_hash": "9ea6ad9132850990"
   },
   "src/page_view.c|src/page_view.c::pv_box_reg": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_box_reg",
-   "start_line": 1798,
-   "end_line": 1807,
+   "start_line": 1829,
+   "end_line": 1838,
    "type": "CLASS",
-   "content_hash": "8c27e3f21478fcf4"
+   "content_hash": "e1616c8c40303498"
   },
   "src/page_view.c|src/page_view.c::trying": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::trying",
-   "start_line": 1808,
-   "end_line": 1836,
+   "start_line": 1839,
+   "end_line": 1867,
    "type": "FUNCTION",
-   "content_hash": "7ab3a5b2972488b9"
+   "content_hash": "dadd43f443b3cc91"
   },
   "src/page_view.c|src/page_view.c::box_reg_free": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::box_reg_free",
-   "start_line": 1837,
-   "end_line": 1845,
+   "start_line": 1868,
+   "end_line": 1876,
    "type": "FUNCTION",
-   "content_hash": "7a7b7d344d0693a3"
+   "content_hash": "1c6ccff7d51c6f57"
   },
   "src/page_view.c|src/page_view.c::boxdef_from_style": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::boxdef_from_style",
-   "start_line": 1846,
-   "end_line": 1946,
+   "start_line": 1877,
+   "end_line": 1977,
    "type": "FUNCTION",
-   "content_hash": "2b4886563d22377a"
+   "content_hash": "823717465a2bc4d9"
   },
   "src/page_view.c|src/page_view.c::here": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::here",
-   "start_line": 1947,
-   "end_line": 1990,
+   "start_line": 1978,
+   "end_line": 2021,
    "type": "FUNCTION",
-   "content_hash": "e3e71eb2d0894e80"
+   "content_hash": "076b80a481d5174e"
   },
   "src/page_view.c|src/page_view.c::glyphs": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::glyphs",
-   "start_line": 1991,
-   "end_line": 2084,
+   "start_line": 2022,
+   "end_line": 2115,
    "type": "FUNCTION",
-   "content_hash": "5083ac1e3c7d0ca9"
+   "content_hash": "54e0877f21d49c93"
   },
   "src/page_view.c|src/page_view.c::box_reg_id": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::box_reg_id",
-   "start_line": 2085,
-   "end_line": 2113,
+   "start_line": 2116,
+   "end_line": 2144,
    "type": "FUNCTION",
-   "content_hash": "d206daa0a9489ec7"
+   "content_hash": "52dd56c9a604da5e"
   },
   "src/page_view.c|src/page_view.c::pseudo_box_reg": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pseudo_box_reg",
-   "start_line": 2114,
-   "end_line": 2134,
+   "start_line": 2145,
+   "end_line": 2165,
    "type": "FUNCTION",
-   "content_hash": "f4c9e86cf3fca000"
+   "content_hash": "dae77ad41ced9029"
   },
   "src/page_view.c|src/page_view.c::pseudo_generates_box": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pseudo_generates_box",
-   "start_line": 2135,
-   "end_line": 2147,
+   "start_line": 2166,
+   "end_line": 2178,
    "type": "FUNCTION",
-   "content_hash": "4d4c7843fd8faedc"
+   "content_hash": "b4ac87b2c9216f73"
   },
   "src/page_view.c|src/page_view.c::pseudo_is_oof": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pseudo_is_oof",
-   "start_line": 2148,
-   "end_line": 2151,
+   "start_line": 2179,
+   "end_line": 2182,
    "type": "FUNCTION",
-   "content_hash": "53edfad5efadef13"
+   "content_hash": "fade074ff479916f"
   },
   "src/page_view.c|src/page_view.c::pseudo_is_block": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pseudo_is_block",
-   "start_line": 2152,
-   "end_line": 2157,
+   "start_line": 2183,
+   "end_line": 2188,
    "type": "FUNCTION",
-   "content_hash": "83031ce357ea5470"
+   "content_hash": "26cb3f078f3542cc"
   },
   "src/page_view.c|src/page_view.c::pseudo_key": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pseudo_key",
-   "start_line": 2158,
-   "end_line": 2176,
+   "start_line": 2189,
+   "end_line": 2207,
    "type": "FUNCTION",
-   "content_hash": "db1b1ad1c087d656"
+   "content_hash": "3ebd3912d45d37bd"
   },
   "src/page_view.c|src/page_view.c::chain": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::chain",
-   "start_line": 2177,
-   "end_line": 2177,
+   "start_line": 2208,
+   "end_line": 2208,
    "type": "FUNCTION",
-   "content_hash": "575dbca484c8f8f9"
+   "content_hash": "f54072cf8124af36"
   },
   "src/page_view.c|src/page_view.c::pv_var_node": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_var_node",
-   "start_line": 2177,
-   "end_line": 2185,
+   "start_line": 2208,
+   "end_line": 2216,
    "type": "CLASS",
-   "content_hash": "2df5335707555023"
+   "content_hash": "142cfb79c71f9361"
   },
   "src/page_view.c|src/page_view.c::pv_def_h": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_def_h",
-   "start_line": 2186,
-   "end_line": 2190,
+   "start_line": 2217,
+   "end_line": 2221,
    "type": "CLASS",
-   "content_hash": "0f81fecfb47d2073"
+   "content_hash": "17180eaa03d1f50c"
   },
   "src/page_view.c|src/page_view.c::pv_style_cache": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_style_cache",
-   "start_line": 2191,
-   "end_line": 2213,
+   "start_line": 2222,
+   "end_line": 2244,
    "type": "CLASS",
-   "content_hash": "a56373dcd999d971"
+   "content_hash": "69984991eb9dbbb9"
   },
   "src/page_view.c|src/page_view.c::pv_ptr_hash": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_ptr_hash",
-   "start_line": 2214,
-   "end_line": 2221,
+   "start_line": 2245,
+   "end_line": 2252,
    "type": "FUNCTION",
-   "content_hash": "a30a99749a315bb4"
+   "content_hash": "a157928995fa3305"
   },
   "src/page_view.c|src/page_view.c::pv_cache_reindex": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_cache_reindex",
-   "start_line": 2222,
-   "end_line": 2231,
+   "start_line": 2253,
+   "end_line": 2262,
    "type": "FUNCTION",
-   "content_hash": "c3d615098c5f0586"
+   "content_hash": "042a5617d25f5bc7"
   },
   "src/page_view.c|src/page_view.c::pv_style_cache_init": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_style_cache_init",
-   "start_line": 2232,
-   "end_line": 2251,
+   "start_line": 2263,
+   "end_line": 2282,
    "type": "FUNCTION",
-   "content_hash": "4c6f34501705f86a"
+   "content_hash": "896a2807e6907619"
   },
   "src/page_view.c|src/page_view.c::pv_style_cache_free": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_style_cache_free",
-   "start_line": 2252,
-   "end_line": 2266,
+   "start_line": 2283,
+   "end_line": 2297,
    "type": "FUNCTION",
-   "content_hash": "18aed09c04186020"
+   "content_hash": "a920adaf79923cab"
   },
   "src/page_view.c|src/page_view.c::pv_cache_find": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_cache_find",
-   "start_line": 2267,
-   "end_line": 2281,
+   "start_line": 2298,
+   "end_line": 2312,
    "type": "FUNCTION",
-   "content_hash": "ba3c5a19a731e1c6"
+   "content_hash": "bad5bc85e123d7f1"
   },
   "src/page_view.c|src/page_view.c::pv_cached_font_px": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_cached_font_px",
-   "start_line": 2282,
-   "end_line": 2286,
+   "start_line": 2313,
+   "end_line": 2317,
    "type": "FUNCTION",
-   "content_hash": "bca57d6df324f441"
+   "content_hash": "bf6b76236e3df1c5"
   },
   "src/page_view.c|src/page_view.c::pv_cache_put": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_cache_put",
-   "start_line": 2287,
-   "end_line": 2330,
+   "start_line": 2318,
+   "end_line": 2361,
    "type": "FUNCTION",
-   "content_hash": "5c660cfd8788524d"
+   "content_hash": "8029d41ce5dbb48d"
   },
   "src/page_view.c|src/page_view.c::pv_var_push": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_var_push",
-   "start_line": 2331,
-   "end_line": 2351,
+   "start_line": 2362,
+   "end_line": 2382,
    "type": "FUNCTION",
-   "content_hash": "6287fac3cb1f4388"
+   "content_hash": "26a25295ea68f5ea"
   },
   "src/page_view.c|src/page_view.c::pv_parent_element": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_parent_element",
-   "start_line": 2352,
-   "end_line": 2424,
+   "start_line": 2383,
+   "end_line": 2455,
    "type": "FUNCTION",
-   "content_hash": "c6e313a91dc3d0cc"
+   "content_hash": "ed60251d661ab21b"
   },
   "src/page_view.c|src/page_view.c::cached_element_style": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::cached_element_style",
-   "start_line": 2425,
-   "end_line": 2528,
+   "start_line": 2456,
+   "end_line": 2559,
    "type": "FUNCTION",
-   "content_hash": "7953a6002bd8a2b8"
+   "content_hash": "c44d5f4bc6f2cc69"
   },
   "src/page_view.c|src/page_view.c::col_free_share": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::col_free_share",
-   "start_line": 2529,
-   "end_line": 2534,
+   "start_line": 2560,
+   "end_line": 2565,
    "type": "FUNCTION",
-   "content_hash": "aeb0191091c08401"
+   "content_hash": "8af6841728d52e89"
   },
   "src/page_view.c|src/page_view.c::inherited_text_color": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::inherited_text_color",
-   "start_line": 2535,
-   "end_line": 2545,
+   "start_line": 2566,
+   "end_line": 2576,
    "type": "FUNCTION",
-   "content_hash": "beda3d96578cc6c8"
+   "content_hash": "09e9d0b2a7db2420"
   },
   "src/page_view.c|src/page_view.c::box_reg_id_ex": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::box_reg_id_ex",
-   "start_line": 2546,
-   "end_line": 2550,
+   "start_line": 2577,
+   "end_line": 2581,
    "type": "FUNCTION",
-   "content_hash": "db07c6a81d4ca0c2"
+   "content_hash": "dfcb71e35ec10d7c"
   },
   "src/page_view.c|src/page_view.c::none": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::none",
-   "start_line": 2551,
-   "end_line": 2569,
+   "start_line": 2582,
+   "end_line": 2600,
    "type": "FUNCTION",
-   "content_hash": "9ad9599d8bd6cf83"
+   "content_hash": "63afc9e2c84b3be7"
   },
   "src/page_view.c|src/page_view.c::cached_pseudo_style": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::cached_pseudo_style",
-   "start_line": 2570,
-   "end_line": 2587,
+   "start_line": 2601,
+   "end_line": 2618,
    "type": "FUNCTION",
-   "content_hash": "3e50b95ae7e56c0c"
+   "content_hash": "3abf5639cc004e60"
   },
   "src/page_view.c|src/page_view.c::subtree_is_oof": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::subtree_is_oof",
-   "start_line": 2588,
-   "end_line": 2607,
+   "start_line": 2619,
+   "end_line": 2638,
    "type": "FUNCTION",
-   "content_hash": "9113e50e144c2198"
+   "content_hash": "b17d258d8a4b1ef2"
   },
   "src/page_view.c|src/page_view.c::size": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::size",
-   "start_line": 2608,
-   "end_line": 2616,
+   "start_line": 2639,
+   "end_line": 2647,
    "type": "FUNCTION",
-   "content_hash": "2be74aad0019c727"
+   "content_hash": "50a6256846af17a8"
   },
   "src/page_view.c|src/page_view.c::css_replaced_h_fixed": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::css_replaced_h_fixed",
-   "start_line": 2617,
-   "end_line": 2634,
+   "start_line": 2648,
+   "end_line": 2665,
    "type": "FUNCTION",
-   "content_hash": "42c32c754ba00c25"
+   "content_hash": "4a77ded1a38916d1"
   },
   "src/page_view.c|src/page_view.c::builder": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::builder",
-   "start_line": 2635,
-   "end_line": 2663,
+   "start_line": 2666,
+   "end_line": 2694,
    "type": "FUNCTION",
-   "content_hash": "c0046f3658e451c0"
+   "content_hash": "05ff53eceef8eb6c"
   },
   "src/page_view.c|src/page_view.c::css_to_fx_justify": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::css_to_fx_justify",
-   "start_line": 2664,
-   "end_line": 2682,
+   "start_line": 2695,
+   "end_line": 2713,
    "type": "FUNCTION",
-   "content_hash": "9d391d7bc51b6822"
+   "content_hash": "a2596eb29239252c"
   },
   "src/page_view.c|src/page_view.c::is_bold_tag": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::is_bold_tag",
-   "start_line": 2683,
-   "end_line": 2687,
+   "start_line": 2714,
+   "end_line": 2718,
    "type": "FUNCTION",
-   "content_hash": "aa6fc2b50cdcb37d"
+   "content_hash": "b93e0ed8f61c813d"
   },
   "src/page_view.c|src/page_view.c::is_italic_tag": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::is_italic_tag",
-   "start_line": 2688,
-   "end_line": 2720,
+   "start_line": 2719,
+   "end_line": 2751,
    "type": "FUNCTION",
-   "content_hash": "b616ba8ac3d25fe9"
+   "content_hash": "e6813776671855a7"
   },
   "src/page_view.c|src/page_view.c::PV_MAX_INLINE_ROW_ITEMS": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::PV_MAX_INLINE_ROW_ITEMS",
-   "start_line": 2721,
-   "end_line": 2724,
+   "start_line": 2752,
+   "end_line": 2755,
    "type": "FUNCTION",
-   "content_hash": "1e6aa9f35ad9456c"
+   "content_hash": "1644d75fcc7f941c"
   },
   "src/page_view.c|src/page_view.c::is_inline_level_style": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::is_inline_level_style",
-   "start_line": 2725,
-   "end_line": 2732,
+   "start_line": 2756,
+   "end_line": 2763,
    "type": "FUNCTION",
-   "content_hash": "f069aad3bc32215c"
+   "content_hash": "4ac41b3cb38f65a5"
   },
   "src/page_view.c|src/page_view.c::in_mixed_line": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::in_mixed_line",
-   "start_line": 2733,
-   "end_line": 2748,
+   "start_line": 2764,
+   "end_line": 2779,
    "type": "FUNCTION",
-   "content_hash": "4b780d61025ef227"
+   "content_hash": "feed4979f87352fa"
   },
   "src/page_view.c|src/page_view.c::children_all_inline_block": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::children_all_inline_block",
-   "start_line": 2749,
-   "end_line": 2773,
+   "start_line": 2780,
+   "end_line": 2804,
    "type": "FUNCTION",
-   "content_hash": "ae52f2ffbff97d7b"
+   "content_hash": "372092722e0fa7ac"
   },
   "src/page_view.c|src/page_view.c::col_has_free_space": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::col_has_free_space",
-   "start_line": 2774,
-   "end_line": 2784,
+   "start_line": 2805,
+   "end_line": 2815,
    "type": "FUNCTION",
-   "content_hash": "09a4086358517c53"
+   "content_hash": "ace697c41876a811"
   },
   "src/page_view.c|src/page_view.c::flex_column_flows_as_block": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::flex_column_flows_as_block",
-   "start_line": 2785,
-   "end_line": 2837,
+   "start_line": 2816,
+   "end_line": 2868,
    "type": "FUNCTION",
-   "content_hash": "29d6f89d59c6f5a3"
+   "content_hash": "114a0aed6c2c8ea4"
   },
   "src/page_view.c|src/page_view.c::fold_column_gap": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::fold_column_gap",
-   "start_line": 2838,
-   "end_line": 2861,
+   "start_line": 2869,
+   "end_line": 2892,
    "type": "FUNCTION",
-   "content_hash": "6fa67012b1da6a3c"
+   "content_hash": "01ef7319ac5db2c8"
   },
   "src/page_view.c|src/page_view.c::is_layout_container": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::is_layout_container",
-   "start_line": 2862,
-   "end_line": 2887,
+   "start_line": 2893,
+   "end_line": 2918,
    "type": "FUNCTION",
-   "content_hash": "c8a9e46960bcf28a"
+   "content_hash": "43c0879719ddbf81"
   },
   "src/page_view.c|src/page_view.c::css_has_hmargin": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::css_has_hmargin",
-   "start_line": 2888,
-   "end_line": 2916,
+   "start_line": 2919,
+   "end_line": 2947,
    "type": "FUNCTION",
-   "content_hash": "53fcf5264de8f162"
+   "content_hash": "e1165b196b021781"
   },
   "src/page_view.c|src/page_view.c::item_sizes_itself": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::item_sizes_itself",
-   "start_line": 2917,
-   "end_line": 2932,
+   "start_line": 2948,
+   "end_line": 2963,
    "type": "FUNCTION",
-   "content_hash": "981da50f2b45142a"
+   "content_hash": "96f2bb27bf867fed"
   },
   "src/page_view.c|src/page_view.c::li_is_list_item": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::li_is_list_item",
-   "start_line": 2933,
-   "end_line": 2959,
+   "start_line": 2964,
+   "end_line": 2990,
    "type": "FUNCTION",
-   "content_hash": "8fe47fc6c95476f9"
+   "content_hash": "c25498eba24c813c"
   },
   "src/page_view.c|src/page_view.c::PV_TEXTLESS_DEPTH_MAX": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::PV_TEXTLESS_DEPTH_MAX",
-   "start_line": 2986,
-   "end_line": 3002,
+   "start_line": 3017,
+   "end_line": 3033,
    "type": "FUNCTION",
-   "content_hash": "f1eb2f2e8ceb4a16"
+   "content_hash": "78fffe32eaa10d0a"
   },
   "src/page_view.c|src/page_view.c::subtree_has_own_text": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::subtree_has_own_text",
-   "start_line": 3003,
-   "end_line": 3022,
+   "start_line": 3034,
+   "end_line": 3053,
    "type": "FUNCTION",
-   "content_hash": "dfcab1df419e8296"
+   "content_hash": "ccdbbe134310b38c"
   },
   "src/page_view.c|src/page_view.c::element_is_content_leaf": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::element_is_content_leaf",
-   "start_line": 3023,
-   "end_line": 3041,
+   "start_line": 3054,
+   "end_line": 3072,
    "type": "FUNCTION",
-   "content_hash": "8185ac4de780aa0e"
+   "content_hash": "185ce3deb37d6a68"
   },
   "src/page_view.c|src/page_view.c::pv_flow_reg": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_flow_reg",
-   "start_line": 4480,
-   "end_line": 4493,
+   "start_line": 4511,
+   "end_line": 4524,
    "type": "CLASS",
-   "content_hash": "f21f7042d1262704"
+   "content_hash": "825ec6375d4a5025"
   },
   "src/page_view.c|src/page_view.c::resolve_context": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::resolve_context",
-   "start_line": 3046,
-   "end_line": 3273,
+   "start_line": 3077,
+   "end_line": 3304,
    "type": "FUNCTION",
-   "content_hash": "1e38d7e3686ca75a"
+   "content_hash": "2508332d7a5fff5f"
   },
   "src/page_view.c|src/page_view.c::outermost": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::outermost",
-   "start_line": 3274,
-   "end_line": 3326,
+   "start_line": 3305,
+   "end_line": 3357,
    "type": "FUNCTION",
-   "content_hash": "dee1d67cfb2e275c"
+   "content_hash": "4f2a2f027831f142"
   },
   "src/page_view.c|src/page_view.c::opens": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::opens",
-   "start_line": 3327,
-   "end_line": 3357,
+   "start_line": 3358,
+   "end_line": 3388,
    "type": "FUNCTION",
-   "content_hash": "9051db39326921a1"
+   "content_hash": "93279c203258c13f"
   },
   "src/page_view.c|src/page_view.c::css_inline_boxdeco": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::css_inline_boxdeco",
-   "start_line": 3358,
-   "end_line": 3397,
+   "start_line": 3389,
+   "end_line": 3428,
    "type": "FUNCTION",
-   "content_hash": "a587fd5d0208a2da"
+   "content_hash": "ccc747da92b22f97"
   },
   "src/page_view.c|src/page_view.c::margins": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::margins",
-   "start_line": 3398,
-   "end_line": 3519,
+   "start_line": 3429,
+   "end_line": 3550,
    "type": "FUNCTION",
-   "content_hash": "4ebd1e70a2e57dab"
+   "content_hash": "7001b68d3bc17077"
   },
   "src/page_view.c|src/page_view.c::container": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::container",
-   "start_line": 3520,
-   "end_line": 3617,
+   "start_line": 3551,
+   "end_line": 3648,
    "type": "FUNCTION",
-   "content_hash": "b891bde08ea03701"
+   "content_hash": "45340db9c77cfc06"
   },
   "src/page_view.c|src/page_view.c::walk": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::walk",
-   "start_line": 3618,
-   "end_line": 3742,
+   "start_line": 3649,
+   "end_line": 3773,
    "type": "FUNCTION",
-   "content_hash": "c99758bac886e08b"
+   "content_hash": "b5b77d46f4124bfc"
   },
   "src/page_view.c|src/page_view.c::float": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::float",
-   "start_line": 3743,
-   "end_line": 3787,
+   "start_line": 3774,
+   "end_line": 3818,
    "type": "FUNCTION",
-   "content_hash": "ac60272488448514"
+   "content_hash": "a2f4324a10d2287b"
   },
   "src/page_view.c|src/page_view.c::sz_count": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::sz_count",
-   "start_line": 3788,
-   "end_line": 3795,
+   "start_line": 3819,
+   "end_line": 3826,
    "type": "FUNCTION",
-   "content_hash": "889312e393fde526"
+   "content_hash": "6a6ee1511a2e03df"
   },
   "src/page_view.c|src/page_view.c::sz_fill": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::sz_fill",
-   "start_line": 3796,
-   "end_line": 3801,
+   "start_line": 3827,
+   "end_line": 3832,
    "type": "CLASS",
-   "content_hash": "19fa008ec7babb64"
+   "content_hash": "a4dc87fd059273e3"
   },
   "src/page_view.c|src/page_view.c::sz_write": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::sz_write",
-   "start_line": 3802,
-   "end_line": 3809,
+   "start_line": 3833,
+   "end_line": 3840,
    "type": "FUNCTION",
-   "content_hash": "6f8cdf5e0904d0a0"
+   "content_hash": "bda12039e786c066"
   },
   "src/page_view.c|src/page_view.c::serialize_subtree": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::serialize_subtree",
-   "start_line": 3810,
-   "end_line": 3828,
+   "start_line": 3841,
+   "end_line": 3859,
    "type": "FUNCTION",
-   "content_hash": "96d00598e68ee6e0"
+   "content_hash": "6327a5d63df27852"
   },
   "src/page_view.c|src/page_view.c::collapse_ws": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::collapse_ws",
-   "start_line": 3829,
-   "end_line": 3852,
+   "start_line": 3860,
+   "end_line": 3883,
    "type": "FUNCTION",
-   "content_hash": "2cfccc54b7d5a108"
+   "content_hash": "ec14a059a439013d"
   },
   "src/page_view.c|src/page_view.c::parse_dim": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::parse_dim",
-   "start_line": 3853,
-   "end_line": 3869,
+   "start_line": 3884,
+   "end_line": 3900,
    "type": "FUNCTION",
-   "content_hash": "8132869548866bd7"
+   "content_hash": "7c0b669a6c343a0b"
   },
   "src/page_view.c|src/page_view.c::present": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::present",
-   "start_line": 3870,
-   "end_line": 3964,
+   "start_line": 3901,
+   "end_line": 3995,
    "type": "FUNCTION",
-   "content_hash": "a90d0ae3f9f28e38"
+   "content_hash": "336da8c97146eb52"
   },
   "src/page_view.c|src/page_view.c::srcset_slot_width": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::srcset_slot_width",
-   "start_line": 3965,
-   "end_line": 4010,
+   "start_line": 3996,
+   "end_line": 4041,
    "type": "FUNCTION",
-   "content_hash": "66fa351c072932cb"
+   "content_hash": "25ae445bd3128bec"
   },
   "src/page_view.c|src/page_view.c::dimensions": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::dimensions",
-   "start_line": 4011,
-   "end_line": 4042,
+   "start_line": 4042,
+   "end_line": 4073,
    "type": "FUNCTION",
-   "content_hash": "f620d22cc00dad14"
+   "content_hash": "6d013837430b0d7d"
   },
   "src/page_view.c|src/page_view.c::find_body": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::find_body",
-   "start_line": 4043,
-   "end_line": 4051,
+   "start_line": 4074,
+   "end_line": 4082,
    "type": "FUNCTION",
-   "content_hash": "2d58cd69278ea2b3"
+   "content_hash": "ff040ad13b69c59a"
   },
   "src/page_view.c|src/page_view.c::pv_root_els": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_root_els",
-   "start_line": 4052,
-   "end_line": 4055,
+   "start_line": 4083,
+   "end_line": 4086,
    "type": "CLASS",
-   "content_hash": "445b8f30735f6be5"
+   "content_hash": "d66594323c9a7e2e"
   },
   "src/page_view.c|src/page_view.c::find_root_els": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::find_root_els",
-   "start_line": 4056,
-   "end_line": 4069,
+   "start_line": 4087,
+   "end_line": 4100,
    "type": "FUNCTION",
-   "content_hash": "e8c15a4c19841b86"
+   "content_hash": "99737b4ca6fac3de"
   },
   "src/page_view.c|src/page_view.c::attributes": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::attributes",
-   "start_line": 4070,
-   "end_line": 4080,
+   "start_line": 4101,
+   "end_line": 4111,
    "type": "FUNCTION",
-   "content_hash": "a020862bdd880385"
+   "content_hash": "490db64e24803e6d"
   },
   "src/page_view.c|src/page_view.c::string": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::string",
-   "start_line": 4081,
-   "end_line": 4117,
+   "start_line": 4112,
+   "end_line": 4148,
    "type": "FUNCTION",
-   "content_hash": "4d03aad1a40fb9d5"
+   "content_hash": "28aa481d1cbe05a0"
   },
   "src/page_view.c|src/page_view.c::form_rec": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::form_rec",
-   "start_line": 4118,
-   "end_line": 4123,
+   "start_line": 4149,
+   "end_line": 4154,
    "type": "CLASS",
-   "content_hash": "d1ffd7f80ce83049"
+   "content_hash": "7a8794dbc9a39537"
   },
   "src/page_view.c|src/page_view.c::form_table": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::form_table",
-   "start_line": 4124,
-   "end_line": 4128,
+   "start_line": 4155,
+   "end_line": 4159,
    "type": "CLASS",
-   "content_hash": "d8b3e11b4f9a6a33"
+   "content_hash": "e60be77eef263b4e"
   },
   "src/page_view.c|src/page_view.c::forms_free": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::forms_free",
-   "start_line": 4129,
-   "end_line": 4135,
+   "start_line": 4160,
+   "end_line": 4166,
    "type": "FUNCTION",
-   "content_hash": "edcee980e81fd692"
+   "content_hash": "e6adf89c20ccf3ae"
   },
   "src/page_view.c|src/page_view.c::ascii_ieq": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::ascii_ieq",
-   "start_line": 4136,
-   "end_line": 4147,
+   "start_line": 4167,
+   "end_line": 4178,
    "type": "FUNCTION",
-   "content_hash": "81d5e732173275c4"
+   "content_hash": "b9ea02da1b202ecd"
   },
   "src/page_view.c|src/page_view.c::attr_dup": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::attr_dup",
-   "start_line": 4148,
-   "end_line": 4156,
+   "start_line": 4179,
+   "end_line": 4187,
    "type": "FUNCTION",
-   "content_hash": "945919860c848758"
+   "content_hash": "90522a1ff7c985f1"
   },
   "src/page_view.c|src/page_view.c::forms_add": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::forms_add",
-   "start_line": 4157,
-   "end_line": 4176,
+   "start_line": 4188,
+   "end_line": 4207,
    "type": "FUNCTION",
-   "content_hash": "44a4dc6040703818"
+   "content_hash": "cd29c51d6b731ce7"
   },
   "src/page_view.c|src/page_view.c::form_for": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::form_for",
-   "start_line": 4177,
-   "end_line": 4192,
+   "start_line": 4208,
+   "end_line": 4223,
    "type": "FUNCTION",
-   "content_hash": "f82df014a38fcabe"
+   "content_hash": "c952b71549f38821"
   },
   "src/page_view.c|src/page_view.c::under_unrendered": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::under_unrendered",
-   "start_line": 4193,
-   "end_line": 4205,
+   "start_line": 4224,
+   "end_line": 4236,
    "type": "FUNCTION",
-   "content_hash": "f5f7fa2ef2ac92dd"
+   "content_hash": "66de15c5e07c0557"
   },
   "src/page_view.c|src/page_view.c::collect_text": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::collect_text",
-   "start_line": 4206,
-   "end_line": 4229,
+   "start_line": 4237,
+   "end_line": 4260,
    "type": "FUNCTION",
-   "content_hash": "d4e444fced9dfe42"
+   "content_hash": "4e70347f677b0520"
   },
   "src/page_view.c|src/page_view.c::classify_input": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::classify_input",
-   "start_line": 4230,
-   "end_line": 4401,
+   "start_line": 4261,
+   "end_line": 4432,
    "type": "FUNCTION",
-   "content_hash": "8347dacf79ebc770"
+   "content_hash": "3aefd21714747a49"
   },
   "src/page_view.c|src/page_view.c::li_ordinal": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::li_ordinal",
-   "start_line": 4402,
-   "end_line": 4427,
+   "start_line": 4433,
+   "end_line": 4458,
    "type": "FUNCTION",
-   "content_hash": "d6731f143b3f8c73"
+   "content_hash": "1fd19ffcfd44e2d9"
   },
   "src/page_view.c|src/page_view.c::roman_marker": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::roman_marker",
-   "start_line": 4428,
-   "end_line": 4452,
+   "start_line": 4459,
+   "end_line": 4483,
    "type": "FUNCTION",
-   "content_hash": "89a53c9ae41006f1"
+   "content_hash": "02dd90e9136a7e91"
   },
   "src/page_view.c|src/page_view.c::list_marker": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::list_marker",
-   "start_line": 4453,
-   "end_line": 4479,
+   "start_line": 4484,
+   "end_line": 4510,
    "type": "FUNCTION",
-   "content_hash": "19f9e42fec09ef64"
+   "content_hash": "71b753735d21c137"
   },
   "src/page_view.c|src/page_view.c::node_table_role": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::node_table_role",
-   "start_line": 4494,
-   "end_line": 4511,
+   "start_line": 4525,
+   "end_line": 4542,
    "type": "FUNCTION",
-   "content_hash": "14abcb7d7421b70b"
+   "content_hash": "ed1ad7d48e42bb53"
   },
   "src/page_view.c|src/page_view.c::nearest_table": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::nearest_table",
-   "start_line": 4512,
-   "end_line": 4545,
+   "start_line": 4543,
+   "end_line": 4581,
    "type": "FUNCTION",
-   "content_hash": "70984f6115ac1624"
+   "content_hash": "0c024279b02c909f"
   },
   "src/page_view.c|src/page_view.c::parent_is_table_internal": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::parent_is_table_internal",
-   "start_line": 4546,
-   "end_line": 4572,
+   "start_line": 4582,
+   "end_line": 4608,
    "type": "FUNCTION",
-   "content_hash": "a14e9dfd9c212dee"
+   "content_hash": "c7fdb1ac8089b4e0"
   },
   "src/page_view.c|src/page_view.c::nearest_cell": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::nearest_cell",
-   "start_line": 4573,
-   "end_line": 4587,
+   "start_line": 4609,
+   "end_line": 4623,
    "type": "FUNCTION",
-   "content_hash": "2f807e22945f4556"
+   "content_hash": "0e0f644d982ea61b"
   },
   "src/page_view.c|src/page_view.c::cell_has_nested_table": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::cell_has_nested_table",
-   "start_line": 4588,
-   "end_line": 4596,
+   "start_line": 4624,
+   "end_line": 4632,
    "type": "FUNCTION",
-   "content_hash": "594a05fe4da9ec29"
+   "content_hash": "7887b40111a4cd1e"
   },
   "src/page_view.c|src/page_view.c::next_skip": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::next_skip",
-   "start_line": 4597,
-   "end_line": 4607,
+   "start_line": 4633,
+   "end_line": 4643,
    "type": "FUNCTION",
-   "content_hash": "f984ae82e9479c0d"
+   "content_hash": "c8d7f99e38879b2e"
   },
   "src/page_view.c|src/page_view.c::cell_anchors": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::cell_anchors",
-   "start_line": 4608,
-   "end_line": 4625,
+   "start_line": 4644,
+   "end_line": 4661,
    "type": "FUNCTION",
-   "content_hash": "3ddf461e5165afb7"
+   "content_hash": "d844472852e3679e"
   },
   "src/page_view.c|src/page_view.c::links": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::links",
-   "start_line": 4626,
-   "end_line": 4646,
+   "start_line": 4662,
+   "end_line": 4682,
    "type": "FUNCTION",
-   "content_hash": "125ab47508d79804"
+   "content_hash": "232a6e7c7b01a2c7"
   },
   "src/page_view.c|src/page_view.c::flow_table": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::flow_table",
-   "start_line": 4647,
-   "end_line": 4658,
+   "start_line": 4683,
+   "end_line": 4694,
    "type": "FUNCTION",
-   "content_hash": "1c191084d14768ed"
+   "content_hash": "761d14cad6b28a8f"
   },
   "src/page_view.c|src/page_view.c::in_flow_table_cell": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::in_flow_table_cell",
-   "start_line": 4659,
-   "end_line": 4667,
+   "start_line": 4695,
+   "end_line": 4703,
    "type": "FUNCTION",
-   "content_hash": "37e395f2374afbbc"
+   "content_hash": "661bfc8aaf8dfa68"
   },
   "src/page_view.c|src/page_view.c::table": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::table",
-   "start_line": 4668,
-   "end_line": 4685,
+   "start_line": 4704,
+   "end_line": 4721,
    "type": "FUNCTION",
-   "content_hash": "97f7a46cf6982b59"
+   "content_hash": "1acd5745ca522941"
   },
   "src/page_view.c|src/page_view.c::table_columns": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::table_columns",
-   "start_line": 4686,
-   "end_line": 4712,
+   "start_line": 4722,
+   "end_line": 4748,
    "type": "FUNCTION",
-   "content_hash": "581c37359fa77a10"
+   "content_hash": "a47a44c191ae04c7"
   },
   "src/page_view.c|src/page_view.c::PV_MAX_STYLE_BYTES": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::PV_MAX_STYLE_BYTES",
-   "start_line": 4713,
-   "end_line": 4759,
+   "start_line": 4749,
+   "end_line": 4795,
    "type": "FUNCTION",
-   "content_hash": "7944e6a35595ef30"
+   "content_hash": "44a645cd4a540f50"
   },
   "src/page_view.c|src/page_view.c::in_hidden_subtree": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::in_hidden_subtree",
-   "start_line": 4760,
-   "end_line": 4783,
+   "start_line": 4796,
+   "end_line": 4819,
    "type": "FUNCTION",
-   "content_hash": "92c524f816c52cba"
+   "content_hash": "9e6b593494b9b536"
   },
   "src/page_view.c|src/page_view.c::in_boilerplate_subtree": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::in_boilerplate_subtree",
-   "start_line": 4784,
-   "end_line": 4798,
+   "start_line": 4820,
+   "end_line": 4834,
    "type": "FUNCTION",
-   "content_hash": "fff445e7c40134b9"
+   "content_hash": "5a020c0e017ec133"
   },
   "src/page_view.c|src/page_view.c::in_closed_details_subtree": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::in_closed_details_subtree",
-   "start_line": 4799,
-   "end_line": 4818,
+   "start_line": 4835,
+   "end_line": 4854,
    "type": "FUNCTION",
-   "content_hash": "db621f15c27198e1"
+   "content_hash": "e400a06980b1d5f8"
   },
   "src/page_view.c|src/page_view.c::pv_build": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_build",
-   "start_line": 4819,
-   "end_line": 4822,
+   "start_line": 4855,
+   "end_line": 4858,
    "type": "FUNCTION",
-   "content_hash": "bb1a9f06d5ef356a"
+   "content_hash": "9dfdfed462c3a924"
   },
   "src/page_view.c|src/page_view.c::pv_build_ex": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_build_ex",
-   "start_line": 4823,
-   "end_line": 4826,
+   "start_line": 4859,
+   "end_line": 4862,
    "type": "FUNCTION",
-   "content_hash": "6b9589c4e51df470"
+   "content_hash": "65d6c6833f681b0e"
   },
   "src/page_view.c|src/page_view.c::pv_build_full": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_build_full",
-   "start_line": 4827,
-   "end_line": 4848,
+   "start_line": 4863,
+   "end_line": 4884,
    "type": "FUNCTION",
-   "content_hash": "9334c19b6240d825"
+   "content_hash": "594d1630c522efcc"
   },
   "src/page_view.c|src/page_view.c::annotate_replaced_run": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::annotate_replaced_run",
-   "start_line": 4849,
-   "end_line": 4921,
+   "start_line": 4885,
+   "end_line": 4957,
    "type": "FUNCTION",
-   "content_hash": "dbe7d787f7613b93"
+   "content_hash": "99364705df84a3ac"
   },
   "src/page_view.c|src/page_view.c::pv_root_insets": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_root_insets",
-   "start_line": 4922,
-   "end_line": 4931,
+   "start_line": 4958,
+   "end_line": 4967,
    "type": "FUNCTION",
-   "content_hash": "b43d4595604ebd2b"
+   "content_hash": "77b6b9048647d91d"
   },
   "src/page_view.c|src/page_view.c::collect_page_css": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::collect_page_css",
-   "start_line": 4932,
-   "end_line": 4960,
+   "start_line": 4968,
+   "end_line": 4996,
    "type": "FUNCTION",
-   "content_hash": "d5b36523c9920485"
+   "content_hash": "d1a685e8c0dd96ae"
   },
   "src/page_view.c|src/page_view.c::pv_build_styled": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_build_styled",
-   "start_line": 4961,
-   "end_line": 5077,
+   "start_line": 4997,
+   "end_line": 5113,
    "type": "FUNCTION",
-   "content_hash": "a96e4d3b224f4f07"
+   "content_hash": "98d23cc53f057488"
   },
   "src/page_view.c|src/page_view.c::inside": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::inside",
-   "start_line": 5078,
-   "end_line": 5401,
+   "start_line": 5114,
+   "end_line": 5438,
    "type": "FUNCTION",
-   "content_hash": "c611c317e94bdadd"
+   "content_hash": "4ddbb2b4f563ba09"
   },
   "src/page_view.c|src/page_view.c::control": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::control",
-   "start_line": 5402,
-   "end_line": 5577,
+   "start_line": 5439,
+   "end_line": 5614,
    "type": "FUNCTION",
-   "content_hash": "2a98ce0815168751"
+   "content_hash": "7aa90fc6f742950b"
   },
   "src/page_view.c|src/page_view.c::px": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::px",
-   "start_line": 5578,
-   "end_line": 5658,
+   "start_line": 5615,
+   "end_line": 5695,
    "type": "FUNCTION",
-   "content_hash": "5cce0a55a038fb02"
+   "content_hash": "3205d422abcad32a"
   },
   "src/page_view.c|src/page_view.c::height": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::height",
-   "start_line": 5659,
-   "end_line": 5792,
+   "start_line": 5696,
+   "end_line": 5829,
    "type": "FUNCTION",
-   "content_hash": "5b36fc3674fcd7bf"
+   "content_hash": "58ef6704bd9973df"
   },
   "src/page_view.c|src/page_view.c::block_id": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::block_id",
-   "start_line": 5793,
-   "end_line": 5933,
+   "start_line": 5830,
+   "end_line": 5970,
    "type": "FUNCTION",
-   "content_hash": "d283b3b41005f453"
+   "content_hash": "b5abe191a08aeff6"
   },
   "src/page_view.c|src/page_view.c::URL": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::URL",
-   "start_line": 5934,
-   "end_line": 6211,
+   "start_line": 5971,
+   "end_line": 6248,
    "type": "FUNCTION",
-   "content_hash": "381d2904431429e7"
+   "content_hash": "fd8ea0ddcc7260c7"
   },
   "src/page_view.c|src/page_view.c::block": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::block",
-   "start_line": 6212,
-   "end_line": 6381,
+   "start_line": 6249,
+   "end_line": 6418,
    "type": "FUNCTION",
-   "content_hash": "7c3cec9e24a22528"
+   "content_hash": "e19da73c08bd7e8b"
   },
   "src/page_view.c|src/page_view.c::flow": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::flow",
-   "start_line": 6382,
-   "end_line": 6487,
+   "start_line": 6419,
+   "end_line": 6524,
    "type": "FUNCTION",
-   "content_hash": "07758a095e125a17"
+   "content_hash": "fc8d73a7c8f796dc"
   },
   "src/page_view.c|src/page_view.c::engine": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::engine",
-   "start_line": 6488,
-   "end_line": 6496,
+   "start_line": 6525,
+   "end_line": 6533,
    "type": "FUNCTION",
-   "content_hash": "699814f7d135300b"
+   "content_hash": "f0fdeb19f9e69dca"
   },
   "src/page_view.c|src/page_view.c::line": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::line",
-   "start_line": 6497,
-   "end_line": 6619,
+   "start_line": 6534,
+   "end_line": 6656,
    "type": "FUNCTION",
-   "content_hash": "4cecdd885571122b"
+   "content_hash": "65c503de357a8534"
   },
   "src/page_view.c|src/page_view.c::pv_css_drops": {
    "file_path": "src/page_view.c",
    "qualified_name": "src/page_view.c::pv_css_drops",
-   "start_line": 6620,
-   "end_line": 6645,
+   "start_line": 6657,
+   "end_line": 6682,
    "type": "FUNCTION",
-   "content_hash": "49ff629f3118090e"
+   "content_hash": "7d13cbce6f80ec22"
   },
   "src/pdf_export.c|src/pdf_export.c::pe_safe_basename": {
    "file_path": "src/pdf_export.c",
@@ -46661,513 +46661,513 @@
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_grid_line_placement_nested_container_item",
    "start_line": 3437,
-   "end_line": 3468,
+   "end_line": 3524,
    "type": "FUNCTION",
    "content_hash": "5f348d3d11ea0715"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_box_min_width_zero_is_declared": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_box_min_width_zero_is_declared",
-   "start_line": 3469,
-   "end_line": 3488,
+   "start_line": 3525,
+   "end_line": 3544,
    "type": "FUNCTION",
-   "content_hash": "f364f129c414dd22"
+   "content_hash": "9cec87c863e55520"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_flex_item_inline_is_blockified": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_flex_item_inline_is_blockified",
-   "start_line": 3489,
-   "end_line": 3504,
+   "start_line": 3545,
+   "end_line": 3560,
    "type": "FUNCTION",
-   "content_hash": "c79c940ceceb4e1e"
+   "content_hash": "827a06120a08f1be"
   },
   "tests/test_page_view.c|tests/test_page_view.c::line": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::line",
-   "start_line": 3505,
-   "end_line": 3517,
+   "start_line": 3561,
+   "end_line": 3573,
    "type": "FUNCTION",
-   "content_hash": "34b8f81d0bff4afb"
+   "content_hash": "79a046df8a28ccaf"
   },
   "tests/test_page_view.c|tests/test_page_view.c::box_of_run_with_bg": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::box_of_run_with_bg",
-   "start_line": 3518,
-   "end_line": 3534,
+   "start_line": 3574,
+   "end_line": 3590,
    "type": "FUNCTION",
-   "content_hash": "ed95a98e7a653c3e"
+   "content_hash": "580fd280e503a025"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_link_color_inherit": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_link_color_inherit",
-   "start_line": 3535,
-   "end_line": 3548,
+   "start_line": 3591,
+   "end_line": 3604,
    "type": "FUNCTION",
-   "content_hash": "4b3f41146f8d4446"
+   "content_hash": "9388563d352a7002"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_pct_padding_generates_box": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_pct_padding_generates_box",
-   "start_line": 3549,
-   "end_line": 3561,
+   "start_line": 3605,
+   "end_line": 3617,
    "type": "FUNCTION",
-   "content_hash": "984eb3c888aa3ad7"
+   "content_hash": "52beb34d78a960a6"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_before_box_on_empty_element": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_before_box_on_empty_element",
-   "start_line": 3562,
-   "end_line": 3577,
+   "start_line": 3618,
+   "end_line": 3633,
    "type": "FUNCTION",
-   "content_hash": "6b215a43cba12a98"
+   "content_hash": "d94e0baef7f1f042"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_before_box_before_text": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_before_box_before_text",
-   "start_line": 3578,
-   "end_line": 3593,
+   "start_line": 3634,
+   "end_line": 3649,
    "type": "FUNCTION",
-   "content_hash": "2760dcc7df0547a7"
+   "content_hash": "662b265a70e66b37"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_pseudo_display_none_generates_nothing": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_pseudo_display_none_generates_nothing",
-   "start_line": 3594,
-   "end_line": 3610,
+   "start_line": 3650,
+   "end_line": 3666,
    "type": "FUNCTION",
-   "content_hash": "529e9f18720ab676"
+   "content_hash": "77da9bb0b7686b79"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_inline_pseudo_registers_no_box": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_inline_pseudo_registers_no_box",
-   "start_line": 3611,
-   "end_line": 3622,
+   "start_line": 3667,
+   "end_line": 3678,
    "type": "FUNCTION",
-   "content_hash": "49aa513718e6dfa8"
+   "content_hash": "f69f3c5d01a056ba"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_after_box_on_empty_element": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_after_box_on_empty_element",
-   "start_line": 3623,
-   "end_line": 3639,
+   "start_line": 3679,
+   "end_line": 3695,
    "type": "FUNCTION",
-   "content_hash": "a33a53ba435efdae"
+   "content_hash": "fc376994754404a6"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_select_shows_selected_option": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_select_shows_selected_option",
-   "start_line": 3640,
-   "end_line": 3678,
+   "start_line": 3696,
+   "end_line": 3734,
    "type": "FUNCTION",
-   "content_hash": "4acab8965dd4d4d0"
+   "content_hash": "a0cd42bc61d15ff9"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_select_defaults_to_first_option": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_select_defaults_to_first_option",
-   "start_line": 3679,
-   "end_line": 3695,
+   "start_line": 3735,
+   "end_line": 3751,
    "type": "FUNCTION",
-   "content_hash": "37eecbae3e4f15f7"
+   "content_hash": "65bfa3a1bb1415ab"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_control_without_form": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_control_without_form",
-   "start_line": 3696,
-   "end_line": 3708,
+   "start_line": 3752,
+   "end_line": 3764,
    "type": "FUNCTION",
-   "content_hash": "460383ec191ee424"
+   "content_hash": "d7e87a26fe510758"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_two_forms_distinct_groups": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_two_forms_distinct_groups",
-   "start_line": 3709,
-   "end_line": 3767,
+   "start_line": 3765,
+   "end_line": 3823,
    "type": "FUNCTION",
-   "content_hash": "bde445e00059c720"
+   "content_hash": "fed75049a94d4c54"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_pseudo_classes_and_siblings": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_pseudo_classes_and_siblings",
-   "start_line": 3768,
-   "end_line": 3830,
+   "start_line": 3824,
+   "end_line": 3886,
    "type": "FUNCTION",
-   "content_hash": "89e6eb519cc20549"
+   "content_hash": "4f97d38d2b23bd95"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_table_cell_author_styles": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_table_cell_author_styles",
-   "start_line": 3831,
-   "end_line": 3890,
+   "start_line": 3887,
+   "end_line": 3946,
    "type": "FUNCTION",
-   "content_hash": "9f8082e2f4f74519"
+   "content_hash": "1109379bf0bcd119"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_style_cache_distinct_siblings": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_style_cache_distinct_siblings",
-   "start_line": 3891,
-   "end_line": 3932,
+   "start_line": 3947,
+   "end_line": 3988,
    "type": "FUNCTION",
-   "content_hash": "5e9a64ef541a8c5f"
+   "content_hash": "57e88d116809332f"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_text_align_and_font_size": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_text_align_and_font_size",
-   "start_line": 3933,
-   "end_line": 3979,
+   "start_line": 3989,
+   "end_line": 4035,
    "type": "FUNCTION",
-   "content_hash": "512a152522e73372"
+   "content_hash": "ca00c9e59aa19ab3"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_text_decoration": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_text_decoration",
-   "start_line": 3980,
-   "end_line": 4002,
+   "start_line": 4036,
+   "end_line": 4058,
    "type": "FUNCTION",
-   "content_hash": "df2a2ddeb69b73f2"
+   "content_hash": "5c271343abd5378d"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_css_bold_and_inline_wins": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_css_bold_and_inline_wins",
-   "start_line": 4003,
-   "end_line": 4025,
+   "start_line": 4059,
+   "end_line": 4081,
    "type": "FUNCTION",
-   "content_hash": "aff648b21a148a6d"
+   "content_hash": "2305ab42f884fd24"
   },
   "tests/test_page_view.c|tests/test_page_view.c::scales": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::scales",
-   "start_line": 4026,
-   "end_line": 4058,
+   "start_line": 4082,
+   "end_line": 4114,
    "type": "FUNCTION",
-   "content_hash": "d62b510a852682d4"
+   "content_hash": "c920308067d8abd0"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_component_custom_props": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_component_custom_props",
-   "start_line": 4059,
-   "end_line": 4097,
+   "start_line": 4115,
+   "end_line": 4153,
    "type": "FUNCTION",
-   "content_hash": "cc66ad92ef5475f9"
+   "content_hash": "8cfb89f790cd7b79"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_display_none_hidden": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_display_none_hidden",
-   "start_line": 4098,
-   "end_line": 4109,
+   "start_line": 4154,
+   "end_line": 4165,
    "type": "FUNCTION",
-   "content_hash": "16d63cb6a051248d"
+   "content_hash": "ad5475de0b1b34d6"
   },
   "tests/test_page_view.c|tests/test_page_view.c::reverted": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::reverted",
-   "start_line": 4110,
-   "end_line": 4123,
+   "start_line": 4166,
+   "end_line": 4179,
    "type": "FUNCTION",
-   "content_hash": "01ffdbca7e234604"
+   "content_hash": "d2281c41f2d187a7"
   },
   "tests/test_page_view.c|tests/test_page_view.c::height": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::height",
-   "start_line": 4124,
-   "end_line": 4149,
+   "start_line": 4180,
+   "end_line": 4205,
    "type": "FUNCTION",
-   "content_hash": "ba88a8c56ca82695"
+   "content_hash": "d34aca5a98a4bd2d"
   },
   "tests/test_page_view.c|tests/test_page_view.c::applies": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::applies",
-   "start_line": 4150,
-   "end_line": 4153,
+   "start_line": 4206,
+   "end_line": 4209,
    "type": "FUNCTION",
-   "content_hash": "cc1598a36e6dfca7"
+   "content_hash": "06383a953951d59b"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_styled_external_css": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_styled_external_css",
-   "start_line": 4154,
-   "end_line": 4182,
+   "start_line": 4210,
+   "end_line": 4238,
    "type": "FUNCTION",
-   "content_hash": "e297719d25cb0fda"
+   "content_hash": "229073d837fe7dd8"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_author_list_padding_replaces_ua_indent": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_author_list_padding_replaces_ua_indent",
-   "start_line": 4183,
-   "end_line": 4207,
+   "start_line": 4239,
+   "end_line": 4263,
    "type": "FUNCTION",
-   "content_hash": "aff56cad3aad239a"
+   "content_hash": "68be5161a3909f17"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_before_rides_float_and_container": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_before_rides_float_and_container",
-   "start_line": 4208,
-   "end_line": 4238,
+   "start_line": 4264,
+   "end_line": 4294,
    "type": "FUNCTION",
-   "content_hash": "f9a74b0da4e9d711"
+   "content_hash": "75e2c68456bb2be1"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_inline_level_tag_list_stays_in_line": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_inline_level_tag_list_stays_in_line",
-   "start_line": 4239,
-   "end_line": 4266,
+   "start_line": 4295,
+   "end_line": 4322,
    "type": "FUNCTION",
-   "content_hash": "9eb4b2b3dab36289"
+   "content_hash": "b005be5bb7c1ced6"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_marker_only_for_list_item_display": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_marker_only_for_list_item_display",
-   "start_line": 4267,
-   "end_line": 4305,
+   "start_line": 4323,
+   "end_line": 4361,
    "type": "FUNCTION",
-   "content_hash": "07533168487655f1"
+   "content_hash": "c879cc8f07cc0606"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_block_inside_inline_block_in_line": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_block_inside_inline_block_in_line",
-   "start_line": 4306,
-   "end_line": 4353,
+   "start_line": 4362,
+   "end_line": 4409,
    "type": "FUNCTION",
-   "content_hash": "97719512fff0e19c"
+   "content_hash": "a6ece393c8b11123"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_pseudo_before_on_empty": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_pseudo_before_on_empty",
-   "start_line": 4354,
-   "end_line": 4366,
+   "start_line": 4410,
+   "end_line": 4422,
    "type": "FUNCTION",
-   "content_hash": "8445fbfe90a9b143"
+   "content_hash": "622a00808370b6be"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_pseudo_before_on_element_with_children": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_pseudo_before_on_element_with_children",
-   "start_line": 4367,
-   "end_line": 4381,
+   "start_line": 4423,
+   "end_line": 4437,
    "type": "FUNCTION",
-   "content_hash": "60ef97fd8b59df24"
+   "content_hash": "583a96363700c8b8"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_pseudo_after_on_element_with_children": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_pseudo_after_on_element_with_children",
-   "start_line": 4382,
-   "end_line": 4396,
+   "start_line": 4438,
+   "end_line": 4452,
    "type": "FUNCTION",
-   "content_hash": "6b8ba68ab75718a5"
+   "content_hash": "608f06659aa93e04"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_pseudo_both_before_and_after": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_pseudo_both_before_and_after",
-   "start_line": 4397,
-   "end_line": 4430,
+   "start_line": 4453,
+   "end_line": 4486,
    "type": "FUNCTION",
-   "content_hash": "9630a6f76c3e7734"
+   "content_hash": "168d319f4c25c34f"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_pseudo_before_on_textless_subtree": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_pseudo_before_on_textless_subtree",
-   "start_line": 4431,
-   "end_line": 4446,
+   "start_line": 4487,
+   "end_line": 4502,
    "type": "FUNCTION",
-   "content_hash": "7127df8381dea2ec"
+   "content_hash": "6f4c7ad34edb0628"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_pseudo_before_escape_end_to_end": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_pseudo_before_escape_end_to_end",
-   "start_line": 4447,
-   "end_line": 4459,
+   "start_line": 4503,
+   "end_line": 4515,
    "type": "FUNCTION",
-   "content_hash": "9076d5d405239459"
+   "content_hash": "d4b8385a2b01c558"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_pseudo_after_on_whitespace_only_no_run": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_pseudo_after_on_whitespace_only_no_run",
-   "start_line": 4460,
-   "end_line": 4473,
+   "start_line": 4516,
+   "end_line": 4529,
    "type": "FUNCTION",
-   "content_hash": "2739b12d60c37d1a"
+   "content_hash": "57acbb339d1f9a0e"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_pseudo_before_fires_with_nested_text": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_pseudo_before_fires_with_nested_text",
-   "start_line": 4474,
-   "end_line": 4486,
+   "start_line": 4530,
+   "end_line": 4542,
    "type": "FUNCTION",
-   "content_hash": "e6b643c823652431"
+   "content_hash": "99cc3f25854232a1"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_pseudo_no_content_no_run": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_pseudo_no_content_no_run",
-   "start_line": 4487,
-   "end_line": 4500,
+   "start_line": 4543,
+   "end_line": 4556,
    "type": "FUNCTION",
-   "content_hash": "ad4cedcd6d5c7489"
+   "content_hash": "db4d8b2b2fb03ad4"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_reader_skips_boilerplate": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_reader_skips_boilerplate",
-   "start_line": 4501,
-   "end_line": 4528,
+   "start_line": 4557,
+   "end_line": 4584,
    "type": "FUNCTION",
-   "content_hash": "2962459ca6dca4aa"
+   "content_hash": "118d491165f70469"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_set_node_id_model": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_set_node_id_model",
-   "start_line": 4529,
-   "end_line": 4544,
+   "start_line": 4585,
+   "end_line": 4600,
    "type": "FUNCTION",
-   "content_hash": "5688339cb0bcdc9a"
+   "content_hash": "0fa1d55b76ff3802"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_node_id_matches_dom_index": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_node_id_matches_dom_index",
-   "start_line": 4545,
-   "end_line": 4583,
+   "start_line": 4601,
+   "end_line": 4639,
    "type": "FUNCTION",
-   "content_hash": "79fa93763fd5b532"
+   "content_hash": "961324d4c0232054"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_set_text_style_model": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_set_text_style_model",
-   "start_line": 4584,
-   "end_line": 4614,
+   "start_line": 4640,
+   "end_line": 4670,
    "type": "FUNCTION",
-   "content_hash": "a9806df9385d0909"
+   "content_hash": "20efd2709b13ebc3"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_pointer_events_on_box": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_pointer_events_on_box",
-   "start_line": 4615,
-   "end_line": 4633,
+   "start_line": 4671,
+   "end_line": 4689,
    "type": "FUNCTION",
-   "content_hash": "104f6d48d58311c4"
+   "content_hash": "8a291283c9420faa"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_content_visibility_hidden_folds": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_content_visibility_hidden_folds",
-   "start_line": 4634,
-   "end_line": 4659,
+   "start_line": 4690,
+   "end_line": 4715,
    "type": "FUNCTION",
-   "content_hash": "3c6f71471469c817"
+   "content_hash": "0ce637da68668886"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_image_rendering_inherited": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_image_rendering_inherited",
-   "start_line": 4660,
-   "end_line": 4678,
+   "start_line": 4716,
+   "end_line": 4734,
    "type": "FUNCTION",
-   "content_hash": "622d37de477aab7b"
+   "content_hash": "4fb094f801a8d2c7"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_caret_color_inherited": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_caret_color_inherited",
-   "start_line": 4679,
-   "end_line": 4702,
+   "start_line": 4735,
+   "end_line": 4758,
    "type": "FUNCTION",
-   "content_hash": "730097217dc7f963"
+   "content_hash": "4c266276f5d9532f"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_append_video_copies_fields": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_append_video_copies_fields",
-   "start_line": 4703,
-   "end_line": 4721,
+   "start_line": 4759,
+   "end_line": 4777,
    "type": "FUNCTION",
-   "content_hash": "f9b04a79c5014d94"
+   "content_hash": "948f6dab0708ffa5"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_append_video_no_poster": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_append_video_no_poster",
-   "start_line": 4722,
-   "end_line": 4737,
+   "start_line": 4778,
+   "end_line": 4793,
    "type": "FUNCTION",
-   "content_hash": "2edbea715d53f9b0"
+   "content_hash": "5dffecf6d1090038"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_append_video_null_args": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_append_video_null_args",
-   "start_line": 4738,
-   "end_line": 4747,
+   "start_line": 4794,
+   "end_line": 4803,
    "type": "FUNCTION",
-   "content_hash": "a97c8b7cf52a45c7"
+   "content_hash": "57a148bb9829e744"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_video_with_source": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_video_with_source",
-   "start_line": 4748,
-   "end_line": 4767,
+   "start_line": 4804,
+   "end_line": 4823,
    "type": "FUNCTION",
-   "content_hash": "74d04d8e21e918f9"
+   "content_hash": "f6951e30eb791352"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_video_uses_source_child": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_video_uses_source_child",
-   "start_line": 4768,
-   "end_line": 4787,
+   "start_line": 4824,
+   "end_line": 4843,
    "type": "FUNCTION",
-   "content_hash": "a423dd01a4f975db"
+   "content_hash": "0a553b8690f50a88"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_video_source_type_preference": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_video_source_type_preference",
-   "start_line": 4788,
-   "end_line": 4805,
+   "start_line": 4844,
+   "end_line": 4861,
    "type": "FUNCTION",
-   "content_hash": "6cc3df1aa57d5deb"
+   "content_hash": "bb47428f3af688e3"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_video_fallback_suppressed": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_video_fallback_suppressed",
-   "start_line": 4806,
-   "end_line": 4820,
+   "start_line": 4862,
+   "end_line": 4876,
    "type": "FUNCTION",
-   "content_hash": "29a2a6dcc9767031"
+   "content_hash": "ec440a3a99cc0188"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_video_without_src_ignored": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_video_without_src_ignored",
-   "start_line": 4821,
-   "end_line": 4831,
+   "start_line": 4877,
+   "end_line": 4887,
    "type": "FUNCTION",
-   "content_hash": "9d63972acd5694db"
+   "content_hash": "4eab23a16103af68"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_audio_as_video_kind": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_audio_as_video_kind",
-   "start_line": 4832,
-   "end_line": 4845,
+   "start_line": 4888,
+   "end_line": 4901,
    "type": "FUNCTION",
-   "content_hash": "83a4acaae4c813df"
+   "content_hash": "6661190f8ee76f8d"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_iframe_emits_navigable_link": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_iframe_emits_navigable_link",
-   "start_line": 4846,
-   "end_line": 4863,
+   "start_line": 4902,
+   "end_line": 4919,
    "type": "FUNCTION",
-   "content_hash": "812653d721775852"
+   "content_hash": "7f3e4cf08a755742"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_iframe_without_src_ignored": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_iframe_without_src_ignored",
-   "start_line": 4864,
-   "end_line": 4876,
+   "start_line": 4920,
+   "end_line": 4932,
    "type": "FUNCTION",
-   "content_hash": "35048717d5c05e0c"
+   "content_hash": "303feda8e9a8028f"
   },
   "tests/test_page_view.c|tests/test_page_view.c::test_build_iframe_display_none_hidden": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::test_build_iframe_display_none_hidden",
-   "start_line": 4877,
-   "end_line": 4889,
+   "start_line": 4933,
+   "end_line": 4945,
    "type": "FUNCTION",
-   "content_hash": "71a79055e58b5977"
+   "content_hash": "5e4e97b7948e8e17"
   },
   "tests/test_page_view.c|tests/test_page_view.c::main": {
    "file_path": "tests/test_page_view.c",
    "qualified_name": "tests/test_page_view.c::main",
-   "start_line": 4890,
-   "end_line": 5102,
+   "start_line": 4946,
+   "end_line": 5160,
    "type": "FUNCTION",
-   "content_hash": "438b834b7f7adbd4"
+   "content_hash": "e5759f520470b545"
   },
   "tests/test_pdf_export.c|tests/test_pdf_export.c::pagination": {
    "file_path": "tests/test_pdf_export.c",
@@ -51469,33 +51469,33 @@
    "file_path": "tools/fbench.py",
    "qualified_name": "tools/fbench.py::bands",
    "start_line": 76,
-   "end_line": 86,
+   "end_line": 87,
    "type": "FUNCTION",
    "content_hash": "a092814a5ce752b2"
   },
   "tools/fbench.py|tools/fbench.py::sbs": {
    "file_path": "tools/fbench.py",
    "qualified_name": "tools/fbench.py::sbs",
-   "start_line": 87,
-   "end_line": 105,
+   "start_line": 88,
+   "end_line": 106,
    "type": "FUNCTION",
-   "content_hash": "77501df759df617a"
+   "content_hash": "180ea2ad5d42d8ae"
   },
   "tools/fbench.py|tools/fbench.py::publish_readme": {
    "file_path": "tools/fbench.py",
    "qualified_name": "tools/fbench.py::publish_readme",
-   "start_line": 106,
-   "end_line": 125,
+   "start_line": 107,
+   "end_line": 126,
    "type": "FUNCTION",
-   "content_hash": "d6571a66eff85b51"
+   "content_hash": "e448f144f20df5c7"
   },
   "tools/fbench.py|tools/fbench.py::main": {
    "file_path": "tools/fbench.py",
    "qualified_name": "tools/fbench.py::main",
-   "start_line": 126,
-   "end_line": 172,
+   "start_line": 127,
+   "end_line": 173,
    "type": "FUNCTION",
-   "content_hash": "1a594e7c25334125"
+   "content_hash": "27c230cb149c565e"
   },
   "tools/ffgeom.py|tools/ffgeom.py::load_rows": {
    "file_path": "tools/ffgeom.py",
@@ -77014,7 +77014,7 @@
        "target": "include/box_style.h|include/box_style.h::bx_definite_content_h",
        "call_sites": [
         {
-         "line": 2410,
+         "line": 2441,
          "column": 18
         }
        ],
@@ -77025,7 +77025,7 @@
        "target": "include/flex_layout.h|include/flex_layout.h::fx_grid_line_resolve",
        "call_sites": [
         {
-         "line": 3662,
+         "line": 3693,
          "column": 36
         }
        ],
@@ -77036,7 +77036,7 @@
        "target": "include/flex_layout.h|include/flex_layout.h::fx_grid_line_resolve",
        "call_sites": [
         {
-         "line": 3665,
+         "line": 3696,
          "column": 36
         }
        ],
@@ -102836,7 +102836,7 @@
      "target": "src/html_parse.c|src/html_parse.c::lxb_dom_element_has_attribute",
      "call_sites": [
       {
-       "line": 4288,
+       "line": 4319,
        "column": 16
       }
      ],
@@ -102847,7 +102847,7 @@
      "target": "src/html_parse.c|src/html_parse.c::lxb_dom_element_has_attribute",
      "call_sites": [
       {
-       "line": 4773,
+       "line": 4809,
        "column": 16
       }
      ],
@@ -102858,7 +102858,7 @@
      "target": "src/html_parse.c|src/html_parse.c::lxb_dom_element_has_attribute",
      "call_sites": [
       {
-       "line": 4807,
+       "line": 4843,
        "column": 31
       }
      ],
@@ -102869,7 +102869,7 @@
      "target": "include/html_parse.h|include/html_parse.h::hp_document_root",
      "call_sites": [
       {
-       "line": 4970,
+       "line": 5006,
        "column": 45
       }
      ],
@@ -102880,7 +102880,7 @@
      "target": "include/util.h|include/util.h::mem_contains_ci",
      "call_sites": [
       {
-       "line": 5834,
+       "line": 5871,
        "column": 32
       }
      ],
@@ -102891,7 +102891,7 @@
      "target": "include/util.h|include/util.h::mem_contains_ci",
      "call_sites": [
       {
-       "line": 5835,
+       "line": 5872,
        "column": 35
       }
      ],
@@ -102902,7 +102902,7 @@
      "target": "include/util.h|include/util.h::mem_contains_ci",
      "call_sites": [
       {
-       "line": 5836,
+       "line": 5873,
        "column": 35
       }
      ],
@@ -103482,7 +103482,7 @@
      "target": "include/css.h|include/css.h::CSS_LEN_IS_INTRINSIC",
      "call_sites": [
       {
-       "line": 1952,
+       "line": 1983,
        "column": 22
       }
      ],
@@ -103493,7 +103493,7 @@
      "target": "include/css.h|include/css.h::CSS_LEN_IS_INTRINSIC",
      "call_sites": [
       {
-       "line": 1958,
+       "line": 1989,
        "column": 48
       }
      ],
@@ -103504,7 +103504,7 @@
      "target": "include/css_vars.h|include/css_vars.h::cvr_free",
      "call_sites": [
       {
-       "line": 2256,
+       "line": 2287,
        "column": 8
       }
      ],
@@ -103515,7 +103515,7 @@
      "target": "include/css_vars.h|include/css_vars.h::cvr_count",
      "call_sites": [
       {
-       "line": 2333,
+       "line": 2364,
        "column": 25
       }
      ],
@@ -103526,7 +103526,7 @@
      "target": "include/css_vars.h|include/css_vars.h::cvr_free",
      "call_sites": [
       {
-       "line": 2333,
+       "line": 2364,
        "column": 48
       }
      ],
@@ -103537,7 +103537,7 @@
      "target": "include/css_vars.h|include/css_vars.h::cvr_free",
      "call_sites": [
       {
-       "line": 2337,
+       "line": 2368,
        "column": 25
       }
      ],
@@ -103548,7 +103548,7 @@
      "target": "include/css_vars.h|include/css_vars.h::cvr_free",
      "call_sites": [
       {
-       "line": 2342,
+       "line": 2373,
        "column": 21
       }
      ],
@@ -103559,7 +103559,7 @@
      "target": "include/css.h|include/css.h::CSS_LEN_IS_INTRINSIC",
      "call_sites": [
       {
-       "line": 2383,
+       "line": 2414,
        "column": 50
       }
      ],
@@ -103570,7 +103570,7 @@
      "target": "src/css_chain.c|src/css_chain.c::cch_element_style_vars",
      "call_sites": [
       {
-       "line": 2457,
+       "line": 2488,
        "column": 23
       }
      ],
@@ -103581,7 +103581,7 @@
      "target": "src/css_chain.c|src/css_chain.c::cch_element_style_vars",
      "call_sites": [
       {
-       "line": 2464,
+       "line": 2495,
        "column": 13
       }
      ],
@@ -103592,7 +103592,7 @@
      "target": "src/css_chain.c|src/css_chain.c::cch_pseudo_style",
      "call_sites": [
       {
-       "line": 2576,
+       "line": 2607,
        "column": 11
       }
      ],
@@ -103603,7 +103603,7 @@
      "target": "include/css.h|include/css.h::CSS_LEN_IS_INTRINSIC",
      "call_sites": [
       {
-       "line": 2776,
+       "line": 2807,
        "column": 60
       }
      ],
@@ -103614,7 +103614,7 @@
      "target": "include/css.h|include/css.h::CSS_LEN_IS_INTRINSIC",
      "call_sites": [
       {
-       "line": 3304,
+       "line": 3335,
        "column": 54
       }
      ],
@@ -103625,7 +103625,7 @@
      "target": "include/css_chain.h|include/css_chain.h::cch_element_matches",
      "call_sites": [
       {
-       "line": 4074,
+       "line": 4105,
        "column": 32
       }
      ],
@@ -103636,7 +103636,7 @@
      "target": "src/css.c|src/css.c::NULL",
      "call_sites": [
       {
-       "line": 4171,
+       "line": 4202,
        "column": 53
       }
      ],
@@ -103647,7 +103647,7 @@
      "target": "src/css.c|src/css.c::css_parse_scoped",
      "call_sites": [
       {
-       "line": 5000,
+       "line": 5036,
        "column": 10
       }
      ],
@@ -103658,7 +103658,7 @@
      "target": "src/css_chain.c|src/css_chain.c::cch_element_style",
      "call_sites": [
       {
-       "line": 5021,
+       "line": 5057,
        "column": 39
       }
      ],
@@ -103669,7 +103669,7 @@
      "target": "include/css.h|include/css.h::element",
      "call_sites": [
       {
-       "line": 5021,
+       "line": 5057,
        "column": 63
       }
      ],

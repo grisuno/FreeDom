@@ -3463,6 +3463,62 @@ static void test_grid_line_placement_nested_container_item(void **state) {
     hp_document_free(doc);
 }
 
+/* A data table inside a grid item is an item OF that grid: its synthesised container
+ * must link to the enclosing container, or the outer grid splits its band at every
+ * table and the sibling column lands under the last band (animate.style's sidebar). */
+static void test_table_container_links_to_enclosing_grid(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='g'><div class='c'><p>Before</p>"
+                             "<table><tr><td>X</td><td>Y</td></tr></table>"
+                             "<p>After</p></div><aside>Side</aside></div></body>");
+    static const char CSS[] =
+        ".g{display:grid;grid-template-columns:70% 30%}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *x = find_text(v, "X");
+    const pv_run *before = find_text(v, "Before");
+    assert_non_null(x);
+    assert_non_null(before);
+    assert_true(x->cont_id != before->cont_id);
+    const pv_cont_def *tbl = pv_cont_at(v, (size_t)x->cont_id);
+    assert_non_null(tbl);
+    assert_int_equal(tbl->parent_id, before->cont_id);
+    assert_true(tbl->parent_item >= 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* `table{display:block}` (every markdown stylesheet: `pre,table{display:block;
+ * max-width:100%;overflow-x:auto}`) makes the TABLE element a block, but its rows and
+ * cells still form an anonymous table (CSS 2.1 17.2.1). The cells must keep their
+ * synthesised grid, and that grid must still be an item of the enclosing container. */
+static void test_block_table_keeps_grid_and_links_to_container(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='g'><div class='c'><p>Before</p>"
+                             "<table><tr><td>X</td><td>Y</td></tr></table></div>"
+                             "<aside>Side</aside></div></body>");
+    static const char CSS[] =
+        ".g{display:grid;grid-template-columns:70% 30%}"
+        "table{display:block;max-width:100%;overflow-x:auto}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *x = find_text(v, "X");
+    const pv_run *y = find_text(v, "Y");
+    const pv_run *before = find_text(v, "Before");
+    assert_non_null(x);
+    assert_non_null(y);
+    assert_non_null(before);
+    assert_true(x->cont_id >= 0);
+    assert_int_equal(x->cont_id, y->cont_id);
+    assert_true(x->cont_id != before->cont_id);
+    const pv_cont_def *tbl = pv_cont_at(v, (size_t)x->cont_id);
+    assert_non_null(tbl);
+    assert_int_equal(tbl->cols, 2);
+    assert_int_equal(tbl->parent_id, before->cont_id);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* `min-width:0` is a DECLARED minimum (Flexbox 4.5: it switches off the automatic
  * minimum), not the "unset" 0 of box_min_w. Hugo Stack's `main.main{min-width:0}`
  * is what lets the post column shrink beside the sidebar. */
@@ -5090,6 +5146,8 @@ int main(void) {
         cmocka_unit_test(test_build_caret_color_inherited),
         cmocka_unit_test(test_grid_line_placement_plain_item),
         cmocka_unit_test(test_grid_line_placement_nested_container_item),
+        cmocka_unit_test(test_table_container_links_to_enclosing_grid),
+        cmocka_unit_test(test_block_table_keeps_grid_and_links_to_container),
         cmocka_unit_test(test_box_min_width_zero_is_declared),
         cmocka_unit_test(test_flex_item_inline_is_blockified),
         cmocka_unit_test(test_br_opening_line_is_empty_line),

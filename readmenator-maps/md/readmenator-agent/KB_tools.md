@@ -9,9 +9,9 @@
   - `load_current` (function, line 59) `def load_current()`
   - `luma` (function, line 72) `def luma(img)`
   - `bands` (function, line 76) `def bands(fd, ff, band)`
-  - `sbs` (function, line 87) `def sbs(name, start, nrows)`
-  - `publish_readme` (function, line 106) `def publish_readme(name, score)`
-  - `main` (function, line 126) `def main()`
+  - `sbs` (function, line 88) `def sbs(name, start, nrows)`
+  - `publish_readme` (function, line 107) `def publish_readme(name, score)`
+  - `main` (function, line 127) `def main()`
 
 ## tools/ffgeom.py
 - Doc: ffgeom -- Firefox geometry as TEXT, no image reading.

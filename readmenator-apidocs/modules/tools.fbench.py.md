@@ -124,7 +124,7 @@ def bands(fd, ff, band)
 
 ### `sbs`
 
-`function` | [tools/fbench.py:87](../../tools/fbench.py#L87)
+`function` | [tools/fbench.py:88](../../tools/fbench.py#L88)
 
 ```python
 def sbs(name, start, nrows)
@@ -146,7 +146,7 @@ def sbs(name, start, nrows)
 
 ### `publish_readme`
 
-`function` | [tools/fbench.py:106](../../tools/fbench.py#L106)
+`function` | [tools/fbench.py:107](../../tools/fbench.py#L107)
 
 ```python
 def publish_readme(name, score)
@@ -171,7 +171,7 @@ Rewrite the README picture of [`name`](src.text_shape.c.md#name) and the score p
 
 ### `main`
 
-`function` | [tools/fbench.py:126](../../tools/fbench.py#L126)
+`function` | [tools/fbench.py:127](../../tools/fbench.py#L127)
 
 ```python
 def main()

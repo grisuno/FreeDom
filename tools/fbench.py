@@ -75,7 +75,8 @@ def luma(img):
 
 def bands(fd, ff, band):
     h = min(fd.shape[0], ff.shape[0])
-    rows = np.abs(fd[:h] - ff[:h]).mean(axis=1)
+    w = min(fd.shape[1], ff.shape[1])
+    rows = np.abs(fd[:h, :w] - ff[:h, :w]).mean(axis=1)
     first = next((i for i, v in enumerate(rows) if v > 2.0), None)
     scored = []
     for y in range(0, h, band):
