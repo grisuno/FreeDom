@@ -3,6 +3,13 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `copy_trimmed` | function | `src/css_atrule.c:54` | `static int copy_trimmed(const char *s, size_t a, size_t b, char *dst, size_t cap, int lower)` |
+| `eval_condition` | function | `src/css_atrule.c:114` | `static int eval_condition(const char *s, size_t a, size_t b, const car_ops *ops,                 ...` |
+| `eval_declaration` | function | `src/css_atrule.c:68` | `static int eval_declaration(const char *s, size_t a, size_t b, const car_ops *ops, int *ok)` |
+| `eval_in_parens` | function | `src/css_atrule.c:85` | `static int eval_in_parens(const char *s, size_t *i, size_t b, const car_ops *ops,                ...` |
+| `keyword_at` | function | `src/css_atrule.c:23` | `static int keyword_at(const char *s, size_t i, size_t b, const char *kw)` |
+| `skip_ws` | function | `src/css_atrule.c:17` | `static size_t skip_ws(const char *s, size_t i, size_t b)` |
+| `AUTO_REJECT` | macro | `src/css_box.c:1158` | `#define AUTO_REJECT` |
 | `AUTO_RESET` | macro | `src/css_box.c:1160` | `#define AUTO_RESET` |
 | `AUTO_RESET_NONE` | macro | `src/css_box.c:1164` | `#define AUTO_RESET_NONE` |
 | `AUTO_VALUE` | macro | `src/css_box.c:1159` | `#define AUTO_VALUE` |
@@ -489,12 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `pool` | function | `src/freedom.c:689` | `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...` |
 | `print_console` | function | `src/freedom.c:380` | `static void print_console(const fb_buffer *log)` |
 | `print_css_drops` | function | `src/freedom.c:522` | `static void print_css_drops(const char *html, size_t len)` |
-| `print_doc` | function | `src/freedom.c:287` | `static void print_doc(const rd_doc *doc)` |
-| `print_dom` | function | `src/freedom.c:397` | `static void print_dom(const rd_doc *doc)` |
-| `print_dom_css` | function | `src/freedom.c:412` | `static void print_dom_css(const rd_doc *doc)` |
-| `print_usage` | function | `src/freedom.c:52` | `static void print_usage(FILE *fp, const char *prog)` |
-| `read_file` | function | `src/freedom.c:219` | `static char *read_file(const char *path, size_t *out_len)` |
-| `render_page` | function | `src/freedom.c:626` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
-| `run_dump_video` | function | `src/freedom.c:1163` | `static int run_dump_video(const char *url)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

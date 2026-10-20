@@ -29,7 +29,7 @@
 | `fuzz/fuzz_url.c` | - | fuzz | 2 | 0 |
 | `fuzz/fuzz_web_storage.c` | - | fuzz | 0 | 0 |
 | `fuzz/fuzz_webfont.c` | libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). | fuzz | 1 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 595 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 602 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 10 | 2 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -178,7 +178,7 @@
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
-| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 243 | 0 |
+| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 244 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
 | `src/prefetch.c` | ci_starts: static int is_ws(char c) { return c == ' ' \|\| c == '\t' \|\| c == '\n' \|\| c == '\r' \|\|... | src | 30 | 0 |
@@ -234,7 +234,7 @@
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
 | `tests/test_freebug.c` | - | tests | 13 | 0 |
-| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 97 | 0 |
+| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 102 | 0 |
 | `tests/test_hls.c` | - | tests | 16 | 0 |
 | `tests/test_host_conf.c` | - | tests | 8 | 0 |
 | `tests/test_hostblock.c` | - | tests | 22 | 0 |

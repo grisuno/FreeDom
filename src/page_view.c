@@ -239,6 +239,7 @@ static void run_init_common(pv_run *r) {
     r->float_box = -1;
     r->float_ow = 0;
     r->float_ow_pct = 0;
+    r->float_obox = -1;
     r->float_mr = 0;
     r->float_mr_pct = 0;
     r->float_oid = -1;
@@ -748,13 +749,14 @@ void pv_set_cont_item(pv_view *v, int cont_item) {
 }
 
 void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box,
-                    int float_ow, int float_ow_pct) {
+                    int float_ow, int float_ow_pct, int float_obox) {
     if (v == NULL || v->count == 0) return;
     v->runs[v->count - 1].float_w = float_w;
     v->runs[v->count - 1].float_w_pct = float_w_pct;
     v->runs[v->count - 1].float_box = float_box;
     v->runs[v->count - 1].float_ow = float_ow;
     v->runs[v->count - 1].float_ow_pct = float_ow_pct;
+    v->runs[v->count - 1].float_obox = float_obox;
 }
 
 void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
@@ -1279,6 +1281,7 @@ typedef struct pv_cont_info {
     int float_w, float_w_pct;   /* the founder's own declared width (pv_run.float_w) */
     int float_box;              /* the founder's own box id (pv_run.float_box), -1 none */
     int float_ow, float_ow_pct; /* the OUTERMOST founder's own width halves (pv_run.float_ow) */
+    int float_obox;             /* the OUTERMOST founder's own box id (pv_run.float_obox), -1 none */
     /* The OUTERMOST float founder (spec/float.md §7d.1): the last (highest)
      * floated self-or-ancestor block on this run's chain. float_oid is its
      * group id (-1 = the nearest IS the outermost: single-level float, the
@@ -1825,7 +1828,7 @@ static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *
                  cont->float_oid, cont->float_oside,
                  cont->float_oml, cont->float_oml_pct,
                  cont->float_omr, cont->float_omr_pct);
-    pv_set_float_w(v, cont->float_w, cont->float_w_pct, cont->float_box, cont->float_ow, cont->float_ow_pct);
+    pv_set_float_w(v, cont->float_w, cont->float_w_pct, cont->float_box, cont->float_ow, cont->float_ow_pct, cont->float_obox);
     pv_set_box(v, box->l, box->r, box->w, box->center, box->mt, box->mb);
     pv_set_ua_tag(v, box->ua);
     pv_set_box_pct(v, box->w_pct, box->l_pct, box->r_pct, box->mt_pct, box->mb_pct);
@@ -3192,7 +3195,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->float_ml = 0; cont->float_ml_pct = 0;
     cont->float_mr = 0; cont->float_mr_pct = 0;
     cont->float_w = 0; cont->float_w_pct = 0; cont->float_box = -1;
-    cont->float_ow = 0; cont->float_ow_pct = 0;
+    cont->float_ow = 0; cont->float_ow_pct = 0; cont->float_obox = -1;
     cont->float_oid = -1; cont->float_oside = 0;
     cont->float_oml = 0; cont->float_oml_pct = 0;
     cont->float_omr = 0; cont->float_omr_pct = 0;
@@ -3238,6 +3241,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     int heading_fs_own = 0;
     int got_li = 0, got_list_kind = 0, got_float = 0;
     const lxb_dom_node_t *float_el = NULL;   /* the nearest float founder */
+    const lxb_dom_node_t *float_oel = NULL;  /* the OUTERMOST float founder (last one met) */
     /* Set once the walk passes through (or starts at) an absolutely/fixed positioned
      * element. Per CSS 2.2 section 9.7 such an element computes `float` to none and is
      * taken out of flow, so it does NOT join an ancestor float's column -- the OOF
@@ -3429,6 +3433,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 cont->float_omr_pct = cs.pct[CSS_PCT_MARGIN_RIGHT];
                 cont->float_ow = (cs.width > 0 && !CSS_LEN_IS_INTRINSIC(cs.width)) ? cs.width : 0;
                 cont->float_ow_pct = (cs.pct[CSS_PCT_WIDTH] > 0) ? cs.pct[CSS_PCT_WIDTH] : 0;
+                cont->float_obox = -1;
+                float_oel = p;
                 if (!got_float) {
                     cont->float_side = cs.float_side;
                     cont->float_id = container_id(float_reg, p);
@@ -3568,6 +3574,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 }
             }
             if (cont != NULL && float_el == p && this_box >= 0) cont->float_box = this_box;
+            if (cont != NULL && float_oel == p && this_box >= 0) cont->float_obox = this_box;
             /* The container found one step in carried no box of its own: the first
              * box further out is the rect its items lay out in. */
             if (cont != NULL && cont->box_pending && this_box >= 0) {
@@ -3902,7 +3909,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
         cont->float_oside = 0;
         cont->float_oml = 0; cont->float_oml_pct = 0;
         cont->float_omr = 0; cont->float_omr_pct = 0;
-        cont->float_ow = 0; cont->float_ow_pct = 0;
+        cont->float_ow = 0; cont->float_ow_pct = 0; cont->float_obox = -1;
     }
 
     /* The walk ended with relative font-sizes and no absolute anchor: the product
@@ -5045,7 +5052,7 @@ static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
                          cont->float_oid, cont->float_oside,
                          cont->float_oml, cont->float_oml_pct,
                          cont->float_omr, cont->float_omr_pct);
-    pv_set_float_w(v, cont->float_w, cont->float_w_pct, cont->float_box, cont->float_ow, cont->float_ow_pct);
+    pv_set_float_w(v, cont->float_w, cont->float_w_pct, cont->float_box, cont->float_ow, cont->float_ow_pct, cont->float_obox);
     if (ext != NULL) pv_set_text_ext(v, ext);
 }
 
@@ -5450,7 +5457,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          cu_cont.float_oid, cu_cont.float_oside,
                          cu_cont.float_oml, cu_cont.float_oml_pct,
                          cu_cont.float_omr, cu_cont.float_omr_pct);
-                pv_set_float_w(v, cu_cont.float_w, cu_cont.float_w_pct, cu_cont.float_box, cu_cont.float_ow, cu_cont.float_ow_pct);
+                pv_set_float_w(v, cu_cont.float_w, cu_cont.float_w_pct, cu_cont.float_box, cu_cont.float_ow, cu_cont.float_ow_pct, cu_cont.float_obox);
                 /* The cell's own box (`td { border: 1px solid; padding: 5px }`).
                  * resolve_context registered it, but the id was resolved and then
                  * dropped, so the cell's border/padding/background never reached the
@@ -5560,7 +5567,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          ictl_cont.float_oid, ictl_cont.float_oside,
                          ictl_cont.float_oml, ictl_cont.float_oml_pct,
                          ictl_cont.float_omr, ictl_cont.float_omr_pct);
-                pv_set_float_w(v, ictl_cont.float_w, ictl_cont.float_w_pct, ictl_cont.float_box, ictl_cont.float_ow, ictl_cont.float_ow_pct);
+                pv_set_float_w(v, ictl_cont.float_w, ictl_cont.float_w_pct, ictl_cont.float_box, ictl_cont.float_ow, ictl_cont.float_ow_pct, ictl_cont.float_obox);
                 /* The resolved inherited text extensions ride the input run too:
                  * caret_color tints the caret of the focused control (2026-07-10). */
                 pv_set_text_ext(v, &ctl_ext);
@@ -5802,6 +5809,17 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_cont_box(v, svg_cont.box_id);
                 pv_set_cont_item(v, item_ordinal(&items, svg_cont.id, svg_cont.item));
                 link_cont_chain(&reg, &items, &svg_cont);
+                /* An <svg> inside a floated column is content of that float like any other
+                 * run: without its float annotation it cut the band (the icon row of a
+                 * `float:right` social list became one float of text plus loose icons). */
+                pv_set_float(v, svg_cont.float_side, svg_cont.float_id, svg_cont.float_clear,
+                             svg_cont.float_ml, svg_cont.float_ml_pct,
+                             svg_cont.float_mr, svg_cont.float_mr_pct,
+                             svg_cont.float_oid, svg_cont.float_oside,
+                             svg_cont.float_oml, svg_cont.float_oml_pct,
+                             svg_cont.float_omr, svg_cont.float_omr_pct);
+                pv_set_float_w(v, svg_cont.float_w, svg_cont.float_w_pct, svg_cont.float_box,
+                               svg_cont.float_ow, svg_cont.float_ow_pct, svg_cont.float_obox);
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 pv_set_oof(v, svg_oof);
@@ -6283,7 +6301,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          econt.float_oid, econt.float_oside,
                          econt.float_oml, econt.float_oml_pct,
                          econt.float_omr, econt.float_omr_pct);
-                    pv_set_float_w(v, econt.float_w, econt.float_w_pct, econt.float_box, econt.float_ow, econt.float_ow_pct);
+                    pv_set_float_w(v, econt.float_w, econt.float_w_pct, econt.float_box, econt.float_ow, econt.float_ow_pct, econt.float_obox);
                     pv_set_box(v, ebox.l, ebox.r, ebox.w, ebox.center, ebox.mt, ebox.mb);
                     pv_set_ua_tag(v, ebox.ua);
                     pv_set_box_pct(v, ebox.w_pct, ebox.l_pct, ebox.r_pct,
@@ -6606,7 +6624,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          cont.float_oid, cont.float_oside,
                          cont.float_oml, cont.float_oml_pct,
                          cont.float_omr, cont.float_omr_pct);
-                pv_set_float_w(v, cont.float_w, cont.float_w_pct, cont.float_box, cont.float_ow, cont.float_ow_pct);
+                pv_set_float_w(v, cont.float_w, cont.float_w_pct, cont.float_box, cont.float_ow, cont.float_ow_pct, cont.float_obox);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
                 pv_set_ua_tag(v, box.ua);
                 pv_set_box_pct(v, box.w_pct, box.l_pct, box.r_pct,

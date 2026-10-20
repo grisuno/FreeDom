@@ -1326,11 +1326,11 @@ drops-update: $(BUILD_DIR)/freedom
 drift:
 	@grep -q "TAB_WIRE_HEAD_N 6" src/tab.c || (echo "drift: HEAD const missing"; exit 1)
 	@grep -q "TAB_WIRE_A_N 38" src/tab.c || (echo "drift: A const missing"; exit 1)
-	@grep -q "TAB_WIRE_B_N 69" src/tab.c || (echo "drift: B const missing"; exit 1)
+	@grep -q "TAB_WIRE_B_N 70" src/tab.c || (echo "drift: B const missing"; exit 1)
 	@grep -q "TAB_WIRE_BOX_F_N 263" src/tab.c || (echo "drift: BOX const missing"; exit 1)
 	@grep -q "int32_t head\[TAB_WIRE_HEAD_N\]\|int32_t head\[6\]" src/tab.c || (echo "drift: head array drift"; exit 1)
 	@grep -q "int32_t a\[TAB_WIRE_A_N\]\|int32_t a\[38\]" src/tab.c || (echo "drift: A array drift"; exit 1)
-	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[69\]" src/tab.c || (echo "drift: B array drift"; exit 1)
+	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[70\]" src/tab.c || (echo "drift: B array drift"; exit 1)
 	@grep -q "int32_t f\[TAB_WIRE_BOX_F_N\]\|int32_t f\[263\]" src/tab.c || (echo "drift: box array drift"; exit 1)
 	@grep -q "FC_UI_FONT_SIZE\|FC_FONT_FALLBACK_PX" include/freedom_config.h || (echo "drift: FC font const missing"; exit 1)
 	@! grep -rn "cairo_set_font_size.*16\.0" gui/ --include="*.c" | grep -v FC_ || (echo "drift: raw 16.0 literal in gui"; exit 1)

@@ -2681,7 +2681,78 @@ static int has_box_x(const char *out, double x0, double w0) {
     return 0;
 }
 
-/* An EMPTY inline-block icon (`<i class=ico></i>` with a declared size) is an atom of
+/* True when some `row[` line has x_off within 0.6 of x0. */
+static int has_row_x(const char *out, double x0) {
+    for (const char *q = strstr(out, "row["); q != NULL; q = strstr(q + 1, "row[")) {
+        double top, h, xo;
+        size_t i;
+        if (sscanf(q, "row[%zu] top=%lf h=%lf x_off=%lf", &i, &top, &h, &xo) != 4) continue;
+        if (xo > x0 - 0.6 && xo < x0 + 0.6) return 1;
+    }
+    return 0;
+}
+
+/* True when some `sub box` line (an out-of-flow subtree) has x within 1.5 of x0. */
+static int has_sub_x(const char *out, double x0) {
+    for (const char *q = strstr(out, "sub box"); q != NULL; q = strstr(q + 1, "sub box")) {
+        double x, top, bw, bh;
+        int bid;
+        if (sscanf(q, "sub box bid=%d x=%lf top=%lf w=%lf h=%lf", &bid, &x, &top, &bw, &bh) != 5) continue;
+        if (x > x0 - 1.5 && x < x0 + 1.5) return 1;
+    }
+    return 0;
+}
+
+/* position:relative moves the CONTENT of the box with it (CSS 2.1 9.4.3), not just its
+ * background: the text of `left:50px` started at x=0 under a background that moved. */
+static void test_dump_layout_relative_offset_moves_content(void **state) {
+    (void)state;
+    char out[8192];
+    layout_of("<html><head><style>body{margin:0;font:14px sans-serif}"
+              ".r{position:relative;left:50px;top:10px;background:#9cf;width:200px}"
+              "</style></head><body><div style=\"height:20px\">a</div>"
+              "<div class=\"r\">relative text</div><div>after</div>"
+              "<div style=\"height:800px\"></div></body></html>",
+              "__freedom_relmove.html", out, sizeof out);
+    assert_true(has_row_x(out, 50.0));
+    /* the box keeps its own height (the offset must not shorten it) */
+    assert_true(has_box(out, 200.0, 21.0, 30.0, 32.0));
+}
+
+/* An inline-level absolutely positioned box has the static position of the inline box it
+ * would have been: on the open line, right after the text before it (the story byline of
+ * Slashdot sits beside its icon, not below the bar). */
+static void test_dump_layout_inline_abs_static_position_on_line(void **state) {
+    (void)state;
+    char out[8192];
+    layout_of("<html><head><style>body{margin:0;font:14px sans-serif}"
+              ".d{padding:5px 20px;background:#eee;line-height:20px}"
+              ".by{display:inline;position:absolute;height:20px;overflow:hidden;background:#9cf}"
+              "</style></head><body><div class=\"d\"><span>Icon</span>"
+              "<span class=\"by\">Posted by me</span></div>"
+              "<div style=\"height:800px\"></div></body></html>",
+              "__freedom_inlineabs.html", out, sizeof out);
+    assert_true(has_sub_x(out, 48.7));
+}
+
+/* A wrapper that bounds its float (a declared height and a background) keeps its own
+ * width and height around a lone `float:right` list; the float sits at the right edge
+ * and the content after the wrapper starts where the wrapper ends. */
+static void test_dump_layout_bounded_wrapper_around_lone_right_float(void **state) {
+    (void)state;
+    char out[8192];
+    layout_of("<html><head><style>body{margin:0;padding:12px 13px;font:12px sans-serif}"
+              ".wrap{height:30px;line-height:28px;background:#004d4d;color:#fff}"
+              ".soc{float:right;padding-right:20px}"
+              "</style></head><body><div class=\"wrap\"><nav class=\"soc\">Follow us:</nav></div>"
+              "<div style=\"height:900px\"></div></body></html>",
+              "__freedom_boundwrap.html", out, sizeof out);
+    assert_true(has_box(out, 974.0, 30.0, 11.5, 12.5));
+    assert_true(has_box(out, 974.0, 900.0, 41.5, 42.5));
+    assert_true(has_row_x(out, 987.0 - 20.0 - 55.7) || has_row_x(out, 911.3));
+}
+
+/* An empty inline-block icon (`<i class=ico></i>` with a declared size) is an atom of
  * its line: it sits on the baseline beside its label instead of opening a block that
  * flushed the line and stacked the icon above its own text (every nav icon on the web). */
 static void test_dump_layout_empty_inline_block_atom_shares_line(void **state) {
@@ -2747,7 +2818,8 @@ static void test_dump_layout_inline_block_heading_keeps_author_margin(void **sta
               "<a href=\"#\" style=\"display:inline-block\">y</a></nav></div>"
               "<div style=\"height:900px\"></div></body></html>",
               "__freedom_h2margin.html", out, sizeof out);
-    assert_true(has_box(out, 674.0, 40.0, 11.5, 12.5));
+    assert_true(has_box(out, 974.0, 40.0, 11.5, 12.5));
+    assert_true(has_box(out, 681.8, 35.0, 11.5, 12.5));
 }
 
 /* Inline-blocks on one line sit on the line's BASELINE (CSS 2.1 10.8.1): a 35px
@@ -3995,6 +4067,9 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_float_pct_widths_resolve_once),
         cmocka_unit_test(test_dump_layout_inline_block_row_baseline),
         cmocka_unit_test(test_dump_layout_empty_inline_block_atom_shares_line),
+        cmocka_unit_test(test_dump_layout_relative_offset_moves_content),
+        cmocka_unit_test(test_dump_layout_inline_abs_static_position_on_line),
+        cmocka_unit_test(test_dump_layout_bounded_wrapper_around_lone_right_float),
         cmocka_unit_test(test_dump_layout_aspect_ratio_frame_with_absolute_child),
         cmocka_unit_test(test_dump_layout_nested_float_pct_is_share_of_outer),
         cmocka_unit_test(test_dump_layout_inline_block_heading_keeps_author_margin),

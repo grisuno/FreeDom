@@ -3,6 +3,14 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `PF_MAX_URL` | macro | `src/prefetch.c:24` | `#define PF_MAX_URL` |
+| `_POSIX_C_SOURCE` | macro | `src/prefetch.c:12` | `#define _POSIX_C_SOURCE` |
+| `attr_span` | struct | `src/prefetch.c:65` | `` |
+| `ci_eq_span` | function | `src/prefetch.c:58` | `static int ci_eq_span(const char *s, size_t n, const char *kw)` |
+| `ci_find` | function | `src/prefetch.c:49` | `static const char *ci_find(const char *p, const char *end, const char *kw)` |
+| `ci_starts` | function | `src/prefetch.c:40` | `static int ci_starts(const char *p, const char *end, const char *kw)` |
+| `emit` | function | `src/prefetch.c:120` | `static void emit(pf_list *out, pf_kind kind, const char *val, size_t vlen)` |
+| `is_name_char` | function | `src/prefetch.c:30` | `static int is_name_char(char c)` |
 | `is_ws` | function | `src/prefetch.c:26` | `static int is_ws(char c)` |
 | `js_ident_ch` | function | `src/prefetch.c:207` | `static int js_ident_ch(char c)` |
 | `js_skip_string` | function | `src/prefetch.c:219` | `static size_t js_skip_string(const char *s, size_t i, size_t n)` |
@@ -60,26 +68,26 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `profile_load` | function | `src/profile.c:112` | `profile_status profile_load(const profile_ctx *ctx, prefs_state *out)` |
 | `profile_open` | function | `src/profile.c:59` | `profile_status profile_open(profile_ctx *ctx, const char *dir)` |
 | `profile_save` | function | `src/profile.c:133` | `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p)` |
-| `place` | function | `src/render_doc.c:235` | `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...` |
-| `rd_at` | function | `src/render_doc.c:758` | `const rd_block *rd_at(const rd_doc *d, size_t i)` |
-| `rd_block_heading_level` | function | `src/render_doc.c:795` | `int rd_block_heading_level(const rd_block *b)` |
-| `rd_block_tag` | function | `src/render_doc.c:806` | `const char *rd_block_tag(const rd_block *b)` |
-| `rd_box_at` | function | `src/render_doc.c:767` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)` |
-| `rd_box_count` | function | `src/render_doc.c:763` | `size_t rd_box_count(const rd_doc *d)` |
-| `rd_build` | function | `src/render_doc.c:267` | `rd_status rd_build(const pv_view *view, rdp_caps caps,                    const char *top_level_u...` |
-| `rd_cont_at` | function | `src/render_doc.c:776` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)` |
-| `rd_cont_count` | function | `src/render_doc.c:772` | `size_t rd_cont_count(const rd_doc *d)` |
-| `rd_count` | function | `src/render_doc.c:754` | `size_t rd_count(const rd_doc *d)` |
-| `rd_free` | function | `src/render_doc.c:737` | `void rd_free(rd_doc *d)` |
-| `rd_image_fail_label` | function | `src/render_doc.c:872` | `const char *rd_image_fail_label(img_fail_reason reason)` |
-| `rd_image_label` | function | `src/render_doc.c:861` | `const char *rd_image_label(rdp_img_decision d)` |
-| `rd_input_invisible` | function | `src/render_doc.c:857` | `int rd_input_invisible(int input_type)` |
-| `rd_input_label` | function | `src/render_doc.c:837` | `const char *rd_input_label(int input_type)` |
-| `rd_kind_name` | function | `src/render_doc.c:781` | `const char *rd_kind_name(rd_kind k)` |
+| `place` | function | `src/render_doc.c:236` | `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...` |
+| `rd_at` | function | `src/render_doc.c:761` | `const rd_block *rd_at(const rd_doc *d, size_t i)` |
+| `rd_block_heading_level` | function | `src/render_doc.c:798` | `int rd_block_heading_level(const rd_block *b)` |
+| `rd_block_tag` | function | `src/render_doc.c:809` | `const char *rd_block_tag(const rd_block *b)` |
+| `rd_box_at` | function | `src/render_doc.c:770` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)` |
+| `rd_box_count` | function | `src/render_doc.c:766` | `size_t rd_box_count(const rd_doc *d)` |
+| `rd_build` | function | `src/render_doc.c:268` | `rd_status rd_build(const pv_view *view, rdp_caps caps,                    const char *top_level_u...` |
+| `rd_cont_at` | function | `src/render_doc.c:779` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)` |
+| `rd_cont_count` | function | `src/render_doc.c:775` | `size_t rd_cont_count(const rd_doc *d)` |
+| `rd_count` | function | `src/render_doc.c:757` | `size_t rd_count(const rd_doc *d)` |
+| `rd_free` | function | `src/render_doc.c:740` | `void rd_free(rd_doc *d)` |
+| `rd_image_fail_label` | function | `src/render_doc.c:875` | `const char *rd_image_fail_label(img_fail_reason reason)` |
+| `rd_image_label` | function | `src/render_doc.c:864` | `const char *rd_image_label(rdp_img_decision d)` |
+| `rd_input_invisible` | function | `src/render_doc.c:860` | `int rd_input_invisible(int input_type)` |
+| `rd_input_label` | function | `src/render_doc.c:840` | `const char *rd_input_label(int input_type)` |
+| `rd_kind_name` | function | `src/render_doc.c:784` | `const char *rd_kind_name(rd_kind k)` |
 | `rd_push` | function | `src/render_doc.c:60` | `static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,                  ...` |
-| `rd_push_input` | function | `src/render_doc.c:209` | `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` |
-| `resolve_image_decision` | function | `src/render_doc.c:245` | `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,         ...` |
-| `unset` | function | `src/render_doc.c:672` | `* background paints as if unset (no border/box-shadow-style                  * "broken image" pla...` |
+| `rd_push_input` | function | `src/render_doc.c:210` | `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` |
+| `resolve_image_decision` | function | `src/render_doc.c:246` | `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,         ...` |
+| `unset` | function | `src/render_doc.c:675` | `* background paints as if unset (no border/box-shadow-style                  * "broken image" pla...` |
 | `utf8_sanitized_dup` | function | `src/render_doc.c:28` | `static char *utf8_sanitized_dup(const char *s)` |
 | `rdp_caps_safe` | function | `src/render_policy.c:17` | `rdp_caps rdp_caps_safe(void)` |
 | `rdp_image_decision` | function | `src/render_policy.c:28` | `rdp_img_decision rdp_image_decision(rdp_caps caps,                                     const char...` |
@@ -488,13 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `span_is_data` | function | `src/webfont.c:114` | `static int span_is_data(const char *span, size_t slen)` |
 | `wf_list_free` | function | `src/webfont.c:49` | `void wf_list_free(wf_list *l)` |
 | `wf_ref_move` | function | `src/webfont.c:64` | `void wf_ref_move(wf_ref *dst, wf_ref *src)` |
-| `wf_scan` | function | `src/webfont.c:422` | `int wf_scan(const char *css, size_t len, wf_list *out)` |
-| `wf_supported_format` | function | `src/webfont.c:74` | `int wf_supported_format(const char *fmt)` |
-| `WF_DATA_URL_MAX` | macro | `src/webfont_load.c:91` | `#define WF_DATA_URL_MAX` |
-| `ctype_ok` | function | `src/webfont_load.c:24` | `static int ctype_ok(const char *ct)` |
-| `fetch` | type_alias | `src/webfont_load.c:56` | `typedef struct wf_cursor { wf_fetch_fn fetch;` |
-| `hash` | type_alias | `src/webfont_load.c:46` | `typedef struct wf_key { unsigned hash;` |
-| `here` | function | `src/webfont_load.c:22` | `* filtered here (a "" hint may still name one);` |
-| `key_find` | function | `src/webfont_load.c:66` | `static int key_find(wf_key *keys, size_t nkeys, unsigned h, int b, int i)` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

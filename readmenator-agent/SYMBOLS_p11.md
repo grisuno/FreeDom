@@ -3,6 +3,14 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_math_min_max_top_level` | function | `tests/test_css.c:4829` | `static void test_math_min_max_top_level(void **state)` |
+| `test_math_nested_in_calc` | function | `tests/test_css.c:4851` | `static void test_math_nested_in_calc(void **state)` |
+| `test_media_and_or` | function | `tests/test_css.c:2722` | `static void test_media_and_or(void **state)` |
+| `test_media_prefers_color_scheme` | function | `tests/test_css.c:2691` | `static void test_media_prefers_color_scheme(void **state)` |
+| `test_media_query_length_honours_its_unit` | function | `tests/test_css.c:5465` | `static void test_media_query_length_honours_its_unit(void **state)` |
+| `test_media_range_syntax_applies` | function | `tests/test_css.c:1014` | `static void test_media_range_syntax_applies(void **state)` |
+| `test_media_screen_and_print` | function | `tests/test_css.c:2672` | `static void test_media_screen_and_print(void **state)` |
+| `test_media_width_queries` | function | `tests/test_css.c:2707` | `static void test_media_width_queries(void **state)` |
 | `test_not_unreadable_argument_fails_closed` | function | `tests/test_css.c:1845` | `static void test_not_unreadable_argument_fails_closed(void **state)` |
 | `test_not_with_pseudo_class` | function | `tests/test_css.c:1817` | `static void test_not_with_pseudo_class(void **state)` |
 | `test_opacity` | function | `tests/test_css.c:215` | `static void test_opacity(void **state)` |
@@ -488,13 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_entry_truncated_not_dropped` | function | `tests/test_freebug.c:75` | `static void test_entry_truncated_not_dropped(void **state)` |
 | `test_free_idempotent` | function | `tests/test_freebug.c:161` | `static void test_free_idempotent(void **state)` |
 | `test_level_clamped` | function | `tests/test_freebug.c:118` | `static void test_level_clamped(void **state)` |
-| `test_level_name` | function | `tests/test_freebug.c:129` | `static void test_level_name(void **state)` |
-| `test_push_and_read` | function | `tests/test_freebug.c:21` | `static void test_push_and_read(void **state)` |
-| `test_push_loc_file_truncated` | function | `tests/test_freebug.c:214` | `static void test_push_loc_file_truncated(void **state)` |
-| `test_push_loc_null_file_and_negative_nums` | function | `tests/test_freebug.c:197` | `static void test_push_loc_null_file_and_negative_nums(void **state)` |
-| `test_push_loc_records_location` | function | `tests/test_freebug.c:175` | `static void test_push_loc_records_location(void **state)` |
-| `test_reset_reuses_and_no_leak` | function | `tests/test_freebug.c:140` | `static void test_reset_reuses_and_no_leak(void **state)` |
-| `test_total_bytes_cap_fails_closed` | function | `tests/test_freebug.c:93` | `static void test_total_bytes_cap_fails_closed(void **state)` |
-| `ERR_FILE` | macro | `tests/test_freedom.c:29` | `#define ERR_FILE` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

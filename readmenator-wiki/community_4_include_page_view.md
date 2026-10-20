@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 21 file(s) rooted at `include` with dominant language c (cohesion 0.47). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (243 symbols).
+This community groups 21 file(s) rooted at `include` with dominant language c (cohesion 0.47). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (244 symbols).
 
 ## Files
 
@@ -39,7 +39,7 @@ This community groups 21 file(s) rooted at `include` with dominant language c (c
 | `src/box_tree.c` | c | utility | 24 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 35 | no |
-| `src/page_view.c` | c | presentation | 243 | no |
+| `src/page_view.c` | c | presentation | 244 | no |
 | `src/render_doc.c` | c | presentation | 21 | no |
 
 ### `fuzz` (1 files)

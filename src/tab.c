@@ -63,7 +63,7 @@ static void ignore_sigpipe(void);
  * Change requires same-diff in both functions; _Static_assert below enforces. */
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
-#define TAB_WIRE_B_N 69
+#define TAB_WIRE_B_N 70
 #define TAB_WIRE_BOX_F_N 263
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
 
@@ -462,7 +462,7 @@ static int write_view(int wfd, const pv_view *v) {
             /* the item's justify-self (appended). */
             (int32_t)r->justify_self,
             /* the OUTERMOST float founder's own width halves (appended). */
-            (int32_t)r->float_ow, (int32_t)r->float_ow_pct,
+            (int32_t)r->float_ow, (int32_t)r->float_ow_pct, (int32_t)r->float_obox,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -2234,7 +2234,7 @@ static int read_view(int fd, pv_view **out) {
                          (int)floid, (int)floside,
                          (int)floml, (int)flomlpct, (int)flomr, (int)flomrpct);
             pv_set_float_w(v, (int)b[61], (int)b[62], (b[63] >= -1) ? (int)b[63] : -1,
-                           (int)b[67], (int)b[68]);
+                           (int)b[67], (int)b[68], (b[69] >= -1) ? (int)b[69] : -1);
             pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);
             /* Both halves of the box placement travel together, and are combined
              * only at layout (bx_lp_px): setting one without the other would make
@@ -2271,7 +2271,7 @@ static int read_view(int fd, pv_view **out) {
                          (int)floid, (int)floside,
                          (int)floml, (int)flomlpct, (int)flomr, (int)flomrpct);
             pv_set_float_w(v, (int)b[61], (int)b[62], (b[63] >= -1) ? (int)b[63] : -1,
-                           (int)b[67], (int)b[68]);
+                           (int)b[67], (int)b[68], (b[69] >= -1) ? (int)b[69] : -1);
         }
         /* block_id/node_id ride EVERY run kind: an input's own box (position:
          * absolute, opacity:0 -- the checkbox-hack pattern) travelled on the

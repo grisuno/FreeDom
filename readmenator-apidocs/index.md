@@ -1,6 +1,6 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 213 modules, 3309 documented entities, documentation coverage 39.7% (1304/3287 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 213 modules, 3311 documented entities, documentation coverage 39.6% (1304/3289 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
@@ -51,7 +51,7 @@ Languages: c (112), h (86), py (10), sh (5)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 197 | 32.5% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 198 | 32.4% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 5 | 4 | 50.0% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) |  | 0 | 6 | 85.7% |
 | [`gui/freedom_view.c`](modules/gui.freedom_view.c.md) |  | 0 | 2 | 0.0% |
@@ -208,7 +208,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
-| [`src/page_view.c`](modules/src.page_view.c.md) |  | 19 | 111 | 44.3% |
+| [`src/page_view.c`](modules/src.page_view.c.md) |  | 19 | 112 | 43.9% |
 | [`src/pdf_export.c`](modules/src.pdf_export.c.md) |  | 0 | 4 | 20.0% |
 | [`src/perf_trace.c`](modules/src.perf_trace.c.md) |  | 0 | 11 | 75.0% |
 | [`src/prefetch.c`](modules/src.prefetch.c.md) |  | 1 | 12 | 42.9% |

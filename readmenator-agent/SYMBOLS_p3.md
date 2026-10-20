@@ -3,6 +3,13 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `cb_interp_align` | function | `include/css_box.h:28` | `int cb_interp_align(const char *v);` |
+| `cb_interp_display` | function | `include/css_box.h:34` | `int cb_interp_display(const char *v);` |
+| `cb_interp_fontsize_ex` | function | `include/css_box.h:29` | `int cb_interp_fontsize_ex(const char *v, int *abs_out);` |
+| `cb_interp_gap` | function | `include/css_box.h:35` | `int cb_interp_gap(const char *v);` |
+| `cb_interp_gridcols` | function | `include/css_box.h:37` | `int cb_interp_gridcols(const char *v);` |
+| `cb_interp_justify` | function | `include/css_box.h:36` | `int cb_interp_justify(const char *v);` |
+| `cb_interp_len` | function | `include/css_box.h:16` | `int cb_interp_len(const char *v, int allow_auto, int *out);` |
 | `cb_interp_lineheight` | function | `include/css_box.h:30` | `int cb_interp_lineheight(const char *v);` |
 | `cb_interp_lp` | function | `include/css_box.h:23` | `int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm);` |
 | `cb_interp_style` | function | `include/css_box.h:32` | `int cb_interp_style(const char *v);` |
@@ -489,12 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `js_limits` | struct | `include/js_sandbox.h:39` | `` |
 | `js_loc_from_stack` | function | `include/js_sandbox.h:140` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` |
 | `js_pump_jobs` | function | `include/js_sandbox.h:159` | `int js_pump_jobs(js_context *ctx, int max_jobs);` |
-| `js_result` | struct | `include/js_sandbox.h:49` | `` |
-| `js_result_free` | function | `include/js_sandbox.h:151` | `void js_result_free(js_result *res);` |
-| `js_set_current_script` | function | `include/js_sandbox.h:171` | `void js_set_current_script(js_context *ctx, const char *src, const char *type);` |
-| `js_set_module_host` | function | `include/js_sandbox.h:119` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` |
-| `js_set_time_budget` | function | `include/js_sandbox.h:148` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` |
-| `js_status` | enum | `include/js_sandbox.h:24` | `` |
-| `loaded` | function | `include/js_sandbox.h:114` | `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

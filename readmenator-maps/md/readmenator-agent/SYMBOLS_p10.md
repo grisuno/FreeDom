@@ -3,6 +3,14 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `wf_scan` | function | `src/webfont.c:422` | `int wf_scan(const char *css, size_t len, wf_list *out)` |
+| `wf_supported_format` | function | `src/webfont.c:74` | `int wf_supported_format(const char *fmt)` |
+| `WF_DATA_URL_MAX` | macro | `src/webfont_load.c:91` | `#define WF_DATA_URL_MAX` |
+| `ctype_ok` | function | `src/webfont_load.c:24` | `static int ctype_ok(const char *ct)` |
+| `fetch` | type_alias | `src/webfont_load.c:56` | `typedef struct wf_cursor { wf_fetch_fn fetch;` |
+| `hash` | type_alias | `src/webfont_load.c:46` | `typedef struct wf_key { unsigned hash;` |
+| `here` | function | `src/webfont_load.c:22` | `* filtered here (a "" hint may still name one);` |
+| `key_find` | function | `src/webfont_load.c:66` | `static int key_find(wf_key *keys, size_t nkeys, unsigned h, int b, int i)` |
 | `ref` | function | `src/webfont_load.c:167` | `* their ref (the register call copies what it keeps). */ if (!is_data) free(fbytes);` |
 | `scan_inline` | function | `src/webfont_load.c:178` | `static void scan_inline(const char *html, size_t len, const char *page_url,                      ...` |
 | `wf_cursor` | struct | `src/webfont_load.c:56` | `` |
@@ -488,13 +496,5 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 | `test_logical_margin_padding` | function | `tests/test_css.c:4865` | `static void test_logical_margin_padding(void **state)` |
 | `test_malformed_inline_no_crash` | function | `tests/test_css.c:731` | `static void test_malformed_inline_no_crash(void **state)` |
 | `test_math_clamp` | function | `tests/test_css.c:4841` | `static void test_math_clamp(void **state)` |
-| `test_math_min_max_top_level` | function | `tests/test_css.c:4829` | `static void test_math_min_max_top_level(void **state)` |
-| `test_math_nested_in_calc` | function | `tests/test_css.c:4851` | `static void test_math_nested_in_calc(void **state)` |
-| `test_media_and_or` | function | `tests/test_css.c:2722` | `static void test_media_and_or(void **state)` |
-| `test_media_prefers_color_scheme` | function | `tests/test_css.c:2691` | `static void test_media_prefers_color_scheme(void **state)` |
-| `test_media_query_length_honours_its_unit` | function | `tests/test_css.c:5465` | `static void test_media_query_length_honours_its_unit(void **state)` |
-| `test_media_range_syntax_applies` | function | `tests/test_css.c:1014` | `static void test_media_range_syntax_applies(void **state)` |
-| `test_media_screen_and_print` | function | `tests/test_css.c:2672` | `static void test_media_screen_and_print(void **state)` |
-| `test_media_width_queries` | function | `tests/test_css.c:2707` | `static void test_media_width_queries(void **state)` |
 
 Next: [SYMBOLS_p11.md](SYMBOLS_p11.md)

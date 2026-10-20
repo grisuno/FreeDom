@@ -15,7 +15,7 @@ flowchart TB
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     subgraph lane_0["Tier 1 - entry / orchestration"]
         direction LR
-        n_c2["include: browser_ui<br/>26 files, 867 symbols<br/>Core / utility"]:::cycle
+        n_c2["include: browser_ui<br/>26 files, 874 symbols<br/>Core / utility"]:::cycle
         n_d_tools["tools<br/>11 files, 61 symbols<br/>Core / utility"]:::default
         n_d__root_["(root)<br/>6 files, 3 symbols<br/>Core / utility"]:::entry
     end
@@ -26,7 +26,7 @@ flowchart TB
     end
     subgraph lane_2["Tier 3"]
         direction LR
-        n_c4["include: page_view<br/>14 files, 630 symbols<br/>Presentation / entry"]:::cycle
+        n_c4["include: page_view<br/>14 files, 631 symbols<br/>Presentation / entry"]:::cycle
     end
     subgraph lane_3["Tier 4"]
         direction LR
@@ -306,7 +306,7 @@ flowchart LR
     n_gui_browser_ui_c__clear_doc["browser_ui.clear_doc<br/>Releases the structured render of the previou...<br/>browser_ui.c:1307"]:::external
     n_gui_browser_ui_c__free_inputs["browser_ui.free_inputs<br/>are not text-editable -- they are tracked via...<br/>browser_ui.c:1052"]:::external
     n_gui_browser_ui_c__free_images["browser_ui.free_images<br/>static int input_is_editable(int input_type)...<br/>browser_ui.c:1060"]:::external
-    n_include_render_doc_h__rd_free["render_doc.rd_free<br/>Builds the paint-ready document from an inert...<br/>render_doc.h:313"]:::external
+    n_include_render_doc_h__rd_free["render_doc.rd_free<br/>Builds the paint-ready document from an inert...<br/>render_doc.h:314"]:::external
     n_gui_browser_ui_c__set_cache["browser_ui.set_cache<br/>Releases the structured render of the previou...<br/>browser_ui.c:1317"]:::external
     n_include_browser_h__browser_set_page["browser.browser_set_page<br/>browser.h:71"]:::external
     n_src_browser_c__browser_navigate["browser.browser_navigate<br/>browser.c:224"]:::external
@@ -321,7 +321,7 @@ flowchart LR
     n_src_prefs_c__prefs_history_add["prefs.prefs_history_add<br/>prefs.c:152"]:::external
     n_src_profile_c__profile_save["profile.profile_save<br/>profile.c:133"]:::external
     n_gui_browser_ui_c__show_busy["browser_ui.show_busy<br/>Marks a request in flight and paints a frame...<br/>browser_ui.c:2502"]:::external
-    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:15813"]:::external
+    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:16008"]:::external
     n_tools_gen_psl_c__emit["gen_psl.emit<br/>gen_psl.c:61"]:::default
     n_tools_gen_psl_c__main -.->|"recursion"| n_tools_gen_psl_c__main
     n_tools_gen_psl_c__main -->|"1"| n_tools_gen_psl_c__ascii_lower

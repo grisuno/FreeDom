@@ -37,31 +37,31 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Language: h
 - Symbols:
   - `rd_block` (struct, line 64)
-  - `rd_doc` (struct, line 262)
+  - `rd_doc` (struct, line 263)
   - `img_fail_reason` (enum, line 34)
   - `rd_kind` (enum, line 42)
-  - `rd_status` (enum, line 294)
+  - `rd_status` (enum, line 295)
   - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
   - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
   - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
   - `form` (function, line 63) `* form (-1 = none);`
   - `default` (function, line 150) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
-  - `to` (function, line 248) `* belongs to (-1 = none);`
-  - `rdp_images_warning` (function, line 303) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
-  - `rd_free` (function, line 313) `void rd_free(rd_doc *d);`
-  - `rd_count` (function, line 316) `size_t rd_count(const rd_doc *d);`
-  - `rd_at` (function, line 317) `const rd_block *rd_at(const rd_doc *d, size_t i);`
-  - `rd_box_count` (function, line 321) `size_t rd_box_count(const rd_doc *d);`
-  - `rd_box_at` (function, line 322) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-  - `rd_cont_count` (function, line 326) `size_t rd_cont_count(const rd_doc *d);`
-  - `rd_cont_at` (function, line 327) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-  - `rd_kind_name` (function, line 331) `const char *rd_kind_name(rd_kind k);`
-  - `rd_block_tag` (function, line 339) `const char *rd_block_tag(const rd_block *b);`
-  - `rd_block_heading_level` (function, line 346) `int rd_block_heading_level(const rd_block *b);`
-  - `decision` (function, line 349) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
-  - `IMG_FAIL_OK` (function, line 355) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-  - `rd_input_label` (function, line 360) `const char *rd_input_label(int input_type);`
-  - `rd_input_invisible` (function, line 365) `int rd_input_invisible(int input_type);`
+  - `to` (function, line 249) `* belongs to (-1 = none);`
+  - `rdp_images_warning` (function, line 304) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
+  - `rd_free` (function, line 314) `void rd_free(rd_doc *d);`
+  - `rd_count` (function, line 317) `size_t rd_count(const rd_doc *d);`
+  - `rd_at` (function, line 318) `const rd_block *rd_at(const rd_doc *d, size_t i);`
+  - `rd_box_count` (function, line 322) `size_t rd_box_count(const rd_doc *d);`
+  - `rd_box_at` (function, line 323) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+  - `rd_cont_count` (function, line 327) `size_t rd_cont_count(const rd_doc *d);`
+  - `rd_cont_at` (function, line 328) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+  - `rd_kind_name` (function, line 332) `const char *rd_kind_name(rd_kind k);`
+  - `rd_block_tag` (function, line 340) `const char *rd_block_tag(const rd_block *b);`
+  - `rd_block_heading_level` (function, line 347) `int rd_block_heading_level(const rd_block *b);`
+  - `decision` (function, line 350) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+  - `IMG_FAIL_OK` (function, line 356) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 361) `const char *rd_input_label(int input_type);`
+  - `rd_input_invisible` (function, line 366) `int rd_input_invisible(int input_type);`
   - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`

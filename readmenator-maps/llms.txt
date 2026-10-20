@@ -1,6 +1,6 @@
 # freedom-0.0.3
 
-> Static analysis knowledge base for freedom-0.0.3: 10 communities, 288 files, 1623 imports, 4 languages, 6844 symbols.
+> Static analysis knowledge base for freedom-0.0.3: 10 communities, 288 files, 1623 imports, 4 languages, 6857 symbols.
 
 Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
 
@@ -12,8 +12,8 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/API_p10.md](md/readmenator-agent/API_p10.md): Depends on: include/antifp.h, include/securefetch.h, include/url.h
 - [readmenator-agent/API_p11.md](md/readmenator-agent/API_p11.md): main (function) tools/ffshot.py:24 def main()
 - [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/blockflow.h, include/boxblur.h, include/boxstyle.h, include/boxtree.h, include/browser.h, include/compositor.h...
-- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): drainfetchresults (function) gui/browserui.c:15038 static void drainfetchresults(browserwindow w) -- Drains every completed fetch the worker threads have...
-- [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Imported by: fuzz/fuzzcss.c, include/boxtree.h, src/css.c, src/domdebug.c, src/flexlayout.c, src/pageview.c, src/tab.c, tests/testcss.c, tests/testdomdebug.c...
+- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): GET (function) gui/browserui.c:15065 the network under weaker rules than a GET (Zero Trust). /
+- [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Imported by: fuzz/fuzzdownload.c, gui/browserui.c, src/download.c, tests/testdownload.c
 - [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Imported by: gui/browserui.c, gui/freedomview.c, gui/uirender.c, src/freedom.c, src/uilayout.c, tests/testui.c
 - [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/css.h, include/cssatrule.h, include/cssbox.h, include/csscolor.h, include/cssdecl.h, include/cssgradient.h, include/cssindex.h...
 - [readmenator-agent/API_p7.md](md/readmenator-agent/API_p7.md): Depends on: include/cssselect.h
@@ -24,7 +24,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/CONCEPTS.md](md/readmenator-agent/CONCEPTS.md): Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 - [readmenator-agent/KB_fuzz.md](md/readmenator-agent/KB_fuzz.md): Doc: fuzzrootmatch: Root matcher for the attribute-scoped custom-property path: a fixed <html...
 - [readmenator-agent/KB_gui.md](md/readmenator-agent/KB_gui.md): Doc: uiinputstate: Live editable state for one form text control, aliasing a block of the current...
-- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): fbwlevelrgb (function, line 16018) static void fbwlevelrgb(int level, double r, double g, double b)
+- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): toplevelclose (function, line 16071) static void toplevelclose(void data, struct xdgtoplevel t)
 - [readmenator-agent/KB_include.md](md/readmenator-agent/KB_include.md): Doc: fpacceptlanguageheader: #define FPSECFETCHDESTNAV "document" #define...
 - [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: clctx: The state a <length> is measured against.
 - [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: imresolve: Resolves specifier as imported from base (the importing module's URL).
@@ -48,7 +48,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p6.md](md/readmenator-agent/KB_tests_p6.md): Doc: parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include...
 - [readmenator-agent/KB_tests_p7.md](md/readmenator-agent/KB_tests_p7.md): Doc: testenforceallowlistedinsecure: The allowlist override: the user's sovereign per-host escape...
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: fbench -- turn the PNG pairs make parity leaves behind into something you can act on.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 288 files at commit b2f4fa49056d. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 288 files at commit 48985282b7f0. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)

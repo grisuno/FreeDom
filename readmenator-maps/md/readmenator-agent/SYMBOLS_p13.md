@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_aggregate_unions_into_ancestors` | function | `tests/test_js_geom.c:108` | `static void test_aggregate_unions_into_ancestors(void **state)` |
+| `test_capacity_bound` | function | `tests/test_js_geom.c:85` | `static void test_capacity_bound(void **state)` |
+| `test_decode_fails_closed` | function | `tests/test_js_geom.c:179` | `static void test_decode_fails_closed(void **state)` |
+| `test_same_node_unions` | function | `tests/test_js_geom.c:48` | `static void test_same_node_unions(void **state)` |
+| `test_wire_roundtrip` | function | `tests/test_js_geom.c:149` | `static void test_wire_roundtrip(void **state)` |
+| `main` | function | `tests/test_js_policy.c:89` | `int main(void)` |
+| `test_enabled_fail_closed_on_bad_mode` | function | `tests/test_js_policy.c:31` | `static void test_enabled_fail_closed_on_bad_mode(void **state)` |
+| `test_mode_from_str` | function | `tests/test_js_policy.c:36` | `static void test_mode_from_str(void **state)` |
+| `test_mode_str_roundtrip` | function | `tests/test_js_policy.c:53` | `static void test_mode_str_roundtrip(void **state)` |
+| `test_trusted_requires_both_signals` | function | `tests/test_js_policy.c:68` | `static void test_trusted_requires_both_signals(void **state)` |
+| `assert_int_equal` | function | `tests/test_js_sandbox.c:156` | `assert_int_equal(js_eval_once("while(true)` |
+| `assert_int_equal` | function | `tests/test_js_sandbox.c:171` | `assert_int_equal(js_eval(ctx, "while(true)` |
+| `fetches` | type_alias | `tests/test_js_sandbox.c:343` | `typedef struct mod_host { int fetches;` |
 | `main` | function | `tests/test_js_sandbox.c:570` | `int main(void)` |
 | `mh_fetch` | function | `tests/test_js_sandbox.c:361` | `static char *mh_fetch(void *host, const char *url, size_t *len)` |
 | `mh_resolve` | function | `tests/test_js_sandbox.c:346` | `static int mh_resolve(void *host, const char *base, const char *spec, char *out, size_t outsz)` |
@@ -483,18 +496,5 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_render_basic` | function | `tests/test_renderer.c:27` | `static void test_render_basic(void **state)` |
 | `test_render_binary_does_not_crash_parent` | function | `tests/test_renderer.c:63` | `static void test_render_binary_does_not_crash_parent(void **state)` |
 | `test_render_multiple_independent` | function | `tests/test_renderer.c:74` | `static void test_render_multiple_independent(void **state)` |
-| `test_render_null_args` | function | `tests/test_renderer.c:48` | `static void test_render_null_args(void **state)` |
-| `test_render_strips_script` | function | `tests/test_renderer.c:39` | `static void test_render_strips_script(void **state)` |
-| `test_render_too_large` | function | `tests/test_renderer.c:55` | `static void test_render_too_large(void **state)` |
-| `test_result_free_null_and_double` | function | `tests/test_renderer.c:84` | `static void test_result_free_null_and_double(void **state)` |
-| `main` | function | `tests/test_request_policy.c:139` | `int main(void)` |
-| `test_evaluate_allow_same_site` | function | `tests/test_request_policy.c:105` | `static void test_evaluate_allow_same_site(void **state)` |
-| `test_evaluate_block_invalid` | function | `tests/test_request_policy.c:128` | `static void test_evaluate_block_invalid(void **state)` |
-| `test_evaluate_block_scheme` | function | `tests/test_request_policy.c:120` | `static void test_evaluate_block_scheme(void **state)` |
-| `test_evaluate_block_third_party` | function | `tests/test_request_policy.c:112` | `static void test_evaluate_block_third_party(void **state)` |
-| `test_host_of_basic` | function | `tests/test_request_policy.c:18` | `static void test_host_of_basic(void **state)` |
-| `test_host_of_invalid` | function | `tests/test_request_policy.c:29` | `static void test_host_of_invalid(void **state)` |
-| `test_host_of_overflow` | function | `tests/test_request_policy.c:37` | `static void test_host_of_overflow(void **state)` |
-| `test_same_site` | function | `tests/test_request_policy.c:91` | `static void test_same_site(void **state)` |
 
 Next: [SYMBOLS_p14.md](SYMBOLS_p14.md)

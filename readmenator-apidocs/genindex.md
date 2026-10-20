@@ -55,6 +55,7 @@
 - [`b`](modules/gui.browser_ui_internal.h.md#b) type_alias in `gui/browser_ui_internal.h`
 - [`b`](modules/include.css_color.h.md#b) type_alias in `include/css_color.h`
 - [`BALANCE_MAX_LINES`](modules/gui.browser_ui.c.md#balance_max_lines) macro in `gui/browser_ui.c`
+- [`band`](modules/src.page_view.c.md#band) function in `src/page_view.c`
 - [`bands`](modules/tools.fbench.py.md#bands) function in `tools.fbench`
 - [`basename`](modules/include.download.h.md#basename) function in `include/download.h`
 - [`basis`](modules/include.flex_layout.h.md#basis) type_alias in `include/flex_layout.h`
@@ -2553,6 +2554,7 @@
 - [`rp_same_site`](modules/src.request_policy.c.md#rp_same_site) function in `src/request_policy.c`
 - [`rp_site_of`](modules/include.request_policy.h.md#rp_site_of) function in `include/request_policy.h`
 - [`rp_site_of`](modules/src.request_policy.c.md#rp_site_of) function in `src/request_policy.c`
+- [`rule`](modules/gui.browser_ui.c.md#rule) function in `gui/browser_ui.c`
 - [`run`](modules/gui.browser_ui.c.md#run) function in `gui/browser_ui.c`
 - [`run`](modules/include.js_dom.h.md#run) function in `include/js_dom.h`
 - [`run`](modules/include.page_view.h.md#run) function in `include/page_view.h`

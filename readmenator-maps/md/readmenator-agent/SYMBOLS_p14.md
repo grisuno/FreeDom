@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_render_null_args` | function | `tests/test_renderer.c:48` | `static void test_render_null_args(void **state)` |
+| `test_render_strips_script` | function | `tests/test_renderer.c:39` | `static void test_render_strips_script(void **state)` |
+| `test_render_too_large` | function | `tests/test_renderer.c:55` | `static void test_render_too_large(void **state)` |
+| `test_result_free_null_and_double` | function | `tests/test_renderer.c:84` | `static void test_result_free_null_and_double(void **state)` |
+| `main` | function | `tests/test_request_policy.c:139` | `int main(void)` |
+| `test_evaluate_allow_same_site` | function | `tests/test_request_policy.c:105` | `static void test_evaluate_allow_same_site(void **state)` |
+| `test_evaluate_block_invalid` | function | `tests/test_request_policy.c:128` | `static void test_evaluate_block_invalid(void **state)` |
+| `test_evaluate_block_scheme` | function | `tests/test_request_policy.c:120` | `static void test_evaluate_block_scheme(void **state)` |
+| `test_evaluate_block_third_party` | function | `tests/test_request_policy.c:112` | `static void test_evaluate_block_third_party(void **state)` |
+| `test_host_of_basic` | function | `tests/test_request_policy.c:18` | `static void test_host_of_basic(void **state)` |
+| `test_host_of_invalid` | function | `tests/test_request_policy.c:29` | `static void test_host_of_invalid(void **state)` |
+| `test_host_of_overflow` | function | `tests/test_request_policy.c:37` | `static void test_host_of_overflow(void **state)` |
+| `test_same_site` | function | `tests/test_request_policy.c:91` | `static void test_same_site(void **state)` |
 | `test_site_of` | function | `tests/test_request_policy.c:45` | `static void test_site_of(void **state)` |
 | `test_site_of_multi_suffix` | function | `tests/test_request_policy.c:58` | `static void test_site_of_multi_suffix(void **state)` |
 | `test_site_of_psl` | function | `tests/test_request_policy.c:70` | `static void test_site_of_psl(void **state)` |

@@ -76,36 +76,41 @@ static void test_download_png_group...`
   - `layout_of` (function, line 2644) `static void layout_of(const char *html, const char *path, char *out, size_t cap)`
   - `has_box` (function, line 2658) `static int has_box(const char *out, double w, double h, double t0, double t1)`
   - `has_box_x` (function, line 2672) `static int has_box_x(const char *out, double x0, double w0)`
-  - `test_dump_layout_sticky_footer` (function, line 2830) `static void test_dump_layout_sticky_footer(void **state)`
-  - `test_dump_layout_root_box_survives_replaced_run` (function, line 2865) `static void test_dump_layout_root_box_survives_replaced_run(void **state)`
-  - `test_dump_layout_pulled_rail_single_margin` (function, line 2958) `static void test_dump_layout_pulled_rail_single_margin(void **state)`
-  - `test_dump_layout_row_nested_in_column` (function, line 3075) `static void test_dump_layout_row_nested_in_column(void **state)`
-  - `test_dump_layout_inline_box_second_run_stays` (function, line 3126) `static void test_dump_layout_inline_box_second_run_stays(void **state)`
-  - `band` (function, line 3155) `* band (which already recurses into nested containers) owns it. */
+  - `has_row_x` (function, line 2685) `static int has_row_x(const char *out, double x0)`
+  - `has_sub_x` (function, line 2696) `static int has_sub_x(const char *out, double x0)`
+  - `test_dump_layout_relative_offset_moves_content` (function, line 2708) `static void test_dump_layout_relative_offset_moves_content(void **state)`
+  - `test_dump_layout_inline_abs_static_position_on_line` (function, line 2725) `static void test_dump_layout_inline_abs_static_position_on_line(void **state)`
+  - `test_dump_layout_bounded_wrapper_around_lone_right_float` (function, line 2741) `static void test_dump_layout_bounded_wrapper_around_lone_right_float(void **state)`
+  - `test_dump_layout_sticky_footer` (function, line 2902) `static void test_dump_layout_sticky_footer(void **state)`
+  - `test_dump_layout_root_box_survives_replaced_run` (function, line 2937) `static void test_dump_layout_root_box_survives_replaced_run(void **state)`
+  - `test_dump_layout_pulled_rail_single_margin` (function, line 3030) `static void test_dump_layout_pulled_rail_single_margin(void **state)`
+  - `test_dump_layout_row_nested_in_column` (function, line 3147) `static void test_dump_layout_row_nested_in_column(void **state)`
+  - `test_dump_layout_inline_box_second_run_stays` (function, line 3198) `static void test_dump_layout_inline_box_second_run_stays(void **state)`
+  - `band` (function, line 3227) `* band (which already recurses into nested containers) owns it. */
 static void test_dump_layout_c...`
-  - `test_dump_layout_line_opening_image_is_inline` (function, line 3198) `static void test_dump_layout_line_opening_image_is_inline(void **state)`
-  - `test_dump_layout_band_flushes_line_before_clear` (function, line 3224) `static void test_dump_layout_band_flushes_line_before_clear(void **state)`
-  - `test_dump_layout_flex_auto_margin_push_right` (function, line 3264) `static void test_dump_layout_flex_auto_margin_push_right(void **state)`
-  - `test_dump_layout_nested_column_takes_max` (function, line 3307) `static void test_dump_layout_nested_column_takes_max(void **state)`
-  - `test_rejects_http_url` (function, line 3357) `static void test_rejects_http_url(void **state)`
-  - `white` (function, line 3419) `* and not white (the old behaviour where only text rows got background fills). */
+  - `test_dump_layout_line_opening_image_is_inline` (function, line 3270) `static void test_dump_layout_line_opening_image_is_inline(void **state)`
+  - `test_dump_layout_band_flushes_line_before_clear` (function, line 3296) `static void test_dump_layout_band_flushes_line_before_clear(void **state)`
+  - `test_dump_layout_flex_auto_margin_push_right` (function, line 3336) `static void test_dump_layout_flex_auto_margin_push_right(void **state)`
+  - `test_dump_layout_nested_column_takes_max` (function, line 3379) `static void test_dump_layout_nested_column_takes_max(void **state)`
+  - `test_rejects_http_url` (function, line 3429) `static void test_rejects_http_url(void **state)`
+  - `white` (function, line 3491) `* and not white (the old behaviour where only text rows got background fills). */
 static void tes...`
-  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 3515) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
-  - `test_download_png_flex_container_paints_one_band` (function, line 3540) `static void test_download_png_flex_container_paints_one_band(void **state)`
-  - `test_download_png_inline_block_shrinks_and_centers` (function, line 3560) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
-  - `test_download_png_inline_svg_path_and_drops_image` (function, line 3604) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
-  - `test_dump_timings_prints_stages` (function, line 3620) `static void test_dump_timings_prints_stages(void **state)`
-  - `test_dump_layout_shrink_pill_nested_container` (function, line 3650) `static void test_dump_layout_shrink_pill_nested_container(void **state)`
-  - `test_dump_layout_inline_input_shares_line` (function, line 3687) `static void test_dump_layout_inline_input_shares_line(void **state)`
-  - `test_dump_layout_oof_label_does_not_widen_nested_container` (function, line 3733) `static void test_dump_layout_oof_label_does_not_widen_nested_container(void **state)`
-  - `test_dump_layout_br_after_block_is_a_line` (function, line 3768) `static void test_dump_layout_br_after_block_is_a_line(void **state)`
-  - `test_dump_layout_flex_item_contains_block_margins` (function, line 3788) `static void test_dump_layout_flex_item_contains_block_margins(void **state)`
-  - `test_dump_layout_flex_definite_height_centres_item` (function, line 3813) `static void test_dump_layout_flex_definite_height_centres_item(void **state)`
-  - `test_download_png_text_color_alpha_blends` (function, line 3837) `static void test_download_png_text_color_alpha_blends(void **state)`
-  - `test_dump_layout_ua_margin_scales_with_font_size` (function, line 3874) `static void test_dump_layout_ua_margin_scales_with_font_size(void **state)`
-  - `main` (function, line 3920) `int main(void)`
+  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 3587) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
+  - `test_download_png_flex_container_paints_one_band` (function, line 3612) `static void test_download_png_flex_container_paints_one_band(void **state)`
+  - `test_download_png_inline_block_shrinks_and_centers` (function, line 3632) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
+  - `test_download_png_inline_svg_path_and_drops_image` (function, line 3676) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
+  - `test_dump_timings_prints_stages` (function, line 3692) `static void test_dump_timings_prints_stages(void **state)`
+  - `test_dump_layout_shrink_pill_nested_container` (function, line 3722) `static void test_dump_layout_shrink_pill_nested_container(void **state)`
+  - `test_dump_layout_inline_input_shares_line` (function, line 3759) `static void test_dump_layout_inline_input_shares_line(void **state)`
+  - `test_dump_layout_oof_label_does_not_widen_nested_container` (function, line 3805) `static void test_dump_layout_oof_label_does_not_widen_nested_container(void **state)`
+  - `test_dump_layout_br_after_block_is_a_line` (function, line 3840) `static void test_dump_layout_br_after_block_is_a_line(void **state)`
+  - `test_dump_layout_flex_item_contains_block_margins` (function, line 3860) `static void test_dump_layout_flex_item_contains_block_margins(void **state)`
+  - `test_dump_layout_flex_definite_height_centres_item` (function, line 3885) `static void test_dump_layout_flex_definite_height_centres_item(void **state)`
+  - `test_download_png_text_color_alpha_blends` (function, line 3909) `static void test_download_png_text_color_alpha_blends(void **state)`
+  - `test_dump_layout_ua_margin_scales_with_font_size` (function, line 3946) `static void test_dump_layout_ua_margin_scales_with_font_size(void **state)`
+  - `main` (function, line 3992) `int main(void)`
   - `rows` (function, line 1353) `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);`
-  - `bottom` (function, line 2938) `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ /* (Each sized float now has a box of...`
+  - `bottom` (function, line 3010) `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ /* (Each sized float now has a box of...`
   - `_DEFAULT_SOURCE` (macro, line 1) `#define _DEFAULT_SOURCE`
   - `_POSIX_C_SOURCE` (macro, line 12) `#define _POSIX_C_SOURCE`
   - `FREEDOM_BIN` (macro, line 27) `#define FREEDOM_BIN`

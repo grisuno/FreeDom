@@ -3336,6 +3336,7 @@ typedef struct rc_layout {
      * that anchor keeps the Stage 2d approximation). Owned; rc_free releases it. */
     struct rc_oof_sub *oof_sub;
     size_t             noof_sub;
+    size_t             defer_placed;   /* deferred float columns placed so far */
 } rc_layout;
 
 /* One out-of-flow subtree's own layout and where it lands on the page. */
@@ -3390,6 +3391,13 @@ typedef struct rc_open_box {
      * whole chain [chain_first_box, nbox) down by the difference. */
     double chain_margin;
     size_t chain_first_box;
+    /* position:relative: the inset offset (px) the box's own rect took at open. The
+     * content it encloses moves with it (CSS 2.1 9.4.3) -- applied when the box closes,
+     * once its rows exist -- while the flow around it is untouched. */
+    double rel_dx, rel_dy;
+    /* rc_layout.defer_placed when the box opened: pulled columns placed while it was open
+     * moved the cursor past anything its own declared height describes. */
+    size_t defer_mark;
 } rc_open_box;
 
 /* Max box-nesting depth the painter composes (anti-DoS; deeper boxes are clamped to
@@ -5750,12 +5758,20 @@ static void close_all_boxes(rc_layout *L, rc_state *s, const ui_theme *th);
  * run (no block boundary between them): the icon in `<a><i class=ico></i> label</a>`.
  * Opened as a block it flushed the line, stacking the icon above its own label. */
 static int empty_atom_continues_line(const rd_doc *doc, size_t run_i, int box_id) {
-    if (run_i >= rd_count(doc) || run_i + 1 >= rd_count(doc)) return 0;
+    if (run_i >= rd_count(doc)) return 0;
     const rd_block *r = rd_at(doc, run_i);
-    const rd_block *nx = rd_at(doc, run_i + 1);
-    return r->kind == RD_PARAGRAPH && r->block_id == box_id &&
-           (r->text == NULL || r->text[0] == '\0') && nx->block_break == 0 &&
-           nx->kind != RD_IMAGE && nx->kind != RD_SVG && nx->kind != RD_VIDEO;
+    if (!(r->kind == RD_PARAGRAPH && r->block_id == box_id &&
+          (r->text == NULL || r->text[0] == '\0')))
+        return 0;
+    /* The line continues with the next run that is IN flow: an absolutely positioned byline
+     * beside the icon takes no part in the line, whatever block break it carries. */
+    for (size_t k = run_i + 1; k < rd_count(doc); ++k) {
+        const rd_block *nx = rd_at(doc, k);
+        if (block_leaves_flow(doc, nx)) continue;
+        return nx->block_break == 0 && nx->kind != RD_IMAGE && nx->kind != RD_SVG &&
+               nx->kind != RD_VIDEO;
+    }
+    return 0;
 }
 
 static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
@@ -5763,6 +5779,8 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                                   const rd_doc *doc, double content_w, int block_id,
                                   size_t run_i, int stop_at);
 static int nested_stop(const rc_state *outer, const rd_doc *doc, int block_id, int stop_at);
+static void oof_static_xy(const rc_state *s, const ui_theme *th, double content_w,
+                          double *x, double *y);
 static int deepest_open_on_path(const rc_state *outer, const rd_doc *doc, int block_id);
 
 /* Item index of run `bk` at container level `cid`: the run's own cont_item when it
@@ -6055,13 +6073,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                                         bk->block_id);
                 size_t sbid = (size_t)oroot;
                 if (sbid < BT_MAX_POSITIONED && !L->oof_static_set[sbid]) {
-                    double in_l, in_w;
-                    rc_box_context(s, content_w, &in_l, &in_w);
-                    (void)in_w;
-                    L->oof_sx[sbid] = in_l;
-                    L->oof_sy[sbid] = s->cur_top
-                        + s->pending_gap
-                        + open_line_height(s, th);
+                    oof_static_xy(s, th, content_w, &L->oof_sx[sbid], &L->oof_sy[sbid]);
                     L->oof_static_set[sbid] = 1;
                 }
                 continue;
@@ -7088,7 +7100,10 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
     s->cur_top += ob->pb + ob->bb;   /* bottom padding + border close the border box */
     if (ob->box_idx < L->nbox) {
         rc_box *bx = &L->boxes[ob->box_idx];
-        double h = s->cur_top - bx->top;
+        /* The flow position of the box, before any position:relative inset moved its rect:
+         * its height and the cursor are measured from there. */
+        const double flow_top = bx->top - ob->rel_dy;
+        double h = s->cur_top - flow_top;
         /* 2026-07-10: author box_h / box_min_h / box_max_h clamp the painted
          * height. box_h wins when set (the box is the declared size); min_h is
          * a floor, max_h a cap. The v1 model is intentionally simple: the box
@@ -7125,9 +7140,18 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
                                         ob->pt, ob->pb, ob->bt, ob->bb);
             if (h > mx) h = mx;
         }
-        col_spend_free_space(L, ob, h - (s->cur_top - bx->top));
+        col_spend_free_space(L, ob, h - (s->cur_top - flow_top));
         bx->h = h;
-        if (h > 0.0 && s->cur_top - bx->top < h) s->cur_top = bx->top + h;
+        if (h > 0.0 && s->cur_top - flow_top < h) s->cur_top = flow_top + h;
+        /* A DECLARED height ends the box there (CSS 2.1 10.6.3): content that overflows it
+         * (visible overflow) spills over what follows instead of pushing the flow down -- the
+         * bar of a `height:40px` wrapper whose floats are taller than it. Only the cursor:
+         * the rows stay where they were laid. */
+        else if (h > 0.0 && (bx->box_h > 0 || bx->box_h_set) && !ob->clip_content &&
+                 ob->col_n <= 1 && ob->defer_mark == L->defer_placed &&
+                 s->cur_top - flow_top > h) {
+            s->cur_top = flow_top + h;
+        }
         /* A height-capped scroll container clips (CSS 2.1 section 10.7 + 11.1.1):
          * the painted height above is already the used (capped) one, but cur_top
          * still stands at the full content height, so the page grew by the
@@ -7137,8 +7161,8 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
          * bottom. With visible overflow (or no cap) nothing changes. Only the
          * flat path: a multicol box already rewrote its rows above. */
         if (h > 0.0 && ob->clip_content && ob->col_n <= 1 &&
-            s->cur_top > bx->top + h) {
-            double clip_bottom = bx->top + h;
+            s->cur_top > flow_top + h) {
+            double clip_bottom = flow_top + h;
             size_t cut = L->nrow;
             for (size_t ri = ob->col_row0; ri < L->nrow; ++ri) {
                 if (L->rows[ri].top >= clip_bottom) { cut = ri; break; }
@@ -7163,6 +7187,19 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
                     L->boxes[bi].h = clip_bottom - L->boxes[bi].top;
             }
             s->cur_top = clip_bottom;
+        }
+    }
+    /* position:relative: the inset moved the box's own rect when it opened; the content
+     * it encloses moves with it (CSS 2.1 9.4.3), the flow around it does not. Only the
+     * rows and the boxes opened INSIDE are translated -- the cursor stays put. */
+    if (ob->rel_dx != 0.0 || ob->rel_dy != 0.0) {
+        for (size_t r = ob->col_row0; r < L->nrow; ++r) {
+            L->rows[r].x_off += ob->rel_dx;
+            L->rows[r].top += ob->rel_dy;
+        }
+        for (size_t bi = ob->col_box0; bi < L->nbox; ++bi) {
+            L->boxes[bi].x += ob->rel_dx;
+            L->boxes[bi].top += ob->rel_dy;
         }
     }
     /* Hand this box's own margin-bottom to the next block so the two can collapse
@@ -7360,6 +7397,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
     /* visibility:hidden on this box or an inherited hidden ancestor: geometry
      * (x/top/w, and h once close_top_box finalizes it) is still resolved so layout
      * space is reserved; only decoration/content painting is skipped. */
+    double rel_dx = 0.0, rel_dy = 0.0;   /* position:relative offset taken by the box rect */
     int inherited_hidden = (s->hidden_from != 0);
     int this_hidden = (def->visibility == CSS_VIS_HIDDEN || def->visibility == CSS_VIS_COLLAPSE);
 
@@ -7398,10 +7436,10 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
             int t_unset = (def->inset_top  == PV_LEN_UNSET || def->inset_top  == (int)PV_LEN_UNSET + 1);
             int r_unset = (def->inset_right == PV_LEN_UNSET || def->inset_right == (int)PV_LEN_UNSET + 1);
             int b_unset = (def->inset_bottom == PV_LEN_UNSET || def->inset_bottom == (int)PV_LEN_UNSET + 1);
-            if (!l_unset) bx->x += (double)def->inset_left;
-            else if (!r_unset) bx->x -= (double)def->inset_right;
-            if (!t_unset) bx->top += (double)def->inset_top;
-            else if (!b_unset) bx->top -= (double)def->inset_bottom;
+            if (!l_unset) { bx->x += (double)def->inset_left; rel_dx = (double)def->inset_left; }
+            else if (!r_unset) { bx->x -= (double)def->inset_right; rel_dx = -(double)def->inset_right; }
+            if (!t_unset) { bx->top += (double)def->inset_top; rel_dy = (double)def->inset_top; }
+            else if (!b_unset) { bx->top -= (double)def->inset_bottom; rel_dy = -(double)def->inset_bottom; }
         }
     }
     s->cur_top += bt + pt;       /* inner content starts below the top border + padding */
@@ -7425,6 +7463,9 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         ob->col_n = 1;
         ob->col_w = ob->inner_w;
         ob->col_gap = 0.0;
+        ob->rel_dx = rel_dx;
+        ob->rel_dy = rel_dy;
+        ob->defer_mark = L->defer_placed;
         ob->col_row0 = L->nrow;
         ob->col_box0 = L->nbox;
         ob->col_content_top = s->cur_top;
@@ -7577,6 +7618,28 @@ static int deepest_open_on_path(const rc_state *outer, const rd_doc *doc, int bl
         id = (d != NULL) ? d->parent_id : -1;
     }
     return -1;
+}
+
+/* The cut for a NESTED float's column inside a multi-float band: the outermost founder's
+ * box (and everything above it) is the context the band already placed this column in, so
+ * it is not reopened inside the column at the column's own width -- `.nav-user{float:right;
+ * width:30%}` holding `ul{float:right;width:50%}` opened the 30% box again inside the 50%
+ * column and laid the list out 44px wide. The caller's stop wins when it is deeper. */
+static int float_item_stop(const rd_doc *doc, const rd_block *bk, int founder_key, int base_stop) {
+    int cut = -1;
+    if (bk->float_oid >= 0 && bk->float_oid != founder_key && bk->float_obox >= 0) {
+        cut = bk->float_obox;
+    } else if (founder_key >= 0 && bk->float_oid < 0 && bk->float_id == founder_key &&
+               bk->float_box >= 0 && (size_t)bk->float_box < rd_box_count(doc)) {
+        /* The column's OWN founder: its box opens in the column (it fills it) but the wrapper
+         * chain above it is the page's, already placed -- reopening it inside the column laid
+         * every panel of Slashdot's rail 13px (the body padding) too far right. */
+        const pv_box_def *fd = rd_box_at(doc, (size_t)bk->float_box);
+        cut = (fd != NULL) ? fd->parent_id : -1;
+    }
+    if (cut < 0) return base_stop;
+    if (base_stop >= 0 && base_stop != cut && box_path_has(doc, base_stop, cut)) return base_stop;
+    return cut;
 }
 
 /* The cut for a nested flow's reconcile: the caller's stop box, or -- when the
@@ -7829,17 +7892,60 @@ static int box_path_of(const rd_doc *doc, int block_id, int *out) {
  * the longest common prefix of their box paths — the box a float band nests inside, so
  * a wrapping position:relative/background panel is opened in flow and paints its
  * background behind the columns. -1 when the blocks share no box (top-level band). */
-static int band_common_box(const rd_doc *doc, size_t start, size_t end) {
+/* Static position of an out-of-flow run met in the flow (CSS 2.1 10.3.7, 10.6.4): where a
+ * `position:static` box would have started. Met on an OPEN line it sits on that line at the
+ * pen (an inline-level `display:inline;position:absolute` byline beside its icon); met
+ * between lines it sits below the content so far, at the context's left edge. */
+static void oof_static_xy(const rc_state *s, const ui_theme *th, double content_w,
+                          double *x, double *y) {
+    double in_l, in_w;
+    rc_box_context(s, content_w, &in_l, &in_w);
+    (void)in_w;
+    if (s->line_open) {
+        *x = in_l + s->pen_x;
+        *y = s->cur_top;
+    } else {
+        *x = in_l;
+        *y = s->cur_top + s->pending_gap + open_line_height(s, th);
+    }
+}
+
+/* The box a run's OUTERMOST float founder sits in (its parent box), or -2 when the
+ * founder carries no box of its own and so says nothing about its wrapper. */
+static int band_parent_box(const rd_doc *doc, const rd_block *bk) {
+    int fb = (bk->float_oid >= 0) ? bk->float_obox : bk->float_box;
+    if (fb < 0 || (size_t)fb >= rd_box_count(doc)) return -2;
+    const pv_box_def *d = rd_box_at(doc, (size_t)fb);
+    return (d != NULL) ? d->parent_id : -2;
+}
+
+static int band_common_box_ex(const rd_doc *doc, size_t start, size_t end, int skip_boxless) {
+    /* A run that carries no box (a replaced element -- an icon <svg>/<img> -- has no
+     * block_id of its own: it sits inside whatever is open) says nothing about the band's
+     * shared context; counting it as an empty path erased the common box of the whole
+     * band, and every column then re-opened the page's own wrapper (a body with padding)
+     * inside itself at the float's width. */
     int common[RC_BOX_STACK_MAX];
-    int ncommon = box_path_of(doc, rd_at(doc, start)->block_id, common);
-    for (size_t k = start + 1; k < end && ncommon > 0; ++k) {
+    int ncommon = -1;
+    for (size_t k = start; k < end; ++k) {
+        const rd_block *bk = rd_at(doc, k);
+        if (skip_boxless && bk->block_id < 0 &&
+            (bk->kind == RD_IMAGE || bk->kind == RD_SVG || bk->kind == RD_VIDEO ||
+             bk->kind == RD_INPUT))
+            continue;
+        if (ncommon < 0) { ncommon = box_path_of(doc, bk->block_id, common); continue; }
         int path[RC_BOX_STACK_MAX];
-        int n = box_path_of(doc, rd_at(doc, k)->block_id, path);
+        int n = box_path_of(doc, bk->block_id, path);
         int m = 0;
         while (m < ncommon && m < n && common[m] == path[m]) ++m;
         ncommon = m;
+        if (ncommon == 0) break;
     }
     return (ncommon > 0) ? common[ncommon - 1] : -1;
+}
+
+static int band_common_box(const rd_doc *doc, size_t start, size_t end) {
+    return band_common_box_ex(doc, start, end, 0);
 }
 
 /* The box a float band nests inside — the band's SHARED context, opened on the parent
@@ -7861,8 +7967,9 @@ static int band_shared_box(const rd_doc *doc, const rc_state *s,
                            size_t start, size_t end) {
     int first = rd_at(doc, start)->float_id;
     for (size_t k = start + 1; k < end; ++k) {
-        if (rd_at(doc, k)->float_id != first)
-            return band_common_box(doc, start, end);
+        if (rd_at(doc, k)->float_id != first) {
+            return band_common_box_ex(doc, start, end, 1);
+        }
     }
     int common[RC_BOX_STACK_MAX];
     int ncommon = box_path_of(doc, rd_at(doc, start)->block_id, common);
@@ -7872,6 +7979,24 @@ static int band_shared_box(const rd_doc *doc, const rc_state *s,
         int m = 0;
         while (m < ncommon && m < n && common[m] == path[m]) ++m;
         ncommon = m;
+    }
+    /* A float that owns a box of its own sits INSIDE its wrapper: the boxes above the
+     * founder's are the band's shared context and are opened at the band level, before
+     * the column -- a `.wrap{height:30px;background:...}` holding one `float:right` list
+     * had its box opened INSIDE the float's column, so its bar painted the column's width
+     * and its height did not reserve the flow. Only when the founder has no box to mark
+     * where the float begins does the old rule (the deepest box already open) apply. */
+    int fb = rd_at(doc, start)->float_box;
+    if (fb >= 0) {
+        for (int i = 1; i < ncommon; ++i) {
+            if (common[i] != fb) continue;
+            /* Only a wrapper that BOUNDS its float (a declared height) is worth the change: it
+             * is what reserves the flow and what the bar's background must span. An auto-height
+             * wrapper keeps the old rule (opened with the float's own column). */
+            const pv_box_def *wd = rd_box_at(doc, (size_t)common[i - 1]);
+            if (wd != NULL && (wd->box_h > 0 || wd->box_h_set)) return common[i - 1];
+            break;
+        }
     }
     int keep = -1;
     for (int i = 0; i < ncommon && i < s->box_depth; ++i) {
@@ -8151,6 +8276,10 @@ static double float_group_pref_w(cairo_t *cr, const browser_window *w, const ui_
     while (k < g1) {
         const rd_block *bk0 = rd_at(doc, k);
         if (block_in_table_caption(doc, bk0)) { ++k; continue; }
+        /* An out-of-flow run (a visually-hidden `sr-only` label) is no part of the float's
+         * content width, anchor or not: counted as text it also cut the container's run into
+         * pieces, so a row of icons measured as its widest label (88px, not 204). */
+        if (block_is_oof(doc, bk0)) { ++k; continue; }
         int is_cont = (bk0->cont_id >= 0 && (bk0->cont_display == BX_DISPLAY_FLEX ||
                                              bk0->cont_display == BX_DISPLAY_GRID));
         int fbx0 = rd_at(doc, g0)->float_box;
@@ -8159,6 +8288,7 @@ static double float_group_pref_w(cairo_t *cr, const browser_window *w, const ui_
         while (e < g1) {
             const rd_block *be = rd_at(doc, e);
             if (block_in_table_caption(doc, be)) break;
+            if (block_is_oof(doc, be)) { ++e; continue; }
             int ec = (be->cont_id >= 0) ? root_cont_in(doc, be->cont_id, fbx0) : -1;
             if (ec != rootc) break;
             ++e;
@@ -8200,6 +8330,7 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                         rc_state *s, const ui_theme *th, double content_w,
                         const rd_doc *doc, rc_defer *d) {
     if (d == NULL || d->n == 0) return;
+    ++L->defer_placed;
     double ctx_left, ctx_w;
     rc_box_context(s, content_w, &ctx_left, &ctx_w);
     if (ctx_w < 1.0) ctx_w = 1.0;
@@ -8369,23 +8500,33 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                  * what brings in wrapper boxes like the `.main-content`
                  * margin box, without which the column flows at full page
                  * width. Items open their own boxes below bbox inside. */
-                /* The band's common box IS the founder when it carries the outermost
-                 * float's declared width (a founder with no run of its own): the column
-                 * already took that width, so the box fills it instead of resolving the
-                 * same percentage against the column a second time (30% of 300). */
+                /* The column IS the outermost founder's border box: its box (carried on
+                 * the runs as float_obox, since the founder often owns no run of its own)
+                 * fills the column instead of re-resolving its width and margins inside it
+                 * -- `aside{float:left;width:320px;margin-left:-320px}` was pushed another
+                 * 320px left and `width:30%` became 30% of its own column. */
                 {
-                    const rd_block *r0 = rd_at(doc, dc->rs[r]);
-                    const pv_box_def *bbd = (bbox >= 0 && (size_t)bbox < rd_box_count(doc))
-                                            ? rd_box_at(doc, (size_t)bbox) : NULL;
-                    if (bbd != NULL && r0->float_oid == dc->key &&
-                        (r0->float_ow > 0 || r0->float_ow_pct != 0) &&
-                        bbd->box_w == r0->float_ow && bbd->box_w_pct == r0->float_ow_pct) {
+                    int fbx = -1;
+                    for (size_t fk = dc->rs[r]; fk < dc->re[r] && fbx < 0; ++fk) {
+                        const rd_block *fb = rd_at(doc, fk);
+                        if (block_leaves_flow(doc, fb)) continue;
+                        if (fb->float_oid == dc->key) fbx = fb->float_obox;
+                        else if (fb->float_oid < 0 && fb->float_id == dc->key) fbx = fb->float_box;
+                    }
+                    if (fbx >= 0 && (size_t)fbx < rd_box_count(doc)) {
                         si.col_founder_set = 1;
-                        si.col_founder_box = bbox;
+                        si.col_founder_box = fbx;
                     }
                 }
-                reconcile_boxes(cr, w, L, &si, th, doc, colw, bbox,
-                                dc->rs[r]);
+                if (bbox >= 0)
+                    /* Boxes ALREADY OPEN on the parent state are what ctx_left/ctx_w (the
+                     * column's context) were measured from: reopening them inside the column
+                     * applied the page wrapper's padding twice (the story column came out 26px
+                     * narrower than Firefox's). */
+                    reconcile_boxes_below(cr, w, L, &si, th, doc, colw, bbox, dc->rs[r],
+                                          nested_stop(s, doc, bbox, -1));
+                else
+                    reconcile_boxes(cr, w, L, &si, th, doc, colw, bbox, dc->rs[r]);
                 /* Inner % resolves against the COLUMN width: it is the
                  * containing block, exactly as a nested flex container's
                  * would. */
@@ -8640,7 +8781,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
             const pv_box_def *fd = (fbx >= 0) ? rd_box_at(doc, (size_t)fbx) : NULL;
             double edges = float_founder_edges(doc, fbx, ctx_w);
             double wj = pref + edges;
-            if (fd != NULL && wj > 0.0) {
+                if (fd != NULL && wj > 0.0) {
                 double cap = bx_width_cap(fd->box_mw, fd->box_mw_pct, ctx_w);
                 if (cap > 0.0 && wj > cap) wj = cap;
             }
@@ -8680,8 +8821,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
          * already spent placing the column. Nested items (their own id
          * under the key's oid) keep their own margins for relative
          * placement. */
-        int is_founder = (founder_key >= 0 && g == 1 &&
-                          bf->float_id == founder_key);
+        int is_founder = (founder_key >= 0 && bf->float_id == founder_key);
         int eml = bf->float_ml - (is_founder ? fml : 0);
         int emlp = bf->float_ml_pct - (is_founder ? fmlpct : 0);
         int emr = bf->float_mr - (is_founder ? fmr : 0);
@@ -8730,7 +8870,11 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
             const rd_block *fj = rd_at(doc, gstart[j]);
             const pv_box_def *fjd = (fj->float_box >= 0 && (size_t)fj->float_box < rd_box_count(doc))
                                     ? rd_box_at(doc, (size_t)fj->float_box) : NULL;
-            if (fjd != NULL && fj->float_id >= 0 && (fjd->box_w > 0 || fjd->box_w_pct != 0)) {
+            /* Declared width or not: the band already sized this column (the declared width,
+             * or the shrink-to-fit of its content), so the founder's box fills it. Measuring an
+             * inline-block founder's content AGAIN inside the column came out 40px narrower
+             * than the column that was sized for it. */
+            if (fjd != NULL && fj->float_id >= 0) {
                 si.col_founder_set = 1;
                 si.col_founder_box = fj->float_box;
             }
@@ -8759,13 +8903,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                                         bk->block_id);
                 size_t sbid = (size_t)oroot;
                 if (sbid < BT_MAX_POSITIONED && !L->oof_static_set[sbid]) {
-                    double in_l, in_w;
-                    rc_box_context(&si, cw, &in_l, &in_w);
-                    (void)in_w;
-                    L->oof_sx[sbid] = in_l;
-                    L->oof_sy[sbid] = si.cur_top
-                        + si.pending_gap
-                        + open_line_height(&si, th);
+                    oof_static_xy(&si, th, cw, &L->oof_sx[sbid], &L->oof_sy[sbid]);
                     L->oof_static_set[sbid] = 1;
                     if (getenv("FREEDOM_DEFER_DEBUG") != NULL)
                         fprintf(stderr, "[oof] band item: box=%d si_top=%.1f k=%zu fid=%d txt='%.30s'\n",
@@ -8802,7 +8940,8 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                 {
                     int cbx = container_box_of(doc, k, ce, rootc);
                     reconcile_boxes_below(cr, w, L, &si, th, doc, cw, cbx, k,
-                                          nested_stop(s, doc, cbx, band_box));
+                                          float_item_stop(doc, bk, founder_key,
+                                                          nested_stop(s, doc, cbx, band_box)));
                 }
                 double cin_l, cin_w;
                 rc_box_context(&si, cw, &cin_l, &cin_w);
@@ -8821,7 +8960,8 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
              * never paints and its white-on-teal title reads white-on-white. */
             leave_inline_box(L, &si, bk->block_id);
             reconcile_boxes_below(cr, w, L, &si, th, doc, cw, bk->block_id, k,
-                                  nested_stop(s, doc, bk->block_id, band_box));
+                                  float_item_stop(doc, bk, founder_key,
+                                                  nested_stop(s, doc, bk->block_id, band_box)));
             /* A float is a block formatting context: the blocks inside its column
              * collapse their vertical margins as in the main flow (CSS 2.1 8.3.1);
              * the column's first run carries the founder's own, placed by the band. */
@@ -9007,12 +9147,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             if (oroot >= 0) {
                 size_t sbid = (size_t)oroot;
                 if (sbid < BT_MAX_POSITIONED && !L->oof_static_set[sbid]) {
-                    double in_l, in_w;
-                    rc_box_context(&s, content_w, &in_l, &in_w);
-                    (void)in_w;
-                    L->oof_sx[sbid] = in_l;
-                    L->oof_sy[sbid] = s.cur_top + s.pending_gap
-                        + open_line_height(&s, th);
+                    oof_static_xy(&s, th, content_w, &L->oof_sx[sbid], &L->oof_sy[sbid]);
                     L->oof_static_set[sbid] = 1;
                 }
                 continue;
@@ -9166,6 +9301,15 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                  * into one full-width band per inline run: the caption's five links
                  * each took a row of their own instead of flowing as one sentence. */
                 if (bj->float_clear != 0 && bj->float_id != b->float_id) break;
+                /* Floats of DIFFERENT wrappers are different bands: `.nav-wrap` and the
+                 * `.nav-secondary-wrap` that follows it each own their floats, background and
+                 * height. One band over both opened the second wrapper's box inside its first
+                 * column only, so its bar painted a fraction of the width. Compared through the
+                 * founders' parent boxes; unknown (a founder with no box) joins as before. */
+                {
+                    int pa = band_parent_box(doc, b), pb2 = band_parent_box(doc, bj);
+                    if (pa != -2 && pb2 != -2 && pa != pb2) break;
+                }
                 ++j;
             }
             /* Pull-up deferral (spec/float.md §7d.2): bands living inside
@@ -9376,6 +9520,22 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * so this is exactly the container top a pulled column aligns to.
          * Whitespace-only runs leave it alone; assigning an unchanged cur_top
          * would be harmless but the guard keeps the invariant legible. */
+        /* An empty block that still OCCUPIES space -- a spacer with a declared height (Slashdot's
+         * 100px `#top-banner-placeholder`) -- is in-flow content too: its bottom is where the
+         * pulled columns start, not the end of the text above it. Its box is still open here, so
+         * its used bottom is its top plus its declared border-box height. */
+        if ((b->text == NULL || b->text[0] == '\0') && b->block_id >= 0 && s.box_depth > 0 &&
+            s.box_stack[s.box_depth - 1].block_id == b->block_id) {
+            const pv_box_def *sd = rd_box_at(doc, (size_t)b->block_id);
+            const rc_open_box *so = &s.box_stack[s.box_depth - 1];
+            if (sd != NULL && (sd->box_h > 0 || sd->box_h_set) && so->box_idx < L->nbox) {
+                double sb = L->boxes[so->box_idx].top +
+                            bx_border_box_h((double)sd->box_h, so->border_box,
+                                            so->pt, so->pb, so->bt, so->bb);
+                if (!df.anchor_set || sb > df.anchor_top) df.anchor_top = sb;
+                df.anchor_set = 1;
+            }
+        }
         if (b->text != NULL && b->text[0] != '\0') {
             const char *at = b->text;
             while (*at == ' ' || *at == '\t' || *at == '\n' || *at == '\r') ++at;
@@ -9648,6 +9808,11 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
     for (size_t i = 0; i < L->nbox; ++i) {
         int bid = L->boxes[i].block_id;
         if (bid < 0 || (size_t)bid >= nbox) continue;
+        /* A box can be emitted in several fragments (one per float column or band it spans):
+         * the containing block for its absolute descendants is the WIDEST fragment, not
+         * the last. A 1px column that merely re-opened a header's chain used to win and
+         * every absolute child (Slashdot's byline) was shrink-wrapped to 1px. */
+        if (in_flow[bid] && L->boxes[i].w < gw[bid]) continue;
         gx[bid] = L->boxes[i].x;
         gy[bid] = L->boxes[i].top;
         gw[bid] = L->boxes[i].w;
@@ -13490,37 +13655,67 @@ static void paint_canvas_background(cairo_t *cr, rc_layout *L) {
     }
 }
 
+/* The z-index a deferred root paints at (auto = 0). */
+static int defer_root_z(const rd_doc *doc, size_t root) {
+    const pv_box_def *rd = rd_box_at(doc, root);
+    return (rd == NULL || rd->z_index == PV_LEN_UNSET) ? 0 : rd->z_index;
+}
+
+/* Whether deferred root `a` paints before root `b`: lower z first, then tree order. */
+static int defer_root_before(const rd_doc *doc, const rc_layout *L, size_t a, size_t b) {
+    int za = defer_root_z(doc, a), zb = defer_root_z(doc, b);
+    if (za != zb) return za < zb;
+    return L->defer_order[a] < L->defer_order[b];
+}
+
 static void paint_positioned_layer(cairo_t *cr, browser_window *w, const ui_theme *th,
                                    rc_layout *L, double left, double origin,
                                    double content_top, double content_h, double view_w,
                                    defer_paint_fn paint_deferred, void *dctx) {
     int pos_ov_stack[OV_MAX_DEPTH] = {0};
     int pos_ov_depth = 0;
-    size_t next_root = 0;
     const rd_doc *doc = w->doc;
+    /* Deferred roots are painted in (z, tree order), NOT in box-index order: a root's
+     * index and its tree order disagree whenever boxes were registered out of document
+     * order (a header opened later than the boxes around it), and walking them by index
+     * let one late-ordered root block every earlier-ordered one until the end of the
+     * layer -- the in-flow bar of Slashdot's story header then painted OVER its own
+     * absolutely positioned byline. */
+    char *painted = (paint_deferred != NULL && L->ndefer > 0) ? (char *)calloc(L->ndefer, 1) : NULL;
     for (size_t i = 0; i < L->npositioned; ++i) {
         const bt_positioned *pb = &L->positioned[i];
         if (pb->z_index < 0) continue;  /* already painted behind, above */
-        while (paint_deferred != NULL && L->ndefer > 0) {
-            while (next_root < L->ndefer && L->defer_root[next_root] != (int)next_root)
-                ++next_root;
-            if (next_root >= L->ndefer) break;
-            const pv_box_def *rd = rd_box_at(doc, next_root);
+        while (painted != NULL) {
+            size_t best = (size_t)-1;
+            for (size_t q = 0; q < L->ndefer; ++q) {
+                if (painted[q] || L->defer_root[q] != (int)q) continue;
+                if (best == (size_t)-1 || defer_root_before(doc, L, q, best)) best = q;
+            }
+            if (best == (size_t)-1) break;
+            const pv_box_def *rd = rd_box_at(doc, best);
             int zr = (rd == NULL || rd->z_index == PV_LEN_UNSET) ? 0 : rd->z_index;
             if (zr > pb->z_index ||
-                (zr == pb->z_index && L->defer_order[next_root] > pb->doc_order)) break;
+                (zr == pb->z_index && L->defer_order[best] > pb->doc_order)) break;
             while (pos_ov_depth > 0) { cairo_restore(cr); pos_ov_depth--; }
-            paint_deferred(dctx, (int)next_root);
-            ++next_root;
+            painted[best] = 1;
+            paint_deferred(dctx, (int)best);
         }
         paint_positioned_one(cr, w, th, pb, left, origin, content_top, content_h,
                              view_w, pos_ov_stack, &pos_ov_depth, L);
     }
     while (pos_ov_depth > 0) { cairo_restore(cr); pos_ov_depth--; }
-    while (paint_deferred != NULL && L->ndefer > 0 && next_root < L->ndefer) {
-        if (L->defer_root[next_root] == (int)next_root)
-            paint_deferred(dctx, (int)next_root);
-        ++next_root;
+    if (painted != NULL) {
+        for (;;) {
+            size_t best = (size_t)-1;
+            for (size_t q = 0; q < L->ndefer; ++q) {
+                if (painted[q] || L->defer_root[q] != (int)q) continue;
+                if (best == (size_t)-1 || defer_root_before(doc, L, q, best)) best = q;
+            }
+            if (best == (size_t)-1) break;
+            painted[best] = 1;
+            paint_deferred(dctx, (int)best);
+        }
+        free(painted);
     }
 }
 
@@ -15814,6 +16009,21 @@ static void redraw(browser_window *w) {
     if (!w->configured) return;
     if (ensure_buffer(w) != 0) return;
     paint(w);
+    /* FREEDOM_GUI_SHOT=path: write what the window just painted (the real on-screen
+     * painter, not the headless PNG one) at most every 3 s, so the GUI can be reviewed
+     * and diffed against --download-png without driving the compositor by hand. */
+    {
+        const char *shot = getenv("FREEDOM_GUI_SHOT");
+        static uint64_t last_shot_ms;
+        static const void *last_shot_doc;
+        uint64_t now = now_ms();
+        if (shot != NULL && shot[0] != '\0' && w->doc != NULL &&
+            (w->doc != last_shot_doc || now - last_shot_ms >= 3000)) {
+            last_shot_ms = now;
+            last_shot_doc = w->doc;
+            (void)cairo_surface_write_to_png(w->cairo_surface, shot);
+        }
+    }
     wl_surface_attach(w->surface, w->buffer, 0, 0);
     wl_surface_damage_buffer(w->surface, 0, 0, w->width, w->height);
     wl_surface_commit(w->surface);
@@ -17863,8 +18073,12 @@ ui_status ui_run_browser(const char *start_url) {
     w.decoder_cmd_fd = -1;
     w.decoder_out_fd = -1;
     w.audio_fd = -1;
-    w.width = 900;
-    w.height = 700;
+    /* The window opens wide enough that its CONTENT is the benchmark viewport
+     * (FC_PNG_PAGE_W): the headless PNG, `make parity` and the GUI then evaluate the same
+     * `@media` queries. At 900 a site like Slashdot crossed its 919px breakpoint and the GUI
+     * showed the icon-only mobile nav that no benchmark image ever shows. */
+    w.width = (int)FC_PNG_PAGE_W + (int)UI_SCROLLBAR_W;
+    w.height = 780;
     w.running = 1;
     w.use_csd = 1;
     w.caps = rdp_caps_safe();   /* Privacy by Default: images/CSS/JS off */

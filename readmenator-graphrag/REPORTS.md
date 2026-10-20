@@ -1,6 +1,6 @@
 # GraphRAG Community Reports
 
-Entities: 7274 | Relationships: 12762 | Communities: 11 | Themes: 3 | Text units: 6834
+Entities: 7287 | Relationships: 12775 | Communities: 11 | Themes: 3 | Text units: 6847
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
@@ -70,7 +70,7 @@ Theme of 1 communities and 17 files: unassigned files (17 files, rating 0.9).
 - `include/css.h` ranks 2 by PageRank, 37 importers, 140 symbols: css_style: A resolved presentation.
 - `include/css_select.h` ranks 3 by PageRank, 15 importers, 34 symbols: css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only tag/.class/#id/[attr] (no combinators, no pseudo-classes inside * sub-selectors).
 - Hotspot `src/css.c`: 246 symbols, 38 connections (score 0.34).
-- Hotspot `tests/test_css.c`: 352 symbols, 19 connections (score 0.33).
+- Hotspot `tests/test_css.c`: 352 symbols, 19 connections (score 0.32).
 - 1 layer violations, e.g. test_css.c (testing) -> flex_layout.h (presentation).
 - Dataflow: 3 INFERRED issues (first: DEAD_STORE in page_view).
 - Key entities: file:tests/test_css.c, file:src/css.c, file:include/css.h, file:src/css_box.c, file:include/css_select.h, file:src/css_gradient.c, file:tests/test_css_color.c, file:src/css_mq.c
@@ -98,8 +98,8 @@ Theme of 1 communities and 17 files: unassigned files (17 files, rating 0.9).
 - `include/image_decode.h` ranks 1 by PageRank, 6 importers, 13 symbols: img_pixels: A decoded bitmap that owns its pixel buffer.
 - `include/pdf_export.h` ranks 2 by PageRank, 5 importers, 10 symbols: pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order) onto pages of usable height page_h without ever splitting a row.
 - `include/download.h` ranks 3 by PageRank, 4 importers, 9 symbols: dl_should_download: 1 if the response should be saved (attachment, or a non-renderable media type), 0 if it should be rendered.
-- Hotspot `gui/browser_ui.c`: 595 symbols, 127 connections (score 1.00).
-- Hotspot `tests/test_freedom.c`: 97 symbols, 12 connections (score 0.12).
+- Hotspot `gui/browser_ui.c`: 602 symbols, 127 connections (score 1.00).
+- Hotspot `tests/test_freedom.c`: 102 symbols, 12 connections (score 0.12).
 - 2 layer violations, e.g. browser_ui.c (presentation) -> data_url.h (data_access).
 - Dataflow: 38 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
 - Surprising bridge: fuzz_download.c <-> test_renderer.c (8 hops across communities).
@@ -126,7 +126,7 @@ Theme of 1 communities and 17 files: unassigned files (17 files, rating 0.9).
 - `include/render_policy.h` ranks 1 by PageRank, 9 importers, 9 symbols: rdp_caps: Render capabilities for a page.
 - `include/page_view.h` ranks 2 by PageRank, 13 importers, 87 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
 - `include/flex_layout.h` ranks 3 by PageRank, 12 importers, 43 symbols: fx_item: Upper bound on items per flex line / grid columns.
-- Hotspot `src/page_view.c`: 243 symbols, 38 connections (score 0.34).
+- Hotspot `src/page_view.c`: 244 symbols, 38 connections (score 0.34).
 - Hotspot `tests/test_page_view.c`: 209 symbols, 22 connections (score 0.24).
 - 14 layer violations, e.g. render_doc.c (presentation) -> data_url.h (data_access).
 - Dataflow: 7 INFERRED issues (first: DEAD_STORE in layout_grid).

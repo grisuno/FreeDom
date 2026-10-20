@@ -1,6 +1,6 @@
 Overflow hidden test
 === Freedom layout ===
-content_w=1000 total_h=823.3 nbox=7 nrow=16 npositioned=0
+content_w=1000 total_h=614.3 nbox=7 nrow=16 npositioned=0
   row[0] top=19.9 h=34.0 x_off=0.0
   row[1] top=99.8 h=23.0 x_off=26.0 w=300.0
   row[2] top=122.8 h=23.0 x_off=26.0 w=300.0
@@ -11,16 +11,16 @@ content_w=1000 total_h=823.3 nbox=7 nrow=16 npositioned=0
   row[7] top=322.8 h=23.0 x_off=31.0 w=500.0
   row[8] top=359.8 h=23.0 x_off=31.0 w=290.0
   row[9] top=382.8 h=23.0 x_off=31.0 w=290.0
-  row[10] top=597.6 h=27.0 x_off=0.0 w=290.0
-  row[11] top=669.3 h=23.0 x_off=26.0 w=300.0
-  row[12] top=714.3 h=23.0 x_off=312.0 w=200.0
-  row[13] top=737.3 h=23.0 x_off=312.0 w=200.0
-  row[14] top=760.3 h=23.0 x_off=312.0 w=200.0
-  row[15] top=783.3 h=23.0 x_off=312.0 w=200.0
+  row[10] top=388.6 h=27.0 x_off=0.0 w=290.0
+  row[11] top=460.3 h=23.0 x_off=26.0 w=300.0
+  row[12] top=505.3 h=23.0 x_off=312.0 w=200.0
+  row[13] top=528.3 h=23.0 x_off=312.0 w=200.0
+  row[14] top=551.3 h=23.0 x_off=312.0 w=200.0
+  row[15] top=574.3 h=23.0 x_off=312.0 w=200.0
   box[0] bid=0 x=16.0 top=73.8 w=320.0 h=140.0
   box[1] bid=1 x=26.0 top=161.8 w=510.0 h=52.0
   box[2] bid=3 x=16.0 top=229.8 w=320.0 h=140.0
   box[3] bid=4 x=26.0 top=317.8 w=510.0 h=33.0
   box[4] bid=5 x=26.0 top=354.8 w=300.0 h=210.0
-  box[5] bid=6 x=16.0 top=643.3 w=320.0 h=180.0
-  box[6] bid=7 x=306.0 top=708.3 w=212.0 h=104.0
+  box[5] bid=6 x=16.0 top=434.3 w=320.0 h=180.0
+  box[6] bid=7 x=306.0 top=499.3 w=212.0 h=104.0

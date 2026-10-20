@@ -3,6 +3,13 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `print_doc` | function | `src/freedom.c:287` | `static void print_doc(const rd_doc *doc)` |
+| `print_dom` | function | `src/freedom.c:397` | `static void print_dom(const rd_doc *doc)` |
+| `print_dom_css` | function | `src/freedom.c:412` | `static void print_dom_css(const rd_doc *doc)` |
+| `print_usage` | function | `src/freedom.c:52` | `static void print_usage(FILE *fp, const char *prog)` |
+| `read_file` | function | `src/freedom.c:219` | `static char *read_file(const char *path, size_t *out_len)` |
+| `render_page` | function | `src/freedom.c:626` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
+| `run_dump_video` | function | `src/freedom.c:1163` | `static int run_dump_video(const char *url)` |
 | `run_headless` | function | `src/freedom.c:1016` | `static int run_headless(const char *target)` |
 | `sf_reason` | function | `src/freedom.c:872` | `static const char *sf_reason(sf_status ss)` |
 | `timings_dump` | function | `src/freedom.c:157` | `static void timings_dump(void)` |
@@ -489,12 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:325` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:336` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:347` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:358` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:369` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:380` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:391` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:402` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:413` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:424` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

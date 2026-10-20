@@ -616,3 +616,13 @@ banda (150 de 1000 px), no 50 % de la página: un `%` es parte de su bloque cont
 - Abierto: la base de un `%` de flotante ignora el padding del `body` (974 vs 1000: la barra
   de slashdot mide 674 donde Firefox da 682) y un contenedor de alto fijo que solo tiene
   flotantes empuja el flujo hasta el fondo del flotante más alto.
+
+## 7e. Tanda 52 additions (Slashdot real GUI)
+
+- `pv_run.float_obox`: box id of the OUTERMOST float founder; a nested float's `%` resolves against `float_ow` unless it is the founder itself.
+- Consecutive floats whose boxes hang from different wrapper boxes break the band (`band_parent_box`).
+- A lone float whose founder box sits in a wrapper with a declared height uses that wrapper as the shared context.
+- `position:relative` offsets move the box content (`rc_open_box.rel_dx/rel_dy`).
+- A declared height ends the box: overflowing content no longer pushes the cursor (CSS 2.1 10.6.3), unless pulled columns were placed inside it (`defer_mark`).
+- Out-of-flow runs do not contribute to a float's preferred width.
+- An empty in-flow spacer with a declared height anchors the pull-up (`anchor_top`).
