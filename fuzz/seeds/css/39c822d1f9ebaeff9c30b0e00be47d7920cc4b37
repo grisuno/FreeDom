@@ -1,0 +1,2 @@
+.a{bt 50% 0,#f*0f,#00f)}
+.c{background:radialagradient(closest-side at 1eft top,red,blue);mix-blend-mode:plus-lighter;filter:blur(-2px)}

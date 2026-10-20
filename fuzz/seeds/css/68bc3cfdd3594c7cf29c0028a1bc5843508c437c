@@ -1,0 +1,2 @@
+.a{background:rad27%,#9a7cff 36.75%,#0e0aa200 100%)}
+.b{background-image:radial-gradient(600pxop,red,blue);t-side at left top,red,blue);mix-blend-mode:plus-lighter;filter:blur(4,red,blue);mix-blend-mode:plus-lighter;filter:blur(42px)}

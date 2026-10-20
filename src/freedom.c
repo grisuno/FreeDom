@@ -16,6 +16,7 @@
 #include "html_parse.h"
 #include "freebug.h"
 #include "hostblock.h"
+#include "host_conf.h"
 #include "js_policy.h"
 #include "link_nav.h"
 #include "net_realm.h"
@@ -54,6 +55,8 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --download-pdf=PATH: headless render to a vector PDF at PATH (implies --headless)\n");
     fprintf(fp, "  --download-png=PATH: headless render to a single PNG image at PATH (implies --headless)\n");
     fprintf(fp, "  --author-css: apply author CSS (colors/sizing/line-height) in the headless render (local only)\n");
+    fprintf(fp, "  --as-gui: headless render with the capabilities the GUI derives for the page host (allow.conf/js.conf)\n");
+    fprintf(fp, "  --as-host=HOST: --as-gui, with HOST standing in for a local file's host\n");
     fprintf(fp, "  --images: enable image loading in headless render (off by default: Privacy by Default)\n");
     fprintf(fp, "  --user=user:password: HTTP Basic Authentication credentials (headless only)\n");
     fprintf(fp, "  --insecure: allow weak TLS certificates (headless only, explicit override)\n");
@@ -193,6 +196,13 @@ static char global_tor_addr[64] = "127.0.0.1:9050";
 static char global_i2p_addr[64] = "127.0.0.1:4444";
 
 static hb_set *g_hosts = NULL;
+static hb_set *g_js_hosts = NULL;
+/* --as-gui / --as-host: take the page's capabilities from the GUI's own derivation
+ * (wc_derive over allow.conf/js.conf) instead of from the operator's flags. */
+static int g_as_gui = 0;
+static const char *g_as_host = NULL;   /* host stand-in for a local file */
+static wc_caps g_gui_wc;
+static int g_op_js = 0, g_op_css = 0, g_op_images = 0;   /* the operator's explicit flags */
 /* User opt-in for TLS-impersonation blend: --impersonate or FREEDOM_IMPERSONATE=1.
  * Third gate signal alongside allow.conf AND js.conf. Default 0 = hardened
  * PQ-hybrid fallback (Zero Trust / Zero Knowledge preserved). */
@@ -224,32 +234,39 @@ static char *read_file(const char *path, size_t *out_len) {
 }
 
 static void headless_load_hosts(void) {
-    g_hosts = hb_new();
-    if (g_hosts == NULL) return;
-    const char *dirs[] = { NULL, "config", NULL };
-    /* home_dir must live for the whole function: dirs[2] aliases it and is read in
-     * the loop below. A previous inner-block buffer went out of scope while dirs[2]
-     * still pointed at it (stack-use-after-scope: the config path was then built from
-     * a dangling pointer). */
-    char home_dir[512];
-    const char *home = getenv("HOME");
-    if (home != NULL) {
-        snprintf(home_dir, sizeof home_dir, "%s/.config/freedom", home);
-        dirs[2] = home_dir;
+    hcf_dirs dirs;
+    hcf_search_dirs_from_env(&dirs);
+    g_hosts = hcf_load_filter(&dirs);
+    g_js_hosts = hcf_load_allowlist(&dirs, "js.conf");
+}
+
+/* Derives the capabilities the GUI would give `top_url` and publishes them through the
+ * headless globals every later stage already reads. The inputs are the GUI's: the host's
+ * membership in allow.conf / js.conf, the JS mode from FREEDOM_JS (default allowlist), user
+ * toggles off. Explicit --author-css / --images / --js=on still add on top. */
+static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images) {
+    if (!g_as_gui) return;
+    char host[512];
+    host[0] = '\0';
+    if (top_url == NULL || rp_host_of(top_url, host, sizeof host) != 0) {
+        host[0] = '\0';
+        if (g_as_host != NULL) snprintf(host, sizeof host, "%s", g_as_host);
     }
-    const char *env = getenv("FREEDOM_HOSTS_DIR");
-    if (env != NULL) dirs[0] = env;
-    for (int i = 0; i < 3; ++i) {
-        if (dirs[i] == NULL) continue;
-        char path[1024];
-        int n = snprintf(path, sizeof path, "%s/allow.conf", dirs[i]);
-        if (n <= 0 || (size_t)n >= sizeof path) continue;
-        size_t len = 0;
-        char *txt = read_file(path, &len);
-        if (txt != NULL) { hb_load(g_hosts, txt, HB_LIST_ALLOW); free(txt); }
-        /* No impersonate.conf: third signal is the user flag (--impersonate /
-         * FREEDOM_IMPERSONATE=1). impersonate.conf on disk, if present, is ignored. */
-    }
+    const char *js_env = getenv("FREEDOM_JS");
+    jsp_mode mode = (js_env != NULL && js_env[0] != '\0') ? jsp_mode_from_str(js_env)
+                                                           : JSP_ALLOWLIST;
+    g_gui_wc = wc_derive((wc_input){
+        .js_mode       = mode,
+        .host_in_js    = host[0] != '\0' && g_js_hosts != NULL && hb_is_allowlisted(g_js_hosts, host),
+        .host_in_allow = host[0] != '\0' && g_hosts != NULL && hb_is_allowlisted(g_hosts, host),
+        .reader        = 0,
+        .user_css      = flag_css,
+        .user_images   = flag_images,
+    });
+    if (flag_js) g_gui_wc.js = true;
+    g_headless_js = g_gui_wc.js;
+    g_author_css  = g_gui_wc.css;
+    g_images      = g_gui_wc.images;
 }
 
 /* True if s holds only ASCII spaces/tabs (or is empty). */
@@ -619,8 +636,10 @@ static int render_page(const char *html, size_t len, const char *top_url,
      * grants page-JS network (XHR/fetch + external <script src>) + session cookies;
      * --author-css also authorizes external <link rel=stylesheet> fetches (GET-only
      * at the parent gate; spec/freedom.md §6). The page URL is the resolution base. */
-    wc_caps wc = wc_from_flags(g_headless_js, g_author_css,
-                               g_images || getenv("FREEDOM_IMAGES") != NULL);
+    apply_as_gui(top_url, g_op_js, g_op_css, g_op_images);
+    wc_caps wc = g_as_gui ? g_gui_wc
+                          : wc_from_flags(g_headless_js, g_author_css,
+                                          g_images || getenv("FREEDOM_IMAGES") != NULL);
     tab_set_net_allowed(t, wc.net);
     tab_set_css_allowed(t, wc.css);
 
@@ -879,6 +898,7 @@ static int fetch_and_render_one(const char *url, char **out_nav) {
      * url_search_rewrite). The rewritten URL becomes the fetch AND the render base. */
     char search_rw[URL_MAX_LEN + 1];
     if (url_search_rewrite(url, search_rw, sizeof search_rw) == URL_OK) url = search_rw;
+    apply_as_gui(url, g_op_js, g_op_css, g_op_images);
 
     sf_config cfg = sf_config_default();
     if (g_hosts != NULL) {
@@ -1210,6 +1230,11 @@ int main(int argc, char **argv) {
             }
             g_png_out = path;
             headless = 1; /* PNG export is a headless operation (no window) */
+        } else if (strcmp(arg, "--as-gui") == 0) {
+            g_as_gui = 1;
+        } else if (strncmp(arg, "--as-host=", 10) == 0 && arg[10] != '\0') {
+            g_as_gui = 1;
+            g_as_host = arg + 10;
         } else if (strcmp(arg, "--author-css") == 0) {
             g_author_css = 1; /* author CSS in the headless render + external sheet fetch */
         } else if (strcmp(arg, "--images") == 0) {
@@ -1292,6 +1317,9 @@ int main(int argc, char **argv) {
      * forces JS on regardless of any --js flag's order; otherwise headless runs JS
      * only when --js resolved to "on". */
     g_headless_js = g_dump_console || js_on;
+    g_op_js = g_headless_js;
+    g_op_css = g_author_css;
+    g_op_images = g_images || getenv("FREEDOM_IMAGES") != NULL;
 
     if (g_video_out != NULL) {
         if (target == NULL) {

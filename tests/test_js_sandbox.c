@@ -430,6 +430,29 @@ static void test_module_errors_are_reported(void **state) {
     js_context_free(ctx);
 }
 
+/* A dynamic import() from a CLASSIC script resolves through the host even when no module
+ * script has run yet (code-splitting bundles do exactly this): the module loader used to be
+ * installed lazily by the first js_eval_module, so the import failed with "could not load
+ * module" until some module had been evaluated. */
+static void test_dynamic_import_from_classic_script(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    mod_host h = { 0 };
+    js_set_module_host(ctx, mh_resolve, mh_fetch, &h);
+    js_result r;
+    const char *src = "import('https://m.test/app/a.js').then(function(m){ globalThis.dyn = m.v; },"
+                      " function(e){ globalThis.dyn = 'fail:' + e; });";
+    assert_int_equal(js_eval(ctx, src, strlen(src), &r), JS_OK);
+    js_result_free(&r);
+    (void)js_pump_jobs(ctx, 256);
+    const char *rd = "String(globalThis.dyn)";
+    assert_int_equal(js_eval(ctx, rd, strlen(rd), &r), JS_OK);
+    assert_string_equal(r.value, "42");
+    js_result_free(&r);
+    js_context_free(ctx);
+}
+
 static void test_module_without_host_cannot_import(void **state) {
     (void)state;
     js_context *ctx = NULL;
@@ -576,6 +599,7 @@ int main(void) {
         cmocka_unit_test(test_eval_thrown_primitive_has_no_location),
         cmocka_unit_test(test_module_imports_resolve_and_run),
         cmocka_unit_test(test_module_errors_are_reported),
+        cmocka_unit_test(test_dynamic_import_from_classic_script),
         cmocka_unit_test(test_module_without_host_cannot_import),
         cmocka_unit_test(test_module_self_await_teardown),
         cmocka_unit_test(test_loc_from_stack_saturates_huge_numbers),

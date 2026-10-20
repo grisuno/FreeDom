@@ -46,6 +46,10 @@
 #include "webfont_load.h"
 #include "textfield.h"
 #include "webcaps.h"
+#include "host_conf.h"
+#include "css_gradient.h"
+#include "css_mask.h"
+#include "css_values.h"
 #include "ui.h"
 #include "url.h"
 #include "zoom.h"
@@ -703,19 +707,6 @@ static int build_file_origin(const char *path_or_url, char *out, size_t outsz) {
     return n > 0 && (size_t)n < outsz;
 }
 
-/* Loads one /etc/hosts-format .conf file (if present and readable) into the given
- * list. A missing file is not an error: the filter fails open, never over-blocking. */
-static void load_host_file(hb_set *s, const char *dir, const char *name, hb_list list) {
-    char path[1024];
-    int n = snprintf(path, sizeof path, "%s/%s", dir, name);
-    if (n <= 0 || (size_t)n >= sizeof path) return;
-    size_t len = 0;
-    char *txt = read_file(path, &len);
-    if (txt == NULL) return;
-    hb_load(s, txt, list);   /* HB_ERR_OOM only drops extra entries; not fatal here */
-    free(txt);
-}
-
 /* Builds the host filter from the user's .conf lists. Privacy by Default: block.conf
  * (a /etc/hosts-format blocklist) blocks trackers/ads and their subdomains; allow.conf
  * re-enables specific (sub)domains and wins over the blocklist. Directories are tried
@@ -723,28 +714,9 @@ static void load_host_file(hb_set *s, const char *dir, const char *name, hb_list
  * and each that exists is loaded cumulatively. Returns NULL only on OOM (hb_check
  * then treats every host as allowed). */
 static hb_set *build_host_filter(void) {
-    hb_set *s = hb_new();
-    if (s == NULL) return NULL;
-
-    const char *env = getenv("FREEDOM_HOSTS_DIR");
-    if (env != NULL && env[0] != '\0') {
-        load_host_file(s, env, "block.conf", HB_LIST_BLOCK);
-        load_host_file(s, env, "allow.conf", HB_LIST_ALLOW);
-    }
-
-    const char *home = getenv("HOME");
-    if (home != NULL && home[0] != '\0') {
-        char dir[1024];
-        int n = snprintf(dir, sizeof dir, "%s/.config/freedom", home);
-        if (n > 0 && (size_t)n < sizeof dir) {
-            load_host_file(s, dir, "block.conf", HB_LIST_BLOCK);
-            load_host_file(s, dir, "allow.conf", HB_LIST_ALLOW);
-        }
-    }
-
-    load_host_file(s, "config", "block.conf", HB_LIST_BLOCK);
-    load_host_file(s, "config", "allow.conf", HB_LIST_ALLOW);
-    return s;
+    hcf_dirs dirs;
+    hcf_search_dirs_from_env(&dirs);
+    return hcf_load_filter(&dirs);
 }
 
 /* Builds the per-host JS allowlist from js.conf (same /etc/hosts format and search
@@ -752,21 +724,9 @@ static hb_set *build_host_filter(void) {
  * membership (subdomains covered). Returns NULL on OOM (then no host is allowlisted,
  * so under JSP_ALLOWLIST no page runs JS -- fail closed). */
 static hb_set *build_conf_allowlist(const char *fname) {
-    hb_set *s = hb_new();
-    if (s == NULL) return NULL;
-
-    const char *env = getenv("FREEDOM_HOSTS_DIR");
-    if (env != NULL && env[0] != '\0') load_host_file(s, env, fname, HB_LIST_ALLOW);
-
-    const char *home = getenv("HOME");
-    if (home != NULL && home[0] != '\0') {
-        char dir[1024];
-        int n = snprintf(dir, sizeof dir, "%s/.config/freedom", home);
-        if (n > 0 && (size_t)n < sizeof dir) load_host_file(s, dir, fname, HB_LIST_ALLOW);
-    }
-
-    load_host_file(s, "config", fname, HB_LIST_ALLOW);
-    return s;
+    hcf_dirs dirs;
+    hcf_search_dirs_from_env(&dirs);
+    return hcf_load_allowlist(&dirs, fname);
 }
 
 static hb_set *build_js_filter(void)          { return build_conf_allowlist("js.conf"); }
@@ -882,21 +842,12 @@ static void load_favorites(browser_window *w) {
     acc[0] = '\0';
     size_t len = 0;
 
-    const char *dirs[3];
-    int nd = 0;
-    char home_dir[PATH_MAX];
-    const char *env = getenv("FREEDOM_HOSTS_DIR");
-    if (env != NULL && env[0] != '\0') dirs[nd++] = env;
-    const char *home = getenv("HOME");
-    if (home != NULL && home[0] != '\0') {
-        int n = snprintf(home_dir, sizeof home_dir, "%s/.config/freedom", home);
-        if (n > 0 && (size_t)n < sizeof home_dir) dirs[nd++] = home_dir;
-    }
-    dirs[nd++] = "config";
-
+    hcf_dirs hd;
+    hcf_search_dirs_from_env(&hd);
+    const int nd = (int)hd.n;
     for (int i = 0; i < nd; ++i) {
         char path[PATH_MAX];
-        int n = snprintf(path, sizeof path, "%s/allow.conf", dirs[i]);
+        int n = snprintf(path, sizeof path, "%s/allow.conf", hd.path[i]);
         if (n <= 0 || (size_t)n >= sizeof path) continue;
         size_t flen = 0;
         char *txt = read_file(path, &flen);
@@ -3321,6 +3272,9 @@ typedef struct rc_box {
     int    grad_c[4];
     int    grad_pos[4];  /* R5d: stop positions 0-1000, -1=evenly spaced */
     int    grad_radial;  /* R5c */
+    int    rad_size, rad_cx, rad_cy, rad_rx, rad_ry;   /* radial geometry (css_gradient.h) */
+    int    canvas_bg;    /* the body box whose solid background is the canvas background */
+    int    canvas_done;  /* the canvas pre-pass already painted it: the in-flow pass must not */
     /* background-image size/repeat (2026-07-16). css_bg_size/css_bg_repeat, 0
      * unset (natural size / CSS default "repeat"). The decoded surface itself is
      * looked up separately by the painter (ui_bg_image, keyed by pv_box_def
@@ -3883,13 +3837,14 @@ static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f
 static void block_style(const ui_theme *th, const rd_block *b,
                         double *size, int *bold, int *italic, int *underline, ui_rgb *color) {
     *bold = 0; *italic = 0; *underline = 0; *size = th->body_font; *color = th->text;
-    if (b->kind == RD_HEADING) {
-        int lv = (b->heading_level >= 1 && b->heading_level <= UI_HEADING_LEVELS)
-                 ? b->heading_level : 1;
+    int hl = rd_block_heading_level(b);
+    if (hl > 0) {
+        int lv = hl <= UI_HEADING_LEVELS ? hl : 1;
         *size = th->body_font * th->heading_scale[lv];
         /* The heading's user-agent bold rides the RESOLVED weight (is_bold_tag), not
          * a force here: forcing it made `h1{font-weight:normal}` unrepresentable. */
-        *color = th->heading;
+        *color = b->kind == RD_LINK ? th->link : th->heading;
+        if (b->kind == RD_LINK) *underline = 1;
     } else if (b->kind == RD_LINK) {
         *color = th->link; *underline = 1;
     } else if (b->kind == RD_NOTICE) {
@@ -3920,7 +3875,7 @@ static void block_margins(const ui_theme *th, const rd_block *b,
      * deleted the containing block's (spec/box_style.md 4f). ua_tag carries the real
      * answer from page_view for every kind alike; the three-way decision is the pure
      * bx_block_ua_box, so the user-agent sheet keeps deciding it, not the painter. */
-    bx_box box = bx_block_ua_box(b->kind == RD_HEADING ? b->heading_level : 0,
+    bx_box box = bx_block_ua_box(rd_block_heading_level(b),
                                  b->indent > 0, (bx_ua_tag)b->ua_tag);
     double size; int bold, italic, underline; ui_rgb color;
     block_style(th, b, &size, &bold, &italic, &underline, &color);
@@ -5185,6 +5140,9 @@ static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def) {
     bx->grad_c[2] = def->grad_c2; bx->grad_c[3] = def->grad_c3;
     for (int k = 0; k < 4; ++k) bx->grad_pos[k] = def->bg_grad_pos[k];
     bx->grad_radial = def->bg_grad_radial;
+    bx->rad_size = def->bg_rad_size; bx->rad_cx = def->bg_rad_cx; bx->rad_cy = def->bg_rad_cy;
+    bx->rad_rx = def->bg_rad_rx; bx->rad_ry = def->bg_rad_ry;
+    bx->canvas_bg = def->canvas_bg;
     bx->bg_size = def->bg_size; bx->bg_repeat = def->bg_repeat;
     bx->bg_pos_x = def->bg_pos_x; bx->bg_pos_y = def->bg_pos_y;
     bx->bg_pos_x_pct = def->bg_pos_x_pct; bx->bg_pos_y_pct = def->bg_pos_y_pct;
@@ -5267,6 +5225,7 @@ static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
         /* An out-of-flow run (an overlay link, a badge) is not part of the item's
          * flow: it forms no item and sits in no container, so it must not veto
          * the "the nested container holds the whole item" answer. */
+        if (block_leaves_flow(doc, rd_at(doc, k))) continue;
         if (child_cont_at_level(doc, rd_at(doc, k), cid) != child) child = -1;
     }
     if (child >= 0) {
@@ -5742,8 +5701,12 @@ static double flex_item_basis(cairo_t *cr, const browser_window *w,
 static double flex_item_min_main(cairo_t *cr, const browser_window *w,
                                  const ui_theme *th, const rd_doc *doc,
                                  size_t b0, size_t b1, const item_sides *sd,
-                                 double basis) {
+                                 double content_w) {
     const pv_box_def *d = (sd->box >= 0) ? rd_box_at(doc, (size_t)sd->box) : NULL;
+    /* The specified size suggestion is the item's DECLARED width; a flex-basis (`0%`
+     * of `flex:1`) is not a size the author specified for the content to respect. */
+    double decl = item_declared_basis(doc, sd, content_w);
+    double specified = (decl > 0.0) ? decl + sd->ml + sd->mr : -1.0;
     /* box_min_w_set, not box_min_w > 0: `min-width:0` is a declared minimum that
      * switches the automatic one off (Flexbox 4.5) -- the idiom that lets a
      * `flex:1` column shrink beside a fixed sidebar. */
@@ -5755,7 +5718,7 @@ static double flex_item_min_main(cairo_t *cr, const browser_window *w,
            + item_inner_inset(doc, b0, b1, sd->box)
            + sd->pl + sd->pr + sd->bl + sd->br + sd->ml + sd->mr;
     }
-    return fx_auto_min_size(mc, basis, author_min, scroll);
+    return fx_auto_min_size(mc, specified, author_min, scroll);
 }
 
 /* Lays the container's items inside the content rect [origin_x, origin_x+content_w).
@@ -6009,6 +5972,9 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                              double origin_x, double content_w,
                              const rd_doc *doc, size_t start, size_t end, int cid) {
     size_t nruns = end - start;
+    if (getenv("FREEDOM_MEASURE_DEBUG") != NULL)
+        fprintf(stderr, "[cont] cid=%d origin_x=%.1f content_w=%.1f start=%zu end=%zu\n",
+                cid, origin_x, content_w, start, end);
     const rd_block *head = rd_at(doc, start);
     pv_cont_def cdv;
     {
@@ -6304,7 +6270,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                         sd.pl + sd.pr + sd.bl + sd.br, sd.ml + sd.mr);
             }
             kid->min_main = flex_item_min_main(cr, w, th, doc, gstart[j],
-                                               gstart[j + 1], &sd, kid->basis);
+                                               gstart[j + 1], &sd, content_w);
             int akw = (it_align != CSS_AK_UNSET && it_align != CSS_AK_AUTO)
                       ? it_align : cdv.align_items;
             kid->align = css_align_to_bt(akw);
@@ -8020,6 +7986,45 @@ static int defer_split(rc_defer *d, const rd_doc *doc, size_t start, size_t end,
      * path byte-identically (a single-level float is its own column only
      * once pull-up is already engaged). */
     if (!nested) return -1;
+    /* Nothing is pulled up when every outer founder in the band is COMPLETE here (its own
+     * runs and the floats nested in it share the band) AND the band opens the page: there
+     * is no earlier content for its column to sit beside, and deferring would reopen the
+     * page's own wrapper boxes inside each column at the float's width (a `.nav-user`
+     * float holding a `.nav-social` one, beside a `.nav-primary`). Pull-up stays for the
+     * holy-grail case: columns that must sit beside content that came before them. */
+    {
+        int fkeys[RC_DEFER_COLS];
+        int fdirect[RC_DEFER_COLS], fnested[RC_DEFER_COLS];
+        int nf = 0, overflow = 0;
+        for (size_t k = start; k < end && !overflow; ++k) {
+            const rd_block *bk = rd_at(doc, k);
+            if (block_leaves_flow(doc, bk)) continue;
+            int is_nested = (bk->float_oid >= 0);
+            int is_outer = 0;
+            for (int o = 0; o < nouter; ++o)
+                if (outer[o] == bk->float_id && !is_nested) { is_outer = 1; break; }
+            if (!is_nested && !is_outer) continue;
+            int key = defer_key_block(bk);
+            int q = 0;
+            while (q < nf && fkeys[q] != key) ++q;
+            if (q == nf) {
+                if (nf >= RC_DEFER_COLS) { overflow = 1; break; }
+                fkeys[nf] = key; fdirect[nf] = 0; fnested[nf] = 0; ++nf;
+            }
+            if (is_nested) fnested[q] = 1; else fdirect[q] = 1;
+        }
+        int all_complete = (nf > 0 && !overflow);
+        for (int q = 0; q < nf && all_complete; ++q)
+            if (!fdirect[q] || !fnested[q]) all_complete = 0;
+        /* Pull-up needs earlier in-flow content to sit beside. A band that opens the page
+         * (a header whose nav floats hold their own nested floats) has none. */
+        int earlier = 0;
+        for (size_t k = 0; k < start && !earlier; ++k) {
+            const rd_block *bk = rd_at(doc, k);
+            if (bk->float_id < 0 && !block_leaves_flow(doc, bk)) earlier = 1;
+        }
+        if (all_complete && !earlier) return -1;
+    }
     /* Bounds before touching the map (atomic: all or inline). */
     int keys[RC_DEFER_COLS];
     int nkeys = 0;
@@ -8083,6 +8088,49 @@ static int defer_append(rc_defer *d, int key, int side,
     return 0;
 }
 
+/* Preferred (max-content) width of one floated element's runs [g0, g1): the widest segment,
+ * where a flex/grid container is ONE line of its items and a table-caption is not part of
+ * the width (CSS 2.1 17.4). The shrink-to-fit input of CSS 2.1 10.3.5. */
+static double float_group_pref_w(cairo_t *cr, const browser_window *w, const ui_theme *th,
+                                 const rd_doc *doc, size_t g0, size_t g1, double ctx_w) {
+    double pref = 0.0;
+    size_t k = g0;
+    while (k < g1) {
+        const rd_block *bk0 = rd_at(doc, k);
+        if (block_in_table_caption(doc, bk0)) { ++k; continue; }
+        int is_cont = (bk0->cont_id >= 0 && (bk0->cont_display == BX_DISPLAY_FLEX ||
+                                             bk0->cont_display == BX_DISPLAY_GRID));
+        int fbx0 = rd_at(doc, g0)->float_box;
+        int rootc = is_cont ? root_cont_in(doc, bk0->cont_id, fbx0) : -1;
+        size_t e = k + 1;
+        while (e < g1) {
+            const rd_block *be = rd_at(doc, e);
+            if (block_in_table_caption(doc, be)) break;
+            int ec = (be->cont_id >= 0) ? root_cont_in(doc, be->cont_id, fbx0) : -1;
+            if (ec != rootc) break;
+            ++e;
+        }
+        double seg = (rootc >= 0)
+                   ? nested_cont_basis(cr, w, th, doc, k, e, rootc, ctx_w, 0, 0)
+                   : measure_item_content_w(cr, w, th, doc, k, e);
+        if (seg > pref) pref = seg;
+        k = e;
+    }
+    return pref;
+}
+
+/* The border+padding a floated founder's box adds around its content: the shrink-to-fit
+ * width is the founder's BORDER box (CSS 2.1 10.3.5), so these sit outside the measured
+ * content. 0 when the founder has no box of its own. */
+static double float_founder_edges(const rd_doc *doc, int float_box, double ctx_w) {
+    if (float_box < 0 || (size_t)float_box >= rd_box_count(doc)) return 0.0;
+    const pv_box_def *fd = rd_box_at(doc, (size_t)float_box);
+    if (fd == NULL) return 0.0;
+    return box_pad_px(fd->pad_l, fd->pad_l_pct, ctx_w)
+         + box_pad_px(fd->pad_r, fd->pad_r_pct, ctx_w)
+         + box_edge_px(fd->bord_lw) + box_edge_px(fd->bord_rw);
+}
+
 /* Places every deferred column: each lays its inner bands (reused, not forked)
  * at the column's border width, stacked in document order, then shifts into
  * place beside the earlier content at the anchor. Sibling columns share ONE
@@ -8123,7 +8171,10 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                 const rd_block *bb = rd_at(doc, k);
                 if (block_leaves_flow(doc, bb)) continue;
                 if (bb->float_oid < 0 && bb->float_id == dc->key) {
-                    double t = run_width_cap(bb, ctx_w);
+                    /* The FOUNDER's own declared width, carried on its runs: a run's own
+                     * box width (an inline-block icon `width:12px` inside the float) is
+                     * not the float's. */
+                    double t = bx_width_cap(bb->float_w, bb->float_w_pct, ctx_w);
                     if (t > fw) fw = t;
                 }
                 if (bb->box_w > 0 || bb->box_mw > 0) {
@@ -8138,9 +8189,24 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                     gids[ngroups++] = bb->float_id;
             }
         }
-        if (fw > 0.0) border[c] = fw;
-        else if (ngroups <= 1 && pxw > 0.0) border[c] = pxw;
-        else border[c] = ctx_w;
+        if (fw > 0.0) {
+            border[c] = fw;
+        } else if (ngroups <= 1) {
+            /* A single-group column with no declared width is `width:auto`: it shrinks to
+             * its content (CSS 2.1 10.3.5), border box included, never to an inner px cap. */
+            double pref = 0.0;
+            int fbox = -1;
+            for (int r = 0; r < dc->nr; ++r) {
+                double pr = float_group_pref_w(cr, w, th, doc, dc->rs[r], dc->re[r], ctx_w);
+                if (pr > pref) pref = pr;
+                const rd_block *f0 = rd_at(doc, dc->rs[r]);
+                if (fbox < 0 && f0->float_box >= 0) fbox = f0->float_box;
+            }
+            double wj = pref + float_founder_edges(doc, fbox, ctx_w);
+            border[c] = (wj > 0.0) ? wj : ((pxw > 0.0) ? pxw : ctx_w);
+        } else {
+            border[c] = ctx_w;
+        }
         if (border[c] > ctx_w) border[c] = ctx_w;
         if (border[c] < 1.0) border[c] = 1.0;
         oml[c] = bx_lp_px(dc->ml, dc->mlpct, ctx_w);
@@ -8372,6 +8438,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
     double outx[BT_MAX_CHILDREN];
     size_t outrow[BT_MAX_CHILDREN];
     double explicit_sum = 0.0;
+    double inner_floor_j[BT_MAX_CHILDREN];
     size_t nfree = 0;
     for (size_t j = 0; j < g; ++j) {
         const rd_block *bk = rd_at(doc, gstart[j]);
@@ -8385,6 +8452,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
          * WIDEST cap in the group: that is the floated element's own box, since nested
          * blocks resolve to narrower ancestors. */
         double capw = 0.0;
+        double founder_cap = 0.0;   /* the floated element's OWN declared width */
         for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
             const rd_block *bb = rd_at(doc, k);
             /* Out-of-flow blocks size nothing in flow (spec/float.md §7c.5):
@@ -8396,8 +8464,18 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
              * content is a list): without it the float looked width-less and
              * shrink-wrapped, and every ancestor wrapper shrank with it. */
             double fc = bx_width_cap(bb->float_w, bb->float_w_pct, ctx_w);
+            if (fc > founder_cap) founder_cap = fc;
             if (fc > c) c = fc;
             if (c > capw) capw = c;
+        }
+        /* Among SEVERAL floats a founder that declares no width is `width:auto` whatever
+         * its descendants declare (an inline-block icon `width:12px` is not the nav's
+         * width): it shrinks to fit, and the inner width is only a floor of its content.
+         * The lone-float case below applies the same rule. */
+        inner_floor_j[j] = 0.0;
+        if (g >= 2 && founder_cap <= 0.0 && capw > 0.0) {
+            inner_floor_j[j] = capw;
+            capw = 0.0;
         }
         width[j] = (capw > 0.0) ? capw : -1.0;
         if (width[j] > 0.0) explicit_sum += width[j]; else ++nfree;
@@ -8438,29 +8516,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         /* A flex/grid container inside the float is ONE line of its items side
          * by side (nested_cont_basis): measuring its runs as flowing text strung
          * every list row of a `li{display:flex}` list into one 400px line. */
-        double pref = 0.0;
-        size_t k = gstart[0];
-        while (k < gstart[1]) {
-            const rd_block *bk0 = rd_at(doc, k);
-            if (block_in_table_caption(doc, bk0)) { ++k; continue; }
-            int is_cont = (bk0->cont_id >= 0 && (bk0->cont_display == BX_DISPLAY_FLEX ||
-                                                 bk0->cont_display == BX_DISPLAY_GRID));
-            int fbx0 = rd_at(doc, gstart[0])->float_box;
-            int rootc = is_cont ? root_cont_in(doc, bk0->cont_id, fbx0) : -1;
-            size_t e = k + 1;
-            while (e < gstart[1]) {
-                const rd_block *be = rd_at(doc, e);
-                if (block_in_table_caption(doc, be)) break;
-                int ec = (be->cont_id >= 0) ? root_cont_in(doc, be->cont_id, fbx0) : -1;
-                if (ec != rootc) break;
-                ++e;
-            }
-            double seg = (rootc >= 0)
-                       ? nested_cont_basis(cr, w, th, doc, k, e, rootc, ctx_w, 0, 0)
-                       : measure_item_content_w(cr, w, th, doc, k, e);
-            if (seg > pref) pref = seg;
-            k = e;
-        }
+        double pref = float_group_pref_w(cr, w, th, doc, gstart[0], gstart[1], ctx_w);
         if (pref < inner_floor) pref = inner_floor;
         /* The column is the founder's BORDER box: its own padding and border
          * wrap the content, and its max-width (resolved against the float's
@@ -8483,6 +8539,32 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
             width[0] = pref;
             explicit_sum += pref;
             nfree = 0;
+        }
+    }
+    /* Several floats: each `width:auto` one shrinks to ITS OWN content (CSS 2.1 10.3.5), border
+     * box included; the even split below only catches what has no content to measure. An
+     * empty float (a padded spacer) is as wide as its own padding and border, never a share
+     * of the band. */
+    if (g >= 2) {
+        for (size_t j = 0; j < g; ++j) {
+            if (width[j] >= 0.0) continue;
+            const rd_block *fj = rd_at(doc, gstart[j]);
+            double pref = float_group_pref_w(cr, w, th, doc, gstart[j], gstart[j + 1], ctx_w);
+            if (pref < inner_floor_j[j]) pref = inner_floor_j[j];
+            int fbx = (fj != NULL && fj->float_box >= 0 &&
+                       (size_t)fj->float_box < rd_box_count(doc)) ? fj->float_box : -1;
+            const pv_box_def *fd = (fbx >= 0) ? rd_box_at(doc, (size_t)fbx) : NULL;
+            double edges = float_founder_edges(doc, fbx, ctx_w);
+            double wj = pref + edges;
+            if (fd != NULL && wj > 0.0) {
+                double cap = bx_width_cap(fd->box_mw, fd->box_mw_pct, ctx_w);
+                if (cap > 0.0 && wj > cap) wj = cap;
+            }
+            if (wj < 1.0) wj = 1.0;
+            if (wj > ctx_w - explicit_sum && ctx_w - explicit_sum >= 1.0) wj = ctx_w - explicit_sum;
+            width[j] = wj;
+            explicit_sum += wj;
+            --nfree;
         }
     }
     double leftover = ctx_w - explicit_sum;
@@ -11248,10 +11330,19 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
             bui_paint_conic(cr, x, y, w, h, rad, bx->grad_angle,
                             bx->grad_c, bx->grad_pos, bx->grad_n);
         } else if (bx->grad_radial == 1) {
-            /* R5c: radial gradient — center at box center, radius = min(w,h)/2 */
-            double cx = x + w / 2.0, cy = y + h / 2.0;
-            double r = (w < h ? w : h) / 2.0;
-            cairo_pattern_t *pat = cairo_pattern_create_radial(cx, cy, 0.0, cx, cy, r);
+            /* Radial gradient (CSS Images 3 3.2): shape, size and position from the box's
+             * own geometry (cg_radial_geometry, pure and tested). Cairo's radial pattern is
+             * a circle, so an ellipse is the unit circle under a scale. */
+            cg_radial rg = { bx->rad_size / 16, bx->rad_size % 16, bx->rad_rx, bx->rad_ry,
+                             bx->rad_cx, bx->rad_cy };
+            double rcx, rcy, rrx, rry;
+            cg_radial_geometry(&rg, w, h, &rcx, &rcy, &rrx, &rry);
+            cairo_pattern_t *pat = cairo_pattern_create_radial(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+            cairo_matrix_t pm;
+            cairo_matrix_init(&pm, 1.0 / rrx, 0.0, 0.0, 1.0 / rry,
+                              -(x + rcx) / rrx, -(y + rcy) / rry);
+            cairo_pattern_set_matrix(pat, &pm);
+            cairo_pattern_set_extend(pat, CAIRO_EXTEND_PAD);
             int nst = bx->grad_n <= 4 ? bx->grad_n : 4;
             for (int k = 0; k < nst; ++k) {
                 double sa;
@@ -11273,7 +11364,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
             cairo_fill(cr);
             cairo_pattern_destroy(pat);
         }
-    } else if (bx->bg_rgb >= 0) {
+    } else if (bx->bg_rgb >= 0 && !(bx->canvas_bg && bx->canvas_done)) {
         /* Background alpha (2026-07-19): an rgba()/hsla() panel paints
          * translucent so the backdrop (or its backdrop-filter blur) shows
          * through. PV_LEN_UNSET = opaque, alpha 0 = nothing to paint. */
@@ -11360,9 +11451,15 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
         } else {
             cairo_set_dash(cr, NULL, 0, 0.0);
         }
-        double inner_rad = rad - bt / 2.0;
-        box_path(cr, x + bt / 2.0, y + bt / 2.0, w - bt, h - bt,
-                 inner_rad > 0.0 ? inner_rad : 0.0);
+        /* The ring follows each corner's OWN radius, inset by half the line width: with
+         * `border-radius:24px 24px 0 0` the bottom corners stay square. One shared radius
+         * rounded all four whenever a border was present. */
+        double ring_rc[4];
+        for (int rk = 0; rk < 4; ++rk) {
+            double ir = radius_c[rk] - bt / 2.0;
+            ring_rc[rk] = ir > 0.0 ? ir : 0.0;
+        }
+        box_path4(cr, x + bt / 2.0, y + bt / 2.0, w - bt, h - bt, ring_rc);
         cairo_stroke(cr);
         cairo_set_dash(cr, NULL, 0, 0.0);
         cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
@@ -11996,6 +12093,7 @@ static int box_forms_stacking_context(const pv_box_def *def) {
                          def->transform_sky != PV_LEN_UNSET,
     };
     if (def->anim_duration_ms > 0) return 1;  /* Phase R1: animation needs stacking context */
+    if (def->mask_n > 0) return 1;              /* a mask composes the box through a group */
     if (def->filter_blur > 0 || def->filter_grayscale > 0 ||
         def->filter_brightness > 0 || def->filter_contrast > 0 ||
         def->filter_sepia > 0 || def->filter_invert > 0 ||
@@ -12168,116 +12266,40 @@ static cairo_operator_t bui_blend_operator(int mix_blend) {
         case CSS_MB_SATURATION:  return CAIRO_OPERATOR_HSL_SATURATION;
         case CSS_MB_COLOR:       return CAIRO_OPERATOR_HSL_COLOR;
         case CSS_MB_LUMINOSITY:  return CAIRO_OPERATOR_HSL_LUMINOSITY;
+        case CSS_MB_PLUS_LIGHTER: return CAIRO_OPERATOR_ADD;
         default:                  return CAIRO_OPERATOR_OVER;
     }
 }
 
-/* Applies a separable box blur to the pixels of an image surface in-place.
- * radius is the CSS blur radius in px (clamped to sane bounds). The blur is a
- * simple moving-average box blur with two passes (horizontal then vertical),
- * each pass accumulating in a temporary row/column buffer. Wraps around the
- * edges by clamping the nearest edge pixel (same as CSS filter: blur()). */
-static void bui_box_blur_surface(cairo_surface_t *surf, int radius) {
-    if (radius <= 0) return;
+/* Gaussian blur of a premultiplied ARGB32 surface, standard deviation `sigma` px, in place
+ * (CSS Filter Effects 1: `blur(N)` is a Gaussian of deviation N, and what lies outside the
+ * surface is transparent -- not a clamped copy of the edge pixel, which smeared the border
+ * colour across the whole blur). Each channel goes through the three-pass box approximation
+ * in box_blur (premultiplied channels blur linearly, so channel by channel is exact). One
+ * w*h plane of scratch, freed before return; a surface over BB_MAX_PIXELS is left sharp. */
+static void bui_gaussian_blur_surface(cairo_surface_t *surf, double sigma) {
+    if (!(sigma > 0.0)) return;
     int w = cairo_image_surface_get_width(surf);
     int h = cairo_image_surface_get_height(surf);
-    if (w <= 0 || h <= 0) return;
+    if (w <= 0 || h <= 0 || (long long)w * h > (long long)BB_MAX_PIXELS) return;
     int stride = cairo_image_surface_get_stride(surf);
     unsigned char *data = cairo_image_surface_get_data(surf);
     if (data == NULL) return;
-    /* Clamp radius to a sane max (the whole surface is the practical limit). */
-    if (radius > w) radius = w;
-    if (radius > h) radius = h;
-
-    /* Horizontal pass: for each row, accumulate a sliding window. */
-    uint32_t *tmp = (uint32_t *)malloc((size_t)w * sizeof(uint32_t));
-    if (tmp == NULL) return;
-    int denom = radius * 2 + 1;
-    for (int y = 0; y < h; ++y) {
-        uint32_t *row = (uint32_t *)(data + y * stride);
-        /* First pixel: sum of the first (denom) pixels, clamped at edges. */
-        unsigned long long sr = 0, sg = 0, sb = 0, sa = 0;
-        for (int k = -radius; k <= radius; ++k) {
-            int ix = (k < 0) ? 0 : (k >= w ? w - 1 : k);
-            uint32_t px = row[ix];
-            sa += (px >> 24) & 0xff;
-            sr += (px >> 16) & 0xff;
-            sg += (px >>  8) & 0xff;
-            sb +=  px        & 0xff;
+    cairo_surface_flush(surf);
+    unsigned char *plane = (unsigned char *)malloc((size_t)w * (size_t)h);
+    if (plane == NULL) return;
+    for (int ch = 0; ch < 4; ++ch) {
+        for (int y = 0; y < h; ++y) {
+            const unsigned char *row = data + (size_t)y * (size_t)stride;
+            for (int x = 0; x < w; ++x) plane[(size_t)y * (size_t)w + (size_t)x] = row[x * 4 + ch];
         }
-        tmp[0] = (uint32_t)((sa / denom) << 24) |
-                 (uint32_t)((sr / denom) << 16) |
-                 (uint32_t)((sg / denom) <<  8) |
-                 (uint32_t) (sb / denom);
-        /* Slide the window across. */
-        for (int x = 1; x < w; ++x) {
-            /* Subtract the pixel leaving the window on the left. */
-            int out_ix = x - radius - 1;
-            if (out_ix < 0) out_ix = 0;
-            uint32_t px_out = row[out_ix];
-            sa -= (px_out >> 24) & 0xff;
-            sr -= (px_out >> 16) & 0xff;
-            sg -= (px_out >>  8) & 0xff;
-            sb -=  px_out        & 0xff;
-            /* Add the pixel entering the window on the right. */
-            int in_ix = x + radius;
-            if (in_ix >= w) in_ix = w - 1;
-            uint32_t px_in = row[in_ix];
-            sa += (px_in >> 24) & 0xff;
-            sr += (px_in >> 16) & 0xff;
-            sg += (px_in >>  8) & 0xff;
-            sb +=  px_in        & 0xff;
-            tmp[x] = (uint32_t)((sa / denom) << 24) |
-                     (uint32_t)((sr / denom) << 16) |
-                     (uint32_t)((sg / denom) <<  8) |
-                     (uint32_t) (sb / denom);
+        if (bb_blur_a8(plane, w, h, w, sigma) < 0) { free(plane); return; }
+        for (int y = 0; y < h; ++y) {
+            unsigned char *row = data + (size_t)y * (size_t)stride;
+            for (int x = 0; x < w; ++x) row[x * 4 + ch] = plane[(size_t)y * (size_t)w + (size_t)x];
         }
-        /* Write back the blurred row. */
-        memcpy(row, tmp, (size_t)w * sizeof(uint32_t));
     }
-
-    /* Vertical pass: for each column, same sliding window. */
-    uint32_t *col = (uint32_t *)malloc((size_t)h * sizeof(uint32_t));
-    if (col == NULL) { free(tmp); return; }
-    for (int x = 0; x < w; ++x) {
-        unsigned long long sa = 0, sr = 0, sg = 0, sb = 0;
-        for (int k = -radius; k <= radius; ++k) {
-            int iy = (k < 0) ? 0 : (k >= h ? h - 1 : k);
-            uint32_t px = ((uint32_t *)(data + iy * stride))[x];
-            sa += (px >> 24) & 0xff;
-            sr += (px >> 16) & 0xff;
-            sg += (px >>  8) & 0xff;
-            sb +=  px        & 0xff;
-        }
-        col[0] = (uint32_t)((sa / denom) << 24) |
-                 (uint32_t)((sr / denom) << 16) |
-                 (uint32_t)((sg / denom) <<  8) |
-                 (uint32_t) (sb / denom);
-        for (int y = 1; y < h; ++y) {
-            int out_iy = y - radius - 1;
-            if (out_iy < 0) out_iy = 0;
-            uint32_t px_out = ((uint32_t *)(data + out_iy * stride))[x];
-            sa -= (px_out >> 24) & 0xff;
-            sr -= (px_out >> 16) & 0xff;
-            sg -= (px_out >>  8) & 0xff;
-            sb -=  px_out        & 0xff;
-            int in_iy = y + radius;
-            if (in_iy >= h) in_iy = h - 1;
-            uint32_t px_in = ((uint32_t *)(data + in_iy * stride))[x];
-            sa += (px_in >> 24) & 0xff;
-            sr += (px_in >> 16) & 0xff;
-            sg += (px_in >>  8) & 0xff;
-            sb +=  px_in        & 0xff;
-            col[y] = (uint32_t)((sa / denom) << 24) |
-                     (uint32_t)((sr / denom) << 16) |
-                     (uint32_t)((sg / denom) <<  8) |
-                     (uint32_t) (sb / denom);
-        }
-        for (int y = 0; y < h; ++y)
-            ((uint32_t *)(data + y * stride))[x] = col[y];
-    }
-    free(col);
-    free(tmp);
+    free(plane);
     cairo_surface_mark_dirty(surf);
 }
 
@@ -12331,7 +12353,7 @@ static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
     cairo_set_source_surface(scr, target, (double)-sx0, (double)-sy0);
     cairo_paint(scr);
     cairo_destroy(scr);
-    bui_box_blur_surface(snap, radius);
+    bui_gaussian_blur_surface(snap, (double)radius);
 
     cairo_save(cr);
     double rad = (def->border_radius > 0 && def->border_radius != PV_LEN_UNSET)
@@ -12345,11 +12367,146 @@ static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
     cairo_surface_destroy(snap);
 }
 
+/* The alpha mask of a box (CSS Masking 1, spec/css_mask.md): up to two linear-gradient layers,
+ * each filling its clip box (border / padding / content, with the corner radii that box has),
+ * composed by mask-composite -- layer 0 over layer 1 -- into one A8 surface. Returns NULL when
+ * there is nothing to mask or the surface would be unreasonable. *out_x/out_y: where the
+ * surface's origin lands (user space). `alpha` (the box's opacity) is folded in, so the caller
+ * paints the group through the mask instead of paint_with_alpha. */
+/* What the mask builder may need besides the box itself: the layout (to find the box that
+ * DECLARED an inherited mask) and the document (its box defs). Either may be NULL. */
+typedef struct bui_mask_ctx {
+    const rc_layout *L;
+    const rd_doc *doc;
+} bui_mask_ctx;
+
+/* The layout rect (x, y, w, h) and rc_box of box `ref`, found among the in-flow boxes or the
+ * positioned ones; 0 when it was laid out nowhere. */
+static int bui_mask_ref_rect(const rc_layout *L, int ref, rc_box *out) {
+    if (L == NULL || ref < 0) return 0;
+    for (size_t i = 0; i < L->nbox; ++i) {
+        if (L->boxes[i].block_id == ref) { *out = L->boxes[i]; return 1; }
+    }
+    for (size_t i = 0; i < L->npositioned; ++i) {
+        const bt_positioned *pb = &L->positioned[i];
+        if ((int)pb->box_index != ref) continue;
+        memset(out, 0, sizeof *out);
+        out->block_id = ref;
+        out->x = pb->x; out->top = pb->y; out->w = pb->w; out->h = pb->h;
+        return 1;
+    }
+    return 0;
+}
+
+static cairo_surface_t *bui_build_mask(const pv_box_def *def, const rc_box *bx_in,
+                                       double ox, double oy, double alpha,
+                                       const bui_mask_ctx *mc, int *out_x, int *out_y) {
+    if (def == NULL || bx_in == NULL || def->mask_n <= 0) return NULL;
+    /* An inherited mask is measured against the box that declared it (its rect, borders,
+     * padding and radii), so every descendant box shows the same slice of one mask. */
+    rc_box ref_box;
+    const rc_box *bx = bx_in;
+    const pv_box_def *gdef = def;
+    if (def->mask_ref1 > 0 && mc != NULL && bui_mask_ref_rect(mc->L, def->mask_ref1 - 1, &ref_box)) {
+        bx = &ref_box;
+        if (mc->doc != NULL) {
+            const pv_box_def *rdef = rd_box_at(mc->doc, (size_t)(def->mask_ref1 - 1));
+            if (rdef != NULL) gdef = rdef;
+        }
+        /* a positioned ref carries no decoration of its own: take it from its def */
+        if (gdef != def) {
+            ref_box.bord_tw = gdef->bord_tw; ref_box.bord_rw = gdef->bord_rw;
+            ref_box.bord_bw = gdef->bord_bw; ref_box.bord_lw = gdef->bord_lw;
+            if (ref_box.radius_c[0] == 0.0 && ref_box.radius_c[1] == 0.0 &&
+                ref_box.radius_c[2] == 0.0 && ref_box.radius_c[3] == 0.0) {
+                ref_box.radius_c[0] = box_edge_px(gdef->border_radius);
+                ref_box.radius_c[1] = box_edge_px(gdef->border_radius_tr);
+                ref_box.radius_c[2] = box_edge_px(gdef->border_radius_br);
+                ref_box.radius_c[3] = box_edge_px(gdef->border_radius_bl);
+            }
+        }
+    }
+    if (bx->w <= 0.0 || bx->h <= 0.0) return NULL;
+    double x = ox + bx->x, y = oy + bx->top, w = bx->w, h = bx->h;
+    int ix = (int)floor(x) - 1, iy = (int)floor(y) - 1;
+    int iw = (int)ceil(w) + 3, ih = (int)ceil(h) + 3;
+    if (iw < 1 || ih < 1 || iw > 8192 || ih > 8192 || (long long)iw * ih > (long long)BB_MAX_PIXELS)
+        return NULL;
+    double bt = box_edge_px(bx->bord_tw), br = box_edge_px(bx->bord_rw);
+    double bb = box_edge_px(bx->bord_bw), bl = box_edge_px(bx->bord_lw);
+    double pt = box_pad_px(gdef->pad_t, gdef->pad_t_pct, w), pr = box_pad_px(gdef->pad_r, gdef->pad_r_pct, w);
+    double pb = box_pad_px(gdef->pad_b, gdef->pad_b_pct, w), pl = box_pad_px(gdef->pad_l, gdef->pad_l_pct, w);
+    double rad_basis = (w < h) ? w : h;
+    double rc[4];
+    for (int k = 0; k < 4; ++k)
+        rc[k] = bx->radius_c[k] + ((bx->radius_pct[k] != 0) ? rad_basis * (double)bx->radius_pct[k] / 1000.0 : 0.0);
+
+    cairo_surface_t *res = cairo_image_surface_create(CAIRO_FORMAT_A8, iw, ih);
+    if (cairo_surface_status(res) != CAIRO_STATUS_SUCCESS) { cairo_surface_destroy(res); return NULL; }
+    cairo_t *c = cairo_create(res);
+    int n = def->mask_n > CM_LAYERS ? CM_LAYERS : def->mask_n;
+    int comp = def->mask_comp;
+    for (int i = n - 1; i >= 0; --i) {
+        cm_layer ly;
+        cm_decode_layer(def->mask_w[i * 3], def->mask_w[i * 3 + 1], def->mask_w[i * 3 + 2], &ly);
+        if (ly.kind == 0) continue;                       /* a `none` layer masks nothing */
+        int clip = (def->mask_clip >> (2 * i)) & 3;
+        /* The clip box and its corner radii: each step in shrinks the radii by that edge. */
+        double cx0 = x, cy0 = y, cw = w, ch = h;
+        double crc[4] = { rc[0], rc[1], rc[2], rc[3] };
+        if (clip >= CM_CLIP_PADDING) {
+            cx0 += bl; cy0 += bt; cw -= bl + br; ch -= bt + bb;
+            crc[0] -= (bl > bt ? bl : bt); crc[1] -= (br > bt ? br : bt);
+            crc[2] -= (br > bb ? br : bb); crc[3] -= (bl > bb ? bl : bb);
+        }
+        if (clip >= CM_CLIP_CONTENT) {
+            cx0 += pl; cy0 += pt; cw -= pl + pr; ch -= pt + pb;
+            crc[0] -= (pl > pt ? pl : pt); crc[1] -= (pr > pt ? pr : pt);
+            crc[2] -= (pr > pb ? pr : pb); crc[3] -= (pl > pb ? pl : pb);
+        }
+        if (cw <= 0.0 || ch <= 0.0) continue;
+        for (int k = 0; k < 4; ++k) if (crc[k] < 0.0) crc[k] = 0.0;
+        int cols[4] = { 0, 0, 0, 0 };
+        for (int k = 0; k < ly.nst; ++k) {
+            int t = ((255 - ly.alpha[k]) * 127 + 127) / 255;   /* back to 0 opaque .. 127 clear */
+            cols[k] = (t & 0x7f) << 24;
+        }
+        cairo_pattern_t *pat = bui_linear_grad(cx0 - ix, cy0 - iy, cw, ch, ly.angle, cols, ly.pos, ly.nst, 1.0);
+        /* The first layer painted is the lowest; every later one composes onto what is there. */
+        static const cairo_operator_t OPS[4] = {
+            CAIRO_OPERATOR_OVER, CAIRO_OPERATOR_OUT, CAIRO_OPERATOR_IN, CAIRO_OPERATOR_XOR };
+        cairo_set_operator(c, (i == n - 1) ? CAIRO_OPERATOR_OVER
+                                           : OPS[(comp >= 0 && comp <= 3) ? comp : 0]);
+        cairo_set_source(c, pat);
+        box_path4(c, cx0 - ix, cy0 - iy, cw, ch, crc);
+        cairo_fill(c);
+        cairo_pattern_destroy(pat);
+    }
+    cairo_destroy(c);
+    if (alpha < 1.0) {                                   /* fold the box's opacity into the mask */
+        cairo_surface_t *r2 = cairo_image_surface_create(CAIRO_FORMAT_A8, iw, ih);
+        if (cairo_surface_status(r2) == CAIRO_STATUS_SUCCESS) {
+            cairo_t *c2 = cairo_create(r2);
+            cairo_set_source_rgba(c2, 0.0, 0.0, 0.0, alpha);
+            cairo_mask_surface(c2, res, 0.0, 0.0);
+            cairo_destroy(c2);
+            cairo_surface_destroy(res);
+            res = r2;
+        } else {
+            cairo_surface_destroy(r2);
+        }
+    }
+    *out_x = ix; *out_y = iy;
+    return res;
+}
+
 /* Composites the currently-pushed group back onto cr using def's opacity/mix-blend
  * (the group must already be open via cairo_push_group). Restores CAIRO_OPERATOR_OVER
  * afterwards so callers never leak a non-default operator into later paint calls.
  * elapsed_ms: time since page load in ms; used for animation-blended opacity. */
-static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms) {
+static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms,
+                                    const rc_box *mbx, double mox, double moy,
+                                    const bui_mask_ctx *mc) {
     int needs_blur = (def && def->filter_blur > 0);
     int needs_grayscale = (def && def->filter_grayscale > 0);
     int needs_brightness = (def && def->filter_brightness > 0 && def->filter_brightness != 100);
@@ -12386,7 +12543,7 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
         if (needs_blur) {
             int radius = def->filter_blur;
             if (radius > 256) radius = 256;
-            bui_box_blur_surface(flt_surf, radius);
+            bui_gaussian_blur_surface(flt_surf, (double)radius);
         }
 
         if (needs_blur || needs_grayscale || needs_brightness || needs_contrast
@@ -12396,16 +12553,13 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
             int gs_pct = (def) ? def->filter_grayscale : 0;
             if (gs_pct > 100) gs_pct = 100;
             double gs_factor = (double)gs_pct / 100.0;
-            double br_factor = (def && def->filter_brightness != 100)
-                             ? (double)def->filter_brightness / 100.0 : 1.0;
-            double ct_factor = (def && def->filter_contrast != 100)
-                             ? (double)def->filter_contrast / 100.0 : 1.0;
+            double br_factor = def ? cv_filter_scale(def->filter_brightness) : 1.0;
+            double ct_factor = def ? cv_filter_scale(def->filter_contrast) : 1.0;
             double se_factor = (def && def->filter_sepia > 0)
                              ? (double)def->filter_sepia / 100.0 : 0.0;
             double in_factor = (def && def->filter_invert > 0)
                              ? (double)def->filter_invert / 100.0 : 0.0;
-            double sa_factor = (def && def->filter_saturate != 100)
-                             ? (double)def->filter_saturate / 100.0 : 1.0;
+            double sa_factor = def ? cv_filter_scale(def->filter_saturate) : 1.0;
             int h_rot = (def) ? def->filter_hue_rotate : 0;
             for (int y = 0; y < fh; ++y) {
                 uint32_t *row = (uint32_t *)(data + y * stride);
@@ -12530,7 +12684,7 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
                 cairo_destroy(scr);
                 int drad = def->filter_drop_blur;
                 if (drad > 256) drad = 256;
-                if (drad > 0) bui_box_blur_surface(sh, drad);
+                if (drad > 0) bui_gaussian_blur_surface(sh, (double)drad / 2.0);
                 cairo_set_source_surface(cr, sh,
                                          x1 + (double)def->filter_drop_dx,
                                          y1 + (double)def->filter_drop_dy);
@@ -12585,7 +12739,14 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
     double alpha = (eff_opacity >= 0 && eff_opacity < 100)
                  ? (double)eff_opacity / 100.0 : 1.0;
     cairo_set_operator(cr, bui_blend_operator(def ? def->mix_blend : CSS_MB_UNSET));
-    cairo_paint_with_alpha(cr, alpha);
+    int mask_x = 0, mask_y = 0;
+    cairo_surface_t *mask = bui_build_mask(def, mbx, mox, moy, alpha, mc, &mask_x, &mask_y);
+    if (mask != NULL) {
+        cairo_mask_surface(cr, mask, (double)mask_x, (double)mask_y);
+        cairo_surface_destroy(mask);
+    } else {
+        cairo_paint_with_alpha(cr, alpha);
+    }
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
     if (flt_surf != NULL) cairo_surface_destroy(flt_surf);
 }
@@ -12687,7 +12848,7 @@ static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
     cairo_transform(cr, &m);
     paint_box_decoration(cr, &bx_anim, ox, oy, bgimg, bgimg2, th);
     cairo_restore(cr);
-    bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
+    bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, ox, oy, NULL);
 }
 
 /* Paints one IN-FLOW box's decoration AND every row that belongs directly to it
@@ -12781,7 +12942,8 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
     }
     while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
     if (own_clip) cairo_restore(cr);
-    bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
+    bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
+                             &(bui_mask_ctx){ L, w->doc });
 }
 
 /* Paints one Stage-2 out-of-flow positioned box: its decoration, then (if it holds
@@ -12923,6 +13085,9 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         .grad_n = def->grad_n, .grad_angle = def->grad_angle,
         .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },
         .grad_radial = def->bg_grad_radial,
+        .rad_size = def->bg_rad_size, .rad_cx = def->bg_rad_cx, .rad_cy = def->bg_rad_cy,
+        .rad_rx = def->bg_rad_rx, .rad_ry = def->bg_rad_ry,
+        .canvas_bg = def->canvas_bg,
         .bg_size = def->bg_size, .bg_repeat = def->bg_repeat,
         .bg_pos_x = def->bg_pos_x, .bg_pos_y = def->bg_pos_y,
         .bg_pos_x_pct = def->bg_pos_x_pct, .bg_pos_y_pct = def->bg_pos_y_pct,
@@ -13061,7 +13226,8 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     }
 
     if (own_clip) cairo_restore(cr);
-    if (needs_group) bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
+    if (needs_group) bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, &bx, left, origin,
+                                                &(bui_mask_ctx){ L, w->doc });
     if (clip_saved) cairo_restore(cr);
 }
 
@@ -13091,7 +13257,8 @@ static void paint_nested_children(cairo_t *cr, browser_window *w,
             box_done[j] = 1;
             paint_nested_children(cr, w, L, cbid, left, origin, content_w,
                                   content_top, content_h, box_done, row_done);
-            bui_pop_group_composite(cr, cdef, now_ms() - w->page_load_mono_ms);
+            bui_pop_group_composite(cr, cdef, now_ms() - w->page_load_mono_ms, &L->boxes[j], left, origin,
+                                    &(bui_mask_ctx){ L, w->doc });
         } else {
             paint_box_and_direct_rows(cr, w, L, &L->boxes[j], left, origin,
                                        content_w, (double)w->width, content_top,
@@ -13168,6 +13335,26 @@ typedef void (*defer_paint_fn)(void *ctx, int root);
  * absolute backdrop paints above it. With nothing deferred this is exactly the
  * plain loop it replaces. Overflow clips opened for the absolute boxes are closed
  * before a deferred subtree paints, which manages its own. */
+/* The canvas background (CSS Backgrounds 3 2.11.2): when <html> declares none, the <body>'s
+ * solid background colour paints the WHOLE canvas, behind every other layer -- negative
+ * z-index boxes included. Painted once before the negative-z pass, and the body box then skips
+ * its own solid fill (canvas_done), so nothing covers the layers that belong above it. */
+static void paint_canvas_background(cairo_t *cr, rc_layout *L) {
+    for (size_t i = 0; i < L->nbox; ++i) {
+        rc_box *bx = &L->boxes[i];
+        if (!bx->canvas_bg || bx->bg_rgb < 0 || bx->canvas_done) continue;
+        double a = (bx->bg_alpha != PV_LEN_UNSET) ? (double)bx->bg_alpha / 100.0 : 1.0;
+        if (a <= 0.0) return;
+        ui_rgb c = rgb_from_packed(bx->bg_rgb);
+        cairo_save(cr);
+        cairo_set_source_rgba(cr, c.r, c.g, c.b, a);
+        cairo_paint(cr);
+        cairo_restore(cr);
+        bx->canvas_done = 1;
+        return;
+    }
+}
+
 static void paint_positioned_layer(cairo_t *cr, browser_window *w, const ui_theme *th,
                                    rc_layout *L, double left, double origin,
                                    double content_top, double content_h, double view_w,
@@ -13281,7 +13468,8 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
             if (box_done != NULL) box_done[i] = 1;
             paint_nested_children(cr, w, Lp, bid, left, origin, content_w,
                                   content_top, content_h, box_done, row_done);
-            bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
+            bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
+                                    &(bui_mask_ctx){ Lp, w->doc });
         } else {
             paint_box_and_direct_rows(cr, w, Lp, bx, left, origin, content_w,
                                        (double)w->width, content_top, content_h,
@@ -13406,6 +13594,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
      * around. cx_sort (M1.1, box_tree.c) already groups L.positioned by layer, so
      * every z<0 entry is a contiguous prefix of the array. */
     {
+        paint_canvas_background(cr, &L);
         int neg_ov_stack[OV_MAX_DEPTH] = {0};
         int neg_ov_depth = 0;
         for (size_t i = 0; i < L.npositioned && L.positioned[i].z_index < 0; ++i) {
@@ -13493,6 +13682,7 @@ static long write_doc_pdf(browser_window *w, const char *path) {
              * contiguous prefix. Reuses paint_positioned_one's per-page clip
              * stack so overflow:hidden ancestors are reconciled per page. */
             {
+                paint_canvas_background(cr, &L);
                 int neg_ov_stack[OV_MAX_DEPTH] = {0};
                 int neg_ov_depth = 0;
                 for (size_t i = 0; i < L.npositioned && L.positioned[i].z_index < 0; ++i) {
@@ -13739,6 +13929,7 @@ static long write_doc_png(browser_window *w, const char *path) {
     /* Stage 2, negative z-index PAINTS FIRST -- see paint_structured for the App E
      * rationale; cx_sort groups L.positioned by layer, so z<0 is a prefix. */
     {
+        paint_canvas_background(cr, &L);
         int neg_ov_stack[OV_MAX_DEPTH] = {0};
         int neg_ov_depth = 0;
         for (size_t i = 0; i < L.npositioned && L.positioned[i].z_index < 0; ++i) {

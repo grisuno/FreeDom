@@ -1,83 +1,84 @@
 ```mermaid
 graph LR
     src["src"]
-    include_css["include: css"]
     include_browser_ui["include: browser_ui"]
+    include_css["include: css"]
     include_page_view["include: page_view"]
     include_text_shape["include: text_shape"]
     include_local_store["include: local_store"]
     gui["gui"]
     include_secure_fetch["include: secure_fetch"]
-    include_download["include: download"]
     include_prefetch["include: prefetch"]
-    src -- "calls into" --> include_prefetch
-    src -- "calls into" --> include_css
+    include_image_decode["include: image_decode"]
+    src -- "calls into" --> include_image_decode
     src -- "calls into" --> include_browser_ui
+    src -- "calls into" --> include_css
     src -- "calls into" --> include_page_view
     src -- "calls into" --> include_text_shape
     src -- "depends on" --> gui
     src -- "calls into" --> include_secure_fetch
-    include_prefetch -- "calls into" --> src
-    include_prefetch -- "calls into" --> include_css
-    include_prefetch -- "calls into" --> include_browser_ui
-    include_css -- "calls into" --> src
-    include_css -- "calls into" --> include_browser_ui
-    include_css -- "calls into" --> include_page_view
-    include_css -- "depends on" --> include_text_shape
+    src -- "calls into" --> include_prefetch
+    include_image_decode -- "calls into" --> src
+    include_image_decode -- "calls into" --> include_css
+    include_image_decode -- "calls into" --> include_page_view
     include_browser_ui -- "calls into" --> src
-    include_browser_ui -- "calls into" --> include_prefetch
+    include_browser_ui -- "depends on" --> include_image_decode
     include_browser_ui -- "calls into" --> include_css
     include_browser_ui -- "calls into" --> include_page_view
     include_browser_ui -- "calls into" --> include_text_shape
     include_browser_ui -- "calls into" --> include_local_store
     include_browser_ui -- "calls into" --> gui
     include_browser_ui -- "calls into" --> include_secure_fetch
-    include_browser_ui -- "depends on" --> include_download
+    include_browser_ui -- "calls into" --> include_prefetch
+    include_css -- "calls into" --> src
+    include_css -- "calls into" --> include_browser_ui
+    include_css -- "calls into" --> include_page_view
+    include_css -- "depends on" --> include_text_shape
     include_page_view -- "calls into" --> src
-    include_page_view -- "calls into" --> include_prefetch
-    include_page_view -- "calls into" --> include_css
+    include_page_view -- "calls into" --> include_image_decode
     include_page_view -- "calls into" --> include_browser_ui
+    include_page_view -- "calls into" --> include_css
     include_page_view -- "calls into" --> include_text_shape
     include_page_view -- "calls into" --> gui
     include_page_view -- "calls into" --> include_secure_fetch
-    include_page_view -- "calls into" --> include_download
+    include_page_view -- "calls into" --> include_prefetch
     include_text_shape -- "calls into" --> src
-    include_text_shape -- "calls into" --> include_prefetch
-    include_text_shape -- "calls into" --> include_css
     include_text_shape -- "calls into" --> include_browser_ui
+    include_text_shape -- "calls into" --> include_css
     include_text_shape -- "calls into" --> include_page_view
+    include_text_shape -- "calls into" --> include_prefetch
     include_local_store -- "calls into" --> src
     include_local_store -- "calls into" --> include_browser_ui
     include_local_store -- "calls into" --> include_page_view
     gui -- "calls into" --> src
-    gui -- "calls into" --> include_css
     gui -- "calls into" --> include_browser_ui
+    gui -- "calls into" --> include_css
     gui -- "calls into" --> include_page_view
     include_secure_fetch -- "calls into" --> src
-    include_secure_fetch -- "calls into" --> include_css
     include_secure_fetch -- "calls into" --> include_browser_ui
+    include_secure_fetch -- "calls into" --> include_css
     include_secure_fetch -- "calls into" --> include_page_view
-    include_download -- "calls into" --> include_css
-    include_download -- "calls into" --> include_browser_ui
+    include_prefetch -- "calls into" --> src
+    include_prefetch -- "calls into" --> include_browser_ui
+    include_prefetch -- "calls into" --> include_css
     click src href "./src.md" "Details"
-    click include_css href "./include_css.md" "Details"
     click include_browser_ui href "./include_browser_ui.md" "Details"
+    click include_css href "./include_css.md" "Details"
     click include_page_view href "./include_page_view.md" "Details"
     click include_text_shape href "./include_text_shape.md" "Details"
     click include_local_store href "./include_local_store.md" "Details"
     click gui href "./gui.md" "Details"
     click include_secure_fetch href "./include_secure_fetch.md" "Details"
-    click include_download href "./include_download.md" "Details"
     click include_prefetch href "./include_prefetch.md" "Details"
 ```
 
 ## Details
 
-Static architecture map of 276 files (c, h, py, sh) in 10 components: src, include: css, include: browser_ui, include: page_view, include: text_shape, include: local_store, gui, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 284 files (c, h, py, sh) in 10 components: src, include: browser_ui, include: css, include: page_view, include: text_shape, include: local_store, gui, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
 ### src (1)
 
-src groups 59 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document.
+src groups 61 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document.
 
 **Related Classes/Methods**:
 
@@ -90,9 +91,24 @@ src groups 59 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp
 - <a href="../include/html_parse.h">include/html_parse.h::dropped</a>
 - <a href="../include/html_parse.h#L48-L56">include/html_parse.h::HP_MAX_SCRIPTS</a>
 
-### include: css (2)
+### include: browser_ui (2)
 
-include: css groups 47 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...
+include: browser_ui groups 52 files (c, h) around FREEDOM_HOSTBLOCK_H, hb_set, hb_list, hb_decision, hb_status.
+
+**Related Classes/Methods**:
+
+- <a href="../include/hostblock.h#L2-L28">include/hostblock.h::FREEDOM_HOSTBLOCK_H</a>
+- <a href="../include/hostblock.h#L29-L31">include/hostblock.h::hb_set</a>
+- <a href="../include/hostblock.h#L32-L36">include/hostblock.h::hb_list</a>
+- <a href="../include/hostblock.h#L37-L41">include/hostblock.h::hb_decision</a>
+- <a href="../include/hostblock.h#L42-L48">include/hostblock.h::hb_status</a>
+- <a href="../include/hostblock.h#L49-L51">include/hostblock.h::hb_new</a>
+- <a href="../include/hostblock.h#L52-L64">include/hostblock.h::hb_free</a>
+- <a href="../include/hostblock.h#L65-L74">include/hostblock.h::walked</a>
+
+### include: css (3)
+
+include: css groups 50 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...
 
 **Related Classes/Methods**:
 
@@ -104,21 +120,6 @@ include: css groups 47 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_st
 - <a href="../include/css_color.h">include/css_color.h::CC_COLOR_CURRENT</a>
 - <a href="../include/css_color.h#L60-L62">include/css_color.h::CC_COLOR_TRANSPARENT</a>
 - <a href="../include/css.h#L2-L27">include/css.h::FREEDOM_CSS_H</a>
-
-### include: browser_ui (3)
-
-include: browser_ui groups 46 files (c, h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. poke_and_free: Touch every claimed pixel corner so the sanitizer flags an...
-
-**Related Classes/Methods**:
-
-- <a href="../include/image_decode.h#L2-L24">include/image_decode.h::FREEDOM_IMAGE_DECODE_H</a>
-- <a href="../include/image_decode.h#L25-L32">include/image_decode.h::guards</a>
-- <a href="../include/image_decode.h#L33-L40">include/image_decode.h::img_format</a>
-- <a href="../include/image_decode.h#L41-L55">include/image_decode.h::img_status</a>
-- <a href="../include/image_decode.h">include/image_decode.h::img_pixels</a>
-- <a href="../include/image_decode.h#L56-L64">include/image_decode.h::width</a>
-- <a href="../include/image_decode.h">include/image_decode.h::IMG_MAX_DIM</a>
-- <a href="../include/image_decode.h#L66-L77">include/image_decode.h::IMG_MAX_PIXELS</a>
 
 ### include: page_view (4)
 
@@ -195,22 +196,7 @@ include: secure_fetch groups 10 files (c, h) around FREEDOM_ANTI_FP_H, FP_TIMER_
 - <a href="../include/anti_fp.h">include/anti_fp.h::FP_SEC_FETCH_DEST_NAV</a>
 - <a href="../include/anti_fp.h">include/anti_fp.h::FP_SEC_FETCH_MODE_NAV</a>
 
-### include: download (9)
-
-include: download groups 8 files (c, h) around FREEDOM_PDF_EXPORT_H, PE_NAME_MAX, PE_EXT, PE_EXT_PNG, PE_FALLBACK_NAME. dl_should_download: 1 if the response should be saved (attachment, or a non-renderable...
-
-**Related Classes/Methods**:
-
-- <a href="../include/pdf_export.h#L2-L27">include/pdf_export.h::FREEDOM_PDF_EXPORT_H</a>
-- <a href="../include/pdf_export.h">include/pdf_export.h::PE_NAME_MAX</a>
-- <a href="../include/pdf_export.h">include/pdf_export.h::PE_EXT</a>
-- <a href="../include/pdf_export.h">include/pdf_export.h::PE_EXT_PNG</a>
-- <a href="../include/pdf_export.h#L31-L32">include/pdf_export.h::PE_FALLBACK_NAME</a>
-- <a href="../include/pdf_export.h#L33-L45">include/pdf_export.h::pe_status</a>
-- <a href="../include/pdf_export.h#L46-L50">include/pdf_export.h::fallback</a>
-- <a href="../include/pdf_export.h">include/pdf_export.h::trusted</a>
-
-### include: prefetch (10)
+### include: prefetch (9)
 
 include: prefetch groups 8 files (c, h) around FREEDOM_IMPORT_MAP_H, algorithm, IM_MAX_TEXT, IM_MAX_ENTRIES, IM_MAX_SCOPES. libFuzzer harness for the prefetch lookahead scanner (Hito 29).
 
@@ -224,3 +210,18 @@ include: prefetch groups 8 files (c, h) around FREEDOM_IMPORT_MAP_H, algorithm, 
 - <a href="../include/import_map.h#L23-L27">include/import_map.h::im_map</a>
 - <a href="../include/import_map.h#L28-L32">include/import_map.h::map</a>
 - <a href="../include/import_map.h#L33-L36">include/import_map.h::im_resolve</a>
+
+### include: image_decode (10)
+
+include: image_decode groups 5 files (c, h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. poke_and_free: Touch every claimed pixel corner so the sanitizer flags an...
+
+**Related Classes/Methods**:
+
+- <a href="../include/image_decode.h#L2-L24">include/image_decode.h::FREEDOM_IMAGE_DECODE_H</a>
+- <a href="../include/image_decode.h#L25-L32">include/image_decode.h::guards</a>
+- <a href="../include/image_decode.h#L33-L40">include/image_decode.h::img_format</a>
+- <a href="../include/image_decode.h#L41-L55">include/image_decode.h::img_status</a>
+- <a href="../include/image_decode.h">include/image_decode.h::img_pixels</a>
+- <a href="../include/image_decode.h#L56-L64">include/image_decode.h::width</a>
+- <a href="../include/image_decode.h">include/image_decode.h::IMG_MAX_DIM</a>
+- <a href="../include/image_decode.h#L66-L77">include/image_decode.h::IMG_MAX_PIXELS</a>

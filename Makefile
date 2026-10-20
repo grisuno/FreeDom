@@ -104,7 +104,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_textfield $(BUILD_DIR)/test_form \
              $(BUILD_DIR)/test_image_decode $(BUILD_DIR)/test_box_style \
              $(BUILD_DIR)/test_flex_layout $(BUILD_DIR)/test_box_tree \
-             $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_net_realm \
+             $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_host_conf $(BUILD_DIR)/test_net_realm \
              $(BUILD_DIR)/test_pdf_export $(BUILD_DIR)/test_js_policy \
              $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download \
              $(BUILD_DIR)/test_webcaps $(BUILD_DIR)/test_compositor \
@@ -118,7 +118,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
               $(BUILD_DIR)/test_interp $(BUILD_DIR)/test_frame_clock \
               $(BUILD_DIR)/test_media_decoder $(BUILD_DIR)/test_svg_render \
              $(BUILD_DIR)/test_perf_trace $(BUILD_DIR)/test_css_length \
-               $(BUILD_DIR)/test_block_flow $(BUILD_DIR)/test_css_values $(BUILD_DIR)/test_css_gradient $(BUILD_DIR)/test_css_box $(BUILD_DIR)/test_css_text \
+               $(BUILD_DIR)/test_block_flow $(BUILD_DIR)/test_css_values $(BUILD_DIR)/test_css_gradient $(BUILD_DIR)/test_css_mask $(BUILD_DIR)/test_css_box $(BUILD_DIR)/test_css_text \
                $(BUILD_DIR)/test_css_vars $(BUILD_DIR)/test_css_atrule $(BUILD_DIR)/test_css_mq \
                $(BUILD_DIR)/test_js_geom $(BUILD_DIR)/test_ws_hub \
                $(BUILD_DIR)/test_web_storage $(BUILD_DIR)/test_import_map \
@@ -179,6 +179,9 @@ $(BUILD_DIR)/js_location.o: $(SRC_DIR)/js_location.c | $(BUILD_DIR)
 $(BUILD_DIR)/js_dom_ext.o: $(SRC_DIR)/js_dom_ext.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -isystem $(QJS_DIR) -c $< -o $@
 
+$(BUILD_DIR)/js_custom_elements.o: $(SRC_DIR)/js_custom_elements.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -isystem $(QJS_DIR) -c $< -o $@
+
 $(BUILD_DIR)/js_fetch.o: $(SRC_DIR)/js_fetch.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -isystem $(QJS_DIR) -c $< -o $@
 
@@ -218,13 +221,13 @@ $(BUILD_DIR)/test_html_parse: $(TEST_DIR)/test_html_parse.c $(BUILD_DIR)/html_pa
 $(BUILD_DIR)/test_js_sandbox: $(TEST_DIR)/test_js_sandbox.c $(BUILD_DIR)/js_sandbox.o $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_dom: $(TEST_DIR)/test_dom.c $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_dom: $(TEST_DIR)/test_dom.c $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/dom.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/dom.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_js_dom: $(TEST_DIR)/test_js_dom.c $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
+$(BUILD_DIR)/test_js_dom: $(TEST_DIR)/test_js_dom.c $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) -isystem $(QJS_DIR) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_os_sandbox: $(TEST_DIR)/test_os_sandbox.c $(BUILD_DIR)/os_sandbox.o | $(BUILD_DIR)
@@ -248,7 +251,7 @@ $(BUILD_DIR)/test_render_policy: $(TEST_DIR)/test_render_policy.c $(BUILD_DIR)/r
 # so it links page_view/html_parse (lexbor) plus the render/request policy chain.
 $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_doc.o \
                               $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o $(BUILD_DIR)/data_url.o \
-                              $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o \
+                              $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o \
                               $(BUILD_DIR)/css_color.o \
                               $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o \
                               $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(PSL_OBJ) | $(BUILD_DIR)
@@ -259,7 +262,7 @@ $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_
 $(BUILD_DIR)/test_dom_debug: $(TEST_DIR)/test_dom_debug.c $(BUILD_DIR)/dom_debug.o \
                              $(BUILD_DIR)/render_doc.o \
                              $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o $(BUILD_DIR)/data_url.o \
-                             $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o \
+                             $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o \
                              $(BUILD_DIR)/css_color.o \
                              $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o \
                              $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(PSL_OBJ) | $(BUILD_DIR)
@@ -388,11 +391,11 @@ $(BUILD_DIR)/test_ws_hub: $(TEST_DIR)/test_ws_hub.c $(BUILD_DIR)/ws_hub.o $(BUIL
 
 # Pure author-CSS parser + simple cascade. Reuses css_color for color tokens.
 # No I/O deps; hostile content (never phones home: url()/@-rules dropped).
-$(BUILD_DIR)/test_css: $(TEST_DIR)/test_css.c $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_css: $(TEST_DIR)/test_css.c $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS) -lm
 
 # Parser drop log: what the CSS parser discards, by property AND by cause.
-$(BUILD_DIR)/test_css_drops: $(TEST_DIR)/test_css_drops.c $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_css_drops: $(TEST_DIR)/test_css_drops.c $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS) -lm
 
 # CSS value interpreters extracted from css.c. Pure, no I/O.
@@ -416,7 +419,7 @@ $(BUILD_DIR)/test_css_vars: $(TEST_DIR)/test_css_vars.c $(BUILD_DIR)/css_vars.o 
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS) -lm
 
 # CSS gradient/background-image expansion extracted from css.c. Pure, no I/O.
-$(BUILD_DIR)/test_css_gradient: $(TEST_DIR)/test_css_gradient.c $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_css_gradient: $(TEST_DIR)/test_css_gradient.c $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS) -lm
 
 # CSS length/box/grid values extracted from css.c. Pure, no I/O.
@@ -442,6 +445,14 @@ $(BUILD_DIR)/test_box_tree: $(TEST_DIR)/test_box_tree.c $(BUILD_DIR)/box_tree.o 
 # Pure /etc/hosts-format host filter (blocklist + allowlist). No I/O deps.
 $(BUILD_DIR)/test_hostblock: $(TEST_DIR)/test_hostblock.c $(BUILD_DIR)/hostblock.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# The single host-list loader (block.conf / allow.conf / js.conf search path).
+$(BUILD_DIR)/test_host_conf: $(TEST_DIR)/test_host_conf.c $(BUILD_DIR)/host_conf.o $(BUILD_DIR)/hostblock.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# CSS mask parsing (alpha gradients). Pure.
+$(BUILD_DIR)/test_css_mask: $(TEST_DIR)/test_css_mask.c $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS) -lm
 
 # Pure realm classifier + router (Tor/I2P/clearnet). No I/O deps.
 $(BUILD_DIR)/test_net_realm: $(TEST_DIR)/test_net_realm.c $(BUILD_DIR)/net_realm.o | $(BUILD_DIR)
@@ -488,7 +499,7 @@ $(BUILD_DIR)/test_download: $(TEST_DIR)/test_download.c $(BUILD_DIR)/download.o 
 $(BUILD_DIR)/test_renderer: $(TEST_DIR)/test_renderer.c $(BUILD_DIR)/renderer.o $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_js_env: $(TEST_DIR)/test_js_env.c $(BUILD_DIR)/js_env.o $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
+$(BUILD_DIR)/test_js_env: $(TEST_DIR)/test_js_env.c $(BUILD_DIR)/js_env.o $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) -isystem $(QJS_DIR) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_local_store: $(TEST_DIR)/test_local_store.c $(BUILD_DIR)/local_store.o | $(BUILD_DIR)
@@ -502,9 +513,9 @@ $(BUILD_DIR)/test_disk_store: $(TEST_DIR)/test_disk_store.c $(BUILD_DIR)/disk_st
 $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
-                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o \
+                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o \
                        $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o \
-                       $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o \
+                       $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o \
                        $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o \
                        $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o \
                        $(BUILD_DIR)/request_policy.o $(PSL_OBJ) \
@@ -525,15 +536,15 @@ FREEDOM_GUI_OBJ = $(GUI_DIR)/browser_ui.c \
 $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                       $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
-                      $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o \
+                      $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o \
                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(QJS_OBJ) \
                       $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/ws_hub.o $(BUILD_DIR)/url.o \
                       $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/css_color.o \
-                      $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o \
+                      $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o \
                       $(BUILD_DIR)/request_policy.o \
                       $(BUILD_DIR)/render_doc.o $(BUILD_DIR)/render_policy.o \
                       $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o $(BUILD_DIR)/box_tree.o \
-                      $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/hostblock.o \
+                      $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/hostblock.o $(BUILD_DIR)/host_conf.o \
                       $(BUILD_DIR)/hostedit.o \
                       $(BUILD_DIR)/net_realm.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
@@ -632,9 +643,9 @@ fuzz-geom: | $(BUILD_DIR)
 fuzz-jsdom: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) -isystem $(QJS_DIR) -D_GNU_SOURCE \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
-	  $(FUZZ_DIR)/fuzz_js_dom.c $(SRC_DIR)/js_dom.c $(SRC_DIR)/js_dom_ext.c $(SRC_DIR)/js_fetch.c $(SRC_DIR)/js_events.c $(SRC_DIR)/js_embed.c $(SRC_DIR)/js_location.c $(SRC_DIR)/js_trusted.c $(SRC_DIR)/js_geom.c $(SRC_DIR)/web_storage.c $(SRC_DIR)/import_map.c $(SRC_DIR)/js_sandbox.c $(SRC_DIR)/dom.c \
+	  $(FUZZ_DIR)/fuzz_js_dom.c $(SRC_DIR)/js_dom.c $(SRC_DIR)/js_dom_ext.c $(SRC_DIR)/js_custom_elements.c $(SRC_DIR)/js_fetch.c $(SRC_DIR)/js_events.c $(SRC_DIR)/js_embed.c $(SRC_DIR)/js_location.c $(SRC_DIR)/js_trusted.c $(SRC_DIR)/js_geom.c $(SRC_DIR)/web_storage.c $(SRC_DIR)/import_map.c $(SRC_DIR)/js_sandbox.c $(SRC_DIR)/dom.c \
 	  $(SRC_DIR)/html_parse.c $(SRC_DIR)/url.c $(SRC_DIR)/freebug.c $(SRC_DIR)/css_chain.c \
-	  $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c \
+	  $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_mask.c \
 	  $(SRC_DIR)/css_values.c $(SRC_DIR)/css_vars.c $(SRC_DIR)/css_atrule.c $(SRC_DIR)/css_mq.c $(SRC_DIR)/flex_layout.c \
 	  $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_index.c $(SRC_DIR)/css_color.c $(QJS_SRC) \
 	  -o $(BUILD_DIR)/fuzz_js_dom $(HP_LIBS) $(JS_LIBS)
@@ -655,7 +666,7 @@ fuzz-img: | $(BUILD_DIR)
 fuzz-pv: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
-  $(FUZZ_DIR)/fuzz_page_view.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_values.c $(SRC_DIR)/css_vars.c $(SRC_DIR)/css_atrule.c $(SRC_DIR)/css_mq.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_index.c \
+  $(FUZZ_DIR)/fuzz_page_view.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_mask.c $(SRC_DIR)/css_values.c $(SRC_DIR)/css_vars.c $(SRC_DIR)/css_atrule.c $(SRC_DIR)/css_mq.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_index.c \
   $(SRC_DIR)/css_color.c \
   $(SRC_DIR)/box_style.c $(SRC_DIR)/html_parse.c \
   -o $(BUILD_DIR)/fuzz_page_view $(HP_LIBS)
@@ -664,7 +675,7 @@ fuzz-pv: | $(BUILD_DIR)
 fuzz-dom: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
-  $(FUZZ_DIR)/fuzz_dom.c $(SRC_DIR)/dom.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_values.c $(SRC_DIR)/css_vars.c $(SRC_DIR)/css_atrule.c $(SRC_DIR)/css_mq.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c \
+  $(FUZZ_DIR)/fuzz_dom.c $(SRC_DIR)/dom.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_mask.c $(SRC_DIR)/css_values.c $(SRC_DIR)/css_vars.c $(SRC_DIR)/css_atrule.c $(SRC_DIR)/css_mq.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c \
   $(SRC_DIR)/css_select.c $(SRC_DIR)/css_index.c $(SRC_DIR)/css_color.c $(SRC_DIR)/html_parse.c \
   -o $(BUILD_DIR)/fuzz_dom $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_dom -max_total_time=30 -rss_limit_mb=2048
@@ -696,9 +707,9 @@ fuzz-dl: | $(BUILD_DIR)
 fuzz-css: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
-  $(FUZZ_DIR)/fuzz_css.c $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_values.c $(SRC_DIR)/css_vars.c $(SRC_DIR)/css_atrule.c $(SRC_DIR)/css_mq.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_index.c $(SRC_DIR)/css_color.c \
+  $(FUZZ_DIR)/fuzz_css.c $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_mask.c $(SRC_DIR)/css_values.c $(SRC_DIR)/css_vars.c $(SRC_DIR)/css_atrule.c $(SRC_DIR)/css_mq.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_index.c $(SRC_DIR)/css_color.c \
   -o $(BUILD_DIR)/fuzz_css $(HP_LIBS)
-	./$(BUILD_DIR)/fuzz_css -max_total_time=30 -rss_limit_mb=2048
+	./$(BUILD_DIR)/fuzz_css -max_total_time=30 -rss_limit_mb=2048 $(FUZZ_DIR)/seeds/css
 
 # Coverage-guided fuzzing of dom_debug (render-tree dump). Arbitrary bytes -> DOM ->
 # pv_build -> rd_build (caps.css on) -> dd_format must never crash/leak/UB nor write
@@ -708,7 +719,7 @@ fuzz-dd: $(PSL_OBJ) | $(BUILD_DIR)
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
 	  $(FUZZ_DIR)/fuzz_dom_debug.c $(SRC_DIR)/dom_debug.c $(SRC_DIR)/render_doc.c \
   $(SRC_DIR)/render_policy.c $(SRC_DIR)/request_policy.c $(SRC_DIR)/data_url.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c \
-  $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_values.c $(SRC_DIR)/css_vars.c $(SRC_DIR)/css_atrule.c $(SRC_DIR)/css_mq.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_index.c $(SRC_DIR)/css_color.c $(SRC_DIR)/box_style.c \
+  $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_mask.c $(SRC_DIR)/css_values.c $(SRC_DIR)/css_vars.c $(SRC_DIR)/css_atrule.c $(SRC_DIR)/css_mq.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_index.c $(SRC_DIR)/css_color.c $(SRC_DIR)/box_style.c \
   $(SRC_DIR)/html_parse.c $(SRC_DIR)/url.c $(PSL_OBJ) \
 	  -o $(BUILD_DIR)/fuzz_dom_debug $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_dom_debug -max_total_time=30 -rss_limit_mb=2048 $(FUZZ_DIR)/in
@@ -944,8 +955,11 @@ $(BUILD_DIR)/freedom-view: $(GUI_DIR)/freedom_view.c $(GUI_DIR)/ui_render.c \
 #
 # The corpus is checked in with every stylesheet inlined, so measuring NEVER
 # touches the network: the numbers are reproducible and nothing phones home.
-# Parity is measured with --author-css --images because that is what the doctrine
-# turns on for a trusted host; the browser's DEFAULTS stay Privacy by Default.
+# Parity is measured through the GUI's OWN capability derivation (--as-host over the
+# corpus allow.conf, tests/parity/hosts): a host on allow.conf gets author CSS + images, which
+# is exactly what the doctrine turns on for a trusted host. One source of truth -- the
+# harness no longer hand-picks flags the browser would not pick; the browser's DEFAULTS stay
+# Privacy by Default.
 #
 # Two Firefox headless traps, both of which fail SILENTLY with exit status 0 and
 # no output file, so neither is detectable without checking for the PNG itself:
@@ -955,6 +969,8 @@ $(BUILD_DIR)/freedom-view: $(GUI_DIR)/freedom_view.c $(GUI_DIR)/ui_render.c \
 #     -profile plus --no-remote.
 # ---------------------------------------------------------------------------
 PARITY_DIR   := tests/parity
+# Freedom as the GUI would render a trusted (allow.conf) host, with the corpus lists.
+FREEDOM_AS_TRUSTED = FREEDOM_JS=off FREEDOM_HOSTS_DIR=$(CURDIR)/$(PARITY_DIR)/hosts ./$(BUILD_DIR)/freedom --as-host=corpus.test
 # `make parity PAGES="slashdot site-github"` scores just those pages (name without the
 # directory or .html), for the measure-fix-measure loop on one page.
 PARITY_PAGES := $(if $(PAGES),$(addprefix $(PARITY_DIR)/pages/,$(addsuffix .html,$(PAGES))),$(sort $(wildcard $(PARITY_DIR)/pages/*.html)))
@@ -1021,7 +1037,7 @@ parity: $(BUILD_DIR)/freedom $(BUILD_DIR)/pngdiff
 	@: > $(PARITY_OUT)/current.tsv
 	@for f in $(PARITY_PAGES); do \
 	  name=$$(basename $$f .html); \
-	  h=$$(./$(BUILD_DIR)/freedom --author-css --images \
+	  h=$$($(FREEDOM_AS_TRUSTED) \
 	        --download-png=$(PARITY_OUT)/$$name.fd.png "$$f" 2>/dev/null \
 	      | sed -n 's/^Saved PNG (\([0-9]*\) px).*/\1/p'); \
 	  if [ -z "$$h" ]; then echo "$$name: freedom produced no PNG"; continue; fi; \
@@ -1098,7 +1114,7 @@ geom: $(BUILD_DIR)/freedom
 	@echo "FIREFOX geometry rendered to $(GEOM_OUT)/firefox.png (read it as an image)"
 	@echo ""
 	@echo "=== FREEDOM ==="
-	@./$(BUILD_DIR)/freedom --dump-layout --author-css --images "$(PAGE)" 2>/dev/null
+	@$(FREEDOM_AS_TRUSTED) --dump-layout "$(PAGE)" 2>/dev/null
 
 # `make parity-snapshot URL=https://site/ NAME=site` -- freeze a live page into
 # tests/parity/pages/NAME.html (tools/snapshot.py): same-site stylesheets and their
@@ -1161,7 +1177,7 @@ wpt: $(BUILD_DIR)/freedom $(BUILD_DIR)/pngdiff
 	for f in $(WPT_TESTS); do \
 	  rel=$${f#$(WPT_DIR)/}; \
 	  name=$$(echo "$$rel" | tr '/' '_' | sed 's/\.[^.]*$$//'); \
-	  h=$$(./$(BUILD_DIR)/freedom --author-css --images \
+	  h=$$($(FREEDOM_AS_TRUSTED) \
 	        --download-png=$(WPT_OUT)/$$name.fd.png "$$f" 2>/dev/null \
 	      | sed -n 's/^Saved PNG (\([0-9]*\) px).*/\1/p'); \
 	  if [ -z "$$h" ] || [ ! -f $(WPT_OUT)/$$name.fd.png ]; then \
@@ -1292,11 +1308,11 @@ drift:
 	@grep -q "TAB_WIRE_HEAD_N 6" src/tab.c || (echo "drift: HEAD const missing"; exit 1)
 	@grep -q "TAB_WIRE_A_N 38" src/tab.c || (echo "drift: A const missing"; exit 1)
 	@grep -q "TAB_WIRE_B_N 67" src/tab.c || (echo "drift: B const missing"; exit 1)
-	@grep -q "TAB_WIRE_BOX_F_N 247" src/tab.c || (echo "drift: BOX const missing"; exit 1)
+	@grep -q "TAB_WIRE_BOX_F_N 263" src/tab.c || (echo "drift: BOX const missing"; exit 1)
 	@grep -q "int32_t head\[TAB_WIRE_HEAD_N\]\|int32_t head\[6\]" src/tab.c || (echo "drift: head array drift"; exit 1)
 	@grep -q "int32_t a\[TAB_WIRE_A_N\]\|int32_t a\[38\]" src/tab.c || (echo "drift: A array drift"; exit 1)
 	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[67\]" src/tab.c || (echo "drift: B array drift"; exit 1)
-	@grep -q "int32_t f\[TAB_WIRE_BOX_F_N\]\|int32_t f\[247\]" src/tab.c || (echo "drift: box array drift"; exit 1)
+	@grep -q "int32_t f\[TAB_WIRE_BOX_F_N\]\|int32_t f\[263\]" src/tab.c || (echo "drift: box array drift"; exit 1)
 	@grep -q "FC_UI_FONT_SIZE\|FC_FONT_FALLBACK_PX" include/freedom_config.h || (echo "drift: FC font const missing"; exit 1)
 	@! grep -rn "cairo_set_font_size.*16\.0" gui/ --include="*.c" | grep -v FC_ || (echo "drift: raw 16.0 literal in gui"; exit 1)
 	@test -f include/css_values.h -a -f include/css_gradient.h -a -f include/css_box.h -a -f include/css_text.h -a -f include/css_decl.h || (echo "drift: css split header missing"; exit 1)

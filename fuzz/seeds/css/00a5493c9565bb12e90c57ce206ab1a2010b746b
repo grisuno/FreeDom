@@ -1,0 +1,3 @@
+.a{mask-image:linear-gradient(#fff0,2#ff f5%);-webkit-mask:linear-gradient(#000 0 0) content-box,limage-set(ient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;mask-clip:padding-box}
+.b{mask:linear-gradircle at 50% 0,#f0f,#00f)}
+.c{box,none}

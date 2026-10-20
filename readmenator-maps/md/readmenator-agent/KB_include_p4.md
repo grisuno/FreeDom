@@ -1,5 +1,35 @@
-# Subsystem: include (page 4 of 4)
+# Subsystem: include (page 4 of 5)
 Previous: [KB_include_p3.md](KB_include_p3.md)
+
+## include/profile.h
+- Doc: profile_close: Loads and decrypts prefs.bin over an out ALREADY initialised (prefs_init).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `profile_ctx` (struct, line 46)
+  - `profile_status` (enum, line 35)
+  - `dir` (type_alias, line 45) `typedef struct profile_ctx { char dir[1024];`
+  - `absent` (function, line 53) `* the keyfile when absent (0600, atomic write);`
+  - `closed` (function, line 54) `* wrong size fails closed (PROFILE_ERR_KEY, never overwritten). Derives the * AEAD key (Argon2id, per-device salt)...`
+  - `profile_close` (function, line 67) `void profile_close(profile_ctx *ctx);`
+  - `FREEDOM_PROFILE_H` (macro, line 2) `#define FREEDOM_PROFILE_H`
+  - `PROFILE_KEY_FILE` (macro, line 32) `#define PROFILE_KEY_FILE`
+  - `PROFILE_PREFS_FILE` (macro, line 33) `#define PROFILE_PREFS_FILE`
+- Depends on: `include/local_store.h`, `include/prefs.h`
+- Imported by: `gui/browser_ui.c`, `src/profile.c`, `tests/test_profile.c`
+
+## include/psl_data.h
+- Layer: data_access
+- Language: h
+- Symbols:
+  - `psl_rules` (variable, line 21) `extern const char *const psl_rules[];`
+  - `psl_rules_n` (variable, line 22) `extern const size_t psl_rules_n;`
+  - `psl_wildcards` (variable, line 23) `extern const char *const psl_wildcards[];`
+  - `psl_wildcards_n` (variable, line 24) `extern const size_t psl_wildcards_n;`
+  - `psl_exceptions` (variable, line 25) `extern const char *const psl_exceptions[];`
+  - `psl_exceptions_n` (variable, line 26) `extern const size_t psl_exceptions_n;`
+  - `FREEDOM_PSL_DATA_H` (macro, line 2) `#define FREEDOM_PSL_DATA_H`
+- Imported by: `src/request_policy.c`
 
 ## include/render_doc.h
 - Doc: rd_block: One paint-ready block in document order. text is owned, NUL-terminated and valid...
@@ -27,10 +57,11 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `rd_cont_at` (function, line 326) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
   - `rd_kind_name` (function, line 330) `const char *rd_kind_name(rd_kind k);`
   - `rd_block_tag` (function, line 338) `const char *rd_block_tag(const rd_block *b);`
-  - `decision` (function, line 341) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
-  - `IMG_FAIL_OK` (function, line 347) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-  - `rd_input_label` (function, line 352) `const char *rd_input_label(int input_type);`
-  - `rd_input_invisible` (function, line 357) `int rd_input_invisible(int input_type);`
+  - `rd_block_heading_level` (function, line 345) `int rd_block_heading_level(const rd_block *b);`
+  - `decision` (function, line 348) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+  - `IMG_FAIL_OK` (function, line 354) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 359) `const char *rd_input_label(int input_type);`
+  - `rd_input_invisible` (function, line 364) `int rd_input_invisible(int input_type);`
   - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
@@ -459,20 +490,5 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Depends on: `include/secure_fetch.h`
 - Imported by: `gui/browser_ui.c`, `src/ws_hub.c`, `tests/test_ws_hub.c`
 
-## include/zoom.h
-- Doc: zm_clamp: stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `zm_clamp` (function, line 26) `int zm_clamp(int pct);`
-  - `zm_zoom_in` (function, line 29) `int zm_zoom_in(int pct);`
-  - `zm_zoom_out` (function, line 32) `int zm_zoom_out(int pct);`
-  - `zm_reset` (function, line 35) `int zm_reset(void);`
-  - `zm_scale` (function, line 38) `double zm_scale(int pct);`
-  - `zm_apply` (function, line 42) `double zm_apply(double base_px, int pct);`
-  - `FREEDOM_ZOOM_H` (macro, line 2) `#define FREEDOM_ZOOM_H`
-  - `ZM_MIN_PCT` (macro, line 21) `#define ZM_MIN_PCT`
-  - `ZM_MAX_PCT` (macro, line 22) `#define ZM_MAX_PCT`
-  - `ZM_DEFAULT_PCT` (macro, line 23) `#define ZM_DEFAULT_PCT`
-- Imported by: `gui/browser_ui.c`, `src/prefs.c`, `src/zoom.c`, `tests/test_prefs.c`, `tests/test_zoom.c`
 
+Next: [KB_include_p5.md](KB_include_p5.md)

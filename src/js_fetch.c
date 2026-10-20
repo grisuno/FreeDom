@@ -189,8 +189,14 @@ static const char JD_XHR_SHIM[] =
     /* the real navigator is non-extensible (anti-fp): the method goes on its own
      * extensible prototype, never on Object.prototype */
     "  var nav=__G.navigator, tgt=Object.isExtensible(nav)?nav:Object.getPrototypeOf(nav);"
-    "  if(tgt&&tgt!==Object.prototype&&Object.isExtensible(tgt))"
-    "    Object.defineProperty(tgt,'sendBeacon',{configurable:true,writable:true,value:sendB}); }"
+    /* An ACCESSOR with a setter, not a data property: analytics code patches the method with
+     * `navigator.sendBeacon = fn`, and a write to an inherited data property would create an
+     * own property on the non-extensible navigator (a strict-mode TypeError). The setter keeps
+     * the override in a closure -- the navigator stays non-extensible, no own key appears. */
+    "  if(tgt&&tgt!==Object.prototype&&Object.isExtensible(tgt)){"
+    "    var cur=sendB;"
+    "    Object.defineProperty(tgt,'sendBeacon',{configurable:true,enumerable:true,"
+    "      get:function(){return cur;},set:function(v){cur=v;}}); } }"
     "try{delete __G.__hostFetch;}catch(e){}"
     "})();";
 

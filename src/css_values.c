@@ -227,3 +227,8 @@ int cv_text_color(const char *v)
     }
     return c;
 }
+
+double cv_filter_scale(int pct) {
+    if (pct <= 0 || pct == 100) return 1.0;
+    return (double)pct / 100.0;
+}

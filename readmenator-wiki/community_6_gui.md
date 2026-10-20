@@ -1,10 +1,10 @@
 # gui
 
-*Community 6 | 15 files | cohesion 0.50*
+*Community 6 | 15 files | cohesion 0.48*
 
 ## Definition
 
-This community groups 15 file(s) rooted at `gui` with dominant language c (cohesion 0.50). Central symbols: `FC_FLEX_MEASURE_W`, `FC_FLEX_MIN_MEASURE_W`, `FC_FONT_CHAIN_MAX`, `FC_FONT_FALLBACK_PX`, `FC_HEADLESS_VIEW_H`, `FC_MAX_AUTHOR_CSS_BYTES`, `FC_MAX_BOXES`, `FC_PNG_MARGIN`. Core file: `src/svg_render.c` (33 symbols). Documented purpose: svg_paint — Cairo back end for the shapes svg_render extracted..
+This community groups 15 file(s) rooted at `gui` with dominant language c (cohesion 0.48). Central symbols: `FC_FLEX_MEASURE_W`, `FC_FLEX_MIN_MEASURE_W`, `FC_FONT_CHAIN_MAX`, `FC_FONT_FALLBACK_PX`, `FC_HEADLESS_VIEW_H`, `FC_MAX_AUTHOR_CSS_BYTES`, `FC_MAX_BOXES`, `FC_PNG_MARGIN`. Core file: `src/svg_render.c` (34 symbols). Documented purpose: svg_paint — Cairo back end for the shapes svg_render extracted..
 
 ## Files
 
@@ -21,9 +21,9 @@ This community groups 15 file(s) rooted at `gui` with dominant language c (cohes
 | `include/svg_paint.h` | h | utility | 2 | no |
 | `include/svg_render.h` | h | presentation | 19 | no |
 | `include/ui.h` | h | presentation | 17 | no |
-| `src/svg_render.c` | c | presentation | 33 | yes |
+| `src/svg_render.c` | c | presentation | 34 | yes |
 | `src/ui_layout.c` | c | presentation | 4 | no |
-| `tests/test_svg_render.c` | c | testing | 16 | yes |
+| `tests/test_svg_render.c` | c | testing | 17 | yes |
 | `tests/test_ui.c` | c | testing | 12 | no |
 
 ## Key Symbols
@@ -39,12 +39,12 @@ This community groups 15 file(s) rooted at `gui` with dominant language c (cohes
 - `ui_theme` (struct, `gui/browser_ui_internal.h:43`)
 - `ui_theme_mode` (enum, `gui/browser_ui_internal.h:92`) - ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb check_border; ui_rg
 - `set_rgb` (function, `gui/browser_ui_internal.h:105`) `void set_rgb(cairo_t *cr, ui_rgb c);` - /* Selectable palettes for the options menu. typedef enum ui_theme_mode { UI_THEME_LIGHT = 0, UI_THE
-- `ui_theme_default` (function, `gui/bui_theme.c:14`) `ui_theme ui_theme_default(void)` - bui_theme — presentation palettes for the Wayland/Cairo GUI.  Carved out of browser_ui.c: the light/
-- `ui_theme_dark` (function, `gui/bui_theme.c:83`) `ui_theme ui_theme_dark(void)` - Dark reading palette. Shares all the metrics (font sizes, spacing) with the * default theme; only th
-- `ui_theme_sepia` (function, `gui/bui_theme.c:128`) `ui_theme ui_theme_sepia(void)` - Sepia reading palette: warm paper background and dark-brown ink, easier on the eyes for long-form te
-- `ui_theme_for` (function, `gui/bui_theme.c:170`) `ui_theme ui_theme_for(int mode)` - t.menu_bg        = (ui_rgb){ 0.95, 0.90, 0.80 }; t.menu_border    = (ui_rgb){ 0.55, 0.46, 0.32 }; t.
-- `rgb_from_packed` (function, `gui/bui_theme.c:179`) `ui_rgb rgb_from_packed(int packed)` - t.scrollbar_thumb_hot = (ui_rgb){ 0.44, 0.35, 0.22 }; return t; } /* The single place that maps the
-- `set_rgb` (function, `gui/bui_theme.c:184`) `void set_rgb(cairo_t *cr, ui_rgb c)`
+- `ui_theme_default` (function, `gui/bui_theme.c:15`) `ui_theme ui_theme_default(void)` - bui_theme — presentation palettes for the Wayland/Cairo GUI.  Carved out of browser_ui.c: the light/
+- `ui_theme_dark` (function, `gui/bui_theme.c:78`) `ui_theme ui_theme_dark(void)` - Dark reading palette. Shares all the metrics (font sizes, spacing) with the * default theme; only th
+- `ui_theme_sepia` (function, `gui/bui_theme.c:123`) `ui_theme ui_theme_sepia(void)` - Sepia reading palette: warm paper background and dark-brown ink, easier on the eyes for long-form te
+- `ui_theme_for` (function, `gui/bui_theme.c:165`) `ui_theme ui_theme_for(int mode)` - t.menu_bg        = (ui_rgb){ 0.95, 0.90, 0.80 }; t.menu_border    = (ui_rgb){ 0.55, 0.46, 0.32 }; t.
+- `rgb_from_packed` (function, `gui/bui_theme.c:174`) `ui_rgb rgb_from_packed(int packed)` - t.scrollbar_thumb_hot = (ui_rgb){ 0.44, 0.35, 0.22 }; return t; } /* The single place that maps the
+- `set_rgb` (function, `gui/bui_theme.c:179`) `void set_rgb(cairo_t *cr, ui_rgb c)`
 - `_POSIX_C_SOURCE` (macro, `gui/freedom_view.c:10`) `#define _POSIX_C_SOURCE`
 - `main` (function, `gui/freedom_view.c:37`) `int main(int argc, char **argv)`
 - `svp_alpha` (function, `gui/svg_paint.c:31`) `static double svp_alpha(int opacity, int paint_opacity)` - Resolves a shape's packed paint into an RGB triple. Returns 0 when the shape * asked for no paint at
@@ -62,14 +62,14 @@ This community groups 15 file(s) rooted at `gui` with dominant language c (cohes
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 14
-- Cross-boundary resolved imports (EXTRACTED): 14
+- Cross-boundary resolved imports (EXTRACTED): 15
 
 ## Connections
 
 - [EXTRACTED] depends_on community 6 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/html_parse.h.
 - [EXTRACTED] depends_on community 6 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/page_view.h.
-- [EXTRACTED] depends_on community 2 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
-- [EXTRACTED] depends_on community 6 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/bui_theme.c imports include/css_color.h.
+- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
+- [EXTRACTED] depends_on community 6 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/bui_theme.c imports include/css.h.
 
 ## Risks
 
@@ -80,7 +80,7 @@ This community groups 15 file(s) rooted at `gui` with dominant language c (cohes
 
 - Why do 12 file(s) lack file-level docs (e.g. `fuzz/fuzz_page_view.c`)? What purpose do they serve?
 - What would break if the most connected file in gui changed?
-- Should gui be split, given cohesion 0.50?
+- Should gui be split, given cohesion 0.48?
 
 ## Sources
 

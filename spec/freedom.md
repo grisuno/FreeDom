@@ -146,6 +146,24 @@ tal cual; la derivación fail-closed del nombre desde un título hostil
 (`pe_safe_basename`/`pe_build_path_ext`) solo aplica al "Save as PDF/PNG" del GUI,
 donde el nombre proviene de contenido remoto.
 
+### `--as-gui` / `--as-host=HOST` (2026-10-20): el headless con el perfil de la GUI
+
+Una cosa, una fuente de verdad. Sin estos flags el headless NO decide por host: las banderas del
+operador (`--author-css`, `--images`, `--js=on`) son la señal de confianza. Eso hacía que el
+benchmark midiera un perfil que el navegador real no tiene para ese sitio.
+
+- `--as-gui`: las capacidades de la página salen de `wc_derive` (la MISMA función que la GUI) con
+  el host de la URL, `allow.conf` y `js.conf` cargados por `host_conf` (la MISMA búsqueda que la
+  GUI), el modo JS de `FREEDOM_JS` (por defecto `allowlist`) y los toggles de usuario apagados.
+  Se re-deriva por cada salto de redirección.
+- `--as-host=HOST` implica `--as-gui` y fija el host para una página local (`file://`), que no
+  tiene host propio: así una instantánea congelada se mide con el perfil del sitio real.
+- Las banderas explícitas (`--author-css`, `--images`, `--js=on`) siguen sumando sobre el perfil.
+
+Dado `allow.conf` con `example.test` y una página local con `<style>p{color:#f00}</style>`, cuando
+se corre con `--as-host=example.test`, entonces el CSS de autor se aplica (presentation-trust); con
+otro host, no.
+
 ## 3. Códigos de salida
 
 | Código | Significado |

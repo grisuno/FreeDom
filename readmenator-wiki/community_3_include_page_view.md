@@ -17,7 +17,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | `include/dom_debug.h` | h | utility | 4 | no |
 | `include/flex_layout.h` | h | presentation | 43 | no |
 | `include/js_policy.h` | h | business_logic | 7 | no |
-| `include/page_view.h` | h | presentation | 86 | no |
+| `include/page_view.h` | h | presentation | 87 | no |
 | `include/perf_trace.h` | h | utility | 17 | no |
 
 ### `src` (10 files)
@@ -28,7 +28,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | `src/box_tree.c` | c | utility | 24 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 35 | no |
-| `src/freedom.c` | c | utility | 46 | no |
+| `src/freedom.c` | c | utility | 47 | no |
 | `src/js_policy.c` | c | business_logic | 6 | no |
 
 ### `tests` (10 files)
@@ -40,7 +40,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 71 | no |
 | `tests/test_js_policy.c` | c | testing | 5 | no |
-| `tests/test_page_view.c` | c | testing | 202 | no |
+| `tests/test_page_view.c` | c | testing | 207 | no |
 
 ### `fuzz` (1 files)
 
@@ -87,15 +87,15 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 58
-- Cross-boundary resolved imports (EXTRACTED): 62
+- Cross-boundary resolved imports (EXTRACTED): 63
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_css.c imports include/flex_layout.h.
+- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_css.c imports include/flex_layout.h.
 - [EXTRACTED] depends_on community 3 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.
 - [EXTRACTED] depends_on community 6 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/page_view.h.
-- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
-- [EXTRACTED] depends_on community 3 <-> 9 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
+- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 3 <-> 8 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
 - [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/request_policy.h.
 - [EXTRACTED] depends_on community 3 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/secure_fetch.h.
 

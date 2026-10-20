@@ -1,11 +1,11 @@
 # `src/js_dom.c`
 
-> Source: [src/js_dom.c:1](../../src/js_dom.c#L1) | language `c` | coverage 9.1% | [API index](../index.md)
+> Source: [src/js_dom.c:1](../../src/js_dom.c#L1) | language `c` | coverage 13.0% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`jd_method`](#jd_method)
-- **Functions:** [`jd_opaque_get`](#jd_opaque_get), [`jd_idx`](#jd_idx), [`jd_handle`](#jd_handle), [`jd_handle_or_null`](#jd_handle_or_null), [`table`](#table), [`attrNames`](#attrnames), [`scripts`](#scripts), [`enough`](#enough), [`ms`](#ms), [`empty`](#empty), [`geometry`](#geometry), [`size`](#size), [`js_env`](#js_env), [`jd_install`](#jd_install), [`fails`](#fails), [`jd_install_console`](#jd_install_console), [`jd_set_cookies`](#jd_set_cookies), [`jd_get_cookies`](#jd_get_cookies), [`jd_set_geometry`](#jd_set_geometry)
+- **Functions:** [`jd_opaque_get`](#jd_opaque_get), [`jd_idx`](#jd_idx), [`jd_handle`](#jd_handle), [`jd_handle_or_null`](#jd_handle_or_null), [`table`](#table), [`attrNames`](#attrnames), [`scripts`](#scripts), [`enough`](#enough), [`ms`](#ms), [`empty`](#empty), [`geometry`](#geometry), [`size`](#size), [`js_env`](#js_env), [`jd_install`](#jd_install), [`jd_flush_custom_elements`](#jd_flush_custom_elements), [`fails`](#fails), [`jd_install_console`](#jd_install_console), [`jd_set_cookies`](#jd_set_cookies), [`jd_get_cookies`](#jd_get_cookies), [`jd_set_geometry`](#jd_set_geometry)
 - **Macros:** [`_GNU_SOURCE`](#_gnu_source)
 
 ## Call Graph
@@ -25,7 +25,7 @@ flowchart LR
 
 ### `jd_method`
 
-`struct` | [src/js_dom.c:428](../../src/js_dom.c#L428)
+`struct` | [src/js_dom.c:429](../../src/js_dom.c#L429)
 
 ```c
 typedef struct jd_method
@@ -130,7 +130,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `table`
 
-`function` | [src/js_dom.c:571](../../src/js_dom.c#L571)
+`function` | [src/js_dom.c:572](../../src/js_dom.c#L572)
 
 ```c
 * a table (dom.viewport() non-null);
@@ -150,7 +150,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `attrNames`
 
-`function` | [src/js_dom.c:610](../../src/js_dom.c#L610)
+`function` | [src/js_dom.c:612](../../src/js_dom.c#L612)
 
 ```c
 * native attrNames(). jQuery's feature detection reads attrs[name].expando, so * a missing '...
@@ -164,7 +164,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `scripts`
 
-`function` | [src/js_dom.c:768](../../src/js_dom.c#L768)
+`function` | [src/js_dom.c:772](../../src/js_dom.c#L772)
 
 ```c
 * player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without throwing. No network, no real * playback in the worker -- actual decoding happens in
@@ -187,7 +187,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `enough`
 
-`function` | [src/js_dom.c:931](../../src/js_dom.c#L931)
+`function` | [src/js_dom.c:935](../../src/js_dom.c#L935)
 
 ```c
 * enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery clones a fragment twice and reads .lastChild * (b.checkClone);
@@ -207,7 +207,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `ms`
 
-`function` `virtual` | [src/js_dom.c:1067](../../src/js_dom.c#L1067)
+`function` `virtual` | [src/js_dom.c:1071](../../src/js_dom.c#L1071)
 
 ```c
 * due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);
@@ -227,7 +227,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `empty`
 
-`function` | [src/js_dom.c:1215](../../src/js_dom.c#L1215)
+`function` | [src/js_dom.c:1219](../../src/js_dom.c#L1219)
 
 ```c
 * inert: DOM interface constructors are empty (instanceof yields false, harmless);
@@ -247,7 +247,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `geometry`
 
-`function` | [src/js_dom.c:1217](../../src/js_dom.c#L1217)
+`function` | [src/js_dom.c:1221](../../src/js_dom.c#L1221)
 
 ```c
 * constant geometry (zero real leak);
@@ -267,7 +267,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `size`
 
-`function` | [src/js_dom.c:1220](../../src/js_dom.c#L1220)
+`function` | [src/js_dom.c:1224](../../src/js_dom.c#L1224)
 
 ```c
 * the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);
@@ -288,7 +288,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `js_env`
 
-`function` | [src/js_dom.c:1223](../../src/js_dom.c#L1223)
+`function` | [src/js_dom.c:1227](../../src/js_dom.c#L1227)
 
 ```c
 * are owned by js_env (anti_fp) and are NOT redefined here. Runs after the * document shim (uses...
@@ -302,7 +302,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `jd_install`
 
-`function` | [src/js_dom.c:1775](../../src/js_dom.c#L1775)
+`function` | [src/js_dom.c:1779](../../src/js_dom.c#L1779)
 
 ```c
 jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
@@ -322,11 +322,35 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
 
 ---
 
+<a id="jd_flush_custom_elements"></a>
+
+### `jd_flush_custom_elements`
+
+`function` | [src/js_dom.c:1853](../../src/js_dom.c#L1853)
+
+```c
+void jd_flush_custom_elements(js_context *ctx)
+```
+
+Reconciles Custom Elements (spec/js_custom_elements.md): upgrades the elements whose tag was just defined and fires attributeChanged/connected/disconnected callbacks.
+
+The embedder calls it after each script, so the page sees the lifecycle a real browser would have run. A context without the facade, or NULL, is a no-op.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+
+> **Inherited:** Documentation from [`jd_flush_custom_elements`](#jd_flush_custom_elements) (include/js_dom.h:195).
+
+---
+
 <a id="fails"></a>
 
 ### `fails`
 
-`function` | [src/js_dom.c:1852](../../src/js_dom.c#L1852)
+`function` | [src/js_dom.c:1867](../../src/js_dom.c#L1867)
 
 ```c
 * cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...
@@ -346,7 +370,7 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
 
 ### `jd_install_console`
 
-`function` | [src/js_dom.c:1966](../../src/js_dom.c#L1966)
+`function` | [src/js_dom.c:1981](../../src/js_dom.c#L1981)
 
 ```c
 jd_status jd_install_console(js_context *ctx, fb_buffer *log)
@@ -369,7 +393,7 @@ jd_status jd_install_console(js_context *ctx, fb_buffer *log)
 
 ### `jd_set_cookies`
 
-`function` | [src/js_dom.c:2003](../../src/js_dom.c#L2003)
+`function` | [src/js_dom.c:2018](../../src/js_dom.c#L2018)
 
 ```c
 jd_status jd_set_cookies(js_context *ctx, const char *cookies)
@@ -390,7 +414,7 @@ jd_status jd_set_cookies(js_context *ctx, const char *cookies)
 
 ### `jd_get_cookies`
 
-`function` | [src/js_dom.c:2023](../../src/js_dom.c#L2023)
+`function` | [src/js_dom.c:2038](../../src/js_dom.c#L2038)
 
 ```c
 int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)
@@ -418,7 +442,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `jd_set_geometry`
 
-`function` | [src/js_dom.c:2046](../../src/js_dom.c#L2046)
+`function` | [src/js_dom.c:2061](../../src/js_dom.c#L2061)
 
 ```c
 jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)

@@ -774,6 +774,22 @@ static void test_flex_wrap_align_row_gap_carried_by_default(void **state) {
     pv_free(v);
 }
 
+static void test_heading_level_of_link(void **state) {
+    (void)state;
+    rd_block b;
+    memset(&b, 0, sizeof b);
+    assert_int_equal(rd_block_heading_level(NULL), 0);
+    b.kind = RD_HEADING; b.heading_level = 3;
+    assert_int_equal(rd_block_heading_level(&b), 3);
+    b.heading_level = 0;  assert_int_equal(rd_block_heading_level(&b), 1);
+    b.heading_level = 99; assert_int_equal(rd_block_heading_level(&b), 6);
+    b.kind = RD_LINK; b.heading_level = 2;
+    assert_int_equal(rd_block_heading_level(&b), 2);
+    b.heading_level = 0;  assert_int_equal(rd_block_heading_level(&b), 0);
+    b.kind = RD_PARAGRAPH; b.heading_level = 2;
+    assert_int_equal(rd_block_heading_level(&b), 0);
+}
+
 static void test_block_tag_total(void **state) {
     (void)state;
     rd_block b;
@@ -859,6 +875,7 @@ int main(void) {
         cmocka_unit_test(test_input_label_total),
         cmocka_unit_test(test_input_invisible),
         cmocka_unit_test(test_node_id_carried_by_default),
+        cmocka_unit_test(test_heading_level_of_link),
         cmocka_unit_test(test_free_null_and_double),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

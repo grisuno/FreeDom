@@ -2,15 +2,15 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 276 files at commit `e4e2185ca7bb`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 284 files at commit `aa6bae7aa56d`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of the LazyOwn Redteam Framework: a free, open-source web browser (`README.md:5`)
-- Domain vocabulary (term, files): `null` (138), `one` (120), `max` (111), `size` (109), `not` (108), `include` (107), `out` (103), `free` (98), `freedom` (96), `char` (90), `const` (88), `css` (87), `text` (85), `its` (84), `static` (83)
-- Subsystem `src`: 59 files, core `src/tab.c`: write_field: Writes one length-prefixed string field (the write mirror of read_field): a size_t...
-- Subsystem `include: css`: 47 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
-- Subsystem `include: browser_ui`: 46 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
+- Domain vocabulary (term, files): `null` (141), `one` (126), `max` (115), `size` (112), `not` (111), `include` (110), `out` (107), `freedom` (100), `free` (98), `char` (96), `const` (93), `css` (90), `text` (86), `its` (85), `static` (85)
+- Subsystem `src`: 61 files, core `src/tab.c`: rad_len_ok: A radial-gradient length off the wire (cg_radial encoding): per-mille 0..1e6, or *...
+- Subsystem `include: browser_ui`: 52 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
+- Subsystem `include: css`: 50 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
 - Subsystem `include: page_view`: 31 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - Subsystem `include: text_shape`: 20 files, core `src/text_shape.c`: load_entry_file: Loads face `index` of the font file at `path` into e (FreeType + cairo + *...
 - Subsystem `include: local_store`: 16 files, core `src/local_store.c`
@@ -68,11 +68,11 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 180 files, 5259 symbols; docstrings on 28% of symbols; functions snake_case (99%); types PascalCase (0%); median file 234 lines, max 18021.
-- h: 82 files, 1350 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 79 lines, max 1207.
+- c: 185 files, 5373 symbols; docstrings on 28% of symbols; functions snake_case (99%); types PascalCase (0%); median file 230 lines, max 18212.
+- h: 85 files, 1387 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 78 lines, max 1225.
 - py: 9 files, 41 symbols; docstrings on 20% of symbols; functions snake_case (100%); median file 96 lines, max 345.
 - sh: 5 files, 0 symbols; median file 11 lines, max 91.
-- Tests: 72 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
+- Tests: 74 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
 
 ## 5. Minimum deliverables
 
@@ -89,8 +89,8 @@ Measured baseline:
 
 ## 6. Risks to respect
 
-- God nodes (changes ripple widely): `gui/browser_ui.c`, `include/css.h`, `src/tab.c`, `src/css.c`, `src/page_view.c`
-- Hotspots (complex and central): `gui/browser_ui.c`, `src/tab.c`, `src/page_view.c`, `src/css.c`, `tests/test_css.c`
+- God nodes (changes ripple widely): `gui/browser_ui.c`, `include/css.h`, `src/tab.c`, `src/css.c`, `src/freedom.c`
+- Hotspots (complex and central): `gui/browser_ui.c`, `src/tab.c`, `src/css.c`, `src/page_view.c`, `tests/test_css.c`
 - Cycle: `include/js_dom.h` -> `include/js_location.h` -> `include/js_dom.h`
 - Full blast radius: `readmenator-agent/GOTCHAS.md`; findings: `readmenator-agent/SECURITY.md`.
 

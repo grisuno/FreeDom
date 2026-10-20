@@ -1,13 +1,13 @@
 # `include/render_doc.h`
 
-> Source: [include/render_doc.h:1](../../include/render_doc.h#L1) | language `h` | coverage 46.2% | [API index](../index.md)
+> Source: [include/render_doc.h:1](../../include/render_doc.h#L1) | language `h` | coverage 48.1% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`rd_block`](#rd_block), [`rd_doc`](#rd_doc)
 - **Enums:** [`img_fail_reason`](#img_fail_reason), [`rd_kind`](#rd_kind), [`rd_status`](#rd_status)
 - **Type Aliases:** [`kind`](#kind)
-- **Functions:** [`list`](#list), [`RD_IMAGE`](#rd_image), [`form`](#form), [`rdp_images_warning`](#rdp_images_warning), [`rd_free`](#rd_free), [`rd_count`](#rd_count), [`rd_at`](#rd_at), [`rd_box_count`](#rd_box_count), [`rd_box_at`](#rd_box_at), [`rd_cont_count`](#rd_cont_count), [`rd_cont_at`](#rd_cont_at), [`rd_kind_name`](#rd_kind_name), [`rd_block_tag`](#rd_block_tag), [`decision`](#decision), [`IMG_FAIL_OK`](#img_fail_ok), [`rd_input_label`](#rd_input_label), [`rd_input_invisible`](#rd_input_invisible)
+- **Functions:** [`list`](#list), [`RD_IMAGE`](#rd_image), [`form`](#form), [`rdp_images_warning`](#rdp_images_warning), [`rd_free`](#rd_free), [`rd_count`](#rd_count), [`rd_at`](#rd_at), [`rd_box_count`](#rd_box_count), [`rd_box_at`](#rd_box_at), [`rd_cont_count`](#rd_cont_count), [`rd_cont_at`](#rd_cont_at), [`rd_kind_name`](#rd_kind_name), [`rd_block_tag`](#rd_block_tag), [`rd_block_heading_level`](#rd_block_heading_level), [`decision`](#decision), [`IMG_FAIL_OK`](#img_fail_ok), [`rd_input_label`](#rd_input_label), [`rd_input_invisible`](#rd_input_invisible)
 
 ## Type Diagram
 
@@ -471,11 +471,35 @@ RD_HEADING -> "h1".."h6" (heading_level clamped to 1..6), RD_PARAGRAPH -> "p", R
 
 ---
 
+<a id="rd_block_heading_level"></a>
+
+### `rd_block_heading_level`
+
+`function` | [include/render_doc.h:345](../../include/render_doc.h#L345)
+
+```c
+int rd_block_heading_level(const rd_block *b);
+```
+
+Effective heading level of a block, 0 when it is not heading content.
+
+RD_HEADING yields its heading_level clamped to 1..6; an RD_LINK carrying heading_level >= 1 (an <a> wrapping or inside an <h2>) yields that level clamped, because the link only changes colour and underline -- the UA sheet still gives its text the heading's size and margins. Anything else, or NULL, yields 0. Pure and total.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `b` | `rd_block *` |  |  |
+
+**Returns:** `int`
+
+---
+
 <a id="decision"></a>
 
 ### `decision`
 
-`function` | [include/render_doc.h:341](../../include/render_doc.h#L341)
+`function` | [include/render_doc.h:348](../../include/render_doc.h#L348)
 
 ```c
 * decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char *rd_image_label(rdp_img_decision d);
@@ -495,7 +519,7 @@ RD_HEADING -> "h1".."h6" (heading_level clamped to 1..6), RD_PARAGRAPH -> "p", R
 
 ### `IMG_FAIL_OK`
 
-`function` | [include/render_doc.h:347](../../include/render_doc.h#L347)
+`function` | [include/render_doc.h:354](../../include/render_doc.h#L354)
 
 ```c
 * IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);
@@ -515,7 +539,7 @@ RD_HEADING -> "h1".."h6" (heading_level clamped to 1..6), RD_PARAGRAPH -> "p", R
 
 ### `rd_input_label`
 
-`function` `const` | [include/render_doc.h:352](../../include/render_doc.h#L352)
+`function` `const` | [include/render_doc.h:359](../../include/render_doc.h#L359)
 
 ```c
 const char *rd_input_label(int input_type);
@@ -539,7 +563,7 @@ Stable, short English name of a form control type (a pv_input_type value), e.g.
 
 ### `rd_input_invisible`
 
-`function` | [include/render_doc.h:357](../../include/render_doc.h#L357)
+`function` | [include/render_doc.h:364](../../include/render_doc.h#L364)
 
 ```c
 int rd_input_invisible(int input_type);

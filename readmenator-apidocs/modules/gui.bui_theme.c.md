@@ -16,6 +16,7 @@ flowchart LR
     n_gui_bui_theme_c__ui_theme_default(["ui_theme_default"])
     n_gui_bui_theme_c__ui_theme_sepia(["ui_theme_sepia"])
     n_gui_bui_theme_c__ui_theme_for(["ui_theme_for"])
+    n_include_css_h__css_ua_heading_em["css.css_ua_heading_em"]
     n_gui_bui_theme_c__rgb_from_packed(["rgb_from_packed"])
     n_src_css_color_c__cc_unpack["css_color.cc_unpack"]
     n_gui_bui_theme_c__ui_theme_dark --> n_gui_bui_theme_c__ui_theme_default
@@ -23,6 +24,7 @@ flowchart LR
     n_gui_bui_theme_c__ui_theme_for --> n_gui_bui_theme_c__ui_theme_dark
     n_gui_bui_theme_c__ui_theme_for --> n_gui_bui_theme_c__ui_theme_default
     n_gui_bui_theme_c__ui_theme_for --> n_gui_bui_theme_c__ui_theme_sepia
+    n_gui_bui_theme_c__ui_theme_default -.-> n_include_css_h__css_ua_heading_em
     n_gui_bui_theme_c__rgb_from_packed -.-> n_src_css_color_c__cc_unpack
 ```
 
@@ -32,7 +34,7 @@ flowchart LR
 
 ### `ui_theme_default`
 
-`function` | [gui/bui_theme.c:14](../../gui/bui_theme.c#L14)
+`function` | [gui/bui_theme.c:15](../../gui/bui_theme.c#L15)
 
 ```c
 ui_theme ui_theme_default(void)
@@ -42,6 +44,8 @@ The single source of truth for the look of the browser.
 
 **Returns:** `ui_theme`
 
+*Calls:* [`css_ua_heading_em`](include.css.h.md#css_ua_heading_em)
+
 *Called by:* [`ui_theme_dark`](#ui_theme_dark), [`ui_theme_for`](#ui_theme_for), [`ui_theme_sepia`](#ui_theme_sepia)
 
 ---
@@ -50,7 +54,7 @@ The single source of truth for the look of the browser.
 
 ### `ui_theme_dark`
 
-`function` | [gui/bui_theme.c:83](../../gui/bui_theme.c#L83)
+`function` | [gui/bui_theme.c:78](../../gui/bui_theme.c#L78)
 
 ```c
 ui_theme ui_theme_dark(void)
@@ -72,7 +76,7 @@ Shares all the metrics (font sizes, spacing) with the default theme; only the co
 
 ### `ui_theme_sepia`
 
-`function` | [gui/bui_theme.c:128](../../gui/bui_theme.c#L128)
+`function` | [gui/bui_theme.c:123](../../gui/bui_theme.c#L123)
 
 ```c
 ui_theme ui_theme_sepia(void)
@@ -94,7 +98,7 @@ Shares all the metrics with the default theme; only the colours change.
 
 ### `ui_theme_for`
 
-`function` | [gui/bui_theme.c:170](../../gui/bui_theme.c#L170)
+`function` | [gui/bui_theme.c:165](../../gui/bui_theme.c#L165)
 
 ```c
 ui_theme ui_theme_for(int mode)
@@ -120,7 +124,7 @@ The single place that maps the theme mode to a palette.
 
 ### `rgb_from_packed`
 
-`function` | [gui/bui_theme.c:179](../../gui/bui_theme.c#L179)
+`function` | [gui/bui_theme.c:174](../../gui/bui_theme.c#L174)
 
 ```c
 ui_rgb rgb_from_packed(int packed)
@@ -144,7 +148,7 @@ Converts a packed 0xRRGGBB author color into a theme RGB triple.
 
 ### `set_rgb`
 
-`function` | [gui/bui_theme.c:184](../../gui/bui_theme.c#L184)
+`function` | [gui/bui_theme.c:179](../../gui/bui_theme.c#L179)
 
 ```c
 void set_rgb(cairo_t *cr, ui_rgb c)

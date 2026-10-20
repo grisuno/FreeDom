@@ -2863,7 +2863,7 @@ static void test_load_view_codec_full_roundtrip(void **state) {
          * page_view leaves the colour on the run itself). The <p> above declares
          * opacity, which registers a box -- and a box paints its own background,
          * so its runs carry none. */
-        "<p style=\"background-color:#778899\">bgrun</p>"
+        "<p><span style=\"background-color:#778899\">bgrun</span></p>"
         "<img src=\"https://e.example/i.png\" width=\"40\" height=\"20\" alt=\"pic\">"
         "<div style=\"display:grid;grid-template-columns:100px 1fr\">"
         "<span style=\"grid-column:span 2\">grid</span></div>"

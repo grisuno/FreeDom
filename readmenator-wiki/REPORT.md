@@ -1,6 +1,6 @@
 # Audit Report
 
-*Project: freedom-0.0.3 | 2026-10-19 | offline, deterministic*
+*Project: freedom-0.0.3 | 2026-10-20 | offline, deterministic*
 
 ## Confidence Trail
 
@@ -8,16 +8,16 @@ Every edge is tagged. Extracted means parsed from source; inferred means derived
 
 | Confidence | Count | Meaning |
 |------------|-------|---------|
-| EXTRACTED | 527 | Resolved import edges parsed from source |
-| EXTRACTED | 1566 | Raw import statements (may include externals) |
+| EXTRACTED | 544 | Resolved import edges parsed from source |
+| EXTRACTED | 1606 | Raw import statements (may include externals) |
 | INFERRED | 5 | Surprising cross-community bridges |
 | AMBIGUOUS | 0 | No uncertain edges are emitted by the static scanner |
 
 ## Coverage
 
-- Files: 276, communities: 11
-- File doc coverage: 37/276
-- Orphans (no docs at any level): 64
+- Files: 284, communities: 11
+- File doc coverage: 40/284
+- Orphans (no docs at any level): 65
 - Layers detected: 6
 - Security findings: 0
 - Large files (>256KB, maybe generated): 4 (browser_ui.c, css.c, page_view.c, test_css.c)
@@ -31,7 +31,7 @@ Every edge is tagged. Extracted means parsed from source; inferred means derived
 
 ## Token Benchmark
 
-- Wiki index plus community pages estimate: ~195149 tokens (chars/4).
+- Wiki index plus community pages estimate: ~199154 tokens (chars/4).
 - Full re-read of every source file would cost strictly more on any non-trivial project; this wiki is the cheaper entry point.
 - Generation cost: $0, offline, no network calls.
 

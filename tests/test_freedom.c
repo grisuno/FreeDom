@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 /*
  * TDD suite for freedom CLI (Hito 5 integration).
  *
@@ -2362,6 +2363,199 @@ static void test_dump_layout_flex_item_sibling_boxes(void **state) {
 }
 
 
+/* A flex row with `width:100%` inside a centred flex COLUMN, next to an absolutely
+ * positioned sibling (a collapsed mobile menu): the absolute run must not veto the
+ * "the nested container IS the item" answer, or the row loses its declared width and
+ * shrinks to the menu's text -- every site header (GitHub, GitLab) collapsed to a
+ * 110px cluster in the middle of the page instead of spanning it. */
+static void test_dump_layout_oof_sibling_keeps_row_width(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>t</title><style>body{margin:0}"
+        ".bar{display:flex;flex-direction:column;align-items:center;padding:0 24px;position:relative}"
+        ".row{display:flex;justify-content:space-between;width:100%}"
+        ".b{border:1px solid #888;padding:4px 8px}"
+        ".menu{position:absolute;left:0;top:0;width:900px;padding-top:68px;display:flex;flex-direction:column}"
+        ".mi{display:flex;padding:12px;background:#000}"
+        "</style></head><body><div class=\"bar\"><div class=\"row\">"
+        "<div><button>=</button></div><a class=\"b\" href=\"/l\">Sign in</a></div>"
+        "<div class=\"menu\"><div class=\"mi\"><a href=\"/m\">Menu item</a></div></div></div><p>z</p></body></html>";
+    const char *path = "__freedom_oofrow.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_oofrow.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    int saw_row = 0;
+    for (char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, w, h;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &w, &h) == 6
+            && x == 24.0 && w == 952.0) saw_row = 1;
+    }
+    assert_true(saw_row);
+    unlink(path);
+}
+
+/* --as-host: the headless render takes its capabilities from the SAME derivation as the
+ * GUI (wc_derive over allow.conf/js.conf loaded by host_conf), so a host on allow.conf gets
+ * author CSS (presentation-trust) and an unlisted one does not. */
+static void test_as_host_uses_the_gui_derivation(void **state) {
+    (void)state;
+    char dir[64] = "/tmp/freedom_asgui_XXXXXX";
+    assert_non_null(mkdtemp(dir));
+    char conf[128];
+    snprintf(conf, sizeof conf, "%s/allow.conf", dir);
+    FILE *cf = fopen(conf, "w");
+    assert_non_null(cf);
+    fputs("listed.example\n", cf);
+    fclose(cf);
+    assert_int_equal(setenv("FREEDOM_HOSTS_DIR", dir, 1), 0);
+
+    const char *html = "<html><head><style>p{color:#ff0000}</style></head>"
+                       "<body><p>hello</p></body></html>";
+    const char *path = "__freedom_asgui.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    fputs(html, f);
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--as-host=listed.example --dump-dom __freedom_asgui.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "fg=#ff0000"));
+    assert_int_equal(run_freedom("--as-host=other.example --dump-dom __freedom_asgui.html",
+                                 out, sizeof out, &rc), 0);
+    assert_null(strstr(out, "fg=#ff0000"));
+    unsetenv("FREEDOM_HOSTS_DIR");
+    unlink(path);
+    unlink(conf);
+    rmdir(dir);
+}
+
+/* Every `width:auto` float shrinks to its own content (CSS 2.1 10.3.5), not only a LONE
+ * one: two free floats used to split the band evenly, so a left nav next to an (empty)
+ * right float got a sliver and its inline-block children collapsed to 1px -- slashdot's
+ * whole header. Firefox gives the left float 82px here (12 icon + 40 link + 30 padding). */
+static void test_dump_layout_two_auto_floats_shrink_to_fit(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>t</title><style>body{margin:0;font:13px/1.5 Arial,sans-serif}"
+        ".wrap{height:40px;background:#066}.p{float:left;padding:0 15px}"
+        ".p>ul,.p .btn{display:inline-block}.p .btn{background:#b7590b}"
+        ".p ul{margin:0;padding:0;list-style:none}"
+        ".sd{display:inline-block;width:12px;height:12px}"
+        ".r{float:right;padding-right:20px}</style></head><body><div class=\"wrap\">"
+        "<nav class=\"p\"><ul><li><a href=\"/s\"><i class=\"sd\"></i> </a></li></ul>"
+        "<a href=\"/sub\" class=\"btn\">Submit</a></nav>"
+        "<nav class=\"u\"><div><nav class=\"r\"></nav></div></nav></div><p>after</p></body></html>";
+    const char *path = "__freedom_twofloats.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    fputs(html, f);
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_twofloats.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    /* The left float's border box: 12 + ~40 + 30 padding, far from the 31px sliver. */
+    int saw_wide = 0;
+    for (char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, w, h;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &w, &h) == 6
+            && x == 0.0 && w > 75.0 && w < 90.0) saw_wide = 1;
+    }
+    assert_true(saw_wide);
+    unlink(path);
+}
+
+/* A float nested in a float with a background (slashdot's .nav-user > .nav-social) makes the
+ * band a DEFERRED column per founder. The left float's column width was read off the first
+ * run that carried a width -- the 12px icon inside it -- instead of shrinking to its content
+ * (the founder declares none), so the whole nav was laid out 12px wide. */
+static void test_dump_layout_deferred_float_column_shrinks_to_content(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>t</title><style>body{margin:0;font:13px/1.5 Arial,sans-serif}"
+        ".wrap{height:40px;background:#066}.p{float:left;padding:0 15px}"
+        ".p>ul,.p .btn{display:inline-block}.p .btn{background:#b7590b}"
+        ".p ul{margin:0;padding:0;list-style:none}"
+        ".sd{display:inline-block;width:12px;height:12px}"
+        ".u{float:right;background:#c60}.r{float:right;padding-right:20px}"
+        "</style></head><body><div class=\"wrap\">"
+        "<nav class=\"p\"><ul><li><a href=\"/s\"><i class=\"sd\"></i> </a></li></ul>"
+        "<a href=\"/sub\" class=\"btn\">Submit</a></nav>"
+        "<nav class=\"u\"><div><nav class=\"r\"></nav></div></nav></div><p>after</p></body></html>";
+    const char *path = "__freedom_deferfloat.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    fputs(html, f);
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_deferfloat.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    int saw_wide = 0;
+    for (char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, w, h;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &w, &h) == 6
+            && x == 0.0 && w > 75.0 && w < 90.0) saw_wide = 1;
+    }
+    assert_true(saw_wide);
+    unlink(path);
+}
+
+/* The page-level boxes around a float band (body, container, wrapper) must keep the PAGE's
+ * width: the deferred-column path used to reopen them at the float's own width (70% -> every
+ * ancestor 700px wide, the wrapper's declared height lost), so a header bar painted as a
+ * sliver. Here the nested float's founder sits in the SAME band, so nothing is pulled up. */
+static void test_dump_layout_float_band_keeps_wrapper_width(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>t</title><style>body{margin:0;font:13px/1.5 Arial,sans-serif;"
+        "padding:12px 1em 0}.container{margin:auto;max-width:100%;width:100%}"
+        ".wrap{height:40px;background:#066;position:relative;line-height:40px}"
+        ".p{float:left;padding:0 15px;width:70%}.u{float:right;width:25%}"
+        ".u ul{margin:0;padding:0;list-style:none}.u li{display:inline-block}"
+        ".r{float:right;padding-right:20px}</style></head><body><div class=\"container\">"
+        "<div class=\"wrap\"><nav class=\"p\">Stories</nav><nav class=\"u\"><div><ul>"
+        "<li><a href=\"/l\">Login</a></li></ul><nav class=\"r\"></nav></div></nav></div></div>"
+        "<p>after</p></body></html>";
+    const char *path = "__freedom_floatwrap.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    fputs(html, f);
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_floatwrap.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    int saw_wrap = 0;
+    for (char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, w, h;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &w, &h) == 6
+            && x == 13.0 && w == 974.0 && h == 40.0) saw_wrap = 1;
+    }
+    assert_true(saw_wrap);
+    unlink(path);
+}
+
 /* An undecorated flex <div> (a navbar dropdown wrapper) holding a PADDED flex <div>
  * with an overlay link: the padded box must open exactly ONCE. The enclosing list
  * item used to adopt it as its own root as well, applying its padding twice (the
@@ -3679,6 +3873,11 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_oof_subtree_real_layout),
         cmocka_unit_test(test_dump_layout_flex_item_sibling_boxes),
         cmocka_unit_test(test_dump_layout_flex_row_item_vmargin),
+        cmocka_unit_test(test_dump_layout_oof_sibling_keeps_row_width),
+        cmocka_unit_test(test_as_host_uses_the_gui_derivation),
+        cmocka_unit_test(test_dump_layout_two_auto_floats_shrink_to_fit),
+        cmocka_unit_test(test_dump_layout_deferred_float_column_shrinks_to_content),
+        cmocka_unit_test(test_dump_layout_float_band_keeps_wrapper_width),
         cmocka_unit_test(test_dump_layout_sticky_footer),
         cmocka_unit_test(test_dump_layout_nested_padded_item_opens_once),
         cmocka_unit_test(test_dump_layout_float_pct_widths_resolve_once),

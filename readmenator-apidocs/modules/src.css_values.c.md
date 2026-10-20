@@ -1,10 +1,10 @@
 # `src/css_values.c`
 
-> Source: [src/css_values.c:1](../../src/css_values.c#L1) | language `c` | coverage 12.5% | [API index](../index.md)
+> Source: [src/css_values.c:1](../../src/css_values.c#L1) | language `c` | coverage 22.2% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`cv_parse_color`](#cv_parse_color), [`cv_interp_color`](#cv_interp_color), [`cv_color_ok`](#cv_color_ok), [`cv_bg_alpha_of`](#cv_bg_alpha_of), [`cv_interp_bg`](#cv_interp_bg), [`cv_parse_color_t7`](#cv_parse_color_t7), [`cv_text_color`](#cv_text_color)
+- **Functions:** [`cv_parse_color`](#cv_parse_color), [`cv_interp_color`](#cv_interp_color), [`cv_color_ok`](#cv_color_ok), [`cv_bg_alpha_of`](#cv_bg_alpha_of), [`cv_interp_bg`](#cv_interp_bg), [`cv_parse_color_t7`](#cv_parse_color_t7), [`cv_text_color`](#cv_text_color), [`cv_filter_scale`](#cv_filter_scale)
 
 ## Call Graph
 
@@ -167,7 +167,7 @@ Sentinels (-1 invalid, CC_COLOR_CURRENT, CC_COLOR_TRANSPARENT) pass through unch
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`cv_parse_color_t7`](#cv_parse_color_t7) (include/css_values.h:19).
+> **Inherited:** Documentation from [`cv_parse_color_t7`](#cv_parse_color_t7) (include/css_values.h:24).
 
 *Calls:* [`cv_bg_alpha_of`](#cv_bg_alpha_of), [`cv_parse_color`](#cv_parse_color)
 
@@ -194,5 +194,31 @@ int cv_text_color(const char *v)
 **Returns:** `int`
 
 *Calls:* [`cv_parse_color_t7`](#cv_parse_color_t7)
+
+---
+
+<a id="cv_filter_scale"></a>
+
+### `cv_filter_scale`
+
+`function` | [src/css_values.c:231](../../src/css_values.c#L231)
+
+```c
+double cv_filter_scale(int pct)
+```
+
+The multiplier a filter() brightness/contrast/saturate percentage means (150 -> 1.5).
+
+The style stores 0 for "not declared" and 100 is the identity: both are exactly 1.0 -- the old `!= 100 ? pct/100 : 1` multiplied by ZERO for every undeclared one. Pure.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `pct` | `int` |  |  |
+
+**Returns:** `double`
+
+> **Inherited:** Documentation from [`cv_filter_scale`](#cv_filter_scale) (include/css_values.h:20).
 
 ---

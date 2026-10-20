@@ -1,5 +1,5 @@
 OpenStreetMap
-CSS drops: 61 declaration(s) dropped, 40 distinct
+CSS drops: 58 declaration(s) dropped, 37 distinct
   count  cause         property                     first value
       7  unknown-prop  text-underline-offset        .25em
       4  unknown-prop  -webkit-tap-highlight-color  rgba(0,0,0,0)
@@ -17,8 +17,6 @@ CSS drops: 61 declaration(s) dropped, 40 distinct
       1  bad-value     content                      counters(section, ".") ". "
       1  unknown-prop  counter-increment            section
       1  unknown-prop  text-decoration-skip-ink     none
-      1  unknown-prop  -webkit-mask-image           linear-gradient(130deg, #000 55%, rgba(0, 0, 0, 0.8) 75%, #000 95%)
-      1  unknown-prop  mask-image                   linear-gradient(130deg, #000 55%, rgba(0, 0, 0, 0.8) 75%, #000 95%)
       1  unknown-prop  -webkit-mask-size            200% 100%
       1  unknown-prop  mask-size                    200% 100%
       1  unknown-prop  -webkit-mask-position        -200% 0%
@@ -33,7 +31,6 @@ CSS drops: 61 declaration(s) dropped, 40 distinct
       1  unknown-prop  page-break-inside            avoid
       1  unknown-prop  -webkit-user-drag            none
       1  bad-value     image-rendering              -webkit-optimize-contrast
-      1  bad-value     mix-blend-mode               plus-lighter
       1  bad-value     text-align                   -webkit-match-parent
       1  unknown-prop  behavior                     url(#default#VML)
       1  bad-value     border-color                 inherit

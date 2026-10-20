@@ -249,9 +249,11 @@ fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
  *   min_content  the item's min-content size (its longest unbreakable word, or a
  *                replaced element's intrinsic size), in the same border-box+margin
  *                units as fx_item.basis. Negative is treated as 0.
- *   basis        the item's base size, used as the "specified size suggestion": the
- *                content-based minimum is clamped by it, so an item the author sized
- *                small is not inflated by one long word. Negative is treated as 0.
+ *   basis        the item's SPECIFIED size (its declared `width`, in the same units),
+ *                the "specified size suggestion": the content-based minimum is clamped
+ *                by it, so an item the author sized small is not inflated by one long
+ *                word. Negative means no specified size and leaves the minimum at
+ *                min-content; a flex-basis is NOT a specified size.
  *   author_min   the author's own `min-width` in px when they set one (min-width is
  *                then NOT `auto` and wins outright, larger OR smaller), or < 0 when
  *                unset.

@@ -585,12 +585,20 @@ static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque) {
     return m;
 }
 
+static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);
+static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque);
+
 void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,
                         js_module_fetch_fn fetch, void *host) {
     if (ctx == NULL) return;
     ctx->mod_resolve = resolve;
     ctx->mod_fetch = fetch;
     ctx->mod_host = host;
+    /* A dynamic import() from a CLASSIC script needs the loader too: installing it only in
+     * js_eval_module made every code-splitting bundle fail with "could not load module"
+     * until some module script had happened to run first. */
+    if (resolve != NULL && fetch != NULL)
+        JS_SetModuleLoaderFunc(ctx->rt, mod_normalize, mod_loader, ctx);
 }
 
 /* Fills res from the pending exception (or the given rejection value, which is

@@ -634,9 +634,12 @@ double fx_auto_min_size(double min_content, double basis, double author_min,
      * (or clipped) rather than forcing the box wider. */
     if (scroll_container) return 0.0;
     double mc = nn(min_content);
-    double b  = nn(basis);
+    /* No specified size (negative, or NaN): nothing clamps the content size
+     * suggestion. `flex:1 1 0%` has a flex-basis of 0 but no `width`, so the item
+     * keeps its min-content rather than collapsing with its base size. */
+    if (!(basis >= 0.0)) return mc;
     /* Content size suggestion, clamped by the specified size suggestion. */
-    return (mc < b) ? mc : b;
+    return (mc < basis) ? mc : basis;
 }
 
 fx_status fx_multicol_used(double avail_w, int column_count, double column_width,

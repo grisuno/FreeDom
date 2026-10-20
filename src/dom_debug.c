@@ -149,6 +149,7 @@ static const char *dd_mix_blend_name(int m) {
         case CSS_MB_SATURATION:  return "saturation";
         case CSS_MB_COLOR:       return "color";
         case CSS_MB_LUMINOSITY:  return "luminosity";
+        case CSS_MB_PLUS_LIGHTER: return "plus-lighter";
         default:                  return "normal";
     }
 }
@@ -300,6 +301,8 @@ static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b) {
      * pattern as the other stacking-context signals above. */
     if (b->mix_blend > CSS_MB_NORMAL)
         dd_printf(c, " mix-blend=%s", dd_mix_blend_name(b->mix_blend));
+    if (b->mask_n > 0)
+        dd_printf(c, " mask=%d%s", b->mask_n, b->mask_ref1 > 0 ? "(inherited)" : "");
     if (b->isolation == CSS_ISO_ISOLATE) dd_puts(c, " isolate");
     /* transform (M1.2 translate; M1.2b scale/rotate): printed only when set. */
     if (b->transform_tx != PV_LEN_UNSET || b->transform_ty != PV_LEN_UNSET)

@@ -2200,6 +2200,91 @@ static void test_trusted_send_beacon(void **state) {
     assert_string_equal(net.body, "k=v");
 }
 
+/* The real navigator is non-extensible (anti-fp), yet analytics code patches it the way it
+ * would a normal object: `navigator.sendBeacon = function(){...}` (old.reddit's bootstrap
+ * module). A plain data property on the prototype made that strict-mode write throw
+ * "object is not extensible"; an accessor with a setter takes the override without
+ * making the navigator extensible. */
+static void test_trusted_send_beacon_can_be_patched(void **state) {
+    fixture *f = (fixture *)*state;
+    fake_net net; memset(&net, 0, sizeof net);
+    EXPECT(f, "__G.navigator=Object.preventExtensions(Object.create({})); typeof navigator", "object");
+    assert_int_equal(jd_install_xhr(f->ctx, fake_fetch, &net), JD_OK);
+    EXPECT(f, "(function(){'use strict'; var o=navigator.sendBeacon;"
+              " navigator.sendBeacon=function(){return 'patched';};"
+              " return navigator.sendBeacon()+','+typeof o;})()", "patched,function");
+    /* the navigator itself stays non-extensible, and no own property appeared */
+    EXPECT(f, "[Object.isExtensible(navigator),Object.keys(navigator).length].join(',')", "false,0");
+}
+
+/* --- Custom Elements v1 (spec/js_custom_elements.md) --- */
+
+/* The constructor runs when the page creates an element it has defined. */
+static void test_ce_create_runs_constructor(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "(function(){ class XBox extends HTMLElement { constructor(){ super(); this.delegate={k:1}; } }"
+              " customElements.define('x-box', XBox); var e=document.createElement('x-box');"
+              " return [e instanceof XBox, e instanceof HTMLElement, e.delegate&&e.delegate.k,"
+              " e.tagName.toLowerCase(), customElements.get('x-box')===XBox, e.constructor===XBox].join(','); })()",
+           "true,true,1,x-box,true,true");
+}
+
+/* An element already in the document is upgraded when its tag gets defined. */
+static void test_ce_define_upgrades_existing(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "(function(){ document.getElementById('main').innerHTML='<x-up id=\"u1\" a=\"1\"></x-up>';"
+              " var seen=[]; class XUp extends HTMLElement { constructor(){ super(); this.ran=1; }"
+              " static get observedAttributes(){ return ['a']; }"
+              " attributeChangedCallback(n,o,v){ seen.push(n+':'+o+'>'+v); } }"
+              " customElements.define('x-up', XUp); var u=document.getElementById('u1');"
+              " return [u.ran, u instanceof XUp, seen.join('|')].join(','); })()", "1,true,a:null>1");
+}
+
+/* connected / disconnected follow the element's presence in the document. */
+static void test_ce_connected_callbacks(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "(function(){ var log=[]; class XC extends HTMLElement {"
+              " connectedCallback(){ log.push('c'); } disconnectedCallback(){ log.push('d'); } }"
+              " customElements.define('x-c', XC); var e=document.createElement('x-c'); __ceFlush();"
+              " log.push('made'); var m=document.getElementById('main'); m.appendChild(e); __ceFlush();"
+              " m.removeChild(e); __ceFlush(); return log.join(','); })()", "made,c,d");
+}
+
+static void test_ce_attribute_changed(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "(function(){ var log=[]; class XA extends HTMLElement {"
+              " static get observedAttributes(){ return ['v']; }"
+              " attributeChangedCallback(n,o,v){ log.push(n+':'+o+'>'+v); } }"
+              " customElements.define('x-a', XA); var e=document.createElement('x-a');"
+              " document.getElementById('main').appendChild(e); __ceFlush();"
+              " e.setAttribute('v','1'); __ceFlush(); e.setAttribute('v','2'); __ceFlush();"
+              " e.setAttribute('other','z'); __ceFlush(); return log.join('|'); })()", "v:null>1|v:1>2");
+}
+
+/* Insertion, removal and innerHTML reconcile at once: a script that appends an element and
+ * reads its state on the next line sees the connectedCallback already done. */
+static void test_ce_sync_on_mutation(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "(function(){ var log=[]; class XS extends HTMLElement {"
+              " connectedCallback(){ log.push('c'); } disconnectedCallback(){ log.push('d'); } }"
+              " customElements.define('x-s', XS); var m=document.getElementById('main');"
+              " var e=document.createElement('x-s'); m.appendChild(e); log.push('appended');"
+              " m.removeChild(e); log.push('removed');"
+              " m.innerHTML='<x-s></x-s>'; log.push('html');"
+              " return log.join(','); })()", "c,appended,d,removed,c,html");
+}
+
+static void test_ce_define_validation(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "(function(){ var r=[];"
+              " try{ customElements.define('nohyphen', class extends HTMLElement{}); }catch(e){ r.push(e.name); }"
+              " customElements.define('x-d', class extends HTMLElement{});"
+              " try{ customElements.define('x-d', class extends HTMLElement{}); }catch(e){ r.push(e.name); }"
+              " try{ new HTMLElement(); }catch(e){ r.push(e.name); }"
+              " r.push(customElements.whenDefined('x-d') instanceof Promise);"
+              " return r.join(','); })()", "SyntaxError,NotSupportedError,TypeError,true");
+}
+
 /* Dedicated Worker in its own realm (spec/js_dom.md 7i). */
 static void pump_ticks(fixture *f, int n) {
     for (int i = 0; i < n; ++i) {
@@ -2576,6 +2661,13 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_trusted_fetch_request_response, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ext_is_equal_node, setup, teardown),
         cmocka_unit_test_setup_teardown(test_text_nodes_are_real, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_trusted_send_beacon_can_be_patched, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_ce_create_runs_constructor, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_ce_define_upgrades_existing, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_ce_connected_callbacks, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_ce_attribute_changed, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_ce_sync_on_mutation, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_ce_define_validation, setup, teardown),
         cmocka_unit_test_setup_teardown(test_trusted_send_beacon, setup, teardown),
         cmocka_unit_test_setup_teardown(test_trusted_worker, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_shim_no_video, setup, teardown),

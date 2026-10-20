@@ -6,6 +6,7 @@
  * truth for every font size, spacing and colour the renderer and chrome use.
  */
 
+#include "css.h"
 #include "browser_ui_internal.h"
 
 #include "css_color.h"
@@ -17,13 +18,7 @@ ui_theme ui_theme_default(void) {
     /* CSS 2.1 App. D / the HTML user-agent sheet, so a heading measures what it
      * measures in a real browser: an <h4> is body size, not 1.2x of it.
      * spec/box_style.md "Metricas UA del tema". */
-    t.heading_scale[0] = 1.0;
-    t.heading_scale[1] = 2.0;
-    t.heading_scale[2] = 1.5;
-    t.heading_scale[3] = 1.17;
-    t.heading_scale[4] = 1.0;
-    t.heading_scale[5] = 0.83;
-    t.heading_scale[6] = 0.67;
+    for (int lv = 0; lv <= 6; ++lv) t.heading_scale[lv] = css_ua_heading_em(lv);
     /* `line-height: normal` IS the font's natural line box -- the scaled
      * ascent+descent the painter already sums -- so the multiplier on top of it is
      * 1.0, not a taste. At 1.2 every line of every page without an author

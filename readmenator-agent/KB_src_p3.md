@@ -1,5 +1,51 @@
-# Subsystem: src (page 3 of 8)
+# Subsystem: src (page 3 of 9)
 Previous: [KB_src_p2.md](KB_src_p2.md)
+
+## src/css_gradient.c
+- Doc: find_gradient_call: Locates a gradient function call `fn` (e.g. "linear-gradient(") in v...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `cg_parse_num` (function, line 13) `static int cg_parse_num(const char *s, double *out, const char **endp)`
+  - `cg_wide_keyword` (function, line 18) `static int cg_wide_keyword(const char *v)`
+  - `gradient` (function, line 28) `* or fewer than 2 stops drop the gradient (and, for the `background` shorthand,
+ * the whole decl...`
+  - `find_gradient_call` (function, line 77) `static int find_gradient_call(const char *v, const char *fn, size_t *start,
+                     ...`
+  - `conic_prelude` (function, line 111) `static int conic_prelude(const char *seg, int *angle)`
+  - `grad_stop_pos` (function, line 153) `static int grad_stop_pos(const char *pp, int conic, const char **endp)`
+  - `CSS_GRAD_STOPS_MAX` (function, line 184) `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
+ * the gradient fai...`
+  - `emit_gradient` (function, line 291) `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
+                         ...`
+  - `find_radial_gradient` (function, line 348) `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
+                      ...`
+  - `emit_radial_geom` (function, line 387) `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)`
+  - `downstream` (function, line 404) `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
+int cg_expand_bg_imag...`
+  - `bg_layer_tokens_ok` (function, line 472) `static int bg_layer_tokens_ok(const char *s)`
+  - `cg_expand_background` (function, line 512) `int cg_expand_background(const char *val, css_decl *dst, int cap,
+                             ch...`
+  - `rad_ieq` (function, line 600) `static int rad_ieq(const char *a, const char *b)`
+  - `rad_len` (function, line 608) `static int rad_len(const char *tok, int *enc)`
+  - `rad_is_len_start` (function, line 629) `static int rad_is_len_start(const char *t)`
+  - `rad_pos_kw` (function, line 634) `static int rad_pos_kw(const char *t, int *axis)`
+  - `rad_parse_position` (function, line 643) `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
+  - `cg_parse_radial_prelude` (function, line 672) `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
+  - `cg_radial_len_px` (function, line 748) `double cg_radial_len_px(int enc, double dim)`
+  - `cg_dmin` (function, line 757) `static double cg_dmin(double a, double b)`
+  - `cg_dmax` (function, line 758) `static double cg_dmax(double a, double b)`
+  - `cg_radial_geometry` (function, line 760) `void cg_radial_geometry(const cg_radial *r, double w, double h,
+                        double *c...`
+  - `cg_parse_linear` (function, line 797) `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
+  - `pool` (function, line 400) `* pool (gradient explicitly reset);`
+  - `declaration` (function, line 465) `* declaration (fail closed);`
+  - `CG_RAD_TOKENS` (macro, line 596) `#define CG_RAD_TOKENS`
+  - `CG_RAD_PM_MAX` (macro, line 597) `#define CG_RAD_PM_MAX`
+  - `CG_RAD_PX_MAX` (macro, line 598) `#define CG_RAD_PX_MAX`
+  - `CG_RAD_FLOOR` (macro, line 754) `#define CG_RAD_FLOOR`
+  - `CG_SQRT2` (macro, line 755) `#define CG_SQRT2`
+- Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/css_index.c
 - Doc: css_index -- see include/css_index.h and spec/css_index.md.
@@ -46,6 +92,25 @@ Previous: [KB_src_p2.md](KB_src_p2.md)
   - `cl_lp_used` (function, line 395) `double cl_lp_used(cl_lp lp, double basis)`
   - `CL_PX_PER_IN` (macro, line 21) `#define CL_PX_PER_IN`
 - Depends on: `include/css.h`, `include/css_length.h`
+
+## src/css_mask.c
+- Doc: split: out->kind = 1; out->nst = (meta >> 4) & 0xf; if (out->nst < 2) out->nst = 2; if (out->nst...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `ieq` (function, line 11) `static int ieq(const char *a, const char *b)`
+  - `cm_is_mask_prop` (function, line 17) `int cm_is_mask_prop(const char *prop)`
+  - `cm_encode_layer` (function, line 24) `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss)`
+  - `cm_decode_layer` (function, line 45) `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)`
+  - `split` (function, line 63) `static int split(const char *s, int comma, char (*out)[CM_TOK_MAX], int max)`
+  - `composite_word` (function, line 90) `static int composite_word(const char *t, int webkit)`
+  - `clip_word` (function, line 104) `static int clip_word(const char *t)`
+  - `image_layer` (function, line 112) `static int image_layer(const char *tok, cm_layer *l)`
+  - `emit_layers` (function, line 130) `static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val)`
+  - `cm_expand` (function, line 181) `int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)`
+  - `CM_TOK_MAX` (macro, line 8) `#define CM_TOK_MAX`
+  - `CM_MAX_TOKS` (macro, line 9) `#define CM_MAX_TOKS`
+- Depends on: `include/css_gradient.h`, `include/css_mask.h`
 
 ## src/css_mq.c
 - Doc: read_word: static int is_space(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r'...
@@ -165,6 +230,7 @@ Previous: [KB_src_p2.md](KB_src_p2.md)
   - `cv_interp_bg` (function, line 160) `int cv_interp_bg(const char *v)`
   - `cv_parse_color_t7` (function, line 205) `int cv_parse_color_t7(const char *v)`
   - `cv_text_color` (function, line 222) `int cv_text_color(const char *v)`
+  - `cv_filter_scale` (function, line 231) `double cv_filter_scale(int pct)`
 - Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/css_vars.c
@@ -336,17 +402,17 @@ static dom_node_id qs_walk(const dom_inde...`
   - `dd_position_name` (function, line 118) `static const char *dd_position_name(int p)`
   - `dd_visibility_name` (function, line 129) `static const char *dd_visibility_name(int v)`
   - `dd_mix_blend_name` (function, line 137) `static const char *dd_mix_blend_name(int m)`
-  - `dd_overflow_name` (function, line 156) `static const char *dd_overflow_name(int o)`
-  - `dd_cursor_name` (function, line 165) `static const char *dd_cursor_name(int c)`
-  - `dd_text_overflow_name` (function, line 198) `static const char *dd_text_overflow_name(int t)`
-  - `dd_inset` (function, line 203) `static int dd_inset(int v)`
-  - `dd_object_fit_name` (function, line 207) `static const char *dd_object_fit_name(int o)`
-  - `dd_image_rendering_name` (function, line 218) `static const char *dd_image_rendering_name(int r)`
-  - `dd_border_style_name` (function, line 227) `static const char *dd_border_style_name(int s)`
-  - `dd_box_line` (function, line 260) `static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b)`
-  - `dd_block_line` (function, line 320) `static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b)`
-  - `dd_format` (function, line 396) `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
-  - `dd_format_css` (function, line 428) `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)`
+  - `dd_overflow_name` (function, line 157) `static const char *dd_overflow_name(int o)`
+  - `dd_cursor_name` (function, line 166) `static const char *dd_cursor_name(int c)`
+  - `dd_text_overflow_name` (function, line 199) `static const char *dd_text_overflow_name(int t)`
+  - `dd_inset` (function, line 204) `static int dd_inset(int v)`
+  - `dd_object_fit_name` (function, line 208) `static const char *dd_object_fit_name(int o)`
+  - `dd_image_rendering_name` (function, line 219) `static const char *dd_image_rendering_name(int r)`
+  - `dd_border_style_name` (function, line 228) `static const char *dd_border_style_name(int s)`
+  - `dd_box_line` (function, line 261) `static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b)`
+  - `dd_block_line` (function, line 323) `static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b)`
+  - `dd_format` (function, line 399) `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
+  - `dd_format_css` (function, line 431) `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`
 
 ## src/download.c
@@ -402,74 +468,30 @@ static dom_node_id qs_walk(const dom_inde...`
                 ...`
   - `fx_auto_min_size` (function, line 628) `double fx_auto_min_size(double min_content, double basis, double author_min,
                     ...`
-  - `fx_multicol_used` (function, line 642) `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
+  - `fx_multicol_used` (function, line 645) `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
                ...`
-  - `fx_multicol_balance` (function, line 679) `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
+  - `fx_multicol_balance` (function, line 682) `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
                         ...`
-  - `fx_justify_name` (function, line 710) `const char *fx_justify_name(fx_justify j)`
-  - `fx_column_place` (function, line 722) `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
+  - `fx_justify_name` (function, line 713) `const char *fx_justify_name(fx_justify j)`
+  - `fx_column_place` (function, line 725) `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
             ...`
-  - `fx_column_place_m` (function, line 729) `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
+  - `fx_column_place_m` (function, line 732) `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
               ...`
-  - `fx_cross_offset` (function, line 790) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)`
-  - `gl_ws` (function, line 802) `static int gl_ws(char c)`
-  - `gl_lower` (function, line 806) `static int gl_lower(char c)`
-  - `gl_kw` (function, line 809) `static int gl_kw(const char *p, const char *end, const char *kw)`
-  - `gl_int` (function, line 819) `static int gl_int(const char *p, const char *end, long cap, long *out)`
-  - `gl_side_range` (function, line 834) `static int gl_side_range(const char *p, const char *end, int *out)`
-  - `fx_grid_line_side` (function, line 857) `int fx_grid_line_side(const char *s, int *out)`
-  - `fx_grid_line_parse` (function, line 865) `int fx_grid_line_parse(const char *v, int *start, int *end)`
-  - `gl_is_span` (function, line 882) `static int gl_is_span(int v)`
-  - `gl_is_line` (function, line 883) `static int gl_is_line(int v)`
-  - `fx_grid_line_resolve` (function, line 885) `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
-  - `fx_col_free_split` (function, line 927) `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
+  - `fx_cross_offset` (function, line 793) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)`
+  - `gl_ws` (function, line 805) `static int gl_ws(char c)`
+  - `gl_lower` (function, line 809) `static int gl_lower(char c)`
+  - `gl_kw` (function, line 812) `static int gl_kw(const char *p, const char *end, const char *kw)`
+  - `gl_int` (function, line 822) `static int gl_int(const char *p, const char *end, long cap, long *out)`
+  - `gl_side_range` (function, line 837) `static int gl_side_range(const char *p, const char *end, int *out)`
+  - `fx_grid_line_side` (function, line 860) `int fx_grid_line_side(const char *s, int *out)`
+  - `fx_grid_line_parse` (function, line 868) `int fx_grid_line_parse(const char *v, int *start, int *end)`
+  - `gl_is_span` (function, line 885) `static int gl_is_span(int v)`
+  - `gl_is_line` (function, line 886) `static int gl_is_line(int v)`
+  - `fx_grid_line_resolve` (function, line 888) `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
+  - `fx_col_free_split` (function, line 930) `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
         ...`
   - `FX_EPS` (macro, line 16) `#define FX_EPS`
 - Depends on: `include/flex_layout.h`
-
-## src/form.c
-- Doc: put_char: No I/O, no global state.
-- Layer: utility
-- Language: c
-- Symbols:
-  - `put_char` (function, line 17) `static int put_char(char *out, size_t outsz, size_t *pos, char c)`
-  - `enc_component` (function, line 25) `static int enc_component(const char *s, char *out, size_t outsz, size_t *pos)`
-  - `fm_encode` (function, line 43) `fm_status fm_encode(const fm_field *fields, size_t n,
-                    char *out, size_t outsz...`
-  - `copy_fit` (function, line 66) `static int copy_fit(char *dst, size_t dstsz, const char *src)`
-  - `clean_action` (function, line 75) `static int clean_action(const char *action, char *out, size_t outsz)`
-  - `strip_query` (function, line 93) `static void strip_query(char *url)`
-  - `resolve_target` (function, line 101) `static fm_block_reason resolve_target(const char *base, const char *act,
-                        ...`
-  - `fm_build` (function, line 120) `fm_status fm_build(const char *base, const char *action, fm_method method,
-                   con...`
-- Depends on: `include/form.h`
-
-## src/frame_clock.c
-- Layer: utility
-- Language: c
-- Symbols:
-  - `fc_set_active` (function, line 16) `void fc_set_active(fc_clock *c, int active)`
-  - `fc_needs_tick` (function, line 21) `int fc_needs_tick(const fc_clock *c)`
-  - `fc_interval_ms` (function, line 26) `int fc_interval_ms(const fc_clock *c)`
-  - `FC_DEFAULT_INTERVAL_MS` (macro, line 8) `#define FC_DEFAULT_INTERVAL_MS`
-- Depends on: `include/frame_clock.h`
-
-## src/freebug.c
-- Layer: utility
-- Language: c
-- Symbols:
-  - `fb_buffer_init` (function, line 15) `void fb_buffer_init(fb_buffer *b)`
-  - `fb_buffer_push` (function, line 19) `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)`
-  - `fb_buffer_push_loc` (function, line 23) `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,
-                   ...`
-  - `fb_buffer_reset` (function, line 78) `void fb_buffer_reset(fb_buffer *b)`
-  - `fb_buffer_free` (function, line 91) `void fb_buffer_free(fb_buffer *b)`
-  - `fb_buffer_count` (function, line 101) `size_t fb_buffer_count(const fb_buffer *b)`
-  - `fb_buffer_at` (function, line 105) `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)`
-  - `fb_level_name` (function, line 110) `const char *fb_level_name(int level)`
-  - `whole` (function, line 5) `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);`
-- Depends on: `include/freebug.h`
 
 
 Next: [KB_src_p4.md](KB_src_p4.md)

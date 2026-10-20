@@ -1081,7 +1081,11 @@ static int generates_box_style(lxb_tag_id_t t, const css_style *cs) {
  * inline while still being eligible for box registration. */
 static int causes_block_break(lxb_tag_id_t t, css_display display) {
     if (display == CSS_DISP_INLINE || display == CSS_DISP_INLINE_BLOCK) return 0;
-    if (display == CSS_DISP_BLOCK) return 1;
+    /* A flex or grid container (and a list item) is block-LEVEL whatever its tag
+     * (CSS Display 3 section 2): the text of `<a style=display:flex>` belongs to
+     * the <a>, not to the block around it. */
+    if (display == CSS_DISP_BLOCK || display == CSS_DISP_FLEX ||
+        display == CSS_DISP_GRID || display == CSS_DISP_LIST_ITEM) return 1;
     return is_block_tag(t);
 }
 
@@ -2016,6 +2020,10 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->bg_image_url2[PV_BG_URL_MAX - 1] = '\0';
     for (int k = 0; k < 4; ++k) d->bg_grad_pos[k] = cs->bg_grad_pos[k];
     d->bg_grad_radial = cs->bg_grad_radial;
+    d->bg_rad_size = cs->bg_rad_size; d->bg_rad_cx = cs->bg_rad_cx; d->bg_rad_cy = cs->bg_rad_cy;
+    d->bg_rad_rx = cs->bg_rad_rx; d->bg_rad_ry = cs->bg_rad_ry;
+    d->mask_n = cs->mask_n; d->mask_comp = cs->mask_comp; d->mask_clip = cs->mask_clip;
+    for (int mk = 0; mk < 6; ++mk) d->mask_w[mk] = cs->mask_w[mk];
     d->bg_size = cs->bg_size;
     d->bg_repeat = cs->bg_repeat;
     /* background-clip:text (2026-07-19): the background lives INSIDE the
@@ -2493,7 +2501,17 @@ static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sh
     for (size_t k = n; k-- > 0; ) {
         cvr_table own = { 0 };
         cs = cch_element_style_vars(stack[k], sheet, inherited, vars, &own);
-        inherited = css_computed_font_size(&cs, inherited);
+        {
+            size_t tl = 0;
+            const lxb_char_t *tn = lxb_dom_element_local_name(stack[k], &tl);
+            char tg[8];
+            const char *tagp = NULL;
+            if (tn != NULL && tl == 2 && (tn[0] == 'h' || tn[0] == 'H')) {
+                tg[0] = 'h'; tg[1] = (char)tn[1]; tg[2] = '\0';
+                tagp = tg;
+            }
+            inherited = css_computed_font_size_for_tag(&cs, inherited, tagp);
+        }
         cb_h = pv_resolve_block_sizes(&cs, cb_h);
         vars = pv_var_push(cache, &own, vars);
         pv_cache_put(cache, (const lxb_dom_node_t *)stack[k], &cs, inherited, vars, cb_h);
@@ -2585,6 +2603,20 @@ static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_st
         r->def[id].bg_rgb = inherited_text_color(node, sheet, cache);
     if (id >= 0 && r->count > before && cs->display == CSS_DISP_INLINE_BLOCK)
         r->def[id].line_align = inherited_line_align(node, sheet, cache);
+    /* The <body> background is the canvas background unless <html> declares one (Backgrounds
+     * 3 2.11.2): mark the box so the painter lays it behind everything. */
+    if (id >= 0 && r->count > before && node != NULL &&
+        node->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(node) == LXB_TAG_BODY &&
+        cs->background >= 0) {
+        int html_has_bg = 0;
+        const lxb_dom_node_t *par = node->parent;
+        if (par != NULL && par->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            css_style hs = cached_element_style(
+                lxb_dom_interface_element((lxb_dom_node_t *)par), sheet, cache);
+            html_has_bg = (hs.background >= 0 || hs.bg_grad_n >= 2);
+        }
+        r->def[id].canvas_bg = html_has_bg ? 0 : 1;
+    }
     if (id >= 0 && r->count > before) {
         int grow = 0;
         r->def[id].col_mauto = col_free_share(node, cs, sheet, cache, &grow);
@@ -3009,7 +3041,14 @@ static int is_inline_block_row(const lxb_dom_node_t *p, const css_sheet *sheet,
 static int pv_element_has_before(lxb_dom_node_t *n, const css_sheet *sheet,
                                  pv_style_cache *cache) {
     css_style ecs = cached_element_style(lxb_dom_interface_element(n), sheet, cache);
-    return ecs.content_before_str[0] != '\0';
+    if (ecs.content_before_str[0] != '\0') return 1;
+    /* `content:""` generates a BOX when the pseudo has a style of its own (a glow, a frame,
+     * an aspect-ratio spacer): the string is empty but the element does own ::before. A host
+     * with no text of its own has no text node to fire it from. */
+    if (!ecs.content_before_on) return 0;
+    css_style bps = cached_pseudo_style(lxb_dom_interface_element(n), sheet, cache,
+                                        CSS_PSEUDO_BEFORE);
+    return bps.display != CSS_DISP_NONE && pseudo_generates_box(&bps);
 }
 
 /* Depth cap for subtree_has_own_text: attacker-controlled nesting fails open to
@@ -3071,6 +3110,7 @@ static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *she
  * cell must not carry its own box (the painter flushes the line at every box
  * transition -- a per-cell box would split the row). */
 struct pv_flow_reg;
+static bx_table_role node_table_role(const lxb_dom_node_t *n, const struct pv_flow_reg *fr);
 static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
                               struct pv_flow_reg *fr);
 
@@ -3381,6 +3421,15 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             if (box_reg != NULL) {
                 int gen = generates_box_style(t, &cs);
                 int has_deco = css_has_boxdeco(&cs);
+                /* A block paints its own BORDER BOX (CSS 2.1 14.2.1): a `background-color`
+                 * alone is decoration. Left on the runs it is only a band behind the lines
+                 * of text, so a wrapper whose content is all floats or boxes (slashdot's
+                 * `body > section{background:#fff}`) painted nothing and the page showed
+                 * the body colour through it. */
+                if (!has_deco && cs.background >= 0 &&
+                    (cs.bg_alpha == CSS_LEN_UNSET || cs.bg_alpha > 0) &&
+                    node_table_role((const lxb_dom_node_t *)p, flowreg) == BX_TROLE_NONE)
+                    has_deco = 1;
                 int cgrow = 0;
                 if (gen && has_deco) {
                     want_box = 1;
@@ -6597,6 +6646,24 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     /* Box engine (Step D): publish the box tree. box_reg holds one def per
      * box-carrying block in document order (id == index) with parent links resolved
      * during the ancestor walks; copy them into the view in id order. */
+    /* A mask covers its element's whole SUBTREE (CSS Masking 1 3): every box below a masked
+     * box that declares none of its own inherits it, remembering which box owns the geometry. */
+    for (size_t bi = 0; bi < box_reg.count; ++bi) {
+        if (box_reg.def[bi].mask_n > 0) continue;
+        int up = box_reg.def[bi].parent_id;
+        for (int guard = 0; up >= 0 && (size_t)up < box_reg.count && guard < 64; ++guard) {
+            const pv_box_def *ad = &box_reg.def[up];
+            if (ad->mask_n > 0 && ad->mask_ref1 == 0) {
+                box_reg.def[bi].mask_n = ad->mask_n;
+                box_reg.def[bi].mask_comp = ad->mask_comp;
+                box_reg.def[bi].mask_clip = ad->mask_clip;
+                for (int mk = 0; mk < 6; ++mk) box_reg.def[bi].mask_w[mk] = ad->mask_w[mk];
+                box_reg.def[bi].mask_ref1 = up + 1;
+                break;
+            }
+            up = ad->parent_id;
+        }
+    }
     for (size_t bi = 0; bi < box_reg.count; ++bi) {
         box_reg.def[bi].node_id = pv_node_map_id(&node_map, box_reg.node[bi]);
         pv_status st = pv_add_box_def(v, &box_reg.def[bi]);

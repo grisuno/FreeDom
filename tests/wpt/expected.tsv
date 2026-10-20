@@ -72,12 +72,12 @@ css-overflow/flex-column-container-with-scrollable-descendant.html	1.65
 css-overflow/flex-container-multiple-items-with-scrollable-descendant.html	1.61
 css-overflow/flex-container-with-scrollable-descendant.html	1.65
 css-overflow/flex-nested-container-with-scrollable-descendant.html	2.01
-css-overflow/float-with-scrollable-descendant.html	0.00
+css-overflow/float-with-scrollable-descendant.html	9.61
 css-overflow/grid-container-with-scrollable-descendant.html	1.45
 css-overflow/grid-nested-container-with-scrollable-descendant.html	1.42
 css-overflow/incremental-scroll-002.html	0.00
 css-overflow/incremental-scroll.html	0.00
-css-overflow/inline-block-with-scrollable-descendant.html	0.00
+css-overflow/inline-block-with-scrollable-descendant.html	9.28
 css-sizing/abspos-stretch-indefinite-cb.html	0.17
 css-sizing/abspos-stretch-replaced-percentage-child.html	0.30
 css-sizing/auto-scrollbar-inside-stf-abspos.html	1.51

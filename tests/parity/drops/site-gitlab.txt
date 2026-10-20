@@ -1,8 +1,8 @@
 GitLab - Speed with control for agentic software engineering
-CSS drops: 59 declaration(s) dropped, 23 distinct
+CSS drops: 51 declaration(s) dropped, 21 distinct
   count  cause         property                     first value
-      6  unknown-prop  -webkit-mask-image           linear-gradient(#000,#000),url(https://res.cloudinary.com/about-gitlab-com/image/upload/v178...
-      6  unknown-prop  mask-image                   linear-gradient(#000,#000),url(https://res.cloudinary.com/about-gitlab-com/image/upload/v178...
+      5  bad-value     -webkit-mask-image           linear-gradient(#000,#000),url(https://res.cloudinary.com/about-gitlab-com/image/upload/v178...
+      5  bad-value     mask-image                   linear-gradient(#000,#000),url(https://res.cloudinary.com/about-gitlab-com/image/upload/v178...
       4  unknown-prop  -webkit-mask-position        center bottom,center bottom
       4  unknown-prop  mask-position                center bottom,center bottom
       4  unknown-prop  -o-object-position           top left
@@ -11,8 +11,6 @@ CSS drops: 59 declaration(s) dropped, 23 distinct
       3  unknown-prop  mask-repeat                  no-repeat,no-repeat
       3  unknown-prop  -webkit-mask-size            100% 100%,100% 100%
       3  unknown-prop  mask-size                    100% 100%,100% 100%
-      3  unknown-prop  -webkit-mask-composite       xor
-      3  unknown-prop  mask-composite               exclude
       2  unknown-prop  will-change                  transform
       2  unknown-prop  scroll-padding-inline-start  16px
       1  bad-value     grid-template-rows           none

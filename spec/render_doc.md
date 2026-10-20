@@ -134,6 +134,15 @@ Etiqueta HTML canónica del bloque, para que la capa de presentación consulte s
 (banner del UA, no es un elemento HTML) y un bloque `NULL` devuelven `NULL`. Cadena estática (no
 se posee). Pura y determinista.
 
+### `rd_block_heading_level`
+Nivel de encabezado EFECTIVO de un bloque (0 = no es encabezado). `RD_HEADING` devuelve su
+`heading_level` acotado a 1..6; un `RD_LINK` con `heading_level >= 1` devuelve ese nivel acotado,
+porque el texto de un `<a>` que envuelve a un `<h2>` (o que vive dentro de uno) es el contenido del
+encabezado y la hoja UA le da su escala y sus márgenes (HTML Rendering §15.3.6): el enlace cambia el
+color y el subrayado, nunca el tamaño. Cualquier otro kind, o un bloque `NULL`, devuelve 0. Pura y total.
+
+Dado `<a href><h2>T</h2></a>`, cuando se pinta, entonces `T` mide 1.5em (24 px a 16 px), como Firefox.
+
 ## 3. Garantías
 
 - **Pureza / Zero Trust:** sin I/O, sin estado global, reentrante; cada imagen se revalida contra

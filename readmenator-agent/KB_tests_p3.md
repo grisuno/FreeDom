@@ -11,7 +11,13 @@ Previous: [KB_tests_p2.md](KB_tests_p2.md)
   - `test_shorthand_resets` (function, line 43) `static void test_shorthand_resets(void **state)`
   - `test_shorthand_broken_drops` (function, line 54) `static void test_shorthand_broken_drops(void **state)`
   - `test_degree_prelude_edges` (function, line 64) `static void test_degree_prelude_edges(void **state)`
-  - `main` (function, line 84) `int main(void)`
+  - `test_radial_prelude_github_glow` (function, line 85) `static void test_radial_prelude_github_glow(void **state)`
+  - `test_radial_prelude_keywords_and_defaults` (function, line 98) `static void test_radial_prelude_keywords_and_defaults(void **state)`
+  - `test_radial_prelude_px_sizes_and_failures` (function, line 123) `static void test_radial_prelude_px_sizes_and_failures(void **state)`
+  - `test_radial_len_resolution` (function, line 148) `static void test_radial_len_resolution(void **state)`
+  - `near_d` (function, line 157) `static int near_d(double a, double b)`
+  - `test_radial_geometry_keywords` (function, line 159) `static void test_radial_geometry_keywords(void **state)`
+  - `main` (function, line 196) `int main(void)`
 - Depends on: `include/css.h`, `include/css_gradient.h`
 
 ## tests/test_css_index.c
@@ -63,6 +69,25 @@ Previous: [KB_tests_p2.md](KB_tests_p2.md)
   - `EPS` (macro, line 19) `#define EPS`
 - Depends on: `include/css.h`, `include/css_length.h`
 
+## tests/test_css_mask.c
+- Doc: Finds the value a decl list assigns to prop, or def when absent.
+- Layer: testing
+- Language: c
+- Symbols:
+  - `val_of` (function, line 10) `static int val_of(const css_decl *d, int n, int prop, int def)`
+  - `has` (function, line 14) `static int has(const css_decl *d, int n, int prop)`
+  - `test_prop_names` (function, line 19) `static void test_prop_names(void **state)`
+  - `test_fade_gradient` (function, line 32) `static void test_fade_gradient(void **state)`
+  - `test_gradient_border_technique` (function, line 52) `static void test_gradient_border_technique(void **state)`
+  - `test_composite_vocabularies` (function, line 77) `static void test_composite_vocabularies(void **state)`
+  - `test_clip_property` (function, line 97) `static void test_clip_property(void **state)`
+  - `test_unsupported_fails_closed` (function, line 109) `static void test_unsupported_fails_closed(void **state)`
+  - `test_none_resets` (function, line 124) `static void test_none_resets(void **state)`
+  - `test_encode_decode_roundtrip` (function, line 137) `static void test_encode_decode_roundtrip(void **state)`
+  - `test_split_never_overruns` (function, line 160) `static void test_split_never_overruns(void **state)`
+  - `main` (function, line 175) `int main(void)`
+- Depends on: `include/css_mask.h`
+
 ## tests/test_css_mq.c
 - Layer: testing
 - Language: c
@@ -97,7 +122,8 @@ Previous: [KB_tests_p2.md](KB_tests_p2.md)
   - `test_junk_fails_closed` (function, line 24) `static void test_junk_fails_closed(void **state)`
   - `test_alpha` (function, line 33) `static void test_alpha(void **state)`
   - `test_bg_skips_url` (function, line 65) `static void test_bg_skips_url(void **state)`
-  - `main` (function, line 71) `int main(void)`
+  - `test_filter_scale_neutral_when_undeclared` (function, line 72) `static void test_filter_scale_neutral_when_undeclared(void **state)`
+  - `main` (function, line 85) `int main(void)`
   - `digit` (function, line 43) `* digit(s) -- the minifier writes `transparent` as #0000. */ assert_int_equal(cv_bg_alpha_of("#0000"), 0);`
 - Depends on: `include/css.h`, `include/css_values.h`
 
@@ -330,26 +356,26 @@ static void test_float_pack_m_holy_grail_pull_u...`
   - `test_float_pack_wrap_errors` (function, line 628) `static void test_float_pack_wrap_errors(void **state)`
   - `test_justify_name` (function, line 637) `static void test_justify_name(void **state)`
   - `test_auto_min_size_is_min_content` (function, line 653) `static void test_auto_min_size_is_min_content(void **state)`
-  - `test_multicol_used_counts` (function, line 680) `static void test_multicol_used_counts(void **state)`
-  - `test_multicol_used_edges` (function, line 717) `static void test_multicol_used_edges(void **state)`
-  - `test_area_hash_basics` (function, line 786) `static void test_area_hash_basics(void **state)`
-  - `test_areas_parse_and_resolve` (function, line 798) `static void test_areas_parse_and_resolve(void **state)`
-  - `test_areas_null_cell` (function, line 832) `static void test_areas_null_cell(void **state)`
-  - `test_areas_rect_spans_rows_and_cols` (function, line 847) `static void test_areas_rect_spans_rows_and_cols(void **state)`
-  - `test_areas_non_rectangular_is_rejected` (function, line 864) `static void test_areas_non_rectangular_is_rejected(void **state)`
-  - `test_areas_parse_fails_closed` (function, line 878) `static void test_areas_parse_fails_closed(void **state)`
-  - `test_areas_parse_bounds` (function, line 896) `static void test_areas_parse_bounds(void **state)`
-  - `test_grid_line_side` (function, line 925) `static void test_grid_line_side(void **state)`
-  - `test_grid_line_parse` (function, line 953) `static void test_grid_line_parse(void **state)`
-  - `test_grid_line_resolve_table` (function, line 972) `static void test_grid_line_resolve_table(void **state)`
-  - `test_grid_place_fixed_col_auto_row` (function, line 1003) `static void test_grid_place_fixed_col_auto_row(void **state)`
-  - `test_grid_place_null_fixed_is_unchanged` (function, line 1034) `static void test_grid_place_null_fixed_is_unchanged(void **state)`
-  - `test_grid_place_explicit_out_of_range_clamps` (function, line 1046) `static void test_grid_place_explicit_out_of_range_clamps(void **state)`
-  - `test_auto_margins_push_right_and_center` (function, line 1057) `static void test_auto_margins_push_right_and_center(void **state)`
-  - `test_column_place_stack_and_justify` (function, line 1090) `static void test_column_place_stack_and_justify(void **state)`
-  - `test_cross_offset` (function, line 1119) `static void test_cross_offset(void **state)`
-  - `test_column_place_auto_margins` (function, line 1133) `static void test_column_place_auto_margins(void **state)`
-  - `main` (function, line 1174) `int main(void)`
+  - `test_multicol_used_counts` (function, line 686) `static void test_multicol_used_counts(void **state)`
+  - `test_multicol_used_edges` (function, line 723) `static void test_multicol_used_edges(void **state)`
+  - `test_area_hash_basics` (function, line 792) `static void test_area_hash_basics(void **state)`
+  - `test_areas_parse_and_resolve` (function, line 804) `static void test_areas_parse_and_resolve(void **state)`
+  - `test_areas_null_cell` (function, line 838) `static void test_areas_null_cell(void **state)`
+  - `test_areas_rect_spans_rows_and_cols` (function, line 853) `static void test_areas_rect_spans_rows_and_cols(void **state)`
+  - `test_areas_non_rectangular_is_rejected` (function, line 870) `static void test_areas_non_rectangular_is_rejected(void **state)`
+  - `test_areas_parse_fails_closed` (function, line 884) `static void test_areas_parse_fails_closed(void **state)`
+  - `test_areas_parse_bounds` (function, line 902) `static void test_areas_parse_bounds(void **state)`
+  - `test_grid_line_side` (function, line 931) `static void test_grid_line_side(void **state)`
+  - `test_grid_line_parse` (function, line 959) `static void test_grid_line_parse(void **state)`
+  - `test_grid_line_resolve_table` (function, line 978) `static void test_grid_line_resolve_table(void **state)`
+  - `test_grid_place_fixed_col_auto_row` (function, line 1009) `static void test_grid_place_fixed_col_auto_row(void **state)`
+  - `test_grid_place_null_fixed_is_unchanged` (function, line 1040) `static void test_grid_place_null_fixed_is_unchanged(void **state)`
+  - `test_grid_place_explicit_out_of_range_clamps` (function, line 1052) `static void test_grid_place_explicit_out_of_range_clamps(void **state)`
+  - `test_auto_margins_push_right_and_center` (function, line 1063) `static void test_auto_margins_push_right_and_center(void **state)`
+  - `test_column_place_stack_and_justify` (function, line 1096) `static void test_column_place_stack_and_justify(void **state)`
+  - `test_cross_offset` (function, line 1125) `static void test_cross_offset(void **state)`
+  - `test_column_place_auto_margins` (function, line 1139) `static void test_column_place_auto_margins(void **state)`
+  - `main` (function, line 1180) `int main(void)`
   - `to` (function, line 280) `* jumps to (1,0);`
 - Depends on: `include/flex_layout.h`
 

@@ -6,371 +6,372 @@ Previous: [KB_tests.md](KB_tests.md)
 - Layer: testing
 - Language: c
 - Symbols:
-  - `test_inline_text_align` (function, line 36) `static void test_inline_text_align(void **state)`
-  - `test_inline_font_size` (function, line 44) `static void test_inline_font_size(void **state)`
-  - `test_inline_font_size_absolute_flag` (function, line 59) `static void test_inline_font_size_absolute_flag(void **state)`
-  - `test_inline_line_height` (function, line 86) `static void test_inline_line_height(void **state)`
-  - `test_inline_font_weight_style` (function, line 103) `static void test_inline_font_weight_style(void **state)`
-  - `test_inline_text_decoration` (function, line 115) `static void test_inline_text_decoration(void **state)`
-  - `test_font_family` (function, line 142) `static void test_font_family(void **state)`
-  - `test_text_transform` (function, line 163) `static void test_text_transform(void **state)`
-  - `test_letter_word_spacing` (function, line 177) `static void test_letter_word_spacing(void **state)`
-  - `test_text_shadow` (function, line 192) `static void test_text_shadow(void **state)`
-  - `test_opacity` (function, line 214) `static void test_opacity(void **state)`
-  - `test_vertical_align` (function, line 224) `static void test_vertical_align(void **state)`
-  - `test_text_indent` (function, line 245) `static void test_text_indent(void **state)`
-  - `test_white_space` (function, line 254) `static void test_white_space(void **state)`
-  - `test_list_style_type` (function, line 265) `static void test_list_style_type(void **state)`
-  - `test_text_ext_cascade_and_important` (function, line 279) `static void test_text_ext_cascade_and_important(void **state)`
-  - `test_inline_display` (function, line 294) `static void test_inline_display(void **state)`
-  - `test_inline_display_table_family` (function, line 307) `static void test_inline_display_table_family(void **state)`
-  - `test_inline_container_props` (function, line 332) `static void test_inline_container_props(void **state)`
-  - `test_sheet_container_props` (function, line 360) `static void test_sheet_container_props(void **state)`
-  - `test_container_cascade_inline_wins` (function, line 380) `static void test_container_cascade_inline_wins(void **state)`
-  - `test_container_fail_closed_and_bounds` (function, line 395) `static void test_container_fail_closed_and_bounds(void **state)`
-  - `test_grid_repeat_expands_count` (function, line 455) `static void test_grid_repeat_expands_count(void **state)`
-  - `test_grid_minmax_counts_as_one_track` (function, line 466) `static void test_grid_minmax_counts_as_one_track(void **state)`
-  - `test_grid_repeat_malformed_fails_closed` (function, line 474) `static void test_grid_repeat_malformed_fails_closed(void **state)`
-  - `test_grid_repeat_clamped_anti_dos` (function, line 481) `static void test_grid_repeat_clamped_anti_dos(void **state)`
-  - `test_container_unset` (function, line 488) `static void test_container_unset(void **state)`
-  - `test_url_value_dropped` (function, line 498) `static void test_url_value_dropped(void **state)`
-  - `dropped` (function, line 511) `* dropped (which kept a lower rule's, or the UA button face's, colour). */
+  - `test_inline_text_align` (function, line 37) `static void test_inline_text_align(void **state)`
+  - `test_inline_font_size` (function, line 45) `static void test_inline_font_size(void **state)`
+  - `test_inline_font_size_absolute_flag` (function, line 60) `static void test_inline_font_size_absolute_flag(void **state)`
+  - `test_inline_line_height` (function, line 87) `static void test_inline_line_height(void **state)`
+  - `test_inline_font_weight_style` (function, line 104) `static void test_inline_font_weight_style(void **state)`
+  - `test_inline_text_decoration` (function, line 116) `static void test_inline_text_decoration(void **state)`
+  - `test_font_family` (function, line 143) `static void test_font_family(void **state)`
+  - `test_text_transform` (function, line 164) `static void test_text_transform(void **state)`
+  - `test_letter_word_spacing` (function, line 178) `static void test_letter_word_spacing(void **state)`
+  - `test_text_shadow` (function, line 193) `static void test_text_shadow(void **state)`
+  - `test_opacity` (function, line 215) `static void test_opacity(void **state)`
+  - `test_vertical_align` (function, line 225) `static void test_vertical_align(void **state)`
+  - `test_text_indent` (function, line 246) `static void test_text_indent(void **state)`
+  - `test_white_space` (function, line 255) `static void test_white_space(void **state)`
+  - `test_list_style_type` (function, line 266) `static void test_list_style_type(void **state)`
+  - `test_text_ext_cascade_and_important` (function, line 280) `static void test_text_ext_cascade_and_important(void **state)`
+  - `test_inline_display` (function, line 295) `static void test_inline_display(void **state)`
+  - `test_inline_display_table_family` (function, line 308) `static void test_inline_display_table_family(void **state)`
+  - `test_inline_container_props` (function, line 333) `static void test_inline_container_props(void **state)`
+  - `test_sheet_container_props` (function, line 361) `static void test_sheet_container_props(void **state)`
+  - `test_container_cascade_inline_wins` (function, line 381) `static void test_container_cascade_inline_wins(void **state)`
+  - `test_container_fail_closed_and_bounds` (function, line 396) `static void test_container_fail_closed_and_bounds(void **state)`
+  - `test_grid_repeat_expands_count` (function, line 456) `static void test_grid_repeat_expands_count(void **state)`
+  - `test_grid_minmax_counts_as_one_track` (function, line 467) `static void test_grid_minmax_counts_as_one_track(void **state)`
+  - `test_grid_repeat_malformed_fails_closed` (function, line 475) `static void test_grid_repeat_malformed_fails_closed(void **state)`
+  - `test_grid_repeat_clamped_anti_dos` (function, line 482) `static void test_grid_repeat_clamped_anti_dos(void **state)`
+  - `test_container_unset` (function, line 489) `static void test_container_unset(void **state)`
+  - `test_url_value_dropped` (function, line 499) `static void test_url_value_dropped(void **state)`
+  - `dropped` (function, line 512) `* dropped (which kept a lower rule's, or the UA button face's, colour). */
 static void test_backg...`
-  - `test_unknown_props_ignored` (function, line 527) `static void test_unknown_props_ignored(void **state)`
-  - `test_linear_gradient_basic` (function, line 536) `static void test_linear_gradient_basic(void **state)`
-  - `test_linear_gradient_directions` (function, line 547) `static void test_linear_gradient_directions(void **state)`
-  - `test_linear_gradient_stops` (function, line 566) `static void test_linear_gradient_stops(void **state)`
-  - `test_linear_gradient_fail_closed` (function, line 584) `static void test_linear_gradient_fail_closed(void **state)`
-  - `test_background_shorthand_resets_gradient` (function, line 614) `static void test_background_shorthand_resets_gradient(void **state)`
-  - `test_bg_image_url_basic` (function, line 635) `static void test_bg_image_url_basic(void **state)`
-  - `test_bg_image_url_quoted` (function, line 642) `static void test_bg_image_url_quoted(void **state)`
-  - `test_bg_image_url_absolute` (function, line 653) `static void test_bg_image_url_absolute(void **state)`
-  - `test_bg_image_url_none_and_junk_reset` (function, line 662) `static void test_bg_image_url_none_and_junk_reset(void **state)`
-  - `test_bg_image_url_overlong_fails_closed` (function, line 676) `static void test_bg_image_url_overlong_fails_closed(void **state)`
-  - `test_bg_image_url_gradient_mutually_exclusive` (function, line 689) `static void test_bg_image_url_gradient_mutually_exclusive(void **state)`
-  - `test_bg_shorthand_captures_url_and_resets_color` (function, line 697) `static void test_bg_shorthand_captures_url_and_resets_color(void **state)`
-  - `test_bg_size_and_repeat` (function, line 716) `static void test_bg_size_and_repeat(void **state)`
-  - `test_malformed_inline_no_crash` (function, line 730) `static void test_malformed_inline_no_crash(void **state)`
-  - `test_custom_prop_var_basic` (function, line 738) `static void test_custom_prop_var_basic(void **state)`
-  - `test_custom_prop_var_fallback_used_when_missing` (function, line 749) `static void test_custom_prop_var_fallback_used_when_missing(void **state)`
-  - `test_custom_prop_var_no_fallback_drops_decl` (function, line 755) `static void test_custom_prop_var_no_fallback_drops_decl(void **state)`
-  - `test_custom_prop_var_chain` (function, line 764) `static void test_custom_prop_var_chain(void **state)`
-  - `test_custom_prop_var_self_reference_fails_closed` (function, line 772) `static void test_custom_prop_var_self_reference_fails_closed(void **state)`
-  - `test_custom_prop_var_in_shorthand` (function, line 781) `static void test_custom_prop_var_in_shorthand(void **state)`
-  - `test_custom_prop_var_later_declaration_wins` (function, line 791) `static void test_custom_prop_var_later_declaration_wins(void **state)`
-  - `test_custom_prop_dark_media_not_collected_in_light` (function, line 804) `static void test_custom_prop_dark_media_not_collected_in_light(void **state)`
-  - `test_custom_prop_dark_media_collected_in_dark` (function, line 819) `static void test_custom_prop_dark_media_collected_in_dark(void **state)`
-  - `test_custom_prop_class_scoped_skipped_without_scope` (function, line 832) `static void test_custom_prop_class_scoped_skipped_without_scope(void **state)`
-  - `test_custom_prop_class_scoped_applies_with_root_scope` (function, line 844) `static void test_custom_prop_class_scoped_applies_with_root_scope(void **state)`
-  - `test_custom_prop_descendant_scoped_skipped` (function, line 857) `static void test_custom_prop_descendant_scoped_skipped(void **state)`
-  - `test_custom_prop_table_holds_hundreds` (function, line 869) `static void test_custom_prop_table_holds_hundreds(void **state)`
-  - `test_custom_prop_long_value_survives` (function, line 893) `static void test_custom_prop_long_value_survives(void **state)`
-  - `test_custom_prop_long_name_survives` (function, line 908) `static void test_custom_prop_long_name_survives(void **state)`
-  - `test_custom_prop_table_holds_thousands` (function, line 920) `static void test_custom_prop_table_holds_thousands(void **state)`
-  - `test_custom_prop_chain_eight_deep` (function, line 939) `static void test_custom_prop_chain_eight_deep(void **state)`
-  - `test_custom_prop_fanout_bounded` (function, line 947) `static void test_custom_prop_fanout_bounded(void **state)`
-  - `root_is_dark_html` (function, line 962) `static int root_is_dark_html(void *ctx, const css_sel *sel)`
-  - `test_custom_prop_attr_scoped_via_root_matcher` (function, line 974) `static void test_custom_prop_attr_scoped_via_root_matcher(void **state)`
-  - `test_custom_prop_attr_scoped_skipped_without_matcher` (function, line 986) `static void test_custom_prop_attr_scoped_skipped_without_matcher(void **state)`
-  - `test_custom_prop_root_matcher_rejects_descendant` (function, line 997) `static void test_custom_prop_root_matcher_rejects_descendant(void **state)`
-  - `test_media_range_syntax_applies` (function, line 1013) `static void test_media_range_syntax_applies(void **state)`
-  - `test_supports_true_block_applies` (function, line 1036) `static void test_supports_true_block_applies(void **state)`
-  - `assert_int_equal` (function, line 1039) `assert_int_equal(css_parse(
+  - `test_unknown_props_ignored` (function, line 528) `static void test_unknown_props_ignored(void **state)`
+  - `test_linear_gradient_basic` (function, line 537) `static void test_linear_gradient_basic(void **state)`
+  - `test_linear_gradient_directions` (function, line 548) `static void test_linear_gradient_directions(void **state)`
+  - `test_linear_gradient_stops` (function, line 567) `static void test_linear_gradient_stops(void **state)`
+  - `test_linear_gradient_fail_closed` (function, line 585) `static void test_linear_gradient_fail_closed(void **state)`
+  - `test_background_shorthand_resets_gradient` (function, line 615) `static void test_background_shorthand_resets_gradient(void **state)`
+  - `test_bg_image_url_basic` (function, line 636) `static void test_bg_image_url_basic(void **state)`
+  - `test_bg_image_url_quoted` (function, line 643) `static void test_bg_image_url_quoted(void **state)`
+  - `test_bg_image_url_absolute` (function, line 654) `static void test_bg_image_url_absolute(void **state)`
+  - `test_bg_image_url_none_and_junk_reset` (function, line 663) `static void test_bg_image_url_none_and_junk_reset(void **state)`
+  - `test_bg_image_url_overlong_fails_closed` (function, line 677) `static void test_bg_image_url_overlong_fails_closed(void **state)`
+  - `test_bg_image_url_gradient_mutually_exclusive` (function, line 690) `static void test_bg_image_url_gradient_mutually_exclusive(void **state)`
+  - `test_bg_shorthand_captures_url_and_resets_color` (function, line 698) `static void test_bg_shorthand_captures_url_and_resets_color(void **state)`
+  - `test_bg_size_and_repeat` (function, line 717) `static void test_bg_size_and_repeat(void **state)`
+  - `test_malformed_inline_no_crash` (function, line 731) `static void test_malformed_inline_no_crash(void **state)`
+  - `test_custom_prop_var_basic` (function, line 739) `static void test_custom_prop_var_basic(void **state)`
+  - `test_custom_prop_var_fallback_used_when_missing` (function, line 750) `static void test_custom_prop_var_fallback_used_when_missing(void **state)`
+  - `test_custom_prop_var_no_fallback_drops_decl` (function, line 756) `static void test_custom_prop_var_no_fallback_drops_decl(void **state)`
+  - `test_custom_prop_var_chain` (function, line 765) `static void test_custom_prop_var_chain(void **state)`
+  - `test_custom_prop_var_self_reference_fails_closed` (function, line 773) `static void test_custom_prop_var_self_reference_fails_closed(void **state)`
+  - `test_custom_prop_var_in_shorthand` (function, line 782) `static void test_custom_prop_var_in_shorthand(void **state)`
+  - `test_custom_prop_var_later_declaration_wins` (function, line 792) `static void test_custom_prop_var_later_declaration_wins(void **state)`
+  - `test_custom_prop_dark_media_not_collected_in_light` (function, line 805) `static void test_custom_prop_dark_media_not_collected_in_light(void **state)`
+  - `test_custom_prop_dark_media_collected_in_dark` (function, line 820) `static void test_custom_prop_dark_media_collected_in_dark(void **state)`
+  - `test_custom_prop_class_scoped_skipped_without_scope` (function, line 833) `static void test_custom_prop_class_scoped_skipped_without_scope(void **state)`
+  - `test_custom_prop_class_scoped_applies_with_root_scope` (function, line 845) `static void test_custom_prop_class_scoped_applies_with_root_scope(void **state)`
+  - `test_custom_prop_descendant_scoped_skipped` (function, line 858) `static void test_custom_prop_descendant_scoped_skipped(void **state)`
+  - `test_custom_prop_table_holds_hundreds` (function, line 870) `static void test_custom_prop_table_holds_hundreds(void **state)`
+  - `test_custom_prop_long_value_survives` (function, line 894) `static void test_custom_prop_long_value_survives(void **state)`
+  - `test_custom_prop_long_name_survives` (function, line 909) `static void test_custom_prop_long_name_survives(void **state)`
+  - `test_custom_prop_table_holds_thousands` (function, line 921) `static void test_custom_prop_table_holds_thousands(void **state)`
+  - `test_custom_prop_chain_eight_deep` (function, line 940) `static void test_custom_prop_chain_eight_deep(void **state)`
+  - `test_custom_prop_fanout_bounded` (function, line 948) `static void test_custom_prop_fanout_bounded(void **state)`
+  - `root_is_dark_html` (function, line 963) `static int root_is_dark_html(void *ctx, const css_sel *sel)`
+  - `test_custom_prop_attr_scoped_via_root_matcher` (function, line 975) `static void test_custom_prop_attr_scoped_via_root_matcher(void **state)`
+  - `test_custom_prop_attr_scoped_skipped_without_matcher` (function, line 987) `static void test_custom_prop_attr_scoped_skipped_without_matcher(void **state)`
+  - `test_custom_prop_root_matcher_rejects_descendant` (function, line 998) `static void test_custom_prop_root_matcher_rejects_descendant(void **state)`
+  - `test_media_range_syntax_applies` (function, line 1014) `static void test_media_range_syntax_applies(void **state)`
+  - `test_supports_true_block_applies` (function, line 1037) `static void test_supports_true_block_applies(void **state)`
+  - `assert_int_equal` (function, line 1040) `assert_int_equal(css_parse(
         "@supports (display:grid)`
-  - `test_supports_collects_custom_props` (function, line 1050) `static void test_supports_collects_custom_props(void **state)`
-  - `assert_int_equal` (function, line 1053) `assert_int_equal(css_parse(
+  - `test_supports_collects_custom_props` (function, line 1051) `static void test_supports_collects_custom_props(void **state)`
+  - `assert_int_equal` (function, line 1054) `assert_int_equal(css_parse(
         "@supports (display:flex)`
-  - `test_layer_block_applies` (function, line 1060) `static void test_layer_block_applies(void **state)`
-  - `test_unlayered_beats_layer_despite_specificity` (function, line 1072) `static void test_unlayered_beats_layer_despite_specificity(void **state)`
-  - `test_layer_order_statement` (function, line 1082) `static void test_layer_order_statement(void **state)`
-  - `test_layer_important_reverses` (function, line 1095) `static void test_layer_important_reverses(void **state)`
-  - `test_layer_inline_still_wins` (function, line 1105) `static void test_layer_inline_still_wins(void **state)`
-  - `test_container_block_still_skipped` (function, line 1114) `static void test_container_block_still_skipped(void **state)`
-  - `assert_int_equal` (function, line 1117) `assert_int_equal(css_parse("@container (width>=10px)`
-  - `test_keyframes_content_does_not_crash` (function, line 1123) `static void test_keyframes_content_does_not_crash(void **state)`
-  - `color_for_class` (function, line 1138) `static int color_for_class(const char *css, const char *cls)`
-  - `test_selector_escaped_colon_and_slash` (function, line 1147) `static void test_selector_escaped_colon_and_slash(void **state)`
-  - `test_selector_hex_escape` (function, line 1155) `static void test_selector_hex_escape(void **state)`
-  - `test_selector_escaped_comma_and_parens` (function, line 1162) `static void test_selector_escaped_comma_and_parens(void **state)`
-  - `test_selector_escape_inside_not` (function, line 1171) `static void test_selector_escape_inside_not(void **state)`
-  - `test_selector_long_class_exact` (function, line 1178) `static void test_selector_long_class_exact(void **state)`
-  - `test_decl_split_ignores_semicolon_in_url_and_string` (function, line 1193) `static void test_decl_split_ignores_semicolon_in_url_and_string(void **state)`
-  - `cls_el` (function, line 1215) `static css_element cls_el(const char *tag, const char *const *cl, size_t n,
+  - `test_layer_block_applies` (function, line 1061) `static void test_layer_block_applies(void **state)`
+  - `test_unlayered_beats_layer_despite_specificity` (function, line 1073) `static void test_unlayered_beats_layer_despite_specificity(void **state)`
+  - `test_layer_order_statement` (function, line 1083) `static void test_layer_order_statement(void **state)`
+  - `test_layer_important_reverses` (function, line 1096) `static void test_layer_important_reverses(void **state)`
+  - `test_layer_inline_still_wins` (function, line 1106) `static void test_layer_inline_still_wins(void **state)`
+  - `test_container_block_still_skipped` (function, line 1115) `static void test_container_block_still_skipped(void **state)`
+  - `assert_int_equal` (function, line 1118) `assert_int_equal(css_parse("@container (width>=10px)`
+  - `test_keyframes_content_does_not_crash` (function, line 1124) `static void test_keyframes_content_does_not_crash(void **state)`
+  - `color_for_class` (function, line 1139) `static int color_for_class(const char *css, const char *cls)`
+  - `test_selector_escaped_colon_and_slash` (function, line 1148) `static void test_selector_escaped_colon_and_slash(void **state)`
+  - `test_selector_hex_escape` (function, line 1156) `static void test_selector_hex_escape(void **state)`
+  - `test_selector_escaped_comma_and_parens` (function, line 1163) `static void test_selector_escaped_comma_and_parens(void **state)`
+  - `test_selector_escape_inside_not` (function, line 1172) `static void test_selector_escape_inside_not(void **state)`
+  - `test_selector_long_class_exact` (function, line 1179) `static void test_selector_long_class_exact(void **state)`
+  - `test_decl_split_ignores_semicolon_in_url_and_string` (function, line 1194) `static void test_decl_split_ignores_semicolon_in_url_and_string(void **state)`
+  - `cls_el` (function, line 1216) `static css_element cls_el(const char *tag, const char *const *cl, size_t n,
                      ...`
-  - `test_text_decoration_wide_keyword_is_none` (function, line 1238) `static void test_text_decoration_wide_keyword_is_none(void **state)`
-  - `test_gradient_stop_alpha` (function, line 1251) `static void test_gradient_stop_alpha(void **state)`
-  - `test_pseudo_element_style` (function, line 1266) `static void test_pseudo_element_style(void **state)`
-  - `test_component_var_same_element` (function, line 1303) `static void test_component_var_same_element(void **state)`
-  - `test_component_var_inherited_by_child` (function, line 1316) `static void test_component_var_inherited_by_child(void **state)`
-  - `test_component_var_cascade_order` (function, line 1336) `static void test_component_var_cascade_order(void **state)`
-  - `test_component_var_inline_overrides` (function, line 1353) `static void test_component_var_inline_overrides(void **state)`
-  - `test_property_initial_value` (function, line 1363) `static void test_property_initial_value(void **state)`
-  - `test_custom_prop_var_unbalanced_paren_drops` (function, line 1377) `static void test_custom_prop_var_unbalanced_paren_drops(void **state)`
-  - `test_custom_prop_var_never_phones_home` (function, line 1390) `static void test_custom_prop_var_never_phones_home(void **state)`
-  - `test_sheet_type_selector` (function, line 1404) `static void test_sheet_type_selector(void **state)`
-  - `test_sheet_class_and_id` (function, line 1415) `static void test_sheet_class_and_id(void **state)`
-  - `test_sheet_universal_and_group` (function, line 1425) `static void test_sheet_universal_and_group(void **state)`
-  - `test_sheet_compound_selector` (function, line 1435) `static void test_sheet_compound_selector(void **state)`
-  - `el_node` (function, line 1448) `static css_element el_node(const char *tag, const char *id,
+  - `test_text_decoration_wide_keyword_is_none` (function, line 1239) `static void test_text_decoration_wide_keyword_is_none(void **state)`
+  - `test_gradient_stop_alpha` (function, line 1252) `static void test_gradient_stop_alpha(void **state)`
+  - `test_pseudo_element_style` (function, line 1267) `static void test_pseudo_element_style(void **state)`
+  - `test_component_var_same_element` (function, line 1304) `static void test_component_var_same_element(void **state)`
+  - `test_component_var_inherited_by_child` (function, line 1317) `static void test_component_var_inherited_by_child(void **state)`
+  - `test_component_var_cascade_order` (function, line 1337) `static void test_component_var_cascade_order(void **state)`
+  - `test_component_var_inline_overrides` (function, line 1354) `static void test_component_var_inline_overrides(void **state)`
+  - `test_property_initial_value` (function, line 1364) `static void test_property_initial_value(void **state)`
+  - `test_custom_prop_var_unbalanced_paren_drops` (function, line 1378) `static void test_custom_prop_var_unbalanced_paren_drops(void **state)`
+  - `test_custom_prop_var_never_phones_home` (function, line 1391) `static void test_custom_prop_var_never_phones_home(void **state)`
+  - `test_sheet_type_selector` (function, line 1405) `static void test_sheet_type_selector(void **state)`
+  - `test_sheet_class_and_id` (function, line 1416) `static void test_sheet_class_and_id(void **state)`
+  - `test_sheet_universal_and_group` (function, line 1426) `static void test_sheet_universal_and_group(void **state)`
+  - `test_sheet_compound_selector` (function, line 1436) `static void test_sheet_compound_selector(void **state)`
+  - `el_node` (function, line 1449) `static css_element el_node(const char *tag, const char *id,
                            const char...`
-  - `el_sib_node` (function, line 1463) `static css_element el_sib_node(const char *tag, int nth, int nsib,
+  - `el_sib_node` (function, line 1464) `static css_element el_sib_node(const char *tag, int nth, int nsib,
                               ...`
-  - `el_type_node` (function, line 1472) `static css_element el_type_node(const char *tag, int nth, int nsib,
+  - `el_type_node` (function, line 1473) `static css_element el_type_node(const char *tag, int nth, int nsib,
                              ...`
-  - `el_attr_node` (function, line 1483) `static css_element el_attr_node(const char *tag, const char *id,
+  - `el_attr_node` (function, line 1484) `static css_element el_attr_node(const char *tag, const char *id,
                                 ...`
-  - `test_text_decoration_cascade` (function, line 1492) `static void test_text_decoration_cascade(void **state)`
-  - `test_descendant_combinator` (function, line 1511) `static void test_descendant_combinator(void **state)`
-  - `test_child_combinator` (function, line 1527) `static void test_child_combinator(void **state)`
-  - `test_combinator_specificity_sum` (function, line 1540) `static void test_combinator_specificity_sum(void **state)`
-  - `test_combinator_class_chain` (function, line 1555) `static void test_combinator_class_chain(void **state)`
-  - `test_adjacent_sibling_combinator` (function, line 1574) `static void test_adjacent_sibling_combinator(void **state)`
-  - `test_general_sibling_combinator` (function, line 1589) `static void test_general_sibling_combinator(void **state)`
-  - `test_sibling_mixed_with_child` (function, line 1604) `static void test_sibling_mixed_with_child(void **state)`
-  - `test_pseudo_link` (function, line 1621) `static void test_pseudo_link(void **state)`
-  - `test_pseudo_never_match_keeps_group` (function, line 1639) `static void test_pseudo_never_match_keeps_group(void **state)`
-  - `test_pseudo_structural` (function, line 1677) `static void test_pseudo_structural(void **state)`
-  - `test_pseudo_nth_child` (function, line 1697) `static void test_pseudo_nth_child(void **state)`
-  - `assert_int_equal` (function, line 1700) `assert_int_equal(css_parse("tr:nth-child(even)`
-  - `test_pseudo_nth_last_child` (function, line 1720) `static void test_pseudo_nth_last_child(void **state)`
-  - `assert_int_equal` (function, line 1723) `assert_int_equal(css_parse("li:nth-last-child(2)`
-  - `test_pseudo_root_and_form_state` (function, line 1731) `static void test_pseudo_root_and_form_state(void **state)`
-  - `test_pseudo_unknown_drops_selector` (function, line 1755) `static void test_pseudo_unknown_drops_selector(void **state)`
-  - `test_not_with_pseudo_class` (function, line 1816) `static void test_not_with_pseudo_class(void **state)`
-  - `assert_int_equal` (function, line 1819) `assert_int_equal(css_parse(".s:not(:focus)`
-  - `test_not_unreadable_argument_fails_closed` (function, line 1844) `static void test_not_unreadable_argument_fails_closed(void **state)`
-  - `assert_int_equal` (function, line 1847) `assert_int_equal(css_parse("p:not(.x > y)`
-  - `test_pseudo_content_before_after_separate` (function, line 1861) `static void test_pseudo_content_before_after_separate(void **state)`
-  - `test_pseudo_content_decodes_hex_escape` (function, line 1875) `static void test_pseudo_content_decodes_hex_escape(void **state)`
-  - `test_pseudo_content_escape_eats_terminator_space` (function, line 1887) `static void test_pseudo_content_escape_eats_terminator_space(void **state)`
-  - `test_pseudo_content_decodes_escaped_char` (function, line 1898) `static void test_pseudo_content_decodes_escaped_char(void **state)`
-  - `test_pseudo_single_colon_before_matches` (function, line 1910) `static void test_pseudo_single_colon_before_matches(void **state)`
-  - `test_color_keeps_alpha` (function, line 1978) `static void test_color_keeps_alpha(void **state)`
-  - `test_justify_self_parsed` (function, line 1990) `static void test_justify_self_parsed(void **state)`
-  - `test_pseudo_content_escapes_fail_closed` (function, line 2003) `static void test_pseudo_content_escapes_fail_closed(void **state)`
-  - `test_pseudo_content_none_parses_empty` (function, line 2034) `static void test_pseudo_content_none_parses_empty(void **state)`
-  - `test_pseudo_single_colon_before_class_tmp` (function, line 2046) `static void test_pseudo_single_colon_before_class_tmp(void **state)`
-  - `test_pseudo_content_attr_resolves` (function, line 2059) `static void test_pseudo_content_attr_resolves(void **state)`
-  - `test_pseudo_content_attr_missing_is_empty` (function, line 2070) `static void test_pseudo_content_attr_missing_is_empty(void **state)`
-  - `test_pseudo_content_attr_fallback` (function, line 2081) `static void test_pseudo_content_attr_fallback(void **state)`
-  - `test_drops_retry_rewinds_buckets` (function, line 2098) `static void test_drops_retry_rewinds_buckets(void **state)`
-  - `test_pseudo_content_empty_without_pseudo` (function, line 2138) `static void test_pseudo_content_empty_without_pseudo(void **state)`
-  - `test_pseudo_geometry_does_not_leak_to_element` (function, line 2156) `static void test_pseudo_geometry_does_not_leak_to_element(void **state)`
-  - `test_pseudo_does_not_claim_cascade_slot` (function, line 2212) `static void test_pseudo_does_not_claim_cascade_slot(void **state)`
-  - `test_pseudo_specificity` (function, line 2225) `static void test_pseudo_specificity(void **state)`
-  - `test_pseudo_with_sibling_combinator` (function, line 2243) `static void test_pseudo_with_sibling_combinator(void **state)`
-  - `test_pseudo_nth_malformed_drops` (function, line 2260) `static void test_pseudo_nth_malformed_drops(void **state)`
-  - `assert_int_equal` (function, line 2265) `assert_int_equal(css_parse("li:nth-child()`
-  - `test_pseudo_of_type` (function, line 2278) `static void test_pseudo_of_type(void **state)`
-  - `test_pseudo_nth_of_type` (function, line 2297) `static void test_pseudo_nth_of_type(void **state)`
-  - `assert_int_equal` (function, line 2300) `assert_int_equal(css_parse("li:nth-of-type(2n)`
-  - `test_pseudo_empty` (function, line 2313) `static void test_pseudo_empty(void **state)`
-  - `test_has_parses_and_fails_closed` (function, line 2326) `static void test_has_parses_and_fails_closed(void **state)`
-  - `assert_int_equal` (function, line 2332) `assert_int_equal(css_parse("div:has(.x)`
-  - `test_pseudo_target` (function, line 2339) `static void test_pseudo_target(void **state)`
-  - `test_pseudo_lang` (function, line 2350) `static void test_pseudo_lang(void **state)`
-  - `assert_int_equal` (function, line 2353) `assert_int_equal(css_parse("html:lang(en)`
-  - `test_resolve_el_inline_only` (function, line 2371) `static void test_resolve_el_inline_only(void **state)`
-  - `test_attr_presence` (function, line 2378) `static void test_attr_presence(void **state)`
-  - `test_attr_equals` (function, line 2391) `static void test_attr_equals(void **state)`
-  - `test_attr_operators` (function, line 2409) `static void test_attr_operators(void **state)`
-  - `test_attr_case_insensitive_flag` (function, line 2441) `static void test_attr_case_insensitive_flag(void **state)`
-  - `test_attr_name_case_insensitive` (function, line 2456) `static void test_attr_name_case_insensitive(void **state)`
-  - `test_attr_quoted_value_with_space` (function, line 2467) `static void test_attr_quoted_value_with_space(void **state)`
-  - `test_attr_specificity_and_compound` (function, line 2481) `static void test_attr_specificity_and_compound(void **state)`
-  - `test_attr_in_combinator` (function, line 2498) `static void test_attr_in_combinator(void **state)`
-  - `test_attr_malformed_fail_closed` (function, line 2514) `static void test_attr_malformed_fail_closed(void **state)`
-  - `test_important_inline_not_dropped` (function, line 2532) `static void test_important_inline_not_dropped(void **state)`
-  - `test_important_beats_specificity` (function, line 2542) `static void test_important_beats_specificity(void **state)`
-  - `test_important_tier_then_normal_order` (function, line 2551) `static void test_important_tier_then_normal_order(void **state)`
-  - `test_important_inline_beats_sheet_important` (function, line 2561) `static void test_important_inline_beats_sheet_important(void **state)`
-  - `test_important_in_shorthand` (function, line 2573) `static void test_important_in_shorthand(void **state)`
-  - `test_cascade_specificity` (function, line 2590) `static void test_cascade_specificity(void **state)`
-  - `silent` (function, line 2606) `* silent (anti-DoS truncation, not a parse failure). 500 filler rules is well past
+  - `test_text_decoration_cascade` (function, line 1493) `static void test_text_decoration_cascade(void **state)`
+  - `test_descendant_combinator` (function, line 1512) `static void test_descendant_combinator(void **state)`
+  - `test_child_combinator` (function, line 1528) `static void test_child_combinator(void **state)`
+  - `test_combinator_specificity_sum` (function, line 1541) `static void test_combinator_specificity_sum(void **state)`
+  - `test_combinator_class_chain` (function, line 1556) `static void test_combinator_class_chain(void **state)`
+  - `test_adjacent_sibling_combinator` (function, line 1575) `static void test_adjacent_sibling_combinator(void **state)`
+  - `test_general_sibling_combinator` (function, line 1590) `static void test_general_sibling_combinator(void **state)`
+  - `test_sibling_mixed_with_child` (function, line 1605) `static void test_sibling_mixed_with_child(void **state)`
+  - `test_pseudo_link` (function, line 1622) `static void test_pseudo_link(void **state)`
+  - `test_pseudo_never_match_keeps_group` (function, line 1640) `static void test_pseudo_never_match_keeps_group(void **state)`
+  - `test_pseudo_structural` (function, line 1678) `static void test_pseudo_structural(void **state)`
+  - `test_pseudo_nth_child` (function, line 1698) `static void test_pseudo_nth_child(void **state)`
+  - `assert_int_equal` (function, line 1701) `assert_int_equal(css_parse("tr:nth-child(even)`
+  - `test_pseudo_nth_last_child` (function, line 1721) `static void test_pseudo_nth_last_child(void **state)`
+  - `assert_int_equal` (function, line 1724) `assert_int_equal(css_parse("li:nth-last-child(2)`
+  - `test_pseudo_root_and_form_state` (function, line 1732) `static void test_pseudo_root_and_form_state(void **state)`
+  - `test_pseudo_unknown_drops_selector` (function, line 1756) `static void test_pseudo_unknown_drops_selector(void **state)`
+  - `test_not_with_pseudo_class` (function, line 1817) `static void test_not_with_pseudo_class(void **state)`
+  - `assert_int_equal` (function, line 1820) `assert_int_equal(css_parse(".s:not(:focus)`
+  - `test_not_unreadable_argument_fails_closed` (function, line 1845) `static void test_not_unreadable_argument_fails_closed(void **state)`
+  - `assert_int_equal` (function, line 1848) `assert_int_equal(css_parse("p:not(.x > y)`
+  - `test_pseudo_content_before_after_separate` (function, line 1862) `static void test_pseudo_content_before_after_separate(void **state)`
+  - `test_pseudo_content_decodes_hex_escape` (function, line 1876) `static void test_pseudo_content_decodes_hex_escape(void **state)`
+  - `test_pseudo_content_escape_eats_terminator_space` (function, line 1888) `static void test_pseudo_content_escape_eats_terminator_space(void **state)`
+  - `test_pseudo_content_decodes_escaped_char` (function, line 1899) `static void test_pseudo_content_decodes_escaped_char(void **state)`
+  - `test_pseudo_single_colon_before_matches` (function, line 1911) `static void test_pseudo_single_colon_before_matches(void **state)`
+  - `test_color_keeps_alpha` (function, line 1979) `static void test_color_keeps_alpha(void **state)`
+  - `test_justify_self_parsed` (function, line 1991) `static void test_justify_self_parsed(void **state)`
+  - `test_pseudo_content_escapes_fail_closed` (function, line 2004) `static void test_pseudo_content_escapes_fail_closed(void **state)`
+  - `test_pseudo_content_none_parses_empty` (function, line 2035) `static void test_pseudo_content_none_parses_empty(void **state)`
+  - `test_pseudo_single_colon_before_class_tmp` (function, line 2047) `static void test_pseudo_single_colon_before_class_tmp(void **state)`
+  - `test_pseudo_content_attr_resolves` (function, line 2060) `static void test_pseudo_content_attr_resolves(void **state)`
+  - `test_pseudo_content_attr_missing_is_empty` (function, line 2071) `static void test_pseudo_content_attr_missing_is_empty(void **state)`
+  - `test_pseudo_content_attr_fallback` (function, line 2082) `static void test_pseudo_content_attr_fallback(void **state)`
+  - `test_drops_retry_rewinds_buckets` (function, line 2099) `static void test_drops_retry_rewinds_buckets(void **state)`
+  - `test_pseudo_content_empty_without_pseudo` (function, line 2139) `static void test_pseudo_content_empty_without_pseudo(void **state)`
+  - `test_pseudo_geometry_does_not_leak_to_element` (function, line 2157) `static void test_pseudo_geometry_does_not_leak_to_element(void **state)`
+  - `test_pseudo_does_not_claim_cascade_slot` (function, line 2213) `static void test_pseudo_does_not_claim_cascade_slot(void **state)`
+  - `test_pseudo_specificity` (function, line 2226) `static void test_pseudo_specificity(void **state)`
+  - `test_pseudo_with_sibling_combinator` (function, line 2244) `static void test_pseudo_with_sibling_combinator(void **state)`
+  - `test_pseudo_nth_malformed_drops` (function, line 2261) `static void test_pseudo_nth_malformed_drops(void **state)`
+  - `assert_int_equal` (function, line 2266) `assert_int_equal(css_parse("li:nth-child()`
+  - `test_pseudo_of_type` (function, line 2279) `static void test_pseudo_of_type(void **state)`
+  - `test_pseudo_nth_of_type` (function, line 2298) `static void test_pseudo_nth_of_type(void **state)`
+  - `assert_int_equal` (function, line 2301) `assert_int_equal(css_parse("li:nth-of-type(2n)`
+  - `test_pseudo_empty` (function, line 2314) `static void test_pseudo_empty(void **state)`
+  - `test_has_parses_and_fails_closed` (function, line 2327) `static void test_has_parses_and_fails_closed(void **state)`
+  - `assert_int_equal` (function, line 2333) `assert_int_equal(css_parse("div:has(.x)`
+  - `test_pseudo_target` (function, line 2340) `static void test_pseudo_target(void **state)`
+  - `test_pseudo_lang` (function, line 2351) `static void test_pseudo_lang(void **state)`
+  - `assert_int_equal` (function, line 2354) `assert_int_equal(css_parse("html:lang(en)`
+  - `test_resolve_el_inline_only` (function, line 2372) `static void test_resolve_el_inline_only(void **state)`
+  - `test_attr_presence` (function, line 2379) `static void test_attr_presence(void **state)`
+  - `test_attr_equals` (function, line 2392) `static void test_attr_equals(void **state)`
+  - `test_attr_operators` (function, line 2410) `static void test_attr_operators(void **state)`
+  - `test_attr_case_insensitive_flag` (function, line 2442) `static void test_attr_case_insensitive_flag(void **state)`
+  - `test_attr_name_case_insensitive` (function, line 2457) `static void test_attr_name_case_insensitive(void **state)`
+  - `test_attr_quoted_value_with_space` (function, line 2468) `static void test_attr_quoted_value_with_space(void **state)`
+  - `test_attr_specificity_and_compound` (function, line 2482) `static void test_attr_specificity_and_compound(void **state)`
+  - `test_attr_in_combinator` (function, line 2499) `static void test_attr_in_combinator(void **state)`
+  - `test_attr_malformed_fail_closed` (function, line 2515) `static void test_attr_malformed_fail_closed(void **state)`
+  - `test_important_inline_not_dropped` (function, line 2533) `static void test_important_inline_not_dropped(void **state)`
+  - `test_important_beats_specificity` (function, line 2543) `static void test_important_beats_specificity(void **state)`
+  - `test_important_tier_then_normal_order` (function, line 2552) `static void test_important_tier_then_normal_order(void **state)`
+  - `test_important_inline_beats_sheet_important` (function, line 2562) `static void test_important_inline_beats_sheet_important(void **state)`
+  - `test_important_in_shorthand` (function, line 2574) `static void test_important_in_shorthand(void **state)`
+  - `test_cascade_specificity` (function, line 2591) `static void test_cascade_specificity(void **state)`
+  - `silent` (function, line 2607) `* silent (anti-DoS truncation, not a parse failure). 500 filler rules is well past
  * the OLD cap...`
-  - `test_cascade_document_order` (function, line 2636) `static void test_cascade_document_order(void **state)`
-  - `test_cascade_inline_wins` (function, line 2645) `static void test_cascade_inline_wins(void **state)`
-  - `test_at_rules_skipped` (function, line 2654) `static void test_at_rules_skipped(void **state)`
-  - `test_media_screen_and_print` (function, line 2671) `static void test_media_screen_and_print(void **state)`
-  - `test_media_prefers_color_scheme` (function, line 2690) `static void test_media_prefers_color_scheme(void **state)`
-  - `test_media_width_queries` (function, line 2706) `static void test_media_width_queries(void **state)`
-  - `assert_int_equal` (function, line 2709) `assert_int_equal(css_parse(
+  - `test_cascade_document_order` (function, line 2637) `static void test_cascade_document_order(void **state)`
+  - `test_cascade_inline_wins` (function, line 2646) `static void test_cascade_inline_wins(void **state)`
+  - `test_at_rules_skipped` (function, line 2655) `static void test_at_rules_skipped(void **state)`
+  - `test_media_screen_and_print` (function, line 2672) `static void test_media_screen_and_print(void **state)`
+  - `test_media_prefers_color_scheme` (function, line 2691) `static void test_media_prefers_color_scheme(void **state)`
+  - `test_media_width_queries` (function, line 2707) `static void test_media_width_queries(void **state)`
+  - `assert_int_equal` (function, line 2710) `assert_int_equal(css_parse(
         "@media (min-width: 600px)`
-  - `test_media_and_or` (function, line 2721) `static void test_media_and_or(void **state)`
-  - `assert_int_equal` (function, line 2724) `assert_int_equal(css_parse(
+  - `test_media_and_or` (function, line 2722) `static void test_media_and_or(void **state)`
+  - `assert_int_equal` (function, line 2725) `assert_int_equal(css_parse(
         "@media screen and (min-width: 600px)`
-  - `assert_int_equal` (function, line 2740) `assert_int_equal(css_parse(
+  - `assert_int_equal` (function, line 2741) `assert_int_equal(css_parse(
         "@media (frobnicate: 1)`
-  - `test_parse_null_args` (function, line 2755) `static void test_parse_null_args(void **state)`
-  - `test_resolve_null_safe` (function, line 2765) `static void test_resolve_null_safe(void **state)`
-  - `test_inline_box_longhands` (function, line 2779) `static void test_inline_box_longhands(void **state)`
-  - `test_box_shorthand_expansion` (function, line 2797) `static void test_box_shorthand_expansion(void **state)`
-  - `test_box_auto_and_centering` (function, line 2825) `static void test_box_auto_and_centering(void **state)`
-  - `test_box_units_and_failclosed` (function, line 2842) `static void test_box_units_and_failclosed(void **state)`
-  - `test_calc_basic_arithmetic` (function, line 2938) `static void test_calc_basic_arithmetic(void **state)`
-  - `test_calc_precedence_and_parens` (function, line 2947) `static void test_calc_precedence_and_parens(void **state)`
-  - `test_calc_units_and_signs` (function, line 2954) `static void test_calc_units_and_signs(void **state)`
-  - `test_calc_dimension_errors_fail_closed` (function, line 2962) `static void test_calc_dimension_errors_fail_closed(void **state)`
-  - `test_calc_clamped_anti_dos` (function, line 2984) `static void test_calc_clamped_anti_dos(void **state)`
-  - `geometry` (function, line 2992) `* hostile sheet never sees real window geometry (anti-fingerprinting) yet 100vh
+  - `test_parse_null_args` (function, line 2756) `static void test_parse_null_args(void **state)`
+  - `test_resolve_null_safe` (function, line 2766) `static void test_resolve_null_safe(void **state)`
+  - `test_inline_box_longhands` (function, line 2780) `static void test_inline_box_longhands(void **state)`
+  - `test_box_shorthand_expansion` (function, line 2798) `static void test_box_shorthand_expansion(void **state)`
+  - `test_box_auto_and_centering` (function, line 2826) `static void test_box_auto_and_centering(void **state)`
+  - `test_box_units_and_failclosed` (function, line 2843) `static void test_box_units_and_failclosed(void **state)`
+  - `test_calc_basic_arithmetic` (function, line 2939) `static void test_calc_basic_arithmetic(void **state)`
+  - `test_calc_precedence_and_parens` (function, line 2948) `static void test_calc_precedence_and_parens(void **state)`
+  - `test_calc_units_and_signs` (function, line 2955) `static void test_calc_units_and_signs(void **state)`
+  - `test_calc_dimension_errors_fail_closed` (function, line 2963) `static void test_calc_dimension_errors_fail_closed(void **state)`
+  - `test_calc_clamped_anti_dos` (function, line 2985) `static void test_calc_clamped_anti_dos(void **state)`
+  - `geometry` (function, line 2993) `* hostile sheet never sees real window geometry (anti-fingerprinting) yet 100vh
  * heroes and cal...`
-  - `test_viewport_units_in_calc_and_mathfn` (function, line 3008) `static void test_viewport_units_in_calc_and_mathfn(void **state)`
-  - `test_viewport_units_font_size` (function, line 3016) `static void test_viewport_units_font_size(void **state)`
-  - `test_viewport_units_junk_fail_closed` (function, line 3024) `static void test_viewport_units_junk_fail_closed(void **state)`
-  - `test_calc_inside_shorthands` (function, line 3037) `static void test_calc_inside_shorthands(void **state)`
-  - `test_calc_with_custom_property` (function, line 3075) `static void test_calc_with_custom_property(void **state)`
-  - `test_box_clamp_anti_dos` (function, line 3082) `static void test_box_clamp_anti_dos(void **state)`
-  - `test_inline_min_width_height` (function, line 3091) `static void test_inline_min_width_height(void **state)`
-  - `test_inline_min_max_height` (function, line 3118) `static void test_inline_min_max_height(void **state)`
-  - `test_box_extension_sheet_cascade` (function, line 3132) `static void test_box_extension_sheet_cascade(void **state)`
-  - `test_inline_text_decoration_color_style` (function, line 3152) `static void test_inline_text_decoration_color_style(void **state)`
-  - `test_inline_text_decoration_thickness` (function, line 3181) `static void test_inline_text_decoration_thickness(void **state)`
-  - `test_inline_aspect_ratio` (function, line 3198) `static void test_inline_aspect_ratio(void **state)`
-  - `test_inline_direction` (function, line 3228) `static void test_inline_direction(void **state)`
-  - `test_inline_outline_offset` (function, line 3237) `static void test_inline_outline_offset(void **state)`
-  - `test_inline_tab_size` (function, line 3249) `static void test_inline_tab_size(void **state)`
-  - `test_box_sheet_cascade_inline_wins` (function, line 3259) `static void test_box_sheet_cascade_inline_wins(void **state)`
-  - `test_position_and_insets` (function, line 3274) `static void test_position_and_insets(void **state)`
-  - `test_float_and_clear` (function, line 3305) `static void test_float_and_clear(void **state)`
-  - `test_visibility` (function, line 3329) `static void test_visibility(void **state)`
-  - `test_overflow` (function, line 3346) `static void test_overflow(void **state)`
-  - `test_cursor` (function, line 3369) `static void test_cursor(void **state)`
-  - `test_animation_shorthand_basic` (function, line 3402) `static void test_animation_shorthand_basic(void **state)`
-  - `test_animation_shorthand_order_free` (function, line 3411) `static void test_animation_shorthand_order_free(void **state)`
-  - `test_animation_shorthand_ignores_bezier` (function, line 3420) `static void test_animation_shorthand_ignores_bezier(void **state)`
-  - `test_animation_none_resets` (function, line 3427) `static void test_animation_none_resets(void **state)`
-  - `test_transition_comma_takes_first` (function, line 3434) `static void test_transition_comma_takes_first(void **state)`
-  - `test_tweener_flex_order` (function, line 3442) `static void test_tweener_flex_order(void **state)`
-  - `test_tweener_flex_factors` (function, line 3448) `static void test_tweener_flex_factors(void **state)`
-  - `test_tweener_pack_vocab` (function, line 3456) `static void test_tweener_pack_vocab(void **state)`
-  - `test_tweener_align` (function, line 3466) `static void test_tweener_align(void **state)`
-  - `test_bg_position_edge_offset` (function, line 3476) `static void test_bg_position_edge_offset(void **state)`
-  - `test_bg_position_center_by_identity` (function, line 3488) `static void test_bg_position_center_by_identity(void **state)`
-  - `test_bg_position_four_value` (function, line 3499) `static void test_bg_position_four_value(void **state)`
-  - `test_bg_position_collision_drops` (function, line 3509) `static void test_bg_position_collision_drops(void **state)`
-  - `test_grid_autofill_marker` (function, line 3519) `static void test_grid_autofill_marker(void **state)`
-  - `test_fontface_matches_sheet_face` (function, line 3532) `static void test_fontface_matches_sheet_face(void **state)`
-  - `test_fontface_no_match_is_zero` (function, line 3544) `static void test_fontface_no_match_is_zero(void **state)`
-  - `test_fontface_case_insensitive` (function, line 3555) `static void test_fontface_case_insensitive(void **state)`
-  - `test_fontface_icon_only_family` (function, line 3566) `static void test_fontface_icon_only_family(void **state)`
-  - `test_fontface_data_url_family_matches` (function, line 3578) `static void test_fontface_data_url_family_matches(void **state)`
-  - `test_fontface_inline_has_no_sheet` (function, line 3600) `static void test_fontface_inline_has_no_sheet(void **state)`
-  - `test_fontface_later_rule_clears` (function, line 3608) `static void test_fontface_later_rule_clears(void **state)`
-  - `test_font_list_normalized` (function, line 3623) `static void test_font_list_normalized(void **state)`
-  - `test_font_list_inline_and_fontface_first_name` (function, line 3641) `static void test_font_list_inline_and_fontface_first_name(void **state)`
-  - `test_placeholder_pseudo_element` (function, line 3657) `static void test_placeholder_pseudo_element(void **state)`
-  - `test_font_size_math_functions` (function, line 3682) `static void test_font_size_math_functions(void **state)`
-  - `test_filter_none_and_default_argument` (function, line 3699) `static void test_filter_none_and_default_argument(void **state)`
-  - `test_logical_borders` (function, line 3713) `static void test_logical_borders(void **state)`
-  - `test_svg_stroke_and_fill_none` (function, line 3731) `static void test_svg_stroke_and_fill_none(void **state)`
-  - `test_text_wrap_balance` (function, line 3746) `static void test_text_wrap_balance(void **state)`
-  - `test_transform_z_identity` (function, line 3755) `static void test_transform_z_identity(void **state)`
-  - `test_calc_shape_mismatch_drops` (function, line 3770) `static void test_calc_shape_mismatch_drops(void **state)`
-  - `test_bare_ms_box_sizing_drops` (function, line 3778) `static void test_bare_ms_box_sizing_drops(void **state)`
-  - `test_font_without_family_drops` (function, line 3784) `static void test_font_without_family_drops(void **state)`
-  - `test_text_overflow_and_word_break` (function, line 3790) `static void test_text_overflow_and_word_break(void **state)`
-  - `test_box_sizing` (function, line 3822) `static void test_box_sizing(void **state)`
-  - `test_border_shorthand` (function, line 3830) `static void test_border_shorthand(void **state)`
-  - `test_border_longhands` (function, line 3860) `static void test_border_longhands(void **state)`
-  - `test_box_shadow_and_outline` (function, line 3886) `static void test_box_shadow_and_outline(void **state)`
-  - `test_flex_item` (function, line 3911) `static void test_flex_item(void **state)`
-  - `test_flex_align` (function, line 3955) `static void test_flex_align(void **state)`
-  - `test_box_orient_maps_to_flex_direction` (function, line 3986) `static void test_box_orient_maps_to_flex_direction(void **state)`
-  - `test_wide_keyword_resets_earlier_loser` (function, line 4013) `static void test_wide_keyword_resets_earlier_loser(void **state)`
-  - `test_grid_line_names_are_not_tracks` (function, line 4045) `static void test_grid_line_names_are_not_tracks(void **state)`
-  - `test_grid_extras` (function, line 4065) `static void test_grid_extras(void **state)`
-  - `test_layout_sheet_cascade_and_unset` (function, line 4120) `static void test_layout_sheet_cascade_and_unset(void **state)`
-  - `test_inline_outline_longhands` (function, line 4156) `static void test_inline_outline_longhands(void **state)`
-  - `test_inline_border_collapse` (function, line 4187) `static void test_inline_border_collapse(void **state)`
-  - `test_inline_border_spacing` (function, line 4196) `static void test_inline_border_spacing(void **state)`
-  - `test_inline_empty_cells` (function, line 4207) `static void test_inline_empty_cells(void **state)`
-  - `test_inline_caption_side` (function, line 4216) `static void test_inline_caption_side(void **state)`
-  - `test_inline_table_layout` (function, line 4225) `static void test_inline_table_layout(void **state)`
-  - `test_inline_font_variant` (function, line 4234) `static void test_inline_font_variant(void **state)`
-  - `test_inline_hyphens` (function, line 4243) `static void test_inline_hyphens(void **state)`
-  - `test_inline_user_select` (function, line 4253) `static void test_inline_user_select(void **state)`
-  - `test_inline_caret_color` (function, line 4264) `static void test_inline_caret_color(void **state)`
-  - `test_inline_appearance` (function, line 4274) `static void test_inline_appearance(void **state)`
-  - `test_inline_pointer_events` (function, line 4285) `static void test_inline_pointer_events(void **state)`
-  - `test_table_sheet_cascade` (function, line 4296) `static void test_table_sheet_cascade(void **state)`
-  - `test_inline_bg_repeat` (function, line 4311) `static void test_inline_bg_repeat(void **state)`
-  - `test_inline_bg_size` (function, line 4323) `static void test_inline_bg_size(void **state)`
-  - `test_inline_bg_clip_origin_attachment` (function, line 4332) `static void test_inline_bg_clip_origin_attachment(void **state)`
-  - `test_inline_isolation` (function, line 4352) `static void test_inline_isolation(void **state)`
-  - `test_inline_contain` (function, line 4360) `static void test_inline_contain(void **state)`
-  - `test_inline_content_visibility` (function, line 4375) `static void test_inline_content_visibility(void **state)`
-  - `test_inline_image_rendering` (function, line 4384) `static void test_inline_image_rendering(void **state)`
-  - `test_inline_color_scheme` (function, line 4393) `static void test_inline_color_scheme(void **state)`
-  - `test_inline_accent_color` (function, line 4403) `static void test_inline_accent_color(void **state)`
-  - `test_inline_print_forced_adjust` (function, line 4412) `static void test_inline_print_forced_adjust(void **state)`
-  - `test_inline_mix_blend_mode` (function, line 4426) `static void test_inline_mix_blend_mode(void **state)`
-  - `test_inline_transform_translate` (function, line 4447) `static void test_inline_transform_translate(void **state)`
-  - `test_inline_transform_scale` (function, line 4498) `static void test_inline_transform_scale(void **state)`
-  - `test_inline_transform_rotate` (function, line 4538) `static void test_inline_transform_rotate(void **state)`
-  - `test_inline_transform_skew` (function, line 4568) `static void test_inline_transform_skew(void **state)`
-  - `test_transform_origin` (function, line 4647) `static void test_transform_origin(void **state)`
-  - `test_inline_transform_independent_cascade_combines` (function, line 4689) `static void test_inline_transform_independent_cascade_combines(void **state)`
-  - `test_inline_object_fit` (function, line 4703) `static void test_inline_object_fit(void **state)`
-  - `test_inline_list_style_pos` (function, line 4714) `static void test_inline_list_style_pos(void **state)`
-  - `test_inline_font_kerning` (function, line 4722) `static void test_inline_font_kerning(void **state)`
-  - `test_inline_text_rendering` (function, line 4731) `static void test_inline_text_rendering(void **state)`
-  - `test_inline_font_stretch` (function, line 4741) `static void test_inline_font_stretch(void **state)`
-  - `test_inline_resize` (function, line 4756) `static void test_inline_resize(void **state)`
-  - `test_inline_scroll_behavior` (function, line 4766) `static void test_inline_scroll_behavior(void **state)`
-  - `test_inline_touch_action` (function, line 4774) `static void test_inline_touch_action(void **state)`
-  - `test_inline_overscroll_behavior` (function, line 4786) `static void test_inline_overscroll_behavior(void **state)`
-  - `test_inline_backface_visibility` (function, line 4795) `static void test_inline_backface_visibility(void **state)`
-  - `test_math_min_max_top_level` (function, line 4804) `static void test_math_min_max_top_level(void **state)`
-  - `test_math_clamp` (function, line 4816) `static void test_math_clamp(void **state)`
-  - `test_math_nested_in_calc` (function, line 4826) `static void test_math_nested_in_calc(void **state)`
-  - `test_logical_margin_padding` (function, line 4840) `static void test_logical_margin_padding(void **state)`
-  - `test_logical_inset_and_sizes` (function, line 4866) `static void test_logical_inset_and_sizes(void **state)`
-  - `test_place_shorthands` (function, line 4888) `static void test_place_shorthands(void **state)`
-  - `test_gap_two_value` (function, line 4911) `static void test_gap_two_value(void **state)`
-  - `test_font_shorthand` (function, line 4928) `static void test_font_shorthand(void **state)`
-  - `test_white_space_break_spaces` (function, line 4950) `static void test_white_space_break_spaces(void **state)`
-  - `test_background_rgba_alpha` (function, line 4958) `static void test_background_rgba_alpha(void **state)`
-  - `test_background_clip_text` (function, line 4987) `static void test_background_clip_text(void **state)`
-  - `test_text_fill_color` (function, line 4996) `static void test_text_fill_color(void **state)`
-  - `test_conic_gradient_basic` (function, line 5007) `static void test_conic_gradient_basic(void **state)`
-  - `test_conic_gradient_from_angle` (function, line 5019) `static void test_conic_gradient_from_angle(void **state)`
-  - `test_conic_gradient_pie_hard_stop` (function, line 5033) `static void test_conic_gradient_pie_hard_stop(void **state)`
-  - `test_conic_gradient_deg_positions` (function, line 5048) `static void test_conic_gradient_deg_positions(void **state)`
-  - `test_conic_gradient_fails_closed` (function, line 5058) `static void test_conic_gradient_fails_closed(void **state)`
-  - `test_linear_gradient_positions_emitted` (function, line 5068) `static void test_linear_gradient_positions_emitted(void **state)`
-  - `test_filter_drop_shadow` (function, line 5085) `static void test_filter_drop_shadow(void **state)`
-  - `test_filter_drop_shadow_defaults_and_failclosed` (function, line 5098) `static void test_filter_drop_shadow_defaults_and_failclosed(void **state)`
-  - `test_backdrop_filter_blur` (function, line 5112) `static void test_backdrop_filter_blur(void **state)`
-  - `test_filter_blur_and_grayscale` (function, line 5124) `static void test_filter_blur_and_grayscale(void **state)`
-  - `test_anim_keyframes_resolved_from_sheet` (function, line 5152) `static void test_anim_keyframes_resolved_from_sheet(void **state)`
-  - `test_anim_transform_keyframes_from_sheet` (function, line 5185) `static void test_anim_transform_keyframes_from_sheet(void **state)`
-  - `test_keyframes_overflow_skips_block_not_sheet` (function, line 5256) `static void test_keyframes_overflow_skips_block_not_sheet(void **state)`
-  - `test_vw_resolves_against_render_width` (function, line 5287) `static void test_vw_resolves_against_render_width(void **state)`
-  - `assert_int_equal` (function, line 5323) `assert_int_equal(css_resolve(sh, "div", NULL, (const char *[])`
-  - `test_rem_rebased_on_root_font_size` (function, line 5328) `static void test_rem_rebased_on_root_font_size(void **state)`
-  - `test_rem_rebase_applies_to_box_lengths` (function, line 5340) `static void test_rem_rebase_applies_to_box_lengths(void **state)`
-  - `test_rem_rebase_absent_root_declaration_is_byte_identical` (function, line 5354) `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)`
-  - `test_rem_rebase_honours_root_pseudo_class` (function, line 5366) `static void test_rem_rebase_honours_root_pseudo_class(void **state)`
-  - `test_rem_rebase_skips_at_rule_prelude` (function, line 5376) `static void test_rem_rebase_skips_at_rule_prelude(void **state)`
-  - `test_rem_rebase_leaves_quoted_text_alone` (function, line 5399) `static void test_rem_rebase_leaves_quoted_text_alone(void **state)`
-  - `test_rem_rebase_ignores_identifier_lookalikes` (function, line 5410) `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)`
-  - `test_rem_rebase_62_5_percent_idiom` (function, line 5425) `static void test_rem_rebase_62_5_percent_idiom(void **state)`
-  - `test_media_query_length_honours_its_unit` (function, line 5440) `static void test_media_query_length_honours_its_unit(void **state)`
-  - `assert_int_equal` (function, line 5447) `assert_int_equal(css_parse("@media (min-width: 200em)`
-  - `assert_int_equal` (function, line 5453) `assert_int_equal(css_parse("@media (min-width: 40em)`
-  - `test_clip_rect` (function, line 5461) `static void test_clip_rect(void **state)`
-  - `test_clip_auto` (function, line 5471) `static void test_clip_auto(void **state)`
-  - `grammar` (function, line 5488) `* grammar (spec/css.md), so they parse instead of dropping. */
+  - `test_viewport_units_in_calc_and_mathfn` (function, line 3009) `static void test_viewport_units_in_calc_and_mathfn(void **state)`
+  - `test_viewport_units_font_size` (function, line 3017) `static void test_viewport_units_font_size(void **state)`
+  - `test_viewport_units_junk_fail_closed` (function, line 3025) `static void test_viewport_units_junk_fail_closed(void **state)`
+  - `test_calc_inside_shorthands` (function, line 3038) `static void test_calc_inside_shorthands(void **state)`
+  - `test_calc_with_custom_property` (function, line 3076) `static void test_calc_with_custom_property(void **state)`
+  - `test_box_clamp_anti_dos` (function, line 3083) `static void test_box_clamp_anti_dos(void **state)`
+  - `test_inline_min_width_height` (function, line 3092) `static void test_inline_min_width_height(void **state)`
+  - `test_inline_min_max_height` (function, line 3119) `static void test_inline_min_max_height(void **state)`
+  - `test_box_extension_sheet_cascade` (function, line 3133) `static void test_box_extension_sheet_cascade(void **state)`
+  - `test_inline_text_decoration_color_style` (function, line 3153) `static void test_inline_text_decoration_color_style(void **state)`
+  - `test_inline_text_decoration_thickness` (function, line 3182) `static void test_inline_text_decoration_thickness(void **state)`
+  - `test_inline_aspect_ratio` (function, line 3199) `static void test_inline_aspect_ratio(void **state)`
+  - `test_inline_direction` (function, line 3229) `static void test_inline_direction(void **state)`
+  - `test_inline_outline_offset` (function, line 3238) `static void test_inline_outline_offset(void **state)`
+  - `test_inline_tab_size` (function, line 3250) `static void test_inline_tab_size(void **state)`
+  - `test_box_sheet_cascade_inline_wins` (function, line 3260) `static void test_box_sheet_cascade_inline_wins(void **state)`
+  - `test_position_and_insets` (function, line 3275) `static void test_position_and_insets(void **state)`
+  - `test_float_and_clear` (function, line 3306) `static void test_float_and_clear(void **state)`
+  - `test_visibility` (function, line 3330) `static void test_visibility(void **state)`
+  - `test_overflow` (function, line 3347) `static void test_overflow(void **state)`
+  - `test_cursor` (function, line 3370) `static void test_cursor(void **state)`
+  - `test_animation_shorthand_basic` (function, line 3403) `static void test_animation_shorthand_basic(void **state)`
+  - `test_animation_shorthand_order_free` (function, line 3412) `static void test_animation_shorthand_order_free(void **state)`
+  - `test_animation_shorthand_ignores_bezier` (function, line 3421) `static void test_animation_shorthand_ignores_bezier(void **state)`
+  - `test_animation_none_resets` (function, line 3428) `static void test_animation_none_resets(void **state)`
+  - `test_transition_comma_takes_first` (function, line 3435) `static void test_transition_comma_takes_first(void **state)`
+  - `test_tweener_flex_order` (function, line 3443) `static void test_tweener_flex_order(void **state)`
+  - `test_tweener_flex_factors` (function, line 3449) `static void test_tweener_flex_factors(void **state)`
+  - `test_tweener_pack_vocab` (function, line 3457) `static void test_tweener_pack_vocab(void **state)`
+  - `test_tweener_align` (function, line 3467) `static void test_tweener_align(void **state)`
+  - `test_bg_position_edge_offset` (function, line 3477) `static void test_bg_position_edge_offset(void **state)`
+  - `test_bg_position_center_by_identity` (function, line 3489) `static void test_bg_position_center_by_identity(void **state)`
+  - `test_bg_position_four_value` (function, line 3500) `static void test_bg_position_four_value(void **state)`
+  - `test_bg_position_collision_drops` (function, line 3510) `static void test_bg_position_collision_drops(void **state)`
+  - `test_grid_autofill_marker` (function, line 3520) `static void test_grid_autofill_marker(void **state)`
+  - `test_fontface_matches_sheet_face` (function, line 3533) `static void test_fontface_matches_sheet_face(void **state)`
+  - `test_fontface_no_match_is_zero` (function, line 3545) `static void test_fontface_no_match_is_zero(void **state)`
+  - `test_fontface_case_insensitive` (function, line 3556) `static void test_fontface_case_insensitive(void **state)`
+  - `test_fontface_icon_only_family` (function, line 3567) `static void test_fontface_icon_only_family(void **state)`
+  - `test_fontface_data_url_family_matches` (function, line 3579) `static void test_fontface_data_url_family_matches(void **state)`
+  - `test_fontface_inline_has_no_sheet` (function, line 3601) `static void test_fontface_inline_has_no_sheet(void **state)`
+  - `test_fontface_later_rule_clears` (function, line 3609) `static void test_fontface_later_rule_clears(void **state)`
+  - `test_font_list_normalized` (function, line 3624) `static void test_font_list_normalized(void **state)`
+  - `test_font_list_inline_and_fontface_first_name` (function, line 3642) `static void test_font_list_inline_and_fontface_first_name(void **state)`
+  - `test_placeholder_pseudo_element` (function, line 3658) `static void test_placeholder_pseudo_element(void **state)`
+  - `test_font_size_math_functions` (function, line 3683) `static void test_font_size_math_functions(void **state)`
+  - `test_filter_none_and_default_argument` (function, line 3700) `static void test_filter_none_and_default_argument(void **state)`
+  - `test_logical_borders` (function, line 3714) `static void test_logical_borders(void **state)`
+  - `test_svg_stroke_and_fill_none` (function, line 3732) `static void test_svg_stroke_and_fill_none(void **state)`
+  - `test_text_wrap_balance` (function, line 3747) `static void test_text_wrap_balance(void **state)`
+  - `test_transform_z_identity` (function, line 3756) `static void test_transform_z_identity(void **state)`
+  - `test_calc_shape_mismatch_drops` (function, line 3771) `static void test_calc_shape_mismatch_drops(void **state)`
+  - `test_bare_ms_box_sizing_drops` (function, line 3779) `static void test_bare_ms_box_sizing_drops(void **state)`
+  - `test_font_without_family_drops` (function, line 3785) `static void test_font_without_family_drops(void **state)`
+  - `test_text_overflow_and_word_break` (function, line 3791) `static void test_text_overflow_and_word_break(void **state)`
+  - `test_box_sizing` (function, line 3823) `static void test_box_sizing(void **state)`
+  - `test_border_shorthand` (function, line 3831) `static void test_border_shorthand(void **state)`
+  - `test_border_longhands` (function, line 3861) `static void test_border_longhands(void **state)`
+  - `test_box_shadow_and_outline` (function, line 3887) `static void test_box_shadow_and_outline(void **state)`
+  - `test_ua_heading_font_size` (function, line 3914) `static void test_ua_heading_font_size(void **state)`
+  - `test_flex_item` (function, line 3934) `static void test_flex_item(void **state)`
+  - `test_flex_align` (function, line 3978) `static void test_flex_align(void **state)`
+  - `test_box_orient_maps_to_flex_direction` (function, line 4009) `static void test_box_orient_maps_to_flex_direction(void **state)`
+  - `test_wide_keyword_resets_earlier_loser` (function, line 4036) `static void test_wide_keyword_resets_earlier_loser(void **state)`
+  - `test_grid_line_names_are_not_tracks` (function, line 4068) `static void test_grid_line_names_are_not_tracks(void **state)`
+  - `test_grid_extras` (function, line 4088) `static void test_grid_extras(void **state)`
+  - `test_layout_sheet_cascade_and_unset` (function, line 4143) `static void test_layout_sheet_cascade_and_unset(void **state)`
+  - `test_inline_outline_longhands` (function, line 4179) `static void test_inline_outline_longhands(void **state)`
+  - `test_inline_border_collapse` (function, line 4210) `static void test_inline_border_collapse(void **state)`
+  - `test_inline_border_spacing` (function, line 4219) `static void test_inline_border_spacing(void **state)`
+  - `test_inline_empty_cells` (function, line 4230) `static void test_inline_empty_cells(void **state)`
+  - `test_inline_caption_side` (function, line 4239) `static void test_inline_caption_side(void **state)`
+  - `test_inline_table_layout` (function, line 4248) `static void test_inline_table_layout(void **state)`
+  - `test_inline_font_variant` (function, line 4257) `static void test_inline_font_variant(void **state)`
+  - `test_inline_hyphens` (function, line 4266) `static void test_inline_hyphens(void **state)`
+  - `test_inline_user_select` (function, line 4276) `static void test_inline_user_select(void **state)`
+  - `test_inline_caret_color` (function, line 4287) `static void test_inline_caret_color(void **state)`
+  - `test_inline_appearance` (function, line 4297) `static void test_inline_appearance(void **state)`
+  - `test_inline_pointer_events` (function, line 4308) `static void test_inline_pointer_events(void **state)`
+  - `test_table_sheet_cascade` (function, line 4319) `static void test_table_sheet_cascade(void **state)`
+  - `test_inline_bg_repeat` (function, line 4334) `static void test_inline_bg_repeat(void **state)`
+  - `test_inline_bg_size` (function, line 4346) `static void test_inline_bg_size(void **state)`
+  - `test_inline_bg_clip_origin_attachment` (function, line 4355) `static void test_inline_bg_clip_origin_attachment(void **state)`
+  - `test_inline_isolation` (function, line 4375) `static void test_inline_isolation(void **state)`
+  - `test_inline_contain` (function, line 4383) `static void test_inline_contain(void **state)`
+  - `test_inline_content_visibility` (function, line 4398) `static void test_inline_content_visibility(void **state)`
+  - `test_inline_image_rendering` (function, line 4407) `static void test_inline_image_rendering(void **state)`
+  - `test_inline_color_scheme` (function, line 4416) `static void test_inline_color_scheme(void **state)`
+  - `test_inline_accent_color` (function, line 4426) `static void test_inline_accent_color(void **state)`
+  - `test_inline_print_forced_adjust` (function, line 4435) `static void test_inline_print_forced_adjust(void **state)`
+  - `test_inline_mix_blend_mode` (function, line 4449) `static void test_inline_mix_blend_mode(void **state)`
+  - `test_inline_transform_translate` (function, line 4472) `static void test_inline_transform_translate(void **state)`
+  - `test_inline_transform_scale` (function, line 4523) `static void test_inline_transform_scale(void **state)`
+  - `test_inline_transform_rotate` (function, line 4563) `static void test_inline_transform_rotate(void **state)`
+  - `test_inline_transform_skew` (function, line 4593) `static void test_inline_transform_skew(void **state)`
+  - `test_transform_origin` (function, line 4672) `static void test_transform_origin(void **state)`
+  - `test_inline_transform_independent_cascade_combines` (function, line 4714) `static void test_inline_transform_independent_cascade_combines(void **state)`
+  - `test_inline_object_fit` (function, line 4728) `static void test_inline_object_fit(void **state)`
+  - `test_inline_list_style_pos` (function, line 4739) `static void test_inline_list_style_pos(void **state)`
+  - `test_inline_font_kerning` (function, line 4747) `static void test_inline_font_kerning(void **state)`
+  - `test_inline_text_rendering` (function, line 4756) `static void test_inline_text_rendering(void **state)`
+  - `test_inline_font_stretch` (function, line 4766) `static void test_inline_font_stretch(void **state)`
+  - `test_inline_resize` (function, line 4781) `static void test_inline_resize(void **state)`
+  - `test_inline_scroll_behavior` (function, line 4791) `static void test_inline_scroll_behavior(void **state)`
+  - `test_inline_touch_action` (function, line 4799) `static void test_inline_touch_action(void **state)`
+  - `test_inline_overscroll_behavior` (function, line 4811) `static void test_inline_overscroll_behavior(void **state)`
+  - `test_inline_backface_visibility` (function, line 4820) `static void test_inline_backface_visibility(void **state)`
+  - `test_math_min_max_top_level` (function, line 4829) `static void test_math_min_max_top_level(void **state)`
+  - `test_math_clamp` (function, line 4841) `static void test_math_clamp(void **state)`
+  - `test_math_nested_in_calc` (function, line 4851) `static void test_math_nested_in_calc(void **state)`
+  - `test_logical_margin_padding` (function, line 4865) `static void test_logical_margin_padding(void **state)`
+  - `test_logical_inset_and_sizes` (function, line 4891) `static void test_logical_inset_and_sizes(void **state)`
+  - `test_place_shorthands` (function, line 4913) `static void test_place_shorthands(void **state)`
+  - `test_gap_two_value` (function, line 4936) `static void test_gap_two_value(void **state)`
+  - `test_font_shorthand` (function, line 4953) `static void test_font_shorthand(void **state)`
+  - `test_white_space_break_spaces` (function, line 4975) `static void test_white_space_break_spaces(void **state)`
+  - `test_background_rgba_alpha` (function, line 4983) `static void test_background_rgba_alpha(void **state)`
+  - `test_background_clip_text` (function, line 5012) `static void test_background_clip_text(void **state)`
+  - `test_text_fill_color` (function, line 5021) `static void test_text_fill_color(void **state)`
+  - `test_conic_gradient_basic` (function, line 5032) `static void test_conic_gradient_basic(void **state)`
+  - `test_conic_gradient_from_angle` (function, line 5044) `static void test_conic_gradient_from_angle(void **state)`
+  - `test_conic_gradient_pie_hard_stop` (function, line 5058) `static void test_conic_gradient_pie_hard_stop(void **state)`
+  - `test_conic_gradient_deg_positions` (function, line 5073) `static void test_conic_gradient_deg_positions(void **state)`
+  - `test_conic_gradient_fails_closed` (function, line 5083) `static void test_conic_gradient_fails_closed(void **state)`
+  - `test_linear_gradient_positions_emitted` (function, line 5093) `static void test_linear_gradient_positions_emitted(void **state)`
+  - `test_filter_drop_shadow` (function, line 5110) `static void test_filter_drop_shadow(void **state)`
+  - `test_filter_drop_shadow_defaults_and_failclosed` (function, line 5123) `static void test_filter_drop_shadow_defaults_and_failclosed(void **state)`
+  - `test_backdrop_filter_blur` (function, line 5137) `static void test_backdrop_filter_blur(void **state)`
+  - `test_filter_blur_and_grayscale` (function, line 5149) `static void test_filter_blur_and_grayscale(void **state)`
+  - `test_anim_keyframes_resolved_from_sheet` (function, line 5177) `static void test_anim_keyframes_resolved_from_sheet(void **state)`
+  - `test_anim_transform_keyframes_from_sheet` (function, line 5210) `static void test_anim_transform_keyframes_from_sheet(void **state)`
+  - `test_keyframes_overflow_skips_block_not_sheet` (function, line 5281) `static void test_keyframes_overflow_skips_block_not_sheet(void **state)`
+  - `test_vw_resolves_against_render_width` (function, line 5312) `static void test_vw_resolves_against_render_width(void **state)`
+  - `assert_int_equal` (function, line 5348) `assert_int_equal(css_resolve(sh, "div", NULL, (const char *[])`
+  - `test_rem_rebased_on_root_font_size` (function, line 5353) `static void test_rem_rebased_on_root_font_size(void **state)`
+  - `test_rem_rebase_applies_to_box_lengths` (function, line 5365) `static void test_rem_rebase_applies_to_box_lengths(void **state)`
+  - `test_rem_rebase_absent_root_declaration_is_byte_identical` (function, line 5379) `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)`
+  - `test_rem_rebase_honours_root_pseudo_class` (function, line 5391) `static void test_rem_rebase_honours_root_pseudo_class(void **state)`
+  - `test_rem_rebase_skips_at_rule_prelude` (function, line 5401) `static void test_rem_rebase_skips_at_rule_prelude(void **state)`
+  - `test_rem_rebase_leaves_quoted_text_alone` (function, line 5424) `static void test_rem_rebase_leaves_quoted_text_alone(void **state)`
+  - `test_rem_rebase_ignores_identifier_lookalikes` (function, line 5435) `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)`
+  - `test_rem_rebase_62_5_percent_idiom` (function, line 5450) `static void test_rem_rebase_62_5_percent_idiom(void **state)`
+  - `test_media_query_length_honours_its_unit` (function, line 5465) `static void test_media_query_length_honours_its_unit(void **state)`
+  - `assert_int_equal` (function, line 5472) `assert_int_equal(css_parse("@media (min-width: 200em)`
+  - `assert_int_equal` (function, line 5478) `assert_int_equal(css_parse("@media (min-width: 40em)`
+  - `test_clip_rect` (function, line 5486) `static void test_clip_rect(void **state)`
+  - `test_clip_auto` (function, line 5496) `static void test_clip_auto(void **state)`
+  - `grammar` (function, line 5513) `* grammar (spec/css.md), so they parse instead of dropping. */
 static void test_vendor_prefixes(v...`
-  - `test_fontface_local_only_is_alias` (function, line 5528) `static void test_fontface_local_only_is_alias(void **state)`
-  - `test_fontface_local_then_url_keeps_url` (function, line 5546) `static void test_fontface_local_then_url_keeps_url(void **state)`
-  - `test_box_shadow_layers_and_alpha` (function, line 5564) `static void test_box_shadow_layers_and_alpha(void **state)`
-  - `test_grid_template_rows_tracks` (function, line 5589) `static void test_grid_template_rows_tracks(void **state)`
-  - `main` (function, line 5605) `int main(void)`
-  - `box` (function, line 233) `* box (CSS 2.1 section 10.8.1). With one line box per line and no separate * parent content edge, they land on the...`
-  - `downstream` (function, line 656) `* and deciding whether to fetch happens downstream (render_doc.c) */ assert_string_equal(css_parse_inline(...`
-  - `invalid` (function, line 758) `* invalid (fail closed), not silently coerced into some default. */ css_style s = css_parse_inline("color...`
-  - `terminator` (function, line 2007) `* terminator (consumed, not painted);`
+  - `test_fontface_local_only_is_alias` (function, line 5553) `static void test_fontface_local_only_is_alias(void **state)`
+  - `test_fontface_local_then_url_keeps_url` (function, line 5571) `static void test_fontface_local_then_url_keeps_url(void **state)`
+  - `test_box_shadow_layers_and_alpha` (function, line 5589) `static void test_box_shadow_layers_and_alpha(void **state)`
+  - `test_grid_template_rows_tracks` (function, line 5614) `static void test_grid_template_rows_tracks(void **state)`
+  - `main` (function, line 5630) `int main(void)`
+  - `box` (function, line 234) `* box (CSS 2.1 section 10.8.1). With one line box per line and no separate * parent content edge, they land on the...`
+  - `downstream` (function, line 657) `* and deciding whether to fetch happens downstream (render_doc.c) */ assert_string_equal(css_parse_inline(...`
+  - `invalid` (function, line 759) `* invalid (fail closed), not silently coerced into some default. */ css_style s = css_parse_inline("color...`
+  - `terminator` (function, line 2008) `* terminator (consumed, not painted);`
 - Depends on: `include/css.h`, `include/css_select.h`, `include/css_vars.h`, `include/flex_layout.h`, `include/webfont.h`
 
 ## tests/test_css_atrule.c

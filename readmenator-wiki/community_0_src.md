@@ -1,22 +1,22 @@
 # src
 
-*Community 0 | 59 files | cohesion 0.74*
+*Community 0 | 61 files | cohesion 0.74*
 
 ## Definition
 
-This community groups 59 file(s) rooted at `src` with dominant language c (cohesion 0.74). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (175 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
+This community groups 61 file(s) rooted at `src` with dominant language c (cohesion 0.74). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (189 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
 
 ## Files
 
-### `src` (22 files)
+### `src` (24 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `src/dom.c` | c | utility | 72 | no |
 | `src/freebug.c` | c | utility | 9 | no |
 | `src/html_parse.c` | c | utility | 29 | no |
-| `src/js_dom.c` | c | utility | 56 | no |
-| `src/js_dom_ext.c` | c | utility | 3 | no |
+| `src/js_custom_elements.c` | c | utility | 1 | no |
+| `src/js_custom_elements.h` | h | utility | 2 | yes |
 
 ### `include` (16 files)
 
@@ -25,7 +25,7 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 | `include/dom.h` | h | utility | 28 | no |
 | `include/freebug.h` | h | utility | 18 | no |
 | `include/html_parse.h` | h | utility | 24 | no |
-| `include/js_dom.h` | h | utility | 17 | no |
+| `include/js_dom.h` | h | utility | 18 | no |
 | `include/js_env.h` | h | infrastructure | 3 | no |
 
 ### `tests` (13 files)
@@ -35,7 +35,7 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 | `tests/test_dom.c` | c | testing | 41 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
-| `tests/test_js_dom.c` | c | testing | 175 | no |
+| `tests/test_js_dom.c` | c | testing | 189 | no |
 | `tests/test_js_env.c` | c | testing | 26 | no |
 
 ### `fuzz` (8 files)
@@ -48,7 +48,7 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 | `fuzz/fuzz_js_dom.c` | c | utility | 3 | no |
 | `fuzz/fuzz_js_geom.c` | c | utility | 3 | no |
 
-*... and 39 more files in this community.*
+*... and 41 more files in this community.*
 
 
 ## Key Symbols
@@ -86,30 +86,26 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 130
-- Cross-boundary resolved imports (EXTRACTED): 45
+- Internal resolved imports (EXTRACTED): 132
+- Cross-boundary resolved imports (EXTRACTED): 46
 
 ## Connections
 
 - [EXTRACTED] depends_on community 3 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.
 - [EXTRACTED] depends_on community 6 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/html_parse.h.
-- [EXTRACTED] depends_on community 2 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
+- [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
 - [EXTRACTED] depends_on community 5 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
-- [EXTRACTED] depends_on community 0 <-> 1 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
+- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
 
 ## Risks
 
 - [cycle] `include/js_dom.h` -> `include/js_location.h` -> `include/js_dom.h`
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
 - [layer strict] `tests/test_renderer.c` (testing) -> `include/renderer.h` (presentation)
-- [dataflow UNCHECKED_ALLOC] `src/js_events.c:30` `jd_click_state_new` `s`: Result of allocator stored in `s` is never checked against NULL.
-- [dataflow DEAD_STORE] `src/js_geom.c:71` `unite` `w`: `w` assigned at line 71 but never read afterwards.
-- [dataflow DEAD_STORE] `src/link_nav.c:58` `ci_prefix` `hash`: `hash` assigned at line 58 but never read afterwards.
-- [dataflow DEAD_STORE] `src/os_sandbox.c:154` `os_harden` `n`: `n` assigned at line 154 but never read afterwards.
 
 ## Open Questions
 
-- Why do 55 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom.c`)? What purpose do they serve?
+- Why do 56 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom.c`)? What purpose do they serve?
 - Can the cycle `include/js_dom.h` -> `include/js_location.h` be broken with an interface?
 - What would break if the most connected file in src changed?
 - Should src be split, given cohesion 0.74?
@@ -136,4 +132,4 @@ This community groups 59 file(s) rooted at `src` with dominant language c (cohes
 - `include/link_nav.h`
 - `include/os_sandbox.h`
 - `include/renderer.h`
-- *... and 39 more*
+- *... and 41 more*

@@ -1,5 +1,50 @@
-# Subsystem: include (page 2 of 4)
+# Subsystem: include (page 2 of 5)
 Previous: [KB_include.md](KB_include.md)
+
+## include/css_length.h
+- Doc: cl_ctx: The state a <length> is measured against.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `cl_ctx` (struct, line 84)
+  - `cl_lp` (struct, line 132)
+  - `cl_status` (enum, line 61)
+  - `font_size` (type_alias, line 84) `typedef struct cl_ctx { double font_size;`
+  - `px` (type_alias, line 132) `typedef struct cl_lp { double px;`
+  - `prelude` (function, line 99) `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the...`
+  - `cl_unit_is_font_relative` (function, line 157) `* cl_unit_is_font_relative() draws. */ /* * Re-fits a resolved length to a different font-size: * * used = px + em *...`
+  - `cl_unit_font_ratio` (function, line 182) `double cl_unit_font_ratio(const char *unit, size_t unit_len);`
+  - `here` (function, line 186) `* Every input cl_resolve accepts resolves identically here (with has_pct 0);`
+  - `length` (function, line 206) `* * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute...`
+  - `cl_number` (function, line 230) `int cl_number(const char *s, double *out, const char **endp);`
+  - `cl_is_length_unit` (function, line 246) `int cl_is_length_unit(const char *unit, size_t unit_len);`
+  - `FREEDOM_CSS_LENGTH_H` (macro, line 2) `#define FREEDOM_CSS_LENGTH_H`
+  - `CL_MAX_TOKEN` (macro, line 33) `#define CL_MAX_TOKEN`
+  - `CL_INITIAL_FONT_SIZE` (macro, line 39) `#define CL_INITIAL_FONT_SIZE`
+  - `CL_NORMAL_LINE_RATIO` (macro, line 45) `#define CL_NORMAL_LINE_RATIO`
+  - `CL_FALLBACK_EX_RATIO` (macro, line 56) `#define CL_FALLBACK_EX_RATIO`
+  - `CL_FALLBACK_CH_RATIO` (macro, line 57) `#define CL_FALLBACK_CH_RATIO`
+  - `CL_FALLBACK_CAP_RATIO` (macro, line 58) `#define CL_FALLBACK_CAP_RATIO`
+  - `CL_FALLBACK_IC_RATIO` (macro, line 59) `#define CL_FALLBACK_IC_RATIO`
+- Imported by: `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_length.c`, `src/css_mq.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `tests/test_css_length.c`
+
+## include/css_mask.h
+- Doc: CSS Masking 1, alpha gradients only (spec/css_mask.md).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `cm_layer` (struct, line 19)
+  - `cm_comp` (enum, line 14)
+  - `cm_clip` (enum, line 15)
+  - `kind` (type_alias, line 19) `typedef struct cm_layer { int kind;`
+  - `cm_is_mask_prop` (function, line 28) `int cm_is_mask_prop(const char *prop);`
+  - `malformed` (function, line 31) `* the value is unsupported or malformed (the caller drops the declaration). */ int cm_expand(const char *prop, const...`
+  - `cm_encode_layer` (function, line 35) `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss);`
+  - `cm_decode_layer` (function, line 36) `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out);`
+  - `FREEDOM_CSS_MASK_H` (macro, line 2) `#define FREEDOM_CSS_MASK_H`
+  - `CM_LAYERS` (macro, line 12) `#define CM_LAYERS`
+- Depends on: `include/css_decl.h`
+- Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_mask.c`, `tests/test_css_mask.c`
 
 ## include/css_mq.h
 - Doc: cmq_matches: 1 iff the media query list s[0,len) matches env; malformed/unknown parts fail * closed.
@@ -89,11 +134,12 @@ Previous: [KB_include.md](KB_include.md)
   - `cv_interp_color` (function, line 13) `int cv_interp_color(const char *v);`
   - `cv_color_ok` (function, line 14) `int cv_color_ok(int c);`
   - `cv_bg_alpha_of` (function, line 15) `int cv_bg_alpha_of(const char *v);`
-  - `cv_parse_color_t7` (function, line 19) `int cv_parse_color_t7(const char *v);`
-  - `black` (function, line 22) `* transparent black (127 << 24) -- text that paints nothing, not an absent * value. CC_COLOR_CURRENT and -1...`
-  - `cv_interp_bg` (function, line 25) `int cv_interp_bg(const char *v);`
+  - `cv_filter_scale` (function, line 20) `double cv_filter_scale(int pct);`
+  - `cv_parse_color_t7` (function, line 24) `int cv_parse_color_t7(const char *v);`
+  - `black` (function, line 27) `* transparent black (127 << 24) -- text that paints nothing, not an absent * value. CC_COLOR_CURRENT and -1...`
+  - `cv_interp_bg` (function, line 30) `int cv_interp_bg(const char *v);`
   - `FREEDOM_CSS_VALUES_H` (macro, line 2) `#define FREEDOM_CSS_VALUES_H`
-- Imported by: `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `tests/test_css_values.c`
+- Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `tests/test_css_values.c`
 
 ## include/css_vars.h
 - Doc: cvr_table: Zero-initialise ({0}) before first use.
@@ -237,12 +283,12 @@ Previous: [KB_include.md](KB_include.md)
   - `widths` (function, line 194) `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...`
   - `FX_ERR_NULL_ARG` (function, line 228) `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);`
   - `space` (function, line 234) `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...`
-  - `fx_auto_min_size` (function, line 263) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
-  - `fx_justify_name` (function, line 319) `const char *fx_justify_name(fx_justify j);`
-  - `height` (function, line 325) `* used height (h_out);`
-  - `it` (function, line 342) `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...`
-  - `win` (function, line 350) `* margins win (both = centre, left only = end);`
-  - `fx_cross_offset` (function, line 352) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);`
+  - `fx_auto_min_size` (function, line 265) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
+  - `fx_justify_name` (function, line 321) `const char *fx_justify_name(fx_justify j);`
+  - `height` (function, line 327) `* used height (h_out);`
+  - `it` (function, line 344) `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...`
+  - `win` (function, line 352) `* margins win (both = centre, left only = end);`
+  - `fx_cross_offset` (function, line 354) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);`
   - `FREEDOM_FLEX_LAYOUT_H` (macro, line 2) `#define FREEDOM_FLEX_LAYOUT_H`
   - `FX_MAX_ITEMS` (macro, line 28) `#define FX_MAX_ITEMS`
   - `FX_GL_AUTO` (macro, line 107) `#define FX_GL_AUTO`
@@ -254,9 +300,9 @@ Previous: [KB_include.md](KB_include.md)
   - `FX_AREA_MAX_CELLS` (macro, line 138) `#define FX_AREA_MAX_CELLS`
   - `FX_AREA_NAME_MAX` (macro, line 139) `#define FX_AREA_NAME_MAX`
   - `FX_FLOAT_MIN_LINE` (macro, line 208) `#define FX_FLOAT_MIN_LINE`
-  - `FX_MAX_COLUMNS` (macro, line 268) `#define FX_MAX_COLUMNS`
-  - `FX_MAUTO_TOP` (macro, line 335) `#define FX_MAUTO_TOP`
-  - `FX_MAUTO_BOTTOM` (macro, line 336) `#define FX_MAUTO_BOTTOM`
+  - `FX_MAX_COLUMNS` (macro, line 270) `#define FX_MAX_COLUMNS`
+  - `FX_MAUTO_TOP` (macro, line 337) `#define FX_MAUTO_TOP`
+  - `FX_MAUTO_BOTTOM` (macro, line 338) `#define FX_MAUTO_BOTTOM`
 - Imported by: `fuzz/fuzz_css.c`, `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ## include/form.h
@@ -352,6 +398,23 @@ Previous: [KB_include.md](KB_include.md)
   - `FREEDOM_HLS_H` (macro, line 2) `#define FREEDOM_HLS_H`
 - Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/hls.c`, `tests/test_hls.c`
 
+## include/host_conf.h
+- Doc: hcf_search_dirs: Pure.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `hcf_dirs` (struct, line 20)
+  - `hcf_search_dirs` (function, line 28) `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out);`
+  - `hcf_search_dirs_from_env` (function, line 31) `void hcf_search_dirs_from_env(hcf_dirs *out);`
+  - `hcf_load_filter` (function, line 35) `hb_set *hcf_load_filter(const hcf_dirs *dirs);`
+  - `hcf_load_allowlist` (function, line 39) `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname);`
+  - `FREEDOM_HOST_CONF_H` (macro, line 2) `#define FREEDOM_HOST_CONF_H`
+  - `HCF_MAX_DIRS` (macro, line 15) `#define HCF_MAX_DIRS`
+  - `HCF_PATH_MAX` (macro, line 16) `#define HCF_PATH_MAX`
+  - `HCF_MAX_FILE_BYTES` (macro, line 18) `#define HCF_MAX_FILE_BYTES`
+- Depends on: `include/hostblock.h`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/host_conf.c`, `tests/test_host_conf.c`
+
 ## include/hostblock.h
 - Doc: hb_new: } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted...
 - Layer: utility
@@ -367,7 +430,7 @@ Previous: [KB_include.md](KB_include.md)
   - `hb_is_allowlisted` (function, line 75) `int hb_is_allowlisted(const hb_set *s, const char *host);`
   - `hb_count` (function, line 79) `size_t hb_count(const hb_set *s, hb_list list);`
   - `FREEDOM_HOSTBLOCK_H` (macro, line 2) `#define FREEDOM_HOSTBLOCK_H`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/hostblock.c`, `tests/test_hostblock.c`
+- Imported by: `gui/browser_ui.c`, `include/host_conf.h`, `src/freedom.c`, `src/hostblock.c`, `tests/test_hostblock.c`
 
 ## include/hostedit.h
 - Doc: he_text_has_host: Returns 1 if text (the body of a hosts-format file) already lists host as a...
@@ -431,52 +494,6 @@ Previous: [KB_include.md](KB_include.md)
   - `IMG_MAX_DIM` (macro, line 65) `#define IMG_MAX_DIM`
   - `IMG_MAX_PIXELS` (macro, line 66) `#define IMG_MAX_PIXELS`
 - Imported by: `fuzz/fuzz_image_decode.c`, `gui/browser_ui.c`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
-
-## include/import_map.h
-- Doc: im_resolve: Resolves specifier as imported from base (the importing module's URL).
-- Layer: utility
-- Language: h
-- Symbols:
-  - `im_map` (type_alias, line 23) `typedef struct im_map im_map;`
-  - `algorithm` (function, line 13) `* resolution algorithm (scopes, exact and prefix matches). URL resolution is the * caller's (the same resolver the...`
-  - `map` (function, line 28) `* map (fail closed = no mapping). NULL only on OOM. */ im_map *im_parse(const char *json, size_t len, const char...`
-  - `im_resolve` (function, line 33) `int im_resolve(const im_map *m, const char *base, const char *specifier, im_url_fn resolve, void *ctx, char *out...`
-  - `im_count` (function, line 37) `size_t im_count(const im_map *m);`
-  - `im_free` (function, line 40) `void im_free(im_map *m);`
-  - `FREEDOM_IMPORT_MAP_H` (macro, line 2) `#define FREEDOM_IMPORT_MAP_H`
-  - `IM_MAX_TEXT` (macro, line 17) `#define IM_MAX_TEXT`
-  - `IM_MAX_ENTRIES` (macro, line 18) `#define IM_MAX_ENTRIES`
-  - `IM_MAX_SCOPES` (macro, line 19) `#define IM_MAX_SCOPES`
-- Imported by: `fuzz/fuzz_import_map.c`, `src/import_map.c`, `src/prefetch.c`, `src/tab.c`, `tests/test_import_map.c`
-
-## include/interp.h
-- Doc: ip_ease: Compute eased t for normalized t ∈ [0,1].
-- Layer: utility
-- Language: h
-- Symbols:
-  - `ip_ease_fn` (struct, line 38)
-  - `ip_keyframe` (struct, line 70)
-  - `ip_anim` (struct, line 101)
-  - `ip_easing` (enum, line 25)
-  - `ip_val_kind` (enum, line 54)
-  - `ip_direction` (enum, line 87)
-  - `ip_fill_mode` (enum, line 94)
-  - `kind` (type_alias, line 37) `typedef struct ip_ease_fn { ip_easing kind;`
-  - `pct` (type_alias, line 69) `typedef struct ip_keyframe { double pct;`
-  - `val_kind` (type_alias, line 100) `typedef struct ip_anim { ip_val_kind val_kind;`
-  - `ip_ease` (function, line 48) `double ip_ease(double t, const ip_ease_fn *fn);`
-  - `ip_lerp` (function, line 60) `double ip_lerp(double a, double b, double t);`
-  - `ip_lerp_color` (function, line 61) `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t);`
-  - `ip_interp` (function, line 62) `double ip_interp(ip_val_kind kind, double a, double b, double t);`
-  - `ip_kf_interp` (function, line 78) `double ip_kf_interp(ip_val_kind val_kind, const ip_keyframe *kf, int n_kf, double pct);`
-  - `ip_anim_init` (function, line 121) `void ip_anim_init(ip_anim *a, ip_val_kind vk, const ip_ease_fn *ease, const ip_keyframe *kf, int n_kf, double...`
-  - `ip_anim_tick` (function, line 128) `int ip_anim_tick(ip_anim *a, double dt_ms);`
-  - `ip_anim_current` (function, line 131) `double ip_anim_current(const ip_anim *a);`
-  - `ip_anim_done` (function, line 134) `int ip_anim_done(const ip_anim *a);`
-  - `FREEDOM_INTERP_H` (macro, line 2) `#define FREEDOM_INTERP_H`
-  - `IP_MAX_KEYFRAMES` (macro, line 68) `#define IP_MAX_KEYFRAMES`
-  - `IP_ITERATION_INFINITE` (macro, line 85) `#define IP_ITERATION_INFINITE`
-- Imported by: `gui/browser_ui.c`, `src/interp.c`, `tests/test_interp.c`
 
 
 Next: [KB_include_p3.md](KB_include_p3.md)

@@ -2,6 +2,23 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_net_realm.c` -> `include/net_realm.h`
+- `tests/test_os_sandbox.c` -> `include/os_sandbox.h`
+- `tests/test_page_view.c` -> `include/box_style.h`
+- `tests/test_page_view.c` -> `include/css.h`
+- `tests/test_page_view.c` -> `include/dom.h`
+- `tests/test_page_view.c` -> `include/flex_layout.h`
+- `tests/test_page_view.c` -> `include/html_parse.h`
+- `tests/test_page_view.c` -> `include/page_view.h`
+- `tests/test_page_view.c` -> `include/webfont.h`
+- `tests/test_pdf_export.c` -> `include/pdf_export.h`
+- `tests/test_perf_trace.c` -> `include/perf_trace.h`
+- `tests/test_prefetch.c` -> `include/prefetch.h`
+- `tests/test_prefs.c` -> `include/prefs.h`
+- `tests/test_prefs.c` -> `include/zoom.h`
+- `tests/test_profile.c` -> `include/prefs.h`
+- `tests/test_profile.c` -> `include/profile.h`
+- `tests/test_render_doc.c` -> `include/box_style.h`
 - `tests/test_render_doc.c` -> `include/css.h`
 - `tests/test_render_doc.c` -> `include/flex_layout.h`
 - `tests/test_render_doc.c` -> `include/page_view.h`
@@ -90,6 +107,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/form.h` -> stddef.h
 - `include/freebug.h` -> stddef.h
 - `include/hls.h` -> stddef.h
+- `include/host_conf.h` -> stddef.h
 - `include/hostblock.h` -> stddef.h
 - `include/hostedit.h` -> stddef.h
 - `include/html_parse.h` -> stddef.h, stdint.h
@@ -142,9 +160,10 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/css_box.c` -> math.h, stdlib.h, string.h
 - `src/css_chain.c` -> stdlib.h, string.h
 - `src/css_color.c` -> math.h, stdlib.h, string.h
-- `src/css_gradient.c` -> ctype.h, stdlib.h, string.h
+- `src/css_gradient.c` -> ctype.h, math.h, stdlib.h, string.h
 - `src/css_index.c` -> stdlib.h, string.h
 - `src/css_length.c` -> math.h, string.h
+- `src/css_mask.c` -> ctype.h, string.h
 - `src/css_mq.c` -> string.h
 - `src/css_select.c` -> lexbor/html/html.h, string.h
 - `src/css_text.c` -> stdlib.h, string.h
@@ -160,12 +179,14 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/freebug.c` -> stdlib.h, string.h
 - `src/freedom.c` -> limits.h, stdio.h, stdlib.h, string.h, time.h, unistd.h
 - `src/hls.c` -> stdlib.h, string.h
+- `src/host_conf.c` -> stdio.h, stdlib.h, string.h
 - `src/hostblock.c` -> stdint.h, stdlib.h, string.h
 - `src/hostedit.c` -> string.h
 - `src/html_parse.c` -> lexbor/html/html.h, lexbor/tag/const.h, stdlib.h, string.h
 - `src/image_decode.c` -> jpeglib.h, png.h, setjmp.h, stdlib.h, string.h, webp/decode.h
 - `src/import_map.c` -> stdint.h, stdlib.h, string.h
 - `src/interp.c` -> float.h, math.h
+- `src/js_custom_elements.h` -> quickjs.h
 - `src/js_dom.c` -> quickjs.h, stdint.h, stdlib.h, string.h
 - `src/js_dom_ext.h` -> quickjs.h
 - `src/js_dom_internal.h` -> quickjs.h
@@ -213,7 +234,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_box_tree.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_browser.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_compositor.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
-- `tests/test_css.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_css.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_atrule.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_box.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_css_color.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
@@ -221,6 +242,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_css_gradient.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_css_index.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_length.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tests/test_css_mask.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_css_mq.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_css_text.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_css_values.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
@@ -236,6 +258,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_freebug.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_freedom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/wait.h, unistd.h
 - `tests/test_hls.c` -> cmocka.h, setjmp.h, stddef.h, stdlib.h, string.h
+- `tests/test_host_conf.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, unistd.h
 - `tests/test_hostblock.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_hostedit.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_html_parse.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h

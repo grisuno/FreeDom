@@ -3,6 +3,17 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `cb_interp_style` | function | `include/css_box.h:32` | `int cb_interp_style(const char *v);` |
+| `cb_interp_textdeco` | function | `include/css_box.h:33` | `int cb_interp_textdeco(const char *v);` |
+| `cb_interp_weight` | function | `include/css_box.h:31` | `int cb_interp_weight(const char *v);` |
+| `cb_length_px` | function | `include/css_box.h:15` | `int cb_length_px(const char *v, double *px);` |
+| `cb_lp_can_be_nonneg` | function | `include/css_box.h:26` | `int cb_lp_can_be_nonneg(int px_val, int pct_pm);` |
+| `cb_next_ws_token` | function | `include/css_box.h:27` | `int cb_next_ws_token(const char **p, char *tok, size_t cap);` |
+| `cb_value_em_milli` | function | `include/css_box.h:25` | `int cb_value_em_milli(const char *v);` |
+| `strings` | function | `include/css_box.h:40` | `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...` |
+| `CCH_CHAIN_MAX` | macro | `include/css_chain.h:26` | `#define CCH_CHAIN_MAX` |
+| `CCH_NTH_MAX` | macro | `include/css_chain.h:28` | `#define CCH_NTH_MAX` |
+| `CCH_SIB_MAX` | macro | `include/css_chain.h:27` | `#define CCH_SIB_MAX` |
 | `FREEDOM_CSS_CHAIN_H` | macro | `include/css_chain.h:2` | `#define FREEDOM_CSS_CHAIN_H` |
 | `box` | function | `include/css_chain.h:72` | `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...` |
 | `cch_element_matches` | function | `include/css_chain.h:69` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);` |
@@ -26,12 +37,22 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CSS_WIDE_PROBE_DECLS` | macro | `include/css_decl.h:35` | `#define CSS_WIDE_PROBE_DECLS` |
 | `FREEDOM_CSS_DECL_H` | macro | `include/css_decl.h:2` | `#define FREEDOM_CSS_DECL_H` |
 | `contiguous` | function | `include/css_decl.h:65` | `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...` |
-| `css_decl` | struct | `include/css_decl.h:210` | `` |
+| `css_decl` | struct | `include/css_decl.h:217` | `` |
 | `order` | function | `include/css_decl.h:50` | `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);` |
-| `prop` | type_alias | `include/css_decl.h:209` | `typedef struct css_decl { int prop;` |
+| `prop` | type_alias | `include/css_decl.h:216` | `typedef struct css_decl { int prop;` |
+| `CG_LEN_UNSET` | macro | `include/css_gradient.h:18` | `#define CG_LEN_UNSET` |
 | `FREEDOM_CSS_GRADIENT_H` | macro | `include/css_gradient.h:2` | `#define FREEDOM_CSS_GRADIENT_H` |
 | `cg_expand_background` | function | `include/css_gradient.h:13` | `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
 | `cg_expand_bg_image` | function | `include/css_gradient.h:11` | `int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
+| `cg_parse_linear` | function | `include/css_gradient.h:51` | `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions);` |
+| `cg_radial` | struct | `include/css_gradient.h:24` | `` |
+| `cg_radial_len_px` | function | `include/css_gradient.h:37` | `double cg_radial_len_px(int enc, double dim);` |
+| `cg_radial_shape` | enum | `include/css_gradient.h:19` | `` |
+| `cg_radial_size` | enum | `include/css_gradient.h:20` | `` |
+| `out` | function | `include/css_gradient.h:32` | `* Returns 1 and fills *out (defaults first) when seg is a valid prelude, 0 when seg is not * one (it is a colour...` |
+| `shape` | type_alias | `include/css_gradient.h:24` | `typedef struct cg_radial { int shape;` |
+| `width` | function | `include/css_gradient.h:17` | `* width (x, rx) or height (y, ry);` |
+| `zero` | function | `include/css_gradient.h:41` | `* floored at a hair above zero (the spec paints the last colour for a degenerate size) and * never non-finite. Pure....` |
 | `FREEDOM_CSS_INDEX_H` | macro | `include/css_index.h:11` | `#define FREEDOM_CSS_INDEX_H` |
 | `cix_build` | function | `include/css_index.h:34` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx);` |
 | `cix_entry` | struct | `include/css_index.h:18` | `` |
@@ -59,6 +80,16 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `length` | function | `include/css_length.h:206` | `* * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute...` |
 | `prelude` | function | `include/css_length.h:99` | `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the...` |
 | `px` | type_alias | `include/css_length.h:132` | `typedef struct cl_lp { double px;` |
+| `CM_LAYERS` | macro | `include/css_mask.h:12` | `#define CM_LAYERS` |
+| `FREEDOM_CSS_MASK_H` | macro | `include/css_mask.h:2` | `#define FREEDOM_CSS_MASK_H` |
+| `cm_clip` | enum | `include/css_mask.h:15` | `` |
+| `cm_comp` | enum | `include/css_mask.h:14` | `` |
+| `cm_decode_layer` | function | `include/css_mask.h:36` | `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out);` |
+| `cm_encode_layer` | function | `include/css_mask.h:35` | `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss);` |
+| `cm_is_mask_prop` | function | `include/css_mask.h:28` | `int cm_is_mask_prop(const char *prop);` |
+| `cm_layer` | struct | `include/css_mask.h:19` | `` |
+| `kind` | type_alias | `include/css_mask.h:19` | `typedef struct cm_layer { int kind;` |
+| `malformed` | function | `include/css_mask.h:31` | `* the value is unsupported or malformed (the caller drops the declaration). */ int cm_expand(const char *prop, const...` |
 | `CMQ_MAX_DEPTH` | macro | `include/css_mq.h:16` | `#define CMQ_MAX_DEPTH` |
 | `CMQ_TOK_MAX` | macro | `include/css_mq.h:17` | `#define CMQ_TOK_MAX` |
 | `FREEDOM_CSS_MQ_H` | macro | `include/css_mq.h:2` | `#define FREEDOM_CSS_MQ_H` |
@@ -117,13 +148,14 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `ct_interp_valign` | function | `include/css_text.h:13` | `int ct_interp_valign(const char *v);` |
 | `ct_interp_whitespace` | function | `include/css_text.h:16` | `int ct_interp_whitespace(const char *v);` |
 | `FREEDOM_CSS_VALUES_H` | macro | `include/css_values.h:2` | `#define FREEDOM_CSS_VALUES_H` |
-| `black` | function | `include/css_values.h:22` | `* transparent black (127 << 24) -- text that paints nothing, not an absent * value. CC_COLOR_CURRENT and -1...` |
+| `black` | function | `include/css_values.h:27` | `* transparent black (127 << 24) -- text that paints nothing, not an absent * value. CC_COLOR_CURRENT and -1...` |
 | `cv_bg_alpha_of` | function | `include/css_values.h:15` | `int cv_bg_alpha_of(const char *v);` |
 | `cv_color_ok` | function | `include/css_values.h:14` | `int cv_color_ok(int c);` |
-| `cv_interp_bg` | function | `include/css_values.h:25` | `int cv_interp_bg(const char *v);` |
+| `cv_filter_scale` | function | `include/css_values.h:20` | `double cv_filter_scale(int pct);` |
+| `cv_interp_bg` | function | `include/css_values.h:30` | `int cv_interp_bg(const char *v);` |
 | `cv_interp_color` | function | `include/css_values.h:13` | `int cv_interp_color(const char *v);` |
 | `cv_parse_color` | function | `include/css_values.h:12` | `int cv_parse_color(const char *v);` |
-| `cv_parse_color_t7` | function | `include/css_values.h:19` | `int cv_parse_color_t7(const char *v);` |
+| `cv_parse_color_t7` | function | `include/css_values.h:24` | `int cv_parse_color_t7(const char *v);` |
 | `CVR_CHAIN_MAX` | macro | `include/css_vars.h:45` | `#define CVR_CHAIN_MAX` |
 | `CVR_MAX_DEPTH` | macro | `include/css_vars.h:22` | `#define CVR_MAX_DEPTH` |
 | `CVR_MAX_ENTRIES` | macro | `include/css_vars.h:21` | `#define CVR_MAX_ENTRIES` |
@@ -204,17 +236,17 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `FX_GL_LINE_MAX` | macro | `include/flex_layout.h:110` | `#define FX_GL_LINE_MAX` |
 | `FX_GL_SPAN_BASE` | macro | `include/flex_layout.h:108` | `#define FX_GL_SPAN_BASE` |
 | `FX_GL_SPAN_MAX` | macro | `include/flex_layout.h:109` | `#define FX_GL_SPAN_MAX` |
-| `FX_MAUTO_BOTTOM` | macro | `include/flex_layout.h:336` | `#define FX_MAUTO_BOTTOM` |
-| `FX_MAUTO_TOP` | macro | `include/flex_layout.h:335` | `#define FX_MAUTO_TOP` |
-| `FX_MAX_COLUMNS` | macro | `include/flex_layout.h:268` | `#define FX_MAX_COLUMNS` |
+| `FX_MAUTO_BOTTOM` | macro | `include/flex_layout.h:338` | `#define FX_MAUTO_BOTTOM` |
+| `FX_MAUTO_TOP` | macro | `include/flex_layout.h:337` | `#define FX_MAUTO_TOP` |
+| `FX_MAX_COLUMNS` | macro | `include/flex_layout.h:270` | `#define FX_MAX_COLUMNS` |
 | `FX_MAX_ITEMS` | macro | `include/flex_layout.h:28` | `#define FX_MAX_ITEMS` |
 | `basis` | type_alias | `include/flex_layout.h:40` | `typedef struct fx_item { double basis;` |
 | `bottom` | type_alias | `include/flex_layout.h:214` | `typedef struct fx_float_rect { double top, bottom;` |
 | `cols` | type_alias | `include/flex_layout.h:144` | `typedef struct fx_area_map { int rows, cols;` |
 | `fx_area_map` | struct | `include/flex_layout.h:144` | `` |
-| `fx_auto_min_size` | function | `include/flex_layout.h:263` | `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` |
+| `fx_auto_min_size` | function | `include/flex_layout.h:265` | `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` |
 | `fx_autofill_count` | function | `include/flex_layout.h:129` | `size_t fx_autofill_count(double avail, double gap, double minw);` |
-| `fx_cross_offset` | function | `include/flex_layout.h:352` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` |
+| `fx_cross_offset` | function | `include/flex_layout.h:354` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` |
 | `fx_float_rect` | struct | `include/flex_layout.h:214` | `` |
 | `fx_grid_area_hash` | function | `include/flex_layout.h:153` | `unsigned fx_grid_area_hash(const char *name);` |
 | `fx_grid_cell` | function | `include/flex_layout.h:74` | `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);` |
@@ -222,11 +254,11 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `fx_grid_line_resolve` | function | `include/flex_layout.h:122` | `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span);` |
 | `fx_item` | struct | `include/flex_layout.h:40` | `` |
 | `fx_justify` | enum | `include/flex_layout.h:30` | `` |
-| `fx_justify_name` | function | `include/flex_layout.h:319` | `const char *fx_justify_name(fx_justify j);` |
+| `fx_justify_name` | function | `include/flex_layout.h:321` | `const char *fx_justify_name(fx_justify j);` |
 | `fx_result` | struct | `include/flex_layout.h:48` | `` |
 | `fx_status` | enum | `include/flex_layout.h:53` | `` |
-| `height` | function | `include/flex_layout.h:325` | `* used height (h_out);` |
-| `it` | function | `include/flex_layout.h:342` | `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...` |
+| `height` | function | `include/flex_layout.h:327` | `* used height (h_out);` |
+| `it` | function | `include/flex_layout.h:344` | `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...` |
 | `number` | function | `include/flex_layout.h:106` | `* line number (negative counts from the end). */ #define FX_GL_AUTO 0 #define FX_GL_SPAN_BASE (1 << 20) #define...` |
 | `offset` | function | `include/flex_layout.h:171` | `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...` |
 | `out` | function | `include/flex_layout.h:62` | `* fx_result to out (caller-owned). n == 0 is a no-op (out may be NULL). */ fx_status fx_flex_line(const fx_item...` |
@@ -235,7 +267,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `size` | function | `include/flex_layout.h:60` | `* content size (px);` |
 | `space` | function | `include/flex_layout.h:234` | `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...` |
 | `widths` | function | `include/flex_layout.h:194` | `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...` |
-| `win` | function | `include/flex_layout.h:350` | `* margins win (both = centre, left only = end);` |
+| `win` | function | `include/flex_layout.h:352` | `* margins win (both = centre, left only = end);` |
 | `FM_BODY_MAX` | macro | `include/form.h:30` | `#define FM_BODY_MAX` |
 | `FM_CONTENT_TYPE_URLENCODED` | variable | `include/form.h:68` | `extern const char FM_CONTENT_TYPE_URLENCODED[];` |
 | `FM_MAX_FIELDS` | macro | `include/form.h:31` | `#define FM_MAX_FIELDS` |
@@ -294,6 +326,15 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `hls_status` | enum | `include/hls.h:21` | `` |
 | `hls_variant` | struct | `include/hls.h:36` | `` |
 | `resolved` | function | `include/hls.h:68` | `* Writes the absolute URL into resolved (bounded by resolved_sz). Returns the * written length, or 0 on failure. */...` |
+| `FREEDOM_HOST_CONF_H` | macro | `include/host_conf.h:2` | `#define FREEDOM_HOST_CONF_H` |
+| `HCF_MAX_DIRS` | macro | `include/host_conf.h:15` | `#define HCF_MAX_DIRS` |
+| `HCF_MAX_FILE_BYTES` | macro | `include/host_conf.h:18` | `#define HCF_MAX_FILE_BYTES` |
+| `HCF_PATH_MAX` | macro | `include/host_conf.h:16` | `#define HCF_PATH_MAX` |
+| `hcf_dirs` | struct | `include/host_conf.h:20` | `` |
+| `hcf_load_allowlist` | function | `include/host_conf.h:39` | `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname);` |
+| `hcf_load_filter` | function | `include/host_conf.h:35` | `hb_set *hcf_load_filter(const hcf_dirs *dirs);` |
+| `hcf_search_dirs` | function | `include/host_conf.h:28` | `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out);` |
+| `hcf_search_dirs_from_env` | function | `include/host_conf.h:31` | `void hcf_search_dirs_from_env(hcf_dirs *out);` |
 | `FREEDOM_HOSTBLOCK_H` | macro | `include/hostblock.h:2` | `#define FREEDOM_HOSTBLOCK_H` |
 | `hb_count` | function | `include/hostblock.h:79` | `size_t hb_count(const hb_set *s, hb_list list);` |
 | `hb_decision` | enum | `include/hostblock.h:37` | `` |
@@ -384,6 +425,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `host` | function | `include/js_dom.h:123` | `* for a trusted host (allow.conf AND js.conf);` |
 | `jd_click_state` | type_alias | `include/js_dom.h:35` | `typedef struct jd_click_state jd_click_state;` |
 | `jd_click_state_free` | function | `include/js_dom.h:78` | `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);` |
+| `jd_flush_custom_elements` | function | `include/js_dom.h:195` | `void jd_flush_custom_elements(js_context *ctx);` |
 | `jd_get_cookies` | function | `include/js_dom.h:134` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` |
 | `jd_iframe_track` | struct | `include/js_dom.h:41` | `` |
 | `jd_opaque` | struct | `include/js_dom.h:46` | `` |
@@ -454,47 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `loaded` | function | `include/js_sandbox.h:114` | `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...` |
 | `max_source_bytes` | type_alias | `include/js_sandbox.h:39` | `typedef struct js_limits { size_t max_source_bytes;` |
 | `status` | type_alias | `include/js_sandbox.h:48` | `typedef struct js_result { js_status status;` |
-| `FREEDOM_JS_TRUSTED_H` | macro | `include/js_trusted.h:2` | `#define FREEDOM_JS_TRUSTED_H` |
-| `JT_WS_MAX` | macro | `include/js_trusted.h:35` | `#define JT_WS_MAX` |
-| `JT_WS_MAX_BYTES` | macro | `include/js_trusted.h:37` | `#define JT_WS_MAX_BYTES` |
-| `JT_WS_MAX_OPS` | macro | `include/js_trusted.h:36` | `#define JT_WS_MAX_OPS` |
-| `jt_take_opens` | function | `include/js_trusted.h:31` | `char *jt_take_opens(js_context *ctx);` |
-| `jt_take_storage` | function | `include/js_trusted.h:82` | `int jt_take_storage(js_context *ctx, char **out, size_t *len);` |
-| `jt_take_ws` | function | `include/js_trusted.h:64` | `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);` |
-| `jt_ws_event` | function | `include/js_trusted.h:70` | `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);` |
-| `jt_ws_event_kind` | enum | `include/js_trusted.h:53` | `` |
-| `jt_ws_kind` | enum | `include/js_trusted.h:39` | `` |
-| `jt_ws_op` | struct | `include/js_trusted.h:46` | `` |
-| `jt_ws_ops_free` | function | `include/js_trusted.h:65` | `void jt_ws_ops_free(jt_ws_op *ops, size_t n);` |
-| `kind` | type_alias | `include/js_trusted.h:45` | `typedef struct jt_ws_op { int kind;` |
-| `null` | function | `include/js_trusted.h:24` | `* noopener semantics: it returns null (no cross-window reference, so no same-origin * channel) and only records up...` |
-| `parent` | function | `include/js_trusted.h:58` | `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);` |
-| `realm` | function | `include/js_trusted.h:85` | `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...` |
-| `FREEDOM_LINK_NAV_H` | macro | `include/link_nav.h:2` | `#define FREEDOM_LINK_NAV_H` |
-| `LN_MAX_FRAGMENT` | macro | `include/link_nav.h:38` | `#define LN_MAX_FRAGMENT` |
-| `LN_MAX_TARGET` | macro | `include/link_nav.h:33` | `#define LN_MAX_TARGET` |
-| `action` | type_alias | `include/link_nav.h:61` | `typedef struct ln_result { ln_action action;` |
-| `dropped` | function | `include/link_nav.h:36` | `* A longer fragment is dropped (stored as "");` |
-| `ln_action` | enum | `include/link_nav.h:40` | `` |
-| `ln_block_reason` | enum | `include/link_nav.h:54` | `` |
-| `ln_block_reason_text` | function | `include/link_nav.h:85` | `const char *ln_block_reason_text(ln_block_reason reason);` |
-| `ln_result` | struct | `include/link_nav.h:62` | `` |
-| `ln_status` | enum | `include/link_nav.h:70` | `` |
-| `ln_target_kind` | enum | `include/link_nav.h:46` | `` |
-| `FREEDOM_LOCAL_STORE_H` | macro | `include/local_store.h:2` | `#define FREEDOM_LOCAL_STORE_H` |
-| `LS_HEADER_LEN` | macro | `include/local_store.h:30` | `#define LS_HEADER_LEN` |
-| `LS_KEY_LEN` | macro | `include/local_store.h:26` | `#define LS_KEY_LEN` |
-| `LS_MAX_PLAINTEXT` | macro | `include/local_store.h:32` | `#define LS_MAX_PLAINTEXT` |
-| `LS_NONCE_LEN` | macro | `include/local_store.h:28` | `#define LS_NONCE_LEN` |
-| `LS_OVERHEAD` | macro | `include/local_store.h:31` | `#define LS_OVERHEAD` |
-| `LS_SALT_LEN` | macro | `include/local_store.h:27` | `#define LS_SALT_LEN` |
-| `LS_TAG_LEN` | macro | `include/local_store.h:29` | `#define LS_TAG_LEN` |
-| `ls_aead` | enum | `include/local_store.h:34` | `` |
-| `ls_free` | function | `include/local_store.h:80` | `void ls_free(uint8_t *buf, size_t len);` |
-| `ls_status` | enum | `include/local_store.h:39` | `` |
-| `FREEDOM_MEDIA_DECODER_H` | macro | `include/media_decoder.h:2` | `#define FREEDOM_MEDIA_DECODER_H` |
-| `MD_MAX_CATCHUP_READS` | macro | `include/media_decoder.h:65` | `#define MD_MAX_CATCHUP_READS` |
-| `MD_MAX_SEGMENT_BYTES` | macro | `include/media_decoder.h:46` | `#define MD_MAX_SEGMENT_BYTES` |
-| `MD_PACE_MAX_LAG_MS` | macro | `include/media_decoder.h:58` | `#define MD_PACE_MAX_LAG_MS` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

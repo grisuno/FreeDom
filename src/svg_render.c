@@ -471,6 +471,17 @@ static int sv_arc_to_cubics(sv_image *im, sv_shape *sh,
     return 1;
 }
 
+/* An arc flag (SVG 1.1 path grammar): exactly one '0' or '1' character, with no
+ * separator required after it -- `a5 5 0 1010 0` is flags 1,0 then 10,0. Anything
+ * else ends the path like any other malformed argument. */
+static int sv_flag(const char *s, size_t n, size_t *i, double *out) {
+    while (*i < n && (sv_is_space(s[*i]) || s[*i] == ',')) ++(*i);
+    if (*i >= n || (s[*i] != '0' && s[*i] != '1')) return 0;
+    *out = (s[*i] == '1') ? 1.0 : 0.0;
+    ++(*i);
+    return 1;
+}
+
 /* Parses path data. An unrecognised command ENDS the path with whatever has been
  * accumulated: guessing at a malformed `d` would invent geometry the author never
  * wrote. Every emitter is bounded, so a hostile `d` cannot exhaust the pools. */
@@ -600,8 +611,8 @@ static void sv_parse_path(sv_image *im, sv_shape *sh, const char *s, size_t n) {
                 if (!sv_number(s, n, &i, &a1)) { ok = 0; break; }
                 sv_sep(s, n, &i); if (!sv_number(s, n, &i, &a2)) { ok = 0; break; }
                 sv_sep(s, n, &i); if (!sv_number(s, n, &i, &a3)) { ok = 0; break; }
-                sv_sep(s, n, &i); if (!sv_number(s, n, &i, &a4)) { ok = 0; break; }
-                sv_sep(s, n, &i); if (!sv_number(s, n, &i, &a5)) { ok = 0; break; }
+                if (!sv_flag(s, n, &i, &a4)) { ok = 0; break; }
+                if (!sv_flag(s, n, &i, &a5)) { ok = 0; break; }
                 sv_sep(s, n, &i); if (!sv_number(s, n, &i, &a6)) { ok = 0; break; }
                 sv_sep(s, n, &i); if (!sv_number(s, n, &i, &a7)) { ok = 0; break; }
                 {

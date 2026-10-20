@@ -1,5 +1,459 @@
-# Subsystem: src (page 8 of 8)
+# Subsystem: src (page 8 of 9)
 Previous: [KB_src_p7.md](KB_src_p7.md)
+
+## src/renderer.c
+- Layer: presentation
+- Language: c
+- Symbols:
+  - `child_render` (function, line 25) `static void child_render(int wfd, const char *html, size_t len)`
+  - `read_field` (function, line 53) `static int read_field(int fd, char **out, size_t *out_len)`
+  - `rd_render_html` (function, line 70) `rd_status rd_render_html(const char *html, size_t len, rd_result *out)`
+  - `rd_result_free` (function, line 120) `void rd_result_free(rd_result *out)`
+  - `write_full` (function, line 40) `&& write_full(wfd, &tl, sizeof tl) == 0 && (tl == 0 || write_full(wfd, title, tl) == 0) && write_full(wfd, &xl...`
+  - `_POSIX_C_SOURCE` (macro, line 7) `#define _POSIX_C_SOURCE`
+- Depends on: `include/html_parse.h`, `include/os_sandbox.h`, `include/renderer.h`, `include/util.h`
+
+## src/request_policy.c
+- Doc: public_suffix_labels: Number of labels of the public suffix (eTLD) of a lowercased host...
+- Layer: business_logic
+- Language: c
+- Symbols:
+  - `lower` (function, line 22) `static char lower(char c)`
+  - `ci_starts_with` (function, line 26) `static int ci_starts_with(const char *s, const char *prefix)`
+  - `psl_cmp` (function, line 36) `static int psl_cmp(const void *key, const void *elem)`
+  - `psl_in` (function, line 40) `static int psl_in(const char *const *arr, size_t n, const char *key)`
+  - `public_suffix_labels` (function, line 48) `static size_t public_suffix_labels(const char *host, const size_t *off, size_t n)`
+  - `rp_host_of` (function, line 76) `int rp_host_of(const char *url, char *out, size_t out_size)`
+  - `rp_site_of` (function, line 102) `int rp_site_of(const char *host, char *out, size_t out_size)`
+  - `rp_same_site` (function, line 134) `int rp_same_site(const char *top_level_url, const char *request_url)`
+  - `rp_evaluate` (function, line 143) `rp_decision rp_evaluate(const char *top_level_url, const char *request_url)`
+  - `RP_MAX_HOST` (macro, line 17) `#define RP_MAX_HOST`
+  - `RP_MAX_LABELS` (macro, line 18) `#define RP_MAX_LABELS`
+- Depends on: `include/psl_data.h`, `include/request_policy.h`
+
+## src/secure_fetch.c
+- Doc: tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `body_sink` (struct, line 434)
+  - `tls_capture` (struct, line 447)
+  - `fetch_ctx` (struct, line 457)
+  - `sf_ws` (struct, line 1098)
+  - `sink` (type_alias, line 456) `typedef struct fetch_ctx { body_sink sink;`
+  - `ci_starts_with` (function, line 44) `static int ci_starts_with(const char *haystack, const char *prefix)`
+  - `ci_index` (function, line 56) `static long ci_index(const char *haystack, const char *needle)`
+  - `sf_share_lock` (function, line 68) `static void sf_share_lock(CURL *handle, curl_lock_data data,
+                          curl_lock_...`
+  - `sf_share_unlock` (function, line 74) `static void sf_share_unlock(CURL *handle, curl_lock_data data, void *userptr)`
+  - `sf_global_init` (function, line 81) `void sf_global_init(void)`
+  - `sf_cookie_line_matches` (function, line 96) `int sf_cookie_line_matches(const char *line, const char *host, const char *path,
+                ...`
+  - `sf_url_host_path` (function, line 151) `static int sf_url_host_path(const char *url, char *host, size_t hostsz,
+                         ...`
+  - `sf_cookie_header_for` (function, line 166) `size_t sf_cookie_header_for(const char *url, char *out, size_t outsz)`
+  - `sf_cookie_put` (function, line 195) `void sf_cookie_put(const char *url, const char *namevalue)`
+  - `sf_config_default` (function, line 216) `sf_config sf_config_default(void)`
+  - `sf_user_agent_or_default` (function, line 241) `const char *sf_user_agent_or_default(const char *ua)`
+  - `sf_impersonate_kex_groups` (function, line 245) `const char *sf_impersonate_kex_groups(void)`
+  - `sf_impersonate_tls13_ciphers` (function, line 246) `const char *sf_impersonate_tls13_ciphers(void)`
+  - `sf_validate_url` (function, line 250) `sf_status sf_validate_url(const char *url)`
+  - `sf_url_is_http` (function, line 258) `static int sf_url_is_http(const char *url)`
+  - `sf_check_tls_version` (function, line 270) `sf_status sf_check_tls_version(const char *negotiated_version)`
+  - `sf_check_group_is_pq` (function, line 275) `sf_status sf_check_group_is_pq(const char *negotiated_group)`
+  - `sf_check_chain_policy` (function, line 284) `sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)`
+  - `sf_enforce_policy` (function, line 294) `sf_status sf_enforce_policy(const char *tls_version, const char *group,
+                         ...`
+  - `copy_checked` (function, line 325) `static int copy_checked(char *dst, size_t dstsz, const char *src)`
+  - `sf_is_redirect_code` (function, line 334) `int sf_is_redirect_code(long http_code)`
+  - `sf_parse_location_header` (function, line 341) `sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz)`
+  - `sf_resolve_redirect` (function, line 359) `sf_status sf_resolve_redirect(const char *base_url, const char *location,
+                       ...`
+  - `sf_ci_prefix` (function, line 371) `static int sf_ci_prefix(const char *s, const char *p)`
+  - `sf_response_free` (function, line 411) `void sf_response_free(sf_response *resp)`
+  - `copy_bounded` (function, line 470) `static void copy_bounded(char *dst, size_t dstsz, const char *src)`
+  - `get_negotiated_group_name` (function, line 481) `static const char *get_negotiated_group_name(SSL *ssl)`
+  - `tls_capture_try` (function, line 514) `static void tls_capture_try(tls_capture *cap)`
+  - `tls_capture_from_ssl` (function, line 524) `static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl)`
+  - `header_cb` (function, line 550) `static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata)`
+  - `write_cb` (function, line 586) `static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *userdata)`
+  - `name_is_pq_sig` (function, line 618) `static int name_is_pq_sig(int pknid)`
+  - `inspect_chain` (function, line 628) `static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len)`
+  - `map_curl_error` (function, line 681) `static sf_status map_curl_error(CURLcode rc, const body_sink *sink)`
+  - `add_header` (function, line 722) `static int add_header(struct curl_slist **h, const char *line)`
+  - `sf_setup_handle` (function, line 736) `static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,
+           ...`
+  - `redirect` (function, line 811) `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
+     * different orig...`
+  - `sf_perform` (function, line 879) `static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,
+            ...`
+  - `sf_get` (function, line 1014) `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)`
+  - `sf_post` (function, line 1018) `sf_status sf_post(const char *url, const sf_config *cfg,
+                  const void *body, size...`
+  - `sf_get_follow` (function, line 1032) `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
+                ...`
+  - `ws_ssl_info_cb` (function, line 1084) `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)`
+  - `ws_ssl_ctx_cb` (function, line 1091) `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
+  - `sf_ws_url_check` (function, line 1105) `sf_status sf_ws_url_check(const char *url)`
+  - `ws_free` (function, line 1117) `static void ws_free(sf_ws *ws)`
+  - `sf_ws_open` (function, line 1126) `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
+  - `sf_ws_send` (function, line 1181) `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
+  - `sf_ws_recv` (function, line 1204) `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
+  - `sf_ws_fd` (function, line 1226) `int sf_ws_fd(const sf_ws *ws)`
+  - `sf_ws_close` (function, line 1233) `void sf_ws_close(sf_ws *ws)`
+  - `module` (function, line 364) `* pure url module (DRY);`
+  - `progress` (function, line 443) `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);`
+  - `database` (function, line 485) `* NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid...`
+  - `group` (function, line 499) `* group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);`
+  - `this` (function, line 531) `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and...`
+  - `_POSIX_C_SOURCE` (macro, line 12) `#define _POSIX_C_SOURCE`
+- Depends on: `include/anti_fp.h`, `include/secure_fetch.h`, `include/url.h`
+
+## src/svg_render.c
+- Doc: svg_render — inline <svg> markup -> a bounded list of geometric shapes.
+- Layer: presentation
+- Language: c
+- Symbols:
+  - `sv_attr` (struct, line 91)
+  - `sv_ctx` (struct, line 151)
+  - `stroke` (type_alias, line 151) `typedef struct sv_ctx { int fill, stroke;`
+  - `sv_is_space` (function, line 21) `static int sv_is_space(char c)`
+  - `sv_is_digit` (function, line 25) `static int sv_is_digit(char c)`
+  - `sv_lower` (function, line 27) `static char sv_lower(char c)`
+  - `sv_span_eq` (function, line 32) `static int sv_span_eq(const char *s, size_t n, const char *lit)`
+  - `sv_sep` (function, line 82) `static void sv_sep(const char *s, size_t n, size_t *i)`
+  - `sv_attr_get` (function, line 99) `static const char *sv_attr_get(const sv_attr *at, size_t nat, const char *name, size_t *len)`
+  - `sv_attr_num` (function, line 108) `static double sv_attr_num(const sv_attr *at, size_t nat, const char *name, double dflt)`
+  - `sv_mat_identity` (function, line 161) `static void sv_mat_identity(double *m)`
+  - `sv_mat_mul` (function, line 166) `static void sv_mat_mul(const double *a, const double *b, double *out)`
+  - `sv_parse_transform` (function, line 179) `static void sv_parse_transform(const char *s, size_t n, double *m)`
+  - `sv_style_next` (function, line 238) `static int sv_style_next(const char *s, size_t n, size_t *i,
+                         const char ...`
+  - `sv_apply_prop` (function, line 260) `static void sv_apply_prop(sv_ctx *ctx, const char *nm, size_t nl,
+                          const...`
+  - `sv_ctx_from_attrs` (function, line 307) `static void sv_ctx_from_attrs(sv_ctx *ctx, const sv_attr *at, size_t nat)`
+  - `sv_new_shape` (function, line 324) `static sv_shape *sv_new_shape(sv_image *im, int kind, const sv_ctx *ctx)`
+  - `sv_parse_points` (function, line 343) `static void sv_parse_points(sv_image *im, sv_shape *sh, const char *s, size_t n)`
+  - `sv_new_seg` (function, line 363) `static sv_seg *sv_new_seg(sv_image *im, sv_shape *sh)`
+  - `sv_seg_move` (function, line 371) `static int sv_seg_move(sv_image *im, sv_shape *sh, double x, double y)`
+  - `sv_seg_line` (function, line 378) `static int sv_seg_line(sv_image *im, sv_shape *sh, double x, double y)`
+  - `sv_seg_cubic` (function, line 385) `static int sv_seg_cubic(sv_image *im, sv_shape *sh,
+                        double x1, double y1,...`
+  - `sv_arc_to_cubics` (function, line 399) `static int sv_arc_to_cubics(sv_image *im, sv_shape *sh,
+                            double x0, do...`
+  - `sv_flag` (function, line 477) `static int sv_flag(const char *s, size_t n, size_t *i, double *out)`
+  - `sv_parse_path` (function, line 488) `static void sv_parse_path(sv_image *im, sv_shape *sh, const char *s, size_t n)`
+  - `sv_is_dropped_element` (function, line 646) `static int sv_is_dropped_element(const char *name, size_t n)`
+  - `sv_scan_attrs` (function, line 658) `static void sv_scan_attrs(const char *s, size_t n, size_t *i,
+                          sv_attr *...`
+  - `sv_skip_subtree` (function, line 704) `static void sv_skip_subtree(const char *s, size_t n, size_t *i, const char *name, size_t nlen)`
+  - `sv_collect_text` (function, line 736) `static void sv_collect_text(const char *s, size_t n, size_t *i, char *dst, size_t cap)`
+  - `sv_fit` (function, line 754) `void sv_fit(const sv_image *img, double dw, double dh,
+            double *scale, double *off_x, ...`
+  - `sv_parse` (function, line 774) `sv_status sv_parse(const char *markup, size_t len, sv_image *out)`
+  - `sv_parse_ex` (function, line 778) `sv_status sv_parse_ex(const char *markup, size_t len, sv_image *out, int root_fill)`
+  - `point` (function, line 567) `* current point (SVG 8.3.6). */ int had = (prev == 'C' || prev == 'c' || prev == 'S' || prev == 's');`
+  - `SV_MAX_ATTRS` (macro, line 96) `#define SV_MAX_ATTRS`
+- Depends on: `include/css_color.h`, `include/svg_render.h`
+
+## src/tab.c
+- Doc: rad_len_ok: A radial-gradient length off the wire (cg_radial encoding): per-mille 0..1e6, or *...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `child_state` (struct, line 135)
+  - `tab` (struct, line 1988)
+  - `rad_len_ok` (function, line 72) `static int rad_len_ok(int32_t v, int dflt)`
+  - `child_reset_page` (function, line 166) `static void child_reset_page(child_state *cs)`
+  - `policy` (function, line 186) `* policy (host blocklist/tracker filter, realm routing, TLS-PQ) before fetching, so a
+ * compromi...`
+  - `run_js` (function, line 240) `* regardless of run_js (a no-JS load simply never records a request). */
+static int child_load(ch...`
+  - `write_field` (function, line 307) `static int write_field(int fd, const char *s)`
+  - `blocks` (function, line 341) `*
+ * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the
+ * grid arr...`
+  - `FB_MAX_FILE_BYTES` (function, line 765) `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
+ * the stream. ...`
+  - `budget_remaining_ms` (function, line 795) `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)`
+  - `ctype_is_javascript` (function, line 809) `static int ctype_is_javascript(const char *ctype)`
+  - `ctype_is_css` (function, line 818) `static int ctype_is_css(const char *ctype)`
+  - `log_external_skip` (function, line 826) `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
+                ...`
+  - `run` (function, line 844) `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
+ * Call after every ...`
+  - `tab_url_resolve` (function, line 893) `static int tab_url_resolve(void *ctx, const char *base, const char *ref,
+                        ...`
+  - `tab_mod_resolve` (function, line 902) `static int tab_mod_resolve(void *host, const char *base, const char *spec,
+                      ...`
+  - `tab_mod_fetch` (function, line 924) `static char *tab_mod_fetch(void *host, const char *url, size_t *len)`
+  - `write_history` (function, line 946) `static int write_history(int wfd, child_state *cs)`
+  - `window` (function, line 965) `* net window (cs->net_active). */
+static void child_fetch_stylesheets(child_state *cs)`
+  - `child_handle_load` (function, line 1010) `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
+           ...`
+  - `swap` (function, line 1334) `* display:none hiding an element via class swap (CSS, not
+     * DOM removal). */
+    if (ok && v...`
+  - `write_ws` (function, line 1376) `static int write_ws(int wfd, child_state *cs)`
+  - `write_storage` (function, line 1393) `static int write_storage(int wfd, child_state *cs)`
+  - `write_opens` (function, line 1407) `static int write_opens(int wfd, child_state *cs)`
+  - `child_next_timer_ms` (function, line 1419) `static int32_t child_next_timer_ms(child_state *cs)`
+  - `child_handle_mutation` (function, line 1434) `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
+                        ...`
+  - `child_handle_click` (function, line 1513) `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
+  - `child_handle_tick` (function, line 1517) `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
+  - `child_handle_event` (function, line 1527) `static void child_handle_event(int wfd, child_state *cs)`
+  - `child_handle_mouse` (function, line 1575) `static void child_handle_mouse(int wfd, child_state *cs)`
+  - `geom_parent` (function, line 1605) `static dom_node_id geom_parent(void *ctx, dom_node_id n)`
+  - `child_handle_geom` (function, line 1613) `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)`
+  - `child_handle_submit` (function, line 1637) `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)`
+  - `child_handle_eval` (function, line 1671) `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)`
+  - `child_handle_decode_image` (function, line 1704) `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)`
+  - `child_handle_decode_image_b64` (function, line 1726) `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)`
+  - `gen_session_key` (function, line 1738) `static uint64_t gen_session_key(void)`
+  - `tab_worker_run` (function, line 1758) `static void tab_worker_run(int rfd, int wfd)`
+  - `parse_worker_fd` (function, line 1956) `static int parse_worker_fd(const char *s, int *out)`
+  - `tab_parse_worker_args` (function, line 1968) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
+  - `tab_worker_dispatch` (function, line 1978) `void tab_worker_dispatch(int argc, char **argv)`
+  - `ignore_sigpipe` (function, line 2016) `static void ignore_sigpipe(void)`
+  - `tab_refresh_alive` (function, line 2023) `static void tab_refresh_alive(tab *t)`
+  - `read_field` (function, line 2042) `static int read_field(int fd, char **out, size_t *out_len)`
+  - `read_view` (function, line 2058) `static int read_view(int fd, pv_view **out)`
+  - `read_console` (function, line 2578) `static int read_console(int fd, fb_buffer *out)`
+  - `send_request` (function, line 2615) `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)`
+  - `io_failure` (function, line 2625) `static tab_status io_failure(tab *t)`
+  - `exec_worker_child` (function, line 2633) `static void exec_worker_child(int rfd, int wfd)`
+  - `tab_set_fetcher` (function, line 2704) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
+  - `tab_set_css_sink` (function, line 2710) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
+  - `tab_set_net_allowed` (function, line 2716) `void tab_set_net_allowed(tab *t, int allowed)`
+  - `tab_set_css_allowed` (function, line 2721) `void tab_set_css_allowed(tab *t, int allowed)`
+  - `tab_last_subreq_stats` (function, line 2726) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
+  - `tab_set_viewport_w` (function, line 2731) `void tab_set_viewport_w(tab *t, int px)`
+  - `tab_set_cookies` (function, line 2736) `void tab_set_cookies(tab *t, const char *cookies)`
+  - `tab_subreq_permitted` (function, line 2742) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
+  - `answered` (function, line 2754) `* A refused frame is still consumed and answered (status 0), so the protocol never
+ * desyncs. Re...`
+  - `hist_ops_free` (function, line 2797) `static void hist_ops_free(tab_hist_op *ops, size_t n)`
+  - `is_activation_event` (function, line 2862) `static int is_activation_event(const char *type)`
+  - `open_urls_free` (function, line 2871) `static void open_urls_free(char **u, size_t n)`
+  - `read_opens` (function, line 2881) `static tab_status read_opens(tab *t, const char *page_url, int gesture,
+                         ...`
+  - `ws_ops_free` (function, line 2910) `static void ws_ops_free(tab_ws_op *ops, size_t n)`
+  - `read_ws` (function, line 2919) `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)`
+  - `gate_js_nav` (function, line 2988) `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)`
+  - `tab_load` (function, line 2998) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
+  - `tab_load_ex` (function, line 3002) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
+  - `tab_load_full` (function, line 3006) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+            ...`
+  - `tab_click` (function, line 3201) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
+  - `tab_tick` (function, line 3208) `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
+  - `tab_submit` (function, line 3217) `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)`
+  - `tab_read_view` (function, line 3322) `tab_status tab_read_view(tab *t, tab_page *out)`
+  - `tab_read_view_ex` (function, line 3326) `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
+  - `tab_eval` (function, line 3422) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
+  - `tab_decode_image_op` (function, line 3462) `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
+        ...`
+  - `tab_decode_image` (function, line 3504) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
+  - `tab_decode_image_data_url` (function, line 3510) `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
+  - `tab_alive` (function, line 3528) `int tab_alive(const tab *t)`
+  - `tab_child_pid` (function, line 3534) `pid_t tab_child_pid(const tab *t)`
+  - `tab_close` (function, line 3538) `void tab_close(tab *t)`
+  - `tab_page_free` (function, line 3553) `void tab_page_free(tab_page *p)`
+  - `tab_eval_result_free` (function, line 3583) `void tab_eval_result_free(tab_eval_result *r)`
+  - `tab_image_free` (function, line 3592) `void tab_image_free(tab_image *img)`
+  - `tab_set_geometry` (function, line 3602) `tab_status tab_set_geometry(tab *t, const jg_table *g)`
+  - `tab_popstate` (function, line 3628) `tab_status tab_popstate(tab *t, int index, tab_page *out)`
+  - `tab_ws_event` (function, line 3634) `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
+       ...`
+  - `tab_set_storage` (function, line 3653) `void tab_set_storage(tab *t, const char *blob, size_t len)`
+  - `buffer` (function, line 283) `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of...`
+  - `host` (function, line 295) `* granted net access for this host (allow.conf AND js.conf). Otherwise they stay * undefined...`
+  - `fallback` (function, line 1086) `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it...`
+  - `WHERE` (function, line 1244) `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...`
+  - `content` (function, line 1280) `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...`
+  - `once` (function, line 1325) `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);`
+  - `write_full` (function, line 1354) `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd...`
+  - `EPIPE` (function, line 1760) `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();`
+  - `tzset` (function, line 1776) `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);`
+  - `depth` (function, line 1781) `* defense in depth (seccomp already excludes open/socket/exec);`
+  - `load` (function, line 1995) `* subresource requests this load (set per page: host in allow.conf AND js.conf);`
+  - `tests` (function, line 2133) `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...`
+  - `layout` (function, line 2237) `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....`
+  - `column` (function, line 2248) `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...`
+  - `_GNU_SOURCE` (macro, line 14) `#define _GNU_SOURCE`
+  - `TAB_SCREEN_W` (macro, line 59) `#define TAB_SCREEN_W`
+  - `TAB_SCREEN_H` (macro, line 60) `#define TAB_SCREEN_H`
+  - `TAB_WIRE_HEAD_N` (macro, line 64) `#define TAB_WIRE_HEAD_N`
+  - `TAB_WIRE_A_N` (macro, line 65) `#define TAB_WIRE_A_N`
+  - `TAB_WIRE_B_N` (macro, line 66) `#define TAB_WIRE_B_N`
+  - `TAB_WIRE_BOX_F_N` (macro, line 67) `#define TAB_WIRE_BOX_F_N`
+  - `TAB_WIRE_GRID_N` (macro, line 68) `#define TAB_WIRE_GRID_N`
+  - `TAB_MAX_RUNS` (macro, line 81) `#define TAB_MAX_RUNS`
+  - `PV_MAX_CONTAINERS_WIRE` (macro, line 85) `#define PV_MAX_CONTAINERS_WIRE`
+  - `TAB_MAX_URL` (macro, line 88) `#define TAB_MAX_URL`
+  - `TAB_MAX_WS_MSG` (macro, line 97) `#define TAB_MAX_WS_MSG`
+  - `TAB_MAX_STORAGE` (macro, line 101) `#define TAB_MAX_STORAGE`
+  - `TAB_MAX_HIST_OPS` (macro, line 105) `#define TAB_MAX_HIST_OPS`
+  - `TAB_MAX_HIST_BYTES` (macro, line 106) `#define TAB_MAX_HIST_BYTES`
+  - `TAB_MAX_OPENS` (macro, line 108) `#define TAB_MAX_OPENS`
+  - `TAB_MAX_OPEN_BYTES` (macro, line 109) `#define TAB_MAX_OPEN_BYTES`
+  - `TAB_MAX_GEOM_WORDS` (macro, line 112) `#define TAB_MAX_GEOM_WORDS`
+  - `TAB_MAX_SUBREQ` (macro, line 122) `#define TAB_MAX_SUBREQ`
+  - `TAB_MAX_SUBRESOURCE` (macro, line 123) `#define TAB_MAX_SUBRESOURCE`
+  - `TAB_MAX_JS_JOBS` (macro, line 124) `#define TAB_MAX_JS_JOBS`
+  - `TAB_MAX_EXTERN_CSS` (macro, line 838) `#define TAB_MAX_EXTERN_CSS`
+- Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/css_gradient.h`, `include/data_url.h`, `include/dom.h`, `include/flex_layout.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/import_map.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/js_trusted.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`, `include/web_storage.h`
+
+## src/text_case.c
+- Doc: Latin Extended-A and the Cyrillic historic block pair letters on adjacent code
+- Layer: utility
+- Language: c
+- Symbols:
+  - `pair_parity` (function, line 8) `static int pair_parity(uint32_t cp)`
+  - `tc_upper` (function, line 18) `uint32_t tc_upper(uint32_t cp)`
+  - `tc_lower` (function, line 37) `uint32_t tc_lower(uint32_t cp)`
+  - `tc_is_lower` (function, line 54) `int tc_is_lower(uint32_t cp)`
+  - `utf8_decode` (function, line 61) `static size_t utf8_decode(const unsigned char *s, size_t n, uint32_t *cp)`
+  - `utf8_put` (function, line 79) `static void utf8_put(uint32_t cp, size_t len, unsigned char *out)`
+  - `utf8_len_of` (function, line 91) `static size_t utf8_len_of(uint32_t cp)`
+  - `tc_transform` (function, line 95) `size_t tc_transform(const char *s, size_t n, int transform, int word_start,
+                    c...`
+  - `tc_smallcaps_runs` (function, line 117) `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap)`
+- Depends on: `include/css.h`, `include/text_case.h`
+
+## src/text_shape.c
+- Doc: load_entry_file: Loads face `index` of the font file at `path` into e (FreeType + cairo + *...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `tsh_entry` (struct, line 35)
+  - `tsh_web` (struct, line 191)
+  - `tsh_lfam` (struct, line 458)
+  - `tsh_llist` (struct, line 464)
+  - `tsh_fb` (struct, line 651)
+  - `tsh_cover_ctx` (struct, line 734)
+  - `loaded` (type_alias, line 34) `typedef struct tsh_entry { int loaded;`
+  - `used` (type_alias, line 190) `typedef struct tsh_web { int used;`
+  - `name` (type_alias, line 457) `typedef struct tsh_lfam { char name[TSH_FAMILY_MAX];`
+  - `file` (type_alias, line 650) `typedef struct tsh_fb { char file[512];`
+  - `generic_name` (function, line 55) `static const char *generic_name(int family)`
+  - `backend_init` (function, line 65) `static int backend_init(void)`
+  - `read_font_file` (function, line 82) `static unsigned char *read_font_file(const char *path, long *out_n)`
+  - `load_entry_named` (function, line 103) `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)`
+  - `load_entry_file` (function, line 133) `static int load_entry_file(tsh_entry *e, const char *path, int index)`
+  - `load_entry` (function, line 169) `static int load_entry(tsh_entry *e, int family, int bold, int italic)`
+  - `get_entry` (function, line 173) `static tsh_entry *get_entry(int family, int bold, int italic)`
+  - `web_entry_free` (function, line 201) `static void web_entry_free(tsh_web *w)`
+  - `web_magic_ok` (function, line 214) `static int web_magic_ok(const unsigned char *b, size_t n)`
+  - `web_make_entry` (function, line 227) `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)`
+  - `tsh_webfont_register` (function, line 267) `int tsh_webfont_register(const char *name,
+                         const unsigned char *bytes, s...`
+  - `tsh_webfont_clear` (function, line 301) `void tsh_webfont_clear(void)`
+  - `web_find` (function, line 306) `static tsh_entry *web_find(unsigned h, int bold, int italic)`
+  - `entry_free` (function, line 318) `static void entry_free(tsh_entry *e)`
+  - `ascii_ieq` (function, line 331) `static int ascii_ieq(const char *a, const char *b)`
+  - `tsh_family_is_generic` (function, line 340) `int tsh_family_is_generic(const char *name)`
+  - `tsh_pick_from_list` (function, line 352) `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
+                  ...`
+  - `tsh_pick_family` (function, line 373) `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
+        ...`
+  - `fc_installed` (function, line 386) `static int fc_installed(const char *name, void *ctx)`
+  - `fc_resolve` (function, line 429) `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
+  - `local_clear` (function, line 474) `static void local_clear(void)`
+  - `lfam_index` (function, line 484) `static int lfam_index(const char *fam)`
+  - `tsh_local_handle` (function, line 492) `int tsh_local_handle(const char *list)`
+  - `local_entry` (function, line 511) `static tsh_entry *local_entry(int handle, int bold, int italic)`
+  - `get_entry_ex` (function, line 531) `static tsh_entry *get_entry_ex(const tsh_font *f)`
+  - `tsh_ready` (function, line 543) `int tsh_ready(void)`
+  - `tsh_shape` (function, line 548) `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
+                ...`
+  - `utf8_next` (function, line 597) `static unsigned utf8_next(const char *s, size_t n, size_t *len)`
+  - `rides_previous` (function, line 614) `static int rides_previous(unsigned cp)`
+  - `tsh_segment` (function, line 622) `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
+                tsh_...`
+  - `fb_clear` (function, line 662) `static void fb_clear(void)`
+  - `fb_entry` (function, line 672) `static tsh_entry *fb_entry(unsigned cp, int bold)`
+  - `cover_cp` (function, line 743) `static int cover_cp(unsigned cp, void *vctx)`
+  - `shape_entry` (function, line 756) `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
+            ...`
+  - `shape_runs` (function, line 787) `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
+               ...`
+  - `tsh_measure` (function, line 829) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
+  - `tsh_draw` (function, line 835) `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
+                    double x, doub...`
+  - `tsh_face` (function, line 842) `cairo_font_face_t *tsh_face(const tsh_font *f)`
+  - `tsh_shutdown` (function, line 848) `void tsh_shutdown(void)`
+  - `characters` (function, line 100) `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...`
+  - `slice` (function, line 213) `* woff2 slice (spec/webfont.md);`
+  - `_POSIX_C_SOURCE` (macro, line 12) `#define _POSIX_C_SOURCE`
+  - `TSH_MAX_FONT_BYTES` (macro, line 29) `#define TSH_MAX_FONT_BYTES`
+  - `TSH_CACHE_SLOTS` (macro, line 33) `#define TSH_CACHE_SLOTS`
+  - `TSH_WEB_SLOTS` (macro, line 189) `#define TSH_WEB_SLOTS`
+  - `TSH_SUBS_MAX` (macro, line 400) `#define TSH_SUBS_MAX`
+  - `TSH_FB_SLOTS` (macro, line 648) `#define TSH_FB_SLOTS`
+  - `TSH_FB_BLOCKS` (macro, line 649) `#define TSH_FB_BLOCKS`
+  - `TSH_MAX_RUNS` (macro, line 783) `#define TSH_MAX_RUNS`
+- Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
+
+## src/textfield.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `whole` (function, line 6) `* the buffer is rejected whole (fail closed), never applied partially.
+ */
+
+#include "textfield.h...`
+  - `tf_clear` (function, line 20) `void tf_clear(tf_field *f)`
+  - `tf_set` (function, line 24) `tf_status tf_set(tf_field *f, const char *s)`
+  - `tf_insert` (function, line 35) `tf_status tf_insert(tf_field *f, char c)`
+  - `tf_backspace` (function, line 47) `void tf_backspace(tf_field *f)`
+  - `tf_delete` (function, line 55) `void tf_delete(tf_field *f)`
+  - `tf_move` (function, line 62) `void tf_move(tf_field *f, long delta)`
+  - `tf_home` (function, line 73) `void tf_home(tf_field *f)`
+  - `tf_end` (function, line 78) `void tf_end(tf_field *f)`
+  - `tf_text` (function, line 83) `const char *tf_text(const tf_field *f)`
+  - `tf_len` (function, line 87) `size_t tf_len(const tf_field *f)`
+  - `tf_cursor` (function, line 91) `size_t tf_cursor(const tf_field *f)`
+- Depends on: `include/textfield.h`
+
+## src/tls_impersonate.c
+- Doc: get_bytes: | ((uint32_t)r->p[r->off + 3] << 24); r->off += 4; return v; } static uint64_t...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `ti_wr` (struct, line 33)
+  - `ti_rd` (struct, line 63)
+  - `ti_should_impersonate` (function, line 18) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled,
+                          i...`
+  - `bounded_len` (function, line 25) `static size_t bounded_len(const char *s, size_t max)`
+  - `put_u8` (function, line 35) `static void put_u8(ti_wr *w, uint8_t v)`
+  - `put_u32` (function, line 40) `static void put_u32(ti_wr *w, uint32_t v)`
+  - `put_u64` (function, line 48) `static void put_u64(ti_wr *w, uint64_t v)`
+  - `put_blob` (function, line 53) `static void put_blob(ti_wr *w, const uint8_t *b, size_t n)`
+  - `get_u8` (function, line 65) `static uint8_t get_u8(ti_rd *r)`
+  - `get_u32` (function, line 70) `static uint32_t get_u32(ti_rd *r)`
+  - `get_u64` (function, line 80) `static uint64_t get_u64(ti_rd *r)`
+  - `get_bytes` (function, line 89) `static void get_bytes(ti_rd *r, size_t cap, uint8_t **out, size_t *out_len)`
+  - `get_str` (function, line 103) `static char *get_str(ti_rd *r, size_t cap)`
+  - `valid_profile` (function, line 116) `static int valid_profile(int p)`
+  - `ti_encode_req` (function, line 122) `size_t ti_encode_req(const ti_req *r, uint8_t *out, size_t out_cap)`
+  - `ti_decode_req` (function, line 140) `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out)`
+  - `ti_req_free` (function, line 166) `void ti_req_free(ti_req *r)`
+  - `ti_encode_resp` (function, line 177) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap)`
+  - `ti_decode_resp` (function, line 196) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out)`
+  - `ti_resp_free` (function, line 230) `void ti_resp_free(ti_resp *r)`
+- Depends on: `include/tls_impersonate.h`
+
+## src/ui_layout.c
+- Layer: presentation
+- Language: c
+- Symbols:
+  - `layout_push` (function, line 13) `static int layout_push(ui_layout *lay, size_t offset, size_t len)`
+  - `ui_wrap_text` (function, line 27) `ui_status ui_wrap_text(const char *text, size_t len, size_t max_cols, ui_layout *out)`
+  - `ui_layout_free` (function, line 91) `void ui_layout_free(ui_layout *lay)`
+  - `ui_clamp_scroll` (function, line 99) `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines)`
+- Depends on: `include/ui.h`
 
 ## src/url.c
 - Doc: ci_prefix: produced; every assembly is bounded and reports overflow rather than truncate....
@@ -41,132 +495,5 @@ static int looks_like_host(const c...`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
 - Depends on: `include/url.h`
 
-## src/web_storage.c
-- Doc: utf8_ok: Well-formed UTF-8, allowing encoded surrogates (WTF-8): a JS string may hold a lone...
-- Layer: data_access
-- Language: c
-- Symbols:
-  - `wst_origin` (struct, line 12)
-  - `wst_db` (struct, line 20)
-  - `key_ref` (struct, line 54)
-  - `get_u32` (function, line 25) `static uint32_t get_u32(const unsigned char *p)`
-  - `utf8_ok` (function, line 32) `static int utf8_ok(const unsigned char *s, size_t n)`
-  - `key_cmp` (function, line 56) `static int key_cmp(const void *a, const void *b)`
-  - `check` (function, line 65) `static int check(const char *blob, size_t len, size_t *bytes_out)`
-  - `wst_decode_check` (function, line 101) `int wst_decode_check(const char *blob, size_t len)`
-  - `wst_new` (function, line 105) `wst_db *wst_new(void)`
-  - `wst_free` (function, line 109) `void wst_free(wst_db *db)`
-  - `find` (function, line 118) `static wst_origin *find(const wst_db *db, const char *origin)`
-  - `wst_encode` (function, line 125) `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len)`
-  - `wst_replace` (function, line 140) `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len)`
-  - `wst_origin_bytes` (function, line 175) `size_t wst_origin_bytes(const wst_db *db, const char *origin)`
-  - `wst_foreach` (function, line 181) `int wst_foreach(const char *blob, size_t len,
-                void (*fn)(void *ctx, const char *k...`
-  - `put_u32` (function, line 201) `static void put_u32(char *b, uint32_t v)`
-  - `wst_pack` (function, line 206) `int wst_pack(const char *const *keys, const size_t *klens,
-             const char *const *vals, ...`
-- Depends on: `include/web_storage.h`
 
-## src/webcaps.c
-- Layer: utility
-- Language: c
-- Symbols:
-  - `wc_safe` (function, line 10) `wc_caps wc_safe(void)`
-  - `wc_derive` (function, line 15) `wc_caps wc_derive(wc_input in)`
-  - `wc_from_flags` (function, line 35) `wc_caps wc_from_flags(bool js, bool css, bool images)`
-  - `wc_render_caps` (function, line 46) `rdp_caps wc_render_caps(wc_caps c)`
-- Depends on: `include/webcaps.h`
-
-## src/webfont.c
-- Doc: ci_eq_span: #include <stdint.h> #include <stdlib.h> #include <string.h> static int is_ws(char c)...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `is_ws` (function, line 19) `static int is_ws(char c)`
-  - `lower_ch` (function, line 23) `static int lower_ch(char c)`
-  - `ci_eq_span` (function, line 28) `static int ci_eq_span(const char *s, size_t n, const char *kw)`
-  - `wf_list_free` (function, line 49) `void wf_list_free(wf_list *l)`
-  - `wf_ref_move` (function, line 64) `void wf_ref_move(wf_ref *dst, wf_ref *src)`
-  - `wf_supported_format` (function, line 74) `int wf_supported_format(const char *fmt)`
-  - `emit_slot` (function, line 83) `static wf_ref *emit_slot(wf_list *out)`
-  - `emit_family_format` (function, line 98) `static void emit_family_format(wf_ref *r, const char *family, const char *format)`
-  - `span_is_data` (function, line 114) `static int span_is_data(const char *span, size_t slen)`
-  - `emit` (function, line 126) `static void emit(wf_list *out, const char *family,
-                 const char *url, size_t ulen,...`
-  - `emit_data` (function, line 142) `static void emit_data(wf_list *out, const char *family,
-                      const char *span, s...`
-  - `scan_face_block` (function, line 179) `static void scan_face_block(const char *s, size_t bstart, size_t bend,
-                          ...`
-  - `lower_ch` (function, line 306) `&& lower_ch(s[k]) == 's' && k + 3 < bend
-                && lower_ch(s[k + 1]) == 'r' && lower_ch...`
-  - `wf_scan` (function, line 422) `int wf_scan(const char *css, size_t len, wf_list *out)`
-  - `candidates` (function, line 7) `* understanding just far enough to find candidates (family + first url() per * src entry + weight/style descriptors);`
-- Depends on: `include/data_url.h`, `include/webfont.h`
-
-## src/webfont_load.c
-- Doc: wf_key: size_t k = 0; while (PREF[i][k] != '\0') ++k; size_t j = 0; for (; j < k; ++j) { char a...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `wf_key` (struct, line 46)
-  - `wf_cursor` (struct, line 56)
-  - `hash` (type_alias, line 46) `typedef struct wf_key { unsigned hash;`
-  - `fetch` (type_alias, line 56) `typedef struct wf_cursor { wf_fetch_fn fetch;`
-  - `ctype_ok` (function, line 24) `static int ctype_ok(const char *ct)`
-  - `key_find` (function, line 66) `static int key_find(wf_key *keys, size_t nkeys, unsigned h, int b, int i)`
-  - `scan_inline` (function, line 178) `static void scan_inline(const char *html, size_t len, const char *page_url,
-                     ...`
-  - `wf_load_document` (function, line 229) `int wf_load_document(wf_fetch_fn fetch, void *fctx, const char *page_url,
-                     co...`
-  - `here` (function, line 22) `* filtered here (a "" hint may still name one);`
-  - `ref` (function, line 167) `* their ref (the register call copies what it keeps). */ if (!is_data) free(fbytes);`
-  - `WF_DATA_URL_MAX` (macro, line 91) `#define WF_DATA_URL_MAX`
-- Depends on: `include/data_url.h`, `include/text_shape.h`, `include/url.h`, `include/webfont.h`, `include/webfont_load.h`
-
-## src/ws_hub.c
-- Doc: wh_job: One open, owned by its thread until handed over through the pipe.
-- Layer: utility
-- Language: c
-- Symbols:
-  - `wh_conn` (struct, line 24)
-  - `wh_hub` (struct, line 35)
-  - `wh_job` (struct, line 43)
-  - `used` (type_alias, line 23) `typedef struct wh_conn { int used;`
-  - `wfd` (type_alias, line 43) `typedef struct wh_job { int wfd;`
-  - `dup_str` (function, line 54) `static char *dup_str(const char *s)`
-  - `job_free` (function, line 63) `static void job_free(wh_job *j)`
-  - `job_str` (function, line 71) `static int job_str(wh_job *j, size_t slot, const char **field)`
-  - `open_thread` (function, line 79) `static void *open_thread(void *arg)`
-  - `conn_clear` (function, line 98) `static void conn_clear(wh_conn *c)`
-  - `find_id` (function, line 104) `static wh_conn *find_id(wh_hub *h, int id)`
-  - `find_token` (function, line 110) `static wh_conn *find_token(wh_hub *h, uint64_t token)`
-  - `wh_new` (function, line 116) `wh_hub *wh_new(void)`
-  - `wh_free` (function, line 129) `void wh_free(wh_hub *h)`
-  - `wh_notify_fd` (function, line 144) `int wh_notify_fd(const wh_hub *h)`
-  - `wh_open_async` (function, line 148) `int wh_open_async(wh_hub *h, int id, const char *url, const sf_config *cfg)`
-  - `wh_on_notify` (function, line 192) `void wh_on_notify(wh_hub *h, wh_emit_fn emit, void *ctx)`
-  - `wh_send` (function, line 221) `int wh_send(wh_hub *h, int id, const void *data, size_t len, int binary)`
-  - `wh_close` (function, line 228) `void wh_close(wh_hub *h, int id)`
-  - `wh_close_all` (function, line 234) `void wh_close_all(wh_hub *h)`
-  - `wh_poll_fds` (function, line 240) `size_t wh_poll_fds(const wh_hub *h, struct pollfd *out, int *ids, size_t cap)`
-  - `fail_conn` (function, line 258) `static void fail_conn(wh_conn *c, int id, wh_emit_fn emit, void *ctx)`
-  - `wh_on_readable` (function, line 266) `void wh_on_readable(wh_hub *h, int id, wh_emit_fn emit, void *ctx)`
-  - `wh_count` (function, line 314) `size_t wh_count(const wh_hub *h)`
-  - `_POSIX_C_SOURCE` (macro, line 6) `#define _POSIX_C_SOURCE`
-  - `WH_READS_PER_PUMP` (macro, line 21) `#define WH_READS_PER_PUMP`
-  - `WH_RECV_CHUNK` (macro, line 22) `#define WH_RECV_CHUNK`
-- Depends on: `include/ws_hub.h`
-
-## src/zoom.c
-- Layer: utility
-- Language: c
-- Symbols:
-  - `zm_clamp` (function, line 14) `int zm_clamp(int pct)`
-  - `zm_zoom_in` (function, line 20) `int zm_zoom_in(int pct)`
-  - `zm_zoom_out` (function, line 28) `int zm_zoom_out(int pct)`
-  - `zm_reset` (function, line 36) `int zm_reset(void)`
-  - `zm_scale` (function, line 40) `double zm_scale(int pct)`
-  - `zm_apply` (function, line 44) `double zm_apply(double base_px, int pct)`
-  - `ZM_LADDER_N` (macro, line 12) `#define ZM_LADDER_N`
-- Depends on: `include/zoom.h`
-
+Next: [KB_src_p9.md](KB_src_p9.md)

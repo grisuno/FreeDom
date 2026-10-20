@@ -1,12 +1,12 @@
 Telegram Messenger
-CSS drops: 76 declaration(s) dropped, 33 distinct
+CSS drops: 74 declaration(s) dropped, 33 distinct
   count  cause         property                     first value
-      8  unknown-prop  -webkit-mask                 center repeat
+      7  bad-value     -webkit-mask                 center repeat
       6  unknown-prop  -webkit-mask-size            420px auto
-      6  unknown-prop  mask                         url("/img/xLogo.svg") no-repeat 0 50%
+      6  bad-value     mask                         url("/img/xLogo.svg") no-repeat 0 50%
       5  unknown-prop  -webkit-font-smoothing       antialiased
       5  unknown-prop  mask-size                    16px 16px
-      4  unknown-prop  -webkit-mask-image           none
+      3  bad-value     -webkit-mask-image           url('/img/tgme/pattern.svg?1')
       3  bad-value     outline                      5px auto -webkit-focus-ring-color
       3  unknown-prop  scrollbar-width              thin
       2  unknown-prop  -webkit-overflow-scrolling   touch
@@ -18,7 +18,7 @@ CSS drops: 76 declaration(s) dropped, 33 distinct
       2  unknown-prop  mask-repeat                  no-repeat
       2  unknown-prop  -webkit-mask-position        0 0
       2  unknown-prop  mask-position                0 0
-      2  unknown-prop  mask-image                   url('/img/SiteIconAndroid.svg')
+      2  bad-value     mask-image                   url('/img/SiteIconAndroid.svg')
       2  unknown-prop  scrollbar-color              rgba(28, 147, 227, 0.35) transparent
       1  unknown-prop  background-position-y        calc(50% + 1px)
       1  unknown-prop  // margin-right              25px

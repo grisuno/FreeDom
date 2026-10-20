@@ -377,6 +377,7 @@ static JSValue m_get_inner_html(JSContext *ctx, JSValueConst this_val,
 
 #include "js_location_internal.h"
 #include "js_dom_ext.h"
+#include "js_custom_elements.h"
 
 /* dom.u8len(s): UTF-8 byte length of String(s) -- the unit the localStorage quota is
  * measured in (spec/web_storage.md). Native: a per-character JS loop over a large
@@ -576,7 +577,8 @@ static const char JD_DOCUMENT_SHIM[] =
     "    if(typeof a==='string'){ var t=dom.createChar(3,a); return t===null?[]:[wrap(t)]; }"
     "    return (a&&a._h!==undefined)?[a]:[]; }"
     "  function insAt(p,list,ref){ for(var i=0;i<list.length;i++)"
-    "    if(list[i]&&list[i]._h!==undefined) dom.insertBefore(p,list[i]._h,ref); }"
+    "    if(list[i]&&list[i]._h!==undefined) dom.insertBefore(p,list[i]._h,ref);"
+    "    if(typeof __G.__ceTouch==='function') __G.__ceTouch(list); }"
     "  function gRect(h){ return dom.rect(h)||[0,0,0,0]; }"
     "  function mkRect(x,y,w,ht){ var o={x:x,y:y,left:x,top:y,width:w,height:ht,right:x+w,bottom:y+ht};"
     "    o.toJSON=function(){ return {x:x,y:y,left:x,top:y,width:w,height:ht,right:x+w,bottom:y+ht}; };"
@@ -663,14 +665,16 @@ static const char JD_DOCUMENT_SHIM[] =
     "      set id(v){ dom.setAttribute(h,'id',String(v)); },"
     "      get className(){ var v=dom.getAttribute(h,'class'); return v===null?'':v; },"
     "      set className(v){ dom.setAttribute(h,'class',String(v)); },"
-     "      set innerHTML(v){ dom.setInnerHtml(h, String(v)); },"
+     "      set innerHTML(v){ dom.setInnerHtml(h, String(v));"
+     "        if(typeof __G.__ceTouch==='function') __G.__ceTouch([wrap(h)]); },"
      "      get innerHTML(){ return dom.getInnerHtml(h); },"
      "      get innerText(){ return dom.textContent(h); },"
      "      set innerText(v){ dom.setText(h, String(v)); },"
     /* A DocumentFragment carries its collected children in __frag; appending the
      * fragment re-parents each child (its contents), never the fragment node. */
     "      appendChild: function(c){ insAt(h,nodesOf(c),null); return c; },"
-    "      removeChild: function(c){ if(c&&c._h!==undefined) dom.removeChild(h,c._h); return c; },"
+    "      removeChild: function(c){ if(c&&c._h!==undefined){ dom.removeChild(h,c._h);"
+    "        if(typeof __G.__ceTouch==='function') __G.__ceTouch([c]); } return c; },"
     "      insertBefore: function(n,ref){ insAt(h,nodesOf(n),(ref&&ref._h!==undefined)?ref._h:null); return n; },"
     "      replaceChild: function(nw,old){ if(old&&old._h!==undefined&&dom.parent(old._h)===h){"
     "        insAt(h,nodesOf(nw),old._h); dom.removeChild(h,old._h); } return old; },"
@@ -1841,7 +1845,18 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
     if (!url_ok) return JD_ERR_INTERNAL;
     /* DOM Standard extras + data APIs: after the interface chains (modern shim) and
      * after URL (object URLs hang off it). */
-    return (jdx_install(jsctx) == 0) ? JD_OK : JD_ERR_INTERNAL;
+    if (jdx_install(jsctx) != 0) return JD_ERR_INTERNAL;
+    /* Custom Elements last: it replaces document.createElement and the HTMLElement stub. */
+    return (jdce_install(jsctx) == 0) ? JD_OK : JD_ERR_INTERNAL;
+}
+
+void jd_flush_custom_elements(js_context *ctx) {
+    if (ctx == NULL) return;
+    static const char flush[] = "if(typeof __ceFlush==='function')__ceFlush();";
+    js_result r;
+    memset(&r, 0, sizeof r);
+    (void)js_eval(ctx, flush, sizeof flush - 1, &r);
+    js_result_free(&r);
 }
 
 /* --- capturing console (Freebug) --- */

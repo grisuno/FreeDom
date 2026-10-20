@@ -68,6 +68,20 @@ static void test_bg_skips_url(void **state)
     assert_true(cv_interp_bg("url(http://x) red") == 0xFF0000);
 }
 
+
+static void test_filter_scale_neutral_when_undeclared(void **state)
+{
+    (void)state;
+    /* brightness/contrast/saturate are multipliers: an UNDECLARED one (0) and 100% are the
+     * identity. Treating 0 as "multiply by zero" turned every filter into a black box. */
+    assert_true(cv_filter_scale(0) == 1.0);
+    assert_true(cv_filter_scale(100) == 1.0);
+    assert_true(cv_filter_scale(-5) == 1.0);
+    assert_true(cv_filter_scale(150) == 1.5);
+    assert_true(cv_filter_scale(25) == 0.25);
+    assert_true(cv_filter_scale(100000) == 1000.0);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -77,6 +91,7 @@ int main(void)
         cmocka_unit_test(test_alpha),
         cmocka_unit_test(test_alpha_slash),
         cmocka_unit_test(test_bg_skips_url),
+        cmocka_unit_test(test_filter_scale_neutral_when_undeclared),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

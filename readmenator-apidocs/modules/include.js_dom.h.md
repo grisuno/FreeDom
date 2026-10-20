@@ -1,13 +1,13 @@
 # `include/js_dom.h`
 
-> Source: [include/js_dom.h:1](../../include/js_dom.h#L1) | language `h` | coverage 35.3% | [API index](../index.md)
+> Source: [include/js_dom.h:1](../../include/js_dom.h#L1) | language `h` | coverage 38.9% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`jd_iframe_track`](#jd_iframe_track), [`jd_opaque`](#jd_opaque)
 - **Enums:** [`jd_status`](#jd_status)
 - **Type Aliases:** [`jd_click_state`](#jd_click_state)
-- **Functions:** [`opaque`](#opaque), [`jd_click_state_free`](#jd_click_state_free), [`run`](#run), [`preventDefault`](#preventdefault), [`host`](#host), [`jd_get_cookies`](#jd_get_cookies), [`out_status`](#out_status), [`jd_process_iframes`](#jd_process_iframes), [`URLs`](#urls), [`jd_video_from_scripts`](#jd_video_from_scripts)
+- **Functions:** [`opaque`](#opaque), [`jd_click_state_free`](#jd_click_state_free), [`run`](#run), [`preventDefault`](#preventdefault), [`host`](#host), [`jd_get_cookies`](#jd_get_cookies), [`out_status`](#out_status), [`jd_process_iframes`](#jd_process_iframes), [`URLs`](#urls), [`jd_video_from_scripts`](#jd_video_from_scripts), [`jd_flush_custom_elements`](#jd_flush_custom_elements)
 - **Macros:** [`JD_IFRAME_TRACK_MAX`](#jd_iframe_track_max)
 
 ## Type Diagram
@@ -308,6 +308,28 @@ Runs before the pre-script preserve_view snapshot so video elements survive jQue
 | `page_url` | `char *` |  |  |
 
 **Returns:** `size_t`
+
+---
+
+<a id="jd_flush_custom_elements"></a>
+
+### `jd_flush_custom_elements`
+
+`function` | [include/js_dom.h:195](../../include/js_dom.h#L195)
+
+```c
+void jd_flush_custom_elements(js_context *ctx);
+```
+
+Reconciles Custom Elements (spec/js_custom_elements.md): upgrades the elements whose tag was just defined and fires attributeChanged/connected/disconnected callbacks.
+
+The embedder calls it after each script, so the page sees the lifecycle a real browser would have run. A context without the facade, or NULL, is a no-op.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
 
 ---
 

@@ -378,7 +378,8 @@ typedef enum css_mix_blend {
     CSS_MB_UNSET = 0, CSS_MB_NORMAL, CSS_MB_MULTIPLY, CSS_MB_SCREEN,
     CSS_MB_OVERLAY, CSS_MB_DARKEN, CSS_MB_LIGHTEN, CSS_MB_COLOR_DODGE,
     CSS_MB_COLOR_BURN, CSS_MB_DIFFERENCE, CSS_MB_EXCLUSION, CSS_MB_HUE,
-    CSS_MB_SATURATION, CSS_MB_COLOR, CSS_MB_LUMINOSITY
+    CSS_MB_SATURATION, CSS_MB_COLOR, CSS_MB_LUMINOSITY,
+    CSS_MB_PLUS_LIGHTER   /* Compositing 1: additive (CAIRO_OPERATOR_ADD) */
 } css_mix_blend;
 /* object-fit. 0 unset. */
 typedef enum css_object_fit {
@@ -608,6 +609,14 @@ typedef struct css_style {
     int         bg_grad_c[CSS_GRAD_STOPS_MAX];
     int         bg_grad_pos[CSS_GRAD_STOPS_MAX]; /* R5d: stop positions 0-1000 */
     int         bg_grad_radial;   /* gradient KIND: 0=linear, 1=radial, 2=conic */
+    /* radial geometry (2026-10-20): bg_rad_size = shape*16 + size (cg_radial_shape /
+     * cg_radial_size); centre and explicit radii in the cg_radial encoding (>=0 per-mille
+     * of the box, <0 is -(px)-1, CG_LEN_UNSET = not given). Meaningful only for kind 1. */
+    int         bg_rad_size, bg_rad_cx, bg_rad_cy, bg_rad_rx, bg_rad_ry;
+    /* mask (spec/css_mask.md): layer count (0 = none), mask-composite (cm_comp), the clip pair
+     * (clip0 | clip1<<2), and the three compact words of each of the two layers. */
+    int         mask_n, mask_comp, mask_clip;
+    int         mask_w[6];
     char        content_str[CSS_URL_MAX];                   /* R8: ::before content (backward compat; synced from content_before_str or content_after_str) */
     char        content_before_str[CSS_URL_MAX];            /* R8: ::before{content:"X"} value */
     /* The winning `content` GENERATES a box (any string, `""` included) rather
@@ -1183,6 +1192,17 @@ css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int 
  * "how big is 1em here". Pure.
  */
 double css_computed_font_size(const css_style *o, double inherited_px);
+
+/* The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HTML
+ * Rendering 15.3.6: 2em, 1.5em, 1.17em, 1em, .83em, .67em). 1.0 for any other level. The
+ * ONE table: the painter's theme reads it too. */
+double css_ua_heading_em(int level);
+
+/* css_computed_font_size for a named element: a heading with NO author font-size is the UA
+ * sheet's multiple of its parent (an author font-size replaces it), so an `em` length on
+ * an <h2> resolves against 1.5x the parent, not the parent. tag is the lowercased local
+ * name (NULL = not a heading). */
+double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag);
 
 /* Convenience: resolve only an inline declaration list (no sheet, no selectors). */
 css_style css_parse_inline(const char *style, size_t len);

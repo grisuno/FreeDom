@@ -1,10 +1,10 @@
 # `src/render_doc.c`
 
-> Source: [src/render_doc.c:1](../../src/render_doc.c#L1) | language `c` | coverage 47.1% | [API index](../index.md)
+> Source: [src/render_doc.c:1](../../src/render_doc.c#L1) | language `c` | coverage 50.0% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`place`](#place), [`rd_build`](#rd_build), [`unset`](#unset), [`rd_free`](#rd_free), [`rd_count`](#rd_count), [`rd_at`](#rd_at), [`rd_box_count`](#rd_box_count), [`rd_box_at`](#rd_box_at), [`rd_cont_count`](#rd_cont_count), [`rd_cont_at`](#rd_cont_at), [`rd_kind_name`](#rd_kind_name), [`rd_block_tag`](#rd_block_tag), [`rd_input_label`](#rd_input_label), [`rd_input_invisible`](#rd_input_invisible), [`rd_image_label`](#rd_image_label), [`rd_image_fail_label`](#rd_image_fail_label)
+- **Functions:** [`place`](#place), [`rd_build`](#rd_build), [`unset`](#unset), [`rd_free`](#rd_free), [`rd_count`](#rd_count), [`rd_at`](#rd_at), [`rd_box_count`](#rd_box_count), [`rd_box_at`](#rd_box_at), [`rd_cont_count`](#rd_cont_count), [`rd_cont_at`](#rd_cont_at), [`rd_kind_name`](#rd_kind_name), [`rd_block_heading_level`](#rd_block_heading_level), [`rd_block_tag`](#rd_block_tag), [`rd_input_label`](#rd_input_label), [`rd_input_invisible`](#rd_input_invisible), [`rd_image_label`](#rd_image_label), [`rd_image_fail_label`](#rd_image_fail_label)
 
 ## Call Graph
 
@@ -278,11 +278,37 @@ Never NULL; an unknown enum value yields "block".
 
 ---
 
+<a id="rd_block_heading_level"></a>
+
+### `rd_block_heading_level`
+
+`function` | [src/render_doc.c:789](../../src/render_doc.c#L789)
+
+```c
+int rd_block_heading_level(const rd_block *b)
+```
+
+Effective heading level of a block, 0 when it is not heading content.
+
+RD_HEADING yields its heading_level clamped to 1..6; an RD_LINK carrying heading_level >= 1 (an <a> wrapping or inside an <h2>) yields that level clamped, because the link only changes colour and underline -- the UA sheet still gives its text the heading's size and margins. Anything else, or NULL, yields 0. Pure and total.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `b` | `rd_block *` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`rd_block_heading_level`](#rd_block_heading_level) (include/render_doc.h:345).
+
+---
+
 <a id="rd_block_tag"></a>
 
 ### `rd_block_tag`
 
-`function` `const` | [src/render_doc.c:789](../../src/render_doc.c#L789)
+`function` `const` | [src/render_doc.c:800](../../src/render_doc.c#L800)
 
 ```c
 const char *rd_block_tag(const rd_block *b)
@@ -308,7 +334,7 @@ RD_HEADING -> "h1".."h6" (heading_level clamped to 1..6), RD_PARAGRAPH -> "p", R
 
 ### `rd_input_label`
 
-`function` `const` | [src/render_doc.c:820](../../src/render_doc.c#L820)
+`function` `const` | [src/render_doc.c:831](../../src/render_doc.c#L831)
 
 ```c
 const char *rd_input_label(int input_type)
@@ -326,7 +352,7 @@ Stable, short English name of a form control type (a pv_input_type value), e.g.
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`rd_input_label`](#rd_input_label) (include/render_doc.h:352).
+> **Inherited:** Documentation from [`rd_input_label`](#rd_input_label) (include/render_doc.h:359).
 
 ---
 
@@ -334,7 +360,7 @@ Stable, short English name of a form control type (a pv_input_type value), e.g.
 
 ### `rd_input_invisible`
 
-`function` | [src/render_doc.c:840](../../src/render_doc.c#L840)
+`function` | [src/render_doc.c:851](../../src/render_doc.c#L851)
 
 ```c
 int rd_input_invisible(int input_type)
@@ -352,7 +378,7 @@ Its data still takes part in form submission.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`rd_input_invisible`](#rd_input_invisible) (include/render_doc.h:357).
+> **Inherited:** Documentation from [`rd_input_invisible`](#rd_input_invisible) (include/render_doc.h:364).
 
 ---
 
@@ -360,7 +386,7 @@ Its data still takes part in form submission.
 
 ### `rd_image_label`
 
-`function` `const` | [src/render_doc.c:844](../../src/render_doc.c#L844)
+`function` `const` | [src/render_doc.c:855](../../src/render_doc.c#L855)
 
 ```c
 const char *rd_image_label(rdp_img_decision d)
@@ -380,7 +406,7 @@ const char *rd_image_label(rdp_img_decision d)
 
 ### `rd_image_fail_label`
 
-`function` `const` | [src/render_doc.c:855](../../src/render_doc.c#L855)
+`function` `const` | [src/render_doc.c:866](../../src/render_doc.c#L866)
 
 ```c
 const char *rd_image_fail_label(img_fail_reason reason)

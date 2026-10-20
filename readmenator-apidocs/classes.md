@@ -24,6 +24,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`bt_positioned`](modules/include.box_tree.h.md#bt_positioned) struct in `include/box_tree.h`
 - [`bt_status`](modules/include.box_tree.h.md#bt_status) enum in `include/box_tree.h`
 - [`buf`](modules/include.textfield.h.md#buf) type_alias in `include/textfield.h`
+- [`bui_mask_ctx`](modules/gui.browser_ui.c.md#bui_mask_ctx) struct in `gui/browser_ui.c`
 - [`bx_bg_layer`](modules/include.box_style.h.md#bx_bg_layer) struct in `include/box_style.h`
 - [`bx_box`](modules/include.box_style.h.md#bx_box) struct in `include/box_style.h`
 - [`bx_display`](modules/include.box_style.h.md#bx_display) enum in `include/box_style.h`
@@ -40,6 +41,9 @@ Project types nested under the project types they derive from. External bases ar
 - [`cc_rgb`](modules/include.css_color.h.md#cc_rgb) struct in `include/css_color.h`
 - [`cc_status`](modules/include.css_color.h.md#cc_status) enum in `include/css_color.h`
 - [`cch_node`](modules/src.css_chain.c.md#cch_node) struct in `src/css_chain.c`
+- [`cg_radial`](modules/include.css_gradient.h.md#cg_radial) struct in `include/css_gradient.h`
+- [`cg_radial_shape`](modules/include.css_gradient.h.md#cg_radial_shape) enum in `include/css_gradient.h`
+- [`cg_radial_size`](modules/include.css_gradient.h.md#cg_radial_size) enum in `include/css_gradient.h`
 - [`chain`](modules/src.page_view.c.md#chain) type_alias in `src/page_view.c`
 - [`child_state`](modules/src.tab.c.md#child_state) struct in `src/tab.c`
 - [`cix_entry`](modules/include.css_index.h.md#cix_entry) struct in `include/css_index.h`
@@ -47,6 +51,9 @@ Project types nested under the project types they derive from. External bases ar
 - [`cl_ctx`](modules/include.css_length.h.md#cl_ctx) struct in `include/css_length.h`
 - [`cl_lp`](modules/include.css_length.h.md#cl_lp) struct in `include/css_length.h`
 - [`cl_status`](modules/include.css_length.h.md#cl_status) enum in `include/css_length.h`
+- [`cm_clip`](modules/include.css_mask.h.md#cm_clip) enum in `include/css_mask.h`
+- [`cm_comp`](modules/include.css_mask.h.md#cm_comp) enum in `include/css_mask.h`
+- [`cm_layer`](modules/include.css_mask.h.md#cm_layer) struct in `include/css_mask.h`
 - [`cmq_env`](modules/include.css_mq.h.md#cmq_env) struct in `include/css_mq.h`
 - [`col`](modules/gui.browser_ui.c.md#col) type_alias in `gui/browser_ui.c`
 - [`col_founder_box`](modules/gui.browser_ui.c.md#col_founder_box) type_alias in `gui/browser_ui.c`
@@ -201,6 +208,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`hb_set`](modules/src.hostblock.c.md#hb_set) struct in `src/hostblock.c`
 - [`hb_status`](modules/include.hostblock.h.md#hb_status) enum in `include/hostblock.h`
 - [`hb_table`](modules/src.hostblock.c.md#hb_table) struct in `src/hostblock.c`
+- [`hcf_dirs`](modules/include.host_conf.h.md#hcf_dirs) struct in `include/host_conf.h`
 - [`he_status`](modules/include.hostedit.h.md#he_status) enum in `include/hostedit.h`
 - [`height`](modules/include.svg_render.h.md#height) type_alias in `include/svg_render.h`
 - [`height`](modules/tools.pngdiff.c.md#height) type_alias in `tools/pngdiff.c`
@@ -264,6 +272,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`key`](modules/include.css_index.h.md#key) type_alias in `include/css_index.h`
 - [`key_ref`](modules/src.web_storage.c.md#key_ref) struct in `src/web_storage.c`
 - [`kind`](modules/gui.browser_ui.c.md#kind) type_alias in `gui/browser_ui.c`
+- [`cm_layer.kind`](modules/include.css_mask.h.md#cm_layer-kind) type_alias in `include/css_mask.h`
 - [`css_pseudo_match.kind`](modules/include.css_select.h.md#css_pseudo_match-kind) type_alias in `include/css_select.h`
 - [`kind`](modules/include.form.h.md#kind) type_alias in `include/form.h`
 - [`kind`](modules/include.interp.h.md#kind) type_alias in `include/interp.h`
@@ -404,6 +413,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`sf_status`](modules/include.secure_fetch.h.md#sf_status) enum in `include/secure_fetch.h`
 - [`sf_ws`](modules/include.secure_fetch.h.md#sf_ws) type_alias in `include/secure_fetch.h`
 - [`sf_ws`](modules/src.secure_fetch.c.md#sf_ws) struct in `src/secure_fetch.c`
+- [`cg_radial.shape`](modules/include.css_gradient.h.md#cg_radial-shape) type_alias in `include/css_gradient.h`
 - [`sink`](modules/src.secure_fetch.c.md#sink) type_alias in `src/secure_fetch.c`
 - [`sm_entry`](modules/src.dom.c.md#sm_entry) struct in `src/dom.c`
 - [`stage`](modules/include.perf_trace.h.md#stage) type_alias in `include/perf_trace.h`

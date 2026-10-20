@@ -188,4 +188,10 @@ size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts,
 /* location / history / JS-navigation capture live in their own module. */
 #include "js_location.h"
 
+/* Reconciles Custom Elements (spec/js_custom_elements.md): upgrades the elements whose tag was
+ * just defined and fires attributeChanged/connected/disconnected callbacks. The embedder calls
+ * it after each script, so the page sees the lifecycle a real browser would have run. A context
+ * without the facade, or NULL, is a no-op. */
+void jd_flush_custom_elements(js_context *ctx);
+
 #endif /* FREEDOM_JS_DOM_H */

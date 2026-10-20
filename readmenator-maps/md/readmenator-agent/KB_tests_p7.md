@@ -73,12 +73,13 @@ Previous: [KB_tests_p6.md](KB_tests_p6.md)
   - `test_polygon_points` (function, line 140) `static void test_polygon_points(void **state)`
   - `test_path_commands` (function, line 159) `static void test_path_commands(void **state)`
   - `test_path_arc_reaches_endpoint` (function, line 192) `static void test_path_arc_reaches_endpoint(void **state)`
-  - `test_url_bearing_elements_are_dropped` (function, line 208) `static void test_url_bearing_elements_are_dropped(void **state)`
-  - `test_bounds_are_enforced` (function, line 232) `static void test_bounds_are_enforced(void **state)`
-  - `test_malformed_values_degrade` (function, line 269) `static void test_malformed_values_degrade(void **state)`
-  - `test_text_element` (function, line 288) `static void test_text_element(void **state)`
-  - `test_fit_uniform_and_centered` (function, line 304) `static void test_fit_uniform_and_centered(void **state)`
-  - `main` (function, line 328) `int main(void)`
+  - `test_path_arc_compact_flags` (function, line 208) `static void test_path_arc_compact_flags(void **state)`
+  - `test_url_bearing_elements_are_dropped` (function, line 224) `static void test_url_bearing_elements_are_dropped(void **state)`
+  - `test_bounds_are_enforced` (function, line 248) `static void test_bounds_are_enforced(void **state)`
+  - `test_malformed_values_degrade` (function, line 285) `static void test_malformed_values_degrade(void **state)`
+  - `test_text_element` (function, line 304) `static void test_text_element(void **state)`
+  - `test_fit_uniform_and_centered` (function, line 320) `static void test_fit_uniform_and_centered(void **state)`
+  - `main` (function, line 344) `int main(void)`
 - Depends on: `include/svg_render.h`
 
 ## tests/test_tab.c

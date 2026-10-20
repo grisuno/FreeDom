@@ -1,5 +1,383 @@
-# API (page 9 of 10)
+# API (page 9 of 11)
 Previous: [API_p8.md](API_p8.md)
+
+## src/page_view.c
+Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_vars.h`, `include/dom.h`, `include/flex_layout.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+- `cp1252_to_ucs` (function) `src/page_view.c:89` `static unsigned int cp1252_to_ucs(unsigned char c)` -- Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80).
+- `utf8_encode` (function) `src/page_view.c:103` `static size_t utf8_encode(unsigned int cp, char *out)` -- Encodes a BMP scalar (<= 0xFFFF, which covers all Windows-1252 targets) as * UTF-8 into out (up to 3 bytes); returns...
+- `utf8_sanitized_dup` (function) `src/page_view.c:116` `static char *utf8_sanitized_dup(const char *s)`
+- `positions` (function) `src/page_view.c:139` `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);`
+- `dup_n` (function) `src/page_view.c:150` `static char *dup_n(const char *s, size_t n)`
+- `run_init_common` (function) `src/page_view.c:164` `static void run_init_common(pv_run *r)` -- Common field initialization shared by all append helpers.
+- `pv_ptrmap_slot` (function) `src/page_view.c:295` `static size_t pv_ptrmap_slot(const pv_ptrmap *m, const void *k)`
+- `pv_ptrmap_get` (function) `src/page_view.c:305` `static int pv_ptrmap_get(const pv_ptrmap *m, const void *k, int *out)`
+- `pv_ptrmap_put` (function) `src/page_view.c:313` `static void pv_ptrmap_put(pv_ptrmap *m, const void *k, int v)`
+- `pv_ptrmap_free` (function) `src/page_view.c:335` `static void pv_ptrmap_free(pv_ptrmap *m)`
+- `pv_node_map_init` (function) `src/page_view.c:350` `static int pv_node_map_init(pv_node_map *m)`
+- `pv_node_map_free` (function) `src/page_view.c:359` `static void pv_node_map_free(pv_node_map *m)`
+- `pv_node_map_build` (function) `src/page_view.c:401` `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)` -- Builds a document-order map of all element nodes under root.
+- `pv_new` (function) `src/page_view.c:410` `pv_view *pv_new(void)`
+- `pv_append` (function) `src/page_view.c:414` `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
+                    c...`
+- `pv_append_image` (function) `src/page_view.c:449` `pv_status pv_append_image(pv_view *v, int heading, int block_break,
+                          con...`
+- `pv_append_input` (function) `src/page_view.c:479` `pv_status pv_append_input(pv_view *v, int heading, int block_break,
+                          pv_...`
+- `pv_append_video` (function) `src/page_view.c:519` `pv_status pv_append_video(pv_view *v, int heading, int block_break,
+                          con...`
+- `pv_append_svg` (function) `src/page_view.c:555` `pv_status pv_append_svg(pv_view *v, int heading, int block_break,
+                        const c...`
+- `pv_set_emphasis` (function) `src/page_view.c:584` `void pv_set_emphasis(pv_view *v, int bold, int italic)`
+- `pv_set_indent` (function) `src/page_view.c:591` `void pv_set_indent(pv_view *v, int indent)`
+- `pv_set_color` (function) `src/page_view.c:596` `void pv_set_color(pv_view *v, int fg_rgb)`
+- `pv_set_bgcolor` (function) `src/page_view.c:601` `void pv_set_bgcolor(pv_view *v, int bg_rgb)`
+- `pv_set_text_style` (function) `src/page_view.c:606` `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,
+                ...`
+- `pv_set_grad_text` (function) `src/page_view.c:617` `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)`
+- `pv_set_text_ext` (function) `src/page_view.c:625` `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)`
+- `ignored` (function) `src/page_view.c:666` `* source is ignored (fail-visible: never invisible text from half a
+     * pattern). A real text-...`
+- `pv_set_container` (function) `src/page_view.c:681` `void pv_set_container(pv_view *v, int cont_id, int cont_display,
+                      int cont_g...`
+- `pv_set_row_span` (function) `src/page_view.c:696` `void pv_set_row_span(pv_view *v, int row_span)`
+- `pv_set_grid_area` (function) `src/page_view.c:700` `void pv_set_grid_area(pv_view *v, int row_start, int col_start)`
+- `pv_set_grid` (function) `src/page_view.c:707` `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)`
+- `pv_set_grid_rows` (function) `src/page_view.c:717` `void pv_set_grid_rows(pv_view *v, int grid_rows)`
+- `pv_set_cont_box` (function) `src/page_view.c:721` `void pv_set_cont_box(pv_view *v, int cont_box_id)`
+- `pv_set_flex` (function) `src/page_view.c:725` `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
+                 int...`
+- `pv_set_flex_mauto` (function) `src/page_view.c:737` `void pv_set_flex_mauto(pv_view *v, int mauto)`
+- `pv_set_cont_item` (function) `src/page_view.c:743` `void pv_set_cont_item(pv_view *v, int cont_item)`
+- `pv_set_float_w` (function) `src/page_view.c:748` `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box)`
+- `pv_set_float` (function) `src/page_view.c:755` `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
+                int ...`
+- `pv_set_box` (function) `src/page_view.c:777` `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
+                int box_center, int ...`
+- `pv_set_box_pct` (function) `src/page_view.c:789` `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
+                    ...`
+- `pv_set_box_maxw` (function) `src/page_view.c:800` `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct)`
+- `pv_set_ua_tag` (function) `src/page_view.c:807` `void pv_set_ua_tag(pv_view *v, int ua_tag)`
+- `pv_set_node_id` (function) `src/page_view.c:813` `void pv_set_node_id(pv_view *v, dom_node_id node_id)`
+- `pv_set_block_id` (function) `src/page_view.c:818` `void pv_set_block_id(pv_view *v, int block_id)`
+- `pv_set_own_box` (function) `src/page_view.c:823` `void pv_set_own_box(pv_view *v, int box_id)`
+- `pv_set_oof` (function) `src/page_view.c:828` `void pv_set_oof(pv_view *v, int oof)`
+- `pv_set_justify_self` (function) `src/page_view.c:833` `void pv_set_justify_self(pv_view *v, int justify_self)`
+- `pv_set_block_node` (function) `src/page_view.c:838` `void pv_set_block_node(pv_view *v, dom_node_id id)`
+- `pv_set_br_line` (function) `src/page_view.c:843` `void pv_set_br_line(pv_view *v, int br_line)`
+- `pv_set_input_checked` (function) `src/page_view.c:848` `void pv_set_input_checked(pv_view *v, int checked)`
+- `pv_set_input_placeholder` (function) `src/page_view.c:853` `void pv_set_input_placeholder(pv_view *v, int ph_color)`
+- `pv_svg_append_root_attrs` (function) `src/page_view.c:858` `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs,
+               ...`
+- `pv_placeholder_color` (function) `src/page_view.c:887` `int pv_placeholder_color(const css_style *ph)`
+- `pv_set_input_select_opts` (function) `src/page_view.c:895` `void pv_set_input_select_opts(pv_view *v, const char *select_opts)`
+- `pv_add_cont_def` (function) `src/page_view.c:903` `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)`
+- `pv_cont_count` (function) `src/page_view.c:916` `size_t pv_cont_count(const pv_view *v)`
+- `pv_cont_at` (function) `src/page_view.c:920` `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)`
+- `pv_add_box_def` (function) `src/page_view.c:925` `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)`
+- `pv_free` (function) `src/page_view.c:938` `void pv_free(pv_view *v)`
+- `pv_count` (function) `src/page_view.c:956` `size_t pv_count(const pv_view *v)`
+- `pv_at` (function) `src/page_view.c:960` `const pv_run *pv_at(const pv_view *v, size_t i)`
+- `pv_box_count` (function) `src/page_view.c:965` `size_t pv_box_count(const pv_view *v)`
+- `pv_box_at` (function) `src/page_view.c:969` `const pv_box_def *pv_box_at(const pv_view *v, size_t i)`
+- `node_next` (function) `src/page_view.c:977` `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` -- } size_t pv_box_count(const pv_view *v) { return (v != NULL) ? v->nbox : 0; } const pv_box_def *pv_box_at(const...
+- `is_block_tag` (function) `src/page_view.c:987` `static int is_block_tag(lxb_tag_id_t t)`
+- `is_block_like` (function) `src/page_view.c:1012` `static int is_block_like(lxb_tag_id_t t, css_display display)` -- An element should be treated as block-like (eligible for box registration, hbox, float) when its CSS display...
+- `resolves` (function) `src/page_view.c:1041` `* box_tree already resolves (R4/R8) had nothing to place -- every badge/close
+ * button/tooltip w...`
+- `is_block_like_style` (function) `src/page_view.c:1051` `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)` -- is_block_like with the out-of-flow coercion applied.
+- `generates_box` (function) `src/page_view.c:1063` `static int generates_box(lxb_tag_id_t t, css_display display)`
+- `generates_box_style` (function) `src/page_view.c:1075` `static int generates_box_style(lxb_tag_id_t t, const css_style *cs)` -- Form controls (input/select/textarea/button) are inline-block by default but can carry author CSS like...
+- `causes_block_break` (function) `src/page_view.c:1082` `static int causes_block_break(lxb_tag_id_t t, css_display display)` -- Returns 1 when the element should cause a block break (start a new line). display:inline-block and display:inline do...
+- `paints` (function) `src/page_view.c:1095` `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas
+ * vacías"). Comment a...`
+- `ua_tag_of` (function) `src/page_view.c:1120` `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)` -- User-agent box identity of a block-level element, from its lexbor tag id.
+- `heading_level` (function) `src/page_view.c:1142` `static int heading_level(lxb_tag_id_t t)`
+- `is_skipped_tag` (function) `src/page_view.c:1154` `static int is_skipped_tag(lxb_tag_id_t t)`
+- `node_tag` (function) `src/page_view.c:1175` `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)`
+- `content` (function) `src/page_view.c:1180` `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);`
+- `in_skipped_subtree` (function) `src/page_view.c:1183` `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+              ...` -- Nonzero if any ancestor up to base is a non-rendered container.
+- `font_color_attr` (function) `src/page_view.c:1220` `static int font_color_attr(lxb_dom_element_t *el)`
+- `bgcolor_attr` (function) `src/page_view.c:1226` `static int bgcolor_attr(lxb_dom_element_t *el)` -- Legacy bgcolor attribute (body/table/tr/td), the background twin of <font * color>: pre-CSS sites (Hacker News'...
+- `address` (function) `src/page_view.c:1248` `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <=...`
+- `child` (function) `src/page_view.c:1256` `* child (NULL = anonymous item: text directly inside the container);`
+- `id` (function) `src/page_view.c:1278` `* group id (-1 = the nearest IS the outermost: single-level float, the * painter's old path);`
+- `item_ordinal` (function) `src/page_view.c:1346` `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` -- Ordinal for a run of container `cid` whose direct-child item is `item` (NULL = * anonymous: every such run is its...
+- `it` (function) `src/page_view.c:1375` `* it (they inherit in CSS). list_style drives the <li> marker (structural);`
+- `pv_content_hidden` (function) `src/page_view.c:1379` `int pv_content_hidden(int box_hidden, int run_visibility)` -- The author text-presentation extensions struct (pv_text_ext) is public now (include/page_view.h): each field...
+- `pv_text_ext_reset` (function) `src/page_view.c:1385` `void pv_text_ext_reset(pv_text_ext *e)`
+- `pv_text_ext_merge` (function) `src/page_view.c:1411` `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` -- Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten...
+- `css_has_hbox` (function) `src/page_view.c:1473` `static int css_has_hbox(const css_style *cs)` -- True if the resolved style declares any HORIZONTAL box property, in either half of the <length-percentage>: `width...
+- `pv_mauto_of` (function) `src/page_view.c:1487` `static int pv_mauto_of(const css_style *cs)` -- Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side...
+- `css_hbox_resolve` (function) `src/page_view.c:1494` `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)`
+- `css_has_position` (function) `src/page_view.c:1545` `static int css_has_position(const css_style *cs)` -- A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree...
+- `css_has_boxdeco` (function) `src/page_view.c:1550` `static int css_has_boxdeco(const css_style *cs)`
+- `cont_def_reset` (function) `src/page_view.c:1694` `static void cont_def_reset(pv_cont_def *d)` -- Per-container parameters + parent linkage (2026-07-31).
+- `container_id` (function) `src/page_view.c:1713` `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` -- d->box_id = -1; d->item_grow = -1; d->item_shrink = -1; d->item_basis = CSS_LEN_UNSET; d->item_order =...
+- `annotate_flow_run` (function) `src/page_view.c:1801` `static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *items,
+          ...` -- Stamps the last run with its element's layout annotation: container membership and item slot, flex/grid item...
+- `trying` (function) `src/page_view.c:1843` `* a real page passes without trying (slashdot's front page saturates it), and past
+ * it box_reg_...`
+- `box_reg_free` (function) `src/page_view.c:1872` `static void box_reg_free(pv_box_reg *r)`
+- `boxdef_from_style` (function) `src/page_view.c:1881` `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` -- Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style.
+- `here` (function) `src/page_view.c:1982` `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3...`
+- `glyphs` (function) `src/page_view.c:2030` `* glyphs (the runs carry it as their fill source);`
+- `box_reg_id` (function) `src/page_view.c:2124` `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
+           ...` -- Registers (or finds) the box for `node`. font_px is the element's COMPUTED font-size, needed because the user-agent...
+- `pseudo_box_reg` (function) `src/page_view.c:2153` `static int pseudo_box_reg(pv_box_reg *r, const lxb_dom_node_t *el, int which,
+                   ...` -- Registers (or finds) the GENERATED box of el's ::before / ::after (which = CSS_PSEUDO_BEFORE / CSS_PSEUDO_AFTER)...
+- `pseudo_generates_box` (function) `src/page_view.c:2174` `static int pseudo_generates_box(const css_style *ps)` -- True iff a generated box paints or sizes something of its own: the same gate as any element's box, plus a declared...
+- `pseudo_is_oof` (function) `src/page_view.c:2187` `static int pseudo_is_oof(const css_style *ps)`
+- `pseudo_is_block` (function) `src/page_view.c:2191` `static int pseudo_is_block(const css_style *ps)`
+- `pseudo_key` (function) `src/page_view.c:2197` `static const void *pseudo_key(const lxb_dom_node_t *el, int which)` -- return css_has_boxdeco(ps) || ps->width > 0 || ps->pct[CSS_PCT_WIDTH] > 0 || ps->background >= 0 ||...
+- `pv_ptr_hash` (function) `src/page_view.c:2253` `static size_t pv_ptr_hash(const void *p)`
+- `pv_cache_reindex` (function) `src/page_view.c:2261` `static void pv_cache_reindex(pv_style_cache *c)`
+- `pv_style_cache_init` (function) `src/page_view.c:2271` `static int pv_style_cache_init(pv_style_cache *c)`
+- `pv_style_cache_free` (function) `src/page_view.c:2291` `static void pv_style_cache_free(pv_style_cache *c)`
+- `pv_cache_find` (function) `src/page_view.c:2306` `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)` -- cch_element_style(el, sheet), memoized in *cache.
+- `pv_cached_font_px` (function) `src/page_view.c:2321` `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)` -- The COMPUTED font-size memoized for `node`, or 0 when it is not in the cache (no cache, or the element's style was...
+- `pv_cache_put` (function) `src/page_view.c:2326` `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
+                     ...`
+- `pv_var_push` (function) `src/page_view.c:2370` `static const cvr_chain *pv_var_push(pv_style_cache *cache, cvr_table *own,
+                      ...` -- Takes ownership of *own (left zeroed) as a new chain node over `parent`. * Returns the node's chain, or `parent`...
+- `pv_parent_element` (function) `src/page_view.c:2391` `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)` -- cache->vn = g; cache->vncap = nc; } pv_var_node *n = (pv_var_node *)calloc(1, sizeof *n); if (n == NULL) {...
+- `cached_element_style` (function) `src/page_view.c:2464` `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
+            ...`
+- `col_free_share` (function) `src/page_view.c:2578` `static int col_free_share(const lxb_dom_node_t *el, const css_style *cs, const css_sheet *sheet, pv_style_cache...` -- box_reg_id plus the line alignment an inline-level box needs (see * pv_box_def.line_align).
+- `inherited_text_color` (function) `src/page_view.c:2584` `static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,
+             ...` -- The computed `color` of an element: its own declaration, else its nearest ancestor's (`color` inherits). -1 when no...
+- `box_reg_id_ex` (function) `src/page_view.c:2595` `static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
+        ...`
+- `none` (function) `src/page_view.c:2600` `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...`
+- `cached_pseudo_style` (function) `src/page_view.c:2633` `static css_style cached_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet,
+             ...` -- The ::before/::after generated box's style of el (spec/page_view.md "Cajas generadas"): resolved against el's...
+- `subtree_is_oof` (function) `src/page_view.c:2651` `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
+                     ...` -- True iff the element itself is out of flow (position:absolute/fixed) or descends from one.
+- `size` (function) `src/page_view.c:2671` `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
+static void app...`
+- `css_replaced_h_fixed` (function) `src/page_view.c:2680` `static int css_replaced_h_fixed(lxb_dom_element_t *el, const css_sheet *sheet,
+                  ...` -- flat model, and auto keeps the intrinsic/attribute size (so the common `img{max-width:100%;height:auto}` rule does...
+- `builder` (function) `src/page_view.c:2698` `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
+ * (the ...`
+- `css_to_fx_justify` (function) `src/page_view.c:2727` `static int css_to_fx_justify(css_justify j)` -- Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to...
+- `is_bold_tag` (function) `src/page_view.c:2746` `static int is_bold_tag(lxb_tag_id_t t)` -- Tags the user-agent sheet renders bold.
+- `is_italic_tag` (function) `src/page_view.c:2751` `static int is_italic_tag(lxb_tag_id_t t)`
+- `is_inline_level_style` (function) `src/page_view.c:2788` `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)` -- Inline-level box (CSS 2.1 9.2.2): display inline or inline-block, or a tag the UA * sheet makes inline, and not...
+- `in_mixed_line` (function) `src/page_view.c:2796` `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,
+                       ...` -- True when `p` shares a line with inline content: a sibling that is non-blank text * or an inline-level element.
+- `children_all_inline_block` (function) `src/page_view.c:2812` `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,
+           ...`
+- `col_has_free_space` (function) `src/page_view.c:2837` `static int col_has_free_space(const css_style *cs)` -- True iff a column can have FREE space on its main axis: a px height or a px min-height floor.
+- `flex_column_flows_as_block` (function) `src/page_view.c:2848` `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,
+            ...` -- A flex COLUMN with the initial geometry (no reverse, no wrap, justify-content start, align-items stretch) stacks...
+- `fold_column_gap` (function) `src/page_view.c:2901` `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,
+                            ...` -- The gap of a column that flows as block (above) is the space BETWEEN its items (Flexbox 8.1), so every item but the...
+- `is_layout_container` (function) `src/page_view.c:2925` `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
+                   ...` -- int prev = 0; for (const lxb_dom_node_t *c = el->prev; c != NULL && !prev; c = c->prev) { if (c->type !=...
+- `css_has_hmargin` (function) `src/page_view.c:2951` `static int css_has_hmargin(const css_style *cs)` -- A flex/grid ITEM: its parent element is a layout container.
+- `item_sizes_itself` (function) `src/page_view.c:2980` `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,
+                     ...`
+- `li_is_list_item` (function) `src/page_view.c:2996` `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,
+                    ...` -- A marker is generated by a `display:list-item` box (CSS Lists 3 3.1), which is what the UA sheet makes an <li>; an...
+- `paints` (function) `src/page_view.c:3023` `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas vacías").
+ *
+ * A chil...`
+- `subtree_has_own_text` (function) `src/page_view.c:3073` `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+            ...` -- True when the subtree holds no non-blank text of its own outside skipped / hidden / closed-details subtrees...
+- `element_is_content_leaf` (function) `src/page_view.c:3093` `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
+             ...`
+- `resolve_context` (function) `src/page_view.c:3117` `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+                ...`
+- `outermost` (function) `src/page_view.c:3345` `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);`
+- `opens` (function) `src/page_view.c:3398` `* painter applies it when the box opens (band/shared context) — seeding
+             * it onto ru...`
+- `css_inline_boxdeco` (function) `src/page_view.c:3438` `css_inline_boxdeco(&cs) &&
+                           !is_layout_item(p, sheet, style_cache))`
+- `margins` (function) `src/page_view.c:3478` `* margins (boxdef_from_style) and the painter applies them when
+                         * it ope...`
+- `container` (function) `src/page_view.c:3600` `* membership in this container (and none in any container further out,
+                 * since i...`
+- `walk` (function) `src/page_view.c:3698` `* far on this walk (they are all inside this element). */
+
+                        /* The innermo...`
+- `float` (function) `src/page_view.c:3823` `* genuinely nested float (oid != id) takes the deferred-column path. */
+    if (cont->float_oid =...`
+- `sz_count` (function) `src/page_view.c:3868` `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` -- Serialises an element subtree (the element itself included) into a fresh NUL-terminated buffer.
+- `sz_write` (function) `src/page_view.c:3882` `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)`
+- `serialize_subtree` (function) `src/page_view.c:3890` `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)`
+- `collapse_ws` (function) `src/page_view.c:3909` `static char *collapse_ws(const char *s, size_t n)` -- if (total == 0 || total > SV_MAX_INPUT) return NULL; char *buf = (char *)calloc(1, total + 1u); if (buf == NULL)...
+- `parse_dim` (function) `src/page_view.c:3933` `static int parse_dim(const lxb_char_t *s, size_t len)` -- Parses the leading non-negative integer of an HTML length attribute value (e.g. "640", "640px", "50%").
+- `present` (function) `src/page_view.c:3950` `* when no width descriptors are present (density-only or bare URLs). */
+static void srcset_best_u...`
+- `srcset_slot_width` (function) `src/page_view.c:4045` `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
+                              ...` -- Parses a sizes attribute ("(max-width: 600px) 100vw, 50vw") and returns the effective slot width in px for the given...
+- `dimensions` (function) `src/page_view.c:4091` `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
+static void srcse...`
+- `find_body` (function) `src/page_view.c:4123` `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
+- `find_root_els` (function) `src/page_view.c:4136` `static pv_root_els find_root_els(lxb_dom_node_t *root)`
+- `attributes` (function) `src/page_view.c:4150` `* carries those attributes (spec/css.md, "Root matcher"). */
+static int root_els_match(void *ctx,...`
+- `string` (function) `src/page_view.c:4161` `* Returns a heap string (caller frees) or NULL when neither carries a class —
+ * NULL simply mean...`
+- `forms_free` (function) `src/page_view.c:4209` `static void forms_free(form_table *ft)`
+- `ascii_ieq` (function) `src/page_view.c:4216` `static int ascii_ieq(const char *s, const char *lit)` -- } form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void...
+- `attr_dup` (function) `src/page_view.c:4228` `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` -- Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent.
+- `forms_add` (function) `src/page_view.c:4237` `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` -- Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent.
+- `form_for` (function) `src/page_view.c:4257` `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
+                    const lxb_...` -- } lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)node); char *method = attr_dup(el, "method"...
+- `under_unrendered` (function) `src/page_view.c:4273` `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` -- Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected...
+- `collect_text` (function) `src/page_view.c:4286` `static char *collect_text(const lxb_dom_node_t *el)` -- Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of...
+- `classify_input` (function) `src/page_view.c:4310` `static pv_input_type classify_input(const char *type)`
+- `li_ordinal` (function) `src/page_view.c:4482` `static int li_ordinal(const lxb_dom_node_t *li)` -- 1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out...
+- `roman_marker` (function) `src/page_view.c:4508` `static void roman_marker(int n, int upper, char *out, size_t cap)` -- int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ?...
+- `list_marker` (function) `src/page_view.c:4533` `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
+                  ...` -- Builds the list marker for the first run of an <li>.
+- `node_table_role` (function) `src/page_view.c:4574` `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)` -- The table role of an element: its computed `display` when that names one, else the role the HTML user-agent sheet...
+- `nearest_table` (function) `src/page_view.c:4592` `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+ ...` -- const lxb_char_t *nm = lxb_dom_element_local_name(el, &nl); char tag[BX_TAG_NAME_MAX]; const char *tagp = NULL; if...
+- `parent_is_table_internal` (function) `src/page_view.c:4631` `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)` -- Nonzero when n's DIRECT parent is table structure that is not a cell -- a table, a row group, a row or a column group.
+- `nearest_cell` (function) `src/page_view.c:4658` `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+  ...` -- if (s->type == LXB_DOM_NODE_TYPE_TEXT && text_node_is_blank(s)) continue; if (s->type == LXB_DOM_NODE_TYPE_ELEMENT...
+- `cell_has_nested_table` (function) `src/page_view.c:4673` `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)` -- Nonzero if cell has a descendant table box: it is then a structural CONTAINER, not a leaf cell.
+- `next_skip` (function) `src/page_view.c:4682` `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` -- Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the...
+- `cell_anchors` (function) `src/page_view.c:4693` `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)` -- First <a href> element in the cell's subtree, with *count receiving how many * such anchors exist, capped at 2 (only...
+- `links` (function) `src/page_view.c:4711` `* its links (the Hacker News case: every story link lives inside a <td>), so the
+ * caller flows ...`
+- `flow_table` (function) `src/page_view.c:4732` `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
+- `in_flow_table_cell` (function) `src/page_view.c:4744` `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
+           ...`
+- `table` (function) `src/page_view.c:4753` `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
+ * content -- their ...`
+- `table_columns` (function) `src/page_view.c:4771` `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` -- Grid column count of a table: the maximum number of logical columns across all its rows, computed by summing each...
+- `in_hidden_subtree` (function) `src/page_view.c:4845` `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+               ...` -- Nonzero if n or any ancestor up to base has display:none (from the <style> sheet or its inline style=). display:none...
+- `in_boilerplate_subtree` (function) `src/page_view.c:4869` `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` -- Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>).
+- `in_closed_details_subtree` (function) `src/page_view.c:4884` `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` -- Nonzero if n or any ancestor up to base is inside a <details> without an `open` attribute and n is NOT inside its...
+- `pv_build` (function) `src/page_view.c:4904` `pv_status pv_build(const hp_document *doc, pv_view **out)`
+- `pv_build_ex` (function) `src/page_view.c:4908` `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
+- `pv_build_full` (function) `src/page_view.c:4912` `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
+                     ...`
+- `annotate_replaced_run` (function) `src/page_view.c:4934` `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
+                            ...` -- Attaches the layout membership a replaced run needs to take part in its surroundings: flex/grid container identity...
+- `pv_root_insets` (function) `src/page_view.c:5007` `void pv_root_insets(const css_style *body, int out[4])`
+- `collect_page_css` (function) `src/page_view.c:5017` `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
+                     ...`
+- `pv_build_styled` (function) `src/page_view.c:5046` `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+                   ...`
+- `inside` (function) `src/page_view.c:5163` `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...`
+- `control` (function) `src/page_view.c:5488` `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
+- `px` (function) `src/page_view.c:5664` `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
+                if (iw <...`
+- `height` (function) `src/page_view.c:5745` `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+- `block_id` (function) `src/page_view.c:5879` `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...`
+- `URL` (function) `src/page_view.c:6020` `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+- `block` (function) `src/page_view.c:6298` `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block...`
+- `flow` (function) `src/page_view.c:6468` `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...`
+- `engine` (function) `src/page_view.c:6574` `* layout engine (contiguous item gather) drops every cell onto its own row and
+         * a 2-col...`
+- `line` (function) `src/page_view.c:6583` `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
+- `pv_css_drops` (function) `src/page_view.c:6724` `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
+                       const cha...` -- Diagnostic counterpart to pv_build_styled: same document, same collected CSS text, same @media/root-scope context...
+
+## src/pdf_export.c
+Depends on: `include/pdf_export.h`
+- `pe_safe_basename` (function) `src/pdf_export.c:25` `pe_status pe_safe_basename(const char *title, char *out, size_t outsz)`
+- `pe_build_path_ext` (function) `src/pdf_export.c:66` `pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext,
+                ...`
+- `pe_build_path` (function) `src/pdf_export.c:91` `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz)`
+- `pe_paginate` (function) `src/pdf_export.c:95` `size_t pe_paginate(const double *tops, const double *heights, size_t n,
+                   double...`
+
+## src/perf_trace.c
+Depends on: `include/perf_trace.h`
+- `pt_init` (function) `src/perf_trace.c:16` `void pt_init(pt_trace *t)`
+- `pt_elapsed_us` (function) `src/perf_trace.c:21` `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us)`
+- `pt_record` (function) `src/perf_trace.c:26` `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us)`
+- `pt_count` (function) `src/perf_trace.c:35` `size_t pt_count(const pt_trace *t, pt_stage stage)`
+- `pt_last_us` (function) `src/perf_trace.c:40` `uint64_t pt_last_us(const pt_trace *t, pt_stage stage)`
+- `pt_min_us` (function) `src/perf_trace.c:49` `uint64_t pt_min_us(const pt_trace *t, pt_stage stage)`
+- `pt_max_us` (function) `src/perf_trace.c:60` `uint64_t pt_max_us(const pt_trace *t, pt_stage stage)`
+- `cmp_u64` (function) `src/perf_trace.c:71` `static int cmp_u64(const void *a, const void *b)`
+- `pt_median_us` (function) `src/perf_trace.c:79` `uint64_t pt_median_us(const pt_trace *t, pt_stage stage)`
+- `pt_stage_name` (function) `src/perf_trace.c:89` `const char *pt_stage_name(pt_stage stage)`
+- `pt_format` (function) `src/perf_trace.c:109` `size_t pt_format(const pt_trace *t, char *buf, size_t cap)`
+
+## src/prefetch.c
+Depends on: `include/import_map.h`, `include/prefetch.h`, `include/url.h`
+- `is_ws` (function) `src/prefetch.c:26` `static int is_ws(char c)`
+- `is_name_char` (function) `src/prefetch.c:30` `static int is_name_char(char c)`
+- `lower` (function) `src/prefetch.c:35` `static int lower(int c)`
+- `ci_starts` (function) `src/prefetch.c:40` `static int ci_starts(const char *p, const char *end, const char *kw)` -- static int is_ws(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f'; } static int...
+- `ci_find` (function) `src/prefetch.c:49` `static const char *ci_find(const char *p, const char *end, const char *kw)` -- static int lower(int c) { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; } /* Case-insensitive: [p,end) starts...
+- `ci_eq_span` (function) `src/prefetch.c:58` `static int ci_eq_span(const char *s, size_t n, const char *kw)`
+- `emit` (function) `src/prefetch.c:120` `static void emit(pf_list *out, pf_kind kind, const char *val, size_t vlen)`
+- `pf_scan` (function) `src/prefetch.c:133` `int pf_scan(const char *html, size_t len, pf_list *out)`
+- `pf_list_free` (function) `src/prefetch.c:196` `void pf_list_free(pf_list *l)`
+- `js_ident_ch` (function) `src/prefetch.c:207` `static int js_ident_ch(char c)`
+- `js_skip_ws` (function) `src/prefetch.c:212` `static size_t js_skip_ws(const char *s, size_t i, size_t n)`
+- `js_skip_string` (function) `src/prefetch.c:219` `static size_t js_skip_string(const char *s, size_t i, size_t n)` -- /* --- ES module graph (spec/prefetch.md section 8) --- static int js_ident_ch(char c) { return (c >= 'a' && c <=...
+- `js_take_spec` (function) `src/prefetch.c:226` `static void js_take_spec(const char *s, size_t i, size_t n,
+                         char (*out)[...` -- static size_t js_skip_ws(const char *s, size_t i, size_t n) { while (i < n && (s[i] == ' ' || s[i] == '\t' || s[i]...
+- `pf_scan_imports` (function) `src/prefetch.c:241` `size_t pf_scan_imports(const char *js, size_t len, char (*out)[PF_SPEC_MAX], size_t cap)`
+- `pf_pool_add` (function) `src/prefetch.c:288` `int pf_pool_add(pf_pool *p, const char *url)`
+- `pf_is_js` (function) `src/prefetch.c:311` `static int pf_is_js(const char *url, const char *ctype)`
+- `pf_url_cb` (function) `src/prefetch.c:319` `static int pf_url_cb(void *ctx, const char *base, const char *ref, char *out, size_t outsz)`
+- `pf_url_shaped` (function) `src/prefetch.c:324` `static int pf_url_shaped(const char *sp)`
+- `pf_follow_imports` (function) `src/prefetch.c:333` `static void pf_follow_imports(pf_pool *p, const char *base, const char *body, size_t len)` -- Queues the static imports of a fetched module body, resolved the way the module loader resolves them: through the...
+- `pf_worker` (function) `src/prefetch.c:349` `static void *pf_worker(void *arg)`
+- `pf_pool_start` (function) `src/prefetch.c:387` `int pf_pool_start(pf_pool *p, const char *const *urls, size_t nurls,
+                  pf_fetch_f...`
+- `pool_start` (function) `src/prefetch.c:394` `static int pool_start(pf_pool *p, const char *const *urls, size_t nurls,
+                      pf...` -- map (owned on success) is set BEFORE the threads start: they read it after a * fetch, unlocked, and it never changes...
+- `pf_pool_take` (function) `src/prefetch.c:444` `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status,
+                 char **body,...`
+- `pf_find_importmap` (function) `src/prefetch.c:483` `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n)`
+- `pf_pool_start_page` (function) `src/prefetch.c:504` `int pf_pool_start_page(pf_pool *p, const char *html, size_t len, const char *page_url,
+          ...`
+- `pf_pool_finish` (function) `src/prefetch.c:540` `void pf_pool_finish(pf_pool *p)`
+- `pf_pooled_fetch` (function) `src/prefetch.c:561` `int pf_pooled_fetch(void *vctx, const char *method, const char *url,
+                    const ch...`
+
+## src/prefs.c
+Depends on: `include/prefs.h`, `include/zoom.h`
+- `url_valid` (function) `src/prefs.c:26` `static int url_valid(const char *url)` -- A representable URL: 1..PREFS_MAX_URL-1 bytes, no control bytes, no DEL. * Space is allowed (local paths may carry...
+- `title_clean` (function) `src/prefs.c:39` `static char *title_clean(const char *src)` -- Copies src into a fresh buffer, mapping control bytes/DEL to ' ' and truncating to PREFS_MAX_TITLE bytes on a UTF-8...
+- `prefs_init` (function) `src/prefs.c:66` `void prefs_init(prefs_state *p)`
+- `prefs_free` (function) `src/prefs.c:74` `void prefs_free(prefs_state *p)`
+- `bookmark_push` (function) `src/prefs.c:91` `static prefs_status bookmark_push(prefs_state *p, const char *url, const char *title)` -- Appends a cleaned bookmark.
+- `history_push_back` (function) `src/prefs.c:109` `static prefs_status history_push_back(prefs_state *p, const char *url)` -- Appends a history entry at the BACK preserving document order (parser path; * the API path inserts at the front).
+- `prefs_bookmark_index` (function) `src/prefs.c:125` `int prefs_bookmark_index(const prefs_state *p, const char *url)`
+- `prefs_bookmark_toggle` (function) `src/prefs.c:132` `prefs_status prefs_bookmark_toggle(prefs_state *p, const char *url,
+                             ...`
+- `prefs_history_add` (function) `src/prefs.c:152` `prefs_status prefs_history_add(prefs_state *p, const char *url)`
+- `prefs_format` (function) `src/prefs.c:183` `prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len)`
+- `apply_kv` (function) `src/prefs.c:225` `static void apply_kv(prefs_state *out, const char *key, long val)` -- } for (size_t i = 0; i < p->history_len; ++i) { size_t space = cap - n; if (space == 0) break; int r = snprintf(buf...
+- `prefs_parse` (function) `src/prefs.c:241` `prefs_status prefs_parse(const char *text, size_t len, prefs_state *out)`
+- `ci_eq` (function) `src/prefs.c:300` `static int ci_eq(char a, char b)`
+- `ci_starts` (function) `src/prefs.c:306` `static int ci_starts(const char *s, const char *q)`
+- `ci_contains` (function) `src/prefs.c:314` `static int ci_contains(const char *s, const char *q)`
+- `url_prefix_match` (function) `src/prefs.c:323` `static int url_prefix_match(const char *url, const char *q)` -- Prefix match as the user types it: the raw URL, past the scheme, and past a * leading "www." ("wiki" hits...
+- `sugg_push` (function) `src/prefs.c:335` `static void sugg_push(char *out, size_t row_len, int max_rows, int *n,
+                      cons...` -- Prefix match as the user types it: the raw URL, past the scheme, and past a * leading "www." ("wiki" hits...
+- `prefs_suggest` (function) `src/prefs.c:344` `int prefs_suggest(const prefs_state *p, const char *query,
+                  char *out, size_t ro...`
+- `sb_put` (function) `src/prefs.c:369` `static void sb_put(sbuf *b, const char *s, size_t n)`
+- `sb_str` (function) `src/prefs.c:384` `static void sb_str(sbuf *b, const char *s)`
+- `sb_esc` (function) `src/prefs.c:387` `static void sb_esc(sbuf *b, const char *s)` -- while (nc < b->len + n + 1) nc *= 2; char *nd = (char *)realloc(b->data, nc); if (nd == NULL) { b->oom = 1; return...
+- `sb_link_item` (function) `src/prefs.c:400` `static void sb_link_item(sbuf *b, const char *url, const char *label)`
+- `prefs_bookmarks_page` (function) `src/prefs.c:408` `prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_len)`
+
+## src/profile.c
+Depends on: `include/disk_store.h`, `include/profile.h`
+- `join_path` (function) `src/profile.c:29` `static int join_path(const profile_ctx *ctx, const char *name,
+                     char *out, si...`
+- `keyfile_create` (function) `src/profile.c:36` `static profile_status keyfile_create(const char *dir, const char *path,
+                         ...` -- #include <unistd.h> #include <openssl/crypto.h> #include <openssl/rand.h> #define PROFILE_KEYFILE_LEN (LS_SALT_LEN +...
+- `profile_open` (function) `src/profile.c:59` `profile_status profile_open(profile_ctx *ctx, const char *dir)`
+- `map_ds` (function) `src/profile.c:98` `static profile_status map_ds(ds_status ds)`
+- `profile_load` (function) `src/profile.c:112` `profile_status profile_load(const profile_ctx *ctx, prefs_state *out)`
+- `profile_save` (function) `src/profile.c:133` `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p)`
+- `profile_close` (function) `src/profile.c:149` `void profile_close(profile_ctx *ctx)`
 
 ## src/render_doc.c
 Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
@@ -22,11 +400,12 @@ Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `inclu
 - `rd_cont_count` (function) `src/render_doc.c:766` `size_t rd_cont_count(const rd_doc *d)`
 - `rd_cont_at` (function) `src/render_doc.c:770` `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
 - `rd_kind_name` (function) `src/render_doc.c:775` `const char *rd_kind_name(rd_kind k)`
-- `rd_block_tag` (function) `src/render_doc.c:789` `const char *rd_block_tag(const rd_block *b)`
-- `rd_input_label` (function) `src/render_doc.c:820` `const char *rd_input_label(int input_type)`
-- `rd_input_invisible` (function) `src/render_doc.c:840` `int rd_input_invisible(int input_type)`
-- `rd_image_label` (function) `src/render_doc.c:844` `const char *rd_image_label(rdp_img_decision d)`
-- `rd_image_fail_label` (function) `src/render_doc.c:855` `const char *rd_image_fail_label(img_fail_reason reason)`
+- `rd_block_heading_level` (function) `src/render_doc.c:789` `int rd_block_heading_level(const rd_block *b)`
+- `rd_block_tag` (function) `src/render_doc.c:800` `const char *rd_block_tag(const rd_block *b)`
+- `rd_input_label` (function) `src/render_doc.c:831` `const char *rd_input_label(int input_type)`
+- `rd_input_invisible` (function) `src/render_doc.c:851` `int rd_input_invisible(int input_type)`
+- `rd_image_label` (function) `src/render_doc.c:855` `const char *rd_image_label(rdp_img_decision d)`
+- `rd_image_fail_label` (function) `src/render_doc.c:866` `const char *rd_image_fail_label(img_fail_reason reason)`
 
 ## src/render_policy.c
 Depends on: `include/data_url.h`, `include/render_policy.h`, `include/request_policy.h`
@@ -56,438 +435,6 @@ Depends on: `include/psl_data.h`, `include/request_policy.h`
 - `rp_site_of` (function) `src/request_policy.c:102` `int rp_site_of(const char *host, char *out, size_t out_size)`
 - `rp_same_site` (function) `src/request_policy.c:134` `int rp_same_site(const char *top_level_url, const char *request_url)`
 - `rp_evaluate` (function) `src/request_policy.c:143` `rp_decision rp_evaluate(const char *top_level_url, const char *request_url)`
-
-## src/secure_fetch.c
-Depends on: `include/anti_fp.h`, `include/secure_fetch.h`, `include/url.h`
-- `ci_starts_with` (function) `src/secure_fetch.c:44` `static int ci_starts_with(const char *haystack, const char *prefix)` -- /* --- small helpers (no libc locale dependence) --- static int ci_equal(const char *a, const char *b) { while (*a...
-- `ci_index` (function) `src/secure_fetch.c:56` `static long ci_index(const char *haystack, const char *needle)` -- /* Case-insensitive: does haystack start with prefix? static int ci_starts_with(const char *haystack, const char...
-- `sf_share_lock` (function) `src/secure_fetch.c:68` `static void sf_share_lock(CURL *handle, curl_lock_data data,
-                          curl_lock_...`
-- `sf_share_unlock` (function) `src/secure_fetch.c:74` `static void sf_share_unlock(CURL *handle, curl_lock_data data, void *userptr)`
-- `sf_global_init` (function) `src/secure_fetch.c:81` `void sf_global_init(void)`
-- `sf_cookie_line_matches` (function) `src/secure_fetch.c:96` `int sf_cookie_line_matches(const char *line, const char *host, const char *path,
-                ...`
-- `sf_url_host_path` (function) `src/secure_fetch.c:151` `static int sf_url_host_path(const char *url, char *host, size_t hostsz,
-                         ...` -- Extracts host + path from a validated https url into caller buffers (path defaults * to "/").
-- `sf_cookie_header_for` (function) `src/secure_fetch.c:166` `size_t sf_cookie_header_for(const char *url, char *out, size_t outsz)`
-- `sf_cookie_put` (function) `src/secure_fetch.c:195` `void sf_cookie_put(const char *url, const char *namevalue)`
-- `sf_config_default` (function) `src/secure_fetch.c:216` `sf_config sf_config_default(void)`
-- `sf_user_agent_or_default` (function) `src/secure_fetch.c:241` `const char *sf_user_agent_or_default(const char *ua)`
-- `sf_impersonate_kex_groups` (function) `src/secure_fetch.c:245` `const char *sf_impersonate_kex_groups(void)`
-- `sf_impersonate_tls13_ciphers` (function) `src/secure_fetch.c:246` `const char *sf_impersonate_tls13_ciphers(void)`
-- `sf_validate_url` (function) `src/secure_fetch.c:250` `sf_status sf_validate_url(const char *url)`
-- `sf_url_is_http` (function) `src/secure_fetch.c:258` `static int sf_url_is_http(const char *url)` -- Nonzero iff url is "http://host..." (case-insensitive) with a non-empty host.
-- `sf_check_tls_version` (function) `src/secure_fetch.c:270` `sf_status sf_check_tls_version(const char *negotiated_version)`
-- `sf_check_group_is_pq` (function) `src/secure_fetch.c:275` `sf_status sf_check_group_is_pq(const char *negotiated_group)`
-- `sf_check_chain_policy` (function) `src/secure_fetch.c:284` `sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)`
-- `sf_enforce_policy` (function) `src/secure_fetch.c:294` `sf_status sf_enforce_policy(const char *tls_version, const char *group,
-                         ...`
-- `copy_checked` (function) `src/secure_fetch.c:325` `static int copy_checked(char *dst, size_t dstsz, const char *src)`
-- `sf_is_redirect_code` (function) `src/secure_fetch.c:334` `int sf_is_redirect_code(long http_code)`
-- `sf_parse_location_header` (function) `src/secure_fetch.c:341` `sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz)`
-- `sf_resolve_redirect` (function) `src/secure_fetch.c:359` `sf_status sf_resolve_redirect(const char *base_url, const char *location,
-                       ...`
-- `module` (function) `src/secure_fetch.c:364` `* pure url module (DRY);`
-- `sf_ci_prefix` (function) `src/secure_fetch.c:371` `static int sf_ci_prefix(const char *s, const char *p)` -- Reference resolution + the https-only / no-downgrade policy live in the pure url module (DRY); a redirect is just a...
-- `sf_response_free` (function) `src/secure_fetch.c:411` `void sf_response_free(sf_response *resp)`
-- `progress` (function) `src/secure_fetch.c:443` `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);`
-- `copy_bounded` (function) `src/secure_fetch.c:470` `static void copy_bounded(char *dst, size_t dstsz, const char *src)`
-- `get_negotiated_group_name` (function) `src/secure_fetch.c:481` `static const char *get_negotiated_group_name(SSL *ssl)` -- static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len); static void...
-- `database` (function) `src/secure_fetch.c:485` `* NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid...`
-- `group` (function) `src/secure_fetch.c:499` `* group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);`
-- `tls_capture_try` (function) `src/secure_fetch.c:514` `static void tls_capture_try(tls_capture *cap)` -- nid = SSL_get_shared_group(ssl, 0); #endif if (nid == 0) { return NULL; /* There is no negotiated group (e.g., TLS...
-- `tls_capture_from_ssl` (function) `src/secure_fetch.c:524` `static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl)` -- static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl); /* Idempotent: takes the TLS snapshot the first time...
-- `this` (function) `src/secure_fetch.c:531` `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and...`
-- `header_cb` (function) `src/secure_fetch.c:550` `static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata)` -- Fires for every HTTP response (status line + headers) even when there is no * body, so it is the reliable point to...
-- `write_cb` (function) `src/secure_fetch.c:586` `static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *userdata)`
-- `name_is_pq_sig` (function) `src/secure_fetch.c:618` `static int name_is_pq_sig(int pknid)` -- if (grown == NULL) { sink->overflow = 2; /* OOM marker return 0; } sink->data = grown; sink->cap = newcap; }...
-- `inspect_chain` (function) `src/secure_fetch.c:628` `static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len)` -- Walks the verified chain into *info. sigbuf receives the leaf signature alg name. * Returns 0 on success, nonzero if...
-- `map_curl_error` (function) `src/secure_fetch.c:681` `static sf_status map_curl_error(CURLcode rc, const body_sink *sink)`
-- `add_header` (function) `src/secure_fetch.c:722` `static int add_header(struct curl_slist **h, const char *line)` -- Appends one header line without losing the list on OOM (the plain "h = curl_slist_append(h, ...)" idiom dropped the...
-- `sf_setup_handle` (function) `src/secure_fetch.c:736` `static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,
-           ...` -- The ONE place a curl handle is configured for a request (spec/secure_fetch.md): URL, realm proxy, TLS floor + KE...
-- `redirect` (function) `src/secure_fetch.c:811` `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
-     * different orig...`
-- `sf_perform` (function) `src/secure_fetch.c:879` `static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,
-            ...` -- The shared request engine for sf_get and sf_post.
-- `sf_get` (function) `src/secure_fetch.c:1014` `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)`
-- `sf_post` (function) `src/secure_fetch.c:1018` `sf_status sf_post(const char *url, const sf_config *cfg,
-                  const void *body, size...`
-- `sf_get_follow` (function) `src/secure_fetch.c:1032` `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
-                ...`
-- `ws_ssl_info_cb` (function) `src/secure_fetch.c:1084` `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)` -- An upgraded (CONNECT_ONLY) connection never runs the header callback that snapshots TLS for a fetch, and curl no...
-- `ws_ssl_ctx_cb` (function) `src/secure_fetch.c:1091` `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
-- `sf_ws_url_check` (function) `src/secure_fetch.c:1105` `sf_status sf_ws_url_check(const char *url)`
-- `ws_free` (function) `src/secure_fetch.c:1117` `static void ws_free(sf_ws *ws)`
-- `sf_ws_open` (function) `src/secure_fetch.c:1126` `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
-- `sf_ws_send` (function) `src/secure_fetch.c:1181` `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
-- `sf_ws_recv` (function) `src/secure_fetch.c:1204` `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
-- `sf_ws_fd` (function) `src/secure_fetch.c:1226` `int sf_ws_fd(const sf_ws *ws)`
-- `sf_ws_close` (function) `src/secure_fetch.c:1233` `void sf_ws_close(sf_ws *ws)`
-
-## src/svg_render.c
-Depends on: `include/css_color.h`, `include/svg_render.h`
-- `sv_is_space` (function) `src/svg_render.c:21` `static int sv_is_space(char c)`
-- `sv_is_digit` (function) `src/svg_render.c:25` `static int sv_is_digit(char c)`
-- `sv_lower` (function) `src/svg_render.c:27` `static char sv_lower(char c)`
-- `sv_span_eq` (function) `src/svg_render.c:32` `static int sv_span_eq(const char *s, size_t n, const char *lit)` -- /* --- small scanning helpers (no locale, no allocation) --- static int sv_is_space(char c) { return c == ' ' || c...
-- `sv_sep` (function) `src/svg_render.c:82` `static void sv_sep(const char *s, size_t n, size_t *i)` -- if (ev > 300) ev = 300; double m = pow(10.0, eneg ? -(double)ev : (double)ev); v *= m; p = q; } } if (neg) v = -v...
-- `sv_attr_get` (function) `src/svg_render.c:99` `static const char *sv_attr_get(const sv_attr *at, size_t nat, const char *name, size_t *len)` -- while (*i < n && sv_is_space(s[*i])) ++*i; } /* --- attribute lookup
-- `sv_attr_num` (function) `src/svg_render.c:108` `static double sv_attr_num(const sv_attr *at, size_t nat, const char *name, double dflt)` -- Numeric attribute, or `dflt` when absent/malformed.
-- `sv_mat_identity` (function) `src/svg_render.c:161` `static void sv_mat_identity(double *m)`
-- `sv_mat_mul` (function) `src/svg_render.c:166` `static void sv_mat_mul(const double *a, const double *b, double *out)` -- int    fill, stroke; double stroke_w; int    opacity, fill_opacity, stroke_opacity; int    fill_even_odd; int...
-- `sv_parse_transform` (function) `src/svg_render.c:179` `static void sv_parse_transform(const char *s, size_t n, double *m)` -- Parses a `transform` list and composes it onto ctx->m.
-- `sv_style_next` (function) `src/svg_render.c:238` `static int sv_style_next(const char *s, size_t n, size_t *i,
-                         const char ...` -- Reads one `name:value` declaration out of a style="" attribute.
-- `sv_apply_prop` (function) `src/svg_render.c:260` `static void sv_apply_prop(sv_ctx *ctx, const char *nm, size_t nl,
-                          const...` -- if (*i >= n || s[*i] != ':') { while (*i < n && s[*i] != ';') ++*i; return 1; } ++*i; size_t vs = *i; while (*i < n...
-- `sv_ctx_from_attrs` (function) `src/svg_render.c:307` `static void sv_ctx_from_attrs(sv_ctx *ctx, const sv_attr *at, size_t nat)` -- Folds every presentation attribute of the current tag (and its style="") into a copy of the inherited context.
-- `sv_new_shape` (function) `src/svg_render.c:324` `static sv_shape *sv_new_shape(sv_image *im, int kind, const sv_ctx *ctx)`
-- `sv_parse_points` (function) `src/svg_render.c:343` `static void sv_parse_points(sv_image *im, sv_shape *sh, const char *s, size_t n)` -- sh->fill = ctx->fill; sh->stroke = ctx->stroke; sh->stroke_w = ctx->stroke_w; sh->opacity = ctx->opacity...
-- `sv_new_seg` (function) `src/svg_render.c:363` `static sv_seg *sv_new_seg(sv_image *im, sv_shape *sh)`
-- `sv_seg_move` (function) `src/svg_render.c:371` `static int sv_seg_move(sv_image *im, sv_shape *sh, double x, double y)`
-- `sv_seg_line` (function) `src/svg_render.c:378` `static int sv_seg_line(sv_image *im, sv_shape *sh, double x, double y)`
-- `sv_seg_cubic` (function) `src/svg_render.c:385` `static int sv_seg_cubic(sv_image *im, sv_shape *sh,
-                        double x1, double y1,...`
-- `sv_arc_to_cubics` (function) `src/svg_render.c:399` `static int sv_arc_to_cubics(sv_image *im, sv_shape *sh,
-                            double x0, do...` -- Endpoint-parameterised elliptical arc -> up to 4 cubic segments (F.6.5 of the SVG spec).
-- `sv_parse_path` (function) `src/svg_render.c:477` `static void sv_parse_path(sv_image *im, sv_shape *sh, const char *s, size_t n)` -- Parses path data.
-- `point` (function) `src/svg_render.c:556` `* current point (SVG 8.3.6). */ int had = (prev == 'C' || prev == 'c' || prev == 'S' || prev == 's');`
-- `sv_is_dropped_element` (function) `src/svg_render.c:635` `static int sv_is_dropped_element(const char *name, size_t n)` -- True for elements whose whole subtree is dropped. <image>/<use>/<foreignObject> can name external resources...
-- `sv_scan_attrs` (function) `src/svg_render.c:647` `static void sv_scan_attrs(const char *s, size_t n, size_t *i,
-                          sv_attr *...` -- Scans the attributes of a tag whose body starts at s[*i] (just past the name). * Stops at '>' and reports whether...
-- `sv_skip_subtree` (function) `src/svg_render.c:693` `static void sv_skip_subtree(const char *s, size_t n, size_t *i, const char *name, size_t nlen)` -- Skips to just past the matching close tag of `name`, honouring nesting.
-- `sv_collect_text` (function) `src/svg_render.c:725` `static void sv_collect_text(const char *s, size_t n, size_t *i, char *dst, size_t cap)` -- Collects the literal text of the element that just opened, up to its close tag, * into a bounded buffer.
-- `sv_fit` (function) `src/svg_render.c:743` `void sv_fit(const sv_image *img, double dw, double dh,
-            double *scale, double *off_x, ...`
-- `sv_parse` (function) `src/svg_render.c:763` `sv_status sv_parse(const char *markup, size_t len, sv_image *out)`
-- `sv_parse_ex` (function) `src/svg_render.c:767` `sv_status sv_parse_ex(const char *markup, size_t len, sv_image *out, int root_fill)`
-
-## src/tab.c
-Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/flex_layout.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/import_map.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/js_trusted.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`, `include/web_storage.h`
-- `child_reset_page` (function) `src/tab.c:156` `static void child_reset_page(child_state *cs)`
-- `policy` (function) `src/tab.c:176` `* policy (host blocklist/tracker filter, realm routing, TLS-PQ) before fetching, so a
- * compromi...`
-- `run_js` (function) `src/tab.c:230` `* regardless of run_js (a no-JS load simply never records a request). */
-static int child_load(ch...`
-- `buffer` (function) `src/tab.c:273` `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of...`
-- `host` (function) `src/tab.c:285` `* granted net access for this host (allow.conf AND js.conf). Otherwise they stay * undefined...`
-- `write_field` (function) `src/tab.c:297` `static int write_field(int fd, const char *s)` -- Writes one length-prefixed string field (the write mirror of read_field): a size_t * length then the bytes, with...
-- `blocks` (function) `src/tab.c:331` `*
- * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the
- * grid arr...`
-- `FB_MAX_FILE_BYTES` (function) `src/tab.c:746` `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
- * the stream. ...`
-- `budget_remaining_ms` (function) `src/tab.c:776` `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` -- Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent. * Used to share one page-wide JS...
-- `ctype_is_javascript` (function) `src/tab.c:790` `static int ctype_is_javascript(const char *ctype)` -- Content-Type gate for an external script's response (anti type-confusion, fail closed for real content types)...
-- `ctype_is_css` (function) `src/tab.c:799` `static int ctype_is_css(const char *ctype)` -- Content-Type gate for an external stylesheet (Hito 27), same shape as the script gate: a missing/empty type is...
-- `log_external_skip` (function) `src/tab.c:807` `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
-                ...` -- Freebug note about an external subresource (script/stylesheet) that was not used (skipped or refused).
-- `run` (function) `src/tab.c:825` `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
- * Call after every ...`
-- `tab_url_resolve` (function) `src/tab.c:874` `static int tab_url_resolve(void *ctx, const char *base, const char *ref,
-                        ...` -- Plain URL resolution of ref against base (https, or a local file confined to its * document's directory): the...
-- `tab_mod_resolve` (function) `src/tab.c:883` `static int tab_mod_resolve(void *host, const char *base, const char *spec,
-                      ...`
-- `tab_mod_fetch` (function) `src/tab.c:905` `static char *tab_mod_fetch(void *host, const char *url, size_t *len)` -- Loads a module's source through the trusted parent (TAG_SUBREQ: the full network policy applies), only inside a...
-- `write_history` (function) `src/tab.c:927` `static int write_history(int wfd, child_state *cs)` -- Writes the history block of a response: [len][ops "K url\n"...][go:int32] * (spec/js_dom.md 7e).
-- `window` (function) `src/tab.c:946` `* net window (cs->net_active). */
-static void child_fetch_stylesheets(child_state *cs)`
-- `child_handle_load` (function) `src/tab.c:991` `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
-           ...`
-- `fallback` (function) `src/tab.c:1067` `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it...`
-- `WHERE` (function) `src/tab.c:1225` `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...`
-- `content` (function) `src/tab.c:1258` `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...`
-- `once` (function) `src/tab.c:1303` `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);`
-- `swap` (function) `src/tab.c:1312` `* display:none hiding an element via class swap (CSS, not
-     * DOM removal). */
-    if (ok && v...`
-- `write_full` (function) `src/tab.c:1332` `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd...`
-- `write_ws` (function) `src/tab.c:1354` `static int write_ws(int wfd, child_state *cs)` -- Writes the WebSocket block of a response: [n:int32] then per op * [kind:int32][id:int32][len][bytes] (spec/js_dom.md...
-- `write_storage` (function) `src/tab.c:1371` `static int write_storage(int wfd, child_state *cs)` -- int32_t cnt = (int32_t)n; int rc = (write_full(wfd, &cnt, sizeof cnt) == 0) ?
-- `write_opens` (function) `src/tab.c:1385` `static int write_opens(int wfd, child_state *cs)` -- static int write_storage(int wfd, child_state *cs) { char *blob = NULL; size_t len = 0; int32_t dirty = (cs->js !=...
-- `child_next_timer_ms` (function) `src/tab.c:1397` `static int32_t child_next_timer_ms(child_state *cs)` -- Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the * eval fails, or nothing is pending.
-- `child_handle_mutation` (function) `src/tab.c:1412` `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
-                        ...` -- Fire click handlers for node_id (OP_CLICK) or advance the virtual timer clock (OP_TICK), then re-derive the view so...
-- `child_handle_click` (function) `src/tab.c:1491` `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
-- `child_handle_tick` (function) `src/tab.c:1495` `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
-- `child_handle_event` (function) `src/tab.c:1505` `static void child_handle_event(int wfd, child_state *cs)`
-- `child_handle_mouse` (function) `src/tab.c:1553` `static void child_handle_mouse(int wfd, child_state *cs)` -- Handles a mouse DOM event (OP_MOUSE).
-- `geom_parent` (function) `src/tab.c:1583` `static dom_node_id geom_parent(void *ctx, dom_node_id n)`
-- `child_handle_geom` (function) `src/tab.c:1591` `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)` -- OP_GEOM (spec/js_geom.md): installs the parent's laid-out geometry into the page's JS, aggregated into ancestors...
-- `child_handle_submit` (function) `src/tab.c:1615` `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)` -- Fires a submit event on the form enclosing node_id.
-- `child_handle_eval` (function) `src/tab.c:1649` `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` -- Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a...
-- `child_handle_decode_image` (function) `src/tab.c:1682` `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` -- Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data].
-- `child_handle_decode_image_b64` (function) `src/tab.c:1704` `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)` -- data: URI images: the parent only sliced the base64 payload (pure pointer arithmetic, no interpretation); the base64...
-- `gen_session_key` (function) `src/tab.c:1716` `static uint64_t gen_session_key(void)`
-- `tab_worker_run` (function) `src/tab.c:1736` `static void tab_worker_run(int rfd, int wfd)` -- The confined request loop.
-- `EPIPE` (function) `src/tab.c:1738` `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();`
-- `tzset` (function) `src/tab.c:1754` `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);`
-- `depth` (function) `src/tab.c:1759` `* defense in depth (seccomp already excludes open/socket/exec);`
-- `parse_worker_fd` (function) `src/tab.c:1934` `static int parse_worker_fd(const char *s, int *out)` -- free(buf); free(url); free(cookies); free(storage); } child_reset_page(&cs); fb_buffer_free(&cs.log); _exit(0); } /*...
-- `tab_parse_worker_args` (function) `src/tab.c:1946` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
-- `tab_worker_dispatch` (function) `src/tab.c:1956` `void tab_worker_dispatch(int argc, char **argv)`
-- `load` (function) `src/tab.c:1973` `* subresource requests this load (set per page: host in allow.conf AND js.conf);`
-- `ignore_sigpipe` (function) `src/tab.c:1994` `static void ignore_sigpipe(void)` -- A write to a dead child must not kill the parent with SIGPIPE.
-- `tab_refresh_alive` (function) `src/tab.c:2001` `static void tab_refresh_alive(tab *t)`
-- `read_field` (function) `src/tab.c:2020` `static int read_field(int fd, char **out, size_t *out_len)` -- Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.
-- `read_view` (function) `src/tab.c:2036` `static int read_view(int fd, pv_view **out)` -- Reads a display list serialised by write_view into a fresh pv_view.
-- `tests` (function) `src/tab.c:2111` `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...`
-- `layout` (function) `src/tab.c:2215` `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....`
-- `column` (function) `src/tab.c:2226` `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...`
-- `read_console` (function) `src/tab.c:2542` `static int read_console(int fd, fb_buffer *out)` -- Reads the console section written by write_console into out (a zero-initialised fb_buffer).
-- `send_request` (function) `src/tab.c:2579` `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` -- if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt...
-- `io_failure` (function) `src/tab.c:2589` `static tab_status io_failure(tab *t)`
-- `exec_worker_child` (function) `src/tab.c:2597` `static void exec_worker_child(int rfd, int wfd)` -- Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other...
-- `tab_set_fetcher` (function) `src/tab.c:2668` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-- `tab_set_css_sink` (function) `src/tab.c:2674` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
-- `tab_set_net_allowed` (function) `src/tab.c:2680` `void tab_set_net_allowed(tab *t, int allowed)`
-- `tab_set_css_allowed` (function) `src/tab.c:2685` `void tab_set_css_allowed(tab *t, int allowed)`
-- `tab_last_subreq_stats` (function) `src/tab.c:2690` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
-- `tab_set_viewport_w` (function) `src/tab.c:2695` `void tab_set_viewport_w(tab *t, int px)`
-- `tab_set_cookies` (function) `src/tab.c:2700` `void tab_set_cookies(tab *t, const char *cookies)`
-- `tab_subreq_permitted` (function) `src/tab.c:2706` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-- `answered` (function) `src/tab.c:2718` `* A refused frame is still consumed and answered (status 0), so the protocol never
- * desyncs. Re...`
-- `hist_ops_free` (function) `src/tab.c:2761` `static void hist_ops_free(tab_hist_op *ops, size_t n)`
-- `is_activation_event` (function) `src/tab.c:2826` `static int is_activation_event(const char *type)` -- HTML 6.4.2 activation-triggering input events: only these let a page open a * window.
-- `open_urls_free` (function) `src/tab.c:2835` `static void open_urls_free(char **u, size_t n)`
-- `read_opens` (function) `src/tab.c:2845` `static tab_status read_opens(tab *t, const char *page_url, int gesture,
-                         ...` -- Reads the window.open block (see write_opens).
-- `ws_ops_free` (function) `src/tab.c:2874` `static void ws_ops_free(tab_ws_op *ops, size_t n)`
-- `read_ws` (function) `src/tab.c:2883` `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` -- Reads the WebSocket block (see write_ws), bounded by JT_WS_MAX_OPS ops and JT_WS_MAX_BYTES of payload.
-- `gate_js_nav` (function) `src/tab.c:2952` `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` -- Gates a raw JS navigation request against the page URL in the trusted parent (Zero Trust: a compromised worker...
-- `tab_load` (function) `src/tab.c:2962` `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-- `tab_load_ex` (function) `src/tab.c:2966` `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-- `tab_load_full` (function) `src/tab.c:2970` `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
-            ...`
-- `tab_click` (function) `src/tab.c:3165` `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-- `tab_tick` (function) `src/tab.c:3172` `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-- `tab_submit` (function) `src/tab.c:3181` `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` -- Dispatches a submit event on the form enclosing node_id.
-- `tab_read_view` (function) `src/tab.c:3286` `tab_status tab_read_view(tab *t, tab_page *out)` -- Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console). * Used by tab_mutation_request...
-- `tab_read_view_ex` (function) `src/tab.c:3290` `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
-- `tab_eval` (function) `src/tab.c:3386` `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-- `tab_decode_image_op` (function) `src/tab.c:3426` `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
-        ...` -- Shared by tab_decode_image and tab_decode_image_data_url: sends `bytes` under opcode `op` and parses the...
-- `tab_decode_image` (function) `src/tab.c:3468` `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-- `tab_decode_image_data_url` (function) `src/tab.c:3474` `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
-- `tab_alive` (function) `src/tab.c:3492` `int tab_alive(const tab *t)`
-- `tab_child_pid` (function) `src/tab.c:3498` `pid_t tab_child_pid(const tab *t)`
-- `tab_close` (function) `src/tab.c:3502` `void tab_close(tab *t)`
-- `tab_page_free` (function) `src/tab.c:3517` `void tab_page_free(tab_page *p)`
-- `tab_eval_result_free` (function) `src/tab.c:3547` `void tab_eval_result_free(tab_eval_result *r)`
-- `tab_image_free` (function) `src/tab.c:3556` `void tab_image_free(tab_image *img)`
-- `tab_set_geometry` (function) `src/tab.c:3566` `tab_status tab_set_geometry(tab *t, const jg_table *g)`
-- `tab_popstate` (function) `src/tab.c:3592` `tab_status tab_popstate(tab *t, int index, tab_page *out)`
-- `tab_ws_event` (function) `src/tab.c:3598` `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
-       ...`
-- `tab_set_storage` (function) `src/tab.c:3617` `void tab_set_storage(tab *t, const char *blob, size_t len)`
-
-## src/text_case.c
-Depends on: `include/css.h`, `include/text_case.h`
-- `pair_parity` (function) `src/text_case.c:8` `static int pair_parity(uint32_t cp)` -- Latin Extended-A and the Cyrillic historic block pair letters on adjacent code points, uppercase first.
-- `tc_upper` (function) `src/text_case.c:18` `uint32_t tc_upper(uint32_t cp)`
-- `tc_lower` (function) `src/text_case.c:37` `uint32_t tc_lower(uint32_t cp)`
-- `tc_is_lower` (function) `src/text_case.c:54` `int tc_is_lower(uint32_t cp)`
-- `utf8_decode` (function) `src/text_case.c:61` `static size_t utf8_decode(const unsigned char *s, size_t n, uint32_t *cp)` -- Decodes one UTF-8 code point of s[0,n) into *cp.
-- `utf8_put` (function) `src/text_case.c:79` `static void utf8_put(uint32_t cp, size_t len, unsigned char *out)` -- if ((c >> 5) == 0x6) { if (n < 2 || (s[1] & 0xC0) != 0x80) return 0; cp = ((c & 0x1Fu) << 6) | (s[1] & 0x3Fu)...
-- `utf8_len_of` (function) `src/text_case.c:91` `static size_t utf8_len_of(uint32_t cp)`
-- `tc_transform` (function) `src/text_case.c:95` `size_t tc_transform(const char *s, size_t n, int transform, int word_start,
-                    c...`
-- `tc_smallcaps_runs` (function) `src/text_case.c:117` `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap)`
-
-## src/text_shape.c
-Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
-- `generic_name` (function) `src/text_shape.c:55` `static const char *generic_name(int family)`
-- `backend_init` (function) `src/text_shape.c:65` `static int backend_init(void)`
-- `read_font_file` (function) `src/text_shape.c:82` `static unsigned char *read_font_file(const char *path, long *out_n)`
-- `characters` (function) `src/text_shape.c:100` `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...`
-- `load_entry_named` (function) `src/text_shape.c:103` `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)`
-- `load_entry_file` (function) `src/text_shape.c:133` `static int load_entry_file(tsh_entry *e, const char *path, int index)` -- Loads face `index` of the font file at `path` into e (FreeType + cairo + * HarfBuzz over one owned copy of the bytes).
-- `load_entry` (function) `src/text_shape.c:169` `static int load_entry(tsh_entry *e, int family, int bold, int italic)`
-- `get_entry` (function) `src/text_shape.c:173` `static tsh_entry *get_entry(int family, int bold, int italic)`
-- `web_entry_free` (function) `src/text_shape.c:201` `static void web_entry_free(tsh_web *w)`
-- `slice` (function) `src/text_shape.c:213` `* woff2 slice (spec/webfont.md);`
-- `web_magic_ok` (function) `src/text_shape.c:214` `static int web_magic_ok(const unsigned char *b, size_t n)` -- True for font programs FreeType parses without new decoders: wOFF/TrueType/ CFF-OpenType (and the mac aliases). wOF2...
-- `web_make_entry` (function) `src/text_shape.c:227` `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)` -- Builds the shaping faces over an OWNED copy of bytes[0,nbytes) into e (shared tail with load_entry's file path: same...
-- `tsh_webfont_register` (function) `src/text_shape.c:267` `int tsh_webfont_register(const char *name,
-                         const unsigned char *bytes, s...`
-- `tsh_webfont_clear` (function) `src/text_shape.c:301` `void tsh_webfont_clear(void)`
-- `web_find` (function) `src/text_shape.c:306` `static tsh_entry *web_find(unsigned h, int bold, int italic)`
-- `entry_free` (function) `src/text_shape.c:318` `static void entry_free(tsh_entry *e)`
-- `ascii_ieq` (function) `src/text_shape.c:331` `static int ascii_ieq(const char *a, const char *b)`
-- `tsh_family_is_generic` (function) `src/text_shape.c:340` `int tsh_family_is_generic(const char *name)`
-- `tsh_pick_from_list` (function) `src/text_shape.c:352` `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
-                  ...`
-- `tsh_pick_family` (function) `src/text_shape.c:373` `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
-        ...`
-- `fc_installed` (function) `src/text_shape.c:386` `static int fc_installed(const char *name, void *ctx)` -- const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...
-- `fc_resolve` (function) `src/text_shape.c:429` `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
-- `local_clear` (function) `src/text_shape.c:474` `static void local_clear(void)`
-- `lfam_index` (function) `src/text_shape.c:484` `static int lfam_index(const char *fam)`
-- `tsh_local_handle` (function) `src/text_shape.c:492` `int tsh_local_handle(const char *list)`
-- `local_entry` (function) `src/text_shape.c:511` `static tsh_entry *local_entry(int handle, int bold, int italic)`
-- `get_entry_ex` (function) `src/text_shape.c:531` `static tsh_entry *get_entry_ex(const tsh_font *f)` -- Entry for a full font selector: a registered @font-face wins over the local bucket stack; a set-but-unregistered...
-- `tsh_ready` (function) `src/text_shape.c:543` `int tsh_ready(void)`
-- `tsh_shape` (function) `src/text_shape.c:548` `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
-                ...`
-- `utf8_next` (function) `src/text_shape.c:597` `static unsigned utf8_next(const char *s, size_t n, size_t *len)` -- Decodes one UTF-8 sequence at s[0..n): the code point (U+FFFD for a malformed * sequence) and its byte length (>= 1...
-- `rides_previous` (function) `src/text_shape.c:614` `static int rides_previous(unsigned cp)` -- size_t l = (c < 0x80) ?
-- `tsh_segment` (function) `src/text_shape.c:622` `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
-                tsh_...`
-- `fb_clear` (function) `src/text_shape.c:662` `static void fb_clear(void)`
-- `fb_entry` (function) `src/text_shape.c:672` `static tsh_entry *fb_entry(unsigned cp, int bold)` -- The fallback entry covering cp (bold or regular), or NULL.
-- `cover_cp` (function) `src/text_shape.c:743` `static int cover_cp(unsigned cp, void *vctx)` -- cover callback: 0 when the requested face has the glyph (or nothing else * does), else the id of the fallback face...
-- `shape_entry` (function) `src/text_shape.c:756` `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
-            ...` -- does), else the id of the fallback face that has it. static int cover_cp(unsigned cp, void *vctx) { tsh_cover_ctx *c...
-- `shape_runs` (function) `src/text_shape.c:787` `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
-               ...` -- Measures (cr == NULL) or draws [text,len) run by run, each with the face that * has its glyphs.
-- `tsh_measure` (function) `src/text_shape.c:829` `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
-- `tsh_draw` (function) `src/text_shape.c:835` `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
-                    double x, doub...`
-- `tsh_face` (function) `src/text_shape.c:842` `cairo_font_face_t *tsh_face(const tsh_font *f)`
-- `tsh_shutdown` (function) `src/text_shape.c:848` `void tsh_shutdown(void)`
-
-## src/textfield.c
-Depends on: `include/textfield.h`
-- `whole` (function) `src/textfield.c:6` `* the buffer is rejected whole (fail closed), never applied partially.
- */
-
-#include "textfield.h...`
-- `tf_clear` (function) `src/textfield.c:20` `void tf_clear(tf_field *f)`
-- `tf_set` (function) `src/textfield.c:24` `tf_status tf_set(tf_field *f, const char *s)`
-- `tf_insert` (function) `src/textfield.c:35` `tf_status tf_insert(tf_field *f, char c)`
-- `tf_backspace` (function) `src/textfield.c:47` `void tf_backspace(tf_field *f)`
-- `tf_delete` (function) `src/textfield.c:55` `void tf_delete(tf_field *f)`
-- `tf_move` (function) `src/textfield.c:62` `void tf_move(tf_field *f, long delta)`
-- `tf_home` (function) `src/textfield.c:73` `void tf_home(tf_field *f)`
-- `tf_end` (function) `src/textfield.c:78` `void tf_end(tf_field *f)`
-- `tf_text` (function) `src/textfield.c:83` `const char *tf_text(const tf_field *f)`
-- `tf_len` (function) `src/textfield.c:87` `size_t tf_len(const tf_field *f)`
-- `tf_cursor` (function) `src/textfield.c:91` `size_t tf_cursor(const tf_field *f)`
-
-## src/tls_impersonate.c
-Depends on: `include/tls_impersonate.h`
-- `ti_should_impersonate` (function) `src/tls_impersonate.c:18` `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled,
-                          i...`
-- `bounded_len` (function) `src/tls_impersonate.c:25` `static size_t bounded_len(const char *s, size_t max)`
-- `put_u8` (function) `src/tls_impersonate.c:35` `static void put_u8(ti_wr *w, uint8_t v)`
-- `put_u32` (function) `src/tls_impersonate.c:40` `static void put_u32(ti_wr *w, uint32_t v)`
-- `put_u64` (function) `src/tls_impersonate.c:48` `static void put_u64(ti_wr *w, uint64_t v)`
-- `put_blob` (function) `src/tls_impersonate.c:53` `static void put_blob(ti_wr *w, const uint8_t *b, size_t n)`
-- `get_u8` (function) `src/tls_impersonate.c:65` `static uint8_t get_u8(ti_rd *r)`
-- `get_u32` (function) `src/tls_impersonate.c:70` `static uint32_t get_u32(ti_rd *r)`
-- `get_u64` (function) `src/tls_impersonate.c:80` `static uint64_t get_u64(ti_rd *r)`
-- `get_bytes` (function) `src/tls_impersonate.c:89` `static void get_bytes(ti_rd *r, size_t cap, uint8_t **out, size_t *out_len)` -- | ((uint32_t)r->p[r->off + 3] << 24); r->off += 4; return v; } static uint64_t get_u64(ti_rd *r) { if (r->err ||...
-- `get_str` (function) `src/tls_impersonate.c:103` `static char *get_str(ti_rd *r, size_t cap)` -- static void get_bytes(ti_rd *r, size_t cap, uint8_t **out, size_t *out_len) { out = NULL; *out_len = 0; uint32_t n =...
-- `valid_profile` (function) `src/tls_impersonate.c:116` `static int valid_profile(int p)`
-- `ti_encode_req` (function) `src/tls_impersonate.c:122` `size_t ti_encode_req(const ti_req *r, uint8_t *out, size_t out_cap)`
-- `ti_decode_req` (function) `src/tls_impersonate.c:140` `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out)`
-- `ti_req_free` (function) `src/tls_impersonate.c:166` `void ti_req_free(ti_req *r)`
-- `ti_encode_resp` (function) `src/tls_impersonate.c:177` `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap)`
-- `ti_decode_resp` (function) `src/tls_impersonate.c:196` `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out)`
-- `ti_resp_free` (function) `src/tls_impersonate.c:230` `void ti_resp_free(ti_resp *r)`
-
-## src/ui_layout.c
-Depends on: `include/ui.h`
-- `layout_push` (function) `src/ui_layout.c:13` `static int layout_push(ui_layout *lay, size_t offset, size_t len)`
-- `ui_wrap_text` (function) `src/ui_layout.c:27` `ui_status ui_wrap_text(const char *text, size_t len, size_t max_cols, ui_layout *out)`
-- `ui_layout_free` (function) `src/ui_layout.c:91` `void ui_layout_free(ui_layout *lay)`
-- `ui_clamp_scroll` (function) `src/ui_layout.c:99` `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines)`
-
-## src/url.c
-Depends on: `include/url.h`
-- `ci_prefix` (function) `src/url.c:20` `static int ci_prefix(const char *haystack, const char *prefix)` -- produced; every assembly is bounded and reports overflow rather than truncate.  #define _POSIX_C_SOURCE 200809L...
-- `copy_checked` (function) `src/url.c:32` `static int copy_checked(char *out, size_t outsz, const char *src)` -- /* Case-insensitive: does haystack start with prefix? static int ci_prefix(const char *haystack, const char *prefix)...
-- `cat_checked` (function) `src/url.c:40` `static int cat_checked(char *out, size_t outsz, const char *src)` -- +haystack; ++prefix; } return 1; } /* Bounded copy: out gets src (NUL-terminated).
-- `ncat_checked` (function) `src/url.c:49` `static int ncat_checked(char *out, size_t outsz, const char *src, size_t n)` -- memcpy(out, src, n + 1); return 0; } /* Bounded append: out += src.
-- `url_has_scheme` (function) `src/url.c:59` `int url_has_scheme(const char *s)`
-- `url_is_https` (function) `src/url.c:73` `int url_is_https(const char *s)`
-- `url_validate_https` (function) `src/url.c:80` `url_status url_validate_https(const char *url)`
-- `url_authority_len` (function) `src/url.c:91` `size_t url_authority_len(const char *url)`
-- `out_pop_segment` (function) `src/url.c:102` `static void out_pop_segment(char *out, size_t *olen)` -- RFC 3986 3.2: the authority ends at the first '/', '?' or '#'.
-- `url_remove_dot_segments` (function) `src/url.c:109` `url_status url_remove_dot_segments(const char *path, char *out, size_t outsz)`
-- `dir_len` (function) `src/url.c:159` `static size_t dir_len(const char *base)` -- Length of base up to and including the last path '/', ignoring query/fragment. * If the path carries no slash...
-- `url_resolve_https` (function) `src/url.c:170` `url_status url_resolve_https(const char *base, const char *ref,
-                             char...`
-- `is_space` (function) `src/url.c:218` `static int is_space(int c)`
-- `is_unreserved` (function) `src/url.c:222` `static int is_unreserved(int c)`
-- `append_query_encoded` (function) `src/url.c:229` `static int append_query_encoded(char *out, size_t outsz, const char *src)` -- Percent-encodes src into a query value appended to out (space -> '+', every * non-unreserved byte -> %XX).
-- `assumed` (function) `src/url.c:254` `* assumed (the caller already routed whitespace to search). */
-static int looks_like_host(const c...`
-- `build_search` (function) `src/url.c:303` `static url_status build_search(const char *query, char *out, size_t outsz)`
-- `url_omnibox` (function) `src/url.c:309` `url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t outsz)`
-- `host_equals` (function) `src/url.c:378` `static int host_equals(const url_parts *p, const char *want)` -- Any remaining explicit scheme is never executed nor downgraded: search for it * (so "javascript:...", "file:..."...
-- `query_find_q` (function) `src/url.c:393` `static const char *query_find_q(const char *search, size_t len, size_t *vlen)` -- Returns a pointer to the value of the "q" parameter within a "?a=b&q=v&..." search span, with its length in *vlen...
-- `url_search_rewrite` (function) `src/url.c:411` `url_status url_search_rewrite(const char *url, char *out, size_t outsz)`
-- `url_extract_userinfo` (function) `src/url.c:431` `url_status url_extract_userinfo(const char *url, char *out, size_t outsz,
-                       ...`
-- `url_is_file` (function) `src/url.c:525` `int url_is_file(const char *s)`
-- `url_file_path` (function) `src/url.c:531` `const char *url_file_path(const char *s)`
-- `url_resolve_file` (function) `src/url.c:535` `url_status url_resolve_file(const char *base, const char *ref, char *out, size_t outsz)`
-- `url_split` (function) `src/url.c:584` `url_status url_split(const char *url, url_parts *out)`
-- `copy_bounded` (function) `src/url.c:645` `static url_status copy_bounded(char *out, size_t outsz, const char *a, size_t alen,
-             ...`
-- `url_history_target` (function) `src/url.c:654` `url_status url_history_target(const char *base, const char *ref, char *out, size_t outsz)`
-
-## src/web_storage.c
-Depends on: `include/web_storage.h`
-- `get_u32` (function) `src/web_storage.c:25` `static uint32_t get_u32(const unsigned char *p)`
-- `utf8_ok` (function) `src/web_storage.c:32` `static int utf8_ok(const unsigned char *s, size_t n)` -- Well-formed UTF-8, allowing encoded surrogates (WTF-8): a JS string may hold a lone surrogate and rejecting it would...
-- `key_cmp` (function) `src/web_storage.c:56` `static int key_cmp(const void *a, const void *b)`
-- `check` (function) `src/web_storage.c:65` `static int check(const char *blob, size_t len, size_t *bytes_out)` -- return 1; } typedef struct key_ref { const unsigned char *p; uint32_t n; } key_ref; static int key_cmp(const void...
-- `wst_decode_check` (function) `src/web_storage.c:101` `int wst_decode_check(const char *blob, size_t len)`
-- `wst_new` (function) `src/web_storage.c:105` `wst_db *wst_new(void)`
-- `wst_free` (function) `src/web_storage.c:109` `void wst_free(wst_db *db)`
-- `find` (function) `src/web_storage.c:118` `static wst_origin *find(const wst_db *db, const char *origin)`
-- `wst_encode` (function) `src/web_storage.c:125` `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len)`
-- `wst_replace` (function) `src/web_storage.c:140` `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len)`
-- `wst_origin_bytes` (function) `src/web_storage.c:175` `size_t wst_origin_bytes(const wst_db *db, const char *origin)`
-- `wst_foreach` (function) `src/web_storage.c:181` `int wst_foreach(const char *blob, size_t len,
-                void (*fn)(void *ctx, const char *k...`
-- `put_u32` (function) `src/web_storage.c:201` `static void put_u32(char *b, uint32_t v)`
-- `wst_pack` (function) `src/web_storage.c:206` `int wst_pack(const char *const *keys, const size_t *klens,
-             const char *const *vals, ...`
-
-## src/webcaps.c
-Depends on: `include/webcaps.h`
-- `wc_safe` (function) `src/webcaps.c:10` `wc_caps wc_safe(void)`
-- `wc_derive` (function) `src/webcaps.c:15` `wc_caps wc_derive(wc_input in)`
-- `wc_from_flags` (function) `src/webcaps.c:35` `wc_caps wc_from_flags(bool js, bool css, bool images)`
-- `wc_render_caps` (function) `src/webcaps.c:46` `rdp_caps wc_render_caps(wc_caps c)`
-
-## src/webfont.c
-Depends on: `include/data_url.h`, `include/webfont.h`
-- `candidates` (function) `src/webfont.c:7` `* understanding just far enough to find candidates (family + first url() per * src entry + weight/style descriptors);`
-- `is_ws` (function) `src/webfont.c:19` `static int is_ws(char c)`
-- `lower_ch` (function) `src/webfont.c:23` `static int lower_ch(char c)`
-- `ci_eq_span` (function) `src/webfont.c:28` `static int ci_eq_span(const char *s, size_t n, const char *kw)` -- #include <stdint.h> #include <stdlib.h> #include <string.h> static int is_ws(char c) { return c == ' ' || c == '\t'...
-- `wf_list_free` (function) `src/webfont.c:49` `void wf_list_free(wf_list *l)`
-- `wf_ref_move` (function) `src/webfont.c:64` `void wf_ref_move(wf_ref *dst, wf_ref *src)`
-- `wf_supported_format` (function) `src/webfont.c:74` `int wf_supported_format(const char *fmt)`
-- `emit_slot` (function) `src/webfont.c:83` `static wf_ref *emit_slot(wf_list *out)` -- src->is_data = 0; } int wf_supported_format(const char *fmt) { if (fmt == NULL) return 0; if (fmt[0] == '\0') return...
-- `emit_family_format` (function) `src/webfont.c:98` `static void emit_family_format(wf_ref *r, const char *family, const char *format)`
-- `span_is_data` (function) `src/webfont.c:114` `static int span_is_data(const char *span, size_t slen)` -- if (fl >= WF_FAMILY_MAX) fl = WF_FAMILY_MAX - 1; memcpy(r->family, family, fl); r->family[fl] = '\0'; if (format !=...
-- `emit` (function) `src/webfont.c:126` `static void emit(wf_list *out, const char *family,
-                 const char *url, size_t ulen,...` -- /* True when span[0,slen) is a data: URL (case-insensitive scheme). static int span_is_data(const char *span, size_t...
-- `emit_data` (function) `src/webfont.c:142` `static void emit_data(wf_list *out, const char *family,
-                      const char *span, s...` -- Appends one data: ref, decoding the bytes NOW (a data: URL never fits url[]; * the bytes ride the ref instead).
-- `scan_face_block` (function) `src/webfont.c:179` `static void scan_face_block(const char *s, size_t bstart, size_t bend,
-                          ...` -- Parses one @font-face {...} body (bstart..bend, braces excluded) into the block's family/weight/style, then emits...
-- `lower_ch` (function) `src/webfont.c:306` `&& lower_ch(s[k]) == 's' && k + 3 < bend
-                && lower_ch(s[k + 1]) == 'r' && lower_ch...`
-- `wf_scan` (function) `src/webfont.c:422` `int wf_scan(const char *css, size_t len, wf_list *out)`
-
-## src/webfont_load.c
-Depends on: `include/data_url.h`, `include/text_shape.h`, `include/url.h`, `include/webfont.h`, `include/webfont_load.h`
-- `here` (function) `src/webfont_load.c:22` `* filtered here (a "" hint may still name one);`
-- `ctype_ok` (function) `src/webfont_load.c:24` `static int ctype_ok(const char *ct)` -- Content types worth downloading as fonts.
-- `key_find` (function) `src/webfont_load.c:66` `static int key_find(wf_key *keys, size_t nkeys, unsigned h, int b, int i)`
-- `ref` (function) `src/webfont_load.c:167` `* their ref (the register call copies what it keeps). */ if (!is_data) free(fbytes);`
-- `scan_inline` (function) `src/webfont_load.c:178` `static void scan_inline(const char *html, size_t len, const char *page_url,
-                     ...` -- Finds inline <style>...</style> bodies in html (case-insensitive tags) and processes each sheet's refs against the...
-- `wf_load_document` (function) `src/webfont_load.c:229` `int wf_load_document(wf_fetch_fn fetch, void *fctx, const char *page_url,
-                     co...`
 
 
 Next: [API_p10.md](API_p10.md)

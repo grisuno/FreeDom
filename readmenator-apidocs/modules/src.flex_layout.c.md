@@ -390,9 +390,11 @@ This is what `min-width: auto` -- the INITIAL value, so the case for almost ever
 min_content  the item's min-content size (its longest unbreakable word, or a
                replaced element's intrinsic size), in the same border-box+margin
                units as fx_item.basis. Negative is treated as 0.
-  basis        the item's base size, used as the "specified size suggestion": the
-               content-based minimum is clamped by it, so an item the author sized
-               small is not inflated by one long word. Negative is treated as 0.
+  basis        the item's SPECIFIED size (its declared `width`, in the same units),
+               the "specified size suggestion": the content-based minimum is clamped
+               by it, so an item the author sized small is not inflated by one long
+               word. Negative means no specified size and leaves the minimum at
+               min-content; a flex-basis is NOT a specified size.
   author_min   the author's own `min-width` in px when they set one (min-width is
                then NOT `auto` and wins outright, larger OR smaller), or < 0 when
                unset.
@@ -413,7 +415,7 @@ Pure, total, no allocation. The result is never negative.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`fx_auto_min_size`](#fx_auto_min_size) (include/flex_layout.h:263).
+> **Inherited:** Documentation from [`fx_auto_min_size`](#fx_auto_min_size) (include/flex_layout.h:265).
 
 ---
 
@@ -421,7 +423,7 @@ Pure, total, no allocation. The result is never negative.
 
 ### `fx_multicol_used`
 
-`function` | [src/flex_layout.c:642](../../src/flex_layout.c#L642)
+`function` | [src/flex_layout.c:645](../../src/flex_layout.c#L645)
 
 ```c
 fx_status fx_multicol_used(double avail_w, int column_count, double column_width, double gap, int *out_n, double *out_w)
@@ -446,7 +448,7 @@ fx_status fx_multicol_used(double avail_w, int column_count, double column_width
 
 ### `fx_multicol_balance`
 
-`function` | [src/flex_layout.c:679](../../src/flex_layout.c#L679)
+`function` | [src/flex_layout.c:682](../../src/flex_layout.c#L682)
 
 ```c
 fx_status fx_multicol_balance(const double *heights, size_t n, int ncol, int *out_col, double *out_colh)
@@ -470,7 +472,7 @@ fx_status fx_multicol_balance(const double *heights, size_t n, int ncol, int *ou
 
 ### `fx_justify_name`
 
-`function` `const` | [src/flex_layout.c:710](../../src/flex_layout.c#L710)
+`function` `const` | [src/flex_layout.c:713](../../src/flex_layout.c#L713)
 
 ```c
 const char *fx_justify_name(fx_justify j)
@@ -488,7 +490,7 @@ Never NULL; an unknown enum value yields "start".
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`fx_justify_name`](#fx_justify_name) (include/flex_layout.h:319).
+> **Inherited:** Documentation from [`fx_justify_name`](#fx_justify_name) (include/flex_layout.h:321).
 
 ---
 
@@ -496,7 +498,7 @@ Never NULL; an unknown enum value yields "start".
 
 ### `fx_column_place`
 
-`function` | [src/flex_layout.c:722](../../src/flex_layout.c#L722)
+`function` | [src/flex_layout.c:725](../../src/flex_layout.c#L725)
 
 ```c
 fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap, double inner_h, int justify, int reverse, double *y_out, double *h_out, double *extent)
@@ -527,7 +529,7 @@ fx_status fx_column_place(const double *h, const double *grow, size_t n, double 
 
 ### `fx_column_place_m`
 
-`function` | [src/flex_layout.c:729](../../src/flex_layout.c#L729)
+`function` | [src/flex_layout.c:732](../../src/flex_layout.c#L732)
 
 ```c
 fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto, size_t n, double gap, double inner_h, int justify, int reverse, double *y_out, double *h_out, double *extent)
@@ -559,7 +561,7 @@ fx_status fx_column_place_m(const double *h, const double *grow, const int *maut
 
 ### `fx_cross_offset`
 
-`function` | [src/flex_layout.c:790](../../src/flex_layout.c#L790)
+`function` | [src/flex_layout.c:793](../../src/flex_layout.c#L793)
 
 ```c
 double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)
@@ -581,7 +583,7 @@ Never negative.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`fx_cross_offset`](#fx_cross_offset) (include/flex_layout.h:352).
+> **Inherited:** Documentation from [`fx_cross_offset`](#fx_cross_offset) (include/flex_layout.h:354).
 
 ---
 
@@ -589,7 +591,7 @@ Never negative.
 
 ### `fx_grid_line_side`
 
-`function` | [src/flex_layout.c:857](../../src/flex_layout.c#L857)
+`function` | [src/flex_layout.c:860](../../src/flex_layout.c#L860)
 
 ```c
 int fx_grid_line_side(const char *s, int *out)
@@ -610,7 +612,7 @@ int fx_grid_line_side(const char *s, int *out)
 
 ### `fx_grid_line_parse`
 
-`function` | [src/flex_layout.c:865](../../src/flex_layout.c#L865)
+`function` | [src/flex_layout.c:868](../../src/flex_layout.c#L868)
 
 ```c
 int fx_grid_line_parse(const char *v, int *start, int *end)
@@ -638,7 +640,7 @@ The shorthand `<side> [ / <side> ]` (no slash => end is auto).
 
 ### `fx_grid_line_resolve`
 
-`function` | [src/flex_layout.c:885](../../src/flex_layout.c#L885)
+`function` | [src/flex_layout.c:888](../../src/flex_layout.c#L888)
 
 ```c
 void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)
@@ -666,7 +668,7 @@ Never fails: anything unresolvable falls back to auto placement.
 
 ### `fx_col_free_split`
 
-`function` | [src/flex_layout.c:927](../../src/flex_layout.c#L927)
+`function` | [src/flex_layout.c:930](../../src/flex_layout.c#L930)
 
 ```c
 fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n, double *before, double *grow_px, double *after)

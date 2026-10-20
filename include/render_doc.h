@@ -337,6 +337,13 @@ const char *rd_kind_name(rd_kind k);
  * block yield NULL. The returned string is a static literal (not owned). */
 const char *rd_block_tag(const rd_block *b);
 
+/* Effective heading level of a block, 0 when it is not heading content. RD_HEADING
+ * yields its heading_level clamped to 1..6; an RD_LINK carrying heading_level >= 1
+ * (an <a> wrapping or inside an <h2>) yields that level clamped, because the link
+ * only changes colour and underline -- the UA sheet still gives its text the
+ * heading's size and margins. Anything else, or NULL, yields 0. Pure and total. */
+int rd_block_heading_level(const rd_block *b);
+
 /* Stable, short English label for an image placeholder, derived from its
  * decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never
  * NULL. */

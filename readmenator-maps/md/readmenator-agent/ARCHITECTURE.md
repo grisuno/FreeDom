@@ -53,12 +53,16 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/compositor.h`
 - `gui/browser_ui.c` -> `include/css.h`
 - `gui/browser_ui.c` -> `include/css_color.h`
+- `gui/browser_ui.c` -> `include/css_gradient.h`
+- `gui/browser_ui.c` -> `include/css_mask.h`
+- `gui/browser_ui.c` -> `include/css_values.h`
 - `gui/browser_ui.c` -> `include/data_url.h`
 - `gui/browser_ui.c` -> `include/download.h`
 - `gui/browser_ui.c` -> `include/form.h`
 - `gui/browser_ui.c` -> `include/frame_clock.h`
 - `gui/browser_ui.c` -> `include/freebug.h`
 - `gui/browser_ui.c` -> `include/hls.h`
+- `gui/browser_ui.c` -> `include/host_conf.h`
 - `gui/browser_ui.c` -> `include/hostblock.h`
 - `gui/browser_ui.c` -> `include/hostedit.h`
 - `gui/browser_ui.c` -> `include/image_decode.h`
@@ -92,6 +96,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/zoom.h`
 - `gui/browser_ui_internal.h` -> `include/freedom_config.h`
 - `gui/bui_theme.c` -> `gui/browser_ui_internal.h`
+- `gui/bui_theme.c` -> `include/css.h`
 - `gui/bui_theme.c` -> `include/css_color.h`
 - `gui/freedom_view.c` -> `include/html_parse.h`
 - `gui/freedom_view.c` -> `include/ui.h`
@@ -112,12 +117,14 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/css_decl.h` -> `include/css_select.h`
 - `include/css_gradient.h` -> `include/css_decl.h`
 - `include/css_index.h` -> `include/css_select.h`
+- `include/css_mask.h` -> `include/css_decl.h`
 - `include/css_select.h` -> `include/css.h`
 - `include/css_text.h` -> `include/css_decl.h`
 - `include/disk_store.h` -> `include/local_store.h`
 - `include/dom.h` -> `include/html_parse.h`
 - `include/dom_debug.h` -> `include/render_doc.h`
 - `include/form.h` -> `include/url.h`
+- `include/host_conf.h` -> `include/hostblock.h`
 - `include/js_dom.h` -> `include/dom.h`
 - `include/js_dom.h` -> `include/freebug.h`
 - `include/js_dom.h` -> `include/js_geom.h`
@@ -166,6 +173,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/css.c` -> `include/css_gradient.h`
 - `src/css.c` -> `include/css_index.h`
 - `src/css.c` -> `include/css_length.h`
+- `src/css.c` -> `include/css_mask.h`
 - `src/css.c` -> `include/css_mq.h`
 - `src/css.c` -> `include/css_select.h`
 - `src/css.c` -> `include/css_text.h`
@@ -194,6 +202,8 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/css_index.c` -> `include/css_index.h`
 - `src/css_length.c` -> `include/css.h`
 - `src/css_length.c` -> `include/css_length.h`
+- `src/css_mask.c` -> `include/css_gradient.h`
+- `src/css_mask.c` -> `include/css_mask.h`
 - `src/css_mq.c` -> `include/css_length.h`
 - `src/css_mq.c` -> `include/css_mq.h`
 - `src/css_select.c` -> `include/css_select.h`
@@ -236,6 +246,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/freedom.c` -> `include/dom_debug.h`
 - `src/freedom.c` -> `include/freebug.h`
 - `src/freedom.c` -> `include/hls.h`
+- `src/freedom.c` -> `include/host_conf.h`
 - `src/freedom.c` -> `include/hostblock.h`
 - `src/freedom.c` -> `include/html_parse.h`
 - `src/freedom.c` -> `include/js_policy.h`
@@ -258,6 +269,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/freedom.c` -> `include/webfont.h`
 - `src/freedom.c` -> `include/webfont_load.h`
 - `src/hls.c` -> `include/hls.h`
+- `src/host_conf.c` -> `include/host_conf.h`
 - `src/hostblock.c` -> `include/hostblock.h`
 - `src/hostblock.c` -> `include/util.h`
 - `src/hostedit.c` -> `include/hostedit.h`
@@ -267,12 +279,14 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/image_decode.c` -> `include/image_decode.h`
 - `src/import_map.c` -> `include/import_map.h`
 - `src/interp.c` -> `include/interp.h`
+- `src/js_custom_elements.c` -> `src/js_custom_elements.h`
 - `src/js_dom.c` -> `include/dom.h`
 - `src/js_dom.c` -> `include/freebug.h`
 - `src/js_dom.c` -> `include/html_parse.h`
 - `src/js_dom.c` -> `include/js_dom.h`
 - `src/js_dom.c` -> `include/js_sandbox.h`
 - `src/js_dom.c` -> `include/web_storage.h`
+- `src/js_dom.c` -> `src/js_custom_elements.h`
 - `src/js_dom.c` -> `src/js_dom_ext.h`
 - `src/js_dom.c` -> `src/js_dom_internal.h`
 - `src/js_dom.c` -> `src/js_location_internal.h`
@@ -362,6 +376,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/tab.c` -> `include/anti_fp.h`
 - `src/tab.c` -> `include/box_tree.h`
 - `src/tab.c` -> `include/css.h`
+- `src/tab.c` -> `include/css_gradient.h`
 - `src/tab.c` -> `include/data_url.h`
 - `src/tab.c` -> `include/dom.h`
 - `src/tab.c` -> `include/flex_layout.h`
@@ -428,6 +443,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_css_index.c` -> `include/css_index.h`
 - `tests/test_css_length.c` -> `include/css.h`
 - `tests/test_css_length.c` -> `include/css_length.h`
+- `tests/test_css_mask.c` -> `include/css_mask.h`
 - `tests/test_css_mq.c` -> `include/css_mq.h`
 - `tests/test_css_text.c` -> `include/css.h`
 - `tests/test_css_text.c` -> `include/css_decl.h`
@@ -454,6 +470,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_freebug.c` -> `include/freebug.h`
 - `tests/test_freedom.c` -> `include/image_decode.h`
 - `tests/test_hls.c` -> `include/hls.h`
+- `tests/test_host_conf.c` -> `include/host_conf.h`
 - `tests/test_hostblock.c` -> `include/hostblock.h`
 - `tests/test_hostedit.c` -> `include/hostedit.h`
 - `tests/test_html_parse.c` -> `include/html_parse.h`
@@ -479,22 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_link_nav.c` -> `include/link_nav.h`
 - `tests/test_local_store.c` -> `include/local_store.h`
 - `tests/test_media_decoder.c` -> `include/media_decoder.h`
-- `tests/test_net_realm.c` -> `include/net_realm.h`
-- `tests/test_os_sandbox.c` -> `include/os_sandbox.h`
-- `tests/test_page_view.c` -> `include/box_style.h`
-- `tests/test_page_view.c` -> `include/css.h`
-- `tests/test_page_view.c` -> `include/dom.h`
-- `tests/test_page_view.c` -> `include/flex_layout.h`
-- `tests/test_page_view.c` -> `include/html_parse.h`
-- `tests/test_page_view.c` -> `include/page_view.h`
-- `tests/test_page_view.c` -> `include/webfont.h`
-- `tests/test_pdf_export.c` -> `include/pdf_export.h`
-- `tests/test_perf_trace.c` -> `include/perf_trace.h`
-- `tests/test_prefetch.c` -> `include/prefetch.h`
-- `tests/test_prefs.c` -> `include/prefs.h`
-- `tests/test_prefs.c` -> `include/zoom.h`
-- `tests/test_profile.c` -> `include/prefs.h`
-- `tests/test_profile.c` -> `include/profile.h`
-- `tests/test_render_doc.c` -> `include/box_style.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

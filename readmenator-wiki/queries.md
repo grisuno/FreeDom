@@ -4,23 +4,23 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 ## Suggested
 
-### Q: What does browser_ui.c depend on, and what depends on it? (46 connections)
+### Q: What does browser_ui.c depend on, and what depends on it? (50 connections)
 
 - Status: unanswered
 
-### Q: What does css.h depend on, and what depends on it? (37 connections)
+### Q: What does css.h depend on, and what depends on it? (38 connections)
 
 - Status: unanswered
 
-### Q: What does tab.c depend on, and what depends on it? (23 connections)
+### Q: What does tab.c depend on, and what depends on it? (24 connections)
 
 - Status: unanswered
 
-### Q: How are the 59 files in 'src' related to each other?
+### Q: How are the 61 files in 'src' related to each other?
 
 - Status: unanswered
 
-### Q: Why are fuzz_download.c and test_renderer.c connected through 8 hops across 4 communities?
+### Q: Why are fuzz_download.c and test_renderer.c connected through 8 hops across 3 communities?
 
 - Status: unanswered
 

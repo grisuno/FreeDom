@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 16 file(s) rooted at `include` with dominant language c (cohesion 0.83). Central symbols: `FREEDOM_DISK_STORE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PREFS_H`, `FREEDOM_PROFILE_H`, `FREEDOM_ZOOM_H`, `LLVMFuzzerTestOneInput`, `LS_ARGON2_M_KIB`, `LS_ARGON2_P`. Core file: `src/local_store.c` (271 symbols).
+This community groups 16 file(s) rooted at `include` with dominant language c (cohesion 0.83). Central symbols: `FREEDOM_DISK_STORE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PREFS_H`, `FREEDOM_PROFILE_H`, `FREEDOM_ZOOM_H`, `LLVMFuzzerTestOneInput`, `LS_ARGON2_M_KIB`, `LS_ARGON2_P`. Core file: `src/local_store.c` (275 symbols).
 
 ## Files
 
@@ -17,7 +17,7 @@ This community groups 16 file(s) rooted at `include` with dominant language c (c
 | `include/profile.h` | h | utility | 9 | no |
 | `include/zoom.h` | h | utility | 10 | no |
 | `src/disk_store.c` | c | data_access | 6 | no |
-| `src/local_store.c` | c | data_access | 271 | no |
+| `src/local_store.c` | c | data_access | 275 | no |
 | `src/prefs.c` | c | utility | 26 | no |
 | `src/profile.c` | c | utility | 9 | no |
 | `src/zoom.c` | c | utility | 7 | no |
@@ -67,7 +67,7 @@ This community groups 16 file(s) rooted at `include` with dominant language c (c
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefs.h.
+- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefs.h.
 - [EXTRACTED] depends_on community 5 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
 
 ## Risks

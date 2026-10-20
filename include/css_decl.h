@@ -205,6 +205,13 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
          * css_style.fontface (a wf_name_hash, 0 = no webfont). -1 = none/normal.
          * APPEND only: cascade slots are compared by index, never renumbered. */
         P_FONTFACE,
+        /* radial-gradient geometry (2026-10-20; APPENDED, never renumber): shape*16+size, centre, explicit radii
+         * (cg_radial encoding: >=0 per-mille of the box, <0 is -(px)-1). */
+        P_BG_RAD_SIZE, P_BG_RAD_CX, P_BG_RAD_CY, P_BG_RAD_RX, P_BG_RAD_RY,
+        /* mask (2026-10-20, spec/css_mask.md; APPENDED, never renumber): layer count, composite
+         * op, clip pair, and the three compact words of each of the two layers. */
+        P_MASK_N, P_MASK_COMP, P_MASK_CLIP,
+        P_MASK_L0A, P_MASK_L0B, P_MASK_L0C, P_MASK_L1A, P_MASK_L1B, P_MASK_L1C,
         P_NSLOTS };
 
 typedef struct css_decl {

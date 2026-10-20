@@ -166,7 +166,11 @@ venía atribuyendo a "el contenedor reparte 0 px".
   idioma casi universal de truncado con `overflow:hidden`.
 - Si no: `min(min_content, basis)` — la *content size suggestion* acotada por la *specified size
   suggestion*, para que un ítem que el autor hizo chico no se infle por una palabra larga.
-- Entradas negativas se tratan como 0; el resultado **nunca** es negativo. Puro, total, sin
+  `basis` es el `width` **declarado**, no el `flex-basis`: `basis < 0` significa "sin tamaño
+  especificado" y el mínimo queda en `min_content` (un `flex:1 1 0%` sin `width` no se reduce a una
+  astilla junto a un hermano ancho). Dado un ítem `flex:1 1 0%` junto a un hermano de 976 px,
+  cuando se reparte, entonces el ítem conserva su min-content.
+- `min_content` negativo se trata como 0; el resultado **nunca** es negativo. Puro, total, sin
   asignación.
 
 `min_content` y `basis` vienen en las mismas unidades (border-box + márgenes) que `fx_item.basis`.

@@ -668,6 +668,12 @@ static void test_auto_min_size_is_min_content(void **state) {
     assert_float_equal(fx_auto_min_size(400.0, 300.0, -1.0, 1), 0.0, 1e-9);
     /* An explicit min-width still applies inside a scroll container. */
     assert_float_equal(fx_auto_min_size(400.0, 300.0, 25.0, 1), 25.0, 1e-9);
+    /* No specified size (a negative `basis`): `flex:1 1 0%` has a flex-basis of 0 but
+     * NO width, so nothing clamps the content-based minimum -- the item keeps its
+     * min-content instead of being ground to a 1px sliver beside a wide sibling. */
+    assert_float_equal(fx_auto_min_size(120.0, -1.0, -1.0, 0), 120.0, 1e-9);
+    /* A specified size of 0 does clamp it (an author `width:0`). */
+    assert_float_equal(fx_auto_min_size(120.0, 0.0, -1.0, 0), 0.0, 1e-9);
     /* Degenerate/negative inputs never yield a negative minimum. */
     assert_float_equal(fx_auto_min_size(-5.0, -5.0, -1.0, 0), 0.0, 1e-9);
 }

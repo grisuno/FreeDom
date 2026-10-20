@@ -480,7 +480,7 @@ static inline char csel_lower_ch(char c)
 
 **Returns:** `char`
 
-*Called by:* [`csel_ci_eq`](#csel_ci_eq), [`csel_span_eq`](#csel_span_eq), [`gradient`](src.css_gradient.c.md#gradient), [`csel_read_ident`](src.css_select.c.md#csel_read_ident), [`cv_bg_alpha_of`](src.css_values.c.md#cv_bg_alpha_of)
+*Called by:* [`csel_ci_eq`](#csel_ci_eq), [`csel_span_eq`](#csel_span_eq), [`CG_RAD_PX_MAX`](src.css_gradient.c.md#cg_rad_px_max), [`gradient`](src.css_gradient.c.md#gradient), [`csel_read_ident`](src.css_select.c.md#csel_read_ident), [`cv_bg_alpha_of`](src.css_values.c.md#cv_bg_alpha_of)
 
 ---
 

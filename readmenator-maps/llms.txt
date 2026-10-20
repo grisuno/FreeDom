@@ -1,6 +1,6 @@
 # freedom-0.0.3
 
-> Static analysis knowledge base for freedom-0.0.3: 10 communities, 276 files, 1566 imports, 4 languages, 6650 symbols.
+> Static analysis knowledge base for freedom-0.0.3: 10 communities, 284 files, 1606 imports, 4 languages, 6801 symbols.
 
 Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
 
@@ -9,34 +9,37 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/INDEX.md](md/readmenator-agent/INDEX.md)
 - [readmenator-agent/GOTCHAS.md](md/readmenator-agent/GOTCHAS.md): These files have the most connections. Changes here have high blast radius.
 - [readmenator-agent/API.md](md/readmenator-agent/API.md): readfuzzstats (function) app.py:30 def readfuzzstats() -- Reads the current status of the active AFL++ fuzzing session.
-- [readmenator-agent/API_p10.md](md/readmenator-agent/API_p10.md): Depends on: include/wshub.h
+- [readmenator-agent/API_p10.md](md/readmenator-agent/API_p10.md): Depends on: include/antifp.h, include/securefetch.h, include/url.h
+- [readmenator-agent/API_p11.md](md/readmenator-agent/API_p11.md): vecpush (function) tools/genpsl.c:27 static void vecpush(vec v, const char s)
 - [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/blockflow.h, include/boxblur.h, include/boxstyle.h, include/boxtree.h, include/browser.h, include/compositor.h...
-- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): toplevelconfigure (function) gui/browserui.c:15513 static void toplevelconfigure(void data, struct xdgtoplevel t,
-- [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Imported by: fuzz/fuzzfreebug.c, gui/browserui.c, include/jsdom.h, include/tab.h, src/freebug.c, src/freedom.c, src/jsdom.c, src/jsembed.c, src/jsevents.c...
-- [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Imported by: gui/browserui.c, src/freedom.c, src/webfontload.c, tests/testwebfontload.c
-- [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/css.h, include/cssbox.h, include/csscolor.h, include/cssdecl.h, include/csslength.h, include/cssselect.h, include/cssvalues.h
-- [readmenator-agent/API_p7.md](md/readmenator-agent/API_p7.md): Depends on: include/freebug.h
-- [readmenator-agent/API_p8.md](md/readmenator-agent/API_p8.md): Depends on: include/jstrusted.h, include/webstorage.h
-- [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/boxstyle.h, include/css.h, include/dataurl.h, include/renderdoc.h, include/url.h, include/util.h
+- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): menuitemtoggle (function) gui/browserui.c:15012 static void menuitemtoggle(browserwindow w, sizet i) -- Toggles options-menu item i and applies its effect.
+- [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Imported by: fuzz/fuzzcss.c, include/boxtree.h, src/css.c, src/domdebug.c, src/flexlayout.c, src/pageview.c, src/tab.c, tests/testcss.c, tests/testdomdebug.c...
+- [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Imported by: gui/browserui.c, gui/freedomview.c, gui/uirender.c, src/freedom.c, src/uilayout.c, tests/testui.c
+- [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/css.h, include/cssatrule.h, include/cssbox.h, include/csscolor.h, include/cssdecl.h, include/cssgradient.h, include/cssindex.h...
+- [readmenator-agent/API_p7.md](md/readmenator-agent/API_p7.md): Depends on: include/cssselect.h
+- [readmenator-agent/API_p8.md](md/readmenator-agent/API_p8.md): Depends on: include/importmap.h
+- [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/boxstyle.h, include/boxtree.h, include/css.h, include/csschain.h, include/csscolor.h, include/cssdecl.h, include/csslength.h...
 - [readmenator-agent/ARCHITECTURE.md](md/readmenator-agent/ARCHITECTURE.md): fuzz/fuzzcss.c -> include/css.h
-- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testrenderdoc.c -> include/css.h
+- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testnetrealm.c -> include/netrealm.h
 - [readmenator-agent/CONCEPTS.md](md/readmenator-agent/CONCEPTS.md): Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 - [readmenator-agent/KB_fuzz.md](md/readmenator-agent/KB_fuzz.md): Doc: fuzzrootmatch: Root matcher for the attribute-scoped custom-property path: a fixed <html...
 - [readmenator-agent/KB_gui.md](md/readmenator-agent/KB_gui.md): Doc: uiinputstate: Live editable state for one form text control, aliasing a block of the current...
-- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): freebugpointerbutton (function, line 16137) static void freebugpointerbutton(browserwindow w, uint32t serial,
+- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): freebugredraw (function, line 16115) static void freebugredraw(browserwindow w)
 - [readmenator-agent/KB_include.md](md/readmenator-agent/KB_include.md): Doc: fpacceptlanguageheader: #define FPSECFETCHDESTNAV "document" #define...
-- [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: cmqmatches: 1 iff the media query list s[0,len) matches env; malformed/unknown parts fail closed.
-- [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: jdiframetrack: Tracks iframes already processed by jdprocessiframes, to avoid re-fetching...
-- [readmenator-agent/KB_include_p4.md](md/readmenator-agent/KB_include_p4.md): Doc: rdblock: One paint-ready block in document order. text is owned, NUL-terminated and valid...
+- [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: clctx: The state a <length> is measured against.
+- [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: imresolve: Resolves specifier as imported from base (the importing module's URL).
+- [readmenator-agent/KB_include_p4.md](md/readmenator-agent/KB_include_p4.md): Doc: profileclose: Loads and decrypts prefs.bin over an out ALREADY initialised (prefsinit).
+- [readmenator-agent/KB_include_p5.md](md/readmenator-agent/KB_include_p5.md): Doc: zmclamp: stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser.
 - [readmenator-agent/KB_root.md](md/readmenator-agent/KB_root.md): Doc: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL...
 - [readmenator-agent/KB_src.md](md/readmenator-agent/KB_src.md): fpcoarsentimems (function, line 17) uint64t fpcoarsentimems(uint64t rawms)
 - [readmenator-agent/KB_src_p2.md](md/readmenator-agent/KB_src_p2.md): Doc: lenrebasectx: int r = snprintf(out + o, space, "%.4f", px); if (r < 0 || (sizet)r >= space)...
-- [readmenator-agent/KB_src_p3.md](md/readmenator-agent/KB_src_p3.md): Doc: cssindex -- see include/cssindex.h and spec/cssindex.md.
-- [readmenator-agent/KB_src_p4.md](md/readmenator-agent/KB_src_p4.md): Doc: isoverlayhttp: fprintf(fp, " --dump-video-url: headless, print the first detected video...
-- [readmenator-agent/KB_src_p5.md](md/readmenator-agent/KB_src_p5.md): Doc: unite: Bounding box of a and b into a; returns 1 if a changed.
-- [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): Doc: osprotallowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks...
-- [readmenator-agent/KB_src_p7.md](md/readmenator-agent/KB_src_p7.md): Doc: rdpush: Appends one block, taking owned copies of text (required) and href (optional). ...
-- [readmenator-agent/KB_src_p8.md](md/readmenator-agent/KB_src_p8.md): Doc: ciprefix: produced; every assembly is bounded and reports overflow rather than truncate....
+- [readmenator-agent/KB_src_p3.md](md/readmenator-agent/KB_src_p3.md): Doc: findgradientcall: Locates a gradient function call fn (e.g. "linear-gradient(") in v...
+- [readmenator-agent/KB_src_p4.md](md/readmenator-agent/KB_src_p4.md): Doc: putchar: No I/O, no global state.
+- [readmenator-agent/KB_src_p5.md](md/readmenator-agent/KB_src_p5.md): Doc: mperfnow: performance.now: coarsened elapsed since the origin bound at install time, so it...
+- [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): cipherfor (function, line 739) static const EVPCIPHER cipherfor(lsaead aead)
+- [readmenator-agent/KB_src_p7.md](md/readmenator-agent/KB_src_p7.md): Doc: pvptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
+- [readmenator-agent/KB_src_p8.md](md/readmenator-agent/KB_src_p8.md): childrender (function, line 25) static void childrender(int wfd, const char html, sizet len)
+- [readmenator-agent/KB_src_p9.md](md/readmenator-agent/KB_src_p9.md): Doc: utf8ok: Well-formed UTF-8, allowing encoded surrogates (WTF-8): a JS string may hold a lone...
 - [readmenator-agent/KB_tests.md](md/readmenator-agent/KB_tests.md): main (function, line 26) int main(void)
 - [readmenator-agent/KB_tests_p2.md](md/readmenator-agent/KB_tests_p2.md): Doc: testinlinefontsizeabsoluteflag: 2026-07-31: a font-size carries whether its percent is OF...
 - [readmenator-agent/KB_tests_p3.md](md/readmenator-agent/KB_tests_p3.md): testlinearbasic (function, line 9) static void testlinearbasic(void state)
@@ -45,7 +48,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p6.md](md/readmenator-agent/KB_tests_p6.md): Doc: parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include...
 - [readmenator-agent/KB_tests_p7.md](md/readmenator-agent/KB_tests_p7.md): Doc: testenforceallowlistedinsecure: The allowlist override: the user's sovereign per-host escape...
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: fbench -- turn the PNG pairs make parity leaves behind into something you can act on.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 276 files at commit e4e2185ca7bb. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 284 files at commit aa6bae7aa56d. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)
@@ -60,9 +63,6 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/SYMBOLS_p6.md](md/readmenator-agent/SYMBOLS_p6.md)
 - [readmenator-agent/SYMBOLS_p7.md](md/readmenator-agent/SYMBOLS_p7.md)
 - [readmenator-agent/SYMBOLS_p8.md](md/readmenator-agent/SYMBOLS_p8.md)
-- [readmenator-agent/SYMBOLS_p9.md](md/readmenator-agent/SYMBOLS_p9.md)
-- [readmenator-agent/recipes/add-function.md](md/readmenator-agent/recipes/add-function.md): Find the target file by purpose: grep -in '<topic>' readmenator-agent/INDEX.md
-- [readmenator-agent/recipes/change-impact.md](md/readmenator-agent/recipes/change-impact.md): Riskiest file: include/css.h (51 dependents)
 
 ## Project Docs
 

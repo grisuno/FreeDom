@@ -175,20 +175,34 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_ext_is_equal_node` (function, line 2146) `static void test_ext_is_equal_node(void **state)`
   - `EXPECT` (function, line 2148) `EXPECT(f, "function mk(h)`
   - `test_trusted_send_beacon` (function, line 2187) `static void test_trusted_send_beacon(void **state)`
-  - `pump_ticks` (function, line 2204) `static void pump_ticks(fixture *f, int n)`
-  - `test_trusted_worker` (function, line 2211) `static void test_trusted_worker(void **state)`
-  - `test_video_shim_no_video` (function, line 2244) `static void test_video_shim_no_video(void **state)`
-  - `test_video_shim_uses_index_1` (function, line 2252) `static void test_video_shim_uses_index_1(void **state)`
-  - `test_video_shim_video_data_wins` (function, line 2276) `static void test_video_shim_video_data_wins(void **state)`
-  - `test_video_shim_relative_url_resolved` (function, line 2300) `static void test_video_shim_relative_url_resolved(void **state)`
-  - `test_video_shim_empty_html` (function, line 2318) `static void test_video_shim_empty_html(void **state)`
-  - `test_video_shim_null_ctx` (function, line 2330) `static void test_video_shim_null_ctx(void **state)`
-  - `test_video_from_scripts_video_data_is_variable` (function, line 2362) `static void test_video_from_scripts_video_data_is_variable(void **state)`
-  - `test_video_from_scripts_relative_resolved` (function, line 2377) `static void test_video_from_scripts_relative_resolved(void **state)`
-  - `test_video_from_scripts_video_data_string` (function, line 2395) `static void test_video_from_scripts_video_data_string(void **state)`
-  - `test_video_from_scripts_no_video` (function, line 2412) `static void test_video_from_scripts_no_video(void **state)`
-  - `test_video_from_scripts_null_args` (function, line 2423) `static void test_video_from_scripts_null_args(void **state)`
-  - `main` (function, line 2434) `int main(void)`
+  - `test_trusted_send_beacon_can_be_patched` (function, line 2208) `static void test_trusted_send_beacon_can_be_patched(void **state)`
+  - `EXPECT` (function, line 2213) `EXPECT(f, "(function()`
+  - `test_ce_create_runs_constructor` (function, line 2223) `static void test_ce_create_runs_constructor(void **state)`
+  - `EXPECT` (function, line 2225) `EXPECT(f, "(function()`
+  - `test_ce_define_upgrades_existing` (function, line 2233) `static void test_ce_define_upgrades_existing(void **state)`
+  - `EXPECT` (function, line 2235) `EXPECT(f, "(function()`
+  - `test_ce_connected_callbacks` (function, line 2244) `static void test_ce_connected_callbacks(void **state)`
+  - `EXPECT` (function, line 2246) `EXPECT(f, "(function()`
+  - `test_ce_attribute_changed` (function, line 2253) `static void test_ce_attribute_changed(void **state)`
+  - `EXPECT` (function, line 2255) `EXPECT(f, "(function()`
+  - `test_ce_sync_on_mutation` (function, line 2266) `static void test_ce_sync_on_mutation(void **state)`
+  - `EXPECT` (function, line 2268) `EXPECT(f, "(function()`
+  - `test_ce_define_validation` (function, line 2277) `static void test_ce_define_validation(void **state)`
+  - `EXPECT` (function, line 2279) `EXPECT(f, "(function()`
+  - `pump_ticks` (function, line 2289) `static void pump_ticks(fixture *f, int n)`
+  - `test_trusted_worker` (function, line 2296) `static void test_trusted_worker(void **state)`
+  - `test_video_shim_no_video` (function, line 2329) `static void test_video_shim_no_video(void **state)`
+  - `test_video_shim_uses_index_1` (function, line 2337) `static void test_video_shim_uses_index_1(void **state)`
+  - `test_video_shim_video_data_wins` (function, line 2361) `static void test_video_shim_video_data_wins(void **state)`
+  - `test_video_shim_relative_url_resolved` (function, line 2385) `static void test_video_shim_relative_url_resolved(void **state)`
+  - `test_video_shim_empty_html` (function, line 2403) `static void test_video_shim_empty_html(void **state)`
+  - `test_video_shim_null_ctx` (function, line 2415) `static void test_video_shim_null_ctx(void **state)`
+  - `test_video_from_scripts_video_data_is_variable` (function, line 2447) `static void test_video_from_scripts_video_data_is_variable(void **state)`
+  - `test_video_from_scripts_relative_resolved` (function, line 2462) `static void test_video_from_scripts_relative_resolved(void **state)`
+  - `test_video_from_scripts_video_data_string` (function, line 2480) `static void test_video_from_scripts_video_data_string(void **state)`
+  - `test_video_from_scripts_no_video` (function, line 2497) `static void test_video_from_scripts_no_video(void **state)`
+  - `test_video_from_scripts_null_args` (function, line 2508) `static void test_video_from_scripts_null_args(void **state)`
+  - `main` (function, line 2519) `int main(void)`
   - `identity` (function, line 362) `* identity (the same one innerWidth and the CSS viewport units use);`
   - `EXPECT` (macro, line 77) `#define EXPECT(f, src, expected)`
 - Depends on: `include/dom.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_geom.h`, `include/js_sandbox.h`, `include/js_trusted.h`, `include/url.h`, `include/web_storage.h`
@@ -296,13 +310,13 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `mh_fetch` (function, line 361) `static char *mh_fetch(void *host, const char *url, size_t *len)`
   - `test_module_imports_resolve_and_run` (function, line 383) `static void test_module_imports_resolve_and_run(void **state)`
   - `test_module_errors_are_reported` (function, line 404) `static void test_module_errors_are_reported(void **state)`
-  - `test_module_without_host_cannot_import` (function, line 433) `static void test_module_without_host_cannot_import(void **state)`
-  - `self_fetch` (function, line 455) `static char *self_fetch(void *host, const char *url, size_t *len)`
-  - `test_module_self_await_teardown` (function, line 465) `static void test_module_self_await_teardown(void **state)`
-  - `realm_expect` (function, line 494) `static void realm_expect(js_context *ctx, const char *src, const char *want)`
-  - `test_realms_isolate_and_clone` (function, line 502) `static void test_realms_isolate_and_clone(void **state)`
-  - `test_realm_shares_time_budget` (function, line 533) `static void test_realm_shares_time_budget(void **state)`
-  - `main` (function, line 547) `int main(void)`
+  - `test_module_without_host_cannot_import` (function, line 456) `static void test_module_without_host_cannot_import(void **state)`
+  - `self_fetch` (function, line 478) `static char *self_fetch(void *host, const char *url, size_t *len)`
+  - `test_module_self_await_teardown` (function, line 488) `static void test_module_self_await_teardown(void **state)`
+  - `realm_expect` (function, line 517) `static void realm_expect(js_context *ctx, const char *src, const char *want)`
+  - `test_realms_isolate_and_clone` (function, line 525) `static void test_realms_isolate_and_clone(void **state)`
+  - `test_realm_shares_time_budget` (function, line 556) `static void test_realm_shares_time_budget(void **state)`
+  - `main` (function, line 570) `int main(void)`
 - Depends on: `include/js_sandbox.h`
 
 ## tests/test_link_nav.c

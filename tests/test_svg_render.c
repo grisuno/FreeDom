@@ -202,6 +202,22 @@ static void test_path_arc_reaches_endpoint(void **state) {
     free(im);
 }
 
+/* SVG 1.1 path grammar: an arc flag is ONE character, with no separator needed after
+ * it, so minified icon sets write `a5 5 0 1010 0` for flags 1,0 then dx=10 dy=0.
+ * Reading a flag as a <number> swallowed "1010" and the whole icon vanished. */
+static void test_path_arc_compact_flags(void **state) {
+    (void)state;
+    sv_image *im = img_new();
+    assert_int_equal(parse(im, "<svg><path d=\"M0 0a5 5 0 1010 0z\"/></svg>"), SV_OK);
+    const sv_shape *sh = &im->shapes[0];
+    assert_true(sh->count >= 3);
+    const sv_seg *last = &im->segs[sh->first + sh->count - 2];
+    assert_int_equal(last->verb, SV_CUBIC);
+    assert_true(fabs(last->x[2] - 10.0) < 0.5);
+    assert_true(fabs(last->y[2] - 0.0) < 0.5);
+    free(im);
+}
+
 /* THE security lock: no element that could name a resource is ever turned into a
  * shape, and its content is dropped with it. If this ever regresses, inline SVG
  * would become a fetch surface. */
@@ -336,6 +352,7 @@ int main(void) {
         cmocka_unit_test(test_polygon_points),
         cmocka_unit_test(test_path_commands),
         cmocka_unit_test(test_path_arc_reaches_endpoint),
+        cmocka_unit_test(test_path_arc_compact_flags),
         cmocka_unit_test(test_url_bearing_elements_are_dropped),
         cmocka_unit_test(test_bounds_are_enforced),
         cmocka_unit_test(test_malformed_values_degrade),

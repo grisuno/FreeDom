@@ -58,7 +58,7 @@ flowchart LR
 
 ### `jd_install_xhr`
 
-`function` | [src/js_fetch.c:197](../../src/js_fetch.c#L197)
+`function` | [src/js_fetch.c:203](../../src/js_fetch.c#L203)
 
 ```c
 jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)

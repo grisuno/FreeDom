@@ -786,6 +786,17 @@ const char *rd_kind_name(rd_kind k) {
     return "block";
 }
 
+int rd_block_heading_level(const rd_block *b) {
+    if (b == NULL) return 0;
+    int lvl = b->heading_level;
+    if (b->kind == RD_HEADING) {
+        if (lvl < 1) lvl = 1;
+    } else if (b->kind != RD_LINK || lvl < 1) {
+        return 0;
+    }
+    return lvl > 6 ? 6 : lvl;
+}
+
 const char *rd_block_tag(const rd_block *b) {
     if (b == NULL) return NULL;
     switch (b->kind) {

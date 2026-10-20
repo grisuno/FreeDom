@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -3908,6 +3909,28 @@ static void test_box_shadow_and_outline(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).outline_width, CSS_LEN_UNSET);
 }
 
+/* The UA sheet's heading sizes (HTML Rendering 15.3.6) live in ONE table, and a heading with
+ * no author font-size computes to that multiple of its parent. */
+static void test_ua_heading_font_size(void **state) {
+    (void)state;
+    assert_true(fabs(css_ua_heading_em(1) - 2.0) < 1e-9);
+    assert_true(fabs(css_ua_heading_em(2) - 1.5) < 1e-9);
+    assert_true(fabs(css_ua_heading_em(3) - 1.17) < 1e-9);
+    assert_true(fabs(css_ua_heading_em(4) - 1.0) < 1e-9);
+    assert_true(fabs(css_ua_heading_em(5) - 0.83) < 1e-9);
+    assert_true(fabs(css_ua_heading_em(6) - 0.67) < 1e-9);
+    assert_true(fabs(css_ua_heading_em(0) - 1.0) < 1e-9);
+    assert_true(fabs(css_ua_heading_em(7) - 1.0) < 1e-9);
+    css_style none = { 0 };
+    assert_true(fabs(css_computed_font_size_for_tag(&none, 16.0, "h2") - 24.0) < 1e-9);
+    assert_true(fabs(css_computed_font_size_for_tag(&none, 16.0, "p") - 16.0) < 1e-9);
+    assert_true(fabs(css_computed_font_size_for_tag(&none, 16.0, NULL) - 16.0) < 1e-9);
+    assert_true(fabs(css_computed_font_size_for_tag(&none, 16.0, "h7") - 16.0) < 1e-9);
+    css_style own = { 0 };
+    own.font_scale = 125;   /* the author declared a size: it replaces the UA's */
+    assert_true(fabs(css_computed_font_size_for_tag(&own, 16.0, "h2") - 20.0) < 1e-9);
+}
+
 static void test_flex_item(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("flex-grow:2", 0).flex_grow, 200);     /* x100 */
@@ -4428,6 +4451,8 @@ static void test_inline_mix_blend_mode(void **state) {
     assert_int_equal(css_parse_inline("mix-blend-mode:normal", 0).mix_blend_mode, CSS_MB_NORMAL);
     assert_int_equal(css_parse_inline("mix-blend-mode:multiply", 0).mix_blend_mode, CSS_MB_MULTIPLY);
     assert_int_equal(css_parse_inline("mix-blend-mode:screen", 0).mix_blend_mode, CSS_MB_SCREEN);
+    /* Compositing 1 adds `plus-lighter`: the additive blend every glow uses. */
+    assert_int_equal(css_parse_inline("mix-blend-mode:plus-lighter", 0).mix_blend_mode, CSS_MB_PLUS_LIGHTER);
     assert_int_equal(css_parse_inline("mix-blend-mode:overlay", 0).mix_blend_mode, CSS_MB_OVERLAY);
     assert_int_equal(css_parse_inline("mix-blend-mode:darken", 0).mix_blend_mode, CSS_MB_DARKEN);
     assert_int_equal(css_parse_inline("mix-blend-mode:lighten", 0).mix_blend_mode, CSS_MB_LIGHTEN);
@@ -5652,6 +5677,7 @@ int main(void) {
         cmocka_unit_test(test_border_shorthand),
         cmocka_unit_test(test_border_longhands),
         cmocka_unit_test(test_box_shadow_and_outline),
+        cmocka_unit_test(test_ua_heading_font_size),
         cmocka_unit_test(test_flex_item),
         cmocka_unit_test(test_flex_align),
         cmocka_unit_test(test_box_orient_maps_to_flex_direction),

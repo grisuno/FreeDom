@@ -13,6 +13,11 @@ int cv_parse_color(const char *v);
 int cv_interp_color(const char *v);
 int cv_color_ok(int c);
 int cv_bg_alpha_of(const char *v);
+
+/* The multiplier a filter() brightness/contrast/saturate percentage means (150 -> 1.5). The
+ * style stores 0 for "not declared" and 100 is the identity: both are exactly 1.0 -- the
+ * old `!= 100 ? pct/100 : 1` multiplied by ZERO for every undeclared one. Pure. */
+double cv_filter_scale(int pct);
 /* cv_parse_color with the color's alpha as TRANSPARENCY in bits 24..30 (0 opaque,
  * 127 clear): an opaque color is exactly cv_parse_color's 0xRRGGBB. Sentinels
  * (-1 invalid, CC_COLOR_CURRENT, CC_COLOR_TRANSPARENT) pass through unchanged. */

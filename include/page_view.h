@@ -649,6 +649,19 @@ typedef struct pv_box_def {
     char bg_image_url2[PV_BG_URL_MAX];
     int bg_grad_pos[4];  /* R5d */
     int bg_grad_radial;
+    /* radial geometry (css.h bg_rad_*): shape*16+size, centre, explicit radii */
+    int bg_rad_size, bg_rad_cx, bg_rad_cy, bg_rad_rx, bg_rad_ry;
+    /* 1 = this is the <body> box and its background is the CANVAS background (CSS Backgrounds
+     * 3 2.11.2: <html> declared none, so the body's propagates to the whole canvas and paints
+     * behind everything, negative z-index included). 0 = an ordinary box. */
+    int canvas_bg;
+    /* mask (css.h mask_*): layer count, composite op, clip pair, 2 layers x 3 compact words */
+    int mask_n, mask_comp, mask_clip;
+    int mask_w[6];
+    /* 1 + the id of the box that DECLARED the mask when this one only inherits it through the
+     * box tree (a mask covers its whole subtree); 0 = declared here (or none). The painter
+     * measures the mask against that box's rect, not this one's. */
+    int mask_ref1;
     int bg_size;
     int bg_repeat;
     /* animation-duration (Phase R1): parsed time in ms, 0 = no animation.

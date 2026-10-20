@@ -91,7 +91,7 @@ Copied by value at each level, so a group can never leak its state to a later si
 
 ### `point`
 
-`function` | [src/svg_render.c:556](../../src/svg_render.c#L556)
+`function` | [src/svg_render.c:567](../../src/svg_render.c#L567)
 
 ```c
 * current point (SVG 8.3.6). */ int had = (prev == 'C' || prev == 'c' || prev == 'S' || prev == 's');
@@ -111,7 +111,7 @@ Copied by value at each level, so a group can never leak its state to a later si
 
 ### `sv_fit`
 
-`function` | [src/svg_render.c:743](../../src/svg_render.c#L743)
+`function` | [src/svg_render.c:754](../../src/svg_render.c#L754)
 
 ```c
 void sv_fit(const sv_image *img, double dw, double dh, double *scale, double *off_x, double *off_y)
@@ -140,7 +140,7 @@ Writes the scale and the translation the painter must apply. Never divides by ze
 
 ### `sv_parse`
 
-`function` | [src/svg_render.c:763](../../src/svg_render.c#L763)
+`function` | [src/svg_render.c:774](../../src/svg_render.c#L774)
 
 ```c
 sv_status sv_parse(const char *markup, size_t len, sv_image *out)
@@ -166,7 +166,7 @@ sv_status sv_parse(const char *markup, size_t len, sv_image *out)
 
 ### `sv_parse_ex`
 
-`function` | [src/svg_render.c:767](../../src/svg_render.c#L767)
+`function` | [src/svg_render.c:778](../../src/svg_render.c#L778)
 
 ```c
 sv_status sv_parse_ex(const char *markup, size_t len, sv_image *out, int root_fill)

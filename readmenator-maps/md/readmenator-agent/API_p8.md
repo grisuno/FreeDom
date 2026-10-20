@@ -1,5 +1,334 @@
-# API (page 8 of 10)
+# API (page 8 of 11)
 Previous: [API_p7.md](API_p7.md)
+
+## src/import_map.c
+Depends on: `include/import_map.h`
+- `ws` (function) `src/import_map.c:39` `static void ws(jr *r)`
+- `eat` (function) `src/import_map.c:44` `static int eat(jr *r, char c)`
+- `hex4` (function) `src/import_map.c:50` `static int hex4(const char *s, uint32_t *out)`
+- `put_utf8` (function) `src/import_map.c:64` `static size_t put_utf8(char *o, uint32_t cp)`
+- `str` (function) `src/import_map.c:78` `static char *str(jr *r)` -- A JSON string into an owned UTF-8 buffer (escapes decoded; a lone surrogate or a * raw control character is malformed).
+- `skip` (function) `src/import_map.c:128` `static void skip(jr *r, int depth)` -- } n += put_utf8(o + n, cp);   /* <= the 6/12 escape bytes it replaces break; } default: goto fail; } } fail...
+- `url_like` (function) `src/import_map.c:156` `static int url_like(const char *s)`
+- `dup_s` (function) `src/import_map.c:168` `static char *dup_s(const char *s)`
+- `clear` (function) `src/import_map.c:175` `static void clear(im_map *m)`
+- `add` (function) `src/import_map.c:185` `static int add(im_map *m, int scope, const char *key, const char *addr, const char *doc_url,
+    ...` -- if (d != NULL) memcpy(d, s, n + 1); return d; } static void clear(im_map *m) { for (size_t i = 0; i < m->n; ++i) {...
+- `specifier_map` (function) `src/import_map.c:209` `static void specifier_map(jr *r, im_map *m, int scope, const char *doc_url,
+                     ...` -- if (m->n == m->cap) { size_t nc = m->cap ? m->cap * 2 : 16; im_entry *g = (im_entry *)realloc(m->e, nc * sizeof *g)...
+- `im_parse` (function) `src/import_map.c:225` `im_map *im_parse(const char *json, size_t len, const char *doc_url, im_url_fn resolve, void *ctx)`
+- `match` (function) `src/import_map.c:272` `static int match(const im_map *m, int scope, const char *key, char *out, size_t outsz)` -- WHATWG "resolve an imports match" within one specifier map (scope).
+- `im_resolve` (function) `src/import_map.c:301` `int im_resolve(const im_map *m, const char *base, const char *specifier,
+               im_url_fn...`
+- `im_count` (function) `src/import_map.c:339` `size_t im_count(const im_map *m)`
+- `im_free` (function) `src/import_map.c:343` `void im_free(im_map *m)`
+
+## src/interp.c
+Depends on: `include/interp.h`
+- `sample_bezier_x` (function) `src/interp.c:18` `static double sample_bezier_x(double t, double cx1, double cx2)`
+- `sample_bezier_dx` (function) `src/interp.c:23` `static double sample_bezier_dx(double t, double cx1, double cx2)`
+- `sample_bezier_y` (function) `src/interp.c:29` `static double sample_bezier_y(double t, double cy1, double cy2)`
+- `solve_bezier_t` (function) `src/interp.c:35` `static double solve_bezier_t(double x, double cx1, double cx2)` -- } static double sample_bezier_dx(double t, double cx1, double cx2) { return 3.0 * cx1 * (1.0 - 4.0 * t + 3.0 * t *...
+- `ip_ease` (function) `src/interp.c:55` `double ip_ease(double t, const ip_ease_fn *fn)`
+- `ip_ease` (function) `src/interp.c:64` `case IP_EASE_EASE:
+        return ip_ease(t, &(ip_ease_fn)`
+- `ip_ease` (function) `src/interp.c:70` `case IP_EASE_EASE_IN:
+        return ip_ease(t, &(ip_ease_fn)`
+- `ip_ease` (function) `src/interp.c:76` `case IP_EASE_EASE_OUT:
+        return ip_ease(t, &(ip_ease_fn)`
+- `ip_ease` (function) `src/interp.c:82` `case IP_EASE_EASE_IN_OUT:
+        return ip_ease(t, &(ip_ease_fn)`
+- `ip_lerp` (function) `src/interp.c:134` `double ip_lerp(double a, double b, double t)`
+- `ip_lerp_color` (function) `src/interp.c:139` `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t)`
+- `ip_interp` (function) `src/interp.c:162` `double ip_interp(ip_val_kind kind, double a, double b, double t)`
+- `ip_kf_interp` (function) `src/interp.c:175` `double ip_kf_interp(ip_val_kind val_kind, const ip_keyframe *kf,
+                    int n_kf, do...`
+- `ip_anim_init` (function) `src/interp.c:196` `void ip_anim_init(ip_anim *a, ip_val_kind vk, const ip_ease_fn *ease,
+                  const ip_...`
+- `anim_effective_dir_for` (function) `src/interp.c:222` `static int anim_effective_dir_for(const ip_anim *a, int iter)`
+- `anim_effective_dir` (function) `src/interp.c:232` `static int anim_effective_dir(const ip_anim *a)`
+- `ip_anim_tick` (function) `src/interp.c:236` `int ip_anim_tick(ip_anim *a, double dt_ms)`
+- `ip_anim_current` (function) `src/interp.c:282` `double ip_anim_current(const ip_anim *a)`
+- `ip_anim_done` (function) `src/interp.c:320` `int ip_anim_done(const ip_anim *a)`
+
+## src/js_custom_elements.c
+Depends on: `src/js_custom_elements.h`
+- `jdce_install` (function) `src/js_custom_elements.c:179` `int jdce_install(JSContext *ctx)`
+
+## src/js_custom_elements.h
+Imported by: `src/js_custom_elements.c`, `src/js_dom.c`
+- `jdce_install` (function) `src/js_custom_elements.h:9` `int jdce_install(JSContext *ctx);`
+
+## src/js_dom.c
+Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `include/web_storage.h`, `src/js_custom_elements.h`, `src/js_dom_ext.h`, `src/js_dom_internal.h`, `src/js_location_internal.h`
+- `jd_opaque_get` (function) `src/js_dom.c:27` `jd_opaque *jd_opaque_get(JSContext *ctx)`
+- `jd_idx` (function) `src/js_dom.c:31` `dom_index *jd_idx(JSContext *ctx)`
+- `jd_handle` (function) `src/js_dom.c:40` `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out)` -- Coerces a JS argument to a node handle.
+- `jd_handle_or_null` (function) `src/js_dom.c:47` `JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)`
+- `m_node_count` (function) `src/js_dom.c:53` `static JSValue m_node_count(JSContext *ctx, JSValueConst this_val,
+                            in...`
+- `m_get_element_by_id` (function) `src/js_dom.c:59` `static JSValue m_get_element_by_id(JSContext *ctx, JSValueConst this_val,
+                       ...`
+- `jd_query_list` (function) `src/js_dom.c:70` `static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class)` -- return JS_NewInt64(ctx, (int64_t)dom_node_count(jd_idx(ctx))); } static JSValue m_get_element_by_id(JSContext *ctx...
+- `m_get_by_tag` (function) `src/js_dom.c:100` `static JSValue m_get_by_tag(JSContext *ctx, JSValueConst this_val,
+                            in...`
+- `m_get_by_class` (function) `src/js_dom.c:106` `static JSValue m_get_by_class(JSContext *ctx, JSValueConst this_val,
+                            ...`
+- `m_tag_name` (function) `src/js_dom.c:112` `static JSValue m_tag_name(JSContext *ctx, JSValueConst this_val,
+                          int ar...`
+- `m_get_attribute` (function) `src/js_dom.c:122` `static JSValue m_get_attribute(JSContext *ctx, JSValueConst this_val,
+                           ...`
+- `m_parent` (function) `src/js_dom.c:135` `static JSValue m_parent(JSContext *ctx, JSValueConst this_val,
+                        int argc, ...`
+- `m_first_child` (function) `src/js_dom.c:143` `static JSValue m_first_child(JSContext *ctx, JSValueConst this_val,
+                             ...`
+- `m_node_kind` (function) `src/js_dom.c:152` `static JSValue m_node_kind(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom_node_id h; if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION; return jd_handle_or_null(ctx...
+- `m_child_node` (function) `src/js_dom.c:159` `static JSValue m_child_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
+- `m_sibling_node` (function) `src/js_dom.c:166` `static JSValue m_sibling_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
+- `m_create_char` (function) `src/js_dom.c:174` `static JSValue m_create_char(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- (void)this_val; (void)argc; dom_node_id h; if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION; return...
+- `m_next_sibling` (function) `src/js_dom.c:188` `static JSValue m_next_sibling(JSContext *ctx, JSValueConst this_val,
+                            ...`
+- `m_precedes` (function) `src/js_dom.c:196` `static JSValue m_precedes(JSContext *ctx, JSValueConst this_val,
+                          int ar...`
+- `m_text_content` (function) `src/js_dom.c:207` `static JSValue m_text_content(JSContext *ctx, JSValueConst this_val,
+                            ...`
+- `m_set_text` (function) `src/js_dom.c:217` `static JSValue m_set_text(JSContext *ctx, JSValueConst this_val,
+                          int ar...`
+- `m_get_title` (function) `src/js_dom.c:231` `static JSValue m_get_title(JSContext *ctx, JSValueConst this_val,
+                           int ...`
+- `m_set_title` (function) `src/js_dom.c:239` `static JSValue m_set_title(JSContext *ctx, JSValueConst this_val,
+                           int ...`
+- `m_create_element` (function) `src/js_dom.c:252` `static JSValue m_create_element(JSContext *ctx, JSValueConst this_val,
+                          ...`
+- `m_append_child` (function) `src/js_dom.c:264` `static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,
+                            ...`
+- `m_move_children` (function) `src/js_dom.c:275` `static JSValue m_move_children(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.moveChildren(src, parent, where, ref|null): every child node of src (text * included) into parent at where (0...
+- `m_clone_node` (function) `src/js_dom.c:289` `static JSValue m_clone_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- static JSValue m_move_children(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {...
+- `m_insert_before` (function) `src/js_dom.c:299` `static JSValue m_insert_before(JSContext *ctx, JSValueConst this_val,
+                           ...` -- return JS_NewBool(ctx, dom_move_children(jd_idx(ctx), src, parent, (dom_place)where, ref) == DOM_OK); } /*...
+- `m_remove_child` (function) `src/js_dom.c:311` `static JSValue m_remove_child(JSContext *ctx, JSValueConst this_val,
+                            ...`
+- `m_set_attribute` (function) `src/js_dom.c:320` `static JSValue m_set_attribute(JSContext *ctx, JSValueConst this_val,
+                           ...`
+- `m_remove_attribute` (function) `src/js_dom.c:336` `static JSValue m_remove_attribute(JSContext *ctx, JSValueConst this_val,
+                        ...`
+- `m_set_inner_html` (function) `src/js_dom.c:348` `static JSValue m_set_inner_html(JSContext *ctx, JSValueConst this_val,
+                          ...`
+- `m_get_inner_html` (function) `src/js_dom.c:364` `static JSValue m_get_inner_html(JSContext *ctx, JSValueConst this_val,
+                          ...` -- innerHTML getter (2026-07-11): serializes the node's children (bounded in dom.c; * over-cap or invalid handle yields...
+- `m_rect` (function) `src/js_dom.c:397` `static JSValue m_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.rect(h): [x, y, w, h] of h in document coordinates from the installed * layout geometry, or null (no table, or...
+- `m_query_selector` (function) `src/js_dom.c:438` `static JSValue m_query_selector(JSContext *ctx, JSValueConst this_val,
+                          ...` -- return a; } /* --- install --- typedef struct jd_method { const char *name; JSCFunction *fn; int          nargs; }...
+- `m_query_selector_all` (function) `src/js_dom.c:451` `static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,
+                      ...` -- /* dom.querySelector(root, sel): root is a handle or -1 for document scope. static JSValue...
+- `m_matches` (function) `src/js_dom.c:480` `static JSValue m_matches(JSContext *ctx, JSValueConst this_val,
+                         int argc...`
+- `m_closest` (function) `src/js_dom.c:492` `static JSValue m_closest(JSContext *ctx, JSValueConst this_val,
+                         int argc...`
+- `m_attr_names` (function) `src/js_dom.c:504` `static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,
+                            in...`
+- `table` (function) `src/js_dom.c:572` `* a table (dom.viewport() non-null);`
+- `attrNames` (function) `src/js_dom.c:612` `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
+     * a missing '...`
+- `scripts` (function) `src/js_dom.c:772` `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
+- `enough` (function) `src/js_dom.c:935` `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
+- `ms` (function) `src/js_dom.c:1071` `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+- `empty` (function) `src/js_dom.c:1219` `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+- `geometry` (function) `src/js_dom.c:1221` `* constant geometry (zero real leak);`
+- `size` (function) `src/js_dom.c:1224` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
+- `js_env` (function) `src/js_dom.c:1227` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+ * document shim (uses...`
+- `jd_install` (function) `src/js_dom.c:1779` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+- `jd_flush_custom_elements` (function) `src/js_dom.c:1853` `void jd_flush_custom_elements(js_context *ctx)`
+- `fails` (function) `src/js_dom.c:1867` `* cap is reached or an allocation fails (caller stops), else 0. */
+static int cb_append(char **bu...`
+- `jd_install_console` (function) `src/js_dom.c:1981` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+- `jd_set_cookies` (function) `src/js_dom.c:2018` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+- `jd_get_cookies` (function) `src/js_dom.c:2038` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+- `jd_set_geometry` (function) `src/js_dom.c:2061` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+
+## src/js_dom_ext.c
+Depends on: `src/js_dom_ext.h`
+- `identity` (function) `src/js_dom_ext.c:96` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
+- `run` (function) `src/js_dom_ext.c:366` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
+- `jdx_install` (function) `src/js_dom_ext.c:374` `int jdx_install(JSContext *ctx)`
+
+## src/js_dom_ext.h
+Imported by: `src/js_dom.c`, `src/js_dom_ext.c`
+- `jdx_install` (function) `src/js_dom_ext.h:10` `int jdx_install(JSContext *ctx);`
+
+## src/js_dom_internal.h
+Depends on: `include/dom.h`, `include/js_dom.h`
+Imported by: `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`
+- `jd_opaque_get` (function) `src/js_dom_internal.h:11` `jd_opaque *jd_opaque_get(JSContext *ctx);`
+- `jd_idx` (function) `src/js_dom_internal.h:12` `dom_index *jd_idx(JSContext *ctx);`
+- `jd_handle` (function) `src/js_dom_internal.h:14` `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out);` -- Private to the js_dom family (js_dom.c, js_fetch.c, js_events.c, js_embed.c): * the context accessors every native...
+
+## src/js_embed.c
+Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
+- `try_create_iframe_from_script` (function) `src/js_embed.c:86` `static int try_create_iframe_from_script(dom_index *idx,
+                                        ...` -- Scans an inline script body for `video[N]` or `video_data` assignment and extracts the first usable iframe src.
+- `jd_video_from_scripts` (function) `src/js_embed.c:203` `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts,
+                   ...`
+- `jd_inject_video_shim` (function) `src/js_embed.c:242` `jd_status jd_inject_video_shim(js_context *ctx)`
+- `scan_video_url` (function) `src/js_embed.c:256` `static int scan_video_url(const char *body, size_t blen,
+                           char *out, si...` -- Scans a body buffer for `.m3u8` (HLS) or `.mp4` (progressive) video URLs.
+- `jd_process_iframes` (function) `src/js_embed.c:294` `void jd_process_iframes(js_context *ctx, dom_index *idx,
+                        jd_fetch_fn fn, ...`
+
+## src/js_env.c
+Depends on: `include/anti_fp.h`, `include/js_env.h`, `include/js_sandbox.h`
+- `primitives` (function) `src/js_env.c:6` `* the pure anti_fp primitives (one audited source of normalized constants);`
+- `wall_clock_ms` (function) `src/js_env.c:35` `static uint64_t wall_clock_ms(void)`
+- `monotonic_ms` (function) `src/js_env.c:41` `static double monotonic_ms(void)`
+- `m_date_now` (function) `src/js_env.c:49` `static JSValue m_date_now(JSContext *ctx, JSValueConst this_val,
+                          int ar...`
+- `m_perf_now` (function) `src/js_env.c:57` `static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,
+                          int ar...` -- performance.now: coarsened elapsed since the origin bound at install time, so * it never leaks the host uptime.
+- `m_empty_array` (function) `src/js_env.c:77` `static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,
+                             ...`
+- `m_get_random_values` (function) `src/js_env.c:85` `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,
+                       ...`
+- `m_random_uuid` (function) `src/js_env.c:125` `static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,
+                             ...`
+- `m_subtle_null` (function) `src/js_env.c:142` `static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,
+                             ...`
+- `def_val` (function) `src/js_env.c:153` `static int def_val(JSContext *ctx, JSValueConst obj, const char *name, JSValue v)` -- Always takes ownership of v: JS_DefinePropertyValueStr consumes it (freeing it even when the define fails).
+- `def_str` (function) `src/js_env.c:159` `static int def_str(JSContext *ctx, JSValueConst obj, const char *name, const char *s)`
+- `def_int` (function) `src/js_env.c:163` `static int def_int(JSContext *ctx, JSValueConst obj, const char *name, int32_t n)`
+- `def_fn` (function) `src/js_env.c:167` `static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
+                  JSCFuncti...`
+- `build_languages` (function) `src/js_env.c:174` `static JSValue build_languages(JSContext *ctx)` -- navigator.languages: a sealed array built by splitting fp_accept_language() * (e.g. "en-US,en") on commas.
+- `build_navigator` (function) `src/js_env.c:198` `static int build_navigator(JSContext *ctx, JSValueConst global)`
+- `methods` (function) `src/js_env.c:201` `* capability methods (sendBeacon, spec/js_dom.md 7h) without touching any * fingerprintable field. An untrusted...`
+- `build_screen` (function) `src/js_env.c:302` `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)`
+- `build_crypto` (function) `src/js_env.c:346` `static int build_crypto(JSContext *ctx, JSValueConst global)`
+- `build_perf_timing` (function) `src/js_env.c:374` `static int build_perf_timing(JSContext *ctx, JSValueConst perf)`
+- `build_perf_navigation` (function) `src/js_env.c:388` `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)`
+- `build_performance` (function) `src/js_env.c:400` `static int build_performance(JSContext *ctx, JSValueConst global)`
+- `override_date_now` (function) `src/js_env.c:432` `static int override_date_now(JSContext *ctx, JSValueConst global)` -- Replaces the built-in Date.now with the coarsened version, non-writable and * non-configurable so a script cannot...
+- `make_readback` (function) `src/js_env.c:476` `static JSValue make_readback(JSContext *ctx, uint64_t key)`
+- `build_readback_obj` (function) `src/js_env.c:484` `static int build_readback_obj(JSContext *ctx, JSValueConst global,
+                              ...`
+- `je_install` (function) `src/js_env.c:497` `je_status je_install(js_context *ctx, int screen_w, int screen_h)`
+- `je_install_canvas` (function) `src/js_env.c:516` `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)`
+
+## src/js_events.c
+Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
+- `jd_click_state_new` (function) `src/js_events.c:29` `jd_click_state *jd_click_state_new(void)`
+- `jd_click_state_free` (function) `src/js_events.c:34` `void jd_click_state_free(jd_click_state *s)`
+- `jd_install_events` (function) `src/js_events.c:38` `jd_status jd_install_events(js_context *ctx, jd_click_state *state)`
+- `jd_eval_default_action` (function) `src/js_events.c:52` `static int jd_eval_default_action(JSContext *jsctx, const char *src, size_t n,
+                  ...` -- Runs one engine event-dispatch expression and maps its result to the C contract: 1 = default action proceeds, 0 = a...
+- `jd_fire_click` (function) `src/js_events.c:66` `int jd_fire_click(js_context *ctx, dom_node_id node_id)`
+- `jd_fire_submit` (function) `src/js_events.c:78` `int jd_fire_submit(js_context *ctx, dom_node_id form_node_id)` -- Fires the submit event for form_node_id.
+- `jd_escape_js_str` (function) `src/js_events.c:91` `static size_t jd_escape_js_str(const char *src, char *dst, size_t dstsz)` -- Escapes a string for safe interpolation into JS double-quoted string literal: replaces backslash with \\ and...
+- `jd_fire_mouse_event` (function) `src/js_events.c:163` `int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id,
+                        const char ...`
+
+## src/js_fetch.c
+Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
+- `jd_pack_ptr` (function) `src/js_fetch.c:28` `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)` -- Carry the host fetch fn + its ctx as a function's closure data, each split into 32-bit halves (no assumption about...
+- `jd_unpack_ptr` (function) `src/js_fetch.c:33` `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)`
+- `m_host_fetch` (function) `src/js_fetch.c:46` `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
+                            in...` -- __hostFetch(method, url, body) -> { status, body, contentType }.
+- `send` (function) `src/js_fetch.c:92` `* callbacks fire right after send();`
+- `task` (function) `src/js_fetch.c:179` `* current task (the page never waits on it);`
+- `jd_install_xhr` (function) `src/js_fetch.c:203` `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
+
+## src/js_geom.c
+Depends on: `include/js_geom.h`
+- `jg_init` (function) `src/js_geom.c:17` `void jg_init(jg_table *t)`
+- `jg_free` (function) `src/js_geom.c:21` `void jg_free(jg_table *t)`
+- `clamp_coord` (function) `src/js_geom.c:27` `static int32_t clamp_coord(double v, double lo)`
+- `grow` (function) `src/js_geom.c:33` `static int grow(jg_table *t)`
+- `push` (function) `src/js_geom.c:45` `static int push(jg_table *t, dom_node_id node, int32_t x, int32_t y, int32_t w, int32_t h)`
+- `jg_add` (function) `src/js_geom.c:52` `int jg_add(jg_table *t, dom_node_id node, double x, double y, double w, double h)`
+- `unite` (function) `src/js_geom.c:63` `static int unite(jg_rect *a, const jg_rect *b)` -- Bounding box of a and b into a; returns 1 if a changed.
+- `cmp_node` (function) `src/js_geom.c:78` `static int cmp_node(const void *pa, const void *pb)`
+- `jg_finish` (function) `src/js_geom.c:83` `int jg_finish(jg_table *t)`
+- `jg_find` (function) `src/js_geom.c:96` `const jg_rect *jg_find(const jg_table *t, dom_node_id node)`
+- `slot_of` (function) `src/js_geom.c:102` `static uint32_t slot_of(dom_node_id n)`
+- `index_of` (function) `src/js_geom.c:109` `static size_t index_of(jg_table *t, uint32_t *slots, dom_node_id node, const jg_rect *seed,
+     ...` -- Index of node in t->r via the local hash, inserting an empty-at-rect entry * (a copy of seed) when absent.
+- `jg_aggregate` (function) `src/js_geom.c:124` `int jg_aggregate(jg_table *t, dom_node_id (*parent)(void *ctx, dom_node_id node), void *ctx)`
+- `jg_wire_len` (function) `src/js_geom.c:163` `size_t jg_wire_len(const jg_table *t)`
+- `jg_encode` (function) `src/js_geom.c:167` `int jg_encode(const jg_table *t, int32_t *out, size_t cap)`
+- `in_range` (function) `src/js_geom.c:182` `static int in_range(int32_t v, int32_t lo)`
+- `jg_decode` (function) `src/js_geom.c:186` `int jg_decode(const int32_t *in, size_t n, jg_table *out)`
+- `fnv` (function) `src/js_geom.c:212` `static uint64_t fnv(uint64_t h, int32_t v)`
+- `jg_hash` (function) `src/js_geom.c:221` `uint64_t jg_hash(const jg_table *t)`
+
+## src/js_location.c
+Depends on: `include/js_dom.h`, `include/url.h`, `src/js_location_internal.h`
+- `jd_lp_set` (function) `src/js_location.c:24` `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
+                      const ...` -- Defines a string property on the __locParts data object from a (ptr,len) span. * The span is copied into an engine...
+- `jl_m_hist_target` (function) `src/js_location.c:35` `JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.histTarget(base, ref): the same-origin target of history.pushState/replaceState (url_history_target) as a...
+- `jd_set_location` (function) `src/js_location.c:139` `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
+- `jd_take_nav_request` (function) `src/js_location.c:173` `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
+- `jd_take_history` (function) `src/js_location.c:219` `char *jd_take_history(js_context *ctx, int *go)`
+- `jd_pop_state` (function) `src/js_location.c:250` `int jd_pop_state(js_context *ctx, int index)`
+
+## src/js_location_internal.h
+Imported by: `src/js_dom.c`, `src/js_location.c`
+- `header` (function) `src/js_location_internal.h:6` `* stay out of every public header (include/ never sees quickjs.h). */ #include "quickjs.h" JSValue...`
+
+## src/js_policy.c
+Depends on: `include/js_policy.h`
+- `eq_ci` (function) `src/js_policy.c:12` `static int eq_ci(const char *a, const char *b)` -- js_policy — implementation: pure per-host JavaScript policy decision.
+- `jsp_enabled` (function) `src/js_policy.c:22` `bool jsp_enabled(jsp_mode mode, int host_allowlisted)`
+- `jsp_trusted` (function) `src/js_policy.c:31` `bool jsp_trusted(bool js_enabled, int host_allowlisted)`
+- `jsp_present_trusted` (function) `src/js_policy.c:35` `bool jsp_present_trusted(int host_allowlisted)`
+- `jsp_mode_from_str` (function) `src/js_policy.c:39` `jsp_mode jsp_mode_from_str(const char *s)`
+- `jsp_mode_str` (function) `src/js_policy.c:51` `const char *jsp_mode_str(jsp_mode mode)`
+
+## src/js_sandbox.c
+Depends on: `include/js_sandbox.h`
+- `jm_malloc` (function) `src/js_sandbox.c:55` `static void *jm_malloc(void *opaque, size_t size)`
+- `jm_calloc` (function) `src/js_sandbox.c:63` `static void *jm_calloc(void *opaque, size_t count, size_t size)`
+- `jm_free` (function) `src/js_sandbox.c:73` `static void jm_free(void *opaque, void *ptr)`
+- `jm_realloc` (function) `src/js_sandbox.c:79` `static void *jm_realloc(void *opaque, void *ptr, size_t size)`
+- `jm_usable_size` (function) `src/js_sandbox.c:89` `static size_t jm_usable_size(const void *ptr)`
+- `host_dup` (function) `src/js_sandbox.c:99` `static char *host_dup(const char *src, size_t len)`
+- `timespec_reached` (function) `src/js_sandbox.c:108` `static int timespec_reached(const struct timespec *now, const struct timespec *deadline)`
+- `js_interrupt_cb` (function) `src/js_sandbox.c:114` `static int js_interrupt_cb(JSRuntime *rt, void *opaque)` -- if (len == (size_t)-1) return NULL; /* guard: len+1 would overflow to 0 char *out = (char *)malloc(len + 1); if (out...
+- `is_ascii_digit` (function) `src/js_sandbox.c:127` `static int is_ascii_digit(char c)`
+- `js_loc_from_stack` (function) `src/js_sandbox.c:129` `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,
+                      i...`
+- `undefined` (function) `src/js_sandbox.c:221` `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx...`
+- `js_limits_default` (function) `src/js_sandbox.c:248` `js_limits js_limits_default(void)`
+- `limits_resolve` (function) `src/js_sandbox.c:257` `static js_limits limits_resolve(const js_limits *lim)`
+- `js_validate_source` (function) `src/js_sandbox.c:266` `js_status js_validate_source(const char *src, size_t len, const js_limits *lim)`
+- `js_context_new` (function) `src/js_sandbox.c:277` `js_status js_context_new(const js_limits *lim, js_context **out)`
+- `js_context_free` (function) `src/js_sandbox.c:316` `void js_context_free(js_context *ctx)`
+- `arm_deadline` (function) `src/js_sandbox.c:327` `static void arm_deadline(js_context *ctx, uint64_t budget_ms)`
+- `js_set_time_budget` (function) `src/js_sandbox.c:342` `void js_set_time_budget(js_context *ctx, uint64_t budget_ms)`
+- `js_eval` (function) `src/js_sandbox.c:347` `js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)`
+- `js_eval_named` (function) `src/js_sandbox.c:351` `js_status js_eval_named(js_context *ctx, const char *src, size_t len,
+                        con...`
+- `js_pump_jobs` (function) `src/js_sandbox.c:434` `int js_pump_jobs(js_context *ctx, int max_jobs)`
+- `js_eval_once` (function) `src/js_sandbox.c:452` `js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res)`
+- `js_result_free` (function) `src/js_sandbox.c:465` `void js_result_free(js_result *res)`
+- `js_set_current_script` (function) `src/js_sandbox.c:489` `void js_set_current_script(js_context *ctx, const char *src, const char *type)`
+- `js_context_raw` (function) `src/js_sandbox.c:522` `void *js_context_raw(js_context *ctx)`
+- `mod_set_meta` (function) `src/js_sandbox.c:543` `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)` -- QuickJS normalizer: every specifier goes through the host resolver.
+- `mod_loader` (function) `src/js_sandbox.c:552` `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)` -- } return js_strdup(jc, out); } /* Sets import.meta.url of a compiled module to its absolute URL. static void...
+- `mod_normalize` (function) `src/js_sandbox.c:588` `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);`
+- `js_set_module_host` (function) `src/js_sandbox.c:591` `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,
+                        js...`
+- `mod_fail` (function) `src/js_sandbox.c:606` `static js_status mod_fail(js_context *ctx, js_result *res, JSValue reason, int use_reason,
+      ...` -- Fills res from the pending exception (or the given rejection value, which is * thrown first so the one capture path...
+- `js_eval_module` (function) `src/js_sandbox.c:621` `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,
+        ...`
+- `realm_of` (function) `src/js_sandbox.c:688` `static JSContext *realm_of(js_context *c, JSValueConst g)` -- The owning js_context rides in each native's closure data, split into 32-bit * halves (no assumption about JS number...
+- `throw_named` (function) `src/js_sandbox.c:701` `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)`
+- `m_realm_new` (function) `src/js_sandbox.c:711` `static JSValue m_realm_new(JSContext *ctx, JSValueConst this_val, int argc,
+                     ...`
+- `m_realm_eval` (function) `src/js_sandbox.c:725` `static JSValue m_realm_eval(JSContext *ctx, JSValueConst this_val, int argc,
+                    ...` -- __realmEval(global, code, name): a classic script in that realm.
+- `m_realm_clone` (function) `src/js_sandbox.c:761` `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,
+                   ...` -- __realmClone(value, global): structured copy into global's realm through the * serializer WITHOUT bytecode -- a...
+- `js_install_realms` (function) `src/js_sandbox.c:783` `js_status js_install_realms(js_context *ctx)`
 
 ## src/js_trusted.c
 Depends on: `include/js_trusted.h`, `include/web_storage.h`
@@ -34,28 +363,28 @@ Depends on: `include/link_nav.h`, `include/url.h`
 
 ## src/local_store.c
 Depends on: `include/local_store.h`
-- `cipher_for` (function) `src/local_store.c:728` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
-- `argon2id_derive` (function) `src/local_store.c:738` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
+- `cipher_for` (function) `src/local_store.c:739` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
+- `argon2id_derive` (function) `src/local_store.c:749` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
                           ...`
-- `ls_derive_key` (function) `src/local_store.c:767` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
+- `ls_derive_key` (function) `src/local_store.c:778` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
                         const...`
-- `aead_encrypt` (function) `src/local_store.c:776` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_encrypt` (function) `src/local_store.c:787` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `aead_decrypt` (function) `src/local_store.c:802` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_decrypt` (function) `src/local_store.c:813` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `seal_core` (function) `src/local_store.c:830` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
+- `seal_core` (function) `src/local_store.c:841` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
                     ...`
-- `decrypt_blob` (function) `src/local_store.c:867` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
+- `decrypt_blob` (function) `src/local_store.c:878` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
          ...`
-- `ls_seal` (function) `src/local_store.c:898` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
+- `ls_seal` (function) `src/local_store.c:909` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
                   const uint8_t *p...`
-- `ls_open` (function) `src/local_store.c:911` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
+- `ls_open` (function) `src/local_store.c:922` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
                   const uint8_t *blob, size_t bl...`
-- `ls_seal_passphrase` (function) `src/local_store.c:922` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
+- `ls_seal_passphrase` (function) `src/local_store.c:933` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
           ...`
-- `ls_open_passphrase` (function) `src/local_store.c:943` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
+- `ls_open_passphrase` (function) `src/local_store.c:954` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
-- `ls_free` (function) `src/local_store.c:963` `void ls_free(uint8_t *buf, size_t len)`
+- `ls_free` (function) `src/local_store.c:974` `void ls_free(uint8_t *buf, size_t len)`
 
 ## src/media_decoder.c
 Depends on: `include/media_decoder.h`, `include/util.h`
@@ -117,384 +446,6 @@ int os_namespac...`
 - `fields` (function) `src/os_sandbox.c:303` `* long as the unknown trailing fields (net/scoped) are zero, which they are. */ int rfd =...`
 - `os_landlock_abi` (function) `src/os_sandbox.c:331` `int os_landlock_abi(void)`
 - `os_landlock_restrict` (function) `src/os_sandbox.c:332` `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
-
-## src/page_view.c
-Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_vars.h`, `include/dom.h`, `include/flex_layout.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
-- `cp1252_to_ucs` (function) `src/page_view.c:89` `static unsigned int cp1252_to_ucs(unsigned char c)` -- Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80).
-- `utf8_encode` (function) `src/page_view.c:103` `static size_t utf8_encode(unsigned int cp, char *out)` -- Encodes a BMP scalar (<= 0xFFFF, which covers all Windows-1252 targets) as * UTF-8 into out (up to 3 bytes); returns...
-- `utf8_sanitized_dup` (function) `src/page_view.c:116` `static char *utf8_sanitized_dup(const char *s)`
-- `positions` (function) `src/page_view.c:139` `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);`
-- `dup_n` (function) `src/page_view.c:150` `static char *dup_n(const char *s, size_t n)`
-- `run_init_common` (function) `src/page_view.c:164` `static void run_init_common(pv_run *r)` -- Common field initialization shared by all append helpers.
-- `pv_ptrmap_slot` (function) `src/page_view.c:295` `static size_t pv_ptrmap_slot(const pv_ptrmap *m, const void *k)`
-- `pv_ptrmap_get` (function) `src/page_view.c:305` `static int pv_ptrmap_get(const pv_ptrmap *m, const void *k, int *out)`
-- `pv_ptrmap_put` (function) `src/page_view.c:313` `static void pv_ptrmap_put(pv_ptrmap *m, const void *k, int v)`
-- `pv_ptrmap_free` (function) `src/page_view.c:335` `static void pv_ptrmap_free(pv_ptrmap *m)`
-- `pv_node_map_init` (function) `src/page_view.c:350` `static int pv_node_map_init(pv_node_map *m)`
-- `pv_node_map_free` (function) `src/page_view.c:359` `static void pv_node_map_free(pv_node_map *m)`
-- `pv_node_map_build` (function) `src/page_view.c:401` `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)` -- Builds a document-order map of all element nodes under root.
-- `pv_new` (function) `src/page_view.c:410` `pv_view *pv_new(void)`
-- `pv_append` (function) `src/page_view.c:414` `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
-                    c...`
-- `pv_append_image` (function) `src/page_view.c:449` `pv_status pv_append_image(pv_view *v, int heading, int block_break,
-                          con...`
-- `pv_append_input` (function) `src/page_view.c:479` `pv_status pv_append_input(pv_view *v, int heading, int block_break,
-                          pv_...`
-- `pv_append_video` (function) `src/page_view.c:519` `pv_status pv_append_video(pv_view *v, int heading, int block_break,
-                          con...`
-- `pv_append_svg` (function) `src/page_view.c:555` `pv_status pv_append_svg(pv_view *v, int heading, int block_break,
-                        const c...`
-- `pv_set_emphasis` (function) `src/page_view.c:584` `void pv_set_emphasis(pv_view *v, int bold, int italic)`
-- `pv_set_indent` (function) `src/page_view.c:591` `void pv_set_indent(pv_view *v, int indent)`
-- `pv_set_color` (function) `src/page_view.c:596` `void pv_set_color(pv_view *v, int fg_rgb)`
-- `pv_set_bgcolor` (function) `src/page_view.c:601` `void pv_set_bgcolor(pv_view *v, int bg_rgb)`
-- `pv_set_text_style` (function) `src/page_view.c:606` `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,
-                ...`
-- `pv_set_grad_text` (function) `src/page_view.c:617` `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)`
-- `pv_set_text_ext` (function) `src/page_view.c:625` `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)`
-- `ignored` (function) `src/page_view.c:666` `* source is ignored (fail-visible: never invisible text from half a
-     * pattern). A real text-...`
-- `pv_set_container` (function) `src/page_view.c:681` `void pv_set_container(pv_view *v, int cont_id, int cont_display,
-                      int cont_g...`
-- `pv_set_row_span` (function) `src/page_view.c:696` `void pv_set_row_span(pv_view *v, int row_span)`
-- `pv_set_grid_area` (function) `src/page_view.c:700` `void pv_set_grid_area(pv_view *v, int row_start, int col_start)`
-- `pv_set_grid` (function) `src/page_view.c:707` `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)`
-- `pv_set_grid_rows` (function) `src/page_view.c:717` `void pv_set_grid_rows(pv_view *v, int grid_rows)`
-- `pv_set_cont_box` (function) `src/page_view.c:721` `void pv_set_cont_box(pv_view *v, int cont_box_id)`
-- `pv_set_flex` (function) `src/page_view.c:725` `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
-                 int...`
-- `pv_set_flex_mauto` (function) `src/page_view.c:737` `void pv_set_flex_mauto(pv_view *v, int mauto)`
-- `pv_set_cont_item` (function) `src/page_view.c:743` `void pv_set_cont_item(pv_view *v, int cont_item)`
-- `pv_set_float_w` (function) `src/page_view.c:748` `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box)`
-- `pv_set_float` (function) `src/page_view.c:755` `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
-                int ...`
-- `pv_set_box` (function) `src/page_view.c:777` `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
-                int box_center, int ...`
-- `pv_set_box_pct` (function) `src/page_view.c:789` `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
-                    ...`
-- `pv_set_box_maxw` (function) `src/page_view.c:800` `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct)`
-- `pv_set_ua_tag` (function) `src/page_view.c:807` `void pv_set_ua_tag(pv_view *v, int ua_tag)`
-- `pv_set_node_id` (function) `src/page_view.c:813` `void pv_set_node_id(pv_view *v, dom_node_id node_id)`
-- `pv_set_block_id` (function) `src/page_view.c:818` `void pv_set_block_id(pv_view *v, int block_id)`
-- `pv_set_own_box` (function) `src/page_view.c:823` `void pv_set_own_box(pv_view *v, int box_id)`
-- `pv_set_oof` (function) `src/page_view.c:828` `void pv_set_oof(pv_view *v, int oof)`
-- `pv_set_justify_self` (function) `src/page_view.c:833` `void pv_set_justify_self(pv_view *v, int justify_self)`
-- `pv_set_block_node` (function) `src/page_view.c:838` `void pv_set_block_node(pv_view *v, dom_node_id id)`
-- `pv_set_br_line` (function) `src/page_view.c:843` `void pv_set_br_line(pv_view *v, int br_line)`
-- `pv_set_input_checked` (function) `src/page_view.c:848` `void pv_set_input_checked(pv_view *v, int checked)`
-- `pv_set_input_placeholder` (function) `src/page_view.c:853` `void pv_set_input_placeholder(pv_view *v, int ph_color)`
-- `pv_svg_append_root_attrs` (function) `src/page_view.c:858` `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs,
-               ...`
-- `pv_placeholder_color` (function) `src/page_view.c:887` `int pv_placeholder_color(const css_style *ph)`
-- `pv_set_input_select_opts` (function) `src/page_view.c:895` `void pv_set_input_select_opts(pv_view *v, const char *select_opts)`
-- `pv_add_cont_def` (function) `src/page_view.c:903` `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)`
-- `pv_cont_count` (function) `src/page_view.c:916` `size_t pv_cont_count(const pv_view *v)`
-- `pv_cont_at` (function) `src/page_view.c:920` `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)`
-- `pv_add_box_def` (function) `src/page_view.c:925` `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)`
-- `pv_free` (function) `src/page_view.c:938` `void pv_free(pv_view *v)`
-- `pv_count` (function) `src/page_view.c:956` `size_t pv_count(const pv_view *v)`
-- `pv_at` (function) `src/page_view.c:960` `const pv_run *pv_at(const pv_view *v, size_t i)`
-- `pv_box_count` (function) `src/page_view.c:965` `size_t pv_box_count(const pv_view *v)`
-- `pv_box_at` (function) `src/page_view.c:969` `const pv_box_def *pv_box_at(const pv_view *v, size_t i)`
-- `node_next` (function) `src/page_view.c:977` `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` -- } size_t pv_box_count(const pv_view *v) { return (v != NULL) ? v->nbox : 0; } const pv_box_def *pv_box_at(const...
-- `is_block_tag` (function) `src/page_view.c:987` `static int is_block_tag(lxb_tag_id_t t)`
-- `is_block_like` (function) `src/page_view.c:1012` `static int is_block_like(lxb_tag_id_t t, css_display display)` -- An element should be treated as block-like (eligible for box registration, hbox, float) when its CSS display...
-- `resolves` (function) `src/page_view.c:1041` `* box_tree already resolves (R4/R8) had nothing to place -- every badge/close
- * button/tooltip w...`
-- `is_block_like_style` (function) `src/page_view.c:1051` `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)` -- is_block_like with the out-of-flow coercion applied.
-- `generates_box` (function) `src/page_view.c:1063` `static int generates_box(lxb_tag_id_t t, css_display display)`
-- `generates_box_style` (function) `src/page_view.c:1075` `static int generates_box_style(lxb_tag_id_t t, const css_style *cs)` -- Form controls (input/select/textarea/button) are inline-block by default but can carry author CSS like...
-- `causes_block_break` (function) `src/page_view.c:1082` `static int causes_block_break(lxb_tag_id_t t, css_display display)` -- Returns 1 when the element should cause a block break (start a new line). display:inline-block and display:inline do...
-- `paints` (function) `src/page_view.c:1091` `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas
- * vacías"). Comment a...`
-- `ua_tag_of` (function) `src/page_view.c:1116` `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)` -- User-agent box identity of a block-level element, from its lexbor tag id.
-- `heading_level` (function) `src/page_view.c:1138` `static int heading_level(lxb_tag_id_t t)`
-- `is_skipped_tag` (function) `src/page_view.c:1150` `static int is_skipped_tag(lxb_tag_id_t t)`
-- `node_tag` (function) `src/page_view.c:1171` `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)`
-- `content` (function) `src/page_view.c:1176` `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);`
-- `in_skipped_subtree` (function) `src/page_view.c:1179` `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
-              ...` -- Nonzero if any ancestor up to base is a non-rendered container.
-- `font_color_attr` (function) `src/page_view.c:1216` `static int font_color_attr(lxb_dom_element_t *el)`
-- `bgcolor_attr` (function) `src/page_view.c:1222` `static int bgcolor_attr(lxb_dom_element_t *el)` -- Legacy bgcolor attribute (body/table/tr/td), the background twin of <font * color>: pre-CSS sites (Hacker News'...
-- `address` (function) `src/page_view.c:1244` `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <=...`
-- `child` (function) `src/page_view.c:1252` `* child (NULL = anonymous item: text directly inside the container);`
-- `id` (function) `src/page_view.c:1274` `* group id (-1 = the nearest IS the outermost: single-level float, the * painter's old path);`
-- `item_ordinal` (function) `src/page_view.c:1342` `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` -- Ordinal for a run of container `cid` whose direct-child item is `item` (NULL = * anonymous: every such run is its...
-- `it` (function) `src/page_view.c:1371` `* it (they inherit in CSS). list_style drives the <li> marker (structural);`
-- `pv_content_hidden` (function) `src/page_view.c:1375` `int pv_content_hidden(int box_hidden, int run_visibility)` -- The author text-presentation extensions struct (pv_text_ext) is public now (include/page_view.h): each field...
-- `pv_text_ext_reset` (function) `src/page_view.c:1381` `void pv_text_ext_reset(pv_text_ext *e)`
-- `pv_text_ext_merge` (function) `src/page_view.c:1407` `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` -- Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten...
-- `css_has_hbox` (function) `src/page_view.c:1469` `static int css_has_hbox(const css_style *cs)` -- True if the resolved style declares any HORIZONTAL box property, in either half of the <length-percentage>: `width...
-- `pv_mauto_of` (function) `src/page_view.c:1483` `static int pv_mauto_of(const css_style *cs)` -- Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side...
-- `css_hbox_resolve` (function) `src/page_view.c:1490` `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)`
-- `css_has_position` (function) `src/page_view.c:1541` `static int css_has_position(const css_style *cs)` -- A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree...
-- `css_has_boxdeco` (function) `src/page_view.c:1546` `static int css_has_boxdeco(const css_style *cs)`
-- `cont_def_reset` (function) `src/page_view.c:1690` `static void cont_def_reset(pv_cont_def *d)` -- Per-container parameters + parent linkage (2026-07-31).
-- `container_id` (function) `src/page_view.c:1709` `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` -- d->box_id = -1; d->item_grow = -1; d->item_shrink = -1; d->item_basis = CSS_LEN_UNSET; d->item_order =...
-- `annotate_flow_run` (function) `src/page_view.c:1797` `static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *items,
-          ...` -- Stamps the last run with its element's layout annotation: container membership and item slot, flex/grid item...
-- `trying` (function) `src/page_view.c:1839` `* a real page passes without trying (slashdot's front page saturates it), and past
- * it box_reg_...`
-- `box_reg_free` (function) `src/page_view.c:1868` `static void box_reg_free(pv_box_reg *r)`
-- `boxdef_from_style` (function) `src/page_view.c:1877` `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` -- Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style.
-- `here` (function) `src/page_view.c:1978` `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3...`
-- `glyphs` (function) `src/page_view.c:2022` `* glyphs (the runs carry it as their fill source);`
-- `box_reg_id` (function) `src/page_view.c:2116` `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
-           ...` -- Registers (or finds) the box for `node`. font_px is the element's COMPUTED font-size, needed because the user-agent...
-- `pseudo_box_reg` (function) `src/page_view.c:2145` `static int pseudo_box_reg(pv_box_reg *r, const lxb_dom_node_t *el, int which,
-                   ...` -- Registers (or finds) the GENERATED box of el's ::before / ::after (which = CSS_PSEUDO_BEFORE / CSS_PSEUDO_AFTER)...
-- `pseudo_generates_box` (function) `src/page_view.c:2166` `static int pseudo_generates_box(const css_style *ps)` -- True iff a generated box paints or sizes something of its own: the same gate as any element's box, plus a declared...
-- `pseudo_is_oof` (function) `src/page_view.c:2179` `static int pseudo_is_oof(const css_style *ps)`
-- `pseudo_is_block` (function) `src/page_view.c:2183` `static int pseudo_is_block(const css_style *ps)`
-- `pseudo_key` (function) `src/page_view.c:2189` `static const void *pseudo_key(const lxb_dom_node_t *el, int which)` -- return css_has_boxdeco(ps) || ps->width > 0 || ps->pct[CSS_PCT_WIDTH] > 0 || ps->background >= 0 ||...
-- `pv_ptr_hash` (function) `src/page_view.c:2245` `static size_t pv_ptr_hash(const void *p)`
-- `pv_cache_reindex` (function) `src/page_view.c:2253` `static void pv_cache_reindex(pv_style_cache *c)`
-- `pv_style_cache_init` (function) `src/page_view.c:2263` `static int pv_style_cache_init(pv_style_cache *c)`
-- `pv_style_cache_free` (function) `src/page_view.c:2283` `static void pv_style_cache_free(pv_style_cache *c)`
-- `pv_cache_find` (function) `src/page_view.c:2298` `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)` -- cch_element_style(el, sheet), memoized in *cache.
-- `pv_cached_font_px` (function) `src/page_view.c:2313` `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)` -- The COMPUTED font-size memoized for `node`, or 0 when it is not in the cache (no cache, or the element's style was...
-- `pv_cache_put` (function) `src/page_view.c:2318` `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
-                     ...`
-- `pv_var_push` (function) `src/page_view.c:2362` `static const cvr_chain *pv_var_push(pv_style_cache *cache, cvr_table *own,
-                      ...` -- Takes ownership of *own (left zeroed) as a new chain node over `parent`. * Returns the node's chain, or `parent`...
-- `pv_parent_element` (function) `src/page_view.c:2383` `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)` -- cache->vn = g; cache->vncap = nc; } pv_var_node *n = (pv_var_node *)calloc(1, sizeof *n); if (n == NULL) {...
-- `cached_element_style` (function) `src/page_view.c:2456` `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
-            ...`
-- `col_free_share` (function) `src/page_view.c:2560` `static int col_free_share(const lxb_dom_node_t *el, const css_style *cs, const css_sheet *sheet, pv_style_cache...` -- box_reg_id plus the line alignment an inline-level box needs (see * pv_box_def.line_align).
-- `inherited_text_color` (function) `src/page_view.c:2566` `static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,
-             ...` -- The computed `color` of an element: its own declaration, else its nearest ancestor's (`color` inherits). -1 when no...
-- `box_reg_id_ex` (function) `src/page_view.c:2577` `static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
-        ...`
-- `none` (function) `src/page_view.c:2582` `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...`
-- `cached_pseudo_style` (function) `src/page_view.c:2601` `static css_style cached_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet,
-             ...` -- The ::before/::after generated box's style of el (spec/page_view.md "Cajas generadas"): resolved against el's...
-- `subtree_is_oof` (function) `src/page_view.c:2619` `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
-                     ...` -- True iff the element itself is out of flow (position:absolute/fixed) or descends from one.
-- `size` (function) `src/page_view.c:2639` `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
-static void app...`
-- `css_replaced_h_fixed` (function) `src/page_view.c:2648` `static int css_replaced_h_fixed(lxb_dom_element_t *el, const css_sheet *sheet,
-                  ...` -- flat model, and auto keeps the intrinsic/attribute size (so the common `img{max-width:100%;height:auto}` rule does...
-- `builder` (function) `src/page_view.c:2666` `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
- * (the ...`
-- `css_to_fx_justify` (function) `src/page_view.c:2695` `static int css_to_fx_justify(css_justify j)` -- Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to...
-- `is_bold_tag` (function) `src/page_view.c:2714` `static int is_bold_tag(lxb_tag_id_t t)` -- Tags the user-agent sheet renders bold.
-- `is_italic_tag` (function) `src/page_view.c:2719` `static int is_italic_tag(lxb_tag_id_t t)`
-- `is_inline_level_style` (function) `src/page_view.c:2756` `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)` -- Inline-level box (CSS 2.1 9.2.2): display inline or inline-block, or a tag the UA * sheet makes inline, and not...
-- `in_mixed_line` (function) `src/page_view.c:2764` `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,
-                       ...` -- True when `p` shares a line with inline content: a sibling that is non-blank text * or an inline-level element.
-- `children_all_inline_block` (function) `src/page_view.c:2780` `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,
-           ...`
-- `col_has_free_space` (function) `src/page_view.c:2805` `static int col_has_free_space(const css_style *cs)` -- True iff a column can have FREE space on its main axis: a px height or a px min-height floor.
-- `flex_column_flows_as_block` (function) `src/page_view.c:2816` `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,
-            ...` -- A flex COLUMN with the initial geometry (no reverse, no wrap, justify-content start, align-items stretch) stacks...
-- `fold_column_gap` (function) `src/page_view.c:2869` `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,
-                            ...` -- The gap of a column that flows as block (above) is the space BETWEEN its items (Flexbox 8.1), so every item but the...
-- `is_layout_container` (function) `src/page_view.c:2893` `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
-                   ...` -- int prev = 0; for (const lxb_dom_node_t *c = el->prev; c != NULL && !prev; c = c->prev) { if (c->type !=...
-- `css_has_hmargin` (function) `src/page_view.c:2919` `static int css_has_hmargin(const css_style *cs)` -- A flex/grid ITEM: its parent element is a layout container.
-- `item_sizes_itself` (function) `src/page_view.c:2948` `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,
-                     ...`
-- `li_is_list_item` (function) `src/page_view.c:2964` `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,
-                    ...` -- A marker is generated by a `display:list-item` box (CSS Lists 3 3.1), which is what the UA sheet makes an <li>; an...
-- `paints` (function) `src/page_view.c:2991` `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas vacías").
- *
- * A chil...`
-- `subtree_has_own_text` (function) `src/page_view.c:3034` `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
-            ...` -- True when the subtree holds no non-blank text of its own outside skipped / hidden / closed-details subtrees...
-- `element_is_content_leaf` (function) `src/page_view.c:3054` `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
-             ...`
-- `resolve_context` (function) `src/page_view.c:3077` `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
-                ...`
-- `outermost` (function) `src/page_view.c:3305` `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);`
-- `opens` (function) `src/page_view.c:3358` `* painter applies it when the box opens (band/shared context) — seeding
-             * it onto ru...`
-- `css_inline_boxdeco` (function) `src/page_view.c:3389` `css_inline_boxdeco(&cs) &&
-                           !is_layout_item(p, sheet, style_cache))`
-- `margins` (function) `src/page_view.c:3429` `* margins (boxdef_from_style) and the painter applies them when
-                         * it ope...`
-- `container` (function) `src/page_view.c:3551` `* membership in this container (and none in any container further out,
-                 * since i...`
-- `walk` (function) `src/page_view.c:3649` `* far on this walk (they are all inside this element). */
-
-                        /* The innermo...`
-- `float` (function) `src/page_view.c:3774` `* genuinely nested float (oid != id) takes the deferred-column path. */
-    if (cont->float_oid =...`
-- `sz_count` (function) `src/page_view.c:3819` `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` -- Serialises an element subtree (the element itself included) into a fresh NUL-terminated buffer.
-- `sz_write` (function) `src/page_view.c:3833` `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)`
-- `serialize_subtree` (function) `src/page_view.c:3841` `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)`
-- `collapse_ws` (function) `src/page_view.c:3860` `static char *collapse_ws(const char *s, size_t n)` -- if (total == 0 || total > SV_MAX_INPUT) return NULL; char *buf = (char *)calloc(1, total + 1u); if (buf == NULL)...
-- `parse_dim` (function) `src/page_view.c:3884` `static int parse_dim(const lxb_char_t *s, size_t len)` -- Parses the leading non-negative integer of an HTML length attribute value (e.g. "640", "640px", "50%").
-- `present` (function) `src/page_view.c:3901` `* when no width descriptors are present (density-only or bare URLs). */
-static void srcset_best_u...`
-- `srcset_slot_width` (function) `src/page_view.c:3996` `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
-                              ...` -- Parses a sizes attribute ("(max-width: 600px) 100vw, 50vw") and returns the effective slot width in px for the given...
-- `dimensions` (function) `src/page_view.c:4042` `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
-static void srcse...`
-- `find_body` (function) `src/page_view.c:4074` `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
-- `find_root_els` (function) `src/page_view.c:4087` `static pv_root_els find_root_els(lxb_dom_node_t *root)`
-- `attributes` (function) `src/page_view.c:4101` `* carries those attributes (spec/css.md, "Root matcher"). */
-static int root_els_match(void *ctx,...`
-- `string` (function) `src/page_view.c:4112` `* Returns a heap string (caller frees) or NULL when neither carries a class —
- * NULL simply mean...`
-- `forms_free` (function) `src/page_view.c:4160` `static void forms_free(form_table *ft)`
-- `ascii_ieq` (function) `src/page_view.c:4167` `static int ascii_ieq(const char *s, const char *lit)` -- } form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void...
-- `attr_dup` (function) `src/page_view.c:4179` `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` -- Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent.
-- `forms_add` (function) `src/page_view.c:4188` `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` -- Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent.
-- `form_for` (function) `src/page_view.c:4208` `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
-                    const lxb_...` -- } lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)node); char *method = attr_dup(el, "method"...
-- `under_unrendered` (function) `src/page_view.c:4224` `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` -- Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected...
-- `collect_text` (function) `src/page_view.c:4237` `static char *collect_text(const lxb_dom_node_t *el)` -- Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of...
-- `classify_input` (function) `src/page_view.c:4261` `static pv_input_type classify_input(const char *type)`
-- `li_ordinal` (function) `src/page_view.c:4433` `static int li_ordinal(const lxb_dom_node_t *li)` -- 1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out...
-- `roman_marker` (function) `src/page_view.c:4459` `static void roman_marker(int n, int upper, char *out, size_t cap)` -- int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ?...
-- `list_marker` (function) `src/page_view.c:4484` `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
-                  ...` -- Builds the list marker for the first run of an <li>.
-- `node_table_role` (function) `src/page_view.c:4525` `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)` -- The table role of an element: its computed `display` when that names one, else the role the HTML user-agent sheet...
-- `nearest_table` (function) `src/page_view.c:4543` `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
- ...` -- const lxb_char_t *nm = lxb_dom_element_local_name(el, &nl); char tag[BX_TAG_NAME_MAX]; const char *tagp = NULL; if...
-- `parent_is_table_internal` (function) `src/page_view.c:4582` `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)` -- Nonzero when n's DIRECT parent is table structure that is not a cell -- a table, a row group, a row or a column group.
-- `nearest_cell` (function) `src/page_view.c:4609` `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
-  ...` -- if (s->type == LXB_DOM_NODE_TYPE_TEXT && text_node_is_blank(s)) continue; if (s->type == LXB_DOM_NODE_TYPE_ELEMENT...
-- `cell_has_nested_table` (function) `src/page_view.c:4624` `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)` -- Nonzero if cell has a descendant table box: it is then a structural CONTAINER, not a leaf cell.
-- `next_skip` (function) `src/page_view.c:4633` `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` -- Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the...
-- `cell_anchors` (function) `src/page_view.c:4644` `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)` -- First <a href> element in the cell's subtree, with *count receiving how many * such anchors exist, capped at 2 (only...
-- `links` (function) `src/page_view.c:4662` `* its links (the Hacker News case: every story link lives inside a <td>), so the
- * caller flows ...`
-- `flow_table` (function) `src/page_view.c:4683` `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
-- `in_flow_table_cell` (function) `src/page_view.c:4695` `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
-           ...`
-- `table` (function) `src/page_view.c:4704` `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
- * content -- their ...`
-- `table_columns` (function) `src/page_view.c:4722` `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` -- Grid column count of a table: the maximum number of logical columns across all its rows, computed by summing each...
-- `in_hidden_subtree` (function) `src/page_view.c:4796` `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
-               ...` -- Nonzero if n or any ancestor up to base has display:none (from the <style> sheet or its inline style=). display:none...
-- `in_boilerplate_subtree` (function) `src/page_view.c:4820` `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` -- Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>).
-- `in_closed_details_subtree` (function) `src/page_view.c:4835` `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` -- Nonzero if n or any ancestor up to base is inside a <details> without an `open` attribute and n is NOT inside its...
-- `pv_build` (function) `src/page_view.c:4855` `pv_status pv_build(const hp_document *doc, pv_view **out)`
-- `pv_build_ex` (function) `src/page_view.c:4859` `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
-- `pv_build_full` (function) `src/page_view.c:4863` `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
-                     ...`
-- `annotate_replaced_run` (function) `src/page_view.c:4885` `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
-                            ...` -- Attaches the layout membership a replaced run needs to take part in its surroundings: flex/grid container identity...
-- `pv_root_insets` (function) `src/page_view.c:4958` `void pv_root_insets(const css_style *body, int out[4])`
-- `collect_page_css` (function) `src/page_view.c:4968` `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
-                     ...`
-- `pv_build_styled` (function) `src/page_view.c:4997` `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
-                   ...`
-- `inside` (function) `src/page_view.c:5114` `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...`
-- `control` (function) `src/page_view.c:5439` `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
-- `px` (function) `src/page_view.c:5615` `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
-                if (iw <...`
-- `height` (function) `src/page_view.c:5696` `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
-- `block_id` (function) `src/page_view.c:5830` `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...`
-- `URL` (function) `src/page_view.c:5971` `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
-- `block` (function) `src/page_view.c:6249` `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block...`
-- `flow` (function) `src/page_view.c:6419` `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...`
-- `engine` (function) `src/page_view.c:6525` `* layout engine (contiguous item gather) drops every cell onto its own row and
-         * a 2-col...`
-- `line` (function) `src/page_view.c:6534` `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
-- `pv_css_drops` (function) `src/page_view.c:6657` `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
-                       const cha...` -- Diagnostic counterpart to pv_build_styled: same document, same collected CSS text, same @media/root-scope context...
-
-## src/pdf_export.c
-Depends on: `include/pdf_export.h`
-- `pe_safe_basename` (function) `src/pdf_export.c:25` `pe_status pe_safe_basename(const char *title, char *out, size_t outsz)`
-- `pe_build_path_ext` (function) `src/pdf_export.c:66` `pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext,
-                ...`
-- `pe_build_path` (function) `src/pdf_export.c:91` `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz)`
-- `pe_paginate` (function) `src/pdf_export.c:95` `size_t pe_paginate(const double *tops, const double *heights, size_t n,
-                   double...`
-
-## src/perf_trace.c
-Depends on: `include/perf_trace.h`
-- `pt_init` (function) `src/perf_trace.c:16` `void pt_init(pt_trace *t)`
-- `pt_elapsed_us` (function) `src/perf_trace.c:21` `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us)`
-- `pt_record` (function) `src/perf_trace.c:26` `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us)`
-- `pt_count` (function) `src/perf_trace.c:35` `size_t pt_count(const pt_trace *t, pt_stage stage)`
-- `pt_last_us` (function) `src/perf_trace.c:40` `uint64_t pt_last_us(const pt_trace *t, pt_stage stage)`
-- `pt_min_us` (function) `src/perf_trace.c:49` `uint64_t pt_min_us(const pt_trace *t, pt_stage stage)`
-- `pt_max_us` (function) `src/perf_trace.c:60` `uint64_t pt_max_us(const pt_trace *t, pt_stage stage)`
-- `cmp_u64` (function) `src/perf_trace.c:71` `static int cmp_u64(const void *a, const void *b)`
-- `pt_median_us` (function) `src/perf_trace.c:79` `uint64_t pt_median_us(const pt_trace *t, pt_stage stage)`
-- `pt_stage_name` (function) `src/perf_trace.c:89` `const char *pt_stage_name(pt_stage stage)`
-- `pt_format` (function) `src/perf_trace.c:109` `size_t pt_format(const pt_trace *t, char *buf, size_t cap)`
-
-## src/prefetch.c
-Depends on: `include/import_map.h`, `include/prefetch.h`, `include/url.h`
-- `is_ws` (function) `src/prefetch.c:26` `static int is_ws(char c)`
-- `is_name_char` (function) `src/prefetch.c:30` `static int is_name_char(char c)`
-- `lower` (function) `src/prefetch.c:35` `static int lower(int c)`
-- `ci_starts` (function) `src/prefetch.c:40` `static int ci_starts(const char *p, const char *end, const char *kw)` -- static int is_ws(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f'; } static int...
-- `ci_find` (function) `src/prefetch.c:49` `static const char *ci_find(const char *p, const char *end, const char *kw)` -- static int lower(int c) { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; } /* Case-insensitive: [p,end) starts...
-- `ci_eq_span` (function) `src/prefetch.c:58` `static int ci_eq_span(const char *s, size_t n, const char *kw)`
-- `emit` (function) `src/prefetch.c:120` `static void emit(pf_list *out, pf_kind kind, const char *val, size_t vlen)`
-- `pf_scan` (function) `src/prefetch.c:133` `int pf_scan(const char *html, size_t len, pf_list *out)`
-- `pf_list_free` (function) `src/prefetch.c:196` `void pf_list_free(pf_list *l)`
-- `js_ident_ch` (function) `src/prefetch.c:207` `static int js_ident_ch(char c)`
-- `js_skip_ws` (function) `src/prefetch.c:212` `static size_t js_skip_ws(const char *s, size_t i, size_t n)`
-- `js_skip_string` (function) `src/prefetch.c:219` `static size_t js_skip_string(const char *s, size_t i, size_t n)` -- /* --- ES module graph (spec/prefetch.md section 8) --- static int js_ident_ch(char c) { return (c >= 'a' && c <=...
-- `js_take_spec` (function) `src/prefetch.c:226` `static void js_take_spec(const char *s, size_t i, size_t n,
-                         char (*out)[...` -- static size_t js_skip_ws(const char *s, size_t i, size_t n) { while (i < n && (s[i] == ' ' || s[i] == '\t' || s[i]...
-- `pf_scan_imports` (function) `src/prefetch.c:241` `size_t pf_scan_imports(const char *js, size_t len, char (*out)[PF_SPEC_MAX], size_t cap)`
-- `pf_pool_add` (function) `src/prefetch.c:288` `int pf_pool_add(pf_pool *p, const char *url)`
-- `pf_is_js` (function) `src/prefetch.c:311` `static int pf_is_js(const char *url, const char *ctype)`
-- `pf_url_cb` (function) `src/prefetch.c:319` `static int pf_url_cb(void *ctx, const char *base, const char *ref, char *out, size_t outsz)`
-- `pf_url_shaped` (function) `src/prefetch.c:324` `static int pf_url_shaped(const char *sp)`
-- `pf_follow_imports` (function) `src/prefetch.c:333` `static void pf_follow_imports(pf_pool *p, const char *base, const char *body, size_t len)` -- Queues the static imports of a fetched module body, resolved the way the module loader resolves them: through the...
-- `pf_worker` (function) `src/prefetch.c:349` `static void *pf_worker(void *arg)`
-- `pf_pool_start` (function) `src/prefetch.c:387` `int pf_pool_start(pf_pool *p, const char *const *urls, size_t nurls,
-                  pf_fetch_f...`
-- `pool_start` (function) `src/prefetch.c:394` `static int pool_start(pf_pool *p, const char *const *urls, size_t nurls,
-                      pf...` -- map (owned on success) is set BEFORE the threads start: they read it after a * fetch, unlocked, and it never changes...
-- `pf_pool_take` (function) `src/prefetch.c:444` `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status,
-                 char **body,...`
-- `pf_find_importmap` (function) `src/prefetch.c:483` `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n)`
-- `pf_pool_start_page` (function) `src/prefetch.c:504` `int pf_pool_start_page(pf_pool *p, const char *html, size_t len, const char *page_url,
-          ...`
-- `pf_pool_finish` (function) `src/prefetch.c:540` `void pf_pool_finish(pf_pool *p)`
-- `pf_pooled_fetch` (function) `src/prefetch.c:561` `int pf_pooled_fetch(void *vctx, const char *method, const char *url,
-                    const ch...`
-
-## src/prefs.c
-Depends on: `include/prefs.h`, `include/zoom.h`
-- `url_valid` (function) `src/prefs.c:26` `static int url_valid(const char *url)` -- A representable URL: 1..PREFS_MAX_URL-1 bytes, no control bytes, no DEL. * Space is allowed (local paths may carry...
-- `title_clean` (function) `src/prefs.c:39` `static char *title_clean(const char *src)` -- Copies src into a fresh buffer, mapping control bytes/DEL to ' ' and truncating to PREFS_MAX_TITLE bytes on a UTF-8...
-- `prefs_init` (function) `src/prefs.c:66` `void prefs_init(prefs_state *p)`
-- `prefs_free` (function) `src/prefs.c:74` `void prefs_free(prefs_state *p)`
-- `bookmark_push` (function) `src/prefs.c:91` `static prefs_status bookmark_push(prefs_state *p, const char *url, const char *title)` -- Appends a cleaned bookmark.
-- `history_push_back` (function) `src/prefs.c:109` `static prefs_status history_push_back(prefs_state *p, const char *url)` -- Appends a history entry at the BACK preserving document order (parser path; * the API path inserts at the front).
-- `prefs_bookmark_index` (function) `src/prefs.c:125` `int prefs_bookmark_index(const prefs_state *p, const char *url)`
-- `prefs_bookmark_toggle` (function) `src/prefs.c:132` `prefs_status prefs_bookmark_toggle(prefs_state *p, const char *url,
-                             ...`
-- `prefs_history_add` (function) `src/prefs.c:152` `prefs_status prefs_history_add(prefs_state *p, const char *url)`
-- `prefs_format` (function) `src/prefs.c:183` `prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len)`
-- `apply_kv` (function) `src/prefs.c:225` `static void apply_kv(prefs_state *out, const char *key, long val)` -- } for (size_t i = 0; i < p->history_len; ++i) { size_t space = cap - n; if (space == 0) break; int r = snprintf(buf...
-- `prefs_parse` (function) `src/prefs.c:241` `prefs_status prefs_parse(const char *text, size_t len, prefs_state *out)`
-- `ci_eq` (function) `src/prefs.c:300` `static int ci_eq(char a, char b)`
-- `ci_starts` (function) `src/prefs.c:306` `static int ci_starts(const char *s, const char *q)`
-- `ci_contains` (function) `src/prefs.c:314` `static int ci_contains(const char *s, const char *q)`
-- `url_prefix_match` (function) `src/prefs.c:323` `static int url_prefix_match(const char *url, const char *q)` -- Prefix match as the user types it: the raw URL, past the scheme, and past a * leading "www." ("wiki" hits...
-- `sugg_push` (function) `src/prefs.c:335` `static void sugg_push(char *out, size_t row_len, int max_rows, int *n,
-                      cons...` -- Prefix match as the user types it: the raw URL, past the scheme, and past a * leading "www." ("wiki" hits...
-- `prefs_suggest` (function) `src/prefs.c:344` `int prefs_suggest(const prefs_state *p, const char *query,
-                  char *out, size_t ro...`
-- `sb_put` (function) `src/prefs.c:369` `static void sb_put(sbuf *b, const char *s, size_t n)`
-- `sb_str` (function) `src/prefs.c:384` `static void sb_str(sbuf *b, const char *s)`
-- `sb_esc` (function) `src/prefs.c:387` `static void sb_esc(sbuf *b, const char *s)` -- while (nc < b->len + n + 1) nc *= 2; char *nd = (char *)realloc(b->data, nc); if (nd == NULL) { b->oom = 1; return...
-- `sb_link_item` (function) `src/prefs.c:400` `static void sb_link_item(sbuf *b, const char *url, const char *label)`
-- `prefs_bookmarks_page` (function) `src/prefs.c:408` `prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_len)`
-
-## src/profile.c
-Depends on: `include/disk_store.h`, `include/profile.h`
-- `join_path` (function) `src/profile.c:29` `static int join_path(const profile_ctx *ctx, const char *name,
-                     char *out, si...`
-- `keyfile_create` (function) `src/profile.c:36` `static profile_status keyfile_create(const char *dir, const char *path,
-                         ...` -- #include <unistd.h> #include <openssl/crypto.h> #include <openssl/rand.h> #define PROFILE_KEYFILE_LEN (LS_SALT_LEN +...
-- `profile_open` (function) `src/profile.c:59` `profile_status profile_open(profile_ctx *ctx, const char *dir)`
-- `map_ds` (function) `src/profile.c:98` `static profile_status map_ds(ds_status ds)`
-- `profile_load` (function) `src/profile.c:112` `profile_status profile_load(const profile_ctx *ctx, prefs_state *out)`
-- `profile_save` (function) `src/profile.c:133` `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p)`
-- `profile_close` (function) `src/profile.c:149` `void profile_close(profile_ctx *ctx)`
 
 
 Next: [API_p9.md](API_p9.md)

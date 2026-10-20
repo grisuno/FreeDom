@@ -1,0 +1,1 @@
+.a{border-top:linear-gradient(#fff0,#fff 25%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-c,#0000) border-box,none}

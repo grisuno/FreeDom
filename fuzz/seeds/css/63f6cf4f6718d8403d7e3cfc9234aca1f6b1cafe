@@ -1,0 +1,3 @@
+.a{border-top:lor;mask-composite:exclude;mask-clip:padding-box}
+.b{mask:linear-gradient(90de-box,linear-gradcent(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;mask-clip:padding-box}
+.b{mask:linear-gradient(90deg,#000,#0000) border-box,none}

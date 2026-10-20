@@ -1,6 +1,6 @@
 # src
 
-src groups 59 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document.
+src groups 61 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document.
 
 ```mermaid
 graph LR
@@ -27,7 +27,7 @@ include groups 16 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, h
 
 ## src (1.3)
 
-src groups 22 files (c, h) around FREEDOM_JS_DOM_EXT_H, jdx_install, FREEDOM_JS_DOM_INTERNAL_H, jd_opaque_get, jd_idx. to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
+src groups 24 files (c, h) around FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install, FREEDOM_JS_DOM_EXT_H, jdx_install, FREEDOM_JS_DOM_INTERNAL_H. to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
 
 ## tests (1.4)
 
@@ -62,6 +62,8 @@ tests groups 13 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_n
 - src/dom.c
 - src/freebug.c
 - src/html_parse.c
+- src/js_custom_elements.c
+- src/js_custom_elements.h
 - src/js_dom.c
 - src/js_dom_ext.c
 - src/js_dom_ext.h

@@ -10,6 +10,7 @@
 #include "css_length.h"
 #include "css_values.h"
 #include "css_gradient.h"
+#include "css_mask.h"
 #include "css_box.h"
 #include "css_text.h"
 #include "webfont.h"
@@ -742,6 +743,7 @@ static int interp_mix_blend_mode(const char *v) {
     if (csel_ci_eq(v, "exclusion"))    return CSS_MB_EXCLUSION;
     if (csel_ci_eq(v, "hue"))          return CSS_MB_HUE;
     if (csel_ci_eq(v, "saturation"))   return CSS_MB_SATURATION;
+    if (csel_ci_eq(v, "plus-lighter")) return CSS_MB_PLUS_LIGHTER;
     if (csel_ci_eq(v, "color"))        return CSS_MB_COLOR;
     if (csel_ci_eq(v, "luminosity"))   return CSS_MB_LUMINOSITY;
     return -1;
@@ -3627,6 +3629,9 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         dst[1].prop = P_BG_ALPHA; dst[1].ival = bg_alpha_of(val);
         return 2;
     }
+    /* mask: alpha gradients only (css_mask.c, spec/css_mask.md). The -webkit- spelling reaches
+     * here without its prefix; its composite vocabulary (xor, source-in, ...) is accepted. */
+    if (cm_is_mask_prop(prop)) return cm_expand(prop, val, dst, cap, 1);
     if (strcmp(prop, "background") == 0)
         return expand_background(val, dst, cap, urltab, nurl, urlcap);
     if (strcmp(prop, "background-image") == 0)
@@ -5475,6 +5480,18 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_BG_GRAD_ANGLE: o->bg_grad_angle = d->ival; break;
             case P_BG_GRAD_N:     o->bg_grad_n = d->ival; break;
             case P_BG_GRAD_RADIAL: o->bg_grad_radial = d->ival; break;
+            case P_MASK_N:    o->mask_n = d->ival; break;
+            case P_MASK_COMP: o->mask_comp = d->ival; break;
+            case P_MASK_CLIP: o->mask_clip = d->ival; break;
+            case P_MASK_L0A: case P_MASK_L0B: case P_MASK_L0C:
+                o->mask_w[d->prop - P_MASK_L0A] = d->ival; break;
+            case P_MASK_L1A: case P_MASK_L1B: case P_MASK_L1C:
+                o->mask_w[3 + (d->prop - P_MASK_L1A)] = d->ival; break;
+            case P_BG_RAD_SIZE: o->bg_rad_size = d->ival; break;
+            case P_BG_RAD_CX:   o->bg_rad_cx = d->ival; break;
+            case P_BG_RAD_CY:   o->bg_rad_cy = d->ival; break;
+            case P_BG_RAD_RX:   o->bg_rad_rx = d->ival; break;
+            case P_BG_RAD_RY:   o->bg_rad_ry = d->ival; break;
             case P_BG_GRAD_C0: case P_BG_GRAD_C1:
             case P_BG_GRAD_C2: case P_BG_GRAD_C3:
                 o->bg_grad_c[d->prop - P_BG_GRAD_C0] = d->ival; break;
@@ -5845,8 +5862,22 @@ double css_computed_font_size(const css_style *o, double inherited_px) {
     return fs;
 }
 
+double css_ua_heading_em(int level) {
+    static const double em[7] = { 1.0, 2.0, 1.5, 1.17, 1.0, 0.83, 0.67 };
+    return (level >= 1 && level <= 6) ? em[level] : 1.0;
+}
+
+double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag) {
+    double fs = css_computed_font_size(o, inherited_px);
+    if (o != NULL && o->font_scale != 0) return fs;   /* the author's size replaces the UA's */
+    if (tag == NULL || tag[0] != 'h' || tag[1] < '1' || tag[1] > '6' || tag[2] != '\0') return fs;
+    fs *= css_ua_heading_em(tag[1] - '0');
+    return (isfinite(fs) && fs > 0.0 && fs <= (double)CSS_FONT_SIZE_MAX) ? fs : css_computed_font_size(o, inherited_px);
+}
+
 static double computed_font_size(const css_style *o, const css_element *el) {
-    return css_computed_font_size(o, (el != NULL) ? el->font_size : 0.0);
+    return css_computed_font_size_for_tag(o, (el != NULL) ? el->font_size : 0.0,
+                                          (el != NULL) ? el->tag : NULL);
 }
 
 /* One matched selector, remembered between the passes of the element cascade. */
@@ -6142,6 +6173,8 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
         .text_decoration_thickness = -1,
         .aspect_num = 0, .aspect_den = 0,
         .bg_grad_n = 0, .bg_grad_angle = 180, .bg_grad_radial = 0,
+        .bg_rad_size = 0, .bg_rad_cx = 500, .bg_rad_cy = 500,
+        .bg_rad_rx = CG_LEN_UNSET, .bg_rad_ry = CG_LEN_UNSET,
         .bg_grad_c = { -1, -1, -1, -1 },
         .bg_grad_pos = { -1, -1, -1, -1 },
         .transform_tx = CSS_LEN_UNSET, .transform_ty = CSS_LEN_UNSET,

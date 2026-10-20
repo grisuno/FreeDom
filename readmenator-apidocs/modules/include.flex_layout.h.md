@@ -485,7 +485,7 @@ NULL/empty/blank -> 0. Comparing hashes rather than strings is what lets an item
 
 ### `fx_auto_min_size`
 
-`function` | [include/flex_layout.h:263](../../include/flex_layout.h#L263)
+`function` | [include/flex_layout.h:265](../../include/flex_layout.h#L265)
 
 ```c
 double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);
@@ -498,9 +498,11 @@ This is what `min-width: auto` -- the INITIAL value, so the case for almost ever
 min_content  the item's min-content size (its longest unbreakable word, or a
                replaced element's intrinsic size), in the same border-box+margin
                units as fx_item.basis. Negative is treated as 0.
-  basis        the item's base size, used as the "specified size suggestion": the
-               content-based minimum is clamped by it, so an item the author sized
-               small is not inflated by one long word. Negative is treated as 0.
+  basis        the item's SPECIFIED size (its declared `width`, in the same units),
+               the "specified size suggestion": the content-based minimum is clamped
+               by it, so an item the author sized small is not inflated by one long
+               word. Negative means no specified size and leaves the minimum at
+               min-content; a flex-basis is NOT a specified size.
   author_min   the author's own `min-width` in px when they set one (min-width is
                then NOT `auto` and wins outright, larger OR smaller), or < 0 when
                unset.
@@ -527,7 +529,7 @@ Pure, total, no allocation. The result is never negative.
 
 ### `fx_justify_name`
 
-`function` `const` | [include/flex_layout.h:319](../../include/flex_layout.h#L319)
+`function` `const` | [include/flex_layout.h:321](../../include/flex_layout.h#L321)
 
 ```c
 const char *fx_justify_name(fx_justify j);
@@ -551,7 +553,7 @@ Never NULL; an unknown enum value yields "start".
 
 ### `height`
 
-`function` | [include/flex_layout.h:325](../../include/flex_layout.h#L325)
+`function` | [include/flex_layout.h:327](../../include/flex_layout.h#L327)
 
 ```c
 * used height (h_out);
@@ -565,7 +567,7 @@ Never NULL; an unknown enum value yields "start".
 
 ### `it`
 
-`function` | [include/flex_layout.h:342](../../include/flex_layout.h#L342)
+`function` | [include/flex_layout.h:344](../../include/flex_layout.h#L344)
 
 ```c
 * children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else equally among the auto margins in * mauto[i] (FX_MAUTO_TOP -> before[i], FX_MAUTO_BOTT
@@ -586,7 +588,7 @@ Never NULL; an unknown enum value yields "start".
 
 ### `win`
 
-`function` | [include/flex_layout.h:350](../../include/flex_layout.h#L350)
+`function` | [include/flex_layout.h:352](../../include/flex_layout.h#L352)
 
 ```c
 * margins win (both = centre, left only = end);
@@ -606,7 +608,7 @@ Never NULL; an unknown enum value yields "start".
 
 ### `fx_cross_offset`
 
-`function` | [include/flex_layout.h:352](../../include/flex_layout.h#L352)
+`function` | [include/flex_layout.h:354](../../include/flex_layout.h#L354)
 
 ```c
 double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);
@@ -775,7 +777,7 @@ A float wider than its container must still leave a usable line rather than a ze
 
 ### `FX_MAX_COLUMNS`
 
-`macro` | [include/flex_layout.h:268](../../include/flex_layout.h#L268)
+`macro` | [include/flex_layout.h:270](../../include/flex_layout.h#L270)
 
 ```c
 #define FX_MAX_COLUMNS
@@ -791,7 +793,7 @@ A larger `column-count` is clamped to it; real stylesheets ask for two to four.
 
 ### `FX_MAUTO_TOP`
 
-`macro` | [include/flex_layout.h:335](../../include/flex_layout.h#L335)
+`macro` | [include/flex_layout.h:337](../../include/flex_layout.h#L337)
 
 ```c
 #define FX_MAUTO_TOP
@@ -805,7 +807,7 @@ As fx_column_place, plus each item's main-axis auto margins (mauto[i]: bits FX_M
 
 ### `FX_MAUTO_BOTTOM`
 
-`macro` | [include/flex_layout.h:336](../../include/flex_layout.h#L336)
+`macro` | [include/flex_layout.h:338](../../include/flex_layout.h#L338)
 
 ```c
 #define FX_MAUTO_BOTTOM

@@ -441,7 +441,7 @@ void *js_context_raw(js_context *ctx)
 
 ### `js_set_module_host`
 
-`function` | [src/js_sandbox.c:588](../../src/js_sandbox.c#L588)
+`function` | [src/js_sandbox.c:591](../../src/js_sandbox.c#L591)
 
 ```c
 void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host)
@@ -468,7 +468,7 @@ NULL functions uninstall it (every import then fails).
 
 ### `js_eval_module`
 
-`function` | [src/js_sandbox.c:613](../../src/js_sandbox.c#L613)
+`function` | [src/js_sandbox.c:621](../../src/js_sandbox.c#L621)
 
 ```c
 js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name, js_result *res)
@@ -496,7 +496,7 @@ js_status js_eval_module(js_context *ctx, const char *src, size_t len, const cha
 
 ### `js_install_realms`
 
-`function` | [src/js_sandbox.c:775](../../src/js_sandbox.c#L775)
+`function` | [src/js_sandbox.c:783](../../src/js_sandbox.c#L783)
 
 ```c
 js_status js_install_realms(js_context *ctx)

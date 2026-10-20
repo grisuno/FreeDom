@@ -14,6 +14,7 @@
 #define _GNU_SOURCE
 
 #include "tab.h"
+#include "css_gradient.h"
 #include "flex_layout.h"
 
 #include "anti_fp.h"
@@ -63,8 +64,17 @@ static void ignore_sigpipe(void);
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
 #define TAB_WIRE_B_N 67
-#define TAB_WIRE_BOX_F_N 247
+#define TAB_WIRE_BOX_F_N 263
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
+
+/* A radial-gradient length off the wire (cg_radial encoding): per-mille 0..1e6, or
+ * -(px)-1 with px <= 100000, or CG_LEN_UNSET. Anything else is the caller's default. */
+static int rad_len_ok(int32_t v, int dflt) {
+    if (v == CG_LEN_UNSET) return v;
+    if (v >= 0 && v <= 1000000) return v;
+    if (v < 0 && v >= -100001) return v;
+    return dflt;
+}
 
 /* Anti-amplification cap on the number of display-list runs the parent will
  * accept from the (possibly exploited) child. Plenty for any real page. */
@@ -661,6 +671,15 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->bsh_x[2][3], (int32_t)bd->bsh_x[2][4], (int32_t)bd->bsh_x[2][5],
             /* unresolved height percentage of an absolute box (read_view mirrors). */
             (int32_t)bd->box_h_pct,
+            /* radial-gradient geometry, 2026-10-20 */
+            (int32_t)bd->bg_rad_size, (int32_t)bd->bg_rad_cx, (int32_t)bd->bg_rad_cy,
+            (int32_t)bd->bg_rad_rx, (int32_t)bd->bg_rad_ry,
+            (int32_t)bd->canvas_bg,
+            /* mask, 2026-10-20 */
+            (int32_t)bd->mask_n, (int32_t)bd->mask_comp, (int32_t)bd->mask_clip,
+            (int32_t)bd->mask_w[0], (int32_t)bd->mask_w[1], (int32_t)bd->mask_w[2],
+            (int32_t)bd->mask_w[3], (int32_t)bd->mask_w[4], (int32_t)bd->mask_w[5],
+            (int32_t)bd->mask_ref1,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1231,6 +1250,9 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             free(ext_body);
             /* Drain promise microtasks queued by this script (e.g. fetch().then),
              * so continuations run before the next script / view derivation. */
+            (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
+            /* Custom elements: upgrade what this script defined, run the lifecycle. */
+            jd_flush_custom_elements(cs->js);
             (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
         }
         } /* pass loop: sync first, then deferred */
@@ -2400,6 +2422,20 @@ static int read_view(int fd, pv_view **out) {
             .col_mauto = f[226] & (PV_MAUTO_TOP | PV_MAUTO_BOTTOM),
             .bsh_n = (f[227] >= 0 && f[227] <= PV_BSHADOW_LAYERS) ? f[227] : 0,
             .box_h_pct = (f[246] >= 0 && f[246] <= 100000) ? f[246] : 0,
+            /* radial geometry from the confined worker: every field re-validated */
+            .bg_rad_size = (f[247] >= 0 && f[247] <= 16 + 4) ? f[247] : 0,
+            .bg_rad_cx = rad_len_ok(f[248], 500),
+            .bg_rad_cy = rad_len_ok(f[249], 500),
+            .bg_rad_rx = rad_len_ok(f[250], CG_LEN_UNSET),
+            .bg_rad_ry = rad_len_ok(f[251], CG_LEN_UNSET),
+            .canvas_bg = (f[252] == 1) ? 1 : 0,
+            /* mask from the confined worker: counts and enums clamped, the layer words are
+             * decoded defensively by cm_decode_layer */
+            .mask_n = (f[253] >= 0 && f[253] <= 2) ? f[253] : 0,
+            .mask_comp = (f[254] >= 0 && f[254] <= 3) ? f[254] : 0,
+            .mask_clip = (f[255] >= 0 && f[255] <= 15) ? f[255] : 0,
+            .mask_w = { f[256], f[257], f[258], f[259], f[260], f[261] },
+            .mask_ref1 = (f[262] >= 0 && f[262] <= 1024) ? f[262] : 0,
         };
         for (int k = 0; k < (PV_BSHADOW_LAYERS - 1) * 6; ++k)
             bd.bsh_x[k / 6][k % 6] = f[228 + k];

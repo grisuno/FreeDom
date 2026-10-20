@@ -1,0 +1,2 @@
+.a{mask-image:linear-gradient(#fff0,#fff 25%);-webr;mask-comor;mask-composite:excludeccccc;mask-clip:padding-box}
+.b{mask:linear-gradient(90deg,#000,#0000) border-box,none}

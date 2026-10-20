@@ -176,6 +176,10 @@
 - [`buf`](modules/include.textfield.h.md#buf) type_alias in `include/textfield.h`
 - [`buffer`](modules/src.tab.c.md#buffer) function in `src/tab.c`
 - [`BUI_CONIC_SLICES`](modules/gui.browser_ui.c.md#bui_conic_slices) macro in `gui/browser_ui.c`
+- [`bui_mask_ctx`](modules/gui.browser_ui.c.md#bui_mask_ctx) struct in `gui/browser_ui.c`
+- [`bui_pop_group_composite`](modules/gui.browser_ui.c.md#bui_pop_group_composite) function in `gui/browser_ui.c`
+- [`bui_pop_group_composite`](modules/gui.browser_ui.c.md#bui_pop_group_composite) function in `gui/browser_ui.c`
+- [`bui_pop_group_composite`](modules/gui.browser_ui.c.md#bui_pop_group_composite) function in `gui/browser_ui.c`
 - [`builder`](modules/src.page_view.c.md#builder) function in `src/page_view.c`
 - [`builds`](modules/gui.browser_ui.c.md#builds) function in `gui/browser_ui.c`
 - [`built`](modules/src.css_select.c.md#built) function in `src/css_select.c`
@@ -337,6 +341,21 @@
 - [`cg_expand_background`](modules/include.css_gradient.h.md#cg_expand_background) function in `include/css_gradient.h`
 - [`cg_expand_background`](modules/src.css_gradient.c.md#cg_expand_background) function in `src/css_gradient.c`
 - [`cg_expand_bg_image`](modules/include.css_gradient.h.md#cg_expand_bg_image) function in `include/css_gradient.h`
+- [`CG_LEN_UNSET`](modules/include.css_gradient.h.md#cg_len_unset) macro in `include/css_gradient.h`
+- [`cg_parse_linear`](modules/include.css_gradient.h.md#cg_parse_linear) function in `include/css_gradient.h`
+- [`cg_parse_linear`](modules/src.css_gradient.c.md#cg_parse_linear) function in `src/css_gradient.c`
+- [`cg_parse_radial_prelude`](modules/src.css_gradient.c.md#cg_parse_radial_prelude) function in `src/css_gradient.c`
+- [`CG_RAD_FLOOR`](modules/src.css_gradient.c.md#cg_rad_floor) macro in `src/css_gradient.c`
+- [`CG_RAD_PM_MAX`](modules/src.css_gradient.c.md#cg_rad_pm_max) macro in `src/css_gradient.c`
+- [`CG_RAD_PX_MAX`](modules/src.css_gradient.c.md#cg_rad_px_max) macro in `src/css_gradient.c`
+- [`CG_RAD_TOKENS`](modules/src.css_gradient.c.md#cg_rad_tokens) macro in `src/css_gradient.c`
+- [`cg_radial`](modules/include.css_gradient.h.md#cg_radial) struct in `include/css_gradient.h`
+- [`cg_radial_geometry`](modules/src.css_gradient.c.md#cg_radial_geometry) function in `src/css_gradient.c`
+- [`cg_radial_len_px`](modules/include.css_gradient.h.md#cg_radial_len_px) function in `include/css_gradient.h`
+- [`cg_radial_len_px`](modules/src.css_gradient.c.md#cg_radial_len_px) function in `src/css_gradient.c`
+- [`cg_radial_shape`](modules/include.css_gradient.h.md#cg_radial_shape) enum in `include/css_gradient.h`
+- [`cg_radial_size`](modules/include.css_gradient.h.md#cg_radial_size) enum in `include/css_gradient.h`
+- [`CG_SQRT2`](modules/src.css_gradient.c.md#cg_sqrt2) macro in `src/css_gradient.c`
 - [`chain`](modules/gui.browser_ui.c.md#chain) function in `gui/browser_ui.c`
 - [`chain`](modules/include.tls_impersonate.h.md#chain) function in `include/tls_impersonate.h`
 - [`chain`](modules/src.page_view.c.md#chain) type_alias in `src/page_view.c`
@@ -378,6 +397,19 @@
 - [`closed`](modules/include.box_tree.h.md#closed) function in `include/box_tree.h`
 - [`closed`](modules/include.data_url.h.md#closed) function in `include/data_url.h`
 - [`closed`](modules/include.profile.h.md#closed) function in `include/profile.h`
+- [`cm_clip`](modules/include.css_mask.h.md#cm_clip) enum in `include/css_mask.h`
+- [`cm_comp`](modules/include.css_mask.h.md#cm_comp) enum in `include/css_mask.h`
+- [`cm_decode_layer`](modules/include.css_mask.h.md#cm_decode_layer) function in `include/css_mask.h`
+- [`cm_decode_layer`](modules/src.css_mask.c.md#cm_decode_layer) function in `src/css_mask.c`
+- [`cm_encode_layer`](modules/include.css_mask.h.md#cm_encode_layer) function in `include/css_mask.h`
+- [`cm_encode_layer`](modules/src.css_mask.c.md#cm_encode_layer) function in `src/css_mask.c`
+- [`cm_expand`](modules/src.css_mask.c.md#cm_expand) function in `src/css_mask.c`
+- [`cm_is_mask_prop`](modules/include.css_mask.h.md#cm_is_mask_prop) function in `include/css_mask.h`
+- [`cm_is_mask_prop`](modules/src.css_mask.c.md#cm_is_mask_prop) function in `src/css_mask.c`
+- [`cm_layer`](modules/include.css_mask.h.md#cm_layer) struct in `include/css_mask.h`
+- [`CM_LAYERS`](modules/include.css_mask.h.md#cm_layers) macro in `include/css_mask.h`
+- [`CM_MAX_TOKS`](modules/src.css_mask.c.md#cm_max_toks) macro in `src/css_mask.c`
+- [`CM_TOK_MAX`](modules/src.css_mask.c.md#cm_tok_max) macro in `src/css_mask.c`
 - [`CMQ_CM_PER_IN`](modules/src.css_mq.c.md#cmq_cm_per_in) macro in `src/css_mq.c`
 - [`CMQ_COLOR_BITS`](modules/src.css_mq.c.md#cmq_color_bits) macro in `src/css_mq.c`
 - [`CMQ_DEVICE_W`](modules/src.css_mq.c.md#cmq_device_w) macro in `src/css_mq.c`
@@ -472,6 +504,7 @@
 - [`css_column_fill`](modules/include.css.h.md#css_column_fill) enum in `include/css.h`
 - [`css_column_span`](modules/include.css.h.md#css_column_span) enum in `include/css.h`
 - [`css_compound`](modules/include.css_select.h.md#css_compound) struct in `include/css_select.h`
+- [`css_computed_font_size_for_tag`](modules/src.css.c.md#css_computed_font_size_for_tag) function in `src/css.c`
 - [`CSS_CONTAIN_LAYOUT`](modules/include.css.h.md#css_contain_layout) macro in `include/css.h`
 - [`CSS_CONTAIN_PAINT`](modules/include.css.h.md#css_contain_paint) macro in `include/css.h`
 - [`CSS_CONTAIN_SIZE`](modules/include.css.h.md#css_contain_size) macro in `include/css.h`
@@ -614,6 +647,8 @@
 - [`css_text_transform`](modules/include.css.h.md#css_text_transform) enum in `include/css.h`
 - [`CSS_TOK_MAX`](modules/include.css_select.h.md#css_tok_max) macro in `include/css_select.h`
 - [`css_touch_action`](modules/include.css.h.md#css_touch_action) enum in `include/css.h`
+- [`css_ua_heading_em`](modules/include.css.h.md#css_ua_heading_em) function in `include/css.h`
+- [`css_ua_heading_em`](modules/src.css.c.md#css_ua_heading_em) function in `src/css.c`
 - [`CSS_URL_MAX`](modules/include.css.h.md#css_url_max) macro in `include/css.h`
 - [`css_user_select`](modules/include.css.h.md#css_user_select) enum in `include/css.h`
 - [`css_valign`](modules/include.css.h.md#css_valign) enum in `include/css.h`
@@ -657,6 +692,8 @@
 - [`cv_bg_alpha_of`](modules/src.css_values.c.md#cv_bg_alpha_of) function in `src/css_values.c`
 - [`cv_color_ok`](modules/include.css_values.h.md#cv_color_ok) function in `include/css_values.h`
 - [`cv_color_ok`](modules/src.css_values.c.md#cv_color_ok) function in `src/css_values.c`
+- [`cv_filter_scale`](modules/include.css_values.h.md#cv_filter_scale) function in `include/css_values.h`
+- [`cv_filter_scale`](modules/src.css_values.c.md#cv_filter_scale) function in `src/css_values.c`
 - [`cv_interp_bg`](modules/include.css_values.h.md#cv_interp_bg) function in `include/css_values.h`
 - [`cv_interp_bg`](modules/src.css_values.c.md#cv_interp_bg) function in `src/css_values.c`
 - [`cv_interp_color`](modules/include.css_values.h.md#cv_interp_color) function in `include/css_values.h`
@@ -1168,6 +1205,7 @@
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.os_sandbox.c.md#_gnu_source) macro in `src/os_sandbox.c`
 - [`_GNU_SOURCE`](modules/src.tab.c.md#_gnu_source) macro in `src/tab.c`
 - [`gradient`](modules/src.css_gradient.c.md#gradient) function in `src/css_gradient.c`
@@ -1206,6 +1244,20 @@
 - [`hb_set`](modules/src.hostblock.c.md#hb_set) struct in `src/hostblock.c`
 - [`hb_status`](modules/include.hostblock.h.md#hb_status) enum in `include/hostblock.h`
 - [`hb_table`](modules/src.hostblock.c.md#hb_table) struct in `src/hostblock.c`
+- [`hcf_dirs`](modules/include.host_conf.h.md#hcf_dirs) struct in `include/host_conf.h`
+- [`hcf_load_allowlist`](modules/include.host_conf.h.md#hcf_load_allowlist) function in `include/host_conf.h`
+- [`hcf_load_allowlist`](modules/src.host_conf.c.md#hcf_load_allowlist) function in `src/host_conf.c`
+- [`hcf_load_filter`](modules/include.host_conf.h.md#hcf_load_filter) function in `include/host_conf.h`
+- [`hcf_load_filter`](modules/src.host_conf.c.md#hcf_load_filter) function in `src/host_conf.c`
+- [`HCF_MAX_DIRS`](modules/include.host_conf.h.md#hcf_max_dirs) macro in `include/host_conf.h`
+- [`HCF_MAX_FILE_BYTES`](modules/include.host_conf.h.md#hcf_max_file_bytes) macro in `include/host_conf.h`
+- [`HCF_PATH_MAX`](modules/include.host_conf.h.md#hcf_path_max) macro in `include/host_conf.h`
+- [`HCF_REPO_DIR`](modules/src.host_conf.c.md#hcf_repo_dir) macro in `src/host_conf.c`
+- [`hcf_search_dirs`](modules/include.host_conf.h.md#hcf_search_dirs) function in `include/host_conf.h`
+- [`hcf_search_dirs`](modules/src.host_conf.c.md#hcf_search_dirs) function in `src/host_conf.c`
+- [`hcf_search_dirs_from_env`](modules/include.host_conf.h.md#hcf_search_dirs_from_env) function in `include/host_conf.h`
+- [`hcf_search_dirs_from_env`](modules/src.host_conf.c.md#hcf_search_dirs_from_env) function in `src/host_conf.c`
+- [`HCF_USER_SUBDIR`](modules/src.host_conf.c.md#hcf_user_subdir) macro in `src/host_conf.c`
 - [`he_make_line`](modules/src.hostedit.c.md#he_make_line) function in `src/hostedit.c`
 - [`HE_MAX_HOST`](modules/include.hostedit.h.md#he_max_host) macro in `include/hostedit.h`
 - [`he_status`](modules/include.hostedit.h.md#he_status) enum in `include/hostedit.h`
@@ -1397,6 +1449,8 @@
 - [`jd_fire_click`](modules/src.js_events.c.md#jd_fire_click) function in `src/js_events.c`
 - [`jd_fire_mouse_event`](modules/src.js_events.c.md#jd_fire_mouse_event) function in `src/js_events.c`
 - [`jd_fire_submit`](modules/src.js_events.c.md#jd_fire_submit) function in `src/js_events.c`
+- [`jd_flush_custom_elements`](modules/include.js_dom.h.md#jd_flush_custom_elements) function in `include/js_dom.h`
+- [`jd_flush_custom_elements`](modules/src.js_dom.c.md#jd_flush_custom_elements) function in `src/js_dom.c`
 - [`jd_get_cookies`](modules/include.js_dom.h.md#jd_get_cookies) function in `include/js_dom.h`
 - [`jd_get_cookies`](modules/src.js_dom.c.md#jd_get_cookies) function in `src/js_dom.c`
 - [`jd_handle`](modules/src.js_dom.c.md#jd_handle) function in `src/js_dom.c`
@@ -1429,6 +1483,8 @@
 - [`jd_take_nav_request`](modules/src.js_location.c.md#jd_take_nav_request) function in `src/js_location.c`
 - [`jd_video_from_scripts`](modules/include.js_dom.h.md#jd_video_from_scripts) function in `include/js_dom.h`
 - [`jd_video_from_scripts`](modules/src.js_embed.c.md#jd_video_from_scripts) function in `src/js_embed.c`
+- [`jdce_install`](modules/src.js_custom_elements.c.md#jdce_install) function in `src/js_custom_elements.c`
+- [`jdce_install`](modules/src.js_custom_elements.h.md#jdce_install) function in `src/js_custom_elements.h`
 - [`jdx_install`](modules/src.js_dom_ext.c.md#jdx_install) function in `src/js_dom_ext.c`
 - [`jdx_install`](modules/src.js_dom_ext.h.md#jdx_install) function in `src/js_dom_ext.h`
 - [`je_install`](modules/src.js_env.c.md#je_install) function in `src/js_env.c`
@@ -1551,6 +1607,7 @@
 - [`key`](modules/gui.browser_ui.c.md#key) function in `gui/browser_ui.c`
 - [`key`](modules/include.css_index.h.md#key) type_alias in `include/css_index.h`
 - [`key_ref`](modules/src.web_storage.c.md#key_ref) struct in `src/web_storage.c`
+- [`kind`](modules/include.css_mask.h.md#cm_layer-kind) type_alias of `cm_layer` in `include/css_mask.h`
 - [`kind`](modules/include.css_select.h.md#css_pseudo_match-kind) type_alias of `css_pseudo_match` in `include/css_select.h`
 - [`kind`](modules/gui.browser_ui.c.md#kind) type_alias in `gui/browser_ui.c`
 - [`kind`](modules/include.form.h.md#kind) type_alias in `include/form.h`
@@ -1672,6 +1729,7 @@
 - [`main`](modules/tools.pngprof.py.md#main) function in `tools.pngprof`
 - [`main`](modules/tools.prune.py.md#main) function in `tools.prune`
 - [`main`](modules/tools.snapshot.py.md#main) function in `tools.snapshot`
+- [`malformed`](modules/include.css_mask.h.md#malformed) function in `include/css_mask.h`
 - [`map`](modules/include.import_map.h.md#map) function in `include/import_map.h`
 - [`margin`](modules/gui.browser_ui.c.md#margin) function in `gui/browser_ui.c`
 - [`margins`](modules/src.page_view.c.md#margins) function in `src/page_view.c`
@@ -1713,6 +1771,7 @@
 ## N
 
 - [`name`](modules/include.css_select.h.md#css_attr_match-name) type_alias of `css_attr_match` in `include/css_select.h`
+- [`name`](modules/include.css.h.md#name) function in `include/css.h`
 - [`name`](modules/include.css_vars.h.md#name) function in `include/css_vars.h`
 - [`name`](modules/src.hls.c.md#name) function in `src/hls.c`
 - [`name`](modules/src.text_shape.c.md#name) type_alias in `src/text_shape.c`
@@ -1863,6 +1922,7 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -1925,6 +1985,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -1988,6 +2050,7 @@
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OUT`](modules/tools.fbench.py.md#out) constant in `tools.fbench`
+- [`out`](modules/include.css_gradient.h.md#out) function in `include/css_gradient.h`
 - [`out`](modules/include.flex_layout.h.md#out) function in `include/flex_layout.h`
 - [`out`](modules/include.ui.h.md#out) function in `include/ui.h`
 - [`out_fd`](modules/src.media_decoder.c.md#out_fd) type_alias in `src/media_decoder.c`
@@ -2384,6 +2447,8 @@
 - [`rd_at`](modules/include.render_doc.h.md#rd_at) function in `include/render_doc.h`
 - [`rd_at`](modules/src.render_doc.c.md#rd_at) function in `src/render_doc.c`
 - [`rd_block`](modules/include.render_doc.h.md#rd_block) struct in `include/render_doc.h`
+- [`rd_block_heading_level`](modules/include.render_doc.h.md#rd_block_heading_level) function in `include/render_doc.h`
+- [`rd_block_heading_level`](modules/src.render_doc.c.md#rd_block_heading_level) function in `src/render_doc.c`
 - [`rd_block_tag`](modules/include.render_doc.h.md#rd_block_tag) function in `include/render_doc.h`
 - [`rd_block_tag`](modules/src.render_doc.c.md#rd_block_tag) function in `src/render_doc.c`
 - [`rd_box_at`](modules/include.render_doc.h.md#rd_box_at) function in `include/render_doc.h`
@@ -2560,6 +2625,7 @@
 - [`sf_ws_send`](modules/src.secure_fetch.c.md#sf_ws_send) function in `src/secure_fetch.c`
 - [`sf_ws_url_check`](modules/gui.browser_ui.c.md#sf_ws_url_check) function in `gui/browser_ui.c`
 - [`sf_ws_url_check`](modules/src.secure_fetch.c.md#sf_ws_url_check) function in `src/secure_fetch.c`
+- [`shape`](modules/include.css_gradient.h.md#cg_radial-shape) type_alias of `cg_radial` in `include/css_gradient.h`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
 - [`sink`](modules/src.secure_fetch.c.md#sink) type_alias in `src/secure_fetch.c`
@@ -2810,6 +2876,7 @@
 - [`translateX`](modules/src.css.c.md#translatex) function in `src/css.c`
 - [`translateZ`](modules/src.css.c.md#translatez) function in `src/css.c`
 - [`treatment`](modules/gui.browser_ui.c.md#treatment) function in `gui/browser_ui.c`
+- [`tree`](modules/include.page_view.h.md#pv_box_def-tree) method of `pv_box_def` in `include/page_view.h`
 - [`truncated`](modules/include.freebug.h.md#truncated) function in `include/freebug.h`
 - [`trusted`](modules/include.pdf_export.h.md#trusted) function in `include/pdf_export.h`
 - [`trying`](modules/src.page_view.c.md#trying) function in `src/page_view.c`
@@ -3058,6 +3125,8 @@
 - [`whole`](modules/src.textfield.c.md#whole) function in `src/textfield.c`
 - [`width`](modules/include.image_decode.h.md#img_pixels-width) type_alias of `img_pixels` in `include/image_decode.h`
 - [`width`](modules/include.tab.h.md#tab_image-width) type_alias of `tab_image` in `include/tab.h`
+- [`width`](modules/gui.browser_ui.c.md#width) function in `gui/browser_ui.c`
+- [`width`](modules/include.css_gradient.h.md#width) function in `include/css_gradient.h`
 - [`width_px`](modules/include.css_mq.h.md#width_px) type_alias in `include/css_mq.h`
 - [`widths`](modules/include.flex_layout.h.md#widths) function in `include/flex_layout.h`
 - [`win`](modules/include.flex_layout.h.md#win) function in `include/flex_layout.h`
@@ -3110,6 +3179,7 @@
 ## Z
 
 - [`ZERO`](modules/src.box_style.c.md#zero) macro in `src/box_style.c`
+- [`zero`](modules/include.css_gradient.h.md#zero) function in `include/css_gradient.h`
 - [`zm_apply`](modules/include.zoom.h.md#zm_apply) function in `include/zoom.h`
 - [`zm_apply`](modules/src.zoom.c.md#zm_apply) function in `src/zoom.c`
 - [`zm_clamp`](modules/include.zoom.h.md#zm_clamp) function in `include/zoom.h`

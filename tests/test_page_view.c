@@ -1168,11 +1168,17 @@ static void test_build_author_color(void **state) {
     const pv_run *plain = find_text(v, "plain text");
     assert_non_null(plain);
     assert_int_equal(plain->fg_rgb, -1); /* background-color is not color */
-    assert_int_equal(plain->bg_rgb, 0x00ff00); /* author background-color */
+    /* A block paints its own border box (CSS 2.1 14.2.1): the author background-color lives
+     * on the BOX, and the run carries no band of its own over it. */
+    assert_true(plain->block_id >= 0);
+    assert_int_equal(pv_box_at(v, (size_t)plain->block_id)->bg_rgb, 0x00ff00);
+    assert_int_equal(plain->bg_rgb, -1);
 
     const pv_run *bg_inh = find_text(v, "bg inherited");
     assert_non_null(bg_inh);
-    assert_int_equal(bg_inh->bg_rgb, 0xabcdef); /* nearest ancestor background-color */
+    assert_true(bg_inh->block_id >= 0);   /* the nearest ancestor's box paints it */
+    assert_int_equal(pv_box_at(v, (size_t)bg_inh->block_id)->bg_rgb, 0xabcdef);
+    assert_int_equal(bg_inh->bg_rgb, -1);
     assert_int_equal(bg_inh->fg_rgb, -1);
 
     const pv_run *blue = find_text(v, "blue text");
@@ -1709,6 +1715,53 @@ static void test_build_absolute_inside_float_escapes(void **state) {
 /* CSS: whitespace directly inside a flex/grid container creates NO anonymous item
  * (the source newlines between <p> items must not become layout columns). The
  * flowed-table inter-cell separator is unaffected (it carries cont_id == -1). */
+/* A flex container is block-level whatever its tag (CSS Display 3 section 2): the
+ * text inside `<a style=display:flex>` belongs to the <a>, not to the block around
+ * it, so the grid's margin-top must not ride on the run as well as on the grid's own
+ * box (the card's text sat one margin too low, its box one margin too tall). */
+/* A heading without an author font-size is 1.5em (h2) of its parent: an `em` length on it
+ * resolves against THAT size, not the parent's. `padding:1em` on an <h2> is 24px; the style
+ * chain used to hand the heading its parent's 16px, so every em-sized padding/margin on a
+ * heading came out two thirds short (and its UA margin with it, once it had a box). */
+static void test_build_heading_em_uses_ua_heading_size(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><h2 style='padding:1em;background:#eee'>Head</h2>"
+        "<h2 style='font-size:20px;padding:1em;background:#eee'>Own</h2></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_text(v, "Head");
+    assert_non_null(r);
+    assert_true(r->block_id >= 0);
+    const pv_box_def *bd = pv_box_at(v, (size_t)r->block_id);
+    assert_non_null(bd);
+    assert_int_equal(bd->pad_t, 24);
+    /* An author font-size REPLACES the UA size: 1em is 20px there. */
+    const pv_run *o = find_text(v, "Own");
+    assert_non_null(o);
+    const pv_box_def *od = pv_box_at(v, (size_t)o->block_id);
+    assert_non_null(od);
+    assert_int_equal(od->pad_t, 20);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_flex_anchor_is_its_own_block(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='display:grid;margin-top:24px'>"
+        "<a href='/x' style='display:flex;padding:24px'><span>card</span></a>"
+        "</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_text(v, "card");
+    assert_non_null(r);
+    assert_true(r->box_mt != 24);
+    assert_true(r->box_mt == PV_LEN_UNSET || r->box_mt == 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_flex_whitespace_not_item(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -3631,6 +3684,66 @@ static void test_before_box_on_empty_element(void **state) {
     hp_document_free(doc);
 }
 
+/* A ::before box on an element whose only content is another (textless) element: the glow
+ * behind a framed screenshot. The element owns no text, so the text-node path can never
+ * emit the pseudo, and `content:""` leaves the string-based test false. */
+static void test_before_box_on_host_with_only_element_children(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='t'><div class='c'></div></div></body>");
+    static const char CSS[] = ".t{position:relative;padding:10px}.c{height:40px;background:#445566}"
+        ".t::before{content:\"\";position:absolute;top:0;left:0;width:100%;height:100%;"
+        "background:#112233}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_box_def *d = box_of_run_with_bg(v, 0x112233);
+    assert_non_null(d);                          /* the generated box exists */
+    assert_int_equal(d->position, CSS_POS_ABSOLUTE);
+    assert_non_null(box_of_run_with_bg(v, 0x445566));   /* and the real child still does */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* The <body> background is the CANVAS background unless <html> declares one (Backgrounds 3
+ * 2.11.2): the box is marked so the painter puts it behind everything, negative z-index
+ * boxes included. */
+static void test_body_background_propagates_to_canvas(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body style='background:#0b0a3a;padding:8px'><p>x</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_box_def *d = box_of_run_with_bg(v, 0x0b0a3a);
+    assert_non_null(d);
+    assert_int_equal(d->canvas_bg, 1);
+    pv_free(v);
+    hp_document_free(doc);
+    /* html owns a background: the body's stays an ordinary box. */
+    doc = parse("<html style='background:#ffffff'><body style='background:#0b0a3a;padding:8px'>"
+                "<p>x</p></body></html>");
+    v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    d = box_of_run_with_bg(v, 0x0b0a3a);
+    assert_non_null(d);
+    assert_int_equal(d->canvas_bg, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* `mask` reaches the box: a masked element registers a box (it is composed through a group)
+ * carrying its layer count, composite and clip. */
+static void test_mask_reaches_the_box(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='m'>masked</div></body>");
+    static const char CSS[] = ".m{background:#336699;mask-image:linear-gradient(#fff0,#fff 40%)}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_box_def *d = box_of_run_with_bg(v, 0x336699);
+    assert_non_null(d);
+    assert_int_equal(d->mask_n, 1);
+    assert_true(d->mask_w[0] != 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_before_box_before_text(void **state) {
     (void)state;
     hp_document *doc = parse("<body><p class='i'>Hi</p></body>");
@@ -5028,6 +5141,8 @@ int main(void) {
         cmocka_unit_test(test_build_hbox_margin_above_container_merges),
         cmocka_unit_test(test_build_hbox_container_width_never_seeds_items),
         cmocka_unit_test(test_build_absolute_inside_float_escapes),
+        cmocka_unit_test(test_build_flex_anchor_is_its_own_block),
+        cmocka_unit_test(test_build_heading_em_uses_ua_heading_size),
         cmocka_unit_test(test_build_flex_whitespace_not_item),
         cmocka_unit_test(test_build_interblock_whitespace_not_emitted),
         cmocka_unit_test(test_build_inline_whitespace_kept),
@@ -5095,6 +5210,9 @@ int main(void) {
         cmocka_unit_test(test_pct_padding_generates_box),
         cmocka_unit_test(test_before_box_on_empty_element),
         cmocka_unit_test(test_before_box_before_text),
+        cmocka_unit_test(test_mask_reaches_the_box),
+        cmocka_unit_test(test_body_background_propagates_to_canvas),
+        cmocka_unit_test(test_before_box_on_host_with_only_element_children),
         cmocka_unit_test(test_pseudo_display_none_generates_nothing),
         cmocka_unit_test(test_inline_pseudo_registers_no_box),
         cmocka_unit_test(test_after_box_on_empty_element),

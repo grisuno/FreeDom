@@ -6,6 +6,7 @@
 #include "css_values.h"
 
 #include <ctype.h>
+#include <math.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -183,8 +184,12 @@ static int grad_stop_pos(const char *pp, int conic, const char **endp) {
  * CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
  * the gradient fails closed. */
 static int parse_gradient_args(const char *s, size_t n, int kind, int *angle,
-                               int *colors, int *positions) {
+                               int *colors, int *positions, cg_radial *rad) {
     *angle = (kind == 2) ? 0 : 180;
+    if (rad != NULL) {
+        rad->shape = CG_RAD_ELLIPSE; rad->size = CG_RS_FARTHEST_CORNER;
+        rad->rx = rad->ry = CG_LEN_UNSET; rad->cx = rad->cy = 500;
+    }
     int nstops = 0, first = 1;
     size_t i = 0;
     while (i < n) {
@@ -211,6 +216,10 @@ static int parse_gradient_args(const char *s, size_t n, int kind, int *angle,
                 int c = conic_prelude(seg, angle);
                 if (c == 1) { i = j + 1; continue; }
                 if (c == -1) return 0;
+            } else if (kind == 1 && rad != NULL) {
+                int rc = cg_parse_radial_prelude(seg, rad);
+                if (rc == 1) { i = j + 1; continue; }
+                if (rc == -1) return 0;
             } else if (kind == 1) {
                 if (radial_prelude(seg)) { i = j + 1; continue; }
             } else {
@@ -374,6 +383,17 @@ static int emit_bg_image_url(css_decl *dst, int cap, const char *url,
     return 1;
 }
 
+/* The five radial-geometry decls that ride a kind-1 gradient emission. */
+static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r) {
+    if (cap < 5) return 0;
+    dst[0].prop = P_BG_RAD_SIZE; dst[0].ival = r->shape * 16 + r->size;
+    dst[1].prop = P_BG_RAD_CX;   dst[1].ival = r->cx;
+    dst[2].prop = P_BG_RAD_CY;   dst[2].ival = r->cy;
+    dst[3].prop = P_BG_RAD_RX;   dst[3].ival = r->rx;
+    dst[4].prop = P_BG_RAD_RY;   dst[4].ival = r->ry;
+    return 5;
+}
+
 /* background-image: linear-gradient resolves to the gradient group (image-url
  * explicitly reset); a single url(...) (bare or quoted, with only whitespace
  * surrounding it -- multi-layer/trailing junk fails closed) resolves to the image
@@ -388,14 +408,15 @@ int cg_expand_bg_image(const char *val, css_decl *dst, int cap,
     int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
     int grad_pos[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
     int angle = 180, nst = 0, kind = 0;
+    cg_radial rad = { CG_RAD_ELLIPSE, CG_RS_FARTHEST_CORNER, CG_LEN_UNSET, CG_LEN_UNSET, 500, 500 };
     if (find_gradient_call(val, "linear-gradient(", &gs, &ge, &as, &an) == 1)
-        nst = parse_gradient_args(val + as, an, 0, &angle, colors, grad_pos);
+        nst = parse_gradient_args(val + as, an, 0, &angle, colors, grad_pos, NULL);
     if (nst == 0 && find_gradient_call(val, "conic-gradient(", &gs, &ge, &as, &an) == 1) {
-        nst = parse_gradient_args(val + as, an, 2, &angle, colors, grad_pos);
+        nst = parse_gradient_args(val + as, an, 2, &angle, colors, grad_pos, NULL);
         if (nst > 0) kind = 2;
     }
     if (nst == 0 && find_radial_gradient(val, &gs, &ge, &as, &an) == 1) {
-        nst = parse_gradient_args(val + as, an, 1, &angle, colors, grad_pos);
+        nst = parse_gradient_args(val + as, an, 1, &angle, colors, grad_pos, &rad);
         if (nst > 0) kind = 1;
     }
     int n = emit_gradient(dst, cap, angle, nst, colors, nst > 0 ? grad_pos : NULL);
@@ -403,6 +424,7 @@ int cg_expand_bg_image(const char *val, css_decl *dst, int cap,
         /* the kind rides every gradient emission so a higher-tier linear fully
          * overrides a lower-tier radial/conic (independent cascade slots). */
         if (cap - n >= 1) { dst[n].prop = P_BG_GRAD_RADIAL; dst[n].ival = kind; ++n; }
+        if (kind == 1) n += emit_radial_geom(dst + n, cap - n, &rad);
         if (cap - n >= 1) n += emit_bg_image_url(dst + n, cap - n, NULL, urltab, nurl, urlcap);
         return n;
     }
@@ -493,17 +515,18 @@ int cg_expand_background(const char *val, css_decl *dst, int cap,
     int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
     int grad_pos[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
     int angle = 180, nst = 0, kind = 0;
+    cg_radial rad = { CG_RAD_ELLIPSE, CG_RS_FARTHEST_CORNER, CG_LEN_UNSET, CG_LEN_UNSET, 500, 500 };
     int f = find_gradient_call(val, "linear-gradient(", &gs, &ge, &as, &an);
     if (f < 0) return 0;
     if (f == 1) {
-        nst = parse_gradient_args(val + as, an, 0, &angle, colors, grad_pos);
+        nst = parse_gradient_args(val + as, an, 0, &angle, colors, grad_pos, NULL);
         if (nst == 0) return 0;
     }
     if (f == 0) {
         f = find_gradient_call(val, "conic-gradient(", &gs, &ge, &as, &an);
         if (f < 0) return 0;
         if (f == 1) {
-            nst = parse_gradient_args(val + as, an, 2, &angle, colors, grad_pos);
+            nst = parse_gradient_args(val + as, an, 2, &angle, colors, grad_pos, NULL);
             if (nst == 0) return 0;
             kind = 2;
         }
@@ -512,7 +535,7 @@ int cg_expand_background(const char *val, css_decl *dst, int cap,
         f = find_gradient_call(val, "radial-gradient(", &gs, &ge, &as, &an);
         if (f < 0) return 0;
         if (f == 1) {
-            nst = parse_gradient_args(val + as, an, 1, &angle, colors, grad_pos);
+            nst = parse_gradient_args(val + as, an, 1, &angle, colors, grad_pos, &rad);
             if (nst == 0) return 0;
             kind = 1;
         }
@@ -561,8 +584,219 @@ int cg_expand_background(const char *val, css_decl *dst, int cap,
     w += emit_gradient(dst + w, cap - w, angle, nst, colors, nst > 0 ? grad_pos : NULL);
     if (nst > 0 && cap - w >= 1) {
         dst[w].prop = P_BG_GRAD_RADIAL; dst[w].ival = kind; ++w;
+        if (kind == 1) w += emit_radial_geom(dst + w, cap - w, &rad);
     }
     if (cap - w >= 1) w += emit_bg_image_url(dst + w, cap - w, uf == 1 ? urlbuf : NULL,
                                              urltab, nurl, urlcap);
     return w;
+}
+
+/* --- radial-gradient geometry (spec/css_gradient.md 3b) --------------------------------- */
+
+#define CG_RAD_TOKENS    12
+#define CG_RAD_PM_MAX    1000000   /* per-mille cap: 1000x the box (anti-DoS, never reached) */
+#define CG_RAD_PX_MAX    100000
+
+static int rad_ieq(const char *a, const char *b) {
+    for (; *a != '\0' && *b != '\0'; ++a, ++b)
+        if (csel_lower_ch(*a) != *b) return 0;
+    return *a == '\0' && *b == '\0';
+}
+
+/* One <length-percentage> token (`12px`, `40%`, `0`) -> the cg_radial encoding; 1 = ok. A
+ * length in any other unit fails closed: this module has no font or viewport to resolve it. */
+static int rad_len(const char *tok, int *enc) {
+    double v;
+    const char *e;
+    if (!cg_parse_num(tok, &v, &e)) return 0;
+    if (!(v >= 0.0) || v > 1.0e7) return 0;
+    if (*e == '%') {
+        if (e[1] != '\0') return 0;
+        double pm = v * 10.0 + 0.5;
+        if (pm > (double)CG_RAD_PM_MAX) return 0;
+        *enc = (int)pm;
+        return 1;
+    }
+    if (*e == '\0' && v == 0.0) { *enc = 0; return 1; }   /* unitless 0 is a zero length */
+    if (rad_ieq(e, "px")) {
+        if (v > (double)CG_RAD_PX_MAX) return 0;
+        *enc = -((int)(v + 0.5)) - 1;
+        return 1;
+    }
+    return 0;
+}
+
+static int rad_is_len_start(const char *t) {
+    return (t[0] >= '0' && t[0] <= '9') || t[0] == '.' || t[0] == '-' || t[0] == '+';
+}
+
+/* Position keyword -> per-mille (x: left/right, y: top/bottom) or -1. */
+static int rad_pos_kw(const char *t, int *axis) {   /* axis: 0 x, 1 y, 2 either */
+    if (rad_ieq(t, "left"))   { *axis = 0; return 0; }
+    if (rad_ieq(t, "right"))  { *axis = 0; return 1000; }
+    if (rad_ieq(t, "top"))    { *axis = 1; return 0; }
+    if (rad_ieq(t, "bottom")) { *axis = 1; return 1000; }
+    if (rad_ieq(t, "center")) { *axis = 2; return 500; }
+    return -1;
+}
+
+static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy) {
+    if (n < 1 || n > 2) return 0;   /* the 3/4-value edge-offset forms fail closed */
+    int ax[2] = { 2, 2 }, val[2] = { 500, 500 }, kw[2] = { 0, 0 };
+    for (int i = 0; i < n; ++i) {
+        int axis = 2;
+        int k = rad_pos_kw(tok[i], &axis);
+        if (k >= 0) { ax[i] = axis; val[i] = k; kw[i] = 1; continue; }
+        int enc;
+        if (!rad_len(tok[i], &enc)) return 0;
+        ax[i] = 2; val[i] = enc; kw[i] = 0;
+    }
+    if (n == 1) {
+        if (kw[0] && ax[0] == 1) { *cx = 500; *cy = val[0]; return 1; }
+        *cx = val[0]; *cy = 500;
+        return 1;
+    }
+    /* Two values: `top left` / `left top` swap; a keyword on the y axis first swaps. */
+    if (kw[0] && kw[1]) {
+        if (ax[0] == 1 || ax[1] == 0) { *cx = val[1]; *cy = val[0]; }
+        else { *cx = val[0]; *cy = val[1]; }
+        if ((ax[0] == 0 && ax[1] == 0) || (ax[0] == 1 && ax[1] == 1)) return 0;
+        return 1;
+    }
+    if (kw[0] && ax[0] == 1) return 0;   /* `top 20px` is not a valid pair */
+    if (kw[1] && ax[1] == 0) return 0;   /* `20px left` is not either */
+    *cx = val[0]; *cy = val[1];
+    return 1;
+}
+
+int cg_parse_radial_prelude(const char *seg, cg_radial *out) {
+    if (seg == NULL || out == NULL) return 0;
+    out->shape = CG_RAD_ELLIPSE; out->size = CG_RS_FARTHEST_CORNER;
+    out->rx = CG_LEN_UNSET; out->ry = CG_LEN_UNSET; out->cx = 500; out->cy = 500;
+    char tok[CG_RAD_TOKENS][CSS_TOK_MAX];
+    int n = 0;
+    for (const char *p = seg; *p != '\0';) {
+        while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') ++p;
+        if (*p == '\0') break;
+        size_t k = 0;
+        while (p[k] != '\0' && p[k] != ' ' && p[k] != '\t' && p[k] != '\n' && p[k] != '\r') ++k;
+        if (n >= CG_RAD_TOKENS || k >= CSS_TOK_MAX) return 0;
+        memcpy(tok[n], p, k);
+        tok[n][k] = '\0';
+        ++n;
+        p += k;
+    }
+    if (n == 0) return 0;
+    /* Not a prelude unless it opens with a keyword or a number (a colour stop never does). */
+    int opens = rad_is_len_start(tok[0]) || rad_ieq(tok[0], "circle") || rad_ieq(tok[0], "ellipse") ||
+                rad_ieq(tok[0], "at") || rad_ieq(tok[0], "closest-side") ||
+                rad_ieq(tok[0], "farthest-side") || rad_ieq(tok[0], "closest-corner") ||
+                rad_ieq(tok[0], "farthest-corner");
+    if (!opens) return 0;
+    int at = n;
+    for (int i = 0; i < n; ++i) if (rad_ieq(tok[i], "at")) { at = i; break; }
+    int shape_seen = 0, size_kw_seen = 0, nlen = 0, enc[2] = { 0, 0 };
+    for (int i = 0; i < at; ++i) {
+        if (rad_ieq(tok[i], "circle")) {
+            if (shape_seen) return -1;
+            shape_seen = 1; out->shape = CG_RAD_CIRCLE;
+        } else if (rad_ieq(tok[i], "ellipse")) {
+            if (shape_seen) return -1;
+            shape_seen = 1; out->shape = CG_RAD_ELLIPSE;
+        } else if (rad_ieq(tok[i], "closest-side")) {
+            if (size_kw_seen || nlen) return -1;
+            size_kw_seen = 1; out->size = CG_RS_CLOSEST_SIDE;
+        } else if (rad_ieq(tok[i], "farthest-side")) {
+            if (size_kw_seen || nlen) return -1;
+            size_kw_seen = 1; out->size = CG_RS_FARTHEST_SIDE;
+        } else if (rad_ieq(tok[i], "closest-corner")) {
+            if (size_kw_seen || nlen) return -1;
+            size_kw_seen = 1; out->size = CG_RS_CLOSEST_CORNER;
+        } else if (rad_ieq(tok[i], "farthest-corner")) {
+            if (size_kw_seen || nlen) return -1;
+            size_kw_seen = 1; out->size = CG_RS_FARTHEST_CORNER;
+        } else if (rad_is_len_start(tok[i])) {
+            if (size_kw_seen || nlen >= 2 || !rad_len(tok[i], &enc[nlen])) return -1;
+            ++nlen;
+        } else {
+            return -1;
+        }
+    }
+    if (nlen > 0) {
+        out->size = CG_RS_EXPLICIT;
+        if (shape_seen && out->shape == CG_RAD_CIRCLE) {
+            if (nlen != 1 || enc[0] >= 0) return -1;   /* a circle takes ONE px length */
+            out->rx = out->ry = enc[0];
+        } else if (shape_seen) {                        /* explicit ellipse needs two */
+            if (nlen != 2) return -1;
+            out->rx = enc[0]; out->ry = enc[1];
+        } else if (nlen == 1) {                         /* a lone length is a circle */
+            if (enc[0] >= 0) return -1;
+            out->shape = CG_RAD_CIRCLE;
+            out->rx = out->ry = enc[0];
+        } else {
+            out->rx = enc[0]; out->ry = enc[1];
+        }
+    }
+    if (at < n) {
+        if (at + 1 >= n) return -1;
+        if (!rad_parse_position(tok + at + 1, n - at - 1, &out->cx, &out->cy)) return -1;
+    }
+    return 1;
+}
+
+double cg_radial_len_px(int enc, double dim) {
+    if (enc == CG_LEN_UNSET) return 0.0;
+    if (enc < 0) return (double)(-(enc + 1));
+    return dim * (double)enc / 1000.0;
+}
+
+#define CG_RAD_FLOOR 0.0001
+#define CG_SQRT2     1.4142135623730951
+
+static double cg_dmin(double a, double b) { return a < b ? a : b; }
+static double cg_dmax(double a, double b) { return a > b ? a : b; }
+
+void cg_radial_geometry(const cg_radial *r, double w, double h,
+                        double *cx, double *cy, double *rx, double *ry) {
+    double x = (r != NULL) ? cg_radial_len_px(r->cx, w) : w / 2.0;
+    double y = (r != NULL) ? cg_radial_len_px(r->cy, h) : h / 2.0;
+    double ax = cg_dmin(fabs(x), fabs(w - x)), bx = cg_dmax(fabs(x), fabs(w - x));
+    double ay = cg_dmin(fabs(y), fabs(h - y)), by = cg_dmax(fabs(y), fabs(h - y));
+    double ex, ey;
+    int circle = (r != NULL && r->shape == CG_RAD_CIRCLE);
+    int size = (r != NULL) ? r->size : CG_RS_FARTHEST_CORNER;
+    switch (size) {
+        case CG_RS_CLOSEST_SIDE:
+            ex = ax; ey = ay;
+            if (circle) ex = ey = cg_dmin(ax, ay);
+            break;
+        case CG_RS_FARTHEST_SIDE:
+            ex = bx; ey = by;
+            if (circle) ex = ey = cg_dmax(bx, by);
+            break;
+        case CG_RS_CLOSEST_CORNER:
+            if (circle) ex = ey = sqrt(ax * ax + ay * ay);
+            else { ex = ax * CG_SQRT2; ey = ay * CG_SQRT2; }
+            break;
+        case CG_RS_EXPLICIT:
+            ex = cg_radial_len_px(r->rx, w);
+            ey = circle ? ex : cg_radial_len_px(r->ry, h);
+            break;
+        case CG_RS_FARTHEST_CORNER:
+        default:
+            if (circle) ex = ey = sqrt(bx * bx + by * by);
+            else { ex = bx * CG_SQRT2; ey = by * CG_SQRT2; }
+            break;
+    }
+    if (!(ex > CG_RAD_FLOOR) || !isfinite(ex)) ex = CG_RAD_FLOOR;
+    if (!(ey > CG_RAD_FLOOR) || !isfinite(ey)) ey = CG_RAD_FLOOR;
+    *cx = x; *cy = y; *rx = ex; *ry = ey;
+}
+
+int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions) {
+    size_t gs, ge, as, an;
+    if (fn == NULL || find_gradient_call(fn, "linear-gradient(", &gs, &ge, &as, &an) != 1) return 0;
+    if (gs != 0 || fn[ge] != '\0') return 0;   /* the whole text is the function, nothing else */
+    return parse_gradient_args(fn + as, an, 0, angle, colors, positions, NULL);
 }
