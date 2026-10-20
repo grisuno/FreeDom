@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_download_pdf_local` | function | `tests/test_freedom.c:247` | `static void test_download_pdf_local(void **state)` |
+| `test_download_pdf_requires_path` | function | `tests/test_freedom.c:273` | `static void test_download_pdf_requires_path(void **state)` |
+| `test_download_png_absolute_shrinks_and_anchors_right` | function | `tests/test_freedom.c:917` | `static void test_download_png_absolute_shrinks_and_anchors_right(void **state)` |
+| `test_download_png_broken_image_keeps_row_order` | function | `tests/test_freedom.c:1473` | `static void test_download_png_broken_image_keeps_row_order(void **state)` |
 | `test_download_png_flex_container_paints_one_band` | function | `tests/test_freedom.c:3428` | `static void test_download_png_flex_container_paints_one_band(void **state)` |
 | `test_download_png_gradient_box_text_keeps_gradient` | function | `tests/test_freedom.c:3403` | `static void test_download_png_gradient_box_text_keeps_gradient(void **state)` |
 | `test_download_png_images_local` | function | `tests/test_freedom.c:623` | `static void test_download_png_images_local(void **state)` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_module_self_await_teardown` | function | `tests/test_js_sandbox.c:488` | `static void test_module_self_await_teardown(void **state)` |
 | `test_module_without_host_cannot_import` | function | `tests/test_js_sandbox.c:456` | `static void test_module_without_host_cannot_import(void **state)` |
 | `test_no_io_globals` | function | `tests/test_js_sandbox.c:124` | `static void test_no_io_globals(void **state)` |
-| `test_realm_shares_time_budget` | function | `tests/test_js_sandbox.c:556` | `static void test_realm_shares_time_budget(void **state)` |
-| `test_realms_isolate_and_clone` | function | `tests/test_js_sandbox.c:525` | `static void test_realms_isolate_and_clone(void **state)` |
-| `test_result_free_on_zeroed` | function | `tests/test_js_sandbox.c:196` | `static void test_result_free_on_zeroed(void **state)` |
-| `test_set_time_budget_applies` | function | `tests/test_js_sandbox.c:163` | `static void test_set_time_budget_applies(void **state)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

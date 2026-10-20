@@ -1,7 +1,7 @@
 {
  "metadata": {
-  "generated_at": "2026-10-20T14:24:34.790142+00:00",
-  "source_tree_hash": "d7b8d86d3c6c2cea8e06ccb52df4bd5e8f647d746f41c22d31788a7967197668",
+  "generated_at": "2026-10-20T17:15:28.097664+00:00",
+  "source_tree_hash": "69186e8d3825372af469672fc8204c3bc64d41901804f7b3358ba8c7205fac67",
   "repo_name": "freedom-0.0.3",
   "depth_level": 2,
   "depth_cap": 3,
@@ -701,7 +701,7 @@
   },
   "src/local_store.c": {
    "language": "c",
-   "symbols": 275
+   "symbols": 279
   },
   "src/media_decoder.c": {
    "language": "c",
@@ -27572,226 +27572,226 @@
   "src/local_store.c|src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES",
-   "start_line": 709,
-   "end_line": 711,
+   "start_line": 720,
+   "end_line": 722,
    "type": "FUNCTION",
-   "content_hash": "7088bcee7f03393b"
+   "content_hash": "64795f718f0d6a6b"
   },
   "src/local_store.c|src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST",
-   "start_line": 712,
-   "end_line": 714,
+   "start_line": 723,
+   "end_line": 725,
    "type": "FUNCTION",
-   "content_hash": "b4be9cfa3c6f6a55"
+   "content_hash": "4cfbc747af39581e"
   },
   "src/local_store.c|src/local_store.c::OSSL_KDF_PARAM_THREADS": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OSSL_KDF_PARAM_THREADS",
-   "start_line": 715,
-   "end_line": 717,
+   "start_line": 726,
+   "end_line": 728,
    "type": "FUNCTION",
-   "content_hash": "cbdb005ca5118355"
+   "content_hash": "ddcc137849356749"
   },
   "src/local_store.c|src/local_store.c::_GNU_SOURCE": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::_GNU_SOURCE",
-   "start_line": 682,
-   "end_line": 708,
+   "start_line": 693,
+   "end_line": 719,
    "type": "FUNCTION",
-   "content_hash": "b3a06bf1871828e6"
+   "content_hash": "a22864c5d9b87195"
   },
   "src/local_store.c|src/local_store.c::LS_VERSION": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_VERSION",
-   "start_line": 718,
-   "end_line": 718,
+   "start_line": 729,
+   "end_line": 729,
    "type": "FUNCTION",
-   "content_hash": "4f1b20ae6e2c4768"
+   "content_hash": "55cc54aaa94afe5a"
   },
   "src/local_store.c|src/local_store.c::LS_KDF_NONE": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_KDF_NONE",
-   "start_line": 719,
-   "end_line": 719,
+   "start_line": 730,
+   "end_line": 730,
    "type": "FUNCTION",
-   "content_hash": "cd5876185de9c100"
+   "content_hash": "3805155448ad78bd"
   },
   "src/local_store.c|src/local_store.c::LS_KDF_ARGON2ID": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_KDF_ARGON2ID",
-   "start_line": 720,
-   "end_line": 722,
+   "start_line": 731,
+   "end_line": 733,
    "type": "FUNCTION",
-   "content_hash": "b98a251ab101fb4b"
+   "content_hash": "bd02c207a9642439"
   },
   "src/local_store.c|src/local_store.c::LS_ARGON2_T": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_ARGON2_T",
-   "start_line": 723,
-   "end_line": 723,
+   "start_line": 734,
+   "end_line": 734,
    "type": "FUNCTION",
-   "content_hash": "478a56782134e4f0"
+   "content_hash": "6a9edd1a7a61f0d6"
   },
   "src/local_store.c|src/local_store.c::LS_ARGON2_M_KIB": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_ARGON2_M_KIB",
-   "start_line": 724,
-   "end_line": 724,
+   "start_line": 735,
+   "end_line": 735,
    "type": "FUNCTION",
-   "content_hash": "e3e5de5231d2e18a"
+   "content_hash": "195f73c1053c5a93"
   },
   "src/local_store.c|src/local_store.c::LS_ARGON2_P": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_ARGON2_P",
-   "start_line": 725,
-   "end_line": 727,
+   "start_line": 736,
+   "end_line": 738,
    "type": "FUNCTION",
-   "content_hash": "9d3a2b13a77efd13"
+   "content_hash": "55b70af85f5bad57"
   },
   "src/local_store.c|src/local_store.c::OFF_MAGIC": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_MAGIC",
-   "start_line": 728,
-   "end_line": 728,
+   "start_line": 739,
+   "end_line": 739,
    "type": "FUNCTION",
-   "content_hash": "26abad351f9266d7"
+   "content_hash": "47884d5fd42a3adb"
   },
   "src/local_store.c|src/local_store.c::OFF_VERSION": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_VERSION",
-   "start_line": 729,
-   "end_line": 729,
+   "start_line": 740,
+   "end_line": 740,
    "type": "FUNCTION",
-   "content_hash": "928fcac2082697c6"
+   "content_hash": "9b15a743c746fd6d"
   },
   "src/local_store.c|src/local_store.c::OFF_AEAD": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_AEAD",
-   "start_line": 730,
-   "end_line": 730,
+   "start_line": 741,
+   "end_line": 741,
    "type": "FUNCTION",
-   "content_hash": "0968a1d70c5a5485"
+   "content_hash": "5e2b6377a8ffa2bf"
   },
   "src/local_store.c|src/local_store.c::OFF_KDF": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_KDF",
-   "start_line": 731,
-   "end_line": 731,
+   "start_line": 742,
+   "end_line": 742,
    "type": "FUNCTION",
-   "content_hash": "67f138f8ac830e06"
+   "content_hash": "abca33976815d0cf"
   },
   "src/local_store.c|src/local_store.c::OFF_SALT": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_SALT",
-   "start_line": 732,
-   "end_line": 732,
+   "start_line": 743,
+   "end_line": 743,
    "type": "FUNCTION",
-   "content_hash": "aaf90cd187e2a72b"
+   "content_hash": "0ba1f1e10d9a1a80"
   },
   "src/local_store.c|src/local_store.c::OFF_NONCE": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_NONCE",
-   "start_line": 733,
-   "end_line": 738,
+   "start_line": 744,
+   "end_line": 749,
    "type": "FUNCTION",
-   "content_hash": "fda2362dc86dab22"
+   "content_hash": "c5691cf585f61aba"
   },
   "src/local_store.c|src/local_store.c::cipher_for": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::cipher_for",
-   "start_line": 739,
-   "end_line": 748,
+   "start_line": 750,
+   "end_line": 759,
    "type": "FUNCTION",
-   "content_hash": "c29d58ce3deeeea0"
+   "content_hash": "042e0eeda6853e5b"
   },
   "src/local_store.c|src/local_store.c::argon2id_derive": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::argon2id_derive",
-   "start_line": 749,
-   "end_line": 777,
+   "start_line": 760,
+   "end_line": 788,
    "type": "FUNCTION",
-   "content_hash": "6639bd49ccc744f1"
+   "content_hash": "aacecba13708df40"
   },
   "src/local_store.c|src/local_store.c::ls_derive_key": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_derive_key",
-   "start_line": 778,
-   "end_line": 786,
+   "start_line": 789,
+   "end_line": 797,
    "type": "FUNCTION",
-   "content_hash": "c6356acdaf0ccfb5"
+   "content_hash": "881f10c2f88dd907"
   },
   "src/local_store.c|src/local_store.c::aead_encrypt": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::aead_encrypt",
-   "start_line": 787,
-   "end_line": 812,
+   "start_line": 798,
+   "end_line": 823,
    "type": "FUNCTION",
-   "content_hash": "32f8025ebd7cc324"
+   "content_hash": "a263a8b5d527bf00"
   },
   "src/local_store.c|src/local_store.c::aead_decrypt": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::aead_decrypt",
-   "start_line": 813,
-   "end_line": 840,
+   "start_line": 824,
+   "end_line": 851,
    "type": "FUNCTION",
-   "content_hash": "a13702065b9a9412"
+   "content_hash": "7733ea8e076bf8e9"
   },
   "src/local_store.c|src/local_store.c::seal_core": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::seal_core",
-   "start_line": 841,
-   "end_line": 877,
+   "start_line": 852,
+   "end_line": 888,
    "type": "FUNCTION",
-   "content_hash": "b89ce101ea6e9ec0"
+   "content_hash": "e15edc3be665db55"
   },
   "src/local_store.c|src/local_store.c::decrypt_blob": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::decrypt_blob",
-   "start_line": 878,
-   "end_line": 908,
+   "start_line": 889,
+   "end_line": 919,
    "type": "FUNCTION",
-   "content_hash": "2731caff5f2bd4c7"
+   "content_hash": "229fd37f7f3c675b"
   },
   "src/local_store.c|src/local_store.c::ls_seal": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_seal",
-   "start_line": 909,
-   "end_line": 921,
+   "start_line": 920,
+   "end_line": 932,
    "type": "FUNCTION",
-   "content_hash": "cdbda0027ba4c289"
+   "content_hash": "bebca5717595d8ac"
   },
   "src/local_store.c|src/local_store.c::ls_open": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_open",
-   "start_line": 922,
-   "end_line": 932,
+   "start_line": 933,
+   "end_line": 943,
    "type": "FUNCTION",
-   "content_hash": "fe024161fa9ff21a"
+   "content_hash": "ac7df73c1504fec7"
   },
   "src/local_store.c|src/local_store.c::ls_seal_passphrase": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_seal_passphrase",
-   "start_line": 933,
-   "end_line": 953,
+   "start_line": 944,
+   "end_line": 964,
    "type": "FUNCTION",
-   "content_hash": "c136b8d91f8e6db4"
+   "content_hash": "5ff954a184c40f85"
   },
   "src/local_store.c|src/local_store.c::ls_open_passphrase": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_open_passphrase",
-   "start_line": 954,
-   "end_line": 973,
+   "start_line": 965,
+   "end_line": 984,
    "type": "FUNCTION",
-   "content_hash": "ff61ed288b32b948"
+   "content_hash": "ab697e86028302c9"
   },
   "src/local_store.c|src/local_store.c::ls_free": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_free",
-   "start_line": 974,
-   "end_line": 978,
+   "start_line": 985,
+   "end_line": 989,
    "type": "FUNCTION",
-   "content_hash": "566a0fbaaa0a1d02"
+   "content_hash": "34947ba2e4f7e5a3"
   },
   "src/media_decoder.c|src/media_decoder.c::open": {
    "file_path": "src/media_decoder.c",
@@ -83433,6 +83433,10 @@
       "src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES",
       "src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST",
       "src/local_store.c::OSSL_KDF_PARAM_THREADS",
+      "src/local_store.c::_GNU_SOURCE",
+      "src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES",
+      "src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST",
+      "src/local_store.c::OSSL_KDF_PARAM_THREADS",
       "src/local_store.c::LS_VERSION",
       "src/local_store.c::LS_KDF_NONE",
       "src/local_store.c::LS_KDF_ARGON2ID",
@@ -84130,6 +84134,10 @@
         "src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES",
         "src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST",
         "src/local_store.c::OSSL_KDF_PARAM_THREADS",
+        "src/local_store.c::_GNU_SOURCE",
+        "src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES",
+        "src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST",
+        "src/local_store.c::OSSL_KDF_PARAM_THREADS",
         "src/local_store.c::LS_VERSION",
         "src/local_store.c::LS_KDF_NONE",
         "src/local_store.c::LS_KDF_ARGON2ID",
@@ -84219,7 +84227,7 @@
      "components": [],
      "components_relations": [],
      "layer": "utility",
-     "symbol_count": 323,
+     "symbol_count": 327,
      "top_symbols": [
       {
        "n": "_POSIX_C_SOURCE",
@@ -86732,7 +86740,7 @@
     }
    ],
    "layer": "utility",
-   "symbol_count": 452,
+   "symbol_count": 456,
    "top_symbols": [
     {
      "n": "FREEDOM_LOCAL_STORE_H",

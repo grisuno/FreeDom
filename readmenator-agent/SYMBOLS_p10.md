@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `wh_close_all` | function | `src/ws_hub.c:234` | `void wh_close_all(wh_hub *h)` |
+| `wh_conn` | struct | `src/ws_hub.c:24` | `` |
+| `wh_count` | function | `src/ws_hub.c:314` | `size_t wh_count(const wh_hub *h)` |
+| `wh_free` | function | `src/ws_hub.c:129` | `void wh_free(wh_hub *h)` |
 | `wh_hub` | struct | `src/ws_hub.c:35` | `` |
 | `wh_job` | struct | `src/ws_hub.c:43` | `` |
 | `wh_new` | function | `src/ws_hub.c:116` | `wh_hub *wh_new(void)` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 | `test_pseudo_link` | function | `tests/test_css.c:1622` | `static void test_pseudo_link(void **state)` |
 | `test_pseudo_never_match_keeps_group` | function | `tests/test_css.c:1640` | `static void test_pseudo_never_match_keeps_group(void **state)` |
 | `test_pseudo_nth_child` | function | `tests/test_css.c:1698` | `static void test_pseudo_nth_child(void **state)` |
-| `test_pseudo_nth_last_child` | function | `tests/test_css.c:1721` | `static void test_pseudo_nth_last_child(void **state)` |
-| `test_pseudo_nth_malformed_drops` | function | `tests/test_css.c:2261` | `static void test_pseudo_nth_malformed_drops(void **state)` |
-| `test_pseudo_nth_of_type` | function | `tests/test_css.c:2298` | `static void test_pseudo_nth_of_type(void **state)` |
-| `test_pseudo_of_type` | function | `tests/test_css.c:2279` | `static void test_pseudo_of_type(void **state)` |
 
 Next: [SYMBOLS_p11.md](SYMBOLS_p11.md)

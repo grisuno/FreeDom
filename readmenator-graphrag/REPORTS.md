@@ -1,6 +1,6 @@
 # GraphRAG Community Reports
 
-Entities: 7226 | Relationships: 12670 | Communities: 11 | Themes: 3 | Text units: 6789
+Entities: 7230 | Relationships: 12674 | Communities: 11 | Themes: 3 | Text units: 6793
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
@@ -140,7 +140,7 @@ Theme of 1 communities and 16 files: unassigned files (16 files, rating 0.8).
 - `include/local_store.h` ranks 1 by PageRank, 6 importers, 11 symbols: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container so ls_open_passphrase can re-derive. ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len...
 - `include/prefs.h` ranks 2 by PageRank, 6 importers, 18 symbols: prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
 - `include/zoom.h` ranks 3 by PageRank, 5 importers, 10 symbols: zm_clamp: stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser.
-- Hotspot `src/local_store.c`: 275 symbols, 10 connections (score 0.23).
+- Hotspot `src/local_store.c`: 279 symbols, 10 connections (score 0.24).
 - Hotspot `tests/test_profile.c`: 17 symbols, 16 connections (score 0.09).
 - Surprising bridge: fuzz_prefs.c <-> test_renderer.c (8 hops across communities).
 - Key entities: file:src/local_store.c, file:src/prefs.c, file:include/prefs.h, file:tests/test_profile.c, file:tests/test_disk_store.c, file:tests/test_local_store.c, file:tests/test_prefs.c, file:src/profile.c

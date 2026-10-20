@@ -1,15 +1,15 @@
 {
   "tool": "readmenator",
   "schema_version": 2,
-  "generated_at": "2026-10-20T14:23:08Z",
+  "generated_at": "2026-10-20T17:14:04Z",
   "project_root": ".",
   "project_name": "freedom-0.0.3",
-  "git_commit": "aa6bae7aa56d423083abf0e979d086c193dd6e3a",
+  "git_commit": "d714f50964620fddff07aec4e22b199dc2e46126",
   "git_branch": "main",
-  "source_fingerprint": "d7b8d86d3c6c2cea8e06ccb52df4bd5e8f647d746f41c22d31788a7967197668",
+  "source_fingerprint": "69186e8d3825372af469672fc8204c3bc64d41901804f7b3358ba8c7205fac67",
   "freshness_check": "readmenator . fresh  # exit 0 = docs match sources, exit 1 = run: readmenator . --rebuild",
   "files": 284,
-  "symbols": 6801,
+  "symbols": 6805,
   "imports": 1606,
   "calls": 472,
   "inherits": 0,
@@ -201,8 +201,8 @@
     },
     {
       "path": "KB_src_p6.md",
-      "lines": 378,
-      "approx_tokens": 7151
+      "lines": 382,
+      "approx_tokens": 7231
     },
     {
       "path": "KB_src_p7.md",
@@ -262,7 +262,7 @@
     {
       "path": "MEMORY.md",
       "lines": 102,
-      "approx_tokens": 1709
+      "approx_tokens": 1708
     },
     {
       "path": "SECURITY.md",
@@ -277,27 +277,27 @@
     {
       "path": "SYMBOLS_p10.md",
       "lines": 500,
-      "approx_tokens": 16149
+      "approx_tokens": 16097
     },
     {
       "path": "SYMBOLS_p11.md",
       "lines": 500,
-      "approx_tokens": 15703
+      "approx_tokens": 15674
     },
     {
       "path": "SYMBOLS_p12.md",
       "lines": 500,
-      "approx_tokens": 16525
+      "approx_tokens": 16542
     },
     {
       "path": "SYMBOLS_p13.md",
       "lines": 500,
-      "approx_tokens": 17012
+      "approx_tokens": 17010
     },
     {
       "path": "SYMBOLS_p14.md",
-      "lines": 398,
-      "approx_tokens": 12023
+      "lines": 402,
+      "approx_tokens": 12163
     },
     {
       "path": "SYMBOLS_p2.md",
@@ -327,17 +327,17 @@
     {
       "path": "SYMBOLS_p7.md",
       "lines": 500,
-      "approx_tokens": 14380
+      "approx_tokens": 14379
     },
     {
       "path": "SYMBOLS_p8.md",
       "lines": 500,
-      "approx_tokens": 14059
+      "approx_tokens": 14055
     },
     {
       "path": "SYMBOLS_p9.md",
       "lines": 500,
-      "approx_tokens": 14030
+      "approx_tokens": 14061
     },
     {
       "path": "recipes/add-function.md",

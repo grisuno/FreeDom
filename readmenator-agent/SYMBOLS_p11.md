@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_pseudo_nth_last_child` | function | `tests/test_css.c:1721` | `static void test_pseudo_nth_last_child(void **state)` |
+| `test_pseudo_nth_malformed_drops` | function | `tests/test_css.c:2261` | `static void test_pseudo_nth_malformed_drops(void **state)` |
+| `test_pseudo_nth_of_type` | function | `tests/test_css.c:2298` | `static void test_pseudo_nth_of_type(void **state)` |
+| `test_pseudo_of_type` | function | `tests/test_css.c:2279` | `static void test_pseudo_of_type(void **state)` |
 | `test_pseudo_root_and_form_state` | function | `tests/test_css.c:1732` | `static void test_pseudo_root_and_form_state(void **state)` |
 | `test_pseudo_single_colon_before_class_tmp` | function | `tests/test_css.c:2047` | `static void test_pseudo_single_colon_before_class_tmp(void **state)` |
 | `test_pseudo_single_colon_before_matches` | function | `tests/test_css.c:1911` | `static void test_pseudo_single_colon_before_matches(void **state)` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_absolute_span_honours_right_bottom` | function | `tests/test_freedom.c:1150` | `static void test_absolute_span_honours_right_bottom(void **state)` |
 | `test_author_can_unbold_a_heading` | function | `tests/test_freedom.c:1131` | `static void test_author_can_unbold_a_heading(void **state)` |
 | `test_author_font_size_on_heading_replaces_ua_scale` | function | `tests/test_freedom.c:1056` | `static void test_author_font_size_on_heading_replaces_ua_scale(void **state)` |
-| `test_download_pdf_local` | function | `tests/test_freedom.c:247` | `static void test_download_pdf_local(void **state)` |
-| `test_download_pdf_requires_path` | function | `tests/test_freedom.c:273` | `static void test_download_pdf_requires_path(void **state)` |
-| `test_download_png_absolute_shrinks_and_anchors_right` | function | `tests/test_freedom.c:917` | `static void test_download_png_absolute_shrinks_and_anchors_right(void **state)` |
-| `test_download_png_broken_image_keeps_row_order` | function | `tests/test_freedom.c:1473` | `static void test_download_png_broken_image_keeps_row_order(void **state)` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

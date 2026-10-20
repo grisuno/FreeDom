@@ -1,6 +1,6 @@
 # Documentation Coverage
 
-Overall: **39.9%** (1299 of 3257 public modules, types, and callables). Data members are excluded from the ratio.
+Overall: **39.8%** (1299 of 3261 public modules, types, and callables). Data members are excluded from the ratio.
 
 [Back to index](index.md)
 
@@ -10,7 +10,7 @@ Overall: **39.9%** (1299 of 3257 public modules, types, and callables). Data mem
 |---|---|---|---|
 | enum | 80 | 151 | 53.0% |
 | function | 700 | 1679 | 41.7% |
-| macro | 289 | 839 | 34.4% |
+| macro | 289 | 843 | 34.3% |
 | method | 0 | 23 | 0.0% |
 | module | 31 | 210 | 14.8% |
 | struct | 106 | 231 | 45.9% |
@@ -52,7 +52,7 @@ Overall: **39.9%** (1299 of 3257 public modules, types, and callables). Data mem
 | [`src/webcaps.c`](modules/src.webcaps.c.md) | 0 | 5 | 0.0% |
 | [`src/webfont.c`](modules/src.webfont.c.md) | 0 | 7 | 0.0% |
 | [`tools/gen_psl.c`](modules/tools.gen_psl.c.md) | 0 | 4 | 0.0% |
-| [`src/local_store.c`](modules/src.local_store.c.md) | 5 | 270 | 1.9% |
+| [`src/local_store.c`](modules/src.local_store.c.md) | 5 | 274 | 1.8% |
 | [`src/tls_impersonate.c`](modules/src.tls_impersonate.c.md) | 1 | 10 | 10.0% |
 | [`include/download.h`](modules/include.download.h.md) | 1 | 9 | 11.1% |
 | [`src/js_dom.c`](modules/src.js_dom.c.md) | 3 | 23 | 13.0% |
@@ -235,7 +235,7 @@ Overall: **39.9%** (1299 of 3257 public modules, types, and callables). Data mem
 
 DOC001 undocumented public item, DOC002 parameter not documented, DOC003 documented parameter missing from the signature (stale doc), DOC004 return value not documented, DOC005 raised exception not documented.
 
-DOC001: 1958, DOC004: 1
+DOC001: 1962, DOC004: 1
 
 - DOC004 `app.py:47` return value of run_freedom_headless is not documented
 - DOC001 `docker-entrypoint.sh:1` module docker-entrypoint.sh is not documented
@@ -737,4 +737,4 @@ DOC001: 1958, DOC004: 1
 - DOC001 `include/frame_clock.h:23` function fc_interval_ms is not documented
 - DOC001 `include/freebug.h:1` module include/freebug.h is not documented
 - DOC001 `include/freebug.h:57` macro FB_MAX_ENTRY_BYTES is not documented
-- ... 1459 more in `api/warnings.jsonl`
+- ... 1463 more in `api/warnings.jsonl`

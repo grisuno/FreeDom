@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `pf_url_shaped` | function | `src/prefetch.c:324` | `static int pf_url_shaped(const char *sp)` |
+| `pf_worker` | function | `src/prefetch.c:349` | `static void *pf_worker(void *arg)` |
+| `pool_start` | function | `src/prefetch.c:394` | `static int pool_start(pf_pool *p, const char *const *urls, size_t nurls,                       pf...` |
+| `PREFS_MAGIC` | macro | `src/prefs.c:20` | `#define PREFS_MAGIC` |
 | `_POSIX_C_SOURCE` | macro | `src/prefs.c:11` | `#define _POSIX_C_SOURCE` |
 | `apply_kv` | function | `src/prefs.c:225` | `static void apply_kv(prefs_state *out, const char *key, long val)` |
 | `bookmark_push` | function | `src/prefs.c:91` | `static prefs_status bookmark_push(prefs_state *p, const char *url, const char *title)` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `used` | type_alias | `src/ws_hub.c:23` | `typedef struct wh_conn { int used;` |
 | `wfd` | type_alias | `src/ws_hub.c:43` | `typedef struct wh_job { int wfd;` |
 | `wh_close` | function | `src/ws_hub.c:228` | `void wh_close(wh_hub *h, int id)` |
-| `wh_close_all` | function | `src/ws_hub.c:234` | `void wh_close_all(wh_hub *h)` |
-| `wh_conn` | struct | `src/ws_hub.c:24` | `` |
-| `wh_count` | function | `src/ws_hub.c:314` | `size_t wh_count(const wh_hub *h)` |
-| `wh_free` | function | `src/ws_hub.c:129` | `void wh_free(wh_hub *h)` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

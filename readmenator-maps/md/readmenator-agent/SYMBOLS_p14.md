@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_resolve_absolute_https` | function | `tests/test_secure_fetch.c:344` | `static void test_resolve_absolute_https(void **state)` |
+| `test_resolve_absolute_path` | function | `tests/test_secure_fetch.c:378` | `static void test_resolve_absolute_path(void **state)` |
+| `test_resolve_null_args` | function | `tests/test_secure_fetch.c:402` | `static void test_resolve_null_args(void **state)` |
+| `test_resolve_refuses_dangerous_schemes` | function | `tests/test_secure_fetch.c:359` | `static void test_resolve_refuses_dangerous_schemes(void **state)` |
 | `test_resolve_refuses_http_downgrade` | function | `tests/test_secure_fetch.c:352` | `static void test_resolve_refuses_http_downgrade(void **state)` |
 | `test_resolve_relative_path` | function | `tests/test_secure_fetch.c:390` | `static void test_resolve_relative_path(void **state)` |
 | `test_resolve_scheme_relative` | function | `tests/test_secure_fetch.c:370` | `static void test_resolve_scheme_relative(void **state)` |

@@ -41,7 +41,7 @@ Second-brain semantic layer: nouns map atomically to file sets (EXTRACTED); verb
 | `non` | 67 | 190 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h` |
 | `cap` | 66 | 199 | `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `include/box_style.h`, `include/css.h`, `include/css_length.h` |
 | `set` | 65 | 276 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/box_style.h` |
-| `source` | 65 | 190 | `docker_run.sh`, `fuzz.sh`, `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/freedom_view.c` |
+| `source` | 65 | 191 | `docker_run.sh`, `fuzz.sh`, `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/freedom_view.c` |
 | `zero` | 65 | 142 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h` |
 | `count` | 64 | 191 | `gui/browser_ui.c`, `include/box_style.h`, `include/css.h`, `include/css_gradient.h`, `include/css_select.h` |
 | `same` | 61 | 234 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h` |
