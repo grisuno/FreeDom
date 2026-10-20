@@ -1,13 +1,13 @@
 # `gui/browser_ui.c`
 
-> Source: [gui/browser_ui.c:1](../../gui/browser_ui.c#L1) | language `c` | coverage 32.8% | [API index](../index.md)
+> Source: [gui/browser_ui.c:1](../../gui/browser_ui.c#L1) | language `c` | coverage 32.5% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`ui_menu_item`](#ui_menu_item), [`ui_input_state`](#ui_input_state), [`ui_image`](#ui_image), [`ui_bg_image`](#ui_bg_image), [`tab_ctx`](#tab_ctx), [`browser_window`](#browser_window), [`repl_edges`](#repl_edges), [`fetch_prep`](#fetch_prep), [`fetch_job`](#fetch_job), [`rc_frag`](#rc_frag), [`rc_row`](#rc_row), [`rc_box`](#rc_box), [`rc_oof_sub`](#rc_oof_sub), [`rc_layout`](#rc_layout), [`rc_oof_sub`](#rc_oof_sub), [`rc_open_box`](#rc_open_box), [`rc_ibox`](#rc_ibox), [`rc_state`](#rc_state), [`rc_ext`](#rc_ext), [`item_sides`](#item_sides), [`rc_defer_col`](#rc_defer_col), [`rc_defer`](#rc_defer), [`bui_mask_ctx`](#bui_mask_ctx), [`screen_flow_ctx`](#screen_flow_ctx), [`png_flow_ctx`](#png_flow_ctx), [`freebug_window`](#freebug_window)
 - **Enums:** [`ui_menu_action`](#ui_menu_action), [`ui_hot`](#ui_hot), [`rc_rowkind`](#rc_rowkind)
 - **Type Aliases:** [`bs`](#bs), [`freebug_window`](#freebug_window), [`pl`](#pl), [`allowlisted`](#allowlisted), [`font_size`](#font_size), [`kind`](#kind), [`h`](#h), [`block_id`](#block_id), [`col_founder_box`](#col_founder_box), [`family`](#family), [`key`](#key), [`col`](#col)
-- **Functions:** [`offset`](#offset), [`fields`](#fields), [`gutter`](#gutter), [`proxy`](#proxy), [`GET`](#get), [`only`](#only), [`first`](#first), [`hb_is_allowlisted`](#hb_is_allowlisted), [`proceed`](#proceed), [`secure_fetch`](#secure_fetch), [`string`](#string), [`toggle`](#toggle), [`stylesheets`](#stylesheets), [`body`](#body), [`ALIVE`](#alive), [`arrives`](#arrives), [`strcmp`](#strcmp), [`resolve`](#resolve), [`HarfBuzz`](#harfbuzz), [`sites`](#sites), [`area`](#area), [`run`](#run), [`produced`](#produced), [`line`](#line), [`inlines`](#inlines), [`them`](#them), [`itself`](#itself), [`table`](#table), [`container`](#container), [`row`](#row), [`way`](#way), [`layout`](#layout), [`TABLE`](#table), [`axis`](#axis), [`slot`](#slot), [`struct`](#struct), [`descriptor`](#descriptor), [`path`](#path), [`builds`](#builds), [`flow`](#flow), [`own`](#own), [`items`](#items), [`children`](#children), [`behind`](#behind), [`column`](#column), [`columns`](#columns), [`treatment`](#treatment), [`context`](#context), [`width`](#width), [`x`](#x), [`it`](#it), [`yet`](#yet), [`chain`](#chain), [`anchor`](#anchor), [`key`](#key), [`have`](#have), [`standalone`](#standalone), [`count`](#count), [`approximation`](#approximation), [`margin`](#margin), [`rd_build`](#rd_build), [`dies`](#dies), [`descriptors`](#descriptors), [`again`](#again), [`blocking`](#blocking), [`video_stop`](#video_stop), [`upstream`](#upstream), [`rect`](#rect), [`text`](#text), [`spaced`](#spaced), [`layer`](#layer), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`convention`](#convention), [`set_rgb`](#set_rgb), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`exactly`](#exactly), [`bg`](#bg), [`rows`](#rows), [`fragment`](#fragment), [`made`](#made), [`the`](#the), [`limits`](#limits), [`fill`](#fill), [`overflow`](#overflow), [`bui_pop_group_composite`](#bui_pop_group_composite), [`compositing`](#compositing), [`box`](#box), [`bui_pop_group_composite`](#bui_pop_group_composite), [`bui_pop_group_composite`](#bui_pop_group_composite), [`caller`](#caller), [`ui_render_png`](#ui_render_png), [`origin`](#origin), [`ui_render_png_images`](#ui_render_png_images), [`ui_render_pdf_images`](#ui_render_pdf_images), [`ui_dump_layout`](#ui_dump_layout), [`in`](#in), [`Firefox`](#firefox), [`reference`](#reference), [`sf_ws_url_check`](#sf_ws_url_check), [`memory`](#memory), [`GET`](#get), [`presentation`](#presentation), [`resizes`](#resizes), [`wl_array_for_each`](#wl_array_for_each), [`element`](#element), [`down`](#down), [`loop`](#loop), [`ui_run_browser`](#ui_run_browser), [`saving`](#saving), [`redraws`](#redraws), [`applies`](#applies), [`cost`](#cost)
+- **Functions:** [`offset`](#offset), [`fields`](#fields), [`gutter`](#gutter), [`proxy`](#proxy), [`GET`](#get), [`only`](#only), [`first`](#first), [`hb_is_allowlisted`](#hb_is_allowlisted), [`proceed`](#proceed), [`secure_fetch`](#secure_fetch), [`string`](#string), [`toggle`](#toggle), [`stylesheets`](#stylesheets), [`body`](#body), [`ALIVE`](#alive), [`arrives`](#arrives), [`strcmp`](#strcmp), [`resolve`](#resolve), [`HarfBuzz`](#harfbuzz), [`sites`](#sites), [`area`](#area), [`run`](#run), [`produced`](#produced), [`line`](#line), [`inlines`](#inlines), [`them`](#them), [`itself`](#itself), [`table`](#table), [`container`](#container), [`row`](#row), [`way`](#way), [`layout`](#layout), [`TABLE`](#table), [`axis`](#axis), [`slot`](#slot), [`struct`](#struct), [`descriptor`](#descriptor), [`path`](#path), [`builds`](#builds), [`flow`](#flow), [`own`](#own), [`items`](#items), [`wins`](#wins), [`children`](#children), [`behind`](#behind), [`column`](#column), [`columns`](#columns), [`treatment`](#treatment), [`context`](#context), [`width`](#width), [`x`](#x), [`it`](#it), [`yet`](#yet), [`chain`](#chain), [`anchor`](#anchor), [`key`](#key), [`have`](#have), [`standalone`](#standalone), [`count`](#count), [`approximation`](#approximation), [`margin`](#margin), [`rd_build`](#rd_build), [`dies`](#dies), [`descriptors`](#descriptors), [`again`](#again), [`blocking`](#blocking), [`video_stop`](#video_stop), [`upstream`](#upstream), [`rect`](#rect), [`text`](#text), [`spaced`](#spaced), [`layer`](#layer), [`widths`](#widths), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`convention`](#convention), [`set_rgb`](#set_rgb), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`cairo_set_dash`](#cairo_set_dash), [`exactly`](#exactly), [`bg`](#bg), [`rows`](#rows), [`fragment`](#fragment), [`made`](#made), [`the`](#the), [`limits`](#limits), [`fill`](#fill), [`overflow`](#overflow), [`bui_pop_group_composite`](#bui_pop_group_composite), [`compositing`](#compositing), [`box`](#box), [`bui_pop_group_composite`](#bui_pop_group_composite), [`bui_pop_group_composite`](#bui_pop_group_composite), [`caller`](#caller), [`ui_render_png`](#ui_render_png), [`origin`](#origin), [`ui_render_png_images`](#ui_render_png_images), [`ui_render_pdf_images`](#ui_render_pdf_images), [`ui_dump_layout`](#ui_dump_layout), [`in`](#in), [`Firefox`](#firefox), [`reference`](#reference), [`sf_ws_url_check`](#sf_ws_url_check), [`memory`](#memory), [`GET`](#get), [`presentation`](#presentation), [`resizes`](#resizes), [`wl_array_for_each`](#wl_array_for_each), [`element`](#element), [`down`](#down), [`loop`](#loop), [`ui_run_browser`](#ui_run_browser), [`saving`](#saving), [`redraws`](#redraws), [`applies`](#applies), [`cost`](#cost)
 - **Macros:** [`_GNU_SOURCE`](#_gnu_source), [`UI_TAB_MIN_W`](#ui_tab_min_w), [`UI_TAB_MAX_W`](#ui_tab_max_w), [`UI_TAB_NEW_W`](#ui_tab_new_w), [`UI_TAB_CLOSE_W`](#ui_tab_close_w), [`UI_BTN_W`](#ui_btn_w), [`UI_WIN_BTN_W`](#ui_win_btn_w), [`UI_MARGIN`](#ui_margin), [`UI_BTN_LEFT`](#ui_btn_left), [`UI_LIST_INDENT`](#ui_list_indent), [`UI_SCROLLBAR_W`](#ui_scrollbar_w), [`UI_SCROLLBAR_MIN`](#ui_scrollbar_min), [`UI_SCROLLBAR_PAD`](#ui_scrollbar_pad), [`UI_RESIZE_MARGIN`](#ui_resize_margin), [`UI_MENU_W`](#ui_menu_w), [`UI_MENU_PAD`](#ui_menu_pad), [`UI_CHECK_SZ`](#ui_check_sz), [`UI_HAMBURGER_W`](#ui_hamburger_w), [`UI_HAMBURGER_GAP`](#ui_hamburger_gap), [`UI_CURSOR_SIZE`](#ui_cursor_size), [`UI_TOAST_PAD`](#ui_toast_pad), [`OMNI_MAX_SUGG`](#omni_max_sugg), [`UI_TWO_PI`](#ui_two_pi), [`UI_INPUT_PAD`](#ui_input_pad), [`UI_CONTROL_FONT`](#ui_control_font), [`UI_INPUT_MEASURE_W`](#ui_input_measure_w), [`UI_INPUT_WIDTH`](#ui_input_width), [`UI_BUTTON_HPAD`](#ui_button_hpad), [`UI_FORM_FIELDS_MAX`](#ui_form_fields_max), [`UI_UNDERLINE_OFFSET`](#ui_underline_offset), [`UI_UNDERLINE_THICK`](#ui_underline_thick), [`UI_STRIKE_OFFSET`](#ui_strike_offset), [`UI_OVERLINE_OFFSET`](#ui_overline_offset), [`UI_SLICE_MAX`](#ui_slice_max), [`UI_MENU_COUNT`](#ui_menu_count), [`UI_IMAGE_MAX_BODY`](#ui_image_max_body), [`UI_MAX_TABS`](#ui_max_tabs), [`UI_READER_COLUMN_W`](#ui_reader_column_w), [`FONT_STASH_MAX_SHEETS`](#font_stash_max_sheets), [`FONT_STASH_MAX_BYTES`](#font_stash_max_bytes), [`JS_NAV_MAX`](#js_nav_max), [`HIST_STEP_DEPTH_MAX`](#hist_step_depth_max), [`JS_TICKS_PER_LOAD`](#js_ticks_per_load), [`UI_RELOAD_X`](#ui_reload_x), [`RC_IBOX_MAX`](#rc_ibox_max), [`RC_BOX_STACK_MAX`](#rc_box_stack_max), [`RC_FLOAT_MAX`](#rc_float_max), [`RC_FLOAT_FIT_MIN`](#rc_float_fit_min), [`FLEX_MEASURE_W`](#flex_measure_w), [`FLEX_MIN_MEASURE_W`](#flex_min_measure_w), [`BALANCE_MAX_LINES`](#balance_max_lines), [`RC_COL_FREE_MAX`](#rc_col_free_max), [`RC_MAX_OUT_OF_FLOW`](#rc_max_out_of_flow), [`RC_DEFER_COLS`](#rc_defer_cols), [`RC_DEFER_RANGES`](#rc_defer_ranges), [`RC_DEFER_BAND_RUNS`](#rc_defer_band_runs), [`BUI_CONIC_SLICES`](#bui_conic_slices), [`ROW_PAINT_ALL`](#row_paint_all), [`ROW_PAINT_BAND`](#row_paint_band), [`ROW_PAINT_CONTENT`](#row_paint_content), [`OV_MAX_DEPTH`](#ov_max_depth), [`H2R`](#h2r), [`PDF_PAGE_W`](#pdf_page_w), [`PDF_MARGIN`](#pdf_margin), [`PNG_PAGE_W`](#png_page_w), [`PNG_MARGIN`](#png_margin), [`FBW_W`](#fbw_w), [`FBW_HEADER`](#fbw_header), [`FBW_PAD`](#fbw_pad), [`FBW_LINE`](#fbw_line), [`FBW_GUTTER`](#fbw_gutter), [`FBW_MIN_SPLIT`](#fbw_min_split), [`FBW_MAX_SPLIT`](#fbw_max_split), [`FBW_COPY_BTN_W`](#fbw_copy_btn_w)
 
 ## Type Diagram
@@ -435,7 +435,7 @@ One inline-level box of the open line (see rc_state.ibx).
 
 ### `rc_state`
 
-`struct` | [gui/browser_ui.c:3429](../../gui/browser_ui.c#L3429)
+`struct` | [gui/browser_ui.c:3434](../../gui/browser_ui.c#L3434)
 
 ```c
 typedef struct rc_state
@@ -447,7 +447,7 @@ typedef struct rc_state
 
 ### `rc_ext`
 
-`struct` | [gui/browser_ui.c:4067](../../gui/browser_ui.c#L4067)
+`struct` | [gui/browser_ui.c:4077](../../gui/browser_ui.c#L4077)
 
 ```c
 typedef struct rc_ext
@@ -461,7 +461,7 @@ Author text-presentation extensions for a block, derived from its rd_block (alre
 
 ### `item_sides`
 
-`struct` | [gui/browser_ui.c:5166](../../gui/browser_ui.c#L5166)
+`struct` | [gui/browser_ui.c:5183](../../gui/browser_ui.c#L5183)
 
 ```c
 typedef struct item_sides
@@ -481,7 +481,7 @@ Extracted so the auto-basis measuring pre-pass and the flow loop below cannot dr
 
 #### `item_sides.mr`
 
-`type_alias` | [gui/browser_ui.c:5166](../../gui/browser_ui.c#L5166)
+`type_alias` | [gui/browser_ui.c:5183](../../gui/browser_ui.c#L5183)
 
 ```c
 typedef struct item_sides { double ml, mr;
@@ -497,7 +497,7 @@ Extracted so the auto-basis measuring pre-pass and the flow loop below cannot dr
 
 ### `rc_defer_col`
 
-`struct` | [gui/browser_ui.c:7879](../../gui/browser_ui.c#L7879)
+`struct` | [gui/browser_ui.c:7932](../../gui/browser_ui.c#L7932)
 
 ```c
 typedef struct rc_defer_col
@@ -509,7 +509,7 @@ typedef struct rc_defer_col
 
 ### `rc_defer`
 
-`struct` | [gui/browser_ui.c:7886](../../gui/browser_ui.c#L7886)
+`struct` | [gui/browser_ui.c:7939](../../gui/browser_ui.c#L7939)
 
 ```c
 typedef struct rc_defer
@@ -521,7 +521,7 @@ typedef struct rc_defer
 
 ### `bui_mask_ctx`
 
-`struct` | [gui/browser_ui.c:12378](../../gui/browser_ui.c#L12378)
+`struct` | [gui/browser_ui.c:12513](../../gui/browser_ui.c#L12513)
 
 ```c
 typedef struct bui_mask_ctx
@@ -537,7 +537,7 @@ Either may be NULL.
 
 ### `screen_flow_ctx`
 
-`struct` | [gui/browser_ui.c:13395](../../gui/browser_ui.c#L13395)
+`struct` | [gui/browser_ui.c:13530](../../gui/browser_ui.c#L13530)
 
 ```c
 typedef struct screen_flow_ctx
@@ -551,7 +551,7 @@ The interactive painter's in-flow context: everything paint_structured has resol
 
 ### `png_flow_ctx`
 
-`struct` | [gui/browser_ui.c:13810](../../gui/browser_ui.c#L13810)
+`struct` | [gui/browser_ui.c:13945](../../gui/browser_ui.c#L13945)
 
 ```c
 typedef struct png_flow_ctx
@@ -565,7 +565,7 @@ The headless PNG painter's in-flow context, shared by the normal pass and the de
 
 ### `freebug_window`
 
-`struct` | [gui/browser_ui.c:15824](../../gui/browser_ui.c#L15824)
+`struct` | [gui/browser_ui.c:15959](../../gui/browser_ui.c#L15959)
 
 ```c
 struct freebug_window
@@ -745,7 +745,7 @@ A box's content rect (inner_left/inner_w) is the coordinate context its children
 
 ### `col_founder_box`
 
-`type_alias` | [gui/browser_ui.c:3428](../../gui/browser_ui.c#L3428)
+`type_alias` | [gui/browser_ui.c:3433](../../gui/browser_ui.c#L3433)
 
 ```c
 typedef struct rc_state { /* Inside a float band column whose width was SHRUNK TO FIT: the float * founder's own box (col_founder_set). The column already IS that box's * border box, so open_box must not apply the box's width/max-width again * -- against the column they resolve to a fraction of themselves. */ int col_founder_set, col_founder_box;
@@ -761,7 +761,7 @@ Below it the line is shifted under the float instead (CSS 2.1 9.5). It is a widt
 
 ### `family`
 
-`type_alias` | [gui/browser_ui.c:4067](../../gui/browser_ui.c#L4067)
+`type_alias` | [gui/browser_ui.c:4077](../../gui/browser_ui.c#L4077)
 
 ```c
 typedef struct rc_ext { int family;
@@ -775,7 +775,7 @@ Author text-presentation extensions for a block, derived from its rd_block (alre
 
 ### `key`
 
-`type_alias` | [gui/browser_ui.c:7879](../../gui/browser_ui.c#L7879)
+`type_alias` | [gui/browser_ui.c:7932](../../gui/browser_ui.c#L7932)
 
 ```c
 typedef struct rc_defer_col { int key;
@@ -787,7 +787,7 @@ typedef struct rc_defer_col { int key;
 
 ### `col`
 
-`type_alias` | [gui/browser_ui.c:7886](../../gui/browser_ui.c#L7886)
+`type_alias` | [gui/browser_ui.c:7939](../../gui/browser_ui.c#L7939)
 
 ```c
 typedef struct rc_defer { rc_defer_col col[RC_DEFER_COLS];
@@ -1187,7 +1187,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `HarfBuzz`
 
-`function` | [gui/browser_ui.c:3690](../../gui/browser_ui.c#L3690)
+`function` | [gui/browser_ui.c:3695](../../gui/browser_ui.c#L3695)
 
 ```c
 * descriptor via HarfBuzz (text_shape);
@@ -1201,7 +1201,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `sites`
 
-`function` | [gui/browser_ui.c:3714](../../gui/browser_ui.c#L3714)
+`function` | [gui/browser_ui.c:3719](../../gui/browser_ui.c#L3719)
 
 ```c
 * sites (wfh 0, local 0) get the bucket face, which is the toy face's twin. */ if (wfh != 0u ...
@@ -1224,7 +1224,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `area`
 
-`function` | [gui/browser_ui.c:3902](../../gui/browser_ui.c#L3902)
+`function` | [gui/browser_ui.c:3907](../../gui/browser_ui.c#L3907)
 
 ```c
 * box spans its CONTENT area (the font's ascent + descent plus its vertical padding * and border), centred on the baseline, as in CSS 2.1 10.6.1. A box that survived a * line wrap simply ends at the wrap -- multi-line inline boxes are out of scope. */ static void close_inline_boxes(rc_layout *L, rc_state *s, double row_top, double row_h, double baseline)
@@ -1244,7 +1244,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `run`
 
-`function` | [gui/browser_ui.c:3950](../../gui/browser_ui.c#L3950)
+`function` | [gui/browser_ui.c:3960](../../gui/browser_ui.c#L3960)
 
 ```c
 * continuation run (block_id < 0 with no block break) deliberately skips reconcile * to stay on ...
@@ -1264,7 +1264,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `produced`
 
-`function` | [gui/browser_ui.c:4194](../../gui/browser_ui.c#L4194)
+`function` | [gui/browser_ui.c:4204](../../gui/browser_ui.c#L4204)
 
 ```c
 * href tags every fragment produced (NULL for non-link runs) so a later hit-test * can recover the click target without re-walking the document. node_id tags the * originating element for JS click dis
@@ -1284,7 +1284,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `line`
 
-`function` | [gui/browser_ui.c:4293](../../gui/browser_ui.c#L4293)
+`function` | [gui/browser_ui.c:4303](../../gui/browser_ui.c#L4303)
 
 ```c
 * its neighbours on the line (spec/page_view.md "Colapso de espacio en el borde * entre runs"). Read from src, the same buffer the loop scans, so a tab-expanded * <pre> agrees with itself. */ int star
@@ -1306,7 +1306,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `inlines`
 
-`function` | [gui/browser_ui.c:4583](../../gui/browser_ui.c#L4583)
+`function` | [gui/browser_ui.c:4593](../../gui/browser_ui.c#L4593)
 
 ```c
 * atomic inlines (`<img><img><img>`, collapsing blanks skipped) share one line * and wrap like words (CSS 2.1 9.2.2) instead of stacking one row each. Returns * that next run's index, or 0 when the element is not followed by inline flow. */ static size_t replaced_opens_inline_line(const rd_doc *doc, size_t i, size_t end)
@@ -1329,7 +1329,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `them`
 
-`function` | [gui/browser_ui.c:5057](../../gui/browser_ui.c#L5057)
+`function` | [gui/browser_ui.c:5067](../../gui/browser_ui.c#L5067)
 
 ```c
 * to them (jkanime's badge-only tiles keep their box). */ static int item_root_box_in(const rd_do...
@@ -1343,13 +1343,15 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 **Returns:** `* to`
 
+*Calls:* [`rd_at`](include.render_doc.h.md#rd_at)
+
 ---
 
 <a id="itself"></a>
 
 ### `itself`
 
-`function` | [gui/browser_ui.c:5079](../../gui/browser_ui.c#L5079)
+`function` | [gui/browser_ui.c:5096](../../gui/browser_ui.c#L5096)
 
 ```c
 * STRETCH itself (box_tree fills the line with it). */ static int css_align_to_bt(int align_kw)
@@ -1369,7 +1371,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `table`
 
-`function` | [gui/browser_ui.c:5296](../../gui/browser_ui.c#L5296)
+`function` | [gui/browser_ui.c:5313](../../gui/browser_ui.c#L5313)
 
 ```c
 * synthesised table (no descriptors to disagree) keeps the stamp. */ if (cd != NULL && !c...
@@ -1391,7 +1393,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `container`
 
-`function` | [gui/browser_ui.c:5306](../../gui/browser_ui.c#L5306)
+`function` | [gui/browser_ui.c:5323](../../gui/browser_ui.c#L5323)
 
 ```c
 * were the container (github's tab pill). */ int item = item_at_level(doc, rd_at(doc, k), cid);
@@ -1411,7 +1413,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `row`
 
-`function` | [gui/browser_ui.c:5361](../../gui/browser_ui.c#L5361)
+`function` | [gui/browser_ui.c:5378](../../gui/browser_ui.c#L5378)
 
 ```c
 * label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */ static d...
@@ -1432,7 +1434,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `way`
 
-`function` | [gui/browser_ui.c:5406](../../gui/browser_ui.c#L5406)
+`function` | [gui/browser_ui.c:5423](../../gui/browser_ui.c#L5423)
 
 ```c
 * intrinsic box either way (it does not wrap below its own size). */ static int block_leaves_flow(const rd_doc *doc, const rd_block *bk);
@@ -1452,7 +1454,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `layout`
 
-`function` | [gui/browser_ui.c:5647](../../gui/browser_ui.c#L5647)
+`function` | [gui/browser_ui.c:5664](../../gui/browser_ui.c#L5664)
 
 ```c
 * hypothetical size in the real layout (Flexbox 9.2.3). */ if (ibd != NULL && ibd->box_min_w > 0) base = bx_flex_min_clamp(base, (double)ibd->box_min_w, ibd->box_sizing == CSS_BOXS_BORDER, isd.pl + is
@@ -1472,7 +1474,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `TABLE`
 
-`function` | [gui/browser_ui.c:5852](../../gui/browser_ui.c#L5852)
+`function` | [gui/browser_ui.c:5881](../../gui/browser_ui.c#L5881)
 
 ```c
 * container TABLE (rd_cont_at) rather than from the head run, because a container * whose children are all containers has no run of its own to read them from -- that * is the whole reason the table ex
@@ -1486,7 +1488,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `axis`
 
-`function` | [gui/browser_ui.c:6113](../../gui/browser_ui.c#L6113)
+`function` | [gui/browser_ui.c:6142](../../gui/browser_ui.c#L6142)
 
 ```c
 * differs: items stack on the vertical main axis (fx_column_place) and align on * the horizontal cross axis (fx_cross_offset). spec/flex_layout.md, tanda 40. */ int is_col = !is_grid && (cdv.direction
@@ -1500,7 +1502,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `slot`
 
-`function` | [gui/browser_ui.c:6166](../../gui/browser_ui.c#L6166)
+`function` | [gui/browser_ui.c:6195](../../gui/browser_ui.c#L6195)
 
 ```c
 * layout slot (item 0 → rightmost, last item → leftmost). */ if (use_flex && cdv.direction ==...
@@ -1521,7 +1523,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `struct`
 
-`function` | [gui/browser_ui.c:6312](../../gui/browser_ui.c#L6312)
+`function` | [gui/browser_ui.c:6341](../../gui/browser_ui.c#L6341)
 
 ```c
 * struct (0 = auto);
@@ -1541,7 +1543,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `descriptor`
 
-`function` | [gui/browser_ui.c:6320](../../gui/browser_ui.c#L6320)
+`function` | [gui/browser_ui.c:6349](../../gui/browser_ui.c#L6349)
 
 ```c
 * placement rides the nested descriptor (spec/grid_areas.md 6). */ int nbc = child_cont_at_level(doc, bk, cid);
@@ -1561,7 +1563,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `path`
 
-`function` | [gui/browser_ui.c:6365](../../gui/browser_ui.c#L6365)
+`function` | [gui/browser_ui.c:6394](../../gui/browser_ui.c#L6394)
 
 ```c
 * * Only a SYNTHESISED table grid takes this path (cdv.is_table), and only when ...
@@ -1581,7 +1583,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `builds`
 
-`function` | [gui/browser_ui.c:6599](../../gui/browser_ui.c#L6599)
+`function` | [gui/browser_ui.c:6628](../../gui/browser_ui.c#L6628)
 
 ```c
 * wraps beside it: the same band the top level builds (spec/float.md). */ const rd_block *fk = rd_at(doc, k);
@@ -1601,7 +1603,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `flow`
 
-`function` | [gui/browser_ui.c:6676](../../gui/browser_ui.c#L6676)
+`function` | [gui/browser_ui.c:6705](../../gui/browser_ui.c#L6705)
 
 ```c
 * it collapse their vertical margins with each other exactly as in * the main flow (CSS 2.1 8.3.1), and none escapes the item. A run of * the item's own boxed block carries the item's margins, which *
@@ -1621,7 +1623,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `own`
 
-`function` | [gui/browser_ui.c:6708](../../gui/browser_ui.c#L6708)
+`function` | [gui/browser_ui.c:6737](../../gui/browser_ui.c#L6737)
 
 ```c
 * root box of its own (rb < 0) the walk must still stop at the * container's box, or it re-opens the container (and its ancestors) * INSIDE the item -- which is what painted a nested nav's own backdro
@@ -1641,7 +1643,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `items`
 
-`function` | [gui/browser_ui.c:6789](../../gui/browser_ui.c#L6789)
+`function` | [gui/browser_ui.c:6818](../../gui/browser_ui.c#L6818)
 
 ```c
 * items (Flexbox 4.2);
@@ -1657,11 +1659,31 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ---
 
+<a id="wins"></a>
+
+### `wins`
+
+`function` | [gui/browser_ui.c:7110](../../gui/browser_ui.c#L7110)
+
+```c
+* content taller than the ratio still wins (min-height:auto). */ if (bx->aspect_num > 0 &...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `auto` | `min-height:` |  |  |
+
+**Returns:** `* content taller than the ratio still`
+
+---
+
 <a id="children"></a>
 
 ### `children`
 
-`function` | [gui/browser_ui.c:7198](../../gui/browser_ui.c#L7198)
+`function` | [gui/browser_ui.c:7239](../../gui/browser_ui.c#L7239)
 
 ```c
 * own content rect onto the stack so its children (text or nested boxes) place inside * it. At t...
@@ -1683,7 +1705,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `behind`
 
-`function` | [gui/browser_ui.c:7207](../../gui/browser_ui.c#L7207)
+`function` | [gui/browser_ui.c:7248](../../gui/browser_ui.c#L7248)
 
 ```c
 * previous block left behind (CSS 2.1 8.3.1) -- read from the element's cascade, * never a theme constant. The old code used th->paragraph_gap as a floor here, * which gave a <div> the vertical rhythm
@@ -1703,7 +1725,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `column`
 
-`function` | [gui/browser_ui.c:7421](../../gui/browser_ui.c#L7421)
+`function` | [gui/browser_ui.c:7462](../../gui/browser_ui.c#L7462)
 
 ```c
 * * Returns the height of the tallest column (0 when there is nothing to fragment). */ static do...
@@ -1723,7 +1745,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `columns`
 
-`function` | [gui/browser_ui.c:7529](../../gui/browser_ui.c#L7529)
+`function` | [gui/browser_ui.c:7570](../../gui/browser_ui.c#L7570)
 
 ```c
 * each card made 1080px columns (huggingface, github). */ static int deepest_open_on_path(const r...
@@ -1739,7 +1761,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `treatment`
 
-`function` | [gui/browser_ui.c:7682](../../gui/browser_ui.c#L7682)
+`function` | [gui/browser_ui.c:7723](../../gui/browser_ui.c#L7723)
 
 ```c
 * block treatment (shrink-wrapped and placed by text-align), which is what a * standalone centred call-to-action button needs. A display:inline element * is inline-level wherever it sits: it never ope
@@ -1759,7 +1781,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `context`
 
-`function` | [gui/browser_ui.c:7832](../../gui/browser_ui.c#L7832)
+`function` | [gui/browser_ui.c:7885](../../gui/browser_ui.c#L7885)
 
 ```c
 * side by side inside the current box context (spec/float.md). Blocks are grouped by * float_id into items (document order);
@@ -1779,7 +1801,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `width`
 
-`function` | [gui/browser_ui.c:8175](../../gui/browser_ui.c#L8175)
+`function` | [gui/browser_ui.c:8228](../../gui/browser_ui.c#L8228)
 
 ```c
 * box width (an inline-block icon `width:12px` inside the float) is * not the float's. */ double t = bx_width_cap(bb->float_w, bb->float_w_pct, ctx_w);
@@ -1799,7 +1821,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `x`
 
-`function` | [gui/browser_ui.c:8217](../../gui/browser_ui.c#L8217)
+`function` | [gui/browser_ui.c:8277](../../gui/browser_ui.c#L8277)
 
 ```c
 * reported x is already the BORDER x (the §7c.2 rule);
@@ -1819,7 +1841,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `it`
 
-`function` | [gui/browser_ui.c:8759](../../gui/browser_ui.c#L8759)
+`function` | [gui/browser_ui.c:8843](../../gui/browser_ui.c#L8843)
 
 ```c
 * already sized it (see col_founder_set), so it is not a cap again. */ int fills_column = (si.col_founder_set && bk->block_id == si.col_founder_box);
@@ -1839,7 +1861,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `yet`
 
-`function` | [gui/browser_ui.c:8852](../../gui/browser_ui.c#L8852)
+`function` | [gui/browser_ui.c:8936](../../gui/browser_ui.c#L8936)
 
 ```c
 * does not carry yet (WPT flex-abspos-staticpos-*). */ static int runs_share_float(const rd_doc *...
@@ -1859,7 +1881,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `chain`
 
-`function` | [gui/browser_ui.c:8918](../../gui/browser_ui.c#L8918)
+`function` | [gui/browser_ui.c:9002](../../gui/browser_ui.c#L9002)
 
 ```c
 * chain (the box that left the normal flow at this pen position);
@@ -1879,7 +1901,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `anchor`
 
-`function` | [gui/browser_ui.c:9030](../../gui/browser_ui.c#L9030)
+`function` | [gui/browser_ui.c:9114](../../gui/browser_ui.c#L9114)
 
 ```c
 * anchor (spec/float.md §7d.3) exactly like a text block. An * empty/hidden one leaves cur_top untouched, so this is a no-op * for it. Without this a flex header never anchored and pulled * columns te
@@ -1899,7 +1921,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `key`
 
-`function` | [gui/browser_ui.c:9090](../../gui/browser_ui.c#L9090)
+`function` | [gui/browser_ui.c:9174](../../gui/browser_ui.c#L9174)
 
 ```c
 * founders splits by key (stories, rail, footer nav each take * their column);
@@ -1919,7 +1941,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `have`
 
-`function` | [gui/browser_ui.c:9104](../../gui/browser_ui.c#L9104)
+`function` | [gui/browser_ui.c:9188](../../gui/browser_ui.c#L9188)
 
 ```c
 * as they always have (spec/float.md §6b.3). The line still open beside * the previous float is committed first, at its own top. */ flush_line(L, &s, th);
@@ -1939,7 +1961,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `standalone`
 
-`function` | [gui/browser_ui.c:9125](../../gui/browser_ui.c#L9125)
+`function` | [gui/browser_ui.c:9209](../../gui/browser_ui.c#L9209)
 
 ```c
 * must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */ size_t line_mate = replaced_opens_inline_line(doc, i, rd_count(doc));
@@ -1959,7 +1981,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `count`
 
-`function` | [gui/browser_ui.c:9306](../../gui/browser_ui.c#L9306)
+`function` | [gui/browser_ui.c:9408](../../gui/browser_ui.c#L9408)
 
 ```c
 * the box count (a hostile parent cycle terminates). */ static int oof_depth(const rd_doc *doc, s...
@@ -1979,7 +2001,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `approximation`
 
-`function` | [gui/browser_ui.c:9325](../../gui/browser_ui.c#L9325)
+`function` | [gui/browser_ui.c:9427](../../gui/browser_ui.c#L9427)
 
 ```c
 * anchors on the Stage 2d approximation (fail-open: content never vanishes). */ static void oof_s...
@@ -1999,7 +2021,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `margin`
 
-`function` | [gui/browser_ui.c:9473](../../gui/browser_ui.c#L9473)
+`function` | [gui/browser_ui.c:9575](../../gui/browser_ui.c#L9575)
 
 ```c
 * own left margin (the margin box starts at the anchor point), a right- * anchored one ends at it. Same for the vertical axis. */ int right_anchored = (bd->inset_left == PV_LEN_UNSET || bd->inset_left
@@ -2021,7 +2043,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `rd_build`
 
-`function` | [gui/browser_ui.c:10151](../../gui/browser_ui.c#L10151)
+`function` | [gui/browser_ui.c:10253](../../gui/browser_ui.c#L10253)
 
 ```c
 * rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr, rgb_from_packed(b->caret_color));
@@ -2041,7 +2063,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `dies`
 
-`function` | [gui/browser_ui.c:10385](../../gui/browser_ui.c#L10385)
+`function` | [gui/browser_ui.c:10487](../../gui/browser_ui.c#L10487)
 
 ```c
 * child dies (exec failed, device busy, daemon absent) is detected on the * next PCM write (EPIP...
@@ -2063,7 +2085,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `descriptors`
 
-`function` | [gui/browser_ui.c:10408](../../gui/browser_ui.c#L10408)
+`function` | [gui/browser_ui.c:10510](../../gui/browser_ui.c#L10510)
 
 ```c
 * descriptors (especially the Wayland display fd) so the sink does * not corrupt the Wayland protocol connection — the most common * cause of the "page flashes white and render loops" bug. */ close(p[
@@ -2083,7 +2105,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `again`
 
-`function` | [gui/browser_ui.c:10489](../../gui/browser_ui.c#L10489)
+`function` | [gui/browser_ui.c:10591](../../gui/browser_ui.c#L10591)
 
 ```c
 * before a respawn opens it again (the WNOHANG reap left the old * process alive long enough to make the new one fail with "Device * or resource busy"). Death is immediate, so the wait is too. */ kill
@@ -2103,7 +2125,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `blocking`
 
-`function` | [gui/browser_ui.c:10776](../../gui/browser_ui.c#L10776)
+`function` | [gui/browser_ui.c:10878](../../gui/browser_ui.c#L10878)
 
 ```c
 * are blocking (POLLIN guaranteed data is available). */ int flags = fcntl(out_fd, F_GETFL, 0);
@@ -2123,7 +2145,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `video_stop`
 
-`function` | [gui/browser_ui.c:10797](../../gui/browser_ui.c#L10797)
+`function` | [gui/browser_ui.c:10899](../../gui/browser_ui.c#L10899)
 
 ```c
 * each segment loop so a video_stop() in the main thread (which sets it to 0 * then calls pthrea...
@@ -2137,7 +2159,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `upstream`
 
-`function` | [gui/browser_ui.c:11003](../../gui/browser_ui.c#L11003)
+`function` | [gui/browser_ui.c:11105](../../gui/browser_ui.c#L11105)
 
 ```c
 * upstream (see spec/css.md). */ static void box_path4(cairo_t *cr, double x, double y, double w,...
@@ -2157,7 +2179,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `rect`
 
-`function` | [gui/browser_ui.c:11129](../../gui/browser_ui.c#L11129)
+`function` | [gui/browser_ui.c:11231](../../gui/browser_ui.c#L11231)
 
 ```c
 * across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops land on the corners. Stops at explicit * 0-1000 positions (pos1000, -1 or NULL = evenly
@@ -2173,7 +2195,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `text`
 
-`function` | [gui/browser_ui.c:11133](../../gui/browser_ui.c#L11133)
+`function` | [gui/browser_ui.c:11235](../../gui/browser_ui.c#L11235)
 
 ```c
 * fill and gradient text (2026-07-19). */ static cairo_pattern_t *bui_linear_grad(double x, doubl...
@@ -2193,7 +2215,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `spaced`
 
-`function` | [gui/browser_ui.c:11208](../../gui/browser_ui.c#L11208)
+`function` | [gui/browser_ui.c:11310](../../gui/browser_ui.c#L11310)
 
 ```c
 * or evenly spaced (bui_grad_color_at). */ static void bui_paint_conic(cairo_t *cr, double x, dou...
@@ -2207,7 +2229,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `layer`
 
-`function` | [gui/browser_ui.c:11381](../../gui/browser_ui.c#L11381)
+`function` | [gui/browser_ui.c:11483](../../gui/browser_ui.c#L11483)
 
 ```c
 * first layer (CSS multi-background: the first declared URL is the topmost) * and OVER bg_rgb/gradient, UNDER the border. Same sizing/repeat/position * as the first layer, using the SAME rc_box fields
@@ -2223,11 +2245,31 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ---
 
+<a id="widths"></a>
+
+### `widths`
+
+`function` | [gui/browser_ui.c:11530](../../gui/browser_ui.c#L11530)
+
+```c
+* the outer minus the adjacent border widths (CSS Backgrounds 3 5.2). The straight * per-sid...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `Backgrounds` | `CSS 3 5.2` |  |  |
+
+**Returns:** `* the outer minus the adjacent border`
+
+---
+
 <a id="cairo_set_dash"></a>
 
 ### `cairo_set_dash`
 
-`function` | [gui/browser_ui.c:11431](../../gui/browser_ui.c#L11431)
+`function` | [gui/browser_ui.c:11566](../../gui/browser_ui.c#L11566)
 
 ```c
 cairo_set_dash(cr, (double[])
@@ -2245,7 +2287,7 @@ cairo_set_dash(cr, (double[])
 
 ### `cairo_set_dash`
 
-`function` | [gui/browser_ui.c:11434](../../gui/browser_ui.c#L11434)
+`function` | [gui/browser_ui.c:11569](../../gui/browser_ui.c#L11569)
 
 ```c
 cairo_set_dash(cr, (double[])
@@ -2263,7 +2305,7 @@ cairo_set_dash(cr, (double[])
 
 ### `cairo_set_dash`
 
-`function` | [gui/browser_ui.c:11480](../../gui/browser_ui.c#L11480)
+`function` | [gui/browser_ui.c:11615](../../gui/browser_ui.c#L11615)
 
 ```c
 cairo_set_dash(cr, (double[])
@@ -2281,7 +2323,7 @@ cairo_set_dash(cr, (double[])
 
 ### `cairo_set_dash`
 
-`function` | [gui/browser_ui.c:11483](../../gui/browser_ui.c#L11483)
+`function` | [gui/browser_ui.c:11618](../../gui/browser_ui.c#L11618)
 
 ```c
 cairo_set_dash(cr, (double[])
@@ -2299,7 +2341,7 @@ cairo_set_dash(cr, (double[])
 
 ### `convention`
 
-`function` | [gui/browser_ui.c:11503](../../gui/browser_ui.c#L11503)
+`function` | [gui/browser_ui.c:11638](../../gui/browser_ui.c#L11638)
 
 ```c
 * on the 3D bevel convention (light top/left, dark right/bottom). */ int is_3d = (style == CSS_BST_GROOVE || style == CSS_BST_RIDGE || style == CSS_BST_INSET || style == CSS_BST_OUTSET);
@@ -2320,7 +2362,7 @@ cairo_set_dash(cr, (double[])
 
 ### `set_rgb`
 
-`function` | [gui/browser_ui.c:11517](../../gui/browser_ui.c#L11517)
+`function` | [gui/browser_ui.c:11652](../../gui/browser_ui.c#L11652)
 
 ```c
 set_rgb(cr, (ui_rgb)
@@ -2342,7 +2384,7 @@ set_rgb(cr, (ui_rgb)
 
 ### `cairo_set_dash`
 
-`function` | [gui/browser_ui.c:11541](../../gui/browser_ui.c#L11541)
+`function` | [gui/browser_ui.c:11676](../../gui/browser_ui.c#L11676)
 
 ```c
 cairo_set_dash(cr, (double[])
@@ -2360,7 +2402,7 @@ cairo_set_dash(cr, (double[])
 
 ### `cairo_set_dash`
 
-`function` | [gui/browser_ui.c:11544](../../gui/browser_ui.c#L11544)
+`function` | [gui/browser_ui.c:11679](../../gui/browser_ui.c#L11679)
 
 ```c
 cairo_set_dash(cr, (double[])
@@ -2378,7 +2420,7 @@ cairo_set_dash(cr, (double[])
 
 ### `cairo_set_dash`
 
-`function` | [gui/browser_ui.c:11636](../../gui/browser_ui.c#L11636)
+`function` | [gui/browser_ui.c:11771](../../gui/browser_ui.c#L11771)
 
 ```c
 cairo_set_dash(cr, (double[])
@@ -2396,7 +2438,7 @@ cairo_set_dash(cr, (double[])
 
 ### `cairo_set_dash`
 
-`function` | [gui/browser_ui.c:11638](../../gui/browser_ui.c#L11638)
+`function` | [gui/browser_ui.c:11773](../../gui/browser_ui.c#L11773)
 
 ```c
 cairo_set_dash(cr, (double[])
@@ -2414,7 +2456,7 @@ cairo_set_dash(cr, (double[])
 
 ### `exactly`
 
-`function` | [gui/browser_ui.c:11699](../../gui/browser_ui.c#L11699)
+`function` | [gui/browser_ui.c:11834](../../gui/browser_ui.c#L11834)
 
 ```c
 * the resolved size exactly (like the SVG path above): routing through * paint_image_row would re-resolve a % width and compound it (tanda 42). */ repl_edges ed = replaced_edges(w->doc, blk, 0.0);
@@ -2434,7 +2476,7 @@ cairo_set_dash(cr, (double[])
 
 ### `bg`
 
-`function` | [gui/browser_ui.c:11795](../../gui/browser_ui.c#L11795)
+`function` | [gui/browser_ui.c:11930](../../gui/browser_ui.c#L11930)
 
 ```c
 * its own DISTINCT bg (an inline span highlight) still paints. */ int own_bid = row_owner_block_id(L, r);
@@ -2454,7 +2496,7 @@ cairo_set_dash(cr, (double[])
 
 ### `rows`
 
-`function` | [gui/browser_ui.c:12019](../../gui/browser_ui.c#L12019)
+`function` | [gui/browser_ui.c:12154](../../gui/browser_ui.c#L12154)
 
 ```c
 * RC_IMAGE rows (see its declaration);
@@ -2474,7 +2516,7 @@ cairo_set_dash(cr, (double[])
 
 ### `fragment`
 
-`function` | [gui/browser_ui.c:12020](../../gui/browser_ui.c#L12020)
+`function` | [gui/browser_ui.c:12155](../../gui/browser_ui.c#L12155)
 
 ```c
 * first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using * blk->block_id alo...
@@ -2497,7 +2539,7 @@ cairo_set_dash(cr, (double[])
 
 ### `made`
 
-`function` | [gui/browser_ui.c:12570](../../gui/browser_ui.c#L12570)
+`function` | [gui/browser_ui.c:12705](../../gui/browser_ui.c#L12705)
 
 ```c
 * its zero channels made (255,255,255,alpha 0) -- an invalid * premultiplied value Cairo composites as ADDITIVE white over * everything behind the group. Filter the straight colour of * the pixels tha
@@ -2520,7 +2562,7 @@ cairo_set_dash(cr, (double[])
 
 ### `the`
 
-`function` | [gui/browser_ui.c:12674](../../gui/browser_ui.c#L12674)
+`function` | [gui/browser_ui.c:12809](../../gui/browser_ui.c#L12809)
 
 ```c
 * the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset -- the shadow * follows the real content shape (PNG transparency, glyphs), not * th
@@ -2540,7 +2582,7 @@ cairo_set_dash(cr, (double[])
 
 ### `limits`
 
-`function` | [gui/browser_ui.c:12759](../../gui/browser_ui.c#L12759)
+`function` | [gui/browser_ui.c:12894](../../gui/browser_ui.c#L12894)
 
 ```c
 * documents narrower v1 limits (no overflow:hidden, no negative z-index). A box * grouped this w...
@@ -2561,7 +2603,7 @@ cairo_set_dash(cr, (double[])
 
 ### `fill`
 
-`function` | [gui/browser_ui.c:12858](../../gui/browser_ui.c#L12858)
+`function` | [gui/browser_ui.c:12993](../../gui/browser_ui.c#L12993)
 
 ```c
 * fill (paint_content_row's r->bg_rgb branch) cascades the SAME author * background-color as the box, but paints in the caller's separate row pass -- * left ungrouped, it shows as a solid, un-faded re
@@ -2581,7 +2623,7 @@ cairo_set_dash(cr, (double[])
 
 ### `overflow`
 
-`function` | [gui/browser_ui.c:12918](../../gui/browser_ui.c#L12918)
+`function` | [gui/browser_ui.c:13053](../../gui/browser_ui.c#L13053)
 
 ```c
 * adding two of them in int was signed overflow (UB, found by UBSan). */ double ox = left + bx->x + box_edge_px(bx->bord_lw);
@@ -2603,7 +2645,7 @@ cairo_set_dash(cr, (double[])
 
 ### `bui_pop_group_composite`
 
-`function` | [gui/browser_ui.c:12945](../../gui/browser_ui.c#L12945)
+`function` | [gui/browser_ui.c:13080](../../gui/browser_ui.c#L13080)
 
 ```c
 bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin, ...
@@ -2622,7 +2664,7 @@ bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, orig
 
 ### `compositing`
 
-`function` | [gui/browser_ui.c:12961](../../gui/browser_ui.c#L12961)
+`function` | [gui/browser_ui.c:13096](../../gui/browser_ui.c#L13096)
 
 ```c
 * * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context * (box_forms_stacking_context: opacity<1, mix-blend != normal, isolation:isolate, * transform != none, or the posit
@@ -2642,7 +2684,7 @@ bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, orig
 
 ### `box`
 
-`function` | [gui/browser_ui.c:13131](../../gui/browser_ui.c#L13131)
+`function` | [gui/browser_ui.c:13266](../../gui/browser_ui.c#L13266)
 
 ```c
 * content belongs to that box (painted by its own positioned entry). */ if (sub == NULL)
@@ -2662,7 +2704,7 @@ bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, orig
 
 ### `bui_pop_group_composite`
 
-`function` | [gui/browser_ui.c:13260](../../gui/browser_ui.c#L13260)
+`function` | [gui/browser_ui.c:13395](../../gui/browser_ui.c#L13395)
 
 ```c
 bui_pop_group_composite(cr, cdef, now_ms() - w->page_load_mono_ms, &L->boxes[j], left, origin, ...
@@ -2682,7 +2724,7 @@ bui_pop_group_composite(cr, cdef, now_ms() - w->page_load_mono_ms, &L->boxes[j],
 
 ### `bui_pop_group_composite`
 
-`function` | [gui/browser_ui.c:13471](../../gui/browser_ui.c#L13471)
+`function` | [gui/browser_ui.c:13606](../../gui/browser_ui.c#L13606)
 
 ```c
 bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin, ...
@@ -2701,7 +2743,7 @@ bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, orig
 
 ### `caller`
 
-`function` | [gui/browser_ui.c:13993](../../gui/browser_ui.c#L13993)
+`function` | [gui/browser_ui.c:14128](../../gui/browser_ui.c#L14128)
 
 ```c
 * caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the * out_path ve...
@@ -2721,7 +2763,7 @@ bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, orig
 
 ### `ui_render_png`
 
-`function` | [gui/browser_ui.c:14016](../../gui/browser_ui.c#L14016)
+`function` | [gui/browser_ui.c:14151](../../gui/browser_ui.c#L14151)
 
 ```c
 ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)
@@ -2747,7 +2789,7 @@ One full-height bitmap of the whole page, the cheapest artifact for visual revie
 
 ### `origin`
 
-`function` | [gui/browser_ui.c:14072](../../gui/browser_ui.c#L14072)
+`function` | [gui/browser_ui.c:14207](../../gui/browser_ui.c#L14207)
 
 ```c
 * top_url is the page origin (https or file://);
@@ -2767,7 +2809,7 @@ One full-height bitmap of the whole page, the cheapest artifact for visual revie
 
 ### `ui_render_png_images`
 
-`function` | [gui/browser_ui.c:14107](../../gui/browser_ui.c#L14107)
+`function` | [gui/browser_ui.c:14242](../../gui/browser_ui.c#L14242)
 
 ```c
 ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url, tab_fetch_fn img_fetch, void *fetch_ctx, const char *out_path, long *out_h)
@@ -2793,7 +2835,7 @@ ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url, t
 
 ### `ui_render_pdf_images`
 
-`function` | [gui/browser_ui.c:14113](../../gui/browser_ui.c#L14113)
+`function` | [gui/browser_ui.c:14248](../../gui/browser_ui.c#L14248)
 
 ```c
 ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url, tab_fetch_fn img_fetch, void *fetch_ctx, const char *out_path, long *out_pages)
@@ -2819,7 +2861,7 @@ ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url, t
 
 ### `ui_dump_layout`
 
-`function` | [gui/browser_ui.c:14128](../../gui/browser_ui.c#L14128)
+`function` | [gui/browser_ui.c:14263](../../gui/browser_ui.c#L14263)
 
 ```c
 ui_status ui_dump_layout(const rd_doc *doc)
@@ -2843,7 +2885,7 @@ This is the layout-side counterpart to --dump-dom (which prints the pre-layout r
 
 ### `in`
 
-`function` | [gui/browser_ui.c:14150](../../gui/browser_ui.c#L14150)
+`function` | [gui/browser_ui.c:14285](../../gui/browser_ui.c#L14285)
 
 ```c
 * a line landed in (Stage 3), which no other dump shows. Text stays out (it is * --dump-dom's job);
@@ -2863,7 +2905,7 @@ This is the layout-side counterpart to --dump-dom (which prints the pre-layout r
 
 ### `Firefox`
 
-`function` | [gui/browser_ui.c:14394](../../gui/browser_ui.c#L14394)
+`function` | [gui/browser_ui.c:14529](../../gui/browser_ui.c#L14529)
 
 ```c
 * on its face does in Firefox (spec/page_view.md, tanda 40). */ static const rd_block *submit_pro...
@@ -2884,7 +2926,7 @@ This is the layout-side counterpart to --dump-dom (which prints the pre-layout r
 
 ### `reference`
 
-`function` | [gui/browser_ui.c:14467](../../gui/browser_ui.c#L14467)
+`function` | [gui/browser_ui.c:14602](../../gui/browser_ui.c#L14602)
 
 ```c
 * reference (downgrade, foreign scheme, no resolvable base) navigates nowhere: * hostile content...
@@ -2905,7 +2947,7 @@ This is the layout-side counterpart to --dump-dom (which prints the pre-layout r
 
 ### `sf_ws_url_check`
 
-`function` | [gui/browser_ui.c:14519](../../gui/browser_ui.c#L14519)
+`function` | [gui/browser_ui.c:14654](../../gui/browser_ui.c#L14654)
 
 ```c
 && sf_ws_url_check(op->data) == SF_OK && rp_host_of(op->data, host, sizeof host) == 0 && hb_check(w->hosts, host) != HB_BLOCK);
@@ -2925,7 +2967,7 @@ This is the layout-side counterpart to --dump-dom (which prints the pre-layout r
 
 ### `memory`
 
-`function` | [gui/browser_ui.c:14641](../../gui/browser_ui.c#L14641)
+`function` | [gui/browser_ui.c:14776](../../gui/browser_ui.c#L14776)
 
 ```c
 * memory (the href pointer, not its contents, was all the old code preserved). */ static void dis...
@@ -2947,7 +2989,7 @@ This is the layout-side counterpart to --dump-dom (which prints the pre-layout r
 
 ### `GET`
 
-`function` | [gui/browser_ui.c:14735](../../gui/browser_ui.c#L14735)
+`function` | [gui/browser_ui.c:14870](../../gui/browser_ui.c#L14870)
 
 ```c
 * the network under weaker rules than a GET (Zero Trust). */ static void do_submit_post(browser_w...
@@ -2967,7 +3009,7 @@ This is the layout-side counterpart to --dump-dom (which prints the pre-layout r
 
 ### `presentation`
 
-`function` | [gui/browser_ui.c:15010](../../gui/browser_ui.c#L15010)
+`function` | [gui/browser_ui.c:15145](../../gui/browser_ui.c#L15145)
 
 ```c
 * affect presentation (a repaint, which re-runs layout, suffices);
@@ -2988,7 +3030,7 @@ This is the layout-side counterpart to --dump-dom (which prints the pre-layout r
 
 ### `resizes`
 
-`function` | [gui/browser_ui.c:15712](../../gui/browser_ui.c#L15712)
+`function` | [gui/browser_ui.c:15847](../../gui/browser_ui.c#L15847)
 
 ```c
 * when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);
@@ -3008,7 +3050,7 @@ This is the layout-side counterpart to --dump-dom (which prints the pre-layout r
 
 ### `wl_array_for_each`
 
-`function` | [gui/browser_ui.c:15720](../../gui/browser_ui.c#L15720)
+`function` | [gui/browser_ui.c:15855](../../gui/browser_ui.c#L15855)
 
 ```c
 wl_array_for_each(st, states)
@@ -3020,7 +3062,7 @@ wl_array_for_each(st, states)
 
 ### `element`
 
-`function` | [gui/browser_ui.c:15777](../../gui/browser_ui.c#L15777)
+`function` | [gui/browser_ui.c:15912](../../gui/browser_ui.c#L15912)
 
 ```c
 * cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand * even without...
@@ -3041,7 +3083,7 @@ wl_array_for_each(st, states)
 
 ### `down`
 
-`function` | [gui/browser_ui.c:16381](../../gui/browser_ui.c#L16381)
+`function` | [gui/browser_ui.c:16516](../../gui/browser_ui.c#L16516)
 
 ```c
 * defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void dispatch_mouse_event(browser_window *w, dom_node_id node_id, const char *event_type, int
@@ -3061,7 +3103,7 @@ wl_array_for_each(st, states)
 
 ### `loop`
 
-`function` | [gui/browser_ui.c:16959](../../gui/browser_ui.c#L16959)
+`function` | [gui/browser_ui.c:17094](../../gui/browser_ui.c#L17094)
 
 ```c
 * we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately might miss it). */ wl_display_roundtrip(w->display);
@@ -3082,7 +3124,7 @@ wl_array_for_each(st, states)
 
 ### `ui_run_browser`
 
-`function` | [gui/browser_ui.c:17725](../../gui/browser_ui.c#L17725)
+`function` | [gui/browser_ui.c:17860](../../gui/browser_ui.c#L17860)
 
 ```c
 ui_status ui_run_browser(const char *start_url)
@@ -3104,7 +3146,7 @@ ui_status ui_run_browser(const char *start_url)
 
 ### `saving`
 
-`function` | [gui/browser_ui.c:17740](../../gui/browser_ui.c#L17740)
+`function` | [gui/browser_ui.c:17875](../../gui/browser_ui.c#L17875)
 
 ```c
 * disables saving (never clobber);
@@ -3124,7 +3166,7 @@ ui_status ui_run_browser(const char *start_url)
 
 ### `redraws`
 
-`function` | [gui/browser_ui.c:17819](../../gui/browser_ui.c#L17819)
+`function` | [gui/browser_ui.c:17954](../../gui/browser_ui.c#L17954)
 
 ```c
 * so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A 4 KiB buffer overflows when * accumulated messages exceed that, since manual flushes
@@ -3145,7 +3187,7 @@ ui_status ui_run_browser(const char *start_url)
 
 ### `applies`
 
-`function` | [gui/browser_ui.c:17889](../../gui/browser_ui.c#L17889)
+`function` | [gui/browser_ui.c:18024](../../gui/browser_ui.c#L18024)
 
 ```c
 * persisted choice applies (prefs_parse already clamped it to a valid mode). */ const char *js_env = getenv("FREEDOM_JS");
@@ -3165,7 +3207,7 @@ ui_status ui_run_browser(const char *start_url)
 
 ### `cost`
 
-`function` | [gui/browser_ui.c:18120](../../gui/browser_ui.c#L18120)
+`function` | [gui/browser_ui.c:18255](../../gui/browser_ui.c#L18255)
 
 ```c
 * measured cost (floor 33 ms = the existing ~30 fps ceiling): * cheap pages paint at...
@@ -3805,7 +3847,7 @@ The reload button sits as the third left chrome button (after back/forward), at 
 
 ### `RC_IBOX_MAX`
 
-`macro` | [gui/browser_ui.c:3414](../../gui/browser_ui.c#L3414)
+`macro` | [gui/browser_ui.c:3419](../../gui/browser_ui.c#L3419)
 
 ```c
 #define RC_IBOX_MAX
@@ -3817,7 +3859,7 @@ The reload button sits as the third left chrome button (after back/forward), at 
 
 ### `RC_BOX_STACK_MAX`
 
-`macro` | [gui/browser_ui.c:3416](../../gui/browser_ui.c#L3416)
+`macro` | [gui/browser_ui.c:3421](../../gui/browser_ui.c#L3421)
 
 ```c
 #define RC_BOX_STACK_MAX
@@ -3829,7 +3871,7 @@ The reload button sits as the third left chrome button (after back/forward), at 
 
 ### `RC_FLOAT_MAX`
 
-`macro` | [gui/browser_ui.c:3420](../../gui/browser_ui.c#L3420)
+`macro` | [gui/browser_ui.c:3425](../../gui/browser_ui.c#L3425)
 
 ```c
 #define RC_FLOAT_MAX
@@ -3845,7 +3887,7 @@ A ninth float is dropped, so a pathological page overlaps a float instead of los
 
 ### `RC_FLOAT_FIT_MIN`
 
-`macro` | [gui/browser_ui.c:3427](../../gui/browser_ui.c#L3427)
+`macro` | [gui/browser_ui.c:3432](../../gui/browser_ui.c#L3432)
 
 ```c
 #define RC_FLOAT_FIT_MIN
@@ -3863,7 +3905,7 @@ Below it the line is shifted under the float instead (CSS 2.1 9.5). It is a widt
 
 ### `FLEX_MEASURE_W`
 
-`macro` | [gui/browser_ui.c:5348](../../gui/browser_ui.c#L5348)
+`macro` | [gui/browser_ui.c:5365](../../gui/browser_ui.c#L5365)
 
 ```c
 #define FLEX_MEASURE_W
@@ -3877,7 +3919,7 @@ Wrap threshold used when measuring an item's MAX-CONTENT width: wide enough that
 
 ### `FLEX_MIN_MEASURE_W`
 
-`macro` | [gui/browser_ui.c:5353](../../gui/browser_ui.c#L5353)
+`macro` | [gui/browser_ui.c:5370](../../gui/browser_ui.c#L5370)
 
 ```c
 #define FLEX_MIN_MEASURE_W
@@ -3893,7 +3935,7 @@ Like FLEX_MEASURE_W it is a measurement device, not a layout value -- no rendere
 
 ### `BALANCE_MAX_LINES`
 
-`macro` | [gui/browser_ui.c:5476](../../gui/browser_ui.c#L5476)
+`macro` | [gui/browser_ui.c:5493](../../gui/browser_ui.c#L5493)
 
 ```c
 #define BALANCE_MAX_LINES
@@ -3909,7 +3951,7 @@ text-wrap: balance: the narrowest width (to 1px) that keeps the line count the b
 
 ### `RC_COL_FREE_MAX`
 
-`macro` | [gui/browser_ui.c:6970](../../gui/browser_ui.c#L6970)
+`macro` | [gui/browser_ui.c:6999](../../gui/browser_ui.c#L6999)
 
 ```c
 #define RC_COL_FREE_MAX
@@ -3925,7 +3967,7 @@ Every claim inside this box is consumed here, so a grandchild's claim (its own c
 
 ### `RC_MAX_OUT_OF_FLOW`
 
-`macro` | [gui/browser_ui.c:7759](../../gui/browser_ui.c#L7759)
+`macro` | [gui/browser_ui.c:7812](../../gui/browser_ui.c#L7812)
 
 ```c
 #define RC_MAX_OUT_OF_FLOW
@@ -3941,7 +3983,7 @@ The cap mirrors PV's per-page container cap; a hostile page cannot exceed it.
 
 ### `RC_DEFER_COLS`
 
-`macro` | [gui/browser_ui.c:7867](../../gui/browser_ui.c#L7867)
+`macro` | [gui/browser_ui.c:7920](../../gui/browser_ui.c#L7920)
 
 ```c
 #define RC_DEFER_COLS
@@ -3966,7 +4008,7 @@ stays empty and every band lays out exactly as before.
 
 ### `RC_DEFER_RANGES`
 
-`macro` | [gui/browser_ui.c:7868](../../gui/browser_ui.c#L7868)
+`macro` | [gui/browser_ui.c:7921](../../gui/browser_ui.c#L7921)
 
 ```c
 #define RC_DEFER_RANGES
@@ -3978,7 +4020,7 @@ stays empty and every band lays out exactly as before.
 
 ### `RC_DEFER_BAND_RUNS`
 
-`macro` | [gui/browser_ui.c:7950](../../gui/browser_ui.c#L7950)
+`macro` | [gui/browser_ui.c:8003](../../gui/browser_ui.c#L8003)
 
 ```c
 #define RC_DEFER_BAND_RUNS
@@ -3994,7 +4036,7 @@ Appends each key's maximal runs to its deferred column and returns the number of
 
 ### `BUI_CONIC_SLICES`
 
-`macro` | [gui/browser_ui.c:11202](../../gui/browser_ui.c#L11202)
+`macro` | [gui/browser_ui.c:11304](../../gui/browser_ui.c#L11304)
 
 ```c
 #define BUI_CONIC_SLICES
@@ -4006,7 +4048,7 @@ Appends each key's maximal runs to its deferred column and returns the number of
 
 ### `ROW_PAINT_ALL`
 
-`macro` | [gui/browser_ui.c:11723](../../gui/browser_ui.c#L11723)
+`macro` | [gui/browser_ui.c:11858](../../gui/browser_ui.c#L11858)
 
 ```c
 #define ROW_PAINT_ALL
@@ -4022,7 +4064,7 @@ Painting every band first, then every content, keeps the in-flow block backgroun
 
 ### `ROW_PAINT_BAND`
 
-`macro` | [gui/browser_ui.c:11724](../../gui/browser_ui.c#L11724)
+`macro` | [gui/browser_ui.c:11859](../../gui/browser_ui.c#L11859)
 
 ```c
 #define ROW_PAINT_BAND
@@ -4034,7 +4076,7 @@ Painting every band first, then every content, keeps the in-flow block backgroun
 
 ### `ROW_PAINT_CONTENT`
 
-`macro` | [gui/browser_ui.c:11725](../../gui/browser_ui.c#L11725)
+`macro` | [gui/browser_ui.c:11860](../../gui/browser_ui.c#L11860)
 
 ```c
 #define ROW_PAINT_CONTENT
@@ -4046,7 +4088,7 @@ Painting every band first, then every content, keeps the in-flow block backgroun
 
 ### `OV_MAX_DEPTH`
 
-`macro` | [gui/browser_ui.c:11944](../../gui/browser_ui.c#L11944)
+`macro` | [gui/browser_ui.c:12079](../../gui/browser_ui.c#L12079)
 
 ```c
 #define OV_MAX_DEPTH
@@ -4060,7 +4102,7 @@ Max overflow:hidden nesting depth (anti-DoS).
 
 ### `H2R`
 
-`macro` | [gui/browser_ui.c:12626](../../gui/browser_ui.c#L12626)
+`macro` | [gui/browser_ui.c:12761](../../gui/browser_ui.c#L12761)
 
 ```c
 #define H2R(p,q,t)
@@ -4072,7 +4114,7 @@ Max overflow:hidden nesting depth (anti-DoS).
 
 ### `PDF_PAGE_W`
 
-`macro` | [gui/browser_ui.c:13625](../../gui/browser_ui.c#L13625)
+`macro` | [gui/browser_ui.c:13760](../../gui/browser_ui.c#L13760)
 
 ```c
 #define PDF_PAGE_W
@@ -4086,7 +4128,7 @@ PDF page geometry: US Letter at 72 dpi (Cairo's PDF user-space unit is 1 point =
 
 ### `PDF_MARGIN`
 
-`macro` | [gui/browser_ui.c:13627](../../gui/browser_ui.c#L13627)
+`macro` | [gui/browser_ui.c:13762](../../gui/browser_ui.c#L13762)
 
 ```c
 #define PDF_MARGIN
@@ -4098,7 +4140,7 @@ PDF page geometry: US Letter at 72 dpi (Cairo's PDF user-space unit is 1 point =
 
 ### `PNG_PAGE_W`
 
-`macro` | [gui/browser_ui.c:13792](../../gui/browser_ui.c#L13792)
+`macro` | [gui/browser_ui.c:13927](../../gui/browser_ui.c#L13927)
 
 ```c
 #define PNG_PAGE_W
@@ -4114,7 +4156,7 @@ The width fixes the wrap column; the height follows the content but is capped so
 
 ### `PNG_MARGIN`
 
-`macro` | [gui/browser_ui.c:13805](../../gui/browser_ui.c#L13805)
+`macro` | [gui/browser_ui.c:13940](../../gui/browser_ui.c#L13940)
 
 ```c
 #define PNG_MARGIN
@@ -4130,7 +4172,7 @@ Headless image padding.
 
 ### `FBW_W`
 
-`macro` | [gui/browser_ui.c:15813](../../gui/browser_ui.c#L15813)
+`macro` | [gui/browser_ui.c:15948](../../gui/browser_ui.c#L15948)
 
 ```c
 #define FBW_W
@@ -4142,7 +4184,7 @@ Headless image padding.
 
 ### `FBW_HEADER`
 
-`macro` | [gui/browser_ui.c:15815](../../gui/browser_ui.c#L15815)
+`macro` | [gui/browser_ui.c:15950](../../gui/browser_ui.c#L15950)
 
 ```c
 #define FBW_HEADER
@@ -4154,7 +4196,7 @@ Headless image padding.
 
 ### `FBW_PAD`
 
-`macro` | [gui/browser_ui.c:15816](../../gui/browser_ui.c#L15816)
+`macro` | [gui/browser_ui.c:15951](../../gui/browser_ui.c#L15951)
 
 ```c
 #define FBW_PAD
@@ -4166,7 +4208,7 @@ Headless image padding.
 
 ### `FBW_LINE`
 
-`macro` | [gui/browser_ui.c:15817](../../gui/browser_ui.c#L15817)
+`macro` | [gui/browser_ui.c:15952](../../gui/browser_ui.c#L15952)
 
 ```c
 #define FBW_LINE
@@ -4178,7 +4220,7 @@ Headless image padding.
 
 ### `FBW_GUTTER`
 
-`macro` | [gui/browser_ui.c:15818](../../gui/browser_ui.c#L15818)
+`macro` | [gui/browser_ui.c:15953](../../gui/browser_ui.c#L15953)
 
 ```c
 #define FBW_GUTTER
@@ -4190,7 +4232,7 @@ Headless image padding.
 
 ### `FBW_MIN_SPLIT`
 
-`macro` | [gui/browser_ui.c:15819](../../gui/browser_ui.c#L15819)
+`macro` | [gui/browser_ui.c:15954](../../gui/browser_ui.c#L15954)
 
 ```c
 #define FBW_MIN_SPLIT
@@ -4202,7 +4244,7 @@ Headless image padding.
 
 ### `FBW_MAX_SPLIT`
 
-`macro` | [gui/browser_ui.c:15820](../../gui/browser_ui.c#L15820)
+`macro` | [gui/browser_ui.c:15955](../../gui/browser_ui.c#L15955)
 
 ```c
 #define FBW_MAX_SPLIT
@@ -4214,7 +4256,7 @@ Headless image padding.
 
 ### `FBW_COPY_BTN_W`
 
-`macro` | [gui/browser_ui.c:15821](../../gui/browser_ui.c#L15821)
+`macro` | [gui/browser_ui.c:15956](../../gui/browser_ui.c#L15956)
 
 ```c
 #define FBW_COPY_BTN_W

@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `url_authority_len` | function | `include/url.h:51` | `size_t url_authority_len(const char *url);` |
+| `url_file_path` | function | `include/url.h:121` | `const char *url_file_path(const char *s);` |
 | `url_has_scheme` | function | `include/url.h:46` | `int url_has_scheme(const char *s);` |
 | `url_is_https` | function | `include/url.h:42` | `int url_is_https(const char *s);` |
 | `url_omni_kind` | enum | `include/url.h:78` | `` |
@@ -56,6 +58,12 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `free` | function | `include/webfont_load.h:31` | `* free()), *out_status the HTTP status. Nonzero on refusal/error (fail-closed: * the face is skipped, never the...` |
 | `skipped` | function | `include/webfont_load.h:47` | `* URLs are skipped (no base). Returns faces registered (>= 0) otherwise. */ int wf_load_document(wf_fetch_fn fetch...` |
 | `wf_sheet` | struct | `include/webfont_load.h:24` | `` |
+| `FREEDOM_WL_DISPLAY_H` | macro | `include/wl_display.h:6` | `#define FREEDOM_WL_DISPLAY_H` |
+| `WD_NONE` | macro | `include/wl_display.h:11` | `#define WD_NONE` |
+| `WD_OK` | macro | `include/wl_display.h:10` | `#define WD_OK` |
+| `pure` | function | `include/wl_display.h:3` | `* wd_pick is pure (no I/O);` |
+| `wd_pick` | function | `include/wl_display.h:16` | `int wd_pick(const char *const *names, size_t n, char *out, size_t cap);` |
+| `wd_resolve_env` | function | `include/wl_display.h:20` | `int wd_resolve_env(void);` |
 | `FREEDOM_WS_HUB_H` | macro | `include/ws_hub.h:2` | `#define FREEDOM_WS_HUB_H` |
 | `WH_CLOSE_ABNORMAL` | macro | `include/ws_hub.h:27` | `#define WH_CLOSE_ABNORMAL` |
 | `WH_MAX` | macro | `include/ws_hub.h:21` | `#define WH_MAX` |
@@ -488,13 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `keyword_at` | function | `src/css_atrule.c:23` | `static int keyword_at(const char *s, size_t i, size_t b, const char *kw)` |
 | `skip_ws` | function | `src/css_atrule.c:17` | `static size_t skip_ws(const char *s, size_t i, size_t b)` |
 | `AUTO_REJECT` | macro | `src/css_box.c:1158` | `#define AUTO_REJECT` |
-| `AUTO_RESET` | macro | `src/css_box.c:1160` | `#define AUTO_RESET` |
-| `AUTO_RESET_NONE` | macro | `src/css_box.c:1164` | `#define AUTO_RESET_NONE` |
-| `AUTO_VALUE` | macro | `src/css_box.c:1159` | `#define AUTO_VALUE` |
-| `CSS_CALC_MAX_DEPTH` | macro | `src/css_box.c:678` | `#define CSS_CALC_MAX_DEPTH` |
-| `CSS_MATHFN_MAX_ARGS` | macro | `src/css_box.c:682` | `#define CSS_MATHFN_MAX_ARGS` |
-| `RELATIVE` | function | `src/css_box.c:63` | `* or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the * absolute keywords. Relative: em...` |
-| `accepts` | function | `src/css_box.c:670` | `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...` |
-| `calc_eval_em` | function | `src/css_box.c:927` | `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

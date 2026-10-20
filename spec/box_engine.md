@@ -1074,3 +1074,20 @@ retira del paso en flujo y se pinta en la capa posicionada, intercalado con P po
   pintado byte-idéntico.
 - Fuera de alcance: contextos de apilamiento anidados con `z` propio dentro de una raíz
   diferida (se pintan con ella, como bloque), `z-index` en ítems flex/grid.
+
+## Tanda 51 — átomo inline-block vacío, raíz de ítem y alto de un átomo sin filas
+
+- **Un `inline-block` vacío con tamaño declarado** (`<i class=ico></i>` de 12×12) es un átomo de
+  su línea (CSS 2.1 §9.2.2, §10.8.1): avanza el lápiz su ancho, apoya su borde inferior en la
+  línea base y comparte fila con el texto que le sigue (`empty_atom_continues_line`,
+  `rc_ibox.min_w/min_h`). Antes abría un bloque que vaciaba la línea y apilaba el icono sobre
+  su propia etiqueta (cada icono de navegación). En flujo plano el flush del bloque anterior y
+  el margen superior se resuelven ANTES de abrir la línea del icono (`atom_first`). Sondas
+  `empty-inline-block-atom`; test `test_dump_layout_empty_inline_block_atom_shares_line`.
+- **Un ítem de la fila anónima de inline-blocks que no produce filas mide 0**, no la altura de
+  la línea (estirado): un `<li>` vacío (solo contenía un `<ul>` oculto) fijaba la línea base de
+  toda la barra 26 px más abajo.
+- **La raíz de un ítem flex/grid no adopta la caja de un hijo absoluto** salvo que el ítem no
+  tenga NINGÚN run en flujo (`item_root_box_in`): un `<video>` absoluto dentro de un marco
+  `display:flex` salía como una barra de alto 0 pintada en flujo. Test
+  `test_dump_layout_aspect_ratio_frame_with_absolute_child`.

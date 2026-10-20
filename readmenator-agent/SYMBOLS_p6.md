@@ -3,6 +3,14 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `AUTO_RESET` | macro | `src/css_box.c:1160` | `#define AUTO_RESET` |
+| `AUTO_RESET_NONE` | macro | `src/css_box.c:1164` | `#define AUTO_RESET_NONE` |
+| `AUTO_VALUE` | macro | `src/css_box.c:1159` | `#define AUTO_VALUE` |
+| `CSS_CALC_MAX_DEPTH` | macro | `src/css_box.c:678` | `#define CSS_CALC_MAX_DEPTH` |
+| `CSS_MATHFN_MAX_ARGS` | macro | `src/css_box.c:682` | `#define CSS_MATHFN_MAX_ARGS` |
+| `RELATIVE` | function | `src/css_box.c:63` | `* or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the * absolute keywords. Relative: em...` |
+| `accepts` | function | `src/css_box.c:670` | `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...` |
+| `calc_eval_em` | function | `src/css_box.c:927` | `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` |
 | `calc_eval_full` | function | `src/css_box.c:913` | `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,            ...` |
 | `calc_expr` | function | `src/css_box.c:894` | `static int calc_expr(calc_parser *p, calc_val *out, int depth)` |
 | `calc_match_fn` | function | `src/css_box.c:707` | `static int calc_match_fn(calc_parser *p, const char *name)` |
@@ -226,14 +234,14 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `simple_pseudo_kind` | function | `src/css_select.c:437` | `static int simple_pseudo_kind(const char *nm)` |
 | `sub_sel_matches` | function | `src/css_select.c:736` | `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)` |
 | `take_sub_arg` | function | `src/css_select.c:293` | `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);` |
-| `ct_emit_spacing` | function | `src/css_text.c:300` | `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)` |
-| `ct_expand_shadow` | function | `src/css_text.c:313` | `int ct_expand_shadow(const char *val, css_decl *dst, int cap)` |
+| `ct_emit_spacing` | function | `src/css_text.c:309` | `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)` |
+| `ct_expand_shadow` | function | `src/css_text.c:322` | `int ct_expand_shadow(const char *val, css_decl *dst, int cap)` |
 | `ct_expand_valign` | function | `src/css_text.c:122` | `int ct_expand_valign(const char *val, css_decl *dst, int cap)` |
 | `ct_family_of` | function | `src/css_text.c:18` | `static int ct_family_of(const char *name)` |
 | `ct_interp_aspect_ratio` | function | `src/css_text.c:194` | `int ct_interp_aspect_ratio(const char *v, int *num, int *den)` |
-| `ct_interp_direction` | function | `src/css_text.c:227` | `int ct_interp_direction(const char *v)` |
+| `ct_interp_direction` | function | `src/css_text.c:236` | `int ct_interp_direction(const char *v)` |
 | `ct_interp_fontfamily` | function | `src/css_text.c:47` | `int ct_interp_fontfamily(const char *v)` |
-| `ct_interp_liststyle` | function | `src/css_text.c:265` | `int ct_interp_liststyle(const char *v)` |
+| `ct_interp_liststyle` | function | `src/css_text.c:274` | `int ct_interp_liststyle(const char *v)` |
 | `ct_interp_tabsize` | function | `src/css_text.c:160` | `int ct_interp_tabsize(const char *v)` |
 | `ct_interp_textdeco_style` | function | `src/css_text.c:171` | `int ct_interp_textdeco_style(const char *v)` |
 | `ct_interp_textdeco_thickness` | function | `src/css_text.c:182` | `int ct_interp_textdeco_thickness(const char *v)` |
@@ -241,8 +249,8 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `ct_interp_transition_property` | function | `src/css_text.c:139` | `int ct_interp_transition_property(const char *v)` |
 | `ct_interp_valign` | function | `src/css_text.c:91` | `int ct_interp_valign(const char *v)` |
 | `ct_interp_whitespace` | function | `src/css_text.c:147` | `int ct_interp_whitespace(const char *v)` |
-| `ct_liststyle_kw` | function | `src/css_text.c:233` | `static int ct_liststyle_kw(const char *t)` |
-| `ct_liststyle_unknown_name` | function | `src/css_text.c:254` | `static int ct_liststyle_unknown_name(const char *t)` |
+| `ct_liststyle_kw` | function | `src/css_text.c:242` | `static int ct_liststyle_kw(const char *t)` |
+| `ct_liststyle_unknown_name` | function | `src/css_text.c:263` | `static int ct_liststyle_unknown_name(const char *t)` |
 | `cv_bg_alpha_of` | function | `src/css_values.c:46` | `int cv_bg_alpha_of(const char *v)` |
 | `cv_color_ok` | function | `src/css_values.c:41` | `int cv_color_ok(int c)` |
 | `cv_filter_scale` | function | `src/css_values.c:231` | `double cv_filter_scale(int pct)` |
@@ -448,53 +456,45 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `fb_buffer_reset` | function | `src/freebug.c:78` | `void fb_buffer_reset(fb_buffer *b)` |
 | `fb_level_name` | function | `src/freebug.c:110` | `const char *fb_level_name(int level)` |
 | `whole` | function | `src/freebug.c:5` | `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);` |
-| `BLOCKED` | function | `src/freedom.c:917` | `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);` |
-| `CSS_DROPS_REPORT_MAX` | macro | `src/freedom.c:167` | `#define CSS_DROPS_REPORT_MAX` |
-| `EXIT_ERROR` | macro | `src/freedom.c:48` | `#define EXIT_ERROR` |
-| `EXIT_OK` | macro | `src/freedom.c:47` | `#define EXIT_OK` |
-| `EXIT_USAGE` | macro | `src/freedom.c:49` | `#define EXIT_USAGE` |
-| `HL_FONT_MAX_BYTES` | macro | `src/freedom.c:556` | `#define HL_FONT_MAX_BYTES` |
-| `HL_FONT_MAX_SHEETS` | macro | `src/freedom.c:555` | `#define HL_FONT_MAX_SHEETS` |
-| `HL_JS_NAV_MAX` | macro | `src/freedom.c:886` | `#define HL_JS_NAV_MAX` |
+| `BLOCKED` | function | `src/freedom.c:918` | `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);` |
+| `CSS_DROPS_REPORT_MAX` | macro | `src/freedom.c:168` | `#define CSS_DROPS_REPORT_MAX` |
+| `EXIT_ERROR` | macro | `src/freedom.c:49` | `#define EXIT_ERROR` |
+| `EXIT_OK` | macro | `src/freedom.c:48` | `#define EXIT_OK` |
+| `EXIT_USAGE` | macro | `src/freedom.c:50` | `#define EXIT_USAGE` |
+| `HL_FONT_MAX_BYTES` | macro | `src/freedom.c:557` | `#define HL_FONT_MAX_BYTES` |
+| `HL_FONT_MAX_SHEETS` | macro | `src/freedom.c:556` | `#define HL_FONT_MAX_SHEETS` |
+| `HL_JS_NAV_MAX` | macro | `src/freedom.c:887` | `#define HL_JS_NAV_MAX` |
 | `_DEFAULT_SOURCE` | macro | `src/freedom.c:10` | `#define _DEFAULT_SOURCE` |
 | `_POSIX_C_SOURCE` | macro | `src/freedom.c:9` | `#define _POSIX_C_SOURCE` |
-| `apply_as_gui` | function | `src/freedom.c:247` | `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)` |
-| `elsewhere` | function | `src/freedom.c:952` | `* page whose script immediately forwards elsewhere (e.g. a search engine's  * JS-capability inter...` |
-| `fetch_and_render_one` | function | `src/freedom.c:890` | `static int fetch_and_render_one(const char *url, char **out_nav)` |
-| `first` | function | `src/freedom.c:702` | `* always cleared first (fetch_and_render may paint several pages per      * process). A NULL top_...` |
-| `foldback_cookies` | function | `src/freedom.c:497` | `static void foldback_cookies(const char *url, const char *jar)` |
-| `gets` | function | `src/freedom.c:431` | `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...` |
-| `headless_fetch` | function | `src/freedom.c:435` | `static int headless_fetch(void *ctx, const char *method, const char *url,                        ...` |
-| `headless_load_hosts` | function | `src/freedom.c:236` | `static void headless_load_hosts(void)` |
-| `hl_css_sink` | function | `src/freedom.c:579` | `static void hl_css_sink(void *vctx, const char *url,                         const char *body, si...` |
-| `hl_font_fetch` | function | `src/freedom.c:616` | `static int hl_font_fetch(void *vctx, const char *url,                          int *out_status, c...` |
-| `hl_font_stash` | struct | `src/freedom.c:558` | `` |
-| `hl_font_stash_free` | function | `src/freedom.c:566` | `static void hl_font_stash_free(hl_font_stash *s)` |
-| `is_blank_text` | function | `src/freedom.c:273` | `static int is_blank_text(const char *s)` |
-| `is_http_url` | function | `src/freedom.c:83` | `static int is_http_url(const char *s)` |
-| `is_https_url` | function | `src/freedom.c:79` | `static int is_https_url(const char *s)` |
-| `is_overlay_http` | function | `src/freedom.c:88` | `static int is_overlay_http(const char *s)` |
-| `main` | function | `src/freedom.c:1181` | `int main(int argc, char **argv)` |
-| `now_us` | function | `src/freedom.c:142` | `static uint64_t now_us(void)` |
-| `only` | function | `src/freedom.c:759` | `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...` |
-| `parent` | function | `src/freedom.c:978` | `* gated by the parent (ln_resolve: a local target stays under the document's  * directory, a remo...` |
-| `pool` | function | `src/freedom.c:688` | `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...` |
-| `print_console` | function | `src/freedom.c:379` | `static void print_console(const fb_buffer *log)` |
-| `print_css_drops` | function | `src/freedom.c:521` | `static void print_css_drops(const char *html, size_t len)` |
-| `print_doc` | function | `src/freedom.c:286` | `static void print_doc(const rd_doc *doc)` |
-| `print_dom` | function | `src/freedom.c:396` | `static void print_dom(const rd_doc *doc)` |
-| `print_dom_css` | function | `src/freedom.c:411` | `static void print_dom_css(const rd_doc *doc)` |
-| `print_usage` | function | `src/freedom.c:51` | `static void print_usage(FILE *fp, const char *prog)` |
-| `read_file` | function | `src/freedom.c:218` | `static char *read_file(const char *path, size_t *out_len)` |
-| `render_page` | function | `src/freedom.c:625` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
-| `run_dump_video` | function | `src/freedom.c:1162` | `static int run_dump_video(const char *url)` |
-| `run_headless` | function | `src/freedom.c:1015` | `static int run_headless(const char *target)` |
-| `sf_reason` | function | `src/freedom.c:871` | `static const char *sf_reason(sf_status ss)` |
-| `timings_dump` | function | `src/freedom.c:156` | `static void timings_dump(void)` |
-| `timings_enabled` | function | `src/freedom.c:152` | `static int timings_enabled(void)` |
-| `timings_ensure_init` | function | `src/freedom.c:148` | `static void timings_ensure_init(void)` |
-| `user_impersonate_enabled` | function | `src/freedom.c:211` | `static int user_impersonate_enabled(void)` |
-| `video_fetch_with_fallback` | function | `src/freedom.c:1051` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,                      ...` |
-| `_GNU_SOURCE` | macro | `src/hls.c:21` | `#define _GNU_SOURCE` |
+| `apply_as_gui` | function | `src/freedom.c:248` | `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)` |
+| `elsewhere` | function | `src/freedom.c:953` | `* page whose script immediately forwards elsewhere (e.g. a search engine's  * JS-capability inter...` |
+| `fetch_and_render_one` | function | `src/freedom.c:891` | `static int fetch_and_render_one(const char *url, char **out_nav)` |
+| `first` | function | `src/freedom.c:703` | `* always cleared first (fetch_and_render may paint several pages per      * process). A NULL top_...` |
+| `foldback_cookies` | function | `src/freedom.c:498` | `static void foldback_cookies(const char *url, const char *jar)` |
+| `gets` | function | `src/freedom.c:432` | `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...` |
+| `headless_fetch` | function | `src/freedom.c:436` | `static int headless_fetch(void *ctx, const char *method, const char *url,                        ...` |
+| `headless_load_hosts` | function | `src/freedom.c:237` | `static void headless_load_hosts(void)` |
+| `hl_css_sink` | function | `src/freedom.c:580` | `static void hl_css_sink(void *vctx, const char *url,                         const char *body, si...` |
+| `hl_font_fetch` | function | `src/freedom.c:617` | `static int hl_font_fetch(void *vctx, const char *url,                          int *out_status, c...` |
+| `hl_font_stash` | struct | `src/freedom.c:559` | `` |
+| `hl_font_stash_free` | function | `src/freedom.c:567` | `static void hl_font_stash_free(hl_font_stash *s)` |
+| `is_blank_text` | function | `src/freedom.c:274` | `static int is_blank_text(const char *s)` |
+| `is_http_url` | function | `src/freedom.c:84` | `static int is_http_url(const char *s)` |
+| `is_https_url` | function | `src/freedom.c:80` | `static int is_https_url(const char *s)` |
+| `is_overlay_http` | function | `src/freedom.c:89` | `static int is_overlay_http(const char *s)` |
+| `main` | function | `src/freedom.c:1182` | `int main(int argc, char **argv)` |
+| `now_us` | function | `src/freedom.c:143` | `static uint64_t now_us(void)` |
+| `only` | function | `src/freedom.c:760` | `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...` |
+| `parent` | function | `src/freedom.c:979` | `* gated by the parent (ln_resolve: a local target stays under the document's  * directory, a remo...` |
+| `pool` | function | `src/freedom.c:689` | `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...` |
+| `print_console` | function | `src/freedom.c:380` | `static void print_console(const fb_buffer *log)` |
+| `print_css_drops` | function | `src/freedom.c:522` | `static void print_css_drops(const char *html, size_t len)` |
+| `print_doc` | function | `src/freedom.c:287` | `static void print_doc(const rd_doc *doc)` |
+| `print_dom` | function | `src/freedom.c:397` | `static void print_dom(const rd_doc *doc)` |
+| `print_dom_css` | function | `src/freedom.c:412` | `static void print_dom_css(const rd_doc *doc)` |
+| `print_usage` | function | `src/freedom.c:52` | `static void print_usage(FILE *fp, const char *prog)` |
+| `read_file` | function | `src/freedom.c:219` | `static char *read_file(const char *path, size_t *out_len)` |
+| `render_page` | function | `src/freedom.c:626` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
+| `run_dump_video` | function | `src/freedom.c:1163` | `static int run_dump_video(const char *url)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

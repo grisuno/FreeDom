@@ -2638,6 +2638,118 @@ static void test_dump_layout_float_pct_widths_resolve_once(void **state) {
     unlink(path);
 }
 
+/* --- slashdot/github render regressions (live-site measured, tanda 51) --- */
+
+/* Writes `html`, lays it out headless and returns the --dump-layout text in `out`. */
+static void layout_of(const char *html, const char *path, char *out, size_t cap) {
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char args[256];
+    assert_true((size_t)snprintf(args, sizeof args, "--author-css --dump-layout %s", path) < sizeof args);
+    int rc;
+    assert_int_equal(run_freedom(args, out, cap, &rc), 0);
+    assert_int_equal(rc, 0);
+    unlink(path);
+}
+
+/* True when some `box[` line matches w (+-0.6) and h (+-0.6) and top in [t0, t1]. */
+static int has_box(const char *out, double w, double h, double t0, double t1) {
+    for (const char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, bw, bh;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &bw, &bh) != 6)
+            continue;
+        if (bw > w - 0.6 && bw < w + 0.6 && bh > h - 0.6 && bh < h + 0.6 && top >= t0 && top <= t1)
+            return 1;
+    }
+    return 0;
+}
+
+/* True when some `box[` line has x (+-0.6) and w (+-0.6). */
+static int has_box_x(const char *out, double x0, double w0) {
+    for (const char *q = strstr(out, "box["); q != NULL; q = strstr(q + 1, "box[")) {
+        double x, top, bw, bh;
+        int bid;
+        size_t i;
+        if (sscanf(q, "box[%zu] bid=%d x=%lf top=%lf w=%lf h=%lf", &i, &bid, &x, &top, &bw, &bh) != 6)
+            continue;
+        if (x > x0 - 0.6 && x < x0 + 0.6 && bw > w0 - 0.6 && bw < w0 + 0.6) return 1;
+    }
+    return 0;
+}
+
+/* An EMPTY inline-block icon (`<i class=ico></i>` with a declared size) is an atom of
+ * its line: it sits on the baseline beside its label instead of opening a block that
+ * flushed the line and stacked the icon above its own text (every nav icon on the web). */
+static void test_dump_layout_empty_inline_block_atom_shares_line(void **state) {
+    (void)state;
+    char out[8192];
+    layout_of("<html><head><style>body{margin:0;font:14px sans-serif}"
+              ".bar{line-height:40px;height:40px;background:#066}"
+              "a{display:block;padding:0 12px}"
+              ".ico{width:12px;height:12px;display:inline-block;background:#fa0}"
+              "</style></head><body><div class=\"bar\"><a href=\"#\"><i class=\"ico\"></i> "
+              "<span>Software</span></a></div><div style=\"height:900px\"></div></body></html>",
+              "__freedom_icoatom.html", out, sizeof out);
+    assert_true(has_box(out, 12.0, 12.0, 10.0, 17.0));
+    assert_false(has_box(out, 12.0, 12.0, 0.0, 1.0));
+}
+
+/* aspect-ratio sizes an auto-height frame from its width even when its only child is
+ * out of flow (an absolute <video>): 600px wide at 1206/684 is 340px tall, and the
+ * absolute child is not adopted as the flex frame's item root (it came out 0 tall). */
+static void test_dump_layout_aspect_ratio_frame_with_absolute_child(void **state) {
+    (void)state;
+    char out[8192];
+    layout_of("<html><head><style>body{margin:0}.f{width:600px}"
+              ".v{aspect-ratio:1206/684;width:100%;position:relative;display:flex}"
+              ".v i{position:absolute;top:0;left:0;width:100%;height:100%;background:#151a22}"
+              "</style></head><body><div class=\"f\"><div class=\"v\"><i></i></div></div>"
+              "<div style=\"height:900px\"></div></body></html>",
+              "__freedom_aspect.html", out, sizeof out);
+    assert_true(has_box(out, 600.0, 340.3, 0.0, 1.0));
+    assert_false(has_box(out, 600.0, 0.0, 0.0, 1.0));
+}
+
+/* A nested float's `%` width is a share of its containing float, not of the page:
+ * `nav{float:right;width:30%}` holding two `width:50%` floats puts 150px boxes inside
+ * the 300px column (each used to resolve to 500px and wrap onto its own band). */
+static void test_dump_layout_nested_float_pct_is_share_of_outer(void **state) {
+    (void)state;
+    char out[8192];
+    layout_of("<html><head><style>body{margin:0;font:14px sans-serif}"
+              ".o{float:right;width:30%;height:40px}"
+              ".a{float:left;width:50%;height:40px;background:#9cf}"
+              ".b{float:right;width:50%;height:40px;background:#fc9}"
+              "</style></head><body><nav class=\"o\"><div class=\"a\">A</div>"
+              "<div class=\"b\">B</div></nav><div style=\"clear:both;height:900px\"></div>"
+              "</body></html>",
+              "__freedom_nestedfloat.html", out, sizeof out);
+    /* the right-floated 30% column holds both children: 150px each at x=700 and x=850 */
+    assert_true(has_box_x(out, 700.0, 150.0));
+    assert_true(has_box_x(out, 850.0, 150.0));
+}
+
+/* An inline-block heading with an author `margin:0` keeps it when its child is a
+ * block link: the UA heading margin must not fill the gap the author zeroed (a 26px
+ * shove on every slashdot nav item). The float's bar starts at its own top. */
+static void test_dump_layout_inline_block_heading_keeps_author_margin(void **state) {
+    (void)state;
+    char out[8192];
+    layout_of("<html><head><style>body{margin:0;font:14px sans-serif}"
+              ".w{height:40px;margin:12px 13px 0;background:#066}"
+              ".p{float:left;width:70%}"
+              "h2{margin:0;display:inline-block;height:35px}h2 a{display:block}"
+              "</style></head><body><div class=\"w\"><nav class=\"p\"><h2><a href=\"#\">x</a></h2>"
+              "<a href=\"#\" style=\"display:inline-block\">y</a></nav></div>"
+              "<div style=\"height:900px\"></div></body></html>",
+              "__freedom_h2margin.html", out, sizeof out);
+    assert_true(has_box(out, 674.0, 40.0, 11.5, 12.5));
+}
+
 /* Inline-blocks on one line sit on the line's BASELINE (CSS 2.1 10.8.1): a 35px
  * heading with margin:0 starts 4px down (its text baseline meets the button's), the
  * top-aligned box starts at 0, and the line is as tall as the tallest of them (40),
@@ -3882,6 +3994,10 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_nested_padded_item_opens_once),
         cmocka_unit_test(test_dump_layout_float_pct_widths_resolve_once),
         cmocka_unit_test(test_dump_layout_inline_block_row_baseline),
+        cmocka_unit_test(test_dump_layout_empty_inline_block_atom_shares_line),
+        cmocka_unit_test(test_dump_layout_aspect_ratio_frame_with_absolute_child),
+        cmocka_unit_test(test_dump_layout_nested_float_pct_is_share_of_outer),
+        cmocka_unit_test(test_dump_layout_inline_block_heading_keeps_author_margin),
         cmocka_unit_test(test_dump_layout_root_box_survives_replaced_run),
         cmocka_unit_test(test_dump_layout_float_two_columns),
         cmocka_unit_test(test_dump_layout_pulled_rail_single_margin),

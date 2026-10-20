@@ -106,7 +106,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_flex_layout $(BUILD_DIR)/test_box_tree \
              $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_host_conf $(BUILD_DIR)/test_net_realm \
              $(BUILD_DIR)/test_pdf_export $(BUILD_DIR)/test_js_policy \
-             $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download \
+             $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download $(BUILD_DIR)/test_wl_display \
              $(BUILD_DIR)/test_webcaps $(BUILD_DIR)/test_compositor \
              $(BUILD_DIR)/test_css $(BUILD_DIR)/test_css_drops \
              $(BUILD_DIR)/test_freebug \
@@ -126,7 +126,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
                $(BUILD_DIR)/test_css_index $(BUILD_DIR)/test_box_blur \
                $(BUILD_DIR)/test_text_case
 
-.PHONY: parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-wst fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
+.PHONY: parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-wst fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -478,6 +478,10 @@ $(BUILD_DIR)/test_form: $(TEST_DIR)/test_form.c $(BUILD_DIR)/form.o $(BUILD_DIR)
 $(BUILD_DIR)/test_pdf_export: $(TEST_DIR)/test_pdf_export.c $(BUILD_DIR)/pdf_export.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Pure Wayland socket picker (WAYLAND_DISPLAY discovery).
+$(BUILD_DIR)/test_wl_display: $(TEST_DIR)/test_wl_display.c $(BUILD_DIR)/wl_display.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 # Pure page-zoom arithmetic (clamp + ladder stepping + scale). No I/O deps.
 $(BUILD_DIR)/test_zoom: $(TEST_DIR)/test_zoom.c $(BUILD_DIR)/zoom.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
@@ -552,7 +556,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/compositor.o $(BUILD_DIR)/box_blur.o $(BUILD_DIR)/text_case.o \
                        $(BUILD_DIR)/interp.o $(BUILD_DIR)/frame_clock.o \
                        $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o $(BUILD_DIR)/pdf_export.o \
-                      $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
+                      $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o $(BUILD_DIR)/wl_display.o \
                       $(BUILD_DIR)/freebug.o $(BUILD_DIR)/text_shape.o \
                        $(BUILD_DIR)/webfont.o $(BUILD_DIR)/webfont_load.o \
                        $(BUILD_DIR)/dom_debug.o $(BUILD_DIR)/prefetch.o \
@@ -1132,6 +1136,21 @@ fbench:
 	@$(MAKE) --no-print-directory parity PAGES="$(PAGES)" | sed -n '/^PAGE/,/^TOTAL/p'
 	@python3 tools/fbench.py --from $(if $(FROM),$(FROM),0) --rows $(if $(ROWS),$(ROWS),1100) $(PAGES)
 
+# One source of truth for the pages the README shows: tests/parity/live.tsv names each
+# one's live URL. `make parity-refresh` re-freezes them all (network), so the README
+# images are never a stale picture of a site that has since changed (the Aug snapshot of
+# Slashdot predated its redesign and looked far better than the site the GUI loads).
+# `make parity-age` reports every stamped snapshot older than SNAP_MAX_DAYS.
+SNAP_MAX_DAYS ?= 30
+parity-refresh:
+	@while IFS=$$'\t' read -r name url; do \
+	  [ -n "$$name" ] || continue; \
+	  python3 tools/snapshot.py "$$url" $(PARITY_DIR)/pages/$$name.html && echo "refreshed $$name <- $$url"; \
+	done < $(PARITY_DIR)/live.tsv
+
+parity-age:
+	@python3 tools/snapshot_age.py $(PARITY_DIR)/pages $(SNAP_MAX_DAYS)
+
 parity-update: parity
 	@cp $(PARITY_OUT)/current.tsv $(PARITY_DIR)/baseline.tsv
 	@echo "Froze parity baseline in $(PARITY_DIR)/baseline.tsv"
@@ -1307,11 +1326,11 @@ drops-update: $(BUILD_DIR)/freedom
 drift:
 	@grep -q "TAB_WIRE_HEAD_N 6" src/tab.c || (echo "drift: HEAD const missing"; exit 1)
 	@grep -q "TAB_WIRE_A_N 38" src/tab.c || (echo "drift: A const missing"; exit 1)
-	@grep -q "TAB_WIRE_B_N 67" src/tab.c || (echo "drift: B const missing"; exit 1)
+	@grep -q "TAB_WIRE_B_N 69" src/tab.c || (echo "drift: B const missing"; exit 1)
 	@grep -q "TAB_WIRE_BOX_F_N 263" src/tab.c || (echo "drift: BOX const missing"; exit 1)
 	@grep -q "int32_t head\[TAB_WIRE_HEAD_N\]\|int32_t head\[6\]" src/tab.c || (echo "drift: head array drift"; exit 1)
 	@grep -q "int32_t a\[TAB_WIRE_A_N\]\|int32_t a\[38\]" src/tab.c || (echo "drift: A array drift"; exit 1)
-	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[67\]" src/tab.c || (echo "drift: B array drift"; exit 1)
+	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[69\]" src/tab.c || (echo "drift: B array drift"; exit 1)
 	@grep -q "int32_t f\[TAB_WIRE_BOX_F_N\]\|int32_t f\[263\]" src/tab.c || (echo "drift: box array drift"; exit 1)
 	@grep -q "FC_UI_FONT_SIZE\|FC_FONT_FALLBACK_PX" include/freedom_config.h || (echo "drift: FC font const missing"; exit 1)
 	@! grep -rn "cairo_set_font_size.*16\.0" gui/ --include="*.c" | grep -v FC_ || (echo "drift: raw 16.0 literal in gui"; exit 1)

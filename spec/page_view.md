@@ -1427,3 +1427,22 @@ ancho intrínseco (`css_hbox_resolve`: `center` también con `fit-content`/`max-
 El fondo `currentColor` es el `color` computado del elemento, heredado si no declara uno
 (cada barra de hamburguesa y cada divisor). `box_reg_id_ex` lo resuelve con
 `inherited_text_color` al registrar la caja; antes caía a "sin fondo".
+
+## Tanda 51 — cajas sin contenido en flujo, `<video>` sin fuente, icono inline-block vacío
+
+- **Una caja existe aunque todo su contenido esté fuera de flujo** (CSS 2.1 §9.3.1). Un
+  elemento es «hoja sin contenido» también cuando sus hijos son contenedores simples
+  (`div/span/section/…` sin decoración, sin tamaño, sin `aspect-ratio`) que a su vez no
+  tienen contenido en flujo (`is_plain_wrapper`, `element_is_content_leaf_d`, profundidad
+  acotada por `PV_TEXTLESS_DEPTH_MAX`). Sin esto el marco del hero de github.com (un `<video>`
+  absoluto dentro de un `div`) no abría su caja y toda la sección colapsaba. Test
+  `test_build_frame_with_only_oof_content_keeps_box`.
+- **Un `<video>`/`<audio>` sin `src` ni `<source>` no emite run pero conserva su caja CSS**
+  (`media_has_source`): el cuadro oscuro de `background-color` que se ve antes de cargar el
+  reproductor. Cae a la rama de caja vacía como cualquier elemento decorado. Test
+  `test_build_sourceless_video_keeps_its_box`.
+- **Un margen declarado en un encabezado cuyo hijo en bloque es un enlace** (`h2{margin:0}`
+  con `a{display:block}`) viaja con el run (el modelo plano pliega la caja del encabezado en
+  el run); si el encabezado es un átomo `inline-block` el margen es del átomo y no se filtra
+  al bloque de arriba (`heading_in_atom`). Antes el margen UA del `h2` empujaba 26 px cada
+  ítem de la barra de slashdot. Test `test_dump_layout_inline_block_heading_keeps_author_margin`.

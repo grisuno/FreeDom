@@ -2,6 +2,8 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_local_store.c` -> `include/local_store.h`
+- `tests/test_media_decoder.c` -> `include/media_decoder.h`
 - `tests/test_net_realm.c` -> `include/net_realm.h`
 - `tests/test_os_sandbox.c` -> `include/os_sandbox.h`
 - `tests/test_page_view.c` -> `include/box_style.h`
@@ -50,6 +52,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_webfont_load.c` -> `include/text_shape.h`
 - `tests/test_webfont_load.c` -> `include/webfont.h`
 - `tests/test_webfont_load.c` -> `include/webfont_load.h`
+- `tests/test_wl_display.c` -> `include/wl_display.h`
 - `tests/test_ws_hub.c` -> `include/ws_hub.h`
 - `tests/test_zoom.c` -> `include/zoom.h`
 
@@ -149,6 +152,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/webcaps.h` -> stdbool.h
 - `include/webfont.h` -> stddef.h
 - `include/webfont_load.h` -> stddef.h
+- `include/wl_display.h` -> stddef.h
 - `include/ws_hub.h` -> poll.h, stddef.h
 - `src/block_flow.c` -> math.h
 - `src/box_blur.c` -> math.h, stdlib.h, string.h
@@ -225,6 +229,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/web_storage.c` -> stdint.h, stdlib.h, string.h
 - `src/webfont.c` -> stdint.h, stdlib.h, string.h
 - `src/webfont_load.c` -> stdlib.h, string.h
+- `src/wl_display.c` -> dirent.h, stdlib.h, string.h
 - `src/ws_hub.c` -> curl/curl.h, errno.h, fcntl.h, pthread.h, stdint.h, stdlib.h, string.h, sys/socket.h, unistd.h
 - `tests/itest_secure_fetch.c` -> stdio.h, string.h
 - `tests/test_anti_fp.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
@@ -298,6 +303,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_webcaps.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_webfont.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_webfont_load.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_wl_display.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tests/test_ws_hub.c` -> cmocka.h, poll.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h, time.h
 - `tests/test_zoom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tools/fbench.py` -> PIL, numpy, os, re, sys
@@ -309,5 +315,6 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tools/pngdiff.c` -> math.h, png.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tools/pngprof.py` -> struct, sys, zlib
 - `tools/prune.py` -> lxml, sys
-- `tools/snapshot.py` -> re, sys, urllib.parse, urllib.request
+- `tools/snapshot.py` -> datetime, re, sys, urllib.parse, urllib.request
+- `tools/snapshot_age.py` -> datetime, os, re, sys
 

@@ -102,7 +102,7 @@ strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_download.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_pdf_export.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`only`](gui.browser_ui.c.md#only), [`blur`](src.css.c.md#blur), [`cc_parse`](#cc_parse), [`dl_should_download`](src.download.c.md#dl_should_download), [`gets`](src.freedom.c.md#gets), [`main`](src.freedom.c.md#main), [`parent`](src.freedom.c.md#parent), [`hls_resolve_url`](src.hls.c.md#hls_resolve_url), [`im_resolve`](src.import_map.c.md#im_resolve) and 3 more
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_download.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_pdf_export.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`only`](gui.browser_ui.c.md#only), [`blur`](src.css.c.md#blur), [`cc_parse`](#cc_parse), [`dl_should_download`](src.download.c.md#dl_should_download), [`gets`](src.freedom.c.md#gets), [`main`](src.freedom.c.md#main), [`parent`](src.freedom.c.md#parent), [`hls_resolve_url`](src.hls.c.md#hls_resolve_url), [`im_resolve`](src.import_map.c.md#im_resolve) and 4 more
 
 ---
 

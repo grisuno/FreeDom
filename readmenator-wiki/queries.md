@@ -16,7 +16,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: How are the 61 files in 'src' related to each other?
+### Q: How are the 57 files in 'src: tab' related to each other?
 
 - Status: unanswered
 

@@ -17,19 +17,19 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## fuzz (3.1)
+## fuzz (2.1)
 
 fuzz groups 2 files (c) around fuzz_root_match, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...
 
-## include (3.2)
+## include (2.2)
 
 include groups 17 files (h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
 
-## src (3.3)
+## src (2.3)
 
 src groups 16 files (c) around cx_forms_stacking_context, cx_box_layer, eff_z, cx_item_compare, cx_sort. eff_z: Not a stacking context: a positioned box with z:auto still paints in the *...
 
-## tests (3.4)
+## tests (2.4)
 
 tests groups 15 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
 

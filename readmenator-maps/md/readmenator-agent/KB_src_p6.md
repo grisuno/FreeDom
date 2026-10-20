@@ -5,28 +5,28 @@ Previous: [KB_src_p5.md](KB_src_p5.md)
 - Layer: data_access
 - Language: c
 - Symbols:
-  - `cipher_for` (function, line 750) `static const EVP_CIPHER *cipher_for(ls_aead aead)`
-  - `argon2id_derive` (function, line 760) `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
+  - `cipher_for` (function, line 772) `static const EVP_CIPHER *cipher_for(ls_aead aead)`
+  - `argon2id_derive` (function, line 782) `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
                           ...`
-  - `ls_derive_key` (function, line 789) `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
+  - `ls_derive_key` (function, line 811) `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
                         const...`
-  - `aead_encrypt` (function, line 798) `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+  - `aead_encrypt` (function, line 820) `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-  - `aead_decrypt` (function, line 824) `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+  - `aead_decrypt` (function, line 846) `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-  - `seal_core` (function, line 852) `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
+  - `seal_core` (function, line 874) `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
                     ...`
-  - `decrypt_blob` (function, line 889) `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
+  - `decrypt_blob` (function, line 911) `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
          ...`
-  - `ls_seal` (function, line 920) `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
+  - `ls_seal` (function, line 942) `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
                   const uint8_t *p...`
-  - `ls_open` (function, line 933) `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
+  - `ls_open` (function, line 955) `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
                   const uint8_t *blob, size_t bl...`
-  - `ls_seal_passphrase` (function, line 944) `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
+  - `ls_seal_passphrase` (function, line 966) `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
           ...`
-  - `ls_open_passphrase` (function, line 965) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
+  - `ls_open_passphrase` (function, line 987) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
-  - `ls_free` (function, line 985) `void ls_free(uint8_t *buf, size_t len)`
+  - `ls_free` (function, line 1007) `void ls_free(uint8_t *buf, size_t len)`
   - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 3) `#define OSSL_KDF_PARAM_ARGON2_LANES`
   - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 6) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
   - `OSSL_KDF_PARAM_THREADS` (macro, line 9) `#define OSSL_KDF_PARAM_THREADS`
@@ -279,21 +279,29 @@ Previous: [KB_src_p5.md](KB_src_p5.md)
   - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 688) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
   - `OSSL_KDF_PARAM_THREADS` (macro, line 691) `#define OSSL_KDF_PARAM_THREADS`
   - `_GNU_SOURCE` (macro, line 693) `#define _GNU_SOURCE`
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 720) `#define OSSL_KDF_PARAM_ARGON2_LANES`
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 723) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 726) `#define OSSL_KDF_PARAM_THREADS`
-  - `LS_VERSION` (macro, line 729) `#define LS_VERSION`
-  - `LS_KDF_NONE` (macro, line 730) `#define LS_KDF_NONE`
-  - `LS_KDF_ARGON2ID` (macro, line 731) `#define LS_KDF_ARGON2ID`
-  - `LS_ARGON2_T` (macro, line 734) `#define LS_ARGON2_T`
-  - `LS_ARGON2_M_KIB` (macro, line 735) `#define LS_ARGON2_M_KIB`
-  - `LS_ARGON2_P` (macro, line 736) `#define LS_ARGON2_P`
-  - `OFF_MAGIC` (macro, line 739) `#define OFF_MAGIC`
-  - `OFF_VERSION` (macro, line 740) `#define OFF_VERSION`
-  - `OFF_AEAD` (macro, line 741) `#define OFF_AEAD`
-  - `OFF_KDF` (macro, line 742) `#define OFF_KDF`
-  - `OFF_SALT` (macro, line 743) `#define OFF_SALT`
-  - `OFF_NONCE` (macro, line 744) `#define OFF_NONCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 696) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 699) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 702) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 704) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 707) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 710) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 713) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 715) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 742) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 745) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 748) `#define OSSL_KDF_PARAM_THREADS`
+  - `LS_VERSION` (macro, line 751) `#define LS_VERSION`
+  - `LS_KDF_NONE` (macro, line 752) `#define LS_KDF_NONE`
+  - `LS_KDF_ARGON2ID` (macro, line 753) `#define LS_KDF_ARGON2ID`
+  - `LS_ARGON2_T` (macro, line 756) `#define LS_ARGON2_T`
+  - `LS_ARGON2_M_KIB` (macro, line 757) `#define LS_ARGON2_M_KIB`
+  - `LS_ARGON2_P` (macro, line 758) `#define LS_ARGON2_P`
+  - `OFF_MAGIC` (macro, line 761) `#define OFF_MAGIC`
+  - `OFF_VERSION` (macro, line 762) `#define OFF_VERSION`
+  - `OFF_AEAD` (macro, line 763) `#define OFF_AEAD`
+  - `OFF_KDF` (macro, line 764) `#define OFF_KDF`
+  - `OFF_SALT` (macro, line 765) `#define OFF_SALT`
+  - `OFF_NONCE` (macro, line 766) `#define OFF_NONCE`
 - Depends on: `include/local_store.h`
 
 ## src/media_decoder.c

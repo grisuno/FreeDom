@@ -162,6 +162,8 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->float_w = 0;
     b->float_w_pct = 0;
     b->float_box = -1;
+    b->float_ow = 0;
+    b->float_ow_pct = 0;
     b->float_oid = -1;
     b->float_oside = 0;
     b->float_oml = 0;
@@ -536,6 +538,8 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->float_w = r->float_w;
             lb->float_w_pct = r->float_w_pct;
             lb->float_box = r->float_box;
+            lb->float_ow = r->float_ow;
+            lb->float_ow_pct = r->float_ow_pct;
             /* Outermost founder likewise: structure, never gated. */
             lb->float_oid = r->float_oid;
             lb->float_oside = r->float_oside;
@@ -629,6 +633,8 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->float_w = r->float_w;
             lb->float_w_pct = r->float_w_pct;
             lb->float_box = r->float_box;
+            lb->float_ow = r->float_ow;
+            lb->float_ow_pct = r->float_ow_pct;
             lb->float_oid = r->float_oid;
             lb->float_oside = r->float_oside;
             lb->float_oml = r->float_oml;

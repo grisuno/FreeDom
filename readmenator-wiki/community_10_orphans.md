@@ -1,10 +1,10 @@
 # orphans
 
-*Community 10 | 16 files | cohesion 0.00*
+*Community 10 | 17 files | cohesion 0.00*
 
 ## Definition
 
-This community groups 16 file(s) rooted at `tools` with dominant language py (cohesion 0.00). Central symbols: `PD_COLS`, `PD_INK_DELTA`, `PD_ROWS`, `_POSIX_C_SOURCE`, `_append_probe`, `_word_reader`, `ascii_lower`, `bands`. Core file: `tools/pngdiff.c` (14 symbols). Documented purpose: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and.
+This community groups 17 file(s) rooted at `tools` with dominant language py (cohesion 0.00). Central symbols: `PD_COLS`, `PD_INK_DELTA`, `PD_ROWS`, `_POSIX_C_SOURCE`, `_append_probe`, `_word_reader`, `ascii_lower`, `bands`. Core file: `tools/pngdiff.c` (14 symbols). Documented purpose: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and.
 
 ## Files
 
@@ -26,6 +26,7 @@ This community groups 16 file(s) rooted at `tools` with dominant language py (co
 | `tools/pngprof.py` | py | utility | 4 | yes |
 | `tools/prune.py` | py | utility | 1 | yes |
 | `tools/snapshot.py` | py | utility | 6 | yes |
+| `tools/snapshot_age.py` | py | utility | 1 | yes |
 
 ## Key Symbols
 
@@ -101,3 +102,4 @@ This community groups 16 file(s) rooted at `tools` with dominant language py (co
 - `tools/pngprof.py`
 - `tools/prune.py`
 - `tools/snapshot.py`
+- `tools/snapshot_age.py`

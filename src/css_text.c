@@ -196,30 +196,39 @@ int ct_interp_aspect_ratio(const char *v, int *num, int *den) {
     const char *p = v;
     while (*p == ' ' || *p == '\t') ++p;
     if (csel_ci_eq(p, "auto")) return 1;  /* auto alone -> unset (natural sizing) */
+    /* `<number> [ / <number> ]`, spaces around the slash allowed (CSS Images 3). */
     char buf[CSS_TOK_MAX];
     size_t k = 0;
-    while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof buf) buf[k++] = *p++;
+    while (*p != '\0' && k + 1 < sizeof buf) {
+        if (*p == ' ' || *p == '\t') {
+            const char *q = p;
+            while (*q == ' ' || *q == '\t') ++q;
+            if (*q != '/' && (k == 0 || buf[k - 1] != '/')) break;
+            p = q;
+            continue;
+        }
+        buf[k++] = *p++;
+    }
     buf[k] = '\0';
     if (k == 0) return 1;
-    /* Look for a '/' separator */
+    double nv = 0.0, dv = 1.0;
+    const char *ne;
     char *slash = strchr(buf, '/');
     if (slash != NULL) {
         *slash = '\0';
-        char *nend = slash + 1;
-        double nv, dv;
-        const char *ne, *de;
         if (!cl_number(buf, &nv, &ne) || *ne != '\0') return 1;   /* fail -> unset */
-        if (!cl_number(nend, &dv, &de) || *de != '\0' || dv <= 0.0) return 1;
-        *num = css_round_clamp(nv * 1000.0, 1, CSS_LEN_MAX);
-        *den = css_round_clamp(dv * 1000.0, 1, CSS_LEN_MAX);
+        if (!cl_number(slash + 1, &dv, &ne) || *ne != '\0' || dv <= 0.0) return 1;
+    } else if (!cl_number(buf, &nv, &ne) || *ne != '\0') {
         return 1;
     }
-    /* Bare number: treat as w/h = N/1 */
-    double nv;
-    const char *ne;
-    if (!cl_number(buf, &nv, &ne) || *ne != '\0' || nv <= 0.0) return 1;
-    *num = css_round_clamp(nv * 1000.0, 1, CSS_LEN_MAX);
-    *den = 1000;
+    if (nv <= 0.0) return 1;
+    /* Both halves share ONE scale, so the ratio keeps its shape: clamping each half to
+     * CSS_LEN_MAX on its own turned 1206/684 into 1:1 (a square media frame). */
+    double hi = (nv > dv) ? nv : dv;
+    double scale = 1000.0;
+    if (hi * scale > (double)CSS_LEN_MAX) scale = (double)CSS_LEN_MAX / hi;
+    *num = css_round_clamp(nv * scale, 1, CSS_LEN_MAX);
+    *den = css_round_clamp(dv * scale, 1, CSS_LEN_MAX);
     return 1;
 }
 

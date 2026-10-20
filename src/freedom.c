@@ -33,6 +33,7 @@
 #include "tls_impersonate.h"
 #include "hls.h"
 #include "ui.h"
+#include "wl_display.h"
 #include "url.h"
 #include "webfont.h"
 #include "webfont_load.h"
@@ -1338,5 +1339,14 @@ int main(int argc, char **argv) {
     }
 
     /* GUI mode: optional start URL/file. */
-    return (ui_run_browser(target) == UI_OK) ? EXIT_OK : EXIT_ERROR;
+    (void)wd_resolve_env();
+    ui_status ust = ui_run_browser(target);
+    if (ust == UI_ERR_DISPLAY)
+        fprintf(stderr, "freedom: cannot connect to a Wayland display (WAYLAND_DISPLAY=%s, "
+                        "XDG_RUNTIME_DIR=%s); start a compositor or export WAYLAND_DISPLAY\n",
+                getenv("WAYLAND_DISPLAY") ? getenv("WAYLAND_DISPLAY") : "(unset)",
+                getenv("XDG_RUNTIME_DIR") ? getenv("XDG_RUNTIME_DIR") : "(unset)");
+    else if (ust != UI_OK)
+        fprintf(stderr, "freedom: GUI failed to start (status %d)\n", (int)ust);
+    return (ust == UI_OK) ? EXIT_OK : EXIT_ERROR;
 }

@@ -593,3 +593,26 @@ sobre `<br>`.
   (`ROW_PAINT_BAND`) para que los fondos de bloque queden DEBAJO de los flotantes
   (CSS 2.1 Apéndice E).
 - Residual: las figuras de wikipedia salen ~8 px más anchas que en Firefox.
+
+## Tanda 51 — el ancho de un flotante anidado es parte de su flotante contenedor
+
+**Dado** `nav{float:right;width:30%}` que contiene `form{float:left;width:50%}` y
+`ul{float:right;width:50%}`, **cuando** se maqueta, **entonces** cada hijo mide 15 % de la
+banda (150 de 1000 px), no 50 % de la página: un `%` es parte de su bloque contenedor
+(CSS 2.1 §10.2), y el contenedor de un flotante anidado es el flotante exterior.
+
+- El flotante exterior suele no tener ningún run propio (solo hijos flotantes), así que su
+  `width` viaja en los runs anidados: `pv_run.float_ow/float_ow_pct` (mitades de la
+  `<length-percentage>`), refrescado por cada ancestro flotante igual que `float_oid`, y
+  plegado a 0 cuando el flotante más cercano ES el más externo. Cruza el IPC (`b[67]`,
+  `b[68]`, `TAB_WIRE_B_N` 69).
+- Banda de varios flotantes (`layout_float_band`): la base de `%` de un grupo anidado es
+  `float_ow`; **dentro de la columna del exterior** (`founder_key == float_oid`) `ctx_w` YA es
+  esa columna y no se reaplica (reaplicarla dio 15 % de 30 %).
+- Columna diferida (`defer_flush`): el ancho de la columna sale de `float_ow` cuando el
+  fundador no tiene runs propios, y la caja común de la banda que lleva ese mismo ancho es el
+  fundador (`col_founder_box`): llena la columna en vez de resolver su 30 % contra ella.
+- Sonda `float-pair-inline-rows`; test `test_dump_layout_nested_float_pct_is_share_of_outer`.
+- Abierto: la base de un `%` de flotante ignora el padding del `body` (974 vs 1000: la barra
+  de slashdot mide 674 donde Firefox da 682) y un contenedor de alto fijo que solo tiene
+  flotantes empuja el flujo hasta el fondo del flotante más alto.

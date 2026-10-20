@@ -3,6 +3,33 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_not_unreadable_argument_fails_closed` | function | `tests/test_css.c:1845` | `static void test_not_unreadable_argument_fails_closed(void **state)` |
+| `test_not_with_pseudo_class` | function | `tests/test_css.c:1817` | `static void test_not_with_pseudo_class(void **state)` |
+| `test_opacity` | function | `tests/test_css.c:215` | `static void test_opacity(void **state)` |
+| `test_overflow` | function | `tests/test_css.c:3347` | `static void test_overflow(void **state)` |
+| `test_parse_null_args` | function | `tests/test_css.c:2756` | `static void test_parse_null_args(void **state)` |
+| `test_place_shorthands` | function | `tests/test_css.c:4913` | `static void test_place_shorthands(void **state)` |
+| `test_placeholder_pseudo_element` | function | `tests/test_css.c:3658` | `static void test_placeholder_pseudo_element(void **state)` |
+| `test_position_and_insets` | function | `tests/test_css.c:3275` | `static void test_position_and_insets(void **state)` |
+| `test_property_initial_value` | function | `tests/test_css.c:1364` | `static void test_property_initial_value(void **state)` |
+| `test_pseudo_content_attr_fallback` | function | `tests/test_css.c:2082` | `static void test_pseudo_content_attr_fallback(void **state)` |
+| `test_pseudo_content_attr_missing_is_empty` | function | `tests/test_css.c:2071` | `static void test_pseudo_content_attr_missing_is_empty(void **state)` |
+| `test_pseudo_content_attr_resolves` | function | `tests/test_css.c:2060` | `static void test_pseudo_content_attr_resolves(void **state)` |
+| `test_pseudo_content_before_after_separate` | function | `tests/test_css.c:1862` | `static void test_pseudo_content_before_after_separate(void **state)` |
+| `test_pseudo_content_decodes_escaped_char` | function | `tests/test_css.c:1899` | `static void test_pseudo_content_decodes_escaped_char(void **state)` |
+| `test_pseudo_content_decodes_hex_escape` | function | `tests/test_css.c:1876` | `static void test_pseudo_content_decodes_hex_escape(void **state)` |
+| `test_pseudo_content_empty_without_pseudo` | function | `tests/test_css.c:2139` | `static void test_pseudo_content_empty_without_pseudo(void **state)` |
+| `test_pseudo_content_escape_eats_terminator_space` | function | `tests/test_css.c:1888` | `static void test_pseudo_content_escape_eats_terminator_space(void **state)` |
+| `test_pseudo_content_escapes_fail_closed` | function | `tests/test_css.c:2004` | `static void test_pseudo_content_escapes_fail_closed(void **state)` |
+| `test_pseudo_content_none_parses_empty` | function | `tests/test_css.c:2035` | `static void test_pseudo_content_none_parses_empty(void **state)` |
+| `test_pseudo_does_not_claim_cascade_slot` | function | `tests/test_css.c:2213` | `static void test_pseudo_does_not_claim_cascade_slot(void **state)` |
+| `test_pseudo_element_style` | function | `tests/test_css.c:1267` | `static void test_pseudo_element_style(void **state)` |
+| `test_pseudo_empty` | function | `tests/test_css.c:2314` | `static void test_pseudo_empty(void **state)` |
+| `test_pseudo_geometry_does_not_leak_to_element` | function | `tests/test_css.c:2157` | `static void test_pseudo_geometry_does_not_leak_to_element(void **state)` |
+| `test_pseudo_lang` | function | `tests/test_css.c:2351` | `static void test_pseudo_lang(void **state)` |
+| `test_pseudo_link` | function | `tests/test_css.c:1622` | `static void test_pseudo_link(void **state)` |
+| `test_pseudo_never_match_keeps_group` | function | `tests/test_css.c:1640` | `static void test_pseudo_never_match_keeps_group(void **state)` |
+| `test_pseudo_nth_child` | function | `tests/test_css.c:1698` | `static void test_pseudo_nth_child(void **state)` |
 | `test_pseudo_nth_last_child` | function | `tests/test_css.c:1721` | `static void test_pseudo_nth_last_child(void **state)` |
 | `test_pseudo_nth_malformed_drops` | function | `tests/test_css.c:2261` | `static void test_pseudo_nth_malformed_drops(void **state)` |
 | `test_pseudo_nth_of_type` | function | `tests/test_css.c:2298` | `static void test_pseudo_nth_of_type(void **state)` |
@@ -216,8 +243,9 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_not_or` | function | `tests/test_css_mq.c:44` | `static void test_not_or(void **state)` |
 | `test_plain_and_types` | function | `tests/test_css_mq.c:30` | `static void test_plain_and_types(void **state)` |
 | `test_range_syntax` | function | `tests/test_css_mq.c:15` | `static void test_range_syntax(void **state)` |
-| `main` | function | `tests/test_css_text.c:56` | `int main(void)` |
+| `main` | function | `tests/test_css_text.c:73` | `int main(void)` |
 | `test_aspect_ratio` | function | `tests/test_css_text.c:44` | `static void test_aspect_ratio(void **state)` |
+| `test_aspect_ratio_large_keeps_shape` | function | `tests/test_css_text.c:59` | `static void test_aspect_ratio_large_keeps_shape(void **state)` |
 | `test_fontfamily_bucket` | function | `tests/test_css_text.c:10` | `static void test_fontfamily_bucket(void **state)` |
 | `test_opacity_shapes` | function | `tests/test_css_text.c:18` | `static void test_opacity_shapes(void **state)` |
 | `test_shadow_needs_both_offsets` | function | `tests/test_css_text.c:34` | `static void test_shadow_needs_both_offsets(void **state)` |
@@ -468,33 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_reset_reuses_and_no_leak` | function | `tests/test_freebug.c:140` | `static void test_reset_reuses_and_no_leak(void **state)` |
 | `test_total_bytes_cap_fails_closed` | function | `tests/test_freebug.c:93` | `static void test_total_bytes_cap_fails_closed(void **state)` |
 | `ERR_FILE` | macro | `tests/test_freedom.c:29` | `#define ERR_FILE` |
-| `FREEDOM_BIN` | macro | `tests/test_freedom.c:27` | `#define FREEDOM_BIN` |
-| `OUT_FILE` | macro | `tests/test_freedom.c:28` | `#define OUT_FILE` |
-| `_DEFAULT_SOURCE` | macro | `tests/test_freedom.c:1` | `#define _DEFAULT_SOURCE` |
-| `_POSIX_C_SOURCE` | macro | `tests/test_freedom.c:12` | `#define _POSIX_C_SOURCE` |
-| `ballooned` | function | `tests/test_freedom.c:2219` | `* ballooned (body + wrapper re-opened per child) and the LAST wrapper piece  * became the contain...` |
-| `band` | function | `tests/test_freedom.c:3043` | `* band (which already recurses into nested containers) owns it. */ static void test_dump_layout_c...` |
-| `blend` | function | `tests/test_freedom.c:852` | `* not some other blend (double-composited or wrong alpha). */ static void test_download_png_group...` |
-| `blend` | function | `tests/test_freedom.c:1878` | `* visibly different from either input color or an OVER blend (which would show  * opaque blue). E...` |
-| `bottom` | function | `tests/test_freedom.c:2826` | `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ /* (Each sized float now has a box of...` |
-| `cleanup_files` | function | `tests/test_freedom.c:85` | `static void cleanup_files(void)` |
-| `count_color_in_row` | function | `tests/test_freedom.c:561` | `static int count_color_in_row(const img_pixels *px, uint32_t y, uint32_t rgb)` |
-| `ink_width` | function | `tests/test_freedom.c:991` | `static double ink_width(const char *html)` |
-| `is_pdf_file` | function | `tests/test_freedom.c:65` | `static int is_pdf_file(const char *path)` |
-| `is_png_file` | function | `tests/test_freedom.c:75` | `static int is_png_file(const char *path)` |
-| `lost` | function | `tests/test_freedom.c:325` | `* lost (every code sample on animate.css lost its leading characters). */ static void test_pre_le...` |
-| `main` | function | `tests/test_freedom.c:3808` | `int main(void)` |
-| `markup` | function | `tests/test_freedom.c:2008` | `* against an unrotated control render of the identical markup (a 50-char-wide box  * at x:[24,975...` |
-| `markup` | function | `tests/test_freedom.c:2067` | `* unscaled control render of the identical markup (box y:[24,49] at x=500,  * center y~36.5): y=2...` |
-| `png_leftmost_ink` | function | `tests/test_freedom.c:309` | `static int png_leftmost_ink(const img_pixels *px, uint32_t y0, uint32_t y1, uint32_t *row)` |
-| `read_file_all` | function | `tests/test_freedom.c:91` | `static uint8_t *read_file_all(const char *path, size_t *out_len)` |
-| `render_html_pixels` | function | `tests/test_freedom.c:534` | `static int render_html_pixels(const char *html, img_pixels *out)` |
-| `rows` | function | `tests/test_freedom.c:1353` | `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);` |
-| `run_freedom` | function | `tests/test_freedom.c:31` | `static int run_freedom(const char *arg, char *out, size_t out_size, int *exit_status)` |
-| `run_freedom_raw` | function | `tests/test_freedom.c:53` | `static int run_freedom_raw(const char *args, int *exit_status)` |
-| `test_absolute_font_size_lands_exact` | function | `tests/test_freedom.c:1038` | `static void test_absolute_font_size_lands_exact(void **state)` |
-| `test_absolute_span_honours_right_bottom` | function | `tests/test_freedom.c:1150` | `static void test_absolute_span_honours_right_bottom(void **state)` |
-| `test_author_can_unbold_a_heading` | function | `tests/test_freedom.c:1131` | `static void test_author_can_unbold_a_heading(void **state)` |
-| `test_author_font_size_on_heading_replaces_ua_scale` | function | `tests/test_freedom.c:1056` | `static void test_author_font_size_on_heading_replaces_ua_scale(void **state)` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

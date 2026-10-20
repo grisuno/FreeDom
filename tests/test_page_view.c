@@ -3113,6 +3113,52 @@ static void test_build_box_tree_textless_wrapper(void **state) {
     hp_document_free(doc);
 }
 
+/* A box whose ONLY content is out-of-flow (a media frame holding an absolute <video>
+ * under an undecorated wrapper) still generates its box: the frame and its aspect-ratio
+ * are geometry, not content. The wrapper div used to make the frame look non-empty, so
+ * it was never opened and the whole hero carousel of github.com collapsed to nothing. */
+static void test_build_frame_with_only_oof_content_keeps_box(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div class=\"frame\"><div class=\"v\"><div><video class=\"vid\"></video></div></div></div>"
+        "<p>after</p></body>");
+    static const char CSS[] =
+        ".frame{border:1px solid #888;padding:12px}"
+        ".v{aspect-ratio:1206/684;position:relative}"
+        ".vid{position:absolute;top:0;left:0;width:100%;height:100%}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    int found = 0;
+    for (size_t i = 0; i < pv_box_count(v); ++i) {
+        const pv_box_def *d = pv_box_at(v, i);
+        if (d != NULL && d->bord_tw == 1 && d->pad_t == 12) found = 1;
+    }
+    assert_int_equal(found, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A <video> with no source has nothing to play but still has its CSS box: the dark
+ * `background-color` frame github.com paints before its player loads. It used to emit
+ * nothing at all, so the frame vanished. */
+static void test_build_sourceless_video_keeps_its_box(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class=\"f\"><video class=\"vid\"></video></div><p>after</p></body>");
+    static const char CSS[] =
+        ".f{position:relative;height:100px}"
+        ".vid{position:absolute;top:0;left:0;width:100%;height:100%;background-color:#151a22;border-radius:12px}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    int found = 0;
+    for (size_t i = 0; i < pv_box_count(v); ++i) {
+        const pv_box_def *d = pv_box_at(v, i);
+        if (d != NULL && d->bg_rgb == 0x151a22 && d->border_radius == 12) found = 1;
+    }
+    assert_int_equal(found, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* A page with no author box has an empty box tree (default render byte-identical). */
 static void test_build_box_tree_empty_no_box(void **state) {
     (void)state;
@@ -5197,6 +5243,8 @@ int main(void) {
         cmocka_unit_test(test_build_boxdeco_shared_id_within_block),
         cmocka_unit_test(test_build_box_tree_nested),
         cmocka_unit_test(test_build_box_tree_textless_wrapper),
+        cmocka_unit_test(test_build_frame_with_only_oof_content_keeps_box),
+        cmocka_unit_test(test_build_sourceless_video_keeps_its_box),
         cmocka_unit_test(test_build_box_tree_empty_no_box),
         cmocka_unit_test(test_build_search_form_get),
         cmocka_unit_test(test_build_form_post_and_hidden),

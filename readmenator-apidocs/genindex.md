@@ -1207,6 +1207,8 @@
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.os_sandbox.c.md#_gnu_source) macro in `src/os_sandbox.c`
 - [`_GNU_SOURCE`](modules/src.tab.c.md#_gnu_source) macro in `src/tab.c`
 - [`gradient`](modules/src.css_gradient.c.md#gradient) function in `src/css_gradient.c`
@@ -1730,6 +1732,7 @@
 - [`main`](modules/tools.pngprof.py.md#main) function in `tools.pngprof`
 - [`main`](modules/tools.prune.py.md#main) function in `tools.prune`
 - [`main`](modules/tools.snapshot.py.md#main) function in `tools.snapshot`
+- [`main`](modules/tools.snapshot_age.py.md#main) function in `tools.snapshot_age`
 - [`malformed`](modules/include.css_mask.h.md#malformed) function in `include/css_mask.h`
 - [`map`](modules/include.import_map.h.md#map) function in `include/import_map.h`
 - [`margin`](modules/gui.browser_ui.c.md#margin) function in `gui/browser_ui.c`
@@ -1925,6 +1928,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -1989,6 +1994,10 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -2181,6 +2190,7 @@
 - [`_POSIX_C_SOURCE`](modules/src.secure_fetch.c.md#_posix_c_source) macro in `src/secure_fetch.c`
 - [`_POSIX_C_SOURCE`](modules/src.text_shape.c.md#_posix_c_source) macro in `src/text_shape.c`
 - [`_POSIX_C_SOURCE`](modules/src.url.c.md#_posix_c_source) macro in `src/url.c`
+- [`_POSIX_C_SOURCE`](modules/src.wl_display.c.md#_posix_c_source) macro in `src/wl_display.c`
 - [`_POSIX_C_SOURCE`](modules/src.ws_hub.c.md#_posix_c_source) macro in `src/ws_hub.c`
 - [`_POSIX_C_SOURCE`](modules/tools.gen_psl.c.md#_posix_c_source) macro in `tools/gen_psl.c`
 - [`prefers_dark`](modules/include.css.h.md#css_sel-prefers_dark) type_alias of `css_sel` in `include/css.h`
@@ -2267,6 +2277,7 @@
 - [`pt_trace`](modules/include.perf_trace.h.md#pt_trace) struct in `include/perf_trace.h`
 - [`ptrmap`](modules/src.dom.c.md#ptrmap) struct in `src/dom.c`
 - [`publish_readme`](modules/tools.fbench.py.md#publish_readme) function in `tools.fbench`
+- [`pure`](modules/include.wl_display.h.md#pure) function in `include/wl_display.h`
 - [`pv_add_box_def`](modules/src.page_view.c.md#pv_add_box_def) function in `src/page_view.c`
 - [`pv_add_cont_def`](modules/src.page_view.c.md#pv_add_cont_def) function in `src/page_view.c`
 - [`pv_append`](modules/src.page_view.c.md#pv_append) function in `src/page_view.c`
@@ -2655,6 +2666,7 @@
 - [`specifiers`](modules/include.prefetch.h.md#specifiers) function in `include/prefetch.h`
 - [`src`](modules/include.html_parse.h.md#src) function in `include/html_parse.h`
 - [`stage`](modules/include.perf_trace.h.md#stage) type_alias in `include/perf_trace.h`
+- [`STAMP`](modules/tools.snapshot_age.py.md#stamp) constant in `tools.snapshot_age`
 - [`standalone`](modules/gui.browser_ui.c.md#standalone) function in `gui/browser_ui.c`
 - [`started`](modules/include.prefetch.h.md#started) function in `include/prefetch.h`
 - [`state`](modules/include.browser.h.md#state) function in `include/browser.h`
@@ -3069,6 +3081,16 @@
 - [`wc_input`](modules/include.webcaps.h.md#wc_input) struct in `include/webcaps.h`
 - [`wc_render_caps`](modules/src.webcaps.c.md#wc_render_caps) function in `src/webcaps.c`
 - [`wc_safe`](modules/src.webcaps.c.md#wc_safe) function in `src/webcaps.c`
+- [`WD_MAX_NAMES`](modules/src.wl_display.c.md#wd_max_names) macro in `src/wl_display.c`
+- [`WD_NAME_MAX`](modules/src.wl_display.c.md#wd_name_max) macro in `src/wl_display.c`
+- [`WD_NONE`](modules/include.wl_display.h.md#wd_none) macro in `include/wl_display.h`
+- [`WD_OK`](modules/include.wl_display.h.md#wd_ok) macro in `include/wl_display.h`
+- [`wd_pick`](modules/include.wl_display.h.md#wd_pick) function in `include/wl_display.h`
+- [`wd_pick`](modules/src.wl_display.c.md#wd_pick) function in `src/wl_display.c`
+- [`WD_PREFIX`](modules/src.wl_display.c.md#wd_prefix) macro in `src/wl_display.c`
+- [`WD_PREFIX_LEN`](modules/src.wl_display.c.md#wd_prefix_len) macro in `src/wl_display.c`
+- [`wd_resolve_env`](modules/include.wl_display.h.md#wd_resolve_env) function in `include/wl_display.h`
+- [`wd_resolve_env`](modules/src.wl_display.c.md#wd_resolve_env) function in `src/wl_display.c`
 - [`wf_cursor`](modules/src.webfont_load.c.md#wf_cursor) struct in `src/webfont_load.c`
 - [`WF_DATA_URL_MAX`](modules/include.webfont.h.md#wf_data_url_max) macro in `include/webfont.h`
 - [`WF_DATA_URL_MAX`](modules/src.webfont_load.c.md#wf_data_url_max) macro in `src/webfont_load.c`
@@ -3132,9 +3154,11 @@
 - [`width`](modules/gui.browser_ui.c.md#width) function in `gui/browser_ui.c`
 - [`width`](modules/include.css_gradient.h.md#width) function in `include/css_gradient.h`
 - [`width_px`](modules/include.css_mq.h.md#width_px) type_alias in `include/css_mq.h`
+- [`widths`](modules/gui.browser_ui.c.md#widths) function in `gui/browser_ui.c`
 - [`widths`](modules/include.flex_layout.h.md#widths) function in `include/flex_layout.h`
 - [`win`](modules/include.flex_layout.h.md#win) function in `include/flex_layout.h`
 - [`window`](modules/src.tab.c.md#window) function in `src/tab.c`
+- [`wins`](modules/gui.browser_ui.c.md#wins) function in `gui/browser_ui.c`
 - [`wins`](modules/include.text_shape.h.md#wins) function in `include/text_shape.h`
 - [`wl_array_for_each`](modules/gui.browser_ui.c.md#wl_array_for_each) function in `gui/browser_ui.c`
 - [`word_spacing`](modules/include.page_view.h.md#pv_text_ext-word_spacing) type_alias of `pv_text_ext` in `include/page_view.h`

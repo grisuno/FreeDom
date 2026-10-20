@@ -56,6 +56,12 @@ Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/webfont_load.c`, `tests/t
 - `free` (function) `include/webfont_load.h:31` `* free()), *out_status the HTTP status. Nonzero on refusal/error (fail-closed: * the face is skipped, never the...`
 - `skipped` (function) `include/webfont_load.h:47` `* URLs are skipped (no base). Returns faces registered (>= 0) otherwise. */ int wf_load_document(wf_fetch_fn fetch...`
 
+## include/wl_display.h
+Imported by: `src/freedom.c`, `src/wl_display.c`, `tests/test_wl_display.c`
+- `pure` (function) `include/wl_display.h:3` `* wd_pick is pure (no I/O);`
+- `wd_pick` (function) `include/wl_display.h:16` `int wd_pick(const char *const *names, size_t n, char *out, size_t cap);` -- Choose the lowest-numbered "wayland-N" (N = digits only) from names[0..n).
+- `wd_resolve_env` (function) `include/wl_display.h:20` `int wd_resolve_env(void);` -- If WAYLAND_DISPLAY is unset/empty, set it from the sockets found in XDG_RUNTIME_DIR. * Returns WD_OK if the variable...
+
 ## include/ws_hub.h
 Depends on: `include/secure_fetch.h`
 Imported by: `gui/browser_ui.c`, `src/ws_hub.c`, `tests/test_ws_hub.c`

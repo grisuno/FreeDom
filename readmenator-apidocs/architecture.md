@@ -4,9 +4,9 @@
 
 ## Architecture Overview
 
-12 components stacked in 6 dependency tiers (weighted Eades-Lin-Smyth ordering: arrows point from dependent to dependency, top to bottom). Labels are import counts, thick arrows the top quartile; 14 transitively implied edges are omitted. Dashed red arrows are upward dependencies: the smallest set of imports that closes every cycle and breaks the layering. Cyan components hold entry points. Interactive version: `readmenator-apidocs/index.html#/flows`.
+12 components stacked in 7 dependency tiers (weighted Eades-Lin-Smyth ordering: arrows point from dependent to dependency, top to bottom). Labels are import counts, thick arrows the top quartile; 17 transitively implied edges are omitted. Dashed red arrows are upward dependencies: the smallest set of imports that closes every cycle and breaks the layering. Cyan components hold entry points. Interactive version: `readmenator-apidocs/index.html#/flows`.
 
-Upward dependencies to fix first: `include: page_view` -> `include: browser_ui` (6 imports); `src` -> `include: page_view` (4 imports); `include: css` -> `include: page_view` (2 imports); `gui` -> `src` (2 imports); `include: text_shape` -> `src` (1 imports); `include: text_shape` -> `include: css` (1 imports); `include: text_shape` -> `include: page_view` (1 imports); `gui` -> `include: page_view` (1 imports); `include: secure_fetch` -> `src` (1 imports); `include: prefetch` -> `src` (1 imports)
+Upward dependencies to fix first: `src: tab` -> `include: page_view` (4 imports); `include: css` -> `include: page_view` (2 imports); `gui` -> `src: tab` (2 imports); `src: tab` -> `include: browser_ui` (1 imports); `src: tab` -> `src: freedom` (1 imports); `include: text_shape` -> `src: tab` (1 imports); `include: text_shape` -> `include: css` (1 imports); `include: text_shape` -> `include: page_view` (1 imports); `gui` -> `include: page_view` (1 imports); `include: secure_fetch` -> `src: tab` (1 imports); `include: prefetch` -> `src: tab` (1 imports)
 
 ```mermaid
 flowchart TB
@@ -15,60 +15,65 @@ flowchart TB
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     subgraph lane_0["Tier 1 - entry / orchestration"]
         direction LR
-        n_c1["include: browser_ui<br/>36 files, 977 symbols<br/>Core / utility"]:::cycle
-        n_d_tools["tools<br/>10 files, 60 symbols<br/>Core / utility"]:::default
+        n_c2["include: browser_ui<br/>26 files, 867 symbols<br/>Core / utility"]:::cycle
+        n_d_tools["tools<br/>11 files, 61 symbols<br/>Core / utility"]:::default
         n_d__root_["(root)<br/>6 files, 3 symbols<br/>Core / utility"]:::entry
     end
     subgraph lane_1["Tier 2"]
         direction LR
-        n_c5["include: local_store<br/>11 files, 379 symbols<br/>Core / utility"]:::cycle
-        n_c3["include: page_view<br/>21 files, 725 symbols<br/>Core / utility"]:::cycle
+        n_c6["include: local_store<br/>11 files, 387 symbols<br/>Core / utility"]:::cycle
+        n_c3["src: freedom<br/>25 files, 289 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_2["Tier 3"]
         direction LR
-        n_c0["src<br/>48 files, 809 symbols<br/>Core / utility"]:::cycle
+        n_c4["include: page_view<br/>14 files, 630 symbols<br/>Presentation / entry"]:::cycle
     end
     subgraph lane_3["Tier 4"]
         direction LR
-        n_c6["gui<br/>13 files, 142 symbols<br/>Presentation / entry"]:::cycle
-        n_c8["include: prefetch<br/>6 files, 93 symbols<br/>Core / utility"]:::cycle
-        n_c7["include: secure_fetch<br/>6 files, 199 symbols<br/>Core / utility"]:::cycle
-        n_c9["include: image_decode<br/>3 files, 42 symbols<br/>Core / utility"]:::default
+        n_c0["src: tab<br/>45 files, 786 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_4["Tier 5"]
         direction LR
-        n_c2["include: css<br/>35 files, 905 symbols<br/>Core / utility"]:::cycle
+        n_c7["gui<br/>13 files, 142 symbols<br/>Presentation / entry"]:::cycle
+        n_c9["include: prefetch<br/>6 files, 93 symbols<br/>Core / utility"]:::cycle
+        n_c8["include: secure_fetch<br/>6 files, 199 symbols<br/>Core / utility"]:::cycle
     end
-    subgraph lane_5["Tier 6 - foundation"]
+    subgraph lane_5["Tier 6"]
         direction LR
-        n_c4["include: text_shape<br/>15 files, 183 symbols<br/>Core / utility"]:::cycle
+        n_c1["include: css<br/>35 files, 905 symbols<br/>Core / utility"]:::cycle
     end
-    n_c0 -->|"1"| n_c6
-    n_c0 -->|"2"| n_c7
-    n_c0 -->|"1"| n_c8
+    subgraph lane_6["Tier 7 - foundation"]
+        direction LR
+        n_c5["include: text_shape<br/>15 files, 183 symbols<br/>Core / utility"]:::cycle
+    end
+    n_c0 -->|"1"| n_c7
+    n_c0 -->|"2"| n_c8
     n_c0 -->|"1"| n_c9
-    n_c1 ==>|"6"| n_c3
-    n_c1 ==>|"3"| n_c5
-    n_c2 -->|"1"| n_c4
-    n_c3 ==>|"13"| n_c0
-    n_c5 -->|"1"| n_c0
-    n_c6 ==>|"4"| n_c2
-    n_c3 <-.-|"4 upward"| n_c0
-    n_c3 <-.-|"2 upward"| n_c2
-    n_c1 <-.-|"6 upward"| n_c3
-    n_c0 <-.-|"1 upward"| n_c4
-    n_c2 <-.-|"1 upward"| n_c4
-    n_c3 <-.-|"1 upward"| n_c4
-    n_c0 <-.-|"2 upward"| n_c6
-    n_c3 <-.-|"1 upward"| n_c6
-    n_c0 <-.-|"1 upward"| n_c7
+    n_c1 -->|"1"| n_c5
+    n_c2 ==>|"9"| n_c3
+    n_c2 -->|"3"| n_c6
+    n_c3 ==>|"5"| n_c4
+    n_c4 ==>|"8"| n_c0
+    n_c6 -->|"1"| n_c0
+    n_c7 ==>|"4"| n_c1
+    n_c2 <-.-|"1 upward"| n_c0
+    n_c3 <-.-|"1 upward"| n_c0
+    n_c4 <-.-|"4 upward"| n_c0
+    n_c4 <-.-|"2 upward"| n_c1
+    n_c0 <-.-|"1 upward"| n_c5
+    n_c1 <-.-|"1 upward"| n_c5
+    n_c4 <-.-|"1 upward"| n_c5
+    n_c0 <-.-|"2 upward"| n_c7
+    n_c4 <-.-|"1 upward"| n_c7
     n_c0 <-.-|"1 upward"| n_c8
-    linkStyle 10,11,12,13,14,15,16,17,18,19 stroke:#f87171,stroke-width:2px;
+    n_c0 <-.-|"1 upward"| n_c9
+    linkStyle 10,11,12,13,14,15,16,17,18,19,20 stroke:#f87171,stroke-width:2px;
+    n_c2 ~~~ n_c6
+    n_c6 ~~~ n_c4
+    n_c4 ~~~ n_c0
+    n_c0 ~~~ n_c7
+    n_c7 ~~~ n_c1
     n_c1 ~~~ n_c5
-    n_c5 ~~~ n_c0
-    n_c0 ~~~ n_c6
-    n_c6 ~~~ n_c2
-    n_c2 ~~~ n_c4
 ```
 
 ---
@@ -148,7 +153,7 @@ sequenceDiagram
 
 ### `freedom.main`
 
-`src/freedom.c:1181`, score 11: `main` in a compiled-language file; entry-style name `main`.
+`src/freedom.c:1182`, score 11: `main` in a compiled-language file; entry-style name `main`.
 
 Call tree:
 
@@ -156,7 +161,7 @@ Call tree:
 flowchart LR
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     classDef external fill:#1a1530,stroke:#a78bfa,color:#ede9fe;
-    n_src_freedom_c__main["freedom.main<br/>freedom.c:1181"]:::entry
+    n_src_freedom_c__main["freedom.main<br/>freedom.c:1182"]:::entry
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2630"]:::external
     n_include_prefs_h__free["prefs.free<br/>prefs.h:71"]:::external
     n_src_prefs_c__prefs_format["prefs.prefs_format<br/>prefs.c:183"]:::external
@@ -301,7 +306,7 @@ flowchart LR
     n_gui_browser_ui_c__clear_doc["browser_ui.clear_doc<br/>Releases the structured render of the previou...<br/>browser_ui.c:1307"]:::external
     n_gui_browser_ui_c__free_inputs["browser_ui.free_inputs<br/>are not text-editable -- they are tracked via...<br/>browser_ui.c:1052"]:::external
     n_gui_browser_ui_c__free_images["browser_ui.free_images<br/>static int input_is_editable(int input_type)...<br/>browser_ui.c:1060"]:::external
-    n_include_render_doc_h__rd_free["render_doc.rd_free<br/>Builds the paint-ready document from an inert...<br/>render_doc.h:312"]:::external
+    n_include_render_doc_h__rd_free["render_doc.rd_free<br/>Builds the paint-ready document from an inert...<br/>render_doc.h:313"]:::external
     n_gui_browser_ui_c__set_cache["browser_ui.set_cache<br/>Releases the structured render of the previou...<br/>browser_ui.c:1317"]:::external
     n_include_browser_h__browser_set_page["browser.browser_set_page<br/>browser.h:71"]:::external
     n_src_browser_c__browser_navigate["browser.browser_navigate<br/>browser.c:224"]:::external
@@ -316,7 +321,7 @@ flowchart LR
     n_src_prefs_c__prefs_history_add["prefs.prefs_history_add<br/>prefs.c:152"]:::external
     n_src_profile_c__profile_save["profile.profile_save<br/>profile.c:133"]:::external
     n_gui_browser_ui_c__show_busy["browser_ui.show_busy<br/>Marks a request in flight and paints a frame...<br/>browser_ui.c:2502"]:::external
-    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:15678"]:::external
+    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:15813"]:::external
     n_tools_gen_psl_c__emit["gen_psl.emit<br/>gen_psl.c:61"]:::default
     n_tools_gen_psl_c__main -.->|"recursion"| n_tools_gen_psl_c__main
     n_tools_gen_psl_c__main -->|"1"| n_tools_gen_psl_c__ascii_lower

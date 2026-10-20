@@ -32,7 +32,7 @@ flowchart LR
 
 ### `fetch`
 
-`function` | [tools/snapshot.py:17](../../tools/snapshot.py#L17)
+`function` | [tools/snapshot.py:18](../../tools/snapshot.py#L18)
 
 ```python
 def fetch(url)
@@ -50,7 +50,7 @@ def fetch(url)
 
 ### `expand_imports`
 
-`function` | [tools/snapshot.py:31](../../tools/snapshot.py#L31)
+`function` | [tools/snapshot.py:32](../../tools/snapshot.py#L32)
 
 ```python
 def expand_imports(css, base, depth)
@@ -74,7 +74,7 @@ Replace each @import with the imported text (wrapped in @media when the import c
 
 ### `inline_css`
 
-`function` | [tools/snapshot.py:48](../../tools/snapshot.py#L48)
+`function` | [tools/snapshot.py:49](../../tools/snapshot.py#L49)
 
 ```python
 def inline_css(html, base)
@@ -97,7 +97,7 @@ def inline_css(html, base)
 
 ### `main`
 
-`function` | [tools/snapshot.py:69](../../tools/snapshot.py#L69)
+`function` | [tools/snapshot.py:70](../../tools/snapshot.py#L70)
 
 ```python
 def main()
@@ -113,7 +113,7 @@ def main()
 
 ### `UA`
 
-`constant` | [tools/snapshot.py:13](../../tools/snapshot.py#L13)
+`constant` | [tools/snapshot.py:14](../../tools/snapshot.py#L14)
 
 ```python
 UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
@@ -125,7 +125,7 @@ UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
 
 ### `MAX_BYTES`
 
-`constant` | [tools/snapshot.py:14](../../tools/snapshot.py#L14)
+`constant` | [tools/snapshot.py:15](../../tools/snapshot.py#L15)
 
 ```python
 MAX_BYTES = 8 * 1024 * 1024
@@ -137,7 +137,7 @@ MAX_BYTES = 8 * 1024 * 1024
 
 ### `IMPORT_RE`
 
-`constant` | [tools/snapshot.py:25](../../tools/snapshot.py#L25)
+`constant` | [tools/snapshot.py:26](../../tools/snapshot.py#L26)
 
 ```python
 IMPORT_RE
@@ -149,7 +149,7 @@ IMPORT_RE
 
 ### `MAX_IMPORT_DEPTH`
 
-`constant` | [tools/snapshot.py:28](../../tools/snapshot.py#L28)
+`constant` | [tools/snapshot.py:29](../../tools/snapshot.py#L29)
 
 ```python
 MAX_IMPORT_DEPTH = 4

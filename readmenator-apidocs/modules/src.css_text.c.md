@@ -323,7 +323,7 @@ Stores both numerator and denominator x1000 (for sub-integer ratios like 1.5 -> 
 
 ### `ct_interp_direction`
 
-`function` | [src/css_text.c:227](../../src/css_text.c#L227)
+`function` | [src/css_text.c:236](../../src/css_text.c#L236)
 
 ```c
 int ct_interp_direction(const char *v)
@@ -347,7 +347,7 @@ direction: ltr/rtl. -1 if unknown.
 
 ### `ct_interp_liststyle`
 
-`function` | [src/css_text.c:265](../../src/css_text.c#L265)
+`function` | [src/css_text.c:274](../../src/css_text.c#L274)
 
 ```c
 int ct_interp_liststyle(const char *v)
@@ -371,7 +371,7 @@ list-style-type, or the type token of the list-style shorthand: the first recogn
 
 ### `ct_emit_spacing`
 
-`function` | [src/css_text.c:300](../../src/css_text.c#L300)
+`function` | [src/css_text.c:309](../../src/css_text.c#L309)
 
 ```c
 int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)
@@ -396,7 +396,7 @@ int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)
 
 ### `ct_expand_shadow`
 
-`function` | [src/css_text.c:313](../../src/css_text.c#L313)
+`function` | [src/css_text.c:322](../../src/css_text.c#L322)
 
 ```c
 int ct_expand_shadow(const char *val, css_decl *dst, int cap)

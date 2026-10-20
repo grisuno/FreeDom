@@ -250,3 +250,18 @@ El lienzo de bits del probe (`tools/ffgeom.py`) se fija con `position:fixed` en
 desplazado, el decodificador fallaba y el arnés caía en silencio a la captura de
 1000×768. La captura sigue sin alto explícito (con alto, Firefox captura solo el
 viewport).
+
+## Tanda 51 — una sola fuente de verdad para lo que muestra el README
+
+- **Problema medido:** el snapshot de Slashdot del corpus era del 8 de agosto; el sitio se
+  rediseñó y el GUI cargaba otra página. Las imágenes del README (y su puntaje 5.61) mostraban
+  un documento más simple que el que el usuario ve. El benchmark y el GUI usan el MISMO motor y
+  las mismas capacidades (`--as-gui`, verificado: el PNG headless de slashdot coincide con la
+  captura del GUI bajo weston); lo que divergía era el DOCUMENTO.
+- Todo snapshot lleva su origen: `<!-- freedom-snapshot url=… date=YYYY-MM-DD -->`
+  (`tools/snapshot.py`). `tests/parity/live.tsv` lista (nombre, URL) de las páginas que el
+  README muestra; `make parity-refresh` las vuelve a congelar y `make parity-age` avisa de las
+  de más de `SNAP_MAX_DAYS` (30) días. Los snapshots anteriores a la marca figuran `unstamped`
+  y se re-congelan cuando importan.
+- Límites que siguen siendo política y no se esconden: el benchmark corre sin JS y sin
+  terceros en los dos motores; el GUI ejecuta JS para hosts de `js.conf`.

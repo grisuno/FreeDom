@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `cb_interp_lineheight` | function | `include/css_box.h:30` | `int cb_interp_lineheight(const char *v);` |
+| `cb_interp_lp` | function | `include/css_box.h:23` | `int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm);` |
 | `cb_interp_style` | function | `include/css_box.h:32` | `int cb_interp_style(const char *v);` |
 | `cb_interp_textdeco` | function | `include/css_box.h:33` | `int cb_interp_textdeco(const char *v);` |
 | `cb_interp_weight` | function | `include/css_box.h:31` | `int cb_interp_weight(const char *v);` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `js_set_time_budget` | function | `include/js_sandbox.h:148` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` |
 | `js_status` | enum | `include/js_sandbox.h:24` | `` |
 | `loaded` | function | `include/js_sandbox.h:114` | `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...` |
-| `max_source_bytes` | type_alias | `include/js_sandbox.h:39` | `typedef struct js_limits { size_t max_source_bytes;` |
-| `status` | type_alias | `include/js_sandbox.h:48` | `typedef struct js_result { js_status status;` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

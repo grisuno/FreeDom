@@ -29,7 +29,7 @@
 | `fuzz/fuzz_url.c` | - | fuzz | 2 | 0 |
 | `fuzz/fuzz_web_storage.c` | - | fuzz | 0 | 0 |
 | `fuzz/fuzz_webfont.c` | libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). | fuzz | 1 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 593 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 595 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 10 | 2 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -113,6 +113,7 @@
 | `include/webcaps.h` | wc_caps: Full capability table for one page. | include | 5 | 4 |
 | `include/webfont.h` | wf_name_hash: FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names. | include | 17 | 12 |
 | `include/webfont_load.h` | wf_sheet: One collected stylesheet: text plus the URL it was fetched from (the * resolution base... | include | 7 | 4 |
+| `include/wl_display.h` | wd_pick: Choose the lowest-numbered "wayland-N" (N = digits only) from names[0..n). | include | 6 | 3 |
 | `include/ws_hub.h` | wh_new: #define WH_MAX 8   /* == JD_WS_MAX: sockets per page /* Event kinds delivered to the... | include | 15 | 3 |
 | `include/zoom.h` | zm_clamp: stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser. | include | 10 | 5 |
 | `install.sh` | Exit immediately if a command exits with a non-zero status, | root | 0 | 0 |
@@ -173,11 +174,11 @@
 | `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 42 | 0 |
 | `src/js_trusted.c` | ws_payload: } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for... | src | 14 | 0 |
 | `src/link_nav.c` | clean_href: Removes tab/newline/CR anywhere and trims leading/trailing spaces, in place * into out. | src | 10 | 0 |
-| `src/local_store.c` | - | src | 279 | 0 |
+| `src/local_store.c` | - | src | 287 | 0 |
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
-| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 240 | 0 |
+| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 243 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
 | `src/prefetch.c` | ci_starts: static int is_ws(char c) { return c == ' ' \|\| c == '\t' \|\| c == '\n' \|\| c == '\r' \|\|... | src | 30 | 0 |
@@ -200,6 +201,7 @@
 | `src/webcaps.c` | - | src | 4 | 0 |
 | `src/webfont.c` | ci_eq_span: #include <stdint.h> #include <stdlib.h> #include <string.h> static int is_ws(char c)... | src | 15 | 0 |
 | `src/webfont_load.c` | wf_key: size_t k = 0; while (PREF[i][k] != '\0') ++k; size_t j = 0; for (; j < k; ++j) { char a... | src | 11 | 0 |
+| `src/wl_display.c` | - | src | 8 | 0 |
 | `src/ws_hub.c` | wh_job: One open, owned by its thread until handed over through the pipe. | src | 27 | 0 |
 | `src/zoom.c` | - | src | 7 | 0 |
 | `tests/itest_secure_fetch.c` | - | tests | 2 | 0 |
@@ -220,7 +222,7 @@
 | `tests/test_css_length.c` | test_unitless: static double px_of(const char *value, const cl_ctx *ctx) { double px = -12345.0... | tests | 25 | 0 |
 | `tests/test_css_mask.c` | Finds the value a decl list assigns to prop, or def when absent. | tests | 12 | 0 |
 | `tests/test_css_mq.c` | - | tests | 7 | 0 |
-| `tests/test_css_text.c` | - | tests | 6 | 0 |
+| `tests/test_css_text.c` | test_aspect_ratio_large_keeps_shape: A large ratio (video sizes, `1206/684`) must keep its... | tests | 7 | 0 |
 | `tests/test_css_values.c` | - | tests | 8 | 0 |
 | `tests/test_css_vars.c` | test_css_vars -- the custom-property table and var() substitution (spec/css_vars.md). | tests | 14 | 0 |
 | `tests/test_data_url.c` | - | tests | 26 | 0 |
@@ -232,7 +234,7 @@
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
 | `tests/test_freebug.c` | - | tests | 13 | 0 |
-| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 94 | 0 |
+| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 97 | 0 |
 | `tests/test_hls.c` | - | tests | 16 | 0 |
 | `tests/test_host_conf.c` | - | tests | 8 | 0 |
 | `tests/test_hostblock.c` | - | tests | 22 | 0 |
@@ -251,7 +253,7 @@
 | `tests/test_media_decoder.c` | test_pacer_paces_by_pts_delta: #include "media_decoder.h" /* First frame anchors the epoch and... | tests | 6 | 0 |
 | `tests/test_net_realm.c` | test_classify_host_lookalikes: static void test_classify_host_i2p(void **state) { (void)state... | tests | 13 | 0 |
 | `tests/test_os_sandbox.c` | test_policy_denies_io_uring: io_uring is a seccomp-bypass primitive (its IORING_OP_* operations... | tests | 19 | 0 |
-| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 207 | 0 |
+| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 209 | 0 |
 | `tests/test_pdf_export.c` | - | tests | 30 | 0 |
 | `tests/test_perf_trace.c` | - | tests | 12 | 0 |
 | `tests/test_prefetch.c` | Tests for prefetch (Hito 29): pure lookahead scanner + parallel download pool. | tests | 18 | 0 |
@@ -274,6 +276,7 @@
 | `tests/test_webcaps.c` | mk: projection, and the headless operator-flag path.  #include <setjmp.h> #include <stdarg.h>... | tests | 11 | 0 |
 | `tests/test_webfont.c` | - | tests | 13 | 0 |
 | `tests/test_webfont_load.c` | test_b64: if (b == NULL) { fclose(f); return NULL; } if (fread(b, 1, (size_t)sz, f) !=... | tests | 16 | 0 |
+| `tests/test_wl_display.c` | test_wl_display — CMocka suite for the pure Wayland socket picker. | tests | 5 | 0 |
 | `tests/test_ws_hub.c` | wait_notify: #include <string.h> #include <cmocka.h> #include "ws_hub.h" typedef struct rec {... | tests | 13 | 0 |
 | `tests/test_zoom.c` | - | tests | 11 | 0 |
 | `tools/fbench.py` | fbench -- turn the PNG pairs `make parity` leaves behind into something you can act on. | tools | 7 | 0 |
@@ -286,3 +289,4 @@
 | `tools/pngprof.py` | pngprof -- structural ink-profile dump for page screenshots. | tools | 4 | 0 |
 | `tools/prune.py` | prune -- cut a corpus page down to ONE subtree, keeping its whole ancestor chain. | tools | 1 | 0 |
 | `tools/snapshot.py` | Freeze a live page into one self-contained HTML file for `make parity`. | tools | 6 | 0 |
+| `tools/snapshot_age.py` | Report parity snapshots older than N days (stamped by tools/snapshot.py). | tools | 1 | 0 |

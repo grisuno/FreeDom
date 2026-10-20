@@ -37,31 +37,31 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Language: h
 - Symbols:
   - `rd_block` (struct, line 64)
-  - `rd_doc` (struct, line 261)
+  - `rd_doc` (struct, line 262)
   - `img_fail_reason` (enum, line 34)
   - `rd_kind` (enum, line 42)
-  - `rd_status` (enum, line 293)
+  - `rd_status` (enum, line 294)
   - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
   - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
   - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
   - `form` (function, line 63) `* form (-1 = none);`
   - `default` (function, line 150) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
-  - `to` (function, line 247) `* belongs to (-1 = none);`
-  - `rdp_images_warning` (function, line 302) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
-  - `rd_free` (function, line 312) `void rd_free(rd_doc *d);`
-  - `rd_count` (function, line 315) `size_t rd_count(const rd_doc *d);`
-  - `rd_at` (function, line 316) `const rd_block *rd_at(const rd_doc *d, size_t i);`
-  - `rd_box_count` (function, line 320) `size_t rd_box_count(const rd_doc *d);`
-  - `rd_box_at` (function, line 321) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-  - `rd_cont_count` (function, line 325) `size_t rd_cont_count(const rd_doc *d);`
-  - `rd_cont_at` (function, line 326) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-  - `rd_kind_name` (function, line 330) `const char *rd_kind_name(rd_kind k);`
-  - `rd_block_tag` (function, line 338) `const char *rd_block_tag(const rd_block *b);`
-  - `rd_block_heading_level` (function, line 345) `int rd_block_heading_level(const rd_block *b);`
-  - `decision` (function, line 348) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
-  - `IMG_FAIL_OK` (function, line 354) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-  - `rd_input_label` (function, line 359) `const char *rd_input_label(int input_type);`
-  - `rd_input_invisible` (function, line 364) `int rd_input_invisible(int input_type);`
+  - `to` (function, line 248) `* belongs to (-1 = none);`
+  - `rdp_images_warning` (function, line 303) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
+  - `rd_free` (function, line 313) `void rd_free(rd_doc *d);`
+  - `rd_count` (function, line 316) `size_t rd_count(const rd_doc *d);`
+  - `rd_at` (function, line 317) `const rd_block *rd_at(const rd_doc *d, size_t i);`
+  - `rd_box_count` (function, line 321) `size_t rd_box_count(const rd_doc *d);`
+  - `rd_box_at` (function, line 322) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+  - `rd_cont_count` (function, line 326) `size_t rd_cont_count(const rd_doc *d);`
+  - `rd_cont_at` (function, line 327) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+  - `rd_kind_name` (function, line 331) `const char *rd_kind_name(rd_kind k);`
+  - `rd_block_tag` (function, line 339) `const char *rd_block_tag(const rd_block *b);`
+  - `rd_block_heading_level` (function, line 346) `int rd_block_heading_level(const rd_block *b);`
+  - `decision` (function, line 349) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+  - `IMG_FAIL_OK` (function, line 355) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 360) `const char *rd_input_label(int input_type);`
+  - `rd_input_invisible` (function, line 365) `int rd_input_invisible(int input_type);`
   - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
@@ -467,28 +467,18 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `WF_LOAD_MAX_FETCHES` (macro, line 54) `#define WF_LOAD_MAX_FETCHES`
 - Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/webfont_load.c`, `tests/test_webfont_load.c`
 
-## include/ws_hub.h
-- Doc: wh_new: #define WH_MAX 8   /* == JD_WS_MAX: sockets per page /* Event kinds delivered to the...
+## include/wl_display.h
+- Doc: wd_pick: Choose the lowest-numbered "wayland-N" (N = digits only) from names[0..n).
 - Layer: utility
 - Language: h
 - Symbols:
-  - `wh_hub` (type_alias, line 30) `typedef struct wh_hub wh_hub;`
-  - `wh_new` (function, line 34) `wh_hub *wh_new(void);`
-  - `wh_free` (function, line 38) `void wh_free(wh_hub *h);`
-  - `wh_notify_fd` (function, line 41) `int wh_notify_fd(const wh_hub *h);`
-  - `wh_open_async` (function, line 46) `int wh_open_async(wh_hub *h, int id, const char *url, const sf_config *cfg);`
-  - `generation` (function, line 50) `* previous generation (before wh_close_all) are closed and dropped silently. */ void wh_on_notify(wh_hub *h...`
-  - `wh_send` (function, line 54) `int wh_send(wh_hub *h, int id, const void *data, size_t len, int binary);`
-  - `wh_close` (function, line 58) `void wh_close(wh_hub *h, int id);`
-  - `wh_close_all` (function, line 61) `void wh_close_all(wh_hub *h);`
-  - `wh_poll_fds` (function, line 65) `size_t wh_poll_fds(const wh_hub *h, struct pollfd *out, int *ids, size_t cap);`
-  - `wh_on_readable` (function, line 70) `void wh_on_readable(wh_hub *h, int id, wh_emit_fn emit, void *ctx);`
-  - `wh_count` (function, line 73) `size_t wh_count(const wh_hub *h);`
-  - `FREEDOM_WS_HUB_H` (macro, line 2) `#define FREEDOM_WS_HUB_H`
-  - `WH_MAX` (macro, line 21) `#define WH_MAX`
-  - `WH_CLOSE_ABNORMAL` (macro, line 27) `#define WH_CLOSE_ABNORMAL`
-- Depends on: `include/secure_fetch.h`
-- Imported by: `gui/browser_ui.c`, `src/ws_hub.c`, `tests/test_ws_hub.c`
+  - `pure` (function, line 3) `* wd_pick is pure (no I/O);`
+  - `wd_pick` (function, line 16) `int wd_pick(const char *const *names, size_t n, char *out, size_t cap);`
+  - `wd_resolve_env` (function, line 20) `int wd_resolve_env(void);`
+  - `FREEDOM_WL_DISPLAY_H` (macro, line 6) `#define FREEDOM_WL_DISPLAY_H`
+  - `WD_OK` (macro, line 10) `#define WD_OK`
+  - `WD_NONE` (macro, line 11) `#define WD_NONE`
+- Imported by: `src/freedom.c`, `src/wl_display.c`, `tests/test_wl_display.c`
 
 
 Next: [KB_include_p5.md](KB_include_p5.md)

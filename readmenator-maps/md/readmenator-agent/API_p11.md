@@ -1,6 +1,9 @@
 # API (page 11 of 11)
 Previous: [API_p10.md](API_p10.md)
 
+## tools/ffshot.py
+- `main` (function) `tools/ffshot.py:24` `def main()`
+
 ## tools/gen_psl.c
 - `vec_push` (function) `tools/gen_psl.c:27` `static void vec_push(vec *v, const char *s)`
 - `cmp_str` (function) `tools/gen_psl.c:38` `static int cmp_str(const void *a, const void *b)`
@@ -37,10 +40,13 @@ Previous: [API_p10.md](API_p10.md)
 - `main` (function) `tools/prune.py:21` `def main()`
 
 ## tools/snapshot.py
-- `fetch` (function) `tools/snapshot.py:17` `def fetch(url)`
-- `expand_imports` (function) `tools/snapshot.py:31` `def expand_imports(css, base, depth)` -- Replace each @import with the imported text (wrapped in @media when the import carries a media condition), resolved...
-- `repl` (function) `tools/snapshot.py:34` `def repl(m)`
-- `inline_css` (function) `tools/snapshot.py:48` `def inline_css(html, base)`
-- `repl` (function) `tools/snapshot.py:49` `def repl(m)`
-- `main` (function) `tools/snapshot.py:69` `def main()`
+- `fetch` (function) `tools/snapshot.py:18` `def fetch(url)`
+- `expand_imports` (function) `tools/snapshot.py:32` `def expand_imports(css, base, depth)` -- Replace each @import with the imported text (wrapped in @media when the import carries a media condition), resolved...
+- `repl` (function) `tools/snapshot.py:35` `def repl(m)`
+- `inline_css` (function) `tools/snapshot.py:49` `def inline_css(html, base)`
+- `repl` (function) `tools/snapshot.py:50` `def repl(m)`
+- `main` (function) `tools/snapshot.py:70` `def main()`
+
+## tools/snapshot_age.py
+- `main` (function) `tools/snapshot_age.py:16` `def main()`
 

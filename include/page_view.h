@@ -314,6 +314,11 @@ typedef struct pv_run {
     int     float_w;
     int     float_w_pct;
     int     float_box;   /* the founder's OWN box id, -1 = it carries none */
+    /* The OUTERMOST founder's own declared width halves: a nested float's runs carry the
+     * outer column's width too, because the outer founder often has no run of its own
+     * (a `nav{float:right;width:30%}` holding only floated children). 0/0 = none. */
+    int     float_ow;
+    int     float_ow_pct;
     /* The OUTERMOST float founder (spec/float.md §7d.1): the highest floated
      * self-or-ancestor block on this run's chain. float_oid is its group id
      * (-1 = the nearest IS the outermost: single-level float, old path);
@@ -1111,7 +1116,8 @@ void pv_set_cont_item(pv_view *v, int cont_item);
  * and -1 / 0 / 0 / 0 / 0 / 0. */
 /* Stamps the float founder's own declared width halves (pv_run.float_w) on the
  * most recently appended run. */
-void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box);
+void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box,
+                    int float_ow, int float_ow_pct);
 
 void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
                   int float_ml, int float_ml_pct, int float_mr, int float_mr_pct,

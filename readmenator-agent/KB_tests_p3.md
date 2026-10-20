@@ -102,6 +102,7 @@ Previous: [KB_tests_p2.md](KB_tests_p2.md)
 - Depends on: `include/css_mq.h`
 
 ## tests/test_css_text.c
+- Doc: test_aspect_ratio_large_keeps_shape: A large ratio (video sizes, `1206/684`) must keep its...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -110,7 +111,8 @@ Previous: [KB_tests_p2.md](KB_tests_p2.md)
   - `test_whitespace_direction` (function, line 26) `static void test_whitespace_direction(void **state)`
   - `test_shadow_needs_both_offsets` (function, line 34) `static void test_shadow_needs_both_offsets(void **state)`
   - `test_aspect_ratio` (function, line 44) `static void test_aspect_ratio(void **state)`
-  - `main` (function, line 56) `int main(void)`
+  - `test_aspect_ratio_large_keeps_shape` (function, line 59) `static void test_aspect_ratio_large_keeps_shape(void **state)`
+  - `main` (function, line 73) `int main(void)`
 - Depends on: `include/css.h`, `include/css_decl.h`, `include/css_text.h`
 
 ## tests/test_css_values.c

@@ -268,6 +268,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/freedom.c` -> `include/webcaps.h`
 - `src/freedom.c` -> `include/webfont.h`
 - `src/freedom.c` -> `include/webfont_load.h`
+- `src/freedom.c` -> `include/wl_display.h`
 - `src/hls.c` -> `include/hls.h`
 - `src/host_conf.c` -> `include/host_conf.h`
 - `src/hostblock.c` -> `include/hostblock.h`
@@ -415,6 +416,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/webfont_load.c` -> `include/url.h`
 - `src/webfont_load.c` -> `include/webfont.h`
 - `src/webfont_load.c` -> `include/webfont_load.h`
+- `src/wl_display.c` -> `include/wl_display.h`
 - `src/ws_hub.c` -> `include/ws_hub.h`
 - `src/zoom.c` -> `include/zoom.h`
 - `tests/itest_secure_fetch.c` -> `include/secure_fetch.h`
@@ -494,7 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_js_policy.c` -> `include/js_policy.h`
 - `tests/test_js_sandbox.c` -> `include/js_sandbox.h`
 - `tests/test_link_nav.c` -> `include/link_nav.h`
-- `tests/test_local_store.c` -> `include/local_store.h`
-- `tests/test_media_decoder.c` -> `include/media_decoder.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

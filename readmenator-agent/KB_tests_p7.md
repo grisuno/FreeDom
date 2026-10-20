@@ -438,6 +438,18 @@ static void tes...`
   - `_POSIX_C_SOURCE` (macro, line 13) `#define _POSIX_C_SOURCE`
 - Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`, `include/webfont_load.h`
 
+## tests/test_wl_display.c
+- Doc: test_wl_display — CMocka suite for the pure Wayland socket picker.
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_picks_lowest` (function, line 11) `static void test_picks_lowest(void **state)`
+  - `test_ignores_lock_and_garbage` (function, line 19) `static void test_ignores_lock_and_garbage(void **state)`
+  - `test_small_cap_fails_closed` (function, line 27) `static void test_small_cap_fails_closed(void **state)`
+  - `test_null_entry` (function, line 35) `static void test_null_entry(void **state)`
+  - `main` (function, line 43) `int main(void)`
+- Depends on: `include/wl_display.h`
+
 ## tests/test_ws_hub.c
 - Doc: wait_notify: #include <string.h> #include <cmocka.h> #include "ws_hub.h" typedef struct rec {...
 - Layer: testing

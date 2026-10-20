@@ -3,6 +3,39 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_site_of` | function | `tests/test_request_policy.c:45` | `static void test_site_of(void **state)` |
+| `test_site_of_multi_suffix` | function | `tests/test_request_policy.c:58` | `static void test_site_of_multi_suffix(void **state)` |
+| `test_site_of_psl` | function | `tests/test_request_policy.c:70` | `static void test_site_of_psl(void **state)` |
+| `main` | function | `tests/test_secure_fetch.c:562` | `int main(void)` |
+| `test_chain_hybrid_allows_classical` | function | `tests/test_secure_fetch.c:149` | `static void test_chain_hybrid_allows_classical(void **state)` |
+| `test_chain_permissive_allows_weak_certs` | function | `tests/test_secure_fetch.c:166` | `static void test_chain_permissive_allows_weak_certs(void **state)` |
+| `test_chain_rejects_null` | function | `tests/test_secure_fetch.c:187` | `static void test_chain_rejects_null(void **state)` |
+| `test_chain_rejects_sha1_in_any_policy` | function | `tests/test_secure_fetch.c:157` | `static void test_chain_rejects_sha1_in_any_policy(void **state)` |
+| `test_chain_rejects_weak_rsa` | function | `tests/test_secure_fetch.c:179` | `static void test_chain_rejects_weak_rsa(void **state)` |
+| `test_chain_strict_accepts_pq` | function | `tests/test_secure_fetch.c:141` | `static void test_chain_strict_accepts_pq(void **state)` |
+| `test_chain_strict_rejects_classical` | function | `tests/test_secure_fetch.c:132` | `static void test_chain_strict_rejects_classical(void **state)` |
+| `test_config_blend_fields_default_null` | function | `tests/test_secure_fetch.c:34` | `static void test_config_blend_fields_default_null(void **state)` |
+| `test_cookie_jar_put_and_header` | function | `tests/test_secure_fetch.c:516` | `static void test_cookie_jar_put_and_header(void **state)` |
+| `test_cookie_line_matches_pure` | function | `tests/test_secure_fetch.c:480` | `static void test_cookie_line_matches_pure(void **state)` |
+| `test_enforce_all_good_hybrid` | function | `tests/test_secure_fetch.c:201` | `static void test_enforce_all_good_hybrid(void **state)` |
+| `test_enforce_allow_classical_ke` | function | `tests/test_secure_fetch.c:244` | `static void test_enforce_allow_classical_ke(void **state)` |
+| `test_enforce_allowlisted_insecure` | function | `tests/test_secure_fetch.c:263` | `static void test_enforce_allowlisted_insecure(void **state)` |
+| `test_enforce_checks_group_after_version` | function | `tests/test_secure_fetch.c:216` | `static void test_enforce_checks_group_after_version(void **state)` |
+| `test_enforce_checks_version_first` | function | `tests/test_secure_fetch.c:207` | `static void test_enforce_checks_version_first(void **state)` |
+| `test_enforce_fails_closed_on_null_chain` | function | `tests/test_secure_fetch.c:224` | `static void test_enforce_fails_closed_on_null_chain(void **state)` |
+| `test_enforce_strict_requires_pq_chain` | function | `tests/test_secure_fetch.c:231` | `static void test_enforce_strict_requires_pq_chain(void **state)` |
+| `test_get_follow_null_args` | function | `tests/test_secure_fetch.c:436` | `static void test_get_follow_null_args(void **state)` |
+| `test_get_null_args` | function | `tests/test_secure_fetch.c:445` | `static void test_get_null_args(void **state)` |
+| `test_group_accepts_hybrid` | function | `tests/test_secure_fetch.c:123` | `static void test_group_accepts_hybrid(void **state)` |
+| `test_group_rejects_classical` | function | `tests/test_secure_fetch.c:109` | `static void test_group_rejects_classical(void **state)` |
+| `test_group_rejects_pure_pq` | function | `tests/test_secure_fetch.c:116` | `static void test_group_rejects_pure_pq(void **state)` |
+| `test_location_is_case_insensitive_and_trims` | function | `tests/test_secure_fetch.c:313` | `static void test_location_is_case_insensitive_and_trims(void **state)` |
+| `test_location_parses_value` | function | `tests/test_secure_fetch.c:305` | `static void test_location_parses_value(void **state)` |
+| `test_location_rejects_non_location_and_empty` | function | `tests/test_secure_fetch.c:323` | `static void test_location_rejects_non_location_and_empty(void **state)` |
+| `test_location_rejects_overflow` | function | `tests/test_secure_fetch.c:335` | `static void test_location_rejects_overflow(void **state)` |
+| `test_post_null_args` | function | `tests/test_secure_fetch.c:454` | `static void test_post_null_args(void **state)` |
+| `test_redirect_code_recognizes_3xx` | function | `tests/test_secure_fetch.c:285` | `static void test_redirect_code_recognizes_3xx(void **state)` |
+| `test_redirect_code_rejects_others` | function | `tests/test_secure_fetch.c:294` | `static void test_redirect_code_rejects_others(void **state)` |
 | `test_resolve_absolute_https` | function | `tests/test_secure_fetch.c:344` | `static void test_resolve_absolute_https(void **state)` |
 | `test_resolve_absolute_path` | function | `tests/test_secure_fetch.c:378` | `static void test_resolve_absolute_path(void **state)` |
 | `test_resolve_null_args` | function | `tests/test_secure_fetch.c:402` | `static void test_resolve_null_args(void **state)` |
@@ -315,6 +348,11 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `test_null_args` | function | `tests/test_webfont_load.c:113` | `static void test_null_args(void **state)` |
 | `test_null_page_data_only` | function | `tests/test_webfont_load.c:288` | `static void test_null_page_data_only(void **state)` |
 | `test_woff2_never_fetched` | function | `tests/test_webfont_load.c:152` | `static void test_woff2_never_fetched(void **state)` |
+| `main` | function | `tests/test_wl_display.c:43` | `int main(void)` |
+| `test_ignores_lock_and_garbage` | function | `tests/test_wl_display.c:19` | `static void test_ignores_lock_and_garbage(void **state)` |
+| `test_null_entry` | function | `tests/test_wl_display.c:35` | `static void test_null_entry(void **state)` |
+| `test_picks_lowest` | function | `tests/test_wl_display.c:11` | `static void test_picks_lowest(void **state)` |
+| `test_small_cap_fails_closed` | function | `tests/test_wl_display.c:27` | `static void test_small_cap_fails_closed(void **state)` |
 | `_POSIX_C_SOURCE` | macro | `tests/test_ws_hub.c:7` | `#define _POSIX_C_SOURCE` |
 | `emit` | function | `tests/test_ws_hub.c:21` | `static void emit(void *ctx, int id, int kind, int code, const char *data, size_t len)` |
 | `main` | function | `tests/test_ws_hub.c:142` | `int main(void)` |
@@ -393,10 +431,11 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `main` | function | `tools/pngprof.py:109` | `def main(argv)` |
 | `render_glyph` | function | `tools/pngprof.py:99` | `def render_glyph(v)` |
 | `main` | function | `tools/prune.py:21` | `def main()` |
-| `expand_imports` | function | `tools/snapshot.py:31` | `def expand_imports(css, base, depth)` |
-| `fetch` | function | `tools/snapshot.py:17` | `def fetch(url)` |
-| `inline_css` | function | `tools/snapshot.py:48` | `def inline_css(html, base)` |
-| `main` | function | `tools/snapshot.py:69` | `def main()` |
-| `repl` | function | `tools/snapshot.py:34` | `def repl(m)` |
-| `repl` | function | `tools/snapshot.py:49` | `def repl(m)` |
+| `expand_imports` | function | `tools/snapshot.py:32` | `def expand_imports(css, base, depth)` |
+| `fetch` | function | `tools/snapshot.py:18` | `def fetch(url)` |
+| `inline_css` | function | `tools/snapshot.py:49` | `def inline_css(html, base)` |
+| `main` | function | `tools/snapshot.py:70` | `def main()` |
+| `repl` | function | `tools/snapshot.py:35` | `def repl(m)` |
+| `repl` | function | `tools/snapshot.py:50` | `def repl(m)` |
+| `main` | function | `tools/snapshot_age.py:16` | `def main()` |
 

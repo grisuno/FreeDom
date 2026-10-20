@@ -3410,6 +3410,11 @@ typedef struct rc_ibox {
     /* Tallest font extents of the fragments it produced: an inline box's content
      * area is the font's ascent + descent, not the whole line box (CSS 2.1 10.6.1). */
     double max_asc, max_desc;
+    /* An EMPTY inline-block (an icon `<i class=ico></i>` with a declared size) is an
+     * atom of its line (CSS 2.1 9.2.2, 10.8.1): it advances the pen by its own width
+     * and sits on the baseline, bottom edge first. min_w/min_h are its content size;
+     * both 0 for a box that wraps real fragments. */
+    double min_w, min_h;
 } rc_ibox;
 #define RC_IBOX_MAX 16
 
@@ -3909,7 +3914,7 @@ static void close_inline_boxes(rc_layout *L, rc_state *s, double row_top, double
         const pv_box_def *d = ib->def;
         if (d == NULL) continue;
         double x0 = ib->pen0;
-        double x1 = x0 + ib->pad_l;
+        double x1 = x0 + ib->pad_l + ib->min_w;
         size_t fend = (ib->frag1 != (size_t)-1) ? ib->frag1 : L->nfrag;
         if (fend > L->nfrag) fend = L->nfrag;
         for (size_t i = ib->frag0; i < fend; ++i) {
@@ -3933,6 +3938,11 @@ static void close_inline_boxes(rc_layout *L, rc_state *s, double row_top, double
             double desc = (ib->max_desc > 0.0) ? ib->max_desc : 0.0;
             bx->top = row_top + baseline - asc - pt;
             bx->h = asc + desc + pt + pb;
+        } else if (ib->min_h > 0.0) {
+            double pt = box_pad_px(d->pad_t, d->pad_t_pct, 0.0) + box_edge_px(d->bord_tw);
+            double pb = box_pad_px(d->pad_b, d->pad_b_pct, 0.0) + box_edge_px(d->bord_bw);
+            bx->h = ib->min_h + pt + pb;
+            bx->top = row_top + baseline - bx->h;
         }
         rc_box_copy_decoration(bx, d);
         bx->hidden = (s->hidden_from != 0) ||
@@ -5059,6 +5069,13 @@ static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox) {
     int any = 0;
     int r = item_root_box_pass(doc, b0, b1, cbox, 1, &any);
     if (any) return r;
+    /* Falling back to the out-of-flow runs is for an item that has NOTHING else (a
+     * badge-only tile). An item with an in-flow run -- even the container's own empty
+     * placeholder -- already has its content; adopting an absolute child's box as the
+     * item's root painted that box in flow at the item's size (a `position:absolute`
+     * <video> inside a flex frame came out as a zero-height bar). */
+    for (size_t k = b0; k < b1; ++k)
+        if (!block_leaves_flow(doc, rd_at(doc, k))) return r;
     return item_root_box_pass(doc, b0, b1, cbox, 0, &any);
 }
 
@@ -5729,6 +5746,18 @@ static double flex_item_min_main(cairo_t *cr, const browser_window *w,
  * the SAME box opening/closing code, so the two paths cannot drift on how a nested
  * box is sized, insets its content or finalises its height. */
 static void close_all_boxes(rc_layout *L, rc_state *s, const ui_theme *th);
+/* An empty placeholder run of an inline-block box whose line CONTINUES with the next
+ * run (no block boundary between them): the icon in `<a><i class=ico></i> label</a>`.
+ * Opened as a block it flushed the line, stacking the icon above its own label. */
+static int empty_atom_continues_line(const rd_doc *doc, size_t run_i, int box_id) {
+    if (run_i >= rd_count(doc) || run_i + 1 >= rd_count(doc)) return 0;
+    const rd_block *r = rd_at(doc, run_i);
+    const rd_block *nx = rd_at(doc, run_i + 1);
+    return r->kind == RD_PARAGRAPH && r->block_id == box_id &&
+           (r->text == NULL || r->text[0] == '\0') && nx->block_break == 0 &&
+           nx->kind != RD_IMAGE && nx->kind != RD_SVG && nx->kind != RD_VIDEO;
+}
+
 static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                                   rc_layout *L, rc_state *s, const ui_theme *th,
                                   const rd_doc *doc, double content_w, int block_id,
@@ -6846,7 +6875,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 /* Stretch is not an inline-block's business: it keeps its own height. */
                 bt_node *kn = &kids[pos_of[j]];
                 double nat = kn->content_h - item_mt[j] - item_mb[j];
-                if (nat > 0.0) kn->h = nat;
+                kn->h = (nat > 0.0) ? nat : 0.0;   /* an empty atom is 0 tall, not line-stretched */
                 const bt_node *kd = &kids[pos_of[j]];
                 double bl = kd->h;                       /* no text: the bottom edge */
                 if (row_count[j] > 0) {
@@ -7074,6 +7103,18 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
         if (bx->box_h > 0 || bx->box_h_set)
             h = bx_border_box_h((double)bx->box_h, ob->border_box,
                                 ob->pt, ob->pb, ob->bt, ob->bb);
+        /* aspect-ratio sizes an auto-height box from its used width (CSS Sizing 4 5.1):
+         * the ratio is of the content box, or of the border box under border-box. A box
+         * whose only children are out-of-flow (a media frame holding an absolute
+         * <video>) has no content to give it a height, which is exactly when it matters;
+         * content taller than the ratio still wins (min-height:auto). */
+        if (bx->aspect_num > 0 && bx->aspect_den > 0 && !bx->box_h_set && bx->box_h <= 0) {
+            double ah = ob->border_box
+                ? bx->w * (double)bx->aspect_den / (double)bx->aspect_num
+                : ob->inner_w * (double)bx->aspect_den / (double)bx->aspect_num +
+                  ob->pt + ob->pb + ob->bt + ob->bb;
+            if (ah > h) h = ah;
+        }
         if (bx->box_min_h > 0) {
             double mn = bx_border_box_h((double)bx->box_min_h, ob->border_box,
                                         ob->pt, ob->pb, ob->bt, ob->bb);
@@ -7690,8 +7731,10 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
         int ib_inline = (d->display == CSS_DISP_INLINE_BOX);
         int ib_atom = (d->display == CSS_DISP_INLINE_BLOCK &&
                        s->line_open && L->nfrag > s->line_first);
-        if ((ib_inline || ib_atom) && s->ibx_open == 0 && s->n_ibx < RC_IBOX_MAX) {
-            if (ib_inline) open_line(L, s);
+        int ib_empty = (!ib_atom && d->display == CSS_DISP_INLINE_BLOCK && k == n - 1 &&
+                        empty_atom_continues_line(doc, run_i, path[k]));
+        if ((ib_inline || ib_atom || ib_empty) && s->ibx_open == 0 && s->n_ibx < RC_IBOX_MAX) {
+            if (ib_inline || ib_empty) open_line(L, s);
             double ictx_l, ictx_w;
             rc_box_context(s, content_w, &ictx_l, &ictx_w);
             double ipl = box_pad_px(d->pad_l, d->pad_l_pct, ictx_w);
@@ -7700,8 +7743,8 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
              * author margin is what is left once the padding is taken back out. */
             double iml = bx_lp_px(d->box_l, d->box_l_pct, ictx_w) - ipl;
             double imr = bx_lp_px(d->box_r, d->box_r_pct, ictx_w) - ipr;
-            if (iml < 0.0 || ib_atom) iml = 0.0;
-            if (imr < 0.0 || ib_atom) imr = 0.0;
+            if (iml < 0.0 || ib_atom || ib_empty) iml = ib_empty ? (iml > 0.0 ? iml : 0.0) : 0.0;
+            if (imr < 0.0 || ib_atom || ib_empty) imr = ib_empty ? (imr > 0.0 ? imr : 0.0) : 0.0;
             s->pen_x += iml;
             rc_ibox *ib = &s->ibx[s->n_ibx++];
             memset(ib, 0, sizeof *ib);
@@ -7713,8 +7756,18 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
             ib->pad_l = ipl + box_edge_px(d->bord_lw);
             ib->pad_r = ipr + box_edge_px(d->bord_rw);
             ib->mar_r = imr;
+            if (ib_empty) {
+                int bb2 = (d->box_sizing == CSS_BOXS_BORDER);
+                double edge_w = ib->pad_l + ib->pad_r;
+                double edge_h = box_pad_px(d->pad_t, d->pad_t_pct, ictx_w) + box_edge_px(d->bord_tw) +
+                                box_pad_px(d->pad_b, d->pad_b_pct, ictx_w) + box_edge_px(d->bord_bw);
+                ib->min_w = (d->box_w > 0) ? (double)d->box_w - (bb2 ? edge_w : 0.0) : 0.0;
+                ib->min_h = (d->box_h > 0) ? (double)d->box_h - (bb2 ? edge_h : 0.0) : 0.0;
+                if (ib->min_w < 0.0) ib->min_w = 0.0;
+                if (ib->min_h < 0.0) ib->min_h = 0.0;
+            }
             s->ibx_open = s->n_ibx;
-            s->pen_x += ib->pad_l;
+            s->pen_x += ib->pad_l + ib->min_w;
             break;
         }
         double ctx_left, ctx_w;
@@ -8176,6 +8229,13 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                      * not the float's. */
                     double t = bx_width_cap(bb->float_w, bb->float_w_pct, ctx_w);
                     if (t > fw) fw = t;
+                } else if (bb->float_oid == dc->key) {
+                    /* A founder with no run of its own (a `nav{float:right;width:30%}`
+                     * holding only floated children) still declares its width: the
+                     * nested runs carry it. Without it the column took the whole
+                     * context and its children resolved their `%` against the page. */
+                    double t = bx_width_cap(bb->float_ow, bb->float_ow_pct, ctx_w);
+                    if (t > fw) fw = t;
                 }
                 if (bb->box_w > 0 || bb->box_mw > 0) {
                     double t = bx_width_cap2(bb->box_w, 0, bb->box_mw, 0, ctx_w);
@@ -8309,6 +8369,21 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                  * what brings in wrapper boxes like the `.main-content`
                  * margin box, without which the column flows at full page
                  * width. Items open their own boxes below bbox inside. */
+                /* The band's common box IS the founder when it carries the outermost
+                 * float's declared width (a founder with no run of its own): the column
+                 * already took that width, so the box fills it instead of resolving the
+                 * same percentage against the column a second time (30% of 300). */
+                {
+                    const rd_block *r0 = rd_at(doc, dc->rs[r]);
+                    const pv_box_def *bbd = (bbox >= 0 && (size_t)bbox < rd_box_count(doc))
+                                            ? rd_box_at(doc, (size_t)bbox) : NULL;
+                    if (bbd != NULL && r0->float_oid == dc->key &&
+                        (r0->float_ow > 0 || r0->float_ow_pct != 0) &&
+                        bbd->box_w == r0->float_ow && bbd->box_w_pct == r0->float_ow_pct) {
+                        si.col_founder_set = 1;
+                        si.col_founder_box = bbox;
+                    }
+                }
                 reconcile_boxes(cr, w, L, &si, th, doc, colw, bbox,
                                 dc->rs[r]);
                 /* Inner % resolves against the COLUMN width: it is the
@@ -8458,12 +8533,21 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
             /* Out-of-flow blocks size nothing in flow (spec/float.md §7c.5):
              * a wide abspos badge must not become the column's width. */
             if (block_leaves_flow(doc, bb)) continue;
-            double c = run_width_cap(bb, ctx_w);
+            /* A NESTED float's `%` is a share of its containing float, which the run
+             * carries (float_ow): `nav{float:right;width:30%}` holding `form{float:left;
+             * width:50%}` is 150px of a 1000px band, not 500. */
+            double wbasis = ctx_w;
+            if (bb->float_oid >= 0 && bb->float_oid != bb->float_id &&
+                founder_key != bb->float_oid) {   /* inside the outer's own column ctx_w IS it */
+                double ow = bx_width_cap(bb->float_ow, bb->float_ow_pct, ctx_w);
+                if (ow > 0.0) wbasis = ow;
+            }
+            double c = run_width_cap(bb, wbasis);
             /* The founder's own declared width travels on its runs even when the
              * founder has no text of its own (a `nav{float:left;width:70%}` whose
              * content is a list): without it the float looked width-less and
              * shrink-wrapped, and every ancestor wrapper shrank with it. */
-            double fc = bx_width_cap(bb->float_w, bb->float_w_pct, ctx_w);
+            double fc = bx_width_cap(bb->float_w, bb->float_w_pct, wbasis);
             if (fc > founder_cap) founder_cap = fc;
             if (fc > c) c = fc;
             if (c > capw) capw = c;
@@ -9138,6 +9222,22 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * stays in the current box context too; closing would flush the line and
          * split e.g. a flowed table row at its inter-cell gap runs. */
         leave_inline_box(L, &s, b->block_id);
+        /* An empty inline-block icon opens its line INSIDE reconcile below, so the
+         * previous block's line and this block's top margin are settled first: the
+         * flush that follows reconcile would otherwise close the icon's line empty. */
+        int atom_first = 0;
+        if (b->block_break && b->block_id >= 0 && s.ibx_open == 0) {
+            const pv_box_def *abd = rd_box_at(doc, (size_t)b->block_id);
+            atom_first = (abd != NULL && abd->display == CSS_DISP_INLINE_BLOCK &&
+                          empty_atom_continues_line(doc, i, b->block_id));
+        }
+        if (atom_first) {
+            flush_line(L, &s, th);
+            double amt, amb;
+            block_margins(th, b, content_w, &amt, &amb);
+            s.pending_gap = bf_collapse(s.prev_bottom, amt);
+            s.prev_bottom = amb;
+        }
         /* A line-opening replaced element carries no box of its own on the wire;
          * it lives in the box of the text that shares its line. */
         int rec_id = (line_mate > 0) ? rd_at(doc, line_mate)->block_id : b->block_id;
@@ -9147,6 +9247,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             /* A forced line break inside the same block: a new line, not a new
              * block -- its margins were collapsed where the block began. */
             flush_line(L, &s, th);
+        } else if (atom_first) {
+            /* settled above, before the icon's line opened */
         } else if (standalone || b->block_break) {
             flush_line(L, &s, th);
             /* Space before this block = its top margin collapsed with the previous
@@ -11421,6 +11523,39 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
      * nothing; folding the sentinel into the default grey drew a frame the author
      * had explicitly made invisible (`border:1px solid rgba(0,0,0,0)`). */
     if (uniform && bc[0] == CC_COLOR_TRANSPARENT) goto after_borders;
+    /* A ROUNDED box with some sides unbordered (`border-bottom:0`: a tab, a frame
+     * whose lower edge runs off the section) is still ONE ring, not four straight
+     * strokes: each present side is solid and they share a colour, the ring is the
+     * region between the outer rounded edge and the inner one, whose corner radius is
+     * the outer minus the adjacent border widths (CSS Backgrounds 3 5.2). The straight
+     * per-side path below squared the corners the radius had rounded. */
+    if (!uniform && rad > 0.0) {
+        int nz = 0, same = 1, solid = 1, first = -1;
+        for (int k = 0; k < 4; ++k) {
+            if (bw[k] <= 0.0) continue;
+            ++nz;
+            if (bs[k] != CSS_BST_SOLID) solid = 0;
+            if (first < 0) first = k;
+            else if (bc[k] != bc[first]) same = 0;
+        }
+        if (nz > 0 && nz < 4 && solid && same && bc[first] != CC_COLOR_TRANSPARENT) {
+            double inner_rc[4];
+            const double wa[4] = { bt > bl ? bt : bl, bt > br ? bt : br,
+                                   bb > br ? bb : br, bb > bl ? bb : bl };
+            for (int rk = 0; rk < 4; ++rk) {
+                double ir = radius_c[rk] - wa[rk];
+                inner_rc[rk] = ir > 0.0 ? ir : 0.0;
+            }
+            set_rgb(cr, rgb_from_packed(bc[first] >= 0 ? bc[first] : 0x333333));
+            cairo_new_path(cr);
+            box_path4(cr, x, y, w, h, radius_c);
+            box_path4(cr, x + bl, y + bt, w - bl - br, h - bt - bb, inner_rc);
+            cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
+            cairo_fill(cr);
+            cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
+            goto after_borders;
+        }
+    }
     if (uniform) {
         int style = bs[0];
         int col = bc[0] >= 0 ? bc[0] : 0x333333;

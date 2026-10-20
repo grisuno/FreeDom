@@ -1,14 +1,14 @@
 # include: page_view
 
-*Community 3 | 31 files | cohesion 0.48*
+*Community 4 | 21 files | cohesion 0.47*
 
 ## Definition
 
-This community groups 31 file(s) rooted at `include` with dominant language c (cohesion 0.48). Central symbols: `BLOCK`, `BLOCKED`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`. Core file: `src/page_view.c` (240 symbols).
+This community groups 21 file(s) rooted at `include` with dominant language c (cohesion 0.47). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (243 symbols).
 
 ## Files
 
-### `include` (10 files)
+### `include` (7 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -16,22 +16,11 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | `include/box_tree.h` | h | utility | 33 | no |
 | `include/dom_debug.h` | h | utility | 4 | no |
 | `include/flex_layout.h` | h | presentation | 43 | no |
-| `include/js_policy.h` | h | business_logic | 7 | no |
 | `include/page_view.h` | h | presentation | 87 | no |
-| `include/perf_trace.h` | h | utility | 17 | no |
+| `include/render_doc.h` | h | presentation | 27 | no |
+| `include/render_policy.h` | h | presentation | 9 | no |
 
-### `src` (10 files)
-
-| File | Language | Layer | Symbols | Doc |
-|------|----------|-------|---------|-----|
-| `src/box_style.c` | c | utility | 48 | no |
-| `src/box_tree.c` | c | utility | 24 | no |
-| `src/dom_debug.c` | c | utility | 24 | no |
-| `src/flex_layout.c` | c | presentation | 35 | no |
-| `src/freedom.c` | c | utility | 47 | no |
-| `src/js_policy.c` | c | business_logic | 6 | no |
-
-### `tests` (10 files)
+### `tests` (7 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -39,8 +28,19 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 | `tests/test_box_tree.c` | c | testing | 68 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 71 | no |
-| `tests/test_js_policy.c` | c | testing | 5 | no |
-| `tests/test_page_view.c` | c | testing | 207 | no |
+| `tests/test_page_view.c` | c | testing | 209 | no |
+| `tests/test_render_doc.c` | c | testing | 37 | no |
+
+### `src` (6 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `src/box_style.c` | c | utility | 48 | no |
+| `src/box_tree.c` | c | utility | 24 | no |
+| `src/dom_debug.c` | c | utility | 24 | no |
+| `src/flex_layout.c` | c | presentation | 35 | no |
+| `src/page_view.c` | c | presentation | 243 | no |
+| `src/render_doc.c` | c | presentation | 21 | no |
 
 ### `fuzz` (1 files)
 
@@ -48,7 +48,7 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 |------|----------|-------|---------|-----|
 | `fuzz/fuzz_dom_debug.c` | c | utility | 1 | no |
 
-*... and 11 more files in this community.*
+*... and 1 more files in this community.*
 
 
 ## Key Symbols
@@ -86,18 +86,16 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 58
-- Cross-boundary resolved imports (EXTRACTED): 63
+- Internal resolved imports (EXTRACTED): 43
+- Cross-boundary resolved imports (EXTRACTED): 48
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_css.c imports include/flex_layout.h.
-- [EXTRACTED] depends_on community 3 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.
-- [EXTRACTED] depends_on community 6 <-> 3 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/page_view.h.
-- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
-- [EXTRACTED] depends_on community 3 <-> 8 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
-- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/request_policy.h.
-- [EXTRACTED] depends_on community 3 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/secure_fetch.h.
+- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_css.c imports include/flex_layout.h.
+- [EXTRACTED] depends_on community 4 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.
+- [EXTRACTED] depends_on community 7 <-> 4 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/page_view.h.
+- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
 
 ## Risks
 
@@ -119,9 +117,9 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 
 ## Open Questions
 
-- Why do 31 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom_debug.c`)? What purpose do they serve?
+- Why do 21 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom_debug.c`)? What purpose do they serve?
 - What would break if the most connected file in include: page_view changed?
-- Should include: page_view be split, given cohesion 0.48?
+- Should include: page_view be split, given cohesion 0.47?
 
 ## Sources
 
@@ -130,19 +128,19 @@ This community groups 31 file(s) rooted at `include` with dominant language c (c
 - `include/box_tree.h`
 - `include/dom_debug.h`
 - `include/flex_layout.h`
-- `include/js_policy.h`
 - `include/page_view.h`
-- `include/perf_trace.h`
 - `include/render_doc.h`
 - `include/render_policy.h`
-- `include/webcaps.h`
 - `src/box_style.c`
 - `src/box_tree.c`
 - `src/dom_debug.c`
 - `src/flex_layout.c`
-- `src/freedom.c`
-- `src/js_policy.c`
 - `src/page_view.c`
-- `src/perf_trace.c`
 - `src/render_doc.c`
-- *... and 11 more*
+- `tests/test_box_style.c`
+- `tests/test_box_tree.c`
+- `tests/test_dom_debug.c`
+- `tests/test_flex_layout.c`
+- `tests/test_page_view.c`
+- `tests/test_render_doc.c`
+- *... and 1 more*

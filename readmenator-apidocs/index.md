@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 210 modules, 3282 documented entities, documentation coverage 39.8% (1299/3261 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 213 modules, 3309 documented entities, documentation coverage 39.7% (1304/3287 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (111), h (85), py (9), sh (5)
+Languages: c (112), h (86), py (10), sh (5)
 
 ## Modules
 
@@ -51,7 +51,7 @@ Languages: c (111), h (85), py (9), sh (5)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 195 | 32.8% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 197 | 32.5% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 5 | 4 | 50.0% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) |  | 0 | 6 | 85.7% |
 | [`gui/freedom_view.c`](modules/gui.freedom_view.c.md) |  | 0 | 2 | 0.0% |
@@ -140,6 +140,7 @@ Languages: c (111), h (85), py (9), sh (5)
 | [`include/webcaps.h`](modules/include.webcaps.h.md) |  | 4 | 0 | 80.0% |
 | [`include/webfont.h`](modules/include.webfont.h.md) |  | 3 | 13 | 17.6% |
 | [`include/webfont_load.h`](modules/include.webfont_load.h.md) |  | 1 | 5 | 14.3% |
+| [`include/wl_display.h`](modules/include.wl_display.h.md) |  | 0 | 5 | 33.3% |
 | [`include/ws_hub.h`](modules/include.ws_hub.h.md) |  | 1 | 13 | 73.3% |
 | [`include/zoom.h`](modules/include.zoom.h.md) |  | 0 | 9 | 60.0% |
 
@@ -203,7 +204,7 @@ Languages: c (111), h (85), py (9), sh (5)
 | [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 19 | 43.5% |
 | [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 10 | 33.3% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
-| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 273 | 1.8% |
+| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 281 | 1.8% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
@@ -230,6 +231,7 @@ Languages: c (111), h (85), py (9), sh (5)
 | [`src/webcaps.c`](modules/src.webcaps.c.md) |  | 0 | 4 | 0.0% |
 | [`src/webfont.c`](modules/src.webfont.c.md) |  | 0 | 6 | 0.0% |
 | [`src/webfont_load.c`](modules/src.webfont_load.c.md) |  | 4 | 4 | 55.6% |
+| [`src/wl_display.c`](modules/src.wl_display.c.md) |  | 0 | 7 | 25.0% |
 | [`src/ws_hub.c`](modules/src.ws_hub.c.md) |  | 5 | 14 | 70.0% |
 | [`src/zoom.c`](modules/src.zoom.c.md) |  | 0 | 7 | 75.0% |
 
@@ -247,3 +249,4 @@ Languages: c (111), h (85), py (9), sh (5)
 | [`tools.pngprof`](modules/tools.pngprof.py.md) | pngprof -- structural ink-profile dump for page screenshots. | 0 | 4 | 20.0% |
 | [`tools.prune`](modules/tools.prune.py.md) | prune -- cut a corpus page down to ONE subtree, keeping its whole ancestor chain. | 0 | 1 | 50.0% |
 | [`tools.snapshot`](modules/tools.snapshot.py.md) | Freeze a live page into one self-contained HTML file for `make parity`. | 0 | 4 | 40.0% |
+| [`tools.snapshot_age`](modules/tools.snapshot_age.py.md) | Report parity snapshots older than N days (stamped by tools/snapshot.py). | 0 | 1 | 50.0% |

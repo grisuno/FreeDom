@@ -3,6 +3,33 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `ref` | function | `src/webfont_load.c:167` | `* their ref (the register call copies what it keeps). */ if (!is_data) free(fbytes);` |
+| `scan_inline` | function | `src/webfont_load.c:178` | `static void scan_inline(const char *html, size_t len, const char *page_url,                      ...` |
+| `wf_cursor` | struct | `src/webfont_load.c:56` | `` |
+| `wf_key` | struct | `src/webfont_load.c:46` | `` |
+| `wf_load_document` | function | `src/webfont_load.c:229` | `int wf_load_document(wf_fetch_fn fetch, void *fctx, const char *page_url,                      co...` |
+| `WD_MAX_NAMES` | macro | `src/wl_display.c:10` | `#define WD_MAX_NAMES` |
+| `WD_NAME_MAX` | macro | `src/wl_display.c:11` | `#define WD_NAME_MAX` |
+| `WD_PREFIX` | macro | `src/wl_display.c:8` | `#define WD_PREFIX` |
+| `WD_PREFIX_LEN` | macro | `src/wl_display.c:9` | `#define WD_PREFIX_LEN` |
+| `_POSIX_C_SOURCE` | macro | `src/wl_display.c:1` | `#define _POSIX_C_SOURCE` |
+| `wd_index` | function | `src/wl_display.c:13` | `static int wd_index(const char *name, unsigned long *idx)` |
+| `wd_pick` | function | `src/wl_display.c:27` | `int wd_pick(const char *const *names, size_t n, char *out, size_t cap)` |
+| `wd_resolve_env` | function | `src/wl_display.c:42` | `int wd_resolve_env(void)` |
+| `WH_READS_PER_PUMP` | macro | `src/ws_hub.c:21` | `#define WH_READS_PER_PUMP` |
+| `WH_RECV_CHUNK` | macro | `src/ws_hub.c:22` | `#define WH_RECV_CHUNK` |
+| `_POSIX_C_SOURCE` | macro | `src/ws_hub.c:6` | `#define _POSIX_C_SOURCE` |
+| `conn_clear` | function | `src/ws_hub.c:98` | `static void conn_clear(wh_conn *c)` |
+| `dup_str` | function | `src/ws_hub.c:54` | `static char *dup_str(const char *s)` |
+| `fail_conn` | function | `src/ws_hub.c:258` | `static void fail_conn(wh_conn *c, int id, wh_emit_fn emit, void *ctx)` |
+| `find_id` | function | `src/ws_hub.c:104` | `static wh_conn *find_id(wh_hub *h, int id)` |
+| `find_token` | function | `src/ws_hub.c:110` | `static wh_conn *find_token(wh_hub *h, uint64_t token)` |
+| `job_free` | function | `src/ws_hub.c:63` | `static void job_free(wh_job *j)` |
+| `job_str` | function | `src/ws_hub.c:71` | `static int job_str(wh_job *j, size_t slot, const char **field)` |
+| `open_thread` | function | `src/ws_hub.c:79` | `static void *open_thread(void *arg)` |
+| `used` | type_alias | `src/ws_hub.c:23` | `typedef struct wh_conn { int used;` |
+| `wfd` | type_alias | `src/ws_hub.c:43` | `typedef struct wh_job { int wfd;` |
+| `wh_close` | function | `src/ws_hub.c:228` | `void wh_close(wh_hub *h, int id)` |
 | `wh_close_all` | function | `src/ws_hub.c:234` | `void wh_close_all(wh_hub *h)` |
 | `wh_conn` | struct | `src/ws_hub.c:24` | `` |
 | `wh_count` | function | `src/ws_hub.c:314` | `size_t wh_count(const wh_hub *h)` |
@@ -469,32 +496,5 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 | `test_media_range_syntax_applies` | function | `tests/test_css.c:1014` | `static void test_media_range_syntax_applies(void **state)` |
 | `test_media_screen_and_print` | function | `tests/test_css.c:2672` | `static void test_media_screen_and_print(void **state)` |
 | `test_media_width_queries` | function | `tests/test_css.c:2707` | `static void test_media_width_queries(void **state)` |
-| `test_not_unreadable_argument_fails_closed` | function | `tests/test_css.c:1845` | `static void test_not_unreadable_argument_fails_closed(void **state)` |
-| `test_not_with_pseudo_class` | function | `tests/test_css.c:1817` | `static void test_not_with_pseudo_class(void **state)` |
-| `test_opacity` | function | `tests/test_css.c:215` | `static void test_opacity(void **state)` |
-| `test_overflow` | function | `tests/test_css.c:3347` | `static void test_overflow(void **state)` |
-| `test_parse_null_args` | function | `tests/test_css.c:2756` | `static void test_parse_null_args(void **state)` |
-| `test_place_shorthands` | function | `tests/test_css.c:4913` | `static void test_place_shorthands(void **state)` |
-| `test_placeholder_pseudo_element` | function | `tests/test_css.c:3658` | `static void test_placeholder_pseudo_element(void **state)` |
-| `test_position_and_insets` | function | `tests/test_css.c:3275` | `static void test_position_and_insets(void **state)` |
-| `test_property_initial_value` | function | `tests/test_css.c:1364` | `static void test_property_initial_value(void **state)` |
-| `test_pseudo_content_attr_fallback` | function | `tests/test_css.c:2082` | `static void test_pseudo_content_attr_fallback(void **state)` |
-| `test_pseudo_content_attr_missing_is_empty` | function | `tests/test_css.c:2071` | `static void test_pseudo_content_attr_missing_is_empty(void **state)` |
-| `test_pseudo_content_attr_resolves` | function | `tests/test_css.c:2060` | `static void test_pseudo_content_attr_resolves(void **state)` |
-| `test_pseudo_content_before_after_separate` | function | `tests/test_css.c:1862` | `static void test_pseudo_content_before_after_separate(void **state)` |
-| `test_pseudo_content_decodes_escaped_char` | function | `tests/test_css.c:1899` | `static void test_pseudo_content_decodes_escaped_char(void **state)` |
-| `test_pseudo_content_decodes_hex_escape` | function | `tests/test_css.c:1876` | `static void test_pseudo_content_decodes_hex_escape(void **state)` |
-| `test_pseudo_content_empty_without_pseudo` | function | `tests/test_css.c:2139` | `static void test_pseudo_content_empty_without_pseudo(void **state)` |
-| `test_pseudo_content_escape_eats_terminator_space` | function | `tests/test_css.c:1888` | `static void test_pseudo_content_escape_eats_terminator_space(void **state)` |
-| `test_pseudo_content_escapes_fail_closed` | function | `tests/test_css.c:2004` | `static void test_pseudo_content_escapes_fail_closed(void **state)` |
-| `test_pseudo_content_none_parses_empty` | function | `tests/test_css.c:2035` | `static void test_pseudo_content_none_parses_empty(void **state)` |
-| `test_pseudo_does_not_claim_cascade_slot` | function | `tests/test_css.c:2213` | `static void test_pseudo_does_not_claim_cascade_slot(void **state)` |
-| `test_pseudo_element_style` | function | `tests/test_css.c:1267` | `static void test_pseudo_element_style(void **state)` |
-| `test_pseudo_empty` | function | `tests/test_css.c:2314` | `static void test_pseudo_empty(void **state)` |
-| `test_pseudo_geometry_does_not_leak_to_element` | function | `tests/test_css.c:2157` | `static void test_pseudo_geometry_does_not_leak_to_element(void **state)` |
-| `test_pseudo_lang` | function | `tests/test_css.c:2351` | `static void test_pseudo_lang(void **state)` |
-| `test_pseudo_link` | function | `tests/test_css.c:1622` | `static void test_pseudo_link(void **state)` |
-| `test_pseudo_never_match_keeps_group` | function | `tests/test_css.c:1640` | `static void test_pseudo_never_match_keeps_group(void **state)` |
-| `test_pseudo_nth_child` | function | `tests/test_css.c:1698` | `static void test_pseudo_nth_child(void **state)` |
 
 Next: [SYMBOLS_p11.md](SYMBOLS_p11.md)

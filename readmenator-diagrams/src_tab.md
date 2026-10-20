@@ -1,6 +1,6 @@
-# src
+# src: tab
 
-src groups 61 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document.
+src: tab groups 57 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document.
 
 ```mermaid
 graph LR
@@ -19,19 +19,19 @@ graph LR
 
 ## fuzz (1.1)
 
-fuzz groups 8 files (c) around ensure_built, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput, fz_dom_parent, FUZZ_JSDOM_MAX_NODES.
+fuzz groups 7 files (c) around ensure_built, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput, fz_dom_parent, FUZZ_JSDOM_MAX_NODES.
 
 ## include (1.2)
 
-include groups 16 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
+include groups 15 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
 
 ## src (1.3)
 
-src groups 24 files (c, h) around FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install, FREEDOM_JS_DOM_EXT_H, jdx_install, FREEDOM_JS_DOM_INTERNAL_H. to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
+src groups 23 files (c, h) around FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install, FREEDOM_JS_DOM_EXT_H, jdx_install, FREEDOM_JS_DOM_INTERNAL_H. to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
 
 ## tests (1.4)
 
-tests groups 13 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_null_args. setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] =...
+tests groups 12 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_null_args. setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] =...
 
 **Files**:
 
@@ -41,7 +41,6 @@ tests groups 13 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_n
 - fuzz/fuzz_js_dom.c
 - fuzz/fuzz_js_geom.c
 - fuzz/fuzz_js_sandbox.c
-- fuzz/fuzz_url.c
 - fuzz/fuzz_web_storage.c
 - include/dom.h
 - include/freebug.h
@@ -52,7 +51,6 @@ tests groups 13 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_n
 - include/js_location.h
 - include/js_sandbox.h
 - include/js_trusted.h
-- include/link_nav.h
 - include/os_sandbox.h
 - include/renderer.h
 - include/tab.h
@@ -77,7 +75,6 @@ tests groups 13 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_n
 - src/js_location_internal.h
 - src/js_sandbox.c
 - src/js_trusted.c
-- src/link_nav.c
 - src/os_sandbox.c
 - src/renderer.c
 - src/tab.c
@@ -90,7 +87,6 @@ tests groups 13 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_n
 - tests/test_js_env.c
 - tests/test_js_geom.c
 - tests/test_js_sandbox.c
-- tests/test_link_nav.c
 - tests/test_os_sandbox.c
 - tests/test_renderer.c
 - tests/test_tab.c

@@ -83,6 +83,20 @@ Previous: [KB_src_p8.md](KB_src_p8.md)
   - `WF_DATA_URL_MAX` (macro, line 91) `#define WF_DATA_URL_MAX`
 - Depends on: `include/data_url.h`, `include/text_shape.h`, `include/url.h`, `include/webfont.h`, `include/webfont_load.h`
 
+## src/wl_display.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `wd_index` (function, line 13) `static int wd_index(const char *name, unsigned long *idx)`
+  - `wd_pick` (function, line 27) `int wd_pick(const char *const *names, size_t n, char *out, size_t cap)`
+  - `wd_resolve_env` (function, line 42) `int wd_resolve_env(void)`
+  - `_POSIX_C_SOURCE` (macro, line 1) `#define _POSIX_C_SOURCE`
+  - `WD_PREFIX` (macro, line 8) `#define WD_PREFIX`
+  - `WD_PREFIX_LEN` (macro, line 9) `#define WD_PREFIX_LEN`
+  - `WD_MAX_NAMES` (macro, line 10) `#define WD_MAX_NAMES`
+  - `WD_NAME_MAX` (macro, line 11) `#define WD_NAME_MAX`
+- Depends on: `include/wl_display.h`
+
 ## src/ws_hub.c
 - Doc: wh_job: One open, owned by its thread until handed over through the pipe.
 - Layer: utility

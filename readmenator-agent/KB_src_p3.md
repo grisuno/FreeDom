@@ -210,12 +210,12 @@ int cg_expand_bg_imag...`
   - `ct_interp_textdeco_style` (function, line 171) `int ct_interp_textdeco_style(const char *v)`
   - `ct_interp_textdeco_thickness` (function, line 182) `int ct_interp_textdeco_thickness(const char *v)`
   - `ct_interp_aspect_ratio` (function, line 194) `int ct_interp_aspect_ratio(const char *v, int *num, int *den)`
-  - `ct_interp_direction` (function, line 227) `int ct_interp_direction(const char *v)`
-  - `ct_liststyle_kw` (function, line 233) `static int ct_liststyle_kw(const char *t)`
-  - `ct_liststyle_unknown_name` (function, line 254) `static int ct_liststyle_unknown_name(const char *t)`
-  - `ct_interp_liststyle` (function, line 265) `int ct_interp_liststyle(const char *v)`
-  - `ct_emit_spacing` (function, line 300) `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
-  - `ct_expand_shadow` (function, line 313) `int ct_expand_shadow(const char *val, css_decl *dst, int cap)`
+  - `ct_interp_direction` (function, line 236) `int ct_interp_direction(const char *v)`
+  - `ct_liststyle_kw` (function, line 242) `static int ct_liststyle_kw(const char *t)`
+  - `ct_liststyle_unknown_name` (function, line 263) `static int ct_liststyle_unknown_name(const char *t)`
+  - `ct_interp_liststyle` (function, line 274) `int ct_interp_liststyle(const char *v)`
+  - `ct_emit_spacing` (function, line 309) `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
+  - `ct_expand_shadow` (function, line 322) `int ct_expand_shadow(const char *val, css_decl *dst, int cap)`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`
 
 ## src/css_values.c

@@ -53,6 +53,23 @@ static void test_aspect_ratio(void **state)
     assert_int_equal(den, 0);
 }
 
+/* A large ratio (video sizes, `1206/684`) must keep its SHAPE: clamping each half
+ * to CSS_LEN_MAX independently turned every ratio over 100:1000 into 1:1, so a media
+ * frame came out square. Spaces around the slash are legal (CSS Images 3 aspect-ratio). */
+static void test_aspect_ratio_large_keeps_shape(void **state)
+{
+    (void)state;
+    int num = 0, den = 0;
+    assert_int_equal(ct_interp_aspect_ratio("1206/684", &num, &den), 1);
+    assert_true(num > 0 && den > 0);
+    assert_true(num > den);
+    double r = (double)num / (double)den;
+    assert_true(r > 1.762 && r < 1.764);
+    assert_int_equal(ct_interp_aspect_ratio("1920 / 1080", &num, &den), 1);
+    r = (double)num / (double)den;
+    assert_true(r > 1.776 && r < 1.778);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -61,6 +78,7 @@ int main(void)
         cmocka_unit_test(test_whitespace_direction),
         cmocka_unit_test(test_shadow_needs_both_offsets),
         cmocka_unit_test(test_aspect_ratio),
+        cmocka_unit_test(test_aspect_ratio_large_keeps_shape),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

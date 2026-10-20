@@ -5,6 +5,7 @@ Both engines must render the SAME document offline (spec/parity.md), so every
 same-site <link rel=stylesheet> is fetched once and inlined as <style>, and
 scripts are dropped: parity runs JS off on both sides. Nothing else is fetched.
 """
+import datetime
 import re
 import sys
 import urllib.parse
@@ -73,8 +74,9 @@ def main():
     html = fetch(url)
     html = re.sub(r'<script\b[^>]*>.*?</script>', '', html, flags=re.I | re.S)
     html = inline_css(html, url)
+    stamp = "<!-- freedom-snapshot url=%s date=%s -->\n" % (url, datetime.date.today().isoformat())
     with open(out, "w", encoding="utf-8") as f:
-        f.write(html)
+        f.write(stamp + html)
 
 
 if __name__ == "__main__":

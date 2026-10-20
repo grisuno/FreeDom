@@ -113,9 +113,16 @@
 - Layer: utility
 - Language: py
 - Symbols:
-  - `fetch` (function, line 17) `def fetch(url)`
-  - `expand_imports` (function, line 31) `def expand_imports(css, base, depth)`
-  - `inline_css` (function, line 48) `def inline_css(html, base)`
-  - `main` (function, line 69) `def main()`
-  - `repl` (function, line 34) `def repl(m)`
-  - `repl` (function, line 49) `def repl(m)`
+  - `fetch` (function, line 18) `def fetch(url)`
+  - `expand_imports` (function, line 32) `def expand_imports(css, base, depth)`
+  - `inline_css` (function, line 49) `def inline_css(html, base)`
+  - `main` (function, line 70) `def main()`
+  - `repl` (function, line 35) `def repl(m)`
+  - `repl` (function, line 50) `def repl(m)`
+
+## tools/snapshot_age.py
+- Doc: Report parity snapshots older than N days (stamped by tools/snapshot.py).
+- Layer: utility
+- Language: py
+- Symbols:
+  - `main` (function, line 16) `def main()`

@@ -1,14 +1,14 @@
-# src
+# src: tab
 
-*Community 0 | 61 files | cohesion 0.74*
+*Community 0 | 57 files | cohesion 0.73*
 
 ## Definition
 
-This community groups 61 file(s) rooted at `src` with dominant language c (cohesion 0.74). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (189 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
+This community groups 57 file(s) rooted at `src` with dominant language c (cohesion 0.73). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (189 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
 
 ## Files
 
-### `src` (24 files)
+### `src` (23 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -18,7 +18,7 @@ This community groups 61 file(s) rooted at `src` with dominant language c (cohes
 | `src/js_custom_elements.c` | c | utility | 1 | no |
 | `src/js_custom_elements.h` | h | utility | 2 | yes |
 
-### `include` (16 files)
+### `include` (15 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -28,7 +28,7 @@ This community groups 61 file(s) rooted at `src` with dominant language c (cohes
 | `include/js_dom.h` | h | utility | 18 | no |
 | `include/js_env.h` | h | infrastructure | 3 | no |
 
-### `tests` (13 files)
+### `tests` (12 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -38,7 +38,7 @@ This community groups 61 file(s) rooted at `src` with dominant language c (cohes
 | `tests/test_js_dom.c` | c | testing | 189 | no |
 | `tests/test_js_env.c` | c | testing | 26 | no |
 
-### `fuzz` (8 files)
+### `fuzz` (7 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -48,7 +48,7 @@ This community groups 61 file(s) rooted at `src` with dominant language c (cohes
 | `fuzz/fuzz_js_dom.c` | c | utility | 3 | no |
 | `fuzz/fuzz_js_geom.c` | c | utility | 3 | no |
 
-*... and 41 more files in this community.*
+*... and 37 more files in this community.*
 
 
 ## Key Symbols
@@ -67,8 +67,6 @@ This community groups 61 file(s) rooted at `src` with dominant language c (cohes
 - `fz_resolve` (function, `fuzz/fuzz_js_sandbox.c:23`) `static int fz_resolve(void *host, const char *base, const char *spec, char *out,`
 - `fz_fetch` (function, `fuzz/fuzz_js_sandbox.c:33`) `static char *fz_fetch(void *host, const char *url, size_t *len)`
 - `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_js_sandbox.c:48`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-- `check_split` (function, `fuzz/fuzz_url.c:31`) `static void check_split(const char *url)`
-- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_url.c:59`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 - `FREEDOM_DOM_H` (macro, `include/dom.h:2`) `#define FREEDOM_DOM_H`
 - `dom_status` (enum, `include/dom.h:26`)
 - `dom_node_id` (type_alias, `include/dom.h:34`) `typedef uint32_t dom_node_id;` - tree. The Lexbor backend stays encapsulated: no lxb_* type appears here.  The index references the t
@@ -83,19 +81,22 @@ This community groups 61 file(s) rooted at `src` with dominant language c (cohes
 - `dom_precedes` (function, `include/dom.h:104`) `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);` - Nearest element at or above node matching the selector list, or DOM_NODE_NONE * (Element.closest). d
 - `dom_tag_name` (function, `include/dom.h:118`) `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);` - int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b); /* Node at the given document-
 - `dom_get_attribute` (function, `include/dom.h:121`) `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char` - dom_node_id dom_node_at(const dom_index *idx, size_t position); /* --- navigation (element-only; DOM
+- `dom_attribute_names` (function, `include/dom.h:128`) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **` - Qualified names of node's attributes, in document order, written to names[] (borrowed, valid while i
+- `dom_text_content` (function, `include/dom.h:133`) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len` - Concatenated text content of node's subtree (borrowed, valid while idx/doc are * alive), or NULL. *l
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 132
-- Cross-boundary resolved imports (EXTRACTED): 46
+- Internal resolved imports (EXTRACTED): 126
+- Cross-boundary resolved imports (EXTRACTED): 47
 
 ## Connections
 
-- [EXTRACTED] depends_on community 3 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.
-- [EXTRACTED] depends_on community 6 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/html_parse.h.
-- [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
-- [EXTRACTED] depends_on community 5 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
-- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
+- [EXTRACTED] depends_on community 4 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.
+- [EXTRACTED] depends_on community 7 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/html_parse.h.
+- [EXTRACTED] depends_on community 3 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_url.c imports include/url.h.
+- [EXTRACTED] depends_on community 2 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
+- [EXTRACTED] depends_on community 6 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
+- [EXTRACTED] depends_on community 0 <-> 1 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
 
 ## Risks
 
@@ -105,10 +106,10 @@ This community groups 61 file(s) rooted at `src` with dominant language c (cohes
 
 ## Open Questions
 
-- Why do 56 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom.c`)? What purpose do they serve?
+- Why do 52 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom.c`)? What purpose do they serve?
 - Can the cycle `include/js_dom.h` -> `include/js_location.h` be broken with an interface?
-- What would break if the most connected file in src changed?
-- Should src be split, given cohesion 0.74?
+- What would break if the most connected file in src: tab changed?
+- Should src: tab be split, given cohesion 0.73?
 
 ## Sources
 
@@ -118,7 +119,6 @@ This community groups 61 file(s) rooted at `src` with dominant language c (cohes
 - `fuzz/fuzz_js_dom.c`
 - `fuzz/fuzz_js_geom.c`
 - `fuzz/fuzz_js_sandbox.c`
-- `fuzz/fuzz_url.c`
 - `fuzz/fuzz_web_storage.c`
 - `include/dom.h`
 - `include/freebug.h`
@@ -129,7 +129,8 @@ This community groups 61 file(s) rooted at `src` with dominant language c (cohes
 - `include/js_location.h`
 - `include/js_sandbox.h`
 - `include/js_trusted.h`
-- `include/link_nav.h`
 - `include/os_sandbox.h`
 - `include/renderer.h`
-- *... and 41 more*
+- `include/tab.h`
+- `include/url.h`
+- *... and 37 more*

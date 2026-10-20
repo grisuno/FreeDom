@@ -237,6 +237,8 @@ static void run_init_common(pv_run *r) {
     r->float_ml = 0;
     r->float_ml_pct = 0;
     r->float_box = -1;
+    r->float_ow = 0;
+    r->float_ow_pct = 0;
     r->float_mr = 0;
     r->float_mr_pct = 0;
     r->float_oid = -1;
@@ -745,11 +747,14 @@ void pv_set_cont_item(pv_view *v, int cont_item) {
     v->runs[v->count - 1].cont_item = cont_item;
 }
 
-void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box) {
+void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box,
+                    int float_ow, int float_ow_pct) {
     if (v == NULL || v->count == 0) return;
     v->runs[v->count - 1].float_w = float_w;
     v->runs[v->count - 1].float_w_pct = float_w_pct;
     v->runs[v->count - 1].float_box = float_box;
+    v->runs[v->count - 1].float_ow = float_ow;
+    v->runs[v->count - 1].float_ow_pct = float_ow_pct;
 }
 
 void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
@@ -1273,6 +1278,7 @@ typedef struct pv_cont_info {
     int float_ml, float_ml_pct, float_mr, float_mr_pct;
     int float_w, float_w_pct;   /* the founder's own declared width (pv_run.float_w) */
     int float_box;              /* the founder's own box id (pv_run.float_box), -1 none */
+    int float_ow, float_ow_pct; /* the OUTERMOST founder's own width halves (pv_run.float_ow) */
     /* The OUTERMOST float founder (spec/float.md §7d.1): the last (highest)
      * floated self-or-ancestor block on this run's chain. float_oid is its
      * group id (-1 = the nearest IS the outermost: single-level float, the
@@ -1819,7 +1825,7 @@ static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *
                  cont->float_oid, cont->float_oside,
                  cont->float_oml, cont->float_oml_pct,
                  cont->float_omr, cont->float_omr_pct);
-    pv_set_float_w(v, cont->float_w, cont->float_w_pct, cont->float_box);
+    pv_set_float_w(v, cont->float_w, cont->float_w_pct, cont->float_box, cont->float_ow, cont->float_ow_pct);
     pv_set_box(v, box->l, box->r, box->w, box->center, box->mt, box->mb);
     pv_set_ua_tag(v, box->ua);
     pv_set_box_pct(v, box->w_pct, box->l_pct, box->r_pct, box->mt_pct, box->mb_pct);
@@ -3090,19 +3096,63 @@ static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *b
     return 0;
 }
 
-static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
-                                   pv_style_cache *cache) {
+/* A plain wrapper: a generic container with no decoration and no size of its own, so
+ * it adds nothing to its parent's geometry (a `<div>` around an absolute <video>). */
+static int is_plain_wrapper(const lxb_dom_node_t *c, const css_style *cs) {
+    switch (lxb_dom_node_tag_id((lxb_dom_node_t *)c)) {
+        case LXB_TAG_DIV: case LXB_TAG_SPAN: case LXB_TAG_SECTION: case LXB_TAG_ARTICLE:
+        case LXB_TAG_HEADER: case LXB_TAG_FOOTER: case LXB_TAG_ASIDE: case LXB_TAG_FIGURE:
+            break;
+        default:
+            return 0;
+    }
+    return !css_has_boxdeco(cs) && cs->height <= 0 && cs->min_height <= 0 && cs->width <= 0 &&
+           cs->aspect_num <= 0;
+}
+
+static int element_is_content_leaf_d(const lxb_dom_node_t *n, const css_sheet *sheet,
+                                     pv_style_cache *cache, int depth) {
     for (const lxb_dom_node_t *c = n->first_child; c != NULL; c = c->next) {
         if (c->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *ce = lxb_dom_interface_element((lxb_dom_node_t *)c);
             css_style ccs = cached_element_style(ce, sheet, cache);
             if (ccs.display == CSS_DISP_NONE) continue;
             if (ccs.position == CSS_POS_ABSOLUTE || ccs.position == CSS_POS_FIXED) continue;
+            /* Out-of-flow content is not content of the box: a wrapper holding only
+             * such children contributes nothing either, so the frame around it is as
+             * empty as if the wrapper were not there (CSS 2.1 9.3.1: the box exists
+             * whatever its content). */
+            if (depth < PV_TEXTLESS_DEPTH_MAX && is_plain_wrapper(c, &ccs) &&
+                element_is_content_leaf_d(c, sheet, cache, depth + 1))
+                continue;
             return 0;
         }
         if (c->type == LXB_DOM_NODE_TYPE_TEXT && !text_node_is_blank(c)) return 0;
     }
     return 1;
+}
+
+/* Whether a <video>/<audio> names anything to play: its own `src`, or a <source> child
+ * with one. A source-less element has no frame to show but still has its CSS BOX (a
+ * `background-color` placeholder, a radius, a declared size), exactly like any empty
+ * decorated element -- so it must reach the empty-box path instead of vanishing. */
+static int media_has_source(const lxb_dom_node_t *n) {
+    size_t sl = 0;
+    lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)n);
+    if (lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &sl) != NULL && sl > 0)
+        return 1;
+    for (const lxb_dom_node_t *ch = n->first_child; ch != NULL; ch = ch->next) {
+        if (ch->type != LXB_DOM_NODE_TYPE_ELEMENT || node_tag(ch) != LXB_TAG_SOURCE) continue;
+        lxb_dom_element_t *sel = lxb_dom_interface_element((lxb_dom_node_t *)ch);
+        if (lxb_dom_element_get_attribute(sel, (const lxb_char_t *)"src", 3, &sl) != NULL && sl > 0)
+            return 1;
+    }
+    return 0;
+}
+
+static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
+                                   pv_style_cache *cache) {
+    return element_is_content_leaf_d(n, sheet, cache, 0);
 }
 
 /* Nonzero when cell (a td/th) is a WALKED cell of a FLOW table (defined after the
@@ -3142,6 +3192,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->float_ml = 0; cont->float_ml_pct = 0;
     cont->float_mr = 0; cont->float_mr_pct = 0;
     cont->float_w = 0; cont->float_w_pct = 0; cont->float_box = -1;
+    cont->float_ow = 0; cont->float_ow_pct = 0;
     cont->float_oid = -1; cont->float_oside = 0;
     cont->float_oml = 0; cont->float_oml_pct = 0;
     cont->float_omr = 0; cont->float_omr_pct = 0;
@@ -3168,7 +3219,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     box->mw = 0; box->mw_pct = 0;
     pv_text_ext_reset(ext);
     *block_id_out = -1;
-    int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
+    int got_link = 0, got_block = 0, got_heading = 0, heading_in_atom = 0, got_color = 0, got_bg = 0, got_cont = 0;
     int color_inherits = 0;   /* an element on the walk said `color:inherit|currentColor` */
     int got_align = 0, got_fs = 0, got_lh = 0, got_deco = 0, got_hbox = 0, got_boxdeco = 0;
     /* The text-align the run's anonymous inline-block row inherits (see below). */
@@ -3286,7 +3337,24 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             int heading_here = 0;
             if (!got_heading) {
                 int lv = heading_level(t);
-                if (lv) { *heading = lv; got_heading = 1; heading_here = 1; }
+                if (lv) {
+                    *heading = lv; got_heading = 1; heading_here = 1;
+                    /* The run's block is a strict descendant of the heading (a
+                     * `display:block` link inside `h2{margin:0}`): the flat run model
+                     * folds the heading's box into the run, so the heading's DECLARED
+                     * margin must ride along or the UA heading margin fills the gap
+                     * the author zeroed. Undeclared stays UA; the block's own wins. */
+                    if (got_block && *block != p) {
+                        if (box->mt == PV_LEN_UNSET && box->mt_pct == 0) {
+                            box->mt = (cs.margin_top != CSS_LEN_UNSET) ? cs.margin_top : PV_LEN_UNSET;
+                            box->mt_pct = cs.pct[CSS_PCT_MARGIN_TOP];
+                        }
+                        if (box->mb == PV_LEN_UNSET && box->mb_pct == 0) {
+                            box->mb = (cs.margin_bottom != CSS_LEN_UNSET) ? cs.margin_bottom : PV_LEN_UNSET;
+                            box->mb_pct = cs.pct[CSS_PCT_MARGIN_BOTTOM];
+                        }
+                    }
+                }
             }
             /* A block INSIDE an inline-block that sits in a mixed line is internal
              * to that atom (CSS 2.1 9.2.2): the line belongs to the block around the
@@ -3295,8 +3363,13 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * into three lines. (v1: a multi-block inline-block inside a sentence
              * flattens into the line.) */
             if (got_block && *block != p && cs.display == CSS_DISP_INLINE_BLOCK &&
-                !is_out_of_flow(&cs) && in_mixed_line(p, sheet, style_cache))
+                !is_out_of_flow(&cs) && in_mixed_line(p, sheet, style_cache)) {
                 got_block = 0;
+                /* A heading seen on the way up lives INSIDE this atom: its margin is the
+                 * atom's own (laid out by the item), not the margin of the block found
+                 * above, which the UA heading margin would otherwise leak into. */
+                if (got_heading) heading_in_atom = 1;
+            }
             int block_set_here = (!got_block && causes_block_break(t, cs.display));
             if (block_set_here) {
                 *block = p; got_block = 1;
@@ -3305,7 +3378,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                  * A table row has NO margins in real CSS (margins do not apply to
                  * table-row boxes): default it to 0 explicitly, or the painter
                  * spaces every row a full paragraph apart (4x-tall tables). */
-                int row_zero = (t == LXB_TAG_TR) ? 0 : PV_LEN_UNSET;
+                int row_zero = (t == LXB_TAG_TR ||
+                                (heading_in_atom && ua_tag_of(t) == BX_UA_NONE)) ? 0 : PV_LEN_UNSET;
                 box->mt = (cs.margin_top != CSS_LEN_UNSET) ? cs.margin_top : row_zero;
                 box->mb = (cs.margin_bottom != CSS_LEN_UNSET) ? cs.margin_bottom : row_zero;
                 /* The percentage half of the same two margins. It resolves against
@@ -3353,6 +3427,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 if (cs.margin_right != CSS_LEN_UNSET && cs.margin_right != CSS_LEN_AUTO)
                     cont->float_omr = cs.margin_right;
                 cont->float_omr_pct = cs.pct[CSS_PCT_MARGIN_RIGHT];
+                cont->float_ow = (cs.width > 0 && !CSS_LEN_IS_INTRINSIC(cs.width)) ? cs.width : 0;
+                cont->float_ow_pct = (cs.pct[CSS_PCT_WIDTH] > 0) ? cs.pct[CSS_PCT_WIDTH] : 0;
                 if (!got_float) {
                     cont->float_side = cs.float_side;
                     cont->float_id = container_id(float_reg, p);
@@ -3826,6 +3902,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
         cont->float_oside = 0;
         cont->float_oml = 0; cont->float_oml_pct = 0;
         cont->float_omr = 0; cont->float_omr_pct = 0;
+        cont->float_ow = 0; cont->float_ow_pct = 0;
     }
 
     /* The walk ended with relative font-sizes and no absolute anchor: the product
@@ -4968,7 +5045,7 @@ static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
                          cont->float_oid, cont->float_oside,
                          cont->float_oml, cont->float_oml_pct,
                          cont->float_omr, cont->float_omr_pct);
-    pv_set_float_w(v, cont->float_w, cont->float_w_pct, cont->float_box);
+    pv_set_float_w(v, cont->float_w, cont->float_w_pct, cont->float_box, cont->float_ow, cont->float_ow_pct);
     if (ext != NULL) pv_set_text_ext(v, ext);
 }
 
@@ -5373,7 +5450,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          cu_cont.float_oid, cu_cont.float_oside,
                          cu_cont.float_oml, cu_cont.float_oml_pct,
                          cu_cont.float_omr, cu_cont.float_omr_pct);
-                pv_set_float_w(v, cu_cont.float_w, cu_cont.float_w_pct, cu_cont.float_box);
+                pv_set_float_w(v, cu_cont.float_w, cu_cont.float_w_pct, cu_cont.float_box, cu_cont.float_ow, cu_cont.float_ow_pct);
                 /* The cell's own box (`td { border: 1px solid; padding: 5px }`).
                  * resolve_context registered it, but the id was resolved and then
                  * dropped, so the cell's border/padding/background never reached the
@@ -5483,7 +5560,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          ictl_cont.float_oid, ictl_cont.float_oside,
                          ictl_cont.float_oml, ictl_cont.float_oml_pct,
                          ictl_cont.float_omr, ictl_cont.float_omr_pct);
-                pv_set_float_w(v, ictl_cont.float_w, ictl_cont.float_w_pct, ictl_cont.float_box);
+                pv_set_float_w(v, ictl_cont.float_w, ictl_cont.float_w_pct, ictl_cont.float_box, ictl_cont.float_ow, ictl_cont.float_ow_pct);
                 /* The resolved inherited text extensions ride the input run too:
                  * caret_color tints the caret of the focused control (2026-07-10). */
                 pv_set_text_ext(v, &ctl_ext);
@@ -5888,7 +5965,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_emphasis(v, unused_bold > 0, unused_italic > 0);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 pv_set_oof(v, img_oof);
-            } else if ((t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO)
+            } else if ((t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO) && media_has_source(n)
                        && !in_skipped_subtree(n, base, js_enabled)
                        && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                        && !(reader && in_boilerplate_subtree(n, base))) {
@@ -6206,7 +6283,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          econt.float_oid, econt.float_oside,
                          econt.float_oml, econt.float_oml_pct,
                          econt.float_omr, econt.float_omr_pct);
-                    pv_set_float_w(v, econt.float_w, econt.float_w_pct, econt.float_box);
+                    pv_set_float_w(v, econt.float_w, econt.float_w_pct, econt.float_box, econt.float_ow, econt.float_ow_pct);
                     pv_set_box(v, ebox.l, ebox.r, ebox.w, ebox.center, ebox.mt, ebox.mb);
                     pv_set_ua_tag(v, ebox.ua);
                     pv_set_box_pct(v, ebox.w_pct, ebox.l_pct, ebox.r_pct,
@@ -6529,7 +6606,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                          cont.float_oid, cont.float_oside,
                          cont.float_oml, cont.float_oml_pct,
                          cont.float_omr, cont.float_omr_pct);
-                pv_set_float_w(v, cont.float_w, cont.float_w_pct, cont.float_box);
+                pv_set_float_w(v, cont.float_w, cont.float_w_pct, cont.float_box, cont.float_ow, cont.float_ow_pct);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
                 pv_set_ua_tag(v, box.ua);
                 pv_set_box_pct(v, box.w_pct, box.l_pct, box.r_pct,

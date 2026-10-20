@@ -2082,3 +2082,18 @@ como `unknown` también; aceptarlas sería inventar), y `-ms-flex-direction`/
   descartaba en silencio el `content` de los íconos de slashdot (~350 reglas) y
   `grid-template-areas` en github/youtube.
 - **`justify-self`** y la mitad justify de `place-self` (`P_JUSTIFY_SELF`).
+
+## Tanda 51 — `aspect-ratio` grande y borde redondeado parcial
+
+- `aspect-ratio: 1206/684` (o `1920 / 1080`) conserva su FORMA: antes cada mitad se acotaba a
+  `CSS_LEN_MAX` por separado y todo cociente > 100:1000 salía 1:1 (marco cuadrado). Ambas
+  mitades comparten una escala; los espacios alrededor de `/` son válidos. Test
+  `test_aspect_ratio_large_keeps_shape`.
+- `aspect-ratio` dimensiona la altura de una caja `auto` desde su ancho usado (CSS Sizing 4
+  §5.1; content-box salvo `box-sizing:border-box`) en `close_top_box`, donde el contenido ya
+  no puede decidirla (un marco cuyo único hijo es un `<video>` absoluto). El contenido más alto
+  gana (`min-height:auto`).
+- Un borde con radio y SOLO algunos lados con ancho (`border-bottom:0`: pestañas, marcos que
+  siguen fuera de la sección) es UN anillo entre el borde exterior redondeado y el interior
+  (radio exterior menos los anchos adyacentes, CSS Backgrounds 3 §5.2), no cuatro trazos
+  rectos: solo estilo `solid` y color común; el resto conserva el camino por lado.
