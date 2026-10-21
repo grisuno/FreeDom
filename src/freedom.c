@@ -485,7 +485,13 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
         if (g_hosts != NULL && rp_host_of(url, h2, sizeof h2) == 0)
             host_allowed = hb_is_allowlisted(g_hosts, h2);
     }
-    int relaxed = host_allowed || g_headless_js;
+    int page_allowed = 0;
+    {
+        char ph[512];
+        if (g_hosts != NULL && base != NULL && rp_host_of(base, ph, sizeof ph) == 0)
+            page_allowed = hb_is_allowlisted(g_hosts, ph);
+    }
+    int relaxed = host_allowed || page_allowed || g_headless_js;
     sf_status s = is_post
         ? sf_post_navigable(url, &cfg, body, body_len, "application/x-www-form-urlencoded",
                             &resp, NULL, relaxed)

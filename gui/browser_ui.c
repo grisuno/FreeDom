@@ -1442,7 +1442,10 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
      * fonts -- gets the allowlist's relaxed strength (owner decision 2026-09-30:
      * third parties of a trusted host load, hostblock still applies). Authenticity is
      * never relaxed: the certificate is verified either way. */
-    int relaxed = allowlisted || page_trusted(w);
+    /* A page the user put on allow.conf also gets its own subresources (a CSS CDN with an
+     * RSA-2048 leaf) at the relaxed strength: without it the page loads unstyled while
+     * the user's explicit sovereignty choice says to show it. Authenticity is untouched. */
+    int relaxed = allowlisted || page_trusted(w) || page_host_allowlisted(w);
     /* Subrequests to a double-trust + user-flag host share the page's TLS-blend identity. */
     cfg.impersonate = ti_should_impersonate(allowlisted,
         hb_is_allowlisted(w->js_hosts, host), w->impersonate_optin);
@@ -8146,6 +8149,18 @@ static int defer_split(rc_defer *d, const rd_doc *doc, size_t start, size_t end,
             const rd_block *bk = rd_at(doc, k);
             if (bk->float_id < 0 && !block_leaves_flow(doc, bk)) earlier = 1;
         }
+        /* A founder whose own margin is negative on its leading side (the holy-grail
+         * rail, `margin-left:-320px` on a float that follows the main column in the same
+         * band) is built to sit beside content that came before it, even when that content
+         * is a float of the same band rather than earlier in-flow text. */
+        if (all_complete) {
+            for (size_t k = start; k < end && !earlier; ++k) {
+                const rd_block *bk = rd_at(doc, k);
+                if (block_leaves_flow(doc, bk) || bk->float_oid >= 0) continue;
+                if ((bk->float_ml < 0 && bk->float_ml > -100000) ||
+                    (bk->float_mr < 0 && bk->float_mr > -100000)) earlier = 1;
+            }
+        }
         if (all_complete && !earlier) return -1;
     }
     /* Bounds before touching the map (atomic: all or inline). */
@@ -8426,6 +8441,7 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
              * newly set ones into place with the column's rows and boxes. */
             char coof_had[BT_MAX_POSITIONED];
             memcpy(coof_had, L->oof_static_set, sizeof coof_had);
+            int col_fbx = -1;
             for (int r = 0; r < dc->nr; ++r) {
                 /* The range's common box (not _shared: si starts empty, so
                  * there is no open stack to keep — _shared would answer -1
@@ -8461,6 +8477,7 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                     if (fbx >= 0 && (size_t)fbx < rd_box_count(doc)) {
                         si.col_founder_set = 1;
                         si.col_founder_box = fbx;
+                        col_fbx = fbx;
                     }
                 }
                 if (bbox >= 0)
@@ -8493,6 +8510,17 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
             for (size_t bb = sbx; bb < L->nbox; ++bb) {
                 double bx2 = L->boxes[bb].top + L->boxes[bb].h;
                 if (bx2 > col_h) col_h = bx2;
+            }
+            /* A float is a block formatting context: its own box contains the floats
+             * nested in it, so a founder box (`overflow:hidden` clips to it) reaches
+             * the column's real bottom, not the zero its in-flow content left. */
+            if (col_fbx >= 0 && (size_t)col_fbx < rd_box_count(doc) &&
+                ov_box_clips(rd_box_at(doc, (size_t)col_fbx))) {
+                for (size_t bb = sbx; bb < L->nbox; ++bb) {
+                    if (L->boxes[bb].block_id != col_fbx) continue;
+                    double need = col_h - L->boxes[bb].top;
+                    if (L->boxes[bb].h < 1.0 && need > L->boxes[bb].h) L->boxes[bb].h = need;
+                }
             }
             for (size_t rr = sr; rr < L->nrow; ++rr) {
                 L->rows[rr].top += top;
@@ -9266,6 +9294,20 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             {
                 int nkeys = defer_split(&df, doc, i, j, douter, dnouter);
                 if (nkeys > 0) {
+                    /* The band's wrapper boxes (a white page panel, a padded container)
+                     * exist even though its columns lay out later: open them now, or a
+                     * page whose first band is the pull-up one loses its background. */
+                    {
+                        int shared = band_shared_box(doc, &s, i, j);
+                        int founder = 0;
+                        for (size_t fk = i; fk < j && !founder; ++fk) {
+                            const rd_block *fb = rd_at(doc, fk);
+                            if (shared >= 0 && (fb->float_box == shared || fb->float_obox == shared))
+                                founder = 1;
+                        }
+                        if (!founder)
+                            reconcile_boxes(cr, w, L, &s, th, doc, content_w, shared, i);
+                    }
                     i = j - 1;  /* the loop's ++i moves past the band */
                     continue;
                 }

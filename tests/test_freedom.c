@@ -2324,6 +2324,46 @@ static void test_dump_layout_oof_subtree_real_layout(void **state) {
 }
 
 
+/* Holy-grail rail whose first content is a float: `.rail{float:left;margin-left:-320px;
+ * overflow:hidden}` beside a full-width float main column. The rail's rows sit at the right
+ * (x 667), not stacked under the stories, and its overflow box reaches its nested float so
+ * the clip does not hide it (slashdot with JS on, tanda 53). */
+static void test_dump_layout_rail_with_nested_float_sits_beside(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;background:#ccc}"
+        ".c{width:974px;margin:0 auto;background:#fff}"
+        ".m,.r{float:left}.m{width:100%}.mc{margin-right:320px}"
+        ".r{width:320px;margin-left:-320px;overflow:hidden;position:relative}"
+        "article{height:300px;background:#cde}"
+        "</style></head><body><div class=\"c\"><div class=\"m\"><div class=\"mc\">"
+        "<article>one</article><article>two</article></div></div>"
+        "<aside class=\"r\"><h2 style=\"float:left;width:100%\">Deals</h2><p>ad</p></aside>"
+        "</div></body></html>";
+    const char *path = "__freedom_rail.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    char args[256];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --dump-layout %s", path) < sizeof args);
+    assert_int_equal(run_freedom(args, out, sizeof out, &rc), 0);
+    int beside = 0;
+    for (char *q = strstr(out, "row["); q != NULL; q = strstr(q + 1, "row[")) {
+        double top, h, xo, w;
+        if (sscanf(q, "row[%*d] top=%lf h=%lf x_off=%lf w=%lf", &top, &h, &xo, &w) == 4
+            && xo == 667.0 && w == 320.0 && top < 200.0)
+            beside = 1;
+    }
+    assert_true(beside);
+    /* the white page panel is still a box spanning the page */
+    assert_non_null(strstr(out, "w=974.0"));
+    unlink(path);
+}
+
 /* A flex item with no box of its own whose children are SIBLING boxes keeps both:
  * the first child is not "the item's box" (tanda 40). */
 static void test_dump_layout_flex_item_sibling_boxes(void **state) {
@@ -3992,6 +4032,7 @@ static void test_dump_layout_grid_justify_self(void **state) {
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_dump_layout_grid_justify_self),
+        cmocka_unit_test(test_dump_layout_rail_with_nested_float_sits_beside),
         cmocka_unit_test(test_dump_layout_ua_margin_scales_with_font_size),
         cmocka_unit_test(test_download_png_text_color_alpha_blends),
         cmocka_unit_test(test_dump_layout_flex_item_contains_block_margins),
