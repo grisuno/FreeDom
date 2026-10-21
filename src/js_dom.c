@@ -1285,6 +1285,13 @@ static const char JD_MODERN_SHIM[] =
     "    var a=(g.document&&g.document.createElement)?g.document.createElement('audio'):{};"
     "    if(src!==undefined&&a&&a.setAttribute) a.setAttribute('src',String(src));"
     "    return a; };"
+    /* new Image(w, h): an <img> element with the optional width/height attributes
+     * (HTML 4.8.4.1.1). Creating it never fetches. */
+    "  if(typeof g.Image==='undefined') g.Image=function(w,h){"
+    "    var i=(g.document&&g.document.createElement)?g.document.createElement('img'):{};"
+    "    if(w!==undefined&&i&&i.setAttribute) i.setAttribute('width',String(w));"
+    "    if(h!==undefined&&i&&i.setAttribute) i.setAttribute('height',String(h));"
+    "    return i; };"
     /* matchMedia evaluates for real (2026-07-19) against the normalized
      * 1920x1080 desktop identity (the same one innerWidth and the CSS viewport
      * units use). Identity signals are ALWAYS normalized: light color scheme,
