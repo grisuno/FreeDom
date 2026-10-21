@@ -3928,6 +3928,26 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         else return 0;
         dst[0].prop = P_ANIM_DIR; dst[0].ival = iv; return 1;
     }
+    else if (strcmp(prop, "clip-path") == 0) {
+        /* A basic-shape or url() clip-path makes the element a STACKING CONTEXT (CSS Masking 1
+         * 3), which is all the engine honours of it: the clip itself is not painted. Carried by
+         * the isolation channel (same effect on paint order, no new wire field), so a
+         * negative-z glow inside `.hero{clip-path:inset(0)}` stays above the hero's own
+         * background instead of sinking under the whole page. */
+        const char *v = val;
+        while (*v == ' ') ++v;
+        if (strncmp(v, "inset(", 6) == 0 || strncmp(v, "circle(", 7) == 0 ||
+            strncmp(v, "ellipse(", 8) == 0 || strncmp(v, "polygon(", 8) == 0 ||
+            strncmp(v, "path(", 5) == 0 || strncmp(v, "url(", 4) == 0) {
+            dst[0].prop = P_ISOLATION; dst[0].ival = CSS_ISO_ISOLATE; return 1;
+        }
+        /* `none` and the legacy `rect()` idiom of visually-hidden text clip nothing the
+         * engine models; accepted (not a parser drop) without touching the channel. */
+        if (strncmp(v, "none", 4) == 0 || strncmp(v, "rect(", 5) == 0) {
+            dst[0].prop = P_ISOLATION; dst[0].ival = 0; return 1;
+        }
+        return 0;
+    }
     else if (strcmp(prop, "animation-fill-mode") == 0) {
         char first[CSS_TOK_MAX];
         first_comma_item(val, first, sizeof first);

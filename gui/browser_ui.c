@@ -11428,7 +11428,7 @@ static ui_rgb grad_stop(const int *cols, int nst, int k, double *alpha) {
  * hard edge. */
 static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
                                 double t, double *alpha) {
-    double p[4];
+    double p[4] = { 0.0, 0.0, 0.0, 0.0 };
     if (nst > 4) nst = 4;
     for (int k = 0; k < nst; ++k) {
         p[k] = (pos1000 != NULL && pos1000[k] >= 0)
@@ -11536,6 +11536,82 @@ static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img
     cairo_restore(cr);
 }
 
+/* Fills (x,y,w,h) with the box's gradient (conic, radial or linear), clipped to the rounded
+ * path. The one painter for both the whole box and a single background-size tile. */
+static void paint_gradient_fill(cairo_t *cr, const rc_box *bx, double x, double y,
+                                double w, double h, const double radius_c[4], double rad) {
+        if (bx->grad_radial == 2) {
+        /* conic-gradient (2026-07-19): pie-sector fan around the center. */
+        bui_paint_conic(cr, x, y, w, h, rad, bx->grad_angle,
+                        bx->grad_c, bx->grad_pos, bx->grad_n);
+    } else if (bx->grad_radial == 1) {
+        /* Radial gradient (CSS Images 3 3.2): shape, size and position from the box's
+         * own geometry (cg_radial_geometry, pure and tested). Cairo's radial pattern is
+         * a circle, so an ellipse is the unit circle under a scale. */
+        cg_radial rg = { bx->rad_size / 16, bx->rad_size % 16, bx->rad_rx, bx->rad_ry,
+                         bx->rad_cx, bx->rad_cy };
+        double rcx, rcy, rrx, rry;
+        cg_radial_geometry(&rg, w, h, &rcx, &rcy, &rrx, &rry);
+        cairo_pattern_t *pat = cairo_pattern_create_radial(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+        cairo_matrix_t pm;
+        cairo_matrix_init(&pm, 1.0 / rrx, 0.0, 0.0, 1.0 / rry,
+                          -(x + rcx) / rrx, -(y + rcy) / rry);
+        cairo_pattern_set_matrix(pat, &pm);
+        cairo_pattern_set_extend(pat, CAIRO_EXTEND_PAD);
+        int nst = bx->grad_n <= 4 ? bx->grad_n : 4;
+        for (int k = 0; k < nst; ++k) {
+            double sa;
+            ui_rgb sc = grad_stop(bx->grad_c, nst, k, &sa);
+            double pos = (bx->grad_pos[k] >= 0) ? (double)bx->grad_pos[k] / 1000.0
+                                                 : (double)k / (double)(nst - 1);
+            cairo_pattern_add_color_stop_rgba(pat, pos, sc.r, sc.g, sc.b, sa);
+        }
+        cairo_set_source(cr, pat);
+        box_path4(cr, x, y, w, h, radius_c);
+        cairo_fill(cr);
+        cairo_pattern_destroy(pat);
+    } else {
+        cairo_pattern_t *pat = bui_linear_grad(x, y, w, h, bx->grad_angle,
+                                               bx->grad_c, bx->grad_pos,
+                                               bx->grad_n, 1.0);
+        cairo_set_source(cr, pat);
+        box_path4(cr, x, y, w, h, radius_c);
+        cairo_fill(cr);
+        cairo_pattern_destroy(pat);
+    }
+}
+
+/* A gradient with an explicit px background-size repeats as a tile (`radial-gradient(circle,
+ * #8a8a934d .8px, #0000 1.1px) 0 0/4px 4px`, the dot-grid idiom). The tile is painted once
+ * into its own surface and tiled over the box; position is the tile origin at the box's
+ * top-left, the initial value. */
+static void paint_gradient_tiled(cairo_t *cr, const rc_box *bx, double x, double y,
+                                 double w, double h, const double radius_c[4], double rad) {
+    double tw = (double)bx->bg_size_w, th = (double)bx->bg_size_h;
+    if (bx->bg_size_w_pct != 0) tw = w * (double)bx->bg_size_w_pct / 1000.0;
+    if (bx->bg_size_h_pct != 0) th = h * (double)bx->bg_size_h_pct / 1000.0;
+    int tiled = bx->bg_repeat != CSS_BGR_NO_REPEAT && tw >= 1.0 && th >= 1.0
+             && tw <= w && th <= h && (tw < w || th < h)
+             && bx->bg_size != CSS_BGS_COVER && bx->bg_size != CSS_BGS_CONTAIN
+             && (w / tw) * (h / th) <= 4.0e6;
+    if (!tiled) { paint_gradient_fill(cr, bx, x, y, w, h, radius_c, rad); return; }
+    cairo_surface_t *tile = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, (int)ceil(tw), (int)ceil(th));
+    cairo_t *tc = cairo_create(tile);
+    static const double zero4[4] = { 0.0, 0.0, 0.0, 0.0 };
+    paint_gradient_fill(tc, bx, 0.0, 0.0, tw, th, zero4, 0.0);
+    cairo_destroy(tc);
+    cairo_pattern_t *pat = cairo_pattern_create_for_surface(tile);
+    cairo_pattern_set_extend(pat, CAIRO_EXTEND_REPEAT);
+    cairo_matrix_t m;
+    cairo_matrix_init_translate(&m, -x, -y);
+    cairo_pattern_set_matrix(pat, &m);
+    cairo_set_source(cr, pat);
+    box_path4(cr, x, y, w, h, radius_c);
+    cairo_fill(cr);
+    cairo_pattern_destroy(pat);
+    cairo_surface_destroy(tile);
+}
+
 static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
                                  const ui_bg_image *bgimg, const ui_bg_image *bgimg2,
                                  const ui_theme *th) {
@@ -11579,45 +11655,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
      * center along the CSS angle (0 = to top, 90 = to right), long enough that the
      * first/last stops land on the box corners; stops paint evenly spaced. */
     if (bx->grad_n >= 2) {
-        if (bx->grad_radial == 2) {
-            /* conic-gradient (2026-07-19): pie-sector fan around the center. */
-            bui_paint_conic(cr, x, y, w, h, rad, bx->grad_angle,
-                            bx->grad_c, bx->grad_pos, bx->grad_n);
-        } else if (bx->grad_radial == 1) {
-            /* Radial gradient (CSS Images 3 3.2): shape, size and position from the box's
-             * own geometry (cg_radial_geometry, pure and tested). Cairo's radial pattern is
-             * a circle, so an ellipse is the unit circle under a scale. */
-            cg_radial rg = { bx->rad_size / 16, bx->rad_size % 16, bx->rad_rx, bx->rad_ry,
-                             bx->rad_cx, bx->rad_cy };
-            double rcx, rcy, rrx, rry;
-            cg_radial_geometry(&rg, w, h, &rcx, &rcy, &rrx, &rry);
-            cairo_pattern_t *pat = cairo_pattern_create_radial(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-            cairo_matrix_t pm;
-            cairo_matrix_init(&pm, 1.0 / rrx, 0.0, 0.0, 1.0 / rry,
-                              -(x + rcx) / rrx, -(y + rcy) / rry);
-            cairo_pattern_set_matrix(pat, &pm);
-            cairo_pattern_set_extend(pat, CAIRO_EXTEND_PAD);
-            int nst = bx->grad_n <= 4 ? bx->grad_n : 4;
-            for (int k = 0; k < nst; ++k) {
-                double sa;
-                ui_rgb sc = grad_stop(bx->grad_c, nst, k, &sa);
-                double pos = (bx->grad_pos[k] >= 0) ? (double)bx->grad_pos[k] / 1000.0
-                                                     : (double)k / (double)(nst - 1);
-                cairo_pattern_add_color_stop_rgba(pat, pos, sc.r, sc.g, sc.b, sa);
-            }
-            cairo_set_source(cr, pat);
-            box_path4(cr, x, y, w, h, radius_c);
-            cairo_fill(cr);
-            cairo_pattern_destroy(pat);
-        } else {
-            cairo_pattern_t *pat = bui_linear_grad(x, y, w, h, bx->grad_angle,
-                                                   bx->grad_c, bx->grad_pos,
-                                                   bx->grad_n, 1.0);
-            cairo_set_source(cr, pat);
-            box_path4(cr, x, y, w, h, radius_c);
-            cairo_fill(cr);
-            cairo_pattern_destroy(pat);
-        }
+        paint_gradient_tiled(cr, bx, x, y, w, h, radius_c, rad);
     } else if (bx->bg_rgb >= 0 && !(bx->canvas_bg && bx->canvas_done)) {
         /* Background alpha (2026-07-19): an rgba()/hsla() panel paints
          * translucent so the backdrop (or its backdrop-filter blur) shows
@@ -13258,6 +13296,27 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
  * box_transform_matrix (M1.2 translate; M1.2b scale/rotate) shifts where
  * decoration/content PAINT -- the box's stored rect used for hit-testing is
  * untouched, see include/page_view.h. */
+/* The stacking-context box that OWNS a negative-z positioned box: the nearest ancestor box
+ * that forms a context (CSS 2.1 App E: a negative z-index paints in ITS context, just above
+ * that context's background, not under the whole page). -1 = the root context, painted by
+ * the global negative pass. Fail-open: an owner that has no box in the layout is not one. */
+static int negz_owner_box(const browser_window *w, const rc_layout *L, const bt_positioned *pb) {
+    const pv_box_def *def = rd_box_at(w->doc, pb->box_index);
+    if (def == NULL) return -1;
+    int bid = def->parent_id;
+    for (int guard = 0; bid >= 0 && guard < 256; ++guard) {
+        const pv_box_def *d = rd_box_at(w->doc, (size_t)bid);
+        if (d == NULL) return -1;
+        if (box_forms_stacking_context(d)) {
+            for (size_t i = 0; i < L->nbox; ++i)
+                if (L->boxes[i].block_id == bid) return bid;
+            return -1;
+        }
+        bid = d->parent_id;
+    }
+    return -1;
+}
+
 /* Stage 2f: paints one out-of-flow subtree's own layout at its translation. The
  * anchor's decoration is painted flat (the caller already opened its stacking
  * group and transform); every other box keeps its own stacking behaviour, exactly
@@ -13516,6 +13575,21 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     if (needs_group) bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, &bx, left, origin,
                                                 &(bui_mask_ctx){ L, w->doc });
     if (clip_saved) cairo_restore(cr);
+}
+
+/* Paints the negative-z positioned boxes owned by stacking-context box `owner`, right after
+ * that box's own decoration and before its in-flow descendants (see negz_owner_box). */
+static void paint_owned_negz(cairo_t *cr, browser_window *w, rc_layout *L, double left,
+                             double origin, double content_top, double content_h,
+                             double page_w, int owner) {
+    int ov_stack[OV_MAX_DEPTH] = {0};
+    int ov_depth = 0;
+    for (size_t i = 0; i < L->npositioned && L->positioned[i].z_index < 0; ++i) {
+        if (negz_owner_box(w, L, &L->positioned[i]) != owner) continue;
+        paint_positioned_one(cr, w, &w->theme, &L->positioned[i], left, origin,
+                             content_top, content_h, page_w, ov_stack, &ov_depth, L);
+    }
+    while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
 }
 
 /* R6: recursively paints child boxes of `parent_id` that form stacking
@@ -13783,6 +13857,8 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
                                        (double)w->width, content_top, content_h,
                                        1, row_done);
             if (box_done != NULL) box_done[i] = 1;
+            paint_owned_negz(cr, w, Lp, left, origin, content_top, content_h,
+                             (double)w->width, bid);
             paint_nested_children(cr, w, Lp, bid, left, origin, content_w,
                                   content_top, content_h, box_done, row_done);
             bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
@@ -13915,6 +13991,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         int neg_ov_stack[OV_MAX_DEPTH] = {0};
         int neg_ov_depth = 0;
         for (size_t i = 0; i < L.npositioned && L.positioned[i].z_index < 0; ++i) {
+            if (negz_owner_box(w, &L, &L.positioned[i]) >= 0) continue;
             paint_positioned_one(cr, w, th, &L.positioned[i], left, origin,
                                  content_top, content_h, (double)w->width,
                                  neg_ov_stack, &neg_ov_depth, &L);
@@ -14157,6 +14234,13 @@ static void paint_png_inflow(const png_flow_ctx *c, int only_root) {
         paint_box_and_direct_rows(cr, w, L, &L->boxes[bi], c->left, c->margin,
                                   c->content_w, PNG_PAGE_W, c->no_cull_top, c->no_cull_h,
                                   0, row_done);
+        {
+            const pv_box_def *sd = (L->boxes[bi].block_id >= 0)
+                ? rd_box_at(w->doc, (size_t)L->boxes[bi].block_id) : NULL;
+            if (sd != NULL && box_forms_stacking_context(sd))
+                paint_owned_negz(cr, w, L, c->left, c->margin, c->no_cull_top, c->no_cull_h,
+                                 PNG_PAGE_W, L->boxes[bi].block_id);
+        }
     }
     for (int pass = ROW_PAINT_BAND; pass <= ROW_PAINT_CONTENT; ++pass) {
         int ov_stack[OV_MAX_DEPTH] = {0};
@@ -14261,6 +14345,7 @@ static long write_doc_png(browser_window *w, const char *path) {
         int neg_ov_stack[OV_MAX_DEPTH] = {0};
         int neg_ov_depth = 0;
         for (size_t i = 0; i < L.npositioned && L.positioned[i].z_index < 0; ++i) {
+            if (negz_owner_box(w, &L, &L.positioned[i]) >= 0) continue;
             paint_positioned_one(cr, w, th, &L.positioned[i], png_left, png_margin,
                                  no_cull_top, no_cull_h, PNG_PAGE_W,
                                  neg_ov_stack, &neg_ov_depth, &L);

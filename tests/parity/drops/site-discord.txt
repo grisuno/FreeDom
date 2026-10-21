@@ -1,5 +1,5 @@
 Discord - Group Chat That’s All Fun & Games
-CSS drops: 1994 declaration(s) dropped, 65 distinct
+CSS drops: 1993 declaration(s) dropped, 64 distinct
   count  cause         property                     first value
     695  unknown-prop  grid-column-gap              16px
     650  unknown-prop  grid-row-gap                 16px
@@ -21,28 +21,27 @@ CSS drops: 1994 declaration(s) dropped, 65 distinct
       9  bad-value     background-color             hsl(235,calc(1*86.1%),71.8%)
       7  unknown-prop  -webkit-box-direction        normal
       6  bad-value     transition-property          height
+      5  unknown-prop  -webkit-tap-highlight-color  #0000
+      5  bad-value     -webkit-text-fill-color      inherit
       5  bad-value     -webkit-transform            translate3d(0, -10px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0)
       5  bad-value     -moz-transform               translate3d(0, -10px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0)
       5  bad-value     -ms-transform                translate3d(0, -10px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0)
-      5  unknown-prop  -webkit-tap-highlight-color  #0000
-      5  bad-value     -webkit-text-fill-color      inherit
       5  bad-value     stroke                       hsl(235,calc(1*85.6%),64.7%)
       4  unknown-prop  tap-highlight-color          #0000
-      3  unknown-prop  grid-auto-rows               minmax(auto,420px)
       3  unknown-prop  perspective                  1000px
       3  unknown-prop  -moz-osx-font-smoothing      grayscale
+      3  unknown-prop  grid-auto-rows               minmax(auto,420px)
       2  bad-value     justify-content              stretch
+      2  bad-value     background-attachment        scroll,scroll
       2  unknown-prop  -webkit-box-flex             1
       2  bad-value     -webkit-transition-property  background-color,color,-webkit-box-shadow
       2  bad-value     -webkit-animation-delay      -.9s
       2  bad-value     animation-delay              -.9s
-      2  bad-value     background-attachment        scroll,scroll
       2  unknown-prop  font-smoothing               antialiased
-      1  bad-value     filter                       grayscale()brightness(10000%)
-      1  unknown-prop  -ms-text-size-adjust         100%
-      1  unknown-prop  clip-path                    none
-      1  unknown-prop  position-anchor              none
-      1  unknown-prop  translate                    none
+      1  unknown-prop  scale                        none
+      1  bad-value     grid-auto-flow               dense
+      1  bad-value     transition                   background-color,all .4s
+      1  unknown-prop  rotate                       none
       1  unknown-prop  @custom-media --xxs-and-up (min-width 480px)
       1  unknown-prop  @custom-media --xs-and-up (min-width 640px)
       1  unknown-prop  @custom-media --sm-and-up (min-width 768px)
@@ -51,18 +50,18 @@ CSS drops: 1994 declaration(s) dropped, 65 distinct
       1  unknown-prop  @custom-media --xl-and-up (min-width 1536px)
       1  unknown-prop  @custom-media --xxl-and-up (min-width 1800px)
       1  unknown-prop  @custom-media --max-and-up (min-width 2500px)
-      1  unknown-prop  rotate                       none
-      1  unknown-prop  scale                        none
-      1  bad-value     transition                   background-color,all .4s
-      1  bad-value     grid-auto-flow               dense
-      1  unknown-prop  all                          inherit
+      1  bad-value     filter                       grayscale()brightness(10000%)
       1  unknown-prop  -webkit-overflow-scrolling   touch
+      1  unknown-prop  -ms-text-size-adjust         100%
+      1  unknown-prop  -webkit-text-size-adjust     100%
+      1  unknown-prop  speak                        none
+      1  unknown-prop  position-anchor              none
       1  unknown-prop  stroke-dasharray             1,200
       1  unknown-prop  stroke-dashoffset            0
       1  unknown-prop  stroke-miterlimit            10
       1  unknown-prop  stroke-linecap               round
-      1  unknown-prop  -webkit-text-size-adjust     100%
+      1  unknown-prop  translate                    none
       1  bad-value     background                   -webkit-gradient(linear,left top,left bottom,from(transparent),color-stop(130%,#1f1d5d))
-      1  unknown-prop  speak                        none
+      1  unknown-prop  all                          inherit
       1  unknown-prop  -webkit-touch-callout        none
       1  unknown-prop  -khtml-user-select           none

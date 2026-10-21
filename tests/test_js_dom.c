@@ -2013,7 +2013,7 @@ static void test_interfaces_window_and_canvas(void **state) {
               "function,function,function,function,function,function,function,function,function,function,function");
     EXPECT(f, "[window instanceof Window, Object.create(CDATASection.prototype) instanceof Text,"
               " Object.create(DocumentType.prototype) instanceof Node, typeof Image].join(',')",
-              "true,true,true,function");
+              "true,true,true,undefined");
     EXPECT(f, "var c=document.createElement('canvas'), x=document.createElementNS('http://www.w3.org/1999/xhtml','canvas');"
               "[typeof c.getContext('2d'), c.getContext('webgl'), typeof x.getContext('2d').fillRect,"
               " typeof document.createElement('div').getContext, c.width, c.height].join(',')",

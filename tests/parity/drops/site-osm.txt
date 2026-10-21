@@ -1,5 +1,5 @@
 OpenStreetMap
-CSS drops: 58 declaration(s) dropped, 37 distinct
+CSS drops: 57 declaration(s) dropped, 36 distinct
   count  cause         property                     first value
       7  unknown-prop  text-underline-offset        .25em
       4  unknown-prop  -webkit-tap-highlight-color  rgba(0,0,0,0)
@@ -24,7 +24,6 @@ CSS drops: 58 declaration(s) dropped, 37 distinct
       1  unknown-prop  -webkit-text-size-adjust     100%
       1  unknown-prop  -webkit-font-smoothing       antialiased
       1  unknown-prop  -moz-osx-font-smoothing      grayscale
-      1  unknown-prop  clip-path                    inset(10%)
       1  unknown-prop  grid-auto-columns            minmax(1em, 1fr)
       1  unknown-prop  grid-auto-rows               minmax(1em, 1fr)
       1  unknown-prop  page-break-after             always

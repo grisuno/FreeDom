@@ -1,5 +1,5 @@
 YouTube
-CSS drops: 5477 declaration(s) dropped, 94 distinct
+CSS drops: 5469 declaration(s) dropped, 93 distinct
   count  cause         property                     first value
    2207  unknown-prop  -moz-box-direction           normal
    1483  bad-value     display                      box
@@ -19,7 +19,6 @@ CSS drops: 5477 declaration(s) dropped, 94 distinct
      10  unknown-prop  -ms-overflow-style           none
      10  unknown-prop  -moz-box-ordinal-group       2
       9  bad-value     -moz-box-pack                left
-      8  unknown-prop  clip-path                    inset(-20px -20px 0 -20px)
       7  unknown-prop  -webkit-box-flex             1
       7  bad-value     justify-content              left
       7  bad-value     animation-timing-function    cubic-bezier(.4,0,.2,1)

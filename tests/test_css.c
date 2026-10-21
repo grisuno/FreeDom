@@ -4372,6 +4372,17 @@ static void test_inline_bg_clip_origin_attachment(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).bg_attachment, CSS_BGA_UNSET);
 }
 
+/* A basic-shape clip-path makes the element a stacking context (CSS Masking 1 3); the engine
+ * carries that through the isolation channel. `none` and the legacy visually-hidden rect()
+ * clip nothing and leave the channel unset. */
+static void test_inline_clip_path_forms_stacking_context(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("clip-path:inset(0)", 0).isolation, CSS_ISO_ISOLATE);
+    assert_int_equal(css_parse_inline("clip-path: circle(50%)", 0).isolation, CSS_ISO_ISOLATE);
+    assert_int_equal(css_parse_inline("clip-path:none", 0).isolation, CSS_ISO_UNSET);
+    assert_int_equal(css_parse_inline("clip-path:rect(0 0 0 0)", 0).isolation, CSS_ISO_UNSET);
+}
+
 static void test_inline_isolation(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("isolation:auto", 0).isolation, CSS_ISO_AUTO);
@@ -5897,6 +5908,7 @@ int main(void) {
         cmocka_unit_test(test_inline_bg_size),
         cmocka_unit_test(test_inline_bg_clip_origin_attachment),
         cmocka_unit_test(test_inline_isolation),
+        cmocka_unit_test(test_inline_clip_path_forms_stacking_context),
         cmocka_unit_test(test_inline_contain),
         cmocka_unit_test(test_inline_content_visibility),
         cmocka_unit_test(test_inline_image_rendering),

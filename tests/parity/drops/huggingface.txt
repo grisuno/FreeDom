@@ -1,5 +1,5 @@
 Hugging Face – The AI community building the future.
-CSS drops: 413 declaration(s) dropped, 65 distinct
+CSS drops: 411 declaration(s) dropped, 64 distinct
   count  cause         property                     first value
      69  unknown-prop  translate                    0 0
      33  bad-value     filter                       initial initial initial initial initial initial initial initial initial
@@ -24,19 +24,18 @@ CSS drops: 413 declaration(s) dropped, 65 distinct
       4  bad-value     z-index                      calc(1 * -1)
       3  bad-value     border-top-width             calc(1px * 0)
       3  bad-value     border-bottom-width          calc(1px * calc(1 - 0))
-      3  unknown-prop  scroll-snap-align            center
-      3  unknown-prop  font-feature-settings        normal
       3  unknown-prop  font-variation-settings      normal
+      3  unknown-prop  font-feature-settings        normal
+      3  unknown-prop  scroll-snap-align            center
       2  unknown-prop  container                    header/inline-size
-      2  unknown-prop  -ms-overflow-style           none
       2  bad-value     outline                      1px solid buttontext
       2  bad-value     border-inline-start-width    calc(1px * 0)
       2  bad-value     border-inline-end-width      calc(1px * calc(1 - 0))
-      2  unknown-prop  clip-path                    inset(50%)
+      2  unknown-prop  scroll-padding-inline        calc(.25rem * 4)
       2  unknown-prop  overscroll-behavior-x        contain
       2  bad-value     -webkit-mask-image           linear-gradient(#0000,#000 1rem calc(100% - 1rem),#0000)
       2  bad-value     mask-image                   linear-gradient(#0000,#000 1rem calc(100% - 1rem),#0000)
-      2  unknown-prop  scroll-padding-inline        calc(.25rem * 4)
+      2  unknown-prop  -ms-overflow-style           none
       2  bad-value     border-color                 inherit
       2  unknown-prop  font-variant-numeric         initial initial initial initial initial
       2  bad-value     -webkit-mask                 radial-gradient(6px at 13px 5px,#0000 98%,#000)
@@ -53,16 +52,16 @@ CSS drops: 413 declaration(s) dropped, 65 distinct
       1  unknown-prop  contain-intrinsic-size       auto 150px
       1  unknown-prop  overflow-clip-margin         3rem
       1  bad-value     background                   linear-gradient(45.4deg,#f700591a 0%,#52ff001a 22.65%,#1400ff13 46.82%,#ff00001a 67.96%,#ffe...
-      1  bad-value     list-style-type              "•"
+      1  unknown-prop  break-inside                 avoid
       1  bad-value     mask                         radial-gradient(farthest-side,#0000 calc(100% - 2px),#000 calc(100% - 1px))
-      1  unknown-prop  scroll-snap-type             x proximity
+      1  bad-value     list-style-type              "•"
       1  bad-value     background-position          0 0,10px 10px
       1  unknown-prop  container-type               inline-size
-      1  unknown-prop  break-inside                 avoid
       1  unknown-prop  -webkit-text-size-adjust     100%
       1  unknown-prop  scroll-padding-right         calc(.25rem * 12)
       1  unknown-prop  scrollbar-gutter             stable
       1  bad-value     touch-action                 initial initial initial
+      1  unknown-prop  scroll-snap-type             x proximity
       1  unknown-prop  -webkit-tap-highlight-color  transparent
       1  unknown-prop  will-change                  transform
       1  unknown-prop  scroll-snap-stop             always

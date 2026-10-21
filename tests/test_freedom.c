@@ -363,6 +363,46 @@ static void test_pre_leading_spaces_indent_ink(void **state) {
     unlink(png);
 }
 
+/* A negative-z generated box paints inside its OWN stacking context, just above that
+ * context's background -- not under the whole page. `section{clip-path:inset(0)}` forms a
+ * context (CSS Masking 1 3), so the red ::before at z-index:-2 shows over the section's navy
+ * background (the GitHub hero glow, tanda 53). */
+static void test_download_png_negz_paints_above_owner_background(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;background:#000}"
+        "section{clip-path:inset(0);background:#000240;position:relative;height:120px}"
+        ".h{position:relative;height:100px;margin:10px}"
+        ".h:before{content:\"\";position:absolute;top:0;left:0;width:100%;height:100%;"
+        "z-index:-2;background:#f00}"
+        "</style></head><body><section><div class=\"h\"><p>x</p></div></section>"
+        "<div style=\"height:900px\"></div></body></html>";
+    const char *path = "__freedom_negz.html";
+    const char *png = "__freedom_negz.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    fwrite(html, 1, strlen(html), f);
+    fclose(f);
+    char args[512];
+    snprintf(args, sizeof args, "--author-css --download-png=%s %s", png, path);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    FILE *pf = fopen(png, "rb");
+    assert_non_null(pf);
+    static unsigned char buf[1 << 20];
+    size_t n = fread(buf, 1, sizeof buf, pf);
+    fclose(pf);
+    img_pixels px = {0};
+    assert_int_equal(img_decode(buf, n, &px), IMG_OK);
+    const uint32_t *line = (const uint32_t *)(px.data + (size_t)90 * px.stride);
+    uint32_t c = line[500];
+    assert_true(((c >> 16) & 0xFFu) > 0xC0u);   /* red shows over the navy section */
+    img_pixels_free(&px);
+    unlink(path);
+    unlink(png);
+}
+
 /* Renders `html` with author CSS to a PNG and returns the leftmost bright pixel
  * inside the dark (#333) box that spans x=300, over the middle half of its rows.
  * -1 when no such box or no text. Helper for the nested-box padding test. */
@@ -4033,6 +4073,7 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_dump_layout_grid_justify_self),
         cmocka_unit_test(test_dump_layout_rail_with_nested_float_sits_beside),
+        cmocka_unit_test(test_download_png_negz_paints_above_owner_background),
         cmocka_unit_test(test_dump_layout_ua_margin_scales_with_font_size),
         cmocka_unit_test(test_download_png_text_color_alpha_blends),
         cmocka_unit_test(test_dump_layout_flex_item_contains_block_margins),

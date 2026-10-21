@@ -3038,6 +3038,38 @@ static int is_inline_block_row(const lxb_dom_node_t *p, const css_sheet *sheet,
  * no box at all -- so it painted nothing, reserved no height, and, worst of all, its
  * children lost their containing block and resolved their insets against a degenerate
  * 0x0 rect, landing off-screen. Comment and other node types carry no content. */
+/* True when a child TEXT node of n carries non-blank text. The ::before text path fires from
+ * a text node whose DIRECT parent is the host; a host whose text lives only in descendant
+ * elements (a frame wrapping an sr-only caption and a video) never reaches it, so its
+ * generated box is emitted at the host's entry instead. */
+static int has_direct_text(const lxb_dom_node_t *n) {
+    for (const lxb_dom_node_t *c = n->first_child; c != NULL; c = c->next) {
+        if (c->type != LXB_DOM_NODE_TYPE_TEXT) continue;
+        lxb_dom_text_t *tx = lxb_dom_interface_text((lxb_dom_node_t *)c);
+        const char *t = (const char *)tx->char_data.data.data;
+        size_t len = tx->char_data.data.length;
+        for (size_t i = 0; t != NULL && i < len; ++i)
+            if (t[i] != ' ' && t[i] != '\t' && t[i] != '\n' && t[i] != '\r' && t[i] != '\f')
+                return 1;
+    }
+    return 0;
+}
+
+/* A host whose text lives only in descendant elements and whose ::before is an OUT-OF-FLOW
+ * generated box (a glow, a frame, an overlay): the text path never fires from the host, so
+ * the box is emitted at the host's entry. Out-of-flow only: such a box reserves no flow
+ * space, whereas an in-flow one (clearfix `content:" "` tables) would add rows to every
+ * wrapper that holds text deeper -- the pre-existing, benchmark-stable behaviour. */
+static int pv_deep_text_oof_before(lxb_dom_node_t *n, const css_sheet *sheet,
+                                   pv_style_cache *cache) {
+    if (has_direct_text(n)) return 0;
+    css_style ecs = cached_element_style(lxb_dom_interface_element(n), sheet, cache);
+    if (!ecs.content_before_on) return 0;
+    css_style bps = cached_pseudo_style(lxb_dom_interface_element(n), sheet, cache,
+                                        CSS_PSEUDO_BEFORE);
+    return bps.display != CSS_DISP_NONE && pseudo_generates_box(&bps) && pseudo_is_oof(&bps);
+}
+
 /* True when the element's resolved style carries ::before generated content
  * (spec/css.md ::before/::after: only `content` crosses over). BEFORE-only by
  * design: ::before has no pending mechanism, so entry emission (which needs a
@@ -6165,8 +6197,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_oof(v, frame_oof);
             } else if ((element_is_content_leaf(n, sheet, &cache)
                         || (pv_element_has_before(n, sheet, &cache)
-                            && !subtree_has_own_text(n, base, sheet, &cache,
-                                                     js_enabled, reader, 0)))
+                            && (!subtree_has_own_text(n, base, sheet, &cache,
+                                                      js_enabled, reader, 0)
+                                || pv_deep_text_oof_before(n, sheet, &cache))))
                        && !in_skipped_subtree(n, base, js_enabled)
                        && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                        && !in_closed_details_subtree(n, base)

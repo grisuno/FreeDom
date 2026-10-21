@@ -21,7 +21,16 @@ static const char JT_OPEN_SHIM[] =
     "  __G.open=function(u){"
     "    if(u!==undefined&&u!==null&&q.length<4){ var s=String(u);"
     "      if(!/[\\x00-\\x1f\\x7f]/.test(s)) q.push(s); }"
-    "    return null; }; })()";
+    "    return null; };"
+    /* new Image(w, h): an <img> element with the optional size attributes (HTML 4.8.4.1.1).
+     * Trusted hosts only: an untrusted page keeps `typeof Image === 'undefined'`. Creating it
+     * fetches nothing. */
+    "  if(typeof __G.Image==='undefined') __G.Image=function(w,h){"
+    "    var i=(__G.document&&__G.document.createElement)?__G.document.createElement('img'):{};"
+    "    if(w!==undefined&&i&&i.setAttribute) i.setAttribute('width',String(w));"
+    "    if(h!==undefined&&i&&i.setAttribute) i.setAttribute('height',String(h));"
+    "    return i; };"
+    " })()";
 
 jd_status jt_enable_open(js_context *ctx) {
     if (ctx == NULL) return JD_ERR_NULL_ARG;
