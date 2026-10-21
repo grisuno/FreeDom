@@ -2,6 +2,7 @@
 #define FREEDOM_SECURE_FETCH_H
 
 #include <stddef.h>
+#include <time.h>
 #include <stdint.h>
 
 #include "anti_fp.h" /* normalized network identity (User-Agent / Accept-Language) */
@@ -342,5 +343,31 @@ sf_status sf_post(const char *url, const sf_config *cfg,
 
 /* Idempotent; safe on a zero-initialised struct and safe to call twice. */
 void sf_response_free(sf_response *resp);
+
+/* Navigability ladder shared by every trusted-side fetcher (GUI and headless), so one
+ * page never loads differently depending on the front end. Order of decreasing security:
+ *   1) SF_ERR_KEM_NOT_PQ -> retry with SF_POLICY_ALLOW_CLASSICAL_KE (every host);
+ *   2) still failing and `allowlisted` -> SF_POLICY_ALLOWLISTED_INSECURE (strength is
+ *      relaxed, the certificate is still verified).
+ * A failure outside the ladder stays fatal (fail closed). */
+enum { SF_DOWNGRADE_NONE = 0, SF_DOWNGRADE_CLASSICAL_KE = 1, SF_DOWNGRADE_ALLOWLISTED = 2 };
+
+/* Pure: the policy to retry with after `failed` under `tried`, or 0 when the ladder
+ * is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */
+int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next);
+
+/* cfg->policy is restored before returning; *downgraded (may be NULL) names the rung. */
+sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,
+                                  int *downgraded, int allowlisted);
+sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
+                            size_t body_len, const char *content_type, sf_response *out,
+                            int *downgraded, int allowlisted);
+
+/* Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only
+ * (never on disk) for a day, so the same URL is not asked twice. Remembering changes
+ * WHEN a redirect is learned, never what policy the target is fetched under. */
+int  sf_rcache_put(const char *from, const char *to, time_t now);
+int  sf_rcache_get(const char *from, time_t now, char *out, size_t cap); /* 1 on hit */
+void sf_rcache_clear(void);
 
 #endif /* FREEDOM_SECURE_FETCH_H */

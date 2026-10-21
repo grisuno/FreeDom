@@ -1,6 +1,7 @@
 #ifndef FREEDOM_UI_H
 #define FREEDOM_UI_H
 
+#include "prefs.h"
 #include <stddef.h>
 
 #ifdef __cplusplus
@@ -139,5 +140,10 @@ ui_status ui_dump_layout(const struct rd_doc *doc);
  * lays out at. The headless driver feeds it to tab_set_viewport_w so @media width
  * queries match the width the page is actually painted at. */
 int ui_render_viewport_w(void);
+
+/* The GUI's persisted choices (JS mode, images/CSS toggles, reader) from the encrypted
+ * profile, so `--as-gui` shows what the window shows. Fills safe defaults and returns -1
+ * when the profile is absent or unreadable. Never writes prefs. */
+int ui_persisted_prefs(prefs_state *out);
 
 #endif /* FREEDOM_UI_H */

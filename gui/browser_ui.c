@@ -1377,80 +1377,23 @@ static void apply_auth(const browser_window *w, const char *url, sf_config *cfg)
     cfg->password = w->auth_pass;
 }
 
-/* Downgrade reasons reported by fetch_follow_navigable via *downgraded. */
-enum { DOWNGRADE_NONE = 0, DOWNGRADE_CLASSICAL_KE = 1, DOWNGRADE_ALLOWLISTED = 2 };
+/* Navigability fallbacks live in secure_fetch (sf_get_follow_navigable /
+ * sf_post_navigable) so the GUI and the headless renderer climb the SAME ladder. */
+enum { DOWNGRADE_NONE = SF_DOWNGRADE_NONE, DOWNGRADE_CLASSICAL_KE = SF_DOWNGRADE_CLASSICAL_KE,
+       DOWNGRADE_ALLOWLISTED = SF_DOWNGRADE_ALLOWLISTED };
 
-/* Fetches url (following redirects) under cfg's policy, applying two navigability
- * fallbacks in order of decreasing security:
- *   1) If the only obstacle is a non-PQ key exchange (SF_ERR_KEM_NOT_PQ), retry with
- *      the classical-KE fallback (TLS 1.3 + full cert validation kept). Applies to
- *      every host; *downgraded = DOWNGRADE_CLASSICAL_KE on success.
- *   2) If the host is on the user's allowlist (allowlisted != 0) and still fails,
- *      retry with the allowlist override: TLS 1.2, classical KE, weak-but-valid cert.
- *      The chain is still authenticated, so this reaches the real site over older
- *      crypto, not an impostor. *downgraded = DOWNGRADE_ALLOWLISTED on success. This
- *      is the user's sovereign escape hatch -- secure by default, not a dictatorship.
- * A non-allowlisted host that fails Freedom's standard stays fatal (fail closed).
- * cfg->policy is restored before returning. */
 static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
                                         sf_response *out, int *downgraded,
                                         int allowlisted) {
-    *downgraded = DOWNGRADE_NONE;
-    /* For video fetches the caller set timeout_ms=10000 so PQ fails fast
-     * if the CDN does not support it; for every other fetch (CSS, JS,
-     * images) the default 30s timeout applies. */
-    sf_policy saved = cfg->policy;
-    /* Try PQ-hybrid first (the standard secure path). */
-    sf_status s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
-    if (s == SF_OK) { *downgraded = DOWNGRADE_NONE; cfg->policy = saved; return s; }
-    /* PQ failed — retry with classical KE (TLS 1.3, X25519). */
-    if (s == SF_ERR_KEM_NOT_PQ) {
-        sf_response_free(out);
-        cfg->policy = SF_POLICY_ALLOW_CLASSICAL_KE;
-        s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
-        if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_CLASSICAL_KE; return s; }
-    }
-    /* Classical KE failed too and host is allowlisted: try the sovereignty
-     * override -- TLS 1.2 floor, classical KE, weak-but-VALID certificate. The
-     * certificate is still verified (VERIFYPEER): the allowlist relaxes strength,
-     * never authenticity (CLAUDE.md 7.2). It used to set insecure = 1, which turned
-     * verification AND sf_enforce_policy off: any certificate, any TLS version. */
-    if (allowlisted && s != SF_OK) {
-        sf_response_free(out);
-        cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
-        s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
-        if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
-    }
-    cfg->policy = saved;
-    return s;
+    return sf_get_follow_navigable(url, cfg, out, downgraded, allowlisted);
 }
 
-/* Like fetch_follow_navigable, but for a POST (sf_post does not follow redirects:
- * the caller inspects out->http_code/out->location). The SAME two navigability
- * fallbacks apply in the SAME order, so a POST is never sent under weaker rules than
- * a GET (Zero Trust). cfg->policy is restored before returning. */
 static sf_status fetch_post_navigable(const char *url, sf_config *cfg,
                                        const void *body, size_t body_len,
                                        const char *content_type, sf_response *out,
                                        int *downgraded, int allowlisted) {
-    *downgraded = DOWNGRADE_NONE;
-    sf_policy saved = cfg->policy;
-    sf_status s = sf_post(url, cfg, body, body_len, content_type, out);
-    if (s == SF_OK) { cfg->policy = saved; return s; }
-    if (s == SF_ERR_KEM_NOT_PQ) {
-        sf_response_free(out);
-        cfg->policy = SF_POLICY_ALLOW_CLASSICAL_KE;
-        s = sf_post(url, cfg, body, body_len, content_type, out);
-        if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_CLASSICAL_KE; return s; }
-    }
-    if (allowlisted && s != SF_OK) {   /* same override as GET: verification stays on */
-        sf_response_free(out);
-        cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
-        s = sf_post(url, cfg, body, body_len, content_type, out);
-        if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
-    }
-    cfg->policy = saved;
-    return s;
+    return sf_post_navigable(url, cfg, body, body_len, content_type, out, downgraded,
+                             allowlisted);
 }
 
 /* Host of the current page is on allow.conf (sovereign list). Used to gate page-JS
@@ -1509,6 +1452,8 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
         ? fetch_post_navigable(abs, &cfg, body, body_len,
                                "application/x-www-form-urlencoded", &resp, &dg, relaxed)
         : fetch_follow_navigable(abs, &cfg, &resp, &dg, relaxed);
+    if (getenv("FREEDOM_TRACE_FETCH") != NULL)
+        fprintf(stderr, "fetch[gui] %s -> %s\n", abs, s == SF_OK ? "ok" : "FAIL");
     if (s != SF_OK) { sf_response_free(&resp); return -1; }
 
     char *rb = (char *)malloc(resp.body_len + 1);
@@ -2378,7 +2323,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
     /* @media width queries evaluate against the paint width, so a responsive page picks
      * the same breakpoint it would in another browser at this window size. */
-    tab_set_viewport_w(t, (int)w->width);
+    tab_set_viewport_w(t, (int)w->width - (int)UI_SCROLLBAR_W);
     tab_status load_ts = tab_load_full(t, w->cur_html, w->cur_html_len, w->cur_top,
                                        w->caps.js, w->reader, prefers_dark, &page);
 
@@ -14121,6 +14066,17 @@ static void export_pdf(browser_window *w) {
  * allocation (a taller page is clipped at PNG_MAX_H). */
 #define PNG_PAGE_W   1000.0
 
+int ui_persisted_prefs(prefs_state *out) {
+    char dir[PATH_MAX];
+    profile_ctx pc;
+    prefs_init(out);
+    if (freedom_write_dir(dir, sizeof dir) != 0 || profile_open(&pc, dir) != PROFILE_OK)
+        return -1;
+    int rc = (profile_load(&pc, out) == PROFILE_OK) ? 0 : -1;
+    profile_close(&pc);
+    return rc;
+}
+
 int ui_render_viewport_w(void) { return (int)PNG_PAGE_W; }
 /* Headless image padding. 0 by default: the PNG canvas IS the 1000px viewport,
  * laid out edge to edge exactly like the reference renderer's headless
@@ -16578,7 +16534,7 @@ static tab *freebug_repl_worker(browser_window *w) {
     tab_set_css_allowed(t, wc.css);
     seed_session_cookies(t, wc.cookies, w->cur_top); /* REPL worker sees the same cookies */
     seed_local_storage(w, t, wc.cookies);
-    tab_set_viewport_w(t, (int)w->width);
+    tab_set_viewport_w(t, (int)w->width - (int)UI_SCROLLBAR_W);
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
     tab_page page;
     memset(&page, 0, sizeof page);

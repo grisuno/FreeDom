@@ -1029,6 +1029,66 @@ sf_status sf_post(const char *url, const sf_config *cfg,
     return sf_perform(url, cfg, out, (body != NULL) ? body : "", body_len, content_type);
 }
 
+/* --- permanent-redirect memory (RAM only, Zero Knowledge) --- */
+
+#define SF_RCACHE_SLOTS 128
+#define SF_RCACHE_TTL_S (24 * 60 * 60)
+
+typedef struct {
+    char   from[SF_MAX_URL];
+    char   to[SF_MAX_URL];
+    time_t stored;
+    int    used;
+} sf_rcache_entry;
+
+static sf_rcache_entry sf_rcache[SF_RCACHE_SLOTS];
+static size_t sf_rcache_next;
+static pthread_mutex_t sf_rcache_lock = PTHREAD_MUTEX_INITIALIZER;
+
+void sf_rcache_clear(void) {
+    pthread_mutex_lock(&sf_rcache_lock);
+    memset(sf_rcache, 0, sizeof sf_rcache);
+    sf_rcache_next = 0;
+    pthread_mutex_unlock(&sf_rcache_lock);
+}
+
+int sf_rcache_put(const char *from, const char *to, time_t now) {
+    if (from == NULL || to == NULL || strcmp(from, to) == 0) return -1;
+    if (strlen(from) >= SF_MAX_URL || strlen(to) >= SF_MAX_URL) return -1;
+    pthread_mutex_lock(&sf_rcache_lock);
+    size_t slot = SF_RCACHE_SLOTS;
+    for (size_t i = 0; i < SF_RCACHE_SLOTS; ++i)
+        if (sf_rcache[i].used && strcmp(sf_rcache[i].from, from) == 0) { slot = i; break; }
+    if (slot == SF_RCACHE_SLOTS) {
+        slot = sf_rcache_next;
+        sf_rcache_next = (sf_rcache_next + 1) % SF_RCACHE_SLOTS;
+    }
+    memcpy(sf_rcache[slot].from, from, strlen(from) + 1);
+    memcpy(sf_rcache[slot].to, to, strlen(to) + 1);
+    sf_rcache[slot].stored = now;
+    sf_rcache[slot].used = 1;
+    pthread_mutex_unlock(&sf_rcache_lock);
+    return 0;
+}
+
+int sf_rcache_get(const char *from, time_t now, char *out, size_t cap) {
+    if (from == NULL || out == NULL || cap == 0) return 0;
+    int hit = 0;
+    pthread_mutex_lock(&sf_rcache_lock);
+    for (size_t i = 0; i < SF_RCACHE_SLOTS; ++i) {
+        if (!sf_rcache[i].used || strcmp(sf_rcache[i].from, from) != 0) continue;
+        if (now - sf_rcache[i].stored > SF_RCACHE_TTL_S || now < sf_rcache[i].stored) {
+            sf_rcache[i].used = 0;
+            break;
+        }
+        size_t n = strlen(sf_rcache[i].to);
+        if (n < cap) { memcpy(out, sf_rcache[i].to, n + 1); hit = 1; }
+        break;
+    }
+    pthread_mutex_unlock(&sf_rcache_lock);
+    return hit;
+}
+
 sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
                         int max_redirects) {
     if (url == NULL || out == NULL) return SF_ERR_NULL_ARG;
@@ -1042,6 +1102,13 @@ sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
     }
 
     for (int hops = 0; ; ++hops) {
+        /* A permanent redirect already seen this session is not asked again: the next
+         * hop is requested directly, under the full policy like any other hop. */
+        char known[SF_MAX_URL];
+        if (hops < max_redirects && sf_rcache_get(current, time(NULL), known, sizeof known)) {
+            memcpy(current, known, strlen(known) + 1);
+            continue;
+        }
         /* Each hop is a fresh request: the full TLS/PQ/chain policy is enforced
          * again. Nothing from the previous hop is trusted but the resolved URL. */
         sf_status s = sf_get(current, cfg, out);
@@ -1069,6 +1136,8 @@ sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
             return rs;
         }
 
+        if ((out->http_code == 301 || out->http_code == 308) && !overlay)
+            (void)sf_rcache_put(current, next, time(NULL));
         sf_response_free(out);
         memcpy(current, next, strlen(next) + 1);
     }
@@ -1237,4 +1306,72 @@ void sf_ws_close(sf_ws *ws) {
         (void)curl_ws_send(ws->curl, "", 0, &sent, 0, CURLWS_CLOSE);
     }
     ws_free(ws);
+}
+
+/* --- navigability ladder (shared by GUI and headless fetchers) --- */
+
+int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next) {
+    if (next == NULL) return 0;
+    if (failed == SF_ERR_KEM_NOT_PQ && tried == SF_POLICY_PQ_HYBRID_KE) {
+        *next = SF_POLICY_ALLOW_CLASSICAL_KE;
+        return 1;
+    }
+    if (allowlisted && tried != SF_POLICY_ALLOWLISTED_INSECURE
+        && failed != SF_OK) {
+        *next = SF_POLICY_ALLOWLISTED_INSECURE;
+        return 1;
+    }
+    return 0;
+}
+
+static int sf_downgrade_of(sf_policy p) {
+    if (p == SF_POLICY_ALLOW_CLASSICAL_KE) return SF_DOWNGRADE_CLASSICAL_KE;
+    if (p == SF_POLICY_ALLOWLISTED_INSECURE) return SF_DOWNGRADE_ALLOWLISTED;
+    return SF_DOWNGRADE_NONE;
+}
+
+typedef sf_status (*sf_attempt_fn)(const char *url, const sf_config *cfg, sf_response *out,
+                                   const void *body, size_t body_len, const char *ctype);
+
+static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,
+                                const void *body, size_t body_len, const char *ctype) {
+    (void)body; (void)body_len; (void)ctype;
+    return sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
+}
+
+static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,
+                                 const void *body, size_t body_len, const char *ctype) {
+    return sf_post(url, cfg, body, body_len, ctype, out);
+}
+
+static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,
+                              sf_response *out, const void *body, size_t body_len,
+                              const char *ctype, int *downgraded, int allowlisted) {
+    sf_policy saved = cfg->policy;
+    sf_policy tried = saved;
+    int dg = SF_DOWNGRADE_NONE;
+    sf_status s = attempt(url, cfg, out, body, body_len, ctype);
+    sf_policy next;
+    while (s != SF_OK && sf_fallback_policy(s, tried, allowlisted, &next)) {
+        sf_response_free(out);
+        cfg->policy = next;
+        tried = next;
+        s = attempt(url, cfg, out, body, body_len, ctype);
+        if (s == SF_OK) dg = sf_downgrade_of(next);
+    }
+    cfg->policy = saved;
+    if (downgraded != NULL) *downgraded = (s == SF_OK) ? dg : SF_DOWNGRADE_NONE;
+    return s;
+}
+
+sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,
+                                  int *downgraded, int allowlisted) {
+    return sf_navigable(sf_attempt_get, url, cfg, out, NULL, 0, NULL, downgraded, allowlisted);
+}
+
+sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
+                            size_t body_len, const char *content_type, sf_response *out,
+                            int *downgraded, int allowlisted) {
+    return sf_navigable(sf_attempt_post, url, cfg, out, body, body_len, content_type,
+                        downgraded, allowlisted);
 }

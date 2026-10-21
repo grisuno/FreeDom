@@ -282,6 +282,41 @@ static void test_enforce_allowlisted_insecure(void **state) {
 
 /* --- sf_is_redirect_code --- */
 
+static void test_fallback_ladder_is_shared_and_ordered(void **state) {
+    (void)state;
+    sf_policy n = SF_POLICY_PQ_HYBRID_KE;
+    /* non-PQ server: classical KE first, for every host */
+    assert_int_equal(sf_fallback_policy(SF_ERR_KEM_NOT_PQ, SF_POLICY_PQ_HYBRID_KE, 0, &n), 1);
+    assert_int_equal(n, SF_POLICY_ALLOW_CLASSICAL_KE);
+    /* classical failed too: only an allowlisted host climbs to the sovereignty rung */
+    assert_int_equal(sf_fallback_policy(SF_ERR_KEM_NOT_PQ, SF_POLICY_ALLOW_CLASSICAL_KE, 0, &n), 0);
+    assert_int_equal(sf_fallback_policy(SF_ERR_KEM_NOT_PQ, SF_POLICY_ALLOW_CLASSICAL_KE, 1, &n), 1);
+    assert_int_equal(n, SF_POLICY_ALLOWLISTED_INSECURE);
+    /* top of the ladder is final; a non-allowlisted hard failure is fail-closed */
+    assert_int_equal(sf_fallback_policy(SF_ERR_KEM_NOT_PQ, SF_POLICY_ALLOWLISTED_INSECURE, 1, &n), 0);
+    assert_int_equal(sf_fallback_policy(SF_ERR_TOO_MANY_REDIRECTS, SF_POLICY_PQ_HYBRID_KE, 0, &n), 0);
+    assert_int_equal(sf_fallback_policy(SF_ERR_KEM_NOT_PQ, SF_POLICY_PQ_HYBRID_KE, 0, NULL), 0);
+}
+
+static void test_rcache_remembers_permanent_redirects(void **state) {
+    (void)state;
+    char out[256];
+    sf_rcache_clear();
+    assert_int_equal(sf_rcache_get("https://a.test/", 1000, out, sizeof out), 0);
+    assert_int_equal(sf_rcache_put("https://a.test/", "https://b.test/x", 1000), 0);
+    assert_int_equal(sf_rcache_get("https://a.test/", 1500, out, sizeof out), 1);
+    assert_string_equal(out, "https://b.test/x");
+    /* expires after a day, and a clock that went backwards is a miss */
+    assert_int_equal(sf_rcache_get("https://a.test/", 1000 + 24 * 3600 + 1, out, sizeof out), 0);
+    assert_int_equal(sf_rcache_put("https://a.test/", "https://c.test/", 5000), 0);
+    assert_int_equal(sf_rcache_get("https://a.test/", 4000, out, sizeof out), 0);
+    /* a self-redirect and a too-small buffer are never served */
+    assert_int_equal(sf_rcache_put("https://s.test/", "https://s.test/", 1), -1);
+    assert_int_equal(sf_rcache_put("https://t.test/", "https://u.test/long", 1), 0);
+    assert_int_equal(sf_rcache_get("https://t.test/", 2, out, 4), 0);
+    sf_rcache_clear();
+}
+
 static void test_redirect_code_recognizes_3xx(void **state) {
     (void)state;
     assert_true(sf_is_redirect_code(301));
@@ -611,6 +646,8 @@ int main(void) {
         cmocka_unit_test(test_cookie_line_matches_pure),
         cmocka_unit_test(test_cookie_jar_put_and_header),
         cmocka_unit_test(test_ws_url_check),
+        cmocka_unit_test(test_fallback_ladder_is_shared_and_ordered),
+        cmocka_unit_test(test_rcache_remembers_permanent_redirects),
         cmocka_unit_test(test_ws_open_rejects_before_any_io),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

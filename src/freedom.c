@@ -253,9 +253,16 @@ static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int fla
         host[0] = '\0';
         if (g_as_host != NULL) snprintf(host, sizeof host, "%s", g_as_host);
     }
+    /* --as-gui alone mirrors the window: the persisted profile (JS mode, toggles) is the
+     * same source the GUI reads. --as-host stays a deterministic corpus profile. */
+    prefs_state pp;
+    prefs_init(&pp);
+    if (g_as_host == NULL) (void)ui_persisted_prefs(&pp);
     const char *js_env = getenv("FREEDOM_JS");
     jsp_mode mode = (js_env != NULL && js_env[0] != '\0') ? jsp_mode_from_str(js_env)
-                                                           : JSP_ALLOWLIST;
+                                                           : (jsp_mode)pp.js_mode;
+    if (pp.css != 0) flag_css = 1;
+    if (pp.images != 0) flag_images = 1;
     g_gui_wc = wc_derive((wc_input){
         .js_mode       = mode,
         .host_in_js    = host[0] != '\0' && g_js_hosts != NULL && hb_is_allowlisted(g_js_hosts, host),
@@ -456,7 +463,6 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
             /* An allowlisted host, or any subresource of an operator-trusted (--js=on)
              * page -- its CDN, modules, API -- gets the allowlist's relaxed strength;
              * the certificate is verified either way. */
-            if (allowed || g_headless_js) cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
             /* Double trust + user flag: allow.conf AND JS-on AND --impersonate.
              * Default 0 = hardened PQ-hybrid fallback (Zero Trust). */
             cfg.impersonate = ti_should_impersonate(
@@ -473,9 +479,19 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
     sf_response resp;
     memset(&resp, 0, sizeof resp);
     int is_post = (method != NULL && (strcmp(method, "POST") == 0 || strcmp(method, "post") == 0));
+    int host_allowed = 0;
+    {
+        char h2[512];
+        if (g_hosts != NULL && rp_host_of(url, h2, sizeof h2) == 0)
+            host_allowed = hb_is_allowlisted(g_hosts, h2);
+    }
+    int relaxed = host_allowed || g_headless_js;
     sf_status s = is_post
-        ? sf_post(url, &cfg, body, body_len, "application/x-www-form-urlencoded", &resp)
-        : sf_get_follow(url, &cfg, &resp, SF_DEFAULT_MAX_REDIRECTS);
+        ? sf_post_navigable(url, &cfg, body, body_len, "application/x-www-form-urlencoded",
+                            &resp, NULL, relaxed)
+        : sf_get_follow_navigable(url, &cfg, &resp, NULL, relaxed);
+    if (getenv("FREEDOM_TRACE_FETCH") != NULL)
+        fprintf(stderr, "fetch[headless] %s -> %s (sf_status=%d)\n", url, s == SF_OK ? "ok" : "FAIL", (int)s);
     if (s != SF_OK) { sf_response_free(&resp); return -1; }
 
     if (resp.body_len == (size_t)-1) { sf_response_free(&resp); return -1; }
