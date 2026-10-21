@@ -1,12 +1,16 @@
-# Symbols (page 6 of 14)
+# Symbols (page 6 of 15)
 Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `tr_mul` | function | `src/css.c:2418` | `static void tr_mul(double out[6], const double l[6], const double r[6])` |
+| `translate3d` | function | `src/css.c:2523` | `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine  * renders z as nothing,...` |
+| `translateX` | function | `src/css.c:2786` | `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc...` |
+| `translateZ` | function | `src/css.c:2795` | `* translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking * context Firefox builds);` |
 | `var` | function | `src/css.c:2269` | `* cvr_resolve then substitutes var() references when a declaration's value is  * interpreted (par...` |
-| `var` | function | `src/css.c:5264` | `* collected and forty var() declarations -- font sizes, widths, radii, the      * whole theme -- ...` |
-| `wide_claim` | function | `src/css.c:4099` | `static int wide_claim(const char *prop, css_decl *dst, int cap,                       char (*urlt...` |
-| `writing` | function | `src/css.c:3238` | `* Wide keywords claim BOTH slots without writing (inheritance then flows, as  * the tail does for...` |
+| `var` | function | `src/css.c:5282` | `* collected and forty var() declarations -- font sizes, widths, radii, the      * whole theme -- ...` |
+| `wide_claim` | function | `src/css.c:4117` | `static int wide_claim(const char *prop, css_decl *dst, int cap,                       char (*urlt...` |
+| `writing` | function | `src/css.c:3275` | `* Wide keywords claim BOTH slots without writing (inheritance then flows, as  * the tail does for...` |
 | `CAR_TEXT_MAX` | macro | `src/css_atrule.c:13` | `#define CAR_TEXT_MAX` |
 | `car_effective_spec` | function | `src/css_atrule.c:171` | `int car_effective_spec(int spec, int layer, int important)` |
 | `car_layer_rank` | function | `src/css_atrule.c:148` | `int car_layer_rank(car_layers *L, const char *name, size_t len)` |
@@ -18,27 +22,28 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `eval_in_parens` | function | `src/css_atrule.c:85` | `static int eval_in_parens(const char *s, size_t *i, size_t b, const car_ops *ops,                ...` |
 | `keyword_at` | function | `src/css_atrule.c:23` | `static int keyword_at(const char *s, size_t i, size_t b, const char *kw)` |
 | `skip_ws` | function | `src/css_atrule.c:17` | `static size_t skip_ws(const char *s, size_t i, size_t b)` |
-| `AUTO_REJECT` | macro | `src/css_box.c:1158` | `#define AUTO_REJECT` |
-| `AUTO_RESET` | macro | `src/css_box.c:1160` | `#define AUTO_RESET` |
-| `AUTO_RESET_NONE` | macro | `src/css_box.c:1164` | `#define AUTO_RESET_NONE` |
-| `AUTO_VALUE` | macro | `src/css_box.c:1159` | `#define AUTO_VALUE` |
-| `CSS_CALC_MAX_DEPTH` | macro | `src/css_box.c:678` | `#define CSS_CALC_MAX_DEPTH` |
-| `CSS_MATHFN_MAX_ARGS` | macro | `src/css_box.c:682` | `#define CSS_MATHFN_MAX_ARGS` |
+| `AUTO_REJECT` | macro | `src/css_box.c:1196` | `#define AUTO_REJECT` |
+| `AUTO_RESET` | macro | `src/css_box.c:1198` | `#define AUTO_RESET` |
+| `AUTO_RESET_NONE` | macro | `src/css_box.c:1202` | `#define AUTO_RESET_NONE` |
+| `AUTO_VALUE` | macro | `src/css_box.c:1197` | `#define AUTO_VALUE` |
+| `CSS_CALC_MAX_DEPTH` | macro | `src/css_box.c:682` | `#define CSS_CALC_MAX_DEPTH` |
+| `CSS_MATHFN_MAX_ARGS` | macro | `src/css_box.c:686` | `#define CSS_MATHFN_MAX_ARGS` |
 | `RELATIVE` | function | `src/css_box.c:63` | `* or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the * absolute keywords. Relative: em...` |
-| `accepts` | function | `src/css_box.c:670` | `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...` |
-| `calc_eval_em` | function | `src/css_box.c:927` | `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` |
-| `calc_eval_full` | function | `src/css_box.c:913` | `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,            ...` |
-| `calc_expr` | function | `src/css_box.c:894` | `static int calc_expr(calc_parser *p, calc_val *out, int depth)` |
-| `calc_match_fn` | function | `src/css_box.c:707` | `static int calc_match_fn(calc_parser *p, const char *name)` |
-| `calc_mathfn` | function | `src/css_box.c:749` | `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` |
-| `calc_parser` | struct | `src/css_box.c:698` | `` |
-| `calc_piecewise` | function | `src/css_box.c:734` | `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` |
-| `calc_skip_ws` | function | `src/css_box.c:700` | `static void calc_skip_ws(calc_parser *p)` |
-| `calc_term` | function | `src/css_box.c:870` | `static int calc_term(calc_parser *p, calc_val *out, int depth)` |
-| `calc_unwrap` | function | `src/css_box.c:935` | `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` |
-| `calc_val` | struct | `src/css_box.c:697` | `` |
+| `accepts` | function | `src/css_box.c:674` | `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...` |
+| `calc_eval_em` | function | `src/css_box.c:931` | `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` |
+| `calc_eval_full` | function | `src/css_box.c:917` | `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,            ...` |
+| `calc_expr` | function | `src/css_box.c:898` | `static int calc_expr(calc_parser *p, calc_val *out, int depth)` |
+| `calc_match_fn` | function | `src/css_box.c:711` | `static int calc_match_fn(calc_parser *p, const char *name)` |
+| `calc_mathfn` | function | `src/css_box.c:753` | `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` |
+| `calc_parser` | struct | `src/css_box.c:702` | `` |
+| `calc_piecewise` | function | `src/css_box.c:738` | `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` |
+| `calc_skip_ws` | function | `src/css_box.c:704` | `static void calc_skip_ws(calc_parser *p)` |
+| `calc_term` | function | `src/css_box.c:874` | `static int calc_term(calc_parser *p, calc_val *out, int depth)` |
+| `calc_unwrap` | function | `src/css_box.c:939` | `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` |
+| `calc_val` | struct | `src/css_box.c:701` | `` |
+| `cb_clip_inset` | function | `src/css_box.c:1089` | `int cb_clip_inset(const char *val, int px[4], int pm[4])` |
 | `cb_copy_trim` | function | `src/css_box.c:25` | `static size_t cb_copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
-| `cb_expand_box2` | function | `src/css_box.c:1332` | `int cb_expand_box2(const char *val, int slot_start, int slot_end,                        int allo...` |
+| `cb_expand_box2` | function | `src/css_box.c:1370` | `int cb_expand_box2(const char *val, int slot_start, int slot_end,                        int allo...` |
 | `cb_expand_grid_template_cols` | function | `src/css_box.c:591` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)` |
 | `cb_expand_grid_template_rows` | function | `src/css_box.c:614` | `int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)` |
 | `cb_interp_align` | function | `src/css_box.c:54` | `int cb_interp_align(const char *v)` |
@@ -46,26 +51,26 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `cb_interp_fontsize_ex` | function | `src/css_box.c:72` | `int cb_interp_fontsize_ex(const char *v, int *abs_out)` |
 | `cb_interp_gap` | function | `src/css_box.c:288` | `int cb_interp_gap(const char *v)` |
 | `cb_interp_justify` | function | `src/css_box.c:295` | `int cb_interp_justify(const char *v)` |
-| `cb_interp_len` | function | `src/css_box.c:986` | `int cb_interp_len(const char *v, int allow_auto, int *out)` |
+| `cb_interp_len` | function | `src/css_box.c:990` | `int cb_interp_len(const char *v, int allow_auto, int *out)` |
 | `cb_interp_lineheight` | function | `src/css_box.c:145` | `int cb_interp_lineheight(const char *v)` |
-| `cb_interp_lp` | function | `src/css_box.c:1085` | `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,                      int *out_px, ...` |
+| `cb_interp_lp` | function | `src/css_box.c:1123` | `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,                      int *out_px, ...` |
 | `cb_interp_style` | function | `src/css_box.c:183` | `int cb_interp_style(const char *v)` |
 | `cb_interp_textdeco` | function | `src/css_box.c:193` | `int cb_interp_textdeco(const char *v)` |
 | `cb_interp_weight` | function | `src/css_box.c:174` | `int cb_interp_weight(const char *v)` |
 | `cb_length_px` | function | `src/css_box.c:49` | `int cb_length_px(const char *v, double *px)` |
 | `cb_parse_num` | function | `src/css_box.c:13` | `static int cb_parse_num(const char *s, double *out, const char **endp)` |
 | `cb_starts_with_ci` | function | `src/css_box.c:320` | `static int cb_starts_with_ci(const char *s, const char *pre)` |
-| `cb_value_em_milli` | function | `src/css_box.c:1065` | `int cb_value_em_milli(const char *v)` |
+| `cb_value_em_milli` | function | `src/css_box.c:1069` | `int cb_value_em_milli(const char *v)` |
 | `cb_wide_keyword` | function | `src/css_box.c:18` | `static int cb_wide_keyword(const char *v)` |
 | `count_one_repeat` | function | `src/css_box.c:364` | `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,                       ...` |
 | `count_tracks` | function | `src/css_box.c:326` | `static int count_tracks(const char *s, size_t n)` |
 | `expand_auto_fill` | function | `src/css_box.c:513` | `static int expand_auto_fill(const char *val, css_decl *dst, int cap)` |
-| `interp_len` | function | `src/css_box.c:1261` | `* this file that might hand a token to interp_len (transitively: margin/padding/  * inset, flex-b...` |
-| `min` | function | `src/css_box.c:768` | `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...` |
-| `pct_slot_of` | function | `src/css_box.c:1015` | `static int pct_slot_of(int slot)` |
-| `px` | type_alias | `src/css_box.c:697` | `typedef struct calc_val { double px;` |
+| `interp_len` | function | `src/css_box.c:1299` | `* this file that might hand a token to interp_len (transitively: margin/padding/  * inset, flex-b...` |
+| `min` | function | `src/css_box.c:772` | `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...` |
+| `pct_slot_of` | function | `src/css_box.c:1019` | `static int pct_slot_of(int slot)` |
+| `px` | type_alias | `src/css_box.c:701` | `typedef struct calc_val { double px;` |
 | `repeat` | function | `src/css_box.c:309` | `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill\|...) /...` |
-| `term` | function | `src/css_box.c:1092` | `* the same expression and failed closed on the percentage term (its property * may not accept one);` |
+| `term` | function | `src/css_box.c:1130` | `* the same expression and failed closed on the percentage term (its property * may not accept one);` |
 | `track_min_of` | function | `src/css_box.c:475` | `static int track_min_of(const char *tok)` |
 | `track_size_of` | function | `src/css_box.c:334` | `static int track_size_of(const char *tok)` |
 | `walk_tracks` | function | `src/css_box.c:407` | `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `headless_fetch` | function | `src/freedom.c:443` | `static int headless_fetch(void *ctx, const char *method, const char *url,                        ...` |
 | `headless_load_hosts` | function | `src/freedom.c:237` | `static void headless_load_hosts(void)` |
 | `hl_css_sink` | function | `src/freedom.c:602` | `static void hl_css_sink(void *vctx, const char *url,                         const char *body, si...` |
-| `hl_font_fetch` | function | `src/freedom.c:639` | `static int hl_font_fetch(void *vctx, const char *url,                          int *out_status, c...` |
-| `hl_font_stash` | struct | `src/freedom.c:581` | `` |
-| `hl_font_stash_free` | function | `src/freedom.c:589` | `static void hl_font_stash_free(hl_font_stash *s)` |
-| `is_blank_text` | function | `src/freedom.c:281` | `static int is_blank_text(const char *s)` |
-| `is_http_url` | function | `src/freedom.c:84` | `static int is_http_url(const char *s)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

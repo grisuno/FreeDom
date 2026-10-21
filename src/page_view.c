@@ -2069,6 +2069,10 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->clip_right = cs->clip_right;
     d->clip_bottom = cs->clip_bottom;
     d->clip_left = cs->clip_left;
+    d->clip_top_pm = cs->clip_top_pm;
+    d->clip_right_pm = cs->clip_right_pm;
+    d->clip_bottom_pm = cs->clip_bottom_pm;
+    d->clip_left_pm = cs->clip_left_pm;
     d->bg_pos_y = cs->bg_pos_y;
     d->anim_iterations = cs->anim_iterations;
     d->anim_timing = cs->anim_timing;
@@ -6301,6 +6305,15 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                      * the element's box, so reconciling it opens both). An
                      * out-of-flow one keeps the element's run and adds its own. */
                     int before_in_flow = (before_box >= 0 && !pseudo_is_oof(&bps));
+                    /* Entry emission IS the decision for these pseudos: the blank text
+                     * node between the host's tags must find the verdict made, or it
+                     * would emit the same generated box a second time. */
+                    if (ecs.content_before_on)
+                        pv_ptrmap_put(&pseudo_memo, pseudo_key(n, CSS_PSEUDO_BEFORE),
+                                      before_hidden ? -2 : before_box);
+                    if (ecs.content_after_on)
+                        pv_ptrmap_put(&pseudo_memo, pseudo_key(n, CSS_PSEUDO_AFTER),
+                                      after_hidden ? -2 : after_box);
                     const char *main_text = (before_box >= 0 && !before_in_flow) ? "" : leaf_text;
                     pv_status st = pv_append(v, PV_TEXT, 0, ebrk, main_text, NULL);
                     if (st != PV_OK) { rc = st; goto cleanup; }

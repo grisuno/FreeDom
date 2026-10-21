@@ -23,7 +23,7 @@ jkanime-main-col	6.39
 jkanime-tile	0.29
 jkanime-tile2	0.11
 jkanime-tile3	0.07
-jkanime	7.14
+jkanime	7.01
 lobsters	1.10
 margin-collapse	0.46
 marquee-flex	0.78
@@ -31,6 +31,7 @@ multicol	2.64
 nav-inline-blocks	0.38
 navbox-table	0.41
 pct-box	0.37
+pseudo-rule	0.01
 rail-negative-margin	0.11
 rem-62	0.54
 scroll-box	0.12
@@ -41,15 +42,15 @@ site-discord	1.92
 site-github	11.95
 site-gitlab	13.10
 site-ipinfo	4.63
-site-justpaste	0.11
+site-justpaste	0.12
 site-ntp	2.11
 site-oldreddit	0.39
 site-olduse	1.64
-site-osm	4.10
+site-osm	4.16
 site-telegram	0.83
 site-youtube	0.16
 slashdot-cols	0.39
-slashdot	4.24
+slashdot	3.21
 story-chain	3.05
 table-fit	3.44
 table-in-bordered-section	1.19

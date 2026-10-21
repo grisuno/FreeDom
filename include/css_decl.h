@@ -212,6 +212,9 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
          * op, clip pair, and the three compact words of each of the two layers. */
         P_MASK_N, P_MASK_COMP, P_MASK_CLIP,
         P_MASK_L0A, P_MASK_L0B, P_MASK_L0C, P_MASK_L1A, P_MASK_L1B, P_MASK_L1C,
+        /* clip-path: inset() (2026-10-21; APPENDED): the per-mille share of the border box that
+         * each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */
+        P_CLIP_TOP_PM, P_CLIP_RIGHT_PM, P_CLIP_BOTTOM_PM, P_CLIP_LEFT_PM,
         P_NSLOTS };
 
 typedef struct css_decl {

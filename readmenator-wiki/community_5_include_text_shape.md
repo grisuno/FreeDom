@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 20 file(s) rooted at `include` with dominant language c (cohesion 0.55). Central symbols: `ASCII`, `DU_MAX_ENCODED_LEN`, `FREEDOM_DATA_URL_H`, `FREEDOM_PSL_DATA_H`, `FREEDOM_REQUEST_POLICY_H`, `FREEDOM_TEXT_SHAPE_H`, `FREEDOM_WEBFONT_H`, `FREEDOM_WEBFONT_LOAD_H`. Core file: `src/text_shape.c` (59 symbols). Documented purpose: libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). The.
+This community groups 20 file(s) rooted at `include` with dominant language c (cohesion 0.55). Central symbols: `ASCII`, `DU_MAX_ENCODED_LEN`, `FREEDOM_DATA_URL_H`, `FREEDOM_PSL_DATA_H`, `FREEDOM_REQUEST_POLICY_H`, `FREEDOM_TEXT_SHAPE_H`, `FREEDOM_WEBFONT_H`, `FREEDOM_WEBFONT_LOAD_H`. Core file: `src/text_shape.c` (61 symbols). Documented purpose: libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). The.
 
 ## Files
 
@@ -22,12 +22,12 @@ This community groups 20 file(s) rooted at `include` with dominant language c (c
 | `src/data_url.c` | c | data_access | 10 | no |
 | `src/render_policy.c` | c | presentation | 5 | no |
 | `src/request_policy.c` | c | business_logic | 11 | no |
-| `src/text_shape.c` | c | utility | 59 | no |
+| `src/text_shape.c` | c | utility | 61 | no |
 | `src/webfont.c` | c | utility | 15 | no |
 | `src/webfont_load.c` | c | utility | 11 | no |
 | `tests/test_data_url.c` | c | testing | 26 | no |
 | `tests/test_request_policy.c` | c | testing | 12 | no |
-| `tests/test_text_shape.c` | c | testing | 21 | no |
+| `tests/test_text_shape.c` | c | testing | 23 | no |
 | `tests/test_webfont.c` | c | testing | 13 | no |
 | `tests/test_webfont_load.c` | c | testing | 16 | no |
 

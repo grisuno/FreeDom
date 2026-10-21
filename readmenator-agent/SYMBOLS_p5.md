@@ -1,8 +1,10 @@
-# Symbols (page 5 of 14)
+# Symbols (page 5 of 15)
 Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `placeholders` | function | `include/ui.h:108` | `* above always draw image placeholders (no worker to decode hostile bytes);` |
+| `rd_doc` | struct | `include/ui.h:69` | `` |
 | `space` | function | `include/ui.h:44` | `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...` |
 | `tab` | struct | `include/ui.h:105` | `` |
 | `ui_clamp_scroll` | function | `include/ui.h:55` | `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);` |
@@ -190,11 +192,12 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `block` | function | `src/box_tree.c:566` | `* true block (same flow neighbourhood), strictly better than zeros. NULL      * placed keeps lega...` |
 | `bt_box_hidden` | function | `src/box_tree.c:776` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)` |
 | `bt_containing_block` | function | `src/box_tree.c:555` | `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,                         ...` |
-| `bt_defer_roots` | function | `src/box_tree.c:797` | `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,                       const bt_positi...` |
+| `bt_defer_roots` | function | `src/box_tree.c:808` | `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,                       const bt_positi...` |
+| `bt_in_subtree` | function | `src/box_tree.c:789` | `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)` |
 | `bt_layout` | function | `src/box_tree.c:465` | `bt_status bt_layout(bt_node *root, double avail_w)` |
 | `bt_nn` | function | `src/box_tree.c:58` | `static double bt_nn(double v)` |
 | `bt_oof_anchor` | function | `src/box_tree.c:768` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)` |
-| `bt_oof_avail` | function | `src/box_tree.c:789` | `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)` |
+| `bt_oof_avail` | function | `src/box_tree.c:800` | `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)` |
 | `bt_oof_root` | function | `src/box_tree.c:772` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)` |
 | `bt_resolve_positioning` | function | `src/box_tree.c:585` | `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,                           ...` |
 | `bt_resolve_positioning_ex` | function | `src/box_tree.c:596` | `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,                        ...` |
@@ -267,60 +270,60 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `CSS_INLINE_DECLS` | macro | `src/css.c:69` | `#define CSS_INLINE_DECLS` |
 | `CSS_MAX_FONT_FACES` | macro | `src/css.c:164` | `#define CSS_MAX_FONT_FACES` |
 | `CSS_MAX_RAW` | macro | `src/css.c:86` | `#define CSS_MAX_RAW` |
-| `CSS_MEDIA_MAX_DEPTH` | macro | `src/css.c:4672` | `#define CSS_MEDIA_MAX_DEPTH` |
+| `CSS_MEDIA_MAX_DEPTH` | macro | `src/css.c:4690` | `#define CSS_MEDIA_MAX_DEPTH` |
 | `CSS_SELS_PER_GROUP` | macro | `src/css.c:68` | `#define CSS_SELS_PER_GROUP` |
-| `CSS_VAR_POOL` | macro | `src/css.c:5976` | `#define CSS_VAR_POOL` |
+| `CSS_VAR_POOL` | macro | `src/css.c:5998` | `#define CSS_VAR_POOL` |
 | `CSS_WIDE_RESET` | macro | `src/css.c:221` | `#define CSS_WIDE_RESET` |
 | `LIST` | function | `src/css.c:2516` | `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...` |
-| `NULL` | function | `src/css.c:6393` | `* Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...` |
+| `NULL` | function | `src/css.c:6415` | `* Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...` |
 | `P_META_CUSTOM` | macro | `src/css.c:82` | `#define P_META_CUSTOM` |
 | `P_META_VARSRC` | macro | `src/css.c:83` | `#define P_META_VARSRC` |
-| `add_rule` | function | `src/css.c:4388` | `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,                      siz...` |
+| `add_rule` | function | `src/css.c:4406` | `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,                      siz...` |
 | `anim_easing_iv` | function | `src/css.c:1186` | `static int anim_easing_iv(const char *tok)` |
-| `apply_decl` | function | `src/css.c:5426` | `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
-| `apply_rule` | function | `src/css.c:6007` | `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
-| `apply_var_source` | function | `src/css.c:5980` | `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,         ...` |
-| `at_is_media` | function | `src/css.c:4539` | `static int at_is_media(const char *s, size_t i, size_t n)` |
-| `at_keyword` | function | `src/css.c:4550` | `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)` |
+| `apply_decl` | function | `src/css.c:5444` | `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
+| `apply_rule` | function | `src/css.c:6029` | `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
+| `apply_var_source` | function | `src/css.c:6002` | `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,         ...` |
+| `at_is_media` | function | `src/css.c:4557` | `static int at_is_media(const char *s, size_t i, size_t n)` |
+| `at_keyword` | function | `src/css.c:4568` | `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)` |
 | `axis` | function | `src/css.c:1512` | `* bare center displaces it to the free axis (`center right` = x:right, y:center).  * Any other co...` |
 | `bg_alpha_of` | function | `src/css.c:235` | `static int bg_alpha_of(const char *v)` |
-| `block_end` | function | `src/css.c:4517` | `static size_t block_end(const char *s, size_t open, size_t n)` |
+| `block_end` | function | `src/css.c:4535` | `static size_t block_end(const char *s, size_t open, size_t n)` |
 | `blur` | function | `src/css.c:1475` | `* consumes ONLY blur(Npx);` |
 | `box_shadow_layer` | function | `src/css.c:1970` | `static int box_shadow_layer(const char *val, size_t len, int out[6])` |
-| `caller` | function | `src/css.c:3360` | `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached...` |
-| `cand_cmp` | function | `src/css.c:5915` | `static int cand_cmp(const void *pa, const void *pb)` |
+| `caller` | function | `src/css.c:3397` | `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached...` |
+| `cand_cmp` | function | `src/css.c:5937` | `static int cand_cmp(const void *pa, const void *pb)` |
 | `cap` | function | `src/css.c:1744` | `* string past the cap (emit_content): a conforming declaration must not * count as a discard just because an icon...` |
-| `collect_custom_props_scoped` | function | `src/css.c:4681` | `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,                 ...` |
+| `collect_custom_props_scoped` | function | `src/css.c:4699` | `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,                 ...` |
 | `column` | function | `src/css.c:2071` | `* column (`flex: 1 1 0%`);` |
-| `computed_font_size` | function | `src/css.c:5898` | `static double computed_font_size(const css_style *o, const css_element *el)` |
-| `consumer` | function | `src/css.c:5337` | `* consumer (shorthands, calc(), var() values) gets it with no context          * threaded through...` |
-| `content_attr_of` | function | `src/css.c:5417` | `static const char *content_attr_of(const css_element *el, const char *name)` |
+| `computed_font_size` | function | `src/css.c:5920` | `static double computed_font_size(const css_style *o, const css_element *el)` |
+| `consumer` | function | `src/css.c:5355` | `* consumer (shorthands, calc(), var() values) gets it with no context          * threaded through...` |
+| `content_attr_of` | function | `src/css.c:5435` | `static const char *content_attr_of(const css_element *el, const char *name)` |
 | `copy_trim` | function | `src/css.c:2231` | `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
-| `csel_substr` | function | `src/css.c:4572` | `return known && csel_substr(val, "var(", 1);` |
-| `css_cand` | struct | `src/css.c:5910` | `` |
-| `css_computed_font_size_for_tag` | function | `src/css.c:5890` | `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)` |
+| `csel_substr` | function | `src/css.c:4590` | `return known && csel_substr(val, "var(", 1);` |
+| `css_cand` | struct | `src/css.c:5932` | `` |
+| `css_computed_font_size_for_tag` | function | `src/css.c:5912` | `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)` |
 | `css_decl` | function | `src/css.c:90` | `* text and stores the INDEX in the css_decl (int-only, see P_BG_IMAGE_URL);` |
-| `css_font_face_at` | function | `src/css.c:6429` | `int css_font_face_at(const css_sheet *sheet, size_t i,                      char *family, size_t ...` |
-| `css_font_face_count` | function | `src/css.c:6425` | `size_t css_font_face_count(const css_sheet *sheet)` |
-| `css_free` | function | `src/css.c:5395` | `void css_free(css_sheet *s)` |
+| `css_font_face_at` | function | `src/css.c:6451` | `int css_font_face_at(const css_sheet *sheet, size_t i,                      char *family, size_t ...` |
+| `css_font_face_count` | function | `src/css.c:6447` | `size_t css_font_face_count(const css_sheet *sheet)` |
+| `css_free` | function | `src/css.c:5413` | `void css_free(css_sheet *s)` |
 | `css_keyframe_stop` | struct | `src/css.c:143` | `` |
-| `css_match` | struct | `src/css.c:5904` | `` |
-| `css_parse` | function | `src/css.c:5289` | `css_status css_parse(const char *text, size_t len, css_sheet **out)` |
-| `css_parse_inline` | function | `src/css.c:6439` | `css_style css_parse_inline(const char *style, size_t len)` |
-| `css_parse_logged` | function | `src/css.c:5303` | `css_status css_parse_logged(const char *text, size_t len, const css_media *media,                ...` |
-| `css_parse_media` | function | `src/css.c:5293` | `css_status css_parse_media(const char *text, size_t len, const css_media *media,                 ...` |
-| `css_parse_scoped` | function | `src/css.c:5298` | `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,                ...` |
-| `css_resolve` | function | `src/css.c:6369` | `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,                   ...` |
-| `css_resolve_el` | function | `src/css.c:6076` | `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,                          ...` |
-| `css_resolve_el_ex` | function | `src/css.c:6085` | `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,                       ...` |
-| `css_resolve_pseudo` | function | `src/css.c:6101` | `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)` |
+| `css_match` | struct | `src/css.c:5926` | `` |
+| `css_parse` | function | `src/css.c:5307` | `css_status css_parse(const char *text, size_t len, css_sheet **out)` |
+| `css_parse_inline` | function | `src/css.c:6461` | `css_style css_parse_inline(const char *style, size_t len)` |
+| `css_parse_logged` | function | `src/css.c:5321` | `css_status css_parse_logged(const char *text, size_t len, const css_media *media,                ...` |
+| `css_parse_media` | function | `src/css.c:5311` | `css_status css_parse_media(const char *text, size_t len, const css_media *media,                 ...` |
+| `css_parse_scoped` | function | `src/css.c:5316` | `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,                ...` |
+| `css_resolve` | function | `src/css.c:6391` | `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,                   ...` |
+| `css_resolve_el` | function | `src/css.c:6098` | `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,                          ...` |
+| `css_resolve_el_ex` | function | `src/css.c:6107` | `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,                       ...` |
+| `css_resolve_pseudo` | function | `src/css.c:6123` | `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)` |
 | `css_rule` | struct | `src/css.c:101` | `` |
 | `css_sheet` | struct | `src/css.c:103` | `` |
-| `css_ua_heading_em` | function | `src/css.c:5885` | `double css_ua_heading_em(int level)` |
+| `css_ua_heading_em` | function | `src/css.c:5907` | `double css_ua_heading_em(int level)` |
 | `declaration` | function | `src/css.c:2006` | `* invalid layer drops the whole declaration (fail closed). `none` is an explicit  * no-shadow. ur...` |
-| `download` | function | `src/css.c:4912` | `* the download (spec/webfont.md b3b). An empty src_url                      * simply never resolv...` |
-| `drop_copy_text` | function | `src/css.c:4166` | `static void drop_copy_text(char *dst, size_t cap, const char *src)` |
-| `drop_record` | function | `src/css.c:4185` | `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)` |
+| `download` | function | `src/css.c:4930` | `* the download (spec/webfont.md b3b). An empty src_url                      * simply never resolv...` |
+| `drop_copy_text` | function | `src/css.c:4184` | `static void drop_copy_text(char *dst, size_t cap, const char *src)` |
+| `drop_record` | function | `src/css.c:4203` | `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)` |
 | `emit` | function | `src/css.c:63` | `* * It must exceed the most slots ANY single declaration can emit (the widest today * is the `background` shorthand...` |
 | `emit_content` | function | `src/css.c:1668` | `static int emit_content(css_decl *dst, int cap, const char *str,                         char (*c...` |
 | `emit_radius_corner` | function | `src/css.c:923` | `static int emit_radius_corner(css_decl *dst, int cap, int slot, const char *val)` |
@@ -333,6 +336,7 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `expand_bg_size` | function | `src/css.c:1628` | `static int expand_bg_size(const char *val, css_decl *dst, int cap)` |
 | `expand_box2` | function | `src/css.c:289` | `static int expand_box2(const char *val, int slot_start, int slot_end,                        int ...` |
 | `expand_box4` | function | `src/css.c:284` | `static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg,             ...` |
+| `expand_clip_path` | function | `src/css.c:3150` | `static int expand_clip_path(const char *val, css_decl *dst, int cap)` |
 | `expand_column_rule` | function | `src/css.c:1093` | `static int expand_column_rule(const char *val, css_decl *dst, int cap)` |
 | `expand_columns` | function | `src/css.c:1037` | `static int expand_columns(const char *val, css_decl *dst, int cap)` |
 | `expand_content` | function | `src/css.c:1774` | `static int expand_content(const char *val, css_decl *dst, int cap,                           char...` |
@@ -351,12 +355,12 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `expand_transform_origin` | function | `src/css.c:3020` | `static int expand_transform_origin(const char *val, css_decl *dst, int cap)` |
 | `expand_valign` | function | `src/css.c:356` | `static int expand_valign(const char *val, css_decl *dst, int cap)` |
 | `filter_paren_body` | function | `src/css.c:1134` | `static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen)` |
-| `fold_font_relative` | function | `src/css.c:6045` | `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,                          ...` |
-| `font_list_alias` | function | `src/css.c:3160` | `static void font_list_alias(const css_sheet *sheet, const char *ls, char *out, size_t cap)` |
-| `font_list_norm` | function | `src/css.c:3194` | `static int font_list_norm(const char *val, char *out, size_t cap)` |
+| `fold_font_relative` | function | `src/css.c:6067` | `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,                          ...` |
+| `font_list_alias` | function | `src/css.c:3197` | `static void font_list_alias(const css_sheet *sheet, const char *ls, char *out, size_t cap)` |
+| `font_list_norm` | function | `src/css.c:3231` | `static int font_list_norm(const char *val, char *out, size_t cap)` |
 | `function` | function | `src/css.c:2797` | `* transform function (perspective/rotate3d/...), or unparseable syntax,  * rejects the WHOLE decl...` |
-| `here` | function | `src/css.c:3848` | `* servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);` |
-| `idx` | type_alias | `src/css.c:5910` | `typedef struct css_cand { int imp, espec, ord, idx;` |
+| `here` | function | `src/css.c:3886` | `* servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);` |
+| `idx` | type_alias | `src/css.c:5932` | `typedef struct css_cand { int imp, espec, ord, idx;` |
 | `interp_accent_color` | function | `src/css.c:715` | `static int interp_accent_color(const char *v)` |
 | `interp_align` | function | `src/css.c:311` | `static int interp_align(const char *v)` |
 | `interp_align_kw` | function | `src/css.c:2137` | `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)` |
@@ -442,59 +446,55 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `interp_weight` | function | `src/css.c:323` | `static int interp_weight(const char *v)` |
 | `interp_whitespace` | function | `src/css.c:358` | `static int interp_whitespace(const char *v)` |
 | `interp_word_break` | function | `src/css.c:479` | `static int interp_word_break(const char *v)` |
-| `interpret_decls` | function | `src/css.c:4324` | `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,                ...` |
-| `interpret_prop` | function | `src/css.c:4139` | `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,             ...` |
-| `interpret_prop_dispatch` | function | `src/css.c:3372` | `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,    ...` |
+| `interpret_decls` | function | `src/css.c:4342` | `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,                ...` |
+| `interpret_prop` | function | `src/css.c:4157` | `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,             ...` |
+| `interpret_prop_dispatch` | function | `src/css.c:3409` | `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,    ...` |
 | `is_anim_ident` | function | `src/css.c:1198` | `static int is_anim_ident(const char *tok)` |
 | `item` | function | `src/css.c:1147` | `* timing list takes its first item (CSS Animations/Transitions 1: with one  * transition/animatio...` |
-| `layer_register` | function | `src/css.c:4638` | `static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,                      ...` |
-| `len_rebase` | function | `src/css.c:5122` | `static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen)` |
-| `len_rebase_ctx` | struct | `src/css.c:5080` | `` |
-| `len_unit_px` | function | `src/css.c:5092` | `static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c)` |
+| `layer_register` | function | `src/css.c:4656` | `static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,                      ...` |
+| `len_rebase` | function | `src/css.c:5140` | `static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen)` |
+| `len_rebase_ctx` | struct | `src/css.c:5098` | `` |
+| `len_unit_px` | function | `src/css.c:5110` | `static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c)` |
 | `lp_can_be_nonneg` | function | `src/css.c:303` | `static int lp_can_be_nonneg(int px_val, int pct_pm)` |
 | `matrix` | function | `src/css.c:2431` | `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands...` |
 | `next_ws_token` | function | `src/css.c:307` | `static int next_ws_token(const char **p, char *tok, size_t cap)` |
 | `number` | function | `src/css.c:504` | `* number (no unit) as px (common in shorthand context like "10 5"). */ static int interp_border_s...` |
 | `order` | function | `src/css.c:1440` | `* declaration order (dx, dy, optional blur >= 0);` |
 | `origin_component` | function | `src/css.c:2994` | `static int origin_component(const char *tok, int axis, int *out)` |
-| `page_view` | function | `src/css.c:5433` | `* the generated text reaches page_view (which materialises it as a synthetic * run);` |
-| `parent` | function | `src/css.c:5466` | `* property from the parent (`inherit`), and an unset non-inherited one          * stands at its i...` |
+| `page_view` | function | `src/css.c:5451` | `* the generated text reaches page_view (which materialises it as a synthetic * run);` |
+| `parent` | function | `src/css.c:5484` | `* property from the parent (`inherit`), and an unset non-inherited one          * stands at its i...` |
 | `parse_angle_deg` | function | `src/css.c:2790` | `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);` |
-| `parse_block` | function | `src/css.c:4756` | `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,                  ...` |
+| `parse_block` | function | `src/css.c:4774` | `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,                  ...` |
 | `parse_color` | function | `src/css.c:191` | `static int parse_color(const char *v)` |
 | `parse_matrix6` | function | `src/css.c:2461` | `static int parse_matrix6(const char *p, size_t argn, double m6[6])` |
 | `parse_num` | function | `src/css.c:180` | `static int parse_num(const char *s, double *out, const char **endp)` |
 | `property` | function | `src/css.c:3106` | `* error drops the whole property (fail closed). */ static int expand_clip(const char *val, css_de...` |
-| `pseudo_of` | function | `src/css.c:6092` | `static int pseudo_of(int which)` |
-| `raw_add` | function | `src/css.c:4211` | `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)` |
-| `rem_emit_px` | function | `src/css.c:5062` | `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)` |
-| `rem_ident_ch` | function | `src/css.c:5044` | `static int rem_ident_ch(char c)` |
-| `rem_num_starts_after` | function | `src/css.c:5052` | `static int rem_num_starts_after(char prev)` |
-| `rem_px` | type_alias | `src/css.c:5080` | `typedef struct len_rebase_ctx { double rem_px;` |
-| `rem_rebase` | function | `src/css.c:5188` | `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)` |
-| `resolve_core` | function | `src/css.c:6112` | `static css_style resolve_core(const css_sheet *sheet, const css_element *el,                     ...` |
+| `pseudo_of` | function | `src/css.c:6114` | `static int pseudo_of(int which)` |
+| `raw_add` | function | `src/css.c:4229` | `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)` |
+| `rem_emit_px` | function | `src/css.c:5080` | `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)` |
+| `rem_ident_ch` | function | `src/css.c:5062` | `static int rem_ident_ch(char c)` |
+| `rem_num_starts_after` | function | `src/css.c:5070` | `static int rem_num_starts_after(char prev)` |
+| `rem_px` | type_alias | `src/css.c:5098` | `typedef struct len_rebase_ctx { double rem_px;` |
+| `rem_rebase` | function | `src/css.c:5206` | `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)` |
+| `resolve_core` | function | `src/css.c:6134` | `static css_style resolve_core(const css_sheet *sheet, const css_element *el,                     ...` |
 | `sel_list_comma` | function | `src/css.c:1963` | `static size_t sel_list_comma(const char *s, size_t i, size_t end);` |
 | `selector_matches_root` | function | `src/css.c:2291` | `static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m)` |
-| `sentinel` | function | `src/css.c:3645` | `* cascade carries as the currentColor sentinel (in `color` the two are the * same thing);` |
-| `sheet_index` | function | `src/css.c:5196` | `static void sheet_index(css_sheet *sh)` |
-| `sheet_pools_reserve` | function | `src/css.c:4382` | `static void sheet_pools_reserve(css_sheet *sh)` |
-| `sheet_rewind` | function | `src/css.c:5201` | `static void sheet_rewind(css_sheet *sh)` |
-| `sheet_root_font_px` | function | `src/css.c:5246` | `static double sheet_root_font_px(const css_sheet *sh)` |
+| `sentinel` | function | `src/css.c:3683` | `* cascade carries as the currentColor sentinel (in `color` the two are the * same thing);` |
+| `sheet_index` | function | `src/css.c:5214` | `static void sheet_index(css_sheet *sh)` |
+| `sheet_pools_reserve` | function | `src/css.c:4400` | `static void sheet_pools_reserve(css_sheet *sh)` |
+| `sheet_rewind` | function | `src/css.c:5219` | `static void sheet_rewind(css_sheet *sh)` |
+| `sheet_root_font_px` | function | `src/css.c:5264` | `static double sheet_root_font_px(const css_sheet *sh)` |
 | `shorthand` | function | `src/css.c:3071` | `* An uninterpretable token drops the whole shorthand (fail closed). */ static int expand_place(co...` |
-| `shorthand` | function | `src/css.c:3280` | `* generic bucket keeps the rest of the shorthand (same net effect as the  * font-family longhand ...` |
-| `skip_at_rule` | function | `src/css.c:4501` | `static size_t skip_at_rule(const char *s, size_t i, size_t n)` |
-| `slots` | function | `src/css.c:3530` | `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return...` |
+| `shorthand` | function | `src/css.c:3317` | `* generic bucket keeps the rest of the shorthand (same net effect as the  * font-family longhand ...` |
+| `skip_at_rule` | function | `src/css.c:4519` | `static size_t skip_at_rule(const char *s, size_t i, size_t n)` |
+| `slots` | function | `src/css.c:3568` | `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return...` |
 | `split_top_args` | function | `src/css.c:2493` | `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,                ...` |
-| `strip_comments` | function | `src/css.c:5254` | `static char *strip_comments(const char *text, size_t len, size_t *outlen)` |
+| `strip_comments` | function | `src/css.c:5272` | `static char *strip_comments(const char *text, size_t len, size_t *outlen)` |
 | `strip_important` | function | `src/css.c:2244` | `static int strip_important(char *val)` |
-| `supports_matches` | function | `src/css.c:4584` | `static int supports_matches(const char *s, size_t a, size_t b)` |
-| `supports_selector_ok` | function | `src/css.c:4575` | `static int supports_selector_ok(void *ctx, const char *sel)` |
+| `supports_matches` | function | `src/css.c:4602` | `static int supports_matches(const char *s, size_t a, size_t b)` |
+| `supports_selector_ok` | function | `src/css.c:4593` | `static int supports_selector_ok(void *ctx, const char *sel)` |
 | `text` | function | `src/css.c:264` | `* source text (rem_rebase, see below) rather than by threading a context here.  *  * Viewport uni...` |
 | `through` | function | `src/css.c:211` | `* at the two SHARED chokepoints every property funnels through (the generic  * dispatch tail, and...` |
 | `tr_decompose` | function | `src/css.c:2438` | `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,                         in...` |
-| `tr_mul` | function | `src/css.c:2418` | `static void tr_mul(double out[6], const double l[6], const double r[6])` |
-| `translate3d` | function | `src/css.c:2523` | `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine  * renders z as nothing,...` |
-| `translateX` | function | `src/css.c:2786` | `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc...` |
-| `translateZ` | function | `src/css.c:2795` | `* translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking * context Firefox builds);` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

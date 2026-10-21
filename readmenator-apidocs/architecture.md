@@ -25,7 +25,7 @@ flowchart TB
     end
     subgraph lane_2["Tier 3"]
         direction LR
-        n_c4["include: page_view<br/>14 files, 631 symbols<br/>Presentation / entry"]:::cycle
+        n_c4["include: page_view<br/>14 files, 633 symbols<br/>Presentation / entry"]:::cycle
     end
     subgraph lane_3["Tier 4"]
         direction LR
@@ -33,21 +33,21 @@ flowchart TB
     end
     subgraph lane_4["Tier 5"]
         direction LR
-        n_c6["include: local_store<br/>11 files, 391 symbols<br/>Core / utility"]:::cycle
+        n_c6["include: local_store<br/>11 files, 399 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_5["Tier 6"]
         direction LR
-        n_c0["src: tab<br/>45 files, 786 symbols<br/>Core / utility"]:::cycle
+        n_c0["src: tab<br/>45 files, 787 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_6["Tier 7"]
         direction LR
-        n_c1["include: css<br/>35 files, 905 symbols<br/>Core / utility"]:::cycle
+        n_c1["include: css<br/>35 files, 908 symbols<br/>Core / utility"]:::cycle
         n_c9["include: prefetch<br/>6 files, 93 symbols<br/>Core / utility"]:::cycle
         n_c8["include: secure_fetch<br/>6 files, 216 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_7["Tier 8 - foundation"]
         direction LR
-        n_c5["include: text_shape<br/>15 files, 183 symbols<br/>Core / utility"]:::cycle
+        n_c5["include: text_shape<br/>15 files, 185 symbols<br/>Core / utility"]:::cycle
     end
     n_c0 ==>|"4"| n_c1
     n_c0 -->|"2"| n_c8
@@ -324,7 +324,7 @@ flowchart LR
     n_src_prefs_c__prefs_history_add["prefs.prefs_history_add<br/>prefs.c:152"]:::external
     n_src_profile_c__profile_save["profile.profile_save<br/>profile.c:133"]:::external
     n_gui_browser_ui_c__show_busy["browser_ui.show_busy<br/>Marks a request in flight and paints a frame...<br/>browser_ui.c:2450"]:::external
-    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:16092"]:::external
+    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:16111"]:::external
     n_tools_gen_psl_c__emit["gen_psl.emit<br/>gen_psl.c:61"]:::default
     n_tools_gen_psl_c__main -.->|"recursion"| n_tools_gen_psl_c__main
     n_tools_gen_psl_c__main -->|"1"| n_tools_gen_psl_c__ascii_lower

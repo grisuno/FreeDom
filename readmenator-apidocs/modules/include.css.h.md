@@ -225,7 +225,7 @@ Resolved @keyframes data (Phase R1c): the keyframe stops from the matching @keyf
 
 ### `css_sel`
 
-`struct` | [include/css.h:985](../../include/css.h#L985)
+`struct` | [include/css.h:988](../../include/css.h#L988)
 
 ```c
 struct css_sel; /* css_select.h */
@@ -244,7 +244,7 @@ Render-time media context for evaluating @media at parse time. width_px is a fix
 
 #### `css_sel.prefers_dark`
 
-`type_alias` | [include/css.h:986](../../include/css.h#L986)
+`type_alias` | [include/css.h:989](../../include/css.h#L989)
 
 ```c
 typedef struct css_media { int prefers_dark;
@@ -256,7 +256,7 @@ css_select.h
 
 #### `css_sel.css_media`
 
-`struct` | [include/css.h:987](../../include/css.h#L987)
+`struct` | [include/css.h:990](../../include/css.h#L990)
 
 ```c
 typedef struct css_media
@@ -268,7 +268,7 @@ typedef struct css_media
 
 ### `css_drop`
 
-`struct` | [include/css.h:1051](../../include/css.h#L1051)
+`struct` | [include/css.h:1054](../../include/css.h#L1054)
 
 ```c
 typedef struct css_drop
@@ -288,7 +288,7 @@ One coalesced drop: every occurrence of the same (property, cause) pair folds in
 
 #### `css_drop.prop`
 
-`type_alias` | [include/css.h:1051](../../include/css.h#L1051)
+`type_alias` | [include/css.h:1054](../../include/css.h#L1054)
 
 ```c
 typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];
@@ -304,7 +304,7 @@ One coalesced drop: every occurrence of the same (property, cause) pair folds in
 
 ### `css_drop_log`
 
-`struct` | [include/css.h:1063](../../include/css.h#L1063)
+`struct` | [include/css.h:1066](../../include/css.h#L1066)
 
 ```c
 typedef struct css_drop_log
@@ -320,7 +320,7 @@ Optional write-only sink the parser fills while parsing.
 
 ### `css_attr`
 
-`struct` | [include/css.h:1092](../../include/css.h#L1092)
+`struct` | [include/css.h:1095](../../include/css.h#L1095)
 
 ```c
 typedef struct css_attr
@@ -336,7 +336,7 @@ Both alias caller storage (nothing is copied/owned).
 
 ### `css_element`
 
-`struct` | [include/css.h:1102](../../include/css.h#L1102)
+`struct` | [include/css.h:1105](../../include/css.h#L1105)
 
 ```c
 typedef struct css_element
@@ -352,7 +352,7 @@ Each field aliases caller storage (nothing is copied/owned). parent walks toward
 
 ### `cvr_table`
 
-`struct` | [include/css.h:1163](../../include/css.h#L1163)
+`struct` | [include/css.h:1166](../../include/css.h#L1166)
 
 ```c
 struct cvr_table;
@@ -1290,7 +1290,7 @@ typedef enum css_pct_slot
 
 ### `css_drop_cause`
 
-`enum` | [include/css.h:1038](../../include/css.h#L1038)
+`enum` | [include/css.h:1041](../../include/css.h#L1041)
 
 ```c
 typedef enum css_drop_cause
@@ -1324,7 +1324,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 ### `css_sheet`
 
-`type_alias` | [include/css.h:979](../../include/css.h#L979)
+`type_alias` | [include/css.h:982](../../include/css.h#L982)
 
 ```c
 typedef struct css_sheet css_sheet;
@@ -1378,7 +1378,7 @@ typedef struct css_sheet css_sheet;
 
 ### `palette`
 
-`function` | [include/css.h:1028](../../include/css.h#L1028)
+`function` | [include/css.h:1031](../../include/css.h#L1031)
 
 ```c
 * so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
@@ -1398,7 +1398,7 @@ typedef struct css_sheet css_sheet;
 
 ### `css_free`
 
-`function` | [include/css.h:1078](../../include/css.h#L1078)
+`function` | [include/css.h:1081](../../include/css.h#L1081)
 
 ```c
 void css_free(css_sheet *s);
@@ -1420,7 +1420,7 @@ Idempotent; NULL-safe.
 
 ### `order`
 
-`function` | [include/css.h:1081](../../include/css.h#L1081)
+`function` | [include/css.h:1084](../../include/css.h#L1084)
 
 ```c
 * cascade order (specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
@@ -1440,7 +1440,7 @@ Idempotent; NULL-safe.
 
 ### `inherited_px`
 
-`function` | [include/css.h:1187](../../include/css.h#L1187)
+`function` | [include/css.h:1190](../../include/css.h#L1190)
 
 ```c
 * whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that walks the DOM is the one that can supply the * inherited value, and it needs the same
@@ -1460,7 +1460,7 @@ Idempotent; NULL-safe.
 
 ### `css_ua_heading_em`
 
-`function` | [include/css.h:1199](../../include/css.h#L1199)
+`function` | [include/css.h:1202](../../include/css.h#L1202)
 
 ```c
 double css_ua_heading_em(int level);
@@ -1486,7 +1486,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 ### `name`
 
-`function` | [include/css.h:1204](../../include/css.h#L1204)
+`function` | [include/css.h:1207](../../include/css.h#L1207)
 
 ```c
 * name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag);
@@ -1500,7 +1500,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 ### `css_font_face_count`
 
-`function` | [include/css.h:1214](../../include/css.h#L1214)
+`function` | [include/css.h:1217](../../include/css.h#L1217)
 
 ```c
 size_t css_font_face_count(const css_sheet *sheet);
@@ -1524,7 +1524,7 @@ Returns 0 on success, -1 if i is out of range.
 
 ### `css_font_face_at`
 
-`function` | [include/css.h:1215](../../include/css.h#L1215)
+`function` | [include/css.h:1218](../../include/css.h#L1218)
 
 ```c
 int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);
@@ -1549,7 +1549,7 @@ int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_
 
 ### `css_resolve_anim_keyframes`
 
-`function` | [include/css.h:1223](../../include/css.h#L1223)
+`function` | [include/css.h:1226](../../include/css.h#L1226)
 
 ```c
 void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);
@@ -2188,7 +2188,7 @@ Bound on the A/B coefficients of :nth-child(An+B) (anti-DoS; larger drops the se
 
 ### `CSS_MEDIA_DEFAULT_WIDTH`
 
-`macro` | [include/css.h:999](../../include/css.h#L999)
+`macro` | [include/css.h:1002](../../include/css.h#L1002)
 
 ```c
 #define CSS_MEDIA_DEFAULT_WIDTH
@@ -2200,7 +2200,7 @@ Bound on the A/B coefficients of :nth-child(An+B) (anti-DoS; larger drops the se
 
 ### `CSS_MEDIA_DEFAULT_HEIGHT`
 
-`macro` | [include/css.h:1004](../../include/css.h#L1004)
+`macro` | [include/css.h:1007](../../include/css.h#L1007)
 
 ```c
 #define CSS_MEDIA_DEFAULT_HEIGHT
@@ -2214,7 +2214,7 @@ Normalized viewport height paired with CSS_MEDIA_DEFAULT_WIDTH (16:9 desktop, th
 
 ### `CSS_DROP_PROP_MAX`
 
-`macro` | [include/css.h:1043](../../include/css.h#L1043)
+`macro` | [include/css.h:1046](../../include/css.h#L1046)
 
 ```c
 #define CSS_DROP_PROP_MAX
@@ -2226,7 +2226,7 @@ Normalized viewport height paired with CSS_MEDIA_DEFAULT_WIDTH (16:9 desktop, th
 
 ### `CSS_DROP_VAL_MAX`
 
-`macro` | [include/css.h:1044](../../include/css.h#L1044)
+`macro` | [include/css.h:1047](../../include/css.h#L1047)
 
 ```c
 #define CSS_DROP_VAL_MAX
@@ -2238,7 +2238,7 @@ Normalized viewport height paired with CSS_MEDIA_DEFAULT_WIDTH (16:9 desktop, th
 
 ### `CSS_PSEUDO_BEFORE`
 
-`macro` | [include/css.h:1173](../../include/css.h#L1173)
+`macro` | [include/css.h:1176](../../include/css.h#L1176)
 
 ```c
 #define CSS_PSEUDO_BEFORE
@@ -2252,7 +2252,7 @@ Which generated box css_resolve_pseudo resolves (CSS 2.1 12.1).
 
 ### `CSS_PSEUDO_AFTER`
 
-`macro` | [include/css.h:1174](../../include/css.h#L1174)
+`macro` | [include/css.h:1177](../../include/css.h#L1177)
 
 ```c
 #define CSS_PSEUDO_AFTER
@@ -2264,7 +2264,7 @@ Which generated box css_resolve_pseudo resolves (CSS 2.1 12.1).
 
 ### `CSS_PSEUDO_PLACEHOLDER`
 
-`macro` | [include/css.h:1175](../../include/css.h#L1175)
+`macro` | [include/css.h:1178](../../include/css.h#L1178)
 
 ```c
 #define CSS_PSEUDO_PLACEHOLDER

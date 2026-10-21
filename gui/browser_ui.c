@@ -9696,6 +9696,18 @@ static void oof_sublayouts(cairo_t *cr, const browser_window *w, double content_
             layout_doc(cr, vw, W, Ls);
             vboxes[a] = *bd;   /* the next anchor sees the real tree again */
 
+            /* The sub-layout owns the anchor's subtree. A run's container/float membership
+             * can make layout_doc open boxes above it (the page's <body>, a nav wrapper);
+             * those belong to the page layout, so here they have no area: they paint
+             * nothing over the page and never register as in-flow geometry below. */
+            for (size_t k = 0; k < Ls->nbox; ++k) {
+                rc_box *rb = &Ls->boxes[k];
+                if (rb->block_id >= 0
+                    && bt_in_subtree(doc->boxes, nbox, a, (size_t)rb->block_id)) continue;
+                rb->w = 0.0;
+                rb->h = 0.0;
+            }
+
             /* The anchor's border box in sub-layout space (union of fragments). */
             double bx0 = 0.0, by0 = 0.0, bx1 = W, by1 = Ls->total_h;
             int got = 0;
@@ -9743,6 +9755,7 @@ static void oof_sublayouts(cairo_t *cr, const browser_window *w, double content_
                 const rc_box *rb = &Ls->boxes[k];
                 int b = rb->block_id;
                 if (b < 0 || (size_t)b >= nbox || b == (int)a) continue;
+                if (rb->w <= 0.0 && rb->h <= 0.0) continue;   /* foreign box, zeroed above */
                 gx[b] = rb->x + dx;
                 gy[b] = rb->top + dy;
                 gw[b] = rb->w;
@@ -13384,10 +13397,16 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     int clip_saved = 0;
     if (def->clip_top != PV_LEN_UNSET || def->clip_right != PV_LEN_UNSET
         || def->clip_bottom != PV_LEN_UNSET || def->clip_left != PV_LEN_UNSET) {
-        double c_l = (def->clip_left  != PV_LEN_UNSET) ? (double)def->clip_left  : 0.0;
-        double c_t = (def->clip_top   != PV_LEN_UNSET) ? (double)def->clip_top   : 0.0;
-        double c_r = (def->clip_right != PV_LEN_UNSET) ? (double)def->clip_right : pb->w;
-        double c_b = (def->clip_bottom!= PV_LEN_UNSET) ? (double)def->clip_bottom: pb->h;
+        /* An edge is its px part plus a per-mille share of the border box (clip-path:
+         * inset() writes both halves; clip: rect() only the px one). */
+        double c_l = (def->clip_left  != PV_LEN_UNSET)
+            ? (double)def->clip_left + (double)def->clip_left_pm * pb->w / 1000.0 : 0.0;
+        double c_t = (def->clip_top   != PV_LEN_UNSET)
+            ? (double)def->clip_top + (double)def->clip_top_pm * pb->h / 1000.0 : 0.0;
+        double c_r = (def->clip_right != PV_LEN_UNSET)
+            ? (double)def->clip_right + (double)def->clip_right_pm * pb->w / 1000.0 : pb->w;
+        double c_b = (def->clip_bottom!= PV_LEN_UNSET)
+            ? (double)def->clip_bottom + (double)def->clip_bottom_pm * pb->h / 1000.0 : pb->h;
         double c_w = c_r - c_l, c_h = c_b - c_t;
         if (c_w >= 0.0 && c_h >= 0.0) {
             cairo_save(cr);

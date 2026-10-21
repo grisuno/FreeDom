@@ -252,3 +252,11 @@ instalada que tenga el glifo (CSS Fonts 4 §5, *system font fallback*).
 - **Dado** texto que la cara pedida cubre entero **entonces** un tramo: el camino
   rápido es byte-idéntico al de antes.
 
+
+## 9. Glifo PUA sin cara (tanda 54)
+
+- **Dado** un code point del Private Use Area (U+E000-F8FF, planos 15/16) que ninguna cara instalada ni registrada cubre (la icon font de la pagina no se cargo: hosts sin confianza, o fallo de fetch),
+- **Cuando** se dibuja,
+- **Entonces** no se tinta nada (los navegadores dejan el PUA en blanco; el cuadro `.notdef` de Slashdot tapaba "Stories"/"Polls") y el avance del lapiz se conserva (el `width:1em` del autor sigue valiendo).
+- Un PUA **nunca** cae al fallback de fontconfig: los codepoints PUA no tienen significado fuera de la fuente de la pagina, y un glifo ajeno (Material Icons, Unifont) pinta un icono equivocado y filtra que fuentes tiene instaladas el usuario. Solo la cara registrada por `@font-face` (primaria) los cubre.
+- Fuera de alcance: caracteres NO-PUA sin cara siguen mostrando `.notdef` (como Firefox).

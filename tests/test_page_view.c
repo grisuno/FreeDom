@@ -3808,6 +3808,30 @@ static void test_mask_reaches_the_box(void **state) {
     hp_document_free(doc);
 }
 
+/* A host whose only child is a display:none subtree (Slashdot's Firehose <li>) gets its
+ * generated ::before once at entry; the blank text node between its tags must not fire the
+ * pseudo a second time (a duplicate run splits the anchor's block range in two and the
+ * out-of-flow sub-layout drags foreign blocks in). */
+static void test_before_box_of_hidden_only_host_emitted_once(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><ul><li class='h'>\n  <ul class='x'><li>gone</li></ul>\n</li>"
+                             "<li>b</li></ul></body>");
+    static const char CSS[] = ".h{position:relative}.x{display:none}"
+        ".h::before{content:\"\";position:absolute;top:0;left:0;height:100%;background:#112233}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_box_def *d = box_of_run_with_bg(v, 0x112233);
+    assert_non_null(d);
+    int n = 0;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->block_id >= 0 && pv_box_at(v, (size_t)r->block_id) == d) ++n;
+    }
+    assert_int_equal(n, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_before_box_before_text(void **state) {
     (void)state;
     hp_document *doc = parse("<body><p class='i'>Hi</p></body>");
@@ -5277,6 +5301,7 @@ int main(void) {
         cmocka_unit_test(test_pct_padding_generates_box),
         cmocka_unit_test(test_before_box_on_empty_element),
         cmocka_unit_test(test_before_box_before_text),
+        cmocka_unit_test(test_before_box_of_hidden_only_host_emitted_once),
         cmocka_unit_test(test_mask_reaches_the_box),
         cmocka_unit_test(test_body_background_propagates_to_canvas),
         cmocka_unit_test(test_before_box_on_host_with_only_element_children),

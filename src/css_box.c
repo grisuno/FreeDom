@@ -625,8 +625,12 @@ int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap) {
     size_t o = 0;
     for (size_t i = 0; i < n; ++i) {
         char c = val[i];
+        /* Each iteration writes at most " auto " plus one byte, and the strings the loop
+         * blanks out can each add an " auto " the source did not have, so `o` can outgrow
+         * `n`: bound the WRITE, not the input (fuzz-css found the stack overflow). */
+        if (o + 8 >= sizeof buf) return 0;
         if (c == '"' || c == '\'') {
-            if (strings > 0 && !sized_since && o + 6 < sizeof buf) {
+            if (strings > 0 && !sized_since) {
                 memcpy(buf + o, " auto ", 6);
                 o += 6;
             }
@@ -1080,6 +1084,40 @@ int cb_value_em_milli(const char *v) {
     if (milli >  (double)CSS_EM_MILLI_MAX) milli =  (double)CSS_EM_MILLI_MAX;
     if (milli < -(double)CSS_EM_MILLI_MAX) milli = -(double)CSS_EM_MILLI_MAX;
     return (int)(milli < 0.0 ? milli - 0.5 : milli + 0.5);
+}
+
+int cb_clip_inset(const char *val, int px[4], int pm[4]) {
+    if (val == NULL || px == NULL || pm == NULL) return 0;
+    while (*val == ' ' || *val == '\t') ++val;
+    if (strncmp(val, "inset(", 6) != 0) return 0;
+    const char *p = val + 6;
+    const char *close = strchr(p, ')');
+    if (close == NULL) return 0;
+    const char *round_kw = NULL;
+    for (const char *q = p; q + 5 <= close; ++q)
+        if (strncmp(q, "round", 5) == 0 && (q == p || q[-1] == ' ')) { round_kw = q; break; }
+    size_t len = (size_t)((round_kw != NULL ? round_kw : close) - p);
+    char body[CSS_TOK_MAX * 4];
+    if (len >= sizeof body) return 0;
+    memcpy(body, p, len);
+    body[len] = '\0';
+    int ipx[4], ipm[4], n = 0;
+    const char *cur = body;
+    char tok[CSS_TOK_MAX];
+    while (cb_next_ws_token(&cur, tok, sizeof tok)) {
+        if (n == 4) return 0;
+        if (!cb_interp_lp(tok, 0, 1, &ipx[n], &ipm[n])) return 0;
+        ++n;
+    }
+    if (n == 0) return 0;
+    /* 1..4 values expand like margin: t | t,r=l... */
+    static const int pick[5][4] = { {0,0,0,0}, {0,0,0,0}, {0,1,0,1}, {0,1,2,1}, {0,1,2,3} };
+    int t = pick[n][0], r = pick[n][1], b = pick[n][2], l = pick[n][3];
+    px[0] = ipx[t];  pm[0] = ipm[t];
+    px[1] = -ipx[r]; pm[1] = 1000 - ipm[r];
+    px[2] = -ipx[b]; pm[2] = 1000 - ipm[b];
+    px[3] = ipx[l];  pm[3] = ipm[l];
+    return 1;
 }
 
 int cb_interp_lp(const char *v, int allow_auto, int allow_pct,

@@ -26,9 +26,9 @@ CSS drops: 926 declaration(s) dropped, 98 distinct
      14  unknown-prop  animation-play-state         paused
      14  unknown-prop  mask-position                50%
      14  unknown-prop  -webkit-overflow-scrolling   touch
-     12  unknown-prop  overflow-clip-margin         .5rem
      12  unknown-prop  contain-intrinsic-size       auto 32px
      12  bad-value     right                        anchor(right)
+     12  unknown-prop  overflow-clip-margin         .5rem
      12  unknown-prop  grid-column-gap              2rem
      11  unknown-prop  -webkit-tap-highlight-color  transparent
      10  unknown-prop  stroke-dasharray             3 3
@@ -81,21 +81,21 @@ CSS drops: 926 declaration(s) dropped, 98 distinct
       2  unknown-prop  font-variant-ligatures       contextual
       2  unknown-prop  transform-box                fill-box
       2  bad-value     grid-template-columns        repeat(auto-fit,160px 160px)
-      1  unknown-prop  -webkit-text-size-adjust     100%
       1  bad-value     font-variant                 tabular-nums
-      1  unknown-prop  stroke-linecap               round
+      1  unknown-prop  text-size-adjust             100%
+      1  bad-value     align-items                  top
       1  unknown-prop  line-break                   anywhere
-      1  unknown-prop  text-anchor                  end
+      1  unknown-prop  stroke-linecap               round
       1  bad-value     visibility                   none
       1  unknown-prop  background-blend-mode        normal
       1  unknown-prop  offset                       2px
       1  unknown-prop  -moz-text-size-adjust        100%
-      1  unknown-prop  text-size-adjust             100%
+      1  unknown-prop  text-anchor                  end
       1  unknown-prop  grid-auto-columns            max-content
       1  unknown-prop  -ms-text-size-adjust         100%
       1  unknown-prop  scrollbar-gutter             stable
       1  unknown-prop  scrollbar-color              #a4aea6 transparent
-      1  bad-value     align-items                  top
+      1  bad-value     min-height                   2rem 2rem
       1  unknown-prop  scroll-snap-type             y mandatory
       1  unknown-prop  scroll-snap-align            start
-      1  bad-value     min-height                   2rem 2rem
+      1  unknown-prop  -webkit-text-size-adjust     100%

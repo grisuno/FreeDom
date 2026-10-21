@@ -143,6 +143,37 @@ static void test_draw_paints(void **state) {
     cairo_surface_destroy(s);
 }
 
+/* Given a Private Use Area code point that no installed face covers (an icon font
+ * that was never loaded), when it is drawn, then nothing is inked (browsers leave
+ * it blank, never the .notdef box) and the pen still advances (spec/text_shape.md 9). */
+static int inked_pixels(cairo_surface_t *s) {
+    cairo_surface_flush(s);
+    const unsigned char *d = cairo_image_surface_get_data(s);
+    int stride = cairo_image_surface_get_stride(s);
+    int h = cairo_image_surface_get_height(s), w = cairo_image_surface_get_width(s);
+    int n = 0;
+    for (int y = 0; y < h; ++y)
+        for (int x = 0; x < w; ++x)
+            if (d[y * stride + x * 4 + 3] != 0) ++n;
+    return n;
+}
+
+static void test_uncovered_pua_draws_nothing(void **state) {
+    (void)state;
+    if (!tsh_ready()) { skip(); }
+    cairo_surface_t *s = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 80, 40);
+    cairo_t *cr = cairo_create(s);
+    cairo_set_source_rgb(cr, 0, 0, 0);
+    const char icon[] = "\xee\xa3\xa6";
+    assert_int_equal(tsh_draw(cr, &SANS, 20.0, 4.0, 28.0, icon, 3), TSH_OK);
+    assert_int_equal(inked_pixels(s), 0);
+    assert_true(tsh_measure(&SANS, 20.0, icon, 3) > 0.0);
+    assert_int_equal(tsh_draw(cr, &SANS, 20.0, 4.0, 28.0, "a", 1), TSH_OK);
+    assert_true(inked_pixels(s) > 0);
+    cairo_destroy(cr);
+    cairo_surface_destroy(s);
+}
+
 /* --- @font-face registry (spec/webfont.md; needs no system font) --- */
 
 static void test_webfont_rejects_bad_input(void **state) {
@@ -401,6 +432,7 @@ int main(void) {
         cmocka_unit_test(test_measure_matches_shape),
         cmocka_unit_test(test_overflow_cap),
         cmocka_unit_test(test_draw_paints),
+        cmocka_unit_test(test_uncovered_pua_draws_nothing),
         cmocka_unit_test(test_webfont_rejects_bad_input),
         cmocka_unit_test(test_webfont_register_find_clear),
         cmocka_unit_test(test_generic_keywords),

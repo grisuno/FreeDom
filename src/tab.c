@@ -64,8 +64,14 @@ static void ignore_sigpipe(void);
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
 #define TAB_WIRE_B_N 70
-#define TAB_WIRE_BOX_F_N 263
+#define TAB_WIRE_BOX_F_N 267
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
+
+/* A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile
+ * worker cannot hand the painter an unbounded rectangle). */
+static int clip_pm_ok(int32_t v) {
+    return (v >= -CSS_PCT_MAX && v <= CSS_PCT_MAX) ? (int)v : 0;
+}
 
 /* A radial-gradient length off the wire (cg_radial encoding): per-mille 0..1e6, or
  * -(px)-1 with px <= 100000, or CG_LEN_UNSET. Anything else is the caller's default. */
@@ -682,6 +688,9 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->mask_w[0], (int32_t)bd->mask_w[1], (int32_t)bd->mask_w[2],
             (int32_t)bd->mask_w[3], (int32_t)bd->mask_w[4], (int32_t)bd->mask_w[5],
             (int32_t)bd->mask_ref1,
+            /* clip-path: inset() per-mille halves of the clip edges, 2026-10-21 */
+            (int32_t)bd->clip_top_pm, (int32_t)bd->clip_right_pm,
+            (int32_t)bd->clip_bottom_pm, (int32_t)bd->clip_left_pm,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -2440,6 +2449,9 @@ static int read_view(int fd, pv_view **out) {
             .mask_clip = (f[255] >= 0 && f[255] <= 15) ? f[255] : 0,
             .mask_w = { f[256], f[257], f[258], f[259], f[260], f[261] },
             .mask_ref1 = (f[262] >= 0 && f[262] <= 1024) ? f[262] : 0,
+            /* a percentage of the border box, saturated like every other per-mille half */
+            .clip_top_pm = clip_pm_ok(f[263]), .clip_right_pm = clip_pm_ok(f[264]),
+            .clip_bottom_pm = clip_pm_ok(f[265]), .clip_left_pm = clip_pm_ok(f[266]),
         };
         for (int k = 0; k < (PV_BSHADOW_LAYERS - 1) * 6; ++k)
             bd.bsh_x[k / 6][k % 6] = f[228 + k];

@@ -39,12 +39,12 @@
 | `include/block_flow.h` | block_flow (bf_) -- vertical margin collapsing for block-level boxes. | include | 4 | 3 |
 | `include/box_blur.h` | Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md). | include | 4 | 3 |
 | `include/box_style.h` | bx_edges: anything longer fails closed instead of truncating into a wrong match. #define... | include | 31 | 11 |
-| `include/box_tree.h` | bt_positioned: Stage 2: one positioned box in the final paint order. | include | 33 | 5 |
+| `include/box_tree.h` | bt_positioned: Stage 2: one positioned box in the final paint order. | include | 34 | 5 |
 | `include/browser.h` | browser_free: Zero-initialise or reset a state. | include | 19 | 3 |
 | `include/compositor.h` | cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position... | include | 9 | 4 |
 | `include/css.h` | css_style: A resolved presentation. | include | 140 | 37 |
 | `include/css_atrule.h` | car_ops: The questions @supports asks the caller's own engine. prop is lowercased and * both... | include | 10 | 3 |
-| `include/css_box.h` | - | include | 26 | 4 |
+| `include/css_box.h` | - | include | 27 | 4 |
 | `include/css_chain.h` | cch_element_matches: Nonzero iff the parsed selector *sel matches element `el`, built against... | include | 8 | 3 |
 | `include/css_color.h` | cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for... | include | 7 | 13 |
 | `include/css_decl.h` | The sheet's two string pools -- background url()s, and the ::before/::after | include | 14 | 12 |
@@ -122,12 +122,12 @@
 | `src/block_flow.c` | block_flow (bf_) -- vertical margin collapsing. | src | 4 | 0 |
 | `src/box_blur.c` | box_line: One box pass of odd width bw over n samples spaced `step` apart, through tmp * (n bytes). | src | 4 | 0 |
 | `src/box_style.c` | tag_row: One row of the user-agent sheet. | src | 48 | 0 |
-| `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 24 | 0 |
+| `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 25 | 0 |
 | `src/browser.c` | clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {... | src | 41 | 0 |
 | `src/compositor.c` | eff_z: Not a stacking context: a positioned box with z:auto still paints in the *... | src | 5 | 0 |
-| `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 246 | 0 |
+| `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 247 | 0 |
 | `src/css_atrule.c` | keyword_at: Scratch size for one declaration or selector handed to the caller. | src | 11 | 0 |
-| `src/css_box.c` | calc_val: `pct` is the percentage component, carried through the arithmetic exactly like `em`... | src | 51 | 0 |
+| `src/css_box.c` | calc_val: `pct` is the percentage component, carried through the arithmetic exactly like `em`... | src | 52 | 0 |
 | `src/css_chain.c` | cch_node: One element's selector inputs (tag/id/classes) plus its css_element view, with *... | src | 20 | 0 |
 | `src/css_color.c` | normalize: Trims surrounding ASCII spaces and lowercases into out (CC_TOKEN_MAX bytes). *... | src | 27 | 0 |
 | `src/css_gradient.c` | find_gradient_call: Locates a gradient function call `fn` (e.g. "linear-gradient(") in v... | src | 31 | 0 |
@@ -174,7 +174,7 @@
 | `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 42 | 0 |
 | `src/js_trusted.c` | ws_payload: } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for... | src | 14 | 0 |
 | `src/link_nav.c` | clean_href: Removes tab/newline/CR anywhere and trims leading/trailing spaces, in place * into out. | src | 10 | 0 |
-| `src/local_store.c` | - | src | 291 | 0 |
+| `src/local_store.c` | - | src | 299 | 0 |
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
@@ -190,9 +190,9 @@
 | `src/request_policy.c` | public_suffix_labels: Number of labels of the public suffix (eTLD) of a lowercased host... | src | 11 | 0 |
 | `src/secure_fetch.c` | tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a... | src | 74 | 0 |
 | `src/svg_render.c` | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | src | 34 | 0 |
-| `src/tab.c` | rad_len_ok: A radial-gradient length off the wire (cg_radial encoding): per-mille 0..1e6, or *... | src | 123 | 0 |
+| `src/tab.c` | clip_pm_ok: A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile... | src | 124 | 0 |
 | `src/text_case.c` | Latin Extended-A and the Cyrillic historic block pair letters on adjacent code | src | 9 | 0 |
-| `src/text_shape.c` | load_entry_file: Loads face `index` of the font file at `path` into e (FreeType + cairo + *... | src | 59 | 0 |
+| `src/text_shape.c` | load_entry_file: Loads face `index` of the font file at `path` into e (FreeType + cairo + *... | src | 61 | 0 |
 | `src/textfield.c` | - | src | 12 | 0 |
 | `src/tls_impersonate.c` | get_bytes: \| ((uint32_t)r->p[r->off + 3] << 24); r->off += 4; return v; } static uint64_t... | src | 20 | 0 |
 | `src/ui_layout.c` | - | src | 4 | 0 |
@@ -212,9 +212,9 @@
 | `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 68 | 0 |
 | `tests/test_browser.c` | test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete... | tests | 17 | 0 |
 | `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 21 | 0 |
-| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 353 | 0 |
+| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 354 | 0 |
 | `tests/test_css_atrule.c` | test_css_atrule -- @supports evaluation and @layer ranks (spec/css_atrule.md). | tests | 10 | 0 |
-| `tests/test_css_box.c` | test_lineheight_abs_vs_scale: line-height (CSS 2.1 10.8.1): a number, a percentage and an em... | tests | 10 | 0 |
+| `tests/test_css_box.c` | test_lineheight_abs_vs_scale: line-height (CSS 2.1 10.8.1): a number, a percentage and an em... | tests | 13 | 0 |
 | `tests/test_css_color.c` | test_hsl_fractional_hue: A fractional hue is a <number> too (and hsl() takes an <angle>, whose... | tests | 36 | 0 |
 | `tests/test_css_drops.c` | Suite for the parser drop log (spec/css_drops.md). | tests | 25 | 0 |
 | `tests/test_css_gradient.c` | - | tests | 13 | 0 |
@@ -267,7 +267,7 @@
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 17 | 0 |
 | `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 121 | 0 |
 | `tests/test_text_case.c` | - | tests | 4 | 0 |
-| `tests/test_text_shape.c` | read_host_font: Reads a host TrueType file when one exists (same philosophy as the shaping *... | tests | 21 | 0 |
+| `tests/test_text_shape.c` | inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font... | tests | 23 | 0 |
 | `tests/test_textfield.c` | - | tests | 8 | 0 |
 | `tests/test_tls_impersonate.c` | - | tests | 11 | 0 |
 | `tests/test_ui.c` | assert_line: Build: make test   ;   ASan: make asan  #include <stdarg.h> #include <stddef.h>... | tests | 12 | 0 |

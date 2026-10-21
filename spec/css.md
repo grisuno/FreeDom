@@ -2097,3 +2097,13 @@ como `unknown` también; aceptarlas sería inventar), y `-ms-flex-direction`/
   siguen fuera de la sección) es UN anillo entre el borde exterior redondeado y el interior
   (radio exterior menos los anchos adyacentes, CSS Backgrounds 3 §5.2), no cuatro trazos
   rectos: solo estilo `solid` y color común; el resto conserva el camino por lado.
+
+## clip-path: inset() como recorte (tanda 54)
+
+- **Dado** `clip-path: inset(t r b l [round ...])`, **cuando** la caja es absoluta/fija, **entonces** se recorta a ese rectangulo
+  (CSS Masking 1 s3). Se representa como los cuatro BORDES del `clip` existente: cada borde es `px + per-mille x caja de borde`
+  (alto para arriba/abajo, ancho para izquierda/derecha); un inset derecho/inferior `r` es el borde en `100% - r`
+  (`cb_clip_inset`, puro). Las otras formas (`circle/ellipse/polygon/path/url`) siguen formando contexto de apilamiento sin
+  recortar; `none` suelta ambos. Fuera de alcance: `round` (radios) y recorte de cajas en flujo.
+- Caso medido: `.HeroCarouselControls:before{filter:blur(42px);clip-path:inset(135% 0 -100%)}` de GitHub pintaba su brillo
+  entero (100px) sobre el video; ahora solo la franja bajo el borde.

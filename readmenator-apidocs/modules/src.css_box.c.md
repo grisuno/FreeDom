@@ -1,11 +1,11 @@
 # `src/css_box.c`
 
-> Source: [src/css_box.c:1](../../src/css_box.c#L1) | language `c` | coverage 46.9% | [API index](../index.md)
+> Source: [src/css_box.c:1](../../src/css_box.c#L1) | language `c` | coverage 45.5% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`calc_val`](#calc_val), [`calc_parser`](#calc_parser)
-- **Functions:** [`cb_length_px`](#cb_length_px), [`cb_interp_align`](#cb_interp_align), [`RELATIVE`](#relative), [`cb_interp_fontsize_ex`](#cb_interp_fontsize_ex), [`cb_interp_lineheight`](#cb_interp_lineheight), [`cb_interp_weight`](#cb_interp_weight), [`cb_interp_style`](#cb_interp_style), [`cb_interp_textdeco`](#cb_interp_textdeco), [`cb_interp_display`](#cb_interp_display), [`cb_interp_gap`](#cb_interp_gap), [`cb_interp_justify`](#cb_interp_justify), [`repeat`](#repeat), [`cb_expand_grid_template_cols`](#cb_expand_grid_template_cols), [`cb_expand_grid_template_rows`](#cb_expand_grid_template_rows), [`accepts`](#accepts), [`min`](#min), [`cb_interp_len`](#cb_interp_len), [`cb_value_em_milli`](#cb_value_em_milli), [`cb_interp_lp`](#cb_interp_lp), [`term`](#term), [`interp_len`](#interp_len), [`cb_expand_box2`](#cb_expand_box2)
+- **Functions:** [`cb_length_px`](#cb_length_px), [`cb_interp_align`](#cb_interp_align), [`RELATIVE`](#relative), [`cb_interp_fontsize_ex`](#cb_interp_fontsize_ex), [`cb_interp_lineheight`](#cb_interp_lineheight), [`cb_interp_weight`](#cb_interp_weight), [`cb_interp_style`](#cb_interp_style), [`cb_interp_textdeco`](#cb_interp_textdeco), [`cb_interp_display`](#cb_interp_display), [`cb_interp_gap`](#cb_interp_gap), [`cb_interp_justify`](#cb_interp_justify), [`repeat`](#repeat), [`cb_expand_grid_template_cols`](#cb_expand_grid_template_cols), [`cb_expand_grid_template_rows`](#cb_expand_grid_template_rows), [`accepts`](#accepts), [`min`](#min), [`cb_interp_len`](#cb_interp_len), [`cb_value_em_milli`](#cb_value_em_milli), [`cb_clip_inset`](#cb_clip_inset), [`cb_interp_lp`](#cb_interp_lp), [`term`](#term), [`interp_len`](#interp_len), [`cb_expand_box2`](#cb_expand_box2)
 - **Macros:** [`CSS_CALC_MAX_DEPTH`](#css_calc_max_depth), [`CSS_MATHFN_MAX_ARGS`](#css_mathfn_max_args), [`AUTO_REJECT`](#auto_reject), [`AUTO_VALUE`](#auto_value), [`AUTO_RESET`](#auto_reset), [`AUTO_RESET_NONE`](#auto_reset_none)
 
 ## Type Diagram
@@ -32,6 +32,7 @@ flowchart LR
     n_src_css_box_c__cb_interp_lineheight(["cb_interp_lineheight"])
     n_src_css_box_c__cb_interp_gap(["cb_interp_gap"])
     n_src_css_box_c__cb_interp_len(["cb_interp_len"])
+    n_src_css_box_c__cb_clip_inset(["cb_clip_inset"])
     n_src_css_box_c__cb_interp_lp(["cb_interp_lp"])
     n_src_css_box_c__AUTO_RESET_NONE(["AUTO_RESET_NONE"])
     n_src_css_box_c__cb_value_em_milli(["cb_value_em_milli"])
@@ -52,6 +53,7 @@ flowchart LR
     n_src_css_box_c__cb_interp_lineheight --> n_src_css_box_c__cb_length_px
     n_src_css_box_c__cb_interp_gap --> n_src_css_box_c__cb_interp_len
     n_src_css_box_c__cb_interp_len --> n_src_css_box_c__cb_length_px
+    n_src_css_box_c__cb_clip_inset --> n_src_css_box_c__cb_interp_lp
     n_src_css_box_c__cb_interp_lp --> n_src_css_box_c__cb_interp_len
     n_src_css_box_c__AUTO_RESET_NONE --> n_src_css_box_c__cb_interp_lp
     n_src_css_box_c__AUTO_RESET_NONE --> n_src_css_box_c__cb_value_em_milli
@@ -71,7 +73,6 @@ flowchart LR
     n_src_css_box_c__cb_expand_grid_template_cols -.-> n_include_url_h__url
     n_src_css_box_c__cb_expand_grid_template_rows -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_box_c__cb_expand_grid_template_rows -.-> n_include_css_select_h__csel_substr
-    n_src_css_box_c__cb_expand_grid_template_rows -.-> n_include_url_h__url
 ```
 
 ## Structs
@@ -80,7 +81,7 @@ flowchart LR
 
 ### `calc_val`
 
-`struct` | [src/css_box.c:697](../../src/css_box.c#L697)
+`struct` | [src/css_box.c:701](../../src/css_box.c#L701)
 
 ```c
 typedef struct calc_val { double px; double em; double pct; int is_length; } calc_val;
@@ -103,7 +104,7 @@ Before this, calc() understood no percentage at all, so `width: calc(100% - 2rem
 
 #### `calc_val.px`
 
-`type_alias` | [src/css_box.c:697](../../src/css_box.c#L697)
+`type_alias` | [src/css_box.c:701](../../src/css_box.c#L701)
 
 ```c
 typedef struct calc_val { double px;
@@ -122,7 +123,7 @@ Before this, calc() understood no percentage at all, so `width: calc(100% - 2rem
 
 ### `calc_parser`
 
-`struct` `const` | [src/css_box.c:698](../../src/css_box.c#L698)
+`struct` `const` | [src/css_box.c:702](../../src/css_box.c#L702)
 
 ```c
 typedef struct calc_parser { const char *s; size_t n, i; } calc_parser;
@@ -467,7 +468,7 @@ int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)
 
 ### `accepts`
 
-`function` | [src/css_box.c:670](../../src/css_box.c#L670)
+`function` | [src/css_box.c:674](../../src/css_box.c#L674)
 
 ```c
 * itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further than interp_len already can). Bounded: * the whole expression already lives inside o
@@ -488,7 +489,7 @@ int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)
 
 ### `min`
 
-`function` | [src/css_box.c:768](../../src/css_box.c#L768)
+`function` | [src/css_box.c:772](../../src/css_box.c#L772)
 
 ```c
 * without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the element to zero width. Dropping the declaration * leaves the element at its content size,
@@ -509,7 +510,7 @@ int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)
 
 ### `cb_interp_len`
 
-`function` | [src/css_box.c:986](../../src/css_box.c#L986)
+`function` | [src/css_box.c:990](../../src/css_box.c#L990)
 
 ```c
 int cb_interp_len(const char *v, int allow_auto, int *out)
@@ -535,7 +536,7 @@ int cb_interp_len(const char *v, int allow_auto, int *out)
 
 ### `cb_value_em_milli`
 
-`function` | [src/css_box.c:1065](../../src/css_box.c#L1065)
+`function` | [src/css_box.c:1069](../../src/css_box.c#L1069)
 
 ```c
 int cb_value_em_milli(const char *v)
@@ -564,11 +565,35 @@ its own sum via calc_eval; a bare token answers through cl_resolve_lp.
 
 ---
 
+<a id="cb_clip_inset"></a>
+
+### `cb_clip_inset`
+
+`function` | [src/css_box.c:1089](../../src/css_box.c#L1089)
+
+```c
+int cb_clip_inset(const char *val, int px[4], int pm[4])
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `val` | `char *` |  |  |
+| `px` | `int [4]` |  |  |
+| `pm` | `int [4]` |  |  |
+
+**Returns:** `int`
+
+*Calls:* [`cb_next_ws_token`](include.css_box.h.md#cb_next_ws_token), [`cb_interp_lp`](#cb_interp_lp), [`strncmp`](src.css_color.c.md#strncmp)
+
+---
+
 <a id="cb_interp_lp"></a>
 
 ### `cb_interp_lp`
 
-`function` | [src/css_box.c:1085](../../src/css_box.c#L1085)
+`function` | [src/css_box.c:1123](../../src/css_box.c#L1123)
 
 ```c
 int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm)
@@ -588,7 +613,7 @@ int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int 
 
 *Calls:* [`cb_interp_len`](#cb_interp_len), [`cl_ctx_initial`](src.css_length.c.md#cl_ctx_initial), [`cl_resolve_lp`](src.css_length.c.md#cl_resolve_lp)
 
-*Called by:* [`AUTO_RESET_NONE`](#auto_reset_none)
+*Called by:* [`AUTO_RESET_NONE`](#auto_reset_none), [`cb_clip_inset`](#cb_clip_inset)
 
 ---
 
@@ -596,7 +621,7 @@ int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int 
 
 ### `term`
 
-`function` | [src/css_box.c:1092](../../src/css_box.c#L1092)
+`function` | [src/css_box.c:1130](../../src/css_box.c#L1130)
 
 ```c
 * the same expression and failed closed on the percentage term (its property * may not accept one);
@@ -616,7 +641,7 @@ int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int 
 
 ### `interp_len`
 
-`function` | [src/css_box.c:1261](../../src/css_box.c#L1261)
+`function` | [src/css_box.c:1299](../../src/css_box.c#L1299)
 
 ```c
 * this file that might hand a token to interp_len (transitively: margin/padding/ * inset, flex-basis, border/outline width, text-shadow/box-shadow offsets) uses * this helper, so calc() works uniformly instead of only in single-value * properties. Returns 0 (tok untouched) when there is nothing left to read. */ int cb_next_ws_token(const char **p, char *tok, size_t cap)
@@ -643,7 +668,7 @@ int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int 
 
 ### `cb_expand_box2`
 
-`function` | [src/css_box.c:1332](../../src/css_box.c#L1332)
+`function` | [src/css_box.c:1370](../../src/css_box.c#L1370)
 
 ```c
 int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int cap)
@@ -677,7 +702,7 @@ Fail closed on zero, more than two, or any uninterpretable token.
 
 ### `CSS_CALC_MAX_DEPTH`
 
-`macro` | [src/css_box.c:678](../../src/css_box.c#L678)
+`macro` | [src/css_box.c:682](../../src/css_box.c#L682)
 
 ```c
 #define CSS_CALC_MAX_DEPTH
@@ -702,7 +727,7 @@ bare-number side; / requires a bare-number, non-zero divisor. A bare-number
 
 ### `CSS_MATHFN_MAX_ARGS`
 
-`macro` | [src/css_box.c:682](../../src/css_box.c#L682)
+`macro` | [src/css_box.c:686](../../src/css_box.c#L686)
 
 ```c
 #define CSS_MATHFN_MAX_ARGS
@@ -718,7 +743,7 @@ More fail the declaration (anti-DoS; the whole value already fits one CSS_TOK_MA
 
 ### `AUTO_REJECT`
 
-`macro` | [src/css_box.c:1158](../../src/css_box.c#L1158)
+`macro` | [src/css_box.c:1196](../../src/css_box.c#L1196)
 
 ```c
 #define AUTO_REJECT
@@ -741,7 +766,7 @@ before) left the 200px in place. 90 declarations in the measured corpus.
 
 ### `AUTO_VALUE`
 
-`macro` | [src/css_box.c:1159](../../src/css_box.c#L1159)
+`macro` | [src/css_box.c:1197](../../src/css_box.c#L1197)
 
 ```c
 #define AUTO_VALUE
@@ -755,7 +780,7 @@ before) left the 200px in place. 90 declarations in the measured corpus.
 
 ### `AUTO_RESET`
 
-`macro` | [src/css_box.c:1160](../../src/css_box.c#L1160)
+`macro` | [src/css_box.c:1198](../../src/css_box.c#L1198)
 
 ```c
 #define AUTO_RESET
@@ -769,7 +794,7 @@ before) left the 200px in place. 90 declarations in the measured corpus.
 
 ### `AUTO_RESET_NONE`
 
-`macro` | [src/css_box.c:1164](../../src/css_box.c#L1164)
+`macro` | [src/css_box.c:1202](../../src/css_box.c#L1202)
 
 ```c
 #define AUTO_RESET_NONE

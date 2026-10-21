@@ -13,7 +13,7 @@ This community groups 21 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/box_style.h` | h | utility | 31 | no |
-| `include/box_tree.h` | h | utility | 33 | no |
+| `include/box_tree.h` | h | utility | 34 | no |
 | `include/dom_debug.h` | h | utility | 4 | no |
 | `include/flex_layout.h` | h | presentation | 43 | no |
 | `include/page_view.h` | h | presentation | 87 | no |
@@ -36,7 +36,7 @@ This community groups 21 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `src/box_style.c` | c | utility | 48 | no |
-| `src/box_tree.c` | c | utility | 24 | no |
+| `src/box_tree.c` | c | utility | 25 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 35 | no |
 | `src/page_view.c` | c | presentation | 244 | no |

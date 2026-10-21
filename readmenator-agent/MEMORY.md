@@ -2,13 +2,13 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 288 files at commit `0e860d50f71b`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 288 files at commit `ea1d6286c4ef`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of the LazyOwn Redteam Framework: a free, open-source web browser (`README.md:5`)
-- Domain vocabulary (term, files): `null` (142), `one` (126), `max` (118), `size` (112), `not` (111), `include` (111), `out` (109), `freedom` (101), `free` (98), `char` (96), `const` (93), `css` (91), `text` (86), `its` (86), `static` (85)
-- Subsystem `src: tab`: 57 files, core `src/tab.c`: rad_len_ok: A radial-gradient length off the wire (cg_radial encoding): per-mille 0..1e6, or *...
+- Domain vocabulary (term, files): `null` (142), `one` (126), `max` (118), `size` (112), `not` (112), `include` (111), `out` (109), `freedom` (101), `free` (98), `char` (96), `const` (93), `css` (91), `its` (87), `text` (86), `static` (85)
+- Subsystem `src: tab`: 57 files, core `src/tab.c`: clip_pm_ok: A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile...
 - Subsystem `include: css`: 50 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
 - Subsystem `include: browser_ui`: 38 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
 - Subsystem `src: freedom`: 36 files, core `src/freedom.c`: is_overlay_http: fprintf(fp, "  --dump-video-url: headless, print the first detected video...
@@ -68,8 +68,8 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 187 files, 5447 symbols; docstrings on 28% of symbols; functions snake_case (99%); types PascalCase (0%); median file 228 lines, max 18645.
-- h: 86 files, 1398 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 78 lines, max 1227.
+- c: 187 files, 5467 symbols; docstrings on 28% of symbols; functions snake_case (99%); types PascalCase (0%); median file 228 lines, max 18664.
+- h: 86 files, 1400 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 78 lines, max 1229.
 - py: 10 files, 42 symbols; docstrings on 19% of symbols; functions snake_case (100%); median file 96 lines, max 345.
 - sh: 5 files, 0 symbols; median file 11 lines, max 91.
 - Tests: 75 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
@@ -89,7 +89,7 @@ Measured baseline:
 
 ## 6. Risks to respect
 
-- God nodes (changes ripple widely): `gui/browser_ui.c`, `include/css.h`, `src/tab.c`, `src/freedom.c`, `src/css.c`
+- God nodes (changes ripple widely): `gui/browser_ui.c`, `include/css.h`, `src/tab.c`, `src/css.c`, `src/freedom.c`
 - Hotspots (complex and central): `gui/browser_ui.c`, `src/tab.c`, `src/css.c`, `src/page_view.c`, `tests/test_css.c`
 - Cycle: `include/js_dom.h` -> `include/js_location.h` -> `include/js_dom.h`
 - Full blast radius: `readmenator-agent/GOTCHAS.md`; findings: `readmenator-agent/SECURITY.md`.

@@ -1,29 +1,31 @@
-# Symbols (page 3 of 14)
+# Symbols (page 3 of 15)
 Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `FREEDOM_CSS_BOX_H` | macro | `include/css_box.h:2` | `#define FREEDOM_CSS_BOX_H` |
 | `cb_emit_len` | function | `include/css_box.h:17` | `int cb_emit_len(css_decl *dst, int cap, int slot, const char *val, int allow_auto, int allow_neg);` |
 | `cb_expand_box2` | function | `include/css_box.h:21` | `int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int...` |
 | `cb_expand_box4` | function | `include/css_box.h:19` | `int cb_expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg, css_decl *dst, int cap);` |
-| `cb_expand_grid_template_cols` | function | `include/css_box.h:38` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);` |
-| `cb_interp_align` | function | `include/css_box.h:28` | `int cb_interp_align(const char *v);` |
-| `cb_interp_display` | function | `include/css_box.h:34` | `int cb_interp_display(const char *v);` |
-| `cb_interp_fontsize_ex` | function | `include/css_box.h:29` | `int cb_interp_fontsize_ex(const char *v, int *abs_out);` |
-| `cb_interp_gap` | function | `include/css_box.h:35` | `int cb_interp_gap(const char *v);` |
-| `cb_interp_gridcols` | function | `include/css_box.h:37` | `int cb_interp_gridcols(const char *v);` |
-| `cb_interp_justify` | function | `include/css_box.h:36` | `int cb_interp_justify(const char *v);` |
+| `cb_expand_grid_template_cols` | function | `include/css_box.h:43` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);` |
+| `cb_interp_align` | function | `include/css_box.h:33` | `int cb_interp_align(const char *v);` |
+| `cb_interp_display` | function | `include/css_box.h:39` | `int cb_interp_display(const char *v);` |
+| `cb_interp_fontsize_ex` | function | `include/css_box.h:34` | `int cb_interp_fontsize_ex(const char *v, int *abs_out);` |
+| `cb_interp_gap` | function | `include/css_box.h:40` | `int cb_interp_gap(const char *v);` |
+| `cb_interp_gridcols` | function | `include/css_box.h:42` | `int cb_interp_gridcols(const char *v);` |
+| `cb_interp_justify` | function | `include/css_box.h:41` | `int cb_interp_justify(const char *v);` |
 | `cb_interp_len` | function | `include/css_box.h:16` | `int cb_interp_len(const char *v, int allow_auto, int *out);` |
-| `cb_interp_lineheight` | function | `include/css_box.h:30` | `int cb_interp_lineheight(const char *v);` |
+| `cb_interp_lineheight` | function | `include/css_box.h:35` | `int cb_interp_lineheight(const char *v);` |
 | `cb_interp_lp` | function | `include/css_box.h:23` | `int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm);` |
-| `cb_interp_style` | function | `include/css_box.h:32` | `int cb_interp_style(const char *v);` |
-| `cb_interp_textdeco` | function | `include/css_box.h:33` | `int cb_interp_textdeco(const char *v);` |
-| `cb_interp_weight` | function | `include/css_box.h:31` | `int cb_interp_weight(const char *v);` |
+| `cb_interp_style` | function | `include/css_box.h:37` | `int cb_interp_style(const char *v);` |
+| `cb_interp_textdeco` | function | `include/css_box.h:38` | `int cb_interp_textdeco(const char *v);` |
+| `cb_interp_weight` | function | `include/css_box.h:36` | `int cb_interp_weight(const char *v);` |
 | `cb_length_px` | function | `include/css_box.h:15` | `int cb_length_px(const char *v, double *px);` |
-| `cb_lp_can_be_nonneg` | function | `include/css_box.h:26` | `int cb_lp_can_be_nonneg(int px_val, int pct_pm);` |
-| `cb_next_ws_token` | function | `include/css_box.h:27` | `int cb_next_ws_token(const char **p, char *tok, size_t cap);` |
+| `cb_lp_can_be_nonneg` | function | `include/css_box.h:31` | `int cb_lp_can_be_nonneg(int px_val, int pct_pm);` |
+| `cb_next_ws_token` | function | `include/css_box.h:32` | `int cb_next_ws_token(const char **p, char *tok, size_t cap);` |
 | `cb_value_em_milli` | function | `include/css_box.h:25` | `int cb_value_em_milli(const char *v);` |
-| `strings` | function | `include/css_box.h:40` | `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...` |
+| `rectangle` | function | `include/css_box.h:27` | `* rectangle (top, right, bottom, left): px[i] + pm[i]/1000 of the border box (height for * top/bottom, width for...` |
+| `strings` | function | `include/css_box.h:45` | `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...` |
 | `CCH_CHAIN_MAX` | macro | `include/css_chain.h:26` | `#define CCH_CHAIN_MAX` |
 | `CCH_NTH_MAX` | macro | `include/css_chain.h:28` | `#define CCH_NTH_MAX` |
 | `CCH_SIB_MAX` | macro | `include/css_chain.h:27` | `#define CCH_SIB_MAX` |
@@ -50,9 +52,9 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CSS_WIDE_PROBE_DECLS` | macro | `include/css_decl.h:35` | `#define CSS_WIDE_PROBE_DECLS` |
 | `FREEDOM_CSS_DECL_H` | macro | `include/css_decl.h:2` | `#define FREEDOM_CSS_DECL_H` |
 | `contiguous` | function | `include/css_decl.h:65` | `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...` |
-| `css_decl` | struct | `include/css_decl.h:217` | `` |
+| `css_decl` | struct | `include/css_decl.h:220` | `` |
 | `order` | function | `include/css_decl.h:50` | `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);` |
-| `prop` | type_alias | `include/css_decl.h:216` | `typedef struct css_decl { int prop;` |
+| `prop` | type_alias | `include/css_decl.h:219` | `typedef struct css_decl { int prop;` |
 | `CG_LEN_UNSET` | macro | `include/css_gradient.h:18` | `#define CG_LEN_UNSET` |
 | `FREEDOM_CSS_GRADIENT_H` | macro | `include/css_gradient.h:2` | `#define FREEDOM_CSS_GRADIENT_H` |
 | `cg_expand_background` | function | `include/css_gradient.h:13` | `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `JS_MODULE_BYTES_MAX` | macro | `include/js_sandbox.h:106` | `#define JS_MODULE_BYTES_MAX` |
 | `JS_MODULE_MAX` | macro | `include/js_sandbox.h:105` | `#define JS_MODULE_MAX` |
 | `JS_REALM_MAX` | macro | `include/js_sandbox.h:179` | `#define JS_REALM_MAX` |
-| `handle` | function | `include/js_sandbox.h:162` | `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....` |
-| `js_context` | type_alias | `include/js_sandbox.h:47` | `typedef struct js_context js_context;` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

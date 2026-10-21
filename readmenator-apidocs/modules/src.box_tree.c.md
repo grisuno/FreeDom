@@ -1,10 +1,10 @@
 # `src/box_tree.c`
 
-> Source: [src/box_tree.c:1](../../src/box_tree.c#L1) | language `c` | coverage 33.3% | [API index](../index.md)
+> Source: [src/box_tree.c:1](../../src/box_tree.c#L1) | language `c` | coverage 37.5% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`height`](#height), [`sized`](#sized), [`bt_layout`](#bt_layout), [`bt_containing_block`](#bt_containing_block), [`block`](#block), [`bt_resolve_positioning`](#bt_resolve_positioning), [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`bt_box_hidden`](#bt_box_hidden), [`bt_oof_avail`](#bt_oof_avail), [`bt_defer_roots`](#bt_defer_roots)
+- **Functions:** [`height`](#height), [`sized`](#sized), [`bt_layout`](#bt_layout), [`bt_containing_block`](#bt_containing_block), [`block`](#block), [`bt_resolve_positioning`](#bt_resolve_positioning), [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`bt_box_hidden`](#bt_box_hidden), [`bt_in_subtree`](#bt_in_subtree), [`bt_oof_avail`](#bt_oof_avail), [`bt_defer_roots`](#bt_defer_roots)
 - **Macros:** [`BT_LEN_AUTO`](#bt_len_auto), [`BT_WRAP_EPS`](#bt_wrap_eps)
 
 ## Call Graph
@@ -129,7 +129,7 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 | `cb_w` | `double *` |  |  |
 | `cb_h` | `double *` |  |  |
 
-> **Inherited:** Documentation from [`bt_containing_block`](#bt_containing_block) (include/box_tree.h:262).
+> **Inherited:** Documentation from [`bt_containing_block`](#bt_containing_block) (include/box_tree.h:268).
 
 *Called by:* [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex)
 
@@ -248,7 +248,7 @@ Both walk the parent_id chain from `bid` (self first) looking for a box whose po
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`bt_oof_anchor`](#bt_oof_anchor) (include/box_tree.h:247).
+> **Inherited:** Documentation from [`bt_oof_anchor`](#bt_oof_anchor) (include/box_tree.h:253).
 
 ---
 
@@ -304,11 +304,40 @@ The walk is bounded by nbox links and fails closed (returns 1, hidden) on NULL b
 
 ---
 
+<a id="bt_in_subtree"></a>
+
+### `bt_in_subtree`
+
+`function` | [src/box_tree.c:789](../../src/box_tree.c#L789)
+
+```c
+int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)
+```
+
+1 when box `bid` is `root` or a descendant of it on the parent_id chain, else 0 (ancestors, siblings, out-of-range ids, NULL, a parent cycle).
+
+The walk is bounded by nbox links. An out-of-flow sub-layout owns its anchor's subtree only: any other box a run's container membership dragged in is not the subtree's to paint.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `boxes` | `pv_box_def *` |  |  |
+| `nbox` | `size_t` |  |  |
+| `root` | `size_t` |  |  |
+| `bid` | `size_t` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`bt_in_subtree`](#bt_in_subtree) (include/box_tree.h:239).
+
+---
+
 <a id="bt_oof_avail"></a>
 
 ### `bt_oof_avail`
 
-`function` | [src/box_tree.c:789](../../src/box_tree.c#L789)
+`function` | [src/box_tree.c:800](../../src/box_tree.c#L800)
 
 ```c
 double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)
@@ -333,7 +362,7 @@ double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)
 
 ### `bt_defer_roots`
 
-`function` | [src/box_tree.c:797](../../src/box_tree.c#L797)
+`function` | [src/box_tree.c:808](../../src/box_tree.c#L808)
 
 ```c
 size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox, const bt_positioned *pos, size_t npos, const char *in_flow, int *root_of, size_t *order_of)
@@ -368,7 +397,7 @@ malformed input fails OPEN: every entry -1, nothing deferred (normal paint).
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`bt_defer_roots`](#bt_defer_roots) (include/box_tree.h:285).
+> **Inherited:** Documentation from [`bt_defer_roots`](#bt_defer_roots) (include/box_tree.h:291).
 
 *Calls:* [`bt_oof_root`](#bt_oof_root)
 

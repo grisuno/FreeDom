@@ -4375,6 +4375,29 @@ static void test_inline_bg_clip_origin_attachment(void **state) {
 /* A basic-shape clip-path makes the element a stacking context (CSS Masking 1 3); the engine
  * carries that through the isolation channel. `none` and the legacy visually-hidden rect()
  * clip nothing and leave the channel unset. */
+/* clip-path: inset() is honoured as a clip rectangle, carried on the clip edges (px + per-mille of
+ * the border box); `none` and a later `clip: auto` release it. GitHub's hero glow is
+ * `inset(135% 0 -100%)`: without the clip the whole blurred blob paints over the video. */
+static void test_inline_clip_path_inset_sets_clip_edges(void **state) {
+    (void)state;
+    css_style st = css_parse_inline("clip-path:inset(135% 0 -100%)", 0);
+    assert_int_equal(st.isolation, CSS_ISO_ISOLATE);
+    assert_int_equal(st.clip_top, 0);
+    assert_int_equal(st.clip_top_pm, 1350);
+    assert_int_equal(st.clip_right_pm, 1000);
+    assert_int_equal(st.clip_bottom_pm, 2000);
+    assert_int_equal(st.clip_left_pm, 0);
+    st = css_parse_inline("clip-path:inset(10px 20px)", 0);
+    assert_int_equal(st.clip_top, 10);
+    assert_int_equal(st.clip_right, -20);
+    assert_int_equal(st.clip_right_pm, 1000);
+    st = css_parse_inline("clip-path:inset(0);clip-path:none", 0);
+    assert_int_equal(st.clip_top, CSS_LEN_UNSET);
+    assert_int_equal(st.clip_right, CSS_LEN_UNSET);
+    st = css_parse_inline("clip-path:circle(50%)", 0);   /* shape not modelled: no clip */
+    assert_int_equal(st.clip_top, CSS_LEN_UNSET);
+}
+
 static void test_inline_clip_path_forms_stacking_context(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("clip-path:inset(0)", 0).isolation, CSS_ISO_ISOLATE);
@@ -5909,6 +5932,7 @@ int main(void) {
         cmocka_unit_test(test_inline_bg_clip_origin_attachment),
         cmocka_unit_test(test_inline_isolation),
         cmocka_unit_test(test_inline_clip_path_forms_stacking_context),
+        cmocka_unit_test(test_inline_clip_path_inset_sets_clip_edges),
         cmocka_unit_test(test_inline_contain),
         cmocka_unit_test(test_inline_content_visibility),
         cmocka_unit_test(test_inline_image_rendering),

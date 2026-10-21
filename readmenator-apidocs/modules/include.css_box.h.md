@@ -4,7 +4,7 @@
 
 ## Contents
 
-- **Functions:** [`cb_length_px`](#cb_length_px), [`cb_interp_len`](#cb_interp_len), [`cb_emit_len`](#cb_emit_len), [`cb_expand_box4`](#cb_expand_box4), [`cb_expand_box2`](#cb_expand_box2), [`cb_interp_lp`](#cb_interp_lp), [`cb_value_em_milli`](#cb_value_em_milli), [`cb_lp_can_be_nonneg`](#cb_lp_can_be_nonneg), [`cb_next_ws_token`](#cb_next_ws_token), [`cb_interp_align`](#cb_interp_align), [`cb_interp_fontsize_ex`](#cb_interp_fontsize_ex), [`cb_interp_lineheight`](#cb_interp_lineheight), [`cb_interp_weight`](#cb_interp_weight), [`cb_interp_style`](#cb_interp_style), [`cb_interp_textdeco`](#cb_interp_textdeco), [`cb_interp_display`](#cb_interp_display), [`cb_interp_gap`](#cb_interp_gap), [`cb_interp_justify`](#cb_interp_justify), [`cb_interp_gridcols`](#cb_interp_gridcols), [`cb_expand_grid_template_cols`](#cb_expand_grid_template_cols), [`strings`](#strings)
+- **Functions:** [`cb_length_px`](#cb_length_px), [`cb_interp_len`](#cb_interp_len), [`cb_emit_len`](#cb_emit_len), [`cb_expand_box4`](#cb_expand_box4), [`cb_expand_box2`](#cb_expand_box2), [`cb_interp_lp`](#cb_interp_lp), [`cb_value_em_milli`](#cb_value_em_milli), [`rectangle`](#rectangle), [`cb_lp_can_be_nonneg`](#cb_lp_can_be_nonneg), [`cb_next_ws_token`](#cb_next_ws_token), [`cb_interp_align`](#cb_interp_align), [`cb_interp_fontsize_ex`](#cb_interp_fontsize_ex), [`cb_interp_lineheight`](#cb_interp_lineheight), [`cb_interp_weight`](#cb_interp_weight), [`cb_interp_style`](#cb_interp_style), [`cb_interp_textdeco`](#cb_interp_textdeco), [`cb_interp_display`](#cb_interp_display), [`cb_interp_gap`](#cb_interp_gap), [`cb_interp_justify`](#cb_interp_justify), [`cb_interp_gridcols`](#cb_interp_gridcols), [`cb_expand_grid_template_cols`](#cb_expand_grid_template_cols), [`strings`](#strings)
 - **Macros:** [`CB_AUTO_REJECT`](#cb_auto_reject), [`CB_AUTO_VALUE`](#cb_auto_value), [`CB_AUTO_RESET`](#cb_auto_reset), [`CB_AUTO_RESET_NONE`](#cb_auto_reset_none)
 
 ## Functions
@@ -180,11 +180,25 @@ int cb_value_em_milli(const char *v);
 
 ---
 
+<a id="rectangle"></a>
+
+### `rectangle`
+
+`function` | [include/css_box.h:27](../../include/css_box.h#L27)
+
+```c
+* rectangle (top, right, bottom, left): px[i] + pm[i]/1000 of the border box (height for * top/bottom, width for left/right). A right/bottom inset r is the edge at 100% - r. The * `round` radii are ig
+```
+
+**Returns:** `` px[i] + pm[i]/1000 of the border box (height for * top/bottom, width for left/right). A right/bottom inset r is the edge at 100% - r. The * `round` radii are ig ``
+
+---
+
 <a id="cb_lp_can_be_nonneg"></a>
 
 ### `cb_lp_can_be_nonneg`
 
-`function` | [include/css_box.h:26](../../include/css_box.h#L26)
+`function` | [include/css_box.h:31](../../include/css_box.h#L31)
 
 ```c
 int cb_lp_can_be_nonneg(int px_val, int pct_pm);
@@ -207,7 +221,7 @@ int cb_lp_can_be_nonneg(int px_val, int pct_pm);
 
 ### `cb_next_ws_token`
 
-`function` | [include/css_box.h:27](../../include/css_box.h#L27)
+`function` | [include/css_box.h:32](../../include/css_box.h#L32)
 
 ```c
 int cb_next_ws_token(const char **p, char *tok, size_t cap);
@@ -223,7 +237,7 @@ int cb_next_ws_token(const char **p, char *tok, size_t cap);
 
 **Returns:** `int`
 
-*Called by:* [`cb_expand_box2`](src.css_box.c.md#cb_expand_box2), [`interp_len`](src.css_box.c.md#interp_len), [`ct_expand_shadow`](src.css_text.c.md#ct_expand_shadow)
+*Called by:* [`cb_clip_inset`](src.css_box.c.md#cb_clip_inset), [`cb_expand_box2`](src.css_box.c.md#cb_expand_box2), [`interp_len`](src.css_box.c.md#interp_len), [`ct_expand_shadow`](src.css_text.c.md#ct_expand_shadow)
 
 ---
 
@@ -231,7 +245,7 @@ int cb_next_ws_token(const char **p, char *tok, size_t cap);
 
 ### `cb_interp_align`
 
-`function` | [include/css_box.h:28](../../include/css_box.h#L28)
+`function` | [include/css_box.h:33](../../include/css_box.h#L33)
 
 ```c
 int cb_interp_align(const char *v);
@@ -251,7 +265,7 @@ int cb_interp_align(const char *v);
 
 ### `cb_interp_fontsize_ex`
 
-`function` | [include/css_box.h:29](../../include/css_box.h#L29)
+`function` | [include/css_box.h:34](../../include/css_box.h#L34)
 
 ```c
 int cb_interp_fontsize_ex(const char *v, int *abs_out);
@@ -272,7 +286,7 @@ int cb_interp_fontsize_ex(const char *v, int *abs_out);
 
 ### `cb_interp_lineheight`
 
-`function` | [include/css_box.h:30](../../include/css_box.h#L30)
+`function` | [include/css_box.h:35](../../include/css_box.h#L35)
 
 ```c
 int cb_interp_lineheight(const char *v);
@@ -292,7 +306,7 @@ int cb_interp_lineheight(const char *v);
 
 ### `cb_interp_weight`
 
-`function` | [include/css_box.h:31](../../include/css_box.h#L31)
+`function` | [include/css_box.h:36](../../include/css_box.h#L36)
 
 ```c
 int cb_interp_weight(const char *v);
@@ -312,7 +326,7 @@ int cb_interp_weight(const char *v);
 
 ### `cb_interp_style`
 
-`function` | [include/css_box.h:32](../../include/css_box.h#L32)
+`function` | [include/css_box.h:37](../../include/css_box.h#L37)
 
 ```c
 int cb_interp_style(const char *v);
@@ -332,7 +346,7 @@ int cb_interp_style(const char *v);
 
 ### `cb_interp_textdeco`
 
-`function` | [include/css_box.h:33](../../include/css_box.h#L33)
+`function` | [include/css_box.h:38](../../include/css_box.h#L38)
 
 ```c
 int cb_interp_textdeco(const char *v);
@@ -352,7 +366,7 @@ int cb_interp_textdeco(const char *v);
 
 ### `cb_interp_display`
 
-`function` | [include/css_box.h:34](../../include/css_box.h#L34)
+`function` | [include/css_box.h:39](../../include/css_box.h#L39)
 
 ```c
 int cb_interp_display(const char *v);
@@ -372,7 +386,7 @@ int cb_interp_display(const char *v);
 
 ### `cb_interp_gap`
 
-`function` | [include/css_box.h:35](../../include/css_box.h#L35)
+`function` | [include/css_box.h:40](../../include/css_box.h#L40)
 
 ```c
 int cb_interp_gap(const char *v);
@@ -392,7 +406,7 @@ int cb_interp_gap(const char *v);
 
 ### `cb_interp_justify`
 
-`function` | [include/css_box.h:36](../../include/css_box.h#L36)
+`function` | [include/css_box.h:41](../../include/css_box.h#L41)
 
 ```c
 int cb_interp_justify(const char *v);
@@ -412,7 +426,7 @@ int cb_interp_justify(const char *v);
 
 ### `cb_interp_gridcols`
 
-`function` | [include/css_box.h:37](../../include/css_box.h#L37)
+`function` | [include/css_box.h:42](../../include/css_box.h#L42)
 
 ```c
 int cb_interp_gridcols(const char *v);
@@ -432,7 +446,7 @@ int cb_interp_gridcols(const char *v);
 
 ### `cb_expand_grid_template_cols`
 
-`function` | [include/css_box.h:38](../../include/css_box.h#L38)
+`function` | [include/css_box.h:43](../../include/css_box.h#L43)
 
 ```c
 int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);
@@ -454,7 +468,7 @@ int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);
 
 ### `strings`
 
-`function` | [include/css_box.h:40](../../include/css_box.h#L40)
+`function` | [include/css_box.h:45](../../include/css_box.h#L45)
 
 ```c
 * Quoted area strings (the grid-template shorthand's row half) are skipped. */ int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap);

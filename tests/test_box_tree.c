@@ -829,6 +829,27 @@ static void test_box_hidden_fail_closed(void **state) {
     assert_int_equal(bt_box_hidden(boxes, 2, 0), 1);  /* cycle 0↔1, no explicit value */
 }
 
+/* Given the box tree, when asking whether a box lies in the subtree of an anchor, then
+ * self and descendants answer yes and everything else (ancestors, siblings, cycles,
+ * out-of-range ids, NULL) answers no: an out-of-flow sub-layout paints only these. */
+static void test_in_subtree(void **state) {
+    (void)state;
+    pv_box_def boxes[5] = {
+        { .parent_id = -1 }, { .parent_id = 0 }, { .parent_id = 1 },
+        { .parent_id = 1 }, { .parent_id = 3 },
+    };
+    assert_int_equal(bt_in_subtree(boxes, 5, 1, 1), 1);
+    assert_int_equal(bt_in_subtree(boxes, 5, 1, 4), 1);
+    assert_int_equal(bt_in_subtree(boxes, 5, 1, 2), 1);
+    assert_int_equal(bt_in_subtree(boxes, 5, 3, 2), 0);   /* sibling */
+    assert_int_equal(bt_in_subtree(boxes, 5, 3, 0), 0);   /* ancestor */
+    assert_int_equal(bt_in_subtree(boxes, 5, 3, 1), 0);   /* ancestor */
+    assert_int_equal(bt_in_subtree(boxes, 5, 3, 9), 0);   /* out of range */
+    assert_int_equal(bt_in_subtree(NULL, 5, 3, 4), 0);
+    pv_box_def cyc[2] = {{ .parent_id = 1 }, { .parent_id = 0 }};
+    assert_int_equal(bt_in_subtree(cyc, 2, 5, 0), 0);     /* terminates */
+}
+
 static void test_oof_anchor_none_on_static_chain(void **state) {
     (void)state;
     pv_box_def boxes[2] = {
@@ -1203,6 +1224,7 @@ int main(void) {
         cmocka_unit_test(test_abspos_resolves_against_placed_ancestor),
         cmocka_unit_test(test_abspos_unplaced_without_anchor_falls_to_viewport),
         cmocka_unit_test(test_box_hidden_self),
+        cmocka_unit_test(test_in_subtree),
         cmocka_unit_test(test_box_hidden_ancestor),
         cmocka_unit_test(test_box_hidden_fail_closed),
         cmocka_unit_test(test_oof_anchor_none_on_static_chain),

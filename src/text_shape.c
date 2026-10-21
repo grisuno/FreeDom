@@ -610,6 +610,13 @@ static unsigned utf8_next(const char *s, size_t n, size_t *len) {
     return cp;
 }
 
+#define TSH_BLANK_GLYPH ((unsigned long)-1)
+
+/* Private Use Area: no standard glyph, so with no face for it a browser draws nothing. */
+static int is_private_use(unsigned cp) {
+    return (cp >= 0xe000 && cp <= 0xf8ff) || cp >= 0xf0000;
+}
+
 /* A character that never chooses a face of its own: it rides the run before it. */
 static int rides_previous(unsigned cp) {
     return cp < 0x20 || cp == 0x7f ||
@@ -744,6 +751,7 @@ static int cover_cp(unsigned cp, void *vctx) {
     tsh_cover_ctx *c = (tsh_cover_ctx *)vctx;
     hb_codepoint_t g;
     if (cp == ' ' || hb_font_get_nominal_glyph(c->primary->hbfont, cp, &g)) return 0;
+    if (is_private_use(cp)) return 0;
     tsh_entry *e = fb_entry(cp, c->bold);
     if (e == NULL || e == c->primary) return 0;
     for (int k = 1; k < c->nfaces; ++k) if (c->faces[k] == e) return k;
@@ -770,6 +778,11 @@ static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t 
     double penx = 0.0, peny = 0.0;
     for (unsigned i = 0; i < gn; ++i) {
         g_scratch[i].index = info[i].codepoint;
+        if (info[i].codepoint == 0 && info[i].cluster < len) {
+            size_t cl;
+            if (is_private_use(utf8_next(text + info[i].cluster, len - info[i].cluster, &cl)))
+                g_scratch[i].index = TSH_BLANK_GLYPH;
+        }
         g_scratch[i].x = penx + (double)pos[i].x_offset / 64.0;
         g_scratch[i].y = peny - (double)pos[i].y_offset / 64.0;
         penx += (double)pos[i].x_advance / 64.0;
@@ -813,11 +826,15 @@ static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x
         if (cr != NULL && n > 0) {
             cairo_set_font_face(cr, re->cface);
             cairo_set_font_size(cr, px);
+            size_t shown = 0;
             for (size_t i = 0; i < n; ++i) {
-                g_scratch[i].x += x + pen;
-                g_scratch[i].y += baseline;
+                if (g_scratch[i].index == TSH_BLANK_GLYPH) continue;
+                g_scratch[shown] = g_scratch[i];
+                g_scratch[shown].x += x + pen;
+                g_scratch[shown].y += baseline;
+                ++shown;
             }
-            cairo_show_glyphs(cr, g_scratch, (int)n);
+            if (shown > 0) cairo_show_glyphs(cr, g_scratch, (int)shown);
         }
         pen += adv;
     }

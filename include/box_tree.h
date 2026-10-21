@@ -232,6 +232,12 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
  * bounds. Pure; no allocation. */
 int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);
 
+/* 1 when box `bid` is `root` or a descendant of it on the parent_id chain, else 0
+ * (ancestors, siblings, out-of-range ids, NULL, a parent cycle). The walk is bounded
+ * by nbox links. An out-of-flow sub-layout owns its anchor's subtree only: any other
+ * box a run's container membership dragged in is not the subtree's to paint. */
+int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid);
+
 /* Stage 2d out-of-flow subtree classification (spec/box_engine.md). Both walk
  * the parent_id chain from `bid` (self first) looking for a box whose position
  * is ABSOLUTE or FIXED:

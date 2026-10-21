@@ -23,6 +23,11 @@ int cb_expand_box2(const char *val, int slot_start, int slot_end,
 int cb_interp_lp(const char *v, int allow_auto, int allow_pct,
                  int *out_px, int *out_pm);
 int cb_value_em_milli(const char *v);
+/* clip-path: inset(<length-percentage>{1,4} [round ...]) as the four edges of the clip
+ * rectangle (top, right, bottom, left): px[i] + pm[i]/1000 of the border box (height for
+ * top/bottom, width for left/right). A right/bottom inset r is the edge at 100% - r. The
+ * `round` radii are ignored. 1 on success, 0 (fail closed) on anything else. */
+int cb_clip_inset(const char *val, int px[4], int pm[4]);
 int cb_lp_can_be_nonneg(int px_val, int pct_pm);
 int cb_next_ws_token(const char **p, char *tok, size_t cap);
 int cb_interp_align(const char *v);

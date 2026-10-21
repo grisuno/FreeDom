@@ -3141,6 +3141,43 @@ static int expand_clip(const char *val, css_decl *dst, int cap) {
     return 4;
 }
 
+/* clip-path (CSS Masking 1 3). Every basic shape or url() makes the element a STACKING CONTEXT,
+ * carried by the isolation channel (same effect on paint order, no new wire field), so a
+ * negative-z glow inside `.hero{clip-path:inset(0)}` stays above the hero's own background.
+ * `inset()` is also honoured as a clip rectangle on the clip edges (cb_clip_inset); the other
+ * shapes are not modelled and clip nothing. `none` releases both. The legacy `rect()`
+ * idiom of visually-hidden text clips nothing the engine models: accepted, no effect. */
+static int expand_clip_path(const char *val, css_decl *dst, int cap) {
+    const char *v = val;
+    while (*v == ' ') ++v;
+    int px[4], pm[4];
+    if (strncmp(v, "inset(", 6) == 0 && cb_clip_inset(v, px, pm) && cap >= 9) {
+        dst[0].prop = P_ISOLATION; dst[0].ival = CSS_ISO_ISOLATE;
+        for (int i = 0; i < 4; ++i) {
+            dst[1 + i].prop = P_CLIP_TOP + i;    dst[1 + i].ival = px[i];
+            dst[5 + i].prop = P_CLIP_TOP_PM + i; dst[5 + i].ival = pm[i];
+        }
+        return 9;
+    }
+    if (strncmp(v, "inset(", 6) == 0 || strncmp(v, "circle(", 7) == 0 ||
+        strncmp(v, "ellipse(", 8) == 0 || strncmp(v, "polygon(", 8) == 0 ||
+        strncmp(v, "path(", 5) == 0 || strncmp(v, "url(", 4) == 0) {
+        if (cap < 1) return 0;
+        dst[0].prop = P_ISOLATION; dst[0].ival = CSS_ISO_ISOLATE;
+        return 1;
+    }
+    if (strncmp(v, "none", 4) == 0 && cap >= 5) {
+        dst[0].prop = P_ISOLATION; dst[0].ival = 0;
+        for (int i = 0; i < 4; ++i) { dst[1 + i].prop = P_CLIP_TOP + i; dst[1 + i].ival = CSS_LEN_UNSET; }
+        return 5;
+    }
+    if (strncmp(v, "rect(", 5) == 0 && cap >= 1) {
+        dst[0].prop = P_ISOLATION; dst[0].ival = 0;
+        return 1;
+    }
+    return 0;
+}
+
 /* First family name of a font-family/font value: up to the first comma,
  * trimmed, quotes stripped -- the same entry walk ct_interp_fontfamily
  * (css_text.c) uses, so the name and the bucket agree about which entry is
@@ -3517,6 +3554,7 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     if (strcmp(prop, "transform") == 0) return expand_transform(val, dst, cap);
     if (strcmp(prop, "transform-origin") == 0) return expand_transform_origin(val, dst, cap);
     if (strcmp(prop, "clip") == 0)   return expand_clip(val, dst, cap);
+    if (strcmp(prop, "clip-path") == 0) return expand_clip_path(val, dst, cap);
 
     /* Text-presentation extensions whose value may legitimately be 0 or negative
      * (so they bypass the generic ival<0 drop, like the box-model lengths). */
@@ -3927,26 +3965,6 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         else if (csel_ci_eq(first, "alternate-reverse")) iv = 3;
         else return 0;
         dst[0].prop = P_ANIM_DIR; dst[0].ival = iv; return 1;
-    }
-    else if (strcmp(prop, "clip-path") == 0) {
-        /* A basic-shape or url() clip-path makes the element a STACKING CONTEXT (CSS Masking 1
-         * 3), which is all the engine honours of it: the clip itself is not painted. Carried by
-         * the isolation channel (same effect on paint order, no new wire field), so a
-         * negative-z glow inside `.hero{clip-path:inset(0)}` stays above the hero's own
-         * background instead of sinking under the whole page. */
-        const char *v = val;
-        while (*v == ' ') ++v;
-        if (strncmp(v, "inset(", 6) == 0 || strncmp(v, "circle(", 7) == 0 ||
-            strncmp(v, "ellipse(", 8) == 0 || strncmp(v, "polygon(", 8) == 0 ||
-            strncmp(v, "path(", 5) == 0 || strncmp(v, "url(", 4) == 0) {
-            dst[0].prop = P_ISOLATION; dst[0].ival = CSS_ISO_ISOLATE; return 1;
-        }
-        /* `none` and the legacy `rect()` idiom of visually-hidden text clip nothing the
-         * engine models; accepted (not a parser drop) without touching the channel. */
-        if (strncmp(v, "none", 4) == 0 || strncmp(v, "rect(", 5) == 0) {
-            dst[0].prop = P_ISOLATION; dst[0].ival = 0; return 1;
-        }
-        return 0;
     }
     else if (strcmp(prop, "animation-fill-mode") == 0) {
         char first[CSS_TOK_MAX];
@@ -5761,6 +5779,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_CLIP_RIGHT:          o->clip_right = d->ival; break;
             case P_CLIP_BOTTOM:         o->clip_bottom = d->ival; break;
             case P_CLIP_LEFT:           o->clip_left = d->ival; break;
+            case P_CLIP_TOP_PM:         o->clip_top_pm = d->ival; break;
+            case P_CLIP_RIGHT_PM:       o->clip_right_pm = d->ival; break;
+            case P_CLIP_BOTTOM_PM:      o->clip_bottom_pm = d->ival; break;
+            case P_CLIP_LEFT_PM:        o->clip_left_pm = d->ival; break;
             case P_CONTENT:
                 if (d->ival < 0) {
                     /* Explicit `content: none|normal`: clears the channel the

@@ -1,8 +1,28 @@
-# Symbols (page 14 of 14)
+# Symbols (page 14 of 15)
 Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_free_null_and_double` | function | `tests/test_render_doc.c:362` | `static void test_free_null_and_double(void **state)` |
+| `test_heading_level_of_link` | function | `tests/test_render_doc.c:777` | `static void test_heading_level_of_link(void **state)` |
+| `test_heading_paragraph_link` | function | `tests/test_render_doc.c:64` | `static void test_heading_paragraph_link(void **state)` |
+| `test_href_sanitised` | function | `tests/test_render_doc.c:322` | `static void test_href_sanitised(void **state)` |
+| `test_image_data_url_allowed_no_top` | function | `tests/test_render_doc.c:278` | `static void test_image_data_url_allowed_no_top(void **state)` |
+| `test_image_data_url_allowed_remote_top` | function | `tests/test_render_doc.c:260` | `static void test_image_data_url_allowed_remote_top(void **state)` |
+| `test_image_data_url_disabled_by_default` | function | `tests/test_render_doc.c:291` | `static void test_image_data_url_disabled_by_default(void **state)` |
+| `test_image_data_url_percent_encoded_blocked_invalid` | function | `tests/test_render_doc.c:306` | `static void test_image_data_url_percent_encoded_blocked_invalid(void **state)` |
+| `test_image_label_total` | function | `tests/test_render_doc.c:349` | `static void test_image_label_total(void **state)` |
+| `test_image_off_emits_notice_and_blocked` | function | `tests/test_render_doc.c:125` | `static void test_image_off_emits_notice_and_blocked(void **state)` |
+| `test_image_on_allows_normal` | function | `tests/test_render_doc.c:164` | `static void test_image_on_allows_normal(void **state)` |
+| `test_image_on_blocks_non_https` | function | `tests/test_render_doc.c:225` | `static void test_image_on_blocks_non_https(void **state)` |
+| `test_image_on_blocks_tracker` | function | `tests/test_render_doc.c:212` | `static void test_image_on_blocks_tracker(void **state)` |
+| `test_image_on_resolves_doc_relative_src` | function | `tests/test_render_doc.c:198` | `static void test_image_on_resolves_doc_relative_src(void **state)` |
+| `test_image_on_resolves_relative_src` | function | `tests/test_render_doc.c:182` | `static void test_image_on_resolves_relative_src(void **state)` |
+| `test_image_rendering_gated_on_image` | function | `tests/test_render_doc.c:477` | `static void test_image_rendering_gated_on_image(void **state)` |
+| `test_input_label_total` | function | `tests/test_render_doc.c:571` | `static void test_input_label_total(void **state)` |
+| `test_input_passthrough` | function | `tests/test_render_doc.c:536` | `static void test_input_passthrough(void **state)` |
+| `test_kind_name_total` | function | `tests/test_render_doc.c:339` | `static void test_kind_name_total(void **state)` |
+| `test_no_images_no_notice` | function | `tests/test_render_doc.c:150` | `static void test_no_images_no_notice(void **state)` |
 | `test_node_id_carried_by_default` | function | `tests/test_render_doc.c:829` | `static void test_node_id_carried_by_default(void **state)` |
 | `test_text_ext_2026_07_10_batch_gated_by_css` | function | `tests/test_render_doc.c:437` | `static void test_text_ext_2026_07_10_batch_gated_by_css(void **state)` |
 | `test_text_overflow_word_break_gated_by_css` | function | `tests/test_render_doc.c:402` | `static void test_text_overflow_word_break_gated_by_css(void **state)` |
@@ -241,27 +261,29 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `test_smallcaps_runs` | function | `tests/test_text_case.c:55` | `static void test_smallcaps_runs(void **state)` |
 | `test_transform_keeps_length` | function | `tests/test_text_case.c:33` | `static void test_transform_keeps_length(void **state)` |
 | `test_upper_lower_ascii_latin` | function | `tests/test_text_case.c:10` | `static void test_upper_lower_ascii_latin(void **state)` |
-| `fake_cover` | function | `tests/test_text_shape.c:352` | `static int fake_cover(unsigned cp, void *ctx)` |
-| `main` | function | `tests/test_text_shape.c:395` | `int main(void)` |
-| `read_host_font` | function | `tests/test_text_shape.c:170` | `static unsigned char *read_host_font(const char *path, size_t *out_n)` |
-| `set_installed` | function | `tests/test_text_shape.c:275` | `static int set_installed(const char *name, void *ctx)` |
-| `table_resolve` | function | `tests/test_text_shape.c:245` | `static int table_resolve(const char *name, char *out, size_t cap, void *ctx)` |
-| `teardown` | function | `tests/test_text_shape.c:327` | `static int teardown(void **state)` |
+| `fake_cover` | function | `tests/test_text_shape.c:383` | `static int fake_cover(unsigned cp, void *ctx)` |
+| `inked_pixels` | function | `tests/test_text_shape.c:149` | `static int inked_pixels(cairo_surface_t *s)` |
+| `main` | function | `tests/test_text_shape.c:426` | `int main(void)` |
+| `read_host_font` | function | `tests/test_text_shape.c:201` | `static unsigned char *read_host_font(const char *path, size_t *out_n)` |
+| `set_installed` | function | `tests/test_text_shape.c:306` | `static int set_installed(const char *name, void *ctx)` |
+| `table_resolve` | function | `tests/test_text_shape.c:276` | `static int table_resolve(const char *name, char *out, size_t cap, void *ctx)` |
+| `teardown` | function | `tests/test_text_shape.c:358` | `static int teardown(void **state)` |
 | `test_determinism` | function | `tests/test_text_shape.c:95` | `static void test_determinism(void **state)` |
 | `test_draw_paints` | function | `tests/test_text_shape.c:133` | `static void test_draw_paints(void **state)` |
 | `test_empty_slice_is_ok` | function | `tests/test_text_shape.c:60` | `static void test_empty_slice_is_ok(void **state)` |
-| `test_generic_keywords` | function | `tests/test_text_shape.c:233` | `static void test_generic_keywords(void **state)` |
-| `test_local_handle_real_fontconfig` | function | `tests/test_text_shape.c:306` | `static void test_local_handle_real_fontconfig(void **state)` |
+| `test_generic_keywords` | function | `tests/test_text_shape.c:264` | `static void test_generic_keywords(void **state)` |
+| `test_local_handle_real_fontconfig` | function | `tests/test_text_shape.c:337` | `static void test_local_handle_real_fontconfig(void **state)` |
 | `test_measure_matches_shape` | function | `tests/test_text_shape.c:111` | `static void test_measure_matches_shape(void **state)` |
-| `test_measure_uses_fallback_face` | function | `tests/test_text_shape.c:384` | `static void test_measure_uses_fallback_face(void **state)` |
+| `test_measure_uses_fallback_face` | function | `tests/test_text_shape.c:415` | `static void test_measure_uses_fallback_face(void **state)` |
 | `test_null_and_bad_inputs` | function | `tests/test_text_shape.c:30` | `static void test_null_and_bad_inputs(void **state)` |
 | `test_overflow_cap` | function | `tests/test_text_shape.c:123` | `static void test_overflow_cap(void **state)` |
-| `test_pick_family_strong_vs_weak` | function | `tests/test_text_shape.c:282` | `static void test_pick_family_strong_vs_weak(void **state)` |
-| `test_pick_from_list_order_and_generic_stop` | function | `tests/test_text_shape.c:255` | `static void test_pick_from_list_order_and_generic_stop(void **state)` |
-| `test_segment_runs` | function | `tests/test_text_shape.c:359` | `static void test_segment_runs(void **state)` |
+| `test_pick_family_strong_vs_weak` | function | `tests/test_text_shape.c:313` | `static void test_pick_family_strong_vs_weak(void **state)` |
+| `test_pick_from_list_order_and_generic_stop` | function | `tests/test_text_shape.c:286` | `static void test_pick_from_list_order_and_generic_stop(void **state)` |
+| `test_segment_runs` | function | `tests/test_text_shape.c:390` | `static void test_segment_runs(void **state)` |
 | `test_shape_ascii` | function | `tests/test_text_shape.c:73` | `static void test_shape_ascii(void **state)` |
-| `test_webfont_register_find_clear` | function | `tests/test_text_shape.c:185` | `static void test_webfont_register_find_clear(void **state)` |
-| `test_webfont_rejects_bad_input` | function | `tests/test_text_shape.c:148` | `static void test_webfont_rejects_bad_input(void **state)` |
+| `test_uncovered_pua_draws_nothing` | function | `tests/test_text_shape.c:161` | `static void test_uncovered_pua_draws_nothing(void **state)` |
+| `test_webfont_register_find_clear` | function | `tests/test_text_shape.c:216` | `static void test_webfont_register_find_clear(void **state)` |
+| `test_webfont_rejects_bad_input` | function | `tests/test_text_shape.c:179` | `static void test_webfont_rejects_bad_input(void **state)` |
 | `main` | function | `tests/test_textfield.c:140` | `int main(void)` |
 | `test_backspace_delete` | function | `tests/test_textfield.c:76` | `static void test_backspace_delete(void **state)` |
 | `test_full_fails_closed` | function | `tests/test_textfield.c:113` | `static void test_full_fails_closed(void **state)` |
@@ -474,11 +496,5 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `main` | function | `tools/pngprof.py:109` | `def main(argv)` |
 | `render_glyph` | function | `tools/pngprof.py:99` | `def render_glyph(v)` |
 | `main` | function | `tools/prune.py:21` | `def main()` |
-| `expand_imports` | function | `tools/snapshot.py:32` | `def expand_imports(css, base, depth)` |
-| `fetch` | function | `tools/snapshot.py:18` | `def fetch(url)` |
-| `inline_css` | function | `tools/snapshot.py:49` | `def inline_css(html, base)` |
-| `main` | function | `tools/snapshot.py:70` | `def main()` |
-| `repl` | function | `tools/snapshot.py:35` | `def repl(m)` |
-| `repl` | function | `tools/snapshot.py:50` | `def repl(m)` |
-| `main` | function | `tools/snapshot_age.py:16` | `def main()` |
 
+Next: [SYMBOLS_p15.md](SYMBOLS_p15.md)

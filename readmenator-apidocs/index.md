@@ -1,6 +1,6 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 213 modules, 3328 documented entities, documentation coverage 39.6% (1310/3306 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 213 modules, 3341 documented entities, documentation coverage 39.5% (1312/3319 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
@@ -66,12 +66,12 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`include/block_flow.h`](modules/include.block_flow.h.md) | block_flow (bf_) -- vertical margin collapsing for block-level boxes. | 0 | 3 | 50.0% |
 | [`include/box_blur.h`](modules/include.box_blur.h.md) | Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md). | 0 | 3 | 100.0% |
 | [`include/box_style.h`](modules/include.box_style.h.md) |  | 12 | 18 | 64.5% |
-| [`include/box_tree.h`](modules/include.box_tree.h.md) |  | 5 | 27 | 36.4% |
+| [`include/box_tree.h`](modules/include.box_tree.h.md) |  | 5 | 28 | 38.2% |
 | [`include/browser.h`](modules/include.browser.h.md) |  | 2 | 16 | 47.4% |
 | [`include/compositor.h`](modules/include.compositor.h.md) |  | 5 | 3 | 88.9% |
 | [`include/css.h`](modules/include.css.h.md) |  | 72 | 67 | 72.9% |
 | [`include/css_atrule.h`](modules/include.css_atrule.h.md) |  | 2 | 7 | 70.0% |
-| [`include/css_box.h`](modules/include.css_box.h.md) |  | 0 | 25 | 0.0% |
+| [`include/css_box.h`](modules/include.css_box.h.md) |  | 0 | 26 | 0.0% |
 | [`include/css_chain.h`](modules/include.css_chain.h.md) |  | 2 | 5 | 25.0% |
 | [`include/css_color.h`](modules/include.css_color.h.md) |  | 3 | 3 | 42.9% |
 | [`include/css_decl.h`](modules/include.css_decl.h.md) |  | 2 | 11 | 14.3% |
@@ -152,12 +152,12 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`src/block_flow.c`](modules/src.block_flow.c.md) | block_flow (bf_) -- vertical margin collapsing. | 0 | 3 | 50.0% |
 | [`src/box_blur.c`](modules/src.box_blur.c.md) |  | 0 | 3 | 25.0% |
 | [`src/box_style.c`](modules/src.box_style.c.md) |  | 2 | 42 | 31.1% |
-| [`src/box_tree.c`](modules/src.box_tree.c.md) |  | 0 | 14 | 33.3% |
+| [`src/box_tree.c`](modules/src.box_tree.c.md) |  | 0 | 15 | 37.5% |
 | [`src/browser.c`](modules/src.browser.c.md) |  | 0 | 30 | 25.8% |
 | [`src/compositor.c`](modules/src.compositor.c.md) |  | 0 | 4 | 60.0% |
 | [`src/css.c`](modules/src.css.c.md) |  | 8 | 70 | 24.1% |
 | [`src/css_atrule.c`](modules/src.css_atrule.c.md) |  | 0 | 4 | 80.0% |
-| [`src/css_box.c`](modules/src.css_box.c.md) |  | 3 | 28 | 46.9% |
+| [`src/css_box.c`](modules/src.css_box.c.md) |  | 3 | 29 | 45.5% |
 | [`src/css_chain.c`](modules/src.css_chain.c.md) |  | 2 | 12 | 46.7% |
 | [`src/css_color.c`](modules/src.css_color.c.md) |  | 1 | 11 | 38.5% |
 | [`src/css_gradient.c`](modules/src.css_gradient.c.md) |  | 0 | 15 | 18.8% |
@@ -204,7 +204,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 19 | 43.5% |
 | [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 10 | 33.3% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
-| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 285 | 1.7% |
+| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 293 | 1.7% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
@@ -222,7 +222,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`src/svg_render.c`](modules/src.svg_render.c.md) | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | 3 | 5 | 55.6% |
 | [`src/tab.c`](modules/src.tab.c.md) |  | 2 | 73 | 36.8% |
 | [`src/text_case.c`](modules/src.text_case.c.md) |  | 0 | 5 | 50.0% |
-| [`src/text_shape.c`](modules/src.text_shape.c.md) |  | 10 | 23 | 47.1% |
+| [`src/text_shape.c`](modules/src.text_shape.c.md) |  | 10 | 24 | 45.7% |
 | [`src/textfield.c`](modules/src.textfield.c.md) |  | 0 | 12 | 46.2% |
 | [`src/tls_impersonate.c`](modules/src.tls_impersonate.c.md) |  | 2 | 7 | 10.0% |
 | [`src/ui_layout.c`](modules/src.ui_layout.c.md) |  | 0 | 3 | 50.0% |

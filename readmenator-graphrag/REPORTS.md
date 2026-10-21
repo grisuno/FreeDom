@@ -1,12 +1,12 @@
 # GraphRAG Community Reports
 
-Entities: 7317 | Relationships: 12811 | Communities: 11 | Themes: 4 | Text units: 6877
+Entities: 7339 | Relationships: 12843 | Communities: 11 | Themes: 4 | Text units: 6899
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
 ## Project overview (`root`, root, rating 7.0)
 
-288 files in 11 communities and 4 themes. Highest-impact communities: include: css (7.0), src: tab (6.1), include: browser_ui (3.1). God nodes: gui/browser_ui.c, include/css.h, src/tab.c, src/freedom.c, src/css.c.
+288 files in 11 communities and 4 themes. Highest-impact communities: include: css (7.0), src: tab (6.1), include: browser_ui (3.1). God nodes: gui/browser_ui.c, include/css.h, src/tab.c, src/css.c, src/freedom.c.
 
 - [include: css] rating 7.0: `include/css_color.h` ranks 1 by PageRank, 13 importers, 7 symbols: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1).
 - [src: tab] rating 6.1: `include/html_parse.h` ranks 1 by PageRank, 23 importers, 24 symbols: hp_script: One executable <script>.
@@ -81,8 +81,8 @@ Theme of 1 communities and 17 files: unassigned files (17 files, rating 0.9).
 - `include/css_color.h` ranks 1 by PageRank, 13 importers, 7 symbols: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1).
 - `include/css.h` ranks 2 by PageRank, 37 importers, 140 symbols: css_style: A resolved presentation.
 - `include/css_select.h` ranks 3 by PageRank, 15 importers, 34 symbols: css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only tag/.class/#id/[attr] (no combinators, no pseudo-classes inside * sub-selectors).
-- Hotspot `src/css.c`: 246 symbols, 38 connections (score 0.34).
-- Hotspot `tests/test_css.c`: 353 symbols, 19 connections (score 0.32).
+- Hotspot `src/css.c`: 247 symbols, 38 connections (score 0.34).
+- Hotspot `tests/test_css.c`: 354 symbols, 19 connections (score 0.32).
 - 1 layer violations, e.g. test_css.c (testing) -> flex_layout.h (presentation).
 - Dataflow: 3 INFERRED issues (first: DEAD_STORE in page_view).
 - Key entities: file:tests/test_css.c, file:src/css.c, file:include/css.h, file:src/css_box.c, file:include/css_select.h, file:src/css_gradient.c, file:tests/test_css_color.c, file:src/css_mq.c
@@ -95,7 +95,7 @@ Theme of 1 communities and 17 files: unassigned files (17 files, rating 0.9).
 - `include/html_parse.h` ranks 1 by PageRank, 23 importers, 24 symbols: hp_script: One executable <script>.
 - `include/dom.h` ranks 2 by PageRank, 19 importers, 28 symbols: dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: * "after this node" and "first" cannot be expressed by an element-only reference).
 - `include/url.h` ranks 3 by PageRank, 18 importers, 14 symbols: url_parts: Components of a validated absolute https URL, sliced for a JS location object.
-- Hotspot `src/tab.c`: 123 symbols, 60 connections (score 0.36).
+- Hotspot `src/tab.c`: 124 symbols, 60 connections (score 0.37).
 - Hotspot `tests/test_js_dom.c`: 189 symbols, 24 connections (score 0.24).
 - Dependency cycle: js_dom.h -> js_location.h -> js_dom.h.
 - 1 layer violations, e.g. test_renderer.c (testing) -> renderer.h (presentation).
@@ -152,7 +152,7 @@ Theme of 1 communities and 17 files: unassigned files (17 files, rating 0.9).
 - `include/data_url.h` ranks 1 by PageRank, 9 importers, 6 symbols: du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real inline icon/ logo/image, bounding the allocation before decoding a payload whose size a * remote, hostile document controls. #define DU_MAX_ENCODED_LEN...
 - `include/webfont.h` ranks 2 by PageRank, 12 importers, 17 symbols: wf_name_hash: FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names.
 - `include/text_shape.h` ranks 3 by PageRank, 7 importers, 24 symbols: tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags.
-- Hotspot `src/text_shape.c`: 59 symbols, 13 connections (score 0.10).
+- Hotspot `src/text_shape.c`: 61 symbols, 13 connections (score 0.10).
 - Hotspot `tests/test_webfont_load.c`: 16 symbols, 16 connections (score 0.09).
 - 1 layer violations, e.g. render_policy.c (presentation) -> data_url.h (data_access).
 - Key entities: file:src/text_shape.c, file:include/text_shape.h, file:tests/test_text_shape.c, file:tests/test_data_url.c, file:include/webfont.h, file:tests/test_webfont_load.c, file:src/webfont.c, file:src/webfont_load.c
@@ -165,7 +165,7 @@ Theme of 1 communities and 17 files: unassigned files (17 files, rating 0.9).
 - `include/prefs.h` ranks 1 by PageRank, 7 importers, 18 symbols: prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
 - `include/local_store.h` ranks 2 by PageRank, 6 importers, 11 symbols: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container so ls_open_passphrase can re-derive. ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len...
 - `include/zoom.h` ranks 3 by PageRank, 5 importers, 10 symbols: zm_clamp: stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser.
-- Hotspot `src/local_store.c`: 291 symbols, 10 connections (score 0.24).
+- Hotspot `src/local_store.c`: 299 symbols, 10 connections (score 0.24).
 - Hotspot `tests/test_profile.c`: 17 symbols, 16 connections (score 0.09).
 - Key entities: file:src/local_store.c, file:src/prefs.c, file:include/prefs.h, file:tests/test_profile.c, file:tests/test_disk_store.c, file:tests/test_local_store.c, file:tests/test_prefs.c, file:src/profile.c
 - Rating 1.6/10 = 7 x PageRank share 0.23 + 3 x risk 0.00. Internal imports: 20.

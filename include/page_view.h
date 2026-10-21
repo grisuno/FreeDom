@@ -701,6 +701,8 @@ typedef struct pv_box_def {
     int clip_right;
     int clip_bottom;
     int clip_left;
+    /* per-mille of the border box each clip edge adds to its px part (clip-path: inset()). */
+    int clip_top_pm, clip_right_pm, clip_bottom_pm, clip_left_pm;
     /* background-position (R5a): px offsets, PV_LEN_UNSET = unset. */
     int bg_pos_x;
     int bg_pos_y;

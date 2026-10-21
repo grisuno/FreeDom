@@ -230,7 +230,7 @@ static void tes...`
 - Depends on: `include/css.h`, `include/text_case.h`
 
 ## tests/test_text_shape.c
-- Doc: read_host_font: Reads a host TrueType file when one exists (same philosophy as the shaping *...
+- Doc: inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -241,20 +241,22 @@ static void tes...`
   - `test_measure_matches_shape` (function, line 111) `static void test_measure_matches_shape(void **state)`
   - `test_overflow_cap` (function, line 123) `static void test_overflow_cap(void **state)`
   - `test_draw_paints` (function, line 133) `static void test_draw_paints(void **state)`
-  - `test_webfont_rejects_bad_input` (function, line 148) `static void test_webfont_rejects_bad_input(void **state)`
-  - `read_host_font` (function, line 170) `static unsigned char *read_host_font(const char *path, size_t *out_n)`
-  - `test_webfont_register_find_clear` (function, line 185) `static void test_webfont_register_find_clear(void **state)`
-  - `test_generic_keywords` (function, line 233) `static void test_generic_keywords(void **state)`
-  - `table_resolve` (function, line 245) `static int table_resolve(const char *name, char *out, size_t cap, void *ctx)`
-  - `test_pick_from_list_order_and_generic_stop` (function, line 255) `static void test_pick_from_list_order_and_generic_stop(void **state)`
-  - `set_installed` (function, line 275) `static int set_installed(const char *name, void *ctx)`
-  - `test_pick_family_strong_vs_weak` (function, line 282) `static void test_pick_family_strong_vs_weak(void **state)`
-  - `test_local_handle_real_fontconfig` (function, line 306) `static void test_local_handle_real_fontconfig(void **state)`
-  - `teardown` (function, line 327) `static int teardown(void **state)`
-  - `fake_cover` (function, line 352) `static int fake_cover(unsigned cp, void *ctx)`
-  - `test_segment_runs` (function, line 359) `static void test_segment_runs(void **state)`
-  - `test_measure_uses_fallback_face` (function, line 384) `static void test_measure_uses_fallback_face(void **state)`
-  - `main` (function, line 395) `int main(void)`
+  - `inked_pixels` (function, line 149) `static int inked_pixels(cairo_surface_t *s)`
+  - `test_uncovered_pua_draws_nothing` (function, line 161) `static void test_uncovered_pua_draws_nothing(void **state)`
+  - `test_webfont_rejects_bad_input` (function, line 179) `static void test_webfont_rejects_bad_input(void **state)`
+  - `read_host_font` (function, line 201) `static unsigned char *read_host_font(const char *path, size_t *out_n)`
+  - `test_webfont_register_find_clear` (function, line 216) `static void test_webfont_register_find_clear(void **state)`
+  - `test_generic_keywords` (function, line 264) `static void test_generic_keywords(void **state)`
+  - `table_resolve` (function, line 276) `static int table_resolve(const char *name, char *out, size_t cap, void *ctx)`
+  - `test_pick_from_list_order_and_generic_stop` (function, line 286) `static void test_pick_from_list_order_and_generic_stop(void **state)`
+  - `set_installed` (function, line 306) `static int set_installed(const char *name, void *ctx)`
+  - `test_pick_family_strong_vs_weak` (function, line 313) `static void test_pick_family_strong_vs_weak(void **state)`
+  - `test_local_handle_real_fontconfig` (function, line 337) `static void test_local_handle_real_fontconfig(void **state)`
+  - `teardown` (function, line 358) `static int teardown(void **state)`
+  - `fake_cover` (function, line 383) `static int fake_cover(unsigned cp, void *ctx)`
+  - `test_segment_runs` (function, line 390) `static void test_segment_runs(void **state)`
+  - `test_measure_uses_fallback_face` (function, line 415) `static void test_measure_uses_fallback_face(void **state)`
+  - `main` (function, line 426) `int main(void)`
 - Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
 
 ## tests/test_textfield.c

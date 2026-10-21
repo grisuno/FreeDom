@@ -975,6 +975,9 @@ typedef struct css_style {
     int         clip_right;
     int         clip_bottom;
     int         clip_left;
+    /* Per-mille of the border box added to each clip edge above (clip-path: inset()); 0 for
+     * `clip: rect()`. Meaningful only while the px half is not CSS_LEN_UNSET. */
+    int         clip_top_pm, clip_right_pm, clip_bottom_pm, clip_left_pm;
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

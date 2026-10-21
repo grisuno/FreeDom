@@ -3,7 +3,7 @@
  "format": "jsonl",
  "meta": {
   "modules": 213,
-  "entities": 3328,
+  "entities": 3341,
   "languages": {
    "c": 112,
    "h": 86,
@@ -13,8 +13,8 @@
   "kinds": {
    "constant": 15,
    "enum": 151,
-   "function": 1699,
-   "macro": 864,
+   "function": 1703,
+   "macro": 873,
    "method": 23,
    "module": 213,
    "struct": 232,
@@ -27,9 +27,9 @@
  },
  "coverage": {
   "overall": {
-   "documented": 1310,
-   "total": 3306,
-   "percent": 39.6
+   "documented": 1312,
+   "total": 3319,
+   "percent": 39.5
   },
   "by_kind": {
    "enum": {
@@ -38,14 +38,14 @@
     "percent": 53.0
    },
    "function": {
-    "documented": 710,
-    "total": 1699,
+    "documented": 712,
+    "total": 1703,
     "percent": 41.8
    },
    "macro": {
     "documented": 289,
-    "total": 864,
-    "percent": 33.4
+    "total": 873,
+    "percent": 33.1
    },
    "method": {
     "documented": 0,
@@ -255,9 +255,9 @@
     "percent": 64.5
    },
    "include/box_tree.h": {
-    "documented": 12,
-    "total": 33,
-    "percent": 36.4
+    "documented": 13,
+    "total": 34,
+    "percent": 38.2
    },
    "include/browser.h": {
     "documented": 9,
@@ -281,7 +281,7 @@
    },
    "include/css_box.h": {
     "documented": 0,
-    "total": 26,
+    "total": 27,
     "percent": 0.0
    },
    "include/css_chain.h": {
@@ -670,9 +670,9 @@
     "percent": 31.1
    },
    "src/box_tree.c": {
-    "documented": 5,
-    "total": 15,
-    "percent": 33.3
+    "documented": 6,
+    "total": 16,
+    "percent": 37.5
    },
    "src/browser.c": {
     "documented": 8,
@@ -696,8 +696,8 @@
    },
    "src/css_box.c": {
     "documented": 15,
-    "total": 32,
-    "percent": 46.9
+    "total": 33,
+    "percent": 45.5
    },
    "src/css_chain.c": {
     "documented": 7,
@@ -931,7 +931,7 @@
    },
    "src/local_store.c": {
     "documented": 5,
-    "total": 286,
+    "total": 294,
     "percent": 1.7
    },
    "src/media_decoder.c": {
@@ -1021,8 +1021,8 @@
    },
    "src/text_shape.c": {
     "documented": 16,
-    "total": 34,
-    "percent": 47.1
+    "total": 35,
+    "percent": 45.7
    },
    "src/textfield.c": {
     "documented": 6,
@@ -1325,7 +1325,7 @@
   {
    "uid": "include/box_tree.h",
    "path": "modules/include.box_tree.h.jsonl",
-   "entities": 33
+   "entities": 34
   },
   {
    "uid": "include/browser.h",
@@ -1350,7 +1350,7 @@
   {
    "uid": "include/css_box.h",
    "path": "modules/include.css_box.h.jsonl",
-   "entities": 26
+   "entities": 27
   },
   {
    "uid": "include/css_chain.h",
@@ -1740,7 +1740,7 @@
   {
    "uid": "src/box_tree.c",
    "path": "modules/src.box_tree.c.jsonl",
-   "entities": 15
+   "entities": 16
   },
   {
    "uid": "src/browser.c",
@@ -1765,7 +1765,7 @@
   {
    "uid": "src/css_box.c",
    "path": "modules/src.css_box.c.jsonl",
-   "entities": 32
+   "entities": 33
   },
   {
    "uid": "src/css_chain.c",
@@ -2000,7 +2000,7 @@
   {
    "uid": "src/local_store.c",
    "path": "modules/src.local_store.c.jsonl",
-   "entities": 286
+   "entities": 294
   },
   {
    "uid": "src/media_decoder.c",
@@ -2090,7 +2090,7 @@
   {
    "uid": "src/text_shape.c",
    "path": "modules/src.text_shape.c.jsonl",
-   "entities": 34
+   "entities": 35
   },
   {
    "uid": "src/textfield.c",
@@ -2205,7 +2205,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 1997
+  "total": 2008
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

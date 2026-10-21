@@ -168,25 +168,25 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_box_hidden_self` (function, line 794) `static void test_box_hidden_self(void **state)`
   - `test_box_hidden_ancestor` (function, line 806) `static void test_box_hidden_ancestor(void **state)`
   - `test_box_hidden_fail_closed` (function, line 819) `static void test_box_hidden_fail_closed(void **state)`
-  - `test_oof_anchor_none_on_static_chain` (function, line 832) `static void test_oof_anchor_none_on_static_chain(void **state)`
-  - `test_oof_anchor_self` (function, line 842) `static void test_oof_anchor_self(void **state)`
-  - `test_oof_anchor_via_ancestor` (function, line 849) `static void test_oof_anchor_via_ancestor(void **state)`
-  - `test_oof_nested_absolute_anchor_vs_root` (function, line 862) `static void test_oof_nested_absolute_anchor_vs_root(void **state)`
-  - `test_oof_relative_does_not_anchor` (function, line 877) `static void test_oof_relative_does_not_anchor(void **state)`
-  - `test_oof_fail_open` (function, line 891) `static void test_oof_fail_open(void **state)`
-  - `test_oof_avail_stretch_and_shrink` (function, line 913) `static void test_oof_avail_stretch_and_shrink(void **state)`
-  - `test_grid_row_tracks_definite_height` (function, line 934) `static void test_grid_row_tracks_definite_height(void **state)`
-  - `test_grid_spanning_item_fits_tracked_rows` (function, line 973) `static void test_grid_spanning_item_fits_tracked_rows(void **state)`
-  - `test_flex_single_line_definite_height` (function, line 997) `static void test_flex_single_line_definite_height(void **state)`
-  - `test_grid_justify_self` (function, line 1024) `static void test_grid_justify_self(void **state)`
-  - `dbox` (function, line 1050) `static pv_box_def dbox(int parent, int position, int z)`
-  - `test_defer_relative_after_abs` (function, line 1059) `static void test_defer_relative_after_abs(void **state)`
-  - `test_defer_relative_before_abs_is_not_deferred` (function, line 1076) `static void test_defer_relative_before_abs_is_not_deferred(void **state)`
-  - `test_defer_respects_z_order` (function, line 1088) `static void test_defer_respects_z_order(void **state)`
-  - `test_defer_outermost_root_and_negative_z` (function, line 1103) `static void test_defer_outermost_root_and_negative_z(void **state)`
-  - `test_defer_uses_tree_order_not_index` (function, line 1127) `static void test_defer_uses_tree_order_not_index(void **state)`
-  - `test_defer_fails_open` (function, line 1143) `static void test_defer_fails_open(void **state)`
-  - `main` (function, line 1157) `int main(void)`
+  - `test_oof_anchor_none_on_static_chain` (function, line 853) `static void test_oof_anchor_none_on_static_chain(void **state)`
+  - `test_oof_anchor_self` (function, line 863) `static void test_oof_anchor_self(void **state)`
+  - `test_oof_anchor_via_ancestor` (function, line 870) `static void test_oof_anchor_via_ancestor(void **state)`
+  - `test_oof_nested_absolute_anchor_vs_root` (function, line 883) `static void test_oof_nested_absolute_anchor_vs_root(void **state)`
+  - `test_oof_relative_does_not_anchor` (function, line 898) `static void test_oof_relative_does_not_anchor(void **state)`
+  - `test_oof_fail_open` (function, line 912) `static void test_oof_fail_open(void **state)`
+  - `test_oof_avail_stretch_and_shrink` (function, line 934) `static void test_oof_avail_stretch_and_shrink(void **state)`
+  - `test_grid_row_tracks_definite_height` (function, line 955) `static void test_grid_row_tracks_definite_height(void **state)`
+  - `test_grid_spanning_item_fits_tracked_rows` (function, line 994) `static void test_grid_spanning_item_fits_tracked_rows(void **state)`
+  - `test_flex_single_line_definite_height` (function, line 1018) `static void test_flex_single_line_definite_height(void **state)`
+  - `test_grid_justify_self` (function, line 1045) `static void test_grid_justify_self(void **state)`
+  - `dbox` (function, line 1071) `static pv_box_def dbox(int parent, int position, int z)`
+  - `test_defer_relative_after_abs` (function, line 1080) `static void test_defer_relative_after_abs(void **state)`
+  - `test_defer_relative_before_abs_is_not_deferred` (function, line 1097) `static void test_defer_relative_before_abs_is_not_deferred(void **state)`
+  - `test_defer_respects_z_order` (function, line 1109) `static void test_defer_respects_z_order(void **state)`
+  - `test_defer_outermost_root_and_negative_z` (function, line 1124) `static void test_defer_outermost_root_and_negative_z(void **state)`
+  - `test_defer_uses_tree_order_not_index` (function, line 1148) `static void test_defer_uses_tree_order_not_index(void **state)`
+  - `test_defer_fails_open` (function, line 1164) `static void test_defer_fails_open(void **state)`
+  - `main` (function, line 1178) `int main(void)`
   - `card` (function, line 769) `* containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */ assert_true(dbl_eq(out[2].x, 100));`
   - `UNSET4` (macro, line 630) `#define UNSET4`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`

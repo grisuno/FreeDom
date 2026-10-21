@@ -1,13 +1,13 @@
 # `include/box_tree.h`
 
-> Source: [include/box_tree.h:1](../../include/box_tree.h#L1) | language `h` | coverage 36.4% | [API index](../index.md)
+> Source: [include/box_tree.h:1](../../include/box_tree.h#L1) | language `h` | coverage 38.2% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`bt_node`](#bt_node), [`bt_positioned`](#bt_positioned)
 - **Enums:** [`bt_status`](#bt_status)
 - **Type Aliases:** [`display`](#display), [`box_index`](#box_index)
-- **Functions:** [`closed`](#closed), [`node`](#node), [`flow`](#flow), [`bottom`](#bottom), [`placed`](#placed), [`bt_box_hidden`](#bt_box_hidden), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`insets`](#insets), [`bt_containing_block`](#bt_containing_block), [`bt_defer_roots`](#bt_defer_roots)
+- **Functions:** [`closed`](#closed), [`node`](#node), [`flow`](#flow), [`bottom`](#bottom), [`placed`](#placed), [`bt_box_hidden`](#bt_box_hidden), [`bt_in_subtree`](#bt_in_subtree), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`insets`](#insets), [`bt_containing_block`](#bt_containing_block), [`bt_defer_roots`](#bt_defer_roots)
 - **Macros:** [`BT_MAX_DEPTH`](#bt_max_depth), [`BT_MAX_CHILDREN`](#bt_max_children), [`BT_MAX_POSITIONED`](#bt_max_positioned), [`BT_POS_STATIC`](#bt_pos_static), [`BT_POS_RELATIVE`](#bt_pos_relative), [`BT_POS_ABSOLUTE`](#bt_pos_absolute), [`BT_POS_FIXED`](#bt_pos_fixed), [`BT_POS_STICKY`](#bt_pos_sticky), [`BT_ALIGN_START`](#bt_align_start), [`BT_ALIGN_CENTER`](#bt_align_center), [`BT_ALIGN_END`](#bt_align_end), [`BT_ALIGN_STRETCH`](#bt_align_stretch), [`BT_MAUTO_LEFT`](#bt_mauto_left), [`BT_MAUTO_RIGHT`](#bt_mauto_right)
 
 ## Type Diagram
@@ -280,11 +280,38 @@ The walk is bounded by nbox links and fails closed (returns 1, hidden) on NULL b
 
 ---
 
+<a id="bt_in_subtree"></a>
+
+### `bt_in_subtree`
+
+`function` | [include/box_tree.h:239](../../include/box_tree.h#L239)
+
+```c
+int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid);
+```
+
+1 when box `bid` is `root` or a descendant of it on the parent_id chain, else 0 (ancestors, siblings, out-of-range ids, NULL, a parent cycle).
+
+The walk is bounded by nbox links. An out-of-flow sub-layout owns its anchor's subtree only: any other box a run's container membership dragged in is not the subtree's to paint.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `boxes` | `pv_box_def *` |  |  |
+| `nbox` | `size_t` |  |  |
+| `root` | `size_t` |  |  |
+| `bid` | `size_t` |  |  |
+
+**Returns:** `int`
+
+---
+
 <a id="bt_oof_anchor"></a>
 
 ### `bt_oof_anchor`
 
-`function` | [include/box_tree.h:247](../../include/box_tree.h#L247)
+`function` | [include/box_tree.h:253](../../include/box_tree.h#L253)
 
 ```c
 int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);
@@ -310,7 +337,7 @@ Both walk the parent_id chain from `bid` (self first) looking for a box whose po
 
 ### `bt_oof_root`
 
-`function` | [include/box_tree.h:248](../../include/box_tree.h#L248)
+`function` | [include/box_tree.h:254](../../include/box_tree.h#L254)
 
 ```c
 int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);
@@ -332,7 +359,7 @@ int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);
 
 ### `insets`
 
-`function` | [include/box_tree.h:252](../../include/box_tree.h#L252)
+`function` | [include/box_tree.h:258](../../include/box_tree.h#L258)
 
 ```c
 * minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may be NULL) is 1 iff both insets were * declared -- the box then stretches between the
@@ -352,7 +379,7 @@ int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);
 
 ### `bt_containing_block`
 
-`function` | [include/box_tree.h:262](../../include/box_tree.h#L262)
+`function` | [include/box_tree.h:268](../../include/box_tree.h#L268)
 
 ```c
 void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y, const double *box_w, const double *box_h, const char *placed, double viewport_w, double viewport_h, double *cb_x, double *cb_y, double *cb_w, double *cb_h)
@@ -387,7 +414,7 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 
 ### `bt_defer_roots`
 
-`function` | [include/box_tree.h:285](../../include/box_tree.h#L285)
+`function` | [include/box_tree.h:291](../../include/box_tree.h#L291)
 
 ```c
 size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox, const bt_positioned *pos, size_t npos, const char *in_flow, int *root_of, size_t *order_of);

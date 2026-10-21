@@ -122,11 +122,12 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `bottom` (function, line 208) `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in...`
   - `placed` (function, line 215) `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour)....`
   - `bt_box_hidden` (function, line 233) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);`
-  - `bt_oof_anchor` (function, line 247) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);`
-  - `bt_oof_root` (function, line 248) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);`
-  - `insets` (function, line 252) `* minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may...`
-  - `bt_containing_block` (function, line 262) `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y...`
-  - `bt_defer_roots` (function, line 285) `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox, const bt_positioned *pos, size_t npos, const char...`
+  - `bt_in_subtree` (function, line 239) `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid);`
+  - `bt_oof_anchor` (function, line 253) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);`
+  - `bt_oof_root` (function, line 254) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);`
+  - `insets` (function, line 258) `* minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may...`
+  - `bt_containing_block` (function, line 268) `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y...`
+  - `bt_defer_roots` (function, line 291) `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox, const bt_positioned *pos, size_t npos, const char...`
   - `FREEDOM_BOX_TREE_H` (macro, line 2) `#define FREEDOM_BOX_TREE_H`
   - `BT_MAX_DEPTH` (macro, line 35) `#define BT_MAX_DEPTH`
   - `BT_MAX_CHILDREN` (macro, line 36) `#define BT_MAX_CHILDREN`
@@ -193,13 +194,13 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Language: h
 - Symbols:
   - `css_style` (struct, line 584)
-  - `css_sel` (struct, line 985)
-  - `css_media` (struct, line 987)
-  - `css_drop` (struct, line 1051)
-  - `css_drop_log` (struct, line 1063)
-  - `css_attr` (struct, line 1092)
-  - `css_element` (struct, line 1102)
-  - `cvr_table` (struct, line 1163)
+  - `css_sel` (struct, line 988)
+  - `css_media` (struct, line 990)
+  - `css_drop` (struct, line 1054)
+  - `css_drop_log` (struct, line 1066)
+  - `css_attr` (struct, line 1095)
+  - `css_element` (struct, line 1105)
+  - `cvr_table` (struct, line 1166)
   - `css_status` (enum, line 28)
   - `css_align` (enum, line 34)
   - `css_display` (enum, line 42)
@@ -259,11 +260,11 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `css_column_span` (enum, line 431)
   - `css_backface` (enum, line 435)
   - `css_pct_slot` (enum, line 512)
-  - `css_drop_cause` (enum, line 1038)
+  - `css_drop_cause` (enum, line 1041)
   - `color` (type_alias, line 584) `typedef struct css_style { int color;`
-  - `css_sheet` (type_alias, line 979) `typedef struct css_sheet css_sheet;`
-  - `prefers_dark` (type_alias, line 986) `typedef struct css_media { int prefers_dark;`
-  - `prop` (type_alias, line 1051) `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];`
+  - `css_sheet` (type_alias, line 982) `typedef struct css_sheet css_sheet;`
+  - `prefers_dark` (type_alias, line 989) `typedef struct css_media { int prefers_dark;`
+  - `prop` (type_alias, line 1054) `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];`
   - `verbatim` (function, line 84) `* the quoted row strings verbatim (flex_layout parses them);`
   - `POINTER` (function, line 220) `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);`
   - `family` (function, line 690) `* LOCAL family (spec/text_shape.md section 7);`
@@ -272,15 +273,15 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `declared` (function, line 861) `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
   - `element` (function, line 866) `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
   - `slots` (function, line 873) `* parse time into ALL seven slots (singular matrices fail closed);`
-  - `palette` (function, line 1028) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
-  - `css_free` (function, line 1078) `void css_free(css_sheet *s);`
-  - `order` (function, line 1081) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
-  - `inherited_px` (function, line 1187) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
-  - `css_ua_heading_em` (function, line 1199) `double css_ua_heading_em(int level);`
-  - `name` (function, line 1204) `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
-  - `css_font_face_count` (function, line 1214) `size_t css_font_face_count(const css_sheet *sheet);`
-  - `css_font_face_at` (function, line 1215) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
-  - `css_resolve_anim_keyframes` (function, line 1223) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
+  - `palette` (function, line 1031) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
+  - `css_free` (function, line 1081) `void css_free(css_sheet *s);`
+  - `order` (function, line 1084) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
+  - `inherited_px` (function, line 1190) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
+  - `css_ua_heading_em` (function, line 1202) `double css_ua_heading_em(int level);`
+  - `name` (function, line 1207) `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
+  - `css_font_face_count` (function, line 1217) `size_t css_font_face_count(const css_sheet *sheet);`
+  - `css_font_face_at` (function, line 1218) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
+  - `css_resolve_anim_keyframes` (function, line 1226) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
   - `FREEDOM_CSS_H` (macro, line 2) `#define FREEDOM_CSS_H`
   - `CSS_GAP_MAX` (macro, line 80) `#define CSS_GAP_MAX`
   - `CSS_GRID_COLS_MAX` (macro, line 81) `#define CSS_GRID_COLS_MAX`
@@ -325,13 +326,13 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CSS_MAX_PSEUDO_SEL` (macro, line 573) `#define CSS_MAX_PSEUDO_SEL`
   - `CSS_NTH_MAX` (macro, line 577) `#define CSS_NTH_MAX`
   - `CSS_MAX_KF_STOPS` (macro, line 896) `#define CSS_MAX_KF_STOPS`
-  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 999) `#define CSS_MEDIA_DEFAULT_WIDTH`
-  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 1004) `#define CSS_MEDIA_DEFAULT_HEIGHT`
-  - `CSS_DROP_PROP_MAX` (macro, line 1043) `#define CSS_DROP_PROP_MAX`
-  - `CSS_DROP_VAL_MAX` (macro, line 1044) `#define CSS_DROP_VAL_MAX`
-  - `CSS_PSEUDO_BEFORE` (macro, line 1173) `#define CSS_PSEUDO_BEFORE`
-  - `CSS_PSEUDO_AFTER` (macro, line 1174) `#define CSS_PSEUDO_AFTER`
-  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1175) `#define CSS_PSEUDO_PLACEHOLDER`
+  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 1002) `#define CSS_MEDIA_DEFAULT_WIDTH`
+  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 1007) `#define CSS_MEDIA_DEFAULT_HEIGHT`
+  - `CSS_DROP_PROP_MAX` (macro, line 1046) `#define CSS_DROP_PROP_MAX`
+  - `CSS_DROP_VAL_MAX` (macro, line 1047) `#define CSS_DROP_VAL_MAX`
+  - `CSS_PSEUDO_BEFORE` (macro, line 1176) `#define CSS_PSEUDO_BEFORE`
+  - `CSS_PSEUDO_AFTER` (macro, line 1177) `#define CSS_PSEUDO_AFTER`
+  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1178) `#define CSS_PSEUDO_PLACEHOLDER`
 - Depends on: `include/css_color.h`
 - Imported by: `fuzz/fuzz_css.c`, `fuzz/fuzz_text_case.c`, `gui/browser_ui.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 
@@ -363,20 +364,21 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `cb_expand_box2` (function, line 21) `int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int...`
   - `cb_interp_lp` (function, line 23) `int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm);`
   - `cb_value_em_milli` (function, line 25) `int cb_value_em_milli(const char *v);`
-  - `cb_lp_can_be_nonneg` (function, line 26) `int cb_lp_can_be_nonneg(int px_val, int pct_pm);`
-  - `cb_next_ws_token` (function, line 27) `int cb_next_ws_token(const char **p, char *tok, size_t cap);`
-  - `cb_interp_align` (function, line 28) `int cb_interp_align(const char *v);`
-  - `cb_interp_fontsize_ex` (function, line 29) `int cb_interp_fontsize_ex(const char *v, int *abs_out);`
-  - `cb_interp_lineheight` (function, line 30) `int cb_interp_lineheight(const char *v);`
-  - `cb_interp_weight` (function, line 31) `int cb_interp_weight(const char *v);`
-  - `cb_interp_style` (function, line 32) `int cb_interp_style(const char *v);`
-  - `cb_interp_textdeco` (function, line 33) `int cb_interp_textdeco(const char *v);`
-  - `cb_interp_display` (function, line 34) `int cb_interp_display(const char *v);`
-  - `cb_interp_gap` (function, line 35) `int cb_interp_gap(const char *v);`
-  - `cb_interp_justify` (function, line 36) `int cb_interp_justify(const char *v);`
-  - `cb_interp_gridcols` (function, line 37) `int cb_interp_gridcols(const char *v);`
-  - `cb_expand_grid_template_cols` (function, line 38) `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);`
-  - `strings` (function, line 40) `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...`
+  - `rectangle` (function, line 27) `* rectangle (top, right, bottom, left): px[i] + pm[i]/1000 of the border box (height for * top/bottom, width for...`
+  - `cb_lp_can_be_nonneg` (function, line 31) `int cb_lp_can_be_nonneg(int px_val, int pct_pm);`
+  - `cb_next_ws_token` (function, line 32) `int cb_next_ws_token(const char **p, char *tok, size_t cap);`
+  - `cb_interp_align` (function, line 33) `int cb_interp_align(const char *v);`
+  - `cb_interp_fontsize_ex` (function, line 34) `int cb_interp_fontsize_ex(const char *v, int *abs_out);`
+  - `cb_interp_lineheight` (function, line 35) `int cb_interp_lineheight(const char *v);`
+  - `cb_interp_weight` (function, line 36) `int cb_interp_weight(const char *v);`
+  - `cb_interp_style` (function, line 37) `int cb_interp_style(const char *v);`
+  - `cb_interp_textdeco` (function, line 38) `int cb_interp_textdeco(const char *v);`
+  - `cb_interp_display` (function, line 39) `int cb_interp_display(const char *v);`
+  - `cb_interp_gap` (function, line 40) `int cb_interp_gap(const char *v);`
+  - `cb_interp_justify` (function, line 41) `int cb_interp_justify(const char *v);`
+  - `cb_interp_gridcols` (function, line 42) `int cb_interp_gridcols(const char *v);`
+  - `cb_expand_grid_template_cols` (function, line 43) `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);`
+  - `strings` (function, line 45) `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...`
   - `FREEDOM_CSS_BOX_H` (macro, line 2) `#define FREEDOM_CSS_BOX_H`
   - `CB_AUTO_REJECT` (macro, line 10) `#define CB_AUTO_REJECT`
   - `CB_AUTO_VALUE` (macro, line 11) `#define CB_AUTO_VALUE`
@@ -420,8 +422,8 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Layer: utility
 - Language: h
 - Symbols:
-  - `css_decl` (struct, line 217)
-  - `prop` (type_alias, line 216) `typedef struct css_decl { int prop;`
+  - `css_decl` (struct, line 220)
+  - `prop` (type_alias, line 219) `typedef struct css_decl { int prop;`
   - `order` (function, line 50) `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);`
   - `contiguous` (function, line 65) `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...`
   - `FREEDOM_CSS_DECL_H` (macro, line 2) `#define FREEDOM_CSS_DECL_H`

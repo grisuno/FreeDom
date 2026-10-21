@@ -151,6 +151,8 @@
 - [`bt_containing_block`](modules/src.box_tree.c.md#bt_containing_block) function in `src/box_tree.c`
 - [`bt_defer_roots`](modules/include.box_tree.h.md#bt_defer_roots) function in `include/box_tree.h`
 - [`bt_defer_roots`](modules/src.box_tree.c.md#bt_defer_roots) function in `src/box_tree.c`
+- [`bt_in_subtree`](modules/include.box_tree.h.md#bt_in_subtree) function in `include/box_tree.h`
+- [`bt_in_subtree`](modules/src.box_tree.c.md#bt_in_subtree) function in `src/box_tree.c`
 - [`bt_layout`](modules/src.box_tree.c.md#bt_layout) function in `src/box_tree.c`
 - [`BT_LEN_AUTO`](modules/src.box_tree.c.md#bt_len_auto) macro in `src/box_tree.c`
 - [`BT_MAUTO_LEFT`](modules/include.box_tree.h.md#bt_mauto_left) macro in `include/box_tree.h`
@@ -271,6 +273,7 @@
 - [`CB_AUTO_RESET`](modules/include.css_box.h.md#cb_auto_reset) macro in `include/css_box.h`
 - [`CB_AUTO_RESET_NONE`](modules/include.css_box.h.md#cb_auto_reset_none) macro in `include/css_box.h`
 - [`CB_AUTO_VALUE`](modules/include.css_box.h.md#cb_auto_value) macro in `include/css_box.h`
+- [`cb_clip_inset`](modules/src.css_box.c.md#cb_clip_inset) function in `src/css_box.c`
 - [`cb_emit_len`](modules/include.css_box.h.md#cb_emit_len) function in `include/css_box.h`
 - [`cb_expand_box2`](modules/include.css_box.h.md#cb_expand_box2) function in `include/css_box.h`
 - [`cb_expand_box2`](modules/src.css_box.c.md#cb_expand_box2) function in `src/css_box.c`
@@ -1211,6 +1214,8 @@
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.os_sandbox.c.md#_gnu_source) macro in `src/os_sandbox.c`
 - [`_GNU_SOURCE`](modules/src.tab.c.md#_gnu_source) macro in `src/tab.c`
 - [`gradient`](modules/src.css_gradient.c.md#gradient) function in `src/css_gradient.c`
@@ -1933,6 +1938,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -2000,6 +2007,10 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -2523,6 +2534,7 @@
 - [`reads`](modules/include.js_location.h.md#reads) function in `include/js_location.h`
 - [`realm`](modules/include.js_trusted.h.md#realm) function in `include/js_trusted.h`
 - [`rect`](modules/gui.browser_ui.c.md#rect) function in `gui/browser_ui.c`
+- [`rectangle`](modules/include.css_box.h.md#rectangle) function in `include/css_box.h`
 - [`redirect`](modules/src.secure_fetch.c.md#redirect) function in `src/secure_fetch.c`
 - [`redraws`](modules/gui.browser_ui.c.md#redraws) function in `gui/browser_ui.c`
 - [`ref`](modules/src.webfont_load.c.md#ref) function in `src/webfont_load.c`
@@ -2913,6 +2925,7 @@
 - [`truncated`](modules/include.freebug.h.md#truncated) function in `include/freebug.h`
 - [`trusted`](modules/include.pdf_export.h.md#trusted) function in `include/pdf_export.h`
 - [`trying`](modules/src.page_view.c.md#trying) function in `src/page_view.c`
+- [`TSH_BLANK_GLYPH`](modules/src.text_shape.c.md#tsh_blank_glyph) macro in `src/text_shape.c`
 - [`TSH_CACHE_SLOTS`](modules/src.text_shape.c.md#tsh_cache_slots) macro in `src/text_shape.c`
 - [`tsh_cover_ctx`](modules/src.text_shape.c.md#tsh_cover_ctx) struct in `src/text_shape.c`
 - [`tsh_draw`](modules/src.text_shape.c.md#tsh_draw) function in `src/text_shape.c`

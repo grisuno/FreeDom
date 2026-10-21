@@ -786,6 +786,17 @@ int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid) {
     return 1;  /* more links than boxes: a parent cycle */
 }
 
+int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid) {
+    if (boxes == NULL || root >= nbox || bid >= nbox) return 0;
+    for (size_t steps = 0; steps <= nbox; ++steps) {
+        if (bid == root) return 1;
+        int p = boxes[bid].parent_id;
+        if (p < 0 || (size_t)p >= nbox) return 0;
+        bid = (size_t)p;
+    }
+    return 0;
+}
+
 double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both) {
     int ua = inset_unset(a, a_pct), ub = inset_unset(b, b_pct);
     if (both != NULL) *both = (!ua && !ub);
