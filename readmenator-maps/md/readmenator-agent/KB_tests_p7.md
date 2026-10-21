@@ -33,29 +33,31 @@ Previous: [KB_tests_p6.md](KB_tests_p6.md)
   - `test_enforce_strict_requires_pq_chain` (function, line 231) `static void test_enforce_strict_requires_pq_chain(void **state)`
   - `test_enforce_allow_classical_ke` (function, line 244) `static void test_enforce_allow_classical_ke(void **state)`
   - `test_enforce_allowlisted_insecure` (function, line 263) `static void test_enforce_allowlisted_insecure(void **state)`
-  - `test_redirect_code_recognizes_3xx` (function, line 285) `static void test_redirect_code_recognizes_3xx(void **state)`
-  - `test_redirect_code_rejects_others` (function, line 294) `static void test_redirect_code_rejects_others(void **state)`
-  - `test_location_parses_value` (function, line 305) `static void test_location_parses_value(void **state)`
-  - `test_location_is_case_insensitive_and_trims` (function, line 313) `static void test_location_is_case_insensitive_and_trims(void **state)`
-  - `test_location_rejects_non_location_and_empty` (function, line 323) `static void test_location_rejects_non_location_and_empty(void **state)`
-  - `test_location_rejects_overflow` (function, line 335) `static void test_location_rejects_overflow(void **state)`
-  - `test_resolve_absolute_https` (function, line 344) `static void test_resolve_absolute_https(void **state)`
-  - `test_resolve_refuses_http_downgrade` (function, line 352) `static void test_resolve_refuses_http_downgrade(void **state)`
-  - `test_resolve_refuses_dangerous_schemes` (function, line 359) `static void test_resolve_refuses_dangerous_schemes(void **state)`
-  - `test_resolve_scheme_relative` (function, line 370) `static void test_resolve_scheme_relative(void **state)`
-  - `test_resolve_absolute_path` (function, line 378) `static void test_resolve_absolute_path(void **state)`
-  - `test_resolve_relative_path` (function, line 390) `static void test_resolve_relative_path(void **state)`
-  - `test_resolve_null_args` (function, line 402) `static void test_resolve_null_args(void **state)`
-  - `test_response_free_on_zeroed` (function, line 413) `static void test_response_free_on_zeroed(void **state)`
-  - `test_response_free_releases_location` (function, line 422) `static void test_response_free_releases_location(void **state)`
-  - `test_get_follow_null_args` (function, line 436) `static void test_get_follow_null_args(void **state)`
-  - `test_get_null_args` (function, line 445) `static void test_get_null_args(void **state)`
-  - `test_post_null_args` (function, line 454) `static void test_post_null_args(void **state)`
-  - `test_cookie_line_matches_pure` (function, line 480) `static void test_cookie_line_matches_pure(void **state)`
-  - `test_cookie_jar_put_and_header` (function, line 516) `static void test_cookie_jar_put_and_header(void **state)`
-  - `test_ws_url_check` (function, line 534) `static void test_ws_url_check(void **state)`
-  - `test_ws_open_rejects_before_any_io` (function, line 546) `static void test_ws_open_rejects_before_any_io(void **state)`
-  - `main` (function, line 562) `int main(void)`
+  - `test_fallback_ladder_is_shared_and_ordered` (function, line 285) `static void test_fallback_ladder_is_shared_and_ordered(void **state)`
+  - `test_rcache_remembers_permanent_redirects` (function, line 301) `static void test_rcache_remembers_permanent_redirects(void **state)`
+  - `test_redirect_code_recognizes_3xx` (function, line 320) `static void test_redirect_code_recognizes_3xx(void **state)`
+  - `test_redirect_code_rejects_others` (function, line 329) `static void test_redirect_code_rejects_others(void **state)`
+  - `test_location_parses_value` (function, line 340) `static void test_location_parses_value(void **state)`
+  - `test_location_is_case_insensitive_and_trims` (function, line 348) `static void test_location_is_case_insensitive_and_trims(void **state)`
+  - `test_location_rejects_non_location_and_empty` (function, line 358) `static void test_location_rejects_non_location_and_empty(void **state)`
+  - `test_location_rejects_overflow` (function, line 370) `static void test_location_rejects_overflow(void **state)`
+  - `test_resolve_absolute_https` (function, line 379) `static void test_resolve_absolute_https(void **state)`
+  - `test_resolve_refuses_http_downgrade` (function, line 387) `static void test_resolve_refuses_http_downgrade(void **state)`
+  - `test_resolve_refuses_dangerous_schemes` (function, line 394) `static void test_resolve_refuses_dangerous_schemes(void **state)`
+  - `test_resolve_scheme_relative` (function, line 405) `static void test_resolve_scheme_relative(void **state)`
+  - `test_resolve_absolute_path` (function, line 413) `static void test_resolve_absolute_path(void **state)`
+  - `test_resolve_relative_path` (function, line 425) `static void test_resolve_relative_path(void **state)`
+  - `test_resolve_null_args` (function, line 437) `static void test_resolve_null_args(void **state)`
+  - `test_response_free_on_zeroed` (function, line 448) `static void test_response_free_on_zeroed(void **state)`
+  - `test_response_free_releases_location` (function, line 457) `static void test_response_free_releases_location(void **state)`
+  - `test_get_follow_null_args` (function, line 471) `static void test_get_follow_null_args(void **state)`
+  - `test_get_null_args` (function, line 480) `static void test_get_null_args(void **state)`
+  - `test_post_null_args` (function, line 489) `static void test_post_null_args(void **state)`
+  - `test_cookie_line_matches_pure` (function, line 515) `static void test_cookie_line_matches_pure(void **state)`
+  - `test_cookie_jar_put_and_header` (function, line 551) `static void test_cookie_jar_put_and_header(void **state)`
+  - `test_ws_url_check` (function, line 569) `static void test_ws_url_check(void **state)`
+  - `test_ws_open_rejects_before_any_io` (function, line 581) `static void test_ws_open_rejects_before_any_io(void **state)`
+  - `main` (function, line 597) `int main(void)`
 - Depends on: `include/secure_fetch.h`
 
 ## tests/test_svg_render.c

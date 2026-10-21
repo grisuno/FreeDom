@@ -1,6 +1,6 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 213 modules, 3311 documented entities, documentation coverage 39.6% (1304/3289 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 213 modules, 3328 documented entities, documentation coverage 39.6% (1310/3306 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
@@ -51,7 +51,7 @@ Languages: c (112), h (86), py (10), sh (5)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 198 | 32.4% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 198 | 32.8% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 5 | 4 | 50.0% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) |  | 0 | 6 | 85.7% |
 | [`gui/freedom_view.c`](modules/gui.freedom_view.c.md) |  | 0 | 2 | 0.0% |
@@ -125,7 +125,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`include/render_policy.h`](modules/include.render_policy.h.md) |  | 3 | 5 | 77.8% |
 | [`include/renderer.h`](modules/include.renderer.h.md) |  | 3 | 3 | 14.3% |
 | [`include/request_policy.h`](modules/include.request_policy.h.md) |  | 1 | 3 | 60.0% |
-| [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) |  | 9 | 28 | 50.0% |
+| [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) |  | 9 | 32 | 50.0% |
 | [`include/svg_paint.h`](modules/include.svg_paint.h.md) |  | 0 | 1 | 50.0% |
 | [`include/svg_render.h`](modules/include.svg_render.h.md) |  | 9 | 8 | 38.9% |
 | [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 29 | 45.2% |
@@ -133,7 +133,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`include/text_shape.h`](modules/include.text_shape.h.md) |  | 5 | 18 | 70.8% |
 | [`include/textfield.h`](modules/include.textfield.h.md) |  | 3 | 11 | 53.3% |
 | [`include/tls_impersonate.h`](modules/include.tls_impersonate.h.md) |  | 4 | 18 | 30.4% |
-| [`include/ui.h`](modules/include.ui.h.md) |  | 7 | 9 | 29.4% |
+| [`include/ui.h`](modules/include.ui.h.md) |  | 7 | 10 | 33.3% |
 | [`include/url.h`](modules/include.url.h.md) |  | 3 | 10 | 50.0% |
 | [`include/util.h`](modules/include.util.h.md) | util.h — shared pure helpers (no I/O except where noted). | 0 | 5 | 33.3% |
 | [`include/web_storage.h`](modules/include.web_storage.h.md) |  | 1 | 11 | 61.5% |
@@ -204,11 +204,11 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 19 | 43.5% |
 | [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 10 | 33.3% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
-| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 281 | 1.8% |
+| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 285 | 1.7% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
-| [`src/page_view.c`](modules/src.page_view.c.md) |  | 19 | 112 | 43.9% |
+| [`src/page_view.c`](modules/src.page_view.c.md) |  | 19 | 111 | 44.3% |
 | [`src/pdf_export.c`](modules/src.pdf_export.c.md) |  | 0 | 4 | 20.0% |
 | [`src/perf_trace.c`](modules/src.perf_trace.c.md) |  | 0 | 11 | 75.0% |
 | [`src/prefetch.c`](modules/src.prefetch.c.md) |  | 1 | 12 | 42.9% |
@@ -218,7 +218,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`src/render_policy.c`](modules/src.render_policy.c.md) |  | 0 | 5 | 50.0% |
 | [`src/renderer.c`](modules/src.renderer.c.md) |  | 0 | 4 | 20.0% |
 | [`src/request_policy.c`](modules/src.request_policy.c.md) |  | 0 | 6 | 57.1% |
-| [`src/secure_fetch.c`](modules/src.secure_fetch.c.md) |  | 5 | 33 | 25.6% |
+| [`src/secure_fetch.c`](modules/src.secure_fetch.c.md) |  | 6 | 41 | 25.0% |
 | [`src/svg_render.c`](modules/src.svg_render.c.md) | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | 3 | 5 | 55.6% |
 | [`src/tab.c`](modules/src.tab.c.md) |  | 2 | 73 | 36.8% |
 | [`src/text_case.c`](modules/src.text_case.c.md) |  | 0 | 5 | 50.0% |

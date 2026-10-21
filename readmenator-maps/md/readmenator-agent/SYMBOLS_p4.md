@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `js_context_free` | function | `include/js_sandbox.h:86` | `void js_context_free(js_context *ctx);` |
+| `js_limits` | struct | `include/js_sandbox.h:39` | `` |
+| `js_loc_from_stack` | function | `include/js_sandbox.h:140` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` |
+| `js_pump_jobs` | function | `include/js_sandbox.h:159` | `int js_pump_jobs(js_context *ctx, int max_jobs);` |
 | `js_result` | struct | `include/js_sandbox.h:49` | `` |
 | `js_result_free` | function | `include/js_sandbox.h:151` | `void js_result_free(js_result *res);` |
 | `js_set_current_script` | function | `include/js_sandbox.h:171` | `void js_set_current_script(js_context *ctx, const char *src, const char *type);` |
@@ -308,44 +312,48 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `rp_host_of` | function | `include/request_policy.h:30` | `int rp_host_of(const char *url, char *out, size_t out_size);` |
 | `rp_same_site` | function | `include/request_policy.h:37` | `int rp_same_site(const char *top_level_url, const char *request_url);` |
 | `rp_site_of` | function | `include/request_policy.h:34` | `int rp_site_of(const char *host, char *out, size_t out_size);` |
-| `EXCLUDED` | function | `include/secure_fetch.h:210` | `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...` |
+| `EXCLUDED` | function | `include/secure_fetch.h:211` | `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...` |
 | `FREEDOM_SECURE_FETCH_H` | macro | `include/secure_fetch.h:2` | `#define FREEDOM_SECURE_FETCH_H` |
-| `SF_CONNECT_TIMEOUT_MS` | macro | `include/secure_fetch.h:193` | `#define SF_CONNECT_TIMEOUT_MS` |
-| `SF_DEFAULT_KEX_GROUPS` | macro | `include/secure_fetch.h:143` | `#define SF_DEFAULT_KEX_GROUPS` |
-| `SF_DEFAULT_MAX_BODY` | macro | `include/secure_fetch.h:169` | `#define SF_DEFAULT_MAX_BODY` |
-| `SF_DEFAULT_MAX_REDIRECTS` | macro | `include/secure_fetch.h:195` | `#define SF_DEFAULT_MAX_REDIRECTS` |
-| `SF_DEFAULT_TIMEOUT_MS` | macro | `include/secure_fetch.h:170` | `#define SF_DEFAULT_TIMEOUT_MS` |
-| `SF_DEFAULT_USER_AGENT` | macro | `include/secure_fetch.h:168` | `#define SF_DEFAULT_USER_AGENT` |
-| `SF_IMPERSONATE_KEX_GROUPS` | macro | `include/secure_fetch.h:152` | `#define SF_IMPERSONATE_KEX_GROUPS` |
-| `SF_IMPERSONATE_TLS12_CIPHERS` | macro | `include/secure_fetch.h:157` | `#define SF_IMPERSONATE_TLS12_CIPHERS` |
-| `SF_IMPERSONATE_TLS13_CIPHERS` | macro | `include/secure_fetch.h:153` | `#define SF_IMPERSONATE_TLS13_CIPHERS` |
-| `SF_MAX_URL` | macro | `include/secure_fetch.h:196` | `#define SF_MAX_URL` |
-| `SF_SUBRESOURCE_TIMEOUT_MS` | macro | `include/secure_fetch.h:194` | `#define SF_SUBRESOURCE_TIMEOUT_MS` |
-| `SF_WS_MAX_MESSAGE` | macro | `include/secure_fetch.h:292` | `#define SF_WS_MAX_MESSAGE` |
-| `bits` | function | `include/secure_fetch.h:310` | `* *flags receives CURLWS_* bits (text/binary/close/cont);` |
-| `connection` | function | `include/secure_fetch.h:324` | `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...` |
-| `policy` | type_alias | `include/secure_fetch.h:74` | `typedef struct sf_config { sf_policy policy;` |
-| `sf_chain_info` | struct | `include/secure_fetch.h:60` | `` |
-| `sf_config` | struct | `include/secure_fetch.h:75` | `` |
-| `sf_cookie_line_matches` | function | `include/secure_fetch.h:222` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` |
-| `sf_cookie_put` | function | `include/secure_fetch.h:217` | `void sf_cookie_put(const char *url, const char *namevalue);` |
-| `sf_get` | function | `include/secure_fetch.h:333` | `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...` |
-| `sf_global_init` | function | `include/secure_fetch.h:204` | `void sf_global_init(void);` |
-| `sf_impersonate_kex_groups` | function | `include/secure_fetch.h:235` | `const char *sf_impersonate_kex_groups(void);` |
-| `sf_impersonate_tls13_ciphers` | function | `include/secure_fetch.h:236` | `const char *sf_impersonate_tls13_ciphers(void);` |
-| `sf_is_redirect_code` | function | `include/secure_fetch.h:267` | `int sf_is_redirect_code(long http_code);` |
-| `sf_policy` | enum | `include/secure_fetch.h:40` | `` |
-| `sf_proxy_type` | enum | `include/secure_fetch.h:69` | `` |
-| `sf_response` | struct | `include/secure_fetch.h:117` | `` |
-| `sf_response_free` | function | `include/secure_fetch.h:344` | `void sf_response_free(sf_response *resp);` |
-| `sf_status` | enum | `include/secure_fetch.h:23` | `` |
-| `sf_user_agent_or_default` | function | `include/secure_fetch.h:231` | `const char *sf_user_agent_or_default(const char *ua);` |
-| `sf_ws` | type_alias | `include/secure_fetch.h:293` | `typedef struct sf_ws sf_ws;` |
-| `sf_ws_close` | function | `include/secure_fetch.h:320` | `void sf_ws_close(sf_ws *ws);` |
-| `sf_ws_fd` | function | `include/secure_fetch.h:317` | `int sf_ws_fd(const sf_ws *ws);` |
-| `skipped` | function | `include/secure_fetch.h:256` | `* skipped (a classical key exchange is accepted);` |
-| `status` | type_alias | `include/secure_fetch.h:116` | `typedef struct sf_response { sf_status status;` |
-| `validators` | function | `include/secure_fetch.h:17` | `* The security logic lives in pure validators (no I/O);` |
+| `SF_CONNECT_TIMEOUT_MS` | macro | `include/secure_fetch.h:194` | `#define SF_CONNECT_TIMEOUT_MS` |
+| `SF_DEFAULT_KEX_GROUPS` | macro | `include/secure_fetch.h:144` | `#define SF_DEFAULT_KEX_GROUPS` |
+| `SF_DEFAULT_MAX_BODY` | macro | `include/secure_fetch.h:170` | `#define SF_DEFAULT_MAX_BODY` |
+| `SF_DEFAULT_MAX_REDIRECTS` | macro | `include/secure_fetch.h:196` | `#define SF_DEFAULT_MAX_REDIRECTS` |
+| `SF_DEFAULT_TIMEOUT_MS` | macro | `include/secure_fetch.h:171` | `#define SF_DEFAULT_TIMEOUT_MS` |
+| `SF_DEFAULT_USER_AGENT` | macro | `include/secure_fetch.h:169` | `#define SF_DEFAULT_USER_AGENT` |
+| `SF_IMPERSONATE_KEX_GROUPS` | macro | `include/secure_fetch.h:153` | `#define SF_IMPERSONATE_KEX_GROUPS` |
+| `SF_IMPERSONATE_TLS12_CIPHERS` | macro | `include/secure_fetch.h:158` | `#define SF_IMPERSONATE_TLS12_CIPHERS` |
+| `SF_IMPERSONATE_TLS13_CIPHERS` | macro | `include/secure_fetch.h:154` | `#define SF_IMPERSONATE_TLS13_CIPHERS` |
+| `SF_MAX_URL` | macro | `include/secure_fetch.h:197` | `#define SF_MAX_URL` |
+| `SF_SUBRESOURCE_TIMEOUT_MS` | macro | `include/secure_fetch.h:195` | `#define SF_SUBRESOURCE_TIMEOUT_MS` |
+| `SF_WS_MAX_MESSAGE` | macro | `include/secure_fetch.h:293` | `#define SF_WS_MAX_MESSAGE` |
+| `bits` | function | `include/secure_fetch.h:311` | `* *flags receives CURLWS_* bits (text/binary/close/cont);` |
+| `connection` | function | `include/secure_fetch.h:325` | `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...` |
+| `exhausted` | function | `include/secure_fetch.h:356` | `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...` |
+| `policy` | type_alias | `include/secure_fetch.h:75` | `typedef struct sf_config { sf_policy policy;` |
+| `sf_chain_info` | struct | `include/secure_fetch.h:61` | `` |
+| `sf_config` | struct | `include/secure_fetch.h:76` | `` |
+| `sf_cookie_line_matches` | function | `include/secure_fetch.h:223` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` |
+| `sf_cookie_put` | function | `include/secure_fetch.h:218` | `void sf_cookie_put(const char *url, const char *namevalue);` |
+| `sf_get` | function | `include/secure_fetch.h:334` | `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...` |
+| `sf_global_init` | function | `include/secure_fetch.h:205` | `void sf_global_init(void);` |
+| `sf_impersonate_kex_groups` | function | `include/secure_fetch.h:236` | `const char *sf_impersonate_kex_groups(void);` |
+| `sf_impersonate_tls13_ciphers` | function | `include/secure_fetch.h:237` | `const char *sf_impersonate_tls13_ciphers(void);` |
+| `sf_is_redirect_code` | function | `include/secure_fetch.h:268` | `int sf_is_redirect_code(long http_code);` |
+| `sf_policy` | enum | `include/secure_fetch.h:41` | `` |
+| `sf_proxy_type` | enum | `include/secure_fetch.h:70` | `` |
+| `sf_rcache_clear` | function | `include/secure_fetch.h:371` | `void sf_rcache_clear(void);` |
+| `sf_rcache_get` | function | `include/secure_fetch.h:370` | `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);` |
+| `sf_rcache_put` | function | `include/secure_fetch.h:369` | `int sf_rcache_put(const char *from, const char *to, time_t now);` |
+| `sf_response` | struct | `include/secure_fetch.h:118` | `` |
+| `sf_response_free` | function | `include/secure_fetch.h:345` | `void sf_response_free(sf_response *resp);` |
+| `sf_status` | enum | `include/secure_fetch.h:24` | `` |
+| `sf_user_agent_or_default` | function | `include/secure_fetch.h:232` | `const char *sf_user_agent_or_default(const char *ua);` |
+| `sf_ws` | type_alias | `include/secure_fetch.h:294` | `typedef struct sf_ws sf_ws;` |
+| `sf_ws_close` | function | `include/secure_fetch.h:321` | `void sf_ws_close(sf_ws *ws);` |
+| `sf_ws_fd` | function | `include/secure_fetch.h:318` | `int sf_ws_fd(const sf_ws *ws);` |
+| `skipped` | function | `include/secure_fetch.h:257` | `* skipped (a classical key exchange is accepted);` |
+| `status` | type_alias | `include/secure_fetch.h:117` | `typedef struct sf_response { sf_status status;` |
+| `validators` | function | `include/secure_fetch.h:18` | `* The security logic lives in pure validators (no I/O);` |
 | `FREEDOM_SVG_PAINT_H` | macro | `include/svg_paint.h:2` | `#define FREEDOM_SVG_PAINT_H` |
 | `svp_draw` | function | `include/svg_paint.h:31` | `void svp_draw(cairo_t *cr, const sv_image *img, double x, double y, double w, double h, int current_rgb);` |
 | `FREEDOM_SVG_RENDER_H` | macro | `include/svg_render.h:2` | `#define FREEDOM_SVG_RENDER_H` |
@@ -480,21 +488,13 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `ti_resp_free` | function | `include/tls_impersonate.h:106` | `void ti_resp_free(ti_resp *r);` |
 | `ti_should_impersonate` | function | `include/tls_impersonate.h:56` | `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);` |
 | `FREEDOM_UI_H` | macro | `include/ui.h:2` | `#define FREEDOM_UI_H` |
-| `available` | function | `include/ui.h:85` | `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...` |
-| `disk` | function | `include/ui.h:112` | `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...` |
-| `images` | function | `include/ui.h:114` | `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...` |
-| `jg_table` | struct | `include/ui.h:94` | `` |
-| `offset` | type_alias | `include/ui.h:29` | `typedef struct ui_line { size_t offset;` |
-| `out` | function | `include/ui.h:97` | `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...` |
-| `placeholders` | function | `include/ui.h:107` | `* above always draw image placeholders (no worker to decode hostile bytes);` |
-| `rd_doc` | struct | `include/ui.h:68` | `` |
-| `space` | function | `include/ui.h:43` | `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...` |
-| `tab` | struct | `include/ui.h:104` | `` |
-| `ui_clamp_scroll` | function | `include/ui.h:54` | `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);` |
-| `ui_layout` | struct | `include/ui.h:34` | `` |
-| `ui_layout_free` | function | `include/ui.h:51` | `void ui_layout_free(ui_layout *lay);` |
-| `ui_line` | struct | `include/ui.h:29` | `` |
-| `ui_render_viewport_w` | function | `include/ui.h:141` | `int ui_render_viewport_w(void);` |
-| `ui_status` | enum | `include/ui.h:19` | `` |
+| `available` | function | `include/ui.h:86` | `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...` |
+| `disk` | function | `include/ui.h:113` | `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...` |
+| `images` | function | `include/ui.h:115` | `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...` |
+| `jg_table` | struct | `include/ui.h:95` | `` |
+| `offset` | type_alias | `include/ui.h:30` | `typedef struct ui_line { size_t offset;` |
+| `out` | function | `include/ui.h:98` | `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...` |
+| `placeholders` | function | `include/ui.h:108` | `* above always draw image placeholders (no worker to decode hostile bytes);` |
+| `rd_doc` | struct | `include/ui.h:69` | `` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

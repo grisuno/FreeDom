@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `pe_safe_basename` | function | `src/pdf_export.c:25` | `pe_status pe_safe_basename(const char *title, char *out, size_t outsz)` |
+| `PT_LINE_CAP` | macro | `src/perf_trace.c:107` | `#define PT_LINE_CAP` |
+| `cmp_u64` | function | `src/perf_trace.c:71` | `static int cmp_u64(const void *a, const void *b)` |
+| `pt_count` | function | `src/perf_trace.c:35` | `size_t pt_count(const pt_trace *t, pt_stage stage)` |
+| `pt_elapsed_us` | function | `src/perf_trace.c:21` | `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us)` |
+| `pt_format` | function | `src/perf_trace.c:109` | `size_t pt_format(const pt_trace *t, char *buf, size_t cap)` |
+| `pt_init` | function | `src/perf_trace.c:16` | `void pt_init(pt_trace *t)` |
+| `pt_last_us` | function | `src/perf_trace.c:40` | `uint64_t pt_last_us(const pt_trace *t, pt_stage stage)` |
+| `pt_max_us` | function | `src/perf_trace.c:60` | `uint64_t pt_max_us(const pt_trace *t, pt_stage stage)` |
+| `pt_median_us` | function | `src/perf_trace.c:79` | `uint64_t pt_median_us(const pt_trace *t, pt_stage stage)` |
+| `pt_min_us` | function | `src/perf_trace.c:49` | `uint64_t pt_min_us(const pt_trace *t, pt_stage stage)` |
+| `pt_record` | function | `src/perf_trace.c:26` | `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us)` |
+| `pt_stage_name` | function | `src/perf_trace.c:89` | `const char *pt_stage_name(pt_stage stage)` |
 | `PF_MAX_URL` | macro | `src/prefetch.c:24` | `#define PF_MAX_URL` |
 | `_POSIX_C_SOURCE` | macro | `src/prefetch.c:12` | `#define _POSIX_C_SOURCE` |
 | `attr_span` | struct | `src/prefetch.c:65` | `` |
@@ -111,6 +124,8 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `rp_host_of` | function | `src/request_policy.c:76` | `int rp_host_of(const char *url, char *out, size_t out_size)` |
 | `rp_same_site` | function | `src/request_policy.c:134` | `int rp_same_site(const char *top_level_url, const char *request_url)` |
 | `rp_site_of` | function | `src/request_policy.c:102` | `int rp_site_of(const char *host, char *out, size_t out_size)` |
+| `SF_RCACHE_SLOTS` | macro | `src/secure_fetch.c:1034` | `#define SF_RCACHE_SLOTS` |
+| `SF_RCACHE_TTL_S` | macro | `src/secure_fetch.c:1035` | `#define SF_RCACHE_TTL_S` |
 | `_POSIX_C_SOURCE` | macro | `src/secure_fetch.c:12` | `#define _POSIX_C_SOURCE` |
 | `add_header` | function | `src/secure_fetch.c:722` | `static int add_header(struct curl_slist **h, const char *line)` |
 | `body_sink` | struct | `src/secure_fetch.c:434` | `` |
@@ -129,6 +144,8 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `name_is_pq_sig` | function | `src/secure_fetch.c:618` | `static int name_is_pq_sig(int pknid)` |
 | `progress` | function | `src/secure_fetch.c:443` | `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);` |
 | `redirect` | function | `src/secure_fetch.c:811` | `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a      * different orig...` |
+| `sf_attempt_get` | function | `src/secure_fetch.c:1336` | `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,         ...` |
+| `sf_attempt_post` | function | `src/secure_fetch.c:1342` | `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,        ...` |
 | `sf_check_chain_policy` | function | `src/secure_fetch.c:284` | `sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)` |
 | `sf_check_group_is_pq` | function | `src/secure_fetch.c:275` | `sf_status sf_check_group_is_pq(const char *negotiated_group)` |
 | `sf_check_tls_version` | function | `src/secure_fetch.c:270` | `sf_status sf_check_tls_version(const char *negotiated_version)` |
@@ -137,16 +154,25 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `sf_cookie_header_for` | function | `src/secure_fetch.c:166` | `size_t sf_cookie_header_for(const char *url, char *out, size_t outsz)` |
 | `sf_cookie_line_matches` | function | `src/secure_fetch.c:96` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path,                 ...` |
 | `sf_cookie_put` | function | `src/secure_fetch.c:195` | `void sf_cookie_put(const char *url, const char *namevalue)` |
+| `sf_downgrade_of` | function | `src/secure_fetch.c:1327` | `static int sf_downgrade_of(sf_policy p)` |
 | `sf_enforce_policy` | function | `src/secure_fetch.c:294` | `sf_status sf_enforce_policy(const char *tls_version, const char *group,                          ...` |
+| `sf_fallback_policy` | function | `src/secure_fetch.c:1313` | `int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)` |
 | `sf_get` | function | `src/secure_fetch.c:1014` | `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)` |
-| `sf_get_follow` | function | `src/secure_fetch.c:1032` | `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,                 ...` |
+| `sf_get_follow` | function | `src/secure_fetch.c:1092` | `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,                 ...` |
+| `sf_get_follow_navigable` | function | `src/secure_fetch.c:1367` | `sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,             ...` |
 | `sf_global_init` | function | `src/secure_fetch.c:81` | `void sf_global_init(void)` |
 | `sf_impersonate_kex_groups` | function | `src/secure_fetch.c:245` | `const char *sf_impersonate_kex_groups(void)` |
 | `sf_impersonate_tls13_ciphers` | function | `src/secure_fetch.c:246` | `const char *sf_impersonate_tls13_ciphers(void)` |
 | `sf_is_redirect_code` | function | `src/secure_fetch.c:334` | `int sf_is_redirect_code(long http_code)` |
+| `sf_navigable` | function | `src/secure_fetch.c:1347` | `static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,            ...` |
 | `sf_parse_location_header` | function | `src/secure_fetch.c:341` | `sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz)` |
 | `sf_perform` | function | `src/secure_fetch.c:879` | `static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,             ...` |
 | `sf_post` | function | `src/secure_fetch.c:1018` | `sf_status sf_post(const char *url, const sf_config *cfg,                   const void *body, size...` |
+| `sf_post_navigable` | function | `src/secure_fetch.c:1372` | `sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,                   ...` |
+| `sf_rcache_clear` | function | `src/secure_fetch.c:1048` | `void sf_rcache_clear(void)` |
+| `sf_rcache_entry` | struct | `src/secure_fetch.c:1037` | `` |
+| `sf_rcache_get` | function | `src/secure_fetch.c:1074` | `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)` |
+| `sf_rcache_put` | function | `src/secure_fetch.c:1055` | `int sf_rcache_put(const char *from, const char *to, time_t now)` |
 | `sf_resolve_redirect` | function | `src/secure_fetch.c:359` | `sf_status sf_resolve_redirect(const char *base_url, const char *location,                        ...` |
 | `sf_response_free` | function | `src/secure_fetch.c:411` | `void sf_response_free(sf_response *resp)` |
 | `sf_setup_handle` | function | `src/secure_fetch.c:736` | `static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,            ...` |
@@ -156,22 +182,22 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `sf_url_is_http` | function | `src/secure_fetch.c:258` | `static int sf_url_is_http(const char *url)` |
 | `sf_user_agent_or_default` | function | `src/secure_fetch.c:241` | `const char *sf_user_agent_or_default(const char *ua)` |
 | `sf_validate_url` | function | `src/secure_fetch.c:250` | `sf_status sf_validate_url(const char *url)` |
-| `sf_ws` | struct | `src/secure_fetch.c:1098` | `` |
-| `sf_ws_close` | function | `src/secure_fetch.c:1233` | `void sf_ws_close(sf_ws *ws)` |
-| `sf_ws_fd` | function | `src/secure_fetch.c:1226` | `int sf_ws_fd(const sf_ws *ws)` |
-| `sf_ws_open` | function | `src/secure_fetch.c:1126` | `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)` |
-| `sf_ws_recv` | function | `src/secure_fetch.c:1204` | `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)` |
-| `sf_ws_send` | function | `src/secure_fetch.c:1181` | `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)` |
-| `sf_ws_url_check` | function | `src/secure_fetch.c:1105` | `sf_status sf_ws_url_check(const char *url)` |
+| `sf_ws` | struct | `src/secure_fetch.c:1167` | `` |
+| `sf_ws_close` | function | `src/secure_fetch.c:1302` | `void sf_ws_close(sf_ws *ws)` |
+| `sf_ws_fd` | function | `src/secure_fetch.c:1295` | `int sf_ws_fd(const sf_ws *ws)` |
+| `sf_ws_open` | function | `src/secure_fetch.c:1195` | `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)` |
+| `sf_ws_recv` | function | `src/secure_fetch.c:1273` | `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)` |
+| `sf_ws_send` | function | `src/secure_fetch.c:1250` | `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)` |
+| `sf_ws_url_check` | function | `src/secure_fetch.c:1174` | `sf_status sf_ws_url_check(const char *url)` |
 | `sink` | type_alias | `src/secure_fetch.c:456` | `typedef struct fetch_ctx { body_sink sink;` |
 | `this` | function | `src/secure_fetch.c:531` | `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and...` |
 | `tls_capture` | struct | `src/secure_fetch.c:447` | `` |
 | `tls_capture_from_ssl` | function | `src/secure_fetch.c:524` | `static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl)` |
 | `tls_capture_try` | function | `src/secure_fetch.c:514` | `static void tls_capture_try(tls_capture *cap)` |
 | `write_cb` | function | `src/secure_fetch.c:586` | `static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *userdata)` |
-| `ws_free` | function | `src/secure_fetch.c:1117` | `static void ws_free(sf_ws *ws)` |
-| `ws_ssl_ctx_cb` | function | `src/secure_fetch.c:1091` | `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)` |
-| `ws_ssl_info_cb` | function | `src/secure_fetch.c:1084` | `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)` |
+| `ws_free` | function | `src/secure_fetch.c:1186` | `static void ws_free(sf_ws *ws)` |
+| `ws_ssl_ctx_cb` | function | `src/secure_fetch.c:1160` | `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)` |
+| `ws_ssl_info_cb` | function | `src/secure_fetch.c:1153` | `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)` |
 | `SV_MAX_ATTRS` | macro | `src/svg_render.c:96` | `#define SV_MAX_ATTRS` |
 | `point` | function | `src/svg_render.c:567` | `* current point (SVG 8.3.6). */ int had = (prev == 'C' \|\| prev == 'c' \|\| prev == 'S' \|\| prev == 's');` |
 | `stroke` | type_alias | `src/svg_render.c:151` | `typedef struct sv_ctx { int fill, stroke;` |
@@ -470,31 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `put_u32` | function | `src/web_storage.c:201` | `static void put_u32(char *b, uint32_t v)` |
 | `utf8_ok` | function | `src/web_storage.c:32` | `static int utf8_ok(const unsigned char *s, size_t n)` |
 | `wst_db` | struct | `src/web_storage.c:20` | `` |
-| `wst_decode_check` | function | `src/web_storage.c:101` | `int wst_decode_check(const char *blob, size_t len)` |
-| `wst_encode` | function | `src/web_storage.c:125` | `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len)` |
-| `wst_foreach` | function | `src/web_storage.c:181` | `int wst_foreach(const char *blob, size_t len,                 void (*fn)(void *ctx, const char *k...` |
-| `wst_free` | function | `src/web_storage.c:109` | `void wst_free(wst_db *db)` |
-| `wst_new` | function | `src/web_storage.c:105` | `wst_db *wst_new(void)` |
-| `wst_origin` | struct | `src/web_storage.c:12` | `` |
-| `wst_origin_bytes` | function | `src/web_storage.c:175` | `size_t wst_origin_bytes(const wst_db *db, const char *origin)` |
-| `wst_pack` | function | `src/web_storage.c:206` | `int wst_pack(const char *const *keys, const size_t *klens,              const char *const *vals, ...` |
-| `wst_replace` | function | `src/web_storage.c:140` | `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len)` |
-| `wc_derive` | function | `src/webcaps.c:15` | `wc_caps wc_derive(wc_input in)` |
-| `wc_from_flags` | function | `src/webcaps.c:35` | `wc_caps wc_from_flags(bool js, bool css, bool images)` |
-| `wc_render_caps` | function | `src/webcaps.c:46` | `rdp_caps wc_render_caps(wc_caps c)` |
-| `wc_safe` | function | `src/webcaps.c:10` | `wc_caps wc_safe(void)` |
-| `candidates` | function | `src/webfont.c:7` | `* understanding just far enough to find candidates (family + first url() per * src entry + weight/style descriptors);` |
-| `ci_eq_span` | function | `src/webfont.c:28` | `static int ci_eq_span(const char *s, size_t n, const char *kw)` |
-| `emit` | function | `src/webfont.c:126` | `static void emit(wf_list *out, const char *family,                  const char *url, size_t ulen,...` |
-| `emit_data` | function | `src/webfont.c:142` | `static void emit_data(wf_list *out, const char *family,                       const char *span, s...` |
-| `emit_family_format` | function | `src/webfont.c:98` | `static void emit_family_format(wf_ref *r, const char *family, const char *format)` |
-| `emit_slot` | function | `src/webfont.c:83` | `static wf_ref *emit_slot(wf_list *out)` |
-| `is_ws` | function | `src/webfont.c:19` | `static int is_ws(char c)` |
-| `lower_ch` | function | `src/webfont.c:23` | `static int lower_ch(char c)` |
-| `lower_ch` | function | `src/webfont.c:306` | `&& lower_ch(s[k]) == 's' && k + 3 < bend                 && lower_ch(s[k + 1]) == 'r' && lower_ch...` |
-| `scan_face_block` | function | `src/webfont.c:179` | `static void scan_face_block(const char *s, size_t bstart, size_t bend,                           ...` |
-| `span_is_data` | function | `src/webfont.c:114` | `static int span_is_data(const char *span, size_t slen)` |
-| `wf_list_free` | function | `src/webfont.c:49` | `void wf_list_free(wf_list *l)` |
-| `wf_ref_move` | function | `src/webfont.c:64` | `void wf_ref_move(wf_ref *dst, wf_ref *src)` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

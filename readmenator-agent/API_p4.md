@@ -1,6 +1,12 @@
 # API (page 4 of 11)
 Previous: [API_p3.md](API_p3.md)
 
+## include/dom_debug.h
+Depends on: `include/render_doc.h`
+Imported by: `fuzz/fuzz_dom_debug.c`, `src/dom_debug.c`, `src/freedom.c`, `tests/test_dom_debug.c`
+- `dd_format` (function) `include/dom_debug.h:36` `size_t dd_format(const rd_doc *doc, char *out, size_t cap);` -- Formats doc into out[0..cap) as a NUL-terminated, line-oriented dump (see the spec for the stable format).
+- `dd_format_css` (function) `include/dom_debug.h:41` `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap);` -- CSS inspector: dumps every block with its FULL resolved css_style fields as a compact property list.
+
 ## include/download.h
 Imported by: `fuzz/fuzz_download.c`, `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
 - `dl_should_download` (function) `include/download.h:43` `int dl_should_download(const char *content_type, const char *content_disposition);` -- 1 if the response should be saved (attachment, or a non-renderable media type), 0 if it should be rendered.
@@ -327,7 +333,7 @@ Imported by: `fuzz/fuzz_prefetch.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/p
 - `pf_pooled_fetch` (function) `include/prefetch.h:165` `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int...`
 
 ## include/prefs.h
-Imported by: `fuzz/fuzz_prefs.c`, `gui/browser_ui.c`, `include/profile.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
+Imported by: `fuzz/fuzz_prefs.c`, `gui/browser_ui.c`, `include/profile.h`, `include/ui.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
 - `prefs_init` (function) `include/prefs.h:65` `void prefs_init(prefs_state *p);` -- Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
 - `prefs_free` (function) `include/prefs.h:68` `void prefs_free(prefs_state *p);` -- Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
 - `free` (function) `include/prefs.h:71` `* free(). */ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len);`
@@ -386,22 +392,26 @@ Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/re
 ## include/secure_fetch.h
 Depends on: `include/anti_fp.h`
 Imported by: `gui/browser_ui.c`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
-- `validators` (function) `include/secure_fetch.h:17` `* The security logic lives in pure validators (no I/O);`
-- `sf_global_init` (function) `include/secure_fetch.h:204` `void sf_global_init(void);` -- Initialises process-global transport state (libcurl/OpenSSL) once, from the main thread, before any concurrent...
-- `EXCLUDED` (function) `include/secure_fetch.h:210` `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
-- `sf_cookie_put` (function) `include/secure_fetch.h:217` `void sf_cookie_put(const char *url, const char *namevalue);` -- Injects a JS-set cookie ("name=value") into the shared jar, scoped to url's host, as if it arrived via Set-Cookie...
-- `sf_cookie_line_matches` (function) `include/secure_fetch.h:222` `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` -- Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecure\\t expiry\\tname\\tvalue"); if...
-- `sf_user_agent_or_default` (function) `include/secure_fetch.h:231` `const char *sf_user_agent_or_default(const char *ua);` -- Returns ua when it is a non-empty string, else SF_DEFAULT_USER_AGENT.
-- `sf_impersonate_kex_groups` (function) `include/secure_fetch.h:235` `const char *sf_impersonate_kex_groups(void);` -- The interim impersonation ClientHello strings (pure; single source of truth so the * shaping is unit-testable...
-- `sf_impersonate_tls13_ciphers` (function) `include/secure_fetch.h:236` `const char *sf_impersonate_tls13_ciphers(void);`
-- `skipped` (function) `include/secure_fetch.h:256` `* skipped (a classical key exchange is accepted);`
-- `sf_is_redirect_code` (function) `include/secure_fetch.h:267` `int sf_is_redirect_code(long http_code);` -- Enforces the full connection policy in order: TLS version, then KE group, then certificate chain.
-- `bits` (function) `include/secure_fetch.h:310` `* *flags receives CURLWS_* bits (text/binary/close/cont);`
-- `sf_ws_fd` (function) `include/secure_fetch.h:317` `int sf_ws_fd(const sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
-- `sf_ws_close` (function) `include/secure_fetch.h:320` `void sf_ws_close(sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
-- `connection` (function) `include/secure_fetch.h:324` `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
-- `sf_get` (function) `include/secure_fetch.h:333` `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
-- `sf_response_free` (function) `include/secure_fetch.h:344` `void sf_response_free(sf_response *resp);` -- Performs an HTTPS POST under the given policy, sending body (body_len bytes) with the given Content-Type.
+- `validators` (function) `include/secure_fetch.h:18` `* The security logic lives in pure validators (no I/O);`
+- `sf_global_init` (function) `include/secure_fetch.h:205` `void sf_global_init(void);` -- Initialises process-global transport state (libcurl/OpenSSL) once, from the main thread, before any concurrent...
+- `EXCLUDED` (function) `include/secure_fetch.h:211` `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
+- `sf_cookie_put` (function) `include/secure_fetch.h:218` `void sf_cookie_put(const char *url, const char *namevalue);` -- Injects a JS-set cookie ("name=value") into the shared jar, scoped to url's host, as if it arrived via Set-Cookie...
+- `sf_cookie_line_matches` (function) `include/secure_fetch.h:223` `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` -- Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecure\\t expiry\\tname\\tvalue"); if...
+- `sf_user_agent_or_default` (function) `include/secure_fetch.h:232` `const char *sf_user_agent_or_default(const char *ua);` -- Returns ua when it is a non-empty string, else SF_DEFAULT_USER_AGENT.
+- `sf_impersonate_kex_groups` (function) `include/secure_fetch.h:236` `const char *sf_impersonate_kex_groups(void);` -- The interim impersonation ClientHello strings (pure; single source of truth so the * shaping is unit-testable...
+- `sf_impersonate_tls13_ciphers` (function) `include/secure_fetch.h:237` `const char *sf_impersonate_tls13_ciphers(void);`
+- `skipped` (function) `include/secure_fetch.h:257` `* skipped (a classical key exchange is accepted);`
+- `sf_is_redirect_code` (function) `include/secure_fetch.h:268` `int sf_is_redirect_code(long http_code);` -- Enforces the full connection policy in order: TLS version, then KE group, then certificate chain.
+- `bits` (function) `include/secure_fetch.h:311` `* *flags receives CURLWS_* bits (text/binary/close/cont);`
+- `sf_ws_fd` (function) `include/secure_fetch.h:318` `int sf_ws_fd(const sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
+- `sf_ws_close` (function) `include/secure_fetch.h:321` `void sf_ws_close(sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
+- `connection` (function) `include/secure_fetch.h:325` `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
+- `sf_get` (function) `include/secure_fetch.h:334` `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
+- `sf_response_free` (function) `include/secure_fetch.h:345` `void sf_response_free(sf_response *resp);` -- Performs an HTTPS POST under the given policy, sending body (body_len bytes) with the given Content-Type.
+- `exhausted` (function) `include/secure_fetch.h:356` `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
+- `sf_rcache_put` (function) `include/secure_fetch.h:369` `int sf_rcache_put(const char *from, const char *to, time_t now);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
+- `sf_rcache_get` (function) `include/secure_fetch.h:370` `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
+- `sf_rcache_clear` (function) `include/secure_fetch.h:371` `void sf_rcache_clear(void);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
 
 ## include/svg_paint.h
 Depends on: `include/svg_render.h`
@@ -480,18 +490,6 @@ Imported by: `gui/browser_ui.c`, `src/textfield.c`, `tests/test_textfield.c`
 - `tf_text` (function) `include/textfield.h:66` `const char *tf_text(const tf_field *f);` -- /* Deletes the byte before the cursor (no-op at the start).
 - `tf_len` (function) `include/textfield.h:67` `size_t tf_len(const tf_field *f);`
 - `tf_cursor` (function) `include/textfield.h:68` `size_t tf_cursor(const tf_field *f);`
-
-## include/tls_impersonate.h
-Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
-- `path` (function) `include/tls_impersonate.h:26` `* Zero Knowledge path (PQ-hybrid, VERIFYPEER). * * 2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed...`
-- `chain` (function) `include/tls_impersonate.h:32` `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT...`
-- `ti_should_impersonate` (function) `include/tls_impersonate.h:56` `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);` -- The double opt-in + user-flag gate (pure).
-- `success` (function) `include/tls_impersonate.h:97` `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out...`
-- `ti_decode_req` (function) `include/tls_impersonate.h:101` `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
-- `ti_req_free` (function) `include/tls_impersonate.h:102` `void ti_req_free(ti_req *r);`
-- `ti_encode_resp` (function) `include/tls_impersonate.h:104` `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
-- `ti_decode_resp` (function) `include/tls_impersonate.h:105` `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
-- `ti_resp_free` (function) `include/tls_impersonate.h:106` `void ti_resp_free(ti_resp *r);`
 
 
 Next: [API_p5.md](API_p5.md)

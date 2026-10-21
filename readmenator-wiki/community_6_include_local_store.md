@@ -1,10 +1,10 @@
 # include: local_store
 
-*Community 6 | 16 files | cohesion 0.83*
+*Community 6 | 16 files | cohesion 0.80*
 
 ## Definition
 
-This community groups 16 file(s) rooted at `include` with dominant language c (cohesion 0.83). Central symbols: `FREEDOM_DISK_STORE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PREFS_H`, `FREEDOM_PROFILE_H`, `FREEDOM_ZOOM_H`, `LLVMFuzzerTestOneInput`, `LS_ARGON2_M_KIB`, `LS_ARGON2_P`. Core file: `src/local_store.c` (287 symbols).
+This community groups 16 file(s) rooted at `include` with dominant language c (cohesion 0.80). Central symbols: `FREEDOM_DISK_STORE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PREFS_H`, `FREEDOM_PROFILE_H`, `FREEDOM_ZOOM_H`, `LLVMFuzzerTestOneInput`, `LS_ARGON2_M_KIB`, `LS_ARGON2_P`. Core file: `src/local_store.c` (291 symbols).
 
 ## Files
 
@@ -17,7 +17,7 @@ This community groups 16 file(s) rooted at `include` with dominant language c (c
 | `include/profile.h` | h | utility | 9 | no |
 | `include/zoom.h` | h | utility | 10 | no |
 | `src/disk_store.c` | c | data_access | 6 | no |
-| `src/local_store.c` | c | data_access | 287 | no |
+| `src/local_store.c` | c | data_access | 291 | no |
 | `src/prefs.c` | c | utility | 26 | no |
 | `src/profile.c` | c | utility | 9 | no |
 | `src/zoom.c` | c | utility | 7 | no |
@@ -63,11 +63,12 @@ This community groups 16 file(s) rooted at `include` with dominant language c (c
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 20
-- Cross-boundary resolved imports (EXTRACTED): 4
+- Cross-boundary resolved imports (EXTRACTED): 5
 
 ## Connections
 
 - [EXTRACTED] depends_on community 2 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefs.h.
+- [EXTRACTED] depends_on community 7 <-> 6 (strength 0.9): Extracted import edge crosses communities: include/ui.h imports include/prefs.h.
 - [EXTRACTED] depends_on community 6 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
 
 ## Risks
@@ -78,7 +79,7 @@ This community groups 16 file(s) rooted at `include` with dominant language c (c
 
 - Why do 16 file(s) lack file-level docs (e.g. `fuzz/fuzz_prefs.c`)? What purpose do they serve?
 - What would break if the most connected file in include: local_store changed?
-- Should include: local_store be split, given cohesion 0.83?
+- Should include: local_store be split, given cohesion 0.80?
 
 ## Sources
 

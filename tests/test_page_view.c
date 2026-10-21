@@ -785,6 +785,24 @@ static void test_build_svg_css_size(void **state) {
     hp_document_free(doc);
 }
 
+/* `svg{fill:currentColor}` (the octicon idiom) must ride the run as the element's
+ * own text colour, not as the CC_COLOR_CURRENT sentinel: the painter would seed both
+ * fill and currentColor from it and draw the default black (github's header mark). */
+static void test_build_svg_fill_current_color_takes_text_color(void **state) {
+    (void)state;
+    static const char CSS[] = "svg{fill:currentColor}";
+    hp_document *doc = parse(
+        "<body style='color:#ffffff'><svg viewBox='0 0 10 10' width='10' height='10'>"
+        "<rect width='10' height='10'/></svg></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *s = find_svg(v);
+    assert_non_null(s);
+    assert_int_equal(s->fg_rgb, 0xffffff);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* A viewBox-only inline <svg> (no width/height attribute AND no CSS width/height of
  * its own) has NO intrinsic pixel size: per CSS 2.1 its used width is 100% of its
  * containing block, height by the viewBox ratio -- exactly what a browser does. So it
@@ -5150,6 +5168,7 @@ int main(void) {
         cmocka_unit_test(test_build_image_unknown_dims),
         cmocka_unit_test(test_build_image_px_and_tracking_dims),
         cmocka_unit_test(test_build_svg_css_size),
+        cmocka_unit_test(test_build_svg_fill_current_color_takes_text_color),
         cmocka_unit_test(test_build_svg_fills_narrow_ancestor),
         cmocka_unit_test(test_build_svg_fills_border_box_ancestor),
         cmocka_unit_test(test_build_svg_no_ancestor_width_unset),

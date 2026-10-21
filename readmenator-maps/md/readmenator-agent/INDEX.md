@@ -29,7 +29,7 @@
 | `fuzz/fuzz_url.c` | - | fuzz | 2 | 0 |
 | `fuzz/fuzz_web_storage.c` | - | fuzz | 0 | 0 |
 | `fuzz/fuzz_webfont.c` | libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). | fuzz | 1 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 602 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 606 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 10 | 2 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -91,14 +91,14 @@
 | `include/pdf_export.h` | pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order)... | include | 10 | 5 |
 | `include/perf_trace.h` | pt_init: #define PT_MAX_SAMPLES 256 typedef struct pt_stage_stats { uint64_t... | include | 17 | 3 |
 | `include/prefetch.h` | pf_ref: One scanned reference. url is the RAW attribute value (the policy-gated fetcher *... | include | 28 | 5 |
-| `include/prefs.h` | prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, *... | include | 18 | 6 |
+| `include/prefs.h` | prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, *... | include | 18 | 7 |
 | `include/profile.h` | profile_close: Loads and decrypts prefs.bin over an out ALREADY initialised (prefs_init). | include | 9 | 3 |
 | `include/psl_data.h` | - | include | 7 | 1 |
 | `include/render_doc.h` | rd_block: One paint-ready block in document order. text is owned, NUL-terminated and valid... | include | 27 | 7 |
 | `include/render_policy.h` | rdp_caps: Render capabilities for a page. | include | 9 | 9 |
 | `include/renderer.h` | rd_result_free: Renders untrusted HTML out-of-process and returns an inert title + text. html ==... | include | 7 | 2 |
 | `include/request_policy.h` | rp_host_of: Lowercased host of an absolute URL into out. | include | 5 | 6 |
-| `include/secure_fetch.h` | sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *... | include | 38 | 6 |
+| `include/secure_fetch.h` | sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *... | include | 42 | 6 |
 | `include/svg_paint.h` | svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred... | include | 2 | 2 |
 | `include/svg_render.h` | sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>... | include | 19 | 6 |
 | `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 42 | 4 |
@@ -106,7 +106,7 @@
 | `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 24 | 7 |
 | `include/textfield.h` | tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at... | include | 15 | 3 |
 | `include/tls_impersonate.h` | ti_req: Request: parent -> helper. | include | 23 | 5 |
-| `include/ui.h` | ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no... | include | 17 | 6 |
+| `include/ui.h` | ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no... | include | 18 | 6 |
 | `include/url.h` | url_parts: Components of a validated absolute https URL, sliced for a JS location object. | include | 14 | 18 |
 | `include/util.h` | — shared pure helpers (no I/O except where noted). | include | 6 | 10 |
 | `include/web_storage.h` | wst_new: web_storage — in-MEMORY localStorage for trusted hosts (owner decision: nothing... | include | 13 | 10 |
@@ -174,7 +174,7 @@
 | `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 42 | 0 |
 | `src/js_trusted.c` | ws_payload: } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for... | src | 14 | 0 |
 | `src/link_nav.c` | clean_href: Removes tab/newline/CR anywhere and trims leading/trailing spaces, in place * into out. | src | 10 | 0 |
-| `src/local_store.c` | - | src | 287 | 0 |
+| `src/local_store.c` | - | src | 291 | 0 |
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
@@ -188,7 +188,7 @@
 | `src/render_policy.c` | - | src | 5 | 0 |
 | `src/renderer.c` | - | src | 6 | 0 |
 | `src/request_policy.c` | public_suffix_labels: Number of labels of the public suffix (eTLD) of a lowercased host... | src | 11 | 0 |
-| `src/secure_fetch.c` | tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a... | src | 61 | 0 |
+| `src/secure_fetch.c` | tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a... | src | 74 | 0 |
 | `src/svg_render.c` | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | src | 34 | 0 |
 | `src/tab.c` | rad_len_ok: A radial-gradient length off the wire (cg_radial encoding): per-mille 0..1e6, or *... | src | 123 | 0 |
 | `src/text_case.c` | Latin Extended-A and the Cyrillic historic block pair letters on adjacent code | src | 9 | 0 |
@@ -212,7 +212,7 @@
 | `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 68 | 0 |
 | `tests/test_browser.c` | test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete... | tests | 17 | 0 |
 | `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 21 | 0 |
-| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 352 | 0 |
+| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 353 | 0 |
 | `tests/test_css_atrule.c` | test_css_atrule -- @supports evaluation and @layer ranks (spec/css_atrule.md). | tests | 10 | 0 |
 | `tests/test_css_box.c` | test_lineheight_abs_vs_scale: line-height (CSS 2.1 10.8.1): a number, a percentage and an em... | tests | 10 | 0 |
 | `tests/test_css_color.c` | test_hsl_fractional_hue: A fractional hue is a <number> too (and hsl() takes an <angle>, whose... | tests | 36 | 0 |
@@ -234,7 +234,7 @@
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
 | `tests/test_freebug.c` | - | tests | 13 | 0 |
-| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 102 | 0 |
+| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 103 | 0 |
 | `tests/test_hls.c` | - | tests | 16 | 0 |
 | `tests/test_host_conf.c` | - | tests | 8 | 0 |
 | `tests/test_hostblock.c` | - | tests | 22 | 0 |
@@ -263,7 +263,7 @@
 | `tests/test_render_policy.c` | test_image_allow_data_url: A data: URI embeds its bytes inline: no socket opens, so it skips the... | tests | 21 | 0 |
 | `tests/test_renderer.c` | test_render_binary_does_not_crash_parent: (void)state; rd_result r... | tests | 8 | 0 |
 | `tests/test_request_policy.c` | test_site_of_psl: } static void test_site_of_multi_suffix(void **state) { (void)state; char... | tests | 12 | 0 |
-| `tests/test_secure_fetch.c` | test_enforce_allowlisted_insecure: The allowlist override: the user's sovereign per-host escape... | tests | 50 | 0 |
+| `tests/test_secure_fetch.c` | test_enforce_allowlisted_insecure: The allowlist override: the user's sovereign per-host escape... | tests | 52 | 0 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 17 | 0 |
 | `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 121 | 0 |
 | `tests/test_text_case.c` | - | tests | 4 | 0 |

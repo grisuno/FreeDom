@@ -479,7 +479,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `PREFS_MAX_HISTORY` (macro, line 30) `#define PREFS_MAX_HISTORY`
   - `PREFS_MAX_TEXT` (macro, line 31) `#define PREFS_MAX_TEXT`
   - `PREFS_PAGE_HISTORY` (macro, line 34) `#define PREFS_PAGE_HISTORY`
-- Imported by: `fuzz/fuzz_prefs.c`, `gui/browser_ui.c`, `include/profile.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
+- Imported by: `fuzz/fuzz_prefs.c`, `gui/browser_ui.c`, `include/profile.h`, `include/ui.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
 
 
 Next: [KB_include_p4.md](KB_include_p4.md)

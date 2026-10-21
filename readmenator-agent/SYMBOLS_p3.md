@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `cb_emit_len` | function | `include/css_box.h:17` | `int cb_emit_len(css_decl *dst, int cap, int slot, const char *val, int allow_auto, int allow_neg);` |
+| `cb_expand_box2` | function | `include/css_box.h:21` | `int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int...` |
+| `cb_expand_box4` | function | `include/css_box.h:19` | `int cb_expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg, css_decl *dst, int cap);` |
+| `cb_expand_grid_template_cols` | function | `include/css_box.h:38` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);` |
 | `cb_interp_align` | function | `include/css_box.h:28` | `int cb_interp_align(const char *v);` |
 | `cb_interp_display` | function | `include/css_box.h:34` | `int cb_interp_display(const char *v);` |
 | `cb_interp_fontsize_ex` | function | `include/css_box.h:29` | `int cb_interp_fontsize_ex(const char *v, int *abs_out);` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `JS_REALM_MAX` | macro | `include/js_sandbox.h:179` | `#define JS_REALM_MAX` |
 | `handle` | function | `include/js_sandbox.h:162` | `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....` |
 | `js_context` | type_alias | `include/js_sandbox.h:47` | `typedef struct js_context js_context;` |
-| `js_context_free` | function | `include/js_sandbox.h:86` | `void js_context_free(js_context *ctx);` |
-| `js_limits` | struct | `include/js_sandbox.h:39` | `` |
-| `js_loc_from_stack` | function | `include/js_sandbox.h:140` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` |
-| `js_pump_jobs` | function | `include/js_sandbox.h:159` | `int js_pump_jobs(js_context *ctx, int max_jobs);` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

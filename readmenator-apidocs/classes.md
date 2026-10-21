@@ -409,6 +409,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`sf_config`](modules/include.secure_fetch.h.md#sf_config) struct in `include/secure_fetch.h`
 - [`sf_policy`](modules/include.secure_fetch.h.md#sf_policy) enum in `include/secure_fetch.h`
 - [`sf_proxy_type`](modules/include.secure_fetch.h.md#sf_proxy_type) enum in `include/secure_fetch.h`
+- [`sf_rcache_entry`](modules/src.secure_fetch.c.md#sf_rcache_entry) struct in `src/secure_fetch.c`
 - [`sf_response`](modules/include.secure_fetch.h.md#sf_response) struct in `include/secure_fetch.h`
 - [`sf_status`](modules/include.secure_fetch.h.md#sf_status) enum in `include/secure_fetch.h`
 - [`sf_ws`](modules/include.secure_fetch.h.md#sf_ws) type_alias in `include/secure_fetch.h`

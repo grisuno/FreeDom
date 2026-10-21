@@ -1,10 +1,10 @@
 # gui
 
-*Community 7 | 15 files | cohesion 0.48*
+*Community 7 | 15 files | cohesion 0.47*
 
 ## Definition
 
-This community groups 15 file(s) rooted at `gui` with dominant language c (cohesion 0.48). Central symbols: `FC_FLEX_MEASURE_W`, `FC_FLEX_MIN_MEASURE_W`, `FC_FONT_CHAIN_MAX`, `FC_FONT_FALLBACK_PX`, `FC_HEADLESS_VIEW_H`, `FC_MAX_AUTHOR_CSS_BYTES`, `FC_MAX_BOXES`, `FC_PNG_MARGIN`. Core file: `src/svg_render.c` (34 symbols). Documented purpose: svg_paint — Cairo back end for the shapes svg_render extracted..
+This community groups 15 file(s) rooted at `gui` with dominant language c (cohesion 0.47). Central symbols: `FC_FLEX_MEASURE_W`, `FC_FLEX_MIN_MEASURE_W`, `FC_FONT_CHAIN_MAX`, `FC_FONT_FALLBACK_PX`, `FC_HEADLESS_VIEW_H`, `FC_MAX_AUTHOR_CSS_BYTES`, `FC_MAX_BOXES`, `FC_PNG_MARGIN`. Core file: `src/svg_render.c` (34 symbols). Documented purpose: svg_paint — Cairo back end for the shapes svg_render extracted..
 
 ## Files
 
@@ -20,7 +20,7 @@ This community groups 15 file(s) rooted at `gui` with dominant language c (cohes
 | `include/freedom_config.h` | h | infrastructure | 13 | no |
 | `include/svg_paint.h` | h | utility | 2 | no |
 | `include/svg_render.h` | h | presentation | 19 | no |
-| `include/ui.h` | h | presentation | 17 | no |
+| `include/ui.h` | h | presentation | 18 | no |
 | `src/svg_render.c` | c | presentation | 34 | yes |
 | `src/ui_layout.c` | c | presentation | 4 | no |
 | `tests/test_svg_render.c` | c | testing | 17 | yes |
@@ -62,7 +62,7 @@ This community groups 15 file(s) rooted at `gui` with dominant language c (cohes
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 14
-- Cross-boundary resolved imports (EXTRACTED): 15
+- Cross-boundary resolved imports (EXTRACTED): 16
 
 ## Connections
 
@@ -70,6 +70,7 @@ This community groups 15 file(s) rooted at `gui` with dominant language c (cohes
 - [EXTRACTED] depends_on community 7 <-> 4 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_page_view.c imports include/page_view.h.
 - [EXTRACTED] depends_on community 2 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
 - [EXTRACTED] depends_on community 7 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/bui_theme.c imports include/css.h.
+- [EXTRACTED] depends_on community 7 <-> 6 (strength 0.9): Extracted import edge crosses communities: include/ui.h imports include/prefs.h.
 
 ## Risks
 
@@ -80,7 +81,7 @@ This community groups 15 file(s) rooted at `gui` with dominant language c (cohes
 
 - Why do 12 file(s) lack file-level docs (e.g. `fuzz/fuzz_page_view.c`)? What purpose do they serve?
 - What would break if the most connected file in gui changed?
-- Should gui be split, given cohesion 0.48?
+- Should gui be split, given cohesion 0.47?
 
 ## Sources
 

@@ -1,6 +1,46 @@
 # Subsystem: src (page 9 of 9)
 Previous: [KB_src_p8.md](KB_src_p8.md)
 
+## src/url.c
+- Doc: ci_prefix: produced; every assembly is bounded and reports overflow rather than truncate....
+- Layer: utility
+- Language: c
+- Symbols:
+  - `ci_prefix` (function, line 20) `static int ci_prefix(const char *haystack, const char *prefix)`
+  - `copy_checked` (function, line 32) `static int copy_checked(char *out, size_t outsz, const char *src)`
+  - `cat_checked` (function, line 40) `static int cat_checked(char *out, size_t outsz, const char *src)`
+  - `ncat_checked` (function, line 49) `static int ncat_checked(char *out, size_t outsz, const char *src, size_t n)`
+  - `url_has_scheme` (function, line 59) `int url_has_scheme(const char *s)`
+  - `url_is_https` (function, line 73) `int url_is_https(const char *s)`
+  - `url_validate_https` (function, line 80) `url_status url_validate_https(const char *url)`
+  - `url_authority_len` (function, line 91) `size_t url_authority_len(const char *url)`
+  - `out_pop_segment` (function, line 102) `static void out_pop_segment(char *out, size_t *olen)`
+  - `url_remove_dot_segments` (function, line 109) `url_status url_remove_dot_segments(const char *path, char *out, size_t outsz)`
+  - `dir_len` (function, line 159) `static size_t dir_len(const char *base)`
+  - `url_resolve_https` (function, line 170) `url_status url_resolve_https(const char *base, const char *ref,
+                             char...`
+  - `is_space` (function, line 218) `static int is_space(int c)`
+  - `is_unreserved` (function, line 222) `static int is_unreserved(int c)`
+  - `append_query_encoded` (function, line 229) `static int append_query_encoded(char *out, size_t outsz, const char *src)`
+  - `assumed` (function, line 254) `* assumed (the caller already routed whitespace to search). */
+static int looks_like_host(const c...`
+  - `build_search` (function, line 303) `static url_status build_search(const char *query, char *out, size_t outsz)`
+  - `url_omnibox` (function, line 309) `url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t outsz)`
+  - `host_equals` (function, line 378) `static int host_equals(const url_parts *p, const char *want)`
+  - `query_find_q` (function, line 393) `static const char *query_find_q(const char *search, size_t len, size_t *vlen)`
+  - `url_search_rewrite` (function, line 411) `url_status url_search_rewrite(const char *url, char *out, size_t outsz)`
+  - `url_extract_userinfo` (function, line 431) `url_status url_extract_userinfo(const char *url, char *out, size_t outsz,
+                       ...`
+  - `url_is_file` (function, line 525) `int url_is_file(const char *s)`
+  - `url_file_path` (function, line 531) `const char *url_file_path(const char *s)`
+  - `url_resolve_file` (function, line 535) `url_status url_resolve_file(const char *base, const char *ref, char *out, size_t outsz)`
+  - `url_split` (function, line 584) `url_status url_split(const char *url, url_parts *out)`
+  - `copy_bounded` (function, line 645) `static url_status copy_bounded(char *out, size_t outsz, const char *a, size_t alen,
+             ...`
+  - `url_history_target` (function, line 654) `url_status url_history_target(const char *base, const char *ref, char *out, size_t outsz)`
+  - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
+- Depends on: `include/url.h`
+
 ## src/web_storage.c
 - Doc: utf8_ok: Well-formed UTF-8, allowing encoded surrogates (WTF-8): a JS string may hold a lone...
 - Layer: data_access

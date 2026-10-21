@@ -63,6 +63,7 @@ graph LR
     gui -- "calls into" --> include_browser_ui
     gui -- "calls into" --> src_freedom
     gui -- "calls into" --> include_page_view
+    gui -- "depends on" --> include_local_store
     include_secure_fetch -- "calls into" --> src_tab
     include_secure_fetch -- "calls into" --> include_css
     include_secure_fetch -- "calls into" --> include_browser_ui
@@ -175,18 +176,18 @@ include: text_shape groups 20 files (c, h) around FREEDOM_DATA_URL_H, allocation
 
 ### include: local_store (7)
 
-include: local_store groups 16 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. ds_free: Reads and decrypts path.
+include: local_store groups 16 files (c, h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ds_free: Reads and decrypts path.
 
 **Related Classes/Methods**:
 
-- <a href="../include/local_store.h#L2-L25">include/local_store.h::FREEDOM_LOCAL_STORE_H</a>
-- <a href="../include/local_store.h">include/local_store.h::LS_KEY_LEN</a>
-- <a href="../include/local_store.h">include/local_store.h::LS_SALT_LEN</a>
-- <a href="../include/local_store.h">include/local_store.h::LS_NONCE_LEN</a>
-- <a href="../include/local_store.h">include/local_store.h::LS_TAG_LEN</a>
-- <a href="../include/local_store.h">include/local_store.h::LS_HEADER_LEN</a>
-- <a href="../include/local_store.h">include/local_store.h::LS_OVERHEAD</a>
-- <a href="../include/local_store.h#L32-L33">include/local_store.h::LS_MAX_PLAINTEXT</a>
+- <a href="../include/prefs.h#L2-L25">include/prefs.h::FREEDOM_PREFS_H</a>
+- <a href="../include/prefs.h">include/prefs.h::PREFS_VERSION</a>
+- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_URL</a>
+- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_TITLE</a>
+- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_BOOKMARKS</a>
+- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_HISTORY</a>
+- <a href="../include/prefs.h#L31-L33">include/prefs.h::PREFS_MAX_TEXT</a>
+- <a href="../include/prefs.h#L34-L35">include/prefs.h::PREFS_PAGE_HISTORY</a>
 
 ### gui (8)
 

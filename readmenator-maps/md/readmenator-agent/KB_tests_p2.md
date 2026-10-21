@@ -297,77 +297,78 @@ static void test_backg...`
   - `test_inline_bg_repeat` (function, line 4334) `static void test_inline_bg_repeat(void **state)`
   - `test_inline_bg_size` (function, line 4346) `static void test_inline_bg_size(void **state)`
   - `test_inline_bg_clip_origin_attachment` (function, line 4355) `static void test_inline_bg_clip_origin_attachment(void **state)`
-  - `test_inline_isolation` (function, line 4375) `static void test_inline_isolation(void **state)`
-  - `test_inline_contain` (function, line 4383) `static void test_inline_contain(void **state)`
-  - `test_inline_content_visibility` (function, line 4398) `static void test_inline_content_visibility(void **state)`
-  - `test_inline_image_rendering` (function, line 4407) `static void test_inline_image_rendering(void **state)`
-  - `test_inline_color_scheme` (function, line 4416) `static void test_inline_color_scheme(void **state)`
-  - `test_inline_accent_color` (function, line 4426) `static void test_inline_accent_color(void **state)`
-  - `test_inline_print_forced_adjust` (function, line 4435) `static void test_inline_print_forced_adjust(void **state)`
-  - `test_inline_mix_blend_mode` (function, line 4449) `static void test_inline_mix_blend_mode(void **state)`
-  - `test_inline_transform_translate` (function, line 4472) `static void test_inline_transform_translate(void **state)`
-  - `test_inline_transform_scale` (function, line 4523) `static void test_inline_transform_scale(void **state)`
-  - `test_inline_transform_rotate` (function, line 4563) `static void test_inline_transform_rotate(void **state)`
-  - `test_inline_transform_skew` (function, line 4593) `static void test_inline_transform_skew(void **state)`
-  - `test_transform_origin` (function, line 4672) `static void test_transform_origin(void **state)`
-  - `test_inline_transform_independent_cascade_combines` (function, line 4714) `static void test_inline_transform_independent_cascade_combines(void **state)`
-  - `test_inline_object_fit` (function, line 4728) `static void test_inline_object_fit(void **state)`
-  - `test_inline_list_style_pos` (function, line 4739) `static void test_inline_list_style_pos(void **state)`
-  - `test_inline_font_kerning` (function, line 4747) `static void test_inline_font_kerning(void **state)`
-  - `test_inline_text_rendering` (function, line 4756) `static void test_inline_text_rendering(void **state)`
-  - `test_inline_font_stretch` (function, line 4766) `static void test_inline_font_stretch(void **state)`
-  - `test_inline_resize` (function, line 4781) `static void test_inline_resize(void **state)`
-  - `test_inline_scroll_behavior` (function, line 4791) `static void test_inline_scroll_behavior(void **state)`
-  - `test_inline_touch_action` (function, line 4799) `static void test_inline_touch_action(void **state)`
-  - `test_inline_overscroll_behavior` (function, line 4811) `static void test_inline_overscroll_behavior(void **state)`
-  - `test_inline_backface_visibility` (function, line 4820) `static void test_inline_backface_visibility(void **state)`
-  - `test_math_min_max_top_level` (function, line 4829) `static void test_math_min_max_top_level(void **state)`
-  - `test_math_clamp` (function, line 4841) `static void test_math_clamp(void **state)`
-  - `test_math_nested_in_calc` (function, line 4851) `static void test_math_nested_in_calc(void **state)`
-  - `test_logical_margin_padding` (function, line 4865) `static void test_logical_margin_padding(void **state)`
-  - `test_logical_inset_and_sizes` (function, line 4891) `static void test_logical_inset_and_sizes(void **state)`
-  - `test_place_shorthands` (function, line 4913) `static void test_place_shorthands(void **state)`
-  - `test_gap_two_value` (function, line 4936) `static void test_gap_two_value(void **state)`
-  - `test_font_shorthand` (function, line 4953) `static void test_font_shorthand(void **state)`
-  - `test_white_space_break_spaces` (function, line 4975) `static void test_white_space_break_spaces(void **state)`
-  - `test_background_rgba_alpha` (function, line 4983) `static void test_background_rgba_alpha(void **state)`
-  - `test_background_clip_text` (function, line 5012) `static void test_background_clip_text(void **state)`
-  - `test_text_fill_color` (function, line 5021) `static void test_text_fill_color(void **state)`
-  - `test_conic_gradient_basic` (function, line 5032) `static void test_conic_gradient_basic(void **state)`
-  - `test_conic_gradient_from_angle` (function, line 5044) `static void test_conic_gradient_from_angle(void **state)`
-  - `test_conic_gradient_pie_hard_stop` (function, line 5058) `static void test_conic_gradient_pie_hard_stop(void **state)`
-  - `test_conic_gradient_deg_positions` (function, line 5073) `static void test_conic_gradient_deg_positions(void **state)`
-  - `test_conic_gradient_fails_closed` (function, line 5083) `static void test_conic_gradient_fails_closed(void **state)`
-  - `test_linear_gradient_positions_emitted` (function, line 5093) `static void test_linear_gradient_positions_emitted(void **state)`
-  - `test_filter_drop_shadow` (function, line 5110) `static void test_filter_drop_shadow(void **state)`
-  - `test_filter_drop_shadow_defaults_and_failclosed` (function, line 5123) `static void test_filter_drop_shadow_defaults_and_failclosed(void **state)`
-  - `test_backdrop_filter_blur` (function, line 5137) `static void test_backdrop_filter_blur(void **state)`
-  - `test_filter_blur_and_grayscale` (function, line 5149) `static void test_filter_blur_and_grayscale(void **state)`
-  - `test_anim_keyframes_resolved_from_sheet` (function, line 5177) `static void test_anim_keyframes_resolved_from_sheet(void **state)`
-  - `test_anim_transform_keyframes_from_sheet` (function, line 5210) `static void test_anim_transform_keyframes_from_sheet(void **state)`
-  - `test_keyframes_overflow_skips_block_not_sheet` (function, line 5281) `static void test_keyframes_overflow_skips_block_not_sheet(void **state)`
-  - `test_vw_resolves_against_render_width` (function, line 5312) `static void test_vw_resolves_against_render_width(void **state)`
-  - `assert_int_equal` (function, line 5348) `assert_int_equal(css_resolve(sh, "div", NULL, (const char *[])`
-  - `test_rem_rebased_on_root_font_size` (function, line 5353) `static void test_rem_rebased_on_root_font_size(void **state)`
-  - `test_rem_rebase_applies_to_box_lengths` (function, line 5365) `static void test_rem_rebase_applies_to_box_lengths(void **state)`
-  - `test_rem_rebase_absent_root_declaration_is_byte_identical` (function, line 5379) `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)`
-  - `test_rem_rebase_honours_root_pseudo_class` (function, line 5391) `static void test_rem_rebase_honours_root_pseudo_class(void **state)`
-  - `test_rem_rebase_skips_at_rule_prelude` (function, line 5401) `static void test_rem_rebase_skips_at_rule_prelude(void **state)`
-  - `test_rem_rebase_leaves_quoted_text_alone` (function, line 5424) `static void test_rem_rebase_leaves_quoted_text_alone(void **state)`
-  - `test_rem_rebase_ignores_identifier_lookalikes` (function, line 5435) `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)`
-  - `test_rem_rebase_62_5_percent_idiom` (function, line 5450) `static void test_rem_rebase_62_5_percent_idiom(void **state)`
-  - `test_media_query_length_honours_its_unit` (function, line 5465) `static void test_media_query_length_honours_its_unit(void **state)`
-  - `assert_int_equal` (function, line 5472) `assert_int_equal(css_parse("@media (min-width: 200em)`
-  - `assert_int_equal` (function, line 5478) `assert_int_equal(css_parse("@media (min-width: 40em)`
-  - `test_clip_rect` (function, line 5486) `static void test_clip_rect(void **state)`
-  - `test_clip_auto` (function, line 5496) `static void test_clip_auto(void **state)`
-  - `grammar` (function, line 5513) `* grammar (spec/css.md), so they parse instead of dropping. */
+  - `test_inline_clip_path_forms_stacking_context` (function, line 4378) `static void test_inline_clip_path_forms_stacking_context(void **state)`
+  - `test_inline_isolation` (function, line 4386) `static void test_inline_isolation(void **state)`
+  - `test_inline_contain` (function, line 4394) `static void test_inline_contain(void **state)`
+  - `test_inline_content_visibility` (function, line 4409) `static void test_inline_content_visibility(void **state)`
+  - `test_inline_image_rendering` (function, line 4418) `static void test_inline_image_rendering(void **state)`
+  - `test_inline_color_scheme` (function, line 4427) `static void test_inline_color_scheme(void **state)`
+  - `test_inline_accent_color` (function, line 4437) `static void test_inline_accent_color(void **state)`
+  - `test_inline_print_forced_adjust` (function, line 4446) `static void test_inline_print_forced_adjust(void **state)`
+  - `test_inline_mix_blend_mode` (function, line 4460) `static void test_inline_mix_blend_mode(void **state)`
+  - `test_inline_transform_translate` (function, line 4483) `static void test_inline_transform_translate(void **state)`
+  - `test_inline_transform_scale` (function, line 4534) `static void test_inline_transform_scale(void **state)`
+  - `test_inline_transform_rotate` (function, line 4574) `static void test_inline_transform_rotate(void **state)`
+  - `test_inline_transform_skew` (function, line 4604) `static void test_inline_transform_skew(void **state)`
+  - `test_transform_origin` (function, line 4683) `static void test_transform_origin(void **state)`
+  - `test_inline_transform_independent_cascade_combines` (function, line 4725) `static void test_inline_transform_independent_cascade_combines(void **state)`
+  - `test_inline_object_fit` (function, line 4739) `static void test_inline_object_fit(void **state)`
+  - `test_inline_list_style_pos` (function, line 4750) `static void test_inline_list_style_pos(void **state)`
+  - `test_inline_font_kerning` (function, line 4758) `static void test_inline_font_kerning(void **state)`
+  - `test_inline_text_rendering` (function, line 4767) `static void test_inline_text_rendering(void **state)`
+  - `test_inline_font_stretch` (function, line 4777) `static void test_inline_font_stretch(void **state)`
+  - `test_inline_resize` (function, line 4792) `static void test_inline_resize(void **state)`
+  - `test_inline_scroll_behavior` (function, line 4802) `static void test_inline_scroll_behavior(void **state)`
+  - `test_inline_touch_action` (function, line 4810) `static void test_inline_touch_action(void **state)`
+  - `test_inline_overscroll_behavior` (function, line 4822) `static void test_inline_overscroll_behavior(void **state)`
+  - `test_inline_backface_visibility` (function, line 4831) `static void test_inline_backface_visibility(void **state)`
+  - `test_math_min_max_top_level` (function, line 4840) `static void test_math_min_max_top_level(void **state)`
+  - `test_math_clamp` (function, line 4852) `static void test_math_clamp(void **state)`
+  - `test_math_nested_in_calc` (function, line 4862) `static void test_math_nested_in_calc(void **state)`
+  - `test_logical_margin_padding` (function, line 4876) `static void test_logical_margin_padding(void **state)`
+  - `test_logical_inset_and_sizes` (function, line 4902) `static void test_logical_inset_and_sizes(void **state)`
+  - `test_place_shorthands` (function, line 4924) `static void test_place_shorthands(void **state)`
+  - `test_gap_two_value` (function, line 4947) `static void test_gap_two_value(void **state)`
+  - `test_font_shorthand` (function, line 4964) `static void test_font_shorthand(void **state)`
+  - `test_white_space_break_spaces` (function, line 4986) `static void test_white_space_break_spaces(void **state)`
+  - `test_background_rgba_alpha` (function, line 4994) `static void test_background_rgba_alpha(void **state)`
+  - `test_background_clip_text` (function, line 5023) `static void test_background_clip_text(void **state)`
+  - `test_text_fill_color` (function, line 5032) `static void test_text_fill_color(void **state)`
+  - `test_conic_gradient_basic` (function, line 5043) `static void test_conic_gradient_basic(void **state)`
+  - `test_conic_gradient_from_angle` (function, line 5055) `static void test_conic_gradient_from_angle(void **state)`
+  - `test_conic_gradient_pie_hard_stop` (function, line 5069) `static void test_conic_gradient_pie_hard_stop(void **state)`
+  - `test_conic_gradient_deg_positions` (function, line 5084) `static void test_conic_gradient_deg_positions(void **state)`
+  - `test_conic_gradient_fails_closed` (function, line 5094) `static void test_conic_gradient_fails_closed(void **state)`
+  - `test_linear_gradient_positions_emitted` (function, line 5104) `static void test_linear_gradient_positions_emitted(void **state)`
+  - `test_filter_drop_shadow` (function, line 5121) `static void test_filter_drop_shadow(void **state)`
+  - `test_filter_drop_shadow_defaults_and_failclosed` (function, line 5134) `static void test_filter_drop_shadow_defaults_and_failclosed(void **state)`
+  - `test_backdrop_filter_blur` (function, line 5148) `static void test_backdrop_filter_blur(void **state)`
+  - `test_filter_blur_and_grayscale` (function, line 5160) `static void test_filter_blur_and_grayscale(void **state)`
+  - `test_anim_keyframes_resolved_from_sheet` (function, line 5188) `static void test_anim_keyframes_resolved_from_sheet(void **state)`
+  - `test_anim_transform_keyframes_from_sheet` (function, line 5221) `static void test_anim_transform_keyframes_from_sheet(void **state)`
+  - `test_keyframes_overflow_skips_block_not_sheet` (function, line 5292) `static void test_keyframes_overflow_skips_block_not_sheet(void **state)`
+  - `test_vw_resolves_against_render_width` (function, line 5323) `static void test_vw_resolves_against_render_width(void **state)`
+  - `assert_int_equal` (function, line 5359) `assert_int_equal(css_resolve(sh, "div", NULL, (const char *[])`
+  - `test_rem_rebased_on_root_font_size` (function, line 5364) `static void test_rem_rebased_on_root_font_size(void **state)`
+  - `test_rem_rebase_applies_to_box_lengths` (function, line 5376) `static void test_rem_rebase_applies_to_box_lengths(void **state)`
+  - `test_rem_rebase_absent_root_declaration_is_byte_identical` (function, line 5390) `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)`
+  - `test_rem_rebase_honours_root_pseudo_class` (function, line 5402) `static void test_rem_rebase_honours_root_pseudo_class(void **state)`
+  - `test_rem_rebase_skips_at_rule_prelude` (function, line 5412) `static void test_rem_rebase_skips_at_rule_prelude(void **state)`
+  - `test_rem_rebase_leaves_quoted_text_alone` (function, line 5435) `static void test_rem_rebase_leaves_quoted_text_alone(void **state)`
+  - `test_rem_rebase_ignores_identifier_lookalikes` (function, line 5446) `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)`
+  - `test_rem_rebase_62_5_percent_idiom` (function, line 5461) `static void test_rem_rebase_62_5_percent_idiom(void **state)`
+  - `test_media_query_length_honours_its_unit` (function, line 5476) `static void test_media_query_length_honours_its_unit(void **state)`
+  - `assert_int_equal` (function, line 5483) `assert_int_equal(css_parse("@media (min-width: 200em)`
+  - `assert_int_equal` (function, line 5489) `assert_int_equal(css_parse("@media (min-width: 40em)`
+  - `test_clip_rect` (function, line 5497) `static void test_clip_rect(void **state)`
+  - `test_clip_auto` (function, line 5507) `static void test_clip_auto(void **state)`
+  - `grammar` (function, line 5524) `* grammar (spec/css.md), so they parse instead of dropping. */
 static void test_vendor_prefixes(v...`
-  - `test_fontface_local_only_is_alias` (function, line 5553) `static void test_fontface_local_only_is_alias(void **state)`
-  - `test_fontface_local_then_url_keeps_url` (function, line 5571) `static void test_fontface_local_then_url_keeps_url(void **state)`
-  - `test_box_shadow_layers_and_alpha` (function, line 5589) `static void test_box_shadow_layers_and_alpha(void **state)`
-  - `test_grid_template_rows_tracks` (function, line 5614) `static void test_grid_template_rows_tracks(void **state)`
-  - `main` (function, line 5630) `int main(void)`
+  - `test_fontface_local_only_is_alias` (function, line 5564) `static void test_fontface_local_only_is_alias(void **state)`
+  - `test_fontface_local_then_url_keeps_url` (function, line 5582) `static void test_fontface_local_then_url_keeps_url(void **state)`
+  - `test_box_shadow_layers_and_alpha` (function, line 5600) `static void test_box_shadow_layers_and_alpha(void **state)`
+  - `test_grid_template_rows_tracks` (function, line 5625) `static void test_grid_template_rows_tracks(void **state)`
+  - `main` (function, line 5641) `int main(void)`
   - `box` (function, line 234) `* box (CSS 2.1 section 10.8.1). With one line box per line and no separate * parent content edge, they land on the...`
   - `downstream` (function, line 657) `* and deciding whether to fetch happens downstream (render_doc.c) */ assert_string_equal(css_parse_inline(...`
   - `invalid` (function, line 759) `* invalid (fail closed), not silently coerced into some default. */ css_style s = css_parse_inline("color...`

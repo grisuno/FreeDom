@@ -3,20 +3,29 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `print_doc` | function | `src/freedom.c:287` | `static void print_doc(const rd_doc *doc)` |
-| `print_dom` | function | `src/freedom.c:397` | `static void print_dom(const rd_doc *doc)` |
-| `print_dom_css` | function | `src/freedom.c:412` | `static void print_dom_css(const rd_doc *doc)` |
+| `is_https_url` | function | `src/freedom.c:80` | `static int is_https_url(const char *s)` |
+| `is_overlay_http` | function | `src/freedom.c:89` | `static int is_overlay_http(const char *s)` |
+| `main` | function | `src/freedom.c:1204` | `int main(int argc, char **argv)` |
+| `now_us` | function | `src/freedom.c:143` | `static uint64_t now_us(void)` |
+| `only` | function | `src/freedom.c:782` | `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...` |
+| `parent` | function | `src/freedom.c:1001` | `* gated by the parent (ln_resolve: a local target stays under the document's  * directory, a remo...` |
+| `pool` | function | `src/freedom.c:711` | `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...` |
+| `print_console` | function | `src/freedom.c:387` | `static void print_console(const fb_buffer *log)` |
+| `print_css_drops` | function | `src/freedom.c:544` | `static void print_css_drops(const char *html, size_t len)` |
+| `print_doc` | function | `src/freedom.c:294` | `static void print_doc(const rd_doc *doc)` |
+| `print_dom` | function | `src/freedom.c:404` | `static void print_dom(const rd_doc *doc)` |
+| `print_dom_css` | function | `src/freedom.c:419` | `static void print_dom_css(const rd_doc *doc)` |
 | `print_usage` | function | `src/freedom.c:52` | `static void print_usage(FILE *fp, const char *prog)` |
 | `read_file` | function | `src/freedom.c:219` | `static char *read_file(const char *path, size_t *out_len)` |
-| `render_page` | function | `src/freedom.c:626` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
-| `run_dump_video` | function | `src/freedom.c:1163` | `static int run_dump_video(const char *url)` |
-| `run_headless` | function | `src/freedom.c:1016` | `static int run_headless(const char *target)` |
-| `sf_reason` | function | `src/freedom.c:872` | `static const char *sf_reason(sf_status ss)` |
+| `render_page` | function | `src/freedom.c:648` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
+| `run_dump_video` | function | `src/freedom.c:1185` | `static int run_dump_video(const char *url)` |
+| `run_headless` | function | `src/freedom.c:1038` | `static int run_headless(const char *target)` |
+| `sf_reason` | function | `src/freedom.c:894` | `static const char *sf_reason(sf_status ss)` |
 | `timings_dump` | function | `src/freedom.c:157` | `static void timings_dump(void)` |
 | `timings_enabled` | function | `src/freedom.c:153` | `static int timings_enabled(void)` |
 | `timings_ensure_init` | function | `src/freedom.c:149` | `static void timings_ensure_init(void)` |
 | `user_impersonate_enabled` | function | `src/freedom.c:212` | `static int user_impersonate_enabled(void)` |
-| `video_fetch_with_fallback` | function | `src/freedom.c:1052` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,                      ...` |
+| `video_fetch_with_fallback` | function | `src/freedom.c:1074` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,                      ...` |
 | `_GNU_SOURCE` | macro | `src/hls.c:21` | `#define _GNU_SOURCE` |
 | `_POSIX_C_SOURCE` | macro | `src/hls.c:22` | `#define _POSIX_C_SOURCE` |
 | `hls_parse` | function | `src/hls.c:80` | `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)` |
@@ -362,20 +371,20 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `throw_named` | function | `src/js_sandbox.c:701` | `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)` |
 | `timespec_reached` | function | `src/js_sandbox.c:108` | `static int timespec_reached(const struct timespec *now, const struct timespec *deadline)` |
 | `undefined` | function | `src/js_sandbox.c:221` | `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx...` |
-| `explicitly` | function | `src/js_trusted.c:344` | `* explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...` |
-| `hex_nibble` | function | `src/js_trusted.c:137` | `static int hex_nibble(char c)` |
-| `jt_enable_open` | function | `src/js_trusted.c:26` | `jd_status jt_enable_open(js_context *ctx)` |
-| `jt_enable_storage` | function | `src/js_trusted.c:275` | `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)` |
-| `jt_enable_worker` | function | `src/js_trusted.c:425` | `jd_status jt_enable_worker(js_context *ctx)` |
-| `jt_enable_ws` | function | `src/js_trusted.c:120` | `jd_status jt_enable_ws(js_context *ctx)` |
-| `jt_seed_ctx` | struct | `src/js_trusted.c:263` | `` |
-| `jt_seed_pair` | function | `src/js_trusted.c:265` | `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)` |
-| `jt_take_opens` | function | `src/js_trusted.c:42` | `char *jt_take_opens(js_context *ctx)` |
-| `jt_take_storage` | function | `src/js_trusted.c:296` | `int jt_take_storage(js_context *ctx, char **out, size_t *len)` |
-| `jt_take_ws` | function | `src/js_trusted.c:168` | `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)` |
-| `jt_ws_event` | function | `src/js_trusted.c:210` | `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)` |
-| `jt_ws_ops_free` | function | `src/js_trusted.c:132` | `void jt_ws_ops_free(jt_ws_op *ops, size_t n)` |
-| `ws_payload` | function | `src/js_trusted.c:144` | `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)` |
+| `explicitly` | function | `src/js_trusted.c:353` | `* explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...` |
+| `hex_nibble` | function | `src/js_trusted.c:146` | `static int hex_nibble(char c)` |
+| `jt_enable_open` | function | `src/js_trusted.c:35` | `jd_status jt_enable_open(js_context *ctx)` |
+| `jt_enable_storage` | function | `src/js_trusted.c:284` | `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)` |
+| `jt_enable_worker` | function | `src/js_trusted.c:434` | `jd_status jt_enable_worker(js_context *ctx)` |
+| `jt_enable_ws` | function | `src/js_trusted.c:129` | `jd_status jt_enable_ws(js_context *ctx)` |
+| `jt_seed_ctx` | struct | `src/js_trusted.c:272` | `` |
+| `jt_seed_pair` | function | `src/js_trusted.c:274` | `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)` |
+| `jt_take_opens` | function | `src/js_trusted.c:51` | `char *jt_take_opens(js_context *ctx)` |
+| `jt_take_storage` | function | `src/js_trusted.c:305` | `int jt_take_storage(js_context *ctx, char **out, size_t *len)` |
+| `jt_take_ws` | function | `src/js_trusted.c:177` | `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)` |
+| `jt_ws_event` | function | `src/js_trusted.c:219` | `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)` |
+| `jt_ws_ops_free` | function | `src/js_trusted.c:141` | `void jt_ws_ops_free(jt_ws_op *ops, size_t n)` |
+| `ws_payload` | function | `src/js_trusted.c:153` | `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)` |
 | `append_seg` | function | `src/link_nav.c:86` | `static int append_seg(char *body, size_t bodysz, size_t *blen,                       const char *...` |
 | `ci_prefix` | function | `src/link_nav.c:38` | `static int ci_prefix(const char *s, const char *prefix)` |
 | `classify_block` | function | `src/link_nav.c:62` | `static ln_block_reason classify_block(const char *ref)` |
@@ -386,18 +395,18 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `ln_resolve` | function | `src/link_nav.c:172` | `ln_status ln_resolve(const char *base, const char *href, ln_result *out)` |
 | `pop_seg` | function | `src/link_nav.c:98` | `static void pop_seg(char *body, size_t *blen)` |
 | `resolve_file` | function | `src/link_nav.c:149` | `static int resolve_file(const char *base, const char *ref, char *out, size_t outsz)` |
-| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:757` | `#define LS_ARGON2_M_KIB` |
-| `LS_ARGON2_P` | macro | `src/local_store.c:758` | `#define LS_ARGON2_P` |
-| `LS_ARGON2_T` | macro | `src/local_store.c:756` | `#define LS_ARGON2_T` |
-| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:753` | `#define LS_KDF_ARGON2ID` |
-| `LS_KDF_NONE` | macro | `src/local_store.c:752` | `#define LS_KDF_NONE` |
-| `LS_VERSION` | macro | `src/local_store.c:751` | `#define LS_VERSION` |
-| `OFF_AEAD` | macro | `src/local_store.c:763` | `#define OFF_AEAD` |
-| `OFF_KDF` | macro | `src/local_store.c:764` | `#define OFF_KDF` |
-| `OFF_MAGIC` | macro | `src/local_store.c:761` | `#define OFF_MAGIC` |
-| `OFF_NONCE` | macro | `src/local_store.c:766` | `#define OFF_NONCE` |
-| `OFF_SALT` | macro | `src/local_store.c:765` | `#define OFF_SALT` |
-| `OFF_VERSION` | macro | `src/local_store.c:762` | `#define OFF_VERSION` |
+| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:768` | `#define LS_ARGON2_M_KIB` |
+| `LS_ARGON2_P` | macro | `src/local_store.c:769` | `#define LS_ARGON2_P` |
+| `LS_ARGON2_T` | macro | `src/local_store.c:767` | `#define LS_ARGON2_T` |
+| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:764` | `#define LS_KDF_ARGON2ID` |
+| `LS_KDF_NONE` | macro | `src/local_store.c:763` | `#define LS_KDF_NONE` |
+| `LS_VERSION` | macro | `src/local_store.c:762` | `#define LS_VERSION` |
+| `OFF_AEAD` | macro | `src/local_store.c:774` | `#define OFF_AEAD` |
+| `OFF_KDF` | macro | `src/local_store.c:775` | `#define OFF_KDF` |
+| `OFF_MAGIC` | macro | `src/local_store.c:772` | `#define OFF_MAGIC` |
+| `OFF_NONCE` | macro | `src/local_store.c:777` | `#define OFF_NONCE` |
+| `OFF_SALT` | macro | `src/local_store.c:776` | `#define OFF_SALT` |
+| `OFF_VERSION` | macro | `src/local_store.c:773` | `#define OFF_VERSION` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:3` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:14` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:25` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
@@ -463,7 +472,8 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:685` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:696` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:707` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:742` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
+| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:718` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
+| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:753` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:6` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:17` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:28` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
@@ -486,15 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:215` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:226` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:237` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:248` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:259` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:270` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:281` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:292` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:303` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:314` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:325` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:336` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:347` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

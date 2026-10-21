@@ -5829,7 +5829,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * fill and currentColor from it. */
                 {
                     css_style svg_own = cached_element_style(el, sheet, &cache);
-                    int svg_fg = (svg_own.svg_fill != -1 && svg_own.svg_fill != CSS_SVG_PAINT_NONE)
+                    int svg_fg = (svg_own.svg_fill != -1 && svg_own.svg_fill != CSS_SVG_PAINT_NONE
+                                  && svg_own.svg_fill != CC_COLOR_CURRENT)
                                  ? svg_own.svg_fill : unused_fg;
                     pv_set_color(v, svg_fg);
                 }

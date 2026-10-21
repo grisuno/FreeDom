@@ -191,87 +191,87 @@ static int expand_clip(const char *val, css_de...`
 - `slots` (function) `src/css.c:3530` `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return...`
 - `sentinel` (function) `src/css.c:3645` `* cascade carries as the currentColor sentinel (in `color` the two are the * same thing);`
 - `here` (function) `src/css.c:3848` `* servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);`
-- `wide_claim` (function) `src/css.c:4079` `static int wide_claim(const char *prop, css_decl *dst, int cap,
+- `wide_claim` (function) `src/css.c:4099` `static int wide_claim(const char *prop, css_decl *dst, int cap,
                       char (*urlt...` -- SHORTHAND it applies to every longhand the shorthand expands to.
-- `interpret_prop` (function) `src/css.c:4119` `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
+- `interpret_prop` (function) `src/css.c:4139` `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
             ...` -- The two value-level rules that hold for EVERY property, applied once around the dispatch so no per-property branch...
-- `drop_copy_text` (function) `src/css.c:4146` `static void drop_copy_text(char *dst, size_t cap, const char *src)` -- Copies hostile CSS text into a fixed report buffer: bounded, NUL-terminated, truncated with a visible "..." marker...
-- `drop_record` (function) `src/css.c:4165` `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)` -- Records one dropped declaration, coalescing by (property, cause).
-- `raw_add` (function) `src/css.c:4191` `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)` -- Interprets one declaration span s[0,n) into dst (up to cap).
-- `interpret_decls` (function) `src/css.c:4304` `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
+- `drop_copy_text` (function) `src/css.c:4166` `static void drop_copy_text(char *dst, size_t cap, const char *src)` -- Copies hostile CSS text into a fixed report buffer: bounded, NUL-terminated, truncated with a visible "..." marker...
+- `drop_record` (function) `src/css.c:4185` `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)` -- Records one dropped declaration, coalescing by (property, cause).
+- `raw_add` (function) `src/css.c:4211` `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)` -- Interprets one declaration span s[0,n) into dst (up to cap).
+- `interpret_decls` (function) `src/css.c:4324` `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
                ...` -- Splits a ';'-separated declaration block into dst (up to cap).
-- `sheet_pools_reserve` (function) `src/css.c:4362` `static void sheet_pools_reserve(css_sheet *sh)`
-- `add_rule` (function) `src/css.c:4368` `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
+- `sheet_pools_reserve` (function) `src/css.c:4382` `static void sheet_pools_reserve(css_sheet *sh)`
+- `add_rule` (function) `src/css.c:4388` `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
                      siz...` -- while (nc - n < CSS_POOL_HEADROOM && nc < hard_cap) nc *= 2; if (nc > hard_cap) nc = hard_cap; char...
-- `skip_at_rule` (function) `src/css.c:4481` `static size_t skip_at_rule(const char *s, size_t i, size_t n)` -- Skips an @-rule starting at s[i] ('@'): to the terminating ';' or past a * brace-balanced block.
-- `block_end` (function) `src/css.c:4497` `static size_t block_end(const char *s, size_t open, size_t n)` -- Index just past the '}' that closes the block whose '{' is at s[open]. n if * unbalanced.
-- `at_is_media` (function) `src/css.c:4519` `static int at_is_media(const char *s, size_t i, size_t n)` -- A media query list s[a,b), evaluated by the Media Queries 4 module against the render width (the only real datum...
-- `at_keyword` (function) `src/css.c:4530` `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)` -- True when s[i] ('@') begins the at-keyword kw (lowercase, without '@') followed * by a delimiter.
-- `csel_substr` (function) `src/css.c:4552` `return known && csel_substr(val, "var(", 1);`
-- `supports_selector_ok` (function) `src/css.c:4555` `static int supports_selector_ok(void *ctx, const char *sel)`
-- `supports_matches` (function) `src/css.c:4564` `static int supports_matches(const char *s, size_t a, size_t b)`
-- `layer_register` (function) `src/css.c:4618` `static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,
+- `skip_at_rule` (function) `src/css.c:4501` `static size_t skip_at_rule(const char *s, size_t i, size_t n)` -- Skips an @-rule starting at s[i] ('@'): to the terminating ';' or past a * brace-balanced block.
+- `block_end` (function) `src/css.c:4517` `static size_t block_end(const char *s, size_t open, size_t n)` -- Index just past the '}' that closes the block whose '{' is at s[open]. n if * unbalanced.
+- `at_is_media` (function) `src/css.c:4539` `static int at_is_media(const char *s, size_t i, size_t n)` -- A media query list s[a,b), evaluated by the Media Queries 4 module against the render width (the only real datum...
+- `at_keyword` (function) `src/css.c:4550` `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)` -- True when s[i] ('@') begins the at-keyword kw (lowercase, without '@') followed * by a delimiter.
+- `csel_substr` (function) `src/css.c:4572` `return known && csel_substr(val, "var(", 1);`
+- `supports_selector_ok` (function) `src/css.c:4575` `static int supports_selector_ok(void *ctx, const char *sel)`
+- `supports_matches` (function) `src/css.c:4584` `static int supports_matches(const char *s, size_t a, size_t b)`
+- `layer_register` (function) `src/css.c:4638` `static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,
                      ...` -- Registers the layer name s[a,b) (trimmed; empty = anonymous) nested under the sheet's current layer, and returns its...
-- `collect_custom_props_scoped` (function) `src/css.c:4661` `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
+- `collect_custom_props_scoped` (function) `src/css.c:4681` `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
                 ...` -- Structure-aware custom-property collection (see the block comment above cvr_collect_decls): walks s[start,end) with...
-- `parse_block` (function) `src/css.c:4736` `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
+- `parse_block` (function) `src/css.c:4756` `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                  ...` -- Parses rules in s[start,end).
-- `download` (function) `src/css.c:4892` `* the download (spec/webfont.md b3b). An empty src_url
+- `download` (function) `src/css.c:4912` `* the download (spec/webfont.md b3b). An empty src_url
                      * simply never resolv...`
-- `rem_ident_ch` (function) `src/css.c:5024` `static int rem_ident_ch(char c)` -- True for a character that continues a CSS identifier, so a `rem` glued to one is * part of a name and not a unit.
-- `rem_num_starts_after` (function) `src/css.c:5032` `static int rem_num_starts_after(char prev)` -- True when a number may START at a character preceded by prev -- i.e. prev cannot be part of a longer name or number.
-- `rem_emit_px` (function) `src/css.c:5042` `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)` -- Appends the px equivalent of num rem.
-- `len_unit_px` (function) `src/css.c:5072` `static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c)` -- px per unit for a unit identifier u[0,len) under c, or 0 when c leaves it alone.
-- `len_rebase` (function) `src/css.c:5102` `static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen)` -- width family) in s[0,n) into `<number x scale>px`.
-- `rem_rebase` (function) `src/css.c:5168` `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)`
-- `sheet_index` (function) `src/css.c:5176` `static void sheet_index(css_sheet *sh)` -- Rewinds a sheet to empty while keeping every allocation, so the text can be * re-parsed in place.
-- `sheet_rewind` (function) `src/css.c:5181` `static void sheet_rewind(css_sheet *sh)`
-- `sheet_root_font_px` (function) `src/css.c:5226` `static double sheet_root_font_px(const css_sheet *sh)` -- The root element's font-size in px, as the cascade resolves it (16px when the sheet leaves the root alone).
-- `strip_comments` (function) `src/css.c:5234` `static char *strip_comments(const char *text, size_t len, size_t *outlen)` -- Removes C-style block comments into a fresh NUL-terminated buffer (each comment * becomes one space).
-- `var` (function) `src/css.c:5244` `* collected and forty var() declarations -- font sizes, widths, radii, the
+- `rem_ident_ch` (function) `src/css.c:5044` `static int rem_ident_ch(char c)` -- True for a character that continues a CSS identifier, so a `rem` glued to one is * part of a name and not a unit.
+- `rem_num_starts_after` (function) `src/css.c:5052` `static int rem_num_starts_after(char prev)` -- True when a number may START at a character preceded by prev -- i.e. prev cannot be part of a longer name or number.
+- `rem_emit_px` (function) `src/css.c:5062` `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)` -- Appends the px equivalent of num rem.
+- `len_unit_px` (function) `src/css.c:5092` `static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c)` -- px per unit for a unit identifier u[0,len) under c, or 0 when c leaves it alone.
+- `len_rebase` (function) `src/css.c:5122` `static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen)` -- width family) in s[0,n) into `<number x scale>px`.
+- `rem_rebase` (function) `src/css.c:5188` `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)`
+- `sheet_index` (function) `src/css.c:5196` `static void sheet_index(css_sheet *sh)` -- Rewinds a sheet to empty while keeping every allocation, so the text can be * re-parsed in place.
+- `sheet_rewind` (function) `src/css.c:5201` `static void sheet_rewind(css_sheet *sh)`
+- `sheet_root_font_px` (function) `src/css.c:5246` `static double sheet_root_font_px(const css_sheet *sh)` -- The root element's font-size in px, as the cascade resolves it (16px when the sheet leaves the root alone).
+- `strip_comments` (function) `src/css.c:5254` `static char *strip_comments(const char *text, size_t len, size_t *outlen)` -- Removes C-style block comments into a fresh NUL-terminated buffer (each comment * becomes one space).
+- `var` (function) `src/css.c:5264` `* collected and forty var() declarations -- font sizes, widths, radii, the
      * whole theme -- ...`
-- `css_parse` (function) `src/css.c:5269` `css_status css_parse(const char *text, size_t len, css_sheet **out)`
-- `css_parse_media` (function) `src/css.c:5273` `css_status css_parse_media(const char *text, size_t len, const css_media *media,
+- `css_parse` (function) `src/css.c:5289` `css_status css_parse(const char *text, size_t len, css_sheet **out)`
+- `css_parse_media` (function) `src/css.c:5293` `css_status css_parse_media(const char *text, size_t len, const css_media *media,
                 ...`
-- `css_parse_scoped` (function) `src/css.c:5278` `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
+- `css_parse_scoped` (function) `src/css.c:5298` `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
                ...`
-- `css_parse_logged` (function) `src/css.c:5283` `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
+- `css_parse_logged` (function) `src/css.c:5303` `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
                ...`
-- `consumer` (function) `src/css.c:5317` `* consumer (shorthands, calc(), var() values) gets it with no context
+- `consumer` (function) `src/css.c:5337` `* consumer (shorthands, calc(), var() values) gets it with no context
          * threaded through...`
-- `css_free` (function) `src/css.c:5375` `void css_free(css_sheet *s)`
-- `content_attr_of` (function) `src/css.c:5397` `static const char *content_attr_of(const css_element *el, const char *name)` -- Looks up an attribute value on the element being styled (names are stored * lowercased by css_chain; the query is...
-- `apply_decl` (function) `src/css.c:5406` `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+- `css_free` (function) `src/css.c:5395` `void css_free(css_sheet *s)`
+- `content_attr_of` (function) `src/css.c:5417` `static const char *content_attr_of(const css_element *el, const char *name)` -- Looks up an attribute value on the element being styled (names are stored * lowercased by css_chain; the query is...
+- `apply_decl` (function) `src/css.c:5426` `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
               ...`
-- `page_view` (function) `src/css.c:5413` `* the generated text reaches page_view (which materialises it as a synthetic * run);`
-- `parent` (function) `src/css.c:5446` `* property from the parent (`inherit`), and an unset non-inherited one
+- `page_view` (function) `src/css.c:5433` `* the generated text reaches page_view (which materialises it as a synthetic * run);`
+- `parent` (function) `src/css.c:5466` `* property from the parent (`inherit`), and an unset non-inherited one
          * stands at its i...`
-- `css_ua_heading_em` (function) `src/css.c:5865` `double css_ua_heading_em(int level)`
-- `css_computed_font_size_for_tag` (function) `src/css.c:5870` `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)`
-- `computed_font_size` (function) `src/css.c:5878` `static double computed_font_size(const css_style *o, const css_element *el)`
-- `cand_cmp` (function) `src/css.c:5895` `static int cand_cmp(const void *pa, const void *pb)`
-- `apply_var_source` (function) `src/css.c:5960` `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+- `css_ua_heading_em` (function) `src/css.c:5885` `double css_ua_heading_em(int level)`
+- `css_computed_font_size_for_tag` (function) `src/css.c:5890` `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)`
+- `computed_font_size` (function) `src/css.c:5898` `static double computed_font_size(const css_style *o, const css_element *el)`
+- `cand_cmp` (function) `src/css.c:5915` `static int cand_cmp(const void *pa, const void *pb)`
+- `apply_var_source` (function) `src/css.c:5980` `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
         ...` -- Re-resolves one var() source ("prop\0value") against the element's scope and * applies what it interprets to...
-- `apply_rule` (function) `src/css.c:5987` `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+- `apply_rule` (function) `src/css.c:6007` `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
               ...` -- Applies one matched rule. es == NULL: the page-global meaning of every var() (markers skipped, their spans applied).
-- `fold_font_relative` (function) `src/css.c:6025` `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
+- `fold_font_relative` (function) `src/css.c:6045` `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
                          ...` -- computed font-size.
-- `css_resolve_el` (function) `src/css.c:6056` `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
+- `css_resolve_el` (function) `src/css.c:6076` `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          ...`
-- `css_resolve_el_ex` (function) `src/css.c:6065` `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
+- `css_resolve_el_ex` (function) `src/css.c:6085` `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
                       ...`
-- `pseudo_of` (function) `src/css.c:6072` `static int pseudo_of(int which)` -- return css_resolve_el_ex(sheet, el, inline_style, inline_len, NULL); } static css_style resolve_core(const css_sheet...
-- `css_resolve_pseudo` (function) `src/css.c:6081` `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)`
-- `resolve_core` (function) `src/css.c:6092` `static css_style resolve_core(const css_sheet *sheet, const css_element *el,
+- `pseudo_of` (function) `src/css.c:6092` `static int pseudo_of(int which)` -- return css_resolve_el_ex(sheet, el, inline_style, inline_len, NULL); } static css_style resolve_core(const css_sheet...
+- `css_resolve_pseudo` (function) `src/css.c:6101` `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)`
+- `resolve_core` (function) `src/css.c:6112` `static css_style resolve_core(const css_sheet *sheet, const css_element *el,
                     ...` -- The cascade. want_pseudo 0 resolves the ELEMENT (a ::before/::after rule only hands it `content`)...
-- `css_resolve` (function) `src/css.c:6349` `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
+- `css_resolve` (function) `src/css.c:6369` `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                   ...`
-- `NULL` (function) `src/css.c:6373` `* Sheet can be NULL (inline style, no @keyframes). */
+- `NULL` (function) `src/css.c:6393` `* Sheet can be NULL (inline style, no @keyframes). */
 void css_resolve_anim_keyframes(css_style *...`
-- `css_font_face_count` (function) `src/css.c:6405` `size_t css_font_face_count(const css_sheet *sheet)`
-- `css_font_face_at` (function) `src/css.c:6409` `int css_font_face_at(const css_sheet *sheet, size_t i,
+- `css_font_face_count` (function) `src/css.c:6425` `size_t css_font_face_count(const css_sheet *sheet)`
+- `css_font_face_at` (function) `src/css.c:6429` `int css_font_face_at(const css_sheet *sheet, size_t i,
                      char *family, size_t ...`
-- `css_parse_inline` (function) `src/css.c:6419` `css_style css_parse_inline(const char *style, size_t len)`
+- `css_parse_inline` (function) `src/css.c:6439` `css_style css_parse_inline(const char *style, size_t len)`
 
 ## src/css_atrule.c
 Depends on: `include/css_atrule.h`, `include/css_select.h`

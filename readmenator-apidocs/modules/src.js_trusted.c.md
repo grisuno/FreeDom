@@ -44,7 +44,7 @@ flowchart LR
 
 ### `jt_seed_ctx`
 
-`struct` | [src/js_trusted.c:263](../../src/js_trusted.c#L263)
+`struct` | [src/js_trusted.c:272](../../src/js_trusted.c#L272)
 
 ```c
 typedef struct jt_seed_ctx { JSContext *js; JSValue fn; JSValue global; } jt_seed_ctx;
@@ -58,7 +58,7 @@ typedef struct jt_seed_ctx { JSContext *js; JSValue fn; JSValue global; } jt_see
 
 ### `jt_enable_open`
 
-`function` | [src/js_trusted.c:26](../../src/js_trusted.c#L26)
+`function` | [src/js_trusted.c:35](../../src/js_trusted.c#L35)
 
 ```c
 jd_status jt_enable_open(js_context *ctx)
@@ -82,7 +82,7 @@ jd_status jt_enable_open(js_context *ctx)
 
 ### `jt_take_opens`
 
-`function` | [src/js_trusted.c:42](../../src/js_trusted.c#L42)
+`function` | [src/js_trusted.c:51](../../src/js_trusted.c#L51)
 
 ```c
 char *jt_take_opens(js_context *ctx)
@@ -108,7 +108,7 @@ Drains the recorded window.open targets as "url\n" lines, or NULL when none.
 
 ### `jt_enable_ws`
 
-`function` | [src/js_trusted.c:120](../../src/js_trusted.c#L120)
+`function` | [src/js_trusted.c:129](../../src/js_trusted.c#L129)
 
 ```c
 jd_status jt_enable_ws(js_context *ctx)
@@ -132,7 +132,7 @@ jd_status jt_enable_ws(js_context *ctx)
 
 ### `jt_ws_ops_free`
 
-`function` | [src/js_trusted.c:132](../../src/js_trusted.c#L132)
+`function` | [src/js_trusted.c:141](../../src/js_trusted.c#L141)
 
 ```c
 void jt_ws_ops_free(jt_ws_op *ops, size_t n)
@@ -151,7 +151,7 @@ void jt_ws_ops_free(jt_ws_op *ops, size_t n)
 
 ### `jt_take_ws`
 
-`function` | [src/js_trusted.c:168](../../src/js_trusted.c#L168)
+`function` | [src/js_trusted.c:177](../../src/js_trusted.c#L177)
 
 ```c
 size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)
@@ -181,7 +181,7 @@ Returns the count. Operations past JT_WS_MAX_OPS/JT_WS_MAX_BYTES are dropped and
 
 ### `jt_ws_event`
 
-`function` | [src/js_trusted.c:210](../../src/js_trusted.c#L210)
+`function` | [src/js_trusted.c:219](../../src/js_trusted.c#L219)
 
 ```c
 int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)
@@ -214,7 +214,7 @@ Returns 1 when a live socket with that id received it.
 
 ### `jt_enable_storage`
 
-`function` | [src/js_trusted.c:275](../../src/js_trusted.c#L275)
+`function` | [src/js_trusted.c:284](../../src/js_trusted.c#L284)
 
 ```c
 jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
@@ -240,7 +240,7 @@ jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
 
 ### `jt_take_storage`
 
-`function` | [src/js_trusted.c:296](../../src/js_trusted.c#L296)
+`function` | [src/js_trusted.c:305](../../src/js_trusted.c#L305)
 
 ```c
 int jt_take_storage(js_context *ctx, char **out, size_t *len)
@@ -268,7 +268,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `explicitly`
 
-`function` | [src/js_trusted.c:344](../../src/js_trusted.c#L344)
+`function` | [src/js_trusted.c:353](../../src/js_trusted.c#L353)
 
 ```c
 * explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...
@@ -289,7 +289,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `jt_enable_worker`
 
-`function` | [src/js_trusted.c:425](../../src/js_trusted.c#L425)
+`function` | [src/js_trusted.c:434](../../src/js_trusted.c#L434)
 
 ```c
 jd_status jt_enable_worker(js_context *ctx)

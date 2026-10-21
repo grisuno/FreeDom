@@ -39,7 +39,8 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
   - `body_sink` (struct, line 434)
   - `tls_capture` (struct, line 447)
   - `fetch_ctx` (struct, line 457)
-  - `sf_ws` (struct, line 1098)
+  - `sf_ws` (struct, line 1167)
+  - `sf_rcache_entry` (struct, line 1037)
   - `sink` (type_alias, line 456) `typedef struct fetch_ctx { body_sink sink;`
   - `ci_starts_with` (function, line 44) `static int ci_starts_with(const char *haystack, const char *prefix)`
   - `ci_index` (function, line 56) `static long ci_index(const char *haystack, const char *needle)`
@@ -90,23 +91,40 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
   - `sf_get` (function, line 1014) `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)`
   - `sf_post` (function, line 1018) `sf_status sf_post(const char *url, const sf_config *cfg,
                   const void *body, size...`
-  - `sf_get_follow` (function, line 1032) `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
+  - `sf_rcache_clear` (function, line 1048) `void sf_rcache_clear(void)`
+  - `sf_rcache_put` (function, line 1055) `int sf_rcache_put(const char *from, const char *to, time_t now)`
+  - `sf_rcache_get` (function, line 1074) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)`
+  - `sf_get_follow` (function, line 1092) `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
                 ...`
-  - `ws_ssl_info_cb` (function, line 1084) `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)`
-  - `ws_ssl_ctx_cb` (function, line 1091) `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
-  - `sf_ws_url_check` (function, line 1105) `sf_status sf_ws_url_check(const char *url)`
-  - `ws_free` (function, line 1117) `static void ws_free(sf_ws *ws)`
-  - `sf_ws_open` (function, line 1126) `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
-  - `sf_ws_send` (function, line 1181) `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
-  - `sf_ws_recv` (function, line 1204) `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
-  - `sf_ws_fd` (function, line 1226) `int sf_ws_fd(const sf_ws *ws)`
-  - `sf_ws_close` (function, line 1233) `void sf_ws_close(sf_ws *ws)`
+  - `ws_ssl_info_cb` (function, line 1153) `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)`
+  - `ws_ssl_ctx_cb` (function, line 1160) `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
+  - `sf_ws_url_check` (function, line 1174) `sf_status sf_ws_url_check(const char *url)`
+  - `ws_free` (function, line 1186) `static void ws_free(sf_ws *ws)`
+  - `sf_ws_open` (function, line 1195) `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
+  - `sf_ws_send` (function, line 1250) `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
+  - `sf_ws_recv` (function, line 1273) `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
+  - `sf_ws_fd` (function, line 1295) `int sf_ws_fd(const sf_ws *ws)`
+  - `sf_ws_close` (function, line 1302) `void sf_ws_close(sf_ws *ws)`
+  - `sf_fallback_policy` (function, line 1313) `int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)`
+  - `sf_downgrade_of` (function, line 1327) `static int sf_downgrade_of(sf_policy p)`
+  - `sf_attempt_get` (function, line 1336) `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,
+        ...`
+  - `sf_attempt_post` (function, line 1342) `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,
+       ...`
+  - `sf_navigable` (function, line 1347) `static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,
+           ...`
+  - `sf_get_follow_navigable` (function, line 1367) `sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,
+            ...`
+  - `sf_post_navigable` (function, line 1372) `sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
+                  ...`
   - `module` (function, line 364) `* pure url module (DRY);`
   - `progress` (function, line 443) `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);`
   - `database` (function, line 485) `* NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid...`
   - `group` (function, line 499) `* group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);`
   - `this` (function, line 531) `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and...`
   - `_POSIX_C_SOURCE` (macro, line 12) `#define _POSIX_C_SOURCE`
+  - `SF_RCACHE_SLOTS` (macro, line 1034) `#define SF_RCACHE_SLOTS`
+  - `SF_RCACHE_TTL_S` (macro, line 1035) `#define SF_RCACHE_TTL_S`
 - Depends on: `include/anti_fp.h`, `include/secure_fetch.h`, `include/url.h`
 
 ## src/svg_render.c
@@ -454,46 +472,6 @@ static void child_fetch_stylesheets(child_state *cs)`
   - `ui_layout_free` (function, line 91) `void ui_layout_free(ui_layout *lay)`
   - `ui_clamp_scroll` (function, line 99) `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines)`
 - Depends on: `include/ui.h`
-
-## src/url.c
-- Doc: ci_prefix: produced; every assembly is bounded and reports overflow rather than truncate....
-- Layer: utility
-- Language: c
-- Symbols:
-  - `ci_prefix` (function, line 20) `static int ci_prefix(const char *haystack, const char *prefix)`
-  - `copy_checked` (function, line 32) `static int copy_checked(char *out, size_t outsz, const char *src)`
-  - `cat_checked` (function, line 40) `static int cat_checked(char *out, size_t outsz, const char *src)`
-  - `ncat_checked` (function, line 49) `static int ncat_checked(char *out, size_t outsz, const char *src, size_t n)`
-  - `url_has_scheme` (function, line 59) `int url_has_scheme(const char *s)`
-  - `url_is_https` (function, line 73) `int url_is_https(const char *s)`
-  - `url_validate_https` (function, line 80) `url_status url_validate_https(const char *url)`
-  - `url_authority_len` (function, line 91) `size_t url_authority_len(const char *url)`
-  - `out_pop_segment` (function, line 102) `static void out_pop_segment(char *out, size_t *olen)`
-  - `url_remove_dot_segments` (function, line 109) `url_status url_remove_dot_segments(const char *path, char *out, size_t outsz)`
-  - `dir_len` (function, line 159) `static size_t dir_len(const char *base)`
-  - `url_resolve_https` (function, line 170) `url_status url_resolve_https(const char *base, const char *ref,
-                             char...`
-  - `is_space` (function, line 218) `static int is_space(int c)`
-  - `is_unreserved` (function, line 222) `static int is_unreserved(int c)`
-  - `append_query_encoded` (function, line 229) `static int append_query_encoded(char *out, size_t outsz, const char *src)`
-  - `assumed` (function, line 254) `* assumed (the caller already routed whitespace to search). */
-static int looks_like_host(const c...`
-  - `build_search` (function, line 303) `static url_status build_search(const char *query, char *out, size_t outsz)`
-  - `url_omnibox` (function, line 309) `url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t outsz)`
-  - `host_equals` (function, line 378) `static int host_equals(const url_parts *p, const char *want)`
-  - `query_find_q` (function, line 393) `static const char *query_find_q(const char *search, size_t len, size_t *vlen)`
-  - `url_search_rewrite` (function, line 411) `url_status url_search_rewrite(const char *url, char *out, size_t outsz)`
-  - `url_extract_userinfo` (function, line 431) `url_status url_extract_userinfo(const char *url, char *out, size_t outsz,
-                       ...`
-  - `url_is_file` (function, line 525) `int url_is_file(const char *s)`
-  - `url_file_path` (function, line 531) `const char *url_file_path(const char *s)`
-  - `url_resolve_file` (function, line 535) `url_status url_resolve_file(const char *base, const char *ref, char *out, size_t outsz)`
-  - `url_split` (function, line 584) `url_status url_split(const char *url, url_parts *out)`
-  - `copy_bounded` (function, line 645) `static url_status copy_bounded(char *out, size_t outsz, const char *a, size_t alen,
-             ...`
-  - `url_history_target` (function, line 654) `url_status url_history_target(const char *base, const char *ref, char *out, size_t outsz)`
-  - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
-- Depends on: `include/url.h`
 
 
 Next: [KB_src_p9.md](KB_src_p9.md)

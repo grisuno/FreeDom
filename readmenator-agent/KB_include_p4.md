@@ -113,44 +113,48 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `sf_chain_info` (struct, line 60)
-  - `sf_config` (struct, line 75)
-  - `sf_response` (struct, line 117)
-  - `sf_status` (enum, line 23)
-  - `sf_policy` (enum, line 40)
-  - `sf_proxy_type` (enum, line 69)
-  - `policy` (type_alias, line 74) `typedef struct sf_config { sf_policy policy;`
-  - `status` (type_alias, line 116) `typedef struct sf_response { sf_status status;`
-  - `sf_ws` (type_alias, line 293) `typedef struct sf_ws sf_ws;`
-  - `validators` (function, line 17) `* The security logic lives in pure validators (no I/O);`
-  - `sf_global_init` (function, line 204) `void sf_global_init(void);`
-  - `EXCLUDED` (function, line 210) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
-  - `sf_cookie_put` (function, line 217) `void sf_cookie_put(const char *url, const char *namevalue);`
-  - `sf_cookie_line_matches` (function, line 222) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
-  - `sf_user_agent_or_default` (function, line 231) `const char *sf_user_agent_or_default(const char *ua);`
-  - `sf_impersonate_kex_groups` (function, line 235) `const char *sf_impersonate_kex_groups(void);`
-  - `sf_impersonate_tls13_ciphers` (function, line 236) `const char *sf_impersonate_tls13_ciphers(void);`
-  - `skipped` (function, line 256) `* skipped (a classical key exchange is accepted);`
-  - `sf_is_redirect_code` (function, line 267) `int sf_is_redirect_code(long http_code);`
-  - `bits` (function, line 310) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
-  - `sf_ws_fd` (function, line 317) `int sf_ws_fd(const sf_ws *ws);`
-  - `sf_ws_close` (function, line 320) `void sf_ws_close(sf_ws *ws);`
-  - `connection` (function, line 324) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
-  - `sf_get` (function, line 333) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
-  - `sf_response_free` (function, line 344) `void sf_response_free(sf_response *resp);`
+  - `sf_chain_info` (struct, line 61)
+  - `sf_config` (struct, line 76)
+  - `sf_response` (struct, line 118)
+  - `sf_status` (enum, line 24)
+  - `sf_policy` (enum, line 41)
+  - `sf_proxy_type` (enum, line 70)
+  - `policy` (type_alias, line 75) `typedef struct sf_config { sf_policy policy;`
+  - `status` (type_alias, line 117) `typedef struct sf_response { sf_status status;`
+  - `sf_ws` (type_alias, line 294) `typedef struct sf_ws sf_ws;`
+  - `validators` (function, line 18) `* The security logic lives in pure validators (no I/O);`
+  - `sf_global_init` (function, line 205) `void sf_global_init(void);`
+  - `EXCLUDED` (function, line 211) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
+  - `sf_cookie_put` (function, line 218) `void sf_cookie_put(const char *url, const char *namevalue);`
+  - `sf_cookie_line_matches` (function, line 223) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
+  - `sf_user_agent_or_default` (function, line 232) `const char *sf_user_agent_or_default(const char *ua);`
+  - `sf_impersonate_kex_groups` (function, line 236) `const char *sf_impersonate_kex_groups(void);`
+  - `sf_impersonate_tls13_ciphers` (function, line 237) `const char *sf_impersonate_tls13_ciphers(void);`
+  - `skipped` (function, line 257) `* skipped (a classical key exchange is accepted);`
+  - `sf_is_redirect_code` (function, line 268) `int sf_is_redirect_code(long http_code);`
+  - `bits` (function, line 311) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
+  - `sf_ws_fd` (function, line 318) `int sf_ws_fd(const sf_ws *ws);`
+  - `sf_ws_close` (function, line 321) `void sf_ws_close(sf_ws *ws);`
+  - `connection` (function, line 325) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
+  - `sf_get` (function, line 334) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
+  - `sf_response_free` (function, line 345) `void sf_response_free(sf_response *resp);`
+  - `exhausted` (function, line 356) `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
+  - `sf_rcache_put` (function, line 369) `int sf_rcache_put(const char *from, const char *to, time_t now);`
+  - `sf_rcache_get` (function, line 370) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
+  - `sf_rcache_clear` (function, line 371) `void sf_rcache_clear(void);`
   - `FREEDOM_SECURE_FETCH_H` (macro, line 2) `#define FREEDOM_SECURE_FETCH_H`
-  - `SF_DEFAULT_KEX_GROUPS` (macro, line 143) `#define SF_DEFAULT_KEX_GROUPS`
-  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 152) `#define SF_IMPERSONATE_KEX_GROUPS`
-  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 153) `#define SF_IMPERSONATE_TLS13_CIPHERS`
-  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 157) `#define SF_IMPERSONATE_TLS12_CIPHERS`
-  - `SF_DEFAULT_USER_AGENT` (macro, line 168) `#define SF_DEFAULT_USER_AGENT`
-  - `SF_DEFAULT_MAX_BODY` (macro, line 169) `#define SF_DEFAULT_MAX_BODY`
-  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 170) `#define SF_DEFAULT_TIMEOUT_MS`
-  - `SF_CONNECT_TIMEOUT_MS` (macro, line 193) `#define SF_CONNECT_TIMEOUT_MS`
-  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 194) `#define SF_SUBRESOURCE_TIMEOUT_MS`
-  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 195) `#define SF_DEFAULT_MAX_REDIRECTS`
-  - `SF_MAX_URL` (macro, line 196) `#define SF_MAX_URL`
-  - `SF_WS_MAX_MESSAGE` (macro, line 292) `#define SF_WS_MAX_MESSAGE`
+  - `SF_DEFAULT_KEX_GROUPS` (macro, line 144) `#define SF_DEFAULT_KEX_GROUPS`
+  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 153) `#define SF_IMPERSONATE_KEX_GROUPS`
+  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 154) `#define SF_IMPERSONATE_TLS13_CIPHERS`
+  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 158) `#define SF_IMPERSONATE_TLS12_CIPHERS`
+  - `SF_DEFAULT_USER_AGENT` (macro, line 169) `#define SF_DEFAULT_USER_AGENT`
+  - `SF_DEFAULT_MAX_BODY` (macro, line 170) `#define SF_DEFAULT_MAX_BODY`
+  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 171) `#define SF_DEFAULT_TIMEOUT_MS`
+  - `SF_CONNECT_TIMEOUT_MS` (macro, line 194) `#define SF_CONNECT_TIMEOUT_MS`
+  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 195) `#define SF_SUBRESOURCE_TIMEOUT_MS`
+  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 196) `#define SF_DEFAULT_MAX_REDIRECTS`
+  - `SF_MAX_URL` (macro, line 197) `#define SF_MAX_URL`
+  - `SF_WS_MAX_MESSAGE` (macro, line 293) `#define SF_WS_MAX_MESSAGE`
 - Depends on: `include/anti_fp.h`
 - Imported by: `gui/browser_ui.c`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
 
@@ -343,23 +347,25 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Layer: presentation
 - Language: h
 - Symbols:
-  - `ui_line` (struct, line 29)
-  - `ui_layout` (struct, line 34)
-  - `rd_doc` (struct, line 68)
-  - `jg_table` (struct, line 94)
-  - `tab` (struct, line 104)
-  - `ui_status` (enum, line 19)
-  - `offset` (type_alias, line 29) `typedef struct ui_line { size_t offset;`
-  - `space` (function, line 43) `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...`
-  - `ui_layout_free` (function, line 51) `void ui_layout_free(ui_layout *lay);`
-  - `ui_clamp_scroll` (function, line 54) `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);`
-  - `available` (function, line 85) `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...`
-  - `out` (function, line 97) `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...`
-  - `placeholders` (function, line 107) `* above always draw image placeholders (no worker to decode hostile bytes);`
-  - `disk` (function, line 112) `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
-  - `images` (function, line 114) `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
-  - `ui_render_viewport_w` (function, line 141) `int ui_render_viewport_w(void);`
+  - `ui_line` (struct, line 30)
+  - `ui_layout` (struct, line 35)
+  - `rd_doc` (struct, line 69)
+  - `jg_table` (struct, line 95)
+  - `tab` (struct, line 105)
+  - `ui_status` (enum, line 20)
+  - `offset` (type_alias, line 30) `typedef struct ui_line { size_t offset;`
+  - `space` (function, line 44) `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...`
+  - `ui_layout_free` (function, line 52) `void ui_layout_free(ui_layout *lay);`
+  - `ui_clamp_scroll` (function, line 55) `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);`
+  - `available` (function, line 86) `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...`
+  - `out` (function, line 98) `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...`
+  - `placeholders` (function, line 108) `* above always draw image placeholders (no worker to decode hostile bytes);`
+  - `disk` (function, line 113) `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
+  - `images` (function, line 115) `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
+  - `ui_render_viewport_w` (function, line 142) `int ui_render_viewport_w(void);`
+  - `ui_persisted_prefs` (function, line 147) `int ui_persisted_prefs(prefs_state *out);`
   - `FREEDOM_UI_H` (macro, line 2) `#define FREEDOM_UI_H`
+- Depends on: `include/prefs.h`
 - Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/freedom.c`, `src/ui_layout.c`, `tests/test_ui.c`
 
 ## include/url.h

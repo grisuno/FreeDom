@@ -206,21 +206,21 @@ Previous: [KB_src_p4.md](KB_src_p4.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `jt_seed_ctx` (struct, line 263)
-  - `jt_enable_open` (function, line 26) `jd_status jt_enable_open(js_context *ctx)`
-  - `jt_take_opens` (function, line 42) `char *jt_take_opens(js_context *ctx)`
-  - `jt_enable_ws` (function, line 120) `jd_status jt_enable_ws(js_context *ctx)`
-  - `jt_ws_ops_free` (function, line 132) `void jt_ws_ops_free(jt_ws_op *ops, size_t n)`
-  - `hex_nibble` (function, line 137) `static int hex_nibble(char c)`
-  - `ws_payload` (function, line 144) `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)`
-  - `jt_take_ws` (function, line 168) `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)`
-  - `jt_ws_event` (function, line 210) `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)`
-  - `jt_seed_pair` (function, line 265) `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)`
-  - `jt_enable_storage` (function, line 275) `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)`
-  - `jt_take_storage` (function, line 296) `int jt_take_storage(js_context *ctx, char **out, size_t *len)`
-  - `explicitly` (function, line 344) `* explicitly (no window, no document). Delivery is always a timer task. */
+  - `jt_seed_ctx` (struct, line 272)
+  - `jt_enable_open` (function, line 35) `jd_status jt_enable_open(js_context *ctx)`
+  - `jt_take_opens` (function, line 51) `char *jt_take_opens(js_context *ctx)`
+  - `jt_enable_ws` (function, line 129) `jd_status jt_enable_ws(js_context *ctx)`
+  - `jt_ws_ops_free` (function, line 141) `void jt_ws_ops_free(jt_ws_op *ops, size_t n)`
+  - `hex_nibble` (function, line 146) `static int hex_nibble(char c)`
+  - `ws_payload` (function, line 153) `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)`
+  - `jt_take_ws` (function, line 177) `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)`
+  - `jt_ws_event` (function, line 219) `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)`
+  - `jt_seed_pair` (function, line 274) `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)`
+  - `jt_enable_storage` (function, line 284) `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)`
+  - `jt_take_storage` (function, line 305) `int jt_take_storage(js_context *ctx, char **out, size_t *len)`
+  - `explicitly` (function, line 353) `* explicitly (no window, no document). Delivery is always a timer task. */
 static const char JT_W...`
-  - `jt_enable_worker` (function, line 425) `jd_status jt_enable_worker(js_context *ctx)`
+  - `jt_enable_worker` (function, line 434) `jd_status jt_enable_worker(js_context *ctx)`
 - Depends on: `include/js_trusted.h`, `include/web_storage.h`
 
 ## src/link_nav.c

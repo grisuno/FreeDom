@@ -892,6 +892,7 @@
 - [`EXCLUDED`](modules/include.secure_fetch.h.md#excluded) function in `include/secure_fetch.h`
 - [`excluded`](modules/src.os_sandbox.c.md#excluded) function in `src/os_sandbox.c`
 - [`exclusively`](modules/include.tab.h.md#exclusively) function in `include/tab.h`
+- [`exhausted`](modules/include.secure_fetch.h.md#exhausted) function in `include/secure_fetch.h`
 - [`exit`](modules/src.image_decode.c.md#exit) function in `src/image_decode.c`
 - [`EXIT_ERROR`](modules/src.freedom.c.md#exit_error) macro in `src/freedom.c`
 - [`EXIT_OK`](modules/src.freedom.c.md#exit_ok) macro in `src/freedom.c`
@@ -1131,7 +1132,6 @@
 - [`generation`](modules/include.ws_hub.h.md#generation) function in `include/ws_hub.h`
 - [`geometry`](modules/src.js_dom.c.md#geometry) function in `src/js_dom.c`
 - [`GET`](modules/gui.browser_ui.c.md#get) function in `gui/browser_ui.c`
-- [`GET`](modules/gui.browser_ui.c.md#get) function in `gui/browser_ui.c`
 - [`gets`](modules/src.freedom.c.md#gets) function in `src/freedom.c`
 - [`gif_bits`](modules/src.image_decode.c.md#gif_bits) struct in `src/image_decode.c`
 - [`GIF_LZW_MAX_CODES`](modules/src.image_decode.c.md#gif_lzw_max_codes) macro in `src/image_decode.c`
@@ -1145,6 +1145,7 @@
 - [`_GNU_SOURCE`](modules/src.js_embed.c.md#_gnu_source) macro in `src/js_embed.c`
 - [`_GNU_SOURCE`](modules/src.js_events.c.md#_gnu_source) macro in `src/js_events.c`
 - [`_GNU_SOURCE`](modules/src.js_fetch.c.md#_gnu_source) macro in `src/js_fetch.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
@@ -1931,6 +1932,7 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -1997,6 +1999,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -2084,7 +2088,6 @@
 - [`P_META_VARSRC`](modules/src.css.c.md#p_meta_varsrc) macro in `src/css.c`
 - [`page`](modules/include.box_style.h.md#page) function in `include/box_style.h`
 - [`page_view`](modules/src.css.c.md#page_view) function in `src/css.c`
-- [`paints`](modules/src.page_view.c.md#paints) function in `src/page_view.c`
 - [`paints`](modules/src.page_view.c.md#paints) function in `src/page_view.c`
 - [`palette`](modules/include.css.h.md#palette) function in `include/css.h`
 - [`parent`](modules/include.dom.h.md#parent) function in `include/dom.h`
@@ -2602,9 +2605,11 @@
 - [`SF_DEFAULT_TIMEOUT_MS`](modules/include.secure_fetch.h.md#sf_default_timeout_ms) macro in `include/secure_fetch.h`
 - [`SF_DEFAULT_USER_AGENT`](modules/include.secure_fetch.h.md#sf_default_user_agent) macro in `include/secure_fetch.h`
 - [`sf_enforce_policy`](modules/src.secure_fetch.c.md#sf_enforce_policy) function in `src/secure_fetch.c`
+- [`sf_fallback_policy`](modules/src.secure_fetch.c.md#sf_fallback_policy) function in `src/secure_fetch.c`
 - [`sf_get`](modules/include.secure_fetch.h.md#sf_get) function in `include/secure_fetch.h`
 - [`sf_get`](modules/src.secure_fetch.c.md#sf_get) function in `src/secure_fetch.c`
 - [`sf_get_follow`](modules/src.secure_fetch.c.md#sf_get_follow) function in `src/secure_fetch.c`
+- [`sf_get_follow_navigable`](modules/src.secure_fetch.c.md#sf_get_follow_navigable) function in `src/secure_fetch.c`
 - [`sf_global_init`](modules/include.secure_fetch.h.md#sf_global_init) function in `include/secure_fetch.h`
 - [`sf_global_init`](modules/src.secure_fetch.c.md#sf_global_init) function in `src/secure_fetch.c`
 - [`SF_IMPERSONATE_KEX_GROUPS`](modules/include.secure_fetch.h.md#sf_impersonate_kex_groups) macro in `include/secure_fetch.h`
@@ -2620,7 +2625,17 @@
 - [`sf_parse_location_header`](modules/src.secure_fetch.c.md#sf_parse_location_header) function in `src/secure_fetch.c`
 - [`sf_policy`](modules/include.secure_fetch.h.md#sf_policy) enum in `include/secure_fetch.h`
 - [`sf_post`](modules/src.secure_fetch.c.md#sf_post) function in `src/secure_fetch.c`
+- [`sf_post_navigable`](modules/src.secure_fetch.c.md#sf_post_navigable) function in `src/secure_fetch.c`
 - [`sf_proxy_type`](modules/include.secure_fetch.h.md#sf_proxy_type) enum in `include/secure_fetch.h`
+- [`sf_rcache_clear`](modules/include.secure_fetch.h.md#sf_rcache_clear) function in `include/secure_fetch.h`
+- [`sf_rcache_clear`](modules/src.secure_fetch.c.md#sf_rcache_clear) function in `src/secure_fetch.c`
+- [`sf_rcache_entry`](modules/src.secure_fetch.c.md#sf_rcache_entry) struct in `src/secure_fetch.c`
+- [`sf_rcache_get`](modules/include.secure_fetch.h.md#sf_rcache_get) function in `include/secure_fetch.h`
+- [`sf_rcache_get`](modules/src.secure_fetch.c.md#sf_rcache_get) function in `src/secure_fetch.c`
+- [`sf_rcache_put`](modules/include.secure_fetch.h.md#sf_rcache_put) function in `include/secure_fetch.h`
+- [`sf_rcache_put`](modules/src.secure_fetch.c.md#sf_rcache_put) function in `src/secure_fetch.c`
+- [`SF_RCACHE_SLOTS`](modules/src.secure_fetch.c.md#sf_rcache_slots) macro in `src/secure_fetch.c`
+- [`SF_RCACHE_TTL_S`](modules/src.secure_fetch.c.md#sf_rcache_ttl_s) macro in `src/secure_fetch.c`
 - [`sf_resolve_redirect`](modules/src.secure_fetch.c.md#sf_resolve_redirect) function in `src/secure_fetch.c`
 - [`sf_response`](modules/include.secure_fetch.h.md#sf_response) struct in `include/secure_fetch.h`
 - [`sf_response_free`](modules/include.secure_fetch.h.md#sf_response_free) function in `include/secure_fetch.h`
@@ -2987,11 +3002,13 @@
 - [`UI_MENU_PAD`](modules/gui.browser_ui.c.md#ui_menu_pad) macro in `gui/browser_ui.c`
 - [`UI_MENU_W`](modules/gui.browser_ui.c.md#ui_menu_w) macro in `gui/browser_ui.c`
 - [`UI_OVERLINE_OFFSET`](modules/gui.browser_ui.c.md#ui_overline_offset) macro in `gui/browser_ui.c`
+- [`ui_persisted_prefs`](modules/include.ui.h.md#ui_persisted_prefs) function in `include/ui.h`
 - [`UI_READER_COLUMN_W`](modules/gui.browser_ui.c.md#ui_reader_column_w) macro in `gui/browser_ui.c`
 - [`UI_RELOAD_X`](modules/gui.browser_ui.c.md#ui_reload_x) macro in `gui/browser_ui.c`
 - [`ui_render_pdf_images`](modules/gui.browser_ui.c.md#ui_render_pdf_images) function in `gui/browser_ui.c`
 - [`ui_render_png`](modules/gui.browser_ui.c.md#ui_render_png) function in `gui/browser_ui.c`
 - [`ui_render_png_images`](modules/gui.browser_ui.c.md#ui_render_png_images) function in `gui/browser_ui.c`
+- [`ui_render_viewport_w`](modules/gui.browser_ui.c.md#ui_render_viewport_w) function in `gui/browser_ui.c`
 - [`ui_render_viewport_w`](modules/include.ui.h.md#ui_render_viewport_w) function in `include/ui.h`
 - [`UI_RESIZE_MARGIN`](modules/gui.browser_ui.c.md#ui_resize_margin) macro in `gui/browser_ui.c`
 - [`ui_rgb`](modules/gui.browser_ui_internal.h.md#ui_rgb) struct in `gui/browser_ui_internal.h`

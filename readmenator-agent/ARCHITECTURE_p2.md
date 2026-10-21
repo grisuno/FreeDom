@@ -2,6 +2,7 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_link_nav.c` -> `include/link_nav.h`
 - `tests/test_local_store.c` -> `include/local_store.h`
 - `tests/test_media_decoder.c` -> `include/media_decoder.h`
 - `tests/test_net_realm.c` -> `include/net_realm.h`
@@ -137,7 +138,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/render_policy.h` -> stdbool.h
 - `include/renderer.h` -> stddef.h
 - `include/request_policy.h` -> stddef.h
-- `include/secure_fetch.h` -> stddef.h, stdint.h
+- `include/secure_fetch.h` -> stddef.h, stdint.h, time.h
 - `include/svg_paint.h` -> cairo.h
 - `include/svg_render.h` -> stddef.h
 - `include/tab.h` -> stddef.h, stdint.h, sys/types.h

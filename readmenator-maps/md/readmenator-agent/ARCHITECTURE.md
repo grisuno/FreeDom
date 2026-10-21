@@ -150,6 +150,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/tab.h` -> `include/freebug.h`
 - `include/tab.h` -> `include/js_geom.h`
 - `include/tab.h` -> `include/page_view.h`
+- `include/ui.h` -> `include/prefs.h`
 - `include/webcaps.h` -> `include/js_policy.h`
 - `include/webcaps.h` -> `include/render_policy.h`
 - `include/ws_hub.h` -> `include/secure_fetch.h`
@@ -495,6 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_js_geom.c` -> `include/js_geom.h`
 - `tests/test_js_policy.c` -> `include/js_policy.h`
 - `tests/test_js_sandbox.c` -> `include/js_sandbox.h`
-- `tests/test_link_nav.c` -> `include/link_nav.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

@@ -1,17 +1,31 @@
 # API (page 5 of 11)
 Previous: [API_p4.md](API_p4.md)
 
+## include/tls_impersonate.h
+Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
+- `path` (function) `include/tls_impersonate.h:26` `* Zero Knowledge path (PQ-hybrid, VERIFYPEER). * * 2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed...`
+- `chain` (function) `include/tls_impersonate.h:32` `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT...`
+- `ti_should_impersonate` (function) `include/tls_impersonate.h:56` `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);` -- The double opt-in + user-flag gate (pure).
+- `success` (function) `include/tls_impersonate.h:97` `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out...`
+- `ti_decode_req` (function) `include/tls_impersonate.h:101` `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
+- `ti_req_free` (function) `include/tls_impersonate.h:102` `void ti_req_free(ti_req *r);`
+- `ti_encode_resp` (function) `include/tls_impersonate.h:104` `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
+- `ti_decode_resp` (function) `include/tls_impersonate.h:105` `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
+- `ti_resp_free` (function) `include/tls_impersonate.h:106` `void ti_resp_free(ti_resp *r);`
+
 ## include/ui.h
+Depends on: `include/prefs.h`
 Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/freedom.c`, `src/ui_layout.c`, `tests/test_ui.c`
-- `space` (function) `include/ui.h:43` `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...`
-- `ui_layout_free` (function) `include/ui.h:51` `void ui_layout_free(ui_layout *lay);` -- Word-wraps text into lines of at most max_cols columns (monospace model).
-- `ui_clamp_scroll` (function) `include/ui.h:54` `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);` -- Word-wraps text into lines of at most max_cols columns (monospace model).
-- `available` (function) `include/ui.h:85` `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...`
-- `out` (function) `include/ui.h:97` `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...`
-- `placeholders` (function) `include/ui.h:107` `* above always draw image placeholders (no worker to decode hostile bytes);`
-- `disk` (function) `include/ui.h:112` `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
-- `images` (function) `include/ui.h:114` `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
-- `ui_render_viewport_w` (function) `include/ui.h:141` `int ui_render_viewport_w(void);` -- The fixed canvas width (px) every headless render (ui_render_png/pdf, ui_dump_layout) lays out at.
+- `space` (function) `include/ui.h:44` `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...`
+- `ui_layout_free` (function) `include/ui.h:52` `void ui_layout_free(ui_layout *lay);` -- Word-wraps text into lines of at most max_cols columns (monospace model).
+- `ui_clamp_scroll` (function) `include/ui.h:55` `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);` -- Word-wraps text into lines of at most max_cols columns (monospace model).
+- `available` (function) `include/ui.h:86` `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...`
+- `out` (function) `include/ui.h:98` `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...`
+- `placeholders` (function) `include/ui.h:108` `* above always draw image placeholders (no worker to decode hostile bytes);`
+- `disk` (function) `include/ui.h:113` `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
+- `images` (function) `include/ui.h:115` `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
+- `ui_render_viewport_w` (function) `include/ui.h:142` `int ui_render_viewport_w(void);` -- The fixed canvas width (px) every headless render (ui_render_png/pdf, ui_dump_layout) lays out at.
+- `ui_persisted_prefs` (function) `include/ui.h:147` `int ui_persisted_prefs(prefs_state *out);` -- The GUI's persisted choices (JS mode, images/CSS toggles, reader) from the encrypted profile, so `--as-gui` shows...
 
 ## include/url.h
 Imported by: `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_url.c`, `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`

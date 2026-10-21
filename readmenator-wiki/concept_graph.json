@@ -279,7 +279,7 @@
         "tools/prune.py",
         "tools/snapshot.py"
       ],
-      "mentions": 536,
+      "mentions": 537,
       "confidence": "EXTRACTED"
     },
     {
@@ -523,7 +523,7 @@
         "tools/gen_psl.c",
         "tools/pngdiff.c"
       ],
-      "mentions": 580,
+      "mentions": 583,
       "confidence": "EXTRACTED"
     },
     {
@@ -641,7 +641,7 @@
         "tools/pngprof.py",
         "tools/prune.py"
       ],
-      "mentions": 573,
+      "mentions": 572,
       "confidence": "EXTRACTED"
     },
     {
@@ -875,7 +875,7 @@
         "tools/pngdiff.c",
         "tools/prune.py"
       ],
-      "mentions": 582,
+      "mentions": 583,
       "confidence": "EXTRACTED"
     },
     {
@@ -983,7 +983,7 @@
         "tools/ffshot.py",
         "tools/pngprof.py"
       ],
-      "mentions": 148,
+      "mentions": 147,
       "confidence": "EXTRACTED"
     },
     {
@@ -1089,7 +1089,113 @@
         "tools/gen_psl.c",
         "tools/pngdiff.c"
       ],
-      "mentions": 994,
+      "mentions": 996,
+      "confidence": "EXTRACTED"
+    },
+    {
+      "name": "when",
+      "files": [
+        "gui/browser_ui.c",
+        "gui/svg_paint.c",
+        "include/block_flow.h",
+        "include/box_blur.h",
+        "include/box_style.h",
+        "include/box_tree.h",
+        "include/browser.h",
+        "include/css.h",
+        "include/css_color.h",
+        "include/css_gradient.h",
+        "include/css_length.h",
+        "include/css_mask.h",
+        "include/css_select.h",
+        "include/dom_debug.h",
+        "include/flex_layout.h",
+        "include/form.h",
+        "include/freebug.h",
+        "include/host_conf.h",
+        "include/hostblock.h",
+        "include/html_parse.h",
+        "include/js_dom.h",
+        "include/js_geom.h",
+        "include/js_location.h",
+        "include/js_sandbox.h",
+        "include/js_trusted.h",
+        "include/media_decoder.h",
+        "include/os_sandbox.h",
+        "include/page_view.h",
+        "include/prefetch.h",
+        "include/render_doc.h",
+        "include/render_policy.h",
+        "include/secure_fetch.h",
+        "include/svg_render.h",
+        "include/tab.h",
+        "include/text_case.h",
+        "include/text_shape.h",
+        "include/textfield.h",
+        "include/ui.h",
+        "include/url.h",
+        "include/util.h",
+        "include/web_storage.h",
+        "include/ws_hub.h",
+        "include/zoom.h",
+        "src/box_style.c",
+        "src/box_tree.c",
+        "src/css.c",
+        "src/css_atrule.c",
+        "src/css_box.c",
+        "src/css_color.c",
+        "src/css_index.c",
+        "src/css_length.c",
+        "src/css_mq.c",
+        "src/css_select.c",
+        "src/css_text.c",
+        "src/dom.c",
+        "src/dom_debug.c",
+        "src/freedom.c",
+        "src/host_conf.c",
+        "src/html_parse.c",
+        "src/js_env.c",
+        "src/js_geom.c",
+        "src/js_location.c",
+        "src/link_nav.c",
+        "src/page_view.c",
+        "src/prefetch.c",
+        "src/secure_fetch.c",
+        "src/svg_render.c",
+        "src/tab.c",
+        "src/text_shape.c",
+        "src/url.c",
+        "src/webfont.c",
+        "tests/test_block_flow.c",
+        "tests/test_box_tree.c",
+        "tests/test_css.c",
+        "tests/test_css_drops.c",
+        "tests/test_css_mask.c",
+        "tests/test_css_values.c",
+        "tests/test_download.c",
+        "tests/test_flex_layout.c",
+        "tests/test_freedom.c",
+        "tests/test_html_parse.c",
+        "tests/test_js_dom.c",
+        "tests/test_js_policy.c",
+        "tests/test_os_sandbox.c",
+        "tests/test_page_view.c",
+        "tests/test_prefetch.c",
+        "tests/test_render_doc.c",
+        "tests/test_render_policy.c",
+        "tests/test_secure_fetch.c",
+        "tests/test_svg_render.c",
+        "tests/test_tab.c",
+        "tests/test_text_shape.c",
+        "tests/test_tls_impersonate.c",
+        "tools/mutate.py",
+        "tools/pngdiff.c",
+        "tools/pngprof.py",
+        "tools/prune.py",
+        "tools/snapshot.py",
+        "tools/snapshot_age.py"
+      ],
+      "mentions": 362,
       "confidence": "EXTRACTED"
     },
     {
@@ -1198,111 +1304,6 @@
       "confidence": "EXTRACTED"
     },
     {
-      "name": "when",
-      "files": [
-        "gui/browser_ui.c",
-        "gui/svg_paint.c",
-        "include/block_flow.h",
-        "include/box_blur.h",
-        "include/box_style.h",
-        "include/box_tree.h",
-        "include/browser.h",
-        "include/css.h",
-        "include/css_color.h",
-        "include/css_gradient.h",
-        "include/css_length.h",
-        "include/css_mask.h",
-        "include/css_select.h",
-        "include/dom_debug.h",
-        "include/flex_layout.h",
-        "include/form.h",
-        "include/freebug.h",
-        "include/host_conf.h",
-        "include/hostblock.h",
-        "include/html_parse.h",
-        "include/js_dom.h",
-        "include/js_geom.h",
-        "include/js_location.h",
-        "include/js_sandbox.h",
-        "include/js_trusted.h",
-        "include/media_decoder.h",
-        "include/os_sandbox.h",
-        "include/page_view.h",
-        "include/prefetch.h",
-        "include/render_doc.h",
-        "include/render_policy.h",
-        "include/secure_fetch.h",
-        "include/svg_render.h",
-        "include/tab.h",
-        "include/text_case.h",
-        "include/text_shape.h",
-        "include/textfield.h",
-        "include/url.h",
-        "include/util.h",
-        "include/web_storage.h",
-        "include/ws_hub.h",
-        "include/zoom.h",
-        "src/box_style.c",
-        "src/box_tree.c",
-        "src/css.c",
-        "src/css_atrule.c",
-        "src/css_box.c",
-        "src/css_color.c",
-        "src/css_index.c",
-        "src/css_length.c",
-        "src/css_mq.c",
-        "src/css_select.c",
-        "src/css_text.c",
-        "src/dom.c",
-        "src/dom_debug.c",
-        "src/freedom.c",
-        "src/host_conf.c",
-        "src/html_parse.c",
-        "src/js_env.c",
-        "src/js_geom.c",
-        "src/js_location.c",
-        "src/link_nav.c",
-        "src/page_view.c",
-        "src/prefetch.c",
-        "src/secure_fetch.c",
-        "src/svg_render.c",
-        "src/tab.c",
-        "src/text_shape.c",
-        "src/url.c",
-        "src/webfont.c",
-        "tests/test_block_flow.c",
-        "tests/test_box_tree.c",
-        "tests/test_css.c",
-        "tests/test_css_drops.c",
-        "tests/test_css_mask.c",
-        "tests/test_css_values.c",
-        "tests/test_download.c",
-        "tests/test_flex_layout.c",
-        "tests/test_freedom.c",
-        "tests/test_html_parse.c",
-        "tests/test_js_dom.c",
-        "tests/test_js_policy.c",
-        "tests/test_os_sandbox.c",
-        "tests/test_page_view.c",
-        "tests/test_prefetch.c",
-        "tests/test_render_doc.c",
-        "tests/test_render_policy.c",
-        "tests/test_secure_fetch.c",
-        "tests/test_svg_render.c",
-        "tests/test_tab.c",
-        "tests/test_text_shape.c",
-        "tests/test_tls_impersonate.c",
-        "tools/mutate.py",
-        "tools/pngdiff.c",
-        "tools/pngprof.py",
-        "tools/prune.py",
-        "tools/snapshot.py",
-        "tools/snapshot_age.py"
-      ],
-      "mentions": 358,
-      "confidence": "EXTRACTED"
-    },
-    {
       "name": "returns",
       "files": [
         "gui/browser_ui.c",
@@ -1348,6 +1349,7 @@
         "include/text_shape.h",
         "include/textfield.h",
         "include/tls_impersonate.h",
+        "include/ui.h",
         "include/url.h",
         "include/util.h",
         "include/web_storage.h",
@@ -1403,7 +1405,7 @@
         "tools/ffgeom.py",
         "tools/pngdiff.c"
       ],
-      "mentions": 276,
+      "mentions": 277,
       "confidence": "EXTRACTED"
     },
     {
@@ -1506,7 +1508,7 @@
         "tests/test_ws_hub.c",
         "tools/gen_psl.c"
       ],
-      "mentions": 503,
+      "mentions": 507,
       "confidence": "EXTRACTED"
     },
     {
@@ -1609,7 +1611,7 @@
         "tools/pngprof.py",
         "tools/prune.py"
       ],
-      "mentions": 345,
+      "mentions": 348,
       "confidence": "EXTRACTED"
     },
     {
@@ -1709,7 +1711,7 @@
         "tests/test_ws_hub.c",
         "tools/gen_psl.c"
       ],
-      "mentions": 516,
+      "mentions": 519,
       "confidence": "EXTRACTED"
     },
     {
@@ -1747,6 +1749,7 @@
         "include/tab.h",
         "include/text_case.h",
         "include/text_shape.h",
+        "include/ui.h",
         "include/webcaps.h",
         "include/webfont.h",
         "src/box_style.c",
@@ -1806,7 +1809,7 @@
         "tools/ffq.py",
         "tools/snapshot.py"
       ],
-      "mentions": 2020,
+      "mentions": 2023,
       "confidence": "EXTRACTED"
     },
     {
@@ -1943,6 +1946,7 @@
         "include/text_shape.h",
         "include/textfield.h",
         "include/tls_impersonate.h",
+        "include/ui.h",
         "include/zoom.h",
         "src/box_tree.c",
         "src/css.c",
@@ -1996,7 +2000,7 @@
         "tools/mutate.py",
         "tools/pngprof.py"
       ],
-      "mentions": 280,
+      "mentions": 286,
       "confidence": "EXTRACTED"
     },
     {
@@ -2089,7 +2093,7 @@
         "tools/ffq.py",
         "tools/snapshot.py"
       ],
-      "mentions": 648,
+      "mentions": 649,
       "confidence": "EXTRACTED"
     },
     {
@@ -2182,7 +2186,7 @@
         "tools/pngdiff.c",
         "tools/prune.py"
       ],
-      "mentions": 516,
+      "mentions": 520,
       "confidence": "EXTRACTED"
     },
     {
@@ -2542,7 +2546,7 @@
         "tests/test_webfont_load.c",
         "tools/snapshot.py"
       ],
-      "mentions": 475,
+      "mentions": 476,
       "confidence": "EXTRACTED"
     },
     {
@@ -2706,7 +2710,7 @@
         "tests/test_tab.c",
         "tools/snapshot.py"
       ],
-      "mentions": 175,
+      "mentions": 176,
       "confidence": "EXTRACTED"
     },
     {
@@ -2868,7 +2872,7 @@
         "tools/ffgeom.py",
         "tools/ffq.py"
       ],
-      "mentions": 294,
+      "mentions": 295,
       "confidence": "EXTRACTED"
     },
     {
@@ -3028,7 +3032,7 @@
         "tests/test_webcaps.c",
         "tests/test_wl_display.c"
       ],
-      "mentions": 173,
+      "mentions": 172,
       "confidence": "EXTRACTED"
     },
     {
@@ -3416,7 +3420,7 @@
         "tests/test_wl_display.c",
         "tools/gen_psl.c"
       ],
-      "mentions": 203,
+      "mentions": 204,
       "confidence": "EXTRACTED"
     },
     {
@@ -3490,7 +3494,7 @@
         "tests/test_tab.c",
         "tests/test_url.c"
       ],
-      "mentions": 190,
+      "mentions": 188,
       "confidence": "EXTRACTED"
     },
     {
@@ -3636,7 +3640,7 @@
         "tools/gen_psl.c",
         "tools/mutate.py"
       ],
-      "mentions": 199,
+      "mentions": 200,
       "confidence": "EXTRACTED"
     },
     {
@@ -3708,7 +3712,7 @@
         "tests/test_ui.c",
         "tests/test_webcaps.c"
       ],
-      "mentions": 142,
+      "mentions": 143,
       "confidence": "EXTRACTED"
     },
     {
@@ -3847,7 +3851,7 @@
         "tools/pngdiff.c",
         "tools/prune.py"
       ],
-      "mentions": 352,
+      "mentions": 353,
       "confidence": "EXTRACTED"
     },
     {
@@ -3915,7 +3919,7 @@
         "tools/ffshot.py",
         "tools/snapshot.py"
       ],
-      "mentions": 234,
+      "mentions": 236,
       "confidence": "EXTRACTED"
     },
     {
@@ -4051,7 +4055,7 @@
         "tests/test_url.c",
         "tests/test_webcaps.c"
       ],
-      "mentions": 134,
+      "mentions": 133,
       "confidence": "EXTRACTED"
     },
     {
@@ -4185,7 +4189,7 @@
         "tools/ffshot.py",
         "tools/mutate.py"
       ],
-      "mentions": 326,
+      "mentions": 327,
       "confidence": "EXTRACTED"
     },
     {
@@ -4492,9 +4496,9 @@
     },
     {
       "source": "one",
-      "target": "include",
+      "target": "freedom",
       "verb": "depends_on",
-      "strength": 0.98,
+      "strength": 0.97,
       "confidence": "INFERRED",
       "evidence": [
         "fuzz/fuzz_css.c->include/css.h",
@@ -4511,7 +4515,7 @@
     },
     {
       "source": "one",
-      "target": "freedom",
+      "target": "include",
       "verb": "depends_on",
       "strength": 0.97,
       "confidence": "INFERRED",
@@ -4549,6 +4553,25 @@
     },
     {
       "source": "out",
+      "target": "freedom",
+      "verb": "depends_on",
+      "strength": 0.9,
+      "confidence": "INFERRED",
+      "evidence": [
+        "fuzz/fuzz_image_decode.c->include/image_decode.h",
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h"
+      ]
+    },
+    {
+      "source": "out",
       "target": "include",
       "verb": "depends_on",
       "strength": 0.9,
@@ -4564,44 +4587,6 @@
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_color.h",
         "gui/browser_ui.c->include/css_gradient.h"
-      ]
-    },
-    {
-      "source": "not",
-      "target": "freedom",
-      "verb": "depends_on",
-      "strength": 0.89,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->gui/browser_ui_internal.h",
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h"
-      ]
-    },
-    {
-      "source": "out",
-      "target": "freedom",
-      "verb": "depends_on",
-      "strength": 0.89,
-      "confidence": "INFERRED",
-      "evidence": [
-        "fuzz/fuzz_image_decode.c->include/image_decode.h",
-        "gui/browser_ui.c->gui/browser_ui_internal.h",
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h"
       ]
     },
     {
@@ -4719,12 +4704,13 @@
       ]
     },
     {
-      "source": "only",
-      "target": "include",
+      "source": "not",
+      "target": "freedom",
       "verb": "depends_on",
       "strength": 0.88,
       "confidence": "INFERRED",
       "evidence": [
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
         "gui/browser_ui.c->include/block_flow.h",
         "gui/browser_ui.c->include/box_blur.h",
         "gui/browser_ui.c->include/box_style.h",
@@ -4733,8 +4719,7 @@
         "gui/browser_ui.c->include/compositor.h",
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h",
-        "gui/browser_ui.c->include/css_mask.h"
+        "gui/browser_ui.c->include/css_gradient.h"
       ]
     },
     {
@@ -4792,6 +4777,25 @@
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_color.h",
         "gui/browser_ui.c->include/css_gradient.h"
+      ]
+    },
+    {
+      "source": "only",
+      "target": "include",
+      "verb": "depends_on",
+      "strength": 0.87,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h",
+        "gui/browser_ui.c->include/css_mask.h"
       ]
     },
     {
@@ -4929,25 +4933,6 @@
     },
     {
       "source": "url",
-      "target": "freedom",
-      "verb": "depends_on",
-      "strength": 0.84,
-      "confidence": "INFERRED",
-      "evidence": [
-        "fuzz/fuzz_data_url.c->include/data_url.h",
-        "fuzz/fuzz_url.c->include/link_nav.h",
-        "fuzz/fuzz_url.c->include/url.h",
-        "gui/browser_ui.c->gui/browser_ui_internal.h",
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h"
-      ]
-    },
-    {
-      "source": "url",
       "target": "include",
       "verb": "depends_on",
       "strength": 0.84,
@@ -4982,6 +4967,25 @@
         "fuzz/fuzz_js_dom.c->include/web_storage.h",
         "gui/browser_ui.c->gui/browser_ui_internal.h",
         "gui/browser_ui.c->include/block_flow.h"
+      ]
+    },
+    {
+      "source": "never",
+      "target": "freedom",
+      "verb": "depends_on",
+      "strength": 0.83,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h"
       ]
     },
     {
@@ -5042,6 +5046,44 @@
       ]
     },
     {
+      "source": "url",
+      "target": "freedom",
+      "verb": "depends_on",
+      "strength": 0.83,
+      "confidence": "INFERRED",
+      "evidence": [
+        "fuzz/fuzz_data_url.c->include/data_url.h",
+        "fuzz/fuzz_url.c->include/link_nav.h",
+        "fuzz/fuzz_url.c->include/url.h",
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/compositor.h"
+      ]
+    },
+    {
+      "source": "when",
+      "target": "freedom",
+      "verb": "depends_on",
+      "strength": 0.83,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h"
+      ]
+    },
+    {
       "source": "when",
       "target": "include",
       "verb": "depends_on",
@@ -5058,44 +5100,6 @@
         "gui/browser_ui.c->include/css_color.h",
         "gui/browser_ui.c->include/css_gradient.h",
         "gui/browser_ui.c->include/css_mask.h"
-      ]
-    },
-    {
-      "source": "its",
-      "target": "include",
-      "verb": "depends_on",
-      "strength": 0.82,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h",
-        "gui/browser_ui.c->include/css_mask.h"
-      ]
-    },
-    {
-      "source": "never",
-      "target": "freedom",
-      "verb": "depends_on",
-      "strength": 0.82,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->gui/browser_ui_internal.h",
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h"
       ]
     },
     {
@@ -5137,10 +5141,29 @@
       ]
     },
     {
-      "source": "when",
+      "source": "its",
+      "target": "include",
+      "verb": "depends_on",
+      "strength": 0.81,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h",
+        "gui/browser_ui.c->include/css_mask.h"
+      ]
+    },
+    {
+      "source": "returns",
       "target": "freedom",
       "verb": "depends_on",
-      "strength": 0.82,
+      "strength": 0.81,
       "confidence": "INFERRED",
       "evidence": [
         "gui/browser_ui.c->gui/browser_ui_internal.h",
@@ -5159,26 +5182,7 @@
       "source": "its",
       "target": "freedom",
       "verb": "depends_on",
-      "strength": 0.81,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->gui/browser_ui_internal.h",
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h"
-      ]
-    },
-    {
-      "source": "returns",
-      "target": "freedom",
-      "verb": "depends_on",
-      "strength": 0.81,
+      "strength": 0.8,
       "confidence": "INFERRED",
       "evidence": [
         "gui/browser_ui.c->gui/browser_ui_internal.h",
@@ -5539,7 +5543,7 @@
       "source": "one",
       "target": "null",
       "verb": "depends_on",
-      "strength": 0.73,
+      "strength": 0.72,
       "confidence": "INFERRED",
       "evidence": [
         "fuzz/fuzz_css.c->include/css.h",
@@ -5552,25 +5556,6 @@
         "fuzz/fuzz_image_decode.c->include/image_decode.h",
         "fuzz/fuzz_import_map.c->include/import_map.h",
         "fuzz/fuzz_js_dom.c->include/dom.h"
-      ]
-    },
-    {
-      "source": "fail",
-      "target": "freedom",
-      "verb": "depends_on",
-      "strength": 0.72,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->gui/browser_ui_internal.h",
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h"
       ]
     },
     {
@@ -5590,6 +5575,25 @@
         "gui/browser_ui.c->include/data_url.h",
         "gui/browser_ui.c->include/download.h",
         "gui/browser_ui.c->include/form.h"
+      ]
+    },
+    {
+      "source": "fail",
+      "target": "freedom",
+      "verb": "depends_on",
+      "strength": 0.71,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h"
       ]
     },
     {
@@ -5707,6 +5711,25 @@
       ]
     },
     {
+      "source": "null",
+      "target": "returns",
+      "verb": "depends_on",
+      "strength": 0.7,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_gradient.h",
+        "gui/browser_ui.c->include/css_mask.h",
+        "gui/browser_ui.c->include/hls.h"
+      ]
+    },
+    {
       "source": "same",
       "target": "freedom",
       "verb": "depends_on",
@@ -5783,6 +5806,44 @@
       ]
     },
     {
+      "source": "every",
+      "target": "include",
+      "verb": "depends_on",
+      "strength": 0.69,
+      "confidence": "INFERRED",
+      "evidence": [
+        "fuzz/fuzz_image_decode.c->include/image_decode.h",
+        "fuzz/fuzz_js_sandbox.c->include/js_sandbox.h",
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h"
+      ]
+    },
+    {
+      "source": "free",
+      "target": "null",
+      "verb": "depends_on",
+      "strength": 0.69,
+      "confidence": "INFERRED",
+      "evidence": [
+        "fuzz/fuzz_image_decode.c->include/image_decode.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/data_url.h",
+        "gui/browser_ui.c->include/download.h",
+        "gui/browser_ui.c->include/form.h",
+        "gui/browser_ui.c->include/freebug.h"
+      ]
+    },
+    {
       "source": "int",
       "target": "max",
       "verb": "depends_on",
@@ -5799,25 +5860,6 @@
         "gui/browser_ui.c->include/download.h",
         "gui/browser_ui.c->include/form.h",
         "gui/browser_ui.c->include/freebug.h"
-      ]
-    },
-    {
-      "source": "null",
-      "target": "returns",
-      "verb": "depends_on",
-      "strength": 0.69,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_gradient.h",
-        "gui/browser_ui.c->include/css_mask.h",
-        "gui/browser_ui.c->include/hls.h"
       ]
     },
     {
@@ -5875,44 +5917,6 @@
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_gradient.h",
         "gui/browser_ui.c->include/data_url.h"
-      ]
-    },
-    {
-      "source": "every",
-      "target": "include",
-      "verb": "depends_on",
-      "strength": 0.68,
-      "confidence": "INFERRED",
-      "evidence": [
-        "fuzz/fuzz_image_decode.c->include/image_decode.h",
-        "fuzz/fuzz_js_sandbox.c->include/js_sandbox.h",
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h"
-      ]
-    },
-    {
-      "source": "free",
-      "target": "null",
-      "verb": "depends_on",
-      "strength": 0.68,
-      "confidence": "INFERRED",
-      "evidence": [
-        "fuzz/fuzz_image_decode.c->include/image_decode.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/data_url.h",
-        "gui/browser_ui.c->include/download.h",
-        "gui/browser_ui.c->include/form.h",
-        "gui/browser_ui.c->include/freebug.h"
       ]
     },
     {
@@ -6049,25 +6053,6 @@
       ]
     },
     {
-      "source": "value",
-      "target": "include",
-      "verb": "depends_on",
-      "strength": 0.67,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h",
-        "gui/browser_ui.c->include/css_mask.h"
-      ]
-    },
-    {
       "source": "zero",
       "target": "freedom",
       "verb": "depends_on",
@@ -6084,6 +6069,25 @@
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_color.h",
         "gui/browser_ui.c->include/css_gradient.h"
+      ]
+    },
+    {
+      "source": "bytes",
+      "target": "freedom",
+      "verb": "depends_on",
+      "strength": 0.66,
+      "confidence": "INFERRED",
+      "evidence": [
+        "fuzz/fuzz_js_geom.c->include/js_geom.h",
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h"
       ]
     },
     {
@@ -6220,14 +6224,12 @@
       ]
     },
     {
-      "source": "bytes",
-      "target": "freedom",
+      "source": "value",
+      "target": "include",
       "verb": "depends_on",
-      "strength": 0.65,
+      "strength": 0.66,
       "confidence": "INFERRED",
       "evidence": [
-        "fuzz/fuzz_js_geom.c->include/js_geom.h",
-        "gui/browser_ui.c->gui/browser_ui_internal.h",
         "gui/browser_ui.c->include/block_flow.h",
         "gui/browser_ui.c->include/box_blur.h",
         "gui/browser_ui.c->include/box_style.h",
@@ -6235,7 +6237,28 @@
         "gui/browser_ui.c->include/browser.h",
         "gui/browser_ui.c->include/compositor.h",
         "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h"
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h",
+        "gui/browser_ui.c->include/css_mask.h"
+      ]
+    },
+    {
+      "source": "when",
+      "target": "max",
+      "verb": "depends_on",
+      "strength": 0.66,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_gradient.h",
+        "gui/browser_ui.c->include/data_url.h",
+        "gui/browser_ui.c->include/download.h",
+        "gui/browser_ui.c->include/form.h",
+        "gui/browser_ui.c->include/freebug.h"
       ]
     },
     {
@@ -6296,25 +6319,6 @@
       ]
     },
     {
-      "source": "non",
-      "target": "include",
-      "verb": "depends_on",
-      "strength": 0.65,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h",
-        "gui/browser_ui.c->include/css_mask.h"
-      ]
-    },
-    {
       "source": "none",
       "target": "freedom",
       "verb": "depends_on",
@@ -6334,8 +6338,8 @@
       ]
     },
     {
-      "source": "none",
-      "target": "include",
+      "source": "null",
+      "target": "when",
       "verb": "depends_on",
       "strength": 0.65,
       "confidence": "INFERRED",
@@ -6345,11 +6349,11 @@
         "gui/browser_ui.c->include/box_style.h",
         "gui/browser_ui.c->include/box_tree.h",
         "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/compositor.h",
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_color.h",
         "gui/browser_ui.c->include/css_gradient.h",
-        "gui/browser_ui.c->include/css_mask.h"
+        "gui/browser_ui.c->include/css_mask.h",
+        "gui/browser_ui.c->include/form.h"
       ]
     }
   ],
@@ -6361,7 +6365,7 @@
     "Thesis: `bytes` centralizes 71 files; Antithesis: `null` pulls 142 files with 56 shared (Jaccard 0.36); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `bytes` centralizes 71 files; Antithesis: `only` pulls 96 files with 40 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `bytes` centralizes 71 files; Antithesis: `out` pulls 109 files with 48 shared (Jaccard 0.36); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
-    "Thesis: `bytes` centralizes 71 files; Antithesis: `returns` pulls 97 files with 40 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `bytes` centralizes 71 files; Antithesis: `returns` pulls 98 files with 41 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `bytes` centralizes 71 files; Antithesis: `size` pulls 112 files with 47 shared (Jaccard 0.35); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `bytes` centralizes 71 files; Antithesis: `static` pulls 85 files with 36 shared (Jaccard 0.30); Synthesis: should they merge, split by layer, or keep `bridges` explicit?"
   ]

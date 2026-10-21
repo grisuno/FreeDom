@@ -10346,7 +10346,8 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
                           ? rd_box_at(w->doc, (size_t)b->own_box_id) : NULL;
     int author_face = own != NULL && !w->force_theme &&
                       (own->bg_rgb >= 0 || own->grad_n > 0 || own->bord_tw > 0 ||
-                       own->bord_rw > 0 || own->bord_bw > 0 || own->bord_lw > 0);
+                       own->bord_rw > 0 || own->bord_bw > 0 || own->bord_lw > 0 ||
+                       own->border_radius > 0);
     double bw = author_face ? content_w : input_box_width(content_w);
     if (!author_face) {
         set_rgb(cr, focused ? th->input_bg_focused : th->input_bg);

@@ -152,7 +152,7 @@ No I/O, no network — the caller resolves and downloads the URL against the pag
 
 ### `len_rebase_ctx`
 
-`struct` | [src/css.c:5060](../../src/css.c#L5060)
+`struct` | [src/css.c:5080](../../src/css.c#L5080)
 
 ```c
 typedef struct len_rebase_ctx
@@ -170,7 +170,7 @@ Unit scales for len_rebase; a scale <= 0 leaves that unit family untouched.
 
 #### `len_rebase_ctx.rem_px`
 
-`type_alias` | [src/css.c:5060](../../src/css.c#L5060)
+`type_alias` | [src/css.c:5080](../../src/css.c#L5080)
 
 ```c
 typedef struct len_rebase_ctx { double rem_px;
@@ -184,7 +184,7 @@ Unit scales for len_rebase; a scale <= 0 leaves that unit family untouched.
 
 ### `css_match`
 
-`struct` | [src/css.c:5884](../../src/css.c#L5884)
+`struct` | [src/css.c:5904](../../src/css.c#L5904)
 
 ```c
 typedef struct css_match
@@ -198,7 +198,7 @@ One matched selector, remembered between the passes of the element cascade.
 
 ### `css_cand`
 
-`struct` | [src/css.c:5890](../../src/css.c#L5890)
+`struct` | [src/css.c:5910](../../src/css.c#L5910)
 
 ```c
 typedef struct css_cand
@@ -216,7 +216,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 #### `css_cand.idx`
 
-`type_alias` | [src/css.c:5890](../../src/css.c#L5890)
+`type_alias` | [src/css.c:5910](../../src/css.c#L5910)
 
 ```c
 typedef struct css_cand { int imp, espec, ord, idx;
@@ -825,7 +825,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 ### `csel_substr`
 
-`function` | [src/css.c:4552](../../src/css.c#L4552)
+`function` | [src/css.c:4572](../../src/css.c#L4572)
 
 ```c
 return known && csel_substr(val, "var(", 1);
@@ -854,7 +854,7 @@ A non-empty needle only; an empty one never matches.
 
 ### `download`
 
-`function` | [src/css.c:4892](../../src/css.c#L4892)
+`function` | [src/css.c:4912](../../src/css.c#L4912)
 
 ```c
 * the download (spec/webfont.md b3b). An empty src_url * simply never resolv...
@@ -874,7 +874,7 @@ A non-empty needle only; an empty one never matches.
 
 ### `var`
 
-`function` | [src/css.c:5244](../../src/css.c#L5244)
+`function` | [src/css.c:5264](../../src/css.c#L5264)
 
 ```c
 * collected and forty var() declarations -- font sizes, widths, radii, the * whole theme -- ...
@@ -888,7 +888,7 @@ A non-empty needle only; an empty one never matches.
 
 ### `css_parse`
 
-`function` | [src/css.c:5269](../../src/css.c#L5269)
+`function` | [src/css.c:5289](../../src/css.c#L5289)
 
 ```c
 css_status css_parse(const char *text, size_t len, css_sheet **out)
@@ -912,7 +912,7 @@ css_status css_parse(const char *text, size_t len, css_sheet **out)
 
 ### `css_parse_media`
 
-`function` | [src/css.c:5273](../../src/css.c#L5273)
+`function` | [src/css.c:5293](../../src/css.c#L5293)
 
 ```c
 css_status css_parse_media(const char *text, size_t len, const css_media *media, css_sheet **out)
@@ -937,7 +937,7 @@ css_status css_parse_media(const char *text, size_t len, const css_media *media,
 
 ### `css_parse_scoped`
 
-`function` | [src/css.c:5278](../../src/css.c#L5278)
+`function` | [src/css.c:5298](../../src/css.c#L5298)
 
 ```c
 css_status css_parse_scoped(const char *text, size_t len, const css_media *media, const char *root_scope, css_sheet **out)
@@ -963,7 +963,7 @@ css_status css_parse_scoped(const char *text, size_t len, const css_media *media
 
 ### `css_parse_logged`
 
-`function` | [src/css.c:5283](../../src/css.c#L5283)
+`function` | [src/css.c:5303](../../src/css.c#L5303)
 
 ```c
 css_status css_parse_logged(const char *text, size_t len, const css_media *media, const char *root_scope, css_sheet **out, css_drop_log *log)
@@ -988,7 +988,7 @@ css_status css_parse_logged(const char *text, size_t len, const css_media *media
 
 ### `consumer`
 
-`function` | [src/css.c:5317](../../src/css.c#L5317)
+`function` | [src/css.c:5337](../../src/css.c#L5337)
 
 ```c
 * consumer (shorthands, calc(), var() values) gets it with no context * threaded through...
@@ -1009,7 +1009,7 @@ css_status css_parse_logged(const char *text, size_t len, const css_media *media
 
 ### `css_free`
 
-`function` | [src/css.c:5375](../../src/css.c#L5375)
+`function` | [src/css.c:5395](../../src/css.c#L5395)
 
 ```c
 void css_free(css_sheet *s)
@@ -1031,7 +1031,7 @@ Idempotent; NULL-safe.
 
 ### `page_view`
 
-`function` | [src/css.c:5413](../../src/css.c#L5413)
+`function` | [src/css.c:5433](../../src/css.c#L5433)
 
 ```c
 * the generated text reaches page_view (which materialises it as a synthetic * run);
@@ -1051,7 +1051,7 @@ Idempotent; NULL-safe.
 
 ### `parent`
 
-`function` | [src/css.c:5446](../../src/css.c#L5446)
+`function` | [src/css.c:5466](../../src/css.c#L5466)
 
 ```c
 * property from the parent (`inherit`), and an unset non-inherited one * stands at its i...
@@ -1071,7 +1071,7 @@ Idempotent; NULL-safe.
 
 ### `css_ua_heading_em`
 
-`function` | [src/css.c:5865](../../src/css.c#L5865)
+`function` | [src/css.c:5885](../../src/css.c#L5885)
 
 ```c
 double css_ua_heading_em(int level)
@@ -1097,7 +1097,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 ### `css_computed_font_size_for_tag`
 
-`function` | [src/css.c:5870](../../src/css.c#L5870)
+`function` | [src/css.c:5890](../../src/css.c#L5890)
 
 ```c
 double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)
@@ -1119,7 +1119,7 @@ double css_computed_font_size_for_tag(const css_style *o, double inherited_px, c
 
 ### `css_resolve_el`
 
-`function` | [src/css.c:6056](../../src/css.c#L6056)
+`function` | [src/css.c:6076](../../src/css.c#L6076)
 
 ```c
 css_style css_resolve_el(const css_sheet *sheet, const css_element *el, const char *inline_style, size_t inline_len)
@@ -1144,7 +1144,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el, const ch
 
 ### `css_resolve_el_ex`
 
-`function` | [src/css.c:6065](../../src/css.c#L6065)
+`function` | [src/css.c:6085](../../src/css.c#L6085)
 
 ```c
 css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el, const char *inline_style, size_t inline_len, cvr_table *own_out)
@@ -1170,7 +1170,7 @@ css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el, const
 
 ### `css_resolve_pseudo`
 
-`function` | [src/css.c:6081](../../src/css.c#L6081)
+`function` | [src/css.c:6101](../../src/css.c#L6101)
 
 ```c
 css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)
@@ -1194,7 +1194,7 @@ css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int 
 
 ### `css_resolve`
 
-`function` | [src/css.c:6349](../../src/css.c#L6349)
+`function` | [src/css.c:6369](../../src/css.c#L6369)
 
 ```c
 css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, const char *const *classes, size_t nclasses, const char *inline_style, size_t inline_len)
@@ -1222,7 +1222,7 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, c
 
 ### `NULL`
 
-`function` | [src/css.c:6373](../../src/css.c#L6373)
+`function` | [src/css.c:6393](../../src/css.c#L6393)
 
 ```c
 * Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...
@@ -1245,7 +1245,7 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, c
 
 ### `css_font_face_count`
 
-`function` | [src/css.c:6405](../../src/css.c#L6405)
+`function` | [src/css.c:6425](../../src/css.c#L6425)
 
 ```c
 size_t css_font_face_count(const css_sheet *sheet)
@@ -1271,7 +1271,7 @@ Returns 0 on success, -1 if i is out of range.
 
 ### `css_font_face_at`
 
-`function` | [src/css.c:6409](../../src/css.c#L6409)
+`function` | [src/css.c:6429](../../src/css.c#L6429)
 
 ```c
 int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap)
@@ -1296,7 +1296,7 @@ int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_
 
 ### `css_parse_inline`
 
-`function` | [src/css.c:6419](../../src/css.c#L6419)
+`function` | [src/css.c:6439](../../src/css.c#L6439)
 
 ```c
 css_style css_parse_inline(const char *style, size_t len)
@@ -1554,7 +1554,7 @@ Stored as "\x01attr:" + lowercased name + optional "\x1f" + fallback (unescaped)
 
 ### `CSS_MEDIA_MAX_DEPTH`
 
-`macro` | [src/css.c:4652](../../src/css.c#L4652)
+`macro` | [src/css.c:4672](../../src/css.c#L4672)
 
 ```c
 #define CSS_MEDIA_MAX_DEPTH
@@ -1568,7 +1568,7 @@ Nesting bound for conditional group rules (@media, @supports, @layer) -- they ne
 
 ### `CSS_VAR_POOL`
 
-`macro` | [src/css.c:5956](../../src/css.c#L5956)
+`macro` | [src/css.c:5976](../../src/css.c#L5976)
 
 ```c
 #define CSS_VAR_POOL

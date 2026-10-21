@@ -50,7 +50,7 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `hl_font_stash` (struct, line 559)
+  - `hl_font_stash` (struct, line 581)
   - `print_usage` (function, line 52) `static void print_usage(FILE *fp, const char *prog)`
   - `is_https_url` (function, line 80) `static int is_https_url(const char *s)`
   - `is_http_url` (function, line 84) `static int is_http_url(const char *s)`
@@ -63,48 +63,48 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `read_file` (function, line 219) `static char *read_file(const char *path, size_t *out_len)`
   - `headless_load_hosts` (function, line 237) `static void headless_load_hosts(void)`
   - `apply_as_gui` (function, line 248) `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)`
-  - `is_blank_text` (function, line 274) `static int is_blank_text(const char *s)`
-  - `print_doc` (function, line 287) `static void print_doc(const rd_doc *doc)`
-  - `print_console` (function, line 380) `static void print_console(const fb_buffer *log)`
-  - `print_dom` (function, line 397) `static void print_dom(const rd_doc *doc)`
-  - `print_dom_css` (function, line 412) `static void print_dom_css(const rd_doc *doc)`
-  - `headless_fetch` (function, line 436) `static int headless_fetch(void *ctx, const char *method, const char *url,
+  - `is_blank_text` (function, line 281) `static int is_blank_text(const char *s)`
+  - `print_doc` (function, line 294) `static void print_doc(const rd_doc *doc)`
+  - `print_console` (function, line 387) `static void print_console(const fb_buffer *log)`
+  - `print_dom` (function, line 404) `static void print_dom(const rd_doc *doc)`
+  - `print_dom_css` (function, line 419) `static void print_dom_css(const rd_doc *doc)`
+  - `headless_fetch` (function, line 443) `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...`
-  - `foldback_cookies` (function, line 498) `static void foldback_cookies(const char *url, const char *jar)`
-  - `print_css_drops` (function, line 522) `static void print_css_drops(const char *html, size_t len)`
-  - `hl_font_stash_free` (function, line 567) `static void hl_font_stash_free(hl_font_stash *s)`
-  - `hl_css_sink` (function, line 580) `static void hl_css_sink(void *vctx, const char *url,
+  - `foldback_cookies` (function, line 520) `static void foldback_cookies(const char *url, const char *jar)`
+  - `print_css_drops` (function, line 544) `static void print_css_drops(const char *html, size_t len)`
+  - `hl_font_stash_free` (function, line 589) `static void hl_font_stash_free(hl_font_stash *s)`
+  - `hl_css_sink` (function, line 602) `static void hl_css_sink(void *vctx, const char *url,
                         const char *body, si...`
-  - `hl_font_fetch` (function, line 617) `static int hl_font_fetch(void *vctx, const char *url,
+  - `hl_font_fetch` (function, line 639) `static int hl_font_fetch(void *vctx, const char *url,
                          int *out_status, c...`
-  - `render_page` (function, line 626) `static int render_page(const char *html, size_t len, const char *top_url,
+  - `render_page` (function, line 648) `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-  - `first` (function, line 703) `* always cleared first (fetch_and_render may paint several pages per
+  - `first` (function, line 725) `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
-  - `sf_reason` (function, line 872) `static const char *sf_reason(sf_status ss)`
-  - `fetch_and_render_one` (function, line 891) `static int fetch_and_render_one(const char *url, char **out_nav)`
-  - `elsewhere` (function, line 953) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+  - `sf_reason` (function, line 894) `static const char *sf_reason(sf_status ss)`
+  - `fetch_and_render_one` (function, line 913) `static int fetch_and_render_one(const char *url, char **out_nav)`
+  - `elsewhere` (function, line 975) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-  - `parent` (function, line 979) `* gated by the parent (ln_resolve: a local target stays under the document's
+  - `parent` (function, line 1001) `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-  - `run_headless` (function, line 1016) `static int run_headless(const char *target)`
-  - `video_fetch_with_fallback` (function, line 1052) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+  - `run_headless` (function, line 1038) `static int run_headless(const char *target)`
+  - `video_fetch_with_fallback` (function, line 1074) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
-  - `run_dump_video` (function, line 1163) `static int run_dump_video(const char *url)`
-  - `main` (function, line 1182) `int main(int argc, char **argv)`
-  - `gets` (function, line 432) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-  - `pool` (function, line 689) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-  - `only` (function, line 760) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-  - `BLOCKED` (function, line 918) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+  - `run_dump_video` (function, line 1185) `static int run_dump_video(const char *url)`
+  - `main` (function, line 1204) `int main(int argc, char **argv)`
+  - `gets` (function, line 439) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
+  - `pool` (function, line 711) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+  - `only` (function, line 782) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+  - `BLOCKED` (function, line 940) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
   - `_DEFAULT_SOURCE` (macro, line 10) `#define _DEFAULT_SOURCE`
   - `EXIT_OK` (macro, line 48) `#define EXIT_OK`
   - `EXIT_ERROR` (macro, line 49) `#define EXIT_ERROR`
   - `EXIT_USAGE` (macro, line 50) `#define EXIT_USAGE`
   - `CSS_DROPS_REPORT_MAX` (macro, line 168) `#define CSS_DROPS_REPORT_MAX`
-  - `HL_FONT_MAX_SHEETS` (macro, line 556) `#define HL_FONT_MAX_SHEETS`
-  - `HL_FONT_MAX_BYTES` (macro, line 557) `#define HL_FONT_MAX_BYTES`
-  - `HL_JS_NAV_MAX` (macro, line 887) `#define HL_JS_NAV_MAX`
+  - `HL_FONT_MAX_SHEETS` (macro, line 578) `#define HL_FONT_MAX_SHEETS`
+  - `HL_FONT_MAX_BYTES` (macro, line 579) `#define HL_FONT_MAX_BYTES`
+  - `HL_JS_NAV_MAX` (macro, line 909) `#define HL_JS_NAV_MAX`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
 
 ## src/hls.c

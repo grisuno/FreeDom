@@ -4,21 +4,21 @@
 
 ## Definition
 
-This community groups 10 file(s) rooted at `tests` with dominant language c (cohesion 0.62). Central symbols: `CHECK`, `EXCLUDED`, `FP_ACCEPT_HEADER_NAV`, `FP_ACCEPT_LANGUAGE`, `FP_ACCEPT_LANGUAGE_HEADER`, `FP_SEC_FETCH_DEST_NAV`, `FP_SEC_FETCH_MODE_NAV`, `FP_SEC_FETCH_SITE_NONE`. Core file: `src/secure_fetch.c` (61 symbols).
+This community groups 10 file(s) rooted at `tests` with dominant language c (cohesion 0.62). Central symbols: `CHECK`, `EXCLUDED`, `FP_ACCEPT_HEADER_NAV`, `FP_ACCEPT_LANGUAGE`, `FP_ACCEPT_LANGUAGE_HEADER`, `FP_SEC_FETCH_DEST_NAV`, `FP_SEC_FETCH_MODE_NAV`, `FP_SEC_FETCH_SITE_NONE`. Core file: `src/secure_fetch.c` (74 symbols).
 
 ## Files
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/anti_fp.h` | h | utility | 35 | no |
-| `include/secure_fetch.h` | h | utility | 38 | no |
+| `include/secure_fetch.h` | h | utility | 42 | no |
 | `include/ws_hub.h` | h | utility | 15 | no |
 | `src/anti_fp.c` | c | utility | 23 | no |
-| `src/secure_fetch.c` | c | utility | 61 | no |
+| `src/secure_fetch.c` | c | utility | 74 | no |
 | `src/ws_hub.c` | c | utility | 27 | no |
 | `tests/itest_secure_fetch.c` | c | testing | 2 | no |
 | `tests/test_anti_fp.c` | c | testing | 15 | no |
-| `tests/test_secure_fetch.c` | c | testing | 50 | no |
+| `tests/test_secure_fetch.c` | c | testing | 52 | no |
 | `tests/test_ws_hub.c` | c | testing | 13 | no |
 
 ## Key Symbols

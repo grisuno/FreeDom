@@ -1,6 +1,6 @@
 # include: local_store
 
-include: local_store groups 16 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. ds_free: Reads and decrypts path.
+include: local_store groups 16 files (c, h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ds_free: Reads and decrypts path.
 
 ```mermaid
 graph LR
@@ -22,7 +22,7 @@ fuzz groups 1 files (c) around LLVMFuzzerTestOneInput.
 
 ## include (7.2)
 
-include groups 5 files (h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. ds_free: Reads and decrypts path.
+include groups 5 files (h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ds_free: Reads and decrypts path.
 
 ## src (7.3)
 

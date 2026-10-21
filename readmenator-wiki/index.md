@@ -1,6 +1,6 @@
 # Second Brain
 
-*Last synthesized: 2026-10-20 | 288 files | 11 concept pages | offline, zero tokens*
+*Last synthesized: 2026-10-21 | 288 files | 11 concept pages | offline, zero tokens*
 
 > Raw sources -> readmenator wiki -> links (Karpathy LLM Wiki Pattern, deterministic).
 > Start here, then open one community page. Prefer grep over full reads.
@@ -18,13 +18,13 @@ Open work clusters around documentation (15% file coverage), 0 security findings
 | Metric | Value |
 |--------|-------|
 | Files | 288 |
-| Symbols | 6857 |
-| Resolved imports | 547 |
+| Symbols | 6887 |
+| Resolved imports | 548 |
 | Languages | c, h, py, sh |
 | Communities | 11 |
 | Doc coverage | 15% (42/288 files) |
 | Security findings | 0 |
-| Estimated read cost | ~201656 tokens (chars/4, offline so $0) |
+| Estimated read cost | ~202188 tokens (chars/4, offline so $0) |
 | Large files (>256KB, maybe generated) | 4: `browser_ui.c`, `css.c`, `page_view.c`, `test_css.c` |
 
 ## Reading Order
@@ -46,8 +46,8 @@ readmenator query "<question>" --target freedom-0.0.3
 - [src: freedom (36 files, cohesion 0.55)](./community_3_src_freedom.md)
 - [include: page_view (21 files, cohesion 0.47)](./community_4_include_page_view.md)
 - [include: text_shape (20 files, cohesion 0.55)](./community_5_include_text_shape.md)
-- [include: local_store (16 files, cohesion 0.83)](./community_6_include_local_store.md)
-- [gui (15 files, cohesion 0.48)](./community_7_gui.md)
+- [include: local_store (16 files, cohesion 0.80)](./community_6_include_local_store.md)
+- [gui (15 files, cohesion 0.47)](./community_7_gui.md)
 - [include: secure_fetch (10 files, cohesion 0.62)](./community_8_include_secure_fetch.md)
 - [include: prefetch (8 files, cohesion 0.64)](./community_9_include_prefetch.md)
 - [orphans (17 files, cohesion 0.00)](./community_10_orphans.md)
@@ -56,7 +56,7 @@ readmenator query "<question>" --target freedom-0.0.3
 
 | File | Score |
 |------|-------|
-| `gui/browser_ui.c` | 160.2 (large, maybe generated) |
+| `gui/browser_ui.c` | 160.6 (large, maybe generated) |
 | `include/css.h` | 90.0 |
 | `src/tab.c` | 60.3 |
 | `src/freedom.c` | 56.7 |

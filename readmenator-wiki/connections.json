@@ -120,6 +120,14 @@
     "confidence": "EXTRACTED"
   },
   {
+    "community_a": 7,
+    "community_b": 6,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: include/ui.h imports include/prefs.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
     "community_a": 3,
     "community_b": 4,
     "connection_type": "depends_on",
@@ -148,14 +156,6 @@
     "community_b": 1,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 3,
-    "community_b": 9,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   }

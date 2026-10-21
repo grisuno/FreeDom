@@ -57,17 +57,32 @@ Depends on: `include/anti_fp.h`, `include/secure_fetch.h`, `include/url.h`
 - `sf_get` (function) `src/secure_fetch.c:1014` `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)`
 - `sf_post` (function) `src/secure_fetch.c:1018` `sf_status sf_post(const char *url, const sf_config *cfg,
                   const void *body, size...`
-- `sf_get_follow` (function) `src/secure_fetch.c:1032` `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
+- `sf_rcache_clear` (function) `src/secure_fetch.c:1048` `void sf_rcache_clear(void)`
+- `sf_rcache_put` (function) `src/secure_fetch.c:1055` `int sf_rcache_put(const char *from, const char *to, time_t now)`
+- `sf_rcache_get` (function) `src/secure_fetch.c:1074` `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)`
+- `sf_get_follow` (function) `src/secure_fetch.c:1092` `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
                 ...`
-- `ws_ssl_info_cb` (function) `src/secure_fetch.c:1084` `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)` -- An upgraded (CONNECT_ONLY) connection never runs the header callback that snapshots TLS for a fetch, and curl no...
-- `ws_ssl_ctx_cb` (function) `src/secure_fetch.c:1091` `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
-- `sf_ws_url_check` (function) `src/secure_fetch.c:1105` `sf_status sf_ws_url_check(const char *url)`
-- `ws_free` (function) `src/secure_fetch.c:1117` `static void ws_free(sf_ws *ws)`
-- `sf_ws_open` (function) `src/secure_fetch.c:1126` `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
-- `sf_ws_send` (function) `src/secure_fetch.c:1181` `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
-- `sf_ws_recv` (function) `src/secure_fetch.c:1204` `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
-- `sf_ws_fd` (function) `src/secure_fetch.c:1226` `int sf_ws_fd(const sf_ws *ws)`
-- `sf_ws_close` (function) `src/secure_fetch.c:1233` `void sf_ws_close(sf_ws *ws)`
+- `ws_ssl_info_cb` (function) `src/secure_fetch.c:1153` `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)` -- An upgraded (CONNECT_ONLY) connection never runs the header callback that snapshots TLS for a fetch, and curl no...
+- `ws_ssl_ctx_cb` (function) `src/secure_fetch.c:1160` `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
+- `sf_ws_url_check` (function) `src/secure_fetch.c:1174` `sf_status sf_ws_url_check(const char *url)`
+- `ws_free` (function) `src/secure_fetch.c:1186` `static void ws_free(sf_ws *ws)`
+- `sf_ws_open` (function) `src/secure_fetch.c:1195` `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
+- `sf_ws_send` (function) `src/secure_fetch.c:1250` `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
+- `sf_ws_recv` (function) `src/secure_fetch.c:1273` `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
+- `sf_ws_fd` (function) `src/secure_fetch.c:1295` `int sf_ws_fd(const sf_ws *ws)`
+- `sf_ws_close` (function) `src/secure_fetch.c:1302` `void sf_ws_close(sf_ws *ws)`
+- `sf_fallback_policy` (function) `src/secure_fetch.c:1313` `int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)`
+- `sf_downgrade_of` (function) `src/secure_fetch.c:1327` `static int sf_downgrade_of(sf_policy p)`
+- `sf_attempt_get` (function) `src/secure_fetch.c:1336` `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,
+        ...`
+- `sf_attempt_post` (function) `src/secure_fetch.c:1342` `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,
+       ...`
+- `sf_navigable` (function) `src/secure_fetch.c:1347` `static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,
+           ...`
+- `sf_get_follow_navigable` (function) `src/secure_fetch.c:1367` `sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,
+            ...`
+- `sf_post_navigable` (function) `src/secure_fetch.c:1372` `sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
+                  ...`
 
 ## src/svg_render.c
 Depends on: `include/css_color.h`, `include/svg_render.h`
@@ -480,21 +495,6 @@ Depends on: `include/zoom.h`
 - `sbs` (function) `tools/fbench.py:88` `def sbs(name, start, nrows)`
 - `publish_readme` (function) `tools/fbench.py:107` `def publish_readme(name, score)` -- Rewrite the README picture of `name` and the score printed beside its label.
 - `main` (function) `tools/fbench.py:127` `def main()`
-
-## tools/ffgeom.py
-- `load_rows` (function) `tools/ffgeom.py:116` `def load_rows(path)`
-- `lum` (function) `tools/ffgeom.py:169` `def lum(p)`
-- `lum_at` (function) `tools/ffgeom.py:181` `def lum_at(x, y)`
-- `bit` (function) `tools/ffgeom.py:206` `def bit(grid_row, cell, origin)`
-- `word` (function) `tools/ffgeom.py:209` `def word(grid_row, origin)`
-- `decode` (function) `tools/ffgeom.py:239` `def decode(path)`
-- `probe` (function) `tools/ffgeom.py:265` `def probe(page, selector, out_html)`
-- `height_probe` (function) `tools/ffgeom.py:279` `def height_probe(page, out_html)`
-- `height` (function) `tools/ffgeom.py:292` `def height(path)` -- Decodes the scrollHeight carried by the #__ffh sentinel: the probe encodes one rect (its height), which decode()...
-- `main` (function) `tools/ffgeom.py:301` `def main(argv)`
-
-## tools/ffq.py
-- `main` (function) `tools/ffq.py:22` `def main()`
 
 
 Next: [API_p11.md](API_p11.md)

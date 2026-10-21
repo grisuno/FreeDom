@@ -62,7 +62,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 |---|---|---|---|
 | `lay` | `ui_layout *` |  |  |
 
-> **Inherited:** Documentation from [`ui_layout_free`](#ui_layout_free) (include/ui.h:51).
+> **Inherited:** Documentation from [`ui_layout_free`](#ui_layout_free) (include/ui.h:52).
 
 *Called by:* [`ui_wrap_text`](#ui_wrap_text)
 
@@ -90,6 +90,6 @@ Clamps desired to [0, max(0, total_lines - viewport_lines)].
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`ui_clamp_scroll`](#ui_clamp_scroll) (include/ui.h:54).
+> **Inherited:** Documentation from [`ui_clamp_scroll`](#ui_clamp_scroll) (include/ui.h:55).
 
 ---

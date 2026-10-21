@@ -335,39 +335,39 @@ Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `includ
 - `read_file` (function) `src/freedom.c:219` `static char *read_file(const char *path, size_t *out_len)` -- User opt-in for TLS-impersonation blend: --impersonate or FREEDOM_IMPERSONATE=1.
 - `headless_load_hosts` (function) `src/freedom.c:237` `static void headless_load_hosts(void)`
 - `apply_as_gui` (function) `src/freedom.c:248` `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)` -- Derives the capabilities the GUI would give `top_url` and publishes them through the headless globals every later...
-- `is_blank_text` (function) `src/freedom.c:274` `static int is_blank_text(const char *s)` -- .js_mode       = mode, .host_in_js    = host[0] != '\0' && g_js_hosts != NULL && hb_is_allowlisted(g_js_hosts...
-- `print_doc` (function) `src/freedom.c:287` `static void print_doc(const rd_doc *doc)` -- Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data...
-- `print_console` (function) `src/freedom.c:380` `static void print_console(const fb_buffer *log)` -- Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed...
-- `print_dom` (function) `src/freedom.c:397` `static void print_dom(const rd_doc *doc)` -- Prints the paint-ready render tree (dom_debug) to stdout.
-- `print_dom_css` (function) `src/freedom.c:412` `static void print_dom_css(const rd_doc *doc)` -- Prints the CSS property inspector (dd_format_css) to stdout.
-- `gets` (function) `src/freedom.c:432` `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-- `headless_fetch` (function) `src/freedom.c:436` `static int headless_fetch(void *ctx, const char *method, const char *url,
+- `is_blank_text` (function) `src/freedom.c:281` `static int is_blank_text(const char *s)` -- .js_mode       = mode, .host_in_js    = host[0] != '\0' && g_js_hosts != NULL && hb_is_allowlisted(g_js_hosts...
+- `print_doc` (function) `src/freedom.c:294` `static void print_doc(const rd_doc *doc)` -- Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data...
+- `print_console` (function) `src/freedom.c:387` `static void print_console(const fb_buffer *log)` -- Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed...
+- `print_dom` (function) `src/freedom.c:404` `static void print_dom(const rd_doc *doc)` -- Prints the paint-ready render tree (dom_debug) to stdout.
+- `print_dom_css` (function) `src/freedom.c:419` `static void print_dom_css(const rd_doc *doc)` -- Prints the CSS property inspector (dd_format_css) to stdout.
+- `gets` (function) `src/freedom.c:439` `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
+- `headless_fetch` (function) `src/freedom.c:443` `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...` -- tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page XHR/fetch and external <script...
-- `foldback_cookies` (function) `src/freedom.c:498` `static void foldback_cookies(const char *url, const char *jar)` -- Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network * jar, one pair at a time, so JS-set...
-- `print_css_drops` (function) `src/freedom.c:522` `static void print_css_drops(const char *html, size_t len)` -- Prints the author-CSS drop report for `html`, sorted by occurrence count.
-- `hl_font_stash_free` (function) `src/freedom.c:567` `static void hl_font_stash_free(hl_font_stash *s)`
-- `hl_css_sink` (function) `src/freedom.c:580` `static void hl_css_sink(void *vctx, const char *url,
+- `foldback_cookies` (function) `src/freedom.c:520` `static void foldback_cookies(const char *url, const char *jar)` -- Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network * jar, one pair at a time, so JS-set...
+- `print_css_drops` (function) `src/freedom.c:544` `static void print_css_drops(const char *html, size_t len)` -- Prints the author-CSS drop report for `html`, sorted by occurrence count.
+- `hl_font_stash_free` (function) `src/freedom.c:589` `static void hl_font_stash_free(hl_font_stash *s)`
+- `hl_css_sink` (function) `src/freedom.c:602` `static void hl_css_sink(void *vctx, const char *url,
                         const char *body, si...` -- tab_css_sink_fn for headless: retains served 2xx CSS bodies (serial and pool paths alike) with an absolute https...
-- `hl_font_fetch` (function) `src/freedom.c:617` `static int hl_font_fetch(void *vctx, const char *url,
+- `hl_font_fetch` (function) `src/freedom.c:639` `static int hl_font_fetch(void *vctx, const char *url,
                          int *out_status, c...` -- wf_fetch_fn around the headless policy gate (font bytes download like any * other subresource of this page). data...
-- `render_page` (function) `src/freedom.c:626` `static int render_page(const char *html, size_t len, const char *top_url,
+- `render_page` (function) `src/freedom.c:648` `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-- `pool` (function) `src/freedom.c:689` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-- `first` (function) `src/freedom.c:703` `* always cleared first (fetch_and_render may paint several pages per
+- `pool` (function) `src/freedom.c:711` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+- `first` (function) `src/freedom.c:725` `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
-- `only` (function) `src/freedom.c:760` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-- `sf_reason` (function) `src/freedom.c:872` `static const char *sf_reason(sf_status ss)`
-- `fetch_and_render_one` (function) `src/freedom.c:891` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
-- `BLOCKED` (function) `src/freedom.c:918` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
-- `elsewhere` (function) `src/freedom.c:953` `* page whose script immediately forwards elsewhere (e.g. a search engine's
+- `only` (function) `src/freedom.c:782` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+- `sf_reason` (function) `src/freedom.c:894` `static const char *sf_reason(sf_status ss)`
+- `fetch_and_render_one` (function) `src/freedom.c:913` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
+- `BLOCKED` (function) `src/freedom.c:940` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+- `elsewhere` (function) `src/freedom.c:975` `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-- `parent` (function) `src/freedom.c:979` `* gated by the parent (ln_resolve: a local target stays under the document's
+- `parent` (function) `src/freedom.c:1001` `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-- `run_headless` (function) `src/freedom.c:1016` `static int run_headless(const char *target)`
-- `video_fetch_with_fallback` (function) `src/freedom.c:1052` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+- `run_headless` (function) `src/freedom.c:1038` `static int run_headless(const char *target)`
+- `video_fetch_with_fallback` (function) `src/freedom.c:1074` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...` -- Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as...
-- `run_dump_video` (function) `src/freedom.c:1163` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
-- `main` (function) `src/freedom.c:1182` `int main(int argc, char **argv)`
+- `run_dump_video` (function) `src/freedom.c:1185` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
+- `main` (function) `src/freedom.c:1204` `int main(int argc, char **argv)`
 
 ## src/hls.c
 Depends on: `include/hls.h`

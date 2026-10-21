@@ -94,11 +94,10 @@ This community groups 36 file(s) rooted at `src` with dominant language c (cohes
 - [EXTRACTED] depends_on community 3 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_url.c imports include/url.h.
 - [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/hostblock.h.
 - [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
-- [EXTRACTED] depends_on community 3 <-> 9 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
 
 ## Risks
 
-- [dataflow UNCHECKED_ALLOC] `src/freedom.c:487` `headless_fetch` `oct`: Result of allocator stored in `oct` is never checked against NULL.
+- [dataflow UNCHECKED_ALLOC] `src/freedom.c:509` `headless_fetch` `oct`: Result of allocator stored in `oct` is never checked against NULL.
 - [dataflow UNCHECKED_ALLOC] `src/hostblock.c:145` `hb_new` `s`: Result of allocator stored in `s` is never checked against NULL.
 
 ## Open Questions

@@ -3,7 +3,7 @@
  "format": "jsonl",
  "meta": {
   "modules": 213,
-  "entities": 3311,
+  "entities": 3328,
   "languages": {
    "c": 112,
    "h": 86,
@@ -13,11 +13,11 @@
   "kinds": {
    "constant": 15,
    "enum": 151,
-   "function": 1689,
-   "macro": 858,
+   "function": 1699,
+   "macro": 864,
    "method": 23,
    "module": 213,
-   "struct": 231,
+   "struct": 232,
    "type_alias": 124,
    "variable": 7
   },
@@ -27,8 +27,8 @@
  },
  "coverage": {
   "overall": {
-   "documented": 1304,
-   "total": 3289,
+   "documented": 1310,
+   "total": 3306,
    "percent": 39.6
   },
   "by_kind": {
@@ -38,14 +38,14 @@
     "percent": 53.0
    },
    "function": {
-    "documented": 704,
-    "total": 1689,
-    "percent": 41.7
+    "documented": 710,
+    "total": 1699,
+    "percent": 41.8
    },
    "macro": {
     "documented": 289,
-    "total": 858,
-    "percent": 33.7
+    "total": 864,
+    "percent": 33.4
    },
    "method": {
     "documented": 0,
@@ -59,8 +59,8 @@
    },
    "struct": {
     "documented": 106,
-    "total": 231,
-    "percent": 45.9
+    "total": 232,
+    "percent": 45.7
    },
    "type_alias": {
     "documented": 93,
@@ -205,9 +205,9 @@
     "percent": 50.0
    },
    "gui/browser_ui.c": {
-    "documented": 78,
+    "documented": 79,
     "total": 241,
-    "percent": 32.4
+    "percent": 32.8
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -550,8 +550,8 @@
     "percent": 60.0
    },
    "include/secure_fetch.h": {
-    "documented": 19,
-    "total": 38,
+    "documented": 21,
+    "total": 42,
     "percent": 50.0
    },
    "include/svg_paint.h": {
@@ -590,9 +590,9 @@
     "percent": 30.4
    },
    "include/ui.h": {
-    "documented": 5,
-    "total": 17,
-    "percent": 29.4
+    "documented": 6,
+    "total": 18,
+    "percent": 33.3
    },
    "include/url.h": {
     "documented": 7,
@@ -931,8 +931,8 @@
    },
    "src/local_store.c": {
     "documented": 5,
-    "total": 282,
-    "percent": 1.8
+    "total": 286,
+    "percent": 1.7
    },
    "src/media_decoder.c": {
     "documented": 3,
@@ -951,8 +951,8 @@
    },
    "src/page_view.c": {
     "documented": 58,
-    "total": 132,
-    "percent": 43.9
+    "total": 131,
+    "percent": 44.3
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -1000,9 +1000,9 @@
     "percent": 57.1
    },
    "src/secure_fetch.c": {
-    "documented": 10,
-    "total": 39,
-    "percent": 25.6
+    "documented": 12,
+    "total": 48,
+    "percent": 25.0
    },
    "src/svg_render.c": {
     "documented": 5,
@@ -1620,7 +1620,7 @@
   {
    "uid": "include/secure_fetch.h",
    "path": "modules/include.secure_fetch.h.jsonl",
-   "entities": 38
+   "entities": 42
   },
   {
    "uid": "include/svg_paint.h",
@@ -1660,7 +1660,7 @@
   {
    "uid": "include/ui.h",
    "path": "modules/include.ui.h.jsonl",
-   "entities": 17
+   "entities": 18
   },
   {
    "uid": "include/url.h",
@@ -2000,7 +2000,7 @@
   {
    "uid": "src/local_store.c",
    "path": "modules/src.local_store.c.jsonl",
-   "entities": 282
+   "entities": 286
   },
   {
    "uid": "src/media_decoder.c",
@@ -2020,7 +2020,7 @@
   {
    "uid": "src/page_view.c",
    "path": "modules/src.page_view.c.jsonl",
-   "entities": 132
+   "entities": 131
   },
   {
    "uid": "src/pdf_export.c",
@@ -2070,7 +2070,7 @@
   {
    "uid": "src/secure_fetch.c",
    "path": "modules/src.secure_fetch.c.jsonl",
-   "entities": 39
+   "entities": 48
   },
   {
    "uid": "src/svg_render.c",
@@ -2205,7 +2205,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 1986
+  "total": 1997
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",
