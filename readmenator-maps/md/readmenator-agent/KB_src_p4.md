@@ -1,6 +1,64 @@
 # Subsystem: src (page 4 of 9)
 Previous: [KB_src_p3.md](KB_src_p3.md)
 
+## src/flex_layout.c
+- Doc: nn: bounded by FX_MAX_ITEMS (no VLAs).
+- Layer: presentation
+- Language: c
+- Symbols:
+  - `nn` (function, line 19) `static double nn(double v)`
+  - `fx_flex_line` (function, line 23) `fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,
+                ...`
+  - `fx_grid_columns` (function, line 128) `fx_status fx_grid_columns(double avail, size_t ncols, double gap,
+                          doubl...`
+  - `fx_autofill_count` (function, line 133) `size_t fx_autofill_count(double avail, double gap, double minw)`
+  - `fx_grid_columns_weighted` (function, line 143) `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
+                      ...`
+  - `fx_grid_place_span` (function, line 177) `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
+                      ...`
+  - `fx_grid_area_hash` (function, line 319) `unsigned fx_grid_area_hash(const char *name)`
+  - `area_token_is_null_cell` (function, line 343) `static int area_token_is_null_cell(const char *tok, size_t len)`
+  - `fx_grid_areas_parse` (function, line 349) `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)`
+  - `fx_grid_area_rect` (function, line 424) `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,
+                            int ...`
+  - `float_pack_impl` (function, line 466) `static fx_status float_pack_impl(const double *width, const int *side, size_t n,
+                ...`
+  - `fx_float_insets` (function, line 506) `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
+                 ...`
+  - `fx_float_pack` (function, line 546) `fx_status fx_float_pack(const double *width, const int *side, size_t n,
+                        d...`
+  - `fx_float_pack_wrap` (function, line 551) `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
+                    ...`
+  - `fx_grid_cell` (function, line 593) `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)`
+  - `fx_auto_margins` (function, line 605) `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
+                ...`
+  - `fx_auto_min_size` (function, line 628) `double fx_auto_min_size(double min_content, double basis, double author_min,
+                    ...`
+  - `fx_multicol_used` (function, line 645) `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
+               ...`
+  - `fx_multicol_balance` (function, line 682) `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
+                        ...`
+  - `fx_justify_name` (function, line 713) `const char *fx_justify_name(fx_justify j)`
+  - `fx_column_place` (function, line 725) `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
+            ...`
+  - `fx_column_place_m` (function, line 732) `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
+              ...`
+  - `fx_cross_offset` (function, line 793) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)`
+  - `gl_ws` (function, line 805) `static int gl_ws(char c)`
+  - `gl_lower` (function, line 809) `static int gl_lower(char c)`
+  - `gl_kw` (function, line 812) `static int gl_kw(const char *p, const char *end, const char *kw)`
+  - `gl_int` (function, line 822) `static int gl_int(const char *p, const char *end, long cap, long *out)`
+  - `gl_side_range` (function, line 837) `static int gl_side_range(const char *p, const char *end, int *out)`
+  - `fx_grid_line_side` (function, line 860) `int fx_grid_line_side(const char *s, int *out)`
+  - `fx_grid_line_parse` (function, line 868) `int fx_grid_line_parse(const char *v, int *start, int *end)`
+  - `gl_is_span` (function, line 885) `static int gl_is_span(int v)`
+  - `gl_is_line` (function, line 886) `static int gl_is_line(int v)`
+  - `fx_grid_line_resolve` (function, line 888) `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
+  - `fx_col_free_split` (function, line 930) `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
+        ...`
+  - `FX_EPS` (macro, line 16) `#define FX_EPS`
+- Depends on: `include/flex_layout.h`
+
 ## src/form.c
 - Doc: put_char: No I/O, no global state.
 - Layer: utility
@@ -50,61 +108,61 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `hl_font_stash` (struct, line 581)
+  - `hl_font_stash` (struct, line 582)
   - `print_usage` (function, line 52) `static void print_usage(FILE *fp, const char *prog)`
   - `is_https_url` (function, line 80) `static int is_https_url(const char *s)`
   - `is_http_url` (function, line 84) `static int is_http_url(const char *s)`
   - `is_overlay_http` (function, line 89) `static int is_overlay_http(const char *s)`
-  - `now_us` (function, line 143) `static uint64_t now_us(void)`
-  - `timings_ensure_init` (function, line 149) `static void timings_ensure_init(void)`
-  - `timings_enabled` (function, line 153) `static int timings_enabled(void)`
-  - `timings_dump` (function, line 157) `static void timings_dump(void)`
-  - `user_impersonate_enabled` (function, line 212) `static int user_impersonate_enabled(void)`
-  - `read_file` (function, line 219) `static char *read_file(const char *path, size_t *out_len)`
-  - `headless_load_hosts` (function, line 237) `static void headless_load_hosts(void)`
-  - `apply_as_gui` (function, line 248) `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)`
-  - `is_blank_text` (function, line 281) `static int is_blank_text(const char *s)`
-  - `print_doc` (function, line 294) `static void print_doc(const rd_doc *doc)`
-  - `print_console` (function, line 387) `static void print_console(const fb_buffer *log)`
-  - `print_dom` (function, line 404) `static void print_dom(const rd_doc *doc)`
-  - `print_dom_css` (function, line 419) `static void print_dom_css(const rd_doc *doc)`
-  - `headless_fetch` (function, line 443) `static int headless_fetch(void *ctx, const char *method, const char *url,
+  - `now_us` (function, line 144) `static uint64_t now_us(void)`
+  - `timings_ensure_init` (function, line 150) `static void timings_ensure_init(void)`
+  - `timings_enabled` (function, line 154) `static int timings_enabled(void)`
+  - `timings_dump` (function, line 158) `static void timings_dump(void)`
+  - `user_impersonate_enabled` (function, line 213) `static int user_impersonate_enabled(void)`
+  - `read_file` (function, line 220) `static char *read_file(const char *path, size_t *out_len)`
+  - `headless_load_hosts` (function, line 238) `static void headless_load_hosts(void)`
+  - `apply_as_gui` (function, line 249) `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)`
+  - `is_blank_text` (function, line 282) `static int is_blank_text(const char *s)`
+  - `print_doc` (function, line 295) `static void print_doc(const rd_doc *doc)`
+  - `print_console` (function, line 388) `static void print_console(const fb_buffer *log)`
+  - `print_dom` (function, line 405) `static void print_dom(const rd_doc *doc)`
+  - `print_dom_css` (function, line 420) `static void print_dom_css(const rd_doc *doc)`
+  - `headless_fetch` (function, line 444) `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...`
-  - `foldback_cookies` (function, line 520) `static void foldback_cookies(const char *url, const char *jar)`
-  - `print_css_drops` (function, line 544) `static void print_css_drops(const char *html, size_t len)`
-  - `hl_font_stash_free` (function, line 589) `static void hl_font_stash_free(hl_font_stash *s)`
-  - `hl_css_sink` (function, line 602) `static void hl_css_sink(void *vctx, const char *url,
+  - `foldback_cookies` (function, line 521) `static void foldback_cookies(const char *url, const char *jar)`
+  - `print_css_drops` (function, line 545) `static void print_css_drops(const char *html, size_t len)`
+  - `hl_font_stash_free` (function, line 590) `static void hl_font_stash_free(hl_font_stash *s)`
+  - `hl_css_sink` (function, line 603) `static void hl_css_sink(void *vctx, const char *url,
                         const char *body, si...`
-  - `hl_font_fetch` (function, line 639) `static int hl_font_fetch(void *vctx, const char *url,
+  - `hl_font_fetch` (function, line 640) `static int hl_font_fetch(void *vctx, const char *url,
                          int *out_status, c...`
-  - `render_page` (function, line 648) `static int render_page(const char *html, size_t len, const char *top_url,
+  - `render_page` (function, line 649) `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-  - `first` (function, line 725) `* always cleared first (fetch_and_render may paint several pages per
+  - `first` (function, line 726) `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
-  - `sf_reason` (function, line 894) `static const char *sf_reason(sf_status ss)`
-  - `fetch_and_render_one` (function, line 913) `static int fetch_and_render_one(const char *url, char **out_nav)`
-  - `elsewhere` (function, line 975) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+  - `sf_reason` (function, line 917) `static const char *sf_reason(sf_status ss)`
+  - `fetch_and_render_one` (function, line 936) `static int fetch_and_render_one(const char *url, char **out_nav)`
+  - `elsewhere` (function, line 998) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-  - `parent` (function, line 1001) `* gated by the parent (ln_resolve: a local target stays under the document's
+  - `parent` (function, line 1024) `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-  - `run_headless` (function, line 1038) `static int run_headless(const char *target)`
-  - `video_fetch_with_fallback` (function, line 1074) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+  - `run_headless` (function, line 1061) `static int run_headless(const char *target)`
+  - `video_fetch_with_fallback` (function, line 1097) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
-  - `run_dump_video` (function, line 1185) `static int run_dump_video(const char *url)`
-  - `main` (function, line 1204) `int main(int argc, char **argv)`
-  - `gets` (function, line 439) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-  - `pool` (function, line 711) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-  - `only` (function, line 782) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-  - `BLOCKED` (function, line 940) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+  - `run_dump_video` (function, line 1208) `static int run_dump_video(const char *url)`
+  - `main` (function, line 1227) `int main(int argc, char **argv)`
+  - `gets` (function, line 440) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
+  - `pool` (function, line 712) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+  - `only` (function, line 794) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+  - `BLOCKED` (function, line 963) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
   - `_DEFAULT_SOURCE` (macro, line 10) `#define _DEFAULT_SOURCE`
   - `EXIT_OK` (macro, line 48) `#define EXIT_OK`
   - `EXIT_ERROR` (macro, line 49) `#define EXIT_ERROR`
   - `EXIT_USAGE` (macro, line 50) `#define EXIT_USAGE`
-  - `CSS_DROPS_REPORT_MAX` (macro, line 168) `#define CSS_DROPS_REPORT_MAX`
-  - `HL_FONT_MAX_SHEETS` (macro, line 578) `#define HL_FONT_MAX_SHEETS`
-  - `HL_FONT_MAX_BYTES` (macro, line 579) `#define HL_FONT_MAX_BYTES`
-  - `HL_JS_NAV_MAX` (macro, line 909) `#define HL_JS_NAV_MAX`
+  - `CSS_DROPS_REPORT_MAX` (macro, line 169) `#define CSS_DROPS_REPORT_MAX`
+  - `HL_FONT_MAX_SHEETS` (macro, line 579) `#define HL_FONT_MAX_SHEETS`
+  - `HL_FONT_MAX_BYTES` (macro, line 580) `#define HL_FONT_MAX_BYTES`
+  - `HL_JS_NAV_MAX` (macro, line 932) `#define HL_JS_NAV_MAX`
 - Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
 
 ## src/hls.c
@@ -343,147 +401,6 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `jdce_install` (function, line 9) `int jdce_install(JSContext *ctx);`
   - `FREEDOM_JS_CUSTOM_ELEMENTS_H` (macro, line 2) `#define FREEDOM_JS_CUSTOM_ELEMENTS_H`
 - Imported by: `src/js_custom_elements.c`, `src/js_dom.c`
-
-## src/js_dom.c
-- Doc: jd_handle: Coerces a JS argument to a node handle.
-- Layer: utility
-- Language: c
-- Symbols:
-  - `jd_method` (struct, line 429)
-  - `jd_opaque_get` (function, line 27) `jd_opaque *jd_opaque_get(JSContext *ctx)`
-  - `jd_idx` (function, line 31) `dom_index *jd_idx(JSContext *ctx)`
-  - `jd_handle` (function, line 40) `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out)`
-  - `jd_handle_or_null` (function, line 47) `JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)`
-  - `m_node_count` (function, line 53) `static JSValue m_node_count(JSContext *ctx, JSValueConst this_val,
-                            in...`
-  - `m_get_element_by_id` (function, line 59) `static JSValue m_get_element_by_id(JSContext *ctx, JSValueConst this_val,
-                       ...`
-  - `jd_query_list` (function, line 70) `static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class)`
-  - `m_get_by_tag` (function, line 100) `static JSValue m_get_by_tag(JSContext *ctx, JSValueConst this_val,
-                            in...`
-  - `m_get_by_class` (function, line 106) `static JSValue m_get_by_class(JSContext *ctx, JSValueConst this_val,
-                            ...`
-  - `m_tag_name` (function, line 112) `static JSValue m_tag_name(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-  - `m_get_attribute` (function, line 122) `static JSValue m_get_attribute(JSContext *ctx, JSValueConst this_val,
-                           ...`
-  - `m_parent` (function, line 135) `static JSValue m_parent(JSContext *ctx, JSValueConst this_val,
-                        int argc, ...`
-  - `m_first_child` (function, line 143) `static JSValue m_first_child(JSContext *ctx, JSValueConst this_val,
-                             ...`
-  - `m_node_kind` (function, line 152) `static JSValue m_node_kind(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_child_node` (function, line 159) `static JSValue m_child_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_sibling_node` (function, line 166) `static JSValue m_sibling_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_create_char` (function, line 174) `static JSValue m_create_char(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_next_sibling` (function, line 188) `static JSValue m_next_sibling(JSContext *ctx, JSValueConst this_val,
-                            ...`
-  - `m_precedes` (function, line 196) `static JSValue m_precedes(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-  - `m_text_content` (function, line 207) `static JSValue m_text_content(JSContext *ctx, JSValueConst this_val,
-                            ...`
-  - `m_set_text` (function, line 217) `static JSValue m_set_text(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-  - `m_get_title` (function, line 231) `static JSValue m_get_title(JSContext *ctx, JSValueConst this_val,
-                           int ...`
-  - `m_set_title` (function, line 239) `static JSValue m_set_title(JSContext *ctx, JSValueConst this_val,
-                           int ...`
-  - `m_create_element` (function, line 252) `static JSValue m_create_element(JSContext *ctx, JSValueConst this_val,
-                          ...`
-  - `m_append_child` (function, line 264) `static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,
-                            ...`
-  - `m_move_children` (function, line 275) `static JSValue m_move_children(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_clone_node` (function, line 289) `static JSValue m_clone_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_insert_before` (function, line 299) `static JSValue m_insert_before(JSContext *ctx, JSValueConst this_val,
-                           ...`
-  - `m_remove_child` (function, line 311) `static JSValue m_remove_child(JSContext *ctx, JSValueConst this_val,
-                            ...`
-  - `m_set_attribute` (function, line 320) `static JSValue m_set_attribute(JSContext *ctx, JSValueConst this_val,
-                           ...`
-  - `m_remove_attribute` (function, line 336) `static JSValue m_remove_attribute(JSContext *ctx, JSValueConst this_val,
-                        ...`
-  - `m_set_inner_html` (function, line 348) `static JSValue m_set_inner_html(JSContext *ctx, JSValueConst this_val,
-                          ...`
-  - `m_get_inner_html` (function, line 364) `static JSValue m_get_inner_html(JSContext *ctx, JSValueConst this_val,
-                          ...`
-  - `m_rect` (function, line 397) `static JSValue m_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `m_query_selector` (function, line 438) `static JSValue m_query_selector(JSContext *ctx, JSValueConst this_val,
-                          ...`
-  - `m_query_selector_all` (function, line 451) `static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,
-                      ...`
-  - `m_matches` (function, line 480) `static JSValue m_matches(JSContext *ctx, JSValueConst this_val,
-                         int argc...`
-  - `m_closest` (function, line 492) `static JSValue m_closest(JSContext *ctx, JSValueConst this_val,
-                         int argc...`
-  - `m_attr_names` (function, line 504) `static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,
-                            in...`
-  - `attrNames` (function, line 612) `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
-     * a missing '...`
-  - `js_env` (function, line 1227) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
- * document shim (uses...`
-  - `jd_install` (function, line 1779) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-  - `jd_flush_custom_elements` (function, line 1853) `void jd_flush_custom_elements(js_context *ctx)`
-  - `fails` (function, line 1867) `* cap is reached or an allocation fails (caller stops), else 0. */
-static int cb_append(char **bu...`
-  - `jd_install_console` (function, line 1981) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-  - `jd_set_cookies` (function, line 2018) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-  - `jd_get_cookies` (function, line 2038) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-  - `jd_set_geometry` (function, line 2061) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
-  - `table` (function, line 572) `* a table (dom.viewport() non-null);`
-  - `scripts` (function, line 772) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
-  - `enough` (function, line 935) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-  - `ms` (function, line 1071) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-  - `empty` (function, line 1219) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-  - `geometry` (function, line 1221) `* constant geometry (zero real leak);`
-  - `size` (function, line 1224) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
-  - `_GNU_SOURCE` (macro, line 10) `#define _GNU_SOURCE`
-- Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `include/web_storage.h`, `src/js_custom_elements.h`, `src/js_dom_ext.h`, `src/js_dom_internal.h`, `src/js_location_internal.h`
-
-## src/js_dom_ext.c
-- Layer: utility
-- Language: c
-- Symbols:
-  - `run` (function, line 366) `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
-  - `jdx_install` (function, line 374) `int jdx_install(JSContext *ctx)`
-  - `identity` (function, line 96) `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
-- Depends on: `src/js_dom_ext.h`
-
-## src/js_dom_ext.h
-- Doc: Private to js_dom.c / js_dom_ext.c: installs the DOM Standard extras (tree
-- Layer: utility
-- Language: h
-- Symbols:
-  - `jdx_install` (function, line 10) `int jdx_install(JSContext *ctx);`
-  - `FREEDOM_JS_DOM_EXT_H` (macro, line 2) `#define FREEDOM_JS_DOM_EXT_H`
-- Imported by: `src/js_dom.c`, `src/js_dom_ext.c`
-
-## src/js_dom_internal.h
-- Doc: Private to the js_dom family (js_dom.c, js_fetch.c, js_events.c, js_embed.c): the context...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `jd_opaque_get` (function, line 11) `jd_opaque *jd_opaque_get(JSContext *ctx);`
-  - `jd_idx` (function, line 12) `dom_index *jd_idx(JSContext *ctx);`
-  - `jd_handle` (function, line 14) `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out);`
-  - `FREEDOM_JS_DOM_INTERNAL_H` (macro, line 2) `#define FREEDOM_JS_DOM_INTERNAL_H`
-- Depends on: `include/dom.h`, `include/js_dom.h`
-- Imported by: `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`
-
-## src/js_embed.c
-- Doc: try_create_iframe_from_script: Scans an inline script body for `video[N]` or `video_data`...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `try_create_iframe_from_script` (function, line 86) `static int try_create_iframe_from_script(dom_index *idx,
-                                        ...`
-  - `jd_video_from_scripts` (function, line 203) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts,
-                   ...`
-  - `jd_inject_video_shim` (function, line 242) `jd_status jd_inject_video_shim(js_context *ctx)`
-  - `scan_video_url` (function, line 256) `static int scan_video_url(const char *body, size_t blen,
-                           char *out, si...`
-  - `jd_process_iframes` (function, line 294) `void jd_process_iframes(js_context *ctx, dom_index *idx,
-                        jd_fetch_fn fn, ...`
-  - `_GNU_SOURCE` (macro, line 6) `#define _GNU_SOURCE`
-- Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
 
 
 Next: [KB_src_p5.md](KB_src_p5.md)

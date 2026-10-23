@@ -95,8 +95,6 @@ Empty table.
 |---|---|---|---|
 | `t` | `jg_table *` |  |  |
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_geom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jg_free"></a>
@@ -118,8 +116,6 @@ Idempotent; NULL is a no-op.
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `t` | `jg_table *` |  |  |
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_geom.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -150,8 +146,6 @@ DOM_NODE_NONE or a non-finite value is ignored (returns 0); coordinates are clam
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_geom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jg_finish"></a>
@@ -176,8 +170,6 @@ Returns 0, or -1 on NULL.
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_geom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jg_find"></a>
@@ -200,8 +192,6 @@ The rect of node in a finished table, or NULL.
 | `node` | `dom_node_id` |  |  |
 
 **Returns:** `jg_rect *`
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_geom.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -231,8 +221,6 @@ Returns 0, or -1 on NULL / exhaustion of JG_MAX_RECTS (the table then holds ever
 
 *Calls:* [`dom_node_id`](include.dom.h.md#dom_node_id)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_geom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jg_wire_len"></a>
@@ -254,8 +242,6 @@ Number of int32 values jg_encode writes: JG_HEADER_N + 1 + n * JG_RECT_N.
 | `t` | `jg_table *` |  |  |
 
 **Returns:** `size_t`
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_geom.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -283,8 +269,6 @@ Returns 0, or -1 on NULL / too small.
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_geom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jg_decode"></a>
@@ -311,8 +295,6 @@ Validates the header, the count against n and JG_MAX_RECTS and every value's ran
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_geom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jg_hash"></a>
@@ -334,8 +316,6 @@ FNV-1a over the header and every rect: equal tables hash equal.
 | `t` | `jg_table *` |  |  |
 
 **Returns:** `uint64_t`
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_geom.c.md#llvmfuzzertestoneinput)
 
 ---
 

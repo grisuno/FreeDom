@@ -20,6 +20,7 @@
 #include "anti_fp.h"
 #include "box_tree.h"
 #include "css.h"
+#include "css_computed.h"
 #include "data_url.h"
 #include "dom.h"
 #include "freebug.h"
@@ -142,6 +143,7 @@ typedef struct child_state {
     hp_document    *doc;
     dom_index      *idx;
     js_context     *js;
+    int             repl_api;  /* Freebug command-line API installed for this page */
     jd_opaque       jd_op;  /* per-context binding state; lives with child_state */
     jd_click_state *click;  /* owned by child_state, freed on reset */
     uint64_t        session_key;
@@ -162,6 +164,8 @@ typedef struct child_state {
     char           *page_url;          /* the loaded page's URL: base of module specifiers */
     im_map         *imap;              /* the page's first <script type=importmap>, or NULL */
     jg_table        geom;              /* laid-out geometry installed into js (OP_GEOM) */
+    pv_computed    *computed;          /* retained cascade behind getComputedStyle (trusted) */
+    uint64_t        computed_sig;      /* css_signature the cascade snapshot was taken at */
 } child_state;
 
 static int write_opens(int wfd, child_state *cs);
@@ -170,7 +174,10 @@ static int write_storage(int wfd, child_state *cs);
 static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture);
 
 static void child_reset_page(child_state *cs) {
+    pv_computed_free(cs->computed);
+    cs->computed = NULL;
     if (cs->js != NULL) { js_context_free(cs->js); cs->js = NULL; }
+    cs->repl_api = 0;
     if (cs->click != NULL) { jd_click_state_free(cs->click); cs->click = NULL; }
     if (cs->idx != NULL) { dom_free(cs->idx); cs->idx = NULL; }
     if (cs->doc != NULL) { hp_document_free(cs->doc); cs->doc = NULL; }
@@ -184,6 +191,91 @@ static void child_reset_page(child_state *cs) {
     cs->page_url = NULL;
     im_free(cs->imap);
     cs->imap = NULL;
+}
+
+static uint64_t sig_mix(uint64_t h, const char *s, size_t n) {
+    for (size_t i = 0; i < n; ++i) h = (h ^ (uint8_t)s[i]) * 1099511628211ULL;
+    return (h ^ 0xff) * 1099511628211ULL;
+}
+
+/* What the retained cascade depends on: every <style> text plus the attributes of
+ * <html>/<body> (class/data-* theme palettes are scoped by them). Cheap, and unchanged
+ * by the style/class writes of a script that merely reads computed values back. */
+static uint64_t computed_signature(const dom_index *idx) {
+    uint64_t h = 1469598103934665603ULL;
+    dom_node_id ids[256];
+    size_t n = dom_get_by_tag(idx, "style", ids, 256);
+    if (n > 256) n = 256;
+    for (size_t i = 0; i < n; ++i) {
+        size_t len = 0;
+        const char *t = dom_text_content(idx, ids[i], &len);
+        if (t != NULL) h = sig_mix(h, t, len);
+    }
+    static const char *const roots[2] = { "html", "body" };
+    for (int r = 0; r < 2; ++r) {
+        dom_node_id id;
+        if (dom_get_by_tag(idx, roots[r], &id, 1) == 0) continue;
+        const char *names[32];
+        size_t lens[32];
+        size_t na = dom_attribute_names(idx, id, names, lens, 32);
+        if (na > 32) na = 32;
+        for (size_t k = 0; k < na; ++k) {
+            char nm[64];
+            if (lens[k] >= sizeof nm) continue;
+            memcpy(nm, names[k], lens[k]);
+            nm[lens[k]] = '\0';
+            const char *v = dom_get_attribute(idx, id, nm, NULL);
+            h = sig_mix(h, nm, lens[k]);
+            if (v != NULL) h = sig_mix(h, v, strlen(v));
+        }
+    }
+    return h;
+}
+
+/* jd_computed_fn: the computed value of `prop` for element h from the page's CURRENT
+ * cascade (spec/js_computed_style.md). The retained sheet is a snapshot, so it is
+ * rebuilt when its inputs changed (a script added a <style>, flipped a root theme class).
+ * prop == NULL lists the supported names. Fail closed: any missing piece yields "". */
+static int child_computed(void *ctx, dom_node_id h, const char *prop, char *out, size_t cap) {
+    child_state *cs = (child_state *)ctx;
+    if (out == NULL || cap == 0) return 0;
+    out[0] = '\0';
+    if (prop == NULL) {
+        size_t n = 0;
+        for (size_t i = 0; i < ccm_property_count(); ++i) {
+            const char *name = ccm_property_name(i);
+            size_t nl = strlen(name);
+            size_t need = nl + (n != 0 ? 1 : 0);
+            if (n + need + 1 > cap) break;
+            if (n != 0) out[n++] = '\n';
+            memcpy(out + n, name, nl);
+            n += nl;
+            out[n] = '\0';
+        }
+        return (int)n;
+    }
+    if (cs->doc == NULL || cs->idx == NULL) return 0;
+    uint64_t sig = computed_signature(cs->idx);
+    if (cs->computed == NULL || sig != cs->computed_sig) {
+        pv_computed_free(cs->computed);
+        cs->computed = pv_computed_new(cs->doc, cs->last_prefers_dark, cs->extern_css,
+                                       cs->extern_css_len, cs->last_viewport_w);
+        cs->computed_sig = sig;
+    }
+    const void *native = dom_native_node(cs->idx, h);
+    css_style st;
+    double font_px = 0.0;
+    int inherited = -1;
+    if (cs->computed == NULL || native == NULL
+        || pv_computed_get(cs->computed, native, &st, &font_px, &inherited) != 0) return 0;
+    size_t tl = 0;
+    const char *tag = dom_tag_name(cs->idx, h, &tl);
+    char tagbuf[32];
+    if (tag != NULL && tl < sizeof tagbuf) { memcpy(tagbuf, tag, tl); tagbuf[tl] = '\0'; }
+    else tagbuf[0] = '\0';
+    for (char *c = tagbuf; *c != '\0'; ++c) if (*c >= 'A' && *c <= 'Z') *c = (char)(*c + 32);
+    ccm_input in = { &st, font_px, inherited, tagbuf[0] != '\0' ? tagbuf : NULL };
+    return (int)ccm_get(&in, prop, out, cap);
 }
 
 /* jd_fetch_fn: the confined worker has NO network (CLONE_NEWNET + seccomp). An XHR/fetch
@@ -1103,7 +1195,9 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     if (ok && run_js) {
         /* window.open exists only for a trusted host (plan B4c); installed before the
          * scripts so feature detection sees it. */
-        if (net) { (void)jt_enable_open(cs->js); (void)jt_enable_ws(cs->js); (void)jt_enable_worker(cs->js); }
+        if (net) { (void)jt_enable_open(cs->js); (void)jt_enable_ws(cs->js); (void)jt_enable_worker(cs->js);
+                     (void)jt_enable_observers(cs->js);
+                     (void)jd_set_computed(cs->js, child_computed, cs); }
         /* Open the network window: XHR/fetch (if installed) may now reach the parent.
          * Closed again before deriving the view so a later REPL eval cannot use it. */
         cs->net_active = 1;
@@ -1633,6 +1727,8 @@ static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, si
             jg_free(&cs->geom);
             cs->geom = tmp;
             accepted = (jd_set_geometry(cs->js, &cs->geom) == JD_OK) ? 1 : 0;
+            /* Observers and 'scroll' listeners see the new layout/scroll right away. */
+            if (accepted) (void)jt_geometry_changed(cs->js);
         } else {
             jg_free(&tmp);
         }
@@ -1688,6 +1784,12 @@ static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t l
 
     /* Fresh transcript: this eval reports only its own console output. */
     fb_buffer_reset(&cs->log);
+
+    /* The Freebug command-line API belongs to the REPL, never to the page's own scripts. */
+    if (!cs->repl_api) {
+        (void)jd_install_repl_api(cs->js);
+        cs->repl_api = 1;
+    }
 
     js_result r;
     js_status s = js_eval_named(cs->js, js, len, "<repl>", &r);

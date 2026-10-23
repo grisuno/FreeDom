@@ -1,4 +1,4 @@
-# Subsystem: tests (page 6 of 7)
+# Subsystem: tests (page 6 of 8)
 Previous: [KB_tests_p5.md](KB_tests_p5.md)
 
 ## tests/test_page_view.c

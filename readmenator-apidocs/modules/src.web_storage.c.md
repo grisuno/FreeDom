@@ -258,6 +258,6 @@ int wst_pack(const char *const *keys, const size_t *klens, const char *const *va
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`jt_take_storage`](src.js_trusted.c.md#jt_take_storage)
+*Called by:* [`jt_take_storage`](src.js_trusted.c.md#jt_take_storage)
 
 ---

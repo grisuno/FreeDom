@@ -64,7 +64,7 @@ Runs before the pre-script preserve_view snapshot so video elements survive jQue
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`jd_video_from_scripts`](#jd_video_from_scripts) (include/js_dom.h:184).
+> **Inherited:** Documentation from [`jd_video_from_scripts`](#jd_video_from_scripts) (include/js_dom.h:203).
 
 ---
 

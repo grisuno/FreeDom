@@ -334,7 +334,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CSS_PSEUDO_AFTER` (macro, line 1177) `#define CSS_PSEUDO_AFTER`
   - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1178) `#define CSS_PSEUDO_PLACEHOLDER`
 - Depends on: `include/css_color.h`
-- Imported by: `fuzz/fuzz_css.c`, `fuzz/fuzz_text_case.c`, `gui/browser_ui.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
+- Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_computed.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 
 ## include/css_atrule.h
 - Doc: car_ops: The questions @supports asks the caller's own engine. prop is lowercased and * both...
@@ -416,6 +416,20 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CC_COLOR_CURRENT` (macro, line 59) `#define CC_COLOR_CURRENT`
   - `CC_COLOR_TRANSPARENT` (macro, line 60) `#define CC_COLOR_TRANSPARENT`
 - Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/css.h`, `src/css.c`, `src/css_box.c`, `src/css_color.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `src/svg_render.c`, `tests/test_css_color.c`
+
+## include/css_computed.h
+- Doc: ccm_get: Writes the computed value of the kebab-case property `prop` into out (cap bytes, NUL...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ccm_input` (struct, line 19)
+  - `ccm_get` (function, line 29) `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap);`
+  - `ccm_property_count` (function, line 32) `size_t ccm_property_count(void);`
+  - `ccm_property_name` (function, line 33) `const char *ccm_property_name(size_t i);`
+  - `FREEDOM_CSS_COMPUTED_H` (macro, line 2) `#define FREEDOM_CSS_COMPUTED_H`
+  - `CCM_VALUE_MAX` (macro, line 17) `#define CCM_VALUE_MAX`
+- Depends on: `include/css.h`
+- Imported by: `src/css_computed.c`, `src/tab.c`, `tests/test_css_computed.c`
 
 ## include/css_decl.h
 - Doc: The sheet's two string pools -- background url()s, and the ::before/::after

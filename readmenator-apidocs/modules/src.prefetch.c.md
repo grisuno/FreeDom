@@ -128,8 +128,6 @@ size_t pf_scan_imports(const char *js, size_t len, char (*out)[PF_SPEC_MAX], siz
 
 **Returns:** `size_t`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefetch.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="pf_pool_add"></a>

@@ -183,6 +183,37 @@ static void test_headless_js_measures_real_geometry(void **state) {
     unlink(path);
 }
 
+/* A lazy loader that uses ONLY an IntersectionObserver (no timer) still runs headless:
+ * the export hands the trusted page its geometry, the observer reveals what is inside the
+ * viewport, and the view is re-pulled so the mutation lands in the output
+ * (spec/js_observers.md). A target far below the fold stays unrevealed, like Firefox. */
+static void test_headless_intersection_observer_reveals_visible_only(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><body style=\"margin:0\">"
+        "<div id=\"near\" style=\"height:50px\">hidden-near</div>"
+        "<div style=\"height:3000px\">spacer</div>"
+        "<div id=\"far\" style=\"height:50px\">hidden-far</div>"
+        "<script>var io=new IntersectionObserver(function(es){es.forEach(function(e){"
+        "if(e.isIntersecting)e.target.textContent='revealed-'+e.target.id;});});"
+        "io.observe(document.getElementById('near'));"
+        "io.observe(document.getElementById('far'));</script></body></html>";
+    const char *path = "__freedom_io.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[4096];
+    int rc;
+    assert_int_equal(run_freedom("--js=on --author-css __freedom_io.html", out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "revealed-near"));
+    assert_null(strstr(out, "revealed-far"));
+    assert_non_null(strstr(out, "hidden-far"));
+    unlink(path);
+}
+
 /* A timer that navigates (plan B4a) is followed headless, like a load-time JS
  * navigation: the second local page is rendered. */
 static void test_headless_timer_navigation_followed(void **state) {
@@ -358,6 +389,45 @@ static void test_pre_leading_spaces_indent_ink(void **state) {
     int x2 = png_leftmost_ink(&px, y, px.height, &r2);
     assert_true(x2 >= 0);
     assert_true(x2 >= x1 + 40); /* 8 monospace columns of indent */
+    img_pixels_free(&px);
+    unlink(path);
+    unlink(png);
+}
+
+/* An <svg> inside a <button> (UA text-align:center) is an item of the button's anonymous
+ * row: the layout already placed it in the shrink-wrapped box, so the painter must not
+ * centre it again against the whole page. GitLab's hamburger icon sat at x=500 while its
+ * button face stayed at the right edge. */
+static void test_download_png_svg_in_button_stays_in_its_box(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><head><style>.x{padding:0}</style></head>"
+        "<body style=\"margin:0;background:#fff\"><button class=\"x\">"
+        "<svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"#000\">"
+        "<path d=\"M0 3h16v2H0zM0 7h16v2H0zM0 11h16v2H0z\"/></svg></button></body></html>";
+    const char *path = "__freedom_svg_btn.html";
+    const char *png = "__freedom_svg_btn.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args, "--author-css --download-png=%s %s", png, path)
+                < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    FILE *pf = fopen(png, "rb");
+    assert_non_null(pf);
+    static unsigned char buf[1 << 20];
+    size_t n = fread(buf, 1, sizeof buf, pf);
+    fclose(pf);
+    img_pixels px = {0};
+    assert_int_equal(img_decode(buf, n, &px), IMG_OK);
+    int x = png_leftmost_ink(&px, 0, px.height, NULL);
+    assert_true(x >= 0);
+    assert_true(x < 60);
     img_pixels_free(&px);
     unlink(path);
     unlink(png);
@@ -2364,6 +2434,35 @@ static void test_dump_layout_oof_subtree_real_layout(void **state) {
 }
 
 
+/* A heading's bottom margin before a flex container that has no box of its own, inside a
+ * `max-width; margin:auto` wrapper, is the gap between them (CSS 2.1 8.3.1): it was dropped
+ * (gitlab "Ship faster. Stay in control.": the cards touched the title). */
+static void test_dump_layout_margin_before_container_in_wrapper(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0}h2{margin:0 0 72px;font-size:30px}"
+        ".f{display:flex;margin:0;padding:0;list-style:none}.f li{height:80px;flex:1}"
+        ".w{max-width:600px;margin:0 auto}</style></head><body><div class=\"w\">"
+        "<h2>Title</h2><ul class=\"f\"><li>a</li></ul></div></body></html>";
+    const char *path = "__freedom_mgcont.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    char args[256];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --dump-layout %s", path) < sizeof args);
+    assert_int_equal(run_freedom(args, out, sizeof out, &rc), 0);
+    char *p = strstr(out, "row[1]");
+    assert_non_null(p);
+    double top = -1;
+    assert_int_equal(sscanf(p, "row[1] top=%lf", &top), 1);
+    assert_true(top >= 113.9);   /* h2 bottom (42) + 72px margin, not the 42 it sat at */
+    unlink(path);
+}
+
 /* Holy-grail rail whose first content is a float: `.rail{float:left;margin-left:-320px;
  * overflow:hidden}` beside a full-width float main column. The rail's rows sit at the right
  * (x 667), not stacked under the stories, and its overflow box reaches its nested float so
@@ -4088,6 +4187,8 @@ int main(void) {
         cmocka_unit_test(test_no_args),
         cmocka_unit_test(test_local_html),
         cmocka_unit_test(test_headless_js_measures_real_geometry),
+        cmocka_unit_test(test_headless_intersection_observer_reveals_visible_only),
+        cmocka_unit_test(test_download_png_svg_in_button_stays_in_its_box),
         cmocka_unit_test(test_headless_timer_navigation_followed),
         cmocka_unit_test(test_local_form_renders_inputs),
         cmocka_unit_test(test_missing_file),
@@ -4165,6 +4266,7 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_band_flushes_line_before_clear),
         cmocka_unit_test(test_dump_layout_line_opening_image_is_inline),
         cmocka_unit_test(test_dump_layout_container_inside_float),
+        cmocka_unit_test(test_dump_layout_margin_before_container_in_wrapper),
         cmocka_unit_test(test_dump_layout_inline_box_second_run_stays),
         cmocka_unit_test(test_dump_layout_nested_column_takes_max),
         cmocka_unit_test(test_download_png_degenerate_transform_paints_rest),

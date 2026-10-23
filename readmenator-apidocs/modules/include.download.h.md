@@ -47,8 +47,6 @@ NULL/empty content_type renders (preserves behavior for servers that omit it); a
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_download.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="literal"></a>

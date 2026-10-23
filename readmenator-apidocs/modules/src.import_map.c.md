@@ -122,7 +122,7 @@ im_map *im_parse(const char *json, size_t len, const char *doc_url, im_url_fn re
 
 *Calls:* [`resolve`](gui.browser_ui.c.md#resolve), [`strcmp`](gui.browser_ui.c.md#strcmp)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_import_map.c.md#llvmfuzzertestoneinput), [`pf_pool_start_page`](src.prefetch.c.md#pf_pool_start_page)
+*Called by:* [`pf_pool_start_page`](src.prefetch.c.md#pf_pool_start_page)
 
 ---
 

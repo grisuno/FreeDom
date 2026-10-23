@@ -1,5 +1,38 @@
-# Subsystem: tests (page 3 of 7)
+# Subsystem: tests (page 3 of 8)
 Previous: [KB_tests_p2.md](KB_tests_p2.md)
+
+## tests/test_css_drops.c
+- Doc: Suite for the parser drop log (spec/css_drops.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `find_drop` (function, line 31) `static const css_drop *find_drop(const css_drop_log *log, const char *prop)`
+  - `test_unknown_property_is_logged` (function, line 39) `static void test_unknown_property_is_logged(void **state)`
+  - `test_bad_value_is_distinguished` (function, line 56) `static void test_bad_value_is_distinguished(void **state)`
+  - `test_accepted_declaration_is_not_logged` (function, line 69) `static void test_accepted_declaration_is_not_logged(void **state)`
+  - `test_repeats_coalesce_by_property_and_cause` (function, line 82) `static void test_repeats_coalesce_by_property_and_cause(void **state)`
+  - `test_custom_property_is_not_a_drop` (function, line 109) `static void test_custom_property_is_not_a_drop(void **state)`
+  - `test_full_log_still_counts_total` (function, line 121) `static void test_full_log_still_counts_total(void **state)`
+  - `test_null_items_disables_listing` (function, line 132) `static void test_null_items_disables_listing(void **state)`
+  - `test_long_value_truncates_and_control_bytes_are_stripped` (function, line 145) `static void test_long_value_truncates_and_control_bytes_are_stripped(void **state)`
+  - `test_log_does_not_change_resolution` (function, line 173) `static void test_log_does_not_change_resolution(void **state)`
+  - `parse_nodrop` (function, line 199) `static css_sheet *parse_nodrop(const char *text)`
+  - `var` (function, line 213) `* was never collected and 40 var() declarations died as bad values. */
+static void test_leading_b...`
+  - `test_transform_function_names_are_case_insensitive` (function, line 238) `static void test_transform_function_names_are_case_insensitive(void **state)`
+  - `test_transform_angle_units` (function, line 249) `static void test_transform_angle_units(void **state)`
+  - `test_transform_3d_flattens` (function, line 260) `static void test_transform_3d_flattens(void **state)`
+  - `test_transform_origin_number_component` (function, line 272) `static void test_transform_origin_number_component(void **state)`
+  - `test_background_size_two_lengths` (function, line 283) `static void test_background_size_two_lengths(void **state)`
+  - `test_background_position_percentages` (function, line 294) `static void test_background_position_percentages(void **state)`
+  - `test_vertical_align_length` (function, line 313) `static void test_vertical_align_length(void **state)`
+  - `test_css_wide_keyword_on_shorthand` (function, line 324) `static void test_css_wide_keyword_on_shorthand(void **state)`
+  - `test_overflow_two_values` (function, line 334) `static void test_overflow_two_values(void **state)`
+  - `test_intrinsic_sizing_keywords` (function, line 360) `static void test_intrinsic_sizing_keywords(void **state)`
+  - `test_vendor_prefixed_value_keyword` (function, line 372) `static void test_vendor_prefixed_value_keyword(void **state)`
+  - `test_font_shorthand_with_line_height` (function, line 382) `static void test_font_shorthand_with_line_height(void **state)`
+  - `main` (function, line 392) `int main(void)`
+- Depends on: `include/css.h`
 
 ## tests/test_css_gradient.c
 - Layer: testing

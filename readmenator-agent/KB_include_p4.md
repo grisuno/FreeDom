@@ -64,7 +64,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `rd_input_invisible` (function, line 366) `int rd_input_invisible(int input_type);`
   - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
-- Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
+- Imported by: `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ## include/render_policy.h
 - Doc: rdp_caps: Render capabilities for a page.
@@ -80,7 +80,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `rdp_images_warning` (function, line 69) `const char *rdp_images_warning(void);`
   - `FREEDOM_RENDER_POLICY_H` (macro, line 2) `#define FREEDOM_RENDER_POLICY_H`
   - `RDP_TRACKER_MAX_DIM` (macro, line 27) `#define RDP_TRACKER_MAX_DIM`
-- Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
+- Imported by: `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
 
 ## include/renderer.h
 - Doc: rd_result_free: Renders untrusted HTML out-of-process and returns an inert title + text. html ==...
@@ -192,7 +192,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `SV_MAX_INPUT` (macro, line 37) `#define SV_MAX_INPUT`
   - `SV_DEFAULT_W` (macro, line 41) `#define SV_DEFAULT_W`
   - `SV_DEFAULT_H` (macro, line 42) `#define SV_DEFAULT_H`
-- Imported by: `fuzz/fuzz_svg_render.c`, `gui/browser_ui.c`, `include/svg_paint.h`, `src/page_view.c`, `src/svg_render.c`, `tests/test_svg_render.c`
+- Imported by: `gui/browser_ui.c`, `include/svg_paint.h`, `src/page_view.c`, `src/svg_render.c`, `tests/test_svg_render.c`
 
 ## include/tab.h
 - Doc: tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState...
@@ -257,7 +257,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `tc_smallcaps_runs` (function, line 41) `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap);`
   - `FREEDOM_TEXT_CASE_H` (macro, line 2) `#define FREEDOM_TEXT_CASE_H`
   - `TC_SMALLCAPS_SCALE` (macro, line 15) `#define TC_SMALLCAPS_SCALE`
-- Imported by: `fuzz/fuzz_text_case.c`, `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`
+- Imported by: `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`
 
 ## include/text_shape.h
 - Doc: tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags.
@@ -288,7 +288,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `TSH_FAMILY_MAX` (macro, line 48) `#define TSH_FAMILY_MAX`
   - `TSH_MAX_GLYPHS` (macro, line 77) `#define TSH_MAX_GLYPHS`
   - `TSH_MAX_TEXT` (macro, line 78) `#define TSH_MAX_TEXT`
-- Imported by: `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 
 ## include/textfield.h
 - Doc: tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at...
@@ -340,7 +340,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `TI_MAX_RESP_BODY` (macro, line 66) `#define TI_MAX_RESP_BODY`
   - `TI_MAX_CHAIN` (macro, line 67) `#define TI_MAX_CHAIN`
   - `TI_MAX_GROUP` (macro, line 68) `#define TI_MAX_GROUP`
-- Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
 
 ## include/ui.h
 - Doc: ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no...
@@ -387,7 +387,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `FREEDOM_URL_H` (macro, line 2) `#define FREEDOM_URL_H`
   - `URL_MAX_LEN` (macro, line 30) `#define URL_MAX_LEN`
   - `URL_SEARCH_ENDPOINT` (macro, line 76) `#define URL_SEARCH_ENDPOINT`
-- Imported by: `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_url.c`, `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
+- Imported by: `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
 
 ## include/util.h
 - Doc: — shared pure helpers (no I/O except where noted).
@@ -420,7 +420,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `WST_MAX_KEYS` (macro, line 18) `#define WST_MAX_KEYS`
   - `WST_QUOTA` (macro, line 19) `#define WST_QUOTA`
   - `WST_ORIGIN_MAX` (macro, line 20) `#define WST_ORIGIN_MAX`
-- Imported by: `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_web_storage.c`, `gui/browser_ui.c`, `src/js_dom.c`, `src/js_trusted.c`, `src/tab.c`, `src/web_storage.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_web_storage.c`
+- Imported by: `gui/browser_ui.c`, `src/js_dom.c`, `src/js_trusted.c`, `src/tab.c`, `src/web_storage.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_web_storage.c`
 
 ## include/webcaps.h
 - Doc: wc_caps: Full capability table for one page.
@@ -457,7 +457,7 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `WF_MAX_FACE_BYTES` (macro, line 24) `#define WF_MAX_FACE_BYTES`
   - `WF_MAX_TOTAL_BYTES` (macro, line 25) `#define WF_MAX_TOTAL_BYTES`
   - `WF_DATA_URL_MAX` (macro, line 29) `#define WF_DATA_URL_MAX`
-- Imported by: `fuzz/fuzz_webfont.c`, `gui/browser_ui.c`, `src/css.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
+- Imported by: `gui/browser_ui.c`, `src/css.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
 
 ## include/webfont_load.h
 - Doc: wf_sheet: One collected stylesheet: text plus the URL it was fetched from (the * resolution base...

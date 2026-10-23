@@ -46,6 +46,8 @@ typedef struct jd_iframe_track {
 typedef struct jd_opaque {
     dom_index       *idx;
     const jg_table  *geom;  /* laid-out geometry (trusted host only), NULL = none */
+    int            (*computed)(void *ctx, dom_node_id h, const char *prop, char *out, size_t cap);
+    void            *computed_ctx; /* cascade provider (trusted host only), NULL = none */
     jd_click_state  *click;
     jd_iframe_track  iframe_track;
 } jd_opaque;
@@ -66,6 +68,13 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque);
  * the no-op console the document shim defines). ctx == NULL => JD_ERR_NULL_ARG. */
 jd_status jd_install_console(js_context *ctx, fb_buffer *log);
 
+/* Freebug command-line API ($, $$, inspect, keys, values, getEventListeners,
+ * monitorEvents/unmonitorEvents). Installed ONLY into the REPL worker, as non-enumerable
+ * globals: page scripts never see them and an existing page global (jQuery's `$`) is
+ * never replaced. Read-only helpers over the sealed document facade -- no new capability.
+ * spec/freebug_repl.md. */
+jd_status jd_install_repl_api(js_context *ctx);
+
 /* Installs (or, with geom == NULL, removes) the laid-out geometry that
  * getBoundingClientRect/offset/client/scroll and the real viewport read. The table
  * must be finished and aggregated (jg_aggregate) and must outlive its installation;
@@ -73,6 +82,16 @@ jd_status jd_install_console(js_context *ctx, fb_buffer *log);
  * (spec/js_geom.md). Without it every measurement is zero and the viewport stays
  * normalized. ctx == NULL => JD_ERR_NULL_ARG. */
 jd_status jd_set_geometry(js_context *ctx, const jg_table *geom);
+
+/* Installs the cascade provider behind dom.computed(h, prop) and the real
+ * getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the
+ * kebab-case `prop` of element h into out (cap bytes) and returns its length, 0 for
+ * an unknown property (out ""); with prop == NULL it writes every supported
+ * property name, newline separated. fn == NULL removes it (dom.computed -> null and
+ * getComputedStyle falls back to the inline style). Trusted hosts only: the caller
+ * is the gate. ctx must outlive the JS context. */
+typedef int (*jd_computed_fn)(void *ctx, dom_node_id h, const char *prop, char *out, size_t cap);
+jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx);
 
 /* Click-event state. Allocate with jd_click_state_new(), free with
  * jd_click_state_free(). Bound to one context via jd_install_events(). */

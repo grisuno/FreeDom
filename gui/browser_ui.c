@@ -6645,12 +6645,21 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                  * the item's edge. */
                 const pv_cont_def *scd = rd_cont_at(doc, (size_t)seg_cont);
                 double sl = 0.0, sw = inner_w;
-                if (scd != NULL && scd->box_id >= 0 && scd->box_id != rb) {
+                /* A container that opens no box of its own (undecorated, or its box is
+                 * one already open) cannot collapse the previous block's bottom margin
+                 * with anything: that margin is the gap before it (a heading's
+                 * `margin-bottom` above a `display:grid` list). */
+                int seg_box_open = (scd == NULL || scd->box_id < 0 || scd->box_id == rb);
+                for (int bk = 0; !seg_box_open && bk < si.box_depth; ++bk)
+                    if (si.box_stack[bk].block_id == scd->box_id) seg_box_open = 1;
+                if (scd != NULL && scd->box_id >= 0) {
                     flush_line(L, &si, th);
                     int stop_at = (rb >= 0) ? rb : nested_stop(s, doc, scd->box_id, item_cbox);
                     reconcile_boxes_below(cr, w, L, &si, th, doc, inner_w, scd->box_id, k, stop_at);
                     rc_box_context(&si, inner_w, &sl, &sw);
                 }
+                if (seg_box_open && si.prev_bottom > 0.0)
+                    si.pending_gap = bf_collapse(si.prev_bottom, 0.0);
                 layout_container(cr, w, L, &si, th, sl, sw, doc,
                                  k, seg_end, seg_cont);
                 flush_line(L, &si, th);
@@ -9210,10 +9219,18 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                 const pv_cont_def *tcd = rd_cont_at(doc, (size_t)rootc);
                 if (tcd != NULL && tcd->is_table) cbox = band_common_box(doc, i, j);
             }
+            /* A box ALREADY open here is an ancestor wrapper the container sits in (it
+             * carries no box of its own): nothing will collapse the previous block's
+             * bottom margin with the container's top one, so it is applied as the gap.
+             * A box opened by the reconcile below is the container's own and handles
+             * its margins itself. */
+            int cbox_was_open = 0;
+            for (int bk = 0; cbox >= 0 && bk < s.box_depth; ++bk)
+                if (s.box_stack[bk].block_id == cbox) cbox_was_open = 1;
             reconcile_boxes(cr, w, L, &s, th, doc, content_w, cbox, i);
             double in_l, in_w;
             rc_box_context(&s, content_w, &in_l, &in_w);
-            if (cbox < 0) s.pending_gap = bf_collapse(s.prev_bottom, mt);
+            if (cbox < 0 || cbox_was_open) s.pending_gap = bf_collapse(s.prev_bottom, mt);
             s.indent_px = in_l;   /* degrade paths flow through the same rect */
             layout_container(cr, w, L, &s, th, in_l, in_w, doc, i, j, rootc);
             s.indent_px = 0.0;
@@ -12087,8 +12104,10 @@ static void paint_content_row_ex(cairo_t *cr, browser_window *w, const rc_layout
         double dw = (r->bg_w > 0.0) ? r->bg_w : content_w;
         double dx = left + r->x_off;
         /* An SVG is a replaced element: the parent's text-align places it, like
-         * any other inline box. */
-        double slack = content_w - dw;
+         * any other inline box. A container item (a button's anonymous row, a flex
+         * column) was already placed by the layout in its own column: the slack is
+         * measured against that column, never against the whole page. */
+        double slack = (r->blk->cont_id >= 0) ? 0.0 : content_w - dw;
         if (slack > 0.0) {
             if (r->align == CSS_ALIGN_CENTER)     dx += slack / 2.0;
             else if (r->align == CSS_ALIGN_RIGHT) dx += slack;
@@ -13701,6 +13720,13 @@ static void publish_geometry(browser_window *w, const rc_layout *L, double left,
         if (tab_set_geometry(w->tab_worker, &g) == TAB_OK) {
             w->geom_hash = h;
             w->geom_page_ms = w->page_load_mono_ms;
+            /* Observer callbacks (lazy loaders) may have mutated the DOM: pull the
+             * refreshed view on the next loop pass without advancing the virtual clock. */
+            if (w->js_tick_due_ms == 0) {
+                w->js_tick_due_ms = now_ms() + 30;
+                w->js_tick_elapsed = 0;
+                if (w->js_ticks_left < 1) w->js_ticks_left = 1;
+            }
         }
     }
     jg_free(&g);

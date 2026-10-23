@@ -90,7 +90,7 @@ NULL => 0.
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`ln_resolve`](src.link_nav.c.md#ln_resolve)
+*Called by:* [`ln_resolve`](src.link_nav.c.md#ln_resolve)
 
 ---
 

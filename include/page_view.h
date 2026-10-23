@@ -897,6 +897,24 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                           int prefers_dark, const char *extern_css, size_t extern_len,
                           int viewport_w, pv_view **out);
 
+/* getComputedStyle bridge (spec/js_computed_style.md). A pv_computed retains the
+ * parsed sheet of a document so single elements can be resolved with the full
+ * cascade (author sheets, inheritance, capas, !important) long after
+ * pv_build_styled has dropped its own. It is a snapshot of the document's CSS:
+ * rebuild it when the tree mutates. NULL on a document with no root or on OOM. */
+typedef struct pv_computed pv_computed;
+pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
+                             size_t extern_len, int viewport_w);
+
+/* Resolves native_el (a dom_native_node pointer of the SAME document) into *st; when
+ * non-NULL, *font_px receives its computed font-size and *inherited_color the
+ * nearest ancestor's declared color (-1 = none). 0 on success, -1 on a NULL
+ * argument, a non-element node or OOM (outputs untouched). */
+int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
+                    double *font_px, int *inherited_color);
+
+void pv_computed_free(pv_computed *pc);
+
 /* Diagnostic: runs exactly the CSS collection and parse pv_build_styled runs, and
  * reports into *log every declaration the parser DISCARDED, by property and by
  * cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so

@@ -1,11 +1,11 @@
 # `src/dom.c`
 
-> Source: [src/dom.c:1](../../src/dom.c#L1) | language `c` | coverage 26.5% | [API index](../index.md)
+> Source: [src/dom.c:1](../../src/dom.c#L1) | language `c` | coverage 26.0% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`sm_entry`](#sm_entry), [`strmap`](#strmap), [`pm_entry`](#pm_entry), [`ptrmap`](#ptrmap), [`dom_index`](#dom_index), [`ih_block`](#ih_block), [`ih_acc`](#ih_acc)
-- **Functions:** [`dom_build`](#dom_build), [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`dom_get_element_by_id`](#dom_get_element_by_id), [`dom_get_by_tag`](#dom_get_by_tag), [`dom_get_by_class`](#dom_get_by_class), [`count`](#count), [`dom_query_selector`](#dom_query_selector), [`dom_query_selector_all`](#dom_query_selector_all), [`dom_matches`](#dom_matches), [`dom_closest`](#dom_closest), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_node_at`](#dom_node_at), [`dom_parent`](#dom_parent), [`dom_first_child`](#dom_first_child), [`dom_next_sibling`](#dom_next_sibling), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`dom_set_text_content`](#dom_set_text_content), [`dom_set_document_title`](#dom_set_document_title), [`dom_create_element`](#dom_create_element), [`dom_append_child`](#dom_append_child), [`dom_remove_child`](#dom_remove_child), [`dom_set_attribute`](#dom_set_attribute), [`dom_remove_attribute`](#dom_remove_attribute), [`dom_set_inner_html`](#dom_set_inner_html), [`dom_get_inner_html`](#dom_get_inner_html), [`dom_insert_before`](#dom_insert_before), [`dom_clone_node`](#dom_clone_node), [`dom_move_children`](#dom_move_children), [`dom_node_kind`](#dom_node_kind), [`dom_child_node`](#dom_child_node), [`dom_sibling_node`](#dom_sibling_node), [`dom_create_char_node`](#dom_create_char_node)
+- **Functions:** [`dom_build`](#dom_build), [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`dom_get_element_by_id`](#dom_get_element_by_id), [`dom_get_by_tag`](#dom_get_by_tag), [`dom_get_by_class`](#dom_get_by_class), [`count`](#count), [`dom_query_selector`](#dom_query_selector), [`dom_query_selector_all`](#dom_query_selector_all), [`dom_matches`](#dom_matches), [`dom_closest`](#dom_closest), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_node_at`](#dom_node_at), [`dom_parent`](#dom_parent), [`dom_first_child`](#dom_first_child), [`dom_next_sibling`](#dom_next_sibling), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`dom_set_text_content`](#dom_set_text_content), [`dom_set_document_title`](#dom_set_document_title), [`dom_create_element`](#dom_create_element), [`dom_append_child`](#dom_append_child), [`dom_remove_child`](#dom_remove_child), [`dom_set_attribute`](#dom_set_attribute), [`dom_remove_attribute`](#dom_remove_attribute), [`dom_set_inner_html`](#dom_set_inner_html), [`dom_get_inner_html`](#dom_get_inner_html), [`dom_insert_before`](#dom_insert_before), [`dom_clone_node`](#dom_clone_node), [`dom_move_children`](#dom_move_children), [`dom_node_kind`](#dom_node_kind), [`dom_child_node`](#dom_child_node), [`dom_sibling_node`](#dom_sibling_node), [`dom_create_char_node`](#dom_create_char_node), [`dom_native_node`](#dom_native_node)
 - **Macros:** [`_POSIX_C_SOURCE`](#_posix_c_source), [`DOM_QS_MAX_SELECTORS`](#dom_qs_max_selectors), [`IH_BLOCK_SIZE`](#ih_block_size)
 
 ## Type Diagram
@@ -157,7 +157,7 @@ dom_status dom_build(const hp_document *doc, dom_index **out)
 
 *Calls:* [`hp_document_root`](include.html_parse.h.md#hp_document_root), [`dom_free`](#dom_free)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`run_js`](src.tab.c.md#run_js)
 
 ---
 
@@ -231,8 +231,6 @@ dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id)
 | `id` | `char *` |  |  |
 
 **Returns:** `dom_node_id`
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_dom.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -324,8 +322,6 @@ dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root, const cha
 
 **Returns:** `dom_node_id`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_dom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="dom_query_selector_all"></a>
@@ -349,8 +345,6 @@ size_t dom_query_selector_all(const dom_index *idx, dom_node_id root, const char
 | `cap` | `size_t` |  |  |
 
 **Returns:** `size_t`
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_dom.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -399,8 +393,6 @@ dom_node_id dom_closest(const dom_index *idx, dom_node_id node, const char *sele
 | `selector` | `char *` |  |  |
 
 **Returns:** `dom_node_id`
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_dom.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -1049,6 +1041,27 @@ dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size
 | `out_id` | `dom_node_id *` |  |  |
 
 **Returns:** `dom_status`
+
+---
+
+<a id="dom_native_node"></a>
+
+### `dom_native_node`
+
+`function` `const` | [src/dom.c:1032](../../src/dom.c#L1032)
+
+```c
+const void *dom_native_node(const dom_index *idx, dom_node_id node)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `idx` | `dom_index *` |  |  |
+| `node` | `dom_node_id` |  |  |
+
+**Returns:** `void *`
 
 ---
 

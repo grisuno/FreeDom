@@ -162,8 +162,6 @@ prefs_status prefs_bookmark_toggle(prefs_state *p, const char *url, const char *
 
 *Calls:* [`free`](include.prefs.h.md#free), [`prefs_bookmark_index`](#prefs_bookmark_index)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="prefs_history_add"></a>
@@ -187,8 +185,6 @@ prefs_status prefs_history_add(prefs_state *p, const char *url)
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`free`](include.prefs.h.md#free)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="prefs_format"></a>
@@ -211,7 +207,7 @@ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len)
 
 **Returns:** `prefs_status`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput), [`profile_save`](src.profile.c.md#profile_save)
+*Called by:* [`profile_save`](src.profile.c.md#profile_save)
 
 ---
 
@@ -237,7 +233,7 @@ prefs_status prefs_parse(const char *text, size_t len, prefs_state *out)
 
 *Calls:* [`prefs_free`](#prefs_free), [`prefs_init`](#prefs_init)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput), [`profile_load`](src.profile.c.md#profile_load)
+*Called by:* [`profile_load`](src.profile.c.md#profile_load)
 
 ---
 
@@ -293,7 +289,7 @@ prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_
 
 *Calls:* [`free`](include.prefs.h.md#free)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput), [`arrives`](gui.browser_ui.c.md#arrives)
+*Called by:* [`arrives`](gui.browser_ui.c.md#arrives)
 
 ---
 

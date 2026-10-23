@@ -5,42 +5,42 @@
 These files have the most connections. Changes here have high blast radius.
 
 - `gui/browser_ui.c` (score: 160.60)
-- `include/css.h` (score: 90.00, imported by 37 files)
-- `src/tab.c` (score: 60.40)
+- `include/css.h` (score: 88.00, imported by 36 files)
+- `src/tab.c` (score: 62.60)
 - `src/css.c` (score: 56.70)
 - `src/freedom.c` (score: 56.70)
-- `src/page_view.c` (score: 54.40)
-- `include/html_parse.h` (score: 48.40, imported by 23 files)
-- `include/dom.h` (score: 40.80, imported by 18 files)
-- `include/page_view.h` (score: 40.70, imported by 13 files)
+- `src/page_view.c` (score: 54.80)
+- `include/html_parse.h` (score: 38.40, imported by 18 files)
+- `include/page_view.h` (score: 37.10, imported by 11 files)
+- `include/dom.h` (score: 36.90, imported by 16 files)
 
 ## Blast Radius (change impact)
 
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
-- `include/css.h` -- 37 direct, 52 total dependents
-- `include/css_color.h` -- 13 direct, 51 total dependents
-- `include/html_parse.h` -- 23 direct, 45 total dependents
-- `include/dom.h` -- 18 direct, 40 total dependents
-- `include/css_select.h` -- 15 direct, 29 total dependents
-- `include/url.h` -- 18 direct, 28 total dependents
-- `include/freebug.h` -- 12 direct, 21 total dependents
-- `include/js_geom.h` -- 8 direct, 21 total dependents
-- `include/js_sandbox.h` -- 16 direct, 19 total dependents
-- `include/page_view.h` -- 13 direct, 18 total dependents
+- `include/css.h` -- 36 direct, 51 total dependents
+- `include/css_color.h` -- 13 direct, 50 total dependents
+- `include/html_parse.h` -- 18 direct, 40 total dependents
+- `include/dom.h` -- 16 direct, 36 total dependents
+- `include/css_select.h` -- 14 direct, 28 total dependents
+- `include/url.h` -- 16 direct, 27 total dependents
+- `include/freebug.h` -- 11 direct, 20 total dependents
+- `include/js_geom.h` -- 6 direct, 20 total dependents
+- `include/js_sandbox.h` -- 15 direct, 18 total dependents
+- `include/css_decl.h` -- 12 direct, 17 total dependents
 
 ## Hotspots (complexity + centrality)
 
 - `gui/browser_ui.c` -- complexity: 1.0, centrality: 1.0, combined: 1.0
 - `src/tab.c` -- complexity: 0.2, centrality: 0.5, combined: 0.4
-- `src/css.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
 - `src/page_view.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
+- `src/css.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
 - `src/freedom.c` -- complexity: 0.1, centrality: 0.5, combined: 0.3
 - `include/css.h` -- complexity: 0.2, centrality: 0.3, combined: 0.3
 - `src/local_store.c` -- complexity: 0.5, centrality: 0.1, combined: 0.2
-- `include/page_view.h` -- complexity: 0.1, centrality: 0.2, combined: 0.2
 - `src/js_dom.c` -- complexity: 0.1, centrality: 0.2, combined: 0.2
-- `include/html_parse.h` -- complexity: 0.0, centrality: 0.2, combined: 0.1
+- `include/page_view.h` -- complexity: 0.2, centrality: 0.1, combined: 0.1
+- `include/js_dom.h` -- complexity: 0.0, centrality: 0.2, combined: 0.1
 
 ## Dependency Cycles
 
@@ -72,4 +72,4 @@ Circular dependencies. Refactor to break the cycle.
 - `gui/browser_ui.c:5274` `table` [DEAD_STORE] `j`: `j` assigned at line 5274 but never read afterwards.
 - `gui/browser_ui.c:5574` `nested_cont_basis` [DEAD_STORE] `total`: `total` assigned at line 5574 but never read afterwards.
 - `gui/browser_ui.c:5575` `nested_cont_basis` [DEAD_STORE] `n_items`: `n_items` assigned at line 5575 but never read afterwards.
-- `gui/browser_ui.c:8310` `defer_flush` [DEAD_STORE] `fw`: `fw` assigned at line 8310 but never read afterwards.
+- `gui/browser_ui.c:6647` `builds` [DEAD_STORE] `sl`: `sl` assigned at line 6647 but never read afterwards.

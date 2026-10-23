@@ -412,7 +412,7 @@ Idempotent; safe on NULL and safe to call twice.
 |---|---|---|---|
 | `doc` | `hp_document *` |  |  |
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`main`](gui.freedom_view.c.md#main), [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`main`](gui.freedom_view.c.md#main), [`run_js`](src.tab.c.md#run_js)
 
 ---
 

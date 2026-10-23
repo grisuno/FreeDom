@@ -3057,7 +3057,12 @@ static int expand_gap(const char *val, css_decl *dst, int cap) {
     if (has_b && next_ws_token(&p, extra, sizeof extra)) return 0;
     int ga = interp_gap(a);
     if (ga < 0 || cap < 1) return 0;
-    if (!has_b) { dst[0].prop = P_GAP; dst[0].ival = ga; return 1; }
+    if (!has_b) {
+        if (cap < 2) return 0;
+        dst[0].prop = P_ROW_GAP; dst[0].ival = ga;   /* one value = both axes (CSS Box Alignment 3 8.5) */
+        dst[1].prop = P_GAP;     dst[1].ival = ga;
+        return 2;
+    }
     int gb = interp_gap(b);
     if (gb < 0 || cap < 2) return 0;
     dst[0].prop = P_ROW_GAP; dst[0].ival = ga;

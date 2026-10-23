@@ -251,4 +251,9 @@ dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
 dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
                               char **out, size_t *out_len);
 
+/* The backend node behind an ELEMENT handle, as an opaque pointer for trusted-side
+ * modules in the same process (style resolution). NULL for a bad or non-element
+ * handle. Valid until the next mutation of that node. */
+const void *dom_native_node(const dom_index *idx, dom_node_id node);
+
 #endif /* FREEDOM_DOM_H */

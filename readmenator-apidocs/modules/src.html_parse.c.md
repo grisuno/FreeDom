@@ -241,7 +241,7 @@ hp_status hp_parse(const char *html, size_t len, const hp_config *cfg, hp_docume
 
 *Calls:* [`hp_config_default`](#hp_config_default), [`hp_validate_input`](#hp_validate_input)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`main`](gui.freedom_view.c.md#main), [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`main`](gui.freedom_view.c.md#main), [`run_js`](src.tab.c.md#run_js)
 
 ---
 

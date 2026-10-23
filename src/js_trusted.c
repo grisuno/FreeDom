@@ -44,6 +44,101 @@ jd_status jt_enable_open(js_context *ctx) {
     return ok ? JD_OK : JD_ERR_INTERNAL;
 }
 
+/* Real IntersectionObserver (spec/js_observers.md). Entry state: -1 never reported,
+ * 0 outside, k>0 inside with k-1 = highest satisfied threshold index. Bounded. */
+#define JT_IO_MAX_STR "2048"
+static const char JT_IO_SHIM[] =
+    "(function(){ var g=__G, live=[], MAX=" JT_IO_MAX_STR ", lastX=null, lastY=null;"
+    "  function margins(o){ var m=[0,0,0,0], s=o&&o.rootMargin; if(typeof s!=='string') return m;"
+    "    var p=s.trim().split(/\\s+/).slice(0,4).map(function(x){ var v=parseFloat(x); return isFinite(v)?v:0; });"
+    "    if(p.length===1) return [p[0],p[0],p[0],p[0]]; if(p.length===2) return [p[0],p[1],p[0],p[1]];"
+    "    if(p.length===3) return [p[0],p[1],p[2],p[1]]; if(p.length===4) return p; return m; }"
+    "  function thresholds(o){ var t=o&&o.threshold, a=[0];"
+    "    if(typeof t==='number') a=[t]; else if(t&&typeof t.length==='number'&&t.length) a=Array.prototype.slice.call(t,0,32);"
+    "    a=a.map(function(x){ x=Number(x); return (x>=0&&x<=1)?x:0; }); a.sort(function(x,y){ return x-y; }); return a; }"
+    "  function IO(cb,o){ if(typeof cb!=='function') throw new TypeError('IntersectionObserver: callback required');"
+    "    this._cb=cb; this._m=margins(o); this._t=thresholds(o); this._e=[]; this._q=[];"
+    "    this.root=null; this.rootMargin=(o&&typeof o.rootMargin==='string')?o.rootMargin:'0px 0px 0px 0px';"
+    "    this.thresholds=this._t.slice(); }"
+    "  function measure(io,en,v){ var r=dom.rect(en.el._h); if(!r) return null;"
+    "    var L=v[0]-io._m[3], T=v[1]-io._m[0], R=v[0]+v[2]+io._m[1], B=v[1]+v[3]+io._m[2];"
+    "    var il=Math.max(L,r[0]), it=Math.max(T,r[1]), ir=Math.min(R,r[0]+r[2]), ib=Math.min(B,r[1]+r[3]);"
+    "    var touch=(ir>=il&&ib>=it), area=Math.max(0,ir-il)*Math.max(0,ib-it), full=r[2]*r[3];"
+    "    var ratio=full>0?area/full:(touch?1:0), st=0;"
+    "    if(touch){ st=1; for(var i=0;i<io._t.length;i++) if(ratio>=io._t[i]&&(io._t[i]>0?area>0:true)) st=i+1; }"
+    "    return {st:st,ratio:touch?ratio:0,r:r,il:il,it:it,ir:ir,ib:ib,vx:v[0],vy:v[1]}; }"
+    "  function box(x,y,w,h){ return {x:x,y:y,left:x,top:y,width:w,height:h,right:x+w,bottom:y+h}; }"
+    "  function entryOf(en,m,v){ var r=m.r;"
+    "    return {target:en.el,time:0,isIntersecting:m.st>0,intersectionRatio:m.ratio,"
+    "      boundingClientRect:box(r[0]-v[0],r[1]-v[1],r[2],r[3]),"
+    "      intersectionRect:m.st>0?box(m.il-v[0],m.it-v[1],Math.max(0,m.ir-m.il),Math.max(0,m.ib-m.it)):box(0,0,0,0),"
+    "      rootBounds:box(0,0,v[2],v[3])}; }"
+    "  function evalIO(io,v){ var out=[];"
+    "    for(var i=0;i<io._e.length;i++){ var en=io._e[i], m=measure(io,en,v);"
+    "      if(m===null) continue; if(m.st!==en.st){ en.st=m.st; out.push(entryOf(en,m,v)); } }"
+    "    if(out.length){ try{ io._cb.call(io,out,io); }catch(e){ try{ console.error(e); }catch(e2){} } } }"
+    "  IO.prototype.observe=function(el){ if(el===null||el===undefined||el._h===undefined) return;"
+    "    for(var i=0;i<this._e.length;i++) if(this._e[i].el===el) return;"
+    "    if(live.length>=MAX) return; this._e.push({el:el,st:-1});"
+    "    if(live.indexOf(this)<0) live.push(this); };"
+    "  IO.prototype.unobserve=function(el){ this._e=this._e.filter(function(e){ return e.el!==el; }); };"
+    "  IO.prototype.disconnect=function(){ this._e=[]; var i=live.indexOf(this); if(i>=0) live.splice(i,1); };"
+    "  IO.prototype.takeRecords=function(){ return []; };"
+    "  g.IntersectionObserver=IO;"
+    "  g.__ioTick=function(){ var v=dom.viewport(); if(!v) return;"
+    "    if(lastY!==null&&(v[0]!==lastX||v[1]!==lastY)){ try{ if(typeof g.Event==='function')"
+    "      g.dispatchEvent(new g.Event('scroll')); }catch(e){} }"
+    "    lastX=v[0]; lastY=v[1];"
+    "    var snap=live.slice(); for(var i=0;i<snap.length;i++) evalIO(snap[i],v);"
+    "    var rs=rlive.slice(); for(var j=0;j<rs.length;j++) evalRO(rs[j]); };"
+    /* ResizeObserver: border-box size from the laid-out rect; the last reported size starts
+     * at 0x0 (a zero-size target never fires, per the spec). */
+    "  var rlive=[];"
+    "  function RO(cb){ if(typeof cb!=='function') throw new TypeError('ResizeObserver: callback required');"
+    "    this._cb=cb; this._e=[]; }"
+    "  function sz(w,h){ return [{inlineSize:w,blockSize:h}]; }"
+    "  function evalRO(ro){ var out=[];"
+    "    for(var i=0;i<ro._e.length;i++){ var en=ro._e[i], r=dom.rect(en.el._h); if(!r) continue;"
+    "      var w=r[2], h=r[3]; if(w===en.w&&h===en.h) continue; en.w=w; en.h=h;"
+    "      out.push({target:en.el,contentRect:{x:0,y:0,top:0,left:0,width:w,height:h,right:w,bottom:h},"
+    "        borderBoxSize:sz(w,h),contentBoxSize:sz(w,h),devicePixelContentBoxSize:sz(w,h)}); }"
+    "    if(out.length){ try{ ro._cb.call(ro,out,ro); }catch(e){ try{ console.error(e); }catch(e2){} } } }"
+    "  RO.prototype.observe=function(el){ if(el===null||el===undefined||el._h===undefined) return;"
+    "    for(var i=0;i<this._e.length;i++) if(this._e[i].el===el) return;"
+    "    if(rlive.length>=MAX) return; this._e.push({el:el,w:0,h:0});"
+    "    if(rlive.indexOf(this)<0) rlive.push(this); };"
+    "  RO.prototype.unobserve=function(el){ this._e=this._e.filter(function(e){ return e.el!==el; }); };"
+    "  RO.prototype.disconnect=function(){ this._e=[]; var i=rlive.indexOf(this); if(i>=0) rlive.splice(i,1); };"
+    "  RO.prototype.takeRecords=function(){ return []; };"
+    "  g.ResizeObserver=RO;"
+    "})()";
+
+jd_status jt_enable_observers(js_context *ctx) {
+    if (ctx == NULL) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return JD_ERR_INTERNAL;
+    JSValue r = JS_Eval(jsctx, JT_IO_SHIM, sizeof JT_IO_SHIM - 1, "<io-shim>",
+                        JS_EVAL_TYPE_GLOBAL);
+    int ok = !JS_IsException(r);
+    if (!ok) JS_FreeValue(jsctx, JS_GetException(jsctx));
+    JS_FreeValue(jsctx, r);
+    return ok ? JD_OK : JD_ERR_INTERNAL;
+}
+
+static const char JT_IO_TICK[] = "if(typeof __ioTick==='function')__ioTick();";
+
+jd_status jt_geometry_changed(js_context *ctx) {
+    if (ctx == NULL) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return JD_ERR_INTERNAL;
+    JSValue r = JS_Eval(jsctx, JT_IO_TICK, sizeof JT_IO_TICK - 1, "<io-tick>",
+                        JS_EVAL_TYPE_GLOBAL);
+    int ok = !JS_IsException(r);
+    if (!ok) JS_FreeValue(jsctx, JS_GetException(jsctx));
+    JS_FreeValue(jsctx, r);
+    return ok ? JD_OK : JD_ERR_INTERNAL;
+}
+
 static const char JT_TAKE_OPENS[] =
     "(function(){ var q=__G.__openReq; if(!q||!q.length) return '';"
     "  var s=q.join('\\n')+'\\n'; q.length=0; return s; })()";

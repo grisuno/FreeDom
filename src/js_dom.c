@@ -409,6 +409,31 @@ static JSValue m_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
     return a;
 }
 
+#define JD_COMPUTED_VALUE_MAX 4096
+
+/* dom.computed(h, prop): the cascade's computed value of `prop` (kebab-case) for h as a
+ * string, "" for an unknown property, or null when no provider is installed (every
+ * host that is not allow-listed with JS). With prop null/undefined: the supported
+ * names, newline separated. */
+static JSValue m_computed(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val;
+    dom_node_id h;
+    if (argc < 1 || jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    jd_opaque *o = jd_opaque_get(ctx);
+    if (o == NULL || o->computed == NULL) return JS_NULL;
+    const char *prop = NULL;
+    if (argc > 1 && !JS_IsUndefined(argv[1]) && !JS_IsNull(argv[1])) {
+        prop = JS_ToCString(ctx, argv[1]);
+        if (prop == NULL) return JS_EXCEPTION;
+    }
+    char buf[JD_COMPUTED_VALUE_MAX];
+    buf[0] = '\0';
+    (void)o->computed(o->computed_ctx, h, prop, buf, sizeof buf);
+    if (prop != NULL) JS_FreeCString(ctx, prop);
+    buf[sizeof buf - 1] = '\0';
+    return JS_NewString(ctx, buf);
+}
+
 /* dom.viewport(): [scroll_x, scroll_y, view_w, view_h, doc_w, doc_h], or null when
  * no geometry is installed (untrusted host: callers keep the normalized values). */
 static JSValue m_viewport(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -555,10 +580,45 @@ static const jd_method JD_METHODS[] = {
     { "matches",          m_matches,            2 },
     { "closest",          m_closest,            2 },
     { "rect",             m_rect,               1 },
+    { "computed",         m_computed,           2 },
     { "viewport",         m_viewport,           0 },
     { "histTarget",       jl_m_hist_target,     2 },
     { "u8len",            m_u8len,              1 },
 };
+
+/* Natives that change the document. They are the single choke point for MutationObserver
+ * (js_dom_ext.c), so they are open to the install-time shims and sealed afterwards. */
+static const char *const JD_MUTATORS[] = {
+    "setText", "appendChild", "insertBefore", "moveChildren",
+    "removeChild", "setAttribute", "removeAttribute", "setInnerHtml",
+};
+
+static int jd_is_mutator(const char *name) {
+    for (size_t i = 0; i < sizeof JD_MUTATORS / sizeof JD_MUTATORS[0]; ++i)
+        if (strcmp(JD_MUTATORS[i], name) == 0) return 1;
+    return 0;
+}
+
+static int jd_freeze_mutators(JSContext *jsctx) {
+    JSValue global = JS_GetGlobalObject(jsctx);
+    JSValue dom = JS_GetPropertyStr(jsctx, global, "dom");
+    JS_FreeValue(jsctx, global);
+    if (JS_IsException(dom)) return -1;
+    int rc = 0;
+    for (size_t i = 0; i < sizeof JD_MUTATORS / sizeof JD_MUTATORS[0]; ++i) {
+        JSAtom a = JS_NewAtom(jsctx, JD_MUTATORS[i]);
+        JSValue cur = JS_GetProperty(jsctx, dom, a);
+        if (JS_IsException(cur) ||
+            JS_DefineProperty(jsctx, dom, a, cur, JS_UNDEFINED, JS_UNDEFINED,
+                              JS_PROP_HAS_CONFIGURABLE | JS_PROP_HAS_WRITABLE |
+                              JS_PROP_HAS_VALUE | JS_PROP_HAS_ENUMERABLE | JS_PROP_ENUMERABLE) < 0)
+            rc = -1;
+        JS_FreeValue(jsctx, cur);
+        JS_FreeAtom(jsctx, a);
+    }
+    JS_FreeValue(jsctx, dom);
+    return rc;
+}
 
 /* A small standard `document` facade over the native handle API, so real page
  * scripts ("document.title = ...", "document.getElementById('x').textContent = ...")
@@ -1165,6 +1225,11 @@ static const char JD_DOCUMENT_SHIM[] =
     "    var c=capOf(o), a=lsArr(k,type,true);"
     "    for(var i=0;i<a.length;i++) if(!a[i].on&&a[i].f===fn&&a[i].c===c) return;"
     "    a.push({f:fn,c:c,o:!!(o&&typeof o==='object'&&o.once),rm:false,on:false}); };"
+    /* Read-only view of one target's registrations (Freebug getEventListeners). */
+    "  __G.__evList=function(k){ var m=LS[k], out={}; if(!m) return out;"
+    "    Object.keys(m).forEach(function(t){ var a=m[t]; if(!a.length) return;"
+    "      out[t]=a.map(function(r){ return {listener:r.f,useCapture:r.c,once:r.o,passive:false,type:t}; }); });"
+    "    return out; };"
     "  function drop(a,i){ a[i].rm=true; a.splice(i,1); }"
     "  __G.__evRemove=function(k,type,fn,o){ var a=lsArr(k,String(type),false); if(!a) return;"
     "    var c=capOf(o);"
@@ -1460,16 +1525,23 @@ static const char JD_MODERN_SHIM[] =
     "    g.MutationObserver=MO; })();"
     "  g.getComputedStyle=function(el){"
     "    function kebab(k){ return String(k).replace(/[A-Z]/g,function(m){return '-'+m.toLowerCase();}); }"
-    "    var map={}; try{ var s=(el&&el._h!==undefined)?dom.getAttribute(el._h,'style'):null;"
+    "    var h=(el&&el._h!==undefined)?el._h:undefined;"
+    "    var map={}; try{ var s=(h!==undefined)?dom.getAttribute(h,'style'):null;"
     "      if(s){ var parts=s.split(';'); for(var i=0;i<parts.length;i++){ var d=parts[i], ix=d.indexOf(':');"
     "        if(ix<0) continue; var k=d.slice(0,ix).trim().toLowerCase(), v=d.slice(ix+1).trim();"
     "        if(k) map[k]=v; } } }catch(e){}"
-    "    var cs=''; try{ var sv=(el&&el._h!==undefined)?dom.getAttribute(el._h,'style'):null;"
+    "    var cs=''; try{ var sv=(h!==undefined)?dom.getAttribute(h,'style'):null;"
     "      cs=sv===null?'':sv; }catch(e2){}"
-    "    var o={ getPropertyValue:function(k){ var v=map[kebab(k).toLowerCase()]; return v===undefined?'':v; },"
-    "      getPropertyPriority:function(){return '';}, length:0, item:function(){return '';}, cssText:cs };"
+    "    var real=false; try{ real=(h!==undefined)&&typeof dom.computed(h,'display')==='string'; }catch(e3){}"
+    "    var names=[]; if(real){ try{ names=dom.computed(h).split('\\n'); }catch(e4){} }"
+    "    function look(k){ k=kebab(k).toLowerCase();"
+    "      if(real){ var rv=dom.computed(h,k); if(rv) return rv; }"
+    "      var v=map[k]; return v===undefined?'':v; }"
+    "    var o={ getPropertyValue:function(k){ return look(k); },"
+    "      getPropertyPriority:function(){return '';}, length:names.length,"
+    "      item:function(i){ return names[i]||''; }, cssText:cs };"
     "    return new Proxy(o,{ get:function(t,p){ if(p in t) return t[p];"
-    "      if(typeof p==='string'){ var v=map[kebab(p).toLowerCase()]; return v===undefined?'':v; }"
+    "      if(typeof p==='string') return look(p);"
     "      return undefined; } }); };"
     "  function ro(name,val){ if(typeof g[name]==='undefined'){ try{ Object.defineProperty(g,name,"
     "    {get:function(){return val;},configurable:true}); }catch(e){ try{ g[name]=val; }catch(e2){} } } }"
@@ -1575,7 +1647,7 @@ static const char JD_MODERN_SHIM[] =
     "      empty:function(){ this.each(function(){ this.innerHTML=''; }); return this; },"
     "      hide:function(){ this.css('display','none'); return this; },"
     "      show:function(){ this.css('display',''); return this; } };"
-    "    g.$=JQ; g.jQuery=JQ; })();"
+    "    JQ.__stub=true; g.$=JQ; g.jQuery=JQ; })();"
     "  if(typeof g.duckduckgo==='undefined') g.duckduckgo={};"
     "  if(typeof g.__NEXT_DATA__==='undefined') g.__NEXT_DATA__={props:{}};"
     "  if(typeof g.__NEXT_PRELOADREADY==='undefined') g.__NEXT_PRELOADREADY=function(){};"
@@ -1809,8 +1881,12 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
         JSValue fn = JS_NewCFunction(jsctx, JD_METHODS[i].fn,
                                      JD_METHODS[i].name, JD_METHODS[i].nargs);
         if (JS_IsException(fn)) { JS_FreeValue(jsctx, dom); return JD_ERR_OOM; }
+        /* The mutators stay writable only while the install-time shims run (the
+         * MutationObserver choke point wraps them); jd_freeze_mutators() closes them. */
+        int open_for_install = jd_is_mutator(JD_METHODS[i].name);
         JS_DefinePropertyValueStr(jsctx, dom, JD_METHODS[i].name, fn,
-                                  JS_PROP_ENUMERABLE);
+                                  open_for_install ? (JS_PROP_ENUMERABLE | JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE)
+                                                   : JS_PROP_ENUMERABLE);
     }
 
     /* Seal the object: no new properties can be added from script. */
@@ -1847,7 +1923,11 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
      * after URL (object URLs hang off it). */
     if (jdx_install(jsctx) != 0) return JD_ERR_INTERNAL;
     /* Custom Elements last: it replaces document.createElement and the HTMLElement stub. */
-    return (jdce_install(jsctx) == 0) ? JD_OK : JD_ERR_INTERNAL;
+    int ce_ok = (jdce_install(jsctx) == 0);
+    /* Close the mutators whether or not every shim succeeded: page script must never be
+     * able to hijack a `dom` native (fail closed). */
+    int frozen = jd_freeze_mutators(jsctx);
+    return (ce_ok && frozen == 0) ? JD_OK : JD_ERR_INTERNAL;
 }
 
 void jd_flush_custom_elements(js_context *ctx) {
@@ -2057,6 +2137,17 @@ int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz) {
     return n;
 }
 
+
+jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx) {
+    if (ctx == NULL) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return JD_ERR_INTERNAL;
+    jd_opaque *o = jd_opaque_get(jsctx);
+    if (o == NULL) return JD_ERR_INTERNAL;
+    o->computed = fn;
+    o->computed_ctx = (fn != NULL) ? fn_ctx : NULL;
+    return JD_OK;
+}
 
 jd_status jd_set_geometry(js_context *ctx, const jg_table *geom) {
     if (ctx == NULL) return JD_ERR_NULL_ARG;

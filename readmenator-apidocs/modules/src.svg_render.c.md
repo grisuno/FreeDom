@@ -158,8 +158,6 @@ sv_status sv_parse(const char *markup, size_t len, sv_image *out)
 
 *Calls:* [`sv_parse_ex`](#sv_parse_ex)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_svg_render.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="sv_parse_ex"></a>

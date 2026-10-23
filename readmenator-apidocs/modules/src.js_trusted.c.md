@@ -5,7 +5,8 @@
 ## Contents
 
 - **Structs:** [`jt_seed_ctx`](#jt_seed_ctx)
-- **Functions:** [`jt_enable_open`](#jt_enable_open), [`jt_take_opens`](#jt_take_opens), [`jt_enable_ws`](#jt_enable_ws), [`jt_ws_ops_free`](#jt_ws_ops_free), [`jt_take_ws`](#jt_take_ws), [`jt_ws_event`](#jt_ws_event), [`jt_enable_storage`](#jt_enable_storage), [`jt_take_storage`](#jt_take_storage), [`explicitly`](#explicitly), [`jt_enable_worker`](#jt_enable_worker)
+- **Functions:** [`jt_enable_open`](#jt_enable_open), [`jt_enable_observers`](#jt_enable_observers), [`jt_geometry_changed`](#jt_geometry_changed), [`jt_take_opens`](#jt_take_opens), [`jt_enable_ws`](#jt_enable_ws), [`jt_ws_ops_free`](#jt_ws_ops_free), [`jt_take_ws`](#jt_take_ws), [`jt_ws_event`](#jt_ws_event), [`jt_enable_storage`](#jt_enable_storage), [`jt_take_storage`](#jt_take_storage), [`explicitly`](#explicitly), [`jt_enable_worker`](#jt_enable_worker)
+- **Macros:** [`JT_IO_MAX_STR`](#jt_io_max_str)
 
 ## Call Graph
 
@@ -15,6 +16,8 @@ Solid arrows stay in this module, dashed arrows leave it.
 flowchart LR
     n_src_js_trusted_c__jt_enable_open(["jt_enable_open"])
     n_src_js_sandbox_c__js_context_raw["js_sandbox.js_context_raw"]
+    n_src_js_trusted_c__jt_enable_observers(["jt_enable_observers"])
+    n_src_js_trusted_c__jt_geometry_changed(["jt_geometry_changed"])
     n_src_js_trusted_c__jt_take_opens(["jt_take_opens"])
     n_src_js_trusted_c__jt_enable_ws(["jt_enable_ws"])
     n_src_js_trusted_c__jt_take_ws(["jt_take_ws"])
@@ -26,6 +29,8 @@ flowchart LR
     n_src_js_trusted_c__jt_enable_worker(["jt_enable_worker"])
     n_src_js_sandbox_c__js_install_realms["js_sandbox.js_install_realms"]
     n_src_js_trusted_c__jt_enable_open -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_trusted_c__jt_enable_observers -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_trusted_c__jt_geometry_changed -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_take_opens -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_enable_ws -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_take_ws -.-> n_src_js_sandbox_c__js_context_raw
@@ -44,7 +49,7 @@ flowchart LR
 
 ### `jt_seed_ctx`
 
-`struct` | [src/js_trusted.c:272](../../src/js_trusted.c#L272)
+`struct` | [src/js_trusted.c:367](../../src/js_trusted.c#L367)
 
 ```c
 typedef struct jt_seed_ctx { JSContext *js; JSValue fn; JSValue global; } jt_seed_ctx;
@@ -74,7 +79,49 @@ jd_status jt_enable_open(js_context *ctx)
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
+---
+
+<a id="jt_enable_observers"></a>
+
+### `jt_enable_observers`
+
+`function` | [src/js_trusted.c:116](../../src/js_trusted.c#L116)
+
+```c
+jd_status jt_enable_observers(js_context *ctx)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+
+**Returns:** `jd_status`
+
+*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+
+---
+
+<a id="jt_geometry_changed"></a>
+
+### `jt_geometry_changed`
+
+`function` | [src/js_trusted.c:130](../../src/js_trusted.c#L130)
+
+```c
+jd_status jt_geometry_changed(js_context *ctx)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+
+**Returns:** `jd_status`
+
+*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -82,7 +129,7 @@ jd_status jt_enable_open(js_context *ctx)
 
 ### `jt_take_opens`
 
-`function` | [src/js_trusted.c:51](../../src/js_trusted.c#L51)
+`function` | [src/js_trusted.c:146](../../src/js_trusted.c#L146)
 
 ```c
 char *jt_take_opens(js_context *ctx)
@@ -98,7 +145,7 @@ Drains the recorded window.open targets as "url\n" lines, or NULL when none.
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`jt_take_opens`](#jt_take_opens) (include/js_trusted.h:31).
+> **Inherited:** Documentation from [`jt_take_opens`](#jt_take_opens) (include/js_trusted.h:42).
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
@@ -108,7 +155,7 @@ Drains the recorded window.open targets as "url\n" lines, or NULL when none.
 
 ### `jt_enable_ws`
 
-`function` | [src/js_trusted.c:129](../../src/js_trusted.c#L129)
+`function` | [src/js_trusted.c:224](../../src/js_trusted.c#L224)
 
 ```c
 jd_status jt_enable_ws(js_context *ctx)
@@ -124,15 +171,13 @@ jd_status jt_enable_ws(js_context *ctx)
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jt_ws_ops_free"></a>
 
 ### `jt_ws_ops_free`
 
-`function` | [src/js_trusted.c:141](../../src/js_trusted.c#L141)
+`function` | [src/js_trusted.c:236](../../src/js_trusted.c#L236)
 
 ```c
 void jt_ws_ops_free(jt_ws_op *ops, size_t n)
@@ -151,7 +196,7 @@ void jt_ws_ops_free(jt_ws_op *ops, size_t n)
 
 ### `jt_take_ws`
 
-`function` | [src/js_trusted.c:177](../../src/js_trusted.c#L177)
+`function` | [src/js_trusted.c:272](../../src/js_trusted.c#L272)
 
 ```c
 size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)
@@ -171,7 +216,7 @@ Returns the count. Operations past JT_WS_MAX_OPS/JT_WS_MAX_BYTES are dropped and
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`jt_take_ws`](#jt_take_ws) (include/js_trusted.h:64).
+> **Inherited:** Documentation from [`jt_take_ws`](#jt_take_ws) (include/js_trusted.h:75).
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
@@ -181,7 +226,7 @@ Returns the count. Operations past JT_WS_MAX_OPS/JT_WS_MAX_BYTES are dropped and
 
 ### `jt_ws_event`
 
-`function` | [src/js_trusted.c:219](../../src/js_trusted.c#L219)
+`function` | [src/js_trusted.c:314](../../src/js_trusted.c#L314)
 
 ```c
 int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)
@@ -204,7 +249,7 @@ Returns 1 when a live socket with that id received it.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`jt_ws_event`](#jt_ws_event) (include/js_trusted.h:70).
+> **Inherited:** Documentation from [`jt_ws_event`](#jt_ws_event) (include/js_trusted.h:81).
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
@@ -214,7 +259,7 @@ Returns 1 when a live socket with that id received it.
 
 ### `jt_enable_storage`
 
-`function` | [src/js_trusted.c:284](../../src/js_trusted.c#L284)
+`function` | [src/js_trusted.c:379](../../src/js_trusted.c#L379)
 
 ```c
 jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
@@ -232,15 +277,13 @@ jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`wst_foreach`](src.web_storage.c.md#wst_foreach)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jt_take_storage"></a>
 
 ### `jt_take_storage`
 
-`function` | [src/js_trusted.c:305](../../src/js_trusted.c#L305)
+`function` | [src/js_trusted.c:400](../../src/js_trusted.c#L400)
 
 ```c
 int jt_take_storage(js_context *ctx, char **out, size_t *len)
@@ -258,7 +301,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`jt_take_storage`](#jt_take_storage) (include/js_trusted.h:82).
+> **Inherited:** Documentation from [`jt_take_storage`](#jt_take_storage) (include/js_trusted.h:93).
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`wst_pack`](src.web_storage.c.md#wst_pack)
 
@@ -268,7 +311,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `explicitly`
 
-`function` | [src/js_trusted.c:353](../../src/js_trusted.c#L353)
+`function` | [src/js_trusted.c:448](../../src/js_trusted.c#L448)
 
 ```c
 * explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...
@@ -289,7 +332,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `jt_enable_worker`
 
-`function` | [src/js_trusted.c:434](../../src/js_trusted.c#L434)
+`function` | [src/js_trusted.c:529](../../src/js_trusted.c#L529)
 
 ```c
 jd_status jt_enable_worker(js_context *ctx)
@@ -305,6 +348,22 @@ jd_status jt_enable_worker(js_context *ctx)
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`js_install_realms`](src.js_sandbox.c.md#js_install_realms)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
+---
+
+## Macros
+
+<a id="jt_io_max_str"></a>
+
+### `JT_IO_MAX_STR`
+
+`macro` | [src/js_trusted.c:49](../../src/js_trusted.c#L49)
+
+```c
+#define JT_IO_MAX_STR
+```
+
+Real IntersectionObserver (spec/js_observers.md).
+
+Entry state: -1 never reported, 0 outside, k>0 inside with k-1 = highest satisfied threshold index. Bounded.
 
 ---

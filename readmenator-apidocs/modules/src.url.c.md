@@ -130,7 +130,7 @@ url_status url_validate_https(const char *url)
 
 *Calls:* [`url_is_https`](#url_is_https)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`fm_build`](src.form.c.md#fm_build), [`sf_validate_url`](src.secure_fetch.c.md#sf_validate_url), [`url_history_target`](#url_history_target), [`url_omnibox`](#url_omnibox), [`url_resolve_https`](#url_resolve_https)
+*Called by:* [`fm_build`](src.form.c.md#fm_build), [`sf_validate_url`](src.secure_fetch.c.md#sf_validate_url), [`url_history_target`](#url_history_target), [`url_omnibox`](#url_omnibox), [`url_resolve_https`](#url_resolve_https)
 
 ---
 
@@ -332,7 +332,7 @@ int url_is_file(const char *s)
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`arrives`](gui.browser_ui.c.md#arrives), [`url_file_path`](#url_file_path), [`url_history_target`](#url_history_target), [`url_resolve_file`](#url_resolve_file)
+*Called by:* [`arrives`](gui.browser_ui.c.md#arrives), [`url_file_path`](#url_file_path), [`url_history_target`](#url_history_target), [`url_resolve_file`](#url_resolve_file)
 
 ---
 
@@ -410,7 +410,7 @@ url_status url_split(const char *url, url_parts *out)
 
 *Calls:* [`url_authority_len`](#url_authority_len), [`url_is_https`](#url_is_https)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`jl_m_hist_target`](src.js_location.c.md#jl_m_hist_target), [`run_js`](src.tab.c.md#run_js), [`url_history_target`](#url_history_target), [`url_search_rewrite`](#url_search_rewrite)
+*Called by:* [`jl_m_hist_target`](src.js_location.c.md#jl_m_hist_target), [`run_js`](src.tab.c.md#run_js), [`url_history_target`](#url_history_target), [`url_search_rewrite`](#url_search_rewrite)
 
 ---
 
@@ -437,7 +437,7 @@ url_status url_history_target(const char *base, const char *ref, char *out, size
 
 *Calls:* [`url_is_file`](#url_is_file), [`url_resolve_https`](#url_resolve_https), [`url_split`](#url_split), [`url_validate_https`](#url_validate_https)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`jl_m_hist_target`](src.js_location.c.md#jl_m_hist_target)
+*Called by:* [`jl_m_hist_target`](src.js_location.c.md#jl_m_hist_target)
 
 ---
 

@@ -1028,3 +1028,7 @@ dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size
     if (n == NULL) return DOM_ERR_OOM;
     return idx_push(idx, n, out_id);
 }
+
+const void *dom_native_node(const dom_index *idx, dom_node_id node) {
+    return valid_el(idx, node) ? (const void *)idx->nodes[node] : NULL;
+}

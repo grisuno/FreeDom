@@ -99,7 +99,7 @@ Previous: [KB_include.md](KB_include.md)
   - `CSEL_FOLD_MARK` (macro, line 174) `#define CSEL_FOLD_MARK`
   - `CSEL_IDENT_SCRATCH` (macro, line 175) `#define CSEL_IDENT_SCRATCH`
 - Depends on: `include/css.h`
-- Imported by: `fuzz/fuzz_css.c`, `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `tests/test_css.c`
+- Imported by: `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `tests/test_css.c`
 
 ## include/css_text.h
 - Layer: utility
@@ -178,7 +178,7 @@ Previous: [KB_include.md](KB_include.md)
   - `closed` (function, line 59) `* 4 fails closed (DU_ERR_BAD_BASE64) -- never decodes a partial prefix. * b64/out/out_len == NULL (with b64_len !=...`
   - `FREEDOM_DATA_URL_H` (macro, line 2) `#define FREEDOM_DATA_URL_H`
   - `DU_MAX_ENCODED_LEN` (macro, line 43) `#define DU_MAX_ENCODED_LEN`
-- Imported by: `fuzz/fuzz_data_url.c`, `gui/browser_ui.c`, `src/data_url.c`, `src/render_doc.c`, `src/render_policy.c`, `src/tab.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_data_url.c`
+- Imported by: `gui/browser_ui.c`, `src/data_url.c`, `src/render_doc.c`, `src/render_policy.c`, `src/tab.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_data_url.c`
 
 ## include/disk_store.h
 - Doc: ds_free: Reads and decrypts path.
@@ -217,6 +217,7 @@ Previous: [KB_include.md](KB_include.md)
   - `dom_node_kind` (function, line 207) `int dom_node_kind(const dom_index *idx, dom_node_id node);`
   - `index` (function, line 223) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...`
   - `length` (function, line 248) `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...`
+  - `process` (function, line 255) `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...`
   - `FREEDOM_DOM_H` (macro, line 2) `#define FREEDOM_DOM_H`
   - `DOM_NODE_NONE` (macro, line 37) `#define DOM_NODE_NONE`
   - `DOM_KIND_NONE` (macro, line 198) `#define DOM_KIND_NONE`
@@ -225,7 +226,7 @@ Previous: [KB_include.md](KB_include.md)
   - `DOM_KIND_COMMENT` (macro, line 201) `#define DOM_KIND_COMMENT`
   - `DOM_MAX_HANDLES` (macro, line 204) `#define DOM_MAX_HANDLES`
 - Depends on: `include/html_parse.h`
-- Imported by: `fuzz/fuzz_dom.c`, `fuzz/fuzz_js_dom.c`, `include/js_dom.h`, `include/js_geom.h`, `include/page_view.h`, `src/dom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
+- Imported by: `include/js_dom.h`, `include/js_geom.h`, `include/page_view.h`, `src/dom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
 
 ## include/dom_debug.h
 - Doc: dd_format: Formats doc into out[0..cap) as a NUL-terminated, line-oriented dump (see the spec...
@@ -237,7 +238,7 @@ Previous: [KB_include.md](KB_include.md)
   - `FREEDOM_DOM_DEBUG_H` (macro, line 2) `#define FREEDOM_DOM_DEBUG_H`
   - `DD_FIELD_MAX` (macro, line 28) `#define DD_FIELD_MAX`
 - Depends on: `include/render_doc.h`
-- Imported by: `fuzz/fuzz_dom_debug.c`, `src/dom_debug.c`, `src/freedom.c`, `tests/test_dom_debug.c`
+- Imported by: `src/dom_debug.c`, `src/freedom.c`, `tests/test_dom_debug.c`
 
 ## include/download.h
 - Doc: dl_should_download: 1 if the response should be saved (attachment, or a non-renderable media...
@@ -253,7 +254,7 @@ Previous: [KB_include.md](KB_include.md)
   - `DL_NAME_MAX` (macro, line 29) `#define DL_NAME_MAX`
   - `DL_FALLBACK_NAME` (macro, line 30) `#define DL_FALLBACK_NAME`
   - `DL_MAX_BYTES` (macro, line 31) `#define DL_MAX_BYTES`
-- Imported by: `fuzz/fuzz_download.c`, `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
+- Imported by: `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
 
 ## include/flex_layout.h
 - Doc: fx_item: Upper bound on items per flex line / grid columns.
@@ -303,7 +304,7 @@ Previous: [KB_include.md](KB_include.md)
   - `FX_MAX_COLUMNS` (macro, line 270) `#define FX_MAX_COLUMNS`
   - `FX_MAUTO_TOP` (macro, line 337) `#define FX_MAUTO_TOP`
   - `FX_MAUTO_BOTTOM` (macro, line 338) `#define FX_MAUTO_BOTTOM`
-- Imported by: `fuzz/fuzz_css.c`, `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+- Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ## include/form.h
 - Doc: fm_field: One named control. value == NULL is treated as the empty value; name == NULL is *...
@@ -362,7 +363,7 @@ Previous: [KB_include.md](KB_include.md)
   - `FB_MAX_ENTRY_BYTES` (macro, line 57) `#define FB_MAX_ENTRY_BYTES`
   - `FB_MAX_TOTAL_BYTES` (macro, line 58) `#define FB_MAX_TOTAL_BYTES`
   - `FB_MAX_FILE_BYTES` (macro, line 62) `#define FB_MAX_FILE_BYTES`
-- Imported by: `fuzz/fuzz_freebug.c`, `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_freebug.c`
+- Imported by: `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_freebug.c`
 
 ## include/freedom_config.h
 - Layer: infrastructure
@@ -381,7 +382,7 @@ Previous: [KB_include.md](KB_include.md)
   - `FC_FONT_FALLBACK_PX` (macro, line 65) `#define FC_FONT_FALLBACK_PX`
   - `FC_UI_FONT_SIZE` (macro, line 69) `#define FC_UI_FONT_SIZE`
   - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 77) `#define FC_MAX_AUTHOR_CSS_BYTES`
-- Imported by: `fuzz/fuzz_page_view.c`, `gui/browser_ui_internal.h`, `gui/svg_paint.c`, `gui/ui_render.c`, `src/page_view.c`, `src/tab.c`
+- Imported by: `gui/browser_ui_internal.h`, `gui/svg_paint.c`, `gui/ui_render.c`, `src/page_view.c`, `src/tab.c`
 
 ## include/hls.h
 - Doc: hls_segment: or variant info.
@@ -473,7 +474,7 @@ Previous: [KB_include.md](KB_include.md)
   - `HP_DEFAULT_MAX_BYTES` (macro, line 41) `#define HP_DEFAULT_MAX_BYTES`
   - `HP_MAX_SCRIPTS` (macro, line 48) `#define HP_MAX_SCRIPTS`
   - `HP_MAX_STYLESHEETS` (macro, line 115) `#define HP_MAX_STYLESHEETS`
-- Imported by: `fuzz/fuzz_dom.c`, `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_html_parse.c`, `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_page_view.c`, `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
+- Imported by: `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
 
 ## include/image_decode.h
 - Doc: img_pixels: A decoded bitmap that owns its pixel buffer.
@@ -493,7 +494,7 @@ Previous: [KB_include.md](KB_include.md)
   - `FREEDOM_IMAGE_DECODE_H` (macro, line 2) `#define FREEDOM_IMAGE_DECODE_H`
   - `IMG_MAX_DIM` (macro, line 65) `#define IMG_MAX_DIM`
   - `IMG_MAX_PIXELS` (macro, line 66) `#define IMG_MAX_PIXELS`
-- Imported by: `fuzz/fuzz_image_decode.c`, `gui/browser_ui.c`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
+- Imported by: `gui/browser_ui.c`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
 
 
 Next: [KB_include_p3.md](KB_include_p3.md)

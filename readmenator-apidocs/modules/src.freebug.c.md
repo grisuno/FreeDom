@@ -85,8 +85,6 @@ int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)
 
 *Calls:* [`fb_buffer_push_loc`](#fb_buffer_push_loc)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="fb_buffer_push_loc"></a>

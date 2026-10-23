@@ -113,7 +113,7 @@ int wf_scan(const char *css, size_t len, wf_list *out);
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_webfont.c.md#llvmfuzzertestoneinput), [`wf_load_document`](src.webfont_load.c.md#wf_load_document)
+*Called by:* [`wf_load_document`](src.webfont_load.c.md#wf_load_document)
 
 ---
 
@@ -133,7 +133,7 @@ void wf_list_free(wf_list *l);
 |---|---|---|---|
 | `l` | `wf_list *` |  |  |
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_webfont.c.md#llvmfuzzertestoneinput), [`wf_load_document`](src.webfont_load.c.md#wf_load_document)
+*Called by:* [`wf_load_document`](src.webfont_load.c.md#wf_load_document)
 
 ---
 

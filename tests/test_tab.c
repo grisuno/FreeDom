@@ -1524,6 +1524,15 @@ static void test_load_null_and_too_large(void **state) {
 
 /* --- eval: sees the DOM bound in the child --- */
 
+/* The Freebug command-line API lives in the REPL worker only: the page's own scripts ran
+ * without it (a hostile or curious page cannot probe for it), and the REPL gets it. */
+static void test_repl_gets_command_line_api(void **state) {
+    fixture *f = (fixture *)*state;
+    expect_eval(f->t, "typeof $$ + ',' + typeof inspect", "function,function");
+    expect_eval(f->t, "$$('p').length", "2");
+    expect_eval(f->t, "inspect($('#main')).tag + ',' + keys({a:1}).join()", "div,a");
+}
+
 static void test_eval_sees_dom(void **state) {
     fixture *f = (fixture *)*state;
     expect_eval(f->t, "dom.nodeCount() > 0", "true");
@@ -2058,6 +2067,120 @@ static void test_geometry_never_reaches_untrusted_page(void **state) {
     char v[128];
     assert_int_equal(geom_load_and_measure(0, v, sizeof v), TAB_OK);
     assert_string_equal(v, "0,0,0,1920,0");
+}
+
+/* getComputedStyle reads the cascade, not just the inline style (spec/js_computed_style.md),
+ * and only for a trusted host: an untrusted page keeps the inline-only object. */
+static const char CS_PAGE[] =
+    "<html><head><style>.box{display:flex;margin-left:12px;color:#336699}"
+    "#a{width:240px;font-weight:700} .hide #a{display:none}</style></head>"
+    "<body><div class=\"box\" id=\"b\"><p id=\"a\" style=\"opacity:.5\">hi</p></div></body></html>";
+
+static void cs_eval(tab *t, const char *js, char *out, size_t outsz) {
+    tab_eval_result e;
+    assert_int_equal(tab_eval(t, js, strlen(js), &e), TAB_OK);
+    assert_non_null(e.value);
+    snprintf(out, outsz, "%s", e.value);
+    tab_eval_result_free(&e);
+}
+
+static void cs_open(tab **t, int net) {
+    assert_int_equal(tab_open(t), TAB_OK);
+    tab_set_net_allowed(*t, net);
+    tab_page p;
+    assert_int_equal(tab_load_ex(*t, CS_PAGE, sizeof CS_PAGE - 1, 1, &p), TAB_OK);
+    tab_page_free(&p);
+}
+
+static void test_computed_style_reads_the_cascade_for_trusted_host(void **state) {
+    (void)state;
+    tab *t = NULL;
+    cs_open(&t, 1);
+    char v[160];
+    cs_eval(t, "var cs=getComputedStyle(document.getElementById('b'));"
+               "cs.display+'|'+cs.marginLeft+'|'+cs.color", v, sizeof v);
+    assert_string_equal(v, "flex|12px|rgb(51, 102, 153)");
+    /* inherited color, declared width, bold, inline opacity, camelCase and getPropertyValue */
+    cs_eval(t, "var c2=getComputedStyle(document.getElementById('a'));"
+               "c2.color+'|'+c2.width+'|'+c2.fontWeight+'|'+c2.opacity+'|'+c2.getPropertyValue('font-weight')",
+            v, sizeof v);
+    assert_string_equal(v, "rgb(51, 102, 153)|240px|700|0.5|700");
+    cs_eval(t, "var c3=getComputedStyle(document.getElementById('a'));"
+               "(c3.length>=40)+'|'+(typeof c3.item(0))+'|'+(c3.getPropertyValue('nope')==='')", v, sizeof v);
+    assert_string_equal(v, "true|string|true");
+    tab_close(t);
+}
+
+static void test_computed_style_follows_dom_mutation(void **state) {
+    (void)state;
+    tab *t = NULL;
+    cs_open(&t, 1);
+    char v[160];
+    cs_eval(t, "getComputedStyle(document.getElementById('a')).display", v, sizeof v);
+    assert_string_equal(v, "block");
+    cs_eval(t, "document.getElementById('b').className='box hide';"
+               "getComputedStyle(document.getElementById('a')).display", v, sizeof v);
+    assert_string_equal(v, "none");
+    /* a <style> a script inserts later joins the cascade (the retained sheet is rebuilt) */
+    cs_eval(t, "document.getElementById('b').className='box';"
+               "var st=document.createElement('style'); st.textContent='#a{display:inline-block}';"
+               "document.head.appendChild(st);"
+               "getComputedStyle(document.getElementById('a')).display", v, sizeof v);
+    assert_string_equal(v, "inline-block");
+    tab_close(t);
+}
+
+static void test_computed_style_is_inline_only_for_untrusted_host(void **state) {
+    (void)state;
+    tab *t = NULL;
+    cs_open(&t, 0);
+    char v[160];
+    cs_eval(t, "var cs=getComputedStyle(document.getElementById('b'));"
+               "'['+cs.display+']['+cs.color+']'+(typeof cs.opacity)", v, sizeof v);
+    assert_string_equal(v, "[][]string");
+    cs_eval(t, "getComputedStyle(document.getElementById('a')).opacity", v, sizeof v);
+    assert_string_equal(v, ".5");   /* the inline declaration verbatim: no cascade */
+    tab_close(t);
+}
+
+/* The Network panel: every request the page's XHR/fetch sent through the parent is logged
+ * (method, url, status, size) and readable in the REPL via net(). */
+static void test_repl_net_lists_page_requests(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] = XHR_PAGE("https://api.test/d");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://api.test/", 1, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    expect_eval(t, "var n=net(); n.length+'|'+n[0].method+'|'+n[0].status+'|'+n[0].url+'|'+n[0].size",
+                "1|GET|200|https://api.test/d|4");
+    expect_eval(t, "net('nomatch').length", "0");
+    expect_eval(t, "typeof __netLog", "undefined");
+    tab_close(t);
+}
+
+/* The REPL's Elements / CSS panels as commands: tree(), styles(), box(). They sit on the
+ * real getComputedStyle, so a trusted page shows cascade values; they exist only in the
+ * REPL worker. */
+static void test_repl_panels_tree_styles_box(void **state) {
+    (void)state;
+    tab *t = NULL;
+    cs_open(&t, 1);
+    char v[400];
+    cs_eval(t, "tree(document.getElementById('b'))", v, sizeof v);
+    assert_string_equal(v, "<div#b.box>\n  <p#a>");
+    cs_eval(t, "var st=styles(document.getElementById('a')); st.display+'|'+st.color+'|'+st.width+'|'+('margin-top' in st)",
+            v, sizeof v);
+    assert_string_equal(v, "block|rgb(51, 102, 153)|240px|false");   /* only non-initial values */
+    cs_eval(t, "var bx=box(document.getElementById('b')); bx.margin.left+'|'+bx.padding.top+'|'+bx.border.top",
+            v, sizeof v);
+    assert_string_equal(v, "12|0|0");
+    cs_eval(t, "typeof tree+typeof styles+typeof box", v, sizeof v);
+    assert_string_equal(v, "functionfunctionfunction");
+    tab_close(t);
 }
 
 /* JS navigation AFTER load (plan B4a): a click handler, a timer or a key handler
@@ -3054,6 +3177,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_js_navigation_unsafe_is_blocked),
         cmocka_unit_test(test_no_js_no_navigation),
         cmocka_unit_test(test_load_null_and_too_large),
+        cmocka_unit_test_setup_teardown(test_repl_gets_command_line_api, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_sees_dom, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_sees_env, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_no_network_or_cross_origin_api, setup_loaded, teardown),
@@ -3076,6 +3200,11 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_boxdef_node_id_crosses_codec),
         cmocka_unit_test(test_geometry_reaches_trusted_page),
         cmocka_unit_test(test_geometry_never_reaches_untrusted_page),
+        cmocka_unit_test(test_computed_style_reads_the_cascade_for_trusted_host),
+        cmocka_unit_test(test_computed_style_follows_dom_mutation),
+        cmocka_unit_test(test_computed_style_is_inline_only_for_untrusted_host),
+        cmocka_unit_test(test_repl_panels_tree_styles_box),
+        cmocka_unit_test(test_repl_net_lists_page_requests),
         cmocka_unit_test(test_click_handler_navigation_reaches_parent),
         cmocka_unit_test(test_timer_navigation_reaches_parent),
         cmocka_unit_test(test_event_navigation_is_policy_gated),

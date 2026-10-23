@@ -2,34 +2,34 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 213,
-  "entities": 3341,
+  "modules": 191,
+  "entities": 3327,
   "languages": {
-   "c": 112,
-   "h": 86,
+   "c": 90,
+   "h": 87,
    "py": 10,
-   "sh": 5
+   "sh": 4
   },
   "kinds": {
    "constant": 15,
    "enum": 151,
-   "function": 1703,
-   "macro": 873,
+   "function": 1702,
+   "macro": 880,
    "method": 23,
-   "module": 213,
-   "struct": 232,
-   "type_alias": 124,
+   "module": 191,
+   "struct": 233,
+   "type_alias": 125,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 75,
+  "skipped_files": 76,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1312,
-   "total": 3319,
-   "percent": 39.5
+   "documented": 1314,
+   "total": 3305,
+   "percent": 39.8
   },
   "by_kind": {
    "enum": {
@@ -38,14 +38,14 @@
     "percent": 53.0
    },
    "function": {
-    "documented": 712,
-    "total": 1703,
-    "percent": 41.8
+    "documented": 718,
+    "total": 1702,
+    "percent": 42.2
    },
    "macro": {
     "documented": 289,
-    "total": 873,
-    "percent": 33.1
+    "total": 880,
+    "percent": 32.8
    },
    "method": {
     "documented": 0,
@@ -53,19 +53,19 @@
     "percent": 0.0
    },
    "module": {
-    "documented": 32,
-    "total": 213,
-    "percent": 15.0
+    "documented": 28,
+    "total": 191,
+    "percent": 14.7
    },
    "struct": {
-    "documented": 106,
-    "total": 232,
-    "percent": 45.7
+    "documented": 105,
+    "total": 233,
+    "percent": 45.1
    },
    "type_alias": {
-    "documented": 93,
-    "total": 124,
-    "percent": 75.0
+    "documented": 94,
+    "total": 125,
+    "percent": 75.2
    }
   },
   "by_module": {
@@ -83,126 +83,6 @@
     "documented": 1,
     "total": 1,
     "percent": 100.0
-   },
-   "fuzz.sh": {
-    "documented": 1,
-    "total": 1,
-    "percent": 100.0
-   },
-   "fuzz/fuzz_css.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_data_url.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_dom.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_dom_debug.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_download.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_freebug.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_html_parse.c": {
-    "documented": 0,
-    "total": 1,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_image_decode.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_import_map.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_js_dom.c": {
-    "documented": 1,
-    "total": 3,
-    "percent": 33.3
-   },
-   "fuzz/fuzz_js_geom.c": {
-    "documented": 0,
-    "total": 3,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_js_sandbox.c": {
-    "documented": 1,
-    "total": 4,
-    "percent": 25.0
-   },
-   "fuzz/fuzz_page_view.c": {
-    "documented": 0,
-    "total": 1,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_pdf_export.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_prefetch.c": {
-    "documented": 1,
-    "total": 2,
-    "percent": 50.0
-   },
-   "fuzz/fuzz_prefs.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_svg_render.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_text_case.c": {
-    "documented": 1,
-    "total": 2,
-    "percent": 50.0
-   },
-   "fuzz/fuzz_text_shape.c": {
-    "documented": 0,
-    "total": 5,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_tls_impersonate.c": {
-    "documented": 0,
-    "total": 1,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_url.c": {
-    "documented": 0,
-    "total": 2,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_web_storage.c": {
-    "documented": 0,
-    "total": 1,
-    "percent": 0.0
-   },
-   "fuzz/fuzz_webfont.c": {
-    "documented": 1,
-    "total": 2,
-    "percent": 50.0
    },
    "gui/browser_ui.c": {
     "documented": 79,
@@ -294,6 +174,11 @@
     "total": 7,
     "percent": 42.9
    },
+   "include/css_computed.h": {
+    "documented": 2,
+    "total": 6,
+    "percent": 33.3
+   },
    "include/css_decl.h": {
     "documented": 2,
     "total": 14,
@@ -356,8 +241,8 @@
    },
    "include/dom.h": {
     "documented": 18,
-    "total": 28,
-    "percent": 64.3
+    "total": 29,
+    "percent": 62.1
    },
    "include/dom_debug.h": {
     "documented": 3,
@@ -436,8 +321,8 @@
    },
    "include/js_dom.h": {
     "documented": 7,
-    "total": 18,
-    "percent": 38.9
+    "total": 20,
+    "percent": 35.0
    },
    "include/js_env.h": {
     "documented": 0,
@@ -495,9 +380,9 @@
     "percent": 50.0
    },
    "include/page_view.h": {
-    "documented": 52,
-    "total": 87,
-    "percent": 59.8
+    "documented": 54,
+    "total": 91,
+    "percent": 59.3
    },
    "include/pdf_export.h": {
     "documented": 3,
@@ -709,6 +594,11 @@
     "total": 13,
     "percent": 38.5
    },
+   "src/css_computed.c": {
+    "documented": 2,
+    "total": 7,
+    "percent": 28.6
+   },
    "src/css_gradient.c": {
     "documented": 3,
     "total": 16,
@@ -766,8 +656,8 @@
    },
    "src/dom.c": {
     "documented": 13,
-    "total": 49,
-    "percent": 26.5
+    "total": 50,
+    "percent": 26.0
    },
    "src/dom_debug.c": {
     "documented": 3,
@@ -856,12 +746,12 @@
    },
    "src/js_dom.c": {
     "documented": 3,
-    "total": 23,
-    "percent": 13.0
+    "total": 25,
+    "percent": 12.0
    },
    "src/js_dom_ext.c": {
     "documented": 0,
-    "total": 3,
+    "total": 5,
     "percent": 0.0
    },
    "src/js_dom_ext.h": {
@@ -920,8 +810,8 @@
     "percent": 43.5
    },
    "src/js_trusted.c": {
-    "documented": 4,
-    "total": 12,
+    "documented": 5,
+    "total": 15,
     "percent": 33.3
    },
    "src/link_nav.c": {
@@ -931,7 +821,7 @@
    },
    "src/local_store.c": {
     "documented": 5,
-    "total": 294,
+    "total": 298,
     "percent": 1.7
    },
    "src/media_decoder.c": {
@@ -950,9 +840,9 @@
     "percent": 33.3
    },
    "src/page_view.c": {
-    "documented": 58,
-    "total": 131,
-    "percent": 44.3
+    "documented": 59,
+    "total": 135,
+    "percent": 43.7
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -1153,126 +1043,6 @@
    "entities": 1
   },
   {
-   "uid": "fuzz.sh",
-   "path": "modules/fuzz.sh.jsonl",
-   "entities": 1
-  },
-  {
-   "uid": "fuzz/fuzz_css.c",
-   "path": "modules/fuzz.fuzz_css.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_data_url.c",
-   "path": "modules/fuzz.fuzz_data_url.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_dom.c",
-   "path": "modules/fuzz.fuzz_dom.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_dom_debug.c",
-   "path": "modules/fuzz.fuzz_dom_debug.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_download.c",
-   "path": "modules/fuzz.fuzz_download.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_freebug.c",
-   "path": "modules/fuzz.fuzz_freebug.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_html_parse.c",
-   "path": "modules/fuzz.fuzz_html_parse.c.jsonl",
-   "entities": 1
-  },
-  {
-   "uid": "fuzz/fuzz_image_decode.c",
-   "path": "modules/fuzz.fuzz_image_decode.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_import_map.c",
-   "path": "modules/fuzz.fuzz_import_map.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_js_dom.c",
-   "path": "modules/fuzz.fuzz_js_dom.c.jsonl",
-   "entities": 3
-  },
-  {
-   "uid": "fuzz/fuzz_js_geom.c",
-   "path": "modules/fuzz.fuzz_js_geom.c.jsonl",
-   "entities": 3
-  },
-  {
-   "uid": "fuzz/fuzz_js_sandbox.c",
-   "path": "modules/fuzz.fuzz_js_sandbox.c.jsonl",
-   "entities": 4
-  },
-  {
-   "uid": "fuzz/fuzz_page_view.c",
-   "path": "modules/fuzz.fuzz_page_view.c.jsonl",
-   "entities": 1
-  },
-  {
-   "uid": "fuzz/fuzz_pdf_export.c",
-   "path": "modules/fuzz.fuzz_pdf_export.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_prefetch.c",
-   "path": "modules/fuzz.fuzz_prefetch.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_prefs.c",
-   "path": "modules/fuzz.fuzz_prefs.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_svg_render.c",
-   "path": "modules/fuzz.fuzz_svg_render.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_text_case.c",
-   "path": "modules/fuzz.fuzz_text_case.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_text_shape.c",
-   "path": "modules/fuzz.fuzz_text_shape.c.jsonl",
-   "entities": 5
-  },
-  {
-   "uid": "fuzz/fuzz_tls_impersonate.c",
-   "path": "modules/fuzz.fuzz_tls_impersonate.c.jsonl",
-   "entities": 1
-  },
-  {
-   "uid": "fuzz/fuzz_url.c",
-   "path": "modules/fuzz.fuzz_url.c.jsonl",
-   "entities": 2
-  },
-  {
-   "uid": "fuzz/fuzz_web_storage.c",
-   "path": "modules/fuzz.fuzz_web_storage.c.jsonl",
-   "entities": 1
-  },
-  {
-   "uid": "fuzz/fuzz_webfont.c",
-   "path": "modules/fuzz.fuzz_webfont.c.jsonl",
-   "entities": 2
-  },
-  {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
    "entities": 241
@@ -1363,6 +1133,11 @@
    "entities": 7
   },
   {
+   "uid": "include/css_computed.h",
+   "path": "modules/include.css_computed.h.jsonl",
+   "entities": 6
+  },
+  {
    "uid": "include/css_decl.h",
    "path": "modules/include.css_decl.h.jsonl",
    "entities": 14
@@ -1425,7 +1200,7 @@
   {
    "uid": "include/dom.h",
    "path": "modules/include.dom.h.jsonl",
-   "entities": 28
+   "entities": 29
   },
   {
    "uid": "include/dom_debug.h",
@@ -1505,7 +1280,7 @@
   {
    "uid": "include/js_dom.h",
    "path": "modules/include.js_dom.h.jsonl",
-   "entities": 18
+   "entities": 20
   },
   {
    "uid": "include/js_env.h",
@@ -1565,7 +1340,7 @@
   {
    "uid": "include/page_view.h",
    "path": "modules/include.page_view.h.jsonl",
-   "entities": 87
+   "entities": 91
   },
   {
    "uid": "include/pdf_export.h",
@@ -1778,6 +1553,11 @@
    "entities": 13
   },
   {
+   "uid": "src/css_computed.c",
+   "path": "modules/src.css_computed.c.jsonl",
+   "entities": 7
+  },
+  {
    "uid": "src/css_gradient.c",
    "path": "modules/src.css_gradient.c.jsonl",
    "entities": 16
@@ -1835,7 +1615,7 @@
   {
    "uid": "src/dom.c",
    "path": "modules/src.dom.c.jsonl",
-   "entities": 49
+   "entities": 50
   },
   {
    "uid": "src/dom_debug.c",
@@ -1925,12 +1705,12 @@
   {
    "uid": "src/js_dom.c",
    "path": "modules/src.js_dom.c.jsonl",
-   "entities": 23
+   "entities": 25
   },
   {
    "uid": "src/js_dom_ext.c",
    "path": "modules/src.js_dom_ext.c.jsonl",
-   "entities": 3
+   "entities": 5
   },
   {
    "uid": "src/js_dom_ext.h",
@@ -1990,7 +1770,7 @@
   {
    "uid": "src/js_trusted.c",
    "path": "modules/src.js_trusted.c.jsonl",
-   "entities": 12
+   "entities": 15
   },
   {
    "uid": "src/link_nav.c",
@@ -2000,7 +1780,7 @@
   {
    "uid": "src/local_store.c",
    "path": "modules/src.local_store.c.jsonl",
-   "entities": 294
+   "entities": 298
   },
   {
    "uid": "src/media_decoder.c",
@@ -2020,7 +1800,7 @@
   {
    "uid": "src/page_view.c",
    "path": "modules/src.page_view.c.jsonl",
-   "entities": 131
+   "entities": 135
   },
   {
    "uid": "src/pdf_export.c",
@@ -2205,7 +1985,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2008
+  "total": 1992
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

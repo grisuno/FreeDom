@@ -2,41 +2,6 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
-- `tests/test_link_nav.c` -> `include/link_nav.h`
-- `tests/test_local_store.c` -> `include/local_store.h`
-- `tests/test_media_decoder.c` -> `include/media_decoder.h`
-- `tests/test_net_realm.c` -> `include/net_realm.h`
-- `tests/test_os_sandbox.c` -> `include/os_sandbox.h`
-- `tests/test_page_view.c` -> `include/box_style.h`
-- `tests/test_page_view.c` -> `include/css.h`
-- `tests/test_page_view.c` -> `include/dom.h`
-- `tests/test_page_view.c` -> `include/flex_layout.h`
-- `tests/test_page_view.c` -> `include/html_parse.h`
-- `tests/test_page_view.c` -> `include/page_view.h`
-- `tests/test_page_view.c` -> `include/webfont.h`
-- `tests/test_pdf_export.c` -> `include/pdf_export.h`
-- `tests/test_perf_trace.c` -> `include/perf_trace.h`
-- `tests/test_prefetch.c` -> `include/prefetch.h`
-- `tests/test_prefs.c` -> `include/prefs.h`
-- `tests/test_prefs.c` -> `include/zoom.h`
-- `tests/test_profile.c` -> `include/prefs.h`
-- `tests/test_profile.c` -> `include/profile.h`
-- `tests/test_render_doc.c` -> `include/box_style.h`
-- `tests/test_render_doc.c` -> `include/css.h`
-- `tests/test_render_doc.c` -> `include/flex_layout.h`
-- `tests/test_render_doc.c` -> `include/page_view.h`
-- `tests/test_render_doc.c` -> `include/render_doc.h`
-- `tests/test_render_doc.c` -> `include/render_policy.h`
-- `tests/test_render_policy.c` -> `include/render_policy.h`
-- `tests/test_renderer.c` -> `include/renderer.h`
-- `tests/test_request_policy.c` -> `include/request_policy.h`
-- `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
-- `tests/test_svg_render.c` -> `include/svg_render.h`
-- `tests/test_tab.c` -> `include/css.h`
-- `tests/test_tab.c` -> `include/js_geom.h`
-- `tests/test_tab.c` -> `include/tab.h`
-- `tests/test_tab.c` -> `include/url.h`
-- `tests/test_tab.c` -> `include/web_storage.h`
 - `tests/test_text_case.c` -> `include/css.h`
 - `tests/test_text_case.c` -> `include/text_case.h`
 - `tests/test_text_shape.c` -> `include/css.h`
@@ -60,29 +25,6 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 ## External Imports
 
 - `app.py` -> logging, mcp.server.fastmcp, os, subprocess, sys
-- `fuzz/fuzz_css.c` -> stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_data_url.c` -> stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_dom.c` -> stddef.h, stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_dom_debug.c` -> stddef.h, stdint.h, string.h
-- `fuzz/fuzz_download.c` -> stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_freebug.c` -> stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_html_parse.c` -> stddef.h, stdint.h
-- `fuzz/fuzz_image_decode.c` -> stddef.h, stdint.h
-- `fuzz/fuzz_import_map.c` -> stdint.h, stdio.h, stdlib.h, string.h
-- `fuzz/fuzz_js_dom.c` -> stddef.h, stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_js_geom.c` -> stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_js_sandbox.c` -> stddef.h, stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_page_view.c` -> stddef.h, stdint.h
-- `fuzz/fuzz_pdf_export.c` -> stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_prefetch.c` -> stddef.h, stdint.h, string.h
-- `fuzz/fuzz_prefs.c` -> stddef.h, stdint.h, stdio.h, stdlib.h, string.h
-- `fuzz/fuzz_svg_render.c` -> math.h, stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_text_case.c` -> stddef.h, stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_text_shape.c` -> stddef.h, stdint.h, stdlib.h
-- `fuzz/fuzz_tls_impersonate.c` -> stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_url.c` -> stdint.h, stdlib.h, string.h, strings.h
-- `fuzz/fuzz_web_storage.c` -> stdint.h, stdlib.h, string.h
-- `fuzz/fuzz_webfont.c` -> stddef.h, stdint.h
 - `gui/browser_ui.c` -> cairo/cairo-pdf.h, cairo/cairo.h, errno.h, fcntl.h, fontconfig/fontconfig.h, limits.h, math.h, poll.h, pthread.h, signal.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/mman.h, sys/stat.h, sys/timerfd.h, sys/wait.h, time.h, unistd.h, wayland-client.h, wayland-cursor.h, xdg-decoration-client-protocol.h, xdg-shell-client-protocol.h, xkbcommon/xkbcommon.h
 - `gui/browser_ui_internal.h` -> cairo/cairo.h
 - `gui/freedom_view.c` -> stdio.h, stdlib.h, string.h
@@ -96,6 +38,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/css.h` -> stddef.h
 - `include/css_atrule.h` -> stddef.h
 - `include/css_chain.h` -> lexbor/html/html.h
+- `include/css_computed.h` -> stddef.h
 - `include/css_gradient.h` -> stddef.h
 - `include/css_index.h` -> stddef.h, stdint.h
 - `include/css_length.h` -> stddef.h
@@ -165,6 +108,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/css_box.c` -> math.h, stdlib.h, string.h
 - `src/css_chain.c` -> stdlib.h, string.h
 - `src/css_color.c` -> math.h, stdlib.h, string.h
+- `src/css_computed.c` -> stdarg.h, stdio.h, string.h
 - `src/css_gradient.c` -> ctype.h, math.h, stdlib.h, string.h
 - `src/css_index.c` -> stdlib.h, string.h
 - `src/css_length.c` -> math.h, string.h
@@ -244,6 +188,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_css_atrule.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_box.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_css_color.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_css_computed.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_css_drops.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_gradient.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_css_index.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h

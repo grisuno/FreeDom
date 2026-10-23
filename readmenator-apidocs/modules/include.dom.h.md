@@ -1,12 +1,12 @@
 # `include/dom.h`
 
-> Source: [include/dom.h:1](../../include/dom.h#L1) | language `h` | coverage 64.3% | [API index](../index.md)
+> Source: [include/dom.h:1](../../include/dom.h#L1) | language `h` | coverage 62.1% | [API index](../index.md)
 
 ## Contents
 
 - **Enums:** [`dom_status`](#dom_status), [`dom_place`](#dom_place)
 - **Type Aliases:** [`dom_node_id`](#dom_node_id), [`dom_index`](#dom_index)
-- **Functions:** [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`count`](#count), [`dom_get_by_class`](#dom_get_by_class), [`dom_matches`](#dom_matches), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`cycle`](#cycle), [`parent`](#parent), [`dom_node_kind`](#dom_node_kind), [`index`](#index), [`length`](#length)
+- **Functions:** [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`count`](#count), [`dom_get_by_class`](#dom_get_by_class), [`dom_matches`](#dom_matches), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`cycle`](#cycle), [`parent`](#parent), [`dom_node_kind`](#dom_node_kind), [`index`](#index), [`length`](#length), [`process`](#process)
 - **Macros:** [`DOM_NODE_NONE`](#dom_node_none), [`DOM_KIND_NONE`](#dom_kind_none), [`DOM_KIND_ELEMENT`](#dom_kind_element), [`DOM_KIND_TEXT`](#dom_kind_text), [`DOM_KIND_COMMENT`](#dom_kind_comment), [`DOM_MAX_HANDLES`](#dom_max_handles)
 
 ## Type Diagram
@@ -106,7 +106,7 @@ Does not free the tree.
 |---|---|---|---|
 | `idx` | `dom_index *` |  |  |
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`run_js`](src.tab.c.md#run_js)
 
 ---
 
@@ -131,8 +131,6 @@ NULL idx => 0.
 | `idx` | `dom_index *` |  |  |
 
 **Returns:** `size_t`
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -201,8 +199,6 @@ Nonzero iff node itself matches the selector list (Element.matches).
 | `selector` | `char *` |  |  |
 
 **Returns:** `int`
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_dom.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -481,6 +477,26 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 | `string` | `no children => an owned empty` |  |  |
 
 **Returns:** `*`
+
+---
+
+<a id="process"></a>
+
+### `process`
+
+`function` | [include/dom.h:255](../../include/dom.h#L255)
+
+```c
+* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next mutation of that node. */ const void *dom_native_node(const dom_index *idx, dom_node_id n
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `resolution` | `style` |  |  |
+
+**Returns:** `* modules in the same`
 
 ---
 

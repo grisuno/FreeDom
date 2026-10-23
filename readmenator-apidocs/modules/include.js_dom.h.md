@@ -1,13 +1,13 @@
 # `include/js_dom.h`
 
-> Source: [include/js_dom.h:1](../../include/js_dom.h#L1) | language `h` | coverage 38.9% | [API index](../index.md)
+> Source: [include/js_dom.h:1](../../include/js_dom.h#L1) | language `h` | coverage 35.0% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`jd_iframe_track`](#jd_iframe_track), [`jd_opaque`](#jd_opaque)
 - **Enums:** [`jd_status`](#jd_status)
 - **Type Aliases:** [`jd_click_state`](#jd_click_state)
-- **Functions:** [`opaque`](#opaque), [`jd_click_state_free`](#jd_click_state_free), [`run`](#run), [`preventDefault`](#preventdefault), [`host`](#host), [`jd_get_cookies`](#jd_get_cookies), [`out_status`](#out_status), [`jd_process_iframes`](#jd_process_iframes), [`URLs`](#urls), [`jd_video_from_scripts`](#jd_video_from_scripts), [`jd_flush_custom_elements`](#jd_flush_custom_elements)
+- **Functions:** [`opaque`](#opaque), [`global`](#global), [`getComputedStyle`](#getcomputedstyle), [`jd_click_state_free`](#jd_click_state_free), [`run`](#run), [`preventDefault`](#preventdefault), [`host`](#host), [`jd_get_cookies`](#jd_get_cookies), [`out_status`](#out_status), [`jd_process_iframes`](#jd_process_iframes), [`URLs`](#urls), [`jd_video_from_scripts`](#jd_video_from_scripts), [`jd_flush_custom_elements`](#jd_flush_custom_elements)
 - **Macros:** [`JD_IFRAME_TRACK_MAX`](#jd_iframe_track_max)
 
 ## Type Diagram
@@ -115,7 +115,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `opaque`
 
-`function` | [include/js_dom.h:64](../../include/js_dom.h#L64)
+`function` | [include/js_dom.h:66](../../include/js_dom.h#L66)
 
 ```c
 * the engine runtime opaque (unreachable from script);
@@ -131,11 +131,51 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ---
 
+<a id="global"></a>
+
+### `global`
+
+`function` | [include/js_dom.h:73](../../include/js_dom.h#L73)
+
+```c
+* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only helpers over the sealed document facade -- no new capability. * spec/freebug_repl.md. *
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `$` | `` jQuery's ` ` `` |  |  |
+
+**Returns:** `*`
+
+---
+
+<a id="getcomputedstyle"></a>
+
+### `getComputedStyle`
+
+`function` | [include/js_dom.h:87](../../include/js_dom.h#L87)
+
+```c
+* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h into out (cap bytes) and returns its length, 0 for * an unknown property (out "");
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `md` | `spec/js_computed_style.` |  |  |
+
+**Returns:** `*`
+
+---
+
 <a id="jd_click_state_free"></a>
 
 ### `jd_click_state_free`
 
-`function` | [include/js_dom.h:78](../../include/js_dom.h#L78)
+`function` | [include/js_dom.h:97](../../include/js_dom.h#L97)
 
 ```c
 * jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);
@@ -151,7 +191,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `run`
 
-`function` | [include/js_dom.h:87](../../include/js_dom.h#L87)
+`function` | [include/js_dom.h:106](../../include/js_dom.h#L106)
 
 ```c
 * run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called preventDefault(). ctx == NULL => 1 (fail-open for the * default action, since no script can
@@ -166,13 +206,15 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 **Returns:** `*`
 
+*Called by:* [`jd_install_repl_api`](src.js_dom_ext.c.md#jd_install_repl_api), [`jdx_install`](src.js_dom_ext.c.md#jdx_install)
+
 ---
 
 <a id="preventdefault"></a>
 
 ### `preventDefault`
 
-`function` | [include/js_dom.h:94](../../include/js_dom.h#L94)
+`function` | [include/js_dom.h:113](../../include/js_dom.h#L113)
 
 ```c
 * preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found => 1 (fail-open: submission proceeds). */ int jd_fire_submit(js_context *ctx, dom_node_
@@ -186,7 +228,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `host`
 
-`function` | [include/js_dom.h:123](../../include/js_dom.h#L123)
+`function` | [include/js_dom.h:142](../../include/js_dom.h#L142)
 
 ```c
 * for a trusted host (allow.conf AND js.conf);
@@ -206,7 +248,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `jd_get_cookies`
 
-`function` | [include/js_dom.h:134](../../include/js_dom.h#L134)
+`function` | [include/js_dom.h:153](../../include/js_dom.h#L153)
 
 ```c
 int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);
@@ -232,7 +274,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `out_status`
 
-`function` | [include/js_dom.h:142](../../include/js_dom.h#L142)
+`function` | [include/js_dom.h:161](../../include/js_dom.h#L161)
 
 ```c
 * On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response bytes, malloc'd -- the bridge frees with free()), and * *out_ctype (Content-Type, malloc'
@@ -253,7 +295,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `jd_process_iframes`
 
-`function` | [include/js_dom.h:163](../../include/js_dom.h#L163)
+`function` | [include/js_dom.h:182](../../include/js_dom.h#L182)
 
 ```c
 * BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */ jd_status jd_inject_video_shim(js_context *ctx);
@@ -267,7 +309,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `URLs`
 
-`function` | [include/js_dom.h:170](../../include/js_dom.h#L170)
+`function` | [include/js_dom.h:189](../../include/js_dom.h#L189)
 
 ```c
 * video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT re-process iframes already processed (tracks them by node_id in * jd_opaque.iframe_track
@@ -287,7 +329,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `jd_video_from_scripts`
 
-`function` | [include/js_dom.h:184](../../include/js_dom.h#L184)
+`function` | [include/js_dom.h:203](../../include/js_dom.h#L203)
 
 ```c
 size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t nscripts, const char *page_url);
@@ -315,7 +357,7 @@ Runs before the pre-script preserve_view snapshot so video elements survive jQue
 
 ### `jd_flush_custom_elements`
 
-`function` | [include/js_dom.h:195](../../include/js_dom.h#L195)
+`function` | [include/js_dom.h:214](../../include/js_dom.h#L214)
 
 ```c
 void jd_flush_custom_elements(js_context *ctx);

@@ -45,7 +45,7 @@ ln_status ln_resolve(const char *base, const char *href, ln_result *out)
 
 *Calls:* [`url_has_scheme`](include.url.h.md#url_has_scheme), [`url_is_https`](include.url.h.md#url_is_https), [`url_resolve_https`](src.url.c.md#url_resolve_https)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`only`](gui.browser_ui.c.md#only), [`gets`](src.freedom.c.md#gets)
+*Called by:* [`only`](gui.browser_ui.c.md#only), [`gets`](src.freedom.c.md#gets)
 
 ---
 

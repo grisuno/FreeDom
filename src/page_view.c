@@ -6889,3 +6889,57 @@ pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
     free(style_text);
     return PV_OK;
 }
+
+/* --- getComputedStyle bridge (spec/js_computed_style.md) --- */
+
+struct pv_computed {
+    css_sheet   *sheet;
+    pv_root_els  roots;   /* referenced by the media callback while parsing only */
+};
+
+pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
+                             size_t extern_len, int viewport_w) {
+    if (doc == NULL) return NULL;
+    lxb_dom_node_t *root = (lxb_dom_node_t *)hp_document_root(doc);
+    if (root == NULL) return NULL;
+    pv_computed *pc = (pv_computed *)calloc(1, sizeof *pc);
+    if (pc == NULL) return NULL;
+    size_t style_len = 0;
+    char *style_text = collect_page_css(root, extern_css, extern_len, &style_len);
+    int media_w = (viewport_w > 0) ? viewport_w : CSS_MEDIA_DEFAULT_WIDTH;
+    pc->roots = find_root_els(root);
+    css_media media = { prefers_dark ? 1 : 0, 0, media_w, root_els_match, &pc->roots };
+    char *root_scope = collect_root_scope(root);
+    (void)css_parse_scoped(style_text, style_len, &media, root_scope, &pc->sheet);
+    free(root_scope);
+    free(style_text);
+    return pc;
+}
+
+int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
+                    double *font_px, int *inherited_color) {
+    if (pc == NULL || native_el == NULL || st == NULL) return -1;
+    const lxb_dom_node_t *node = (const lxb_dom_node_t *)native_el;
+    if (node->type != LXB_DOM_NODE_TYPE_ELEMENT) return -1;
+    pv_style_cache cache;
+    if (pv_style_cache_init(&cache) != 0) return -1;
+    lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)node);
+    *st = cached_element_style(el, pc->sheet, &cache);
+    if (font_px != NULL) {
+        double f = pv_cached_font_px(&cache, node);
+        *font_px = (f > 0.0) ? f : CL_INITIAL_FONT_SIZE;
+    }
+    if (inherited_color != NULL) {
+        lxb_dom_element_t *par = pv_parent_element(el);
+        *inherited_color = (par != NULL)
+            ? inherited_text_color((const lxb_dom_node_t *)par, pc->sheet, &cache) : -1;
+    }
+    pv_style_cache_free(&cache);
+    return 0;
+}
+
+void pv_computed_free(pv_computed *pc) {
+    if (pc == NULL) return;
+    css_free(pc->sheet);
+    free(pc);
+}

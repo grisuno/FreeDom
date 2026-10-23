@@ -1,47 +1,33 @@
 # src: tab
 
-src: tab groups 57 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document.
+src: tab groups 45 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. ccm_get: Writes the computed value of the kebab-case property `prop` into out (cap...
 
 ```mermaid
 graph LR
-    fuzz["fuzz"]
     include["include"]
     src["src"]
     tests["tests"]
-    fuzz -- "calls into" --> include
-    fuzz -- "calls into" --> src
     include -- "calls into" --> src
-    include -- "calls into" --> tests
     src -- "calls into" --> include
     tests -- "calls into" --> include
     tests -- "calls into" --> src
 ```
 
-## fuzz (1.1)
+## include (3.1)
 
-fuzz groups 7 files (c) around ensure_built, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput, fz_dom_parent, FUZZ_JSDOM_MAX_NODES.
+include groups 13 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. ccm_get: Writes the computed value of the kebab-case property `prop` into out (cap...
 
-## include (1.2)
+## src (3.2)
 
-include groups 15 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
+src groups 21 files (c, h) around FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install, FREEDOM_JS_DOM_INTERNAL_H, jd_opaque_get, jd_idx. ua_display: The HTML Rendering UA sheet's `display` for a tag when the cascade...
 
-## src (1.3)
+## tests (3.3)
 
-src groups 23 files (c, h) around FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install, FREEDOM_JS_DOM_EXT_H, jdx_install, FREEDOM_JS_DOM_INTERNAL_H. to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
-
-## tests (1.4)
-
-tests groups 12 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_null_args. setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] =...
+tests groups 11 files (c) around get, blank, test_initial_values, test_declared_values, test_ua_display_by_tag. setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] =...
 
 **Files**:
 
-- fuzz/fuzz_dom.c
-- fuzz/fuzz_freebug.c
-- fuzz/fuzz_html_parse.c
-- fuzz/fuzz_js_dom.c
-- fuzz/fuzz_js_geom.c
-- fuzz/fuzz_js_sandbox.c
-- fuzz/fuzz_web_storage.c
+- include/css_computed.h
 - include/dom.h
 - include/freebug.h
 - include/html_parse.h
@@ -51,13 +37,10 @@ tests groups 12 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_n
 - include/js_location.h
 - include/js_sandbox.h
 - include/js_trusted.h
-- include/os_sandbox.h
-- include/renderer.h
 - include/tab.h
 - include/url.h
-- include/util.h
 - include/web_storage.h
-- src/dom.c
+- src/css_computed.c
 - src/freebug.c
 - src/html_parse.c
 - src/js_custom_elements.c
@@ -75,11 +58,10 @@ tests groups 12 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_n
 - src/js_location_internal.h
 - src/js_sandbox.c
 - src/js_trusted.c
-- src/os_sandbox.c
-- src/renderer.c
 - src/tab.c
 - src/url.c
 - src/web_storage.c
+- tests/test_css_computed.c
 - tests/test_dom.c
 - tests/test_freebug.c
 - tests/test_html_parse.c
@@ -87,8 +69,6 @@ tests groups 12 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_n
 - tests/test_js_env.c
 - tests/test_js_geom.c
 - tests/test_js_sandbox.c
-- tests/test_os_sandbox.c
-- tests/test_renderer.c
 - tests/test_tab.c
 - tests/test_url.c
 - tests/test_web_storage.c

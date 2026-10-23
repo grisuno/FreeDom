@@ -304,8 +304,6 @@ Returns < 0.0 on any failure so the caller can fall back to the toy-API measurem
 
 **Returns:** `double`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_text_shape.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="tsh_webfont_register"></a>

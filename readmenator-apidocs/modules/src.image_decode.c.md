@@ -122,8 +122,6 @@ img_status img_png_dimensions(const uint8_t *bytes, size_t len, uint32_t *out_w,
 
 **Returns:** `img_status`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_image_decode.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="img_dimensions_ok"></a>
@@ -198,7 +196,7 @@ img_status img_decode_png(const uint8_t *bytes, size_t len, img_pixels *out)
 
 *Calls:* [`img_dimensions_ok`](#img_dimensions_ok)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_image_decode.c.md#llvmfuzzertestoneinput), [`img_decode`](#img_decode)
+*Called by:* [`img_decode`](#img_decode)
 
 ---
 
@@ -224,7 +222,7 @@ img_status img_decode_jpeg(const uint8_t *bytes, size_t len, img_pixels *out)
 
 *Calls:* [`img_dimensions_ok`](#img_dimensions_ok)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_image_decode.c.md#llvmfuzzertestoneinput), [`img_decode`](#img_decode)
+*Called by:* [`img_decode`](#img_decode)
 
 ---
 
@@ -301,8 +299,6 @@ img_status img_decode(const uint8_t *bytes, size_t len, img_pixels *out)
 **Returns:** `img_status`
 
 *Calls:* [`img_decode_gif`](#img_decode_gif), [`img_decode_jpeg`](#img_decode_jpeg), [`img_decode_png`](#img_decode_png), [`img_decode_webp`](#img_decode_webp)
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_image_decode.c.md#llvmfuzzertestoneinput)
 
 ---
 

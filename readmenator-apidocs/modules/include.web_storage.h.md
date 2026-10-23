@@ -114,8 +114,6 @@ Pure validation of a snapshot: 0 when it is complete and well-formed (counts and
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="wst_replace"></a>

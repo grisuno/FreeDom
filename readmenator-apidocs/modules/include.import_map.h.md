@@ -92,8 +92,6 @@ Resolves specifier as imported from base (the importing module's URL).
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_import_map.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="im_count"></a>
@@ -138,7 +136,7 @@ NULL is a no-op.
 |---|---|---|---|
 | `m` | `im_map *` |  |  |
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_import_map.c.md#llvmfuzzertestoneinput), [`pf_pool_finish`](src.prefetch.c.md#pf_pool_finish), [`pf_pool_start_page`](src.prefetch.c.md#pf_pool_start_page)
+*Called by:* [`pf_pool_finish`](src.prefetch.c.md#pf_pool_finish), [`pf_pool_start_page`](src.prefetch.c.md#pf_pool_start_page)
 
 ---
 

@@ -196,8 +196,6 @@ Writes the scale and the translation the painter must apply. Never divides by ze
 | `off_x` | `double *` |  |  |
 | `off_y` | `double *` |  |  |
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_svg_render.c.md#llvmfuzzertestoneinput)
-
 ---
 
 ## Macros

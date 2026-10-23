@@ -356,6 +356,12 @@ static void test_inline_container_props(void **state) {
     assert_int_equal(css_parse_inline("gap:10px 4px", 0).gap, 4);
     assert_int_equal(css_parse_inline("gap:10px 4px", 0).row_gap, 10);
     assert_int_equal(css_parse_inline("gap:normal", 0).gap, 0);
+    /* a one-value gap sets BOTH axes: it must replace the row half an earlier two-value
+     * rule left (the gitlab hero: `gap:48px 32px`, then `@media{gap:24px}`). */
+    css_style g1 = css_parse_inline("gap:48px 32px;gap:24px", 0);
+    assert_int_equal(g1.gap, 24);
+    assert_int_equal(g1.row_gap, 24);
+    assert_int_equal(css_parse_inline("gap:8px", 0).row_gap, 8);
 }
 
 static void test_sheet_container_props(void **state) {
@@ -4974,7 +4980,7 @@ static void test_gap_two_value(void **state) {
     assert_int_equal(s.gap, 20);
     s = css_parse_inline("gap:12px", 0);
     assert_int_equal(s.gap, 12);
-    assert_int_equal(s.row_gap, -1);   /* one value keeps the prior semantics */
+    assert_int_equal(s.row_gap, 12);   /* one value sets both axes, replacing an earlier row half */
     s = css_parse_inline("grid-gap:1px 2px", 0);
     assert_int_equal(s.row_gap, 1);
     assert_int_equal(s.gap, 2);

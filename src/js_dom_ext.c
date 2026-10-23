@@ -9,6 +9,8 @@
  */
 
 #include "js_dom_ext.h"
+#include "js_dom.h"
+#include "js_sandbox.h"
 
 static const char JDX_SHIM[] =
     "(function(){ var g=__G, d=g.document, EP=(g.Element&&g.Element.prototype)||null;"
@@ -363,6 +365,153 @@ static const char JDX_DATA_SHIM[] =
     "  g.BroadcastChannel.prototype.removeEventListener=function(){};"
     "})()";
 
+
+/* MutationObserver (spec/js_mutation.md): REAL, not synthetic. Every DOM mutation the page
+ * can make goes through the sealed `dom` mutators, so wrapping those natives ONCE is the
+ * single choke point -- the element wrappers, fragments, innerHTML, custom elements and
+ * insertAdjacent* all report without being touched. Records are matched per observer
+ * registration (options, attributeFilter, subtree) and delivered in one microtask. An
+ * observer only ever sees mutations to the page's own DOM: no new capability, no leak.
+ * Bounds: 4096 live observers, 8192 queued records per observer, ancestor walk 100000. */
+static const char JDX_MUTATION_SHIM[] =
+    "(function(){ var g=__G, W=g.__wrap; if(typeof W!=='function'||!dom) return;"
+    "  var obs=[], MAXO=4096, MAXQ=8192, scheduled=false;"
+    "  function MO(cb){ if(typeof cb!=='function') throw new TypeError('MutationObserver: callback is not a function');"
+    "    this._cb=cb; this._q=[]; this._t=[]; this._in=false; }"
+    "  MO.prototype.observe=function(node,o){ if(!node||node._h===undefined) throw new TypeError('MutationObserver.observe: target is not a Node');"
+    "    o=o||{}; var at=o.attributes, cd=o.characterData;"
+    "    if(o.attributeOldValue||o.attributeFilter) if(at===undefined) at=true;"
+    "    if(o.characterDataOldValue) if(cd===undefined) cd=true;"
+    "    if(!o.childList&&!at&&!cd) throw new TypeError('MutationObserver.observe: options must set childList, attributes or characterData');"
+    "    var reg={h:node._h,child:!!o.childList,attr:!!at,cdata:!!cd,sub:!!o.subtree,"
+    "      aold:!!o.attributeOldValue,cold:!!o.characterDataOldValue,"
+    "      filter:o.attributeFilter?Array.prototype.map.call(o.attributeFilter,String):null};"
+    "    for(var i=0;i<this._t.length;i++) if(this._t[i].h===reg.h){ this._t[i]=reg; return; }"
+    "    this._t.push(reg); if(!this._in&&obs.length<MAXO){ this._in=true; obs.push(this); } };"
+    "  MO.prototype.disconnect=function(){ this._t=[]; this._q=[]; var i=obs.indexOf(this); if(i>=0) obs.splice(i,1); this._in=false; };"
+    "  MO.prototype.takeRecords=function(){ var q=this._q; this._q=[]; return q; };"
+    "  function inside(h,r){ if(h===r.h) return true; if(!r.sub) return false;"
+    "    var p=dom.parent(h), n=0; while(p!==null&&n++<100000){ if(p===r.h) return true; p=dom.parent(p); } return false; }"
+    "  function deliver(){ scheduled=false; var list=obs.slice();"
+    "    for(var i=0;i<list.length;i++){ var o=list[i]; if(!o._q.length) continue;"
+    "      var q=o._q; o._q=[]; try{ o._cb.call(o,q,o); }catch(e){ if(g.console&&g.console.error) g.console.error(e); } } }"
+    "  function push(kind,h,rec,reg){ for(var i=0;i<obs.length;i++){ var o=obs[i], hit=null;"
+    "      for(var j=0;j<o._t.length;j++){ var r=o._t[j]; if(!r[kind]||!inside(h,r)) continue;"
+    "        if(r.h!==h&&!r.sub) continue;"
+    "        if(kind==='attr'&&r.filter&&r.filter.indexOf(rec.attributeName)<0) continue;"
+    "        hit=r; break; }"
+    "      if(!hit) continue; if(o._q.length>=MAXQ) continue;"
+    "      var c=Object.assign({},rec);"
+    "      if(kind==='attr'&&!hit.aold) c.oldValue=null; if(kind==='cdata'&&!hit.cold) c.oldValue=null;"
+    "      o._q.push(c); }"
+    "    if(!scheduled){ scheduled=true; Promise.resolve().then(deliver); } }"
+    "  function rec(type,h){ return {type:type,target:W(h),addedNodes:[],removedNodes:[],previousSibling:null,"
+    "    nextSibling:null,attributeName:null,attributeNamespace:null,oldValue:null}; }"
+    "  function kids(h){ var a=[], c=dom.firstChild(h), n=0; while(c!==null&&n++<100000){ a.push(c); c=dom.nextSibling(c); } return a; }"
+    "  function sib(h,prev){ var s=dom.siblingNode(h,prev); return s===null?null:W(s); }"
+    "  function wl(a){ return a.map(function(x){ return W(x); }); }"
+    "  function live(){ return obs.length>0; }"
+    "  function emitChild(p,added,removed,prevH,nextH){ var r=rec('childList',p); r.addedNodes=wl(added); r.removedNodes=wl(removed);"
+    "    r.previousSibling=prevH===null?null:W(prevH); r.nextSibling=nextH===null?null:W(nextH); push('child',p,r); }"
+    "  function lastOf(p){ var c=dom.firstChild(p), l=null, n=0; while(c!==null&&n++<100000){ l=c; c=dom.nextSibling(c); } return l; }"
+    "  var o_sa=dom.setAttribute, o_ra=dom.removeAttribute, o_st=dom.setText, o_ac=dom.appendChild,"
+    "      o_ib=dom.insertBefore, o_rc=dom.removeChild, o_ih=dom.setInnerHtml, o_mc=dom.moveChildren;"
+    "  function detachFirst(c){ var op=dom.parent(c); if(op!==null){"
+    "      var pv=dom.siblingNode(c,true), nx=dom.siblingNode(c,false); return {p:op,prev:pv,next:nx}; } return null; }"
+    "  dom.setAttribute=function(h,n,v){ if(!live()) return o_sa.call(dom,h,n,v);"
+    "    var old=dom.getAttribute(h,String(n)); o_sa.call(dom,h,n,v);"
+    "    var r=rec('attributes',h); r.attributeName=String(n); r.oldValue=old===undefined?null:old; push('attr',h,r); };"
+    "  dom.removeAttribute=function(h,n){ if(!live()) return o_ra.call(dom,h,n);"
+    "    var old=dom.getAttribute(h,String(n)); o_ra.call(dom,h,n); if(old===null||old===undefined) return;"
+    "    var r=rec('attributes',h); r.attributeName=String(n); r.oldValue=old; push('attr',h,r); };"
+    "  dom.setText=function(h,v){ if(!live()) return o_st.call(dom,h,v); var k=dom.nodeKind(h);"
+    "    if(k===3||k===8){ var old=dom.textContent(h); o_st.call(dom,h,v);"
+    "      var r=rec('characterData',h); r.oldValue=old==null?'':String(old); push('cdata',h,r); return; }"
+    "    var before=kids(h); o_st.call(dom,h,v); var after=kids(h);"
+    "    if(before.length||after.length) emitChild(h,after,before,null,null); };"
+    "  dom.appendChild=function(p,c){ if(!live()) return o_ac.call(dom,p,c); var from=detachFirst(c), prev=lastOf(p);"
+    "    var res=o_ac.call(dom,p,c);"
+    "    if(from) emitChild(from.p,[],[c],from.prev,from.next);"
+    "    emitChild(p,[c],[],prev,null); return res; };"
+    "  dom.insertBefore=function(p,c,ref){ if(!live()) return o_ib.call(dom,p,c,ref); var from=detachFirst(c);"
+    "    var res=o_ib.call(dom,p,c,ref);"
+    "    if(from) emitChild(from.p,[],[c],from.prev,from.next);"
+    "    emitChild(p,[c],[],dom.siblingNode(c,true),dom.siblingNode(c,false)); return res; };"
+    "  dom.removeChild=function(p,c){ if(!live()) return o_rc.call(dom,p,c);"
+    "    var pv=dom.siblingNode(c,true), nx=dom.siblingNode(c,false); var res=o_rc.call(dom,p,c);"
+    "    emitChild(p,[],[c],pv,nx); return res; };"
+    "  dom.setInnerHtml=function(h,html){ if(!live()) return o_ih.call(dom,h,html);"
+    "    var before=kids(h); var res=o_ih.call(dom,h,html); var after=kids(h);"
+    "    if(before.length||after.length) emitChild(h,after,before,null,null); return res; };"
+    "  if(typeof o_mc==='function') dom.moveChildren=function(src,parent,where,ref){ if(!live()) return o_mc.call(dom,src,parent,where,ref);"
+    "    var moved=kids(src); var res=o_mc.call(dom,src,parent,where,ref);"
+    "    if(moved.length){ emitChild(src,[],moved,null,null); emitChild(parent,moved,[],null,null); } return res; };"
+    "  g.MutationObserver=MO; g.MutationRecord=function(){};"
+    "})()";
+
+
+/* Freebug command-line API (spec/freebug_repl.md). Defined non-enumerable on the global
+ * only for the REPL worker; never replaces a page global (jQuery's `$`). */
+static const char JDX_REPL_SHIM[] =
+    "(function(){ var g=__G, d=g.document; if(!d) return;"
+    "  function def(n,f){ if(typeof g[n]!=='undefined') return;"
+    "    Object.defineProperty(g,n,{value:f,writable:true,configurable:true,enumerable:false}); }"
+    "  if(typeof g.$==='undefined'||(g.$&&g.$.__stub===true)) Object.defineProperty(g,'$',{value:function(sel,ctx){"
+    "    return (ctx||d).querySelector(String(sel)); },writable:true,configurable:true,enumerable:false});"
+    "  def('$$',function(sel,ctx){ return Array.prototype.slice.call((ctx||d).querySelectorAll(String(sel))); });"
+    "  def('keys',function(o){ return Object.keys(Object(o)); });"
+    "  def('values',function(o){ o=Object(o); return Object.keys(o).map(function(k){ return o[k]; }); });"
+    "  def('inspect',function(o){ if(!o||o._h===undefined) return o;"
+    "    var at={}, names=(typeof o.getAttributeNames==='function')?o.getAttributeNames():[];"
+    "    for(var i=0;i<names.length&&i<256;i++) at[names[i]]=o.getAttribute(names[i]);"
+    "    var r=null; try{ var q=dom.rect(o._h); if(q) r={x:q[0],y:q[1],width:q[2],height:q[3]}; }catch(e){}"
+    "    var info={tag:String(dom.tagName(o._h)||o.tagName||'').toLowerCase(),id:o.id||'',classes:String(o.className||'').split(/\\s+/).filter(Boolean),"
+    "      attributes:at,style:String(o.getAttribute('style')||''),rect:r,text:String(o.textContent||'').slice(0,120),"
+    "      children:o.children?o.children.length:0};"
+    "    try{ g.console.info('<'+info.tag+(info.id?'#'+info.id:'')+(info.classes.length?'.'+info.classes.join('.'):'')+'>'"
+    "      +(r?' '+r.width+'x'+r.height+' @'+r.x+','+r.y:'')); }catch(e){}"
+    "    return info; });"
+    "  def('getEventListeners',function(o){ if(!o) return {};"
+    "    if(o===d) return g.__evList('d'); if(o===g) return g.__evList('w');"
+    "    return o._h===undefined?{}:g.__evList('n'+o._h); });"
+    "  function lbl(o){ var t=String(dom.tagName(o._h)||o.tagName||'').toLowerCase(), c=String(o.className||'').split(/\\s+/).filter(Boolean);"
+    "    return '<'+t+(o.id?'#'+o.id:'')+(c.length?'.'+c.join('.'):'')+'>'; }"
+    "  def('tree',function(o,depth){ o=o||d.documentElement; if(!o||o._h===undefined) return '';"
+    "    var max=(depth===undefined)?3:Math.max(0,Math.min(32,depth|0)), lines=[];"
+    "    (function walk(n,lv){ if(lines.length>=400) return; lines.push(new Array(lv+1).join('  ')+lbl(n));"
+    "      if(lv>=max||!n.children) return; for(var i=0;i<n.children.length;i++) walk(n.children[i],lv+1); })(o,0);"
+    "    var out=lines.join('\\n'); try{ g.console.log(out); }catch(e){} return out; });"
+    "  var INIT={'0px':1,'auto':1,'none':1,'normal':1,'visible':1,'static':1,'1':1,'0':1,'400':1,'rgba(0, 0, 0, 0)':1,"
+    "    'nowrap':1,'row':1,'stretch':1,'content-box':1,'start':1,'left':1,'both':0};"
+    "  def('styles',function(o,filter){ if(!o||o._h===undefined) return {};"
+    "    var cs=g.getComputedStyle(o), r={}, n=cs.length;"
+    "    for(var i=0;i<n;i++){ var k=cs.item(i), v=cs.getPropertyValue(k);"
+    "      if(filter&&String(k).indexOf(String(filter))<0) continue;"
+    "      if(!v||(INIT[v]===1&&k!=='display'&&k!=='font-size')) continue; r[k]=v; }"
+    "    try{ g.console.info(lbl(o)+' '+Object.keys(r).map(function(k){ return k+': '+r[k]; }).join('; ')); }catch(e){}"
+    "    return r; });"
+    "  def('box',function(o){ if(!o||o._h===undefined) return null; var cs=g.getComputedStyle(o);"
+    "    function side(p,s){ var o2={}; ['top','right','bottom','left'].forEach(function(k){"
+    "      o2[k]=parseFloat(cs.getPropertyValue(p+'-'+k+s))||0; }); return o2; }"
+    "    var r=null; try{ var q=dom.rect(o._h); if(q) r={width:q[2],height:q[3]}; }catch(e){}"
+    "    return {margin:side('margin',''),border:side('border','-width'),padding:side('padding',''),content:r}; });"
+    "  var NL=g.__netLog; try{ delete g.__netLog; }catch(e){}"
+    "  def('net',function(filter){ var l=(typeof NL==='function')?NL():[], out=[];"
+    "    for(var i=0;i<l.length;i++){ var e=l[i]; if(filter&&e.url.indexOf(String(filter))<0) continue; out.push(e); }"
+    "    try{ g.console.info(out.map(function(e){ return e.method+' '+e.status+' '+e.url+(e.size?' ('+e.size+'B)':''); }).join('\\n')||'(no requests)'); }catch(x){}"
+    "    return out; });"
+    "  var mon=[];"
+    "  def('monitorEvents',function(o,types){ if(!o||typeof o.addEventListener!=='function') return;"
+    "    var ts=(types===undefined)?['click','dblclick','keydown','keyup','input','change','submit','focus','blur','scroll','resize','mousedown','mouseup']"
+    "      :(Array.isArray(types)?types:[types]);"
+    "    ts.forEach(function(t){ t=String(t); for(var i=0;i<mon.length;i++) if(mon[i].o===o&&mon[i].t===t) return;"
+    "      if(mon.length>=256) return;"
+    "      var f=function(e){ try{ g.console.log(t,e); }catch(x){} }; mon.push({o:o,t:t,f:f}); o.addEventListener(t,f); }); });"
+    "  def('unmonitorEvents',function(o,types){ var ts=(types===undefined)?null:(Array.isArray(types)?types:[types]).map(String);"
+    "    mon=mon.filter(function(m){ if(m.o!==o||(ts&&ts.indexOf(m.t)<0)) return true;"
+    "      o.removeEventListener(m.t,m.f); return false; }); });"
+    "})()";
+
 static int run(JSContext *ctx, const char *src, size_t len, const char *name) {
     JSValue r = JS_Eval(ctx, src, len, name, JS_EVAL_TYPE_GLOBAL);
     int ok = !JS_IsException(r);
@@ -373,5 +522,13 @@ static int run(JSContext *ctx, const char *src, size_t len, const char *name) {
 
 int jdx_install(JSContext *ctx) {
     if (run(ctx, JDX_SHIM, sizeof JDX_SHIM - 1, "<dom-ext>") != 0) return -1;
-    return run(ctx, JDX_DATA_SHIM, sizeof JDX_DATA_SHIM - 1, "<data-ext>");
+    if (run(ctx, JDX_DATA_SHIM, sizeof JDX_DATA_SHIM - 1, "<data-ext>") != 0) return -1;
+    return run(ctx, JDX_MUTATION_SHIM, sizeof JDX_MUTATION_SHIM - 1, "<mutation-observer>");
+}
+
+jd_status jd_install_repl_api(js_context *ctx) {
+    if (ctx == NULL) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return JD_ERR_INTERNAL;
+    return (run(jsctx, JDX_REPL_SHIM, sizeof JDX_REPL_SHIM - 1, "<repl-api>") == 0) ? JD_OK : JD_ERR_INTERNAL;
 }

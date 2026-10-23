@@ -31,7 +31,7 @@ classDiagram
 
 ### `jt_ws_op`
 
-`struct` | [include/js_trusted.h:46](../../include/js_trusted.h#L46)
+`struct` | [include/js_trusted.h:57](../../include/js_trusted.h#L57)
 
 ```c
 typedef struct jt_ws_op
@@ -45,7 +45,7 @@ typedef struct jt_ws_op
 
 ### `jt_ws_kind`
 
-`enum` | [include/js_trusted.h:39](../../include/js_trusted.h#L39)
+`enum` | [include/js_trusted.h:50](../../include/js_trusted.h#L50)
 
 ```c
 typedef enum jt_ws_kind
@@ -57,7 +57,7 @@ typedef enum jt_ws_kind
 
 ### `jt_ws_event_kind`
 
-`enum` | [include/js_trusted.h:53](../../include/js_trusted.h#L53)
+`enum` | [include/js_trusted.h:64](../../include/js_trusted.h#L64)
 
 ```c
 typedef enum jt_ws_event_kind
@@ -71,7 +71,7 @@ typedef enum jt_ws_event_kind
 
 ### `kind`
 
-`type_alias` | [include/js_trusted.h:45](../../include/js_trusted.h#L45)
+`type_alias` | [include/js_trusted.h:56](../../include/js_trusted.h#L56)
 
 ```c
 typedef struct jt_ws_op { int kind;
@@ -106,7 +106,7 @@ typedef struct jt_ws_op { int kind;
 
 ### `jt_take_opens`
 
-`function` | [include/js_trusted.h:31](../../include/js_trusted.h#L31)
+`function` | [include/js_trusted.h:42](../../include/js_trusted.h#L42)
 
 ```c
 char *jt_take_opens(js_context *ctx);
@@ -122,15 +122,13 @@ Drains the recorded window.open targets as "url\n" lines, or NULL when none.
 
 **Returns:** `char *`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="parent"></a>
 
 ### `parent`
 
-`function` | [include/js_trusted.h:58](../../include/js_trusted.h#L58)
+`function` | [include/js_trusted.h:69](../../include/js_trusted.h#L69)
 
 ```c
 * socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);
@@ -144,7 +142,7 @@ Drains the recorded window.open targets as "url\n" lines, or NULL when none.
 
 ### `jt_take_ws`
 
-`function` | [include/js_trusted.h:64](../../include/js_trusted.h#L64)
+`function` | [include/js_trusted.h:75](../../include/js_trusted.h#L75)
 
 ```c
 size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);
@@ -164,15 +162,13 @@ Returns the count. Operations past JT_WS_MAX_OPS/JT_WS_MAX_BYTES are dropped and
 
 **Returns:** `size_t`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jt_ws_ops_free"></a>
 
 ### `jt_ws_ops_free`
 
-`function` | [include/js_trusted.h:65](../../include/js_trusted.h#L65)
+`function` | [include/js_trusted.h:76](../../include/js_trusted.h#L76)
 
 ```c
 void jt_ws_ops_free(jt_ws_op *ops, size_t n);
@@ -185,15 +181,13 @@ void jt_ws_ops_free(jt_ws_op *ops, size_t n);
 | `ops` | `jt_ws_op *` |  |  |
 | `n` | `size_t` |  |  |
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jt_ws_event"></a>
 
 ### `jt_ws_event`
 
-`function` | [include/js_trusted.h:70](../../include/js_trusted.h#L70)
+`function` | [include/js_trusted.h:81](../../include/js_trusted.h#L81)
 
 ```c
 int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);
@@ -216,15 +210,13 @@ Returns 1 when a live socket with that id received it.
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jt_take_storage"></a>
 
 ### `jt_take_storage`
 
-`function` | [include/js_trusted.h:82](../../include/js_trusted.h#L82)
+`function` | [include/js_trusted.h:93](../../include/js_trusted.h#L93)
 
 ```c
 int jt_take_storage(js_context *ctx, char **out, size_t *len);
@@ -242,15 +234,13 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="realm"></a>
 
 ### `realm`
 
-`function` | [include/js_trusted.h:85](../../include/js_trusted.h#L85)
+`function` | [include/js_trusted.h:96](../../include/js_trusted.h#L96)
 
 ```c
 * runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and budget. ctx NULL => JD_ERR_NULL_ARG. */ jd_status jt_enable_worker(js_context *ctx);
@@ -266,7 +256,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `JT_WS_MAX`
 
-`macro` | [include/js_trusted.h:35](../../include/js_trusted.h#L35)
+`macro` | [include/js_trusted.h:46](../../include/js_trusted.h#L46)
 
 ```c
 #define JT_WS_MAX
@@ -278,7 +268,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `JT_WS_MAX_OPS`
 
-`macro` | [include/js_trusted.h:36](../../include/js_trusted.h#L36)
+`macro` | [include/js_trusted.h:47](../../include/js_trusted.h#L47)
 
 ```c
 #define JT_WS_MAX_OPS
@@ -292,7 +282,7 @@ sockets per page
 
 ### `JT_WS_MAX_BYTES`
 
-`macro` | [include/js_trusted.h:37](../../include/js_trusted.h#L37)
+`macro` | [include/js_trusted.h:48](../../include/js_trusted.h#L48)
 
 ```c
 #define JT_WS_MAX_BYTES

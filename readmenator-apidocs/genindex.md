@@ -30,7 +30,6 @@
 - [`approximation`](modules/gui.browser_ui.c.md#approximation) function in `gui/browser_ui.c`
 - [`area`](modules/gui.browser_ui.c.md#area) function in `gui/browser_ui.c`
 - [`arrives`](modules/gui.browser_ui.c.md#arrives) function in `gui/browser_ui.c`
-- [`ASCII`](modules/fuzz.fuzz_text_shape.c.md#ascii) function in `fuzz/fuzz_text_shape.c`
 - [`assumed`](modules/src.url.c.md#assumed) function in `src/url.c`
 - [`attr_span`](modules/src.prefetch.c.md#attr_span) struct in `src/prefetch.c`
 - [`attributes`](modules/src.page_view.c.md#attributes) function in `src/page_view.c`
@@ -341,6 +340,16 @@
 - [`cch_pseudo_style`](modules/src.css_chain.c.md#cch_pseudo_style) function in `src/css_chain.c`
 - [`CCH_SIB_MAX`](modules/include.css_chain.h.md#cch_sib_max) macro in `include/css_chain.h`
 - [`CCH_TAG_MAX`](modules/src.css_chain.c.md#cch_tag_max) macro in `src/css_chain.c`
+- [`ccm_get`](modules/include.css_computed.h.md#ccm_get) function in `include/css_computed.h`
+- [`ccm_get`](modules/src.css_computed.c.md#ccm_get) function in `src/css_computed.c`
+- [`ccm_input`](modules/include.css_computed.h.md#ccm_input) struct in `include/css_computed.h`
+- [`CCM_NPROPS`](modules/src.css_computed.c.md#ccm_nprops) macro in `src/css_computed.c`
+- [`ccm_prop`](modules/src.css_computed.c.md#ccm_prop) struct in `src/css_computed.c`
+- [`ccm_property_count`](modules/include.css_computed.h.md#ccm_property_count) function in `include/css_computed.h`
+- [`ccm_property_count`](modules/src.css_computed.c.md#ccm_property_count) function in `src/css_computed.c`
+- [`ccm_property_name`](modules/include.css_computed.h.md#ccm_property_name) function in `include/css_computed.h`
+- [`ccm_property_name`](modules/src.css_computed.c.md#ccm_property_name) function in `src/css_computed.c`
+- [`CCM_VALUE_MAX`](modules/include.css_computed.h.md#ccm_value_max) macro in `include/css_computed.h`
 - [`cfg`](modules/include.html_parse.h.md#cfg) function in `include/html_parse.h`
 - [`cg_expand_background`](modules/include.css_gradient.h.md#cg_expand_background) function in `include/css_gradient.h`
 - [`cg_expand_background`](modules/src.css_gradient.c.md#cg_expand_background) function in `src/css_gradient.c`
@@ -828,6 +837,7 @@
 - [`dom_matches`](modules/src.dom.c.md#dom_matches) function in `src/dom.c`
 - [`DOM_MAX_HANDLES`](modules/include.dom.h.md#dom_max_handles) macro in `include/dom.h`
 - [`dom_move_children`](modules/src.dom.c.md#dom_move_children) function in `src/dom.c`
+- [`dom_native_node`](modules/src.dom.c.md#dom_native_node) function in `src/dom.c`
 - [`dom_next_sibling`](modules/src.dom.c.md#dom_next_sibling) function in `src/dom.c`
 - [`dom_node_at`](modules/src.dom.c.md#dom_node_at) function in `src/dom.c`
 - [`dom_node_count`](modules/include.dom.h.md#dom_node_count) function in `include/dom.h`
@@ -1069,7 +1079,6 @@
 - [`freebug_window`](modules/gui.browser_ui.c.md#freebug_window) struct in `gui/browser_ui.c`
 - [`full`](modules/include.web_storage.h.md#full) function in `include/web_storage.h`
 - [`function`](modules/src.css.c.md#function) function in `src/css.c`
-- [`FUZZ_JSDOM_MAX_NODES`](modules/fuzz.fuzz_js_dom.c.md#fuzz_jsdom_max_nodes) macro in `fuzz/fuzz_js_dom.c`
 - [`fval`](modules/src.css_mq.c.md#fval) struct in `src/css_mq.c`
 - [`fx_area_map`](modules/include.flex_layout.h.md#fx_area_map) struct in `include/flex_layout.h`
 - [`FX_AREA_MAX_CELLS`](modules/include.flex_layout.h.md#fx_area_max_cells) macro in `include/flex_layout.h`
@@ -1124,9 +1133,6 @@
 - [`fx_multicol_used`](modules/src.flex_layout.c.md#fx_multicol_used) function in `src/flex_layout.c`
 - [`fx_result`](modules/include.flex_layout.h.md#fx_result) struct in `include/flex_layout.h`
 - [`fx_status`](modules/include.flex_layout.h.md#fx_status) enum in `include/flex_layout.h`
-- [`FZ_CAP`](modules/fuzz.fuzz_text_shape.c.md#fz_cap) macro in `fuzz/fuzz_text_shape.c`
-- [`fz_mod`](modules/fuzz.fuzz_js_sandbox.c.md#fz_mod) struct in `fuzz/fuzz_js_sandbox.c`
-- [`fz_parent`](modules/fuzz.fuzz_js_geom.c.md#fz_parent) struct in `fuzz/fuzz_js_geom.c`
 
 <a id="g"></a>
 
@@ -1135,11 +1141,12 @@
 - [`generation`](modules/include.ws_hub.h.md#generation) function in `include/ws_hub.h`
 - [`geometry`](modules/src.js_dom.c.md#geometry) function in `src/js_dom.c`
 - [`GET`](modules/gui.browser_ui.c.md#get) function in `gui/browser_ui.c`
+- [`getComputedStyle`](modules/include.js_dom.h.md#getcomputedstyle) function in `include/js_dom.h`
 - [`gets`](modules/src.freedom.c.md#gets) function in `src/freedom.c`
 - [`gif_bits`](modules/src.image_decode.c.md#gif_bits) struct in `src/image_decode.c`
 - [`GIF_LZW_MAX_CODES`](modules/src.image_decode.c.md#gif_lzw_max_codes) macro in `src/image_decode.c`
 - [`gif_reader`](modules/src.image_decode.c.md#gif_reader) struct in `src/image_decode.c`
-- [`glyph`](modules/fuzz.fuzz_text_shape.c.md#glyph) function in `fuzz/fuzz_text_shape.c`
+- [`global`](modules/include.js_dom.h.md#global) function in `include/js_dom.h`
 - [`glyphs`](modules/src.page_view.c.md#glyphs) function in `src/page_view.c`
 - [`_GNU_SOURCE`](modules/gui.browser_ui.c.md#_gnu_source) macro in `gui/browser_ui.c`
 - [`_GNU_SOURCE`](modules/gui.ui_render.c.md#_gnu_source) macro in `gui/ui_render.c`
@@ -1148,6 +1155,7 @@
 - [`_GNU_SOURCE`](modules/src.js_embed.c.md#_gnu_source) macro in `src/js_embed.c`
 - [`_GNU_SOURCE`](modules/src.js_events.c.md#_gnu_source) macro in `src/js_events.c`
 - [`_GNU_SOURCE`](modules/src.js_fetch.c.md#_gnu_source) macro in `src/js_fetch.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
@@ -1456,6 +1464,7 @@
 - [`jd_click_state_free`](modules/include.js_dom.h.md#jd_click_state_free) function in `include/js_dom.h`
 - [`jd_click_state_free`](modules/src.js_events.c.md#jd_click_state_free) function in `src/js_events.c`
 - [`jd_click_state_new`](modules/src.js_events.c.md#jd_click_state_new) function in `src/js_events.c`
+- [`JD_COMPUTED_VALUE_MAX`](modules/src.js_dom.c.md#jd_computed_value_max) macro in `src/js_dom.c`
 - [`jd_fire_click`](modules/src.js_events.c.md#jd_fire_click) function in `src/js_events.c`
 - [`jd_fire_mouse_event`](modules/src.js_events.c.md#jd_fire_mouse_event) function in `src/js_events.c`
 - [`jd_fire_submit`](modules/src.js_events.c.md#jd_fire_submit) function in `src/js_events.c`
@@ -1475,6 +1484,7 @@
 - [`jd_install`](modules/src.js_dom.c.md#jd_install) function in `src/js_dom.c`
 - [`jd_install_console`](modules/src.js_dom.c.md#jd_install_console) function in `src/js_dom.c`
 - [`jd_install_events`](modules/src.js_events.c.md#jd_install_events) function in `src/js_events.c`
+- [`jd_install_repl_api`](modules/src.js_dom_ext.c.md#jd_install_repl_api) function in `src/js_dom_ext.c`
 - [`jd_install_xhr`](modules/src.js_fetch.c.md#jd_install_xhr) function in `src/js_fetch.c`
 - [`jd_method`](modules/src.js_dom.c.md#jd_method) struct in `src/js_dom.c`
 - [`jd_opaque`](modules/include.js_dom.h.md#jd_opaque) struct in `include/js_dom.h`
@@ -1484,6 +1494,7 @@
 - [`jd_pop_state`](modules/src.js_location.c.md#jd_pop_state) function in `src/js_location.c`
 - [`jd_process_iframes`](modules/include.js_dom.h.md#jd_process_iframes) function in `include/js_dom.h`
 - [`jd_process_iframes`](modules/src.js_embed.c.md#jd_process_iframes) function in `src/js_embed.c`
+- [`jd_set_computed`](modules/src.js_dom.c.md#jd_set_computed) function in `src/js_dom.c`
 - [`jd_set_cookies`](modules/src.js_dom.c.md#jd_set_cookies) function in `src/js_dom.c`
 - [`jd_set_geometry`](modules/src.js_dom.c.md#jd_set_geometry) function in `src/js_dom.c`
 - [`jd_set_location`](modules/src.js_location.c.md#jd_set_location) function in `src/js_location.c`
@@ -1568,7 +1579,6 @@
 - [`js_result`](modules/include.js_sandbox.h.md#js_result) struct in `include/js_sandbox.h`
 - [`js_result_free`](modules/include.js_sandbox.h.md#js_result_free) function in `include/js_sandbox.h`
 - [`js_result_free`](modules/src.js_sandbox.c.md#js_result_free) function in `src/js_sandbox.c`
-- [`js_sandbox`](modules/fuzz.fuzz_js_sandbox.c.md#js_sandbox) function in `fuzz/fuzz_js_sandbox.c`
 - [`js_set_current_script`](modules/include.js_sandbox.h.md#js_set_current_script) function in `include/js_sandbox.h`
 - [`js_set_current_script`](modules/src.js_sandbox.c.md#js_set_current_script) function in `src/js_sandbox.c`
 - [`js_set_module_host`](modules/include.js_sandbox.h.md#js_set_module_host) function in `include/js_sandbox.h`
@@ -1587,10 +1597,13 @@
 - [`jsp_present_trusted`](modules/src.js_policy.c.md#jsp_present_trusted) function in `src/js_policy.c`
 - [`jsp_trusted`](modules/include.js_policy.h.md#jsp_trusted) function in `include/js_policy.h`
 - [`jsp_trusted`](modules/src.js_policy.c.md#jsp_trusted) function in `src/js_policy.c`
+- [`jt_enable_observers`](modules/src.js_trusted.c.md#jt_enable_observers) function in `src/js_trusted.c`
 - [`jt_enable_open`](modules/src.js_trusted.c.md#jt_enable_open) function in `src/js_trusted.c`
 - [`jt_enable_storage`](modules/src.js_trusted.c.md#jt_enable_storage) function in `src/js_trusted.c`
 - [`jt_enable_worker`](modules/src.js_trusted.c.md#jt_enable_worker) function in `src/js_trusted.c`
 - [`jt_enable_ws`](modules/src.js_trusted.c.md#jt_enable_ws) function in `src/js_trusted.c`
+- [`jt_geometry_changed`](modules/src.js_trusted.c.md#jt_geometry_changed) function in `src/js_trusted.c`
+- [`JT_IO_MAX_STR`](modules/src.js_trusted.c.md#jt_io_max_str) macro in `src/js_trusted.c`
 - [`jt_seed_ctx`](modules/src.js_trusted.c.md#jt_seed_ctx) struct in `src/js_trusted.c`
 - [`jt_take_opens`](modules/include.js_trusted.h.md#jt_take_opens) function in `include/js_trusted.h`
 - [`jt_take_opens`](modules/src.js_trusted.c.md#jt_take_opens) function in `src/js_trusted.c`
@@ -1640,6 +1653,7 @@
 - [`layout`](modules/gui.browser_ui.c.md#layout) function in `gui/browser_ui.c`
 - [`layout`](modules/src.tab.c.md#layout) function in `src/tab.c`
 - [`left`](modules/include.box_style.h.md#bx_edges-left) type_alias of `bx_edges` in `include/box_style.h`
+- [`LEN_FIELD`](modules/src.css_computed.c.md#len_field) macro in `src/css_computed.c`
 - [`len_rebase_ctx`](modules/src.css.c.md#len_rebase_ctx) struct in `src/css.c`
 - [`length`](modules/include.css_length.h.md#length) function in `include/css_length.h`
 - [`length`](modules/include.dom.h.md#length) function in `include/dom.h`
@@ -1658,23 +1672,6 @@
 - [`literal`](modules/include.download.h.md#literal) function in `include/download.h`
 - [`literal`](modules/include.pdf_export.h.md#literal) function in `include/pdf_export.h`
 - [`LL_FS_BASE`](modules/src.os_sandbox.c.md#ll_fs_base) macro in `src/os_sandbox.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_css.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_css.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_dom.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_dom.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_download.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_download.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_freebug.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_image_decode.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_image_decode.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_import_map.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_import_map.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_js_dom.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_js_geom.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_js_geom.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_js_sandbox.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_pdf_export.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_pdf_export.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_prefetch.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_prefetch.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_prefs.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_svg_render.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_svg_render.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_text_case.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_text_case.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_text_shape.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_text_shape.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_url.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_url.c`
-- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_webfont.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_webfont.c`
 - [`ln_action`](modules/include.link_nav.h.md#ln_action) enum in `include/link_nav.h`
 - [`ln_block_reason`](modules/include.link_nav.h.md#ln_block_reason) enum in `include/link_nav.h`
 - [`ln_block_reason_text`](modules/include.link_nav.h.md#ln_block_reason_text) function in `include/link_nav.h`
@@ -1940,6 +1937,7 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -2009,6 +2007,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -2110,7 +2110,6 @@
 - [`PARITY`](modules/tools.fbench.py.md#parity) constant in `tools.fbench`
 - [`parse_angle_deg`](modules/src.css.c.md#parse_angle_deg) function in `src/css.c`
 - [`parts`](modules/include.css_select.h.md#css_sel-parts) type_alias of `css_sel` in `include/css_select.h`
-- [`pass`](modules/fuzz.fuzz_dom_debug.c.md#pass) function in `fuzz/fuzz_dom_debug.c`
 - [`password`](modules/include.url.h.md#password) function in `include/url.h`
 - [`path`](modules/gui.browser_ui.c.md#path) function in `gui/browser_ui.c`
 - [`path`](modules/include.tls_impersonate.h.md#path) function in `include/tls_impersonate.h`
@@ -2242,6 +2241,7 @@
 - [`probe`](modules/tools.ffgeom.py.md#probe) function in `tools.ffgeom`
 - [`PROBE_TMPL`](modules/tools.ffgeom.py.md#probe_tmpl) constant in `tools.ffgeom`
 - [`proceed`](modules/gui.browser_ui.c.md#proceed) function in `gui/browser_ui.c`
+- [`process`](modules/include.dom.h.md#process) function in `include/dom.h`
 - [`processed`](modules/include.js_dom.h.md#jd_iframe_track-processed) type_alias of `jd_iframe_track` in `include/js_dom.h`
 - [`produced`](modules/gui.browser_ui.c.md#produced) function in `gui/browser_ui.c`
 - [`profile_close`](modules/include.profile.h.md#profile_close) function in `include/profile.h`
@@ -2318,6 +2318,14 @@
 - [`pv_build_full`](modules/src.page_view.c.md#pv_build_full) function in `src/page_view.c`
 - [`pv_build_styled`](modules/src.page_view.c.md#pv_build_styled) function in `src/page_view.c`
 - [`PV_COLOR_TOKEN_MAX`](modules/src.page_view.c.md#pv_color_token_max) macro in `src/page_view.c`
+- [`pv_computed`](modules/include.page_view.h.md#pv_computed) type_alias in `include/page_view.h`
+- [`pv_computed`](modules/src.page_view.c.md#pv_computed) struct in `src/page_view.c`
+- [`pv_computed_free`](modules/include.page_view.h.md#pv_computed_free) function in `include/page_view.h`
+- [`pv_computed_free`](modules/src.page_view.c.md#pv_computed_free) function in `src/page_view.c`
+- [`pv_computed_get`](modules/include.page_view.h.md#pv_computed_get) function in `include/page_view.h`
+- [`pv_computed_get`](modules/src.page_view.c.md#pv_computed_get) function in `src/page_view.c`
+- [`pv_computed_new`](modules/include.page_view.h.md#pv_computed_new) function in `include/page_view.h`
+- [`pv_computed_new`](modules/src.page_view.c.md#pv_computed_new) function in `src/page_view.c`
 - [`pv_cont_at`](modules/include.page_view.h.md#pv_cont_at) function in `include/page_view.h`
 - [`pv_cont_at`](modules/src.page_view.c.md#pv_cont_at) function in `src/page_view.c`
 - [`pv_cont_count`](modules/include.page_view.h.md#pv_cont_count) function in `include/page_view.h`
@@ -2540,6 +2548,7 @@
 - [`ref`](modules/src.webfont_load.c.md#ref) function in `src/webfont_load.c`
 - [`reference`](modules/gui.browser_ui.c.md#reference) function in `gui/browser_ui.c`
 - [`refs`](modules/include.prefetch.h.md#refs) type_alias in `include/prefetch.h`
+- [`registration`](modules/src.js_dom_ext.c.md#registration) function in `src/js_dom_ext.c`
 - [`RELATIVE`](modules/src.css_box.c.md#relative) function in `src/css_box.c`
 - [`rem_px`](modules/src.css.c.md#len_rebase_ctx-rem_px) type_alias of `len_rebase_ctx` in `src/css.c`
 - [`render_glyph`](modules/tools.pngprof.py.md#render_glyph) function in `tools.pngprof`
@@ -3194,7 +3203,6 @@
 - [`wins`](modules/include.text_shape.h.md#wins) function in `include/text_shape.h`
 - [`wl_array_for_each`](modules/gui.browser_ui.c.md#wl_array_for_each) function in `gui/browser_ui.c`
 - [`word_spacing`](modules/include.page_view.h.md#pv_text_ext-word_spacing) type_alias of `pv_text_ext` in `include/page_view.h`
-- [`worker`](modules/fuzz.fuzz_data_url.c.md#worker) function in `fuzz/fuzz_data_url.c`
 - [`write_full`](modules/include.util.h.md#write_full) function in `include/util.h`
 - [`write_full`](modules/src.renderer.c.md#write_full) function in `src/renderer.c`
 - [`write_full`](modules/src.tab.c.md#write_full) function in `src/tab.c`

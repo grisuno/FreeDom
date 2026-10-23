@@ -1,6 +1,59 @@
 # Subsystem: src (page 3 of 9)
 Previous: [KB_src_p2.md](KB_src_p2.md)
 
+## src/css_computed.c
+- Doc: ua_display: The HTML Rendering UA sheet's `display` for a tag when the cascade declared none *...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `ccm_prop` (struct, line 276)
+  - `put` (function, line 9) `static size_t put(char *out, size_t cap, const char *s)`
+  - `putf` (function, line 17) `static size_t putf(char *out, size_t cap, const char *fmt, ...)`
+  - `put_rgb` (function, line 26) `static size_t put_rgb(char *out, size_t cap, int rgb, int alpha_pct)`
+  - `put_len` (function, line 37) `static size_t put_len(char *out, size_t cap, int v, const char *unset_text)`
+  - `put_enum` (function, line 42) `static size_t put_enum(char *out, size_t cap, int v, const char *const *names, size_t n,
+        ...`
+  - `ua_display` (function, line 49) `static const char *ua_display(const char *tag)`
+  - `f_display` (function, line 77) `static size_t f_display(const ccm_input *in, char *out, size_t cap)`
+  - `f_position` (function, line 95) `static size_t f_position(const ccm_input *in, char *out, size_t cap)`
+  - `f_visibility` (function, line 100) `static size_t f_visibility(const ccm_input *in, char *out, size_t cap)`
+  - `f_float` (function, line 105) `static size_t f_float(const ccm_input *in, char *out, size_t cap)`
+  - `f_clear` (function, line 110) `static size_t f_clear(const ccm_input *in, char *out, size_t cap)`
+  - `f_overflow_x` (function, line 115) `static size_t f_overflow_x(const ccm_input *in, char *out, size_t cap)`
+  - `f_overflow_y` (function, line 120) `static size_t f_overflow_y(const ccm_input *in, char *out, size_t cap)`
+  - `f_text_align` (function, line 125) `static size_t f_text_align(const ccm_input *in, char *out, size_t cap)`
+  - `f_box_sizing` (function, line 130) `static size_t f_box_sizing(const ccm_input *in, char *out, size_t cap)`
+  - `f_flex_direction` (function, line 135) `static size_t f_flex_direction(const ccm_input *in, char *out, size_t cap)`
+  - `f_flex_wrap` (function, line 140) `static size_t f_flex_wrap(const ccm_input *in, char *out, size_t cap)`
+  - `f_justify` (function, line 145) `static size_t f_justify(const ccm_input *in, char *out, size_t cap)`
+  - `f_align_items` (function, line 151) `static size_t f_align_items(const ccm_input *in, char *out, size_t cap)`
+  - `f_cursor` (function, line 157) `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)`
+  - `f_white_space` (function, line 163) `static size_t f_white_space(const ccm_input *in, char *out, size_t cap)`
+  - `f_text_transform` (function, line 168) `static size_t f_text_transform(const ccm_input *in, char *out, size_t cap)`
+  - `f_font_style` (function, line 173) `static size_t f_font_style(const ccm_input *in, char *out, size_t cap)`
+  - `f_font_weight` (function, line 177) `static size_t f_font_weight(const ccm_input *in, char *out, size_t cap)`
+  - `f_font_size` (function, line 181) `static size_t f_font_size(const ccm_input *in, char *out, size_t cap)`
+  - `f_line_height` (function, line 187) `static size_t f_line_height(const ccm_input *in, char *out, size_t cap)`
+  - `f_color` (function, line 193) `static size_t f_color(const ccm_input *in, char *out, size_t cap)`
+  - `f_background_color` (function, line 198) `static size_t f_background_color(const ccm_input *in, char *out, size_t cap)`
+  - `f_opacity` (function, line 204) `static size_t f_opacity(const ccm_input *in, char *out, size_t cap)`
+  - `f_z_index` (function, line 212) `static size_t f_z_index(const ccm_input *in, char *out, size_t cap)`
+  - `f_border_style` (function, line 217) `static size_t f_border_style(int v, char *out, size_t cap)`
+  - `NAME` (function, line 224) `static size_t NAME(const ccm_input *in, char *out, size_t cap)`
+  - `f_gap` (function, line 244) `static size_t f_gap(const ccm_input *in, char *out, size_t cap)`
+  - `f_border_top_style` (function, line 256) `static size_t f_border_top_style(const ccm_input *in, char *out, size_t cap)`
+  - `f_border_right_style` (function, line 259) `static size_t f_border_right_style(const ccm_input *in, char *out, size_t cap)`
+  - `f_border_bottom_style` (function, line 262) `static size_t f_border_bottom_style(const ccm_input *in, char *out, size_t cap)`
+  - `f_border_left_style` (function, line 265) `static size_t f_border_left_style(const ccm_input *in, char *out, size_t cap)`
+  - `f_flex_grow` (function, line 269) `static size_t f_flex_grow(const ccm_input *in, char *out, size_t cap)`
+  - `f_flex_shrink` (function, line 272) `static size_t f_flex_shrink(const ccm_input *in, char *out, size_t cap)`
+  - `ccm_get` (function, line 310) `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)`
+  - `ccm_property_count` (function, line 323) `size_t ccm_property_count(void)`
+  - `ccm_property_name` (function, line 325) `const char *ccm_property_name(size_t i)`
+  - `LEN_FIELD` (macro, line 223) `#define LEN_FIELD(NAME, FIELD, UNSET)`
+  - `CCM_NPROPS` (macro, line 308) `#define CCM_NPROPS`
+- Depends on: `include/css_computed.h`
+
 ## src/css_gradient.c
 - Doc: find_gradient_call: Locates a gradient function call `fn` (e.g. "linear-gradient(") in v...
 - Layer: utility
@@ -379,6 +432,7 @@ static dom_node_id qs_walk(const dom_inde...`
   - `dom_sibling_node` (function, line 1011) `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
   - `dom_create_char_node` (function, line 1018) `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
          ...`
+  - `dom_native_node` (function, line 1032) `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
   - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
   - `DOM_QS_MAX_SELECTORS` (macro, line 380) `#define DOM_QS_MAX_SELECTORS`
   - `IH_BLOCK_SIZE` (macro, line 818) `#define IH_BLOCK_SIZE`
@@ -434,64 +488,6 @@ static dom_node_id qs_walk(const dom_inde...`
   - `dl_build_path` (function, line 195) `dl_status dl_build_path(const char *dir, const char *name, char *out, size_t outsz)`
   - `dl_check_size` (function, line 213) `dl_status dl_check_size(size_t len)`
 - Depends on: `include/download.h`, `include/pdf_export.h`
-
-## src/flex_layout.c
-- Doc: nn: bounded by FX_MAX_ITEMS (no VLAs).
-- Layer: presentation
-- Language: c
-- Symbols:
-  - `nn` (function, line 19) `static double nn(double v)`
-  - `fx_flex_line` (function, line 23) `fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,
-                ...`
-  - `fx_grid_columns` (function, line 128) `fx_status fx_grid_columns(double avail, size_t ncols, double gap,
-                          doubl...`
-  - `fx_autofill_count` (function, line 133) `size_t fx_autofill_count(double avail, double gap, double minw)`
-  - `fx_grid_columns_weighted` (function, line 143) `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
-                      ...`
-  - `fx_grid_place_span` (function, line 177) `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
-                      ...`
-  - `fx_grid_area_hash` (function, line 319) `unsigned fx_grid_area_hash(const char *name)`
-  - `area_token_is_null_cell` (function, line 343) `static int area_token_is_null_cell(const char *tok, size_t len)`
-  - `fx_grid_areas_parse` (function, line 349) `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)`
-  - `fx_grid_area_rect` (function, line 424) `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,
-                            int ...`
-  - `float_pack_impl` (function, line 466) `static fx_status float_pack_impl(const double *width, const int *side, size_t n,
-                ...`
-  - `fx_float_insets` (function, line 506) `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
-                 ...`
-  - `fx_float_pack` (function, line 546) `fx_status fx_float_pack(const double *width, const int *side, size_t n,
-                        d...`
-  - `fx_float_pack_wrap` (function, line 551) `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
-                    ...`
-  - `fx_grid_cell` (function, line 593) `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)`
-  - `fx_auto_margins` (function, line 605) `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
-                ...`
-  - `fx_auto_min_size` (function, line 628) `double fx_auto_min_size(double min_content, double basis, double author_min,
-                    ...`
-  - `fx_multicol_used` (function, line 645) `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
-               ...`
-  - `fx_multicol_balance` (function, line 682) `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
-                        ...`
-  - `fx_justify_name` (function, line 713) `const char *fx_justify_name(fx_justify j)`
-  - `fx_column_place` (function, line 725) `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
-            ...`
-  - `fx_column_place_m` (function, line 732) `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
-              ...`
-  - `fx_cross_offset` (function, line 793) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)`
-  - `gl_ws` (function, line 805) `static int gl_ws(char c)`
-  - `gl_lower` (function, line 809) `static int gl_lower(char c)`
-  - `gl_kw` (function, line 812) `static int gl_kw(const char *p, const char *end, const char *kw)`
-  - `gl_int` (function, line 822) `static int gl_int(const char *p, const char *end, long cap, long *out)`
-  - `gl_side_range` (function, line 837) `static int gl_side_range(const char *p, const char *end, int *out)`
-  - `fx_grid_line_side` (function, line 860) `int fx_grid_line_side(const char *s, int *out)`
-  - `fx_grid_line_parse` (function, line 868) `int fx_grid_line_parse(const char *v, int *start, int *end)`
-  - `gl_is_span` (function, line 885) `static int gl_is_span(int v)`
-  - `gl_is_line` (function, line 886) `static int gl_is_line(int v)`
-  - `fx_grid_line_resolve` (function, line 888) `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
-  - `fx_col_free_split` (function, line 930) `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
-        ...`
-  - `FX_EPS` (macro, line 16) `#define FX_EPS`
-- Depends on: `include/flex_layout.h`
 
 
 Next: [KB_src_p4.md](KB_src_p4.md)

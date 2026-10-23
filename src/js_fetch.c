@@ -94,7 +94,15 @@ static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
  * then deleted from the global, so page script cannot call it directly. */
 static const char JD_XHR_SHIM[] =
     "(function(){"
-    "var HF=__G.__hostFetch; if(typeof HF!=='function')return;"
+    "var HF0=__G.__hostFetch; if(typeof HF0!=='function')return;"
+    /* Request log for the Freebug Network panel: bounded, closure-held; the REPL shim takes
+     * the reader once and deletes the global (a page that asks first only sees its own
+     * requests -- no timing, Date is normalized). */
+    "var NLOG=[]; function HF(m,u,b){ var r; try{ r=HF0(m,u,b); }catch(e){ r=null; }"
+    "  if(NLOG.length<512) NLOG.push({method:String(m),url:String(u),status:r?(r.status|0):0,"
+    "    size:r&&r.body?r.body.length:0,type:r&&r.contentType?String(r.contentType):''});"
+    "  if(r===null) throw new Error('fetch'); return r; }"
+    "Object.defineProperty(__G,'__netLog',{value:function(){return NLOG;},configurable:true,writable:true,enumerable:false});"
     "function fire(o,n){var f=o['on'+n]; if(typeof f==='function'){try{f.call(o);}catch(e){}}}"
     "function XHR(){this.readyState=0;this.status=0;this.statusText='';this.responseText='';"
     "this.response='';this.responseType='';this.responseURL='';this.withCredentials=false;"

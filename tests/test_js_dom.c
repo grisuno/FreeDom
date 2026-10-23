@@ -294,8 +294,6 @@ static void test_intersection_observer_fires_synthetically(void **state) {
               " + (en.target===document.body)", "1,true,1,true");
     EXPECT(f, "var hit2=0; var io2=new IntersectionObserver(function(){hit2++;});"
               "io2.observe(document.body); io2.disconnect(); __fireDeferred(); hit2", "0");
-    EXPECT(f, "var mh=0; var mo=new MutationObserver(function(){mh++;});"
-              "mo.observe(document.body,{childList:true}); __fireDeferred(); mh", "1");
 }
 
 /* 7j slice1 RED: style write-through + getComputedStyle inline + RO/MO synthetic. */
@@ -333,13 +331,82 @@ static void test_resize_observer_fires_synthetically(void **state) {
               "ro2.observe(document.body); ro2.disconnect(); __fireDeferred(); hit2", "0");
 }
 
-static void test_mutation_observer_fires_synthetically(void **state) {
+/* MutationObserver is REAL (spec/js_mutation.md): records come only from actual DOM
+ * mutations, in order, and are delivered once per microtask checkpoint (js_pump_jobs). */
+static void test_mutation_observer_reports_child_list(void **state) {
     fixture *f = (fixture *)*state;
-    EXPECT(f, "var mh=0; var mo=new MutationObserver(function(){mh++;});"
-              "mo.observe(document.body,{childList:true}); __fireDeferred(); mh", "1");
-    EXPECT(f, "var mh2=0; var mo2=new MutationObserver(function(){mh2++;});"
-              "mo2.observe(document.body,{childList:true}); mo2.disconnect();"
-              "__fireDeferred(); mh2", "0");
+    EXPECT(f, "globalThis.recs=[]; var mo=new MutationObserver(function(r){ recs=recs.concat(r); });"
+              "mo.observe(document.body,{childList:true});"
+              "globalThis.d=document.createElement('div'); document.body.appendChild(d);"
+              "document.body.removeChild(d); recs.length", "0");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "recs.length+','+recs[0].type+','+recs[0].addedNodes.length+','+(recs[0].addedNodes[0]===d)"
+              "+','+recs[1].removedNodes.length+','+(recs[1].target===document.body)",
+           "2,childList,1,true,1,true");
+    EXPECT(f, "globalThis.quiet=0; var mq=new MutationObserver(function(){quiet++;});"
+              "mq.observe(document.body,{childList:true}); 0", "0");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "quiet", "0");
+    EXPECT(f, "globalThis.gone=0; var mg=new MutationObserver(function(){gone++;});"
+              "mg.observe(document.body,{childList:true}); mg.disconnect();"
+              "document.body.appendChild(document.createElement('i')); 0", "0");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "gone", "0");
+}
+
+static void test_mutation_observer_reports_attributes(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var el=document.createElement('div'); el.setAttribute('data-a','1'); document.body.appendChild(el);"
+              "globalThis.recs=[]; var mo=new MutationObserver(function(r){ recs=recs.concat(r); });"
+              "mo.observe(el,{attributes:true,attributeOldValue:true,attributeFilter:['data-a']});"
+              "el.setAttribute('data-a','2'); el.setAttribute('data-b','x'); el.removeAttribute('data-a'); 0", "0");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "recs.length+','+recs[0].attributeName+','+recs[0].oldValue+','+recs[1].oldValue",
+           "2,data-a,1,2");
+    EXPECT(f, "var noold=document.createElement('p'); document.body.appendChild(noold);"
+              "globalThis.r2=[]; var m2=new MutationObserver(function(r){ r2=r; });"
+              "m2.observe(noold,{attributes:true}); noold.className='k'; 0", "0");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "r2.length+','+r2[0].oldValue+','+r2[0].attributeName", "1,null,class");
+}
+
+static void test_mutation_observer_subtree_character_data_and_take_records(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var host=document.createElement('div'); globalThis.kid=document.createElement('span');"
+              "host.appendChild(kid); document.body.appendChild(host);"
+              "var t=document.createTextNode('a'); kid.appendChild(t);"
+              "globalThis.seen=[]; var mo=new MutationObserver(function(r){ seen=seen.concat(r); });"
+              "mo.observe(host,{subtree:true,childList:true,characterData:true,characterDataOldValue:true});"
+              "t.data='b'; kid.appendChild(document.createElement('b')); 0", "0");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "seen.length+','+seen[0].type+','+seen[0].oldValue+','+seen[1].type+','+(seen[1].target===kid)",
+           "2,characterData,a,childList,true");
+    EXPECT(f, "var host2=document.createElement('div'); document.body.appendChild(host2);"
+              "globalThis.cnt=0; var m3=new MutationObserver(function(){cnt++;});"
+              "m3.observe(host2,{childList:true}); host2.appendChild(document.createElement('u'));"
+              "var taken=m3.takeRecords(); taken.length", "1");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "cnt", "0");
+    EXPECT(f, "var sub=document.createElement('div'); document.body.appendChild(sub);"
+              "globalThis.c4=0; var m4=new MutationObserver(function(){c4++;});"
+              "m4.observe(sub,{childList:true}); globalThis.deep=document.createElement('em');"
+              "sub.appendChild(deep); 0", "0");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "c4=0; deep.appendChild(document.createElement('s')); 0", "0");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "c4", "0");
+}
+
+/* The natives MutationObserver wraps are sealed again once the shims ran: page script
+ * cannot replace or redefine a `dom` mutator (it could otherwise silence observers or
+ * hijack the bridge). */
+static void test_dom_mutators_are_sealed_after_install(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "['setText','appendChild','insertBefore','moveChildren','removeChild','setAttribute',"
+              "'removeAttribute','setInnerHtml'].map(function(n){ var d=Object.getOwnPropertyDescriptor(dom,n);"
+              "return d.writable||d.configurable?'OPEN:'+n:'ok'; }).join(',')",
+           "ok,ok,ok,ok,ok,ok,ok,ok");
+    EXPECT(f, "var before=dom.setText; try{ dom.setText=function(){}; }catch(e){} dom.setText===before", "true");
 }
 
 /* 7k slice2 RED: attachShadow mirrors into light DOM so pv_build paints it. */
@@ -1666,6 +1733,118 @@ static void test_geom_installed_is_real(void **state) {
     jg_free(&t);
 }
 
+/* Freebug command-line API (spec/freebug_repl.md): $, $$, inspect, keys, values,
+ * getEventListeners, monitorEvents exist ONLY after jd_install_repl_api (the REPL worker);
+ * page scripts never see them, and a page's own `$` (jQuery) is never replaced. */
+static void test_repl_api_is_repl_only_and_nondestructive(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof $$+','+typeof inspect+','+typeof keys+','+typeof getEventListeners", "undefined,undefined,undefined,undefined");
+    EXPECT(f, "globalThis.$=function(){ return 'page'; }; 0", "0");
+    assert_int_equal(jd_install_repl_api(f->ctx), JD_OK);
+    EXPECT(f, "$('p')", "page");
+    EXPECT(f, "$$('p').length>0 && Array.isArray($$('p'))", "true");
+    EXPECT(f, "keys({a:1,b:2}).join()+'|'+values({a:1,b:2}).join()", "a,b|1,2");
+    EXPECT(f, "Object.keys(globalThis).indexOf('$$')", "-1");
+}
+
+static void test_repl_api_inspect_and_event_listeners(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_install_repl_api(f->ctx), JD_OK);
+    EXPECT(f, "var el=document.getElementById('go'); var i=inspect(el);"
+              "i.id+','+(typeof i.tag)+','+(typeof i.attributes)+','+(i.rect===null)", "go,string,object,true");
+    EXPECT(f, "function onc(){} el.addEventListener('click',onc,true); el.addEventListener('click',function(){});"
+              "var L=getEventListeners(el); L.click.length+','+(L.click[0].listener===onc)+','+L.click[0].useCapture",
+           "2,true,true");
+    EXPECT(f, "getEventListeners(document.createElement('div')).click===undefined", "true");
+    EXPECT(f, "var n=0, old=console.log; console.log=function(){ n++; };"
+              "monitorEvents(el,'click'); el.dispatchEvent(new Event('click')); unmonitorEvents(el,'click');"
+              "el.dispatchEvent(new Event('click')); console.log=old; n", "1");
+}
+
+/* Real ResizeObserver (spec/js_observers.md): on a trusted page it reports the laid-out
+ * size on the first measurement, stays quiet while the size is unchanged, and fires again
+ * when a new layout changes it. Zero-size targets and targets without a rect never fire. */
+static void test_ro_real_reports_size_changes(void **state) {
+    fixture *f = (fixture *)*state;
+    dom_node_id go = js_handle(f, "document.getElementById('go')._h");
+    assert_int_equal(jt_enable_observers(f->ctx), JD_OK);
+    EXPECT(f, "globalThis.__ro=[];"
+              "var ro=new ResizeObserver(function(es){ es.forEach(function(e){"
+              "__ro.push(e.target.id+':'+e.contentRect.width+'x'+e.contentRect.height"
+              "+':'+e.borderBoxSize[0].inlineSize); }); });"
+              "ro.observe(document.getElementById('go')); ro.observe(document.getElementsByTagName('p')[0]);"
+              "__ro.length", "0");
+    jg_table t;
+    jg_init(&t);
+    t.scroll_y = 0; t.view_w = 1000; t.view_h = 700; t.doc_w = 1000; t.doc_h = 3000;
+    assert_int_equal(jg_add(&t, go, 10, 100, 200, 50), 0);
+    assert_int_equal(jg_aggregate(&t, geom_parent, f->idx), 0);
+    assert_int_equal(jd_set_geometry(f->ctx, &t), JD_OK);
+    assert_int_equal(jt_geometry_changed(f->ctx), JD_OK);
+    EXPECT(f, "__ro.join(',')", "go:200x50:200");
+    assert_int_equal(jt_geometry_changed(f->ctx), JD_OK);
+    EXPECT(f, "__ro.length", "1");
+    jg_free(&t);
+    jg_init(&t);
+    t.scroll_y = 0; t.view_w = 1000; t.view_h = 700; t.doc_w = 1000; t.doc_h = 3000;
+    assert_int_equal(jg_add(&t, go, 10, 100, 320, 50), 0);
+    assert_int_equal(jg_aggregate(&t, geom_parent, f->idx), 0);
+    assert_int_equal(jd_set_geometry(f->ctx, &t), JD_OK);
+    assert_int_equal(jt_geometry_changed(f->ctx), JD_OK);
+    EXPECT(f, "__ro.length+','+__ro[1]", "2,go:320x50:320");
+    jg_free(&t);
+}
+
+/* Real IntersectionObserver (spec/js_observers.md): on a trusted page the observer reports
+ * the element's laid-out rect against the real viewport (+ rootMargin), and re-evaluates
+ * when the parent re-installs geometry after a scroll -- lazy loaders fire on scroll. */
+static void test_io_real_follows_scroll(void **state) {
+    fixture *f = (fixture *)*state;
+    dom_node_id go = js_handle(f, "document.getElementById('go')._h");
+    dom_node_id p1 = js_handle(f, "document.getElementsByTagName('p')[0]._h");
+    assert_int_equal(jt_enable_observers(f->ctx), JD_OK);
+    EXPECT(f, "globalThis.__log=[];"
+              "var io=new IntersectionObserver(function(es){ es.forEach(function(e){"
+              "__log.push(e.target.nodeName.toLowerCase()+':'+(e.isIntersecting?1:0)); }); },"
+              " {rootMargin:'100px'});"
+              "io.observe(document.getElementById('go')); io.observe(document.getElementsByTagName('p')[0]);"
+              "__log.length", "0");
+    jg_table t;
+    jg_init(&t);
+    t.scroll_y = 0; t.view_w = 1000; t.view_h = 700; t.doc_w = 1000; t.doc_h = 3000;
+    assert_int_equal(jg_add(&t, go, 10, 100, 200, 50), 0);
+    assert_int_equal(jg_add(&t, p1, 0, 2000, 300, 20), 0);
+    assert_int_equal(jg_aggregate(&t, geom_parent, f->idx), 0);
+    assert_int_equal(jd_set_geometry(f->ctx, &t), JD_OK);
+    assert_int_equal(jt_geometry_changed(f->ctx), JD_OK);
+    const char *first = NULL;
+    js_result r;
+    assert_int_equal(run(f, "__log.join(',')", &r), JS_OK);
+    first = r.value;
+    assert_true(strstr(first, ":1") != NULL && strstr(first, ":0") != NULL);
+    js_result_free(&r);
+    assert_int_equal(jt_geometry_changed(f->ctx), JD_OK);
+    EXPECT(f, "__log.length", "2");
+    jg_free(&t);
+
+    jg_init(&t);
+    t.scroll_y = 1800; t.view_w = 1000; t.view_h = 700; t.doc_w = 1000; t.doc_h = 3000;
+    assert_int_equal(jg_add(&t, go, 10, 100, 200, 50), 0);
+    assert_int_equal(jg_add(&t, p1, 0, 2000, 300, 20), 0);
+    assert_int_equal(jg_aggregate(&t, geom_parent, f->idx), 0);
+    assert_int_equal(jd_set_geometry(f->ctx, &t), JD_OK);
+    assert_int_equal(jt_geometry_changed(f->ctx), JD_OK);
+    EXPECT(f, "__log.length", "4");
+    jg_free(&t);
+}
+
+/* An untrusted page never gets the real observer: geometry stays private. */
+static void test_io_untrusted_stays_synthetic(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof IntersectionObserver.prototype.observe+','+(typeof __ioTick)",
+              "function,undefined");
+}
+
 static void test_geom_null_ctx(void **state) {
     (void)state;
     assert_int_equal(jd_set_geometry(NULL, NULL), JD_ERR_NULL_ARG);
@@ -2541,7 +2720,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_style_write_through, setup, teardown),
         cmocka_unit_test_setup_teardown(test_get_computed_style_inline, setup, teardown),
         cmocka_unit_test_setup_teardown(test_resize_observer_fires_synthetically, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_mutation_observer_fires_synthetically, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_dom_mutators_are_sealed_after_install, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mutation_observer_reports_child_list, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mutation_observer_reports_attributes, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mutation_observer_subtree_character_data_and_take_records, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_mirror_append, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_mirror_inner_html, setup, teardown),
         cmocka_unit_test_setup_teardown(test_match_media_normalized_viewport, setup, teardown),
@@ -2629,6 +2811,11 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_event_handle_event_object, setup, teardown),
         cmocka_unit_test_setup_teardown(test_geom_absent_is_zero, setup, teardown),
         cmocka_unit_test_setup_teardown(test_geom_installed_is_real, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_io_real_follows_scroll, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_ro_real_reports_size_changes, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_repl_api_is_repl_only_and_nondestructive, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_repl_api_inspect_and_event_listeners, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_io_untrusted_stays_synthetic, setup, teardown),
         cmocka_unit_test(test_geom_null_ctx),
         cmocka_unit_test_setup_teardown(test_history_push_replace_update_location, setup, teardown),
         cmocka_unit_test_setup_teardown(test_history_cross_origin_is_security_error, setup, teardown),

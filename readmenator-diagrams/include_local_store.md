@@ -1,52 +1,55 @@
 # include: local_store
 
-include: local_store groups 16 files (c, h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ds_free: Reads and decrypts path.
+include: local_store groups 26 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. browser_free: Zero-initialise or reset a state.
 
 ```mermaid
 graph LR
-    fuzz["fuzz"]
     include["include"]
     src["src"]
     tests["tests"]
-    fuzz -- "calls into" --> include
-    fuzz -- "calls into" --> src
     include -- "calls into" --> src
     src -- "calls into" --> include
     tests -- "calls into" --> include
     tests -- "calls into" --> src
 ```
 
-## fuzz (7.1)
+## include (5.1)
 
-fuzz groups 1 files (c) around LLVMFuzzerTestOneInput.
+include groups 9 files (h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. browser_free: Zero-initialise or reset a state.
 
-## include (7.2)
+## src (5.2)
 
-include groups 5 files (h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ds_free: Reads and decrypts path.
+src groups 9 files (c) around _POSIX_C_SOURCE, free_page, clear_status, free_history, free_exceptions. clear_status: #include <stdlib.h> #include <string.h> static void...
 
-## src (7.3)
+## tests (5.3)
 
-src groups 5 files (c) around _POSIX_C_SOURCE, fsync_dir, map_ls, ds_write, ds_read. fsync_dir: Best-effort fsync of the directory holding path, for crash durability of...
-
-## tests (7.4)
-
-tests groups 5 files (c) around _POSIX_C_SOURCE, dir, fixture, setup, teardown.
+tests groups 8 files (c) around _POSIX_C_SOURCE, test_init, test_navigate_history, test_navigate_from_middle_discards_future, test_back_forward_bounds. test_url_bar_selection: Omnibar selection model: extend builds a selection, ops...
 
 **Files**:
 
-- fuzz/fuzz_prefs.c
+- include/browser.h
 - include/disk_store.h
+- include/host_conf.h
+- include/hostblock.h
 - include/local_store.h
-- include/prefs.h
-- include/profile.h
-- include/zoom.h
+- include/media_decoder.h
+- include/os_sandbox.h
+- include/renderer.h
+- include/util.h
+- src/browser.c
 - src/disk_store.c
+- src/host_conf.c
+- src/hostblock.c
 - src/local_store.c
-- src/prefs.c
+- src/media_decoder.c
+- src/os_sandbox.c
 - src/profile.c
-- src/zoom.c
+- src/renderer.c
+- tests/test_browser.c
 - tests/test_disk_store.c
+- tests/test_host_conf.c
+- tests/test_hostblock.c
 - tests/test_local_store.c
-- tests/test_prefs.c
-- tests/test_profile.c
-- tests/test_zoom.c
+- tests/test_media_decoder.c
+- tests/test_os_sandbox.c
+- tests/test_renderer.c

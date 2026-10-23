@@ -1,6 +1,38 @@
 # API (page 9 of 11)
 Previous: [API_p8.md](API_p8.md)
 
+## src/os_sandbox.c
+Depends on: `include/os_sandbox.h`
+- `os_policy_allows` (function) `src/os_sandbox.c:52` `int os_policy_allows(long syscall_nr)`
+- `os_policy_size` (function) `src/os_sandbox.c:59` `size_t os_policy_size(void)`
+- `os_prot_allowed` (function) `src/os_sandbox.c:65` `int os_prot_allowed(long syscall_nr, unsigned long prot)` -- W^X mirror: mmap/mprotect keep their membership but lose any request that asks * for executable memory.
+- `os_no_dump` (function) `src/os_sandbox.c:75` `os_status os_no_dump(void)` -- Anti-dump defense in depth: undumpable + no core file, so neither a crash nor a foreign ptrace can exfiltrate worker...
+- `excluded` (function) `src/os_sandbox.c:89` `* intentionally excluded (they need /proc remounting and a post-unshare fork). */
+int os_namespac...`
+- `os_isolate_namespaces` (function) `src/os_sandbox.c:94` `os_status os_isolate_namespaces(void)`
+- `os_policy_allows` (function) `src/os_sandbox.c:106` `int os_policy_allows(long syscall_nr)`
+- `os_policy_size` (function) `src/os_sandbox.c:107` `size_t os_policy_size(void)`
+- `os_prot_allowed` (function) `src/os_sandbox.c:108` `int os_prot_allowed(long syscall_nr, unsigned long prot)`
+- `os_no_dump` (function) `src/os_sandbox.c:111` `os_status os_no_dump(void)`
+- `os_harden` (function) `src/os_sandbox.c:113` `os_status os_harden(os_violation action)`
+- `os_namespace_flags` (function) `src/os_sandbox.c:115` `int os_namespace_flags(void)`
+- `os_isolate_namespaces` (function) `src/os_sandbox.c:116` `os_status os_isolate_namespaces(void)`
+- `os_harden` (function) `src/os_sandbox.c:145` `os_status os_harden(os_violation action)`
+- `number` (function) `src/os_sandbox.c:157` `* number (x32/i386 on x86_64, AArch32 on aarch64). */ prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W |...`
+- `headroom` (function) `src/os_sandbox.c:203` `* wide headroom (room for ~125 allowed syscalls). */ prog[at_mmap].jt = (unsigned char)(prot_check - (at_mmap + 1));`
+- `ll_create_ruleset` (function) `src/os_sandbox.c:239` `static long ll_create_ruleset(const struct landlock_ruleset_attr *attr,
+                         ...`
+- `ll_add_rule` (function) `src/os_sandbox.c:244` `static long ll_add_rule(int fd, enum landlock_rule_type type,
+                        const void ...`
+- `ll_restrict_self` (function) `src/os_sandbox.c:249` `static long ll_restrict_self(int fd, uint32_t flags)`
+- `ll_handled` (function) `src/os_sandbox.c:265` `static uint64_t ll_handled(int abi)` -- The set of FS rights the ruleset handles, masked to what this ABI supports so * landlock_create_ruleset does not...
+- `ll_read_access` (function) `src/os_sandbox.c:279` `static uint64_t ll_read_access(uint64_t handled)`
+- `os_landlock_abi` (function) `src/os_sandbox.c:285` `int os_landlock_abi(void)`
+- `os_landlock_restrict` (function) `src/os_sandbox.c:291` `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
+- `fields` (function) `src/os_sandbox.c:303` `* long as the unknown trailing fields (net/scoped) are zero, which they are. */ int rfd =...`
+- `os_landlock_abi` (function) `src/os_sandbox.c:331` `int os_landlock_abi(void)`
+- `os_landlock_restrict` (function) `src/os_sandbox.c:332` `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
+
 ## src/page_view.c
 Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_vars.h`, `include/dom.h`, `include/flex_layout.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 - `cp1252_to_ucs` (function) `src/page_view.c:89` `static unsigned int cp1252_to_ucs(unsigned char c)` -- Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80).
@@ -283,6 +315,11 @@ static int root_els_match(void *ctx,...`
 - `line` (function) `src/page_view.c:6725` `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
 - `pv_css_drops` (function) `src/page_view.c:6866` `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
                        const cha...` -- Diagnostic counterpart to pv_build_styled: same document, same collected CSS text, same @media/root-scope context...
+- `pv_computed_new` (function) `src/page_view.c:6900` `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
+  ...`
+- `pv_computed_get` (function) `src/page_view.c:6919` `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
+                    do...`
+- `pv_computed_free` (function) `src/page_view.c:6941` `void pv_computed_free(pv_computed *pc)`
 
 ## src/pdf_export.c
 Depends on: `include/pdf_export.h`

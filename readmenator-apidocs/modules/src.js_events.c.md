@@ -123,8 +123,6 @@ int jd_fire_click(js_context *ctx, dom_node_id node_id)
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jd_fire_submit"></a>
@@ -152,8 +150,6 @@ Returns 0 if preventDefault() was called, 1 if the default action should proceed
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="jd_fire_mouse_event"></a>
@@ -180,8 +176,6 @@ int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id, const char *event_
 **Returns:** `int`
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
 
 ---
 

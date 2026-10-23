@@ -3,28 +3,6 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `tr_mul` | function | `src/css.c:2418` | `static void tr_mul(double out[6], const double l[6], const double r[6])` |
-| `translate3d` | function | `src/css.c:2523` | `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine  * renders z as nothing,...` |
-| `translateX` | function | `src/css.c:2786` | `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc...` |
-| `translateZ` | function | `src/css.c:2795` | `* translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking * context Firefox builds);` |
-| `var` | function | `src/css.c:2269` | `* cvr_resolve then substitutes var() references when a declaration's value is  * interpreted (par...` |
-| `var` | function | `src/css.c:5282` | `* collected and forty var() declarations -- font sizes, widths, radii, the      * whole theme -- ...` |
-| `wide_claim` | function | `src/css.c:4117` | `static int wide_claim(const char *prop, css_decl *dst, int cap,                       char (*urlt...` |
-| `writing` | function | `src/css.c:3275` | `* Wide keywords claim BOTH slots without writing (inheritance then flows, as  * the tail does for...` |
-| `CAR_TEXT_MAX` | macro | `src/css_atrule.c:13` | `#define CAR_TEXT_MAX` |
-| `car_effective_spec` | function | `src/css_atrule.c:171` | `int car_effective_spec(int spec, int layer, int important)` |
-| `car_layer_rank` | function | `src/css_atrule.c:148` | `int car_layer_rank(car_layers *L, const char *name, size_t len)` |
-| `car_supports` | function | `src/css_atrule.c:141` | `int car_supports(const char *s, size_t a, size_t b, const car_ops *ops)` |
-| `close_paren` | function | `src/css_atrule.c:33` | `static size_t close_paren(const char *s, size_t open, size_t b)` |
-| `copy_trimmed` | function | `src/css_atrule.c:54` | `static int copy_trimmed(const char *s, size_t a, size_t b, char *dst, size_t cap, int lower)` |
-| `eval_condition` | function | `src/css_atrule.c:114` | `static int eval_condition(const char *s, size_t a, size_t b, const car_ops *ops,                 ...` |
-| `eval_declaration` | function | `src/css_atrule.c:68` | `static int eval_declaration(const char *s, size_t a, size_t b, const car_ops *ops, int *ok)` |
-| `eval_in_parens` | function | `src/css_atrule.c:85` | `static int eval_in_parens(const char *s, size_t *i, size_t b, const car_ops *ops,                ...` |
-| `keyword_at` | function | `src/css_atrule.c:23` | `static int keyword_at(const char *s, size_t i, size_t b, const char *kw)` |
-| `skip_ws` | function | `src/css_atrule.c:17` | `static size_t skip_ws(const char *s, size_t i, size_t b)` |
-| `AUTO_REJECT` | macro | `src/css_box.c:1196` | `#define AUTO_REJECT` |
-| `AUTO_RESET` | macro | `src/css_box.c:1198` | `#define AUTO_RESET` |
-| `AUTO_RESET_NONE` | macro | `src/css_box.c:1202` | `#define AUTO_RESET_NONE` |
 | `AUTO_VALUE` | macro | `src/css_box.c:1197` | `#define AUTO_VALUE` |
 | `CSS_CALC_MAX_DEPTH` | macro | `src/css_box.c:682` | `#define CSS_CALC_MAX_DEPTH` |
 | `CSS_MATHFN_MAX_ARGS` | macro | `src/css_box.c:686` | `#define CSS_MATHFN_MAX_ARGS` |
@@ -121,6 +99,51 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `span` | function | `src/css_color.c:325` | `* span (when a slash is present) into ab/ae, and returns the component count,  * or -1. Bounded: ...` |
 | `srgb_encode` | function | `src/css_color.c:495` | `static unsigned char srgb_encode(double lin)` |
 | `strncmp` | function | `src/css_color.c:598` | `strncmp(buf, "oklab(", 6) == 0 \|\| strncmp(buf, "oklch(", 6) == 0)` |
+| `CCM_NPROPS` | macro | `src/css_computed.c:308` | `#define CCM_NPROPS` |
+| `LEN_FIELD` | macro | `src/css_computed.c:223` | `#define LEN_FIELD(NAME, FIELD, UNSET)` |
+| `NAME` | function | `src/css_computed.c:224` | `static size_t NAME(const ccm_input *in, char *out, size_t cap)` |
+| `ccm_get` | function | `src/css_computed.c:310` | `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)` |
+| `ccm_prop` | struct | `src/css_computed.c:276` | `` |
+| `ccm_property_count` | function | `src/css_computed.c:323` | `size_t ccm_property_count(void)` |
+| `ccm_property_name` | function | `src/css_computed.c:325` | `const char *ccm_property_name(size_t i)` |
+| `f_align_items` | function | `src/css_computed.c:151` | `static size_t f_align_items(const ccm_input *in, char *out, size_t cap)` |
+| `f_background_color` | function | `src/css_computed.c:198` | `static size_t f_background_color(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_bottom_style` | function | `src/css_computed.c:262` | `static size_t f_border_bottom_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_left_style` | function | `src/css_computed.c:265` | `static size_t f_border_left_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_right_style` | function | `src/css_computed.c:259` | `static size_t f_border_right_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_style` | function | `src/css_computed.c:217` | `static size_t f_border_style(int v, char *out, size_t cap)` |
+| `f_border_top_style` | function | `src/css_computed.c:256` | `static size_t f_border_top_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_box_sizing` | function | `src/css_computed.c:130` | `static size_t f_box_sizing(const ccm_input *in, char *out, size_t cap)` |
+| `f_clear` | function | `src/css_computed.c:110` | `static size_t f_clear(const ccm_input *in, char *out, size_t cap)` |
+| `f_color` | function | `src/css_computed.c:193` | `static size_t f_color(const ccm_input *in, char *out, size_t cap)` |
+| `f_cursor` | function | `src/css_computed.c:157` | `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)` |
+| `f_display` | function | `src/css_computed.c:77` | `static size_t f_display(const ccm_input *in, char *out, size_t cap)` |
+| `f_flex_direction` | function | `src/css_computed.c:135` | `static size_t f_flex_direction(const ccm_input *in, char *out, size_t cap)` |
+| `f_flex_grow` | function | `src/css_computed.c:269` | `static size_t f_flex_grow(const ccm_input *in, char *out, size_t cap)` |
+| `f_flex_shrink` | function | `src/css_computed.c:272` | `static size_t f_flex_shrink(const ccm_input *in, char *out, size_t cap)` |
+| `f_flex_wrap` | function | `src/css_computed.c:140` | `static size_t f_flex_wrap(const ccm_input *in, char *out, size_t cap)` |
+| `f_float` | function | `src/css_computed.c:105` | `static size_t f_float(const ccm_input *in, char *out, size_t cap)` |
+| `f_font_size` | function | `src/css_computed.c:181` | `static size_t f_font_size(const ccm_input *in, char *out, size_t cap)` |
+| `f_font_style` | function | `src/css_computed.c:173` | `static size_t f_font_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_font_weight` | function | `src/css_computed.c:177` | `static size_t f_font_weight(const ccm_input *in, char *out, size_t cap)` |
+| `f_gap` | function | `src/css_computed.c:244` | `static size_t f_gap(const ccm_input *in, char *out, size_t cap)` |
+| `f_justify` | function | `src/css_computed.c:145` | `static size_t f_justify(const ccm_input *in, char *out, size_t cap)` |
+| `f_line_height` | function | `src/css_computed.c:187` | `static size_t f_line_height(const ccm_input *in, char *out, size_t cap)` |
+| `f_opacity` | function | `src/css_computed.c:204` | `static size_t f_opacity(const ccm_input *in, char *out, size_t cap)` |
+| `f_overflow_x` | function | `src/css_computed.c:115` | `static size_t f_overflow_x(const ccm_input *in, char *out, size_t cap)` |
+| `f_overflow_y` | function | `src/css_computed.c:120` | `static size_t f_overflow_y(const ccm_input *in, char *out, size_t cap)` |
+| `f_position` | function | `src/css_computed.c:95` | `static size_t f_position(const ccm_input *in, char *out, size_t cap)` |
+| `f_text_align` | function | `src/css_computed.c:125` | `static size_t f_text_align(const ccm_input *in, char *out, size_t cap)` |
+| `f_text_transform` | function | `src/css_computed.c:168` | `static size_t f_text_transform(const ccm_input *in, char *out, size_t cap)` |
+| `f_visibility` | function | `src/css_computed.c:100` | `static size_t f_visibility(const ccm_input *in, char *out, size_t cap)` |
+| `f_white_space` | function | `src/css_computed.c:163` | `static size_t f_white_space(const ccm_input *in, char *out, size_t cap)` |
+| `f_z_index` | function | `src/css_computed.c:212` | `static size_t f_z_index(const ccm_input *in, char *out, size_t cap)` |
+| `put` | function | `src/css_computed.c:9` | `static size_t put(char *out, size_t cap, const char *s)` |
+| `put_enum` | function | `src/css_computed.c:42` | `static size_t put_enum(char *out, size_t cap, int v, const char *const *names, size_t n,         ...` |
+| `put_len` | function | `src/css_computed.c:37` | `static size_t put_len(char *out, size_t cap, int v, const char *unset_text)` |
+| `put_rgb` | function | `src/css_computed.c:26` | `static size_t put_rgb(char *out, size_t cap, int rgb, int alpha_pct)` |
+| `putf` | function | `src/css_computed.c:17` | `static size_t putf(char *out, size_t cap, const char *fmt, ...)` |
+| `ua_display` | function | `src/css_computed.c:49` | `static const char *ua_display(const char *tag)` |
 | `CG_RAD_FLOOR` | macro | `src/css_gradient.c:754` | `#define CG_RAD_FLOOR` |
 | `CG_RAD_PM_MAX` | macro | `src/css_gradient.c:597` | `#define CG_RAD_PM_MAX` |
 | `CG_RAD_PX_MAX` | macro | `src/css_gradient.c:598` | `#define CG_RAD_PX_MAX` |
@@ -340,6 +363,7 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `dom_insert_before` | function | `src/dom.c:917` | `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,              ...` |
 | `dom_matches` | function | `src/dom.c:487` | `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)` |
 | `dom_move_children` | function | `src/dom.c:948` | `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,                ...` |
+| `dom_native_node` | function | `src/dom.c:1032` | `const void *dom_native_node(const dom_index *idx, dom_node_id node)` |
 | `dom_next_sibling` | function | `src/dom.c:545` | `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)` |
 | `dom_node_at` | function | `src/dom.c:522` | `dom_node_id dom_node_at(const dom_index *idx, size_t position)` |
 | `dom_node_count` | function | `src/dom.c:344` | `size_t dom_node_count(const dom_index *idx)` |
@@ -472,29 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `fb_buffer_count` | function | `src/freebug.c:101` | `size_t fb_buffer_count(const fb_buffer *b)` |
 | `fb_buffer_free` | function | `src/freebug.c:91` | `void fb_buffer_free(fb_buffer *b)` |
 | `fb_buffer_init` | function | `src/freebug.c:15` | `void fb_buffer_init(fb_buffer *b)` |
-| `fb_buffer_push` | function | `src/freebug.c:19` | `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)` |
-| `fb_buffer_push_loc` | function | `src/freebug.c:23` | `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,                    ...` |
-| `fb_buffer_reset` | function | `src/freebug.c:78` | `void fb_buffer_reset(fb_buffer *b)` |
-| `fb_level_name` | function | `src/freebug.c:110` | `const char *fb_level_name(int level)` |
-| `whole` | function | `src/freebug.c:5` | `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);` |
-| `BLOCKED` | function | `src/freedom.c:940` | `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);` |
-| `CSS_DROPS_REPORT_MAX` | macro | `src/freedom.c:168` | `#define CSS_DROPS_REPORT_MAX` |
-| `EXIT_ERROR` | macro | `src/freedom.c:49` | `#define EXIT_ERROR` |
-| `EXIT_OK` | macro | `src/freedom.c:48` | `#define EXIT_OK` |
-| `EXIT_USAGE` | macro | `src/freedom.c:50` | `#define EXIT_USAGE` |
-| `HL_FONT_MAX_BYTES` | macro | `src/freedom.c:579` | `#define HL_FONT_MAX_BYTES` |
-| `HL_FONT_MAX_SHEETS` | macro | `src/freedom.c:578` | `#define HL_FONT_MAX_SHEETS` |
-| `HL_JS_NAV_MAX` | macro | `src/freedom.c:909` | `#define HL_JS_NAV_MAX` |
-| `_DEFAULT_SOURCE` | macro | `src/freedom.c:10` | `#define _DEFAULT_SOURCE` |
-| `_POSIX_C_SOURCE` | macro | `src/freedom.c:9` | `#define _POSIX_C_SOURCE` |
-| `apply_as_gui` | function | `src/freedom.c:248` | `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)` |
-| `elsewhere` | function | `src/freedom.c:975` | `* page whose script immediately forwards elsewhere (e.g. a search engine's  * JS-capability inter...` |
-| `fetch_and_render_one` | function | `src/freedom.c:913` | `static int fetch_and_render_one(const char *url, char **out_nav)` |
-| `first` | function | `src/freedom.c:725` | `* always cleared first (fetch_and_render may paint several pages per      * process). A NULL top_...` |
-| `foldback_cookies` | function | `src/freedom.c:520` | `static void foldback_cookies(const char *url, const char *jar)` |
-| `gets` | function | `src/freedom.c:439` | `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...` |
-| `headless_fetch` | function | `src/freedom.c:443` | `static int headless_fetch(void *ctx, const char *method, const char *url,                        ...` |
-| `headless_load_hosts` | function | `src/freedom.c:237` | `static void headless_load_hosts(void)` |
-| `hl_css_sink` | function | `src/freedom.c:602` | `static void hl_css_sink(void *vctx, const char *url,                         const char *body, si...` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

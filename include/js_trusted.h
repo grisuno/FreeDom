@@ -27,6 +27,17 @@
  * pages never get it (typeof open === 'undefined'). */
 jd_status jt_enable_open(js_context *ctx);
 
+/* Replaces the synthetic IntersectionObserver with a REAL one for a TRUSTED host
+ * (spec/js_observers.md): it measures each target's laid-out rect (js_geom) against the
+ * real viewport plus rootMargin and notifies on every change of state. Untrusted pages
+ * keep the synthetic always-intersecting observer and never see geometry. */
+jd_status jt_enable_observers(js_context *ctx);
+
+/* The parent installed a new geometry table (layout or scroll changed): re-evaluates
+ * every observed target and fires a window 'scroll' event when the scroll moved. A
+ * no-op when jt_enable_observers was never called. Bounded by JT_IO_MAX targets. */
+jd_status jt_geometry_changed(js_context *ctx);
+
 /* Drains the recorded window.open targets as "url\n" lines, or NULL when none. */
 char *jt_take_opens(js_context *ctx);
 

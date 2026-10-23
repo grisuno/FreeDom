@@ -41,7 +41,7 @@ pe_status pe_safe_basename(const char *title, char *out, size_t outsz)
 
 **Returns:** `pe_status`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_pdf_export.c.md#llvmfuzzertestoneinput), [`dl_pick_name`](src.download.c.md#dl_pick_name), [`pe_build_path_ext`](#pe_build_path_ext)
+*Called by:* [`dl_pick_name`](src.download.c.md#dl_pick_name), [`pe_build_path_ext`](#pe_build_path_ext)
 
 ---
 
@@ -95,8 +95,6 @@ pe_status pe_build_path(const char *dir, const char *title, char *out, size_t ou
 **Returns:** `pe_status`
 
 *Calls:* [`pe_build_path_ext`](#pe_build_path_ext)
-
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_pdf_export.c.md#llvmfuzzertestoneinput)
 
 ---
 

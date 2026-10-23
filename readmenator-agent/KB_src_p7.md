@@ -21,6 +21,7 @@ Previous: [KB_src_p6.md](KB_src_p6.md)
   - `form_rec` (struct, line 4318)
   - `form_table` (struct, line 4324)
   - `pv_flow_reg` (struct, line 4680)
+  - `pv_computed` (struct, line 6895)
   - `pv_def_h` (struct, line 2238)
   - `cols` (type_alias, line 1265) `typedef struct pv_cont_info { int id, display, gap, justify, cols;`
   - `mb` (type_alias, line 1367) `typedef struct pv_box_info { int l, r, w, center, mt, mb;`
@@ -285,6 +286,11 @@ static int root_els_match(void *ctx,...`
          * a 2-col...`
   - `pv_css_drops` (function, line 6866) `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
                        const cha...`
+  - `pv_computed_new` (function, line 6900) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
+  ...`
+  - `pv_computed_get` (function, line 6919) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
+                    do...`
+  - `pv_computed_free` (function, line 6941) `void pv_computed_free(pv_computed *pc)`
   - `positions` (function, line 139) `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);`
   - `content` (function, line 1187) `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);`
   - `address` (function, line 1255) `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <=...`
@@ -480,18 +486,6 @@ static int root_els_match(void *ctx,...`
   - `rd_image_fail_label` (function, line 875) `const char *rd_image_fail_label(img_fail_reason reason)`
   - `place` (function, line 236) `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
-
-## src/render_policy.c
-- Layer: presentation
-- Language: c
-- Symbols:
-  - `rdp_caps_safe` (function, line 17) `rdp_caps rdp_caps_safe(void)`
-  - `rdp_is_tracking_pixel` (function, line 22) `int rdp_is_tracking_pixel(int w, int h)`
-  - `rdp_image_decision` (function, line 28) `rdp_img_decision rdp_image_decision(rdp_caps caps,
-                                    const char...`
-  - `rdp_img_reason` (function, line 63) `const char *rdp_img_reason(rdp_img_decision d)`
-  - `rdp_images_warning` (function, line 74) `const char *rdp_images_warning(void)`
-- Depends on: `include/data_url.h`, `include/render_policy.h`, `include/request_policy.h`
 
 
 Next: [KB_src_p8.md](KB_src_p8.md)

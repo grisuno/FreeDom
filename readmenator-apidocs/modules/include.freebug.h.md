@@ -112,7 +112,7 @@ Zero-initialise b (no allocation).
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput), [`tab_eval`](src.tab.c.md#tab_eval), [`tab_load_full`](src.tab.c.md#tab_load_full)
+*Called by:* [`tab_eval`](src.tab.c.md#tab_eval), [`tab_load_full`](src.tab.c.md#tab_load_full)
 
 ---
 
@@ -184,8 +184,6 @@ Caps and fail-closed behaviour are identical to fb_buffer_push; the file copy is
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput)
-
 ---
 
 <a id="fb_buffer_reset"></a>
@@ -208,7 +206,7 @@ Safe on NULL / a zeroed struct.
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput), [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`run_js`](src.tab.c.md#run_js)
 
 ---
 
@@ -232,7 +230,7 @@ Idempotent; safe on NULL.
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput), [`tab_eval`](src.tab.c.md#tab_eval), [`tab_eval_result_free`](src.tab.c.md#tab_eval_result_free), [`tab_load_full`](src.tab.c.md#tab_load_full), [`tab_page_free`](src.tab.c.md#tab_page_free)
+*Called by:* [`tab_eval`](src.tab.c.md#tab_eval), [`tab_eval_result_free`](src.tab.c.md#tab_eval_result_free), [`tab_load_full`](src.tab.c.md#tab_load_full), [`tab_page_free`](src.tab.c.md#tab_page_free)
 
 ---
 
@@ -256,7 +254,7 @@ Number of stored entries (0 for NULL).
 
 **Returns:** `size_t`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput), [`FB_MAX_FILE_BYTES`](src.tab.c.md#fb_max_file_bytes)
+*Called by:* [`FB_MAX_FILE_BYTES`](src.tab.c.md#fb_max_file_bytes)
 
 ---
 

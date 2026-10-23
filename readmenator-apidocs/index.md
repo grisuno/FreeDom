@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 213 modules, 3341 documented entities, documentation coverage 39.5% (1312/3319 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 191 modules, 3327 documented entities, documentation coverage 39.8% (1314/3305 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (112), h (86), py (10), sh (5)
+Languages: c (90), h (87), py (10), sh (4)
 
 ## Modules
 
@@ -15,37 +15,8 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`app`](modules/app.py.md) | app.py | 0 | 3 | 100.0% |
 | [`docker-entrypoint.sh`](modules/docker-entrypoint.sh.md) |  | 0 | 0 | 0.0% |
 | [`docker_run.sh`](modules/docker_run.sh.md) | Thin wrapper. | 0 | 0 | 100.0% |
-| [`fuzz.sh`](modules/fuzz.sh.md) | Thin wrapper. | 0 | 0 | 100.0% |
 | [`install.sh`](modules/install.sh.md) | Exit immediately if a command exits with a non-zero status, | 0 | 0 | 100.0% |
 | [`run_freedom.sh`](modules/run_freedom.sh.md) | Thin wrapper. | 0 | 0 | 100.0% |
-
-### `fuzz`
-
-| Module | Summary | Types | Callables | Coverage |
-|---|---|---|---|---|
-| [`fuzz/fuzz_css.c`](modules/fuzz.fuzz_css.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_data_url.c`](modules/fuzz.fuzz_data_url.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_dom.c`](modules/fuzz.fuzz_dom.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_dom_debug.c`](modules/fuzz.fuzz_dom_debug.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_download.c`](modules/fuzz.fuzz_download.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_freebug.c`](modules/fuzz.fuzz_freebug.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_html_parse.c`](modules/fuzz.fuzz_html_parse.c.md) |  | 0 | 0 | 0.0% |
-| [`fuzz/fuzz_image_decode.c`](modules/fuzz.fuzz_image_decode.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_import_map.c`](modules/fuzz.fuzz_import_map.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_js_dom.c`](modules/fuzz.fuzz_js_dom.c.md) |  | 0 | 2 | 33.3% |
-| [`fuzz/fuzz_js_geom.c`](modules/fuzz.fuzz_js_geom.c.md) |  | 1 | 1 | 0.0% |
-| [`fuzz/fuzz_js_sandbox.c`](modules/fuzz.fuzz_js_sandbox.c.md) |  | 1 | 2 | 25.0% |
-| [`fuzz/fuzz_page_view.c`](modules/fuzz.fuzz_page_view.c.md) |  | 0 | 0 | 0.0% |
-| [`fuzz/fuzz_pdf_export.c`](modules/fuzz.fuzz_pdf_export.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_prefetch.c`](modules/fuzz.fuzz_prefetch.c.md) | libFuzzer harness for the prefetch lookahead scanner (Hito 29). | 0 | 1 | 50.0% |
-| [`fuzz/fuzz_prefs.c`](modules/fuzz.fuzz_prefs.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_svg_render.c`](modules/fuzz.fuzz_svg_render.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_text_case.c`](modules/fuzz.fuzz_text_case.c.md) | libFuzzer harness for text_case (spec/text_case.md): case mapping and the | 0 | 1 | 50.0% |
-| [`fuzz/fuzz_text_shape.c`](modules/fuzz.fuzz_text_shape.c.md) |  | 0 | 4 | 0.0% |
-| [`fuzz/fuzz_tls_impersonate.c`](modules/fuzz.fuzz_tls_impersonate.c.md) |  | 0 | 0 | 0.0% |
-| [`fuzz/fuzz_url.c`](modules/fuzz.fuzz_url.c.md) |  | 0 | 1 | 0.0% |
-| [`fuzz/fuzz_web_storage.c`](modules/fuzz.fuzz_web_storage.c.md) |  | 0 | 0 | 0.0% |
-| [`fuzz/fuzz_webfont.c`](modules/fuzz.fuzz_webfont.c.md) | libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). | 0 | 1 | 50.0% |
 
 ### `gui`
 
@@ -74,6 +45,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`include/css_box.h`](modules/include.css_box.h.md) |  | 0 | 26 | 0.0% |
 | [`include/css_chain.h`](modules/include.css_chain.h.md) |  | 2 | 5 | 25.0% |
 | [`include/css_color.h`](modules/include.css_color.h.md) |  | 3 | 3 | 42.9% |
+| [`include/css_computed.h`](modules/include.css_computed.h.md) |  | 1 | 4 | 33.3% |
 | [`include/css_decl.h`](modules/include.css_decl.h.md) |  | 2 | 11 | 14.3% |
 | [`include/css_gradient.h`](modules/include.css_gradient.h.md) |  | 4 | 8 | 30.8% |
 | [`include/css_index.h`](modules/include.css_index.h.md) |  | 3 | 3 | 42.9% |
@@ -86,7 +58,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`include/css_vars.h`](modules/include.css_vars.h.md) |  | 4 | 14 | 73.7% |
 | [`include/data_url.h`](modules/include.data_url.h.md) |  | 1 | 4 | 33.3% |
 | [`include/disk_store.h`](modules/include.disk_store.h.md) |  | 1 | 1 | 33.3% |
-| [`include/dom.h`](modules/include.dom.h.md) |  | 4 | 23 | 64.3% |
+| [`include/dom.h`](modules/include.dom.h.md) |  | 4 | 24 | 62.1% |
 | [`include/dom_debug.h`](modules/include.dom_debug.h.md) |  | 0 | 3 | 75.0% |
 | [`include/download.h`](modules/include.download.h.md) |  | 1 | 7 | 11.1% |
 | [`include/flex_layout.h`](modules/include.flex_layout.h.md) |  | 10 | 32 | 53.5% |
@@ -102,7 +74,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`include/image_decode.h`](modules/include.image_decode.h.md) |  | 4 | 8 | 46.2% |
 | [`include/import_map.h`](modules/include.import_map.h.md) |  | 1 | 8 | 30.0% |
 | [`include/interp.h`](modules/include.interp.h.md) |  | 10 | 11 | 31.8% |
-| [`include/js_dom.h`](modules/include.js_dom.h.md) |  | 5 | 12 | 38.9% |
+| [`include/js_dom.h`](modules/include.js_dom.h.md) |  | 5 | 14 | 35.0% |
 | [`include/js_env.h`](modules/include.js_env.h.md) |  | 1 | 1 | 0.0% |
 | [`include/js_geom.h`](modules/include.js_geom.h.md) |  | 3 | 15 | 78.9% |
 | [`include/js_location.h`](modules/include.js_location.h.md) |  | 0 | 5 | 50.0% |
@@ -114,7 +86,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`include/media_decoder.h`](modules/include.media_decoder.h.md) |  | 4 | 7 | 75.0% |
 | [`include/net_realm.h`](modules/include.net_realm.h.md) |  | 4 | 5 | 20.0% |
 | [`include/os_sandbox.h`](modules/include.os_sandbox.h.md) |  | 4 | 7 | 50.0% |
-| [`include/page_view.h`](modules/include.page_view.h.md) |  | 13 | 73 | 59.8% |
+| [`include/page_view.h`](modules/include.page_view.h.md) |  | 14 | 76 | 59.3% |
 | [`include/pdf_export.h`](modules/include.pdf_export.h.md) |  | 1 | 8 | 30.0% |
 | [`include/perf_trace.h`](modules/include.perf_trace.h.md) |  | 5 | 11 | 52.9% |
 | [`include/prefetch.h`](modules/include.prefetch.h.md) |  | 11 | 16 | 53.6% |
@@ -160,6 +132,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`src/css_box.c`](modules/src.css_box.c.md) |  | 3 | 29 | 45.5% |
 | [`src/css_chain.c`](modules/src.css_chain.c.md) |  | 2 | 12 | 46.7% |
 | [`src/css_color.c`](modules/src.css_color.c.md) |  | 1 | 11 | 38.5% |
+| [`src/css_computed.c`](modules/src.css_computed.c.md) |  | 1 | 5 | 28.6% |
 | [`src/css_gradient.c`](modules/src.css_gradient.c.md) |  | 0 | 15 | 18.8% |
 | [`src/css_index.c`](modules/src.css_index.c.md) | css_index -- see include/css_index.h and spec/css_index.md. | 0 | 3 | 75.0% |
 | [`src/css_length.c`](modules/src.css_length.c.md) |  | 0 | 11 | 25.0% |
@@ -171,7 +144,7 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`src/css_vars.c`](modules/src.css_vars.c.md) |  | 0 | 8 | 55.6% |
 | [`src/data_url.c`](modules/src.data_url.c.md) |  | 0 | 4 | 20.0% |
 | [`src/disk_store.c`](modules/src.disk_store.c.md) |  | 0 | 4 | 20.0% |
-| [`src/dom.c`](modules/src.dom.c.md) |  | 7 | 41 | 26.5% |
+| [`src/dom.c`](modules/src.dom.c.md) |  | 7 | 42 | 26.0% |
 | [`src/dom_debug.c`](modules/src.dom_debug.c.md) |  | 1 | 2 | 75.0% |
 | [`src/download.c`](modules/src.download.c.md) |  | 0 | 5 | 16.7% |
 | [`src/flex_layout.c`](modules/src.flex_layout.c.md) |  | 0 | 25 | 34.6% |
@@ -189,8 +162,8 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`src/interp.c`](modules/src.interp.c.md) |  | 0 | 13 | 71.4% |
 | [`src/js_custom_elements.c`](modules/src.js_custom_elements.c.md) |  | 0 | 1 | 0.0% |
 | [`src/js_custom_elements.h`](modules/src.js_custom_elements.h.md) | Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. | 0 | 1 | 50.0% |
-| [`src/js_dom.c`](modules/src.js_dom.c.md) |  | 1 | 21 | 13.0% |
-| [`src/js_dom_ext.c`](modules/src.js_dom_ext.c.md) |  | 0 | 2 | 0.0% |
+| [`src/js_dom.c`](modules/src.js_dom.c.md) |  | 1 | 23 | 12.0% |
+| [`src/js_dom_ext.c`](modules/src.js_dom_ext.c.md) |  | 0 | 4 | 0.0% |
 | [`src/js_dom_ext.h`](modules/src.js_dom_ext.h.md) | Private to js_dom.c / js_dom_ext.c: installs the DOM Standard extras (tree | 0 | 1 | 50.0% |
 | [`src/js_dom_internal.h`](modules/src.js_dom_internal.h.md) | Private to the js_dom family (js_dom.c, js_fetch.c, js_events.c, js_embed.c): the context accessors every native needs. | 0 | 3 | 50.0% |
 | [`src/js_embed.c`](modules/src.js_embed.c.md) |  | 0 | 4 | 40.0% |
@@ -202,13 +175,13 @@ Languages: c (112), h (86), py (10), sh (5)
 | [`src/js_location_internal.h`](modules/src.js_location_internal.h.md) | Private to js_dom.c / js_location.c: the dom.histTarget native lives with the | 0 | 1 | 50.0% |
 | [`src/js_policy.c`](modules/src.js_policy.c.md) |  | 0 | 5 | 50.0% |
 | [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 19 | 43.5% |
-| [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 10 | 33.3% |
+| [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 13 | 33.3% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
-| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 293 | 1.7% |
+| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 297 | 1.7% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
-| [`src/page_view.c`](modules/src.page_view.c.md) |  | 19 | 111 | 44.3% |
+| [`src/page_view.c`](modules/src.page_view.c.md) |  | 20 | 114 | 43.7% |
 | [`src/pdf_export.c`](modules/src.pdf_export.c.md) |  | 0 | 4 | 20.0% |
 | [`src/perf_trace.c`](modules/src.perf_trace.c.md) |  | 0 | 11 | 75.0% |
 | [`src/prefetch.c`](modules/src.prefetch.c.md) |  | 1 | 12 | 42.9% |

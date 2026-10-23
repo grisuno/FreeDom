@@ -41,6 +41,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`cc_rgb`](modules/include.css_color.h.md#cc_rgb) struct in `include/css_color.h`
 - [`cc_status`](modules/include.css_color.h.md#cc_status) enum in `include/css_color.h`
 - [`cch_node`](modules/src.css_chain.c.md#cch_node) struct in `src/css_chain.c`
+- [`ccm_input`](modules/include.css_computed.h.md#ccm_input) struct in `include/css_computed.h`
+- [`ccm_prop`](modules/src.css_computed.c.md#ccm_prop) struct in `src/css_computed.c`
 - [`cg_radial`](modules/include.css_gradient.h.md#cg_radial) struct in `include/css_gradient.h`
 - [`cg_radial_shape`](modules/include.css_gradient.h.md#cg_radial_shape) enum in `include/css_gradient.h`
 - [`cg_radial_size`](modules/include.css_gradient.h.md#cg_radial_size) enum in `include/css_gradient.h`
@@ -196,8 +198,6 @@ Project types nested under the project types they derive from. External bases ar
 - [`fx_justify`](modules/include.flex_layout.h.md#fx_justify) enum in `include/flex_layout.h`
 - [`fx_result`](modules/include.flex_layout.h.md#fx_result) struct in `include/flex_layout.h`
 - [`fx_status`](modules/include.flex_layout.h.md#fx_status) enum in `include/flex_layout.h`
-- [`fz_mod`](modules/fuzz.fuzz_js_sandbox.c.md#fz_mod) struct in `fuzz/fuzz_js_sandbox.c`
-- [`fz_parent`](modules/fuzz.fuzz_js_geom.c.md#fz_parent) struct in `fuzz/fuzz_js_geom.c`
 - [`gif_bits`](modules/src.image_decode.c.md#gif_bits) struct in `src/image_decode.c`
 - [`gif_reader`](modules/src.image_decode.c.md#gif_reader) struct in `src/image_decode.c`
 - [`h`](modules/gui.browser_ui.c.md#h) type_alias in `gui/browser_ui.c`
@@ -353,6 +353,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`pv_box_def`](modules/include.page_view.h.md#pv_box_def) struct in `include/page_view.h`
 - [`pv_box_info`](modules/src.page_view.c.md#pv_box_info) struct in `src/page_view.c`
 - [`pv_box_reg`](modules/src.page_view.c.md#pv_box_reg) struct in `src/page_view.c`
+- [`pv_computed`](modules/include.page_view.h.md#pv_computed) type_alias in `include/page_view.h`
+- [`pv_computed`](modules/src.page_view.c.md#pv_computed) struct in `src/page_view.c`
 - [`pv_cont_def`](modules/include.page_view.h.md#pv_cont_def) struct in `include/page_view.h`
 - [`pv_cont_info`](modules/src.page_view.c.md#pv_cont_info) struct in `src/page_view.c`
 - [`pv_container_reg`](modules/src.page_view.c.md#pv_container_reg) struct in `src/page_view.c`

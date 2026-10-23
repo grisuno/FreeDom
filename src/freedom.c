@@ -115,6 +115,7 @@ static int g_images = 0;
 /* Set by --dump-console: after the headless render, print the captured Freebug
  * console (page console.* output + any uncaught script error). Implies running JS. */
 static int g_dump_console = 0;
+static const char *g_eval_expr = NULL;  /* --eval=EXPR: one Freebug REPL line against the loaded page */
 
 /* Set by --dump-dom: print the paint-ready render tree (dom_debug) to stdout instead
  * of the page render, the agent-readable instrument for diagnosing layout/paint gaps.
@@ -745,14 +746,25 @@ static int render_page(const char *html, size_t len, const char *top_url,
      * page its real geometry now, so a timer/rAF that measures an element sees what
      * the export will paint (spec/js_geom.md). tab_set_geometry sends nothing for an
      * untrusted load. */
-    if (wc.net && page.view != NULL && page.next_timer_ms >= 0) {
+    if (wc.net && page.view != NULL) {
         rd_doc *gdoc = NULL;
+        int geom_sent = 0;
         if (rd_build(page.view, wc_render_caps(wc), top_url, &gdoc) == RD_OK) {
             jg_table geom;
             jg_init(&geom);
-            if (ui_page_geometry(gdoc, &geom) == UI_OK) (void)tab_set_geometry(t, &geom);
+            if (ui_page_geometry(gdoc, &geom) == UI_OK)
+                geom_sent = (tab_set_geometry(t, &geom) == TAB_OK);
             jg_free(&geom);
             rd_free(gdoc);
+        }
+        /* Observer callbacks (lazy loaders) fire on that geometry and may mutate the DOM
+         * with no timer pending: pull the refreshed view without advancing the clock. */
+        if (geom_sent && page.nav_url == NULL) {
+            tab_page refreshed;
+            if (tab_tick(t, 0, &refreshed) == TAB_OK) {
+                tab_page_free(&page);
+                page = refreshed;
+            }
         }
     }
     enum { HL_TICK_MAX = 240 };
@@ -875,6 +887,17 @@ static int render_page(const char *html, size_t len, const char *top_url,
         }
     }
     rd_free(doc);
+
+    /* --eval: one REPL line (command-line API included) against the page worker, the same
+     * path as the Freebug window; the value prints to stdout, its console output to stderr. */
+    if (g_eval_expr != NULL) {
+        tab_eval_result er;
+        if (tab_eval(t, g_eval_expr, strlen(g_eval_expr), &er) == TAB_OK) {
+            if (er.value != NULL) printf("%s\n", er.value);
+            print_console(&er.console);
+            tab_eval_result_free(&er);
+        }
+    }
 
     /* Developer console (Freebug): show what the page's JS logged and any error. */
     if (g_dump_console) print_console(&page.console);
@@ -1297,6 +1320,10 @@ int main(int argc, char **argv) {
         } else if (strncmp(arg, "--js=", 5) == 0) {
             setenv("FREEDOM_JS", arg + 5, 1);          /* off|allowlist|on */
             js_on = (jsp_mode_from_str(arg + 5) == JSP_ON); /* headless runs JS only on 'on' */
+        } else if (strncmp(arg, "--eval=", 7) == 0 && arg[7] != '\0') {
+            g_eval_expr = arg + 7;
+            js_on = 1;         /* the REPL needs the page's JS context */
+            headless = 1;
         } else if (strcmp(arg, "--dump-console") == 0) {
             g_dump_console = 1;
             headless = 1;      /* it is a headless diagnostic (no window) */
