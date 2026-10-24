@@ -20,4 +20,11 @@ int bb_box_sizes(double sigma, int sizes[3]);
  * arguments or a mask larger than BB_MAX_PIXELS (buffer untouched). */
 int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma);
 
+/* Smallest rectangle of a premultiplied ARGB32 surface that a blur of `sigma` can change: the
+ * bounding box of every pixel with non-zero alpha, grown by the blur's reach (the sum of its three
+ * box radii) and clamped to the surface. rect = {x0, y0, x1, y1}, x1/y1 exclusive. Returns 0 when
+ * no pixel has alpha (nothing to blur), 1 otherwise. Everything outside rect stays 0 after the blur,
+ * so blurring just rect is identical to blurring the whole surface. */
+int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4]);
+
 #endif

@@ -566,7 +566,51 @@ static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
  * dropped. Whitespace inside a bracket (a quoted attribute value) or inside the
  * parentheses of :nth-child(...) does NOT split a compound. Specificity is the
  * sum over all compounds (id*100 + (class+attr+pseudo)*10 + type). */
-int csel_parse(const char *s, size_t a, size_t b, css_sel *sel) {
+/* ---- ancestor filter (include/css_select.h csel_anc_reject) ---- */
+
+static unsigned long long feat_bits(unsigned kind, const char *tok, size_t len) {
+    char folded[CSS_TOK_MAX];
+    if (len >= CSS_TOK_MAX) {            /* the same fold csel_ident_eq applies to long names */
+        csel_ident_fold(tok, len, folded);
+        tok = folded;
+        len = strlen(folded);
+    }
+    unsigned long long h = 1469598103934665603ull ^ ((unsigned long long)kind * 0x9E3779B97F4A7C15ull);
+    for (size_t i = 0; i < len; ++i) { h ^= (unsigned char)tok[i]; h *= 1099511628211ull; }
+    return (1ull << (h & 63u)) | (1ull << ((h >> 7) & 63u));
+}
+
+enum { FEAT_TAG = 1, FEAT_ID = 2, FEAT_CLASS = 3 };
+
+unsigned long long csel_element_feature_bits(const css_element *e) {
+    unsigned long long b = 0;
+    if (e == NULL) return 0;
+    if (e->tag != NULL && e->tag[0] != '\0') b |= feat_bits(FEAT_TAG, e->tag, strlen(e->tag));
+    if (e->id != NULL && e->id[0] != '\0') b |= feat_bits(FEAT_ID, e->id, strlen(e->id));
+    for (size_t i = 0; i < e->nclasses; ++i)
+        if (e->classes[i] != NULL && e->classes[i][0] != '\0')
+            b |= feat_bits(FEAT_CLASS, e->classes[i], strlen(e->classes[i]));
+    return b;
+}
+
+/* What the ancestors of the subject must contain: walk left from the subject while the combinator
+ * is descendant or child; each compound reached is an ancestor. A `+` or `~` stops the walk (the
+ * compound to its left is a sibling, and nothing further is claimed). Attributes and pseudo-classes
+ * add no requirement. */
+static unsigned long long compute_anc_req(const css_sel *sel) {
+    unsigned long long req = 0;
+    for (int j = sel->nparts - 1; j >= 1; --j) {
+        if (sel->comb[j] != COMB_DESCENDANT && sel->comb[j] != COMB_CHILD) break;
+        const css_compound *c = &sel->parts[j - 1];
+        if (c->has_tag && c->tag[0] != '\0') req |= feat_bits(FEAT_TAG, c->tag, strlen(c->tag));
+        if (c->has_id && c->id[0] != '\0') req |= feat_bits(FEAT_ID, c->id, strlen(c->id));
+        for (int k = 0; k < c->ncls; ++k)
+            if (c->cls[k][0] != '\0') req |= feat_bits(FEAT_CLASS, c->cls[k], strlen(c->cls[k]));
+    }
+    return req;
+}
+
+static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel) {
     while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
     while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
     if (a >= b) return 0;
@@ -653,6 +697,26 @@ int csel_parse(const char *s, size_t a, size_t b, css_sel *sel) {
                 (sel->parts[k].has_tag ? 1 : 0);
     }
     sel->spec = spec;
+    return 1;
+}
+
+/* What the subject element must itself carry. */
+static unsigned long long compute_subj_req(const css_sel *sel) {
+    if (sel->nparts < 1) return 0;
+    const css_compound *c = &sel->parts[sel->nparts - 1];
+    unsigned long long req = 0;
+    if (c->has_tag && c->tag[0] != '\0') req |= feat_bits(FEAT_TAG, c->tag, strlen(c->tag));
+    if (c->has_id && c->id[0] != '\0') req |= feat_bits(FEAT_ID, c->id, strlen(c->id));
+    for (int k = 0; k < c->ncls; ++k)
+        if (c->cls[k][0] != '\0') req |= feat_bits(FEAT_CLASS, c->cls[k], strlen(c->cls[k]));
+    return req;
+}
+
+int csel_parse(const char *s, size_t a, size_t b, css_sel *sel) {
+    if (sel == NULL) return 0;
+    if (!csel_parse_core(s, a, b, sel)) return 0;
+    sel->anc_req = compute_anc_req(sel);
+    sel->subj_req = compute_subj_req(sel);
     return 1;
 }
 

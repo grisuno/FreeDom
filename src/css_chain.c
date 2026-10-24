@@ -254,6 +254,17 @@ static const css_element *build_chain(lxb_dom_element_t *el,
     }
     for (int i = 0; i < n; ++i)
         chain[i].el.parent = (i + 1 < n) ? &chain[i + 1].el : NULL;
+    /* Ancestor feature filter: element i carries the union of the features of everything ABOVE it,
+     * so a selector needing an ancestor tag/id/class nobody above has is skipped unevaluated. */
+    {
+        unsigned long long acc = 0;
+        for (int i = n - 1; i >= 0; --i) {
+            chain[i].el.anc_bloom = acc;
+            chain[i].el.anc_bloom_valid = 1;
+            chain[i].el.own_bloom = csel_element_feature_bits(&chain[i].el);
+            acc |= chain[i].el.own_bloom;
+        }
+    }
 
     /* Structure (positions among siblings, children counts) costs a scan of every sibling list
      * along the chain: only a selector that reads it pays for it (see csel_needs_structure). */

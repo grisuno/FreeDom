@@ -150,6 +150,105 @@ static void test_invalid_index_reports_fallback(void **state) {
     free(buf);
 }
 
+/* --- ancestor filter (spec/css_index.md "Filtro de ancestros") ---------------------------------
+ * A selector with ancestor requirements (`.card a`, `nav > ul li`) is rejected WITHOUT being
+ * evaluated when the element's ancestors lack a required tag/id/class. The filter only ever says
+ * "cannot match": it must never reject a selector that does match. */
+
+static css_element with_bloom(css_element e, const css_element *const *ancestors, size_t n) {
+    uint64_t acc = 0;
+    for (size_t i = 0; i < n; ++i) acc |= csel_element_feature_bits(ancestors[i]);
+    e.anc_bloom = acc;
+    e.own_bloom = csel_element_feature_bits(&e);
+    e.anc_bloom_valid = 1;
+    return e;
+}
+
+static void test_anc_filter_rejects_when_a_required_ancestor_is_absent(void **state) {
+    (void)state;
+    const char *src[] = { "div a", ".card a", "#hdr a", "ul > li a", "a" };
+    css_sel *s = parse_all(src, 5);
+    const char *card[] = { "card" };
+    css_element div_card = elem("div", NULL, card, 1);
+    css_element ul = elem("ul", NULL, NULL, 0);
+    css_element li = elem("li", NULL, NULL, 0);
+    const css_element *anc_all[] = { &div_card, &ul, &li };
+    css_element a_in = with_bloom(elem("a", NULL, NULL, 0), anc_all, 3);
+    for (size_t i = 0; i < 5; ++i) assert_false(csel_anc_reject(&s[i], &a_in));   /* ids aside, all can match */
+    css_element span = elem("span", NULL, NULL, 0);
+    const css_element *anc_span[] = { &span };
+    css_element a_out = with_bloom(elem("a", NULL, NULL, 0), anc_span, 1);
+    assert_true(csel_anc_reject(&s[0], &a_out));      /* needs a div ancestor */
+    assert_true(csel_anc_reject(&s[1], &a_out));      /* needs .card */
+    assert_true(csel_anc_reject(&s[3], &a_out));      /* needs ul and li */
+    assert_false(csel_anc_reject(&s[4], &a_out));     /* no ancestor requirement */
+    free(s);
+}
+
+static void test_anc_filter_is_off_without_a_bloom_and_ignores_sibling_combinators(void **state) {
+    (void)state;
+    const char *src[] = { "div a", "h2 + a", "section h2 + a" };
+    css_sel *s = parse_all(src, 3);
+    css_element bare = elem("a", NULL, NULL, 0);        /* anc_bloom_valid == 0: never rejects */
+    assert_false(csel_anc_reject(&s[0], &bare));
+    css_element span = elem("span", NULL, NULL, 0);
+    const css_element *anc[] = { &span };
+    css_element a = with_bloom(elem("a", NULL, NULL, 0), anc, 1);
+    assert_false(csel_anc_reject(&s[1], &a));           /* `h2` is a SIBLING of a, not an ancestor */
+    assert_false(csel_anc_reject(&s[2], &a));           /* stops at the first + : not provably absent */
+    free(s);
+}
+
+static void test_anc_filter_long_class_names_fold_the_same_way(void **state) {
+    (void)state;
+    char longcls[96], sel[128];
+    memset(longcls, 'x', sizeof longcls - 1);
+    longcls[sizeof longcls - 1] = '\0';
+    snprintf(sel, sizeof sel, ".%s a", longcls);
+    css_sel s;
+    assert_int_equal(csel_parse(sel, 0, strlen(sel), &s), 1);
+    const char *cls[] = { longcls };
+    css_element host = elem("div", NULL, cls, 1);
+    const css_element *anc[] = { &host };
+    css_element a = with_bloom(elem("a", NULL, NULL, 0), anc, 1);
+    assert_false(csel_anc_reject(&s, &a));              /* the folded names agree: it can match */
+}
+
+static void test_anc_filter_never_rejects_a_matching_selector(void **state) {
+    (void)state;
+    const char *src[] = { ".a .b .c", "div > .b p", "#x p", "body *" , "ul li:first-child p" };
+    css_sel *s = parse_all(src, 5);
+    const char *ca[] = { "a" }, *cb[] = { "b" }, *cc[] = { "c" };
+    css_element body = elem("body", NULL, NULL, 0);
+    css_element ea = elem("div", "x", ca, 1);
+    css_element eb = elem("div", NULL, cb, 1);
+    css_element ul = elem("ul", NULL, NULL, 0);
+    css_element li = elem("li", NULL, NULL, 0);
+    css_element span = elem("span", NULL, NULL, 0);
+    const css_element *anc[] = { &body, &ea, &eb, &ul, &li, &span };
+    css_element c = with_bloom(elem("p", NULL, cc, 1), anc, 6);   /* every selector above matches this <p class=c> */
+    for (size_t i = 0; i < 5; ++i) assert_false(csel_anc_reject(&s[i], &c));
+    free(s);
+}
+
+static void test_anc_filter_also_checks_the_subjects_own_tag_id_and_classes(void **state) {
+    (void)state;
+    const char *src[] = { ".a.b", "p.a", "#i.a", "div" , ".a" };
+    css_sel *s = parse_all(src, 5);
+    const char *only_a[] = { "a" }, *ab[] = { "a", "b" };
+    css_element p_a = with_bloom(elem("p", NULL, only_a, 1), NULL, 0);
+    assert_true(csel_anc_reject(&s[0], &p_a));       /* lacks .b */
+    assert_false(csel_anc_reject(&s[1], &p_a));      /* p.a */
+    assert_true(csel_anc_reject(&s[2], &p_a));       /* lacks #i */
+    assert_true(csel_anc_reject(&s[3], &p_a));       /* not a div */
+    assert_false(csel_anc_reject(&s[4], &p_a));
+    css_element div_ab = with_bloom(elem("div", "i", ab, 2), NULL, 0);
+    for (size_t i = 0; i < 5; ++i)
+        if (i == 1) assert_true(csel_anc_reject(&s[i], &div_ab));   /* p.a vs a div */
+        else assert_false(csel_anc_reject(&s[i], &div_ab));
+    free(s);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_buckets_and_order),
@@ -157,6 +256,11 @@ int main(void) {
         cmocka_unit_test(test_long_class_folds),
         cmocka_unit_test(test_matching_implies_candidate),
         cmocka_unit_test(test_invalid_index_reports_fallback),
+        cmocka_unit_test(test_anc_filter_rejects_when_a_required_ancestor_is_absent),
+        cmocka_unit_test(test_anc_filter_is_off_without_a_bloom_and_ignores_sibling_combinators),
+        cmocka_unit_test(test_anc_filter_long_class_names_fold_the_same_way),
+        cmocka_unit_test(test_anc_filter_never_rejects_a_matching_selector),
+        cmocka_unit_test(test_anc_filter_also_checks_the_subjects_own_tag_id_and_classes),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

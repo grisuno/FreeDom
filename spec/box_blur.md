@@ -39,3 +39,11 @@ int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma);
 
 Desenfoque de color/RGBA (las sombras son una máscara × un color), `filter: blur()`
 (tiene su propio camino) y el recorte de la sombra (lo hace el pintor).
+
+## Rectangulo con tinta (2026-10-24)
+`bb_ink_rect` devuelve la caja de los pixeles con alfa > 0 de una superficie ARGB32, ensanchada por el
+alcance del filtro (suma de los tres radios de caja) y acotada a la superficie. Fuera de ella el desenfoque
+deja 0, asi que desenfocar solo ese rectangulo es identico a desenfocar todo. El GUI lo usa en
+`bui_gaussian_blur_surface`: el grupo con `filter: blur()` crea una superficie del tamano del recorte (hasta
+4096 x 4096) y antes pagaba tres pasadas por cada pixel de cada canal aunque el elemento fuera pequeno o
+estuviera vacio. Discord (cientos de `blur(30..130px)`): pintado 10.5 s -> ~0.1 s por cuadro; PNG identico.

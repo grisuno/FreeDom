@@ -12840,13 +12840,20 @@ static cairo_operator_t bui_blend_operator(int mix_blend) {
  * w*h plane of scratch, freed before return; a surface over BB_MAX_PIXELS is left sharp. */
 static void bui_gaussian_blur_surface(cairo_surface_t *surf, double sigma) {
     if (!(sigma > 0.0)) return;
-    int w = cairo_image_surface_get_width(surf);
-    int h = cairo_image_surface_get_height(surf);
-    if (w <= 0 || h <= 0 || (long long)w * h > (long long)BB_MAX_PIXELS) return;
+    int sw = cairo_image_surface_get_width(surf);
+    int sh = cairo_image_surface_get_height(surf);
+    if (sw <= 0 || sh <= 0) return;
     int stride = cairo_image_surface_get_stride(surf);
-    unsigned char *data = cairo_image_surface_get_data(surf);
-    if (data == NULL) return;
+    unsigned char *base = cairo_image_surface_get_data(surf);
+    if (base == NULL) return;
     cairo_surface_flush(surf);
+    /* Only the rectangle that holds ink plus the blur's reach can change: a group-sized surface
+     * that holds one small element used to cost three passes over every pixel of every channel. */
+    int rc[4];
+    if (!bb_ink_rect(base, sw, sh, stride, sigma, rc)) return;
+    int w = rc[2] - rc[0], h = rc[3] - rc[1];
+    if ((long long)w * h > (long long)BB_MAX_PIXELS) return;
+    unsigned char *data = base + (size_t)rc[1] * (size_t)stride + (size_t)rc[0] * 4u;
     unsigned char *plane = (unsigned char *)malloc((size_t)w * (size_t)h);
     if (plane == NULL) return;
     for (int ch = 0; ch < 4; ++ch) {

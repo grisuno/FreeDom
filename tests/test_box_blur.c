@@ -75,6 +75,58 @@ static void test_invalid_arguments(void **state) {
     assert_int_equal(bb_blur_a8(b, 8192, 4096, 8192, 1.0), -1);
 }
 
+/* --- ink bounds: blur only where there is something to blur --------------------------------- */
+
+static void put_px(unsigned char *d, int stride, int x, int y, unsigned char a) {
+    unsigned char *p = d + (size_t)y * (size_t)stride + (size_t)x * 4u;
+    p[0] = p[1] = p[2] = a; p[3] = a;
+}
+
+static void test_ink_rect_empty_surface_has_no_ink(void **state) {
+    (void)state;
+    unsigned char *d = calloc(40u * 30u * 4u, 1);
+    int r[4];
+    assert_int_equal(bb_ink_rect(d, 40, 30, 160, 5.0, r), 0);
+    free(d);
+}
+
+static void test_ink_rect_grows_by_the_blur_reach_and_clamps(void **state) {
+    (void)state;
+    unsigned char *d = calloc(100u * 80u * 4u, 1);
+    put_px(d, 400, 50, 40, 255);
+    int r[4], sizes[3];
+    assert_int_equal(bb_box_sizes(4.0, sizes), 1);
+    int reach = sizes[0] / 2 + sizes[1] / 2 + sizes[2] / 2;
+    assert_int_equal(bb_ink_rect(d, 100, 80, 400, 4.0, r), 1);
+    assert_int_equal(r[0], 50 - reach);
+    assert_int_equal(r[1], 40 - reach);
+    assert_int_equal(r[2], 50 + reach + 1);
+    assert_int_equal(r[3], 40 + reach + 1);
+    put_px(d, 400, 0, 0, 255);
+    assert_int_equal(bb_ink_rect(d, 100, 80, 400, 4.0, r), 1);
+    assert_int_equal(r[0], 0);
+    assert_int_equal(r[1], 0);
+    free(d);
+}
+
+static void test_ink_rect_covers_every_pixel_the_blur_can_touch(void **state) {
+    (void)state;
+    enum { W = 64, H = 48 };
+    unsigned char *a = calloc(W * H, 1), *b = calloc(W * H, 1);
+    a[20 * W + 30] = 255;
+    memcpy(b, a, W * H);
+    assert_int_equal(bb_blur_a8(a, W, H, W, 3.0), 1);
+    unsigned char *argb = calloc(W * H * 4u, 1);
+    put_px(argb, W * 4, 30, 20, 255);
+    int r[4];
+    assert_int_equal(bb_ink_rect(argb, W, H, W * 4, 3.0, r), 1);
+    for (int y = 0; y < H; ++y)
+        for (int x = 0; x < W; ++x)
+            if (a[y * W + x] != 0)
+                assert_true(x >= r[0] && x < r[2] && y >= r[1] && y < r[3]);
+    free(a); free(b); free(argb);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_box_sizes),
@@ -82,6 +134,9 @@ int main(void) {
         cmocka_unit_test(test_zero_sigma_is_identity),
         cmocka_unit_test(test_uniform_interior_unchanged),
         cmocka_unit_test(test_invalid_arguments),
+        cmocka_unit_test(test_ink_rect_empty_surface_has_no_ink),
+        cmocka_unit_test(test_ink_rect_grows_by_the_blur_reach_and_clamps),
+        cmocka_unit_test(test_ink_rect_covers_every_pixel_the_blur_can_touch),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

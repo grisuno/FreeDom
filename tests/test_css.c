@@ -4326,7 +4326,7 @@ static void test_table_sheet_cascade(void **state) {
     (void)state;
     css_sheet *sh = NULL;
     assert_int_equal(css_parse("table{border-collapse:collapse;empty-cells:hide;caption-side:bottom;table-layout:fixed}", 0, &sh), CSS_OK);
-    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL, 0, 0.0, NULL };
+    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL, 0, 0.0, NULL, 0, 0, 0 };
     css_style s = css_resolve_el(sh, &el, "border-spacing:4px", 0);
     assert_int_equal(s.border_collapse, CSS_BCOL_COLLAPSE);
     assert_int_equal(s.empty_cells, CSS_EC_HIDE);

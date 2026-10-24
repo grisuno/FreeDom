@@ -53,3 +53,30 @@ int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma) {
     free(tmp);
     return 1;
 }
+
+int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4]) {
+    int sizes[3];
+    if (argb == NULL || rect == NULL || w <= 0 || h <= 0 || stride < w * 4) return 0;
+    if (!bb_box_sizes(sigma, sizes)) return 0;
+    int x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (int y = 0; y < h; ++y) {
+        const unsigned char *row = argb + (size_t)y * (size_t)stride;
+        int first = -1, last = -1;
+        for (int x = 0; x < w; ++x)
+            if (row[x * 4 + 3] != 0) { first = x; break; }
+        if (first < 0) continue;
+        for (int x = w - 1; x >= first; --x)
+            if (row[x * 4 + 3] != 0) { last = x; break; }
+        if (first < x0) x0 = first;
+        if (last > x1) x1 = last;
+        if (y < y0) y0 = y;
+        y1 = y;
+    }
+    if (x1 < 0) return 0;
+    int reach = sizes[0] / 2 + sizes[1] / 2 + sizes[2] / 2;
+    rect[0] = (x0 - reach > 0) ? x0 - reach : 0;
+    rect[1] = (y0 - reach > 0) ? y0 - reach : 0;
+    rect[2] = (x1 + reach + 1 < w) ? x1 + reach + 1 : w;
+    rect[3] = (y1 + reach + 1 < h) ? y1 + reach + 1 : h;
+    return 1;
+}

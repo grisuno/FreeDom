@@ -1155,6 +1155,13 @@ typedef struct css_element {
      * its parent's computed chain, supplied top-down by the engine like
      * font_size. NULL = none, and var() then sees only the page-global table. */
     const struct cvr_chain *vars;
+    /* (appended last so positional initialisers keep working) Ancestor feature filter (css_select.h csel_anc_reject): the union of csel feature bits of
+     * every ANCESTOR's tag, id and classes. Valid only when anc_bloom_valid is 1; zero (the
+     * default) means "unknown" and never rejects anything, so a view that does not compute it is
+     * exactly as before. */
+    unsigned long long anc_bloom;
+    unsigned long long own_bloom;   /* the element's OWN tag/id/class bits (same hashing) */
+    int anc_bloom_valid;
 } css_element;
 
 /* As css_resolve, but matches descendant (`A B`) and child (`A > B`) combinators

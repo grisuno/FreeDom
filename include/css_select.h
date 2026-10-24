@@ -146,6 +146,13 @@ typedef struct css_sel {
     int  layer;     /* @layer rank (css_atrule), 0 = unlayered */
     css_sub_sel subs[CSS_MAX_SUB_SELS];
     int  nsubs;
+    /* Feature bits every ancestor chain must contain for this selector to match (the tags, ids and
+     * classes of the compounds linked to the subject by descendant/child combinators). 0 = no
+     * requirement. Computed by csel_parse; see csel_anc_reject. */
+    unsigned long long anc_req;
+    /* Feature bits the SUBJECT element itself must have (its compound's tag, id and every class):
+     * the index keys a selector by only one of them, this checks the rest without evaluating. */
+    unsigned long long subj_req;
 } css_sel;
 
 /* Parses the complex selector s[a,b) into *sel (spec computed; order/rule left to
@@ -161,6 +168,17 @@ int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);
  * pseudo-element kind; otherwise set to -1. */
 int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
                  int allow_pseudo_el, int *pseudo_kind);
+
+/* Ancestor filter. csel_element_feature_bits: the bits of one element's tag, id and classes (two
+ * bits per feature, hashed the way csel_ident_eq compares). csel_anc_reject: 1 when the selector
+ * REQUIRES a feature that none of the element's ancestors has (or that the element itself lacks:
+ * a class or tag of its own compound), so it cannot match and need not be evaluated; 0 when it might. Conservative by construction: no bloom (anc_bloom_valid == 0) or no
+ * requirement answers 0, and only compounds reachable through descendant/child combinators count. */
+unsigned long long csel_element_feature_bits(const css_element *e);
+static inline int csel_anc_reject(const css_sel *sel, const css_element *el) {
+    return el->anc_bloom_valid && ((sel->anc_req & ~el->anc_bloom) != 0ull ||
+                                   (sel->subj_req & ~el->own_bloom) != 0ull);
+}
 
 /* True when matching *sel can read sibling/child STRUCTURE (nth positions, of-type counts,
  * :empty, :has(), `+`/`~`): an element's position among its siblings and its children count.

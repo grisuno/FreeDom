@@ -6275,6 +6275,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
             if (si >= sheet->nsels) continue;
             const css_sel *sel = &sheet->sels[si];
             int pseudo_kind = -1;
+            if (csel_anc_reject(sel, el)) continue;   /* an ancestor it needs is absent */
             if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;
             if (want_pseudo != 0) {
                 if (pseudo_kind != pseudo_of(want_pseudo)) continue;
@@ -6351,6 +6352,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
         for (size_t si = 0; si < sheet->nsels; ++si) {
             const css_sel *sel = &sheet->sels[si];
             int pseudo_kind = -1;
+            if (csel_anc_reject(sel, el)) continue;   /* an ancestor it needs is absent */
             if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;
             if (want_pseudo != 0) {
                 if (pseudo_kind != pseudo_of(want_pseudo)) continue;
