@@ -48,7 +48,64 @@ struct js_context {
     /* Realms (spec/js_sandbox.md 7c): extra contexts on rt, freed before ctx. */
     JSContext           *realms[JS_REALM_MAX];
     size_t               nrealms;
+    /* Promises rejected with no handler yet (spec/js_sandbox.md 7d): reported through the
+     * page's __onUnhandledRejection once the job queue drains, unless a handler arrived. */
+    JSValue              rej_promise[JS_REJECT_MAX];
+    JSValue              rej_reason[JS_REJECT_MAX];
+    size_t               nrej;
 };
+
+/* --- unhandled-rejection tracking --- */
+
+static void rej_remove(js_context *c, size_t i) {
+    JS_FreeValue(c->ctx, c->rej_promise[i]);
+    JS_FreeValue(c->ctx, c->rej_reason[i]);
+    c->nrej--;
+    c->rej_promise[i] = c->rej_promise[c->nrej];
+    c->rej_reason[i]  = c->rej_reason[c->nrej];
+}
+
+static void js_rejection_cb(JSContext *jc, JSValueConst promise, JSValueConst reason,
+                            bool is_handled, void *opaque) {
+    js_context *c = (js_context *)opaque;
+    if (is_handled) {
+        for (size_t i = 0; i < c->nrej; ++i)
+            if (JS_VALUE_GET_PTR(c->rej_promise[i]) == JS_VALUE_GET_PTR(promise)) {
+                rej_remove(c, i);
+                return;
+            }
+        return;
+    }
+    if (c->nrej >= JS_REJECT_MAX) return;
+    c->rej_promise[c->nrej] = JS_DupValue(jc, promise);
+    c->rej_reason[c->nrej]  = JS_DupValue(jc, reason);
+    c->nrej++;
+}
+
+/* Hands each still-unhandled rejection to the page, oldest first. The list is detached
+ * before any page code runs, so a handler that rejects again only queues for next time. */
+static void rej_report(js_context *c) {
+    if (c->nrej == 0) return;
+    JSValue ps[JS_REJECT_MAX], rs[JS_REJECT_MAX];
+    size_t n = c->nrej;
+    memcpy(ps, c->rej_promise, n * sizeof ps[0]);
+    memcpy(rs, c->rej_reason,  n * sizeof rs[0]);
+    c->nrej = 0;
+    JSValue g = JS_GetGlobalObject(c->ctx);
+    JSValue fn = JS_GetPropertyStr(c->ctx, g, "__onUnhandledRejection");
+    for (size_t i = 0; i < n; ++i) {
+        if (JS_IsFunction(c->ctx, fn)) {
+            JSValue args[2] = { ps[i], rs[i] };
+            JSValue r = JS_Call(c->ctx, fn, JS_UNDEFINED, 2, args);
+            if (JS_IsException(r)) JS_FreeValue(c->ctx, JS_GetException(c->ctx));
+            JS_FreeValue(c->ctx, r);
+        }
+        JS_FreeValue(c->ctx, ps[i]);
+        JS_FreeValue(c->ctx, rs[i]);
+    }
+    JS_FreeValue(c->ctx, fn);
+    JS_FreeValue(c->ctx, g);
+}
 
 /* --- bounded allocator (QuickJS backend) --- */
 
@@ -297,6 +354,7 @@ js_status js_context_new(const js_limits *lim, js_context **out) {
     /* Hard limits before any context exists so they cover everything. */
     JS_SetMaxStackSize(c->rt, l.max_stack_bytes);
     JS_SetInterruptHandler(c->rt, js_interrupt_cb, c);
+    JS_SetHostPromiseRejectionTracker(c->rt, js_rejection_cb, c);
 
     /* JS_NewContext adds only compute intrinsics: no std/os/require/print. */
     c->ctx = JS_NewContext(c->rt);
@@ -315,6 +373,7 @@ js_status js_context_new(const js_limits *lim, js_context **out) {
 
 void js_context_free(js_context *ctx) {
     if (ctx == NULL) return;
+    while (ctx->nrej > 0 && ctx->ctx != NULL) rej_remove(ctx, ctx->nrej - 1);
     for (size_t i = 0; i < ctx->nrealms; ++i) JS_FreeContext(ctx->realms[i]);
     ctx->nrealms = 0;
     if (ctx->ctx != NULL) JS_FreeContext(ctx->ctx);
@@ -445,6 +504,7 @@ int js_pump_jobs(js_context *ctx, int max_jobs) {
         ran++;
         if (ctx->interrupted) break;          /* time budget hit */
     }
+    if (!ctx->interrupted && !JS_IsJobPending(ctx->rt)) rej_report(ctx);
     ctx->has_deadline = 0;
     return ran;
 }

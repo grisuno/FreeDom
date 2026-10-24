@@ -1446,3 +1446,16 @@ El fondo `currentColor` es el `color` computado del elemento, heredado si no dec
   el run); si el encabezado es un átomo `inline-block` el margen es del átomo y no se filtra
   al bloque de arriba (`heading_in_atom`). Antes el margen UA del `h2` empujaba 26 px cada
   ítem de la barra de slashdot. Test `test_dump_layout_inline_block_heading_keeps_author_margin`.
+
+## Tanda 62 — el margen horizontal negativo es real (CSS 2.1 §10.3.3, Flexbox §9.7)
+
+- **`pv_box_info.l/r` (y sus mitades `%`) son margen + padding y pueden ser negativos.** El padding es
+  >= 0, así que el signo lo da un margen negativo. `css_hbox_resolve` los recortaba a 0: se
+  perdían `margin:0 -15px` de `.row` de Bootstrap, `margin-right:-10%` de la fila hero de GitHub y
+  todo el idioma de "sangrar" una caja hacia afuera. Ahora viajan con su signo.
+- **Un ítem flex mide por su caja EXTERIOR** (`size + ml + mr`): con `margin-right:-100px` el
+  ítem libera 100 px al espacio libre y el hermano `flex:1` los toma. `item_sides_from_box` solo
+  fuerza 0 en un borde que la cascada nunca escribió (`PV_LEN_UNSET` y sin `%`).
+- Sonda `flex-pct-visual` (corpus de `parity`) y test
+  `test_dump_layout_flex_item_negative_margin_widens_sibling` (rojo verificado: sin el fix el
+  texto medía 500 px, Firefox y ahora Freedom 600).

@@ -3634,6 +3634,36 @@ static void test_dump_layout_flex_auto_margin_push_right(void **state) {
     unlink(path);
 }
 
+/* A negative main-axis margin on a flex item widens the free space (Flexbox 9.7: the outer
+ * size is size + margins). GitHub's hero row (`.visual{width:65%;margin-right:-10%}` beside a
+ * `flex:1` text column) gave the text 281 px where Firefox gives 368: the margin was clamped
+ * to 0, so every negative-margin item took space it does not take. */
+static void test_dump_layout_flex_item_negative_margin_widens_sibling(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0}"
+        ".c{display:flex;width:1000px}"
+        ".t{flex:1;background:#111}"
+        ".v{width:50%;margin-right:-10%;background:#222}"
+        "</style></head><body><div class=\"c\"><div class=\"t\">text</div>"
+        "<div class=\"v\">visual</div></div></body></html>";
+    const char *path = "__freedom_negmargin.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_negmargin.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    /* visual = 50% of 1000 = 500; text = 1000 - (500 - 100) = 600. */
+    assert_non_null(strstr(out, "w=600.0"));
+    assert_non_null(strstr(out, "w=500.0"));
+    unlink(path);
+}
+
 /* --- nested column max-content is the max, not the sum (box_engine.md) --- */
 
 /* A one-item flex row holding a `flex-direction:column` card (blocked thumbnail
@@ -4350,6 +4380,7 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_flex_badges_share_row),
         cmocka_unit_test(test_dump_layout_row_nested_in_column),
         cmocka_unit_test(test_dump_layout_flex_auto_margin_push_right),
+        cmocka_unit_test(test_dump_layout_flex_item_negative_margin_widens_sibling),
         cmocka_unit_test(test_download_png_positioned_overflow_clips_own_content),
         cmocka_unit_test(test_dump_layout_band_flushes_line_before_clear),
         cmocka_unit_test(test_dump_layout_line_opening_image_is_inline),

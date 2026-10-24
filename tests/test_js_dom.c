@@ -354,6 +354,68 @@ static void test_mutation_observer_reports_child_list(void **state) {
     EXPECT(f, "gone", "0");
 }
 
+/* A page may observe the DOCUMENT (the usual lazy-loading / hydration idiom): the
+ * observation is rooted at the document element. The window is not a Node and still throws. */
+static void test_mutation_observer_accepts_document_target(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "globalThis.recs=[]; var mo=new MutationObserver(function(r){ recs=recs.concat(r); });"
+              "mo.observe(document,{childList:true,subtree:true});"
+              "document.body.appendChild(document.createElement('div')); 0", "0");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "''+recs.length+','+recs[0].type", "1,childList");
+    EXPECT(f, "var thrown=false; try{ (new MutationObserver(function(){})).observe(window,{childList:true}); }"
+              "catch(e){ thrown=(e instanceof TypeError); } thrown", "true");
+}
+
+/* The engine never invents library objects: a page without jQuery has no `jQuery`/`$`, so
+ * feature detection (`window.jQuery && jQuery.fn`) takes the no-jQuery path, and the SVG
+ * interface family exists for `x instanceof SVGElement`. */
+static void test_no_invented_jquery_and_svg_interfaces_exist(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof window.jQuery+','+typeof window.$", "undefined,undefined");
+    EXPECT(f, "typeof SVGElement+','+typeof SVGSVGElement+','+(SVGSVGElement.prototype instanceof SVGElement)",
+           "function,function,true");
+}
+
+/* Uncaught errors are page-visible like in a browser (HTML 8.1.5.5): a throwing timer or
+ * listener fires `error` on the window with an ErrorEvent, window.onerror sees it first, and an
+ * error thrown by the error handler itself never recurses. */
+static void test_uncaught_timer_error_fires_window_error_event(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "globalThis.got=[]; window.addEventListener('error',function(e){"
+              "got.push((e instanceof ErrorEvent)+':'+e.message+':'+(e.error instanceof TypeError)); });"
+              "window.onerror=function(m){ got.push('onerror:'+m); return true; };"
+              "setTimeout(function(){ null.x; },0); __fireDeferred(); got.length", "2");
+    EXPECT(f, "got[0].indexOf('onerror:')===0 && got[1].indexOf('true:')===0 && got[1].indexOf(':true')>0",
+           "true");
+    EXPECT(f, "globalThis.n=0; window.addEventListener('error',function(){ n++; throw new Error('again'); });"
+              "setTimeout(function(){ null.y; },0); __fireDeferred(); n", "1");
+}
+
+/* A promise rejected with no handler by the end of the job checkpoint fires
+ * `unhandledrejection` (PromiseRejectionEvent: promise, reason); one handled in time does not. */
+static void test_unhandled_rejection_event(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "globalThis.rj=[]; window.addEventListener('unhandledrejection',function(e){"
+              "rj.push(String(e.reason)+':'+(e.promise instanceof Promise)+':'+(e instanceof PromiseRejectionEvent)); });"
+              "Promise.reject('boom'); var ok=Promise.reject('fine'); ok.catch(function(){}); 0", "0");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "rj.join('|')", "boom:true:true");
+}
+
+/* A DocumentFragment and a ShadowRoot are EventTargets and observable (GitHub's invoker
+ * behaviours call addEventListener on every shadow root and observe it). */
+static void test_shadow_root_is_event_target_and_observable(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var h=document.createElement('div'); document.body.appendChild(h);"
+              "var sr=h.attachShadow({mode:'open'}); var hit=0;"
+              "sr.addEventListener('ping',function(){hit++;}); sr.dispatchEvent(new Event('ping'));"
+              "var l=function(){hit+=10;}; sr.addEventListener('pong',l); sr.removeEventListener('pong',l);"
+              "sr.dispatchEvent(new Event('pong'));"
+              "(new MutationObserver(function(){})).observe(sr,{childList:true,subtree:true});"
+              "hit+','+typeof document.createDocumentFragment().addEventListener", "1,function");
+}
+
 static void test_mutation_observer_reports_attributes(void **state) {
     fixture *f = (fixture *)*state;
     EXPECT(f, "var el=document.createElement('div'); el.setAttribute('data-a','1'); document.body.appendChild(el);"
@@ -2888,6 +2950,11 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_mutation_observer_reports_child_list, setup, teardown),
         cmocka_unit_test_setup_teardown(test_mutation_observer_reports_attributes, setup, teardown),
         cmocka_unit_test_setup_teardown(test_mutation_observer_subtree_character_data_and_take_records, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mutation_observer_accepts_document_target, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_no_invented_jquery_and_svg_interfaces_exist, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_uncaught_timer_error_fires_window_error_event, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_unhandled_rejection_event, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_shadow_root_is_event_target_and_observable, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_mirror_append, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_mirror_inner_html, setup, teardown),
         cmocka_unit_test_setup_teardown(test_match_media_normalized_viewport, setup, teardown),

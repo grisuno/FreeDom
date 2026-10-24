@@ -5230,8 +5230,12 @@ static item_sides item_sides_from_box(const rd_doc *doc, int box, double cb_w) {
     sd.pb = box_pad_px(d->pad_b, d->pad_b_pct, cb_w);
     sd.bl = box_edge_px(d->bord_lw); sd.br = box_edge_px(d->bord_rw);
     sd.bt = box_edge_px(d->bord_tw); sd.bb = box_edge_px(d->bord_bw);
-    sd.ml = bx_lp_px(d->box_l, d->box_l_pct, cb_w) - sd.pl; if (sd.ml < 0.0) sd.ml = 0.0;
-    sd.mr = bx_lp_px(d->box_r, d->box_r_pct, cb_w) - sd.pr; if (sd.mr < 0.0) sd.mr = 0.0;
+    /* box_l/box_r are margin + padding; a negative margin is legitimate (Flexbox 9.7 sizes the
+     * item by its outer box), so only an edge the cascade never wrote is forced to 0. */
+    if (d->box_l != PV_LEN_UNSET || d->box_l_pct != 0)
+        sd.ml = bx_lp_px(d->box_l, d->box_l_pct, cb_w) - sd.pl;
+    if (d->box_r != PV_LEN_UNSET || d->box_r_pct != 0)
+        sd.mr = bx_lp_px(d->box_r, d->box_r_pct, cb_w) - sd.pr;
     return sd;
 }
 

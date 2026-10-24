@@ -228,6 +228,18 @@ js_status js_install_realms(js_context *ctx);   /* define __realmNew/__realmEval
 - Los nativos los consume un shim (`jt_enable_worker`) que los captura en su closure y los borra
   del global: la página nunca los ve.
 
+## 7d. Rechazos de promesa sin manejar (`unhandledrejection`, 2026-10-24)
+
+- **Dado** una promesa rechazada sin manejador, **cuando** la cola de microtareas se vacia
+  (`js_pump_jobs` sin interrupcion por presupuesto), **entonces** el sandbox llama a
+  `globalThis.__onUnhandledRejection(promise, reason)` una vez por rechazo, en orden de aparicion.
+- **Dado** una promesa a la que llega un manejador (`.catch`/`.then`) antes de ese punto, **entonces**
+  no se reporta (el rastreador de QuickJS la retira de la lista).
+- Acotado a `JS_REJECT_MAX` (64) pendientes por contexto; el exceso se descarta. La lista se separa
+  antes de ejecutar codigo de la pagina: un manejador que rechaza de nuevo se reporta en el
+  siguiente checkpoint, nunca recursivamente. `js_context_free` libera lo pendiente.
+- Sin `__onUnhandledRejection` (contexto sin shim del DOM) el rechazo se descarta en silencio.
+
 ## 8. Fuera de alcance
 
 - Cableado del DOM inerte (`html_parse`) hacia el motor y exposición de APIs de navegador

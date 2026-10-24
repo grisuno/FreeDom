@@ -177,6 +177,9 @@ void js_set_current_script(js_context *ctx, const char *src, const char *type);
  * to capture and delete. Realms are freed with the context. ctx NULL =>
  * JS_ERR_NULL_ARG; OOM => JS_ERR_OOM. */
 #define JS_REALM_MAX 8
+
+/* Unhandled promise rejections remembered per context between job checkpoints. */
+#define JS_REJECT_MAX 64
 js_status js_install_realms(js_context *ctx);
 
 #endif /* FREEDOM_JS_SANDBOX_H */

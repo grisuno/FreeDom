@@ -501,6 +501,29 @@ Encapsulación real (shadow Oculta light sin slot, proyección en `<slot>`) fuer
 - **Seguridad:** misma capacidad que `appendChild`/`setInnerHtml` (ya selladas, mismo
   documento). Sin red, sin cross-tree. Cota de moves por op (100k, como `replaceChildren`).
 
+## 7l. Errores no capturados, `ShadowRoot` como `EventTarget`, observar el documento (2026-10-24)
+
+- **Errores (HTML 8.1.5.5).** Una excepcion no capturada de un temporizador, un listener o el ciclo
+  de carga pasa por `__reportError`: siempre a la consola de Freebug, luego `window.onerror`
+  (`message, '', 0, 0, error`) y un `ErrorEvent('error')` en `window`. Un error lanzado por el
+  propio manejador solo se registra (un nivel, sin recursion). `window.onerror` y
+  `onunhandledrejection` nacen en `null`.
+- **`unhandledrejection`.** `PromiseRejectionEvent{promise,reason}` en `window`
+  (`js_sandbox.md` 7d); sin `preventDefault()` se registra `Uncaught (in promise) ...`.
+- **`DocumentFragment`/`ShadowRoot` son `EventTarget`:** `addEventListener/removeEventListener/
+  dispatchEvent` con registro perezoso (la clave se reserva en el primer listener; los fragmentos
+  de jQuery que nunca escuchan no cuestan nada). El camino de un evento de fragmento es solo el
+  fragmento (no hay burbuja hacia el host).
+- **`MutationObserver.observe`:** acepta `document` (se enraiza en `documentElement`) y un
+  `ShadowRoot` (se enraiza en su host: el contenido se espeja en el light DOM, 7k); `window`
+  y todo lo que no es nodo siguen lanzando `TypeError`.
+- **Nada inventado.** Se retiraron el stub de `jQuery`/`$`, y los globales `duckduckgo`,
+  `__NEXT_DATA__`, `__NEXT_PRELOADREADY` y `locale_data`: una pagina sin esas bibliotecas no las
+  tiene, y la deteccion de caracteristicas (`window.jQuery && jQuery.fn`) toma el camino correcto
+  (Blogger/masonry lanzaba `cannot set property of undefined` sobre el stub sin `.fn`).
+- **Interfaces SVG:** `SVGElement`, `SVGGraphicsElement`, `SVGSVGElement` y las de figuras existen y
+  encadenan (`SVGSVGElement -> SVGGraphicsElement -> SVGElement -> Element`).
+
 ## 8. Fuera de alcance
 
 - Eventos **interactivos** más allá del click (keydown/mousemove/submit; el click del

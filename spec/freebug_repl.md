@@ -8,8 +8,8 @@
   `getEventListeners`, **entonces** es `undefined`: la API existe SOLO en el worker del REPL
   (Freebug F12, Ctrl+Enter). Una pagina no puede detectar Freebug por esta via.
 - Se definen como globales NO enumerables y nunca reemplazan un global real de la pagina.
-  `$` es `querySelector` salvo que la pagina haya cargado jQuery real; el stub de compatibilidad
-  de Freedom (`JQ.__stub`) SI se reemplaza.
+  `$` es `querySelector` salvo que la pagina haya cargado jQuery real (Freedom ya no inyecta un
+  stub de jQuery, `js_dom.md` 7l).
 - `$(sel[,ctx])`, `$$(sel[,ctx])` (array), `keys(o)`, `values(o)`.
 - `inspect(el)` devuelve `{tag,id,classes,attributes,style,rect,text,children}` y registra una
   linea resumen en la consola; `rect` es `null` sin geometria (host no confiable).

@@ -1531,15 +1531,17 @@ static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
      * percentage half by definition. */
     int lp = cs->pct[CSS_PCT_PAD_LEFT]  + ((ml != CSS_LEN_AUTO) ? cs->pct[CSS_PCT_MARGIN_LEFT]  : 0);
     int rp = cs->pct[CSS_PCT_PAD_RIGHT] + ((mr != CSS_LEN_AUTO) ? cs->pct[CSS_PCT_MARGIN_RIGHT] : 0);
-    out->l = (l > 0) ? l : 0;
-    out->r = (r > 0) ? r : 0;
+    /* margin + padding: negative only through a negative margin (padding is >= 0), which
+     * is real and pulls the box outward (CSS 2.1 10.3.3), so it is kept, not clamped. */
+    out->l = l;
+    out->r = r;
     /* A negative px half is real when a percentage half rides with it: it is
      * `calc(50% - 16px)`, the gutter-aware column width of every grid. */
     out->w = (w != CSS_LEN_UNSET && (w > 0 || (wp > 0 && !CSS_LEN_IS_INTRINSIC(w)
                                                 && w != CSS_LEN_AUTO))) ? w : 0;
     out->w_pct = wp;
-    out->l_pct = (lp > 0) ? lp : 0;
-    out->r_pct = (rp > 0) ? rp : 0;
+    out->l_pct = lp;
+    out->r_pct = rp;
     /* An intrinsic width (fit-content / max-content) is a definite shrink-wrapped
      * width once measured, so auto margins centre it like any other declared one. */
     out->center = (ml == CSS_LEN_AUTO && mr == CSS_LEN_AUTO &&
