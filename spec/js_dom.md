@@ -554,3 +554,19 @@ Encapsulación real (shadow Oculta light sin slot, proyección en `<slot>`) fuer
 - Selectores CSS **completos**: `querySelector` cubre el subconjunto de `css_select`
   (tipo/`.clase`/`#id`/`*`/`[attr]` + combinadores + pseudo-clases estructurales/`:link`); quedan
   fuera `:not()`/`:is()`/`:where()`/`:has()`, of-type y pseudo-elementos `::` (fail closed).
+
+## 7n. Miembros del wrapper compartidos y consultas lineales (2026-10-24)
+- **Un wrapper es un objeto pequeño.** Sus ~100 miembros (getters, `setAttribute`, `classList`, `style`, las
+  ranuras `on<evento>`...) viven UNA vez en un objeto compartido (`__elBase`), copiado a
+  `HTMLElement.prototype` al instalar la superficie moderna, y leen su nodo de `this._h`. El wrapper propio
+  conserva `_h`, `nodeType`, `ELEMENT_NODE`, `nodeName` y el estado por elemento (`_style`, la fachada de
+  `<video>`, `<canvas>`, `<template>`). Una clase de Custom Elements que extiende `HTMLElement` hereda los
+  miembros sin que se pierdan al cambiar el prototipo. Los stubs de interfaz (`Element.prototype.getAttribute`)
+  delegan al objeto compartido (`memD`).
+- **La etiqueta se consulta una vez por nodo** (`tl`), no cuatro.
+- **`querySelectorAll`/`matches`/`closest` no pagan estructura que el selector no lee**
+  (`csel_needs_structure`, `css_select.h`): sin `:nth-*`, `:first/last/only-*`, `:empty`, `:has`, `+`, `~`, no se
+  recorren hermanos ni se cuentan hijos de cada ancestro por candidato. 8000 hermanos: 5223 ms -> 41 ms
+  (el costo era O(N^2)). Con un selector estructural el comportamiento no cambia (incluida la cota
+  `CCH_NTH_MAX`, que falla cerrado en listas muy anchas).
+- `FREEDOM_JS_PROFILE=1` imprime tambien `selectors total=... top: ...` (llamadas por selector).

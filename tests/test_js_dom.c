@@ -432,6 +432,34 @@ static void test_dynamic_script_src_loads_async_and_reports_load_or_error(void *
               "e.onerror=function(){ er=1; }; document.head.appendChild(e); __fireDeferred(); ''+er", "1");
 }
 
+/* The wrapper's members must survive every way a page reaches them: a custom element (its
+ * prototype is replaced by the class prototype), Element.prototype.m.call(el) (what shadow-DOM
+ * polyfills do), per-element on* handler slots, and per-element state (style, classList). These
+ * hold whatever way the members are stored (they were own closures per node; they are shared
+ * prototype members now, because wrapping thousands of nodes dominated GitHub's load time). */
+static void test_element_members_survive_prototype_swaps_and_detached_calls(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "class XA extends HTMLElement{ connectedCallback(){ this.setAttribute('data-up','1'); } }"
+              "customElements.define('x-a',XA); var x=document.createElement('x-a'); document.body.appendChild(x);"
+              "x.setAttribute('id','xa'); x.classList.add('c1'); x.style.color='red';"
+              "[x.getAttribute('data-up'), x.id, x.className, x.getAttribute('style'), x instanceof HTMLElement,"
+              " typeof x.querySelector, typeof x.onclick].join('|')",
+           "1|xa|c1|color: red;|true|function|object");
+    EXPECT(f, "var d1=document.createElement('div'); d1.setAttribute('title','T');"
+              "[Element.prototype.getAttribute.call(d1,'title'),"
+              " HTMLElement.prototype.click===undefined, typeof Node.prototype.appendChild,"
+              " Object.getOwnPropertyDescriptor(Node.prototype,'textContent')!==undefined].join('|')",
+           "T|false|function|true");
+    EXPECT(f, "var a=document.createElement('div'), b=document.createElement('div'); var n=0;"
+              "a.onclick=function(){ n++; }; b.onclick=function(){ n+=10; };"
+              "a.dispatchEvent(new Event('click')); [n, typeof a.onclick, typeof b.onclick, a.onclick===b.onclick].join('|')",
+           "1|function|function|false");
+    EXPECT(f, "var s1=document.createElement('div'), s2=document.createElement('div');"
+              "s1.style.color='red'; s2.style.color='blue';"
+              "[s1.style.color, s2.style.color, s1.style===s1.style, s1.style===s2.style].join('|')",
+           "red|blue|true|false");
+}
+
 /* A DocumentFragment and a ShadowRoot are EventTargets and observable (GitHub's invoker
  * behaviours call addEventListener on every shadow root and observe it). */
 static void test_shadow_root_is_event_target_and_observable(void **state) {
@@ -2984,6 +3012,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_uncaught_timer_error_fires_window_error_event, setup, teardown),
         cmocka_unit_test_setup_teardown(test_unhandled_rejection_event, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_root_is_event_target_and_observable, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_element_members_survive_prototype_swaps_and_detached_calls, setup, teardown),
         cmocka_unit_test_setup_teardown(test_dynamic_inline_script_runs_once_on_insert, setup, teardown),
         cmocka_unit_test_setup_teardown(test_dynamic_script_src_loads_async_and_reports_load_or_error, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_mirror_append, setup, teardown),

@@ -1361,6 +1361,13 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             js_result r;
             memset(&r, 0, sizeof r);
             struct timespec pt0, pt1;
+            if (getenv("FREEDOM_JS_PROFILE") != NULL) {   /* selector counters on (idempotent) */
+                static const char on[] = "if(!__selProf)__selProf=Object.create(null);0";
+                js_result pr0;
+                memset(&pr0, 0, sizeof pr0);
+                (void)js_eval(cs->js, on, sizeof on - 1, &pr0);
+                js_result_free(&pr0);
+            }
             clock_gettime(CLOCK_MONOTONIC, &pt0);
             js_status es = scripts[i].module
                 ? js_eval_module(cs->js, code, code_len, sname, &r)
@@ -1407,6 +1414,15 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         /* Inject the video shim if the page defines `video[]` / `video_data`
          * (e.g. jkanime.net whose video_min.js is 404). It creates <iframe>
          * elements from the array, which the next step fetches and scans. */
+        if (cs->js != NULL && getenv("FREEDOM_JS_PROFILE") != NULL) {
+            static const char rep[] = "typeof __selReport==='function'?__selReport():''";
+            js_result pr;
+            memset(&pr, 0, sizeof pr);
+            js_set_time_budget(cs->js, 2000);   /* the page may have spent the whole budget */
+            if (js_eval(cs->js, rep, sizeof rep - 1, &pr) == JS_OK && pr.value != NULL && pr.value_len > 0)
+                fb_buffer_push(&cs->log, FB_INFO, pr.value, pr.value_len);
+            js_result_free(&pr);
+        }
         if (cs->js != NULL)
             jd_inject_video_shim(cs->js);
         /* Process any <iframe src=...> elements created by the page's scripts

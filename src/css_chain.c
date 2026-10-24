@@ -243,7 +243,7 @@ static const css_element *build_chain(lxb_dom_element_t *el,
                                       cch_node chain[CCH_CHAIN_MAX],
                                       cch_node sibs[CCH_SIB_MAX],
                                       lxb_dom_node_t *nodes[CCH_CHAIN_MAX],
-                                      int *out_n, int *out_ns) {
+                                      int *out_n, int *out_ns, int structural) {
     int n = 0;
     for (lxb_dom_node_t *p = (lxb_dom_node_t *)el;
          p != NULL && p->type == LXB_DOM_NODE_TYPE_ELEMENT && n < CCH_CHAIN_MAX;
@@ -255,14 +255,16 @@ static const css_element *build_chain(lxb_dom_element_t *el,
     for (int i = 0; i < n; ++i)
         chain[i].el.parent = (i + 1 < n) ? &chain[i + 1].el : NULL;
 
-    for (int i = 0; i < n; ++i) {
+    /* Structure (positions among siblings, children counts) costs a scan of every sibling list
+     * along the chain: only a selector that reads it pays for it (see csel_needs_structure). */
+    for (int i = 0; structural && i < n; ++i) {
         sibling_position(nodes[i], &chain[i].el.nth, &chain[i].el.nsib);
         sibling_type_position(nodes[i], &chain[i].el.nth_of_type,
                               &chain[i].el.nsib_of_type);
         chain[i].el.child_count = count_children(nodes[i]);
     }
     int ns = 0;
-    if (n > 0) {
+    if (structural && n > 0) {
         for (lxb_dom_node_t *p = nodes[0]->prev; p != NULL && ns < CCH_SIB_MAX;
              p = p->prev) {
             if (p->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
@@ -302,7 +304,7 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
     cch_node sibs[CCH_SIB_MAX];
     lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
     int nfill = 0, nsfill = 0;
-    const css_element *subject = build_chain(el, chain, sibs, nodes, &nfill, &nsfill);
+    const css_element *subject = build_chain(el, chain, sibs, nodes, &nfill, &nsfill, 1);
 
     /* The inherited font-size is an ENGINE INPUT, like `state`: the cascade
      * cannot discover it (font-size is computed before every other property),
@@ -331,7 +333,7 @@ css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int wh
     cch_node sibs[CCH_SIB_MAX];
     lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
     int nfill = 0, nsfill = 0;
-    const css_element *subject = build_chain(el, chain, sibs, nodes, &nfill, &nsfill);
+    const css_element *subject = build_chain(el, chain, sibs, nodes, &nfill, &nsfill, 1);
     if (subject != NULL) {
         /* The generated box inherits from its element: the element's computed
          * size is the "parent" size its own em lengths resolve against. */
@@ -354,7 +356,8 @@ int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel) {
     cch_node sibs[CCH_SIB_MAX];
     lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
     int nfill = 0, nsfill = 0;
-    const css_element *subject = build_chain(el, chain, sibs, nodes, &nfill, &nsfill);
+    const css_element *subject = build_chain(el, chain, sibs, nodes, &nfill, &nsfill,
+                                             csel_needs_structure(sel));
     int m = (subject != NULL) ? csel_matches(sel, subject, NULL, 0, NULL) : 0;
     release_nodes(chain, nfill);
     release_nodes(sibs, nsfill);

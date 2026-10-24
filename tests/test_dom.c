@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 /*
  * TDD suite for dom (Hito 2 -> 3 bridge).
  *
@@ -13,6 +14,8 @@
 #include <stdlib.h>
 #include <setjmp.h>
 #include <string.h>
+#include <stdio.h>
+#include <time.h>
 #include <cmocka.h>
 
 #include "dom.h"
@@ -360,6 +363,60 @@ static void test_get_inner_html(void **state) {
 /* Fixture tree (inside body): div#main.container.box > [ p.text "Hello",
  * p.text.muted "World", button#go.btn "Go" ]. */
 
+/* A simple selector must not pay for structure it never reads: matching `div`, `.c3` or `#d5`
+ * used to scan every sibling and every child of every ancestor (nth positions, :empty counts) for
+ * EACH candidate element, so querySelectorAll over a flat list of N nodes cost O(N^2) -- 8000
+ * siblings took 5 s and dominated GitHub's script time. Structural selectors still get structure. */
+static void test_query_selector_all_is_linear_on_wide_flat_documents(void **state) {
+    (void)state;
+    enum { N = 6000 };
+    size_t cap = (size_t)N * 48 + 64;
+    char *html = (char *)malloc(cap);
+    assert_non_null(html);
+    size_t n = (size_t)snprintf(html, cap, "<html><body>");
+    for (int i = 0; i < N; ++i)
+        n += (size_t)snprintf(html + n, cap - n, "<div id=\"d%d\" class=\"c%d\"><i>x</i></div>", i, i % 7);
+    n += (size_t)snprintf(html + n, cap - n, "</body></html>");
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(html, n, NULL, &doc), HP_OK);
+    free(html);
+    dom_index *idx = NULL;
+    assert_int_equal(dom_build(doc, &idx), DOM_OK);
+    dom_node_id *out = (dom_node_id *)calloc(2 * N, sizeof *out);
+    assert_non_null(out);
+    struct timespec t0, t1;
+    clock_gettime(CLOCK_MONOTONIC, &t0);
+    size_t a = dom_query_selector_all(idx, DOM_NODE_NONE, "div", out, 2 * N);
+    size_t b = dom_query_selector_all(idx, DOM_NODE_NONE, ".c3", out, 2 * N);
+    size_t c = dom_query_selector_all(idx, DOM_NODE_NONE, "#d77", out, 2 * N);
+    size_t d = dom_query_selector_all(idx, DOM_NODE_NONE, "body > div", out, 2 * N);
+    clock_gettime(CLOCK_MONOTONIC, &t1);
+    long ms = (long)((t1.tv_sec - t0.tv_sec) * 1000 + (t1.tv_nsec - t0.tv_nsec) / 1000000);
+    assert_int_equal(a, N);
+    assert_int_equal(b, (size_t)(N / 7) + ((N % 7) > 3 ? 1 : 0));
+    assert_int_equal(c, 1);
+    assert_int_equal(d, N);
+    assert_true(ms < 600);                         /* linear: tens of ms; quadratic: seconds */
+    free(out);
+    dom_free(idx);
+    hp_document_free(doc);
+
+    /* structure is still computed where the selector reads it */
+    static const char small[] =
+        "<html><body><ul><li>a</li><li>b</li><li>c</li></ul><p></p><p>x</p></body></html>";
+    assert_int_equal(hp_parse(small, sizeof small - 1, NULL, &doc), HP_OK);
+    assert_int_equal(dom_build(doc, &idx), DOM_OK);
+    dom_node_id o2[16];
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "li:first-child", o2, 16), 1);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "li:last-child", o2, 16), 1);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "li + li", o2, 16), 2);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "li:nth-child(2)", o2, 16), 1);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "p:empty", o2, 16), 1);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "li:not(:first-child)", o2, 16), 2);
+    dom_free(idx);
+    hp_document_free(doc);
+}
+
 static void test_query_selector_type_class_id(void **state) {
     dom_index *idx = IDX(state);
     /* First p.text in document order == the "Hello" p == first result of getByTag. */
@@ -660,6 +717,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_get_inner_html, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_construction_invalid_args, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_query_selector_type_class_id, setup_doc, teardown_doc),
+        cmocka_unit_test(test_query_selector_all_is_linear_on_wide_flat_documents),
         cmocka_unit_test_setup_teardown(test_query_selector_all_counts, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_query_selector_combinators, setup_doc, teardown_doc),
         cmocka_unit_test(test_query_selector_deep_descendant_chain),

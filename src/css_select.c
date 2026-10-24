@@ -1059,6 +1059,43 @@ static int complex_matches(const css_sel *sel, int k, const css_element *el,
     }
 }
 
+/* Pseudo-classes that read nothing but the element itself, its state bits or its attributes. */
+static int pseudo_is_local(int kind) {
+    switch (kind) {
+        case PSEUDO_LINK: case PSEUDO_NEVER: case PSEUDO_HOVER: case PSEUDO_ROOT:
+        case PSEUDO_CHECKED: case PSEUDO_DISABLED: case PSEUDO_ENABLED:
+        case PSEUDO_TARGET: case PSEUDO_LANG: case PSEUDO_BEFORE: case PSEUDO_AFTER:
+        case PSEUDO_ACTIVE: case PSEUDO_FOCUS: case PSEUDO_FOCUS_WITHIN:
+        case PSEUDO_FOCUS_VISIBLE: case PSEUDO_PLACEHOLDER:
+            return 1;
+        default:
+            return 0;   /* nth-*, first/last/only-*, :empty, :has(), :not/:is/:where handled apart */
+    }
+}
+
+int csel_needs_structure(const css_sel *sel) {
+    if (sel == NULL) return 1;
+    for (int i = 0; i < sel->nparts; ++i) {
+        if (i >= 1 && (sel->comb[i] == COMB_ADJACENT || sel->comb[i] == COMB_GENERAL)) return 1;
+        const css_compound *c = &sel->parts[i];
+        for (int k = 0; k < c->npseudo; ++k) {
+            const css_pseudo_match *p = &c->pseudos[k];
+            if (p->kind == PSEUDO_NOT || p->kind == PSEUDO_IS || p->kind == PSEUDO_WHERE) {
+                /* the sub-selectors' own simple pseudo-classes decide */
+                for (int j = 0; j < p->sub_count; ++j) {
+                    int si = p->sub_first + j;
+                    if (si < 0 || si >= sel->nsubs) return 1;
+                    for (int q = 0; q < sel->subs[si].npseudos; ++q)
+                        if (!pseudo_is_local(sel->subs[si].pseudos[q])) return 1;
+                }
+                continue;
+            }
+            if (!pseudo_is_local(p->kind)) return 1;
+        }
+    }
+    return 0;
+}
+
 int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
                  int allow_pseudo_el, int *pseudo_kind) {
     int pk = -1;

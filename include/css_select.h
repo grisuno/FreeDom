@@ -162,6 +162,13 @@ int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);
 int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
                  int allow_pseudo_el, int *pseudo_kind);
 
+/* True when matching *sel can read sibling/child STRUCTURE (nth positions, of-type counts,
+ * :empty, :has(), `+`/`~`): an element's position among its siblings and its children count.
+ * Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches
+ * from the element's own tag/id/classes/attributes and its ancestors alone, so the caller can
+ * skip scanning sibling lists -- on a flat list of N nodes that scan made every match O(N). */
+int csel_needs_structure(const css_sel *sel);
+
 /* --- Identifiers: escapes and long names (spec/css_select.md, 2026-09-29) ---
  * A selector identifier (tag, .class, #id) is read with CSS escapes decoded
  * (`.md\:flex` is the class "md:flex") and stored in a CSS_TOK_MAX slot. One that
