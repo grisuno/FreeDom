@@ -39,3 +39,11 @@ elementos): el excedente de elementos nunca conectados se descarta, no crece sin
   construye y recibe `attributeChangedCallback` por cada atributo observado que ya tenía.
 - Dado un elemento creado y luego añadido y quitado del documento, entonces `connectedCallback` y
   `disconnectedCallback` se llaman una vez cada uno, en ese orden.
+
+## Costo de `define()` (2026-10-24)
+`customElements.define(name)` reconcilia SOLO ese nombre (`flush(undefined, name)`): busca en el
+documento `name` (no la unión de todos los nombres definidos) y recorre solo los registros vivos de ese
+nombre. Antes cada `define` hacía `scan(document)` con un selector de todos los nombres y reconciliaba
+todos los elementos vivos: O(define² × DOM). GitHub define cientos; su módulo `github-elements`
+(7.7 KB) pasó de 8.3 s a 0.9 s. `__ceFlush`/`__connectedCallback` (tras timers y carga) siguen
+reconciliando todo, una vez.

@@ -337,3 +337,13 @@ Más cobertura de los validadores puros (URL, grupo KE híbrido vs. clásico/PQ-
   endpoint PQ que acepte POST queda **pendiente de itest**, no presentado como verificado.
 - Seguimiento de redirecciones en `sf_post` (un `303 See Other` debería re-emitirse como GET): por
   ahora el llamante inspecciona `http_code`/`location`.
+
+## Validadores de caché y memoria persistente de redirecciones (2026-10-24)
+- `sf_response` guarda (copia por valor, vacío = ausente) `etag`, `last_modified`, `cache_control`,
+  `expires` y `date` de la respuesta final; un valor más largo que `SF_META_MAX` se descarta, nunca se
+  trunca. `sf_header_value` es el lector puro (sin distinguir mayúsculas, recorta CR/LF).
+- `sf_config.if_none_match` / `if_modified_since` envían un GET condicional (solo GET; un valor con CR o LF
+  se ignora: inyección de cabeceras). Los usa `cached_fetch` contra la URL FINAL almacenada.
+- `sf_rcache_set_backing(load, save, ctx)`: respaldo persistente de la memoria de 301/308. `save` oye cada
+  redirección permanente recordada, `load` se consulta ante un fallo de RAM; devuelve un destino para
+  VOLVER A PEDIR bajo la política completa, nada más. Los callbacks corren fuera del cerrojo.

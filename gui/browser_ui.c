@@ -5308,6 +5308,16 @@ static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
         const pv_cont_def *ccd = rd_cont_at(doc, (size_t)child);
         int cbox = (ccd != NULL) ? ccd->box_id : -1;
         if (!box_is_strict_descendant(doc, cbox, cont_box)) cbox = -1;
+        /* The ITEM is the child of this container's box: a wrapper between the two (a
+         * `width:65%;margin-right:-10%` block around a nested flex frame) owns the item's
+         * size, margins and padding, not the nested container (CSS Flexbox 4: the items are
+         * the container's in-flow children). With no wrapper the container's box already is
+         * that child and the climb does not move. */
+        for (int guard = 0; cbox >= 0 && cont_box >= 0 && guard < 256; ++guard) {
+            const pv_box_def *wd = rd_box_at(doc, (size_t)cbox);
+            if (wd == NULL || wd->parent_id < 0 || wd->parent_id == cont_box) break;
+            cbox = wd->parent_id;
+        }
         return item_sides_from_box(doc, cbox, cb_w);
     }
     /* An explicit container box wins over the run's stamp: a synthesised table has

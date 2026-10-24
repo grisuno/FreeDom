@@ -3664,6 +3664,36 @@ static void test_dump_layout_flex_item_negative_margin_widens_sibling(void **sta
     unlink(path);
 }
 
+/* A flex item whose ONLY content is a nested flex container is still the WRAPPER: its declared
+ * width, margins and padding are the wrapper's, not the nested container's. GitHub's hero
+ * (`.visual{width:65%;margin-right:-10%}` > `.frame{display:flex;width:120%}`) took the frame's
+ * box as the item, so the `flex:1` text beside it got 155 px where Firefox gives 368. */
+static void test_dump_layout_flex_item_is_wrapper_around_nested_container(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0}"
+        ".c{display:flex;width:1000px;padding:0 64px;box-sizing:border-box;gap:24px}"
+        ".t{flex:1;background:#111}"
+        ".v{width:65%;margin-right:-10%;background:#222}"
+        ".f{width:120%;display:flex;position:relative;padding:8px;background:#333}"
+        "</style></head><body><div class=\"c\"><div class=\"t\">text</div>"
+        "<div class=\"v\"><div class=\"f\"><p>frame</p></div></div></div></body></html>";
+    const char *path = "__freedom_nested_item.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_nested_item.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    /* wrapper = 65% of the 872 px content box = 566.8; text = 872 - 24 - 566.8 + 87.2 = 368.4 */
+    assert_non_null(strstr(out, "w=368."));
+    assert_non_null(strstr(out, "w=566."));
+    unlink(path);
+}
+
 /* --- nested column max-content is the max, not the sum (box_engine.md) --- */
 
 /* A one-item flex row holding a `flex-direction:column` card (blocked thumbnail
@@ -4381,6 +4411,7 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_row_nested_in_column),
         cmocka_unit_test(test_dump_layout_flex_auto_margin_push_right),
         cmocka_unit_test(test_dump_layout_flex_item_negative_margin_widens_sibling),
+        cmocka_unit_test(test_dump_layout_flex_item_is_wrapper_around_nested_container),
         cmocka_unit_test(test_download_png_positioned_overflow_clips_own_content),
         cmocka_unit_test(test_dump_layout_band_flushes_line_before_clear),
         cmocka_unit_test(test_dump_layout_line_opening_image_is_inline),

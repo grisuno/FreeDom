@@ -1357,9 +1357,20 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                                        scripts[i].type);
             js_result r;
             memset(&r, 0, sizeof r);
+            struct timespec pt0, pt1;
+            clock_gettime(CLOCK_MONOTONIC, &pt0);
             js_status es = scripts[i].module
                 ? js_eval_module(cs->js, code, code_len, sname, &r)
                 : js_eval_named(cs->js, code, code_len, sname, &r);
+            clock_gettime(CLOCK_MONOTONIC, &pt1);
+            /* FREEDOM_JS_PROFILE=1: wall time of each script's evaluation (module graphs
+             * count their evaluation, not their fetch) into the Freebug console. */
+            if (getenv("FREEDOM_JS_PROFILE") != NULL) {
+                long ms = (long)((pt1.tv_sec - pt0.tv_sec) * 1000 + (pt1.tv_nsec - pt0.tv_nsec) / 1000000);
+                char pl[320];
+                int pn = snprintf(pl, sizeof pl, "js-profile %ld ms %zu B %s", ms, code_len, sname);
+                if (pn > 0 && (size_t)pn < sizeof pl) fb_buffer_push(&cs->log, FB_INFO, pl, (size_t)pn);
+            }
             /* A native throw carries no stack location: name the script that ran, so
              * the console still says WHERE (a module's URL, "inline #n", a src). */
             if (es != JS_OK && r.is_exception && r.value != NULL)

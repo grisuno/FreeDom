@@ -1473,3 +1473,13 @@ El fondo `currentColor` es el `color` computado del elemento, heredado si no dec
 - **Un render de una pasada (PNG/PDF) carga todo** (`defer=0`): no hay scroll. `FREEDOM_TRACE_FETCH=1`
   imprime `fetch[image]` por cada imagen, eager o diferida (medido en lobste.rs con margen 150: 13 al
   cargar, 21 tras el primer scroll, 25 al final).
+
+## Tanda 63 — el ítem flex es el WRAPPER, no el contenedor anidado (2026-10-24)
+
+- **Un ítem cuyo único contenido es un contenedor flex/grid anidado** (`item_sides_at_level`) tomaba
+  la caja del contenedor anidado como la del ítem, saltándose el wrapper intermedio. Ahora se
+  asciende hasta el hijo directo de la caja del contenedor: el `width:65%; margin-right:-10%` de
+  `.visual` (GitHub) deja de perderse a favor del `width:120%` del marco que contiene. Sin wrapper,
+  la caja del contenedor anidado ya es ese hijo y el ascenso no se mueve.
+- Test `test_dump_layout_flex_item_is_wrapper_around_nested_container` (rojo: texto 155 px, Firefox
+  y ahora Freedom 368). Aislado con ddmin automático de las reglas CSS de la página real (de ~5000 a 5).

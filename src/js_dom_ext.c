@@ -9,6 +9,7 @@
  */
 
 #include "js_dom_ext.h"
+#include <stdlib.h>
 #include "js_dom.h"
 #include <math.h>
 #include "js_sandbox.h"
@@ -1191,7 +1192,8 @@ int jdx_install(JSContext *ctx) {
     if (run(ctx, JDX_DATA_SHIM, sizeof JDX_DATA_SHIM - 1, "<data-ext>") != 0) return -1;
     if (run(ctx, JDX_MUTATION_SHIM, sizeof JDX_MUTATION_SHIM - 1, "<mutation-observer>") != 0) return -1;
     if (run(ctx, JDX_PLATFORM_SHIM, sizeof JDX_PLATFORM_SHIM - 1, "<platform>") != 0) return -1;
-    return run(ctx, JDX_DYNSCRIPT_SHIM, sizeof JDX_DYNSCRIPT_SHIM - 1, "<dyn-script>");
+    if (run(ctx, JDX_DYNSCRIPT_SHIM, sizeof JDX_DYNSCRIPT_SHIM - 1, "<dyn-script>") != 0) return -1;
+    return 0;
 }
 
 jd_status jd_install_repl_api(js_context *ctx) {
