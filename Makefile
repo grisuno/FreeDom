@@ -1162,7 +1162,13 @@ parity-snapshot:
 # (tools/fbench.py) -- the loop for fixing one page: measure, SEE, change, repeat.
 fbench:
 	@$(MAKE) --no-print-directory parity PAGES="$(PAGES)" | sed -n '/^PAGE/,/^TOTAL/p'
-	@python3 tools/fbench.py --from $(if $(FROM),$(FROM),0) --rows $(if $(ROWS),$(ROWS),1100) $(PAGES)
+	@python3 tools/fbench.py --from $(if $(FROM),$(FROM),0) --rows $(if $(ROWS),$(ROWS),1100) $(if $(NOTIME),--no-time) $(PAGES)
+
+# Freeze the render-to-idle numbers of the last `make fbench` as the baseline later runs diff against.
+timing-update:
+	@test -f build/bench/timing.tsv || { echo "run 'make fbench' first"; exit 1; }
+	@cut -f1,2 build/bench/timing.tsv > $(PARITY_DIR)/timing-baseline.tsv
+	@echo "Froze render-time baseline in $(PARITY_DIR)/timing-baseline.tsv"
 
 # One source of truth for the pages the README shows: tests/parity/live.tsv names each
 # one's live URL. `make parity-refresh` re-freezes them all (network), so the README

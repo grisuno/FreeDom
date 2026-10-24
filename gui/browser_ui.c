@@ -334,6 +334,16 @@ typedef struct browser_window {
     } slot[SS_COUNT];
     ss_state          ss;
     int               redraw_wanted;   /* a repaint was deferred: both buffers were held */
+    /* Render-to-idle timing (spec/parity.md "Timing"): FREEDOM_GUI_TIMING=path makes the REAL
+     * window write how long it took, from the navigation request to the last paint of a quiet
+     * page. Same code path as a user's session; nothing is measured in a separate mode. */
+    char              timing_path[512];
+    int               timing_done;
+    uint64_t          nav_start_ms;    /* first navigation requested */
+    uint64_t          last_paint_ms;   /* last frame committed */
+    uint64_t          idle_paint_ms;   /* last_paint_ms when the page was first seen idle */
+    uint64_t          idle_seen_ms;
+    char              as_host[256];    /* FREEDOM_AS_HOST: policy host for a local file (corpus) */
     struct wl_buffer *buffer;
     void             *shm_data;
     size_t            shm_size;
@@ -1462,10 +1472,23 @@ static sf_status fetch_post_navigable(const char *url, sf_config *cfg,
 
 /* Host of the current page is on allow.conf (sovereign list). Used to gate page-JS
  * network access (XHR/fetch): allowed only for allow.conf AND js.conf hosts. */
+/* The host the lists are asked about: FREEDOM_AS_HOST (a corpus file standing in for a site)
+ * or the page URL's own host. */
+static int page_policy_host(const browser_window *w, char *out, size_t cap) {
+    if (w == NULL) return 0;
+    if (w->as_host[0] != '\0') {
+        size_t n = strlen(w->as_host);
+        if (n >= cap) return 0;
+        memcpy(out, w->as_host, n + 1);
+        return 1;
+    }
+    if (w->cur_top == NULL) return 0;
+    return rp_host_of(w->cur_top, out, cap) == 0;
+}
+
 static int page_host_allowlisted(const browser_window *w) {
-    if (w == NULL || w->cur_top == NULL) return 0;
     char host[256];
-    if (rp_host_of(w->cur_top, host, sizeof host) != 0) return 0;
+    if (!page_policy_host(w, host, sizeof host)) return 0;
     return hb_is_allowlisted(w->hosts, host);
 }
 
@@ -2221,7 +2244,7 @@ static void ws_apply_ops(browser_window *w, const tab_page *page);
  * window state; reused by render_current_ex and the Freebug REPL's lazy worker. */
 static int page_js_host_allowlisted(const browser_window *w) {
     char js_host[256];
-    if (w->cur_top != NULL && host_from_url(w->cur_top, js_host, sizeof js_host))
+    if (page_policy_host(w, js_host, sizeof js_host))
         return hb_is_allowlisted(w->js_hosts, js_host);
     return 0;
 }
@@ -2614,6 +2637,7 @@ static void identity_load(browser_window *w) {
  * in-flight fetch is discarded when it completes. */
 static void do_load(browser_window *w, const char *url) {
     gui_quiesce(w);   /* a background tick reads what this changes */
+    if (w->timing_path[0] != '\0' && w->nav_start_ms == 0) w->nav_start_ms = now_ms();
     if (url == NULL) return;
     w->net_gen++;        /* new navigation: supersede any in-flight fetch */
     w->menu_open = 0;
@@ -16472,6 +16496,7 @@ static void redraw(browser_window *w) {
     wl_surface_commit(w->surface);
     ss_committed(&w->ss, w->ss.back);      /* the compositor owns this buffer until `release` */
     wl_display_flush(w->display);  /* drain connection buffer after each paint */
+    w->last_paint_ms = now_ms();
 }
 
 /* --- xdg-shell --- */
@@ -18518,6 +18543,35 @@ static const struct wl_registry_listener registry_listener = {
 
 /* --- public API --- */
 
+/* The page has nothing left to do: loaded, no background job, no JS tick due, no deferred
+ * repaint. A video or animation keeps repainting and so is never idle (correctly: it is not
+ * "finished rendering"). */
+static int gui_is_idle(const browser_window *w) {
+    if (w->loading || w->doc == NULL || w->redraw_wanted) return 0;
+    if (w->tab_worker != NULL && tab_async_busy(w->tab_worker)) return 0;
+    if (w->js_tick_due_ms != 0) return 0;
+    return w->last_paint_ms >= w->nav_start_ms;
+}
+
+/* Called every loop turn while FREEDOM_GUI_TIMING is set. The page must stay idle with no new
+ * paint for TIMING_QUIET_MS before it counts; the reported time is the LAST PAINT, not the
+ * moment the quiet period ended. Returns the wake-up (ms) the poll must respect, or -1. */
+#define TIMING_QUIET_MS 150u
+static int gui_timing_step(browser_window *w, uint64_t now) {
+    if (w->timing_path[0] == '\0' || w->timing_done || w->nav_start_ms == 0) return -1;
+    if (!gui_is_idle(w)) { w->idle_paint_ms = 0; return 50; }
+    if (w->idle_paint_ms != w->last_paint_ms) { w->idle_paint_ms = w->last_paint_ms; w->idle_seen_ms = now; }
+    if (now - w->idle_seen_ms < TIMING_QUIET_MS) return 50;
+    FILE *fp = fopen(w->timing_path, "w");
+    if (fp != NULL) {
+        fprintf(fp, "{\"ms\":%llu}\n", (unsigned long long)(w->last_paint_ms - w->nav_start_ms));
+        fclose(fp);
+    }
+    w->timing_done = 1;
+    if (getenv("FREEDOM_GUI_EXIT_AT_IDLE") != NULL) w->running = 0;
+    return -1;
+}
+
 ui_status ui_run_browser(const char *start_url) {
     browser_window w;
     memset(&w, 0, sizeof w);
@@ -18701,6 +18755,14 @@ ui_status ui_run_browser(const char *start_url) {
     load_favorites(&w);                    /* omnibox autocomplete from allow.conf */
     /* JS policy: an explicit FREEDOM_JS env wins for this session; otherwise the
      * persisted choice applies (prefs_parse already clamped it to a valid mode). */
+    {
+        const char *tp = getenv("FREEDOM_GUI_TIMING");
+        if (tp != NULL && tp[0] != '\0' && strlen(tp) < sizeof w.timing_path)
+            memcpy(w.timing_path, tp, strlen(tp) + 1);
+        const char *ah = getenv("FREEDOM_AS_HOST");
+        if (ah != NULL && ah[0] != '\0' && strlen(ah) < sizeof w.as_host)
+            memcpy(w.as_host, ah, strlen(ah) + 1);
+    }
     const char *js_env = getenv("FREEDOM_JS");
     w.js_mode = (js_env != NULL && js_env[0] != '\0') ? jsp_mode_from_str(js_env)
                                                       : (jsp_mode)w.prefs.js_mode;
@@ -18742,6 +18804,9 @@ ui_status ui_run_browser(const char *start_url) {
      * fire the toast's auto-hide without racing the Wayland queue. The timeout is
      * the remaining lifetime of an active toast, or infinite when there is none. */
     while (w.running) {
+        /* Before the read is prepared: the probe may end the session, and the loop must notice. */
+        int tw_step = gui_timing_step(&w, now_ms());
+        if (!w.running) break;
         while (wl_display_prepare_read(w.display) != 0) {
             wl_display_dispatch_pending(w.display);
         }
@@ -18755,6 +18820,13 @@ ui_status ui_run_browser(const char *start_url) {
         }
         /* While a fetch is in flight, wake ~12 fps to animate the spinner. */
         if (w.loading && (timeout < 0 || timeout > 80)) timeout = 80;
+        /* The timing probe's own wake-ups must not repaint (that would perturb what it measures
+         * and the page could never be seen quiet): remember when it alone set the timeout. */
+        int timing_wake_only = 0;
+        {
+            int tw = tw_step;
+            if (tw >= 0 && (timeout < 0 || tw < timeout)) { timeout = tw; timing_wake_only = 1; }
+        }
         /* A pending JS timer tick bounds the wait too (real async timers). */
         if (w.js_tick_due_ms != 0) {
             int tk = (w.js_tick_due_ms > t) ? (int)(w.js_tick_due_ms - t) : 0;
@@ -18831,7 +18903,7 @@ ui_status ui_run_browser(const char *start_url) {
         } else {
             wl_display_cancel_read(w.display);
             if (pr < 0) { if (errno != EINTR) break; }       /* a real poll error */
-            else if (pr == 0) redraw(&w);                    /* toast/spinner/animation tick: repaint */
+            else if (pr == 0 && !timing_wake_only) redraw(&w);  /* toast/spinner/animation tick: repaint */
             else if (pfds[0].revents & (POLLHUP | POLLERR)) break; /* the display is gone */
         }
         /* If CSS animations are active (frame_clock ticking), poll already timed

@@ -336,6 +336,24 @@ static int child_fetch(void *vctx, const char *method, const char *url,
     return 0;
 }
 
+/* FREEDOM_JS_PROFILE=1: wall time of each worker load phase, on the worker's stderr. */
+static double prof_now_ms(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec * 1000.0 + (double)ts.tv_nsec / 1.0e6;
+}
+static int prof_on(void) {
+    static int on = -1;
+    if (on < 0) on = (getenv("FREEDOM_JS_PROFILE") != NULL);
+    return on;
+}
+static void prof_lap(const char *what, double *t0) {
+    if (!prof_on()) return;
+    double t = prof_now_ms();
+    fprintf(stderr, "tab-profile %-14s %7.1f ms\n", what, t - *t0);
+    *t0 = t;
+}
+
 /* Parse + index + fresh JS context bound to the page and the anti-fp env. When
  * run_js, inline <script>s are kept (not stripped) so child_handle_load can execute
  * them; event-handler attributes (on*) are stripped regardless. page_url (may be
@@ -345,15 +363,18 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
                       int net_allowed, const char *page_url) {
     child_reset_page(cs);
     cs->subreq_used = 0;
+    double pt = prof_now_ms();
 
     hp_config cfg = hp_config_default();
     cfg.strip_scripts = run_js ? 0 : 1; /* keep scripts only when JS will run */
 
     hp_document *doc = NULL;
     if (hp_parse(html, len, &cfg, &doc) != HP_OK) return -1;
+    prof_lap("html-parse", &pt);
 
     dom_index *idx = NULL;
     if (dom_build(doc, &idx) != DOM_OK) { hp_document_free(doc); return -1; }
+    prof_lap("dom-index", &pt);
 
     js_context *js = NULL;
     if (js_context_new(NULL, &js) != JS_OK) {
@@ -1132,6 +1153,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                               int run_js, int net, int reader, int prefers_dark,
                               int css, int viewport_w, const char *page_url,
                               const char *cookies, const char *storage, size_t storage_len) {
+    double ph0 = prof_now_ms(), ph = ph0;
     cs->last_run_js = run_js;
     cs->last_net = net;
     cs->last_reader = reader;
@@ -1145,6 +1167,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     navbuf[0] = '\0';
     int32_t nav_replace = 0;
     int ok = (child_load(cs, html, len, run_js, net, page_url) == 0);
+    prof_lap("child-load", &ph);
     free(cs->page_url);
     cs->page_url = (page_url != NULL && page_url[0] != '\0') ? strdup(page_url) : NULL;
     if (ok && run_js) js_set_module_host(cs->js, tab_mod_resolve, tab_mod_fetch, cs);
@@ -1201,7 +1224,10 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
      * by the native video extractor above, so video blocks survive the
      * fallback. */
     pv_view *preserve_view = NULL;
-    if (ok) {
+    /* Only scripts can corrupt the DOM, so the snapshot is built only when some will run: with JS
+     * off, or a page without scripts, the final view IS the pre-script view and a second full
+     * style cascade (170 ms on Wikipedia) bought nothing. */
+    if (ok && run_js && nscripts > 0) {
         /* The snapshot preserves the PRE-SCRIPT DOM, not no-JS semantics:
          * it must carry the same js_enabled flag as the final view, or the
          * <noscript> fallback (rendered only under js=0) inflates the block
@@ -1450,10 +1476,13 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     if (ok) {
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);
-        if (title == NULL || text == NULL
+        double pt2 = prof_now_ms();
+        int pv_ok = !(title == NULL || text == NULL
             || pv_build_styled(cs->doc, run_js, reader, prefers_dark,
                                cs->extern_css, cs->extern_css_len,
-                               cs->last_viewport_w, &view) != PV_OK) {
+                               cs->last_viewport_w, &view) != PV_OK);
+        prof_lap("pv-build-styled", &pt2);
+        if (!pv_ok) {
             ok = 0;
             child_reset_page(cs);
         } else {
@@ -1497,6 +1526,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     uint8_t rtag = TAG_RESULT;
     int32_t k = ok ? 1 : 0;
     int32_t next_ms = child_next_timer_ms(cs);
+    prof_lap("scripts+pv+misc", &ph);
     if (write_full(wfd, &rtag, 1) == 0 && write_full(wfd, &k, sizeof k) == 0 && ok) {
         size_t nlen = strlen(navbuf);
         (void)(write_full(wfd, &tl, sizeof tl) == 0
@@ -1516,6 +1546,8 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             && write_full(wfd, &cklen, sizeof cklen) == 0
             && (cklen == 0 || write_full(wfd, ckdump, cklen) == 0));
     }
+    prof_lap("write-response", &ph);
+    if (prof_on()) fprintf(stderr, "tab-profile %-14s %7.1f ms\n", "WORKER-TOTAL", prof_now_ms() - ph0);
     hp_free(title);
     hp_free(text);
     pv_free(view);
