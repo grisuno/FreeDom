@@ -49,6 +49,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <pthread.h>
+#include <sys/eventfd.h>
 #include <unistd.h>
 #include <linux/close_range.h>
 #include <sys/random.h>
@@ -174,6 +176,7 @@ static int write_opens(int wfd, child_state *cs);
 static int write_ws(int wfd, child_state *cs);
 static int write_storage(int wfd, child_state *cs);
 static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture);
+static void tab_async_sync(tab *t);
 
 static void child_reset_page(child_state *cs) {
     pv_computed_free(cs->computed);
@@ -2155,6 +2158,18 @@ struct tab {
     int            net_allowed;
     int            css_allowed;
     int            in_op;           /* serving a post-load operation (tab_await_result) */
+    /* background job (tab_tick_async / tab_geometry_async) */
+    pthread_t      job_th;
+    int            job_running;     /* the thread exists and is not yet joined */
+    int            job_ready;       /* joined; result waits for tab_async_finish */
+    int            job_is_tick;
+    int            job_elapsed;
+    int32_t       *job_words;       /* geometry job: encoded table (owned until done) */
+    size_t         job_nwords;
+    tab_page       job_page;
+    tab_status     job_st;
+    int            job_efd;         /* completion eventfd (lazily created), -1 = none */
+    int            in_async;        /* the serving thread is the job (no css sink) */
     int            op_budget_ms;    /* its network time budget (0 = default) */
     int64_t        op_net_us;       /* network time spent in the current operation */
     int            viewport_w;    /* @media render width for the next load (0 => default) */
@@ -2865,6 +2880,7 @@ tab_status tab_open(tab **out) {
     t->resp_fd = resp[0];
     t->alive = 1;
     t->reaped = 0;
+    t->job_efd = -1;
     *out = t;
     return TAB_OK;
 }
@@ -2967,7 +2983,7 @@ static int tab_serve_subreq(tab *t, int net_granted, int css_granted) {
      * bodies, only while a sink is installed; the sink copies what it keeps
      * (rbody is freed below). The worker protocol is untouched. */
     if (ok && status >= 200 && status < 300 && rlen > 0 && rbody != NULL
-        && t->css_sink != NULL && ctype_is_css(rctype))
+        && t->css_sink != NULL && !t->in_async && ctype_is_css(rctype))
         t->css_sink(t->css_sink_ctx, url, rbody, rlen, rctype);
 
     /* The reply goes back on req_fd (the worker reads it from its rfd, the same fd it
@@ -3194,6 +3210,7 @@ tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_pag
 
 tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
                          int run_js, int reader, int prefers_dark, tab_page *out) {
+    tab_async_sync(t);
     if (t == NULL || out == NULL || html == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     if (len > TAB_MAX_INPUT) return TAB_ERR_TOO_LARGE;
@@ -3391,6 +3408,7 @@ static tab_status tab_mutation_request(tab *t, uint8_t op, int32_t arg, tab_page
 }
 
 tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out) {
+    tab_async_sync(t);
     if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
 
@@ -3398,6 +3416,7 @@ tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out) {
 }
 
 tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out) {
+    tab_async_sync(t);
     if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     return tab_mutation_request(t, OP_TICK,
@@ -3407,6 +3426,7 @@ tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out) {
 /* Dispatches a submit event on the form enclosing node_id. Simple response:
  * [TAG_RESULT][ok:int32][prevented:int32]. No view re-derivation. */
 tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented) {
+    tab_async_sync(t);
     if (t == NULL || prevented == NULL) return TAB_ERR_NULL_ARG;
     *prevented = 0;
     tab_refresh_alive(t);
@@ -3442,6 +3462,7 @@ tab_status tab_dispatch_event(tab *t, dom_node_id node_id,
                               const char *key, int key_code,
                               const char *value,
                               tab_page *out) {
+    tab_async_sync(t);
     if (t == NULL || out == NULL || event_type == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     if (node_id == DOM_NODE_NONE) return TAB_ERR_NULL_ARG;
@@ -3482,6 +3503,7 @@ tab_status tab_dispatch_mouse(tab *t, dom_node_id node_id,
                               const char *event_type,
                               int client_x, int client_y, int button,
                               tab_page *out) {
+    tab_async_sync(t);
     if (t == NULL || out == NULL || event_type == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     if (node_id == DOM_NODE_NONE) return TAB_ERR_NULL_ARG;
@@ -3512,6 +3534,7 @@ tab_status tab_dispatch_mouse(tab *t, dom_node_id node_id,
 /* Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console).
  * Used by tab_mutation_request, tab_subreq, tab_dispatch_event. */
 tab_status tab_read_view(tab *t, tab_page *out) {
+    tab_async_sync(t);
     return tab_read_view_ex(t, out, 0);
 }
 
@@ -3633,6 +3656,7 @@ static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
 }
 
 tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out) {
+    tab_async_sync(t);
     if (t == NULL || out == NULL || js == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     if (len > TAB_MAX_INPUT) return TAB_ERR_TOO_LARGE;
@@ -3715,12 +3739,14 @@ static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, siz
 }
 
 tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out) {
+    tab_async_sync(t);
     if (t == NULL || out == NULL || (bytes == NULL && len != 0)) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     return tab_decode_image_op(t, OP_DECODE_IMAGE, (const char *)bytes, len, out);
 }
 
 tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out) {
+    tab_async_sync(t);
     if (t == NULL || data_url == NULL || out == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
 
@@ -3750,6 +3776,8 @@ pid_t tab_child_pid(const tab *t) {
 
 void tab_close(tab *t) {
     if (t == NULL) return;
+    tab_async_sync(t);                      /* a running job must not outlive its pipes */
+    if (t->job_efd > 0) close(t->job_efd);
     if (t->req_fd >= 0) close(t->req_fd);   /* EOF => the child quits its loop */
     if (t->resp_fd >= 0) close(t->resp_fd);
     if (t->pid > 0 && !t->reaped) {
@@ -3812,21 +3840,15 @@ void tab_image_free(tab_image *img) {
     img->data_len = 0;
 }
 
-tab_status tab_set_geometry(tab *t, const jg_table *g) {
-    if (t == NULL || g == NULL) return TAB_ERR_NULL_ARG;
-    if (!t->last_net_granted) return TAB_OK;   /* untrusted page: never sent */
+/* Writes one encoded geometry table and waits for its acknowledgement (serving any network the
+ * observer callbacks it triggers). No job synchronisation: the callers do that. */
+static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words) {
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
-    size_t words = jg_wire_len(g);
-    if (words == 0 || words > TAB_MAX_GEOM_WORDS) return TAB_ERR_TOO_LARGE;
-    int32_t *buf = (int32_t *)calloc(words, sizeof *buf);
-    if (buf == NULL) return TAB_ERR_OOM;
-    if (jg_encode(g, buf, words) != 0) { free(buf); return TAB_ERR_IO; }
     uint8_t op = OP_GEOM;
     int wok = (write_full(t->req_fd, &op, 1) == 0
             && write_full(t->req_fd, &words, sizeof words) == 0
             && write_full(t->req_fd, buf, words * sizeof *buf) == 0);
-    free(buf);
     if (!wok) {
         tab_refresh_alive(t);
         return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
@@ -3838,7 +3860,143 @@ tab_status tab_set_geometry(tab *t, const jg_table *g) {
     return TAB_OK;
 }
 
+static int32_t *geometry_encode(const jg_table *g, size_t *words_out) {
+    size_t words = jg_wire_len(g);
+    if (words == 0 || words > TAB_MAX_GEOM_WORDS) return NULL;
+    int32_t *buf = (int32_t *)calloc(words, sizeof *buf);
+    if (buf == NULL) return NULL;
+    if (jg_encode(g, buf, words) != 0) { free(buf); return NULL; }
+    *words_out = words;
+    return buf;
+}
+
+tab_status tab_set_geometry(tab *t, const jg_table *g) {
+    if (t == NULL || g == NULL) return TAB_ERR_NULL_ARG;
+    if (!t->last_net_granted) return TAB_OK;   /* untrusted page: never sent */
+    tab_async_sync(t);
+    size_t words = 0;
+    int32_t *buf = geometry_encode(g, &words);
+    if (buf == NULL) return TAB_ERR_TOO_LARGE;
+    tab_status st = tab_geometry_send(t, buf, words);
+    free(buf);
+    return st;
+}
+
+/* ---- background jobs (tab_tick_async / tab_geometry_async) ---- */
+
+static void job_discard(tab *t) {
+    if (t->job_ready) tab_page_free(&t->job_page);
+    memset(&t->job_page, 0, sizeof t->job_page);
+    free(t->job_words);
+    t->job_words = NULL;
+    t->job_nwords = 0;
+    t->job_ready = 0;
+    t->in_async = 0;
+}
+
+/* Waits for a running job and DISCARDS its result: any other worker call is about to change
+ * the page, so the finished job's view would be stale. */
+static void tab_async_sync(tab *t) {
+    if (t == NULL) return;
+    if (t->job_running) {
+        pthread_join(t->job_th, NULL);
+        t->job_running = 0;
+        t->job_ready = 1;
+    }
+    if (t->job_ready) job_discard(t);
+}
+
+static void *job_main(void *arg) {
+    tab *t = (tab *)arg;
+    tab_page pg;
+    memset(&pg, 0, sizeof pg);
+    tab_status st;
+    if (t->job_is_tick) st = tab_mutation_request(t, OP_TICK, (int32_t)(t->job_elapsed >= 0 ? t->job_elapsed : 0), &pg);
+    else st = tab_geometry_send(t, t->job_words, t->job_nwords);
+    t->job_page = pg;
+    t->job_st = st;
+    free(t->job_words);
+    t->job_words = NULL;
+    uint64_t one = 1;
+    if (t->job_efd >= 0) (void)!write(t->job_efd, &one, sizeof one);
+    return NULL;
+}
+
+int tab_async_fd(tab *t) {
+    if (t == NULL) return -1;
+    if (t->job_efd <= 0) {
+        int fd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
+        t->job_efd = fd >= 0 ? fd : -1;
+    }
+    return t->job_efd;
+}
+
+int tab_async_busy(const tab *t) {
+    return t != NULL && (t->job_running || t->job_ready);
+}
+
+static tab_status job_start(tab *t) {
+    if (tab_async_fd(t) < 0) return TAB_ERR_SPAWN;
+    t->in_async = 1;
+    if (pthread_create(&t->job_th, NULL, job_main, t) != 0) {
+        t->in_async = 0;
+        free(t->job_words);
+        t->job_words = NULL;
+        return TAB_ERR_SPAWN;
+    }
+    t->job_running = 1;
+    return TAB_OK;
+}
+
+tab_status tab_tick_async(tab *t, int elapsed_ms) {
+    if (t == NULL) return TAB_ERR_NULL_ARG;
+    if (tab_async_busy(t)) return TAB_ERR_BUSY;
+    tab_refresh_alive(t);
+    if (!t->alive) return TAB_ERR_DEAD;
+    t->job_is_tick = 1;
+    t->job_elapsed = elapsed_ms;
+    return job_start(t);
+}
+
+tab_status tab_geometry_async(tab *t, const jg_table *g) {
+    if (t == NULL || g == NULL) return TAB_ERR_NULL_ARG;
+    if (!t->last_net_granted) return TAB_OK;   /* untrusted page: never sent */
+    if (tab_async_busy(t)) return TAB_ERR_BUSY;
+    tab_refresh_alive(t);
+    if (!t->alive) return TAB_ERR_DEAD;
+    size_t words = 0;
+    int32_t *buf = geometry_encode(g, &words);
+    if (buf == NULL) return TAB_ERR_TOO_LARGE;
+    t->job_is_tick = 0;
+    t->job_words = buf;
+    t->job_nwords = words;
+    return job_start(t);
+}
+
+tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick) {
+    if (t == NULL || out == NULL || job_status == NULL) return TAB_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+    if (t->job_running) {
+        pthread_join(t->job_th, NULL);
+        t->job_running = 0;
+        t->job_ready = 1;
+    }
+    if (t->job_efd >= 0) {                       /* drain the completion counter */
+        uint64_t v;
+        while (read(t->job_efd, &v, sizeof v) > 0) { /* empty it */ }
+    }
+    if (!t->job_ready) return TAB_ERR_NULL_ARG;
+    *out = t->job_page;
+    memset(&t->job_page, 0, sizeof t->job_page);
+    *job_status = t->job_st;
+    if (was_tick != NULL) *was_tick = t->job_is_tick;
+    t->job_ready = 0;
+    t->in_async = 0;
+    return TAB_OK;
+}
+
 tab_status tab_popstate(tab *t, int index, tab_page *out) {
+    tab_async_sync(t);
     if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     return tab_mutation_request(t, OP_POPSTATE, (int32_t)index, out);
@@ -3846,6 +4004,7 @@ tab_status tab_popstate(tab *t, int index, tab_page *out) {
 
 tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
                         tab_page *out) {
+    tab_async_sync(t);
     if (t == NULL || out == NULL || (data == NULL && len != 0)) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     if (len > TAB_MAX_WS_MSG) return TAB_ERR_TOO_LARGE;

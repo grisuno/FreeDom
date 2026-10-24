@@ -421,3 +421,18 @@ int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);
 - `@import` dentro de hojas externas (el módulo `css` lo sigue descartando: cero fetches
   recursivos). Hojas para páginas `file://` locales (el resolver de subrecursos es https-only).
 - Caché de hojas entre cargas/pestañas.
+
+## Trabajos en segundo plano: `tab_tick_async` / `tab_geometry_async` (2026-10-24)
+- **Dado** un tick o la publicación de geometría de un host de confianza, **cuando** se pide
+  `tab_tick_async`/`tab_geometry_async`, **entonces** corre en un hilo propio del tab y la llamada vuelve
+  al instante; la finalización se señala en `tab_async_fd` (eventfd legible) y `tab_async_finish` entrega el
+  resultado (la vista refrescada solo para un tick que devolvió `TAB_OK`).
+- **Un solo trabajo a la vez** (`TAB_ERR_BUSY`). El pipe al worker es de un solo canal: TODA otra llamada
+  pública (`tab_load*`, `click`, `tick`, `eval`, `decode`, `popstate`, `ws`, `set_geometry`, `close`...) espera
+  primero al trabajo en vuelo (`tab_async_sync`) y DESCARTA su resultado, que quedó obsoleto. El sitio que
+  llama no pierde nada: la vista siguiente ya incluye lo que el tick hizo.
+- **Invariante del llamador:** mientras `tab_async_busy`, lo que lee el fetcher (URL de la página, listas de
+  hosts, credenciales) no cambia. La GUI lo asegura con `gui_quiesce` al inicio de las funciones que lo mutan
+  (navegación, ediciones de listas, pestañas). El sumidero de CSS (`css_sink`) no se invoca desde el hilo.
+- Efecto medido: con 3 XHR de 150 ms dentro de un timer, `tab_tick_async` vuelve en < 100 ms y la ventana
+  sigue pintando y desplazándose; antes la GUI esperaba los 450 ms.

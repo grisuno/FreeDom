@@ -591,6 +591,7 @@ static void freebug_pointer_motion(browser_window *w);
 static void freebug_pointer_axis(browser_window *w, wl_fixed_t value);
 
 static void redraw(browser_window *w);
+static void gui_quiesce(browser_window *w);   /* settle the background tab job (see on_tab_async) */
 static void profile_sync(browser_window *w);  /* persists preference changes (Hito 10) */
 
 /* Rebuilds the live theme for the current mode and scales the font-driven metrics
@@ -776,6 +777,7 @@ static void load_favorites(browser_window *w);  /* defined below; refreshed afte
  * provenance: the pure hostedit validates it fail-closed and builds the line; a
  * duplicate is skipped. Feedback goes through the status toast. */
 static void add_current_host_to_list(browser_window *w, int sel) {
+    gui_quiesce(w);   /* a background tick reads what this changes */
     const char *filename = (sel == HOSTLIST_BLOCK) ? "block.conf"
                          : (sel == HOSTLIST_ALLOW) ? "allow.conf" : "js.conf";
     w->menu_open = 0;
@@ -1324,6 +1326,7 @@ static void clear_doc(browser_window *w) {
 
 /* Replaces the cached page source. Takes ownership of html; copies top. */
 static void set_cache(browser_window *w, char *html, size_t len, const char *top) {
+    gui_quiesce(w);   /* a background tick reads what this changes */
     free(w->cur_html);
     free(w->cur_top);
     w->cur_html = html;
@@ -2571,6 +2574,7 @@ static void identity_load(browser_window *w) {
  * and local files are synchronous (no network). Every call bumps net_gen so an older
  * in-flight fetch is discarded when it completes. */
 static void do_load(browser_window *w, const char *url) {
+    gui_quiesce(w);   /* a background tick reads what this changes */
     if (url == NULL) return;
     w->net_gen++;        /* new navigation: supersede any in-flight fetch */
     w->menu_open = 0;
@@ -2730,6 +2734,7 @@ static void do_load(browser_window *w, const char *url) {
  * live fields briefly alias the same allocations; the live fields are overwritten
  * by tab_restore before anything is freed). */
 static void tab_save(browser_window *w) {
+    gui_quiesce(w);   /* a background tick reads what this changes */
     tab_ctx *c = &w->tab_slots[w->active_tab];
     c->bs = w->bs;
     c->doc = w->doc;
@@ -2747,6 +2752,7 @@ static void tab_save(browser_window *w) {
 
 /* Loads the active tab's slot into the live fields (the inverse move). */
 static void tab_restore(browser_window *w) {
+    gui_quiesce(w);   /* a background tick reads what this changes */
     tab_ctx *c = &w->tab_slots[w->active_tab];
     w->bs = c->bs;
     w->doc = c->doc;
@@ -2764,6 +2770,7 @@ static void tab_restore(browser_window *w) {
 
 /* Frees the LIVE page's owned state (used when closing the foreground tab). */
 static void free_live_page(browser_window *w) {
+    gui_quiesce(w);   /* a background tick reads what this changes */
     clear_doc(w);                 /* inputs, images, doc, hover_href */
     font_stash_reset(w);          /* served-CSS stash never outlives its load */
     free(w->font_done_for); w->font_done_for = NULL;
@@ -2799,6 +2806,7 @@ static void tab_ctx_release(tab_ctx *c) {
 
 /* Brings tab idx to the foreground (no network: the cached doc is restored). */
 static void tab_switch(browser_window *w, int idx) {
+    gui_quiesce(w);   /* a background tick reads what this changes */
     if (idx < 0 || idx >= w->tab_count || idx == w->active_tab) return;
     /* Single-load model: leaving a tab abandons its in-flight fetch (the discarded
      * result is dropped by the generation check). Concurrent per-tab loading is future
@@ -2820,6 +2828,7 @@ static void tab_switch(browser_window *w, int idx) {
  * url (a window.open target, already policy-gated by the parent) is a navigation of
  * the new tab: it enters its history and stays in the URL bar. */
 static void tab_new(browser_window *w, const char *url) {
+    gui_quiesce(w);   /* a background tick reads what this changes */
     if (w->tab_count >= UI_MAX_TABS) {
         browser_set_status(&w->bs, "Tab limit reached.", now_ms());
         redraw(w);
@@ -13848,7 +13857,9 @@ static void publish_geometry(browser_window *w, const rc_layout *L, double left,
     geom_from_layout(w->doc, L, left, top0, content_w, &g);
     uint64_t h = jg_hash(&g);
     if (h != w->geom_hash || w->geom_page_ms != w->page_load_mono_ms) {
-        if (tab_set_geometry(w->tab_worker, &g) == TAB_OK) {
+        /* Background job: the observer callbacks it fires (lazy loaders) may fetch, and a slow
+         * server must not freeze the window. BUSY (a tick is running) = try again next paint. */
+        if (tab_geometry_async(w->tab_worker, &g) == TAB_OK) {
             w->geom_hash = h;
             w->geom_page_ms = w->page_load_mono_ms;
             /* Observer callbacks (lazy loaders) may have mutated the DOM: pull the
@@ -14120,6 +14131,9 @@ static int load_lazy_images(browser_window *w, const rc_layout *L, double origin
     int any_deferred = 0;
     for (size_t i = 0; i < w->image_count; ++i) if (w->images[i].deferred) { any_deferred = 1; break; }
     if (!any_deferred) return 0;
+    /* The decode goes through the worker: with a background job running that would wait for it.
+     * Try again on the next paint (the job's completion repaints). */
+    if (w->tab_worker != NULL && tab_async_busy(w->tab_worker)) return 0;
     double lo = content_top - FC_LAZY_IMAGE_MARGIN_PX, hi = content_top + content_h + FC_LAZY_IMAGE_MARGIN_PX;
     unsigned char *seen = (unsigned char *)calloc(w->image_count, 1);
     if (seen == NULL) return 0;
@@ -15149,6 +15163,7 @@ static void follow_link(browser_window *w, const char *href) {
 /* Makes url the page's base (link/image resolution) without touching the cached
  * source: after pushState the document's URL changes in place, like Firefox. */
 static void set_page_url(browser_window *w, const char *url) {
+    gui_quiesce(w);   /* a background tick reads what this changes */
     if (url == NULL) return;
     char *copy = strdup(url);
     if (copy == NULL) return;
@@ -15297,6 +15312,26 @@ static int apply_click_result(browser_window *w, tab_page *page) {
         return 1;   /* history_step may have replaced the document */
     }
     return 0;
+}
+
+/* Completion of the tab's background job (tab_tick_async / tab_geometry_async). A tick's refreshed
+ * view is applied exactly like a synchronous one; a geometry job has nothing to apply. A result
+ * another worker call already discarded as stale is simply not there. */
+static void on_tab_async(browser_window *w) {
+    if (w->tab_worker == NULL) return;
+    tab_page tp;
+    tab_status st = TAB_ERR_IO;
+    int was_tick = 0;
+    if (tab_async_finish(w->tab_worker, &tp, &st, &was_tick) != TAB_OK) return;
+    if (was_tick && st == TAB_OK) {
+        (void)apply_click_result(w, &tp);
+        tab_page_free(&tp);
+    }
+    redraw(w);
+}
+
+static void gui_quiesce(browser_window *w) {
+    if (w->tab_worker != NULL && tab_async_busy(w->tab_worker)) on_tab_async(w);
 }
 
 /* Dispatches a click to the live worker for the node under the cursor. If the node
@@ -18700,12 +18735,19 @@ ui_status ui_run_browser(const char *start_url) {
 
         /* Poll the Wayland fd, the key-repeat timer, the async-fetch result pipe,
          * and the video decoder + feeder-thread eventfds together. */
-        struct pollfd pfds[7 + WH_MAX];
+        struct pollfd pfds[8 + WH_MAX];
         int ws_ids[WH_MAX];
         int nfds = 0;
         pfds[nfds].fd = wl_display_get_fd(w.display); pfds[nfds].events = POLLIN; pfds[nfds].revents = 0; nfds++;
         int timer_idx = -1, fetch_idx = -1, stream_idx = -1,
-            video_idx = -1, video_ev_idx = -1;
+            video_idx = -1, video_ev_idx = -1, async_idx = -1;
+        if (w.tab_worker != NULL) {
+            int afd = tab_async_fd(w.tab_worker);
+            if (afd >= 0) {
+                async_idx = nfds;
+                pfds[nfds].fd = afd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0; nfds++;
+            }
+        }
         if (w.repeat_timer_fd >= 0) {
             pfds[nfds].fd = w.repeat_timer_fd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
             timer_idx = nfds++;
@@ -18771,6 +18813,9 @@ ui_status ui_run_browser(const char *start_url) {
             if (pfds[ws_first + (int)k].revents & (POLLIN | POLLHUP | POLLERR))
                 wh_on_readable(w.ws_hub, ws_ids[k], gui_ws_emit, &w);
 
+        /* The background tick/geometry job finished: apply it on this (main) thread. */
+        if (pr > 0 && async_idx >= 0 && (pfds[async_idx].revents & POLLIN)) on_tab_async(&w);
+
         /* One or more fetches completed: render them on this (main) thread. */
         if (pr > 0 && fetch_idx >= 0 && (pfds[fetch_idx].revents & POLLIN))
             drain_fetch_results(&w);
@@ -18783,12 +18828,11 @@ ui_status ui_run_browser(const char *start_url) {
             w.js_tick_due_ms = 0;
             if (w.js_ticks_left > 0) {
                 w.js_ticks_left--;
-                tab_page tp;
-                memset(&tp, 0, sizeof tp);
-                if (tab_tick(w.tab_worker, w.js_tick_elapsed, &tp) == TAB_OK) {
-                    apply_click_result(&w, &tp);
-                    tab_page_free(&tp);
-                    redraw(&w);
+                /* Runs on a background thread: the window keeps painting and scrolling while a
+                 * script's XHR waits on the network; the result lands in on_tab_async. */
+                if (tab_tick_async(w.tab_worker, w.js_tick_elapsed) == TAB_ERR_BUSY) {
+                    w.js_ticks_left++;                      /* a job is running: retry shortly */
+                    w.js_tick_due_ms = now_ms() + 30;
                 }
             }
         }

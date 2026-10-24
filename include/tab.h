@@ -38,7 +38,8 @@ typedef enum tab_status {
     TAB_ERR_DEAD,      /* child is not alive (crashed, killed, or closed) */
     TAB_ERR_RENDER,    /* HTML parse / DOM build failed in the child */
     TAB_ERR_SCRIPT,    /* internal failure running the script (not a JS exception) */
-    TAB_ERR_OOM
+    TAB_ERR_OOM,
+    TAB_ERR_BUSY       /* an asynchronous job is already in flight */
 } tab_status;
 
 /* Opaque parent-side handle to a tab worker. */
@@ -206,6 +207,21 @@ void tab_set_net_allowed(tab *t, int allowed);
 /* Per-operation network time budget in ms for requests the worker issues AFTER the load
  * (default FC_TAB_OP_NET_BUDGET_MS; <= 0 restores it). Tests lower it. */
 void tab_set_op_net_budget_ms(tab *t, int ms);
+
+/* --- Asynchronous jobs (spec/tab.md "ticks asíncronos") -----------------------------------
+ * A tick or a geometry publish can run on a background thread owned by the tab, so a slow
+ * server answering a script's XHR does not freeze the window. At most ONE job is in flight;
+ * the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single
+ * channel, so EVERY other worker call first waits for the job and DISCARDS its (now stale)
+ * result. Everything the fetcher reads must therefore stay unchanged while tab_async_busy. */
+int  tab_async_fd(tab *t);                       /* eventfd, -1 on failure */
+tab_status tab_tick_async(tab *t, int elapsed_ms);   /* TAB_ERR_BUSY if a job is in flight */
+tab_status tab_geometry_async(tab *t, const jg_table *g);
+int  tab_async_busy(const tab *t);               /* running, or finished and not yet claimed */
+/* Joins the job and moves its result out. TAB_ERR_NULL_ARG when there is none to claim (it
+ * was discarded by another call). *job_status is the operation's own status; `out` holds the
+ * refreshed page only for a tick that returned TAB_OK. *was_tick tells the two kinds apart. */
+tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick);
 
 /* Seeds the page's document.cookie jar for the NEXT load with cookies ("name=value; ...")
  * the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only

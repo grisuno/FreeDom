@@ -23,6 +23,8 @@
 #include <signal.h>
 #include <string.h>
 #include <time.h>
+#include <poll.h>
+#include <time.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <cmocka.h>
@@ -2678,6 +2680,74 @@ static void test_post_load_network_time_is_bounded_per_operation(void **state) {
     tab_page_free(&p2); tab_close(t);
 }
 
+/* A tick can run in the background (spec/tab.md async ticks): tab_tick_async returns at once, the
+ * result arrives through an eventfd, and any OTHER worker call first waits for the job in flight
+ * (the pipe is single-channel) and discards its stale view. This is what keeps the window alive
+ * while a slow server answers a script's XHR. */
+static const char SLOW_PAGE[] =
+    "<html><body><p id=\"o\">none</p><script>setTimeout(function(){"
+    "var ok=0; for(var i=0;i<3;i++){ var x=new XMLHttpRequest(); x.open('GET','https://site.test/s'+i,false);"
+    "x.send(); if(x.status===200) ok++; }"
+    "document.getElementById('o').textContent='ok='+ok;},10);</script></body></html>";
+
+static tab *slow_tab(void) {
+    tab *t = NULL; tab_page p;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_slow_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    slow_calls = 0;
+    assert_int_equal(tab_load_full(t, SLOW_PAGE, sizeof SLOW_PAGE - 1, "https://site.test/index.html", 1, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    return t;
+}
+
+static long ms_since(const struct timespec *a) {
+    struct timespec b;
+    clock_gettime(CLOCK_MONOTONIC, &b);
+    return (b.tv_sec - a->tv_sec) * 1000 + (b.tv_nsec - a->tv_nsec) / 1000000;
+}
+
+static void test_async_tick_returns_at_once_and_delivers_through_eventfd(void **state) {
+    (void)state;
+    tab *t = slow_tab();
+    int fd = tab_async_fd(t);
+    assert_true(fd >= 0);
+    struct timespec t0;
+    clock_gettime(CLOCK_MONOTONIC, &t0);
+    assert_int_equal(tab_tick_async(t, 100), TAB_OK);
+    assert_true(ms_since(&t0) < 100);                    /* the 3 x 150 ms of network is not waited */
+    assert_true(tab_async_busy(t));
+    assert_int_equal(tab_tick_async(t, 100), TAB_ERR_BUSY);   /* one job at a time */
+    struct pollfd pf = { fd, POLLIN, 0 };
+    assert_int_equal(poll(&pf, 1, 4000), 1);             /* the completion event */
+    tab_page p;
+    tab_status st = TAB_ERR_IO;
+    int was_tick = 0;
+    assert_int_equal(tab_async_finish(t, &p, &st, &was_tick), TAB_OK);
+    assert_int_equal(st, TAB_OK);
+    assert_int_equal(was_tick, 1);
+    assert_non_null(view_find_text(p.view, "ok=3"));
+    tab_page_free(&p);
+    assert_false(tab_async_busy(t));
+    tab_close(t);
+}
+
+static void test_other_worker_calls_wait_for_the_job_and_discard_its_view(void **state) {
+    (void)state;
+    tab *t = slow_tab();
+    assert_int_equal(tab_tick_async(t, 100), TAB_OK);
+    tab_eval_result r;
+    static const char js[] = "document.getElementById('o').textContent";
+    assert_int_equal(tab_eval(t, js, sizeof js - 1, &r), TAB_OK);   /* waited for the tick first */
+    assert_non_null(r.value);
+    assert_string_equal(r.value, "ok=3");
+    tab_eval_result_free(&r);
+    tab_page p;
+    tab_status st;
+    assert_int_equal(tab_async_finish(t, &p, &st, NULL), TAB_ERR_NULL_ARG);   /* stale view discarded */
+    tab_close(t);
+}
+
 /* A bare specifier resolves through the page's import map (spec/import_map.md). */
 static void test_import_map_resolves_bare_specifier(void **state) {
     (void)state;
@@ -3375,6 +3445,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_ajax_after_load_reaches_the_gated_fetcher),
         cmocka_unit_test(test_lazy_script_src_and_import_after_load),
         cmocka_unit_test(test_post_load_network_time_is_bounded_per_operation),
+        cmocka_unit_test(test_async_tick_returns_at_once_and_delivers_through_eventfd),
+        cmocka_unit_test(test_other_worker_calls_wait_for_the_job_and_discard_its_view),
         cmocka_unit_test(test_import_map_resolves_bare_specifier),
         cmocka_unit_test(test_data_url_classic_script_runs_without_network),
         cmocka_unit_test(test_module_src_is_a_url_and_data_modules_run),
