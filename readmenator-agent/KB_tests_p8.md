@@ -1,6 +1,18 @@
 # Subsystem: tests (page 8 of 8)
 Previous: [KB_tests_p7.md](KB_tests_p7.md)
 
+## tests/test_wl_guard.c
+- Doc: test_guard_starts_idles_and_stops_promptly: The helper starts on a live display, tolerates an...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `ms_since` (function, line 13) `static long ms_since(const struct timespec *a)`
+  - `test_guard_starts_idles_and_stops_promptly` (function, line 21) `static void test_guard_starts_idles_and_stops_promptly(void **state)`
+  - `test_guard_survives_peer_hangup` (function, line 41) `static void test_guard_survives_peer_hangup(void **state)`
+  - `main` (function, line 55) `int main(void)`
+  - `_DEFAULT_SOURCE` (macro, line 1) `#define _DEFAULT_SOURCE`
+- Depends on: `include/wl_guard.h`
+
 ## tests/test_ws_hub.c
 - Doc: wait_notify: #include <string.h> #include <cmocka.h> #include "ws_hub.h" typedef struct rec {...
 - Layer: testing

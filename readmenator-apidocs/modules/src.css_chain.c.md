@@ -25,6 +25,8 @@ Solid arrows stay in this module, dashed arrows leave it.
 
 ```mermaid
 flowchart LR
+    n_src_css_chain_c__inputs(["inputs"])
+    n_include_css_select_h__csel_element_feature_bits["css_select.csel_element_feature_bits"]
     n_src_css_chain_c__cch_element_style_vars(["cch_element_style_vars"])
     n_src_css_c__css_resolve_el_ex["css.css_resolve_el_ex"]
     n_src_css_chain_c__cch_pseudo_style(["cch_pseudo_style"])
@@ -32,6 +34,7 @@ flowchart LR
     n_src_css_chain_c__cch_element_matches(["cch_element_matches"])
     n_include_css_select_h__csel_matches["css_select.csel_matches"]
     n_src_css_select_c__csel_needs_structure["css_select.csel_needs_structure"]
+    n_src_css_chain_c__inputs -.-> n_include_css_select_h__csel_element_feature_bits
     n_src_css_chain_c__cch_element_style_vars -.-> n_src_css_c__css_resolve_el_ex
     n_src_css_chain_c__cch_pseudo_style -.-> n_src_css_c__css_resolve_pseudo
     n_src_css_chain_c__cch_element_matches -.-> n_include_css_select_h__csel_matches
@@ -92,13 +95,15 @@ One element's selector inputs (tag/id/classes) plus its css_element view, with b
 
 **Returns:** `* identical`
 
+*Calls:* [`csel_element_feature_bits`](include.css_select.h.md#csel_element_feature_bits)
+
 ---
 
 <a id="cch_element_style_vars"></a>
 
 ### `cch_element_style_vars`
 
-`function` | [src/css_chain.c:299](../../src/css_chain.c#L299)
+`function` | [src/css_chain.c:310](../../src/css_chain.c#L310)
 
 ```c
 css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet, double parent_font_size, const struct cvr_chain *inherited, struct cvr_table *own_out)
@@ -124,7 +129,7 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet, 
 
 ### `cch_pseudo_style`
 
-`function` | [src/css_chain.c:330](../../src/css_chain.c#L330)
+`function` | [src/css_chain.c:341](../../src/css_chain.c#L341)
 
 ```c
 css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which, double font_size, const struct cvr_chain *inherited)
@@ -152,7 +157,7 @@ css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int wh
 
 ### `cch_element_style`
 
-`function` | [src/css_chain.c:349](../../src/css_chain.c#L349)
+`function` | [src/css_chain.c:360](../../src/css_chain.c#L360)
 
 ```c
 css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
@@ -175,7 +180,7 @@ css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
 
 ### `cch_element_matches`
 
-`function` | [src/css_chain.c:353](../../src/css_chain.c#L353)
+`function` | [src/css_chain.c:364](../../src/css_chain.c#L364)
 
 ```c
 int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)

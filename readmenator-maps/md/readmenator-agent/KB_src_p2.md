@@ -256,14 +256,14 @@ static int expand_clip(const char *val, css_de...`
   - `css_resolve_pseudo` (function, line 6128) `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)`
   - `resolve_core` (function, line 6139) `static css_style resolve_core(const css_sheet *sheet, const css_element *el,
                     ...`
-  - `css_resolve` (function, line 6396) `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
+  - `css_resolve` (function, line 6398) `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                   ...`
-  - `NULL` (function, line 6420) `* Sheet can be NULL (inline style, no @keyframes). */
+  - `NULL` (function, line 6422) `* Sheet can be NULL (inline style, no @keyframes). */
 void css_resolve_anim_keyframes(css_style *...`
-  - `css_font_face_count` (function, line 6452) `size_t css_font_face_count(const css_sheet *sheet)`
-  - `css_font_face_at` (function, line 6456) `int css_font_face_at(const css_sheet *sheet, size_t i,
+  - `css_font_face_count` (function, line 6454) `size_t css_font_face_count(const css_sheet *sheet)`
+  - `css_font_face_at` (function, line 6458) `int css_font_face_at(const css_sheet *sheet, size_t i,
                      char *family, size_t ...`
-  - `css_parse_inline` (function, line 6466) `css_style css_parse_inline(const char *style, size_t len)`
+  - `css_parse_inline` (function, line 6468) `css_style css_parse_inline(const char *style, size_t len)`
   - `emit` (function, line 63) `* * It must exceed the most slots ANY single declaration can emit (the widest today * is the `background` shorthand...`
   - `css_decl` (function, line 90) `* text and stores the INDEX in the css_decl (int-only, see P_BG_IMAGE_URL);`
   - `order` (function, line 1440) `* declaration order (dx, dy, optional blur >= 0);`
@@ -404,12 +404,12 @@ void css_resolve_anim_keyframes(css_style *...`
   - `count_children` (function, line 227) `static int count_children(lxb_dom_node_t *n)`
   - `inputs` (function, line 241) `* identical inputs (single source of truth). */
 static const css_element *build_chain(lxb_dom_ele...`
-  - `cch_element_style_vars` (function, line 299) `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
+  - `cch_element_style_vars` (function, line 310) `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
                  ...`
-  - `cch_pseudo_style` (function, line 330) `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
+  - `cch_pseudo_style` (function, line 341) `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
             ...`
-  - `cch_element_style` (function, line 349) `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
-  - `cch_element_matches` (function, line 353) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
+  - `cch_element_style` (function, line 360) `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
+  - `cch_element_matches` (function, line 364) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
   - `CCH_TAG_MAX` (macro, line 15) `#define CCH_TAG_MAX`
   - `CCH_ID_MAX` (macro, line 16) `#define CCH_ID_MAX`
   - `CCH_CLASS_BUF` (macro, line 17) `#define CCH_CLASS_BUF`

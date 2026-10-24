@@ -1,6 +1,6 @@
 # `include/box_blur.h`
 
-> Source: [include/box_blur.h:1](../../include/box_blur.h#L1) | language `h` | coverage 100.0% | [API index](../index.md)
+> Source: [include/box_blur.h:1](../../include/box_blur.h#L1) | language `h` | coverage 80.0% | [API index](../index.md)
 
 Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md).
 
@@ -8,7 +8,7 @@ Pure: no I/O, one scratch allocation freed before return.
 
 ## Contents
 
-- **Functions:** [`bb_box_sizes`](#bb_box_sizes), [`BB_MAX_PIXELS`](#bb_max_pixels)
+- **Functions:** [`bb_box_sizes`](#bb_box_sizes), [`BB_MAX_PIXELS`](#bb_max_pixels), [`alpha`](#alpha)
 - **Macros:** [`BB_MAX_PIXELS`](#bb_max_pixels)
 
 ## Functions
@@ -59,6 +59,26 @@ Largest mask bb_blur_a8 accepts (anti-DoS).
 **Returns:** `* arguments or a mask larger than`
 
 > **Inherited:** Documentation from [`BB_MAX_PIXELS`](#bb_max_pixels) (include/box_blur.h:12).
+
+---
+
+<a id="alpha"></a>
+
+### `alpha`
+
+`function` | [include/box_blur.h:26](../../include/box_blur.h#L26)
+
+```c
+* no pixel has alpha (nothing to blur), 1 otherwise. Everything outside rect stays 0 after the blur, * so blurring just rect is identical to blurring the whole surface. */ int bb_ink_rect(const unsign
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `blur` | `nothing to` |  |  |
+
+**Returns:** `* no pixel has`
 
 ---
 

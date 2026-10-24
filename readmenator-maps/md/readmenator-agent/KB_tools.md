@@ -5,13 +5,17 @@
 - Layer: utility
 - Language: py
 - Symbols:
-  - `load_baseline` (function, line 46) `def load_baseline()`
-  - `load_current` (function, line 59) `def load_current()`
-  - `luma` (function, line 72) `def luma(img)`
-  - `bands` (function, line 76) `def bands(fd, ff, band)`
-  - `sbs` (function, line 88) `def sbs(name, start, nrows)`
-  - `publish_readme` (function, line 107) `def publish_readme(name, score)`
-  - `main` (function, line 127) `def main()`
+  - `load_baseline` (function, line 53) `def load_baseline()`
+  - `load_current` (function, line 66) `def load_current()`
+  - `luma` (function, line 79) `def luma(img)`
+  - `bands` (function, line 83) `def bands(fd, ff, band)`
+  - `sbs` (function, line 95) `def sbs(name, start, nrows)`
+  - `publish_readme` (function, line 114) `def publish_readme(name, score)`
+  - `run_timer` (function, line 140) `def run_timer(tool, pages, runs)`
+  - `load_timing_baseline` (function, line 158) `def load_timing_baseline()`
+  - `publish_timing` (function, line 171) `def publish_timing(rows)`
+  - `timing` (function, line 193) `def timing(names, runs, readme)`
+  - `main` (function, line 227) `def main()`
 
 ## tools/ffgeom.py
 - Doc: ffgeom -- Firefox geometry as TEXT, no image reading.
@@ -45,6 +49,13 @@
 - Symbols:
   - `main` (function, line 24) `def main()`
 
+## tools/fftime.py
+- Doc: fftime -- Firefox's time from "navigate" to "painted and idle", for `make fbench`.
+- Layer: utility
+- Language: py
+- Symbols:
+  - `main` (function, line 38) `def main()`
+
 ## tools/gen_psl.c
 - Doc: sort_unique: v->cap = v->cap ? v->cap * 2 : 1024; v->items = (char **)realloc(v->items, v->cap *...
 - Layer: utility
@@ -58,6 +69,15 @@
   - `emit` (function, line 61) `static void emit(const char *name, vec *v)`
   - `main` (function, line 67) `int main(int argc, char **argv)`
   - `_POSIX_C_SOURCE` (macro, line 15) `#define _POSIX_C_SOURCE`
+
+## tools/guitime.py
+- Doc: guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle".
+- Layer: utility
+- Language: py
+- Symbols:
+  - `start_display` (function, line 34) `def start_display(workdir)`
+  - `one_run` (function, line 65) `def one_run(binary, page, env, hosts_dir, tmp)`
+  - `main` (function, line 92) `def main()`
 
 ## tools/mutate.py
 - Doc: mutate -- compile-time mutation testing for the CMocka suites.

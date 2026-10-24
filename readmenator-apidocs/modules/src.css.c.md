@@ -844,7 +844,7 @@ A non-empty needle only; an empty one never matches.
 
 **Returns:** `return known &&`
 
-> **Inherited:** Documentation from [`csel_substr`](#csel_substr) (include/css_select.h:229).
+> **Inherited:** Documentation from [`csel_substr`](#csel_substr) (include/css_select.h:247).
 
 *Called by:* [`blur`](#blur), [`declaration`](#declaration)
 
@@ -1085,7 +1085,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`css_ua_heading_em`](#css_ua_heading_em) (include/css.h:1202).
+> **Inherited:** Documentation from [`css_ua_heading_em`](#css_ua_heading_em) (include/css.h:1209).
 
 ---
 
@@ -1188,7 +1188,7 @@ css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int 
 
 ### `css_resolve`
 
-`function` | [src/css.c:6396](../../src/css.c#L6396)
+`function` | [src/css.c:6398](../../src/css.c#L6398)
 
 ```c
 css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, const char *const *classes, size_t nclasses, const char *inline_style, size_t inline_len)
@@ -1214,7 +1214,7 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, c
 
 ### `NULL`
 
-`function` | [src/css.c:6420](../../src/css.c#L6420)
+`function` | [src/css.c:6422](../../src/css.c#L6422)
 
 ```c
 * Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...
@@ -1237,7 +1237,7 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, c
 
 ### `css_font_face_count`
 
-`function` | [src/css.c:6452](../../src/css.c#L6452)
+`function` | [src/css.c:6454](../../src/css.c#L6454)
 
 ```c
 size_t css_font_face_count(const css_sheet *sheet)
@@ -1255,7 +1255,7 @@ Returns 0 on success, -1 if i is out of range.
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`css_font_face_count`](#css_font_face_count) (include/css.h:1217).
+> **Inherited:** Documentation from [`css_font_face_count`](#css_font_face_count) (include/css.h:1224).
 
 ---
 
@@ -1263,7 +1263,7 @@ Returns 0 on success, -1 if i is out of range.
 
 ### `css_font_face_at`
 
-`function` | [src/css.c:6456](../../src/css.c#L6456)
+`function` | [src/css.c:6458](../../src/css.c#L6458)
 
 ```c
 int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap)
@@ -1288,7 +1288,7 @@ int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_
 
 ### `css_parse_inline`
 
-`function` | [src/css.c:6466](../../src/css.c#L6466)
+`function` | [src/css.c:6468](../../src/css.c#L6468)
 
 ```c
 css_style css_parse_inline(const char *style, size_t len)

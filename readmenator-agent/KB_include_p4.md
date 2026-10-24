@@ -262,6 +262,20 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Depends on: `include/anti_fp.h`
 - Imported by: `gui/browser_ui.c`, `include/cached_fetch.h`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
 
+## include/shm_slots.h
+- Doc: ss_committed: Chooses the slot to paint into: the current one if free, else the other free one.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ss_state` (struct, line 19)
+  - `busy` (type_alias, line 18) `typedef struct ss_state { int busy[SS_COUNT];`
+  - `ss_init` (function, line 24) `static inline void ss_init(ss_state *s)`
+  - `ss_committed` (function, line 41) `static inline void ss_committed(ss_state *s, int i)`
+  - `ss_released` (function, line 49) `static inline int ss_released(ss_state *s, int i)`
+  - `FREEDOM_SHM_SLOTS_H` (macro, line 2) `#define FREEDOM_SHM_SLOTS_H`
+  - `SS_COUNT` (macro, line 17) `#define SS_COUNT`
+- Imported by: `gui/browser_ui.c`, `tests/test_shm_slots.c`
+
 ## include/svg_paint.h
 - Doc: svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred...
 - Layer: utility

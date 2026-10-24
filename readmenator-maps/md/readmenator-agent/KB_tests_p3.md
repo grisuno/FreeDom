@@ -67,7 +67,12 @@ static void test_leading_b...`
   - `test_long_class_folds` (function, line 82) `static void test_long_class_folds(void **state)`
   - `test_matching_implies_candidate` (function, line 105) `static void test_matching_implies_candidate(void **state)`
   - `test_invalid_index_reports_fallback` (function, line 140) `static void test_invalid_index_reports_fallback(void **state)`
-  - `main` (function, line 153) `int main(void)`
+  - `test_anc_filter_rejects_when_a_required_ancestor_is_absent` (function, line 167) `static void test_anc_filter_rejects_when_a_required_ancestor_is_absent(void **state)`
+  - `test_anc_filter_is_off_without_a_bloom_and_ignores_sibling_combinators` (function, line 188) `static void test_anc_filter_is_off_without_a_bloom_and_ignores_sibling_combinators(void **state)`
+  - `test_anc_filter_long_class_names_fold_the_same_way` (function, line 202) `static void test_anc_filter_long_class_names_fold_the_same_way(void **state)`
+  - `test_anc_filter_never_rejects_a_matching_selector` (function, line 217) `static void test_anc_filter_never_rejects_a_matching_selector(void **state)`
+  - `test_anc_filter_also_checks_the_subjects_own_tag_id_and_classes` (function, line 234) `static void test_anc_filter_also_checks_the_subjects_own_tag_id_and_classes(void **state)`
+  - `main` (function, line 252) `int main(void)`
 - Depends on: `include/css_index.h`
 
 ## tests/test_css_length.c

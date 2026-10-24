@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 199 modules, 3477 documented entities, documentation coverage 39.4% (1361/3455 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 204 modules, 3525 documented entities, documentation coverage 39.4% (1378/3495 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (94), h (91), py (10), sh (4)
+Languages: c (95), h (93), py (12), sh (4)
 
 ## Modules
 
@@ -22,7 +22,7 @@ Languages: c (94), h (91), py (10), sh (4)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 200 | 32.9% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 201 | 33.2% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 5 | 4 | 50.0% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) |  | 0 | 6 | 85.7% |
 | [`gui/freedom_view.c`](modules/gui.freedom_view.c.md) |  | 0 | 2 | 0.0% |
@@ -35,7 +35,7 @@ Languages: c (94), h (91), py (10), sh (4)
 |---|---|---|---|---|
 | [`include/anti_fp.h`](modules/include.anti_fp.h.md) |  | 0 | 34 | 60.0% |
 | [`include/block_flow.h`](modules/include.block_flow.h.md) | block_flow (bf_) -- vertical margin collapsing for block-level boxes. | 0 | 3 | 50.0% |
-| [`include/box_blur.h`](modules/include.box_blur.h.md) | Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md). | 0 | 3 | 100.0% |
+| [`include/box_blur.h`](modules/include.box_blur.h.md) | Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md). | 0 | 4 | 80.0% |
 | [`include/box_style.h`](modules/include.box_style.h.md) |  | 12 | 18 | 64.5% |
 | [`include/box_tree.h`](modules/include.box_tree.h.md) |  | 5 | 28 | 38.2% |
 | [`include/browser.h`](modules/include.browser.h.md) |  | 2 | 16 | 47.4% |
@@ -53,7 +53,7 @@ Languages: c (94), h (91), py (10), sh (4)
 | [`include/css_length.h`](modules/include.css_length.h.md) |  | 5 | 14 | 55.0% |
 | [`include/css_mask.h`](modules/include.css_mask.h.md) | CSS Masking 1, alpha gradients only (spec/css_mask.md). | 4 | 5 | 50.0% |
 | [`include/css_mq.h`](modules/include.css_mq.h.md) |  | 2 | 3 | 50.0% |
-| [`include/css_select.h`](modules/include.css_select.h.md) |  | 10 | 24 | 60.0% |
+| [`include/css_select.h`](modules/include.css_select.h.md) |  | 10 | 26 | 59.5% |
 | [`include/css_text.h`](modules/include.css_text.h.md) |  | 0 | 16 | 0.0% |
 | [`include/css_values.h`](modules/include.css_values.h.md) | Single owner of CSS value interpretation for colors and backgrounds. | 0 | 8 | 33.3% |
 | [`include/css_vars.h`](modules/include.css_vars.h.md) |  | 4 | 14 | 73.7% |
@@ -102,6 +102,7 @@ Languages: c (94), h (91), py (10), sh (4)
 | [`include/renderer.h`](modules/include.renderer.h.md) |  | 3 | 3 | 14.3% |
 | [`include/request_policy.h`](modules/include.request_policy.h.md) |  | 1 | 3 | 60.0% |
 | [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) |  | 9 | 36 | 54.3% |
+| [`include/shm_slots.h`](modules/include.shm_slots.h.md) |  | 2 | 4 | 42.9% |
 | [`include/svg_paint.h`](modules/include.svg_paint.h.md) |  | 0 | 1 | 50.0% |
 | [`include/svg_render.h`](modules/include.svg_render.h.md) |  | 9 | 8 | 38.9% |
 | [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 33 | 45.7% |
@@ -117,6 +118,7 @@ Languages: c (94), h (91), py (10), sh (4)
 | [`include/webfont.h`](modules/include.webfont.h.md) |  | 3 | 13 | 17.6% |
 | [`include/webfont_load.h`](modules/include.webfont_load.h.md) |  | 1 | 5 | 14.3% |
 | [`include/wl_display.h`](modules/include.wl_display.h.md) |  | 0 | 5 | 33.3% |
+| [`include/wl_guard.h`](modules/include.wl_guard.h.md) |  | 2 | 2 | 60.0% |
 | [`include/ws_hub.h`](modules/include.ws_hub.h.md) |  | 1 | 13 | 73.3% |
 | [`include/zoom.h`](modules/include.zoom.h.md) |  | 0 | 9 | 60.0% |
 
@@ -126,7 +128,7 @@ Languages: c (94), h (91), py (10), sh (4)
 |---|---|---|---|---|
 | [`src/anti_fp.c`](modules/src.anti_fp.c.md) |  | 0 | 22 | 73.9% |
 | [`src/block_flow.c`](modules/src.block_flow.c.md) | block_flow (bf_) -- vertical margin collapsing. | 0 | 3 | 50.0% |
-| [`src/box_blur.c`](modules/src.box_blur.c.md) |  | 0 | 3 | 25.0% |
+| [`src/box_blur.c`](modules/src.box_blur.c.md) |  | 0 | 4 | 20.0% |
 | [`src/box_style.c`](modules/src.box_style.c.md) |  | 2 | 42 | 31.1% |
 | [`src/box_tree.c`](modules/src.box_tree.c.md) |  | 0 | 15 | 37.5% |
 | [`src/browser.c`](modules/src.browser.c.md) |  | 0 | 30 | 25.8% |
@@ -143,7 +145,7 @@ Languages: c (94), h (91), py (10), sh (4)
 | [`src/css_length.c`](modules/src.css_length.c.md) |  | 0 | 11 | 25.0% |
 | [`src/css_mask.c`](modules/src.css_mask.c.md) |  | 0 | 6 | 28.6% |
 | [`src/css_mq.c`](modules/src.css_mq.c.md) |  | 3 | 7 | 18.2% |
-| [`src/css_select.c`](modules/src.css_select.c.md) |  | 0 | 14 | 60.0% |
+| [`src/css_select.c`](modules/src.css_select.c.md) |  | 0 | 16 | 64.7% |
 | [`src/css_text.c`](modules/src.css_text.c.md) | --- text-presentation extensions (Hito 23b-6) --- | 0 | 14 | 73.3% |
 | [`src/css_values.c`](modules/src.css_values.c.md) |  | 0 | 8 | 22.2% |
 | [`src/css_vars.c`](modules/src.css_vars.c.md) |  | 0 | 8 | 55.6% |
@@ -184,11 +186,11 @@ Languages: c (94), h (91), py (10), sh (4)
 | [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 19 | 43.5% |
 | [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 13 | 33.3% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
-| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 305 | 1.6% |
+| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 309 | 1.6% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
-| [`src/page_view.c`](modules/src.page_view.c.md) |  | 20 | 114 | 43.7% |
+| [`src/page_view.c`](modules/src.page_view.c.md) |  | 20 | 115 | 43.4% |
 | [`src/pdf_export.c`](modules/src.pdf_export.c.md) |  | 0 | 4 | 20.0% |
 | [`src/perf_trace.c`](modules/src.perf_trace.c.md) |  | 0 | 11 | 75.0% |
 | [`src/pq_seal.c`](modules/src.pq_seal.c.md) |  | 1 | 8 | 10.0% |
@@ -213,6 +215,7 @@ Languages: c (94), h (91), py (10), sh (4)
 | [`src/webfont.c`](modules/src.webfont.c.md) |  | 0 | 6 | 0.0% |
 | [`src/webfont_load.c`](modules/src.webfont_load.c.md) |  | 4 | 4 | 55.6% |
 | [`src/wl_display.c`](modules/src.wl_display.c.md) |  | 0 | 7 | 25.0% |
+| [`src/wl_guard.c`](modules/src.wl_guard.c.md) |  | 1 | 4 | 33.3% |
 | [`src/ws_hub.c`](modules/src.ws_hub.c.md) |  | 5 | 14 | 70.0% |
 | [`src/zoom.c`](modules/src.zoom.c.md) |  | 0 | 7 | 75.0% |
 
@@ -220,11 +223,13 @@ Languages: c (94), h (91), py (10), sh (4)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`tools.fbench`](modules/tools.fbench.py.md) | fbench -- turn the PNG pairs `make parity` leaves behind into something you can act on. | 0 | 7 | 25.0% |
+| [`tools.fbench`](modules/tools.fbench.py.md) | fbench -- turn the PNG pairs `make parity` leaves behind into something you can act on. | 0 | 11 | 33.3% |
 | [`tools.ffgeom`](modules/tools.ffgeom.py.md) | ffgeom -- Firefox geometry as TEXT, no image reading. | 0 | 7 | 25.0% |
 | [`tools.ffq`](modules/tools.ffq.py.md) | ffq -- ask Firefox what it computed, as TEXT. | 0 | 1 | 50.0% |
 | [`tools.ffshot`](modules/tools.ffshot.py.md) | ffshot -- full-page Firefox screenshot at a FIXED viewport, for `make parity`/`make wpt`. | 0 | 1 | 50.0% |
+| [`tools.fftime`](modules/tools.fftime.py.md) | fftime -- Firefox's time from "navigate" to "painted and idle", for `make fbench`. | 0 | 1 | 50.0% |
 | [`tools/gen_psl.c`](modules/tools.gen_psl.c.md) |  | 1 | 2 | 0.0% |
+| [`tools.guitime`](modules/tools.guitime.py.md) | guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle". | 0 | 3 | 50.0% |
 | [`tools.mutate`](modules/tools.mutate.py.md) | mutate -- compile-time mutation testing for the CMocka suites. | 0 | 6 | 14.3% |
 | [`tools/pngdiff.c`](modules/tools.pngdiff.c.md) |  | 3 | 5 | 44.4% |
 | [`tools.pngprof`](modules/tools.pngprof.py.md) | pngprof -- structural ink-profile dump for page screenshots. | 0 | 4 | 20.0% |

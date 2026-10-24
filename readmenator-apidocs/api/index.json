@@ -2,33 +2,33 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 199,
-  "entities": 3477,
+  "modules": 204,
+  "entities": 3525,
   "languages": {
-   "c": 94,
-   "h": 91,
-   "py": 10,
+   "c": 95,
+   "h": 93,
+   "py": 12,
    "sh": 4
   },
   "kinds": {
-   "constant": 15,
+   "constant": 23,
    "enum": 155,
-   "function": 1789,
-   "macro": 922,
+   "function": 1810,
+   "macro": 931,
    "method": 23,
-   "module": 199,
-   "struct": 238,
-   "type_alias": 129,
+   "module": 204,
+   "struct": 241,
+   "type_alias": 131,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 80,
+  "skipped_files": 82,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1361,
-   "total": 3455,
+   "documented": 1378,
+   "total": 3495,
    "percent": 39.4
   },
   "by_kind": {
@@ -38,14 +38,14 @@
     "percent": 51.6
    },
    "function": {
-    "documented": 754,
-    "total": 1789,
-    "percent": 42.1
+    "documented": 766,
+    "total": 1810,
+    "percent": 42.3
    },
    "macro": {
-    "documented": 299,
-    "total": 922,
-    "percent": 32.4
+    "documented": 300,
+    "total": 931,
+    "percent": 32.2
    },
    "method": {
     "documented": 0,
@@ -53,19 +53,19 @@
     "percent": 0.0
    },
    "module": {
-    "documented": 28,
-    "total": 199,
-    "percent": 14.1
+    "documented": 30,
+    "total": 204,
+    "percent": 14.7
    },
    "struct": {
     "documented": 105,
-    "total": 238,
-    "percent": 44.1
+    "total": 241,
+    "percent": 43.6
    },
    "type_alias": {
-    "documented": 95,
-    "total": 129,
-    "percent": 73.6
+    "documented": 97,
+    "total": 131,
+    "percent": 74.0
    }
   },
   "by_module": {
@@ -85,9 +85,9 @@
     "percent": 100.0
    },
    "gui/browser_ui.c": {
-    "documented": 80,
-    "total": 243,
-    "percent": 32.9
+    "documented": 81,
+    "total": 244,
+    "percent": 33.2
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -126,8 +126,8 @@
    },
    "include/box_blur.h": {
     "documented": 4,
-    "total": 4,
-    "percent": 100.0
+    "total": 5,
+    "percent": 80.0
    },
    "include/box_style.h": {
     "documented": 20,
@@ -215,9 +215,9 @@
     "percent": 50.0
    },
    "include/css_select.h": {
-    "documented": 21,
-    "total": 35,
-    "percent": 60.0
+    "documented": 22,
+    "total": 37,
+    "percent": 59.5
    },
    "include/css_text.h": {
     "documented": 0,
@@ -459,6 +459,11 @@
     "total": 46,
     "percent": 54.3
    },
+   "include/shm_slots.h": {
+    "documented": 3,
+    "total": 7,
+    "percent": 42.9
+   },
    "include/svg_paint.h": {
     "documented": 1,
     "total": 2,
@@ -534,6 +539,11 @@
     "total": 6,
     "percent": 33.3
    },
+   "include/wl_guard.h": {
+    "documented": 3,
+    "total": 5,
+    "percent": 60.0
+   },
    "include/ws_hub.h": {
     "documented": 11,
     "total": 15,
@@ -566,8 +576,8 @@
    },
    "src/box_blur.c": {
     "documented": 1,
-    "total": 4,
-    "percent": 25.0
+    "total": 5,
+    "percent": 20.0
    },
    "src/box_style.c": {
     "documented": 14,
@@ -650,9 +660,9 @@
     "percent": 18.2
    },
    "src/css_select.c": {
-    "documented": 9,
-    "total": 15,
-    "percent": 60.0
+    "documented": 11,
+    "total": 17,
+    "percent": 64.7
    },
    "src/css_text.c": {
     "documented": 11,
@@ -856,7 +866,7 @@
    },
    "src/local_store.c": {
     "documented": 5,
-    "total": 306,
+    "total": 310,
     "percent": 1.6
    },
    "src/media_decoder.c": {
@@ -876,8 +886,8 @@
    },
    "src/page_view.c": {
     "documented": 59,
-    "total": 135,
-    "percent": 43.7
+    "total": 136,
+    "percent": 43.4
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -999,6 +1009,11 @@
     "total": 8,
     "percent": 25.0
    },
+   "src/wl_guard.c": {
+    "documented": 2,
+    "total": 6,
+    "percent": 33.3
+   },
    "src/ws_hub.c": {
     "documented": 14,
     "total": 20,
@@ -1010,9 +1025,9 @@
     "percent": 75.0
    },
    "tools/fbench.py": {
-    "documented": 2,
-    "total": 8,
-    "percent": 25.0
+    "documented": 4,
+    "total": 12,
+    "percent": 33.3
    },
    "tools/ffgeom.py": {
     "documented": 2,
@@ -1029,10 +1044,20 @@
     "total": 2,
     "percent": 50.0
    },
+   "tools/fftime.py": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
    "tools/gen_psl.c": {
     "documented": 0,
     "total": 4,
     "percent": 0.0
+   },
+   "tools/guitime.py": {
+    "documented": 2,
+    "total": 4,
+    "percent": 50.0
    },
    "tools/mutate.py": {
     "documented": 1,
@@ -1085,7 +1110,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 243
+   "entities": 244
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1125,7 +1150,7 @@
   {
    "uid": "include/box_blur.h",
    "path": "modules/include.box_blur.h.jsonl",
-   "entities": 4
+   "entities": 5
   },
   {
    "uid": "include/box_style.h",
@@ -1215,7 +1240,7 @@
   {
    "uid": "include/css_select.h",
    "path": "modules/include.css_select.h.jsonl",
-   "entities": 35
+   "entities": 37
   },
   {
    "uid": "include/css_text.h",
@@ -1458,6 +1483,11 @@
    "entities": 46
   },
   {
+   "uid": "include/shm_slots.h",
+   "path": "modules/include.shm_slots.h.jsonl",
+   "entities": 7
+  },
+  {
    "uid": "include/svg_paint.h",
    "path": "modules/include.svg_paint.h.jsonl",
    "entities": 2
@@ -1533,6 +1563,11 @@
    "entities": 6
   },
   {
+   "uid": "include/wl_guard.h",
+   "path": "modules/include.wl_guard.h.jsonl",
+   "entities": 5
+  },
+  {
    "uid": "include/ws_hub.h",
    "path": "modules/include.ws_hub.h.jsonl",
    "entities": 15
@@ -1565,7 +1600,7 @@
   {
    "uid": "src/box_blur.c",
    "path": "modules/src.box_blur.c.jsonl",
-   "entities": 4
+   "entities": 5
   },
   {
    "uid": "src/box_style.c",
@@ -1650,7 +1685,7 @@
   {
    "uid": "src/css_select.c",
    "path": "modules/src.css_select.c.jsonl",
-   "entities": 15
+   "entities": 17
   },
   {
    "uid": "src/css_text.c",
@@ -1855,7 +1890,7 @@
   {
    "uid": "src/local_store.c",
    "path": "modules/src.local_store.c.jsonl",
-   "entities": 306
+   "entities": 310
   },
   {
    "uid": "src/media_decoder.c",
@@ -1875,7 +1910,7 @@
   {
    "uid": "src/page_view.c",
    "path": "modules/src.page_view.c.jsonl",
-   "entities": 135
+   "entities": 136
   },
   {
    "uid": "src/pdf_export.c",
@@ -1998,6 +2033,11 @@
    "entities": 8
   },
   {
+   "uid": "src/wl_guard.c",
+   "path": "modules/src.wl_guard.c.jsonl",
+   "entities": 6
+  },
+  {
    "uid": "src/ws_hub.c",
    "path": "modules/src.ws_hub.c.jsonl",
    "entities": 20
@@ -2010,7 +2050,7 @@
   {
    "uid": "tools/fbench.py",
    "path": "modules/tools.fbench.py.jsonl",
-   "entities": 12
+   "entities": 20
   },
   {
    "uid": "tools/ffgeom.py",
@@ -2028,9 +2068,19 @@
    "entities": 2
   },
   {
+   "uid": "tools/fftime.py",
+   "path": "modules/tools.fftime.py.jsonl",
+   "entities": 4
+  },
+  {
    "uid": "tools/gen_psl.c",
    "path": "modules/tools.gen_psl.c.jsonl",
    "entities": 4
+  },
+  {
+   "uid": "tools/guitime.py",
+   "path": "modules/tools.guitime.py.jsonl",
+   "entities": 6
   },
   {
    "uid": "tools/mutate.py",
@@ -2065,7 +2115,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2095
+  "total": 2118
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

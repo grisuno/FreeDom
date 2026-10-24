@@ -352,7 +352,7 @@ Each field aliases caller storage (nothing is copied/owned). parent walks toward
 
 ### `cvr_table`
 
-`struct` | [include/css.h:1166](../../include/css.h#L1166)
+`struct` | [include/css.h:1173](../../include/css.h#L1173)
 
 ```c
 struct cvr_table;
@@ -1438,7 +1438,7 @@ Idempotent; NULL-safe.
 
 ### `inherited_px`
 
-`function` | [include/css.h:1190](../../include/css.h#L1190)
+`function` | [include/css.h:1197](../../include/css.h#L1197)
 
 ```c
 * whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that walks the DOM is the one that can supply the * inherited value, and it needs the same
@@ -1458,7 +1458,7 @@ Idempotent; NULL-safe.
 
 ### `css_ua_heading_em`
 
-`function` | [include/css.h:1202](../../include/css.h#L1202)
+`function` | [include/css.h:1209](../../include/css.h#L1209)
 
 ```c
 double css_ua_heading_em(int level);
@@ -1484,7 +1484,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 ### `name`
 
-`function` | [include/css.h:1207](../../include/css.h#L1207)
+`function` | [include/css.h:1214](../../include/css.h#L1214)
 
 ```c
 * name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag);
@@ -1498,7 +1498,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 ### `css_font_face_count`
 
-`function` | [include/css.h:1217](../../include/css.h#L1217)
+`function` | [include/css.h:1224](../../include/css.h#L1224)
 
 ```c
 size_t css_font_face_count(const css_sheet *sheet);
@@ -1522,7 +1522,7 @@ Returns 0 on success, -1 if i is out of range.
 
 ### `css_font_face_at`
 
-`function` | [include/css.h:1218](../../include/css.h#L1218)
+`function` | [include/css.h:1225](../../include/css.h#L1225)
 
 ```c
 int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);
@@ -1547,7 +1547,7 @@ int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_
 
 ### `css_resolve_anim_keyframes`
 
-`function` | [include/css.h:1226](../../include/css.h#L1226)
+`function` | [include/css.h:1233](../../include/css.h#L1233)
 
 ```c
 void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);
@@ -2236,7 +2236,7 @@ Normalized viewport height paired with CSS_MEDIA_DEFAULT_WIDTH (16:9 desktop, th
 
 ### `CSS_PSEUDO_BEFORE`
 
-`macro` | [include/css.h:1176](../../include/css.h#L1176)
+`macro` | [include/css.h:1183](../../include/css.h#L1183)
 
 ```c
 #define CSS_PSEUDO_BEFORE
@@ -2250,7 +2250,7 @@ Which generated box css_resolve_pseudo resolves (CSS 2.1 12.1).
 
 ### `CSS_PSEUDO_AFTER`
 
-`macro` | [include/css.h:1177](../../include/css.h#L1177)
+`macro` | [include/css.h:1184](../../include/css.h#L1184)
 
 ```c
 #define CSS_PSEUDO_AFTER
@@ -2262,7 +2262,7 @@ Which generated box css_resolve_pseudo resolves (CSS 2.1 12.1).
 
 ### `CSS_PSEUDO_PLACEHOLDER`
 
-`macro` | [include/css.h:1178](../../include/css.h#L1178)
+`macro` | [include/css.h:1185](../../include/css.h#L1185)
 
 ```c
 #define CSS_PSEUDO_PLACEHOLDER

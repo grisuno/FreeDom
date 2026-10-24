@@ -40,6 +40,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/render_policy.h`
 - `gui/browser_ui.c` -> `include/request_policy.h`
 - `gui/browser_ui.c` -> `include/secure_fetch.h`
+- `gui/browser_ui.c` -> `include/shm_slots.h`
 - `gui/browser_ui.c` -> `include/svg_paint.h`
 - `gui/browser_ui.c` -> `include/svg_render.h`
 - `gui/browser_ui.c` -> `include/tab.h`
@@ -53,6 +54,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/webcaps.h`
 - `gui/browser_ui.c` -> `include/webfont.h`
 - `gui/browser_ui.c` -> `include/webfont_load.h`
+- `gui/browser_ui.c` -> `include/wl_guard.h`
 - `gui/browser_ui.c` -> `include/ws_hub.h`
 - `gui/browser_ui.c` -> `include/zoom.h`
 - `gui/browser_ui_internal.h` -> `include/freedom_config.h`
@@ -397,6 +399,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/webfont_load.c` -> `include/webfont.h`
 - `src/webfont_load.c` -> `include/webfont_load.h`
 - `src/wl_display.c` -> `include/wl_display.h`
+- `src/wl_guard.c` -> `include/wl_guard.h`
 - `src/ws_hub.c` -> `include/ws_hub.h`
 - `src/zoom.c` -> `include/zoom.h`
 - `tests/itest_secure_fetch.c` -> `include/secure_fetch.h`
@@ -493,8 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_page_view.c` -> `include/page_view.h`
 - `tests/test_page_view.c` -> `include/webfont.h`
 - `tests/test_pdf_export.c` -> `include/pdf_export.h`
-- `tests/test_perf_trace.c` -> `include/perf_trace.h`
-- `tests/test_pq_seal.c` -> `include/pq_seal.h`
-- `tests/test_prefetch.c` -> `include/prefetch.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

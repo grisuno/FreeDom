@@ -228,25 +228,30 @@ int cg_expand_bg_imag...`
                   ...`
   - `selector` (function, line 565) `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
  * dropped. Whitespa...`
-  - `el_attr_value` (function, line 661) `static const char *el_attr_value(const css_element *el, const char *name)`
-  - `ends_with` (function, line 671) `static int ends_with(const char *v, const char *suf, int ci)`
-  - `has_word` (function, line 679) `static int has_word(const char *v, const char *w, int ci)`
-  - `attr_matches` (function, line 694) `static int attr_matches(const css_attr_match *am, const css_element *el)`
-  - `nth_matches` (function, line 714) `static int nth_matches(int A, int B, int idx)`
-  - `is_form_control` (function, line 723) `static int is_form_control(const char *tag)`
-  - `sub_sel_matches` (function, line 736) `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
-  - `compound_matches` (function, line 986) `static int compound_matches(const css_compound *c, const css_element *el,
+  - `csel_element_feature_bits` (function, line 585) `unsigned long long csel_element_feature_bits(const css_element *e)`
+  - `compute_anc_req` (function, line 600) `static unsigned long long compute_anc_req(const css_sel *sel)`
+  - `csel_parse_core` (function, line 613) `static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel)`
+  - `compute_subj_req` (function, line 704) `static unsigned long long compute_subj_req(const css_sel *sel)`
+  - `csel_parse` (function, line 715) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel)`
+  - `el_attr_value` (function, line 725) `static const char *el_attr_value(const css_element *el, const char *name)`
+  - `ends_with` (function, line 735) `static int ends_with(const char *v, const char *suf, int ci)`
+  - `has_word` (function, line 743) `static int has_word(const char *v, const char *w, int ci)`
+  - `attr_matches` (function, line 758) `static int attr_matches(const css_attr_match *am, const css_element *el)`
+  - `nth_matches` (function, line 778) `static int nth_matches(int A, int B, int idx)`
+  - `is_form_control` (function, line 787) `static int is_form_control(const char *tag)`
+  - `sub_sel_matches` (function, line 800) `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
+  - `compound_matches` (function, line 1050) `static int compound_matches(const css_compound *c, const css_element *el,
                        ...`
-  - `built` (function, line 1021) `* chains the caller built (an element without parent/prev links never matches
+  - `built` (function, line 1085) `* chains the caller built (an element without parent/prev links never matches
  * through that com...`
-  - `pseudo_is_local` (function, line 1063) `static int pseudo_is_local(int kind)`
-  - `csel_needs_structure` (function, line 1076) `int csel_needs_structure(const css_sel *sel)`
-  - `csel_matches` (function, line 1099) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+  - `pseudo_is_local` (function, line 1127) `static int pseudo_is_local(int kind)`
+  - `csel_needs_structure` (function, line 1140) `int csel_needs_structure(const css_sel *sel)`
+  - `csel_matches` (function, line 1163) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
               ...`
   - `take_sub_arg` (function, line 293) `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);`
   - `between` (function, line 382) `* between ( and ) is split on commas (not inside [] or ());`
-  - `pseudo_matches` (function, line 732) `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...`
-  - `HAS_MAX_DEPTH` (macro, line 845) `#define HAS_MAX_DEPTH`
+  - `pseudo_matches` (function, line 796) `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...`
+  - `HAS_MAX_DEPTH` (macro, line 909) `#define HAS_MAX_DEPTH`
 - Depends on: `include/css_select.h`
 
 ## src/css_text.c

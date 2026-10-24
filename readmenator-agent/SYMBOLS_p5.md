@@ -3,6 +3,24 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `tc_is_lower` | function | `include/text_case.h:24` | `int tc_is_lower(uint32_t cp);` |
+| `tc_lower` | function | `include/text_case.h:21` | `uint32_t tc_lower(uint32_t cp);` |
+| `tc_run` | struct | `include/text_case.h:33` | `` |
+| `tc_smallcaps_runs` | function | `include/text_case.h:41` | `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap);` |
+| `tc_transform` | function | `include/text_case.h:29` | `size_t tc_transform(const char *s, size_t n, int transform, int word_start, char *out, size_t cap);` |
+| `FREEDOM_TEXT_SHAPE_H` | macro | `include/text_shape.h:19` | `#define FREEDOM_TEXT_SHAPE_H` |
+| `TSH_FAMILY_MAX` | macro | `include/text_shape.h:48` | `#define TSH_FAMILY_MAX` |
+| `TSH_LOCAL_FAMILIES` | macro | `include/text_shape.h:47` | `#define TSH_LOCAL_FAMILIES` |
+| `TSH_LOCAL_LISTS` | macro | `include/text_shape.h:46` | `#define TSH_LOCAL_LISTS` |
+| `TSH_MAX_GLYPHS` | macro | `include/text_shape.h:77` | `#define TSH_MAX_GLYPHS` |
+| `TSH_MAX_TEXT` | macro | `include/text_shape.h:78` | `#define TSH_MAX_TEXT` |
+| `content` | function | `include/text_shape.h:11` | `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);` |
+| `end` | type_alias | `include/text_shape.h:132` | `typedef struct tsh_run { size_t start, end;` |
+| `family` | type_alias | `include/text_shape.h:33` | `typedef struct tsh_font { int family;` |
+| `origin` | function | `include/text_shape.h:92` | `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...` |
+| `own` | function | `include/text_shape.h:136` | `* face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ) * stay in the run before them....` |
+| `tsh_face` | function | `include/text_shape.h:127` | `cairo_font_face_t *tsh_face(const tsh_font *f);` |
+| `tsh_family_is_generic` | function | `include/text_shape.h:52` | `int tsh_family_is_generic(const char *name);` |
 | `tsh_font` | struct | `include/text_shape.h:33` | `` |
 | `tsh_local_handle` | function | `include/text_shape.h:75` | `int tsh_local_handle(const char *list);` |
 | `tsh_measure` | function | `include/text_shape.h:101` | `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);` |
@@ -138,6 +156,11 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `pure` | function | `include/wl_display.h:3` | `* wd_pick is pure (no I/O);` |
 | `wd_pick` | function | `include/wl_display.h:16` | `int wd_pick(const char *const *names, size_t n, char *out, size_t cap);` |
 | `wd_resolve_env` | function | `include/wl_display.h:20` | `int wd_resolve_env(void);` |
+| `FREEDOM_WL_GUARD_H` | macro | `include/wl_guard.h:2` | `#define FREEDOM_WL_GUARD_H` |
+| `wl_display` | struct | `include/wl_guard.h:8` | `` |
+| `wl_guard` | type_alias | `include/wl_guard.h:21` | `typedef struct wl_guard wl_guard;` |
+| `wlg_start` | function | `include/wl_guard.h:25` | `wl_guard *wlg_start(struct wl_display *display);` |
+| `wlg_stop` | function | `include/wl_guard.h:28` | `void wlg_stop(wl_guard *g);` |
 | `FREEDOM_WS_HUB_H` | macro | `include/ws_hub.h:2` | `#define FREEDOM_WS_HUB_H` |
 | `WH_CLOSE_ABNORMAL` | macro | `include/ws_hub.h:27` | `#define WH_CLOSE_ABNORMAL` |
 | `WH_MAX` | macro | `include/ws_hub.h:21` | `#define WH_MAX` |
@@ -192,6 +215,7 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `finite_or_zero` | function | `src/block_flow.c:11` | `static double finite_or_zero(double v)` |
 | `bb_blur_a8` | function | `src/box_blur.c:41` | `int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)` |
 | `bb_box_sizes` | function | `src/box_blur.c:7` | `int bb_box_sizes(double sigma, int sizes[3])` |
+| `bb_ink_rect` | function | `src/box_blur.c:57` | `int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4])` |
 | `box_line` | function | `src/box_blur.c:28` | `static void box_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp)` |
 | `variance` | function | `src/box_blur.c:10` | `* width w has variance (w^2 - 1) / 12): the ideal common width, rounded down * to an odd wl and up to wu = wl + 2...` |
 | `BLOCK` | macro | `src/box_style.c:67` | `#define BLOCK` |
@@ -345,7 +369,7 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `CSS_VAR_POOL` | macro | `src/css.c:6003` | `#define CSS_VAR_POOL` |
 | `CSS_WIDE_RESET` | macro | `src/css.c:221` | `#define CSS_WIDE_RESET` |
 | `LIST` | function | `src/css.c:2516` | `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...` |
-| `NULL` | function | `src/css.c:6420` | `* Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...` |
+| `NULL` | function | `src/css.c:6422` | `* Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...` |
 | `P_META_CUSTOM` | macro | `src/css.c:82` | `#define P_META_CUSTOM` |
 | `P_META_VARSRC` | macro | `src/css.c:83` | `#define P_META_VARSRC` |
 | `add_rule` | function | `src/css.c:4411` | `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,                      siz...` |
@@ -373,17 +397,17 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `css_cand` | struct | `src/css.c:5937` | `` |
 | `css_computed_font_size_for_tag` | function | `src/css.c:5917` | `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)` |
 | `css_decl` | function | `src/css.c:90` | `* text and stores the INDEX in the css_decl (int-only, see P_BG_IMAGE_URL);` |
-| `css_font_face_at` | function | `src/css.c:6456` | `int css_font_face_at(const css_sheet *sheet, size_t i,                      char *family, size_t ...` |
-| `css_font_face_count` | function | `src/css.c:6452` | `size_t css_font_face_count(const css_sheet *sheet)` |
+| `css_font_face_at` | function | `src/css.c:6458` | `int css_font_face_at(const css_sheet *sheet, size_t i,                      char *family, size_t ...` |
+| `css_font_face_count` | function | `src/css.c:6454` | `size_t css_font_face_count(const css_sheet *sheet)` |
 | `css_free` | function | `src/css.c:5418` | `void css_free(css_sheet *s)` |
 | `css_keyframe_stop` | struct | `src/css.c:143` | `` |
 | `css_match` | struct | `src/css.c:5931` | `` |
 | `css_parse` | function | `src/css.c:5312` | `css_status css_parse(const char *text, size_t len, css_sheet **out)` |
-| `css_parse_inline` | function | `src/css.c:6466` | `css_style css_parse_inline(const char *style, size_t len)` |
+| `css_parse_inline` | function | `src/css.c:6468` | `css_style css_parse_inline(const char *style, size_t len)` |
 | `css_parse_logged` | function | `src/css.c:5326` | `css_status css_parse_logged(const char *text, size_t len, const css_media *media,                ...` |
 | `css_parse_media` | function | `src/css.c:5316` | `css_status css_parse_media(const char *text, size_t len, const css_media *media,                 ...` |
 | `css_parse_scoped` | function | `src/css.c:5321` | `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,                ...` |
-| `css_resolve` | function | `src/css.c:6396` | `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,                   ...` |
+| `css_resolve` | function | `src/css.c:6398` | `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,                   ...` |
 | `css_resolve_el` | function | `src/css.c:6103` | `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,                          ...` |
 | `css_resolve_el_ex` | function | `src/css.c:6112` | `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,                       ...` |
 | `css_resolve_pseudo` | function | `src/css.c:6128` | `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)` |
@@ -472,29 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `interp_flex_line_pack` | function | `src/css.c:2195` | `static int interp_flex_line_pack(const char *v)` |
 | `interp_flex_wrap` | function | `src/css.c:2205` | `static int interp_flex_wrap(const char *v)` |
 | `interp_float` | function | `src/css.c:385` | `static int interp_float(const char *v)` |
-| `interp_font_kerning` | function | `src/css.c:767` | `static int interp_font_kerning(const char *v)` |
-| `interp_font_stretch` | function | `src/css.c:782` | `static int interp_font_stretch(const char *v)` |
-| `interp_font_variant` | function | `src/css.c:550` | `static int interp_font_variant(const char *v)` |
-| `interp_fontfamily` | function | `src/css.c:353` | `static int interp_fontfamily(const char *v)` |
-| `interp_fontsize_ex` | function | `src/css.c:315` | `static int interp_fontsize_ex(const char *v, int *abs_out)` |
-| `interp_forced_color_adjust` | function | `src/css.c:726` | `static int interp_forced_color_adjust(const char *v)` |
-| `interp_gap` | function | `src/css.c:339` | `static int interp_gap(const char *v)` |
-| `interp_grid_flow` | function | `src/css.c:2213` | `static int interp_grid_flow(const char *v)` |
-| `interp_hyphens` | function | `src/css.c:558` | `static int interp_hyphens(const char *v)` |
-| `interp_image_rendering` | function | `src/css.c:690` | `static int interp_image_rendering(const char *v)` |
-| `interp_isolation` | function | `src/css.c:656` | `static int interp_isolation(const char *v)` |
-| `interp_justify` | function | `src/css.c:343` | `static int interp_justify(const char *v)` |
-| `interp_len` | function | `src/css.c:294` | `static int interp_len(const char *v, int allow_auto, int *out)` |
-| `interp_lineheight` | function | `src/css.c:319` | `static int interp_lineheight(const char *v)` |
-| `interp_list_style_pos` | function | `src/css.c:761` | `static int interp_list_style_pos(const char *v)` |
-| `interp_liststyle` | function | `src/css.c:364` | `static int interp_liststyle(const char *v)` |
-| `interp_lp` | function | `src/css.c:298` | `static int interp_lp(const char *v, int allow_auto, int allow_pct,                      int *out_...` |
-| `interp_mix_blend_mode` | function | `src/css.c:733` | `static int interp_mix_blend_mode(const char *v)` |
-| `interp_object_fit` | function | `src/css.c:752` | `static int interp_object_fit(const char *v)` |
-| `interp_opacity` | function | `src/css.c:355` | `static int interp_opacity(const char *v)` |
-| `interp_overflow` | function | `src/css.c:409` | `static int interp_overflow(const char *v)` |
-| `interp_overflow_wrap` | function | `src/css.c:487` | `static int interp_overflow_wrap(const char *v)` |
-| `interp_overscroll_behavior` | function | `src/css.c:825` | `static int interp_overscroll_behavior(const char *v)` |
-| `interp_pointer_events` | function | `src/css.c:605` | `static int interp_pointer_events(const char *v)` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

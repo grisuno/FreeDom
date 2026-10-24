@@ -1,6 +1,22 @@
 # API (page 8 of 11)
 Previous: [API_p7.md](API_p7.md)
 
+## src/hostedit.c
+Depends on: `include/hostedit.h`
+- `he_lower` (function) `src/hostedit.c:12` `static char he_lower(char c)`
+- `is_label_char` (function) `src/hostedit.c:16` `static int is_label_char(char c)`
+- `valid_host` (function) `src/hostedit.c:22` `static int valid_host(const char *host, size_t n)` -- #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c >= 'A' && c <= 'Z') ?
+- `he_make_line` (function) `src/hostedit.c:41` `he_status he_make_line(const char *host, char *out, size_t cap)`
+- `is_ip_token` (function) `src/hostedit.c:67` `static int is_ip_token(const char *ts, const char *te)` -- True if the token looks like an IPv4 dotted-quad / contains only digits and dots * (matches hostblock's is_ip_token...
+- `he_scan` (function) `src/hostedit.c:80` `static int he_scan(const char *text, int (*fn)(const char *, size_t, void *), void *ctx)` -- Visits each domain token (non-comment, non-IP) of a hosts-format text in document order, calling fn(ts, tl, ctx).
+- `has_host_cb` (function) `src/hostedit.c:105` `static int has_host_cb(const char *ts, size_t tl, void *ctx)`
+- `he_text_has_host` (function) `src/hostedit.c:109` `int he_text_has_host(const char *text, const char *host)`
+- `contains_ci` (function) `src/hostedit.c:115` `static int contains_ci(const char *hs, size_t hl, const char *needle)` -- } return 0; } static int has_host_cb(const char *ts, size_t tl, void *ctx) { return token_eq_host(ts, ts + tl...
+- `starts_with_ci` (function) `src/hostedit.c:128` `static int starts_with_ci(const char *hs, size_t hl, const char *pfx)`
+- `suggest_cb` (function) `src/hostedit.c:144` `static int suggest_cb(const char *ts, size_t tl, void *vctx)`
+- `he_suggest` (function) `src/hostedit.c:164` `int he_suggest(const char *text, const char *query,
+               char results[][HE_MAX_HOST + 1...`
+
 ## src/html_parse.c
 Depends on: `include/dom.h`, `include/html_parse.h`, `include/util.h`
 - `dup_bytes` (function) `src/html_parse.c:27` `static char *dup_bytes(const lxb_char_t *src, size_t len)`
@@ -471,25 +487,6 @@ Depends on: `include/js_sandbox.h`
 - `m_realm_clone` (function) `src/js_sandbox.c:832` `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,
                    ...` -- __realmClone(value, global): structured copy into global's realm through the * serializer WITHOUT bytecode -- a...
 - `js_install_realms` (function) `src/js_sandbox.c:854` `js_status js_install_realms(js_context *ctx)`
-
-## src/js_trusted.c
-Depends on: `include/js_trusted.h`, `include/web_storage.h`
-- `jt_enable_open` (function) `src/js_trusted.c:35` `jd_status jt_enable_open(js_context *ctx)`
-- `jt_enable_observers` (function) `src/js_trusted.c:116` `jd_status jt_enable_observers(js_context *ctx)`
-- `jt_geometry_changed` (function) `src/js_trusted.c:130` `jd_status jt_geometry_changed(js_context *ctx)`
-- `jt_take_opens` (function) `src/js_trusted.c:146` `char *jt_take_opens(js_context *ctx)`
-- `jt_enable_ws` (function) `src/js_trusted.c:224` `jd_status jt_enable_ws(js_context *ctx)`
-- `jt_ws_ops_free` (function) `src/js_trusted.c:236` `void jt_ws_ops_free(jt_ws_op *ops, size_t n)`
-- `hex_nibble` (function) `src/js_trusted.c:241` `static int hex_nibble(char c)`
-- `ws_payload` (function) `src/js_trusted.c:248` `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)` -- } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for (size_t i = 0; i < n; ++i) {...
-- `jt_take_ws` (function) `src/js_trusted.c:272` `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)`
-- `jt_ws_event` (function) `src/js_trusted.c:314` `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)`
-- `jt_seed_pair` (function) `src/js_trusted.c:369` `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)`
-- `jt_enable_storage` (function) `src/js_trusted.c:379` `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)`
-- `jt_take_storage` (function) `src/js_trusted.c:400` `int jt_take_storage(js_context *ctx, char **out, size_t *len)`
-- `explicitly` (function) `src/js_trusted.c:448` `* explicitly (no window, no document). Delivery is always a timer task. */
-static const char JT_W...`
-- `jt_enable_worker` (function) `src/js_trusted.c:529` `jd_status jt_enable_worker(js_context *ctx)`
 
 
 Next: [API_p9.md](API_p9.md)

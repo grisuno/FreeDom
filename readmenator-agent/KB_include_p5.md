@@ -119,6 +119,18 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `WD_NONE` (macro, line 11) `#define WD_NONE`
 - Imported by: `src/freedom.c`, `src/wl_display.c`, `tests/test_wl_display.c`
 
+## include/wl_guard.h
+- Doc: wlg_start: wl_guard -- keeps the Wayland connection drained while the GUI thread is busy.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `wl_display` (struct, line 8)
+  - `wl_guard` (type_alias, line 21) `typedef struct wl_guard wl_guard;`
+  - `wlg_start` (function, line 25) `wl_guard *wlg_start(struct wl_display *display);`
+  - `wlg_stop` (function, line 28) `void wlg_stop(wl_guard *g);`
+  - `FREEDOM_WL_GUARD_H` (macro, line 2) `#define FREEDOM_WL_GUARD_H`
+- Imported by: `gui/browser_ui.c`, `src/wl_guard.c`, `tests/test_wl_guard.c`
+
 ## include/ws_hub.h
 - Doc: wh_new: #define WH_MAX 8   /* == JD_WS_MAX: sockets per page /* Event kinds delivered to the...
 - Layer: utility

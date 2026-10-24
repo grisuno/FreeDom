@@ -25,6 +25,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`bt_status`](modules/include.box_tree.h.md#bt_status) enum in `include/box_tree.h`
 - [`buf`](modules/include.textfield.h.md#buf) type_alias in `include/textfield.h`
 - [`bui_mask_ctx`](modules/gui.browser_ui.c.md#bui_mask_ctx) struct in `gui/browser_ui.c`
+- [`busy`](modules/include.shm_slots.h.md#busy) type_alias in `include/shm_slots.h`
 - [`bx_bg_layer`](modules/include.box_style.h.md#bx_bg_layer) struct in `include/box_style.h`
 - [`bx_box`](modules/include.box_style.h.md#bx_box) struct in `include/box_style.h`
 - [`bx_display`](modules/include.box_style.h.md#bx_display) enum in `include/box_style.h`
@@ -431,6 +432,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`cg_radial.shape`](modules/include.css_gradient.h.md#cg_radial-shape) type_alias in `include/css_gradient.h`
 - [`sink`](modules/src.secure_fetch.c.md#sink) type_alias in `src/secure_fetch.c`
 - [`sm_entry`](modules/src.dom.c.md#sm_entry) struct in `src/dom.c`
+- [`ss_state`](modules/include.shm_slots.h.md#ss_state) struct in `include/shm_slots.h`
 - [`stage`](modules/include.perf_trace.h.md#stage) type_alias in `include/perf_trace.h`
 - [`status`](modules/include.js_sandbox.h.md#status) type_alias in `include/js_sandbox.h`
 - [`status`](modules/include.renderer.h.md#status) type_alias in `include/renderer.h`
@@ -521,6 +523,9 @@ Project types nested under the project types they derive from. External bases ar
 - [`img_pixels.width`](modules/include.image_decode.h.md#img_pixels-width) type_alias in `include/image_decode.h`
 - [`tab_image.width`](modules/include.tab.h.md#tab_image-width) type_alias in `include/tab.h`
 - [`width_px`](modules/include.css_mq.h.md#width_px) type_alias in `include/css_mq.h`
+- [`wl_display`](modules/include.wl_guard.h.md#wl_display) struct in `include/wl_guard.h`
+- [`wl_guard`](modules/include.wl_guard.h.md#wl_guard) type_alias in `include/wl_guard.h`
+- [`wl_guard`](modules/src.wl_guard.c.md#wl_guard) struct in `src/wl_guard.c`
 - [`pv_text_ext.word_spacing`](modules/include.page_view.h.md#pv_text_ext-word_spacing) type_alias in `include/page_view.h`
 - [`wst_db`](modules/include.web_storage.h.md#wst_db) type_alias in `include/web_storage.h`
 - [`wst_db`](modules/src.web_storage.c.md#wst_db) struct in `src/web_storage.c`

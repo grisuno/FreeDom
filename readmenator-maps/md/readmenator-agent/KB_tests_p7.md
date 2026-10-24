@@ -65,6 +65,16 @@ Previous: [KB_tests_p6.md](KB_tests_p6.md)
   - `main` (function, line 670) `int main(void)`
 - Depends on: `include/secure_fetch.h`
 
+## tests/test_shm_slots.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_alternates_and_never_paints_a_held_slot` (function, line 8) `static void test_alternates_and_never_paints_a_held_slot(void **state)`
+  - `test_release_of_unknown_or_idle_slot_is_ignored` (function, line 23) `static void test_release_of_unknown_or_idle_slot_is_ignored(void **state)`
+  - `test_repaint_before_commit_reuses_the_same_free_slot` (function, line 34) `static void test_repaint_before_commit_reuses_the_same_free_slot(void **state)`
+  - `main` (function, line 42) `int main(void)`
+- Depends on: `include/shm_slots.h`
+
 ## tests/test_svg_render.c
 - Doc: tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_).
 - Layer: testing

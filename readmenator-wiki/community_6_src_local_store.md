@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 16 file(s) rooted at `src` with dominant language c (cohesion 0.79). Central symbols: `FREEDOM_CACHED_FETCH_H`, `FREEDOM_DISK_STORE_H`, `FREEDOM_HTTP_CACHE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PQ_SEAL_H`, `HC_EVICT_EVERY`, `HC_HEURISTIC_CAP`, `HC_KEY_FILE`. Core file: `src/local_store.c` (311 symbols).
+This community groups 16 file(s) rooted at `src` with dominant language c (cohesion 0.79). Central symbols: `FREEDOM_CACHED_FETCH_H`, `FREEDOM_DISK_STORE_H`, `FREEDOM_HTTP_CACHE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PQ_SEAL_H`, `HC_EVICT_EVERY`, `HC_HEURISTIC_CAP`, `HC_KEY_FILE`. Core file: `src/local_store.c` (315 symbols).
 
 ## Files
 
@@ -18,7 +18,7 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 | `src/cached_fetch.c` | c | infrastructure | 14 | no |
 | `src/disk_store.c` | c | data_access | 6 | no |
 | `src/http_cache.c` | c | presentation | 38 | no |
-| `src/local_store.c` | c | data_access | 311 | no |
+| `src/local_store.c` | c | data_access | 315 | no |
 | `src/pq_seal.c` | c | utility | 11 | no |
 | `src/profile.c` | c | utility | 9 | no |
 | `tests/test_cached_fetch.c` | c | testing | 14 | no |
@@ -67,8 +67,8 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/cached_fetch.h.
-- [EXTRACTED] depends_on community 6 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/secure_fetch.h.
+- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/cached_fetch.h.
+- [EXTRACTED] depends_on community 6 <-> 8 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/secure_fetch.h.
 - [EXTRACTED] depends_on community 6 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
 
 ## Risks

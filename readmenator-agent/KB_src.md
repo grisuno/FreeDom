@@ -49,6 +49,7 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
   - `bb_box_sizes` (function, line 7) `int bb_box_sizes(double sigma, int sizes[3])`
   - `box_line` (function, line 28) `static void box_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp)`
   - `bb_blur_a8` (function, line 41) `int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)`
+  - `bb_ink_rect` (function, line 57) `int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4])`
   - `variance` (function, line 10) `* width w has variance (w^2 - 1) / 12): the ideal common width, rounded down * to an odd wl and up to wu = wl + 2...`
 - Depends on: `include/box_blur.h`
 

@@ -265,14 +265,14 @@ static int expand_clip(const char *val, css_de...`
 - `css_resolve_pseudo` (function) `src/css.c:6128` `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)`
 - `resolve_core` (function) `src/css.c:6139` `static css_style resolve_core(const css_sheet *sheet, const css_element *el,
                     ...` -- The cascade. want_pseudo 0 resolves the ELEMENT (a ::before/::after rule only hands it `content`)...
-- `css_resolve` (function) `src/css.c:6396` `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
+- `css_resolve` (function) `src/css.c:6398` `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                   ...`
-- `NULL` (function) `src/css.c:6420` `* Sheet can be NULL (inline style, no @keyframes). */
+- `NULL` (function) `src/css.c:6422` `* Sheet can be NULL (inline style, no @keyframes). */
 void css_resolve_anim_keyframes(css_style *...`
-- `css_font_face_count` (function) `src/css.c:6452` `size_t css_font_face_count(const css_sheet *sheet)`
-- `css_font_face_at` (function) `src/css.c:6456` `int css_font_face_at(const css_sheet *sheet, size_t i,
+- `css_font_face_count` (function) `src/css.c:6454` `size_t css_font_face_count(const css_sheet *sheet)`
+- `css_font_face_at` (function) `src/css.c:6458` `int css_font_face_at(const css_sheet *sheet, size_t i,
                      char *family, size_t ...`
-- `css_parse_inline` (function) `src/css.c:6466` `css_style css_parse_inline(const char *style, size_t len)`
+- `css_parse_inline` (function) `src/css.c:6468` `css_style css_parse_inline(const char *style, size_t len)`
 
 ## src/css_atrule.c
 Depends on: `include/css_atrule.h`, `include/css_select.h`
@@ -350,12 +350,12 @@ Depends on: `include/css_chain.h`, `include/css_select.h`
 - `count_children` (function) `src/css_chain.c:227` `static int count_children(lxb_dom_node_t *n)` -- Counts ALL child nodes (elements, text, comments) of the DOM element n. * R2: for :empty matching.
 - `inputs` (function) `src/css_chain.c:241` `* identical inputs (single source of truth). */
 static const css_element *build_chain(lxb_dom_ele...`
-- `cch_element_style_vars` (function) `src/css_chain.c:299` `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
+- `cch_element_style_vars` (function) `src/css_chain.c:310` `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
                  ...`
-- `cch_pseudo_style` (function) `src/css_chain.c:330` `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
+- `cch_pseudo_style` (function) `src/css_chain.c:341` `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
             ...`
-- `cch_element_style` (function) `src/css_chain.c:349` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
-- `cch_element_matches` (function) `src/css_chain.c:353` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
+- `cch_element_style` (function) `src/css_chain.c:360` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
+- `cch_element_matches` (function) `src/css_chain.c:364` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
 
 ## src/css_color.c
 Depends on: `include/css_color.h`

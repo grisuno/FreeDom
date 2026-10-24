@@ -2,6 +2,9 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_perf_trace.c` -> `include/perf_trace.h`
+- `tests/test_pq_seal.c` -> `include/pq_seal.h`
+- `tests/test_prefetch.c` -> `include/prefetch.h`
 - `tests/test_prefs.c` -> `include/prefs.h`
 - `tests/test_prefs.c` -> `include/zoom.h`
 - `tests/test_profile.c` -> `include/prefs.h`
@@ -16,6 +19,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_renderer.c` -> `include/renderer.h`
 - `tests/test_request_policy.c` -> `include/request_policy.h`
 - `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
+- `tests/test_shm_slots.c` -> `include/shm_slots.h`
 - `tests/test_svg_render.c` -> `include/svg_render.h`
 - `tests/test_tab.c` -> `include/css.h`
 - `tests/test_tab.c` -> `include/js_geom.h`
@@ -39,6 +43,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_webfont_load.c` -> `include/webfont.h`
 - `tests/test_webfont_load.c` -> `include/webfont_load.h`
 - `tests/test_wl_display.c` -> `include/wl_display.h`
+- `tests/test_wl_guard.c` -> `include/wl_guard.h`
 - `tests/test_ws_hub.c` -> `include/ws_hub.h`
 - `tests/test_zoom.c` -> `include/zoom.h`
 
@@ -204,6 +209,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/webfont.c` -> stdint.h, stdlib.h, string.h
 - `src/webfont_load.c` -> stdlib.h, string.h
 - `src/wl_display.c` -> dirent.h, stdlib.h, string.h
+- `src/wl_guard.c` -> poll.h, pthread.h, stdatomic.h, stdlib.h, unistd.h, wayland-client.h
 - `src/ws_hub.c` -> curl/curl.h, errno.h, fcntl.h, pthread.h, stdint.h, stdlib.h, string.h, sys/socket.h, unistd.h
 - `tests/itest_secure_fetch.c` -> stdio.h, string.h
 - `tests/test_anti_fp.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
@@ -270,6 +276,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_renderer.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_request_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_secure_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_shm_slots.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_svg_render.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_tab.c` -> cmocka.h, poll.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/types.h, time.h, unistd.h
 - `tests/test_text_case.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
@@ -283,13 +290,16 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_webfont.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_webfont_load.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_wl_display.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tests/test_wl_guard.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, sys/socket.h, time.h, unistd.h, wayland-client.h
 - `tests/test_ws_hub.c` -> cmocka.h, poll.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h, time.h
 - `tests/test_zoom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
-- `tools/fbench.py` -> PIL, numpy, os, re, sys
+- `tools/fbench.py` -> PIL, numpy, os, re, subprocess, sys
 - `tools/ffgeom.py` -> re, struct, subprocess, sys, zlib
 - `tools/ffq.py` -> os, selenium, selenium.webdriver.firefox.options, selenium.webdriver.firefox.service, shutil, sys
 - `tools/ffshot.py` -> os, selenium, selenium.webdriver.firefox.options, selenium.webdriver.firefox.service, shutil, sys
+- `tools/fftime.py` -> os, selenium, selenium.webdriver.firefox.options, selenium.webdriver.firefox.service, shutil, statistics, sys, time
 - `tools/gen_psl.c` -> stdio.h, stdlib.h, string.h
+- `tools/guitime.py` -> json, os, shutil, statistics, subprocess, sys, tempfile, time
 - `tools/mutate.py` -> os, re, shutil, subprocess, sys
 - `tools/pngdiff.c` -> math.h, png.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tools/pngprof.py` -> struct, sys, zlib

@@ -61,6 +61,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Symbols:
   - `bb_box_sizes` (function, line 16) `int bb_box_sizes(double sigma, int sizes[3]);`
   - `BB_MAX_PIXELS` (function, line 20) `* arguments or a mask larger than BB_MAX_PIXELS (buffer untouched). */ int bb_blur_a8(unsigned char *buf, int w, int...`
+  - `alpha` (function, line 26) `* no pixel has alpha (nothing to blur), 1 otherwise. Everything outside rect stays 0 after the blur, * so blurring...`
   - `FREEDOM_BOX_BLUR_H` (macro, line 2) `#define FREEDOM_BOX_BLUR_H`
   - `BB_MAX_PIXELS` (macro, line 12) `#define BB_MAX_PIXELS`
 - Imported by: `gui/browser_ui.c`, `src/box_blur.c`, `tests/test_box_blur.c`
@@ -212,7 +213,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `css_drop_log` (struct, line 1066)
   - `css_attr` (struct, line 1095)
   - `css_element` (struct, line 1105)
-  - `cvr_table` (struct, line 1166)
+  - `cvr_table` (struct, line 1173)
   - `css_status` (enum, line 28)
   - `css_align` (enum, line 34)
   - `css_display` (enum, line 42)
@@ -288,12 +289,12 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `palette` (function, line 1031) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
   - `css_free` (function, line 1081) `void css_free(css_sheet *s);`
   - `order` (function, line 1084) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
-  - `inherited_px` (function, line 1190) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
-  - `css_ua_heading_em` (function, line 1202) `double css_ua_heading_em(int level);`
-  - `name` (function, line 1207) `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
-  - `css_font_face_count` (function, line 1217) `size_t css_font_face_count(const css_sheet *sheet);`
-  - `css_font_face_at` (function, line 1218) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
-  - `css_resolve_anim_keyframes` (function, line 1226) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
+  - `inherited_px` (function, line 1197) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
+  - `css_ua_heading_em` (function, line 1209) `double css_ua_heading_em(int level);`
+  - `name` (function, line 1214) `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
+  - `css_font_face_count` (function, line 1224) `size_t css_font_face_count(const css_sheet *sheet);`
+  - `css_font_face_at` (function, line 1225) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
+  - `css_resolve_anim_keyframes` (function, line 1233) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
   - `FREEDOM_CSS_H` (macro, line 2) `#define FREEDOM_CSS_H`
   - `CSS_GAP_MAX` (macro, line 80) `#define CSS_GAP_MAX`
   - `CSS_GRID_COLS_MAX` (macro, line 81) `#define CSS_GRID_COLS_MAX`
@@ -342,9 +343,9 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 1007) `#define CSS_MEDIA_DEFAULT_HEIGHT`
   - `CSS_DROP_PROP_MAX` (macro, line 1046) `#define CSS_DROP_PROP_MAX`
   - `CSS_DROP_VAL_MAX` (macro, line 1047) `#define CSS_DROP_VAL_MAX`
-  - `CSS_PSEUDO_BEFORE` (macro, line 1176) `#define CSS_PSEUDO_BEFORE`
-  - `CSS_PSEUDO_AFTER` (macro, line 1177) `#define CSS_PSEUDO_AFTER`
-  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1178) `#define CSS_PSEUDO_PLACEHOLDER`
+  - `CSS_PSEUDO_BEFORE` (macro, line 1183) `#define CSS_PSEUDO_BEFORE`
+  - `CSS_PSEUDO_AFTER` (macro, line 1184) `#define CSS_PSEUDO_AFTER`
+  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1185) `#define CSS_PSEUDO_PLACEHOLDER`
 - Depends on: `include/css_color.h`
 - Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_computed.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 

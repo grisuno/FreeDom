@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 19 file(s) rooted at `include` with dominant language c (cohesion 0.45). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`, `BT_MAX_CHILDREN`. Core file: `src/page_view.c` (248 symbols).
+This community groups 19 file(s) rooted at `include` with dominant language c (cohesion 0.45). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`, `BT_MAX_CHILDREN`. Core file: `src/page_view.c` (251 symbols).
 
 ## Files
 
@@ -20,7 +20,7 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 | `src/box_style.c` | c | utility | 48 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 35 | no |
-| `src/page_view.c` | c | presentation | 248 | no |
+| `src/page_view.c` | c | presentation | 251 | no |
 | `src/render_doc.c` | c | presentation | 21 | no |
 | `tests/test_box_style.c` | c | testing | 49 | no |
 | `tests/test_box_tree.c` | c | testing | 68 | no |
@@ -70,8 +70,8 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
-- [EXTRACTED] depends_on community 4 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
+- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 4 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
 - [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
 - [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
 

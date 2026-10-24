@@ -1,6 +1,15 @@
 # API (page 5 of 11)
 Previous: [API_p4.md](API_p4.md)
 
+## include/svg_paint.h
+Depends on: `include/svg_render.h`
+Imported by: `gui/browser_ui.c`, `gui/svg_paint.c`
+- `svp_draw` (function) `include/svg_paint.h:31` `void svp_draw(cairo_t *cr, const sv_image *img, double x, double y, double w, double h, int current_rgb);` -- Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred ("xMidYMid meet"). current_rgb is the...
+
+## include/svg_render.h
+Imported by: `gui/browser_ui.c`, `include/svg_paint.h`, `src/page_view.c`, `src/svg_render.c`, `tests/test_svg_render.c`
+- `sv_fit` (function) `include/svg_render.h:131` `void sv_fit(const sv_image *img, double dw, double dh, double *scale, double *off_x, double *off_y);` -- Maps the image's user space onto the destination rect [dx, dy, dw, dh] the way a `preserveAspectRatio="xMidYMid...
+
 ## include/tab.h
 Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
 Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tab.c`, `tests/test_tab.c`
@@ -149,6 +158,11 @@ Imported by: `src/freedom.c`, `src/wl_display.c`, `tests/test_wl_display.c`
 - `wd_pick` (function) `include/wl_display.h:16` `int wd_pick(const char *const *names, size_t n, char *out, size_t cap);` -- Choose the lowest-numbered "wayland-N" (N = digits only) from names[0..n).
 - `wd_resolve_env` (function) `include/wl_display.h:20` `int wd_resolve_env(void);` -- If WAYLAND_DISPLAY is unset/empty, set it from the sockets found in XDG_RUNTIME_DIR. * Returns WD_OK if the variable...
 
+## include/wl_guard.h
+Imported by: `gui/browser_ui.c`, `src/wl_guard.c`, `tests/test_wl_guard.c`
+- `wlg_start` (function) `include/wl_guard.h:25` `wl_guard *wlg_start(struct wl_display *display);` -- wl_guard -- keeps the Wayland connection drained while the GUI thread is busy.
+- `wlg_stop` (function) `include/wl_guard.h:28` `void wlg_stop(wl_guard *g);` -- client that does not read for a few seconds while the pointer moves gets DISCONNECTED ("libwayland: Data too big for...
+
 ## include/ws_hub.h
 Depends on: `include/secure_fetch.h`
 Imported by: `gui/browser_ui.c`, `src/ws_hub.c`, `tests/test_ws_hub.c`
@@ -212,6 +226,7 @@ Depends on: `include/box_blur.h`
 - `variance` (function) `src/box_blur.c:10` `* width w has variance (w^2 - 1) / 12): the ideal common width, rounded down * to an odd wl and up to wu = wl + 2...`
 - `box_line` (function) `src/box_blur.c:28` `static void box_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp)` -- One box pass of odd width bw over n samples spaced `step` apart, through tmp * (n bytes).
 - `bb_blur_a8` (function) `src/box_blur.c:41` `int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)`
+- `bb_ink_rect` (function) `src/box_blur.c:57` `int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4])`
 
 ## src/box_style.c
 Depends on: `include/box_style.h`

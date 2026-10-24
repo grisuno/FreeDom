@@ -1,12 +1,12 @@
 # `include/css_select.h`
 
-> Source: [include/css_select.h:1](../../include/css_select.h#L1) | language `h` | coverage 60.0% | [API index](../index.md)
+> Source: [include/css_select.h:1](../../include/css_select.h#L1) | language `h` | coverage 59.5% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`css_attr_match`](#css_attr_match), [`css_sub_sel`](#css_sub_sel), [`css_pseudo_match`](#css_pseudo_match), [`css_compound`](#css_compound), [`css_sel`](#css_sel)
 - **Type Aliases:** [`tag`](#tag)
-- **Functions:** [`csel_parse`](#csel_parse), [`csel_matches`](#csel_matches), [`conservative`](#conservative), [`identifier`](#identifier), [`csel_emit_utf8`](#csel_emit_utf8), [`csel_unescape`](#csel_unescape), [`csel_escape_len`](#csel_escape_len), [`csel_ident_fold`](#csel_ident_fold), [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident), [`csel_decl_end`](#csel_decl_end), [`csel_lower_ch`](#csel_lower_ch), [`csel_ci_eq`](#csel_ci_eq), [`csel_span_eq`](#csel_span_eq), [`csel_substr`](#csel_substr), [`csel_ident_ch`](#csel_ident_ch)
+- **Functions:** [`csel_parse`](#csel_parse), [`csel_matches`](#csel_matches), [`csel_element_feature_bits`](#csel_element_feature_bits), [`csel_anc_reject`](#csel_anc_reject), [`conservative`](#conservative), [`identifier`](#identifier), [`csel_emit_utf8`](#csel_emit_utf8), [`csel_unescape`](#csel_unescape), [`csel_escape_len`](#csel_escape_len), [`csel_ident_fold`](#csel_ident_fold), [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident), [`csel_decl_end`](#csel_decl_end), [`csel_lower_ch`](#csel_lower_ch), [`csel_ci_eq`](#csel_ci_eq), [`csel_span_eq`](#csel_span_eq), [`csel_substr`](#csel_substr), [`csel_ident_ch`](#csel_ident_ch)
 - **Macros:** [`CSS_TOK_MAX`](#css_tok_max), [`CSS_MAX_CLASSES_PER_SEL`](#css_max_classes_per_sel), [`CSS_MAX_SUB_SELS`](#css_max_sub_sels), [`CSS_SUB_MAX_ATTRS`](#css_sub_max_attrs), [`CSS_SUB_MAX_PSEUDOS`](#css_sub_max_pseudos), [`CSEL_FOLD_PREFIX`](#csel_fold_prefix), [`CSEL_FOLD_MARK`](#csel_fold_mark), [`CSEL_IDENT_SCRATCH`](#csel_ident_scratch)
 
 ## Type Diagram
@@ -217,7 +217,7 @@ typedef struct css_sub_sel { char tag[CSS_TOK_MAX];
 
 ### `csel_parse`
 
-`function` | [include/css_select.h:153](../../include/css_select.h#L153)
+`function` | [include/css_select.h:160](../../include/css_select.h#L160)
 
 ```c
 int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);
@@ -238,15 +238,13 @@ Returns 1 if supported, 0 to drop the selector (fail closed).
 
 **Returns:** `int`
 
-*Called by:* [`selector`](src.css_select.c.md#selector)
-
 ---
 
 <a id="csel_matches"></a>
 
 ### `csel_matches`
 
-`function` | [include/css_select.h:162](../../include/css_select.h#L162)
+`function` | [include/css_select.h:169](../../include/css_select.h#L169)
 
 ```c
 int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int *pseudo_kind);
@@ -270,11 +268,58 @@ True if *sel matches element *el against its ancestor chain. target_id (optional
 
 ---
 
+<a id="csel_element_feature_bits"></a>
+
+### `csel_element_feature_bits`
+
+`function` | [include/css_select.h:177](../../include/css_select.h#L177)
+
+```c
+unsigned long long csel_element_feature_bits(const css_element *e);
+```
+
+Ancestor filter. csel_element_feature_bits: the bits of one element's tag, id and classes (two bits per feature, hashed the way csel_ident_eq compares). csel_anc_reject: 1 when the selector REQUIRES a feature that none of the element's ancestors has (or that the element itself lacks: a class or tag of its own compound), so it cannot match and need not be evaluated; 0 when it might.
+
+Conservative by construction: no bloom (anc_bloom_valid == 0) or no requirement answers 0, and only compounds reachable through descendant/child combinators count.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `e` | `css_element *` |  |  |
+
+**Returns:** `unsigned long long`
+
+*Called by:* [`inputs`](src.css_chain.c.md#inputs)
+
+---
+
+<a id="csel_anc_reject"></a>
+
+### `csel_anc_reject`
+
+`function` `inline` `static` | [include/css_select.h:178](../../include/css_select.h#L178)
+
+```c
+static inline int csel_anc_reject(const css_sel *sel, const css_element *el)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `sel` | `css_sel *` |  |  |
+| `el` | `css_element *` |  |  |
+
+**Returns:** `int`
+
+---
+
 <a id="conservative"></a>
 
 ### `conservative`
 
-`function` | [include/css_select.h:167](../../include/css_select.h#L167)
+`function` | [include/css_select.h:185](../../include/css_select.h#L185)
 
 ```c
 * Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's own tag/id/classes/attributes and its ancestors alone, so the caller can * skip scanni
@@ -294,7 +339,7 @@ True if *sel matches element *el against its ancestor chain. target_id (optional
 
 ### `identifier`
 
-`function` | [include/css_select.h:173](../../include/css_select.h#L173)
+`function` | [include/css_select.h:191](../../include/css_select.h#L191)
 
 ```c
 * A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex") and stored in a CSS_TOK_MAX slot. One that * does not fit is FOLDED: its first CSEL_F
@@ -315,7 +360,7 @@ True if *sel matches element *el against its ancestor chain. target_id (optional
 
 ### `csel_emit_utf8`
 
-`function` | [include/css_select.h:185](../../include/css_select.h#L185)
+`function` | [include/css_select.h:203](../../include/css_select.h#L203)
 
 ```c
 size_t csel_emit_utf8(unsigned int cp, char *out);
@@ -336,7 +381,7 @@ size_t csel_emit_utf8(unsigned int cp, char *out);
 
 ### `csel_unescape`
 
-`function` | [include/css_select.h:187](../../include/css_select.h#L187)
+`function` | [include/css_select.h:205](../../include/css_select.h#L205)
 
 ```c
 void csel_unescape(char *dst, size_t cap, const char *src, size_t n);
@@ -361,7 +406,7 @@ Decodes CSS escapes in src[0,n) into dst (cap bytes, NUL-terminated, truncates).
 
 ### `csel_escape_len`
 
-`function` | [include/css_select.h:189](../../include/css_select.h#L189)
+`function` | [include/css_select.h:207](../../include/css_select.h#L207)
 
 ```c
 size_t csel_escape_len(const char *s, size_t i, size_t b);
@@ -385,7 +430,7 @@ Bytes the escape starting at s[i] occupies (0 when s[i] does not start one).
 
 ### `csel_ident_fold`
 
-`function` | [include/css_select.h:191](../../include/css_select.h#L191)
+`function` | [include/css_select.h:209](../../include/css_select.h#L209)
 
 ```c
 void csel_ident_fold(const char *src, size_t len, char *dst);
@@ -407,7 +452,7 @@ dst (CSS_TOK_MAX bytes) receives src[0,len) as-is, or folded when too long.
 
 ### `csel_ident_eq`
 
-`function` | [include/css_select.h:193](../../include/css_select.h#L193)
+`function` | [include/css_select.h:211](../../include/css_select.h#L211)
 
 ```c
 int csel_ident_eq(const char *stored, const char *tok, size_t tlen);
@@ -431,7 +476,7 @@ A stored (possibly folded) identifier against an element token of tlen bytes.
 
 ### `csel_read_ident`
 
-`function` | [include/css_select.h:196](../../include/css_select.h#L196)
+`function` | [include/css_select.h:214](../../include/css_select.h#L214)
 
 ```c
 int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);
@@ -459,7 +504,7 @@ Returns 0, *ip untouched, when none.
 
 ### `csel_decl_end`
 
-`function` | [include/css_select.h:201](../../include/css_select.h#L201)
+`function` | [include/css_select.h:219](../../include/css_select.h#L219)
 
 ```c
 size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);
@@ -486,7 +531,7 @@ Index of the ';' ending the declaration that starts at s[i] (or of a '}' when st
 
 ### `csel_lower_ch`
 
-`function` `inline` `static` | [include/css_select.h:205](../../include/css_select.h#L205)
+`function` `inline` `static` | [include/css_select.h:223](../../include/css_select.h#L223)
 
 ```c
 static inline char csel_lower_ch(char c)
@@ -508,7 +553,7 @@ static inline char csel_lower_ch(char c)
 
 ### `csel_ci_eq`
 
-`function` `inline` `static` | [include/css_select.h:209](../../include/css_select.h#L209)
+`function` `inline` `static` | [include/css_select.h:227](../../include/css_select.h#L227)
 
 ```c
 static inline int csel_ci_eq(const char *a, const char *b)
@@ -533,7 +578,7 @@ static inline int csel_ci_eq(const char *a, const char *b)
 
 ### `csel_span_eq`
 
-`function` `inline` `static` | [include/css_select.h:218](../../include/css_select.h#L218)
+`function` `inline` `static` | [include/css_select.h:236](../../include/css_select.h#L236)
 
 ```c
 static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)
@@ -562,7 +607,7 @@ True if a[0,n) equals b[0,n) up to n chars (b NUL-terminated), case-folded when 
 
 ### `csel_substr`
 
-`function` `inline` `static` | [include/css_select.h:229](../../include/css_select.h#L229)
+`function` `inline` `static` | [include/css_select.h:247](../../include/css_select.h#L247)
 
 ```c
 static inline int csel_substr(const char *hay, const char *needle, int ci)
@@ -592,7 +637,7 @@ A non-empty needle only; an empty one never matches.
 
 ### `csel_ident_ch`
 
-`function` `inline` `static` | [include/css_select.h:237](../../include/css_select.h#L237)
+`function` `inline` `static` | [include/css_select.h:255](../../include/css_select.h#L255)
 
 ```c
 static inline int csel_ident_ch(char c)
@@ -682,7 +727,7 @@ Bounded: CSS_MAX_SUB_SELS per selector, one level deep.
 
 ### `CSEL_FOLD_PREFIX`
 
-`macro` | [include/css_select.h:180](../../include/css_select.h#L180)
+`macro` | [include/css_select.h:198](../../include/css_select.h#L198)
 
 ```c
 #define CSEL_FOLD_PREFIX
@@ -703,7 +748,7 @@ instead of being truncated and never matching.
 
 ### `CSEL_FOLD_MARK`
 
-`macro` | [include/css_select.h:181](../../include/css_select.h#L181)
+`macro` | [include/css_select.h:199](../../include/css_select.h#L199)
 
 ```c
 #define CSEL_FOLD_MARK
@@ -715,7 +760,7 @@ instead of being truncated and never matching.
 
 ### `CSEL_IDENT_SCRATCH`
 
-`macro` | [include/css_select.h:182](../../include/css_select.h#L182)
+`macro` | [include/css_select.h:200](../../include/css_select.h#L200)
 
 ```c
 #define CSEL_IDENT_SCRATCH

@@ -56,7 +56,11 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_zero_sigma_is_identity` (function, line 50) `static void test_zero_sigma_is_identity(void **state)`
   - `test_uniform_interior_unchanged` (function, line 58) `static void test_uniform_interior_unchanged(void **state)`
   - `test_invalid_arguments` (function, line 69) `static void test_invalid_arguments(void **state)`
-  - `main` (function, line 78) `int main(void)`
+  - `put_px` (function, line 80) `static void put_px(unsigned char *d, int stride, int x, int y, unsigned char a)`
+  - `test_ink_rect_empty_surface_has_no_ink` (function, line 85) `static void test_ink_rect_empty_surface_has_no_ink(void **state)`
+  - `test_ink_rect_grows_by_the_blur_reach_and_clamps` (function, line 93) `static void test_ink_rect_grows_by_the_blur_reach_and_clamps(void **state)`
+  - `test_ink_rect_covers_every_pixel_the_blur_can_touch` (function, line 112) `static void test_ink_rect_covers_every_pixel_the_blur_can_touch(void **state)`
+  - `main` (function, line 130) `int main(void)`
 - Depends on: `include/box_blur.h`
 
 ## tests/test_box_style.c

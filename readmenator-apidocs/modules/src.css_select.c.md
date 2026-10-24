@@ -1,10 +1,10 @@
 # `src/css_select.c`
 
-> Source: [src/css_select.c:1](../../src/css_select.c#L1) | language `c` | coverage 60.0% | [API index](../index.md)
+> Source: [src/css_select.c:1](../../src/css_select.c#L1) | language `c` | coverage 64.7% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`csel_hex_val`](#csel_hex_val), [`csel_emit_utf8`](#csel_emit_utf8), [`csel_unescape`](#csel_unescape), [`csel_escape_len`](#csel_escape_len), [`csel_decl_end`](#csel_decl_end), [`csel_ident_fold`](#csel_ident_fold), [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident), [`between`](#between), [`selector`](#selector), [`built`](#built), [`csel_needs_structure`](#csel_needs_structure), [`csel_matches`](#csel_matches)
+- **Functions:** [`csel_hex_val`](#csel_hex_val), [`csel_emit_utf8`](#csel_emit_utf8), [`csel_unescape`](#csel_unescape), [`csel_escape_len`](#csel_escape_len), [`csel_decl_end`](#csel_decl_end), [`csel_ident_fold`](#csel_ident_fold), [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident), [`between`](#between), [`selector`](#selector), [`csel_element_feature_bits`](#csel_element_feature_bits), [`csel_parse`](#csel_parse), [`built`](#built), [`csel_needs_structure`](#csel_needs_structure), [`csel_matches`](#csel_matches)
 - **Macros:** [`HAS_MAX_DEPTH`](#has_max_depth)
 
 ## Call Graph
@@ -24,7 +24,6 @@ flowchart LR
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
     n_include_css_select_h__csel_ident_ch["css_select.csel_ident_ch"]
     n_include_css_select_h__csel_lower_ch["css_select.csel_lower_ch"]
-    n_include_css_select_h__csel_parse["css_select.csel_parse"]
     n_src_css_select_c__csel_unescape --> n_src_css_select_c__csel_emit_utf8
     n_src_css_select_c__csel_unescape --> n_src_css_select_c__csel_hex_val
     n_src_css_select_c__csel_escape_len --> n_src_css_select_c__csel_hex_val
@@ -32,11 +31,10 @@ flowchart LR
     n_src_css_select_c__csel_read_ident --> n_src_css_select_c__csel_escape_len
     n_src_css_select_c__csel_read_ident --> n_src_css_select_c__csel_ident_fold
     n_src_css_select_c__csel_read_ident --> n_src_css_select_c__csel_unescape
-    n_src_css_select_c__selector --> n_src_css_select_c__csel_escape_len
+    n_src_css_select_c__selector --> n_src_css_select_c__csel_ident_fold
     n_src_css_select_c__csel_ident_eq -.-> n_gui_browser_ui_c__strcmp
     n_src_css_select_c__csel_read_ident -.-> n_include_css_select_h__csel_ident_ch
     n_src_css_select_c__csel_read_ident -.-> n_include_css_select_h__csel_lower_ch
-    n_src_css_select_c__selector -.-> n_include_css_select_h__csel_parse
 ```
 
 ## Functions
@@ -111,7 +109,7 @@ Decodes CSS escapes in src[0,n) into dst (cap bytes, NUL-terminated, truncates).
 | `src` | `char *` |  |  |
 | `n` | `size_t` |  |  |
 
-> **Inherited:** Documentation from [`csel_unescape`](#csel_unescape) (include/css_select.h:187).
+> **Inherited:** Documentation from [`csel_unescape`](#csel_unescape) (include/css_select.h:205).
 
 *Calls:* [`csel_emit_utf8`](#csel_emit_utf8), [`csel_hex_val`](#csel_hex_val)
 
@@ -141,11 +139,11 @@ Bytes the escape starting at s[i] occupies (0 when s[i] does not start one).
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`csel_escape_len`](#csel_escape_len) (include/css_select.h:189).
+> **Inherited:** Documentation from [`csel_escape_len`](#csel_escape_len) (include/css_select.h:207).
 
 *Calls:* [`csel_hex_val`](#csel_hex_val)
 
-*Called by:* [`csel_read_ident`](#csel_read_ident), [`selector`](#selector)
+*Called by:* [`csel_read_ident`](#csel_read_ident)
 
 ---
 
@@ -172,7 +170,7 @@ Index of the ';' ending the declaration that starts at s[i] (or of a '}' when st
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`csel_decl_end`](#csel_decl_end) (include/css_select.h:201).
+> **Inherited:** Documentation from [`csel_decl_end`](#csel_decl_end) (include/css_select.h:219).
 
 ---
 
@@ -196,9 +194,9 @@ dst (CSS_TOK_MAX bytes) receives src[0,len) as-is, or folded when too long.
 | `len` | `size_t` |  |  |
 | `dst` | `char *` |  |  |
 
-> **Inherited:** Documentation from [`csel_ident_fold`](#csel_ident_fold) (include/css_select.h:191).
+> **Inherited:** Documentation from [`csel_ident_fold`](#csel_ident_fold) (include/css_select.h:209).
 
-*Called by:* [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident)
+*Called by:* [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident), [`selector`](#selector)
 
 ---
 
@@ -224,7 +222,7 @@ A stored (possibly folded) identifier against an element token of tlen bytes.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_ident_eq`](#csel_ident_eq) (include/css_select.h:193).
+> **Inherited:** Documentation from [`csel_ident_eq`](#csel_ident_eq) (include/css_select.h:211).
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`csel_ident_fold`](#csel_ident_fold)
 
@@ -256,7 +254,7 @@ Returns 0, *ip untouched, when none.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_read_ident`](#csel_read_ident) (include/css_select.h:196).
+> **Inherited:** Documentation from [`csel_read_ident`](#csel_read_ident) (include/css_select.h:214).
 
 *Calls:* [`csel_ident_ch`](include.css_select.h.md#csel_ident_ch), [`csel_lower_ch`](include.css_select.h.md#csel_lower_ch), [`csel_escape_len`](#csel_escape_len), [`csel_ident_fold`](#csel_ident_fold), [`csel_unescape`](#csel_unescape)
 
@@ -294,7 +292,62 @@ Returns 0, *ip untouched, when none.
 
 **Returns:** `* the whole`
 
-*Calls:* [`csel_parse`](include.css_select.h.md#csel_parse), [`csel_escape_len`](#csel_escape_len)
+*Calls:* [`csel_ident_fold`](#csel_ident_fold)
+
+---
+
+<a id="csel_element_feature_bits"></a>
+
+### `csel_element_feature_bits`
+
+`function` | [src/css_select.c:585](../../src/css_select.c#L585)
+
+```c
+unsigned long long csel_element_feature_bits(const css_element *e)
+```
+
+Ancestor filter. csel_element_feature_bits: the bits of one element's tag, id and classes (two bits per feature, hashed the way csel_ident_eq compares). csel_anc_reject: 1 when the selector REQUIRES a feature that none of the element's ancestors has (or that the element itself lacks: a class or tag of its own compound), so it cannot match and need not be evaluated; 0 when it might.
+
+Conservative by construction: no bloom (anc_bloom_valid == 0) or no requirement answers 0, and only compounds reachable through descendant/child combinators count.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `e` | `css_element *` |  |  |
+
+**Returns:** `unsigned long long`
+
+> **Inherited:** Documentation from [`csel_element_feature_bits`](#csel_element_feature_bits) (include/css_select.h:177).
+
+---
+
+<a id="csel_parse"></a>
+
+### `csel_parse`
+
+`function` | [src/css_select.c:715](../../src/css_select.c#L715)
+
+```c
+int csel_parse(const char *s, size_t a, size_t b, css_sel *sel)
+```
+
+Parses the complex selector s[a,b) into *sel (spec computed; order/rule left to the caller).
+
+Returns 1 if supported, 0 to drop the selector (fail closed).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `s` | `char *` |  |  |
+| `a` | `size_t` |  |  |
+| `b` | `size_t` |  |  |
+| `sel` | `css_sel *` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`csel_parse`](#csel_parse) (include/css_select.h:160).
 
 ---
 
@@ -302,7 +355,7 @@ Returns 0, *ip untouched, when none.
 
 ### `built`
 
-`function` | [src/css_select.c:1021](../../src/css_select.c#L1021)
+`function` | [src/css_select.c:1085](../../src/css_select.c#L1085)
 
 ```c
 * chains the caller built (an element without parent/prev links never matches * through that combinator — fail closed). When pseudo_kind is non-NULL and the * subject compound (rightmost, index k) matches via PSEUDO_BEFORE or * PSEUDO_AFTER, *pseudo_kind is set to that kind. */ static int complex_matches(const css_sel *sel, int k, const css_element *el, const char *target_id, int allow_pseudo_el, int *pseudo_kind)
@@ -322,7 +375,7 @@ Returns 0, *ip untouched, when none.
 
 ### `csel_needs_structure`
 
-`function` | [src/css_select.c:1076](../../src/css_select.c#L1076)
+`function` | [src/css_select.c:1140](../../src/css_select.c#L1140)
 
 ```c
 int csel_needs_structure(const css_sel *sel)
@@ -344,7 +397,7 @@ int csel_needs_structure(const css_sel *sel)
 
 ### `csel_matches`
 
-`function` | [src/css_select.c:1099](../../src/css_select.c#L1099)
+`function` | [src/css_select.c:1163](../../src/css_select.c#L1163)
 
 ```c
 int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int *pseudo_kind)
@@ -364,7 +417,7 @@ True if *sel matches element *el against its ancestor chain. target_id (optional
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_matches`](#csel_matches) (include/css_select.h:162).
+> **Inherited:** Documentation from [`csel_matches`](#csel_matches) (include/css_select.h:169).
 
 ---
 
@@ -374,7 +427,7 @@ True if *sel matches element *el against its ancestor chain. target_id (optional
 
 ### `HAS_MAX_DEPTH`
 
-`macro` | [src/css_select.c:845](../../src/css_select.c#L845)
+`macro` | [src/css_select.c:909](../../src/css_select.c#L909)
 
 ```c
 #define HAS_MAX_DEPTH

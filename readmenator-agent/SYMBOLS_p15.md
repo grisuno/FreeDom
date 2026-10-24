@@ -3,6 +3,64 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_post_null_args` | function | `tests/test_secure_fetch.c:562` | `static void test_post_null_args(void **state)` |
+| `test_rcache_backing_persists_and_serves_after_ram_loss` | function | `tests/test_secure_fetch.c:332` | `static void test_rcache_backing_persists_and_serves_after_ram_loss(void **state)` |
+| `test_rcache_remembers_permanent_redirects` | function | `tests/test_secure_fetch.c:350` | `static void test_rcache_remembers_permanent_redirects(void **state)` |
+| `test_redirect_code_recognizes_3xx` | function | `tests/test_secure_fetch.c:369` | `static void test_redirect_code_recognizes_3xx(void **state)` |
+| `test_redirect_code_rejects_others` | function | `tests/test_secure_fetch.c:378` | `static void test_redirect_code_rejects_others(void **state)` |
+| `test_resolve_absolute_https` | function | `tests/test_secure_fetch.c:452` | `static void test_resolve_absolute_https(void **state)` |
+| `test_resolve_absolute_path` | function | `tests/test_secure_fetch.c:486` | `static void test_resolve_absolute_path(void **state)` |
+| `test_resolve_null_args` | function | `tests/test_secure_fetch.c:510` | `static void test_resolve_null_args(void **state)` |
+| `test_resolve_refuses_dangerous_schemes` | function | `tests/test_secure_fetch.c:467` | `static void test_resolve_refuses_dangerous_schemes(void **state)` |
+| `test_resolve_refuses_http_downgrade` | function | `tests/test_secure_fetch.c:460` | `static void test_resolve_refuses_http_downgrade(void **state)` |
+| `test_resolve_relative_path` | function | `tests/test_secure_fetch.c:498` | `static void test_resolve_relative_path(void **state)` |
+| `test_resolve_scheme_relative` | function | `tests/test_secure_fetch.c:478` | `static void test_resolve_scheme_relative(void **state)` |
+| `test_response_free_on_zeroed` | function | `tests/test_secure_fetch.c:521` | `static void test_response_free_on_zeroed(void **state)` |
+| `test_response_free_releases_location` | function | `tests/test_secure_fetch.c:530` | `static void test_response_free_releases_location(void **state)` |
+| `test_tls_accepts_13` | function | `tests/test_secure_fetch.c:116` | `static void test_tls_accepts_13(void **state)` |
+| `test_tls_rejects_12` | function | `tests/test_secure_fetch.c:102` | `static void test_tls_rejects_12(void **state)` |
+| `test_tls_rejects_older_and_garbage` | function | `tests/test_secure_fetch.c:107` | `static void test_tls_rejects_older_and_garbage(void **state)` |
+| `test_url_accepts_https` | function | `tests/test_secure_fetch.c:94` | `static void test_url_accepts_https(void **state)` |
+| `test_url_rejects_dangerous_schemes` | function | `tests/test_secure_fetch.c:84` | `static void test_url_rejects_dangerous_schemes(void **state)` |
+| `test_url_rejects_null` | function | `tests/test_secure_fetch.c:74` | `static void test_url_rejects_null(void **state)` |
+| `test_url_rejects_plain_http` | function | `tests/test_secure_fetch.c:79` | `static void test_url_rejects_plain_http(void **state)` |
+| `test_user_agent_default_when_unset` | function | `tests/test_secure_fetch.c:47` | `static void test_user_agent_default_when_unset(void **state)` |
+| `test_user_agent_uses_override` | function | `tests/test_secure_fetch.c:53` | `static void test_user_agent_uses_override(void **state)` |
+| `test_ws_open_rejects_before_any_io` | function | `tests/test_secure_fetch.c:654` | `static void test_ws_open_rejects_before_any_io(void **state)` |
+| `test_ws_url_check` | function | `tests/test_secure_fetch.c:642` | `static void test_ws_url_check(void **state)` |
+| `main` | function | `tests/test_shm_slots.c:42` | `int main(void)` |
+| `test_alternates_and_never_paints_a_held_slot` | function | `tests/test_shm_slots.c:8` | `static void test_alternates_and_never_paints_a_held_slot(void **state)` |
+| `test_release_of_unknown_or_idle_slot_is_ignored` | function | `tests/test_shm_slots.c:23` | `static void test_release_of_unknown_or_idle_slot_is_ignored(void **state)` |
+| `test_repaint_before_commit_reuses_the_same_free_slot` | function | `tests/test_shm_slots.c:34` | `static void test_repaint_before_commit_reuses_the_same_free_slot(void **state)` |
+| `main` | function | `tests/test_svg_render.c:344` | `int main(void)` |
+| `parse` | function | `tests/test_svg_render.c:26` | `static sv_status parse(sv_image *im, const char *s)` |
+| `test_basic_shapes` | function | `tests/test_svg_render.c:71` | `static void test_basic_shapes(void **state)` |
+| `test_bounds_are_enforced` | function | `tests/test_svg_render.c:248` | `static void test_bounds_are_enforced(void **state)` |
+| `test_dimensions_and_viewbox` | function | `tests/test_svg_render.c:50` | `static void test_dimensions_and_viewbox(void **state)` |
+| `test_empty_and_garbage_do_not_parse` | function | `tests/test_svg_render.c:38` | `static void test_empty_and_garbage_do_not_parse(void **state)` |
+| `test_fit_uniform_and_centered` | function | `tests/test_svg_render.c:320` | `static void test_fit_uniform_and_centered(void **state)` |
+| `test_group_inheritance_and_transform` | function | `tests/test_svg_render.c:118` | `static void test_group_inheritance_and_transform(void **state)` |
+| `test_malformed_values_degrade` | function | `tests/test_svg_render.c:285` | `static void test_malformed_values_degrade(void **state)` |
+| `test_null_args` | function | `tests/test_svg_render.c:30` | `static void test_null_args(void **state)` |
+| `test_paint_attributes` | function | `tests/test_svg_render.c:96` | `static void test_paint_attributes(void **state)` |
+| `test_path_arc_compact_flags` | function | `tests/test_svg_render.c:208` | `static void test_path_arc_compact_flags(void **state)` |
+| `test_path_arc_reaches_endpoint` | function | `tests/test_svg_render.c:192` | `static void test_path_arc_reaches_endpoint(void **state)` |
+| `test_path_commands` | function | `tests/test_svg_render.c:159` | `static void test_path_commands(void **state)` |
+| `test_polygon_points` | function | `tests/test_svg_render.c:140` | `static void test_polygon_points(void **state)` |
+| `test_text_element` | function | `tests/test_svg_render.c:304` | `static void test_text_element(void **state)` |
+| `test_url_bearing_elements_are_dropped` | function | `tests/test_svg_render.c:224` | `static void test_url_bearing_elements_are_dropped(void **state)` |
+| `CSS_PAGE` | macro | `tests/test_tab.c:1865` | `#define CSS_PAGE(HREF)` |
+| `EXT_PAGE` | macro | `tests/test_tab.c:1738` | `#define EXT_PAGE(SRC)` |
+| `XHR_PAGE` | macro | `tests/test_tab.c:1643` | `#define XHR_PAGE(URL)` |
+| `_DEFAULT_SOURCE` | macro | `tests/test_tab.c:1` | `#define _DEFAULT_SOURCE` |
+| `_POSIX_C_SOURCE` | macro | `tests/test_tab.c:15` | `#define _POSIX_C_SOURCE` |
+| `console_find` | function | `tests/test_tab.c:1282` | `static const fb_entry *console_find(const fb_buffer *log, int level, const char *needle)` |
+| `cs_eval` | function | `tests/test_tab.c:2128` | `static void cs_eval(tab *t, const char *js, char *out, size_t outsz)` |
+| `cs_open` | function | `tests/test_tab.c:2136` | `static void cs_open(tab **t, int net)` |
+| `document` | function | `tests/test_tab.c:2021` | `* listener is on document (the React/jQuery-delegation shape);` |
+| `expect_eval` | function | `tests/test_tab.c:69` | `static void expect_eval(tab *t, const char *js, const char *expected)` |
+| `fixture` | struct | `tests/test_tab.c:46` | `` |
+| `geom_load_and_measure` | function | `tests/test_tab.c:2081` | `static int geom_load_and_measure(int net, char *out, size_t outsz)` |
 | `load` | function | `tests/test_tab.c:2071` | `* table only for a trusted load (net granted: allow.conf AND js.conf);` |
 | `load_js_page` | function | `tests/test_tab.c:2238` | `static void load_js_page(tab **out_t, const char *html, tab_page *p)` |
 | `ls_load` | function | `tests/test_tab.c:2473` | `static void ls_load(int net, tab **t, tab_page *p)` |
@@ -293,6 +351,11 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_null_entry` | function | `tests/test_wl_display.c:35` | `static void test_null_entry(void **state)` |
 | `test_picks_lowest` | function | `tests/test_wl_display.c:11` | `static void test_picks_lowest(void **state)` |
 | `test_small_cap_fails_closed` | function | `tests/test_wl_display.c:27` | `static void test_small_cap_fails_closed(void **state)` |
+| `_DEFAULT_SOURCE` | macro | `tests/test_wl_guard.c:1` | `#define _DEFAULT_SOURCE` |
+| `main` | function | `tests/test_wl_guard.c:55` | `int main(void)` |
+| `ms_since` | function | `tests/test_wl_guard.c:13` | `static long ms_since(const struct timespec *a)` |
+| `test_guard_starts_idles_and_stops_promptly` | function | `tests/test_wl_guard.c:21` | `static void test_guard_starts_idles_and_stops_promptly(void **state)` |
+| `test_guard_survives_peer_hangup` | function | `tests/test_wl_guard.c:41` | `static void test_guard_survives_peer_hangup(void **state)` |
 | `_POSIX_C_SOURCE` | macro | `tests/test_ws_hub.c:7` | `#define _POSIX_C_SOURCE` |
 | `emit` | function | `tests/test_ws_hub.c:21` | `static void emit(void *ctx, int id, int kind, int code, const char *data, size_t len)` |
 | `main` | function | `tests/test_ws_hub.c:142` | `int main(void)` |
@@ -317,13 +380,17 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_step_snaps_off_ladder` | function | `tests/test_zoom.c:49` | `static void test_step_snaps_off_ladder(void **state)` |
 | `test_zoom_in_steps_ladder` | function | `tests/test_zoom.c:33` | `static void test_zoom_in_steps_ladder(void **state)` |
 | `test_zoom_out_steps_ladder` | function | `tests/test_zoom.c:41` | `static void test_zoom_out_steps_ladder(void **state)` |
-| `bands` | function | `tools/fbench.py:76` | `def bands(fd, ff, band)` |
-| `load_baseline` | function | `tools/fbench.py:46` | `def load_baseline()` |
-| `load_current` | function | `tools/fbench.py:59` | `def load_current()` |
-| `luma` | function | `tools/fbench.py:72` | `def luma(img)` |
-| `main` | function | `tools/fbench.py:127` | `def main()` |
-| `publish_readme` | function | `tools/fbench.py:107` | `def publish_readme(name, score)` |
-| `sbs` | function | `tools/fbench.py:88` | `def sbs(name, start, nrows)` |
+| `bands` | function | `tools/fbench.py:83` | `def bands(fd, ff, band)` |
+| `load_baseline` | function | `tools/fbench.py:53` | `def load_baseline()` |
+| `load_current` | function | `tools/fbench.py:66` | `def load_current()` |
+| `load_timing_baseline` | function | `tools/fbench.py:158` | `def load_timing_baseline()` |
+| `luma` | function | `tools/fbench.py:79` | `def luma(img)` |
+| `main` | function | `tools/fbench.py:227` | `def main()` |
+| `publish_readme` | function | `tools/fbench.py:114` | `def publish_readme(name, score)` |
+| `publish_timing` | function | `tools/fbench.py:171` | `def publish_timing(rows)` |
+| `run_timer` | function | `tools/fbench.py:140` | `def run_timer(tool, pages, runs)` |
+| `sbs` | function | `tools/fbench.py:95` | `def sbs(name, start, nrows)` |
+| `timing` | function | `tools/fbench.py:193` | `def timing(names, runs, readme)` |
 | `_append_probe` | function | `tools/ffgeom.py:254` | `def _append_probe(src, script)` |
 | `_word_reader` | function | `tools/ffgeom.py:173` | `def _word_reader(path)` |
 | `bit` | function | `tools/ffgeom.py:206` | `def bit(grid_row, cell, origin)` |
@@ -338,6 +405,7 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `word` | function | `tools/ffgeom.py:209` | `def word(grid_row, origin)` |
 | `main` | function | `tools/ffq.py:22` | `def main()` |
 | `main` | function | `tools/ffshot.py:24` | `def main()` |
+| `main` | function | `tools/fftime.py:38` | `def main()` |
 | `_POSIX_C_SOURCE` | macro | `tools/gen_psl.c:15` | `#define _POSIX_C_SOURCE` |
 | `ascii_lower` | function | `tools/gen_psl.c:55` | `static void ascii_lower(char *s)` |
 | `cmp_str` | function | `tools/gen_psl.c:38` | `static int cmp_str(const void *a, const void *b)` |
@@ -346,6 +414,9 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `sort_unique` | function | `tools/gen_psl.c:43` | `static void sort_unique(vec *v)` |
 | `vec` | struct | `tools/gen_psl.c:21` | `` |
 | `vec_push` | function | `tools/gen_psl.c:27` | `static void vec_push(vec *v, const char *s)` |
+| `main` | function | `tools/guitime.py:92` | `def main()` |
+| `one_run` | function | `tools/guitime.py:65` | `def one_run(binary, page, env, hosts_dir, tmp)` |
+| `start_display` | function | `tools/guitime.py:34` | `def start_display(workdir)` |
 | `find_modules` | function | `tools/mutate.py:107` | `def find_modules(root)` |
 | `line_sites` | function | `tools/mutate.py:41` | `def line_sites(text)` |
 | `main` | function | `tools/mutate.py:137` | `def main(argv)` |

@@ -1,10 +1,10 @@
 # `src/box_blur.c`
 
-> Source: [src/box_blur.c:1](../../src/box_blur.c#L1) | language `c` | coverage 25.0% | [API index](../index.md)
+> Source: [src/box_blur.c:1](../../src/box_blur.c#L1) | language `c` | coverage 20.0% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`bb_box_sizes`](#bb_box_sizes), [`variance`](#variance), [`bb_blur_a8`](#bb_blur_a8)
+- **Functions:** [`bb_box_sizes`](#bb_box_sizes), [`variance`](#variance), [`bb_blur_a8`](#bb_blur_a8), [`bb_ink_rect`](#bb_ink_rect)
 
 ## Call Graph
 
@@ -14,7 +14,9 @@ Solid arrows stay in this module, dashed arrows leave it.
 flowchart LR
     n_src_box_blur_c__bb_blur_a8(["bb_blur_a8"])
     n_src_box_blur_c__bb_box_sizes(["bb_box_sizes"])
+    n_src_box_blur_c__bb_ink_rect(["bb_ink_rect"])
     n_src_box_blur_c__bb_blur_a8 --> n_src_box_blur_c__bb_box_sizes
+    n_src_box_blur_c__bb_ink_rect --> n_src_box_blur_c__bb_box_sizes
 ```
 
 ## Functions
@@ -44,7 +46,7 @@ Returns 0 (sizes untouched) when sigma is not finite or <= 0, else 1.
 
 > **Inherited:** Documentation from [`bb_box_sizes`](#bb_box_sizes) (include/box_blur.h:16).
 
-*Called by:* [`bb_blur_a8`](#bb_blur_a8)
+*Called by:* [`bb_blur_a8`](#bb_blur_a8), [`bb_ink_rect`](#bb_ink_rect)
 
 ---
 
@@ -87,6 +89,33 @@ int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)
 | `h` | `int` |  |  |
 | `stride` | `int` |  |  |
 | `sigma` | `double` |  |  |
+
+**Returns:** `int`
+
+*Calls:* [`bb_box_sizes`](#bb_box_sizes)
+
+---
+
+<a id="bb_ink_rect"></a>
+
+### `bb_ink_rect`
+
+`function` | [src/box_blur.c:57](../../src/box_blur.c#L57)
+
+```c
+int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4])
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `argb` | `unsigned char *` |  |  |
+| `w` | `int` |  |  |
+| `h` | `int` |  |  |
+| `stride` | `int` |  |  |
+| `sigma` | `double` |  |  |
+| `rect` | `int [4]` |  |  |
 
 **Returns:** `int`
 

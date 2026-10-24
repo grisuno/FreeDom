@@ -196,6 +196,18 @@ static int looks_like_host(const c...`
   - `WD_NAME_MAX` (macro, line 11) `#define WD_NAME_MAX`
 - Depends on: `include/wl_display.h`
 
+## src/wl_guard.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `wl_guard` (struct, line 19)
+  - `guard_main` (function, line 26) `static void *guard_main(void *arg)`
+  - `wlg_start` (function, line 45) `wl_guard *wlg_start(struct wl_display *display)`
+  - `wlg_stop` (function, line 61) `void wlg_stop(wl_guard *g)`
+  - `_DEFAULT_SOURCE` (macro, line 5) `#define _DEFAULT_SOURCE`
+  - `WLG_POLL_MS` (macro, line 17) `#define WLG_POLL_MS`
+- Depends on: `include/wl_guard.h`
+
 ## src/ws_hub.c
 - Doc: wh_job: One open, owned by its thread until handed over through the pipe.
 - Layer: utility

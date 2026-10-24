@@ -22,11 +22,11 @@
 - [`allocation`](modules/include.data_url.h.md#allocation) function in `include/data_url.h`
 - [`allowlist`](modules/include.js_policy.h.md#allowlist) function in `include/js_policy.h`
 - [`allowlisted`](modules/gui.browser_ui.c.md#allowlisted) type_alias in `gui/browser_ui.c`
+- [`alpha`](modules/include.box_blur.h.md#alpha) function in `include/box_blur.h`
 - [`ancestors`](modules/include.page_view.h.md#ancestors) function in `include/page_view.h`
 - [`anchor`](modules/gui.browser_ui.c.md#anchor) function in `gui/browser_ui.c`
 - [`answered`](modules/src.tab.c.md#answered) function in `src/tab.c`
 - [`anyway`](modules/include.prefs.h.md#anyway) function in `include/prefs.h`
-- [`applies`](modules/gui.browser_ui.c.md#applies) function in `gui/browser_ui.c`
 - [`approximation`](modules/gui.browser_ui.c.md#approximation) function in `gui/browser_ui.c`
 - [`area`](modules/gui.browser_ui.c.md#area) function in `gui/browser_ui.c`
 - [`arrives`](modules/gui.browser_ui.c.md#arrives) function in `gui/browser_ui.c`
@@ -61,6 +61,7 @@
 - [`bb_blur_a8`](modules/src.box_blur.c.md#bb_blur_a8) function in `src/box_blur.c`
 - [`bb_box_sizes`](modules/include.box_blur.h.md#bb_box_sizes) function in `include/box_blur.h`
 - [`bb_box_sizes`](modules/src.box_blur.c.md#bb_box_sizes) function in `src/box_blur.c`
+- [`bb_ink_rect`](modules/src.box_blur.c.md#bb_ink_rect) function in `src/box_blur.c`
 - [`BB_MAX_PIXELS`](modules/include.box_blur.h.md#bb_max_pixels) macro in `include/box_blur.h`
 - [`BB_MAX_PIXELS`](modules/include.box_blur.h.md#bb_max_pixels) function in `include/box_blur.h`
 - [`behind`](modules/gui.browser_ui.c.md#behind) function in `gui/browser_ui.c`
@@ -185,6 +186,7 @@
 - [`builder`](modules/src.page_view.c.md#builder) function in `src/page_view.c`
 - [`builds`](modules/gui.browser_ui.c.md#builds) function in `gui/browser_ui.c`
 - [`built`](modules/src.css_select.c.md#built) function in `src/css_select.c`
+- [`busy`](modules/include.shm_slots.h.md#busy) type_alias in `include/shm_slots.h`
 - [`bx_background_layer`](modules/include.box_style.h.md#bx_background_layer) function in `include/box_style.h`
 - [`bx_background_layer`](modules/src.box_style.c.md#bx_background_layer) function in `src/box_style.c`
 - [`bx_bg_layer`](modules/include.box_style.h.md#bx_bg_layer) struct in `include/box_style.h`
@@ -472,9 +474,12 @@
 - [`count`](modules/include.dom.h.md#count) function in `include/dom.h`
 - [`count`](modules/src.dom.c.md#count) function in `src/dom.c`
 - [`cp`](modules/include.text_case.h.md#cp) function in `include/text_case.h`
+- [`csel_anc_reject`](modules/include.css_select.h.md#csel_anc_reject) function in `include/css_select.h`
 - [`csel_ci_eq`](modules/include.css_select.h.md#csel_ci_eq) function in `include/css_select.h`
 - [`csel_decl_end`](modules/include.css_select.h.md#csel_decl_end) function in `include/css_select.h`
 - [`csel_decl_end`](modules/src.css_select.c.md#csel_decl_end) function in `src/css_select.c`
+- [`csel_element_feature_bits`](modules/include.css_select.h.md#csel_element_feature_bits) function in `include/css_select.h`
+- [`csel_element_feature_bits`](modules/src.css_select.c.md#csel_element_feature_bits) function in `src/css_select.c`
 - [`csel_emit_utf8`](modules/include.css_select.h.md#csel_emit_utf8) function in `include/css_select.h`
 - [`csel_emit_utf8`](modules/src.css_select.c.md#csel_emit_utf8) function in `src/css_select.c`
 - [`csel_escape_len`](modules/include.css_select.h.md#csel_escape_len) function in `include/css_select.h`
@@ -493,6 +498,7 @@
 - [`csel_matches`](modules/src.css_select.c.md#csel_matches) function in `src/css_select.c`
 - [`csel_needs_structure`](modules/src.css_select.c.md#csel_needs_structure) function in `src/css_select.c`
 - [`csel_parse`](modules/include.css_select.h.md#csel_parse) function in `include/css_select.h`
+- [`csel_parse`](modules/src.css_select.c.md#csel_parse) function in `src/css_select.c`
 - [`csel_read_ident`](modules/include.css_select.h.md#csel_read_ident) function in `include/css_select.h`
 - [`csel_read_ident`](modules/src.css_select.c.md#csel_read_ident) function in `src/css_select.c`
 - [`csel_span_eq`](modules/include.css_select.h.md#csel_span_eq) function in `include/css_select.h`
@@ -790,6 +796,7 @@
 - [`default`](modules/include.page_view.h.md#default) function in `include/page_view.h`
 - [`default`](modules/include.render_doc.h.md#rd_block-default) method of `rd_block` in `include/render_doc.h`
 - [`_DEFAULT_SOURCE`](modules/src.freedom.c.md#_default_source) macro in `src/freedom.c`
+- [`_DEFAULT_SOURCE`](modules/src.wl_guard.c.md#_default_source) macro in `src/wl_guard.c`
 - [`delay`](modules/gui.browser_ui.c.md#browser_window-delay) method of `browser_window` in `gui/browser_ui.c`
 - [`denied`](modules/include.os_sandbox.h.md#denied) function in `include/os_sandbox.h`
 - [`depth`](modules/src.tab.c.md#depth) function in `src/tab.c`
@@ -1172,6 +1179,7 @@
 - [`_GNU_SOURCE`](modules/src.js_embed.c.md#_gnu_source) macro in `src/js_embed.c`
 - [`_GNU_SOURCE`](modules/src.js_events.c.md#_gnu_source) macro in `src/js_events.c`
 - [`_GNU_SOURCE`](modules/src.js_fetch.c.md#_gnu_source) macro in `src/js_fetch.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
@@ -1783,6 +1791,7 @@
 - [`load_current`](modules/tools.fbench.py.md#load_current) function in `tools.fbench`
 - [`load_rows`](modules/tools.ffgeom.py.md#load_rows) function in `tools.ffgeom`
 - [`load_rows`](modules/tools.pngprof.py.md#load_rows) function in `tools.pngprof`
+- [`load_timing_baseline`](modules/tools.fbench.py.md#load_timing_baseline) function in `tools.fbench`
 - [`loaded`](modules/include.js_sandbox.h.md#loaded) function in `include/js_sandbox.h`
 - [`loaded`](modules/src.text_shape.c.md#loaded) type_alias in `src/text_shape.c`
 - [`loop`](modules/gui.browser_ui.c.md#loop) function in `gui/browser_ui.c`
@@ -1826,7 +1835,9 @@
 - [`main`](modules/tools.ffgeom.py.md#main) function in `tools.ffgeom`
 - [`main`](modules/tools.ffq.py.md#main) function in `tools.ffq`
 - [`main`](modules/tools.ffshot.py.md#main) function in `tools.ffshot`
+- [`main`](modules/tools.fftime.py.md#main) function in `tools.fftime`
 - [`main`](modules/tools.gen_psl.c.md#main) function in `tools/gen_psl.c`
+- [`main`](modules/tools.guitime.py.md#main) function in `tools.guitime`
 - [`main`](modules/tools.mutate.py.md#main) function in `tools.mutate`
 - [`main`](modules/tools.pngdiff.c.md#main) function in `tools/pngdiff.c`
 - [`main`](modules/tools.pngprof.py.md#main) function in `tools.pngprof`
@@ -1862,6 +1873,7 @@
 - [`min`](modules/src.css_box.c.md#min) function in `src/css_box.c`
 - [`module`](modules/src.secure_fetch.c.md#module) function in `src/secure_fetch.c`
 - [`modules`](modules/include.html_parse.h.md#modules) function in `include/html_parse.h`
+- [`moves`](modules/gui.browser_ui.c.md#moves) function in `gui/browser_ui.c`
 - [`mq_cur`](modules/src.css_mq.c.md#mq_cur) struct in `src/css_mq.c`
 - [`MQ_EPS`](modules/src.css_mq.c.md#mq_eps) macro in `src/css_mq.c`
 - [`mr`](modules/gui.browser_ui.c.md#item_sides-mr) type_alias of `item_sides` in `gui/browser_ui.c`
@@ -1922,6 +1934,7 @@
 - [`OMNI_MAX_SUGG`](modules/gui.browser_ui.c.md#omni_max_sugg) macro in `gui/browser_ui.c`
 - [`once`](modules/src.tab.c.md#once) function in `src/tab.c`
 - [`one`](modules/include.box_tree.h.md#bt_node-one) method of `bt_node` in `include/box_tree.h`
+- [`one_run`](modules/tools.guitime.py.md#one_run) function in `tools.guitime`
 - [`only`](modules/gui.browser_ui.c.md#only) function in `gui/browser_ui.c`
 - [`only`](modules/src.freedom.c.md#only) function in `src/freedom.c`
 - [`opaque`](modules/include.js_dom.h.md#opaque) function in `include/js_dom.h`
@@ -2036,6 +2049,7 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -2108,6 +2122,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -2201,6 +2217,7 @@
 - [`P_META_VARSRC`](modules/src.css.c.md#p_meta_varsrc) macro in `src/css.c`
 - [`page`](modules/include.box_style.h.md#page) function in `include/box_style.h`
 - [`page_view`](modules/src.css.c.md#page_view) function in `src/css.c`
+- [`PAINT_WAIT_S`](modules/tools.fftime.py.md#paint_wait_s) constant in `tools.fftime`
 - [`paints`](modules/src.page_view.c.md#paints) function in `src/page_view.c`
 - [`palette`](modules/include.css.h.md#palette) function in `include/css.h`
 - [`parent`](modules/include.dom.h.md#parent) function in `include/dom.h`
@@ -2234,6 +2251,7 @@
 - [`pe_paginate`](modules/src.pdf_export.c.md#pe_paginate) function in `src/pdf_export.c`
 - [`pe_safe_basename`](modules/src.pdf_export.c.md#pe_safe_basename) function in `src/pdf_export.c`
 - [`pe_status`](modules/include.pdf_export.h.md#pe_status) enum in `include/pdf_export.h`
+- [`PER_RUN_TIMEOUT_S`](modules/tools.guitime.py.md#per_run_timeout_s) constant in `tools.guitime`
 - [`PERF_ORIGIN_EPOCH`](modules/src.js_env.c.md#perf_origin_epoch) macro in `src/js_env.c`
 - [`pf_find_importmap`](modules/include.prefetch.h.md#pf_find_importmap) function in `include/prefetch.h`
 - [`pf_find_importmap`](modules/src.prefetch.c.md#pf_find_importmap) function in `src/prefetch.c`
@@ -2413,6 +2431,7 @@
 - [`pt_trace`](modules/include.perf_trace.h.md#pt_trace) struct in `include/perf_trace.h`
 - [`ptrmap`](modules/src.dom.c.md#ptrmap) struct in `src/dom.c`
 - [`publish_readme`](modules/tools.fbench.py.md#publish_readme) function in `tools.fbench`
+- [`publish_timing`](modules/tools.fbench.py.md#publish_timing) function in `tools.fbench`
 - [`pure`](modules/include.wl_display.h.md#pure) function in `include/wl_display.h`
 - [`pv_add_box_def`](modules/src.page_view.c.md#pv_add_box_def) function in `src/page_view.c`
 - [`pv_add_cont_def`](modules/src.page_view.c.md#pv_add_cont_def) function in `src/page_view.c`
@@ -2564,6 +2583,7 @@
 - [`pv_set_ua_tag`](modules/src.page_view.c.md#pv_set_ua_tag) function in `src/page_view.c`
 - [`pv_status`](modules/include.page_view.h.md#pv_status) enum in `include/page_view.h`
 - [`pv_style_cache`](modules/src.page_view.c.md#pv_style_cache) struct in `src/page_view.c`
+- [`PV_STYLE_RETIRE_MAX`](modules/src.page_view.c.md#pv_style_retire_max) macro in `src/page_view.c`
 - [`pv_svg_append_root_attrs`](modules/include.page_view.h.md#pv_svg_append_root_attrs) function in `include/page_view.h`
 - [`pv_svg_append_root_attrs`](modules/src.page_view.c.md#pv_svg_append_root_attrs) function in `src/page_view.c`
 - [`pv_text_ext`](modules/include.page_view.h.md#pv_text_ext) struct in `include/page_view.h`
@@ -2660,6 +2680,8 @@
 - [`read_fuzz_stats`](modules/app.py.md#read_fuzz_stats) function in `app`
 - [`README_PAGES`](modules/tools.fbench.py.md#readme_pages) constant in `tools.fbench`
 - [`README_ROWS`](modules/tools.fbench.py.md#readme_rows) constant in `tools.fbench`
+- [`README_TIMING_BEGIN`](modules/tools.fbench.py.md#readme_timing_begin) constant in `tools.fbench`
+- [`README_TIMING_END`](modules/tools.fbench.py.md#readme_timing_end) constant in `tools.fbench`
 - [`reads`](modules/include.js_location.h.md#reads) function in `include/js_location.h`
 - [`realm`](modules/include.js_trusted.h.md#realm) function in `include/js_trusted.h`
 - [`rect`](modules/gui.browser_ui.c.md#rect) function in `gui/browser_ui.c`
@@ -2708,6 +2730,7 @@
 - [`run_freedom_headless`](modules/app.py.md#run_freedom_headless) function in `app`
 - [`run_js`](modules/src.tab.c.md#run_js) function in `src/tab.c`
 - [`run_make`](modules/tools.mutate.py.md#run_make) function in `tools.mutate`
+- [`run_timer`](modules/tools.fbench.py.md#run_timer) function in `tools.fbench`
 
 <a id="s"></a>
 
@@ -2831,9 +2854,16 @@
 - [`span`](modules/src.css_color.c.md#span) function in `src/css_color.c`
 - [`specifiers`](modules/include.prefetch.h.md#specifiers) function in `include/prefetch.h`
 - [`src`](modules/include.html_parse.h.md#src) function in `include/html_parse.h`
+- [`ss_committed`](modules/include.shm_slots.h.md#ss_committed) function in `include/shm_slots.h`
+- [`SS_COUNT`](modules/include.shm_slots.h.md#ss_count) macro in `include/shm_slots.h`
+- [`ss_init`](modules/include.shm_slots.h.md#ss_init) function in `include/shm_slots.h`
+- [`ss_released`](modules/include.shm_slots.h.md#ss_released) function in `include/shm_slots.h`
+- [`ss_state`](modules/include.shm_slots.h.md#ss_state) struct in `include/shm_slots.h`
 - [`stage`](modules/include.perf_trace.h.md#stage) type_alias in `include/perf_trace.h`
 - [`STAMP`](modules/tools.snapshot_age.py.md#stamp) constant in `tools.snapshot_age`
 - [`standalone`](modules/gui.browser_ui.c.md#standalone) function in `gui/browser_ui.c`
+- [`START_ATTEMPTS`](modules/tools.guitime.py.md#start_attempts) constant in `tools.guitime`
+- [`start_display`](modules/tools.guitime.py.md#start_display) function in `tools.guitime`
 - [`started`](modules/include.prefetch.h.md#started) function in `include/prefetch.h`
 - [`state`](modules/include.browser.h.md#state) function in `include/browser.h`
 - [`status`](modules/include.js_sandbox.h.md#status) type_alias in `include/js_sandbox.h`
@@ -3060,6 +3090,11 @@
 - [`ti_should_impersonate`](modules/include.tls_impersonate.h.md#ti_should_impersonate) function in `include/tls_impersonate.h`
 - [`ti_should_impersonate`](modules/src.tls_impersonate.c.md#ti_should_impersonate) function in `src/tls_impersonate.c`
 - [`ti_wr`](modules/src.tls_impersonate.c.md#ti_wr) struct in `src/tls_impersonate.c`
+- [`TIMELINE`](modules/tools.fftime.py.md#timeline) constant in `tools.fftime`
+- [`timing`](modules/tools.fbench.py.md#timing) function in `tools.fbench`
+- [`TIMING_BASELINE`](modules/tools.fbench.py.md#timing_baseline) constant in `tools.fbench`
+- [`TIMING_OUT`](modules/tools.fbench.py.md#timing_out) constant in `tools.fbench`
+- [`TIMING_QUIET_MS`](modules/gui.browser_ui.c.md#timing_quiet_ms) macro in `gui/browser_ui.c`
 - [`tls_capture`](modules/src.secure_fetch.c.md#tls_capture) struct in `src/secure_fetch.c`
 - [`to`](modules/include.render_doc.h.md#rd_block-to) method of `rd_block` in `include/render_doc.h`
 - [`toggle`](modules/gui.browser_ui.c.md#toggle) function in `gui/browser_ui.c`
@@ -3344,6 +3379,14 @@
 - [`wins`](modules/gui.browser_ui.c.md#wins) function in `gui/browser_ui.c`
 - [`wins`](modules/include.text_shape.h.md#wins) function in `include/text_shape.h`
 - [`wl_array_for_each`](modules/gui.browser_ui.c.md#wl_array_for_each) function in `gui/browser_ui.c`
+- [`wl_display`](modules/include.wl_guard.h.md#wl_display) struct in `include/wl_guard.h`
+- [`wl_guard`](modules/include.wl_guard.h.md#wl_guard) type_alias in `include/wl_guard.h`
+- [`wl_guard`](modules/src.wl_guard.c.md#wl_guard) struct in `src/wl_guard.c`
+- [`WLG_POLL_MS`](modules/src.wl_guard.c.md#wlg_poll_ms) macro in `src/wl_guard.c`
+- [`wlg_start`](modules/include.wl_guard.h.md#wlg_start) function in `include/wl_guard.h`
+- [`wlg_start`](modules/src.wl_guard.c.md#wlg_start) function in `src/wl_guard.c`
+- [`wlg_stop`](modules/include.wl_guard.h.md#wlg_stop) function in `include/wl_guard.h`
+- [`wlg_stop`](modules/src.wl_guard.c.md#wlg_stop) function in `src/wl_guard.c`
 - [`word_spacing`](modules/include.page_view.h.md#pv_text_ext-word_spacing) type_alias of `pv_text_ext` in `include/page_view.h`
 - [`write_full`](modules/include.util.h.md#write_full) function in `include/util.h`
 - [`write_full`](modules/src.renderer.c.md#write_full) function in `src/renderer.c`
