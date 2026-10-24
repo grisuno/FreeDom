@@ -1,6 +1,6 @@
 # include: local_store
 
-include: local_store groups 26 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. browser_free: Zero-initialise or reset a state.
+include: local_store groups 20 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. browser_free: Zero-initialise or reset a state.
 
 ```mermaid
 graph LR
@@ -15,22 +15,20 @@ graph LR
 
 ## include (5.1)
 
-include groups 9 files (h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. browser_free: Zero-initialise or reset a state.
+include groups 7 files (h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. browser_free: Zero-initialise or reset a state.
 
 ## src (5.2)
 
-src groups 9 files (c) around _POSIX_C_SOURCE, free_page, clear_status, free_history, free_exceptions. clear_status: #include <stdlib.h> #include <string.h> static void...
+src groups 7 files (c) around _POSIX_C_SOURCE, free_page, clear_status, free_history, free_exceptions. clear_status: #include <stdlib.h> #include <string.h> static void...
 
 ## tests (5.3)
 
-tests groups 8 files (c) around _POSIX_C_SOURCE, test_init, test_navigate_history, test_navigate_from_middle_discards_future, test_back_forward_bounds. test_url_bar_selection: Omnibar selection model: extend builds a selection, ops...
+tests groups 6 files (c) around _POSIX_C_SOURCE, test_init, test_navigate_history, test_navigate_from_middle_discards_future, test_back_forward_bounds. test_url_bar_selection: Omnibar selection model: extend builds a selection, ops...
 
 **Files**:
 
 - include/browser.h
 - include/disk_store.h
-- include/host_conf.h
-- include/hostblock.h
 - include/local_store.h
 - include/media_decoder.h
 - include/os_sandbox.h
@@ -38,8 +36,6 @@ tests groups 8 files (c) around _POSIX_C_SOURCE, test_init, test_navigate_histor
 - include/util.h
 - src/browser.c
 - src/disk_store.c
-- src/host_conf.c
-- src/hostblock.c
 - src/local_store.c
 - src/media_decoder.c
 - src/os_sandbox.c
@@ -47,8 +43,6 @@ tests groups 8 files (c) around _POSIX_C_SOURCE, test_init, test_navigate_histor
 - src/renderer.c
 - tests/test_browser.c
 - tests/test_disk_store.c
-- tests/test_host_conf.c
-- tests/test_hostblock.c
 - tests/test_local_store.c
 - tests/test_media_decoder.c
 - tests/test_os_sandbox.c

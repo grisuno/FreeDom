@@ -476,25 +476,5 @@ Previous: [KB_include.md](KB_include.md)
   - `HP_MAX_STYLESHEETS` (macro, line 115) `#define HP_MAX_STYLESHEETS`
 - Imported by: `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
 
-## include/image_decode.h
-- Doc: img_pixels: A decoded bitmap that owns its pixel buffer.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `img_pixels` (struct, line 56)
-  - `img_format` (enum, line 33)
-  - `img_status` (enum, line 41)
-  - `width` (type_alias, line 56) `typedef struct img_pixels { uint32_t width;`
-  - `guards` (function, line 25) `* guards (in-memory source only, longjmp error manager so a bad stream never * calls exit(), dimension caps before...`
-  - `img_dimensions_ok` (function, line 78) `int img_dimensions_ok(uint32_t w, uint32_t h);`
-  - `inputs` (function, line 81) `* Degenerate inputs (<= 0) yield (0,0). Pure. */ void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h...`
-  - `decode` (function, line 92) `* the declared dimensions BEFORE the full decode (anti-bomb), decodes to RGB and * expands to BGRA. Rejects non-JPEG...`
-  - `img_pixels_free` (function, line 121) `void img_pixels_free(img_pixels *p);`
-  - `img_format_name` (function, line 124) `const char *img_format_name(img_format f);`
-  - `FREEDOM_IMAGE_DECODE_H` (macro, line 2) `#define FREEDOM_IMAGE_DECODE_H`
-  - `IMG_MAX_DIM` (macro, line 65) `#define IMG_MAX_DIM`
-  - `IMG_MAX_PIXELS` (macro, line 66) `#define IMG_MAX_PIXELS`
-- Imported by: `gui/browser_ui.c`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
-
 
 Next: [KB_include_p3.md](KB_include_p3.md)

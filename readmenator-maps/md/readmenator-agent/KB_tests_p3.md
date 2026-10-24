@@ -111,14 +111,14 @@ static void test_leading_b...`
   - `has` (function, line 14) `static int has(const css_decl *d, int n, int prop)`
   - `test_prop_names` (function, line 19) `static void test_prop_names(void **state)`
   - `test_fade_gradient` (function, line 32) `static void test_fade_gradient(void **state)`
-  - `test_gradient_border_technique` (function, line 52) `static void test_gradient_border_technique(void **state)`
-  - `test_composite_vocabularies` (function, line 77) `static void test_composite_vocabularies(void **state)`
-  - `test_clip_property` (function, line 97) `static void test_clip_property(void **state)`
-  - `test_unsupported_fails_closed` (function, line 109) `static void test_unsupported_fails_closed(void **state)`
-  - `test_none_resets` (function, line 124) `static void test_none_resets(void **state)`
-  - `test_encode_decode_roundtrip` (function, line 137) `static void test_encode_decode_roundtrip(void **state)`
-  - `test_split_never_overruns` (function, line 160) `static void test_split_never_overruns(void **state)`
-  - `main` (function, line 175) `int main(void)`
+  - `test_gradient_border_technique` (function, line 77) `static void test_gradient_border_technique(void **state)`
+  - `test_composite_vocabularies` (function, line 102) `static void test_composite_vocabularies(void **state)`
+  - `test_clip_property` (function, line 122) `static void test_clip_property(void **state)`
+  - `test_unsupported_fails_closed` (function, line 134) `static void test_unsupported_fails_closed(void **state)`
+  - `test_none_resets` (function, line 149) `static void test_none_resets(void **state)`
+  - `test_encode_decode_roundtrip` (function, line 162) `static void test_encode_decode_roundtrip(void **state)`
+  - `test_split_never_overruns` (function, line 185) `static void test_split_never_overruns(void **state)`
+  - `main` (function, line 200) `int main(void)`
 - Depends on: `include/css_mask.h`
 
 ## tests/test_css_mq.c

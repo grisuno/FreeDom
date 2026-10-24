@@ -69,6 +69,25 @@ static void test_install_null_args(void **state) {
     js_context_free(ctx);
 }
 
+/* The user's identity override (spec/identity.md) reaches navigator: userAgent/appVersion, language(s). */
+static void test_install_identity_override(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    assert_int_equal(je_install_identity(ctx, 1920, 1080, "Mozilla/5.0 Mine", "es-AR,es,en"), JE_OK);
+    fixture f = { ctx };
+    EXPECT(&f, "[navigator.userAgent,navigator.appVersion,navigator.language,navigator.languages.join('|'),"
+               "Object.isFrozen(navigator.languages)||Object.isExtensible(navigator.languages)].join(';')",
+           "Mozilla/5.0 Mine;Mozilla/5.0 Mine;es-AR;es-AR|es|en;false");
+    js_context_free(ctx);
+    /* NULL = the normalized default, byte for byte what je_install gives. */
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    assert_int_equal(je_install_identity(ctx, 1920, 1080, NULL, NULL), JE_OK);
+    f.ctx = ctx;
+    EXPECT(&f, "navigator.language+'|'+navigator.languages.join()", "en-US|en-US,en");
+    js_context_free(ctx);
+}
+
 /* --- normalized identity --- */
 
 static void test_navigator_identity(void **state) {
@@ -355,6 +374,7 @@ static void test_coexists_with_dom(void **state) {
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_install_null_args),
+        cmocka_unit_test(test_install_identity_override),
         cmocka_unit_test_setup_teardown(test_navigator_identity, setup, teardown),
         cmocka_unit_test_setup_teardown(test_legacy_nav_props, setup, teardown),
         cmocka_unit_test_setup_teardown(test_bool_nav_props, setup, teardown),

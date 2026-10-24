@@ -106,7 +106,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_flex_layout $(BUILD_DIR)/test_box_tree \
              $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_host_conf $(BUILD_DIR)/test_net_realm \
              $(BUILD_DIR)/test_pdf_export $(BUILD_DIR)/test_js_policy \
-             $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download $(BUILD_DIR)/test_wl_display \
+             $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_identity $(BUILD_DIR)/test_download $(BUILD_DIR)/test_wl_display \
              $(BUILD_DIR)/test_webcaps $(BUILD_DIR)/test_compositor \
              $(BUILD_DIR)/test_css $(BUILD_DIR)/test_css_drops \
              $(BUILD_DIR)/test_freebug \
@@ -490,6 +490,10 @@ $(BUILD_DIR)/test_wl_display: $(TEST_DIR)/test_wl_display.c $(BUILD_DIR)/wl_disp
 $(BUILD_DIR)/test_zoom: $(TEST_DIR)/test_zoom.c $(BUILD_DIR)/zoom.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# User identity settings (spec/identity.md): validation, codec, about:config page. anti_fp supplies the default.
+$(BUILD_DIR)/test_identity: $(TEST_DIR)/test_identity.c $(BUILD_DIR)/identity.o $(BUILD_DIR)/anti_fp.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 # Pure bounded console-log buffer for the Freebug devtools. Fail-closed caps. No I/O deps.
 $(BUILD_DIR)/test_freebug: $(TEST_DIR)/test_freebug.c $(BUILD_DIR)/freebug.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
@@ -518,7 +522,7 @@ $(BUILD_DIR)/test_disk_store: $(TEST_DIR)/test_disk_store.c $(BUILD_DIR)/disk_st
 
 # Long-lived per-tab worker: links the whole hostile-content pipeline that runs
 # inside the confined child (parse + DOM + JS sandbox + bindings) plus os_sandbox.
-$(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/css_computed.o \
+$(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
                        $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                        $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o \
@@ -541,7 +545,7 @@ FREEDOM_GUI_OBJ = $(GUI_DIR)/browser_ui.c \
                   $(BUILD_DIR)/xdg-shell-protocol.c \
                   $(BUILD_DIR)/xdg-decoration-protocol.c
 
-$(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/css_computed.o \
+$(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
                       $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                       $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o \
@@ -1331,7 +1335,7 @@ drift:
 	@grep -q "TAB_WIRE_HEAD_N 6" src/tab.c || (echo "drift: HEAD const missing"; exit 1)
 	@grep -q "TAB_WIRE_A_N 38" src/tab.c || (echo "drift: A const missing"; exit 1)
 	@grep -q "TAB_WIRE_B_N 70" src/tab.c || (echo "drift: B const missing"; exit 1)
-	@grep -q "TAB_WIRE_BOX_F_N 267" src/tab.c || (echo "drift: BOX const missing"; exit 1)
+	@grep -q "TAB_WIRE_BOX_F_N 268" src/tab.c || (echo "drift: BOX const missing"; exit 1)
 	@grep -q "int32_t head\[TAB_WIRE_HEAD_N\]\|int32_t head\[6\]" src/tab.c || (echo "drift: head array drift"; exit 1)
 	@grep -q "int32_t a\[TAB_WIRE_A_N\]\|int32_t a\[38\]" src/tab.c || (echo "drift: A array drift"; exit 1)
 	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[70\]" src/tab.c || (echo "drift: B array drift"; exit 1)

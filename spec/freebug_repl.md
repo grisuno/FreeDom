@@ -29,6 +29,21 @@
 - Headless: `freedom --headless --eval='EXPR' pagina` ejecuta una linea del REPL (valor a stdout,
   consola a stderr), el mismo camino que la ventana Freebug.
 
+## Reglas que coinciden (`rules`)
+- `rules(el)` -> arreglo, la regla ganadora primero (estilo del elemento, luego especificidad
+  descendente, luego orden inverso de aparicion): `{selector, specificity:'a,b,c', source,
+  media, declarations:[{property,value,important,overridden}]}`. `source` es `inline`
+  (atributo `style`), `style#N` (N-esimo `<style>`) o `external` (hojas `<link>` ya
+  descargadas por el padre). `overridden` es verdadero si otra declaracion de la misma
+  propiedad gana (`!important` > estilo en linea > especificidad > orden); la consola marca esas
+  con `~`.
+- Dado un `@media` falso (`matchMedia`) o un pseudo-elemento (`::before`), la regla NO aparece;
+  `@supports`/`@layer` se recorren sin evaluar (aproximacion: el orden de capas no se modela).
+- La coincidencia la decide el motor real (`el.matches`), no una copia del selector. El texto
+  externo llega por `jd_set_repl_css` justo antes de `jd_install_repl_api` y el portador
+  `__replCss` se borra al leerlo (una pagina no lo ve). Tope 4 MiB.
+- Limitacion conocida: las hojas externas se ordenan ANTES de las `<style>` (la posicion
+  relativa de `<link>` y `<style>` no se conserva en el texto retenido).
+
 ## Fuera de alcance (siguiente hito)
-Pestanas graficas dedicadas (hoy son comandos en la consola), reglas CSS que coinciden por
-elemento, tiempos de red.
+Pestanas graficas dedicadas (hoy son comandos en la consola), tiempos de red.

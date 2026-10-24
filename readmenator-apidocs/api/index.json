@@ -2,49 +2,49 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 191,
-  "entities": 3327,
+  "modules": 193,
+  "entities": 3382,
   "languages": {
-   "c": 90,
-   "h": 87,
+   "c": 91,
+   "h": 88,
    "py": 10,
    "sh": 4
   },
   "kinds": {
    "constant": 15,
-   "enum": 151,
-   "function": 1702,
-   "macro": 880,
+   "enum": 152,
+   "function": 1738,
+   "macro": 894,
    "method": 23,
-   "module": 191,
-   "struct": 233,
-   "type_alias": 125,
+   "module": 193,
+   "struct": 234,
+   "type_alias": 126,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 76,
+  "skipped_files": 77,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1314,
-   "total": 3305,
+   "documented": 1338,
+   "total": 3360,
    "percent": 39.8
   },
   "by_kind": {
    "enum": {
     "documented": 80,
-    "total": 151,
-    "percent": 53.0
+    "total": 152,
+    "percent": 52.6
    },
    "function": {
-    "documented": 718,
-    "total": 1702,
-    "percent": 42.2
+    "documented": 738,
+    "total": 1738,
+    "percent": 42.5
    },
    "macro": {
-    "documented": 289,
-    "total": 880,
+    "documented": 293,
+    "total": 894,
     "percent": 32.8
    },
    "method": {
@@ -54,18 +54,18 @@
    },
    "module": {
     "documented": 28,
-    "total": 191,
-    "percent": 14.7
+    "total": 193,
+    "percent": 14.5
    },
    "struct": {
     "documented": 105,
-    "total": 233,
-    "percent": 45.1
+    "total": 234,
+    "percent": 44.9
    },
    "type_alias": {
     "documented": 94,
-    "total": 125,
-    "percent": 75.2
+    "total": 126,
+    "percent": 74.6
    }
   },
   "by_module": {
@@ -304,6 +304,11 @@
     "total": 24,
     "percent": 50.0
    },
+   "include/identity.h": {
+    "documented": 11,
+    "total": 24,
+    "percent": 45.8
+   },
    "include/image_decode.h": {
     "documented": 6,
     "total": 13,
@@ -320,9 +325,9 @@
     "percent": 31.8
    },
    "include/js_dom.h": {
-    "documented": 7,
-    "total": 20,
-    "percent": 35.0
+    "documented": 8,
+    "total": 23,
+    "percent": 34.8
    },
    "include/js_env.h": {
     "documented": 0,
@@ -435,9 +440,9 @@
     "percent": 60.0
    },
    "include/secure_fetch.h": {
-    "documented": 21,
-    "total": 42,
-    "percent": 50.0
+    "documented": 22,
+    "total": 43,
+    "percent": 51.2
    },
    "include/svg_paint.h": {
     "documented": 1,
@@ -450,9 +455,9 @@
     "percent": 38.9
    },
    "include/tab.h": {
-    "documented": 19,
-    "total": 42,
-    "percent": 45.2
+    "documented": 20,
+    "total": 43,
+    "percent": 46.5
    },
    "include/text_case.h": {
     "documented": 6,
@@ -719,6 +724,11 @@
     "total": 19,
     "percent": 47.4
    },
+   "src/identity.c": {
+    "documented": 8,
+    "total": 16,
+    "percent": 50.0
+   },
    "src/image_decode.c": {
     "documented": 6,
     "total": 17,
@@ -751,7 +761,7 @@
    },
    "src/js_dom_ext.c": {
     "documented": 0,
-    "total": 5,
+    "total": 8,
     "percent": 0.0
    },
    "src/js_dom_ext.h": {
@@ -771,7 +781,7 @@
    },
    "src/js_env.c": {
     "documented": 0,
-    "total": 8,
+    "total": 9,
     "percent": 0.0
    },
    "src/js_events.c": {
@@ -821,7 +831,7 @@
    },
    "src/local_store.c": {
     "documented": 5,
-    "total": 298,
+    "total": 302,
     "percent": 1.7
    },
    "src/media_decoder.c": {
@@ -890,9 +900,9 @@
     "percent": 57.1
    },
    "src/secure_fetch.c": {
-    "documented": 12,
-    "total": 48,
-    "percent": 25.0
+    "documented": 13,
+    "total": 49,
+    "percent": 26.5
    },
    "src/svg_render.c": {
     "documented": 5,
@@ -900,9 +910,9 @@
     "percent": 55.6
    },
    "src/tab.c": {
-    "documented": 28,
-    "total": 76,
-    "percent": 36.8
+    "documented": 29,
+    "total": 77,
+    "percent": 37.7
    },
    "src/text_case.c": {
     "documented": 3,
@@ -1263,6 +1273,11 @@
    "entities": 24
   },
   {
+   "uid": "include/identity.h",
+   "path": "modules/include.identity.h.jsonl",
+   "entities": 24
+  },
+  {
    "uid": "include/image_decode.h",
    "path": "modules/include.image_decode.h.jsonl",
    "entities": 13
@@ -1280,7 +1295,7 @@
   {
    "uid": "include/js_dom.h",
    "path": "modules/include.js_dom.h.jsonl",
-   "entities": 20
+   "entities": 23
   },
   {
    "uid": "include/js_env.h",
@@ -1395,7 +1410,7 @@
   {
    "uid": "include/secure_fetch.h",
    "path": "modules/include.secure_fetch.h.jsonl",
-   "entities": 42
+   "entities": 43
   },
   {
    "uid": "include/svg_paint.h",
@@ -1410,7 +1425,7 @@
   {
    "uid": "include/tab.h",
    "path": "modules/include.tab.h.jsonl",
-   "entities": 42
+   "entities": 43
   },
   {
    "uid": "include/text_case.h",
@@ -1678,6 +1693,11 @@
    "entities": 19
   },
   {
+   "uid": "src/identity.c",
+   "path": "modules/src.identity.c.jsonl",
+   "entities": 16
+  },
+  {
    "uid": "src/image_decode.c",
    "path": "modules/src.image_decode.c.jsonl",
    "entities": 17
@@ -1710,7 +1730,7 @@
   {
    "uid": "src/js_dom_ext.c",
    "path": "modules/src.js_dom_ext.c.jsonl",
-   "entities": 5
+   "entities": 8
   },
   {
    "uid": "src/js_dom_ext.h",
@@ -1730,7 +1750,7 @@
   {
    "uid": "src/js_env.c",
    "path": "modules/src.js_env.c.jsonl",
-   "entities": 8
+   "entities": 9
   },
   {
    "uid": "src/js_events.c",
@@ -1780,7 +1800,7 @@
   {
    "uid": "src/local_store.c",
    "path": "modules/src.local_store.c.jsonl",
-   "entities": 298
+   "entities": 302
   },
   {
    "uid": "src/media_decoder.c",
@@ -1850,7 +1870,7 @@
   {
    "uid": "src/secure_fetch.c",
    "path": "modules/src.secure_fetch.c.jsonl",
-   "entities": 48
+   "entities": 49
   },
   {
    "uid": "src/svg_render.c",
@@ -1860,7 +1880,7 @@
   {
    "uid": "src/tab.c",
    "path": "modules/src.tab.c.jsonl",
-   "entities": 76
+   "entities": 77
   },
   {
    "uid": "src/text_case.c",
@@ -1985,7 +2005,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 1992
+  "total": 2023
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

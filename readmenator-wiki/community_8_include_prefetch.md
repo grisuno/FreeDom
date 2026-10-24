@@ -1,6 +1,6 @@
 # include: prefetch
 
-*Community 7 | 6 files | cohesion 0.56*
+*Community 8 | 6 files | cohesion 0.56*
 
 ## Definition
 
@@ -57,8 +57,8 @@ This community groups 6 file(s) rooted at `include` with dominant language c (co
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
-- [EXTRACTED] depends_on community 3 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
+- [EXTRACTED] depends_on community 1 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
+- [EXTRACTED] depends_on community 3 <-> 8 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
 
 ## Risks
 

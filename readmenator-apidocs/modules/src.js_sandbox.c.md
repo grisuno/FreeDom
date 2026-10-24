@@ -429,7 +429,7 @@ void *js_context_raw(js_context *ctx)
 
 **Returns:** `void *`
 
-*Called by:* [`jd_install_repl_api`](src.js_dom_ext.c.md#jd_install_repl_api), [`jd_inject_video_shim`](src.js_embed.c.md#jd_inject_video_shim), [`jd_process_iframes`](src.js_embed.c.md#jd_process_iframes), [`je_install`](src.js_env.c.md#je_install), [`je_install_canvas`](src.js_env.c.md#je_install_canvas), [`jd_fire_click`](src.js_events.c.md#jd_fire_click), [`jd_fire_mouse_event`](src.js_events.c.md#jd_fire_mouse_event), [`jd_fire_submit`](src.js_events.c.md#jd_fire_submit), [`jd_install_events`](src.js_events.c.md#jd_install_events), [`jd_install_xhr`](src.js_fetch.c.md#jd_install_xhr), [`jd_pop_state`](src.js_location.c.md#jd_pop_state), [`jd_set_location`](src.js_location.c.md#jd_set_location) and 12 more
+*Called by:* [`jd_inject_video_shim`](src.js_embed.c.md#jd_inject_video_shim), [`jd_process_iframes`](src.js_embed.c.md#jd_process_iframes), [`je_install_canvas`](src.js_env.c.md#je_install_canvas), [`je_install_identity`](src.js_env.c.md#je_install_identity), [`jd_fire_click`](src.js_events.c.md#jd_fire_click), [`jd_fire_mouse_event`](src.js_events.c.md#jd_fire_mouse_event), [`jd_fire_submit`](src.js_events.c.md#jd_fire_submit), [`jd_install_events`](src.js_events.c.md#jd_install_events), [`jd_install_xhr`](src.js_fetch.c.md#jd_install_xhr), [`jd_pop_state`](src.js_location.c.md#jd_pop_state), [`jd_set_location`](src.js_location.c.md#jd_set_location), [`jd_take_history`](src.js_location.c.md#jd_take_history) and 11 more
 
 ---
 
@@ -437,7 +437,7 @@ void *js_context_raw(js_context *ctx)
 
 ### `js_set_module_host`
 
-`function` | [src/js_sandbox.c:591](../../src/js_sandbox.c#L591)
+`function` | [src/js_sandbox.c:602](../../src/js_sandbox.c#L602)
 
 ```c
 void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host)
@@ -464,7 +464,7 @@ NULL functions uninstall it (every import then fails).
 
 ### `js_eval_module`
 
-`function` | [src/js_sandbox.c:621](../../src/js_sandbox.c#L621)
+`function` | [src/js_sandbox.c:632](../../src/js_sandbox.c#L632)
 
 ```c
 js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name, js_result *res)
@@ -490,7 +490,7 @@ js_status js_eval_module(js_context *ctx, const char *src, size_t len, const cha
 
 ### `js_install_realms`
 
-`function` | [src/js_sandbox.c:783](../../src/js_sandbox.c#L783)
+`function` | [src/js_sandbox.c:794](../../src/js_sandbox.c#L794)
 
 ```c
 js_status js_install_realms(js_context *ctx)

@@ -122,6 +122,22 @@ Imported by: `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/
 - `hp_document_free` (function) `include/html_parse.h:136` `void hp_document_free(hp_document *doc);` -- (ASCII case-insensitive) and NOT the token "alternate"; href is present and non-empty; and media is absent/empty or...
 - `hp_document_root` (function) `include/html_parse.h:142` `const void *hp_document_root(const hp_document *doc);` -- Internal seam for the dom layer: returns the document's root node as an opaque handle (so html_parse.h stays free of...
 
+## include/identity.h
+Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/identity.c`, `src/tab.c`, `tests/test_identity.c`
+- `idn_defaults` (function) `include/identity.h:45` `void idn_defaults(idn_config *c);` -- enum { IDN_REJ_UA   = 1 << 0, IDN_REJ_LANG = 1 << 1, IDN_REJ_GEO  = 1 << 2 }; typedef struct idn_config { char...
+- `idn_is_default` (function) `include/identity.h:48` `int idn_is_default(const idn_config *c);` -- IDN_REJ_GEO  = 1 << 2 }; typedef struct idn_config { char   user_agent[IDN_UA_MAX];  /* "" = FP_USER_AGENT char...
+- `idn_set_user_agent` (function) `include/identity.h:51` `int idn_set_user_agent(idn_config *c, const char *ua);` -- typedef struct idn_config { char   user_agent[IDN_UA_MAX];  /* "" = FP_USER_AGENT char   languages[IDN_LANG_MAX]; /*...
+- `idn_set_languages` (function) `include/identity.h:52` `int idn_set_languages(idn_config *c, const char *list);`
+- `idn_set_geo` (function) `include/identity.h:53` `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);`
+- `idn_clear_geo` (function) `include/identity.h:54` `void idn_clear_geo(idn_config *c);`
+- `idn_user_agent` (function) `include/identity.h:57` `const char *idn_user_agent(const idn_config *c);` -- /* The anti_fp identity, geolocation off.
+- `idn_accept_language` (function) `include/identity.h:58` `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);`
+- `idn_primary_language` (function) `include/identity.h:59` `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);`
+- `idn_serialize` (function) `include/identity.h:63` `size_t idn_serialize(const idn_config *c, char *out, size_t cap);` -- One-line text form for prefs and the worker IPC.
+- `idn_parse` (function) `include/identity.h:67` `void idn_parse(idn_config *c, const char *text);` -- Parses idn_serialize output field by field; an invalid field keeps its default.
+- `idn_apply_query` (function) `include/identity.h:70` `unsigned idn_apply_query(idn_config *c, const char *query);` -- Parses idn_serialize output field by field; an invalid field keeps its default.
+- `idn_render_page` (function) `include/identity.h:73` `size_t idn_render_page(const idn_config *c, char *out, size_t cap);` -- Parses idn_serialize output field by field; an invalid field keeps its default.
+
 ## include/image_decode.h
 Imported by: `gui/browser_ui.c`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
 - `guards` (function) `include/image_decode.h:25` `* guards (in-memory source only, longjmp error manager so a bad stream never * calls exit(), dimension caps before...`
@@ -156,22 +172,24 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/js_geom.h`, `include/
 Imported by: `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`
 - `opaque` (function) `include/js_dom.h:66` `* the engine runtime opaque (unreachable from script);`
 - `global` (function) `include/js_dom.h:73` `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...`
-- `getComputedStyle` (function) `include/js_dom.h:87` `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...`
-- `jd_click_state_free` (function) `include/js_dom.h:97` `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);`
-- `run` (function) `include/js_dom.h:106` `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...`
-- `preventDefault` (function) `include/js_dom.h:113` `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...`
-- `host` (function) `include/js_dom.h:142` `* for a trusted host (allow.conf AND js.conf);`
-- `jd_get_cookies` (function) `include/js_dom.h:153` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` -- Serialises the page's current cookie jar ("name=value; ...") into buf (bounded, NUL-terminated) and returns its...
-- `out_status` (function) `include/js_dom.h:161` `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
-- `jd_process_iframes` (function) `include/js_dom.h:182` `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
-- `URLs` (function) `include/js_dom.h:189` `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
-- `jd_video_from_scripts` (function) `include/js_dom.h:203` `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` -- Creates <iframe> elements in the DOM from video data (`video[N]` / `video_data`) found in inline script text...
-- `jd_flush_custom_elements` (function) `include/js_dom.h:214` `void jd_flush_custom_elements(js_context *ctx);` -- Reconciles Custom Elements (spec/js_custom_elements.md): upgrades the elements whose tag was just defined and fires...
+- `jd_install_repl_api` (function) `include/js_dom.h:82` `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...`
+- `place` (function) `include/js_dom.h:87` `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...`
+- `getComputedStyle` (function) `include/js_dom.h:108` `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...`
+- `jd_click_state_free` (function) `include/js_dom.h:118` `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);`
+- `run` (function) `include/js_dom.h:127` `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...`
+- `preventDefault` (function) `include/js_dom.h:134` `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...`
+- `host` (function) `include/js_dom.h:163` `* for a trusted host (allow.conf AND js.conf);`
+- `jd_get_cookies` (function) `include/js_dom.h:174` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` -- Serialises the page's current cookie jar ("name=value; ...") into buf (bounded, NUL-terminated) and returns its...
+- `out_status` (function) `include/js_dom.h:182` `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
+- `jd_process_iframes` (function) `include/js_dom.h:203` `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
+- `URLs` (function) `include/js_dom.h:210` `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
+- `jd_video_from_scripts` (function) `include/js_dom.h:224` `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` -- Creates <iframe> elements in the DOM from video data (`video[N]` / `video_data`) found in inline script text...
+- `jd_flush_custom_elements` (function) `include/js_dom.h:235` `void jd_flush_custom_elements(js_context *ctx);` -- Reconciles Custom Elements (spec/js_custom_elements.md): upgrades the elements whose tag was just defined and fires...
 
 ## include/js_env.h
 Depends on: `include/js_sandbox.h`
 Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`
-- `poisoned` (function) `include/js_env.h:43` `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...`
+- `poisoned` (function) `include/js_env.h:49` `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...`
 
 ## include/js_geom.h
 Depends on: `include/dom.h`
@@ -268,62 +286,62 @@ Imported by: `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src
 - `bx_display` (function) `include/page_view.h:229` `* bx_display (flex/grid);`
 - `order` (function) `include/page_view.h:293` `* groups the runs of ONE floated element in document order (-1 = not in a float);`
 - `itself` (function) `include/page_view.h:357` `* by itself (bx_width_cap2);`
-- `CSS_LEN_UNSET` (function) `include/page_view.h:552` `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
-- `scale` (function) `include/page_view.h:627` `* scale(1)) and rotate in whole degrees (transform_rotate);`
-- `tree` (function) `include/page_view.h:668` `* box tree (a mask covers its whole subtree);`
-- `declare` (function) `include/page_view.h:857` `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
-- `nonzero` (function) `include/page_view.h:869` `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
-- `resolved` (function) `include/page_view.h:876` `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
-- `policy` (function) `include/page_view.h:884` `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
-- `pv_computed_new` (function) `include/page_view.h:906` `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
-- `pv_computed_get` (function) `include/page_view.h:913` `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);` -- Resolves native_el (a dom_native_node pointer of the SAME document) into *st; when non-NULL, *font_px receives its...
-- `pv_computed_free` (function) `include/page_view.h:916` `void pv_computed_free(pv_computed *pc);`
-- `cause` (function) `include/page_view.h:920` `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
-- `pv_new` (function) `include/page_view.h:932` `pv_view *pv_new(void);` -- Allocates an empty view (used by the IPC deserialiser to rebuild a view on the * receiving side).
-- `form` (function) `include/page_view.h:951` `* form (-1 if none);`
-- `pv_set_emphasis` (function) `include/page_view.h:983` `void pv_set_emphasis(pv_view *v, int bold, int italic);` -- Sets the inline emphasis flags (bold from <b>/<strong>/<th>, italic from <i>/<em>) on the most recently appended run.
-- `default` (function) `include/page_view.h:988` `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
-- `pv_set_color` (function) `include/page_view.h:991` `void pv_set_color(pv_view *v, int fg_rgb);`
-- `pv_set_bgcolor` (function) `include/page_view.h:998` `void pv_set_bgcolor(pv_view *v, int bg_rgb);` -- Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most recently appended run.
-- `pv_set_text_style` (function) `include/page_view.h:1007` `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` -- Sets the author text presentation (text_align as a css_align, font_scale as a font-size percent or 0, font_abs as 1...
-- `pv_text_ext_reset` (function) `include/page_view.h:1062` `void pv_text_ext_reset(pv_text_ext *e);` -- Gradient text (2026-07-19). text_fill: -webkit-text-fill-color from the nearest ancestor that sets it (packed /...
-- `ancestors` (function) `include/page_view.h:1067` `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
-- `pv_set_text_ext` (function) `include/page_view.h:1077` `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
-- `pv_set_grad_text` (function) `include/page_view.h:1083` `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` -- Sets the gradient-text fill (grad_text_*) verbatim on the most recently appended run. n < 2 is a no-op (no gradient).
-- `run` (function) `include/page_view.h:1086` `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
-- `pv_set_row_span` (function) `include/page_view.h:1099` `void pv_set_row_span(pv_view *v, int row_span);` -- Sets the container's grid track sizes and this run's ITEM column span on the most recently appended run...
-- `pv_set_grid_area` (function) `include/page_view.h:1103` `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` -- Sets the last run's RESOLVED named-grid cell (-1, -1 = auto-placed).
-- `pv_set_grid_rows` (function) `include/page_view.h:1104` `void pv_set_grid_rows(pv_view *v, int grid_rows);`
-- `pv_set_ua_tag` (function) `include/page_view.h:1109` `void pv_set_ua_tag(pv_view *v, int ua_tag);` -- Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its nearest block-level ancestor).
-- `pv_set_cont_box` (function) `include/page_view.h:1113` `void pv_set_cont_box(pv_view *v, int cont_box_id);` -- Sets the last run's cont_box_id (the box enclosing its container's items; -1 = * none).
-- `pv_set_grid` (function) `include/page_view.h:1114` `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
-- `pv_set_flex` (function) `include/page_view.h:1122` `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
-- `pv_set_flex_mauto` (function) `include/page_view.h:1125` `void pv_set_flex_mauto(pv_view *v, int mauto);` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
-- `pv_set_cont_item` (function) `include/page_view.h:1129` `void pv_set_cont_item(pv_view *v, int cont_item);` -- Sets the container-item ordinal on the most recently appended run (-1 = none). * No-op on an empty or NULL view; the...
-- `pv_set_float_w` (function) `include/page_view.h:1140` `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...` -- Stamps the float founder's own declared width halves (pv_run.float_w) on the * most recently appended run.
-- `pv_set_float` (function) `include/page_view.h:1143` `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
-- `pv_set_box` (function) `include/page_view.h:1153` `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` -- Sets the author box model on the most recently appended run (left/right insets, width cap, centered flag, and...
-- `pv_set_box_pct` (function) `include/page_view.h:1159` `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` -- Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the most recently appended run.
-- `pv_set_box_maxw` (function) `include/page_view.h:1164` `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` -- Sets the max-width cap (px half, 0 = none; per-mille half, 0 = none) on the most * recently appended run.
-- `pv_set_node_id` (function) `include/page_view.h:1169` `void pv_set_node_id(pv_view *v, dom_node_id node_id);` -- Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of the source element.
-- `pv_set_block_id` (function) `include/page_view.h:1174` `void pv_set_block_id(pv_view *v, int block_id);` -- Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of the box-carrying block it belongs...
-- `pv_set_own_box` (function) `include/page_view.h:1178` `void pv_set_own_box(pv_view *v, int box_id);` -- Records the replaced element's own box def index on the last appended run.
-- `pv_set_oof` (function) `include/page_view.h:1182` `void pv_set_oof(pv_view *v, int oof);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
-- `pv_set_justify_self` (function) `include/page_view.h:1185` `void pv_set_justify_self(pv_view *v, int justify_self);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
-- `pv_set_block_node` (function) `include/page_view.h:1188` `void pv_set_block_node(pv_view *v, dom_node_id id);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
-- `pv_set_br_line` (function) `include/page_view.h:1196` `void pv_set_br_line(pv_view *v, int br_line);` -- Sets the last appended run's PV_BR_* flags (see pv_run.br_line); other bits * are dropped.
-- `pv_cont_count` (function) `include/page_view.h:1211` `size_t pv_cont_count(const pv_view *v);` -- pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] * (i == a cont_id) or NULL when out of...
-- `pv_cont_at` (function) `include/page_view.h:1212` `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
-- `pv_set_input_checked` (function) `include/page_view.h:1216` `void pv_set_input_checked(pv_view *v, int checked);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
-- `pv_set_input_placeholder` (function) `include/page_view.h:1220` `void pv_set_input_placeholder(pv_view *v, int ph_color);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
-- `pv_svg_append_root_attrs` (function) `include/page_view.h:1226` `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` -- Appends attrs (e.g.
-- `pv_placeholder_color` (function) `include/page_view.h:1229` `int pv_placeholder_color(const css_style *ph);` -- Appends attrs (e.g.
-- `pv_set_input_select_opts` (function) `include/page_view.h:1233` `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_free` (function) `include/page_view.h:1236` `void pv_free(pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_count` (function) `include/page_view.h:1239` `size_t pv_count(const pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_at` (function) `include/page_view.h:1240` `const pv_run *pv_at(const pv_view *v, size_t i);`
-- `pv_box_count` (function) `include/page_view.h:1244` `size_t pv_box_count(const pv_view *v);` -- Box tree accessors (Step D). pv_box_count is the number of box definitions; * pv_box_at returns boxes[i] (i == a...
-- `pv_box_at` (function) `include/page_view.h:1245` `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
+- `CSS_LEN_UNSET` (function) `include/page_view.h:553` `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
+- `scale` (function) `include/page_view.h:628` `* scale(1)) and rotate in whole degrees (transform_rotate);`
+- `tree` (function) `include/page_view.h:669` `* box tree (a mask covers its whole subtree);`
+- `declare` (function) `include/page_view.h:858` `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
+- `nonzero` (function) `include/page_view.h:870` `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
+- `resolved` (function) `include/page_view.h:877` `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
+- `policy` (function) `include/page_view.h:885` `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
+- `pv_computed_new` (function) `include/page_view.h:907` `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
+- `pv_computed_get` (function) `include/page_view.h:914` `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);` -- Resolves native_el (a dom_native_node pointer of the SAME document) into *st; when non-NULL, *font_px receives its...
+- `pv_computed_free` (function) `include/page_view.h:917` `void pv_computed_free(pv_computed *pc);`
+- `cause` (function) `include/page_view.h:921` `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
+- `pv_new` (function) `include/page_view.h:933` `pv_view *pv_new(void);` -- Allocates an empty view (used by the IPC deserialiser to rebuild a view on the * receiving side).
+- `form` (function) `include/page_view.h:952` `* form (-1 if none);`
+- `pv_set_emphasis` (function) `include/page_view.h:984` `void pv_set_emphasis(pv_view *v, int bold, int italic);` -- Sets the inline emphasis flags (bold from <b>/<strong>/<th>, italic from <i>/<em>) on the most recently appended run.
+- `default` (function) `include/page_view.h:989` `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
+- `pv_set_color` (function) `include/page_view.h:992` `void pv_set_color(pv_view *v, int fg_rgb);`
+- `pv_set_bgcolor` (function) `include/page_view.h:999` `void pv_set_bgcolor(pv_view *v, int bg_rgb);` -- Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most recently appended run.
+- `pv_set_text_style` (function) `include/page_view.h:1008` `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` -- Sets the author text presentation (text_align as a css_align, font_scale as a font-size percent or 0, font_abs as 1...
+- `pv_text_ext_reset` (function) `include/page_view.h:1063` `void pv_text_ext_reset(pv_text_ext *e);` -- Gradient text (2026-07-19). text_fill: -webkit-text-fill-color from the nearest ancestor that sets it (packed /...
+- `ancestors` (function) `include/page_view.h:1068` `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
+- `pv_set_text_ext` (function) `include/page_view.h:1078` `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
+- `pv_set_grad_text` (function) `include/page_view.h:1084` `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` -- Sets the gradient-text fill (grad_text_*) verbatim on the most recently appended run. n < 2 is a no-op (no gradient).
+- `run` (function) `include/page_view.h:1087` `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
+- `pv_set_row_span` (function) `include/page_view.h:1100` `void pv_set_row_span(pv_view *v, int row_span);` -- Sets the container's grid track sizes and this run's ITEM column span on the most recently appended run...
+- `pv_set_grid_area` (function) `include/page_view.h:1104` `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` -- Sets the last run's RESOLVED named-grid cell (-1, -1 = auto-placed).
+- `pv_set_grid_rows` (function) `include/page_view.h:1105` `void pv_set_grid_rows(pv_view *v, int grid_rows);`
+- `pv_set_ua_tag` (function) `include/page_view.h:1110` `void pv_set_ua_tag(pv_view *v, int ua_tag);` -- Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its nearest block-level ancestor).
+- `pv_set_cont_box` (function) `include/page_view.h:1114` `void pv_set_cont_box(pv_view *v, int cont_box_id);` -- Sets the last run's cont_box_id (the box enclosing its container's items; -1 = * none).
+- `pv_set_grid` (function) `include/page_view.h:1115` `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
+- `pv_set_flex` (function) `include/page_view.h:1123` `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
+- `pv_set_flex_mauto` (function) `include/page_view.h:1126` `void pv_set_flex_mauto(pv_view *v, int mauto);` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
+- `pv_set_cont_item` (function) `include/page_view.h:1130` `void pv_set_cont_item(pv_view *v, int cont_item);` -- Sets the container-item ordinal on the most recently appended run (-1 = none). * No-op on an empty or NULL view; the...
+- `pv_set_float_w` (function) `include/page_view.h:1141` `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...` -- Stamps the float founder's own declared width halves (pv_run.float_w) on the * most recently appended run.
+- `pv_set_float` (function) `include/page_view.h:1144` `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
+- `pv_set_box` (function) `include/page_view.h:1154` `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` -- Sets the author box model on the most recently appended run (left/right insets, width cap, centered flag, and...
+- `pv_set_box_pct` (function) `include/page_view.h:1160` `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` -- Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the most recently appended run.
+- `pv_set_box_maxw` (function) `include/page_view.h:1165` `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` -- Sets the max-width cap (px half, 0 = none; per-mille half, 0 = none) on the most * recently appended run.
+- `pv_set_node_id` (function) `include/page_view.h:1170` `void pv_set_node_id(pv_view *v, dom_node_id node_id);` -- Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of the source element.
+- `pv_set_block_id` (function) `include/page_view.h:1175` `void pv_set_block_id(pv_view *v, int block_id);` -- Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of the box-carrying block it belongs...
+- `pv_set_own_box` (function) `include/page_view.h:1179` `void pv_set_own_box(pv_view *v, int box_id);` -- Records the replaced element's own box def index on the last appended run.
+- `pv_set_oof` (function) `include/page_view.h:1183` `void pv_set_oof(pv_view *v, int oof);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_justify_self` (function) `include/page_view.h:1186` `void pv_set_justify_self(pv_view *v, int justify_self);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_block_node` (function) `include/page_view.h:1189` `void pv_set_block_node(pv_view *v, dom_node_id id);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_br_line` (function) `include/page_view.h:1197` `void pv_set_br_line(pv_view *v, int br_line);` -- Sets the last appended run's PV_BR_* flags (see pv_run.br_line); other bits * are dropped.
+- `pv_cont_count` (function) `include/page_view.h:1212` `size_t pv_cont_count(const pv_view *v);` -- pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] * (i == a cont_id) or NULL when out of...
+- `pv_cont_at` (function) `include/page_view.h:1213` `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
+- `pv_set_input_checked` (function) `include/page_view.h:1217` `void pv_set_input_checked(pv_view *v, int checked);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
+- `pv_set_input_placeholder` (function) `include/page_view.h:1221` `void pv_set_input_placeholder(pv_view *v, int ph_color);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
+- `pv_svg_append_root_attrs` (function) `include/page_view.h:1227` `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` -- Appends attrs (e.g.
+- `pv_placeholder_color` (function) `include/page_view.h:1230` `int pv_placeholder_color(const css_style *ph);` -- Appends attrs (e.g.
+- `pv_set_input_select_opts` (function) `include/page_view.h:1234` `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_free` (function) `include/page_view.h:1237` `void pv_free(pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_count` (function) `include/page_view.h:1240` `size_t pv_count(const pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_at` (function) `include/page_view.h:1241` `const pv_run *pv_at(const pv_view *v, size_t i);`
+- `pv_box_count` (function) `include/page_view.h:1245` `size_t pv_box_count(const pv_view *v);` -- Box tree accessors (Step D). pv_box_count is the number of box definitions; * pv_box_at returns boxes[i] (i == a...
+- `pv_box_at` (function) `include/page_view.h:1246` `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
 
 ## include/pdf_export.h
 Imported by: `gui/browser_ui.c`, `src/download.c`, `src/pdf_export.c`, `tests/test_pdf_export.c`
@@ -361,12 +379,12 @@ Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/prefetch.c`, `tests/test_
 
 ## include/prefs.h
 Imported by: `gui/browser_ui.c`, `include/profile.h`, `include/ui.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
-- `prefs_init` (function) `include/prefs.h:65` `void prefs_init(prefs_state *p);` -- Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
-- `prefs_free` (function) `include/prefs.h:68` `void prefs_free(prefs_state *p);` -- Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
-- `free` (function) `include/prefs.h:71` `* free(). */ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len);`
-- `prefs_bookmark_index` (function) `include/prefs.h:81` `int prefs_bookmark_index(const prefs_state *p, const char *url);` -- Parses text[0..len) over an out ALREADY initialised with prefs_init.
-- `prefs_suggest` (function) `include/prefs.h:100` `int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows);` -- Omnibox autocomplete: up to max_rows distinct URLs matching query (case- insensitive) written to out (rows of...
-- `anyway` (function) `include/prefs.h:105` `* page is rendered by the normal confined pipeline anyway (defence in depth). * *out is owned (free());`
+- `prefs_init` (function) `include/prefs.h:66` `void prefs_init(prefs_state *p);` -- Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
+- `prefs_free` (function) `include/prefs.h:69` `void prefs_free(prefs_state *p);` -- Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
+- `free` (function) `include/prefs.h:72` `* free(). */ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len);`
+- `prefs_bookmark_index` (function) `include/prefs.h:82` `int prefs_bookmark_index(const prefs_state *p, const char *url);` -- Parses text[0..len) over an out ALREADY initialised with prefs_init.
+- `prefs_suggest` (function) `include/prefs.h:101` `int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows);` -- Omnibox autocomplete: up to max_rows distinct URLs matching query (case- insensitive) written to out (rows of...
+- `anyway` (function) `include/prefs.h:106` `* page is rendered by the normal confined pipeline anyway (defence in depth). * *out is owned (free());`
 
 ## include/profile.h
 Depends on: `include/local_store.h`, `include/prefs.h`
@@ -420,25 +438,26 @@ Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/re
 Depends on: `include/anti_fp.h`
 Imported by: `gui/browser_ui.c`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
 - `validators` (function) `include/secure_fetch.h:18` `* The security logic lives in pure validators (no I/O);`
-- `sf_global_init` (function) `include/secure_fetch.h:205` `void sf_global_init(void);` -- Initialises process-global transport state (libcurl/OpenSSL) once, from the main thread, before any concurrent...
-- `EXCLUDED` (function) `include/secure_fetch.h:211` `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
-- `sf_cookie_put` (function) `include/secure_fetch.h:218` `void sf_cookie_put(const char *url, const char *namevalue);` -- Injects a JS-set cookie ("name=value") into the shared jar, scoped to url's host, as if it arrived via Set-Cookie...
-- `sf_cookie_line_matches` (function) `include/secure_fetch.h:223` `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` -- Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecure\\t expiry\\tname\\tvalue"); if...
-- `sf_user_agent_or_default` (function) `include/secure_fetch.h:232` `const char *sf_user_agent_or_default(const char *ua);` -- Returns ua when it is a non-empty string, else SF_DEFAULT_USER_AGENT.
-- `sf_impersonate_kex_groups` (function) `include/secure_fetch.h:236` `const char *sf_impersonate_kex_groups(void);` -- The interim impersonation ClientHello strings (pure; single source of truth so the * shaping is unit-testable...
-- `sf_impersonate_tls13_ciphers` (function) `include/secure_fetch.h:237` `const char *sf_impersonate_tls13_ciphers(void);`
-- `skipped` (function) `include/secure_fetch.h:257` `* skipped (a classical key exchange is accepted);`
-- `sf_is_redirect_code` (function) `include/secure_fetch.h:268` `int sf_is_redirect_code(long http_code);` -- Enforces the full connection policy in order: TLS version, then KE group, then certificate chain.
-- `bits` (function) `include/secure_fetch.h:311` `* *flags receives CURLWS_* bits (text/binary/close/cont);`
-- `sf_ws_fd` (function) `include/secure_fetch.h:318` `int sf_ws_fd(const sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
-- `sf_ws_close` (function) `include/secure_fetch.h:321` `void sf_ws_close(sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
-- `connection` (function) `include/secure_fetch.h:325` `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
-- `sf_get` (function) `include/secure_fetch.h:334` `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
-- `sf_response_free` (function) `include/secure_fetch.h:345` `void sf_response_free(sf_response *resp);` -- Performs an HTTPS POST under the given policy, sending body (body_len bytes) with the given Content-Type.
-- `exhausted` (function) `include/secure_fetch.h:356` `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
-- `sf_rcache_put` (function) `include/secure_fetch.h:369` `int sf_rcache_put(const char *from, const char *to, time_t now);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
-- `sf_rcache_get` (function) `include/secure_fetch.h:370` `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
-- `sf_rcache_clear` (function) `include/secure_fetch.h:371` `void sf_rcache_clear(void);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
+- `sf_global_init` (function) `include/secure_fetch.h:206` `void sf_global_init(void);` -- Initialises process-global transport state (libcurl/OpenSSL) once, from the main thread, before any concurrent...
+- `EXCLUDED` (function) `include/secure_fetch.h:212` `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
+- `sf_cookie_put` (function) `include/secure_fetch.h:219` `void sf_cookie_put(const char *url, const char *namevalue);` -- Injects a JS-set cookie ("name=value") into the shared jar, scoped to url's host, as if it arrived via Set-Cookie...
+- `sf_cookie_line_matches` (function) `include/secure_fetch.h:224` `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` -- Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecure\\t expiry\\tname\\tvalue"); if...
+- `sf_user_agent_or_default` (function) `include/secure_fetch.h:233` `const char *sf_user_agent_or_default(const char *ua);` -- Returns ua when it is a non-empty string, else SF_DEFAULT_USER_AGENT.
+- `sf_accept_language_or_default` (function) `include/secure_fetch.h:237` `const char *sf_accept_language_or_default(const char *lang);` -- As sf_user_agent_or_default for Accept-Language.
+- `sf_impersonate_kex_groups` (function) `include/secure_fetch.h:241` `const char *sf_impersonate_kex_groups(void);` -- The interim impersonation ClientHello strings (pure; single source of truth so the * shaping is unit-testable...
+- `sf_impersonate_tls13_ciphers` (function) `include/secure_fetch.h:242` `const char *sf_impersonate_tls13_ciphers(void);`
+- `skipped` (function) `include/secure_fetch.h:262` `* skipped (a classical key exchange is accepted);`
+- `sf_is_redirect_code` (function) `include/secure_fetch.h:273` `int sf_is_redirect_code(long http_code);` -- Enforces the full connection policy in order: TLS version, then KE group, then certificate chain.
+- `bits` (function) `include/secure_fetch.h:316` `* *flags receives CURLWS_* bits (text/binary/close/cont);`
+- `sf_ws_fd` (function) `include/secure_fetch.h:323` `int sf_ws_fd(const sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
+- `sf_ws_close` (function) `include/secure_fetch.h:326` `void sf_ws_close(sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
+- `connection` (function) `include/secure_fetch.h:330` `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
+- `sf_get` (function) `include/secure_fetch.h:339` `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
+- `sf_response_free` (function) `include/secure_fetch.h:350` `void sf_response_free(sf_response *resp);` -- Performs an HTTPS POST under the given policy, sending body (body_len bytes) with the given Content-Type.
+- `exhausted` (function) `include/secure_fetch.h:361` `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
+- `sf_rcache_put` (function) `include/secure_fetch.h:374` `int sf_rcache_put(const char *from, const char *to, time_t now);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
+- `sf_rcache_get` (function) `include/secure_fetch.h:375` `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
+- `sf_rcache_clear` (function) `include/secure_fetch.h:376` `void sf_rcache_clear(void);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
 
 ## include/svg_paint.h
 Depends on: `include/svg_render.h`
@@ -448,46 +467,6 @@ Imported by: `gui/browser_ui.c`, `gui/svg_paint.c`
 ## include/svg_render.h
 Imported by: `gui/browser_ui.c`, `include/svg_paint.h`, `src/page_view.c`, `src/svg_render.c`, `tests/test_svg_render.c`
 - `sv_fit` (function) `include/svg_render.h:131` `void sv_fit(const sv_image *img, double dw, double dh, double *scale, double *off_x, double *off_y);` -- Maps the image's user space onto the destination rect [dx, dy, dw, dh] the way a `preserveAspectRatio="xMidYMid...
-
-## include/tab.h
-Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
-Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tab.c`, `tests/test_tab.c`
-- `tab_worker_dispatch` (function) `include/tab.h:152` `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
-- `tab_open` (function) `include/tab.h:156` `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
-- `tab_parse_worker_args` (function) `include/tab.h:163` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` -- Pure validator of the worker handoff arguments (the security-relevant surface of the exec): returns nonzero and...
-- `out_status` (function) `include/tab.h:175` `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
-- `tab_set_fetcher` (function) `include/tab.h:186` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` -- Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests are then * refused). fn/ctx must...
-- `bytes` (function) `include/tab.h:190` `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
-- `tab_set_css_sink` (function) `include/tab.h:199` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
-- `tab_set_net_allowed` (function) `include/tab.h:204` `void tab_set_net_allowed(tab *t, int allowed);` -- Grants/revokes page-JS network access (XMLHttpRequest/fetch) for the NEXT load.
-- `jar` (function) `include/tab.h:207` `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
-- `tab_set_cookies` (function) `include/tab.h:211` `void tab_set_cookies(tab *t, const char *cookies);` -- Seeds the page's document.cookie jar for the NEXT load with cookies ("name=value; ...") the trusted parent read from...
-- `origin` (function) `include/tab.h:214` `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
-- `tab_set_storage` (function) `include/tab.h:216` `void tab_set_storage(tab *t, const char *blob, size_t len);` -- Seeds localStorage for the next load from the parent's in-memory store for the page origin (web_storage snapshot...
-- `exclusively` (function) `include/tab.h:222` `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
-- `tab_set_viewport_w` (function) `include/tab.h:230` `void tab_set_viewport_w(tab *t, int px);` -- Sets the render viewport width (px) used to evaluate @media width queries on the NEXT load, so a responsive page...
-- `tab_last_subreq_stats` (function) `include/tab.h:236` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` -- Subresources the parent served for the LAST load (the worker's TAG_SUBREQ: XHR, fetch, external scripts, ES...
-- `tab_subreq_permitted` (function) `include/tab.h:241` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` -- Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants for this load, never the worker's...
-- `view` (function) `include/tab.h:249` `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
-- `string` (function) `include/tab.h:269` `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
-- `granted` (function) `include/tab.h:318` `* granted (allow.conf AND js.conf);`
-- `returned` (function) `include/tab.h:319` `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
-- `popstate` (function) `include/tab.h:325` `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
-- `decode` (function) `include/tab.h:344` `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
-- `tab_alive` (function) `include/tab.h:357` `int tab_alive(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
-- `tab_child_pid` (function) `include/tab.h:360` `pid_t tab_child_pid(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
-- `tab_close` (function) `include/tab.h:363` `void tab_close(tab *t);` -- variant): data_url slices the base64 payload out of `data_url` (no allocation, no network -- the bytes are already...
-- `tab_page_free` (function) `include/tab.h:366` `void tab_page_free(tab_page *p);` -- malformed data: URI is not a transport error: *out stays zeroed, same as an * undecodable format, and the caller...
-- `tab_eval_result_free` (function) `include/tab.h:367` `void tab_eval_result_free(tab_eval_result *r);`
-- `tab_image_free` (function) `include/tab.h:368` `void tab_image_free(tab_image *img);`
-
-## include/text_case.h
-Imported by: `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`
-- `cp` (function) `include/text_case.h:19` `* cp (identity otherwise), so a transformed text keeps its length. */ uint32_t tc_upper(uint32_t cp);`
-- `tc_lower` (function) `include/text_case.h:21` `uint32_t tc_lower(uint32_t cp);`
-- `tc_is_lower` (function) `include/text_case.h:24` `int tc_is_lower(uint32_t cp);` -- Simple 1:1 case mapping for ASCII, Latin-1, Latin Extended-A, basic Greek and basic Cyrillic.
-- `tc_transform` (function) `include/text_case.h:29` `size_t tc_transform(const char *s, size_t n, int transform, int word_start, char *out, size_t cap);` -- Copies s[0,n) to out applying transform (CSS_TT_UPPERCASE / _LOWERCASE / _CAPITALIZE; any other value copies...
-- `tc_smallcaps_runs` (function) `include/text_case.h:41` `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap);` -- Splits s[0,n) into consecutive maximal runs of lowercase letters vs the rest, covering the whole text in order.
 
 
 Next: [API_p5.md](API_p5.md)

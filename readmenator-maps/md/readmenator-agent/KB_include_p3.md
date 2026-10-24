@@ -1,6 +1,57 @@
 # Subsystem: include (page 3 of 5)
 Previous: [KB_include_p2.md](KB_include_p2.md)
 
+## include/identity.h
+- Doc: idn_defaults: enum { IDN_REJ_UA   = 1 << 0, IDN_REJ_LANG = 1 << 1, IDN_REJ_GEO  = 1 << 2 }...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `idn_config` (struct, line 37)
+  - `idn_geo_mode` (enum, line 25)
+  - `user_agent` (type_alias, line 36) `typedef struct idn_config { char user_agent[IDN_UA_MAX];`
+  - `idn_defaults` (function, line 45) `void idn_defaults(idn_config *c);`
+  - `idn_is_default` (function, line 48) `int idn_is_default(const idn_config *c);`
+  - `idn_set_user_agent` (function, line 51) `int idn_set_user_agent(idn_config *c, const char *ua);`
+  - `idn_set_languages` (function, line 52) `int idn_set_languages(idn_config *c, const char *list);`
+  - `idn_set_geo` (function, line 53) `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);`
+  - `idn_clear_geo` (function, line 54) `void idn_clear_geo(idn_config *c);`
+  - `idn_user_agent` (function, line 57) `const char *idn_user_agent(const idn_config *c);`
+  - `idn_accept_language` (function, line 58) `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);`
+  - `idn_primary_language` (function, line 59) `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);`
+  - `idn_serialize` (function, line 63) `size_t idn_serialize(const idn_config *c, char *out, size_t cap);`
+  - `idn_parse` (function, line 67) `void idn_parse(idn_config *c, const char *text);`
+  - `idn_apply_query` (function, line 70) `unsigned idn_apply_query(idn_config *c, const char *query);`
+  - `idn_render_page` (function, line 73) `size_t idn_render_page(const idn_config *c, char *out, size_t cap);`
+  - `FREEDOM_IDENTITY_H` (macro, line 2) `#define FREEDOM_IDENTITY_H`
+  - `IDN_UA_MAX` (macro, line 16) `#define IDN_UA_MAX`
+  - `IDN_LANG_MAX` (macro, line 17) `#define IDN_LANG_MAX`
+  - `IDN_LANG_TAGS_MAX` (macro, line 18) `#define IDN_LANG_TAGS_MAX`
+  - `IDN_SERIAL_MAX` (macro, line 19) `#define IDN_SERIAL_MAX`
+  - `IDN_PAGE_MAX` (macro, line 20) `#define IDN_PAGE_MAX`
+  - `IDN_GEO_ACC_MIN` (macro, line 22) `#define IDN_GEO_ACC_MIN`
+  - `IDN_GEO_ACC_MAX` (macro, line 23) `#define IDN_GEO_ACC_MAX`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/identity.c`, `src/tab.c`, `tests/test_identity.c`
+
+## include/image_decode.h
+- Doc: img_pixels: A decoded bitmap that owns its pixel buffer.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `img_pixels` (struct, line 56)
+  - `img_format` (enum, line 33)
+  - `img_status` (enum, line 41)
+  - `width` (type_alias, line 56) `typedef struct img_pixels { uint32_t width;`
+  - `guards` (function, line 25) `* guards (in-memory source only, longjmp error manager so a bad stream never * calls exit(), dimension caps before...`
+  - `img_dimensions_ok` (function, line 78) `int img_dimensions_ok(uint32_t w, uint32_t h);`
+  - `inputs` (function, line 81) `* Degenerate inputs (<= 0) yield (0,0). Pure. */ void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h...`
+  - `decode` (function, line 92) `* the declared dimensions BEFORE the full decode (anti-bomb), decodes to RGB and * expands to BGRA. Rejects non-JPEG...`
+  - `img_pixels_free` (function, line 121) `void img_pixels_free(img_pixels *p);`
+  - `img_format_name` (function, line 124) `const char *img_format_name(img_format f);`
+  - `FREEDOM_IMAGE_DECODE_H` (macro, line 2) `#define FREEDOM_IMAGE_DECODE_H`
+  - `IMG_MAX_DIM` (macro, line 65) `#define IMG_MAX_DIM`
+  - `IMG_MAX_PIXELS` (macro, line 66) `#define IMG_MAX_PIXELS`
+- Imported by: `gui/browser_ui.c`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
+
 ## include/import_map.h
 - Doc: im_resolve: Resolves specifier as imported from base (the importing module's URL).
 - Layer: utility
@@ -59,19 +110,22 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `processed` (type_alias, line 41) `typedef struct jd_iframe_track { dom_node_id processed[JD_IFRAME_TRACK_MAX];`
   - `opaque` (function, line 66) `* the engine runtime opaque (unreachable from script);`
   - `global` (function, line 73) `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...`
-  - `getComputedStyle` (function, line 87) `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...`
-  - `jd_click_state_free` (function, line 97) `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);`
-  - `run` (function, line 106) `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...`
-  - `preventDefault` (function, line 113) `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...`
-  - `host` (function, line 142) `* for a trusted host (allow.conf AND js.conf);`
-  - `jd_get_cookies` (function, line 153) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);`
-  - `out_status` (function, line 161) `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
-  - `jd_process_iframes` (function, line 182) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
-  - `URLs` (function, line 189) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
-  - `jd_video_from_scripts` (function, line 203) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
-  - `jd_flush_custom_elements` (function, line 214) `void jd_flush_custom_elements(js_context *ctx);`
+  - `jd_install_repl_api` (function, line 82) `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...`
+  - `place` (function, line 87) `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...`
+  - `getComputedStyle` (function, line 108) `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...`
+  - `jd_click_state_free` (function, line 118) `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);`
+  - `run` (function, line 127) `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...`
+  - `preventDefault` (function, line 134) `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...`
+  - `host` (function, line 163) `* for a trusted host (allow.conf AND js.conf);`
+  - `jd_get_cookies` (function, line 174) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);`
+  - `out_status` (function, line 182) `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
+  - `jd_process_iframes` (function, line 203) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
+  - `URLs` (function, line 210) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
+  - `jd_video_from_scripts` (function, line 224) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
+  - `jd_flush_custom_elements` (function, line 235) `void jd_flush_custom_elements(js_context *ctx);`
   - `FREEDOM_JS_DOM_H` (macro, line 2) `#define FREEDOM_JS_DOM_H`
   - `JD_IFRAME_TRACK_MAX` (macro, line 40) `#define JD_IFRAME_TRACK_MAX`
+  - `JD_REPL_CSS_MAX` (macro, line 79) `#define JD_REPL_CSS_MAX`
 - Depends on: `include/dom.h`, `include/freebug.h`, `include/js_geom.h`, `include/js_location.h`, `include/js_sandbox.h`, `include/url.h`
 - Imported by: `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`
 
@@ -80,7 +134,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
 - Language: h
 - Symbols:
   - `je_status` (enum, line 27)
-  - `poisoned` (function, line 43) `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...`
+  - `poisoned` (function, line 49) `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...`
   - `FREEDOM_JS_ENV_H` (macro, line 2) `#define FREEDOM_JS_ENV_H`
 - Depends on: `include/js_sandbox.h`
 - Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`
@@ -294,78 +348,78 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
 - Symbols:
   - `pv_run` (struct, line 121)
   - `pv_box_def` (struct, line 455)
-  - `pv_cont_def` (struct, line 783)
-  - `pv_view` (struct, line 833)
-  - `pv_text_ext` (struct, line 1023)
+  - `pv_cont_def` (struct, line 784)
+  - `pv_view` (struct, line 834)
+  - `pv_text_ext` (struct, line 1024)
   - `pv_status` (enum, line 34)
   - `pv_kind` (enum, line 71)
   - `pv_input_type` (enum, line 87)
   - `pv_form_method` (enum, line 107)
   - `kind` (type_alias, line 121) `typedef struct pv_run { pv_kind kind;`
   - `parent_id` (type_alias, line 455) `typedef struct pv_box_def { int parent_id;`
-  - `parent_id` (type_alias, line 783) `typedef struct pv_cont_def { int parent_id;`
-  - `pv_computed` (type_alias, line 905) `typedef struct pv_computed pv_computed;`
-  - `word_spacing` (type_alias, line 1023) `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;`
+  - `parent_id` (type_alias, line 784) `typedef struct pv_cont_def { int parent_id;`
+  - `pv_computed` (type_alias, line 906) `typedef struct pv_computed pv_computed;`
+  - `word_spacing` (type_alias, line 1024) `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;`
   - `container` (function, line 228) `* cont_id groups runs of one container (-1 = none);`
   - `bx_display` (function, line 229) `* bx_display (flex/grid);`
   - `order` (function, line 293) `* groups the runs of ONE floated element in document order (-1 = not in a float);`
   - `itself` (function, line 357) `* by itself (bx_width_cap2);`
-  - `CSS_LEN_UNSET` (function, line 552) `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
-  - `scale` (function, line 627) `* scale(1)) and rotate in whole degrees (transform_rotate);`
-  - `tree` (function, line 668) `* box tree (a mask covers its whole subtree);`
-  - `declare` (function, line 857) `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
-  - `nonzero` (function, line 869) `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
-  - `resolved` (function, line 876) `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
-  - `policy` (function, line 884) `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
-  - `pv_computed_new` (function, line 906) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
-  - `pv_computed_get` (function, line 913) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);`
-  - `pv_computed_free` (function, line 916) `void pv_computed_free(pv_computed *pc);`
-  - `cause` (function, line 920) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
-  - `pv_new` (function, line 932) `pv_view *pv_new(void);`
-  - `form` (function, line 951) `* form (-1 if none);`
-  - `pv_set_emphasis` (function, line 983) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
-  - `default` (function, line 988) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
-  - `pv_set_color` (function, line 991) `void pv_set_color(pv_view *v, int fg_rgb);`
-  - `pv_set_bgcolor` (function, line 998) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
-  - `pv_set_text_style` (function, line 1007) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
-  - `pv_text_ext_reset` (function, line 1062) `void pv_text_ext_reset(pv_text_ext *e);`
-  - `ancestors` (function, line 1067) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
-  - `pv_set_text_ext` (function, line 1077) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
-  - `pv_set_grad_text` (function, line 1083) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
-  - `run` (function, line 1086) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
-  - `pv_set_row_span` (function, line 1099) `void pv_set_row_span(pv_view *v, int row_span);`
-  - `pv_set_grid_area` (function, line 1103) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
-  - `pv_set_grid_rows` (function, line 1104) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
-  - `pv_set_ua_tag` (function, line 1109) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
-  - `pv_set_cont_box` (function, line 1113) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
-  - `pv_set_grid` (function, line 1114) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
-  - `pv_set_flex` (function, line 1122) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...`
-  - `pv_set_flex_mauto` (function, line 1125) `void pv_set_flex_mauto(pv_view *v, int mauto);`
-  - `pv_set_cont_item` (function, line 1129) `void pv_set_cont_item(pv_view *v, int cont_item);`
-  - `pv_set_float_w` (function, line 1140) `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...`
-  - `pv_set_float` (function, line 1143) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
-  - `pv_set_box` (function, line 1153) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
-  - `pv_set_box_pct` (function, line 1159) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
-  - `pv_set_box_maxw` (function, line 1164) `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);`
-  - `pv_set_node_id` (function, line 1169) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
-  - `pv_set_block_id` (function, line 1174) `void pv_set_block_id(pv_view *v, int block_id);`
-  - `pv_set_own_box` (function, line 1178) `void pv_set_own_box(pv_view *v, int box_id);`
-  - `pv_set_oof` (function, line 1182) `void pv_set_oof(pv_view *v, int oof);`
-  - `pv_set_justify_self` (function, line 1185) `void pv_set_justify_self(pv_view *v, int justify_self);`
-  - `pv_set_block_node` (function, line 1188) `void pv_set_block_node(pv_view *v, dom_node_id id);`
-  - `pv_set_br_line` (function, line 1196) `void pv_set_br_line(pv_view *v, int br_line);`
-  - `pv_cont_count` (function, line 1211) `size_t pv_cont_count(const pv_view *v);`
-  - `pv_cont_at` (function, line 1212) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
-  - `pv_set_input_checked` (function, line 1216) `void pv_set_input_checked(pv_view *v, int checked);`
-  - `pv_set_input_placeholder` (function, line 1220) `void pv_set_input_placeholder(pv_view *v, int ph_color);`
-  - `pv_svg_append_root_attrs` (function, line 1226) `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);`
-  - `pv_placeholder_color` (function, line 1229) `int pv_placeholder_color(const css_style *ph);`
-  - `pv_set_input_select_opts` (function, line 1233) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
-  - `pv_free` (function, line 1236) `void pv_free(pv_view *v);`
-  - `pv_count` (function, line 1239) `size_t pv_count(const pv_view *v);`
-  - `pv_at` (function, line 1240) `const pv_run *pv_at(const pv_view *v, size_t i);`
-  - `pv_box_count` (function, line 1244) `size_t pv_box_count(const pv_view *v);`
-  - `pv_box_at` (function, line 1245) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
+  - `CSS_LEN_UNSET` (function, line 553) `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
+  - `scale` (function, line 628) `* scale(1)) and rotate in whole degrees (transform_rotate);`
+  - `tree` (function, line 669) `* box tree (a mask covers its whole subtree);`
+  - `declare` (function, line 858) `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
+  - `nonzero` (function, line 870) `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
+  - `resolved` (function, line 877) `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
+  - `policy` (function, line 885) `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
+  - `pv_computed_new` (function, line 907) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
+  - `pv_computed_get` (function, line 914) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);`
+  - `pv_computed_free` (function, line 917) `void pv_computed_free(pv_computed *pc);`
+  - `cause` (function, line 921) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
+  - `pv_new` (function, line 933) `pv_view *pv_new(void);`
+  - `form` (function, line 952) `* form (-1 if none);`
+  - `pv_set_emphasis` (function, line 984) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
+  - `default` (function, line 989) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
+  - `pv_set_color` (function, line 992) `void pv_set_color(pv_view *v, int fg_rgb);`
+  - `pv_set_bgcolor` (function, line 999) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
+  - `pv_set_text_style` (function, line 1008) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
+  - `pv_text_ext_reset` (function, line 1063) `void pv_text_ext_reset(pv_text_ext *e);`
+  - `ancestors` (function, line 1068) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
+  - `pv_set_text_ext` (function, line 1078) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
+  - `pv_set_grad_text` (function, line 1084) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
+  - `run` (function, line 1087) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
+  - `pv_set_row_span` (function, line 1100) `void pv_set_row_span(pv_view *v, int row_span);`
+  - `pv_set_grid_area` (function, line 1104) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
+  - `pv_set_grid_rows` (function, line 1105) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
+  - `pv_set_ua_tag` (function, line 1110) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
+  - `pv_set_cont_box` (function, line 1114) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
+  - `pv_set_grid` (function, line 1115) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
+  - `pv_set_flex` (function, line 1123) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...`
+  - `pv_set_flex_mauto` (function, line 1126) `void pv_set_flex_mauto(pv_view *v, int mauto);`
+  - `pv_set_cont_item` (function, line 1130) `void pv_set_cont_item(pv_view *v, int cont_item);`
+  - `pv_set_float_w` (function, line 1141) `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...`
+  - `pv_set_float` (function, line 1144) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
+  - `pv_set_box` (function, line 1154) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
+  - `pv_set_box_pct` (function, line 1160) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
+  - `pv_set_box_maxw` (function, line 1165) `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);`
+  - `pv_set_node_id` (function, line 1170) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
+  - `pv_set_block_id` (function, line 1175) `void pv_set_block_id(pv_view *v, int block_id);`
+  - `pv_set_own_box` (function, line 1179) `void pv_set_own_box(pv_view *v, int box_id);`
+  - `pv_set_oof` (function, line 1183) `void pv_set_oof(pv_view *v, int oof);`
+  - `pv_set_justify_self` (function, line 1186) `void pv_set_justify_self(pv_view *v, int justify_self);`
+  - `pv_set_block_node` (function, line 1189) `void pv_set_block_node(pv_view *v, dom_node_id id);`
+  - `pv_set_br_line` (function, line 1197) `void pv_set_br_line(pv_view *v, int br_line);`
+  - `pv_cont_count` (function, line 1212) `size_t pv_cont_count(const pv_view *v);`
+  - `pv_cont_at` (function, line 1213) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
+  - `pv_set_input_checked` (function, line 1217) `void pv_set_input_checked(pv_view *v, int checked);`
+  - `pv_set_input_placeholder` (function, line 1221) `void pv_set_input_placeholder(pv_view *v, int ph_color);`
+  - `pv_svg_append_root_attrs` (function, line 1227) `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);`
+  - `pv_placeholder_color` (function, line 1230) `int pv_placeholder_color(const css_style *ph);`
+  - `pv_set_input_select_opts` (function, line 1234) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
+  - `pv_free` (function, line 1237) `void pv_free(pv_view *v);`
+  - `pv_count` (function, line 1240) `size_t pv_count(const pv_view *v);`
+  - `pv_at` (function, line 1241) `const pv_run *pv_at(const pv_view *v, size_t i);`
+  - `pv_box_count` (function, line 1245) `size_t pv_box_count(const pv_view *v);`
+  - `pv_box_at` (function, line 1246) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
   - `FREEDOM_PAGE_VIEW_H` (macro, line 2) `#define FREEDOM_PAGE_VIEW_H`
   - `PV_BSHADOW_LAYERS` (macro, line 44) `#define PV_BSHADOW_LAYERS`
   - `PV_MAUTO_LEFT` (macro, line 46) `#define PV_MAUTO_LEFT`
@@ -378,11 +432,11 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `PV_GRID_TRACKS` (macro, line 58) `#define PV_GRID_TRACKS`
   - `PV_CONT_DEPTH` (macro, line 63) `#define PV_CONT_DEPTH`
   - `PV_BG_URL_MAX` (macro, line 69) `#define PV_BG_URL_MAX`
-  - `PV_UA_BODY_MARGIN` (macro, line 854) `#define PV_UA_BODY_MARGIN`
-  - `PV_BR_EMPTY` (macro, line 1191) `#define PV_BR_EMPTY`
-  - `PV_BR_CONT` (macro, line 1192) `#define PV_BR_CONT`
-  - `PV_PH_THEME` (macro, line 1217) `#define PV_PH_THEME`
-  - `PV_PH_HIDDEN` (macro, line 1218) `#define PV_PH_HIDDEN`
+  - `PV_UA_BODY_MARGIN` (macro, line 855) `#define PV_UA_BODY_MARGIN`
+  - `PV_BR_EMPTY` (macro, line 1192) `#define PV_BR_EMPTY`
+  - `PV_BR_CONT` (macro, line 1193) `#define PV_BR_CONT`
+  - `PV_PH_THEME` (macro, line 1218) `#define PV_PH_THEME`
+  - `PV_PH_HIDDEN` (macro, line 1219) `#define PV_PH_HIDDEN`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
@@ -426,66 +480,6 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FREEDOM_PERF_TRACE_H` (macro, line 2) `#define FREEDOM_PERF_TRACE_H`
   - `PT_MAX_SAMPLES` (macro, line 32) `#define PT_MAX_SAMPLES`
 - Imported by: `src/freedom.c`, `src/perf_trace.c`, `tests/test_perf_trace.c`
-
-## include/prefetch.h
-- Doc: pf_ref: One scanned reference. url is the RAW attribute value (the policy-gated fetcher *...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `pf_ref` (struct, line 42)
-  - `pf_list` (struct, line 53)
-  - `pf_job` (struct, line 80)
-  - `pf_pool` (struct, line 90)
-  - `pf_gated_fetch` (struct, line 159)
-  - `pf_kind` (enum, line 35)
-  - `pf_job_state` (enum, line 73)
-  - `kind` (type_alias, line 42) `typedef struct pf_ref { pf_kind kind;`
-  - `refs` (type_alias, line 52) `typedef struct pf_list { pf_ref refs[PF_MAX_REFS];`
-  - `jobs` (type_alias, line 89) `typedef struct pf_pool { pf_job jobs[PF_MAX_JOBS];`
-  - `inner` (type_alias, line 159) `typedef struct pf_gated_fetch { pf_fetch_fn inner;`
-  - `pf_scan` (function, line 62) `int pf_scan(const char *html, size_t len, pf_list *out);`
-  - `pf_list_free` (function, line 63) `void pf_list_free(pf_list *l);`
-  - `specifiers` (function, line 110) `* specifiers (each < PF_SPEC_MAX) into out[k] and returns how many. Pure. */ size_t pf_scan_imports(const char *js...`
-  - `pf_find_importmap` (function, line 115) `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n);`
-  - `started` (function, line 121) `* to fetch or no thread started (the caller fetches serially). */ int pf_pool_start_page(pf_pool *p, const char...`
-  - `pf_pool_add` (function, line 127) `int pf_pool_add(pf_pool *p, const char *url);`
-  - `fetch` (function, line 132) `* claiming jobs and running fetch(ctx, "GET", url, ...). Returns 0 on success or * -1 when no thread could start...`
-  - `pf_pool_take` (function, line 145) `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body, size_t *len, char **ctype);`
-  - `pf_pool_finish` (function, line 151) `void pf_pool_finish(pf_pool *p);`
-  - `pool` (function, line 155) `* whose URL is pooled is served from the pool (a failed prefetch propagates the * failure -- never refetched);`
-  - `pf_pooled_fetch` (function, line 165) `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int...`
-  - `FREEDOM_PREFETCH_H` (macro, line 2) `#define FREEDOM_PREFETCH_H`
-  - `PF_MAX_REFS` (macro, line 47) `#define PF_MAX_REFS`
-  - `PF_MAX_THREADS` (macro, line 48) `#define PF_MAX_THREADS`
-  - `PF_MAX_JOBS` (macro, line 49) `#define PF_MAX_JOBS`
-  - `PF_MAX_IMPORTS` (macro, line 50) `#define PF_MAX_IMPORTS`
-  - `PF_SPEC_MAX` (macro, line 51) `#define PF_SPEC_MAX`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/prefetch.c`, `tests/test_prefetch.c`
-
-## include/prefs.h
-- Doc: prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, *...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `prefs_entry` (struct, line 45)
-  - `prefs_state` (struct, line 50)
-  - `prefs_status` (enum, line 36)
-  - `theme_mode` (type_alias, line 49) `typedef struct prefs_state { int theme_mode;`
-  - `prefs_init` (function, line 65) `void prefs_init(prefs_state *p);`
-  - `prefs_free` (function, line 68) `void prefs_free(prefs_state *p);`
-  - `free` (function, line 71) `* free(). */ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len);`
-  - `prefs_bookmark_index` (function, line 81) `int prefs_bookmark_index(const prefs_state *p, const char *url);`
-  - `prefs_suggest` (function, line 100) `int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows);`
-  - `anyway` (function, line 105) `* page is rendered by the normal confined pipeline anyway (defence in depth). * *out is owned (free());`
-  - `FREEDOM_PREFS_H` (macro, line 2) `#define FREEDOM_PREFS_H`
-  - `PREFS_VERSION` (macro, line 26) `#define PREFS_VERSION`
-  - `PREFS_MAX_URL` (macro, line 27) `#define PREFS_MAX_URL`
-  - `PREFS_MAX_TITLE` (macro, line 28) `#define PREFS_MAX_TITLE`
-  - `PREFS_MAX_BOOKMARKS` (macro, line 29) `#define PREFS_MAX_BOOKMARKS`
-  - `PREFS_MAX_HISTORY` (macro, line 30) `#define PREFS_MAX_HISTORY`
-  - `PREFS_MAX_TEXT` (macro, line 31) `#define PREFS_MAX_TEXT`
-  - `PREFS_PAGE_HISTORY` (macro, line 34) `#define PREFS_PAGE_HISTORY`
-- Imported by: `gui/browser_ui.c`, `include/profile.h`, `include/ui.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
 
 
 Next: [KB_include_p4.md](KB_include_p4.md)

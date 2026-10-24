@@ -98,7 +98,7 @@ void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)
 
 ### `cm_expand`
 
-`function` | [src/css_mask.c:181](../../src/css_mask.c#L181)
+`function` | [src/css_mask.c:197](../../src/css_mask.c#L197)
 
 ```c
 int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)

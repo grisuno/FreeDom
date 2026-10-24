@@ -433,6 +433,92 @@ static void test_download_png_svg_in_button_stays_in_its_box(void **state) {
     unlink(png);
 }
 
+/* overflow:hidden clips at the PADDING box (CSS Overflow 3 2.2): an absolutely positioned overlay
+ * with left:0;top:0;width:100% inside a padded `overflow:hidden` section reaches the section's own
+ * edge, not just its content box (the GitLab "mask" panels, tanda 61). */
+static void test_download_png_overflow_clips_at_padding_box(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;background:#fff}"
+        ".s{position:relative;overflow:hidden;padding:60px 50px;background:#fff}"
+        ".m{position:absolute;left:0;top:0;width:100%;height:80px;background:#00ff00}"
+        ".c{position:relative;z-index:1;height:40px;background:#fff}"
+        "</style></head><body><div class=\"s\"><div class=\"m\"></div><div class=\"c\"></div></div>"
+        "<div style=\"height:900px\"></div></body></html>";
+    const char *path = "__freedom_ovpad.html";
+    const char *png = "__freedom_ovpad.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args, "--author-css --download-png=%s %s", png, path)
+                < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    FILE *pf = fopen(png, "rb");
+    assert_non_null(pf);
+    static unsigned char buf[1 << 20];
+    size_t n = fread(buf, 1, sizeof buf, pf);
+    fclose(pf);
+    img_pixels px = {0};
+    assert_int_equal(img_decode(buf, n, &px), IMG_OK);
+    /* y=10 is inside the 60px top padding: the overlay is visible there, from x=0 to the right edge */
+    const uint32_t *line = (const uint32_t *)(px.data + (size_t)10 * px.stride);
+    assert_int_equal(line[5] & 0xFFFFFFu, 0x00ff00u);
+    assert_int_equal(line[px.width - 5] & 0xFFFFFFu, 0x00ff00u);
+    img_pixels_free(&px);
+    unlink(path);
+    unlink(png);
+}
+
+/* background-clip:content-box|padding-box limits where the background paints (CSS Backgrounds 3 3.7):
+ * a padded box with content-box shows NO colour in its padding, padding-box none under its border.
+ * (GitLab's "pixel mask" band is exactly this, tanda 61.) */
+static void test_download_png_background_clip_content_and_padding_box(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;background:#fff}"
+        ".a{padding:50px 0;background:#00ff00;background-clip:content-box}"
+        ".b{margin-top:20px;border:10px solid #000;padding:30px 0;background:#ff0000;background-clip:padding-box}"
+        ".i{height:40px}</style></head><body>"
+        "<div class=\"a\"><div class=\"i\"></div></div><div class=\"b\"><div class=\"i\"></div></div>"
+        "<div style=\"height:900px\"></div></body></html>";
+    const char *path = "__freedom_bgclip.html";
+    const char *png = "__freedom_bgclip.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args, "--author-css --download-png=%s %s", png, path)
+                < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    FILE *pf = fopen(png, "rb");
+    assert_non_null(pf);
+    static unsigned char buf[1 << 20];
+    size_t n = fread(buf, 1, sizeof buf, pf);
+    fclose(pf);
+    img_pixels px = {0};
+    assert_int_equal(img_decode(buf, n, &px), IMG_OK);
+#define PIXEL(yy, xx) (((const uint32_t *)(px.data + (size_t)(yy) * px.stride))[xx] & 0xFFFFFFu)
+    assert_int_equal(PIXEL(20, 100), 0xffffffu);      /* .a padding: not painted (content-box) */
+    assert_int_equal(PIXEL(70, 100), 0x00ff00u);      /* .a content area */
+    assert_int_equal(PIXEL(120, 100), 0xffffffu);     /* .a bottom padding */
+    /* .b: .a is 140px tall, +20px margin: the 10px border spans y=160..169, then the padding area */
+    assert_int_equal(PIXEL(165, 100), 0x000000u);     /* border: padding-box paint stops at its inner edge */
+    assert_int_equal(PIXEL(180, 100), 0xff0000u);     /* padding area IS painted for padding-box */
+#undef PIXEL
+    img_pixels_free(&px);
+    unlink(path);
+    unlink(png);
+}
+
 /* A negative-z generated box paints inside its OWN stacking context, just above that
  * context's background -- not under the whole page. `section{clip-path:inset(0)}` forms a
  * context (CSS Masking 1 3), so the red ::before at z-index:-2 shows over the section's navy
@@ -4189,6 +4275,8 @@ int main(void) {
         cmocka_unit_test(test_headless_js_measures_real_geometry),
         cmocka_unit_test(test_headless_intersection_observer_reveals_visible_only),
         cmocka_unit_test(test_download_png_svg_in_button_stays_in_its_box),
+        cmocka_unit_test(test_download_png_overflow_clips_at_padding_box),
+        cmocka_unit_test(test_download_png_background_clip_content_and_padding_box),
         cmocka_unit_test(test_headless_timer_navigation_followed),
         cmocka_unit_test(test_local_form_renders_inputs),
         cmocka_unit_test(test_missing_file),

@@ -75,6 +75,27 @@ jd_status jd_install_console(js_context *ctx, fb_buffer *log);
  * spec/freebug_repl.md. */
 jd_status jd_install_repl_api(js_context *ctx);
 
+/* Longest external-CSS text handed to rules(): anything beyond is cut, never an error. */
+#define JD_REPL_CSS_MAX ((size_t)(4u * 1024u * 1024u))
+
+/* Hands the parent's fetched stylesheet text to the REPL's rules(el). Call it right before
+ * jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never
+ * sees it). css == NULL clears. ctx == NULL => JD_ERR_NULL_ARG. */
+jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len);
+
+/* Installs navigator.geolocation answering with exactly (lat, lon, accuracy_m): the user's
+ * configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host
+ * with geolocation set to fixed. Out-of-range or non-finite values are refused with
+ * JD_ERR_INTERNAL and nothing is installed. The numbers cross as values, never as source text.
+ * ctx == NULL => JD_ERR_NULL_ARG. */
+/* Installs indexedDB (+ IDBKeyRange and friends) over memory that lives as long as the page:
+ * stores, indexes, cursors, key ranges and rollback-capable transactions. Call it ONLY for a
+ * trusted host (allow.conf AND js.conf); an untrusted page keeps `indexedDB` undefined. Nothing
+ * is written to disk. ctx == NULL => JD_ERR_NULL_ARG. */
+jd_status jd_install_indexeddb(js_context *ctx);
+
+jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m);
+
 /* Installs (or, with geom == NULL, removes) the laid-out geometry that
  * getBoundingClientRect/offset/client/scroll and the real viewport read. The table
  * must be finished and aggregated (jg_aggregate) and must outlive its installation;

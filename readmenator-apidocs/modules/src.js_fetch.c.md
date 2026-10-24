@@ -38,7 +38,7 @@ flowchart LR
 
 ### `task`
 
-`function` | [src/js_fetch.c:187](../../src/js_fetch.c#L187)
+`function` | [src/js_fetch.c:188](../../src/js_fetch.c#L188)
 
 ```c
 * current task (the page never waits on it);
@@ -58,7 +58,7 @@ flowchart LR
 
 ### `jd_install_xhr`
 
-`function` | [src/js_fetch.c:211](../../src/js_fetch.c#L211)
+`function` | [src/js_fetch.c:212](../../src/js_fetch.c#L212)
 
 ```c
 jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)

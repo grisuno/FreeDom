@@ -634,6 +634,8 @@ browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t n
 
 **Returns:** `browser_status`
 
+*Called by:* [`arrives`](gui.browser_ui.c.md#arrives)
+
 ---
 
 <a id="browser_status_text"></a>

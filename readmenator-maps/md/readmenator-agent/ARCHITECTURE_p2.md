@@ -2,6 +2,13 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
+- `tests/test_svg_render.c` -> `include/svg_render.h`
+- `tests/test_tab.c` -> `include/css.h`
+- `tests/test_tab.c` -> `include/js_geom.h`
+- `tests/test_tab.c` -> `include/tab.h`
+- `tests/test_tab.c` -> `include/url.h`
+- `tests/test_tab.c` -> `include/web_storage.h`
 - `tests/test_text_case.c` -> `include/css.h`
 - `tests/test_text_case.c` -> `include/text_case.h`
 - `tests/test_text_shape.c` -> `include/css.h`
@@ -58,6 +65,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/hostblock.h` -> stddef.h
 - `include/hostedit.h` -> stddef.h
 - `include/html_parse.h` -> stddef.h, stdint.h
+- `include/identity.h` -> stddef.h
 - `include/image_decode.h` -> stddef.h, stdint.h
 - `include/import_map.h` -> stddef.h
 - `include/interp.h` -> stdint.h
@@ -132,11 +140,13 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/hostblock.c` -> stdint.h, stdlib.h, string.h
 - `src/hostedit.c` -> string.h
 - `src/html_parse.c` -> lexbor/html/html.h, lexbor/tag/const.h, stdlib.h, string.h
+- `src/identity.c` -> math.h, stdarg.h, stdio.h, stdlib.h, string.h
 - `src/image_decode.c` -> jpeglib.h, png.h, setjmp.h, stdlib.h, string.h, webp/decode.h
 - `src/import_map.c` -> stdint.h, stdlib.h, string.h
 - `src/interp.c` -> float.h, math.h
 - `src/js_custom_elements.h` -> quickjs.h
 - `src/js_dom.c` -> quickjs.h, stdint.h, stdlib.h, string.h
+- `src/js_dom_ext.c` -> math.h
 - `src/js_dom_ext.h` -> quickjs.h
 - `src/js_dom_internal.h` -> quickjs.h
 - `src/js_embed.c` -> quickjs.h, stdint.h, stdio.h, stdlib.h, string.h
@@ -213,6 +223,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_hostblock.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_hostedit.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_html_parse.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_identity.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_image_decode.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_import_map.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
 - `tests/test_interp.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h

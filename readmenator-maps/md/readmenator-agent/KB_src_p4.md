@@ -108,62 +108,63 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `hl_font_stash` (struct, line 582)
-  - `print_usage` (function, line 52) `static void print_usage(FILE *fp, const char *prog)`
-  - `is_https_url` (function, line 80) `static int is_https_url(const char *s)`
-  - `is_http_url` (function, line 84) `static int is_http_url(const char *s)`
-  - `is_overlay_http` (function, line 89) `static int is_overlay_http(const char *s)`
-  - `now_us` (function, line 144) `static uint64_t now_us(void)`
-  - `timings_ensure_init` (function, line 150) `static void timings_ensure_init(void)`
-  - `timings_enabled` (function, line 154) `static int timings_enabled(void)`
-  - `timings_dump` (function, line 158) `static void timings_dump(void)`
-  - `user_impersonate_enabled` (function, line 213) `static int user_impersonate_enabled(void)`
-  - `read_file` (function, line 220) `static char *read_file(const char *path, size_t *out_len)`
-  - `headless_load_hosts` (function, line 238) `static void headless_load_hosts(void)`
-  - `apply_as_gui` (function, line 249) `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)`
-  - `is_blank_text` (function, line 282) `static int is_blank_text(const char *s)`
-  - `print_doc` (function, line 295) `static void print_doc(const rd_doc *doc)`
-  - `print_console` (function, line 388) `static void print_console(const fb_buffer *log)`
-  - `print_dom` (function, line 405) `static void print_dom(const rd_doc *doc)`
-  - `print_dom_css` (function, line 420) `static void print_dom_css(const rd_doc *doc)`
-  - `headless_fetch` (function, line 444) `static int headless_fetch(void *ctx, const char *method, const char *url,
+  - `hl_font_stash` (struct, line 600)
+  - `print_usage` (function, line 53) `static void print_usage(FILE *fp, const char *prog)`
+  - `is_https_url` (function, line 81) `static int is_https_url(const char *s)`
+  - `is_http_url` (function, line 85) `static int is_http_url(const char *s)`
+  - `is_overlay_http` (function, line 90) `static int is_overlay_http(const char *s)`
+  - `now_us` (function, line 145) `static uint64_t now_us(void)`
+  - `timings_ensure_init` (function, line 151) `static void timings_ensure_init(void)`
+  - `timings_enabled` (function, line 155) `static int timings_enabled(void)`
+  - `timings_dump` (function, line 159) `static void timings_dump(void)`
+  - `user_impersonate_enabled` (function, line 214) `static int user_impersonate_enabled(void)`
+  - `read_file` (function, line 221) `static char *read_file(const char *path, size_t *out_len)`
+  - `headless_load_hosts` (function, line 239) `static void headless_load_hosts(void)`
+  - `apply_identity` (function, line 256) `static void apply_identity(sf_config *cfg)`
+  - `apply_as_gui` (function, line 261) `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)`
+  - `is_blank_text` (function, line 299) `static int is_blank_text(const char *s)`
+  - `print_doc` (function, line 312) `static void print_doc(const rd_doc *doc)`
+  - `print_console` (function, line 405) `static void print_console(const fb_buffer *log)`
+  - `print_dom` (function, line 422) `static void print_dom(const rd_doc *doc)`
+  - `print_dom_css` (function, line 437) `static void print_dom_css(const rd_doc *doc)`
+  - `headless_fetch` (function, line 461) `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...`
-  - `foldback_cookies` (function, line 521) `static void foldback_cookies(const char *url, const char *jar)`
-  - `print_css_drops` (function, line 545) `static void print_css_drops(const char *html, size_t len)`
-  - `hl_font_stash_free` (function, line 590) `static void hl_font_stash_free(hl_font_stash *s)`
-  - `hl_css_sink` (function, line 603) `static void hl_css_sink(void *vctx, const char *url,
+  - `foldback_cookies` (function, line 539) `static void foldback_cookies(const char *url, const char *jar)`
+  - `print_css_drops` (function, line 563) `static void print_css_drops(const char *html, size_t len)`
+  - `hl_font_stash_free` (function, line 608) `static void hl_font_stash_free(hl_font_stash *s)`
+  - `hl_css_sink` (function, line 621) `static void hl_css_sink(void *vctx, const char *url,
                         const char *body, si...`
-  - `hl_font_fetch` (function, line 640) `static int hl_font_fetch(void *vctx, const char *url,
+  - `hl_font_fetch` (function, line 658) `static int hl_font_fetch(void *vctx, const char *url,
                          int *out_status, c...`
-  - `render_page` (function, line 649) `static int render_page(const char *html, size_t len, const char *top_url,
+  - `render_page` (function, line 667) `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-  - `first` (function, line 726) `* always cleared first (fetch_and_render may paint several pages per
+  - `first` (function, line 745) `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
-  - `sf_reason` (function, line 917) `static const char *sf_reason(sf_status ss)`
-  - `fetch_and_render_one` (function, line 936) `static int fetch_and_render_one(const char *url, char **out_nav)`
-  - `elsewhere` (function, line 998) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+  - `sf_reason` (function, line 936) `static const char *sf_reason(sf_status ss)`
+  - `fetch_and_render_one` (function, line 955) `static int fetch_and_render_one(const char *url, char **out_nav)`
+  - `elsewhere` (function, line 1018) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-  - `parent` (function, line 1024) `* gated by the parent (ln_resolve: a local target stays under the document's
+  - `parent` (function, line 1044) `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-  - `run_headless` (function, line 1061) `static int run_headless(const char *target)`
-  - `video_fetch_with_fallback` (function, line 1097) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+  - `run_headless` (function, line 1081) `static int run_headless(const char *target)`
+  - `video_fetch_with_fallback` (function, line 1118) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
-  - `run_dump_video` (function, line 1208) `static int run_dump_video(const char *url)`
-  - `main` (function, line 1227) `int main(int argc, char **argv)`
-  - `gets` (function, line 440) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-  - `pool` (function, line 712) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-  - `only` (function, line 794) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-  - `BLOCKED` (function, line 963) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+  - `run_dump_video` (function, line 1229) `static int run_dump_video(const char *url)`
+  - `main` (function, line 1248) `int main(int argc, char **argv)`
+  - `gets` (function, line 457) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
+  - `pool` (function, line 731) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+  - `only` (function, line 813) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+  - `BLOCKED` (function, line 983) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
   - `_DEFAULT_SOURCE` (macro, line 10) `#define _DEFAULT_SOURCE`
-  - `EXIT_OK` (macro, line 48) `#define EXIT_OK`
-  - `EXIT_ERROR` (macro, line 49) `#define EXIT_ERROR`
-  - `EXIT_USAGE` (macro, line 50) `#define EXIT_USAGE`
-  - `CSS_DROPS_REPORT_MAX` (macro, line 169) `#define CSS_DROPS_REPORT_MAX`
-  - `HL_FONT_MAX_SHEETS` (macro, line 579) `#define HL_FONT_MAX_SHEETS`
-  - `HL_FONT_MAX_BYTES` (macro, line 580) `#define HL_FONT_MAX_BYTES`
-  - `HL_JS_NAV_MAX` (macro, line 932) `#define HL_JS_NAV_MAX`
-- Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
+  - `EXIT_OK` (macro, line 49) `#define EXIT_OK`
+  - `EXIT_ERROR` (macro, line 50) `#define EXIT_ERROR`
+  - `EXIT_USAGE` (macro, line 51) `#define EXIT_USAGE`
+  - `CSS_DROPS_REPORT_MAX` (macro, line 170) `#define CSS_DROPS_REPORT_MAX`
+  - `HL_FONT_MAX_SHEETS` (macro, line 597) `#define HL_FONT_MAX_SHEETS`
+  - `HL_FONT_MAX_BYTES` (macro, line 598) `#define HL_FONT_MAX_BYTES`
+  - `HL_JS_NAV_MAX` (macro, line 951) `#define HL_JS_NAV_MAX`
+- Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
 
 ## src/hls.c
 - Doc: last_char: Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not...
@@ -284,6 +285,38 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `lxb_dom_element_has_attribute` (function, line 230) `&& lxb_dom_element_has_attribute(sel, (const lxb_char_t *)"nomodule", 8);`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
 - Depends on: `include/dom.h`, `include/html_parse.h`, `include/util.h`
+
+## src/identity.c
+- Doc: tag_valid: size_t n = strlen(ua); if (n >= IDN_UA_MAX) return -1; int printable = 0; for (size_t...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `is_alpha` (function, line 20) `static int is_alpha(char c)`
+  - `is_alnum` (function, line 21) `static int is_alnum(char c)`
+  - `idn_defaults` (function, line 23) `void idn_defaults(idn_config *c)`
+  - `idn_is_default` (function, line 29) `int idn_is_default(const idn_config *c)`
+  - `idn_set_user_agent` (function, line 34) `int idn_set_user_agent(idn_config *c, const char *ua)`
+  - `tag_valid` (function, line 50) `static int tag_valid(const char *s, size_t n)`
+  - `idn_set_languages` (function, line 63) `int idn_set_languages(idn_config *c, const char *list)`
+  - `idn_set_geo` (function, line 91) `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)`
+  - `idn_clear_geo` (function, line 103) `void idn_clear_geo(idn_config *c)`
+  - `idn_user_agent` (function, line 109) `const char *idn_user_agent(const idn_config *c)`
+  - `idn_accept_language` (function, line 113) `size_t idn_accept_language(const idn_config *c, char *out, size_t cap)`
+  - `idn_primary_language` (function, line 143) `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)`
+  - `hexval` (function, line 157) `static int hexval(int ch)`
+  - `pct_decode` (function, line 166) `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)`
+  - `append` (function, line 186) `static int append(char *buf, size_t *n, size_t cap, const char *fmt, ...)`
+  - `append_pct` (function, line 197) `static int append_pct(char *buf, size_t *n, size_t cap, const char *s)`
+  - `idn_serialize` (function, line 206) `size_t idn_serialize(const idn_config *c, char *out, size_t cap)`
+  - `parse_geo` (function, line 223) `static int parse_geo(const char *s, double *lat, double *lon, double *acc)`
+  - `idn_parse` (function, line 236) `void idn_parse(idn_config *c, const char *text)`
+  - `parse_number` (function, line 268) `static int parse_number(const char *s, double *out)`
+  - `idn_apply_query` (function, line 275) `unsigned idn_apply_query(idn_config *c, const char *query)`
+  - `esc_append` (function, line 346) `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)`
+  - `idn_render_page` (function, line 362) `size_t idn_render_page(const idn_config *c, char *out, size_t cap)`
+  - `_GNU_SOURCE` (macro, line 7) `#define _GNU_SOURCE`
+  - `IDN_QUERY_FIELD_MAX` (macro, line 18) `#define IDN_QUERY_FIELD_MAX`
+- Depends on: `include/anti_fp.h`, `include/identity.h`
 
 ## src/image_decode.c
 - Doc: jpeg_err_ctx: libjpeg error manager that longjmps instead of calling exit(), so a hostile JPEG *...

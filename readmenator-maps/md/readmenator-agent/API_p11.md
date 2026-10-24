@@ -1,6 +1,37 @@
 # API (page 11 of 11)
 Previous: [API_p10.md](API_p10.md)
 
+## src/ws_hub.c
+Depends on: `include/ws_hub.h`
+- `dup_str` (function) `src/ws_hub.c:54` `static char *dup_str(const char *s)`
+- `job_free` (function) `src/ws_hub.c:63` `static void job_free(wh_job *j)`
+- `job_str` (function) `src/ws_hub.c:71` `static int job_str(wh_job *j, size_t slot, const char **field)` -- if (n == (size_t)-1) return NULL; char *d = (char *)malloc(n + 1); if (d != NULL) memcpy(d, s, n + 1); return d; }...
+- `open_thread` (function) `src/ws_hub.c:79` `static void *open_thread(void *arg)`
+- `conn_clear` (function) `src/ws_hub.c:98` `static void conn_clear(wh_conn *c)`
+- `find_id` (function) `src/ws_hub.c:104` `static wh_conn *find_id(wh_hub *h, int id)`
+- `find_token` (function) `src/ws_hub.c:110` `static wh_conn *find_token(wh_hub *h, uint64_t token)`
+- `wh_new` (function) `src/ws_hub.c:116` `wh_hub *wh_new(void)`
+- `wh_free` (function) `src/ws_hub.c:129` `void wh_free(wh_hub *h)`
+- `wh_notify_fd` (function) `src/ws_hub.c:144` `int wh_notify_fd(const wh_hub *h)`
+- `wh_open_async` (function) `src/ws_hub.c:148` `int wh_open_async(wh_hub *h, int id, const char *url, const sf_config *cfg)`
+- `wh_on_notify` (function) `src/ws_hub.c:192` `void wh_on_notify(wh_hub *h, wh_emit_fn emit, void *ctx)`
+- `wh_send` (function) `src/ws_hub.c:221` `int wh_send(wh_hub *h, int id, const void *data, size_t len, int binary)`
+- `wh_close` (function) `src/ws_hub.c:228` `void wh_close(wh_hub *h, int id)`
+- `wh_close_all` (function) `src/ws_hub.c:234` `void wh_close_all(wh_hub *h)`
+- `wh_poll_fds` (function) `src/ws_hub.c:240` `size_t wh_poll_fds(const wh_hub *h, struct pollfd *out, int *ids, size_t cap)`
+- `fail_conn` (function) `src/ws_hub.c:258` `static void fail_conn(wh_conn *c, int id, wh_emit_fn emit, void *ctx)` -- const wh_conn *c = &h->c[i]; if (!c->used || c->pending || c->ws == NULL) continue; int fd = sf_ws_fd(c->ws); if (fd...
+- `wh_on_readable` (function) `src/ws_hub.c:266` `void wh_on_readable(wh_hub *h, int id, wh_emit_fn emit, void *ctx)`
+- `wh_count` (function) `src/ws_hub.c:314` `size_t wh_count(const wh_hub *h)`
+
+## src/zoom.c
+Depends on: `include/zoom.h`
+- `zm_clamp` (function) `src/zoom.c:14` `int zm_clamp(int pct)`
+- `zm_zoom_in` (function) `src/zoom.c:20` `int zm_zoom_in(int pct)`
+- `zm_zoom_out` (function) `src/zoom.c:28` `int zm_zoom_out(int pct)`
+- `zm_reset` (function) `src/zoom.c:36` `int zm_reset(void)`
+- `zm_scale` (function) `src/zoom.c:40` `double zm_scale(int pct)`
+- `zm_apply` (function) `src/zoom.c:44` `double zm_apply(double base_px, int pct)`
+
 ## tools/fbench.py
 - `load_baseline` (function) `tools/fbench.py:46` `def load_baseline()`
 - `load_current` (function) `tools/fbench.py:59` `def load_current()`

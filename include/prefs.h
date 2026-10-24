@@ -56,6 +56,7 @@ typedef struct prefs_state {
     int tor, i2p, torify;  /* opt-in network routing */
     int zoom_pct;          /* zm_clamp owns the ladder bounds */
     int remember_history;  /* 1 = persist visits (default) */
+    char identity[1024];   /* idn_serialize text ("" = no override); validated by idn_parse */
     prefs_entry *bookmarks; size_t bookmarks_len;  /* insertion order */
     char **history;         size_t history_len;    /* most recent first */
 } prefs_state;

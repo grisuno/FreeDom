@@ -47,6 +47,36 @@ static void test_init_defaults(void **state) {
 
 /* --- round-trip ----------------------------------------------------------- */
 
+/* The user identity line (spec/identity.md) round-trips as an opaque single line; a line with
+ * control bytes or one that is too long is dropped (fail-closed to "no override"). */
+static void test_identity_line_roundtrip_and_rejection(void **state) {
+    (void)state;
+    prefs_state p;
+    prefs_init(&p);
+    assert_string_equal(p.identity, "");
+    snprintf(p.identity, sizeof p.identity, "ua=Custom|lang=es|geo=1.000000,2.000000,10.0");
+    char *text = NULL;
+    size_t n = 0;
+    assert_int_equal(prefs_format(&p, &text, &n), PREFS_OK);
+    prefs_state q;
+    prefs_init(&q);
+    assert_int_equal(prefs_parse(text, n, &q), PREFS_OK);
+    assert_string_equal(q.identity, "ua=Custom|lang=es|geo=1.000000,2.000000,10.0");
+    free(text);
+    p.identity[0] = '\0';
+    assert_int_equal(prefs_format(&p, &text, &n), PREFS_OK);
+    char *bad = (char *)malloc(n + 32);
+    assert_non_null(bad);
+    memcpy(bad, text, n);
+    free(text);
+    size_t bn = n + (size_t)snprintf(bad + n, 32, "id\tua=bad\x01" "ctl\n");
+    assert_int_equal(prefs_parse(bad, bn, &q), PREFS_OK);
+    free(bad);
+    assert_string_equal(q.identity, "");
+    prefs_free(&p);
+    prefs_free(&q);
+}
+
 static void test_roundtrip(void **state) {
     (void)state;
     prefs_state p;
@@ -395,6 +425,7 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_init_defaults),
         cmocka_unit_test(test_roundtrip),
+        cmocka_unit_test(test_identity_line_roundtrip_and_rejection),
         cmocka_unit_test(test_parse_bad_magic),
         cmocka_unit_test(test_parse_too_large),
         cmocka_unit_test(test_parse_unknown_and_malformed_skipped),

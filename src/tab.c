@@ -29,6 +29,7 @@
 #include "image_decode.h"
 #include "js_dom.h"
 #include "js_trusted.h"
+#include "identity.h"
 #include "js_env.h"
 #include "js_sandbox.h"
 #include "link_nav.h"
@@ -65,7 +66,7 @@ static void ignore_sigpipe(void);
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 38
 #define TAB_WIRE_B_N 70
-#define TAB_WIRE_BOX_F_N 267
+#define TAB_WIRE_BOX_F_N 268
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
 
 /* A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile
@@ -161,6 +162,7 @@ typedef struct child_state {
     pv_view        *preserved_view;    /* pre-script DOM snapshot (fallback when jQuery */
                                         /* corrupts the tree on mutation re-derive) */
     int             last_net;          /* last OP_LOAD had net granted (trusted host) */
+    char            identity[IDN_SERIAL_MAX]; /* the user's identity override (idn_serialize), "" = none */
     char           *page_url;          /* the loaded page's URL: base of module specifiers */
     im_map         *imap;              /* the page's first <script type=importmap>, or NULL */
     jg_table        geom;              /* laid-out geometry installed into js (OP_GEOM) */
@@ -370,9 +372,11 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
         js_context_free(js); dom_free(idx); hp_document_free(doc); return -1;
     }
     uint64_t readback_key = fp_origin_key(cs->session_key, rb_origin);
+    idn_config idn_cfg;
+    idn_parse(&idn_cfg, cs->identity);              /* an unreadable line is the default identity */
     if (jd_install(js, idx, &cs->jd_op) != JD_OK
      || jd_install_events(js, cs->click) != JD_OK
-     || je_install(js, TAB_SCREEN_W, TAB_SCREEN_H) != JE_OK
+     || je_install_identity(js, TAB_SCREEN_W, TAB_SCREEN_H, idn_cfg.user_agent, idn_cfg.languages) != JE_OK
      || je_install_canvas(js, readback_key) != JE_OK) {
         js_context_free(js); jd_click_state_free(cs->click); cs->click = NULL;
         dom_free(idx); hp_document_free(doc); return -1;
@@ -395,6 +399,11 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
      * net_active is set during the script window, so install is safe regardless. */
     if (run_js && net_allowed)
         (void)jd_install_xhr(js, child_fetch, cs);
+    /* indexedDB lives in page memory and only for a trusted host (like localStorage in RAM). */
+    if (run_js && net_allowed) (void)jd_install_indexeddb(js);
+    /* navigator.geolocation: only a trusted host, only when the user fixed a place. */
+    if (run_js && net_allowed && idn_cfg.geo_mode == IDN_GEO_FIXED)
+        (void)jd_install_geolocation(js, idn_cfg.geo_lat, idn_cfg.geo_lon, idn_cfg.geo_accuracy_m);
 
     cs->doc = doc; cs->idx = idx; cs->js = js;
     return 0;
@@ -783,6 +792,8 @@ static int write_view(int wfd, const pv_view *v) {
             /* clip-path: inset() per-mille halves of the clip edges, 2026-10-21 */
             (int32_t)bd->clip_top_pm, (int32_t)bd->clip_right_pm,
             (int32_t)bd->clip_bottom_pm, (int32_t)bd->clip_left_pm,
+            /* background-clip padding-box/content-box, 2026-10-24 (appended; read_view mirrors) */
+            (int32_t)bd->bg_clip,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1787,6 +1798,7 @@ static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t l
 
     /* The Freebug command-line API belongs to the REPL, never to the page's own scripts. */
     if (!cs->repl_api) {
+        (void)jd_set_repl_css(cs->js, cs->extern_css, cs->extern_css_len);
         (void)jd_install_repl_api(cs->js);
         cs->repl_api = 1;
     }
@@ -2036,6 +2048,14 @@ static void tab_worker_run(int rfd, int wfd) {
                     free(storage); free(cookies); free(url); break;
                 }
             }
+            size_t idlen = 0;
+            if (read_full(rfd, &idlen, sizeof idlen) != 0 || idlen >= sizeof cs.identity) {
+                free(storage); free(cookies); free(url); break;
+            }
+            if (idlen != 0 && read_full(rfd, cs.identity, idlen) != 0) {
+                free(storage); free(cookies); free(url); break;
+            }
+            cs.identity[idlen] = '\0';
         }
 
         size_t len = 0;
@@ -2111,6 +2131,7 @@ struct tab {
     int            net_allowed;
     int            css_allowed;
     int            viewport_w;    /* @media render width for the next load (0 => default) */
+    char           identity[IDN_SERIAL_MAX]; /* idn_serialize text sent with every load ("" = default) */
     size_t         subreq_n;      /* subresources served during the last load */
     uint64_t       subreq_us;     /* wall time spent serving them (microseconds) */
     int            last_net_granted; /* the current page was loaded with net granted */
@@ -2554,6 +2575,7 @@ static int read_view(int fd, pv_view **out) {
             /* a percentage of the border box, saturated like every other per-mille half */
             .clip_top_pm = clip_pm_ok(f[263]), .clip_right_pm = clip_pm_ok(f[264]),
             .clip_bottom_pm = clip_pm_ok(f[265]), .clip_left_pm = clip_pm_ok(f[266]),
+            .bg_clip = (f[267] == CSS_BGC_PADDING_BOX || f[267] == CSS_BGC_CONTENT_BOX) ? f[267] : 0,
         };
         for (int k = 0; k < (PV_BSHADOW_LAYERS - 1) * 6; ++k)
             bd.bsh_x[k / 6][k % 6] = f[228 + k];
@@ -2846,6 +2868,14 @@ void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us) {
     if (total_us != NULL) *total_us = (t != NULL) ? t->subreq_us : 0;
 }
 
+void tab_set_identity(tab *t, const char *serialized) {
+    if (t == NULL) return;
+    size_t n = (serialized != NULL) ? strlen(serialized) : 0;
+    if (n >= sizeof t->identity) n = 0;               /* too long: no override, never truncated */
+    if (n != 0) memcpy(t->identity, serialized, n);
+    t->identity[n] = '\0';
+}
+
 void tab_set_viewport_w(tab *t, int px) {
     if (t == NULL) return;
     t->viewport_w = (px > 0) ? px : 0;   /* 0 => the worker uses the normalized default */
@@ -3133,7 +3163,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     if (!t->alive) return TAB_ERR_DEAD;
 
     /* OP_LOAD framing: [op][run_js:1][net:1][reader:1][dark:1][css:1][vpw:4][url_len][url]
-     * [ck_len][cookies][len][html] (the flags, viewport width, URL and cookie seed
+     * [ck_len][cookies][st_len][storage][id_len][identity][len][html] (the flags, viewport width, URL and cookie seed
      * precede the payload so the html stays zero-copy). net grants XHR/fetch and is only
      * meaningful with JS on; css grants GET-only external stylesheet fetches (Hito 27);
      * vpw is the @media render width; cookies seed document.cookie for a trusted host. */
@@ -3146,6 +3176,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     size_t cklen = strlen(ck);
     /* localStorage seed: a trusted load only (the worker also re-checks net). */
     size_t stlen = (nflag && t->storage_in != NULL) ? t->storage_in_len : 0;
+    size_t idlen = strlen(t->identity);
     if (write_full(t->req_fd, &op, 1) != 0
      || write_full(t->req_fd, &jflag, 1) != 0
      || write_full(t->req_fd, &nflag, 1) != 0
@@ -3159,6 +3190,8 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
      || (cklen != 0 && write_full(t->req_fd, ck, cklen) != 0)
      || write_full(t->req_fd, &stlen, sizeof stlen) != 0
      || (stlen != 0 && write_full(t->req_fd, t->storage_in, stlen) != 0)
+     || write_full(t->req_fd, &idlen, sizeof idlen) != 0
+     || (idlen != 0 && write_full(t->req_fd, t->identity, idlen) != 0)
      || write_full(t->req_fd, &len, sizeof len) != 0
      || (len != 0 && write_full(t->req_fd, html, len) != 0)) {
         tab_refresh_alive(t);

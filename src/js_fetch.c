@@ -176,6 +176,7 @@ static const char JD_XHR_SHIM[] =
     "Response.redirect=function(u,st){ var h=new Headers(); h.set('location',String(u));"
     "  return new Response(null,{status:st||302,headers:h}); };"
     "__G.Request=Request; __G.Response=Response;"
+    "if(typeof __G.__streamBody==='function') __G.__streamBody(Response);"
     "__G.fetch=function(input,opt){ var rq; try{ rq=new Request(input,opt); }catch(e){ return Promise.reject(e); }"
     "  if(rq.signal&&rq.signal.aborted) return Promise.reject(abortErr());"
     "  var r; try{ r=HF(rq.method,rq.url,bodyText(rq._body)); }catch(e){ r=null; }"

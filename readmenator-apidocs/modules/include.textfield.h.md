@@ -244,8 +244,6 @@ NULL-safe (return ""/0).
 
 **Returns:** `char *`
 
-*Called by:* [`proceed`](gui.browser_ui.c.md#proceed)
-
 ---
 
 <a id="tf_len"></a>

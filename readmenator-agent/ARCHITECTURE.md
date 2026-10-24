@@ -24,6 +24,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/host_conf.h`
 - `gui/browser_ui.c` -> `include/hostblock.h`
 - `gui/browser_ui.c` -> `include/hostedit.h`
+- `gui/browser_ui.c` -> `include/identity.h`
 - `gui/browser_ui.c` -> `include/image_decode.h`
 - `gui/browser_ui.c` -> `include/interp.h`
 - `gui/browser_ui.c` -> `include/js_policy.h`
@@ -211,6 +212,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/freedom.c` -> `include/host_conf.h`
 - `src/freedom.c` -> `include/hostblock.h`
 - `src/freedom.c` -> `include/html_parse.h`
+- `src/freedom.c` -> `include/identity.h`
 - `src/freedom.c` -> `include/js_policy.h`
 - `src/freedom.c` -> `include/link_nav.h`
 - `src/freedom.c` -> `include/media_decoder.h`
@@ -239,6 +241,8 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/html_parse.c` -> `include/dom.h`
 - `src/html_parse.c` -> `include/html_parse.h`
 - `src/html_parse.c` -> `include/util.h`
+- `src/identity.c` -> `include/anti_fp.h`
+- `src/identity.c` -> `include/identity.h`
 - `src/image_decode.c` -> `include/image_decode.h`
 - `src/import_map.c` -> `include/import_map.h`
 - `src/interp.c` -> `include/interp.h`
@@ -349,6 +353,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/tab.c` -> `include/freebug.h`
 - `src/tab.c` -> `include/freedom_config.h`
 - `src/tab.c` -> `include/html_parse.h`
+- `src/tab.c` -> `include/identity.h`
 - `src/tab.c` -> `include/image_decode.h`
 - `src/tab.c` -> `include/import_map.h`
 - `src/tab.c` -> `include/js_dom.h`
@@ -442,6 +447,8 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_hostblock.c` -> `include/hostblock.h`
 - `tests/test_hostedit.c` -> `include/hostedit.h`
 - `tests/test_html_parse.c` -> `include/html_parse.h`
+- `tests/test_identity.c` -> `include/anti_fp.h`
+- `tests/test_identity.c` -> `include/identity.h`
 - `tests/test_image_decode.c` -> `include/image_decode.h`
 - `tests/test_import_map.c` -> `include/import_map.h`
 - `tests/test_interp.c` -> `include/interp.h`
@@ -489,12 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_render_policy.c` -> `include/render_policy.h`
 - `tests/test_renderer.c` -> `include/renderer.h`
 - `tests/test_request_policy.c` -> `include/request_policy.h`
-- `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
-- `tests/test_svg_render.c` -> `include/svg_render.h`
-- `tests/test_tab.c` -> `include/css.h`
-- `tests/test_tab.c` -> `include/js_geom.h`
-- `tests/test_tab.c` -> `include/tab.h`
-- `tests/test_tab.c` -> `include/url.h`
-- `tests/test_tab.c` -> `include/web_storage.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

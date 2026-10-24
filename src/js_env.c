@@ -171,11 +171,10 @@ static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
 
 /* navigator.languages: a sealed array built by splitting fp_accept_language()
  * (e.g. "en-US,en") on commas. Returns an exception value on OOM. */
-static JSValue build_languages(JSContext *ctx) {
+static JSValue build_languages(JSContext *ctx, const char *langs) {
     JSValue arr = JS_NewArray(ctx);
     if (JS_IsException(arr)) return arr;
 
-    const char *langs = fp_accept_language();
     uint32_t idx = 0;
     const char *start = langs;
     for (const char *p = langs;; ++p) {
@@ -195,7 +194,8 @@ static JSValue build_languages(JSContext *ctx) {
     return arr;
 }
 
-static int build_navigator(JSContext *ctx, JSValueConst global) {
+static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_override,
+                           const char *lang_csv) {
     /* The identity fields are OWN, read-only and the object is non-extensible; its
      * prototype is a separate, extensible object so a trusted page's runtime can add
      * capability methods (sendBeacon, spec/js_dom.md 7h) without touching any
@@ -206,7 +206,14 @@ static int build_navigator(JSContext *ctx, JSValueConst global) {
     JS_FreeValue(ctx, proto);
     if (JS_IsException(nav)) return -1;
 
-    JSValue languages = build_languages(ctx);
+    const char *ua = (ua_override != NULL && ua_override[0] != '\0') ? ua_override : fp_user_agent();
+    const char *csv = (lang_csv != NULL && lang_csv[0] != '\0') ? lang_csv : fp_accept_language();
+    char primary[64];
+    size_t pl = strcspn(csv, ",");
+    if (pl >= sizeof primary) pl = sizeof primary - 1;
+    memcpy(primary, csv, pl);
+    primary[pl] = '\0';
+    JSValue languages = build_languages(ctx, csv);
     if (JS_IsException(languages)) { JS_FreeValue(ctx, nav); return -1; }
 
     JSValue plugins = JS_NewArray(ctx);
@@ -274,14 +281,14 @@ static int build_navigator(JSContext *ctx, JSValueConst global) {
 
     int ok = def_str(ctx, nav, "appCodeName", fp_app_code_name()) == 0
           && def_str(ctx, nav, "appName", fp_app_name()) == 0
-          && def_str(ctx, nav, "appVersion", fp_app_version()) == 0
+          && def_str(ctx, nav, "appVersion", (ua == fp_user_agent()) ? fp_app_version() : ua) == 0
           && def_str(ctx, nav, "product", fp_product()) == 0
           && def_str(ctx, nav, "productSub", fp_product_sub()) == 0
           && def_str(ctx, nav, "oscpu", fp_oscpu()) == 0
           && def_str(ctx, nav, "buildID", fp_build_id()) == 0
           && def_val(ctx, nav, "languages", languages) == 0
-          && def_str(ctx, nav, "userAgent", fp_user_agent()) == 0
-          && def_str(ctx, nav, "language", "en-US") == 0
+          && def_str(ctx, nav, "userAgent", ua) == 0
+          && def_str(ctx, nav, "language", primary) == 0
           && def_str(ctx, nav, "platform", fp_platform()) == 0
           && def_str(ctx, nav, "vendor", fp_vendor()) == 0
           && def_int(ctx, nav, "hardwareConcurrency", fp_hardware_concurrency()) == 0
@@ -495,6 +502,11 @@ static int build_readback_obj(JSContext *ctx, JSValueConst global,
 }
 
 je_status je_install(js_context *ctx, int screen_w, int screen_h) {
+    return je_install_identity(ctx, screen_w, screen_h, NULL, NULL);
+}
+
+je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
+                              const char *user_agent, const char *languages) {
     if (ctx == NULL) return JE_ERR_NULL_ARG;
 
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
@@ -503,7 +515,7 @@ je_status je_install(js_context *ctx, int screen_w, int screen_h) {
     JSValue global = JS_GetGlobalObject(jsctx);
     if (JS_IsException(global)) return JE_ERR_OOM;
 
-    int ok = build_navigator(jsctx, global) == 0
+    int ok = build_navigator(jsctx, global, user_agent, languages) == 0
           && build_screen(jsctx, global, screen_w, screen_h) == 0
           && build_performance(jsctx, global) == 0
           && build_crypto(jsctx, global) == 0

@@ -26,6 +26,7 @@
 #include "download.h"
 #include "frame_clock.h"
 #include "freebug.h"
+#include "identity.h"
 #include "hostblock.h"
 #include "hostedit.h"
 #include "image_decode.h"
@@ -185,7 +186,8 @@ typedef enum ui_menu_action {
     UI_MENU_HOSTADD,  /* action: add the current host to a .conf list (theme_val selects which) */
     UI_MENU_BOOKMARK, /* action: toggle a bookmark for the current page (Ctrl+B) */
     UI_MENU_BOOKMARKS,/* action: open the internal about:bookmarks page */
-    UI_MENU_REMHIST   /* toggles persistent history (off also forgets it) */
+    UI_MENU_REMHIST,  /* toggles persistent history (off also forgets it) */
+    UI_MENU_CONFIG    /* action: open the internal about:config page (identity, geolocation) */
 } ui_menu_action;
 
 typedef struct ui_menu_item {
@@ -204,6 +206,7 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
     { "Distraction-free (Ctrl+D)", UI_MENU_READER, 0,                    0 },
     { "Bookmark page (Ctrl+B)", UI_MENU_BOOKMARK, 0,                     0 },
     { "Bookmarks & history",  UI_MENU_BOOKMARKS, 0,                      0 },
+    { "Config: identity & APIs", UI_MENU_CONFIG, 0,                      0 },
     { "Remember history",     UI_MENU_REMHIST, 0,                        0 },
     { "Tor routing (.onion)", UI_MENU_TOR,   0,                          0 },
     { "I2P routing (.i2p)",   UI_MENU_I2P,   0,                          0 },
@@ -404,6 +407,9 @@ typedef struct browser_window {
      * the options menu with the shared textfield primitive. */
     tf_field    ua_field;
     int         ua_field_focused;
+    int         config_page;     /* the page on screen IS the internal about:config (set only by do_load) */
+    idn_config  identity;        /* user identity override (spec/identity.md), one source for wire + navigator */
+    char        accept_lang[160]; /* idn_accept_language of identity, for sf_config.accept_language */
 
     /* Cached source of the current page, so a capability toggle re-renders without
      * a network round-trip. cur_top is the https origin (image policy) or NULL. */
@@ -1361,6 +1367,9 @@ static nr_route apply_route(const browser_window *w, const char *url, sf_config 
      * authenticates + encrypts by address). Only i2p opts in today; onion stays https. */
     if (r == NR_ROUTE_TOR || r == NR_ROUTE_I2P)
         cfg->allow_overlay_http = nr_realm_allows_http(nr_classify_url(url));
+    /* The user's identity (spec/identity.md): the same value navigator reports; "" => default. */
+    cfg->user_agent = (w->identity.user_agent[0] != '\0') ? w->identity.user_agent : NULL;
+    cfg->accept_language = (w->identity.languages[0] != '\0') ? w->accept_lang : NULL;
     return r;
 }
 
@@ -1618,7 +1627,6 @@ static int gui_image_fetch(void *vctx, const char *method, const char *url,
     if (url_resolve_https(w->cur_top, url, abs, sizeof abs) != URL_OK) return -1;
 
     sf_config cfg = sf_config_default();
-    cfg.user_agent = tf_text(&w->ua_field);
     cfg.max_body_bytes = UI_IMAGE_MAX_BODY;
     /* Same reasoning as gui_subresource_fetch, and it matters most here: a page
      * names dozens of images, and every unreachable one used to cost the full
@@ -1683,7 +1691,6 @@ static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
                          fetch_prep *pr) {
     memset(pr, 0, sizeof *pr);
     *cfg = sf_config_default();
-    cfg->user_agent = tf_text(&w->ua_field); /* "" => SF_DEFAULT_USER_AGENT */
 
     char host[256];
     int have_host = host_from_url(url, host, sizeof host);
@@ -2297,6 +2304,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     int css_grant = wc.css;   /* external-stylesheet prefetch + author CSS apply */
     int js_grant  = wc.net;   /* external-script prefetch (was caps.js && trusted) */
     tab_set_net_allowed(t, wc.net);
+    tab_set_identity(t, w->prefs.identity);
     tab_set_css_allowed(t, wc.css);
     seed_session_cookies(t, wc.cookies, w->cur_top);
     seed_local_storage(w, t, wc.cookies);
@@ -2504,6 +2512,31 @@ static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
     browser_set_page(&w->bs, NULL, msg, 1);
 }
 
+/* Commits w->identity: refreshes the cached Accept-Language, mirrors the serialized text into
+ * the persisted prefs (default => "") and the User-Agent editor, and hands it to the live
+ * worker. Every other reader (wire headers, navigator, geolocation) derives from this one
+ * struct, so they cannot disagree. */
+static void identity_commit(browser_window *w) {
+    (void)idn_accept_language(&w->identity, w->accept_lang, sizeof w->accept_lang);
+    if (idn_is_default(&w->identity)) {
+        w->prefs.identity[0] = '\0';
+    } else if (idn_serialize(&w->identity, w->prefs.identity, sizeof w->prefs.identity) == 0) {
+        w->prefs.identity[0] = '\0';           /* does not fit: no override rather than a cut one */
+    }
+    tf_clear(&w->ua_field);
+    for (const char *c = w->identity.user_agent; *c != '\0'; ++c) tf_insert(&w->ua_field, *c);
+    if (w->tab_worker != NULL) tab_set_identity(w->tab_worker, w->prefs.identity);
+    profile_sync(w);
+}
+
+/* Loads the persisted identity into the window (startup). An unreadable line is the default. */
+static void identity_load(browser_window *w) {
+    idn_parse(&w->identity, w->prefs.identity);
+    (void)idn_accept_language(&w->identity, w->accept_lang, sizeof w->accept_lang);
+    tf_clear(&w->ua_field);
+    for (const char *c = w->identity.user_agent; *c != '\0'; ++c) tf_insert(&w->ua_field, *c);
+}
+
 /* Starts a navigation. Network loads are ASYNCHRONOUS: prepare_fetch (pure, fast)
  * runs here, then fetch_launch hands the blocking transfer to a worker thread and we
  * return immediately -- the event loop stays responsive and the previous page stays
@@ -2514,6 +2547,7 @@ static void do_load(browser_window *w, const char *url) {
     if (url == NULL) return;
     w->net_gen++;        /* new navigation: supersede any in-flight fetch */
     w->menu_open = 0;
+    w->config_page = 0;
 
     if (strcmp(url, "about:blank") == 0) {
         clear_doc(w);
@@ -2521,6 +2555,38 @@ static void do_load(browser_window *w, const char *url) {
         w->loading = 0;
         set_cache(w, NULL, 0, NULL);
         browser_set_page(&w->bs, "Freedom", "", 0);
+        return;
+    }
+
+    /* Internal configuration page (spec/identity.md): identity, languages, fixed geolocation.
+     * about:config?<query> applies the form's values (validated, fail-closed), persists them and
+     * re-renders; the page is built pure and escaped, then rendered by the confined pipeline. */
+    if (strncmp(url, "about:config", 12) == 0 && (url[12] == '\0' || url[12] == '?')) {
+        clear_doc(w);
+        w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
+        w->loading = 0;
+        w->config_page = 1;
+        unsigned rej = 0;
+        if (url[12] == '?') {
+            rej = idn_apply_query(&w->identity, url + 13);
+            identity_commit(w);
+        }
+        char *html = (char *)malloc(IDN_PAGE_MAX);
+        size_t hlen = (html != NULL) ? idn_render_page(&w->identity, html, IDN_PAGE_MAX) : 0;
+        if (hlen == 0) {
+            free(html);
+            set_cache(w, NULL, 0, NULL);
+            browser_set_page(&w->bs, NULL, "Could not build the configuration page.", 1);
+            return;
+        }
+        set_cache(w, html, hlen, NULL);
+        browser_set_url_bar(&w->bs, "about:config");
+        render_current(w);
+        if (url[12] == '?') {
+            browser_set_status(&w->bs, rej != 0 ? "Some values were not valid and were ignored."
+                                                : "Configuration saved. Reload other pages to apply.",
+                               now_ms());
+        }
         return;
     }
 
@@ -3202,6 +3268,8 @@ typedef struct rc_box {
     int    outline_offset;  /* px outset from the border edge; CSS_LEN_UNSET = 0 */
     int    bg_rgb;
     int    bg_alpha;     /* background alpha percent 0..100; PV_LEN_UNSET opaque */
+    int    bg_clip;      /* pv_box_def.bg_clip: 2 = padding-box, 3 = content-box, else border-box */
+    int    pad_px[4], pad_pct[4]; /* top, right, bottom, left (the content-box clip needs them at paint time) */
     int    hidden;   /* visibility:hidden on this box (or an ancestor): geometry (h/w)
                        * is still resolved, decoration painting is skipped */
     /* 2026-07-10 author vertical dimensions: a fixed height/width sets the box's
@@ -5108,6 +5176,10 @@ static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def) {
     bx->outline_offset = (def->outline_offset != PV_LEN_UNSET) ? def->outline_offset : 0;
     bx->bg_rgb = def->bg_rgb;
     bx->bg_alpha = def->bg_alpha;
+    bx->bg_clip = def->bg_clip;
+    bx->pad_px[0] = def->pad_t; bx->pad_px[1] = def->pad_r; bx->pad_px[2] = def->pad_b; bx->pad_px[3] = def->pad_l;
+    bx->pad_pct[0] = def->pad_t_pct; bx->pad_pct[1] = def->pad_r_pct;
+    bx->pad_pct[2] = def->pad_b_pct; bx->pad_pct[3] = def->pad_l_pct;
     bx->grad_n = def->grad_n; bx->grad_angle = def->grad_angle;
     bx->grad_c[0] = def->grad_c0; bx->grad_c[1] = def->grad_c1;
     bx->grad_c[2] = def->grad_c2; bx->grad_c[3] = def->grad_c3;
@@ -11681,6 +11753,25 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
             paint_box_shadow_layer(cr, x, y, w, h, rad, layers[k]);
     }
 
+    /* background-clip (CSS Backgrounds 3 3.7): padding-box stops at the padding edge,
+     * content-box inside the padding. The fill and every image layer share the clip; the
+     * percentage padding basis is the box's own width (exact for inset:0 overlays). */
+    int bgclip_on = (bx->bg_clip == CSS_BGC_PADDING_BOX || bx->bg_clip == CSS_BGC_CONTENT_BOX);
+    if (bgclip_on) {
+        double cl = box_edge_px(bx->bord_lw), cr_ = box_edge_px(bx->bord_rw);
+        double ct = box_edge_px(bx->bord_tw), cb_ = box_edge_px(bx->bord_bw);
+        if (bx->bg_clip == CSS_BGC_CONTENT_BOX) {
+            ct += box_pad_px(bx->pad_px[0], bx->pad_pct[0], w);
+            cr_ += box_pad_px(bx->pad_px[1], bx->pad_pct[1], w);
+            cb_ += box_pad_px(bx->pad_px[2], bx->pad_pct[2], w);
+            cl += box_pad_px(bx->pad_px[3], bx->pad_pct[3], w);
+        }
+        double kw = w - cl - cr_, kh = h - ct - cb_;
+        cairo_save(cr);
+        cairo_rectangle(cr, x + cl, y + ct, kw > 0.0 ? kw : 0.0, kh > 0.0 ? kh : 0.0);
+        cairo_clip(cr);
+    }
+
     /* Background fill inside the border box (covers the padding area). A linear
      * gradient wins over the solid color: the gradient line runs through the box
      * center along the CSS angle (0 = to top, 90 = to right), long enough that the
@@ -11721,6 +11812,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
      * space/round fall back to plain repeat (their exact tile-count/spacing math is a
      * v2 refinement, see spec/css.md). */
     paint_bg_layer(cr, bx, bgimg, x, y, w, h, radius_c);
+    if (bgclip_on) cairo_restore(cr);
 
     /* The four borders. With a radius and UNIFORM sides (same width, colour and a
      * visible style on all four) the ring is one rounded stroke centred on the
@@ -12353,21 +12445,19 @@ static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out) {
     return 1;
 }
 
-/* Computes the padding-box content rect (in page coords: y, x, w, h) for a box.
- * Used as the clip region for overflow:hidden children. */
+/* Computes the PADDING-box rect (in page coords: y, x, w, h) of a box: the region
+ * overflow clips to (CSS Overflow 3 2.2 -- the padding edge, i.e. the border box minus
+ * the border only). Clipping to the content box instead hid every absolutely positioned
+ * overlay (inset:0 / left:0;top:0;width:100%) of a padded section. */
 static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
                             double origin, double left, double *oy, double *ox,
                             double *ow, double *oh) {
     double bl = box_edge_px(d->bord_lw), br = box_edge_px(d->bord_rw);
     double bt = box_edge_px(d->bord_tw), bb = box_edge_px(d->bord_bw);
-    double pl = (d->pad_l > 0) ? d->pad_l : 0.0;
-    double pr = (d->pad_r > 0) ? d->pad_r : 0.0;
-    double pt = (d->pad_t > 0) ? d->pad_t : 0.0;
-    double pb = (d->pad_b > 0) ? d->pad_b : 0.0;
-    *oy = origin + bx->top + bt + pt;
-    *ox = left   + bx->x   + bl + pl;
-    double cw = bx->w - bl - br - pl - pr;
-    double ch = bx->h - bt - bb - pt - pb;
+    *oy = origin + bx->top + bt;
+    *ox = left   + bx->x   + bl;
+    double cw = bx->w - bl - br;
+    double ch = bx->h - bt - bb;
     *ow = (cw >= 1.0) ? cw : 1.0;
     *oh = (ch >= 1.0) ? ch : 1.0;
 }
@@ -15398,6 +15488,35 @@ static void submit_form(browser_window *w, const rd_block *rep) {
         nf++;
     }
 
+    /* The internal configuration page submits to itself: the fields become the query of
+     * about:config, which do_load applies. No network and no fm_build (its target is not https). */
+    {
+        if (w->config_page && w->cur_top == NULL) {
+            char q[3072];
+            size_t qn = 0;
+            int full = 0;
+            for (size_t i = 0; i < nf && !full; ++i) {
+                size_t need = strlen(fields[i].name) + 3 * strlen(fields[i].value) + 3;
+                if (qn + need >= sizeof q - 16) { full = 1; break; }
+                qn += (size_t)snprintf(q + qn, sizeof q - qn, "%s%s=", qn ? "&" : "", fields[i].name);
+                for (const unsigned char *c = (const unsigned char *)fields[i].value; *c != '\0'; ++c) {
+                    int plain = (*c >= 'a' && *c <= 'z') || (*c >= 'A' && *c <= 'Z')
+                             || (*c >= '0' && *c <= '9') || *c == '-' || *c == '.' || *c == '_' || *c == '~';
+                    qn += (size_t)snprintf(q + qn, sizeof q - qn, plain ? "%c" : "%%%02X",
+                                           plain ? (int)*c : (unsigned)*c);
+                }
+            }
+            if (full) {
+                browser_set_status(&w->bs, "The configuration values are too long.", now_ms());
+                return;
+            }
+            char target[3200];
+            snprintf(target, sizeof target, "about:config?%s", q);
+            do_load(w, target);
+            return;
+        }
+    }
+
     /* Dispatch submit event to JS before proceeding. If the handler calls
      * preventDefault(), abort the native form submission. */
     if (w->js_mode != JSP_OFF && w->tab_worker != NULL && rep->node_id != DOM_NODE_NONE) {
@@ -15460,7 +15579,7 @@ static int menu_item_checked(const browser_window *w, size_t i) {
     if (it->action == UI_MENU_HOSTADD) return 0; /* an action, never "checked" */
     if (it->action == UI_MENU_BOOKMARK)
         return prefs_bookmark_index(&w->prefs, browser_current_url(&w->bs)) >= 0;
-    if (it->action == UI_MENU_BOOKMARKS) return 0; /* an action, never "checked" */
+    if (it->action == UI_MENU_BOOKMARKS || it->action == UI_MENU_CONFIG) return 0; /* actions, never "checked" */
     if (it->action == UI_MENU_REMHIST) return w->prefs.remember_history;
     return *(const bool *)((const char *)&w->caps + it->cap_offset);
 }
@@ -15552,6 +15671,11 @@ static void menu_item_toggle(browser_window *w, size_t i) {
     if (it->action == UI_MENU_BOOKMARKS) {
         w->menu_open = 0;
         do_load(w, "about:bookmarks");
+        return;
+    }
+    if (it->action == UI_MENU_CONFIG) {
+        w->menu_open = 0;
+        do_load(w, "about:config");
         return;
     }
     if (it->action == UI_MENU_REMHIST) {
@@ -16704,6 +16828,7 @@ static tab *freebug_repl_worker(browser_window *w) {
     });
     tab_set_fetcher(t, gui_subresource_fetch, w);
     tab_set_net_allowed(t, wc.net);
+    tab_set_identity(t, w->prefs.identity);
     tab_set_css_allowed(t, wc.css);
     seed_session_cookies(t, wc.cookies, w->cur_top); /* REPL worker sees the same cookies */
     seed_local_storage(w, t, wc.cookies);
@@ -17878,7 +18003,13 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
             w->ua_field_focused = 0;
         } else if (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter) {
             w->ua_field_focused = 0;
-            browser_set_status(&w->bs, "User-Agent set; reload to apply.", now_ms());
+            if (idn_set_user_agent(&w->identity, tf_text(&w->ua_field)) == 0) {
+                identity_commit(w);
+                browser_set_status(&w->bs, "User-Agent set; reload to apply.", now_ms());
+            } else {
+                identity_commit(w);                    /* restore the editor to the valid value */
+                browser_set_status(&w->bs, "That User-Agent is not valid (printable ASCII only).", now_ms());
+            }
         } else if (sym == XKB_KEY_BackSpace) {
             tf_backspace(&w->ua_field);
         } else if (sym == XKB_KEY_Delete || sym == XKB_KEY_KP_Delete) {
@@ -18238,6 +18369,8 @@ ui_status ui_run_browser(const char *start_url) {
     w.tab_count = 1;            /* the foreground tab lives in the window's own fields */
     w.active_tab = 0;
     tf_init(&w.ua_field);       /* empty => SF_DEFAULT_USER_AGENT */
+    idn_defaults(&w.identity);
+    identity_load(&w);          /* the persisted identity override ("" => anti_fp default) */
     fc_init(&w.fc);             /* animation frame scheduler (Phase R1) */
 
     /* Key auto-repeat: a monotonic timerfd polled alongside the Wayland fd. Defaults

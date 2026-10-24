@@ -1,6 +1,47 @@
 # API (page 5 of 11)
 Previous: [API_p4.md](API_p4.md)
 
+## include/tab.h
+Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
+Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tab.c`, `tests/test_tab.c`
+- `tab_worker_dispatch` (function) `include/tab.h:152` `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
+- `tab_open` (function) `include/tab.h:156` `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
+- `tab_parse_worker_args` (function) `include/tab.h:163` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` -- Pure validator of the worker handoff arguments (the security-relevant surface of the exec): returns nonzero and...
+- `out_status` (function) `include/tab.h:175` `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
+- `tab_set_fetcher` (function) `include/tab.h:186` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` -- Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests are then * refused). fn/ctx must...
+- `bytes` (function) `include/tab.h:190` `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
+- `tab_set_css_sink` (function) `include/tab.h:199` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
+- `tab_set_net_allowed` (function) `include/tab.h:204` `void tab_set_net_allowed(tab *t, int allowed);` -- Grants/revokes page-JS network access (XMLHttpRequest/fetch) for the NEXT load.
+- `jar` (function) `include/tab.h:207` `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
+- `tab_set_cookies` (function) `include/tab.h:211` `void tab_set_cookies(tab *t, const char *cookies);` -- Seeds the page's document.cookie jar for the NEXT load with cookies ("name=value; ...") the trusted parent read from...
+- `origin` (function) `include/tab.h:214` `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
+- `tab_set_storage` (function) `include/tab.h:216` `void tab_set_storage(tab *t, const char *blob, size_t len);` -- Seeds localStorage for the next load from the parent's in-memory store for the page origin (web_storage snapshot...
+- `exclusively` (function) `include/tab.h:222` `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
+- `tab_set_viewport_w` (function) `include/tab.h:230` `void tab_set_viewport_w(tab *t, int px);` -- Sets the render viewport width (px) used to evaluate @media width queries on the NEXT load, so a responsive page...
+- `tab_set_identity` (function) `include/tab.h:235` `void tab_set_identity(tab *t, const char *serialized);` -- The user's identity override (idn_serialize text, spec/identity.md) for the NEXT loads: the worker applies it to...
+- `tab_last_subreq_stats` (function) `include/tab.h:241` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` -- Subresources the parent served for the LAST load (the worker's TAG_SUBREQ: XHR, fetch, external scripts, ES...
+- `tab_subreq_permitted` (function) `include/tab.h:246` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` -- Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants for this load, never the worker's...
+- `view` (function) `include/tab.h:254` `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
+- `string` (function) `include/tab.h:274` `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
+- `granted` (function) `include/tab.h:323` `* granted (allow.conf AND js.conf);`
+- `returned` (function) `include/tab.h:324` `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
+- `popstate` (function) `include/tab.h:330` `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
+- `decode` (function) `include/tab.h:349` `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
+- `tab_alive` (function) `include/tab.h:362` `int tab_alive(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
+- `tab_child_pid` (function) `include/tab.h:365` `pid_t tab_child_pid(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
+- `tab_close` (function) `include/tab.h:368` `void tab_close(tab *t);` -- variant): data_url slices the base64 payload out of `data_url` (no allocation, no network -- the bytes are already...
+- `tab_page_free` (function) `include/tab.h:371` `void tab_page_free(tab_page *p);` -- malformed data: URI is not a transport error: *out stays zeroed, same as an * undecodable format, and the caller...
+- `tab_eval_result_free` (function) `include/tab.h:372` `void tab_eval_result_free(tab_eval_result *r);`
+- `tab_image_free` (function) `include/tab.h:373` `void tab_image_free(tab_image *img);`
+
+## include/text_case.h
+Imported by: `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`
+- `cp` (function) `include/text_case.h:19` `* cp (identity otherwise), so a transformed text keeps its length. */ uint32_t tc_upper(uint32_t cp);`
+- `tc_lower` (function) `include/text_case.h:21` `uint32_t tc_lower(uint32_t cp);`
+- `tc_is_lower` (function) `include/text_case.h:24` `int tc_is_lower(uint32_t cp);` -- Simple 1:1 case mapping for ASCII, Latin-1, Latin Extended-A, basic Greek and basic Cyrillic.
+- `tc_transform` (function) `include/text_case.h:29` `size_t tc_transform(const char *s, size_t n, int transform, int word_start, char *out, size_t cap);` -- Copies s[0,n) to out applying transform (CSS_TT_UPPERCASE / _LOWERCASE / _CAPITALIZE; any other value copies...
+- `tc_smallcaps_runs` (function) `include/text_case.h:41` `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap);` -- Splits s[0,n) into consecutive maximal runs of lowercase letters vs the rest, covering the whole text in order.
+
 ## include/text_shape.h
 Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 - `content` (function) `include/text_shape.h:11` `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);`

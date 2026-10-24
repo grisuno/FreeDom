@@ -160,7 +160,7 @@ int cg_expand_bg_imag...`
   - `clip_word` (function, line 104) `static int clip_word(const char *t)`
   - `image_layer` (function, line 112) `static int image_layer(const char *tok, cm_layer *l)`
   - `emit_layers` (function, line 130) `static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val)`
-  - `cm_expand` (function, line 181) `int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)`
+  - `cm_expand` (function, line 197) `int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)`
   - `CM_TOK_MAX` (macro, line 8) `#define CM_TOK_MAX`
   - `CM_MAX_TOKS` (macro, line 9) `#define CM_MAX_TOKS`
 - Depends on: `include/css_gradient.h`, `include/css_mask.h`

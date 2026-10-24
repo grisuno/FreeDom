@@ -37,6 +37,12 @@ typedef enum je_status {
  * to be called on a freshly created context, before any untrusted script runs. */
 je_status je_install(js_context *ctx, int screen_w, int screen_h);
 
+/* As je_install with the user's identity override (spec/identity.md): `user_agent` becomes
+ * navigator.userAgent and appVersion, `languages` (comma-separated tags, already validated by
+ * idn_set_languages) navigator.language/languages. NULL or "" keeps the normalized default. */
+je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
+                              const char *user_agent, const char *languages);
+
 /* Installs sealed, read-only `canvas` and `audio` globals, each with a
  * `readback(Uint8Array)` method that returns a new Uint8Array with fp_perturb
  * applied under readback_key. This is the seam where canvas pixel / audio sample

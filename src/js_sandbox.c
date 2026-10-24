@@ -530,13 +530,24 @@ void *js_context_raw(js_context *ctx) {
  * specifier or no host is a TypeError (the import fails, the page continues). */
 static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque) {
     js_context *c = (js_context *)opaque;
-    char out[JS_MODULE_URL_MAX];
-    if (c == NULL || c->mod_resolve == NULL
-        || c->mod_resolve(c->mod_host, base, name, out, sizeof out) != 0) {
+    size_t nlen = strlen(name);
+    /* A data: specifier is its own URL and can dwarf any URL limit, so the output buffer
+     * grows with the specifier instead of capping it. */
+    if (c == NULL || c->mod_resolve == NULL || nlen > JS_MODULE_BYTES_MAX) {
         JS_ThrowTypeError(jc, "Failed to resolve module specifier \"%s\"", name);
         return NULL;
     }
-    return js_strdup(jc, out);
+    size_t cap = nlen + JS_MODULE_URL_MAX;
+    char *out = (char *)calloc(cap, 1);
+    if (out == NULL) { JS_ThrowOutOfMemory(jc); return NULL; }
+    if (c->mod_resolve(c->mod_host, base, name, out, cap) != 0) {
+        free(out);
+        JS_ThrowTypeError(jc, "Failed to resolve module specifier \"%s\"", name);
+        return NULL;
+    }
+    char *r = js_strdup(jc, out);
+    free(out);
+    return r;
 }
 
 /* Sets import.meta.url of a compiled module to its absolute URL. */

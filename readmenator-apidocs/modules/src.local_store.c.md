@@ -5,7 +5,7 @@
 ## Contents
 
 - **Functions:** [`ls_derive_key`](#ls_derive_key), [`ls_seal`](#ls_seal), [`ls_open`](#ls_open), [`ls_seal_passphrase`](#ls_seal_passphrase), [`ls_open_passphrase`](#ls_open_passphrase), [`ls_free`](#ls_free)
-- **Macros:** [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`LS_VERSION`](#ls_version), [`LS_KDF_NONE`](#ls_kdf_none), [`LS_KDF_ARGON2ID`](#ls_kdf_argon2id), [`LS_ARGON2_T`](#ls_argon2_t), [`LS_ARGON2_M_KIB`](#ls_argon2_m_kib), [`LS_ARGON2_P`](#ls_argon2_p), [`OFF_MAGIC`](#off_magic), [`OFF_VERSION`](#off_version), [`OFF_AEAD`](#off_aead), [`OFF_KDF`](#off_kdf), [`OFF_SALT`](#off_salt), [`OFF_NONCE`](#off_nonce)
+- **Macros:** [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`_GNU_SOURCE`](#_gnu_source), [`OSSL_KDF_PARAM_ARGON2_LANES`](#ossl_kdf_param_argon2_lanes), [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](#ossl_kdf_param_argon2_memcost), [`OSSL_KDF_PARAM_THREADS`](#ossl_kdf_param_threads), [`LS_VERSION`](#ls_version), [`LS_KDF_NONE`](#ls_kdf_none), [`LS_KDF_ARGON2ID`](#ls_kdf_argon2id), [`LS_ARGON2_T`](#ls_argon2_t), [`LS_ARGON2_M_KIB`](#ls_argon2_m_kib), [`LS_ARGON2_P`](#ls_argon2_p), [`OFF_MAGIC`](#off_magic), [`OFF_VERSION`](#off_version), [`OFF_AEAD`](#off_aead), [`OFF_KDF`](#off_kdf), [`OFF_SALT`](#off_salt), [`OFF_NONCE`](#off_nonce)
 
 ## Call Graph
 
@@ -26,7 +26,7 @@ flowchart LR
 
 ### `ls_derive_key`
 
-`function` | [src/local_store.c:855](../../src/local_store.c#L855)
+`function` | [src/local_store.c:866](../../src/local_store.c#L866)
 
 ```c
 ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len, const uint8_t *salt, size_t salt_len, uint8_t out_key[LS_KEY_LEN])
@@ -52,7 +52,7 @@ ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len, const uint8_
 
 ### `ls_seal`
 
-`function` | [src/local_store.c:986](../../src/local_store.c#L986)
+`function` | [src/local_store.c:997](../../src/local_store.c#L997)
 
 ```c
 ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead, const uint8_t *plaintext, size_t pt_len, uint8_t **out, size_t *out_len)
@@ -79,7 +79,7 @@ ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead, const uint8_t *pl
 
 ### `ls_open`
 
-`function` | [src/local_store.c:999](../../src/local_store.c#L999)
+`function` | [src/local_store.c:1010](../../src/local_store.c#L1010)
 
 ```c
 ls_status ls_open(const uint8_t key[LS_KEY_LEN], const uint8_t *blob, size_t blob_len, uint8_t **out, size_t *out_len)
@@ -105,7 +105,7 @@ ls_status ls_open(const uint8_t key[LS_KEY_LEN], const uint8_t *blob, size_t blo
 
 ### `ls_seal_passphrase`
 
-`function` | [src/local_store.c:1010](../../src/local_store.c#L1010)
+`function` | [src/local_store.c:1021](../../src/local_store.c#L1021)
 
 ```c
 ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead, const uint8_t *plaintext, size_t pt_len, uint8_t **out, size_t *out_len)
@@ -133,7 +133,7 @@ ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead
 
 ### `ls_open_passphrase`
 
-`function` | [src/local_store.c:1031](../../src/local_store.c#L1031)
+`function` | [src/local_store.c:1042](../../src/local_store.c#L1042)
 
 ```c
 ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len, const uint8_t *blob, size_t blob_len, uint8_t **out, size_t *out_len)
@@ -160,7 +160,7 @@ ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len, const u
 
 ### `ls_free`
 
-`function` | [src/local_store.c:1051](../../src/local_store.c#L1051)
+`function` | [src/local_store.c:1062](../../src/local_store.c#L1062)
 
 ```c
 void ls_free(uint8_t *buf, size_t len)
@@ -3499,7 +3499,7 @@ Safe on NULL.
 
 ### `OSSL_KDF_PARAM_ARGON2_LANES`
 
-`macro` | [src/local_store.c:786](../../src/local_store.c#L786)
+`macro` | [src/local_store.c:762](../../src/local_store.c#L762)
 
 ```c
 #define OSSL_KDF_PARAM_ARGON2_LANES
@@ -3511,7 +3511,7 @@ Safe on NULL.
 
 ### `OSSL_KDF_PARAM_ARGON2_MEMCOST`
 
-`macro` | [src/local_store.c:789](../../src/local_store.c#L789)
+`macro` | [src/local_store.c:765](../../src/local_store.c#L765)
 
 ```c
 #define OSSL_KDF_PARAM_ARGON2_MEMCOST
@@ -3523,7 +3523,55 @@ Safe on NULL.
 
 ### `OSSL_KDF_PARAM_THREADS`
 
-`macro` | [src/local_store.c:792](../../src/local_store.c#L792)
+`macro` | [src/local_store.c:768](../../src/local_store.c#L768)
+
+```c
+#define OSSL_KDF_PARAM_THREADS
+```
+
+---
+
+<a id="_gnu_source"></a>
+
+### `_GNU_SOURCE`
+
+`macro` | [src/local_store.c:770](../../src/local_store.c#L770)
+
+```c
+#define _GNU_SOURCE
+```
+
+---
+
+<a id="ossl_kdf_param_argon2_lanes"></a>
+
+### `OSSL_KDF_PARAM_ARGON2_LANES`
+
+`macro` | [src/local_store.c:797](../../src/local_store.c#L797)
+
+```c
+#define OSSL_KDF_PARAM_ARGON2_LANES
+```
+
+---
+
+<a id="ossl_kdf_param_argon2_memcost"></a>
+
+### `OSSL_KDF_PARAM_ARGON2_MEMCOST`
+
+`macro` | [src/local_store.c:800](../../src/local_store.c#L800)
+
+```c
+#define OSSL_KDF_PARAM_ARGON2_MEMCOST
+```
+
+---
+
+<a id="ossl_kdf_param_threads"></a>
+
+### `OSSL_KDF_PARAM_THREADS`
+
+`macro` | [src/local_store.c:803](../../src/local_store.c#L803)
 
 ```c
 #define OSSL_KDF_PARAM_THREADS
@@ -3535,7 +3583,7 @@ Safe on NULL.
 
 ### `LS_VERSION`
 
-`macro` | [src/local_store.c:795](../../src/local_store.c#L795)
+`macro` | [src/local_store.c:806](../../src/local_store.c#L806)
 
 ```c
 #define LS_VERSION
@@ -3547,7 +3595,7 @@ Safe on NULL.
 
 ### `LS_KDF_NONE`
 
-`macro` | [src/local_store.c:796](../../src/local_store.c#L796)
+`macro` | [src/local_store.c:807](../../src/local_store.c#L807)
 
 ```c
 #define LS_KDF_NONE
@@ -3559,7 +3607,7 @@ Safe on NULL.
 
 ### `LS_KDF_ARGON2ID`
 
-`macro` | [src/local_store.c:797](../../src/local_store.c#L797)
+`macro` | [src/local_store.c:808](../../src/local_store.c#L808)
 
 ```c
 #define LS_KDF_ARGON2ID
@@ -3571,7 +3619,7 @@ Safe on NULL.
 
 ### `LS_ARGON2_T`
 
-`macro` | [src/local_store.c:800](../../src/local_store.c#L800)
+`macro` | [src/local_store.c:811](../../src/local_store.c#L811)
 
 ```c
 #define LS_ARGON2_T
@@ -3585,7 +3633,7 @@ Argon2id v1 parameters (OWASP interactive minimums).
 
 ### `LS_ARGON2_M_KIB`
 
-`macro` | [src/local_store.c:801](../../src/local_store.c#L801)
+`macro` | [src/local_store.c:812](../../src/local_store.c#L812)
 
 ```c
 #define LS_ARGON2_M_KIB
@@ -3599,7 +3647,7 @@ passes (t_cost)
 
 ### `LS_ARGON2_P`
 
-`macro` | [src/local_store.c:802](../../src/local_store.c#L802)
+`macro` | [src/local_store.c:813](../../src/local_store.c#L813)
 
 ```c
 #define LS_ARGON2_P
@@ -3613,7 +3661,7 @@ memory cost in KiB (19 MiB)
 
 ### `OFF_MAGIC`
 
-`macro` | [src/local_store.c:805](../../src/local_store.c#L805)
+`macro` | [src/local_store.c:816](../../src/local_store.c#L816)
 
 ```c
 #define OFF_MAGIC
@@ -3627,7 +3675,7 @@ Container field offsets.
 
 ### `OFF_VERSION`
 
-`macro` | [src/local_store.c:806](../../src/local_store.c#L806)
+`macro` | [src/local_store.c:817](../../src/local_store.c#L817)
 
 ```c
 #define OFF_VERSION
@@ -3639,7 +3687,7 @@ Container field offsets.
 
 ### `OFF_AEAD`
 
-`macro` | [src/local_store.c:807](../../src/local_store.c#L807)
+`macro` | [src/local_store.c:818](../../src/local_store.c#L818)
 
 ```c
 #define OFF_AEAD
@@ -3651,7 +3699,7 @@ Container field offsets.
 
 ### `OFF_KDF`
 
-`macro` | [src/local_store.c:808](../../src/local_store.c#L808)
+`macro` | [src/local_store.c:819](../../src/local_store.c#L819)
 
 ```c
 #define OFF_KDF
@@ -3663,7 +3711,7 @@ Container field offsets.
 
 ### `OFF_SALT`
 
-`macro` | [src/local_store.c:809](../../src/local_store.c#L809)
+`macro` | [src/local_store.c:820](../../src/local_store.c#L820)
 
 ```c
 #define OFF_SALT
@@ -3675,7 +3723,7 @@ Container field offsets.
 
 ### `OFF_NONCE`
 
-`macro` | [src/local_store.c:810](../../src/local_store.c#L810)
+`macro` | [src/local_store.c:821](../../src/local_store.c#L821)
 
 ```c
 #define OFF_NONCE

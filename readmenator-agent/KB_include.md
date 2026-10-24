@@ -41,7 +41,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `FP_SEC_FETCH_MODE_NAV` (macro, line 46) `#define FP_SEC_FETCH_MODE_NAV`
   - `FP_SEC_FETCH_SITE_NONE` (macro, line 47) `#define FP_SEC_FETCH_SITE_NONE`
   - `FP_SEC_FETCH_USER_ON` (macro, line 48) `#define FP_SEC_FETCH_USER_ON`
-- Imported by: `include/secure_fetch.h`, `src/anti_fp.c`, `src/js_env.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_anti_fp.c`
+- Imported by: `include/secure_fetch.h`, `src/anti_fp.c`, `src/identity.c`, `src/js_env.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_anti_fp.c`, `tests/test_identity.c`
 
 ## include/block_flow.h
 - Doc: block_flow (bf_) -- vertical margin collapsing for block-level boxes.

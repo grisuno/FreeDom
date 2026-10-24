@@ -79,6 +79,7 @@ typedef struct sf_config {
     size_t      max_body_bytes; /* hard cap on buffered response; 0 => SF_DEFAULT_MAX_BODY */
     const char *kex_groups;     /* OpenSSL group list; NULL => SF_DEFAULT_KEX_GROUPS */
     const char *user_agent;     /* User-Agent header; NULL/"" => SF_DEFAULT_USER_AGENT */
+    const char *accept_language;/* Accept-Language value; NULL/"" => FP_ACCEPT_LANGUAGE_HEADER */
     sf_proxy_type proxy_type;   /* SF_PROXY_NONE => direct connection */
     const char *proxy_address;  /* "host:port" for the proxy; used iff proxy_type != NONE */
     int allow_overlay_http;     /* allow plain http:// (no TLS) -- ONLY for overlay realms
@@ -230,6 +231,10 @@ sf_config sf_config_default(void);
  * single place that resolves the effective User-Agent, so the orchestrator never
  * sends an empty header and the default lives in one tested spot. */
 const char *sf_user_agent_or_default(const char *ua);
+
+/* As sf_user_agent_or_default for Accept-Language. Both refuse a value holding a control byte
+ * (a CR/LF would split the request): the default is sent instead, never the tainted string. */
+const char *sf_accept_language_or_default(const char *lang);
 
 /* The interim impersonation ClientHello strings (pure; single source of truth so the
  * shaping is unit-testable without a live handshake). Both are classical (no MLKEM). */

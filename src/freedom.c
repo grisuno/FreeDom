@@ -17,6 +17,7 @@
 #include "freebug.h"
 #include "hostblock.h"
 #include "host_conf.h"
+#include "identity.h"
 #include "js_policy.h"
 #include "link_nav.h"
 #include "net_realm.h"
@@ -246,6 +247,17 @@ static void headless_load_hosts(void) {
  * headless globals every later stage already reads. The inputs are the GUI's: the host's
  * membership in allow.conf / js.conf, the JS mode from FREEDOM_JS (default allowlist), user
  * toggles off. Explicit --author-css / --images / --js=on still add on top. */
+/* The user's persisted identity (spec/identity.md), read only by --as-gui: the same value the GUI
+ * sends on the wire and reports through navigator. Defaults when unset. */
+static idn_config g_identity;
+static char g_identity_ser[IDN_SERIAL_MAX];
+static char g_accept_lang[160];
+
+static void apply_identity(sf_config *cfg) {
+    cfg->user_agent = (g_identity.user_agent[0] != '\0') ? g_identity.user_agent : NULL;
+    cfg->accept_language = (g_identity.languages[0] != '\0') ? g_accept_lang : NULL;
+}
+
 static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images) {
     if (!g_as_gui) return;
     char host[512];
@@ -259,6 +271,11 @@ static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int fla
     prefs_state pp;
     prefs_init(&pp);
     if (g_as_host == NULL) (void)ui_persisted_prefs(&pp);
+    if (g_as_host == NULL) {
+        snprintf(g_identity_ser, sizeof g_identity_ser, "%s", pp.identity);
+        idn_parse(&g_identity, g_identity_ser);
+        (void)idn_accept_language(&g_identity, g_accept_lang, sizeof g_accept_lang);
+    }
     const char *js_env = getenv("FREEDOM_JS");
     jsp_mode mode = (js_env != NULL && js_env[0] != '\0') ? jsp_mode_from_str(js_env)
                                                            : (jsp_mode)pp.js_mode;
@@ -457,6 +474,7 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
     }
 
     sf_config cfg = sf_config_default();
+    apply_identity(&cfg);
     if (g_hosts != NULL) {
         char host[512];
         if (rp_host_of(url, host, sizeof host) == 0) {
@@ -665,6 +683,7 @@ static int render_page(const char *html, size_t len, const char *top_url,
                           : wc_from_flags(g_headless_js, g_author_css,
                                           g_images || getenv("FREEDOM_IMAGES") != NULL);
     tab_set_net_allowed(t, wc.net);
+    tab_set_identity(t, g_identity_ser);
     tab_set_css_allowed(t, wc.css);
 
     /* Hito 29 (lookahead prefetch): pre-scan the HTML and download the external
@@ -947,6 +966,7 @@ static int fetch_and_render_one(const char *url, char **out_nav) {
     apply_as_gui(url, g_op_js, g_op_css, g_op_images);
 
     sf_config cfg = sf_config_default();
+    apply_identity(&cfg);
     if (g_hosts != NULL) {
         char host[512];
         if (rp_host_of(url, host, sizeof host) == 0) {
@@ -1072,6 +1092,7 @@ static int run_headless(const char *target) {
 static int build_fetch_config(const char *url, sf_config *cfg,
                                int *allowlisted) {
     *cfg = sf_config_default();
+    apply_identity(cfg);
     *allowlisted = 0;
     if (url == NULL) return -1;
     char host[512];

@@ -222,6 +222,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`hp_document`](modules/src.html_parse.c.md#hp_document) struct in `src/html_parse.c`
 - [`hp_script`](modules/include.html_parse.h.md#hp_script) struct in `include/html_parse.h`
 - [`hp_status`](modules/include.html_parse.h.md#hp_status) enum in `include/html_parse.h`
+- [`idn_config`](modules/include.identity.h.md#idn_config) struct in `include/identity.h`
+- [`idn_geo_mode`](modules/include.identity.h.md#idn_geo_mode) enum in `include/identity.h`
 - [`css_cand.idx`](modules/src.css.c.md#css_cand-idx) type_alias in `src/css.c`
 - [`ih_acc`](modules/src.dom.c.md#ih_acc) struct in `src/dom.c`
 - [`ih_block`](modules/src.dom.c.md#ih_block) struct in `src/dom.c`
@@ -490,6 +492,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`url_status`](modules/include.url.h.md#url_status) enum in `include/url.h`
 - [`used`](modules/src.text_shape.c.md#used) type_alias in `src/text_shape.c`
 - [`used`](modules/src.ws_hub.c.md#used) type_alias in `src/ws_hub.c`
+- [`user_agent`](modules/include.identity.h.md#user_agent) type_alias in `include/identity.h`
 - [`val_kind`](modules/include.interp.h.md#val_kind) type_alias in `include/interp.h`
 - [`vec`](modules/tools.gen_psl.c.md#vec) struct in `tools/gen_psl.c`
 - [`verb`](modules/include.svg_render.h.md#verb) type_alias in `include/svg_render.h`

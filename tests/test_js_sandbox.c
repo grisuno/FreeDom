@@ -345,6 +345,12 @@ typedef struct mod_host { int fetches; } mod_host;
 
 static int mh_resolve(void *host, const char *base, const char *spec, char *out, size_t outsz) {
     (void)host;
+    if (strncmp(spec, "data:", 5) == 0) {          /* its own URL, as the real host resolves it */
+        size_t dn = strlen(spec);
+        if (dn >= outsz) return -1;
+        memcpy(out, spec, dn + 1);
+        return 0;
+    }
     if (strncmp(spec, "./", 2) != 0 && strncmp(spec, "https://", 8) != 0) return -1;
     const char *rel = (spec[0] == '.') ? spec + 2 : NULL;
     int n;
@@ -362,7 +368,9 @@ static char *mh_fetch(void *host, const char *url, size_t *len) {
     mod_host *h = (mod_host *)host;
     h->fetches++;
     const char *src = NULL;
-    if (strcmp(url, "https://m.test/app/a.js") == 0)
+    if (strncmp(url, "data:", 5) == 0)
+        src = "export const d = 7;";
+    else if (strcmp(url, "https://m.test/app/a.js") == 0)
         src = "import { k } from './b.js'; export const v = k * 2;";
     else if (strcmp(url, "https://m.test/app/b.js") == 0)
         src = "export const k = 21; globalThis.bUrl = import.meta.url;";
@@ -449,6 +457,34 @@ static void test_dynamic_import_from_classic_script(void **state) {
     const char *rd = "String(globalThis.dyn)";
     assert_int_equal(js_eval(ctx, rd, strlen(rd), &r), JS_OK);
     assert_string_equal(r.value, "42");
+    js_result_free(&r);
+    js_context_free(ctx);
+}
+
+/* A data: module URL is its own name and may be far longer than any URL buffer (reddit's
+ * shreddit imports a 35 KB one): the normalizer must not cap it at the host's URL limit. */
+static void test_dynamic_import_of_long_data_url(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    mod_host h = { 0 };
+    js_set_module_host(ctx, mh_resolve, mh_fetch, &h);
+    enum { PAD = 20000 };
+    char *src = (char *)malloc(PAD + 256);
+    assert_non_null(src);
+    int n = snprintf(src, 200, "import('data:text/javascript,export%%20const%%20x%%3D1;/*");
+    memset(src + n, 'x', PAD);
+    n += PAD;
+    n += snprintf(src + n, 120, "*/').then(function(m){ globalThis.ldm = m.d; },"
+                                " function(e){ globalThis.ldm = 'fail:' + e; });");
+    js_result r;
+    assert_int_equal(js_eval(ctx, src, (size_t)n, &r), JS_OK);
+    js_result_free(&r);
+    free(src);
+    (void)js_pump_jobs(ctx, 256);
+    const char *rd = "String(globalThis.ldm)";
+    assert_int_equal(js_eval(ctx, rd, strlen(rd), &r), JS_OK);
+    assert_string_equal(r.value, "7");
     js_result_free(&r);
     js_context_free(ctx);
 }
@@ -600,6 +636,7 @@ int main(void) {
         cmocka_unit_test(test_module_imports_resolve_and_run),
         cmocka_unit_test(test_module_errors_are_reported),
         cmocka_unit_test(test_dynamic_import_from_classic_script),
+        cmocka_unit_test(test_dynamic_import_of_long_data_url),
         cmocka_unit_test(test_module_without_host_cannot_import),
         cmocka_unit_test(test_module_self_await_teardown),
         cmocka_unit_test(test_loc_from_stack_saturates_huge_numbers),

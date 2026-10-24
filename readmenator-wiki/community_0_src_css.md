@@ -1,14 +1,14 @@
 # src: css
 
-*Community 1 | 50 files | cohesion 0.71*
+*Community 0 | 53 files | cohesion 0.72*
 
 ## Definition
 
-This community groups 50 file(s) rooted at `src` with dominant language c (cohesion 0.71). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `BT_LEN_AUTO`, `BT_WRAP_EPS`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`. Core file: `tests/test_css.c` (354 symbols). Documented purpose: The sheet's two string pools -- background url()s, and the ::before/::after.
+This community groups 53 file(s) rooted at `src` with dominant language c (cohesion 0.72). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `BT_LEN_AUTO`, `BT_WRAP_EPS`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`. Core file: `tests/test_css.c` (354 symbols). Documented purpose: The sheet's two string pools -- background url()s, and the ::before/::after.
 
 ## Files
 
-### `src` (18 files)
+### `src` (19 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -20,7 +20,7 @@ This community groups 50 file(s) rooted at `src` with dominant language c (cohes
 | `src/css_chain.c` | c | utility | 20 | no |
 | `src/css_color.c` | c | utility | 27 | no |
 
-### `include` (17 files)
+### `include` (18 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -30,9 +30,9 @@ This community groups 50 file(s) rooted at `src` with dominant language c (cohes
 | `include/css_box.h` | h | utility | 27 | no |
 | `include/css_chain.h` | h | utility | 8 | no |
 | `include/css_color.h` | h | utility | 7 | no |
-| `include/css_decl.h` | h | utility | 14 | yes |
+| `include/css_computed.h` | h | utility | 6 | no |
 
-### `tests` (15 files)
+### `tests` (16 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -41,9 +41,9 @@ This community groups 50 file(s) rooted at `src` with dominant language c (cohes
 | `tests/test_css_atrule.c` | c | testing | 10 | yes |
 | `tests/test_css_box.c` | c | testing | 13 | no |
 | `tests/test_css_color.c` | c | testing | 36 | no |
-| `tests/test_css_drops.c` | c | testing | 25 | yes |
+| `tests/test_css_computed.c` | c | testing | 9 | no |
 
-*... and 30 more files in this community.*
+*... and 33 more files in this community.*
 
 
 ## Key Symbols
@@ -81,16 +81,17 @@ This community groups 50 file(s) rooted at `src` with dominant language c (cohes
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 100
+- Internal resolved imports (EXTRACTED): 103
 - Cross-boundary resolved imports (EXTRACTED): 42
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/compositor.h.
-- [EXTRACTED] depends_on community 5 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
-- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/css_computed.h imports include/css.h.
-- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
-- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
+- [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/compositor.h.
+- [EXTRACTED] depends_on community 6 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/bui_theme.c imports include/css.h.
+- [EXTRACTED] depends_on community 5 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
+- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
+- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/dom.h.
+- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
 
 ## Risks
 
@@ -108,9 +109,9 @@ This community groups 50 file(s) rooted at `src` with dominant language c (cohes
 
 ## Open Questions
 
-- Why do 38 file(s) lack file-level docs (e.g. `include/compositor.h`)? What purpose do they serve?
+- Why do 41 file(s) lack file-level docs (e.g. `include/compositor.h`)? What purpose do they serve?
 - What would break if the most connected file in src: css changed?
-- Should src: css be split, given cohesion 0.71?
+- Should src: css be split, given cohesion 0.72?
 
 ## Sources
 
@@ -120,6 +121,7 @@ This community groups 50 file(s) rooted at `src` with dominant language c (cohes
 - `include/css_box.h`
 - `include/css_chain.h`
 - `include/css_color.h`
+- `include/css_computed.h`
 - `include/css_decl.h`
 - `include/css_gradient.h`
 - `include/css_index.h`
@@ -133,5 +135,4 @@ This community groups 50 file(s) rooted at `src` with dominant language c (cohes
 - `include/text_case.h`
 - `src/box_tree.c`
 - `src/compositor.c`
-- `src/css.c`
-- *... and 30 more*
+- *... and 33 more*

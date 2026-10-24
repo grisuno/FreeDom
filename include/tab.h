@@ -229,6 +229,11 @@ void tab_set_css_allowed(tab *t, int allowed);
  * normalized desktop, so no real geometry leaks into computed lengths. */
 void tab_set_viewport_w(tab *t, int px);
 
+/* The user's identity override (idn_serialize text, spec/identity.md) for the NEXT loads: the
+ * worker applies it to navigator and, for a trusted host with a fixed place, installs
+ * geolocation. "" / NULL (or a string that does not fit) is the normalized default. */
+void tab_set_identity(tab *t, const char *serialized);
+
 /* Subresources the parent served for the LAST load (the worker's TAG_SUBREQ: XHR,
  * fetch, external scripts, ES modules): how many, and the total wall time the
  * worker spent blocked on them, in microseconds. A diagnostic (FREEDOM_PERF): it

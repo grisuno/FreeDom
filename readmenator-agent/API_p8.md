@@ -33,6 +33,32 @@ Depends on: `include/dom.h`, `include/html_parse.h`, `include/util.h`
 - `hp_document_free` (function) `src/html_parse.c:483` `void hp_document_free(hp_document *doc)`
 - `hp_document_root` (function) `src/html_parse.c:489` `const void *hp_document_root(const hp_document *doc)`
 
+## src/identity.c
+Depends on: `include/anti_fp.h`, `include/identity.h`
+- `is_alpha` (function) `src/identity.c:20` `static int is_alpha(char c)`
+- `is_alnum` (function) `src/identity.c:21` `static int is_alnum(char c)`
+- `idn_defaults` (function) `src/identity.c:23` `void idn_defaults(idn_config *c)`
+- `idn_is_default` (function) `src/identity.c:29` `int idn_is_default(const idn_config *c)`
+- `idn_set_user_agent` (function) `src/identity.c:34` `int idn_set_user_agent(idn_config *c, const char *ua)`
+- `tag_valid` (function) `src/identity.c:50` `static int tag_valid(const char *s, size_t n)` -- size_t n = strlen(ua); if (n >= IDN_UA_MAX) return -1; int printable = 0; for (size_t i = 0; i < n; ++i) { unsigned...
+- `idn_set_languages` (function) `src/identity.c:63` `int idn_set_languages(idn_config *c, const char *list)`
+- `idn_set_geo` (function) `src/identity.c:91` `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)`
+- `idn_clear_geo` (function) `src/identity.c:103` `void idn_clear_geo(idn_config *c)`
+- `idn_user_agent` (function) `src/identity.c:109` `const char *idn_user_agent(const idn_config *c)`
+- `idn_accept_language` (function) `src/identity.c:113` `size_t idn_accept_language(const idn_config *c, char *out, size_t cap)`
+- `idn_primary_language` (function) `src/identity.c:143` `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)`
+- `hexval` (function) `src/identity.c:157` `static int hexval(int ch)`
+- `pct_decode` (function) `src/identity.c:166` `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)` -- Decodes %XX (and '+' when plus) from [s, s+n) into out.
+- `append` (function) `src/identity.c:186` `static int append(char *buf, size_t *n, size_t cap, const char *fmt, ...)`
+- `append_pct` (function) `src/identity.c:197` `static int append_pct(char *buf, size_t *n, size_t cap, const char *s)`
+- `idn_serialize` (function) `src/identity.c:206` `size_t idn_serialize(const idn_config *c, char *out, size_t cap)`
+- `parse_geo` (function) `src/identity.c:223` `static int parse_geo(const char *s, double *lat, double *lon, double *acc)` -- if (c == NULL) return 0; size_t n = 0; if (append(out, &n, cap, "ua=") != 0 || append_pct(out, &n, cap...
+- `idn_parse` (function) `src/identity.c:236` `void idn_parse(idn_config *c, const char *text)`
+- `parse_number` (function) `src/identity.c:268` `static int parse_number(const char *s, double *out)`
+- `idn_apply_query` (function) `src/identity.c:275` `unsigned idn_apply_query(idn_config *c, const char *query)`
+- `esc_append` (function) `src/identity.c:346` `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)`
+- `idn_render_page` (function) `src/identity.c:362` `size_t idn_render_page(const idn_config *c, char *out, size_t cap)`
+
 ## src/image_decode.c
 Depends on: `include/image_decode.h`
 - `exit` (function) `src/image_decode.c:6` `* malformed stream fails closed instead of calling exit(). GIF uses an own pure-C * bounded LZW decoder (no giflib)....`
@@ -201,24 +227,27 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
 - `size` (function) `src/js_dom.c:1289` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
 - `js_env` (function) `src/js_dom.c:1292` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
-- `jd_install` (function) `src/js_dom.c:1851` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-- `jd_flush_custom_elements` (function) `src/js_dom.c:1933` `void jd_flush_custom_elements(js_context *ctx)`
-- `fails` (function) `src/js_dom.c:1947` `* cap is reached or an allocation fails (caller stops), else 0. */
+- `jd_install` (function) `src/js_dom.c:1864` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+- `jd_flush_custom_elements` (function) `src/js_dom.c:1946` `void jd_flush_custom_elements(js_context *ctx)`
+- `fails` (function) `src/js_dom.c:1960` `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-- `jd_install_console` (function) `src/js_dom.c:2061` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-- `jd_set_cookies` (function) `src/js_dom.c:2098` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-- `jd_get_cookies` (function) `src/js_dom.c:2118` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-- `jd_set_computed` (function) `src/js_dom.c:2141` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-- `jd_set_geometry` (function) `src/js_dom.c:2152` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+- `jd_install_console` (function) `src/js_dom.c:2074` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+- `jd_set_cookies` (function) `src/js_dom.c:2111` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+- `jd_get_cookies` (function) `src/js_dom.c:2131` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+- `jd_set_computed` (function) `src/js_dom.c:2154` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+- `jd_set_geometry` (function) `src/js_dom.c:2165` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
 
 ## src/js_dom_ext.c
 Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`
-- `identity` (function) `src/js_dom_ext.c:98` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
-- `registration` (function) `src/js_dom_ext.c:373` `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
+- `identity` (function) `src/js_dom_ext.c:99` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
+- `registration` (function) `src/js_dom_ext.c:374` `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
  * observer...`
-- `run` (function) `src/js_dom_ext.c:515` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
-- `jdx_install` (function) `src/js_dom_ext.c:523` `int jdx_install(JSContext *ctx)`
-- `jd_install_repl_api` (function) `src/js_dom_ext.c:529` `jd_status jd_install_repl_api(js_context *ctx)`
+- `run` (function) `src/js_dom_ext.c:1120` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
+- `jdx_install` (function) `src/js_dom_ext.c:1128` `int jdx_install(JSContext *ctx)`
+- `jd_install_repl_api` (function) `src/js_dom_ext.c:1135` `jd_status jd_install_repl_api(js_context *ctx)`
+- `jd_set_repl_css` (function) `src/js_dom_ext.c:1143` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
+- `jd_install_geolocation` (function) `src/js_dom_ext.c:1156` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
+- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1175` `jd_status jd_install_indexeddb(js_context *ctx)`
 
 ## src/js_dom_ext.h
 Imported by: `src/js_dom.c`, `src/js_dom_ext.c`
@@ -265,20 +294,23 @@ Depends on: `include/anti_fp.h`, `include/js_env.h`, `include/js_sandbox.h`
 - `def_int` (function) `src/js_env.c:163` `static int def_int(JSContext *ctx, JSValueConst obj, const char *name, int32_t n)`
 - `def_fn` (function) `src/js_env.c:167` `static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
                   JSCFuncti...`
-- `build_languages` (function) `src/js_env.c:174` `static JSValue build_languages(JSContext *ctx)` -- navigator.languages: a sealed array built by splitting fp_accept_language() * (e.g. "en-US,en") on commas.
-- `build_navigator` (function) `src/js_env.c:198` `static int build_navigator(JSContext *ctx, JSValueConst global)`
+- `build_languages` (function) `src/js_env.c:174` `static JSValue build_languages(JSContext *ctx, const char *langs)` -- navigator.languages: a sealed array built by splitting fp_accept_language() * (e.g. "en-US,en") on commas.
+- `build_navigator` (function) `src/js_env.c:197` `static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_override,
+        ...`
 - `methods` (function) `src/js_env.c:201` `* capability methods (sendBeacon, spec/js_dom.md 7h) without touching any * fingerprintable field. An untrusted...`
-- `build_screen` (function) `src/js_env.c:302` `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)`
-- `build_crypto` (function) `src/js_env.c:346` `static int build_crypto(JSContext *ctx, JSValueConst global)`
-- `build_perf_timing` (function) `src/js_env.c:374` `static int build_perf_timing(JSContext *ctx, JSValueConst perf)`
-- `build_perf_navigation` (function) `src/js_env.c:388` `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)`
-- `build_performance` (function) `src/js_env.c:400` `static int build_performance(JSContext *ctx, JSValueConst global)`
-- `override_date_now` (function) `src/js_env.c:432` `static int override_date_now(JSContext *ctx, JSValueConst global)` -- Replaces the built-in Date.now with the coarsened version, non-writable and * non-configurable so a script cannot...
-- `make_readback` (function) `src/js_env.c:476` `static JSValue make_readback(JSContext *ctx, uint64_t key)`
-- `build_readback_obj` (function) `src/js_env.c:484` `static int build_readback_obj(JSContext *ctx, JSValueConst global,
+- `build_screen` (function) `src/js_env.c:309` `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)`
+- `build_crypto` (function) `src/js_env.c:353` `static int build_crypto(JSContext *ctx, JSValueConst global)`
+- `build_perf_timing` (function) `src/js_env.c:381` `static int build_perf_timing(JSContext *ctx, JSValueConst perf)`
+- `build_perf_navigation` (function) `src/js_env.c:395` `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)`
+- `build_performance` (function) `src/js_env.c:407` `static int build_performance(JSContext *ctx, JSValueConst global)`
+- `override_date_now` (function) `src/js_env.c:439` `static int override_date_now(JSContext *ctx, JSValueConst global)` -- Replaces the built-in Date.now with the coarsened version, non-writable and * non-configurable so a script cannot...
+- `make_readback` (function) `src/js_env.c:483` `static JSValue make_readback(JSContext *ctx, uint64_t key)`
+- `build_readback_obj` (function) `src/js_env.c:491` `static int build_readback_obj(JSContext *ctx, JSValueConst global,
                               ...`
-- `je_install` (function) `src/js_env.c:497` `je_status je_install(js_context *ctx, int screen_w, int screen_h)`
-- `je_install_canvas` (function) `src/js_env.c:516` `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)`
+- `je_install` (function) `src/js_env.c:504` `je_status je_install(js_context *ctx, int screen_w, int screen_h)`
+- `je_install_identity` (function) `src/js_env.c:508` `je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
+                      ...`
+- `je_install_canvas` (function) `src/js_env.c:528` `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)`
 
 ## src/js_events.c
 Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
@@ -300,8 +332,8 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
 - `m_host_fetch` (function) `src/js_fetch.c:46` `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
                             in...` -- __hostFetch(method, url, body) -> { status, body, contentType }.
 - `send` (function) `src/js_fetch.c:92` `* callbacks fire right after send();`
-- `task` (function) `src/js_fetch.c:187` `* current task (the page never waits on it);`
-- `jd_install_xhr` (function) `src/js_fetch.c:211` `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
+- `task` (function) `src/js_fetch.c:188` `* current task (the page never waits on it);`
+- `jd_install_xhr` (function) `src/js_fetch.c:212` `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
 
 ## src/js_geom.c
 Depends on: `include/js_geom.h`
@@ -378,24 +410,24 @@ Depends on: `include/js_sandbox.h`
 - `js_result_free` (function) `src/js_sandbox.c:465` `void js_result_free(js_result *res)`
 - `js_set_current_script` (function) `src/js_sandbox.c:489` `void js_set_current_script(js_context *ctx, const char *src, const char *type)`
 - `js_context_raw` (function) `src/js_sandbox.c:522` `void *js_context_raw(js_context *ctx)`
-- `mod_set_meta` (function) `src/js_sandbox.c:543` `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)` -- QuickJS normalizer: every specifier goes through the host resolver.
-- `mod_loader` (function) `src/js_sandbox.c:552` `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)` -- } return js_strdup(jc, out); } /* Sets import.meta.url of a compiled module to its absolute URL. static void...
-- `mod_normalize` (function) `src/js_sandbox.c:588` `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);`
-- `js_set_module_host` (function) `src/js_sandbox.c:591` `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,
+- `mod_set_meta` (function) `src/js_sandbox.c:554` `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)` -- size_t cap = nlen + JS_MODULE_URL_MAX; char *out = (char *)calloc(cap, 1); if (out == NULL) {...
+- `mod_loader` (function) `src/js_sandbox.c:563` `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)` -- free(out); return r; } /* Sets import.meta.url of a compiled module to its absolute URL. static void...
+- `mod_normalize` (function) `src/js_sandbox.c:599` `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);`
+- `js_set_module_host` (function) `src/js_sandbox.c:602` `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,
                         js...`
-- `mod_fail` (function) `src/js_sandbox.c:606` `static js_status mod_fail(js_context *ctx, js_result *res, JSValue reason, int use_reason,
+- `mod_fail` (function) `src/js_sandbox.c:617` `static js_status mod_fail(js_context *ctx, js_result *res, JSValue reason, int use_reason,
       ...` -- Fills res from the pending exception (or the given rejection value, which is * thrown first so the one capture path...
-- `js_eval_module` (function) `src/js_sandbox.c:621` `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,
+- `js_eval_module` (function) `src/js_sandbox.c:632` `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,
         ...`
-- `realm_of` (function) `src/js_sandbox.c:688` `static JSContext *realm_of(js_context *c, JSValueConst g)` -- The owning js_context rides in each native's closure data, split into 32-bit * halves (no assumption about JS number...
-- `throw_named` (function) `src/js_sandbox.c:701` `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)`
-- `m_realm_new` (function) `src/js_sandbox.c:711` `static JSValue m_realm_new(JSContext *ctx, JSValueConst this_val, int argc,
+- `realm_of` (function) `src/js_sandbox.c:699` `static JSContext *realm_of(js_context *c, JSValueConst g)` -- The owning js_context rides in each native's closure data, split into 32-bit * halves (no assumption about JS number...
+- `throw_named` (function) `src/js_sandbox.c:712` `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)`
+- `m_realm_new` (function) `src/js_sandbox.c:722` `static JSValue m_realm_new(JSContext *ctx, JSValueConst this_val, int argc,
                      ...`
-- `m_realm_eval` (function) `src/js_sandbox.c:725` `static JSValue m_realm_eval(JSContext *ctx, JSValueConst this_val, int argc,
+- `m_realm_eval` (function) `src/js_sandbox.c:736` `static JSValue m_realm_eval(JSContext *ctx, JSValueConst this_val, int argc,
                     ...` -- __realmEval(global, code, name): a classic script in that realm.
-- `m_realm_clone` (function) `src/js_sandbox.c:761` `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,
+- `m_realm_clone` (function) `src/js_sandbox.c:772` `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,
                    ...` -- __realmClone(value, global): structured copy into global's realm through the * serializer WITHOUT bytecode -- a...
-- `js_install_realms` (function) `src/js_sandbox.c:783` `js_status js_install_realms(js_context *ctx)`
+- `js_install_realms` (function) `src/js_sandbox.c:794` `js_status js_install_realms(js_context *ctx)`
 
 ## src/js_trusted.c
 Depends on: `include/js_trusted.h`, `include/web_storage.h`
@@ -432,57 +464,28 @@ Depends on: `include/link_nav.h`, `include/url.h`
 
 ## src/local_store.c
 Depends on: `include/local_store.h`
-- `cipher_for` (function) `src/local_store.c:816` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
-- `argon2id_derive` (function) `src/local_store.c:826` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
+- `cipher_for` (function) `src/local_store.c:827` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
+- `argon2id_derive` (function) `src/local_store.c:837` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
                           ...`
-- `ls_derive_key` (function) `src/local_store.c:855` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
+- `ls_derive_key` (function) `src/local_store.c:866` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
                         const...`
-- `aead_encrypt` (function) `src/local_store.c:864` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_encrypt` (function) `src/local_store.c:875` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `aead_decrypt` (function) `src/local_store.c:890` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_decrypt` (function) `src/local_store.c:901` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `seal_core` (function) `src/local_store.c:918` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
+- `seal_core` (function) `src/local_store.c:929` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
                     ...`
-- `decrypt_blob` (function) `src/local_store.c:955` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
+- `decrypt_blob` (function) `src/local_store.c:966` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
          ...`
-- `ls_seal` (function) `src/local_store.c:986` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
+- `ls_seal` (function) `src/local_store.c:997` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
                   const uint8_t *p...`
-- `ls_open` (function) `src/local_store.c:999` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
+- `ls_open` (function) `src/local_store.c:1010` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
                   const uint8_t *blob, size_t bl...`
-- `ls_seal_passphrase` (function) `src/local_store.c:1010` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
+- `ls_seal_passphrase` (function) `src/local_store.c:1021` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
           ...`
-- `ls_open_passphrase` (function) `src/local_store.c:1031` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
+- `ls_open_passphrase` (function) `src/local_store.c:1042` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
-- `ls_free` (function) `src/local_store.c:1051` `void ls_free(uint8_t *buf, size_t len)`
-
-## src/media_decoder.c
-Depends on: `include/media_decoder.h`, `include/util.h`
-- `open` (function) `src/media_decoder.c:18` `*
- * Sandbox: the decoder needs open() for shared libraries (.so loading) and
- * brk/mmap for FFm...`
-- `decoder_close` (function) `src/media_decoder.c:78` `static void decoder_close(decoder_ctx *dc)` -- AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /* converted frame (ARGB) AVFrame...
-- `decoder_init` (function) `src/media_decoder.c:96` `static int decoder_init(decoder_ctx *dc, const uint8_t *data, size_t len)` -- Initialises the decoder from the first TS segment bytes.
-- `frame_pts_us` (function) `src/media_decoder.c:215` `static int64_t frame_pts_us(const AVFrame *f, AVRational tb, int64_t fallback)` -- Rescales a decoded frame's PTS to microseconds using the time base of the * stream it came from; frames without a...
-- `av_rescale_q` (function) `src/media_decoder.c:217` `return av_rescale_q(f->pts, tb, (AVRational)`
-- `send_video_frame` (function) `src/media_decoder.c:222` `static void send_video_frame(decoder_ctx *dc, int64_t pts_us)` -- Converts the current dc->frame (YUV) to BGRA and sends it as MD_FRAME with * the given PTS in microseconds.
-- `send_audio_frame` (function) `src/media_decoder.c:242` `static void send_audio_frame(decoder_ctx *dc, int64_t pts_us)` -- Converts the current dc->audio_frame to interleaved S16LE PCM and sends it as MD_AUDIO_FRAME with the given PTS in...
-- `decode_segment` (function) `src/media_decoder.c:276` `static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len)` -- Decodes one segment of TS data and sends frames.
-- `dropped` (function) `src/media_decoder.c:369` `* the codec in permanent EOF state: every segment after the first decoded * one was silently dropped ("plays a...`
-- `media_decoder_run` (function) `src/media_decoder.c:379` `void media_decoder_run(int out_fd, int cmd_fd)`
-- `media_decoder_spawn` (function) `src/media_decoder.c:449` `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd)`
-- `fd` (function) `src/media_decoder.c:469` `* prevent the Wayland display fd (inherited from the parent) from * surviving the exec. An inherited Wayland fd...`
-
-## src/net_realm.c
-Depends on: `include/net_realm.h`
-- `lower` (function) `src/net_realm.c:17` `static char lower(char c)`
-- `ends_with_realm` (function) `src/net_realm.c:23` `static int ends_with_realm(const char *host, size_t n, const char *suffix)` -- True if the lowercased host (length n) ends with ".suffix" AND has at least one * non-empty label before the dot....
-- `nr_classify_host` (function) `src/net_realm.c:34` `nr_realm nr_classify_host(const char *host)`
-- `host_of` (function) `src/net_realm.c:52` `static int host_of(const char *url, char *out, size_t out_size)` -- Extracts the host of scheme://host[:port][/...] into out (lowercased not required * here; nr_classify_host lowercases).
-- `nr_classify_url` (function) `src/net_realm.c:68` `nr_realm nr_classify_url(const char *url)`
-- `nr_route_for` (function) `src/net_realm.c:74` `nr_route nr_route_for(const char *url, nr_config cfg)`
-- `nr_realm_allows_http` (function) `src/net_realm.c:88` `int nr_realm_allows_http(nr_realm r)`
-- `nr_realm_name` (function) `src/net_realm.c:94` `const char *nr_realm_name(nr_realm r)`
-- `nr_route_name` (function) `src/net_realm.c:103` `const char *nr_route_name(nr_route r)`
+- `ls_free` (function) `src/local_store.c:1062` `void ls_free(uint8_t *buf, size_t len)`
 
 
 Next: [API_p9.md](API_p9.md)

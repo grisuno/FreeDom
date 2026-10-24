@@ -2,137 +2,138 @@
 Previous: [API_p2.md](API_p2.md)
 
 ## gui/browser_ui.c (continued)
-- `ws_apply_ops` (function) `gui/browser_ui.c:14970` `static void ws_apply_ops(browser_window *w, const tab_page *page)` -- Opens/sends/closes the page's WebSockets (trusted host only; spec/js_dom.md 7f).
-- `sf_ws_url_check` (function) `gui/browser_ui.c:14978` `&& sf_ws_url_check(op->data) == SF_OK && rp_host_of(op->data, host, sizeof host) == 0 && hb_check(w->hosts, host) !=...`
-- `apply_history_ops` (function) `gui/browser_ui.c:15005` `static void apply_history_ops(browser_window *w, const tab_page *page)` -- Mirrors the page's history.pushState/replaceState into the session history (spec/js_dom.md 7e): same-document...
-- `history_step` (function) `gui/browser_ui.c:15017` `static void history_step(browser_window *w, int steps)` -- Moves steps entries through the session history (negative = back).
-- `apply_click_result` (function) `gui/browser_ui.c:15050` `static int apply_click_result(browser_window *w, tab_page *page)` -- Applies a click/event/timer result returned by the worker: rebuild the rendered document and refresh inputs/console...
-- `memory` (function) `gui/browser_ui.c:15100` `* memory (the href pointer, not its contents, was all the old code preserved). */
+- `set_page_url` (function) `gui/browser_ui.c:15035` `static void set_page_url(browser_window *w, const char *url)` -- Makes url the page's base (link/image resolution) without touching the cached * source: after pushState the...
+- `ws_apply_ops` (function) `gui/browser_ui.c:15060` `static void ws_apply_ops(browser_window *w, const tab_page *page)` -- Opens/sends/closes the page's WebSockets (trusted host only; spec/js_dom.md 7f).
+- `sf_ws_url_check` (function) `gui/browser_ui.c:15068` `&& sf_ws_url_check(op->data) == SF_OK && rp_host_of(op->data, host, sizeof host) == 0 && hb_check(w->hosts, host) !=...`
+- `apply_history_ops` (function) `gui/browser_ui.c:15095` `static void apply_history_ops(browser_window *w, const tab_page *page)` -- Mirrors the page's history.pushState/replaceState into the session history (spec/js_dom.md 7e): same-document...
+- `history_step` (function) `gui/browser_ui.c:15107` `static void history_step(browser_window *w, int steps)` -- Moves steps entries through the session history (negative = back).
+- `apply_click_result` (function) `gui/browser_ui.c:15140` `static int apply_click_result(browser_window *w, tab_page *page)` -- Applies a click/event/timer result returned by the worker: rebuild the rendered document and refresh inputs/console...
+- `memory` (function) `gui/browser_ui.c:15190` `* memory (the href pointer, not its contents, was all the old code preserved). */
 static void dis...`
-- `GET` (function) `gui/browser_ui.c:15194` `* the network under weaker rules than a GET (Zero Trust). */
+- `GET` (function) `gui/browser_ui.c:15284` `* the network under weaker rules than a GET (Zero Trust). */
 static void do_submit_post(browser_w...`
-- `ensure_download_dir` (function) `gui/browser_ui.c:15228` `static int ensure_download_dir(char *out, size_t outsz)` -- Builds ~/Downloads/freedom into out and creates both levels (best effort; an existing directory is fine).
-- `write_file_atomic` (function) `gui/browser_ui.c:15243` `static int write_file_atomic(const char *path, const void *bytes, size_t len)` -- Writes len bytes to path with 0600 perms via a temp file + atomic rename (the disk_store convention): a crash...
-- `save_download` (function) `gui/browser_ui.c:15265` `static void save_download(browser_window *w, const char *url, const char *bytes,
+- `ensure_download_dir` (function) `gui/browser_ui.c:15318` `static int ensure_download_dir(char *out, size_t outsz)` -- Builds ~/Downloads/freedom into out and creates both levels (best effort; an existing directory is fine).
+- `write_file_atomic` (function) `gui/browser_ui.c:15333` `static int write_file_atomic(const char *path, const void *bytes, size_t len)` -- Writes len bytes to path with 0600 perms via a temp file + atomic rename (the disk_store convention): a crash...
+- `save_download` (function) `gui/browser_ui.c:15355` `static void save_download(browser_window *w, const char *url, const char *bytes,
                 ...` -- Saves a fetched resource to ~/Downloads/freedom instead of rendering it.
-- `save_current_page` (function) `gui/browser_ui.c:15298` `static void save_current_page(browser_window *w)` -- Ctrl+S: save the current page's cached source to ~/Downloads/freedom.
-- `deliver_fetch_result` (function) `gui/browser_ui.c:15308` `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
-- `drain_fetch_results` (function) `gui/browser_ui.c:15362` `static void drain_fetch_results(browser_window *w)` -- Drains every completed fetch the worker threads have posted (the read end is non-blocking; pointer-sized writes are...
-- `toggle_reader` (function) `gui/browser_ui.c:15438` `static void toggle_reader(browser_window *w)` -- Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author...
-- `menu_item_checked` (function) `gui/browser_ui.c:15449` `static int menu_item_checked(const browser_window *w, size_t i)` -- Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author...
-- `presentation` (function) `gui/browser_ui.c:15469` `* affect presentation (a repaint, which re-runs layout, suffices);`
-- `menu_item_toggle` (function) `gui/browser_ui.c:15471` `static void menu_item_toggle(browser_window *w, size_t i)` -- Toggles options-menu item i and applies its effect.
-- `draw_clock` (function) `gui/browser_ui.c:15581` `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
+- `save_current_page` (function) `gui/browser_ui.c:15388` `static void save_current_page(browser_window *w)` -- Ctrl+S: save the current page's cached source to ~/Downloads/freedom.
+- `deliver_fetch_result` (function) `gui/browser_ui.c:15398` `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
+- `drain_fetch_results` (function) `gui/browser_ui.c:15452` `static void drain_fetch_results(browser_window *w)` -- Drains every completed fetch the worker threads have posted (the read end is non-blocking; pointer-sized writes are...
+- `toggle_reader` (function) `gui/browser_ui.c:15557` `static void toggle_reader(browser_window *w)` -- Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author...
+- `menu_item_checked` (function) `gui/browser_ui.c:15568` `static int menu_item_checked(const browser_window *w, size_t i)` -- Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author...
+- `presentation` (function) `gui/browser_ui.c:15588` `* affect presentation (a repaint, which re-runs layout, suffices);`
+- `menu_item_toggle` (function) `gui/browser_ui.c:15590` `static void menu_item_toggle(browser_window *w, size_t i)` -- Toggles options-menu item i and applies its effect.
+- `draw_clock` (function) `gui/browser_ui.c:15705` `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
                ...` -- A small spinner meaning "busy".
-- `draw_hamburger` (function) `gui/browser_ui.c:15593` `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-- `draw_reload` (function) `gui/browser_ui.c:15609` `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)` -- The reload button glyph: a ~300-degree circular arrow centred in a UI_BTN_W button starting at bx.
-- `draw_menu` (function) `gui/browser_ui.c:15631` `static void draw_menu(cairo_t *cr, browser_window *w)` -- double a1 = a0 + UI_TWO_PI * 0.82;      /* leave a gap for the arrowhead cairo_new_sub_path(cr); cairo_arc(cr, cx...
-- `draw_hover_url` (function) `gui/browser_ui.c:15742` `static double draw_hover_url(cairo_t *cr, browser_window *w)` -- Persistent bottom strip showing the target of the link under the pointer, so the user always knows where a click...
-- `draw_toast` (function) `gui/browser_ui.c:15774` `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)` -- Draws the transient status toast (a banner near the bottom of the window), * raised by bottom_offset so it stacks...
-- `draw_tabstrip` (function) `gui/browser_ui.c:15804` `static void draw_tabstrip(cairo_t *cr, browser_window *w)` -- Paints the tab strip: one cell per tab (the active one connected to the content background, the rest dimmed), each...
-- `draw_omnibox` (function) `gui/browser_ui.c:15859` `static void draw_omnibox(cairo_t *cr, browser_window *w)` -- Omnibox autocomplete dropdown: a panel of favorite-host suggestions below the URL bar, drawn as an overlay (on top...
-- `paint` (function) `gui/browser_ui.c:15893` `static void paint(browser_window *w)`
-- `redraw` (function) `gui/browser_ui.c:16137` `static void redraw(browser_window *w)`
-- `wm_base_ping` (function) `gui/browser_ui.c:16164` `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)`
-- `xdg_surface_configure` (function) `gui/browser_ui.c:16170` `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- `toplevel_configure` (function) `gui/browser_ui.c:16178` `static void toplevel_configure(void *data, struct xdg_toplevel *t,
+- `draw_hamburger` (function) `gui/browser_ui.c:15717` `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
+- `draw_reload` (function) `gui/browser_ui.c:15733` `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)` -- The reload button glyph: a ~300-degree circular arrow centred in a UI_BTN_W button starting at bx.
+- `draw_menu` (function) `gui/browser_ui.c:15755` `static void draw_menu(cairo_t *cr, browser_window *w)` -- double a1 = a0 + UI_TWO_PI * 0.82;      /* leave a gap for the arrowhead cairo_new_sub_path(cr); cairo_arc(cr, cx...
+- `draw_hover_url` (function) `gui/browser_ui.c:15866` `static double draw_hover_url(cairo_t *cr, browser_window *w)` -- Persistent bottom strip showing the target of the link under the pointer, so the user always knows where a click...
+- `draw_toast` (function) `gui/browser_ui.c:15898` `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)` -- Draws the transient status toast (a banner near the bottom of the window), * raised by bottom_offset so it stacks...
+- `draw_tabstrip` (function) `gui/browser_ui.c:15928` `static void draw_tabstrip(cairo_t *cr, browser_window *w)` -- Paints the tab strip: one cell per tab (the active one connected to the content background, the rest dimmed), each...
+- `draw_omnibox` (function) `gui/browser_ui.c:15983` `static void draw_omnibox(cairo_t *cr, browser_window *w)` -- Omnibox autocomplete dropdown: a panel of favorite-host suggestions below the URL bar, drawn as an overlay (on top...
+- `paint` (function) `gui/browser_ui.c:16017` `static void paint(browser_window *w)`
+- `redraw` (function) `gui/browser_ui.c:16261` `static void redraw(browser_window *w)`
+- `wm_base_ping` (function) `gui/browser_ui.c:16288` `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)`
+- `xdg_surface_configure` (function) `gui/browser_ui.c:16294` `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
+- `toplevel_configure` (function) `gui/browser_ui.c:16302` `static void toplevel_configure(void *data, struct xdg_toplevel *t,
                               ...`
-- `resizes` (function) `gui/browser_ui.c:16186` `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);`
-- `wl_array_for_each` (function) `gui/browser_ui.c:16194` `wl_array_for_each(st, states)`
-- `toplevel_close` (function) `gui/browser_ui.c:16200` `static void toplevel_close(void *data, struct xdg_toplevel *t)`
-- `deco_configure` (function) `gui/browser_ui.c:16209` `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
-- `set_cursor` (function) `gui/browser_ui.c:16221` `static void set_cursor(browser_window *w, int cur_kind)` -- Applies the appropriate Wayland cursor for the given CSS cursor value. * A no-op when no themed cursor is available...
-- `element` (function) `gui/browser_ui.c:16251` `* cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
+- `resizes` (function) `gui/browser_ui.c:16310` `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);`
+- `wl_array_for_each` (function) `gui/browser_ui.c:16318` `wl_array_for_each(st, states)`
+- `toplevel_close` (function) `gui/browser_ui.c:16324` `static void toplevel_close(void *data, struct xdg_toplevel *t)`
+- `deco_configure` (function) `gui/browser_ui.c:16333` `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
+- `set_cursor` (function) `gui/browser_ui.c:16345` `static void set_cursor(browser_window *w, int cur_kind)` -- Applies the appropriate Wayland cursor for the given CSS cursor value. * A no-op when no themed cursor is available...
+- `element` (function) `gui/browser_ui.c:16375` `* cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
  * even without...`
-- `fbw_split_y` (function) `gui/browser_ui.c:16321` `static double fbw_split_y(const freebug_window *fb)` -- struct wl_buffer *buffer; void  *shm_data; size_t shm_size; cairo_surface_t *cairo_surface; double split...
-- `freebug_ensure_buffer` (function) `gui/browser_ui.c:16330` `static int freebug_ensure_buffer(freebug_window *fb)`
-- `fbw_level_rgb` (function) `gui/browser_ui.c:16357` `static void fbw_level_rgb(int level, double *r, double *g, double *b)` -- struct wl_shm_pool *pool = wl_shm_create_pool(fb->owner->shm, fd, (int32_t)size); fb->buffer =...
-- `fbw_console_lines` (function) `gui/browser_ui.c:16368` `static size_t fbw_console_lines(const fb_buffer *log)` -- } /* Color for a console level (dark devtools palette). static void fbw_level_rgb(int level, double *r, double *g...
-- `freebug_paint` (function) `gui/browser_ui.c:16381` `static void freebug_paint(freebug_window *fb)`
-- `freebug_redraw_fb` (function) `gui/browser_ui.c:16580` `static void freebug_redraw_fb(freebug_window *fb)`
-- `freebug_redraw` (function) `gui/browser_ui.c:16589` `static void freebug_redraw(browser_window *w)`
-- `freebug_hide` (function) `gui/browser_ui.c:16593` `static void freebug_hide(browser_window *w)`
-- `fbw_xdg_surface_configure` (function) `gui/browser_ui.c:16609` `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- `fbw_toplevel_configure` (function) `gui/browser_ui.c:16617` `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
+- `fbw_split_y` (function) `gui/browser_ui.c:16445` `static double fbw_split_y(const freebug_window *fb)` -- struct wl_buffer *buffer; void  *shm_data; size_t shm_size; cairo_surface_t *cairo_surface; double split...
+- `freebug_ensure_buffer` (function) `gui/browser_ui.c:16454` `static int freebug_ensure_buffer(freebug_window *fb)`
+- `fbw_level_rgb` (function) `gui/browser_ui.c:16481` `static void fbw_level_rgb(int level, double *r, double *g, double *b)` -- struct wl_shm_pool *pool = wl_shm_create_pool(fb->owner->shm, fd, (int32_t)size); fb->buffer =...
+- `fbw_console_lines` (function) `gui/browser_ui.c:16492` `static size_t fbw_console_lines(const fb_buffer *log)` -- } /* Color for a console level (dark devtools palette). static void fbw_level_rgb(int level, double *r, double *g...
+- `freebug_paint` (function) `gui/browser_ui.c:16505` `static void freebug_paint(freebug_window *fb)`
+- `freebug_redraw_fb` (function) `gui/browser_ui.c:16704` `static void freebug_redraw_fb(freebug_window *fb)`
+- `freebug_redraw` (function) `gui/browser_ui.c:16713` `static void freebug_redraw(browser_window *w)`
+- `freebug_hide` (function) `gui/browser_ui.c:16717` `static void freebug_hide(browser_window *w)`
+- `fbw_xdg_surface_configure` (function) `gui/browser_ui.c:16733` `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
+- `fbw_toplevel_configure` (function) `gui/browser_ui.c:16741` `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
                           ...`
-- `fbw_toplevel_close` (function) `gui/browser_ui.c:16626` `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
-- `freebug_show` (function) `gui/browser_ui.c:16636` `static void freebug_show(browser_window *w)`
-- `freebug_toggle` (function) `gui/browser_ui.c:16666` `static void freebug_toggle(browser_window *w)`
-- `freebug_destroy` (function) `gui/browser_ui.c:16671` `static void freebug_destroy(browser_window *w)`
-- `freebug_owns_surface` (function) `gui/browser_ui.c:16678` `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
-- `freebug_is_open` (function) `gui/browser_ui.c:16682` `static int freebug_is_open(const browser_window *w)`
-- `freebug_repl_worker` (function) `gui/browser_ui.c:16689` `static tab *freebug_repl_worker(browser_window *w)` -- Returns the live page worker for the REPL, lazily (re)opening one bound to the active page's cache if none is kept...
-- `freebug_eval` (function) `gui/browser_ui.c:16727` `static void freebug_eval(browser_window *w)`
-- `freebug_handle_key` (function) `gui/browser_ui.c:16767` `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
+- `fbw_toplevel_close` (function) `gui/browser_ui.c:16750` `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
+- `freebug_show` (function) `gui/browser_ui.c:16760` `static void freebug_show(browser_window *w)`
+- `freebug_toggle` (function) `gui/browser_ui.c:16790` `static void freebug_toggle(browser_window *w)`
+- `freebug_destroy` (function) `gui/browser_ui.c:16795` `static void freebug_destroy(browser_window *w)`
+- `freebug_owns_surface` (function) `gui/browser_ui.c:16802` `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
+- `freebug_is_open` (function) `gui/browser_ui.c:16806` `static int freebug_is_open(const browser_window *w)`
+- `freebug_repl_worker` (function) `gui/browser_ui.c:16813` `static tab *freebug_repl_worker(browser_window *w)` -- Returns the live page worker for the REPL, lazily (re)opening one bound to the active page's cache if none is kept...
+- `freebug_eval` (function) `gui/browser_ui.c:16852` `static void freebug_eval(browser_window *w)`
+- `freebug_handle_key` (function) `gui/browser_ui.c:16892` `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
                              ...`
-- `freebug_pointer_button` (function) `gui/browser_ui.c:16802` `static void freebug_pointer_button(browser_window *w, uint32_t serial,
+- `freebug_pointer_button` (function) `gui/browser_ui.c:16927` `static void freebug_pointer_button(browser_window *w, uint32_t serial,
                           ...`
-- `freebug_pointer_motion` (function) `gui/browser_ui.c:16821` `static void freebug_pointer_motion(browser_window *w)`
-- `freebug_pointer_axis` (function) `gui/browser_ui.c:16843` `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
-- `down` (function) `gui/browser_ui.c:16855` `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void...`
-- `ptr_enter` (function) `gui/browser_ui.c:16861` `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
+- `freebug_pointer_motion` (function) `gui/browser_ui.c:16946` `static void freebug_pointer_motion(browser_window *w)`
+- `freebug_pointer_axis` (function) `gui/browser_ui.c:16968` `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
+- `down` (function) `gui/browser_ui.c:16980` `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void...`
+- `ptr_enter` (function) `gui/browser_ui.c:16986` `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_...`
-- `ptr_leave` (function) `gui/browser_ui.c:16879` `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
-- `ptr_motion` (function) `gui/browser_ui.c:16896` `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
-- `load_current` (function) `gui/browser_ui.c:16921` `static void load_current(browser_window *w)`
-- `go_omnibox` (function) `gui/browser_ui.c:16934` `static void go_omnibox(browser_window *w)` -- Commits the URL bar like a real omnibox: an existing local file is opened as before; otherwise url_omnibox (pure)...
-- `ptr_button` (function) `gui/browser_ui.c:16979` `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
+- `ptr_leave` (function) `gui/browser_ui.c:17004` `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
+- `ptr_motion` (function) `gui/browser_ui.c:17021` `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
+- `load_current` (function) `gui/browser_ui.c:17046` `static void load_current(browser_window *w)`
+- `go_omnibox` (function) `gui/browser_ui.c:17059` `static void go_omnibox(browser_window *w)` -- Commits the URL bar like a real omnibox: an existing local file is opened as before; otherwise url_omnibox (pure)...
+- `ptr_button` (function) `gui/browser_ui.c:17104` `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
               ...`
-- `scroll_line_px` (function) `gui/browser_ui.c:17226` `static double scroll_line_px(const browser_window *w)` -- const rd_block *again = NULL; for (size_t i = 0; w->doc != NULL && i < rd_count(w->doc); ++i) { const rd_block *b =...
-- `ptr_axis` (function) `gui/browser_ui.c:17230` `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
+- `scroll_line_px` (function) `gui/browser_ui.c:17351` `static double scroll_line_px(const browser_window *w)` -- const rd_block *again = NULL; for (size_t i = 0; w->doc != NULL && i < rd_count(w->doc); ++i) { const rd_block *b =...
+- `ptr_axis` (function) `gui/browser_ui.c:17355` `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32...`
-- `ptr_frame` (function) `gui/browser_ui.c:17254` `static void ptr_frame(void *d, struct wl_pointer *p)`
-- `mime_is_text` (function) `gui/browser_ui.c:17270` `static int mime_is_text(const char *mime)` -- } static const struct wl_pointer_listener pointer_listener = { .enter = ptr_enter, .leave = ptr_leave, .motion =...
-- `data_offer_source_actions` (function) `gui/browser_ui.c:17288` `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
-- `data_offer_action` (function) `gui/browser_ui.c:17291` `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
-- `data_device_data_offer` (function) `gui/browser_ui.c:17301` `static void data_device_data_offer(void *data, struct wl_data_device *dev,
+- `ptr_frame` (function) `gui/browser_ui.c:17379` `static void ptr_frame(void *d, struct wl_pointer *p)`
+- `mime_is_text` (function) `gui/browser_ui.c:17395` `static int mime_is_text(const char *mime)` -- } static const struct wl_pointer_listener pointer_listener = { .enter = ptr_enter, .leave = ptr_leave, .motion =...
+- `data_offer_source_actions` (function) `gui/browser_ui.c:17413` `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
+- `data_offer_action` (function) `gui/browser_ui.c:17416` `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
+- `data_device_data_offer` (function) `gui/browser_ui.c:17426` `static void data_device_data_offer(void *data, struct wl_data_device *dev,
                       ...` -- } static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a) { (void)d; (void)o; (void)a; }...
-- `data_device_selection` (function) `gui/browser_ui.c:17313` `static void data_device_selection(void *data, struct wl_data_device *dev,
+- `data_device_selection` (function) `gui/browser_ui.c:17438` `static void data_device_selection(void *data, struct wl_data_device *dev,
                        ...` -- The clipboard selection changed.
-- `data_device_enter` (function) `gui/browser_ui.c:17332` `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
+- `data_device_enter` (function) `gui/browser_ui.c:17457` `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
              ...` -- wl_data_offer_destroy(w->selection_offer); if (offer == NULL) { w->selection_offer = NULL...
-- `data_device_leave` (function) `gui/browser_ui.c:17337` `static void data_device_leave(void *d, struct wl_data_device *dev)`
-- `data_device_motion` (function) `gui/browser_ui.c:17338` `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
+- `data_device_leave` (function) `gui/browser_ui.c:17462` `static void data_device_leave(void *d, struct wl_data_device *dev)`
+- `data_device_motion` (function) `gui/browser_ui.c:17463` `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
                  ...`
-- `data_device_drop` (function) `gui/browser_ui.c:17342` `static void data_device_drop(void *d, struct wl_data_device *dev)`
-- `data_source_cancelled` (function) `gui/browser_ui.c:17353` `static void data_source_cancelled(void *data, struct wl_data_source *src)` -- wl_fixed_t x, wl_fixed_t y) { (void)d; (void)dev; (void)t; (void)x; (void)y; } static void data_device_drop(void *d...
-- `data_source_send` (function) `gui/browser_ui.c:17359` `static void data_source_send(void *data, struct wl_data_source *src,
+- `data_device_drop` (function) `gui/browser_ui.c:17467` `static void data_device_drop(void *d, struct wl_data_device *dev)`
+- `data_source_cancelled` (function) `gui/browser_ui.c:17478` `static void data_source_cancelled(void *data, struct wl_data_source *src)` -- wl_fixed_t x, wl_fixed_t y) { (void)d; (void)dev; (void)t; (void)x; (void)y; } static void data_device_drop(void *d...
+- `data_source_send` (function) `gui/browser_ui.c:17484` `static void data_source_send(void *data, struct wl_data_source *src,
                             ...` -- .enter = data_device_enter, .leave = data_device_leave, .motion = data_device_motion, .drop = data_device_drop...
-- `data_source_target` (function) `gui/browser_ui.c:17372` `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
-- `freebug_copy_console` (function) `gui/browser_ui.c:17384` `static void freebug_copy_console(browser_window *w)` -- Formats the entire Freebug console buffer and places it on the Wayland clipboard, so the user can paste the...
-- `loop` (function) `gui/browser_ui.c:17433` `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately...`
-- `insert_pasted_text` (function) `gui/browser_ui.c:17442` `static void insert_pasted_text(browser_window *w, const char *text, size_t len)` -- Inserts pasted bytes into whichever text target currently has focus (page input, User-Agent box, or the URL bar).
-- `clipboard_copy` (function) `gui/browser_ui.c:17506` `static void clipboard_copy(browser_window *w)` -- Ctrl+C: copy the focused field's text (or, with nothing focused, the page address) * to the clipboard by owning a...
-- `keyboard_keymap` (function) `gui/browser_ui.c:17554` `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
+- `data_source_target` (function) `gui/browser_ui.c:17497` `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
+- `freebug_copy_console` (function) `gui/browser_ui.c:17509` `static void freebug_copy_console(browser_window *w)` -- Formats the entire Freebug console buffer and places it on the Wayland clipboard, so the user can paste the...
+- `loop` (function) `gui/browser_ui.c:17558` `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately...`
+- `insert_pasted_text` (function) `gui/browser_ui.c:17567` `static void insert_pasted_text(browser_window *w, const char *text, size_t len)` -- Inserts pasted bytes into whichever text target currently has focus (page input, User-Agent box, or the URL bar).
+- `clipboard_copy` (function) `gui/browser_ui.c:17631` `static void clipboard_copy(browser_window *w)` -- Ctrl+C: copy the focused field's text (or, with nothing focused, the page address) * to the clipboard by owning a...
+- `keyboard_keymap` (function) `gui/browser_ui.c:17679` `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
                             uint...`
-- `keyboard_enter` (function) `gui/browser_ui.c:17575` `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
+- `keyboard_enter` (function) `gui/browser_ui.c:17700` `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                         ...`
-- `keyboard_leave` (function) `gui/browser_ui.c:17582` `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
-- `key_sym_to_js_key` (function) `gui/browser_ui.c:17590` `static const char *key_sym_to_js_key(xkb_keysym_t sym)` -- Maps an xkb keysym to a JS event.key string.
-- `key_sym_to_keycode` (function) `gui/browser_ui.c:17616` `static int key_sym_to_keycode(xkb_keysym_t sym)` -- Maps an xkb keysym to a JS keyCode number.
-- `dispatch_js_event` (function) `gui/browser_ui.c:17641` `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
+- `keyboard_leave` (function) `gui/browser_ui.c:17707` `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
+- `key_sym_to_js_key` (function) `gui/browser_ui.c:17715` `static const char *key_sym_to_js_key(xkb_keysym_t sym)` -- Maps an xkb keysym to a JS event.key string.
+- `key_sym_to_keycode` (function) `gui/browser_ui.c:17741` `static int key_sym_to_keycode(xkb_keysym_t sym)` -- Maps an xkb keysym to a JS keyCode number.
+- `dispatch_js_event` (function) `gui/browser_ui.c:17766` `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
                            ...` -- Dispatches a JS DOM event to the worker for the given node_id.
-- `handle_key_press` (function) `gui/browser_ui.c:17699` `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
+- `handle_key_press` (function) `gui/browser_ui.c:17824` `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
              ...` -- Performs the effect of a single key press.
-- `key_is_repeatable` (function) `gui/browser_ui.c:18029` `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)` -- Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion and scrolling.
-- `key_repeat_arm` (function) `gui/browser_ui.c:18045` `static void key_repeat_arm(browser_window *w, uint32_t key)` -- Arms the repeat timer for key: first fire after repeat_delay ms, then every * 1/repeat_rate s.
-- `key_repeat_stop` (function) `gui/browser_ui.c:18058` `static void key_repeat_stop(browser_window *w)` -- 1/repeat_rate s.
-- `key_repeat_fire` (function) `gui/browser_ui.c:18069` `static void key_repeat_fire(browser_window *w)` -- Re-fires the currently held key.
-- `keyboard_key` (function) `gui/browser_ui.c:18083` `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
+- `key_is_repeatable` (function) `gui/browser_ui.c:18160` `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)` -- Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion and scrolling.
+- `key_repeat_arm` (function) `gui/browser_ui.c:18176` `static void key_repeat_arm(browser_window *w, uint32_t key)` -- Arms the repeat timer for key: first fire after repeat_delay ms, then every * 1/repeat_rate s.
+- `key_repeat_stop` (function) `gui/browser_ui.c:18189` `static void key_repeat_stop(browser_window *w)` -- 1/repeat_rate s.
+- `key_repeat_fire` (function) `gui/browser_ui.c:18200` `static void key_repeat_fire(browser_window *w)` -- Re-fires the currently held key.
+- `keyboard_key` (function) `gui/browser_ui.c:18214` `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                   ...`
-- `keyboard_modifiers` (function) `gui/browser_ui.c:18123` `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
+- `keyboard_modifiers` (function) `gui/browser_ui.c:18254` `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                  ...`
-- `keyboard_repeat_info` (function) `gui/browser_ui.c:18132` `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
-- `seat_caps` (function) `gui/browser_ui.c:18151` `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
-- `seat_name` (function) `gui/browser_ui.c:18162` `static void seat_name(void *d, struct wl_seat *s, const char *name)`
-- `registry_global` (function) `gui/browser_ui.c:18169` `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
+- `keyboard_repeat_info` (function) `gui/browser_ui.c:18263` `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
+- `seat_caps` (function) `gui/browser_ui.c:18282` `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
+- `seat_name` (function) `gui/browser_ui.c:18293` `static void seat_name(void *d, struct wl_seat *s, const char *name)`
+- `registry_global` (function) `gui/browser_ui.c:18300` `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...`
-- `registry_remove` (function) `gui/browser_ui.c:18189` `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
-- `ui_run_browser` (function) `gui/browser_ui.c:18199` `ui_status ui_run_browser(const char *start_url)`
-- `saving` (function) `gui/browser_ui.c:18218` `* disables saving (never clobber);`
-- `redraws` (function) `gui/browser_ui.c:18297` `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
-- `applies` (function) `gui/browser_ui.c:18367` `* persisted choice applies (prefs_parse already clamped it to a valid mode). */ const char *js_env =...`
-- `cost` (function) `gui/browser_ui.c:18598` `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
+- `registry_remove` (function) `gui/browser_ui.c:18320` `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
+- `ui_run_browser` (function) `gui/browser_ui.c:18330` `ui_status ui_run_browser(const char *start_url)`
+- `saving` (function) `gui/browser_ui.c:18349` `* disables saving (never clobber);`
+- `redraws` (function) `gui/browser_ui.c:18430` `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
+- `applies` (function) `gui/browser_ui.c:18500` `* persisted choice applies (prefs_parse already clamped it to a valid mode). */ const char *js_env =...`
+- `cost` (function) `gui/browser_ui.c:18731` `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
              * cheap pages paint at...`
 
 ## gui/browser_ui_internal.h
@@ -193,7 +194,7 @@ Depends on: `include/freedom_config.h`, `include/ui.h`
 - `ui_run_text_view` (function) `gui/ui_render.c:410` `ui_status ui_run_text_view(const char *title, const char *text, size_t text_len)`
 
 ## include/anti_fp.h
-Imported by: `include/secure_fetch.h`, `src/anti_fp.c`, `src/js_env.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_anti_fp.c`
+Imported by: `include/secure_fetch.h`, `src/anti_fp.c`, `src/identity.c`, `src/js_env.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_anti_fp.c`, `tests/test_identity.c`
 - `fp_timer_resolution_ms` (function) `include/anti_fp.h:52` `uint64_t fp_timer_resolution_ms(void);`
 - `fp_coarsen_time_ms` (function) `include/anti_fp.h:53` `uint64_t fp_coarsen_time_ms(uint64_t raw_ms);`
 - `fp_user_agent` (function) `include/anti_fp.h:57` `const char *fp_user_agent(void);`

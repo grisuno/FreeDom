@@ -312,19 +312,19 @@ static void test_build_heading_own_relative_size_replac...`
 - Language: c
 - Symbols:
   - `test_init_defaults` (function, line 25) `static void test_init_defaults(void **state)`
-  - `test_roundtrip` (function, line 50) `static void test_roundtrip(void **state)`
-  - `test_parse_bad_magic` (function, line 110) `static void test_parse_bad_magic(void **state)`
-  - `test_parse_too_large` (function, line 126) `static void test_parse_too_large(void **state)`
-  - `test_parse_unknown_and_malformed_skipped` (function, line 135) `static void test_parse_unknown_and_malformed_skipped(void **state)`
-  - `test_parse_clamps_out_of_range` (function, line 157) `static void test_parse_clamps_out_of_range(void **state)`
-  - `test_invalid_urls_rejected` (function, line 179) `static void test_invalid_urls_rejected(void **state)`
-  - `test_hostile_title_cleaned` (function, line 207) `static void test_hostile_title_cleaned(void **state)`
-  - `test_bookmark_toggle_and_cap` (function, line 237) `static void test_bookmark_toggle_and_cap(void **state)`
-  - `test_history_dedup_and_evict` (function, line 265) `static void test_history_dedup_and_evict(void **state)`
-  - `test_suggest_priorities` (function, line 290) `static void test_suggest_priorities(void **state)`
-  - `test_bookmarks_page_escapes` (function, line 345) `static void test_bookmarks_page_escapes(void **state)`
-  - `test_format_null_args` (function, line 382) `static void test_format_null_args(void **state)`
-  - `main` (function, line 394) `int main(void)`
+  - `test_roundtrip` (function, line 80) `static void test_roundtrip(void **state)`
+  - `test_parse_bad_magic` (function, line 140) `static void test_parse_bad_magic(void **state)`
+  - `test_parse_too_large` (function, line 156) `static void test_parse_too_large(void **state)`
+  - `test_parse_unknown_and_malformed_skipped` (function, line 165) `static void test_parse_unknown_and_malformed_skipped(void **state)`
+  - `test_parse_clamps_out_of_range` (function, line 187) `static void test_parse_clamps_out_of_range(void **state)`
+  - `test_invalid_urls_rejected` (function, line 209) `static void test_invalid_urls_rejected(void **state)`
+  - `test_hostile_title_cleaned` (function, line 237) `static void test_hostile_title_cleaned(void **state)`
+  - `test_bookmark_toggle_and_cap` (function, line 267) `static void test_bookmark_toggle_and_cap(void **state)`
+  - `test_history_dedup_and_evict` (function, line 295) `static void test_history_dedup_and_evict(void **state)`
+  - `test_suggest_priorities` (function, line 320) `static void test_suggest_priorities(void **state)`
+  - `test_bookmarks_page_escapes` (function, line 375) `static void test_bookmarks_page_escapes(void **state)`
+  - `test_format_null_args` (function, line 412) `static void test_format_null_args(void **state)`
+  - `main` (function, line 424) `int main(void)`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
 - Depends on: `include/prefs.h`, `include/zoom.h`
 

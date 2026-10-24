@@ -1,13 +1,13 @@
 # `include/tab.h`
 
-> Source: [include/tab.h:1](../../include/tab.h#L1) | language `h` | coverage 45.2% | [API index](../index.md)
+> Source: [include/tab.h:1](../../include/tab.h#L1) | language `h` | coverage 46.5% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`tab_hist_op`](#tab_hist_op), [`tab_ws_op`](#tab_ws_op), [`tab_page`](#tab_page), [`tab_eval_result`](#tab_eval_result), [`tab_image`](#tab_image)
 - **Enums:** [`tab_status`](#tab_status), [`tab_ws_kind`](#tab_ws_kind), [`tab_ws_event_kind`](#tab_ws_event_kind)
 - **Type Aliases:** [`tab`](#tab), [`replace`](#replace), [`kind`](#kind)
-- **Functions:** [`tab_worker_dispatch`](#tab_worker_dispatch), [`tab_open`](#tab_open), [`tab_parse_worker_args`](#tab_parse_worker_args), [`out_status`](#out_status), [`tab_set_fetcher`](#tab_set_fetcher), [`bytes`](#bytes), [`tab_set_css_sink`](#tab_set_css_sink), [`tab_set_net_allowed`](#tab_set_net_allowed), [`jar`](#jar), [`tab_set_cookies`](#tab_set_cookies), [`origin`](#origin), [`tab_set_storage`](#tab_set_storage), [`exclusively`](#exclusively), [`tab_set_viewport_w`](#tab_set_viewport_w), [`tab_last_subreq_stats`](#tab_last_subreq_stats), [`tab_subreq_permitted`](#tab_subreq_permitted), [`view`](#view), [`string`](#string), [`granted`](#granted), [`returned`](#returned), [`popstate`](#popstate), [`decode`](#decode), [`tab_alive`](#tab_alive), [`tab_child_pid`](#tab_child_pid), [`tab_close`](#tab_close), [`tab_page_free`](#tab_page_free), [`tab_eval_result_free`](#tab_eval_result_free), [`tab_image_free`](#tab_image_free)
+- **Functions:** [`tab_worker_dispatch`](#tab_worker_dispatch), [`tab_open`](#tab_open), [`tab_parse_worker_args`](#tab_parse_worker_args), [`out_status`](#out_status), [`tab_set_fetcher`](#tab_set_fetcher), [`bytes`](#bytes), [`tab_set_css_sink`](#tab_set_css_sink), [`tab_set_net_allowed`](#tab_set_net_allowed), [`jar`](#jar), [`tab_set_cookies`](#tab_set_cookies), [`origin`](#origin), [`tab_set_storage`](#tab_set_storage), [`exclusively`](#exclusively), [`tab_set_viewport_w`](#tab_set_viewport_w), [`tab_set_identity`](#tab_set_identity), [`tab_last_subreq_stats`](#tab_last_subreq_stats), [`tab_subreq_permitted`](#tab_subreq_permitted), [`view`](#view), [`string`](#string), [`granted`](#granted), [`returned`](#returned), [`popstate`](#popstate), [`decode`](#decode), [`tab_alive`](#tab_alive), [`tab_child_pid`](#tab_child_pid), [`tab_close`](#tab_close), [`tab_page_free`](#tab_page_free), [`tab_eval_result_free`](#tab_eval_result_free), [`tab_image_free`](#tab_image_free)
 - **Macros:** [`TAB_MAX_INPUT`](#tab_max_input)
 
 ## Type Diagram
@@ -503,11 +503,34 @@ Only the @media width query sees it; viewport UNITS (vw/vh) still resolve agains
 
 ---
 
+<a id="tab_set_identity"></a>
+
+### `tab_set_identity`
+
+`function` | [include/tab.h:235](../../include/tab.h#L235)
+
+```c
+void tab_set_identity(tab *t, const char *serialized);
+```
+
+The user's identity override (idn_serialize text, spec/identity.md) for the NEXT loads: the worker applies it to navigator and, for a trusted host with a fixed place, installs geolocation.
+
+"" / NULL (or a string that does not fit) is the normalized default.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `t` | `tab *` |  |  |
+| `serialized` | `char *` |  |  |
+
+---
+
 <a id="tab_last_subreq_stats"></a>
 
 ### `tab_last_subreq_stats`
 
-`function` | [include/tab.h:236](../../include/tab.h#L236)
+`function` | [include/tab.h:241](../../include/tab.h#L241)
 
 ```c
 void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);
@@ -531,7 +554,7 @@ A diagnostic (FREEDOM_PERF): it separates "the page's JS is slow" from "the page
 
 ### `tab_subreq_permitted`
 
-`function` | [include/tab.h:241](../../include/tab.h#L241)
+`function` | [include/tab.h:246](../../include/tab.h#L246)
 
 ```c
 int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);
@@ -555,7 +578,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `view`
 
-`function` | [include/tab.h:249](../../include/tab.h#L249)
+`function` | [include/tab.h:254](../../include/tab.h#L254)
 
 ```c
 * <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted page-script execution will hook in (live-DOM milestone). * tab_load is tab_load_ex with run
@@ -576,7 +599,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `string`
 
-`function` | [include/tab.h:269](../../include/tab.h#L269)
+`function` | [include/tab.h:274](../../include/tab.h#L274)
 
 ```c
 * event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be NULL). * key_code is the numeric keyCode/key value. * value is the element's current
@@ -598,7 +621,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `granted`
 
-`function` | [include/tab.h:318](../../include/tab.h#L318)
+`function` | [include/tab.h:323](../../include/tab.h#L323)
 
 ```c
 * granted (allow.conf AND js.conf);
@@ -618,7 +641,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `returned`
 
-`function` | [include/tab.h:319](../../include/tab.h#L319)
+`function` | [include/tab.h:324](../../include/tab.h#L324)
 
 ```c
 * returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */ tab_status tab_set_geometry(tab *t, const jg_table *g);
@@ -638,7 +661,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `popstate`
 
-`function` | [include/tab.h:325](../../include/tab.h#L325)
+`function` | [include/tab.h:330](../../include/tab.h#L330)
 
 ```c
 * popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index, tab_page *out);
@@ -658,7 +681,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `decode`
 
-`function` | [include/tab.h:344](../../include/tab.h#L344)
+`function` | [include/tab.h:349](../../include/tab.h#L349)
 
 ```c
 * could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for transport/worker failures. */ tab_status tab_decode_image(tab *t, const uint8_t *bytes, s
@@ -678,7 +701,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `tab_alive`
 
-`function` | [include/tab.h:357](../../include/tab.h#L357)
+`function` | [include/tab.h:362](../../include/tab.h#L362)
 
 ```c
 int tab_alive(const tab *t);
@@ -700,7 +723,7 @@ Nonzero while the worker process is believed alive.
 
 ### `tab_child_pid`
 
-`function` | [include/tab.h:360](../../include/tab.h#L360)
+`function` | [include/tab.h:365](../../include/tab.h#L365)
 
 ```c
 pid_t tab_child_pid(const tab *t);
@@ -722,7 +745,7 @@ The worker's process id (for monitoring), or -1.
 
 ### `tab_close`
 
-`function` | [include/tab.h:363](../../include/tab.h#L363)
+`function` | [include/tab.h:368](../../include/tab.h#L368)
 
 ```c
 void tab_close(tab *t);
@@ -744,7 +767,7 @@ Safe on NULL.
 
 ### `tab_page_free`
 
-`function` | [include/tab.h:366](../../include/tab.h#L366)
+`function` | [include/tab.h:371](../../include/tab.h#L371)
 
 ```c
 void tab_page_free(tab_page *p);
@@ -766,7 +789,7 @@ Safe on NULL / zeroed structs.
 
 ### `tab_eval_result_free`
 
-`function` | [include/tab.h:367](../../include/tab.h#L367)
+`function` | [include/tab.h:372](../../include/tab.h#L372)
 
 ```c
 void tab_eval_result_free(tab_eval_result *r);
@@ -784,7 +807,7 @@ void tab_eval_result_free(tab_eval_result *r);
 
 ### `tab_image_free`
 
-`function` | [include/tab.h:368](../../include/tab.h#L368)
+`function` | [include/tab.h:373](../../include/tab.h#L373)
 
 ```c
 void tab_image_free(tab_image *img);

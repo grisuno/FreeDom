@@ -1,6 +1,6 @@
 # freedom-0.0.3
 
-> Static analysis knowledge base for freedom-0.0.3: 8 communities, 267 files, 1526 imports, 4 languages, 6983 symbols.
+> Static analysis knowledge base for freedom-0.0.3: 9 communities, 270 files, 1546 imports, 4 languages, 7074 symbols.
 
 Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
 
@@ -9,33 +9,33 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/INDEX.md](md/readmenator-agent/INDEX.md)
 - [readmenator-agent/GOTCHAS.md](md/readmenator-agent/GOTCHAS.md): These files have the most connections. Changes here have high blast radius.
 - [readmenator-agent/API.md](md/readmenator-agent/API.md): readfuzzstats (function) app.py:30 def readfuzzstats() -- Reads the current status of the active AFL++ fuzzing session.
-- [readmenator-agent/API_p10.md](md/readmenator-agent/API_p10.md): Depends on: include/antifp.h, include/securefetch.h, include/url.h
-- [readmenator-agent/API_p11.md](md/readmenator-agent/API_p11.md): loadbaseline (function) tools/fbench.py:46 def loadbaseline()
+- [readmenator-agent/API_p10.md](md/readmenator-agent/API_p10.md): Depends on: include/psldata.h, include/requestpolicy.h
+- [readmenator-agent/API_p11.md](md/readmenator-agent/API_p11.md): Depends on: include/wshub.h
 - [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/blockflow.h, include/boxblur.h, include/boxstyle.h, include/boxtree.h, include/browser.h, include/compositor.h...
-- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): wsapplyops (function) gui/browserui.c:14970 static void wsapplyops(browserwindow w, const tabpage page) -- Opens/sends/closes the page's WebSockets (trusted...
+- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): setpageurl (function) gui/browserui.c:15035 static void setpageurl(browserwindow w, const char url) -- Makes url the page's base (link/image resolution)...
 - [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Depends on: include/htmlparse.h
-- [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Imported by: gui/browserui.c, src/freedom.c, src/textshape.c, src/webfontload.c, tests/testtextshape.c, tests/testwebfontload.c
+- [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Depends on: include/freebug.h, include/jsgeom.h, include/pageview.h
 - [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/css.h, include/cssatrule.h, include/cssbox.h, include/csscolor.h, include/cssdecl.h, include/cssgradient.h, include/cssindex.h...
 - [readmenator-agent/API_p7.md](md/readmenator-agent/API_p7.md): Depends on: include/css.h, include/csslength.h
 - [readmenator-agent/API_p8.md](md/readmenator-agent/API_p8.md): Depends on: include/dom.h, include/htmlparse.h, include/util.h
-- [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/ossandbox.h
+- [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/mediadecoder.h, include/util.h
 - [readmenator-agent/ARCHITECTURE.md](md/readmenator-agent/ARCHITECTURE.md): gui/browserui.c -> gui/browseruiinternal.h
-- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testtextcase.c -> include/css.h
+- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testsecurefetch.c -> include/securefetch.h
 - [readmenator-agent/CONCEPTS.md](md/readmenator-agent/CONCEPTS.md): Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 - [readmenator-agent/KB_gui.md](md/readmenator-agent/KB_gui.md): Doc: uiinputstate: Live editable state for one form text control, aliasing a block of the current...
-- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): paint (function, line 15893) static void paint(browserwindow w)
+- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): drawomnibox (function, line 15983) static void drawomnibox(cairot cr, browserwindow w)
 - [readmenator-agent/KB_include.md](md/readmenator-agent/KB_include.md): Doc: fpacceptlanguageheader: #define FPSECFETCHDESTNAV "document" #define...
 - [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: clctx: The state a <length> is measured against.
-- [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: imresolve: Resolves specifier as imported from base (the importing module's URL).
-- [readmenator-agent/KB_include_p4.md](md/readmenator-agent/KB_include_p4.md): Doc: profileclose: Loads and decrypts prefs.bin over an out ALREADY initialised (prefsinit).
-- [readmenator-agent/KB_include_p5.md](md/readmenator-agent/KB_include_p5.md): Doc: whnew: #define WHMAX 8 / == JDWSMAX: sockets per page / Event kinds delivered to the...
+- [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: idndefaults: enum { IDNREJUA = 1 << 0, IDNREJLANG = 1 << 1, IDNREJGEO = 1 << 2 }...
+- [readmenator-agent/KB_include_p4.md](md/readmenator-agent/KB_include_p4.md): Doc: pfref: One scanned reference. url is the RAW attribute value (the policy-gated fetcher ...
+- [readmenator-agent/KB_include_p5.md](md/readmenator-agent/KB_include_p5.md): Doc: wccaps: Full capability table for one page.
 - [readmenator-agent/KB_root.md](md/readmenator-agent/KB_root.md): Doc: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL...
 - [readmenator-agent/KB_src.md](md/readmenator-agent/KB_src.md): fpcoarsentimems (function, line 17) uint64t fpcoarsentimems(uint64t rawms)
 - [readmenator-agent/KB_src_p2.md](md/readmenator-agent/KB_src_p2.md): Doc: lenrebasectx: int r = snprintf(out + o, space, "%.4f", px); if (r < 0 || (sizet)r >= space)...
 - [readmenator-agent/KB_src_p3.md](md/readmenator-agent/KB_src_p3.md): Doc: uadisplay: The HTML Rendering UA sheet's display for a tag when the cascade declared none ...
 - [readmenator-agent/KB_src_p4.md](md/readmenator-agent/KB_src_p4.md): Doc: nn: bounded by FXMAXITEMS (no VLAs).
 - [readmenator-agent/KB_src_p5.md](md/readmenator-agent/KB_src_p5.md): Doc: jdhandle: Coerces a JS argument to a node handle.
-- [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): cipherfor (function, line 816) static const EVPCIPHER cipherfor(lsaead aead)
+- [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): cipherfor (function, line 827) static const EVPCIPHER cipherfor(lsaead aead)
 - [readmenator-agent/KB_src_p7.md](md/readmenator-agent/KB_src_p7.md): Doc: pvptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - [readmenator-agent/KB_src_p8.md](md/readmenator-agent/KB_src_p8.md): rdpcapssafe (function, line 17) rdpcaps rdpcapssafe(void)
 - [readmenator-agent/KB_src_p9.md](md/readmenator-agent/KB_src_p9.md): Doc: ciprefix: produced; every assembly is bounded and reports overflow rather than truncate....
@@ -48,7 +48,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p7.md](md/readmenator-agent/KB_tests_p7.md): Doc: testenforceallowlistedinsecure: The allowlist override: the user's sovereign per-host escape...
 - [readmenator-agent/KB_tests_p8.md](md/readmenator-agent/KB_tests_p8.md): testclampbounds (function, line 17) static void testclampbounds(void state)
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: fbench -- turn the PNG pairs make parity leaves behind into something you can act on.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 267 files at commit 815de7330e33. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 270 files at commit 690f4b242ed4. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)

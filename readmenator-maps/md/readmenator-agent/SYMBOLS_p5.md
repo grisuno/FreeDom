@@ -3,6 +3,36 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `ti_should_impersonate` | function | `include/tls_impersonate.h:56` | `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);` |
+| `FREEDOM_UI_H` | macro | `include/ui.h:2` | `#define FREEDOM_UI_H` |
+| `available` | function | `include/ui.h:86` | `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...` |
+| `disk` | function | `include/ui.h:113` | `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...` |
+| `images` | function | `include/ui.h:115` | `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...` |
+| `jg_table` | struct | `include/ui.h:95` | `` |
+| `offset` | type_alias | `include/ui.h:30` | `typedef struct ui_line { size_t offset;` |
+| `out` | function | `include/ui.h:98` | `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...` |
+| `placeholders` | function | `include/ui.h:108` | `* above always draw image placeholders (no worker to decode hostile bytes);` |
+| `rd_doc` | struct | `include/ui.h:69` | `` |
+| `space` | function | `include/ui.h:44` | `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...` |
+| `tab` | struct | `include/ui.h:105` | `` |
+| `ui_clamp_scroll` | function | `include/ui.h:55` | `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);` |
+| `ui_layout` | struct | `include/ui.h:35` | `` |
+| `ui_layout_free` | function | `include/ui.h:52` | `void ui_layout_free(ui_layout *lay);` |
+| `ui_line` | struct | `include/ui.h:30` | `` |
+| `ui_persisted_prefs` | function | `include/ui.h:147` | `int ui_persisted_prefs(prefs_state *out);` |
+| `ui_render_viewport_w` | function | `include/ui.h:142` | `int ui_render_viewport_w(void);` |
+| `ui_status` | enum | `include/ui.h:20` | `` |
+| `FREEDOM_URL_H` | macro | `include/url.h:2` | `#define FREEDOM_URL_H` |
+| `URL_ERR_NOT_HTTPS` | function | `include/url.h:109` | `* URL_ERR_NOT_HTTPS (out untouched);` |
+| `URL_MAX_LEN` | macro | `include/url.h:30` | `#define URL_MAX_LEN` |
+| `URL_SEARCH_ENDPOINT` | macro | `include/url.h:76` | `#define URL_SEARCH_ENDPOINT` |
+| `password` | function | `include/url.h:152` | `* username and password (owned, must be freed) into *username_out and * *password_out, and returns URL_OK. When...` |
+| `path` | function | `include/url.h:115` | `* absolute path ("file:///..."). NULL => 0. */ int url_is_file(const char *s);` |
+| `url` | function | `include/url.h:126` | `* Every field ALIASES the input url (not owned, valid while url is alive);` |
+| `url_authority_len` | function | `include/url.h:51` | `size_t url_authority_len(const char *url);` |
+| `url_file_path` | function | `include/url.h:121` | `const char *url_file_path(const char *s);` |
+| `url_has_scheme` | function | `include/url.h:46` | `int url_has_scheme(const char *s);` |
+| `url_is_https` | function | `include/url.h:42` | `int url_is_https(const char *s);` |
 | `url_omni_kind` | enum | `include/url.h:78` | `` |
 | `url_parts` | struct | `include/url.h:129` | `` |
 | `url_status` | enum | `include/url.h:32` | `` |
@@ -466,35 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `shorthand` | function | `src/css.c:3322` | `* generic bucket keeps the rest of the shorthand (same net effect as the  * font-family longhand ...` |
 | `skip_at_rule` | function | `src/css.c:4524` | `static size_t skip_at_rule(const char *s, size_t i, size_t n)` |
 | `slots` | function | `src/css.c:3573` | `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return...` |
-| `split_top_args` | function | `src/css.c:2493` | `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,                ...` |
-| `strip_comments` | function | `src/css.c:5277` | `static char *strip_comments(const char *text, size_t len, size_t *outlen)` |
-| `strip_important` | function | `src/css.c:2244` | `static int strip_important(char *val)` |
-| `supports_matches` | function | `src/css.c:4607` | `static int supports_matches(const char *s, size_t a, size_t b)` |
-| `supports_selector_ok` | function | `src/css.c:4598` | `static int supports_selector_ok(void *ctx, const char *sel)` |
-| `text` | function | `src/css.c:264` | `* source text (rem_rebase, see below) rather than by threading a context here.  *  * Viewport uni...` |
-| `through` | function | `src/css.c:211` | `* at the two SHARED chokepoints every property funnels through (the generic  * dispatch tail, and...` |
-| `tr_decompose` | function | `src/css.c:2438` | `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,                         in...` |
-| `tr_mul` | function | `src/css.c:2418` | `static void tr_mul(double out[6], const double l[6], const double r[6])` |
-| `translate3d` | function | `src/css.c:2523` | `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine  * renders z as nothing,...` |
-| `translateX` | function | `src/css.c:2786` | `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc...` |
-| `translateZ` | function | `src/css.c:2795` | `* translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking * context Firefox builds);` |
-| `var` | function | `src/css.c:2269` | `* cvr_resolve then substitutes var() references when a declaration's value is  * interpreted (par...` |
-| `var` | function | `src/css.c:5287` | `* collected and forty var() declarations -- font sizes, widths, radii, the      * whole theme -- ...` |
-| `wide_claim` | function | `src/css.c:4122` | `static int wide_claim(const char *prop, css_decl *dst, int cap,                       char (*urlt...` |
-| `writing` | function | `src/css.c:3280` | `* Wide keywords claim BOTH slots without writing (inheritance then flows, as  * the tail does for...` |
-| `CAR_TEXT_MAX` | macro | `src/css_atrule.c:13` | `#define CAR_TEXT_MAX` |
-| `car_effective_spec` | function | `src/css_atrule.c:171` | `int car_effective_spec(int spec, int layer, int important)` |
-| `car_layer_rank` | function | `src/css_atrule.c:148` | `int car_layer_rank(car_layers *L, const char *name, size_t len)` |
-| `car_supports` | function | `src/css_atrule.c:141` | `int car_supports(const char *s, size_t a, size_t b, const car_ops *ops)` |
-| `close_paren` | function | `src/css_atrule.c:33` | `static size_t close_paren(const char *s, size_t open, size_t b)` |
-| `copy_trimmed` | function | `src/css_atrule.c:54` | `static int copy_trimmed(const char *s, size_t a, size_t b, char *dst, size_t cap, int lower)` |
-| `eval_condition` | function | `src/css_atrule.c:114` | `static int eval_condition(const char *s, size_t a, size_t b, const car_ops *ops,                 ...` |
-| `eval_declaration` | function | `src/css_atrule.c:68` | `static int eval_declaration(const char *s, size_t a, size_t b, const car_ops *ops, int *ok)` |
-| `eval_in_parens` | function | `src/css_atrule.c:85` | `static int eval_in_parens(const char *s, size_t *i, size_t b, const car_ops *ops,                ...` |
-| `keyword_at` | function | `src/css_atrule.c:23` | `static int keyword_at(const char *s, size_t i, size_t b, const char *kw)` |
-| `skip_ws` | function | `src/css_atrule.c:17` | `static size_t skip_ws(const char *s, size_t i, size_t b)` |
-| `AUTO_REJECT` | macro | `src/css_box.c:1196` | `#define AUTO_REJECT` |
-| `AUTO_RESET` | macro | `src/css_box.c:1198` | `#define AUTO_RESET` |
-| `AUTO_RESET_NONE` | macro | `src/css_box.c:1202` | `#define AUTO_RESET_NONE` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

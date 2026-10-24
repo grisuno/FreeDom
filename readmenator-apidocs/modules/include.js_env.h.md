@@ -27,7 +27,7 @@ typedef enum je_status
 
 ### `poisoned`
 
-`function` | [include/js_env.h:43](../../include/js_env.h#L43)
+`function` | [include/js_env.h:49](../../include/js_env.h#L49)
 
 ```c
 * readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat readback fingerprinting. readback_key * is the per-origin key the orchestrator derive

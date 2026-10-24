@@ -4,11 +4,11 @@
 
 These files have the most connections. Changes here have high blast radius.
 
-- `gui/browser_ui.c` (score: 160.60)
+- `gui/browser_ui.c` (score: 162.70)
 - `include/css.h` (score: 88.00, imported by 36 files)
-- `src/tab.c` (score: 62.60)
+- `src/tab.c` (score: 64.70)
+- `src/freedom.c` (score: 58.80)
 - `src/css.c` (score: 56.70)
-- `src/freedom.c` (score: 56.70)
 - `src/page_view.c` (score: 54.80)
 - `include/html_parse.h` (score: 38.40, imported by 18 files)
 - `include/page_view.h` (score: 37.10, imported by 11 files)
@@ -18,8 +18,8 @@ These files have the most connections. Changes here have high blast radius.
 
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
+- `include/css_color.h` -- 13 direct, 52 total dependents
 - `include/css.h` -- 36 direct, 51 total dependents
-- `include/css_color.h` -- 13 direct, 50 total dependents
 - `include/html_parse.h` -- 18 direct, 40 total dependents
 - `include/dom.h` -- 16 direct, 36 total dependents
 - `include/css_select.h` -- 14 direct, 28 total dependents
@@ -39,7 +39,7 @@ Editing these files can break the listed number of dependents. Run their tests a
 - `include/css.h` -- complexity: 0.2, centrality: 0.3, combined: 0.3
 - `src/local_store.c` -- complexity: 0.5, centrality: 0.1, combined: 0.2
 - `src/js_dom.c` -- complexity: 0.1, centrality: 0.2, combined: 0.2
-- `include/page_view.h` -- complexity: 0.2, centrality: 0.1, combined: 0.1
+- `include/page_view.h` -- complexity: 0.1, centrality: 0.1, combined: 0.1
 - `include/js_dom.h` -- complexity: 0.0, centrality: 0.2, combined: 0.1
 
 ## Dependency Cycles
@@ -63,13 +63,13 @@ Circular dependencies. Refactor to break the cycle.
 
 ## Dataflow Issues (INFERRED, review each lead)
 
-- `gui/browser_ui.c:1468` `gui_subresource_fetch` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- `gui/browser_ui.c:1633` `first` [DEAD_STORE] `dg`: `dg` assigned at line 1633 but never read afterwards.
-- `gui/browser_ui.c:4253` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 4253 but never read afterwards.
-- `gui/browser_ui.c:4255` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 4255 but never read afterwards.
-- `gui/browser_ui.c:5271` `table` [DEAD_STORE] `parent`: `parent` assigned at line 5271 but never read afterwards.
-- `gui/browser_ui.c:5272` `table` [DEAD_STORE] `seen`: `seen` assigned at line 5272 but never read afterwards.
-- `gui/browser_ui.c:5274` `table` [DEAD_STORE] `j`: `j` assigned at line 5274 but never read afterwards.
-- `gui/browser_ui.c:5574` `nested_cont_basis` [DEAD_STORE] `total`: `total` assigned at line 5574 but never read afterwards.
-- `gui/browser_ui.c:5575` `nested_cont_basis` [DEAD_STORE] `n_items`: `n_items` assigned at line 5575 but never read afterwards.
-- `gui/browser_ui.c:6647` `builds` [DEAD_STORE] `sl`: `sl` assigned at line 6647 but never read afterwards.
+- `gui/browser_ui.c:1477` `gui_subresource_fetch` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- `gui/browser_ui.c:1641` `first` [DEAD_STORE] `dg`: `dg` assigned at line 1641 but never read afterwards.
+- `gui/browser_ui.c:4321` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 4321 but never read afterwards.
+- `gui/browser_ui.c:4323` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 4323 but never read afterwards.
+- `gui/browser_ui.c:5343` `table` [DEAD_STORE] `parent`: `parent` assigned at line 5343 but never read afterwards.
+- `gui/browser_ui.c:5344` `table` [DEAD_STORE] `seen`: `seen` assigned at line 5344 but never read afterwards.
+- `gui/browser_ui.c:5346` `table` [DEAD_STORE] `j`: `j` assigned at line 5346 but never read afterwards.
+- `gui/browser_ui.c:5646` `nested_cont_basis` [DEAD_STORE] `total`: `total` assigned at line 5646 but never read afterwards.
+- `gui/browser_ui.c:5647` `nested_cont_basis` [DEAD_STORE] `n_items`: `n_items` assigned at line 5647 but never read afterwards.
+- `gui/browser_ui.c:6719` `builds` [DEAD_STORE] `sl`: `sl` assigned at line 6719 but never read afterwards.

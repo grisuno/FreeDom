@@ -238,8 +238,19 @@ sf_config sf_config_default(void) {
     return c;
 }
 
+/* 1 when s holds no control byte (the only thing that can split a header line). */
+static int header_value_clean(const char *s) {
+    for (; *s != '\0'; ++s)
+        if ((unsigned char)*s < 0x20 || *s == 0x7f) return 0;
+    return 1;
+}
+
 const char *sf_user_agent_or_default(const char *ua) {
-    return (ua != NULL && ua[0] != '\0') ? ua : SF_DEFAULT_USER_AGENT;
+    return (ua != NULL && ua[0] != '\0' && header_value_clean(ua)) ? ua : SF_DEFAULT_USER_AGENT;
+}
+
+const char *sf_accept_language_or_default(const char *lang) {
+    return (lang != NULL && lang[0] != '\0' && header_value_clean(lang)) ? lang : FP_ACCEPT_LANGUAGE_HEADER;
 }
 
 const char *sf_impersonate_kex_groups(void)    { return SF_IMPERSONATE_KEX_GROUPS; }
@@ -837,7 +848,13 @@ static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *l
     /* Send a normalized Accept-Language on every request (anti-fingerprinting): the
      * value matches the JS-visible identity, so the on-the-wire and in-page locales
      * agree. Omitting it is itself a signal; the real system locale must never leak. */
-    if (add_header(hdrs, "Accept-Language: " FP_ACCEPT_LANGUAGE_HEADER) != 0) return SF_ERR_OOM;
+    {
+        char al[320];
+        int alr = snprintf(al, sizeof al, "Accept-Language: %s",
+                           sf_accept_language_or_default(local->accept_language));
+        if (alr < 0 || (size_t)alr >= sizeof al) return SF_ERR_OOM;
+        if (add_header(hdrs, al) != 0) return SF_ERR_OOM;
+    }
 
     /* Browser-like Accept header (Hito 30b): replaces libcurl's generic accept with a
      * standard Firefox content-negotiation string. Every real browser sends this;

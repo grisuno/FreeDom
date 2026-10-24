@@ -1127,6 +1127,52 @@ static void test_load_session_cookies_roundtrip(void **state) {
     tab_close(t);
 }
 
+/* indexedDB (memory only) exists for a trusted host and is undefined for any other. */
+static void test_indexeddb_only_for_trusted_host(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body><script>document.title=typeof indexedDB+','+typeof IDBKeyRange;</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://untrusted.example/", 1, 0, 0, &p), TAB_OK);
+    assert_string_equal(p.title, "undefined,undefined");
+    tab_page_free(&p);
+    tab_set_net_allowed(t, 1);
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://trusted.example/", 1, 0, 0, &p), TAB_OK);
+    assert_string_equal(p.title, "object,function");
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* The user's identity override (spec/identity.md) crosses to the worker: navigator carries it for
+ * any host, but navigator.geolocation exists only for a trusted host with a fixed place. */
+static void test_identity_override_reaches_worker(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body><script>"
+        "document.title=navigator.userAgent+'|'+navigator.language+'|'+typeof navigator.geolocation;"
+        "</script></body></html>";
+    static const char ID[] = "ua=Mozilla/5.0 Mine|lang=es-AR,en|geo=-34.600000,-58.380000,30.0";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_identity(t, ID);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://untrusted.example/", 1, 0, 0, &p), TAB_OK);
+    assert_string_equal(p.title, "Mozilla/5.0 Mine|es-AR|undefined");        /* untrusted: no geolocation */
+    tab_page_free(&p);
+    tab_set_net_allowed(t, 1);
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://trusted.example/", 1, 0, 0, &p), TAB_OK);
+    assert_string_equal(p.title, "Mozilla/5.0 Mine|es-AR|object");           /* trusted + fixed place */
+    tab_page_free(&p);
+    tab_set_identity(t, "ua=bad\x01ctl|lang=zz");                             /* unreadable field: default UA */
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://trusted.example/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(strstr(p.title, "Firefox"));
+    assert_non_null(strstr(p.title, "|zz|undefined"));                       /* the valid field survives */
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* Untrusted host (net off): the cookie jar stays disabled -- document.cookie is '' even
  * if the parent were to seed it, and nothing is dumped back (Zero Knowledge default). */
 static void test_load_no_session_cookies_when_untrusted(void **state) {
@@ -3167,6 +3213,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_ex_noscript_hidden_with_js),
         cmocka_unit_test(test_load_ex_media_element_facade),
         cmocka_unit_test(test_load_session_cookies_roundtrip),
+        cmocka_unit_test(test_identity_override_reaches_worker),
+        cmocka_unit_test(test_indexeddb_only_for_trusted_host),
         cmocka_unit_test(test_load_no_session_cookies_when_untrusted),
         cmocka_unit_test(test_load_ex_builds_dom_and_fires_onload),
         cmocka_unit_test(test_load_ex_inner_html_renders),

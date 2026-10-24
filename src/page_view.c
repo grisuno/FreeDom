@@ -1914,6 +1914,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
               : (bg == CC_COLOR_CURRENT) ? -1
               : -1;
     d->bg_alpha = cs->bg_alpha;
+    d->bg_clip = (cs->bg_clip == CSS_BGC_PADDING_BOX || cs->bg_clip == CSS_BGC_CONTENT_BOX) ? cs->bg_clip : 0;
     d->box_sizing = cs->box_sizing;
     d->pad_t = (cs->pad_top    != CSS_LEN_UNSET) ? cs->pad_top    : 0;
     d->pad_r = (cs->pad_right  != CSS_LEN_UNSET) ? cs->pad_right  : 0;

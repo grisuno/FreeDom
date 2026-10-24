@@ -1,13 +1,13 @@
 # `include/secure_fetch.h`
 
-> Source: [include/secure_fetch.h:1](../../include/secure_fetch.h#L1) | language `h` | coverage 50.0% | [API index](../index.md)
+> Source: [include/secure_fetch.h:1](../../include/secure_fetch.h#L1) | language `h` | coverage 51.2% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`sf_chain_info`](#sf_chain_info), [`sf_config`](#sf_config), [`sf_response`](#sf_response)
 - **Enums:** [`sf_status`](#sf_status), [`sf_policy`](#sf_policy), [`sf_proxy_type`](#sf_proxy_type)
 - **Type Aliases:** [`policy`](#policy), [`status`](#status), [`sf_ws`](#sf_ws)
-- **Functions:** [`validators`](#validators), [`sf_global_init`](#sf_global_init), [`EXCLUDED`](#excluded), [`sf_cookie_put`](#sf_cookie_put), [`sf_cookie_line_matches`](#sf_cookie_line_matches), [`sf_user_agent_or_default`](#sf_user_agent_or_default), [`sf_impersonate_kex_groups`](#sf_impersonate_kex_groups), [`sf_impersonate_tls13_ciphers`](#sf_impersonate_tls13_ciphers), [`skipped`](#skipped), [`sf_is_redirect_code`](#sf_is_redirect_code), [`bits`](#bits), [`sf_ws_fd`](#sf_ws_fd), [`sf_ws_close`](#sf_ws_close), [`connection`](#connection), [`sf_get`](#sf_get), [`sf_response_free`](#sf_response_free), [`exhausted`](#exhausted), [`sf_rcache_put`](#sf_rcache_put), [`sf_rcache_get`](#sf_rcache_get), [`sf_rcache_clear`](#sf_rcache_clear)
+- **Functions:** [`validators`](#validators), [`sf_global_init`](#sf_global_init), [`EXCLUDED`](#excluded), [`sf_cookie_put`](#sf_cookie_put), [`sf_cookie_line_matches`](#sf_cookie_line_matches), [`sf_user_agent_or_default`](#sf_user_agent_or_default), [`sf_accept_language_or_default`](#sf_accept_language_or_default), [`sf_impersonate_kex_groups`](#sf_impersonate_kex_groups), [`sf_impersonate_tls13_ciphers`](#sf_impersonate_tls13_ciphers), [`skipped`](#skipped), [`sf_is_redirect_code`](#sf_is_redirect_code), [`bits`](#bits), [`sf_ws_fd`](#sf_ws_fd), [`sf_ws_close`](#sf_ws_close), [`connection`](#connection), [`sf_get`](#sf_get), [`sf_response_free`](#sf_response_free), [`exhausted`](#exhausted), [`sf_rcache_put`](#sf_rcache_put), [`sf_rcache_get`](#sf_rcache_get), [`sf_rcache_clear`](#sf_rcache_clear)
 - **Macros:** [`SF_DEFAULT_KEX_GROUPS`](#sf_default_kex_groups), [`SF_IMPERSONATE_KEX_GROUPS`](#sf_impersonate_kex_groups), [`SF_IMPERSONATE_TLS13_CIPHERS`](#sf_impersonate_tls13_ciphers), [`SF_IMPERSONATE_TLS12_CIPHERS`](#sf_impersonate_tls12_ciphers), [`SF_DEFAULT_USER_AGENT`](#sf_default_user_agent), [`SF_DEFAULT_MAX_BODY`](#sf_default_max_body), [`SF_DEFAULT_TIMEOUT_MS`](#sf_default_timeout_ms), [`SF_CONNECT_TIMEOUT_MS`](#sf_connect_timeout_ms), [`SF_SUBRESOURCE_TIMEOUT_MS`](#sf_subresource_timeout_ms), [`SF_DEFAULT_MAX_REDIRECTS`](#sf_default_max_redirects), [`SF_MAX_URL`](#sf_max_url), [`SF_WS_MAX_MESSAGE`](#sf_ws_max_message)
 
 ## Type Diagram
@@ -69,7 +69,7 @@ typedef struct sf_config
 
 ### `sf_response`
 
-`struct` | [include/secure_fetch.h:118](../../include/secure_fetch.h#L118)
+`struct` | [include/secure_fetch.h:119](../../include/secure_fetch.h#L119)
 
 ```c
 typedef struct sf_response
@@ -143,7 +143,7 @@ typedef struct sf_config { sf_policy policy;
 
 ### `status`
 
-`type_alias` | [include/secure_fetch.h:117](../../include/secure_fetch.h#L117)
+`type_alias` | [include/secure_fetch.h:118](../../include/secure_fetch.h#L118)
 
 ```c
 typedef struct sf_response { sf_status status;
@@ -155,7 +155,7 @@ typedef struct sf_response { sf_status status;
 
 ### `sf_ws`
 
-`type_alias` | [include/secure_fetch.h:294](../../include/secure_fetch.h#L294)
+`type_alias` | [include/secure_fetch.h:299](../../include/secure_fetch.h#L299)
 
 ```c
 typedef struct sf_ws sf_ws;
@@ -191,7 +191,7 @@ per-message cap (anti-DoS)
 
 ### `sf_global_init`
 
-`function` | [include/secure_fetch.h:205](../../include/secure_fetch.h#L205)
+`function` | [include/secure_fetch.h:206](../../include/secure_fetch.h#L206)
 
 ```c
 void sf_global_init(void);
@@ -207,7 +207,7 @@ Idempotent; safe to call more than once. A single-threaded caller need not call 
 
 ### `EXCLUDED`
 
-`function` | [include/secure_fetch.h:211](../../include/secure_fetch.h#L211)
+`function` | [include/secure_fetch.h:212](../../include/secure_fetch.h#L212)
 
 ```c
 * cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host (the caller gates on allow.conf AND js.conf). 0 on empty/error. */ size_t sf_cookie_he
@@ -228,7 +228,7 @@ Idempotent; safe to call more than once. A single-threaded caller need not call 
 
 ### `sf_cookie_put`
 
-`function` | [include/secure_fetch.h:218](../../include/secure_fetch.h#L218)
+`function` | [include/secure_fetch.h:219](../../include/secure_fetch.h#L219)
 
 ```c
 void sf_cookie_put(const char *url, const char *namevalue);
@@ -251,7 +251,7 @@ No-op on malformed input.
 
 ### `sf_cookie_line_matches`
 
-`function` | [include/secure_fetch.h:223](../../include/secure_fetch.h#L223)
+`function` | [include/secure_fetch.h:224](../../include/secure_fetch.h#L224)
 
 ```c
 int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);
@@ -278,7 +278,7 @@ Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecu
 
 ### `sf_user_agent_or_default`
 
-`function` `const` | [include/secure_fetch.h:232](../../include/secure_fetch.h#L232)
+`function` `const` | [include/secure_fetch.h:233](../../include/secure_fetch.h#L233)
 
 ```c
 const char *sf_user_agent_or_default(const char *ua);
@@ -298,11 +298,35 @@ Pure: the single place that resolves the effective User-Agent, so the orchestrat
 
 ---
 
+<a id="sf_accept_language_or_default"></a>
+
+### `sf_accept_language_or_default`
+
+`function` `const` | [include/secure_fetch.h:237](../../include/secure_fetch.h#L237)
+
+```c
+const char *sf_accept_language_or_default(const char *lang);
+```
+
+As sf_user_agent_or_default for Accept-Language.
+
+Both refuse a value holding a control byte (a CR/LF would split the request): the default is sent instead, never the tainted string.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `lang` | `char *` |  |  |
+
+**Returns:** `char *`
+
+---
+
 <a id="sf_impersonate_kex_groups"></a>
 
 ### `sf_impersonate_kex_groups`
 
-`function` `const` | [include/secure_fetch.h:236](../../include/secure_fetch.h#L236)
+`function` `const` | [include/secure_fetch.h:241](../../include/secure_fetch.h#L241)
 
 ```c
 const char *sf_impersonate_kex_groups(void);
@@ -320,7 +344,7 @@ Both are classical (no MLKEM).
 
 ### `sf_impersonate_tls13_ciphers`
 
-`function` `const` | [include/secure_fetch.h:237](../../include/secure_fetch.h#L237)
+`function` `const` | [include/secure_fetch.h:242](../../include/secure_fetch.h#L242)
 
 ```c
 const char *sf_impersonate_tls13_ciphers(void);
@@ -334,7 +358,7 @@ const char *sf_impersonate_tls13_ciphers(void);
 
 ### `skipped`
 
-`function` | [include/secure_fetch.h:257](../../include/secure_fetch.h#L257)
+`function` | [include/secure_fetch.h:262](../../include/secure_fetch.h#L262)
 
 ```c
 * skipped (a classical key exchange is accepted);
@@ -354,7 +378,7 @@ const char *sf_impersonate_tls13_ciphers(void);
 
 ### `sf_is_redirect_code`
 
-`function` | [include/secure_fetch.h:268](../../include/secure_fetch.h#L268)
+`function` | [include/secure_fetch.h:273](../../include/secure_fetch.h#L273)
 
 ```c
 int sf_is_redirect_code(long http_code);
@@ -376,7 +400,7 @@ Nonzero only for HTTP redirect status codes (301, 302, 303, 307, 308).
 
 ### `bits`
 
-`function` | [include/secure_fetch.h:311](../../include/secure_fetch.h#L311)
+`function` | [include/secure_fetch.h:316](../../include/secure_fetch.h#L316)
 
 ```c
 * *flags receives CURLWS_* bits (text/binary/close/cont);
@@ -396,7 +420,7 @@ Nonzero only for HTTP redirect status codes (301, 302, 303, 307, 308).
 
 ### `sf_ws_fd`
 
-`function` | [include/secure_fetch.h:318](../../include/secure_fetch.h#L318)
+`function` | [include/secure_fetch.h:323](../../include/secure_fetch.h#L323)
 
 ```c
 int sf_ws_fd(const sf_ws *ws);
@@ -418,7 +442,7 @@ The connection's socket for poll(), or -1.
 
 ### `sf_ws_close`
 
-`function` | [include/secure_fetch.h:321](../../include/secure_fetch.h#L321)
+`function` | [include/secure_fetch.h:326](../../include/secure_fetch.h#L326)
 
 ```c
 void sf_ws_close(sf_ws *ws);
@@ -440,7 +464,7 @@ NULL is a no-op.
 
 ### `connection`
 
-`function` | [include/secure_fetch.h:325](../../include/secure_fetch.h#L325)
+`function` | [include/secure_fetch.h:330](../../include/secure_fetch.h#L330)
 
 ```c
 * on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding max_redirects => SF_ERR_TOO_MANY_REDIRECTS. * On SF_OK, *out is the final response and
@@ -460,7 +484,7 @@ NULL is a no-op.
 
 ### `sf_get`
 
-`function` | [include/secure_fetch.h:334](../../include/secure_fetch.h#L334)
+`function` | [include/secure_fetch.h:339](../../include/secure_fetch.h#L339)
 
 ```c
 * sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects out->http_code / out->location and decides). * cfg == NULL => sf_config_default(). url ==
@@ -480,7 +504,7 @@ NULL is a no-op.
 
 ### `sf_response_free`
 
-`function` | [include/secure_fetch.h:345](../../include/secure_fetch.h#L345)
+`function` | [include/secure_fetch.h:350](../../include/secure_fetch.h#L350)
 
 ```c
 void sf_response_free(sf_response *resp);
@@ -502,7 +526,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `exhausted`
 
-`function` | [include/secure_fetch.h:356](../../include/secure_fetch.h#L356)
+`function` | [include/secure_fetch.h:361](../../include/secure_fetch.h#L361)
 
 ```c
 * is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next);
@@ -522,7 +546,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `sf_rcache_put`
 
-`function` | [include/secure_fetch.h:369](../../include/secure_fetch.h#L369)
+`function` | [include/secure_fetch.h:374](../../include/secure_fetch.h#L374)
 
 ```c
 int sf_rcache_put(const char *from, const char *to, time_t now);
@@ -548,7 +572,7 @@ Remembering changes WHEN a redirect is learned, never what policy the target is 
 
 ### `sf_rcache_get`
 
-`function` | [include/secure_fetch.h:370](../../include/secure_fetch.h#L370)
+`function` | [include/secure_fetch.h:375](../../include/secure_fetch.h#L375)
 
 ```c
 int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);
@@ -571,7 +595,7 @@ int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);
 
 ### `sf_rcache_clear`
 
-`function` | [include/secure_fetch.h:371](../../include/secure_fetch.h#L371)
+`function` | [include/secure_fetch.h:376](../../include/secure_fetch.h#L376)
 
 ```c
 void sf_rcache_clear(void);
@@ -587,7 +611,7 @@ void sf_rcache_clear(void);
 
 ### `SF_DEFAULT_KEX_GROUPS`
 
-`macro` | [include/secure_fetch.h:144](../../include/secure_fetch.h#L144)
+`macro` | [include/secure_fetch.h:145](../../include/secure_fetch.h#L145)
 
 ```c
 #define SF_DEFAULT_KEX_GROUPS
@@ -603,7 +627,7 @@ Offering a classical group never weakens the strict policy: a classical *negotia
 
 ### `SF_IMPERSONATE_KEX_GROUPS`
 
-`macro` | [include/secure_fetch.h:153](../../include/secure_fetch.h#L153)
+`macro` | [include/secure_fetch.h:154](../../include/secure_fetch.h#L154)
 
 ```c
 #define SF_IMPERSONATE_KEX_GROUPS
@@ -619,7 +643,7 @@ A classical profile consistent with FP_USER_AGENT (Firefox): it DROPS X25519MLKE
 
 ### `SF_IMPERSONATE_TLS13_CIPHERS`
 
-`macro` | [include/secure_fetch.h:154](../../include/secure_fetch.h#L154)
+`macro` | [include/secure_fetch.h:155](../../include/secure_fetch.h#L155)
 
 ```c
 #define SF_IMPERSONATE_TLS13_CIPHERS
@@ -631,7 +655,7 @@ A classical profile consistent with FP_USER_AGENT (Firefox): it DROPS X25519MLKE
 
 ### `SF_IMPERSONATE_TLS12_CIPHERS`
 
-`macro` | [include/secure_fetch.h:158](../../include/secure_fetch.h#L158)
+`macro` | [include/secure_fetch.h:159](../../include/secure_fetch.h#L159)
 
 ```c
 #define SF_IMPERSONATE_TLS12_CIPHERS
@@ -647,7 +671,7 @@ OpenSSL's default advertises ~80 TLS 1.2 suites; Firefox advertises ~14, so rest
 
 ### `SF_DEFAULT_USER_AGENT`
 
-`macro` | [include/secure_fetch.h:169](../../include/secure_fetch.h#L169)
+`macro` | [include/secure_fetch.h:170](../../include/secure_fetch.h#L170)
 
 ```c
 #define SF_DEFAULT_USER_AGENT
@@ -663,7 +687,7 @@ Demoting the old "Freedom/0.1" to merely a brand string was deliberate; never re
 
 ### `SF_DEFAULT_MAX_BODY`
 
-`macro` | [include/secure_fetch.h:170](../../include/secure_fetch.h#L170)
+`macro` | [include/secure_fetch.h:171](../../include/secure_fetch.h#L171)
 
 ```c
 #define SF_DEFAULT_MAX_BODY
@@ -675,7 +699,7 @@ Demoting the old "Freedom/0.1" to merely a brand string was deliberate; never re
 
 ### `SF_DEFAULT_TIMEOUT_MS`
 
-`macro` | [include/secure_fetch.h:171](../../include/secure_fetch.h#L171)
+`macro` | [include/secure_fetch.h:172](../../include/secure_fetch.h#L172)
 
 ```c
 #define SF_DEFAULT_TIMEOUT_MS
@@ -687,7 +711,7 @@ Demoting the old "Freedom/0.1" to merely a brand string was deliberate; never re
 
 ### `SF_CONNECT_TIMEOUT_MS`
 
-`macro` | [include/secure_fetch.h:194](../../include/secure_fetch.h#L194)
+`macro` | [include/secure_fetch.h:195](../../include/secure_fetch.h#L195)
 
 ```c
 #define SF_CONNECT_TIMEOUT_MS
@@ -719,7 +743,7 @@ SF_DEFAULT_TIMEOUT_MS: there is nothing to show without it.
 
 ### `SF_SUBRESOURCE_TIMEOUT_MS`
 
-`macro` | [include/secure_fetch.h:195](../../include/secure_fetch.h#L195)
+`macro` | [include/secure_fetch.h:196](../../include/secure_fetch.h#L196)
 
 ```c
 #define SF_SUBRESOURCE_TIMEOUT_MS
@@ -731,7 +755,7 @@ SF_DEFAULT_TIMEOUT_MS: there is nothing to show without it.
 
 ### `SF_DEFAULT_MAX_REDIRECTS`
 
-`macro` | [include/secure_fetch.h:196](../../include/secure_fetch.h#L196)
+`macro` | [include/secure_fetch.h:197](../../include/secure_fetch.h#L197)
 
 ```c
 #define SF_DEFAULT_MAX_REDIRECTS
@@ -743,7 +767,7 @@ SF_DEFAULT_TIMEOUT_MS: there is nothing to show without it.
 
 ### `SF_MAX_URL`
 
-`macro` | [include/secure_fetch.h:197](../../include/secure_fetch.h#L197)
+`macro` | [include/secure_fetch.h:198](../../include/secure_fetch.h#L198)
 
 ```c
 #define SF_MAX_URL
@@ -755,7 +779,7 @@ SF_DEFAULT_TIMEOUT_MS: there is nothing to show without it.
 
 ### `SF_WS_MAX_MESSAGE`
 
-`macro` | [include/secure_fetch.h:293](../../include/secure_fetch.h#L293)
+`macro` | [include/secure_fetch.h:298](../../include/secure_fetch.h#L298)
 
 ```c
 #define SF_WS_MAX_MESSAGE

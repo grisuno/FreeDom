@@ -308,7 +308,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `jd_install`
 
-`function` | [src/js_dom.c:1851](../../src/js_dom.c#L1851)
+`function` | [src/js_dom.c:1864](../../src/js_dom.c#L1864)
 
 ```c
 jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
@@ -332,7 +332,7 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
 
 ### `jd_flush_custom_elements`
 
-`function` | [src/js_dom.c:1933](../../src/js_dom.c#L1933)
+`function` | [src/js_dom.c:1946](../../src/js_dom.c#L1946)
 
 ```c
 void jd_flush_custom_elements(js_context *ctx)
@@ -348,7 +348,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 |---|---|---|---|
 | `ctx` | `js_context *` |  |  |
 
-> **Inherited:** Documentation from [`jd_flush_custom_elements`](#jd_flush_custom_elements) (include/js_dom.h:214).
+> **Inherited:** Documentation from [`jd_flush_custom_elements`](#jd_flush_custom_elements) (include/js_dom.h:235).
 
 ---
 
@@ -356,7 +356,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 
 ### `fails`
 
-`function` | [src/js_dom.c:1947](../../src/js_dom.c#L1947)
+`function` | [src/js_dom.c:1960](../../src/js_dom.c#L1960)
 
 ```c
 * cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...
@@ -376,7 +376,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 
 ### `jd_install_console`
 
-`function` | [src/js_dom.c:2061](../../src/js_dom.c#L2061)
+`function` | [src/js_dom.c:2074](../../src/js_dom.c#L2074)
 
 ```c
 jd_status jd_install_console(js_context *ctx, fb_buffer *log)
@@ -399,7 +399,7 @@ jd_status jd_install_console(js_context *ctx, fb_buffer *log)
 
 ### `jd_set_cookies`
 
-`function` | [src/js_dom.c:2098](../../src/js_dom.c#L2098)
+`function` | [src/js_dom.c:2111](../../src/js_dom.c#L2111)
 
 ```c
 jd_status jd_set_cookies(js_context *ctx, const char *cookies)
@@ -420,7 +420,7 @@ jd_status jd_set_cookies(js_context *ctx, const char *cookies)
 
 ### `jd_get_cookies`
 
-`function` | [src/js_dom.c:2118](../../src/js_dom.c#L2118)
+`function` | [src/js_dom.c:2131](../../src/js_dom.c#L2131)
 
 ```c
 int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)
@@ -440,7 +440,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`jd_get_cookies`](#jd_get_cookies) (include/js_dom.h:153).
+> **Inherited:** Documentation from [`jd_get_cookies`](#jd_get_cookies) (include/js_dom.h:174).
 
 ---
 
@@ -448,7 +448,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `jd_set_computed`
 
-`function` | [src/js_dom.c:2141](../../src/js_dom.c#L2141)
+`function` | [src/js_dom.c:2154](../../src/js_dom.c#L2154)
 
 ```c
 jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)
@@ -470,7 +470,7 @@ jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)
 
 ### `jd_set_geometry`
 
-`function` | [src/js_dom.c:2152](../../src/js_dom.c#L2152)
+`function` | [src/js_dom.c:2165](../../src/js_dom.c#L2165)
 
 ```c
 jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)

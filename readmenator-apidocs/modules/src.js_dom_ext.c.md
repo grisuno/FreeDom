@@ -4,22 +4,7 @@
 
 ## Contents
 
-- **Functions:** [`identity`](#identity), [`registration`](#registration), [`jdx_install`](#jdx_install), [`jd_install_repl_api`](#jd_install_repl_api)
-
-## Call Graph
-
-Solid arrows stay in this module, dashed arrows leave it.
-
-```mermaid
-flowchart LR
-    n_src_js_dom_ext_c__jdx_install(["jdx_install"])
-    n_include_js_dom_h__run["js_dom.run"]
-    n_src_js_dom_ext_c__jd_install_repl_api(["jd_install_repl_api"])
-    n_src_js_sandbox_c__js_context_raw["js_sandbox.js_context_raw"]
-    n_src_js_dom_ext_c__jdx_install -.-> n_include_js_dom_h__run
-    n_src_js_dom_ext_c__jd_install_repl_api -.-> n_include_js_dom_h__run
-    n_src_js_dom_ext_c__jd_install_repl_api -.-> n_src_js_sandbox_c__js_context_raw
-```
+- **Functions:** [`identity`](#identity), [`registration`](#registration), [`jdx_install`](#jdx_install), [`jd_install_repl_api`](#jd_install_repl_api), [`jd_set_repl_css`](#jd_set_repl_css), [`jd_install_geolocation`](#jd_install_geolocation), [`jd_install_indexeddb`](#jd_install_indexeddb)
 
 ## Functions
 
@@ -27,7 +12,7 @@ flowchart LR
 
 ### `identity`
 
-`function` | [src/js_dom_ext.c:98](../../src/js_dom_ext.c#L98)
+`function` | [src/js_dom_ext.c:99](../../src/js_dom_ext.c#L99)
 
 ```c
 * identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*, so the next pv_build_styled paints it. * innerHTML/textContent append (never replace
@@ -47,7 +32,7 @@ flowchart LR
 
 ### `registration`
 
-`function` | [src/js_dom_ext.c:373](../../src/js_dom_ext.c#L373)
+`function` | [src/js_dom_ext.c:374](../../src/js_dom_ext.c#L374)
 
 ```c
 * registration (options, attributeFilter, subtree) and delivered in one microtask. An * observer...
@@ -61,7 +46,7 @@ flowchart LR
 
 ### `jdx_install`
 
-`function` | [src/js_dom_ext.c:523](../../src/js_dom_ext.c#L523)
+`function` | [src/js_dom_ext.c:1128](../../src/js_dom_ext.c#L1128)
 
 ```c
 int jdx_install(JSContext *ctx)
@@ -75,15 +60,13 @@ int jdx_install(JSContext *ctx)
 
 **Returns:** `int`
 
-*Calls:* [`run`](include.js_dom.h.md#run)
-
 ---
 
 <a id="jd_install_repl_api"></a>
 
 ### `jd_install_repl_api`
 
-`function` | [src/js_dom_ext.c:529](../../src/js_dom_ext.c#L529)
+`function` | [src/js_dom_ext.c:1135](../../src/js_dom_ext.c#L1135)
 
 ```c
 jd_status jd_install_repl_api(js_context *ctx)
@@ -97,6 +80,73 @@ jd_status jd_install_repl_api(js_context *ctx)
 
 **Returns:** `jd_status`
 
-*Calls:* [`run`](include.js_dom.h.md#run), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+---
+
+<a id="jd_set_repl_css"></a>
+
+### `jd_set_repl_css`
+
+`function` | [src/js_dom_ext.c:1143](../../src/js_dom_ext.c#L1143)
+
+```c
+jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `css` | `char *` |  |  |
+| `len` | `size_t` |  |  |
+
+**Returns:** `jd_status`
+
+---
+
+<a id="jd_install_geolocation"></a>
+
+### `jd_install_geolocation`
+
+`function` | [src/js_dom_ext.c:1156](../../src/js_dom_ext.c#L1156)
+
+```c
+jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `lat` | `double` |  |  |
+| `lon` | `double` |  |  |
+| `accuracy_m` | `double` |  |  |
+
+**Returns:** `jd_status`
+
+*Called by:* [`run_js`](src.tab.c.md#run_js)
+
+---
+
+<a id="jd_install_indexeddb"></a>
+
+### `jd_install_indexeddb`
+
+`function` | [src/js_dom_ext.c:1175](../../src/js_dom_ext.c#L1175)
+
+```c
+jd_status jd_install_indexeddb(js_context *ctx)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+
+**Returns:** `jd_status`
+
+*Called by:* [`run_js`](src.tab.c.md#run_js)
 
 ---

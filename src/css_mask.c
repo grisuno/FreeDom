@@ -133,7 +133,7 @@ static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val) {
     if (nl < 1 || nl > CM_LAYERS) return 0;
     cm_layer L[CM_LAYERS];
     int clips[CM_LAYERS] = { CM_CLIP_BORDER, CM_CLIP_BORDER };
-    int comp = CM_COMP_ADD, any = 0;
+    int comp = CM_COMP_ADD, any = 0, unavailable = 0;
     for (int i = 0; i < nl; ++i) {
         char toks[CM_MAX_TOKS][CM_TOK_MAX];
         int nt = split(layers[i], 0, toks, CM_MAX_TOKS);
@@ -141,6 +141,11 @@ static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val) {
         int got_image = 0;
         memset(&L[i], 0, sizeof L[i]);
         for (int t = 0; t < nt; ++t) {
+            /* A url() mask image is never fetched (decoration must not open a socket). Like
+             * Firefox with an unavailable image, the element is then not painted at all. */
+            if (strstr(toks[t], "url(") != NULL && strstr(toks[t], "data:") == NULL) {
+                unavailable = 1; got_image = 1; continue;      /* a data: image stays unsupported */
+            }
             cm_layer img;
             int r = image_layer(toks[t], &img);
             if (r == 1 || r == 2) {
@@ -159,6 +164,17 @@ static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val) {
             /* repeat / position / size / mode tokens: accepted, not implemented */
         }
         if (!got_image) return 0;
+    }
+    if (unavailable) {                         /* one fully transparent layer: nothing shows */
+        nl = 1;
+        memset(&L[0], 0, sizeof L[0]);
+        L[0].kind = 1;
+        L[0].nst = 2;
+        L[0].angle = 180;
+        L[0].pos[0] = L[0].pos[1] = -1;        /* alpha stays 0 */
+        any = 1;
+        comp = CM_COMP_ADD;
+        clips[0] = CM_CLIP_BORDER;
     }
     int need = 1 + 6 + (shorthand ? 2 : 0);
     if (cap < need) return 0;

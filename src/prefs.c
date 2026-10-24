@@ -185,7 +185,7 @@ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len) {
     *out = NULL;
     *out_len = 0;
 
-    size_t cap = 256;  /* header + scalar keys */
+    size_t cap = 256 + 3 + strlen(p->identity);  /* header + scalar keys + identity line */
     for (size_t i = 0; i < p->bookmarks_len; ++i)
         cap += 4 + strlen(p->bookmarks[i].url) + strlen(p->bookmarks[i].title);
     for (size_t i = 0; i < p->history_len; ++i)
@@ -201,6 +201,12 @@ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len) {
         PREFS_VERSION,
         p->theme_mode, p->force_theme, p->images, p->css, p->reader, p->js_mode,
         p->tor, p->i2p, p->torify, p->zoom_pct, p->remember_history);
+    if (p->identity[0] != '\0') {
+        size_t space = cap - n;
+        int r = snprintf(buf + n, space, "id\t%s\n", p->identity);
+        if (r < 0 || (size_t)r >= space) { free(buf); return PREFS_ERR_FORMAT; }
+        n += (size_t)r;
+    }
     for (size_t i = 0; i < p->bookmarks_len; ++i) {
         size_t space = cap - n;
         if (space == 0) break;
@@ -276,6 +282,13 @@ prefs_status prefs_parse(const char *text, size_t len, prefs_state *out) {
                         if (st == PREFS_ERR_OOM) return PREFS_ERR_OOM;
                     }
                 }
+            } else if (lbuf[0] == 'i' && lbuf[1] == 'd' && lbuf[2] == '\t') {
+                const char *idv = lbuf + 3;
+                size_t il = strlen(idv);
+                int clean = (il < sizeof out->identity);
+                for (size_t k = 0; clean && k < il; ++k)
+                    if ((unsigned char)idv[k] < 0x20 || (unsigned char)idv[k] > 0x7e) clean = 0;
+                if (clean) memcpy(out->identity, idv, il + 1);
             } else if (lbuf[0] == 'h' && lbuf[1] == '\t') {
                 if (url_valid(lbuf + 2)) {
                     prefs_status st = history_push_back(out, lbuf + 2);

@@ -3,58 +3,89 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `fx_grid_line_resolve` | function | `src/flex_layout.c:888` | `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)` |
+| `fx_grid_line_side` | function | `src/flex_layout.c:860` | `int fx_grid_line_side(const char *s, int *out)` |
+| `fx_grid_place_span` | function | `src/flex_layout.c:177` | `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,                       ...` |
+| `fx_justify_name` | function | `src/flex_layout.c:713` | `const char *fx_justify_name(fx_justify j)` |
+| `fx_multicol_balance` | function | `src/flex_layout.c:682` | `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,                         ...` |
+| `fx_multicol_used` | function | `src/flex_layout.c:645` | `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,                ...` |
+| `gl_int` | function | `src/flex_layout.c:822` | `static int gl_int(const char *p, const char *end, long cap, long *out)` |
+| `gl_is_line` | function | `src/flex_layout.c:886` | `static int gl_is_line(int v)` |
+| `gl_is_span` | function | `src/flex_layout.c:885` | `static int gl_is_span(int v)` |
+| `gl_kw` | function | `src/flex_layout.c:812` | `static int gl_kw(const char *p, const char *end, const char *kw)` |
+| `gl_lower` | function | `src/flex_layout.c:809` | `static int gl_lower(char c)` |
+| `gl_side_range` | function | `src/flex_layout.c:837` | `static int gl_side_range(const char *p, const char *end, int *out)` |
+| `gl_ws` | function | `src/flex_layout.c:805` | `static int gl_ws(char c)` |
+| `nn` | function | `src/flex_layout.c:19` | `static double nn(double v)` |
+| `clean_action` | function | `src/form.c:75` | `static int clean_action(const char *action, char *out, size_t outsz)` |
+| `copy_fit` | function | `src/form.c:66` | `static int copy_fit(char *dst, size_t dstsz, const char *src)` |
+| `enc_component` | function | `src/form.c:25` | `static int enc_component(const char *s, char *out, size_t outsz, size_t *pos)` |
+| `fm_build` | function | `src/form.c:120` | `fm_status fm_build(const char *base, const char *action, fm_method method,                    con...` |
+| `fm_encode` | function | `src/form.c:43` | `fm_status fm_encode(const fm_field *fields, size_t n,                     char *out, size_t outsz...` |
+| `put_char` | function | `src/form.c:17` | `static int put_char(char *out, size_t outsz, size_t *pos, char c)` |
+| `resolve_target` | function | `src/form.c:101` | `static fm_block_reason resolve_target(const char *base, const char *act,                         ...` |
+| `strip_query` | function | `src/form.c:93` | `static void strip_query(char *url)` |
+| `FC_DEFAULT_INTERVAL_MS` | macro | `src/frame_clock.c:8` | `#define FC_DEFAULT_INTERVAL_MS` |
+| `fc_interval_ms` | function | `src/frame_clock.c:26` | `int fc_interval_ms(const fc_clock *c)` |
+| `fc_needs_tick` | function | `src/frame_clock.c:21` | `int fc_needs_tick(const fc_clock *c)` |
+| `fc_set_active` | function | `src/frame_clock.c:16` | `void fc_set_active(fc_clock *c, int active)` |
+| `fb_buffer_at` | function | `src/freebug.c:105` | `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)` |
+| `fb_buffer_count` | function | `src/freebug.c:101` | `size_t fb_buffer_count(const fb_buffer *b)` |
+| `fb_buffer_free` | function | `src/freebug.c:91` | `void fb_buffer_free(fb_buffer *b)` |
+| `fb_buffer_init` | function | `src/freebug.c:15` | `void fb_buffer_init(fb_buffer *b)` |
 | `fb_buffer_push` | function | `src/freebug.c:19` | `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)` |
 | `fb_buffer_push_loc` | function | `src/freebug.c:23` | `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,                    ...` |
 | `fb_buffer_reset` | function | `src/freebug.c:78` | `void fb_buffer_reset(fb_buffer *b)` |
 | `fb_level_name` | function | `src/freebug.c:110` | `const char *fb_level_name(int level)` |
 | `whole` | function | `src/freebug.c:5` | `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);` |
-| `BLOCKED` | function | `src/freedom.c:963` | `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);` |
-| `CSS_DROPS_REPORT_MAX` | macro | `src/freedom.c:169` | `#define CSS_DROPS_REPORT_MAX` |
-| `EXIT_ERROR` | macro | `src/freedom.c:49` | `#define EXIT_ERROR` |
-| `EXIT_OK` | macro | `src/freedom.c:48` | `#define EXIT_OK` |
-| `EXIT_USAGE` | macro | `src/freedom.c:50` | `#define EXIT_USAGE` |
-| `HL_FONT_MAX_BYTES` | macro | `src/freedom.c:580` | `#define HL_FONT_MAX_BYTES` |
-| `HL_FONT_MAX_SHEETS` | macro | `src/freedom.c:579` | `#define HL_FONT_MAX_SHEETS` |
-| `HL_JS_NAV_MAX` | macro | `src/freedom.c:932` | `#define HL_JS_NAV_MAX` |
+| `BLOCKED` | function | `src/freedom.c:983` | `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);` |
+| `CSS_DROPS_REPORT_MAX` | macro | `src/freedom.c:170` | `#define CSS_DROPS_REPORT_MAX` |
+| `EXIT_ERROR` | macro | `src/freedom.c:50` | `#define EXIT_ERROR` |
+| `EXIT_OK` | macro | `src/freedom.c:49` | `#define EXIT_OK` |
+| `EXIT_USAGE` | macro | `src/freedom.c:51` | `#define EXIT_USAGE` |
+| `HL_FONT_MAX_BYTES` | macro | `src/freedom.c:598` | `#define HL_FONT_MAX_BYTES` |
+| `HL_FONT_MAX_SHEETS` | macro | `src/freedom.c:597` | `#define HL_FONT_MAX_SHEETS` |
+| `HL_JS_NAV_MAX` | macro | `src/freedom.c:951` | `#define HL_JS_NAV_MAX` |
 | `_DEFAULT_SOURCE` | macro | `src/freedom.c:10` | `#define _DEFAULT_SOURCE` |
 | `_POSIX_C_SOURCE` | macro | `src/freedom.c:9` | `#define _POSIX_C_SOURCE` |
-| `apply_as_gui` | function | `src/freedom.c:249` | `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)` |
-| `elsewhere` | function | `src/freedom.c:998` | `* page whose script immediately forwards elsewhere (e.g. a search engine's  * JS-capability inter...` |
-| `fetch_and_render_one` | function | `src/freedom.c:936` | `static int fetch_and_render_one(const char *url, char **out_nav)` |
-| `first` | function | `src/freedom.c:726` | `* always cleared first (fetch_and_render may paint several pages per      * process). A NULL top_...` |
-| `foldback_cookies` | function | `src/freedom.c:521` | `static void foldback_cookies(const char *url, const char *jar)` |
-| `gets` | function | `src/freedom.c:440` | `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...` |
-| `headless_fetch` | function | `src/freedom.c:444` | `static int headless_fetch(void *ctx, const char *method, const char *url,                        ...` |
-| `headless_load_hosts` | function | `src/freedom.c:238` | `static void headless_load_hosts(void)` |
-| `hl_css_sink` | function | `src/freedom.c:603` | `static void hl_css_sink(void *vctx, const char *url,                         const char *body, si...` |
-| `hl_font_fetch` | function | `src/freedom.c:640` | `static int hl_font_fetch(void *vctx, const char *url,                          int *out_status, c...` |
-| `hl_font_stash` | struct | `src/freedom.c:582` | `` |
-| `hl_font_stash_free` | function | `src/freedom.c:590` | `static void hl_font_stash_free(hl_font_stash *s)` |
-| `is_blank_text` | function | `src/freedom.c:282` | `static int is_blank_text(const char *s)` |
-| `is_http_url` | function | `src/freedom.c:84` | `static int is_http_url(const char *s)` |
-| `is_https_url` | function | `src/freedom.c:80` | `static int is_https_url(const char *s)` |
-| `is_overlay_http` | function | `src/freedom.c:89` | `static int is_overlay_http(const char *s)` |
-| `main` | function | `src/freedom.c:1227` | `int main(int argc, char **argv)` |
-| `now_us` | function | `src/freedom.c:144` | `static uint64_t now_us(void)` |
-| `only` | function | `src/freedom.c:794` | `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...` |
-| `parent` | function | `src/freedom.c:1024` | `* gated by the parent (ln_resolve: a local target stays under the document's  * directory, a remo...` |
-| `pool` | function | `src/freedom.c:712` | `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...` |
-| `print_console` | function | `src/freedom.c:388` | `static void print_console(const fb_buffer *log)` |
-| `print_css_drops` | function | `src/freedom.c:545` | `static void print_css_drops(const char *html, size_t len)` |
-| `print_doc` | function | `src/freedom.c:295` | `static void print_doc(const rd_doc *doc)` |
-| `print_dom` | function | `src/freedom.c:405` | `static void print_dom(const rd_doc *doc)` |
-| `print_dom_css` | function | `src/freedom.c:420` | `static void print_dom_css(const rd_doc *doc)` |
-| `print_usage` | function | `src/freedom.c:52` | `static void print_usage(FILE *fp, const char *prog)` |
-| `read_file` | function | `src/freedom.c:220` | `static char *read_file(const char *path, size_t *out_len)` |
-| `render_page` | function | `src/freedom.c:649` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
-| `run_dump_video` | function | `src/freedom.c:1208` | `static int run_dump_video(const char *url)` |
-| `run_headless` | function | `src/freedom.c:1061` | `static int run_headless(const char *target)` |
-| `sf_reason` | function | `src/freedom.c:917` | `static const char *sf_reason(sf_status ss)` |
-| `timings_dump` | function | `src/freedom.c:158` | `static void timings_dump(void)` |
-| `timings_enabled` | function | `src/freedom.c:154` | `static int timings_enabled(void)` |
-| `timings_ensure_init` | function | `src/freedom.c:150` | `static void timings_ensure_init(void)` |
-| `user_impersonate_enabled` | function | `src/freedom.c:213` | `static int user_impersonate_enabled(void)` |
-| `video_fetch_with_fallback` | function | `src/freedom.c:1097` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,                      ...` |
+| `apply_as_gui` | function | `src/freedom.c:261` | `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)` |
+| `apply_identity` | function | `src/freedom.c:256` | `static void apply_identity(sf_config *cfg)` |
+| `elsewhere` | function | `src/freedom.c:1018` | `* page whose script immediately forwards elsewhere (e.g. a search engine's  * JS-capability inter...` |
+| `fetch_and_render_one` | function | `src/freedom.c:955` | `static int fetch_and_render_one(const char *url, char **out_nav)` |
+| `first` | function | `src/freedom.c:745` | `* always cleared first (fetch_and_render may paint several pages per      * process). A NULL top_...` |
+| `foldback_cookies` | function | `src/freedom.c:539` | `static void foldback_cookies(const char *url, const char *jar)` |
+| `gets` | function | `src/freedom.c:457` | `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...` |
+| `headless_fetch` | function | `src/freedom.c:461` | `static int headless_fetch(void *ctx, const char *method, const char *url,                        ...` |
+| `headless_load_hosts` | function | `src/freedom.c:239` | `static void headless_load_hosts(void)` |
+| `hl_css_sink` | function | `src/freedom.c:621` | `static void hl_css_sink(void *vctx, const char *url,                         const char *body, si...` |
+| `hl_font_fetch` | function | `src/freedom.c:658` | `static int hl_font_fetch(void *vctx, const char *url,                          int *out_status, c...` |
+| `hl_font_stash` | struct | `src/freedom.c:600` | `` |
+| `hl_font_stash_free` | function | `src/freedom.c:608` | `static void hl_font_stash_free(hl_font_stash *s)` |
+| `is_blank_text` | function | `src/freedom.c:299` | `static int is_blank_text(const char *s)` |
+| `is_http_url` | function | `src/freedom.c:85` | `static int is_http_url(const char *s)` |
+| `is_https_url` | function | `src/freedom.c:81` | `static int is_https_url(const char *s)` |
+| `is_overlay_http` | function | `src/freedom.c:90` | `static int is_overlay_http(const char *s)` |
+| `main` | function | `src/freedom.c:1248` | `int main(int argc, char **argv)` |
+| `now_us` | function | `src/freedom.c:145` | `static uint64_t now_us(void)` |
+| `only` | function | `src/freedom.c:813` | `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...` |
+| `parent` | function | `src/freedom.c:1044` | `* gated by the parent (ln_resolve: a local target stays under the document's  * directory, a remo...` |
+| `pool` | function | `src/freedom.c:731` | `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...` |
+| `print_console` | function | `src/freedom.c:405` | `static void print_console(const fb_buffer *log)` |
+| `print_css_drops` | function | `src/freedom.c:563` | `static void print_css_drops(const char *html, size_t len)` |
+| `print_doc` | function | `src/freedom.c:312` | `static void print_doc(const rd_doc *doc)` |
+| `print_dom` | function | `src/freedom.c:422` | `static void print_dom(const rd_doc *doc)` |
+| `print_dom_css` | function | `src/freedom.c:437` | `static void print_dom_css(const rd_doc *doc)` |
+| `print_usage` | function | `src/freedom.c:53` | `static void print_usage(FILE *fp, const char *prog)` |
+| `read_file` | function | `src/freedom.c:221` | `static char *read_file(const char *path, size_t *out_len)` |
+| `render_page` | function | `src/freedom.c:667` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
+| `run_dump_video` | function | `src/freedom.c:1229` | `static int run_dump_video(const char *url)` |
+| `run_headless` | function | `src/freedom.c:1081` | `static int run_headless(const char *target)` |
+| `sf_reason` | function | `src/freedom.c:936` | `static const char *sf_reason(sf_status ss)` |
+| `timings_dump` | function | `src/freedom.c:159` | `static void timings_dump(void)` |
+| `timings_enabled` | function | `src/freedom.c:155` | `static int timings_enabled(void)` |
+| `timings_ensure_init` | function | `src/freedom.c:151` | `static void timings_ensure_init(void)` |
+| `user_impersonate_enabled` | function | `src/freedom.c:214` | `static int user_impersonate_enabled(void)` |
+| `video_fetch_with_fallback` | function | `src/freedom.c:1118` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,                      ...` |
 | `_GNU_SOURCE` | macro | `src/hls.c:21` | `#define _GNU_SOURCE` |
 | `_POSIX_C_SOURCE` | macro | `src/hls.c:22` | `#define _POSIX_C_SOURCE` |
 | `hls_parse` | function | `src/hls.c:80` | `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)` |
@@ -134,6 +165,31 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `strip_scripts` | function | `src/html_parse.c:60` | `static void strip_scripts(lxb_html_document_t *document)` |
 | `type_is` | function | `src/html_parse.c:100` | `static int type_is(const lxb_char_t *t, size_t len, const char *word)` |
 | `type_is_module` | function | `src/html_parse.c:117` | `static int type_is_module(const lxb_char_t *t, size_t len)` |
+| `IDN_QUERY_FIELD_MAX` | macro | `src/identity.c:18` | `#define IDN_QUERY_FIELD_MAX` |
+| `_GNU_SOURCE` | macro | `src/identity.c:7` | `#define _GNU_SOURCE` |
+| `append` | function | `src/identity.c:186` | `static int append(char *buf, size_t *n, size_t cap, const char *fmt, ...)` |
+| `append_pct` | function | `src/identity.c:197` | `static int append_pct(char *buf, size_t *n, size_t cap, const char *s)` |
+| `esc_append` | function | `src/identity.c:346` | `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)` |
+| `hexval` | function | `src/identity.c:157` | `static int hexval(int ch)` |
+| `idn_accept_language` | function | `src/identity.c:113` | `size_t idn_accept_language(const idn_config *c, char *out, size_t cap)` |
+| `idn_apply_query` | function | `src/identity.c:275` | `unsigned idn_apply_query(idn_config *c, const char *query)` |
+| `idn_clear_geo` | function | `src/identity.c:103` | `void idn_clear_geo(idn_config *c)` |
+| `idn_defaults` | function | `src/identity.c:23` | `void idn_defaults(idn_config *c)` |
+| `idn_is_default` | function | `src/identity.c:29` | `int idn_is_default(const idn_config *c)` |
+| `idn_parse` | function | `src/identity.c:236` | `void idn_parse(idn_config *c, const char *text)` |
+| `idn_primary_language` | function | `src/identity.c:143` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)` |
+| `idn_render_page` | function | `src/identity.c:362` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap)` |
+| `idn_serialize` | function | `src/identity.c:206` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap)` |
+| `idn_set_geo` | function | `src/identity.c:91` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)` |
+| `idn_set_languages` | function | `src/identity.c:63` | `int idn_set_languages(idn_config *c, const char *list)` |
+| `idn_set_user_agent` | function | `src/identity.c:34` | `int idn_set_user_agent(idn_config *c, const char *ua)` |
+| `idn_user_agent` | function | `src/identity.c:109` | `const char *idn_user_agent(const idn_config *c)` |
+| `is_alnum` | function | `src/identity.c:21` | `static int is_alnum(char c)` |
+| `is_alpha` | function | `src/identity.c:20` | `static int is_alpha(char c)` |
+| `parse_geo` | function | `src/identity.c:223` | `static int parse_geo(const char *s, double *lat, double *lon, double *acc)` |
+| `parse_number` | function | `src/identity.c:268` | `static int parse_number(const char *s, double *out)` |
+| `pct_decode` | function | `src/identity.c:166` | `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)` |
+| `tag_valid` | function | `src/identity.c:50` | `static int tag_valid(const char *s, size_t n)` |
 | `GIF_LZW_MAX_CODES` | macro | `src/image_decode.c:253` | `#define GIF_LZW_MAX_CODES` |
 | `PNG_IHDR_MIN` | macro | `src/image_decode.c:34` | `#define PNG_IHDR_MIN` |
 | `exit` | function | `src/image_decode.c:6` | `* malformed stream fails closed instead of calling exit(). GIF uses an own pure-C * bounded LZW decoder (no giflib)....` |
@@ -210,23 +266,23 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `attrNames` | function | `src/js_dom.c:672` | `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so      * a missing '...` |
 | `empty` | function | `src/js_dom.c:1284` | `* inert: DOM interface constructors are empty (instanceof yields false, harmless);` |
 | `enough` | function | `src/js_dom.c:995` | `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...` |
-| `fails` | function | `src/js_dom.c:1947` | `* cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...` |
+| `fails` | function | `src/js_dom.c:1960` | `* cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...` |
 | `geometry` | function | `src/js_dom.c:1286` | `* constant geometry (zero real leak);` |
-| `jd_flush_custom_elements` | function | `src/js_dom.c:1933` | `void jd_flush_custom_elements(js_context *ctx)` |
+| `jd_flush_custom_elements` | function | `src/js_dom.c:1946` | `void jd_flush_custom_elements(js_context *ctx)` |
 | `jd_freeze_mutators` | function | `src/js_dom.c:602` | `static int jd_freeze_mutators(JSContext *jsctx)` |
-| `jd_get_cookies` | function | `src/js_dom.c:2118` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)` |
+| `jd_get_cookies` | function | `src/js_dom.c:2131` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)` |
 | `jd_handle` | function | `src/js_dom.c:40` | `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out)` |
 | `jd_handle_or_null` | function | `src/js_dom.c:47` | `JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)` |
 | `jd_idx` | function | `src/js_dom.c:31` | `dom_index *jd_idx(JSContext *ctx)` |
-| `jd_install` | function | `src/js_dom.c:1851` | `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)` |
-| `jd_install_console` | function | `src/js_dom.c:2061` | `jd_status jd_install_console(js_context *ctx, fb_buffer *log)` |
+| `jd_install` | function | `src/js_dom.c:1864` | `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)` |
+| `jd_install_console` | function | `src/js_dom.c:2074` | `jd_status jd_install_console(js_context *ctx, fb_buffer *log)` |
 | `jd_is_mutator` | function | `src/js_dom.c:596` | `static int jd_is_mutator(const char *name)` |
 | `jd_method` | struct | `src/js_dom.c:454` | `` |
 | `jd_opaque_get` | function | `src/js_dom.c:27` | `jd_opaque *jd_opaque_get(JSContext *ctx)` |
 | `jd_query_list` | function | `src/js_dom.c:70` | `static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class)` |
-| `jd_set_computed` | function | `src/js_dom.c:2141` | `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)` |
-| `jd_set_cookies` | function | `src/js_dom.c:2098` | `jd_status jd_set_cookies(js_context *ctx, const char *cookies)` |
-| `jd_set_geometry` | function | `src/js_dom.c:2152` | `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)` |
+| `jd_set_computed` | function | `src/js_dom.c:2154` | `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)` |
+| `jd_set_cookies` | function | `src/js_dom.c:2111` | `jd_status jd_set_cookies(js_context *ctx, const char *cookies)` |
+| `jd_set_geometry` | function | `src/js_dom.c:2165` | `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)` |
 | `js_env` | function | `src/js_dom.c:1292` | `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the  * document shim (uses...` |
 | `m_append_child` | function | `src/js_dom.c:264` | `static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,                             ...` |
 | `m_attr_names` | function | `src/js_dom.c:529` | `static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,                             in...` |
@@ -267,11 +323,14 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `scripts` | function | `src/js_dom.c:832` | `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...` |
 | `size` | function | `src/js_dom.c:1289` | `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);` |
 | `table` | function | `src/js_dom.c:632` | `* a table (dom.viewport() non-null);` |
-| `identity` | function | `src/js_dom_ext.c:98` | `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...` |
-| `jd_install_repl_api` | function | `src/js_dom_ext.c:529` | `jd_status jd_install_repl_api(js_context *ctx)` |
-| `jdx_install` | function | `src/js_dom_ext.c:523` | `int jdx_install(JSContext *ctx)` |
-| `registration` | function | `src/js_dom_ext.c:373` | `* registration (options, attributeFilter, subtree) and delivered in one microtask. An  * observer...` |
-| `run` | function | `src/js_dom_ext.c:515` | `static int run(JSContext *ctx, const char *src, size_t len, const char *name)` |
+| `identity` | function | `src/js_dom_ext.c:99` | `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...` |
+| `jd_install_geolocation` | function | `src/js_dom_ext.c:1156` | `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)` |
+| `jd_install_indexeddb` | function | `src/js_dom_ext.c:1175` | `jd_status jd_install_indexeddb(js_context *ctx)` |
+| `jd_install_repl_api` | function | `src/js_dom_ext.c:1135` | `jd_status jd_install_repl_api(js_context *ctx)` |
+| `jd_set_repl_css` | function | `src/js_dom_ext.c:1143` | `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)` |
+| `jdx_install` | function | `src/js_dom_ext.c:1128` | `int jdx_install(JSContext *ctx)` |
+| `registration` | function | `src/js_dom_ext.c:374` | `* registration (options, attributeFilter, subtree) and delivered in one microtask. An  * observer...` |
+| `run` | function | `src/js_dom_ext.c:1120` | `static int run(JSContext *ctx, const char *src, size_t len, const char *name)` |
 | `FREEDOM_JS_DOM_EXT_H` | macro | `src/js_dom_ext.h:2` | `#define FREEDOM_JS_DOM_EXT_H` |
 | `jdx_install` | function | `src/js_dom_ext.h:10` | `int jdx_install(JSContext *ctx);` |
 | `FREEDOM_JS_DOM_INTERNAL_H` | macro | `src/js_dom_internal.h:2` | `#define FREEDOM_JS_DOM_INTERNAL_H` |
@@ -284,33 +343,34 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `jd_video_from_scripts` | function | `src/js_embed.c:203` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts,                    ...` |
 | `scan_video_url` | function | `src/js_embed.c:256` | `static int scan_video_url(const char *body, size_t blen,                            char *out, si...` |
 | `try_create_iframe_from_script` | function | `src/js_embed.c:86` | `static int try_create_iframe_from_script(dom_index *idx,                                         ...` |
-| `FP_MIME_COUNT` | macro | `src/js_env.c:260` | `#define FP_MIME_COUNT` |
-| `PERF_ORIGIN_EPOCH` | macro | `src/js_env.c:344` | `#define PERF_ORIGIN_EPOCH` |
+| `FP_MIME_COUNT` | macro | `src/js_env.c:267` | `#define FP_MIME_COUNT` |
+| `PERF_ORIGIN_EPOCH` | macro | `src/js_env.c:351` | `#define PERF_ORIGIN_EPOCH` |
 | `_POSIX_C_SOURCE` | macro | `src/js_env.c:17` | `#define _POSIX_C_SOURCE` |
-| `build_crypto` | function | `src/js_env.c:346` | `static int build_crypto(JSContext *ctx, JSValueConst global)` |
-| `build_languages` | function | `src/js_env.c:174` | `static JSValue build_languages(JSContext *ctx)` |
-| `build_navigator` | function | `src/js_env.c:198` | `static int build_navigator(JSContext *ctx, JSValueConst global)` |
-| `build_perf_navigation` | function | `src/js_env.c:388` | `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)` |
-| `build_perf_timing` | function | `src/js_env.c:374` | `static int build_perf_timing(JSContext *ctx, JSValueConst perf)` |
-| `build_performance` | function | `src/js_env.c:400` | `static int build_performance(JSContext *ctx, JSValueConst global)` |
-| `build_readback_obj` | function | `src/js_env.c:484` | `static int build_readback_obj(JSContext *ctx, JSValueConst global,                               ...` |
-| `build_screen` | function | `src/js_env.c:302` | `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)` |
+| `build_crypto` | function | `src/js_env.c:353` | `static int build_crypto(JSContext *ctx, JSValueConst global)` |
+| `build_languages` | function | `src/js_env.c:174` | `static JSValue build_languages(JSContext *ctx, const char *langs)` |
+| `build_navigator` | function | `src/js_env.c:197` | `static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_override,         ...` |
+| `build_perf_navigation` | function | `src/js_env.c:395` | `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)` |
+| `build_perf_timing` | function | `src/js_env.c:381` | `static int build_perf_timing(JSContext *ctx, JSValueConst perf)` |
+| `build_performance` | function | `src/js_env.c:407` | `static int build_performance(JSContext *ctx, JSValueConst global)` |
+| `build_readback_obj` | function | `src/js_env.c:491` | `static int build_readback_obj(JSContext *ctx, JSValueConst global,                               ...` |
+| `build_screen` | function | `src/js_env.c:309` | `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)` |
 | `def_fn` | function | `src/js_env.c:167` | `static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,                   JSCFuncti...` |
 | `def_int` | function | `src/js_env.c:163` | `static int def_int(JSContext *ctx, JSValueConst obj, const char *name, int32_t n)` |
 | `def_str` | function | `src/js_env.c:159` | `static int def_str(JSContext *ctx, JSValueConst obj, const char *name, const char *s)` |
 | `def_val` | function | `src/js_env.c:153` | `static int def_val(JSContext *ctx, JSValueConst obj, const char *name, JSValue v)` |
-| `je_install` | function | `src/js_env.c:497` | `je_status je_install(js_context *ctx, int screen_w, int screen_h)` |
-| `je_install_canvas` | function | `src/js_env.c:516` | `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)` |
+| `je_install` | function | `src/js_env.c:504` | `je_status je_install(js_context *ctx, int screen_w, int screen_h)` |
+| `je_install_canvas` | function | `src/js_env.c:528` | `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)` |
+| `je_install_identity` | function | `src/js_env.c:508` | `je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,                       ...` |
 | `m_date_now` | function | `src/js_env.c:49` | `static JSValue m_date_now(JSContext *ctx, JSValueConst this_val,                           int ar...` |
 | `m_empty_array` | function | `src/js_env.c:77` | `static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,                              ...` |
 | `m_get_random_values` | function | `src/js_env.c:85` | `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,                        ...` |
 | `m_perf_now` | function | `src/js_env.c:57` | `static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,                           int ar...` |
 | `m_random_uuid` | function | `src/js_env.c:125` | `static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,                              ...` |
 | `m_subtle_null` | function | `src/js_env.c:142` | `static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,                              ...` |
-| `make_readback` | function | `src/js_env.c:476` | `static JSValue make_readback(JSContext *ctx, uint64_t key)` |
+| `make_readback` | function | `src/js_env.c:483` | `static JSValue make_readback(JSContext *ctx, uint64_t key)` |
 | `methods` | function | `src/js_env.c:201` | `* capability methods (sendBeacon, spec/js_dom.md 7h) without touching any * fingerprintable field. An untrusted...` |
 | `monotonic_ms` | function | `src/js_env.c:41` | `static double monotonic_ms(void)` |
-| `override_date_now` | function | `src/js_env.c:432` | `static int override_date_now(JSContext *ctx, JSValueConst global)` |
+| `override_date_now` | function | `src/js_env.c:439` | `static int override_date_now(JSContext *ctx, JSValueConst global)` |
 | `primitives` | function | `src/js_env.c:6` | `* the pure anti_fp primitives (one audited source of normalized constants);` |
 | `wall_clock_ms` | function | `src/js_env.c:35` | `static uint64_t wall_clock_ms(void)` |
 | `_GNU_SOURCE` | macro | `src/js_events.c:6` | `#define _GNU_SOURCE` |
@@ -324,12 +384,12 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `jd_fire_submit` | function | `src/js_events.c:78` | `int jd_fire_submit(js_context *ctx, dom_node_id form_node_id)` |
 | `jd_install_events` | function | `src/js_events.c:38` | `jd_status jd_install_events(js_context *ctx, jd_click_state *state)` |
 | `_GNU_SOURCE` | macro | `src/js_fetch.c:6` | `#define _GNU_SOURCE` |
-| `jd_install_xhr` | function | `src/js_fetch.c:211` | `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)` |
+| `jd_install_xhr` | function | `src/js_fetch.c:212` | `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)` |
 | `jd_pack_ptr` | function | `src/js_fetch.c:28` | `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)` |
 | `jd_unpack_ptr` | function | `src/js_fetch.c:33` | `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)` |
 | `m_host_fetch` | function | `src/js_fetch.c:46` | `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,                             in...` |
 | `send` | function | `src/js_fetch.c:92` | `* callbacks fire right after send();` |
-| `task` | function | `src/js_fetch.c:187` | `* current task (the page never waits on it);` |
+| `task` | function | `src/js_fetch.c:188` | `* current task (the page never waits on it);` |
 | `JG_INDEX_SLOTS` | macro | `src/js_geom.c:14` | `#define JG_INDEX_SLOTS` |
 | `JG_SLOT_EMPTY` | macro | `src/js_geom.c:15` | `#define JG_SLOT_EMPTY` |
 | `clamp_coord` | function | `src/js_geom.c:27` | `static int32_t clamp_coord(double v, double lo)` |
@@ -380,10 +440,10 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `js_context_new` | function | `src/js_sandbox.c:277` | `js_status js_context_new(const js_limits *lim, js_context **out)` |
 | `js_context_raw` | function | `src/js_sandbox.c:522` | `void *js_context_raw(js_context *ctx)` |
 | `js_eval` | function | `src/js_sandbox.c:347` | `js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)` |
-| `js_eval_module` | function | `src/js_sandbox.c:621` | `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,         ...` |
+| `js_eval_module` | function | `src/js_sandbox.c:632` | `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,         ...` |
 | `js_eval_named` | function | `src/js_sandbox.c:351` | `js_status js_eval_named(js_context *ctx, const char *src, size_t len,                         con...` |
 | `js_eval_once` | function | `src/js_sandbox.c:452` | `js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res)` |
-| `js_install_realms` | function | `src/js_sandbox.c:783` | `js_status js_install_realms(js_context *ctx)` |
+| `js_install_realms` | function | `src/js_sandbox.c:794` | `js_status js_install_realms(js_context *ctx)` |
 | `js_interrupt_cb` | function | `src/js_sandbox.c:114` | `static int js_interrupt_cb(JSRuntime *rt, void *opaque)` |
 | `js_limits_default` | function | `src/js_sandbox.c:248` | `js_limits js_limits_default(void)` |
 | `js_loc_from_stack` | function | `src/js_sandbox.c:129` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,                       i...` |
@@ -391,20 +451,20 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `js_pump_jobs` | function | `src/js_sandbox.c:434` | `int js_pump_jobs(js_context *ctx, int max_jobs)` |
 | `js_result_free` | function | `src/js_sandbox.c:465` | `void js_result_free(js_result *res)` |
 | `js_set_current_script` | function | `src/js_sandbox.c:489` | `void js_set_current_script(js_context *ctx, const char *src, const char *type)` |
-| `js_set_module_host` | function | `src/js_sandbox.c:591` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,                         js...` |
+| `js_set_module_host` | function | `src/js_sandbox.c:602` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,                         js...` |
 | `js_set_time_budget` | function | `src/js_sandbox.c:342` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms)` |
 | `js_validate_source` | function | `src/js_sandbox.c:266` | `js_status js_validate_source(const char *src, size_t len, const js_limits *lim)` |
 | `limit` | type_alias | `src/js_sandbox.c:27` | `typedef struct js_mem_state { size_t limit;` |
 | `limits_resolve` | function | `src/js_sandbox.c:257` | `static js_limits limits_resolve(const js_limits *lim)` |
-| `m_realm_clone` | function | `src/js_sandbox.c:761` | `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,                    ...` |
-| `m_realm_eval` | function | `src/js_sandbox.c:725` | `static JSValue m_realm_eval(JSContext *ctx, JSValueConst this_val, int argc,                     ...` |
-| `m_realm_new` | function | `src/js_sandbox.c:711` | `static JSValue m_realm_new(JSContext *ctx, JSValueConst this_val, int argc,                      ...` |
-| `mod_fail` | function | `src/js_sandbox.c:606` | `static js_status mod_fail(js_context *ctx, js_result *res, JSValue reason, int use_reason,       ...` |
-| `mod_loader` | function | `src/js_sandbox.c:552` | `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)` |
-| `mod_normalize` | function | `src/js_sandbox.c:588` | `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);` |
-| `mod_set_meta` | function | `src/js_sandbox.c:543` | `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)` |
-| `realm_of` | function | `src/js_sandbox.c:688` | `static JSContext *realm_of(js_context *c, JSValueConst g)` |
-| `throw_named` | function | `src/js_sandbox.c:701` | `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)` |
+| `m_realm_clone` | function | `src/js_sandbox.c:772` | `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,                    ...` |
+| `m_realm_eval` | function | `src/js_sandbox.c:736` | `static JSValue m_realm_eval(JSContext *ctx, JSValueConst this_val, int argc,                     ...` |
+| `m_realm_new` | function | `src/js_sandbox.c:722` | `static JSValue m_realm_new(JSContext *ctx, JSValueConst this_val, int argc,                      ...` |
+| `mod_fail` | function | `src/js_sandbox.c:617` | `static js_status mod_fail(js_context *ctx, js_result *res, JSValue reason, int use_reason,       ...` |
+| `mod_loader` | function | `src/js_sandbox.c:563` | `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)` |
+| `mod_normalize` | function | `src/js_sandbox.c:599` | `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);` |
+| `mod_set_meta` | function | `src/js_sandbox.c:554` | `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)` |
+| `realm_of` | function | `src/js_sandbox.c:699` | `static JSContext *realm_of(js_context *c, JSValueConst g)` |
+| `throw_named` | function | `src/js_sandbox.c:712` | `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)` |
 | `timespec_reached` | function | `src/js_sandbox.c:108` | `static int timespec_reached(const struct timespec *now, const struct timespec *deadline)` |
 | `undefined` | function | `src/js_sandbox.c:221` | `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx...` |
 | `JT_IO_MAX_STR` | macro | `src/js_trusted.c:49` | `#define JT_IO_MAX_STR` |
@@ -434,67 +494,7 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `ln_resolve` | function | `src/link_nav.c:172` | `ln_status ln_resolve(const char *base, const char *href, ln_result *out)` |
 | `pop_seg` | function | `src/link_nav.c:98` | `static void pop_seg(char *body, size_t *blen)` |
 | `resolve_file` | function | `src/link_nav.c:149` | `static int resolve_file(const char *base, const char *ref, char *out, size_t outsz)` |
-| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:801` | `#define LS_ARGON2_M_KIB` |
-| `LS_ARGON2_P` | macro | `src/local_store.c:802` | `#define LS_ARGON2_P` |
-| `LS_ARGON2_T` | macro | `src/local_store.c:800` | `#define LS_ARGON2_T` |
-| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:797` | `#define LS_KDF_ARGON2ID` |
-| `LS_KDF_NONE` | macro | `src/local_store.c:796` | `#define LS_KDF_NONE` |
-| `LS_VERSION` | macro | `src/local_store.c:795` | `#define LS_VERSION` |
-| `OFF_AEAD` | macro | `src/local_store.c:807` | `#define OFF_AEAD` |
-| `OFF_KDF` | macro | `src/local_store.c:808` | `#define OFF_KDF` |
-| `OFF_MAGIC` | macro | `src/local_store.c:805` | `#define OFF_MAGIC` |
-| `OFF_NONCE` | macro | `src/local_store.c:810` | `#define OFF_NONCE` |
-| `OFF_SALT` | macro | `src/local_store.c:809` | `#define OFF_SALT` |
-| `OFF_VERSION` | macro | `src/local_store.c:806` | `#define OFF_VERSION` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:3` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:14` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:25` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:36` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:47` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:58` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:69` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:80` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:91` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:102` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:113` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:124` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:135` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:146` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:157` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:168` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:179` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:190` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:201` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:212` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:223` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:234` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:245` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:256` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:267` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:278` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:289` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:300` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:311` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:322` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:333` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:344` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:355` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:366` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:377` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:388` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:399` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:410` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:421` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:432` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:443` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:454` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:465` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:476` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:487` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:498` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:509` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:520` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:531` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:542` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
+| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:812` | `#define LS_ARGON2_M_KIB` |
+| `LS_ARGON2_P` | macro | `src/local_store.c:813` | `#define LS_ARGON2_P` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

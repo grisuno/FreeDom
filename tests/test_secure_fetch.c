@@ -55,6 +55,19 @@ static void test_user_agent_uses_override(void **state) {
     assert_string_equal(sf_user_agent_or_default(ua), ua);
 }
 
+/* A header value that could split the request (CR/LF/control) is never sent: both resolvers
+ * fall back to the normalized default (fail-closed), whoever built the string. */
+static void test_header_resolvers_refuse_injection(void **state) {
+    (void)state;
+    assert_string_equal(sf_user_agent_or_default("evil\r\nX-Injected: 1"), SF_DEFAULT_USER_AGENT);
+    assert_string_equal(sf_user_agent_or_default("bad\x01ua"), SF_DEFAULT_USER_AGENT);
+    assert_string_equal(sf_accept_language_or_default(NULL), FP_ACCEPT_LANGUAGE_HEADER);
+    assert_string_equal(sf_accept_language_or_default(""), FP_ACCEPT_LANGUAGE_HEADER);
+    assert_string_equal(sf_accept_language_or_default("es-AR,es;q=0.9"), "es-AR,es;q=0.9");
+    assert_string_equal(sf_accept_language_or_default("es\r\nX: 1"), FP_ACCEPT_LANGUAGE_HEADER);
+    assert_null(sf_config_default().accept_language);
+}
+
 /* --- sf_validate_url --- */
 
 static void test_url_rejects_null(void **state) {
@@ -600,6 +613,7 @@ int main(void) {
         cmocka_unit_test(test_config_blend_fields_default_null),
         cmocka_unit_test(test_user_agent_default_when_unset),
         cmocka_unit_test(test_user_agent_uses_override),
+        cmocka_unit_test(test_header_resolvers_refuse_injection),
         cmocka_unit_test(test_url_rejects_null),
         cmocka_unit_test(test_url_rejects_plain_http),
         cmocka_unit_test(test_url_rejects_dangerous_schemes),

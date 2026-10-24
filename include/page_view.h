@@ -522,6 +522,7 @@ typedef struct pv_box_def {
     /* Background alpha percent 0..100 from rgba()/hsla() (2026-07-19);
      * PV_LEN_UNSET = opaque. The box background fill multiplies by it. */
     int bg_alpha;
+    int bg_clip;  /* css_bg_clip: border-box (0/1), padding-box (2), content-box (3); text is handled by the run path */
     int box_sizing;
     int pad_t, pad_r, pad_b, pad_l;
     int bord_tw, bord_rw, bord_bw, bord_lw;

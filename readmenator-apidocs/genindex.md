@@ -1151,10 +1151,12 @@
 - [`_GNU_SOURCE`](modules/gui.browser_ui.c.md#_gnu_source) macro in `gui/browser_ui.c`
 - [`_GNU_SOURCE`](modules/gui.ui_render.c.md#_gnu_source) macro in `gui/ui_render.c`
 - [`_GNU_SOURCE`](modules/src.hls.c.md#_gnu_source) macro in `src/hls.c`
+- [`_GNU_SOURCE`](modules/src.identity.c.md#_gnu_source) macro in `src/identity.c`
 - [`_GNU_SOURCE`](modules/src.js_dom.c.md#_gnu_source) macro in `src/js_dom.c`
 - [`_GNU_SOURCE`](modules/src.js_embed.c.md#_gnu_source) macro in `src/js_embed.c`
 - [`_GNU_SOURCE`](modules/src.js_events.c.md#_gnu_source) macro in `src/js_events.c`
 - [`_GNU_SOURCE`](modules/src.js_fetch.c.md#_gnu_source) macro in `src/js_fetch.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
@@ -1358,6 +1360,42 @@
 - [`id`](modules/src.page_view.c.md#pv_cont_info-id) method of `pv_cont_info` in `src/page_view.c`
 - [`identifier`](modules/include.css_select.h.md#identifier) function in `include/css_select.h`
 - [`identity`](modules/src.js_dom_ext.c.md#identity) function in `src/js_dom_ext.c`
+- [`idn_accept_language`](modules/include.identity.h.md#idn_accept_language) function in `include/identity.h`
+- [`idn_accept_language`](modules/src.identity.c.md#idn_accept_language) function in `src/identity.c`
+- [`idn_apply_query`](modules/include.identity.h.md#idn_apply_query) function in `include/identity.h`
+- [`idn_apply_query`](modules/src.identity.c.md#idn_apply_query) function in `src/identity.c`
+- [`idn_clear_geo`](modules/include.identity.h.md#idn_clear_geo) function in `include/identity.h`
+- [`idn_clear_geo`](modules/src.identity.c.md#idn_clear_geo) function in `src/identity.c`
+- [`idn_config`](modules/include.identity.h.md#idn_config) struct in `include/identity.h`
+- [`idn_defaults`](modules/include.identity.h.md#idn_defaults) function in `include/identity.h`
+- [`idn_defaults`](modules/src.identity.c.md#idn_defaults) function in `src/identity.c`
+- [`IDN_GEO_ACC_MAX`](modules/include.identity.h.md#idn_geo_acc_max) macro in `include/identity.h`
+- [`IDN_GEO_ACC_MIN`](modules/include.identity.h.md#idn_geo_acc_min) macro in `include/identity.h`
+- [`idn_geo_mode`](modules/include.identity.h.md#idn_geo_mode) enum in `include/identity.h`
+- [`idn_is_default`](modules/include.identity.h.md#idn_is_default) function in `include/identity.h`
+- [`idn_is_default`](modules/src.identity.c.md#idn_is_default) function in `src/identity.c`
+- [`IDN_LANG_MAX`](modules/include.identity.h.md#idn_lang_max) macro in `include/identity.h`
+- [`IDN_LANG_TAGS_MAX`](modules/include.identity.h.md#idn_lang_tags_max) macro in `include/identity.h`
+- [`IDN_PAGE_MAX`](modules/include.identity.h.md#idn_page_max) macro in `include/identity.h`
+- [`idn_parse`](modules/include.identity.h.md#idn_parse) function in `include/identity.h`
+- [`idn_parse`](modules/src.identity.c.md#idn_parse) function in `src/identity.c`
+- [`idn_primary_language`](modules/include.identity.h.md#idn_primary_language) function in `include/identity.h`
+- [`idn_primary_language`](modules/src.identity.c.md#idn_primary_language) function in `src/identity.c`
+- [`IDN_QUERY_FIELD_MAX`](modules/src.identity.c.md#idn_query_field_max) macro in `src/identity.c`
+- [`idn_render_page`](modules/include.identity.h.md#idn_render_page) function in `include/identity.h`
+- [`idn_render_page`](modules/src.identity.c.md#idn_render_page) function in `src/identity.c`
+- [`IDN_SERIAL_MAX`](modules/include.identity.h.md#idn_serial_max) macro in `include/identity.h`
+- [`idn_serialize`](modules/include.identity.h.md#idn_serialize) function in `include/identity.h`
+- [`idn_serialize`](modules/src.identity.c.md#idn_serialize) function in `src/identity.c`
+- [`idn_set_geo`](modules/include.identity.h.md#idn_set_geo) function in `include/identity.h`
+- [`idn_set_geo`](modules/src.identity.c.md#idn_set_geo) function in `src/identity.c`
+- [`idn_set_languages`](modules/include.identity.h.md#idn_set_languages) function in `include/identity.h`
+- [`idn_set_languages`](modules/src.identity.c.md#idn_set_languages) function in `src/identity.c`
+- [`idn_set_user_agent`](modules/include.identity.h.md#idn_set_user_agent) function in `include/identity.h`
+- [`idn_set_user_agent`](modules/src.identity.c.md#idn_set_user_agent) function in `src/identity.c`
+- [`IDN_UA_MAX`](modules/include.identity.h.md#idn_ua_max) macro in `include/identity.h`
+- [`idn_user_agent`](modules/include.identity.h.md#idn_user_agent) function in `include/identity.h`
+- [`idn_user_agent`](modules/src.identity.c.md#idn_user_agent) function in `src/identity.c`
 - [`idx`](modules/src.css.c.md#css_cand-idx) type_alias of `css_cand` in `src/css.c`
 - [`ignored`](modules/src.page_view.c.md#ignored) function in `src/page_view.c`
 - [`ih_acc`](modules/src.dom.c.md#ih_acc) struct in `src/dom.c`
@@ -1484,6 +1522,9 @@
 - [`jd_install`](modules/src.js_dom.c.md#jd_install) function in `src/js_dom.c`
 - [`jd_install_console`](modules/src.js_dom.c.md#jd_install_console) function in `src/js_dom.c`
 - [`jd_install_events`](modules/src.js_events.c.md#jd_install_events) function in `src/js_events.c`
+- [`jd_install_geolocation`](modules/src.js_dom_ext.c.md#jd_install_geolocation) function in `src/js_dom_ext.c`
+- [`jd_install_indexeddb`](modules/src.js_dom_ext.c.md#jd_install_indexeddb) function in `src/js_dom_ext.c`
+- [`jd_install_repl_api`](modules/include.js_dom.h.md#jd_install_repl_api) function in `include/js_dom.h`
 - [`jd_install_repl_api`](modules/src.js_dom_ext.c.md#jd_install_repl_api) function in `src/js_dom_ext.c`
 - [`jd_install_xhr`](modules/src.js_fetch.c.md#jd_install_xhr) function in `src/js_fetch.c`
 - [`jd_method`](modules/src.js_dom.c.md#jd_method) struct in `src/js_dom.c`
@@ -1494,10 +1535,12 @@
 - [`jd_pop_state`](modules/src.js_location.c.md#jd_pop_state) function in `src/js_location.c`
 - [`jd_process_iframes`](modules/include.js_dom.h.md#jd_process_iframes) function in `include/js_dom.h`
 - [`jd_process_iframes`](modules/src.js_embed.c.md#jd_process_iframes) function in `src/js_embed.c`
+- [`JD_REPL_CSS_MAX`](modules/include.js_dom.h.md#jd_repl_css_max) macro in `include/js_dom.h`
 - [`jd_set_computed`](modules/src.js_dom.c.md#jd_set_computed) function in `src/js_dom.c`
 - [`jd_set_cookies`](modules/src.js_dom.c.md#jd_set_cookies) function in `src/js_dom.c`
 - [`jd_set_geometry`](modules/src.js_dom.c.md#jd_set_geometry) function in `src/js_dom.c`
 - [`jd_set_location`](modules/src.js_location.c.md#jd_set_location) function in `src/js_location.c`
+- [`jd_set_repl_css`](modules/src.js_dom_ext.c.md#jd_set_repl_css) function in `src/js_dom_ext.c`
 - [`jd_status`](modules/include.js_dom.h.md#jd_status) enum in `include/js_dom.h`
 - [`jd_take_history`](modules/include.js_location.h.md#jd_take_history) function in `include/js_location.h`
 - [`jd_take_history`](modules/src.js_location.c.md#jd_take_history) function in `src/js_location.c`
@@ -1510,6 +1553,7 @@
 - [`jdx_install`](modules/src.js_dom_ext.h.md#jdx_install) function in `src/js_dom_ext.h`
 - [`je_install`](modules/src.js_env.c.md#je_install) function in `src/js_env.c`
 - [`je_install_canvas`](modules/src.js_env.c.md#je_install_canvas) function in `src/js_env.c`
+- [`je_install_identity`](modules/src.js_env.c.md#je_install_identity) function in `src/js_env.c`
 - [`je_status`](modules/include.js_env.h.md#je_status) enum in `include/js_env.h`
 - [`jg_add`](modules/include.js_geom.h.md#jg_add) function in `include/js_geom.h`
 - [`jg_add`](modules/src.js_geom.c.md#jg_add) function in `src/js_geom.c`
@@ -1938,6 +1982,7 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -2008,6 +2053,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -2164,6 +2211,7 @@
 - [`pf_scan_imports`](modules/src.prefetch.c.md#pf_scan_imports) function in `src/prefetch.c`
 - [`PF_SPEC_MAX`](modules/include.prefetch.h.md#pf_spec_max) macro in `include/prefetch.h`
 - [`pl`](modules/gui.browser_ui.c.md#pl) type_alias in `gui/browser_ui.c`
+- [`place`](modules/include.js_dom.h.md#place) function in `include/js_dom.h`
 - [`place`](modules/src.render_doc.c.md#place) function in `src/render_doc.c`
 - [`placed`](modules/include.box_tree.h.md#placed) function in `include/box_tree.h`
 - [`placeholders`](modules/include.ui.h.md#placeholders) function in `include/ui.h`
@@ -2608,6 +2656,8 @@
 - [`set_rgb`](modules/gui.browser_ui.c.md#set_rgb) function in `gui/browser_ui.c`
 - [`set_rgb`](modules/gui.browser_ui_internal.h.md#set_rgb) function in `gui/browser_ui_internal.h`
 - [`set_rgb`](modules/gui.bui_theme.c.md#set_rgb) function in `gui/bui_theme.c`
+- [`sf_accept_language_or_default`](modules/include.secure_fetch.h.md#sf_accept_language_or_default) function in `include/secure_fetch.h`
+- [`sf_accept_language_or_default`](modules/src.secure_fetch.c.md#sf_accept_language_or_default) function in `src/secure_fetch.c`
 - [`sf_chain_info`](modules/include.secure_fetch.h.md#sf_chain_info) struct in `include/secure_fetch.h`
 - [`sf_check_chain_policy`](modules/src.secure_fetch.c.md#sf_check_chain_policy) function in `src/secure_fetch.c`
 - [`sf_check_group_is_pq`](modules/src.secure_fetch.c.md#sf_check_group_is_pq) function in `src/secure_fetch.c`
@@ -2817,6 +2867,8 @@
 - [`tab_set_fetcher`](modules/include.tab.h.md#tab_set_fetcher) function in `include/tab.h`
 - [`tab_set_fetcher`](modules/src.tab.c.md#tab_set_fetcher) function in `src/tab.c`
 - [`tab_set_geometry`](modules/src.tab.c.md#tab_set_geometry) function in `src/tab.c`
+- [`tab_set_identity`](modules/include.tab.h.md#tab_set_identity) function in `include/tab.h`
+- [`tab_set_identity`](modules/src.tab.c.md#tab_set_identity) function in `src/tab.c`
 - [`tab_set_net_allowed`](modules/include.tab.h.md#tab_set_net_allowed) function in `include/tab.h`
 - [`tab_set_net_allowed`](modules/src.tab.c.md#tab_set_net_allowed) function in `src/tab.c`
 - [`tab_set_storage`](modules/include.tab.h.md#tab_set_storage) function in `include/tab.h`
@@ -3092,6 +3144,7 @@
 - [`URLs`](modules/include.js_dom.h.md#urls) function in `include/js_dom.h`
 - [`used`](modules/src.text_shape.c.md#used) type_alias in `src/text_shape.c`
 - [`used`](modules/src.ws_hub.c.md#used) type_alias in `src/ws_hub.c`
+- [`user_agent`](modules/include.identity.h.md#user_agent) type_alias in `include/identity.h`
 - [`utf8_seq_len`](modules/include.util.h.md#utf8_seq_len) function in `include/util.h`
 
 <a id="v"></a>

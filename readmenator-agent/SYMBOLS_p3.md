@@ -3,6 +3,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `b` | type_alias | `include/css_color.h:26` | `typedef struct cc_rgb { unsigned char r, g, b;` |
 | `cc_pack` | function | `include/css_color.h:49` | `int cc_pack(cc_rgb c);` |
 | `cc_rgb` | struct | `include/css_color.h:27` | `` |
 | `cc_status` | enum | `include/css_color.h:31` | `` |
@@ -361,6 +362,30 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `max_bytes` | type_alias | `include/html_parse.h:31` | `typedef struct hp_config { size_t max_bytes;` |
 | `modules` | function | `include/html_parse.h:94` | `* ES modules (import/export cannot run as a classic script), and template blocks * (text/x-jquery-tmpl, text/html...` |
 | `src` | function | `include/html_parse.h:90` | `* carry their raw src (a <script src> with an inline body lists ONLY the src -- * browser rule: when src is present...` |
+| `FREEDOM_IDENTITY_H` | macro | `include/identity.h:2` | `#define FREEDOM_IDENTITY_H` |
+| `IDN_GEO_ACC_MAX` | macro | `include/identity.h:23` | `#define IDN_GEO_ACC_MAX` |
+| `IDN_GEO_ACC_MIN` | macro | `include/identity.h:22` | `#define IDN_GEO_ACC_MIN` |
+| `IDN_LANG_MAX` | macro | `include/identity.h:17` | `#define IDN_LANG_MAX` |
+| `IDN_LANG_TAGS_MAX` | macro | `include/identity.h:18` | `#define IDN_LANG_TAGS_MAX` |
+| `IDN_PAGE_MAX` | macro | `include/identity.h:20` | `#define IDN_PAGE_MAX` |
+| `IDN_SERIAL_MAX` | macro | `include/identity.h:19` | `#define IDN_SERIAL_MAX` |
+| `IDN_UA_MAX` | macro | `include/identity.h:16` | `#define IDN_UA_MAX` |
+| `idn_accept_language` | function | `include/identity.h:58` | `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);` |
+| `idn_apply_query` | function | `include/identity.h:70` | `unsigned idn_apply_query(idn_config *c, const char *query);` |
+| `idn_clear_geo` | function | `include/identity.h:54` | `void idn_clear_geo(idn_config *c);` |
+| `idn_config` | struct | `include/identity.h:37` | `` |
+| `idn_defaults` | function | `include/identity.h:45` | `void idn_defaults(idn_config *c);` |
+| `idn_geo_mode` | enum | `include/identity.h:25` | `` |
+| `idn_is_default` | function | `include/identity.h:48` | `int idn_is_default(const idn_config *c);` |
+| `idn_parse` | function | `include/identity.h:67` | `void idn_parse(idn_config *c, const char *text);` |
+| `idn_primary_language` | function | `include/identity.h:59` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);` |
+| `idn_render_page` | function | `include/identity.h:73` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap);` |
+| `idn_serialize` | function | `include/identity.h:63` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap);` |
+| `idn_set_geo` | function | `include/identity.h:53` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);` |
+| `idn_set_languages` | function | `include/identity.h:52` | `int idn_set_languages(idn_config *c, const char *list);` |
+| `idn_set_user_agent` | function | `include/identity.h:51` | `int idn_set_user_agent(idn_config *c, const char *ua);` |
+| `idn_user_agent` | function | `include/identity.h:57` | `const char *idn_user_agent(const idn_config *c);` |
+| `user_agent` | type_alias | `include/identity.h:36` | `typedef struct idn_config { char user_agent[IDN_UA_MAX];` |
 | `FREEDOM_IMAGE_DECODE_H` | macro | `include/image_decode.h:2` | `#define FREEDOM_IMAGE_DECODE_H` |
 | `IMG_MAX_DIM` | macro | `include/image_decode.h:65` | `#define IMG_MAX_DIM` |
 | `IMG_MAX_PIXELS` | macro | `include/image_decode.h:66` | `#define IMG_MAX_PIXELS` |
@@ -408,27 +433,30 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `val_kind` | type_alias | `include/interp.h:100` | `typedef struct ip_anim { ip_val_kind val_kind;` |
 | `FREEDOM_JS_DOM_H` | macro | `include/js_dom.h:2` | `#define FREEDOM_JS_DOM_H` |
 | `JD_IFRAME_TRACK_MAX` | macro | `include/js_dom.h:40` | `#define JD_IFRAME_TRACK_MAX` |
-| `URLs` | function | `include/js_dom.h:189` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
-| `getComputedStyle` | function | `include/js_dom.h:87` | `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...` |
+| `JD_REPL_CSS_MAX` | macro | `include/js_dom.h:79` | `#define JD_REPL_CSS_MAX` |
+| `URLs` | function | `include/js_dom.h:210` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
+| `getComputedStyle` | function | `include/js_dom.h:108` | `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...` |
 | `global` | function | `include/js_dom.h:73` | `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...` |
-| `host` | function | `include/js_dom.h:142` | `* for a trusted host (allow.conf AND js.conf);` |
+| `host` | function | `include/js_dom.h:163` | `* for a trusted host (allow.conf AND js.conf);` |
 | `jd_click_state` | type_alias | `include/js_dom.h:35` | `typedef struct jd_click_state jd_click_state;` |
-| `jd_click_state_free` | function | `include/js_dom.h:97` | `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);` |
-| `jd_flush_custom_elements` | function | `include/js_dom.h:214` | `void jd_flush_custom_elements(js_context *ctx);` |
-| `jd_get_cookies` | function | `include/js_dom.h:153` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` |
+| `jd_click_state_free` | function | `include/js_dom.h:118` | `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);` |
+| `jd_flush_custom_elements` | function | `include/js_dom.h:235` | `void jd_flush_custom_elements(js_context *ctx);` |
+| `jd_get_cookies` | function | `include/js_dom.h:174` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` |
 | `jd_iframe_track` | struct | `include/js_dom.h:41` | `` |
+| `jd_install_repl_api` | function | `include/js_dom.h:82` | `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...` |
 | `jd_opaque` | struct | `include/js_dom.h:46` | `` |
-| `jd_process_iframes` | function | `include/js_dom.h:182` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
+| `jd_process_iframes` | function | `include/js_dom.h:203` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
 | `jd_status` | enum | `include/js_dom.h:25` | `` |
-| `jd_video_from_scripts` | function | `include/js_dom.h:203` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
+| `jd_video_from_scripts` | function | `include/js_dom.h:224` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
 | `opaque` | function | `include/js_dom.h:66` | `* the engine runtime opaque (unreachable from script);` |
-| `out_status` | function | `include/js_dom.h:161` | `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...` |
-| `preventDefault` | function | `include/js_dom.h:113` | `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...` |
+| `out_status` | function | `include/js_dom.h:182` | `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...` |
+| `place` | function | `include/js_dom.h:87` | `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...` |
+| `preventDefault` | function | `include/js_dom.h:134` | `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...` |
 | `processed` | type_alias | `include/js_dom.h:41` | `typedef struct jd_iframe_track { dom_node_id processed[JD_IFRAME_TRACK_MAX];` |
-| `run` | function | `include/js_dom.h:106` | `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...` |
+| `run` | function | `include/js_dom.h:127` | `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...` |
 | `FREEDOM_JS_ENV_H` | macro | `include/js_env.h:2` | `#define FREEDOM_JS_ENV_H` |
 | `je_status` | enum | `include/js_env.h:27` | `` |
-| `poisoned` | function | `include/js_env.h:43` | `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...` |
+| `poisoned` | function | `include/js_env.h:49` | `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...` |
 | `FREEDOM_JS_GEOM_H` | macro | `include/js_geom.h:2` | `#define FREEDOM_JS_GEOM_H` |
 | `JG_COORD_MAX` | macro | `include/js_geom.h:26` | `#define JG_COORD_MAX` |
 | `JG_HEADER_N` | macro | `include/js_geom.h:27` | `#define JG_HEADER_N` |
@@ -468,33 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `JS_DEFAULT_TIME_BUDGET` | macro | `include/js_sandbox.h:69` | `#define JS_DEFAULT_TIME_BUDGET` |
 | `JS_LOC_FILE_MAX` | macro | `include/js_sandbox.h:64` | `#define JS_LOC_FILE_MAX` |
 | `JS_MODULE_BYTES_MAX` | macro | `include/js_sandbox.h:106` | `#define JS_MODULE_BYTES_MAX` |
-| `JS_MODULE_MAX` | macro | `include/js_sandbox.h:105` | `#define JS_MODULE_MAX` |
-| `JS_REALM_MAX` | macro | `include/js_sandbox.h:179` | `#define JS_REALM_MAX` |
-| `handle` | function | `include/js_sandbox.h:162` | `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....` |
-| `js_context` | type_alias | `include/js_sandbox.h:47` | `typedef struct js_context js_context;` |
-| `js_context_free` | function | `include/js_sandbox.h:86` | `void js_context_free(js_context *ctx);` |
-| `js_limits` | struct | `include/js_sandbox.h:39` | `` |
-| `js_loc_from_stack` | function | `include/js_sandbox.h:140` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` |
-| `js_pump_jobs` | function | `include/js_sandbox.h:159` | `int js_pump_jobs(js_context *ctx, int max_jobs);` |
-| `js_result` | struct | `include/js_sandbox.h:49` | `` |
-| `js_result_free` | function | `include/js_sandbox.h:151` | `void js_result_free(js_result *res);` |
-| `js_set_current_script` | function | `include/js_sandbox.h:171` | `void js_set_current_script(js_context *ctx, const char *src, const char *type);` |
-| `js_set_module_host` | function | `include/js_sandbox.h:119` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` |
-| `js_set_time_budget` | function | `include/js_sandbox.h:148` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` |
-| `js_status` | enum | `include/js_sandbox.h:24` | `` |
-| `loaded` | function | `include/js_sandbox.h:114` | `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...` |
-| `max_source_bytes` | type_alias | `include/js_sandbox.h:39` | `typedef struct js_limits { size_t max_source_bytes;` |
-| `status` | type_alias | `include/js_sandbox.h:48` | `typedef struct js_result { js_status status;` |
-| `FREEDOM_JS_TRUSTED_H` | macro | `include/js_trusted.h:2` | `#define FREEDOM_JS_TRUSTED_H` |
-| `JT_WS_MAX` | macro | `include/js_trusted.h:46` | `#define JT_WS_MAX` |
-| `JT_WS_MAX_BYTES` | macro | `include/js_trusted.h:48` | `#define JT_WS_MAX_BYTES` |
-| `JT_WS_MAX_OPS` | macro | `include/js_trusted.h:47` | `#define JT_WS_MAX_OPS` |
-| `jt_take_opens` | function | `include/js_trusted.h:42` | `char *jt_take_opens(js_context *ctx);` |
-| `jt_take_storage` | function | `include/js_trusted.h:93` | `int jt_take_storage(js_context *ctx, char **out, size_t *len);` |
-| `jt_take_ws` | function | `include/js_trusted.h:75` | `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);` |
-| `jt_ws_event` | function | `include/js_trusted.h:81` | `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);` |
-| `jt_ws_event_kind` | enum | `include/js_trusted.h:64` | `` |
-| `jt_ws_kind` | enum | `include/js_trusted.h:50` | `` |
-| `jt_ws_op` | struct | `include/js_trusted.h:57` | `` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

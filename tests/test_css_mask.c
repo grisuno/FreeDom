@@ -49,6 +49,31 @@ static void test_fade_gradient(void **state)
     assert_true(l.pos[1] >= 246 && l.pos[1] <= 254);
 }
 
+/* A `url()` mask image is never fetched (no third-party request for decoration). Firefox does not
+ * paint an element whose mask image is unavailable -- alone, XORed or ADDed with a gradient -- so
+ * the layer list collapses to ONE fully transparent layer (GitLab's grey "mask" slabs, tanda 61). */
+static void test_url_mask_is_unavailable_so_element_is_hidden(void **state)
+{
+    (void)state;
+    const char *vals[] = {
+        "url(https://x.invalid/a.svg)",
+        "linear-gradient(#000,#000),url(https://x.invalid/a.svg)",
+        "url(https://x.invalid/a.svg) center/cover no-repeat",
+    };
+    for (size_t k = 0; k < 3; ++k) {
+        css_decl d[24];
+        int n = cm_expand(k == 2 ? "mask" : "mask-image", vals[k], d, 24, 0);
+        assert_true(n > 0);
+        assert_int_equal(val_of(d, n, P_MASK_N, -1), 1);
+        cm_layer l;
+        cm_decode_layer(val_of(d, n, P_MASK_L0A, 0), val_of(d, n, P_MASK_L0B, 0),
+                        val_of(d, n, P_MASK_L0C, 0), &l);
+        assert_int_equal(l.kind, 1);
+        assert_int_equal(l.alpha[0], 0);
+        assert_int_equal(l.alpha[1], 0);
+    }
+}
+
 static void test_gradient_border_technique(void **state)
 {
     (void)state;
@@ -110,7 +135,7 @@ static void test_unsupported_fails_closed(void **state)
 {
     (void)state;
     css_decl d[16];
-    assert_int_equal(cm_expand("mask-image", "url(https://t.example/a.svg)", d, 16, 0), 0);
+    assert_true(cm_expand("mask-image", "url(https://t.example/a.svg)", d, 16, 0) > 0); /* unavailable: hidden */
     assert_int_equal(cm_expand("mask-image", "url(data:image/svg+xml;base64,AAAA)", d, 16, 0), 0);
     assert_int_equal(cm_expand("mask-image", "radial-gradient(#000,#fff)", d, 16, 0), 0);
     assert_int_equal(cm_expand("mask-image", "linear-gradient(red)", d, 16, 0), 0);
@@ -177,6 +202,7 @@ int main(void)
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_prop_names),
         cmocka_unit_test(test_fade_gradient),
+        cmocka_unit_test(test_url_mask_is_unavailable_so_element_is_hidden),
         cmocka_unit_test(test_gradient_border_technique),
         cmocka_unit_test(test_composite_vocabularies),
         cmocka_unit_test(test_clip_property),

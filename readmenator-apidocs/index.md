@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 191 modules, 3327 documented entities, documentation coverage 39.8% (1314/3305 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 193 modules, 3382 documented entities, documentation coverage 39.8% (1338/3360 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (90), h (87), py (10), sh (4)
+Languages: c (91), h (88), py (10), sh (4)
 
 ## Modules
 
@@ -71,10 +71,11 @@ Languages: c (90), h (87), py (10), sh (4)
 | [`include/hostblock.h`](modules/include.hostblock.h.md) |  | 4 | 5 | 50.0% |
 | [`include/hostedit.h`](modules/include.hostedit.h.md) |  | 1 | 3 | 60.0% |
 | [`include/html_parse.h`](modules/include.html_parse.h.md) |  | 5 | 18 | 50.0% |
+| [`include/identity.h`](modules/include.identity.h.md) |  | 3 | 20 | 45.8% |
 | [`include/image_decode.h`](modules/include.image_decode.h.md) |  | 4 | 8 | 46.2% |
 | [`include/import_map.h`](modules/include.import_map.h.md) |  | 1 | 8 | 30.0% |
 | [`include/interp.h`](modules/include.interp.h.md) |  | 10 | 11 | 31.8% |
-| [`include/js_dom.h`](modules/include.js_dom.h.md) |  | 5 | 14 | 35.0% |
+| [`include/js_dom.h`](modules/include.js_dom.h.md) |  | 5 | 17 | 34.8% |
 | [`include/js_env.h`](modules/include.js_env.h.md) |  | 1 | 1 | 0.0% |
 | [`include/js_geom.h`](modules/include.js_geom.h.md) |  | 3 | 15 | 78.9% |
 | [`include/js_location.h`](modules/include.js_location.h.md) |  | 0 | 5 | 50.0% |
@@ -97,10 +98,10 @@ Languages: c (90), h (87), py (10), sh (4)
 | [`include/render_policy.h`](modules/include.render_policy.h.md) |  | 3 | 5 | 77.8% |
 | [`include/renderer.h`](modules/include.renderer.h.md) |  | 3 | 3 | 14.3% |
 | [`include/request_policy.h`](modules/include.request_policy.h.md) |  | 1 | 3 | 60.0% |
-| [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) |  | 9 | 32 | 50.0% |
+| [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) |  | 9 | 33 | 51.2% |
 | [`include/svg_paint.h`](modules/include.svg_paint.h.md) |  | 0 | 1 | 50.0% |
 | [`include/svg_render.h`](modules/include.svg_render.h.md) |  | 9 | 8 | 38.9% |
-| [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 29 | 45.2% |
+| [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 30 | 46.5% |
 | [`include/text_case.h`](modules/include.text_case.h.md) | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | 1 | 6 | 75.0% |
 | [`include/text_shape.h`](modules/include.text_shape.h.md) |  | 5 | 18 | 70.8% |
 | [`include/textfield.h`](modules/include.textfield.h.md) |  | 3 | 11 | 53.3% |
@@ -157,17 +158,18 @@ Languages: c (90), h (87), py (10), sh (4)
 | [`src/hostblock.c`](modules/src.hostblock.c.md) |  | 2 | 8 | 45.5% |
 | [`src/hostedit.c`](modules/src.hostedit.c.md) |  | 1 | 3 | 40.0% |
 | [`src/html_parse.c`](modules/src.html_parse.c.md) |  | 1 | 17 | 47.4% |
+| [`src/identity.c`](modules/src.identity.c.md) |  | 0 | 15 | 50.0% |
 | [`src/image_decode.c`](modules/src.image_decode.c.md) |  | 3 | 13 | 35.3% |
 | [`src/import_map.c`](modules/src.import_map.c.md) |  | 4 | 6 | 45.5% |
 | [`src/interp.c`](modules/src.interp.c.md) |  | 0 | 13 | 71.4% |
 | [`src/js_custom_elements.c`](modules/src.js_custom_elements.c.md) |  | 0 | 1 | 0.0% |
 | [`src/js_custom_elements.h`](modules/src.js_custom_elements.h.md) | Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. | 0 | 1 | 50.0% |
 | [`src/js_dom.c`](modules/src.js_dom.c.md) |  | 1 | 23 | 12.0% |
-| [`src/js_dom_ext.c`](modules/src.js_dom_ext.c.md) |  | 0 | 4 | 0.0% |
+| [`src/js_dom_ext.c`](modules/src.js_dom_ext.c.md) |  | 0 | 7 | 0.0% |
 | [`src/js_dom_ext.h`](modules/src.js_dom_ext.h.md) | Private to js_dom.c / js_dom_ext.c: installs the DOM Standard extras (tree | 0 | 1 | 50.0% |
 | [`src/js_dom_internal.h`](modules/src.js_dom_internal.h.md) | Private to the js_dom family (js_dom.c, js_fetch.c, js_events.c, js_embed.c): the context accessors every native needs. | 0 | 3 | 50.0% |
 | [`src/js_embed.c`](modules/src.js_embed.c.md) |  | 0 | 4 | 40.0% |
-| [`src/js_env.c`](modules/src.js_env.c.md) |  | 0 | 7 | 0.0% |
+| [`src/js_env.c`](modules/src.js_env.c.md) |  | 0 | 8 | 0.0% |
 | [`src/js_events.c`](modules/src.js_events.c.md) |  | 1 | 7 | 22.2% |
 | [`src/js_fetch.c`](modules/src.js_fetch.c.md) |  | 0 | 4 | 20.0% |
 | [`src/js_geom.c`](modules/src.js_geom.c.md) |  | 0 | 12 | 84.6% |
@@ -177,7 +179,7 @@ Languages: c (90), h (87), py (10), sh (4)
 | [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 19 | 43.5% |
 | [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 13 | 33.3% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
-| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 297 | 1.7% |
+| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 301 | 1.7% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
@@ -191,9 +193,9 @@ Languages: c (90), h (87), py (10), sh (4)
 | [`src/render_policy.c`](modules/src.render_policy.c.md) |  | 0 | 5 | 50.0% |
 | [`src/renderer.c`](modules/src.renderer.c.md) |  | 0 | 4 | 20.0% |
 | [`src/request_policy.c`](modules/src.request_policy.c.md) |  | 0 | 6 | 57.1% |
-| [`src/secure_fetch.c`](modules/src.secure_fetch.c.md) |  | 6 | 41 | 25.0% |
+| [`src/secure_fetch.c`](modules/src.secure_fetch.c.md) |  | 6 | 42 | 26.5% |
 | [`src/svg_render.c`](modules/src.svg_render.c.md) | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | 3 | 5 | 55.6% |
-| [`src/tab.c`](modules/src.tab.c.md) |  | 2 | 73 | 36.8% |
+| [`src/tab.c`](modules/src.tab.c.md) |  | 2 | 74 | 37.7% |
 | [`src/text_case.c`](modules/src.text_case.c.md) |  | 0 | 5 | 50.0% |
 | [`src/text_shape.c`](modules/src.text_shape.c.md) |  | 10 | 24 | 45.7% |
 | [`src/textfield.c`](modules/src.textfield.c.md) |  | 0 | 12 | 46.2% |

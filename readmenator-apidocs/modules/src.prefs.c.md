@@ -23,6 +23,7 @@ flowchart LR
     n_include_prefs_h__free["prefs.free"]
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
     n_src_prefs_c__prefs_history_add(["prefs_history_add"])
+    n_src_prefs_c__prefs_format(["prefs_format"])
     n_src_prefs_c__prefs_bookmarks_page(["prefs_bookmarks_page"])
     n_src_prefs_c__prefs_bookmark_toggle --> n_src_prefs_c__prefs_bookmark_index
     n_src_prefs_c__prefs_parse --> n_src_prefs_c__prefs_free
@@ -33,6 +34,7 @@ flowchart LR
     n_src_prefs_c__prefs_bookmark_toggle -.-> n_include_prefs_h__free
     n_src_prefs_c__prefs_history_add -.-> n_gui_browser_ui_c__strcmp
     n_src_prefs_c__prefs_history_add -.-> n_include_prefs_h__free
+    n_src_prefs_c__prefs_format -.-> n_include_prefs_h__free
     n_src_prefs_c__prefs_bookmarks_page -.-> n_include_prefs_h__free
 ```
 
@@ -42,7 +44,7 @@ flowchart LR
 
 ### `sbuf`
 
-`struct` | [src/prefs.c:367](../../src/prefs.c#L367)
+`struct` | [src/prefs.c:380](../../src/prefs.c#L380)
 
 ```c
 typedef struct sbuf { char *data; size_t len, cap; int oom; } sbuf;
@@ -72,7 +74,7 @@ NULL-safe.
 |---|---|---|---|
 | `p` | `prefs_state *` |  |  |
 
-> **Inherited:** Documentation from [`prefs_init`](#prefs_init) (include/prefs.h:65).
+> **Inherited:** Documentation from [`prefs_init`](#prefs_init) (include/prefs.h:66).
 
 *Calls:* [`zm_reset`](include.zoom.h.md#zm_reset)
 
@@ -100,7 +102,7 @@ Idempotent; NULL-safe.
 |---|---|---|---|
 | `p` | `prefs_state *` |  |  |
 
-> **Inherited:** Documentation from [`prefs_free`](#prefs_free) (include/prefs.h:68).
+> **Inherited:** Documentation from [`prefs_free`](#prefs_free) (include/prefs.h:69).
 
 *Calls:* [`free`](include.prefs.h.md#free)
 
@@ -131,7 +133,7 @@ NULL-safe.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`prefs_bookmark_index`](#prefs_bookmark_index) (include/prefs.h:81).
+> **Inherited:** Documentation from [`prefs_bookmark_index`](#prefs_bookmark_index) (include/prefs.h:82).
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
 
@@ -207,6 +209,8 @@ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len)
 
 **Returns:** `prefs_status`
 
+*Calls:* [`free`](include.prefs.h.md#free)
+
 *Called by:* [`profile_save`](src.profile.c.md#profile_save)
 
 ---
@@ -215,7 +219,7 @@ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len)
 
 ### `prefs_parse`
 
-`function` | [src/prefs.c:241](../../src/prefs.c#L241)
+`function` | [src/prefs.c:247](../../src/prefs.c#L247)
 
 ```c
 prefs_status prefs_parse(const char *text, size_t len, prefs_state *out)
@@ -241,7 +245,7 @@ prefs_status prefs_parse(const char *text, size_t len, prefs_state *out)
 
 ### `prefs_suggest`
 
-`function` | [src/prefs.c:344](../../src/prefs.c#L344)
+`function` | [src/prefs.c:357](../../src/prefs.c#L357)
 
 ```c
 int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows)
@@ -263,7 +267,7 @@ Priority: bookmark-prefix, history-prefix, bookmark-substring (URL or title), hi
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`prefs_suggest`](#prefs_suggest) (include/prefs.h:100).
+> **Inherited:** Documentation from [`prefs_suggest`](#prefs_suggest) (include/prefs.h:101).
 
 ---
 
@@ -271,7 +275,7 @@ Priority: bookmark-prefix, history-prefix, bookmark-substring (URL or title), hi
 
 ### `prefs_bookmarks_page`
 
-`function` | [src/prefs.c:408](../../src/prefs.c#L408)
+`function` | [src/prefs.c:421](../../src/prefs.c#L421)
 
 ```c
 prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_len)

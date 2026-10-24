@@ -863,7 +863,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "       'abort','emptied','ratechange'].forEach(function(t){ __G.__evHandlerProps(el,'n'+h,[t]); });"
     "    })();"
     /* instanceof HTMLElement/Element/Node/EventTarget hold for every wrapper. */
-    "    if(__G.__elProto) Object.setPrototypeOf(el, __G.__elProto);"
+    "    if(__G.__elProto) Object.setPrototypeOf(el, (__G.__elProtoFor&&__G.__elProtoFor(dom.tagName(h)))||__G.__elProto);"
     /* <canvas>: width/height reflect the attributes (300x150 by default); getContext
      * gives the software 2D context ('2d' only -- webgl is null, the standard "not
      * supported" answer), buffer area capped at 1 megapixel (worker memory). */
@@ -1335,6 +1335,19 @@ static const char JD_MODERN_SHIM[] =
     "  Object.getOwnPropertyNames(g).forEach(function(n){"
     "    if(/^HTML.+Element$/.test(n)&&n!=='HTMLElement') chainTo(n,'HTMLElement'); });"
     "  if(typeof g.HTMLElement==='function') g.__elProto=g.HTMLElement.prototype;"
+    /* Each element wrapper gets the prototype of its tag's interface (div -> HTMLDivElement),
+     * still chained to HTMLElement, so instanceof answers like a browser and form controls can
+     * carry their own methods (js_dom_ext). */
+    "  var TAGP={a:'Anchor',img:'Image',input:'Input',button:'Button',form:'Form',select:'Select',option:'Option',"
+    "    textarea:'TextArea',table:'Table',tr:'TableRow',td:'TableCell',th:'TableCell',p:'Paragraph',div:'Div',span:'Span',"
+    "    h1:'Heading',h2:'Heading',h3:'Heading',h4:'Heading',h5:'Heading',h6:'Heading',ul:'UList',ol:'OList',li:'LI',br:'BR',"
+    "    hr:'HR',pre:'Pre',canvas:'Canvas',video:'Video',audio:'Audio',source:'Source',iframe:'IFrame',label:'Label',"
+    "    fieldset:'FieldSet',legend:'Legend',details:'Details',dialog:'Dialog',slot:'Slot',template:'Template',head:'Head',"
+    "    body:'Body',title:'Title',meta:'Meta',link:'Link',script:'Script',style:'Style',object:'Object',embed:'Embed',"
+    "    param:'Param',base:'Base',picture:'Picture',map:'Map',area:'Area',progress:'Progress',meter:'Meter',output:'Output',"
+    "    datalist:'DataList',dl:'DList',time:'Time',blockquote:'Quote',q:'Quote',ins:'Mod',del:'Mod'};"
+    "  g.__elProtoFor=function(t){ var c=TAGP[String(t||'').toLowerCase()]; c=c&&g['HTML'+c+'Element'];"
+    "    return (typeof c==='function')?c.prototype:null; };"
     "  if(typeof g.HTMLDocument==='function'&&g.document)"
     "    try{ Object.setPrototypeOf(g.document, g.HTMLDocument.prototype); }catch(e){}"
     "  if(g.Node){ g.Node.ELEMENT_NODE=1; g.Node.TEXT_NODE=3; g.Node.COMMENT_NODE=8;"

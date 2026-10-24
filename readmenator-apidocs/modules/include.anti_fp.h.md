@@ -55,6 +55,8 @@ const char *fp_user_agent(void);
 
 **Returns:** `char *`
 
+*Called by:* [`idn_user_agent`](src.identity.c.md#idn_user_agent)
+
 ---
 
 <a id="fp_accept_language"></a>
@@ -68,6 +70,8 @@ const char *fp_accept_language(void);
 ```
 
 **Returns:** `char *`
+
+*Called by:* [`idn_primary_language`](src.identity.c.md#idn_primary_language), [`idn_render_page`](src.identity.c.md#idn_render_page)
 
 ---
 
@@ -86,6 +90,8 @@ list form, e.g.
 "en-US,en"
 
 **Returns:** `char *`
+
+*Called by:* [`idn_accept_language`](src.identity.c.md#idn_accept_language)
 
 ---
 

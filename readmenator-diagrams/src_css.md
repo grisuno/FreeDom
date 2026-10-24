@@ -1,6 +1,6 @@
 # src: css
 
-src: css groups 50 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
+src: css groups 53 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
 
 ```mermaid
 graph LR
@@ -14,17 +14,17 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (2.1)
+## include (1.1)
 
-include groups 17 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
+include groups 18 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
 
-## src (2.2)
+## src (1.2)
 
-src groups 18 files (c) around BT_LEN_AUTO, layout_block, bt_nn, BT_WRAP_EPS, height. layout_block: Block container: stack non-none children vertically, collapsing each...
+src groups 19 files (c) around BT_LEN_AUTO, layout_block, bt_nn, BT_WRAP_EPS, height. layout_block: Block container: stack non-none children vertically, collapsing each...
 
-## tests (2.3)
+## tests (1.3)
 
-tests groups 15 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
+tests groups 16 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
 
 **Files**:
 
@@ -34,6 +34,7 @@ tests groups 15 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - include/css_box.h
 - include/css_chain.h
 - include/css_color.h
+- include/css_computed.h
 - include/css_decl.h
 - include/css_gradient.h
 - include/css_index.h
@@ -52,6 +53,7 @@ tests groups 15 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - src/css_box.c
 - src/css_chain.c
 - src/css_color.c
+- src/css_computed.c
 - src/css_gradient.c
 - src/css_index.c
 - src/css_length.c
@@ -68,6 +70,7 @@ tests groups 15 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - tests/test_css_atrule.c
 - tests/test_css_box.c
 - tests/test_css_color.c
+- tests/test_css_computed.c
 - tests/test_css_drops.c
 - tests/test_css_gradient.c
 - tests/test_css_index.c

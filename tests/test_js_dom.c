@@ -1747,6 +1747,170 @@ static void test_repl_api_is_repl_only_and_nondestructive(void **state) {
     EXPECT(f, "Object.keys(globalThis).indexOf('$$')", "-1");
 }
 
+/* rules(el) (spec/freebug_repl.md): the rules that match an element, winning first, with
+ * source, specificity, media context and which declarations a stronger rule overrides.
+ * External sheet text (the parent's fetched <link> bodies) arrives through jd_set_repl_css. */
+/* Web-platform surface (spec/js_platform.md): the guarded globals and element methods a modern
+ * page calls without feature detection. */
+static void test_platform_interfaces_and_events(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var b=document.getElementById('go'), i=document.querySelector('input');"
+              "[b instanceof HTMLButtonElement, b instanceof HTMLElement, i instanceof HTMLInputElement,"
+              " i instanceof HTMLButtonElement, document.getElementById('main') instanceof HTMLDivElement].join()",
+           "true,true,true,false,true");
+    EXPECT(f, "var e=new TransitionEvent('transitionend',{propertyName:'opacity',elapsedTime:2});"
+              "[e.type,e.propertyName,e.elapsedTime,String(new StorageEvent('storage').key),e instanceof TransitionEvent,e instanceof Event].join()",
+           "transitionend,opacity,2,null,true,true");
+    EXPECT(f, "var k=new KeyboardEvent('keydown',{key:'Enter',ctrlKey:true,bubbles:true}), m=new MouseEvent('click',{clientX:7});"
+              "[k.key,k.code===''?'e':k.code,k.ctrlKey,k.getModifierState('Control'),k.bubbles,k instanceof UIEvent,"
+              " m.clientX,m.pageX,m.button,m instanceof MouseEvent,new CustomEvent('c',{detail:3}).detail,Event.AT_TARGET].join()",
+           "Enter,e,true,true,true,true,7,7,0,true,3,2");
+    EXPECT(f, "var seen=[]; var b=document.getElementById('go');"
+              "b.addEventListener('click',function(e){ seen.push((e instanceof Event)+':'+e.type); });"
+              "b.dispatchEvent(new MouseEvent('click',{bubbles:true})); b.dispatchEvent(new Event('click')); seen.join()",
+           "true:click,true:click");
+    EXPECT(f, "var c=new AbortController(); c.abort('why'); var any=AbortSignal.any([new AbortController().signal,c.signal]);"
+              "any.aborted+','+any.reason", "true,why");
+    EXPECT(f, "typeof AbortSignal.timeout(50)+','+typeof reportError+','+typeof scheduler.postTask+','+visualViewport.scale",
+           "object,function,function,1");
+}
+
+static void test_platform_dommatrix_and_imagedata(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "new DOMMatrix().translate(10,20).scale(2).toString()", "matrix(2, 0, 0, 2, 10, 20)");
+    EXPECT(f, "var m=new DOMMatrix('matrix(2,0,0,2,10,20)'), p=m.inverse().transformPoint(new DOMPoint(14,24));"
+              "p.x+','+p.y+','+m.is2D+','+new DOMMatrix().isIdentity", "2,2,true,true");
+    EXPECT(f, "var im=new ImageData(2,3); im.width+','+im.height+','+im.data.length", "2,3,24");
+    EXPECT(f, "var t=0; try{ new ImageData(0,5); }catch(e){ t=e.name; } t", "IndexSizeError");
+}
+
+static void test_platform_form_controls(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var i=document.querySelector('input'); i.value='hello'; i.setSelectionRange(1,3);"
+              "[i.selectionStart,i.selectionEnd,i.selectionDirection].join()", "1,3,none");
+    EXPECT(f, "i.select(); i.selectionStart+','+i.selectionEnd", "0,5");
+    EXPECT(f, "i.required=true; i.value=''; var n=0; i.addEventListener('invalid',function(){ n++; });"
+              "[i.checkValidity(), i.validity.valueMissing, n, document.getElementById('frm').checkValidity()].join()",
+           "false,true,1,false");
+    EXPECT(f, "i.value='x'; i.setCustomValidity('nope'); [i.validity.customError,i.validationMessage,i.checkValidity()].join()",
+           "true,nope,false");
+    EXPECT(f, "i.setCustomValidity(''); var s=0; var fm=document.getElementById('frm');"
+              "fm.addEventListener('submit',function(e){ s++; e.preventDefault(); }); fm.requestSubmit(); s", "1");
+    EXPECT(f, "var e=document.createElement('input'); e.setAttribute('type','email'); e.value='nope';"
+              "var a=e.validity.typeMismatch; e.value='a@b.c'; a+','+e.validity.typeMismatch", "true,false");
+}
+
+/* Streams (spec/js_platform.md): ReadableStream/WritableStream/TransformStream and Response.body over
+ * the already-received body. Async: the jobs are pumped before the result is read. */
+/* navigator.geolocation (spec/identity.md): absent until the host installs it; then it answers
+ * with exactly the coordinates the user configured, never a sensor or a lookup. */
+/* indexedDB over page memory (spec/js_platform.md): upgrade, stores, indexes, constraint errors,
+ * cursors, ranges and rollback. Async: jobs are pumped before the log is read. */
+static void test_indexeddb_core(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof indexedDB", "undefined");               /* absent until a trusted host installs it */
+    assert_int_equal(jd_install_indexeddb(f->ctx), JD_OK);
+    EXPECT(f, "globalThis.L=[]; var r=indexedDB.open('db',1);"
+              "r.onupgradeneeded=function(e){ L.push('up:'+e.oldVersion+'>'+e.newVersion); var db=r.result;"
+              " var s=db.createObjectStore('p',{keyPath:'id'}); s.createIndex('byName','name');"
+              " s.put({id:1,name:'b'}); s.put({id:2,name:'a'}); };"
+              "r.onsuccess=function(){ var db=r.result, tx=db.transaction('p','readwrite'), st=tx.objectStore('p');"
+              " st.add({id:3,name:'c'});"
+              " st.getAll().onsuccess=function(e){ L.push('all:'+e.target.result.map(function(x){return x.id;})); };"
+              " st.index('byName').get('a').onsuccess=function(e){ L.push('ix:'+e.target.result.id); };"
+              " st.add({id:3}).onerror=function(e){ L.push('dup:'+e.target.error.name); e.preventDefault(); };"
+              " st.getAll(IDBKeyRange.bound(2,3)).onsuccess=function(e){ L.push('rng:'+e.target.result.length); };"
+              " var n=[]; st.openCursor().onsuccess=function(e){ var c=e.target.result; if(c){ n.push(c.key); c.continue(); } else L.push('cur:'+n); };"
+              " tx.oncomplete=function(){ L.push('done'); }; }; 0", "0");
+    (void)js_pump_jobs(f->ctx, 4096);
+    EXPECT(f, "L.join('|')", "up:0>1|all:1,2,3|ix:2|dup:ConstraintError|rng:2|cur:1,2,3|done");
+    /* rollback: an uncaught request error aborts the transaction and undoes its writes */
+    EXPECT(f, "globalThis.M=[]; var q=indexedDB.open('db',1); q.onsuccess=function(){ var db=q.result, tx=db.transaction('p','readwrite'), st=tx.objectStore('p');"
+              " st.put({id:9,name:'z'}); st.add({id:1,name:'dup'}); tx.onabort=function(){ M.push('abort');"
+              "  var t2=db.transaction('p'); t2.objectStore('p').count().onsuccess=function(e){ M.push('count:'+e.target.result); }; }; }; 0", "0");
+    (void)js_pump_jobs(f->ctx, 4096);
+    EXPECT(f, "M.join('|')", "abort|count:3");
+    EXPECT(f, "var e1=null; try{ IDBKeyRange.bound(5,1); }catch(x){ e1=x.name; } e1+','+indexedDB.cmp(1,'a')+','+indexedDB.cmp([1,2],[1,3])", "DataError,-1,-1");
+}
+
+static void test_geolocation_fixed_coordinates(void **state) {
+    fixture *f = (fixture *)*state;
+    /* The real navigator (js_env): non-extensible, with an extensible prototype. */
+    EXPECT(f, "globalThis.navigator=Object.preventExtensions(Object.create({})); typeof navigator.geolocation", "undefined");
+    assert_int_equal(jd_install_geolocation(f->ctx, -34.6037, -58.3816, 50.0), JD_OK);
+    EXPECT(f, "typeof globalThis.__geoCfg+','+typeof navigator.geolocation.getCurrentPosition", "undefined,function");
+    EXPECT(f, "globalThis.gp=[]; navigator.geolocation.getCurrentPosition(function(p){"
+              " gp.push([p.coords.latitude,p.coords.longitude,p.coords.accuracy,p.coords.altitude,typeof p.timestamp].join()); });"
+              "var id=navigator.geolocation.watchPosition(function(p){ gp.push('w'+p.coords.latitude); });"
+              "navigator.geolocation.clearWatch(id); typeof id", "number");
+    (void)js_pump_jobs(f->ctx, 256);
+    EXPECT(f, "gp.join('|')", "-34.6037,-58.3816,50,,number");
+    EXPECT(f, "var d=Object.getOwnPropertyDescriptor(navigator,'geolocation')||Object.getOwnPropertyDescriptor(Object.getPrototypeOf(navigator),'geolocation');"
+              "String(d&&typeof d.get==='function'&&!d.set)", "true");
+    assert_int_equal(jd_install_geolocation(f->ctx, 95.0, 0.0, 10.0), JD_ERR_INTERNAL);   /* out of range: refused */
+}
+
+static void test_platform_streams(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "globalThis.o1=[]; globalThis.o2=[]; globalThis.o3=[]; globalThis.o4=[];"
+              "var rs=new ReadableStream({start:function(c){ c.enqueue('a'); c.enqueue('b'); c.close(); }});"
+              "(async function(){ var rd=rs.getReader(), r; while(!(r=await rd.read()).done) o1.push(r.value); o1.push('end'); })();"
+              "(async function(){ var rd=new Blob(['h\\u00e9llo']).stream().pipeThrough(new TextDecoderStream()).getReader(), r;"
+              " while(!(r=await rd.read()).done) o2.push(r.value); o2.push('true'); })();"
+              "(async function(){ var t=new ReadableStream({start:function(c){ c.enqueue('x'); c.enqueue('y'); c.close(); }})"
+              "  .pipeThrough(new TransformStream({transform:function(ch,k){ k.enqueue(ch.toUpperCase()); }}));"
+              " for await (var v of t) o3.push(v); })();"
+              "(async function(){ var got=[]; var ws=new WritableStream({write:function(c){ got.push(c); },close:function(){ got.push('closed'); }});"
+              " await new ReadableStream({start:function(c){ c.enqueue(1); c.enqueue(2); c.close(); }}).pipeTo(ws); o4.push(got.join('|'));"
+              " var two=new ReadableStream({start:function(c){ c.enqueue('z'); c.close(); }}).tee();"
+              " var r1=await two[0].getReader().read(), r2=await two[1].getReader().read(); o4.push(r1.value+r2.value);"
+              " var b=await new Blob(['blob!']).stream().getReader().read(); o4.push(new TextDecoder().decode(b.value)); })();"
+              "0", "0");
+    (void)js_pump_jobs(f->ctx, 4096);
+    EXPECT(f, "o1.join()", "a,b,end");
+    EXPECT(f, "o2.join()", "h\xc3\xa9llo,true");
+    EXPECT(f, "o3.join()", "X,Y");
+    EXPECT(f, "o4.join(';')", "1|2|closed;zz;blob!");
+    EXPECT(f, "var e=null; try{ var q=new ReadableStream(); q.getReader(); q.getReader(); }catch(x){ e=x.constructor===TypeError; } e", "true");
+}
+
+static void test_platform_element_surface(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var d=document.getElementById('main'); d.hidden=true; var h1=d.hasAttribute('hidden'); d.hidden=false;"
+              "h1+','+d.hasAttribute('hidden')+','+d.hidden", "true,false,false");
+    EXPECT(f, "document.getElementById('go').outerHTML", "<button id=\"go\" class=\"btn\">Go</button>");
+    EXPECT(f, "var x=document.getElementById('go'); var a=x.animate([{opacity:0},{opacity:0.5}],{duration:0,fill:'forwards'});"
+              "a.finish(); a.playState+','+x.style.opacity+','+x.getAnimations().length", "finished,0.5,0");
+    EXPECT(f, "var k=document.getElementById('go'); k.scrollTo(5,7); k.scrollTop+','+k.checkVisibility()", "0,true");   /* scroll offsets stay normalised */
+    EXPECT(f, "var q=new DOMParser().parseFromString('<p class=x>hi <b>there</b></p>','text/html');"
+              "q.querySelector('.x').textContent+','+q.body.querySelectorAll('b').length+','+typeof new XMLSerializer().serializeToString",
+           "hi there,1,function");
+    EXPECT(f, "var st=document.createElement('style'); st.textContent='.a{color:red} @media print{.b{margin:0}}';"
+              "document.head.appendChild(st); var ss=document.styleSheets[document.styleSheets.length-1];"
+              "var i0=ss.insertRule('p{margin:1px}',0);"
+              "[document.styleSheets.length,i0,ss.cssRules.length,ss.cssRules[0].selectorText,ss.cssRules[1].style.getPropertyValue('color'),"
+              " ss.cssRules[2].type].join()", "1,0,3,p,red,4");
+}
+
+static void test_repl_rules_lists_matching_rules_by_cascade(void **state) {
+    fixture *f = (fixture *)*state;
+    static const char EXT[] = "button{color:black;padding:1px} @media (min-width:99999px){button{color:pink}}";
+    assert_int_equal(jd_set_repl_css(f->ctx, EXT, sizeof EXT - 1), JD_OK);
+    assert_int_equal(jd_install_repl_api(f->ctx), JD_OK);
+    EXPECT(f, "var s=document.createElement('style');"
+              "s.textContent='/*c*/ .btn{color:red;margin:0} #go{color:blue} p{color:green} .btn{padding:4px!important}';"
+              "document.head.appendChild(s); document.getElementById('go').setAttribute('style','margin:9px');"
+              "var R=rules(document.getElementById('go'));"
+              "R.map(function(r){ return r.selector+'@'+r.source+'@'+r.specificity; }).join('|')",
+           "element.style@inline@0,0,0|#go@style#1@1,0,0|.btn@style#1@0,1,0|.btn@style#1@0,1,0|button@external@0,0,1");
+    EXPECT(f, "R[2].declarations.concat(R[3].declarations).map(function(x){"
+              "return x.property+':'+x.overridden+(x.important?'!':''); }).join(',')",
+           "padding:false!,color:true,margin:true");
+    EXPECT(f, "R[0].declarations[0].overridden+','+R[4].declarations[1].overridden", "false,true");
+    EXPECT(f, "rules(document.getElementsByTagName('p')[0]).length+','+rules(null).length", "1,0");
+    EXPECT(f, "typeof globalThis.__replCss", "undefined");
+}
+
 static void test_repl_api_inspect_and_event_listeners(void **state) {
     fixture *f = (fixture *)*state;
     assert_int_equal(jd_install_repl_api(f->ctx), JD_OK);
@@ -2815,6 +2979,14 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_ro_real_reports_size_changes, setup, teardown),
         cmocka_unit_test_setup_teardown(test_repl_api_is_repl_only_and_nondestructive, setup, teardown),
         cmocka_unit_test_setup_teardown(test_repl_api_inspect_and_event_listeners, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_platform_interfaces_and_events, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_platform_dommatrix_and_imagedata, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_platform_form_controls, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_indexeddb_core, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_geolocation_fixed_coordinates, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_platform_streams, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_platform_element_surface, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_repl_rules_lists_matching_rules_by_cascade, setup, teardown),
         cmocka_unit_test_setup_teardown(test_io_untrusted_stays_synthetic, setup, teardown),
         cmocka_unit_test(test_geom_null_ctx),
         cmocka_unit_test_setup_teardown(test_history_push_replace_update_location, setup, teardown),

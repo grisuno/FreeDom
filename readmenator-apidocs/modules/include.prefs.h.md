@@ -85,7 +85,7 @@ typedef struct prefs_state { int theme_mode;
 
 ### `prefs_init`
 
-`function` | [include/prefs.h:65](../../include/prefs.h#L65)
+`function` | [include/prefs.h:66](../../include/prefs.h#L66)
 
 ```c
 void prefs_init(prefs_state *p);
@@ -107,7 +107,7 @@ NULL-safe.
 
 ### `prefs_free`
 
-`function` | [include/prefs.h:68](../../include/prefs.h#L68)
+`function` | [include/prefs.h:69](../../include/prefs.h#L69)
 
 ```c
 void prefs_free(prefs_state *p);
@@ -129,7 +129,7 @@ Idempotent; NULL-safe.
 
 ### `free`
 
-`function` | [include/prefs.h:71](../../include/prefs.h#L71)
+`function` | [include/prefs.h:72](../../include/prefs.h#L72)
 
 ```c
 * free(). */ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len);
@@ -137,7 +137,7 @@ Idempotent; NULL-safe.
 
 **Returns:** `*`
 
-*Called by:* [`FONT_STASH_MAX_BYTES`](gui.browser_ui.c.md#font_stash_max_bytes), [`arrives`](gui.browser_ui.c.md#arrives), [`first`](gui.browser_ui.c.md#first), [`offset`](gui.browser_ui.c.md#offset), [`only`](gui.browser_ui.c.md#only), [`strcmp`](gui.browser_ui.c.md#strcmp), [`prefs_bookmark_toggle`](src.prefs.c.md#prefs_bookmark_toggle), [`prefs_bookmarks_page`](src.prefs.c.md#prefs_bookmarks_page), [`prefs_free`](src.prefs.c.md#prefs_free), [`prefs_history_add`](src.prefs.c.md#prefs_history_add)
+*Called by:* [`FONT_STASH_MAX_BYTES`](gui.browser_ui.c.md#font_stash_max_bytes), [`arrives`](gui.browser_ui.c.md#arrives), [`first`](gui.browser_ui.c.md#first), [`offset`](gui.browser_ui.c.md#offset), [`only`](gui.browser_ui.c.md#only), [`strcmp`](gui.browser_ui.c.md#strcmp), [`prefs_bookmark_toggle`](src.prefs.c.md#prefs_bookmark_toggle), [`prefs_bookmarks_page`](src.prefs.c.md#prefs_bookmarks_page), [`prefs_format`](src.prefs.c.md#prefs_format), [`prefs_free`](src.prefs.c.md#prefs_free), [`prefs_history_add`](src.prefs.c.md#prefs_history_add)
 
 ---
 
@@ -145,7 +145,7 @@ Idempotent; NULL-safe.
 
 ### `prefs_bookmark_index`
 
-`function` | [include/prefs.h:81](../../include/prefs.h#L81)
+`function` | [include/prefs.h:82](../../include/prefs.h#L82)
 
 ```c
 int prefs_bookmark_index(const prefs_state *p, const char *url);
@@ -170,7 +170,7 @@ NULL-safe.
 
 ### `prefs_suggest`
 
-`function` | [include/prefs.h:100](../../include/prefs.h#L100)
+`function` | [include/prefs.h:101](../../include/prefs.h#L101)
 
 ```c
 int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows);
@@ -198,7 +198,7 @@ Priority: bookmark-prefix, history-prefix, bookmark-substring (URL or title), hi
 
 ### `anyway`
 
-`function` | [include/prefs.h:105](../../include/prefs.h#L105)
+`function` | [include/prefs.h:106](../../include/prefs.h#L106)
 
 ```c
 * page is rendered by the normal confined pipeline anyway (defence in depth). * *out is owned (free());
