@@ -79,4 +79,10 @@
 /* Distance (px) beyond the viewport at which a loading="lazy" image starts loading. */
 #define FC_LAZY_IMAGE_MARGIN_PX 1000.0
 
+/* Wall time (ms) the trusted parent spends serving ONE worker operation's network requests after
+ * the page load (a timer, click or observer callback). The fetch is synchronous in the GUI
+ * thread, so this bounds how long a slow server can freeze the window; once spent, the rest of
+ * that operation's requests fail (status 0) instead of blocking. */
+#define FC_TAB_OP_NET_BUDGET_MS 3000
+
 #endif /* FREEDOM_CONFIG_H */

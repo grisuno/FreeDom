@@ -203,6 +203,10 @@ void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);
  * boundary); false (default) keeps XHR/fetch undefined (Same-Origin-by-construction). */
 void tab_set_net_allowed(tab *t, int allowed);
 
+/* Per-operation network time budget in ms for requests the worker issues AFTER the load
+ * (default FC_TAB_OP_NET_BUDGET_MS; <= 0 restores it). Tests lower it. */
+void tab_set_op_net_budget_ms(tab *t, int ms);
+
 /* Seeds the page's document.cookie jar for the NEXT load with cookies ("name=value; ...")
  * the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only
  * meaningful for a trusted host (allow.conf AND js.conf); pass NULL/"" otherwise so the

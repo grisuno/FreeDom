@@ -39,6 +39,7 @@
 #include "prefetch.h"
 #include "prefs.h"
 #include "profile.h"
+#include "cached_fetch.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "request_policy.h"
@@ -318,6 +319,7 @@ typedef struct browser_window {
     int configured;
     int running;
     int redraw_pending;
+    hc_store *http_cache;   /* sealed HTTP cache + redirect memory (NULL = off) */
 
     struct wl_buffer *buffer;
     void             *shm_data;
@@ -1398,6 +1400,16 @@ static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
     return sf_get_follow_navigable(url, cfg, out, downgraded, allowlisted);
 }
 
+/* GET through the sealed HTTP cache (spec/http_cache.md), partitioned by the top-level
+ * site. With no store open this is exactly fetch_follow_navigable. */
+static sf_status fetch_get_cached(const browser_window *w, const char *url, sf_config *cfg,
+                                  sf_response *out, int *downgraded, int allowlisted) {
+    char part[256];
+    if (w == NULL || w->cur_top == NULL || rp_host_of(w->cur_top, part, sizeof part) != 0)
+        return fetch_follow_navigable(url, cfg, out, downgraded, allowlisted);
+    return cf_get(part, url, cfg, out, downgraded, allowlisted);
+}
+
 static sf_status fetch_post_navigable(const char *url, sf_config *cfg,
                                        const void *body, size_t body_len,
                                        const char *content_type, sf_response *out,
@@ -1464,7 +1476,7 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     sf_status s = is_post
         ? fetch_post_navigable(abs, &cfg, body, body_len,
                                "application/x-www-form-urlencoded", &resp, &dg, relaxed)
-        : fetch_follow_navigable(abs, &cfg, &resp, &dg, relaxed);
+        : fetch_get_cached(w, abs, &cfg, &resp, &dg, relaxed);
     if (getenv("FREEDOM_TRACE_FETCH") != NULL)
         fprintf(stderr, "fetch[gui] %s -> %s\n", abs, s == SF_OK ? "ok" : "FAIL");
     if (s != SF_OK) { sf_response_free(&resp); return -1; }
@@ -1660,7 +1672,7 @@ static int gui_image_fetch(void *vctx, const char *method, const char *url,
         hb_is_allowlisted(w->js_hosts, ihost), w->impersonate_optin);
     sf_response resp;
     memset(&resp, 0, sizeof resp);
-    sf_status img_s = fetch_follow_navigable(abs, &cfg, &resp, &dg, img_allow);
+    sf_status img_s = fetch_get_cached(w, abs, &cfg, &resp, &dg, img_allow);
     if (getenv("FREEDOM_TRACE_FETCH") != NULL)
         fprintf(stderr, "fetch[image] %s -> %s\n", abs, img_s == SF_OK ? "ok" : "FAIL");
     if (img_s != SF_OK) {
@@ -18449,6 +18461,15 @@ ui_status ui_run_browser(const char *start_url) {
             profile_open(&w.profile, profile_dir) == PROFILE_OK &&
             profile_load(&w.profile, &w.prefs) == PROFILE_OK) {
             w.profile_rw = 1;
+            /* Sealed HTTP cache + permanent-redirect memory next to the profile: the cache
+             * is keyed by the profile key, so a foreign key empties it (spec/http_cache.md). */
+            char cache_dir[PATH_MAX];
+            if (getenv("FREEDOM_NO_CACHE") == NULL
+                && snprintf(cache_dir, sizeof cache_dir, "%s/cache", profile_dir) < (int)sizeof cache_dir
+                && hc_open(&w.http_cache, cache_dir, w.profile.key) == HC_OK) {
+                cf_set_store(w.http_cache);
+                cf_attach_redirect_memory(w.http_cache);
+            }
         }
     }
     w.theme_mode  = w.prefs.theme_mode;
@@ -18903,6 +18924,10 @@ ui_status ui_run_browser(const char *start_url) {
     free(w.auth_pass);
     browser_free(&w.bs);
     prefs_free(&w.prefs);
+    cf_attach_redirect_memory(NULL);
+    cf_set_store(NULL);
+    hc_close(w.http_cache);
+    w.http_cache = NULL;
     profile_close(&w.profile);
 
     /* Release the process-wide font caches so a leak checker sees a clean exit.

@@ -73,6 +73,9 @@ typedef enum sf_proxy_type {
     SF_PROXY_HTTP       /* HTTP proxy (I2P) */
 } sf_proxy_type;
 
+/* Longest validator/cache-control value kept (longer ones are dropped, never truncated). */
+#define SF_META_MAX 256u
+
 typedef struct sf_config {
     sf_policy   policy;
     long        timeout_ms;     /* total request timeout; 0 => SF_DEFAULT_TIMEOUT_MS */
@@ -114,6 +117,10 @@ typedef struct sf_config {
      * range_end >= range_start specifies an inclusive end, or -1 for open-ended. */
     int64_t range_start;
     int64_t range_end;
+    /* Conditional GET for the HTTP cache (spec/http_cache.md). Plain GET only; a value with a
+     * CR or LF is ignored (header injection). NULL => unconditional. */
+    const char *if_none_match;
+    const char *if_modified_since;
 } sf_config;
 
 typedef struct sf_response {
@@ -131,6 +138,12 @@ typedef struct sf_response {
     char     *content_type;     /* owned; the response Content-Type (e.g. "text/html;
                                  * charset=utf-8"), or NULL if the server omitted it. Used
                                  * to decide render-vs-download; never trusted to execute. */
+    /* Cache validators/freshness of the response (value copies, "" = absent). */
+    char      etag[SF_META_MAX];
+    char      last_modified[SF_META_MAX];
+    char      cache_control[SF_META_MAX];
+    char      expires[SF_META_MAX];
+    char      date[SF_META_MAX];
     char     *content_disposition; /* owned; the raw Content-Disposition header value, or
                                  * NULL if absent. Hostile input (its filename is sanitized
                                  * fail-closed before any disk use; see download.h). */
@@ -278,6 +291,11 @@ int sf_is_redirect_code(long http_code);
  * with a non-empty value that fits in out; otherwise SF_ERR_INVALID_URL. */
 sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz);
 
+/* Generic header-line reader for the cache validators: when header_line is `name:` (matched
+ * case-insensitively, name without the colon) copies the trimmed value to out and returns 1;
+ * 0 for another header, an empty value, or one that does not fit. No I/O. */
+int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);
+
 /* Resolves a redirect target against base_url, always yielding an absolute
  * https URL in out or failing closed. Rejects downgrade to http:// and any
  * non-https scheme. The result is validated with sf_validate_url before return. */
@@ -374,5 +392,14 @@ sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
 int  sf_rcache_put(const char *from, const char *to, time_t now);
 int  sf_rcache_get(const char *from, time_t now, char *out, size_t cap); /* 1 on hit */
 void sf_rcache_clear(void);
+
+/* Optional persistent backing (spec/http_cache.md "Memoria de redirecciones"): `save` is told of
+ * every permanent redirect remembered, `load` is asked on a RAM miss. The backing decides its
+ * own TTL; what it returns is a destination to REQUEST AGAIN under the full policy, nothing
+ * more. NULL/NULL detaches. Callbacks run outside the cache lock and may be called from any
+ * fetching thread. */
+typedef int (*sf_rcache_load_fn)(void *ctx, const char *from, time_t now, char *out, size_t cap);
+typedef void (*sf_rcache_save_fn)(void *ctx, const char *from, const char *to, time_t now);
+void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);
 
 #endif /* FREEDOM_SECURE_FETCH_H */

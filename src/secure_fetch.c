@@ -11,6 +11,7 @@
 
 #define _POSIX_C_SOURCE 200809L
 
+#include <stdio.h>
 #include "secure_fetch.h"
 #include "anti_fp.h"
 #include "url.h"
@@ -349,6 +350,28 @@ int sf_is_redirect_code(long http_code) {
     }
 }
 
+int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz) {
+    if (header_line == NULL || name == NULL || out == NULL || outsz == 0) return 0;
+    size_t nl = strlen(name);
+    if (nl == 0) return 0;
+    for (size_t i = 0; i < nl; ++i) {
+        char a = header_line[i], b = name[i];
+        if (a == '\0') return 0;
+        if (a >= 'A' && a <= 'Z') a = (char)(a + 32);
+        if (b >= 'A' && b <= 'Z') b = (char)(b + 32);
+        if (a != b) return 0;
+    }
+    if (header_line[nl] != ':') return 0;
+    const char *p = header_line + nl + 1;
+    while (*p == ' ' || *p == '\t') ++p;
+    size_t vl = strlen(p);
+    while (vl > 0 && (p[vl - 1] == '\r' || p[vl - 1] == '\n' || p[vl - 1] == ' ' || p[vl - 1] == '\t')) --vl;
+    if (vl == 0 || vl >= outsz) return 0;
+    memcpy(out, p, vl);
+    out[vl] = '\0';
+    return 1;
+}
+
 sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz) {
     if (header_line == NULL || out == NULL || outsz == 0) return SF_ERR_INVALID_URL;
     if (!ci_starts_with(header_line, "location:")) return SF_ERR_INVALID_URL;
@@ -436,6 +459,11 @@ void sf_response_free(sf_response *resp) {
     resp->final_url = NULL;
     resp->content_type = NULL;
     resp->content_disposition = NULL;
+    memset(resp->etag, 0, sizeof resp->etag);
+    memset(resp->last_modified, 0, sizeof resp->last_modified);
+    memset(resp->cache_control, 0, sizeof resp->cache_control);
+    memset(resp->expires, 0, sizeof resp->expires);
+    memset(resp->date, 0, sizeof resp->date);
     resp->http_code = 0;
     resp->status = SF_OK;
 }
@@ -472,6 +500,8 @@ typedef struct fetch_ctx {
     int         have_location;
     char        disposition[SF_MAX_URL]; /* last Content-Disposition value, if any */
     int         have_disposition;
+    char        etag[SF_META_MAX], last_modified[SF_META_MAX], cache_control[SF_META_MAX];
+    char        expires[SF_META_MAX], date[SF_META_MAX];
     void       *progress_ctx; /* userdata passed to the progress callback */
     void      (*progress_cb)(const uint8_t *body, size_t body_len, void *ctx);
 } fetch_ctx;
@@ -577,6 +607,13 @@ static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata
         memcpy(ctx->location, val, strlen(val) + 1);
         ctx->have_location = 1;
     }
+    /* Cache validators (a redirect hop's headers are overwritten by the next hop's, so what
+     * is left is the final response's). */
+    (void)(sf_header_value(line, "etag", ctx->etag, sizeof ctx->etag)
+        || sf_header_value(line, "last-modified", ctx->last_modified, sizeof ctx->last_modified)
+        || sf_header_value(line, "cache-control", ctx->cache_control, sizeof ctx->cache_control)
+        || sf_header_value(line, "expires", ctx->expires, sizeof ctx->expires)
+        || sf_header_value(line, "date", ctx->date, sizeof ctx->date));
     /* Capture Content-Disposition: its filename drives the download name (hostile;
      * sanitized fail-closed downstream). The header name is matched case-insensitively;
      * the value is the trimmed remainder after the colon. */
@@ -955,6 +992,18 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)post_len);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (post_body != NULL) ? post_body : "");
     }
+    /* Conditional GET (HTTP cache revalidation): plain GET only, values free of CR/LF. */
+    if (post_body == NULL && post_len == 0) {
+        char hbuf[SF_META_MAX + 32];
+        if (local.if_none_match != NULL && local.if_none_match[0] != '\0'
+            && strpbrk(local.if_none_match, "\r\n") == NULL
+            && snprintf(hbuf, sizeof hbuf, "If-None-Match: %.*s", (int)SF_META_MAX, local.if_none_match) > 0
+            && add_header(&hdrs, hbuf) != 0) { result = SF_ERR_OOM; goto done; }
+        if (local.if_modified_since != NULL && local.if_modified_since[0] != '\0'
+            && strpbrk(local.if_modified_since, "\r\n") == NULL
+            && snprintf(hbuf, sizeof hbuf, "If-Modified-Since: %.*s", (int)SF_META_MAX, local.if_modified_since) > 0
+            && add_header(&hdrs, hbuf) != 0) { result = SF_ERR_OOM; goto done; }
+    }
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
 
     CURLcode rc = curl_easy_perform(curl);
@@ -1013,6 +1062,11 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     out->location = loc;
     out->content_type = ctype;
     out->content_disposition = disp;
+    memcpy(out->etag, ctx.etag, sizeof out->etag);
+    memcpy(out->last_modified, ctx.last_modified, sizeof out->last_modified);
+    memcpy(out->cache_control, ctx.cache_control, sizeof out->cache_control);
+    memcpy(out->expires, ctx.expires, sizeof out->expires);
+    memcpy(out->date, ctx.date, sizeof out->date);
     out->body = ctx.sink.data;
     out->body_len = ctx.sink.len;
     ctx.sink.data = NULL; /* ownership transferred */
@@ -1069,7 +1123,19 @@ void sf_rcache_clear(void) {
     pthread_mutex_unlock(&sf_rcache_lock);
 }
 
-int sf_rcache_put(const char *from, const char *to, time_t now) {
+static sf_rcache_load_fn sf_rcache_load_cb;
+static sf_rcache_save_fn sf_rcache_save_cb;
+static void *sf_rcache_backing_ctx;
+
+void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx) {
+    pthread_mutex_lock(&sf_rcache_lock);
+    sf_rcache_load_cb = load;
+    sf_rcache_save_cb = save;
+    sf_rcache_backing_ctx = ctx;
+    pthread_mutex_unlock(&sf_rcache_lock);
+}
+
+static int rcache_put_ram(const char *from, const char *to, time_t now) {
     if (from == NULL || to == NULL || strcmp(from, to) == 0) return -1;
     if (strlen(from) >= SF_MAX_URL || strlen(to) >= SF_MAX_URL) return -1;
     pthread_mutex_lock(&sf_rcache_lock);
@@ -1088,6 +1154,16 @@ int sf_rcache_put(const char *from, const char *to, time_t now) {
     return 0;
 }
 
+int sf_rcache_put(const char *from, const char *to, time_t now) {
+    if (rcache_put_ram(from, to, now) != 0) return -1;
+    pthread_mutex_lock(&sf_rcache_lock);
+    sf_rcache_save_fn save = sf_rcache_save_cb;
+    void *bctx = sf_rcache_backing_ctx;
+    pthread_mutex_unlock(&sf_rcache_lock);
+    if (save != NULL) save(bctx, from, to, now);
+    return 0;
+}
+
 int sf_rcache_get(const char *from, time_t now, char *out, size_t cap) {
     if (from == NULL || out == NULL || cap == 0) return 0;
     int hit = 0;
@@ -1102,7 +1178,18 @@ int sf_rcache_get(const char *from, time_t now, char *out, size_t cap) {
         if (n < cap) { memcpy(out, sf_rcache[i].to, n + 1); hit = 1; }
         break;
     }
+    sf_rcache_load_fn load = sf_rcache_load_cb;
+    void *bctx = sf_rcache_backing_ctx;
     pthread_mutex_unlock(&sf_rcache_lock);
+    if (!hit && load != NULL) {
+        /* RAM miss: the persistent memory may still know it (a previous session). */
+        char to[SF_MAX_URL];
+        if (load(bctx, from, now, to, sizeof to) && strlen(to) < cap) {
+            memcpy(out, to, strlen(to) + 1);
+            (void)rcache_put_ram(from, to, now);
+            hit = 1;
+        }
+    }
     return hit;
 }
 
@@ -1123,6 +1210,8 @@ sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
          * hop is requested directly, under the full policy like any other hop. */
         char known[SF_MAX_URL];
         if (hops < max_redirects && sf_rcache_get(current, time(NULL), known, sizeof known)) {
+            if (getenv("FREEDOM_TRACE_FETCH") != NULL)
+                fprintf(stderr, "redirect-memory %s -> %s\n", current, known);
             memcpy(current, known, strlen(known) + 1);
             continue;
         }

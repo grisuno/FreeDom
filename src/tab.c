@@ -2143,6 +2143,9 @@ struct tab {
      * opt-in); fetcher does the policy-checked fetch in the trusted parent. */
     int            net_allowed;
     int            css_allowed;
+    int            in_op;           /* serving a post-load operation (tab_await_result) */
+    int            op_budget_ms;    /* its network time budget (0 = default) */
+    int64_t        op_net_us;       /* network time spent in the current operation */
     int            viewport_w;    /* @media render width for the next load (0 => default) */
     char           identity[IDN_SERIAL_MAX]; /* idn_serialize text sent with every load ("" = default) */
     size_t         subreq_n;      /* subresources served during the last load */
@@ -2867,6 +2870,10 @@ void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx) {
     t->css_sink_ctx = ctx;
 }
 
+void tab_set_op_net_budget_ms(tab *t, int ms) {
+    if (t != NULL) t->op_budget_ms = ms > 0 ? ms : 0;
+}
+
 void tab_set_net_allowed(tab *t, int allowed) {
     if (t == NULL) return;
     t->net_allowed = allowed ? 1 : 0;
@@ -2925,12 +2932,21 @@ static int tab_serve_subreq(tab *t, int net_granted, int css_granted) {
 
     int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL;
     int ok = 0;
-    if (tab_subreq_permitted(net_granted, css_granted, method)
+    /* After the load the fetch blocks the GUI thread: once an operation has spent its network
+     * budget, its remaining requests are refused (answered, so the protocol stays in step). */
+    int64_t budget_us = (int64_t)(t->op_budget_ms > 0 ? t->op_budget_ms : FC_TAB_OP_NET_BUDGET_MS) * 1000;
+    int over = t->in_op && t->op_net_us >= budget_us;
+    struct timespec f0, f1;
+    clock_gettime(CLOCK_MONOTONIC, &f0);
+    if (!over && tab_subreq_permitted(net_granted, css_granted, method)
         && t->fetcher != NULL && ulen != 0
         && t->fetcher(t->fetcher_ctx, method, url, body, blen,
                       &status, &rbody, &rlen, &rctype) == 0) {
         ok = 1;
     }
+    clock_gettime(CLOCK_MONOTONIC, &f1);
+    if (t->in_op) t->op_net_us += (int64_t)(f1.tv_sec - f0.tv_sec) * 1000000
+                                + (f1.tv_nsec - f0.tv_nsec) / 1000;
     if (!ok) { status = 0; rlen = 0; }                 /* refused/failed: fail-closed */
     if (rlen > TAB_MAX_SUBRESOURCE) { rlen = 0; status = 0; } /* defensive cap */
     size_t clen = (ok && rctype != NULL) ? strlen(rctype) : 0;
@@ -3491,7 +3507,16 @@ tab_status tab_read_view(tab *t, tab_page *out) {
 /* Reads response tags until the TAG_RESULT of the current operation, serving the worker's
  * TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the
  * load, net grant of the page, never the stylesheet grant. Anything else is a desync. */
+static tab_status tab_await_result_inner(tab *t);
 static tab_status tab_await_result(tab *t) {
+    t->in_op = 1;
+    t->op_net_us = 0;
+    tab_status rc = tab_await_result_inner(t);
+    t->in_op = 0;
+    return rc;
+}
+
+static tab_status tab_await_result_inner(tab *t) {
     for (;;) {
         uint8_t tag = 0;
         if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);

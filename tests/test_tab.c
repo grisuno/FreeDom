@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 /*
  * TDD suite for tab (Hito 5 - long-lived per-tab worker + JS in the child).
  *
@@ -2641,6 +2642,42 @@ static void test_lazy_script_src_and_import_after_load(void **state) {
     tab_page_free(&p2); tab_close(t);
 }
 
+/* After the load, network time per worker operation is bounded: a slow server cannot hold the
+ * window for the sum of every request a script issues -- once the budget is spent the rest fail
+ * fast with status 0. */
+static int slow_calls;
+static int stub_slow_fetch(void *ctx, const char *method, const char *url, const char *body,
+                           size_t body_len, int *st, char **ob, size_t *ol, char **oct) {
+    (void)ctx; (void)method; (void)url; (void)body; (void)body_len;
+    slow_calls++;
+    usleep(150 * 1000);
+    *ob = strdup("slow"); *ol = 4; *oct = strdup("text/plain"); *st = 200;
+    return (*ob != NULL && *oct != NULL) ? 0 : -1;
+}
+
+static void test_post_load_network_time_is_bounded_per_operation(void **state) {
+    (void)state;
+    static const char page[] =
+        "<html><body><p id=\"o\">none</p><script>setTimeout(function(){"
+        "var ok=0; for(var i=0;i<12;i++){ var x=new XMLHttpRequest(); x.open('GET','https://site.test/s'+i,false);"
+        "x.send(); if(x.status===200) ok++; }"
+        "document.getElementById('o').textContent='ok='+ok;},10);</script></body></html>";
+    tab *t = NULL; tab_page p, p2;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_slow_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    tab_set_op_net_budget_ms(t, 400);
+    slow_calls = 0;
+    assert_int_equal(tab_load_full(t, page, sizeof page - 1, "https://site.test/index.html", 1, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    int before = slow_calls;
+    assert_int_equal(tab_tick(t, 100, &p2), TAB_OK);
+    int served = slow_calls - before;
+    assert_true(served >= 2 && served <= 4);       /* 400 ms budget / 150 ms each, never all 12 */
+    assert_non_null(view_find_text(p2.view, served == 3 ? "ok=3" : served == 2 ? "ok=2" : "ok="));
+    tab_page_free(&p2); tab_close(t);
+}
+
 /* A bare specifier resolves through the page's import map (spec/import_map.md). */
 static void test_import_map_resolves_bare_specifier(void **state) {
     (void)state;
@@ -3337,6 +3374,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_dynamic_import_from_classic_script_uses_document_base),
         cmocka_unit_test(test_ajax_after_load_reaches_the_gated_fetcher),
         cmocka_unit_test(test_lazy_script_src_and_import_after_load),
+        cmocka_unit_test(test_post_load_network_time_is_bounded_per_operation),
         cmocka_unit_test(test_import_map_resolves_bare_specifier),
         cmocka_unit_test(test_data_url_classic_script_runs_without_network),
         cmocka_unit_test(test_module_src_is_a_url_and_data_modules_run),

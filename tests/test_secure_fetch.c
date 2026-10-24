@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <setjmp.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <cmocka.h>
 
@@ -311,6 +312,41 @@ static void test_fallback_ladder_is_shared_and_ordered(void **state) {
     assert_int_equal(sf_fallback_policy(SF_ERR_KEM_NOT_PQ, SF_POLICY_PQ_HYBRID_KE, 0, NULL), 0);
 }
 
+/* A persistent backing remembers permanent redirects across sessions: `save` hears every put,
+ * and a RAM miss falls through to `load` (then the answer is cached in RAM). */
+static char bk_from[256], bk_to[256];
+static int bk_saves;
+static void bk_save(void *c, const char *from, const char *to, time_t now) {
+    (void)c; (void)now;
+    snprintf(bk_from, sizeof bk_from, "%s", from);
+    snprintf(bk_to, sizeof bk_to, "%s", to);
+    bk_saves++;
+}
+static int bk_load(void *c, const char *from, time_t now, char *out, size_t cap) {
+    (void)c; (void)now;
+    if (strcmp(from, bk_from) != 0 || strlen(bk_to) >= cap) return 0;
+    memcpy(out, bk_to, strlen(bk_to) + 1);
+    return 1;
+}
+
+static void test_rcache_backing_persists_and_serves_after_ram_loss(void **state) {
+    (void)state;
+    char out[256];
+    bk_from[0] = bk_to[0] = '\0'; bk_saves = 0;
+    sf_rcache_clear();
+    sf_rcache_set_backing(bk_load, bk_save, NULL);
+    assert_int_equal(sf_rcache_put("https://old.test/", "https://new.test/home", 1000), 0);
+    assert_int_equal(bk_saves, 1);
+    assert_string_equal(bk_to, "https://new.test/home");
+    sf_rcache_clear();                                   /* a new session: RAM is empty */
+    assert_int_equal(sf_rcache_get("https://old.test/", 1100, out, sizeof out), 1);
+    assert_string_equal(out, "https://new.test/home");
+    sf_rcache_set_backing(NULL, NULL, NULL);             /* now answered from RAM alone */
+    assert_int_equal(sf_rcache_get("https://old.test/", 1200, out, sizeof out), 1);
+    assert_int_equal(sf_rcache_get("https://unknown.test/", 1200, out, sizeof out), 0);
+    sf_rcache_clear();
+}
+
 static void test_rcache_remembers_permanent_redirects(void **state) {
     (void)state;
     char out[256];
@@ -346,6 +382,30 @@ static void test_redirect_code_rejects_others(void **state) {
     assert_false(sf_is_redirect_code(304)); /* Not Modified is not a redirect target */
     assert_false(sf_is_redirect_code(404));
     assert_false(sf_is_redirect_code(0));
+}
+
+/* --- sf_header_value (cache validators) --- */
+
+static void test_header_value_reads_named_header(void **state) {
+    (void)state;
+    char out[64];
+    assert_int_equal(sf_header_value("ETag: \"abc\"\r\n", "etag", out, sizeof out), 1);
+    assert_string_equal(out, "\"abc\"");
+    assert_int_equal(sf_header_value("CACHE-CONTROL:   max-age=60 \r\n", "Cache-Control", out, sizeof out), 1);
+    assert_string_equal(out, "max-age=60");
+    assert_int_equal(sf_header_value("Last-Modified: Wed, 21 Oct 2015 07:28:00 GMT\n", "last-modified", out, sizeof out), 1);
+    assert_string_equal(out, "Wed, 21 Oct 2015 07:28:00 GMT");
+}
+
+static void test_header_value_rejects_other_empty_and_oversize(void **state) {
+    (void)state;
+    char out[8];
+    assert_int_equal(sf_header_value("Etag2: x\r\n", "etag", out, sizeof out), 0);
+    assert_int_equal(sf_header_value("Content-Type: x\r\n", "etag", out, sizeof out), 0);
+    assert_int_equal(sf_header_value("ETag:   \r\n", "etag", out, sizeof out), 0);
+    assert_int_equal(sf_header_value("ETag: 0123456789\r\n", "etag", out, sizeof out), 0);
+    assert_int_equal(sf_header_value("ETag", "etag", out, sizeof out), 0);
+    assert_int_equal(sf_header_value(NULL, "etag", out, sizeof out), 0);
 }
 
 /* --- sf_parse_location_header --- */
@@ -640,6 +700,8 @@ int main(void) {
         cmocka_unit_test(test_enforce_allowlisted_insecure),
         cmocka_unit_test(test_redirect_code_recognizes_3xx),
         cmocka_unit_test(test_redirect_code_rejects_others),
+        cmocka_unit_test(test_header_value_reads_named_header),
+        cmocka_unit_test(test_header_value_rejects_other_empty_and_oversize),
         cmocka_unit_test(test_location_parses_value),
         cmocka_unit_test(test_location_is_case_insensitive_and_trims),
         cmocka_unit_test(test_location_rejects_non_location_and_empty),
@@ -662,6 +724,7 @@ int main(void) {
         cmocka_unit_test(test_ws_url_check),
         cmocka_unit_test(test_fallback_ladder_is_shared_and_ordered),
         cmocka_unit_test(test_rcache_remembers_permanent_redirects),
+        cmocka_unit_test(test_rcache_backing_persists_and_serves_after_ram_loss),
         cmocka_unit_test(test_ws_open_rejects_before_any_io),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
