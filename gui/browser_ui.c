@@ -40,6 +40,7 @@
 #include "prefs.h"
 #include "profile.h"
 #include "cached_fetch.h"
+#include "wl_guard.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "request_policy.h"
@@ -320,6 +321,7 @@ typedef struct browser_window {
     int running;
     int redraw_pending;
     hc_store *http_cache;   /* sealed HTTP cache + redirect memory (NULL = off) */
+    wl_guard *wl_guard;     /* drains the Wayland socket while this thread is busy */
 
     struct wl_buffer *buffer;
     void             *shm_data;
@@ -18599,6 +18601,9 @@ ui_status ui_run_browser(const char *start_url) {
     w.registry = wl_display_get_registry(w.display);
     wl_registry_add_listener(w.registry, &registry_listener, &w);
     wl_display_roundtrip(w.display);
+    /* The GUI thread blocks on loads, image fetches and big layouts; a compositor disconnects a
+     * client that stops reading its socket while the pointer moves (spec/wl_guard.md). */
+    if (getenv("FREEDOM_NO_WL_GUARD") == NULL) w.wl_guard = wlg_start(w.display);
 
     if (w.compositor == NULL || w.shm == NULL || w.wm_base == NULL) {
         wl_display_disconnect(w.display);
@@ -18941,6 +18946,8 @@ ui_status ui_run_browser(const char *start_url) {
     if (w.shm) wl_shm_destroy(w.shm);
     if (w.compositor) wl_compositor_destroy(w.compositor);
     if (w.registry) wl_registry_destroy(w.registry);
+    wlg_stop(w.wl_guard);
+    w.wl_guard = NULL;
     wl_display_disconnect(w.display);
 
     if (w.repeat_timer_fd >= 0) close(w.repeat_timer_fd);
