@@ -559,7 +559,7 @@ static int write_view(int wfd, const pv_view *v) {
             /* text-wrap-style: balance, tanda 43 (appended). */
             (int32_t)r->text_balance,
             /* the image's height is its CSS px height, tanda 43 (appended). */
-            (int32_t)(r->img_h_css | (r->img_inline << 1)),
+            (int32_t)(r->img_h_css | (r->img_inline << 1) | (r->img_lazy << 2)),
             /* the float founder's own width halves, tanda 44 (appended). */
             (int32_t)r->float_w, (int32_t)r->float_w_pct, (int32_t)r->float_box,
             /* the empty line a <br> leaves, br-line tanda (appended). */
@@ -1017,6 +1017,10 @@ static int tab_mod_resolve(void *host, const char *base, const char *spec,
                            char *out, size_t outsz) {
     child_state *cs = (child_state *)host;
     if (base == NULL || spec == NULL) return -1;
+    /* A classic script's "base" is its display name ("inline #1", a file), not a URL: its base
+     * URL is the document's (HTML 8.1.3.8), so a dynamic import() resolves against the page. A
+     * base that IS a URL (a module, a data: URL) is left alone. */
+    if (!url_has_scheme(base) && cs != NULL && cs->page_url != NULL) base = cs->page_url;
     if (du_is_data_url(spec)) {                    /* a data: module is its own URL */
         size_t n = strlen(spec);
         if (n >= outsz) return -1;
@@ -1927,6 +1931,15 @@ static void tab_worker_run(int rfd, int wfd) {
             op != OP_WS_EVENT)
             break; /* desync */
 
+        /* The network window follows the operation, not just the load: a timer, a click or an
+         * observer callback of a TRUSTED page may issue XHR/fetch/import()/script src, each a
+         * TAG_SUBREQ the parent serves (tab_await_result) under the full policy. Every other
+         * op (eval, decode, submit) keeps it closed. Fresh budget per operation. */
+        cs.net_active = (cs.last_net && cs.js != NULL
+                         && (op == OP_CLICK || op == OP_TICK || op == OP_EVENT || op == OP_MOUSE
+                             || op == OP_GEOM || op == OP_POPSTATE || op == OP_WS_EVENT)) ? 1 : 0;
+        if (cs.net_active) cs.subreq_used = 0;
+
         /* OP_WS_EVENT: [id][kind][code][len][bytes] -- an event of a WebSocket the
          * parent owns. Delivered only to a page loaded trusted (fail closed). */
         if (op == OP_WS_EVENT) {
@@ -2300,6 +2313,7 @@ static int read_view(int fd, pv_view **out) {
         if (kind == PV_IMAGE) {
             v->runs[v->count - 1].img_h_css = (b[60] & 1) != 0;
             v->runs[v->count - 1].img_inline = (b[60] & 2) != 0;
+            v->runs[v->count - 1].img_lazy = (b[60] & 4) != 0;
         }
         free(opts);
         /* The text extensions ride every run kind (an input's caret_color and an
@@ -3474,11 +3488,23 @@ tab_status tab_read_view(tab *t, tab_page *out) {
     return tab_read_view_ex(t, out, 0);
 }
 
+/* Reads response tags until the TAG_RESULT of the current operation, serving the worker's
+ * TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the
+ * load, net grant of the page, never the stylesheet grant. Anything else is a desync. */
+static tab_status tab_await_result(tab *t) {
+    for (;;) {
+        uint8_t tag = 0;
+        if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);
+        if (tag == TAG_RESULT) return TAB_OK;
+        if (tag != TAG_SUBREQ) return io_failure(t);
+        if (tab_serve_subreq(t, t->last_net_granted, 0) != 0) return io_failure(t);
+    }
+}
+
 static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
     if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
-    uint8_t tag = 0;
-    if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);
-    if (tag != TAG_RESULT) return io_failure(t);
+    tab_status aw = tab_await_result(t);
+    if (aw != TAB_OK) return aw;
 
     int32_t ok = 0;
     if (read_full(t->resp_fd, &ok, sizeof ok) != 0) return io_failure(t);
@@ -3769,9 +3795,9 @@ tab_status tab_set_geometry(tab *t, const jg_table *g) {
         tab_refresh_alive(t);
         return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
     }
-    uint8_t tag = 0;
     int32_t accepted = 0;
-    if (read_full(t->resp_fd, &tag, 1) != 0 || tag != TAG_RESULT) return io_failure(t);
+    tab_status aw = tab_await_result(t);   /* observer callbacks (lazy loaders) may fetch */
+    if (aw != TAB_OK) return aw;
     if (read_full(t->resp_fd, &accepted, sizeof accepted) != 0) return io_failure(t);
     return TAB_OK;
 }

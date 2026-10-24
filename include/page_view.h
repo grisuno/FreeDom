@@ -133,6 +133,8 @@ typedef struct pv_run {
     int     img_h;        /* PV_IMAGE/PV_VIDEO declared height in px, or -1 if unknown */
     int     img_h_css;    /* 1 when img_h is the element's CSS px height (not an
                            * attribute): with a % width it is kept, not scaled */
+    int     img_lazy;     /* 1 when the <img> says loading="lazy": the front end defers its
+                           * fetch until the image nears the viewport */
     int     img_inline;   /* 1 when the <img> is inline-level (display unset/inline):
                            * unavailable with an alt, it renders as that text */
     int     fg_rgb;       /* author color packed 0xRRGGBB, or -1 if none */

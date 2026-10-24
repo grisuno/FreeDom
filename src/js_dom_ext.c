@@ -1129,11 +1129,69 @@ static int run(JSContext *ctx, const char *src, size_t len, const char *name) {
     return ok ? 0 : -1;
 }
 
+/* Dynamic <script> (HTML 4.12.1 "prepare the script element"): a script inserted by script runs
+ * once, when it becomes connected -- an inline one synchronously, one with `src` on a later task.
+ * This is the base of every lazy JS loader (webpack chunks, analytics, polyfill injectors).
+ * A src loads through the SAME gated path as XHR (the parent re-applies the network policy; no
+ * XHR means no network, and the script fires `error`), only as a JS MIME type, and a data: URL
+ * needs no network at all. Modules go through import(). A throw is reported like any uncaught
+ * error and never propagates into the inserting script. Bounds: 4096 started scripts. */
+static const char JDX_DYNSCRIPT_SHIM[] =
+    "(function(){ var g=__G; if(typeof dom==='undefined'||typeof g.__wrap!=='function') return;"
+    "  var started={}, nstarted=0, MAXS=4096;"
+    "  function lc(s){ return String(s).toLowerCase(); }"
+    "  function jsType(t){ t=lc(t==null?'':t).replace(/;.*$/,'').replace(/^\\s+|\\s+$/g,'');"
+    "    return t===''||t==='text/javascript'||t==='application/javascript'||t==='text/ecmascript'"
+    "      ||t==='application/ecmascript'||t==='application/x-javascript'||t==='text/jscript'; }"
+    "  function connected(h){ var p=h, n=0; while(p!==null&&p!==undefined&&n++<100000){"
+    "    var q=dom.parent(p); if(q===null||q===undefined) return dom.tagName(p)==='html'; p=q; } return false; }"
+    "  function dataSrc(u){ var i=u.indexOf(','); if(i<0||lc(u.slice(0,5))!=='data:') return null;"
+    "    var meta=u.slice(5,i), pl=u.slice(i+1), b64=/;base64$/i.test(meta);"
+    "    try{ return { mime:lc(meta.replace(/;base64$/i,'').split(';')[0]), text:b64?String(g.atob(pl)):decodeURIComponent(pl) }; }"
+    "    catch(e){ return null; } }"
+    "  function fire(el,type){ var ev; try{ ev=new g.Event(type); }catch(e){ return; }"
+    "    try{ var f=el['on'+type]; if(typeof f==='function') f.call(el,ev); }catch(e){ if(g.__reportError) g.__reportError(e); }"
+    "    try{ el.dispatchEvent(ev); }catch(e){} }"
+    "  function exec(code,el){ var d=g.document, prev=d.currentScript;"
+    "    try{ d.currentScript=el; (0,g.eval)(code); }"
+    "    catch(e){ if(g.__reportError) g.__reportError(e); else try{ console.error(e); }catch(x){} }"
+    "    finally{ d.currentScript=prev; } }"
+    "  function load(u){ var d=dataSrc(u); if(d) return jsType(d.mime)||d.mime==='text/plain'?d.text:null;"
+    "    if(typeof g.XMLHttpRequest!=='function') return null;"
+    "    try{ var x=new g.XMLHttpRequest(); x.open('GET',u,false); x.send();"
+    "      if(x.status<200||x.status>=300) return null;"
+    "      var ct=lc(x.getResponseHeader('content-type')||'');"
+    "      if(!/javascript|ecmascript/.test(ct)) return null;"
+    "      return String(x.responseText); }catch(e){ return null; } }"
+    "  function start(el){ var h=el._h; if(started[h]||nstarted>=MAXS||!connected(h)) return;"
+    "    var type=dom.getAttribute(h,'type'), mod=(type!==null&&lc(type)==='module');"
+    "    if(!mod&&type!==null&&!jsType(type)) return;"
+    "    if(dom.getAttribute(h,'nomodule')!==null) return;"
+    "    var src=dom.getAttribute(h,'src');"
+    "    if(src===null&&typeof el.src==='string'&&el.src!=='') src=el.src;"
+    "    if(src===null||src===''){ if(src===''&&dom.getAttribute(h,'src')!==null) return;"
+    "      var code=(typeof el.text==='string'&&el.text!=='')?el.text:String(dom.textContent(h)||'');"
+    "      if(code===''||mod) return; started[h]=1; nstarted++; exec(code,el); return; }"
+    "    started[h]=1; nstarted++;"
+    "    var url; try{ url=new g.URL(src,g.location.href).href; }catch(e){ url=String(src); }"
+    "    g.setTimeout(function(){"
+    "      if(mod){ var p; try{ p=g.eval('(u)=>import(u)')(url); }catch(e){ fire(el,'error'); return; }"
+    "        p.then(function(){ fire(el,'load'); },function(e){ fire(el,'error'); }); return; }"
+    "      var body=load(url); if(body===null){ fire(el,'error'); return; }"
+    "      exec(body,el); fire(el,'load'); },0); }"
+    "  function scan(n,depth){ if(!n||depth>64) return;"
+    "    if(n.nodeType===1&&n._h!==undefined){ if(lc(n.localName||n.tagName||'')==='script') start(n);"
+    "      else if(dom.firstChild(n._h)!==null&&typeof n.querySelectorAll==='function'){ var l=n.querySelectorAll('script');"
+    "        for(var i=0;i<l.length&&i<1024;i++) start(l[i]); } } }"
+    "  g.__scriptsInserted=function(nodes){ if(!nodes) return; for(var i=0;i<nodes.length;i++) scan(nodes[i],0); };"
+    "})()";
+
 int jdx_install(JSContext *ctx) {
     if (run(ctx, JDX_SHIM, sizeof JDX_SHIM - 1, "<dom-ext>") != 0) return -1;
     if (run(ctx, JDX_DATA_SHIM, sizeof JDX_DATA_SHIM - 1, "<data-ext>") != 0) return -1;
     if (run(ctx, JDX_MUTATION_SHIM, sizeof JDX_MUTATION_SHIM - 1, "<mutation-observer>") != 0) return -1;
-    return run(ctx, JDX_PLATFORM_SHIM, sizeof JDX_PLATFORM_SHIM - 1, "<platform>");
+    if (run(ctx, JDX_PLATFORM_SHIM, sizeof JDX_PLATFORM_SHIM - 1, "<platform>") != 0) return -1;
+    return run(ctx, JDX_DYNSCRIPT_SHIM, sizeof JDX_DYNSCRIPT_SHIM - 1, "<dyn-script>");
 }
 
 jd_status jd_install_repl_api(js_context *ctx) {

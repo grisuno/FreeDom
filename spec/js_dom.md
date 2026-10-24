@@ -524,6 +524,26 @@ Encapsulación real (shadow Oculta light sin slot, proyección en `<slot>`) fuer
 - **Interfaces SVG:** `SVGElement`, `SVGGraphicsElement`, `SVGSVGElement` y las de figuras existen y
   encadenan (`SVGSVGElement -> SVGGraphicsElement -> SVGElement -> Element`).
 
+## 7m. Carga lazy: `<script>` dinámico y red después de la carga (2026-10-24)
+
+- **`<script>` insertado por script** (HTML 4.12.1): se ejecuta UNA vez al quedar conectado
+  (`insAt`, el único punto de inserción, llama a `__scriptsInserted`). Inline (texto o `.text`):
+  sincrónico. Con `src`: en una tarea posterior, y dispara `load`/`error` (listener y `onload`).
+  Solo tipos JS (`type` vacío o MIME de JS); `nomodule` no corre; `type=module` va por `import()`;
+  `innerHTML` nunca ejecuta; un `throw` se reporta como error no capturado (`error` en `window`) y no
+  se propaga a quien insertó. Acotado: 4096 scripts iniciados.
+- **El `src` usa el mismo camino gateado que XHR:** MIME de JS obligatorio; sin `XMLHttpRequest`
+  (host sin red) dispara `error`; una URL `data:` no necesita red.
+- **La red del worker sigue a la OPERACIÓN, no solo a la carga.** En un host de confianza el worker
+  puede pedir `XHR/fetch/import()/script src` durante `OP_CLICK/TICK/EVENT/MOUSE/GEOM/POPSTATE/
+  WS_EVENT`; el padre atiende los `TAG_SUBREQ` intercalados (`tab_await_result`) con la política
+  completa. Presupuesto de `TAB_MAX_SUBREQ` por operación; `eval`, decodificación y `submit` no
+  abren ventana. Antes todo AJAX, import y script tras la carga devolvía status 0.
+- **`import()` desde un script clásico** resuelve contra la URL del documento (su base), no contra
+  el nombre del script (`inline #1`).
+- Limitación conocida: el fetch del padre es síncrono, así que una petición lenta bloquea el hilo
+  de la GUI durante esa operación (mismo coste que ya tenía la carga).
+
 ## 8. Fuera de alcance
 
 - Eventos **interactivos** más allá del click (keydown/mousemove/submit; el click del

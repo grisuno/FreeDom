@@ -76,4 +76,7 @@
  * that follow them were dropped whole and the page rendered unstyled. */
 #define FC_MAX_AUTHOR_CSS_BYTES ((size_t)16u << 20)
 
+/* Distance (px) beyond the viewport at which a loading="lazy" image starts loading. */
+#define FC_LAZY_IMAGE_MARGIN_PX 1000.0
+
 #endif /* FREEDOM_CONFIG_H */

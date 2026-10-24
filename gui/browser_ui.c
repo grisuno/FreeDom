@@ -257,6 +257,7 @@ typedef struct ui_image {
     char            *href;
     cairo_surface_t *surface;
     int              nat_w, nat_h;
+    int              deferred;   /* loading="lazy": not fetched yet (load_lazy_images) */
 } ui_image;
 
 /* A decoded CSS background-image for one box of the current doc (2026-07-16).
@@ -1659,7 +1660,10 @@ static int gui_image_fetch(void *vctx, const char *method, const char *url,
         hb_is_allowlisted(w->js_hosts, ihost), w->impersonate_optin);
     sf_response resp;
     memset(&resp, 0, sizeof resp);
-    if (fetch_follow_navigable(abs, &cfg, &resp, &dg, img_allow) != SF_OK) {
+    sf_status img_s = fetch_follow_navigable(abs, &cfg, &resp, &dg, img_allow);
+    if (getenv("FREEDOM_TRACE_FETCH") != NULL)
+        fprintf(stderr, "fetch[image] %s -> %s\n", abs, img_s == SF_OK ? "ok" : "FAIL");
+    if (img_s != SF_OK) {
         sf_response_free(&resp);
         return -1;
     }
@@ -2003,7 +2007,16 @@ static img_fail_reason fetch_decode_image(browser_window *w, tab *t, tab_fetch_f
     return r;
 }
 
-static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx) {
+/* A lazy image (loading="lazy") is only DEFERRED in the window, where load_lazy_images
+ * fetches it when it nears the viewport; a one-shot render (PNG/PDF) has no scroll, so it
+ * loads everything (`defer` = 0), exactly as before. */
+static int image_is_deferred(const browser_window *w, const rd_block *b, int defer) {
+    return defer && b->img_lazy && b->img_decision == RDP_IMG_ALLOW && b->href != NULL
+           && w->cur_top != NULL && !url_is_file(w->cur_top) && !du_is_data_url(b->href);
+}
+
+static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx,
+                        int defer) {
     if (w->doc == NULL) return;
     size_t n = rd_count(w->doc);
     size_t nimg = 0;
@@ -2031,7 +2044,8 @@ static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void 
              * prefetch, and it is not a real network request the pool fetcher
              * could perform. */
             if (b->kind == RD_IMAGE && b->img_decision == RDP_IMG_ALLOW
-                && b->href != NULL && !du_is_data_url(b->href))
+                && b->href != NULL && !du_is_data_url(b->href)
+                && !image_is_deferred(w, b, defer))
                 purls[np++] = b->href;
         }
     }
@@ -2066,6 +2080,7 @@ static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void 
         } else {
             if (b->img_decision != RDP_IMG_ALLOW) continue;
             if (w->cur_top == NULL && !du_is_data_url(b->href)) continue;
+            if (image_is_deferred(w, b, defer)) { slot->deferred = 1; continue; }
             img_fail_reason reason = fetch_decode_image(w, t, img_fetch, fetch_ctx, target_url,
                                                          &imgpool, pooled,
                                                          &slot->surface, &slot->nat_w, &slot->nat_h);
@@ -2416,7 +2431,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
         fc_set_active(&w->fc, has_anim);
     }
     rebuild_inputs(w); /* seed live editable state for this page's controls */
-    load_images(w, t, gui_image_fetch, w); /* fetch + decode allowed images in the still-open worker */
+    load_images(w, t, gui_image_fetch, w, 1); /* fetch + decode allowed images in the still-open worker; lazy ones wait */
     load_bg_images(w, t, gui_image_fetch, w); /* fetch + decode allowed CSS background-images */
 
     /* Video playback is user-initiated (click), not auto-played. The auto-play
@@ -14051,6 +14066,72 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
 
 }
 
+/* Bounds per layout pass and number of re-layout passes (a loaded image changes the flow). */
+#define UI_LAZY_PER_PASS 16
+#define UI_LAZY_PASSES 4
+
+static ui_image *lazy_slot(browser_window *w, const char *href, size_t *idx) {
+    if (href == NULL) return NULL;
+    for (size_t i = 0; i < w->image_count; ++i)
+        if (w->images[i].href != NULL && strcmp(w->images[i].href, href) == 0) {
+            if (idx != NULL) *idx = i;
+            return &w->images[i];
+        }
+    return NULL;
+}
+
+/* Loads one deferred image now: the same gated fetch + worker decode as load_images. */
+static void lazy_load_one(browser_window *w, ui_image *slot, const rd_block *b) {
+    slot->deferred = 0;
+    if (w->tab_worker == NULL) return;
+    img_fail_reason r = fetch_decode_image(w, w->tab_worker, gui_image_fetch, w, b->href,
+                                           NULL, 0, &slot->surface, &slot->nat_w, &slot->nat_h);
+    if (r != IMG_FAIL_OK) ((rd_block *)b)->img_fail = r;
+}
+
+/* Fetches the deferred images whose row is within FC_LAZY_IMAGE_MARGIN_PX of the viewport. A
+ * deferred image the layout never placed in a row (out-of-flow subtree) loads at once:
+ * fail open, content must never stay missing. Returns how many loaded (the caller
+ * re-lays-out, since they change the flow). */
+static int load_lazy_images(browser_window *w, const rc_layout *L, double origin,
+                            double content_top, double content_h) {
+    int any_deferred = 0;
+    for (size_t i = 0; i < w->image_count; ++i) if (w->images[i].deferred) { any_deferred = 1; break; }
+    if (!any_deferred) return 0;
+    double lo = content_top - FC_LAZY_IMAGE_MARGIN_PX, hi = content_top + content_h + FC_LAZY_IMAGE_MARGIN_PX;
+    unsigned char *seen = (unsigned char *)calloc(w->image_count, 1);
+    if (seen == NULL) return 0;
+    int loaded = 0;
+    for (size_t i = 0; i < L->nrow; ++i) {
+        const rc_row *r = &L->rows[i];
+        double ry = origin + r->top;
+        int near = !(ry + r->height < lo || ry > hi);
+        const rd_block *cand[1 + 8];
+        size_t nc = 0;
+        if (r->kind == RC_IMAGE && r->blk != NULL) cand[nc++] = r->blk;
+        else if (r->kind == RC_TEXT)
+            for (size_t k = r->first; k < r->first + r->count && nc < 9; ++k)
+                if (L->frags[k].repl != NULL) cand[nc++] = L->frags[k].repl;
+        for (size_t c = 0; c < nc; ++c) {
+            size_t idx = 0;
+            ui_image *slot = (cand[c]->kind == RD_IMAGE) ? lazy_slot(w, cand[c]->href, &idx) : NULL;
+            if (slot == NULL || !slot->deferred) continue;
+            seen[idx] = 1;
+            if (near && loaded < UI_LAZY_PER_PASS) { lazy_load_one(w, slot, cand[c]); loaded++; }
+        }
+    }
+    size_t n = rd_count(w->doc);
+    for (size_t b = 0; b < n; ++b) {
+        const rd_block *bk = rd_at(w->doc, b);
+        size_t idx = 0;
+        if (bk->kind != RD_IMAGE || bk->href == NULL) continue;
+        ui_image *slot = lazy_slot(w, bk->href, &idx);
+        if (slot != NULL && slot->deferred && !seen[idx]) { lazy_load_one(w, slot, bk); loaded++; }
+    }
+    free(seen);
+    return loaded;
+}
+
 static void paint_screen_deferred(void *ctx, int root) {
     paint_screen_inflow((const screen_flow_ctx *)ctx, root);
 }
@@ -14062,15 +14143,24 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     double content_w = content_width(w);
 
     rc_layout L;
-    layout_doc(cr, w, content_w, &L);
-    position_doc(cr, w, content_w, content_h, &L);
-    w->content_total_h = L.total_h;  /* cached for the scrollbar */
+    double origin;
+    for (int lazy_pass = 0;; ++lazy_pass) {
+        layout_doc(cr, w, content_w, &L);
+        position_doc(cr, w, content_w, content_h, &L);
+        w->content_total_h = L.total_h;  /* cached for the scrollbar */
 
-    double max_scroll = L.total_h - content_h;
-    if (max_scroll < 0.0) max_scroll = 0.0;
-    if (w->scroll < 0.0) w->scroll = 0.0;
-    if (w->scroll > max_scroll) w->scroll = max_scroll;
-    double origin = content_top + page_gutter(w) - w->scroll;
+        double max_scroll = L.total_h - content_h;
+        if (max_scroll < 0.0) max_scroll = 0.0;
+        if (w->scroll < 0.0) w->scroll = 0.0;
+        if (w->scroll > max_scroll) w->scroll = max_scroll;
+        origin = content_top + page_gutter(w) - w->scroll;
+        /* Lazy images that just came near the viewport load now, then the flow is re-laid
+         * out with their real size (bounded passes). */
+        if (lazy_pass >= UI_LAZY_PASSES ||
+            load_lazy_images(w, &L, origin, content_top, content_h) == 0)
+            break;
+        rc_free(&L);
+    }
     publish_geometry(w, &L, left, content_w, content_h);
 
     /* R4: sticky positioning for OUT-OF-FLOW boxes — clamp to viewport top
@@ -14644,7 +14734,7 @@ static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_ur
      * (2026-07-16) follow the same path so --download-png/--download-pdf --images can
      * actually verify them headless, not just <img>. */
     if (t != NULL && img_fetch != NULL) {
-        load_images(&w, t, img_fetch, fetch_ctx);
+        load_images(&w, t, img_fetch, fetch_ctx, 0);
         load_bg_images(&w, t, img_fetch, fetch_ctx);
     }
 

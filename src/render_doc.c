@@ -180,6 +180,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->box_w_pct = 0;
     b->img_h_css = 0;
     b->img_inline = 0;
+    b->img_lazy = 0;
     b->box_mw = 0;
     b->box_mw_pct = 0;
     b->box_l_pct = 0;
@@ -369,6 +370,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                     ib->video_h = r->img_h;
                     ib->img_h_css = r->img_h_css;
                     ib->img_inline = r->img_inline;
+                    ib->img_lazy = r->img_lazy;
                 }
                 break;
             }

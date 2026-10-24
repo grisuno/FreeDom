@@ -2527,6 +2527,12 @@ static int stub_module_fetch(void *ctx, const char *method, const char *url,
         src = "export const word = 'module-ok';";
     else if (strcmp(url, "https://site.test/main.mjs") == 0)
         src = "document.getElementById('o').textContent = 'relative-src-ok';";
+    else if (strcmp(url, "https://site.test/data.txt") == 0) {
+        *ob = strdup("payload"); *ol = 7; *oct = strdup("text/plain"); *st = 200;
+        return (*ob != NULL && *oct != NULL) ? 0 : -1;
+    }
+    else if (strcmp(url, "https://site.test/lazy.js") == 0)
+        src = "document.getElementById('o').textContent = 'lazy-script-ran';";
     else if (strcmp(url, "https://site.test/app/mapped.js") == 0)
         src = "import { word } from 'dep';"
               "document.getElementById('o').textContent = 'mapped ' + word;";
@@ -2570,6 +2576,69 @@ static void test_nomodule_fallback_for_untrusted_host(void **state) {
     assert_non_null(module_page(0, &t, &p, "legacy"));
     tab_page_free(&p);
     tab_close(t);
+}
+
+/* A dynamic import() from a CLASSIC script resolves against the document URL (the script's
+ * base URL), not the script's display name ("inline #1"): `import('/main.mjs')` on a trusted
+ * page loads https://site.test/main.mjs. It used to throw "Failed to resolve module specifier",
+ * which silently broke every lazy-loaded chunk (reddit, github). */
+static void test_dynamic_import_from_classic_script_uses_document_base(void **state) {
+    (void)state;
+    static const char page[] =
+        "<html><body><p id=\"o\">none</p>"
+        "<script>import('/main.mjs');</script></body></html>";
+    tab *t = NULL;
+    tab_page p;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_module_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    assert_int_equal(tab_load_full(t, page, sizeof page - 1, "https://site.test/index.html",
+                                   1, 0, 0, &p), TAB_OK);
+    assert_non_null(view_find_text(p.view, "relative-src-ok"));
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* The network window is open for the worker's LATER turns too (timers, events), not only the load:
+ * AJAX, a lazily inserted <script src> and a dynamic import() fired from a timer all reach the
+ * parent's gated fetcher. Before, every one of them failed with status 0 once the load ended. */
+static const pv_run *tick_page(const char *html, size_t len, tab **t, tab_page *p2,
+                               const char *needle) {
+    tab_page p;
+    assert_int_equal(tab_open(t), TAB_OK);
+    tab_set_fetcher(*t, stub_module_fetch, NULL);
+    tab_set_net_allowed(*t, 1);
+    assert_int_equal(tab_load_full(*t, html, len, "https://site.test/index.html", 1, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    assert_int_equal(tab_tick(*t, 100, p2), TAB_OK);
+    return view_find_text(p2->view, needle);
+}
+
+static void test_ajax_after_load_reaches_the_gated_fetcher(void **state) {
+    (void)state;
+    static const char page[] =
+        "<html><body><p id=\"o\">none</p><script>setTimeout(function(){"
+        "var x=new XMLHttpRequest(); x.open('GET','https://site.test/data.txt',false); x.send();"
+        "document.getElementById('o').textContent='ajax:'+x.status+':'+x.responseText;},10);</script></body></html>";
+    tab *t = NULL; tab_page p2;
+    assert_non_null(tick_page(page, sizeof page - 1, &t, &p2, "ajax:200:payload"));
+    tab_page_free(&p2); tab_close(t);
+}
+
+static void test_lazy_script_src_and_import_after_load(void **state) {
+    (void)state;
+    static const char page[] =
+        "<html><body><p id=\"o\">none</p><script>setTimeout(function(){"
+        "var s=document.createElement('script'); s.src='/lazy.js'; document.head.appendChild(s);},10);"
+        "</script></body></html>";
+    tab *t = NULL; tab_page p2;
+    assert_non_null(tick_page(page, sizeof page - 1, &t, &p2, "lazy-script-ran"));
+    tab_page_free(&p2); tab_close(t);
+    static const char page2[] =
+        "<html><body><p id=\"o\">none</p><script>setTimeout(function(){"
+        "import('/main.mjs');},10);</script></body></html>";
+    assert_non_null(tick_page(page2, sizeof page2 - 1, &t, &p2, "relative-src-ok"));
+    tab_page_free(&p2); tab_close(t);
 }
 
 /* A bare specifier resolves through the page's import map (spec/import_map.md). */
@@ -3265,6 +3334,9 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_local_storage_never_seeded_for_untrusted),
         cmocka_unit_test(test_module_scripts_run_for_trusted_host),
         cmocka_unit_test(test_nomodule_fallback_for_untrusted_host),
+        cmocka_unit_test(test_dynamic_import_from_classic_script_uses_document_base),
+        cmocka_unit_test(test_ajax_after_load_reaches_the_gated_fetcher),
+        cmocka_unit_test(test_lazy_script_src_and_import_after_load),
         cmocka_unit_test(test_import_map_resolves_bare_specifier),
         cmocka_unit_test(test_data_url_classic_script_runs_without_network),
         cmocka_unit_test(test_module_src_is_a_url_and_data_modules_run),

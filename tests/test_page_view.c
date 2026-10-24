@@ -2104,6 +2104,30 @@ static void test_build_inline_block_row_alignment(void **state) {
     hp_document_free(doc);
 }
 
+/* loading="lazy" (HTML 4.8.4.4.2) is recorded on the image run so the front end can defer the
+ * fetch until the image nears the viewport; the default and "eager" stay eager. */
+static void test_build_img_loading_lazy_is_recorded(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><body><p><img src=\"https://x.test/a.png\" loading=\"lazy\" alt=\"a\"></p>"
+        "<p><img src=\"https://x.test/b.png\" loading=\"LAZY\" alt=\"b\"></p>"
+        "<p><img src=\"https://x.test/c.png\" loading=\"eager\" alt=\"c\"></p>"
+        "<p><img src=\"https://x.test/d.png\" alt=\"d\"></p></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    int lazy = 0, eager = 0;
+    for (size_t i = 0; i < v->count; ++i) {
+        const pv_run *r = &v->runs[i];
+        if (r->kind != PV_IMAGE || r->src == NULL) continue;
+        if (strstr(r->src, "/a.png") || strstr(r->src, "/b.png")) { assert_int_equal(r->img_lazy, 1); lazy++; }
+        else { assert_int_equal(r->img_lazy, 0); eager++; }
+    }
+    assert_int_equal(lazy, 2);
+    assert_int_equal(eager, 2);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* A styled text field records its own box and its ::placeholder style. */
 static void test_build_input_own_box_and_placeholder(void **state) {
     (void)state;
@@ -5246,6 +5270,7 @@ int main(void) {
         cmocka_unit_test(test_root_insets),
         cmocka_unit_test(test_build_inline_block_row_alignment),
         cmocka_unit_test(test_build_input_own_box_and_placeholder),
+        cmocka_unit_test(test_build_img_loading_lazy_is_recorded),
         cmocka_unit_test(test_build_inline_block_row_ignores_oof_child),
         cmocka_unit_test(test_build_intrinsic_width_flag),
         cmocka_unit_test(test_svg_append_root_attrs),

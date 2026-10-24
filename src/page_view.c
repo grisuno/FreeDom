@@ -38,6 +38,7 @@ _Static_assert(PV_GRID_TRACKS == CSS_GRID_TRACKS_MAX,
 _Static_assert(PV_BG_URL_MAX == CSS_URL_MAX,
                "PV_BG_URL_MAX must mirror CSS_URL_MAX");
 #include <string.h>
+#include <strings.h>
 #include <limits.h>
 #include <ctype.h>
 
@@ -173,6 +174,7 @@ static void run_init_common(pv_run *r) {
     r->img_h = -1;
     r->img_h_css = 0;
     r->img_inline = 0;
+    r->img_lazy = 0;
     r->bold = 0;
     r->italic = 0;
     r->indent = 0;
@@ -5960,6 +5962,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 free(alt_dup);
                 if (st != PV_OK) { rc = st; goto cleanup; }
                 v->runs[v->count - 1].img_h_css = css_replaced_h_fixed(el, sheet, &cache);
+                {
+                    size_t ll = 0;
+                    const lxb_char_t *lv = lxb_dom_element_get_attribute(
+                        el, (const lxb_char_t *)"loading", 7, &ll);
+                    v->runs[v->count - 1].img_lazy =
+                        (lv != NULL && ll == 4 && strncasecmp((const char *)lv, "lazy", 4) == 0);
+                }
                 {
                     css_style dcs = cached_element_style(el, sheet, &cache);
                     /* A flex/grid item is blockified (CSS Display 3 2.7), so an

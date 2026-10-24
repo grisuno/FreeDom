@@ -223,6 +223,7 @@ typedef struct rd_block {
     int              box_w_pct;
     int              img_h_css;   /* pv_run.img_h_css: video_h is a CSS px height */
     int              img_inline;  /* pv_run.img_inline */
+    int              img_lazy;    /* pv_run.img_lazy: loading="lazy" */
     int              box_mw, box_mw_pct;  /* max-width cap (its own value) */
     int              box_l_pct, box_r_pct, box_mt_pct, box_mb_pct;
     /* User-agent box identity of the block this came from (a bx_ua_tag code).

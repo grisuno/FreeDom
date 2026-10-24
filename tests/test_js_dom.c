@@ -403,6 +403,35 @@ static void test_unhandled_rejection_event(void **state) {
     EXPECT(f, "rj.join('|')", "boom:true:true");
 }
 
+/* A <script> inserted by script runs when it becomes connected (HTML 4.12.1): an inline one
+ * synchronously, one with `src` asynchronously with load/error events -- the base of every lazy
+ * JS loader. It runs once, only as a JS type, never from innerHTML, and a throw is reported (error
+ * event) instead of propagating into the inserting script. */
+static void test_dynamic_inline_script_runs_once_on_insert(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "globalThis.n=0; var s=document.createElement('script'); s.text='n++';"
+              "document.body.appendChild(s); document.head.appendChild(s); ''+n", "1");
+    EXPECT(f, "globalThis.m=0; var t=document.createElement('script');"
+              "t.appendChild(document.createTextNode('m=5')); document.body.appendChild(t); ''+m", "5");
+    EXPECT(f, "globalThis.u=0; var x=document.createElement('script'); x.text='u=1'; ''+u", "0");
+    EXPECT(f, "globalThis.p=0; var y=document.createElement('script'); y.type='text/plain'; y.text='p=1';"
+              "document.body.appendChild(y); ''+p", "0");
+    EXPECT(f, "globalThis.h=0; document.body.innerHTML='<script>h=1<\\/script>'; ''+h", "0");
+    EXPECT(f, "globalThis.got=0; window.addEventListener('error',function(){got++;});"
+              "var z=document.createElement('script'); z.text='throw new Error(\"x\")';"
+              "document.body.appendChild(z); ''+got", "1");
+}
+
+static void test_dynamic_script_src_loads_async_and_reports_load_or_error(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "globalThis.r2=0; globalThis.loaded=0; var d=document.createElement('script');"
+              "d.src='data:text/javascript,globalThis.r2=2'; d.onload=function(){ loaded=1; };"
+              "document.head.appendChild(d); ''+r2+loaded", "00");
+    EXPECT(f, "__fireDeferred(); ''+r2+loaded", "21");
+    EXPECT(f, "globalThis.er=0; var e=document.createElement('script'); e.src='https://x.test/a.js';"
+              "e.onerror=function(){ er=1; }; document.head.appendChild(e); __fireDeferred(); ''+er", "1");
+}
+
 /* A DocumentFragment and a ShadowRoot are EventTargets and observable (GitHub's invoker
  * behaviours call addEventListener on every shadow root and observe it). */
 static void test_shadow_root_is_event_target_and_observable(void **state) {
@@ -2955,6 +2984,8 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_uncaught_timer_error_fires_window_error_event, setup, teardown),
         cmocka_unit_test_setup_teardown(test_unhandled_rejection_event, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_root_is_event_target_and_observable, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_dynamic_inline_script_runs_once_on_insert, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_dynamic_script_src_loads_async_and_reports_load_or_error, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_mirror_append, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_mirror_inner_html, setup, teardown),
         cmocka_unit_test_setup_teardown(test_match_media_normalized_viewport, setup, teardown),

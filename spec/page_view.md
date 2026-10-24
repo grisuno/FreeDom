@@ -1459,3 +1459,17 @@ El fondo `currentColor` es el `color` computado del elemento, heredado si no dec
 - Sonda `flex-pct-visual` (corpus de `parity`) y test
   `test_dump_layout_flex_item_negative_margin_widens_sibling` (rojo verificado: sin el fix el
   texto medía 500 px, Firefox y ahora Freedom 600).
+
+## Tanda 62 — `loading="lazy"` en `<img>` (2026-10-24)
+
+- **`pv_run.img_lazy`** (`loading` = `lazy`, sin distinguir mayúsculas) cruza el IPC en el bit 2 de
+  `b[60]` (sin ensanchar el cable) y llega a `rd_block.img_lazy`. `eager`/ausente = como siempre.
+- **La ventana difiere la descarga** de una imagen lazy de red (no `file:`/`data:`): `load_images(..., defer=1)`
+  deja su slot `deferred`. Tras cada layout, `load_lazy_images` carga las que están a menos de
+  `FC_LAZY_IMAGE_MARGIN_PX` (1000) del viewport por el mismo fetch gateado + decodificación en el
+  worker; cada tanda re-maqueta (máx. 4 pasadas, 16 imágenes por pasada). Una imagen diferida que
+  el layout nunca colocó en una fila (subárbol fuera de flujo) se carga de inmediato: fail-open, el
+  contenido nunca queda ausente.
+- **Un render de una pasada (PNG/PDF) carga todo** (`defer=0`): no hay scroll. `FREEDOM_TRACE_FETCH=1`
+  imprime `fetch[image]` por cada imagen, eager o diferida (medido en lobste.rs con margen 150: 13 al
+  cargar, 21 tras el primer scroll, 25 al final).
