@@ -14235,6 +14235,18 @@ static void paint_screen_deferred(void *ctx, int root) {
     paint_screen_inflow((const screen_flow_ctx *)ctx, root);
 }
 
+/* FREEDOM_JS_PROFILE=1: GUI-side phase timings on stderr (same switch as the worker's). */
+static double gui_prof_now_ms(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec * 1000.0 + (double)ts.tv_nsec / 1.0e6;
+}
+static void gui_prof_log(const char *what, double ms) {
+    static int on = -1;
+    if (on < 0) on = (getenv("FREEDOM_JS_PROFILE") != NULL);
+    if (on) fprintf(stderr, "gui-profile %-14s %7.1f ms\n", what, ms);
+}
+
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                              double content_h) {
     const ui_theme *th = &w->theme;
@@ -14244,8 +14256,12 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     rc_layout L;
     double origin;
     for (int lazy_pass = 0;; ++lazy_pass) {
+        double prof_t0 = gui_prof_now_ms();
         layout_doc(cr, w, content_w, &L);
+        double prof_t1 = gui_prof_now_ms();
         position_doc(cr, w, content_w, content_h, &L);
+        gui_prof_log("layout_doc", prof_t1 - prof_t0);
+        gui_prof_log("position_doc", gui_prof_now_ms() - prof_t1);
         w->content_total_h = L.total_h;  /* cached for the scrollbar */
 
         double max_scroll = L.total_h - content_h;
@@ -16475,7 +16491,9 @@ static void paint(browser_window *w) {
 static void redraw(browser_window *w) {
     if (!w->configured) return;
     if (ensure_buffer(w) != 0) return;
+    double prof_p0 = gui_prof_now_ms();
     paint(w);
+    gui_prof_log("paint(total)", gui_prof_now_ms() - prof_p0);
     /* FREEDOM_GUI_SHOT=path: write what the window just painted (the real on-screen
      * painter, not the headless PNG one) at most every 3 s, so the GUI can be reviewed
      * and diffed against --download-png without driving the compositor by hand. */

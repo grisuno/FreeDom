@@ -1483,3 +1483,19 @@ El fondo `currentColor` es el `color` computado del elemento, heredado si no dec
   la caja del contenedor anidado ya es ese hijo y el ascenso no se mueve.
 - Test `test_dump_layout_flex_item_is_wrapper_around_nested_container` (rojo: texto 155 px, Firefox
   y ahora Freedom 368). Aislado con ddmin automático de las reglas CSS de la página real (de ~5000 a 5).
+
+## Tanda 65 — la cascada ya no copia 7 KB por consulta (2026-10-24)
+- **`css_style` mide 7104 bytes** y `cached_element_style` lo devolvia por valor: los recorridos de
+  ancestros/subarbol (`resolve_context`, `subtree_is_oof`, `subtree_has_own_text`, `cell_has_nested_table`,
+  `flow_table`, ...) lo llamaban ~100 veces por elemento (2.6 M llamadas en Wikipedia = ~3 GB de `memcpy`
+  por construccion). `cached_element_style_ref` devuelve un puntero a la entrada memoizada; la copia por
+  valor queda para quien necesita modificarla (`resolve_context` copia solo los niveles que ajusta: un
+  hueco de columna o los valores UA de un `<fieldset>`).
+- **El puntero es estable mientras viva la cache:** al crecer, los bloques `style[]` viejos se RETIRAN (no se
+  liberan) hasta `pv_style_cache_free` (las entradas se escriben una vez y no cambian). Los caminos
+  degenerados (sin cache, OOM) usan un anillo de 8 estilos para que dos referencias vivas no se pisen.
+- **No se construye el snapshot "pre-script" cuando ningun script va a correr** (JS apagado o pagina sin
+  scripts): era una segunda cascada completa (170 ms en Wikipedia) sin utilidad.
+- Medido (`pv_build_styled`, mejor de 8): Wikipedia 165 -> 108 ms, Hacker News 13.3 -> 8.7 ms; `parity`,
+  `layout-diff` y `drops` sin cambios. Sigue: `fill_css_node` por cada nodo de la cadena de ancestros de cada
+  elemento y `cch_pseudo_style` por elemento.

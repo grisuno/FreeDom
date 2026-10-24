@@ -265,3 +265,32 @@ viewport).
   y se re-congelan cuando importan.
 - Límites que siguen siendo política y no se esconden: el benchmark corre sin JS y sin
   terceros en los dos motores; el GUI ejecuta JS para hosts de `js.conf`.
+
+## Timing: render hasta idle, en la GUI real (`make fbench`, 2026-10-24)
+
+`make fbench` mide tambien CUANTO TARDA cada navegador desde "navegar" hasta "pintado y quieto", para las
+paginas del README (o las que se nombren). No es la medicion headless: la que importa es la que siente el
+usuario, asi que Freedom se mide en su ventana.
+
+- **Freedom** (`tools/guitime.py`): el binario de la GUI dentro de un weston anidado (Xvfb + weston, render
+  `pixman`), cargando la pagina por el MISMO `do_load`/render/pintado que una sesion de usuario. Lo unico
+  anadido es `FREEDOM_GUI_TIMING=<archivo>`: cuando la pagina esta cargada, sin trabajo en segundo plano ni
+  tick de JS pendiente, y no se pinto ningun cuadro nuevo en 150 ms, la ventana escribe
+  `{"ms": ultimo pintado - peticion de navegacion}` y sale (`FREEDOM_GUI_EXIT_AT_IDLE`). Los despertares del
+  propio medidor no repintan (alterarian lo medido). Politica de corpus: `FREEDOM_AS_HOST=corpus.test` con
+  `tests/parity/hosts` (confianza de presentacion, JS apagado) y un perfil temporal, para que las
+  preferencias del usuario no entren en la medida. Sin Xvfb/weston la herramienta lo dice y sale con 2:
+  jamas sustituye por una medicion headless.
+- **Firefox** (`tools/fftime.py`): por geckodriver con la misma politica (JS fuera, red muerta) y el mismo
+  viewport; la mediana de `max(loadEventEnd, first-contentful-paint)` de su propia Performance Timeline. Con el
+  JS de pagina apagado WebDriver no puede ejecutar scripts asincronos, solo sincronos, por eso se lee la linea
+  de tiempo del navegador. Es una COTA INFERIOR del idle real de Firefox (no ve repintados posteriores como
+  la decodificacion de imagenes), asi que la comparacion nunca favorece a Freedom.
+- Mediana de 3 por pagina; una pasada previa sin cronometrar (cache de fuentes y configuracion, como un
+  usuario que vuelve). `make timing-update` congela `tests/parity/timing-baseline.tsv`; `fbench` imprime la
+  diferencia contra esa base y reescribe la tabla del README entre `<!-- fbench-timing:begin/end -->`.
+- `FREEDOM_JS_PROFILE=1` imprime ademas, por etapa, el tiempo del worker (`tab-profile ...`) y de la GUI
+  (`gui-profile layout_doc/position_doc/paint(total)`), para saber que optimizar.
+
+Primera medicion (mediana de 3, ms, Freedom GUI / Firefox): Hacker News 113 / 26, Wikipedia 539 / 90, GitHub
+1473 / 127. Tras las optimizaciones de esta tanda (ver `spec/page_view.md`): Wikipedia 539 -> ~360.
