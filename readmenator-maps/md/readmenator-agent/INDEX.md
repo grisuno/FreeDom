@@ -5,7 +5,7 @@
 | `app.py` | Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL... | root | 3 | 0 |
 | `docker-entrypoint.sh` | - | root | 0 | 0 |
 | `docker_run.sh` | Thin wrapper. | root | 0 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 607 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 614 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 10 | 2 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -17,6 +17,7 @@
 | `include/box_style.h` | bx_edges: anything longer fails closed instead of truncating into a wrong match. #define... | include | 31 | 11 |
 | `include/box_tree.h` | bt_positioned: Stage 2: one positioned box in the final paint order. | include | 34 | 5 |
 | `include/browser.h` | browser_free: Zero-initialise or reset a state. | include | 19 | 3 |
+| `include/cached_fetch.h` | cf_set_store: Cache-aware GET. | include | 4 | 3 |
 | `include/compositor.h` | cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position... | include | 9 | 4 |
 | `include/css.h` | css_style: A resolved presentation. | include | 140 | 36 |
 | `include/css_atrule.h` | car_ops: The questions @supports asks the caller's own engine. prop is lowercased and * both... | include | 10 | 3 |
@@ -30,12 +31,12 @@
 | `include/css_length.h` | cl_ctx: The state a <length> is measured against. | include | 20 | 9 |
 | `include/css_mask.h` | CSS Masking 1, alpha gradients only (spec/css_mask.md). | include | 10 | 4 |
 | `include/css_mq.h` | cmq_matches: 1 iff the media query list s[0,len) matches env; malformed/unknown parts fail * closed. | include | 6 | 3 |
-| `include/css_select.h` | css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only... | include | 34 | 14 |
+| `include/css_select.h` | css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only... | include | 35 | 14 |
 | `include/css_text.h` | - | include | 17 | 3 |
 | `include/css_values.h` | Single owner of CSS value interpretation for colors and backgrounds. | include | 9 | 7 |
 | `include/css_vars.h` | cvr_table: Zero-initialise ({0}) before first use. | include | 19 | 5 |
 | `include/data_url.h` | du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real inline icon/... | include | 6 | 8 |
-| `include/disk_store.h` | ds_free: Reads and decrypts path. | include | 3 | 3 |
+| `include/disk_store.h` | ds_free: Reads and decrypts path. | include | 3 | 4 |
 | `include/dom.h` | dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: *... | include | 29 | 16 |
 | `include/dom_debug.h` | dd_format: Formats doc into out[0..cap) as a NUL-terminated, line-oriented dump (see the spec... | include | 4 | 3 |
 | `include/download.h` | dl_should_download: 1 if the response should be saved (attachment, or a non-renderable media... | include | 9 | 3 |
@@ -43,12 +44,13 @@
 | `include/form.h` | fm_field: One named control. value == NULL is treated as the empty value; name == NULL is *... | include | 12 | 3 |
 | `include/frame_clock.h` | active: frame_clock (fc_) — pure animation frame scheduler. | include | 7 | 3 |
 | `include/freebug.h` | fb_entry: One captured console message. text and file are owned by the buffer (NUL-terminated).... | include | 18 | 11 |
-| `include/freedom_config.h` | - | include | 13 | 5 |
+| `include/freedom_config.h` | - | include | 15 | 5 |
 | `include/hls.h` | hls_segment: or variant info. | include | 8 | 4 |
 | `include/host_conf.h` | hcf_search_dirs: Pure. | include | 9 | 4 |
 | `include/hostblock.h` | hb_new: } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted... | include | 10 | 5 |
 | `include/hostedit.h` | he_text_has_host: Returns 1 if text (the body of a hosts-format file) already lists host as a... | include | 5 | 3 |
 | `include/html_parse.h` | hp_script: One executable <script>. | include | 24 | 18 |
+| `include/http_cache.h` | hc_parse_http_date: } hc_class; typedef struct hc_meta { char   final_url[HC_URL_MAX]; char... | include | 19 | 3 |
 | `include/identity.h` | idn_defaults: enum { IDN_REJ_UA   = 1 << 0, IDN_REJ_LANG = 1 << 1, IDN_REJ_GEO  = 1 << 2 }... | include | 24 | 5 |
 | `include/image_decode.h` | img_pixels: A decoded bitmap that owns its pixel buffer. | include | 13 | 5 |
 | `include/import_map.h` | im_resolve: Resolves specifier as imported from base (the importing module's URL). | include | 10 | 4 |
@@ -58,16 +60,17 @@
 | `include/js_geom.h` | jg_init: typedef struct jg_rect { dom_node_id node; int32_t     x, y, w, h;       /* document... | include | 19 | 6 |
 | `include/js_location.h` | jd_take_history: Drains the history operations page JS performed since the last call: an owned... | include | 6 | 1 |
 | `include/js_policy.h` | jsp_trusted: Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its... | include | 7 | 5 |
-| `include/js_sandbox.h` | js_limits: Per-evaluation resource limits. | include | 24 | 15 |
+| `include/js_sandbox.h` | js_limits: Per-evaluation resource limits. | include | 25 | 15 |
 | `include/js_trusted.h` | jt_take_opens: The parent installed a new geometry table (layout or scroll changed)... | include | 16 | 3 |
 | `include/link_nav.h` | ln_block_reason: Why a reference was blocked, for a precise user-facing notice and for *... | include | 11 | 5 |
-| `include/local_store.h` | ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and... | include | 11 | 6 |
+| `include/local_store.h` | ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and... | include | 11 | 8 |
 | `include/media_decoder.h` | md_cmd: Communicates with the parent over two pipes: out_fd: decoder → parent (frames, stream... | include | 12 | 4 |
 | `include/net_realm.h` | nr_realm_allows_http: 1 iff plain http:// is acceptable for this realm. | include | 10 | 4 |
 | `include/os_sandbox.h` | os_violation: function (os_policy_allows) that mirrors the installed BPF program. | include | 12 | 4 |
 | `include/page_view.h` | pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt... | include | 91 | 11 |
 | `include/pdf_export.h` | pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order)... | include | 10 | 4 |
 | `include/perf_trace.h` | pt_init: #define PT_MAX_SAMPLES 256 typedef struct pt_stage_stats { uint64_t... | include | 17 | 3 |
+| `include/pq_seal.h` | pqs_buf_free: DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der... | include | 8 | 3 |
 | `include/prefetch.h` | pf_ref: One scanned reference. url is the RAW attribute value (the policy-gated fetcher *... | include | 28 | 4 |
 | `include/prefs.h` | prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, *... | include | 18 | 6 |
 | `include/profile.h` | profile_close: Loads and decrypts prefs.bin over an out ALREADY initialised (prefs_init). | include | 9 | 3 |
@@ -76,10 +79,10 @@
 | `include/render_policy.h` | rdp_caps: Render capabilities for a page. | include | 9 | 8 |
 | `include/renderer.h` | rd_result_free: Renders untrusted HTML out-of-process and returns an inert title + text. html ==... | include | 7 | 2 |
 | `include/request_policy.h` | rp_host_of: Lowercased host of an absolute URL into out. | include | 5 | 6 |
-| `include/secure_fetch.h` | sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *... | include | 43 | 6 |
+| `include/secure_fetch.h` | sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *... | include | 46 | 7 |
 | `include/svg_paint.h` | svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred... | include | 2 | 2 |
 | `include/svg_render.h` | sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>... | include | 19 | 5 |
-| `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 43 | 4 |
+| `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 46 | 4 |
 | `include/text_case.h` | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | include | 8 | 3 |
 | `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 24 | 6 |
 | `include/textfield.h` | tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at... | include | 15 | 3 |
@@ -102,6 +105,7 @@
 | `src/box_style.c` | tag_row: One row of the user-agent sheet. | src | 48 | 0 |
 | `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 25 | 0 |
 | `src/browser.c` | clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {... | src | 41 | 0 |
+| `src/cached_fetch.c` | trace: fetcher, and so the same policy, as an uncached request.  #define _POSIX_C_SOURCE 200809L... | src | 14 | 0 |
 | `src/compositor.c` | eff_z: Not a stacking context: a positioned box with z:auto still paints in the *... | src | 5 | 0 |
 | `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 247 | 0 |
 | `src/css_atrule.c` | keyword_at: Scratch size for one declaration or selector handed to the caller. | src | 11 | 0 |
@@ -114,7 +118,7 @@
 | `src/css_length.c` | cl_unit_eq: ASCII case-insensitive compare of a possibly-unterminated unit slice against a... | src | 18 | 0 |
 | `src/css_mask.c` | split: out->kind = 1; out->nst = (meta >> 4) & 0xf; if (out->nst < 2) out->nst = 2; if (out->nst... | src | 12 | 0 |
 | `src/css_mq.c` | read_word: static int is_space(char c) { return c == ' ' \|\| c == '\t' \|\| c == '\n' \|\| c == '\r'... | src | 34 | 0 |
-| `src/css_select.c` | csel_hex_val: CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted content... | src | 29 | 0 |
+| `src/css_select.c` | csel_hex_val: CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted content... | src | 31 | 0 |
 | `src/css_text.c` | --- text-presentation extensions (Hito 23b-6) --- | src | 17 | 0 |
 | `src/css_values.c` | - | src | 9 | 0 |
 | `src/css_vars.c` | find_slot: Index into t->slot where name lives, or the empty slot where it would go. * Requires... | src | 16 | 0 |
@@ -133,6 +137,7 @@
 | `src/hostblock.c` | table_probe: Finds the slot for key (length klen) in t, which must have a free slot. | src | 18 | 0 |
 | `src/hostedit.c` | valid_host: #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c... | src | 13 | 0 |
 | `src/html_parse.c` | node_next: }; /* --- helpers --- static char *dup_bytes(const lxb_char_t *src, size_t len) { if... | src | 29 | 0 |
+| `src/http_cache.c` | days_from_civil: #define HC_MAGIC      "FHC1\n" #define HC_NAME_HEX   64u #define HC_EVICT_EVERY... | src | 38 | 0 |
 | `src/identity.c` | tag_valid: size_t n = strlen(ua); if (n >= IDN_UA_MAX) return -1; int printable = 0; for (size_t... | src | 25 | 0 |
 | `src/image_decode.c` | jpeg_err_ctx: libjpeg error manager that longjmps instead of calling exit(), so a hostile JPEG *... | src | 27 | 0 |
 | `src/import_map.c` | str: A JSON string into an owned UTF-8 buffer (escapes decoded; a lone surrogate or a * raw... | src | 22 | 0 |
@@ -151,16 +156,17 @@
 | `src/js_location.c` | jd_lp_set: Defines a string property on the __locParts data object from a (ptr,len) span. * The... | src | 6 | 0 |
 | `src/js_location_internal.h` | Private to js_dom.c / js_location.c: the dom.histTarget native lives with the | src | 2 | 2 |
 | `src/js_policy.c` | eq_ci: js_policy — implementation: pure per-host JavaScript policy decision. | src | 6 | 0 |
-| `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 42 | 0 |
+| `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 45 | 0 |
 | `src/js_trusted.c` | ws_payload: } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for... | src | 17 | 0 |
 | `src/link_nav.c` | clean_href: Removes tab/newline/CR anywhere and trims leading/trailing spaces, in place * into out. | src | 10 | 0 |
-| `src/local_store.c` | - | src | 307 | 0 |
+| `src/local_store.c` | - | src | 311 | 0 |
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
 | `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 248 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
+| `src/pq_seal.c` | derive_key: pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out) { if (der ==... | src | 11 | 0 |
 | `src/prefetch.c` | ci_starts: static int is_ws(char c) { return c == ' ' \|\| c == '\t' \|\| c == '\n' \|\| c == '\r' \|\|... | src | 30 | 0 |
 | `src/prefs.c` | url_valid: A representable URL: 1..PREFS_MAX_URL-1 bytes, no control bytes, no DEL. * Space is... | src | 26 | 0 |
 | `src/profile.c` | keyfile_create: #include <unistd.h> #include <openssl/crypto.h> #include <openssl/rand.h>... | src | 9 | 0 |
@@ -168,9 +174,9 @@
 | `src/render_policy.c` | - | src | 5 | 0 |
 | `src/renderer.c` | - | src | 6 | 0 |
 | `src/request_policy.c` | public_suffix_labels: Number of labels of the public suffix (eTLD) of a lowercased host... | src | 11 | 0 |
-| `src/secure_fetch.c` | tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a... | src | 76 | 0 |
+| `src/secure_fetch.c` | tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a... | src | 79 | 0 |
 | `src/svg_render.c` | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | src | 34 | 0 |
-| `src/tab.c` | clip_pm_ok: A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile... | src | 127 | 0 |
+| `src/tab.c` | clip_pm_ok: A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile... | src | 142 | 0 |
 | `src/text_case.c` | Latin Extended-A and the Cyrillic historic block pair letters on adjacent code | src | 9 | 0 |
 | `src/text_shape.c` | load_entry_file: Loads face `index` of the font file at `path` into e (FreeType + cairo + *... | src | 61 | 0 |
 | `src/textfield.c` | - | src | 12 | 0 |
@@ -191,6 +197,7 @@
 | `tests/test_box_style.c` | dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include... | tests | 49 | 0 |
 | `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 68 | 0 |
 | `tests/test_browser.c` | test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete... | tests | 17 | 0 |
+| `tests/test_cached_fetch.c` | - | tests | 14 | 0 |
 | `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 21 | 0 |
 | `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 354 | 0 |
 | `tests/test_css_atrule.c` | test_css_atrule -- @supports evaluation and @layer ranks (spec/css_atrule.md). | tests | 10 | 0 |
@@ -208,24 +215,25 @@
 | `tests/test_css_vars.c` | test_css_vars -- the custom-property table and var() substitution (spec/css_vars.md). | tests | 14 | 0 |
 | `tests/test_data_url.c` | - | tests | 26 | 0 |
 | `tests/test_disk_store.c` | - | tests | 16 | 0 |
-| `tests/test_dom.c` | setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] = "<!DOCTYPE... | tests | 41 | 0 |
+| `tests/test_dom.c` | setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] = "<!DOCTYPE... | tests | 42 | 0 |
 | `tests/test_dom_debug.c` | build: #include "dom_debug.h" #include "page_view.h" #include "render_doc.h" #include... | tests | 11 | 0 |
 | `tests/test_download.c` | - | tests | 21 | 0 |
 | `tests/test_flex_layout.c` | test_autofill_count: assert_item(out[0], 0.0, 100.0);  /* no divide-by-zero, behaves like start... | tests | 71 | 0 |
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
 | `tests/test_freebug.c` | - | tests | 13 | 0 |
-| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 109 | 0 |
+| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 111 | 0 |
 | `tests/test_hls.c` | - | tests | 16 | 0 |
 | `tests/test_host_conf.c` | - | tests | 8 | 0 |
 | `tests/test_hostblock.c` | - | tests | 22 | 0 |
 | `tests/test_hostedit.c` | - | tests | 11 | 0 |
 | `tests/test_html_parse.c` | test_extract_script_list_external_semantics: External-script semantics (Hito 24 EXT): a <script... | tests | 24 | 0 |
+| `tests/test_http_cache.c` | - | tests | 17 | 0 |
 | `tests/test_identity.c` | - | tests | 9 | 0 |
 | `tests/test_image_decode.c` | - | tests | 37 | 0 |
 | `tests/test_import_map.c` | tres: Test URL resolver: absolute https passes, "/x" is origin-relative, "./x" and "../x" * are... | tests | 8 | 0 |
 | `tests/test_interp.c` | assert_float_equal: ip_ease_fn fns_0to0[] = { { .kind = IP_EASE_LINEAR }, { .kind = IP_EASE_EASE... | tests | 37 | 0 |
-| `tests/test_js_dom.c` | fake_net: Object.defineProperty(event, ...) -- it threw "not an object" on openstreetmap), *... | tests | 208 | 0 |
+| `tests/test_js_dom.c` | fake_net: Object.defineProperty(event, ...) -- it threw "not an object" on openstreetmap), *... | tests | 215 | 0 |
 | `tests/test_js_env.c` | test_install_identity_override: /* --- install --- static void test_install_null_args(void... | tests | 27 | 0 |
 | `tests/test_js_geom.c` | test_same_node_unions: assert_int_equal(jg_add(&t, 2, 0, 0, 5, 5), 0)... | tests | 11 | 0 |
 | `tests/test_js_policy.c` | test_trusted_requires_both_signals: Hito 28: a host is TRUSTED (full author CSS + images, on top... | tests | 5 | 0 |
@@ -235,9 +243,10 @@
 | `tests/test_media_decoder.c` | test_pacer_paces_by_pts_delta: #include "media_decoder.h" /* First frame anchors the epoch and... | tests | 6 | 0 |
 | `tests/test_net_realm.c` | test_classify_host_lookalikes: static void test_classify_host_i2p(void **state) { (void)state... | tests | 13 | 0 |
 | `tests/test_os_sandbox.c` | test_policy_denies_io_uring: io_uring is a seccomp-bypass primitive (its IORING_OP_* operations... | tests | 19 | 0 |
-| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 209 | 0 |
+| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 210 | 0 |
 | `tests/test_pdf_export.c` | - | tests | 30 | 0 |
 | `tests/test_perf_trace.c` | - | tests | 12 | 0 |
+| `tests/test_pq_seal.c` | test_requires_both_secrets_and_detects_tamper: static void test_each_seal_is_fresh(void **state)... | tests | 7 | 0 |
 | `tests/test_prefetch.c` | Tests for prefetch (Hito 29): pure lookahead scanner + parallel download pool. | tests | 18 | 0 |
 | `tests/test_prefs.c` | - | tests | 15 | 0 |
 | `tests/test_profile.c` | dir: include "prefs.h" include "profile.h" | tests | 17 | 0 |
@@ -245,9 +254,9 @@
 | `tests/test_render_policy.c` | test_image_allow_data_url: A data: URI embeds its bytes inline: no socket opens, so it skips the... | tests | 21 | 0 |
 | `tests/test_renderer.c` | test_render_binary_does_not_crash_parent: (void)state; rd_result r... | tests | 8 | 0 |
 | `tests/test_request_policy.c` | test_site_of_psl: } static void test_site_of_multi_suffix(void **state) { (void)state; char... | tests | 12 | 0 |
-| `tests/test_secure_fetch.c` | test_enforce_allowlisted_insecure: The allowlist override: the user's sovereign per-host escape... | tests | 52 | 0 |
+| `tests/test_secure_fetch.c` | test_enforce_allowlisted_insecure: The allowlist override: the user's sovereign per-host escape... | tests | 57 | 0 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 17 | 0 |
-| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 130 | 0 |
+| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 141 | 0 |
 | `tests/test_text_case.c` | - | tests | 4 | 0 |
 | `tests/test_text_shape.c` | inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font... | tests | 23 | 0 |
 | `tests/test_textfield.c` | - | tests | 8 | 0 |

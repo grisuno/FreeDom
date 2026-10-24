@@ -210,6 +210,29 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
   - `_POSIX_C_SOURCE` (macro, line 7) `#define _POSIX_C_SOURCE`
 - Depends on: `include/browser.h`, `include/util.h`
 
+## src/cached_fetch.c
+- Doc: trace: fetcher, and so the same policy, as an uncached request.  #define _POSIX_C_SOURCE 200809L...
+- Layer: infrastructure
+- Language: c
+- Symbols:
+  - `trace` (function, line 18) `static void trace(const char *what, const char *url)`
+  - `cf_set_store` (function, line 22) `void cf_set_store(hc_store *store)`
+  - `cf_store` (function, line 23) `hc_store *cf_store(void)`
+  - `cacheable_request` (function, line 26) `static int cacheable_request(const sf_config *cfg, const char *url)`
+  - `copy_val` (function, line 33) `static void copy_val(char *dst, size_t cap, const char *src)`
+  - `meta_from_response` (function, line 40) `static void meta_from_response(hc_meta *m, const sf_response *r, const char *url, time_t now)`
+  - `response_from_cache` (function, line 53) `static int response_from_cache(sf_response *out, const hc_meta *m, uint8_t *body, size_t len)`
+  - `remember` (function, line 77) `static void remember(hc_store *store, const char *partition, const char *url,
+                   ...`
+  - `cf_get_with` (function, line 85) `sf_status cf_get_with(hc_store *store, cf_fetch_fn fetch, const char *partition, const char *url,...`
+  - `cf_get` (function, line 133) `sf_status cf_get(const char *partition, const char *url, sf_config *cfg, sf_response *out,
+      ...`
+  - `redirect_load` (function, line 140) `static int redirect_load(void *ctx, const char *from, time_t now, char *out, size_t cap)`
+  - `redirect_save` (function, line 144) `static void redirect_save(void *ctx, const char *from, const char *to, time_t now)`
+  - `cf_attach_redirect_memory` (function, line 148) `void cf_attach_redirect_memory(hc_store *store)`
+  - `_POSIX_C_SOURCE` (macro, line 7) `#define _POSIX_C_SOURCE`
+- Depends on: `include/cached_fetch.h`
+
 ## src/compositor.c
 - Doc: eff_z: Not a stacking context: a positioned box with z:auto still paints in the *...
 - Layer: utility

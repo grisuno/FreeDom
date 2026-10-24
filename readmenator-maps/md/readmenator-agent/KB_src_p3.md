@@ -239,7 +239,9 @@ int cg_expand_bg_imag...`
                        ...`
   - `built` (function, line 1021) `* chains the caller built (an element without parent/prev links never matches
  * through that com...`
-  - `csel_matches` (function, line 1062) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+  - `pseudo_is_local` (function, line 1063) `static int pseudo_is_local(int kind)`
+  - `csel_needs_structure` (function, line 1076) `int csel_needs_structure(const css_sel *sel)`
+  - `csel_matches` (function, line 1099) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
               ...`
   - `take_sub_arg` (function, line 293) `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);`
   - `between` (function, line 382) `* between ( and ) is split on commas (not inside [] or ());`

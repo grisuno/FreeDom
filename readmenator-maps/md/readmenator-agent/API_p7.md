@@ -96,7 +96,9 @@ Depends on: `include/css_select.h`
                        ...` -- True if one compound matches one element (no ancestor context).
 - `built` (function) `src/css_select.c:1021` `* chains the caller built (an element without parent/prev links never matches
  * through that com...`
-- `csel_matches` (function) `src/css_select.c:1062` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+- `pseudo_is_local` (function) `src/css_select.c:1063` `static int pseudo_is_local(int kind)` -- case COMB_ADJACENT: return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id, allow_pseudo_el...
+- `csel_needs_structure` (function) `src/css_select.c:1076` `int csel_needs_structure(const css_sel *sel)`
+- `csel_matches` (function) `src/css_select.c:1099` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
               ...`
 
 ## src/css_text.c

@@ -98,24 +98,26 @@ static void test_dump_layout_c...`
   - `test_dump_layout_line_opening_image_is_inline` (function, line 3535) `static void test_dump_layout_line_opening_image_is_inline(void **state)`
   - `test_dump_layout_band_flushes_line_before_clear` (function, line 3561) `static void test_dump_layout_band_flushes_line_before_clear(void **state)`
   - `test_dump_layout_flex_auto_margin_push_right` (function, line 3601) `static void test_dump_layout_flex_auto_margin_push_right(void **state)`
-  - `test_dump_layout_nested_column_takes_max` (function, line 3644) `static void test_dump_layout_nested_column_takes_max(void **state)`
-  - `test_rejects_http_url` (function, line 3694) `static void test_rejects_http_url(void **state)`
-  - `white` (function, line 3756) `* and not white (the old behaviour where only text rows got background fills). */
+  - `test_dump_layout_flex_item_negative_margin_widens_sibling` (function, line 3641) `static void test_dump_layout_flex_item_negative_margin_widens_sibling(void **state)`
+  - `test_dump_layout_flex_item_is_wrapper_around_nested_container` (function, line 3671) `static void test_dump_layout_flex_item_is_wrapper_around_nested_container(void **state)`
+  - `test_dump_layout_nested_column_takes_max` (function, line 3704) `static void test_dump_layout_nested_column_takes_max(void **state)`
+  - `test_rejects_http_url` (function, line 3754) `static void test_rejects_http_url(void **state)`
+  - `white` (function, line 3816) `* and not white (the old behaviour where only text rows got background fills). */
 static void tes...`
-  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 3852) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
-  - `test_download_png_flex_container_paints_one_band` (function, line 3877) `static void test_download_png_flex_container_paints_one_band(void **state)`
-  - `test_download_png_inline_block_shrinks_and_centers` (function, line 3897) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
-  - `test_download_png_inline_svg_path_and_drops_image` (function, line 3941) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
-  - `test_dump_timings_prints_stages` (function, line 3957) `static void test_dump_timings_prints_stages(void **state)`
-  - `test_dump_layout_shrink_pill_nested_container` (function, line 3987) `static void test_dump_layout_shrink_pill_nested_container(void **state)`
-  - `test_dump_layout_inline_input_shares_line` (function, line 4024) `static void test_dump_layout_inline_input_shares_line(void **state)`
-  - `test_dump_layout_oof_label_does_not_widen_nested_container` (function, line 4070) `static void test_dump_layout_oof_label_does_not_widen_nested_container(void **state)`
-  - `test_dump_layout_br_after_block_is_a_line` (function, line 4105) `static void test_dump_layout_br_after_block_is_a_line(void **state)`
-  - `test_dump_layout_flex_item_contains_block_margins` (function, line 4125) `static void test_dump_layout_flex_item_contains_block_margins(void **state)`
-  - `test_dump_layout_flex_definite_height_centres_item` (function, line 4150) `static void test_dump_layout_flex_definite_height_centres_item(void **state)`
-  - `test_download_png_text_color_alpha_blends` (function, line 4174) `static void test_download_png_text_color_alpha_blends(void **state)`
-  - `test_dump_layout_ua_margin_scales_with_font_size` (function, line 4211) `static void test_dump_layout_ua_margin_scales_with_font_size(void **state)`
-  - `main` (function, line 4257) `int main(void)`
+  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 3912) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
+  - `test_download_png_flex_container_paints_one_band` (function, line 3937) `static void test_download_png_flex_container_paints_one_band(void **state)`
+  - `test_download_png_inline_block_shrinks_and_centers` (function, line 3957) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
+  - `test_download_png_inline_svg_path_and_drops_image` (function, line 4001) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
+  - `test_dump_timings_prints_stages` (function, line 4017) `static void test_dump_timings_prints_stages(void **state)`
+  - `test_dump_layout_shrink_pill_nested_container` (function, line 4047) `static void test_dump_layout_shrink_pill_nested_container(void **state)`
+  - `test_dump_layout_inline_input_shares_line` (function, line 4084) `static void test_dump_layout_inline_input_shares_line(void **state)`
+  - `test_dump_layout_oof_label_does_not_widen_nested_container` (function, line 4130) `static void test_dump_layout_oof_label_does_not_widen_nested_container(void **state)`
+  - `test_dump_layout_br_after_block_is_a_line` (function, line 4165) `static void test_dump_layout_br_after_block_is_a_line(void **state)`
+  - `test_dump_layout_flex_item_contains_block_margins` (function, line 4185) `static void test_dump_layout_flex_item_contains_block_margins(void **state)`
+  - `test_dump_layout_flex_definite_height_centres_item` (function, line 4210) `static void test_dump_layout_flex_definite_height_centres_item(void **state)`
+  - `test_download_png_text_color_alpha_blends` (function, line 4234) `static void test_download_png_text_color_alpha_blends(void **state)`
+  - `test_dump_layout_ua_margin_scales_with_font_size` (function, line 4271) `static void test_dump_layout_ua_margin_scales_with_font_size(void **state)`
+  - `main` (function, line 4317) `int main(void)`
   - `rows` (function, line 1549) `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);`
   - `bottom` (function, line 3275) `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ /* (Each sized float now has a box of...`
   - `_DEFAULT_SOURCE` (macro, line 1) `#define _DEFAULT_SOURCE`
@@ -237,6 +239,30 @@ static void tes...`
   - `main` (function, line 507) `int main(void)`
   - `LIT` (macro, line 21) `#define LIT(s)`
 - Depends on: `include/html_parse.h`
+
+## tests/test_http_cache.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `meta_of` (function, line 18) `static hc_meta meta_of(const char *cc, const char *etag, const char *lm, const char *date,
+      ...`
+  - `test_http_date_parses_imf_fixdate` (function, line 35) `static void test_http_date_parses_imf_fixdate(void **state)`
+  - `test_lifetime_rules_in_order` (function, line 44) `static void test_lifetime_rules_in_order(void **state)`
+  - `test_classify_fresh_revalidate_unusable` (function, line 63) `static void test_classify_fresh_revalidate_unusable(void **state)`
+  - `test_storable_rules` (function, line 76) `static void test_storable_rules(void **state)`
+  - `setup` (function, line 93) `static int setup(void **state)`
+  - `teardown` (function, line 98) `static int teardown(void **state)`
+  - `count_files` (function, line 105) `static size_t count_files(const char *skip)`
+  - `test_put_get_roundtrip_and_no_plaintext_on_disk` (function, line 115) `static void test_put_get_roundtrip_and_no_plaintext_on_disk(void **state)`
+  - `test_partitions_do_not_share_entries` (function, line 138) `static void test_partitions_do_not_share_entries(void **state)`
+  - `test_tampered_entry_is_removed_and_misses` (function, line 151) `static void test_tampered_entry_is_removed_and_misses(void **state)`
+  - `test_foreign_profile_key_empties_the_cache` (function, line 175) `static void test_foreign_profile_key_empties_the_cache(void **state)`
+  - `test_redirect_memory_persists_and_expires` (function, line 189) `static void test_redirect_memory_persists_and_expires(void **state)`
+  - `test_clear_removes_every_entry` (function, line 207) `static void test_clear_removes_every_entry(void **state)`
+  - `main` (function, line 220) `int main(void)`
+  - `_GNU_SOURCE` (macro, line 1) `#define _GNU_SOURCE`
+  - `NOW` (macro, line 16) `#define NOW`
+- Depends on: `include/http_cache.h`
 
 ## tests/test_identity.c
 - Layer: testing

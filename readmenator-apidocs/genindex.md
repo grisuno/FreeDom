@@ -234,6 +234,7 @@
 - [`bx_width_cap`](modules/src.box_style.c.md#bx_width_cap) function in `src/box_style.c`
 - [`bx_width_cap2`](modules/include.box_style.h.md#bx_width_cap2) function in `include/box_style.h`
 - [`bx_width_cap2`](modules/src.box_style.c.md#bx_width_cap2) function in `src/box_style.c`
+- [`by`](modules/include.http_cache.h.md#by) function in `include/http_cache.h`
 - [`bytes`](modules/include.tab.h.md#bytes) function in `include/tab.h`
 
 <a id="c"></a>
@@ -350,6 +351,14 @@
 - [`ccm_property_name`](modules/include.css_computed.h.md#ccm_property_name) function in `include/css_computed.h`
 - [`ccm_property_name`](modules/src.css_computed.c.md#ccm_property_name) function in `src/css_computed.c`
 - [`CCM_VALUE_MAX`](modules/include.css_computed.h.md#ccm_value_max) macro in `include/css_computed.h`
+- [`cf_attach_redirect_memory`](modules/include.cached_fetch.h.md#cf_attach_redirect_memory) function in `include/cached_fetch.h`
+- [`cf_attach_redirect_memory`](modules/src.cached_fetch.c.md#cf_attach_redirect_memory) function in `src/cached_fetch.c`
+- [`cf_get`](modules/src.cached_fetch.c.md#cf_get) function in `src/cached_fetch.c`
+- [`cf_get_with`](modules/src.cached_fetch.c.md#cf_get_with) function in `src/cached_fetch.c`
+- [`cf_set_store`](modules/include.cached_fetch.h.md#cf_set_store) function in `include/cached_fetch.h`
+- [`cf_set_store`](modules/src.cached_fetch.c.md#cf_set_store) function in `src/cached_fetch.c`
+- [`cf_store`](modules/include.cached_fetch.h.md#cf_store) function in `include/cached_fetch.h`
+- [`cf_store`](modules/src.cached_fetch.c.md#cf_store) function in `src/cached_fetch.c`
 - [`cfg`](modules/include.html_parse.h.md#cfg) function in `include/html_parse.h`
 - [`cg_expand_background`](modules/include.css_gradient.h.md#cg_expand_background) function in `include/css_gradient.h`
 - [`cg_expand_background`](modules/src.css_gradient.c.md#cg_expand_background) function in `src/css_gradient.c`
@@ -444,6 +453,7 @@
 - [`columns`](modules/gui.browser_ui.c.md#columns) function in `gui/browser_ui.c`
 - [`compositing`](modules/gui.browser_ui.c.md#compositing) function in `gui/browser_ui.c`
 - [`connection`](modules/include.secure_fetch.h.md#connection) function in `include/secure_fetch.h`
+- [`conservative`](modules/include.css_select.h.md#conservative) function in `include/css_select.h`
 - [`consumer`](modules/src.css.c.md#consumer) function in `src/css.c`
 - [`container`](modules/gui.browser_ui.c.md#container) function in `gui/browser_ui.c`
 - [`container`](modules/src.page_view.c.md#container) function in `src/page_view.c`
@@ -481,6 +491,7 @@
 - [`csel_lower_ch`](modules/include.css_select.h.md#csel_lower_ch) function in `include/css_select.h`
 - [`csel_matches`](modules/include.css_select.h.md#csel_matches) function in `include/css_select.h`
 - [`csel_matches`](modules/src.css_select.c.md#csel_matches) function in `src/css_select.c`
+- [`csel_needs_structure`](modules/src.css_select.c.md#csel_needs_structure) function in `src/css_select.c`
 - [`csel_parse`](modules/include.css_select.h.md#csel_parse) function in `include/css_select.h`
 - [`csel_read_ident`](modules/include.css_select.h.md#csel_read_ident) function in `include/css_select.h`
 - [`csel_read_ident`](modules/src.css_select.c.md#csel_read_ident) function in `src/css_select.c`
@@ -899,6 +910,7 @@
 - [`end`](modules/include.text_shape.h.md#end) type_alias in `include/text_shape.h`
 - [`engine`](modules/src.page_view.c.md#engine) function in `src/page_view.c`
 - [`enough`](modules/src.js_dom.c.md#enough) function in `src/js_dom.c`
+- [`ent`](modules/src.http_cache.c.md#ent) struct in `src/http_cache.c`
 - [`EPIPE`](modules/src.tab.c.md#epipe) function in `src/tab.c`
 - [`epoch_ms`](modules/include.media_decoder.h.md#epoch_ms) type_alias in `include/media_decoder.h`
 - [`exactly`](modules/gui.browser_ui.c.md#exactly) function in `gui/browser_ui.c`
@@ -965,6 +977,7 @@
 - [`fc_init`](modules/include.frame_clock.h.md#fc_init) function in `include/frame_clock.h`
 - [`fc_interval_ms`](modules/include.frame_clock.h.md#fc_interval_ms) function in `include/frame_clock.h`
 - [`fc_interval_ms`](modules/src.frame_clock.c.md#fc_interval_ms) function in `src/frame_clock.c`
+- [`FC_LAZY_IMAGE_MARGIN_PX`](modules/include.freedom_config.h.md#fc_lazy_image_margin_px) macro in `include/freedom_config.h`
 - [`FC_MAX_AUTHOR_CSS_BYTES`](modules/include.freedom_config.h.md#fc_max_author_css_bytes) macro in `include/freedom_config.h`
 - [`FC_MAX_BOXES`](modules/include.freedom_config.h.md#fc_max_boxes) macro in `include/freedom_config.h`
 - [`fc_needs_tick`](modules/include.frame_clock.h.md#fc_needs_tick) function in `include/frame_clock.h`
@@ -973,6 +986,7 @@
 - [`FC_PNG_PAGE_W`](modules/include.freedom_config.h.md#fc_png_page_w) macro in `include/freedom_config.h`
 - [`fc_set_active`](modules/include.frame_clock.h.md#fc_set_active) function in `include/frame_clock.h`
 - [`fc_set_active`](modules/src.frame_clock.c.md#fc_set_active) function in `src/frame_clock.c`
+- [`FC_TAB_OP_NET_BUDGET_MS`](modules/include.freedom_config.h.md#fc_tab_op_net_budget_ms) macro in `include/freedom_config.h`
 - [`FC_TRUSTED_JS_BUDGET_MS`](modules/include.freedom_config.h.md#fc_trusted_js_budget_ms) macro in `include/freedom_config.h`
 - [`FC_UI_FONT_SIZE`](modules/include.freedom_config.h.md#fc_ui_font_size) macro in `include/freedom_config.h`
 - [`fd`](modules/src.media_decoder.c.md#fd) function in `src/media_decoder.c`
@@ -986,6 +1000,7 @@
 - [`fields`](modules/src.os_sandbox.c.md#fields) function in `src/os_sandbox.c`
 - [`file`](modules/src.text_shape.c.md#file) type_alias in `src/text_shape.c`
 - [`fill`](modules/gui.browser_ui.c.md#fill) function in `gui/browser_ui.c`
+- [`final_url`](modules/include.http_cache.h.md#final_url) type_alias in `include/http_cache.h`
 - [`find_modules`](modules/tools.mutate.py.md#find_modules) function in `tools.mutate`
 - [`Firefox`](modules/gui.browser_ui.c.md#firefox) function in `gui/browser_ui.c`
 - [`first`](modules/gui.browser_ui.c.md#first) function in `gui/browser_ui.c`
@@ -1073,6 +1088,7 @@
 - [`fp_vendor`](modules/include.anti_fp.h.md#fp_vendor) function in `include/anti_fp.h`
 - [`fp_vendor`](modules/src.anti_fp.c.md#fp_vendor) function in `src/anti_fp.c`
 - [`fragment`](modules/gui.browser_ui.c.md#fragment) function in `gui/browser_ui.c`
+- [`frames`](modules/src.tab.c.md#frames) function in `src/tab.c`
 - [`free`](modules/include.prefs.h.md#free) function in `include/prefs.h`
 - [`free`](modules/include.webfont_load.h.md#free) function in `include/webfont_load.h`
 - [`freebug_window`](modules/gui.browser_ui.c.md#freebug_window) type_alias in `gui/browser_ui.c`
@@ -1226,6 +1242,7 @@
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.os_sandbox.c.md#_gnu_source) macro in `src/os_sandbox.c`
 - [`_GNU_SOURCE`](modules/src.tab.c.md#_gnu_source) macro in `src/tab.c`
 - [`gradient`](modules/src.css_gradient.c.md#gradient) function in `src/css_gradient.c`
@@ -1264,6 +1281,40 @@
 - [`hb_set`](modules/src.hostblock.c.md#hb_set) struct in `src/hostblock.c`
 - [`hb_status`](modules/include.hostblock.h.md#hb_status) enum in `include/hostblock.h`
 - [`hb_table`](modules/src.hostblock.c.md#hb_table) struct in `src/hostblock.c`
+- [`hc_body_free`](modules/include.http_cache.h.md#hc_body_free) function in `include/http_cache.h`
+- [`hc_body_free`](modules/src.http_cache.c.md#hc_body_free) function in `src/http_cache.c`
+- [`hc_class`](modules/include.http_cache.h.md#hc_class) enum in `include/http_cache.h`
+- [`hc_classify`](modules/src.http_cache.c.md#hc_classify) function in `src/http_cache.c`
+- [`hc_clear`](modules/include.http_cache.h.md#hc_clear) function in `include/http_cache.h`
+- [`hc_clear`](modules/src.http_cache.c.md#hc_clear) function in `src/http_cache.c`
+- [`hc_close`](modules/include.http_cache.h.md#hc_close) function in `include/http_cache.h`
+- [`hc_close`](modules/src.http_cache.c.md#hc_close) function in `src/http_cache.c`
+- [`HC_EVICT_EVERY`](modules/src.http_cache.c.md#hc_evict_every) macro in `src/http_cache.c`
+- [`hc_get`](modules/src.http_cache.c.md#hc_get) function in `src/http_cache.c`
+- [`HC_HEURISTIC_CAP`](modules/include.http_cache.h.md#hc_heuristic_cap) macro in `include/http_cache.h`
+- [`HC_KEY_FILE`](modules/src.http_cache.c.md#hc_key_file) macro in `src/http_cache.c`
+- [`hc_lifetime`](modules/include.http_cache.h.md#hc_lifetime) function in `include/http_cache.h`
+- [`hc_lifetime`](modules/src.http_cache.c.md#hc_lifetime) function in `src/http_cache.c`
+- [`HC_MAGIC`](modules/src.http_cache.c.md#hc_magic) macro in `src/http_cache.c`
+- [`HC_MAX_AGE_CAP`](modules/src.http_cache.c.md#hc_max_age_cap) macro in `src/http_cache.c`
+- [`HC_MAX_ENTRY`](modules/include.http_cache.h.md#hc_max_entry) macro in `include/http_cache.h`
+- [`HC_MAX_TOTAL`](modules/include.http_cache.h.md#hc_max_total) macro in `include/http_cache.h`
+- [`hc_meta`](modules/include.http_cache.h.md#hc_meta) struct in `include/http_cache.h`
+- [`HC_NAME_HEX`](modules/src.http_cache.c.md#hc_name_hex) macro in `src/http_cache.c`
+- [`hc_open`](modules/src.http_cache.c.md#hc_open) function in `src/http_cache.c`
+- [`hc_parse_http_date`](modules/include.http_cache.h.md#hc_parse_http_date) function in `include/http_cache.h`
+- [`hc_parse_http_date`](modules/src.http_cache.c.md#hc_parse_http_date) function in `src/http_cache.c`
+- [`hc_put`](modules/src.http_cache.c.md#hc_put) function in `src/http_cache.c`
+- [`hc_redirect_get`](modules/src.http_cache.c.md#hc_redirect_get) function in `src/http_cache.c`
+- [`hc_redirect_put`](modules/src.http_cache.c.md#hc_redirect_put) function in `src/http_cache.c`
+- [`HC_REDIRECT_TTL`](modules/include.http_cache.h.md#hc_redirect_ttl) macro in `include/http_cache.h`
+- [`hc_status`](modules/include.http_cache.h.md#hc_status) enum in `include/http_cache.h`
+- [`hc_storable`](modules/src.http_cache.c.md#hc_storable) function in `src/http_cache.c`
+- [`hc_store`](modules/include.http_cache.h.md#hc_store) type_alias in `include/http_cache.h`
+- [`hc_store`](modules/src.http_cache.c.md#hc_store) struct in `src/http_cache.c`
+- [`HC_TYPE_MAX`](modules/include.http_cache.h.md#hc_type_max) macro in `include/http_cache.h`
+- [`HC_URL_MAX`](modules/include.http_cache.h.md#hc_url_max) macro in `include/http_cache.h`
+- [`HC_VAL_MAX`](modules/include.http_cache.h.md#hc_val_max) macro in `include/http_cache.h`
 - [`hcf_dirs`](modules/include.host_conf.h.md#hcf_dirs) struct in `include/host_conf.h`
 - [`hcf_load_allowlist`](modules/include.host_conf.h.md#hcf_load_allowlist) function in `include/host_conf.h`
 - [`hcf_load_allowlist`](modules/src.host_conf.c.md#hcf_load_allowlist) function in `src/host_conf.c`
@@ -1620,6 +1671,7 @@
 - [`js_pump_jobs`](modules/include.js_sandbox.h.md#js_pump_jobs) function in `include/js_sandbox.h`
 - [`js_pump_jobs`](modules/src.js_sandbox.c.md#js_pump_jobs) function in `src/js_sandbox.c`
 - [`JS_REALM_MAX`](modules/include.js_sandbox.h.md#js_realm_max) macro in `include/js_sandbox.h`
+- [`JS_REJECT_MAX`](modules/include.js_sandbox.h.md#js_reject_max) macro in `include/js_sandbox.h`
 - [`js_result`](modules/include.js_sandbox.h.md#js_result) struct in `include/js_sandbox.h`
 - [`js_result_free`](modules/include.js_sandbox.h.md#js_result_free) function in `include/js_sandbox.h`
 - [`js_result_free`](modules/src.js_sandbox.c.md#js_result_free) function in `src/js_sandbox.c`
@@ -1983,6 +2035,7 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -2054,6 +2107,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -2236,11 +2291,13 @@
 - [`positions`](modules/src.page_view.c.md#positions) function in `src/page_view.c`
 - [`_POSIX_C_SOURCE`](modules/gui.freedom_view.c.md#_posix_c_source) macro in `gui/freedom_view.c`
 - [`_POSIX_C_SOURCE`](modules/src.browser.c.md#_posix_c_source) macro in `src/browser.c`
+- [`_POSIX_C_SOURCE`](modules/src.cached_fetch.c.md#_posix_c_source) macro in `src/cached_fetch.c`
 - [`_POSIX_C_SOURCE`](modules/src.disk_store.c.md#_posix_c_source) macro in `src/disk_store.c`
 - [`_POSIX_C_SOURCE`](modules/src.dom.c.md#_posix_c_source) macro in `src/dom.c`
 - [`_POSIX_C_SOURCE`](modules/src.freedom.c.md#_posix_c_source) macro in `src/freedom.c`
 - [`_POSIX_C_SOURCE`](modules/src.hls.c.md#_posix_c_source) macro in `src/hls.c`
 - [`_POSIX_C_SOURCE`](modules/src.html_parse.c.md#_posix_c_source) macro in `src/html_parse.c`
+- [`_POSIX_C_SOURCE`](modules/src.http_cache.c.md#_posix_c_source) macro in `src/http_cache.c`
 - [`_POSIX_C_SOURCE`](modules/src.js_env.c.md#_posix_c_source) macro in `src/js_env.c`
 - [`_POSIX_C_SOURCE`](modules/src.js_sandbox.c.md#_posix_c_source) macro in `src/js_sandbox.c`
 - [`_POSIX_C_SOURCE`](modules/src.media_decoder.c.md#_posix_c_source) macro in `src/media_decoder.c`
@@ -2255,6 +2312,22 @@
 - [`_POSIX_C_SOURCE`](modules/src.wl_display.c.md#_posix_c_source) macro in `src/wl_display.c`
 - [`_POSIX_C_SOURCE`](modules/src.ws_hub.c.md#_posix_c_source) macro in `src/ws_hub.c`
 - [`_POSIX_C_SOURCE`](modules/tools.gen_psl.c.md#_posix_c_source) macro in `tools/gen_psl.c`
+- [`pqs_buf_free`](modules/include.pq_seal.h.md#pqs_buf_free) function in `include/pq_seal.h`
+- [`pqs_buf_free`](modules/src.pq_seal.c.md#pqs_buf_free) function in `src/pq_seal.c`
+- [`PQS_CT_LEN`](modules/include.pq_seal.h.md#pqs_ct_len) macro in `include/pq_seal.h`
+- [`pqs_export`](modules/src.pq_seal.c.md#pqs_export) function in `src/pq_seal.c`
+- [`pqs_free`](modules/include.pq_seal.h.md#pqs_free) function in `include/pq_seal.h`
+- [`pqs_free`](modules/src.pq_seal.c.md#pqs_free) function in `src/pq_seal.c`
+- [`pqs_generate`](modules/src.pq_seal.c.md#pqs_generate) function in `src/pq_seal.c`
+- [`pqs_import`](modules/src.pq_seal.c.md#pqs_import) function in `src/pq_seal.c`
+- [`pqs_keys`](modules/include.pq_seal.h.md#pqs_keys) type_alias in `include/pq_seal.h`
+- [`pqs_keys`](modules/src.pq_seal.c.md#pqs_keys) struct in `src/pq_seal.c`
+- [`PQS_MAGIC`](modules/include.pq_seal.h.md#pqs_magic) macro in `include/pq_seal.h`
+- [`PQS_MAGIC_LEN`](modules/include.pq_seal.h.md#pqs_magic_len) macro in `include/pq_seal.h`
+- [`pqs_open`](modules/src.pq_seal.c.md#pqs_open) function in `src/pq_seal.c`
+- [`pqs_seal`](modules/src.pq_seal.c.md#pqs_seal) function in `src/pq_seal.c`
+- [`PQS_SS_LEN`](modules/src.pq_seal.c.md#pqs_ss_len) macro in `src/pq_seal.c`
+- [`pqs_status`](modules/include.pq_seal.h.md#pqs_status) enum in `include/pq_seal.h`
 - [`prefers_dark`](modules/include.css.h.md#css_sel-prefers_dark) type_alias of `css_sel` in `include/css.h`
 - [`prefs_bookmark_index`](modules/include.prefs.h.md#prefs_bookmark_index) function in `include/prefs.h`
 - [`prefs_bookmark_index`](modules/src.prefs.c.md#prefs_bookmark_index) function in `src/prefs.c`
@@ -2683,6 +2756,8 @@
 - [`sf_get_follow_navigable`](modules/src.secure_fetch.c.md#sf_get_follow_navigable) function in `src/secure_fetch.c`
 - [`sf_global_init`](modules/include.secure_fetch.h.md#sf_global_init) function in `include/secure_fetch.h`
 - [`sf_global_init`](modules/src.secure_fetch.c.md#sf_global_init) function in `src/secure_fetch.c`
+- [`sf_header_value`](modules/include.secure_fetch.h.md#sf_header_value) function in `include/secure_fetch.h`
+- [`sf_header_value`](modules/src.secure_fetch.c.md#sf_header_value) function in `src/secure_fetch.c`
 - [`SF_IMPERSONATE_KEX_GROUPS`](modules/include.secure_fetch.h.md#sf_impersonate_kex_groups) macro in `include/secure_fetch.h`
 - [`sf_impersonate_kex_groups`](modules/include.secure_fetch.h.md#sf_impersonate_kex_groups) function in `include/secure_fetch.h`
 - [`sf_impersonate_kex_groups`](modules/src.secure_fetch.c.md#sf_impersonate_kex_groups) function in `src/secure_fetch.c`
@@ -2693,6 +2768,7 @@
 - [`sf_is_redirect_code`](modules/include.secure_fetch.h.md#sf_is_redirect_code) function in `include/secure_fetch.h`
 - [`sf_is_redirect_code`](modules/src.secure_fetch.c.md#sf_is_redirect_code) function in `src/secure_fetch.c`
 - [`SF_MAX_URL`](modules/include.secure_fetch.h.md#sf_max_url) macro in `include/secure_fetch.h`
+- [`SF_META_MAX`](modules/include.secure_fetch.h.md#sf_meta_max) macro in `include/secure_fetch.h`
 - [`sf_parse_location_header`](modules/src.secure_fetch.c.md#sf_parse_location_header) function in `src/secure_fetch.c`
 - [`sf_policy`](modules/include.secure_fetch.h.md#sf_policy) enum in `include/secure_fetch.h`
 - [`sf_post`](modules/src.secure_fetch.c.md#sf_post) function in `src/secure_fetch.c`
@@ -2705,6 +2781,8 @@
 - [`sf_rcache_get`](modules/src.secure_fetch.c.md#sf_rcache_get) function in `src/secure_fetch.c`
 - [`sf_rcache_put`](modules/include.secure_fetch.h.md#sf_rcache_put) function in `include/secure_fetch.h`
 - [`sf_rcache_put`](modules/src.secure_fetch.c.md#sf_rcache_put) function in `src/secure_fetch.c`
+- [`sf_rcache_set_backing`](modules/include.secure_fetch.h.md#sf_rcache_set_backing) function in `include/secure_fetch.h`
+- [`sf_rcache_set_backing`](modules/src.secure_fetch.c.md#sf_rcache_set_backing) function in `src/secure_fetch.c`
 - [`SF_RCACHE_SLOTS`](modules/src.secure_fetch.c.md#sf_rcache_slots) macro in `src/secure_fetch.c`
 - [`SF_RCACHE_TTL_S`](modules/src.secure_fetch.c.md#sf_rcache_ttl_s) macro in `src/secure_fetch.c`
 - [`sf_resolve_redirect`](modules/src.secure_fetch.c.md#sf_resolve_redirect) function in `src/secure_fetch.c`
@@ -2815,6 +2893,11 @@
 - [`tab`](modules/src.tab.c.md#tab) struct in `src/tab.c`
 - [`tab_alive`](modules/include.tab.h.md#tab_alive) function in `include/tab.h`
 - [`tab_alive`](modules/src.tab.c.md#tab_alive) function in `src/tab.c`
+- [`tab_async_busy`](modules/include.tab.h.md#tab_async_busy) function in `include/tab.h`
+- [`tab_async_busy`](modules/src.tab.c.md#tab_async_busy) function in `src/tab.c`
+- [`tab_async_fd`](modules/include.tab.h.md#tab_async_fd) function in `include/tab.h`
+- [`tab_async_fd`](modules/src.tab.c.md#tab_async_fd) function in `src/tab.c`
+- [`tab_async_finish`](modules/src.tab.c.md#tab_async_finish) function in `src/tab.c`
 - [`tab_child_pid`](modules/include.tab.h.md#tab_child_pid) function in `include/tab.h`
 - [`tab_child_pid`](modules/src.tab.c.md#tab_child_pid) function in `src/tab.c`
 - [`tab_click`](modules/src.tab.c.md#tab_click) function in `src/tab.c`
@@ -2827,6 +2910,7 @@
 - [`tab_eval_result`](modules/include.tab.h.md#tab_eval_result) struct in `include/tab.h`
 - [`tab_eval_result_free`](modules/include.tab.h.md#tab_eval_result_free) function in `include/tab.h`
 - [`tab_eval_result_free`](modules/src.tab.c.md#tab_eval_result_free) function in `src/tab.c`
+- [`tab_geometry_async`](modules/src.tab.c.md#tab_geometry_async) function in `src/tab.c`
 - [`tab_hist_op`](modules/include.tab.h.md#tab_hist_op) struct in `include/tab.h`
 - [`tab_image`](modules/include.tab.h.md#tab_image) struct in `include/tab.h`
 - [`tab_image_free`](modules/include.tab.h.md#tab_image_free) function in `include/tab.h`
@@ -2871,6 +2955,8 @@
 - [`tab_set_identity`](modules/src.tab.c.md#tab_set_identity) function in `src/tab.c`
 - [`tab_set_net_allowed`](modules/include.tab.h.md#tab_set_net_allowed) function in `include/tab.h`
 - [`tab_set_net_allowed`](modules/src.tab.c.md#tab_set_net_allowed) function in `src/tab.c`
+- [`tab_set_op_net_budget_ms`](modules/include.tab.h.md#tab_set_op_net_budget_ms) function in `include/tab.h`
+- [`tab_set_op_net_budget_ms`](modules/src.tab.c.md#tab_set_op_net_budget_ms) function in `src/tab.c`
 - [`tab_set_storage`](modules/include.tab.h.md#tab_set_storage) function in `include/tab.h`
 - [`tab_set_storage`](modules/src.tab.c.md#tab_set_storage) function in `src/tab.c`
 - [`tab_set_viewport_w`](modules/include.tab.h.md#tab_set_viewport_w) function in `include/tab.h`
@@ -2880,6 +2966,7 @@
 - [`tab_subreq_permitted`](modules/include.tab.h.md#tab_subreq_permitted) function in `include/tab.h`
 - [`tab_subreq_permitted`](modules/src.tab.c.md#tab_subreq_permitted) function in `src/tab.c`
 - [`tab_tick`](modules/src.tab.c.md#tab_tick) function in `src/tab.c`
+- [`tab_tick_async`](modules/src.tab.c.md#tab_tick_async) function in `src/tab.c`
 - [`TAB_WIRE_A_N`](modules/src.tab.c.md#tab_wire_a_n) macro in `src/tab.c`
 - [`TAB_WIRE_B_N`](modules/src.tab.c.md#tab_wire_b_n) macro in `src/tab.c`
 - [`TAB_WIRE_BOX_F_N`](modules/src.tab.c.md#tab_wire_box_f_n) macro in `src/tab.c`
@@ -3065,6 +3152,8 @@
 - [`ui_layout`](modules/include.ui.h.md#ui_layout) struct in `include/ui.h`
 - [`ui_layout_free`](modules/include.ui.h.md#ui_layout_free) function in `include/ui.h`
 - [`ui_layout_free`](modules/src.ui_layout.c.md#ui_layout_free) function in `src/ui_layout.c`
+- [`UI_LAZY_PASSES`](modules/gui.browser_ui.c.md#ui_lazy_passes) macro in `gui/browser_ui.c`
+- [`UI_LAZY_PER_PASS`](modules/gui.browser_ui.c.md#ui_lazy_per_pass) macro in `gui/browser_ui.c`
 - [`ui_line`](modules/include.ui.h.md#ui_line) struct in `include/ui.h`
 - [`UI_LIST_INDENT`](modules/gui.browser_ui.c.md#ui_list_indent) macro in `gui/browser_ui.c`
 - [`UI_MARGIN`](modules/gui.browser_ui.c.md#ui_margin) macro in `gui/browser_ui.c`

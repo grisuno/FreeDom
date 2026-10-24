@@ -12,7 +12,7 @@
 
 ### `jdce_install`
 
-`function` | [src/js_custom_elements.c:179](../../src/js_custom_elements.c#L179)
+`function` | [src/js_custom_elements.c:183](../../src/js_custom_elements.c#L183)
 
 ```c
 int jdce_install(JSContext *ctx)

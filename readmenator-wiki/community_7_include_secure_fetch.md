@@ -1,10 +1,10 @@
 # include: secure_fetch
 
-*Community 7 | 13 files | cohesion 0.61*
+*Community 7 | 13 files | cohesion 0.58*
 
 ## Definition
 
-This community groups 13 file(s) rooted at `tests` with dominant language c (cohesion 0.61). Central symbols: `CHECK`, `EXCLUDED`, `FP_ACCEPT_HEADER_NAV`, `FP_ACCEPT_LANGUAGE`, `FP_ACCEPT_LANGUAGE_HEADER`, `FP_SEC_FETCH_DEST_NAV`, `FP_SEC_FETCH_MODE_NAV`, `FP_SEC_FETCH_SITE_NONE`. Core file: `src/secure_fetch.c` (76 symbols).
+This community groups 13 file(s) rooted at `tests` with dominant language c (cohesion 0.58). Central symbols: `CHECK`, `EXCLUDED`, `FP_ACCEPT_HEADER_NAV`, `FP_ACCEPT_LANGUAGE`, `FP_ACCEPT_LANGUAGE_HEADER`, `FP_SEC_FETCH_DEST_NAV`, `FP_SEC_FETCH_MODE_NAV`, `FP_SEC_FETCH_SITE_NONE`. Core file: `src/secure_fetch.c` (79 symbols).
 
 ## Files
 
@@ -12,16 +12,16 @@ This community groups 13 file(s) rooted at `tests` with dominant language c (coh
 |------|----------|-------|---------|-----|
 | `include/anti_fp.h` | h | utility | 35 | no |
 | `include/identity.h` | h | utility | 24 | no |
-| `include/secure_fetch.h` | h | utility | 43 | no |
+| `include/secure_fetch.h` | h | utility | 46 | no |
 | `include/ws_hub.h` | h | utility | 15 | no |
 | `src/anti_fp.c` | c | utility | 23 | no |
 | `src/identity.c` | c | utility | 25 | no |
-| `src/secure_fetch.c` | c | utility | 76 | no |
+| `src/secure_fetch.c` | c | utility | 79 | no |
 | `src/ws_hub.c` | c | utility | 27 | no |
 | `tests/itest_secure_fetch.c` | c | testing | 2 | no |
 | `tests/test_anti_fp.c` | c | testing | 15 | no |
 | `tests/test_identity.c` | c | testing | 9 | no |
-| `tests/test_secure_fetch.c` | c | testing | 52 | no |
+| `tests/test_secure_fetch.c` | c | testing | 57 | no |
 | `tests/test_ws_hub.c` | c | testing | 13 | no |
 
 ## Key Symbols
@@ -60,11 +60,12 @@ This community groups 13 file(s) rooted at `tests` with dominant language c (coh
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 14
-- Cross-boundary resolved imports (EXTRACTED): 9
+- Cross-boundary resolved imports (EXTRACTED): 10
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
+- [EXTRACTED] depends_on community 0 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
+- [EXTRACTED] depends_on community 6 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/secure_fetch.h.
 - [EXTRACTED] depends_on community 3 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/identity.h.
 
 ## Risks
@@ -75,7 +76,7 @@ This community groups 13 file(s) rooted at `tests` with dominant language c (coh
 
 - Why do 13 file(s) lack file-level docs (e.g. `include/anti_fp.h`)? What purpose do they serve?
 - What would break if the most connected file in include: secure_fetch changed?
-- Should include: secure_fetch be split, given cohesion 0.61?
+- Should include: secure_fetch be split, given cohesion 0.58?
 
 ## Sources
 

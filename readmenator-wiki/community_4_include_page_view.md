@@ -1,6 +1,6 @@
 # include: page_view
 
-*Community 5 | 19 files | cohesion 0.45*
+*Community 4 | 19 files | cohesion 0.45*
 
 ## Definition
 
@@ -26,7 +26,7 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 | `tests/test_box_tree.c` | c | testing | 68 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 71 | no |
-| `tests/test_page_view.c` | c | testing | 209 | no |
+| `tests/test_page_view.c` | c | testing | 210 | no |
 | `tests/test_render_doc.c` | c | testing | 37 | no |
 | `tests/test_render_policy.c` | c | testing | 21 | no |
 
@@ -70,10 +70,10 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
-- [EXTRACTED] depends_on community 5 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
-- [EXTRACTED] depends_on community 5 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
-- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/dom_debug.h.
+- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 4 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
+- [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
 
 ## Risks
 

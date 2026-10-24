@@ -1,6 +1,21 @@
 # Subsystem: include (page 2 of 5)
 Previous: [KB_include.md](KB_include.md)
 
+## include/css_index.h
+- Doc: cix_build: Builds the index over sels[0,n) into *idx, overwriting it (a built index must be *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `cix_entry` (struct, line 18)
+  - `cix_index` (struct, line 23)
+  - `key` (type_alias, line 17) `typedef struct cix_entry { uint64_t key;`
+  - `cix_build` (function, line 34) `void cix_build(const css_sel *sels, size_t n, cix_index *idx);`
+  - `cix_free` (function, line 37) `void cix_free(cix_index *idx);`
+  - `index` (function, line 41) `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...`
+  - `FREEDOM_CSS_INDEX_H` (macro, line 11) `#define FREEDOM_CSS_INDEX_H`
+- Depends on: `include/css_select.h`
+- Imported by: `src/css.c`, `src/css_index.c`, `tests/test_css_index.c`
+
 ## include/css_length.h
 - Doc: cl_ctx: The state a <length> is measured against.
 - Layer: utility
@@ -74,30 +89,31 @@ Previous: [KB_include.md](KB_include.md)
   - `kind` (type_alias, line 112) `typedef struct css_pseudo_match { int kind;`
   - `tag` (type_alias, line 122) `typedef struct css_compound { char tag[CSS_TOK_MAX];`
   - `parts` (type_alias, line 139) `typedef struct css_sel { css_compound parts[CSS_MAX_COMPOUNDS];`
-  - `csel_lower_ch` (function, line 198) `static inline char csel_lower_ch(char c)`
-  - `csel_ci_eq` (function, line 202) `static inline int csel_ci_eq(const char *a, const char *b)`
-  - `csel_span_eq` (function, line 211) `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
-  - `csel_substr` (function, line 222) `static inline int csel_substr(const char *hay, const char *needle, int ci)`
-  - `csel_ident_ch` (function, line 230) `static inline int csel_ident_ch(char c)`
+  - `csel_lower_ch` (function, line 205) `static inline char csel_lower_ch(char c)`
+  - `csel_ci_eq` (function, line 209) `static inline int csel_ci_eq(const char *a, const char *b)`
+  - `csel_span_eq` (function, line 218) `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
+  - `csel_substr` (function, line 229) `static inline int csel_substr(const char *hay, const char *needle, int ci)`
+  - `csel_ident_ch` (function, line 237) `static inline int csel_ident_ch(char c)`
   - `csel_parse` (function, line 153) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);`
   - `csel_matches` (function, line 162) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...`
-  - `identifier` (function, line 166) `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
-  - `csel_emit_utf8` (function, line 178) `size_t csel_emit_utf8(unsigned int cp, char *out);`
-  - `csel_unescape` (function, line 180) `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);`
-  - `csel_escape_len` (function, line 182) `size_t csel_escape_len(const char *s, size_t i, size_t b);`
-  - `csel_ident_fold` (function, line 184) `void csel_ident_fold(const char *src, size_t len, char *dst);`
-  - `csel_ident_eq` (function, line 186) `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);`
-  - `csel_read_ident` (function, line 189) `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);`
-  - `csel_decl_end` (function, line 194) `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);`
+  - `conservative` (function, line 167) `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...`
+  - `identifier` (function, line 173) `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
+  - `csel_emit_utf8` (function, line 185) `size_t csel_emit_utf8(unsigned int cp, char *out);`
+  - `csel_unescape` (function, line 187) `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);`
+  - `csel_escape_len` (function, line 189) `size_t csel_escape_len(const char *s, size_t i, size_t b);`
+  - `csel_ident_fold` (function, line 191) `void csel_ident_fold(const char *src, size_t len, char *dst);`
+  - `csel_ident_eq` (function, line 193) `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);`
+  - `csel_read_ident` (function, line 196) `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);`
+  - `csel_decl_end` (function, line 201) `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);`
   - `FREEDOM_CSS_SELECT_H` (macro, line 2) `#define FREEDOM_CSS_SELECT_H`
   - `CSS_TOK_MAX` (macro, line 27) `#define CSS_TOK_MAX`
   - `CSS_MAX_CLASSES_PER_SEL` (macro, line 28) `#define CSS_MAX_CLASSES_PER_SEL`
   - `CSS_MAX_SUB_SELS` (macro, line 83) `#define CSS_MAX_SUB_SELS`
   - `CSS_SUB_MAX_ATTRS` (macro, line 84) `#define CSS_SUB_MAX_ATTRS`
   - `CSS_SUB_MAX_PSEUDOS` (macro, line 85) `#define CSS_SUB_MAX_PSEUDOS`
-  - `CSEL_FOLD_PREFIX` (macro, line 173) `#define CSEL_FOLD_PREFIX`
-  - `CSEL_FOLD_MARK` (macro, line 174) `#define CSEL_FOLD_MARK`
-  - `CSEL_IDENT_SCRATCH` (macro, line 175) `#define CSEL_IDENT_SCRATCH`
+  - `CSEL_FOLD_PREFIX` (macro, line 180) `#define CSEL_FOLD_PREFIX`
+  - `CSEL_FOLD_MARK` (macro, line 181) `#define CSEL_FOLD_MARK`
+  - `CSEL_IDENT_SCRATCH` (macro, line 182) `#define CSEL_IDENT_SCRATCH`
 - Depends on: `include/css.h`
 - Imported by: `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `tests/test_css.c`
 
@@ -189,7 +205,7 @@ Previous: [KB_include.md](KB_include.md)
   - `ds_free` (function, line 47) `void ds_free(uint8_t *buf, size_t len);`
   - `FREEDOM_DISK_STORE_H` (macro, line 2) `#define FREEDOM_DISK_STORE_H`
 - Depends on: `include/local_store.h`
-- Imported by: `src/disk_store.c`, `src/profile.c`, `tests/test_disk_store.c`
+- Imported by: `src/disk_store.c`, `src/http_cache.c`, `src/profile.c`, `tests/test_disk_store.c`
 
 ## include/dom.h
 - Doc: dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: *...
@@ -382,6 +398,8 @@ Previous: [KB_include.md](KB_include.md)
   - `FC_FONT_FALLBACK_PX` (macro, line 65) `#define FC_FONT_FALLBACK_PX`
   - `FC_UI_FONT_SIZE` (macro, line 69) `#define FC_UI_FONT_SIZE`
   - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 77) `#define FC_MAX_AUTHOR_CSS_BYTES`
+  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 80) `#define FC_LAZY_IMAGE_MARGIN_PX`
+  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 86) `#define FC_TAB_OP_NET_BUDGET_MS`
 - Imported by: `gui/browser_ui_internal.h`, `gui/svg_paint.c`, `gui/ui_render.c`, `src/page_view.c`, `src/tab.c`
 
 ## include/hls.h

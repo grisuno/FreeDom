@@ -242,48 +242,49 @@ static void test_leading_b...`
 - Layer: testing
 - Language: c
 - Symbols:
-  - `setup_doc` (function, line 32) `static int setup_doc(void **state)`
-  - `teardown_doc` (function, line 45) `static int teardown_doc(void **state)`
-  - `test_build_null_args` (function, line 60) `static void test_build_null_args(void **state)`
-  - `test_free_null_and_double` (function, line 70) `static void test_free_null_and_double(void **state)`
-  - `test_node_count` (function, line 81) `static void test_node_count(void **state)`
-  - `test_get_by_id` (function, line 88) `static void test_get_by_id(void **state)`
-  - `test_get_by_id_absent` (function, line 102) `static void test_get_by_id_absent(void **state)`
-  - `test_by_class` (function, line 109) `static void test_by_class(void **state)`
-  - `test_by_tag` (function, line 118) `static void test_by_tag(void **state)`
-  - `test_by_tag_results_in_document_order` (function, line 127) `static void test_by_tag_results_in_document_order(void **state)`
-  - `test_document_order` (function, line 137) `static void test_document_order(void **state)`
-  - `test_navigation` (function, line 151) `static void test_navigation(void **state)`
-  - `test_attributes` (function, line 171) `static void test_attributes(void **state)`
-  - `test_text_content_read` (function, line 185) `static void test_text_content_read(void **state)`
-  - `test_set_text_content_changes_tree` (function, line 196) `static void test_set_text_content_changes_tree(void **state)`
-  - `test_set_text_content_empty_clears` (function, line 214) `static void test_set_text_content_empty_clears(void **state)`
-  - `test_set_text_content_invalid_node` (function, line 224) `static void test_set_text_content_invalid_node(void **state)`
-  - `test_set_and_get_document_title` (function, line 229) `static void test_set_and_get_document_title(void **state)`
-  - `test_create_and_append` (function, line 241) `static void test_create_and_append(void **state)`
-  - `test_append_rejects_cycle` (function, line 259) `static void test_append_rejects_cycle(void **state)`
-  - `test_remove_child` (function, line 269) `static void test_remove_child(void **state)`
-  - `test_set_attribute_reindexes_id` (function, line 281) `static void test_set_attribute_reindexes_id(void **state)`
-  - `test_remove_attribute` (function, line 294) `static void test_remove_attribute(void **state)`
-  - `test_set_inner_html` (function, line 311) `static void test_set_inner_html(void **state)`
-  - `test_construction_invalid_args` (function, line 327) `static void test_construction_invalid_args(void **state)`
-  - `test_get_inner_html` (function, line 335) `static void test_get_inner_html(void **state)`
-  - `test_query_selector_type_class_id` (function, line 363) `static void test_query_selector_type_class_id(void **state)`
-  - `test_query_selector_all_counts` (function, line 377) `static void test_query_selector_all_counts(void **state)`
-  - `test_query_selector_combinators` (function, line 388) `static void test_query_selector_combinators(void **state)`
-  - `rule` (function, line 405) `* silently drops the whole rule (fail closed), so the title read black-on-teal
+  - `setup_doc` (function, line 35) `static int setup_doc(void **state)`
+  - `teardown_doc` (function, line 48) `static int teardown_doc(void **state)`
+  - `test_build_null_args` (function, line 63) `static void test_build_null_args(void **state)`
+  - `test_free_null_and_double` (function, line 73) `static void test_free_null_and_double(void **state)`
+  - `test_node_count` (function, line 84) `static void test_node_count(void **state)`
+  - `test_get_by_id` (function, line 91) `static void test_get_by_id(void **state)`
+  - `test_get_by_id_absent` (function, line 105) `static void test_get_by_id_absent(void **state)`
+  - `test_by_class` (function, line 112) `static void test_by_class(void **state)`
+  - `test_by_tag` (function, line 121) `static void test_by_tag(void **state)`
+  - `test_by_tag_results_in_document_order` (function, line 130) `static void test_by_tag_results_in_document_order(void **state)`
+  - `test_document_order` (function, line 140) `static void test_document_order(void **state)`
+  - `test_navigation` (function, line 154) `static void test_navigation(void **state)`
+  - `test_attributes` (function, line 174) `static void test_attributes(void **state)`
+  - `test_text_content_read` (function, line 188) `static void test_text_content_read(void **state)`
+  - `test_set_text_content_changes_tree` (function, line 199) `static void test_set_text_content_changes_tree(void **state)`
+  - `test_set_text_content_empty_clears` (function, line 217) `static void test_set_text_content_empty_clears(void **state)`
+  - `test_set_text_content_invalid_node` (function, line 227) `static void test_set_text_content_invalid_node(void **state)`
+  - `test_set_and_get_document_title` (function, line 232) `static void test_set_and_get_document_title(void **state)`
+  - `test_create_and_append` (function, line 244) `static void test_create_and_append(void **state)`
+  - `test_append_rejects_cycle` (function, line 262) `static void test_append_rejects_cycle(void **state)`
+  - `test_remove_child` (function, line 272) `static void test_remove_child(void **state)`
+  - `test_set_attribute_reindexes_id` (function, line 284) `static void test_set_attribute_reindexes_id(void **state)`
+  - `test_remove_attribute` (function, line 297) `static void test_remove_attribute(void **state)`
+  - `test_set_inner_html` (function, line 314) `static void test_set_inner_html(void **state)`
+  - `test_construction_invalid_args` (function, line 330) `static void test_construction_invalid_args(void **state)`
+  - `test_get_inner_html` (function, line 338) `static void test_get_inner_html(void **state)`
+  - `test_query_selector_type_class_id` (function, line 420) `static void test_query_selector_type_class_id(void **state)`
+  - `test_query_selector_all_counts` (function, line 434) `static void test_query_selector_all_counts(void **state)`
+  - `test_query_selector_combinators` (function, line 445) `static void test_query_selector_combinators(void **state)`
+  - `rule` (function, line 462) `* silently drops the whole rule (fail closed), so the title read black-on-teal
  * instead of the ...`
-  - `test_query_selector_nth_and_structural` (function, line 435) `static void test_query_selector_nth_and_structural(void **state)`
-  - `test_query_selector_scope_is_descendants_only` (function, line 448) `static void test_query_selector_scope_is_descendants_only(void **state)`
-  - `test_matches_and_closest` (function, line 460) `static void test_matches_and_closest(void **state)`
-  - `test_query_selector_fail_closed` (function, line 473) `static void test_query_selector_fail_closed(void **state)`
-  - `test_insert_before` (function, line 493) `static void test_insert_before(void **state)`
-  - `test_clone_node` (function, line 525) `static void test_clone_node(void **state)`
-  - `test_move_children` (function, line 548) `static void test_move_children(void **state)`
-  - `test_char_nodes` (function, line 589) `static void test_char_nodes(void **state)`
-  - `main` (function, line 636) `int main(void)`
-  - `DOC` (macro, line 55) `#define DOC(state)`
-  - `IDX` (macro, line 56) `#define IDX(state)`
+  - `test_query_selector_nth_and_structural` (function, line 492) `static void test_query_selector_nth_and_structural(void **state)`
+  - `test_query_selector_scope_is_descendants_only` (function, line 505) `static void test_query_selector_scope_is_descendants_only(void **state)`
+  - `test_matches_and_closest` (function, line 517) `static void test_matches_and_closest(void **state)`
+  - `test_query_selector_fail_closed` (function, line 530) `static void test_query_selector_fail_closed(void **state)`
+  - `test_insert_before` (function, line 550) `static void test_insert_before(void **state)`
+  - `test_clone_node` (function, line 582) `static void test_clone_node(void **state)`
+  - `test_move_children` (function, line 605) `static void test_move_children(void **state)`
+  - `test_char_nodes` (function, line 646) `static void test_char_nodes(void **state)`
+  - `main` (function, line 693) `int main(void)`
+  - `_POSIX_C_SOURCE` (macro, line 1) `#define _POSIX_C_SOURCE`
+  - `DOC` (macro, line 58) `#define DOC(state)`
+  - `IDX` (macro, line 59) `#define IDX(state)`
 - Depends on: `include/dom.h`, `include/html_parse.h`
 
 ## tests/test_dom_debug.c

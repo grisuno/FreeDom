@@ -1,6 +1,60 @@
 # Subsystem: include (page 5 of 5)
 Previous: [KB_include_p4.md](KB_include_p4.md)
 
+## include/url.h
+- Doc: url_parts: Components of a validated absolute https URL, sliced for a JS location object.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `url_parts` (struct, line 129)
+  - `url_status` (enum, line 32)
+  - `url_omni_kind` (enum, line 78)
+  - `url_is_https` (function, line 42) `int url_is_https(const char *s);`
+  - `url_has_scheme` (function, line 46) `int url_has_scheme(const char *s);`
+  - `url_authority_len` (function, line 51) `size_t url_authority_len(const char *url);`
+  - `URL_ERR_NOT_HTTPS` (function, line 109) `* URL_ERR_NOT_HTTPS (out untouched);`
+  - `path` (function, line 115) `* absolute path ("file:///..."). NULL => 0. */ int url_is_file(const char *s);`
+  - `url_file_path` (function, line 121) `const char *url_file_path(const char *s);`
+  - `url` (function, line 126) `* Every field ALIASES the input url (not owned, valid while url is alive);`
+  - `password` (function, line 152) `* username and password (owned, must be freed) into *username_out and * *password_out, and returns URL_OK. When...`
+  - `FREEDOM_URL_H` (macro, line 2) `#define FREEDOM_URL_H`
+  - `URL_MAX_LEN` (macro, line 30) `#define URL_MAX_LEN`
+  - `URL_SEARCH_ENDPOINT` (macro, line 76) `#define URL_SEARCH_ENDPOINT`
+- Imported by: `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
+
+## include/util.h
+- Doc: — shared pure helpers (no I/O except where noted).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `write_full` (function, line 15) `static inline int write_full(int fd, const void *buf, size_t n)`
+  - `read_full` (function, line 26) `static inline int read_full(int fd, void *buf, size_t n)`
+  - `mem_contains_ci` (function, line 43) `static inline int mem_contains_ci(const void *hay, size_t hlen, const char *needle)`
+  - `utf8_seq_len` (function, line 57) `static inline size_t utf8_seq_len(unsigned char c)`
+  - `fnv1a` (function, line 67) `static inline uint64_t fnv1a(const char *s, size_t n)`
+  - `UTIL_H` (macro, line 5) `#define UTIL_H`
+- Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
+
+## include/web_storage.h
+- Doc: wst_new: web_storage — in-MEMORY localStorage for trusted hosts (owner decision: nothing...
+- Layer: data_access
+- Language: h
+- Symbols:
+  - `wst_db` (type_alias, line 21) `typedef struct wst_db wst_db;`
+  - `wst_new` (function, line 25) `wst_db *wst_new(void);`
+  - `wst_free` (function, line 28) `void wst_free(wst_db *db);`
+  - `wst_encode` (function, line 33) `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len);`
+  - `wst_decode_check` (function, line 37) `int wst_decode_check(const char *blob, size_t len);`
+  - `wst_replace` (function, line 42) `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len);`
+  - `full` (function, line 45) `* validating it in full (wst_decode_check). Returns 0, or -1 when invalid (fn is then * never called). The one...`
+  - `wst_origin_bytes` (function, line 59) `size_t wst_origin_bytes(const wst_db *db, const char *origin);`
+  - `FREEDOM_WEB_STORAGE_H` (macro, line 2) `#define FREEDOM_WEB_STORAGE_H`
+  - `WST_MAX_ORIGINS` (macro, line 17) `#define WST_MAX_ORIGINS`
+  - `WST_MAX_KEYS` (macro, line 18) `#define WST_MAX_KEYS`
+  - `WST_QUOTA` (macro, line 19) `#define WST_QUOTA`
+  - `WST_ORIGIN_MAX` (macro, line 20) `#define WST_ORIGIN_MAX`
+- Imported by: `gui/browser_ui.c`, `src/js_dom.c`, `src/js_trusted.c`, `src/tab.c`, `src/web_storage.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_web_storage.c`
+
 ## include/webcaps.h
 - Doc: wc_caps: Full capability table for one page.
 - Layer: utility

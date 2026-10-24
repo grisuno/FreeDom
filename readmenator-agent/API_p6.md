@@ -350,12 +350,12 @@ Depends on: `include/css_chain.h`, `include/css_select.h`
 - `count_children` (function) `src/css_chain.c:227` `static int count_children(lxb_dom_node_t *n)` -- Counts ALL child nodes (elements, text, comments) of the DOM element n. * R2: for :empty matching.
 - `inputs` (function) `src/css_chain.c:241` `* identical inputs (single source of truth). */
 static const css_element *build_chain(lxb_dom_ele...`
-- `cch_element_style_vars` (function) `src/css_chain.c:297` `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
+- `cch_element_style_vars` (function) `src/css_chain.c:299` `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
                  ...`
-- `cch_pseudo_style` (function) `src/css_chain.c:328` `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
+- `cch_pseudo_style` (function) `src/css_chain.c:330` `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
             ...`
-- `cch_element_style` (function) `src/css_chain.c:347` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
-- `cch_element_matches` (function) `src/css_chain.c:351` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
+- `cch_element_style` (function) `src/css_chain.c:349` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
+- `cch_element_matches` (function) `src/css_chain.c:353` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
 
 ## src/css_color.c
 Depends on: `include/css_color.h`

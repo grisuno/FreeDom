@@ -31,9 +31,11 @@ flowchart LR
     n_src_css_c__css_resolve_pseudo["css.css_resolve_pseudo"]
     n_src_css_chain_c__cch_element_matches(["cch_element_matches"])
     n_include_css_select_h__csel_matches["css_select.csel_matches"]
+    n_src_css_select_c__csel_needs_structure["css_select.csel_needs_structure"]
     n_src_css_chain_c__cch_element_style_vars -.-> n_src_css_c__css_resolve_el_ex
     n_src_css_chain_c__cch_pseudo_style -.-> n_src_css_c__css_resolve_pseudo
     n_src_css_chain_c__cch_element_matches -.-> n_include_css_select_h__csel_matches
+    n_src_css_chain_c__cch_element_matches -.-> n_src_css_select_c__csel_needs_structure
 ```
 
 ## Structs
@@ -96,7 +98,7 @@ One element's selector inputs (tag/id/classes) plus its css_element view, with b
 
 ### `cch_element_style_vars`
 
-`function` | [src/css_chain.c:297](../../src/css_chain.c#L297)
+`function` | [src/css_chain.c:299](../../src/css_chain.c#L299)
 
 ```c
 css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet, double parent_font_size, const struct cvr_chain *inherited, struct cvr_table *own_out)
@@ -122,7 +124,7 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet, 
 
 ### `cch_pseudo_style`
 
-`function` | [src/css_chain.c:328](../../src/css_chain.c#L328)
+`function` | [src/css_chain.c:330](../../src/css_chain.c#L330)
 
 ```c
 css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which, double font_size, const struct cvr_chain *inherited)
@@ -150,7 +152,7 @@ css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int wh
 
 ### `cch_element_style`
 
-`function` | [src/css_chain.c:347](../../src/css_chain.c#L347)
+`function` | [src/css_chain.c:349](../../src/css_chain.c#L349)
 
 ```c
 css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
@@ -173,7 +175,7 @@ css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
 
 ### `cch_element_matches`
 
-`function` | [src/css_chain.c:351](../../src/css_chain.c#L351)
+`function` | [src/css_chain.c:353](../../src/css_chain.c#L353)
 
 ```c
 int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)
@@ -194,7 +196,7 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 > **Inherited:** Documentation from [`cch_element_matches`](#cch_element_matches) (include/css_chain.h:69).
 
-*Calls:* [`csel_matches`](include.css_select.h.md#csel_matches)
+*Calls:* [`csel_matches`](include.css_select.h.md#csel_matches), [`csel_needs_structure`](src.css_select.c.md#csel_needs_structure)
 
 ---
 

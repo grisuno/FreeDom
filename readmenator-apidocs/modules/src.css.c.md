@@ -844,7 +844,7 @@ A non-empty needle only; an empty one never matches.
 
 **Returns:** `return known &&`
 
-> **Inherited:** Documentation from [`csel_substr`](#csel_substr) (include/css_select.h:222).
+> **Inherited:** Documentation from [`csel_substr`](#csel_substr) (include/css_select.h:229).
 
 *Called by:* [`blur`](#blur), [`declaration`](#declaration)
 

@@ -1,6 +1,46 @@
 # Subsystem: include (page 4 of 5)
 Previous: [KB_include_p3.md](KB_include_p3.md)
 
+## include/perf_trace.h
+- Doc: pt_init: #define PT_MAX_SAMPLES 256 typedef struct pt_stage_stats { uint64_t...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `pt_stage_stats` (struct, line 34)
+  - `pt_trace` (struct, line 41)
+  - `order` (enum, line 71)
+  - `samples` (type_alias, line 33) `typedef struct pt_stage_stats { uint64_t samples[PT_MAX_SAMPLES];`
+  - `stage` (type_alias, line 40) `typedef struct pt_trace { pt_stage_stats stage[PT_STAGE_COUNT];`
+  - `pt_init` (function, line 46) `void pt_init(pt_trace *t);`
+  - `pt_elapsed_us` (function, line 50) `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us);`
+  - `pt_record` (function, line 54) `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us);`
+  - `pt_count` (function, line 57) `size_t pt_count(const pt_trace *t, pt_stage stage);`
+  - `pt_last_us` (function, line 60) `uint64_t pt_last_us(const pt_trace *t, pt_stage stage);`
+  - `pt_min_us` (function, line 63) `uint64_t pt_min_us(const pt_trace *t, pt_stage stage);`
+  - `pt_max_us` (function, line 64) `uint64_t pt_max_us(const pt_trace *t, pt_stage stage);`
+  - `pt_median_us` (function, line 65) `uint64_t pt_median_us(const pt_trace *t, pt_stage stage);`
+  - `pt_stage_name` (function, line 69) `const char *pt_stage_name(pt_stage stage);`
+  - `pt_format` (function, line 76) `size_t pt_format(const pt_trace *t, char *buf, size_t cap);`
+  - `FREEDOM_PERF_TRACE_H` (macro, line 2) `#define FREEDOM_PERF_TRACE_H`
+  - `PT_MAX_SAMPLES` (macro, line 32) `#define PT_MAX_SAMPLES`
+- Imported by: `src/freedom.c`, `src/perf_trace.c`, `tests/test_perf_trace.c`
+
+## include/pq_seal.h
+- Doc: pqs_buf_free: DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `pqs_status` (enum, line 24)
+  - `pqs_keys` (type_alias, line 33) `typedef struct pqs_keys pqs_keys;`
+  - `pqs_free` (function, line 41) `void pqs_free(pqs_keys *k);`
+  - `pqs_buf_free` (function, line 51) `void pqs_buf_free(uint8_t *buf, size_t len);`
+  - `FREEDOM_PQ_SEAL_H` (macro, line 2) `#define FREEDOM_PQ_SEAL_H`
+  - `PQS_MAGIC` (macro, line 20) `#define PQS_MAGIC`
+  - `PQS_MAGIC_LEN` (macro, line 21) `#define PQS_MAGIC_LEN`
+  - `PQS_CT_LEN` (macro, line 22) `#define PQS_CT_LEN`
+- Depends on: `include/local_store.h`
+- Imported by: `src/http_cache.c`, `src/pq_seal.c`, `tests/test_pq_seal.c`
+
 ## include/prefetch.h
 - Doc: pf_ref: One scanned reference. url is the RAW attribute value (the policy-gated fetcher *...
 - Layer: utility
@@ -97,31 +137,31 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Language: h
 - Symbols:
   - `rd_block` (struct, line 64)
-  - `rd_doc` (struct, line 263)
+  - `rd_doc` (struct, line 264)
   - `img_fail_reason` (enum, line 34)
   - `rd_kind` (enum, line 42)
-  - `rd_status` (enum, line 295)
+  - `rd_status` (enum, line 296)
   - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
   - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
   - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
   - `form` (function, line 63) `* form (-1 = none);`
   - `default` (function, line 150) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
-  - `to` (function, line 249) `* belongs to (-1 = none);`
-  - `rdp_images_warning` (function, line 304) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
-  - `rd_free` (function, line 314) `void rd_free(rd_doc *d);`
-  - `rd_count` (function, line 317) `size_t rd_count(const rd_doc *d);`
-  - `rd_at` (function, line 318) `const rd_block *rd_at(const rd_doc *d, size_t i);`
-  - `rd_box_count` (function, line 322) `size_t rd_box_count(const rd_doc *d);`
-  - `rd_box_at` (function, line 323) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-  - `rd_cont_count` (function, line 327) `size_t rd_cont_count(const rd_doc *d);`
-  - `rd_cont_at` (function, line 328) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-  - `rd_kind_name` (function, line 332) `const char *rd_kind_name(rd_kind k);`
-  - `rd_block_tag` (function, line 340) `const char *rd_block_tag(const rd_block *b);`
-  - `rd_block_heading_level` (function, line 347) `int rd_block_heading_level(const rd_block *b);`
-  - `decision` (function, line 350) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
-  - `IMG_FAIL_OK` (function, line 356) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-  - `rd_input_label` (function, line 361) `const char *rd_input_label(int input_type);`
-  - `rd_input_invisible` (function, line 366) `int rd_input_invisible(int input_type);`
+  - `to` (function, line 250) `* belongs to (-1 = none);`
+  - `rdp_images_warning` (function, line 305) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
+  - `rd_free` (function, line 315) `void rd_free(rd_doc *d);`
+  - `rd_count` (function, line 318) `size_t rd_count(const rd_doc *d);`
+  - `rd_at` (function, line 319) `const rd_block *rd_at(const rd_doc *d, size_t i);`
+  - `rd_box_count` (function, line 323) `size_t rd_box_count(const rd_doc *d);`
+  - `rd_box_at` (function, line 324) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+  - `rd_cont_count` (function, line 328) `size_t rd_cont_count(const rd_doc *d);`
+  - `rd_cont_at` (function, line 329) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+  - `rd_kind_name` (function, line 333) `const char *rd_kind_name(rd_kind k);`
+  - `rd_block_tag` (function, line 341) `const char *rd_block_tag(const rd_block *b);`
+  - `rd_block_heading_level` (function, line 348) `int rd_block_heading_level(const rd_block *b);`
+  - `decision` (function, line 351) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+  - `IMG_FAIL_OK` (function, line 357) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 362) `const char *rd_input_label(int input_type);`
+  - `rd_input_invisible` (function, line 367) `int rd_input_invisible(int input_type);`
   - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
@@ -174,50 +214,53 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Language: h
 - Symbols:
   - `sf_chain_info` (struct, line 61)
-  - `sf_config` (struct, line 76)
-  - `sf_response` (struct, line 119)
+  - `sf_config` (struct, line 79)
+  - `sf_response` (struct, line 126)
   - `sf_status` (enum, line 24)
   - `sf_policy` (enum, line 41)
   - `sf_proxy_type` (enum, line 70)
-  - `policy` (type_alias, line 75) `typedef struct sf_config { sf_policy policy;`
-  - `status` (type_alias, line 118) `typedef struct sf_response { sf_status status;`
-  - `sf_ws` (type_alias, line 299) `typedef struct sf_ws sf_ws;`
+  - `policy` (type_alias, line 78) `typedef struct sf_config { sf_policy policy;`
+  - `status` (type_alias, line 125) `typedef struct sf_response { sf_status status;`
+  - `sf_ws` (type_alias, line 317) `typedef struct sf_ws sf_ws;`
   - `validators` (function, line 18) `* The security logic lives in pure validators (no I/O);`
-  - `sf_global_init` (function, line 206) `void sf_global_init(void);`
-  - `EXCLUDED` (function, line 212) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
-  - `sf_cookie_put` (function, line 219) `void sf_cookie_put(const char *url, const char *namevalue);`
-  - `sf_cookie_line_matches` (function, line 224) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
-  - `sf_user_agent_or_default` (function, line 233) `const char *sf_user_agent_or_default(const char *ua);`
-  - `sf_accept_language_or_default` (function, line 237) `const char *sf_accept_language_or_default(const char *lang);`
-  - `sf_impersonate_kex_groups` (function, line 241) `const char *sf_impersonate_kex_groups(void);`
-  - `sf_impersonate_tls13_ciphers` (function, line 242) `const char *sf_impersonate_tls13_ciphers(void);`
-  - `skipped` (function, line 262) `* skipped (a classical key exchange is accepted);`
-  - `sf_is_redirect_code` (function, line 273) `int sf_is_redirect_code(long http_code);`
-  - `bits` (function, line 316) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
-  - `sf_ws_fd` (function, line 323) `int sf_ws_fd(const sf_ws *ws);`
-  - `sf_ws_close` (function, line 326) `void sf_ws_close(sf_ws *ws);`
-  - `connection` (function, line 330) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
-  - `sf_get` (function, line 339) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
-  - `sf_response_free` (function, line 350) `void sf_response_free(sf_response *resp);`
-  - `exhausted` (function, line 361) `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
-  - `sf_rcache_put` (function, line 374) `int sf_rcache_put(const char *from, const char *to, time_t now);`
-  - `sf_rcache_get` (function, line 375) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
-  - `sf_rcache_clear` (function, line 376) `void sf_rcache_clear(void);`
+  - `sf_global_init` (function, line 219) `void sf_global_init(void);`
+  - `EXCLUDED` (function, line 225) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
+  - `sf_cookie_put` (function, line 232) `void sf_cookie_put(const char *url, const char *namevalue);`
+  - `sf_cookie_line_matches` (function, line 237) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
+  - `sf_user_agent_or_default` (function, line 246) `const char *sf_user_agent_or_default(const char *ua);`
+  - `sf_accept_language_or_default` (function, line 250) `const char *sf_accept_language_or_default(const char *lang);`
+  - `sf_impersonate_kex_groups` (function, line 254) `const char *sf_impersonate_kex_groups(void);`
+  - `sf_impersonate_tls13_ciphers` (function, line 255) `const char *sf_impersonate_tls13_ciphers(void);`
+  - `skipped` (function, line 275) `* skipped (a classical key exchange is accepted);`
+  - `sf_is_redirect_code` (function, line 286) `int sf_is_redirect_code(long http_code);`
+  - `sf_header_value` (function, line 297) `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);`
+  - `bits` (function, line 334) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
+  - `sf_ws_fd` (function, line 341) `int sf_ws_fd(const sf_ws *ws);`
+  - `sf_ws_close` (function, line 344) `void sf_ws_close(sf_ws *ws);`
+  - `connection` (function, line 348) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
+  - `sf_get` (function, line 357) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
+  - `sf_response_free` (function, line 368) `void sf_response_free(sf_response *resp);`
+  - `exhausted` (function, line 379) `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
+  - `sf_rcache_put` (function, line 392) `int sf_rcache_put(const char *from, const char *to, time_t now);`
+  - `sf_rcache_get` (function, line 393) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
+  - `sf_rcache_clear` (function, line 394) `void sf_rcache_clear(void);`
+  - `sf_rcache_set_backing` (function, line 403) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
   - `FREEDOM_SECURE_FETCH_H` (macro, line 2) `#define FREEDOM_SECURE_FETCH_H`
-  - `SF_DEFAULT_KEX_GROUPS` (macro, line 145) `#define SF_DEFAULT_KEX_GROUPS`
-  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 154) `#define SF_IMPERSONATE_KEX_GROUPS`
-  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 155) `#define SF_IMPERSONATE_TLS13_CIPHERS`
-  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 159) `#define SF_IMPERSONATE_TLS12_CIPHERS`
-  - `SF_DEFAULT_USER_AGENT` (macro, line 170) `#define SF_DEFAULT_USER_AGENT`
-  - `SF_DEFAULT_MAX_BODY` (macro, line 171) `#define SF_DEFAULT_MAX_BODY`
-  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 172) `#define SF_DEFAULT_TIMEOUT_MS`
-  - `SF_CONNECT_TIMEOUT_MS` (macro, line 195) `#define SF_CONNECT_TIMEOUT_MS`
-  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 196) `#define SF_SUBRESOURCE_TIMEOUT_MS`
-  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 197) `#define SF_DEFAULT_MAX_REDIRECTS`
-  - `SF_MAX_URL` (macro, line 198) `#define SF_MAX_URL`
-  - `SF_WS_MAX_MESSAGE` (macro, line 298) `#define SF_WS_MAX_MESSAGE`
+  - `SF_META_MAX` (macro, line 77) `#define SF_META_MAX`
+  - `SF_DEFAULT_KEX_GROUPS` (macro, line 158) `#define SF_DEFAULT_KEX_GROUPS`
+  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 167) `#define SF_IMPERSONATE_KEX_GROUPS`
+  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 168) `#define SF_IMPERSONATE_TLS13_CIPHERS`
+  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 172) `#define SF_IMPERSONATE_TLS12_CIPHERS`
+  - `SF_DEFAULT_USER_AGENT` (macro, line 183) `#define SF_DEFAULT_USER_AGENT`
+  - `SF_DEFAULT_MAX_BODY` (macro, line 184) `#define SF_DEFAULT_MAX_BODY`
+  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 185) `#define SF_DEFAULT_TIMEOUT_MS`
+  - `SF_CONNECT_TIMEOUT_MS` (macro, line 208) `#define SF_CONNECT_TIMEOUT_MS`
+  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 209) `#define SF_SUBRESOURCE_TIMEOUT_MS`
+  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 210) `#define SF_DEFAULT_MAX_REDIRECTS`
+  - `SF_MAX_URL` (macro, line 211) `#define SF_MAX_URL`
+  - `SF_WS_MAX_MESSAGE` (macro, line 316) `#define SF_WS_MAX_MESSAGE`
 - Depends on: `include/anti_fp.h`
-- Imported by: `gui/browser_ui.c`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
+- Imported by: `gui/browser_ui.c`, `include/cached_fetch.h`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
 
 ## include/svg_paint.h
 - Doc: svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred...
@@ -260,49 +303,52 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `tab_hist_op` (struct, line 53)
-  - `tab_ws_op` (struct, line 68)
-  - `tab_page` (struct, line 75)
-  - `tab_eval_result` (struct, line 127)
-  - `tab_image` (struct, line 140)
+  - `tab_hist_op` (struct, line 54)
+  - `tab_ws_op` (struct, line 69)
+  - `tab_page` (struct, line 76)
+  - `tab_eval_result` (struct, line 128)
+  - `tab_image` (struct, line 141)
   - `tab_status` (enum, line 31)
-  - `tab_ws_kind` (enum, line 60)
-  - `tab_ws_event_kind` (enum, line 64)
-  - `tab` (type_alias, line 45) `typedef struct tab tab;`
-  - `replace` (type_alias, line 53) `typedef struct tab_hist_op { int replace;`
-  - `kind` (type_alias, line 67) `typedef struct tab_ws_op { int kind;`
-  - `width` (type_alias, line 140) `typedef struct tab_image { uint32_t width;`
-  - `tab_worker_dispatch` (function, line 152) `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
-  - `tab_open` (function, line 156) `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
-  - `tab_parse_worker_args` (function, line 163) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);`
-  - `out_status` (function, line 175) `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
-  - `tab_set_fetcher` (function, line 186) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);`
-  - `bytes` (function, line 190) `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
-  - `tab_set_css_sink` (function, line 199) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
-  - `tab_set_net_allowed` (function, line 204) `void tab_set_net_allowed(tab *t, int allowed);`
-  - `jar` (function, line 207) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
-  - `tab_set_cookies` (function, line 211) `void tab_set_cookies(tab *t, const char *cookies);`
-  - `origin` (function, line 214) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
-  - `tab_set_storage` (function, line 216) `void tab_set_storage(tab *t, const char *blob, size_t len);`
-  - `exclusively` (function, line 222) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
-  - `tab_set_viewport_w` (function, line 230) `void tab_set_viewport_w(tab *t, int px);`
-  - `tab_set_identity` (function, line 235) `void tab_set_identity(tab *t, const char *serialized);`
-  - `tab_last_subreq_stats` (function, line 241) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);`
-  - `tab_subreq_permitted` (function, line 246) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
-  - `view` (function, line 254) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
-  - `string` (function, line 274) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
-  - `granted` (function, line 323) `* granted (allow.conf AND js.conf);`
-  - `returned` (function, line 324) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
-  - `popstate` (function, line 330) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
-  - `decode` (function, line 349) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
-  - `tab_alive` (function, line 362) `int tab_alive(const tab *t);`
-  - `tab_child_pid` (function, line 365) `pid_t tab_child_pid(const tab *t);`
-  - `tab_close` (function, line 368) `void tab_close(tab *t);`
-  - `tab_page_free` (function, line 371) `void tab_page_free(tab_page *p);`
-  - `tab_eval_result_free` (function, line 372) `void tab_eval_result_free(tab_eval_result *r);`
-  - `tab_image_free` (function, line 373) `void tab_image_free(tab_image *img);`
+  - `tab_ws_kind` (enum, line 61)
+  - `tab_ws_event_kind` (enum, line 65)
+  - `tab` (type_alias, line 46) `typedef struct tab tab;`
+  - `replace` (type_alias, line 54) `typedef struct tab_hist_op { int replace;`
+  - `kind` (type_alias, line 68) `typedef struct tab_ws_op { int kind;`
+  - `width` (type_alias, line 141) `typedef struct tab_image { uint32_t width;`
+  - `tab_worker_dispatch` (function, line 153) `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
+  - `tab_open` (function, line 157) `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
+  - `tab_parse_worker_args` (function, line 164) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);`
+  - `out_status` (function, line 176) `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
+  - `tab_set_fetcher` (function, line 187) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);`
+  - `bytes` (function, line 191) `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
+  - `tab_set_css_sink` (function, line 200) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
+  - `tab_set_net_allowed` (function, line 205) `void tab_set_net_allowed(tab *t, int allowed);`
+  - `tab_set_op_net_budget_ms` (function, line 209) `void tab_set_op_net_budget_ms(tab *t, int ms);`
+  - `tab_async_fd` (function, line 214) `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
+  - `tab_async_busy` (function, line 220) `int tab_async_busy(const tab *t);`
+  - `jar` (function, line 227) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
+  - `tab_set_cookies` (function, line 231) `void tab_set_cookies(tab *t, const char *cookies);`
+  - `origin` (function, line 234) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
+  - `tab_set_storage` (function, line 236) `void tab_set_storage(tab *t, const char *blob, size_t len);`
+  - `exclusively` (function, line 242) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
+  - `tab_set_viewport_w` (function, line 250) `void tab_set_viewport_w(tab *t, int px);`
+  - `tab_set_identity` (function, line 255) `void tab_set_identity(tab *t, const char *serialized);`
+  - `tab_last_subreq_stats` (function, line 261) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);`
+  - `tab_subreq_permitted` (function, line 266) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
+  - `view` (function, line 274) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
+  - `string` (function, line 294) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
+  - `granted` (function, line 343) `* granted (allow.conf AND js.conf);`
+  - `returned` (function, line 344) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
+  - `popstate` (function, line 350) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
+  - `decode` (function, line 369) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
+  - `tab_alive` (function, line 382) `int tab_alive(const tab *t);`
+  - `tab_child_pid` (function, line 385) `pid_t tab_child_pid(const tab *t);`
+  - `tab_close` (function, line 388) `void tab_close(tab *t);`
+  - `tab_page_free` (function, line 391) `void tab_page_free(tab_page *p);`
+  - `tab_eval_result_free` (function, line 392) `void tab_eval_result_free(tab_eval_result *r);`
+  - `tab_image_free` (function, line 393) `void tab_image_free(tab_image *img);`
   - `FREEDOM_TAB_H` (macro, line 2) `#define FREEDOM_TAB_H`
-  - `TAB_MAX_INPUT` (macro, line 148) `#define TAB_MAX_INPUT`
+  - `TAB_MAX_INPUT` (macro, line 149) `#define TAB_MAX_INPUT`
 - Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tab.c`, `tests/test_tab.c`
 
@@ -429,60 +475,6 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `FREEDOM_UI_H` (macro, line 2) `#define FREEDOM_UI_H`
 - Depends on: `include/prefs.h`
 - Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/freedom.c`, `src/ui_layout.c`, `tests/test_ui.c`
-
-## include/url.h
-- Doc: url_parts: Components of a validated absolute https URL, sliced for a JS location object.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `url_parts` (struct, line 129)
-  - `url_status` (enum, line 32)
-  - `url_omni_kind` (enum, line 78)
-  - `url_is_https` (function, line 42) `int url_is_https(const char *s);`
-  - `url_has_scheme` (function, line 46) `int url_has_scheme(const char *s);`
-  - `url_authority_len` (function, line 51) `size_t url_authority_len(const char *url);`
-  - `URL_ERR_NOT_HTTPS` (function, line 109) `* URL_ERR_NOT_HTTPS (out untouched);`
-  - `path` (function, line 115) `* absolute path ("file:///..."). NULL => 0. */ int url_is_file(const char *s);`
-  - `url_file_path` (function, line 121) `const char *url_file_path(const char *s);`
-  - `url` (function, line 126) `* Every field ALIASES the input url (not owned, valid while url is alive);`
-  - `password` (function, line 152) `* username and password (owned, must be freed) into *username_out and * *password_out, and returns URL_OK. When...`
-  - `FREEDOM_URL_H` (macro, line 2) `#define FREEDOM_URL_H`
-  - `URL_MAX_LEN` (macro, line 30) `#define URL_MAX_LEN`
-  - `URL_SEARCH_ENDPOINT` (macro, line 76) `#define URL_SEARCH_ENDPOINT`
-- Imported by: `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
-
-## include/util.h
-- Doc: — shared pure helpers (no I/O except where noted).
-- Layer: utility
-- Language: h
-- Symbols:
-  - `write_full` (function, line 15) `static inline int write_full(int fd, const void *buf, size_t n)`
-  - `read_full` (function, line 26) `static inline int read_full(int fd, void *buf, size_t n)`
-  - `mem_contains_ci` (function, line 43) `static inline int mem_contains_ci(const void *hay, size_t hlen, const char *needle)`
-  - `utf8_seq_len` (function, line 57) `static inline size_t utf8_seq_len(unsigned char c)`
-  - `fnv1a` (function, line 67) `static inline uint64_t fnv1a(const char *s, size_t n)`
-  - `UTIL_H` (macro, line 5) `#define UTIL_H`
-- Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
-
-## include/web_storage.h
-- Doc: wst_new: web_storage — in-MEMORY localStorage for trusted hosts (owner decision: nothing...
-- Layer: data_access
-- Language: h
-- Symbols:
-  - `wst_db` (type_alias, line 21) `typedef struct wst_db wst_db;`
-  - `wst_new` (function, line 25) `wst_db *wst_new(void);`
-  - `wst_free` (function, line 28) `void wst_free(wst_db *db);`
-  - `wst_encode` (function, line 33) `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len);`
-  - `wst_decode_check` (function, line 37) `int wst_decode_check(const char *blob, size_t len);`
-  - `wst_replace` (function, line 42) `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len);`
-  - `full` (function, line 45) `* validating it in full (wst_decode_check). Returns 0, or -1 when invalid (fn is then * never called). The one...`
-  - `wst_origin_bytes` (function, line 59) `size_t wst_origin_bytes(const wst_db *db, const char *origin);`
-  - `FREEDOM_WEB_STORAGE_H` (macro, line 2) `#define FREEDOM_WEB_STORAGE_H`
-  - `WST_MAX_ORIGINS` (macro, line 17) `#define WST_MAX_ORIGINS`
-  - `WST_MAX_KEYS` (macro, line 18) `#define WST_MAX_KEYS`
-  - `WST_QUOTA` (macro, line 19) `#define WST_QUOTA`
-  - `WST_ORIGIN_MAX` (macro, line 20) `#define WST_ORIGIN_MAX`
-- Imported by: `gui/browser_ui.c`, `src/js_dom.c`, `src/js_trusted.c`, `src/tab.c`, `src/web_storage.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_web_storage.c`
 
 
 Next: [KB_include_p5.md](KB_include_p5.md)

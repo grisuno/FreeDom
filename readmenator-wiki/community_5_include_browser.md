@@ -1,32 +1,31 @@
-# include: local_store
+# include: browser
 
-*Community 4 | 20 files | cohesion 0.62*
+*Community 5 | 19 files | cohesion 0.55*
 
 ## Definition
 
-This community groups 20 file(s) rooted at `include` with dominant language c (cohesion 0.62). Central symbols: `BROWSER_STATUS_DURATION_MS`, `BROWSER_STATUS_MAX`, `BROWSER_URL_MAX`, `FREEDOM_BROWSER_H`, `FREEDOM_DISK_STORE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_MEDIA_DECODER_H`, `FREEDOM_OS_SANDBOX_H`. Core file: `src/local_store.c` (307 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
+This community groups 19 file(s) rooted at `include` with dominant language c (cohesion 0.55). Central symbols: `BROWSER_STATUS_DURATION_MS`, `BROWSER_STATUS_MAX`, `BROWSER_URL_MAX`, `FREEDOM_BROWSER_H`, `FREEDOM_HOSTBLOCK_H`, `FREEDOM_HOST_CONF_H`, `FREEDOM_MEDIA_DECODER_H`, `FREEDOM_OS_SANDBOX_H`. Core file: `src/browser.c` (41 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
 
 ## Files
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/browser.h` | h | utility | 19 | no |
-| `include/disk_store.h` | h | data_access | 3 | no |
-| `include/local_store.h` | h | data_access | 11 | no |
+| `include/host_conf.h` | h | utility | 9 | no |
+| `include/hostblock.h` | h | utility | 10 | no |
 | `include/media_decoder.h` | h | utility | 12 | no |
 | `include/os_sandbox.h` | h | utility | 12 | no |
 | `include/renderer.h` | h | presentation | 7 | no |
 | `include/util.h` | h | utility | 6 | yes |
 | `src/browser.c` | c | utility | 41 | no |
-| `src/disk_store.c` | c | data_access | 6 | no |
-| `src/local_store.c` | c | data_access | 307 | no |
+| `src/host_conf.c` | c | utility | 9 | no |
+| `src/hostblock.c` | c | utility | 18 | no |
 | `src/media_decoder.c` | c | utility | 15 | no |
 | `src/os_sandbox.c` | c | utility | 31 | no |
-| `src/profile.c` | c | utility | 9 | no |
 | `src/renderer.c` | c | presentation | 6 | no |
 | `tests/test_browser.c` | c | testing | 17 | no |
-| `tests/test_disk_store.c` | c | testing | 16 | no |
-| `tests/test_local_store.c` | c | testing | 18 | no |
+| `tests/test_host_conf.c` | c | testing | 8 | no |
+| `tests/test_hostblock.c` | c | testing | 22 | no |
 | `tests/test_media_decoder.c` | c | testing | 6 | no |
 | `tests/test_os_sandbox.c` | c | testing | 19 | no |
 | `tests/test_renderer.c` | c | testing | 8 | no |
@@ -52,58 +51,59 @@ This community groups 20 file(s) rooted at `include` with dominant language c (c
 - `browser_url_bar_delete_selection` (function, `include/browser.h:135`) `int browser_url_bar_delete_selection(browser_state *bs);` - Removes the selected range (if any), placing the cursor at its start; returns 1 if * something was r
 - `copied` (function, `include/browser.h:143`) `* copied (truncated to fit) and shown until now_ms reaches the expiry * (now_ms`
 - `browser_status_text` (function, `include/browser.h:150`) `const char *browser_status_text(const browser_state *bs, uint64_t now_ms);` - Transient status line (a toast, e.g. "blocked: insecure http link"). msg is copied (truncated to fit
-- `FREEDOM_DISK_STORE_H` (macro, `include/disk_store.h:2`) `#define FREEDOM_DISK_STORE_H`
-- `ds_status` (enum, `include/disk_store.h:25`)
-- `ds_free` (function, `include/disk_store.h:47`) `void ds_free(uint8_t *buf, size_t len);` - Reads and decrypts path. Wrong key / tampering => DS_ERR_AUTH (no plaintext). * *out is owned; relea
-- `FREEDOM_LOCAL_STORE_H` (macro, `include/local_store.h:2`) `#define FREEDOM_LOCAL_STORE_H`
-- `LS_KEY_LEN` (macro, `include/local_store.h:26`) `#define LS_KEY_LEN`
-- `LS_SALT_LEN` (macro, `include/local_store.h:27`) `#define LS_SALT_LEN`
-- `LS_NONCE_LEN` (macro, `include/local_store.h:28`) `#define LS_NONCE_LEN`
-- `LS_TAG_LEN` (macro, `include/local_store.h:29`) `#define LS_TAG_LEN`
-- `LS_HEADER_LEN` (macro, `include/local_store.h:30`) `#define LS_HEADER_LEN`
-- `LS_OVERHEAD` (macro, `include/local_store.h:31`) `#define LS_OVERHEAD`
-- `LS_MAX_PLAINTEXT` (macro, `include/local_store.h:32`) `#define LS_MAX_PLAINTEXT`
+- `FREEDOM_HOST_CONF_H` (macro, `include/host_conf.h:2`) `#define FREEDOM_HOST_CONF_H`
+- `HCF_MAX_DIRS` (macro, `include/host_conf.h:15`) `#define HCF_MAX_DIRS`
+- `HCF_PATH_MAX` (macro, `include/host_conf.h:16`) `#define HCF_PATH_MAX`
+- `HCF_MAX_FILE_BYTES` (macro, `include/host_conf.h:18`) `#define HCF_MAX_FILE_BYTES`
+- `hcf_dirs` (struct, `include/host_conf.h:20`)
+- `hcf_search_dirs` (function, `include/host_conf.h:28`) `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out);` - Pure. Fills out with, in order: env (when non-empty), home + "/.config/freedom" (when home is non-em
+- `hcf_search_dirs_from_env` (function, `include/host_conf.h:31`) `void hcf_search_dirs_from_env(hcf_dirs *out);` - Pure. Fills out with, in order: env (when non-empty), home + "/.config/freedom" (when home is non-em
+- `hcf_load_filter` (function, `include/host_conf.h:35`) `hb_set *hcf_load_filter(const hcf_dirs *dirs);` - block.conf (BLOCK) + allow.conf (ALLOW) from every directory, cumulative. Missing or * unreadable fi
+- `hcf_load_allowlist` (function, `include/host_conf.h:39`) `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname);` - One file (js.conf, allow.conf, ...) from every directory as an ALLOW list. NULL only on * OOM or a N
+- `FREEDOM_HOSTBLOCK_H` (macro, `include/hostblock.h:2`) `#define FREEDOM_HOSTBLOCK_H`
+- `hb_set` (type_alias, `include/hostblock.h:29`) `typedef struct hb_set hb_set;` - caller reads the list files and passes their text in; this module parses them into hash tables and d
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 21
-- Cross-boundary resolved imports (EXTRACTED): 13
+- Internal resolved imports (EXTRACTED): 18
+- Cross-boundary resolved imports (EXTRACTED): 15
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
-- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
-- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/media_decoder.h.
+- [EXTRACTED] depends_on community 0 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
+- [EXTRACTED] depends_on community 6 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
+- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
+- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/hostblock.h.
 
 ## Risks
 
 - [layer strict] `tests/test_renderer.c` (testing) -> `include/renderer.h` (presentation)
+- [dataflow UNCHECKED_ALLOC] `src/hostblock.c:145` `hb_new` `s`: Result of allocator stored in `s` is never checked against NULL.
 
 ## Open Questions
 
-- Why do 19 file(s) lack file-level docs (e.g. `include/browser.h`)? What purpose do they serve?
-- What would break if the most connected file in include: local_store changed?
-- Should include: local_store be split, given cohesion 0.62?
+- Why do 18 file(s) lack file-level docs (e.g. `include/browser.h`)? What purpose do they serve?
+- What would break if the most connected file in include: browser changed?
+- Should include: browser be split, given cohesion 0.55?
 
 ## Sources
 
 - `include/browser.h`
-- `include/disk_store.h`
-- `include/local_store.h`
+- `include/host_conf.h`
+- `include/hostblock.h`
 - `include/media_decoder.h`
 - `include/os_sandbox.h`
 - `include/renderer.h`
 - `include/util.h`
 - `src/browser.c`
-- `src/disk_store.c`
-- `src/local_store.c`
+- `src/host_conf.c`
+- `src/hostblock.c`
 - `src/media_decoder.c`
 - `src/os_sandbox.c`
-- `src/profile.c`
 - `src/renderer.c`
 - `tests/test_browser.c`
-- `tests/test_disk_store.c`
-- `tests/test_local_store.c`
+- `tests/test_host_conf.c`
+- `tests/test_hostblock.c`
 - `tests/test_media_decoder.c`
 - `tests/test_os_sandbox.c`
 - `tests/test_renderer.c`

@@ -9,6 +9,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/box_style.h`
 - `gui/browser_ui.c` -> `include/box_tree.h`
 - `gui/browser_ui.c` -> `include/browser.h`
+- `gui/browser_ui.c` -> `include/cached_fetch.h`
 - `gui/browser_ui.c` -> `include/compositor.h`
 - `gui/browser_ui.c` -> `include/css.h`
 - `gui/browser_ui.c` -> `include/css_color.h`
@@ -69,6 +70,8 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/box_tree.h` -> `include/box_style.h`
 - `include/box_tree.h` -> `include/flex_layout.h`
 - `include/box_tree.h` -> `include/page_view.h`
+- `include/cached_fetch.h` -> `include/http_cache.h`
+- `include/cached_fetch.h` -> `include/secure_fetch.h`
 - `include/css.h` -> `include/css_color.h`
 - `include/css_box.h` -> `include/css_decl.h`
 - `include/css_chain.h` -> `include/css.h`
@@ -86,6 +89,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/dom_debug.h` -> `include/render_doc.h`
 - `include/form.h` -> `include/url.h`
 - `include/host_conf.h` -> `include/hostblock.h`
+- `include/http_cache.h` -> `include/local_store.h`
 - `include/js_dom.h` -> `include/dom.h`
 - `include/js_dom.h` -> `include/freebug.h`
 - `include/js_dom.h` -> `include/js_geom.h`
@@ -102,6 +106,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/page_view.h` -> `include/css.h`
 - `include/page_view.h` -> `include/dom.h`
 - `include/page_view.h` -> `include/html_parse.h`
+- `include/pq_seal.h` -> `include/local_store.h`
 - `include/profile.h` -> `include/local_store.h`
 - `include/profile.h` -> `include/prefs.h`
 - `include/render_doc.h` -> `include/page_view.h`
@@ -125,6 +130,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/box_tree.c` -> `include/css.h`
 - `src/browser.c` -> `include/browser.h`
 - `src/browser.c` -> `include/util.h`
+- `src/cached_fetch.c` -> `include/cached_fetch.h`
 - `src/compositor.c` -> `include/compositor.h`
 - `src/compositor.c` -> `include/css.h`
 - `src/css.c` -> `include/css.h`
@@ -241,6 +247,9 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/html_parse.c` -> `include/dom.h`
 - `src/html_parse.c` -> `include/html_parse.h`
 - `src/html_parse.c` -> `include/util.h`
+- `src/http_cache.c` -> `include/disk_store.h`
+- `src/http_cache.c` -> `include/http_cache.h`
+- `src/http_cache.c` -> `include/pq_seal.h`
 - `src/identity.c` -> `include/anti_fp.h`
 - `src/identity.c` -> `include/identity.h`
 - `src/image_decode.c` -> `include/image_decode.h`
@@ -315,6 +324,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/page_view.c` -> `include/util.h`
 - `src/pdf_export.c` -> `include/pdf_export.h`
 - `src/perf_trace.c` -> `include/perf_trace.h`
+- `src/pq_seal.c` -> `include/pq_seal.h`
 - `src/prefetch.c` -> `include/import_map.h`
 - `src/prefetch.c` -> `include/prefetch.h`
 - `src/prefetch.c` -> `include/url.h`
@@ -398,6 +408,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_box_tree.c` -> `include/css.h`
 - `tests/test_box_tree.c` -> `include/page_view.h`
 - `tests/test_browser.c` -> `include/browser.h`
+- `tests/test_cached_fetch.c` -> `include/cached_fetch.h`
 - `tests/test_compositor.c` -> `include/compositor.h`
 - `tests/test_compositor.c` -> `include/css.h`
 - `tests/test_css.c` -> `include/css.h`
@@ -447,6 +458,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_hostblock.c` -> `include/hostblock.h`
 - `tests/test_hostedit.c` -> `include/hostedit.h`
 - `tests/test_html_parse.c` -> `include/html_parse.h`
+- `tests/test_http_cache.c` -> `include/http_cache.h`
 - `tests/test_identity.c` -> `include/anti_fp.h`
 - `tests/test_identity.c` -> `include/identity.h`
 - `tests/test_image_decode.c` -> `include/image_decode.h`
@@ -482,19 +494,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_page_view.c` -> `include/webfont.h`
 - `tests/test_pdf_export.c` -> `include/pdf_export.h`
 - `tests/test_perf_trace.c` -> `include/perf_trace.h`
+- `tests/test_pq_seal.c` -> `include/pq_seal.h`
 - `tests/test_prefetch.c` -> `include/prefetch.h`
-- `tests/test_prefs.c` -> `include/prefs.h`
-- `tests/test_prefs.c` -> `include/zoom.h`
-- `tests/test_profile.c` -> `include/prefs.h`
-- `tests/test_profile.c` -> `include/profile.h`
-- `tests/test_render_doc.c` -> `include/box_style.h`
-- `tests/test_render_doc.c` -> `include/css.h`
-- `tests/test_render_doc.c` -> `include/flex_layout.h`
-- `tests/test_render_doc.c` -> `include/page_view.h`
-- `tests/test_render_doc.c` -> `include/render_doc.h`
-- `tests/test_render_doc.c` -> `include/render_policy.h`
-- `tests/test_render_policy.c` -> `include/render_policy.h`
-- `tests/test_renderer.c` -> `include/renderer.h`
-- `tests/test_request_policy.c` -> `include/request_policy.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

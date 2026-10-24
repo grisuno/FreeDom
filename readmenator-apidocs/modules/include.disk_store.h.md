@@ -42,6 +42,6 @@ Secure free of a buffer returned by ds_read (delegates to ls_free).
 | `buf` | `uint8_t *` |  |  |
 | `len` | `size_t` |  |  |
 
-*Called by:* [`profile_load`](src.profile.c.md#profile_load)
+*Called by:* [`hc_open`](src.http_cache.c.md#hc_open), [`profile_load`](src.profile.c.md#profile_load)
 
 ---

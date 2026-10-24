@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 193 modules, 3382 documented entities, documentation coverage 39.8% (1338/3360 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 199 modules, 3477 documented entities, documentation coverage 39.4% (1361/3455 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (91), h (88), py (10), sh (4)
+Languages: c (94), h (91), py (10), sh (4)
 
 ## Modules
 
@@ -22,7 +22,7 @@ Languages: c (91), h (88), py (10), sh (4)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 198 | 32.8% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 200 | 32.9% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 5 | 4 | 50.0% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) |  | 0 | 6 | 85.7% |
 | [`gui/freedom_view.c`](modules/gui.freedom_view.c.md) |  | 0 | 2 | 0.0% |
@@ -39,6 +39,7 @@ Languages: c (91), h (88), py (10), sh (4)
 | [`include/box_style.h`](modules/include.box_style.h.md) |  | 12 | 18 | 64.5% |
 | [`include/box_tree.h`](modules/include.box_tree.h.md) |  | 5 | 28 | 38.2% |
 | [`include/browser.h`](modules/include.browser.h.md) |  | 2 | 16 | 47.4% |
+| [`include/cached_fetch.h`](modules/include.cached_fetch.h.md) |  | 0 | 3 | 50.0% |
 | [`include/compositor.h`](modules/include.compositor.h.md) |  | 5 | 3 | 88.9% |
 | [`include/css.h`](modules/include.css.h.md) |  | 72 | 67 | 72.9% |
 | [`include/css_atrule.h`](modules/include.css_atrule.h.md) |  | 2 | 7 | 70.0% |
@@ -52,7 +53,7 @@ Languages: c (91), h (88), py (10), sh (4)
 | [`include/css_length.h`](modules/include.css_length.h.md) |  | 5 | 14 | 55.0% |
 | [`include/css_mask.h`](modules/include.css_mask.h.md) | CSS Masking 1, alpha gradients only (spec/css_mask.md). | 4 | 5 | 50.0% |
 | [`include/css_mq.h`](modules/include.css_mq.h.md) |  | 2 | 3 | 50.0% |
-| [`include/css_select.h`](modules/include.css_select.h.md) |  | 10 | 23 | 61.8% |
+| [`include/css_select.h`](modules/include.css_select.h.md) |  | 10 | 24 | 60.0% |
 | [`include/css_text.h`](modules/include.css_text.h.md) |  | 0 | 16 | 0.0% |
 | [`include/css_values.h`](modules/include.css_values.h.md) | Single owner of CSS value interpretation for colors and backgrounds. | 0 | 8 | 33.3% |
 | [`include/css_vars.h`](modules/include.css_vars.h.md) |  | 4 | 14 | 73.7% |
@@ -65,12 +66,13 @@ Languages: c (91), h (88), py (10), sh (4)
 | [`include/form.h`](modules/include.form.h.md) |  | 7 | 3 | 27.3% |
 | [`include/frame_clock.h`](modules/include.frame_clock.h.md) |  | 2 | 4 | 14.3% |
 | [`include/freebug.h`](modules/include.freebug.h.md) |  | 4 | 13 | 72.2% |
-| [`include/freedom_config.h`](modules/include.freedom_config.h.md) |  | 0 | 10 | 90.9% |
+| [`include/freedom_config.h`](modules/include.freedom_config.h.md) |  | 0 | 12 | 92.3% |
 | [`include/hls.h`](modules/include.hls.h.md) |  | 4 | 3 | 62.5% |
 | [`include/host_conf.h`](modules/include.host_conf.h.md) |  | 1 | 7 | 55.6% |
 | [`include/hostblock.h`](modules/include.hostblock.h.md) |  | 4 | 5 | 50.0% |
 | [`include/hostedit.h`](modules/include.hostedit.h.md) |  | 1 | 3 | 60.0% |
 | [`include/html_parse.h`](modules/include.html_parse.h.md) |  | 5 | 18 | 50.0% |
+| [`include/http_cache.h`](modules/include.http_cache.h.md) |  | 5 | 13 | 21.1% |
 | [`include/identity.h`](modules/include.identity.h.md) |  | 3 | 20 | 45.8% |
 | [`include/image_decode.h`](modules/include.image_decode.h.md) |  | 4 | 8 | 46.2% |
 | [`include/import_map.h`](modules/include.import_map.h.md) |  | 1 | 8 | 30.0% |
@@ -80,7 +82,7 @@ Languages: c (91), h (88), py (10), sh (4)
 | [`include/js_geom.h`](modules/include.js_geom.h.md) |  | 3 | 15 | 78.9% |
 | [`include/js_location.h`](modules/include.js_location.h.md) |  | 0 | 5 | 50.0% |
 | [`include/js_policy.h`](modules/include.js_policy.h.md) |  | 1 | 5 | 42.9% |
-| [`include/js_sandbox.h`](modules/include.js_sandbox.h.md) |  | 6 | 17 | 54.2% |
+| [`include/js_sandbox.h`](modules/include.js_sandbox.h.md) |  | 6 | 18 | 56.0% |
 | [`include/js_trusted.h`](modules/include.js_trusted.h.md) |  | 4 | 11 | 37.5% |
 | [`include/link_nav.h`](modules/include.link_nav.h.md) |  | 6 | 4 | 36.4% |
 | [`include/local_store.h`](modules/include.local_store.h.md) |  | 2 | 8 | 18.2% |
@@ -90,6 +92,7 @@ Languages: c (91), h (88), py (10), sh (4)
 | [`include/page_view.h`](modules/include.page_view.h.md) |  | 14 | 76 | 59.3% |
 | [`include/pdf_export.h`](modules/include.pdf_export.h.md) |  | 1 | 8 | 30.0% |
 | [`include/perf_trace.h`](modules/include.perf_trace.h.md) |  | 5 | 11 | 52.9% |
+| [`include/pq_seal.h`](modules/include.pq_seal.h.md) |  | 2 | 5 | 12.5% |
 | [`include/prefetch.h`](modules/include.prefetch.h.md) |  | 11 | 16 | 53.6% |
 | [`include/prefs.h`](modules/include.prefs.h.md) |  | 4 | 13 | 38.9% |
 | [`include/profile.h`](modules/include.profile.h.md) |  | 3 | 5 | 22.2% |
@@ -98,10 +101,10 @@ Languages: c (91), h (88), py (10), sh (4)
 | [`include/render_policy.h`](modules/include.render_policy.h.md) |  | 3 | 5 | 77.8% |
 | [`include/renderer.h`](modules/include.renderer.h.md) |  | 3 | 3 | 14.3% |
 | [`include/request_policy.h`](modules/include.request_policy.h.md) |  | 1 | 3 | 60.0% |
-| [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) |  | 9 | 33 | 51.2% |
+| [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) |  | 9 | 36 | 54.3% |
 | [`include/svg_paint.h`](modules/include.svg_paint.h.md) |  | 0 | 1 | 50.0% |
 | [`include/svg_render.h`](modules/include.svg_render.h.md) |  | 9 | 8 | 38.9% |
-| [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 30 | 46.5% |
+| [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 33 | 45.7% |
 | [`include/text_case.h`](modules/include.text_case.h.md) | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | 1 | 6 | 75.0% |
 | [`include/text_shape.h`](modules/include.text_shape.h.md) |  | 5 | 18 | 70.8% |
 | [`include/textfield.h`](modules/include.textfield.h.md) |  | 3 | 11 | 53.3% |
@@ -127,6 +130,7 @@ Languages: c (91), h (88), py (10), sh (4)
 | [`src/box_style.c`](modules/src.box_style.c.md) |  | 2 | 42 | 31.1% |
 | [`src/box_tree.c`](modules/src.box_tree.c.md) |  | 0 | 15 | 37.5% |
 | [`src/browser.c`](modules/src.browser.c.md) |  | 0 | 30 | 25.8% |
+| [`src/cached_fetch.c`](modules/src.cached_fetch.c.md) |  | 0 | 6 | 28.6% |
 | [`src/compositor.c`](modules/src.compositor.c.md) |  | 0 | 4 | 60.0% |
 | [`src/css.c`](modules/src.css.c.md) |  | 8 | 70 | 24.1% |
 | [`src/css_atrule.c`](modules/src.css_atrule.c.md) |  | 0 | 4 | 80.0% |
@@ -139,7 +143,7 @@ Languages: c (91), h (88), py (10), sh (4)
 | [`src/css_length.c`](modules/src.css_length.c.md) |  | 0 | 11 | 25.0% |
 | [`src/css_mask.c`](modules/src.css_mask.c.md) |  | 0 | 6 | 28.6% |
 | [`src/css_mq.c`](modules/src.css_mq.c.md) |  | 3 | 7 | 18.2% |
-| [`src/css_select.c`](modules/src.css_select.c.md) |  | 0 | 13 | 64.3% |
+| [`src/css_select.c`](modules/src.css_select.c.md) |  | 0 | 14 | 60.0% |
 | [`src/css_text.c`](modules/src.css_text.c.md) | --- text-presentation extensions (Hito 23b-6) --- | 0 | 14 | 73.3% |
 | [`src/css_values.c`](modules/src.css_values.c.md) |  | 0 | 8 | 22.2% |
 | [`src/css_vars.c`](modules/src.css_vars.c.md) |  | 0 | 8 | 55.6% |
@@ -158,6 +162,7 @@ Languages: c (91), h (88), py (10), sh (4)
 | [`src/hostblock.c`](modules/src.hostblock.c.md) |  | 2 | 8 | 45.5% |
 | [`src/hostedit.c`](modules/src.hostedit.c.md) |  | 1 | 3 | 40.0% |
 | [`src/html_parse.c`](modules/src.html_parse.c.md) |  | 1 | 17 | 47.4% |
+| [`src/http_cache.c`](modules/src.http_cache.c.md) |  | 2 | 18 | 14.3% |
 | [`src/identity.c`](modules/src.identity.c.md) |  | 0 | 15 | 50.0% |
 | [`src/image_decode.c`](modules/src.image_decode.c.md) |  | 3 | 13 | 35.3% |
 | [`src/import_map.c`](modules/src.import_map.c.md) |  | 4 | 6 | 45.5% |
@@ -179,13 +184,14 @@ Languages: c (91), h (88), py (10), sh (4)
 | [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 19 | 43.5% |
 | [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 13 | 33.3% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
-| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 301 | 1.7% |
+| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 305 | 1.6% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
 | [`src/page_view.c`](modules/src.page_view.c.md) |  | 20 | 114 | 43.7% |
 | [`src/pdf_export.c`](modules/src.pdf_export.c.md) |  | 0 | 4 | 20.0% |
 | [`src/perf_trace.c`](modules/src.perf_trace.c.md) |  | 0 | 11 | 75.0% |
+| [`src/pq_seal.c`](modules/src.pq_seal.c.md) |  | 1 | 8 | 10.0% |
 | [`src/prefetch.c`](modules/src.prefetch.c.md) |  | 1 | 12 | 42.9% |
 | [`src/prefs.c`](modules/src.prefs.c.md) |  | 1 | 11 | 30.8% |
 | [`src/profile.c`](modules/src.profile.c.md) |  | 0 | 6 | 14.3% |
@@ -193,9 +199,9 @@ Languages: c (91), h (88), py (10), sh (4)
 | [`src/render_policy.c`](modules/src.render_policy.c.md) |  | 0 | 5 | 50.0% |
 | [`src/renderer.c`](modules/src.renderer.c.md) |  | 0 | 4 | 20.0% |
 | [`src/request_policy.c`](modules/src.request_policy.c.md) |  | 0 | 6 | 57.1% |
-| [`src/secure_fetch.c`](modules/src.secure_fetch.c.md) |  | 6 | 42 | 26.5% |
+| [`src/secure_fetch.c`](modules/src.secure_fetch.c.md) |  | 6 | 44 | 27.5% |
 | [`src/svg_render.c`](modules/src.svg_render.c.md) | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | 3 | 5 | 55.6% |
-| [`src/tab.c`](modules/src.tab.c.md) |  | 2 | 74 | 37.7% |
+| [`src/tab.c`](modules/src.tab.c.md) |  | 2 | 81 | 35.7% |
 | [`src/text_case.c`](modules/src.text_case.c.md) |  | 0 | 5 | 50.0% |
 | [`src/text_shape.c`](modules/src.text_shape.c.md) |  | 10 | 24 | 45.7% |
 | [`src/textfield.c`](modules/src.textfield.c.md) |  | 0 | 12 | 46.2% |

@@ -15,10 +15,10 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 | `src/data_url.c` | c | data_access | 10 | no |
 | `src/freedom.c` | c | utility | 48 | no |
 | `src/hls.c` | c | utility | 10 | no |
-| `src/host_conf.c` | c | utility | 9 | no |
-| `src/hostblock.c` | c | utility | 18 | no |
+| `src/js_policy.c` | c | business_logic | 6 | no |
 | `src/net_realm.c` | c | utility | 10 | no |
 | `src/perf_trace.c` | c | utility | 12 | no |
+| `src/render_policy.c` | c | presentation | 5 | no |
 
 ### `include` (13 files)
 
@@ -26,11 +26,11 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 |------|----------|-------|---------|-----|
 | `include/data_url.h` | h | data_access | 6 | no |
 | `include/hls.h` | h | utility | 8 | no |
-| `include/host_conf.h` | h | utility | 9 | no |
-| `include/hostblock.h` | h | utility | 10 | no |
+| `include/js_policy.h` | h | business_logic | 7 | no |
 | `include/net_realm.h` | h | utility | 10 | no |
 | `include/perf_trace.h` | h | utility | 17 | no |
 | `include/psl_data.h` | h | data_access | 7 | no |
+| `include/request_policy.h` | h | business_logic | 5 | no |
 
 ### `tests` (12 files)
 
@@ -38,10 +38,10 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 |------|----------|-------|---------|-----|
 | `tests/test_data_url.c` | c | testing | 26 | no |
 | `tests/test_hls.c` | c | testing | 16 | no |
-| `tests/test_host_conf.c` | c | testing | 8 | no |
-| `tests/test_hostblock.c` | c | testing | 22 | no |
+| `tests/test_js_policy.c` | c | testing | 5 | no |
 | `tests/test_net_realm.c` | c | testing | 13 | no |
 | `tests/test_perf_trace.c` | c | testing | 12 | no |
+| `tests/test_request_policy.c` | c | testing | 12 | no |
 
 *... and 19 more files in this community.*
 
@@ -62,22 +62,22 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 - `hls_select_variant` (function, `include/hls.h:65`) `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h);` - Selects the best variant from a multi-variant playlist. Returns the index of the chosen variant, or
 - `resolved` (function, `include/hls.h:68`) `* Writes the absolute URL into resolved (bounded by resolved_sz). Returns the *`
 - `hls_playlist_free` (function, `include/hls.h:74`) `void hls_playlist_free(hls_playlist *pl);` - Resolves a (possibly relative) segment URL against the playlist base URL. Writes the absolute URL in
-- `FREEDOM_HOST_CONF_H` (macro, `include/host_conf.h:2`) `#define FREEDOM_HOST_CONF_H`
-- `HCF_MAX_DIRS` (macro, `include/host_conf.h:15`) `#define HCF_MAX_DIRS`
-- `HCF_PATH_MAX` (macro, `include/host_conf.h:16`) `#define HCF_PATH_MAX`
-- `HCF_MAX_FILE_BYTES` (macro, `include/host_conf.h:18`) `#define HCF_MAX_FILE_BYTES`
-- `hcf_dirs` (struct, `include/host_conf.h:20`)
-- `hcf_search_dirs` (function, `include/host_conf.h:28`) `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out);` - Pure. Fills out with, in order: env (when non-empty), home + "/.config/freedom" (when home is non-em
-- `hcf_search_dirs_from_env` (function, `include/host_conf.h:31`) `void hcf_search_dirs_from_env(hcf_dirs *out);` - Pure. Fills out with, in order: env (when non-empty), home + "/.config/freedom" (when home is non-em
-- `hcf_load_filter` (function, `include/host_conf.h:35`) `hb_set *hcf_load_filter(const hcf_dirs *dirs);` - block.conf (BLOCK) + allow.conf (ALLOW) from every directory, cumulative. Missing or * unreadable fi
-- `hcf_load_allowlist` (function, `include/host_conf.h:39`) `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname);` - One file (js.conf, allow.conf, ...) from every directory as an ALLOW list. NULL only on * OOM or a N
-- `FREEDOM_HOSTBLOCK_H` (macro, `include/hostblock.h:2`) `#define FREEDOM_HOSTBLOCK_H`
-- `hb_set` (type_alias, `include/hostblock.h:29`) `typedef struct hb_set hb_set;` - caller reads the list files and passes their text in; this module parses them into hash tables and d
-- `hb_list` (enum, `include/hostblock.h:32`)
-- `hb_decision` (enum, `include/hostblock.h:37`)
-- `hb_status` (enum, `include/hostblock.h:42`)
-- `hb_new` (function, `include/hostblock.h:49`) `hb_set *hb_new(void);` - } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted HB_BLOCK       /*
-- `hb_free` (function, `include/hostblock.h:52`) `void hb_free(hb_set *s);` - HB_ALLOW = 0,  /* the host may be contacted HB_BLOCK       /* the host is on the blocklist (and not
+- `FREEDOM_JS_POLICY_H` (macro, `include/js_policy.h:2`) `#define FREEDOM_JS_POLICY_H`
+- `membership` (function, `include/js_policy.h:16`) `* membership (the allowlist itself is matched by the hostblock module, which * a`
+- `jsp_mode` (enum, `include/js_policy.h:27`)
+- `allowlist` (function, `include/js_policy.h:34`) `* allowlist (e.g. hb_is_allowlisted over js.conf). Fails closed: an unknown mode`
+- `jsp_trusted` (function, `include/js_policy.h:45`) `bool jsp_trusted(bool js_enabled, int host_allowlisted);` - Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its JS is enabled (js
+- `jsp_present_trusted` (function, `include/js_policy.h:54`) `bool jsp_present_trusted(int host_allowlisted);` - Presentation-trust (2026-07-11): a host EXPLICITLY on allow.conf (host_allowlisted, e.g. hb_is_allow
+- `jsp_mode_str` (function, `include/js_policy.h:64`) `const char *jsp_mode_str(jsp_mode mode);` - Stable lowercase name of a mode ("off"/"allowlist"/"on"); an unknown value * yields "off" (fail clos
+- `FREEDOM_NET_REALM_H` (macro, `include/net_realm.h:2`) `#define FREEDOM_NET_REALM_H`
+- `nr_realm` (enum, `include/net_realm.h:29`)
+- `nr_route` (enum, `include/net_realm.h:35`)
+- `tor_enabled` (type_alias, `include/net_realm.h:41`) `typedef struct nr_config { int tor_enabled;`
+- `nr_config` (struct, `include/net_realm.h:42`)
+- `NR_ROUTE_BLOCKED` (function, `include/net_realm.h:57`) `* NR_ROUTE_BLOCKED (fail closed: never route what cannot be classified). A realm`
+- `address` (function, `include/net_realm.h:62`) `* and encrypts by its address (the I2P destination / onion key), so http over it`
+- `nr_realm_allows_http` (function, `include/net_realm.h:66`) `int nr_realm_allows_http(nr_realm r);` - 1 iff plain http:// is acceptable for this realm. An overlay realm authenticates and encrypts by its
+- `nr_realm_name` (function, `include/net_realm.h:69`) `const char *nr_realm_name(nr_realm r);` - 1 iff plain http:// is acceptable for this realm. An overlay realm authenticates and encrypts by its
 
 ## Internal vs External Edges
 
@@ -86,13 +86,13 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
-- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
-- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/dom_debug.h.
+- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
+- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
+- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
 - [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.
+- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/hostblock.h.
 - [EXTRACTED] depends_on community 3 <-> 7 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/identity.h.
 - [EXTRACTED] depends_on community 3 <-> 8 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
-- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/media_decoder.h.
 
 ## Risks
 
@@ -100,7 +100,6 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 - [layer strict] `src/render_doc.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `src/render_policy.c` (presentation) -> `include/data_url.h` (data_access)
 - [dataflow UNCHECKED_ALLOC] `src/freedom.c:528` `headless_fetch` `oct`: Result of allocator stored in `oct` is never checked against NULL.
-- [dataflow UNCHECKED_ALLOC] `src/hostblock.c:145` `hb_new` `s`: Result of allocator stored in `s` is never checked against NULL.
 
 ## Open Questions
 
@@ -112,22 +111,22 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 
 - `include/data_url.h`
 - `include/hls.h`
-- `include/host_conf.h`
-- `include/hostblock.h`
+- `include/js_policy.h`
 - `include/net_realm.h`
 - `include/perf_trace.h`
 - `include/psl_data.h`
 - `include/request_policy.h`
 - `include/text_shape.h`
 - `include/tls_impersonate.h`
+- `include/webcaps.h`
 - `include/webfont.h`
 - `include/webfont_load.h`
 - `include/wl_display.h`
 - `src/data_url.c`
 - `src/freedom.c`
 - `src/hls.c`
-- `src/host_conf.c`
-- `src/hostblock.c`
+- `src/js_policy.c`
 - `src/net_realm.c`
 - `src/perf_trace.c`
+- `src/render_policy.c`
 - *... and 19 more*

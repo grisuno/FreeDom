@@ -62,11 +62,11 @@ third-party network. Each pair shows the top of the page; the number is the
 | Hacker News (3.04) | Wikipedia (3.53) |
 | :-: | :-: |
 | ![Hacker News](docs/img/compare-hackernews.png) | ![Wikipedia](docs/img/compare-wikipedia.png) |
-| **andreagrandi.it (3.01)** | **Hugging Face (5.18)** |
+| **andreagrandi.it (3.01)** | **Hugging Face (5.67)** |
 | ![andreagrandi.it](docs/img/compare-site-andreagrandi.png) | ![Hugging Face](docs/img/compare-huggingface.png) |
-| **GitHub (11.95)** | **Slashdot (3.21): still the hardest page** |
+| **GitHub (2.93)** | **Slashdot (3.25): still the hardest page** |
 | ![GitHub](docs/img/compare-site-github.png) | ![Slashdot](docs/img/compare-slashdot.png) |
-| **Discord (1.92)** | **GitLab (13.56)** |
+| **Discord (2.96)** | **GitLab (13.38)** |
 | ![Discord](docs/img/compare-site-discord.png) | ![GitLab](docs/img/compare-site-gitlab.png) |
 
 These images and scores are regenerated automatically by `make fbench` (`tools/fbench.py`) from `build/parity/*.{fd,ff}.png`. The

@@ -1,10 +1,10 @@
 # `src/css_select.c`
 
-> Source: [src/css_select.c:1](../../src/css_select.c#L1) | language `c` | coverage 64.3% | [API index](../index.md)
+> Source: [src/css_select.c:1](../../src/css_select.c#L1) | language `c` | coverage 60.0% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`csel_hex_val`](#csel_hex_val), [`csel_emit_utf8`](#csel_emit_utf8), [`csel_unescape`](#csel_unescape), [`csel_escape_len`](#csel_escape_len), [`csel_decl_end`](#csel_decl_end), [`csel_ident_fold`](#csel_ident_fold), [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident), [`between`](#between), [`selector`](#selector), [`built`](#built), [`csel_matches`](#csel_matches)
+- **Functions:** [`csel_hex_val`](#csel_hex_val), [`csel_emit_utf8`](#csel_emit_utf8), [`csel_unescape`](#csel_unescape), [`csel_escape_len`](#csel_escape_len), [`csel_decl_end`](#csel_decl_end), [`csel_ident_fold`](#csel_ident_fold), [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident), [`between`](#between), [`selector`](#selector), [`built`](#built), [`csel_needs_structure`](#csel_needs_structure), [`csel_matches`](#csel_matches)
 - **Macros:** [`HAS_MAX_DEPTH`](#has_max_depth)
 
 ## Call Graph
@@ -111,7 +111,7 @@ Decodes CSS escapes in src[0,n) into dst (cap bytes, NUL-terminated, truncates).
 | `src` | `char *` |  |  |
 | `n` | `size_t` |  |  |
 
-> **Inherited:** Documentation from [`csel_unescape`](#csel_unescape) (include/css_select.h:180).
+> **Inherited:** Documentation from [`csel_unescape`](#csel_unescape) (include/css_select.h:187).
 
 *Calls:* [`csel_emit_utf8`](#csel_emit_utf8), [`csel_hex_val`](#csel_hex_val)
 
@@ -141,7 +141,7 @@ Bytes the escape starting at s[i] occupies (0 when s[i] does not start one).
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`csel_escape_len`](#csel_escape_len) (include/css_select.h:182).
+> **Inherited:** Documentation from [`csel_escape_len`](#csel_escape_len) (include/css_select.h:189).
 
 *Calls:* [`csel_hex_val`](#csel_hex_val)
 
@@ -172,7 +172,7 @@ Index of the ';' ending the declaration that starts at s[i] (or of a '}' when st
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`csel_decl_end`](#csel_decl_end) (include/css_select.h:194).
+> **Inherited:** Documentation from [`csel_decl_end`](#csel_decl_end) (include/css_select.h:201).
 
 ---
 
@@ -196,7 +196,7 @@ dst (CSS_TOK_MAX bytes) receives src[0,len) as-is, or folded when too long.
 | `len` | `size_t` |  |  |
 | `dst` | `char *` |  |  |
 
-> **Inherited:** Documentation from [`csel_ident_fold`](#csel_ident_fold) (include/css_select.h:184).
+> **Inherited:** Documentation from [`csel_ident_fold`](#csel_ident_fold) (include/css_select.h:191).
 
 *Called by:* [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident)
 
@@ -224,7 +224,7 @@ A stored (possibly folded) identifier against an element token of tlen bytes.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_ident_eq`](#csel_ident_eq) (include/css_select.h:186).
+> **Inherited:** Documentation from [`csel_ident_eq`](#csel_ident_eq) (include/css_select.h:193).
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`csel_ident_fold`](#csel_ident_fold)
 
@@ -256,7 +256,7 @@ Returns 0, *ip untouched, when none.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_read_ident`](#csel_read_ident) (include/css_select.h:189).
+> **Inherited:** Documentation from [`csel_read_ident`](#csel_read_ident) (include/css_select.h:196).
 
 *Calls:* [`csel_ident_ch`](include.css_select.h.md#csel_ident_ch), [`csel_lower_ch`](include.css_select.h.md#csel_lower_ch), [`csel_escape_len`](#csel_escape_len), [`csel_ident_fold`](#csel_ident_fold), [`csel_unescape`](#csel_unescape)
 
@@ -318,11 +318,33 @@ Returns 0, *ip untouched, when none.
 
 ---
 
+<a id="csel_needs_structure"></a>
+
+### `csel_needs_structure`
+
+`function` | [src/css_select.c:1076](../../src/css_select.c#L1076)
+
+```c
+int csel_needs_structure(const css_sel *sel)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `sel` | `css_sel *` |  |  |
+
+**Returns:** `int`
+
+*Called by:* [`cch_element_matches`](src.css_chain.c.md#cch_element_matches)
+
+---
+
 <a id="csel_matches"></a>
 
 ### `csel_matches`
 
-`function` | [src/css_select.c:1062](../../src/css_select.c#L1062)
+`function` | [src/css_select.c:1099](../../src/css_select.c#L1099)
 
 ```c
 int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int *pseudo_kind)

@@ -1,6 +1,6 @@
 # `include/js_sandbox.h`
 
-> Source: [include/js_sandbox.h:1](../../include/js_sandbox.h#L1) | language `h` | coverage 54.2% | [API index](../index.md)
+> Source: [include/js_sandbox.h:1](../../include/js_sandbox.h#L1) | language `h` | coverage 56.0% | [API index](../index.md)
 
 ## Contents
 
@@ -8,7 +8,7 @@
 - **Enums:** [`js_status`](#js_status)
 - **Type Aliases:** [`js_context`](#js_context), [`status`](#status)
 - **Functions:** [`js_context_free`](#js_context_free), [`loaded`](#loaded), [`js_set_module_host`](#js_set_module_host), [`js_loc_from_stack`](#js_loc_from_stack), [`js_set_time_budget`](#js_set_time_budget), [`js_result_free`](#js_result_free), [`js_pump_jobs`](#js_pump_jobs), [`handle`](#handle), [`js_set_current_script`](#js_set_current_script)
-- **Macros:** [`JS_LOC_FILE_MAX`](#js_loc_file_max), [`JS_DEFAULT_MAX_SOURCE`](#js_default_max_source), [`JS_DEFAULT_MEM_LIMIT`](#js_default_mem_limit), [`JS_DEFAULT_STACK_LIMIT`](#js_default_stack_limit), [`JS_DEFAULT_TIME_BUDGET`](#js_default_time_budget), [`JS_MODULE_MAX`](#js_module_max), [`JS_MODULE_BYTES_MAX`](#js_module_bytes_max), [`JS_REALM_MAX`](#js_realm_max)
+- **Macros:** [`JS_LOC_FILE_MAX`](#js_loc_file_max), [`JS_DEFAULT_MAX_SOURCE`](#js_default_max_source), [`JS_DEFAULT_MEM_LIMIT`](#js_default_mem_limit), [`JS_DEFAULT_STACK_LIMIT`](#js_default_stack_limit), [`JS_DEFAULT_TIME_BUDGET`](#js_default_time_budget), [`JS_MODULE_MAX`](#js_module_max), [`JS_MODULE_BYTES_MAX`](#js_module_bytes_max), [`JS_REALM_MAX`](#js_realm_max), [`JS_REJECT_MAX`](#js_reject_max)
 
 ## Type Diagram
 
@@ -438,5 +438,19 @@ interrupt handler): the substrate for dedicated Workers. Defines the natives
 __realmNew / __realmEval / __realmClone on the global object, for a trusted shim
 to capture and delete. Realms are freed with the context. ctx NULL =>
 JS_ERR_NULL_ARG; OOM => JS_ERR_OOM.
+
+---
+
+<a id="js_reject_max"></a>
+
+### `JS_REJECT_MAX`
+
+`macro` | [include/js_sandbox.h:182](../../include/js_sandbox.h#L182)
+
+```c
+#define JS_REJECT_MAX
+```
+
+Unhandled promise rejections remembered per context between job checkpoints.
 
 ---

@@ -56,7 +56,7 @@ ds_status ds_write(const char *path, const uint8_t key[LS_KEY_LEN], ls_aead aead
 
 *Calls:* [`ls_free`](include.local_store.h.md#ls_free), [`write_full`](include.util.h.md#write_full), [`ls_seal`](src.local_store.c.md#ls_seal)
 
-*Called by:* [`profile_save`](src.profile.c.md#profile_save)
+*Called by:* [`hc_open`](src.http_cache.c.md#hc_open), [`profile_save`](src.profile.c.md#profile_save)
 
 ---
 
@@ -83,7 +83,7 @@ ds_status ds_read(const char *path, const uint8_t key[LS_KEY_LEN], uint8_t **out
 
 *Calls:* [`ls_free`](include.local_store.h.md#ls_free), [`read_full`](include.util.h.md#read_full), [`ls_open`](src.local_store.c.md#ls_open)
 
-*Called by:* [`profile_load`](src.profile.c.md#profile_load)
+*Called by:* [`hc_open`](src.http_cache.c.md#hc_open), [`profile_load`](src.profile.c.md#profile_load)
 
 ---
 

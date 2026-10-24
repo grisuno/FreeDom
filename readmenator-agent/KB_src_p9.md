@@ -1,6 +1,65 @@
 # Subsystem: src (page 9 of 9)
 Previous: [KB_src_p8.md](KB_src_p8.md)
 
+## src/textfield.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `whole` (function, line 6) `* the buffer is rejected whole (fail closed), never applied partially.
+ */
+
+#include "textfield.h...`
+  - `tf_clear` (function, line 20) `void tf_clear(tf_field *f)`
+  - `tf_set` (function, line 24) `tf_status tf_set(tf_field *f, const char *s)`
+  - `tf_insert` (function, line 35) `tf_status tf_insert(tf_field *f, char c)`
+  - `tf_backspace` (function, line 47) `void tf_backspace(tf_field *f)`
+  - `tf_delete` (function, line 55) `void tf_delete(tf_field *f)`
+  - `tf_move` (function, line 62) `void tf_move(tf_field *f, long delta)`
+  - `tf_home` (function, line 73) `void tf_home(tf_field *f)`
+  - `tf_end` (function, line 78) `void tf_end(tf_field *f)`
+  - `tf_text` (function, line 83) `const char *tf_text(const tf_field *f)`
+  - `tf_len` (function, line 87) `size_t tf_len(const tf_field *f)`
+  - `tf_cursor` (function, line 91) `size_t tf_cursor(const tf_field *f)`
+- Depends on: `include/textfield.h`
+
+## src/tls_impersonate.c
+- Doc: get_bytes: | ((uint32_t)r->p[r->off + 3] << 24); r->off += 4; return v; } static uint64_t...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `ti_wr` (struct, line 33)
+  - `ti_rd` (struct, line 63)
+  - `ti_should_impersonate` (function, line 18) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled,
+                          i...`
+  - `bounded_len` (function, line 25) `static size_t bounded_len(const char *s, size_t max)`
+  - `put_u8` (function, line 35) `static void put_u8(ti_wr *w, uint8_t v)`
+  - `put_u32` (function, line 40) `static void put_u32(ti_wr *w, uint32_t v)`
+  - `put_u64` (function, line 48) `static void put_u64(ti_wr *w, uint64_t v)`
+  - `put_blob` (function, line 53) `static void put_blob(ti_wr *w, const uint8_t *b, size_t n)`
+  - `get_u8` (function, line 65) `static uint8_t get_u8(ti_rd *r)`
+  - `get_u32` (function, line 70) `static uint32_t get_u32(ti_rd *r)`
+  - `get_u64` (function, line 80) `static uint64_t get_u64(ti_rd *r)`
+  - `get_bytes` (function, line 89) `static void get_bytes(ti_rd *r, size_t cap, uint8_t **out, size_t *out_len)`
+  - `get_str` (function, line 103) `static char *get_str(ti_rd *r, size_t cap)`
+  - `valid_profile` (function, line 116) `static int valid_profile(int p)`
+  - `ti_encode_req` (function, line 122) `size_t ti_encode_req(const ti_req *r, uint8_t *out, size_t out_cap)`
+  - `ti_decode_req` (function, line 140) `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out)`
+  - `ti_req_free` (function, line 166) `void ti_req_free(ti_req *r)`
+  - `ti_encode_resp` (function, line 177) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap)`
+  - `ti_decode_resp` (function, line 196) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out)`
+  - `ti_resp_free` (function, line 230) `void ti_resp_free(ti_resp *r)`
+- Depends on: `include/tls_impersonate.h`
+
+## src/ui_layout.c
+- Layer: presentation
+- Language: c
+- Symbols:
+  - `layout_push` (function, line 13) `static int layout_push(ui_layout *lay, size_t offset, size_t len)`
+  - `ui_wrap_text` (function, line 27) `ui_status ui_wrap_text(const char *text, size_t len, size_t max_cols, ui_layout *out)`
+  - `ui_layout_free` (function, line 91) `void ui_layout_free(ui_layout *lay)`
+  - `ui_clamp_scroll` (function, line 99) `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines)`
+- Depends on: `include/ui.h`
+
 ## src/url.c
 - Doc: ci_prefix: produced; every assembly is bounded and reports overflow rather than truncate....
 - Layer: utility

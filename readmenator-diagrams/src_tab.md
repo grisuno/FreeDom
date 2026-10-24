@@ -24,7 +24,7 @@ src groups 21 files (c, h) around FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install, FR
 
 ## tests (3.3)
 
-tests groups 11 files (c) around setup_doc, teardown_doc, DOC, IDX, test_build_null_args. setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] =...
+tests groups 11 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, IDX. setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] =...
 
 **Files**:
 

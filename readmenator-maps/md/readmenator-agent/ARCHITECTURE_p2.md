@@ -2,6 +2,19 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_prefs.c` -> `include/prefs.h`
+- `tests/test_prefs.c` -> `include/zoom.h`
+- `tests/test_profile.c` -> `include/prefs.h`
+- `tests/test_profile.c` -> `include/profile.h`
+- `tests/test_render_doc.c` -> `include/box_style.h`
+- `tests/test_render_doc.c` -> `include/css.h`
+- `tests/test_render_doc.c` -> `include/flex_layout.h`
+- `tests/test_render_doc.c` -> `include/page_view.h`
+- `tests/test_render_doc.c` -> `include/render_doc.h`
+- `tests/test_render_doc.c` -> `include/render_policy.h`
+- `tests/test_render_policy.c` -> `include/render_policy.h`
+- `tests/test_renderer.c` -> `include/renderer.h`
+- `tests/test_request_policy.c` -> `include/request_policy.h`
 - `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
 - `tests/test_svg_render.c` -> `include/svg_render.h`
 - `tests/test_tab.c` -> `include/css.h`
@@ -41,6 +54,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/block_flow.h` -> stddef.h
 - `include/box_tree.h` -> stddef.h
 - `include/browser.h` -> stddef.h, stdint.h
+- `include/cached_fetch.h` -> time.h
 - `include/compositor.h` -> stddef.h
 - `include/css.h` -> stddef.h
 - `include/css_atrule.h` -> stddef.h
@@ -65,6 +79,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/hostblock.h` -> stddef.h
 - `include/hostedit.h` -> stddef.h
 - `include/html_parse.h` -> stddef.h, stdint.h
+- `include/http_cache.h` -> stddef.h, stdint.h, time.h
 - `include/identity.h` -> stddef.h
 - `include/image_decode.h` -> stddef.h, stdint.h
 - `include/import_map.h` -> stddef.h
@@ -81,6 +96,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/page_view.h` -> stddef.h, stdint.h
 - `include/pdf_export.h` -> stddef.h
 - `include/perf_trace.h` -> stddef.h, stdint.h
+- `include/pq_seal.h` -> stddef.h, stdint.h
 - `include/prefetch.h` -> pthread.h, stddef.h
 - `include/prefs.h` -> stddef.h
 - `include/profile.h` -> stddef.h, stdint.h
@@ -111,6 +127,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/box_style.c` -> math.h, stddef.h, stdlib.h, string.h
 - `src/box_tree.c` -> stddef.h
 - `src/browser.c` -> stdlib.h, string.h
+- `src/cached_fetch.c` -> stdio.h, stdlib.h, string.h
 - `src/css.c` -> limits.h, math.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/css_atrule.c` -> string.h
 - `src/css_box.c` -> math.h, stdlib.h, string.h
@@ -140,13 +157,14 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/hostblock.c` -> stdint.h, stdlib.h, string.h
 - `src/hostedit.c` -> string.h
 - `src/html_parse.c` -> lexbor/html/html.h, lexbor/tag/const.h, stdlib.h, string.h
+- `src/http_cache.c` -> ctype.h, dirent.h, errno.h, fcntl.h, openssl/crypto.h, openssl/evp.h, openssl/hmac.h, pthread.h, stdio.h, stdlib.h, string.h, strings.h, sys/stat.h, unistd.h
 - `src/identity.c` -> math.h, stdarg.h, stdio.h, stdlib.h, string.h
 - `src/image_decode.c` -> jpeglib.h, png.h, setjmp.h, stdlib.h, string.h, webp/decode.h
 - `src/import_map.c` -> stdint.h, stdlib.h, string.h
 - `src/interp.c` -> float.h, math.h
 - `src/js_custom_elements.h` -> quickjs.h
 - `src/js_dom.c` -> quickjs.h, stdint.h, stdlib.h, string.h
-- `src/js_dom_ext.c` -> math.h
+- `src/js_dom_ext.c` -> math.h, stdlib.h
 - `src/js_dom_ext.h` -> quickjs.h
 - `src/js_dom_internal.h` -> quickjs.h
 - `src/js_embed.c` -> quickjs.h, stdint.h, stdio.h, stdlib.h, string.h
@@ -164,18 +182,19 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/media_decoder.c` -> errno.h, libavcodec/avcodec.h, libavformat/avformat.h, libavutil/avutil.h, libavutil/imgutils.h, libswscale/swscale.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, unistd.h
 - `src/net_realm.c` -> stddef.h, string.h
 - `src/os_sandbox.c` -> errno.h, fcntl.h, linux/audit.h, linux/filter.h, linux/landlock.h, linux/seccomp.h, sched.h, stddef.h, stdint.h, string.h, sys/mman.h, sys/prctl.h, sys/resource.h, sys/syscall.h, unistd.h
-- `src/page_view.c` -> ctype.h, lexbor/html/html.h, lexbor/tag/const.h, limits.h, stdint.h, stdio.h, stdlib.h, string.h
+- `src/page_view.c` -> ctype.h, lexbor/html/html.h, lexbor/tag/const.h, limits.h, stdint.h, stdio.h, stdlib.h, string.h, strings.h
 - `src/pdf_export.c` -> string.h
 - `src/perf_trace.c` -> stdio.h, stdlib.h, string.h
+- `src/pq_seal.c` -> openssl/core_names.h, openssl/crypto.h, openssl/evp.h, openssl/kdf.h, openssl/x509.h, stdlib.h, string.h
 - `src/prefetch.c` -> stdlib.h, string.h, strings.h
 - `src/prefs.c` -> stdio.h, stdlib.h, string.h
 - `src/profile.c` -> errno.h, fcntl.h, openssl/crypto.h, openssl/rand.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
 - `src/render_doc.c` -> stdlib.h, string.h
 - `src/renderer.c` -> errno.h, stdint.h, stdlib.h, string.h, sys/wait.h, unistd.h
 - `src/request_policy.c` -> stdlib.h, string.h
-- `src/secure_fetch.c` -> curl/curl.h, inttypes.h, openssl/objects.h, openssl/ssl.h, openssl/x509.h, pthread.h, stdlib.h, string.h, strings.h, time.h
+- `src/secure_fetch.c` -> curl/curl.h, inttypes.h, openssl/objects.h, openssl/ssl.h, openssl/x509.h, pthread.h, stdio.h, stdlib.h, string.h, strings.h, time.h
 - `src/svg_render.c` -> math.h, stddef.h, string.h
-- `src/tab.c` -> errno.h, fcntl.h, linux/close_range.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, sys/random.h, sys/wait.h, time.h, unistd.h
+- `src/tab.c` -> errno.h, fcntl.h, linux/close_range.h, pthread.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/random.h, sys/wait.h, time.h, unistd.h
 - `src/text_shape.c` -> cairo/cairo-ft.h, fontconfig/fontconfig.h, ft2build.h, harfbuzz/hb.h, stdio.h, stdlib.h, string.h
 - `src/textfield.c` -> string.h
 - `src/tls_impersonate.c` -> stdlib.h, string.h
@@ -193,6 +212,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_box_style.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_box_tree.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_browser.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_cached_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h
 - `tests/test_compositor.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tests/test_css.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_atrule.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
@@ -210,7 +230,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_css_vars.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_data_url.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_disk_store.c` -> cmocka.h, dirent.h, fcntl.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
-- `tests/test_dom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_dom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, time.h
 - `tests/test_dom_debug.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_download.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_flex_layout.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
@@ -223,6 +243,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_hostblock.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_hostedit.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_html_parse.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_http_cache.c` -> cmocka.h, dirent.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
 - `tests/test_identity.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_image_decode.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_import_map.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
@@ -240,6 +261,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_page_view.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_pdf_export.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_perf_trace.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_pq_seal.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_prefetch.c` -> cmocka.h, pthread.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_prefs.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_profile.c` -> cmocka.h, dirent.h, fcntl.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
@@ -247,9 +269,9 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_render_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_renderer.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_request_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
-- `tests/test_secure_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_secure_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_svg_render.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
-- `tests/test_tab.c` -> cmocka.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/types.h, time.h, unistd.h
+- `tests/test_tab.c` -> cmocka.h, poll.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/types.h, time.h, unistd.h
 - `tests/test_text_case.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_text_shape.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_textfield.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h

@@ -3,6 +3,54 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `tsh_font` | struct | `include/text_shape.h:33` | `` |
+| `tsh_local_handle` | function | `include/text_shape.h:75` | `int tsh_local_handle(const char *list);` |
+| `tsh_measure` | function | `include/text_shape.h:101` | `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);` |
+| `tsh_pick_family` | function | `include/text_shape.h:68` | `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...` |
+| `tsh_ready` | function | `include/text_shape.h:89` | `int tsh_ready(void);` |
+| `tsh_run` | struct | `include/text_shape.h:132` | `` |
+| `tsh_shutdown` | function | `include/text_shape.h:143` | `void tsh_shutdown(void);` |
+| `tsh_status` | enum | `include/text_shape.h:80` | `` |
+| `tsh_webfont_clear` | function | `include/text_shape.h:120` | `void tsh_webfont_clear(void);` |
+| `tsh_webfont_register` | function | `include/text_shape.h:114` | `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);` |
+| `wins` | function | `include/text_shape.h:58` | `* the first name the resolver accepts wins (returns 1, family in out). Pure: the * resolver is injected (fontconfig...` |
+| `FREEDOM_TEXTFIELD_H` | macro | `include/textfield.h:2` | `#define FREEDOM_TEXTFIELD_H` |
+| `TF_CAP` | macro | `include/textfield.h:23` | `#define TF_CAP` |
+| `buf` | type_alias | `include/textfield.h:24` | `typedef struct tf_field { char buf[TF_CAP];` |
+| `tf_backspace` | function | `include/textfield.h:53` | `void tf_backspace(tf_field *f);` |
+| `tf_clear` | function | `include/textfield.h:45` | `void tf_clear(tf_field *f);` |
+| `tf_cursor` | function | `include/textfield.h:68` | `size_t tf_cursor(const tf_field *f);` |
+| `tf_delete` | function | `include/textfield.h:56` | `void tf_delete(tf_field *f);` |
+| `tf_end` | function | `include/textfield.h:63` | `void tf_end(tf_field *f);` |
+| `tf_field` | struct | `include/textfield.h:25` | `` |
+| `tf_home` | function | `include/textfield.h:62` | `void tf_home(tf_field *f);` |
+| `tf_init` | function | `include/textfield.h:38` | `void tf_init(tf_field *f);` |
+| `tf_len` | function | `include/textfield.h:67` | `size_t tf_len(const tf_field *f);` |
+| `tf_move` | function | `include/textfield.h:59` | `void tf_move(tf_field *f, long delta);` |
+| `tf_status` | enum | `include/textfield.h:31` | `` |
+| `tf_text` | function | `include/textfield.h:66` | `const char *tf_text(const tf_field *f);` |
+| `FREEDOM_TLS_IMPERSONATE_H` | macro | `include/tls_impersonate.h:2` | `#define FREEDOM_TLS_IMPERSONATE_H` |
+| `TI_MAGIC` | macro | `include/tls_impersonate.h:60` | `#define TI_MAGIC` |
+| `TI_MAX_BODY` | macro | `include/tls_impersonate.h:64` | `#define TI_MAX_BODY` |
+| `TI_MAX_CHAIN` | macro | `include/tls_impersonate.h:67` | `#define TI_MAX_CHAIN` |
+| `TI_MAX_GROUP` | macro | `include/tls_impersonate.h:68` | `#define TI_MAX_GROUP` |
+| `TI_MAX_HEADERS` | macro | `include/tls_impersonate.h:63` | `#define TI_MAX_HEADERS` |
+| `TI_MAX_METHOD` | macro | `include/tls_impersonate.h:62` | `#define TI_MAX_METHOD` |
+| `TI_MAX_RESP_BODY` | macro | `include/tls_impersonate.h:66` | `#define TI_MAX_RESP_BODY` |
+| `TI_MAX_RESP_HDR` | macro | `include/tls_impersonate.h:65` | `#define TI_MAX_RESP_HDR` |
+| `TI_MAX_URL` | macro | `include/tls_impersonate.h:61` | `#define TI_MAX_URL` |
+| `chain` | function | `include/tls_impersonate.h:32` | `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT...` |
+| `path` | function | `include/tls_impersonate.h:26` | `* Zero Knowledge path (PQ-hybrid, VERIFYPEER). * * 2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed...` |
+| `status` | type_alias | `include/tls_impersonate.h:82` | `typedef struct ti_resp { long status;` |
+| `success` | function | `include/tls_impersonate.h:97` | `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out...` |
+| `ti_decode_req` | function | `include/tls_impersonate.h:101` | `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);` |
+| `ti_decode_resp` | function | `include/tls_impersonate.h:105` | `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);` |
+| `ti_encode_resp` | function | `include/tls_impersonate.h:104` | `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);` |
+| `ti_profile` | enum | `include/tls_impersonate.h:41` | `` |
+| `ti_req` | struct | `include/tls_impersonate.h:72` | `` |
+| `ti_req_free` | function | `include/tls_impersonate.h:102` | `void ti_req_free(ti_req *r);` |
+| `ti_resp` | struct | `include/tls_impersonate.h:82` | `` |
+| `ti_resp_free` | function | `include/tls_impersonate.h:106` | `void ti_resp_free(ti_resp *r);` |
 | `ti_should_impersonate` | function | `include/tls_impersonate.h:56` | `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);` |
 | `FREEDOM_UI_H` | macro | `include/ui.h:2` | `#define FREEDOM_UI_H` |
 | `available` | function | `include/ui.h:86` | `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...` |
@@ -260,6 +308,20 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `url_is_allowed` | function | `src/browser.c:60` | `static int url_is_allowed(const char *url)` |
 | `utf8_encode` | function | `src/browser.c:102` | `static size_t utf8_encode(unsigned int cp, char *out)` |
 | `xstrdup` | function | `src/browser.c:74` | `static char *xstrdup(const char *s)` |
+| `_POSIX_C_SOURCE` | macro | `src/cached_fetch.c:7` | `#define _POSIX_C_SOURCE` |
+| `cacheable_request` | function | `src/cached_fetch.c:26` | `static int cacheable_request(const sf_config *cfg, const char *url)` |
+| `cf_attach_redirect_memory` | function | `src/cached_fetch.c:148` | `void cf_attach_redirect_memory(hc_store *store)` |
+| `cf_get` | function | `src/cached_fetch.c:133` | `sf_status cf_get(const char *partition, const char *url, sf_config *cfg, sf_response *out,       ...` |
+| `cf_get_with` | function | `src/cached_fetch.c:85` | `sf_status cf_get_with(hc_store *store, cf_fetch_fn fetch, const char *partition, const char *url,...` |
+| `cf_set_store` | function | `src/cached_fetch.c:22` | `void cf_set_store(hc_store *store)` |
+| `cf_store` | function | `src/cached_fetch.c:23` | `hc_store *cf_store(void)` |
+| `copy_val` | function | `src/cached_fetch.c:33` | `static void copy_val(char *dst, size_t cap, const char *src)` |
+| `meta_from_response` | function | `src/cached_fetch.c:40` | `static void meta_from_response(hc_meta *m, const sf_response *r, const char *url, time_t now)` |
+| `redirect_load` | function | `src/cached_fetch.c:140` | `static int redirect_load(void *ctx, const char *from, time_t now, char *out, size_t cap)` |
+| `redirect_save` | function | `src/cached_fetch.c:144` | `static void redirect_save(void *ctx, const char *from, const char *to, time_t now)` |
+| `remember` | function | `src/cached_fetch.c:77` | `static void remember(hc_store *store, const char *partition, const char *url,                    ...` |
+| `response_from_cache` | function | `src/cached_fetch.c:53` | `static int response_from_cache(sf_response *out, const hc_meta *m, uint8_t *body, size_t len)` |
+| `trace` | function | `src/cached_fetch.c:18` | `static void trace(const char *what, const char *url)` |
 | `cx_box_layer` | function | `src/compositor.c:34` | `cx_layer cx_box_layer(const cx_style *s)` |
 | `cx_forms_stacking_context` | function | `src/compositor.c:16` | `int cx_forms_stacking_context(const cx_style *s)` |
 | `cx_item_compare` | function | `src/compositor.c:54` | `int cx_item_compare(const cx_item *a, const cx_item *b)` |
@@ -434,67 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `interp_overflow_wrap` | function | `src/css.c:487` | `static int interp_overflow_wrap(const char *v)` |
 | `interp_overscroll_behavior` | function | `src/css.c:825` | `static int interp_overscroll_behavior(const char *v)` |
 | `interp_pointer_events` | function | `src/css.c:605` | `static int interp_pointer_events(const char *v)` |
-| `interp_position` | function | `src/css.c:370` | `static int interp_position(const char *v)` |
-| `interp_print_color_adjust` | function | `src/css.c:720` | `static int interp_print_color_adjust(const char *v)` |
-| `interp_resize` | function | `src/css.c:795` | `static int interp_resize(const char *v)` |
-| `interp_scroll_behavior` | function | `src/css.c:803` | `static int interp_scroll_behavior(const char *v)` |
-| `interp_style` | function | `src/css.c:327` | `static int interp_style(const char *v)` |
-| `interp_table_layout` | function | `src/css.c:543` | `static int interp_table_layout(const char *v)` |
-| `interp_tabsize` | function | `src/css.c:359` | `static int interp_tabsize(const char *v)` |
-| `interp_text_overflow` | function | `src/css.c:473` | `static int interp_text_overflow(const char *v)` |
-| `interp_text_rendering` | function | `src/css.c:774` | `static int interp_text_rendering(const char *v)` |
-| `interp_textdeco` | function | `src/css.c:331` | `static int interp_textdeco(const char *v)` |
-| `interp_textdeco_style` | function | `src/css.c:360` | `static int interp_textdeco_style(const char *v)` |
-| `interp_textdeco_thickness` | function | `src/css.c:361` | `static int interp_textdeco_thickness(const char *v)` |
-| `interp_texttransform` | function | `src/css.c:354` | `static int interp_texttransform(const char *v)` |
-| `interp_time_ms` | function | `src/css.c:890` | `static int interp_time_ms(const char *v)` |
-| `interp_transition_property` | function | `src/css.c:357` | `static int interp_transition_property(const char *v)` |
-| `interp_user_select` | function | `src/css.c:566` | `static int interp_user_select(const char *v)` |
-| `interp_visibility` | function | `src/css.c:402` | `static int interp_visibility(const char *v)` |
-| `interp_weight` | function | `src/css.c:323` | `static int interp_weight(const char *v)` |
-| `interp_whitespace` | function | `src/css.c:358` | `static int interp_whitespace(const char *v)` |
-| `interp_word_break` | function | `src/css.c:479` | `static int interp_word_break(const char *v)` |
-| `interpret_decls` | function | `src/css.c:4347` | `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,                ...` |
-| `interpret_prop` | function | `src/css.c:4162` | `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,             ...` |
-| `interpret_prop_dispatch` | function | `src/css.c:3414` | `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,    ...` |
-| `is_anim_ident` | function | `src/css.c:1198` | `static int is_anim_ident(const char *tok)` |
-| `item` | function | `src/css.c:1147` | `* timing list takes its first item (CSS Animations/Transitions 1: with one  * transition/animatio...` |
-| `layer_register` | function | `src/css.c:4661` | `static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,                      ...` |
-| `len_rebase` | function | `src/css.c:5145` | `static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen)` |
-| `len_rebase_ctx` | struct | `src/css.c:5103` | `` |
-| `len_unit_px` | function | `src/css.c:5115` | `static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c)` |
-| `lp_can_be_nonneg` | function | `src/css.c:303` | `static int lp_can_be_nonneg(int px_val, int pct_pm)` |
-| `matrix` | function | `src/css.c:2431` | `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands...` |
-| `next_ws_token` | function | `src/css.c:307` | `static int next_ws_token(const char **p, char *tok, size_t cap)` |
-| `number` | function | `src/css.c:504` | `* number (no unit) as px (common in shorthand context like "10 5"). */ static int interp_border_s...` |
-| `order` | function | `src/css.c:1440` | `* declaration order (dx, dy, optional blur >= 0);` |
-| `origin_component` | function | `src/css.c:2994` | `static int origin_component(const char *tok, int axis, int *out)` |
-| `page_view` | function | `src/css.c:5456` | `* the generated text reaches page_view (which materialises it as a synthetic * run);` |
-| `parent` | function | `src/css.c:5489` | `* property from the parent (`inherit`), and an unset non-inherited one          * stands at its i...` |
-| `parse_angle_deg` | function | `src/css.c:2790` | `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);` |
-| `parse_block` | function | `src/css.c:4779` | `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,                  ...` |
-| `parse_color` | function | `src/css.c:191` | `static int parse_color(const char *v)` |
-| `parse_matrix6` | function | `src/css.c:2461` | `static int parse_matrix6(const char *p, size_t argn, double m6[6])` |
-| `parse_num` | function | `src/css.c:180` | `static int parse_num(const char *s, double *out, const char **endp)` |
-| `property` | function | `src/css.c:3111` | `* error drops the whole property (fail closed). */ static int expand_clip(const char *val, css_de...` |
-| `pseudo_of` | function | `src/css.c:6119` | `static int pseudo_of(int which)` |
-| `raw_add` | function | `src/css.c:4234` | `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)` |
-| `rem_emit_px` | function | `src/css.c:5085` | `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)` |
-| `rem_ident_ch` | function | `src/css.c:5067` | `static int rem_ident_ch(char c)` |
-| `rem_num_starts_after` | function | `src/css.c:5075` | `static int rem_num_starts_after(char prev)` |
-| `rem_px` | type_alias | `src/css.c:5103` | `typedef struct len_rebase_ctx { double rem_px;` |
-| `rem_rebase` | function | `src/css.c:5211` | `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)` |
-| `resolve_core` | function | `src/css.c:6139` | `static css_style resolve_core(const css_sheet *sheet, const css_element *el,                     ...` |
-| `sel_list_comma` | function | `src/css.c:1963` | `static size_t sel_list_comma(const char *s, size_t i, size_t end);` |
-| `selector_matches_root` | function | `src/css.c:2291` | `static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m)` |
-| `sentinel` | function | `src/css.c:3688` | `* cascade carries as the currentColor sentinel (in `color` the two are the * same thing);` |
-| `sheet_index` | function | `src/css.c:5219` | `static void sheet_index(css_sheet *sh)` |
-| `sheet_pools_reserve` | function | `src/css.c:4405` | `static void sheet_pools_reserve(css_sheet *sh)` |
-| `sheet_rewind` | function | `src/css.c:5224` | `static void sheet_rewind(css_sheet *sh)` |
-| `sheet_root_font_px` | function | `src/css.c:5269` | `static double sheet_root_font_px(const css_sheet *sh)` |
-| `shorthand` | function | `src/css.c:3076` | `* An uninterpretable token drops the whole shorthand (fail closed). */ static int expand_place(co...` |
-| `shorthand` | function | `src/css.c:3322` | `* generic bucket keeps the rest of the shorthand (same net effect as the  * font-family longhand ...` |
-| `skip_at_rule` | function | `src/css.c:4524` | `static size_t skip_at_rule(const char *s, size_t i, size_t n)` |
-| `slots` | function | `src/css.c:3573` | `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return...` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

@@ -96,7 +96,7 @@ The input_* fields are meaningful only for RD_INPUT: input_type is a pv_input_ty
 
 #### `rd_block.to`
 
-`method` | [include/render_doc.h:249](../../include/render_doc.h#L249)
+`method` | [include/render_doc.h:250](../../include/render_doc.h#L250)
 
 ```c
 * belongs to (-1 = none);
@@ -116,7 +116,7 @@ The input_* fields are meaningful only for RD_INPUT: input_type is a pv_input_ty
 
 ### `rd_doc`
 
-`struct` | [include/render_doc.h:263](../../include/render_doc.h#L263)
+`struct` | [include/render_doc.h:264](../../include/render_doc.h#L264)
 
 ```c
 typedef struct rd_doc
@@ -158,7 +158,7 @@ typedef enum rd_kind
 
 ### `rd_status`
 
-`enum` | [include/render_doc.h:295](../../include/render_doc.h#L295)
+`enum` | [include/render_doc.h:296](../../include/render_doc.h#L296)
 
 ```c
 typedef enum rd_status
@@ -246,7 +246,7 @@ The input_* fields are meaningful only for RD_INPUT: input_type is a pv_input_ty
 
 ### `rdp_images_warning`
 
-`function` | [include/render_doc.h:304](../../include/render_doc.h#L304)
+`function` | [include/render_doc.h:305](../../include/render_doc.h#L305)
 
 ```c
 * rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose img_decision is computed with * rdp_image_decision(caps, top_level_url, src, img_w, img_h)
@@ -268,7 +268,7 @@ Never NULL or empty.
 
 ### `rd_free`
 
-`function` | [include/render_doc.h:314](../../include/render_doc.h#L314)
+`function` | [include/render_doc.h:315](../../include/render_doc.h#L315)
 
 ```c
 void rd_free(rd_doc *d);
@@ -288,7 +288,7 @@ Idempotent; safe on NULL and safe to call twice.
 
 ### `rd_count`
 
-`function` | [include/render_doc.h:317](../../include/render_doc.h#L317)
+`function` | [include/render_doc.h:318](../../include/render_doc.h#L318)
 
 ```c
 size_t rd_count(const rd_doc *d);
@@ -314,7 +314,7 @@ NULL-safe.
 
 ### `rd_at`
 
-`function` `const` | [include/render_doc.h:318](../../include/render_doc.h#L318)
+`function` `const` | [include/render_doc.h:319](../../include/render_doc.h#L319)
 
 ```c
 const rd_block *rd_at(const rd_doc *d, size_t i);
@@ -337,7 +337,7 @@ const rd_block *rd_at(const rd_doc *d, size_t i);
 
 ### `rd_box_count`
 
-`function` | [include/render_doc.h:322](../../include/render_doc.h#L322)
+`function` | [include/render_doc.h:323](../../include/render_doc.h#L323)
 
 ```c
 size_t rd_box_count(const rd_doc *d);
@@ -361,7 +361,7 @@ Box tree accessors (Step D). rd_box_count is the number of box definitions (0 wh
 
 ### `rd_box_at`
 
-`function` `const` | [include/render_doc.h:323](../../include/render_doc.h#L323)
+`function` `const` | [include/render_doc.h:324](../../include/render_doc.h#L324)
 
 ```c
 const pv_box_def *rd_box_at(const rd_doc *d, size_t i);
@@ -384,7 +384,7 @@ const pv_box_def *rd_box_at(const rd_doc *d, size_t i);
 
 ### `rd_cont_count`
 
-`function` | [include/render_doc.h:327](../../include/render_doc.h#L327)
+`function` | [include/render_doc.h:328](../../include/render_doc.h#L328)
 
 ```c
 size_t rd_cont_count(const rd_doc *d);
@@ -406,7 +406,7 @@ Container table accessors. rd_cont_count is the number of containers; rd_cont_at
 
 ### `rd_cont_at`
 
-`function` `const` | [include/render_doc.h:328](../../include/render_doc.h#L328)
+`function` `const` | [include/render_doc.h:329](../../include/render_doc.h#L329)
 
 ```c
 const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);
@@ -427,7 +427,7 @@ const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);
 
 ### `rd_kind_name`
 
-`function` `const` | [include/render_doc.h:332](../../include/render_doc.h#L332)
+`function` `const` | [include/render_doc.h:333](../../include/render_doc.h#L333)
 
 ```c
 const char *rd_kind_name(rd_kind k);
@@ -451,7 +451,7 @@ Never NULL; an unknown enum value yields "block".
 
 ### `rd_block_tag`
 
-`function` `const` | [include/render_doc.h:340](../../include/render_doc.h#L340)
+`function` `const` | [include/render_doc.h:341](../../include/render_doc.h#L341)
 
 ```c
 const char *rd_block_tag(const rd_block *b);
@@ -475,7 +475,7 @@ RD_HEADING -> "h1".."h6" (heading_level clamped to 1..6), RD_PARAGRAPH -> "p", R
 
 ### `rd_block_heading_level`
 
-`function` | [include/render_doc.h:347](../../include/render_doc.h#L347)
+`function` | [include/render_doc.h:348](../../include/render_doc.h#L348)
 
 ```c
 int rd_block_heading_level(const rd_block *b);
@@ -499,7 +499,7 @@ RD_HEADING yields its heading_level clamped to 1..6; an RD_LINK carrying heading
 
 ### `decision`
 
-`function` | [include/render_doc.h:350](../../include/render_doc.h#L350)
+`function` | [include/render_doc.h:351](../../include/render_doc.h#L351)
 
 ```c
 * decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char *rd_image_label(rdp_img_decision d);
@@ -519,7 +519,7 @@ RD_HEADING yields its heading_level clamped to 1..6; an RD_LINK carrying heading
 
 ### `IMG_FAIL_OK`
 
-`function` | [include/render_doc.h:356](../../include/render_doc.h#L356)
+`function` | [include/render_doc.h:357](../../include/render_doc.h#L357)
 
 ```c
 * IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);
@@ -539,7 +539,7 @@ RD_HEADING yields its heading_level clamped to 1..6; an RD_LINK carrying heading
 
 ### `rd_input_label`
 
-`function` `const` | [include/render_doc.h:361](../../include/render_doc.h#L361)
+`function` `const` | [include/render_doc.h:362](../../include/render_doc.h#L362)
 
 ```c
 const char *rd_input_label(int input_type);
@@ -563,7 +563,7 @@ Stable, short English name of a form control type (a pv_input_type value), e.g.
 
 ### `rd_input_invisible`
 
-`function` | [include/render_doc.h:366](../../include/render_doc.h#L366)
+`function` | [include/render_doc.h:367](../../include/render_doc.h#L367)
 
 ```c
 int rd_input_invisible(int input_type);

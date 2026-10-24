@@ -404,12 +404,12 @@ void css_resolve_anim_keyframes(css_style *...`
   - `count_children` (function, line 227) `static int count_children(lxb_dom_node_t *n)`
   - `inputs` (function, line 241) `* identical inputs (single source of truth). */
 static const css_element *build_chain(lxb_dom_ele...`
-  - `cch_element_style_vars` (function, line 297) `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
+  - `cch_element_style_vars` (function, line 299) `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
                  ...`
-  - `cch_pseudo_style` (function, line 328) `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
+  - `cch_pseudo_style` (function, line 330) `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
             ...`
-  - `cch_element_style` (function, line 347) `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
-  - `cch_element_matches` (function, line 351) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
+  - `cch_element_style` (function, line 349) `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
+  - `cch_element_matches` (function, line 353) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
   - `CCH_TAG_MAX` (macro, line 15) `#define CCH_TAG_MAX`
   - `CCH_ID_MAX` (macro, line 16) `#define CCH_ID_MAX`
   - `CCH_CLASS_BUF` (macro, line 17) `#define CCH_CLASS_BUF`

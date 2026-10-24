@@ -1,10 +1,10 @@
 # `include/freedom_config.h`
 
-> Source: [include/freedom_config.h:1](../../include/freedom_config.h#L1) | language `h` | coverage 90.9% | [API index](../index.md)
+> Source: [include/freedom_config.h:1](../../include/freedom_config.h#L1) | language `h` | coverage 92.3% | [API index](../index.md)
 
 ## Contents
 
-- **Macros:** [`FC_PNG_PAGE_W`](#fc_png_page_w), [`FC_TRUSTED_JS_BUDGET_MS`](#fc_trusted_js_budget_ms), [`FC_PNG_MARGIN`](#fc_png_margin), [`FC_FLEX_MEASURE_W`](#fc_flex_measure_w), [`FC_FLEX_MIN_MEASURE_W`](#fc_flex_min_measure_w), [`FC_FONT_CHAIN_MAX`](#fc_font_chain_max), [`FC_MAX_BOXES`](#fc_max_boxes), [`FC_FONT_FALLBACK_PX`](#fc_font_fallback_px), [`FC_UI_FONT_SIZE`](#fc_ui_font_size), [`FC_MAX_AUTHOR_CSS_BYTES`](#fc_max_author_css_bytes)
+- **Macros:** [`FC_PNG_PAGE_W`](#fc_png_page_w), [`FC_TRUSTED_JS_BUDGET_MS`](#fc_trusted_js_budget_ms), [`FC_PNG_MARGIN`](#fc_png_margin), [`FC_FLEX_MEASURE_W`](#fc_flex_measure_w), [`FC_FLEX_MIN_MEASURE_W`](#fc_flex_min_measure_w), [`FC_FONT_CHAIN_MAX`](#fc_font_chain_max), [`FC_MAX_BOXES`](#fc_max_boxes), [`FC_FONT_FALLBACK_PX`](#fc_font_fallback_px), [`FC_UI_FONT_SIZE`](#fc_ui_font_size), [`FC_MAX_AUTHOR_CSS_BYTES`](#fc_max_author_css_bytes), [`FC_LAZY_IMAGE_MARGIN_PX`](#fc_lazy_image_margin_px), [`FC_TAB_OP_NET_BUDGET_MS`](#fc_tab_op_net_budget_ms)
 
 ## Macros
 
@@ -165,5 +165,35 @@ Formerly duplicated as UI_FONT_SIZE in gui/ui_render.c and gui/browser_ui_intern
 Ceiling on the author CSS text one page may feed the parser: the document's <style> blocks plus its fetched <link> sheets, together.
 
 It is an anti-DoS bound on parser memory and time, and it must sit ABOVE what real pages ship: github.com's front page links ~2.4 MB of distinct CSS, and the former 1 MiB value was consumed by its four colour-theme sheets alone, so the layout sheets that follow them were dropped whole and the page rendered unstyled.
+
+---
+
+<a id="fc_lazy_image_margin_px"></a>
+
+### `FC_LAZY_IMAGE_MARGIN_PX`
+
+`macro` | [include/freedom_config.h:80](../../include/freedom_config.h#L80)
+
+```c
+#define FC_LAZY_IMAGE_MARGIN_PX
+```
+
+Distance (px) beyond the viewport at which a loading="lazy" image starts loading.
+
+---
+
+<a id="fc_tab_op_net_budget_ms"></a>
+
+### `FC_TAB_OP_NET_BUDGET_MS`
+
+`macro` | [include/freedom_config.h:86](../../include/freedom_config.h#L86)
+
+```c
+#define FC_TAB_OP_NET_BUDGET_MS
+```
+
+Wall time (ms) the trusted parent spends serving ONE worker operation's network requests after the page load (a timer, click or observer callback).
+
+The fetch is synchronous in the GUI thread, so this bounds how long a slow server can freeze the window; once spent, the rest of that operation's requests fail (status 0) instead of blocking.
 
 ---

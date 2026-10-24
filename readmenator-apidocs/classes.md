@@ -166,6 +166,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`ds_status`](modules/include.disk_store.h.md#ds_status) enum in `include/disk_store.h`
 - [`du_status`](modules/include.data_url.h.md#du_status) enum in `include/data_url.h`
 - [`end`](modules/include.text_shape.h.md#end) type_alias in `include/text_shape.h`
+- [`ent`](modules/src.http_cache.c.md#ent) struct in `src/http_cache.c`
 - [`epoch_ms`](modules/include.media_decoder.h.md#epoch_ms) type_alias in `include/media_decoder.h`
 - [`family`](modules/gui.browser_ui.c.md#family) type_alias in `gui/browser_ui.c`
 - [`family`](modules/include.text_shape.h.md#family) type_alias in `include/text_shape.h`
@@ -179,6 +180,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`fetch_job`](modules/gui.browser_ui.c.md#fetch_job) struct in `gui/browser_ui.c`
 - [`fetch_prep`](modules/gui.browser_ui.c.md#fetch_prep) struct in `gui/browser_ui.c`
 - [`file`](modules/src.text_shape.c.md#file) type_alias in `src/text_shape.c`
+- [`final_url`](modules/include.http_cache.h.md#final_url) type_alias in `include/http_cache.h`
 - [`fm_block_reason`](modules/include.form.h.md#fm_block_reason) enum in `include/form.h`
 - [`fm_field`](modules/include.form.h.md#fm_field) struct in `include/form.h`
 - [`fm_kind`](modules/include.form.h.md#fm_kind) enum in `include/form.h`
@@ -208,6 +210,11 @@ Project types nested under the project types they derive from. External bases ar
 - [`hb_set`](modules/src.hostblock.c.md#hb_set) struct in `src/hostblock.c`
 - [`hb_status`](modules/include.hostblock.h.md#hb_status) enum in `include/hostblock.h`
 - [`hb_table`](modules/src.hostblock.c.md#hb_table) struct in `src/hostblock.c`
+- [`hc_class`](modules/include.http_cache.h.md#hc_class) enum in `include/http_cache.h`
+- [`hc_meta`](modules/include.http_cache.h.md#hc_meta) struct in `include/http_cache.h`
+- [`hc_status`](modules/include.http_cache.h.md#hc_status) enum in `include/http_cache.h`
+- [`hc_store`](modules/include.http_cache.h.md#hc_store) type_alias in `include/http_cache.h`
+- [`hc_store`](modules/src.http_cache.c.md#hc_store) struct in `src/http_cache.c`
 - [`hcf_dirs`](modules/include.host_conf.h.md#hcf_dirs) struct in `include/host_conf.h`
 - [`he_status`](modules/include.hostedit.h.md#he_status) enum in `include/hostedit.h`
 - [`height`](modules/include.svg_render.h.md#height) type_alias in `include/svg_render.h`
@@ -340,6 +347,9 @@ Project types nested under the project types they derive from. External bases ar
 - [`policy`](modules/include.secure_fetch.h.md#policy) type_alias in `include/secure_fetch.h`
 - [`fx_result.pos`](modules/include.flex_layout.h.md#fx_result-pos) type_alias in `include/flex_layout.h`
 - [`cx_style.position`](modules/include.compositor.h.md#cx_style-position) type_alias in `include/compositor.h`
+- [`pqs_keys`](modules/include.pq_seal.h.md#pqs_keys) type_alias in `include/pq_seal.h`
+- [`pqs_keys`](modules/src.pq_seal.c.md#pqs_keys) struct in `src/pq_seal.c`
+- [`pqs_status`](modules/include.pq_seal.h.md#pqs_status) enum in `include/pq_seal.h`
 - [`css_sel.prefers_dark`](modules/include.css.h.md#css_sel-prefers_dark) type_alias in `include/css.h`
 - [`prefs_entry`](modules/include.prefs.h.md#prefs_entry) struct in `include/prefs.h`
 - [`prefs_state`](modules/include.prefs.h.md#prefs_state) struct in `include/prefs.h`

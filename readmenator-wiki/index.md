@@ -1,15 +1,15 @@
 # Second Brain
 
-*Last synthesized: 2026-10-23 | 270 files | 10 concept pages | offline, zero tokens*
+*Last synthesized: 2026-10-24 | 279 files | 10 concept pages | offline, zero tokens*
 
 > Raw sources -> readmenator wiki -> links (Karpathy LLM Wiki Pattern, deterministic).
 > Start here, then open one community page. Prefer grep over full reads.
 
 ## Vault Overview
 
-The codebase centres on `browser_ui.c`, `css.h`, `tab.c`. Architecturally it is 6 layers, dominant utility (158 files) across 10 import-based communities. Recorded risk surface: 0 security findings and 1 dependency cycles.
+The codebase centres on `browser_ui.c`, `css.h`, `tab.c`. Architecturally it is 6 layers, dominant utility (160 files) across 10 import-based communities. Recorded risk surface: 0 security findings and 1 dependency cycles.
 
-Surprising tissue lives between src: css, include: browser_ui, src: tab: 20 extracted cross-community imports and 0 inferred bridges. Follow `connections.json` sorted by strength before refactoring.
+Surprising tissue lives between include: browser_ui, src: css, src: tab: 20 extracted cross-community imports and 0 inferred bridges. Follow `connections.json` sorted by strength before refactoring.
 
 Open work clusters around documentation (14% file coverage), 0 security findings, 4 taint paths, and 5 suggested exploration questions in `queries.md`.
 
@@ -17,14 +17,14 @@ Open work clusters around documentation (14% file coverage), 0 security findings
 
 | Metric | Value |
 |--------|-------|
-| Files | 270 |
-| Symbols | 7074 |
-| Resolved imports | 520 |
+| Files | 279 |
+| Symbols | 7277 |
+| Resolved imports | 533 |
 | Languages | c, h, py, sh |
 | Communities | 10 |
-| Doc coverage | 14% (38/270 files) |
+| Doc coverage | 14% (38/279 files) |
 | Security findings | 0 |
-| Estimated read cost | ~206046 tokens (chars/4, offline so $0) |
+| Estimated read cost | ~210969 tokens (chars/4, offline so $0) |
 | Large files (>256KB, maybe generated) | 4: `browser_ui.c`, `css.c`, `page_view.c`, `test_css.c` |
 
 ## Reading Order
@@ -40,14 +40,14 @@ readmenator query "<question>" --target freedom-0.0.3
 
 ## Concept Wiki
 
-- [src: css (53 files, cohesion 0.72)](./community_0_src_css.md)
-- [include: browser_ui (46 files, cohesion 0.54)](./community_1_include_browser_ui.md)
+- [include: browser_ui (53 files, cohesion 0.56)](./community_0_include_browser_ui.md)
+- [src: css (53 files, cohesion 0.72)](./community_1_src_css.md)
 - [src: tab (45 files, cohesion 0.70)](./community_2_src_tab.md)
 - [src: text_shape (39 files, cohesion 0.55)](./community_3_src_text_shape.md)
-- [include: local_store (20 files, cohesion 0.62)](./community_4_include_local_store.md)
-- [include: page_view (19 files, cohesion 0.45)](./community_5_include_page_view.md)
-- [gui (13 files, cohesion 0.46)](./community_6_gui.md)
-- [include: secure_fetch (13 files, cohesion 0.61)](./community_7_include_secure_fetch.md)
+- [include: page_view (19 files, cohesion 0.45)](./community_4_include_page_view.md)
+- [include: browser (19 files, cohesion 0.55)](./community_5_include_browser.md)
+- [src: local_store (16 files, cohesion 0.79)](./community_6_src_local_store.md)
+- [include: secure_fetch (13 files, cohesion 0.58)](./community_7_include_secure_fetch.md)
 - [include: prefetch (6 files, cohesion 0.56)](./community_8_include_prefetch.md)
 - [orphans (16 files, cohesion 0.00)](./community_9_orphans.md)
 
@@ -55,24 +55,24 @@ readmenator query "<question>" --target freedom-0.0.3
 
 | File | Score |
 |------|-------|
-| `gui/browser_ui.c` | 162.7 (large, maybe generated) |
+| `gui/browser_ui.c` | 165.4 (large, maybe generated) |
 | `include/css.h` | 88.0 |
-| `src/tab.c` | 64.7 |
+| `src/tab.c` | 66.2 |
 | `src/freedom.c` | 58.8 |
 | `src/css.c` | 56.7 (large, maybe generated) |
 
 ## Strongest Connections
 
-- 1 -> 4: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 5: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 0: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 6: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 3: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 2: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 7: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 8: depends_on (strength 0.9, EXTRACTED)
-- 6 -> 0: depends_on (strength 0.9, EXTRACTED)
-- 6 -> 2: depends_on (strength 0.9, EXTRACTED)
+- 0 -> 5: depends_on (strength 0.9, EXTRACTED)
+- 0 -> 4: depends_on (strength 0.9, EXTRACTED)
+- 0 -> 1: depends_on (strength 0.9, EXTRACTED)
+- 0 -> 3: depends_on (strength 0.9, EXTRACTED)
+- 0 -> 2: depends_on (strength 0.9, EXTRACTED)
+- 0 -> 7: depends_on (strength 0.9, EXTRACTED)
+- 0 -> 8: depends_on (strength 0.9, EXTRACTED)
+- 0 -> 6: depends_on (strength 0.9, EXTRACTED)
+- 4 -> 1: depends_on (strength 0.9, EXTRACTED)
+- 6 -> 7: depends_on (strength 0.9, EXTRACTED)
 
 ## Navigation Tips
 

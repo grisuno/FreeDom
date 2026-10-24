@@ -56,7 +56,7 @@ static inline int read_full(int fd, void *buf, size_t n)
 
 **Returns:** `int`
 
-*Called by:* [`ds_read`](src.disk_store.c.md#ds_read), [`media_decoder_run`](src.media_decoder.c.md#media_decoder_run), [`policy`](src.tab.c.md#policy), [`tab_eval`](src.tab.c.md#tab_eval), [`tab_load_full`](src.tab.c.md#tab_load_full), [`tab_set_geometry`](src.tab.c.md#tab_set_geometry), [`tab_submit`](src.tab.c.md#tab_submit)
+*Called by:* [`ds_read`](src.disk_store.c.md#ds_read), [`media_decoder_run`](src.media_decoder.c.md#media_decoder_run), [`policy`](src.tab.c.md#policy), [`tab_eval`](src.tab.c.md#tab_eval), [`tab_load_full`](src.tab.c.md#tab_load_full), [`tab_submit`](src.tab.c.md#tab_submit)
 
 ---
 

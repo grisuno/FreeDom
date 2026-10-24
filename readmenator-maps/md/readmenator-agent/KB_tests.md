@@ -215,6 +215,26 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `_POSIX_C_SOURCE` (macro, line 8) `#define _POSIX_C_SOURCE`
 - Depends on: `include/browser.h`
 
+## tests/test_cached_fetch.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `fake_fetch` (function, line 23) `static sf_status fake_fetch(const char *url, sf_config *cfg, sf_response *out, int *dg, int al)`
+  - `setup` (function, line 44) `static int setup(void **state)`
+  - `teardown` (function, line 53) `static int teardown(void **state)`
+  - `get` (function, line 61) `static sf_status get(const char *part, const char *url, sf_config *cfg, sf_response *r, time_t now)`
+  - `test_miss_fetches_stores_then_fresh_hit_skips_network` (function, line 66) `static void test_miss_fetches_stores_then_fresh_hit_skips_network(void **state)`
+  - `test_stale_entry_revalidates_and_304_serves_cached_body` (function, line 82) `static void test_stale_entry_revalidates_and_304_serves_cached_body(void **state)`
+  - `test_stale_entry_with_new_200_replaces_the_body` (function, line 101) `static void test_stale_entry_with_new_200_replaces_the_body(void **state)`
+  - `test_partitions_isolated` (function, line 118) `static void test_partitions_isolated(void **state)`
+  - `test_no_store_credentials_range_and_non_200_are_never_cached` (function, line 129) `static void test_no_store_credentials_range_and_non_200_are_never_cached(void **state)`
+  - `test_non_https_url_bypasses_the_cache` (function, line 154) `static void test_non_https_url_bypasses_the_cache(void **state)`
+  - `test_null_store_is_a_plain_fetch` (function, line 163) `static void test_null_store_is_a_plain_fetch(void **state)`
+  - `main` (function, line 173) `int main(void)`
+  - `_GNU_SOURCE` (macro, line 1) `#define _GNU_SOURCE`
+  - `NOW` (macro, line 12) `#define NOW`
+- Depends on: `include/cached_fetch.h`
+
 ## tests/test_compositor.c
 - Doc: test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by...
 - Layer: testing

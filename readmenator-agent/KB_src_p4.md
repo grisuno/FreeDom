@@ -286,6 +286,57 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
 - Depends on: `include/dom.h`, `include/html_parse.h`, `include/util.h`
 
+## src/http_cache.c
+- Doc: days_from_civil: #define HC_MAGIC      "FHC1\n" #define HC_NAME_HEX   64u #define HC_EVICT_EVERY...
+- Layer: presentation
+- Language: c
+- Symbols:
+  - `hc_store` (struct, line 146)
+  - `ent` (struct, line 397)
+  - `days_in_month` (function, line 39) `static int days_in_month(int y, int m)`
+  - `days_from_civil` (function, line 46) `static long days_from_civil(int y, int m, int d)`
+  - `hc_parse_http_date` (function, line 55) `time_t hc_parse_http_date(const char *s)`
+  - `cc_find` (function, line 74) `static int cc_find(const char *cc, const char *name, const char **val)`
+  - `cc_max_age` (function, line 92) `static int cc_max_age(const char *cc, long *out)`
+  - `hc_storable` (function, line 107) `int hc_storable(long http_code, const hc_meta *m, size_t body_len)`
+  - `hc_lifetime` (function, line 115) `long hc_lifetime(const hc_meta *m)`
+  - `hc_classify` (function, line 136) `hc_class hc_classify(const hc_meta *m, time_t now)`
+  - `hex_of` (function, line 155) `static void hex_of(const uint8_t *b, size_t n, char *out)`
+  - `entry_path` (function, line 162) `static int entry_path(const hc_store *s, char kind, const char *partition, const char *url,
+     ...`
+  - `remove_entries` (function, line 180) `static void remove_entries(const char *dir)`
+  - `write_atomic` (function, line 192) `static int write_atomic(const char *path, const uint8_t *data, size_t len)`
+  - `read_file` (function, line 208) `static uint8_t *read_file(const char *path, size_t max, size_t *len)`
+  - `hc_open` (function, line 230) `hc_status hc_open(hc_store **out, const char *dir, const uint8_t wrap[LS_KEY_LEN])`
+  - `hc_close` (function, line 279) `void hc_close(hc_store *s)`
+  - `hc_body_free` (function, line 287) `void hc_body_free(uint8_t *body, size_t len)`
+  - `has_nl` (function, line 293) `static int has_nl(const char *s)`
+  - `meta_ok` (function, line 295) `static int meta_ok(const hc_meta *m)`
+  - `store_entry` (function, line 302) `static hc_status store_entry(hc_store *s, const char *path, const hc_meta *m,
+                   ...`
+  - `load_entry` (function, line 327) `static hc_status load_entry(hc_store *s, const char *path, hc_meta *m, uint8_t **body,
+          ...`
+  - `get_locked` (function, line 385) `static hc_status get_locked(hc_store *s, const char *partition, const char *url, hc_meta *meta,
+ ...`
+  - `evict` (function, line 396) `static void evict(hc_store *s)`
+  - `put_locked` (function, line 434) `static hc_status put_locked(hc_store *s, const char *partition, const char *url, const hc_meta *m...`
+  - `redirect_put_locked` (function, line 446) `static hc_status redirect_put_locked(hc_store *s, const char *from, const char *to, time_t now)`
+  - `redirect_get_locked` (function, line 459) `static hc_status redirect_get_locked(hc_store *s, const char *from, time_t now, char *out, size_t...`
+  - `hc_clear` (function, line 473) `void hc_clear(hc_store *s)`
+  - `hc_get` (function, line 480) `hc_status hc_get(hc_store *s, const char *partition, const char *url, hc_meta *meta,
+            ...`
+  - `hc_put` (function, line 489) `hc_status hc_put(hc_store *s, const char *partition, const char *url, const hc_meta *meta,
+      ...`
+  - `hc_redirect_put` (function, line 498) `hc_status hc_redirect_put(hc_store *s, const char *from, const char *to, time_t now)`
+  - `hc_redirect_get` (function, line 506) `hc_status hc_redirect_get(hc_store *s, const char *from, time_t now, char *out, size_t cap)`
+  - `_POSIX_C_SOURCE` (macro, line 7) `#define _POSIX_C_SOURCE`
+  - `HC_KEY_FILE` (macro, line 31) `#define HC_KEY_FILE`
+  - `HC_MAGIC` (macro, line 32) `#define HC_MAGIC`
+  - `HC_NAME_HEX` (macro, line 33) `#define HC_NAME_HEX`
+  - `HC_EVICT_EVERY` (macro, line 34) `#define HC_EVICT_EVERY`
+  - `HC_MAX_AGE_CAP` (macro, line 35) `#define HC_MAX_AGE_CAP`
+- Depends on: `include/disk_store.h`, `include/http_cache.h`, `include/pq_seal.h`
+
 ## src/identity.c
 - Doc: tag_valid: size_t n = strlen(ua); if (n >= IDN_UA_MAX) return -1; int printable = 0; for (size_t...
 - Layer: utility
@@ -423,7 +474,7 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `jdce_install` (function, line 179) `int jdce_install(JSContext *ctx)`
+  - `jdce_install` (function, line 183) `int jdce_install(JSContext *ctx)`
 - Depends on: `src/js_custom_elements.h`
 
 ## src/js_custom_elements.h

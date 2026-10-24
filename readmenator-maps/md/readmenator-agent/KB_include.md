@@ -172,6 +172,18 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `BROWSER_STATUS_DURATION_MS` (macro, line 25) `#define BROWSER_STATUS_DURATION_MS`
 - Imported by: `gui/browser_ui.c`, `src/browser.c`, `tests/test_browser.c`
 
+## include/cached_fetch.h
+- Doc: cf_set_store: Cache-aware GET.
+- Layer: infrastructure
+- Language: h
+- Symbols:
+  - `cf_set_store` (function, line 30) `void cf_set_store(hc_store *store);`
+  - `cf_store` (function, line 31) `hc_store *cf_store(void);`
+  - `cf_attach_redirect_memory` (function, line 38) `void cf_attach_redirect_memory(hc_store *store);`
+  - `FREEDOM_CACHED_FETCH_H` (macro, line 2) `#define FREEDOM_CACHED_FETCH_H`
+- Depends on: `include/http_cache.h`, `include/secure_fetch.h`
+- Imported by: `gui/browser_ui.c`, `src/cached_fetch.c`, `tests/test_cached_fetch.c`
+
 ## include/compositor.h
 - Doc: cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position...
 - Layer: utility
@@ -473,21 +485,6 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CG_LEN_UNSET` (macro, line 18) `#define CG_LEN_UNSET`
 - Depends on: `include/css_decl.h`
 - Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_gradient.c`, `src/css_mask.c`, `src/tab.c`, `tests/test_css_gradient.c`
-
-## include/css_index.h
-- Doc: cix_build: Builds the index over sels[0,n) into *idx, overwriting it (a built index must be *...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `cix_entry` (struct, line 18)
-  - `cix_index` (struct, line 23)
-  - `key` (type_alias, line 17) `typedef struct cix_entry { uint64_t key;`
-  - `cix_build` (function, line 34) `void cix_build(const css_sel *sels, size_t n, cix_index *idx);`
-  - `cix_free` (function, line 37) `void cix_free(cix_index *idx);`
-  - `index` (function, line 41) `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...`
-  - `FREEDOM_CSS_INDEX_H` (macro, line 11) `#define FREEDOM_CSS_INDEX_H`
-- Depends on: `include/css_select.h`
-- Imported by: `src/css.c`, `src/css_index.c`, `tests/test_css_index.c`
 
 
 Next: [KB_include_p2.md](KB_include_p2.md)
