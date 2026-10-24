@@ -41,6 +41,7 @@
 #include "profile.h"
 #include "cached_fetch.h"
 #include "wl_guard.h"
+#include "shm_slots.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "request_policy.h"
@@ -323,6 +324,16 @@ typedef struct browser_window {
     hc_store *http_cache;   /* sealed HTTP cache + redirect memory (NULL = off) */
     wl_guard *wl_guard;     /* drains the Wayland socket while this thread is busy */
 
+    /* Double buffer (spec/shm_slots.md): the page is repainted whole every frame, so painting
+     * into a buffer the compositor still reads shows half a frame (a video flickered). The
+     * fields below alias the slot being painted; slot[i] is BUSY from commit to `release`. */
+    struct {
+        struct wl_buffer *buf;
+        void             *data;
+        cairo_surface_t  *surf;
+    } slot[SS_COUNT];
+    ss_state          ss;
+    int               redraw_wanted;   /* a repaint was deferred: both buffers were held */
     struct wl_buffer *buffer;
     void             *shm_data;
     size_t            shm_size;
@@ -631,43 +642,69 @@ static void apply_zoom(browser_window *w) {
 /* --- shm buffer (same pattern as ui_render.c) --- */
 
 static void buffer_release(void *data, struct wl_buffer *wl_buffer) {
-    (void)wl_buffer;
-    (void)data;
+    browser_window *w = (browser_window *)data;
+    for (int i = 0; i < SS_COUNT; ++i)
+        if (w->slot[i].buf == wl_buffer && ss_released(&w->ss, i)) break;
+    /* A repaint was postponed because the compositor held both buffers: do it now. */
+    if (w->redraw_wanted) { w->redraw_wanted = 0; redraw(w); }
 }
 static const struct wl_buffer_listener buffer_listener = { buffer_release };
 
+/* Freebug's window keeps its single buffer: its user data is the freebug window, not a
+ * browser_window, so it must not share the browser's release handler. */
+static void fb_buffer_release(void *data, struct wl_buffer *wl_buffer) { (void)data; (void)wl_buffer; }
+static const struct wl_buffer_listener fb_buffer_listener = { fb_buffer_release };
+
 static void destroy_buffer(browser_window *w) {
-    if (w->cairo_surface) { cairo_surface_destroy(w->cairo_surface); w->cairo_surface = NULL; }
-    if (w->buffer) { wl_buffer_destroy(w->buffer); w->buffer = NULL; }
-    if (w->shm_data) { munmap(w->shm_data, w->shm_size); w->shm_data = NULL; w->shm_size = 0; }
+    for (int i = 0; i < SS_COUNT; ++i) {
+        if (w->slot[i].surf) { cairo_surface_destroy(w->slot[i].surf); w->slot[i].surf = NULL; }
+        if (w->slot[i].buf) { wl_buffer_destroy(w->slot[i].buf); w->slot[i].buf = NULL; }
+        if (w->slot[i].data) { munmap(w->slot[i].data, w->shm_size); w->slot[i].data = NULL; }
+    }
+    ss_init(&w->ss);
+    w->buffer = NULL; w->shm_data = NULL; w->cairo_surface = NULL; w->shm_size = 0;
 }
 
-static int ensure_buffer(browser_window *w) {
-    int stride = w->width * 4;
-    size_t size = (size_t)stride * (size_t)w->height;
-    if (w->buffer && w->shm_size == size && w->cairo_surface) return 0;
-
-    destroy_buffer(w);
-
+static int make_slot(browser_window *w, int i, size_t size, int stride) {
     int fd = memfd_create("freedom-shm", MFD_CLOEXEC);
     if (fd < 0) return -1;
     if (ftruncate(fd, (off_t)size) < 0) { close(fd); return -1; }
-
     void *data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (data == MAP_FAILED) { close(fd); return -1; }
-
     struct wl_shm_pool *pool = wl_shm_create_pool(w->shm, fd, (int32_t)size);
-    w->buffer = wl_shm_pool_create_buffer(pool, 0, w->width, w->height, stride, WL_SHM_FORMAT_ARGB8888);
+    struct wl_buffer *buf = wl_shm_pool_create_buffer(pool, 0, w->width, w->height, stride,
+                                                      WL_SHM_FORMAT_ARGB8888);
     wl_shm_pool_destroy(pool);
     close(fd);
-    if (w->buffer == NULL) { munmap(data, size); return -1; }
-    wl_buffer_add_listener(w->buffer, &buffer_listener, w);
-
-    w->shm_data = data;
-    w->shm_size = size;
-    w->cairo_surface = cairo_image_surface_create_for_data(
+    if (buf == NULL) { munmap(data, size); return -1; }
+    cairo_surface_t *surf = cairo_image_surface_create_for_data(
         (unsigned char *)data, CAIRO_FORMAT_ARGB32, w->width, w->height, stride);
-    return (cairo_surface_status(w->cairo_surface) == CAIRO_STATUS_SUCCESS) ? 0 : -1;
+    if (cairo_surface_status(surf) != CAIRO_STATUS_SUCCESS) {
+        cairo_surface_destroy(surf); wl_buffer_destroy(buf); munmap(data, size);
+        return -1;
+    }
+    wl_buffer_add_listener(buf, &buffer_listener, w);
+    w->slot[i].buf = buf; w->slot[i].data = data; w->slot[i].surf = surf;
+    return 0;
+}
+
+/* Selects the slot to paint into and points the legacy aliases (buffer/shm_data/cairo_surface)
+ * at it. Returns -1 when the buffers could not be made, -2 when the compositor holds both. */
+static int ensure_buffer(browser_window *w) {
+    int stride = w->width * 4;
+    size_t size = (size_t)stride * (size_t)w->height;
+    if (w->shm_size != size || w->slot[0].buf == NULL || w->slot[1].buf == NULL) {
+        destroy_buffer(w);
+        w->shm_size = size;
+        for (int i = 0; i < SS_COUNT; ++i)
+            if (make_slot(w, i, size, stride) != 0) { destroy_buffer(w); return -1; }
+    }
+    int i = ss_pick(&w->ss);
+    if (i < 0) { w->redraw_wanted = 1; return -2; }
+    w->buffer = w->slot[i].buf;
+    w->shm_data = w->slot[i].data;
+    w->cairo_surface = w->slot[i].surf;
+    return 0;
 }
 
 /* --- page loading --- */
@@ -16433,6 +16470,7 @@ static void redraw(browser_window *w) {
     wl_surface_attach(w->surface, w->buffer, 0, 0);
     wl_surface_damage_buffer(w->surface, 0, 0, w->width, w->height);
     wl_surface_commit(w->surface);
+    ss_committed(&w->ss, w->ss.back);      /* the compositor owns this buffer until `release` */
     wl_display_flush(w->display);  /* drain connection buffer after each paint */
 }
 
@@ -16622,7 +16660,7 @@ static int freebug_ensure_buffer(freebug_window *fb) {
     wl_shm_pool_destroy(pool);
     close(fd);
     if (fb->buffer == NULL) { munmap(data, size); return -1; }
-    wl_buffer_add_listener(fb->buffer, &buffer_listener, fb); /* release is a no-op */
+    wl_buffer_add_listener(fb->buffer, &fb_buffer_listener, fb); /* release is a no-op */
     fb->shm_data = data;
     fb->shm_size = size;
     fb->cairo_surface = cairo_image_surface_create_for_data(

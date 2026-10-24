@@ -96,7 +96,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_ui $(BUILD_DIR)/test_request_policy \
              $(BUILD_DIR)/test_anti_fp $(BUILD_DIR)/test_renderer \
              $(BUILD_DIR)/test_js_env $(BUILD_DIR)/test_local_store \
-             $(BUILD_DIR)/test_disk_store $(BUILD_DIR)/test_pq_seal $(BUILD_DIR)/test_http_cache $(BUILD_DIR)/test_cached_fetch $(BUILD_DIR)/test_wl_guard $(BUILD_DIR)/test_tab \
+             $(BUILD_DIR)/test_disk_store $(BUILD_DIR)/test_pq_seal $(BUILD_DIR)/test_http_cache $(BUILD_DIR)/test_cached_fetch $(BUILD_DIR)/test_wl_guard $(BUILD_DIR)/test_shm_slots $(BUILD_DIR)/test_tab \
              $(BUILD_DIR)/test_browser $(BUILD_DIR)/test_freedom \
              $(BUILD_DIR)/test_page_view $(BUILD_DIR)/test_render_policy \
              $(BUILD_DIR)/test_render_doc $(BUILD_DIR)/test_url \
@@ -528,6 +528,9 @@ $(BUILD_DIR)/test_cached_fetch: $(TEST_DIR)/test_cached_fetch.c $(BUILD_DIR)/cac
 
 $(BUILD_DIR)/test_wl_guard: $(TEST_DIR)/test_wl_guard.c $(BUILD_DIR)/wl_guard.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $(WL_CFLAGS) $^ -o $@ $(LDFLAGS) $(WL_LIBS) $(CMOCKA_LIBS)
+
+$(BUILD_DIR)/test_shm_slots: $(TEST_DIR)/test_shm_slots.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_pq_seal: $(TEST_DIR)/test_pq_seal.c $(BUILD_DIR)/pq_seal.o $(BUILD_DIR)/local_store.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(LS_LIBS) $(CMOCKA_LIBS)
