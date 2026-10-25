@@ -118,7 +118,7 @@ void      js_result_free(js_result *res);
 
 ### Configuración por defecto (Secure by Default)
 - `max_source_bytes  = JS_DEFAULT_MAX_SOURCE`   (4 MiB).
-- `memory_limit_bytes = JS_DEFAULT_MEM_LIMIT`   (64 MiB).
+- `memory_limit_bytes = JS_DEFAULT_MEM_LIMIT`   (256 MiB: un bundle real como el de YouTube desbordaba los 64 MiB anteriores; JS corre solo en hosts allow∩js)
 - `max_stack_bytes    = JS_DEFAULT_STACK_LIMIT` (256 KiB).
 - `time_budget_ms     = JS_DEFAULT_TIME_BUDGET` (1000 ms).
 
@@ -247,6 +247,22 @@ js_status js_install_realms(js_context *ctx);   /* define __realmNew/__realmEval
   antes de ejecutar codigo de la pagina: un manejador que rechaza de nuevo se reporta en el
   siguiente checkpoint, nunca recursivamente. `js_context_free` libera lo pendiente.
 - Sin `__onUnhandledRejection` (contexto sin shim del DOM) el rechazo se descarta en silencio.
+
+## 7p. Perfilador de muestreo (`FREEDOM_JS_PROFILE=2`)
+
+Dado: un contexto con `js_profile_enable`. Cuando: el manejador de interrupción corre y pasó al menos
+`JS_PROFILE_PERIOD_MS` desde la última muestra. Entonces: se lee el `stack` de un `Error` recién creado,
+se toman sus DOS primeros marcos (`f (archivo:l:c) <- llamador`) y se carga a esa clave el tiempo
+transcurrido desde la muestra anterior (tope 1 s). Una llamada nativa larga (puente DOM, regex) queda así
+bajo el marco JS que la hizo, en vez de infrarrepresentarse como pasaba al contar solo interrupciones.
+`js_profile_report(ctx, out, cap, top_n)` escribe `"<n>% <marco> <- <llamador>"`, el más caliente primero.
+
+- Tabla de tamaño fijo (`JS_PROFILE_SLOTS`, claves de `JS_PROFILE_KEY_MAX` bytes): una página hostil no la
+  hace crecer; lo que no cabe se descarta.
+- Apagado por defecto (cero costo: un entero en el contexto). El conmutador vive en el worker
+  (`tab.c`), el informe sale al log de Freebug junto a `js-profile`.
+- Medido con él (GitHub): ~40 % del tiempo de JS eran `querySelector`/`matches`, y el resto era red
+  secuencial, no intérprete.
 
 ## 8. Fuera de alcance
 

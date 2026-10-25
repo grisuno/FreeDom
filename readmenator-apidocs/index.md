@@ -1,6 +1,6 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 206 modules, 3564 documented entities, documentation coverage 39.7% (1403/3534 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 206 modules, 3575 documented entities, documentation coverage 39.7% (1406/3545 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
@@ -44,7 +44,7 @@ Languages: c (96), h (94), py (12), sh (4)
 | [`include/css.h`](modules/include.css.h.md) |  | 72 | 67 | 72.9% |
 | [`include/css_atrule.h`](modules/include.css_atrule.h.md) |  | 2 | 7 | 70.0% |
 | [`include/css_box.h`](modules/include.css_box.h.md) |  | 0 | 26 | 0.0% |
-| [`include/css_chain.h`](modules/include.css_chain.h.md) |  | 2 | 5 | 25.0% |
+| [`include/css_chain.h`](modules/include.css_chain.h.md) |  | 2 | 6 | 22.2% |
 | [`include/css_color.h`](modules/include.css_color.h.md) |  | 3 | 3 | 42.9% |
 | [`include/css_computed.h`](modules/include.css_computed.h.md) |  | 1 | 4 | 33.3% |
 | [`include/css_decl.h`](modules/include.css_decl.h.md) |  | 2 | 11 | 14.3% |
@@ -83,7 +83,7 @@ Languages: c (96), h (94), py (12), sh (4)
 | [`include/js_geom.h`](modules/include.js_geom.h.md) |  | 3 | 15 | 78.9% |
 | [`include/js_location.h`](modules/include.js_location.h.md) |  | 0 | 5 | 50.0% |
 | [`include/js_policy.h`](modules/include.js_policy.h.md) |  | 1 | 5 | 42.9% |
-| [`include/js_sandbox.h`](modules/include.js_sandbox.h.md) |  | 6 | 22 | 58.6% |
+| [`include/js_sandbox.h`](modules/include.js_sandbox.h.md) |  | 6 | 26 | 57.6% |
 | [`include/js_trusted.h`](modules/include.js_trusted.h.md) |  | 4 | 11 | 37.5% |
 | [`include/link_nav.h`](modules/include.link_nav.h.md) |  | 6 | 4 | 36.4% |
 | [`include/local_store.h`](modules/include.local_store.h.md) |  | 2 | 8 | 18.2% |
@@ -138,7 +138,7 @@ Languages: c (96), h (94), py (12), sh (4)
 | [`src/css.c`](modules/src.css.c.md) |  | 8 | 70 | 24.1% |
 | [`src/css_atrule.c`](modules/src.css_atrule.c.md) |  | 0 | 4 | 80.0% |
 | [`src/css_box.c`](modules/src.css_box.c.md) |  | 3 | 29 | 45.5% |
-| [`src/css_chain.c`](modules/src.css_chain.c.md) |  | 2 | 12 | 46.7% |
+| [`src/css_chain.c`](modules/src.css_chain.c.md) |  | 2 | 13 | 43.8% |
 | [`src/css_color.c`](modules/src.css_color.c.md) |  | 1 | 11 | 38.5% |
 | [`src/css_computed.c`](modules/src.css_computed.c.md) |  | 1 | 5 | 28.6% |
 | [`src/css_gradient.c`](modules/src.css_gradient.c.md) |  | 0 | 15 | 18.8% |
@@ -173,7 +173,7 @@ Languages: c (96), h (94), py (12), sh (4)
 | [`src/interp.c`](modules/src.interp.c.md) |  | 0 | 13 | 71.4% |
 | [`src/js_custom_elements.c`](modules/src.js_custom_elements.c.md) |  | 0 | 1 | 0.0% |
 | [`src/js_custom_elements.h`](modules/src.js_custom_elements.h.md) | Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. | 0 | 1 | 50.0% |
-| [`src/js_dom.c`](modules/src.js_dom.c.md) |  | 1 | 23 | 12.0% |
+| [`src/js_dom.c`](modules/src.js_dom.c.md) |  | 1 | 24 | 11.5% |
 | [`src/js_dom_ext.c`](modules/src.js_dom_ext.c.md) |  | 0 | 7 | 0.0% |
 | [`src/js_dom_ext.h`](modules/src.js_dom_ext.h.md) | Private to js_dom.c / js_dom_ext.c: installs the DOM Standard extras (tree | 0 | 1 | 50.0% |
 | [`src/js_dom_internal.h`](modules/src.js_dom_internal.h.md) | Private to the js_dom family (js_dom.c, js_fetch.c, js_events.c, js_embed.c): the context accessors every native needs. | 0 | 3 | 50.0% |
@@ -185,7 +185,7 @@ Languages: c (96), h (94), py (12), sh (4)
 | [`src/js_location.c`](modules/src.js_location.c.md) |  | 0 | 5 | 50.0% |
 | [`src/js_location_internal.h`](modules/src.js_location_internal.h.md) | Private to js_dom.c / js_location.c: the dom.histTarget native lives with the | 0 | 1 | 50.0% |
 | [`src/js_policy.c`](modules/src.js_policy.c.md) |  | 0 | 5 | 50.0% |
-| [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 21 | 48.0% |
+| [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 25 | 44.8% |
 | [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 13 | 33.3% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
 | [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 317 | 1.6% |

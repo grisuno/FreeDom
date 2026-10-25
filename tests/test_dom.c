@@ -690,8 +690,34 @@ static void test_char_nodes(void **state) {
     assert_int_equal(dom_child_node(idx, a, 0), DOM_NODE_NONE);
 }
 
+/* The subject pre-filter must reject only what cannot match: mixed lists, escaped and long
+ * (folded) identifiers, attribute-only selectors and a class the element lacks. */
+static void test_qs_subject_prefilter_is_exact(void **state) {
+    (void)state;
+    static const char html[] =
+        "<html><body><main id=\"m\"><div class=\"a b\" data-k=\"1\"><span class=\"md:flex\">x</span></div>"
+        "<div class=\"Primer_Brand__LogoSuite-module__LogoSuiteHeading___bUhyS extra\">y</div>"
+        "<p id=\"solo\">z</p></main></body></html>";
+    hp_document *doc = NULL;
+    dom_index *idx = NULL;
+    assert_int_equal(hp_parse(html, sizeof html - 1, NULL, &doc), HP_OK);
+    assert_int_equal(dom_build(doc, &idx), DOM_OK);
+    dom_node_id o[16];
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, ".a, #solo, span", o, 16), 3);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, ".md\\:flex", o, 16), 1);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE,
+        ".Primer_Brand__LogoSuite-module__LogoSuiteHeading___bUhyS", o, 16), 1);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "[data-k]", o, 16), 1);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "main .a.b > span", o, 16), 1);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, ".a.zzz, .nope, p.a", o, 16), 0);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "div:not(.a)", o, 16), 1);
+    dom_free(idx);
+    hp_document_free(doc);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_qs_subject_prefilter_is_exact),
         cmocka_unit_test(test_build_null_args),
         cmocka_unit_test(test_free_null_and_double),
         cmocka_unit_test_setup_teardown(test_node_count, setup_doc, teardown_doc),

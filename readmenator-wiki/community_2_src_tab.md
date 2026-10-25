@@ -16,7 +16,7 @@ This community groups 45 file(s) rooted at `src` with dominant language c (cohes
 | `src/html_parse.c` | c | utility | 29 | no |
 | `src/js_custom_elements.c` | c | utility | 1 | no |
 | `src/js_custom_elements.h` | h | utility | 2 | yes |
-| `src/js_dom.c` | c | utility | 62 | no |
+| `src/js_dom.c` | c | utility | 63 | no |
 | `src/js_dom_ext.c` | c | utility | 8 | no |
 | `src/js_dom_ext.h` | h | utility | 2 | yes |
 
@@ -36,7 +36,7 @@ This community groups 45 file(s) rooted at `src` with dominant language c (cohes
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `tests/test_dom.c` | c | testing | 42 | no |
+| `tests/test_dom.c` | c | testing | 43 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
 | `tests/test_js_dom.c` | c | testing | 228 | no |

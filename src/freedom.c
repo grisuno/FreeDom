@@ -244,6 +244,9 @@ static void headless_load_hosts(void) {
     hcf_search_dirs_from_env(&dirs);
     g_hosts = hcf_load_filter(&dirs);
     g_js_hosts = hcf_load_allowlist(&dirs, "js.conf");
+    /* The GUI initialises libcurl's shared state (keep-alive connections, session jar) once at
+     * startup; --as-gui must fetch the same way or it measures a browser nobody runs. */
+    if (g_as_gui) sf_global_init();
 }
 
 /* Derives the capabilities the GUI would give `top_url` and publishes them through the
@@ -481,6 +484,7 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
     if (g_hosts != NULL) {
         char host[512];
         if (rp_host_of(url, host, sizeof host) == 0) {
+            if (hb_check(g_hosts, host) == HB_BLOCK) return -1; /* same gate as the GUI fetcher */
             int allowed = hb_is_allowlisted(g_hosts, host);
             /* An allowlisted host, or any subresource of an operator-trusted (--js=on)
              * page -- its CDN, modules, API -- gets the allowlist's relaxed strength;

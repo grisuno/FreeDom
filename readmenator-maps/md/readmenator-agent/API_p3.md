@@ -380,7 +380,8 @@ Imported by: `src/css.c`, `src/css_box.c`, `src/css_text.c`, `tests/test_css_box
 Depends on: `include/css.h`, `include/css_select.h`
 Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`
 - `cch_element_matches` (function) `include/css_chain.h:69` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);` -- Nonzero iff the parsed selector *sel matches element `el`, built against the same bounded ancestor/sibling/attribute...
-- `box` (function) `include/css_chain.h:72` `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
+- `lacks` (function) `include/css_chain.h:73` `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...`
+- `box` (function) `include/css_chain.h:79` `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
 
 ## include/css_color.h
 Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/css.h`, `src/css.c`, `src/css_box.c`, `src/css_color.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `src/svg_render.c`, `tests/test_css_color.c`

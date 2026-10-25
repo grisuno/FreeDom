@@ -273,10 +273,13 @@ Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_location.h`, `i
 - `js_set_module_host` (function) `include/js_sandbox.h:129` `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` -- Installs the host every static import and dynamic import() goes through. host must * outlive ctx.
 - `js_loc_from_stack` (function) `include/js_sandbox.h:150` `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` -- Pure parser: extracts the throw site (file, line, column) from the FIRST frame of a QuickJS .stack string.
 - `js_set_time_budget` (function) `include/js_sandbox.h:158` `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` -- Adjusts the wall-clock budget armed on each subsequent js_eval.
-- `js_result_free` (function) `include/js_sandbox.h:161` `void js_result_free(js_result *res);` -- Adjusts the wall-clock budget armed on each subsequent js_eval.
-- `js_pump_jobs` (function) `include/js_sandbox.h:169` `int js_pump_jobs(js_context *ctx, int max_jobs);` -- Runs up to max_jobs pending microtasks/jobs (promise reactions queued by the last eval), under the context's current...
-- `handle` (function) `include/js_sandbox.h:172` `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
-- `js_set_current_script` (function) `include/js_sandbox.h:181` `void js_set_current_script(js_context *ctx, const char *src, const char *type);` -- Sets document.currentScript on the global object so external scripts can read their own src / type / data-*...
+- `out` (function) `include/js_sandbox.h:163` `* into out (NUL-terminated, truncated at cap);`
+- `js_profile_enable` (function) `include/js_sandbox.h:166` `void js_profile_enable(js_context *ctx);` -- Sampling profiler (FREEDOM_JS_PROFILE=2).
+- `js_profile_report` (function) `include/js_sandbox.h:167` `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
+- `js_result_free` (function) `include/js_sandbox.h:170` `void js_result_free(js_result *res);` -- Sampling profiler (FREEDOM_JS_PROFILE=2).
+- `js_pump_jobs` (function) `include/js_sandbox.h:178` `int js_pump_jobs(js_context *ctx, int max_jobs);` -- Runs up to max_jobs pending microtasks/jobs (promise reactions queued by the last eval), under the context's current...
+- `handle` (function) `include/js_sandbox.h:181` `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
+- `js_set_current_script` (function) `include/js_sandbox.h:190` `void js_set_current_script(js_context *ctx, const char *src, const char *type);` -- Sets document.currentScript on the global object so external scripts can read their own src / type / data-*...
 
 ## include/js_trusted.h
 Depends on: `include/js_dom.h`, `include/js_sandbox.h`

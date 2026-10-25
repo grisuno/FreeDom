@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_text_decoration_wide_keyword_is_none` | function | `tests/test_css.c:1245` | `static void test_text_decoration_wide_keyword_is_none(void **state)` |
+| `test_text_ext_cascade_and_important` | function | `tests/test_css.c:280` | `static void test_text_ext_cascade_and_important(void **state)` |
+| `test_text_fill_color` | function | `tests/test_css.c:5061` | `static void test_text_fill_color(void **state)` |
+| `test_text_indent` | function | `tests/test_css.c:246` | `static void test_text_indent(void **state)` |
+| `test_text_overflow_and_word_break` | function | `tests/test_css.c:3797` | `static void test_text_overflow_and_word_break(void **state)` |
+| `test_text_shadow` | function | `tests/test_css.c:193` | `static void test_text_shadow(void **state)` |
+| `test_text_transform` | function | `tests/test_css.c:164` | `static void test_text_transform(void **state)` |
+| `test_text_wrap_balance` | function | `tests/test_css.c:3753` | `static void test_text_wrap_balance(void **state)` |
+| `test_transform_origin` | function | `tests/test_css.c:4712` | `static void test_transform_origin(void **state)` |
+| `test_transform_z_identity` | function | `tests/test_css.c:3762` | `static void test_transform_z_identity(void **state)` |
+| `test_transition_comma_takes_first` | function | `tests/test_css.c:3441` | `static void test_transition_comma_takes_first(void **state)` |
+| `test_tweener_align` | function | `tests/test_css.c:3473` | `static void test_tweener_align(void **state)` |
+| `test_tweener_flex_factors` | function | `tests/test_css.c:3455` | `static void test_tweener_flex_factors(void **state)` |
 | `test_tweener_flex_order` | function | `tests/test_css.c:3449` | `static void test_tweener_flex_order(void **state)` |
 | `test_tweener_pack_vocab` | function | `tests/test_css.c:3463` | `static void test_tweener_pack_vocab(void **state)` |
 | `test_ua_heading_font_size` | function | `tests/test_css.c:3920` | `static void test_ua_heading_font_size(void **state)` |
@@ -256,7 +269,7 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `DOC` | macro | `tests/test_dom.c:58` | `#define DOC(state)` |
 | `IDX` | macro | `tests/test_dom.c:59` | `#define IDX(state)` |
 | `_POSIX_C_SOURCE` | macro | `tests/test_dom.c:1` | `#define _POSIX_C_SOURCE` |
-| `main` | function | `tests/test_dom.c:693` | `int main(void)` |
+| `main` | function | `tests/test_dom.c:718` | `int main(void)` |
 | `rule` | function | `tests/test_dom.c:462` | `* silently drops the whole rule (fail closed), so the title read black-on-teal  * instead of the ...` |
 | `setup_doc` | function | `tests/test_dom.c:35` | `static int setup_doc(void **state)` |
 | `teardown_doc` | function | `tests/test_dom.c:48` | `static int teardown_doc(void **state)` |
@@ -280,6 +293,7 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_move_children` | function | `tests/test_dom.c:605` | `static void test_move_children(void **state)` |
 | `test_navigation` | function | `tests/test_dom.c:154` | `static void test_navigation(void **state)` |
 | `test_node_count` | function | `tests/test_dom.c:84` | `static void test_node_count(void **state)` |
+| `test_qs_subject_prefilter_is_exact` | function | `tests/test_dom.c:695` | `static void test_qs_subject_prefilter_is_exact(void **state)` |
 | `test_query_selector_all_counts` | function | `tests/test_dom.c:434` | `static void test_query_selector_all_counts(void **state)` |
 | `test_query_selector_combinators` | function | `tests/test_dom.c:445` | `static void test_query_selector_combinators(void **state)` |
 | `test_query_selector_fail_closed` | function | `tests/test_dom.c:530` | `static void test_query_selector_fail_closed(void **state)` |
@@ -482,19 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_download_pdf_local` | function | `tests/test_freedom.c:278` | `static void test_download_pdf_local(void **state)` |
 | `test_download_pdf_requires_path` | function | `tests/test_freedom.c:304` | `static void test_download_pdf_requires_path(void **state)` |
 | `test_download_png_absolute_shrinks_and_anchors_right` | function | `tests/test_freedom.c:1113` | `static void test_download_png_absolute_shrinks_and_anchors_right(void **state)` |
-| `test_download_png_background_clip_content_and_padding_box` | function | `tests/test_freedom.c:480` | `static void test_download_png_background_clip_content_and_padding_box(void **state)` |
-| `test_download_png_broken_image_keeps_row_order` | function | `tests/test_freedom.c:1669` | `static void test_download_png_broken_image_keeps_row_order(void **state)` |
-| `test_download_png_flex_container_paints_one_band` | function | `tests/test_freedom.c:3937` | `static void test_download_png_flex_container_paints_one_band(void **state)` |
-| `test_download_png_gradient_box_text_keeps_gradient` | function | `tests/test_freedom.c:3912` | `static void test_download_png_gradient_box_text_keeps_gradient(void **state)` |
-| `test_download_png_images_local` | function | `tests/test_freedom.c:819` | `static void test_download_png_images_local(void **state)` |
-| `test_download_png_inline_block_flows_in_line` | function | `tests/test_freedom.c:1495` | `static void test_download_png_inline_block_flows_in_line(void **state)` |
-| `test_download_png_inline_block_shrinks_and_centers` | function | `tests/test_freedom.c:3957` | `static void test_download_png_inline_block_shrinks_and_centers(void **state)` |
-| `test_download_png_inline_replaced_share_row` | function | `tests/test_freedom.c:1609` | `static void test_download_png_inline_replaced_share_row(void **state)` |
-| `test_download_png_inline_svg_path_and_drops_image` | function | `tests/test_freedom.c:4001` | `static void test_download_png_inline_svg_path_and_drops_image(void **state)` |
-| `test_download_png_line_height_zero_does_not_shrink_line` | function | `tests/test_freedom.c:1943` | `static void test_download_png_line_height_zero_does_not_shrink_line(void **state)` |
-| `test_download_png_local` | function | `tests/test_freedom.c:313` | `static void test_download_png_local(void **state)` |
-| `test_download_png_negative_zindex_paints_behind_inflow` | function | `tests/test_freedom.c:896` | `static void test_download_png_negative_zindex_paints_behind_inflow(void **state)` |
-| `test_download_png_nested_flex_lays_out_on_one_row` | function | `tests/test_freedom.c:1416` | `static void test_download_png_nested_flex_lays_out_on_one_row(void **state)` |
-| `test_download_png_overflow_clips_at_padding_box` | function | `tests/test_freedom.c:439` | `static void test_download_png_overflow_clips_at_padding_box(void **state)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

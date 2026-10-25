@@ -263,8 +263,25 @@ static void test_check_fail_open_edges(void **state) {
     hb_free(s);
 }
 
+/* A bare top-level label blocks the whole TLD (.cyou is almost only malvertising), and an
+ * allowlisted host inside it still wins. */
+static void test_tld_entry_blocks_every_host_under_it(void **state) {
+    (void)state;
+    hb_set *s = hb_new();
+    assert_non_null(s);
+    assert_int_equal(hb_load(s, "cyou\n", HB_LIST_BLOCK), HB_OK);
+    assert_int_equal(hb_load(s, "ok.example.cyou\n", HB_LIST_ALLOW), HB_OK);
+    assert_int_equal(hb_check(s, "pooftah.fescuesbracky.cyou"), HB_BLOCK);
+    assert_int_equal(hb_check(s, "x.cyou"), HB_BLOCK);
+    assert_int_equal(hb_check(s, "ok.example.cyou"), HB_ALLOW);
+    assert_int_equal(hb_check(s, "cyou.example.com"), HB_ALLOW);
+    assert_int_equal(hb_check(s, "notcyou"), HB_ALLOW);
+    hb_free(s);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_tld_entry_blocks_every_host_under_it),
         cmocka_unit_test(test_new_free),
         cmocka_unit_test(test_free_null_idempotent),
         cmocka_unit_test(test_count_null_set),

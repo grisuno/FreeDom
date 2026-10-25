@@ -270,10 +270,13 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `js_set_module_host` (function, line 129) `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);`
   - `js_loc_from_stack` (function, line 150) `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);`
   - `js_set_time_budget` (function, line 158) `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);`
-  - `js_result_free` (function, line 161) `void js_result_free(js_result *res);`
-  - `js_pump_jobs` (function, line 169) `int js_pump_jobs(js_context *ctx, int max_jobs);`
-  - `handle` (function, line 172) `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
-  - `js_set_current_script` (function, line 181) `void js_set_current_script(js_context *ctx, const char *src, const char *type);`
+  - `out` (function, line 163) `* into out (NUL-terminated, truncated at cap);`
+  - `js_profile_enable` (function, line 166) `void js_profile_enable(js_context *ctx);`
+  - `js_profile_report` (function, line 167) `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
+  - `js_result_free` (function, line 170) `void js_result_free(js_result *res);`
+  - `js_pump_jobs` (function, line 178) `int js_pump_jobs(js_context *ctx, int max_jobs);`
+  - `handle` (function, line 181) `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
+  - `js_set_current_script` (function, line 190) `void js_set_current_script(js_context *ctx, const char *src, const char *type);`
   - `FREEDOM_JS_SANDBOX_H` (macro, line 2) `#define FREEDOM_JS_SANDBOX_H`
   - `JS_LOC_FILE_MAX` (macro, line 64) `#define JS_LOC_FILE_MAX`
   - `JS_DEFAULT_MAX_SOURCE` (macro, line 66) `#define JS_DEFAULT_MAX_SOURCE`
@@ -284,8 +287,9 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `JS_DEFAULT_TIME_BUDGET` (macro, line 71) `#define JS_DEFAULT_TIME_BUDGET`
   - `JS_MODULE_MAX` (macro, line 115) `#define JS_MODULE_MAX`
   - `JS_MODULE_BYTES_MAX` (macro, line 116) `#define JS_MODULE_BYTES_MAX`
-  - `JS_REALM_MAX` (macro, line 189) `#define JS_REALM_MAX`
-  - `JS_REJECT_MAX` (macro, line 192) `#define JS_REJECT_MAX`
+  - `JS_PROFILE_PERIOD_MS` (macro, line 165) `#define JS_PROFILE_PERIOD_MS`
+  - `JS_REALM_MAX` (macro, line 198) `#define JS_REALM_MAX`
+  - `JS_REJECT_MAX` (macro, line 201) `#define JS_REJECT_MAX`
 - Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_sandbox.c`
 
 ## include/js_trusted.h

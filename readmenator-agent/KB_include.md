@@ -408,7 +408,8 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `cvr_chain` (struct, line 51)
   - `cvr_table` (struct, line 52)
   - `cch_element_matches` (function, line 69) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);`
-  - `box` (function, line 72) `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
+  - `lacks` (function, line 73) `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...`
+  - `box` (function, line 79) `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
   - `FREEDOM_CSS_CHAIN_H` (macro, line 2) `#define FREEDOM_CSS_CHAIN_H`
   - `CCH_CHAIN_MAX` (macro, line 26) `#define CCH_CHAIN_MAX`
   - `CCH_SIB_MAX` (macro, line 27) `#define CCH_SIB_MAX`

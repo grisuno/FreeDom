@@ -96,7 +96,7 @@ This community groups 42 file(s) rooted at `src` with dominant language c (cohes
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `src/render_doc.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `src/render_policy.c` (presentation) -> `include/data_url.h` (data_access)
-- [dataflow UNCHECKED_ALLOC] `src/freedom.c:531` `headless_fetch` `oct`: Result of allocator stored in `oct` is never checked against NULL.
+- [dataflow UNCHECKED_ALLOC] `src/freedom.c:535` `headless_fetch` `oct`: Result of allocator stored in `oct` is never checked against NULL.
 
 ## Open Questions
 

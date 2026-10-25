@@ -3,6 +3,11 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `interp_bg_clip` | function | `src/css.c:634` | `static int interp_bg_clip(const char *v)` |
+| `interp_bg_origin` | function | `src/css.c:642` | `static int interp_bg_origin(const char *v)` |
+| `interp_bg_repeat` | function | `src/css.c:617` | `static int interp_bg_repeat(const char *v)` |
+| `interp_bg_size` | function | `src/css.c:627` | `static int interp_bg_size(const char *v)` |
+| `interp_border_collapse` | function | `src/css.c:495` | `static int interp_border_collapse(const char *v)` |
 | `interp_border_style` | function | `src/css.c:855` | `static int interp_border_style(const char *v)` |
 | `interp_box_orient` | function | `src/css.c:2168` | `static int interp_box_orient(const char *v)` |
 | `interp_boxsizing` | function | `src/css.c:379` | `static int interp_boxsizing(const char *v)` |
@@ -203,6 +208,7 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `CCH_MAX_CLASSES` | macro | `src/css_chain.c:18` | `#define CCH_MAX_CLASSES` |
 | `CCH_TAG_MAX` | macro | `src/css_chain.c:15` | `#define CCH_TAG_MAX` |
 | `cch_element_matches` | function | `src/css_chain.c:364` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)` |
+| `cch_element_matches_any` | function | `src/css_chain.c:378` | `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)` |
 | `cch_element_style` | function | `src/css_chain.c:360` | `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)` |
 | `cch_element_style_vars` | function | `src/css_chain.c:310` | `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,                  ...` |
 | `cch_node` | struct | `src/css_chain.c:27` | `` |
@@ -487,14 +493,8 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `fsync_dir` | function | `src/disk_store.c:32` | `static void fsync_dir(const char *path)` |
 | `map_ls` | function | `src/disk_store.c:50` | `static ds_status map_ls(ls_status s)` |
 | `DOM_QS_MAX_SELECTORS` | macro | `src/dom.c:380` | `#define DOM_QS_MAX_SELECTORS` |
-| `IH_BLOCK_SIZE` | macro | `src/dom.c:818` | `#define IH_BLOCK_SIZE` |
+| `IH_BLOCK_SIZE` | macro | `src/dom.c:815` | `#define IH_BLOCK_SIZE` |
 | `_POSIX_C_SOURCE` | macro | `src/dom.c:11` | `#define _POSIX_C_SOURCE` |
-| `char_kind` | function | `src/dom.c:981` | `static int char_kind(const lxb_dom_node_t *n)` |
-| `copy_ids` | function | `src/dom.c:354` | `static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap)` |
-| `count` | function | `src/dom.c:437` | `* count (may exceed cap), and returns DOM_NODE_NONE. */ static dom_node_id qs_walk(const dom_inde...` |
-| `dom_append_child` | function | `src/dom.c:710` | `dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)` |
-| `dom_attribute_names` | function | `src/dom.c:586` | `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,                            con...` |
-| `dom_build` | function | `src/dom.c:291` | `dom_status dom_build(const hp_document *doc, dom_index **out)` |
-| `dom_child_node` | function | `src/dom.c:1004` | `dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)` |
+| `char_kind` | function | `src/dom.c:978` | `static int char_kind(const lxb_dom_node_t *n)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

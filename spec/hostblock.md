@@ -121,3 +121,13 @@ size_t      hb_count(const hb_set *s, hb_list list);
   solo dominios y subdominios.
 - La decisión de origen/terceros (eso es `[[request_policy]]`); `hostblock` es un filtro adicional
   ortogonal, consultado antes de abrir el socket.
+
+## Entradas de TLD y el fetcher headless
+
+- Una etiqueta suelta (`cyou`) bloquea todo host que termine en ella; el recorrido por sufijos ya la cubre
+  y una entrada de la lista blanca más específica sigue ganando (`tests/test_hostblock.c`).
+- `config/block.conf` incluye telemetría/errores (Sentry, Datadog, New Relic…), analítica y repetición de
+  sesión, redes de anuncios, píxeles sociales y el TLD `.cyou` (publicidad pop-under medida en jkanime).
+- El fetcher headless (`headless_fetch`) consulta `hb_check` igual que la GUI: antes solo la GUI lo hacía y el
+  arnés cargaba lo que la ventana bloquea. La blanca gana sobre subdominios: con `reddit.com` en allow.conf,
+  `pi.reddit.com` pasa; con solo `old.reddit.com`, se corta.

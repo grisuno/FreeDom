@@ -410,6 +410,7 @@ static const css_element *build_chain(lxb_dom_ele...`
             ...`
   - `cch_element_style` (function, line 360) `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
   - `cch_element_matches` (function, line 364) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
+  - `cch_element_matches_any` (function, line 378) `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)`
   - `CCH_TAG_MAX` (macro, line 15) `#define CCH_TAG_MAX`
   - `CCH_ID_MAX` (macro, line 16) `#define CCH_ID_MAX`
   - `CCH_CLASS_BUF` (macro, line 17) `#define CCH_CLASS_BUF`

@@ -31,6 +31,16 @@ static void test_limits_default_is_secure(void **state) {
     assert_true(l.time_budget_ms > 0);
 }
 
+/* A real site bundle (YouTube: ~1.2 MB of minified script plus its object graph) overran the
+ * old 64 MiB heap with "out of memory" and left the page dead; the heap must hold it while
+ * still being bounded. */
+static void test_limits_default_heap_holds_real_bundles(void **state) {
+    (void)state;
+    js_limits l = js_limits_default();
+    assert_true(l.memory_limit_bytes >= (size_t)256 * 1024 * 1024);
+    assert_true(l.memory_limit_bytes <= (size_t)1024 * 1024 * 1024);
+}
+
 /* --- js_validate_source --- */
 
 static void test_validate_rejects_null(void **state) {
@@ -174,6 +184,39 @@ static void test_set_time_budget_applies(void **state) {
     memset(&r, 0, sizeof r);
     assert_int_equal(js_eval(ctx, "for(;;){}", 9, &r), JS_ERR_TIMEOUT);
     js_result_free(&r);
+    js_context_free(ctx);
+}
+
+/* The sampling profiler names the JS function that burned the time, charges native-call time
+ * to its caller, stays inert until enabled, and is a safe no-op on NULL. */
+static void test_profiler_names_the_hot_function(void **state) {
+    (void)state;
+    char out[1024];
+    js_profile_enable(NULL);
+    assert_int_equal((int)js_profile_report(NULL, out, sizeof out, 5), 0);
+
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    js_result r;
+    memset(&r, 0, sizeof r);
+    static const char busy[] =
+        "function spinHere(){var t=Date.now(),n=0;for(var i=0;i<4e6;i++){n+=i%7;}return n;}"
+        "spinHere();spinHere();0";
+    assert_int_equal(js_eval(ctx, busy, sizeof busy - 1, &r), JS_OK); /* profiler off */
+    js_result_free(&r);
+    assert_int_equal((int)js_profile_report(ctx, out, sizeof out, 5), 0);
+
+    js_profile_enable(ctx);
+    memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, busy, sizeof busy - 1, &r), JS_OK);
+    js_result_free(&r);
+    size_t n = js_profile_report(ctx, out, sizeof out, 5);
+    assert_true(n > 0);
+    assert_true(n < sizeof out);
+    assert_non_null(strstr(out, "spinHere"));
+    assert_non_null(strstr(out, "%"));
+    char tiny[8];
+    assert_true(js_profile_report(ctx, tiny, sizeof tiny, 5) < sizeof tiny);
     js_context_free(ctx);
 }
 
@@ -636,6 +679,7 @@ static void test_realm_shares_time_budget(void **state) {
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_limits_default_is_secure),
+        cmocka_unit_test(test_limits_default_heap_holds_real_bundles),
         cmocka_unit_test(test_validate_rejects_null),
         cmocka_unit_test(test_validate_rejects_empty),
         cmocka_unit_test(test_validate_rejects_oversize),
@@ -650,6 +694,7 @@ int main(void) {
         cmocka_unit_test(test_filesystem_access_is_reference_error),
         cmocka_unit_test(test_infinite_loop_times_out),
         cmocka_unit_test(test_set_time_budget_applies),
+        cmocka_unit_test(test_profiler_names_the_hot_function),
         cmocka_unit_test(test_stack_limit_follows_process_stack),
         cmocka_unit_test(test_deep_recursion_runs_and_runaway_is_caught),
         cmocka_unit_test(test_memory_limit_is_enforced),

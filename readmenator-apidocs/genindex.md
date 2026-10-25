@@ -333,6 +333,7 @@
 - [`CCH_CLASS_SPILL_MAX`](modules/src.css_chain.c.md#cch_class_spill_max) macro in `src/css_chain.c`
 - [`cch_element_matches`](modules/include.css_chain.h.md#cch_element_matches) function in `include/css_chain.h`
 - [`cch_element_matches`](modules/src.css_chain.c.md#cch_element_matches) function in `src/css_chain.c`
+- [`cch_element_matches_any`](modules/src.css_chain.c.md#cch_element_matches_any) function in `src/css_chain.c`
 - [`cch_element_style`](modules/src.css_chain.c.md#cch_element_style) function in `src/css_chain.c`
 - [`cch_element_style_vars`](modules/src.css_chain.c.md#cch_element_style_vars) function in `src/css_chain.c`
 - [`CCH_ID_MAX`](modules/src.css_chain.c.md#cch_id_max) macro in `src/css_chain.c`
@@ -1618,6 +1619,7 @@
 - [`jd_pop_state`](modules/src.js_location.c.md#jd_pop_state) function in `src/js_location.c`
 - [`jd_process_iframes`](modules/include.js_dom.h.md#jd_process_iframes) function in `include/js_dom.h`
 - [`jd_process_iframes`](modules/src.js_embed.c.md#jd_process_iframes) function in `src/js_embed.c`
+- [`JD_QSA_INLINE`](modules/src.js_dom.c.md#jd_qsa_inline) macro in `src/js_dom.c`
 - [`JD_REPL_CSS_MAX`](modules/include.js_dom.h.md#jd_repl_css_max) macro in `include/js_dom.h`
 - [`jd_set_computed`](modules/src.js_dom.c.md#jd_set_computed) function in `src/js_dom.c`
 - [`jd_set_cookies`](modules/src.js_dom.c.md#jd_set_cookies) function in `src/js_dom.c`
@@ -1704,6 +1706,13 @@
 - [`JS_NAV_MAX`](modules/gui.browser_ui.c.md#js_nav_max) macro in `gui/browser_ui.c`
 - [`js_prime_stack_limit`](modules/include.js_sandbox.h.md#js_prime_stack_limit) function in `include/js_sandbox.h`
 - [`js_prime_stack_limit`](modules/src.js_sandbox.c.md#js_prime_stack_limit) function in `src/js_sandbox.c`
+- [`js_profile_enable`](modules/include.js_sandbox.h.md#js_profile_enable) function in `include/js_sandbox.h`
+- [`js_profile_enable`](modules/src.js_sandbox.c.md#js_profile_enable) function in `src/js_sandbox.c`
+- [`JS_PROFILE_KEY_MAX`](modules/src.js_sandbox.c.md#js_profile_key_max) macro in `src/js_sandbox.c`
+- [`JS_PROFILE_PERIOD_MS`](modules/include.js_sandbox.h.md#js_profile_period_ms) macro in `include/js_sandbox.h`
+- [`js_profile_report`](modules/include.js_sandbox.h.md#js_profile_report) function in `include/js_sandbox.h`
+- [`js_profile_report`](modules/src.js_sandbox.c.md#js_profile_report) function in `src/js_sandbox.c`
+- [`JS_PROFILE_SLOTS`](modules/src.js_sandbox.c.md#js_profile_slots) macro in `src/js_sandbox.c`
 - [`js_pump_jobs`](modules/include.js_sandbox.h.md#js_pump_jobs) function in `include/js_sandbox.h`
 - [`js_pump_jobs`](modules/src.js_sandbox.c.md#js_pump_jobs) function in `src/js_sandbox.c`
 - [`JS_REALM_MAX`](modules/include.js_sandbox.h.md#js_realm_max) macro in `include/js_sandbox.h`
@@ -1782,6 +1791,7 @@
 
 ## L
 
+- [`lacks`](modules/include.css_chain.h.md#lacks) function in `include/css_chain.h`
 - [`layer`](modules/include.compositor.h.md#cx_item-layer) type_alias of `cx_item` in `include/compositor.h`
 - [`layer`](modules/gui.browser_ui.c.md#layer) function in `gui/browser_ui.c`
 - [`layout`](modules/gui.browser_ui.c.md#layout) function in `gui/browser_ui.c`
@@ -2235,6 +2245,7 @@
 - [`OUT`](modules/tools.fbench.py.md#out) constant in `tools.fbench`
 - [`out`](modules/include.css_gradient.h.md#out) function in `include/css_gradient.h`
 - [`out`](modules/include.flex_layout.h.md#out) function in `include/flex_layout.h`
+- [`out`](modules/include.js_sandbox.h.md#out) function in `include/js_sandbox.h`
 - [`out`](modules/include.ui.h.md#out) function in `include/ui.h`
 - [`out_fd`](modules/src.media_decoder.c.md#out_fd) type_alias in `src/media_decoder.c`
 - [`out_status`](modules/include.js_dom.h.md#out_status) function in `include/js_dom.h`

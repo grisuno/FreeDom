@@ -3,6 +3,11 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `tab_async_fd` | function | `include/tab.h:214` | `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...` |
+| `tab_child_pid` | function | `include/tab.h:385` | `pid_t tab_child_pid(const tab *t);` |
+| `tab_close` | function | `include/tab.h:388` | `void tab_close(tab *t);` |
+| `tab_eval_result` | struct | `include/tab.h:128` | `` |
+| `tab_eval_result_free` | function | `include/tab.h:392` | `void tab_eval_result_free(tab_eval_result *r);` |
 | `tab_hist_op` | struct | `include/tab.h:54` | `` |
 | `tab_image` | struct | `include/tab.h:141` | `` |
 | `tab_image_free` | function | `include/tab.h:393` | `void tab_image_free(tab_image *img);` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `interp_bc_tok` | function | `src/css.c:933` | `static int interp_bc_tok(const char *t, int *o)` |
 | `interp_bg` | function | `src/css.c:239` | `static int interp_bg(const char *v)` |
 | `interp_bg_attachment` | function | `src/css.c:649` | `static int interp_bg_attachment(const char *v)` |
-| `interp_bg_clip` | function | `src/css.c:634` | `static int interp_bg_clip(const char *v)` |
-| `interp_bg_origin` | function | `src/css.c:642` | `static int interp_bg_origin(const char *v)` |
-| `interp_bg_repeat` | function | `src/css.c:617` | `static int interp_bg_repeat(const char *v)` |
-| `interp_bg_size` | function | `src/css.c:627` | `static int interp_bg_size(const char *v)` |
-| `interp_border_collapse` | function | `src/css.c:495` | `static int interp_border_collapse(const char *v)` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

@@ -3,6 +3,24 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `height` | function | `tools/ffgeom.py:292` | `def height(path)` |
+| `height_probe` | function | `tools/ffgeom.py:279` | `def height_probe(page, out_html)` |
+| `load_rows` | function | `tools/ffgeom.py:116` | `def load_rows(path)` |
+| `lum` | function | `tools/ffgeom.py:169` | `def lum(p)` |
+| `lum_at` | function | `tools/ffgeom.py:181` | `def lum_at(x, y)` |
+| `main` | function | `tools/ffgeom.py:301` | `def main(argv)` |
+| `probe` | function | `tools/ffgeom.py:265` | `def probe(page, selector, out_html)` |
+| `word` | function | `tools/ffgeom.py:209` | `def word(grid_row, origin)` |
+| `main` | function | `tools/ffq.py:22` | `def main()` |
+| `main` | function | `tools/ffshot.py:24` | `def main()` |
+| `main` | function | `tools/fftime.py:38` | `def main()` |
+| `_POSIX_C_SOURCE` | macro | `tools/gen_psl.c:15` | `#define _POSIX_C_SOURCE` |
+| `ascii_lower` | function | `tools/gen_psl.c:55` | `static void ascii_lower(char *s)` |
+| `cmp_str` | function | `tools/gen_psl.c:38` | `static int cmp_str(const void *a, const void *b)` |
+| `emit` | function | `tools/gen_psl.c:61` | `static void emit(const char *name, vec *v)` |
+| `main` | function | `tools/gen_psl.c:67` | `int main(int argc, char **argv)` |
+| `sort_unique` | function | `tools/gen_psl.c:43` | `static void sort_unique(vec *v)` |
+| `vec` | struct | `tools/gen_psl.c:21` | `` |
 | `vec_push` | function | `tools/gen_psl.c:27` | `static void vec_push(vec *v, const char *s)` |
 | `main` | function | `tools/guitime.py:92` | `def main()` |
 | `one_run` | function | `tools/guitime.py:65` | `def one_run(binary, page, env, hosts_dir, tmp)` |

@@ -425,10 +425,7 @@ static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap) {
 /* Nonzero iff element node `cn` matches any selector in the parsed list. */
 static int node_matches_any(const lxb_dom_node_t *cn,
                             const css_sel *sels, size_t nsel) {
-    lxb_dom_element_t *e = lxb_dom_interface_element((lxb_dom_node_t *)cn);
-    for (size_t k = 0; k < nsel; ++k)
-        if (cch_element_matches(e, &sels[k])) return 1;
-    return 0;
+    return cch_element_matches_any(lxb_dom_interface_element((lxb_dom_node_t *)cn), sels, nsel);
 }
 
 /* Walks candidate elements under `root` (DOM_NODE_NONE = whole document) in

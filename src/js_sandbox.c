@@ -32,6 +32,9 @@ typedef struct js_mem_state {
     int    hit; /* sticky within one eval: an allocation was denied by the cap */
 } js_mem_state;
 
+#define JS_PROFILE_SLOTS   192
+#define JS_PROFILE_KEY_MAX 200
+
 struct js_context {
     JSRuntime      *rt;
     JSContext      *ctx;
@@ -55,6 +58,12 @@ struct js_context {
     JSValue              rej_promise[JS_REJECT_MAX];
     JSValue              rej_reason[JS_REJECT_MAX];
     size_t               nrej;
+    /* Sampling profiler (js_profile_enable): fixed table, zero when off. */
+    int                  prof_on;
+    struct timespec      prof_last;
+    unsigned             prof_total;
+    size_t               prof_n;
+    struct { char key[JS_PROFILE_KEY_MAX]; unsigned hits; } prof[JS_PROFILE_SLOTS];
 };
 
 /* --- unhandled-rejection tracking --- */
@@ -169,12 +178,88 @@ static int timespec_reached(const struct timespec *now, const struct timespec *d
     return now->tv_nsec >= deadline->tv_nsec;
 }
 
+static long timespec_diff_ms(const struct timespec *a, const struct timespec *b) {
+    return (long)((a->tv_sec - b->tv_sec) * 1000L + (a->tv_nsec - b->tv_nsec) / 1000000L);
+}
+
+/* Records the two innermost frames of the running stack ("at f (file:l:c)" lines). */
+static void profile_sample(js_context *c, unsigned weight_ms) {
+    JSValue err = JS_NewError(c->ctx);
+    JSValue st = JS_GetPropertyStr(c->ctx, err, "stack");
+    size_t len = 0;
+    const char *s = JS_IsString(st) ? JS_ToCStringLen(c->ctx, &len, st) : NULL;
+    if (s != NULL) {
+        char key[JS_PROFILE_KEY_MAX];
+        size_t k = 0;
+        int lines = 0;
+        for (size_t i = 0; i < len && k + 1 < sizeof key && lines < 2; i++) {
+            char ch = s[i];
+            if (ch == '\n') { lines++; if (lines < 2 && k + 4 < sizeof key) { memcpy(key + k, " <- ", 4); k += 4; } continue; }
+            if (ch == ' ' && (k == 0 || key[k - 1] == ' ')) continue;
+            key[k++] = ch;
+        }
+        key[k] = '\0';
+        size_t slot = c->prof_n;
+        for (size_t i = 0; i < c->prof_n; i++)
+            if (strcmp(c->prof[i].key, key) == 0) { slot = i; break; }
+        if (slot == c->prof_n && c->prof_n < JS_PROFILE_SLOTS) {
+            memcpy(c->prof[slot].key, key, k + 1);
+            c->prof[slot].hits = 0;
+            c->prof_n++;
+        }
+        if (slot < c->prof_n) c->prof[slot].hits += weight_ms;
+        c->prof_total += weight_ms;
+        JS_FreeCString(c->ctx, s);
+    }
+    JS_FreeValue(c->ctx, st);
+    JS_FreeValue(c->ctx, err);
+}
+
+void js_profile_enable(js_context *ctx) {
+    if (ctx == NULL) return;
+    ctx->prof_on = 1;
+    clock_gettime(CLOCK_MONOTONIC, &ctx->prof_last);
+}
+
+size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n) {
+    if (out == NULL || cap == 0) return 0;
+    out[0] = '\0';
+    if (ctx == NULL || !ctx->prof_on || ctx->prof_total == 0) return 0;
+    size_t n = 0;
+    unsigned char used[JS_PROFILE_SLOTS] = {0};
+    for (size_t r = 0; r < top_n && r < ctx->prof_n; r++) {
+        size_t best = ctx->prof_n;
+        for (size_t i = 0; i < ctx->prof_n; i++)
+            if (!used[i] && (best == ctx->prof_n || ctx->prof[i].hits > ctx->prof[best].hits)) best = i;
+        if (best == ctx->prof_n) break;
+        used[best] = 1;
+        size_t space = cap - n;
+        if (space == 0) break;
+        int w = snprintf(out + n, space, "%u%% %s\n", ctx->prof[best].hits * 100u / ctx->prof_total,
+                         ctx->prof[best].key);
+        if (w < 0 || (size_t)w >= space) { n = cap - 1; break; }
+        n += (size_t)w;
+    }
+    return n;
+}
+
 /* Returns nonzero to interrupt the engine once the per-eval budget is spent. */
 static int js_interrupt_cb(JSRuntime *rt, void *opaque) {
     (void)rt;
     js_context *c = (js_context *)opaque;
-    if (c == NULL || !c->has_deadline) return 0;
+    if (c == NULL) return 0;
     struct timespec now;
+    if (c->prof_on) {
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        long dt = timespec_diff_ms(&now, &c->prof_last);
+        if (dt >= JS_PROFILE_PERIOD_MS) {
+            c->prof_last = now;
+            /* The interval is charged to the stack found at its end: a long native call
+             * (DOM bridge, regex) shows up under the JS frame that made it. */
+            profile_sample(c, dt > 1000 ? 1000u : (unsigned)dt);
+        }
+    }
+    if (!c->has_deadline) return 0;
     clock_gettime(CLOCK_MONOTONIC, &now);
     if (timespec_reached(&now, &c->deadline)) {
         c->interrupted = 1;

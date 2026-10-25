@@ -30,7 +30,7 @@ flowchart TB
     end
     subgraph lane_3["Tier 4"]
         direction LR
-        n_c2["src: tab<br/>34 files, 716 symbols<br/>Core / utility"]:::cycle
+        n_c2["src: tab<br/>34 files, 727 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_4["Tier 5"]
         direction LR
@@ -40,7 +40,7 @@ flowchart TB
     end
     subgraph lane_5["Tier 6"]
         direction LR
-        n_c0["src: css<br/>37 files, 1064 symbols<br/>Core / utility"]:::cycle
+        n_c0["src: css<br/>37 files, 1066 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_6["Tier 7 - foundation"]
         direction LR
@@ -156,7 +156,7 @@ sequenceDiagram
 
 ### `freedom.main`
 
-`src/freedom.c:1251`, score 11: `main` in a compiled-language file; entry-style name `main`.
+`src/freedom.c:1255`, score 11: `main` in a compiled-language file; entry-style name `main`.
 
 Call tree:
 
@@ -164,7 +164,7 @@ Call tree:
 flowchart LR
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     classDef external fill:#1a1530,stroke:#a78bfa,color:#ede9fe;
-    n_src_freedom_c__main["freedom.main<br/>freedom.c:1251"]:::entry
+    n_src_freedom_c__main["freedom.main<br/>freedom.c:1255"]:::entry
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2742"]:::external
     n_include_prefs_h__free["prefs.free<br/>prefs.h:72"]:::external
     n_src_prefs_c__prefs_format["prefs.prefs_format<br/>prefs.c:183"]:::external

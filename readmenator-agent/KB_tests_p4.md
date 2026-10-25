@@ -165,6 +165,7 @@ static void tes...`
 - Depends on: `include/host_conf.h`
 
 ## tests/test_hostblock.c
+- Doc: test_tld_entry_blocks_every_host_under_it: A bare top-level label blocks the whole TLD (.cyou is...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -189,7 +190,8 @@ static void tes...`
   - `test_no_lists_allows` (function, line 224) `static void test_no_lists_allows(void **state)`
   - `test_is_allowlisted` (function, line 231) `static void test_is_allowlisted(void **state)`
   - `test_check_fail_open_edges` (function, line 252) `static void test_check_fail_open_edges(void **state)`
-  - `main` (function, line 266) `int main(void)`
+  - `test_tld_entry_blocks_every_host_under_it` (function, line 268) `static void test_tld_entry_blocks_every_host_under_it(void **state)`
+  - `main` (function, line 282) `int main(void)`
 - Depends on: `include/hostblock.h`
 
 ## tests/test_hostedit.c

@@ -1,6 +1,6 @@
 # GraphRAG Community Reports
 
-Entities: 7868 | Relationships: 13721 | Communities: 11 | Themes: 3 | Text units: 7416
+Entities: 7886 | Relationships: 13745 | Communities: 11 | Themes: 3 | Text units: 7434
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
@@ -88,7 +88,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - Hotspot `tests/test_js_dom.c`: 228 symbols, 26 connections (score 0.26).
 - Dependency cycle: js_dom.h -> js_location.h -> js_dom.h.
 - Dataflow: 2 INFERRED issues (first: UNCHECKED_ALLOC in jd_click_state_new).
-- Key entities: file:tests/test_js_dom.c, file:src/tab.c, file:tests/test_tab.c, file:src/js_dom.c, file:include/tab.h, file:src/js_sandbox.c, file:tests/test_url.c, file:tests/test_js_sandbox.c
+- Key entities: file:tests/test_js_dom.c, file:src/tab.c, file:tests/test_tab.c, file:src/js_dom.c, file:src/js_sandbox.c, file:include/tab.h, file:tests/test_url.c, file:tests/test_js_sandbox.c
 - Rating 4.6/10 = 7 x PageRank share 0.66 + 3 x risk 0.00. Internal imports: 103.
 
 ## include: browser_ui (`c1`, community, rating 3.6)
@@ -159,7 +159,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - 1 layer violations, e.g. test_renderer.c (testing) -> renderer.h (presentation).
 - Dataflow: 1 INFERRED issues (first: UNCHECKED_ALLOC in hb_new).
 - Surprising bridge: block_flow.c <-> test_renderer.c (8 hops across communities).
-- Key entities: file:src/browser.c, file:src/os_sandbox.c, file:tests/test_os_sandbox.c, file:src/media_decoder.c, file:include/browser.h, file:tests/test_hostblock.c, file:src/hostblock.c, file:tests/test_browser.c
+- Key entities: file:src/browser.c, file:src/os_sandbox.c, file:tests/test_os_sandbox.c, file:src/media_decoder.c, file:tests/test_hostblock.c, file:include/browser.h, file:src/hostblock.c, file:tests/test_browser.c
 - Rating 1.6/10 = 7 x PageRank share 0.23 + 3 x risk 0.00. Internal imports: 18.
 
 ## include: secure_fetch (`c8`, community, rating 1.5)
@@ -197,7 +197,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - Hotspot `tools/guitime.py`: 3 symbols, 8 connections (score 0.04).
 - Hotspot `tools/fftime.py`: 1 symbols, 8 connections (score 0.04).
 - Taint: 6 paths reach this group via subprocess, urllib.request.
-- Key entities: file:tools/pngdiff.c, file:tools/gen_psl.c, file:tools/ffgeom.py, file:tools/fbench.py, file:tools/guitime.py, file:tools/mutate.py, file:tools/snapshot.py, file:tools/fftime.py
+- Key entities: file:tools/pngdiff.c, file:tools/gen_psl.c, file:tools/ffgeom.py, file:tools/fbench.py, file:tools/guitime.py, file:tools/mutate.py, file:tools/fftime.py, file:tools/snapshot.py
 - Rating 0.9/10 = 7 x PageRank share 0.13 + 3 x risk 0.00. Internal imports: 0.
 
 ## include: prefetch (`c9`, community, rating 0.4)

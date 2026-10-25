@@ -374,3 +374,16 @@ int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel) {
     release_nodes(sibs, nsfill);
     return m;
 }
+
+int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n) {
+    if (el == NULL || sels == NULL || n == 0) return 0;
+    cch_node self;
+    fill_css_node(el, &self);
+    unsigned long long own = csel_element_feature_bits(&self.el);
+    free(self.spill);
+    for (size_t k = 0; k < n; ++k) {
+        if ((sels[k].subj_req & ~own) != 0ull) continue;
+        if (cch_element_matches(el, &sels[k])) return 1;
+    }
+    return 0;
+}

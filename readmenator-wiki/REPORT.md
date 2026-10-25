@@ -17,7 +17,7 @@ Every edge is tagged. Extracted means parsed from source; inferred means derived
 
 - Files: 289, communities: 11
 - File doc coverage: 40/289
-- Orphans (no docs at any level): 57
+- Orphans (no docs at any level): 56
 - Layers detected: 6
 - Security findings: 0
 - Large files (>256KB, maybe generated): 4 (browser_ui.c, css.c, page_view.c, test_css.c)
@@ -31,7 +31,7 @@ Every edge is tagged. Extracted means parsed from source; inferred means derived
 
 ## Token Benchmark
 
-- Wiki index plus community pages estimate: ~216332 tokens (chars/4).
+- Wiki index plus community pages estimate: ~216865 tokens (chars/4).
 - Full re-read of every source file would cost strictly more on any non-trivial project; this wiki is the cheaper entry point.
 - Generation cost: $0, offline, no network calls.
 

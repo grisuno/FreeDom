@@ -64,7 +64,7 @@ typedef struct js_result {
 #define JS_LOC_FILE_MAX ((size_t)512)
 
 #define JS_DEFAULT_MAX_SOURCE   ((size_t)(4u * 1024u * 1024u))
-#define JS_DEFAULT_MEM_LIMIT    ((size_t)(64u * 1024u * 1024u))
+#define JS_DEFAULT_MEM_LIMIT    ((size_t)(256u * 1024u * 1024u))
 #define JS_MIN_STACK_LIMIT      ((size_t)(256u * 1024u))
 #define JS_MAX_STACK_LIMIT      ((size_t)(6u * 1024u * 1024u))
 #define JS_DEFAULT_STACK_LIMIT  JS_MIN_STACK_LIMIT   /* fallback when the process stack is unknown */
@@ -156,6 +156,15 @@ int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,
  * each call, so isolating scripts into separate evals does not multiply the cap.
  * No-op on a NULL context. Does not affect an evaluation already in progress. */
 void js_set_time_budget(js_context *ctx, uint64_t budget_ms);
+
+/* Sampling profiler (FREEDOM_JS_PROFILE=2). Once enabled, the interrupt handler samples
+ * the running JS stack at most once per JS_PROFILE_PERIOD_MS and counts the innermost two
+ * frames. js_profile_report writes "<percent>% <frame> <- <caller>" lines, hottest first,
+ * into out (NUL-terminated, truncated at cap); returns bytes written. Both are no-ops on a
+ * NULL context; the table is fixed-size, so a hostile page cannot grow it. */
+#define JS_PROFILE_PERIOD_MS 1
+void   js_profile_enable(js_context *ctx);
+size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);
 
 /* Idempotent; safe on a zero-initialised struct and safe to call twice. */
 void js_result_free(js_result *res);

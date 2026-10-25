@@ -3,6 +3,7 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `kind` | type_alias | `include/interp.h:37` | `typedef struct ip_ease_fn { ip_easing kind;` |
 | `pct` | type_alias | `include/interp.h:69` | `typedef struct ip_keyframe { double pct;` |
 | `val_kind` | type_alias | `include/interp.h:100` | `typedef struct ip_anim { ip_val_kind val_kind;` |
 | `FREEDOM_JS_DOM_H` | macro | `include/js_dom.h:2` | `#define FREEDOM_JS_DOM_H` |
@@ -73,24 +74,28 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `JS_MIN_STACK_LIMIT` | macro | `include/js_sandbox.h:68` | `#define JS_MIN_STACK_LIMIT` |
 | `JS_MODULE_BYTES_MAX` | macro | `include/js_sandbox.h:116` | `#define JS_MODULE_BYTES_MAX` |
 | `JS_MODULE_MAX` | macro | `include/js_sandbox.h:115` | `#define JS_MODULE_MAX` |
-| `JS_REALM_MAX` | macro | `include/js_sandbox.h:189` | `#define JS_REALM_MAX` |
-| `JS_REJECT_MAX` | macro | `include/js_sandbox.h:192` | `#define JS_REJECT_MAX` |
-| `handle` | function | `include/js_sandbox.h:172` | `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....` |
+| `JS_PROFILE_PERIOD_MS` | macro | `include/js_sandbox.h:165` | `#define JS_PROFILE_PERIOD_MS` |
+| `JS_REALM_MAX` | macro | `include/js_sandbox.h:198` | `#define JS_REALM_MAX` |
+| `JS_REJECT_MAX` | macro | `include/js_sandbox.h:201` | `#define JS_REJECT_MAX` |
+| `handle` | function | `include/js_sandbox.h:181` | `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....` |
 | `js_context` | type_alias | `include/js_sandbox.h:47` | `typedef struct js_context js_context;` |
 | `js_context_free` | function | `include/js_sandbox.h:96` | `void js_context_free(js_context *ctx);` |
 | `js_limits` | struct | `include/js_sandbox.h:39` | `` |
 | `js_loc_from_stack` | function | `include/js_sandbox.h:150` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` |
 | `js_prime_stack_limit` | function | `include/js_sandbox.h:79` | `void js_prime_stack_limit(void);` |
-| `js_pump_jobs` | function | `include/js_sandbox.h:169` | `int js_pump_jobs(js_context *ctx, int max_jobs);` |
+| `js_profile_enable` | function | `include/js_sandbox.h:166` | `void js_profile_enable(js_context *ctx);` |
+| `js_profile_report` | function | `include/js_sandbox.h:167` | `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);` |
+| `js_pump_jobs` | function | `include/js_sandbox.h:178` | `int js_pump_jobs(js_context *ctx, int max_jobs);` |
 | `js_result` | struct | `include/js_sandbox.h:49` | `` |
-| `js_result_free` | function | `include/js_sandbox.h:161` | `void js_result_free(js_result *res);` |
-| `js_set_current_script` | function | `include/js_sandbox.h:181` | `void js_set_current_script(js_context *ctx, const char *src, const char *type);` |
+| `js_result_free` | function | `include/js_sandbox.h:170` | `void js_result_free(js_result *res);` |
+| `js_set_current_script` | function | `include/js_sandbox.h:190` | `void js_set_current_script(js_context *ctx, const char *src, const char *type);` |
 | `js_set_module_host` | function | `include/js_sandbox.h:129` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` |
 | `js_set_time_budget` | function | `include/js_sandbox.h:158` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` |
 | `js_stack_limit_for` | function | `include/js_sandbox.h:75` | `size_t js_stack_limit_for(size_t soft_stack);` |
 | `js_status` | enum | `include/js_sandbox.h:24` | `` |
 | `loaded` | function | `include/js_sandbox.h:124` | `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...` |
 | `max_source_bytes` | type_alias | `include/js_sandbox.h:39` | `typedef struct js_limits { size_t max_source_bytes;` |
+| `out` | function | `include/js_sandbox.h:163` | `* into out (NUL-terminated, truncated at cap);` |
 | `status` | type_alias | `include/js_sandbox.h:48` | `typedef struct js_result { js_status status;` |
 | `FREEDOM_JS_TRUSTED_H` | macro | `include/js_trusted.h:2` | `#define FREEDOM_JS_TRUSTED_H` |
 | `JT_WS_MAX` | macro | `include/js_trusted.h:46` | `#define JT_WS_MAX` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `tab` | type_alias | `include/tab.h:46` | `typedef struct tab tab;` |
 | `tab_alive` | function | `include/tab.h:382` | `int tab_alive(const tab *t);` |
 | `tab_async_busy` | function | `include/tab.h:220` | `int tab_async_busy(const tab *t);` |
-| `tab_async_fd` | function | `include/tab.h:214` | `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...` |
-| `tab_child_pid` | function | `include/tab.h:385` | `pid_t tab_child_pid(const tab *t);` |
-| `tab_close` | function | `include/tab.h:388` | `void tab_close(tab *t);` |
-| `tab_eval_result` | struct | `include/tab.h:128` | `` |
-| `tab_eval_result_free` | function | `include/tab.h:392` | `void tab_eval_result_free(tab_eval_result *r);` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

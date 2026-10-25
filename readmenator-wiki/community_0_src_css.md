@@ -17,7 +17,7 @@ This community groups 53 file(s) rooted at `src` with dominant language c (cohes
 | `src/css.c` | c | utility | 247 | no |
 | `src/css_atrule.c` | c | utility | 11 | no |
 | `src/css_box.c` | c | utility | 52 | no |
-| `src/css_chain.c` | c | utility | 20 | no |
+| `src/css_chain.c` | c | utility | 21 | no |
 | `src/css_color.c` | c | utility | 27 | no |
 
 ### `include` (18 files)
@@ -28,7 +28,7 @@ This community groups 53 file(s) rooted at `src` with dominant language c (cohes
 | `include/css.h` | h | utility | 140 | no |
 | `include/css_atrule.h` | h | utility | 10 | no |
 | `include/css_box.h` | h | utility | 27 | no |
-| `include/css_chain.h` | h | utility | 8 | no |
+| `include/css_chain.h` | h | utility | 9 | no |
 | `include/css_color.h` | h | utility | 7 | no |
 | `include/css_computed.h` | h | utility | 6 | no |
 

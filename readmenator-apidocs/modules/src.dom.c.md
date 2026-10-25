@@ -114,7 +114,7 @@ struct dom_index
 
 ### `ih_block`
 
-`struct` | [src/dom.c:820](../../src/dom.c#L820)
+`struct` | [src/dom.c:817](../../src/dom.c#L817)
 
 ```c
 typedef struct ih_block
@@ -126,7 +126,7 @@ typedef struct ih_block
 
 ### `ih_acc`
 
-`struct` | [src/dom.c:825](../../src/dom.c#L825)
+`struct` | [src/dom.c:822](../../src/dom.c#L822)
 
 ```c
 typedef struct ih_acc
@@ -286,7 +286,7 @@ size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out,
 
 ### `count`
 
-`function` | [src/dom.c:437](../../src/dom.c#L437)
+`function` | [src/dom.c:434](../../src/dom.c#L434)
 
 ```c
 * count (may exceed cap), and returns DOM_NODE_NONE. */ static dom_node_id qs_walk(const dom_inde...
@@ -306,7 +306,7 @@ size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out,
 
 ### `dom_query_selector`
 
-`function` | [src/dom.c:467](../../src/dom.c#L467)
+`function` | [src/dom.c:464](../../src/dom.c#L464)
 
 ```c
 dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root, const char *selector)
@@ -328,7 +328,7 @@ dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root, const cha
 
 ### `dom_query_selector_all`
 
-`function` | [src/dom.c:476](../../src/dom.c#L476)
+`function` | [src/dom.c:473](../../src/dom.c#L473)
 
 ```c
 size_t dom_query_selector_all(const dom_index *idx, dom_node_id root, const char *selector, dom_node_id *out, size_t cap)
@@ -346,13 +346,15 @@ size_t dom_query_selector_all(const dom_index *idx, dom_node_id root, const char
 
 **Returns:** `size_t`
 
+*Called by:* [`JD_QSA_INLINE`](src.js_dom.c.md#jd_qsa_inline)
+
 ---
 
 <a id="dom_matches"></a>
 
 ### `dom_matches`
 
-`function` | [src/dom.c:487](../../src/dom.c#L487)
+`function` | [src/dom.c:484](../../src/dom.c#L484)
 
 ```c
 int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)
@@ -378,7 +380,7 @@ Nonzero iff node itself matches the selector list (Element.matches).
 
 ### `dom_closest`
 
-`function` | [src/dom.c:496](../../src/dom.c#L496)
+`function` | [src/dom.c:493](../../src/dom.c#L493)
 
 ```c
 dom_node_id dom_closest(const dom_index *idx, dom_node_id node, const char *selector)
@@ -400,7 +402,7 @@ dom_node_id dom_closest(const dom_index *idx, dom_node_id node, const char *sele
 
 ### `dom_document_position`
 
-`function` | [src/dom.c:512](../../src/dom.c#L512)
+`function` | [src/dom.c:509](../../src/dom.c#L509)
 
 ```c
 size_t dom_document_position(const dom_index *idx, dom_node_id node)
@@ -425,7 +427,7 @@ size_t dom_document_position(const dom_index *idx, dom_node_id node)
 
 ### `dom_precedes`
 
-`function` | [src/dom.c:517](../../src/dom.c#L517)
+`function` | [src/dom.c:514](../../src/dom.c#L514)
 
 ```c
 int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)
@@ -451,7 +453,7 @@ Nonzero iff a precedes b in document order.
 
 ### `dom_node_at`
 
-`function` | [src/dom.c:522](../../src/dom.c#L522)
+`function` | [src/dom.c:519](../../src/dom.c#L519)
 
 ```c
 dom_node_id dom_node_at(const dom_index *idx, size_t position)
@@ -472,7 +474,7 @@ dom_node_id dom_node_at(const dom_index *idx, size_t position)
 
 ### `dom_parent`
 
-`function` | [src/dom.c:527](../../src/dom.c#L527)
+`function` | [src/dom.c:524](../../src/dom.c#L524)
 
 ```c
 dom_node_id dom_parent(const dom_index *idx, dom_node_id node)
@@ -493,7 +495,7 @@ dom_node_id dom_parent(const dom_index *idx, dom_node_id node)
 
 ### `dom_first_child`
 
-`function` | [src/dom.c:537](../../src/dom.c#L537)
+`function` | [src/dom.c:534](../../src/dom.c#L534)
 
 ```c
 dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)
@@ -516,7 +518,7 @@ dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)
 
 ### `dom_next_sibling`
 
-`function` | [src/dom.c:545](../../src/dom.c#L545)
+`function` | [src/dom.c:542](../../src/dom.c#L542)
 
 ```c
 dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)
@@ -539,7 +541,7 @@ dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)
 
 ### `dom_tag_name`
 
-`function` `const` | [src/dom.c:553](../../src/dom.c#L553)
+`function` `const` | [src/dom.c:550](../../src/dom.c#L550)
 
 ```c
 const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len)
@@ -565,7 +567,7 @@ Lowercase qualified tag name, or NULL. *len (optional) excludes the NUL.
 
 ### `dom_get_attribute`
 
-`function` `const` | [src/dom.c:564](../../src/dom.c#L564)
+`function` `const` | [src/dom.c:561](../../src/dom.c#L561)
 
 ```c
 const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len)
@@ -594,7 +596,7 @@ Attribute value by name, or NULL if absent. *len (optional) excludes NUL.
 
 ### `dom_attribute_names`
 
-`function` | [src/dom.c:586](../../src/dom.c#L586)
+`function` | [src/dom.c:583](../../src/dom.c#L583)
 
 ```c
 size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap)
@@ -624,7 +626,7 @@ Writes at most cap entries; returns the total attribute count (which may exceed 
 
 ### `dom_text_content`
 
-`function` `const` | [src/dom.c:604](../../src/dom.c#L604)
+`function` `const` | [src/dom.c:601](../../src/dom.c#L601)
 
 ```c
 const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)
@@ -650,7 +652,7 @@ Concatenated text content of node's subtree (borrowed, valid while idx/doc are a
 
 ### `dom_document_title`
 
-`function` `const` | [src/dom.c:614](../../src/dom.c#L614)
+`function` `const` | [src/dom.c:611](../../src/dom.c#L611)
 
 ```c
 const char *dom_document_title(const dom_index *idx, size_t *len)
@@ -675,7 +677,7 @@ Current document <title> text (borrowed), or NULL. *len excludes the NUL.
 
 ### `dom_set_text_content`
 
-`function` | [src/dom.c:627](../../src/dom.c#L627)
+`function` | [src/dom.c:624](../../src/dom.c#L624)
 
 ```c
 dom_status dom_set_text_content(dom_index *idx, dom_node_id node, const char *text, size_t len)
@@ -698,7 +700,7 @@ dom_status dom_set_text_content(dom_index *idx, dom_node_id node, const char *te
 
 ### `dom_set_document_title`
 
-`function` | [src/dom.c:661](../../src/dom.c#L661)
+`function` | [src/dom.c:658](../../src/dom.c#L658)
 
 ```c
 dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)
@@ -720,7 +722,7 @@ dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)
 
 ### `dom_create_element`
 
-`function` | [src/dom.c:690](../../src/dom.c#L690)
+`function` | [src/dom.c:687](../../src/dom.c#L687)
 
 ```c
 dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)
@@ -744,7 +746,7 @@ dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_
 
 ### `dom_append_child`
 
-`function` | [src/dom.c:710](../../src/dom.c#L710)
+`function` | [src/dom.c:707](../../src/dom.c#L707)
 
 ```c
 dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)
@@ -768,7 +770,7 @@ dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id chil
 
 ### `dom_remove_child`
 
-`function` | [src/dom.c:724](../../src/dom.c#L724)
+`function` | [src/dom.c:721](../../src/dom.c#L721)
 
 ```c
 dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child)
@@ -790,7 +792,7 @@ dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id chil
 
 ### `dom_set_attribute`
 
-`function` | [src/dom.c:732](../../src/dom.c#L732)
+`function` | [src/dom.c:729](../../src/dom.c#L729)
 
 ```c
 dom_status dom_set_attribute(dom_index *idx, dom_node_id node, const char *name, const char *value)
@@ -815,7 +817,7 @@ dom_status dom_set_attribute(dom_index *idx, dom_node_id node, const char *name,
 
 ### `dom_remove_attribute`
 
-`function` | [src/dom.c:761](../../src/dom.c#L761)
+`function` | [src/dom.c:758](../../src/dom.c#L758)
 
 ```c
 dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)
@@ -837,7 +839,7 @@ dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *na
 
 ### `dom_set_inner_html`
 
-`function` | [src/dom.c:780](../../src/dom.c#L780)
+`function` | [src/dom.c:777](../../src/dom.c#L777)
 
 ```c
 dom_status dom_set_inner_html(dom_index *idx, dom_node_id node, const char *html, size_t len)
@@ -860,7 +862,7 @@ dom_status dom_set_inner_html(dom_index *idx, dom_node_id node, const char *html
 
 ### `dom_get_inner_html`
 
-`function` | [src/dom.c:887](../../src/dom.c#L887)
+`function` | [src/dom.c:884](../../src/dom.c#L884)
 
 ```c
 dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node, char **out, size_t *out_len)
@@ -883,7 +885,7 @@ dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node, char **out
 
 ### `dom_insert_before`
 
-`function` | [src/dom.c:917](../../src/dom.c#L917)
+`function` | [src/dom.c:914](../../src/dom.c#L914)
 
 ```c
 dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child, dom_node_id ref)
@@ -908,7 +910,7 @@ dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id chi
 
 ### `dom_clone_node`
 
-`function` | [src/dom.c:934](../../src/dom.c#L934)
+`function` | [src/dom.c:931](../../src/dom.c#L931)
 
 ```c
 dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id)
@@ -931,7 +933,7 @@ dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_i
 
 ### `dom_move_children`
 
-`function` | [src/dom.c:948](../../src/dom.c#L948)
+`function` | [src/dom.c:945](../../src/dom.c#L945)
 
 ```c
 dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent, dom_place where, dom_node_id ref)
@@ -955,7 +957,7 @@ dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent
 
 ### `dom_node_kind`
 
-`function` | [src/dom.c:1000](../../src/dom.c#L1000)
+`function` | [src/dom.c:997](../../src/dom.c#L997)
 
 ```c
 int dom_node_kind(const dom_index *idx, dom_node_id node)
@@ -980,7 +982,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `dom_child_node`
 
-`function` | [src/dom.c:1004](../../src/dom.c#L1004)
+`function` | [src/dom.c:1001](../../src/dom.c#L1001)
 
 ```c
 dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)
@@ -1002,7 +1004,7 @@ dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)
 
 ### `dom_sibling_node`
 
-`function` | [src/dom.c:1011](../../src/dom.c#L1011)
+`function` | [src/dom.c:1008](../../src/dom.c#L1008)
 
 ```c
 dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)
@@ -1024,7 +1026,7 @@ dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)
 
 ### `dom_create_char_node`
 
-`function` | [src/dom.c:1018](../../src/dom.c#L1018)
+`function` | [src/dom.c:1015](../../src/dom.c#L1015)
 
 ```c
 dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len, dom_node_id *out_id)
@@ -1048,7 +1050,7 @@ dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size
 
 ### `dom_native_node`
 
-`function` `const` | [src/dom.c:1032](../../src/dom.c#L1032)
+`function` `const` | [src/dom.c:1029](../../src/dom.c#L1029)
 
 ```c
 const void *dom_native_node(const dom_index *idx, dom_node_id node)
@@ -1099,7 +1101,7 @@ A longer list is truncated (anti-DoS): the extra selectors are dropped, which on
 
 ### `IH_BLOCK_SIZE`
 
-`macro` | [src/dom.c:818](../../src/dom.c#L818)
+`macro` | [src/dom.c:815](../../src/dom.c#L815)
 
 ```c
 #define IH_BLOCK_SIZE

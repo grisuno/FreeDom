@@ -290,7 +290,7 @@ Conservative by construction: no bloom (anc_bloom_valid == 0) or no requirement 
 
 **Returns:** `unsigned long long`
 
-*Called by:* [`inputs`](src.css_chain.c.md#inputs)
+*Called by:* [`cch_element_matches_any`](src.css_chain.c.md#cch_element_matches_any), [`inputs`](src.css_chain.c.md#inputs)
 
 ---
 

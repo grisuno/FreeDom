@@ -1,11 +1,11 @@
 # `src/css_chain.c`
 
-> Source: [src/css_chain.c:1](../../src/css_chain.c#L1) | language `c` | coverage 46.7% | [API index](../index.md)
+> Source: [src/css_chain.c:1](../../src/css_chain.c#L1) | language `c` | coverage 43.8% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`cch_node`](#cch_node)
-- **Functions:** [`inputs`](#inputs), [`cch_element_style_vars`](#cch_element_style_vars), [`cch_pseudo_style`](#cch_pseudo_style), [`cch_element_style`](#cch_element_style), [`cch_element_matches`](#cch_element_matches)
+- **Functions:** [`inputs`](#inputs), [`cch_element_style_vars`](#cch_element_style_vars), [`cch_pseudo_style`](#cch_pseudo_style), [`cch_element_style`](#cch_element_style), [`cch_element_matches`](#cch_element_matches), [`cch_element_matches_any`](#cch_element_matches_any)
 - **Macros:** [`CCH_TAG_MAX`](#cch_tag_max), [`CCH_ID_MAX`](#cch_id_max), [`CCH_CLASS_BUF`](#cch_class_buf), [`CCH_MAX_CLASSES`](#cch_max_classes), [`CCH_CLASS_SPILL_MAX`](#cch_class_spill_max), [`CCH_MAX_ATTRS`](#cch_max_attrs), [`CCH_ATTR_BUF`](#cch_attr_buf)
 
 ## Type Diagram
@@ -25,20 +25,23 @@ Solid arrows stay in this module, dashed arrows leave it.
 
 ```mermaid
 flowchart LR
+    n_src_css_chain_c__cch_element_matches_any(["cch_element_matches_any"])
+    n_src_css_chain_c__cch_element_matches(["cch_element_matches"])
     n_src_css_chain_c__inputs(["inputs"])
     n_include_css_select_h__csel_element_feature_bits["css_select.csel_element_feature_bits"]
     n_src_css_chain_c__cch_element_style_vars(["cch_element_style_vars"])
     n_src_css_c__css_resolve_el_ex["css.css_resolve_el_ex"]
     n_src_css_chain_c__cch_pseudo_style(["cch_pseudo_style"])
     n_src_css_c__css_resolve_pseudo["css.css_resolve_pseudo"]
-    n_src_css_chain_c__cch_element_matches(["cch_element_matches"])
     n_include_css_select_h__csel_matches["css_select.csel_matches"]
     n_src_css_select_c__csel_needs_structure["css_select.csel_needs_structure"]
+    n_src_css_chain_c__cch_element_matches_any --> n_src_css_chain_c__cch_element_matches
     n_src_css_chain_c__inputs -.-> n_include_css_select_h__csel_element_feature_bits
     n_src_css_chain_c__cch_element_style_vars -.-> n_src_css_c__css_resolve_el_ex
     n_src_css_chain_c__cch_pseudo_style -.-> n_src_css_c__css_resolve_pseudo
     n_src_css_chain_c__cch_element_matches -.-> n_include_css_select_h__csel_matches
     n_src_css_chain_c__cch_element_matches -.-> n_src_css_select_c__csel_needs_structure
+    n_src_css_chain_c__cch_element_matches_any -.-> n_include_css_select_h__csel_element_feature_bits
 ```
 
 ## Structs
@@ -202,6 +205,32 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 > **Inherited:** Documentation from [`cch_element_matches`](#cch_element_matches) (include/css_chain.h:69).
 
 *Calls:* [`csel_matches`](include.css_select.h.md#csel_matches), [`csel_needs_structure`](src.css_select.c.md#csel_needs_structure)
+
+*Called by:* [`cch_element_matches_any`](#cch_element_matches_any)
+
+---
+
+<a id="cch_element_matches_any"></a>
+
+### `cch_element_matches_any`
+
+`function` | [src/css_chain.c:378](../../src/css_chain.c#L378)
+
+```c
+int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `el` | `lxb_dom_element_t *` |  |  |
+| `sels` | `css_sel *` |  |  |
+| `n` | `size_t` |  |  |
+
+**Returns:** `int`
+
+*Calls:* [`csel_element_feature_bits`](include.css_select.h.md#csel_element_feature_bits), [`cch_element_matches`](#cch_element_matches)
 
 ---
 

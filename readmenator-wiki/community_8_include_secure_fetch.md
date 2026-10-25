@@ -21,7 +21,7 @@ This community groups 13 file(s) rooted at `tests` with dominant language c (coh
 | `tests/itest_secure_fetch.c` | c | testing | 2 | no |
 | `tests/test_anti_fp.c` | c | testing | 15 | no |
 | `tests/test_identity.c` | c | testing | 9 | no |
-| `tests/test_secure_fetch.c` | c | testing | 57 | no |
+| `tests/test_secure_fetch.c` | c | testing | 58 | no |
 | `tests/test_ws_hub.c` | c | testing | 13 | no |
 
 ## Key Symbols

@@ -1,14 +1,14 @@
 # `include/js_sandbox.h`
 
-> Source: [include/js_sandbox.h:1](../../include/js_sandbox.h#L1) | language `h` | coverage 58.6% | [API index](../index.md)
+> Source: [include/js_sandbox.h:1](../../include/js_sandbox.h#L1) | language `h` | coverage 57.6% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`js_limits`](#js_limits), [`js_result`](#js_result)
 - **Enums:** [`js_status`](#js_status)
 - **Type Aliases:** [`js_context`](#js_context), [`status`](#status)
-- **Functions:** [`js_stack_limit_for`](#js_stack_limit_for), [`js_prime_stack_limit`](#js_prime_stack_limit), [`js_context_free`](#js_context_free), [`loaded`](#loaded), [`js_set_module_host`](#js_set_module_host), [`js_loc_from_stack`](#js_loc_from_stack), [`js_set_time_budget`](#js_set_time_budget), [`js_result_free`](#js_result_free), [`js_pump_jobs`](#js_pump_jobs), [`handle`](#handle), [`js_set_current_script`](#js_set_current_script)
-- **Macros:** [`JS_LOC_FILE_MAX`](#js_loc_file_max), [`JS_DEFAULT_MAX_SOURCE`](#js_default_max_source), [`JS_DEFAULT_MEM_LIMIT`](#js_default_mem_limit), [`JS_MIN_STACK_LIMIT`](#js_min_stack_limit), [`JS_MAX_STACK_LIMIT`](#js_max_stack_limit), [`JS_DEFAULT_STACK_LIMIT`](#js_default_stack_limit), [`JS_DEFAULT_TIME_BUDGET`](#js_default_time_budget), [`JS_MODULE_MAX`](#js_module_max), [`JS_MODULE_BYTES_MAX`](#js_module_bytes_max), [`JS_REALM_MAX`](#js_realm_max), [`JS_REJECT_MAX`](#js_reject_max)
+- **Functions:** [`js_stack_limit_for`](#js_stack_limit_for), [`js_prime_stack_limit`](#js_prime_stack_limit), [`js_context_free`](#js_context_free), [`loaded`](#loaded), [`js_set_module_host`](#js_set_module_host), [`js_loc_from_stack`](#js_loc_from_stack), [`js_set_time_budget`](#js_set_time_budget), [`out`](#out), [`js_profile_enable`](#js_profile_enable), [`js_profile_report`](#js_profile_report), [`js_result_free`](#js_result_free), [`js_pump_jobs`](#js_pump_jobs), [`handle`](#handle), [`js_set_current_script`](#js_set_current_script)
+- **Macros:** [`JS_LOC_FILE_MAX`](#js_loc_file_max), [`JS_DEFAULT_MAX_SOURCE`](#js_default_max_source), [`JS_DEFAULT_MEM_LIMIT`](#js_default_mem_limit), [`JS_MIN_STACK_LIMIT`](#js_min_stack_limit), [`JS_MAX_STACK_LIMIT`](#js_max_stack_limit), [`JS_DEFAULT_STACK_LIMIT`](#js_default_stack_limit), [`JS_DEFAULT_TIME_BUDGET`](#js_default_time_budget), [`JS_MODULE_MAX`](#js_module_max), [`JS_MODULE_BYTES_MAX`](#js_module_bytes_max), [`JS_PROFILE_PERIOD_MS`](#js_profile_period_ms), [`JS_REALM_MAX`](#js_realm_max), [`JS_REJECT_MAX`](#js_reject_max)
 
 ## Type Diagram
 
@@ -283,11 +283,77 @@ Used to enforce a single page-wide budget across a sequence of evaluations (e.g.
 
 ---
 
+<a id="out"></a>
+
+### `out`
+
+`function` | [include/js_sandbox.h:163](../../include/js_sandbox.h#L163)
+
+```c
+* into out (NUL-terminated, truncated at cap);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `terminated` | `NUL-` |  |  |
+| `cap` | `truncated at` |  |  |
+
+**Returns:** `* into`
+
+---
+
+<a id="js_profile_enable"></a>
+
+### `js_profile_enable`
+
+`function` | [include/js_sandbox.h:166](../../include/js_sandbox.h#L166)
+
+```c
+void js_profile_enable(js_context *ctx);
+```
+
+Sampling profiler (FREEDOM_JS_PROFILE=2).
+
+Once enabled, the interrupt handler samples the running JS stack at most once per JS_PROFILE_PERIOD_MS and counts the innermost two frames. js_profile_report writes "<percent>% <frame> <- <caller>" lines, hottest first, into out (NUL-terminated, truncated at cap); returns bytes written. Both are no-ops on a * NULL context; the table is fixed-size, so a hostile page cannot grow it. define JS_PROFILE_PERIOD_MS 1
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+
+---
+
+<a id="js_profile_report"></a>
+
+### `js_profile_report`
+
+`function` | [include/js_sandbox.h:167](../../include/js_sandbox.h#L167)
+
+```c
+size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `out` | `char *` |  |  |
+| `cap` | `size_t` |  |  |
+| `top_n` | `size_t` |  |  |
+
+**Returns:** `size_t`
+
+---
+
 <a id="js_result_free"></a>
 
 ### `js_result_free`
 
-`function` | [include/js_sandbox.h:161](../../include/js_sandbox.h#L161)
+`function` | [include/js_sandbox.h:170](../../include/js_sandbox.h#L170)
 
 ```c
 void js_result_free(js_result *res);
@@ -307,7 +373,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `js_pump_jobs`
 
-`function` | [include/js_sandbox.h:169](../../include/js_sandbox.h#L169)
+`function` | [include/js_sandbox.h:178](../../include/js_sandbox.h#L178)
 
 ```c
 int js_pump_jobs(js_context *ctx, int max_jobs);
@@ -332,7 +398,7 @@ Job exceptions (rejected promises with no handler, etc.) are swallowed -- a job 
 
 ### `handle`
 
-`function` | [include/js_sandbox.h:172](../../include/js_sandbox.h#L172)
+`function` | [include/js_sandbox.h:181](../../include/js_sandbox.h#L181)
 
 ```c
 * as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive. Binding modules are the intended consumers. */ void *js_context_raw(js_context *ctx);
@@ -352,7 +418,7 @@ Job exceptions (rejected promises with no handler, etc.) are swallowed -- a job 
 
 ### `js_set_current_script`
 
-`function` | [include/js_sandbox.h:181](../../include/js_sandbox.h#L181)
+`function` | [include/js_sandbox.h:190](../../include/js_sandbox.h#L190)
 
 ```c
 void js_set_current_script(js_context *ctx, const char *src, const char *type);
@@ -488,11 +554,27 @@ modules per context
 
 ---
 
+<a id="js_profile_period_ms"></a>
+
+### `JS_PROFILE_PERIOD_MS`
+
+`macro` | [include/js_sandbox.h:165](../../include/js_sandbox.h#L165)
+
+```c
+#define JS_PROFILE_PERIOD_MS
+```
+
+Sampling profiler (FREEDOM_JS_PROFILE=2).
+
+Once enabled, the interrupt handler samples the running JS stack at most once per JS_PROFILE_PERIOD_MS and counts the innermost two frames. js_profile_report writes "<percent>% <frame> <- <caller>" lines, hottest first, into out (NUL-terminated, truncated at cap); returns bytes written. Both are no-ops on a NULL context; the table is fixed-size, so a hostile page cannot grow it.
+
+---
+
 <a id="js_realm_max"></a>
 
 ### `JS_REALM_MAX`
 
-`macro` | [include/js_sandbox.h:189](../../include/js_sandbox.h#L189)
+`macro` | [include/js_sandbox.h:198](../../include/js_sandbox.h#L198)
 
 ```c
 #define JS_REALM_MAX
@@ -511,7 +593,7 @@ JS_ERR_NULL_ARG; OOM => JS_ERR_OOM.
 
 ### `JS_REJECT_MAX`
 
-`macro` | [include/js_sandbox.h:192](../../include/js_sandbox.h#L192)
+`macro` | [include/js_sandbox.h:201](../../include/js_sandbox.h#L201)
 
 ```c
 #define JS_REJECT_MAX

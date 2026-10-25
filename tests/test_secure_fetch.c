@@ -32,6 +32,14 @@ static void test_config_default_is_secure(void **state) {
     assert_null(c.user_agent); /* NULL => resolved to the default at request time */
 }
 
+/* Some servers (justpaste.it, 2026 Let's Encrypt P-384 chain) accept only secp384r1: without it
+ * in the offer the handshake dies with an opaque alert instead of reaching the policy check. */
+static void test_default_groups_offer_p384(void **state) {
+    (void)state;
+    assert_non_null(strstr(SF_DEFAULT_KEX_GROUPS, "secp384r1"));
+    assert_int_equal(strncmp(SF_DEFAULT_KEX_GROUPS, "X25519MLKEM768", 14), 0);
+}
+
 static void test_config_blend_fields_default_null(void **state) {
     (void)state;
     sf_config c = sf_config_default();
@@ -670,6 +678,7 @@ static void test_ws_open_rejects_before_any_io(void **state) {
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_config_default_is_secure),
+        cmocka_unit_test(test_default_groups_offer_p384),
         cmocka_unit_test(test_config_blend_fields_default_null),
         cmocka_unit_test(test_user_agent_default_when_unset),
         cmocka_unit_test(test_user_agent_uses_override),

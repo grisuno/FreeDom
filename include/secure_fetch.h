@@ -155,7 +155,7 @@ typedef struct sf_response {
  * orchestrator offer the classical-KE navigability fallback. Offering a classical
  * group never weakens the strict policy: a classical *negotiated* group is still
  * rejected by sf_check_group_is_pq. */
-#define SF_DEFAULT_KEX_GROUPS  "X25519MLKEM768:X25519:secp256r1"
+#define SF_DEFAULT_KEX_GROUPS  "X25519MLKEM768:X25519:secp256r1:secp384r1"
 /* Interim impersonation ClientHello shaping (OpenSSL, Hito TLS Fase 3). A classical
  * profile consistent with FP_USER_AGENT (Firefox): it DROPS X25519MLKEM768 (almost no
  * shipping Firefox of our advertised version offers MLKEM, so offering it under that UA

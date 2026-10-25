@@ -3,7 +3,7 @@
  "format": "jsonl",
  "meta": {
   "modules": 206,
-  "entities": 3564,
+  "entities": 3575,
   "languages": {
    "c": 96,
    "h": 94,
@@ -13,8 +13,8 @@
   "kinds": {
    "constant": 23,
    "enum": 156,
-   "function": 1830,
-   "macro": 946,
+   "function": 1837,
+   "macro": 950,
    "method": 23,
    "module": 206,
    "struct": 242,
@@ -27,8 +27,8 @@
  },
  "coverage": {
   "overall": {
-   "documented": 1403,
-   "total": 3534,
+   "documented": 1406,
+   "total": 3545,
    "percent": 39.7
   },
   "by_kind": {
@@ -38,13 +38,13 @@
     "percent": 51.3
    },
    "function": {
-    "documented": 786,
-    "total": 1830,
-    "percent": 43.0
+    "documented": 788,
+    "total": 1837,
+    "percent": 42.9
    },
    "macro": {
-    "documented": 304,
-    "total": 946,
+    "documented": 305,
+    "total": 950,
     "percent": 32.1
    },
    "method": {
@@ -171,8 +171,8 @@
    },
    "include/css_chain.h": {
     "documented": 2,
-    "total": 8,
-    "percent": 25.0
+    "total": 9,
+    "percent": 22.2
    },
    "include/css_color.h": {
     "documented": 3,
@@ -365,9 +365,9 @@
     "percent": 42.9
    },
    "include/js_sandbox.h": {
-    "documented": 17,
-    "total": 29,
-    "percent": 58.6
+    "documented": 19,
+    "total": 33,
+    "percent": 57.6
    },
    "include/js_trusted.h": {
     "documented": 6,
@@ -626,8 +626,8 @@
    },
    "src/css_chain.c": {
     "documented": 7,
-    "total": 15,
-    "percent": 46.7
+    "total": 16,
+    "percent": 43.8
    },
    "src/css_color.c": {
     "documented": 5,
@@ -801,8 +801,8 @@
    },
    "src/js_dom.c": {
     "documented": 3,
-    "total": 25,
-    "percent": 12.0
+    "total": 26,
+    "percent": 11.5
    },
    "src/js_dom_ext.c": {
     "documented": 0,
@@ -860,9 +860,9 @@
     "percent": 50.0
    },
    "src/js_sandbox.c": {
-    "documented": 12,
-    "total": 25,
-    "percent": 48.0
+    "documented": 13,
+    "total": 29,
+    "percent": 44.8
    },
    "src/js_trusted.c": {
     "documented": 5,
@@ -1205,7 +1205,7 @@
   {
    "uid": "include/css_chain.h",
    "path": "modules/include.css_chain.h.jsonl",
-   "entities": 8
+   "entities": 9
   },
   {
    "uid": "include/css_color.h",
@@ -1400,7 +1400,7 @@
   {
    "uid": "include/js_sandbox.h",
    "path": "modules/include.js_sandbox.h.jsonl",
-   "entities": 29
+   "entities": 33
   },
   {
    "uid": "include/js_trusted.h",
@@ -1660,7 +1660,7 @@
   {
    "uid": "src/css_chain.c",
    "path": "modules/src.css_chain.c.jsonl",
-   "entities": 15
+   "entities": 16
   },
   {
    "uid": "src/css_color.c",
@@ -1835,7 +1835,7 @@
   {
    "uid": "src/js_dom.c",
    "path": "modules/src.js_dom.c.jsonl",
-   "entities": 25
+   "entities": 26
   },
   {
    "uid": "src/js_dom_ext.c",
@@ -1895,7 +1895,7 @@
   {
    "uid": "src/js_sandbox.c",
    "path": "modules/src.js_sandbox.c.jsonl",
-   "entities": 25
+   "entities": 29
   },
   {
    "uid": "src/js_trusted.c",
@@ -2135,7 +2135,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2132
+  "total": 2140
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

@@ -64,17 +64,21 @@ static long ci_index(const char *haystack, const char *needle) {
 /* --- ephemeral cookie jar (in-memory, zero persistence, Zero Knowledge) --- */
 
 static CURLSH *sf_share = NULL;
-static pthread_mutex_t sf_cookie_lock = PTHREAD_MUTEX_INITIALIZER;
+/* One mutex PER shared data kind: libcurl may take the connection-cache lock while a cookie
+ * operation is in flight on another handle, and a single non-recursive mutex would deadlock. */
+static pthread_mutex_t sf_share_locks[CURL_LOCK_DATA_LAST] = {
+    [0 ... CURL_LOCK_DATA_LAST - 1] = PTHREAD_MUTEX_INITIALIZER
+};
 
 static void sf_share_lock(CURL *handle, curl_lock_data data,
                           curl_lock_access access, void *userptr) {
-    (void)handle; (void)data; (void)access; (void)userptr;
-    pthread_mutex_lock(&sf_cookie_lock);
+    (void)handle; (void)access; (void)userptr;
+    if ((int)data >= 0 && data < CURL_LOCK_DATA_LAST) pthread_mutex_lock(&sf_share_locks[data]);
 }
 
 static void sf_share_unlock(CURL *handle, curl_lock_data data, void *userptr) {
-    (void)handle; (void)data; (void)userptr;
-    pthread_mutex_unlock(&sf_cookie_lock);
+    (void)handle; (void)userptr;
+    if ((int)data >= 0 && data < CURL_LOCK_DATA_LAST) pthread_mutex_unlock(&sf_share_locks[data]);
 }
 
 /* --- public: defaults --- */
@@ -89,6 +93,16 @@ void sf_global_init(void) {
     sf_share = curl_share_init();
     if (sf_share != NULL) {
         curl_share_setopt(sf_share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+        /* Keep-alive across requests: a page makes dozens of fetches to a few hosts and every
+         * one used to pay a full TLS 1.3 + ML-KEM handshake (github.com: 134 serial fetches,
+         * ~0.25 s each). libcurl only reuses a connection whose TLS configuration (version,
+         * curves, ciphers, verification) matches, and sf_enforce_policy still runs on the live
+         * SSL* of EVERY response, so a reused connection is held to the same policy. TLS
+         * session tickets are deliberately NOT shared: a ticket is a cross-request token. */
+        curl_share_setopt(sf_share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+        /* One resolver cache for all handles: strace showed ~10 connect() calls per fetch
+         * (DNS retries + happy-eyeballs) because every handle resolved from scratch. */
+        curl_share_setopt(sf_share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
         curl_share_setopt(sf_share, CURLSHOPT_LOCKFUNC, sf_share_lock);
         curl_share_setopt(sf_share, CURLSHOPT_UNLOCKFUNC, sf_share_unlock);
     }

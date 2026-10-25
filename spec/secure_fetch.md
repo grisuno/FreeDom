@@ -52,7 +52,7 @@ Principio 5 para que el navegador sea usable en la web no-PQ de 2026; nunca se a
 
 > Para que un host no-PQ produzca un `SF_ERR_KEM_NOT_PQ` *limpio* (en vez de un fallo opaco de
 > handshake), el cliente ofrece grupos clásicos además del híbrido: `SF_DEFAULT_KEX_GROUPS =
-> "X25519MLKEM768:X25519:secp256r1"` (PQ preferido). Ofrecer un grupo clásico no debilita las
+> "X25519MLKEM768:X25519:secp256r1:secp384r1"` (PQ preferido; secp384r1 porque hay servidores, p. ej. justpaste.it con la cadena P-384 de 2026, que no aceptan otro grupo clásico). Ofrecer un grupo clásico no debilita las
 > políticas estrictas: un grupo *negociado* clásico sigue siendo rechazado por `sf_check_group_is_pq`.
 
 Justificación: el KE híbrido es desplegable hoy y es lo que neutraliza *Harvest-Now,
@@ -293,6 +293,22 @@ void      sf_ws_close(sf_ws *ws);                      /* idempotente sobre NULL
 - **Verificación:** la parte pura se prueba en `test_secure_fetch`; el handshake real necesita un
   servidor `wss://` con certificado válido y KE PQ, así que queda como **prueba de integración
   pendiente** (no se puede montar localmente sin debilitar la política).
+
+## 6quater. Reutilización de conexiones y DNS
+
+El `CURLSH` compartido (6ter) también comparte `CURL_LOCK_DATA_CONNECT` y `CURL_LOCK_DATA_DNS`, con
+UN mutex por tipo de dato (libcurl puede tomar el lock de conexiones mientras otro handle toca cookies;
+un mutex único no recursivo se bloquearía). Antes cada petición hacía `curl_easy_init`/`cleanup`: un
+handshake TLS 1.3 + ML-KEM nuevo y ~10 `connect()` (DNS + happy-eyeballs) por fetch.
+
+- **La política no se relaja:** libcurl solo reutiliza una conexión cuya configuración TLS (versión,
+  curvas, cifrados, verificación) coincide, y `sf_enforce_policy` corre sobre el `SSL*` VIVO de CADA
+  respuesta (`tls_capture_try` desde `CURLINFO_TLS_SSL_PTR`), así que una conexión reutilizada se juzga
+  igual que una nueva.
+- **Las sesiones TLS NO se comparten** (`CURL_LOCK_DATA_SSL_SESSION` queda fuera): un ticket es un
+  identificador entre peticiones.
+- `--as-gui` llama a `sf_global_init` como la GUI (antes el arnés buscaba sin jar ni caché de
+  conexiones). Medido: github.com 48 s → 28 s de pared en carga completa.
 
 ## 7. Garantías de memoria
 

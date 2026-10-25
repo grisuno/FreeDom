@@ -132,7 +132,7 @@ hb_decision hb_check(const hb_set *s, const char *host)
 
 **Returns:** `hb_decision`
 
-*Called by:* [`proceed`](gui.browser_ui.c.md#proceed)
+*Called by:* [`proceed`](gui.browser_ui.c.md#proceed), [`gets`](src.freedom.c.md#gets)
 
 ---
 

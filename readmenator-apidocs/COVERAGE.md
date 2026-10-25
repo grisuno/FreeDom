@@ -1,6 +1,6 @@
 # Documentation Coverage
 
-Overall: **39.7%** (1403 of 3534 public modules, types, and callables). Data members are excluded from the ratio.
+Overall: **39.7%** (1406 of 3545 public modules, types, and callables). Data members are excluded from the ratio.
 
 [Back to index](index.md)
 
@@ -9,8 +9,8 @@ Overall: **39.7%** (1403 of 3534 public modules, types, and callables). Data mem
 | Kind | Documented | Total | Coverage |
 |---|---|---|---|
 | enum | 80 | 156 | 51.3% |
-| function | 786 | 1830 | 43.0% |
-| macro | 304 | 946 | 32.1% |
+| function | 788 | 1837 | 42.9% |
+| macro | 305 | 950 | 32.1% |
 | method | 0 | 23 | 0.0% |
 | module | 30 | 206 | 14.6% |
 | struct | 106 | 242 | 43.8% |
@@ -38,7 +38,7 @@ Overall: **39.7%** (1403 of 3534 public modules, types, and callables). Data mem
 | [`src/pq_seal.c`](modules/src.pq_seal.c.md) | 1 | 10 | 10.0% |
 | [`src/tls_impersonate.c`](modules/src.tls_impersonate.c.md) | 1 | 10 | 10.0% |
 | [`include/download.h`](modules/include.download.h.md) | 1 | 9 | 11.1% |
-| [`src/js_dom.c`](modules/src.js_dom.c.md) | 3 | 25 | 12.0% |
+| [`src/js_dom.c`](modules/src.js_dom.c.md) | 3 | 26 | 11.5% |
 | [`include/pq_seal.h`](modules/include.pq_seal.h.md) | 1 | 8 | 12.5% |
 | [`include/css_decl.h`](modules/include.css_decl.h.md) | 2 | 14 | 14.3% |
 | [`include/frame_clock.h`](modules/include.frame_clock.h.md) | 1 | 7 | 14.3% |
@@ -62,12 +62,12 @@ Overall: **39.7%** (1403 of 3534 public modules, types, and callables). Data mem
 | [`src/renderer.c`](modules/src.renderer.c.md) | 1 | 5 | 20.0% |
 | [`tools.pngprof`](modules/tools.pngprof.py.md) | 1 | 5 | 20.0% |
 | [`include/http_cache.h`](modules/include.http_cache.h.md) | 4 | 19 | 21.1% |
+| [`include/css_chain.h`](modules/include.css_chain.h.md) | 2 | 9 | 22.2% |
 | [`include/profile.h`](modules/include.profile.h.md) | 2 | 9 | 22.2% |
 | [`src/css_values.c`](modules/src.css_values.c.md) | 2 | 9 | 22.2% |
 | [`src/js_events.c`](modules/src.js_events.c.md) | 2 | 9 | 22.2% |
 | [`src/url.c`](modules/src.url.c.md) | 4 | 17 | 23.5% |
 | [`src/css.c`](modules/src.css.c.md) | 19 | 79 | 24.1% |
-| [`include/css_chain.h`](modules/include.css_chain.h.md) | 2 | 8 | 25.0% |
 | [`src/css_length.c`](modules/src.css_length.c.md) | 3 | 12 | 25.0% |
 | [`src/hls.c`](modules/src.hls.c.md) | 2 | 8 | 25.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) | 2 | 8 | 25.0% |
@@ -121,8 +121,10 @@ Overall: **39.7%** (1403 of 3534 public modules, types, and callables). Data mem
 | [`include/js_policy.h`](modules/include.js_policy.h.md) | 3 | 7 | 42.9% |
 | [`include/shm_slots.h`](modules/include.shm_slots.h.md) | 3 | 7 | 42.9% |
 | [`src/prefetch.c`](modules/src.prefetch.c.md) | 6 | 14 | 42.9% |
+| [`src/css_chain.c`](modules/src.css_chain.c.md) | 7 | 16 | 43.8% |
 | [`src/page_view.c`](modules/src.page_view.c.md) | 60 | 137 | 43.8% |
 | [`tools/pngdiff.c`](modules/tools.pngdiff.c.md) | 4 | 9 | 44.4% |
+| [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) | 13 | 29 | 44.8% |
 | [`src/css_box.c`](modules/src.css_box.c.md) | 15 | 33 | 45.5% |
 | [`src/hostblock.c`](modules/src.hostblock.c.md) | 5 | 11 | 45.5% |
 | [`src/import_map.c`](modules/src.import_map.c.md) | 5 | 11 | 45.5% |
@@ -131,10 +133,8 @@ Overall: **39.7%** (1403 of 3534 public modules, types, and callables). Data mem
 | [`include/identity.h`](modules/include.identity.h.md) | 11 | 24 | 45.8% |
 | [`include/image_decode.h`](modules/include.image_decode.h.md) | 6 | 13 | 46.2% |
 | [`src/textfield.c`](modules/src.textfield.c.md) | 6 | 13 | 46.2% |
-| [`src/css_chain.c`](modules/src.css_chain.c.md) | 7 | 15 | 46.7% |
 | [`include/browser.h`](modules/include.browser.h.md) | 9 | 19 | 47.4% |
 | [`src/html_parse.c`](modules/src.html_parse.c.md) | 9 | 19 | 47.4% |
-| [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) | 12 | 25 | 48.0% |
 | [`include/render_doc.h`](modules/include.render_doc.h.md) | 13 | 27 | 48.1% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) | 5 | 10 | 50.0% |
 | [`include/block_flow.h`](modules/include.block_flow.h.md) | 2 | 4 | 50.0% |
@@ -178,7 +178,7 @@ Overall: **39.7%** (1403 of 3534 public modules, types, and callables). Data mem
 | [`src/webfont_load.c`](modules/src.webfont_load.c.md) | 5 | 9 | 55.6% |
 | [`src/host_conf.c`](modules/src.host_conf.c.md) | 4 | 7 | 57.1% |
 | [`src/request_policy.c`](modules/src.request_policy.c.md) | 4 | 7 | 57.1% |
-| [`include/js_sandbox.h`](modules/include.js_sandbox.h.md) | 17 | 29 | 58.6% |
+| [`include/js_sandbox.h`](modules/include.js_sandbox.h.md) | 19 | 33 | 57.6% |
 | [`include/page_view.h`](modules/include.page_view.h.md) | 54 | 91 | 59.3% |
 | [`include/css_select.h`](modules/include.css_select.h.md) | 22 | 37 | 59.5% |
 | [`include/anti_fp.h`](modules/include.anti_fp.h.md) | 21 | 35 | 60.0% |
@@ -231,7 +231,7 @@ Overall: **39.7%** (1403 of 3534 public modules, types, and callables). Data mem
 
 DOC001 undocumented public item, DOC002 parameter not documented, DOC003 documented parameter missing from the signature (stale doc), DOC004 return value not documented, DOC005 raised exception not documented.
 
-DOC001: 2131, DOC004: 1
+DOC001: 2139, DOC004: 1
 
 - DOC004 `app.py:47` return value of run_freedom_headless is not documented
 - DOC001 `docker-entrypoint.sh:1` module docker-entrypoint.sh is not documented
@@ -548,7 +548,8 @@ DOC001: 2131, DOC004: 1
 - DOC001 `include/css_chain.h:28` macro CCH_NTH_MAX is not documented
 - DOC001 `include/css_chain.h:51` struct cvr_chain is not documented
 - DOC001 `include/css_chain.h:52` struct cvr_table is not documented
-- DOC001 `include/css_chain.h:72` function box is not documented
+- DOC001 `include/css_chain.h:73` function lacks is not documented
+- DOC001 `include/css_chain.h:79` function box is not documented
 - DOC001 `include/css_color.h:1` module include/css_color.h is not documented
 - DOC001 `include/css_color.h:27` struct cc_rgb is not documented
 - DOC001 `include/css_color.h:31` enum cc_status is not documented
@@ -732,5 +733,4 @@ DOC001: 2131, DOC004: 1
 - DOC001 `include/html_parse.h:41` macro HP_DEFAULT_MAX_BYTES is not documented
 - DOC001 `include/html_parse.h:47` function dropped is not documented
 - DOC001 `include/html_parse.h:57` function cfg is not documented
-- DOC001 `include/html_parse.h:64` function hp_script_count is not documented
-- ... 1632 more in `api/warnings.jsonl`
+- ... 1640 more in `api/warnings.jsonl`

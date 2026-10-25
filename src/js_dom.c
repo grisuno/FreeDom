@@ -472,6 +472,8 @@ static JSValue m_query_selector(JSContext *ctx, JSValueConst this_val,
     return jd_handle_or_null(ctx, h);
 }
 
+#define JD_QSA_INLINE 256
+
 /* dom.querySelectorAll(root, sel) -> array of handles. */
 static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,
                                     int argc, JSValueConst *argv) {
@@ -481,23 +483,28 @@ static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,
     const char *sel = JS_ToCString(ctx, argv[1]);
     if (sel == NULL) return JS_EXCEPTION;
     const dom_index *idx = jd_idx(ctx);
-    size_t total = dom_query_selector_all(idx, root, sel, NULL, 0);
-
-    JSValue arr = JS_NewArray(ctx);
-    if (JS_IsException(arr)) { JS_FreeCString(ctx, sel); return arr; }
-    if (total > 0) {
-        dom_node_id *buf = (dom_node_id *)calloc(total, sizeof *buf);
-        if (buf == NULL) {
+    /* One document walk serves the common case: the first JD_QSA_INLINE hits land in a
+     * stack buffer, and only a larger result set pays a second walk into a heap one. */
+    dom_node_id inline_buf[JD_QSA_INLINE];
+    dom_node_id *buf = inline_buf;
+    size_t total = dom_query_selector_all(idx, root, sel, inline_buf, JD_QSA_INLINE);
+    dom_node_id *heap = NULL;
+    if (total > JD_QSA_INLINE) {
+        heap = (dom_node_id *)calloc(total, sizeof *heap);
+        if (heap == NULL) {
             JS_FreeCString(ctx, sel);
-            JS_FreeValue(ctx, arr);
             return JS_ThrowOutOfMemory(ctx);
         }
-        size_t n = dom_query_selector_all(idx, root, sel, buf, total);
-        if (n > total) n = total;
-        for (size_t i = 0; i < n; ++i)
-            JS_SetPropertyUint32(ctx, arr, (uint32_t)i, JS_NewInt64(ctx, (int64_t)buf[i]));
-        free(buf);
+        size_t again = dom_query_selector_all(idx, root, sel, heap, total);
+        if (again < total) total = again;
+        buf = heap;
     }
+
+    JSValue arr = JS_NewArray(ctx);
+    if (JS_IsException(arr)) { free(heap); JS_FreeCString(ctx, sel); return arr; }
+    for (size_t i = 0; i < total; ++i)
+        JS_SetPropertyUint32(ctx, arr, (uint32_t)i, JS_NewInt64(ctx, (int64_t)buf[i]));
+    free(heap);
     JS_FreeCString(ctx, sel);
     return arr;
 }

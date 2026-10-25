@@ -3,6 +3,20 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_download_png_background_clip_content_and_padding_box` | function | `tests/test_freedom.c:480` | `static void test_download_png_background_clip_content_and_padding_box(void **state)` |
+| `test_download_png_broken_image_keeps_row_order` | function | `tests/test_freedom.c:1669` | `static void test_download_png_broken_image_keeps_row_order(void **state)` |
+| `test_download_png_flex_container_paints_one_band` | function | `tests/test_freedom.c:3937` | `static void test_download_png_flex_container_paints_one_band(void **state)` |
+| `test_download_png_gradient_box_text_keeps_gradient` | function | `tests/test_freedom.c:3912` | `static void test_download_png_gradient_box_text_keeps_gradient(void **state)` |
+| `test_download_png_images_local` | function | `tests/test_freedom.c:819` | `static void test_download_png_images_local(void **state)` |
+| `test_download_png_inline_block_flows_in_line` | function | `tests/test_freedom.c:1495` | `static void test_download_png_inline_block_flows_in_line(void **state)` |
+| `test_download_png_inline_block_shrinks_and_centers` | function | `tests/test_freedom.c:3957` | `static void test_download_png_inline_block_shrinks_and_centers(void **state)` |
+| `test_download_png_inline_replaced_share_row` | function | `tests/test_freedom.c:1609` | `static void test_download_png_inline_replaced_share_row(void **state)` |
+| `test_download_png_inline_svg_path_and_drops_image` | function | `tests/test_freedom.c:4001` | `static void test_download_png_inline_svg_path_and_drops_image(void **state)` |
+| `test_download_png_line_height_zero_does_not_shrink_line` | function | `tests/test_freedom.c:1943` | `static void test_download_png_line_height_zero_does_not_shrink_line(void **state)` |
+| `test_download_png_local` | function | `tests/test_freedom.c:313` | `static void test_download_png_local(void **state)` |
+| `test_download_png_negative_zindex_paints_behind_inflow` | function | `tests/test_freedom.c:896` | `static void test_download_png_negative_zindex_paints_behind_inflow(void **state)` |
+| `test_download_png_nested_flex_lays_out_on_one_row` | function | `tests/test_freedom.c:1416` | `static void test_download_png_nested_flex_lays_out_on_one_row(void **state)` |
+| `test_download_png_overflow_clips_at_padding_box` | function | `tests/test_freedom.c:439` | `static void test_download_png_overflow_clips_at_padding_box(void **state)` |
 | `test_download_png_positioned_overflow_clips_own_content` | function | `tests/test_freedom.c:1000` | `static void test_download_png_positioned_overflow_clips_own_content(void **state)` |
 | `test_download_png_replaced_pct_width` | function | `tests/test_freedom.c:1721` | `static void test_download_png_replaced_pct_width(void **state)` |
 | `test_download_png_requires_path` | function | `tests/test_freedom.c:880` | `static void test_download_png_requires_path(void **state)` |
@@ -85,7 +99,7 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_missing_files_fail_open` | function | `tests/test_host_conf.c:88` | `static void test_missing_files_fail_open(void **state)` |
 | `test_search_order_and_dedup` | function | `tests/test_host_conf.c:34` | `static void test_search_order_and_dedup(void **state)` |
 | `write_file` | function | `tests/test_host_conf.c:20` | `static void write_file(const char *dir, const char *name, const char *text)` |
-| `main` | function | `tests/test_hostblock.c:266` | `int main(void)` |
+| `main` | function | `tests/test_hostblock.c:282` | `int main(void)` |
 | `test_allow_wins_and_covers_subdomains` | function | `tests/test_hostblock.c:210` | `static void test_allow_wins_and_covers_subdomains(void **state)` |
 | `test_bare_domain_per_line` | function | `tests/test_hostblock.c:73` | `static void test_bare_domain_per_line(void **state)` |
 | `test_block_covers_subdomains` | function | `tests/test_hostblock.c:197` | `static void test_block_covers_subdomains(void **state)` |
@@ -104,6 +118,7 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_no_lists_allows` | function | `tests/test_hostblock.c:224` | `static void test_no_lists_allows(void **state)` |
 | `test_no_trailing_newline` | function | `tests/test_hostblock.c:107` | `static void test_no_trailing_newline(void **state)` |
 | `test_oversize_token_skipped` | function | `tests/test_hostblock.c:155` | `static void test_oversize_token_skipped(void **state)` |
+| `test_tld_entry_blocks_every_host_under_it` | function | `tests/test_hostblock.c:268` | `static void test_tld_entry_blocks_every_host_under_it(void **state)` |
 | `test_trailing_dot_trimmed` | function | `tests/test_hostblock.c:128` | `static void test_trailing_dot_trimmed(void **state)` |
 | `test_underscore_and_hyphen_valid` | function | `tests/test_hostblock.c:166` | `static void test_underscore_and_hyphen_valid(void **state)` |
 | `test_various_ip_tokens_ignored` | function | `tests/test_hostblock.c:64` | `static void test_various_ip_tokens_ignored(void **state)` |
@@ -481,20 +496,5 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `EXPECT` | macro | `tests/test_js_env.c:51` | `#define EXPECT(f, src, expected)` |
 | `fixture` | struct | `tests/test_js_env.c:25` | `` |
 | `main` | function | `tests/test_js_env.c:374` | `int main(void)` |
-| `readback_checksum` | function | `tests/test_js_env.c:298` | `static void readback_checksum(uint64_t key, char *out, size_t out_size)` |
-| `run` | function | `tests/test_js_env.c:47` | `static js_status run(fixture *f, const char *src, js_result *r)` |
-| `setup` | function | `tests/test_js_env.c:29` | `static int setup(void **state)` |
-| `teardown` | function | `tests/test_js_env.c:38` | `static int teardown(void **state)` |
-| `test_bool_nav_props` | function | `tests/test_js_env.c:122` | `static void test_bool_nav_props(void **state)` |
-| `test_canvas_readback` | function | `tests/test_js_env.c:258` | `static void test_canvas_readback(void **state)` |
-| `test_canvas_unforgeable` | function | `tests/test_js_env.c:322` | `static void test_canvas_unforgeable(void **state)` |
-| `test_canvas_unlinkable` | function | `tests/test_js_env.c:314` | `static void test_canvas_unlinkable(void **state)` |
-| `test_clocks_coarse` | function | `tests/test_js_env.c:197` | `static void test_clocks_coarse(void **state)` |
-| `test_coexists_with_dom` | function | `tests/test_js_env.c:345` | `static void test_coexists_with_dom(void **state)` |
-| `test_crypto_present` | function | `tests/test_js_env.c:148` | `static void test_crypto_present(void **state)` |
-| `test_crypto_random_uuid` | function | `tests/test_js_env.c:156` | `static void test_crypto_random_uuid(void **state)` |
-| `test_crypto_random_values` | function | `tests/test_js_env.c:165` | `static void test_crypto_random_values(void **state)` |
-| `test_install_identity_override` | function | `tests/test_js_env.c:73` | `static void test_install_identity_override(void **state)` |
-| `test_install_null_args` | function | `tests/test_js_env.c:62` | `static void test_install_null_args(void **state)` |
 
 Next: [SYMBOLS_p14.md](SYMBOLS_p14.md)

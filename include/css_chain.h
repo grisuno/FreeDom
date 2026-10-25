@@ -68,6 +68,13 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
  * (see csel_parse); NULL args return 0 (fail closed). */
 int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);
 
+/* Nonzero iff `el` matches ANY of sels[0..n). Equivalent to looping cch_element_matches, but
+ * the element's own tag/id/class bits are computed ONCE and a selector that requires a feature
+ * the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a
+ * query that scans a whole document nearly every candidate dies there, so the scan no longer
+ * pays O(depth) attribute captures per element. */
+int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n);
+
 /* The style of el's ::before (CSS_PSEUDO_BEFORE) or ::after (CSS_PSEUDO_AFTER)
  * generated box (css_resolve_pseudo) against the same element context.
  * font_size is el's own COMPUTED font-size (the pseudo inherits it) and

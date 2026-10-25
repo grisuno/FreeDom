@@ -25,7 +25,7 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 | `src/renderer.c` | c | presentation | 6 | no |
 | `tests/test_browser.c` | c | testing | 17 | no |
 | `tests/test_host_conf.c` | c | testing | 8 | no |
-| `tests/test_hostblock.c` | c | testing | 22 | no |
+| `tests/test_hostblock.c` | c | testing | 23 | no |
 | `tests/test_media_decoder.c` | c | testing | 6 | no |
 | `tests/test_os_sandbox.c` | c | testing | 19 | no |
 | `tests/test_renderer.c` | c | testing | 8 | no |

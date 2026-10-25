@@ -1,11 +1,11 @@
 # `include/css_chain.h`
 
-> Source: [include/css_chain.h:1](../../include/css_chain.h#L1) | language `h` | coverage 25.0% | [API index](../index.md)
+> Source: [include/css_chain.h:1](../../include/css_chain.h#L1) | language `h` | coverage 22.2% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`cvr_chain`](#cvr_chain), [`cvr_table`](#cvr_table)
-- **Functions:** [`cch_element_matches`](#cch_element_matches), [`box`](#box)
+- **Functions:** [`cch_element_matches`](#cch_element_matches), [`lacks`](#lacks), [`box`](#box)
 - **Macros:** [`CCH_CHAIN_MAX`](#cch_chain_max), [`CCH_SIB_MAX`](#cch_sib_max), [`CCH_NTH_MAX`](#cch_nth_max)
 
 ## Type Diagram
@@ -74,11 +74,31 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 ---
 
+<a id="lacks"></a>
+
+### `lacks`
+
+`function` | [include/css_chain.h:73](../../include/css_chain.h#L73)
+
+```c
+* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a whole document nearly every candidate dies there, so the scan no longer * pays O(depth)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `subj_req` | `csel's` |  |  |
+
+**Returns:** `* the element`
+
+---
+
 <a id="box"></a>
 
 ### `box`
 
-`function` | [include/css_chain.h:72](../../include/css_chain.h#L72)
+`function` | [include/css_chain.h:79](../../include/css_chain.h#L79)
 
 ```c
 * generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size (the pseudo inherits it) and * inherited el's own custom-property chain (NULL = none).

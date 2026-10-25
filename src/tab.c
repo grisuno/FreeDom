@@ -1392,6 +1392,8 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             memset(&r, 0, sizeof r);
             struct timespec pt0, pt1;
             if (getenv("FREEDOM_JS_PROFILE") != NULL) {   /* selector counters on (idempotent) */
+                const char *pm = getenv("FREEDOM_JS_PROFILE");
+                if (pm[0] == '2') js_profile_enable(cs->js);
                 static const char on[] = "if(!__selProf)__selProf=Object.create(null);0";
                 js_result pr0;
                 memset(&pr0, 0, sizeof pr0);
@@ -1445,6 +1447,9 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
          * (e.g. jkanime.net whose video_min.js is 404). It creates <iframe>
          * elements from the array, which the next step fetches and scans. */
         if (cs->js != NULL && getenv("FREEDOM_JS_PROFILE") != NULL) {
+            char hot[2048];
+            if (js_profile_report(cs->js, hot, sizeof hot, 14) > 0)
+                fb_buffer_push(&cs->log, FB_INFO, hot, strlen(hot));
             static const char rep[] = "typeof __selReport==='function'?__selReport():''";
             js_result pr;
             memset(&pr, 0, sizeof pr);

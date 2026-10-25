@@ -25,6 +25,7 @@ flowchart LR
     n_include_secure_fetch_h__sf_response_free["secure_fetch.sf_response_free"]
     n_include_tls_impersonate_h__ti_should_impersonate["tls_impersonate.ti_should_impersonate"]
     n_src_css_color_c__strncmp["css_color.strncmp"]
+    n_src_hostblock_c__hb_check["hostblock.hb_check"]
     n_src_link_nav_c__ln_resolve["link_nav.ln_resolve"]
     n_src_net_realm_c__nr_route_for["net_realm.nr_route_for"]
     n_src_secure_fetch_c__sf_config_default["secure_fetch.sf_config_default"]
@@ -47,6 +48,7 @@ flowchart LR
     n_src_freedom_c__gets -.-> n_include_secure_fetch_h__sf_response_free
     n_src_freedom_c__gets -.-> n_include_tls_impersonate_h__ti_should_impersonate
     n_src_freedom_c__gets -.-> n_src_css_color_c__strncmp
+    n_src_freedom_c__gets -.-> n_src_hostblock_c__hb_check
     n_src_freedom_c__gets -.-> n_src_link_nav_c__ln_resolve
     n_src_freedom_c__gets -.-> n_src_net_realm_c__nr_route_for
     n_src_freedom_c__gets -.-> n_src_secure_fetch_c__sf_config_default
@@ -61,7 +63,6 @@ flowchart LR
     n_src_freedom_c__HL_JS_NAV_MAX -.-> n_include_perf_trace_h__pt_record
     n_src_freedom_c__HL_JS_NAV_MAX -.-> n_include_request_policy_h__rp_host_of
     n_src_freedom_c__HL_JS_NAV_MAX -.-> n_include_secure_fetch_h__sf_response_free
-    n_src_freedom_c__HL_JS_NAV_MAX -.-> n_include_tls_impersonate_h__ti_should_impersonate
 ```
 
 ## Structs
@@ -70,7 +71,7 @@ flowchart LR
 
 ### `hl_font_stash`
 
-`struct` | [src/freedom.c:603](../../src/freedom.c#L603)
+`struct` | [src/freedom.c:607](../../src/freedom.c#L607)
 
 ```c
 typedef struct
@@ -84,7 +85,7 @@ typedef struct
 
 ### `gets`
 
-`function` | [src/freedom.c:460](../../src/freedom.c#L460)
+`function` | [src/freedom.c:463](../../src/freedom.c#L463)
 
 ```c
 * gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed (fail-closed);
@@ -100,7 +101,7 @@ typedef struct
 
 **Returns:** `* gate a click`
 
-*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`hb_is_allowlisted`](include.hostblock.h.md#hb_is_allowlisted), [`rp_host_of`](include.request_policy.h.md#rp_host_of), [`sf_response_free`](include.secure_fetch.h.md#sf_response_free), [`ti_should_impersonate`](include.tls_impersonate.h.md#ti_should_impersonate), [`strncmp`](src.css_color.c.md#strncmp), [`ln_resolve`](src.link_nav.c.md#ln_resolve), [`nr_route_for`](src.net_realm.c.md#nr_route_for), [`sf_config_default`](src.secure_fetch.c.md#sf_config_default), [`sf_get_follow_navigable`](src.secure_fetch.c.md#sf_get_follow_navigable), [`sf_post_navigable`](src.secure_fetch.c.md#sf_post_navigable)
+*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`hb_is_allowlisted`](include.hostblock.h.md#hb_is_allowlisted), [`rp_host_of`](include.request_policy.h.md#rp_host_of), [`sf_response_free`](include.secure_fetch.h.md#sf_response_free), [`ti_should_impersonate`](include.tls_impersonate.h.md#ti_should_impersonate), [`strncmp`](src.css_color.c.md#strncmp), [`hb_check`](src.hostblock.c.md#hb_check), [`ln_resolve`](src.link_nav.c.md#ln_resolve), [`nr_route_for`](src.net_realm.c.md#nr_route_for), [`sf_config_default`](src.secure_fetch.c.md#sf_config_default), [`sf_get_follow_navigable`](src.secure_fetch.c.md#sf_get_follow_navigable), [`sf_post_navigable`](src.secure_fetch.c.md#sf_post_navigable)
 
 ---
 
@@ -108,7 +109,7 @@ typedef struct
 
 ### `pool`
 
-`function` | [src/freedom.c:734](../../src/freedom.c#L734)
+`function` | [src/freedom.c:738](../../src/freedom.c#L738)
 
 ```c
 * the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void *)(uintptr_t)top_url);
@@ -129,7 +130,7 @@ typedef struct
 
 ### `first`
 
-`function` | [src/freedom.c:748](../../src/freedom.c#L748)
+`function` | [src/freedom.c:752](../../src/freedom.c#L752)
 
 ```c
 * always cleared first (fetch_and_render may paint several pages per * process). A NULL top_...
@@ -151,7 +152,7 @@ typedef struct
 
 ### `only`
 
-`function` | [src/freedom.c:816](../../src/freedom.c#L816)
+`function` | [src/freedom.c:820](../../src/freedom.c#L820)
 
 ```c
 * styling for the local render only (no network). --images enables image loading * AND rendering, including remote fetches (so --download-png --images actually * shows images in the bitmap). */ rdp_ca
@@ -171,7 +172,7 @@ typedef struct
 
 ### `BLOCKED`
 
-`function` | [src/freedom.c:986](../../src/freedom.c#L986)
+`function` | [src/freedom.c:990](../../src/freedom.c#L990)
 
 ```c
 * is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);
@@ -191,7 +192,7 @@ typedef struct
 
 ### `elsewhere`
 
-`function` | [src/freedom.c:1021](../../src/freedom.c#L1021)
+`function` | [src/freedom.c:1025](../../src/freedom.c#L1025)
 
 ```c
 * page whose script immediately forwards elsewhere (e.g. a search engine's * JS-capability interstitial) renders as an empty husk instead of its destination. */ static int fetch_and_render(const char *url)
@@ -213,7 +214,7 @@ typedef struct
 
 ### `parent`
 
-`function` | [src/freedom.c:1047](../../src/freedom.c#L1047)
+`function` | [src/freedom.c:1051](../../src/freedom.c#L1051)
 
 ```c
 * gated by the parent (ln_resolve: a local target stays under the document's * directory, a remote one must be https), bounded by HL_JS_NAV_MAX hops. */ static int render_local(const char *target, int hop)
@@ -235,7 +236,7 @@ typedef struct
 
 ### `main`
 
-`function` | [src/freedom.c:1251](../../src/freedom.c#L1251)
+`function` | [src/freedom.c:1255](../../src/freedom.c#L1255)
 
 ```c
 int main(int argc, char **argv)
@@ -338,7 +339,7 @@ The corpus's worst page has ~25; the cap keeps the report readable and the buffe
 
 ### `HL_FONT_MAX_SHEETS`
 
-`macro` | [src/freedom.c:600](../../src/freedom.c#L600)
+`macro` | [src/freedom.c:604](../../src/freedom.c#L604)
 
 ```c
 #define HL_FONT_MAX_SHEETS
@@ -354,7 +355,7 @@ Same 16-sheet / 2 MiB bounds as the GUI stash (anti-DoS).
 
 ### `HL_FONT_MAX_BYTES`
 
-`macro` | [src/freedom.c:601](../../src/freedom.c#L601)
+`macro` | [src/freedom.c:605](../../src/freedom.c#L605)
 
 ```c
 #define HL_FONT_MAX_BYTES
@@ -366,7 +367,7 @@ Same 16-sheet / 2 MiB bounds as the GUI stash (anti-DoS).
 
 ### `HL_JS_NAV_MAX`
 
-`macro` | [src/freedom.c:954](../../src/freedom.c#L954)
+`macro` | [src/freedom.c:958](../../src/freedom.c#L958)
 
 ```c
 #define HL_JS_NAV_MAX

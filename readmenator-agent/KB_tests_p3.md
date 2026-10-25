@@ -286,7 +286,8 @@ static void test_leading_b...`
   - `test_clone_node` (function, line 582) `static void test_clone_node(void **state)`
   - `test_move_children` (function, line 605) `static void test_move_children(void **state)`
   - `test_char_nodes` (function, line 646) `static void test_char_nodes(void **state)`
-  - `main` (function, line 693) `int main(void)`
+  - `test_qs_subject_prefilter_is_exact` (function, line 695) `static void test_qs_subject_prefilter_is_exact(void **state)`
+  - `main` (function, line 718) `int main(void)`
   - `_POSIX_C_SOURCE` (macro, line 1) `#define _POSIX_C_SOURCE`
   - `DOC` (macro, line 58) `#define DOC(state)`
   - `IDX` (macro, line 59) `#define IDX(state)`

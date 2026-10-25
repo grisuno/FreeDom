@@ -1,12 +1,12 @@
 # `src/js_dom.c`
 
-> Source: [src/js_dom.c:1](../../src/js_dom.c#L1) | language `c` | coverage 12.0% | [API index](../index.md)
+> Source: [src/js_dom.c:1](../../src/js_dom.c#L1) | language `c` | coverage 11.5% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`jd_method`](#jd_method)
 - **Functions:** [`jd_opaque_get`](#jd_opaque_get), [`jd_idx`](#jd_idx), [`jd_handle`](#jd_handle), [`jd_handle_or_null`](#jd_handle_or_null), [`table`](#table), [`attrNames`](#attrnames), [`scripts`](#scripts), [`enough`](#enough), [`ms`](#ms), [`empty`](#empty), [`geometry`](#geometry), [`size`](#size), [`js_env`](#js_env), [`jd_install`](#jd_install), [`jd_flush_custom_elements`](#jd_flush_custom_elements), [`fails`](#fails), [`jd_install_console`](#jd_install_console), [`jd_set_cookies`](#jd_set_cookies), [`jd_get_cookies`](#jd_get_cookies), [`jd_set_computed`](#jd_set_computed), [`jd_set_geometry`](#jd_set_geometry)
-- **Macros:** [`_GNU_SOURCE`](#_gnu_source), [`JD_COMPUTED_VALUE_MAX`](#jd_computed_value_max)
+- **Macros:** [`_GNU_SOURCE`](#_gnu_source), [`JD_COMPUTED_VALUE_MAX`](#jd_computed_value_max), [`JD_QSA_INLINE`](#jd_qsa_inline)
 
 ## Call Graph
 
@@ -18,9 +18,14 @@ flowchart LR
     n_src_js_dom_c__jd_opaque_get(["jd_opaque_get"])
     n_src_js_dom_c__JD_COMPUTED_VALUE_MAX(["JD_COMPUTED_VALUE_MAX"])
     n_src_js_dom_c__jd_handle(["jd_handle"])
+    n_src_js_dom_c__JD_QSA_INLINE(["JD_QSA_INLINE"])
+    n_src_dom_c__dom_query_selector_all["dom.dom_query_selector_all"]
     n_src_js_dom_c__jd_idx --> n_src_js_dom_c__jd_opaque_get
     n_src_js_dom_c__JD_COMPUTED_VALUE_MAX --> n_src_js_dom_c__jd_handle
     n_src_js_dom_c__JD_COMPUTED_VALUE_MAX --> n_src_js_dom_c__jd_opaque_get
+    n_src_js_dom_c__JD_QSA_INLINE --> n_src_js_dom_c__jd_handle
+    n_src_js_dom_c__JD_QSA_INLINE --> n_src_js_dom_c__jd_idx
+    n_src_js_dom_c__JD_QSA_INLINE -.-> n_src_dom_c__dom_query_selector_all
 ```
 
 ## Structs
@@ -81,6 +86,8 @@ dom_index *jd_idx(JSContext *ctx)
 
 *Calls:* [`jd_opaque_get`](#jd_opaque_get)
 
+*Called by:* [`JD_QSA_INLINE`](#jd_qsa_inline)
+
 ---
 
 <a id="jd_handle"></a>
@@ -107,7 +114,7 @@ Returns -1 with a pending exception if coercion threw; otherwise stores the hand
 
 **Returns:** `int`
 
-*Called by:* [`JD_COMPUTED_VALUE_MAX`](#jd_computed_value_max)
+*Called by:* [`JD_COMPUTED_VALUE_MAX`](#jd_computed_value_max), [`JD_QSA_INLINE`](#jd_qsa_inline)
 
 ---
 
@@ -136,7 +143,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `table`
 
-`function` | [src/js_dom.c:632](../../src/js_dom.c#L632)
+`function` | [src/js_dom.c:639](../../src/js_dom.c#L639)
 
 ```c
 * a table (dom.viewport() non-null);
@@ -156,7 +163,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `attrNames`
 
-`function` | [src/js_dom.c:673](../../src/js_dom.c#L673)
+`function` | [src/js_dom.c:680](../../src/js_dom.c#L680)
 
 ```c
 * native attrNames(). jQuery's feature detection reads attrs[name].expando, so * a missing '...
@@ -170,7 +177,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `scripts`
 
-`function` | [src/js_dom.c:845](../../src/js_dom.c#L845)
+`function` | [src/js_dom.c:852](../../src/js_dom.c#L852)
 
 ```c
 * player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without throwing. No network, no real * playback in the worker -- actual decoding happens in
@@ -193,7 +200,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `enough`
 
-`function` | [src/js_dom.c:1018](../../src/js_dom.c#L1018)
+`function` | [src/js_dom.c:1025](../../src/js_dom.c#L1025)
 
 ```c
 * enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery clones a fragment twice and reads .lastChild * (b.checkClone);
@@ -213,7 +220,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `ms`
 
-`function` `virtual` | [src/js_dom.c:1189](../../src/js_dom.c#L1189)
+`function` `virtual` | [src/js_dom.c:1196](../../src/js_dom.c#L1196)
 
 ```c
 * due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);
@@ -233,7 +240,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `empty`
 
-`function` | [src/js_dom.c:1378](../../src/js_dom.c#L1378)
+`function` | [src/js_dom.c:1385](../../src/js_dom.c#L1385)
 
 ```c
 * inert: DOM interface constructors are empty (instanceof yields false, harmless);
@@ -253,7 +260,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `geometry`
 
-`function` | [src/js_dom.c:1380](../../src/js_dom.c#L1380)
+`function` | [src/js_dom.c:1387](../../src/js_dom.c#L1387)
 
 ```c
 * constant geometry (zero real leak);
@@ -273,7 +280,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `size`
 
-`function` | [src/js_dom.c:1383](../../src/js_dom.c#L1383)
+`function` | [src/js_dom.c:1390](../../src/js_dom.c#L1390)
 
 ```c
 * the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);
@@ -294,7 +301,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `js_env`
 
-`function` | [src/js_dom.c:1386](../../src/js_dom.c#L1386)
+`function` | [src/js_dom.c:1393](../../src/js_dom.c#L1393)
 
 ```c
 * are owned by js_env (anti_fp) and are NOT redefined here. Runs after the * document shim (uses...
@@ -308,7 +315,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `jd_install`
 
-`function` | [src/js_dom.c:1921](../../src/js_dom.c#L1921)
+`function` | [src/js_dom.c:1928](../../src/js_dom.c#L1928)
 
 ```c
 jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
@@ -332,7 +339,7 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
 
 ### `jd_flush_custom_elements`
 
-`function` | [src/js_dom.c:2003](../../src/js_dom.c#L2003)
+`function` | [src/js_dom.c:2010](../../src/js_dom.c#L2010)
 
 ```c
 void jd_flush_custom_elements(js_context *ctx)
@@ -356,7 +363,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 
 ### `fails`
 
-`function` | [src/js_dom.c:2017](../../src/js_dom.c#L2017)
+`function` | [src/js_dom.c:2024](../../src/js_dom.c#L2024)
 
 ```c
 * cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...
@@ -376,7 +383,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 
 ### `jd_install_console`
 
-`function` | [src/js_dom.c:2131](../../src/js_dom.c#L2131)
+`function` | [src/js_dom.c:2138](../../src/js_dom.c#L2138)
 
 ```c
 jd_status jd_install_console(js_context *ctx, fb_buffer *log)
@@ -399,7 +406,7 @@ jd_status jd_install_console(js_context *ctx, fb_buffer *log)
 
 ### `jd_set_cookies`
 
-`function` | [src/js_dom.c:2168](../../src/js_dom.c#L2168)
+`function` | [src/js_dom.c:2175](../../src/js_dom.c#L2175)
 
 ```c
 jd_status jd_set_cookies(js_context *ctx, const char *cookies)
@@ -420,7 +427,7 @@ jd_status jd_set_cookies(js_context *ctx, const char *cookies)
 
 ### `jd_get_cookies`
 
-`function` | [src/js_dom.c:2188](../../src/js_dom.c#L2188)
+`function` | [src/js_dom.c:2195](../../src/js_dom.c#L2195)
 
 ```c
 int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)
@@ -448,7 +455,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `jd_set_computed`
 
-`function` | [src/js_dom.c:2211](../../src/js_dom.c#L2211)
+`function` | [src/js_dom.c:2218](../../src/js_dom.c#L2218)
 
 ```c
 jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)
@@ -470,7 +477,7 @@ jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)
 
 ### `jd_set_geometry`
 
-`function` | [src/js_dom.c:2222](../../src/js_dom.c#L2222)
+`function` | [src/js_dom.c:2229](../../src/js_dom.c#L2229)
 
 ```c
 jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)
@@ -512,5 +519,19 @@ jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)
 ```
 
 *Calls:* [`jd_handle`](#jd_handle), [`jd_opaque_get`](#jd_opaque_get)
+
+---
+
+<a id="jd_qsa_inline"></a>
+
+### `JD_QSA_INLINE`
+
+`macro` | [src/js_dom.c:475](../../src/js_dom.c#L475)
+
+```c
+#define JD_QSA_INLINE
+```
+
+*Calls:* [`dom_query_selector_all`](src.dom.c.md#dom_query_selector_all), [`jd_handle`](#jd_handle), [`jd_idx`](#jd_idx)
 
 ---

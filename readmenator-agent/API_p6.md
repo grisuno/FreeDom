@@ -356,6 +356,7 @@ static const css_element *build_chain(lxb_dom_ele...`
             ...`
 - `cch_element_style` (function) `src/css_chain.c:360` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
 - `cch_element_matches` (function) `src/css_chain.c:364` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
+- `cch_element_matches_any` (function) `src/css_chain.c:378` `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)`
 
 ## src/css_color.c
 Depends on: `include/css_color.h`

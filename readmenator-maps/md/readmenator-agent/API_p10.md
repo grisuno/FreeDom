@@ -103,88 +103,88 @@ Depends on: `include/psl_data.h`, `include/request_policy.h`
 Depends on: `include/anti_fp.h`, `include/secure_fetch.h`, `include/url.h`
 - `ci_starts_with` (function) `src/secure_fetch.c:45` `static int ci_starts_with(const char *haystack, const char *prefix)` -- /* --- small helpers (no libc locale dependence) --- static int ci_equal(const char *a, const char *b) { while (*a...
 - `ci_index` (function) `src/secure_fetch.c:57` `static long ci_index(const char *haystack, const char *needle)` -- /* Case-insensitive: does haystack start with prefix? static int ci_starts_with(const char *haystack, const char...
-- `sf_share_lock` (function) `src/secure_fetch.c:69` `static void sf_share_lock(CURL *handle, curl_lock_data data,
+- `sf_share_lock` (function) `src/secure_fetch.c:73` `static void sf_share_lock(CURL *handle, curl_lock_data data,
                           curl_lock_...`
-- `sf_share_unlock` (function) `src/secure_fetch.c:75` `static void sf_share_unlock(CURL *handle, curl_lock_data data, void *userptr)`
-- `sf_global_init` (function) `src/secure_fetch.c:82` `void sf_global_init(void)`
-- `sf_cookie_line_matches` (function) `src/secure_fetch.c:97` `int sf_cookie_line_matches(const char *line, const char *host, const char *path,
+- `sf_share_unlock` (function) `src/secure_fetch.c:79` `static void sf_share_unlock(CURL *handle, curl_lock_data data, void *userptr)`
+- `sf_global_init` (function) `src/secure_fetch.c:86` `void sf_global_init(void)`
+- `sf_cookie_line_matches` (function) `src/secure_fetch.c:111` `int sf_cookie_line_matches(const char *line, const char *host, const char *path,
                 ...`
-- `sf_url_host_path` (function) `src/secure_fetch.c:152` `static int sf_url_host_path(const char *url, char *host, size_t hostsz,
+- `sf_url_host_path` (function) `src/secure_fetch.c:166` `static int sf_url_host_path(const char *url, char *host, size_t hostsz,
                          ...` -- Extracts host + path from a validated https url into caller buffers (path defaults * to "/").
-- `sf_cookie_header_for` (function) `src/secure_fetch.c:167` `size_t sf_cookie_header_for(const char *url, char *out, size_t outsz)`
-- `sf_cookie_put` (function) `src/secure_fetch.c:196` `void sf_cookie_put(const char *url, const char *namevalue)`
-- `sf_config_default` (function) `src/secure_fetch.c:217` `sf_config sf_config_default(void)`
-- `header_value_clean` (function) `src/secure_fetch.c:243` `static int header_value_clean(const char *s)` -- c.password = NULL; c.insecure = 0; c.impersonate = 0; /* default hardened PQ-hybrid ClientHello; opt-in per trusted...
-- `sf_user_agent_or_default` (function) `src/secure_fetch.c:249` `const char *sf_user_agent_or_default(const char *ua)`
-- `sf_accept_language_or_default` (function) `src/secure_fetch.c:253` `const char *sf_accept_language_or_default(const char *lang)`
-- `sf_impersonate_kex_groups` (function) `src/secure_fetch.c:257` `const char *sf_impersonate_kex_groups(void)`
-- `sf_impersonate_tls13_ciphers` (function) `src/secure_fetch.c:258` `const char *sf_impersonate_tls13_ciphers(void)`
-- `sf_validate_url` (function) `src/secure_fetch.c:262` `sf_status sf_validate_url(const char *url)`
-- `sf_url_is_http` (function) `src/secure_fetch.c:270` `static int sf_url_is_http(const char *url)` -- Nonzero iff url is "http://host..." (case-insensitive) with a non-empty host.
-- `sf_check_tls_version` (function) `src/secure_fetch.c:282` `sf_status sf_check_tls_version(const char *negotiated_version)`
-- `sf_check_group_is_pq` (function) `src/secure_fetch.c:287` `sf_status sf_check_group_is_pq(const char *negotiated_group)`
-- `sf_check_chain_policy` (function) `src/secure_fetch.c:296` `sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)`
-- `sf_enforce_policy` (function) `src/secure_fetch.c:306` `sf_status sf_enforce_policy(const char *tls_version, const char *group,
+- `sf_cookie_header_for` (function) `src/secure_fetch.c:181` `size_t sf_cookie_header_for(const char *url, char *out, size_t outsz)`
+- `sf_cookie_put` (function) `src/secure_fetch.c:210` `void sf_cookie_put(const char *url, const char *namevalue)`
+- `sf_config_default` (function) `src/secure_fetch.c:231` `sf_config sf_config_default(void)`
+- `header_value_clean` (function) `src/secure_fetch.c:257` `static int header_value_clean(const char *s)` -- c.password = NULL; c.insecure = 0; c.impersonate = 0; /* default hardened PQ-hybrid ClientHello; opt-in per trusted...
+- `sf_user_agent_or_default` (function) `src/secure_fetch.c:263` `const char *sf_user_agent_or_default(const char *ua)`
+- `sf_accept_language_or_default` (function) `src/secure_fetch.c:267` `const char *sf_accept_language_or_default(const char *lang)`
+- `sf_impersonate_kex_groups` (function) `src/secure_fetch.c:271` `const char *sf_impersonate_kex_groups(void)`
+- `sf_impersonate_tls13_ciphers` (function) `src/secure_fetch.c:272` `const char *sf_impersonate_tls13_ciphers(void)`
+- `sf_validate_url` (function) `src/secure_fetch.c:276` `sf_status sf_validate_url(const char *url)`
+- `sf_url_is_http` (function) `src/secure_fetch.c:284` `static int sf_url_is_http(const char *url)` -- Nonzero iff url is "http://host..." (case-insensitive) with a non-empty host.
+- `sf_check_tls_version` (function) `src/secure_fetch.c:296` `sf_status sf_check_tls_version(const char *negotiated_version)`
+- `sf_check_group_is_pq` (function) `src/secure_fetch.c:301` `sf_status sf_check_group_is_pq(const char *negotiated_group)`
+- `sf_check_chain_policy` (function) `src/secure_fetch.c:310` `sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)`
+- `sf_enforce_policy` (function) `src/secure_fetch.c:320` `sf_status sf_enforce_policy(const char *tls_version, const char *group,
                          ...`
-- `copy_checked` (function) `src/secure_fetch.c:337` `static int copy_checked(char *dst, size_t dstsz, const char *src)`
-- `sf_is_redirect_code` (function) `src/secure_fetch.c:346` `int sf_is_redirect_code(long http_code)`
-- `sf_header_value` (function) `src/secure_fetch.c:353` `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz)`
-- `sf_parse_location_header` (function) `src/secure_fetch.c:375` `sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz)`
-- `sf_resolve_redirect` (function) `src/secure_fetch.c:393` `sf_status sf_resolve_redirect(const char *base_url, const char *location,
+- `copy_checked` (function) `src/secure_fetch.c:351` `static int copy_checked(char *dst, size_t dstsz, const char *src)`
+- `sf_is_redirect_code` (function) `src/secure_fetch.c:360` `int sf_is_redirect_code(long http_code)`
+- `sf_header_value` (function) `src/secure_fetch.c:367` `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz)`
+- `sf_parse_location_header` (function) `src/secure_fetch.c:389` `sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz)`
+- `sf_resolve_redirect` (function) `src/secure_fetch.c:407` `sf_status sf_resolve_redirect(const char *base_url, const char *location,
                        ...`
-- `module` (function) `src/secure_fetch.c:398` `* pure url module (DRY);`
-- `sf_ci_prefix` (function) `src/secure_fetch.c:405` `static int sf_ci_prefix(const char *s, const char *p)` -- Reference resolution + the https-only / no-downgrade policy live in the pure url module (DRY); a redirect is just a...
-- `sf_response_free` (function) `src/secure_fetch.c:445` `void sf_response_free(sf_response *resp)`
-- `progress` (function) `src/secure_fetch.c:482` `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);`
-- `copy_bounded` (function) `src/secure_fetch.c:511` `static void copy_bounded(char *dst, size_t dstsz, const char *src)`
-- `get_negotiated_group_name` (function) `src/secure_fetch.c:522` `static const char *get_negotiated_group_name(SSL *ssl)` -- static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len); static void...
-- `database` (function) `src/secure_fetch.c:526` `* NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid...`
-- `group` (function) `src/secure_fetch.c:540` `* group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);`
-- `tls_capture_try` (function) `src/secure_fetch.c:555` `static void tls_capture_try(tls_capture *cap)` -- nid = SSL_get_shared_group(ssl, 0); #endif if (nid == 0) { return NULL; /* There is no negotiated group (e.g., TLS...
-- `tls_capture_from_ssl` (function) `src/secure_fetch.c:565` `static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl)` -- static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl); /* Idempotent: takes the TLS snapshot the first time...
-- `this` (function) `src/secure_fetch.c:572` `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and...`
-- `header_cb` (function) `src/secure_fetch.c:591` `static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata)` -- Fires for every HTTP response (status line + headers) even when there is no * body, so it is the reliable point to...
-- `write_cb` (function) `src/secure_fetch.c:634` `static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *userdata)`
-- `name_is_pq_sig` (function) `src/secure_fetch.c:666` `static int name_is_pq_sig(int pknid)` -- if (grown == NULL) { sink->overflow = 2; /* OOM marker return 0; } sink->data = grown; sink->cap = newcap; }...
-- `inspect_chain` (function) `src/secure_fetch.c:676` `static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len)` -- Walks the verified chain into *info. sigbuf receives the leaf signature alg name. * Returns 0 on success, nonzero if...
-- `map_curl_error` (function) `src/secure_fetch.c:729` `static sf_status map_curl_error(CURLcode rc, const body_sink *sink)`
-- `add_header` (function) `src/secure_fetch.c:770` `static int add_header(struct curl_slist **h, const char *line)` -- Appends one header line without losing the list on OOM (the plain "h = curl_slist_append(h, ...)" idiom dropped the...
-- `sf_setup_handle` (function) `src/secure_fetch.c:784` `static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,
+- `module` (function) `src/secure_fetch.c:412` `* pure url module (DRY);`
+- `sf_ci_prefix` (function) `src/secure_fetch.c:419` `static int sf_ci_prefix(const char *s, const char *p)` -- Reference resolution + the https-only / no-downgrade policy live in the pure url module (DRY); a redirect is just a...
+- `sf_response_free` (function) `src/secure_fetch.c:459` `void sf_response_free(sf_response *resp)`
+- `progress` (function) `src/secure_fetch.c:496` `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);`
+- `copy_bounded` (function) `src/secure_fetch.c:525` `static void copy_bounded(char *dst, size_t dstsz, const char *src)`
+- `get_negotiated_group_name` (function) `src/secure_fetch.c:536` `static const char *get_negotiated_group_name(SSL *ssl)` -- static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len); static void...
+- `database` (function) `src/secure_fetch.c:540` `* NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid...`
+- `group` (function) `src/secure_fetch.c:554` `* group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);`
+- `tls_capture_try` (function) `src/secure_fetch.c:569` `static void tls_capture_try(tls_capture *cap)` -- nid = SSL_get_shared_group(ssl, 0); #endif if (nid == 0) { return NULL; /* There is no negotiated group (e.g., TLS...
+- `tls_capture_from_ssl` (function) `src/secure_fetch.c:579` `static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl)` -- static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl); /* Idempotent: takes the TLS snapshot the first time...
+- `this` (function) `src/secure_fetch.c:586` `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and...`
+- `header_cb` (function) `src/secure_fetch.c:605` `static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata)` -- Fires for every HTTP response (status line + headers) even when there is no * body, so it is the reliable point to...
+- `write_cb` (function) `src/secure_fetch.c:648` `static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *userdata)`
+- `name_is_pq_sig` (function) `src/secure_fetch.c:680` `static int name_is_pq_sig(int pknid)` -- if (grown == NULL) { sink->overflow = 2; /* OOM marker return 0; } sink->data = grown; sink->cap = newcap; }...
+- `inspect_chain` (function) `src/secure_fetch.c:690` `static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len)` -- Walks the verified chain into *info. sigbuf receives the leaf signature alg name. * Returns 0 on success, nonzero if...
+- `map_curl_error` (function) `src/secure_fetch.c:743` `static sf_status map_curl_error(CURLcode rc, const body_sink *sink)`
+- `add_header` (function) `src/secure_fetch.c:784` `static int add_header(struct curl_slist **h, const char *line)` -- Appends one header line without losing the list on OOM (the plain "h = curl_slist_append(h, ...)" idiom dropped the...
+- `sf_setup_handle` (function) `src/secure_fetch.c:798` `static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,
            ...` -- The ONE place a curl handle is configured for a request (spec/secure_fetch.md): URL, realm proxy, TLS floor + KE...
-- `redirect` (function) `src/secure_fetch.c:859` `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
+- `redirect` (function) `src/secure_fetch.c:873` `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
      * different orig...`
-- `sf_perform` (function) `src/secure_fetch.c:933` `static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,
+- `sf_perform` (function) `src/secure_fetch.c:947` `static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,
             ...` -- The shared request engine for sf_get and sf_post.
-- `sf_get` (function) `src/secure_fetch.c:1085` `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)`
-- `sf_post` (function) `src/secure_fetch.c:1089` `sf_status sf_post(const char *url, const sf_config *cfg,
+- `sf_get` (function) `src/secure_fetch.c:1099` `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)`
+- `sf_post` (function) `src/secure_fetch.c:1103` `sf_status sf_post(const char *url, const sf_config *cfg,
                   const void *body, size...`
-- `sf_rcache_clear` (function) `src/secure_fetch.c:1119` `void sf_rcache_clear(void)`
-- `sf_rcache_set_backing` (function) `src/secure_fetch.c:1130` `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx)`
-- `rcache_put_ram` (function) `src/secure_fetch.c:1138` `static int rcache_put_ram(const char *from, const char *to, time_t now)`
-- `sf_rcache_put` (function) `src/secure_fetch.c:1157` `int sf_rcache_put(const char *from, const char *to, time_t now)`
-- `sf_rcache_get` (function) `src/secure_fetch.c:1167` `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)`
-- `sf_get_follow` (function) `src/secure_fetch.c:1196` `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
+- `sf_rcache_clear` (function) `src/secure_fetch.c:1133` `void sf_rcache_clear(void)`
+- `sf_rcache_set_backing` (function) `src/secure_fetch.c:1144` `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx)`
+- `rcache_put_ram` (function) `src/secure_fetch.c:1152` `static int rcache_put_ram(const char *from, const char *to, time_t now)`
+- `sf_rcache_put` (function) `src/secure_fetch.c:1171` `int sf_rcache_put(const char *from, const char *to, time_t now)`
+- `sf_rcache_get` (function) `src/secure_fetch.c:1181` `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)`
+- `sf_get_follow` (function) `src/secure_fetch.c:1210` `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
                 ...`
-- `ws_ssl_info_cb` (function) `src/secure_fetch.c:1259` `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)` -- An upgraded (CONNECT_ONLY) connection never runs the header callback that snapshots TLS for a fetch, and curl no...
-- `ws_ssl_ctx_cb` (function) `src/secure_fetch.c:1266` `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
-- `sf_ws_url_check` (function) `src/secure_fetch.c:1280` `sf_status sf_ws_url_check(const char *url)`
-- `ws_free` (function) `src/secure_fetch.c:1292` `static void ws_free(sf_ws *ws)`
-- `sf_ws_open` (function) `src/secure_fetch.c:1301` `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
-- `sf_ws_send` (function) `src/secure_fetch.c:1356` `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
-- `sf_ws_recv` (function) `src/secure_fetch.c:1379` `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
-- `sf_ws_fd` (function) `src/secure_fetch.c:1401` `int sf_ws_fd(const sf_ws *ws)`
-- `sf_ws_close` (function) `src/secure_fetch.c:1408` `void sf_ws_close(sf_ws *ws)`
-- `sf_fallback_policy` (function) `src/secure_fetch.c:1419` `int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)`
-- `sf_downgrade_of` (function) `src/secure_fetch.c:1433` `static int sf_downgrade_of(sf_policy p)`
-- `sf_attempt_get` (function) `src/secure_fetch.c:1442` `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,
+- `ws_ssl_info_cb` (function) `src/secure_fetch.c:1273` `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)` -- An upgraded (CONNECT_ONLY) connection never runs the header callback that snapshots TLS for a fetch, and curl no...
+- `ws_ssl_ctx_cb` (function) `src/secure_fetch.c:1280` `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
+- `sf_ws_url_check` (function) `src/secure_fetch.c:1294` `sf_status sf_ws_url_check(const char *url)`
+- `ws_free` (function) `src/secure_fetch.c:1306` `static void ws_free(sf_ws *ws)`
+- `sf_ws_open` (function) `src/secure_fetch.c:1315` `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
+- `sf_ws_send` (function) `src/secure_fetch.c:1370` `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
+- `sf_ws_recv` (function) `src/secure_fetch.c:1393` `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
+- `sf_ws_fd` (function) `src/secure_fetch.c:1415` `int sf_ws_fd(const sf_ws *ws)`
+- `sf_ws_close` (function) `src/secure_fetch.c:1422` `void sf_ws_close(sf_ws *ws)`
+- `sf_fallback_policy` (function) `src/secure_fetch.c:1433` `int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)`
+- `sf_downgrade_of` (function) `src/secure_fetch.c:1447` `static int sf_downgrade_of(sf_policy p)`
+- `sf_attempt_get` (function) `src/secure_fetch.c:1456` `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,
         ...`
-- `sf_attempt_post` (function) `src/secure_fetch.c:1448` `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,
+- `sf_attempt_post` (function) `src/secure_fetch.c:1462` `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,
        ...`
-- `sf_navigable` (function) `src/secure_fetch.c:1453` `static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,
+- `sf_navigable` (function) `src/secure_fetch.c:1467` `static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,
            ...`
-- `sf_get_follow_navigable` (function) `src/secure_fetch.c:1473` `sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,
+- `sf_get_follow_navigable` (function) `src/secure_fetch.c:1487` `sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,
             ...`
-- `sf_post_navigable` (function) `src/secure_fetch.c:1478` `sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
+- `sf_post_navigable` (function) `src/secure_fetch.c:1492` `sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
                   ...`
 
 ## src/svg_render.c
@@ -266,108 +266,108 @@ static void child_fetch_stylesheets(child_state *cs)`
 - `child_handle_load` (function) `src/tab.c:1156` `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
            ...`
 - `fallback` (function) `src/tab.c:1237` `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it...`
-- `WHERE` (function) `src/tab.c:1415` `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...`
-- `content` (function) `src/tab.c:1460` `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...`
-- `once` (function) `src/tab.c:1508` `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);`
-- `swap` (function) `src/tab.c:1517` `* display:none hiding an element via class swap (CSS, not
+- `WHERE` (function) `src/tab.c:1417` `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...`
+- `content` (function) `src/tab.c:1465` `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...`
+- `once` (function) `src/tab.c:1513` `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);`
+- `swap` (function) `src/tab.c:1522` `* display:none hiding an element via class swap (CSS, not
      * DOM removal). */
     if (ok && v...`
-- `write_full` (function) `src/tab.c:1538` `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd...`
-- `write_ws` (function) `src/tab.c:1562` `static int write_ws(int wfd, child_state *cs)` -- Writes the WebSocket block of a response: [n:int32] then per op * [kind:int32][id:int32][len][bytes] (spec/js_dom.md...
-- `write_storage` (function) `src/tab.c:1579` `static int write_storage(int wfd, child_state *cs)` -- int32_t cnt = (int32_t)n; int rc = (write_full(wfd, &cnt, sizeof cnt) == 0) ?
-- `write_opens` (function) `src/tab.c:1593` `static int write_opens(int wfd, child_state *cs)` -- static int write_storage(int wfd, child_state *cs) { char *blob = NULL; size_t len = 0; int32_t dirty = (cs->js !=...
-- `child_next_timer_ms` (function) `src/tab.c:1605` `static int32_t child_next_timer_ms(child_state *cs)` -- Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the * eval fails, or nothing is pending.
-- `child_handle_mutation` (function) `src/tab.c:1620` `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
+- `write_full` (function) `src/tab.c:1543` `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd...`
+- `write_ws` (function) `src/tab.c:1567` `static int write_ws(int wfd, child_state *cs)` -- Writes the WebSocket block of a response: [n:int32] then per op * [kind:int32][id:int32][len][bytes] (spec/js_dom.md...
+- `write_storage` (function) `src/tab.c:1584` `static int write_storage(int wfd, child_state *cs)` -- int32_t cnt = (int32_t)n; int rc = (write_full(wfd, &cnt, sizeof cnt) == 0) ?
+- `write_opens` (function) `src/tab.c:1598` `static int write_opens(int wfd, child_state *cs)` -- static int write_storage(int wfd, child_state *cs) { char *blob = NULL; size_t len = 0; int32_t dirty = (cs->js !=...
+- `child_next_timer_ms` (function) `src/tab.c:1610` `static int32_t child_next_timer_ms(child_state *cs)` -- Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the * eval fails, or nothing is pending.
+- `child_handle_mutation` (function) `src/tab.c:1625` `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                         ...` -- Fire click handlers for node_id (OP_CLICK) or advance the virtual timer clock (OP_TICK), then re-derive the view so...
-- `child_handle_click` (function) `src/tab.c:1699` `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
-- `child_handle_tick` (function) `src/tab.c:1703` `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
-- `child_handle_event` (function) `src/tab.c:1713` `static void child_handle_event(int wfd, child_state *cs)`
-- `child_handle_mouse` (function) `src/tab.c:1761` `static void child_handle_mouse(int wfd, child_state *cs)` -- Handles a mouse DOM event (OP_MOUSE).
-- `geom_parent` (function) `src/tab.c:1791` `static dom_node_id geom_parent(void *ctx, dom_node_id n)`
-- `child_handle_geom` (function) `src/tab.c:1799` `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)` -- OP_GEOM (spec/js_geom.md): installs the parent's laid-out geometry into the page's JS, aggregated into ancestors...
-- `child_handle_submit` (function) `src/tab.c:1825` `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)` -- Fires a submit event on the form enclosing node_id.
-- `child_handle_eval` (function) `src/tab.c:1859` `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` -- Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a...
-- `child_handle_decode_image` (function) `src/tab.c:1899` `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` -- Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data].
-- `child_handle_decode_image_b64` (function) `src/tab.c:1921` `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)` -- data: URI images: the parent only sliced the base64 payload (pure pointer arithmetic, no interpretation); the base64...
-- `gen_session_key` (function) `src/tab.c:1933` `static uint64_t gen_session_key(void)`
-- `tab_worker_run` (function) `src/tab.c:1953` `static void tab_worker_run(int rfd, int wfd)` -- The confined request loop.
-- `EPIPE` (function) `src/tab.c:1955` `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();`
-- `tzset` (function) `src/tab.c:1971` `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);`
-- `depth` (function) `src/tab.c:1977` `* defense in depth (seccomp already excludes open/socket/exec);`
-- `parse_worker_fd` (function) `src/tab.c:2169` `static int parse_worker_fd(const char *s, int *out)` -- free(buf); free(url); free(cookies); free(storage); } child_reset_page(&cs); fb_buffer_free(&cs.log); _exit(0); } /*...
-- `tab_parse_worker_args` (function) `src/tab.c:2181` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
-- `tab_worker_dispatch` (function) `src/tab.c:2191` `void tab_worker_dispatch(int argc, char **argv)`
-- `load` (function) `src/tab.c:2208` `* subresource requests this load (set per page: host in allow.conf AND js.conf);`
-- `ignore_sigpipe` (function) `src/tab.c:2245` `static void ignore_sigpipe(void)` -- A write to a dead child must not kill the parent with SIGPIPE.
-- `tab_refresh_alive` (function) `src/tab.c:2252` `static void tab_refresh_alive(tab *t)`
-- `read_field` (function) `src/tab.c:2271` `static int read_field(int fd, char **out, size_t *out_len)` -- Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.
-- `read_view` (function) `src/tab.c:2287` `static int read_view(int fd, pv_view **out)` -- Reads a display list serialised by write_view into a fresh pv_view.
-- `tests` (function) `src/tab.c:2362` `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...`
-- `layout` (function) `src/tab.c:2468` `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....`
-- `column` (function) `src/tab.c:2479` `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...`
-- `read_console` (function) `src/tab.c:2814` `static int read_console(int fd, fb_buffer *out)` -- Reads the console section written by write_console into out (a zero-initialised fb_buffer).
-- `send_request` (function) `src/tab.c:2851` `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` -- if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt...
-- `io_failure` (function) `src/tab.c:2861` `static tab_status io_failure(tab *t)`
-- `exec_worker_child` (function) `src/tab.c:2869` `static void exec_worker_child(int rfd, int wfd)` -- Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other...
-- `tab_set_fetcher` (function) `src/tab.c:2941` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-- `tab_set_css_sink` (function) `src/tab.c:2947` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
-- `tab_set_op_net_budget_ms` (function) `src/tab.c:2953` `void tab_set_op_net_budget_ms(tab *t, int ms)`
-- `tab_set_net_allowed` (function) `src/tab.c:2957` `void tab_set_net_allowed(tab *t, int allowed)`
-- `tab_set_css_allowed` (function) `src/tab.c:2962` `void tab_set_css_allowed(tab *t, int allowed)`
-- `tab_last_subreq_stats` (function) `src/tab.c:2967` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
-- `tab_set_identity` (function) `src/tab.c:2972` `void tab_set_identity(tab *t, const char *serialized)`
-- `tab_set_viewport_w` (function) `src/tab.c:2980` `void tab_set_viewport_w(tab *t, int px)`
-- `tab_set_cookies` (function) `src/tab.c:2985` `void tab_set_cookies(tab *t, const char *cookies)`
-- `tab_subreq_permitted` (function) `src/tab.c:2991` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-- `answered` (function) `src/tab.c:3003` `* A refused frame is still consumed and answered (status 0), so the protocol never
+- `child_handle_click` (function) `src/tab.c:1704` `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
+- `child_handle_tick` (function) `src/tab.c:1708` `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
+- `child_handle_event` (function) `src/tab.c:1718` `static void child_handle_event(int wfd, child_state *cs)`
+- `child_handle_mouse` (function) `src/tab.c:1766` `static void child_handle_mouse(int wfd, child_state *cs)` -- Handles a mouse DOM event (OP_MOUSE).
+- `geom_parent` (function) `src/tab.c:1796` `static dom_node_id geom_parent(void *ctx, dom_node_id n)`
+- `child_handle_geom` (function) `src/tab.c:1804` `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)` -- OP_GEOM (spec/js_geom.md): installs the parent's laid-out geometry into the page's JS, aggregated into ancestors...
+- `child_handle_submit` (function) `src/tab.c:1830` `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)` -- Fires a submit event on the form enclosing node_id.
+- `child_handle_eval` (function) `src/tab.c:1864` `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` -- Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a...
+- `child_handle_decode_image` (function) `src/tab.c:1904` `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` -- Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data].
+- `child_handle_decode_image_b64` (function) `src/tab.c:1926` `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)` -- data: URI images: the parent only sliced the base64 payload (pure pointer arithmetic, no interpretation); the base64...
+- `gen_session_key` (function) `src/tab.c:1938` `static uint64_t gen_session_key(void)`
+- `tab_worker_run` (function) `src/tab.c:1958` `static void tab_worker_run(int rfd, int wfd)` -- The confined request loop.
+- `EPIPE` (function) `src/tab.c:1960` `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();`
+- `tzset` (function) `src/tab.c:1976` `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);`
+- `depth` (function) `src/tab.c:1982` `* defense in depth (seccomp already excludes open/socket/exec);`
+- `parse_worker_fd` (function) `src/tab.c:2174` `static int parse_worker_fd(const char *s, int *out)` -- free(buf); free(url); free(cookies); free(storage); } child_reset_page(&cs); fb_buffer_free(&cs.log); _exit(0); } /*...
+- `tab_parse_worker_args` (function) `src/tab.c:2186` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
+- `tab_worker_dispatch` (function) `src/tab.c:2196` `void tab_worker_dispatch(int argc, char **argv)`
+- `load` (function) `src/tab.c:2213` `* subresource requests this load (set per page: host in allow.conf AND js.conf);`
+- `ignore_sigpipe` (function) `src/tab.c:2250` `static void ignore_sigpipe(void)` -- A write to a dead child must not kill the parent with SIGPIPE.
+- `tab_refresh_alive` (function) `src/tab.c:2257` `static void tab_refresh_alive(tab *t)`
+- `read_field` (function) `src/tab.c:2276` `static int read_field(int fd, char **out, size_t *out_len)` -- Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.
+- `read_view` (function) `src/tab.c:2292` `static int read_view(int fd, pv_view **out)` -- Reads a display list serialised by write_view into a fresh pv_view.
+- `tests` (function) `src/tab.c:2367` `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...`
+- `layout` (function) `src/tab.c:2473` `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....`
+- `column` (function) `src/tab.c:2484` `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...`
+- `read_console` (function) `src/tab.c:2819` `static int read_console(int fd, fb_buffer *out)` -- Reads the console section written by write_console into out (a zero-initialised fb_buffer).
+- `send_request` (function) `src/tab.c:2856` `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` -- if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt...
+- `io_failure` (function) `src/tab.c:2866` `static tab_status io_failure(tab *t)`
+- `exec_worker_child` (function) `src/tab.c:2874` `static void exec_worker_child(int rfd, int wfd)` -- Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other...
+- `tab_set_fetcher` (function) `src/tab.c:2946` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
+- `tab_set_css_sink` (function) `src/tab.c:2952` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
+- `tab_set_op_net_budget_ms` (function) `src/tab.c:2958` `void tab_set_op_net_budget_ms(tab *t, int ms)`
+- `tab_set_net_allowed` (function) `src/tab.c:2962` `void tab_set_net_allowed(tab *t, int allowed)`
+- `tab_set_css_allowed` (function) `src/tab.c:2967` `void tab_set_css_allowed(tab *t, int allowed)`
+- `tab_last_subreq_stats` (function) `src/tab.c:2972` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
+- `tab_set_identity` (function) `src/tab.c:2977` `void tab_set_identity(tab *t, const char *serialized)`
+- `tab_set_viewport_w` (function) `src/tab.c:2985` `void tab_set_viewport_w(tab *t, int px)`
+- `tab_set_cookies` (function) `src/tab.c:2990` `void tab_set_cookies(tab *t, const char *cookies)`
+- `tab_subreq_permitted` (function) `src/tab.c:2996` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
+- `answered` (function) `src/tab.c:3008` `* A refused frame is still consumed and answered (status 0), so the protocol never
  * desyncs. Re...`
-- `hist_ops_free` (function) `src/tab.c:3055` `static void hist_ops_free(tab_hist_op *ops, size_t n)`
-- `is_activation_event` (function) `src/tab.c:3120` `static int is_activation_event(const char *type)` -- HTML 6.4.2 activation-triggering input events: only these let a page open a * window.
-- `open_urls_free` (function) `src/tab.c:3129` `static void open_urls_free(char **u, size_t n)`
-- `read_opens` (function) `src/tab.c:3139` `static tab_status read_opens(tab *t, const char *page_url, int gesture,
+- `hist_ops_free` (function) `src/tab.c:3060` `static void hist_ops_free(tab_hist_op *ops, size_t n)`
+- `is_activation_event` (function) `src/tab.c:3125` `static int is_activation_event(const char *type)` -- HTML 6.4.2 activation-triggering input events: only these let a page open a * window.
+- `open_urls_free` (function) `src/tab.c:3134` `static void open_urls_free(char **u, size_t n)`
+- `read_opens` (function) `src/tab.c:3144` `static tab_status read_opens(tab *t, const char *page_url, int gesture,
                          ...` -- Reads the window.open block (see write_opens).
-- `ws_ops_free` (function) `src/tab.c:3168` `static void ws_ops_free(tab_ws_op *ops, size_t n)`
-- `read_ws` (function) `src/tab.c:3177` `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` -- Reads the WebSocket block (see write_ws), bounded by JT_WS_MAX_OPS ops and JT_WS_MAX_BYTES of payload.
-- `gate_js_nav` (function) `src/tab.c:3246` `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` -- Gates a raw JS navigation request against the page URL in the trusted parent (Zero Trust: a compromised worker...
-- `tab_load` (function) `src/tab.c:3256` `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-- `tab_load_ex` (function) `src/tab.c:3260` `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-- `tab_load_full` (function) `src/tab.c:3264` `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+- `ws_ops_free` (function) `src/tab.c:3173` `static void ws_ops_free(tab_ws_op *ops, size_t n)`
+- `read_ws` (function) `src/tab.c:3182` `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` -- Reads the WebSocket block (see write_ws), bounded by JT_WS_MAX_OPS ops and JT_WS_MAX_BYTES of payload.
+- `gate_js_nav` (function) `src/tab.c:3251` `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` -- Gates a raw JS navigation request against the page URL in the trusted parent (Zero Trust: a compromised worker...
+- `tab_load` (function) `src/tab.c:3261` `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
+- `tab_load_ex` (function) `src/tab.c:3265` `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
+- `tab_load_full` (function) `src/tab.c:3269` `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...`
-- `tab_click` (function) `src/tab.c:3463` `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-- `tab_tick` (function) `src/tab.c:3471` `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-- `tab_submit` (function) `src/tab.c:3481` `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` -- Dispatches a submit event on the form enclosing node_id.
-- `tab_read_view` (function) `src/tab.c:3589` `tab_status tab_read_view(tab *t, tab_page *out)` -- Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console). * Used by tab_mutation_request...
-- `frames` (function) `src/tab.c:3595` `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...`
-- `tab_await_result` (function) `src/tab.c:3598` `static tab_status tab_await_result(tab *t)`
-- `tab_await_result_inner` (function) `src/tab.c:3606` `static tab_status tab_await_result_inner(tab *t)`
-- `tab_read_view_ex` (function) `src/tab.c:3616` `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
-- `tab_eval` (function) `src/tab.c:3711` `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-- `tab_decode_image_op` (function) `src/tab.c:3752` `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
+- `tab_click` (function) `src/tab.c:3468` `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
+- `tab_tick` (function) `src/tab.c:3476` `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
+- `tab_submit` (function) `src/tab.c:3486` `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` -- Dispatches a submit event on the form enclosing node_id.
+- `tab_read_view` (function) `src/tab.c:3594` `tab_status tab_read_view(tab *t, tab_page *out)` -- Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console). * Used by tab_mutation_request...
+- `frames` (function) `src/tab.c:3600` `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...`
+- `tab_await_result` (function) `src/tab.c:3603` `static tab_status tab_await_result(tab *t)`
+- `tab_await_result_inner` (function) `src/tab.c:3611` `static tab_status tab_await_result_inner(tab *t)`
+- `tab_read_view_ex` (function) `src/tab.c:3621` `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
+- `tab_eval` (function) `src/tab.c:3716` `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
+- `tab_decode_image_op` (function) `src/tab.c:3757` `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
         ...` -- Shared by tab_decode_image and tab_decode_image_data_url: sends `bytes` under opcode `op` and parses the...
-- `tab_decode_image` (function) `src/tab.c:3794` `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-- `tab_decode_image_data_url` (function) `src/tab.c:3801` `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
-- `tab_alive` (function) `src/tab.c:3820` `int tab_alive(const tab *t)`
-- `tab_child_pid` (function) `src/tab.c:3826` `pid_t tab_child_pid(const tab *t)`
-- `tab_close` (function) `src/tab.c:3830` `void tab_close(tab *t)`
-- `tab_page_free` (function) `src/tab.c:3847` `void tab_page_free(tab_page *p)`
-- `tab_eval_result_free` (function) `src/tab.c:3877` `void tab_eval_result_free(tab_eval_result *r)`
-- `tab_image_free` (function) `src/tab.c:3886` `void tab_image_free(tab_image *img)`
-- `tab_geometry_send` (function) `src/tab.c:3898` `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)` -- Writes one encoded geometry table and waits for its acknowledgement (serving any network the * observer callbacks it...
-- `geometry_encode` (function) `src/tab.c:3916` `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)`
-- `tab_set_geometry` (function) `src/tab.c:3926` `tab_status tab_set_geometry(tab *t, const jg_table *g)`
-- `job_discard` (function) `src/tab.c:3940` `static void job_discard(tab *t)`
-- `tab_async_sync` (function) `src/tab.c:3952` `static void tab_async_sync(tab *t)` -- Waits for a running job and DISCARDS its result: any other worker call is about to change * the page, so the...
-- `job_main` (function) `src/tab.c:3962` `static void *job_main(void *arg)`
-- `tab_async_fd` (function) `src/tab.c:3978` `int tab_async_fd(tab *t)`
-- `tab_async_busy` (function) `src/tab.c:3987` `int tab_async_busy(const tab *t)`
-- `job_start` (function) `src/tab.c:3991` `static tab_status job_start(tab *t)`
-- `tab_tick_async` (function) `src/tab.c:4004` `tab_status tab_tick_async(tab *t, int elapsed_ms)`
-- `tab_geometry_async` (function) `src/tab.c:4014` `tab_status tab_geometry_async(tab *t, const jg_table *g)`
-- `tab_async_finish` (function) `src/tab.c:4029` `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)`
-- `tab_popstate` (function) `src/tab.c:4051` `tab_status tab_popstate(tab *t, int index, tab_page *out)`
-- `tab_ws_event` (function) `src/tab.c:4058` `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
+- `tab_decode_image` (function) `src/tab.c:3799` `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
+- `tab_decode_image_data_url` (function) `src/tab.c:3806` `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
+- `tab_alive` (function) `src/tab.c:3825` `int tab_alive(const tab *t)`
+- `tab_child_pid` (function) `src/tab.c:3831` `pid_t tab_child_pid(const tab *t)`
+- `tab_close` (function) `src/tab.c:3835` `void tab_close(tab *t)`
+- `tab_page_free` (function) `src/tab.c:3852` `void tab_page_free(tab_page *p)`
+- `tab_eval_result_free` (function) `src/tab.c:3882` `void tab_eval_result_free(tab_eval_result *r)`
+- `tab_image_free` (function) `src/tab.c:3891` `void tab_image_free(tab_image *img)`
+- `tab_geometry_send` (function) `src/tab.c:3903` `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)` -- Writes one encoded geometry table and waits for its acknowledgement (serving any network the * observer callbacks it...
+- `geometry_encode` (function) `src/tab.c:3921` `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)`
+- `tab_set_geometry` (function) `src/tab.c:3931` `tab_status tab_set_geometry(tab *t, const jg_table *g)`
+- `job_discard` (function) `src/tab.c:3945` `static void job_discard(tab *t)`
+- `tab_async_sync` (function) `src/tab.c:3957` `static void tab_async_sync(tab *t)` -- Waits for a running job and DISCARDS its result: any other worker call is about to change * the page, so the...
+- `job_main` (function) `src/tab.c:3967` `static void *job_main(void *arg)`
+- `tab_async_fd` (function) `src/tab.c:3983` `int tab_async_fd(tab *t)`
+- `tab_async_busy` (function) `src/tab.c:3992` `int tab_async_busy(const tab *t)`
+- `job_start` (function) `src/tab.c:3996` `static tab_status job_start(tab *t)`
+- `tab_tick_async` (function) `src/tab.c:4009` `tab_status tab_tick_async(tab *t, int elapsed_ms)`
+- `tab_geometry_async` (function) `src/tab.c:4019` `tab_status tab_geometry_async(tab *t, const jg_table *g)`
+- `tab_async_finish` (function) `src/tab.c:4034` `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)`
+- `tab_popstate` (function) `src/tab.c:4056` `tab_status tab_popstate(tab *t, int index, tab_page *out)`
+- `tab_ws_event` (function) `src/tab.c:4063` `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
        ...`
-- `tab_set_storage` (function) `src/tab.c:4078` `void tab_set_storage(tab *t, const char *blob, size_t len)`
+- `tab_set_storage` (function) `src/tab.c:4083` `void tab_set_storage(tab *t, const char *blob, size_t len)`
 
 ## src/text_case.c
 Depends on: `include/css.h`, `include/text_case.h`
