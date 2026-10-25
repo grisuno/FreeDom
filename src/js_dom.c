@@ -61,7 +61,7 @@ static JSValue m_get_element_by_id(JSContext *ctx, JSValueConst this_val,
     (void)this_val; (void)argc;
     const char *s = JS_ToCString(ctx, argv[0]);
     if (s == NULL) return JS_EXCEPTION;
-    dom_node_id h = dom_get_element_by_id(jd_idx(ctx), s);
+    dom_node_id h = dom_get_connected_by_id(jd_idx(ctx), s);
     JS_FreeCString(ctx, s);
     return jd_handle_or_null(ctx, h);
 }

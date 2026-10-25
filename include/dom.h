@@ -55,6 +55,11 @@ size_t dom_node_count(const dom_index *idx);
 /* O(1). First match in document order, or DOM_NODE_NONE. Case-sensitive. */
 dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id);
 
+/* document.getElementById: like dom_get_element_by_id, but only an element that is IN the document
+ * tree (the index only grows, so a node a script removed is still registered and must not be
+ * found); with several live matches the first in tree order. DOM_NODE_NONE otherwise. */
+dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id);
+
 /* Writes up to cap matching ids (in document order) into out; returns the total
  * match count (which may exceed cap, so the caller can size a buffer). */
 size_t dom_get_by_tag(const dom_index *idx, const char *tag,

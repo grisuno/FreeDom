@@ -36,6 +36,7 @@
 #include "os_sandbox.h"
 #include "page_view.h"
 #include "request_policy.h"
+#include "secure_fetch.h"
 #include "url.h"
 #include "web_storage.h"
 #include "import_map.h"
@@ -170,6 +171,8 @@ typedef struct child_state {
     jg_table        geom;              /* laid-out geometry installed into js (OP_GEOM) */
     pv_computed    *computed;          /* retained cascade behind getComputedStyle (trusted) */
     uint64_t        computed_sig;      /* css_signature the cascade snapshot was taken at */
+    char   prelude[32768];  /* FREEDOM_JS_PRELUDE text, read before seccomp */
+    size_t prelude_len;
 } child_state;
 
 static int write_opens(int wfd, child_state *cs);
@@ -291,17 +294,20 @@ static int child_computed(void *ctx, dom_node_id h, const char *prop, char *out,
  * non-zero (XHR completes with status 0). Only callable inside a page-load script window
  * (net_active) so it never desyncs the OP_EVAL/OP_DECODE_IMAGE response paths. */
 static int child_fetch(void *vctx, const char *method, const char *url,
-                       const char *body, size_t body_len,
+                       const char *body, size_t body_len, const char *req_headers,
                        int *out_status, char **out_body, size_t *out_body_len,
-                       char **out_ctype) {
+                       char **out_ctype, char **out_headers) {
     child_state *cs = (child_state *)vctx;
     *out_status = 0; *out_body = NULL; *out_body_len = 0; *out_ctype = NULL;
+    if (out_headers != NULL) *out_headers = NULL;
     if (cs == NULL || !cs->net_active) return -1;
     if (cs->subreq_used >= TAB_MAX_SUBREQ) return -1;
     size_t mlen = (method != NULL) ? strlen(method) : 0;
     size_t ulen = (url != NULL) ? strlen(url) : 0;
     if (ulen == 0 || ulen > TAB_MAX_URL || mlen > 16 || body_len > TAB_MAX_SUBRESOURCE)
         return -1;
+    size_t hlen = (req_headers != NULL) ? strlen(req_headers) : 0;
+    if (hlen > RP_HDR_MAX_BYTES) hlen = 0;      /* over the cap: the page's headers are dropped */
     cs->subreq_used++;
 
     uint8_t tag = TAG_SUBREQ;
@@ -311,7 +317,9 @@ static int child_fetch(void *vctx, const char *method, const char *url,
      || write_full(cs->wfd, &ulen, sizeof ulen) != 0
      || write_full(cs->wfd, url, ulen) != 0
      || write_full(cs->wfd, &body_len, sizeof body_len) != 0
-     || (body_len != 0 && write_full(cs->wfd, body, body_len) != 0))
+     || (body_len != 0 && write_full(cs->wfd, body, body_len) != 0)
+     || write_full(cs->wfd, &hlen, sizeof hlen) != 0
+     || (hlen != 0 && write_full(cs->wfd, req_headers, hlen) != 0))
         return -1;
 
     int32_t status = 0;
@@ -332,7 +340,17 @@ static int child_fetch(void *vctx, const char *method, const char *url,
     if (clen != 0 && read_full(cs->rfd, ctype, clen) != 0) { free(rbody); free(ctype); return -1; }
     ctype[clen] = '\0';
 
+    size_t xlen = 0;
+    if (read_full(cs->rfd, &xlen, sizeof xlen) != 0 || xlen > SF_RESPONSE_HEADERS_MAX) {
+        free(rbody); free(ctype); return -1;
+    }
+    char *xhdrs = (char *)malloc(xlen + 1);
+    if (xhdrs == NULL) { free(rbody); free(ctype); return -1; }
+    if (xlen != 0 && read_full(cs->rfd, xhdrs, xlen) != 0) { free(rbody); free(ctype); free(xhdrs); return -1; }
+    xhdrs[xlen] = '\0';
+
     *out_status = (int)status; *out_body = rbody; *out_body_len = rlen; *out_ctype = ctype;
+    if (out_headers != NULL) *out_headers = xhdrs; else free(xhdrs);
     return 0;
 }
 
@@ -421,8 +439,10 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
      * granted net access for this host (allow.conf AND js.conf). Otherwise they stay
      * undefined (Same-Origin-by-construction holds). child_fetch still refuses unless
      * net_active is set during the script window, so install is safe regardless. */
-    if (run_js && net_allowed)
+    if (run_js && net_allowed) {
         (void)jd_install_xhr(js, child_fetch, cs);
+        js_devtools_enable(js);   /* trusted page: record, so Freebug's Profile / Throws tabs have data */
+    }
     /* indexedDB lives in page memory and only for a trusted host (like localStorage in RAM). */
     if (run_js && net_allowed) (void)jd_install_indexeddb(js);
     /* navigator.geolocation: only a trusted host, only when the user fixed a place. */
@@ -1075,7 +1095,7 @@ static char *tab_mod_fetch(void *host, const char *url, size_t *len) {
     int st = 0;
     char *body = NULL, *ctype = NULL;
     size_t blen = 0;
-    int fr = child_fetch(cs, "GET", url, NULL, 0, &st, &body, &blen, &ctype);
+    int fr = child_fetch(cs, "GET", url, NULL, 0, NULL, &st, &body, &blen, &ctype, NULL);
     if (fr != 0 || st < 200 || st >= 300 || !ctype_is_javascript(ctype)) {
         log_external_skip(&cs->log, "module", fr != 0 ? "blocked or failed" : "refused", url);
         free(body);
@@ -1116,7 +1136,7 @@ static void child_fetch_stylesheets(child_state *cs) {
         int st = 0;
         char *body = NULL, *ctype = NULL;
         size_t blen = 0;
-        int fr = child_fetch(cs, "GET", hrefs[i], NULL, 0, &st, &body, &blen, &ctype);
+        int fr = child_fetch(cs, "GET", hrefs[i], NULL, 0, NULL, &st, &body, &blen, &ctype, NULL);
         if (fr != 0 || st < 200 || st >= 300 || !ctype_is_css(ctype)) {
             char why[96];
             int why_r;
@@ -1274,6 +1294,15 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             if (scripts[i].importmap && scripts[i].text != NULL && cs->page_url != NULL)
                 cs->imap = im_parse(scripts[i].text, scripts[i].len, cs->page_url,
                                     tab_url_resolve, NULL);
+        /* FREEDOM_JS_PRELUDE=file.js (read before the worker confined itself, see child main): a
+         * debugging prelude evaluated before any page script, so a real site can be instrumented
+         * (wrap fetch, trace events) without a local copy that would change its origin. */
+        if (cs->prelude_len > 0) {
+            js_result pr;
+            memset(&pr, 0, sizeof pr);
+            (void)js_eval_named(cs->js, cs->prelude, cs->prelude_len, "<prelude>", &pr);
+            js_result_free(&pr);
+        }
         for (int pass = 0; pass < 3; ++pass) {
         for (size_t i = 0; i < nscripts; i++) {
             if (pass == 0 && (scripts[i].defer || scripts[i].async)) continue; /* first pass: sync only */
@@ -1358,8 +1387,8 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                 int st = 0;
                 size_t blen = 0;
                 char *ctype = NULL;
-                int fr = child_fetch(cs, "GET", scripts[i].src, NULL, 0,
-                                     &st, &ext_body, &blen, &ctype);
+                int fr = child_fetch(cs, "GET", scripts[i].src, NULL, 0, NULL,
+                                     &st, &ext_body, &blen, &ctype, NULL);
                 if (fr != 0 || st < 200 || st >= 300 || !ctype_is_javascript(ctype)) {
                     char why[96];
                     int why_r;
@@ -1394,6 +1423,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             if (getenv("FREEDOM_JS_PROFILE") != NULL) {   /* selector counters on (idempotent) */
                 const char *pm = getenv("FREEDOM_JS_PROFILE");
                 if (pm[0] == '2') js_profile_enable(cs->js);
+                if (pm[0] == '3') js_throws_enable(cs->js);
                 static const char on[] = "if(!__selProf)__selProf=Object.create(null);0";
                 js_result pr0;
                 memset(&pr0, 0, sizeof pr0);
@@ -1418,6 +1448,16 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             if (es != JS_OK && r.is_exception && r.value != NULL)
                 fb_buffer_push_loc(&cs->log, FB_ERROR, r.value, r.value_len,
                                    r.file != NULL ? r.file : sname, r.line, r.col);
+            else if (es != JS_OK && !r.is_exception) {
+                /* A script the engine REFUSED (over the source cap, out of memory) never ran:
+                 * say so, or the page just silently never starts (a 10 MB bundle did). */
+                char why[320];
+                int wn = snprintf(why, sizeof why, "script not run (%s, %zu bytes): %s",
+                                  es == JS_ERR_TOO_LARGE ? "over the source limit"
+                                  : es == JS_ERR_OOM ? "out of memory" : "engine refused it",
+                                  code_len, sname);
+                if (wn > 0 && (size_t)wn < sizeof why) fb_buffer_push(&cs->log, FB_ERROR, why, (size_t)wn);
+            }
             js_result_free(&r);
             js_set_current_script(cs->js, NULL, NULL);
             free(ext_body);
@@ -1447,8 +1487,10 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
          * (e.g. jkanime.net whose video_min.js is 404). It creates <iframe>
          * elements from the array, which the next step fetches and scans. */
         if (cs->js != NULL && getenv("FREEDOM_JS_PROFILE") != NULL) {
-            char hot[2048];
+            char hot[16384];
             if (js_profile_report(cs->js, hot, sizeof hot, 14) > 0)
+                fb_buffer_push(&cs->log, FB_INFO, hot, strlen(hot));
+            if (js_throws_report(cs->js, hot, sizeof hot, 20) > 0)
                 fb_buffer_push(&cs->log, FB_INFO, hot, strlen(hot));
             static const char rep[] = "typeof __selReport==='function'?__selReport():''";
             js_result pr;
@@ -1874,6 +1916,7 @@ static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t l
     /* The Freebug command-line API belongs to the REPL, never to the page's own scripts. */
     if (!cs->repl_api) {
         (void)jd_set_repl_css(cs->js, cs->extern_css, cs->extern_css_len);
+        (void)js_devtools_expose(cs->js);   /* the report natives exist only now, for the REPL shim to take */
         (void)jd_install_repl_api(cs->js);
         cs->repl_api = 1;
     }
@@ -1977,6 +2020,14 @@ static void tab_worker_run(int rfd, int wfd) {
     setenv("TZ", "UTC0", 1);
     tzset();
     js_prime_stack_limit();   /* getrlimit is not allowed once seccomp is on */
+    {   /* operator debugging prelude: open() is not allowed once seccomp is on either */
+        const char *pre = getenv("FREEDOM_JS_PRELUDE");
+        FILE *pf = (pre != NULL && pre[0] != '\0') ? fopen(pre, "rb") : NULL;
+        if (pf != NULL) {
+            cs.prelude_len = fread(cs.prelude, 1, sizeof cs.prelude - 1, pf);
+            fclose(pf);
+        }
+    }
 
     /* Confine before any content. Namespace isolation and Landlock are best-effort
      * defense in depth (seccomp already excludes open/socket/exec); seccomp is
@@ -3000,6 +3051,29 @@ int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method) {
     return 0;
 }
 
+/* The sanitized request headers of the subrequest the fetcher is serving right now. Thread-local
+ * and set only around the fetcher call in tab_serve_subreq (the same thread), so it is the
+ * in-flight request's context, not shared state. */
+static _Thread_local const char *g_inflight_headers = NULL;
+static _Thread_local char *g_inflight_resp = NULL;   /* response headers the fetcher reported */
+static _Thread_local int g_inflight_active = 0;
+
+void tab_report_response_headers(const char *lines) {
+    if (!g_inflight_active || lines == NULL) return;
+    size_t n = strlen(lines);
+    if (n > SF_RESPONSE_HEADERS_MAX) n = SF_RESPONSE_HEADERS_MAX;
+    char *copy = (char *)malloc(n + 1);
+    if (copy == NULL) return;
+    memcpy(copy, lines, n);
+    copy[n] = '\0';
+    free(g_inflight_resp);
+    g_inflight_resp = copy;
+}
+
+const char *tab_inflight_request_headers(void) {
+    return (g_inflight_headers != NULL && g_inflight_headers[0] != '\0') ? g_inflight_headers : NULL;
+}
+
 /* Handles one TAG_SUBREQ frame on the response pipe: reads the worker's subresource
  * request, gates it on the grants the PARENT decided for this load (Zero Trust: a
  * compromised worker forging frames gets a refusal, never a fetch -- net grants any
@@ -3009,11 +3083,23 @@ int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method) {
  * desyncs. Returns 0 on success, -1 on a pipe/protocol error (caller aborts the
  * load). Bytes are capped (anti-amplification). */
 static int tab_serve_subreq(tab *t, int net_granted, int css_granted) {
-    size_t mlen = 0, ulen = 0, blen = 0;
-    char *method = NULL, *url = NULL, *body = NULL;
+    size_t mlen = 0, ulen = 0, blen = 0, hlen = 0;
+    char *method = NULL, *url = NULL, *body = NULL, *rawh = NULL;
     if (read_field(t->resp_fd, &method, &mlen) != 0) return -1;
     if (read_field(t->resp_fd, &url, &ulen) != 0) { free(method); return -1; }
     if (read_field(t->resp_fd, &body, &blen) != 0) { free(method); free(url); return -1; }
+    if (read_field(t->resp_fd, &rawh, &hlen) != 0) { free(method); free(url); free(body); return -1; }
+
+    /* The worker is untrusted: its header block is re-filtered here, and only the filtered
+     * block is visible to the fetcher (tab_inflight_request_headers) for this one call. */
+    char hdrs[RP_HDR_MAX_BYTES + 1];
+    hdrs[0] = '\0';
+    if (hlen <= RP_HDR_MAX_BYTES && rawh != NULL) (void)rp_sanitize_request_headers(rawh, hdrs, sizeof hdrs);
+    free(rawh);
+    g_inflight_headers = hdrs;
+    free(g_inflight_resp);
+    g_inflight_resp = NULL;
+    g_inflight_active = 1;
 
     int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL;
     int ok = 0;
@@ -3030,6 +3116,8 @@ static int tab_serve_subreq(tab *t, int net_granted, int css_granted) {
         ok = 1;
     }
     clock_gettime(CLOCK_MONOTONIC, &f1);
+    g_inflight_headers = NULL;
+    g_inflight_active = 0;
     if (t->in_op) t->op_net_us += (int64_t)(f1.tv_sec - f0.tv_sec) * 1000000
                                 + (f1.tv_nsec - f0.tv_nsec) / 1000;
     if (!ok) { status = 0; rlen = 0; }                 /* refused/failed: fail-closed */
@@ -3052,6 +3140,13 @@ static int tab_serve_subreq(tab *t, int net_granted, int css_granted) {
             && (rlen == 0 || write_full(t->req_fd, rbody, rlen) == 0)
             && write_full(t->req_fd, &clen, sizeof clen) == 0
             && (clen == 0 || write_full(t->req_fd, rctype, clen) == 0));
+    /* Response headers the page may read (a refused request reports none). */
+    size_t xlen = (ok && g_inflight_resp != NULL) ? strlen(g_inflight_resp) : 0;
+    if (xlen > SF_RESPONSE_HEADERS_MAX) xlen = 0;
+    wok = wok && write_full(t->req_fd, &xlen, sizeof xlen) == 0
+              && (xlen == 0 || write_full(t->req_fd, g_inflight_resp, xlen) == 0);
+    free(g_inflight_resp);
+    g_inflight_resp = NULL;
 
     free(method); free(url); free(body); free(rbody); free(rctype);
     return wok ? 0 : -1;

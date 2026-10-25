@@ -29,6 +29,7 @@ flowchart LR
     n_src_url_c__url_history_target(["url_history_target"])
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
     n_src_css_color_c__strncmp["css_color.strncmp"]
+    n_include_js_dom_h__host["js_dom.host"]
     n_src_url_c__url_validate_https --> n_src_url_c__url_is_https
     n_src_url_c__url_resolve_https --> n_src_url_c__url_authority_len
     n_src_url_c__url_resolve_https --> n_src_url_c__url_has_scheme
@@ -49,6 +50,7 @@ flowchart LR
     n_src_url_c__url_history_target --> n_src_url_c__url_validate_https
     n_src_url_c__url_remove_dot_segments -.-> n_gui_browser_ui_c__strcmp
     n_src_url_c__url_remove_dot_segments -.-> n_src_css_color_c__strncmp
+    n_src_url_c__url_extract_userinfo -.-> n_include_js_dom_h__host
     n_src_url_c__url_resolve_file -.-> n_src_css_color_c__strncmp
 ```
 
@@ -308,7 +310,7 @@ url_status url_extract_userinfo(const char *url, char *out, size_t outsz, char *
 
 **Returns:** `url_status`
 
-*Calls:* [`url_is_https`](#url_is_https)
+*Calls:* [`host`](include.js_dom.h.md#host), [`url_is_https`](#url_is_https)
 
 *Called by:* [`arrives`](gui.browser_ui.c.md#arrives)
 

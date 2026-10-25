@@ -1,6 +1,72 @@
 # API (page 9 of 11)
 Previous: [API_p8.md](API_p8.md)
 
+## src/js_sandbox.c
+Depends on: `include/js_sandbox.h`
+- `rej_remove` (function) `src/js_sandbox.c:75` `static void rej_remove(js_context *c, size_t i)`
+- `js_rejection_cb` (function) `src/js_sandbox.c:83` `static void js_rejection_cb(JSContext *jc, JSValueConst promise, JSValueConst reason,
+           ...`
+- `rej_report` (function) `src/js_sandbox.c:102` `static void rej_report(js_context *c)` -- Hands each still-unhandled rejection to the page, oldest first.
+- `jm_malloc` (function) `src/js_sandbox.c:127` `static void *jm_malloc(void *opaque, size_t size)`
+- `jm_calloc` (function) `src/js_sandbox.c:135` `static void *jm_calloc(void *opaque, size_t count, size_t size)`
+- `jm_free` (function) `src/js_sandbox.c:145` `static void jm_free(void *opaque, void *ptr)`
+- `jm_realloc` (function) `src/js_sandbox.c:151` `static void *jm_realloc(void *opaque, void *ptr, size_t size)`
+- `jm_usable_size` (function) `src/js_sandbox.c:161` `static size_t jm_usable_size(const void *ptr)`
+- `host_dup` (function) `src/js_sandbox.c:171` `static char *host_dup(const char *src, size_t len)`
+- `timespec_reached` (function) `src/js_sandbox.c:180` `static int timespec_reached(const struct timespec *now, const struct timespec *deadline)`
+- `timespec_diff_ms` (function) `src/js_sandbox.c:185` `static long timespec_diff_ms(const struct timespec *a, const struct timespec *b)`
+- `profile_sample` (function) `src/js_sandbox.c:190` `static void profile_sample(js_context *c, unsigned weight_ms)` -- out[len] = '\0'; return out; } static int timespec_reached(const struct timespec *now, const struct timespec...
+- `js_profile_enable` (function) `src/js_sandbox.c:222` `void js_profile_enable(js_context *ctx)`
+- `js_profile_report` (function) `src/js_sandbox.c:228` `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n)`
+- `throw_key` (function) `src/js_sandbox.c:251` `static void throw_key(JSContext *ctx, JSValueConst obj, char *key, size_t cap)` -- if (!used[i] && (best == ctx->prof_n || ctx->prof[i].hits > ctx->prof[best].hits)) best = i; if (best ==...
+- `throw_hook_cb` (function) `src/js_sandbox.c:308` `static void throw_hook_cb(JSContext *ctx, JSValueConst obj, void *opaque)`
+- `js_throws_enable` (function) `src/js_sandbox.c:328` `void js_throws_enable(js_context *ctx)`
+- `js_throws_report` (function) `src/js_sandbox.c:334` `size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n)`
+- `m_fb_report` (function) `src/js_sandbox.c:356` `static JSValue m_fb_report(JSContext *jsctx, JSValueConst this_val, int argc, JSValueConst *argv,...` -- for (size_t i = 0; i < ctx->thr_n; i++) if (!used[i] && (best == ctx->thr_n || ctx->thr[i].hits >...
+- `js_devtools_enable` (function) `src/js_sandbox.c:372` `void js_devtools_enable(js_context *ctx)`
+- `js_devtools_expose` (function) `src/js_sandbox.c:378` `js_status js_devtools_expose(js_context *ctx)`
+- `js_interrupt_cb` (function) `src/js_sandbox.c:394` `static int js_interrupt_cb(JSRuntime *rt, void *opaque)` -- uint64_t u = (uint64_t)(uintptr_t)ctx; static const char *const names[2] = { "__fbProfile", "__fbThrows" }; JSValue...
+- `is_ascii_digit` (function) `src/js_sandbox.c:418` `static int is_ascii_digit(char c)`
+- `js_loc_from_stack` (function) `src/js_sandbox.c:420` `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,
+                      i...`
+- `undefined` (function) `src/js_sandbox.c:512` `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx...`
+- `js_stack_limit_for` (function) `src/js_sandbox.c:539` `size_t js_stack_limit_for(size_t soft_stack)`
+- `process_soft_stack` (function) `src/js_sandbox.c:550` `static size_t process_soft_stack(void)`
+- `js_prime_stack_limit` (function) `src/js_sandbox.c:560` `void js_prime_stack_limit(void)`
+- `js_limits_default` (function) `src/js_sandbox.c:562` `js_limits js_limits_default(void)`
+- `limits_resolve` (function) `src/js_sandbox.c:571` `static js_limits limits_resolve(const js_limits *lim)`
+- `js_validate_source` (function) `src/js_sandbox.c:580` `js_status js_validate_source(const char *src, size_t len, const js_limits *lim)`
+- `js_context_new` (function) `src/js_sandbox.c:591` `js_status js_context_new(const js_limits *lim, js_context **out)`
+- `js_context_free` (function) `src/js_sandbox.c:631` `void js_context_free(js_context *ctx)`
+- `arm_deadline` (function) `src/js_sandbox.c:643` `static void arm_deadline(js_context *ctx, uint64_t budget_ms)`
+- `js_set_time_budget` (function) `src/js_sandbox.c:658` `void js_set_time_budget(js_context *ctx, uint64_t budget_ms)`
+- `js_eval` (function) `src/js_sandbox.c:663` `js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)`
+- `js_eval_named` (function) `src/js_sandbox.c:667` `js_status js_eval_named(js_context *ctx, const char *src, size_t len,
+                        con...`
+- `js_pump_jobs` (function) `src/js_sandbox.c:750` `int js_pump_jobs(js_context *ctx, int max_jobs)`
+- `js_eval_once` (function) `src/js_sandbox.c:769` `js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res)`
+- `js_result_free` (function) `src/js_sandbox.c:782` `void js_result_free(js_result *res)`
+- `js_set_current_script` (function) `src/js_sandbox.c:806` `void js_set_current_script(js_context *ctx, const char *src, const char *type)`
+- `js_context_raw` (function) `src/js_sandbox.c:839` `void *js_context_raw(js_context *ctx)`
+- `mod_set_meta` (function) `src/js_sandbox.c:871` `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)` -- size_t cap = nlen + JS_MODULE_URL_MAX; char *out = (char *)calloc(cap, 1); if (out == NULL) {...
+- `mod_loader` (function) `src/js_sandbox.c:880` `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)` -- free(out); return r; } /* Sets import.meta.url of a compiled module to its absolute URL. static void...
+- `mod_normalize` (function) `src/js_sandbox.c:916` `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);`
+- `js_set_module_host` (function) `src/js_sandbox.c:919` `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,
+                        js...`
+- `mod_fail` (function) `src/js_sandbox.c:934` `static js_status mod_fail(js_context *ctx, js_result *res, JSValue reason, int use_reason,
+      ...` -- Fills res from the pending exception (or the given rejection value, which is * thrown first so the one capture path...
+- `js_eval_module` (function) `src/js_sandbox.c:949` `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,
+        ...`
+- `realm_of` (function) `src/js_sandbox.c:1016` `static JSContext *realm_of(js_context *c, JSValueConst g)` -- The owning js_context rides in each native's closure data, split into 32-bit * halves (no assumption about JS number...
+- `throw_named` (function) `src/js_sandbox.c:1029` `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)`
+- `m_realm_new` (function) `src/js_sandbox.c:1039` `static JSValue m_realm_new(JSContext *ctx, JSValueConst this_val, int argc,
+                     ...`
+- `m_realm_eval` (function) `src/js_sandbox.c:1053` `static JSValue m_realm_eval(JSContext *ctx, JSValueConst this_val, int argc,
+                    ...` -- __realmEval(global, code, name): a classic script in that realm.
+- `m_realm_clone` (function) `src/js_sandbox.c:1089` `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,
+                   ...` -- __realmClone(value, global): structured copy into global's realm through the * serializer WITHOUT bytecode -- a...
+- `js_install_realms` (function) `src/js_sandbox.c:1111` `js_status js_install_realms(js_context *ctx)`
+
 ## src/js_trusted.c
 Depends on: `include/js_trusted.h`, `include/web_storage.h`
 - `jt_enable_open` (function) `src/js_trusted.c:48` `jd_status jt_enable_open(js_context *ctx)`
@@ -36,28 +102,28 @@ Depends on: `include/link_nav.h`, `include/url.h`
 
 ## src/local_store.c
 Depends on: `include/local_store.h`
-- `cipher_for` (function) `src/local_store.c:871` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
-- `argon2id_derive` (function) `src/local_store.c:881` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
+- `cipher_for` (function) `src/local_store.c:882` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
+- `argon2id_derive` (function) `src/local_store.c:892` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
                           ...`
-- `ls_derive_key` (function) `src/local_store.c:910` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
+- `ls_derive_key` (function) `src/local_store.c:921` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
                         const...`
-- `aead_encrypt` (function) `src/local_store.c:919` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_encrypt` (function) `src/local_store.c:930` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `aead_decrypt` (function) `src/local_store.c:945` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_decrypt` (function) `src/local_store.c:956` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `seal_core` (function) `src/local_store.c:973` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
+- `seal_core` (function) `src/local_store.c:984` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
                     ...`
-- `decrypt_blob` (function) `src/local_store.c:1010` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
+- `decrypt_blob` (function) `src/local_store.c:1021` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
          ...`
-- `ls_seal` (function) `src/local_store.c:1041` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
+- `ls_seal` (function) `src/local_store.c:1052` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
                   const uint8_t *p...`
-- `ls_open` (function) `src/local_store.c:1054` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
+- `ls_open` (function) `src/local_store.c:1065` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
                   const uint8_t *blob, size_t bl...`
-- `ls_seal_passphrase` (function) `src/local_store.c:1065` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
+- `ls_seal_passphrase` (function) `src/local_store.c:1076` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
           ...`
-- `ls_open_passphrase` (function) `src/local_store.c:1086` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
+- `ls_open_passphrase` (function) `src/local_store.c:1097` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
-- `ls_free` (function) `src/local_store.c:1106` `void ls_free(uint8_t *buf, size_t len)`
+- `ls_free` (function) `src/local_store.c:1117` `void ls_free(uint8_t *buf, size_t len)`
 
 ## src/media_decoder.c
 Depends on: `include/media_decoder.h`, `include/util.h`
@@ -422,71 +488,6 @@ Depends on: `include/pdf_export.h`
 - `pe_build_path` (function) `src/pdf_export.c:91` `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz)`
 - `pe_paginate` (function) `src/pdf_export.c:95` `size_t pe_paginate(const double *tops, const double *heights, size_t n,
                    double...`
-
-## src/perf_trace.c
-Depends on: `include/perf_trace.h`
-- `pt_init` (function) `src/perf_trace.c:16` `void pt_init(pt_trace *t)`
-- `pt_elapsed_us` (function) `src/perf_trace.c:21` `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us)`
-- `pt_record` (function) `src/perf_trace.c:26` `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us)`
-- `pt_count` (function) `src/perf_trace.c:35` `size_t pt_count(const pt_trace *t, pt_stage stage)`
-- `pt_last_us` (function) `src/perf_trace.c:40` `uint64_t pt_last_us(const pt_trace *t, pt_stage stage)`
-- `pt_min_us` (function) `src/perf_trace.c:49` `uint64_t pt_min_us(const pt_trace *t, pt_stage stage)`
-- `pt_max_us` (function) `src/perf_trace.c:60` `uint64_t pt_max_us(const pt_trace *t, pt_stage stage)`
-- `cmp_u64` (function) `src/perf_trace.c:71` `static int cmp_u64(const void *a, const void *b)`
-- `pt_median_us` (function) `src/perf_trace.c:79` `uint64_t pt_median_us(const pt_trace *t, pt_stage stage)`
-- `pt_stage_name` (function) `src/perf_trace.c:89` `const char *pt_stage_name(pt_stage stage)`
-- `pt_format` (function) `src/perf_trace.c:109` `size_t pt_format(const pt_trace *t, char *buf, size_t cap)`
-
-## src/pq_seal.c
-Depends on: `include/pq_seal.h`
-- `pqs_buf_free` (function) `src/pq_seal.c:23` `void pqs_buf_free(uint8_t *buf, size_t len)`
-- `pqs_free` (function) `src/pq_seal.c:29` `void pqs_free(pqs_keys *k)`
-- `keys_wrap` (function) `src/pq_seal.c:35` `static pqs_keys *keys_wrap(EVP_PKEY *pkey)`
-- `pqs_generate` (function) `src/pq_seal.c:42` `pqs_status pqs_generate(pqs_keys **out)`
-- `pqs_export` (function) `src/pq_seal.c:55` `pqs_status pqs_export(const pqs_keys *k, uint8_t **der, size_t *len)`
-- `pqs_import` (function) `src/pq_seal.c:68` `pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out)`
-- `derive_key` (function) `src/pq_seal.c:81` `static int derive_key(const uint8_t ss[PQS_SS_LEN], const uint8_t wrap[LS_KEY_LEN],
-             ...` -- pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out) { if (der == NULL || out == NULL) return...
-- `pqs_seal` (function) `src/pq_seal.c:106` `pqs_status pqs_seal(const pqs_keys *k, const uint8_t wrap[LS_KEY_LEN],
-                    const ...`
-- `pqs_open` (function) `src/pq_seal.c:147` `pqs_status pqs_open(const pqs_keys *k, const uint8_t wrap[LS_KEY_LEN],
-                    const ...`
-
-## src/prefetch.c
-Depends on: `include/import_map.h`, `include/prefetch.h`, `include/url.h`
-- `is_ws` (function) `src/prefetch.c:26` `static int is_ws(char c)`
-- `is_name_char` (function) `src/prefetch.c:30` `static int is_name_char(char c)`
-- `lower` (function) `src/prefetch.c:35` `static int lower(int c)`
-- `ci_starts` (function) `src/prefetch.c:40` `static int ci_starts(const char *p, const char *end, const char *kw)` -- static int is_ws(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f'; } static int...
-- `ci_find` (function) `src/prefetch.c:49` `static const char *ci_find(const char *p, const char *end, const char *kw)` -- static int lower(int c) { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; } /* Case-insensitive: [p,end) starts...
-- `ci_eq_span` (function) `src/prefetch.c:58` `static int ci_eq_span(const char *s, size_t n, const char *kw)`
-- `emit` (function) `src/prefetch.c:120` `static void emit(pf_list *out, pf_kind kind, const char *val, size_t vlen)`
-- `pf_scan` (function) `src/prefetch.c:133` `int pf_scan(const char *html, size_t len, pf_list *out)`
-- `pf_list_free` (function) `src/prefetch.c:196` `void pf_list_free(pf_list *l)`
-- `js_ident_ch` (function) `src/prefetch.c:207` `static int js_ident_ch(char c)`
-- `js_skip_ws` (function) `src/prefetch.c:212` `static size_t js_skip_ws(const char *s, size_t i, size_t n)`
-- `js_skip_string` (function) `src/prefetch.c:219` `static size_t js_skip_string(const char *s, size_t i, size_t n)` -- /* --- ES module graph (spec/prefetch.md section 8) --- static int js_ident_ch(char c) { return (c >= 'a' && c <=...
-- `js_take_spec` (function) `src/prefetch.c:226` `static void js_take_spec(const char *s, size_t i, size_t n,
-                         char (*out)[...` -- static size_t js_skip_ws(const char *s, size_t i, size_t n) { while (i < n && (s[i] == ' ' || s[i] == '\t' || s[i]...
-- `pf_scan_imports` (function) `src/prefetch.c:241` `size_t pf_scan_imports(const char *js, size_t len, char (*out)[PF_SPEC_MAX], size_t cap)`
-- `pf_pool_add` (function) `src/prefetch.c:288` `int pf_pool_add(pf_pool *p, const char *url)`
-- `pf_is_js` (function) `src/prefetch.c:311` `static int pf_is_js(const char *url, const char *ctype)`
-- `pf_url_cb` (function) `src/prefetch.c:319` `static int pf_url_cb(void *ctx, const char *base, const char *ref, char *out, size_t outsz)`
-- `pf_url_shaped` (function) `src/prefetch.c:324` `static int pf_url_shaped(const char *sp)`
-- `pf_follow_imports` (function) `src/prefetch.c:333` `static void pf_follow_imports(pf_pool *p, const char *base, const char *body, size_t len)` -- Queues the static imports of a fetched module body, resolved the way the module loader resolves them: through the...
-- `pf_worker` (function) `src/prefetch.c:349` `static void *pf_worker(void *arg)`
-- `pf_pool_start` (function) `src/prefetch.c:387` `int pf_pool_start(pf_pool *p, const char *const *urls, size_t nurls,
-                  pf_fetch_f...`
-- `pool_start` (function) `src/prefetch.c:394` `static int pool_start(pf_pool *p, const char *const *urls, size_t nurls,
-                      pf...` -- map (owned on success) is set BEFORE the threads start: they read it after a * fetch, unlocked, and it never changes...
-- `pf_pool_take` (function) `src/prefetch.c:444` `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status,
-                 char **body,...`
-- `pf_find_importmap` (function) `src/prefetch.c:483` `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n)`
-- `pf_pool_start_page` (function) `src/prefetch.c:504` `int pf_pool_start_page(pf_pool *p, const char *html, size_t len, const char *page_url,
-          ...`
-- `pf_pool_finish` (function) `src/prefetch.c:540` `void pf_pool_finish(pf_pool *p)`
-- `pf_pooled_fetch` (function) `src/prefetch.c:561` `int pf_pooled_fetch(void *vctx, const char *method, const char *url,
-                    const ch...`
 
 
 Next: [API_p10.md](API_p10.md)

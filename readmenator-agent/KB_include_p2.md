@@ -215,34 +215,35 @@ Previous: [KB_include.md](KB_include.md)
 - Language: h
 - Symbols:
   - `dom_status` (enum, line 26)
-  - `dom_place` (enum, line 182)
+  - `dom_place` (enum, line 187)
   - `dom_node_id` (type_alias, line 34) `typedef uint32_t dom_node_id;`
   - `dom_index` (type_alias, line 40) `typedef struct dom_index dom_index;`
   - `dom_free` (function, line 48) `void dom_free(dom_index *idx);`
   - `dom_node_count` (function, line 51) `size_t dom_node_count(const dom_index *idx);`
-  - `count` (function, line 59) `* match count (which may exceed cap, so the caller can size a buffer). */ size_t dom_get_by_tag(const dom_index...`
-  - `dom_get_by_class` (function, line 62) `size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);`
-  - `dom_matches` (function, line 91) `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);`
-  - `dom_document_position` (function, line 101) `size_t dom_document_position(const dom_index *idx, dom_node_id node);`
-  - `dom_precedes` (function, line 104) `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);`
-  - `dom_tag_name` (function, line 118) `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);`
-  - `dom_get_attribute` (function, line 121) `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);`
-  - `dom_attribute_names` (function, line 128) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);`
-  - `dom_text_content` (function, line 133) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);`
-  - `dom_document_title` (function, line 136) `const char *dom_document_title(const dom_index *idx, size_t *len);`
-  - `cycle` (function, line 164) `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...`
-  - `parent` (function, line 191) `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...`
-  - `dom_node_kind` (function, line 207) `int dom_node_kind(const dom_index *idx, dom_node_id node);`
-  - `index` (function, line 223) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...`
-  - `length` (function, line 248) `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...`
-  - `process` (function, line 255) `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...`
+  - `tree` (function, line 59) `* tree (the index only grows, so a node a script removed is still registered and must not be * found);`
+  - `count` (function, line 64) `* match count (which may exceed cap, so the caller can size a buffer). */ size_t dom_get_by_tag(const dom_index...`
+  - `dom_get_by_class` (function, line 67) `size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);`
+  - `dom_matches` (function, line 96) `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);`
+  - `dom_document_position` (function, line 106) `size_t dom_document_position(const dom_index *idx, dom_node_id node);`
+  - `dom_precedes` (function, line 109) `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);`
+  - `dom_tag_name` (function, line 123) `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);`
+  - `dom_get_attribute` (function, line 126) `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);`
+  - `dom_attribute_names` (function, line 133) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);`
+  - `dom_text_content` (function, line 138) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);`
+  - `dom_document_title` (function, line 141) `const char *dom_document_title(const dom_index *idx, size_t *len);`
+  - `cycle` (function, line 169) `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...`
+  - `parent` (function, line 196) `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...`
+  - `dom_node_kind` (function, line 212) `int dom_node_kind(const dom_index *idx, dom_node_id node);`
+  - `index` (function, line 228) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...`
+  - `length` (function, line 253) `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...`
+  - `process` (function, line 260) `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...`
   - `FREEDOM_DOM_H` (macro, line 2) `#define FREEDOM_DOM_H`
   - `DOM_NODE_NONE` (macro, line 37) `#define DOM_NODE_NONE`
-  - `DOM_KIND_NONE` (macro, line 198) `#define DOM_KIND_NONE`
-  - `DOM_KIND_ELEMENT` (macro, line 199) `#define DOM_KIND_ELEMENT`
-  - `DOM_KIND_TEXT` (macro, line 200) `#define DOM_KIND_TEXT`
-  - `DOM_KIND_COMMENT` (macro, line 201) `#define DOM_KIND_COMMENT`
-  - `DOM_MAX_HANDLES` (macro, line 204) `#define DOM_MAX_HANDLES`
+  - `DOM_KIND_NONE` (macro, line 203) `#define DOM_KIND_NONE`
+  - `DOM_KIND_ELEMENT` (macro, line 204) `#define DOM_KIND_ELEMENT`
+  - `DOM_KIND_TEXT` (macro, line 205) `#define DOM_KIND_TEXT`
+  - `DOM_KIND_COMMENT` (macro, line 206) `#define DOM_KIND_COMMENT`
+  - `DOM_MAX_HANDLES` (macro, line 209) `#define DOM_MAX_HANDLES`
 - Depends on: `include/html_parse.h`
 - Imported by: `include/js_dom.h`, `include/js_geom.h`, `include/page_view.h`, `src/dom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
 
@@ -275,22 +276,22 @@ Previous: [KB_include.md](KB_include.md)
 - Imported by: `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
 
 ## include/fb_panes.h
-- Doc: fbp_tab_label: typedef enum fbp_tab { FBP_CONSOLE = 0, FBP_HTML, FBP_CSS, FBP_SCRIPT, FBP_NET...
+- Doc: fbp_tab_label: FBP_CONSOLE = 0, FBP_HTML, FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_PROFILE,   /* where...
 - Layer: utility
 - Language: h
 - Symbols:
   - `fbp_tab` (enum, line 17)
-  - `fbp_tab_label` (function, line 30) `const char *fbp_tab_label(int tab);`
-  - `fbp_tab_from_name` (function, line 33) `int fbp_tab_from_name(const char *name);`
-  - `fbp_tab_wrap` (function, line 36) `int fbp_tab_wrap(int tab, int dir);`
-  - `fbp_tab_span` (function, line 39) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);`
-  - `fbp_tab_at` (function, line 42) `int fbp_tab_at(double x, double cell_w, double pad_cells);`
-  - `fbp_is_pane` (function, line 45) `int fbp_is_pane(int tab);`
-  - `fbp_js_quote` (function, line 49) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);`
-  - `fbp_expr` (function, line 53) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);`
+  - `fbp_tab_label` (function, line 32) `const char *fbp_tab_label(int tab);`
+  - `fbp_tab_from_name` (function, line 35) `int fbp_tab_from_name(const char *name);`
+  - `fbp_tab_wrap` (function, line 38) `int fbp_tab_wrap(int tab, int dir);`
+  - `fbp_tab_span` (function, line 41) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);`
+  - `fbp_tab_at` (function, line 44) `int fbp_tab_at(double x, double cell_w, double pad_cells);`
+  - `fbp_is_pane` (function, line 47) `int fbp_is_pane(int tab);`
+  - `fbp_js_quote` (function, line 51) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);`
+  - `fbp_expr` (function, line 55) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);`
   - `FREEDOM_FB_PANES_H` (macro, line 2) `#define FREEDOM_FB_PANES_H`
-  - `FBP_SELECTOR_MAX` (macro, line 26) `#define FBP_SELECTOR_MAX`
-  - `FBP_EXPR_MAX` (macro, line 27) `#define FBP_EXPR_MAX`
+  - `FBP_SELECTOR_MAX` (macro, line 28) `#define FBP_SELECTOR_MAX`
+  - `FBP_EXPR_MAX` (macro, line 29) `#define FBP_EXPR_MAX`
 - Imported by: `gui/browser_ui.c`, `src/fb_panes.c`, `src/freedom.c`, `tests/test_fb_panes.c`, `tests/test_js_dom.c`
 
 ## include/flex_layout.h
@@ -409,18 +410,18 @@ Previous: [KB_include.md](KB_include.md)
   - `FREEDOM_CONFIG_H` (macro, line 14) `#define FREEDOM_CONFIG_H`
   - `FC_PNG_PAGE_W` (macro, line 20) `#define FC_PNG_PAGE_W`
   - `FC_HEADLESS_VIEW_H` (macro, line 24) `#define FC_HEADLESS_VIEW_H`
-  - `FC_TRUSTED_JS_BUDGET_MS` (macro, line 29) `#define FC_TRUSTED_JS_BUDGET_MS`
-  - `FC_PNG_MARGIN` (macro, line 33) `#define FC_PNG_MARGIN`
-  - `FC_PNG_MAX_H` (macro, line 38) `#define FC_PNG_MAX_H`
-  - `FC_FLEX_MEASURE_W` (macro, line 44) `#define FC_FLEX_MEASURE_W`
-  - `FC_FLEX_MIN_MEASURE_W` (macro, line 50) `#define FC_FLEX_MIN_MEASURE_W`
-  - `FC_FONT_CHAIN_MAX` (macro, line 55) `#define FC_FONT_CHAIN_MAX`
-  - `FC_MAX_BOXES` (macro, line 60) `#define FC_MAX_BOXES`
-  - `FC_FONT_FALLBACK_PX` (macro, line 65) `#define FC_FONT_FALLBACK_PX`
-  - `FC_UI_FONT_SIZE` (macro, line 69) `#define FC_UI_FONT_SIZE`
-  - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 77) `#define FC_MAX_AUTHOR_CSS_BYTES`
-  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 80) `#define FC_LAZY_IMAGE_MARGIN_PX`
-  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 86) `#define FC_TAB_OP_NET_BUDGET_MS`
+  - `FC_TRUSTED_JS_BUDGET_MS` (macro, line 30) `#define FC_TRUSTED_JS_BUDGET_MS`
+  - `FC_PNG_MARGIN` (macro, line 34) `#define FC_PNG_MARGIN`
+  - `FC_PNG_MAX_H` (macro, line 39) `#define FC_PNG_MAX_H`
+  - `FC_FLEX_MEASURE_W` (macro, line 45) `#define FC_FLEX_MEASURE_W`
+  - `FC_FLEX_MIN_MEASURE_W` (macro, line 51) `#define FC_FLEX_MIN_MEASURE_W`
+  - `FC_FONT_CHAIN_MAX` (macro, line 56) `#define FC_FONT_CHAIN_MAX`
+  - `FC_MAX_BOXES` (macro, line 61) `#define FC_MAX_BOXES`
+  - `FC_FONT_FALLBACK_PX` (macro, line 66) `#define FC_FONT_FALLBACK_PX`
+  - `FC_UI_FONT_SIZE` (macro, line 70) `#define FC_UI_FONT_SIZE`
+  - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 78) `#define FC_MAX_AUTHOR_CSS_BYTES`
+  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 81) `#define FC_LAZY_IMAGE_MARGIN_PX`
+  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 87) `#define FC_TAB_OP_NET_BUDGET_MS`
 - Imported by: `gui/browser_ui_internal.h`, `gui/svg_paint.c`, `gui/ui_render.c`, `src/page_view.c`, `src/tab.c`
 
 ## include/hls.h

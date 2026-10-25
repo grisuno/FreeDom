@@ -83,7 +83,7 @@ flowchart LR
 
 ### `body_sink`
 
-`struct` | [src/secure_fetch.c:487](../../src/secure_fetch.c#L487)
+`struct` | [src/secure_fetch.c:490](../../src/secure_fetch.c#L490)
 
 ```c
 typedef struct body_sink
@@ -95,7 +95,7 @@ typedef struct body_sink
 
 ### `tls_capture`
 
-`struct` | [src/secure_fetch.c:500](../../src/secure_fetch.c#L500)
+`struct` | [src/secure_fetch.c:503](../../src/secure_fetch.c#L503)
 
 ```c
 typedef struct tls_capture
@@ -111,7 +111,7 @@ So we capture from inside the header/write callbacks and copy everything into ow
 
 ### `fetch_ctx`
 
-`struct` | [src/secure_fetch.c:510](../../src/secure_fetch.c#L510)
+`struct` | [src/secure_fetch.c:513](../../src/secure_fetch.c#L513)
 
 ```c
 typedef struct fetch_ctx
@@ -123,7 +123,7 @@ typedef struct fetch_ctx
 
 ### `sf_rcache_entry`
 
-`struct` | [src/secure_fetch.c:1122](../../src/secure_fetch.c#L1122)
+`struct` | [src/secure_fetch.c:1167](../../src/secure_fetch.c#L1167)
 
 ```c
 typedef struct
@@ -135,7 +135,7 @@ typedef struct
 
 ### `sf_ws`
 
-`struct` | [src/secure_fetch.c:1287](../../src/secure_fetch.c#L1287)
+`struct` | [src/secure_fetch.c:1332](../../src/secure_fetch.c#L1332)
 
 ```c
 struct sf_ws
@@ -149,7 +149,7 @@ struct sf_ws
 
 ### `sink`
 
-`type_alias` | [src/secure_fetch.c:509](../../src/secure_fetch.c#L509)
+`type_alias` | [src/secure_fetch.c:512](../../src/secure_fetch.c#L512)
 
 ```c
 typedef struct fetch_ctx { body_sink sink;
@@ -163,7 +163,7 @@ typedef struct fetch_ctx { body_sink sink;
 
 ### `sf_global_init`
 
-`function` | [src/secure_fetch.c:86](../../src/secure_fetch.c#L86)
+`function` | [src/secure_fetch.c:87](../../src/secure_fetch.c#L87)
 
 ```c
 void sf_global_init(void)
@@ -173,7 +173,7 @@ Initialises process-global transport state (libcurl/OpenSSL) once, from the main
 
 Idempotent; safe to call more than once. A single-threaded caller need not call it. There is intentionally no cleanup: it would race in-flight fetches at shutdown, and the OS reclaims everything on exit.
 
-> **Inherited:** Documentation from [`sf_global_init`](#sf_global_init) (include/secure_fetch.h:219).
+> **Inherited:** Documentation from [`sf_global_init`](#sf_global_init) (include/secure_fetch.h:227).
 
 ---
 
@@ -181,7 +181,7 @@ Idempotent; safe to call more than once. A single-threaded caller need not call 
 
 ### `sf_cookie_line_matches`
 
-`function` | [src/secure_fetch.c:111](../../src/secure_fetch.c#L111)
+`function` | [src/secure_fetch.c:112](../../src/secure_fetch.c#L112)
 
 ```c
 int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz)
@@ -202,7 +202,7 @@ Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecu
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`sf_cookie_line_matches`](#sf_cookie_line_matches) (include/secure_fetch.h:237).
+> **Inherited:** Documentation from [`sf_cookie_line_matches`](#sf_cookie_line_matches) (include/secure_fetch.h:245).
 
 *Calls:* [`strncmp`](src.css_color.c.md#strncmp)
 
@@ -214,7 +214,7 @@ Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecu
 
 ### `sf_cookie_header_for`
 
-`function` | [src/secure_fetch.c:181](../../src/secure_fetch.c#L181)
+`function` | [src/secure_fetch.c:182](../../src/secure_fetch.c#L182)
 
 ```c
 size_t sf_cookie_header_for(const char *url, char *out, size_t outsz)
@@ -238,7 +238,7 @@ size_t sf_cookie_header_for(const char *url, char *out, size_t outsz)
 
 ### `sf_cookie_put`
 
-`function` | [src/secure_fetch.c:210](../../src/secure_fetch.c#L210)
+`function` | [src/secure_fetch.c:211](../../src/secure_fetch.c#L211)
 
 ```c
 void sf_cookie_put(const char *url, const char *namevalue)
@@ -255,7 +255,7 @@ No-op on malformed input.
 | `url` | `char *` |  |  |
 | `namevalue` | `char *` |  |  |
 
-> **Inherited:** Documentation from [`sf_cookie_put`](#sf_cookie_put) (include/secure_fetch.h:232).
+> **Inherited:** Documentation from [`sf_cookie_put`](#sf_cookie_put) (include/secure_fetch.h:240).
 
 ---
 
@@ -263,7 +263,7 @@ No-op on malformed input.
 
 ### `sf_config_default`
 
-`function` | [src/secure_fetch.c:231](../../src/secure_fetch.c#L231)
+`function` | [src/secure_fetch.c:232](../../src/secure_fetch.c#L232)
 
 ```c
 sf_config sf_config_default(void)
@@ -279,7 +279,7 @@ sf_config sf_config_default(void)
 
 ### `sf_user_agent_or_default`
 
-`function` `const` | [src/secure_fetch.c:263](../../src/secure_fetch.c#L263)
+`function` `const` | [src/secure_fetch.c:264](../../src/secure_fetch.c#L264)
 
 ```c
 const char *sf_user_agent_or_default(const char *ua)
@@ -297,7 +297,7 @@ Pure: the single place that resolves the effective User-Agent, so the orchestrat
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`sf_user_agent_or_default`](#sf_user_agent_or_default) (include/secure_fetch.h:246).
+> **Inherited:** Documentation from [`sf_user_agent_or_default`](#sf_user_agent_or_default) (include/secure_fetch.h:254).
 
 ---
 
@@ -305,7 +305,7 @@ Pure: the single place that resolves the effective User-Agent, so the orchestrat
 
 ### `sf_accept_language_or_default`
 
-`function` `const` | [src/secure_fetch.c:267](../../src/secure_fetch.c#L267)
+`function` `const` | [src/secure_fetch.c:268](../../src/secure_fetch.c#L268)
 
 ```c
 const char *sf_accept_language_or_default(const char *lang)
@@ -323,7 +323,7 @@ Both refuse a value holding a control byte (a CR/LF would split the request): th
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`sf_accept_language_or_default`](#sf_accept_language_or_default) (include/secure_fetch.h:250).
+> **Inherited:** Documentation from [`sf_accept_language_or_default`](#sf_accept_language_or_default) (include/secure_fetch.h:258).
 
 ---
 
@@ -331,7 +331,7 @@ Both refuse a value holding a control byte (a CR/LF would split the request): th
 
 ### `sf_impersonate_kex_groups`
 
-`function` `const` | [src/secure_fetch.c:271](../../src/secure_fetch.c#L271)
+`function` `const` | [src/secure_fetch.c:272](../../src/secure_fetch.c#L272)
 
 ```c
 const char *sf_impersonate_kex_groups(void)
@@ -343,7 +343,7 @@ Both are classical (no MLKEM).
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`sf_impersonate_kex_groups`](#sf_impersonate_kex_groups) (include/secure_fetch.h:254).
+> **Inherited:** Documentation from [`sf_impersonate_kex_groups`](#sf_impersonate_kex_groups) (include/secure_fetch.h:262).
 
 ---
 
@@ -351,7 +351,7 @@ Both are classical (no MLKEM).
 
 ### `sf_impersonate_tls13_ciphers`
 
-`function` `const` | [src/secure_fetch.c:272](../../src/secure_fetch.c#L272)
+`function` `const` | [src/secure_fetch.c:273](../../src/secure_fetch.c#L273)
 
 ```c
 const char *sf_impersonate_tls13_ciphers(void)
@@ -365,7 +365,7 @@ const char *sf_impersonate_tls13_ciphers(void)
 
 ### `sf_validate_url`
 
-`function` | [src/secure_fetch.c:276](../../src/secure_fetch.c#L276)
+`function` | [src/secure_fetch.c:277](../../src/secure_fetch.c#L277)
 
 ```c
 sf_status sf_validate_url(const char *url)
@@ -389,7 +389,7 @@ sf_status sf_validate_url(const char *url)
 
 ### `sf_check_tls_version`
 
-`function` | [src/secure_fetch.c:296](../../src/secure_fetch.c#L296)
+`function` | [src/secure_fetch.c:297](../../src/secure_fetch.c#L297)
 
 ```c
 sf_status sf_check_tls_version(const char *negotiated_version)
@@ -411,7 +411,7 @@ sf_status sf_check_tls_version(const char *negotiated_version)
 
 ### `sf_check_group_is_pq`
 
-`function` | [src/secure_fetch.c:301](../../src/secure_fetch.c#L301)
+`function` | [src/secure_fetch.c:302](../../src/secure_fetch.c#L302)
 
 ```c
 sf_status sf_check_group_is_pq(const char *negotiated_group)
@@ -433,7 +433,7 @@ sf_status sf_check_group_is_pq(const char *negotiated_group)
 
 ### `sf_check_chain_policy`
 
-`function` | [src/secure_fetch.c:310](../../src/secure_fetch.c#L310)
+`function` | [src/secure_fetch.c:311](../../src/secure_fetch.c#L311)
 
 ```c
 sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)
@@ -456,7 +456,7 @@ sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)
 
 ### `sf_enforce_policy`
 
-`function` | [src/secure_fetch.c:320](../../src/secure_fetch.c#L320)
+`function` | [src/secure_fetch.c:321](../../src/secure_fetch.c#L321)
 
 ```c
 sf_status sf_enforce_policy(const char *tls_version, const char *group, const sf_chain_info *chain, sf_policy policy)
@@ -483,7 +483,7 @@ sf_status sf_enforce_policy(const char *tls_version, const char *group, const sf
 
 ### `sf_is_redirect_code`
 
-`function` | [src/secure_fetch.c:360](../../src/secure_fetch.c#L360)
+`function` | [src/secure_fetch.c:361](../../src/secure_fetch.c#L361)
 
 ```c
 int sf_is_redirect_code(long http_code)
@@ -499,7 +499,7 @@ Nonzero only for HTTP redirect status codes (301, 302, 303, 307, 308).
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`sf_is_redirect_code`](#sf_is_redirect_code) (include/secure_fetch.h:286).
+> **Inherited:** Documentation from [`sf_is_redirect_code`](#sf_is_redirect_code) (include/secure_fetch.h:294).
 
 *Called by:* [`sf_get_follow`](#sf_get_follow)
 
@@ -509,7 +509,7 @@ Nonzero only for HTTP redirect status codes (301, 302, 303, 307, 308).
 
 ### `sf_header_value`
 
-`function` | [src/secure_fetch.c:367](../../src/secure_fetch.c#L367)
+`function` | [src/secure_fetch.c:368](../../src/secure_fetch.c#L368)
 
 ```c
 int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz)
@@ -530,7 +530,7 @@ No I/O.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`sf_header_value`](#sf_header_value) (include/secure_fetch.h:297).
+> **Inherited:** Documentation from [`sf_header_value`](#sf_header_value) (include/secure_fetch.h:305).
 
 ---
 
@@ -538,7 +538,7 @@ No I/O.
 
 ### `sf_parse_location_header`
 
-`function` | [src/secure_fetch.c:389](../../src/secure_fetch.c#L389)
+`function` | [src/secure_fetch.c:390](../../src/secure_fetch.c#L390)
 
 ```c
 sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz)
@@ -560,7 +560,7 @@ sf_status sf_parse_location_header(const char *header_line, char *out, size_t ou
 
 ### `sf_resolve_redirect`
 
-`function` | [src/secure_fetch.c:407](../../src/secure_fetch.c#L407)
+`function` | [src/secure_fetch.c:408](../../src/secure_fetch.c#L408)
 
 ```c
 sf_status sf_resolve_redirect(const char *base_url, const char *location, char *out, size_t outsz)
@@ -587,7 +587,7 @@ sf_status sf_resolve_redirect(const char *base_url, const char *location, char *
 
 ### `module`
 
-`function` | [src/secure_fetch.c:412](../../src/secure_fetch.c#L412)
+`function` | [src/secure_fetch.c:413](../../src/secure_fetch.c#L413)
 
 ```c
 * pure url module (DRY);
@@ -601,7 +601,7 @@ sf_status sf_resolve_redirect(const char *base_url, const char *location, char *
 
 ### `sf_response_free`
 
-`function` | [src/secure_fetch.c:459](../../src/secure_fetch.c#L459)
+`function` | [src/secure_fetch.c:460](../../src/secure_fetch.c#L460)
 
 ```c
 void sf_response_free(sf_response *resp)
@@ -615,7 +615,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 |---|---|---|---|
 | `resp` | `sf_response *` |  |  |
 
-> **Inherited:** Documentation from [`sf_response_free`](#sf_response_free) (include/secure_fetch.h:368).
+> **Inherited:** Documentation from [`sf_response_free`](#sf_response_free) (include/secure_fetch.h:376).
 
 *Called by:* [`sf_get_follow`](#sf_get_follow)
 
@@ -625,7 +625,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `progress`
 
-`function` | [src/secure_fetch.c:496](../../src/secure_fetch.c#L496)
+`function` | [src/secure_fetch.c:499](../../src/secure_fetch.c#L499)
 
 ```c
 * transfer is in progress (via CURLINFO_TLS_SSL_PTR);
@@ -645,7 +645,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `database`
 
-`function` | [src/secure_fetch.c:540](../../src/secure_fetch.c#L540)
+`function` | [src/secure_fetch.c:545](../../src/secure_fetch.c#L545)
 
 ```c
 * NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid handshake as unnamed and the * policy check rejects it -- exactly the sites doing TLS r
@@ -665,7 +665,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `group`
 
-`function` | [src/secure_fetch.c:554](../../src/secure_fetch.c#L554)
+`function` | [src/secure_fetch.c:559](../../src/secure_fetch.c#L559)
 
 ```c
 * group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);
@@ -685,7 +685,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `this`
 
-`function` | [src/secure_fetch.c:586](../../src/secure_fetch.c#L586)
+`function` | [src/secure_fetch.c:591](../../src/secure_fetch.c#L591)
 
 ```c
 * We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and causes false rejections. * If it is NULL (no group / not TLS 1.3 / no PFS), we copy ""
@@ -706,7 +706,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `redirect`
 
-`function` | [src/secure_fetch.c:873](../../src/secure_fetch.c#L873)
+`function` | [src/secure_fetch.c:892](../../src/secure_fetch.c#L892)
 
 ```c
 * redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a * different orig...
@@ -726,7 +726,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `sf_get`
 
-`function` | [src/secure_fetch.c:1099](../../src/secure_fetch.c#L1099)
+`function` | [src/secure_fetch.c:1144](../../src/secure_fetch.c#L1144)
 
 ```c
 sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)
@@ -750,7 +750,7 @@ sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)
 
 ### `sf_post`
 
-`function` | [src/secure_fetch.c:1103](../../src/secure_fetch.c#L1103)
+`function` | [src/secure_fetch.c:1148](../../src/secure_fetch.c#L1148)
 
 ```c
 sf_status sf_post(const char *url, const sf_config *cfg, const void *body, size_t body_len, const char *content_type, sf_response *out)
@@ -775,7 +775,7 @@ sf_status sf_post(const char *url, const sf_config *cfg, const void *body, size_
 
 ### `sf_rcache_clear`
 
-`function` | [src/secure_fetch.c:1133](../../src/secure_fetch.c#L1133)
+`function` | [src/secure_fetch.c:1178](../../src/secure_fetch.c#L1178)
 
 ```c
 void sf_rcache_clear(void)
@@ -783,7 +783,7 @@ void sf_rcache_clear(void)
 
 1 on hit
 
-> **Inherited:** Documentation from [`sf_rcache_clear`](#sf_rcache_clear) (include/secure_fetch.h:394).
+> **Inherited:** Documentation from [`sf_rcache_clear`](#sf_rcache_clear) (include/secure_fetch.h:402).
 
 ---
 
@@ -791,7 +791,7 @@ void sf_rcache_clear(void)
 
 ### `sf_rcache_set_backing`
 
-`function` | [src/secure_fetch.c:1144](../../src/secure_fetch.c#L1144)
+`function` | [src/secure_fetch.c:1189](../../src/secure_fetch.c#L1189)
 
 ```c
 void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx)
@@ -811,7 +811,7 @@ void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void 
 
 ### `sf_rcache_put`
 
-`function` | [src/secure_fetch.c:1171](../../src/secure_fetch.c#L1171)
+`function` | [src/secure_fetch.c:1216](../../src/secure_fetch.c#L1216)
 
 ```c
 int sf_rcache_put(const char *from, const char *to, time_t now)
@@ -831,7 +831,7 @@ Remembering changes WHEN a redirect is learned, never what policy the target is 
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`sf_rcache_put`](#sf_rcache_put) (include/secure_fetch.h:392).
+> **Inherited:** Documentation from [`sf_rcache_put`](#sf_rcache_put) (include/secure_fetch.h:400).
 
 *Called by:* [`sf_get_follow`](#sf_get_follow)
 
@@ -841,7 +841,7 @@ Remembering changes WHEN a redirect is learned, never what policy the target is 
 
 ### `sf_rcache_get`
 
-`function` | [src/secure_fetch.c:1181](../../src/secure_fetch.c#L1181)
+`function` | [src/secure_fetch.c:1226](../../src/secure_fetch.c#L1226)
 
 ```c
 int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)
@@ -868,7 +868,7 @@ int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)
 
 ### `sf_get_follow`
 
-`function` | [src/secure_fetch.c:1210](../../src/secure_fetch.c#L1210)
+`function` | [src/secure_fetch.c:1255](../../src/secure_fetch.c#L1255)
 
 ```c
 sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out, int max_redirects)
@@ -895,7 +895,7 @@ sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
 
 ### `sf_ws_url_check`
 
-`function` | [src/secure_fetch.c:1294](../../src/secure_fetch.c#L1294)
+`function` | [src/secure_fetch.c:1339](../../src/secure_fetch.c#L1339)
 
 ```c
 sf_status sf_ws_url_check(const char *url)
@@ -919,7 +919,7 @@ sf_status sf_ws_url_check(const char *url)
 
 ### `sf_ws_open`
 
-`function` | [src/secure_fetch.c:1315](../../src/secure_fetch.c#L1315)
+`function` | [src/secure_fetch.c:1360](../../src/secure_fetch.c#L1360)
 
 ```c
 sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)
@@ -943,7 +943,7 @@ sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)
 
 ### `sf_ws_send`
 
-`function` | [src/secure_fetch.c:1370](../../src/secure_fetch.c#L1370)
+`function` | [src/secure_fetch.c:1415](../../src/secure_fetch.c#L1415)
 
 ```c
 sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)
@@ -968,7 +968,7 @@ sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)
 
 ### `sf_ws_recv`
 
-`function` | [src/secure_fetch.c:1393](../../src/secure_fetch.c#L1393)
+`function` | [src/secure_fetch.c:1438](../../src/secure_fetch.c#L1438)
 
 ```c
 sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)
@@ -995,7 +995,7 @@ sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, 
 
 ### `sf_ws_fd`
 
-`function` | [src/secure_fetch.c:1415](../../src/secure_fetch.c#L1415)
+`function` | [src/secure_fetch.c:1460](../../src/secure_fetch.c#L1460)
 
 ```c
 int sf_ws_fd(const sf_ws *ws)
@@ -1011,7 +1011,7 @@ The connection's socket for poll(), or -1.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`sf_ws_fd`](#sf_ws_fd) (include/secure_fetch.h:341).
+> **Inherited:** Documentation from [`sf_ws_fd`](#sf_ws_fd) (include/secure_fetch.h:349).
 
 ---
 
@@ -1019,7 +1019,7 @@ The connection's socket for poll(), or -1.
 
 ### `sf_ws_close`
 
-`function` | [src/secure_fetch.c:1422](../../src/secure_fetch.c#L1422)
+`function` | [src/secure_fetch.c:1467](../../src/secure_fetch.c#L1467)
 
 ```c
 void sf_ws_close(sf_ws *ws)
@@ -1035,7 +1035,7 @@ NULL is a no-op.
 |---|---|---|---|
 | `ws` | `sf_ws *` |  |  |
 
-> **Inherited:** Documentation from [`sf_ws_close`](#sf_ws_close) (include/secure_fetch.h:344).
+> **Inherited:** Documentation from [`sf_ws_close`](#sf_ws_close) (include/secure_fetch.h:352).
 
 ---
 
@@ -1043,7 +1043,7 @@ NULL is a no-op.
 
 ### `sf_fallback_policy`
 
-`function` | [src/secure_fetch.c:1433](../../src/secure_fetch.c#L1433)
+`function` | [src/secure_fetch.c:1478](../../src/secure_fetch.c#L1478)
 
 ```c
 int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)
@@ -1066,7 +1066,7 @@ int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_po
 
 ### `sf_get_follow_navigable`
 
-`function` | [src/secure_fetch.c:1487](../../src/secure_fetch.c#L1487)
+`function` | [src/secure_fetch.c:1532](../../src/secure_fetch.c#L1532)
 
 ```c
 sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out, int *downgraded, int allowlisted)
@@ -1092,7 +1092,7 @@ sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *
 
 ### `sf_post_navigable`
 
-`function` | [src/secure_fetch.c:1492](../../src/secure_fetch.c#L1492)
+`function` | [src/secure_fetch.c:1537](../../src/secure_fetch.c#L1537)
 
 ```c
 sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body, size_t body_len, const char *content_type, sf_response *out, int *downgraded, int allowlisted)
@@ -1135,7 +1135,7 @@ sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body, s
 
 ### `SF_RCACHE_SLOTS`
 
-`macro` | [src/secure_fetch.c:1119](../../src/secure_fetch.c#L1119)
+`macro` | [src/secure_fetch.c:1164](../../src/secure_fetch.c#L1164)
 
 ```c
 #define SF_RCACHE_SLOTS
@@ -1147,7 +1147,7 @@ sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body, s
 
 ### `SF_RCACHE_TTL_S`
 
-`macro` | [src/secure_fetch.c:1120](../../src/secure_fetch.c#L1120)
+`macro` | [src/secure_fetch.c:1165](../../src/secure_fetch.c#L1165)
 
 ```c
 #define SF_RCACHE_TTL_S

@@ -3,6 +3,43 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `main` | function | `tests/test_anti_fp.c:197` | `int main(void)` |
+| `test_boolean_props` | function | `tests/test_anti_fp.c:74` | `static void test_boolean_props(void **state)` |
+| `test_bucket_screen` | function | `tests/test_anti_fp.c:83` | `static void test_bucket_screen(void **state)` |
+| `test_coarsen_time` | function | `tests/test_anti_fp.c:18` | `static void test_coarsen_time(void **state)` |
+| `test_identity_is_fixed` | function | `tests/test_anti_fp.c:34` | `static void test_identity_is_fixed(void **state)` |
+| `test_legacy_identity_fixed` | function | `tests/test_anti_fp.c:61` | `static void test_legacy_identity_fixed(void **state)` |
+| `test_origin_key_deterministic` | function | `tests/test_anti_fp.c:146` | `static void test_origin_key_deterministic(void **state)` |
+| `test_origin_key_empty_namespace` | function | `tests/test_anti_fp.c:171` | `static void test_origin_key_empty_namespace(void **state)` |
+| `test_origin_key_per_session` | function | `tests/test_anti_fp.c:165` | `static void test_origin_key_per_session(void **state)` |
+| `test_origin_key_per_site` | function | `tests/test_anti_fp.c:153` | `static void test_origin_key_per_site(void **state)` |
+| `test_origin_key_unlinks_readback` | function | `tests/test_anti_fp.c:183` | `static void test_origin_key_unlinks_readback(void **state)` |
+| `test_perturb_bounded_lsb` | function | `tests/test_anti_fp.c:111` | `static void test_perturb_bounded_lsb(void **state)` |
+| `test_perturb_deterministic` | function | `tests/test_anti_fp.c:101` | `static void test_perturb_deterministic(void **state)` |
+| `test_perturb_key_sensitive` | function | `tests/test_anti_fp.c:126` | `static void test_perturb_key_sensitive(void **state)` |
+| `test_perturb_safe_edges` | function | `tests/test_anti_fp.c:136` | `static void test_perturb_safe_edges(void **state)` |
+| `dbl_eq` | function | `tests/test_block_flow.c:21` | `static int dbl_eq(double a, double b)` |
+| `main` | function | `tests/test_block_flow.c:105` | `int main(void)` |
+| `test_collapse_n_edges` | function | `tests/test_block_flow.c:84` | `static void test_collapse_n_edges(void **state)` |
+| `test_collapse_n_matches_binary` | function | `tests/test_block_flow.c:70` | `static void test_collapse_n_matches_binary(void **state)` |
+| `test_margins_adjoin` | function | `tests/test_block_flow.c:95` | `static void test_margins_adjoin(void **state)` |
+| `test_non_finite_is_absent` | function | `tests/test_block_flow.c:59` | `static void test_non_finite_is_absent(void **state)` |
+| `test_two_negative_take_the_most_negative` | function | `tests/test_block_flow.c:50` | `static void test_two_negative_take_the_most_negative(void **state)` |
+| `test_two_positive_collapse_to_max` | function | `tests/test_block_flow.c:29` | `static void test_two_positive_collapse_to_max(void **state)` |
+| `main` | function | `tests/test_box_blur.c:130` | `int main(void)` |
+| `mass` | function | `tests/test_box_blur.c:11` | `static long mass(const unsigned char *b, int n)` |
+| `put_px` | function | `tests/test_box_blur.c:80` | `static void put_px(unsigned char *d, int stride, int x, int y, unsigned char a)` |
+| `test_box_sizes` | function | `tests/test_box_blur.c:17` | `static void test_box_sizes(void **state)` |
+| `test_impulse_conserves_mass_and_is_symmetric` | function | `tests/test_box_blur.c:34` | `static void test_impulse_conserves_mass_and_is_symmetric(void **state)` |
+| `test_ink_rect_covers_every_pixel_the_blur_can_touch` | function | `tests/test_box_blur.c:112` | `static void test_ink_rect_covers_every_pixel_the_blur_can_touch(void **state)` |
+| `test_ink_rect_empty_surface_has_no_ink` | function | `tests/test_box_blur.c:85` | `static void test_ink_rect_empty_surface_has_no_ink(void **state)` |
+| `test_ink_rect_grows_by_the_blur_reach_and_clamps` | function | `tests/test_box_blur.c:93` | `static void test_ink_rect_grows_by_the_blur_reach_and_clamps(void **state)` |
+| `test_invalid_arguments` | function | `tests/test_box_blur.c:69` | `static void test_invalid_arguments(void **state)` |
+| `test_uniform_interior_unchanged` | function | `tests/test_box_blur.c:58` | `static void test_uniform_interior_unchanged(void **state)` |
+| `test_zero_sigma_is_identity` | function | `tests/test_box_blur.c:50` | `static void test_zero_sigma_is_identity(void **state)` |
+| `assert_edges` | function | `tests/test_box_style.c:28` | `static void assert_edges(bx_edges e, double t, double r, double b, double l)` |
+| `dbl_eq` | function | `tests/test_box_style.c:23` | `static int dbl_eq(double a, double b)` |
+| `main` | function | `tests/test_box_style.c:712` | `int main(void)` |
 | `percentage` | function | `tests/test_box_style.c:543` | `* percentage (a plain `width:50%` leaves the px half UNSET, a plain `width:300px`  * leaves the p...` |
 | `test_block_ua_box_heading_level_wins` | function | `tests/test_box_style.c:206` | `static void test_block_ua_box_heading_level_wins(void **state)` |
 | `test_block_ua_box_is_content_independent` | function | `tests/test_box_style.c:195` | `static void test_block_ua_box_is_content_independent(void **state)` |
@@ -459,42 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_pseudo_never_match_keeps_group` | function | `tests/test_css.c:1646` | `static void test_pseudo_never_match_keeps_group(void **state)` |
 | `test_pseudo_nth_child` | function | `tests/test_css.c:1704` | `static void test_pseudo_nth_child(void **state)` |
 | `test_pseudo_nth_last_child` | function | `tests/test_css.c:1727` | `static void test_pseudo_nth_last_child(void **state)` |
-| `test_pseudo_nth_malformed_drops` | function | `tests/test_css.c:2267` | `static void test_pseudo_nth_malformed_drops(void **state)` |
-| `test_pseudo_nth_of_type` | function | `tests/test_css.c:2304` | `static void test_pseudo_nth_of_type(void **state)` |
-| `test_pseudo_of_type` | function | `tests/test_css.c:2285` | `static void test_pseudo_of_type(void **state)` |
-| `test_pseudo_root_and_form_state` | function | `tests/test_css.c:1738` | `static void test_pseudo_root_and_form_state(void **state)` |
-| `test_pseudo_single_colon_before_class_tmp` | function | `tests/test_css.c:2053` | `static void test_pseudo_single_colon_before_class_tmp(void **state)` |
-| `test_pseudo_single_colon_before_matches` | function | `tests/test_css.c:1917` | `static void test_pseudo_single_colon_before_matches(void **state)` |
-| `test_pseudo_specificity` | function | `tests/test_css.c:2232` | `static void test_pseudo_specificity(void **state)` |
-| `test_pseudo_structural` | function | `tests/test_css.c:1684` | `static void test_pseudo_structural(void **state)` |
-| `test_pseudo_target` | function | `tests/test_css.c:2346` | `static void test_pseudo_target(void **state)` |
-| `test_pseudo_unknown_drops_selector` | function | `tests/test_css.c:1762` | `static void test_pseudo_unknown_drops_selector(void **state)` |
-| `test_pseudo_with_sibling_combinator` | function | `tests/test_css.c:2250` | `static void test_pseudo_with_sibling_combinator(void **state)` |
-| `test_rem_rebase_62_5_percent_idiom` | function | `tests/test_css.c:5490` | `static void test_rem_rebase_62_5_percent_idiom(void **state)` |
-| `test_rem_rebase_absent_root_declaration_is_byte_identical` | function | `tests/test_css.c:5419` | `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)` |
-| `test_rem_rebase_applies_to_box_lengths` | function | `tests/test_css.c:5405` | `static void test_rem_rebase_applies_to_box_lengths(void **state)` |
-| `test_rem_rebase_honours_root_pseudo_class` | function | `tests/test_css.c:5431` | `static void test_rem_rebase_honours_root_pseudo_class(void **state)` |
-| `test_rem_rebase_ignores_identifier_lookalikes` | function | `tests/test_css.c:5475` | `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)` |
-| `test_rem_rebase_leaves_quoted_text_alone` | function | `tests/test_css.c:5464` | `static void test_rem_rebase_leaves_quoted_text_alone(void **state)` |
-| `test_rem_rebase_skips_at_rule_prelude` | function | `tests/test_css.c:5441` | `static void test_rem_rebase_skips_at_rule_prelude(void **state)` |
-| `test_rem_rebased_on_root_font_size` | function | `tests/test_css.c:5393` | `static void test_rem_rebased_on_root_font_size(void **state)` |
-| `test_resolve_el_inline_only` | function | `tests/test_css.c:2378` | `static void test_resolve_el_inline_only(void **state)` |
-| `test_resolve_null_safe` | function | `tests/test_css.c:2772` | `static void test_resolve_null_safe(void **state)` |
-| `test_selector_escape_inside_not` | function | `tests/test_css.c:1178` | `static void test_selector_escape_inside_not(void **state)` |
-| `test_selector_escaped_colon_and_slash` | function | `tests/test_css.c:1154` | `static void test_selector_escaped_colon_and_slash(void **state)` |
-| `test_selector_escaped_comma_and_parens` | function | `tests/test_css.c:1169` | `static void test_selector_escaped_comma_and_parens(void **state)` |
-| `test_selector_hex_escape` | function | `tests/test_css.c:1162` | `static void test_selector_hex_escape(void **state)` |
-| `test_selector_long_class_exact` | function | `tests/test_css.c:1185` | `static void test_selector_long_class_exact(void **state)` |
-| `test_sheet_class_and_id` | function | `tests/test_css.c:1422` | `static void test_sheet_class_and_id(void **state)` |
-| `test_sheet_compound_selector` | function | `tests/test_css.c:1442` | `static void test_sheet_compound_selector(void **state)` |
-| `test_sheet_container_props` | function | `tests/test_css.c:367` | `static void test_sheet_container_props(void **state)` |
-| `test_sheet_type_selector` | function | `tests/test_css.c:1411` | `static void test_sheet_type_selector(void **state)` |
-| `test_sheet_universal_and_group` | function | `tests/test_css.c:1432` | `static void test_sheet_universal_and_group(void **state)` |
-| `test_sibling_mixed_with_child` | function | `tests/test_css.c:1611` | `static void test_sibling_mixed_with_child(void **state)` |
-| `test_supports_collects_custom_props` | function | `tests/test_css.c:1057` | `static void test_supports_collects_custom_props(void **state)` |
-| `test_supports_true_block_applies` | function | `tests/test_css.c:1043` | `static void test_supports_true_block_applies(void **state)` |
-| `test_svg_stroke_and_fill_none` | function | `tests/test_css.c:3738` | `static void test_svg_stroke_and_fill_none(void **state)` |
-| `test_table_sheet_cascade` | function | `tests/test_css.c:4325` | `static void test_table_sheet_cascade(void **state)` |
-| `test_text_decoration_cascade` | function | `tests/test_css.c:1499` | `static void test_text_decoration_cascade(void **state)` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

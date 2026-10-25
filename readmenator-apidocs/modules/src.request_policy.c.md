@@ -1,10 +1,10 @@
 # `src/request_policy.c`
 
-> Source: [src/request_policy.c:1](../../src/request_policy.c#L1) | language `c` | coverage 57.1% | [API index](../index.md)
+> Source: [src/request_policy.c:1](../../src/request_policy.c#L1) | language `c` | coverage 62.5% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`rp_host_of`](#rp_host_of), [`rp_site_of`](#rp_site_of), [`rp_same_site`](#rp_same_site), [`rp_evaluate`](#rp_evaluate)
+- **Functions:** [`rp_host_of`](#rp_host_of), [`rp_site_of`](#rp_site_of), [`rp_same_site`](#rp_same_site), [`rp_evaluate`](#rp_evaluate), [`rp_sanitize_request_headers`](#rp_sanitize_request_headers)
 - **Macros:** [`RP_MAX_HOST`](#rp_max_host), [`RP_MAX_LABELS`](#rp_max_labels)
 
 ## Call Graph
@@ -18,12 +18,15 @@ flowchart LR
     n_src_request_policy_c__rp_site_of(["rp_site_of"])
     n_src_request_policy_c__rp_evaluate(["rp_evaluate"])
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
+    n_src_request_policy_c__rp_sanitize_request_headers(["rp_sanitize_request_headers"])
+    n_include_request_policy_h__rp_headers_have["request_policy.rp_headers_have"]
     n_src_request_policy_c__rp_same_site --> n_src_request_policy_c__rp_host_of
     n_src_request_policy_c__rp_same_site --> n_src_request_policy_c__rp_site_of
     n_src_request_policy_c__rp_evaluate --> n_src_request_policy_c__rp_host_of
     n_src_request_policy_c__rp_evaluate --> n_src_request_policy_c__rp_site_of
     n_src_request_policy_c__rp_same_site -.-> n_gui_browser_ui_c__strcmp
     n_src_request_policy_c__rp_evaluate -.-> n_gui_browser_ui_c__strcmp
+    n_src_request_policy_c__rp_sanitize_request_headers -.-> n_include_request_policy_h__rp_headers_have
 ```
 
 ## Functions
@@ -137,6 +140,36 @@ rp_decision rp_evaluate(const char *top_level_url, const char *request_url)
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`rp_host_of`](#rp_host_of), [`rp_site_of`](#rp_site_of)
 
 *Called by:* [`rdp_image_decision`](src.render_policy.c.md#rdp_image_decision)
+
+---
+
+<a id="rp_sanitize_request_headers"></a>
+
+### `rp_sanitize_request_headers`
+
+`function` | [src/request_policy.c:197](../../src/request_policy.c#L197)
+
+```c
+int rp_sanitize_request_headers(const char *raw, char *out, size_t cap)
+```
+
+Filters the page-supplied header block `raw` ("Name: value" lines separated by '\n') into `out` (same format, '\n'-terminated lines, NUL-terminated) keeping ONLY headers a page may set: well-formed token name and a value free of control bytes, within the count/size caps, and not on the forbidden list (identity and framing headers the browser owns: Host, Cookie, Referer, User-Agent, Accept-Language, Accept-Encoding, Connection, Content-Length, Transfer-Encoding, TE, Upgrade, Expect, Date, DNT, Via, Origin, Sec-*, Proxy-*, X-HTTP-Method*, Access-Control-Request-*).
+
+A repeated name keeps its first occurrence. Pure; fail-closed (anything doubtful is dropped, never rewritten). Returns the number of headers kept, or -1 on NULL/zero-capacity arguments.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `raw` | `char *` |  |  |
+| `out` | `char *` |  |  |
+| `cap` | `size_t` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`rp_sanitize_request_headers`](#rp_sanitize_request_headers) (include/request_policy.h:57).
+
+*Calls:* [`rp_headers_have`](include.request_policy.h.md#rp_headers_have)
 
 ---
 

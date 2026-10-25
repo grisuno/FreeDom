@@ -1,15 +1,22 @@
 ```mermaid
 graph LR
-    src_css["src: css"]
     include_browser_ui["include: browser_ui"]
+    src_css["src: css"]
     src_tab["src: tab"]
     src_text_shape["src: text_shape"]
     include_page_view["include: page_view"]
     include_browser["include: browser"]
     src_local_store["src: local_store"]
-    gui["gui"]
     include_secure_fetch["include: secure_fetch"]
     include_prefetch["include: prefetch"]
+    include_browser_ui -- "calls into" --> src_css
+    include_browser_ui -- "calls into" --> src_tab
+    include_browser_ui -- "calls into" --> src_text_shape
+    include_browser_ui -- "calls into" --> include_page_view
+    include_browser_ui -- "calls into" --> include_browser
+    include_browser_ui -- "calls into" --> src_local_store
+    include_browser_ui -- "calls into" --> include_secure_fetch
+    include_browser_ui -- "calls into" --> include_prefetch
     src_css -- "calls into" --> include_browser_ui
     src_css -- "calls into" --> src_tab
     src_css -- "calls into" --> src_text_shape
@@ -17,79 +24,76 @@ graph LR
     src_css -- "calls into" --> include_browser
     src_css -- "calls into" --> src_local_store
     src_css -- "calls into" --> include_secure_fetch
-    include_prefetch -- "calls into" --> src_css
-    include_prefetch -- "calls into" --> include_browser_ui
-    include_prefetch -- "calls into" --> src_tab
-    include_prefetch -- "calls into" --> src_text_shape
-    include_browser_ui -- "calls into" --> src_css
-    include_browser_ui -- "calls into" --> include_prefetch
-    include_browser_ui -- "calls into" --> src_tab
-    include_browser_ui -- "calls into" --> src_text_shape
-    include_browser_ui -- "calls into" --> include_page_view
-    include_browser_ui -- "calls into" --> include_browser
-    include_browser_ui -- "calls into" --> src_local_store
-    include_browser_ui -- "calls into" --> gui
-    include_browser_ui -- "calls into" --> include_secure_fetch
-    src_tab -- "calls into" --> src_css
-    src_tab -- "calls into" --> include_prefetch
     src_tab -- "calls into" --> include_browser_ui
+    src_tab -- "calls into" --> src_css
     src_tab -- "calls into" --> src_text_shape
     src_tab -- "calls into" --> include_page_view
     src_tab -- "calls into" --> include_browser
-    src_tab -- "depends on" --> gui
     src_tab -- "calls into" --> include_secure_fetch
-    src_text_shape -- "calls into" --> src_css
-    src_text_shape -- "calls into" --> include_prefetch
+    src_tab -- "calls into" --> include_prefetch
     src_text_shape -- "calls into" --> include_browser_ui
+    src_text_shape -- "calls into" --> src_css
     src_text_shape -- "calls into" --> src_tab
     src_text_shape -- "calls into" --> include_page_view
     src_text_shape -- "calls into" --> include_browser
-    src_text_shape -- "calls into" --> gui
     src_text_shape -- "calls into" --> include_secure_fetch
-    include_page_view -- "calls into" --> src_css
+    src_text_shape -- "calls into" --> include_prefetch
     include_page_view -- "calls into" --> include_browser_ui
+    include_page_view -- "calls into" --> src_css
     include_page_view -- "calls into" --> src_tab
     include_page_view -- "calls into" --> src_text_shape
     include_page_view -- "calls into" --> include_browser
-    include_page_view -- "depends on" --> gui
-    include_browser -- "calls into" --> src_css
     include_browser -- "calls into" --> include_browser_ui
+    include_browser -- "calls into" --> src_css
     include_browser -- "calls into" --> src_tab
     include_browser -- "calls into" --> src_text_shape
     include_browser -- "calls into" --> include_page_view
     include_browser -- "calls into" --> include_secure_fetch
-    src_local_store -- "calls into" --> src_css
     src_local_store -- "calls into" --> include_browser_ui
+    src_local_store -- "calls into" --> src_css
     src_local_store -- "calls into" --> src_tab
     src_local_store -- "calls into" --> src_text_shape
     src_local_store -- "calls into" --> include_browser
     src_local_store -- "calls into" --> include_secure_fetch
-    gui -- "calls into" --> src_css
-    gui -- "calls into" --> include_browser_ui
-    gui -- "calls into" --> src_tab
-    gui -- "calls into" --> src_text_shape
-    gui -- "calls into" --> include_page_view
-    include_secure_fetch -- "calls into" --> src_css
     include_secure_fetch -- "calls into" --> include_browser_ui
+    include_secure_fetch -- "calls into" --> src_css
     include_secure_fetch -- "calls into" --> src_tab
     include_secure_fetch -- "calls into" --> src_text_shape
-    click src_css href "./src_css.md" "Details"
+    include_prefetch -- "calls into" --> include_browser_ui
+    include_prefetch -- "calls into" --> src_css
+    include_prefetch -- "calls into" --> src_tab
+    include_prefetch -- "calls into" --> src_text_shape
     click include_browser_ui href "./include_browser_ui.md" "Details"
+    click src_css href "./src_css.md" "Details"
     click src_tab href "./src_tab.md" "Details"
     click src_text_shape href "./src_text_shape.md" "Details"
     click include_page_view href "./include_page_view.md" "Details"
     click include_browser href "./include_browser.md" "Details"
     click src_local_store href "./src_local_store.md" "Details"
-    click gui href "./gui.md" "Details"
     click include_secure_fetch href "./include_secure_fetch.md" "Details"
     click include_prefetch href "./include_prefetch.md" "Details"
 ```
 
 ## Details
 
-Static architecture map of 289 files (c, h, py, sh) in 10 components: src: css, include: browser_ui, src: tab, src: text_shape, include: page_view, include: browser, src: local_store, gui. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 290 files (c, h, py, sh) in 9 components: include: browser_ui, src: css, src: tab, src: text_shape, include: page_view, include: browser, src: local_store, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
-### src: css (1)
+### include: browser_ui (1)
+
+include: browser_ui groups 59 files (c, h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ui_input_state: Live editable state for one form text control, aliasing a block of the...
+
+**Related Classes/Methods**:
+
+- <a href="../include/prefs.h#L2-L25">include/prefs.h::FREEDOM_PREFS_H</a>
+- <a href="../include/prefs.h">include/prefs.h::PREFS_VERSION</a>
+- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_URL</a>
+- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_TITLE</a>
+- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_BOOKMARKS</a>
+- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_HISTORY</a>
+- <a href="../include/prefs.h#L31-L33">include/prefs.h::PREFS_MAX_TEXT</a>
+- <a href="../include/prefs.h#L34-L35">include/prefs.h::PREFS_PAGE_HISTORY</a>
+
+### src: css (2)
 
 src: css groups 53 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
 
@@ -103,21 +107,6 @@ src: css groups 53 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css
 - <a href="../include/css.h">include/css.h::CSS_GAP_MAX</a>
 - <a href="../include/css.h">include/css.h::CSS_GRID_COLS_MAX</a>
 - <a href="../include/css.h#L82-L83">include/css.h::CSS_GRID_TRACKS_MAX</a>
-
-### include: browser_ui (2)
-
-include: browser_ui groups 45 files (c, h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ui_input_state: Live editable state for one form text control, aliasing a block of the...
-
-**Related Classes/Methods**:
-
-- <a href="../include/prefs.h#L2-L25">include/prefs.h::FREEDOM_PREFS_H</a>
-- <a href="../include/prefs.h">include/prefs.h::PREFS_VERSION</a>
-- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_URL</a>
-- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_TITLE</a>
-- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_BOOKMARKS</a>
-- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_HISTORY</a>
-- <a href="../include/prefs.h#L31-L33">include/prefs.h::PREFS_MAX_TEXT</a>
-- <a href="../include/prefs.h#L34-L35">include/prefs.h::PREFS_PAGE_HISTORY</a>
 
 ### src: tab (3)
 
@@ -194,22 +183,7 @@ src: local_store groups 16 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN
 - <a href="../include/local_store.h">include/local_store.h::LS_OVERHEAD</a>
 - <a href="../include/local_store.h#L32-L33">include/local_store.h::LS_MAX_PLAINTEXT</a>
 
-### gui (8)
-
-gui groups 13 files (c, h) around FREEDOM_UI_H, ui_status, offset, ui_line, ui_layout. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
-
-**Related Classes/Methods**:
-
-- <a href="../include/ui.h#L2-L19">include/ui.h::FREEDOM_UI_H</a>
-- <a href="../include/ui.h#L20-L29">include/ui.h::ui_status</a>
-- <a href="../include/ui.h">include/ui.h::offset</a>
-- <a href="../include/ui.h#L30-L34">include/ui.h::ui_line</a>
-- <a href="../include/ui.h#L35-L43">include/ui.h::ui_layout</a>
-- <a href="../include/ui.h#L44-L51">include/ui.h::space</a>
-- <a href="../include/ui.h#L52-L54">include/ui.h::ui_layout_free</a>
-- <a href="../include/ui.h#L55-L68">include/ui.h::ui_clamp_scroll</a>
-
-### include: secure_fetch (9)
+### include: secure_fetch (8)
 
 include: secure_fetch groups 13 files (c, h) around FREEDOM_ANTI_FP_H, FP_TIMER_RESOLUTION_MS, FP_USER_AGENT, FP_ACCEPT_LANGUAGE, FP_ACCEPT_LANGUAGE_HEADER. fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  "document" #define...
 
@@ -224,7 +198,7 @@ include: secure_fetch groups 13 files (c, h) around FREEDOM_ANTI_FP_H, FP_TIMER_
 - <a href="../include/anti_fp.h">include/anti_fp.h::FP_SEC_FETCH_DEST_NAV</a>
 - <a href="../include/anti_fp.h">include/anti_fp.h::FP_SEC_FETCH_MODE_NAV</a>
 
-### include: prefetch (10)
+### include: prefetch (9)
 
 include: prefetch groups 6 files (c, h) around FREEDOM_IMPORT_MAP_H, algorithm, IM_MAX_TEXT, IM_MAX_ENTRIES, IM_MAX_SCOPES. im_resolve: Resolves specifier as imported from base (the importing module's URL).
 

@@ -40,3 +40,10 @@ pinta lo que este módulo describe y reenvía la expresión al worker del REPL; 
 Depurador con puntos de ruptura/paso a paso (QuickJS-ng embebido no expone un depurador al worker
 confinado), edición en vivo de CSS desde el panel (el REPL ya permite `insertRule`), tiempos de red
 (el registro `net()` no guarda marcas de tiempo) y selección de elemento con el ratón sobre la página.
+
+## Pestañas Profile y Throws
+
+`FBP_PROFILE` ("Profile") ejecuta `profile()` y `FBP_THROWS` ("Throws") ejecuta `throws()` del REPL: el
+perfil ponderado por tiempo y el registro de TODA excepción lanzada (también las capturadas), ambos del
+motor (`spec/js_sandbox.md` 7p/7q). Fallan blandos: sin la API (página no allow∩js) dicen
+`(profile() unavailable)`. Mismo mecanismo en la ventana y en `--dump-pane=profile|throws`.

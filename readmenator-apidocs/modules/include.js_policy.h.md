@@ -15,7 +15,9 @@ Solid arrows stay in this module, dashed arrows leave it.
 flowchart LR
     n_include_js_policy_h__membership(["membership"])
     n_include_js_policy_h__allowlist(["allowlist"])
+    n_include_js_dom_h__host["js_dom.host"]
     n_include_js_policy_h__membership --> n_include_js_policy_h__allowlist
+    n_include_js_policy_h__membership -.-> n_include_js_dom_h__host
 ```
 
 ## Enums
@@ -53,7 +55,7 @@ typedef enum jsp_mode
 
 **Returns:** `*`
 
-*Calls:* [`allowlist`](#allowlist)
+*Calls:* [`host`](include.js_dom.h.md#host), [`allowlist`](#allowlist)
 
 ---
 

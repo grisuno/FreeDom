@@ -177,10 +177,10 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `host` (function, line 163) `* for a trusted host (allow.conf AND js.conf);`
   - `jd_get_cookies` (function, line 174) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);`
   - `out_status` (function, line 182) `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
-  - `jd_process_iframes` (function, line 203) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
-  - `URLs` (function, line 210) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
-  - `jd_video_from_scripts` (function, line 224) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
-  - `jd_flush_custom_elements` (function, line 235) `void jd_flush_custom_elements(js_context *ctx);`
+  - `jd_process_iframes` (function, line 207) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
+  - `URLs` (function, line 214) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
+  - `jd_video_from_scripts` (function, line 228) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
+  - `jd_flush_custom_elements` (function, line 239) `void jd_flush_custom_elements(js_context *ctx);`
   - `FREEDOM_JS_DOM_H` (macro, line 2) `#define FREEDOM_JS_DOM_H`
   - `JD_IFRAME_TRACK_MAX` (macro, line 40) `#define JD_IFRAME_TRACK_MAX`
   - `JD_REPL_CSS_MAX` (macro, line 79) `#define JD_REPL_CSS_MAX`
@@ -273,10 +273,13 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `out` (function, line 163) `* into out (NUL-terminated, truncated at cap);`
   - `js_profile_enable` (function, line 166) `void js_profile_enable(js_context *ctx);`
   - `js_profile_report` (function, line 167) `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
-  - `js_result_free` (function, line 170) `void js_result_free(js_result *res);`
-  - `js_pump_jobs` (function, line 178) `int js_pump_jobs(js_context *ctx, int max_jobs);`
-  - `handle` (function, line 181) `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
-  - `js_set_current_script` (function, line 190) `void js_set_current_script(js_context *ctx, const char *src, const char *type);`
+  - `silently` (function, line 171) `* fails silently (an exception swallowed by a try/catch, a rejected promise nobody awaits) shows * its real first...`
+  - `js_throws_report` (function, line 176) `size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
+  - `global` (function, line 181) `* Freebug REPL installs: its shim takes them once and deletes them from the global (like * __netLog), because the...`
+  - `js_result_free` (function, line 187) `void js_result_free(js_result *res);`
+  - `js_pump_jobs` (function, line 195) `int js_pump_jobs(js_context *ctx, int max_jobs);`
+  - `handle` (function, line 198) `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
+  - `js_set_current_script` (function, line 207) `void js_set_current_script(js_context *ctx, const char *src, const char *type);`
   - `FREEDOM_JS_SANDBOX_H` (macro, line 2) `#define FREEDOM_JS_SANDBOX_H`
   - `JS_LOC_FILE_MAX` (macro, line 64) `#define JS_LOC_FILE_MAX`
   - `JS_DEFAULT_MAX_SOURCE` (macro, line 66) `#define JS_DEFAULT_MAX_SOURCE`
@@ -288,8 +291,9 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `JS_MODULE_MAX` (macro, line 115) `#define JS_MODULE_MAX`
   - `JS_MODULE_BYTES_MAX` (macro, line 116) `#define JS_MODULE_BYTES_MAX`
   - `JS_PROFILE_PERIOD_MS` (macro, line 165) `#define JS_PROFILE_PERIOD_MS`
-  - `JS_REALM_MAX` (macro, line 198) `#define JS_REALM_MAX`
-  - `JS_REJECT_MAX` (macro, line 201) `#define JS_REJECT_MAX`
+  - `JS_THROW_SLOTS` (macro, line 174) `#define JS_THROW_SLOTS`
+  - `JS_REALM_MAX` (macro, line 215) `#define JS_REALM_MAX`
+  - `JS_REJECT_MAX` (macro, line 218) `#define JS_REJECT_MAX`
 - Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_sandbox.c`
 
 ## include/js_trusted.h
@@ -315,6 +319,13 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `JT_WS_MAX_BYTES` (macro, line 48) `#define JT_WS_MAX_BYTES`
 - Depends on: `include/js_dom.h`, `include/js_sandbox.h`
 - Imported by: `src/js_trusted.c`, `src/tab.c`, `tests/test_js_dom.c`
+
+## include/lazy_load.h
+- Layer: utility
+- Language: h
+- Symbols:
+  - `FREEDOM_LAZY_LOAD_H` (macro, line 2) `#define FREEDOM_LAZY_LOAD_H`
+- Imported by: `gui/browser_ui.c`, `tests/test_ui.c`
 
 ## include/link_nav.h
 - Doc: ln_block_reason: Why a reference was blocked, for a precise user-facing notice and for *...

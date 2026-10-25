@@ -355,7 +355,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 |---|---|---|---|
 | `ctx` | `js_context *` |  |  |
 
-> **Inherited:** Documentation from [`jd_flush_custom_elements`](#jd_flush_custom_elements) (include/js_dom.h:235).
+> **Inherited:** Documentation from [`jd_flush_custom_elements`](#jd_flush_custom_elements) (include/js_dom.h:239).
 
 ---
 

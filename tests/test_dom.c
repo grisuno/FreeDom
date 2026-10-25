@@ -715,8 +715,45 @@ static void test_qs_subject_prefilter_is_exact(void **state) {
     hp_document_free(doc);
 }
 
+/* getElementById answers with an element that is IN the document, never with a detached one the
+ * additive index still remembers. YouTube/Polymer re-stamps templates: the dead first copy of
+ * #page-manager came back, its isConnected was false, and the app never mounted a page. */
+static void test_get_element_by_id_ignores_detached_nodes(void **state) {
+    (void)state;
+    static const char html[] =
+        "<html><body><div id=\"host\"><section id=\"x\">old</section></div><p id=\"solo\">s</p></body></html>";
+    hp_document *doc = NULL;
+    dom_index *idx = NULL;
+    assert_int_equal(hp_parse(html, sizeof html - 1, NULL, &doc), HP_OK);
+    assert_int_equal(dom_build(doc, &idx), DOM_OK);
+    dom_node_id host = dom_get_element_by_id(idx, "host");
+    dom_node_id oldx = dom_get_element_by_id(idx, "x");
+    assert_int_not_equal(oldx, DOM_NODE_NONE);
+
+    /* detach the original and attach a replacement with the same id */
+    assert_int_equal(dom_remove_child(idx, host, oldx), DOM_OK);
+    assert_int_equal(dom_get_connected_by_id(idx, "x"), DOM_NODE_NONE);     /* detached only => null */
+    dom_node_id fresh = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "section", &fresh), DOM_OK);
+    assert_int_equal(dom_set_attribute(idx, fresh, "id", "x"), DOM_OK);
+    assert_int_equal(dom_get_connected_by_id(idx, "x"), DOM_NODE_NONE);     /* created, not attached yet */
+    assert_int_equal(dom_append_child(idx, host, fresh), DOM_OK);
+    assert_int_equal(dom_get_connected_by_id(idx, "x"), fresh);             /* the live one, not the stale one */
+
+    /* two live elements with one id: document order wins */
+    dom_node_id late = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "i", &late), DOM_OK);
+    assert_int_equal(dom_set_attribute(idx, late, "id", "x"), DOM_OK);
+    assert_int_equal(dom_append_child(idx, host, late), DOM_OK);
+    assert_int_equal(dom_get_connected_by_id(idx, "x"), fresh);
+    assert_int_equal(dom_get_connected_by_id(idx, "solo") != DOM_NODE_NONE, 1);
+    dom_free(idx);
+    hp_document_free(doc);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_get_element_by_id_ignores_detached_nodes),
         cmocka_unit_test(test_qs_subject_prefilter_is_exact),
         cmocka_unit_test(test_build_null_args),
         cmocka_unit_test(test_free_null_and_double),

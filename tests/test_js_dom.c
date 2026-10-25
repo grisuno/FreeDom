@@ -784,11 +784,13 @@ static void test_set_text_content_detach_is_memory_safe(void **state) {
      * detached child via its still-valid handle must not crash (no UAF). */
     js_result r;
     assert_int_equal(run(f,
+        "var g=document.getElementById('go');"
         "document.getElementById('main').textContent='X';"
-        "var g=document.getElementById('go'); g===null?'gone':g.tagName", &r), JS_OK);
+        "g.tagName+','+(document.getElementById('go')===null)", &r), JS_OK);
     assert_non_null(r.value);
-    /* 'go' is detached but alive: its tag still reads safely. */
-    assert_string_equal(r.value, "BUTTON");
+    /* 'go' is detached but alive: the reference taken before reads safely, while the document
+     * itself no longer finds it (getElementById only answers with attached elements). */
+    assert_string_equal(r.value, "BUTTON,true");
     js_result_free(&r);
     EXPECT(f, "document.getElementById('main').textContent", "X");
 }
@@ -2748,14 +2750,17 @@ static void test_lifecycle_listeners_get_event(void **state) {
 }
 
 /* Fake host fetch: records what crossed to the parent and answers 200 JSON. */
-typedef struct { char method[16]; char url[256]; char body[256]; int calls; } fake_net;
+typedef struct { char method[16]; char url[256]; char body[256]; char headers[256]; int calls; } fake_net;
 static int fake_fetch(void *ctx, const char *method, const char *url, const char *body,
-                      size_t body_len, int *out_status, char **out_body, size_t *out_len,
-                      char **out_ctype) {
+                      size_t body_len, const char *req_headers, int *out_status, char **out_body, size_t *out_len,
+                      char **out_ctype, char **out_headers) {
+    static const char RH[] = "ETag: \"abc\"\nX-Total: 7\nContent-Type: application/json\n";
+    if (out_headers != NULL && (*out_headers = (char *)malloc(sizeof RH)) != NULL) memcpy(*out_headers, RH, sizeof RH);
     fake_net *n = (fake_net *)ctx;
     n->calls++;
     snprintf(n->method, sizeof n->method, "%s", method);
     snprintf(n->url, sizeof n->url, "%s", url);
+    snprintf(n->headers, sizeof n->headers, "%s", req_headers ? req_headers : "");
     snprintf(n->body, sizeof n->body, "%.*s", (int)(body_len < 255 ? body_len : 255), body ? body : "");
     static const char R[] = "{\"ok\":1}";
     *out_status = 200;
@@ -2865,6 +2870,80 @@ static void test_trusted_send_beacon_can_be_patched(void **state) {
               " return navigator.sendBeacon()+','+typeof o;})()", "patched,function");
     /* the navigator itself stays non-extensible, and no own property appeared */
     EXPECT(f, "[Object.isExtensible(navigator),Object.keys(navigator).length].join(',')", "false,0");
+}
+
+/* Request headers the page sets reach the host fetch: XHR.setRequestHeader (repeated names
+ * combine) and fetch() init.headers / a Request's headers. Before this setRequestHeader was a
+ * no-op, so no Accept/Content-Type/CSRF header ever left the page (reddit's login partial
+ * answers 406 to a bare Accept). */
+static void test_trusted_request_headers_cross_to_host(void **state) {
+    fixture *f = (fixture *)*state;
+    fake_net net; memset(&net, 0, sizeof net);
+    assert_int_equal(jd_install_xhr(f->ctx, fake_fetch, &net), JD_OK);
+    EXPECT(f, "(function(){ var x=new XMLHttpRequest(); x.open('GET','https://a.test/p');"
+              " x.setRequestHeader('Accept','text/vnd.reddit.partial+html');"
+              " x.setRequestHeader('X-T','1'); x.setRequestHeader('x-t','2'); x.send(); return 'sent'; })()", "sent");
+    assert_string_equal(net.headers, "Accept: text/vnd.reddit.partial+html\nX-T: 1, 2\n");
+    EXPECT(f, "(function(){ fetch('https://a.test/q',{method:'POST',body:'{}',"
+              "headers:{'Content-Type':'application/json','X-Csrf':'tok'}}); return 'sent'; })()", "sent");
+    assert_non_null(strstr(net.headers, "content-type: application/json"));
+    assert_non_null(strstr(net.headers, "x-csrf: tok"));
+    EXPECT(f, "(function(){ fetch('https://a.test/r'); return 'sent'; })()", "sent");
+    assert_string_equal(net.headers, "");
+}
+
+/* XMLHttpRequest is an EventTarget with the whole lifecycle (YouTube's loader calls
+ * d.addEventListener("loadend", ...) and died with "not a function"), exposes the response
+ * headers, an upload target, and abort(). Events of an async request arrive after send();
+ * the result fields are settled by then. */
+static void test_trusted_xhr_event_target_and_response_headers(void **state) {
+    fixture *f = (fixture *)*state;
+    fake_net net; memset(&net, 0, sizeof net);
+    assert_int_equal(jd_install_xhr(f->ctx, fake_fetch, &net), JD_OK);
+    EXPECT(f, "(function(){ var x=new XMLHttpRequest(); window.__ev=[];"
+              " x.addEventListener('loadstart',function(){__ev.push('ls')});"
+              " x.addEventListener('readystatechange',function(){__ev.push('rs'+x.readyState)});"
+              " x.addEventListener('progress',function(){__ev.push('pr')});"
+              " x.addEventListener('load',function(){__ev.push('ld')});"
+              " x.onloadend=function(){__ev.push('le')};"
+              " x.open('GET','https://a.test/p'); x.send();"
+              " return [typeof x.addEventListener, typeof x.upload.addEventListener, x.status, x.readyState,"
+              " x.getResponseHeader('X-Total'), x.getResponseHeader('etag'), x.getAllResponseHeaders().indexOf('x-total: 7')>=0,"
+              " x.responseText.length>0, __ev.join('+')].join(','); })()",
+           "function,function,200,4,7,\"abc\",true,true,rs1");   /* only open()'s rs1 so far: the rest is deferred */
+    EXPECT(f, "(function(){ var x=new XMLHttpRequest(), L=[];"
+              " x.addEventListener('abort',function(){L.push('abort')}); x.addEventListener('load',function(){L.push('load')});"
+              " x.addEventListener('loadend',function(){L.push('end')}); x.open('GET','https://a.test/p'); x.send(); x.abort();"
+              " return L.join(',')+':'+x.readyState+':'+x.status; })()", "abort,end:0:0");
+    EXPECT(f, "(function(){ var x=new XMLHttpRequest(), L=[]; x.open('GET','https://a.test/p',false);"
+              " x.onload=function(){L.push('load:'+x.readyState)}; x.onreadystatechange=function(){L.push('rs'+x.readyState)};"
+              " x.send(); return L.join(','); })()", "rs2,rs3,rs4,load:4");
+    EXPECT(f, "(function(){ var x=new XMLHttpRequest(); x.open('POST','https://a.test/p'); x.send('a=1');"
+              " try{ x.setRequestHeader('X-A','1'); return 'no-throw'; }catch(e){ return e.name; } })()", "InvalidStateError");
+}
+
+static void test_trusted_fetch_exposes_response_headers(void **state) {
+    fixture *f = (fixture *)*state;
+    fake_net net; memset(&net, 0, sizeof net);
+    assert_int_equal(jd_install_xhr(f->ctx, fake_fetch, &net), JD_OK);
+    EXPECT(f, "(function(){ window.__r=''; fetch('https://a.test/q').then(function(r){"
+              " window.__r=[r.status,r.ok,r.headers.get('x-total'),r.headers.get('ETag'),r.headers.get('content-type')].join('|'); });"
+              " return 'started'; })()", "started");
+    js_pump_jobs(f->ctx, 64);
+    EXPECT(f, "__r", "200|true|7|\"abc\"|application/json");
+}
+
+/* XMLSerializer.serializeToString serializes elements, text and DocumentFragments. faceplate-partial
+ * (reddit's partial loader) feeds it a fragment and used to get "" back. */
+static void test_xml_serializer_covers_fragments_and_text(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "(function(){ var p=document.createElement('p'); p.innerHTML='<i>q</i> &amp; r';"
+              " return new XMLSerializer().serializeToString(p); })()", "<p><i>q</i> &amp; r</p>");
+    EXPECT(f, "(function(){ var fr=document.createDocumentFragment(), a=document.createElement('a'), b=document.createElement('b');"
+              " a.setAttribute('href','/x'); fr.appendChild(a); fr.appendChild(document.createTextNode('1 < 2')); fr.appendChild(b);"
+              " return new XMLSerializer().serializeToString(fr); })()", "<a href=\"/x\"></a>1 &lt; 2<b></b>");
+    EXPECT(f, "new XMLSerializer().serializeToString(document.createTextNode('a<b'))", "a&lt;b");
+    EXPECT(f, "new XMLSerializer().serializeToString(null)", "");
 }
 
 /* --- Custom Elements v1 (spec/js_custom_elements.md) --- */
@@ -3348,6 +3427,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_trusted_fetch_request_response, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ext_is_equal_node, setup, teardown),
         cmocka_unit_test_setup_teardown(test_text_nodes_are_real, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_xml_serializer_covers_fragments_and_text, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_trusted_request_headers_cross_to_host, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_trusted_xhr_event_target_and_response_headers, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_trusted_fetch_exposes_response_headers, setup, teardown),
         cmocka_unit_test_setup_teardown(test_trusted_send_beacon_can_be_patched, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ce_create_runs_constructor, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ce_define_upgrades_existing, setup, teardown),

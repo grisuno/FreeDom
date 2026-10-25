@@ -15,6 +15,7 @@
 #include <cmocka.h>
 
 #include "ui.h"
+#include "lazy_load.h"
 
 /* Asserts that line `n` of the layout equals expected (over the source text). */
 static void assert_line(const char *text, const ui_layout *lay, size_t n,
@@ -127,8 +128,24 @@ static void test_layout_free_null_and_double(void **state) {
     ui_layout_free(&lay); /* idempotent */
 }
 
+/* --- lazy_load: one meaning of "near the viewport" for lazy <img> and CSS backgrounds --- */
+
+static void test_lazy_near_viewport(void **state) {
+    (void)state;
+    /* viewport [0,800], margin 1000 => reach [-1000,1800] */
+    assert_int_equal(ll_near_viewport(100, 50, 0, 800, 1000), 1);     /* inside */
+    assert_int_equal(ll_near_viewport(1700, 300, 0, 800, 1000), 1);   /* straddles the lower edge */
+    assert_int_equal(ll_near_viewport(1801, 50, 0, 800, 1000), 0);    /* just below the reach */
+    assert_int_equal(ll_near_viewport(-1100, 50, 0, 800, 1000), 0);   /* above: ends at -1050 < -1000 */
+    assert_int_equal(ll_near_viewport(-1040, 50, 0, 800, 1000), 1);   /* above but its bottom is within reach */
+    assert_int_equal(ll_near_viewport(5000, -1, 0, 800, 1000), 1);    /* never placed: fail open */
+    assert_int_equal(ll_near_viewport(5000, 100, 4500, 800, 0), 1);   /* scrolled, zero margin */
+    assert_int_equal(ll_near_viewport(5000, 100, 0, 800, 0), 0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_lazy_near_viewport),
         cmocka_unit_test(test_wrap_null_args),
         cmocka_unit_test(test_wrap_empty),
         cmocka_unit_test(test_wrap_short_single_line),

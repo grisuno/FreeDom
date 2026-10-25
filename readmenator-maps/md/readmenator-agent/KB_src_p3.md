@@ -359,8 +359,8 @@ int cg_expand_bg_imag...`
   - `pm_entry` (struct, line 154)
   - `ptrmap` (struct, line 160)
   - `dom_index` (struct, line 220)
-  - `ih_block` (struct, line 817)
-  - `ih_acc` (struct, line 822)
+  - `ih_block` (struct, line 850)
+  - `ih_acc` (struct, line 855)
   - `to_lower_buf` (function, line 33) `static int to_lower_buf(const char *s, size_t n, char *out, size_t outcap)`
   - `ptr_hash` (function, line 45) `static size_t ptr_hash(const void *p)`
   - `sm_entry_append` (function, line 70) `static int sm_entry_append(sm_entry *e, dom_node_id id)`
@@ -378,71 +378,73 @@ int cg_expand_bg_imag...`
   - `dom_build` (function, line 291) `dom_status dom_build(const hp_document *doc, dom_index **out)`
   - `dom_free` (function, line 332) `void dom_free(dom_index *idx)`
   - `dom_node_count` (function, line 344) `size_t dom_node_count(const dom_index *idx)`
-  - `dom_get_element_by_id` (function, line 348) `dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id)`
-  - `copy_ids` (function, line 354) `static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap)`
-  - `dom_get_by_tag` (function, line 361) `size_t dom_get_by_tag(const dom_index *idx, const char *tag,
+  - `node_in_document` (function, line 352) `static int node_in_document(const lxb_dom_node_t *node)`
+  - `dom_get_element_by_id` (function, line 358) `dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id)`
+  - `dom_get_connected_by_id` (function, line 364) `dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id)`
+  - `copy_ids` (function, line 387) `static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap)`
+  - `dom_get_by_tag` (function, line 394) `size_t dom_get_by_tag(const dom_index *idx, const char *tag,
                       dom_node_id *o...`
-  - `dom_get_by_class` (function, line 370) `size_t dom_get_by_class(const dom_index *idx, const char *cls,
+  - `dom_get_by_class` (function, line 403) `size_t dom_get_by_class(const dom_index *idx, const char *cls,
                         dom_node_i...`
-  - `id_of` (function, line 383) `static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node)`
-  - `parse_selector_list` (function, line 393) `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)`
-  - `node_matches_any` (function, line 426) `static int node_matches_any(const lxb_dom_node_t *cn,
+  - `id_of` (function, line 416) `static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node)`
+  - `parse_selector_list` (function, line 426) `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)`
+  - `node_matches_any` (function, line 459) `static int node_matches_any(const lxb_dom_node_t *cn,
                             const css_sel *...`
-  - `count` (function, line 434) `* count (may exceed cap), and returns DOM_NODE_NONE. */
+  - `count` (function, line 467) `* count (may exceed cap), and returns DOM_NODE_NONE. */
 static dom_node_id qs_walk(const dom_inde...`
-  - `dom_query_selector` (function, line 464) `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
+  - `dom_query_selector` (function, line 497) `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
                           ...`
-  - `dom_query_selector_all` (function, line 473) `size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
+  - `dom_query_selector_all` (function, line 506) `size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
                            ...`
-  - `dom_matches` (function, line 484) `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)`
-  - `dom_closest` (function, line 493) `dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
+  - `dom_matches` (function, line 517) `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)`
+  - `dom_closest` (function, line 526) `dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
                         const cha...`
-  - `dom_document_position` (function, line 509) `size_t dom_document_position(const dom_index *idx, dom_node_id node)`
-  - `dom_precedes` (function, line 514) `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)`
-  - `dom_node_at` (function, line 519) `dom_node_id dom_node_at(const dom_index *idx, size_t position)`
-  - `dom_parent` (function, line 524) `dom_node_id dom_parent(const dom_index *idx, dom_node_id node)`
-  - `dom_first_child` (function, line 534) `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)`
-  - `dom_next_sibling` (function, line 542) `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)`
-  - `dom_tag_name` (function, line 550) `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len)`
-  - `dom_get_attribute` (function, line 561) `const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
+  - `dom_document_position` (function, line 542) `size_t dom_document_position(const dom_index *idx, dom_node_id node)`
+  - `dom_precedes` (function, line 547) `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)`
+  - `dom_node_at` (function, line 552) `dom_node_id dom_node_at(const dom_index *idx, size_t position)`
+  - `dom_parent` (function, line 557) `dom_node_id dom_parent(const dom_index *idx, dom_node_id node)`
+  - `dom_first_child` (function, line 567) `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)`
+  - `dom_next_sibling` (function, line 575) `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)`
+  - `dom_tag_name` (function, line 583) `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len)`
+  - `dom_get_attribute` (function, line 594) `const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
                            ...`
-  - `dom_attribute_names` (function, line 583) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
+  - `dom_attribute_names` (function, line 616) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
                            con...`
-  - `dom_text_content` (function, line 601) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)`
-  - `dom_document_title` (function, line 611) `const char *dom_document_title(const dom_index *idx, size_t *len)`
-  - `dom_set_text_content` (function, line 624) `dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
+  - `dom_text_content` (function, line 634) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)`
+  - `dom_document_title` (function, line 644) `const char *dom_document_title(const dom_index *idx, size_t *len)`
+  - `dom_set_text_content` (function, line 657) `dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
                                ...`
-  - `dom_set_document_title` (function, line 658) `dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)`
-  - `idx_push` (function, line 669) `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)`
-  - `dom_create_element` (function, line 687) `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)`
-  - `dom_append_child` (function, line 707) `dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
-  - `dom_remove_child` (function, line 721) `dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
-  - `dom_set_attribute` (function, line 729) `dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
+  - `dom_set_document_title` (function, line 691) `dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)`
+  - `idx_push` (function, line 702) `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)`
+  - `dom_create_element` (function, line 720) `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)`
+  - `dom_append_child` (function, line 740) `dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
+  - `dom_remove_child` (function, line 754) `dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
+  - `dom_set_attribute` (function, line 762) `dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
                              const...`
-  - `dom_remove_attribute` (function, line 758) `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)`
-  - `index_subtree` (function, line 767) `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)`
-  - `dom_set_inner_html` (function, line 777) `dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
+  - `dom_remove_attribute` (function, line 791) `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)`
+  - `index_subtree` (function, line 800) `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)`
+  - `dom_set_inner_html` (function, line 810) `dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
                               con...`
-  - `ih_append` (function, line 830) `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)`
-  - `ih_free` (function, line 857) `static void ih_free(ih_acc *a)`
-  - `dom_get_inner_html` (function, line 884) `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
+  - `ih_append` (function, line 863) `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)`
+  - `ih_free` (function, line 890) `static void ih_free(ih_acc *a)`
+  - `dom_get_inner_html` (function, line 917) `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
                            ...`
-  - `dom_insert_before` (function, line 914) `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
+  - `dom_insert_before` (function, line 947) `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
              ...`
-  - `dom_clone_node` (function, line 931) `dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id)`
-  - `dom_move_children` (function, line 945) `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
+  - `dom_clone_node` (function, line 964) `dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id)`
+  - `dom_move_children` (function, line 978) `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
                ...`
-  - `char_kind` (function, line 978) `static int char_kind(const lxb_dom_node_t *n)`
-  - `handle_of` (function, line 989) `static dom_node_id handle_of(dom_index *idx, lxb_dom_node_t *n)`
-  - `dom_node_kind` (function, line 997) `int dom_node_kind(const dom_index *idx, dom_node_id node)`
-  - `dom_child_node` (function, line 1001) `dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)`
-  - `dom_sibling_node` (function, line 1008) `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
-  - `dom_create_char_node` (function, line 1015) `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
+  - `char_kind` (function, line 1011) `static int char_kind(const lxb_dom_node_t *n)`
+  - `handle_of` (function, line 1022) `static dom_node_id handle_of(dom_index *idx, lxb_dom_node_t *n)`
+  - `dom_node_kind` (function, line 1030) `int dom_node_kind(const dom_index *idx, dom_node_id node)`
+  - `dom_child_node` (function, line 1034) `dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)`
+  - `dom_sibling_node` (function, line 1041) `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
+  - `dom_create_char_node` (function, line 1048) `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
          ...`
-  - `dom_native_node` (function, line 1029) `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
+  - `dom_native_node` (function, line 1062) `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
   - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
-  - `DOM_QS_MAX_SELECTORS` (macro, line 380) `#define DOM_QS_MAX_SELECTORS`
-  - `IH_BLOCK_SIZE` (macro, line 815) `#define IH_BLOCK_SIZE`
+  - `DOM_QS_MAX_SELECTORS` (macro, line 413) `#define DOM_QS_MAX_SELECTORS`
+  - `IH_BLOCK_SIZE` (macro, line 848) `#define IH_BLOCK_SIZE`
 - Depends on: `include/css_chain.h`, `include/css_select.h`, `include/dom.h`, `include/html_parse.h`, `include/util.h`
 
 ## src/dom_debug.c
@@ -475,26 +477,6 @@ static dom_node_id qs_walk(const dom_inde...`
   - `dd_format` (function, line 399) `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
   - `dd_format_css` (function, line 431) `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`
-
-## src/download.c
-- Doc: lc: download — pure helpers for "save this resource to disk".
-- Layer: utility
-- Language: c
-- Symbols:
-  - `lc` (function, line 13) `static int lc(int c)`
-  - `ci_find` (function, line 19) `static const char *ci_find(const char *hay, const char *needle)`
-  - `media_type` (function, line 33) `static void media_type(const char *content_type, char *buf, size_t bufsz)`
-  - `dl_should_download` (function, line 47) `int dl_should_download(const char *content_type, const char *content_disposition)`
-  - `dl_ext_for_type` (function, line 58) `const char *dl_ext_for_type(const char *content_type)`
-  - `copy_span` (function, line 85) `static void copy_span(const char *src, const char *end, char *buf, size_t bufsz)`
-  - `extract_disposition_name` (function, line 96) `static int extract_disposition_name(const char *cd, char *buf, size_t bufsz)`
-  - `extract_url_name` (function, line 134) `static int extract_url_name(const char *url, char *buf, size_t bufsz)`
-  - `has_extension` (function, line 148) `static int has_extension(const char *name)`
-  - `dl_pick_name` (function, line 153) `dl_status dl_pick_name(const char *url, const char *content_disposition,
-                       c...`
-  - `dl_build_path` (function, line 195) `dl_status dl_build_path(const char *dir, const char *name, char *out, size_t outsz)`
-  - `dl_check_size` (function, line 213) `dl_status dl_check_size(size_t len)`
-- Depends on: `include/download.h`, `include/pdf_export.h`
 
 
 Next: [KB_src_p4.md](KB_src_p4.md)

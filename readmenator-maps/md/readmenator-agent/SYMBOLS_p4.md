@@ -3,26 +3,28 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `ip_lerp_color` | function | `include/interp.h:61` | `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t);` |
+| `ip_val_kind` | enum | `include/interp.h:54` | `` |
 | `kind` | type_alias | `include/interp.h:37` | `typedef struct ip_ease_fn { ip_easing kind;` |
 | `pct` | type_alias | `include/interp.h:69` | `typedef struct ip_keyframe { double pct;` |
 | `val_kind` | type_alias | `include/interp.h:100` | `typedef struct ip_anim { ip_val_kind val_kind;` |
 | `FREEDOM_JS_DOM_H` | macro | `include/js_dom.h:2` | `#define FREEDOM_JS_DOM_H` |
 | `JD_IFRAME_TRACK_MAX` | macro | `include/js_dom.h:40` | `#define JD_IFRAME_TRACK_MAX` |
 | `JD_REPL_CSS_MAX` | macro | `include/js_dom.h:79` | `#define JD_REPL_CSS_MAX` |
-| `URLs` | function | `include/js_dom.h:210` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
+| `URLs` | function | `include/js_dom.h:214` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
 | `getComputedStyle` | function | `include/js_dom.h:108` | `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...` |
 | `global` | function | `include/js_dom.h:73` | `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...` |
 | `host` | function | `include/js_dom.h:163` | `* for a trusted host (allow.conf AND js.conf);` |
 | `jd_click_state` | type_alias | `include/js_dom.h:35` | `typedef struct jd_click_state jd_click_state;` |
 | `jd_click_state_free` | function | `include/js_dom.h:118` | `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);` |
-| `jd_flush_custom_elements` | function | `include/js_dom.h:235` | `void jd_flush_custom_elements(js_context *ctx);` |
+| `jd_flush_custom_elements` | function | `include/js_dom.h:239` | `void jd_flush_custom_elements(js_context *ctx);` |
 | `jd_get_cookies` | function | `include/js_dom.h:174` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` |
 | `jd_iframe_track` | struct | `include/js_dom.h:41` | `` |
 | `jd_install_repl_api` | function | `include/js_dom.h:82` | `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...` |
 | `jd_opaque` | struct | `include/js_dom.h:46` | `` |
-| `jd_process_iframes` | function | `include/js_dom.h:203` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
+| `jd_process_iframes` | function | `include/js_dom.h:207` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
 | `jd_status` | enum | `include/js_dom.h:25` | `` |
-| `jd_video_from_scripts` | function | `include/js_dom.h:224` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
+| `jd_video_from_scripts` | function | `include/js_dom.h:228` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
 | `opaque` | function | `include/js_dom.h:66` | `* the engine runtime opaque (unreachable from script);` |
 | `out_status` | function | `include/js_dom.h:182` | `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...` |
 | `place` | function | `include/js_dom.h:87` | `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...` |
@@ -75,9 +77,11 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `JS_MODULE_BYTES_MAX` | macro | `include/js_sandbox.h:116` | `#define JS_MODULE_BYTES_MAX` |
 | `JS_MODULE_MAX` | macro | `include/js_sandbox.h:115` | `#define JS_MODULE_MAX` |
 | `JS_PROFILE_PERIOD_MS` | macro | `include/js_sandbox.h:165` | `#define JS_PROFILE_PERIOD_MS` |
-| `JS_REALM_MAX` | macro | `include/js_sandbox.h:198` | `#define JS_REALM_MAX` |
-| `JS_REJECT_MAX` | macro | `include/js_sandbox.h:201` | `#define JS_REJECT_MAX` |
-| `handle` | function | `include/js_sandbox.h:181` | `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....` |
+| `JS_REALM_MAX` | macro | `include/js_sandbox.h:215` | `#define JS_REALM_MAX` |
+| `JS_REJECT_MAX` | macro | `include/js_sandbox.h:218` | `#define JS_REJECT_MAX` |
+| `JS_THROW_SLOTS` | macro | `include/js_sandbox.h:174` | `#define JS_THROW_SLOTS` |
+| `global` | function | `include/js_sandbox.h:181` | `* Freebug REPL installs: its shim takes them once and deletes them from the global (like * __netLog), because the...` |
+| `handle` | function | `include/js_sandbox.h:198` | `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....` |
 | `js_context` | type_alias | `include/js_sandbox.h:47` | `typedef struct js_context js_context;` |
 | `js_context_free` | function | `include/js_sandbox.h:96` | `void js_context_free(js_context *ctx);` |
 | `js_limits` | struct | `include/js_sandbox.h:39` | `` |
@@ -85,17 +89,19 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `js_prime_stack_limit` | function | `include/js_sandbox.h:79` | `void js_prime_stack_limit(void);` |
 | `js_profile_enable` | function | `include/js_sandbox.h:166` | `void js_profile_enable(js_context *ctx);` |
 | `js_profile_report` | function | `include/js_sandbox.h:167` | `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);` |
-| `js_pump_jobs` | function | `include/js_sandbox.h:178` | `int js_pump_jobs(js_context *ctx, int max_jobs);` |
+| `js_pump_jobs` | function | `include/js_sandbox.h:195` | `int js_pump_jobs(js_context *ctx, int max_jobs);` |
 | `js_result` | struct | `include/js_sandbox.h:49` | `` |
-| `js_result_free` | function | `include/js_sandbox.h:170` | `void js_result_free(js_result *res);` |
-| `js_set_current_script` | function | `include/js_sandbox.h:190` | `void js_set_current_script(js_context *ctx, const char *src, const char *type);` |
+| `js_result_free` | function | `include/js_sandbox.h:187` | `void js_result_free(js_result *res);` |
+| `js_set_current_script` | function | `include/js_sandbox.h:207` | `void js_set_current_script(js_context *ctx, const char *src, const char *type);` |
 | `js_set_module_host` | function | `include/js_sandbox.h:129` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` |
 | `js_set_time_budget` | function | `include/js_sandbox.h:158` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` |
 | `js_stack_limit_for` | function | `include/js_sandbox.h:75` | `size_t js_stack_limit_for(size_t soft_stack);` |
 | `js_status` | enum | `include/js_sandbox.h:24` | `` |
+| `js_throws_report` | function | `include/js_sandbox.h:176` | `size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n);` |
 | `loaded` | function | `include/js_sandbox.h:124` | `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...` |
 | `max_source_bytes` | type_alias | `include/js_sandbox.h:39` | `typedef struct js_limits { size_t max_source_bytes;` |
 | `out` | function | `include/js_sandbox.h:163` | `* into out (NUL-terminated, truncated at cap);` |
+| `silently` | function | `include/js_sandbox.h:171` | `* fails silently (an exception swallowed by a try/catch, a rejected promise nobody awaits) shows * its real first...` |
 | `status` | type_alias | `include/js_sandbox.h:48` | `typedef struct js_result { js_status status;` |
 | `FREEDOM_JS_TRUSTED_H` | macro | `include/js_trusted.h:2` | `#define FREEDOM_JS_TRUSTED_H` |
 | `JT_WS_MAX` | macro | `include/js_trusted.h:46` | `#define JT_WS_MAX` |
@@ -113,6 +119,7 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `null` | function | `include/js_trusted.h:24` | `* noopener semantics: it returns null (no cross-window reference, so no same-origin * channel) and only records up...` |
 | `parent` | function | `include/js_trusted.h:69` | `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);` |
 | `realm` | function | `include/js_trusted.h:96` | `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...` |
+| `FREEDOM_LAZY_LOAD_H` | macro | `include/lazy_load.h:2` | `#define FREEDOM_LAZY_LOAD_H` |
 | `FREEDOM_LINK_NAV_H` | macro | `include/link_nav.h:2` | `#define FREEDOM_LINK_NAV_H` |
 | `LN_MAX_FRAGMENT` | macro | `include/link_nav.h:38` | `#define LN_MAX_FRAGMENT` |
 | `LN_MAX_TARGET` | macro | `include/link_nav.h:33` | `#define LN_MAX_TARGET` |
@@ -401,55 +408,63 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `rd_status` | enum | `include/renderer.h:20` | `` |
 | `status` | type_alias | `include/renderer.h:28` | `typedef struct rd_result { rd_status status;` |
 | `FREEDOM_REQUEST_POLICY_H` | macro | `include/request_policy.h:2` | `#define FREEDOM_REQUEST_POLICY_H` |
+| `RP_HDR_MAX_BYTES` | macro | `include/request_policy.h:44` | `#define RP_HDR_MAX_BYTES` |
+| `RP_HDR_MAX_COUNT` | macro | `include/request_policy.h:43` | `#define RP_HDR_MAX_COUNT` |
+| `RP_HDR_NAME_MAX` | macro | `include/request_policy.h:45` | `#define RP_HDR_NAME_MAX` |
+| `RP_HDR_VALUE_MAX` | macro | `include/request_policy.h:46` | `#define RP_HDR_VALUE_MAX` |
 | `rp_decision` | enum | `include/request_policy.h:21` | `` |
+| `rp_headers_have` | function | `include/request_policy.h:61` | `static inline int rp_headers_have(const char *lines, const char *name)` |
 | `rp_host_of` | function | `include/request_policy.h:30` | `int rp_host_of(const char *url, char *out, size_t out_size);` |
 | `rp_same_site` | function | `include/request_policy.h:37` | `int rp_same_site(const char *top_level_url, const char *request_url);` |
+| `rp_sanitize_request_headers` | function | `include/request_policy.h:57` | `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap);` |
 | `rp_site_of` | function | `include/request_policy.h:34` | `int rp_site_of(const char *host, char *out, size_t out_size);` |
-| `EXCLUDED` | function | `include/secure_fetch.h:225` | `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...` |
+| `EXCLUDED` | function | `include/secure_fetch.h:233` | `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...` |
 | `FREEDOM_SECURE_FETCH_H` | macro | `include/secure_fetch.h:2` | `#define FREEDOM_SECURE_FETCH_H` |
-| `SF_CONNECT_TIMEOUT_MS` | macro | `include/secure_fetch.h:208` | `#define SF_CONNECT_TIMEOUT_MS` |
-| `SF_DEFAULT_KEX_GROUPS` | macro | `include/secure_fetch.h:158` | `#define SF_DEFAULT_KEX_GROUPS` |
-| `SF_DEFAULT_MAX_BODY` | macro | `include/secure_fetch.h:184` | `#define SF_DEFAULT_MAX_BODY` |
-| `SF_DEFAULT_MAX_REDIRECTS` | macro | `include/secure_fetch.h:210` | `#define SF_DEFAULT_MAX_REDIRECTS` |
-| `SF_DEFAULT_TIMEOUT_MS` | macro | `include/secure_fetch.h:185` | `#define SF_DEFAULT_TIMEOUT_MS` |
-| `SF_DEFAULT_USER_AGENT` | macro | `include/secure_fetch.h:183` | `#define SF_DEFAULT_USER_AGENT` |
-| `SF_IMPERSONATE_KEX_GROUPS` | macro | `include/secure_fetch.h:167` | `#define SF_IMPERSONATE_KEX_GROUPS` |
-| `SF_IMPERSONATE_TLS12_CIPHERS` | macro | `include/secure_fetch.h:172` | `#define SF_IMPERSONATE_TLS12_CIPHERS` |
-| `SF_IMPERSONATE_TLS13_CIPHERS` | macro | `include/secure_fetch.h:168` | `#define SF_IMPERSONATE_TLS13_CIPHERS` |
-| `SF_MAX_URL` | macro | `include/secure_fetch.h:211` | `#define SF_MAX_URL` |
+| `SF_CONNECT_TIMEOUT_MS` | macro | `include/secure_fetch.h:216` | `#define SF_CONNECT_TIMEOUT_MS` |
+| `SF_DEFAULT_KEX_GROUPS` | macro | `include/secure_fetch.h:166` | `#define SF_DEFAULT_KEX_GROUPS` |
+| `SF_DEFAULT_MAX_BODY` | macro | `include/secure_fetch.h:192` | `#define SF_DEFAULT_MAX_BODY` |
+| `SF_DEFAULT_MAX_REDIRECTS` | macro | `include/secure_fetch.h:218` | `#define SF_DEFAULT_MAX_REDIRECTS` |
+| `SF_DEFAULT_TIMEOUT_MS` | macro | `include/secure_fetch.h:193` | `#define SF_DEFAULT_TIMEOUT_MS` |
+| `SF_DEFAULT_USER_AGENT` | macro | `include/secure_fetch.h:191` | `#define SF_DEFAULT_USER_AGENT` |
+| `SF_IMPERSONATE_KEX_GROUPS` | macro | `include/secure_fetch.h:175` | `#define SF_IMPERSONATE_KEX_GROUPS` |
+| `SF_IMPERSONATE_TLS12_CIPHERS` | macro | `include/secure_fetch.h:180` | `#define SF_IMPERSONATE_TLS12_CIPHERS` |
+| `SF_IMPERSONATE_TLS13_CIPHERS` | macro | `include/secure_fetch.h:176` | `#define SF_IMPERSONATE_TLS13_CIPHERS` |
+| `SF_MAX_URL` | macro | `include/secure_fetch.h:219` | `#define SF_MAX_URL` |
 | `SF_META_MAX` | macro | `include/secure_fetch.h:77` | `#define SF_META_MAX` |
-| `SF_SUBRESOURCE_TIMEOUT_MS` | macro | `include/secure_fetch.h:209` | `#define SF_SUBRESOURCE_TIMEOUT_MS` |
-| `SF_WS_MAX_MESSAGE` | macro | `include/secure_fetch.h:316` | `#define SF_WS_MAX_MESSAGE` |
-| `bits` | function | `include/secure_fetch.h:334` | `* *flags receives CURLWS_* bits (text/binary/close/cont);` |
-| `connection` | function | `include/secure_fetch.h:348` | `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...` |
-| `exhausted` | function | `include/secure_fetch.h:379` | `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...` |
-| `policy` | type_alias | `include/secure_fetch.h:78` | `typedef struct sf_config { sf_policy policy;` |
-| `sf_accept_language_or_default` | function | `include/secure_fetch.h:250` | `const char *sf_accept_language_or_default(const char *lang);` |
+| `SF_RESPONSE_HEADERS_MAX` | macro | `include/secure_fetch.h:78` | `#define SF_RESPONSE_HEADERS_MAX` |
+| `SF_SUBRESOURCE_TIMEOUT_MS` | macro | `include/secure_fetch.h:217` | `#define SF_SUBRESOURCE_TIMEOUT_MS` |
+| `SF_WS_MAX_MESSAGE` | macro | `include/secure_fetch.h:324` | `#define SF_WS_MAX_MESSAGE` |
+| `bits` | function | `include/secure_fetch.h:342` | `* *flags receives CURLWS_* bits (text/binary/close/cont);` |
+| `connection` | function | `include/secure_fetch.h:356` | `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...` |
+| `exhausted` | function | `include/secure_fetch.h:387` | `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...` |
+| `policy` | type_alias | `include/secure_fetch.h:79` | `typedef struct sf_config { sf_policy policy;` |
+| `rp_sanitize_request_headers` | function | `include/secure_fetch.h:109` | `* rp_sanitize_request_headers ("Name: value\n" lines);` |
+| `sf_accept_language_or_default` | function | `include/secure_fetch.h:258` | `const char *sf_accept_language_or_default(const char *lang);` |
 | `sf_chain_info` | struct | `include/secure_fetch.h:61` | `` |
-| `sf_config` | struct | `include/secure_fetch.h:79` | `` |
-| `sf_cookie_line_matches` | function | `include/secure_fetch.h:237` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` |
-| `sf_cookie_put` | function | `include/secure_fetch.h:232` | `void sf_cookie_put(const char *url, const char *namevalue);` |
-| `sf_get` | function | `include/secure_fetch.h:357` | `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...` |
-| `sf_global_init` | function | `include/secure_fetch.h:219` | `void sf_global_init(void);` |
-| `sf_header_value` | function | `include/secure_fetch.h:297` | `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);` |
-| `sf_impersonate_kex_groups` | function | `include/secure_fetch.h:254` | `const char *sf_impersonate_kex_groups(void);` |
-| `sf_impersonate_tls13_ciphers` | function | `include/secure_fetch.h:255` | `const char *sf_impersonate_tls13_ciphers(void);` |
-| `sf_is_redirect_code` | function | `include/secure_fetch.h:286` | `int sf_is_redirect_code(long http_code);` |
+| `sf_config` | struct | `include/secure_fetch.h:80` | `` |
+| `sf_cookie_line_matches` | function | `include/secure_fetch.h:245` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` |
+| `sf_cookie_put` | function | `include/secure_fetch.h:240` | `void sf_cookie_put(const char *url, const char *namevalue);` |
+| `sf_get` | function | `include/secure_fetch.h:365` | `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...` |
+| `sf_global_init` | function | `include/secure_fetch.h:227` | `void sf_global_init(void);` |
+| `sf_header_value` | function | `include/secure_fetch.h:305` | `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);` |
+| `sf_impersonate_kex_groups` | function | `include/secure_fetch.h:262` | `const char *sf_impersonate_kex_groups(void);` |
+| `sf_impersonate_tls13_ciphers` | function | `include/secure_fetch.h:263` | `const char *sf_impersonate_tls13_ciphers(void);` |
+| `sf_is_redirect_code` | function | `include/secure_fetch.h:294` | `int sf_is_redirect_code(long http_code);` |
 | `sf_policy` | enum | `include/secure_fetch.h:41` | `` |
 | `sf_proxy_type` | enum | `include/secure_fetch.h:70` | `` |
-| `sf_rcache_clear` | function | `include/secure_fetch.h:394` | `void sf_rcache_clear(void);` |
-| `sf_rcache_get` | function | `include/secure_fetch.h:393` | `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);` |
-| `sf_rcache_put` | function | `include/secure_fetch.h:392` | `int sf_rcache_put(const char *from, const char *to, time_t now);` |
-| `sf_rcache_set_backing` | function | `include/secure_fetch.h:403` | `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);` |
-| `sf_response` | struct | `include/secure_fetch.h:126` | `` |
-| `sf_response_free` | function | `include/secure_fetch.h:368` | `void sf_response_free(sf_response *resp);` |
+| `sf_rcache_clear` | function | `include/secure_fetch.h:402` | `void sf_rcache_clear(void);` |
+| `sf_rcache_get` | function | `include/secure_fetch.h:401` | `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);` |
+| `sf_rcache_put` | function | `include/secure_fetch.h:400` | `int sf_rcache_put(const char *from, const char *to, time_t now);` |
+| `sf_rcache_set_backing` | function | `include/secure_fetch.h:411` | `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);` |
+| `sf_response` | struct | `include/secure_fetch.h:130` | `` |
+| `sf_response_free` | function | `include/secure_fetch.h:376` | `void sf_response_free(sf_response *resp);` |
 | `sf_status` | enum | `include/secure_fetch.h:24` | `` |
-| `sf_user_agent_or_default` | function | `include/secure_fetch.h:246` | `const char *sf_user_agent_or_default(const char *ua);` |
-| `sf_ws` | type_alias | `include/secure_fetch.h:317` | `typedef struct sf_ws sf_ws;` |
-| `sf_ws_close` | function | `include/secure_fetch.h:344` | `void sf_ws_close(sf_ws *ws);` |
-| `sf_ws_fd` | function | `include/secure_fetch.h:341` | `int sf_ws_fd(const sf_ws *ws);` |
-| `skipped` | function | `include/secure_fetch.h:275` | `* skipped (a classical key exchange is accepted);` |
-| `status` | type_alias | `include/secure_fetch.h:125` | `typedef struct sf_response { sf_status status;` |
+| `sf_user_agent_or_default` | function | `include/secure_fetch.h:254` | `const char *sf_user_agent_or_default(const char *ua);` |
+| `sf_ws` | type_alias | `include/secure_fetch.h:325` | `typedef struct sf_ws sf_ws;` |
+| `sf_ws_close` | function | `include/secure_fetch.h:352` | `void sf_ws_close(sf_ws *ws);` |
+| `sf_ws_fd` | function | `include/secure_fetch.h:349` | `int sf_ws_fd(const sf_ws *ws);` |
+| `skipped` | function | `include/secure_fetch.h:283` | `* skipped (a classical key exchange is accepted);` |
+| `status` | type_alias | `include/secure_fetch.h:129` | `typedef struct sf_response { sf_status status;` |
 | `validators` | function | `include/secure_fetch.h:18` | `* The security logic lives in pure validators (no I/O);` |
 | `FREEDOM_SHM_SLOTS_H` | macro | `include/shm_slots.h:2` | `#define FREEDOM_SHM_SLOTS_H` |
 | `SS_COUNT` | macro | `include/shm_slots.h:17` | `#define SS_COUNT` |
@@ -481,20 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `verb` | type_alias | `include/svg_render.h:64` | `typedef struct sv_seg { int verb;` |
 | `FREEDOM_TAB_H` | macro | `include/tab.h:2` | `#define FREEDOM_TAB_H` |
 | `TAB_MAX_INPUT` | macro | `include/tab.h:149` | `#define TAB_MAX_INPUT` |
-| `bytes` | function | `include/tab.h:191` | `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....` |
-| `decode` | function | `include/tab.h:369` | `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...` |
-| `exclusively` | function | `include/tab.h:242` | `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...` |
-| `granted` | function | `include/tab.h:343` | `* granted (allow.conf AND js.conf);` |
-| `jar` | function | `include/tab.h:227` | `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...` |
-| `kind` | type_alias | `include/tab.h:68` | `typedef struct tab_ws_op { int kind;` |
-| `origin` | function | `include/tab.h:234` | `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);` |
-| `out_status` | function | `include/tab.h:176` | `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...` |
-| `popstate` | function | `include/tab.h:350` | `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...` |
-| `replace` | type_alias | `include/tab.h:54` | `typedef struct tab_hist_op { int replace;` |
-| `returned` | function | `include/tab.h:344` | `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...` |
-| `string` | function | `include/tab.h:294` | `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...` |
-| `tab` | type_alias | `include/tab.h:46` | `typedef struct tab tab;` |
-| `tab_alive` | function | `include/tab.h:382` | `int tab_alive(const tab *t);` |
-| `tab_async_busy` | function | `include/tab.h:220` | `int tab_async_busy(const tab *t);` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

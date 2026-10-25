@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 206 modules, 3575 documented entities, documentation coverage 39.7% (1406/3545 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 207 modules, 3603 documented entities, documentation coverage 39.6% (1415/3573 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (96), h (94), py (12), sh (4)
+Languages: c (96), h (95), py (12), sh (4)
 
 ## Modules
 
@@ -22,7 +22,7 @@ Languages: c (96), h (94), py (12), sh (4)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 204 | 33.6% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 205 | 33.5% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 5 | 4 | 50.0% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) |  | 0 | 6 | 85.7% |
 | [`gui/freedom_view.c`](modules/gui.freedom_view.c.md) |  | 0 | 2 | 0.0% |
@@ -59,7 +59,7 @@ Languages: c (96), h (94), py (12), sh (4)
 | [`include/css_vars.h`](modules/include.css_vars.h.md) |  | 4 | 14 | 73.7% |
 | [`include/data_url.h`](modules/include.data_url.h.md) |  | 1 | 4 | 33.3% |
 | [`include/disk_store.h`](modules/include.disk_store.h.md) |  | 1 | 1 | 33.3% |
-| [`include/dom.h`](modules/include.dom.h.md) |  | 4 | 24 | 62.1% |
+| [`include/dom.h`](modules/include.dom.h.md) |  | 4 | 25 | 60.0% |
 | [`include/dom_debug.h`](modules/include.dom_debug.h.md) |  | 0 | 3 | 75.0% |
 | [`include/download.h`](modules/include.download.h.md) |  | 1 | 7 | 11.1% |
 | [`include/fb_panes.h`](modules/include.fb_panes.h.md) |  | 1 | 10 | 75.0% |
@@ -83,8 +83,9 @@ Languages: c (96), h (94), py (12), sh (4)
 | [`include/js_geom.h`](modules/include.js_geom.h.md) |  | 3 | 15 | 78.9% |
 | [`include/js_location.h`](modules/include.js_location.h.md) |  | 0 | 5 | 50.0% |
 | [`include/js_policy.h`](modules/include.js_policy.h.md) |  | 1 | 5 | 42.9% |
-| [`include/js_sandbox.h`](modules/include.js_sandbox.h.md) |  | 6 | 26 | 57.6% |
+| [`include/js_sandbox.h`](modules/include.js_sandbox.h.md) |  | 6 | 30 | 54.1% |
 | [`include/js_trusted.h`](modules/include.js_trusted.h.md) |  | 4 | 11 | 37.5% |
+| [`include/lazy_load.h`](modules/include.lazy_load.h.md) |  | 0 | 0 | 0.0% |
 | [`include/link_nav.h`](modules/include.link_nav.h.md) |  | 6 | 4 | 36.4% |
 | [`include/local_store.h`](modules/include.local_store.h.md) |  | 2 | 8 | 18.2% |
 | [`include/media_decoder.h`](modules/include.media_decoder.h.md) |  | 4 | 7 | 75.0% |
@@ -101,12 +102,12 @@ Languages: c (96), h (94), py (12), sh (4)
 | [`include/render_doc.h`](modules/include.render_doc.h.md) |  | 6 | 20 | 48.1% |
 | [`include/render_policy.h`](modules/include.render_policy.h.md) |  | 3 | 5 | 77.8% |
 | [`include/renderer.h`](modules/include.renderer.h.md) |  | 3 | 3 | 14.3% |
-| [`include/request_policy.h`](modules/include.request_policy.h.md) |  | 1 | 3 | 60.0% |
-| [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) |  | 9 | 36 | 54.3% |
+| [`include/request_policy.h`](modules/include.request_policy.h.md) |  | 1 | 9 | 54.5% |
+| [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) |  | 9 | 38 | 52.1% |
 | [`include/shm_slots.h`](modules/include.shm_slots.h.md) |  | 2 | 4 | 42.9% |
 | [`include/svg_paint.h`](modules/include.svg_paint.h.md) |  | 0 | 1 | 50.0% |
 | [`include/svg_render.h`](modules/include.svg_render.h.md) |  | 9 | 8 | 38.9% |
-| [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 33 | 45.7% |
+| [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 35 | 47.9% |
 | [`include/text_case.h`](modules/include.text_case.h.md) | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | 1 | 6 | 75.0% |
 | [`include/text_shape.h`](modules/include.text_shape.h.md) |  | 5 | 18 | 70.8% |
 | [`include/textfield.h`](modules/include.textfield.h.md) |  | 3 | 11 | 53.3% |
@@ -152,7 +153,7 @@ Languages: c (96), h (94), py (12), sh (4)
 | [`src/css_vars.c`](modules/src.css_vars.c.md) |  | 0 | 8 | 55.6% |
 | [`src/data_url.c`](modules/src.data_url.c.md) |  | 0 | 4 | 20.0% |
 | [`src/disk_store.c`](modules/src.disk_store.c.md) |  | 0 | 4 | 20.0% |
-| [`src/dom.c`](modules/src.dom.c.md) |  | 7 | 42 | 26.0% |
+| [`src/dom.c`](modules/src.dom.c.md) |  | 7 | 43 | 25.5% |
 | [`src/dom_debug.c`](modules/src.dom_debug.c.md) |  | 1 | 2 | 75.0% |
 | [`src/download.c`](modules/src.download.c.md) |  | 0 | 5 | 16.7% |
 | [`src/fb_panes.c`](modules/src.fb_panes.c.md) |  | 0 | 8 | 88.9% |
@@ -185,10 +186,10 @@ Languages: c (96), h (94), py (12), sh (4)
 | [`src/js_location.c`](modules/src.js_location.c.md) |  | 0 | 5 | 50.0% |
 | [`src/js_location_internal.h`](modules/src.js_location_internal.h.md) | Private to js_dom.c / js_location.c: the dom.histTarget native lives with the | 0 | 1 | 50.0% |
 | [`src/js_policy.c`](modules/src.js_policy.c.md) |  | 0 | 5 | 50.0% |
-| [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 25 | 44.8% |
+| [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 29 | 39.4% |
 | [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 13 | 33.3% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
-| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 317 | 1.6% |
+| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 321 | 1.6% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
@@ -202,10 +203,10 @@ Languages: c (96), h (94), py (12), sh (4)
 | [`src/render_doc.c`](modules/src.render_doc.c.md) |  | 0 | 17 | 50.0% |
 | [`src/render_policy.c`](modules/src.render_policy.c.md) |  | 0 | 5 | 50.0% |
 | [`src/renderer.c`](modules/src.renderer.c.md) |  | 0 | 4 | 20.0% |
-| [`src/request_policy.c`](modules/src.request_policy.c.md) |  | 0 | 6 | 57.1% |
+| [`src/request_policy.c`](modules/src.request_policy.c.md) |  | 0 | 7 | 62.5% |
 | [`src/secure_fetch.c`](modules/src.secure_fetch.c.md) |  | 6 | 44 | 27.5% |
 | [`src/svg_render.c`](modules/src.svg_render.c.md) | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | 3 | 5 | 55.6% |
-| [`src/tab.c`](modules/src.tab.c.md) |  | 2 | 81 | 35.7% |
+| [`src/tab.c`](modules/src.tab.c.md) |  | 2 | 82 | 37.6% |
 | [`src/text_case.c`](modules/src.text_case.c.md) |  | 0 | 5 | 50.0% |
 | [`src/text_shape.c`](modules/src.text_shape.c.md) |  | 10 | 24 | 45.7% |
 | [`src/textfield.c`](modules/src.textfield.c.md) |  | 0 | 12 | 46.2% |

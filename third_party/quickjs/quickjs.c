@@ -314,6 +314,11 @@ struct JSRuntime {
     JSInterruptHandler *interrupt_handler;
     void *interrupt_opaque;
 
+    /* Freedom patch: observer of every JS_Throw (devtools "log on exception"). */
+    JSThrowHook *throw_hook;
+    void *throw_opaque;
+    int in_throw_hook;
+
     JSPromiseHook *promise_hook;
     void *promise_hook_opaque;
     // for smuggling the parent promise from js_promise_then
@@ -7594,9 +7599,20 @@ JSValue JS_GetGlobalObject(JSContext *ctx)
 }
 
 /* WARNING: obj is freed */
+void JS_SetThrowHook(JSRuntime *rt, JSThrowHook *cb, void *opaque)
+{
+    rt->throw_hook = cb;
+    rt->throw_opaque = opaque;
+}
+
 JSValue JS_Throw(JSContext *ctx, JSValue obj)
 {
     JSRuntime *rt = ctx->rt;
+    if (rt->throw_hook != NULL && !rt->in_throw_hook) {
+        rt->in_throw_hook = 1;
+        rt->throw_hook(ctx, obj, rt->throw_opaque);
+        rt->in_throw_hook = 0;
+    }
     JS_FreeValue(ctx, rt->current_exception);
     rt->current_exception = obj;
     return JS_EXCEPTION;

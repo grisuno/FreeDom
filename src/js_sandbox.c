@@ -33,7 +33,7 @@ typedef struct js_mem_state {
 } js_mem_state;
 
 #define JS_PROFILE_SLOTS   192
-#define JS_PROFILE_KEY_MAX 200
+#define JS_PROFILE_KEY_MAX 640
 
 struct js_context {
     JSRuntime      *rt;
@@ -64,6 +64,10 @@ struct js_context {
     unsigned             prof_total;
     size_t               prof_n;
     struct { char key[JS_PROFILE_KEY_MAX]; unsigned hits; } prof[JS_PROFILE_SLOTS];
+    /* Throw tracer (js_throws_enable). */
+    int                  thr_on;
+    size_t               thr_n;
+    struct { char key[JS_PROFILE_KEY_MAX]; unsigned hits; } thr[JS_THROW_SLOTS];
 };
 
 /* --- unhandled-rejection tracking --- */
@@ -241,6 +245,149 @@ size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n) {
         n += (size_t)w;
     }
     return n;
+}
+
+/* Condenses "message + the two innermost frames" of a thrown value into one line. */
+static void throw_key(JSContext *ctx, JSValueConst obj, char *key, size_t cap) {
+    size_t k = 0;
+    key[0] = '\0';
+    const char *msg = NULL, *stack = NULL;
+    JSValue vstack = JS_UNDEFINED;
+    if (JS_IsObject(obj)) {
+        JSValue m = JS_GetPropertyStr(ctx, obj, "message");
+        if (JS_IsString(m)) msg = JS_ToCString(ctx, m);
+        JS_FreeValue(ctx, m);
+        vstack = JS_GetPropertyStr(ctx, obj, "stack");
+        if (JS_IsString(vstack)) stack = JS_ToCString(ctx, vstack);
+    } else if (!JS_IsUndefined(obj)) {
+        msg = JS_ToCString(ctx, obj);
+    }
+    if (JS_HasException(ctx)) JS_FreeValue(ctx, JS_GetException(ctx));   /* a getter threw: ignore */
+    if (stack == NULL || stack[0] == '\0') {
+        /* A native throw (TypeError from the engine) carries no frames: the live call stack at
+         * the throw site is the useful one. */
+        if (stack != NULL) JS_FreeCString(ctx, stack);
+        JS_FreeValue(ctx, vstack);
+        JSValue fresh = JS_NewError(ctx);
+        vstack = JS_GetPropertyStr(ctx, fresh, "stack");
+        JS_FreeValue(ctx, fresh);
+        stack = JS_IsString(vstack) ? JS_ToCString(ctx, vstack) : NULL;
+    }
+    if (msg != NULL) {
+        for (size_t i = 0; msg[i] != '\0' && k + 1 < cap && k < 100; i++)
+            key[k++] = (msg[i] == '\n') ? ' ' : msg[i];
+    }
+    if (stack != NULL && k + 4 < cap) {
+        memcpy(key + k, " @ ", 3); k += 3;
+        int lines = 0;
+        size_t loc_start = (size_t)-1;   /* inside "(url:l:c)": keep only the tail of long URLs */
+        for (size_t i = 0; stack[i] != '\0' && k + 1 < cap && lines < 2; i++) {
+            char ch = stack[i];
+            if (ch == '\n') { lines++; if (lines < 2 && k + 4 < cap) { memcpy(key + k, " <- ", 4); k += 4; } continue; }
+            if (ch == ' ' && (k == 0 || key[k - 1] == ' ')) continue;
+            if (ch == '(') loc_start = k + 1;
+            key[k++] = ch;
+            if (ch == ')' && loc_start != (size_t)-1) {
+                size_t span = k - 1 - loc_start;
+                if (span > 44) {                 /* "(...tail)" */
+                    memmove(key + loc_start + 3, key + k - 1 - 41, 41);
+                    memcpy(key + loc_start, "...", 3);
+                    k = loc_start + 3 + 41;
+                    key[k++] = ')';
+                }
+                loc_start = (size_t)-1;
+            }
+        }
+    }
+    key[k] = '\0';
+    if (msg != NULL) JS_FreeCString(ctx, msg);
+    if (stack != NULL) JS_FreeCString(ctx, stack);
+    JS_FreeValue(ctx, vstack);
+}
+
+static void throw_hook_cb(JSContext *ctx, JSValueConst obj, void *opaque) {
+    js_context *c = (js_context *)opaque;
+    if (c == NULL || !c->thr_on) return;
+    if (JS_VALUE_GET_TAG(obj) == JS_TAG_UNINITIALIZED) return;   /* the engine's internal re-throw marker */
+    char key[JS_PROFILE_KEY_MAX];
+    throw_key(ctx, obj, key, sizeof key);
+    if (key[0] == '\0') return;
+    size_t slot = c->thr_n;
+    for (size_t i = 0; i < c->thr_n; i++)
+        if (strcmp(c->thr[i].key, key) == 0) { slot = i; break; }
+    if (slot == c->thr_n) {
+        if (c->thr_n >= JS_THROW_SLOTS) return;
+        size_t kl = strlen(key);
+        memcpy(c->thr[slot].key, key, kl + 1);
+        c->thr[slot].hits = 0;
+        c->thr_n++;
+    }
+    c->thr[slot].hits++;
+}
+
+void js_throws_enable(js_context *ctx) {
+    if (ctx == NULL || ctx->rt == NULL) return;
+    ctx->thr_on = 1;
+    JS_SetThrowHook(ctx->rt, throw_hook_cb, ctx);
+}
+
+size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n) {
+    if (out == NULL || cap == 0) return 0;
+    out[0] = '\0';
+    if (ctx == NULL || !ctx->thr_on || ctx->thr_n == 0) return 0;
+    size_t n = 0;
+    unsigned char used[JS_THROW_SLOTS] = {0};
+    for (size_t r = 0; r < top_n && r < ctx->thr_n; r++) {
+        size_t best = ctx->thr_n;
+        for (size_t i = 0; i < ctx->thr_n; i++)
+            if (!used[i] && (best == ctx->thr_n || ctx->thr[i].hits > ctx->thr[best].hits)) best = i;
+        if (best == ctx->thr_n) break;
+        used[best] = 1;
+        size_t space = cap - n;
+        if (space == 0) break;
+        int w = snprintf(out + n, space, "%ux %s\n", ctx->thr[best].hits, ctx->thr[best].key);
+        if (w < 0 || (size_t)w >= space) { n = cap - 1; break; }
+        n += (size_t)w;
+    }
+    return n;
+}
+
+/* __fbProfile(n) / __fbThrows(n): the report text of the context packed in the closure data. */
+static JSValue m_fb_report(JSContext *jsctx, JSValueConst this_val, int argc, JSValueConst *argv,
+                           int magic, JSValue *fd) {
+    (void)this_val;
+    int32_t lo = 0, hi = 0, top = 14;
+    JS_ToInt32(jsctx, &lo, fd[0]);
+    JS_ToInt32(jsctx, &hi, fd[1]);
+    if (argc > 0) JS_ToInt32(jsctx, &top, argv[0]);
+    if (top < 1) top = 1;
+    if (top > 64) top = 64;
+    js_context *c = (js_context *)(uintptr_t)(((uint64_t)(uint32_t)hi << 32) | (uint32_t)lo);
+    char buf[16384];
+    size_t n = (magic == 0) ? js_profile_report(c, buf, sizeof buf, (size_t)top)
+                            : js_throws_report(c, buf, sizeof buf, (size_t)top);
+    return JS_NewStringLen(jsctx, buf, n);
+}
+
+void js_devtools_enable(js_context *ctx) {
+    if (ctx == NULL) return;
+    js_profile_enable(ctx);
+    js_throws_enable(ctx);
+}
+
+js_status js_devtools_expose(js_context *ctx) {
+    if (ctx == NULL || ctx->ctx == NULL) return JS_ERR_NULL_ARG;
+    uint64_t u = (uint64_t)(uintptr_t)ctx;
+    static const char *const names[2] = { "__fbProfile", "__fbThrows" };
+    JSValue g = JS_GetGlobalObject(ctx->ctx);
+    for (int m = 0; m < 2; ++m) {
+        JSValue data[2] = { JS_NewInt32(ctx->ctx, (int32_t)(uint32_t)u),
+                            JS_NewInt32(ctx->ctx, (int32_t)(uint32_t)(u >> 32)) };
+        JSValue fn = JS_NewCFunctionData(ctx->ctx, m_fb_report, 1, m, 2, data);
+        JS_DefinePropertyValueStr(ctx->ctx, g, names[m], fn, JS_PROP_CONFIGURABLE | JS_PROP_WRITABLE);
+    }
+    JS_FreeValue(ctx->ctx, g);
+    return JS_OK;
 }
 
 /* Returns nonzero to interrupt the engine once the per-eval budget is spent. */

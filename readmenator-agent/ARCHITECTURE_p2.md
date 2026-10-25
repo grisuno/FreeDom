@@ -2,6 +2,9 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_page_view.c` -> `include/box_style.h`
+- `tests/test_page_view.c` -> `include/css.h`
+- `tests/test_page_view.c` -> `include/dom.h`
 - `tests/test_page_view.c` -> `include/flex_layout.h`
 - `tests/test_page_view.c` -> `include/html_parse.h`
 - `tests/test_page_view.c` -> `include/page_view.h`
@@ -38,6 +41,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_text_shape.c` -> `include/webfont.h`
 - `tests/test_textfield.c` -> `include/textfield.h`
 - `tests/test_tls_impersonate.c` -> `include/tls_impersonate.h`
+- `tests/test_ui.c` -> `include/lazy_load.h`
 - `tests/test_ui.c` -> `include/ui.h`
 - `tests/test_url.c` -> `include/url.h`
 - `tests/test_web_storage.c` -> `include/web_storage.h`
@@ -282,7 +286,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_render_doc.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_render_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_renderer.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
-- `tests/test_request_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_request_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
 - `tests/test_secure_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_shm_slots.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_svg_render.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h

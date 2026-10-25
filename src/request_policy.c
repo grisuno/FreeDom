@@ -156,3 +156,90 @@ rp_decision rp_evaluate(const char *top_level_url, const char *request_url) {
 
     return (strcmp(rs, ts) == 0) ? RP_ALLOW : RP_BLOCK_THIRD_PARTY;
 }
+
+/* --- request headers a page may attach (spec/request_headers.md) --- */
+
+static int hdr_lower(int c) { return (c >= 'A' && c <= 'Z') ? c + 32 : c; }
+
+static int hdr_name_ieq(const char *a, size_t alen, const char *lit) {
+    size_t n = strlen(lit);
+    if (alen != n) return 0;
+    for (size_t i = 0; i < n; ++i) if (hdr_lower((unsigned char)a[i]) != lit[i]) return 0;
+    return 1;
+}
+
+static int hdr_name_has_prefix(const char *a, size_t alen, const char *lit) {
+    size_t n = strlen(lit);
+    if (alen < n) return 0;
+    for (size_t i = 0; i < n; ++i) if (hdr_lower((unsigned char)a[i]) != lit[i]) return 0;
+    return 1;
+}
+
+static int hdr_token_char(unsigned char c) {
+    if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) return 1;
+    return c != 0 && strchr("!#$%&'*+-.^_`|~", c) != NULL;
+}
+
+/* Identity and framing headers the browser owns: the page may not set or override them. */
+static int hdr_forbidden(const char *n, size_t len) {
+    static const char *const exact[] = {
+        "host", "cookie", "cookie2", "set-cookie", "referer", "user-agent", "accept-language",
+        "accept-encoding", "connection", "content-length", "transfer-encoding", "te", "upgrade",
+        "keep-alive", "expect", "date", "dnt", "via", "trailer", "origin", "content-encoding",
+    };
+    for (size_t i = 0; i < sizeof exact / sizeof exact[0]; ++i)
+        if (hdr_name_ieq(n, len, exact[i])) return 1;
+    return hdr_name_has_prefix(n, len, "sec-") || hdr_name_has_prefix(n, len, "proxy-")
+        || hdr_name_has_prefix(n, len, "x-http-method")
+        || hdr_name_has_prefix(n, len, "access-control-request-");
+}
+
+int rp_sanitize_request_headers(const char *raw, char *out, size_t cap) {
+    if (raw == NULL || out == NULL || cap == 0) return -1;
+    out[0] = '\0';
+    size_t used = 0;
+    int kept = 0;
+    const char *p = raw;
+    while (*p != '\0' && kept < RP_HDR_MAX_COUNT) {
+        const char *eol = strchr(p, '\n');
+        size_t linelen = (eol != NULL) ? (size_t)(eol - p) : strlen(p);
+        const char *line = p;
+        p = (eol != NULL) ? eol + 1 : p + linelen;
+
+        const char *colon = memchr(line, ':', linelen);
+        if (colon == NULL || colon == line) continue;
+        size_t nlen = (size_t)(colon - line);
+        if (nlen > RP_HDR_NAME_MAX) continue;
+        int ok = 1;
+        for (size_t i = 0; i < nlen; ++i) if (!hdr_token_char((unsigned char)line[i])) { ok = 0; break; }
+        if (!ok || hdr_forbidden(line, nlen)) continue;
+
+        const char *v = colon + 1;
+        const char *ve = line + linelen;
+        while (v < ve && (*v == ' ' || *v == '\t')) ++v;
+        while (ve > v && (ve[-1] == ' ' || ve[-1] == '\t')) --ve;
+        size_t vlen = (size_t)(ve - v);
+        if (vlen > RP_HDR_VALUE_MAX) continue;
+        for (size_t i = 0; i < vlen; ++i) {
+            unsigned char c = (unsigned char)v[i];
+            if ((c < 0x20 && c != '\t') || c == 0x7f) { ok = 0; break; }
+        }
+        if (!ok) continue;
+
+        char lower[RP_HDR_NAME_MAX + 1];
+        for (size_t i = 0; i < nlen; ++i) lower[i] = (char)hdr_lower((unsigned char)line[i]);
+        lower[nlen] = '\0';
+        if (rp_headers_have(out, lower)) continue;
+
+        size_t need = nlen + 2 + vlen + 1;               /* "Name: value\n" */
+        if (used + need + 1 > cap || used + need > RP_HDR_MAX_BYTES) continue;
+        memcpy(out + used, line, nlen); used += nlen;
+        out[used++] = ':'; out[used++] = ' ';
+        memcpy(out + used, v, vlen); used += vlen;
+        out[used++] = '\n';
+        out[used] = '\0';
+        ++kept;
+    }
+    return kept;
+}
+

@@ -63,7 +63,7 @@ typedef struct js_result {
 /* Upper bound on a stack-parsed source name (file) length, NUL excluded. */
 #define JS_LOC_FILE_MAX ((size_t)512)
 
-#define JS_DEFAULT_MAX_SOURCE   ((size_t)(4u * 1024u * 1024u))
+#define JS_DEFAULT_MAX_SOURCE   ((size_t)(32u * 1024u * 1024u))
 #define JS_DEFAULT_MEM_LIMIT    ((size_t)(256u * 1024u * 1024u))
 #define JS_MIN_STACK_LIMIT      ((size_t)(256u * 1024u))
 #define JS_MAX_STACK_LIMIT      ((size_t)(6u * 1024u * 1024u))
@@ -165,6 +165,23 @@ void js_set_time_budget(js_context *ctx, uint64_t budget_ms);
 #define JS_PROFILE_PERIOD_MS 1
 void   js_profile_enable(js_context *ctx);
 size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);
+
+/* Throw tracer: while enabled, EVERY thrown value -- caught or not -- is recorded as
+ * "<message> @ <innermost frames>" with a hit count (devtools "log on exception"). A page that
+ * fails silently (an exception swallowed by a try/catch, a rejected promise nobody awaits) shows
+ * its real first failure here. js_throws_report writes "<n>x <message> @ <frames>" lines, most
+ * frequent first. Fixed-size table (JS_THROW_SLOTS): a hostile page cannot grow it. */
+#define JS_THROW_SLOTS 64
+void   js_throws_enable(js_context *ctx);
+size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n);
+
+/* Devtools for a TRUSTED page. js_devtools_enable turns the profiler and the throw tracer on when
+ * the page loads (recording only; nothing is exposed to the page). js_devtools_expose defines the
+ * non-enumerable globals __fbProfile() / __fbThrows() (report text) and is called only when the
+ * Freebug REPL installs: its shim takes them once and deletes them from the global (like
+ * __netLog), because the report carries real timings a page must never read. */
+void      js_devtools_enable(js_context *ctx);
+js_status js_devtools_expose(js_context *ctx);
 
 /* Idempotent; safe on a zero-initialised struct and safe to call twice. */
 void js_result_free(js_result *res);

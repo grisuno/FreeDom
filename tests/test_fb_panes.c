@@ -28,11 +28,11 @@ static void test_labels_and_names(void **state) {
 static void test_wrap_is_cyclic_and_total(void **state) {
     (void)state;
     assert_int_equal(fbp_tab_wrap(FBP_CONSOLE, 1), FBP_HTML);
-    assert_int_equal(fbp_tab_wrap(FBP_NET, 1), FBP_CONSOLE);
-    assert_int_equal(fbp_tab_wrap(FBP_CONSOLE, -1), FBP_NET);
+    assert_int_equal(fbp_tab_wrap(FBP_THROWS, 1), FBP_CONSOLE);
+    assert_int_equal(fbp_tab_wrap(FBP_CONSOLE, -1), FBP_THROWS);
     assert_int_equal(fbp_tab_wrap(FBP_CSS, 0), FBP_CSS);
     assert_int_equal(fbp_tab_wrap(77, 1), FBP_HTML);   /* invalid counts as the console */
-    assert_int_equal(fbp_tab_wrap(-5, -1), FBP_NET);
+    assert_int_equal(fbp_tab_wrap(-5, -1), FBP_THROWS);
 }
 
 static void test_hit_test_inverts_the_layout(void **state) {
@@ -93,7 +93,23 @@ static void test_expr_per_tab(void **state) {
         assert_true(fbp_is_pane(t));
     }
     assert_false(fbp_is_pane(FBP_CONSOLE));
-    assert_true(strstr(out, "net(") != NULL);           /* the last tab built is Net */
+    assert_true(strstr(out, "throws(") != NULL);        /* the last tab built is Throws */
+}
+
+/* Profile and Throws read the engine's sampler/tracer through the REPL command-line API, name
+ * their tabs for --dump-pane, and fail soft when the API is absent (an untrusted page has none). */
+static void test_profile_and_throws_tabs(void **state) {
+    (void)state;
+    char out[FBP_EXPR_MAX];
+    assert_int_equal(fbp_tab_from_name("profile"), FBP_PROFILE);
+    assert_int_equal(fbp_tab_from_name("THROWS"), FBP_THROWS);
+    assert_string_equal(fbp_tab_label(FBP_PROFILE), "Profile");
+    assert_string_equal(fbp_tab_label(FBP_THROWS), "Throws");
+    assert_true(fbp_expr(FBP_PROFILE, "", 0, out, sizeof out) > 0);
+    assert_non_null(strstr(out, "profile("));
+    assert_non_null(strstr(out, "unavailable"));
+    assert_true(fbp_expr(FBP_THROWS, "", 0, out, sizeof out) > 0);
+    assert_non_null(strstr(out, "throws("));
 }
 
 static void test_expr_selector_cannot_escape_the_literal(void **state) {
@@ -123,6 +139,7 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_labels_and_names),
         cmocka_unit_test(test_wrap_is_cyclic_and_total),
+        cmocka_unit_test(test_profile_and_throws_tabs),
         cmocka_unit_test(test_hit_test_inverts_the_layout),
         cmocka_unit_test(test_quote_escapes_and_fails_closed),
         cmocka_unit_test(test_expr_per_tab),

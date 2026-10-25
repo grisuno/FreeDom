@@ -23,7 +23,7 @@ src groups 15 files (c) around lower, ci_starts_with, du_is_data_url, du_base64_
 
 ## tests (4.3)
 
-tests groups 13 files (c) around test_is_data_url_true, test_is_data_url_false, test_payload_basic, test_payload_no_mediatype, test_payload_empty.
+tests groups 13 files (c) around test_is_data_url_true, test_is_data_url_false, test_payload_basic, test_payload_no_mediatype, test_payload_empty. test_profile_and_throws_tabs: Profile and Throws read the engine's sampler/tracer...
 
 **Files**:
 

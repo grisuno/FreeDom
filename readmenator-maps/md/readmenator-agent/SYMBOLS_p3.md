@@ -3,6 +3,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `cb_expand_box2` | function | `include/css_box.h:21` | `int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int...` |
 | `cb_expand_box4` | function | `include/css_box.h:19` | `int cb_expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg, css_decl *dst, int cap);` |
 | `cb_expand_grid_template_cols` | function | `include/css_box.h:43` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);` |
 | `cb_interp_align` | function | `include/css_box.h:33` | `int cb_interp_align(const char *v);` |
@@ -206,35 +207,36 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `FREEDOM_DISK_STORE_H` | macro | `include/disk_store.h:2` | `#define FREEDOM_DISK_STORE_H` |
 | `ds_free` | function | `include/disk_store.h:47` | `void ds_free(uint8_t *buf, size_t len);` |
 | `ds_status` | enum | `include/disk_store.h:25` | `` |
-| `DOM_KIND_COMMENT` | macro | `include/dom.h:201` | `#define DOM_KIND_COMMENT` |
-| `DOM_KIND_ELEMENT` | macro | `include/dom.h:199` | `#define DOM_KIND_ELEMENT` |
-| `DOM_KIND_NONE` | macro | `include/dom.h:198` | `#define DOM_KIND_NONE` |
-| `DOM_KIND_TEXT` | macro | `include/dom.h:200` | `#define DOM_KIND_TEXT` |
-| `DOM_MAX_HANDLES` | macro | `include/dom.h:204` | `#define DOM_MAX_HANDLES` |
+| `DOM_KIND_COMMENT` | macro | `include/dom.h:206` | `#define DOM_KIND_COMMENT` |
+| `DOM_KIND_ELEMENT` | macro | `include/dom.h:204` | `#define DOM_KIND_ELEMENT` |
+| `DOM_KIND_NONE` | macro | `include/dom.h:203` | `#define DOM_KIND_NONE` |
+| `DOM_KIND_TEXT` | macro | `include/dom.h:205` | `#define DOM_KIND_TEXT` |
+| `DOM_MAX_HANDLES` | macro | `include/dom.h:209` | `#define DOM_MAX_HANDLES` |
 | `DOM_NODE_NONE` | macro | `include/dom.h:37` | `#define DOM_NODE_NONE` |
 | `FREEDOM_DOM_H` | macro | `include/dom.h:2` | `#define FREEDOM_DOM_H` |
-| `count` | function | `include/dom.h:59` | `* match count (which may exceed cap, so the caller can size a buffer). */ size_t dom_get_by_tag(const dom_index...` |
-| `cycle` | function | `include/dom.h:164` | `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...` |
-| `dom_attribute_names` | function | `include/dom.h:128` | `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);` |
-| `dom_document_position` | function | `include/dom.h:101` | `size_t dom_document_position(const dom_index *idx, dom_node_id node);` |
-| `dom_document_title` | function | `include/dom.h:136` | `const char *dom_document_title(const dom_index *idx, size_t *len);` |
+| `count` | function | `include/dom.h:64` | `* match count (which may exceed cap, so the caller can size a buffer). */ size_t dom_get_by_tag(const dom_index...` |
+| `cycle` | function | `include/dom.h:169` | `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...` |
+| `dom_attribute_names` | function | `include/dom.h:133` | `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);` |
+| `dom_document_position` | function | `include/dom.h:106` | `size_t dom_document_position(const dom_index *idx, dom_node_id node);` |
+| `dom_document_title` | function | `include/dom.h:141` | `const char *dom_document_title(const dom_index *idx, size_t *len);` |
 | `dom_free` | function | `include/dom.h:48` | `void dom_free(dom_index *idx);` |
-| `dom_get_attribute` | function | `include/dom.h:121` | `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);` |
-| `dom_get_by_class` | function | `include/dom.h:62` | `size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);` |
+| `dom_get_attribute` | function | `include/dom.h:126` | `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);` |
+| `dom_get_by_class` | function | `include/dom.h:67` | `size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);` |
 | `dom_index` | type_alias | `include/dom.h:40` | `typedef struct dom_index dom_index;` |
-| `dom_matches` | function | `include/dom.h:91` | `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);` |
+| `dom_matches` | function | `include/dom.h:96` | `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);` |
 | `dom_node_count` | function | `include/dom.h:51` | `size_t dom_node_count(const dom_index *idx);` |
 | `dom_node_id` | type_alias | `include/dom.h:34` | `typedef uint32_t dom_node_id;` |
-| `dom_node_kind` | function | `include/dom.h:207` | `int dom_node_kind(const dom_index *idx, dom_node_id node);` |
-| `dom_place` | enum | `include/dom.h:182` | `` |
-| `dom_precedes` | function | `include/dom.h:104` | `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);` |
+| `dom_node_kind` | function | `include/dom.h:212` | `int dom_node_kind(const dom_index *idx, dom_node_id node);` |
+| `dom_place` | enum | `include/dom.h:187` | `` |
+| `dom_precedes` | function | `include/dom.h:109` | `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);` |
 | `dom_status` | enum | `include/dom.h:26` | `` |
-| `dom_tag_name` | function | `include/dom.h:118` | `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);` |
-| `dom_text_content` | function | `include/dom.h:133` | `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);` |
-| `index` | function | `include/dom.h:223` | `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...` |
-| `length` | function | `include/dom.h:248` | `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...` |
-| `parent` | function | `include/dom.h:191` | `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...` |
-| `process` | function | `include/dom.h:255` | `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...` |
+| `dom_tag_name` | function | `include/dom.h:123` | `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);` |
+| `dom_text_content` | function | `include/dom.h:138` | `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);` |
+| `index` | function | `include/dom.h:228` | `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...` |
+| `length` | function | `include/dom.h:253` | `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...` |
+| `parent` | function | `include/dom.h:196` | `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...` |
+| `process` | function | `include/dom.h:260` | `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...` |
+| `tree` | function | `include/dom.h:59` | `* tree (the index only grows, so a node a script removed is still registered and must not be * found);` |
 | `DD_FIELD_MAX` | macro | `include/dom_debug.h:28` | `#define DD_FIELD_MAX` |
 | `FREEDOM_DOM_DEBUG_H` | macro | `include/dom_debug.h:2` | `#define FREEDOM_DOM_DEBUG_H` |
 | `dd_format` | function | `include/dom_debug.h:36` | `size_t dd_format(const rd_doc *doc, char *out, size_t cap);` |
@@ -248,18 +250,18 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `dl_should_download` | function | `include/download.h:43` | `int dl_should_download(const char *content_type, const char *content_disposition);` |
 | `dl_status` | enum | `include/download.h:33` | `` |
 | `literal` | function | `include/download.h:47` | `* a static string literal (never freed). */ const char *dl_ext_for_type(const char *content_type);` |
-| `FBP_EXPR_MAX` | macro | `include/fb_panes.h:27` | `#define FBP_EXPR_MAX` |
-| `FBP_SELECTOR_MAX` | macro | `include/fb_panes.h:26` | `#define FBP_SELECTOR_MAX` |
+| `FBP_EXPR_MAX` | macro | `include/fb_panes.h:29` | `#define FBP_EXPR_MAX` |
+| `FBP_SELECTOR_MAX` | macro | `include/fb_panes.h:28` | `#define FBP_SELECTOR_MAX` |
 | `FREEDOM_FB_PANES_H` | macro | `include/fb_panes.h:2` | `#define FREEDOM_FB_PANES_H` |
-| `fbp_expr` | function | `include/fb_panes.h:53` | `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);` |
-| `fbp_is_pane` | function | `include/fb_panes.h:45` | `int fbp_is_pane(int tab);` |
-| `fbp_js_quote` | function | `include/fb_panes.h:49` | `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);` |
+| `fbp_expr` | function | `include/fb_panes.h:55` | `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);` |
+| `fbp_is_pane` | function | `include/fb_panes.h:47` | `int fbp_is_pane(int tab);` |
+| `fbp_js_quote` | function | `include/fb_panes.h:51` | `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);` |
 | `fbp_tab` | enum | `include/fb_panes.h:17` | `` |
-| `fbp_tab_at` | function | `include/fb_panes.h:42` | `int fbp_tab_at(double x, double cell_w, double pad_cells);` |
-| `fbp_tab_from_name` | function | `include/fb_panes.h:33` | `int fbp_tab_from_name(const char *name);` |
-| `fbp_tab_label` | function | `include/fb_panes.h:30` | `const char *fbp_tab_label(int tab);` |
-| `fbp_tab_span` | function | `include/fb_panes.h:39` | `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);` |
-| `fbp_tab_wrap` | function | `include/fb_panes.h:36` | `int fbp_tab_wrap(int tab, int dir);` |
+| `fbp_tab_at` | function | `include/fb_panes.h:44` | `int fbp_tab_at(double x, double cell_w, double pad_cells);` |
+| `fbp_tab_from_name` | function | `include/fb_panes.h:35` | `int fbp_tab_from_name(const char *name);` |
+| `fbp_tab_label` | function | `include/fb_panes.h:32` | `const char *fbp_tab_label(int tab);` |
+| `fbp_tab_span` | function | `include/fb_panes.h:41` | `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);` |
+| `fbp_tab_wrap` | function | `include/fb_panes.h:38` | `int fbp_tab_wrap(int tab, int dir);` |
 | `FREEDOM_FLEX_LAYOUT_H` | macro | `include/flex_layout.h:2` | `#define FREEDOM_FLEX_LAYOUT_H` |
 | `FX_AREA_MAX_CELLS` | macro | `include/flex_layout.h:138` | `#define FX_AREA_MAX_CELLS` |
 | `FX_AREA_MAX_COLS` | macro | `include/flex_layout.h:137` | `#define FX_AREA_MAX_COLS` |
@@ -340,20 +342,20 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `fb_level_name` | function | `include/freebug.h:96` | `const char *fb_level_name(int level);` |
 | `level` | type_alias | `include/freebug.h:36` | `typedef struct fb_entry { int level;` |
 | `truncated` | function | `include/freebug.h:69` | `* A message longer than FB_MAX_ENTRY_BYTES is stored truncated (not dropped). A * dropped push raises b->overflow...` |
-| `FC_FLEX_MEASURE_W` | macro | `include/freedom_config.h:44` | `#define FC_FLEX_MEASURE_W` |
-| `FC_FLEX_MIN_MEASURE_W` | macro | `include/freedom_config.h:50` | `#define FC_FLEX_MIN_MEASURE_W` |
-| `FC_FONT_CHAIN_MAX` | macro | `include/freedom_config.h:55` | `#define FC_FONT_CHAIN_MAX` |
-| `FC_FONT_FALLBACK_PX` | macro | `include/freedom_config.h:65` | `#define FC_FONT_FALLBACK_PX` |
+| `FC_FLEX_MEASURE_W` | macro | `include/freedom_config.h:45` | `#define FC_FLEX_MEASURE_W` |
+| `FC_FLEX_MIN_MEASURE_W` | macro | `include/freedom_config.h:51` | `#define FC_FLEX_MIN_MEASURE_W` |
+| `FC_FONT_CHAIN_MAX` | macro | `include/freedom_config.h:56` | `#define FC_FONT_CHAIN_MAX` |
+| `FC_FONT_FALLBACK_PX` | macro | `include/freedom_config.h:66` | `#define FC_FONT_FALLBACK_PX` |
 | `FC_HEADLESS_VIEW_H` | macro | `include/freedom_config.h:24` | `#define FC_HEADLESS_VIEW_H` |
-| `FC_LAZY_IMAGE_MARGIN_PX` | macro | `include/freedom_config.h:80` | `#define FC_LAZY_IMAGE_MARGIN_PX` |
-| `FC_MAX_AUTHOR_CSS_BYTES` | macro | `include/freedom_config.h:77` | `#define FC_MAX_AUTHOR_CSS_BYTES` |
-| `FC_MAX_BOXES` | macro | `include/freedom_config.h:60` | `#define FC_MAX_BOXES` |
-| `FC_PNG_MARGIN` | macro | `include/freedom_config.h:33` | `#define FC_PNG_MARGIN` |
-| `FC_PNG_MAX_H` | macro | `include/freedom_config.h:38` | `#define FC_PNG_MAX_H` |
+| `FC_LAZY_IMAGE_MARGIN_PX` | macro | `include/freedom_config.h:81` | `#define FC_LAZY_IMAGE_MARGIN_PX` |
+| `FC_MAX_AUTHOR_CSS_BYTES` | macro | `include/freedom_config.h:78` | `#define FC_MAX_AUTHOR_CSS_BYTES` |
+| `FC_MAX_BOXES` | macro | `include/freedom_config.h:61` | `#define FC_MAX_BOXES` |
+| `FC_PNG_MARGIN` | macro | `include/freedom_config.h:34` | `#define FC_PNG_MARGIN` |
+| `FC_PNG_MAX_H` | macro | `include/freedom_config.h:39` | `#define FC_PNG_MAX_H` |
 | `FC_PNG_PAGE_W` | macro | `include/freedom_config.h:20` | `#define FC_PNG_PAGE_W` |
-| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:86` | `#define FC_TAB_OP_NET_BUDGET_MS` |
-| `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:29` | `#define FC_TRUSTED_JS_BUDGET_MS` |
-| `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:69` | `#define FC_UI_FONT_SIZE` |
+| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:87` | `#define FC_TAB_OP_NET_BUDGET_MS` |
+| `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:30` | `#define FC_TRUSTED_JS_BUDGET_MS` |
+| `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:70` | `#define FC_UI_FONT_SIZE` |
 | `FREEDOM_CONFIG_H` | macro | `include/freedom_config.h:14` | `#define FREEDOM_CONFIG_H` |
 | `FREEDOM_HLS_H` | macro | `include/hls.h:2` | `#define FREEDOM_HLS_H` |
 | `hls_playlist` | struct | `include/hls.h:45` | `` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `ip_keyframe` | struct | `include/interp.h:70` | `` |
 | `ip_kf_interp` | function | `include/interp.h:78` | `double ip_kf_interp(ip_val_kind val_kind, const ip_keyframe *kf, int n_kf, double pct);` |
 | `ip_lerp` | function | `include/interp.h:60` | `double ip_lerp(double a, double b, double t);` |
-| `ip_lerp_color` | function | `include/interp.h:61` | `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t);` |
-| `ip_val_kind` | enum | `include/interp.h:54` | `` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

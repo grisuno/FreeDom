@@ -55,11 +55,13 @@ static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
     const char *body   = (argc > 2 && !JS_IsUndefined(argv[2]) && !JS_IsNull(argv[2]))
                          ? JS_ToCStringLen(ctx, &blen, argv[2]) : NULL;
 
-    int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL;
+    const char *rh = (argc > 3 && JS_IsString(argv[3])) ? JS_ToCString(ctx, argv[3]) : NULL;
+
+    int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL, *rhdrs = NULL;
     int rc = -1;
     if (fn != NULL && url != NULL)
-        rc = fn(fctx, method ? method : "GET", url, body ? body : "", blen,
-                &status, &rbody, &rlen, &rctype);
+        rc = fn(fctx, method ? method : "GET", url, body ? body : "", blen, rh,
+                &status, &rbody, &rlen, &rctype, &rhdrs);
 
     JSValue o = JS_NewObject(ctx);
     if (rc == 0) {
@@ -74,16 +76,18 @@ static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
             JS_FreeValue(ctx, buf);
         }
         JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, rctype ? rctype : ""));
+        JS_SetPropertyStr(ctx, o, "headers", JS_NewString(ctx, rhdrs ? rhdrs : ""));
     } else { /* fail-closed */
         JS_SetPropertyStr(ctx, o, "status", JS_NewInt32(ctx, 0));
         JS_SetPropertyStr(ctx, o, "body", JS_NewString(ctx, ""));
         JS_SetPropertyStr(ctx, o, "bodyRaw", JS_NULL);
         JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, ""));
     }
-    free(rbody); free(rctype);
+    free(rbody); free(rctype); free(rhdrs);
     if (method != NULL) JS_FreeCString(ctx, method);
     if (url != NULL)    JS_FreeCString(ctx, url);
     if (body != NULL)   JS_FreeCString(ctx, body);
+    if (rh != NULL)     JS_FreeCString(ctx, rh);
     return o;
 }
 
@@ -98,38 +102,100 @@ static const char JD_XHR_SHIM[] =
     /* Request log for the Freebug Network panel: bounded, closure-held; the REPL shim takes
      * the reader once and deletes the global (a page that asks first only sees its own
      * requests -- no timing, Date is normalized). */
-    "var NLOG=[]; function HF(m,u,b){ var r; try{ r=HF0(m,u,b); }catch(e){ r=null; }"
+    "var NLOG=[]; function HF(m,u,b,h){ var r; try{ r=HF0(m,u,b,h||''); }catch(e){ r=null; }"
     "  if(NLOG.length<512) NLOG.push({method:String(m),url:String(u),status:r?(r.status|0):0,"
     "    size:r&&r.body?r.body.length:0,type:r&&r.contentType?String(r.contentType):''});"
     "  if(r===null) throw new Error('fetch'); return r; }"
     "Object.defineProperty(__G,'__netLog',{value:function(){return NLOG;},configurable:true,writable:true,enumerable:false});"
-    "function fire(o,n){var f=o['on'+n]; if(typeof f==='function'){try{f.call(o);}catch(e){}}}"
-    "function XHR(){this.readyState=0;this.status=0;this.statusText='';this.responseText='';"
-    "this.response='';this.responseType='';this.responseURL='';this.withCredentials=false;"
-    "this.onreadystatechange=null;this.onload=null;this.onerror=null;this.onloadend=null;"
-    "this._m='GET';this._u='';this._h='';}"
-    "XHR.UNSENT=0;XHR.OPENED=1;XHR.HEADERS_RECEIVED=2;XHR.LOADING=3;XHR.DONE=4;"
-    "XHR.prototype.open=function(m,u){this._m=String(m||'GET');this._u=String(u||'');"
-    "this.responseURL=this._u;this.readyState=1;fire(this,'readystatechange');};"
-    "XHR.prototype.setRequestHeader=function(){};"
-    "XHR.prototype.getAllResponseHeaders=function(){return this._h;};"
-    "XHR.prototype.getResponseHeader=function(k){k=String(k).toLowerCase();"
-    "var ls=this._h.split('\\r\\n');for(var i=0;i<ls.length;i++){var p=ls[i].indexOf(':');"
-    "if(p>0&&ls[i].slice(0,p).toLowerCase().trim()===k)return ls[i].slice(p+1).trim();}return null;};"
-    "XHR.prototype.abort=function(){};XHR.prototype.overrideMimeType=function(){};"
-    "XHR.prototype.send=function(b){var r;try{r=HF(this._m,this._u,(b==null?'':String(b)));}catch(e){r=null;}"
-    "if(!r||(r.status|0)===0){this.status=0;this.readyState=4;fire(this,'readystatechange');"
-    "fire(this,'error');fire(this,'loadend');return;}"
-    "this.status=r.status|0;this.responseText=r.body||'';"
-    "this._h=r.contentType?('content-type: '+r.contentType+'\\r\\n'):'';"
-    "if(this.responseType==='arraybuffer'){"
-    "  if(r.bodyRaw&&r.bodyRaw.buffer&&r.bodyRaw.buffer!==r.bodyRaw){"
-    "    try{this.response=r.bodyRaw.buffer;}catch(e){this.response=r.bodyRaw;}"
-    "  }else{this.response=r.bodyRaw;}"
-    "}else if(this.responseType==='json'){try{this.response=JSON.parse(this.responseText);}catch(e){this.response=null;}}"
-    "else{this.response=this.responseText;}"
-    "this.readyState=4;fire(this,'readystatechange');fire(this,'load');fire(this,'loadend');};"
-    "Object.defineProperty(__G,'XMLHttpRequest',{configurable:true,writable:true,value:XHR});"
+    "function hdrPairs(t){ var m=[]; String(t||'').split('\\n').forEach(function(l){ var p=l.indexOf(':');\n"
+    "  if(p>0) m.push([l.slice(0,p).trim(), l.slice(p+1).trim()]); }); return m; }\n"
+    "var STATUS_TEXT={200:'OK',201:'Created',202:'Accepted',204:'No Content',206:'Partial Content',301:'Moved Permanently',\n"
+    "  302:'Found',303:'See Other',304:'Not Modified',307:'Temporary Redirect',308:'Permanent Redirect',400:'Bad Request',\n"
+    "  401:'Unauthorized',403:'Forbidden',404:'Not Found',405:'Method Not Allowed',406:'Not Acceptable',409:'Conflict',\n"
+    "  410:'Gone',413:'Payload Too Large',415:'Unsupported Media Type',418:\"I'm a teapot\",422:'Unprocessable Entity',\n"
+    "  429:'Too Many Requests',500:'Internal Server Error',501:'Not Implemented',502:'Bad Gateway',503:'Service Unavailable',\n"
+    "  504:'Gateway Timeout'};\n"
+    "function XETarget(){ this._L={}; }\n"
+    "XETarget.prototype.addEventListener=function(t,f){ if(typeof f!=='function'&&!(f&&typeof f.handleEvent==='function')) return;\n"
+    "  var a=(this._L[t]=this._L[t]||[]); if(a.indexOf(f)<0) a.push(f); };\n"
+    "XETarget.prototype.removeEventListener=function(t,f){ var a=this._L[t]; if(!a) return; var i=a.indexOf(f); if(i>=0) a.splice(i,1); };\n"
+    "XETarget.prototype.dispatchEvent=function(e){ var t=e.type, h=this['on'+t];\n"
+    "  try{ e.target=this; e.currentTarget=this; }catch(x){}\n"
+    "  if(typeof h==='function'){ try{ h.call(this,e); }catch(x){} }\n"
+    "  var a=(this._L[t]||[]).slice();\n"
+    "  for(var i=0;i<a.length;i++){ try{ typeof a[i]==='function'?a[i].call(this,e):a[i].handleEvent(e); }catch(x){} }\n"
+    "  return true; };\n"
+    "function pev(type,loaded,total){ var e; try{ e=new ProgressEvent(type,{lengthComputable:total>0,loaded:loaded,total:total}); }\n"
+    "  catch(x){ try{ e=new Event(type); }catch(y){ e={type:type}; } e.lengthComputable=total>0; e.loaded=loaded; e.total=total; } return e; }\n"
+    "function XUpload(){ XETarget.call(this); }\n"
+    "XUpload.prototype=Object.create(XETarget.prototype); XUpload.prototype.constructor=XUpload;\n"
+    "function XHR(){ XETarget.call(this); this.readyState=0;this.status=0;this.statusText='';this.responseText='';\n"
+    "  this.response='';this.responseType='';this.responseURL='';this.responseXML=null;this.withCredentials=false;this.timeout=0;\n"
+    "  this.upload=new XUpload();\n"
+    "  this.onreadystatechange=null;this.onload=null;this.onerror=null;this.onloadend=null;this.onloadstart=null;\n"
+    "  this.onprogress=null;this.onabort=null;this.ontimeout=null;\n"
+    "  this._m='GET';this._u='';this._h='';this._rh={};this._async=true;this._sent=false;this._done=false;this._gen=0; }\n"
+    "XHR.prototype=Object.create(XETarget.prototype); XHR.prototype.constructor=XHR;\n"
+    "XHR.UNSENT=0;XHR.OPENED=1;XHR.HEADERS_RECEIVED=2;XHR.LOADING=3;XHR.DONE=4;\n"
+    "XHR.prototype.UNSENT=0;XHR.prototype.OPENED=1;XHR.prototype.HEADERS_RECEIVED=2;XHR.prototype.LOADING=3;XHR.prototype.DONE=4;\n"
+    "function xstate(x,n){ x.readyState=n; x.dispatchEvent(pev('readystatechange',0,0)); }\n"
+    "XHR.prototype.open=function(m,u,a){ this._m=String(m||'GET').toUpperCase(); this._u=String(u==null?'':u);\n"
+    "  this._async=(a===undefined)?true:!!a; this._rh={}; this._sent=false; this._done=false; this._gen++;\n"
+    "  this.status=0; this.statusText=''; this.responseText=''; this.response=''; this._h='';\n"
+    "  this.responseURL=this._u; xstate(this,1); };\n"
+    "/* Request headers the page sets: repeated names combine with \", \" (XHR spec); the trusted parent\n"
+    " * filters the block (identity/framing headers are never forwarded). */\n"
+    "XHR.prototype.setRequestHeader=function(k,v){ if(this.readyState!==1||this._sent){ var e=new Error(\"Failed to execute 'setRequestHeader' on 'XMLHttpRequest': The object's state must be OPENED.\");\n"
+    "    e.name='InvalidStateError'; throw e; }\n"
+    "  k=String(k); v=String(v); var l=k.toLowerCase(); var o=this._rh;\n"
+    "  if(Object.prototype.hasOwnProperty.call(o,l)) o[l][1]+=', '+v; else o[l]=[k,v]; };\n"
+    "XHR.prototype.getAllResponseHeaders=function(){ if(this.readyState<2) return ''; var out='';\n"
+    "  hdrPairs(this._h).forEach(function(p){ out+=p[0].toLowerCase()+': '+p[1]+'\\r\\n'; }); return out; };\n"
+    "XHR.prototype.getResponseHeader=function(k){ if(this.readyState<2) return null; k=String(k).toLowerCase(); var v=null;\n"
+    "  hdrPairs(this._h).forEach(function(p){ if(p[0].toLowerCase()===k) v=(v===null?'':v+', ')+p[1]; }); return v; };\n"
+    "XHR.prototype.overrideMimeType=function(){};\n"
+    "XHR.prototype.abort=function(){ if(this._sent&&this._ev){ this._gen++; this._ev=false; this.status=0;\n"
+    "    this.responseText=''; this.response=''; this.readyState=4; this.dispatchEvent(pev('readystatechange',0,0));\n"
+    "    this.dispatchEvent(pev('abort',0,0)); this.upload.dispatchEvent(pev('abort',0,0));\n"
+    "    this.dispatchEvent(pev('loadend',0,0)); }\n"
+    "  this._sent=false; this.readyState=0; };\n"
+    "/* The round trip is synchronous under the hood, so the RESULT (status, responseText, headers) is\n"
+    " * settled inside send(); only the EVENTS of an async request are deferred, which keeps both the\n"
+    " * \"read it right after send()\" idiom of this engine and handlers set after send() working. */\n"
+    "XHR.prototype.send=function(b){ if(this.readyState!==1||this._sent){ var ie=new Error(\"Failed to execute 'send' on 'XMLHttpRequest': The object's state must be OPENED.\");\n"
+    "    ie.name='InvalidStateError'; throw ie; }\n"
+    "  var self=this, gen=++this._gen, hs='', o=this._rh; this._sent=true; this._done=false;\n"
+    "  for(var k in o) hs+=o[k][0]+': '+o[k][1]+'\\n';\n"
+    "  var body=(b==null||this._m==='GET'||this._m==='HEAD')?'':bodyText(b);\n"
+    "  var r; try{ r=HF(this._m,this._u,body,hs); }catch(e){ r=null; }\n"
+    "  var ok=!!r&&(r.status|0)!==0, n=0;\n"
+    "  if(ok){ this.status=r.status|0; this.statusText=STATUS_TEXT[this.status]||'';\n"
+    "    var hdrs=r.headers||''; if(r.contentType&&!/^content-type:/im.test(hdrs)) hdrs='content-type: '+r.contentType+'\\n'+hdrs;\n"
+    "    this._h=hdrs; this.responseText=r.body||''; n=this.responseText.length;\n"
+    "    var rt=this.responseType;\n"
+    "    if(rt==='arraybuffer'){\n"
+    "      if(r.bodyRaw&&r.bodyRaw.buffer&&r.bodyRaw.buffer!==r.bodyRaw){ try{this.response=r.bodyRaw.buffer;}catch(e){this.response=r.bodyRaw;} }\n"
+    "      else{ this.response=r.bodyRaw; }\n"
+    "    }else if(rt==='json'){ try{ this.response=JSON.parse(this.responseText); }catch(e){ this.response=null; } }\n"
+    "    else if(rt==='blob'){ try{ this.response=new Blob([r.bodyRaw||this.responseText],{type:r.contentType||''}); }catch(e){ this.response=null; } }\n"
+    "    else if(rt==='document'){ try{ this.response=new DOMParser().parseFromString(this.responseText,'text/html'); this.responseXML=this.response; }catch(e){ this.response=null; } }\n"
+    "    else{ this.response=this.responseText; } }\n"
+    "  else{ this.status=0; this.statusText=''; }\n"
+    "  this.readyState=4; this._done=true; this._ev=true;\n"
+    "  var fire=function(){ if(gen!==self._gen) return; self._ev=false;\n"
+    "    self.dispatchEvent(pev('loadstart',0,0));\n"
+    "    if(body!==''){ self.upload.dispatchEvent(pev('loadstart',0,body.length)); self.upload.dispatchEvent(pev('progress',body.length,body.length));\n"
+    "      self.upload.dispatchEvent(pev('load',body.length,body.length)); self.upload.dispatchEvent(pev('loadend',body.length,body.length)); }\n"
+    "    if(!ok){ self.readyState=4; self.dispatchEvent(pev('readystatechange',0,0));\n"
+    "      self.dispatchEvent(pev('error',0,0)); self.dispatchEvent(pev('loadend',0,0)); return; }\n"
+    "    self.readyState=2; self.dispatchEvent(pev('readystatechange',0,0));\n"
+    "    self.readyState=3; self.dispatchEvent(pev('readystatechange',0,0)); self.dispatchEvent(pev('progress',n,n));\n"
+    "    self.readyState=4; self.dispatchEvent(pev('readystatechange',0,0));\n"
+    "    self.dispatchEvent(pev('load',n,n)); self.dispatchEvent(pev('loadend',n,n)); };\n"
+    "  if(this._async&&typeof __G.setTimeout==='function') __G.setTimeout(fire,0); else fire(); };\n"
+    "Object.defineProperty(__G,'XMLHttpRequest',{configurable:true,writable:true,value:XHR});\n"
+    "Object.defineProperty(__G,'XMLHttpRequestEventTarget',{configurable:true,writable:true,value:XETarget});\n"
+    "Object.defineProperty(__G,'XMLHttpRequestUpload',{configurable:true,writable:true,value:XUpload});\n"
     /* Fetch Standard classes over the same gated host call. Request/Response are
      * data containers; only fetch() reaches HF (and so the parent's full policy). */
     "function bodyText(b){ if(b==null) return '';"
@@ -179,10 +245,13 @@ static const char JD_XHR_SHIM[] =
     "if(typeof __G.__streamBody==='function') __G.__streamBody(Response);"
     "__G.fetch=function(input,opt){ var rq; try{ rq=new Request(input,opt); }catch(e){ return Promise.reject(e); }"
     "  if(rq.signal&&rq.signal.aborted) return Promise.reject(abortErr());"
-    "  var r; try{ r=HF(rq.method,rq.url,bodyText(rq._body)); }catch(e){ r=null; }"
+    "  var hs=''; try{ rq.headers.forEach(function(v,k){ hs+=k+': '+v+'\\n'; }); }catch(e){}"
+    "  var r; try{ r=HF(rq.method,rq.url,bodyText(rq._body),hs); }catch(e){ r=null; }"
     "  var st=r?(r.status|0):0; if(st===0) return Promise.reject(new TypeError('Failed to fetch'));"
     "  if(rq.signal&&rq.signal.aborted) return Promise.reject(abortErr());"
     "  var h=new Headers(); if(r.contentType) h.set('content-type',r.contentType);"
+    "  String(r.headers||'').split('\\n').forEach(function(l){ var p=l.indexOf(':'); if(p>0){ var k=l.slice(0,p).trim(), v=l.slice(p+1).trim();"
+    "    if(k.toLowerCase()==='content-type') return; try{ h.append(k,v); }catch(e){} } });"
     "  return Promise.resolve(new Response(r.body||'',{status:st,headers:h,url:rq.url,type:'basic',raw:r.bodyRaw||null})); };"
     /* navigator.sendBeacon: a queued POST over the same gated call, sent after the
      * current task (the page never waits on it); the parent applies the full policy

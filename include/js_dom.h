@@ -185,9 +185,13 @@ int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);
  * (blocked host, policy failure, over budget): the XHR completes with status 0 and an
  * empty body (fail-closed, never throws to the page in a way that leaks why). */
 typedef int (*jd_fetch_fn)(void *ctx, const char *method, const char *url,
-                           const char *body, size_t body_len,
+                           const char *body, size_t body_len, const char *req_headers,
                            int *out_status, char **out_body, size_t *out_body_len,
-                           char **out_ctype);
+                           char **out_ctype, char **out_headers);
+
+/* req_headers: the page-supplied request headers ("Name: value" lines, may be NULL/empty).
+ * UNTRUSTED text from the page; the trusted parent re-filters it (rp_sanitize_request_headers)
+ * before it can reach a socket. */
 
 /* Installs XMLHttpRequest + fetch backed by `fn` (called with `fetch_ctx`). This is the
  * ONLY path that gives page JS network access, and it is gated by the caller: install it

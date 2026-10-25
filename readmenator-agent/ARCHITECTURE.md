@@ -30,6 +30,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/image_decode.h`
 - `gui/browser_ui.c` -> `include/interp.h`
 - `gui/browser_ui.c` -> `include/js_policy.h`
+- `gui/browser_ui.c` -> `include/lazy_load.h`
 - `gui/browser_ui.c` -> `include/link_nav.h`
 - `gui/browser_ui.c` -> `include/media_decoder.h`
 - `gui/browser_ui.c` -> `include/net_realm.h`
@@ -353,6 +354,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/request_policy.c` -> `include/psl_data.h`
 - `src/request_policy.c` -> `include/request_policy.h`
 - `src/secure_fetch.c` -> `include/anti_fp.h`
+- `src/secure_fetch.c` -> `include/request_policy.h`
 - `src/secure_fetch.c` -> `include/secure_fetch.h`
 - `src/secure_fetch.c` -> `include/url.h`
 - `src/svg_render.c` -> `include/css_color.h`
@@ -379,6 +381,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/tab.c` -> `include/os_sandbox.h`
 - `src/tab.c` -> `include/page_view.h`
 - `src/tab.c` -> `include/request_policy.h`
+- `src/tab.c` -> `include/secure_fetch.h`
 - `src/tab.c` -> `include/tab.h`
 - `src/tab.c` -> `include/url.h`
 - `src/tab.c` -> `include/util.h`
@@ -493,8 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_media_decoder.c` -> `include/media_decoder.h`
 - `tests/test_net_realm.c` -> `include/net_realm.h`
 - `tests/test_os_sandbox.c` -> `include/os_sandbox.h`
-- `tests/test_page_view.c` -> `include/box_style.h`
-- `tests/test_page_view.c` -> `include/css.h`
-- `tests/test_page_view.c` -> `include/dom.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

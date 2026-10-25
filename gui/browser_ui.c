@@ -41,6 +41,7 @@
 #include "prefs.h"
 #include "profile.h"
 #include "cached_fetch.h"
+#include "lazy_load.h"
 #include "wl_guard.h"
 #include "shm_slots.h"
 #include "render_doc.h"
@@ -275,6 +276,8 @@ typedef struct ui_bg_image {
     char             *url;
     cairo_surface_t  *surface;
     int               nat_w, nat_h;
+    int               deferred;   /* GUI: not fetched yet; load_lazy_bg_images fetches it near the viewport */
+    int               box;        /* pv_box_def index that names this image (for the near-viewport test) */
 } ui_bg_image;
 
 /* Maximum concurrent tabs. Bounded so the per-tab snapshot array is a fixed,
@@ -1160,11 +1163,13 @@ static void free_bg_images(browser_window *w) {
  * background-image). Matches by URL content, not box identity; see find_image. */
 static const ui_bg_image *find_bg_image(const browser_window *w, const char *url) {
     if (url == NULL || url[0] == '\0') return NULL;
+    const ui_bg_image *first = NULL;
     for (size_t i = 0; i < w->bg_image_count; ++i) {
-        if (w->bg_images[i].url != NULL && strcmp(w->bg_images[i].url, url) == 0)
-            return &w->bg_images[i];
+        if (w->bg_images[i].url == NULL || strcmp(w->bg_images[i].url, url) != 0) continue;
+        if (w->bg_images[i].surface != NULL) return &w->bg_images[i];   /* one that is loaded wins */
+        if (first == NULL) first = &w->bg_images[i];
     }
-    return NULL;
+    return first;
 }
 
 /* On-screen size of a decoded image: fit to the content width, never upscaled past
@@ -1519,6 +1524,7 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     if (hb_check(w->hosts, host) == HB_BLOCK) return -1;   /* tracker/host blocklist */
 
     sf_config cfg = sf_config_default();
+    cfg.extra_headers = tab_inflight_request_headers();   /* the page's own XHR/fetch headers */
     /* A subresource is optional by construction: the page renders without it.
      * Letting one stalled stylesheet or script hold the document's full 30 s
      * budget is a guaranteed delay bought for a possible improvement, and a
@@ -1555,6 +1561,7 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     *out_status = (int)resp.http_code;
     *out_body = rb; *out_body_len = resp.body_len;
     *out_ctype = (resp.content_type != NULL) ? strdup(resp.content_type) : NULL;
+    tab_report_response_headers(resp.headers);   /* what the page's XHR/fetch may read */
     sf_response_free(&resp);
     return 0;
 }
@@ -2181,7 +2188,10 @@ static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void 
  * box def carries no decision field, only the already-cleared-or-not URL). Not
  * prefetch-pooled in v1 (see fetch_decode_image); a page with many distinct
  * background-images fetches them serially, same as it would without a pool. */
-static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx) {
+/* lazy != 0 (the window): every image is only REGISTERED, deferred until its box nears the
+ * viewport (load_lazy_bg_images). lazy == 0 (headless export): fetched now, a page export is whole. */
+static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx,
+                           int lazy) {
     if (w->doc == NULL) return;
     size_t nb = rd_box_count(w->doc);
     size_t nwith = 0;
@@ -2198,21 +2208,16 @@ static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, vo
     size_t k = 0;
     for (size_t i = 0; i < nb; ++i) {
         const pv_box_def *bx = rd_box_at(w->doc, i);
-        if (bx->bg_image_url[0] == '\0') continue;
-        if (w->cur_top == NULL && !du_is_data_url(bx->bg_image_url)) continue;
-        ui_bg_image *slot = &w->bg_images[k++];
-        slot->url = strdup(bx->bg_image_url);
-        fetch_decode_image(w, t, img_fetch, fetch_ctx, bx->bg_image_url,
-                           NULL, 0, &slot->surface, &slot->nat_w, &slot->nat_h);
-        /* R5b: second background layer */
-        if (bx->bg_image_url2[0] != '\0' && k < nwith) {
-            if (w->cur_top != NULL || du_is_data_url(bx->bg_image_url2)) {
-                ui_bg_image *slot2 = &w->bg_images[k++];
-                slot2->url = strdup(bx->bg_image_url2);
-                fetch_decode_image(w, t, img_fetch, fetch_ctx,
-                                   bx->bg_image_url2, NULL, 0,
-                                   &slot2->surface, &slot2->nat_w, &slot2->nat_h);
-            }
+        for (int layer = 0; layer < 2; ++layer) {
+            const char *u = layer == 0 ? bx->bg_image_url : bx->bg_image_url2;   /* R5b: second layer */
+            if (u[0] == '\0' || k >= nwith) continue;
+            if (w->cur_top == NULL && !du_is_data_url(u)) continue;
+            ui_bg_image *slot = &w->bg_images[k++];
+            slot->url = strdup(u);
+            slot->box = (int)i;
+            if (lazy && !du_is_data_url(u)) { slot->deferred = 1; continue; }   /* data: costs no network */
+            fetch_decode_image(w, t, img_fetch, fetch_ctx, u, NULL, 0,
+                               &slot->surface, &slot->nat_w, &slot->nat_h);
         }
     }
     w->bg_image_count = k;
@@ -2512,7 +2517,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     }
     rebuild_inputs(w); /* seed live editable state for this page's controls */
     load_images(w, t, gui_image_fetch, w, 1); /* fetch + decode allowed images in the still-open worker; lazy ones wait */
-    load_bg_images(w, t, gui_image_fetch, w); /* fetch + decode allowed CSS background-images */
+    load_bg_images(w, t, gui_image_fetch, w, 1); /* register CSS background-images; they load lazily near the viewport */
 
     /* Video playback is user-initiated (click), not auto-played. The auto-play
      * via video_play() would block the Wayland event loop with a synchronous
@@ -14208,14 +14213,13 @@ static int load_lazy_images(browser_window *w, const rc_layout *L, double origin
     /* The decode goes through the worker: with a background job running that would wait for it.
      * Try again on the next paint (the job's completion repaints). */
     if (w->tab_worker != NULL && tab_async_busy(w->tab_worker)) return 0;
-    double lo = content_top - FC_LAZY_IMAGE_MARGIN_PX, hi = content_top + content_h + FC_LAZY_IMAGE_MARGIN_PX;
     unsigned char *seen = (unsigned char *)calloc(w->image_count, 1);
     if (seen == NULL) return 0;
     int loaded = 0;
     for (size_t i = 0; i < L->nrow; ++i) {
         const rc_row *r = &L->rows[i];
-        double ry = origin + r->top;
-        int near = !(ry + r->height < lo || ry > hi);
+        int near = ll_near_viewport(origin + r->top, r->height, content_top, content_h,
+                                    FC_LAZY_IMAGE_MARGIN_PX);
         const rd_block *cand[1 + 8];
         size_t nc = 0;
         if (r->kind == RC_IMAGE && r->blk != NULL) cand[nc++] = r->blk;
@@ -14240,6 +14244,44 @@ static int load_lazy_images(browser_window *w, const rc_layout *L, double origin
     }
     free(seen);
     return loaded;
+}
+
+/* Fetches the deferred CSS background-images whose box is near the viewport (spec/lazy_load.md).
+ * Decoration never changes the flow, so no re-layout: the paint that follows uses what loaded. A
+ * box the layout never placed loads at once (fail open); a URL already decoded is shared. */
+static void load_lazy_bg_images(browser_window *w, const rc_layout *L, double origin,
+                                double content_top, double content_h) {
+    int any = 0;
+    for (size_t i = 0; i < w->bg_image_count; ++i) if (w->bg_images[i].deferred) { any = 1; break; }
+    if (!any || w->tab_worker == NULL || tab_async_busy(w->tab_worker)) return;
+    int loaded = 0;
+    for (size_t i = 0; i < w->bg_image_count && loaded < UI_LAZY_PER_PASS; ++i) {
+        ui_bg_image *slot = &w->bg_images[i];
+        if (!slot->deferred || slot->url == NULL) continue;
+        int near = 1;                                  /* unplaced => near */
+        for (size_t b = 0; b < L->nbox; ++b) {
+            if (L->boxes[b].block_id != slot->box) continue;
+            near = ll_near_viewport(origin + L->boxes[b].top, L->boxes[b].h, content_top, content_h,
+                                    FC_LAZY_IMAGE_MARGIN_PX);
+            break;
+        }
+        if (!near) continue;
+        slot->deferred = 0;
+        const ui_bg_image *twin = NULL;
+        for (size_t j = 0; j < w->bg_image_count; ++j)
+            if (j != i && !w->bg_images[j].deferred && w->bg_images[j].surface != NULL
+                && w->bg_images[j].url != NULL && strcmp(w->bg_images[j].url, slot->url) == 0) {
+                twin = &w->bg_images[j]; break;
+            }
+        if (twin != NULL) {
+            slot->surface = cairo_surface_reference(twin->surface);
+            slot->nat_w = twin->nat_w; slot->nat_h = twin->nat_h;
+            continue;
+        }
+        fetch_decode_image(w, w->tab_worker, gui_image_fetch, w, slot->url, NULL, 0,
+                           &slot->surface, &slot->nat_w, &slot->nat_h);
+        loaded++;
+    }
 }
 
 static void paint_screen_deferred(void *ctx, int root) {
@@ -14288,6 +14330,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         rc_free(&L);
     }
     publish_geometry(w, &L, left, content_w, content_h);
+    load_lazy_bg_images(w, &L, origin, content_top, content_h);
 
     /* R4: sticky positioning for OUT-OF-FLOW boxes — clamp to viewport top
      * (inset_top) when scrolled past. For in-flow sticky boxes (the common
@@ -14861,7 +14904,7 @@ static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_ur
      * actually verify them headless, not just <img>. */
     if (t != NULL && img_fetch != NULL) {
         load_images(&w, t, img_fetch, fetch_ctx, 0);
-        load_bg_images(&w, t, img_fetch, fetch_ctx);
+        load_bg_images(&w, t, img_fetch, fetch_ctx, 0);
     }
 
     long metric = as_pdf ? write_doc_pdf(&w, out_path) : write_doc_png(&w, out_path);

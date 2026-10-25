@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <setjmp.h>
 #include <string.h>
+#include <stdio.h>
 #include <cmocka.h>
 
 #include "request_policy.h"
@@ -136,8 +137,85 @@ static void test_evaluate_block_invalid(void **state) {
     assert_int_equal(rp_evaluate("https://example.com/", NULL), RP_BLOCK_INVALID);
 }
 
+/* --- rp_sanitize_request_headers --- */
+
+static void test_hdr_keeps_application_headers(void **state) {
+    (void)state;
+    char out[512];
+    int n = rp_sanitize_request_headers(
+        "Accept: text/vnd.reddit.partial+html\nContent-Type: application/json\n"
+        "X-Requested-With: XMLHttpRequest\nAuthorization: Bearer abc\n", out, sizeof out);
+    assert_int_equal(n, 4);
+    assert_string_equal(out,
+        "Accept: text/vnd.reddit.partial+html\nContent-Type: application/json\n"
+        "X-Requested-With: XMLHttpRequest\nAuthorization: Bearer abc\n");
+    assert_true(rp_headers_have(out, "accept"));
+    assert_true(rp_headers_have(out, "CONTENT-TYPE"));
+    assert_false(rp_headers_have(out, "cookie"));
+}
+
+static void test_hdr_drops_forbidden_and_identity(void **state) {
+    (void)state;
+    char out[512];
+    int n = rp_sanitize_request_headers(
+        "Host: evil.test\nCookie: a=b\nReferer: https://x/\nUser-Agent: curl\n"
+        "Accept-Language: es\nAccept-Encoding: br\nConnection: close\nContent-Length: 0\n"
+        "Transfer-Encoding: chunked\nTE: trailers\nUpgrade: websocket\nExpect: 100-continue\n"
+        "Date: x\nDNT: 0\nVia: 1.1 x\nOrigin: https://x\nSec-Fetch-Site: none\n"
+        "Proxy-Authorization: x\nX-HTTP-Method-Override: DELETE\nAccess-Control-Request-Method: PUT\n"
+        "X-Ok: 1\n", out, sizeof out);
+    assert_int_equal(n, 1);
+    assert_string_equal(out, "X-Ok: 1\n");
+}
+
+static void test_hdr_rejects_malformed(void **state) {
+    (void)state;
+    char out[512];
+    assert_int_equal(rp_sanitize_request_headers("Bad Name: v\nNoColon\n: empty\nX-A: ok\n", out, sizeof out), 1);
+    assert_string_equal(out, "X-A: ok\n");
+    assert_int_equal(rp_sanitize_request_headers("X-A: a\rInjected: b\nX-B: c\x01d\nX-C: fine\n", out, sizeof out), 1);
+    assert_string_equal(out, "X-C: fine\n");
+    assert_int_equal(rp_sanitize_request_headers("", out, sizeof out), 0);
+    assert_string_equal(out, "");
+    assert_int_equal(rp_sanitize_request_headers("X-A:   padded value  \n", out, sizeof out), 1);
+    assert_string_equal(out, "X-A: padded value\n");
+}
+
+static void test_hdr_first_duplicate_wins(void **state) {
+    (void)state;
+    char out[512];
+    assert_int_equal(rp_sanitize_request_headers("X-A: 1\nx-a: 2\nX-B: 3\n", out, sizeof out), 2);
+    assert_string_equal(out, "X-A: 1\nX-B: 3\n");
+}
+
+static void test_hdr_caps_and_args(void **state) {
+    (void)state;
+    char out[RP_HDR_MAX_BYTES + 64];
+    char big[8192];
+    size_t n = 0;
+    for (int i = 0; i < 100; ++i) n += (size_t)snprintf(big + n, sizeof big - n, "X-H%d: v\n", i);
+    assert_int_equal(rp_sanitize_request_headers(big, out, sizeof out), RP_HDR_MAX_COUNT);
+    char longv[RP_HDR_VALUE_MAX + 64];
+    memset(longv, 'a', sizeof longv);
+    memcpy(longv, "X-L: ", 5);
+    longv[sizeof longv - 2] = '\n';
+    longv[sizeof longv - 1] = '\0';
+    assert_int_equal(rp_sanitize_request_headers(longv, out, sizeof out), 0);
+    assert_int_equal(rp_sanitize_request_headers(NULL, out, sizeof out), -1);
+    assert_int_equal(rp_sanitize_request_headers("X-A: 1\n", NULL, 8), -1);
+    assert_int_equal(rp_sanitize_request_headers("X-A: 1\n", out, 0), -1);
+    char tiny[6];
+    assert_int_equal(rp_sanitize_request_headers("X-Long-Name: value\nX-B: 1\n", tiny, sizeof tiny), 0);
+    assert_string_equal(tiny, "");
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_hdr_keeps_application_headers),
+        cmocka_unit_test(test_hdr_drops_forbidden_and_identity),
+        cmocka_unit_test(test_hdr_rejects_malformed),
+        cmocka_unit_test(test_hdr_first_duplicate_wins),
+        cmocka_unit_test(test_hdr_caps_and_args),
         cmocka_unit_test(test_host_of_basic),
         cmocka_unit_test(test_host_of_invalid),
         cmocka_unit_test(test_host_of_overflow),

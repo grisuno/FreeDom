@@ -297,12 +297,12 @@ Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`
 - `identity` (function) `src/js_dom_ext.c:102` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
 - `registration` (function) `src/js_dom_ext.c:385` `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
  * observer...`
-- `run` (function) `src/js_dom_ext.c:1135` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
-- `jdx_install` (function) `src/js_dom_ext.c:1200` `int jdx_install(JSContext *ctx)`
-- `jd_install_repl_api` (function) `src/js_dom_ext.c:1209` `jd_status jd_install_repl_api(js_context *ctx)`
-- `jd_set_repl_css` (function) `src/js_dom_ext.c:1217` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
-- `jd_install_geolocation` (function) `src/js_dom_ext.c:1230` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
-- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1249` `jd_status jd_install_indexeddb(js_context *ctx)`
+- `run` (function) `src/js_dom_ext.c:1144` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
+- `jdx_install` (function) `src/js_dom_ext.c:1209` `int jdx_install(JSContext *ctx)`
+- `jd_install_repl_api` (function) `src/js_dom_ext.c:1218` `jd_status jd_install_repl_api(js_context *ctx)`
+- `jd_set_repl_css` (function) `src/js_dom_ext.c:1226` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
+- `jd_install_geolocation` (function) `src/js_dom_ext.c:1239` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
+- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1258` `jd_status jd_install_indexeddb(js_context *ctx)`
 
 ## src/js_dom_ext.h
 Imported by: `src/js_dom.c`, `src/js_dom_ext.c`
@@ -338,7 +338,7 @@ Depends on: `include/anti_fp.h`, `include/js_env.h`, `include/js_sandbox.h`
                           int ar...` -- performance.now: coarsened elapsed since the origin bound at install time, so * it never leaks the host uptime.
 - `m_empty_array` (function) `src/js_env.c:77` `static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,
                              ...`
-- `m_get_random_values` (function) `src/js_env.c:85` `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,
+- `m_get_random_values` (function) `src/js_env.c:95` `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,
                        ...`
 - `m_random_uuid` (function) `src/js_env.c:125` `static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,
                              ...`
@@ -386,9 +386,9 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
 - `jd_unpack_ptr` (function) `src/js_fetch.c:33` `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)`
 - `m_host_fetch` (function) `src/js_fetch.c:46` `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
                             in...` -- __hostFetch(method, url, body) -> { status, body, contentType }.
-- `send` (function) `src/js_fetch.c:92` `* callbacks fire right after send();`
-- `task` (function) `src/js_fetch.c:188` `* current task (the page never waits on it);`
-- `jd_install_xhr` (function) `src/js_fetch.c:212` `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
+- `send` (function) `src/js_fetch.c:96` `* callbacks fire right after send();`
+- `task` (function) `src/js_fetch.c:257` `* current task (the page never waits on it);`
+- `jd_install_xhr` (function) `src/js_fetch.c:281` `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
 
 ## src/js_geom.c
 Depends on: `include/js_geom.h`
@@ -435,65 +435,6 @@ Depends on: `include/js_policy.h`
 - `jsp_present_trusted` (function) `src/js_policy.c:35` `bool jsp_present_trusted(int host_allowlisted)`
 - `jsp_mode_from_str` (function) `src/js_policy.c:39` `jsp_mode jsp_mode_from_str(const char *s)`
 - `jsp_mode_str` (function) `src/js_policy.c:51` `const char *jsp_mode_str(jsp_mode mode)`
-
-## src/js_sandbox.c
-Depends on: `include/js_sandbox.h`
-- `rej_remove` (function) `src/js_sandbox.c:71` `static void rej_remove(js_context *c, size_t i)`
-- `js_rejection_cb` (function) `src/js_sandbox.c:79` `static void js_rejection_cb(JSContext *jc, JSValueConst promise, JSValueConst reason,
-           ...`
-- `rej_report` (function) `src/js_sandbox.c:98` `static void rej_report(js_context *c)` -- Hands each still-unhandled rejection to the page, oldest first.
-- `jm_malloc` (function) `src/js_sandbox.c:123` `static void *jm_malloc(void *opaque, size_t size)`
-- `jm_calloc` (function) `src/js_sandbox.c:131` `static void *jm_calloc(void *opaque, size_t count, size_t size)`
-- `jm_free` (function) `src/js_sandbox.c:141` `static void jm_free(void *opaque, void *ptr)`
-- `jm_realloc` (function) `src/js_sandbox.c:147` `static void *jm_realloc(void *opaque, void *ptr, size_t size)`
-- `jm_usable_size` (function) `src/js_sandbox.c:157` `static size_t jm_usable_size(const void *ptr)`
-- `host_dup` (function) `src/js_sandbox.c:167` `static char *host_dup(const char *src, size_t len)`
-- `timespec_reached` (function) `src/js_sandbox.c:176` `static int timespec_reached(const struct timespec *now, const struct timespec *deadline)`
-- `timespec_diff_ms` (function) `src/js_sandbox.c:181` `static long timespec_diff_ms(const struct timespec *a, const struct timespec *b)`
-- `profile_sample` (function) `src/js_sandbox.c:186` `static void profile_sample(js_context *c, unsigned weight_ms)` -- out[len] = '\0'; return out; } static int timespec_reached(const struct timespec *now, const struct timespec...
-- `js_profile_enable` (function) `src/js_sandbox.c:218` `void js_profile_enable(js_context *ctx)`
-- `js_profile_report` (function) `src/js_sandbox.c:224` `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n)`
-- `js_interrupt_cb` (function) `src/js_sandbox.c:247` `static int js_interrupt_cb(JSRuntime *rt, void *opaque)` -- if (!used[i] && (best == ctx->prof_n || ctx->prof[i].hits > ctx->prof[best].hits)) best = i; if (best ==...
-- `is_ascii_digit` (function) `src/js_sandbox.c:271` `static int is_ascii_digit(char c)`
-- `js_loc_from_stack` (function) `src/js_sandbox.c:273` `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,
-                      i...`
-- `undefined` (function) `src/js_sandbox.c:365` `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx...`
-- `js_stack_limit_for` (function) `src/js_sandbox.c:392` `size_t js_stack_limit_for(size_t soft_stack)`
-- `process_soft_stack` (function) `src/js_sandbox.c:403` `static size_t process_soft_stack(void)`
-- `js_prime_stack_limit` (function) `src/js_sandbox.c:413` `void js_prime_stack_limit(void)`
-- `js_limits_default` (function) `src/js_sandbox.c:415` `js_limits js_limits_default(void)`
-- `limits_resolve` (function) `src/js_sandbox.c:424` `static js_limits limits_resolve(const js_limits *lim)`
-- `js_validate_source` (function) `src/js_sandbox.c:433` `js_status js_validate_source(const char *src, size_t len, const js_limits *lim)`
-- `js_context_new` (function) `src/js_sandbox.c:444` `js_status js_context_new(const js_limits *lim, js_context **out)`
-- `js_context_free` (function) `src/js_sandbox.c:484` `void js_context_free(js_context *ctx)`
-- `arm_deadline` (function) `src/js_sandbox.c:496` `static void arm_deadline(js_context *ctx, uint64_t budget_ms)`
-- `js_set_time_budget` (function) `src/js_sandbox.c:511` `void js_set_time_budget(js_context *ctx, uint64_t budget_ms)`
-- `js_eval` (function) `src/js_sandbox.c:516` `js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)`
-- `js_eval_named` (function) `src/js_sandbox.c:520` `js_status js_eval_named(js_context *ctx, const char *src, size_t len,
-                        con...`
-- `js_pump_jobs` (function) `src/js_sandbox.c:603` `int js_pump_jobs(js_context *ctx, int max_jobs)`
-- `js_eval_once` (function) `src/js_sandbox.c:622` `js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res)`
-- `js_result_free` (function) `src/js_sandbox.c:635` `void js_result_free(js_result *res)`
-- `js_set_current_script` (function) `src/js_sandbox.c:659` `void js_set_current_script(js_context *ctx, const char *src, const char *type)`
-- `js_context_raw` (function) `src/js_sandbox.c:692` `void *js_context_raw(js_context *ctx)`
-- `mod_set_meta` (function) `src/js_sandbox.c:724` `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)` -- size_t cap = nlen + JS_MODULE_URL_MAX; char *out = (char *)calloc(cap, 1); if (out == NULL) {...
-- `mod_loader` (function) `src/js_sandbox.c:733` `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)` -- free(out); return r; } /* Sets import.meta.url of a compiled module to its absolute URL. static void...
-- `mod_normalize` (function) `src/js_sandbox.c:769` `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);`
-- `js_set_module_host` (function) `src/js_sandbox.c:772` `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,
-                        js...`
-- `mod_fail` (function) `src/js_sandbox.c:787` `static js_status mod_fail(js_context *ctx, js_result *res, JSValue reason, int use_reason,
-      ...` -- Fills res from the pending exception (or the given rejection value, which is * thrown first so the one capture path...
-- `js_eval_module` (function) `src/js_sandbox.c:802` `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,
-        ...`
-- `realm_of` (function) `src/js_sandbox.c:869` `static JSContext *realm_of(js_context *c, JSValueConst g)` -- The owning js_context rides in each native's closure data, split into 32-bit * halves (no assumption about JS number...
-- `throw_named` (function) `src/js_sandbox.c:882` `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)`
-- `m_realm_new` (function) `src/js_sandbox.c:892` `static JSValue m_realm_new(JSContext *ctx, JSValueConst this_val, int argc,
-                     ...`
-- `m_realm_eval` (function) `src/js_sandbox.c:906` `static JSValue m_realm_eval(JSContext *ctx, JSValueConst this_val, int argc,
-                    ...` -- __realmEval(global, code, name): a classic script in that realm.
-- `m_realm_clone` (function) `src/js_sandbox.c:942` `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,
-                   ...` -- __realmClone(value, global): structured copy into global's realm through the * serializer WITHOUT bytecode -- a...
-- `js_install_realms` (function) `src/js_sandbox.c:964` `js_status js_install_realms(js_context *ctx)`
 
 
 Next: [API_p9.md](API_p9.md)

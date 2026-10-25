@@ -186,6 +186,16 @@ typedef int (*tab_fetch_fn)(void *ctx, const char *method, const char *url,
  * refused). fn/ctx must outlive any tab_load_full call that may trigger a subresource. */
 void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);
 
+/* Inside a tab_fetch_fn call: the request headers the page attached to this XHR/fetch, already
+ * filtered by rp_sanitize_request_headers ("Name: value\n" lines), or NULL when it set none.
+ * Valid only for the duration of that call, on the calling thread; NULL anywhere else. */
+const char *tab_inflight_request_headers(void);
+
+/* Inside a tab_fetch_fn call: reports the response header lines ("name: value\n", no Set-Cookie)
+ * the page's XHR/fetch may read. Copied (bounded); the fetcher keeps ownership of `lines`. Outside
+ * a fetcher call it is a no-op. */
+void tab_report_response_headers(const char *lines);
+
 /* Installs a served-stylesheet sink (NULL clears it): after the parent serves a
  * 2xx subresource whose content type is CSS, tab calls fn(url, body, len, ctype)
  * so the parent can retain the bytes (spec/webfont.md b3b feeds them to the

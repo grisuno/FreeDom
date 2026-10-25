@@ -46,7 +46,7 @@
 
 ### `jdx_install`
 
-`function` | [src/js_dom_ext.c:1200](../../src/js_dom_ext.c#L1200)
+`function` | [src/js_dom_ext.c:1209](../../src/js_dom_ext.c#L1209)
 
 ```c
 int jdx_install(JSContext *ctx)
@@ -66,7 +66,7 @@ int jdx_install(JSContext *ctx)
 
 ### `jd_install_repl_api`
 
-`function` | [src/js_dom_ext.c:1209](../../src/js_dom_ext.c#L1209)
+`function` | [src/js_dom_ext.c:1218](../../src/js_dom_ext.c#L1218)
 
 ```c
 jd_status jd_install_repl_api(js_context *ctx)
@@ -86,7 +86,7 @@ jd_status jd_install_repl_api(js_context *ctx)
 
 ### `jd_set_repl_css`
 
-`function` | [src/js_dom_ext.c:1217](../../src/js_dom_ext.c#L1217)
+`function` | [src/js_dom_ext.c:1226](../../src/js_dom_ext.c#L1226)
 
 ```c
 jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)
@@ -108,7 +108,7 @@ jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)
 
 ### `jd_install_geolocation`
 
-`function` | [src/js_dom_ext.c:1230](../../src/js_dom_ext.c#L1230)
+`function` | [src/js_dom_ext.c:1239](../../src/js_dom_ext.c#L1239)
 
 ```c
 jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)
@@ -133,7 +133,7 @@ jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double
 
 ### `jd_install_indexeddb`
 
-`function` | [src/js_dom_ext.c:1249](../../src/js_dom_ext.c#L1249)
+`function` | [src/js_dom_ext.c:1258](../../src/js_dom_ext.c#L1258)
 
 ```c
 jd_status jd_install_indexeddb(js_context *ctx)

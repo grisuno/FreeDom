@@ -1,20 +1,40 @@
 # Subsystem: src (page 4 of 9)
 Previous: [KB_src_p3.md](KB_src_p3.md)
 
+## src/download.c
+- Doc: lc: download — pure helpers for "save this resource to disk".
+- Layer: utility
+- Language: c
+- Symbols:
+  - `lc` (function, line 13) `static int lc(int c)`
+  - `ci_find` (function, line 19) `static const char *ci_find(const char *hay, const char *needle)`
+  - `media_type` (function, line 33) `static void media_type(const char *content_type, char *buf, size_t bufsz)`
+  - `dl_should_download` (function, line 47) `int dl_should_download(const char *content_type, const char *content_disposition)`
+  - `dl_ext_for_type` (function, line 58) `const char *dl_ext_for_type(const char *content_type)`
+  - `copy_span` (function, line 85) `static void copy_span(const char *src, const char *end, char *buf, size_t bufsz)`
+  - `extract_disposition_name` (function, line 96) `static int extract_disposition_name(const char *cd, char *buf, size_t bufsz)`
+  - `extract_url_name` (function, line 134) `static int extract_url_name(const char *url, char *buf, size_t bufsz)`
+  - `has_extension` (function, line 148) `static int has_extension(const char *name)`
+  - `dl_pick_name` (function, line 153) `dl_status dl_pick_name(const char *url, const char *content_disposition,
+                       c...`
+  - `dl_build_path` (function, line 195) `dl_status dl_build_path(const char *dir, const char *name, char *out, size_t outsz)`
+  - `dl_check_size` (function, line 213) `dl_status dl_check_size(size_t len)`
+- Depends on: `include/download.h`, `include/pdf_export.h`
+
 ## src/fb_panes.c
 - Layer: utility
 - Language: c
 - Symbols:
-  - `tab_ok` (function, line 62) `static int tab_ok(int tab)`
-  - `fbp_tab_label` (function, line 64) `const char *fbp_tab_label(int tab)`
-  - `ieq` (function, line 66) `static int ieq(const char *a, const char *b)`
-  - `fbp_tab_from_name` (function, line 75) `int fbp_tab_from_name(const char *name)`
-  - `fbp_tab_wrap` (function, line 82) `int fbp_tab_wrap(int tab, int dir)`
-  - `fbp_tab_span` (function, line 88) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
-  - `fbp_tab_at` (function, line 97) `int fbp_tab_at(double px, double cell_w, double pad_cells)`
-  - `fbp_is_pane` (function, line 107) `int fbp_is_pane(int tab)`
-  - `fbp_js_quote` (function, line 109) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
-  - `fbp_expr` (function, line 138) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
+  - `tab_ok` (function, line 70) `static int tab_ok(int tab)`
+  - `fbp_tab_label` (function, line 72) `const char *fbp_tab_label(int tab)`
+  - `ieq` (function, line 74) `static int ieq(const char *a, const char *b)`
+  - `fbp_tab_from_name` (function, line 83) `int fbp_tab_from_name(const char *name)`
+  - `fbp_tab_wrap` (function, line 90) `int fbp_tab_wrap(int tab, int dir)`
+  - `fbp_tab_span` (function, line 96) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
+  - `fbp_tab_at` (function, line 105) `int fbp_tab_at(double px, double cell_w, double pad_cells)`
+  - `fbp_is_pane` (function, line 115) `int fbp_is_pane(int tab)`
+  - `fbp_js_quote` (function, line 117) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
+  - `fbp_expr` (function, line 146) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
 - Depends on: `include/fb_panes.h`
 
 ## src/flex_layout.c
@@ -124,7 +144,7 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `hl_font_stash` (struct, line 607)
+  - `hl_font_stash` (struct, line 609)
   - `print_usage` (function, line 54) `static void print_usage(FILE *fp, const char *prog)`
   - `is_https_url` (function, line 83) `static int is_https_url(const char *s)`
   - `is_http_url` (function, line 87) `static int is_http_url(const char *s)`
@@ -145,41 +165,41 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `print_dom_css` (function, line 443) `static void print_dom_css(const rd_doc *doc)`
   - `headless_fetch` (function, line 467) `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...`
-  - `foldback_cookies` (function, line 546) `static void foldback_cookies(const char *url, const char *jar)`
-  - `print_css_drops` (function, line 570) `static void print_css_drops(const char *html, size_t len)`
-  - `hl_font_stash_free` (function, line 615) `static void hl_font_stash_free(hl_font_stash *s)`
-  - `hl_css_sink` (function, line 628) `static void hl_css_sink(void *vctx, const char *url,
+  - `foldback_cookies` (function, line 548) `static void foldback_cookies(const char *url, const char *jar)`
+  - `print_css_drops` (function, line 572) `static void print_css_drops(const char *html, size_t len)`
+  - `hl_font_stash_free` (function, line 617) `static void hl_font_stash_free(hl_font_stash *s)`
+  - `hl_css_sink` (function, line 630) `static void hl_css_sink(void *vctx, const char *url,
                         const char *body, si...`
-  - `hl_font_fetch` (function, line 665) `static int hl_font_fetch(void *vctx, const char *url,
+  - `hl_font_fetch` (function, line 667) `static int hl_font_fetch(void *vctx, const char *url,
                          int *out_status, c...`
-  - `render_page` (function, line 674) `static int render_page(const char *html, size_t len, const char *top_url,
+  - `render_page` (function, line 676) `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-  - `first` (function, line 752) `* always cleared first (fetch_and_render may paint several pages per
+  - `first` (function, line 754) `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
-  - `sf_reason` (function, line 943) `static const char *sf_reason(sf_status ss)`
-  - `fetch_and_render_one` (function, line 962) `static int fetch_and_render_one(const char *url, char **out_nav)`
-  - `elsewhere` (function, line 1025) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+  - `sf_reason` (function, line 945) `static const char *sf_reason(sf_status ss)`
+  - `fetch_and_render_one` (function, line 964) `static int fetch_and_render_one(const char *url, char **out_nav)`
+  - `elsewhere` (function, line 1027) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-  - `parent` (function, line 1051) `* gated by the parent (ln_resolve: a local target stays under the document's
+  - `parent` (function, line 1053) `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-  - `run_headless` (function, line 1088) `static int run_headless(const char *target)`
-  - `video_fetch_with_fallback` (function, line 1125) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+  - `run_headless` (function, line 1090) `static int run_headless(const char *target)`
+  - `video_fetch_with_fallback` (function, line 1127) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
-  - `run_dump_video` (function, line 1236) `static int run_dump_video(const char *url)`
-  - `main` (function, line 1255) `int main(int argc, char **argv)`
+  - `run_dump_video` (function, line 1238) `static int run_dump_video(const char *url)`
+  - `main` (function, line 1257) `int main(int argc, char **argv)`
   - `gets` (function, line 463) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-  - `pool` (function, line 738) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-  - `only` (function, line 820) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-  - `BLOCKED` (function, line 990) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+  - `pool` (function, line 740) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+  - `only` (function, line 822) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+  - `BLOCKED` (function, line 992) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
   - `_DEFAULT_SOURCE` (macro, line 10) `#define _DEFAULT_SOURCE`
   - `EXIT_OK` (macro, line 50) `#define EXIT_OK`
   - `EXIT_ERROR` (macro, line 51) `#define EXIT_ERROR`
   - `EXIT_USAGE` (macro, line 52) `#define EXIT_USAGE`
   - `CSS_DROPS_REPORT_MAX` (macro, line 173) `#define CSS_DROPS_REPORT_MAX`
-  - `HL_FONT_MAX_SHEETS` (macro, line 604) `#define HL_FONT_MAX_SHEETS`
-  - `HL_FONT_MAX_BYTES` (macro, line 605) `#define HL_FONT_MAX_BYTES`
-  - `HL_JS_NAV_MAX` (macro, line 958) `#define HL_JS_NAV_MAX`
+  - `HL_FONT_MAX_SHEETS` (macro, line 606) `#define HL_FONT_MAX_SHEETS`
+  - `HL_FONT_MAX_BYTES` (macro, line 607) `#define HL_FONT_MAX_BYTES`
+  - `HL_JS_NAV_MAX` (macro, line 960) `#define HL_JS_NAV_MAX`
 - Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
 
 ## src/hls.c
@@ -453,45 +473,6 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `IM_MAX_DEPTH` (macro, line 16) `#define IM_MAX_DEPTH`
   - `IM_URL_MAX` (macro, line 17) `#define IM_URL_MAX`
 - Depends on: `include/import_map.h`
-
-## src/interp.c
-- Doc: solve_bezier_t: } static double sample_bezier_dx(double t, double cx1, double cx2) { return 3.0...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `sample_bezier_x` (function, line 18) `static double sample_bezier_x(double t, double cx1, double cx2)`
-  - `sample_bezier_dx` (function, line 23) `static double sample_bezier_dx(double t, double cx1, double cx2)`
-  - `sample_bezier_y` (function, line 29) `static double sample_bezier_y(double t, double cy1, double cy2)`
-  - `solve_bezier_t` (function, line 35) `static double solve_bezier_t(double x, double cx1, double cx2)`
-  - `ip_ease` (function, line 55) `double ip_ease(double t, const ip_ease_fn *fn)`
-  - `ip_ease` (function, line 64) `case IP_EASE_EASE:
-        return ip_ease(t, &(ip_ease_fn)`
-  - `ip_ease` (function, line 70) `case IP_EASE_EASE_IN:
-        return ip_ease(t, &(ip_ease_fn)`
-  - `ip_ease` (function, line 76) `case IP_EASE_EASE_OUT:
-        return ip_ease(t, &(ip_ease_fn)`
-  - `ip_ease` (function, line 82) `case IP_EASE_EASE_IN_OUT:
-        return ip_ease(t, &(ip_ease_fn)`
-  - `ip_lerp` (function, line 134) `double ip_lerp(double a, double b, double t)`
-  - `ip_lerp_color` (function, line 139) `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t)`
-  - `ip_interp` (function, line 162) `double ip_interp(ip_val_kind kind, double a, double b, double t)`
-  - `ip_kf_interp` (function, line 175) `double ip_kf_interp(ip_val_kind val_kind, const ip_keyframe *kf,
-                    int n_kf, do...`
-  - `ip_anim_init` (function, line 196) `void ip_anim_init(ip_anim *a, ip_val_kind vk, const ip_ease_fn *ease,
-                  const ip_...`
-  - `anim_effective_dir_for` (function, line 222) `static int anim_effective_dir_for(const ip_anim *a, int iter)`
-  - `anim_effective_dir` (function, line 232) `static int anim_effective_dir(const ip_anim *a)`
-  - `ip_anim_tick` (function, line 236) `int ip_anim_tick(ip_anim *a, double dt_ms)`
-  - `ip_anim_current` (function, line 282) `double ip_anim_current(const ip_anim *a)`
-  - `ip_anim_done` (function, line 320) `int ip_anim_done(const ip_anim *a)`
-- Depends on: `include/interp.h`
-
-## src/js_custom_elements.c
-- Layer: utility
-- Language: c
-- Symbols:
-  - `jdce_install` (function, line 183) `int jdce_install(JSContext *ctx)`
-- Depends on: `src/js_custom_elements.h`
 
 
 Next: [KB_src_p5.md](KB_src_p5.md)

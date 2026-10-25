@@ -3,16 +3,35 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `m_next_sibling` | function | `src/js_dom.c:188` | `static JSValue m_next_sibling(JSContext *ctx, JSValueConst this_val,                             ...` |
+| `m_node_count` | function | `src/js_dom.c:53` | `static JSValue m_node_count(JSContext *ctx, JSValueConst this_val,                             in...` |
+| `m_node_kind` | function | `src/js_dom.c:152` | `static JSValue m_node_kind(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `m_parent` | function | `src/js_dom.c:135` | `static JSValue m_parent(JSContext *ctx, JSValueConst this_val,                         int argc, ...` |
+| `m_precedes` | function | `src/js_dom.c:196` | `static JSValue m_precedes(JSContext *ctx, JSValueConst this_val,                           int ar...` |
+| `m_query_selector` | function | `src/js_dom.c:463` | `static JSValue m_query_selector(JSContext *ctx, JSValueConst this_val,                           ...` |
+| `m_query_selector_all` | function | `src/js_dom.c:478` | `static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,                       ...` |
+| `m_rect` | function | `src/js_dom.c:397` | `static JSValue m_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `m_remove_attribute` | function | `src/js_dom.c:336` | `static JSValue m_remove_attribute(JSContext *ctx, JSValueConst this_val,                         ...` |
+| `m_remove_child` | function | `src/js_dom.c:311` | `static JSValue m_remove_child(JSContext *ctx, JSValueConst this_val,                             ...` |
+| `m_set_attribute` | function | `src/js_dom.c:320` | `static JSValue m_set_attribute(JSContext *ctx, JSValueConst this_val,                            ...` |
+| `m_set_inner_html` | function | `src/js_dom.c:348` | `static JSValue m_set_inner_html(JSContext *ctx, JSValueConst this_val,                           ...` |
+| `m_set_text` | function | `src/js_dom.c:217` | `static JSValue m_set_text(JSContext *ctx, JSValueConst this_val,                           int ar...` |
+| `m_set_title` | function | `src/js_dom.c:239` | `static JSValue m_set_title(JSContext *ctx, JSValueConst this_val,                            int ...` |
+| `m_sibling_node` | function | `src/js_dom.c:166` | `static JSValue m_sibling_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `m_tag_name` | function | `src/js_dom.c:112` | `static JSValue m_tag_name(JSContext *ctx, JSValueConst this_val,                           int ar...` |
+| `m_text_content` | function | `src/js_dom.c:207` | `static JSValue m_text_content(JSContext *ctx, JSValueConst this_val,                             ...` |
+| `ms` | function | `src/js_dom.c:1196` | `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);` |
+| `scripts` | function | `src/js_dom.c:852` | `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...` |
 | `size` | function | `src/js_dom.c:1390` | `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);` |
 | `table` | function | `src/js_dom.c:639` | `* a table (dom.viewport() non-null);` |
 | `identity` | function | `src/js_dom_ext.c:102` | `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...` |
-| `jd_install_geolocation` | function | `src/js_dom_ext.c:1230` | `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)` |
-| `jd_install_indexeddb` | function | `src/js_dom_ext.c:1249` | `jd_status jd_install_indexeddb(js_context *ctx)` |
-| `jd_install_repl_api` | function | `src/js_dom_ext.c:1209` | `jd_status jd_install_repl_api(js_context *ctx)` |
-| `jd_set_repl_css` | function | `src/js_dom_ext.c:1217` | `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)` |
-| `jdx_install` | function | `src/js_dom_ext.c:1200` | `int jdx_install(JSContext *ctx)` |
+| `jd_install_geolocation` | function | `src/js_dom_ext.c:1239` | `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)` |
+| `jd_install_indexeddb` | function | `src/js_dom_ext.c:1258` | `jd_status jd_install_indexeddb(js_context *ctx)` |
+| `jd_install_repl_api` | function | `src/js_dom_ext.c:1218` | `jd_status jd_install_repl_api(js_context *ctx)` |
+| `jd_set_repl_css` | function | `src/js_dom_ext.c:1226` | `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)` |
+| `jdx_install` | function | `src/js_dom_ext.c:1209` | `int jdx_install(JSContext *ctx)` |
 | `registration` | function | `src/js_dom_ext.c:385` | `* registration (options, attributeFilter, subtree) and delivered in one microtask. An  * observer...` |
-| `run` | function | `src/js_dom_ext.c:1135` | `static int run(JSContext *ctx, const char *src, size_t len, const char *name)` |
+| `run` | function | `src/js_dom_ext.c:1144` | `static int run(JSContext *ctx, const char *src, size_t len, const char *name)` |
 | `FREEDOM_JS_DOM_EXT_H` | macro | `src/js_dom_ext.h:2` | `#define FREEDOM_JS_DOM_EXT_H` |
 | `jdx_install` | function | `src/js_dom_ext.h:10` | `int jdx_install(JSContext *ctx);` |
 | `FREEDOM_JS_DOM_INTERNAL_H` | macro | `src/js_dom_internal.h:2` | `#define FREEDOM_JS_DOM_INTERNAL_H` |
@@ -45,7 +64,7 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `je_install_identity` | function | `src/js_env.c:508` | `je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,                       ...` |
 | `m_date_now` | function | `src/js_env.c:49` | `static JSValue m_date_now(JSContext *ctx, JSValueConst this_val,                           int ar...` |
 | `m_empty_array` | function | `src/js_env.c:77` | `static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,                              ...` |
-| `m_get_random_values` | function | `src/js_env.c:85` | `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,                        ...` |
+| `m_get_random_values` | function | `src/js_env.c:95` | `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,                        ...` |
 | `m_perf_now` | function | `src/js_env.c:57` | `static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,                           int ar...` |
 | `m_random_uuid` | function | `src/js_env.c:125` | `static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,                              ...` |
 | `m_subtle_null` | function | `src/js_env.c:142` | `static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,                              ...` |
@@ -66,12 +85,12 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `jd_fire_submit` | function | `src/js_events.c:78` | `int jd_fire_submit(js_context *ctx, dom_node_id form_node_id)` |
 | `jd_install_events` | function | `src/js_events.c:38` | `jd_status jd_install_events(js_context *ctx, jd_click_state *state)` |
 | `_GNU_SOURCE` | macro | `src/js_fetch.c:6` | `#define _GNU_SOURCE` |
-| `jd_install_xhr` | function | `src/js_fetch.c:212` | `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)` |
+| `jd_install_xhr` | function | `src/js_fetch.c:281` | `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)` |
 | `jd_pack_ptr` | function | `src/js_fetch.c:28` | `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)` |
 | `jd_unpack_ptr` | function | `src/js_fetch.c:33` | `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)` |
 | `m_host_fetch` | function | `src/js_fetch.c:46` | `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,                             in...` |
-| `send` | function | `src/js_fetch.c:92` | `* callbacks fire right after send();` |
-| `task` | function | `src/js_fetch.c:188` | `* current task (the page never waits on it);` |
+| `send` | function | `src/js_fetch.c:96` | `* callbacks fire right after send();` |
+| `task` | function | `src/js_fetch.c:257` | `* current task (the page never waits on it);` |
 | `JG_INDEX_SLOTS` | macro | `src/js_geom.c:14` | `#define JG_INDEX_SLOTS` |
 | `JG_SLOT_EMPTY` | macro | `src/js_geom.c:15` | `#define JG_SLOT_EMPTY` |
 | `clamp_coord` | function | `src/js_geom.c:27` | `static int32_t clamp_coord(double v, double lo)` |
@@ -107,60 +126,67 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `jsp_mode_str` | function | `src/js_policy.c:51` | `const char *jsp_mode_str(jsp_mode mode)` |
 | `jsp_present_trusted` | function | `src/js_policy.c:35` | `bool jsp_present_trusted(int host_allowlisted)` |
 | `jsp_trusted` | function | `src/js_policy.c:31` | `bool jsp_trusted(bool js_enabled, int host_allowlisted)` |
-| `JS_MODULE_URL_MAX` | macro | `src/js_sandbox.c:697` | `#define JS_MODULE_URL_MAX` |
+| `JS_MODULE_URL_MAX` | macro | `src/js_sandbox.c:844` | `#define JS_MODULE_URL_MAX` |
 | `JS_PROFILE_KEY_MAX` | macro | `src/js_sandbox.c:36` | `#define JS_PROFILE_KEY_MAX` |
 | `JS_PROFILE_SLOTS` | macro | `src/js_sandbox.c:35` | `#define JS_PROFILE_SLOTS` |
 | `_POSIX_C_SOURCE` | macro | `src/js_sandbox.c:12` | `#define _POSIX_C_SOURCE` |
-| `arm_deadline` | function | `src/js_sandbox.c:496` | `static void arm_deadline(js_context *ctx, uint64_t budget_ms)` |
-| `host_dup` | function | `src/js_sandbox.c:167` | `static char *host_dup(const char *src, size_t len)` |
-| `is_ascii_digit` | function | `src/js_sandbox.c:271` | `static int is_ascii_digit(char c)` |
-| `jm_calloc` | function | `src/js_sandbox.c:131` | `static void *jm_calloc(void *opaque, size_t count, size_t size)` |
-| `jm_free` | function | `src/js_sandbox.c:141` | `static void jm_free(void *opaque, void *ptr)` |
-| `jm_malloc` | function | `src/js_sandbox.c:123` | `static void *jm_malloc(void *opaque, size_t size)` |
-| `jm_realloc` | function | `src/js_sandbox.c:147` | `static void *jm_realloc(void *opaque, void *ptr, size_t size)` |
-| `jm_usable_size` | function | `src/js_sandbox.c:157` | `static size_t jm_usable_size(const void *ptr)` |
+| `arm_deadline` | function | `src/js_sandbox.c:643` | `static void arm_deadline(js_context *ctx, uint64_t budget_ms)` |
+| `host_dup` | function | `src/js_sandbox.c:171` | `static char *host_dup(const char *src, size_t len)` |
+| `is_ascii_digit` | function | `src/js_sandbox.c:418` | `static int is_ascii_digit(char c)` |
+| `jm_calloc` | function | `src/js_sandbox.c:135` | `static void *jm_calloc(void *opaque, size_t count, size_t size)` |
+| `jm_free` | function | `src/js_sandbox.c:145` | `static void jm_free(void *opaque, void *ptr)` |
+| `jm_malloc` | function | `src/js_sandbox.c:127` | `static void *jm_malloc(void *opaque, size_t size)` |
+| `jm_realloc` | function | `src/js_sandbox.c:151` | `static void *jm_realloc(void *opaque, void *ptr, size_t size)` |
+| `jm_usable_size` | function | `src/js_sandbox.c:161` | `static size_t jm_usable_size(const void *ptr)` |
 | `js_context` | struct | `src/js_sandbox.c:38` | `` |
-| `js_context_free` | function | `src/js_sandbox.c:484` | `void js_context_free(js_context *ctx)` |
-| `js_context_new` | function | `src/js_sandbox.c:444` | `js_status js_context_new(const js_limits *lim, js_context **out)` |
-| `js_context_raw` | function | `src/js_sandbox.c:692` | `void *js_context_raw(js_context *ctx)` |
-| `js_eval` | function | `src/js_sandbox.c:516` | `js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)` |
-| `js_eval_module` | function | `src/js_sandbox.c:802` | `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,         ...` |
-| `js_eval_named` | function | `src/js_sandbox.c:520` | `js_status js_eval_named(js_context *ctx, const char *src, size_t len,                         con...` |
-| `js_eval_once` | function | `src/js_sandbox.c:622` | `js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res)` |
-| `js_install_realms` | function | `src/js_sandbox.c:964` | `js_status js_install_realms(js_context *ctx)` |
-| `js_interrupt_cb` | function | `src/js_sandbox.c:247` | `static int js_interrupt_cb(JSRuntime *rt, void *opaque)` |
-| `js_limits_default` | function | `src/js_sandbox.c:415` | `js_limits js_limits_default(void)` |
-| `js_loc_from_stack` | function | `src/js_sandbox.c:273` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,                       i...` |
+| `js_context_free` | function | `src/js_sandbox.c:631` | `void js_context_free(js_context *ctx)` |
+| `js_context_new` | function | `src/js_sandbox.c:591` | `js_status js_context_new(const js_limits *lim, js_context **out)` |
+| `js_context_raw` | function | `src/js_sandbox.c:839` | `void *js_context_raw(js_context *ctx)` |
+| `js_devtools_enable` | function | `src/js_sandbox.c:372` | `void js_devtools_enable(js_context *ctx)` |
+| `js_devtools_expose` | function | `src/js_sandbox.c:378` | `js_status js_devtools_expose(js_context *ctx)` |
+| `js_eval` | function | `src/js_sandbox.c:663` | `js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)` |
+| `js_eval_module` | function | `src/js_sandbox.c:949` | `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,         ...` |
+| `js_eval_named` | function | `src/js_sandbox.c:667` | `js_status js_eval_named(js_context *ctx, const char *src, size_t len,                         con...` |
+| `js_eval_once` | function | `src/js_sandbox.c:769` | `js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res)` |
+| `js_install_realms` | function | `src/js_sandbox.c:1111` | `js_status js_install_realms(js_context *ctx)` |
+| `js_interrupt_cb` | function | `src/js_sandbox.c:394` | `static int js_interrupt_cb(JSRuntime *rt, void *opaque)` |
+| `js_limits_default` | function | `src/js_sandbox.c:562` | `js_limits js_limits_default(void)` |
+| `js_loc_from_stack` | function | `src/js_sandbox.c:420` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,                       i...` |
 | `js_mem_state` | struct | `src/js_sandbox.c:29` | `` |
-| `js_prime_stack_limit` | function | `src/js_sandbox.c:413` | `void js_prime_stack_limit(void)` |
-| `js_profile_enable` | function | `src/js_sandbox.c:218` | `void js_profile_enable(js_context *ctx)` |
-| `js_profile_report` | function | `src/js_sandbox.c:224` | `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n)` |
-| `js_pump_jobs` | function | `src/js_sandbox.c:603` | `int js_pump_jobs(js_context *ctx, int max_jobs)` |
-| `js_rejection_cb` | function | `src/js_sandbox.c:79` | `static void js_rejection_cb(JSContext *jc, JSValueConst promise, JSValueConst reason,            ...` |
-| `js_result_free` | function | `src/js_sandbox.c:635` | `void js_result_free(js_result *res)` |
-| `js_set_current_script` | function | `src/js_sandbox.c:659` | `void js_set_current_script(js_context *ctx, const char *src, const char *type)` |
-| `js_set_module_host` | function | `src/js_sandbox.c:772` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,                         js...` |
-| `js_set_time_budget` | function | `src/js_sandbox.c:511` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms)` |
-| `js_stack_limit_for` | function | `src/js_sandbox.c:392` | `size_t js_stack_limit_for(size_t soft_stack)` |
-| `js_validate_source` | function | `src/js_sandbox.c:433` | `js_status js_validate_source(const char *src, size_t len, const js_limits *lim)` |
+| `js_prime_stack_limit` | function | `src/js_sandbox.c:560` | `void js_prime_stack_limit(void)` |
+| `js_profile_enable` | function | `src/js_sandbox.c:222` | `void js_profile_enable(js_context *ctx)` |
+| `js_profile_report` | function | `src/js_sandbox.c:228` | `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n)` |
+| `js_pump_jobs` | function | `src/js_sandbox.c:750` | `int js_pump_jobs(js_context *ctx, int max_jobs)` |
+| `js_rejection_cb` | function | `src/js_sandbox.c:83` | `static void js_rejection_cb(JSContext *jc, JSValueConst promise, JSValueConst reason,            ...` |
+| `js_result_free` | function | `src/js_sandbox.c:782` | `void js_result_free(js_result *res)` |
+| `js_set_current_script` | function | `src/js_sandbox.c:806` | `void js_set_current_script(js_context *ctx, const char *src, const char *type)` |
+| `js_set_module_host` | function | `src/js_sandbox.c:919` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,                         js...` |
+| `js_set_time_budget` | function | `src/js_sandbox.c:658` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms)` |
+| `js_stack_limit_for` | function | `src/js_sandbox.c:539` | `size_t js_stack_limit_for(size_t soft_stack)` |
+| `js_throws_enable` | function | `src/js_sandbox.c:328` | `void js_throws_enable(js_context *ctx)` |
+| `js_throws_report` | function | `src/js_sandbox.c:334` | `size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n)` |
+| `js_validate_source` | function | `src/js_sandbox.c:580` | `js_status js_validate_source(const char *src, size_t len, const js_limits *lim)` |
 | `limit` | type_alias | `src/js_sandbox.c:29` | `typedef struct js_mem_state { size_t limit;` |
-| `limits_resolve` | function | `src/js_sandbox.c:424` | `static js_limits limits_resolve(const js_limits *lim)` |
-| `m_realm_clone` | function | `src/js_sandbox.c:942` | `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,                    ...` |
-| `m_realm_eval` | function | `src/js_sandbox.c:906` | `static JSValue m_realm_eval(JSContext *ctx, JSValueConst this_val, int argc,                     ...` |
-| `m_realm_new` | function | `src/js_sandbox.c:892` | `static JSValue m_realm_new(JSContext *ctx, JSValueConst this_val, int argc,                      ...` |
-| `mod_fail` | function | `src/js_sandbox.c:787` | `static js_status mod_fail(js_context *ctx, js_result *res, JSValue reason, int use_reason,       ...` |
-| `mod_loader` | function | `src/js_sandbox.c:733` | `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)` |
-| `mod_normalize` | function | `src/js_sandbox.c:769` | `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);` |
-| `mod_set_meta` | function | `src/js_sandbox.c:724` | `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)` |
-| `process_soft_stack` | function | `src/js_sandbox.c:403` | `static size_t process_soft_stack(void)` |
-| `profile_sample` | function | `src/js_sandbox.c:186` | `static void profile_sample(js_context *c, unsigned weight_ms)` |
-| `realm_of` | function | `src/js_sandbox.c:869` | `static JSContext *realm_of(js_context *c, JSValueConst g)` |
-| `rej_remove` | function | `src/js_sandbox.c:71` | `static void rej_remove(js_context *c, size_t i)` |
-| `rej_report` | function | `src/js_sandbox.c:98` | `static void rej_report(js_context *c)` |
-| `throw_named` | function | `src/js_sandbox.c:882` | `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)` |
-| `timespec_diff_ms` | function | `src/js_sandbox.c:181` | `static long timespec_diff_ms(const struct timespec *a, const struct timespec *b)` |
-| `timespec_reached` | function | `src/js_sandbox.c:176` | `static int timespec_reached(const struct timespec *now, const struct timespec *deadline)` |
-| `undefined` | function | `src/js_sandbox.c:365` | `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx...` |
+| `limits_resolve` | function | `src/js_sandbox.c:571` | `static js_limits limits_resolve(const js_limits *lim)` |
+| `m_fb_report` | function | `src/js_sandbox.c:356` | `static JSValue m_fb_report(JSContext *jsctx, JSValueConst this_val, int argc, JSValueConst *argv,...` |
+| `m_realm_clone` | function | `src/js_sandbox.c:1089` | `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,                    ...` |
+| `m_realm_eval` | function | `src/js_sandbox.c:1053` | `static JSValue m_realm_eval(JSContext *ctx, JSValueConst this_val, int argc,                     ...` |
+| `m_realm_new` | function | `src/js_sandbox.c:1039` | `static JSValue m_realm_new(JSContext *ctx, JSValueConst this_val, int argc,                      ...` |
+| `mod_fail` | function | `src/js_sandbox.c:934` | `static js_status mod_fail(js_context *ctx, js_result *res, JSValue reason, int use_reason,       ...` |
+| `mod_loader` | function | `src/js_sandbox.c:880` | `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)` |
+| `mod_normalize` | function | `src/js_sandbox.c:916` | `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);` |
+| `mod_set_meta` | function | `src/js_sandbox.c:871` | `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)` |
+| `process_soft_stack` | function | `src/js_sandbox.c:550` | `static size_t process_soft_stack(void)` |
+| `profile_sample` | function | `src/js_sandbox.c:190` | `static void profile_sample(js_context *c, unsigned weight_ms)` |
+| `realm_of` | function | `src/js_sandbox.c:1016` | `static JSContext *realm_of(js_context *c, JSValueConst g)` |
+| `rej_remove` | function | `src/js_sandbox.c:75` | `static void rej_remove(js_context *c, size_t i)` |
+| `rej_report` | function | `src/js_sandbox.c:102` | `static void rej_report(js_context *c)` |
+| `throw_hook_cb` | function | `src/js_sandbox.c:308` | `static void throw_hook_cb(JSContext *ctx, JSValueConst obj, void *opaque)` |
+| `throw_key` | function | `src/js_sandbox.c:251` | `static void throw_key(JSContext *ctx, JSValueConst obj, char *key, size_t cap)` |
+| `throw_named` | function | `src/js_sandbox.c:1029` | `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)` |
+| `timespec_diff_ms` | function | `src/js_sandbox.c:185` | `static long timespec_diff_ms(const struct timespec *a, const struct timespec *b)` |
+| `timespec_reached` | function | `src/js_sandbox.c:180` | `static int timespec_reached(const struct timespec *now, const struct timespec *deadline)` |
+| `undefined` | function | `src/js_sandbox.c:512` | `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx...` |
 | `JT_IO_MAX_STR` | macro | `src/js_trusted.c:62` | `#define JT_IO_MAX_STR` |
 | `explicitly` | function | `src/js_trusted.c:461` | `* explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...` |
 | `hex_nibble` | function | `src/js_trusted.c:254` | `static int hex_nibble(char c)` |
@@ -188,18 +214,18 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `ln_resolve` | function | `src/link_nav.c:172` | `ln_status ln_resolve(const char *base, const char *href, ln_result *out)` |
 | `pop_seg` | function | `src/link_nav.c:98` | `static void pop_seg(char *body, size_t *blen)` |
 | `resolve_file` | function | `src/link_nav.c:149` | `static int resolve_file(const char *base, const char *ref, char *out, size_t outsz)` |
-| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:856` | `#define LS_ARGON2_M_KIB` |
-| `LS_ARGON2_P` | macro | `src/local_store.c:857` | `#define LS_ARGON2_P` |
-| `LS_ARGON2_T` | macro | `src/local_store.c:855` | `#define LS_ARGON2_T` |
-| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:852` | `#define LS_KDF_ARGON2ID` |
-| `LS_KDF_NONE` | macro | `src/local_store.c:851` | `#define LS_KDF_NONE` |
-| `LS_VERSION` | macro | `src/local_store.c:850` | `#define LS_VERSION` |
-| `OFF_AEAD` | macro | `src/local_store.c:862` | `#define OFF_AEAD` |
-| `OFF_KDF` | macro | `src/local_store.c:863` | `#define OFF_KDF` |
-| `OFF_MAGIC` | macro | `src/local_store.c:860` | `#define OFF_MAGIC` |
-| `OFF_NONCE` | macro | `src/local_store.c:865` | `#define OFF_NONCE` |
-| `OFF_SALT` | macro | `src/local_store.c:864` | `#define OFF_SALT` |
-| `OFF_VERSION` | macro | `src/local_store.c:861` | `#define OFF_VERSION` |
+| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:867` | `#define LS_ARGON2_M_KIB` |
+| `LS_ARGON2_P` | macro | `src/local_store.c:868` | `#define LS_ARGON2_P` |
+| `LS_ARGON2_T` | macro | `src/local_store.c:866` | `#define LS_ARGON2_T` |
+| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:863` | `#define LS_KDF_ARGON2ID` |
+| `LS_KDF_NONE` | macro | `src/local_store.c:862` | `#define LS_KDF_NONE` |
+| `LS_VERSION` | macro | `src/local_store.c:861` | `#define LS_VERSION` |
+| `OFF_AEAD` | macro | `src/local_store.c:873` | `#define OFF_AEAD` |
+| `OFF_KDF` | macro | `src/local_store.c:874` | `#define OFF_KDF` |
+| `OFF_MAGIC` | macro | `src/local_store.c:871` | `#define OFF_MAGIC` |
+| `OFF_NONCE` | macro | `src/local_store.c:876` | `#define OFF_NONCE` |
+| `OFF_SALT` | macro | `src/local_store.c:875` | `#define OFF_SALT` |
+| `OFF_VERSION` | macro | `src/local_store.c:872` | `#define OFF_VERSION` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:3` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:14` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:25` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
@@ -274,7 +300,8 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:784` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:795` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:806` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:841` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
+| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:817` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
+| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:852` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:6` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:17` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:28` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
@@ -349,7 +376,8 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:787` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:798` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:809` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:844` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
+| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:820` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
+| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:855` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:9` | `#define OSSL_KDF_PARAM_THREADS` |
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:20` | `#define OSSL_KDF_PARAM_THREADS` |
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:31` | `#define OSSL_KDF_PARAM_THREADS` |
@@ -424,7 +452,8 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:790` | `#define OSSL_KDF_PARAM_THREADS` |
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:801` | `#define OSSL_KDF_PARAM_THREADS` |
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:812` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:847` | `#define OSSL_KDF_PARAM_THREADS` |
+| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:823` | `#define OSSL_KDF_PARAM_THREADS` |
+| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:858` | `#define OSSL_KDF_PARAM_THREADS` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:11` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:22` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:33` | `#define _GNU_SOURCE` |
@@ -467,34 +496,5 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `_GNU_SOURCE` | macro | `src/local_store.c:440` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:451` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:462` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:473` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:484` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:495` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:506` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:517` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:528` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:539` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:550` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:561` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:572` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:583` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:594` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:605` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:616` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:627` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:638` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:649` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:660` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:671` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:682` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:693` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:704` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:715` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:726` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:737` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:748` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:759` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:770` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:781` | `#define _GNU_SOURCE` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

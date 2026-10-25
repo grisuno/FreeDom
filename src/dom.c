@@ -345,10 +345,43 @@ size_t dom_node_count(const dom_index *idx) {
     return (idx != NULL) ? idx->count : 0;
 }
 
+static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node);
+
+/* 1 when `node` is in the document tree (its topmost ancestor is the document node). The index
+ * only ever grows, so a node removed by a script is still registered but must not be found. */
+static int node_in_document(const lxb_dom_node_t *node) {
+    size_t guard = 0;
+    while (node != NULL && node->parent != NULL && guard++ < 1000000u) node = node->parent;
+    return node != NULL && node->type == LXB_DOM_NODE_TYPE_DOCUMENT;
+}
+
 dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id) {
     if (idx == NULL || id == NULL) return DOM_NODE_NONE;
     const sm_entry *e = sm_find(&idx->by_id, id, strlen(id));
     return (e != NULL && e->count > 0) ? e->ids[0] : DOM_NODE_NONE;
+}
+
+dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id) {
+    if (idx == NULL || id == NULL) return DOM_NODE_NONE;
+    const sm_entry *e = sm_find(&idx->by_id, id, strlen(id));
+    if (e == NULL) return DOM_NODE_NONE;
+    dom_node_id first = DOM_NODE_NONE;
+    size_t live = 0;
+    for (size_t i = 0; i < e->count; ++i) {
+        dom_node_id h = e->ids[i];
+        if (!valid_el(idx, h) || !node_in_document(idx->nodes[h])) continue;
+        if (live++ == 0) first = h;
+    }
+    if (live <= 1) return first;
+    /* Several live elements share the id (invalid HTML, but pages do it): tree order decides. */
+    for (lxb_dom_node_t *w = idx->nodes[0]; w != NULL; w = node_next(w, idx->nodes[0])) {
+        if (w->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        dom_node_id h = id_of(idx, w);
+        if (h == DOM_NODE_NONE) continue;
+        for (size_t i = 0; i < e->count; ++i)
+            if (e->ids[i] == h && node_in_document(w)) return h;
+    }
+    return first;
 }
 
 static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap) {

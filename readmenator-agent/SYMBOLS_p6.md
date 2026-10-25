@@ -3,6 +3,23 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `expand_valign` | function | `src/css.c:356` | `static int expand_valign(const char *val, css_decl *dst, int cap)` |
+| `filter_paren_body` | function | `src/css.c:1134` | `static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen)` |
+| `fold_font_relative` | function | `src/css.c:6072` | `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,                          ...` |
+| `font_list_alias` | function | `src/css.c:3202` | `static void font_list_alias(const css_sheet *sheet, const char *ls, char *out, size_t cap)` |
+| `font_list_norm` | function | `src/css.c:3236` | `static int font_list_norm(const char *val, char *out, size_t cap)` |
+| `function` | function | `src/css.c:2797` | `* transform function (perspective/rotate3d/...), or unparseable syntax,  * rejects the WHOLE decl...` |
+| `here` | function | `src/css.c:3891` | `* servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);` |
+| `idx` | type_alias | `src/css.c:5937` | `typedef struct css_cand { int imp, espec, ord, idx;` |
+| `interp_accent_color` | function | `src/css.c:715` | `static int interp_accent_color(const char *v)` |
+| `interp_align` | function | `src/css.c:311` | `static int interp_align(const char *v)` |
+| `interp_align_kw` | function | `src/css.c:2137` | `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)` |
+| `interp_appearance` | function | `src/css.c:587` | `static int interp_appearance(const char *v)` |
+| `interp_aspect_ratio` | function | `src/css.c:362` | `static int interp_aspect_ratio(const char *v, int *num, int *den)` |
+| `interp_backface_visibility` | function | `src/css.c:832` | `static int interp_backface_visibility(const char *v)` |
+| `interp_bc_tok` | function | `src/css.c:933` | `static int interp_bc_tok(const char *t, int *o)` |
+| `interp_bg` | function | `src/css.c:239` | `static int interp_bg(const char *v)` |
+| `interp_bg_attachment` | function | `src/css.c:649` | `static int interp_bg_attachment(const char *v)` |
 | `interp_bg_clip` | function | `src/css.c:634` | `static int interp_bg_clip(const char *v)` |
 | `interp_bg_origin` | function | `src/css.c:642` | `static int interp_bg_origin(const char *v)` |
 | `interp_bg_repeat` | function | `src/css.c:617` | `static int interp_bg_repeat(const char *v)` |
@@ -479,22 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `ascii_ws` | function | `src/data_url.c:115` | `static int ascii_ws(char c)` |
 | `b64_val` | function | `src/data_url.c:61` | `static int b64_val(unsigned char c)` |
 | `ci_starts_with` | function | `src/data_url.c:20` | `static int ci_starts_with(const char *s, const char *prefix)` |
-| `du_base64_decode` | function | `src/data_url.c:70` | `du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len)` |
-| `du_base64_payload` | function | `src/data_url.c:32` | `du_status du_base64_payload(const char *url, const char **payload, size_t *payload_len)` |
-| `du_decode` | function | `src/data_url.c:131` | `du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len)` |
-| `du_is_data_url` | function | `src/data_url.c:28` | `int du_is_data_url(const char *url)` |
-| `ends_ci` | function | `src/data_url.c:120` | `static int ends_ci(const char *s, size_t n, const char *suf)` |
-| `hexval` | function | `src/data_url.c:108` | `static int hexval(char c)` |
-| `lower` | function | `src/data_url.c:16` | `static int lower(char c)` |
-| `_POSIX_C_SOURCE` | macro | `src/disk_store.c:11` | `#define _POSIX_C_SOURCE` |
-| `ds_free` | function | `src/disk_store.c:136` | `void ds_free(uint8_t *buf, size_t len)` |
-| `ds_read` | function | `src/disk_store.c:103` | `ds_status ds_read(const char *path, const uint8_t key[LS_KEY_LEN],                   uint8_t **ou...` |
-| `ds_write` | function | `src/disk_store.c:66` | `ds_status ds_write(const char *path, const uint8_t key[LS_KEY_LEN], ls_aead aead,                ...` |
-| `fsync_dir` | function | `src/disk_store.c:32` | `static void fsync_dir(const char *path)` |
-| `map_ls` | function | `src/disk_store.c:50` | `static ds_status map_ls(ls_status s)` |
-| `DOM_QS_MAX_SELECTORS` | macro | `src/dom.c:380` | `#define DOM_QS_MAX_SELECTORS` |
-| `IH_BLOCK_SIZE` | macro | `src/dom.c:815` | `#define IH_BLOCK_SIZE` |
-| `_POSIX_C_SOURCE` | macro | `src/dom.c:11` | `#define _POSIX_C_SOURCE` |
-| `char_kind` | function | `src/dom.c:978` | `static int char_kind(const lxb_dom_node_t *n)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

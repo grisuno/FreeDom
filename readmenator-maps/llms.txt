@@ -1,6 +1,6 @@
 # freedom-0.0.3
 
-> Static analysis knowledge base for freedom-0.0.3: 10 communities, 289 files, 1674 imports, 4 languages, 7449 symbols.
+> Static analysis knowledge base for freedom-0.0.3: 9 communities, 290 files, 1679 imports, 4 languages, 7511 symbols.
 
 Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
 
@@ -9,21 +9,21 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/INDEX.md](md/readmenator-agent/INDEX.md)
 - [readmenator-agent/GOTCHAS.md](md/readmenator-agent/GOTCHAS.md): These files have the most connections. Changes here have high blast radius.
 - [readmenator-agent/API.md](md/readmenator-agent/API.md): readfuzzstats (function) app.py:30 def readfuzzstats() -- Reads the current status of the active AFL++ fuzzing session.
-- [readmenator-agent/API_p10.md](md/readmenator-agent/API_p10.md): Depends on: include/prefs.h, include/zoom.h
-- [readmenator-agent/API_p11.md](md/readmenator-agent/API_p11.md): Depends on: include/url.h
+- [readmenator-agent/API_p10.md](md/readmenator-agent/API_p10.md): Depends on: include/perftrace.h
+- [readmenator-agent/API_p11.md](md/readmenator-agent/API_p11.md): Depends on: include/css.h, include/textshape.h, include/webfont.h
 - [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/blockflow.h, include/boxblur.h, include/boxstyle.h, include/boxtree.h, include/browser.h, include/cachedfetch.h...
-- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): resolveboxcursor (function) gui/browserui.c:15060 static int resolveboxcursor(const rddoc doc, int blockid) -- First non-unset author cursor on blockid's box...
+- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): in (function) gui/browserui.c:14962 a line landed in (Stage 3), which no other dump shows. Text stays out (it is --dump-dom's job);
 - [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Imported by: src/css.c, src/cssvars.c, src/pageview.c, tests/testcss.c, tests/testcssvars.c
 - [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Depends on: include/antifp.h
 - [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/css.h, include/cssatrule.h, include/cssbox.h, include/csscolor.h, include/cssdecl.h, include/cssgradient.h, include/cssindex.h...
 - [readmenator-agent/API_p7.md](md/readmenator-agent/API_p7.md): Depends on: include/css.h, include/csslength.h
 - [readmenator-agent/API_p8.md](md/readmenator-agent/API_p8.md): Depends on: include/hostedit.h
-- [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/jstrusted.h, include/webstorage.h
+- [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/jssandbox.h
 - [readmenator-agent/ARCHITECTURE.md](md/readmenator-agent/ARCHITECTURE.md): gui/browserui.c -> gui/browseruiinternal.h
-- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testpageview.c -> include/flexlayout.h
+- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testpageview.c -> include/boxstyle.h
 - [readmenator-agent/CONCEPTS.md](md/readmenator-agent/CONCEPTS.md): Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 - [readmenator-agent/KB_gui.md](md/readmenator-agent/KB_gui.md): Doc: uiinputstate: Live editable state for one form text control, aliasing a block of the current...
-- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): drainfetchresults (function, line 15693) static void drainfetchresults(browserwindow w)
+- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): deliverfetchresult (function, line 15682) static void deliverfetchresult(browserwindow w, fetchjob j)
 - [readmenator-agent/KB_include.md](md/readmenator-agent/KB_include.md): Doc: fpacceptlanguageheader: #define FPSECFETCHDESTNAV "document" #define...
 - [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: cixbuild: Builds the index over sels[0,n) into idx, overwriting it (a built index must be ...
 - [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: hpscript: One executable <script>.
@@ -33,9 +33,9 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_src.md](md/readmenator-agent/KB_src.md): fpcoarsentimems (function, line 17) uint64t fpcoarsentimems(uint64t rawms)
 - [readmenator-agent/KB_src_p2.md](md/readmenator-agent/KB_src_p2.md): Doc: lenrebasectx: int r = snprintf(out + o, space, "%.4f", px); if (r < 0 || (sizet)r >= space)...
 - [readmenator-agent/KB_src_p3.md](md/readmenator-agent/KB_src_p3.md): Doc: uadisplay: The HTML Rendering UA sheet's display for a tag when the cascade declared none ...
-- [readmenator-agent/KB_src_p4.md](md/readmenator-agent/KB_src_p4.md): tabok (function, line 62) static int tabok(int tab)
-- [readmenator-agent/KB_src_p5.md](md/readmenator-agent/KB_src_p5.md): Doc: Private to jsdom.c: installs Custom Elements v1 (spec/jscustomelements.md) on top of the...
-- [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): cipherfor (function, line 871) static const EVPCIPHER cipherfor(lsaead aead)
+- [readmenator-agent/KB_src_p4.md](md/readmenator-agent/KB_src_p4.md): Doc: lc: download — pure helpers for "save this resource to disk".
+- [readmenator-agent/KB_src_p5.md](md/readmenator-agent/KB_src_p5.md): Doc: solvebeziert: } static double samplebezierdx(double t, double cx1, double cx2) { return 3.0...
+- [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): cipherfor (function, line 882) static const EVPCIPHER cipherfor(lsaead aead)
 - [readmenator-agent/KB_src_p7.md](md/readmenator-agent/KB_src_p7.md): Doc: pvptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - [readmenator-agent/KB_src_p8.md](md/readmenator-agent/KB_src_p8.md): Doc: rdpush: Appends one block, taking owned copies of text (required) and href (optional). ...
 - [readmenator-agent/KB_src_p9.md](md/readmenator-agent/KB_src_p9.md): whole (function, line 6) the buffer is rejected whole (fail closed), never applied partially.
@@ -48,7 +48,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p7.md](md/readmenator-agent/KB_tests_p7.md): Doc: testdefaultgroupsofferp384: Some servers (justpaste.it, 2026 Let's Encrypt P-384 chain)...
 - [readmenator-agent/KB_tests_p8.md](md/readmenator-agent/KB_tests_p8.md): Doc: testwldisplay — CMocka suite for the pure Wayland socket picker.
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: fbench -- turn the PNG pairs make parity leaves behind into something you can act on.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 289 files at commit 893645313925. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 290 files at commit aff636aeefc8. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)

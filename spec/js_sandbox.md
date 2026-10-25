@@ -264,6 +264,24 @@ bajo el marco JS que la hizo, en vez de infrarrepresentarse como pasaba al conta
 - Medido con él (GitHub): ~40 % del tiempo de JS eran `querySelector`/`matches`, y el resto era red
   secuencial, no intérprete.
 
+## 7q. Trazador de excepciones y herramientas de devtools
+
+- `JS_SetThrowHook` (parche mínimo al QuickJS vendorizado, `third_party/quickjs`): se llama con el valor
+  ANTES de que sea la excepción pendiente, también en las capturadas por un `try/catch`. Una página que
+  falla "en silencio" muestra aquí su primer fallo real (así se halló que el XHR no tenía
+  `addEventListener`).
+- `js_throws_enable` registra `"<mensaje> @ <dos marcos>"` con conteo en una tabla fija (`JS_THROW_SLOTS`);
+  un lanzamiento nativo (TypeError del motor) toma los marcos de la pila viva en el punto del throw. Los
+  URLs largos se abrevian a su cola.
+- `js_devtools_enable` (página allow∩js, al cargar) activa perfilador + trazador; `js_devtools_expose` define
+  `__fbProfile()`/`__fbThrows()` solo cuando el REPL de Freebug se instala, y su shim los toma una vez y
+  los borra del global (los informes llevan tiempos reales que la página no debe leer).
+- Freebug: pestañas **Profile** y **Throws** (`profile()`/`throws()` del REPL; `--dump-pane=profile|throws`);
+  `FREEDOM_JS_PROFILE=2|3` los activa en cualquier carga y vuelca el informe al log.
+- `FREEDOM_JS_PRELUDE=archivo.js`: se evalúa antes que los scripts de la página (se lee antes de seccomp);
+  instrumenta un sitio real sin cambiar su origen.
+- Límite de fuente 32 MiB (`JS_DEFAULT_MAX_SOURCE`); un script rechazado se reporta en consola.
+
 ## 8. Fuera de alcance
 
 - Cableado del DOM inerte (`html_parse`) hacia el motor y exposición de APIs de navegador

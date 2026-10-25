@@ -41,6 +41,15 @@ static void test_limits_default_heap_holds_real_bundles(void **state) {
     assert_true(l.memory_limit_bytes <= (size_t)1024 * 1024 * 1024);
 }
 
+/* YouTube's base module is a single 10.8 MB script. The 4 MiB source cap refused it without a
+ * word (0 ms "evaluation") and the app never started. The cap must admit real bundles. */
+static void test_limits_default_source_admits_real_bundles(void **state) {
+    (void)state;
+    js_limits l = js_limits_default();
+    assert_true(l.max_source_bytes >= (size_t)16 * 1024 * 1024);
+    assert_true(l.max_source_bytes <= (size_t)128 * 1024 * 1024);
+}
+
 /* --- js_validate_source --- */
 
 static void test_validate_rejects_null(void **state) {
@@ -197,10 +206,11 @@ static void test_profiler_names_the_hot_function(void **state) {
 
     js_context *ctx = NULL;
     assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    js_set_time_budget(ctx, 60000);   /* a sanitizer build is far slower than the 1 s default allows */
     js_result r;
     memset(&r, 0, sizeof r);
     static const char busy[] =
-        "function spinHere(){var t=Date.now(),n=0;for(var i=0;i<4e6;i++){n+=i%7;}return n;}"
+        "function spinHere(){var t=Date.now(),n=0;for(var i=0;i<2e6;i++){n+=i%7;}return n;}"
         "spinHere();spinHere();0";
     assert_int_equal(js_eval(ctx, busy, sizeof busy - 1, &r), JS_OK); /* profiler off */
     js_result_free(&r);
@@ -217,6 +227,39 @@ static void test_profiler_names_the_hot_function(void **state) {
     assert_non_null(strstr(out, "%"));
     char tiny[8];
     assert_true(js_profile_report(ctx, tiny, sizeof tiny, 5) < sizeof tiny);
+    js_context_free(ctx);
+}
+
+/* The throw tracer records EVERY thrown value, caught or not, with its site and a count, in a
+ * fixed-size table, and stays inert until enabled. */
+static void test_throw_tracer_records_caught_exceptions(void **state) {
+    (void)state;
+    char out[2048];
+    js_throws_enable(NULL);
+    assert_int_equal((int)js_throws_report(NULL, out, sizeof out, 5), 0);
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    js_result r;
+    static const char code[] =
+        "function boomHere(){ throw new Error('boom'); }"
+        "for(var i=0;i<3;i++){ try{ boomHere(); }catch(e){} }"
+        "try{ null.x; }catch(e){} try{ throw 'plain string'; }catch(e){} 0";
+    memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, code, sizeof code - 1, &r), JS_OK);   /* tracer off */
+    js_result_free(&r);
+    assert_int_equal((int)js_throws_report(ctx, out, sizeof out, 5), 0);
+
+    js_throws_enable(ctx);
+    memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, code, sizeof code - 1, &r), JS_OK);
+    js_result_free(&r);
+    size_t n = js_throws_report(ctx, out, sizeof out, 8);
+    assert_true(n > 0 && n < sizeof out);
+    assert_non_null(strstr(out, "3x boom"));
+    assert_non_null(strstr(out, "boomHere"));
+    assert_non_null(strstr(out, "cannot read property"));
+    assert_non_null(strstr(out, "plain string"));
+    assert_true(strstr(out, "3x boom") < strstr(out, "plain string"));   /* most frequent first */
     js_context_free(ctx);
 }
 
@@ -680,6 +723,7 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_limits_default_is_secure),
         cmocka_unit_test(test_limits_default_heap_holds_real_bundles),
+        cmocka_unit_test(test_limits_default_source_admits_real_bundles),
         cmocka_unit_test(test_validate_rejects_null),
         cmocka_unit_test(test_validate_rejects_empty),
         cmocka_unit_test(test_validate_rejects_oversize),
@@ -695,6 +739,7 @@ int main(void) {
         cmocka_unit_test(test_infinite_loop_times_out),
         cmocka_unit_test(test_set_time_budget_applies),
         cmocka_unit_test(test_profiler_names_the_hot_function),
+        cmocka_unit_test(test_throw_tracer_records_caught_exceptions),
         cmocka_unit_test(test_stack_limit_follows_process_stack),
         cmocka_unit_test(test_deep_recursion_runs_and_runaway_is_caught),
         cmocka_unit_test(test_memory_limit_is_enforced),

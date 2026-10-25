@@ -245,7 +245,7 @@ The pointer aliases s (not owned).
 
 **Returns:** `* username and`
 
-*Called by:* [`SF_META_MAX`](include.secure_fetch.h.md#sf_meta_max)
+*Called by:* [`SF_RESPONSE_HEADERS_MAX`](include.secure_fetch.h.md#sf_response_headers_max)
 
 ---
 

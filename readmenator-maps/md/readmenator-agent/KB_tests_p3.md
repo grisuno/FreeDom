@@ -287,7 +287,8 @@ static void test_leading_b...`
   - `test_move_children` (function, line 605) `static void test_move_children(void **state)`
   - `test_char_nodes` (function, line 646) `static void test_char_nodes(void **state)`
   - `test_qs_subject_prefilter_is_exact` (function, line 695) `static void test_qs_subject_prefilter_is_exact(void **state)`
-  - `main` (function, line 718) `int main(void)`
+  - `test_get_element_by_id_ignores_detached_nodes` (function, line 721) `static void test_get_element_by_id_ignores_detached_nodes(void **state)`
+  - `main` (function, line 754) `int main(void)`
   - `_POSIX_C_SOURCE` (macro, line 1) `#define _POSIX_C_SOURCE`
   - `DOC` (macro, line 58) `#define DOC(state)`
   - `IDX` (macro, line 59) `#define IDX(state)`
@@ -342,6 +343,7 @@ static void test_leading_b...`
 - Depends on: `include/download.h`
 
 ## tests/test_fb_panes.c
+- Doc: test_profile_and_throws_tabs: Profile and Throws read the engine's sampler/tracer through the...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -351,8 +353,9 @@ static void test_leading_b...`
   - `test_quote_escapes_and_fails_closed` (function, line 57) `static void test_quote_escapes_and_fails_closed(void **state)`
   - `test_expr_per_tab` (function, line 83) `static void test_expr_per_tab(void **state)`
   - `assert_true` (function, line 91) `assert_true(strncmp(out, "(function(q)`
-  - `test_expr_selector_cannot_escape_the_literal` (function, line 99) `static void test_expr_selector_cannot_escape_the_literal(void **state)`
-  - `main` (function, line 122) `int main(void)`
+  - `test_profile_and_throws_tabs` (function, line 101) `static void test_profile_and_throws_tabs(void **state)`
+  - `test_expr_selector_cannot_escape_the_literal` (function, line 115) `static void test_expr_selector_cannot_escape_the_literal(void **state)`
+  - `main` (function, line 138) `int main(void)`
 - Depends on: `include/fb_panes.h`
 
 ## tests/test_flex_layout.c

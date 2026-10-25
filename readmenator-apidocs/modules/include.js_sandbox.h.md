@@ -1,14 +1,14 @@
 # `include/js_sandbox.h`
 
-> Source: [include/js_sandbox.h:1](../../include/js_sandbox.h#L1) | language `h` | coverage 57.6% | [API index](../index.md)
+> Source: [include/js_sandbox.h:1](../../include/js_sandbox.h#L1) | language `h` | coverage 54.1% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`js_limits`](#js_limits), [`js_result`](#js_result)
 - **Enums:** [`js_status`](#js_status)
 - **Type Aliases:** [`js_context`](#js_context), [`status`](#status)
-- **Functions:** [`js_stack_limit_for`](#js_stack_limit_for), [`js_prime_stack_limit`](#js_prime_stack_limit), [`js_context_free`](#js_context_free), [`loaded`](#loaded), [`js_set_module_host`](#js_set_module_host), [`js_loc_from_stack`](#js_loc_from_stack), [`js_set_time_budget`](#js_set_time_budget), [`out`](#out), [`js_profile_enable`](#js_profile_enable), [`js_profile_report`](#js_profile_report), [`js_result_free`](#js_result_free), [`js_pump_jobs`](#js_pump_jobs), [`handle`](#handle), [`js_set_current_script`](#js_set_current_script)
-- **Macros:** [`JS_LOC_FILE_MAX`](#js_loc_file_max), [`JS_DEFAULT_MAX_SOURCE`](#js_default_max_source), [`JS_DEFAULT_MEM_LIMIT`](#js_default_mem_limit), [`JS_MIN_STACK_LIMIT`](#js_min_stack_limit), [`JS_MAX_STACK_LIMIT`](#js_max_stack_limit), [`JS_DEFAULT_STACK_LIMIT`](#js_default_stack_limit), [`JS_DEFAULT_TIME_BUDGET`](#js_default_time_budget), [`JS_MODULE_MAX`](#js_module_max), [`JS_MODULE_BYTES_MAX`](#js_module_bytes_max), [`JS_PROFILE_PERIOD_MS`](#js_profile_period_ms), [`JS_REALM_MAX`](#js_realm_max), [`JS_REJECT_MAX`](#js_reject_max)
+- **Functions:** [`js_stack_limit_for`](#js_stack_limit_for), [`js_prime_stack_limit`](#js_prime_stack_limit), [`js_context_free`](#js_context_free), [`loaded`](#loaded), [`js_set_module_host`](#js_set_module_host), [`js_loc_from_stack`](#js_loc_from_stack), [`js_set_time_budget`](#js_set_time_budget), [`out`](#out), [`js_profile_enable`](#js_profile_enable), [`js_profile_report`](#js_profile_report), [`silently`](#silently), [`js_throws_report`](#js_throws_report), [`global`](#global), [`js_result_free`](#js_result_free), [`js_pump_jobs`](#js_pump_jobs), [`handle`](#handle), [`js_set_current_script`](#js_set_current_script)
+- **Macros:** [`JS_LOC_FILE_MAX`](#js_loc_file_max), [`JS_DEFAULT_MAX_SOURCE`](#js_default_max_source), [`JS_DEFAULT_MEM_LIMIT`](#js_default_mem_limit), [`JS_MIN_STACK_LIMIT`](#js_min_stack_limit), [`JS_MAX_STACK_LIMIT`](#js_max_stack_limit), [`JS_DEFAULT_STACK_LIMIT`](#js_default_stack_limit), [`JS_DEFAULT_TIME_BUDGET`](#js_default_time_budget), [`JS_MODULE_MAX`](#js_module_max), [`JS_MODULE_BYTES_MAX`](#js_module_bytes_max), [`JS_PROFILE_PERIOD_MS`](#js_profile_period_ms), [`JS_THROW_SLOTS`](#js_throw_slots), [`JS_REALM_MAX`](#js_realm_max), [`JS_REJECT_MAX`](#js_reject_max)
 
 ## Type Diagram
 
@@ -349,11 +349,75 @@ size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);
 
 ---
 
+<a id="silently"></a>
+
+### `silently`
+
+`function` | [include/js_sandbox.h:171](../../include/js_sandbox.h#L171)
+
+```c
+* fails silently (an exception swallowed by a try/catch, a rejected promise nobody awaits) shows * its real first failure here. js_throws_report writes "<n>x <message> @ <frames>" lines, most * freque
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `catch` | `an exception swallowed by a try/` |  |  |
+| `awaits` | `a rejected promise nobody` |  |  |
+
+**Returns:** `* fails`
+
+---
+
+<a id="js_throws_report"></a>
+
+### `js_throws_report`
+
+`function` | [include/js_sandbox.h:176](../../include/js_sandbox.h#L176)
+
+```c
+size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `out` | `char *` |  |  |
+| `cap` | `size_t` |  |  |
+| `top_n` | `size_t` |  |  |
+
+**Returns:** `size_t`
+
+---
+
+<a id="global"></a>
+
+### `global`
+
+`function` | [include/js_sandbox.h:181](../../include/js_sandbox.h#L181)
+
+```c
+* Freebug REPL installs: its shim takes them once and deletes them from the global (like * __netLog), because the report carries real timings a page must never read. */ void js_devtools_enable(js_cont
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `__netLog` | `like *` |  |  |
+
+**Returns:** `* Freebug REPL installs: its shim takes them once and deletes them from the`
+
+---
+
 <a id="js_result_free"></a>
 
 ### `js_result_free`
 
-`function` | [include/js_sandbox.h:170](../../include/js_sandbox.h#L170)
+`function` | [include/js_sandbox.h:187](../../include/js_sandbox.h#L187)
 
 ```c
 void js_result_free(js_result *res);
@@ -373,7 +437,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `js_pump_jobs`
 
-`function` | [include/js_sandbox.h:178](../../include/js_sandbox.h#L178)
+`function` | [include/js_sandbox.h:195](../../include/js_sandbox.h#L195)
 
 ```c
 int js_pump_jobs(js_context *ctx, int max_jobs);
@@ -398,7 +462,7 @@ Job exceptions (rejected promises with no handler, etc.) are swallowed -- a job 
 
 ### `handle`
 
-`function` | [include/js_sandbox.h:181](../../include/js_sandbox.h#L181)
+`function` | [include/js_sandbox.h:198](../../include/js_sandbox.h#L198)
 
 ```c
 * as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive. Binding modules are the intended consumers. */ void *js_context_raw(js_context *ctx);
@@ -418,7 +482,7 @@ Job exceptions (rejected promises with no handler, etc.) are swallowed -- a job 
 
 ### `js_set_current_script`
 
-`function` | [include/js_sandbox.h:190](../../include/js_sandbox.h#L190)
+`function` | [include/js_sandbox.h:207](../../include/js_sandbox.h#L207)
 
 ```c
 void js_set_current_script(js_context *ctx, const char *src, const char *type);
@@ -570,11 +634,27 @@ Once enabled, the interrupt handler samples the running JS stack at most once pe
 
 ---
 
+<a id="js_throw_slots"></a>
+
+### `JS_THROW_SLOTS`
+
+`macro` | [include/js_sandbox.h:174](../../include/js_sandbox.h#L174)
+
+```c
+#define JS_THROW_SLOTS
+```
+
+Throw tracer: while enabled, EVERY thrown value -- caught or not -- is recorded as "<message> @ <innermost frames>" with a hit count (devtools "log on exception").
+
+A page that fails silently (an exception swallowed by a try/catch, a rejected promise nobody awaits) shows its real first failure here. js_throws_report writes "<n>x <message> @ <frames>" lines, most frequent first. Fixed-size table (JS_THROW_SLOTS): a hostile page cannot grow it.
+
+---
+
 <a id="js_realm_max"></a>
 
 ### `JS_REALM_MAX`
 
-`macro` | [include/js_sandbox.h:198](../../include/js_sandbox.h#L198)
+`macro` | [include/js_sandbox.h:215](../../include/js_sandbox.h#L215)
 
 ```c
 #define JS_REALM_MAX
@@ -593,7 +673,7 @@ JS_ERR_NULL_ARG; OOM => JS_ERR_OOM.
 
 ### `JS_REJECT_MAX`
 
-`macro` | [include/js_sandbox.h:201](../../include/js_sandbox.h#L201)
+`macro` | [include/js_sandbox.h:218](../../include/js_sandbox.h#L218)
 
 ```c
 #define JS_REJECT_MAX

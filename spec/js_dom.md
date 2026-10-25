@@ -604,3 +604,11 @@ y tiene su test rojo (`test_js_dom`, `test_tab`).
   elementos), **`prefix`** = `null`. Antes los tres eran `undefined`: `customElements.whenDefined(el.localName)`
   de reddit rechazaba con "'undefined' is not a valid custom element name". Dado un `<span>`, cuando se
   lee `localName`, entonces es `"span"`; un `<svg>` en línea tiene el espacio de nombres SVG.
+
+## 7r. `getElementById` solo responde con elementos del documento (2026-10-25)
+
+El índice de `dom` solo crece: un nodo que un script quitó sigue registrado. `document.getElementById`
+usa `dom_get_connected_by_id`: un elemento cuyo ancestro superior no es el documento no se devuelve (con
+dos vivos, gana el primero en orden de árbol). Polymer/YouTube vuelve a estampar plantillas; la copia
+muerta de `#page-manager` volvía, con `isConnected === false`, y la app no montaba página.
+`dom_get_element_by_id` queda como búsqueda de handle por índice (también de nodos desprendidos).

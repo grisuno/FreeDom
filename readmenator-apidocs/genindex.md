@@ -843,6 +843,7 @@
 - [`dom_get_by_class`](modules/include.dom.h.md#dom_get_by_class) function in `include/dom.h`
 - [`dom_get_by_class`](modules/src.dom.c.md#dom_get_by_class) function in `src/dom.c`
 - [`dom_get_by_tag`](modules/src.dom.c.md#dom_get_by_tag) function in `src/dom.c`
+- [`dom_get_connected_by_id`](modules/src.dom.c.md#dom_get_connected_by_id) function in `src/dom.c`
 - [`dom_get_element_by_id`](modules/src.dom.c.md#dom_get_element_by_id) function in `src/dom.c`
 - [`dom_get_inner_html`](modules/src.dom.c.md#dom_get_inner_html) function in `src/dom.c`
 - [`dom_index`](modules/include.dom.h.md#dom_index) type_alias in `include/dom.h`
@@ -1193,6 +1194,7 @@
 - [`GIF_LZW_MAX_CODES`](modules/src.image_decode.c.md#gif_lzw_max_codes) macro in `src/image_decode.c`
 - [`gif_reader`](modules/src.image_decode.c.md#gif_reader) struct in `src/image_decode.c`
 - [`global`](modules/include.js_dom.h.md#global) function in `include/js_dom.h`
+- [`global`](modules/include.js_sandbox.h.md#global) function in `include/js_sandbox.h`
 - [`glyphs`](modules/src.page_view.c.md#glyphs) function in `src/page_view.c`
 - [`_GNU_SOURCE`](modules/gui.browser_ui.c.md#_gnu_source) macro in `gui/browser_ui.c`
 - [`_GNU_SOURCE`](modules/gui.ui_render.c.md#_gnu_source) macro in `gui/ui_render.c`
@@ -1202,6 +1204,7 @@
 - [`_GNU_SOURCE`](modules/src.js_embed.c.md#_gnu_source) macro in `src/js_embed.c`
 - [`_GNU_SOURCE`](modules/src.js_events.c.md#_gnu_source) macro in `src/js_events.c`
 - [`_GNU_SOURCE`](modules/src.js_fetch.c.md#_gnu_source) macro in `src/js_fetch.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
@@ -1400,7 +1403,6 @@
 - [`hls_status`](modules/include.hls.h.md#hls_status) enum in `include/hls.h`
 - [`hls_variant`](modules/include.hls.h.md#hls_variant) struct in `include/hls.h`
 - [`host`](modules/include.js_dom.h.md#host) function in `include/js_dom.h`
-- [`host`](modules/src.tab.c.md#host) function in `src/tab.c`
 - [`hp_config`](modules/include.html_parse.h.md#hp_config) struct in `include/html_parse.h`
 - [`hp_config_default`](modules/src.html_parse.c.md#hp_config_default) function in `src/html_parse.c`
 - [`HP_DEFAULT_MAX_BYTES`](modules/include.html_parse.h.md#hp_default_max_bytes) macro in `include/html_parse.h`
@@ -1685,6 +1687,8 @@
 - [`JS_DEFAULT_MEM_LIMIT`](modules/include.js_sandbox.h.md#js_default_mem_limit) macro in `include/js_sandbox.h`
 - [`JS_DEFAULT_STACK_LIMIT`](modules/include.js_sandbox.h.md#js_default_stack_limit) macro in `include/js_sandbox.h`
 - [`JS_DEFAULT_TIME_BUDGET`](modules/include.js_sandbox.h.md#js_default_time_budget) macro in `include/js_sandbox.h`
+- [`js_devtools_enable`](modules/src.js_sandbox.c.md#js_devtools_enable) function in `src/js_sandbox.c`
+- [`js_devtools_expose`](modules/src.js_sandbox.c.md#js_devtools_expose) function in `src/js_sandbox.c`
 - [`js_env`](modules/src.js_dom.c.md#js_env) function in `src/js_dom.c`
 - [`js_eval`](modules/src.js_sandbox.c.md#js_eval) function in `src/js_sandbox.c`
 - [`js_eval_module`](modules/src.js_sandbox.c.md#js_eval_module) function in `src/js_sandbox.c`
@@ -1729,6 +1733,10 @@
 - [`js_stack_limit_for`](modules/include.js_sandbox.h.md#js_stack_limit_for) function in `include/js_sandbox.h`
 - [`js_stack_limit_for`](modules/src.js_sandbox.c.md#js_stack_limit_for) function in `src/js_sandbox.c`
 - [`js_status`](modules/include.js_sandbox.h.md#js_status) enum in `include/js_sandbox.h`
+- [`JS_THROW_SLOTS`](modules/include.js_sandbox.h.md#js_throw_slots) macro in `include/js_sandbox.h`
+- [`js_throws_enable`](modules/src.js_sandbox.c.md#js_throws_enable) function in `src/js_sandbox.c`
+- [`js_throws_report`](modules/include.js_sandbox.h.md#js_throws_report) function in `include/js_sandbox.h`
+- [`js_throws_report`](modules/src.js_sandbox.c.md#js_throws_report) function in `src/js_sandbox.c`
 - [`JS_TICKS_PER_LOAD`](modules/gui.browser_ui.c.md#js_ticks_per_load) macro in `gui/browser_ui.c`
 - [`js_validate_source`](modules/src.js_sandbox.c.md#js_validate_source) function in `src/js_sandbox.c`
 - [`jsp_enabled`](modules/src.js_policy.c.md#jsp_enabled) function in `src/js_policy.c`
@@ -1972,6 +1980,7 @@
 - [`offset`](modules/include.flex_layout.h.md#offset) function in `include/flex_layout.h`
 - [`offset`](modules/include.ui.h.md#offset) type_alias in `include/ui.h`
 - [`OMNI_MAX_SUGG`](modules/gui.browser_ui.c.md#omni_max_sugg) macro in `gui/browser_ui.c`
+- [`once`](modules/gui.browser_ui.c.md#once) function in `gui/browser_ui.c`
 - [`once`](modules/src.tab.c.md#once) function in `src/tab.c`
 - [`one`](modules/include.box_tree.h.md#bt_node-one) method of `bt_node` in `include/box_tree.h`
 - [`one_run`](modules/tools.guitime.py.md#one_run) function in `tools.guitime`
@@ -2092,6 +2101,7 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -2167,6 +2177,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -2761,12 +2773,20 @@
 - [`rows`](modules/gui.browser_ui.c.md#rows) function in `gui/browser_ui.c`
 - [`rp_decision`](modules/include.request_policy.h.md#rp_decision) enum in `include/request_policy.h`
 - [`rp_evaluate`](modules/src.request_policy.c.md#rp_evaluate) function in `src/request_policy.c`
+- [`RP_HDR_MAX_BYTES`](modules/include.request_policy.h.md#rp_hdr_max_bytes) macro in `include/request_policy.h`
+- [`RP_HDR_MAX_COUNT`](modules/include.request_policy.h.md#rp_hdr_max_count) macro in `include/request_policy.h`
+- [`RP_HDR_NAME_MAX`](modules/include.request_policy.h.md#rp_hdr_name_max) macro in `include/request_policy.h`
+- [`RP_HDR_VALUE_MAX`](modules/include.request_policy.h.md#rp_hdr_value_max) macro in `include/request_policy.h`
+- [`rp_headers_have`](modules/include.request_policy.h.md#rp_headers_have) function in `include/request_policy.h`
 - [`rp_host_of`](modules/include.request_policy.h.md#rp_host_of) function in `include/request_policy.h`
 - [`rp_host_of`](modules/src.request_policy.c.md#rp_host_of) function in `src/request_policy.c`
 - [`RP_MAX_HOST`](modules/src.request_policy.c.md#rp_max_host) macro in `src/request_policy.c`
 - [`RP_MAX_LABELS`](modules/src.request_policy.c.md#rp_max_labels) macro in `src/request_policy.c`
 - [`rp_same_site`](modules/include.request_policy.h.md#rp_same_site) function in `include/request_policy.h`
 - [`rp_same_site`](modules/src.request_policy.c.md#rp_same_site) function in `src/request_policy.c`
+- [`rp_sanitize_request_headers`](modules/include.request_policy.h.md#rp_sanitize_request_headers) function in `include/request_policy.h`
+- [`rp_sanitize_request_headers`](modules/src.request_policy.c.md#rp_sanitize_request_headers) function in `src/request_policy.c`
+- [`rp_sanitize_request_headers`](modules/include.secure_fetch.h.md#sf_config-rp_sanitize_request_headers) method of `sf_config` in `include/secure_fetch.h`
 - [`rp_site_of`](modules/include.request_policy.h.md#rp_site_of) function in `include/request_policy.h`
 - [`rp_site_of`](modules/src.request_policy.c.md#rp_site_of) function in `src/request_policy.c`
 - [`rule`](modules/gui.browser_ui.c.md#rule) function in `gui/browser_ui.c`
@@ -2860,6 +2880,7 @@
 - [`sf_response`](modules/include.secure_fetch.h.md#sf_response) struct in `include/secure_fetch.h`
 - [`sf_response_free`](modules/include.secure_fetch.h.md#sf_response_free) function in `include/secure_fetch.h`
 - [`sf_response_free`](modules/src.secure_fetch.c.md#sf_response_free) function in `src/secure_fetch.c`
+- [`SF_RESPONSE_HEADERS_MAX`](modules/include.secure_fetch.h.md#sf_response_headers_max) macro in `include/secure_fetch.h`
 - [`sf_status`](modules/include.secure_fetch.h.md#sf_status) enum in `include/secure_fetch.h`
 - [`SF_SUBRESOURCE_TIMEOUT_MS`](modules/include.secure_fetch.h.md#sf_subresource_timeout_ms) macro in `include/secure_fetch.h`
 - [`sf_user_agent_or_default`](modules/include.secure_fetch.h.md#sf_user_agent_or_default) function in `include/secure_fetch.h`
@@ -2880,6 +2901,7 @@
 - [`shape`](modules/include.css_gradient.h.md#cg_radial-shape) type_alias of `cg_radial` in `include/css_gradient.h`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
+- [`silently`](modules/include.js_sandbox.h.md#silently) function in `include/js_sandbox.h`
 - [`sink`](modules/src.secure_fetch.c.md#sink) type_alias in `src/secure_fetch.c`
 - [`sites`](modules/gui.browser_ui.c.md#sites) function in `gui/browser_ui.c`
 - [`size`](modules/include.flex_layout.h.md#size) function in `include/flex_layout.h`
@@ -2993,6 +3015,8 @@
 - [`tab_image`](modules/include.tab.h.md#tab_image) struct in `include/tab.h`
 - [`tab_image_free`](modules/include.tab.h.md#tab_image_free) function in `include/tab.h`
 - [`tab_image_free`](modules/src.tab.c.md#tab_image_free) function in `src/tab.c`
+- [`tab_inflight_request_headers`](modules/include.tab.h.md#tab_inflight_request_headers) function in `include/tab.h`
+- [`tab_inflight_request_headers`](modules/src.tab.c.md#tab_inflight_request_headers) function in `src/tab.c`
 - [`tab_last_subreq_stats`](modules/include.tab.h.md#tab_last_subreq_stats) function in `include/tab.h`
 - [`tab_last_subreq_stats`](modules/src.tab.c.md#tab_last_subreq_stats) function in `src/tab.c`
 - [`tab_load`](modules/src.tab.c.md#tab_load) function in `src/tab.c`
@@ -3020,6 +3044,8 @@
 - [`tab_parse_worker_args`](modules/src.tab.c.md#tab_parse_worker_args) function in `src/tab.c`
 - [`tab_popstate`](modules/src.tab.c.md#tab_popstate) function in `src/tab.c`
 - [`tab_read_view`](modules/src.tab.c.md#tab_read_view) function in `src/tab.c`
+- [`tab_report_response_headers`](modules/include.tab.h.md#tab_report_response_headers) function in `include/tab.h`
+- [`tab_report_response_headers`](modules/src.tab.c.md#tab_report_response_headers) function in `src/tab.c`
 - [`TAB_SCREEN_W`](modules/src.tab.c.md#tab_screen_w) macro in `src/tab.c`
 - [`tab_set_cookies`](modules/include.tab.h.md#tab_set_cookies) function in `include/tab.h`
 - [`tab_set_cookies`](modules/src.tab.c.md#tab_set_cookies) function in `src/tab.c`
@@ -3153,6 +3179,7 @@
 - [`translateZ`](modules/src.css.c.md#translatez) function in `src/css.c`
 - [`treatment`](modules/gui.browser_ui.c.md#treatment) function in `gui/browser_ui.c`
 - [`tree`](modules/include.page_view.h.md#pv_box_def-tree) method of `pv_box_def` in `include/page_view.h`
+- [`tree`](modules/include.dom.h.md#tree) function in `include/dom.h`
 - [`truncated`](modules/include.freebug.h.md#truncated) function in `include/freebug.h`
 - [`trusted`](modules/include.pdf_export.h.md#trusted) function in `include/pdf_export.h`
 - [`trying`](modules/src.page_view.c.md#trying) function in `src/page_view.c`

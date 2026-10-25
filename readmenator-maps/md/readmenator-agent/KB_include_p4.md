@@ -313,16 +313,22 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Imported by: `src/renderer.c`, `tests/test_renderer.c`
 
 ## include/request_policy.h
-- Doc: rp_host_of: Lowercased host of an absolute URL into out.
+- Doc: rp_headers_have: 1 when the sanitized block `lines` carries a header called `name`...
 - Layer: business_logic
 - Language: h
 - Symbols:
   - `rp_decision` (enum, line 21)
+  - `rp_headers_have` (function, line 61) `static inline int rp_headers_have(const char *lines, const char *name)`
   - `rp_host_of` (function, line 30) `int rp_host_of(const char *url, char *out, size_t out_size);`
   - `rp_site_of` (function, line 34) `int rp_site_of(const char *host, char *out, size_t out_size);`
   - `rp_same_site` (function, line 37) `int rp_same_site(const char *top_level_url, const char *request_url);`
+  - `rp_sanitize_request_headers` (function, line 57) `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap);`
   - `FREEDOM_REQUEST_POLICY_H` (macro, line 2) `#define FREEDOM_REQUEST_POLICY_H`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/request_policy.c`, `src/tab.c`, `tests/test_request_policy.c`
+  - `RP_HDR_MAX_COUNT` (macro, line 43) `#define RP_HDR_MAX_COUNT`
+  - `RP_HDR_MAX_BYTES` (macro, line 44) `#define RP_HDR_MAX_BYTES`
+  - `RP_HDR_NAME_MAX` (macro, line 45) `#define RP_HDR_NAME_MAX`
+  - `RP_HDR_VALUE_MAX` (macro, line 46) `#define RP_HDR_VALUE_MAX`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/request_policy.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_request_policy.c`
 
 ## include/secure_fetch.h
 - Doc: sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *...
@@ -330,53 +336,55 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Language: h
 - Symbols:
   - `sf_chain_info` (struct, line 61)
-  - `sf_config` (struct, line 79)
-  - `sf_response` (struct, line 126)
+  - `sf_config` (struct, line 80)
+  - `sf_response` (struct, line 130)
   - `sf_status` (enum, line 24)
   - `sf_policy` (enum, line 41)
   - `sf_proxy_type` (enum, line 70)
-  - `policy` (type_alias, line 78) `typedef struct sf_config { sf_policy policy;`
-  - `status` (type_alias, line 125) `typedef struct sf_response { sf_status status;`
-  - `sf_ws` (type_alias, line 317) `typedef struct sf_ws sf_ws;`
+  - `policy` (type_alias, line 79) `typedef struct sf_config { sf_policy policy;`
+  - `status` (type_alias, line 129) `typedef struct sf_response { sf_status status;`
+  - `sf_ws` (type_alias, line 325) `typedef struct sf_ws sf_ws;`
   - `validators` (function, line 18) `* The security logic lives in pure validators (no I/O);`
-  - `sf_global_init` (function, line 219) `void sf_global_init(void);`
-  - `EXCLUDED` (function, line 225) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
-  - `sf_cookie_put` (function, line 232) `void sf_cookie_put(const char *url, const char *namevalue);`
-  - `sf_cookie_line_matches` (function, line 237) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
-  - `sf_user_agent_or_default` (function, line 246) `const char *sf_user_agent_or_default(const char *ua);`
-  - `sf_accept_language_or_default` (function, line 250) `const char *sf_accept_language_or_default(const char *lang);`
-  - `sf_impersonate_kex_groups` (function, line 254) `const char *sf_impersonate_kex_groups(void);`
-  - `sf_impersonate_tls13_ciphers` (function, line 255) `const char *sf_impersonate_tls13_ciphers(void);`
-  - `skipped` (function, line 275) `* skipped (a classical key exchange is accepted);`
-  - `sf_is_redirect_code` (function, line 286) `int sf_is_redirect_code(long http_code);`
-  - `sf_header_value` (function, line 297) `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);`
-  - `bits` (function, line 334) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
-  - `sf_ws_fd` (function, line 341) `int sf_ws_fd(const sf_ws *ws);`
-  - `sf_ws_close` (function, line 344) `void sf_ws_close(sf_ws *ws);`
-  - `connection` (function, line 348) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
-  - `sf_get` (function, line 357) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
-  - `sf_response_free` (function, line 368) `void sf_response_free(sf_response *resp);`
-  - `exhausted` (function, line 379) `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
-  - `sf_rcache_put` (function, line 392) `int sf_rcache_put(const char *from, const char *to, time_t now);`
-  - `sf_rcache_get` (function, line 393) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
-  - `sf_rcache_clear` (function, line 394) `void sf_rcache_clear(void);`
-  - `sf_rcache_set_backing` (function, line 403) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
+  - `rp_sanitize_request_headers` (function, line 109) `* rp_sanitize_request_headers ("Name: value\n" lines);`
+  - `sf_global_init` (function, line 227) `void sf_global_init(void);`
+  - `EXCLUDED` (function, line 233) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
+  - `sf_cookie_put` (function, line 240) `void sf_cookie_put(const char *url, const char *namevalue);`
+  - `sf_cookie_line_matches` (function, line 245) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
+  - `sf_user_agent_or_default` (function, line 254) `const char *sf_user_agent_or_default(const char *ua);`
+  - `sf_accept_language_or_default` (function, line 258) `const char *sf_accept_language_or_default(const char *lang);`
+  - `sf_impersonate_kex_groups` (function, line 262) `const char *sf_impersonate_kex_groups(void);`
+  - `sf_impersonate_tls13_ciphers` (function, line 263) `const char *sf_impersonate_tls13_ciphers(void);`
+  - `skipped` (function, line 283) `* skipped (a classical key exchange is accepted);`
+  - `sf_is_redirect_code` (function, line 294) `int sf_is_redirect_code(long http_code);`
+  - `sf_header_value` (function, line 305) `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);`
+  - `bits` (function, line 342) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
+  - `sf_ws_fd` (function, line 349) `int sf_ws_fd(const sf_ws *ws);`
+  - `sf_ws_close` (function, line 352) `void sf_ws_close(sf_ws *ws);`
+  - `connection` (function, line 356) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
+  - `sf_get` (function, line 365) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
+  - `sf_response_free` (function, line 376) `void sf_response_free(sf_response *resp);`
+  - `exhausted` (function, line 387) `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
+  - `sf_rcache_put` (function, line 400) `int sf_rcache_put(const char *from, const char *to, time_t now);`
+  - `sf_rcache_get` (function, line 401) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
+  - `sf_rcache_clear` (function, line 402) `void sf_rcache_clear(void);`
+  - `sf_rcache_set_backing` (function, line 411) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
   - `FREEDOM_SECURE_FETCH_H` (macro, line 2) `#define FREEDOM_SECURE_FETCH_H`
   - `SF_META_MAX` (macro, line 77) `#define SF_META_MAX`
-  - `SF_DEFAULT_KEX_GROUPS` (macro, line 158) `#define SF_DEFAULT_KEX_GROUPS`
-  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 167) `#define SF_IMPERSONATE_KEX_GROUPS`
-  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 168) `#define SF_IMPERSONATE_TLS13_CIPHERS`
-  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 172) `#define SF_IMPERSONATE_TLS12_CIPHERS`
-  - `SF_DEFAULT_USER_AGENT` (macro, line 183) `#define SF_DEFAULT_USER_AGENT`
-  - `SF_DEFAULT_MAX_BODY` (macro, line 184) `#define SF_DEFAULT_MAX_BODY`
-  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 185) `#define SF_DEFAULT_TIMEOUT_MS`
-  - `SF_CONNECT_TIMEOUT_MS` (macro, line 208) `#define SF_CONNECT_TIMEOUT_MS`
-  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 209) `#define SF_SUBRESOURCE_TIMEOUT_MS`
-  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 210) `#define SF_DEFAULT_MAX_REDIRECTS`
-  - `SF_MAX_URL` (macro, line 211) `#define SF_MAX_URL`
-  - `SF_WS_MAX_MESSAGE` (macro, line 316) `#define SF_WS_MAX_MESSAGE`
+  - `SF_RESPONSE_HEADERS_MAX` (macro, line 78) `#define SF_RESPONSE_HEADERS_MAX`
+  - `SF_DEFAULT_KEX_GROUPS` (macro, line 166) `#define SF_DEFAULT_KEX_GROUPS`
+  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 175) `#define SF_IMPERSONATE_KEX_GROUPS`
+  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 176) `#define SF_IMPERSONATE_TLS13_CIPHERS`
+  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 180) `#define SF_IMPERSONATE_TLS12_CIPHERS`
+  - `SF_DEFAULT_USER_AGENT` (macro, line 191) `#define SF_DEFAULT_USER_AGENT`
+  - `SF_DEFAULT_MAX_BODY` (macro, line 192) `#define SF_DEFAULT_MAX_BODY`
+  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 193) `#define SF_DEFAULT_TIMEOUT_MS`
+  - `SF_CONNECT_TIMEOUT_MS` (macro, line 216) `#define SF_CONNECT_TIMEOUT_MS`
+  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 217) `#define SF_SUBRESOURCE_TIMEOUT_MS`
+  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 218) `#define SF_DEFAULT_MAX_REDIRECTS`
+  - `SF_MAX_URL` (macro, line 219) `#define SF_MAX_URL`
+  - `SF_WS_MAX_MESSAGE` (macro, line 324) `#define SF_WS_MAX_MESSAGE`
 - Depends on: `include/anti_fp.h`
-- Imported by: `gui/browser_ui.c`, `include/cached_fetch.h`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
+- Imported by: `gui/browser_ui.c`, `include/cached_fetch.h`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
 
 ## include/shm_slots.h
 - Doc: ss_committed: Chooses the slot to paint into: the current one if free, else the other free one.
@@ -450,33 +458,35 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `tab_parse_worker_args` (function, line 164) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);`
   - `out_status` (function, line 176) `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
   - `tab_set_fetcher` (function, line 187) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);`
-  - `bytes` (function, line 191) `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
-  - `tab_set_css_sink` (function, line 200) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
-  - `tab_set_net_allowed` (function, line 205) `void tab_set_net_allowed(tab *t, int allowed);`
-  - `tab_set_op_net_budget_ms` (function, line 209) `void tab_set_op_net_budget_ms(tab *t, int ms);`
-  - `tab_async_fd` (function, line 214) `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
-  - `tab_async_busy` (function, line 220) `int tab_async_busy(const tab *t);`
-  - `jar` (function, line 227) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
-  - `tab_set_cookies` (function, line 231) `void tab_set_cookies(tab *t, const char *cookies);`
-  - `origin` (function, line 234) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
-  - `tab_set_storage` (function, line 236) `void tab_set_storage(tab *t, const char *blob, size_t len);`
-  - `exclusively` (function, line 242) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
-  - `tab_set_viewport_w` (function, line 250) `void tab_set_viewport_w(tab *t, int px);`
-  - `tab_set_identity` (function, line 255) `void tab_set_identity(tab *t, const char *serialized);`
-  - `tab_last_subreq_stats` (function, line 261) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);`
-  - `tab_subreq_permitted` (function, line 266) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
-  - `view` (function, line 274) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
-  - `string` (function, line 294) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
-  - `granted` (function, line 343) `* granted (allow.conf AND js.conf);`
-  - `returned` (function, line 344) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
-  - `popstate` (function, line 350) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
-  - `decode` (function, line 369) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
-  - `tab_alive` (function, line 382) `int tab_alive(const tab *t);`
-  - `tab_child_pid` (function, line 385) `pid_t tab_child_pid(const tab *t);`
-  - `tab_close` (function, line 388) `void tab_close(tab *t);`
-  - `tab_page_free` (function, line 391) `void tab_page_free(tab_page *p);`
-  - `tab_eval_result_free` (function, line 392) `void tab_eval_result_free(tab_eval_result *r);`
-  - `tab_image_free` (function, line 393) `void tab_image_free(tab_image *img);`
+  - `tab_inflight_request_headers` (function, line 192) `const char *tab_inflight_request_headers(void);`
+  - `tab_report_response_headers` (function, line 197) `void tab_report_response_headers(const char *lines);`
+  - `bytes` (function, line 201) `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
+  - `tab_set_css_sink` (function, line 210) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
+  - `tab_set_net_allowed` (function, line 215) `void tab_set_net_allowed(tab *t, int allowed);`
+  - `tab_set_op_net_budget_ms` (function, line 219) `void tab_set_op_net_budget_ms(tab *t, int ms);`
+  - `tab_async_fd` (function, line 224) `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
+  - `tab_async_busy` (function, line 230) `int tab_async_busy(const tab *t);`
+  - `jar` (function, line 237) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
+  - `tab_set_cookies` (function, line 241) `void tab_set_cookies(tab *t, const char *cookies);`
+  - `origin` (function, line 244) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
+  - `tab_set_storage` (function, line 246) `void tab_set_storage(tab *t, const char *blob, size_t len);`
+  - `exclusively` (function, line 252) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
+  - `tab_set_viewport_w` (function, line 260) `void tab_set_viewport_w(tab *t, int px);`
+  - `tab_set_identity` (function, line 265) `void tab_set_identity(tab *t, const char *serialized);`
+  - `tab_last_subreq_stats` (function, line 271) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);`
+  - `tab_subreq_permitted` (function, line 276) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
+  - `view` (function, line 284) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
+  - `string` (function, line 304) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
+  - `granted` (function, line 353) `* granted (allow.conf AND js.conf);`
+  - `returned` (function, line 354) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
+  - `popstate` (function, line 360) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
+  - `decode` (function, line 379) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
+  - `tab_alive` (function, line 392) `int tab_alive(const tab *t);`
+  - `tab_child_pid` (function, line 395) `pid_t tab_child_pid(const tab *t);`
+  - `tab_close` (function, line 398) `void tab_close(tab *t);`
+  - `tab_page_free` (function, line 401) `void tab_page_free(tab_page *p);`
+  - `tab_eval_result_free` (function, line 402) `void tab_eval_result_free(tab_eval_result *r);`
+  - `tab_image_free` (function, line 403) `void tab_image_free(tab_image *img);`
   - `FREEDOM_TAB_H` (macro, line 2) `#define FREEDOM_TAB_H`
   - `TAB_MAX_INPUT` (macro, line 149) `#define TAB_MAX_INPUT`
 - Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`

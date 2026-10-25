@@ -170,6 +170,22 @@ static void test_crypto_random_values(void **state) {
               "a===b?'returned-same':'different'", "returned-same");
 }
 
+/* The view is the contract: only bytes [byteOffset, byteOffset+byteLength) change. The old code
+ * filled the whole underlying ArrayBuffer starting at byteOffset (a write past the view, and
+ * past the buffer for a nonzero offset) and left a pending "ArrayBuffer object expected". */
+static void test_crypto_random_values_respects_view(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var b=new Uint8Array(64); var v=b.subarray(8,16); crypto.getRandomValues(v);"
+              "var out=0,in_=0; for(var i=0;i<64;i++){ if(i>=8&&i<16) in_|=b[i]; else out|=b[i]; }"
+              "(out===0&&in_>0)?'confined':('leak:'+out+','+in_)", "confined");
+    EXPECT(f, "var a=new Uint16Array(new ArrayBuffer(32),8,4); crypto.getRandomValues(a);"
+              "var u=new Uint8Array(a.buffer); var o=0; for(var i=0;i<32;i++) if(i<8||i>=16) o|=u[i]; o===0?'ok':'leak'", "ok");
+    EXPECT(f, "try{ crypto.getRandomValues(new Float32Array(2)); 'no-throw' }catch(e){ e.name }", "TypeMismatchError");
+    EXPECT(f, "try{ crypto.getRandomValues({}); 'no-throw' }catch(e){ e instanceof TypeError ? 'TypeError' : e.name }", "TypeError");
+    EXPECT(f, "try{ crypto.getRandomValues(new Uint8Array(65537)); 'no-throw' }catch(e){ e.name }", "QuotaExceededError");
+    EXPECT(f, "(function(){ var r=crypto.getRandomValues(new Uint8Array(0)); return r.length; })()", "0");
+}
+
 /* --- screen orientation (Hito 30b) --- */
 
 static void test_screen_orientation(void **state) {
@@ -382,6 +398,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_navigator_mime_types, setup, teardown),
         cmocka_unit_test_setup_teardown(test_crypto_present, setup, teardown),
         cmocka_unit_test_setup_teardown(test_crypto_random_uuid, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_crypto_random_values_respects_view, setup, teardown),
         cmocka_unit_test_setup_teardown(test_crypto_random_values, setup, teardown),
         cmocka_unit_test_setup_teardown(test_screen_orientation, setup, teardown),
         cmocka_unit_test_setup_teardown(test_screen_bucketed, setup, teardown),

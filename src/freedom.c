@@ -480,6 +480,7 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
     }
 
     sf_config cfg = sf_config_default();
+    cfg.extra_headers = tab_inflight_request_headers();   /* the page's own XHR/fetch headers */
     apply_identity(&cfg);
     if (g_hosts != NULL) {
         char host[512];
@@ -533,6 +534,7 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
     rb[resp.body_len] = '\0';
     *st = (int)resp.http_code; *ob = rb; *ol = resp.body_len;
     *oct = (resp.content_type != NULL) ? strdup(resp.content_type) : NULL;
+    tab_report_response_headers(resp.headers);   /* what the page's XHR/fetch may read */
     sf_response_free(&resp);
     return 0;
 }

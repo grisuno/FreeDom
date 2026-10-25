@@ -3,21 +3,51 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `_GNU_SOURCE` | macro | `src/local_store.c:473` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:484` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:495` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:506` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:517` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:528` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:539` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:550` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:561` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:572` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:583` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:594` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:605` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:616` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:627` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:638` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:649` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:660` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:671` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:682` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:693` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:704` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:715` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:726` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:737` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:748` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:759` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:770` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:781` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:792` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:803` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:814` | `#define _GNU_SOURCE` |
-| `aead_decrypt` | function | `src/local_store.c:945` | `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
-| `aead_encrypt` | function | `src/local_store.c:919` | `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
-| `argon2id_derive` | function | `src/local_store.c:881` | `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,                           ...` |
-| `cipher_for` | function | `src/local_store.c:871` | `static const EVP_CIPHER *cipher_for(ls_aead aead)` |
-| `decrypt_blob` | function | `src/local_store.c:1010` | `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,          ...` |
-| `ls_derive_key` | function | `src/local_store.c:910` | `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,                         const...` |
-| `ls_free` | function | `src/local_store.c:1106` | `void ls_free(uint8_t *buf, size_t len)` |
-| `ls_open` | function | `src/local_store.c:1054` | `ls_status ls_open(const uint8_t key[LS_KEY_LEN],                   const uint8_t *blob, size_t bl...` |
-| `ls_open_passphrase` | function | `src/local_store.c:1086` | `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,                         ...` |
-| `ls_seal` | function | `src/local_store.c:1041` | `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,                   const uint8_t *p...` |
-| `ls_seal_passphrase` | function | `src/local_store.c:1065` | `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,           ...` |
-| `seal_core` | function | `src/local_store.c:973` | `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,                     ...` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:825` | `#define _GNU_SOURCE` |
+| `aead_decrypt` | function | `src/local_store.c:956` | `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
+| `aead_encrypt` | function | `src/local_store.c:930` | `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
+| `argon2id_derive` | function | `src/local_store.c:892` | `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,                           ...` |
+| `cipher_for` | function | `src/local_store.c:882` | `static const EVP_CIPHER *cipher_for(ls_aead aead)` |
+| `decrypt_blob` | function | `src/local_store.c:1021` | `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,          ...` |
+| `ls_derive_key` | function | `src/local_store.c:921` | `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,                         const...` |
+| `ls_free` | function | `src/local_store.c:1117` | `void ls_free(uint8_t *buf, size_t len)` |
+| `ls_open` | function | `src/local_store.c:1065` | `ls_status ls_open(const uint8_t key[LS_KEY_LEN],                   const uint8_t *blob, size_t bl...` |
+| `ls_open_passphrase` | function | `src/local_store.c:1097` | `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,                         ...` |
+| `ls_seal` | function | `src/local_store.c:1052` | `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,                   const uint8_t *p...` |
+| `ls_seal_passphrase` | function | `src/local_store.c:1076` | `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,           ...` |
+| `seal_core` | function | `src/local_store.c:984` | `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,                     ...` |
 | `_POSIX_C_SOURCE` | macro | `src/media_decoder.c:23` | `#define _POSIX_C_SOURCE` |
 | `av_rescale_q` | function | `src/media_decoder.c:217` | `return av_rescale_q(f->pts, tb, (AVRational)` |
 | `decode_segment` | function | `src/media_decoder.c:276` | `static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len)` |
@@ -454,6 +484,11 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `RP_MAX_HOST` | macro | `src/request_policy.c:17` | `#define RP_MAX_HOST` |
 | `RP_MAX_LABELS` | macro | `src/request_policy.c:18` | `#define RP_MAX_LABELS` |
 | `ci_starts_with` | function | `src/request_policy.c:26` | `static int ci_starts_with(const char *s, const char *prefix)` |
+| `hdr_forbidden` | function | `src/request_policy.c:184` | `static int hdr_forbidden(const char *n, size_t len)` |
+| `hdr_lower` | function | `src/request_policy.c:162` | `static int hdr_lower(int c)` |
+| `hdr_name_has_prefix` | function | `src/request_policy.c:171` | `static int hdr_name_has_prefix(const char *a, size_t alen, const char *lit)` |
+| `hdr_name_ieq` | function | `src/request_policy.c:164` | `static int hdr_name_ieq(const char *a, size_t alen, const char *lit)` |
+| `hdr_token_char` | function | `src/request_policy.c:178` | `static int hdr_token_char(unsigned char c)` |
 | `lower` | function | `src/request_policy.c:22` | `static char lower(char c)` |
 | `psl_cmp` | function | `src/request_policy.c:36` | `static int psl_cmp(const void *key, const void *elem)` |
 | `psl_in` | function | `src/request_policy.c:40` | `static int psl_in(const char *const *arr, size_t n, const char *key)` |
@@ -461,40 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `rp_evaluate` | function | `src/request_policy.c:143` | `rp_decision rp_evaluate(const char *top_level_url, const char *request_url)` |
 | `rp_host_of` | function | `src/request_policy.c:76` | `int rp_host_of(const char *url, char *out, size_t out_size)` |
 | `rp_same_site` | function | `src/request_policy.c:134` | `int rp_same_site(const char *top_level_url, const char *request_url)` |
-| `rp_site_of` | function | `src/request_policy.c:102` | `int rp_site_of(const char *host, char *out, size_t out_size)` |
-| `SF_RCACHE_SLOTS` | macro | `src/secure_fetch.c:1119` | `#define SF_RCACHE_SLOTS` |
-| `SF_RCACHE_TTL_S` | macro | `src/secure_fetch.c:1120` | `#define SF_RCACHE_TTL_S` |
-| `_POSIX_C_SOURCE` | macro | `src/secure_fetch.c:12` | `#define _POSIX_C_SOURCE` |
-| `add_header` | function | `src/secure_fetch.c:784` | `static int add_header(struct curl_slist **h, const char *line)` |
-| `body_sink` | struct | `src/secure_fetch.c:487` | `` |
-| `ci_index` | function | `src/secure_fetch.c:57` | `static long ci_index(const char *haystack, const char *needle)` |
-| `ci_starts_with` | function | `src/secure_fetch.c:45` | `static int ci_starts_with(const char *haystack, const char *prefix)` |
-| `copy_bounded` | function | `src/secure_fetch.c:525` | `static void copy_bounded(char *dst, size_t dstsz, const char *src)` |
-| `copy_checked` | function | `src/secure_fetch.c:351` | `static int copy_checked(char *dst, size_t dstsz, const char *src)` |
-| `database` | function | `src/secure_fetch.c:540` | `* NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid...` |
-| `fetch_ctx` | struct | `src/secure_fetch.c:510` | `` |
-| `get_negotiated_group_name` | function | `src/secure_fetch.c:536` | `static const char *get_negotiated_group_name(SSL *ssl)` |
-| `group` | function | `src/secure_fetch.c:554` | `* group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);` |
-| `header_cb` | function | `src/secure_fetch.c:605` | `static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata)` |
-| `header_value_clean` | function | `src/secure_fetch.c:257` | `static int header_value_clean(const char *s)` |
-| `inspect_chain` | function | `src/secure_fetch.c:690` | `static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len)` |
-| `map_curl_error` | function | `src/secure_fetch.c:743` | `static sf_status map_curl_error(CURLcode rc, const body_sink *sink)` |
-| `module` | function | `src/secure_fetch.c:412` | `* pure url module (DRY);` |
-| `name_is_pq_sig` | function | `src/secure_fetch.c:680` | `static int name_is_pq_sig(int pknid)` |
-| `progress` | function | `src/secure_fetch.c:496` | `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);` |
-| `rcache_put_ram` | function | `src/secure_fetch.c:1152` | `static int rcache_put_ram(const char *from, const char *to, time_t now)` |
-| `redirect` | function | `src/secure_fetch.c:873` | `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a      * different orig...` |
-| `sf_accept_language_or_default` | function | `src/secure_fetch.c:267` | `const char *sf_accept_language_or_default(const char *lang)` |
-| `sf_attempt_get` | function | `src/secure_fetch.c:1456` | `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,         ...` |
-| `sf_attempt_post` | function | `src/secure_fetch.c:1462` | `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,        ...` |
-| `sf_check_chain_policy` | function | `src/secure_fetch.c:310` | `sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)` |
-| `sf_check_group_is_pq` | function | `src/secure_fetch.c:301` | `sf_status sf_check_group_is_pq(const char *negotiated_group)` |
-| `sf_check_tls_version` | function | `src/secure_fetch.c:296` | `sf_status sf_check_tls_version(const char *negotiated_version)` |
-| `sf_ci_prefix` | function | `src/secure_fetch.c:419` | `static int sf_ci_prefix(const char *s, const char *p)` |
-| `sf_config_default` | function | `src/secure_fetch.c:231` | `sf_config sf_config_default(void)` |
-| `sf_cookie_header_for` | function | `src/secure_fetch.c:181` | `size_t sf_cookie_header_for(const char *url, char *out, size_t outsz)` |
-| `sf_cookie_line_matches` | function | `src/secure_fetch.c:111` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path,                 ...` |
-| `sf_cookie_put` | function | `src/secure_fetch.c:210` | `void sf_cookie_put(const char *url, const char *namevalue)` |
-| `sf_downgrade_of` | function | `src/secure_fetch.c:1447` | `static int sf_downgrade_of(sf_policy p)` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

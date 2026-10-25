@@ -28,7 +28,7 @@ typedef enum fbp_tab
 
 ### `fbp_tab_label`
 
-`function` `const` | [include/fb_panes.h:30](../../include/fb_panes.h#L30)
+`function` `const` | [include/fb_panes.h:32](../../include/fb_panes.h#L32)
 
 ```c
 const char *fbp_tab_label(int tab);
@@ -52,7 +52,7 @@ Never NULL.
 
 ### `fbp_tab_from_name`
 
-`function` | [include/fb_panes.h:33](../../include/fb_panes.h#L33)
+`function` | [include/fb_panes.h:35](../../include/fb_panes.h#L35)
 
 ```c
 int fbp_tab_from_name(const char *name);
@@ -76,7 +76,7 @@ Tab named [`name`](src.text_shape.c.md#name) (case-insensitive), or -1 when unkn
 
 ### `fbp_tab_wrap`
 
-`function` | [include/fb_panes.h:36](../../include/fb_panes.h#L36)
+`function` | [include/fb_panes.h:38](../../include/fb_panes.h#L38)
 
 ```c
 int fbp_tab_wrap(int tab, int dir);
@@ -99,7 +99,7 @@ The tab [`dir`](include.profile.h.md#dir) steps away (cyclic); an invalid `tab` 
 
 ### `fbp_tab_span`
 
-`function` | [include/fb_panes.h:39](../../include/fb_panes.h#L39)
+`function` | [include/fb_panes.h:41](../../include/fb_panes.h#L41)
 
 ```c
 void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);
@@ -123,7 +123,7 @@ x-extent of a tab in the bar: each is (letters + 2 * pad_cells) cells wide, cont
 
 ### `fbp_tab_at`
 
-`function` | [include/fb_panes.h:42](../../include/fb_panes.h#L42)
+`function` | [include/fb_panes.h:44](../../include/fb_panes.h#L44)
 
 ```c
 int fbp_tab_at(double x, double cell_w, double pad_cells);
@@ -149,7 +149,7 @@ Exact inverse of fbp_tab_span.
 
 ### `fbp_is_pane`
 
-`function` | [include/fb_panes.h:45](../../include/fb_panes.h#L45)
+`function` | [include/fb_panes.h:47](../../include/fb_panes.h#L47)
 
 ```c
 int fbp_is_pane(int tab);
@@ -173,7 +173,7 @@ Whether the tab's editor argument is meaningful (console: JS; others: selector/i
 
 ### `fbp_js_quote`
 
-`function` | [include/fb_panes.h:49](../../include/fb_panes.h#L49)
+`function` | [include/fb_panes.h:51](../../include/fb_panes.h#L51)
 
 ```c
 size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);
@@ -200,7 +200,7 @@ Returns its length, or 0 on failure (n too long, embedded NUL, cap too small).
 
 ### `fbp_expr`
 
-`function` | [include/fb_panes.h:53](../../include/fb_panes.h#L53)
+`function` | [include/fb_panes.h:55](../../include/fb_panes.h#L55)
 
 ```c
 size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);
@@ -232,7 +232,7 @@ Returns its length, or 0 for the console, a hostile/oversized argument or a smal
 
 ### `FBP_SELECTOR_MAX`
 
-`macro` | [include/fb_panes.h:26](../../include/fb_panes.h#L26)
+`macro` | [include/fb_panes.h:28](../../include/fb_panes.h#L28)
 
 ```c
 #define FBP_SELECTOR_MAX
@@ -244,7 +244,7 @@ Returns its length, or 0 for the console, a hostile/oversized argument or a smal
 
 ### `FBP_EXPR_MAX`
 
-`macro` | [include/fb_panes.h:27](../../include/fb_panes.h#L27)
+`macro` | [include/fb_panes.h:29](../../include/fb_panes.h#L29)
 
 ```c
 #define FBP_EXPR_MAX

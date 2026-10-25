@@ -25,8 +25,9 @@
 
 /* Page-wide script time budget (ms) for a TRUSTED page (allow.conf AND js.conf): a
  * modern app (github's React bundle) needs well over the untrusted 1 s budget in an
- * interpreter. The user consented to this host; the per-task interrupt still applies. */
-#define FC_TRUSTED_JS_BUDGET_MS 15000
+ * interpreter. The user consented to this host; the per-task interrupt still applies. 60 s: the
+ * window runs the load off the UI thread, so a heavy app is slow, never frozen. */
+#define FC_TRUSTED_JS_BUDGET_MS 60000
 
 /* Padding around the PNG export canvas (px): the document's content box is
  * FC_PNG_PAGE_W minus twice this. A page's own <html> margin overrides it. */

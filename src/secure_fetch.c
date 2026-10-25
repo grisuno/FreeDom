@@ -15,6 +15,7 @@
 #include "secure_fetch.h"
 #include "anti_fp.h"
 #include "url.h"
+#include "request_policy.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -465,6 +466,8 @@ void sf_response_free(sf_response *resp) {
     free(resp->final_url);
     free(resp->content_type);
     free(resp->content_disposition);
+    free(resp->headers);
+    resp->headers = NULL;
     resp->tls_version = NULL;
     resp->negotiated_group = NULL;
     resp->body = NULL;
@@ -518,6 +521,8 @@ typedef struct fetch_ctx {
     char        expires[SF_META_MAX], date[SF_META_MAX];
     void       *progress_ctx; /* userdata passed to the progress callback */
     void      (*progress_cb)(const uint8_t *body, size_t body_len, void *ctx);
+    char        hdr_all[SF_RESPONSE_HEADERS_MAX]; /* final hop's header lines, status line excluded */
+    size_t      hdr_len;
 } fetch_ctx;
 
 static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len);
@@ -615,6 +620,20 @@ static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata
     size_t m = n < sizeof line - 1 ? n : sizeof line - 1;
     memcpy(line, buffer, m);
     line[m] = '\0';
+
+    /* Every response header line, for page script (XHR/fetch). A new status line starts a new
+     * hop, so what remains is the FINAL response's. Set-Cookie never reaches script. */
+    if (ci_starts_with(line, "http/")) {
+        ctx->hdr_len = 0;
+    } else if (!ci_starts_with(line, "set-cookie") && memchr(line, ':', m) != NULL) {
+        size_t ll = m;
+        while (ll > 0 && (line[ll - 1] == '\r' || line[ll - 1] == '\n')) --ll;
+        if (ll > 0 && ctx->hdr_len + ll + 1 <= sizeof ctx->hdr_all) {
+            memcpy(ctx->hdr_all + ctx->hdr_len, line, ll);
+            ctx->hdr_len += ll;
+            ctx->hdr_all[ctx->hdr_len++] = '\n';
+        }
+    }
 
     char val[SF_MAX_URL];
     if (sf_parse_location_header(line, val, sizeof val) == SF_OK) {
@@ -910,7 +929,25 @@ static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *l
     /* Browser-like Accept header (Hito 30b): replaces libcurl's generic accept with a
      * standard Firefox content-negotiation string. Every real browser sends this;
      * a bare wildcard accept is a bot/script signal. */
-    if (add_header(hdrs, "Accept: " FP_ACCEPT_HEADER_NAV) != 0) return SF_ERR_OOM;
+    if (!rp_headers_have(local->extra_headers, "accept")
+        && add_header(hdrs, "Accept: " FP_ACCEPT_HEADER_NAV) != 0) return SF_ERR_OOM;
+
+    /* Headers the page attached to its XHR/fetch (already filtered by the trusted parent): an
+     * Accept or Content-Type of its own replaces the browser default above. */
+    if (local->extra_headers != NULL) {
+        const char *p = local->extra_headers;
+        while (*p != '\0') {
+            const char *eol = strchr(p, '\n');
+            size_t n = (eol != NULL) ? (size_t)(eol - p) : strlen(p);
+            char line[RP_HDR_NAME_MAX + RP_HDR_VALUE_MAX + 8];
+            if (n > 0 && n < sizeof line) {
+                memcpy(line, p, n);
+                line[n] = '\0';
+                if (add_header(hdrs, line) != 0) return SF_ERR_OOM;
+            }
+            p = (eol != NULL) ? eol + 1 : p + n;
+        }
+    }
 
     /* DNT: 1 matches Firefox privacy defaults (Hito 30b). */
     if (add_header(hdrs, "DNT: 1") != 0) return SF_ERR_OOM;
@@ -999,7 +1036,8 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
         char hbuf[256];
         int hn = snprintf(hbuf, sizeof hbuf, "Content-Type: %s", ct);
         if (hn < 0 || (size_t)hn >= sizeof hbuf) { result = SF_ERR_INVALID_URL; goto done; }
-        if (add_header(&hdrs, hbuf) != 0) { result = SF_ERR_OOM; goto done; }
+        if (!rp_headers_have(local.extra_headers, "content-type")
+            && add_header(&hdrs, hbuf) != 0) { result = SF_ERR_OOM; goto done; }
         /* Suppress libcurl's "Expect: 100-continue" so a small POST is one round trip. */
         if (add_header(&hdrs, "Expect:") != 0) { result = SF_ERR_OOM; goto done; }
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
@@ -1076,6 +1114,13 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     out->location = loc;
     out->content_type = ctype;
     out->content_disposition = disp;
+    if (ctx.hdr_len > 0) {
+        out->headers = (char *)malloc(ctx.hdr_len + 1);
+        if (out->headers != NULL) {
+            memcpy(out->headers, ctx.hdr_all, ctx.hdr_len);
+            out->headers[ctx.hdr_len] = '\0';
+        }
+    }
     memcpy(out->etag, ctx.etag, sizeof out->etag);
     memcpy(out->last_modified, ctx.last_modified, sizeof out->last_modified);
     memcpy(out->cache_control, ctx.cache_control, sizeof out->cache_control);

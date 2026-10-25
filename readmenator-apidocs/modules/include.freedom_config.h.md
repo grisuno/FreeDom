@@ -28,7 +28,7 @@ The harness renders Firefox at this same width so both engines measure the SAME 
 
 ### `FC_TRUSTED_JS_BUDGET_MS`
 
-`macro` | [include/freedom_config.h:29](../../include/freedom_config.h#L29)
+`macro` | [include/freedom_config.h:30](../../include/freedom_config.h#L30)
 
 ```c
 #define FC_TRUSTED_JS_BUDGET_MS
@@ -36,7 +36,7 @@ The harness renders Firefox at this same width so both engines measure the SAME 
 
 Page-wide script time budget (ms) for a TRUSTED page (allow.conf AND js.conf): a modern app (github's React bundle) needs well over the untrusted 1 s budget in an interpreter.
 
-The user consented to this host; the per-task interrupt still applies.
+The user consented to this host; the per-task interrupt still applies. 60 s: the window runs the load off the UI thread, so a heavy app is slow, never frozen.
 
 ---
 
@@ -44,7 +44,7 @@ The user consented to this host; the per-task interrupt still applies.
 
 ### `FC_PNG_MARGIN`
 
-`macro` | [include/freedom_config.h:33](../../include/freedom_config.h#L33)
+`macro` | [include/freedom_config.h:34](../../include/freedom_config.h#L34)
 
 ```c
 #define FC_PNG_MARGIN
@@ -60,7 +60,7 @@ A page's own <html> margin overrides it.
 
 ### `FC_FLEX_MEASURE_W`
 
-`macro` | [include/freedom_config.h:44](../../include/freedom_config.h#L44)
+`macro` | [include/freedom_config.h:45](../../include/freedom_config.h#L45)
 
 ```c
 #define FC_FLEX_MEASURE_W
@@ -76,7 +76,7 @@ A measurement device, not a layout value -- no rendered geometry is ever placed 
 
 ### `FC_FLEX_MIN_MEASURE_W`
 
-`macro` | [include/freedom_config.h:50](../../include/freedom_config.h#L50)
+`macro` | [include/freedom_config.h:51](../../include/freedom_config.h#L51)
 
 ```c
 #define FC_FLEX_MIN_MEASURE_W
@@ -92,7 +92,7 @@ Like FC_FLEX_MEASURE_W it is a measurement device, not a layout value.
 
 ### `FC_FONT_CHAIN_MAX`
 
-`macro` | [include/freedom_config.h:55](../../include/freedom_config.h#L55)
+`macro` | [include/freedom_config.h:56](../../include/freedom_config.h#L56)
 
 ```c
 #define FC_FONT_CHAIN_MAX
@@ -108,7 +108,7 @@ The chain depth is chosen by the attacker, so this is an anti-DoS bound: the wal
 
 ### `FC_MAX_BOXES`
 
-`macro` | [include/freedom_config.h:60](../../include/freedom_config.h#L60)
+`macro` | [include/freedom_config.h:61](../../include/freedom_config.h#L61)
 
 ```c
 #define FC_MAX_BOXES
@@ -124,7 +124,7 @@ Coupled to the out-of-flow resolver's indexed storage by _Static_assert in page_
 
 ### `FC_FONT_FALLBACK_PX`
 
-`macro` | [include/freedom_config.h:65](../../include/freedom_config.h#L65)
+`macro` | [include/freedom_config.h:66](../../include/freedom_config.h#L66)
 
 ```c
 #define FC_FONT_FALLBACK_PX
@@ -140,7 +140,7 @@ Single source for the former scattered 16.0 literals in painters and harnesses; 
 
 ### `FC_UI_FONT_SIZE`
 
-`macro` | [include/freedom_config.h:69](../../include/freedom_config.h#L69)
+`macro` | [include/freedom_config.h:70](../../include/freedom_config.h#L70)
 
 ```c
 #define FC_UI_FONT_SIZE
@@ -156,7 +156,7 @@ Formerly duplicated as UI_FONT_SIZE in gui/ui_render.c and gui/browser_ui_intern
 
 ### `FC_MAX_AUTHOR_CSS_BYTES`
 
-`macro` | [include/freedom_config.h:77](../../include/freedom_config.h#L77)
+`macro` | [include/freedom_config.h:78](../../include/freedom_config.h#L78)
 
 ```c
 #define FC_MAX_AUTHOR_CSS_BYTES
@@ -172,7 +172,7 @@ It is an anti-DoS bound on parser memory and time, and it must sit ABOVE what re
 
 ### `FC_LAZY_IMAGE_MARGIN_PX`
 
-`macro` | [include/freedom_config.h:80](../../include/freedom_config.h#L80)
+`macro` | [include/freedom_config.h:81](../../include/freedom_config.h#L81)
 
 ```c
 #define FC_LAZY_IMAGE_MARGIN_PX
@@ -186,7 +186,7 @@ Distance (px) beyond the viewport at which a loading="lazy" image starts loading
 
 ### `FC_TAB_OP_NET_BUDGET_MS`
 
-`macro` | [include/freedom_config.h:86](../../include/freedom_config.h#L86)
+`macro` | [include/freedom_config.h:87](../../include/freedom_config.h#L87)
 
 ```c
 #define FC_TAB_OP_NET_BUDGET_MS

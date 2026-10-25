@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static const char *const TAB_LABEL[FBP_COUNT] = { "Console", "HTML", "CSS", "Script", "Net" };
+static const char *const TAB_LABEL[FBP_COUNT] = { "Console", "HTML", "CSS", "Script", "Net", "Profile", "Throws" };
 
 /* Each body runs as `function(q){ BODY }` and returns a string. q is the user's argument.
  * They read the page through the REPL command-line API (rules/styles/box/net), which exists
@@ -57,7 +57,15 @@ static const char JS_NET[] =
     "o.push((e.method||'GET')+'  '+e.status+'  '+(e.type||'-')+'  '+e.url+(e.size?'  ('+e.size+' B)':''));}"
     "return o.length?o.join('\\n'):'(no requests)';";
 
-static const char *const JS_BODY[FBP_COUNT] = { NULL, JS_HTML, JS_CSS, JS_SCRIPT, JS_NET };
+static const char JS_PROFILE[] =
+    "var r;try{r=profile(q||undefined);}catch(z){return '(profile() unavailable)';}"
+    "return r||'(no samples: the profiler runs on allow.conf + js.conf pages)';";
+
+static const char JS_THROWS[] =
+    "var r;try{r=throws(q||undefined);}catch(z){return '(throws() unavailable)';}"
+    "return r||'(no exceptions thrown)';";
+
+static const char *const JS_BODY[FBP_COUNT] = { NULL, JS_HTML, JS_CSS, JS_SCRIPT, JS_NET, JS_PROFILE, JS_THROWS };
 
 static int tab_ok(int tab) { return tab >= 0 && tab < FBP_COUNT; }
 

@@ -82,40 +82,40 @@ static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,
 
 /* --- crypto native functions (Hito 30b: blend-in surface) --- */
 
+/* WebCrypto getRandomValues: fills exactly the view's bytes. Only integer typed arrays are
+ * accepted (a Float32/64 array is TypeMismatchError), and at most 65536 bytes per call
+ * (QuotaExceededError). Never touches the underlying buffer outside [byteOffset, +byteLength). */
+static JSValue throw_dom_exception(JSContext *ctx, const char *name, const char *msg) {
+    JSValue err = JS_NewError(ctx);
+    JS_SetPropertyStr(ctx, err, "name", JS_NewString(ctx, name));
+    JS_SetPropertyStr(ctx, err, "message", JS_NewString(ctx, msg));
+    return JS_Throw(ctx, err);
+}
+
 static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,
                                     int argc, JSValueConst *argv) {
     (void)this_val;
     if (argc < 1) return JS_ThrowTypeError(ctx, "getRandomValues requires 1 argument");
-    uint8_t *buf = NULL;
-    size_t byte_len = 0, byte_off = 0;
-    size_t ab_len = 0;
-    buf = JS_GetArrayBuffer(ctx, &ab_len, argv[0]);
-    if (buf != NULL) {
-        byte_len = ab_len;
-    } else {
-        JSValue ab = JS_GetPropertyStr(ctx, argv[0], "buffer");
-        if (JS_IsException(ab))
-            return ab;
-        if (JS_IsUndefined(ab))
-            return JS_ThrowTypeError(ctx, "getRandomValues requires a TypedArray");
-        buf = JS_GetArrayBuffer(ctx, &byte_len, ab);
+    int type = JS_GetTypedArrayType(argv[0]);
+    if (type < 0) return JS_ThrowTypeError(ctx, "getRandomValues requires an integer TypedArray");
+    if (type == JS_TYPED_ARRAY_FLOAT16 || type == JS_TYPED_ARRAY_FLOAT32
+        || type == JS_TYPED_ARRAY_FLOAT64)
+        return throw_dom_exception(ctx, "TypeMismatchError", "getRandomValues requires an integer TypedArray");
+    size_t off = 0, len = 0, per = 0;
+    JSValue ab = JS_GetTypedArrayBuffer(ctx, argv[0], &off, &len, &per);
+    if (JS_IsException(ab)) return ab;
+    if (len > 65536u) {
         JS_FreeValue(ctx, ab);
-        if (buf == NULL)
-            return JS_ThrowTypeError(ctx, "getRandomValues requires a TypedArray");
-        JSValue off_val = JS_GetPropertyStr(ctx, argv[0], "byteOffset");
-        if (JS_IsException(off_val))
-            return off_val;
-        if (!JS_IsUndefined(off_val)) {
-            int32_t off32 = 0;
-            JS_ToInt32(ctx, &off32, off_val);
-            byte_off = (size_t)(off32 >= 0 ? off32 : 0);
-        }
-        JS_FreeValue(ctx, off_val);
+        return throw_dom_exception(ctx, "QuotaExceededError", "getRandomValues: more than 65536 bytes requested");
     }
-    if (byte_len > 65536u) return JS_ThrowTypeError(ctx, "TypedArray too large");
+    size_t ab_len = 0;
+    uint8_t *buf = JS_GetArrayBuffer(ctx, &ab_len, ab);
+    JS_FreeValue(ctx, ab);
+    if (buf == NULL) return JS_EXCEPTION;
+    if (off > ab_len || len > ab_len - off) return JS_ThrowRangeError(ctx, "typed array view out of range");
     size_t got = 0;
-    while (got < byte_len) {
-        ssize_t n = getrandom(buf + byte_off + got, byte_len - got, 0);
+    while (got < len) {
+        ssize_t n = getrandom(buf + off + got, len - got, 0);
         if (n < 0) return JS_ThrowInternalError(ctx, "getrandom failed");
         got += (size_t)n;
     }

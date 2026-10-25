@@ -3,6 +3,62 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_pool_parallel_fetch_and_take` | function | `tests/test_prefetch.c:153` | `static void test_pool_parallel_fetch_and_take(void **state)` |
+| `test_pool_start_page_import_map` | function | `tests/test_prefetch.c:378` | `static void test_pool_start_page_import_map(void **state)` |
+| `test_pooled_fetch_adapter` | function | `tests/test_prefetch.c:255` | `static void test_pooled_fetch_adapter(void **state)` |
+| `test_scan_basic_stylesheet_and_script` | function | `tests/test_prefetch.c:32` | `static void test_scan_basic_stylesheet_and_script(void **state)` |
+| `test_scan_imports_static_only` | function | `tests/test_prefetch.c:298` | `static void test_scan_imports_static_only(void **state)` |
+| `test_scan_null_args` | function | `tests/test_prefetch.c:22` | `static void test_scan_null_args(void **state)` |
+| `test_scan_ref_cap` | function | `tests/test_prefetch.c:104` | `static void test_scan_ref_cap(void **state)` |
+| `_POSIX_C_SOURCE` | macro | `tests/test_prefs.c:9` | `#define _POSIX_C_SOURCE` |
+| `main` | function | `tests/test_prefs.c:424` | `int main(void)` |
+| `test_bookmark_toggle_and_cap` | function | `tests/test_prefs.c:267` | `static void test_bookmark_toggle_and_cap(void **state)` |
+| `test_bookmarks_page_escapes` | function | `tests/test_prefs.c:375` | `static void test_bookmarks_page_escapes(void **state)` |
+| `test_format_null_args` | function | `tests/test_prefs.c:412` | `static void test_format_null_args(void **state)` |
+| `test_history_dedup_and_evict` | function | `tests/test_prefs.c:295` | `static void test_history_dedup_and_evict(void **state)` |
+| `test_hostile_title_cleaned` | function | `tests/test_prefs.c:237` | `static void test_hostile_title_cleaned(void **state)` |
+| `test_init_defaults` | function | `tests/test_prefs.c:25` | `static void test_init_defaults(void **state)` |
+| `test_invalid_urls_rejected` | function | `tests/test_prefs.c:209` | `static void test_invalid_urls_rejected(void **state)` |
+| `test_parse_bad_magic` | function | `tests/test_prefs.c:140` | `static void test_parse_bad_magic(void **state)` |
+| `test_parse_clamps_out_of_range` | function | `tests/test_prefs.c:187` | `static void test_parse_clamps_out_of_range(void **state)` |
+| `test_parse_too_large` | function | `tests/test_prefs.c:156` | `static void test_parse_too_large(void **state)` |
+| `test_parse_unknown_and_malformed_skipped` | function | `tests/test_prefs.c:165` | `static void test_parse_unknown_and_malformed_skipped(void **state)` |
+| `test_roundtrip` | function | `tests/test_prefs.c:80` | `static void test_roundtrip(void **state)` |
+| `test_suggest_priorities` | function | `tests/test_prefs.c:320` | `static void test_suggest_priorities(void **state)` |
+| `_GNU_SOURCE` | macro | `tests/test_profile.c:9` | `#define _GNU_SOURCE` |
+| `dir` | type_alias | `tests/test_profile.c:27` | `typedef struct fixture { char dir[64];` |
+| `file_size` | function | `tests/test_profile.c:64` | `static size_t file_size(const char *path)` |
+| `fixture` | struct | `tests/test_profile.c:28` | `` |
+| `main` | function | `tests/test_profile.c:278` | `int main(void)` |
+| `path_of` | function | `tests/test_profile.c:60` | `static void path_of(const fixture *f, const char *name, char *out, size_t cap)` |
+| `setup` | function | `tests/test_profile.c:30` | `static int setup(void **state)` |
+| `teardown` | function | `tests/test_profile.c:39` | `static int teardown(void **state)` |
+| `test_first_launch_defaults` | function | `tests/test_profile.c:115` | `static void test_first_launch_defaults(void **state)` |
+| `test_foreign_key_auth_fails` | function | `tests/test_profile.c:236` | `static void test_foreign_key_auth_fails(void **state)` |
+| `test_nothing_readable_on_disk` | function | `tests/test_profile.c:174` | `static void test_nothing_readable_on_disk(void **state)` |
+| `test_null_and_not_ready` | function | `tests/test_profile.c:261` | `static void test_null_and_not_ready(void **state)` |
+| `test_open_bad_dir` | function | `tests/test_profile.c:103` | `static void test_open_bad_dir(void **state)` |
+| `test_open_creates_keyfile` | function | `tests/test_profile.c:72` | `static void test_open_creates_keyfile(void **state)` |
+| `test_open_rejects_corrupt_keyfile` | function | `tests/test_profile.c:89` | `static void test_open_rejects_corrupt_keyfile(void **state)` |
+| `test_save_load_roundtrip_two_ctx` | function | `tests/test_profile.c:128` | `static void test_save_load_roundtrip_two_ctx(void **state)` |
+| `test_tampered_blob_auth_fails` | function | `tests/test_profile.c:204` | `static void test_tampered_blob_auth_fails(void **state)` |
+| `caps_images_on` | function | `tests/test_render_doc.c:28` | `static rdp_caps caps_images_on(void)` |
+| `first_kind` | function | `tests/test_render_doc.c:35` | `static const rd_block *first_kind(const rd_doc *d, rd_kind k)` |
+| `main` | function | `tests/test_render_doc.c:842` | `int main(void)` |
+| `test_author_color_gated_by_css` | function | `tests/test_render_doc.c:372` | `static void test_author_color_gated_by_css(void **state)` |
+| `test_block_tag_total` | function | `tests/test_render_doc.c:793` | `static void test_block_tag_total(void **state)` |
+| `test_build_null_out` | function | `tests/test_render_doc.c:44` | `static void test_build_null_out(void **state)` |
+| `test_build_null_view_is_empty` | function | `tests/test_render_doc.c:51` | `static void test_build_null_view_is_empty(void **state)` |
+| `test_caret_color_gated_on_input` | function | `tests/test_render_doc.c:506` | `static void test_caret_color_gated_on_input(void **state)` |
+| `test_cont_item_carried_by_default` | function | `tests/test_render_doc.c:628` | `static void test_cont_item_carried_by_default(void **state)` |
+| `test_container_carried_by_default` | function | `tests/test_render_doc.c:596` | `static void test_container_carried_by_default(void **state)` |
+| `test_emphasis_propagates` | function | `tests/test_render_doc.c:94` | `static void test_emphasis_propagates(void **state)` |
+| `test_flex_item_carried_by_default` | function | `tests/test_render_doc.c:697` | `static void test_flex_item_carried_by_default(void **state)` |
+| `test_flex_wrap_align_row_gap_carried_by_default` | function | `tests/test_render_doc.c:745` | `static void test_flex_wrap_align_row_gap_carried_by_default(void **state)` |
+| `test_float_carried_by_default` | function | `tests/test_render_doc.c:661` | `static void test_float_carried_by_default(void **state)` |
+| `test_free_null_and_double` | function | `tests/test_render_doc.c:362` | `static void test_free_null_and_double(void **state)` |
+| `test_heading_level_of_link` | function | `tests/test_render_doc.c:777` | `static void test_heading_level_of_link(void **state)` |
+| `test_heading_paragraph_link` | function | `tests/test_render_doc.c:64` | `static void test_heading_paragraph_link(void **state)` |
 | `test_href_sanitised` | function | `tests/test_render_doc.c:322` | `static void test_href_sanitised(void **state)` |
 | `test_image_data_url_allowed_no_top` | function | `tests/test_render_doc.c:278` | `static void test_image_data_url_allowed_no_top(void **state)` |
 | `test_image_data_url_allowed_remote_top` | function | `tests/test_render_doc.c:260` | `static void test_image_data_url_allowed_remote_top(void **state)` |
@@ -52,18 +108,23 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_render_strips_script` | function | `tests/test_renderer.c:39` | `static void test_render_strips_script(void **state)` |
 | `test_render_too_large` | function | `tests/test_renderer.c:55` | `static void test_render_too_large(void **state)` |
 | `test_result_free_null_and_double` | function | `tests/test_renderer.c:84` | `static void test_result_free_null_and_double(void **state)` |
-| `main` | function | `tests/test_request_policy.c:139` | `int main(void)` |
-| `test_evaluate_allow_same_site` | function | `tests/test_request_policy.c:105` | `static void test_evaluate_allow_same_site(void **state)` |
-| `test_evaluate_block_invalid` | function | `tests/test_request_policy.c:128` | `static void test_evaluate_block_invalid(void **state)` |
-| `test_evaluate_block_scheme` | function | `tests/test_request_policy.c:120` | `static void test_evaluate_block_scheme(void **state)` |
-| `test_evaluate_block_third_party` | function | `tests/test_request_policy.c:112` | `static void test_evaluate_block_third_party(void **state)` |
-| `test_host_of_basic` | function | `tests/test_request_policy.c:18` | `static void test_host_of_basic(void **state)` |
-| `test_host_of_invalid` | function | `tests/test_request_policy.c:29` | `static void test_host_of_invalid(void **state)` |
-| `test_host_of_overflow` | function | `tests/test_request_policy.c:37` | `static void test_host_of_overflow(void **state)` |
-| `test_same_site` | function | `tests/test_request_policy.c:91` | `static void test_same_site(void **state)` |
-| `test_site_of` | function | `tests/test_request_policy.c:45` | `static void test_site_of(void **state)` |
-| `test_site_of_multi_suffix` | function | `tests/test_request_policy.c:58` | `static void test_site_of_multi_suffix(void **state)` |
-| `test_site_of_psl` | function | `tests/test_request_policy.c:70` | `static void test_site_of_psl(void **state)` |
+| `main` | function | `tests/test_request_policy.c:212` | `int main(void)` |
+| `test_evaluate_allow_same_site` | function | `tests/test_request_policy.c:106` | `static void test_evaluate_allow_same_site(void **state)` |
+| `test_evaluate_block_invalid` | function | `tests/test_request_policy.c:129` | `static void test_evaluate_block_invalid(void **state)` |
+| `test_evaluate_block_scheme` | function | `tests/test_request_policy.c:121` | `static void test_evaluate_block_scheme(void **state)` |
+| `test_evaluate_block_third_party` | function | `tests/test_request_policy.c:113` | `static void test_evaluate_block_third_party(void **state)` |
+| `test_hdr_caps_and_args` | function | `tests/test_request_policy.c:191` | `static void test_hdr_caps_and_args(void **state)` |
+| `test_hdr_drops_forbidden_and_identity` | function | `tests/test_request_policy.c:157` | `static void test_hdr_drops_forbidden_and_identity(void **state)` |
+| `test_hdr_first_duplicate_wins` | function | `tests/test_request_policy.c:184` | `static void test_hdr_first_duplicate_wins(void **state)` |
+| `test_hdr_keeps_application_headers` | function | `tests/test_request_policy.c:142` | `static void test_hdr_keeps_application_headers(void **state)` |
+| `test_hdr_rejects_malformed` | function | `tests/test_request_policy.c:171` | `static void test_hdr_rejects_malformed(void **state)` |
+| `test_host_of_basic` | function | `tests/test_request_policy.c:19` | `static void test_host_of_basic(void **state)` |
+| `test_host_of_invalid` | function | `tests/test_request_policy.c:30` | `static void test_host_of_invalid(void **state)` |
+| `test_host_of_overflow` | function | `tests/test_request_policy.c:38` | `static void test_host_of_overflow(void **state)` |
+| `test_same_site` | function | `tests/test_request_policy.c:92` | `static void test_same_site(void **state)` |
+| `test_site_of` | function | `tests/test_request_policy.c:46` | `static void test_site_of(void **state)` |
+| `test_site_of_multi_suffix` | function | `tests/test_request_policy.c:59` | `static void test_site_of_multi_suffix(void **state)` |
+| `test_site_of_psl` | function | `tests/test_request_policy.c:71` | `static void test_site_of_psl(void **state)` |
 | `bk_load` | function | `tests/test_secure_fetch.c:333` | `static int bk_load(void *c, const char *from, time_t now, char *out, size_t cap)` |
 | `bk_save` | function | `tests/test_secure_fetch.c:327` | `static void bk_save(void *c, const char *from, const char *to, time_t now)` |
 | `main` | function | `tests/test_secure_fetch.c:678` | `int main(void)` |
@@ -337,18 +398,19 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_encode_rejects_oversize_url` | function | `tests/test_tls_impersonate.c:203` | `static void test_encode_rejects_oversize_url(void **state)` |
 | `test_gate_requires_all_three_signals` | function | `tests/test_tls_impersonate.c:22` | `static void test_gate_requires_all_three_signals(void **state)` |
 | `test_resp_no_chain_ok` | function | `tests/test_tls_impersonate.c:121` | `static void test_resp_no_chain_ok(void **state)` |
-| `assert_line` | function | `tests/test_ui.c:20` | `static void assert_line(const char *text, const ui_layout *lay, size_t n,                        ...` |
-| `main` | function | `tests/test_ui.c:130` | `int main(void)` |
-| `test_clamp_scroll` | function | `tests/test_ui.c:113` | `static void test_clamp_scroll(void **state)` |
-| `test_layout_free_null_and_double` | function | `tests/test_ui.c:121` | `static void test_layout_free_null_and_double(void **state)` |
-| `test_wrap_breaks_at_space` | function | `tests/test_ui.c:53` | `static void test_wrap_breaks_at_space(void **state)` |
-| `test_wrap_does_not_split_utf8` | function | `tests/test_ui.c:76` | `static void test_wrap_does_not_split_utf8(void **state)` |
-| `test_wrap_empty` | function | `tests/test_ui.c:35` | `static void test_wrap_empty(void **state)` |
-| `test_wrap_hard_breaks_long_word` | function | `tests/test_ui.c:64` | `static void test_wrap_hard_breaks_long_word(void **state)` |
-| `test_wrap_null_args` | function | `tests/test_ui.c:28` | `static void test_wrap_null_args(void **state)` |
-| `test_wrap_respects_newline` | function | `tests/test_ui.c:90` | `static void test_wrap_respects_newline(void **state)` |
-| `test_wrap_short_single_line` | function | `tests/test_ui.c:43` | `static void test_wrap_short_single_line(void **state)` |
-| `test_wrap_zero_cols_is_sanitised` | function | `tests/test_ui.c:101` | `static void test_wrap_zero_cols_is_sanitised(void **state)` |
+| `assert_line` | function | `tests/test_ui.c:21` | `static void assert_line(const char *text, const ui_layout *lay, size_t n,                        ...` |
+| `main` | function | `tests/test_ui.c:146` | `int main(void)` |
+| `test_clamp_scroll` | function | `tests/test_ui.c:114` | `static void test_clamp_scroll(void **state)` |
+| `test_layout_free_null_and_double` | function | `tests/test_ui.c:122` | `static void test_layout_free_null_and_double(void **state)` |
+| `test_lazy_near_viewport` | function | `tests/test_ui.c:133` | `static void test_lazy_near_viewport(void **state)` |
+| `test_wrap_breaks_at_space` | function | `tests/test_ui.c:54` | `static void test_wrap_breaks_at_space(void **state)` |
+| `test_wrap_does_not_split_utf8` | function | `tests/test_ui.c:77` | `static void test_wrap_does_not_split_utf8(void **state)` |
+| `test_wrap_empty` | function | `tests/test_ui.c:36` | `static void test_wrap_empty(void **state)` |
+| `test_wrap_hard_breaks_long_word` | function | `tests/test_ui.c:65` | `static void test_wrap_hard_breaks_long_word(void **state)` |
+| `test_wrap_null_args` | function | `tests/test_ui.c:29` | `static void test_wrap_null_args(void **state)` |
+| `test_wrap_respects_newline` | function | `tests/test_ui.c:91` | `static void test_wrap_respects_newline(void **state)` |
+| `test_wrap_short_single_line` | function | `tests/test_ui.c:44` | `static void test_wrap_short_single_line(void **state)` |
+| `test_wrap_zero_cols_is_sanitised` | function | `tests/test_ui.c:102` | `static void test_wrap_zero_cols_is_sanitised(void **state)` |
 | `assert_span` | function | `tests/test_url.c:449` | `static void assert_span(const char *p, size_t len, const char *expect)` |
 | `main` | function | `tests/test_url.c:701` | `int main(void)` |
 | `test_authority_len` | function | `tests/test_url.c:86` | `static void test_authority_len(void **state)` |
@@ -434,67 +496,5 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `_POSIX_C_SOURCE` | macro | `tests/test_webfont_load.c:13` | `#define _POSIX_C_SOURCE` |
 | `main` | function | `tests/test_webfont_load.c:325` | `int main(void)` |
 | `read_host_font` | function | `tests/test_webfont_load.c:64` | `static unsigned char *read_host_font(size_t *out_n)` |
-| `stub` | struct | `tests/test_webfont_load.c:30` | `` |
-| `stub_fetch` | function | `tests/test_webfont_load.c:38` | `static int stub_fetch(void *ctx, const char *url,                       int *out_status, char **o...` |
-| `teardown` | function | `tests/test_webfont_load.c:318` | `static int teardown(void **state)` |
-| `test_b64` | function | `tests/test_webfont_load.c:92` | `static char *test_b64(const unsigned char *in, size_t n)` |
-| `test_data_url_bad_bytes_skipped` | function | `tests/test_webfont_load.c:240` | `static void test_data_url_bad_bytes_skipped(void **state)` |
-| `test_data_url_registers` | function | `tests/test_webfont_load.c:255` | `static void test_data_url_registers(void **state)` |
-| `test_extern_sheet_relative_url` | function | `tests/test_webfont_load.c:217` | `static void test_extern_sheet_relative_url(void **state)` |
-| `test_fallback_second_url` | function | `tests/test_webfont_load.c:170` | `static void test_fallback_second_url(void **state)` |
-| `test_first_wins` | function | `tests/test_webfont_load.c:194` | `static void test_first_wins(void **state)` |
-| `test_https_stub_registers` | function | `tests/test_webfont_load.c:126` | `static void test_https_stub_registers(void **state)` |
-| `test_null_args` | function | `tests/test_webfont_load.c:113` | `static void test_null_args(void **state)` |
-| `test_null_page_data_only` | function | `tests/test_webfont_load.c:288` | `static void test_null_page_data_only(void **state)` |
-| `test_woff2_never_fetched` | function | `tests/test_webfont_load.c:152` | `static void test_woff2_never_fetched(void **state)` |
-| `main` | function | `tests/test_wl_display.c:43` | `int main(void)` |
-| `test_ignores_lock_and_garbage` | function | `tests/test_wl_display.c:19` | `static void test_ignores_lock_and_garbage(void **state)` |
-| `test_null_entry` | function | `tests/test_wl_display.c:35` | `static void test_null_entry(void **state)` |
-| `test_picks_lowest` | function | `tests/test_wl_display.c:11` | `static void test_picks_lowest(void **state)` |
-| `test_small_cap_fails_closed` | function | `tests/test_wl_display.c:27` | `static void test_small_cap_fails_closed(void **state)` |
-| `_DEFAULT_SOURCE` | macro | `tests/test_wl_guard.c:1` | `#define _DEFAULT_SOURCE` |
-| `main` | function | `tests/test_wl_guard.c:55` | `int main(void)` |
-| `ms_since` | function | `tests/test_wl_guard.c:13` | `static long ms_since(const struct timespec *a)` |
-| `test_guard_starts_idles_and_stops_promptly` | function | `tests/test_wl_guard.c:21` | `static void test_guard_starts_idles_and_stops_promptly(void **state)` |
-| `test_guard_survives_peer_hangup` | function | `tests/test_wl_guard.c:41` | `static void test_guard_survives_peer_hangup(void **state)` |
-| `_POSIX_C_SOURCE` | macro | `tests/test_ws_hub.c:7` | `#define _POSIX_C_SOURCE` |
-| `emit` | function | `tests/test_ws_hub.c:21` | `static void emit(void *ctx, int id, int kind, int code, const char *data, size_t len)` |
-| `main` | function | `tests/test_ws_hub.c:142` | `int main(void)` |
-| `n` | type_alias | `tests/test_ws_hub.c:18` | `typedef struct rec { int n;` |
-| `rec` | struct | `tests/test_ws_hub.c:19` | `` |
-| `test_close_all_drops_late_results` | function | `tests/test_ws_hub.c:85` | `static void test_close_all_drops_late_results(void **state)` |
-| `test_close_cancels_pending_open` | function | `tests/test_ws_hub.c:102` | `static void test_close_cancels_pending_open(void **state)` |
-| `test_duplicate_and_capacity` | function | `tests/test_ws_hub.c:64` | `static void test_duplicate_and_capacity(void **state)` |
-| `test_failed_open_reports_error_then_close` | function | `tests/test_ws_hub.c:47` | `static void test_failed_open_reports_error_then_close(void **state)` |
-| `test_free_with_pending_open` | function | `tests/test_ws_hub.c:132` | `static void test_free_with_pending_open(void **state)` |
-| `test_new_free` | function | `tests/test_ws_hub.c:34` | `static void test_new_free(void **state)` |
-| `test_send_unknown_and_readable_unknown` | function | `tests/test_ws_hub.c:115` | `static void test_send_unknown_and_readable_unknown(void **state)` |
-| `wait_notify` | function | `tests/test_ws_hub.c:28` | `static void wait_notify(wh_hub *h, rec *r)` |
-| `main` | function | `tests/test_zoom.c:112` | `int main(void)` |
-| `test_apply_scales_and_floors` | function | `tests/test_zoom.c:100` | `static void test_apply_scales_and_floors(void **state)` |
-| `test_clamp_bounds` | function | `tests/test_zoom.c:17` | `static void test_clamp_bounds(void **state)` |
-| `test_ends_are_idempotent` | function | `tests/test_zoom.c:59` | `static void test_ends_are_idempotent(void **state)` |
-| `test_repeated_in_reaches_max` | function | `tests/test_zoom.c:67` | `static void test_repeated_in_reaches_max(void **state)` |
-| `test_repeated_out_reaches_min` | function | `tests/test_zoom.c:79` | `static void test_repeated_out_reaches_min(void **state)` |
-| `test_reset_is_default` | function | `tests/test_zoom.c:27` | `static void test_reset_is_default(void **state)` |
-| `test_scale_factor` | function | `tests/test_zoom.c:91` | `static void test_scale_factor(void **state)` |
-| `test_step_snaps_off_ladder` | function | `tests/test_zoom.c:49` | `static void test_step_snaps_off_ladder(void **state)` |
-| `test_zoom_in_steps_ladder` | function | `tests/test_zoom.c:33` | `static void test_zoom_in_steps_ladder(void **state)` |
-| `test_zoom_out_steps_ladder` | function | `tests/test_zoom.c:41` | `static void test_zoom_out_steps_ladder(void **state)` |
-| `bands` | function | `tools/fbench.py:83` | `def bands(fd, ff, band)` |
-| `load_baseline` | function | `tools/fbench.py:53` | `def load_baseline()` |
-| `load_current` | function | `tools/fbench.py:66` | `def load_current()` |
-| `load_timing_baseline` | function | `tools/fbench.py:158` | `def load_timing_baseline()` |
-| `luma` | function | `tools/fbench.py:79` | `def luma(img)` |
-| `main` | function | `tools/fbench.py:227` | `def main()` |
-| `publish_readme` | function | `tools/fbench.py:114` | `def publish_readme(name, score)` |
-| `publish_timing` | function | `tools/fbench.py:171` | `def publish_timing(rows)` |
-| `run_timer` | function | `tools/fbench.py:140` | `def run_timer(tool, pages, runs)` |
-| `sbs` | function | `tools/fbench.py:95` | `def sbs(name, start, nrows)` |
-| `timing` | function | `tools/fbench.py:193` | `def timing(names, runs, readme)` |
-| `_append_probe` | function | `tools/ffgeom.py:254` | `def _append_probe(src, script)` |
-| `_word_reader` | function | `tools/ffgeom.py:173` | `def _word_reader(path)` |
-| `bit` | function | `tools/ffgeom.py:206` | `def bit(grid_row, cell, origin)` |
-| `decode` | function | `tools/ffgeom.py:239` | `def decode(path)` |
 
 Next: [SYMBOLS_p16.md](SYMBOLS_p16.md)

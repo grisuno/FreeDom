@@ -1,11 +1,11 @@
 # `src/js_sandbox.c`
 
-> Source: [src/js_sandbox.c:1](../../src/js_sandbox.c#L1) | language `c` | coverage 44.8% | [API index](../index.md)
+> Source: [src/js_sandbox.c:1](../../src/js_sandbox.c#L1) | language `c` | coverage 39.4% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`js_mem_state`](#js_mem_state), [`js_context`](#js_context)
-- **Functions:** [`js_profile_enable`](#js_profile_enable), [`js_profile_report`](#js_profile_report), [`js_loc_from_stack`](#js_loc_from_stack), [`undefined`](#undefined), [`js_stack_limit_for`](#js_stack_limit_for), [`js_prime_stack_limit`](#js_prime_stack_limit), [`js_limits_default`](#js_limits_default), [`js_validate_source`](#js_validate_source), [`js_context_new`](#js_context_new), [`js_context_free`](#js_context_free), [`js_set_time_budget`](#js_set_time_budget), [`js_eval`](#js_eval), [`js_eval_named`](#js_eval_named), [`js_pump_jobs`](#js_pump_jobs), [`js_eval_once`](#js_eval_once), [`js_result_free`](#js_result_free), [`js_set_current_script`](#js_set_current_script), [`js_context_raw`](#js_context_raw), [`js_set_module_host`](#js_set_module_host), [`js_eval_module`](#js_eval_module), [`js_install_realms`](#js_install_realms)
+- **Functions:** [`js_profile_enable`](#js_profile_enable), [`js_profile_report`](#js_profile_report), [`js_throws_enable`](#js_throws_enable), [`js_throws_report`](#js_throws_report), [`js_devtools_enable`](#js_devtools_enable), [`js_devtools_expose`](#js_devtools_expose), [`js_loc_from_stack`](#js_loc_from_stack), [`undefined`](#undefined), [`js_stack_limit_for`](#js_stack_limit_for), [`js_prime_stack_limit`](#js_prime_stack_limit), [`js_limits_default`](#js_limits_default), [`js_validate_source`](#js_validate_source), [`js_context_new`](#js_context_new), [`js_context_free`](#js_context_free), [`js_set_time_budget`](#js_set_time_budget), [`js_eval`](#js_eval), [`js_eval_named`](#js_eval_named), [`js_pump_jobs`](#js_pump_jobs), [`js_eval_once`](#js_eval_once), [`js_result_free`](#js_result_free), [`js_set_current_script`](#js_set_current_script), [`js_context_raw`](#js_context_raw), [`js_set_module_host`](#js_set_module_host), [`js_eval_module`](#js_eval_module), [`js_install_realms`](#js_install_realms)
 - **Macros:** [`_POSIX_C_SOURCE`](#_posix_c_source), [`JS_PROFILE_SLOTS`](#js_profile_slots), [`JS_PROFILE_KEY_MAX`](#js_profile_key_max), [`JS_MODULE_URL_MAX`](#js_module_url_max)
 
 ## Type Diagram
@@ -27,6 +27,9 @@ Solid arrows stay in this module, dashed arrows leave it.
 
 ```mermaid
 flowchart LR
+    n_src_js_sandbox_c__js_devtools_enable(["js_devtools_enable"])
+    n_src_js_sandbox_c__js_profile_enable(["js_profile_enable"])
+    n_src_js_sandbox_c__js_throws_enable(["js_throws_enable"])
     n_src_js_sandbox_c__js_limits_default(["js_limits_default"])
     n_src_js_sandbox_c__js_stack_limit_for(["js_stack_limit_for"])
     n_src_js_sandbox_c__js_eval(["js_eval"])
@@ -37,6 +40,8 @@ flowchart LR
     n_src_js_sandbox_c__js_context_new(["js_context_new"])
     n_src_js_sandbox_c__js_eval_module(["js_eval_module"])
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
+    n_src_js_sandbox_c__js_devtools_enable --> n_src_js_sandbox_c__js_profile_enable
+    n_src_js_sandbox_c__js_devtools_enable --> n_src_js_sandbox_c__js_throws_enable
     n_src_js_sandbox_c__js_limits_default --> n_src_js_sandbox_c__js_stack_limit_for
     n_src_js_sandbox_c__js_eval --> n_src_js_sandbox_c__js_eval_named
     n_src_js_sandbox_c__js_eval_named --> n_src_js_sandbox_c__js_validate_source
@@ -103,7 +108,7 @@ struct js_context
 
 ### `js_profile_enable`
 
-`function` | [src/js_sandbox.c:218](../../src/js_sandbox.c#L218)
+`function` | [src/js_sandbox.c:222](../../src/js_sandbox.c#L222)
 
 ```c
 void js_profile_enable(js_context *ctx)
@@ -121,13 +126,15 @@ Once enabled, the interrupt handler samples the running JS stack at most once pe
 
 > **Inherited:** Documentation from [`js_profile_enable`](#js_profile_enable) (include/js_sandbox.h:166).
 
+*Called by:* [`js_devtools_enable`](#js_devtools_enable)
+
 ---
 
 <a id="js_profile_report"></a>
 
 ### `js_profile_report`
 
-`function` | [src/js_sandbox.c:224](../../src/js_sandbox.c#L224)
+`function` | [src/js_sandbox.c:228](../../src/js_sandbox.c#L228)
 
 ```c
 size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n)
@@ -146,11 +153,96 @@ size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n)
 
 ---
 
+<a id="js_throws_enable"></a>
+
+### `js_throws_enable`
+
+`function` | [src/js_sandbox.c:328](../../src/js_sandbox.c#L328)
+
+```c
+void js_throws_enable(js_context *ctx)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+
+*Called by:* [`js_devtools_enable`](#js_devtools_enable)
+
+---
+
+<a id="js_throws_report"></a>
+
+### `js_throws_report`
+
+`function` | [src/js_sandbox.c:334](../../src/js_sandbox.c#L334)
+
+```c
+size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `out` | `char *` |  |  |
+| `cap` | `size_t` |  |  |
+| `top_n` | `size_t` |  |  |
+
+**Returns:** `size_t`
+
+---
+
+<a id="js_devtools_enable"></a>
+
+### `js_devtools_enable`
+
+`function` | [src/js_sandbox.c:372](../../src/js_sandbox.c#L372)
+
+```c
+void js_devtools_enable(js_context *ctx)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+
+*Calls:* [`js_profile_enable`](#js_profile_enable), [`js_throws_enable`](#js_throws_enable)
+
+*Called by:* [`run_js`](src.tab.c.md#run_js)
+
+---
+
+<a id="js_devtools_expose"></a>
+
+### `js_devtools_expose`
+
+`function` | [src/js_sandbox.c:378](../../src/js_sandbox.c#L378)
+
+```c
+js_status js_devtools_expose(js_context *ctx)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+
+**Returns:** `js_status`
+
+---
+
 <a id="js_loc_from_stack"></a>
 
 ### `js_loc_from_stack`
 
-`function` | [src/js_sandbox.c:273](../../src/js_sandbox.c#L273)
+`function` | [src/js_sandbox.c:420](../../src/js_sandbox.c#L420)
 
 ```c
 int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col)
@@ -180,7 +272,7 @@ Recognised frame forms: at <name> (<file>:<line>:<col>) at <file>:<line>:<col> W
 
 ### `undefined`
 
-`function` | [src/js_sandbox.c:365](../../src/js_sandbox.c#L365)
+`function` | [src/js_sandbox.c:512](../../src/js_sandbox.c#L512)
 
 ```c
 * yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx, exc, "stack");
@@ -200,7 +292,7 @@ Recognised frame forms: at <name> (<file>:<line>:<col>) at <file>:<line>:<col> W
 
 ### `js_stack_limit_for`
 
-`function` | [src/js_sandbox.c:392](../../src/js_sandbox.c#L392)
+`function` | [src/js_sandbox.c:539](../../src/js_sandbox.c#L539)
 
 ```c
 size_t js_stack_limit_for(size_t soft_stack)
@@ -228,7 +320,7 @@ Pure.
 
 ### `js_prime_stack_limit`
 
-`function` | [src/js_sandbox.c:413](../../src/js_sandbox.c#L413)
+`function` | [src/js_sandbox.c:560](../../src/js_sandbox.c#L560)
 
 ```c
 void js_prime_stack_limit(void)
@@ -246,7 +338,7 @@ A process that will confine itself with seccomp calls this first: getrlimit is n
 
 ### `js_limits_default`
 
-`function` | [src/js_sandbox.c:415](../../src/js_sandbox.c#L415)
+`function` | [src/js_sandbox.c:562](../../src/js_sandbox.c#L562)
 
 ```c
 js_limits js_limits_default(void)
@@ -262,7 +354,7 @@ js_limits js_limits_default(void)
 
 ### `js_validate_source`
 
-`function` | [src/js_sandbox.c:433](../../src/js_sandbox.c#L433)
+`function` | [src/js_sandbox.c:580](../../src/js_sandbox.c#L580)
 
 ```c
 js_status js_validate_source(const char *src, size_t len, const js_limits *lim)
@@ -286,7 +378,7 @@ js_status js_validate_source(const char *src, size_t len, const js_limits *lim)
 
 ### `js_context_new`
 
-`function` | [src/js_sandbox.c:444](../../src/js_sandbox.c#L444)
+`function` | [src/js_sandbox.c:591](../../src/js_sandbox.c#L591)
 
 ```c
 js_status js_context_new(const js_limits *lim, js_context **out)
@@ -309,7 +401,7 @@ js_status js_context_new(const js_limits *lim, js_context **out)
 
 ### `js_context_free`
 
-`function` | [src/js_sandbox.c:484](../../src/js_sandbox.c#L484)
+`function` | [src/js_sandbox.c:631](../../src/js_sandbox.c#L631)
 
 ```c
 void js_context_free(js_context *ctx)
@@ -333,7 +425,7 @@ Idempotent; safe on NULL and safe to call twice.
 
 ### `js_set_time_budget`
 
-`function` | [src/js_sandbox.c:511](../../src/js_sandbox.c#L511)
+`function` | [src/js_sandbox.c:658](../../src/js_sandbox.c#L658)
 
 ```c
 void js_set_time_budget(js_context *ctx, uint64_t budget_ms)
@@ -358,7 +450,7 @@ Used to enforce a single page-wide budget across a sequence of evaluations (e.g.
 
 ### `js_eval`
 
-`function` | [src/js_sandbox.c:516](../../src/js_sandbox.c#L516)
+`function` | [src/js_sandbox.c:663](../../src/js_sandbox.c#L663)
 
 ```c
 js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)
@@ -385,7 +477,7 @@ js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)
 
 ### `js_eval_named`
 
-`function` | [src/js_sandbox.c:520](../../src/js_sandbox.c#L520)
+`function` | [src/js_sandbox.c:667](../../src/js_sandbox.c#L667)
 
 ```c
 js_status js_eval_named(js_context *ctx, const char *src, size_t len, const char *filename, js_result *res)
@@ -413,7 +505,7 @@ js_status js_eval_named(js_context *ctx, const char *src, size_t len, const char
 
 ### `js_pump_jobs`
 
-`function` | [src/js_sandbox.c:603](../../src/js_sandbox.c#L603)
+`function` | [src/js_sandbox.c:750](../../src/js_sandbox.c#L750)
 
 ```c
 int js_pump_jobs(js_context *ctx, int max_jobs)
@@ -432,7 +524,7 @@ Job exceptions (rejected promises with no handler, etc.) are swallowed -- a job 
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`js_pump_jobs`](#js_pump_jobs) (include/js_sandbox.h:178).
+> **Inherited:** Documentation from [`js_pump_jobs`](#js_pump_jobs) (include/js_sandbox.h:195).
 
 ---
 
@@ -440,7 +532,7 @@ Job exceptions (rejected promises with no handler, etc.) are swallowed -- a job 
 
 ### `js_eval_once`
 
-`function` | [src/js_sandbox.c:622](../../src/js_sandbox.c#L622)
+`function` | [src/js_sandbox.c:769](../../src/js_sandbox.c#L769)
 
 ```c
 js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res)
@@ -465,7 +557,7 @@ js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_res
 
 ### `js_result_free`
 
-`function` | [src/js_sandbox.c:635](../../src/js_sandbox.c#L635)
+`function` | [src/js_sandbox.c:782](../../src/js_sandbox.c#L782)
 
 ```c
 void js_result_free(js_result *res)
@@ -479,7 +571,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 |---|---|---|---|
 | `res` | `js_result *` |  |  |
 
-> **Inherited:** Documentation from [`js_result_free`](#js_result_free) (include/js_sandbox.h:170).
+> **Inherited:** Documentation from [`js_result_free`](#js_result_free) (include/js_sandbox.h:187).
 
 ---
 
@@ -487,7 +579,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `js_set_current_script`
 
-`function` | [src/js_sandbox.c:659](../../src/js_sandbox.c#L659)
+`function` | [src/js_sandbox.c:806](../../src/js_sandbox.c#L806)
 
 ```c
 void js_set_current_script(js_context *ctx, const char *src, const char *type)
@@ -505,7 +597,7 @@ The script element is a fabricated plain object with {src, type, getAttribute} t
 | `src` | `char *` |  |  |
 | `type` | `char *` |  |  |
 
-> **Inherited:** Documentation from [`js_set_current_script`](#js_set_current_script) (include/js_sandbox.h:190).
+> **Inherited:** Documentation from [`js_set_current_script`](#js_set_current_script) (include/js_sandbox.h:207).
 
 ---
 
@@ -513,7 +605,7 @@ The script element is a fabricated plain object with {src, type, getAttribute} t
 
 ### `js_context_raw`
 
-`function` | [src/js_sandbox.c:692](../../src/js_sandbox.c#L692)
+`function` | [src/js_sandbox.c:839](../../src/js_sandbox.c#L839)
 
 ```c
 void *js_context_raw(js_context *ctx)
@@ -535,7 +627,7 @@ void *js_context_raw(js_context *ctx)
 
 ### `js_set_module_host`
 
-`function` | [src/js_sandbox.c:772](../../src/js_sandbox.c#L772)
+`function` | [src/js_sandbox.c:919](../../src/js_sandbox.c#L919)
 
 ```c
 void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host)
@@ -562,7 +654,7 @@ NULL functions uninstall it (every import then fails).
 
 ### `js_eval_module`
 
-`function` | [src/js_sandbox.c:802](../../src/js_sandbox.c#L802)
+`function` | [src/js_sandbox.c:949](../../src/js_sandbox.c#L949)
 
 ```c
 js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name, js_result *res)
@@ -588,7 +680,7 @@ js_status js_eval_module(js_context *ctx, const char *src, size_t len, const cha
 
 ### `js_install_realms`
 
-`function` | [src/js_sandbox.c:964](../../src/js_sandbox.c#L964)
+`function` | [src/js_sandbox.c:1111](../../src/js_sandbox.c#L1111)
 
 ```c
 js_status js_install_realms(js_context *ctx)
@@ -648,7 +740,7 @@ js_status js_install_realms(js_context *ctx)
 
 ### `JS_MODULE_URL_MAX`
 
-`macro` | [src/js_sandbox.c:697](../../src/js_sandbox.c#L697)
+`macro` | [src/js_sandbox.c:844](../../src/js_sandbox.c#L844)
 
 ```c
 #define JS_MODULE_URL_MAX

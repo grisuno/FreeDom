@@ -335,8 +335,8 @@ void jd_process_iframes(js_context *ctx, dom_index *idx,
         char *body = NULL;
         size_t blen = 0;
         char *ctype = NULL;
-        int fr = fn(fetch_ctx, "GET", src, "", 0,
-                    &status, &body, &blen, &ctype);
+        int fr = fn(fetch_ctx, "GET", src, "", 0, NULL,
+                    &status, &body, &blen, &ctype, NULL);
         free(ctype);
 
         if (fr != 0 || body == NULL || blen == 0) {

@@ -75,6 +75,7 @@ typedef enum sf_proxy_type {
 
 /* Longest validator/cache-control value kept (longer ones are dropped, never truncated). */
 #define SF_META_MAX 256u
+#define SF_RESPONSE_HEADERS_MAX 8192u
 
 typedef struct sf_config {
     sf_policy   policy;
@@ -104,6 +105,9 @@ typedef struct sf_config {
      * per-section headers; their absence is a bot signal. dest/mode NULL => navigation
      * defaults ("document"/"navigate"). referrer_url is the current page URL used to
      * compute Sec-Fetch-Site (NULL => "none" for top-level navigation). */
+    const char *extra_headers;   /* page-set XHR/fetch headers, ALREADY filtered by
+                                  * rp_sanitize_request_headers ("Name: value\n" lines); they replace the
+                                  * default Accept / Content-Type of the same name. NULL => none. */
     const char *referrer_url;    /* document URL of the initiator; NULL => top-level nav */
     const char *sec_fetch_dest;  /* NULL => "document"; set to "script"/"image"/"style" etc. */
     const char *sec_fetch_mode;  /* NULL => "navigate"; set to "no-cors"/"cors" etc. */
@@ -144,6 +148,10 @@ typedef struct sf_response {
     char      cache_control[SF_META_MAX];
     char      expires[SF_META_MAX];
     char      date[SF_META_MAX];
+    char     *headers;          /* owned; the final response's header lines ("name: value\n"), minus
+                                 * the status line and any Set-Cookie (HttpOnly/session state never
+                                 * reaches page script), capped at SF_RESPONSE_HEADERS_MAX; NULL if
+                                 * none. What XHR.getAllResponseHeaders / Response.headers expose. */
     char     *content_disposition; /* owned; the raw Content-Disposition header value, or
                                  * NULL if absent. Hostile input (its filename is sanitized
                                  * fail-closed before any disk use; see download.h). */

@@ -24,7 +24,7 @@ flowchart LR
 
 ### `send`
 
-`function` | [src/js_fetch.c:92](../../src/js_fetch.c#L92)
+`function` | [src/js_fetch.c:96](../../src/js_fetch.c#L96)
 
 ```c
 * callbacks fire right after send();
@@ -38,7 +38,7 @@ flowchart LR
 
 ### `task`
 
-`function` | [src/js_fetch.c:188](../../src/js_fetch.c#L188)
+`function` | [src/js_fetch.c:257](../../src/js_fetch.c#L257)
 
 ```c
 * current task (the page never waits on it);
@@ -58,7 +58,7 @@ flowchart LR
 
 ### `jd_install_xhr`
 
-`function` | [src/js_fetch.c:212](../../src/js_fetch.c#L212)
+`function` | [src/js_fetch.c:281](../../src/js_fetch.c#L281)
 
 ```c
 jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)

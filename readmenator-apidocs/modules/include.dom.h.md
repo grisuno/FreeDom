@@ -1,12 +1,12 @@
 # `include/dom.h`
 
-> Source: [include/dom.h:1](../../include/dom.h#L1) | language `h` | coverage 62.1% | [API index](../index.md)
+> Source: [include/dom.h:1](../../include/dom.h#L1) | language `h` | coverage 60.0% | [API index](../index.md)
 
 ## Contents
 
 - **Enums:** [`dom_status`](#dom_status), [`dom_place`](#dom_place)
 - **Type Aliases:** [`dom_node_id`](#dom_node_id), [`dom_index`](#dom_index)
-- **Functions:** [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`count`](#count), [`dom_get_by_class`](#dom_get_by_class), [`dom_matches`](#dom_matches), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`cycle`](#cycle), [`parent`](#parent), [`dom_node_kind`](#dom_node_kind), [`index`](#index), [`length`](#length), [`process`](#process)
+- **Functions:** [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`tree`](#tree), [`count`](#count), [`dom_get_by_class`](#dom_get_by_class), [`dom_matches`](#dom_matches), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`cycle`](#cycle), [`parent`](#parent), [`dom_node_kind`](#dom_node_kind), [`index`](#index), [`length`](#length), [`process`](#process)
 - **Macros:** [`DOM_NODE_NONE`](#dom_node_none), [`DOM_KIND_NONE`](#dom_kind_none), [`DOM_KIND_ELEMENT`](#dom_kind_element), [`DOM_KIND_TEXT`](#dom_kind_text), [`DOM_KIND_COMMENT`](#dom_kind_comment), [`DOM_MAX_HANDLES`](#dom_max_handles)
 
 ## Type Diagram
@@ -42,7 +42,7 @@ typedef enum dom_status
 
 ### `dom_place`
 
-`enum` | [include/dom.h:182](../../include/dom.h#L182)
+`enum` | [include/dom.h:187](../../include/dom.h#L187)
 
 ```c
 typedef enum dom_place
@@ -134,11 +134,32 @@ NULL idx => 0.
 
 ---
 
+<a id="tree"></a>
+
+### `tree`
+
+`function` | [include/dom.h:59](../../include/dom.h#L59)
+
+```c
+* tree (the index only grows, so a node a script removed is still registered and must not be * found);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `grows` | `the index only` |  |  |
+| `found` | `so a node a script removed is still registered and must not be *` |  |  |
+
+**Returns:** `*`
+
+---
+
 <a id="count"></a>
 
 ### `count`
 
-`function` | [include/dom.h:59](../../include/dom.h#L59)
+`function` | [include/dom.h:64](../../include/dom.h#L64)
 
 ```c
 * match count (which may exceed cap, so the caller can size a buffer). */ size_t dom_get_by_tag(const dom_index *idx, const char *tag, dom_node_id *out, size_t cap);
@@ -159,7 +180,7 @@ NULL idx => 0.
 
 ### `dom_get_by_class`
 
-`function` | [include/dom.h:62](../../include/dom.h#L62)
+`function` | [include/dom.h:67](../../include/dom.h#L67)
 
 ```c
 size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);
@@ -182,7 +203,7 @@ size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out,
 
 ### `dom_matches`
 
-`function` | [include/dom.h:91](../../include/dom.h#L91)
+`function` | [include/dom.h:96](../../include/dom.h#L96)
 
 ```c
 int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);
@@ -206,7 +227,7 @@ Nonzero iff node itself matches the selector list (Element.matches).
 
 ### `dom_document_position`
 
-`function` | [include/dom.h:101](../../include/dom.h#L101)
+`function` | [include/dom.h:106](../../include/dom.h#L106)
 
 ```c
 size_t dom_document_position(const dom_index *idx, dom_node_id node);
@@ -229,7 +250,7 @@ size_t dom_document_position(const dom_index *idx, dom_node_id node);
 
 ### `dom_precedes`
 
-`function` | [include/dom.h:104](../../include/dom.h#L104)
+`function` | [include/dom.h:109](../../include/dom.h#L109)
 
 ```c
 int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);
@@ -253,7 +274,7 @@ Nonzero iff a precedes b in document order.
 
 ### `dom_tag_name`
 
-`function` `const` | [include/dom.h:118](../../include/dom.h#L118)
+`function` `const` | [include/dom.h:123](../../include/dom.h#L123)
 
 ```c
 const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);
@@ -279,7 +300,7 @@ Lowercase qualified tag name, or NULL. *len (optional) excludes the NUL.
 
 ### `dom_get_attribute`
 
-`function` `const` | [include/dom.h:121](../../include/dom.h#L121)
+`function` `const` | [include/dom.h:126](../../include/dom.h#L126)
 
 ```c
 const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);
@@ -306,7 +327,7 @@ Attribute value by name, or NULL if absent. *len (optional) excludes NUL.
 
 ### `dom_attribute_names`
 
-`function` | [include/dom.h:128](../../include/dom.h#L128)
+`function` | [include/dom.h:133](../../include/dom.h#L133)
 
 ```c
 size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);
@@ -334,7 +355,7 @@ Writes at most cap entries; returns the total attribute count (which may exceed 
 
 ### `dom_text_content`
 
-`function` `const` | [include/dom.h:133](../../include/dom.h#L133)
+`function` `const` | [include/dom.h:138](../../include/dom.h#L138)
 
 ```c
 const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);
@@ -358,7 +379,7 @@ Concatenated text content of node's subtree (borrowed, valid while idx/doc are a
 
 ### `dom_document_title`
 
-`function` `const` | [include/dom.h:136](../../include/dom.h#L136)
+`function` `const` | [include/dom.h:141](../../include/dom.h#L141)
 
 ```c
 const char *dom_document_title(const dom_index *idx, size_t *len);
@@ -381,7 +402,7 @@ Current document <title> text (borrowed), or NULL. *len excludes the NUL.
 
 ### `cycle`
 
-`function` | [include/dom.h:164](../../include/dom.h#L164)
+`function` | [include/dom.h:169](../../include/dom.h#L169)
 
 ```c
 * Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */ dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child);
@@ -401,7 +422,7 @@ Current document <title> text (borrowed), or NULL. *len excludes the NUL.
 
 ### `parent`
 
-`function` | [include/dom.h:191](../../include/dom.h#L191)
+`function` | [include/dom.h:196](../../include/dom.h#L196)
 
 ```c
 * child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent, dom_place where, dom_node_id ref
@@ -421,7 +442,7 @@ Current document <title> text (borrowed), or NULL. *len excludes the NUL.
 
 ### `dom_node_kind`
 
-`function` | [include/dom.h:207](../../include/dom.h#L207)
+`function` | [include/dom.h:212](../../include/dom.h#L212)
 
 ```c
 int dom_node_kind(const dom_index *idx, dom_node_id node);
@@ -444,7 +465,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `index`
 
-`function` | [include/dom.h:223](../../include/dom.h#L223)
+`function` | [include/dom.h:228](../../include/dom.h#L228)
 
 ```c
 * stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child);
@@ -464,7 +485,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `length`
 
-`function` | [include/dom.h:248](../../include/dom.h#L248)
+`function` | [include/dom.h:253](../../include/dom.h#L253)
 
 ```c
 * length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard cap — OOM from malloc is the only limit. * Invalid handle / NULL out => DOM_ERR_NULL
@@ -484,7 +505,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `process`
 
-`function` | [include/dom.h:255](../../include/dom.h#L255)
+`function` | [include/dom.h:260](../../include/dom.h#L260)
 
 ```c
 * modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next mutation of that node. */ const void *dom_native_node(const dom_index *idx, dom_node_id n
@@ -520,7 +541,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `DOM_KIND_NONE`
 
-`macro` | [include/dom.h:198](../../include/dom.h#L198)
+`macro` | [include/dom.h:203](../../include/dom.h#L203)
 
 ```c
 #define DOM_KIND_NONE
@@ -536,7 +557,7 @@ node-level navigation or creation reaches them. Element-only functions reject th
 
 ### `DOM_KIND_ELEMENT`
 
-`macro` | [include/dom.h:199](../../include/dom.h#L199)
+`macro` | [include/dom.h:204](../../include/dom.h#L204)
 
 ```c
 #define DOM_KIND_ELEMENT
@@ -548,7 +569,7 @@ node-level navigation or creation reaches them. Element-only functions reject th
 
 ### `DOM_KIND_TEXT`
 
-`macro` | [include/dom.h:200](../../include/dom.h#L200)
+`macro` | [include/dom.h:205](../../include/dom.h#L205)
 
 ```c
 #define DOM_KIND_TEXT
@@ -562,7 +583,7 @@ the DOM nodeType numbers
 
 ### `DOM_KIND_COMMENT`
 
-`macro` | [include/dom.h:201](../../include/dom.h#L201)
+`macro` | [include/dom.h:206](../../include/dom.h#L206)
 
 ```c
 #define DOM_KIND_COMMENT
@@ -574,7 +595,7 @@ the DOM nodeType numbers
 
 ### `DOM_MAX_HANDLES`
 
-`macro` | [include/dom.h:204](../../include/dom.h#L204)
+`macro` | [include/dom.h:209](../../include/dom.h#L209)
 
 ```c
 #define DOM_MAX_HANDLES

@@ -126,7 +126,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
                $(BUILD_DIR)/test_css_index $(BUILD_DIR)/test_box_blur \
                $(BUILD_DIR)/test_text_case $(BUILD_DIR)/test_css_computed
 
-.PHONY: parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-wst fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
+.PHONY: parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -665,6 +665,14 @@ fuzz-wst: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
 	  $(FUZZ_DIR)/fuzz_web_storage.c $(SRC_DIR)/web_storage.c -o $(BUILD_DIR)/fuzz_web_storage
 	./$(BUILD_DIR)/fuzz_web_storage -max_total_time=60 -rss_limit_mb=2048
+
+# Coverage-guided fuzzing of the page-supplied XHR/fetch request header filter
+# (rp_sanitize_request_headers, spec/request_headers.md): well-formed, capped, no forbidden or
+# identity header, no CR/LF injection, idempotent.
+fuzz-rqh: $(PSL_OBJ) | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_request_headers.c $(SRC_DIR)/request_policy.c $(PSL_OBJ) -o $(BUILD_DIR)/fuzz_request_headers
+	./$(BUILD_DIR)/fuzz_request_headers -max_total_time=45 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of js_geom: decode/aggregate/encode of the layout
 # geometry table with hostile words and a possibly cyclic parent function.
