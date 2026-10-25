@@ -4,7 +4,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 ## Suggested
 
-### Q: What does browser_ui.c depend on, and what depends on it? (54 connections)
+### Q: What does browser_ui.c depend on, and what depends on it? (55 connections)
 
 - Status: unanswered
 

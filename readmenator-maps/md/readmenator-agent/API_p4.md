@@ -1,6 +1,17 @@
 # API (page 4 of 11)
 Previous: [API_p3.md](API_p3.md)
 
+## include/css_vars.h
+Imported by: `src/css.c`, `src/css_vars.c`, `src/page_view.c`, `tests/test_css.c`, `tests/test_css_vars.c`
+- `name` (function) `include/css_vars.h:62` `* name (last declaration wins). Returns 1 when stored, 0 when dropped: a name that * is not "--" + at least one...`
+- `cvr_get` (function) `include/css_vars.h:69` `const char *cvr_get(const cvr_table *t, const char *name, size_t nlen);` -- The stored value for name[0,nlen), or NULL.
+- `cvr_count` (function) `include/css_vars.h:71` `size_t cvr_count(const cvr_table *t);`
+- `cvr_reset` (function) `include/css_vars.h:75` `void cvr_reset(cvr_table *t);` -- Frees every stored string and empties the table, keeping its arrays for reuse. * NULL-safe.
+- `cvr_free` (function) `include/css_vars.h:78` `void cvr_free(cvr_table *t);` -- Frees every stored string and empties the table, keeping its arrays for reuse. * NULL-safe. void cvr_reset(cvr_table...
+- `cvr_collect_decls` (function) `include/css_vars.h:83` `void cvr_collect_decls(cvr_table *t, const char *s, size_t a, size_t b);` -- Scans the declaration span s[a,b) for `--ident : value` pairs and stores each (a trailing !important is stripped).
+- `declaration` (function) `include/css_vars.h:91` `* then drops the whole declaration (CSS Variables 1: invalid at computed time). */ int cvr_resolve(const char *val...`
+- `cvr_lookup` (function) `include/css_vars.h:96` `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen);` -- The value name[0,nlen) has in scope sc (same lookup order as cvr_resolve), or * NULL.
+
 ## include/data_url.h
 Imported by: `gui/browser_ui.c`, `src/data_url.c`, `src/render_doc.c`, `src/render_policy.c`, `src/tab.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_data_url.c`
 - `allocation` (function) `include/data_url.h:21` `* * du_base64_payload does no allocation (it only slices the caller's url string);`
@@ -46,6 +57,17 @@ Imported by: `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
 - `literal` (function) `include/download.h:47` `* a static string literal (never freed). */ const char *dl_ext_for_type(const char *content_type);`
 - `DL_ERR_OVERFLOW` (function) `include/download.h:56` `* DL_ERR_OVERFLOW (out left empty). url/content_disposition NULL => absent. */ dl_status dl_pick_name(const char...`
 - `basename` (function) `include/download.h:61` `* sanitized basename (a name still containing '/' is rejected => DL_ERR_OVERFLOW, * so the path can never escape...`
+
+## include/fb_panes.h
+Imported by: `gui/browser_ui.c`, `src/fb_panes.c`, `src/freedom.c`, `tests/test_fb_panes.c`, `tests/test_js_dom.c`
+- `fbp_tab_label` (function) `include/fb_panes.h:30` `const char *fbp_tab_label(int tab);` -- typedef enum fbp_tab { FBP_CONSOLE = 0, FBP_HTML, FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_COUNT } fbp_tab; #define...
+- `fbp_tab_from_name` (function) `include/fb_panes.h:33` `int fbp_tab_from_name(const char *name);` -- FBP_HTML, FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_COUNT } fbp_tab; #define FBP_SELECTOR_MAX 256   /* bytes of the user's...
+- `fbp_tab_wrap` (function) `include/fb_panes.h:36` `int fbp_tab_wrap(int tab, int dir);` -- FBP_NET, FBP_COUNT } fbp_tab; #define FBP_SELECTOR_MAX 256   /* bytes of the user's argument (selector / index /...
+- `fbp_tab_span` (function) `include/fb_panes.h:39` `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);` -- #define FBP_SELECTOR_MAX 256   /* bytes of the user's argument (selector / index / filter) #define FBP_EXPR_MAX...
+- `fbp_tab_at` (function) `include/fb_panes.h:42` `int fbp_tab_at(double x, double cell_w, double pad_cells);` -- /* Label of a tab; an out-of-range id is the console.
+- `fbp_is_pane` (function) `include/fb_panes.h:45` `int fbp_is_pane(int tab);` -- /* Tab named `name` (case-insensitive), or -1 when unknown / NULL. int fbp_tab_from_name(const char *name); /* The...
+- `fbp_js_quote` (function) `include/fb_panes.h:49` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);` -- JS string literal for s[0,n) (double-quoted).
+- `fbp_expr` (function) `include/fb_panes.h:53` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);` -- The expression that fills `tab`'s panel for argument sel[0,n); NUL-terminated in out. * Returns its length, or 0 for...
 
 ## include/flex_layout.h
 Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
@@ -244,15 +266,17 @@ Imported by: `gui/browser_ui.c`, `include/webcaps.h`, `src/freedom.c`, `src/js_p
 
 ## include/js_sandbox.h
 Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_sandbox.c`
-- `js_context_free` (function) `include/js_sandbox.h:86` `void js_context_free(js_context *ctx);` -- Creates an isolated, hardened sandbox (memory/stack/time limits armed; no I/O modules). lim == NULL =>...
-- `loaded` (function) `include/js_sandbox.h:114` `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...`
-- `js_set_module_host` (function) `include/js_sandbox.h:119` `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` -- Installs the host every static import and dynamic import() goes through. host must * outlive ctx.
-- `js_loc_from_stack` (function) `include/js_sandbox.h:140` `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` -- Pure parser: extracts the throw site (file, line, column) from the FIRST frame of a QuickJS .stack string.
-- `js_set_time_budget` (function) `include/js_sandbox.h:148` `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` -- Adjusts the wall-clock budget armed on each subsequent js_eval.
-- `js_result_free` (function) `include/js_sandbox.h:151` `void js_result_free(js_result *res);` -- Adjusts the wall-clock budget armed on each subsequent js_eval.
-- `js_pump_jobs` (function) `include/js_sandbox.h:159` `int js_pump_jobs(js_context *ctx, int max_jobs);` -- Runs up to max_jobs pending microtasks/jobs (promise reactions queued by the last eval), under the context's current...
-- `handle` (function) `include/js_sandbox.h:162` `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
-- `js_set_current_script` (function) `include/js_sandbox.h:171` `void js_set_current_script(js_context *ctx, const char *src, const char *type);` -- Sets document.currentScript on the global object so external scripts can read their own src / type / data-*...
+- `js_stack_limit_for` (function) `include/js_sandbox.h:75` `size_t js_stack_limit_for(size_t soft_stack);` -- Engine stack cap for a process whose soft stack limit is `soft_stack` bytes (0 = unknown): * 75 % of it (the rest is...
+- `js_prime_stack_limit` (function) `include/js_sandbox.h:79` `void js_prime_stack_limit(void);` -- Reads the process stack limit now.
+- `js_context_free` (function) `include/js_sandbox.h:96` `void js_context_free(js_context *ctx);` -- Creates an isolated, hardened sandbox (memory/stack/time limits armed; no I/O modules). lim == NULL =>...
+- `loaded` (function) `include/js_sandbox.h:124` `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...`
+- `js_set_module_host` (function) `include/js_sandbox.h:129` `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` -- Installs the host every static import and dynamic import() goes through. host must * outlive ctx.
+- `js_loc_from_stack` (function) `include/js_sandbox.h:150` `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` -- Pure parser: extracts the throw site (file, line, column) from the FIRST frame of a QuickJS .stack string.
+- `js_set_time_budget` (function) `include/js_sandbox.h:158` `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` -- Adjusts the wall-clock budget armed on each subsequent js_eval.
+- `js_result_free` (function) `include/js_sandbox.h:161` `void js_result_free(js_result *res);` -- Adjusts the wall-clock budget armed on each subsequent js_eval.
+- `js_pump_jobs` (function) `include/js_sandbox.h:169` `int js_pump_jobs(js_context *ctx, int max_jobs);` -- Runs up to max_jobs pending microtasks/jobs (promise reactions queued by the last eval), under the context's current...
+- `handle` (function) `include/js_sandbox.h:172` `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
+- `js_set_current_script` (function) `include/js_sandbox.h:181` `void js_set_current_script(js_context *ctx, const char *src, const char *type);` -- Sets document.currentScript on the global object so external scripts can read their own src / type / data-*...
 
 ## include/js_trusted.h
 Depends on: `include/js_dom.h`, `include/js_sandbox.h`
@@ -460,39 +484,6 @@ Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/re
 - `rp_host_of` (function) `include/request_policy.h:30` `int rp_host_of(const char *url, char *out, size_t out_size);` -- Lowercased host of an absolute URL into out.
 - `rp_site_of` (function) `include/request_policy.h:34` `int rp_site_of(const char *host, char *out, size_t out_size);` -- Registrable domain ("site") of a host into out (simplified public-suffix * rule).
 - `rp_same_site` (function) `include/request_policy.h:37` `int rp_same_site(const char *top_level_url, const char *request_url);` -- Registrable domain ("site") of a host into out (simplified public-suffix * rule).
-
-## include/secure_fetch.h
-Depends on: `include/anti_fp.h`
-Imported by: `gui/browser_ui.c`, `include/cached_fetch.h`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
-- `validators` (function) `include/secure_fetch.h:18` `* The security logic lives in pure validators (no I/O);`
-- `sf_global_init` (function) `include/secure_fetch.h:219` `void sf_global_init(void);` -- Initialises process-global transport state (libcurl/OpenSSL) once, from the main thread, before any concurrent...
-- `EXCLUDED` (function) `include/secure_fetch.h:225` `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
-- `sf_cookie_put` (function) `include/secure_fetch.h:232` `void sf_cookie_put(const char *url, const char *namevalue);` -- Injects a JS-set cookie ("name=value") into the shared jar, scoped to url's host, as if it arrived via Set-Cookie...
-- `sf_cookie_line_matches` (function) `include/secure_fetch.h:237` `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` -- Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecure\\t expiry\\tname\\tvalue"); if...
-- `sf_user_agent_or_default` (function) `include/secure_fetch.h:246` `const char *sf_user_agent_or_default(const char *ua);` -- Returns ua when it is a non-empty string, else SF_DEFAULT_USER_AGENT.
-- `sf_accept_language_or_default` (function) `include/secure_fetch.h:250` `const char *sf_accept_language_or_default(const char *lang);` -- As sf_user_agent_or_default for Accept-Language.
-- `sf_impersonate_kex_groups` (function) `include/secure_fetch.h:254` `const char *sf_impersonate_kex_groups(void);` -- The interim impersonation ClientHello strings (pure; single source of truth so the * shaping is unit-testable...
-- `sf_impersonate_tls13_ciphers` (function) `include/secure_fetch.h:255` `const char *sf_impersonate_tls13_ciphers(void);`
-- `skipped` (function) `include/secure_fetch.h:275` `* skipped (a classical key exchange is accepted);`
-- `sf_is_redirect_code` (function) `include/secure_fetch.h:286` `int sf_is_redirect_code(long http_code);` -- Enforces the full connection policy in order: TLS version, then KE group, then certificate chain.
-- `sf_header_value` (function) `include/secure_fetch.h:297` `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);` -- Generic header-line reader for the cache validators: when header_line is `name:` (matched case-insensitively, name...
-- `bits` (function) `include/secure_fetch.h:334` `* *flags receives CURLWS_* bits (text/binary/close/cont);`
-- `sf_ws_fd` (function) `include/secure_fetch.h:341` `int sf_ws_fd(const sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
-- `sf_ws_close` (function) `include/secure_fetch.h:344` `void sf_ws_close(sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
-- `connection` (function) `include/secure_fetch.h:348` `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
-- `sf_get` (function) `include/secure_fetch.h:357` `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
-- `sf_response_free` (function) `include/secure_fetch.h:368` `void sf_response_free(sf_response *resp);` -- Performs an HTTPS POST under the given policy, sending body (body_len bytes) with the given Content-Type.
-- `exhausted` (function) `include/secure_fetch.h:379` `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
-- `sf_rcache_put` (function) `include/secure_fetch.h:392` `int sf_rcache_put(const char *from, const char *to, time_t now);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
-- `sf_rcache_get` (function) `include/secure_fetch.h:393` `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
-- `sf_rcache_clear` (function) `include/secure_fetch.h:394` `void sf_rcache_clear(void);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
-- `sf_rcache_set_backing` (function) `include/secure_fetch.h:403` `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
-
-## include/shm_slots.h
-Imported by: `gui/browser_ui.c`, `tests/test_shm_slots.c`
-- `ss_init` (function) `include/shm_slots.h:24` `static inline void ss_init(ss_state *s)`
-- `ss_committed` (function) `include/shm_slots.h:41` `static inline void ss_committed(ss_state *s, int i)` -- Chooses the slot to paint into: the current one if free, else the other free one.
-- `ss_released` (function) `include/shm_slots.h:49` `static inline int ss_released(ss_state *s, int i)` -- if (!s->busy[i]) { s->back = i; return i; } } return -1; } /* The painted slot was attached and committed. static...
 
 
 Next: [API_p5.md](API_p5.md)

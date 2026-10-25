@@ -23,6 +23,7 @@
 #include "js_geom.h"
 #include "web_storage.h"
 #include "js_sandbox.h"
+#include "fb_panes.h"
 #include "url.h"
 
 static const char HTML[] =
@@ -443,6 +444,26 @@ static void test_element_nodevalue_is_null(void **state) {
     EXPECT(f, "String(document.body.nodeValue)", "null");
     EXPECT(f, "document.createElement('span').nodeName+document.body.nodeName", "SPANBODY");
     EXPECT(f, "document.createTextNode('z').nodeValue", "z");
+}
+
+/* localName/namespaceURI/prefix of an element (DOM 4.9): libraries key custom-element and
+ * framework lookups on localName; undefined made customElements.whenDefined reject. */
+/* element.dataset is a DOMStringMap (HTML 3.2.6.6): Facebook's bootloader feature-tests
+ * `el.dataset instanceof window.DOMStringMap`; the missing global made it throw. */
+static void test_dataset_is_a_domstringmap(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof DOMStringMap", "function");
+    EXPECT(f, "var b=document.getElementById('go'); b.setAttribute('data-foo-bar','1');"
+              "[b.dataset instanceof DOMStringMap, b.dataset.fooBar, ({}) instanceof DOMStringMap].join()", "true,1,false");
+    EXPECT(f, "try{ new DOMStringMap(); 'no' }catch(e){ e.name }", "TypeError");
+}
+
+static void test_element_local_name_namespace(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "document.createElement('span').localName+'|'+document.body.localName", "span|body");
+    EXPECT(f, "document.createElement('x-y').localName", "x-y");
+    EXPECT(f, "document.createElement('p').namespaceURI", "http://www.w3.org/1999/xhtml");
+    EXPECT(f, "String(document.createElement('p').prefix)", "null");
 }
 
 static void test_unhandled_rejection_event(void **state) {
@@ -2123,6 +2144,80 @@ static void test_repl_rules_lists_matching_rules_by_cascade(void **state) {
     EXPECT(f, "typeof globalThis.__replCss", "undefined");
 }
 
+/* The Freebug panels (spec/fb_panes.md) run against the real engine: each tab's expression
+ * returns the text its pane shows, from the same REPL command-line API the console uses. */
+static void run_pane(fixture *f, int tab, const char *arg, js_result *r) {
+    char expr[FBP_EXPR_MAX];
+    assert_true(fbp_expr(tab, arg, strlen(arg), expr, sizeof expr) > 0);
+    assert_int_equal(run(f, expr, r), JS_OK);
+    assert_non_null(r->value);
+}
+
+static void test_freebug_html_pane_outlines_the_dom(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_install_repl_api(f->ctx), JD_OK);
+    js_result r;
+    run_pane(f, FBP_HTML, "#main", &r);
+    assert_non_null(strstr(r.value, "<div id=\"main\" class=\"container box\">\n"));
+    assert_non_null(strstr(r.value, "\n  <p class=\"text\">\n    \"Hello\"\n"));
+    assert_non_null(strstr(r.value, "<button id=\"go\" class=\"btn\">"));
+    js_result_free(&r);
+    run_pane(f, FBP_HTML, "#absent", &r);
+    assert_string_equal(r.value, "(no element matches #absent)");
+    js_result_free(&r);
+    run_pane(f, FBP_HTML, "", &r);                       /* empty = the whole document */
+    assert_true(strncmp(r.value, "<html>", 6) == 0);
+    js_result_free(&r);
+}
+
+static void test_freebug_css_pane_lists_rules_computed_and_box(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_install_repl_api(f->ctx), JD_OK);
+    EXPECT(f, "var s=document.createElement('style');s.textContent='.btn{color:red} #go{color:blue}';"
+              "document.head.appendChild(s); 1", "1");
+    js_result r;
+    run_pane(f, FBP_CSS, "#go", &r);
+    assert_non_null(strstr(r.value, "== matched rules (2) =="));
+    assert_non_null(strstr(r.value, "#go  [style#1]  specificity 1,0,0\n    color: blue"));
+    assert_non_null(strstr(r.value, "~ color: red"));      /* the losing declaration is marked */
+    assert_non_null(strstr(r.value, "== computed =="));
+    assert_non_null(strstr(r.value, "== box =="));
+    js_result_free(&r);
+    run_pane(f, FBP_CSS, "#absent", &r);
+    assert_string_equal(r.value, "(no element matches #absent)");
+    js_result_free(&r);
+}
+
+static void test_freebug_script_pane_lists_and_numbers_source(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_install_repl_api(f->ctx), JD_OK);
+    EXPECT(f, "var a=document.createElement('script');a.textContent='var x=1;\\nvar y=2;';"
+              "document.body.appendChild(a); 1", "1");
+    js_result r;
+    run_pane(f, FBP_SCRIPT, "", &r);
+    assert_non_null(strstr(r.value, "1. inline, 17 chars"));
+    js_result_free(&r);
+    run_pane(f, FBP_SCRIPT, "1", &r);
+    assert_non_null(strstr(r.value, "    1  var x=1;\n    2  var y=2;"));
+    js_result_free(&r);
+    run_pane(f, FBP_SCRIPT, "9", &r);
+    assert_string_equal(r.value, "(no script #9)");
+    js_result_free(&r);
+}
+
+static void test_freebug_net_pane_empty_and_selector_is_data(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_install_repl_api(f->ctx), JD_OK);
+    js_result r;
+    run_pane(f, FBP_NET, "", &r);
+    assert_string_equal(r.value, "(no requests)");
+    js_result_free(&r);
+    /* A selector that tries to break out of its literal is only ever a string. */
+    run_pane(f, FBP_HTML, "\"});globalThis.__pwn=1;(\"", &r);
+    js_result_free(&r);
+    EXPECT(f, "typeof globalThis.__pwn", "undefined");
+}
+
 static void test_repl_api_inspect_and_event_listeners(void **state) {
     fixture *f = (fixture *)*state;
     assert_int_equal(jd_install_repl_api(f->ctx), JD_OK);
@@ -3106,6 +3201,8 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_unhandled_rejection_event, setup, teardown),
         cmocka_unit_test_setup_teardown(test_template_content_is_a_real_fragment, setup, teardown),
         cmocka_unit_test_setup_teardown(test_element_nodevalue_is_null, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_element_local_name_namespace, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_dataset_is_a_domstringmap, setup, teardown),
         cmocka_unit_test_setup_teardown(test_attributes_are_iterable, setup, teardown),
         cmocka_unit_test_setup_teardown(test_document_parentnode_surface, setup, teardown),
         cmocka_unit_test_setup_teardown(test_performance_observer_supported_entry_types, setup, teardown),
@@ -3205,6 +3302,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_io_real_follows_scroll, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ro_real_reports_size_changes, setup, teardown),
         cmocka_unit_test_setup_teardown(test_repl_api_is_repl_only_and_nondestructive, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_freebug_html_pane_outlines_the_dom, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_freebug_css_pane_lists_rules_computed_and_box, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_freebug_script_pane_lists_and_numbers_source, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_freebug_net_pane_empty_and_selector_is_data, setup, teardown),
         cmocka_unit_test_setup_teardown(test_repl_api_inspect_and_event_listeners, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_interfaces_and_events, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_dommatrix_and_imagedata, setup, teardown),

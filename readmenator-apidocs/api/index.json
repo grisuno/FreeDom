@@ -2,49 +2,49 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 204,
-  "entities": 3529,
+  "modules": 206,
+  "entities": 3564,
   "languages": {
-   "c": 95,
-   "h": 93,
+   "c": 96,
+   "h": 94,
    "py": 12,
    "sh": 4
   },
   "kinds": {
    "constant": 23,
-   "enum": 155,
-   "function": 1810,
-   "macro": 935,
+   "enum": 156,
+   "function": 1830,
+   "macro": 946,
    "method": 23,
-   "module": 204,
-   "struct": 241,
+   "module": 206,
+   "struct": 242,
    "type_alias": 131,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 82,
+  "skipped_files": 83,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1378,
-   "total": 3499,
-   "percent": 39.4
+   "documented": 1403,
+   "total": 3534,
+   "percent": 39.7
   },
   "by_kind": {
    "enum": {
     "documented": 80,
-    "total": 155,
-    "percent": 51.6
+    "total": 156,
+    "percent": 51.3
    },
    "function": {
-    "documented": 766,
-    "total": 1810,
-    "percent": 42.3
+    "documented": 786,
+    "total": 1830,
+    "percent": 43.0
    },
    "macro": {
-    "documented": 300,
-    "total": 935,
+    "documented": 304,
+    "total": 946,
     "percent": 32.1
    },
    "method": {
@@ -54,13 +54,13 @@
    },
    "module": {
     "documented": 30,
-    "total": 204,
-    "percent": 14.7
+    "total": 206,
+    "percent": 14.6
    },
    "struct": {
-    "documented": 105,
-    "total": 241,
-    "percent": 43.6
+    "documented": 106,
+    "total": 242,
+    "percent": 43.8
    },
    "type_alias": {
     "documented": 97,
@@ -85,9 +85,9 @@
     "percent": 100.0
    },
    "gui/browser_ui.c": {
-    "documented": 81,
-    "total": 244,
-    "percent": 33.2
+    "documented": 83,
+    "total": 247,
+    "percent": 33.6
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -259,6 +259,11 @@
     "total": 9,
     "percent": 11.1
    },
+   "include/fb_panes.h": {
+    "documented": 9,
+    "total": 12,
+    "percent": 75.0
+   },
    "include/flex_layout.h": {
     "documented": 23,
     "total": 43,
@@ -360,9 +365,9 @@
     "percent": 42.9
    },
    "include/js_sandbox.h": {
-    "documented": 14,
-    "total": 25,
-    "percent": 56.0
+    "documented": 17,
+    "total": 29,
+    "percent": 58.6
    },
    "include/js_trusted.h": {
     "documented": 6,
@@ -704,6 +709,11 @@
     "total": 6,
     "percent": 16.7
    },
+   "src/fb_panes.c": {
+    "documented": 8,
+    "total": 9,
+    "percent": 88.9
+   },
    "src/flex_layout.c": {
     "documented": 9,
     "total": 26,
@@ -850,9 +860,9 @@
     "percent": 50.0
    },
    "src/js_sandbox.c": {
-    "documented": 10,
-    "total": 23,
-    "percent": 43.5
+    "documented": 12,
+    "total": 25,
+    "percent": 48.0
    },
    "src/js_trusted.c": {
     "documented": 5,
@@ -866,7 +876,7 @@
    },
    "src/local_store.c": {
     "documented": 5,
-    "total": 314,
+    "total": 318,
     "percent": 1.6
    },
    "src/media_decoder.c": {
@@ -885,9 +895,9 @@
     "percent": 33.3
    },
    "src/page_view.c": {
-    "documented": 59,
-    "total": 136,
-    "percent": 43.4
+    "documented": 60,
+    "total": 137,
+    "percent": 43.8
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -1110,7 +1120,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 244
+   "entities": 247
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1283,6 +1293,11 @@
    "entities": 9
   },
   {
+   "uid": "include/fb_panes.h",
+   "path": "modules/include.fb_panes.h.jsonl",
+   "entities": 12
+  },
+  {
    "uid": "include/flex_layout.h",
    "path": "modules/include.flex_layout.h.jsonl",
    "entities": 43
@@ -1385,7 +1400,7 @@
   {
    "uid": "include/js_sandbox.h",
    "path": "modules/include.js_sandbox.h.jsonl",
-   "entities": 25
+   "entities": 29
   },
   {
    "uid": "include/js_trusted.h",
@@ -1728,6 +1743,11 @@
    "entities": 6
   },
   {
+   "uid": "src/fb_panes.c",
+   "path": "modules/src.fb_panes.c.jsonl",
+   "entities": 9
+  },
+  {
    "uid": "src/flex_layout.c",
    "path": "modules/src.flex_layout.c.jsonl",
    "entities": 26
@@ -1875,7 +1895,7 @@
   {
    "uid": "src/js_sandbox.c",
    "path": "modules/src.js_sandbox.c.jsonl",
-   "entities": 23
+   "entities": 25
   },
   {
    "uid": "src/js_trusted.c",
@@ -1890,7 +1910,7 @@
   {
    "uid": "src/local_store.c",
    "path": "modules/src.local_store.c.jsonl",
-   "entities": 314
+   "entities": 318
   },
   {
    "uid": "src/media_decoder.c",
@@ -1910,7 +1930,7 @@
   {
    "uid": "src/page_view.c",
    "path": "modules/src.page_view.c.jsonl",
-   "entities": 136
+   "entities": 137
   },
   {
    "uid": "src/pdf_export.c",
@@ -2115,7 +2135,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2122
+  "total": 2132
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

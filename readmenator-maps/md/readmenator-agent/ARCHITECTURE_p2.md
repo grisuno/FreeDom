@@ -2,6 +2,11 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_page_view.c` -> `include/flex_layout.h`
+- `tests/test_page_view.c` -> `include/html_parse.h`
+- `tests/test_page_view.c` -> `include/page_view.h`
+- `tests/test_page_view.c` -> `include/webfont.h`
+- `tests/test_pdf_export.c` -> `include/pdf_export.h`
 - `tests/test_perf_trace.c` -> `include/perf_trace.h`
 - `tests/test_pq_seal.c` -> `include/pq_seal.h`
 - `tests/test_prefetch.c` -> `include/prefetch.h`
@@ -76,6 +81,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/dom.h` -> stddef.h, stdint.h
 - `include/dom_debug.h` -> stddef.h
 - `include/download.h` -> stddef.h
+- `include/fb_panes.h` -> stddef.h
 - `include/flex_layout.h` -> stddef.h
 - `include/form.h` -> stddef.h
 - `include/freebug.h` -> stddef.h
@@ -153,6 +159,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/dom.c` -> lexbor/html/html.h, stdint.h, stdlib.h, string.h
 - `src/dom_debug.c` -> stdarg.h, stddef.h, stdio.h
 - `src/download.c` -> ctype.h, string.h
+- `src/fb_panes.c` -> stdio.h, string.h
 - `src/flex_layout.c` -> stddef.h, string.h
 - `src/form.c` -> string.h
 - `src/freebug.c` -> stdlib.h, string.h
@@ -180,7 +187,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/js_location.c` -> quickjs.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/js_location_internal.h` -> quickjs.h
 - `src/js_policy.c` -> string.h
-- `src/js_sandbox.c` -> malloc.h, quickjs.h, stdlib.h, string.h, time.h
+- `src/js_sandbox.c` -> malloc.h, quickjs.h, stdlib.h, string.h, sys/resource.h, time.h
 - `src/js_trusted.c` -> quickjs.h, stdint.h, stdlib.h, string.h
 - `src/link_nav.c` -> string.h
 - `src/local_store.c` -> openssl/core_names.h, openssl/crypto.h, openssl/evp.h, openssl/kdf.h, openssl/params.h, openssl/rand.h, stdlib.h, string.h
@@ -239,6 +246,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_dom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, time.h
 - `tests/test_dom_debug.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_download.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_fb_panes.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_flex_layout.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
 - `tests/test_form.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_frame_clock.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h

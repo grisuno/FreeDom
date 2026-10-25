@@ -1,10 +1,10 @@
 # src: tab
 
-*Community 2 | 45 files | cohesion 0.70*
+*Community 2 | 45 files | cohesion 0.69*
 
 ## Definition
 
-This community groups 45 file(s) rooted at `src` with dominant language c (cohesion 0.70). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (221 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
+This community groups 45 file(s) rooted at `src` with dominant language c (cohesion 0.69). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (228 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
 
 ## Files
 
@@ -39,7 +39,7 @@ This community groups 45 file(s) rooted at `src` with dominant language c (cohes
 | `tests/test_dom.c` | c | testing | 42 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
-| `tests/test_js_dom.c` | c | testing | 221 | no |
+| `tests/test_js_dom.c` | c | testing | 228 | no |
 | `tests/test_js_env.c` | c | testing | 27 | no |
 | `tests/test_js_geom.c` | c | testing | 11 | no |
 
@@ -82,7 +82,7 @@ This community groups 45 file(s) rooted at `src` with dominant language c (cohes
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 103
-- Cross-boundary resolved imports (EXTRACTED): 45
+- Cross-boundary resolved imports (EXTRACTED): 46
 
 ## Connections
 
@@ -98,14 +98,13 @@ This community groups 45 file(s) rooted at `src` with dominant language c (cohes
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
 - [dataflow UNCHECKED_ALLOC] `src/js_events.c:30` `jd_click_state_new` `s`: Result of allocator stored in `s` is never checked against NULL.
 - [dataflow DEAD_STORE] `src/js_geom.c:71` `unite` `w`: `w` assigned at line 71 but never read afterwards.
-- [dataflow DEAD_STORE] `src/link_nav.c:58` `ci_prefix` `hash`: `hash` assigned at line 58 but never read afterwards.
 
 ## Open Questions
 
 - Why do 41 file(s) lack file-level docs (e.g. `include/dom.h`)? What purpose do they serve?
 - Can the cycle `include/js_dom.h` -> `include/js_location.h` be broken with an interface?
 - What would break if the most connected file in src: tab changed?
-- Should src: tab be split, given cohesion 0.70?
+- Should src: tab be split, given cohesion 0.69?
 
 ## Sources
 

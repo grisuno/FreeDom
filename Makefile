@@ -109,7 +109,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_identity $(BUILD_DIR)/test_download $(BUILD_DIR)/test_wl_display \
              $(BUILD_DIR)/test_webcaps $(BUILD_DIR)/test_compositor \
              $(BUILD_DIR)/test_css $(BUILD_DIR)/test_css_drops \
-             $(BUILD_DIR)/test_freebug \
+             $(BUILD_DIR)/test_freebug $(BUILD_DIR)/test_fb_panes \
              $(BUILD_DIR)/test_text_shape $(BUILD_DIR)/test_hostedit \
              $(BUILD_DIR)/test_dom_debug $(BUILD_DIR)/test_prefetch \
              $(BUILD_DIR)/test_prefs $(BUILD_DIR)/test_profile \
@@ -227,7 +227,7 @@ $(BUILD_DIR)/test_dom: $(TEST_DIR)/test_dom.c $(BUILD_DIR)/dom.o $(BUILD_DIR)/ht
 $(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/dom.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_js_dom: $(TEST_DIR)/test_js_dom.c $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
+$(BUILD_DIR)/test_js_dom: $(TEST_DIR)/test_js_dom.c $(BUILD_DIR)/fb_panes.o $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) -isystem $(QJS_DIR) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_os_sandbox: $(TEST_DIR)/test_os_sandbox.c $(BUILD_DIR)/os_sandbox.o | $(BUILD_DIR)
@@ -498,6 +498,10 @@ $(BUILD_DIR)/test_identity: $(TEST_DIR)/test_identity.c $(BUILD_DIR)/identity.o 
 $(BUILD_DIR)/test_freebug: $(TEST_DIR)/test_freebug.c $(BUILD_DIR)/freebug.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Pure tab model + panel expressions of the Freebug devtools window. No I/O deps.
+$(BUILD_DIR)/test_fb_panes: $(TEST_DIR)/test_fb_panes.c $(BUILD_DIR)/fb_panes.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 # HarfBuzz text shaper (trusted-side painter helper). Shaped text is hostile;
 # fonts are local. Links cairo + harfbuzz + freetype + fontconfig.
 $(BUILD_DIR)/test_text_shape: $(TEST_DIR)/test_text_shape.c $(BUILD_DIR)/text_shape.o | $(BUILD_DIR)
@@ -583,7 +587,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/ident
                        $(BUILD_DIR)/interp.o $(BUILD_DIR)/frame_clock.o \
                        $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o $(BUILD_DIR)/pdf_export.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o $(BUILD_DIR)/wl_display.o \
-                      $(BUILD_DIR)/freebug.o $(BUILD_DIR)/text_shape.o \
+                      $(BUILD_DIR)/freebug.o $(BUILD_DIR)/fb_panes.o $(BUILD_DIR)/text_shape.o \
                        $(BUILD_DIR)/webfont.o $(BUILD_DIR)/webfont_load.o \
                        $(BUILD_DIR)/dom_debug.o $(BUILD_DIR)/prefetch.o \
                        $(BUILD_DIR)/perf_trace.o \

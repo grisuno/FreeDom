@@ -20,6 +20,7 @@ graph LR
     include_prefetch -- "calls into" --> src_css
     include_prefetch -- "calls into" --> include_browser_ui
     include_prefetch -- "calls into" --> src_tab
+    include_prefetch -- "calls into" --> src_text_shape
     include_browser_ui -- "calls into" --> src_css
     include_browser_ui -- "calls into" --> include_prefetch
     include_browser_ui -- "calls into" --> src_tab
@@ -54,6 +55,7 @@ graph LR
     include_browser -- "calls into" --> src_css
     include_browser -- "calls into" --> include_browser_ui
     include_browser -- "calls into" --> src_tab
+    include_browser -- "calls into" --> src_text_shape
     include_browser -- "calls into" --> include_page_view
     include_browser -- "calls into" --> include_secure_fetch
     src_local_store -- "calls into" --> src_css
@@ -85,7 +87,7 @@ graph LR
 
 ## Details
 
-Static architecture map of 286 files (c, h, py, sh) in 10 components: src: css, include: browser_ui, src: tab, src: text_shape, include: page_view, include: browser, src: local_store, gui. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 289 files (c, h, py, sh) in 10 components: src: css, include: browser_ui, src: tab, src: text_shape, include: page_view, include: browser, src: local_store, gui. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
 ### src: css (1)
 
@@ -134,7 +136,7 @@ src: tab groups 45 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_byte
 
 ### src: text_shape (4)
 
-src: text_shape groups 39 files (c, h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
+src: text_shape groups 42 files (c, h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
 
 **Related Classes/Methods**:
 

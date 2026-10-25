@@ -2,56 +2,56 @@
 
 Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 
-- `null` | files=153 | mentions=1088 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/cached_fetch.h`, `include/compositor.h`, `include/css.h`, `include/css_chain.h`, `include/css_computed.h`
-- `max` | files=126 | mentions=638 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_atrule.h`, `include/css_chain.h`, `include/css_computed.h`
-- `not` | files=120 | mentions=607 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_gradient.h`, `include/css_length.h`
-- `size` | files=119 | mentions=615 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_index.h`
-- `out` | files=118 | mentions=635 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/cached_fetch.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`
-- `one` | files=118 | mentions=549 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/cached_fetch.h`, `include/compositor.h`
-- `include` | files=118 | mentions=220 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/cached_fetch.h`, `include/compositor.h`
-- `freedom` | files=113 | mentions=169 | `app.py`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/freedom_view.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`
-- `when` | files=111 | mentions=406 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_color.h`, `include/css_computed.h`
-- `int` | files=107 | mentions=1046 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/svg_paint.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/css_atrule.h`, `include/css_gradient.h`
-- `free` | files=104 | mentions=428 | `app.py`, `gui/browser_ui.c`, `include/browser.h`, `include/css.h`, `include/css_index.h`, `include/css_vars.h`, `include/disk_store.h`, `include/dom.h`, `include/freebug.h`, `include/hls.h`
-- `returns` | files=104 | mentions=291 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_computed.h`
-- `char` | files=103 | mentions=562 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/css.h`, `include/css_atrule.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_mask.h`
-- `const` | files=101 | mentions=582 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/css.h`, `include/css_atrule.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_index.h`
+- `null` | files=154 | mentions=1099 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/cached_fetch.h`, `include/compositor.h`, `include/css.h`, `include/css_chain.h`, `include/css_computed.h`
+- `max` | files=128 | mentions=651 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_atrule.h`, `include/css_chain.h`, `include/css_computed.h`
+- `size` | files=120 | mentions=622 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_index.h`
+- `not` | files=120 | mentions=612 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_gradient.h`, `include/css_length.h`
+- `out` | files=119 | mentions=641 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/cached_fetch.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`
+- `include` | files=119 | mentions=221 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/cached_fetch.h`, `include/compositor.h`
+- `one` | files=118 | mentions=555 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/cached_fetch.h`, `include/compositor.h`
+- `freedom` | files=114 | mentions=170 | `app.py`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/freedom_view.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`
+- `when` | files=112 | mentions=415 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_color.h`, `include/css_computed.h`
+- `int` | files=108 | mentions=1069 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/svg_paint.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/css_atrule.h`, `include/css_gradient.h`
+- `char` | files=105 | mentions=574 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/css.h`, `include/css_atrule.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_mask.h`
+- `returns` | files=105 | mentions=295 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_computed.h`
+- `free` | files=104 | mentions=429 | `app.py`, `gui/browser_ui.c`, `include/browser.h`, `include/css.h`, `include/css_index.h`, `include/css_vars.h`, `include/disk_store.h`, `include/dom.h`, `include/freebug.h`, `include/hls.h`
+- `const` | files=103 | mentions=594 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/css.h`, `include/css_atrule.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_index.h`
 - `only` | files=101 | mentions=376 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/css_length.h`
-- `never` | files=96 | mentions=305 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`, `include/css_length.h`, `include/css_mask.h`, `include/css_select.h`, `include/dom_debug.h`
-- `css` | files=95 | mentions=2040 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/block_flow.h`, `include/box_style.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_chain.h`, `include/css_color.h`
-- `its` | files=93 | mentions=559 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_length.h`
-- `empty` | files=92 | mentions=255 | `gui/browser_ui.c`, `include/browser.h`, `include/css.h`, `include/css_mq.h`, `include/css_select.h`, `include/css_vars.h`, `include/dom_debug.h`, `include/download.h`, `include/flex_layout.h`, `include/form.h`
-- `void` | files=91 | mentions=583 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/ui_render.c`, `include/anti_fp.h`, `include/cached_fetch.h`, `include/css_atrule.h`, `include/css_index.h`, `include/css_select.h`, `include/css_vars.h`, `include/dom.h`
-- `static` | files=90 | mentions=388 | `gui/browser_ui.c`, `gui/svg_paint.c`, `gui/ui_render.c`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`, `include/css_select.h`, `include/form.h`, `include/js_dom.h`, `include/js_sandbox.h`
-- `name` | files=89 | mentions=340 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h`, `include/css_atrule.h`, `include/css_computed.h`, `include/css_mask.h`, `include/css_mq.h`, `include/css_select.h`
-- `text` | files=88 | mentions=661 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/svg_paint.c`, `gui/ui_render.c`, `include/box_style.h`, `include/browser.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`
-- `url` | files=85 | mentions=513 | `gui/browser_ui.c`, `include/browser.h`, `include/cached_fetch.h`, `include/css.h`, `include/css_decl.h`, `include/css_select.h`, `include/data_url.h`, `include/form.h`, `include/hls.h`, `include/http_cache.h`
-- `spec` | files=82 | mentions=198 | `gui/browser_ui.c`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_color.h`, `include/css_gradient.h`
-- `every` | files=81 | mentions=272 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_length.h`, `include/css_mask.h`, `include/css_values.h`
-- `return` | files=79 | mentions=812 | `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/box_blur.h`, `include/box_tree.h`, `include/css_chain.h`, `include/css_select.h`, `include/prefetch.h`, `include/renderer.h`, `include/shm_slots.h`
-- `len` | files=78 | mentions=365 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_gradient.h`, `include/css_mq.h`, `include/css_select.h`
-- `value` | files=78 | mentions=317 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anti_fp.h`, `include/box_style.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_computed.h`, `include/css_length.h`
-- `per` | files=78 | mentions=214 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/anti_fp.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css_color.h`, `include/css_gradient.h`, `include/css_length.h`
-- `source` | files=75 | mentions=218 | `docker_run.sh`, `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `include/box_style.h`, `include/compositor.h`, `include/css_chain.h`, `include/freebug.h`, `include/js_sandbox.h`
-- `closed` | files=75 | mentions=176 | `gui/browser_ui.c`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_mq.h`, `include/css_select.h`, `include/data_url.h`
-- `page` | files=74 | mentions=421 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_color.h`, `include/css_vars.h`, `include/freebug.h`, `include/freedom_config.h`
-- `cap` | files=73 | mentions=225 | `gui/browser_ui.c`, `include/box_style.h`, `include/css.h`, `include/css_computed.h`, `include/css_length.h`, `include/css_mask.h`, `include/css_select.h`, `include/css_vars.h`, `include/dom.h`, `include/dom_debug.h`
-- `set` | files=72 | mentions=317 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/box_style.h`, `include/browser.h`, `include/cached_fetch.h`, `include/compositor.h`, `include/css_color.h`, `include/css_select.h`
-- `first` | files=72 | mentions=207 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_gradient.h`, `include/css_index.h`, `include/css_length.h`, `include/css_select.h`
-- `bytes` | files=72 | mentions=179 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/css.h`, `include/css_computed.h`, `include/css_mq.h`, `include/css_select.h`, `include/dom_debug.h`, `include/download.h`, `include/form.h`, `include/freebug.h`
+- `css` | files=97 | mentions=2047 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/block_flow.h`, `include/box_style.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_chain.h`, `include/css_color.h`
+- `never` | files=97 | mentions=313 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`, `include/css_length.h`, `include/css_mask.h`, `include/css_select.h`, `include/dom_debug.h`
+- `its` | files=94 | mentions=566 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_length.h`
+- `void` | files=92 | mentions=585 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/ui_render.c`, `include/anti_fp.h`, `include/cached_fetch.h`, `include/css_atrule.h`, `include/css_index.h`, `include/css_select.h`, `include/css_vars.h`, `include/dom.h`
+- `empty` | files=92 | mentions=260 | `gui/browser_ui.c`, `include/browser.h`, `include/css.h`, `include/css_mq.h`, `include/css_select.h`, `include/css_vars.h`, `include/dom_debug.h`, `include/download.h`, `include/flex_layout.h`, `include/form.h`
+- `name` | files=91 | mentions=356 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h`, `include/css_atrule.h`, `include/css_computed.h`, `include/css_mask.h`, `include/css_mq.h`, `include/css_select.h`
+- `static` | files=90 | mentions=391 | `gui/browser_ui.c`, `gui/svg_paint.c`, `gui/ui_render.c`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`, `include/css_select.h`, `include/form.h`, `include/js_dom.h`, `include/js_sandbox.h`
+- `text` | files=88 | mentions=673 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/svg_paint.c`, `gui/ui_render.c`, `include/box_style.h`, `include/browser.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`
+- `url` | files=85 | mentions=515 | `gui/browser_ui.c`, `include/browser.h`, `include/cached_fetch.h`, `include/css.h`, `include/css_decl.h`, `include/css_select.h`, `include/data_url.h`, `include/form.h`, `include/hls.h`, `include/http_cache.h`
+- `spec` | files=82 | mentions=200 | `gui/browser_ui.c`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_color.h`, `include/css_gradient.h`
+- `every` | files=81 | mentions=273 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_length.h`, `include/css_mask.h`, `include/css_values.h`
+- `return` | files=79 | mentions=819 | `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/box_blur.h`, `include/box_tree.h`, `include/css_chain.h`, `include/css_select.h`, `include/prefetch.h`, `include/renderer.h`, `include/shm_slots.h`
+- `value` | files=79 | mentions=318 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anti_fp.h`, `include/box_style.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_computed.h`, `include/css_length.h`
+- `per` | files=79 | mentions=217 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/anti_fp.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css_color.h`, `include/css_gradient.h`, `include/css_length.h`
+- `len` | files=78 | mentions=366 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_gradient.h`, `include/css_mq.h`, `include/css_select.h`
+- `source` | files=76 | mentions=224 | `docker_run.sh`, `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `include/box_style.h`, `include/compositor.h`, `include/css_chain.h`, `include/freebug.h`, `include/js_sandbox.h`
+- `closed` | files=76 | mentions=177 | `gui/browser_ui.c`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_mq.h`, `include/css_select.h`, `include/data_url.h`
+- `page` | files=74 | mentions=425 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_color.h`, `include/css_vars.h`, `include/freebug.h`, `include/freedom_config.h`
+- `cap` | files=74 | mentions=231 | `gui/browser_ui.c`, `include/box_style.h`, `include/css.h`, `include/css_computed.h`, `include/css_length.h`, `include/css_mask.h`, `include/css_select.h`, `include/css_vars.h`, `include/dom.h`, `include/dom_debug.h`
+- `first` | files=73 | mentions=210 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_gradient.h`, `include/css_index.h`, `include/css_length.h`, `include/css_select.h`
+- `bytes` | files=73 | mentions=184 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/css.h`, `include/css_computed.h`, `include/css_mq.h`, `include/css_select.h`, `include/dom_debug.h`, `include/download.h`, `include/fb_panes.h`, `include/form.h`
+- `set` | files=72 | mentions=321 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/box_style.h`, `include/browser.h`, `include/cached_fetch.h`, `include/compositor.h`, `include/css_color.h`, `include/css_select.h`
 - `non` | files=70 | mentions=195 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_color.h`, `include/css_length.h`, `include/css_select.h`, `include/download.h`
-- `count` | files=68 | mentions=206 | `gui/browser_ui.c`, `include/box_style.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_select.h`, `include/css_vars.h`, `include/dom.h`, `include/flex_layout.h`, `include/freebug.h`
-- `same` | files=67 | mentions=248 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_chain.h`, `include/css_length.h`, `include/css_select.h`
-- `line` | files=65 | mentions=336 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_length.h`, `include/dom_debug.h`, `include/flex_layout.h`
+- `count` | files=69 | mentions=213 | `gui/browser_ui.c`, `include/box_style.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_select.h`, `include/css_vars.h`, `include/dom.h`, `include/fb_panes.h`, `include/flex_layout.h`
+- `same` | files=67 | mentions=249 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_chain.h`, `include/css_length.h`, `include/css_select.h`
+- `line` | files=65 | mentions=339 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_length.h`, `include/dom_debug.h`, `include/flex_layout.h`
 - `zero` | files=65 | mentions=144 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`
 - `state` | files=64 | mentions=368 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/browser.h`, `include/css.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/freebug.h`, `include/html_parse.h`
-- `none` | files=64 | mentions=359 | `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_box.h`
+- `none` | files=64 | mentions=360 | `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_box.h`
 - `fail` | files=64 | mentions=137 | `gui/browser_ui.c`, `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_mq.h`, `include/css_select.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/freebug.h`
 - `status` | files=63 | mentions=170 | `app.py`, `gui/browser_ui.c`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/cached_fetch.h`, `include/css.h`, `include/css_color.h`, `include/css_length.h`, `include/data_url.h`
+- `case` | files=63 | mentions=153 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_computed.h`, `include/css_length.h`, `include/css_select.h`, `include/css_vars.h`, `include/data_url.h`, `include/fb_panes.h`, `include/flex_layout.h`
 - `caller` | files=63 | mentions=146 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_color.h`
-- `case` | files=62 | mentions=143 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_computed.h`, `include/css_length.h`, `include/css_select.h`, `include/css_vars.h`, `include/data_url.h`, `include/flex_layout.h`, `include/hostedit.h`
+- `string` | files=60 | mentions=141 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css_decl.h`, `include/css_vars.h`, `include/fb_panes.h`, `include/form.h`, `include/js_location.h`, `include/js_sandbox.h`, `include/js_trusted.h`
 - `without` | files=60 | mentions=126 | `gui/browser_ui.c`, `include/box_style.h`, `include/css.h`, `include/css_length.h`, `include/dom.h`, `include/image_decode.h`, `include/import_map.h`, `include/js_dom.h`, `include/js_geom.h`, `include/js_policy.h`
-- `any` | files=60 | mentions=120 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_length.h`, `include/css_select.h`, `include/css_vars.h`, `include/data_url.h`
 
 ## Verb Edges
 
@@ -59,62 +59,62 @@ Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges 
 - `null` --depends_on--> `include` (strength 1.00)
 - `not` --depends_on--> `include` (strength 0.92)
 - `not` --depends_on--> `freedom` (strength 0.91)
+- `css` --depends_on--> `freedom` (strength 0.90)
+- `css` --depends_on--> `include` (strength 0.90)
 - `out` --depends_on--> `freedom` (strength 0.90)
 - `out` --depends_on--> `include` (strength 0.90)
+- `char` --depends_on--> `freedom` (strength 0.88)
 - `char` --depends_on--> `include` (strength 0.88)
-- `css` --depends_on--> `freedom` (strength 0.88)
 - `int` --depends_on--> `freedom` (strength 0.88)
 - `int` --depends_on--> `include` (strength 0.88)
 - `one` --depends_on--> `include` (strength 0.88)
 - `static` --depends_on--> `include` (strength 0.88)
-- `char` --depends_on--> `freedom` (strength 0.87)
-- `css` --depends_on--> `include` (strength 0.87)
 - `free` --depends_on--> `include` (strength 0.87)
 - `one` --depends_on--> `freedom` (strength 0.87)
 - `static` --depends_on--> `freedom` (strength 0.87)
+- `free` --depends_on--> `freedom` (strength 0.86)
 - `only` --depends_on--> `freedom` (strength 0.86)
 - `only` --depends_on--> `include` (strength 0.86)
 - `return` --depends_on--> `freedom` (strength 0.86)
 - `return` --depends_on--> `include` (strength 0.86)
-- `free` --depends_on--> `freedom` (strength 0.85)
 - `when` --depends_on--> `freedom` (strength 0.85)
 - `when` --depends_on--> `include` (strength 0.85)
+- `max` --depends_on--> `freedom` (strength 0.84)
 - `max` --depends_on--> `include` (strength 0.84)
-- `max` --depends_on--> `freedom` (strength 0.83)
 - `never` --depends_on--> `freedom` (strength 0.83)
 - `never` --depends_on--> `include` (strength 0.83)
 - `size` --depends_on--> `freedom` (strength 0.83)
 - `size` --depends_on--> `include` (strength 0.83)
 - `text` --depends_on--> `freedom` (strength 0.83)
 - `text` --depends_on--> `include` (strength 0.83)
+- `url` --depends_on--> `freedom` (strength 0.83)
 - `url` --depends_on--> `include` (strength 0.83)
-- `url` --depends_on--> `freedom` (strength 0.82)
+- `returns` --depends_on--> `include` (strength 0.81)
+- `source` --depends_on--> `include` (strength 0.81)
+- `its` --depends_on--> `freedom` (strength 0.80)
 - `its` --depends_on--> `include` (strength 0.80)
 - `null` --depends_on--> `max` (strength 0.80)
 - `returns` --depends_on--> `freedom` (strength 0.80)
-- `returns` --depends_on--> `include` (strength 0.80)
-- `its` --depends_on--> `freedom` (strength 0.79)
-- `source` --depends_on--> `include` (strength 0.79)
+- `source` --depends_on--> `freedom` (strength 0.80)
+- `const` --depends_on--> `include` (strength 0.79)
 - `const` --depends_on--> `freedom` (strength 0.78)
-- `const` --depends_on--> `include` (strength 0.78)
-- `source` --depends_on--> `freedom` (strength 0.78)
+- `empty` --depends_on--> `freedom` (strength 0.76)
+- `empty` --depends_on--> `include` (strength 0.76)
+- `set` --depends_on--> `freedom` (strength 0.76)
 - `void` --depends_on--> `freedom` (strength 0.76)
 - `void` --depends_on--> `include` (strength 0.76)
-- `empty` --depends_on--> `freedom` (strength 0.75)
-- `empty` --depends_on--> `include` (strength 0.75)
-- `set` --depends_on--> `freedom` (strength 0.75)
+- `name` --depends_on--> `freedom` (strength 0.75)
 - `set` --depends_on--> `include` (strength 0.75)
-- `name` --depends_on--> `freedom` (strength 0.74)
 
 ## Dialectic
 
-- Thesis: `any` centralizes 60 files; Antithesis: `caller` pulls 63 files with 29 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 60 files; Antithesis: `every` pulls 81 files with 33 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 60 files; Antithesis: `first` pulls 72 files with 31 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 60 files; Antithesis: `its` pulls 93 files with 41 shared (Jaccard 0.37); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 60 files; Antithesis: `line` pulls 65 files with 30 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 60 files; Antithesis: `max` pulls 126 files with 44 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 60 files; Antithesis: `never` pulls 96 files with 38 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 60 files; Antithesis: `not` pulls 120 files with 46 shared (Jaccard 0.34); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 60 files; Antithesis: `only` pulls 101 files with 41 shared (Jaccard 0.34); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 60 files; Antithesis: `page` pulls 74 files with 32 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `bytes` centralizes 73 files; Antithesis: `cap` pulls 74 files with 34 shared (Jaccard 0.30); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `bytes` centralizes 73 files; Antithesis: `char` pulls 105 files with 47 shared (Jaccard 0.36); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `bytes` centralizes 73 files; Antithesis: `const` pulls 103 files with 43 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `bytes` centralizes 73 files; Antithesis: `empty` pulls 92 files with 42 shared (Jaccard 0.34); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `bytes` centralizes 73 files; Antithesis: `null` pulls 154 files with 59 shared (Jaccard 0.35); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `bytes` centralizes 73 files; Antithesis: `out` pulls 119 files with 51 shared (Jaccard 0.36); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `bytes` centralizes 73 files; Antithesis: `returns` pulls 105 files with 44 shared (Jaccard 0.33); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `bytes` centralizes 73 files; Antithesis: `size` pulls 120 files with 49 shared (Jaccard 0.34); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `bytes` centralizes 73 files; Antithesis: `value` pulls 79 files with 37 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `bytes` centralizes 73 files; Antithesis: `void` pulls 92 files with 39 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?

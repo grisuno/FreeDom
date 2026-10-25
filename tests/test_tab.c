@@ -1613,6 +1613,17 @@ static void test_eval_sees_dom(void **state) {
     expect_eval(f->t, "dom.getAttribute(dom.getElementById('main'),'class')", "box");
 }
 
+/* The confined worker derives its engine stack cap from the process stack BEFORE seccomp (getrlimit
+ * is not allowed afterwards), so real recursion depth is in the thousands and runaway recursion is
+ * still a catchable RangeError -- not the ~180 frames of the old fixed 256 KiB, nor a SIGSYS kill. */
+static void test_worker_deep_recursion_and_runaway(void **state) {
+    fixture *f = (fixture *)*state;
+    expect_eval(f->t, "var fr=function(n){return n?1+fr(n-1):0}; fr(2000)", "2000");
+    expect_eval(f->t, "var gr=function(){return gr()+1}; try{ gr(); 'no' }catch(e){ e instanceof RangeError ? 'caught' : 'other' }",
+                "caught");
+    expect_eval(f->t, "1+1", "2");   /* the worker is still alive and answering */
+}
+
 /* --- eval: sees the normalized anti-fp environment --- */
 
 static void test_eval_sees_env(void **state) {
@@ -3523,6 +3534,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_null_and_too_large),
         cmocka_unit_test_setup_teardown(test_repl_gets_command_line_api, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_sees_dom, setup_loaded, teardown),
+        cmocka_unit_test_setup_teardown(test_worker_deep_recursion_and_runaway, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_sees_env, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_no_network_or_cross_origin_api, setup_loaded, teardown),
         cmocka_unit_test(test_xhr_works_when_net_allowed),

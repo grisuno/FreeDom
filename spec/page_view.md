@@ -1499,3 +1499,16 @@ El fondo `currentColor` es el `color` computado del elemento, heredado si no dec
 - Medido (`pv_build_styled`, mejor de 8): Wikipedia 165 -> 108 ms, Hacker News 13.3 -> 8.7 ms; `parity`,
   `layout-diff` y `drops` sin cambios. Sigue: `fill_css_node` por cada nodo de la cadena de ancestros de cada
   elemento y `cch_pseudo_style` por elemento.
+
+## Tanda 67 — generados e ítems de columna (2026-10-25)
+
+- **Un `::after` de un elemento con hijos lleva el contexto de su elemento** (`pv_after_pending`): se
+  captura al armarlo (contenedor, ítem, caja, estilo de texto, color) y UN emisor lo aplica al salir del
+  elemento y en el volcado final. Antes solo lo recibía si el pseudo tenía caja propia; sin él, el run
+  quedaba fuera del ítem flex y partía su banda (`[ ETIQUETA ]` de las tarjetas de GitLab).
+  Test `test_after_content_stays_in_flex_item`.
+- **El contenido generado hereda el color del elemento** (CSS 2.1 §12.1), no su `color` propio:
+  `pv_inherited_color` (marcha acotada por los ancestros). `test_pseudo_content_inherits_color`.
+- **Los hijos de una columna flex que fluye como bloque se blockifican** (CSS Display 3 §2.7):
+  `is_flow_column_item` en `resolve_context`. `<p class=stat>` flex columna con dos `<span>` apila los dos.
+  `test_flex_column_blockifies_inline_items`.

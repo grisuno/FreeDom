@@ -1,6 +1,130 @@
 # Subsystem: include (page 5 of 5)
 Previous: [KB_include_p4.md](KB_include_p4.md)
 
+## include/text_case.h
+- Doc: Case mapping for text-transform and synthesized small caps (spec/text_case.md).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `tc_run` (struct, line 33)
+  - `cp` (function, line 19) `* cp (identity otherwise), so a transformed text keeps its length. */ uint32_t tc_upper(uint32_t cp);`
+  - `tc_lower` (function, line 21) `uint32_t tc_lower(uint32_t cp);`
+  - `tc_is_lower` (function, line 24) `int tc_is_lower(uint32_t cp);`
+  - `tc_transform` (function, line 29) `size_t tc_transform(const char *s, size_t n, int transform, int word_start, char *out, size_t cap);`
+  - `tc_smallcaps_runs` (function, line 41) `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap);`
+  - `FREEDOM_TEXT_CASE_H` (macro, line 2) `#define FREEDOM_TEXT_CASE_H`
+  - `TC_SMALLCAPS_SCALE` (macro, line 15) `#define TC_SMALLCAPS_SCALE`
+- Imported by: `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`
+
+## include/text_shape.h
+- Doc: tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `tsh_font` (struct, line 33)
+  - `tsh_run` (struct, line 132)
+  - `tsh_status` (enum, line 80)
+  - `family` (type_alias, line 33) `typedef struct tsh_font { int family;`
+  - `end` (type_alias, line 132) `typedef struct tsh_run { size_t start, end;`
+  - `content` (function, line 11) `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);`
+  - `tsh_family_is_generic` (function, line 52) `int tsh_family_is_generic(const char *name);`
+  - `wins` (function, line 58) `* the first name the resolver accepts wins (returns 1, family in out). Pure: the * resolver is injected (fontconfig...`
+  - `tsh_pick_family` (function, line 68) `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...`
+  - `tsh_local_handle` (function, line 75) `int tsh_local_handle(const char *list);`
+  - `tsh_ready` (function, line 89) `int tsh_ready(void);`
+  - `origin` (function, line 92) `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...`
+  - `tsh_measure` (function, line 101) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);`
+  - `tsh_webfont_register` (function, line 114) `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);`
+  - `tsh_webfont_clear` (function, line 120) `void tsh_webfont_clear(void);`
+  - `tsh_face` (function, line 127) `cairo_font_face_t *tsh_face(const tsh_font *f);`
+  - `own` (function, line 136) `* face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ) * stay in the run before them....`
+  - `tsh_shutdown` (function, line 143) `void tsh_shutdown(void);`
+  - `FREEDOM_TEXT_SHAPE_H` (macro, line 19) `#define FREEDOM_TEXT_SHAPE_H`
+  - `TSH_LOCAL_LISTS` (macro, line 46) `#define TSH_LOCAL_LISTS`
+  - `TSH_LOCAL_FAMILIES` (macro, line 47) `#define TSH_LOCAL_FAMILIES`
+  - `TSH_FAMILY_MAX` (macro, line 48) `#define TSH_FAMILY_MAX`
+  - `TSH_MAX_GLYPHS` (macro, line 77) `#define TSH_MAX_GLYPHS`
+  - `TSH_MAX_TEXT` (macro, line 78) `#define TSH_MAX_TEXT`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
+
+## include/textfield.h
+- Doc: tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `tf_field` (struct, line 25)
+  - `tf_status` (enum, line 31)
+  - `buf` (type_alias, line 24) `typedef struct tf_field { char buf[TF_CAP];`
+  - `tf_init` (function, line 38) `void tf_init(tf_field *f);`
+  - `tf_clear` (function, line 45) `void tf_clear(tf_field *f);`
+  - `tf_backspace` (function, line 53) `void tf_backspace(tf_field *f);`
+  - `tf_delete` (function, line 56) `void tf_delete(tf_field *f);`
+  - `tf_move` (function, line 59) `void tf_move(tf_field *f, long delta);`
+  - `tf_home` (function, line 62) `void tf_home(tf_field *f);`
+  - `tf_end` (function, line 63) `void tf_end(tf_field *f);`
+  - `tf_text` (function, line 66) `const char *tf_text(const tf_field *f);`
+  - `tf_len` (function, line 67) `size_t tf_len(const tf_field *f);`
+  - `tf_cursor` (function, line 68) `size_t tf_cursor(const tf_field *f);`
+  - `FREEDOM_TEXTFIELD_H` (macro, line 2) `#define FREEDOM_TEXTFIELD_H`
+  - `TF_CAP` (macro, line 23) `#define TF_CAP`
+- Imported by: `gui/browser_ui.c`, `src/textfield.c`, `tests/test_textfield.c`
+
+## include/tls_impersonate.h
+- Doc: ti_req: Request: parent -> helper.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ti_req` (struct, line 72)
+  - `ti_resp` (struct, line 82)
+  - `ti_profile` (enum, line 41)
+  - `status` (type_alias, line 82) `typedef struct ti_resp { long status;`
+  - `path` (function, line 26) `* Zero Knowledge path (PQ-hybrid, VERIFYPEER). * * 2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed...`
+  - `chain` (function, line 32) `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT...`
+  - `ti_should_impersonate` (function, line 56) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);`
+  - `success` (function, line 97) `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out...`
+  - `ti_decode_req` (function, line 101) `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
+  - `ti_req_free` (function, line 102) `void ti_req_free(ti_req *r);`
+  - `ti_encode_resp` (function, line 104) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
+  - `ti_decode_resp` (function, line 105) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
+  - `ti_resp_free` (function, line 106) `void ti_resp_free(ti_resp *r);`
+  - `FREEDOM_TLS_IMPERSONATE_H` (macro, line 2) `#define FREEDOM_TLS_IMPERSONATE_H`
+  - `TI_MAGIC` (macro, line 60) `#define TI_MAGIC`
+  - `TI_MAX_URL` (macro, line 61) `#define TI_MAX_URL`
+  - `TI_MAX_METHOD` (macro, line 62) `#define TI_MAX_METHOD`
+  - `TI_MAX_HEADERS` (macro, line 63) `#define TI_MAX_HEADERS`
+  - `TI_MAX_BODY` (macro, line 64) `#define TI_MAX_BODY`
+  - `TI_MAX_RESP_HDR` (macro, line 65) `#define TI_MAX_RESP_HDR`
+  - `TI_MAX_RESP_BODY` (macro, line 66) `#define TI_MAX_RESP_BODY`
+  - `TI_MAX_CHAIN` (macro, line 67) `#define TI_MAX_CHAIN`
+  - `TI_MAX_GROUP` (macro, line 68) `#define TI_MAX_GROUP`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
+
+## include/ui.h
+- Doc: ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `ui_line` (struct, line 30)
+  - `ui_layout` (struct, line 35)
+  - `rd_doc` (struct, line 69)
+  - `jg_table` (struct, line 95)
+  - `tab` (struct, line 105)
+  - `ui_status` (enum, line 20)
+  - `offset` (type_alias, line 30) `typedef struct ui_line { size_t offset;`
+  - `space` (function, line 44) `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...`
+  - `ui_layout_free` (function, line 52) `void ui_layout_free(ui_layout *lay);`
+  - `ui_clamp_scroll` (function, line 55) `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);`
+  - `available` (function, line 86) `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...`
+  - `out` (function, line 98) `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...`
+  - `placeholders` (function, line 108) `* above always draw image placeholders (no worker to decode hostile bytes);`
+  - `disk` (function, line 113) `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
+  - `images` (function, line 115) `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
+  - `ui_render_viewport_w` (function, line 142) `int ui_render_viewport_w(void);`
+  - `ui_persisted_prefs` (function, line 147) `int ui_persisted_prefs(prefs_state *out);`
+  - `FREEDOM_UI_H` (macro, line 2) `#define FREEDOM_UI_H`
+- Depends on: `include/prefs.h`
+- Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/freedom.c`, `src/ui_layout.c`, `tests/test_ui.c`
+
 ## include/url.h
 - Doc: url_parts: Components of a validated absolute https URL, sliced for a JS location object.
 - Layer: utility

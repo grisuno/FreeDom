@@ -1,8 +1,19 @@
-# Symbols (page 3 of 15)
+# Symbols (page 3 of 16)
 Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `cb_expand_box4` | function | `include/css_box.h:19` | `int cb_expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg, css_decl *dst, int cap);` |
+| `cb_expand_grid_template_cols` | function | `include/css_box.h:43` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);` |
+| `cb_interp_align` | function | `include/css_box.h:33` | `int cb_interp_align(const char *v);` |
+| `cb_interp_display` | function | `include/css_box.h:39` | `int cb_interp_display(const char *v);` |
+| `cb_interp_fontsize_ex` | function | `include/css_box.h:34` | `int cb_interp_fontsize_ex(const char *v, int *abs_out);` |
+| `cb_interp_gap` | function | `include/css_box.h:40` | `int cb_interp_gap(const char *v);` |
+| `cb_interp_gridcols` | function | `include/css_box.h:42` | `int cb_interp_gridcols(const char *v);` |
+| `cb_interp_justify` | function | `include/css_box.h:41` | `int cb_interp_justify(const char *v);` |
+| `cb_interp_len` | function | `include/css_box.h:16` | `int cb_interp_len(const char *v, int allow_auto, int *out);` |
+| `cb_interp_lineheight` | function | `include/css_box.h:35` | `int cb_interp_lineheight(const char *v);` |
+| `cb_interp_lp` | function | `include/css_box.h:23` | `int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm);` |
 | `cb_interp_style` | function | `include/css_box.h:37` | `int cb_interp_style(const char *v);` |
 | `cb_interp_textdeco` | function | `include/css_box.h:38` | `int cb_interp_textdeco(const char *v);` |
 | `cb_interp_weight` | function | `include/css_box.h:36` | `int cb_interp_weight(const char *v);` |
@@ -236,6 +247,18 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `dl_should_download` | function | `include/download.h:43` | `int dl_should_download(const char *content_type, const char *content_disposition);` |
 | `dl_status` | enum | `include/download.h:33` | `` |
 | `literal` | function | `include/download.h:47` | `* a static string literal (never freed). */ const char *dl_ext_for_type(const char *content_type);` |
+| `FBP_EXPR_MAX` | macro | `include/fb_panes.h:27` | `#define FBP_EXPR_MAX` |
+| `FBP_SELECTOR_MAX` | macro | `include/fb_panes.h:26` | `#define FBP_SELECTOR_MAX` |
+| `FREEDOM_FB_PANES_H` | macro | `include/fb_panes.h:2` | `#define FREEDOM_FB_PANES_H` |
+| `fbp_expr` | function | `include/fb_panes.h:53` | `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);` |
+| `fbp_is_pane` | function | `include/fb_panes.h:45` | `int fbp_is_pane(int tab);` |
+| `fbp_js_quote` | function | `include/fb_panes.h:49` | `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);` |
+| `fbp_tab` | enum | `include/fb_panes.h:17` | `` |
+| `fbp_tab_at` | function | `include/fb_panes.h:42` | `int fbp_tab_at(double x, double cell_w, double pad_cells);` |
+| `fbp_tab_from_name` | function | `include/fb_panes.h:33` | `int fbp_tab_from_name(const char *name);` |
+| `fbp_tab_label` | function | `include/fb_panes.h:30` | `const char *fbp_tab_label(int tab);` |
+| `fbp_tab_span` | function | `include/fb_panes.h:39` | `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);` |
+| `fbp_tab_wrap` | function | `include/fb_panes.h:36` | `int fbp_tab_wrap(int tab, int dir);` |
 | `FREEDOM_FLEX_LAYOUT_H` | macro | `include/flex_layout.h:2` | `#define FREEDOM_FLEX_LAYOUT_H` |
 | `FX_AREA_MAX_CELLS` | macro | `include/flex_layout.h:138` | `#define FX_AREA_MAX_CELLS` |
 | `FX_AREA_MAX_COLS` | macro | `include/flex_layout.h:137` | `#define FX_AREA_MAX_COLS` |
@@ -473,28 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `ip_lerp_color` | function | `include/interp.h:61` | `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t);` |
 | `ip_val_kind` | enum | `include/interp.h:54` | `` |
 | `kind` | type_alias | `include/interp.h:37` | `typedef struct ip_ease_fn { ip_easing kind;` |
-| `pct` | type_alias | `include/interp.h:69` | `typedef struct ip_keyframe { double pct;` |
-| `val_kind` | type_alias | `include/interp.h:100` | `typedef struct ip_anim { ip_val_kind val_kind;` |
-| `FREEDOM_JS_DOM_H` | macro | `include/js_dom.h:2` | `#define FREEDOM_JS_DOM_H` |
-| `JD_IFRAME_TRACK_MAX` | macro | `include/js_dom.h:40` | `#define JD_IFRAME_TRACK_MAX` |
-| `JD_REPL_CSS_MAX` | macro | `include/js_dom.h:79` | `#define JD_REPL_CSS_MAX` |
-| `URLs` | function | `include/js_dom.h:210` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
-| `getComputedStyle` | function | `include/js_dom.h:108` | `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...` |
-| `global` | function | `include/js_dom.h:73` | `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...` |
-| `host` | function | `include/js_dom.h:163` | `* for a trusted host (allow.conf AND js.conf);` |
-| `jd_click_state` | type_alias | `include/js_dom.h:35` | `typedef struct jd_click_state jd_click_state;` |
-| `jd_click_state_free` | function | `include/js_dom.h:118` | `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);` |
-| `jd_flush_custom_elements` | function | `include/js_dom.h:235` | `void jd_flush_custom_elements(js_context *ctx);` |
-| `jd_get_cookies` | function | `include/js_dom.h:174` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` |
-| `jd_iframe_track` | struct | `include/js_dom.h:41` | `` |
-| `jd_install_repl_api` | function | `include/js_dom.h:82` | `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...` |
-| `jd_opaque` | struct | `include/js_dom.h:46` | `` |
-| `jd_process_iframes` | function | `include/js_dom.h:203` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
-| `jd_status` | enum | `include/js_dom.h:25` | `` |
-| `jd_video_from_scripts` | function | `include/js_dom.h:224` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
-| `opaque` | function | `include/js_dom.h:66` | `* the engine runtime opaque (unreachable from script);` |
-| `out_status` | function | `include/js_dom.h:182` | `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...` |
-| `place` | function | `include/js_dom.h:87` | `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...` |
-| `preventDefault` | function | `include/js_dom.h:134` | `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

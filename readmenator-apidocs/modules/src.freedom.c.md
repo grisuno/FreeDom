@@ -70,7 +70,7 @@ flowchart LR
 
 ### `hl_font_stash`
 
-`struct` | [src/freedom.c:600](../../src/freedom.c#L600)
+`struct` | [src/freedom.c:603](../../src/freedom.c#L603)
 
 ```c
 typedef struct
@@ -84,7 +84,7 @@ typedef struct
 
 ### `gets`
 
-`function` | [src/freedom.c:457](../../src/freedom.c#L457)
+`function` | [src/freedom.c:460](../../src/freedom.c#L460)
 
 ```c
 * gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed (fail-closed);
@@ -108,7 +108,7 @@ typedef struct
 
 ### `pool`
 
-`function` | [src/freedom.c:731](../../src/freedom.c#L731)
+`function` | [src/freedom.c:734](../../src/freedom.c#L734)
 
 ```c
 * the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void *)(uintptr_t)top_url);
@@ -129,7 +129,7 @@ typedef struct
 
 ### `first`
 
-`function` | [src/freedom.c:745](../../src/freedom.c#L745)
+`function` | [src/freedom.c:748](../../src/freedom.c#L748)
 
 ```c
 * always cleared first (fetch_and_render may paint several pages per * process). A NULL top_...
@@ -151,7 +151,7 @@ typedef struct
 
 ### `only`
 
-`function` | [src/freedom.c:813](../../src/freedom.c#L813)
+`function` | [src/freedom.c:816](../../src/freedom.c#L816)
 
 ```c
 * styling for the local render only (no network). --images enables image loading * AND rendering, including remote fetches (so --download-png --images actually * shows images in the bitmap). */ rdp_ca
@@ -171,7 +171,7 @@ typedef struct
 
 ### `BLOCKED`
 
-`function` | [src/freedom.c:983](../../src/freedom.c#L983)
+`function` | [src/freedom.c:986](../../src/freedom.c#L986)
 
 ```c
 * is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);
@@ -191,7 +191,7 @@ typedef struct
 
 ### `elsewhere`
 
-`function` | [src/freedom.c:1018](../../src/freedom.c#L1018)
+`function` | [src/freedom.c:1021](../../src/freedom.c#L1021)
 
 ```c
 * page whose script immediately forwards elsewhere (e.g. a search engine's * JS-capability interstitial) renders as an empty husk instead of its destination. */ static int fetch_and_render(const char *url)
@@ -213,7 +213,7 @@ typedef struct
 
 ### `parent`
 
-`function` | [src/freedom.c:1044](../../src/freedom.c#L1044)
+`function` | [src/freedom.c:1047](../../src/freedom.c#L1047)
 
 ```c
 * gated by the parent (ln_resolve: a local target stays under the document's * directory, a remote one must be https), bounded by HL_JS_NAV_MAX hops. */ static int render_local(const char *target, int hop)
@@ -235,7 +235,7 @@ typedef struct
 
 ### `main`
 
-`function` | [src/freedom.c:1248](../../src/freedom.c#L1248)
+`function` | [src/freedom.c:1251](../../src/freedom.c#L1251)
 
 ```c
 int main(int argc, char **argv)
@@ -250,7 +250,7 @@ int main(int argc, char **argv)
 
 **Returns:** `int`
 
-*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`ui_run_browser`](gui.browser_ui.c.md#ui_run_browser), [`media_decoder_run`](include.media_decoder.h.md#media_decoder_run), [`tab_worker_dispatch`](include.tab.h.md#tab_worker_dispatch), [`wd_resolve_env`](include.wl_display.h.md#wd_resolve_env), [`strncmp`](src.css_color.c.md#strncmp), [`jsp_mode_from_str`](src.js_policy.c.md#jsp_mode_from_str)
+*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`ui_run_browser`](gui.browser_ui.c.md#ui_run_browser), [`fbp_expr`](include.fb_panes.h.md#fbp_expr), [`fbp_is_pane`](include.fb_panes.h.md#fbp_is_pane), [`fbp_tab_from_name`](include.fb_panes.h.md#fbp_tab_from_name), [`media_decoder_run`](include.media_decoder.h.md#media_decoder_run), [`tab_worker_dispatch`](include.tab.h.md#tab_worker_dispatch), [`wd_resolve_env`](include.wl_display.h.md#wd_resolve_env), [`strncmp`](src.css_color.c.md#strncmp), [`jsp_mode_from_str`](src.js_policy.c.md#jsp_mode_from_str)
 
 ---
 
@@ -284,7 +284,7 @@ int main(int argc, char **argv)
 
 ### `EXIT_OK`
 
-`macro` | [src/freedom.c:49](../../src/freedom.c#L49)
+`macro` | [src/freedom.c:50](../../src/freedom.c#L50)
 
 ```c
 #define EXIT_OK
@@ -296,7 +296,7 @@ int main(int argc, char **argv)
 
 ### `EXIT_ERROR`
 
-`macro` | [src/freedom.c:50](../../src/freedom.c#L50)
+`macro` | [src/freedom.c:51](../../src/freedom.c#L51)
 
 ```c
 #define EXIT_ERROR
@@ -308,7 +308,7 @@ int main(int argc, char **argv)
 
 ### `EXIT_USAGE`
 
-`macro` | [src/freedom.c:51](../../src/freedom.c#L51)
+`macro` | [src/freedom.c:52](../../src/freedom.c#L52)
 
 ```c
 #define EXIT_USAGE
@@ -322,7 +322,7 @@ int main(int argc, char **argv)
 
 ### `CSS_DROPS_REPORT_MAX`
 
-`macro` | [src/freedom.c:170](../../src/freedom.c#L170)
+`macro` | [src/freedom.c:173](../../src/freedom.c#L173)
 
 ```c
 #define CSS_DROPS_REPORT_MAX
@@ -338,7 +338,7 @@ The corpus's worst page has ~25; the cap keeps the report readable and the buffe
 
 ### `HL_FONT_MAX_SHEETS`
 
-`macro` | [src/freedom.c:597](../../src/freedom.c#L597)
+`macro` | [src/freedom.c:600](../../src/freedom.c#L600)
 
 ```c
 #define HL_FONT_MAX_SHEETS
@@ -354,7 +354,7 @@ Same 16-sheet / 2 MiB bounds as the GUI stash (anti-DoS).
 
 ### `HL_FONT_MAX_BYTES`
 
-`macro` | [src/freedom.c:598](../../src/freedom.c#L598)
+`macro` | [src/freedom.c:601](../../src/freedom.c#L601)
 
 ```c
 #define HL_FONT_MAX_BYTES
@@ -366,7 +366,7 @@ Same 16-sheet / 2 MiB bounds as the GUI stash (anti-DoS).
 
 ### `HL_JS_NAV_MAX`
 
-`macro` | [src/freedom.c:951](../../src/freedom.c#L951)
+`macro` | [src/freedom.c:954](../../src/freedom.c#L954)
 
 ```c
 #define HL_JS_NAV_MAX

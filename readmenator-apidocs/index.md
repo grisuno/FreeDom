@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 204 modules, 3529 documented entities, documentation coverage 39.4% (1378/3499 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 206 modules, 3564 documented entities, documentation coverage 39.7% (1403/3534 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (95), h (93), py (12), sh (4)
+Languages: c (96), h (94), py (12), sh (4)
 
 ## Modules
 
@@ -22,7 +22,7 @@ Languages: c (95), h (93), py (12), sh (4)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 201 | 33.2% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 204 | 33.6% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 5 | 4 | 50.0% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) |  | 0 | 6 | 85.7% |
 | [`gui/freedom_view.c`](modules/gui.freedom_view.c.md) |  | 0 | 2 | 0.0% |
@@ -62,6 +62,7 @@ Languages: c (95), h (93), py (12), sh (4)
 | [`include/dom.h`](modules/include.dom.h.md) |  | 4 | 24 | 62.1% |
 | [`include/dom_debug.h`](modules/include.dom_debug.h.md) |  | 0 | 3 | 75.0% |
 | [`include/download.h`](modules/include.download.h.md) |  | 1 | 7 | 11.1% |
+| [`include/fb_panes.h`](modules/include.fb_panes.h.md) |  | 1 | 10 | 75.0% |
 | [`include/flex_layout.h`](modules/include.flex_layout.h.md) |  | 10 | 32 | 53.5% |
 | [`include/form.h`](modules/include.form.h.md) |  | 7 | 3 | 27.3% |
 | [`include/frame_clock.h`](modules/include.frame_clock.h.md) |  | 2 | 4 | 14.3% |
@@ -82,7 +83,7 @@ Languages: c (95), h (93), py (12), sh (4)
 | [`include/js_geom.h`](modules/include.js_geom.h.md) |  | 3 | 15 | 78.9% |
 | [`include/js_location.h`](modules/include.js_location.h.md) |  | 0 | 5 | 50.0% |
 | [`include/js_policy.h`](modules/include.js_policy.h.md) |  | 1 | 5 | 42.9% |
-| [`include/js_sandbox.h`](modules/include.js_sandbox.h.md) |  | 6 | 18 | 56.0% |
+| [`include/js_sandbox.h`](modules/include.js_sandbox.h.md) |  | 6 | 22 | 58.6% |
 | [`include/js_trusted.h`](modules/include.js_trusted.h.md) |  | 4 | 11 | 37.5% |
 | [`include/link_nav.h`](modules/include.link_nav.h.md) |  | 6 | 4 | 36.4% |
 | [`include/local_store.h`](modules/include.local_store.h.md) |  | 2 | 8 | 18.2% |
@@ -154,6 +155,7 @@ Languages: c (95), h (93), py (12), sh (4)
 | [`src/dom.c`](modules/src.dom.c.md) |  | 7 | 42 | 26.0% |
 | [`src/dom_debug.c`](modules/src.dom_debug.c.md) |  | 1 | 2 | 75.0% |
 | [`src/download.c`](modules/src.download.c.md) |  | 0 | 5 | 16.7% |
+| [`src/fb_panes.c`](modules/src.fb_panes.c.md) |  | 0 | 8 | 88.9% |
 | [`src/flex_layout.c`](modules/src.flex_layout.c.md) |  | 0 | 25 | 34.6% |
 | [`src/form.c`](modules/src.form.c.md) |  | 0 | 2 | 0.0% |
 | [`src/frame_clock.c`](modules/src.frame_clock.c.md) |  | 0 | 4 | 0.0% |
@@ -183,14 +185,14 @@ Languages: c (95), h (93), py (12), sh (4)
 | [`src/js_location.c`](modules/src.js_location.c.md) |  | 0 | 5 | 50.0% |
 | [`src/js_location_internal.h`](modules/src.js_location_internal.h.md) | Private to js_dom.c / js_location.c: the dom.histTarget native lives with the | 0 | 1 | 50.0% |
 | [`src/js_policy.c`](modules/src.js_policy.c.md) |  | 0 | 5 | 50.0% |
-| [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 19 | 43.5% |
+| [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 21 | 48.0% |
 | [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 13 | 33.3% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
-| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 313 | 1.6% |
+| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 317 | 1.6% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
-| [`src/page_view.c`](modules/src.page_view.c.md) |  | 20 | 115 | 43.4% |
+| [`src/page_view.c`](modules/src.page_view.c.md) |  | 21 | 115 | 43.8% |
 | [`src/pdf_export.c`](modules/src.pdf_export.c.md) |  | 0 | 4 | 20.0% |
 | [`src/perf_trace.c`](modules/src.perf_trace.c.md) |  | 0 | 11 | 75.0% |
 | [`src/pq_seal.c`](modules/src.pq_seal.c.md) |  | 1 | 8 | 10.0% |

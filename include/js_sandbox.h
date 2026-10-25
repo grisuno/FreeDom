@@ -65,10 +65,20 @@ typedef struct js_result {
 
 #define JS_DEFAULT_MAX_SOURCE   ((size_t)(4u * 1024u * 1024u))
 #define JS_DEFAULT_MEM_LIMIT    ((size_t)(64u * 1024u * 1024u))
-#define JS_DEFAULT_STACK_LIMIT  ((size_t)(256u * 1024u))
+#define JS_MIN_STACK_LIMIT      ((size_t)(256u * 1024u))
+#define JS_MAX_STACK_LIMIT      ((size_t)(6u * 1024u * 1024u))
+#define JS_DEFAULT_STACK_LIMIT  JS_MIN_STACK_LIMIT   /* fallback when the process stack is unknown */
 #define JS_DEFAULT_TIME_BUDGET  ((uint64_t)1000)
 
-/* Returns limits with the secure defaults applied. */
+/* Engine stack cap for a process whose soft stack limit is `soft_stack` bytes (0 = unknown):
+ * 75 % of it (the rest is for native frames), within [JS_MIN_STACK_LIMIT, JS_MAX_STACK_LIMIT]. Pure. */
+size_t js_stack_limit_for(size_t soft_stack);
+
+/* Reads the process stack limit now. A process that will confine itself with seccomp calls this
+ * first: getrlimit is not allowed afterwards, and js_limits_default() needs the value. */
+void js_prime_stack_limit(void);
+
+/* Returns limits with the secure defaults applied (stack cap from the process's RLIMIT_STACK). */
 js_limits js_limits_default(void);
 
 /* --- Pure validator (no engine): NULL / empty / size-cap checks. --- */

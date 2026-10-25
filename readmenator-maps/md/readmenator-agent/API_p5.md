@@ -1,6 +1,39 @@
 # API (page 5 of 11)
 Previous: [API_p4.md](API_p4.md)
 
+## include/secure_fetch.h
+Depends on: `include/anti_fp.h`
+Imported by: `gui/browser_ui.c`, `include/cached_fetch.h`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
+- `validators` (function) `include/secure_fetch.h:18` `* The security logic lives in pure validators (no I/O);`
+- `sf_global_init` (function) `include/secure_fetch.h:219` `void sf_global_init(void);` -- Initialises process-global transport state (libcurl/OpenSSL) once, from the main thread, before any concurrent...
+- `EXCLUDED` (function) `include/secure_fetch.h:225` `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
+- `sf_cookie_put` (function) `include/secure_fetch.h:232` `void sf_cookie_put(const char *url, const char *namevalue);` -- Injects a JS-set cookie ("name=value") into the shared jar, scoped to url's host, as if it arrived via Set-Cookie...
+- `sf_cookie_line_matches` (function) `include/secure_fetch.h:237` `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` -- Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecure\\t expiry\\tname\\tvalue"); if...
+- `sf_user_agent_or_default` (function) `include/secure_fetch.h:246` `const char *sf_user_agent_or_default(const char *ua);` -- Returns ua when it is a non-empty string, else SF_DEFAULT_USER_AGENT.
+- `sf_accept_language_or_default` (function) `include/secure_fetch.h:250` `const char *sf_accept_language_or_default(const char *lang);` -- As sf_user_agent_or_default for Accept-Language.
+- `sf_impersonate_kex_groups` (function) `include/secure_fetch.h:254` `const char *sf_impersonate_kex_groups(void);` -- The interim impersonation ClientHello strings (pure; single source of truth so the * shaping is unit-testable...
+- `sf_impersonate_tls13_ciphers` (function) `include/secure_fetch.h:255` `const char *sf_impersonate_tls13_ciphers(void);`
+- `skipped` (function) `include/secure_fetch.h:275` `* skipped (a classical key exchange is accepted);`
+- `sf_is_redirect_code` (function) `include/secure_fetch.h:286` `int sf_is_redirect_code(long http_code);` -- Enforces the full connection policy in order: TLS version, then KE group, then certificate chain.
+- `sf_header_value` (function) `include/secure_fetch.h:297` `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);` -- Generic header-line reader for the cache validators: when header_line is `name:` (matched case-insensitively, name...
+- `bits` (function) `include/secure_fetch.h:334` `* *flags receives CURLWS_* bits (text/binary/close/cont);`
+- `sf_ws_fd` (function) `include/secure_fetch.h:341` `int sf_ws_fd(const sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
+- `sf_ws_close` (function) `include/secure_fetch.h:344` `void sf_ws_close(sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
+- `connection` (function) `include/secure_fetch.h:348` `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
+- `sf_get` (function) `include/secure_fetch.h:357` `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
+- `sf_response_free` (function) `include/secure_fetch.h:368` `void sf_response_free(sf_response *resp);` -- Performs an HTTPS POST under the given policy, sending body (body_len bytes) with the given Content-Type.
+- `exhausted` (function) `include/secure_fetch.h:379` `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
+- `sf_rcache_put` (function) `include/secure_fetch.h:392` `int sf_rcache_put(const char *from, const char *to, time_t now);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
+- `sf_rcache_get` (function) `include/secure_fetch.h:393` `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
+- `sf_rcache_clear` (function) `include/secure_fetch.h:394` `void sf_rcache_clear(void);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
+- `sf_rcache_set_backing` (function) `include/secure_fetch.h:403` `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
+
+## include/shm_slots.h
+Imported by: `gui/browser_ui.c`, `tests/test_shm_slots.c`
+- `ss_init` (function) `include/shm_slots.h:24` `static inline void ss_init(ss_state *s)`
+- `ss_committed` (function) `include/shm_slots.h:41` `static inline void ss_committed(ss_state *s, int i)` -- Chooses the slot to paint into: the current one if free, else the other free one.
+- `ss_released` (function) `include/shm_slots.h:49` `static inline int ss_released(ss_state *s, int i)` -- if (!s->busy[i]) { s->back = i; return i; } } return -1; } /* The painted slot was attached and committed. static...
+
 ## include/svg_paint.h
 Depends on: `include/svg_render.h`
 Imported by: `gui/browser_ui.c`, `gui/svg_paint.c`

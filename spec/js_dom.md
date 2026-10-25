@@ -596,3 +596,11 @@ y tiene su test rojo (`test_js_dom`, `test_tab`).
 - `nodeName` de elemento = `tagName` (era `''`), `nodeValue` de elemento = `null`,
   `document.firstElementChild/lastElementChild/children/childElementCount`, `element.attributes` iterable,
   `PerformanceObserver.supportedEntryTypes` = `[]` (no se emite ninguna entrada).
+
+## 7p. Identidad de nombre del elemento (2026-10-25, barrido de consola)
+
+- **`localName`** = nombre en minúsculas para un elemento HTML (`tagName` en mayúsculas es la forma HTML
+  del mismo nombre); **`namespaceURI`** = `http://www.w3.org/1999/xhtml` (o el de `svg`/`math` para esos
+  elementos), **`prefix`** = `null`. Antes los tres eran `undefined`: `customElements.whenDefined(el.localName)`
+  de reddit rechazaba con "'undefined' is not a valid custom element name". Dado un `<span>`, cuando se
+  lee `localName`, entonces es `"span"`; un `<svg>` en línea tiene el espacio de nombres SVG.

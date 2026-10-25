@@ -274,6 +274,25 @@ Previous: [KB_include.md](KB_include.md)
   - `DL_MAX_BYTES` (macro, line 31) `#define DL_MAX_BYTES`
 - Imported by: `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
 
+## include/fb_panes.h
+- Doc: fbp_tab_label: typedef enum fbp_tab { FBP_CONSOLE = 0, FBP_HTML, FBP_CSS, FBP_SCRIPT, FBP_NET...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `fbp_tab` (enum, line 17)
+  - `fbp_tab_label` (function, line 30) `const char *fbp_tab_label(int tab);`
+  - `fbp_tab_from_name` (function, line 33) `int fbp_tab_from_name(const char *name);`
+  - `fbp_tab_wrap` (function, line 36) `int fbp_tab_wrap(int tab, int dir);`
+  - `fbp_tab_span` (function, line 39) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);`
+  - `fbp_tab_at` (function, line 42) `int fbp_tab_at(double x, double cell_w, double pad_cells);`
+  - `fbp_is_pane` (function, line 45) `int fbp_is_pane(int tab);`
+  - `fbp_js_quote` (function, line 49) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);`
+  - `fbp_expr` (function, line 53) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);`
+  - `FREEDOM_FB_PANES_H` (macro, line 2) `#define FREEDOM_FB_PANES_H`
+  - `FBP_SELECTOR_MAX` (macro, line 26) `#define FBP_SELECTOR_MAX`
+  - `FBP_EXPR_MAX` (macro, line 27) `#define FBP_EXPR_MAX`
+- Imported by: `gui/browser_ui.c`, `src/fb_panes.c`, `src/freedom.c`, `tests/test_fb_panes.c`, `tests/test_js_dom.c`
+
 ## include/flex_layout.h
 - Doc: fx_item: Upper bound on items per flex line / grid columns.
 - Layer: presentation
@@ -464,37 +483,6 @@ Previous: [KB_include.md](KB_include.md)
   - `FREEDOM_HOSTEDIT_H` (macro, line 2) `#define FREEDOM_HOSTEDIT_H`
   - `HE_MAX_HOST` (macro, line 32) `#define HE_MAX_HOST`
 - Imported by: `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
-
-## include/html_parse.h
-- Doc: hp_script: One executable <script>.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `hp_config` (struct, line 32)
-  - `hp_script` (struct, line 76)
-  - `hp_status` (enum, line 22)
-  - `max_bytes` (type_alias, line 31) `typedef struct hp_config { size_t max_bytes;`
-  - `hp_document` (type_alias, line 39) `typedef struct hp_document hp_document;`
-  - `dropped` (function, line 47) `* dropped (not executed). */ #define HP_MAX_SCRIPTS ((size_t)4096) /* Returns a configuration with the secure...`
-  - `cfg` (function, line 57) `* policy in cfg (cfg == NULL => secure defaults). No script is ever executed. * html == NULL or out == NULL =>...`
-  - `hp_element_count` (function, line 63) `size_t hp_element_count(const hp_document *doc);`
-  - `hp_script_count` (function, line 64) `size_t hp_script_count(const hp_document *doc);`
-  - `hp_event_handler_count` (function, line 65) `size_t hp_event_handler_count(const hp_document *doc);`
-  - `hp_extract_text` (function, line 69) `char *hp_extract_text(const hp_document *doc, size_t *out_len);`
-  - `hp_get_title` (function, line 70) `char *hp_get_title(const hp_document *doc, size_t *out_len);`
-  - `src` (function, line 90) `* carry their raw src (a <script src> with an inline body lists ONLY the src -- * browser rule: when src is present...`
-  - `modules` (function, line 94) `* ES modules (import/export cannot run as a classic script), and template blocks * (text/x-jquery-tmpl, text/html...`
-  - `hp_free_scripts` (function, line 111) `void hp_free_scripts(hp_script *scripts, size_t count);`
-  - `hp_extract_stylesheet_hrefs` (function, line 127) `char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count);`
-  - `hp_free_stylesheet_hrefs` (function, line 130) `void hp_free_stylesheet_hrefs(char **hrefs, size_t count);`
-  - `hp_free` (function, line 133) `void hp_free(char *buf);`
-  - `hp_document_free` (function, line 136) `void hp_document_free(hp_document *doc);`
-  - `hp_document_root` (function, line 142) `const void *hp_document_root(const hp_document *doc);`
-  - `FREEDOM_HTML_PARSE_H` (macro, line 2) `#define FREEDOM_HTML_PARSE_H`
-  - `HP_DEFAULT_MAX_BYTES` (macro, line 41) `#define HP_DEFAULT_MAX_BYTES`
-  - `HP_MAX_SCRIPTS` (macro, line 48) `#define HP_MAX_SCRIPTS`
-  - `HP_MAX_STYLESHEETS` (macro, line 115) `#define HP_MAX_STYLESHEETS`
-- Imported by: `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
 
 
 Next: [KB_include_p3.md](KB_include_p3.md)

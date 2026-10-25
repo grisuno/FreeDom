@@ -1971,6 +1971,7 @@ static void tab_worker_run(int rfd, int wfd) {
      * tzset() caches it while syscalls are still unrestricted. */
     setenv("TZ", "UTC0", 1);
     tzset();
+    js_prime_stack_limit();   /* getrlimit is not allowed once seccomp is on */
 
     /* Confine before any content. Namespace isolation and Landlock are best-effort
      * defense in depth (seccomp already excludes open/socket/exec); seccomp is

@@ -3901,6 +3901,80 @@ static void test_inline_pseudo_registers_no_box(void **state) {
     hp_document_free(doc);
 }
 
+/* A ::after with no box of its own still belongs to its element's flex item: the run was
+ * left unannotated, so the item's band ended before the closing "]" and the next item
+ * started on a fresh band (GitLab's "[ LABEL ]" card headers split from their bodies). */
+/* Generated content inherits the element's computed colour (CSS 2.1 12.1): the "[ " of a
+ * label inside a white-on-dark card painted in the UA default black. */
+/* Every child of a flex column is blockified (CSS Display 3 2.7) even when the column flows
+ * as plain block: the two <span>s of GitLab's `p.stat{display:flex;flex-direction:column}`
+ * ran together on one line ("1Mdeveloper hours saved"). */
+static void test_flex_column_blockifies_inline_items(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p class='s'><span>1M</span><span>hours saved</span></p></body>");
+    static const char CSS[] = ".s{display:flex;flex-direction:column;gap:8px}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *a = find_sub(v, "1M");
+    const pv_run *b = find_sub(v, "hours");
+    assert_non_null(a);
+    assert_non_null(b);
+    assert_true(b->block_break);
+    /* Control: a plain inline pair in an ordinary paragraph keeps flowing. */
+    pv_free(v);
+    hp_document_free(doc);
+    doc = parse("<body><p><span>1M</span><span>hours saved</span></p></body>");
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, "", 0, 0, &v), PV_OK);
+    b = find_sub(v, "hours");
+    assert_non_null(b);
+    assert_false(b->block_break);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_pseudo_content_inherits_color(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='w'><h3 class='l'>Fin</h3></div></body>");
+    static const char CSS[] = ".w{color:#123456}"
+        ".l::before{content:\"[ \"}.l::after{content:\" ]\"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *open = find_sub(v, "[");
+    const pv_run *close = find_sub(v, "]");
+    const pv_run *fin = find_sub(v, "Fin");
+    assert_non_null(open);
+    assert_non_null(close);
+    assert_non_null(fin);
+    assert_int_equal(fin->fg_rgb, 0x123456);
+    assert_int_equal(open->fg_rgb, 0x123456);
+    assert_int_equal(close->fg_rgb, 0x123456);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_after_content_stays_in_flex_item(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='c'><div class='it'><h3 class='l'>Fin</h3></div>"
+                             "<div class='it'>Second</div></div></body>");
+    static const char CSS[] = ".c{display:flex}.it{flex:0 0 100px}"
+        ".l::before{content:\"[ \"}.l::after{content:\" ]\"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *fin = find_sub(v, "Fin");
+    const pv_run *close = find_sub(v, "]");
+    const pv_run *second = find_sub(v, "Second");
+    assert_non_null(fin);
+    assert_non_null(close);
+    assert_non_null(second);
+    assert_true(fin->cont_id >= 0);
+    assert_int_equal(close->cont_id, fin->cont_id);
+    assert_int_equal(close->cont_item, fin->cont_item);
+    assert_int_equal(close->block_id, fin->block_id);
+    assert_true(second->cont_item != fin->cont_item);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_after_box_on_empty_element(void **state) {
     (void)state;
     hp_document *doc = parse("<body><div class='a'></div></body>");
@@ -5332,6 +5406,9 @@ int main(void) {
         cmocka_unit_test(test_before_box_on_host_with_only_element_children),
         cmocka_unit_test(test_pseudo_display_none_generates_nothing),
         cmocka_unit_test(test_inline_pseudo_registers_no_box),
+        cmocka_unit_test(test_flex_column_blockifies_inline_items),
+        cmocka_unit_test(test_pseudo_content_inherits_color),
+        cmocka_unit_test(test_after_content_stays_in_flex_item),
         cmocka_unit_test(test_after_box_on_empty_element),
         cmocka_unit_test(test_build_select_shows_selected_option),
         cmocka_unit_test(test_build_select_last_selected_wins),

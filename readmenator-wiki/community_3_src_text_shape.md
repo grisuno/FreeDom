@@ -1,49 +1,49 @@
 # src: text_shape
 
-*Community 3 | 39 files | cohesion 0.55*
+*Community 3 | 42 files | cohesion 0.56*
 
 ## Definition
 
-This community groups 39 file(s) rooted at `src` with dominant language c (cohesion 0.55). Central symbols: `BLOCKED`, `CSS_DROPS_REPORT_MAX`, `DU_MAX_ENCODED_LEN`, `EXIT_ERROR`, `EXIT_OK`, `EXIT_USAGE`, `FREEDOM_DATA_URL_H`, `FREEDOM_HLS_H`. Core file: `src/text_shape.c` (61 symbols). Documented purpose: test_wl_display — CMocka suite for the pure Wayland socket picker..
+This community groups 42 file(s) rooted at `src` with dominant language c (cohesion 0.56). Central symbols: `BLOCKED`, `CSS_DROPS_REPORT_MAX`, `DU_MAX_ENCODED_LEN`, `EXIT_ERROR`, `EXIT_OK`, `EXIT_USAGE`, `FBP_EXPR_MAX`, `FBP_SELECTOR_MAX`. Core file: `src/text_shape.c` (61 symbols). Documented purpose: test_wl_display — CMocka suite for the pure Wayland socket picker..
 
 ## Files
 
-### `src` (14 files)
+### `src` (15 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `src/data_url.c` | c | data_access | 10 | no |
+| `src/fb_panes.c` | c | utility | 10 | no |
 | `src/freedom.c` | c | utility | 48 | no |
 | `src/hls.c` | c | utility | 10 | no |
 | `src/js_policy.c` | c | business_logic | 6 | no |
 | `src/net_realm.c` | c | utility | 10 | no |
 | `src/perf_trace.c` | c | utility | 12 | no |
-| `src/render_policy.c` | c | presentation | 5 | no |
 
-### `include` (13 files)
+### `include` (14 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/data_url.h` | h | data_access | 6 | no |
+| `include/fb_panes.h` | h | utility | 12 | no |
 | `include/hls.h` | h | utility | 8 | no |
 | `include/js_policy.h` | h | business_logic | 7 | no |
 | `include/net_realm.h` | h | utility | 10 | no |
 | `include/perf_trace.h` | h | utility | 17 | no |
 | `include/psl_data.h` | h | data_access | 7 | no |
-| `include/request_policy.h` | h | business_logic | 5 | no |
 
-### `tests` (12 files)
+### `tests` (13 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `tests/test_data_url.c` | c | testing | 26 | no |
+| `tests/test_fb_panes.c` | c | testing | 8 | no |
 | `tests/test_hls.c` | c | testing | 16 | no |
 | `tests/test_js_policy.c` | c | testing | 5 | no |
 | `tests/test_net_realm.c` | c | testing | 13 | no |
 | `tests/test_perf_trace.c` | c | testing | 12 | no |
-| `tests/test_request_policy.c` | c | testing | 12 | no |
 
-*... and 19 more files in this community.*
+*... and 22 more files in this community.*
 
 
 ## Key Symbols
@@ -54,6 +54,18 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 - `DU_MAX_ENCODED_LEN` (macro, `include/data_url.h:43`) `#define DU_MAX_ENCODED_LEN`
 - `du_is_data_url` (function, `include/data_url.h:46`) `int du_is_data_url(const char *url);` - 16 MiB of encoded text (~12 MiB decoded) -- generous for any real inline icon/ logo/image, bounding
 - `closed` (function, `include/data_url.h:59`) `* 4 fails closed (DU_ERR_BAD_BASE64) -- never decodes a partial prefix. * b64/ou`
+- `FREEDOM_FB_PANES_H` (macro, `include/fb_panes.h:2`) `#define FREEDOM_FB_PANES_H`
+- `fbp_tab` (enum, `include/fb_panes.h:17`)
+- `FBP_SELECTOR_MAX` (macro, `include/fb_panes.h:26`) `#define FBP_SELECTOR_MAX`
+- `FBP_EXPR_MAX` (macro, `include/fb_panes.h:27`) `#define FBP_EXPR_MAX`
+- `fbp_tab_label` (function, `include/fb_panes.h:30`) `const char *fbp_tab_label(int tab);` - typedef enum fbp_tab { FBP_CONSOLE = 0, FBP_HTML, FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_COUNT } fbp_tab;
+- `fbp_tab_from_name` (function, `include/fb_panes.h:33`) `int fbp_tab_from_name(const char *name);` - FBP_HTML, FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_COUNT } fbp_tab; #define FBP_SELECTOR_MAX 256   /* bytes
+- `fbp_tab_wrap` (function, `include/fb_panes.h:36`) `int fbp_tab_wrap(int tab, int dir);` - FBP_NET, FBP_COUNT } fbp_tab; #define FBP_SELECTOR_MAX 256   /* bytes of the user's argument (select
+- `fbp_tab_span` (function, `include/fb_panes.h:39`) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w` - #define FBP_SELECTOR_MAX 256   /* bytes of the user's argument (selector / index / filter) #define F
+- `fbp_tab_at` (function, `include/fb_panes.h:42`) `int fbp_tab_at(double x, double cell_w, double pad_cells);` - /* Label of a tab; an out-of-range id is the console. Never NULL. const char *fbp_tab_label(int tab)
+- `fbp_is_pane` (function, `include/fb_panes.h:45`) `int fbp_is_pane(int tab);` - /* Tab named `name` (case-insensitive), or -1 when unknown / NULL. int fbp_tab_from_name(const char
+- `fbp_js_quote` (function, `include/fb_panes.h:49`) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);` - JS string literal for s[0,n) (double-quoted). Returns its length, or 0 on failure * (n too long, emb
+- `fbp_expr` (function, `include/fb_panes.h:53`) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);` - The expression that fills `tab`'s panel for argument sel[0,n); NUL-terminated in out. * Returns its
 - `FREEDOM_HLS_H` (macro, `include/hls.h:2`) `#define FREEDOM_HLS_H`
 - `hls_status` (enum, `include/hls.h:21`)
 - `hls_segment` (struct, `include/hls.h:29`) - or variant info. URLs are returned as they appear in the playlist (may be relative to the playlist's
@@ -66,23 +78,11 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 - `membership` (function, `include/js_policy.h:16`) `* membership (the allowlist itself is matched by the hostblock module, which * a`
 - `jsp_mode` (enum, `include/js_policy.h:27`)
 - `allowlist` (function, `include/js_policy.h:34`) `* allowlist (e.g. hb_is_allowlisted over js.conf). Fails closed: an unknown mode`
-- `jsp_trusted` (function, `include/js_policy.h:45`) `bool jsp_trusted(bool js_enabled, int host_allowlisted);` - Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its JS is enabled (js
-- `jsp_present_trusted` (function, `include/js_policy.h:54`) `bool jsp_present_trusted(int host_allowlisted);` - Presentation-trust (2026-07-11): a host EXPLICITLY on allow.conf (host_allowlisted, e.g. hb_is_allow
-- `jsp_mode_str` (function, `include/js_policy.h:64`) `const char *jsp_mode_str(jsp_mode mode);` - Stable lowercase name of a mode ("off"/"allowlist"/"on"); an unknown value * yields "off" (fail clos
-- `FREEDOM_NET_REALM_H` (macro, `include/net_realm.h:2`) `#define FREEDOM_NET_REALM_H`
-- `nr_realm` (enum, `include/net_realm.h:29`)
-- `nr_route` (enum, `include/net_realm.h:35`)
-- `tor_enabled` (type_alias, `include/net_realm.h:41`) `typedef struct nr_config { int tor_enabled;`
-- `nr_config` (struct, `include/net_realm.h:42`)
-- `NR_ROUTE_BLOCKED` (function, `include/net_realm.h:57`) `* NR_ROUTE_BLOCKED (fail closed: never route what cannot be classified). A realm`
-- `address` (function, `include/net_realm.h:62`) `* and encrypts by its address (the I2P destination / onion key), so http over it`
-- `nr_realm_allows_http` (function, `include/net_realm.h:66`) `int nr_realm_allows_http(nr_realm r);` - 1 iff plain http:// is acceptable for this realm. An overlay realm authenticates and encrypts by its
-- `nr_realm_name` (function, `include/net_realm.h:69`) `const char *nr_realm_name(nr_realm r);` - 1 iff plain http:// is acceptable for this realm. An overlay realm authenticates and encrypts by its
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 47
-- Cross-boundary resolved imports (EXTRACTED): 38
+- Internal resolved imports (EXTRACTED): 50
+- Cross-boundary resolved imports (EXTRACTED): 40
 
 ## Connections
 
@@ -96,17 +96,18 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `src/render_doc.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `src/render_policy.c` (presentation) -> `include/data_url.h` (data_access)
-- [dataflow UNCHECKED_ALLOC] `src/freedom.c:528` `headless_fetch` `oct`: Result of allocator stored in `oct` is never checked against NULL.
+- [dataflow UNCHECKED_ALLOC] `src/freedom.c:531` `headless_fetch` `oct`: Result of allocator stored in `oct` is never checked against NULL.
 
 ## Open Questions
 
-- Why do 38 file(s) lack file-level docs (e.g. `include/data_url.h`)? What purpose do they serve?
+- Why do 41 file(s) lack file-level docs (e.g. `include/data_url.h`)? What purpose do they serve?
 - What would break if the most connected file in src: text_shape changed?
-- Should src: text_shape be split, given cohesion 0.55?
+- Should src: text_shape be split, given cohesion 0.56?
 
 ## Sources
 
 - `include/data_url.h`
+- `include/fb_panes.h`
 - `include/hls.h`
 - `include/js_policy.h`
 - `include/net_realm.h`
@@ -120,10 +121,9 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 - `include/webfont_load.h`
 - `include/wl_display.h`
 - `src/data_url.c`
+- `src/fb_panes.c`
 - `src/freedom.c`
 - `src/hls.c`
 - `src/js_policy.c`
 - `src/net_realm.c`
-- `src/perf_trace.c`
-- `src/render_policy.c`
-- *... and 19 more*
+- *... and 22 more*

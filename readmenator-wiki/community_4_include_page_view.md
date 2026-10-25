@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 19 file(s) rooted at `include` with dominant language c (cohesion 0.45). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`, `BT_MAX_CHILDREN`. Core file: `src/page_view.c` (251 symbols).
+This community groups 19 file(s) rooted at `include` with dominant language c (cohesion 0.45). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`, `BT_MAX_CHILDREN`. Core file: `src/page_view.c` (253 symbols).
 
 ## Files
 
@@ -20,13 +20,13 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 | `src/box_style.c` | c | utility | 48 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 35 | no |
-| `src/page_view.c` | c | presentation | 251 | no |
+| `src/page_view.c` | c | presentation | 253 | no |
 | `src/render_doc.c` | c | presentation | 21 | no |
 | `tests/test_box_style.c` | c | testing | 49 | no |
-| `tests/test_box_tree.c` | c | testing | 68 | no |
+| `tests/test_box_tree.c` | c | testing | 69 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 71 | no |
-| `tests/test_page_view.c` | c | testing | 210 | no |
+| `tests/test_page_view.c` | c | testing | 212 | no |
 | `tests/test_render_doc.c` | c | testing | 37 | no |
 | `tests/test_render_policy.c` | c | testing | 21 | no |
 

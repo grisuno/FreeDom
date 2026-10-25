@@ -1145,6 +1145,28 @@ static void test_defer_outermost_root_and_negative_z(void **state) {
     assert_int_equal(bt_defer_roots(b2, 2, neg, 1, f2, r2, NULL), 0);
 }
 
+static void test_defer_nested_higher_z_keeps_own_turn(void **state) {
+    (void)state;
+    /* 0: abs z0 backdrop, 1: relative section (z auto), 2: abs ::before inside it,
+     * 3: relative layout z:1 inside it, 4: a card under the layout. */
+    pv_box_def bx[5] = {
+        dbox(-1, BT_POS_ABSOLUTE, 0), dbox(-1, BT_POS_RELATIVE, PV_LEN_UNSET),
+        dbox(1, BT_POS_ABSOLUTE, PV_LEN_UNSET), dbox(1, BT_POS_RELATIVE, 1),
+        dbox(3, 0, PV_LEN_UNSET),
+    };
+    bt_positioned pos[2] = { { .box_index = 0, .z_index = 0 }, { .box_index = 2, .z_index = 0 } };
+    char in_flow[5] = { 0, 1, 0, 1, 1 };
+    int root[5];
+    assert_int_equal(bt_defer_roots(bx, 5, pos, 2, in_flow, root, NULL), 2);
+    assert_int_equal(root[1], 1);
+    assert_int_equal(root[3], 3);   /* z 1 > section z 0: its own turn, after ::before */
+    assert_int_equal(root[4], 3);   /* its content rides with it, not with the section */
+    /* Same z: the nested box keeps riding with the outer root. */
+    bx[3].z_index = PV_LEN_UNSET;
+    assert_int_equal(bt_defer_roots(bx, 5, pos, 2, in_flow, root, NULL), 1);
+    assert_int_equal(root[3], 1);
+}
+
 static void test_defer_uses_tree_order_not_index(void **state) {
     (void)state;
     /* The absolute box (id 0) is NESTED in the relative one (id 1): it holds the
@@ -1239,6 +1261,7 @@ int main(void) {
         cmocka_unit_test(test_defer_relative_before_abs_is_not_deferred),
         cmocka_unit_test(test_defer_respects_z_order),
         cmocka_unit_test(test_defer_outermost_root_and_negative_z),
+        cmocka_unit_test(test_defer_nested_higher_z_keeps_own_turn),
         cmocka_unit_test(test_defer_uses_tree_order_not_index),
         cmocka_unit_test(test_defer_fails_open),
     };

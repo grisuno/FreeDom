@@ -45,5 +45,12 @@
 - Limitacion conocida: las hojas externas se ordenan ANTES de las `<style>` (la posicion
   relativa de `<link>` y `<style>` no se conserva en el texto retenido).
 
+## Pestañas gráficas (tanda 67)
+La ventana Freebug tiene las pestañas Console / HTML / CSS / Script / Net (`spec/fb_panes.md`): clic o
+`Ctrl+Tab` / `Ctrl+Mays+Tab` / `Ctrl+1..5`. En HTML/CSS/Script/Net la caja de abajo es el argumento
+(selector, número de script, filtro de URL) y `Enter` consulta; cada pestaña conserva su argumento y su
+posición. Se vuelven a pedir al cargar otra página. `freedom --as-gui --dump-pane=css:#id pagina` imprime el
+mismo panel sin ventana.
+
 ## Fuera de alcance (siguiente hito)
-Pestanas graficas dedicadas (hoy son comandos en la consola), tiempos de red.
+Depurador con puntos de ruptura, edición en vivo desde el panel, tiempos de red, selección con el ratón.

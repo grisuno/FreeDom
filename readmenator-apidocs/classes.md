@@ -175,6 +175,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`fb_buffer`](modules/include.freebug.h.md#fb_buffer) struct in `include/freebug.h`
 - [`fb_entry`](modules/include.freebug.h.md#fb_entry) struct in `include/freebug.h`
 - [`fb_level`](modules/include.freebug.h.md#fb_level) enum in `include/freebug.h`
+- [`fbp_tab`](modules/include.fb_panes.h.md#fbp_tab) enum in `include/fb_panes.h`
 - [`fc_clock`](modules/include.frame_clock.h.md#fc_clock) struct in `include/frame_clock.h`
 - [`fetch`](modules/src.webfont_load.c.md#fetch) type_alias in `src/webfont_load.c`
 - [`fetch_ctx`](modules/src.secure_fetch.c.md#fetch_ctx) struct in `src/secure_fetch.c`
@@ -363,6 +364,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`pt_stage_stats`](modules/include.perf_trace.h.md#pt_stage_stats) struct in `include/perf_trace.h`
 - [`pt_trace`](modules/include.perf_trace.h.md#pt_trace) struct in `include/perf_trace.h`
 - [`ptrmap`](modules/src.dom.c.md#ptrmap) struct in `src/dom.c`
+- [`pv_after_pending`](modules/src.page_view.c.md#pv_after_pending) struct in `src/page_view.c`
 - [`pv_box_def`](modules/include.page_view.h.md#pv_box_def) struct in `include/page_view.h`
 - [`pv_box_info`](modules/src.page_view.c.md#pv_box_info) struct in `src/page_view.c`
 - [`pv_box_reg`](modules/src.page_view.c.md#pv_box_reg) struct in `src/page_view.c`

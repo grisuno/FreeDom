@@ -188,9 +188,10 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_defer_relative_before_abs_is_not_deferred` (function, line 1097) `static void test_defer_relative_before_abs_is_not_deferred(void **state)`
   - `test_defer_respects_z_order` (function, line 1109) `static void test_defer_respects_z_order(void **state)`
   - `test_defer_outermost_root_and_negative_z` (function, line 1124) `static void test_defer_outermost_root_and_negative_z(void **state)`
-  - `test_defer_uses_tree_order_not_index` (function, line 1148) `static void test_defer_uses_tree_order_not_index(void **state)`
-  - `test_defer_fails_open` (function, line 1164) `static void test_defer_fails_open(void **state)`
-  - `main` (function, line 1178) `int main(void)`
+  - `test_defer_nested_higher_z_keeps_own_turn` (function, line 1148) `static void test_defer_nested_higher_z_keeps_own_turn(void **state)`
+  - `test_defer_uses_tree_order_not_index` (function, line 1170) `static void test_defer_uses_tree_order_not_index(void **state)`
+  - `test_defer_fails_open` (function, line 1186) `static void test_defer_fails_open(void **state)`
+  - `main` (function, line 1200) `int main(void)`
   - `card` (function, line 769) `* containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */ assert_true(dbl_eq(out[2].x, 100));`
   - `UNSET4` (macro, line 630) `#define UNSET4`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`

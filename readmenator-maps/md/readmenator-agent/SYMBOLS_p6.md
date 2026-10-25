@@ -1,8 +1,35 @@
-# Symbols (page 6 of 15)
+# Symbols (page 6 of 16)
 Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `interp_border_style` | function | `src/css.c:855` | `static int interp_border_style(const char *v)` |
+| `interp_box_orient` | function | `src/css.c:2168` | `static int interp_box_orient(const char *v)` |
+| `interp_boxsizing` | function | `src/css.c:379` | `static int interp_boxsizing(const char *v)` |
+| `interp_bs_tok` | function | `src/css.c:932` | `static int interp_bs_tok(const char *t, int *o)` |
+| `interp_bw_tok` | function | `src/css.c:931` | `static int interp_bw_tok(const char *t, int *o)` |
+| `interp_bwidth1` | function | `src/css.c:881` | `static int interp_bwidth1(const char *v)` |
+| `interp_caption_side` | function | `src/css.c:536` | `static int interp_caption_side(const char *v)` |
+| `interp_caret_color` | function | `src/css.c:575` | `static int interp_caret_color(const char *v)` |
+| `interp_clear` | function | `src/css.c:392` | `static int interp_clear(const char *v)` |
+| `interp_color` | function | `src/css.c:195` | `static int interp_color(const char *v)` |
+| `interp_color_scheme` | function | `src/css.c:697` | `static int interp_color_scheme(const char *v)` |
+| `interp_column_count` | function | `src/css.c:1014` | `static int interp_column_count(const char *v)` |
+| `interp_column_width` | function | `src/css.c:1026` | `static int interp_column_width(const char *v)` |
+| `interp_contain` | function | `src/css.c:662` | `static int interp_contain(const char *v)` |
+| `interp_content_visibility` | function | `src/css.c:683` | `static int interp_content_visibility(const char *v)` |
+| `interp_cursor` | function | `src/css.c:441` | `static int interp_cursor(const char *v)` |
+| `interp_direction` | function | `src/css.c:363` | `static int interp_direction(const char *v)` |
+| `interp_display` | function | `src/css.c:335` | `static int interp_display(const char *v)` |
+| `interp_empty_cells` | function | `src/css.c:529` | `static int interp_empty_cells(const char *v)` |
+| `interp_filter_deg` | function | `src/css.c:1119` | `static int interp_filter_deg(const char *s)` |
+| `interp_filter_pct` | function | `src/css.c:1105` | `static int interp_filter_pct(const char *s)` |
+| `interp_flex_basis` | function | `src/css.c:2058` | `static int interp_flex_basis(const char *v, int *out)` |
+| `interp_flex_direction` | function | `src/css.c:2150` | `static int interp_flex_direction(const char *v)` |
+| `interp_flex_factor` | function | `src/css.c:2048` | `static int interp_flex_factor(const char *v)` |
+| `interp_flex_line_pack` | function | `src/css.c:2195` | `static int interp_flex_line_pack(const char *v)` |
+| `interp_flex_wrap` | function | `src/css.c:2205` | `static int interp_flex_wrap(const char *v)` |
+| `interp_float` | function | `src/css.c:385` | `static int interp_float(const char *v)` |
 | `interp_font_kerning` | function | `src/css.c:767` | `static int interp_font_kerning(const char *v)` |
 | `interp_font_stretch` | function | `src/css.c:782` | `static int interp_font_stretch(const char *v)` |
 | `interp_font_variant` | function | `src/css.c:550` | `static int interp_font_variant(const char *v)` |
@@ -469,32 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `dom_attribute_names` | function | `src/dom.c:586` | `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,                            con...` |
 | `dom_build` | function | `src/dom.c:291` | `dom_status dom_build(const hp_document *doc, dom_index **out)` |
 | `dom_child_node` | function | `src/dom.c:1004` | `dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)` |
-| `dom_clone_node` | function | `src/dom.c:934` | `dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id)` |
-| `dom_closest` | function | `src/dom.c:496` | `dom_node_id dom_closest(const dom_index *idx, dom_node_id node,                         const cha...` |
-| `dom_create_char_node` | function | `src/dom.c:1018` | `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,          ...` |
-| `dom_create_element` | function | `src/dom.c:690` | `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)` |
-| `dom_document_position` | function | `src/dom.c:512` | `size_t dom_document_position(const dom_index *idx, dom_node_id node)` |
-| `dom_document_title` | function | `src/dom.c:614` | `const char *dom_document_title(const dom_index *idx, size_t *len)` |
-| `dom_first_child` | function | `src/dom.c:537` | `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)` |
-| `dom_free` | function | `src/dom.c:332` | `void dom_free(dom_index *idx)` |
-| `dom_get_attribute` | function | `src/dom.c:564` | `const char *dom_get_attribute(const dom_index *idx, dom_node_id node,                            ...` |
-| `dom_get_by_class` | function | `src/dom.c:370` | `size_t dom_get_by_class(const dom_index *idx, const char *cls,                         dom_node_i...` |
-| `dom_get_by_tag` | function | `src/dom.c:361` | `size_t dom_get_by_tag(const dom_index *idx, const char *tag,                       dom_node_id *o...` |
-| `dom_get_element_by_id` | function | `src/dom.c:348` | `dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id)` |
-| `dom_get_inner_html` | function | `src/dom.c:887` | `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,                            ...` |
-| `dom_index` | struct | `src/dom.c:220` | `` |
-| `dom_insert_before` | function | `src/dom.c:917` | `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,              ...` |
-| `dom_matches` | function | `src/dom.c:487` | `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)` |
-| `dom_move_children` | function | `src/dom.c:948` | `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,                ...` |
-| `dom_native_node` | function | `src/dom.c:1032` | `const void *dom_native_node(const dom_index *idx, dom_node_id node)` |
-| `dom_next_sibling` | function | `src/dom.c:545` | `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)` |
-| `dom_node_at` | function | `src/dom.c:522` | `dom_node_id dom_node_at(const dom_index *idx, size_t position)` |
-| `dom_node_count` | function | `src/dom.c:344` | `size_t dom_node_count(const dom_index *idx)` |
-| `dom_node_kind` | function | `src/dom.c:1000` | `int dom_node_kind(const dom_index *idx, dom_node_id node)` |
-| `dom_parent` | function | `src/dom.c:527` | `dom_node_id dom_parent(const dom_index *idx, dom_node_id node)` |
-| `dom_precedes` | function | `src/dom.c:517` | `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)` |
-| `dom_query_selector` | function | `src/dom.c:467` | `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,                           ...` |
-| `dom_query_selector_all` | function | `src/dom.c:476` | `size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,                            ...` |
-| `dom_remove_attribute` | function | `src/dom.c:761` | `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

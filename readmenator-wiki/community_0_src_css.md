@@ -103,6 +103,7 @@ This community groups 53 file(s) rooted at `src` with dominant language c (cohes
 - [dataflow DEAD_STORE] `src/box_tree.c:334` `layout_grid` `jx`: `jx` assigned at line 334 but never read afterwards.
 - [dataflow DEAD_STORE] `src/box_tree.c:562` `bt_containing_block` `ancestor`: `ancestor` assigned at line 562 but never read afterwards.
 - [dataflow DEAD_STORE] `src/box_tree.c:716` `bt_resolve_positioning_ex` `z_auto`: `z_auto` assigned at line 716 but never read afterwards.
+- [dataflow UNINIT_USE] `src/box_tree.c:865` `bt_defer_roots` `by_order`: `by_order` may be read before initialization (declared line 864).
 - [dataflow DEAD_STORE] `src/css.c:5481` `page_view` `had_winner`: `had_winner` assigned at line 5481 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:155` `parse_hex` `r`: `r` assigned at line 155 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:156` `parse_hex` `g`: `g` assigned at line 156 but never read afterwards.

@@ -15,6 +15,7 @@
 #include "dom_debug.h"
 #include "html_parse.h"
 #include "freebug.h"
+#include "fb_panes.h"
 #include "hostblock.h"
 #include "host_conf.h"
 #include "identity.h"
@@ -67,6 +68,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --i2p[=host:port]: route .i2p via an I2P HTTP proxy (default 127.0.0.1:4444)\n");
     fprintf(fp, "  --torify: also route ordinary clearnet through Tor (implies --tor)\n");
     fprintf(fp, "  --js[=off|allowlist|on]: page-JS policy (GUI; headless runs JS when this resolves to 'on')\n");
+    fprintf(fp, "  --dump-pane=TAB[:ARG]: headless, print a Freebug panel (html[:selector], css[:selector], script[:n], net[:filter]); implies JS on\n");
     fprintf(fp, "  --dump-console: headless, run the page's JS and print the captured console (Freebug); implies JS on\n");
     fprintf(fp, "  --dump-dom: headless, print the paint-ready render tree (blocks, boxes, containers) to stdout\n");
     fprintf(fp, "  --dump-css: headless, print the resolved CSS property dump (boxes + block properties) to stdout\n");
@@ -117,6 +119,7 @@ static int g_images = 0;
  * console (page console.* output + any uncaught script error). Implies running JS. */
 static int g_dump_console = 0;
 static const char *g_eval_expr = NULL;  /* --eval=EXPR: one Freebug REPL line against the loaded page */
+static char g_pane_expr[FBP_EXPR_MAX];  /* --dump-pane=TAB[:ARG]: the Freebug panel expression (fb_panes) */
 
 /* Set by --dump-dom: print the paint-ready render tree (dom_debug) to stdout instead
  * of the page render, the agent-readable instrument for diagnosing layout/paint gaps.
@@ -1344,6 +1347,27 @@ int main(int argc, char **argv) {
         } else if (strncmp(arg, "--eval=", 7) == 0 && arg[7] != '\0') {
             g_eval_expr = arg + 7;
             js_on = 1;         /* the REPL needs the page's JS context */
+            headless = 1;
+        } else if (strncmp(arg, "--dump-pane=", 12) == 0) {
+            /* TAB[:ARG], ARG = selector / script number / URL filter. The expression is the
+             * one the Freebug window runs (fb_panes), so the two can never disagree. */
+            const char *spec = arg + 12;
+            const char *colon = strchr(spec, ':');
+            char name[16];
+            size_t nl = colon != NULL ? (size_t)(colon - spec) : strlen(spec);
+            if (nl == 0 || nl >= sizeof name) { fprintf(stderr, "--dump-pane: unknown tab\n"); return 2; }
+            memcpy(name, spec, nl);
+            name[nl] = '\0';
+            int ptab = fbp_tab_from_name(name);
+            const char *targ = colon != NULL ? colon + 1 : "";
+            if (!fbp_is_pane(ptab) ||
+                fbp_expr(ptab, targ, strlen(targ), g_pane_expr, sizeof g_pane_expr) == 0) {
+                fprintf(stderr, "--dump-pane: expected html|css|script|net[:argument] (argument <= %d bytes)\n",
+                        FBP_SELECTOR_MAX);
+                return 2;
+            }
+            g_eval_expr = g_pane_expr;
+            js_on = 1;
             headless = 1;
         } else if (strcmp(arg, "--dump-console") == 0) {
             g_dump_console = 1;

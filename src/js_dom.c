@@ -690,7 +690,8 @@ static const char JD_DOCUMENT_SHIM[] =
     /* dataset: data-* attributes via a Proxy, so reads like el.dataset.fooBar map to
      * the data-foo-bar attribute (missing => undefined, never a throw). Identity-safe:
      * only this element's own attributes, no enumeration of anything else. */
-    "      get dataset(){ var h=this._h; return new Proxy({}, {"
+    "      get dataset(){ var h=this._h; var dm=__G.DOMStringMap;"
+    "        return new Proxy(typeof dm==='function'?Object.create(dm.prototype):{}, {"
     "        get:function(t,p){ if(typeof p!=='string') return undefined;"
     "          var k='data-'+p.replace(/[A-Z]/g,function(m){return '-'+m.toLowerCase();});"
     "          var v=dom.getAttribute(h,k); return v===null?undefined:v; },"
@@ -723,6 +724,10 @@ static const char JD_DOCUMENT_SHIM[] =
      "      get selected(){ var h=this._h; var v=dom.getAttribute(h,'selected'); return v!==null; },"
      "      set selected(v){ var h=this._h; if(v) dom.setAttribute(h,'selected','selected'); else dom.removeAttribute(h,'selected'); },"
      "      get tagName(){ var h=this._h; var t=dom.tagName(h); return t===null?null:String(t).toUpperCase(); },"
+     "      get localName(){ var h=this._h; var t=dom.tagName(h); return t===null?null:String(t).toLowerCase(); },"
+     "      get namespaceURI(){ var h=this._h; var t=dom.tagName(h); t=t===null?'':String(t).toLowerCase();"
+     "        return t==='svg'?'http://www.w3.org/2000/svg':t==='math'?'http://www.w3.org/1998/Math/MathML':'http://www.w3.org/1999/xhtml'; },"
+     "      get prefix(){ return null; },"
     "      get id(){ var h=this._h; var v=dom.getAttribute(h,'id'); return v===null?'':v; },"
     "      set id(v){ var h=this._h; dom.setAttribute(h,'id',String(v)); },"
     "      get className(){ var h=this._h; var v=dom.getAttribute(h,'class'); return v===null?'':v; },"
@@ -1113,6 +1118,9 @@ static const char JD_DOCUMENT_SHIM[] =
      * result formatting, date/number rendering -- dies with "Intl is not defined").
      * Everything resolves to a fixed en-US-ish behaviour via the engine's own
      * toLocaleString/toString: no real locale/timezone enumeration leaks (anti-fp). */
+    "  if (typeof __G.DOMStringMap==='undefined'){ (function(){"
+    "    function DOMStringMap(){ throw new TypeError('Illegal constructor'); }"
+    "    Object.defineProperty(__G,'DOMStringMap',{value:DOMStringMap,writable:true,configurable:true,enumerable:false}); })(); }"
     "  if (typeof __G.Intl==='undefined'){ (function(){"
     "    function res(){ return {locale:'en-US',numberingSystem:'latn',calendar:'gregory',timeZone:'UTC'}; }"
     /* BCP 47 case canonicalisation: language lower, 4-letter script title, region upper. */

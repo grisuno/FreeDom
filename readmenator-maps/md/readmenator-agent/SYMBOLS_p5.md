@@ -1,8 +1,35 @@
-# Symbols (page 5 of 15)
+# Symbols (page 5 of 16)
 Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `tab_hist_op` | struct | `include/tab.h:54` | `` |
+| `tab_image` | struct | `include/tab.h:141` | `` |
+| `tab_image_free` | function | `include/tab.h:393` | `void tab_image_free(tab_image *img);` |
+| `tab_last_subreq_stats` | function | `include/tab.h:261` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` |
+| `tab_open` | function | `include/tab.h:157` | `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...` |
+| `tab_page` | struct | `include/tab.h:76` | `` |
+| `tab_page_free` | function | `include/tab.h:391` | `void tab_page_free(tab_page *p);` |
+| `tab_parse_worker_args` | function | `include/tab.h:164` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` |
+| `tab_set_cookies` | function | `include/tab.h:231` | `void tab_set_cookies(tab *t, const char *cookies);` |
+| `tab_set_css_sink` | function | `include/tab.h:200` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);` |
+| `tab_set_fetcher` | function | `include/tab.h:187` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` |
+| `tab_set_identity` | function | `include/tab.h:255` | `void tab_set_identity(tab *t, const char *serialized);` |
+| `tab_set_net_allowed` | function | `include/tab.h:205` | `void tab_set_net_allowed(tab *t, int allowed);` |
+| `tab_set_op_net_budget_ms` | function | `include/tab.h:209` | `void tab_set_op_net_budget_ms(tab *t, int ms);` |
+| `tab_set_storage` | function | `include/tab.h:236` | `void tab_set_storage(tab *t, const char *blob, size_t len);` |
+| `tab_set_viewport_w` | function | `include/tab.h:250` | `void tab_set_viewport_w(tab *t, int px);` |
+| `tab_status` | enum | `include/tab.h:31` | `` |
+| `tab_subreq_permitted` | function | `include/tab.h:266` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
+| `tab_worker_dispatch` | function | `include/tab.h:153` | `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...` |
+| `tab_ws_event_kind` | enum | `include/tab.h:65` | `` |
+| `tab_ws_kind` | enum | `include/tab.h:61` | `` |
+| `tab_ws_op` | struct | `include/tab.h:69` | `` |
+| `view` | function | `include/tab.h:274` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
+| `width` | type_alias | `include/tab.h:141` | `typedef struct tab_image { uint32_t width;` |
+| `FREEDOM_TEXT_CASE_H` | macro | `include/text_case.h:2` | `#define FREEDOM_TEXT_CASE_H` |
+| `TC_SMALLCAPS_SCALE` | macro | `include/text_case.h:15` | `#define TC_SMALLCAPS_SCALE` |
+| `cp` | function | `include/text_case.h:19` | `* cp (identity otherwise), so a transformed text keeps its length. */ uint32_t tc_upper(uint32_t cp);` |
 | `tc_is_lower` | function | `include/text_case.h:24` | `int tc_is_lower(uint32_t cp);` |
 | `tc_lower` | function | `include/text_case.h:21` | `uint32_t tc_lower(uint32_t cp);` |
 | `tc_run` | struct | `include/text_case.h:33` | `` |
@@ -469,32 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `interp_bg_repeat` | function | `src/css.c:617` | `static int interp_bg_repeat(const char *v)` |
 | `interp_bg_size` | function | `src/css.c:627` | `static int interp_bg_size(const char *v)` |
 | `interp_border_collapse` | function | `src/css.c:495` | `static int interp_border_collapse(const char *v)` |
-| `interp_border_style` | function | `src/css.c:855` | `static int interp_border_style(const char *v)` |
-| `interp_box_orient` | function | `src/css.c:2168` | `static int interp_box_orient(const char *v)` |
-| `interp_boxsizing` | function | `src/css.c:379` | `static int interp_boxsizing(const char *v)` |
-| `interp_bs_tok` | function | `src/css.c:932` | `static int interp_bs_tok(const char *t, int *o)` |
-| `interp_bw_tok` | function | `src/css.c:931` | `static int interp_bw_tok(const char *t, int *o)` |
-| `interp_bwidth1` | function | `src/css.c:881` | `static int interp_bwidth1(const char *v)` |
-| `interp_caption_side` | function | `src/css.c:536` | `static int interp_caption_side(const char *v)` |
-| `interp_caret_color` | function | `src/css.c:575` | `static int interp_caret_color(const char *v)` |
-| `interp_clear` | function | `src/css.c:392` | `static int interp_clear(const char *v)` |
-| `interp_color` | function | `src/css.c:195` | `static int interp_color(const char *v)` |
-| `interp_color_scheme` | function | `src/css.c:697` | `static int interp_color_scheme(const char *v)` |
-| `interp_column_count` | function | `src/css.c:1014` | `static int interp_column_count(const char *v)` |
-| `interp_column_width` | function | `src/css.c:1026` | `static int interp_column_width(const char *v)` |
-| `interp_contain` | function | `src/css.c:662` | `static int interp_contain(const char *v)` |
-| `interp_content_visibility` | function | `src/css.c:683` | `static int interp_content_visibility(const char *v)` |
-| `interp_cursor` | function | `src/css.c:441` | `static int interp_cursor(const char *v)` |
-| `interp_direction` | function | `src/css.c:363` | `static int interp_direction(const char *v)` |
-| `interp_display` | function | `src/css.c:335` | `static int interp_display(const char *v)` |
-| `interp_empty_cells` | function | `src/css.c:529` | `static int interp_empty_cells(const char *v)` |
-| `interp_filter_deg` | function | `src/css.c:1119` | `static int interp_filter_deg(const char *s)` |
-| `interp_filter_pct` | function | `src/css.c:1105` | `static int interp_filter_pct(const char *s)` |
-| `interp_flex_basis` | function | `src/css.c:2058` | `static int interp_flex_basis(const char *v, int *out)` |
-| `interp_flex_direction` | function | `src/css.c:2150` | `static int interp_flex_direction(const char *v)` |
-| `interp_flex_factor` | function | `src/css.c:2048` | `static int interp_flex_factor(const char *v)` |
-| `interp_flex_line_pack` | function | `src/css.c:2195` | `static int interp_flex_line_pack(const char *v)` |
-| `interp_flex_wrap` | function | `src/css.c:2205` | `static int interp_flex_wrap(const char *v)` |
-| `interp_float` | function | `src/css.c:385` | `static int interp_float(const char *v)` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

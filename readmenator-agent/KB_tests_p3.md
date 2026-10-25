@@ -340,6 +340,20 @@ static void test_leading_b...`
   - `main` (function, line 204) `int main(void)`
 - Depends on: `include/download.h`
 
+## tests/test_fb_panes.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_labels_and_names` (function, line 9) `static void test_labels_and_names(void **state)`
+  - `test_wrap_is_cyclic_and_total` (function, line 28) `static void test_wrap_is_cyclic_and_total(void **state)`
+  - `test_hit_test_inverts_the_layout` (function, line 38) `static void test_hit_test_inverts_the_layout(void **state)`
+  - `test_quote_escapes_and_fails_closed` (function, line 57) `static void test_quote_escapes_and_fails_closed(void **state)`
+  - `test_expr_per_tab` (function, line 83) `static void test_expr_per_tab(void **state)`
+  - `assert_true` (function, line 91) `assert_true(strncmp(out, "(function(q)`
+  - `test_expr_selector_cannot_escape_the_literal` (function, line 99) `static void test_expr_selector_cannot_escape_the_literal(void **state)`
+  - `main` (function, line 122) `int main(void)`
+- Depends on: `include/fb_panes.h`
+
 ## tests/test_flex_layout.c
 - Doc: test_autofill_count: assert_item(out[0], 0.0, 100.0);  /* no divide-by-zero, behaves like start...
 - Layer: testing

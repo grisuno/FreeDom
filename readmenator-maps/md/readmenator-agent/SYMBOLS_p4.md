@@ -1,8 +1,31 @@
-# Symbols (page 4 of 15)
+# Symbols (page 4 of 16)
 Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `pct` | type_alias | `include/interp.h:69` | `typedef struct ip_keyframe { double pct;` |
+| `val_kind` | type_alias | `include/interp.h:100` | `typedef struct ip_anim { ip_val_kind val_kind;` |
+| `FREEDOM_JS_DOM_H` | macro | `include/js_dom.h:2` | `#define FREEDOM_JS_DOM_H` |
+| `JD_IFRAME_TRACK_MAX` | macro | `include/js_dom.h:40` | `#define JD_IFRAME_TRACK_MAX` |
+| `JD_REPL_CSS_MAX` | macro | `include/js_dom.h:79` | `#define JD_REPL_CSS_MAX` |
+| `URLs` | function | `include/js_dom.h:210` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
+| `getComputedStyle` | function | `include/js_dom.h:108` | `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...` |
+| `global` | function | `include/js_dom.h:73` | `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...` |
+| `host` | function | `include/js_dom.h:163` | `* for a trusted host (allow.conf AND js.conf);` |
+| `jd_click_state` | type_alias | `include/js_dom.h:35` | `typedef struct jd_click_state jd_click_state;` |
+| `jd_click_state_free` | function | `include/js_dom.h:118` | `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);` |
+| `jd_flush_custom_elements` | function | `include/js_dom.h:235` | `void jd_flush_custom_elements(js_context *ctx);` |
+| `jd_get_cookies` | function | `include/js_dom.h:174` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` |
+| `jd_iframe_track` | struct | `include/js_dom.h:41` | `` |
+| `jd_install_repl_api` | function | `include/js_dom.h:82` | `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...` |
+| `jd_opaque` | struct | `include/js_dom.h:46` | `` |
+| `jd_process_iframes` | function | `include/js_dom.h:203` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
+| `jd_status` | enum | `include/js_dom.h:25` | `` |
+| `jd_video_from_scripts` | function | `include/js_dom.h:224` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
+| `opaque` | function | `include/js_dom.h:66` | `* the engine runtime opaque (unreachable from script);` |
+| `out_status` | function | `include/js_dom.h:182` | `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...` |
+| `place` | function | `include/js_dom.h:87` | `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...` |
+| `preventDefault` | function | `include/js_dom.h:134` | `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...` |
 | `processed` | type_alias | `include/js_dom.h:41` | `typedef struct jd_iframe_track { dom_node_id processed[JD_IFRAME_TRACK_MAX];` |
 | `run` | function | `include/js_dom.h:127` | `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...` |
 | `FREEDOM_JS_ENV_H` | macro | `include/js_env.h:2` | `#define FREEDOM_JS_ENV_H` |
@@ -43,26 +66,30 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `FREEDOM_JS_SANDBOX_H` | macro | `include/js_sandbox.h:2` | `#define FREEDOM_JS_SANDBOX_H` |
 | `JS_DEFAULT_MAX_SOURCE` | macro | `include/js_sandbox.h:66` | `#define JS_DEFAULT_MAX_SOURCE` |
 | `JS_DEFAULT_MEM_LIMIT` | macro | `include/js_sandbox.h:67` | `#define JS_DEFAULT_MEM_LIMIT` |
-| `JS_DEFAULT_STACK_LIMIT` | macro | `include/js_sandbox.h:68` | `#define JS_DEFAULT_STACK_LIMIT` |
-| `JS_DEFAULT_TIME_BUDGET` | macro | `include/js_sandbox.h:69` | `#define JS_DEFAULT_TIME_BUDGET` |
+| `JS_DEFAULT_STACK_LIMIT` | macro | `include/js_sandbox.h:70` | `#define JS_DEFAULT_STACK_LIMIT` |
+| `JS_DEFAULT_TIME_BUDGET` | macro | `include/js_sandbox.h:71` | `#define JS_DEFAULT_TIME_BUDGET` |
 | `JS_LOC_FILE_MAX` | macro | `include/js_sandbox.h:64` | `#define JS_LOC_FILE_MAX` |
-| `JS_MODULE_BYTES_MAX` | macro | `include/js_sandbox.h:106` | `#define JS_MODULE_BYTES_MAX` |
-| `JS_MODULE_MAX` | macro | `include/js_sandbox.h:105` | `#define JS_MODULE_MAX` |
-| `JS_REALM_MAX` | macro | `include/js_sandbox.h:179` | `#define JS_REALM_MAX` |
-| `JS_REJECT_MAX` | macro | `include/js_sandbox.h:182` | `#define JS_REJECT_MAX` |
-| `handle` | function | `include/js_sandbox.h:162` | `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....` |
+| `JS_MAX_STACK_LIMIT` | macro | `include/js_sandbox.h:69` | `#define JS_MAX_STACK_LIMIT` |
+| `JS_MIN_STACK_LIMIT` | macro | `include/js_sandbox.h:68` | `#define JS_MIN_STACK_LIMIT` |
+| `JS_MODULE_BYTES_MAX` | macro | `include/js_sandbox.h:116` | `#define JS_MODULE_BYTES_MAX` |
+| `JS_MODULE_MAX` | macro | `include/js_sandbox.h:115` | `#define JS_MODULE_MAX` |
+| `JS_REALM_MAX` | macro | `include/js_sandbox.h:189` | `#define JS_REALM_MAX` |
+| `JS_REJECT_MAX` | macro | `include/js_sandbox.h:192` | `#define JS_REJECT_MAX` |
+| `handle` | function | `include/js_sandbox.h:172` | `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....` |
 | `js_context` | type_alias | `include/js_sandbox.h:47` | `typedef struct js_context js_context;` |
-| `js_context_free` | function | `include/js_sandbox.h:86` | `void js_context_free(js_context *ctx);` |
+| `js_context_free` | function | `include/js_sandbox.h:96` | `void js_context_free(js_context *ctx);` |
 | `js_limits` | struct | `include/js_sandbox.h:39` | `` |
-| `js_loc_from_stack` | function | `include/js_sandbox.h:140` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` |
-| `js_pump_jobs` | function | `include/js_sandbox.h:159` | `int js_pump_jobs(js_context *ctx, int max_jobs);` |
+| `js_loc_from_stack` | function | `include/js_sandbox.h:150` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` |
+| `js_prime_stack_limit` | function | `include/js_sandbox.h:79` | `void js_prime_stack_limit(void);` |
+| `js_pump_jobs` | function | `include/js_sandbox.h:169` | `int js_pump_jobs(js_context *ctx, int max_jobs);` |
 | `js_result` | struct | `include/js_sandbox.h:49` | `` |
-| `js_result_free` | function | `include/js_sandbox.h:151` | `void js_result_free(js_result *res);` |
-| `js_set_current_script` | function | `include/js_sandbox.h:171` | `void js_set_current_script(js_context *ctx, const char *src, const char *type);` |
-| `js_set_module_host` | function | `include/js_sandbox.h:119` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` |
-| `js_set_time_budget` | function | `include/js_sandbox.h:148` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` |
+| `js_result_free` | function | `include/js_sandbox.h:161` | `void js_result_free(js_result *res);` |
+| `js_set_current_script` | function | `include/js_sandbox.h:181` | `void js_set_current_script(js_context *ctx, const char *src, const char *type);` |
+| `js_set_module_host` | function | `include/js_sandbox.h:129` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` |
+| `js_set_time_budget` | function | `include/js_sandbox.h:158` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` |
+| `js_stack_limit_for` | function | `include/js_sandbox.h:75` | `size_t js_stack_limit_for(size_t soft_stack);` |
 | `js_status` | enum | `include/js_sandbox.h:24` | `` |
-| `loaded` | function | `include/js_sandbox.h:114` | `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...` |
+| `loaded` | function | `include/js_sandbox.h:124` | `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...` |
 | `max_source_bytes` | type_alias | `include/js_sandbox.h:39` | `typedef struct js_limits { size_t max_source_bytes;` |
 | `status` | type_alias | `include/js_sandbox.h:48` | `typedef struct js_result { js_status status;` |
 | `FREEDOM_JS_TRUSTED_H` | macro | `include/js_trusted.h:2` | `#define FREEDOM_JS_TRUSTED_H` |
@@ -469,32 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `tab_close` | function | `include/tab.h:388` | `void tab_close(tab *t);` |
 | `tab_eval_result` | struct | `include/tab.h:128` | `` |
 | `tab_eval_result_free` | function | `include/tab.h:392` | `void tab_eval_result_free(tab_eval_result *r);` |
-| `tab_hist_op` | struct | `include/tab.h:54` | `` |
-| `tab_image` | struct | `include/tab.h:141` | `` |
-| `tab_image_free` | function | `include/tab.h:393` | `void tab_image_free(tab_image *img);` |
-| `tab_last_subreq_stats` | function | `include/tab.h:261` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` |
-| `tab_open` | function | `include/tab.h:157` | `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...` |
-| `tab_page` | struct | `include/tab.h:76` | `` |
-| `tab_page_free` | function | `include/tab.h:391` | `void tab_page_free(tab_page *p);` |
-| `tab_parse_worker_args` | function | `include/tab.h:164` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` |
-| `tab_set_cookies` | function | `include/tab.h:231` | `void tab_set_cookies(tab *t, const char *cookies);` |
-| `tab_set_css_sink` | function | `include/tab.h:200` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);` |
-| `tab_set_fetcher` | function | `include/tab.h:187` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` |
-| `tab_set_identity` | function | `include/tab.h:255` | `void tab_set_identity(tab *t, const char *serialized);` |
-| `tab_set_net_allowed` | function | `include/tab.h:205` | `void tab_set_net_allowed(tab *t, int allowed);` |
-| `tab_set_op_net_budget_ms` | function | `include/tab.h:209` | `void tab_set_op_net_budget_ms(tab *t, int ms);` |
-| `tab_set_storage` | function | `include/tab.h:236` | `void tab_set_storage(tab *t, const char *blob, size_t len);` |
-| `tab_set_viewport_w` | function | `include/tab.h:250` | `void tab_set_viewport_w(tab *t, int px);` |
-| `tab_status` | enum | `include/tab.h:31` | `` |
-| `tab_subreq_permitted` | function | `include/tab.h:266` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
-| `tab_worker_dispatch` | function | `include/tab.h:153` | `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...` |
-| `tab_ws_event_kind` | enum | `include/tab.h:65` | `` |
-| `tab_ws_kind` | enum | `include/tab.h:61` | `` |
-| `tab_ws_op` | struct | `include/tab.h:69` | `` |
-| `view` | function | `include/tab.h:274` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
-| `width` | type_alias | `include/tab.h:141` | `typedef struct tab_image { uint32_t width;` |
-| `FREEDOM_TEXT_CASE_H` | macro | `include/text_case.h:2` | `#define FREEDOM_TEXT_CASE_H` |
-| `TC_SMALLCAPS_SCALE` | macro | `include/text_case.h:15` | `#define TC_SMALLCAPS_SCALE` |
-| `cp` | function | `include/text_case.h:19` | `* cp (identity otherwise), so a transformed text keeps its length. */ uint32_t tc_upper(uint32_t cp);` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

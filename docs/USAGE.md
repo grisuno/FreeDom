@@ -29,6 +29,23 @@ WAYLAND_DISPLAY=wayland-1 ./build/freedom
 ./build/freedom --dump-console https://example.com
 ```
 
+### Inspecting a page without a window: `--dump-pane`
+
+The Freebug window has Console / HTML / CSS / Script / Net tabs; `--dump-pane=TAB[:ARG]` prints the same
+panel headlessly (it runs the very expression the window runs; add `--as-gui` so the host gets the
+capabilities `allow.conf`/`js.conf` grant it):
+
+```
+./build/freedom --as-gui --dump-pane=html:'#main' page.html   # DOM outline of #main
+./build/freedom --as-gui --dump-pane=css:'.btn'   page.html   # matching rules (winner first, ~ = overridden), computed, box
+./build/freedom --as-gui --dump-pane=script       page.html   # the <script> list
+./build/freedom --as-gui --dump-pane=script:2     page.html   # script #2 with numbered lines
+./build/freedom --as-gui --dump-pane=net:api      page.html   # XHR/fetch requests whose URL contains "api"
+```
+
+The argument is only ever data (a selector, a number, a URL filter, at most 256 bytes); it is never spliced
+into the script as code. There is no breakpoint debugger and no network timing yet.
+
 ### Seeing JavaScript: the headless console
 
 `--dump-console` runs the page's JavaScript and prints the captured console —

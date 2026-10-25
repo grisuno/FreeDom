@@ -18,6 +18,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/css_values.h`
 - `gui/browser_ui.c` -> `include/data_url.h`
 - `gui/browser_ui.c` -> `include/download.h`
+- `gui/browser_ui.c` -> `include/fb_panes.h`
 - `gui/browser_ui.c` -> `include/form.h`
 - `gui/browser_ui.c` -> `include/frame_clock.h`
 - `gui/browser_ui.c` -> `include/freebug.h`
@@ -210,11 +211,13 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/dom_debug.c` -> `include/page_view.h`
 - `src/download.c` -> `include/download.h`
 - `src/download.c` -> `include/pdf_export.h`
+- `src/fb_panes.c` -> `include/fb_panes.h`
 - `src/flex_layout.c` -> `include/flex_layout.h`
 - `src/form.c` -> `include/form.h`
 - `src/frame_clock.c` -> `include/frame_clock.h`
 - `src/freebug.c` -> `include/freebug.h`
 - `src/freedom.c` -> `include/dom_debug.h`
+- `src/freedom.c` -> `include/fb_panes.h`
 - `src/freedom.c` -> `include/freebug.h`
 - `src/freedom.c` -> `include/hls.h`
 - `src/freedom.c` -> `include/host_conf.h`
@@ -451,6 +454,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_dom_debug.c` -> `include/render_doc.h`
 - `tests/test_dom_debug.c` -> `include/render_policy.h`
 - `tests/test_download.c` -> `include/download.h`
+- `tests/test_fb_panes.c` -> `include/fb_panes.h`
 - `tests/test_flex_layout.c` -> `include/flex_layout.h`
 - `tests/test_form.c` -> `include/form.h`
 - `tests/test_frame_clock.c` -> `include/frame_clock.h`
@@ -468,6 +472,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_import_map.c` -> `include/import_map.h`
 - `tests/test_interp.c` -> `include/interp.h`
 - `tests/test_js_dom.c` -> `include/dom.h`
+- `tests/test_js_dom.c` -> `include/fb_panes.h`
 - `tests/test_js_dom.c` -> `include/html_parse.h`
 - `tests/test_js_dom.c` -> `include/js_dom.h`
 - `tests/test_js_dom.c` -> `include/js_geom.h`
@@ -491,10 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_page_view.c` -> `include/box_style.h`
 - `tests/test_page_view.c` -> `include/css.h`
 - `tests/test_page_view.c` -> `include/dom.h`
-- `tests/test_page_view.c` -> `include/flex_layout.h`
-- `tests/test_page_view.c` -> `include/html_parse.h`
-- `tests/test_page_view.c` -> `include/page_view.h`
-- `tests/test_page_view.c` -> `include/webfont.h`
-- `tests/test_pdf_export.c` -> `include/pdf_export.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

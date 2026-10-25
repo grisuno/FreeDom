@@ -5,7 +5,7 @@
 | `app.py` | Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL... | root | 3 | 0 |
 | `docker-entrypoint.sh` | - | root | 0 | 0 |
 | `docker_run.sh` | Thin wrapper. | root | 0 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 622 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 633 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 10 | 2 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -40,6 +40,7 @@
 | `include/dom.h` | dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: *... | include | 29 | 16 |
 | `include/dom_debug.h` | dd_format: Formats doc into out[0..cap) as a NUL-terminated, line-oriented dump (see the spec... | include | 4 | 3 |
 | `include/download.h` | dl_should_download: 1 if the response should be saved (attachment, or a non-renderable media... | include | 9 | 3 |
+| `include/fb_panes.h` | fbp_tab_label: typedef enum fbp_tab { FBP_CONSOLE = 0, FBP_HTML, FBP_CSS, FBP_SCRIPT, FBP_NET... | include | 12 | 5 |
 | `include/flex_layout.h` | fx_item: Upper bound on items per flex line / grid columns. | include | 43 | 11 |
 | `include/form.h` | fm_field: One named control. value == NULL is treated as the empty value; name == NULL is *... | include | 12 | 3 |
 | `include/frame_clock.h` | active: frame_clock (fc_) — pure animation frame scheduler. | include | 7 | 3 |
@@ -60,7 +61,7 @@
 | `include/js_geom.h` | jg_init: typedef struct jg_rect { dom_node_id node; int32_t     x, y, w, h;       /* document... | include | 19 | 6 |
 | `include/js_location.h` | jd_take_history: Drains the history operations page JS performed since the last call: an owned... | include | 6 | 1 |
 | `include/js_policy.h` | jsp_trusted: Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its... | include | 7 | 5 |
-| `include/js_sandbox.h` | js_limits: Per-evaluation resource limits. | include | 25 | 15 |
+| `include/js_sandbox.h` | js_limits: Per-evaluation resource limits. | include | 29 | 15 |
 | `include/js_trusted.h` | jt_take_opens: The parent installed a new geometry table (layout or scroll changed)... | include | 16 | 3 |
 | `include/link_nav.h` | ln_block_reason: Why a reference was blocked, for a precise user-facing notice and for *... | include | 11 | 5 |
 | `include/local_store.h` | ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and... | include | 11 | 8 |
@@ -129,6 +130,7 @@
 | `src/dom.c` | to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include... | src | 73 | 0 |
 | `src/dom_debug.c` | dd_cursor: Bounded write cursor: `pos` bytes are committed to `out` (always leaving room for the... | src | 24 | 0 |
 | `src/download.c` | lc: download — pure helpers for "save this resource to disk". | src | 12 | 0 |
+| `src/fb_panes.c` | - | src | 10 | 0 |
 | `src/flex_layout.c` | nn: bounded by FX_MAX_ITEMS (no VLAs). | src | 35 | 0 |
 | `src/form.c` | put_char: No I/O, no global state. | src | 8 | 0 |
 | `src/frame_clock.c` | - | src | 4 | 0 |
@@ -158,14 +160,14 @@
 | `src/js_location.c` | jd_lp_set: Defines a string property on the __locParts data object from a (ptr,len) span. * The... | src | 6 | 0 |
 | `src/js_location_internal.h` | Private to js_dom.c / js_location.c: the dom.histTarget native lives with the | src | 2 | 2 |
 | `src/js_policy.c` | eq_ci: js_policy — implementation: pure per-host JavaScript policy decision. | src | 6 | 0 |
-| `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 45 | 0 |
+| `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 48 | 0 |
 | `src/js_trusted.c` | ws_payload: } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for... | src | 17 | 0 |
 | `src/link_nav.c` | clean_href: Removes tab/newline/CR anywhere and trims leading/trailing spaces, in place * into out. | src | 10 | 0 |
-| `src/local_store.c` | - | src | 319 | 0 |
+| `src/local_store.c` | - | src | 323 | 0 |
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
-| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 251 | 0 |
+| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 253 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
 | `src/pq_seal.c` | derive_key: pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out) { if (der ==... | src | 11 | 0 |
@@ -198,7 +200,7 @@
 | `tests/test_block_flow.c` | test_two_positive_collapse_to_max: Two positive margins collapse to the LARGER, never to their... | tests | 8 | 0 |
 | `tests/test_box_blur.c` | - | tests | 11 | 0 |
 | `tests/test_box_style.c` | dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include... | tests | 49 | 0 |
-| `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 68 | 0 |
+| `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 69 | 0 |
 | `tests/test_browser.c` | test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete... | tests | 17 | 0 |
 | `tests/test_cached_fetch.c` | - | tests | 14 | 0 |
 | `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 21 | 0 |
@@ -221,6 +223,7 @@
 | `tests/test_dom.c` | setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] = "<!DOCTYPE... | tests | 42 | 0 |
 | `tests/test_dom_debug.c` | build: #include "dom_debug.h" #include "page_view.h" #include "render_doc.h" #include... | tests | 11 | 0 |
 | `tests/test_download.c` | - | tests | 21 | 0 |
+| `tests/test_fb_panes.c` | - | tests | 8 | 0 |
 | `tests/test_flex_layout.c` | test_autofill_count: assert_item(out[0], 0.0, 100.0);  /* no divide-by-zero, behaves like start... | tests | 71 | 0 |
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
@@ -236,17 +239,17 @@
 | `tests/test_image_decode.c` | - | tests | 37 | 0 |
 | `tests/test_import_map.c` | tres: Test URL resolver: absolute https passes, "/x" is origin-relative, "./x" and "../x" * are... | tests | 8 | 0 |
 | `tests/test_interp.c` | assert_float_equal: ip_ease_fn fns_0to0[] = { { .kind = IP_EASE_LINEAR }, { .kind = IP_EASE_EASE... | tests | 37 | 0 |
-| `tests/test_js_dom.c` | fake_net: Object.defineProperty(event, ...) -- it threw "not an object" on openstreetmap), *... | tests | 221 | 0 |
+| `tests/test_js_dom.c` | fake_net: Object.defineProperty(event, ...) -- it threw "not an object" on openstreetmap), *... | tests | 228 | 0 |
 | `tests/test_js_env.c` | test_install_identity_override: /* --- install --- static void test_install_null_args(void... | tests | 27 | 0 |
 | `tests/test_js_geom.c` | test_same_node_unions: assert_int_equal(jg_add(&t, 2, 0, 0, 5, 5), 0)... | tests | 11 | 0 |
 | `tests/test_js_policy.c` | test_trusted_requires_both_signals: Hito 28: a host is TRUSTED (full author CSS + images, on top... | tests | 5 | 0 |
-| `tests/test_js_sandbox.c` | test_set_time_budget_applies: js_set_time_budget lowers the wall-clock cap armed on subsequent... | tests | 43 | 0 |
+| `tests/test_js_sandbox.c` | test_set_time_budget_applies: js_set_time_budget lowers the wall-clock cap armed on subsequent... | tests | 45 | 0 |
 | `tests/test_link_nav.c` | test_resolve_long_bundle_target: Modern bundle URLs exceed the old 4096 target cap (google's xjs... | tests | 22 | 0 |
 | `tests/test_local_store.c` | - | tests | 18 | 0 |
 | `tests/test_media_decoder.c` | test_pacer_paces_by_pts_delta: #include "media_decoder.h" /* First frame anchors the epoch and... | tests | 6 | 0 |
 | `tests/test_net_realm.c` | test_classify_host_lookalikes: static void test_classify_host_i2p(void **state) { (void)state... | tests | 13 | 0 |
 | `tests/test_os_sandbox.c` | test_policy_denies_io_uring: io_uring is a seccomp-bypass primitive (its IORING_OP_* operations... | tests | 19 | 0 |
-| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 210 | 0 |
+| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 212 | 0 |
 | `tests/test_pdf_export.c` | - | tests | 30 | 0 |
 | `tests/test_perf_trace.c` | - | tests | 12 | 0 |
 | `tests/test_pq_seal.c` | test_requires_both_secrets_and_detects_tamper: static void test_each_seal_is_fresh(void **state)... | tests | 7 | 0 |
@@ -260,7 +263,7 @@
 | `tests/test_secure_fetch.c` | test_enforce_allowlisted_insecure: The allowlist override: the user's sovereign per-host escape... | tests | 57 | 0 |
 | `tests/test_shm_slots.c` | - | tests | 4 | 0 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 17 | 0 |
-| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 145 | 0 |
+| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 148 | 0 |
 | `tests/test_text_case.c` | - | tests | 4 | 0 |
 | `tests/test_text_shape.c` | inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font... | tests | 23 | 0 |
 | `tests/test_textfield.c` | - | tests | 8 | 0 |

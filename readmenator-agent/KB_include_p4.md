@@ -1,6 +1,122 @@
 # Subsystem: include (page 4 of 5)
 Previous: [KB_include_p3.md](KB_include_p3.md)
 
+## include/page_view.h
+- Doc: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `pv_run` (struct, line 121)
+  - `pv_box_def` (struct, line 457)
+  - `pv_cont_def` (struct, line 786)
+  - `pv_view` (struct, line 836)
+  - `pv_text_ext` (struct, line 1026)
+  - `pv_status` (enum, line 34)
+  - `pv_kind` (enum, line 71)
+  - `pv_input_type` (enum, line 87)
+  - `pv_form_method` (enum, line 107)
+  - `kind` (type_alias, line 121) `typedef struct pv_run { pv_kind kind;`
+  - `parent_id` (type_alias, line 457) `typedef struct pv_box_def { int parent_id;`
+  - `parent_id` (type_alias, line 786) `typedef struct pv_cont_def { int parent_id;`
+  - `pv_computed` (type_alias, line 908) `typedef struct pv_computed pv_computed;`
+  - `word_spacing` (type_alias, line 1026) `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;`
+  - `container` (function, line 230) `* cont_id groups runs of one container (-1 = none);`
+  - `bx_display` (function, line 231) `* bx_display (flex/grid);`
+  - `order` (function, line 295) `* groups the runs of ONE floated element in document order (-1 = not in a float);`
+  - `itself` (function, line 359) `* by itself (bx_width_cap2);`
+  - `CSS_LEN_UNSET` (function, line 555) `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
+  - `scale` (function, line 630) `* scale(1)) and rotate in whole degrees (transform_rotate);`
+  - `tree` (function, line 671) `* box tree (a mask covers its whole subtree);`
+  - `declare` (function, line 860) `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
+  - `nonzero` (function, line 872) `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
+  - `resolved` (function, line 879) `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
+  - `policy` (function, line 887) `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
+  - `pv_computed_new` (function, line 909) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
+  - `pv_computed_get` (function, line 916) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);`
+  - `pv_computed_free` (function, line 919) `void pv_computed_free(pv_computed *pc);`
+  - `cause` (function, line 923) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
+  - `pv_new` (function, line 935) `pv_view *pv_new(void);`
+  - `form` (function, line 954) `* form (-1 if none);`
+  - `pv_set_emphasis` (function, line 986) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
+  - `default` (function, line 991) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
+  - `pv_set_color` (function, line 994) `void pv_set_color(pv_view *v, int fg_rgb);`
+  - `pv_set_bgcolor` (function, line 1001) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
+  - `pv_set_text_style` (function, line 1010) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
+  - `pv_text_ext_reset` (function, line 1065) `void pv_text_ext_reset(pv_text_ext *e);`
+  - `ancestors` (function, line 1070) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
+  - `pv_set_text_ext` (function, line 1080) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
+  - `pv_set_grad_text` (function, line 1086) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
+  - `run` (function, line 1089) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
+  - `pv_set_row_span` (function, line 1102) `void pv_set_row_span(pv_view *v, int row_span);`
+  - `pv_set_grid_area` (function, line 1106) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
+  - `pv_set_grid_rows` (function, line 1107) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
+  - `pv_set_ua_tag` (function, line 1112) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
+  - `pv_set_cont_box` (function, line 1116) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
+  - `pv_set_grid` (function, line 1117) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
+  - `pv_set_flex` (function, line 1125) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...`
+  - `pv_set_flex_mauto` (function, line 1128) `void pv_set_flex_mauto(pv_view *v, int mauto);`
+  - `pv_set_cont_item` (function, line 1132) `void pv_set_cont_item(pv_view *v, int cont_item);`
+  - `pv_set_float_w` (function, line 1143) `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...`
+  - `pv_set_float` (function, line 1146) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
+  - `pv_set_box` (function, line 1156) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
+  - `pv_set_box_pct` (function, line 1162) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
+  - `pv_set_box_maxw` (function, line 1167) `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);`
+  - `pv_set_node_id` (function, line 1172) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
+  - `pv_set_block_id` (function, line 1177) `void pv_set_block_id(pv_view *v, int block_id);`
+  - `pv_set_own_box` (function, line 1181) `void pv_set_own_box(pv_view *v, int box_id);`
+  - `pv_set_oof` (function, line 1185) `void pv_set_oof(pv_view *v, int oof);`
+  - `pv_set_justify_self` (function, line 1188) `void pv_set_justify_self(pv_view *v, int justify_self);`
+  - `pv_set_block_node` (function, line 1191) `void pv_set_block_node(pv_view *v, dom_node_id id);`
+  - `pv_set_br_line` (function, line 1199) `void pv_set_br_line(pv_view *v, int br_line);`
+  - `pv_cont_count` (function, line 1214) `size_t pv_cont_count(const pv_view *v);`
+  - `pv_cont_at` (function, line 1215) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
+  - `pv_set_input_checked` (function, line 1219) `void pv_set_input_checked(pv_view *v, int checked);`
+  - `pv_set_input_placeholder` (function, line 1223) `void pv_set_input_placeholder(pv_view *v, int ph_color);`
+  - `pv_svg_append_root_attrs` (function, line 1229) `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);`
+  - `pv_placeholder_color` (function, line 1232) `int pv_placeholder_color(const css_style *ph);`
+  - `pv_set_input_select_opts` (function, line 1236) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
+  - `pv_free` (function, line 1239) `void pv_free(pv_view *v);`
+  - `pv_count` (function, line 1242) `size_t pv_count(const pv_view *v);`
+  - `pv_at` (function, line 1243) `const pv_run *pv_at(const pv_view *v, size_t i);`
+  - `pv_box_count` (function, line 1247) `size_t pv_box_count(const pv_view *v);`
+  - `pv_box_at` (function, line 1248) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
+  - `FREEDOM_PAGE_VIEW_H` (macro, line 2) `#define FREEDOM_PAGE_VIEW_H`
+  - `PV_BSHADOW_LAYERS` (macro, line 44) `#define PV_BSHADOW_LAYERS`
+  - `PV_MAUTO_LEFT` (macro, line 46) `#define PV_MAUTO_LEFT`
+  - `PV_MAUTO_RIGHT` (macro, line 47) `#define PV_MAUTO_RIGHT`
+  - `PV_MAUTO_TOP` (macro, line 48) `#define PV_MAUTO_TOP`
+  - `PV_MAUTO_BOTTOM` (macro, line 49) `#define PV_MAUTO_BOTTOM`
+  - `PV_LEN_UNSET` (macro, line 53) `#define PV_LEN_UNSET`
+  - `PV_LEN_AUTO` (macro, line 54) `#define PV_LEN_AUTO`
+  - `PV_LEN_END` (macro, line 55) `#define PV_LEN_END`
+  - `PV_GRID_TRACKS` (macro, line 58) `#define PV_GRID_TRACKS`
+  - `PV_CONT_DEPTH` (macro, line 63) `#define PV_CONT_DEPTH`
+  - `PV_BG_URL_MAX` (macro, line 69) `#define PV_BG_URL_MAX`
+  - `PV_UA_BODY_MARGIN` (macro, line 857) `#define PV_UA_BODY_MARGIN`
+  - `PV_BR_EMPTY` (macro, line 1194) `#define PV_BR_EMPTY`
+  - `PV_BR_CONT` (macro, line 1195) `#define PV_BR_CONT`
+  - `PV_PH_THEME` (macro, line 1220) `#define PV_PH_THEME`
+  - `PV_PH_HIDDEN` (macro, line 1221) `#define PV_PH_HIDDEN`
+- Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
+- Imported by: `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+
+## include/pdf_export.h
+- Doc: pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order)...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `pe_status` (enum, line 33)
+  - `fallback` (function, line 46) `* fallback (PE_ERR_OVERFLOW, out left empty). title == NULL is treated as empty. * Does NOT append the extension...`
+  - `trusted` (function, line 51) `* dir is trusted (chosen by the app from XDG/$HOME);`
+  - `literal` (function, line 52) `* trusted literal (e.g. PE_EXT / PE_EXT_PNG);`
+  - `pe_paginate` (function, line 70) `size_t pe_paginate(const double *tops, const double *heights, size_t n, double page_h, int *out_page, double...`
+  - `FREEDOM_PDF_EXPORT_H` (macro, line 2) `#define FREEDOM_PDF_EXPORT_H`
+  - `PE_NAME_MAX` (macro, line 28) `#define PE_NAME_MAX`
+  - `PE_EXT` (macro, line 29) `#define PE_EXT`
+  - `PE_EXT_PNG` (macro, line 30) `#define PE_EXT_PNG`
+  - `PE_FALLBACK_NAME` (macro, line 31) `#define PE_FALLBACK_NAME`
+- Imported by: `gui/browser_ui.c`, `src/download.c`, `src/pdf_export.c`, `tests/test_pdf_export.c`
+
 ## include/perf_trace.h
 - Doc: pt_init: #define PT_MAX_SAMPLES 256 typedef struct pt_stage_stats { uint64_t...
 - Layer: utility
@@ -365,130 +481,6 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `TAB_MAX_INPUT` (macro, line 149) `#define TAB_MAX_INPUT`
 - Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tab.c`, `tests/test_tab.c`
-
-## include/text_case.h
-- Doc: Case mapping for text-transform and synthesized small caps (spec/text_case.md).
-- Layer: utility
-- Language: h
-- Symbols:
-  - `tc_run` (struct, line 33)
-  - `cp` (function, line 19) `* cp (identity otherwise), so a transformed text keeps its length. */ uint32_t tc_upper(uint32_t cp);`
-  - `tc_lower` (function, line 21) `uint32_t tc_lower(uint32_t cp);`
-  - `tc_is_lower` (function, line 24) `int tc_is_lower(uint32_t cp);`
-  - `tc_transform` (function, line 29) `size_t tc_transform(const char *s, size_t n, int transform, int word_start, char *out, size_t cap);`
-  - `tc_smallcaps_runs` (function, line 41) `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap);`
-  - `FREEDOM_TEXT_CASE_H` (macro, line 2) `#define FREEDOM_TEXT_CASE_H`
-  - `TC_SMALLCAPS_SCALE` (macro, line 15) `#define TC_SMALLCAPS_SCALE`
-- Imported by: `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`
-
-## include/text_shape.h
-- Doc: tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `tsh_font` (struct, line 33)
-  - `tsh_run` (struct, line 132)
-  - `tsh_status` (enum, line 80)
-  - `family` (type_alias, line 33) `typedef struct tsh_font { int family;`
-  - `end` (type_alias, line 132) `typedef struct tsh_run { size_t start, end;`
-  - `content` (function, line 11) `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);`
-  - `tsh_family_is_generic` (function, line 52) `int tsh_family_is_generic(const char *name);`
-  - `wins` (function, line 58) `* the first name the resolver accepts wins (returns 1, family in out). Pure: the * resolver is injected (fontconfig...`
-  - `tsh_pick_family` (function, line 68) `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...`
-  - `tsh_local_handle` (function, line 75) `int tsh_local_handle(const char *list);`
-  - `tsh_ready` (function, line 89) `int tsh_ready(void);`
-  - `origin` (function, line 92) `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...`
-  - `tsh_measure` (function, line 101) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);`
-  - `tsh_webfont_register` (function, line 114) `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);`
-  - `tsh_webfont_clear` (function, line 120) `void tsh_webfont_clear(void);`
-  - `tsh_face` (function, line 127) `cairo_font_face_t *tsh_face(const tsh_font *f);`
-  - `own` (function, line 136) `* face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ) * stay in the run before them....`
-  - `tsh_shutdown` (function, line 143) `void tsh_shutdown(void);`
-  - `FREEDOM_TEXT_SHAPE_H` (macro, line 19) `#define FREEDOM_TEXT_SHAPE_H`
-  - `TSH_LOCAL_LISTS` (macro, line 46) `#define TSH_LOCAL_LISTS`
-  - `TSH_LOCAL_FAMILIES` (macro, line 47) `#define TSH_LOCAL_FAMILIES`
-  - `TSH_FAMILY_MAX` (macro, line 48) `#define TSH_FAMILY_MAX`
-  - `TSH_MAX_GLYPHS` (macro, line 77) `#define TSH_MAX_GLYPHS`
-  - `TSH_MAX_TEXT` (macro, line 78) `#define TSH_MAX_TEXT`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
-
-## include/textfield.h
-- Doc: tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `tf_field` (struct, line 25)
-  - `tf_status` (enum, line 31)
-  - `buf` (type_alias, line 24) `typedef struct tf_field { char buf[TF_CAP];`
-  - `tf_init` (function, line 38) `void tf_init(tf_field *f);`
-  - `tf_clear` (function, line 45) `void tf_clear(tf_field *f);`
-  - `tf_backspace` (function, line 53) `void tf_backspace(tf_field *f);`
-  - `tf_delete` (function, line 56) `void tf_delete(tf_field *f);`
-  - `tf_move` (function, line 59) `void tf_move(tf_field *f, long delta);`
-  - `tf_home` (function, line 62) `void tf_home(tf_field *f);`
-  - `tf_end` (function, line 63) `void tf_end(tf_field *f);`
-  - `tf_text` (function, line 66) `const char *tf_text(const tf_field *f);`
-  - `tf_len` (function, line 67) `size_t tf_len(const tf_field *f);`
-  - `tf_cursor` (function, line 68) `size_t tf_cursor(const tf_field *f);`
-  - `FREEDOM_TEXTFIELD_H` (macro, line 2) `#define FREEDOM_TEXTFIELD_H`
-  - `TF_CAP` (macro, line 23) `#define TF_CAP`
-- Imported by: `gui/browser_ui.c`, `src/textfield.c`, `tests/test_textfield.c`
-
-## include/tls_impersonate.h
-- Doc: ti_req: Request: parent -> helper.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `ti_req` (struct, line 72)
-  - `ti_resp` (struct, line 82)
-  - `ti_profile` (enum, line 41)
-  - `status` (type_alias, line 82) `typedef struct ti_resp { long status;`
-  - `path` (function, line 26) `* Zero Knowledge path (PQ-hybrid, VERIFYPEER). * * 2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed...`
-  - `chain` (function, line 32) `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT...`
-  - `ti_should_impersonate` (function, line 56) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);`
-  - `success` (function, line 97) `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out...`
-  - `ti_decode_req` (function, line 101) `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
-  - `ti_req_free` (function, line 102) `void ti_req_free(ti_req *r);`
-  - `ti_encode_resp` (function, line 104) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
-  - `ti_decode_resp` (function, line 105) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
-  - `ti_resp_free` (function, line 106) `void ti_resp_free(ti_resp *r);`
-  - `FREEDOM_TLS_IMPERSONATE_H` (macro, line 2) `#define FREEDOM_TLS_IMPERSONATE_H`
-  - `TI_MAGIC` (macro, line 60) `#define TI_MAGIC`
-  - `TI_MAX_URL` (macro, line 61) `#define TI_MAX_URL`
-  - `TI_MAX_METHOD` (macro, line 62) `#define TI_MAX_METHOD`
-  - `TI_MAX_HEADERS` (macro, line 63) `#define TI_MAX_HEADERS`
-  - `TI_MAX_BODY` (macro, line 64) `#define TI_MAX_BODY`
-  - `TI_MAX_RESP_HDR` (macro, line 65) `#define TI_MAX_RESP_HDR`
-  - `TI_MAX_RESP_BODY` (macro, line 66) `#define TI_MAX_RESP_BODY`
-  - `TI_MAX_CHAIN` (macro, line 67) `#define TI_MAX_CHAIN`
-  - `TI_MAX_GROUP` (macro, line 68) `#define TI_MAX_GROUP`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
-
-## include/ui.h
-- Doc: ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no...
-- Layer: presentation
-- Language: h
-- Symbols:
-  - `ui_line` (struct, line 30)
-  - `ui_layout` (struct, line 35)
-  - `rd_doc` (struct, line 69)
-  - `jg_table` (struct, line 95)
-  - `tab` (struct, line 105)
-  - `ui_status` (enum, line 20)
-  - `offset` (type_alias, line 30) `typedef struct ui_line { size_t offset;`
-  - `space` (function, line 44) `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...`
-  - `ui_layout_free` (function, line 52) `void ui_layout_free(ui_layout *lay);`
-  - `ui_clamp_scroll` (function, line 55) `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);`
-  - `available` (function, line 86) `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...`
-  - `out` (function, line 98) `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...`
-  - `placeholders` (function, line 108) `* above always draw image placeholders (no worker to decode hostile bytes);`
-  - `disk` (function, line 113) `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
-  - `images` (function, line 115) `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
-  - `ui_render_viewport_w` (function, line 142) `int ui_render_viewport_w(void);`
-  - `ui_persisted_prefs` (function, line 147) `int ui_persisted_prefs(prefs_state *out);`
-  - `FREEDOM_UI_H` (macro, line 2) `#define FREEDOM_UI_H`
-- Depends on: `include/prefs.h`
-- Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/freedom.c`, `src/ui_layout.c`, `tests/test_ui.c`
 
 
 Next: [KB_include_p5.md](KB_include_p5.md)

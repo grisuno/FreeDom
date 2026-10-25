@@ -1,13 +1,13 @@
 # Second Brain
 
-*Last synthesized: 2026-10-24 | 286 files | 11 concept pages | offline, zero tokens*
+*Last synthesized: 2026-10-25 | 289 files | 11 concept pages | offline, zero tokens*
 
 > Raw sources -> readmenator wiki -> links (Karpathy LLM Wiki Pattern, deterministic).
 > Start here, then open one community page. Prefer grep over full reads.
 
 ## Vault Overview
 
-The codebase centres on `browser_ui.c`, `css.h`, `tab.c`. Architecturally it is 6 layers, dominant utility (165 files) across 11 import-based communities. Recorded risk surface: 0 security findings and 1 dependency cycles.
+The codebase centres on `browser_ui.c`, `css.h`, `tab.c`. Architecturally it is 6 layers, dominant utility (167 files) across 11 import-based communities. Recorded risk surface: 0 security findings and 1 dependency cycles.
 
 Surprising tissue lives between src: css, include: browser_ui, src: tab: 20 extracted cross-community imports and 0 inferred bridges. Follow `connections.json` sorted by strength before refactoring.
 
@@ -17,14 +17,14 @@ Open work clusters around documentation (14% file coverage), 0 security findings
 
 | Metric | Value |
 |--------|-------|
-| Files | 286 |
-| Symbols | 7362 |
-| Resolved imports | 538 |
+| Files | 289 |
+| Symbols | 7431 |
+| Resolved imports | 543 |
 | Languages | c, h, py, sh |
 | Communities | 11 |
-| Doc coverage | 14% (40/286 files) |
+| Doc coverage | 14% (40/289 files) |
 | Security findings | 0 |
-| Estimated read cost | ~214645 tokens (chars/4, offline so $0) |
+| Estimated read cost | ~216932 tokens (chars/4, offline so $0) |
 | Large files (>256KB, maybe generated) | 4: `browser_ui.c`, `css.c`, `page_view.c`, `test_css.c` |
 
 ## Reading Order
@@ -41,9 +41,9 @@ readmenator query "<question>" --target freedom-0.0.3
 ## Concept Wiki
 
 - [src: css (53 files, cohesion 0.72)](./community_0_src_css.md)
-- [include: browser_ui (45 files, cohesion 0.53)](./community_1_include_browser_ui.md)
-- [src: tab (45 files, cohesion 0.70)](./community_2_src_tab.md)
-- [src: text_shape (39 files, cohesion 0.55)](./community_3_src_text_shape.md)
+- [include: browser_ui (45 files, cohesion 0.52)](./community_1_include_browser_ui.md)
+- [src: tab (45 files, cohesion 0.69)](./community_2_src_tab.md)
+- [src: text_shape (42 files, cohesion 0.56)](./community_3_src_text_shape.md)
 - [include: page_view (19 files, cohesion 0.45)](./community_4_include_page_view.md)
 - [include: browser (19 files, cohesion 0.55)](./community_5_include_browser.md)
 - [src: local_store (16 files, cohesion 0.79)](./community_6_src_local_store.md)
@@ -56,10 +56,10 @@ readmenator query "<question>" --target freedom-0.0.3
 
 | File | Score |
 |------|-------|
-| `gui/browser_ui.c` | 170.2 (large, maybe generated) |
+| `gui/browser_ui.c` | 173.3 (large, maybe generated) |
 | `include/css.h` | 88.0 |
 | `src/tab.c` | 66.5 |
-| `src/freedom.c` | 58.8 |
+| `src/freedom.c` | 60.8 |
 | `src/css.c` | 56.7 (large, maybe generated) |
 
 ## Strongest Connections

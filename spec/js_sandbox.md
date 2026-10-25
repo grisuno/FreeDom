@@ -47,6 +47,14 @@ propio del proyecto; el código de `src/` mantiene el build endurecido completo.
    evaluación con `JS_ERR_MEMORY`, no con un OOM del host.
 3. **Acotado en pila.** `max_stack_bytes` limita la profundidad de pila del motor: la recursión
    no acotada de un atacante produce un error capturable, no un desbordamiento del host.
+   **El tope por defecto sigue la pila real del proceso (tanda 67):** con 256 KiB una función
+   recursiva simple moría a ~180 niveles (Firefox admite decenas de miles) y la hidratación de
+   Svelte en huggingface.co desbordaba. `js_stack_limit_for(soft)` (pura) devuelve el 75 % de la
+   pila blanda (el resto queda para los marcos nativos del puente), acotado a
+   `[JS_MIN_STACK_LIMIT, JS_MAX_STACK_LIMIT]` = [256 KiB, 6 MiB]; `0` (desconocida) vale el mínimo.
+   `js_limits_default()` la alimenta con `RLIMIT_STACK` (infinito = 8 MiB). **Dado** una
+   recursión de 2 000 niveles, **entonces** termina; **dado** una recursión infinita, **entonces**
+   `RangeError` capturable (nunca un SIGSEGV).
 4. **Acotado en tiempo.** `time_budget_ms` fija un presupuesto de reloj por evaluación. Un bucle
    infinito (`while(true){}`) se interrumpe y devuelve `JS_ERR_TIMEOUT`. La interrupción usa
    `CLOCK_MONOTONIC` (inmune a saltos del reloj de pared) mediante el *interrupt handler* del

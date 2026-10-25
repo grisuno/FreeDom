@@ -856,12 +856,24 @@ size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
         root_of[s] = (int)s;
         ++nroots;
     }
-    /* Keep only the outermost roots, then propagate each down to its descendants. */
-    for (size_t s = 0; s < nbox; ++s) {
+    /* Keep the outermost roots, plus a nested one whose z is STRICTLY above that of the
+     * nearest root enclosing it: such a box has its own turn in the positioned layer
+     * (after the earlier boxes of the outer root's z), so riding inside the outer root
+     * would paint it under a later sibling of lower z. Walking in TREE order settles
+     * every ancestor before its descendants. */
+    size_t by_order[BT_MAX_POSITIONED];
+    for (size_t i = 0; i < nbox; ++i) by_order[order[i]] = i;
+    for (size_t k = 0; k < nbox; ++k) {
+        size_t s = by_order[k];
         if (root_of[s] != (int)s) continue;
         int cur = boxes[s].parent_id;
         for (size_t hop = 0; cur >= 0 && (size_t)cur < nbox && hop < nbox; ++hop) {
-            if (root_of[cur] == cur) { root_of[s] = -1; --nroots; break; }
+            if (root_of[cur] == cur) {
+                int zc = (boxes[cur].z_index == PV_LEN_UNSET) ? 0 : boxes[cur].z_index;
+                int zs = (boxes[s].z_index == PV_LEN_UNSET) ? 0 : boxes[s].z_index;
+                if (zs <= zc) { root_of[s] = -1; --nroots; }
+                break;
+            }
             cur = boxes[cur].parent_id;
         }
     }

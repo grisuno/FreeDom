@@ -1840,6 +1840,50 @@ static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *
     pv_set_block_node(v, box->block_node);
 }
 
+/* The ::after of an element that has children is emitted when the walk LEAVES the element,
+ * so everything it must ride is captured when it is armed: the element's own container,
+ * item and block annotation, and the text style of its last text. A generated run that
+ * carries none of it (the case when the pseudo has no box of its own) is a stray run
+ * outside the flex/grid item, which ends the item's band and starts the next item on a
+ * fresh one. */
+typedef struct pv_after_pending {
+    const lxb_dom_node_t *el;   /* element whose ::after is pending, NULL = none */
+    char *text;                 /* owned generated content */
+    int box;                    /* generated box id, -1 = none */
+    int brk;                    /* generated box is block-level */
+    int bdeco, indent;          /* the element's own block box and list indent */
+    int align, font_scale, font_abs, line_scale, text_decoration;
+    int color;                  /* inherited colour of the element, -1 = none declared */
+    pv_cont_info cont;
+    pv_box_info boxinfo;
+    pv_text_ext ext;
+} pv_after_pending;
+
+static pv_status after_pending_emit(pv_view *v, pv_container_reg *reg, pv_item_track *items,
+                                    pv_after_pending *ap, int node_id,
+                                    const css_style *acs, int *pending_break) {
+    pv_status st = pv_append(v, PV_TEXT, 0, (ap->box >= 0) ? ap->brk : 0, ap->text, NULL);
+    if (st != PV_OK) return st;
+    pv_set_node_id(v, node_id);
+    if (ap->color >= 0) pv_set_color(v, ap->color);
+    if (acs != NULL) {
+        if (acs->background >= 0) pv_set_bgcolor(v, acs->background);
+        pv_set_emphasis(v, acs->bold > 0, acs->italic > 0);
+    }
+    pv_set_indent(v, ap->indent);
+    pv_set_text_style(v, ap->align, ap->font_scale, ap->font_abs, ap->line_scale,
+                      ap->text_decoration);
+    annotate_flow_run(v, reg, items, &ap->cont, &ap->boxinfo);
+    pv_set_text_ext(v, &ap->ext);
+    pv_set_block_id(v, ap->box >= 0 ? ap->box : ap->bdeco);
+    if (ap->box >= 0 && ap->brk && pending_break != NULL) *pending_break = 1;
+    free(ap->text);
+    ap->text = NULL;
+    ap->el = NULL;
+    ap->box = -1;
+    return PV_OK;
+}
+
 /* Box engine (Hito 23b-8 Step D): document-order registry of box-carrying block
  * nodes plus each box's resolved definition (decoration + parent link). A box's
  * block_id is its index here, so the painter can reconstruct the box tree. */
@@ -2566,6 +2610,20 @@ static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const cs
     return scratch;
 }
 
+/* The colour an element's generated content paints with: the nearest author `color` on the
+ * element or an ancestor (CSS 2.1 12.1: generated content inherits from its element). -1 when
+ * none is declared, which leaves the painter's default exactly as before. Bounded walk. */
+static int pv_inherited_color(const lxb_dom_node_t *el, const css_sheet *sheet,
+                              pv_style_cache *cache) {
+    for (int hop = 0; el != NULL && hop < 4096; ++hop, el = el->parent) {
+        if (el->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        const css_style *cs = cached_element_style_ref(
+            lxb_dom_interface_element((lxb_dom_node_t *)el), sheet, cache);
+        if (cs != NULL && cs->color >= 0) return cs->color;
+    }
+    return -1;
+}
+
 static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
                                       pv_style_cache *cache) {
     return *cached_element_style_ref(el, sheet, cache);
@@ -2920,6 +2978,21 @@ static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style 
          * closes, so the page keeps the full block engine. */
     }
     return 1;
+}
+
+/* A child of a flex column that flows as plain block (see above) is still a flex ITEM, and
+ * every item is blockified (CSS Display 3 2.7): a `<span>` there is a block of its own, not an
+ * inline fragment of its parent's line. A container that IS registered blockifies its items
+ * through the container path instead, so this only answers for the block-flow case. The
+ * parent's display is checked first because the flow test walks the siblings. */
+static int is_flow_column_item(const lxb_dom_node_t *el, const css_sheet *sheet,
+                               pv_style_cache *cache) {
+    const lxb_dom_node_t *par = el->parent;
+    if (par == NULL || par->type != LXB_DOM_NODE_TYPE_ELEMENT) return 0;
+    const css_style *pcs = cached_element_style_ref(
+        lxb_dom_interface_element((lxb_dom_node_t *)par), sheet, cache);
+    if (pcs->display != CSS_DISP_FLEX || pcs->flex_direction != CSS_FD_COLUMN) return 0;
+    return flex_column_flows_as_block(par, pcs, sheet, cache);
 }
 
 /* The share of its parent column's free space a child takes, when the parent is a
@@ -3469,7 +3542,9 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                  * above, which the UA heading margin would otherwise leak into. */
                 if (got_heading) heading_in_atom = 1;
             }
-            int block_set_here = (!got_block && causes_block_break(t, cs->display));
+            int block_set_here = (!got_block &&
+                                  (causes_block_break(t, cs->display) ||
+                                   (reg != NULL && is_flow_column_item(p, sheet, style_cache))));
             if (block_set_here) {
                 *block = p; got_block = 1;
                 /* The leaf block's OWN vertical margins override the UA (a wrapper's
@@ -5280,18 +5355,11 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     pv_box_reg box_reg = { NULL, NULL, 0, 0 };  /* box-carrying blocks + their defs (heap, grows) */
     pv_item_track items = { { NULL }, { 0 } };  /* per-container item ordinals */
     int last_was_gap = 0;  /* dedupe for inter-cell separator runs of flowed tables */
-    const lxb_dom_node_t *after_pending_el = NULL;
-    char *after_pending_text = NULL;
+    pv_after_pending after_p;        /* the ::after armed for the element being walked */
     pv_style_cache cache;  /* memoized cch_element_style() per element (see above) */
     pv_ptrmap pseudo_memo = { NULL, NULL, 0, 0 };  /* generated-box verdicts */
-    int after_pending_box = -1;      /* ::after generated box of after_pending_el */
-    int after_pending_brk = 0;       /* ... and whether it is block-level */
-    pv_cont_info after_cont;         /* the annotation it must ride */
-    pv_box_info after_boxinfo;
-    pv_text_ext after_ext;
-    memset(&after_cont, 0, sizeof after_cont);
-    memset(&after_boxinfo, 0, sizeof after_boxinfo);
-    memset(&after_ext, 0, sizeof after_ext);
+    memset(&after_p, 0, sizeof after_p);
+    after_p.box = -1;
     (void)pv_style_cache_init(&cache);  /* on OOM: cap stays 0, every lookup degrades to uncached */
     /* Per-table flow-vs-grid decisions, plus the style context the table role
      * resolution needs (a role is a computed `display`, spec/css.md). Declared
@@ -5345,35 +5413,19 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     }
 
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {
-        if (after_pending_el != NULL) {
+        if (after_p.el != NULL) {
             int inside = 0;
             for (const lxb_dom_node_t *p = n; p != NULL; p = p->parent) {
-                if (p == after_pending_el) { inside = 1; break; }
+                if (p == after_p.el) { inside = 1; break; }
             }
             if (!inside) {
                 const css_style *acs = cached_element_style_ref(
-                    lxb_dom_interface_element((lxb_dom_node_t *)after_pending_el),
+                    lxb_dom_interface_element((lxb_dom_node_t *)after_p.el),
                     sheet, &cache);
-                pv_status st = pv_append(v, PV_TEXT, 0,
-                                         (after_pending_box >= 0) ? after_pending_brk : 0,
-                                         after_pending_text, NULL);
-                if (st != PV_OK) { free(after_pending_text); after_pending_text = NULL; rc = st; goto cleanup; }
-                pv_set_node_id(v, pv_node_map_id(&node_map, after_pending_el));
-                if (acs->color >= 0) pv_set_color(v, acs->color);
-                if (acs->background >= 0) pv_set_bgcolor(v, acs->background);
-                pv_set_emphasis(v, acs->bold > 0, acs->italic > 0);
-                if (after_pending_box >= 0) {
-                    /* The generated box rides its element's annotation (container,
-                     * item, float) captured when it was armed. */
-                    annotate_flow_run(v, &reg, &items, &after_cont, &after_boxinfo);
-                    pv_set_text_ext(v, &after_ext);
-                    pv_set_block_id(v, after_pending_box);
-                    if (after_pending_brk) pending_break = 1;
-                }
-                free(after_pending_text);
-                after_pending_text = NULL;
-                after_pending_el = NULL;
-                after_pending_box = -1;
+                pv_status st = after_pending_emit(v, &reg, &items, &after_p,
+                                                  pv_node_map_id(&node_map, after_p.el),
+                                                  acs, &pending_break);
+                if (st != PV_OK) { rc = st; goto cleanup; }
             }
         }
         /* A <br> takes the text path: whether it only ends the current line or
@@ -6443,7 +6495,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                                   ecs->content_after_str, NULL);
                         if (st2 != PV_OK) { rc = st2; goto cleanup; }
                         pv_set_node_id(v, pv_node_map_id(&node_map, n));
-                        if (ecs->color >= 0) pv_set_color(v, ecs->color);
+                        pv_set_color(v, pv_inherited_color(n, sheet, &cache));
                         if (ecs->background >= 0) pv_set_bgcolor(v, ecs->background);
                         pv_set_emphasis(v, ecs->bold > 0, ecs->italic > 0);
                         if (after_box >= 0) {
@@ -6644,7 +6696,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     if (st != PV_OK) { free(collapsed); rc = st; goto cleanup; }
                     pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
                     pv_set_oof(v, before_oof);
-                    pv_set_color(v, pcs->color);
+                    pv_set_color(v, pv_inherited_color(n->parent, sheet, &cache));
                     pv_set_bgcolor(v, pcs->background);
                     pv_set_emphasis(v, pcs->bold > 0, pcs->italic > 0);
                     pv_set_indent(v, list_depth);
@@ -6657,17 +6709,25 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     prev_block = block;
                 }
             }
-                if (after_pending_el == NULL && !pafter_hidden
+                if (after_p.el == NULL && !pafter_hidden
                     && (pcs->content_after_str[0] != '\0' || pafter_box >= 0)) {
-                    after_pending_el = n->parent;
-                    after_pending_text = dup_n(pcs->content_after_str,
-                                               strlen(pcs->content_after_str));
-                    if (after_pending_text == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
-                    after_pending_box = pafter_box;
-                    after_pending_brk = pafter_blk;
-                    after_cont = cont;
-                    after_boxinfo = box;
-                    after_ext = ext;
+                    after_p.text = dup_n(pcs->content_after_str,
+                                         strlen(pcs->content_after_str));
+                    if (after_p.text == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
+                    after_p.el = n->parent;
+                    after_p.box = pafter_box;
+                    after_p.brk = pafter_blk;
+                    after_p.bdeco = bdeco;
+                    after_p.indent = list_depth;
+                    after_p.align = align;
+                    after_p.font_scale = font_scale;
+                    after_p.font_abs = font_abs;
+                    after_p.line_scale = line_scale;
+                    after_p.text_decoration = text_decoration;
+                    after_p.color = pv_inherited_color(n->parent, sheet, &cache);
+                    after_p.cont = cont;
+                    after_p.boxinfo = box;
+                    after_p.ext = ext;
                 }
             }
             }
@@ -6887,20 +6947,12 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         if (st != PV_OK) { rc = st; goto cleanup; }
     }
 
-    if (after_pending_el != NULL && after_pending_text != NULL) {
-        pv_status st = pv_append(v, PV_TEXT, 0,
-                                 (after_pending_box >= 0) ? after_pending_brk : 0,
-                                 after_pending_text, NULL);
+    if (after_p.el != NULL && after_p.text != NULL) {
+        const css_style *acs = cached_element_style_ref(
+            lxb_dom_interface_element((lxb_dom_node_t *)after_p.el), sheet, &cache);
+        pv_status st = after_pending_emit(v, &reg, &items, &after_p,
+                                          pv_node_map_id(&node_map, after_p.el), acs, NULL);
         if (st != PV_OK) { rc = st; goto cleanup; }
-        pv_set_node_id(v, pv_node_map_id(&node_map, after_pending_el));
-        if (after_pending_box >= 0) {
-            annotate_flow_run(v, &reg, &items, &after_cont, &after_boxinfo);
-            pv_set_text_ext(v, &after_ext);
-            pv_set_block_id(v, after_pending_box);
-        }
-        free(after_pending_text);
-        after_pending_text = NULL;
-        after_pending_el = NULL;
     }
 
     *out = v;
@@ -6913,7 +6965,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     return PV_OK;
 
 cleanup:
-    free(after_pending_text);
+    free(after_p.text);
     forms_free(&forms);
     css_free(sheet);
     pv_node_map_free(&node_map);

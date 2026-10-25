@@ -26,6 +26,7 @@
 #include "download.h"
 #include "frame_clock.h"
 #include "freebug.h"
+#include "fb_panes.h"
 #include "identity.h"
 #include "hostblock.h"
 #include "hostedit.h"
@@ -603,6 +604,7 @@ typedef struct browser_window {
 typedef struct freebug_window freebug_window;
 static void freebug_toggle(browser_window *w);
 static void freebug_redraw(browser_window *w);
+static void freebug_panes_invalidate(browser_window *w);
 static void freebug_destroy(browser_window *w);
 static int  freebug_is_open(const browser_window *w);
 static int  freebug_owns_surface(const browser_window *w, const struct wl_surface *sf);
@@ -2340,6 +2342,7 @@ static void close_page_worker(browser_window *w) {
 static void drop_repl_worker(browser_window *w) {
     close_page_worker(w);
     fb_buffer_reset(&w->console);
+    freebug_panes_invalidate(w);
     if (w->freebug != NULL) freebug_redraw(w);
 }
 
@@ -2536,6 +2539,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     collect_local_storage(w, &page);
     ws_apply_ops(w, &page);   /* sockets the load scripts opened (needs the live worker) */
     tab_page_free(&page);
+    freebug_panes_invalidate(w);               /* the HTML/CSS/Script/Net panels describe the old page */
     if (w->freebug != NULL) freebug_redraw(w); /* refresh the console pane if open */
 }
 
@@ -16652,6 +16656,9 @@ static void update_hover(browser_window *w) {
 #define FBW_W          760
 #define FBW_H          560
 #define FBW_HEADER     26.0
+#define FBW_TABBAR     24.0
+#define FBW_TOP        (FBW_HEADER + FBW_TABBAR)  /* y where the body starts, below the tab bar */
+#define FBW_TAB_PAD    1.0   /* cells of padding each side of a tab label */
 #define FBW_PAD         8.0
 #define FBW_LINE       16.0
 #define FBW_GUTTER     16.0
@@ -16680,16 +16687,20 @@ struct freebug_window {
     int    copy_status;    /* 0=idle, 1=no-clipboard(red), 2=OK(green) */
     uint64_t copy_ts;      /* last copy timestamp (ms), for "Copied!" feedback */
     tf_field editor;       /* the JS REPL input (newlines allowed) */
+    int    tab;                        /* active fbp_tab */
+    char  *pane_text[FBP_COUNT];       /* last text of each panel, NULL = not fetched */
+    char  *saved_arg[FBP_COUNT];       /* each tab's editor text while another tab is active */
+    double saved_scroll[FBP_COUNT];    /* each tab's scroll while another tab is active */
 };
 
 /* y of the divider between the log pane and the editor. */
 static double fbw_split_y(const freebug_window *fb) {
-    double body = (double)fb->height - FBW_HEADER;
+    double body = (double)fb->height - FBW_TOP;
     if (body < 0) body = 0;
     double s = fb->split;
     if (s < FBW_MIN_SPLIT) s = FBW_MIN_SPLIT;
     if (s > FBW_MAX_SPLIT) s = FBW_MAX_SPLIT;
-    return FBW_HEADER + body * s;
+    return FBW_TOP + body * s;
 }
 
 static int freebug_ensure_buffer(freebug_window *fb) {
@@ -16743,6 +16754,86 @@ static size_t fbw_console_lines(const fb_buffer *log) {
 /* Forward declaration (defined in the clipboard section below). */
 static void freebug_copy_console(browser_window *w);
 
+/* Width of one monospace cell at the panel font size (the tab bar's unit). */
+static double fbw_cell_w(cairo_t *cr) {
+    cairo_text_extents_t te;
+    cairo_text_extents(cr, "M", &te);
+    return te.x_advance > 1.0 ? te.x_advance : 8.0;
+}
+
+static size_t fbw_text_lines(const char *t) {
+    if (t == NULL || *t == '\0') return 0;
+    size_t n = 1;
+    for (const char *p = t; *p != '\0'; ++p) if (*p == '\n') ++n;
+    return n;
+}
+
+static const char *fbw_arg_hint(int which) {
+    switch (which) {
+    case FBP_HTML:   return "CSS selector (empty = whole page), Enter to inspect";
+    case FBP_CSS:    return "CSS selector (empty = body), Enter to inspect";
+    case FBP_SCRIPT: return "script number (empty = list), Enter to show";
+    case FBP_NET:    return "URL filter (empty = all requests), Enter to refresh";
+    default:         return "";
+    }
+}
+
+/* Firebug-style tab bar under the header: one cell strip per fbp_tab, the active one lit. */
+static void fbw_paint_tabs(cairo_t *cr, const freebug_window *fb) {
+    double cw = fbw_cell_w(cr);
+    cairo_set_source_rgb(cr, 0.15, 0.16, 0.19);
+    cairo_rectangle(cr, 0, FBW_HEADER, fb->width, FBW_TABBAR);
+    cairo_fill(cr);
+    for (int t = 0; t < FBP_COUNT; ++t) {
+        double x, w;
+        fbp_tab_span(t, cw, FBW_TAB_PAD, &x, &w);
+        int on = (t == fb->tab);
+        if (on) {
+            cairo_set_source_rgb(cr, 0.11, 0.12, 0.14);
+            cairo_rectangle(cr, x, FBW_HEADER + 2.0, w, FBW_TABBAR - 2.0);
+            cairo_fill(cr);
+            cairo_set_source_rgb(cr, 0.38, 0.62, 0.92);
+            cairo_rectangle(cr, x, FBW_HEADER + 2.0, w, 2.0);
+            cairo_fill(cr);
+        }
+        cairo_set_source_rgb(cr, on ? 0.92 : 0.62, on ? 0.94 : 0.65, on ? 0.97 : 0.70);
+        cairo_move_to(cr, x + cw * FBW_TAB_PAD, FBW_HEADER + FBW_TABBAR - 8.0);
+        cairo_show_text(cr, fbp_tab_label(t));
+    }
+}
+
+/* A panel's text, one monospace line per source line, from `y` (already scrolled). */
+static void fbw_paint_pane(cairo_t *cr, const freebug_window *fb, double y, double split_y) {
+    const char *t = fb->pane_text[fb->tab];
+    if (t == NULL) {
+        cairo_set_source_rgb(cr, 0.55, 0.58, 0.64);
+        cairo_move_to(cr, FBW_PAD, y);
+        cairo_show_text(cr, "(nothing yet: press Enter in the box below to inspect)");
+        return;
+    }
+    const char *p = t;
+    for (;;) {
+        const char *nl = strchr(p, '\n');
+        size_t len = nl ? (size_t)(nl - p) : strlen(p);
+        if (y > FBW_TOP && y < split_y + FBW_LINE) {
+            char buf[1024];
+            size_t cpy = (len < sizeof buf - 1) ? len : sizeof buf - 1;
+            memcpy(buf, p, cpy);
+            buf[cpy] = '\0';
+            int dim = (buf[0] == '=' && buf[1] == '=');
+            int lost = (buf[0] == ' ' && buf[1] == ' ' && buf[2] == '~');
+            if (dim) cairo_set_source_rgb(cr, 0.45, 0.70, 0.95);
+            else if (lost) cairo_set_source_rgb(cr, 0.50, 0.52, 0.56);   /* overridden declaration */
+            else cairo_set_source_rgb(cr, 0.86, 0.88, 0.91);
+            cairo_move_to(cr, FBW_PAD, y);
+            cairo_show_text(cr, buf);
+        }
+        y += FBW_LINE;
+        if (nl == NULL) break;
+        p = nl + 1;
+    }
+}
+
 static void freebug_paint(freebug_window *fb) {
     browser_window *w = fb->owner;
     cairo_t *cr = cairo_create(fb->cairo_surface);
@@ -16757,7 +16848,7 @@ static void freebug_paint(freebug_window *fb) {
     cairo_fill(cr);
     cairo_set_source_rgb(cr, 0.80, 0.82, 0.86);
     cairo_move_to(cr, FBW_PAD, FBW_HEADER - 8.0);
-    cairo_show_text(cr, "Freebug  -  F12 close  -  Ctrl+Enter run  - Ctrl+L clear  - Ctrl+C copy");
+    cairo_show_text(cr, "Freebug - F12 close - Ctrl+Tab/1-5 tabs - Ctrl+Enter run - Ctrl+L clear - Ctrl+C copy");
 
     /* copy button (right side of header) */
     double cbx = fb->width - FBW_PAD - FBW_COPY_BTN_W;
@@ -16792,12 +16883,14 @@ static void freebug_paint(freebug_window *fb) {
     cairo_line_to(cr, icx + 8.0, icy + 4.0);
     cairo_stroke(cr);
     cairo_set_font_size(cr, 13.0);
+    fbw_paint_tabs(cr, fb);
 
     double split_y = fbw_split_y(fb);
-    double logh = split_y - FBW_HEADER;
+    double logh = split_y - FBW_TOP;
 
     /* clamp the scroll against the content height */
-    double total = (double)fbw_console_lines(&w->console) * FBW_LINE;
+    double total = (double)((fb->tab == FBP_CONSOLE) ? fbw_console_lines(&w->console)
+                                                     : fbw_text_lines(fb->pane_text[fb->tab])) * FBW_LINE;
     double view = logh - 2 * FBW_PAD;
     double maxs = (total > view) ? (total - view) : 0.0;
     if (fb->scroll > maxs) fb->scroll = maxs;
@@ -16805,9 +16898,14 @@ static void freebug_paint(freebug_window *fb) {
 
     /* log pane (clipped) */
     cairo_save(cr);
-    cairo_rectangle(cr, 0, FBW_HEADER, fb->width, logh);
+    cairo_rectangle(cr, 0, FBW_TOP, fb->width, logh);
     cairo_clip(cr);
-    double y = FBW_HEADER + FBW_PAD + FBW_LINE - fb->scroll;
+    double y = FBW_TOP + FBW_PAD + FBW_LINE - fb->scroll;
+    if (fb->tab != FBP_CONSOLE) {
+        fbw_paint_pane(cr, fb, y, split_y);
+        cairo_restore(cr);
+        goto divider;
+    }
     for (size_t i = 0; i < fb_buffer_count(&w->console); ++i) {
         const fb_entry *e = fb_buffer_at(&w->console, i);
         double r, g, b; fbw_level_rgb(e->level, &r, &g, &b);
@@ -16818,7 +16916,7 @@ static void freebug_paint(freebug_window *fb) {
         for (;;) {
             const char *nl = (rem > 0) ? (const char *)memchr(p, '\n', rem) : NULL;
             size_t linelen = nl ? (size_t)(nl - p) : rem;
-            if (y > FBW_HEADER && y < split_y + FBW_LINE) {
+            if (y > FBW_TOP && y < split_y + FBW_LINE) {
                 double textx = FBW_PAD + FBW_GUTTER;
                 if (first) {
                     const char *mk = (e->level == FB_ERROR) ? "x"
@@ -16866,6 +16964,7 @@ static void freebug_paint(freebug_window *fb) {
     }
     cairo_restore(cr);
 
+divider:
     /* divider */
     cairo_set_source_rgb(cr, 0.30, 0.32, 0.36);
     cairo_rectangle(cr, 0, split_y, fb->width, 3.0);
@@ -16886,7 +16985,7 @@ static void freebug_paint(freebug_window *fb) {
     if (elen == 0) {
         cairo_set_source_rgb(cr, 0.45, 0.47, 0.50);
         cairo_move_to(cr, FBW_PAD + FBW_GUTTER, ey0 + FBW_PAD + FBW_LINE);
-        cairo_show_text(cr, "type JS here, Ctrl+Enter to run");
+        cairo_show_text(cr, fb->tab == FBP_CONSOLE ? "type JS here, Ctrl+Enter to run" : fbw_arg_hint(fb->tab));
         /* still draw the prompt + caret at the start */
         cairo_set_source_rgb(cr, 0.55, 0.85, 0.55);
         cairo_move_to(cr, FBW_PAD, ey0 + FBW_PAD + FBW_LINE);
@@ -17036,6 +17135,7 @@ static void freebug_toggle(browser_window *w) {
 static void freebug_destroy(browser_window *w) {
     if (w->freebug == NULL) return;
     freebug_hide(w);
+    for (int t = 0; t < FBP_COUNT; ++t) { free(w->freebug->pane_text[t]); free(w->freebug->saved_arg[t]); }
     free(w->freebug);
     w->freebug = NULL;
 }
@@ -17090,9 +17190,75 @@ static tab *freebug_repl_worker(browser_window *w) {
     return t;
 }
 
+/* Runs the active panel's expression (fb_panes) in the page's REPL worker and stores the text it
+ * returns. The editor holds the panel's argument (selector / script number / URL filter). The
+ * expression is built from the argument as a string LITERAL, never as code (fbp_js_quote). */
+static void freebug_pane_refresh(browser_window *w) {
+    freebug_window *fb = w->freebug;
+    if (fb == NULL || !fbp_is_pane(fb->tab)) return;
+    char expr[FBP_EXPR_MAX];
+    const char *arg = tf_text(&fb->editor);
+    size_t alen = tf_len(&fb->editor);
+    /* The argument is one line: a newline can only come from a paste. */
+    for (size_t i = 0; i < alen; ++i) if (arg[i] == '\n') { alen = i; break; }
+    const char *msg = NULL;
+    char *text = NULL;
+    if (fbp_expr(fb->tab, arg, alen, expr, sizeof expr) == 0) {
+        msg = "(argument too long or invalid)";
+    } else {
+        tab *t = freebug_repl_worker(w);
+        if (t == NULL) {
+            msg = "(no live page to inspect: reload the page first)";
+        } else {
+            tab_eval_result r;
+            if (tab_eval(t, expr, strlen(expr), &r) != TAB_OK) {
+                if (w->tab_worker == t) close_page_worker(w);
+                msg = "(the page worker is gone: reload the page)";
+            } else {
+                text = strdup(r.value != NULL ? r.value : "");
+                tab_eval_result_free(&r);
+                if (text == NULL) msg = "(out of memory)";
+            }
+        }
+    }
+    if (text == NULL) text = strdup(msg != NULL ? msg : "");
+    free(fb->pane_text[fb->tab]);
+    fb->pane_text[fb->tab] = text;
+    fb->scroll = 0;
+    freebug_redraw_fb(fb);
+}
+
+/* Activates `tab`: each tab keeps its own editor text and scroll, so switching back finds the
+ * argument and position left behind. A panel never fetched is fetched on first display. */
+static void freebug_set_tab(browser_window *w, int which) {
+    freebug_window *fb = w->freebug;
+    if (fb == NULL || which < 0 || which >= FBP_COUNT || which == fb->tab) return;
+    int old = fb->tab;
+    free(fb->saved_arg[old]);
+    fb->saved_arg[old] = strndup(tf_text(&fb->editor), tf_len(&fb->editor));
+    fb->saved_scroll[old] = fb->scroll;
+    tf_clear(&fb->editor);
+    const char *keep = fb->saved_arg[which];
+    for (const char *p = keep; p != NULL && *p != '\0'; ++p) tf_insert(&fb->editor, *p);
+    fb->scroll = fb->saved_scroll[which];
+    fb->tab = which;
+    if (fbp_is_pane(which) && fb->pane_text[which] == NULL) freebug_pane_refresh(w);
+    else freebug_redraw_fb(fb);
+}
+
+/* A new page (or a dropped worker) makes every fetched panel stale: forget them and, when the
+ * window shows one, fetch it again. */
+static void freebug_panes_invalidate(browser_window *w) {
+    freebug_window *fb = w->freebug;
+    if (fb == NULL) return;
+    for (int t = 0; t < FBP_COUNT; ++t) { free(fb->pane_text[t]); fb->pane_text[t] = NULL; }
+    if (fb->visible && fbp_is_pane(fb->tab) && w->tab_worker != NULL) freebug_pane_refresh(w);
+}
+
 static void freebug_eval(browser_window *w) {
     freebug_window *fb = w->freebug;
     if (fb == NULL) return;
+    if (fbp_is_pane(fb->tab)) { freebug_pane_refresh(w); return; }
     const char *code = tf_text(&fb->editor);
     size_t clen = tf_len(&fb->editor);
     if (clen == 0) return;
@@ -17134,9 +17300,16 @@ static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
                                const char *utf8, int n, int ctrl, int shift) {
     freebug_window *fb = w->freebug;
     if (fb == NULL) return;
-    (void)shift;
     if (sym == XKB_KEY_F12 || sym == XKB_KEY_Escape) { freebug_hide(w); redraw(w); return; }
     if (ctrl && (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter)) { freebug_eval(w); return; }
+    if (ctrl && (sym == XKB_KEY_Tab || sym == XKB_KEY_ISO_Left_Tab)) {
+        freebug_set_tab(w, fbp_tab_wrap(fb->tab, (shift || sym == XKB_KEY_ISO_Left_Tab) ? -1 : 1));
+        return;
+    }
+    if (ctrl && sym >= XKB_KEY_1 && sym < XKB_KEY_1 + FBP_COUNT) {
+        freebug_set_tab(w, (int)(sym - XKB_KEY_1));
+        return;
+    }
     if (ctrl && (sym == XKB_KEY_c || sym == XKB_KEY_C)) {
         freebug_copy_console(w); freebug_redraw_fb(fb); return;
     }
@@ -17144,6 +17317,7 @@ static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
         tf_clear(&fb->editor); freebug_redraw_fb(fb); return;
     }
     if (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter) {
+        if (fbp_is_pane(fb->tab)) { freebug_pane_refresh(w); return; }  /* one-line argument */
         tf_insert(&fb->editor, '\n'); freebug_redraw_fb(fb); return;
     }
     if (sym == XKB_KEY_BackSpace) { tf_backspace(&fb->editor); freebug_redraw_fb(fb); return; }
@@ -17172,6 +17346,16 @@ static void freebug_pointer_button(browser_window *w, uint32_t serial,
     if (button != UI_BTN_LEFT) return;
     if (state == WL_POINTER_BUTTON_STATE_RELEASED) { fb->dragging_split = 0; return; }
     w->last_serial = serial;
+    if (w->ptr_y >= FBW_HEADER && w->ptr_y < FBW_TOP) {
+        cairo_t *mcr = cairo_create(fb->cairo_surface);
+        cairo_select_font_face(mcr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        cairo_set_font_size(mcr, 13.0);
+        double cw = fbw_cell_w(mcr);
+        cairo_destroy(mcr);
+        int hit = fbp_tab_at(w->ptr_x, cw, FBW_TAB_PAD);
+        if (hit >= 0) freebug_set_tab(w, hit);
+        return;
+    }
     double sy = fbw_split_y(fb);
     if (w->ptr_y >= sy - 4.0 && w->ptr_y <= sy + 7.0) { fb->dragging_split = 1; return; }
     /* copy button hit-test */
@@ -17197,9 +17381,9 @@ static void freebug_pointer_motion(browser_window *w) {
         freebug_redraw_fb(fb);
     }
     if (!fb->dragging_split) return;
-    double body = (double)fb->height - FBW_HEADER;
+    double body = (double)fb->height - FBW_TOP;
     if (body < 1.0) body = 1.0;
-    double s = (w->ptr_y - FBW_HEADER) / body;
+    double s = (w->ptr_y - FBW_TOP) / body;
     if (s < FBW_MIN_SPLIT) s = FBW_MIN_SPLIT;
     if (s > FBW_MAX_SPLIT) s = FBW_MAX_SPLIT;
     fb->split = s;
@@ -17756,6 +17940,15 @@ static void freebug_copy_console(browser_window *w) {
         return;
     }
     if (fb != NULL) fb->copy_status = 2; /* green: OK */
+    if (fb != NULL && fbp_is_pane(fb->tab)) {
+        /* A panel copies its own text, not the console transcript. */
+        const char *pt = fb->pane_text[fb->tab];
+        char *pbuf = strdup(pt != NULL ? pt : "");
+        if (pbuf == NULL) return;
+        free(w->copy_text);
+        w->copy_text = pbuf;
+        goto offer;
+    }
     size_t n = fb_buffer_count(&w->console);
     size_t est = 128;
     for (size_t i = 0; i < n; ++i) {
@@ -17788,6 +17981,7 @@ static void freebug_copy_console(browser_window *w) {
     }
     free(w->copy_text);
     w->copy_text = buf;
+offer:
     if (w->copy_source != NULL) wl_data_source_destroy(w->copy_source);
     w->copy_source = wl_data_device_manager_create_data_source(w->data_device_manager);
     if (w->copy_source == NULL) return;

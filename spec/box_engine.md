@@ -1072,8 +1072,13 @@ retira del paso en flujo y se pinta en la capa posicionada, intercalado con P po
   o sea pintado normal en flujo.
 - Una página sin absolutos anteriores a un relativo (la inmensa mayoría) no difiere nada:
   pintado byte-idéntico.
-- Fuera de alcance: contextos de apilamiento anidados con `z` propio dentro de una raíz
-  diferida (se pintan con ella, como bloque), `z-index` en ítems flex/grid.
+- **Raíz anidada con `z` mayor (tanda 67):** un candidato en flujo DENTRO de otra raíz diferida
+  conserva su propio turno cuando su `z` es ESTRICTAMENTE mayor que el de su raíz envolvente más
+  cercana; `root_of` de su subárbol es él mismo. **Dado** `.b` (relative, z auto) que sigue a un
+  absoluto z 0, con un `::before` absoluto z auto y un `.layout` relative `z-index:1` dentro,
+  **cuando** se pinta, **entonces** `.layout` va DESPUÉS del `::before` (sección de tarjetas de
+  GitLab: el `::before` gris tapaba el cuerpo de cada tarjeta). Igual `z` ⇒ viaja con su raíz.
+- Fuera de alcance: `z-index` en ítems flex/grid.
 
 ## Tanda 51 — átomo inline-block vacío, raíz de ítem y alto de un átomo sin filas
 

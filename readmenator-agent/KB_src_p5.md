@@ -1,6 +1,15 @@
 # Subsystem: src (page 5 of 9)
 Previous: [KB_src_p4.md](KB_src_p4.md)
 
+## src/js_custom_elements.h
+- Doc: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `jdce_install` (function, line 9) `int jdce_install(JSContext *ctx);`
+  - `FREEDOM_JS_CUSTOM_ELEMENTS_H` (macro, line 2) `#define FREEDOM_JS_CUSTOM_ELEMENTS_H`
+- Imported by: `src/js_custom_elements.c`, `src/js_dom.c`
+
 ## src/js_dom.c
 - Doc: jd_handle: Coerces a JS argument to a node handle.
 - Layer: utility
@@ -78,24 +87,24 @@ Previous: [KB_src_p4.md](KB_src_p4.md)
   - `jd_freeze_mutators` (function, line 602) `static int jd_freeze_mutators(JSContext *jsctx)`
   - `attrNames` (function, line 673) `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
      * a missing '...`
-  - `js_env` (function, line 1378) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+  - `js_env` (function, line 1386) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
-  - `jd_install` (function, line 1913) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-  - `jd_flush_custom_elements` (function, line 1995) `void jd_flush_custom_elements(js_context *ctx)`
-  - `fails` (function, line 2009) `* cap is reached or an allocation fails (caller stops), else 0. */
+  - `jd_install` (function, line 1921) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+  - `jd_flush_custom_elements` (function, line 2003) `void jd_flush_custom_elements(js_context *ctx)`
+  - `fails` (function, line 2017) `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-  - `jd_install_console` (function, line 2123) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-  - `jd_set_cookies` (function, line 2160) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-  - `jd_get_cookies` (function, line 2180) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-  - `jd_set_computed` (function, line 2203) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-  - `jd_set_geometry` (function, line 2214) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+  - `jd_install_console` (function, line 2131) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+  - `jd_set_cookies` (function, line 2168) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+  - `jd_get_cookies` (function, line 2188) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+  - `jd_set_computed` (function, line 2211) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+  - `jd_set_geometry` (function, line 2222) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
   - `table` (function, line 632) `* a table (dom.viewport() non-null);`
-  - `scripts` (function, line 840) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
-  - `enough` (function, line 1013) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-  - `ms` (function, line 1181) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-  - `empty` (function, line 1370) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-  - `geometry` (function, line 1372) `* constant geometry (zero real leak);`
-  - `size` (function, line 1375) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
+  - `scripts` (function, line 845) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
+  - `enough` (function, line 1018) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
+  - `ms` (function, line 1189) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+  - `empty` (function, line 1378) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+  - `geometry` (function, line 1380) `* constant geometry (zero real leak);`
+  - `size` (function, line 1383) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
   - `_GNU_SOURCE` (macro, line 10) `#define _GNU_SOURCE`
   - `JD_COMPUTED_VALUE_MAX` (macro, line 412) `#define JD_COMPUTED_VALUE_MAX`
 - Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `include/web_storage.h`, `src/js_custom_elements.h`, `src/js_dom_ext.h`, `src/js_dom_internal.h`, `src/js_location_internal.h`
@@ -304,60 +313,63 @@ static int cb_append(char **bu...`
 - Layer: utility
 - Language: c
 - Symbols:
-  - `js_mem_state` (struct, line 27)
-  - `js_context` (struct, line 33)
-  - `limit` (type_alias, line 27) `typedef struct js_mem_state { size_t limit;`
-  - `rej_remove` (function, line 60) `static void rej_remove(js_context *c, size_t i)`
-  - `js_rejection_cb` (function, line 68) `static void js_rejection_cb(JSContext *jc, JSValueConst promise, JSValueConst reason,
+  - `js_mem_state` (struct, line 29)
+  - `js_context` (struct, line 35)
+  - `limit` (type_alias, line 29) `typedef struct js_mem_state { size_t limit;`
+  - `rej_remove` (function, line 62) `static void rej_remove(js_context *c, size_t i)`
+  - `js_rejection_cb` (function, line 70) `static void js_rejection_cb(JSContext *jc, JSValueConst promise, JSValueConst reason,
            ...`
-  - `rej_report` (function, line 87) `static void rej_report(js_context *c)`
-  - `jm_malloc` (function, line 112) `static void *jm_malloc(void *opaque, size_t size)`
-  - `jm_calloc` (function, line 120) `static void *jm_calloc(void *opaque, size_t count, size_t size)`
-  - `jm_free` (function, line 130) `static void jm_free(void *opaque, void *ptr)`
-  - `jm_realloc` (function, line 136) `static void *jm_realloc(void *opaque, void *ptr, size_t size)`
-  - `jm_usable_size` (function, line 146) `static size_t jm_usable_size(const void *ptr)`
-  - `host_dup` (function, line 156) `static char *host_dup(const char *src, size_t len)`
-  - `timespec_reached` (function, line 165) `static int timespec_reached(const struct timespec *now, const struct timespec *deadline)`
-  - `js_interrupt_cb` (function, line 171) `static int js_interrupt_cb(JSRuntime *rt, void *opaque)`
-  - `is_ascii_digit` (function, line 184) `static int is_ascii_digit(char c)`
-  - `js_loc_from_stack` (function, line 186) `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,
+  - `rej_report` (function, line 89) `static void rej_report(js_context *c)`
+  - `jm_malloc` (function, line 114) `static void *jm_malloc(void *opaque, size_t size)`
+  - `jm_calloc` (function, line 122) `static void *jm_calloc(void *opaque, size_t count, size_t size)`
+  - `jm_free` (function, line 132) `static void jm_free(void *opaque, void *ptr)`
+  - `jm_realloc` (function, line 138) `static void *jm_realloc(void *opaque, void *ptr, size_t size)`
+  - `jm_usable_size` (function, line 148) `static size_t jm_usable_size(const void *ptr)`
+  - `host_dup` (function, line 158) `static char *host_dup(const char *src, size_t len)`
+  - `timespec_reached` (function, line 167) `static int timespec_reached(const struct timespec *now, const struct timespec *deadline)`
+  - `js_interrupt_cb` (function, line 173) `static int js_interrupt_cb(JSRuntime *rt, void *opaque)`
+  - `is_ascii_digit` (function, line 186) `static int is_ascii_digit(char c)`
+  - `js_loc_from_stack` (function, line 188) `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,
                       i...`
-  - `js_limits_default` (function, line 305) `js_limits js_limits_default(void)`
-  - `limits_resolve` (function, line 314) `static js_limits limits_resolve(const js_limits *lim)`
-  - `js_validate_source` (function, line 323) `js_status js_validate_source(const char *src, size_t len, const js_limits *lim)`
-  - `js_context_new` (function, line 334) `js_status js_context_new(const js_limits *lim, js_context **out)`
-  - `js_context_free` (function, line 374) `void js_context_free(js_context *ctx)`
-  - `arm_deadline` (function, line 386) `static void arm_deadline(js_context *ctx, uint64_t budget_ms)`
-  - `js_set_time_budget` (function, line 401) `void js_set_time_budget(js_context *ctx, uint64_t budget_ms)`
-  - `js_eval` (function, line 406) `js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)`
-  - `js_eval_named` (function, line 410) `js_status js_eval_named(js_context *ctx, const char *src, size_t len,
+  - `js_stack_limit_for` (function, line 307) `size_t js_stack_limit_for(size_t soft_stack)`
+  - `process_soft_stack` (function, line 318) `static size_t process_soft_stack(void)`
+  - `js_prime_stack_limit` (function, line 328) `void js_prime_stack_limit(void)`
+  - `js_limits_default` (function, line 330) `js_limits js_limits_default(void)`
+  - `limits_resolve` (function, line 339) `static js_limits limits_resolve(const js_limits *lim)`
+  - `js_validate_source` (function, line 348) `js_status js_validate_source(const char *src, size_t len, const js_limits *lim)`
+  - `js_context_new` (function, line 359) `js_status js_context_new(const js_limits *lim, js_context **out)`
+  - `js_context_free` (function, line 399) `void js_context_free(js_context *ctx)`
+  - `arm_deadline` (function, line 411) `static void arm_deadline(js_context *ctx, uint64_t budget_ms)`
+  - `js_set_time_budget` (function, line 426) `void js_set_time_budget(js_context *ctx, uint64_t budget_ms)`
+  - `js_eval` (function, line 431) `js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)`
+  - `js_eval_named` (function, line 435) `js_status js_eval_named(js_context *ctx, const char *src, size_t len,
                         con...`
-  - `js_pump_jobs` (function, line 493) `int js_pump_jobs(js_context *ctx, int max_jobs)`
-  - `js_eval_once` (function, line 512) `js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res)`
-  - `js_result_free` (function, line 525) `void js_result_free(js_result *res)`
-  - `js_set_current_script` (function, line 549) `void js_set_current_script(js_context *ctx, const char *src, const char *type)`
-  - `js_context_raw` (function, line 582) `void *js_context_raw(js_context *ctx)`
-  - `mod_set_meta` (function, line 614) `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)`
-  - `mod_loader` (function, line 623) `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)`
-  - `js_set_module_host` (function, line 662) `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,
+  - `js_pump_jobs` (function, line 518) `int js_pump_jobs(js_context *ctx, int max_jobs)`
+  - `js_eval_once` (function, line 537) `js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res)`
+  - `js_result_free` (function, line 550) `void js_result_free(js_result *res)`
+  - `js_set_current_script` (function, line 574) `void js_set_current_script(js_context *ctx, const char *src, const char *type)`
+  - `js_context_raw` (function, line 607) `void *js_context_raw(js_context *ctx)`
+  - `mod_set_meta` (function, line 639) `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)`
+  - `mod_loader` (function, line 648) `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)`
+  - `js_set_module_host` (function, line 687) `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,
                         js...`
-  - `mod_fail` (function, line 677) `static js_status mod_fail(js_context *ctx, js_result *res, JSValue reason, int use_reason,
+  - `mod_fail` (function, line 702) `static js_status mod_fail(js_context *ctx, js_result *res, JSValue reason, int use_reason,
       ...`
-  - `js_eval_module` (function, line 692) `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,
+  - `js_eval_module` (function, line 717) `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,
         ...`
-  - `realm_of` (function, line 759) `static JSContext *realm_of(js_context *c, JSValueConst g)`
-  - `throw_named` (function, line 772) `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)`
-  - `m_realm_new` (function, line 782) `static JSValue m_realm_new(JSContext *ctx, JSValueConst this_val, int argc,
+  - `realm_of` (function, line 784) `static JSContext *realm_of(js_context *c, JSValueConst g)`
+  - `throw_named` (function, line 797) `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)`
+  - `m_realm_new` (function, line 807) `static JSValue m_realm_new(JSContext *ctx, JSValueConst this_val, int argc,
                      ...`
-  - `m_realm_eval` (function, line 796) `static JSValue m_realm_eval(JSContext *ctx, JSValueConst this_val, int argc,
+  - `m_realm_eval` (function, line 821) `static JSValue m_realm_eval(JSContext *ctx, JSValueConst this_val, int argc,
                     ...`
-  - `m_realm_clone` (function, line 832) `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,
+  - `m_realm_clone` (function, line 857) `static JSValue m_realm_clone(JSContext *ctx, JSValueConst this_val, int argc,
                    ...`
-  - `js_install_realms` (function, line 854) `js_status js_install_realms(js_context *ctx)`
-  - `undefined` (function, line 278) `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx...`
-  - `mod_normalize` (function, line 659) `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);`
+  - `js_install_realms` (function, line 879) `js_status js_install_realms(js_context *ctx)`
+  - `undefined` (function, line 280) `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx...`
+  - `mod_normalize` (function, line 684) `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);`
   - `_POSIX_C_SOURCE` (macro, line 12) `#define _POSIX_C_SOURCE`
-  - `JS_MODULE_URL_MAX` (macro, line 587) `#define JS_MODULE_URL_MAX`
+  - `JS_MODULE_URL_MAX` (macro, line 612) `#define JS_MODULE_URL_MAX`
 - Depends on: `include/js_sandbox.h`
 
 ## src/js_trusted.c

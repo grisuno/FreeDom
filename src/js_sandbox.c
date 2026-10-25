@@ -13,6 +13,8 @@
 
 #include "js_sandbox.h"
 
+#include <sys/resource.h>
+
 #include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
@@ -302,11 +304,34 @@ static char *capture_exception(JSContext *ctx, size_t *out_len,
 
 /* --- public: defaults & validator --- */
 
+size_t js_stack_limit_for(size_t soft_stack) {
+    size_t cap = soft_stack - soft_stack / 4;      /* 75 %: the bridge's native frames need the rest */
+    if (soft_stack == 0 || cap < JS_MIN_STACK_LIMIT) return JS_MIN_STACK_LIMIT;
+    return cap > JS_MAX_STACK_LIMIT ? JS_MAX_STACK_LIMIT : cap;
+}
+
+/* The soft stack of this process in bytes; unlimited is taken as the common 8 MiB, unknown as 0.
+ * Read once and kept: getrlimit is not on the confined worker's syscall allowlist, so the worker
+ * primes it (js_prime_stack_limit) before it confines itself and every later call is a read. */
+static size_t g_soft_stack = (size_t)-1;
+
+static size_t process_soft_stack(void) {
+    if (g_soft_stack == (size_t)-1) {
+        struct rlimit rl;
+        if (getrlimit(RLIMIT_STACK, &rl) != 0) g_soft_stack = 0;
+        else if (rl.rlim_cur == RLIM_INFINITY) g_soft_stack = (size_t)8u * 1024u * 1024u;
+        else g_soft_stack = (size_t)rl.rlim_cur;
+    }
+    return g_soft_stack;
+}
+
+void js_prime_stack_limit(void) { (void)process_soft_stack(); }
+
 js_limits js_limits_default(void) {
     js_limits l;
     l.max_source_bytes   = JS_DEFAULT_MAX_SOURCE;
     l.memory_limit_bytes = JS_DEFAULT_MEM_LIMIT;
-    l.max_stack_bytes    = JS_DEFAULT_STACK_LIMIT;
+    l.max_stack_bytes    = js_stack_limit_for(process_soft_stack());
     l.time_budget_ms     = JS_DEFAULT_TIME_BUDGET;
     return l;
 }
@@ -315,7 +340,7 @@ static js_limits limits_resolve(const js_limits *lim) {
     js_limits l = (lim != NULL) ? *lim : js_limits_default();
     if (l.max_source_bytes == 0)   l.max_source_bytes   = JS_DEFAULT_MAX_SOURCE;
     if (l.memory_limit_bytes == 0) l.memory_limit_bytes = JS_DEFAULT_MEM_LIMIT;
-    if (l.max_stack_bytes == 0)    l.max_stack_bytes    = JS_DEFAULT_STACK_LIMIT;
+    if (l.max_stack_bytes == 0)    l.max_stack_bytes    = js_stack_limit_for(process_soft_stack());
     if (l.time_budget_ms == 0)     l.time_budget_ms     = JS_DEFAULT_TIME_BUDGET;
     return l;
 }

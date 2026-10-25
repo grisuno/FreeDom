@@ -4,12 +4,12 @@
 
 These files have the most connections. Changes here have high blast radius.
 
-- `gui/browser_ui.c` (score: 170.20)
+- `gui/browser_ui.c` (score: 173.30)
 - `include/css.h` (score: 88.00, imported by 36 files)
 - `src/tab.c` (score: 66.50)
-- `src/freedom.c` (score: 58.80)
+- `src/freedom.c` (score: 60.80)
 - `src/css.c` (score: 56.70)
-- `src/page_view.c` (score: 55.10)
+- `src/page_view.c` (score: 55.30)
 - `include/html_parse.h` (score: 38.40, imported by 18 files)
 - `include/page_view.h` (score: 37.10, imported by 11 files)
 
@@ -18,7 +18,7 @@ These files have the most connections. Changes here have high blast radius.
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
 - `include/css_color.h` -- 13 direct, 53 total dependents
-- `include/css.h` -- 36 direct, 50 total dependents
+- `include/css.h` -- 36 direct, 51 total dependents
 - `include/html_parse.h` -- 18 direct, 40 total dependents
 - `include/dom.h` -- 16 direct, 36 total dependents
 - `include/css_select.h` -- 14 direct, 28 total dependents
@@ -34,7 +34,7 @@ Editing these files can break the listed number of dependents. Run their tests a
 - `src/tab.c` -- complexity: 0.2, centrality: 0.5, combined: 0.4
 - `src/page_view.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
 - `src/css.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
-- `src/freedom.c` -- complexity: 0.1, centrality: 0.4, combined: 0.3
+- `src/freedom.c` -- complexity: 0.1, centrality: 0.5, combined: 0.3
 - `include/css.h` -- complexity: 0.2, centrality: 0.3, combined: 0.3
 - `src/local_store.c` -- complexity: 0.5, centrality: 0.1, combined: 0.2
 - `src/js_dom.c` -- complexity: 0.1, centrality: 0.2, combined: 0.1
@@ -62,13 +62,13 @@ Circular dependencies. Refactor to break the cycle.
 
 ## Dataflow Issues (INFERRED, review each lead)
 
-- `gui/browser_ui.c:1555` `gui_subresource_fetch` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- `gui/browser_ui.c:1719` `first` [DEAD_STORE] `dg`: `dg` assigned at line 1719 but never read afterwards.
-- `gui/browser_ui.c:4420` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 4420 but never read afterwards.
-- `gui/browser_ui.c:4422` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 4422 but never read afterwards.
-- `gui/browser_ui.c:5456` `table` [DEAD_STORE] `parent`: `parent` assigned at line 5456 but never read afterwards.
-- `gui/browser_ui.c:5457` `table` [DEAD_STORE] `seen`: `seen` assigned at line 5457 but never read afterwards.
-- `gui/browser_ui.c:5459` `table` [DEAD_STORE] `j`: `j` assigned at line 5459 but never read afterwards.
-- `gui/browser_ui.c:5759` `nested_cont_basis` [DEAD_STORE] `total`: `total` assigned at line 5759 but never read afterwards.
-- `gui/browser_ui.c:5760` `nested_cont_basis` [DEAD_STORE] `n_items`: `n_items` assigned at line 5760 but never read afterwards.
-- `gui/browser_ui.c:6832` `builds` [DEAD_STORE] `sl`: `sl` assigned at line 6832 but never read afterwards.
+- `gui/browser_ui.c:1557` `gui_subresource_fetch` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- `gui/browser_ui.c:1721` `first` [DEAD_STORE] `dg`: `dg` assigned at line 1721 but never read afterwards.
+- `gui/browser_ui.c:4424` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 4424 but never read afterwards.
+- `gui/browser_ui.c:4426` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 4426 but never read afterwards.
+- `gui/browser_ui.c:5460` `table` [DEAD_STORE] `parent`: `parent` assigned at line 5460 but never read afterwards.
+- `gui/browser_ui.c:5461` `table` [DEAD_STORE] `seen`: `seen` assigned at line 5461 but never read afterwards.
+- `gui/browser_ui.c:5463` `table` [DEAD_STORE] `j`: `j` assigned at line 5463 but never read afterwards.
+- `gui/browser_ui.c:5763` `nested_cont_basis` [DEAD_STORE] `total`: `total` assigned at line 5763 but never read afterwards.
+- `gui/browser_ui.c:5764` `nested_cont_basis` [DEAD_STORE] `n_items`: `n_items` assigned at line 5764 but never read afterwards.
+- `gui/browser_ui.c:6836` `builds` [DEAD_STORE] `sl`: `sl` assigned at line 6836 but never read afterwards.

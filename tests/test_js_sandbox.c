@@ -191,6 +191,36 @@ static void test_memory_limit_is_enforced(void **state) {
     js_result_free(&r);
 }
 
+/* The engine stack cap follows the process stack (spec/js_sandbox.md section 3). */
+static void test_stack_limit_follows_process_stack(void **state) {
+    (void)state;
+    assert_int_equal(js_stack_limit_for(0), JS_MIN_STACK_LIMIT);
+    assert_int_equal(js_stack_limit_for(64u * 1024u), JS_MIN_STACK_LIMIT);        /* never below the floor */
+    assert_int_equal(js_stack_limit_for(4u * 1024u * 1024u), 3u * 1024u * 1024u); /* 75 % of the stack */
+    assert_int_equal(js_stack_limit_for(8u * 1024u * 1024u), 6u * 1024u * 1024u);
+    assert_int_equal(js_stack_limit_for((size_t)1 << 40), JS_MAX_STACK_LIMIT);    /* and never above the cap */
+    js_limits l = js_limits_default();
+    assert_true(l.max_stack_bytes >= JS_MIN_STACK_LIMIT && l.max_stack_bytes <= JS_MAX_STACK_LIMIT);
+}
+
+/* Real pages recurse far past 180 frames (component trees, parsers); unbounded recursion stays
+ * a catchable RangeError, never a crash of the host. */
+static void test_deep_recursion_runs_and_runaway_is_caught(void **state) {
+    (void)state;
+    js_limits l = js_limits_default();
+    js_result r;
+    memset(&r, 0, sizeof r);
+    const char *deep = "var f=function(n){return n?1+f(n-1):0}; f(2000)";
+    assert_int_equal(js_eval_once(deep, strlen(deep), &l, &r), JS_OK);
+    assert_string_equal(r.value, "2000");
+    js_result_free(&r);
+    const char *runaway = "var g=function(){return g()+1}; try{ g(); 'no' }catch(e){ e instanceof RangeError ? 'caught' : 'other' }";
+    memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval_once(runaway, strlen(runaway), &l, &r), JS_OK);
+    assert_string_equal(r.value, "caught");
+    js_result_free(&r);
+}
+
 /* --- memory safety --- */
 
 static void test_result_free_on_zeroed(void **state) {
@@ -620,6 +650,8 @@ int main(void) {
         cmocka_unit_test(test_filesystem_access_is_reference_error),
         cmocka_unit_test(test_infinite_loop_times_out),
         cmocka_unit_test(test_set_time_budget_applies),
+        cmocka_unit_test(test_stack_limit_follows_process_stack),
+        cmocka_unit_test(test_deep_recursion_runs_and_runaway_is_caught),
         cmocka_unit_test(test_memory_limit_is_enforced),
         cmocka_unit_test(test_result_free_on_zeroed),
         cmocka_unit_test(test_context_free_null_and_double),
