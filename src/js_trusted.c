@@ -30,6 +30,19 @@ static const char JT_OPEN_SHIM[] =
     "    if(w!==undefined&&i&&i.setAttribute) i.setAttribute('width',String(w));"
     "    if(h!==undefined&&i&&i.setAttribute) i.setAttribute('height',String(h));"
     "    return i; };"
+    /* document.domain: the host, read-only. Assigning it would relax the same-origin
+     * boundary (deprecated for that reason), so the setter is a silent no-op. */
+    "  try{ Object.defineProperty(__G.document,'domain',{configurable:true,"
+    "    get:function(){ return (__G.location&&__G.location.hostname)||''; }, set:function(){} }); }catch(e){}"
+    /* window.postMessage to THIS window only (macrotask idiom: schedulers, polyfills). No
+     * other window is reachable (open returns null, no frames, no opener), so there is no
+     * channel: the event is delivered back to the same realm with a structured clone. */
+    "  __G.postMessage=function(d){ var c;"
+    "    try{ c=(typeof __G.structuredClone==='function')?__G.structuredClone(d):d; }catch(e){ return; }"
+    "    setTimeout(function(){"
+    "      var ev=new __G.Event('message'); ev.data=c; ev.origin=(__G.location&&__G.location.origin)||'';"
+    "      ev.source=__G; ev.ports=[]; ev.lastEventId='';"
+    "      __G.dispatchEvent(ev); },0); };"
     " })()";
 
 jd_status jt_enable_open(js_context *ctx) {

@@ -1045,6 +1045,10 @@ static int tab_mod_resolve(void *host, const char *base, const char *spec,
      * URL is the document's (HTML 8.1.3.8), so a dynamic import() resolves against the page. A
      * base that IS a URL (a module, a data: URL) is left alone. */
     if (!url_has_scheme(base) && cs != NULL && cs->page_url != NULL) base = cs->page_url;
+    /* A data: importer has no hierarchical base (RFC 2397): relative specifiers cannot join
+     * against it, but an absolute one needs no base -- the document stands in for it. */
+    if (du_is_data_url(base) && url_has_scheme(spec) && cs != NULL && cs->page_url != NULL)
+        base = cs->page_url;
     if (du_is_data_url(spec)) {                    /* a data: module is its own URL */
         size_t n = strlen(spec);
         if (n >= outsz) return -1;
@@ -1174,7 +1178,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     /* Enable + seed document.cookie ONLY for a trusted host (net => allow.conf AND
      * js.conf). Untrusted stays a no-op jar (Zero Knowledge). The cookie bytes are a
      * JS string value, never interpolated into source. */
-    if (ok && net && cookies != NULL && cookies[0] != '\0')
+    if (ok && net && cookies != NULL)       /* an empty seed still ENABLES the jar */
         (void)jd_set_cookies(cs->js, cookies);
     /* In-memory localStorage (spec/web_storage.md): trusted host only, seeded from
      * the parent's store for this origin before any script runs. */

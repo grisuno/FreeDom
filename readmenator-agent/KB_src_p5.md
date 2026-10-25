@@ -78,24 +78,24 @@ Previous: [KB_src_p4.md](KB_src_p4.md)
   - `jd_freeze_mutators` (function, line 602) `static int jd_freeze_mutators(JSContext *jsctx)`
   - `attrNames` (function, line 673) `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
      * a missing '...`
-  - `js_env` (function, line 1338) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+  - `js_env` (function, line 1378) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
-  - `jd_install` (function, line 1871) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-  - `jd_flush_custom_elements` (function, line 1953) `void jd_flush_custom_elements(js_context *ctx)`
-  - `fails` (function, line 1967) `* cap is reached or an allocation fails (caller stops), else 0. */
+  - `jd_install` (function, line 1913) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+  - `jd_flush_custom_elements` (function, line 1995) `void jd_flush_custom_elements(js_context *ctx)`
+  - `fails` (function, line 2009) `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-  - `jd_install_console` (function, line 2081) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-  - `jd_set_cookies` (function, line 2118) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-  - `jd_get_cookies` (function, line 2138) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-  - `jd_set_computed` (function, line 2161) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-  - `jd_set_geometry` (function, line 2172) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+  - `jd_install_console` (function, line 2123) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+  - `jd_set_cookies` (function, line 2160) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+  - `jd_get_cookies` (function, line 2180) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+  - `jd_set_computed` (function, line 2203) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+  - `jd_set_geometry` (function, line 2214) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
   - `table` (function, line 632) `* a table (dom.viewport() non-null);`
-  - `scripts` (function, line 839) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
-  - `enough` (function, line 1002) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-  - `ms` (function, line 1146) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-  - `empty` (function, line 1330) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-  - `geometry` (function, line 1332) `* constant geometry (zero real leak);`
-  - `size` (function, line 1335) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
+  - `scripts` (function, line 840) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
+  - `enough` (function, line 1013) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
+  - `ms` (function, line 1181) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+  - `empty` (function, line 1370) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+  - `geometry` (function, line 1372) `* constant geometry (zero real leak);`
+  - `size` (function, line 1375) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
   - `_GNU_SOURCE` (macro, line 10) `#define _GNU_SOURCE`
   - `JD_COMPUTED_VALUE_MAX` (macro, line 412) `#define JD_COMPUTED_VALUE_MAX`
 - Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `include/web_storage.h`, `src/js_custom_elements.h`, `src/js_dom_ext.h`, `src/js_dom_internal.h`, `src/js_location_internal.h`
@@ -104,15 +104,15 @@ static int cb_append(char **bu...`
 - Layer: utility
 - Language: c
 - Symbols:
-  - `registration` (function, line 376) `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
+  - `registration` (function, line 385) `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
  * observer...`
-  - `run` (function, line 1126) `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
-  - `jdx_install` (function, line 1191) `int jdx_install(JSContext *ctx)`
-  - `jd_install_repl_api` (function, line 1200) `jd_status jd_install_repl_api(js_context *ctx)`
-  - `jd_set_repl_css` (function, line 1208) `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
-  - `jd_install_geolocation` (function, line 1221) `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
-  - `jd_install_indexeddb` (function, line 1240) `jd_status jd_install_indexeddb(js_context *ctx)`
-  - `identity` (function, line 100) `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
+  - `run` (function, line 1135) `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
+  - `jdx_install` (function, line 1200) `int jdx_install(JSContext *ctx)`
+  - `jd_install_repl_api` (function, line 1209) `jd_status jd_install_repl_api(js_context *ctx)`
+  - `jd_set_repl_css` (function, line 1217) `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
+  - `jd_install_geolocation` (function, line 1230) `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
+  - `jd_install_indexeddb` (function, line 1249) `jd_status jd_install_indexeddb(js_context *ctx)`
+  - `identity` (function, line 102) `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
 - Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`
 
 ## src/js_dom_ext.h
@@ -365,24 +365,24 @@ static int cb_append(char **bu...`
 - Layer: utility
 - Language: c
 - Symbols:
-  - `jt_seed_ctx` (struct, line 367)
-  - `jt_enable_open` (function, line 35) `jd_status jt_enable_open(js_context *ctx)`
-  - `jt_enable_observers` (function, line 116) `jd_status jt_enable_observers(js_context *ctx)`
-  - `jt_geometry_changed` (function, line 130) `jd_status jt_geometry_changed(js_context *ctx)`
-  - `jt_take_opens` (function, line 146) `char *jt_take_opens(js_context *ctx)`
-  - `jt_enable_ws` (function, line 224) `jd_status jt_enable_ws(js_context *ctx)`
-  - `jt_ws_ops_free` (function, line 236) `void jt_ws_ops_free(jt_ws_op *ops, size_t n)`
-  - `hex_nibble` (function, line 241) `static int hex_nibble(char c)`
-  - `ws_payload` (function, line 248) `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)`
-  - `jt_take_ws` (function, line 272) `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)`
-  - `jt_ws_event` (function, line 314) `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)`
-  - `jt_seed_pair` (function, line 369) `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)`
-  - `jt_enable_storage` (function, line 379) `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)`
-  - `jt_take_storage` (function, line 400) `int jt_take_storage(js_context *ctx, char **out, size_t *len)`
-  - `explicitly` (function, line 448) `* explicitly (no window, no document). Delivery is always a timer task. */
+  - `jt_seed_ctx` (struct, line 380)
+  - `jt_enable_open` (function, line 48) `jd_status jt_enable_open(js_context *ctx)`
+  - `jt_enable_observers` (function, line 129) `jd_status jt_enable_observers(js_context *ctx)`
+  - `jt_geometry_changed` (function, line 143) `jd_status jt_geometry_changed(js_context *ctx)`
+  - `jt_take_opens` (function, line 159) `char *jt_take_opens(js_context *ctx)`
+  - `jt_enable_ws` (function, line 237) `jd_status jt_enable_ws(js_context *ctx)`
+  - `jt_ws_ops_free` (function, line 249) `void jt_ws_ops_free(jt_ws_op *ops, size_t n)`
+  - `hex_nibble` (function, line 254) `static int hex_nibble(char c)`
+  - `ws_payload` (function, line 261) `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)`
+  - `jt_take_ws` (function, line 285) `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)`
+  - `jt_ws_event` (function, line 327) `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)`
+  - `jt_seed_pair` (function, line 382) `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)`
+  - `jt_enable_storage` (function, line 392) `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)`
+  - `jt_take_storage` (function, line 413) `int jt_take_storage(js_context *ctx, char **out, size_t *len)`
+  - `explicitly` (function, line 461) `* explicitly (no window, no document). Delivery is always a timer task. */
 static const char JT_W...`
-  - `jt_enable_worker` (function, line 529) `jd_status jt_enable_worker(js_context *ctx)`
-  - `JT_IO_MAX_STR` (macro, line 49) `#define JT_IO_MAX_STR`
+  - `jt_enable_worker` (function, line 542) `jd_status jt_enable_worker(js_context *ctx)`
+  - `JT_IO_MAX_STR` (macro, line 62) `#define JT_IO_MAX_STR`
 - Depends on: `include/js_trusted.h`, `include/web_storage.h`
 
 ## src/link_nav.c

@@ -1130,6 +1130,29 @@ static void test_load_session_cookies_roundtrip(void **state) {
     tab_close(t);
 }
 
+/* FIRST visit to a trusted host (nothing to seed): the jar must still be live, or the page's
+ * very first document.cookie write is dropped and every analytics/consent script reports
+ * "error setting cookie". */
+static void test_first_visit_trusted_host_can_set_cookie(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body><script>"
+        "document.cookie='first=1; path=/'; document.title='jar:'+document.cookie;"
+        "</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://trusted.example/",
+                                   1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "jar:first=1");
+    assert_non_null(p.set_cookies);
+    assert_non_null(strstr(p.set_cookies, "first=1"));
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* indexedDB (memory only) exists for a trusted host and is undefined for any other. */
 static void test_indexeddb_only_for_trusted_host(void **state) {
     (void)state;
@@ -2409,6 +2432,76 @@ static void test_window_open_absent_for_untrusted_host(void **state) {
     tab_close(t);
 }
 
+/* document.domain (read-only) and window.postMessage to ITSELF for a trusted host: GitHub
+ * reads the former at boot, reddit's scheduler uses the latter as a macrotask. No channel to
+ * another window exists, so an untrusted page keeps both absent. */
+static const char SELFMSG_PAGE[] =
+    "<html><body><p id=\"d\">none</p><p id=\"o\">none</p><script>"
+    "document.getElementById('d').textContent='dom:'+document.domain;"
+    "window.addEventListener('message',function(e){"
+    "  document.getElementById('o').textContent='msg:'+e.data.k+':'+e.origin+':'+(e.source===window);});"
+    "window.postMessage({k:7},'*');"
+    "</script></body></html>";
+
+static void test_self_postmessage_and_document_domain_trusted(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, SELFMSG_PAGE, sizeof SELFMSG_PAGE - 1,
+                                   "https://site.test/x", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(view_find_text(p.view, "dom:site.test"));
+    int ms = p.next_timer_ms;
+    tab_page_free(&p);
+    tab_page c;
+    assert_int_equal(tab_tick(t, ms, &c), TAB_OK);
+    assert_non_null(view_find_text(c.view, "msg:7:https://site.test:true"));
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+/* A prototype accessor reached with a receiver that has no own member of that name must fail
+ * like a browser ("Illegal invocation"), not re-enter itself until the stack is gone (OSM's
+ * jQuery code threw RangeError from the delegating setter). */
+static void test_prototype_accessor_without_own_member_does_not_recurse(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, "<html><body>x</body></html>", 27,
+                                   "https://site.test/x", 1, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    static const char JS[] =
+        "var o=Object.create(HTMLElement.prototype), r=[];"
+        "['title','hidden','innerText'].forEach(function(n){"
+        "  try{ o[n]='v'; r.push('ok'); }catch(e){ r.push(e.name); } });"
+        "r.join(',')";
+    tab_eval_result e;
+    assert_int_equal(tab_eval(t, JS, sizeof JS - 1, &e), TAB_OK);
+    assert_non_null(e.value);
+    assert_null(strstr(e.value, "RangeError"));
+    tab_eval_result_free(&e);
+    tab_close(t);
+}
+
+static void test_postmessage_absent_for_untrusted_host(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 0);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, "<html><body>x</body></html>", 27,
+                                   "https://site.test/x", 1, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    tab_eval_result e;
+    assert_int_equal(tab_eval(t, "typeof postMessage", 18, &e), TAB_OK);
+    assert_string_equal(e.value, "undefined");
+    tab_eval_result_free(&e);
+    tab_close(t);
+}
+
 /* WebSocket through the real worker (spec/js_dom.md 7f): the page records ops, the
  * parent would own the socket, and pushes events back with OP_WS_EVENT. */
 static const char WS_PAGE[] =
@@ -2536,6 +2629,8 @@ static int stub_module_fetch(void *ctx, const char *method, const char *url,
     }
     else if (strcmp(url, "https://site.test/lazy.js") == 0)
         src = "document.getElementById('o').textContent = 'lazy-script-ran';";
+    else if (strcmp(url, "https://site.test/app/abs.js") == 0)
+        src = "export const word = 'abs-import-ok';";
     else if (strcmp(url, "https://site.test/app/mapped.js") == 0)
         src = "import { word } from 'dep';"
               "document.getElementById('o').textContent = 'mapped ' + word;";
@@ -2833,6 +2928,30 @@ static void test_module_src_is_a_url_and_data_modules_run(void **state) {
                                    1, 0, 0, &p), TAB_OK);
     assert_non_null(view_find_text(p.view, "relative-src-ok"));
     assert_non_null(view_find_text(p.view, "data-module"));
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* A data: module that imports an ABSOLUTE https URL (reddit's inline modules do): the
+ * importer's base is not a URL the resolver can join against, but an absolute specifier needs
+ * no base -- it must load, not throw "Failed to resolve module specifier". */
+static void test_data_module_imports_absolute_https(void **state) {
+    (void)state;
+    /* import { word } from 'https://site.test/app/abs.js';
+     * document.getElementById('o').textContent = word; */
+    static const char H[] =
+        "<html><body><p id=\"o\">none</p>"
+        "<script type=\"module\" src=\"data:text/javascript,"
+        "import%20%7B%20word%20%7D%20from%20'https%3A%2F%2Fsite.test%2Fapp%2Fabs.js'%3B"
+        "document.getElementById('o').textContent%3Dword%3B\"></script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_module_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/index.html",
+                                   1, 0, 0, &p), TAB_OK);
+    assert_non_null(view_find_text(p.view, "abs-import-ok"));
     tab_page_free(&p);
     tab_close(t);
 }
@@ -3389,6 +3508,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_ex_noscript_hidden_with_js),
         cmocka_unit_test(test_load_ex_media_element_facade),
         cmocka_unit_test(test_load_session_cookies_roundtrip),
+        cmocka_unit_test(test_first_visit_trusted_host_can_set_cookie),
         cmocka_unit_test(test_identity_override_reaches_worker),
         cmocka_unit_test(test_indexeddb_only_for_trusted_host),
         cmocka_unit_test(test_load_no_session_cookies_when_untrusted),
@@ -3435,12 +3555,16 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_history_ops_reach_parent_and_popstate_returns),
         cmocka_unit_test(test_window_open_on_gesture_for_trusted_host),
         cmocka_unit_test(test_window_open_absent_for_untrusted_host),
+        cmocka_unit_test(test_self_postmessage_and_document_domain_trusted),
+        cmocka_unit_test(test_postmessage_absent_for_untrusted_host),
+        cmocka_unit_test(test_prototype_accessor_without_own_member_does_not_recurse),
         cmocka_unit_test(test_websocket_ops_and_events_cross_the_worker),
         cmocka_unit_test(test_websocket_absent_for_untrusted_host),
         cmocka_unit_test(test_local_storage_seeded_and_collected_for_trusted),
         cmocka_unit_test(test_local_storage_never_seeded_for_untrusted),
         cmocka_unit_test(test_module_scripts_run_for_trusted_host),
         cmocka_unit_test(test_nomodule_fallback_for_untrusted_host),
+        cmocka_unit_test(test_data_module_imports_absolute_https),
         cmocka_unit_test(test_dynamic_import_from_classic_script_uses_document_base),
         cmocka_unit_test(test_ajax_after_load_reaches_the_gated_fetcher),
         cmocka_unit_test(test_lazy_script_src_and_import_after_load),

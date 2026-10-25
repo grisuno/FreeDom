@@ -49,7 +49,7 @@ flowchart LR
 
 ### `jt_seed_ctx`
 
-`struct` | [src/js_trusted.c:367](../../src/js_trusted.c#L367)
+`struct` | [src/js_trusted.c:380](../../src/js_trusted.c#L380)
 
 ```c
 typedef struct jt_seed_ctx { JSContext *js; JSValue fn; JSValue global; } jt_seed_ctx;
@@ -63,7 +63,7 @@ typedef struct jt_seed_ctx { JSContext *js; JSValue fn; JSValue global; } jt_see
 
 ### `jt_enable_open`
 
-`function` | [src/js_trusted.c:35](../../src/js_trusted.c#L35)
+`function` | [src/js_trusted.c:48](../../src/js_trusted.c#L48)
 
 ```c
 jd_status jt_enable_open(js_context *ctx)
@@ -85,7 +85,7 @@ jd_status jt_enable_open(js_context *ctx)
 
 ### `jt_enable_observers`
 
-`function` | [src/js_trusted.c:116](../../src/js_trusted.c#L116)
+`function` | [src/js_trusted.c:129](../../src/js_trusted.c#L129)
 
 ```c
 jd_status jt_enable_observers(js_context *ctx)
@@ -107,7 +107,7 @@ jd_status jt_enable_observers(js_context *ctx)
 
 ### `jt_geometry_changed`
 
-`function` | [src/js_trusted.c:130](../../src/js_trusted.c#L130)
+`function` | [src/js_trusted.c:143](../../src/js_trusted.c#L143)
 
 ```c
 jd_status jt_geometry_changed(js_context *ctx)
@@ -129,7 +129,7 @@ jd_status jt_geometry_changed(js_context *ctx)
 
 ### `jt_take_opens`
 
-`function` | [src/js_trusted.c:146](../../src/js_trusted.c#L146)
+`function` | [src/js_trusted.c:159](../../src/js_trusted.c#L159)
 
 ```c
 char *jt_take_opens(js_context *ctx)
@@ -155,7 +155,7 @@ Drains the recorded window.open targets as "url\n" lines, or NULL when none.
 
 ### `jt_enable_ws`
 
-`function` | [src/js_trusted.c:224](../../src/js_trusted.c#L224)
+`function` | [src/js_trusted.c:237](../../src/js_trusted.c#L237)
 
 ```c
 jd_status jt_enable_ws(js_context *ctx)
@@ -177,7 +177,7 @@ jd_status jt_enable_ws(js_context *ctx)
 
 ### `jt_ws_ops_free`
 
-`function` | [src/js_trusted.c:236](../../src/js_trusted.c#L236)
+`function` | [src/js_trusted.c:249](../../src/js_trusted.c#L249)
 
 ```c
 void jt_ws_ops_free(jt_ws_op *ops, size_t n)
@@ -196,7 +196,7 @@ void jt_ws_ops_free(jt_ws_op *ops, size_t n)
 
 ### `jt_take_ws`
 
-`function` | [src/js_trusted.c:272](../../src/js_trusted.c#L272)
+`function` | [src/js_trusted.c:285](../../src/js_trusted.c#L285)
 
 ```c
 size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)
@@ -226,7 +226,7 @@ Returns the count. Operations past JT_WS_MAX_OPS/JT_WS_MAX_BYTES are dropped and
 
 ### `jt_ws_event`
 
-`function` | [src/js_trusted.c:314](../../src/js_trusted.c#L314)
+`function` | [src/js_trusted.c:327](../../src/js_trusted.c#L327)
 
 ```c
 int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)
@@ -259,7 +259,7 @@ Returns 1 when a live socket with that id received it.
 
 ### `jt_enable_storage`
 
-`function` | [src/js_trusted.c:379](../../src/js_trusted.c#L379)
+`function` | [src/js_trusted.c:392](../../src/js_trusted.c#L392)
 
 ```c
 jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
@@ -283,7 +283,7 @@ jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
 
 ### `jt_take_storage`
 
-`function` | [src/js_trusted.c:400](../../src/js_trusted.c#L400)
+`function` | [src/js_trusted.c:413](../../src/js_trusted.c#L413)
 
 ```c
 int jt_take_storage(js_context *ctx, char **out, size_t *len)
@@ -311,7 +311,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `explicitly`
 
-`function` | [src/js_trusted.c:448](../../src/js_trusted.c#L448)
+`function` | [src/js_trusted.c:461](../../src/js_trusted.c#L461)
 
 ```c
 * explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...
@@ -332,7 +332,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `jt_enable_worker`
 
-`function` | [src/js_trusted.c:529](../../src/js_trusted.c#L529)
+`function` | [src/js_trusted.c:542](../../src/js_trusted.c#L542)
 
 ```c
 jd_status jt_enable_worker(js_context *ctx)
@@ -356,7 +356,7 @@ jd_status jt_enable_worker(js_context *ctx)
 
 ### `JT_IO_MAX_STR`
 
-`macro` | [src/js_trusted.c:49](../../src/js_trusted.c#L49)
+`macro` | [src/js_trusted.c:62](../../src/js_trusted.c#L62)
 
 ```c
 #define JT_IO_MAX_STR

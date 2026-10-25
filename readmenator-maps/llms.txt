@@ -1,6 +1,6 @@
 # freedom-0.0.3
 
-> Static analysis knowledge base for freedom-0.0.3: 10 communities, 286 files, 1660 imports, 4 languages, 7348 symbols.
+> Static analysis knowledge base for freedom-0.0.3: 10 communities, 286 files, 1660 imports, 4 languages, 7362 symbols.
 
 Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
 
@@ -35,7 +35,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_src_p3.md](md/readmenator-agent/KB_src_p3.md): Doc: uadisplay: The HTML Rendering UA sheet's display for a tag when the cascade declared none ...
 - [readmenator-agent/KB_src_p4.md](md/readmenator-agent/KB_src_p4.md): Doc: nn: bounded by FXMAXITEMS (no VLAs).
 - [readmenator-agent/KB_src_p5.md](md/readmenator-agent/KB_src_p5.md): Doc: jdhandle: Coerces a JS argument to a node handle.
-- [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): cipherfor (function, line 849) static const EVPCIPHER cipherfor(lsaead aead)
+- [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): cipherfor (function, line 860) static const EVPCIPHER cipherfor(lsaead aead)
 - [readmenator-agent/KB_src_p7.md](md/readmenator-agent/KB_src_p7.md): Doc: pvptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - [readmenator-agent/KB_src_p8.md](md/readmenator-agent/KB_src_p8.md): Doc: rdpush: Appends one block, taking owned copies of text (required) and href (optional). ...
 - [readmenator-agent/KB_src_p9.md](md/readmenator-agent/KB_src_p9.md): whole (function, line 6) the buffer is rejected whole (fail closed), never applied partially.
@@ -48,7 +48,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p7.md](md/readmenator-agent/KB_tests_p7.md): Doc: testenforceallowlistedinsecure: The allowlist override: the user's sovereign per-host escape...
 - [readmenator-agent/KB_tests_p8.md](md/readmenator-agent/KB_tests_p8.md): Doc: testguardstartsidlesandstopspromptly: The helper starts on a live display, tolerates an...
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: fbench -- turn the PNG pairs make parity leaves behind into something you can act on.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 286 files at commit 353ef26c333c. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 286 files at commit 36219af27cf9. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)

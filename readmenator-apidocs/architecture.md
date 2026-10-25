@@ -21,7 +21,7 @@ flowchart TB
     end
     subgraph lane_1["Tier 2"]
         direction LR
-        n_c6["src: local_store<br/>11 files, 438 symbols<br/>Data access"]:::cycle
+        n_c6["src: local_store<br/>11 files, 442 symbols<br/>Data access"]:::cycle
         n_c3["src: text_shape<br/>27 files, 373 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_2["Tier 3"]

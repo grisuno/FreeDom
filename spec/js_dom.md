@@ -570,3 +570,29 @@ Encapsulación real (shadow Oculta light sin slot, proyección en `<slot>`) fuer
   (el costo era O(N^2)). Con un selector estructural el comportamiento no cambia (incluida la cota
   `CCH_NTH_MAX`, que falla cerrado en listas muy anchas).
 - `FREEDOM_JS_PROFILE=1` imprime tambien `selectors total=... top: ...` (llamadas por selector).
+
+## 7o. Superficie que los frameworks dan por hecha (2026-10-24, barrido de consola)
+
+Medido con `--as-gui --dump-console` sobre los sitios de `js.conf`; cada fila nace de un error real
+y tiene su test rojo (`test_js_dom`, `test_tab`).
+
+- **Módulos `data:` con imports absolutos:** la base de un importador `data:` no es unible (RFC 2397);
+  un especificador con esquema usa la URL del documento (`tab_mod_resolve`). Antes: "Failed to resolve
+  module specifier" (reddit).
+- **Superficie de confianza (`js_trusted.c`):** `document.domain` solo lectura (el setter es no-op: asignarlo
+  relaja la SOP) y `window.postMessage` a **esta** ventana (macrotarea con clon estructurado; sin
+  otra ventana alcanzable no hay canal). Un host no confiable conserva ambos ausentes.
+- **Cookie jar:** se habilita en todo host de confianza aunque no haya semilla; antes la primera visita
+  descartaba cada `document.cookie = ...`.
+- **Accesores delegadores de prototipo:** un receptor sin miembro propio ya no reentra en sí mismo
+  (`DL`/`isDel`): falla con `Illegal invocation` en vez de `RangeError`.
+- **`console.*` escribible** (instrumentación tipo Sentry); el reporte de rechazos no manejados antepone
+  `Name: message` (la pila de una `DOMException` no lo trae).
+- **`<template>.content`** es un fragmento respaldado por un contenedor nativo (`mkHolderFrag`): hermanos y
+  `cloneNode(true)` conservan vínculos, `innerHTML` de la plantilla parsea en él. Svelte/Lit/Vue
+  recorren `firstChild/nextSibling` sobre ese clon. **Falta:** el contenido de un `<template>` del HTML
+  fuente (lexbor lo guarda aparte, el índice DOM no lo expone) y el contexto de parseo de plantilla
+  (`<tr>` suelto en `innerHTML`).
+- `nodeName` de elemento = `tagName` (era `''`), `nodeValue` de elemento = `null`,
+  `document.firstElementChild/lastElementChild/children/childElementCount`, `element.attributes` iterable,
+  `PerformanceObserver.supportedEntryTypes` = `[]` (no se emite ninguna entrada).

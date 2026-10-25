@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_defer_outermost_root_and_negative_z` | function | `tests/test_box_tree.c:1124` | `static void test_defer_outermost_root_and_negative_z(void **state)` |
+| `test_defer_relative_after_abs` | function | `tests/test_box_tree.c:1080` | `static void test_defer_relative_after_abs(void **state)` |
+| `test_defer_relative_before_abs_is_not_deferred` | function | `tests/test_box_tree.c:1097` | `static void test_defer_relative_before_abs_is_not_deferred(void **state)` |
+| `test_defer_respects_z_order` | function | `tests/test_box_tree.c:1109` | `static void test_defer_respects_z_order(void **state)` |
 | `test_defer_uses_tree_order_not_index` | function | `tests/test_box_tree.c:1148` | `static void test_defer_uses_tree_order_not_index(void **state)` |
 | `test_depth_cap` | function | `tests/test_box_tree.c:398` | `static void test_depth_cap(void **state)` |
 | `test_display_none_skipped` | function | `tests/test_box_tree.c:353` | `static void test_display_none_skipped(void **state)` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_fractional_still_fails_closed` | function | `tests/test_css_color.c:280` | `static void test_fractional_still_fails_closed(void **state)` |
 | `test_hex_bad` | function | `tests/test_css_color.c:59` | `static void test_hex_bad(void **state)` |
 | `test_hex_long` | function | `tests/test_css_color.c:44` | `static void test_hex_long(void **state)` |
-| `test_hex_long_alpha` | function | `tests/test_css_color.c:53` | `static void test_hex_long_alpha(void **state)` |
-| `test_hex_short` | function | `tests/test_css_color.c:28` | `static void test_hex_short(void **state)` |
-| `test_hex_short_alpha` | function | `tests/test_css_color.c:37` | `static void test_hex_short_alpha(void **state)` |
-| `test_hsl` | function | `tests/test_css_color.c:134` | `static void test_hsl(void **state)` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

@@ -397,6 +397,8 @@ Cada línea es la decisión + su porqué; el detalle vive en `spec/`, en `git lo
 
 - **Tanda 65 (oct 24) — tiempo de render medido en la GUI real y recortado.** `make fbench` mide render-hasta-idle de la ventana real (weston) contra Firefox (`spec/parity.md` "Timing"); `wl_guard` evita que el compositor mate al cliente con el socket sin leer (caida de Wikipedia con imagenes); doble buffer SHM (`shm_slots`) elimina el parpadeo del video. Rendimiento: snapshot pre-script omitido sin scripts, cascada sin copias de 7 KB (`cached_element_style_ref`), filtro de ancestros por Bloom en selectores (`csel_anc_reject`), blur solo sobre el rectangulo con tinta (`bb_ink_rect`). Wikipedia 539->295 ms, GitHub 1473->871, Discord 20984->338. `parity`/`layout-diff`/`drops` sin cambios. `[[freedom-gui-timing-tanda65-2026-10-24]]`
 
+- **Tanda 66 (oct 24) — barrido de consola JS en los sitios de `js.conf`: OSM 3→0, YouTube 2→0, HF 3→1, GitHub 5→2, reddit 11→8.** Causas sistémicas, cada una con test rojo: módulos `data:` con imports absolutos, cookie jar muerto en la primera visita, accesor delegador reentrante, `<template>.content` vacío (hidratación de Svelte), `nodeName`, `document.firstElementChild`, `attributes` iterable, `console` escribible. `spec/js_dom.md` 7o. **Abierto:** GitLab 13.38 (10445 px vs 8255; tarjetas vacías y columnas apiladas), `<template>` del HTML fuente, pestañas gráficas/depurador de Freebug, DDG #418.
+
 ### 7.4 Abierto — por valor visual medido
 
 - **Tanda 21 (sep 6) — "sale del flujo" necesita ancla, y el bloque contenedor de un contenedor SIN caja era el de su primer ítem.** `[[freedom-oof-leaves-flow-anchor-2026-09-06]]`

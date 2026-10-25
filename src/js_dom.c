@@ -680,6 +680,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "          get:function(t,p){ if(p==='length') return dom.attrNames(h).length;"
     "            if(p==='getNamedItem') return function(nm){ var r=node(String(nm)); return r===undefined?null:r; };"
     "            if(p==='item') return function(i){ var ns=dom.attrNames(h); return i>=0&&i<ns.length?node(ns[i]):null; };"
+    "            if(p===Symbol.iterator) return function(){ return dom.attrNames(h).map(node)[Symbol.iterator](); };"
     "            if(typeof p==='symbol') return undefined;"
     "            if(/^[0-9]+$/.test(p)){ var ns=dom.attrNames(h); var i=+p; return i<ns.length?node(ns[i]):undefined; }"
     "            return node(String(p)); },"
@@ -834,7 +835,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "    var kd=dom.nodeKind(h);"
     "    if ((kd===3||kd===8)&&typeof __G.__wrapChar==='function') return (__wc[h]=__G.__wrapChar(h,kd));"
     "    var tn0=dom.tagName(h), tl=tn0?String(tn0).toLowerCase():'';"
-    "    var el={_h:h, nodeType:1, ELEMENT_NODE:1, nodeName:''};"
+    "    var el={_h:h, nodeType:1, ELEMENT_NODE:1, nodeValue:null};"
     /* HTMLMediaElement facade for <video>/<audio>: identity-safe stubs so
      * player scripts (canPlayType feature-detection, play/pause, muted/loop
      * reflection, buffered ranges) run without throwing. No network, no real
@@ -890,9 +891,14 @@ static const char JD_DOCUMENT_SHIM[] =
     "      el.toBlob=function(cb){ if(typeof cb==='function') setTimeout(function(){ cb(null); },0); };"
     "    })();"
     /* <template>.content: one DocumentFragment per template, stable identity. */
+    /* The content lives in a detached holder element, so its nodes are REAL (sibling links,
+     * native cloneNode); innerHTML parses into the holder instead of the template's children. */
     "    (function(){ if(tl!=='template') return;"
-    "      var tc=null; Object.defineProperty(el,'content',{get:function(){ if(tc===null) tc=mkFrag();"
-    "        return tc; }}); })();"
+    "      var tc=null, hold=null; function holder(){ if(hold===null) hold=__G.document.createElement('div'); return hold; }"
+    "      Object.defineProperty(el,'content',{get:function(){ if(tc===null) tc=mkHolderFrag(holder());"
+    "        return tc; }});"
+    "      Object.defineProperty(el,'innerHTML',{configurable:true,get:function(){ return holder().innerHTML; },"
+    "        set:function(v){ holder().innerHTML=String(v); }}); })();"
     "    __wc[h]=el;"
     "    return el;"
     "  }"
@@ -957,6 +963,11 @@ static const char JD_DOCUMENT_SHIM[] =
     "  Object.defineProperty(d,'body',{get:function(){return tagOne('body');},enumerable:true});"
     "  Object.defineProperty(d,'head',{get:function(){return tagOne('head');},enumerable:true});"
     "  Object.defineProperty(d,'documentElement',{get:function(){return tagOne('html');},enumerable:true});"
+    /* ParentNode on the document: the root element is its only element child. */
+    "  Object.defineProperty(d,'firstElementChild',{get:function(){return tagOne('html');},enumerable:true});"
+    "  Object.defineProperty(d,'lastElementChild',{get:function(){return tagOne('html');},enumerable:true});"
+    "  Object.defineProperty(d,'children',{get:function(){var r=tagOne('html');return r?[r]:[];},enumerable:true});"
+    "  Object.defineProperty(d,'childElementCount',{get:function(){return tagOne('html')?1:0;},enumerable:true});"
     /* document.fonts: a benign FontFaceSet stub so feature-detecting scripts that call
      * document.fonts.load(...)/ready do not throw -- the literal cause of google.com's
      * "cannot read property 'load' of undefined". Identity-neutral: fixed values, no
@@ -1025,6 +1036,30 @@ static const char JD_DOCUMENT_SHIM[] =
     "    get childElementCount(){ return kids.length; }, hasChildNodes:function(){ return kids.length>0; },"
     "    getElementById:function(){return null;},"
     "    querySelector:function(){return null;}, querySelectorAll:function(){return [];} }; return f; }"
+    /* A DocumentFragment over real nodes: every member delegates to the holder element that owns
+     * them. __frag is a fresh snapshot, which nodesOf() moves natively into the new parent. */
+    "  function mkHolderFrag(h){"
+    "    var f={nodeType:11, nodeName:'#document-fragment', nodeValue:null, DOCUMENT_FRAGMENT_NODE:11,"
+    "      get __frag(){ return Array.prototype.slice.call(h.childNodes); },"
+    "      appendChild:function(c){ h.appendChild(c); return c; },"
+    "      insertBefore:function(n,r){ h.insertBefore(n,r||null); return n; },"
+    "      removeChild:function(c){ h.removeChild(c); return c; },"
+    "      replaceChild:function(n,o){ h.replaceChild(n,o); return o; },"
+    "      append:function(){ h.append.apply(h,arguments); }, prepend:function(){ h.prepend.apply(h,arguments); },"
+    "      replaceChildren:function(){ h.replaceChildren.apply(h,arguments); },"
+    "      cloneNode:function(deep){ return mkHolderFrag(h.cloneNode(!!deep)); },"
+    "      get childNodes(){ return h.childNodes; }, get children(){ return h.children; },"
+    "      get firstChild(){ return h.firstChild; }, get lastChild(){ return h.lastChild; },"
+    "      get firstElementChild(){ return h.firstElementChild; }, get lastElementChild(){ return h.lastElementChild; },"
+    "      get childElementCount(){ return h.childElementCount; }, hasChildNodes:function(){ return h.hasChildNodes(); },"
+    "      get textContent(){ return h.textContent; }, set textContent(v){ h.textContent=v; },"
+    "      get ownerDocument(){ return __G.document; },"
+    "      querySelector:function(s){ return h.querySelector(s); }, querySelectorAll:function(s){ return h.querySelectorAll(s); },"
+    "      getElementById:function(i){ return h.querySelector('[id=\"'+String(i).replace(/[\\\"]/g,'\\$&')+'\"]'); },"
+    "      addEventListener:function(){ return h.addEventListener.apply(h,arguments); },"
+    "      removeEventListener:function(){ return h.removeEventListener.apply(h,arguments); },"
+    "      dispatchEvent:function(e){ return h.dispatchEvent(e); } };"
+    "    return f; }"
     "  d.createDocumentFragment=function(){ return mkFrag(); };"
     "  d.append=function(){ var r=tagOne('html'); if(r) r.append.apply(r,arguments); };"
     "  d.prepend=function(){ var r=tagOne('html'); if(r) r.prepend.apply(r,arguments); };"
@@ -1210,12 +1245,17 @@ static const char JD_DOCUMENT_SHIM[] =
     "      if(ev&&typeof __G.dispatchEvent==='function') try{ __G.dispatchEvent(ev); }catch(e){}"
     "    }finally{ inReport=false; } };"
     /* Called by the host (js_pump_jobs) for a rejection still unhandled at the checkpoint. */
+    /* A DOMException's stack carries no "Name: message" header, so the report adds it. */
+    "  function rejText(r){ var st=(r&&r.stack)?String(r.stack):'';"
+    "    if(!st) return String(r);"
+    "    if(r.message!==undefined&&st.indexOf(String(r.message))<0) st=String(r.name||'Error')+': '+String(r.message)+'\\n'+st;"
+    "    return st; }"
     "  __G.__onUnhandledRejection=function(promise,reason){"
     "    var ev=(typeof __G.PromiseRejectionEvent==='function')?new __G.PromiseRejectionEvent('unhandledrejection',{promise:promise,reason:reason,cancelable:true}):null;"
     "    var prevented=false;"
     "    try{ if(typeof __G.onunhandledrejection==='function'){ __G.onunhandledrejection.call(__G,ev); prevented=!!(ev&&ev.defaultPrevented); } }catch(e){}"
     "    if(ev&&typeof __G.dispatchEvent==='function') try{ __G.dispatchEvent(ev); prevented=!!ev.defaultPrevented; }catch(e){}"
-    "    if(!prevented) try{ console.error('Uncaught (in promise) '+((reason&&reason.stack)?reason.stack:String(reason))); }catch(e){} };"
+    "    if(!prevented) try{ console.error('Uncaught (in promise) '+rejText(reason)); }catch(e){} };"
     "  __G.__fireDeferred=function(){"
     "    function fbLogErr(ex){ __G.__reportError(ex); }"
     /* Lifecycle order (HTML 8.4.5): readystatechange + DOMContentLoaded on the
@@ -1553,6 +1593,8 @@ static const char JD_MODERN_SHIM[] =
      "    O.prototype.takeRecords=function(){return [];}; return O; }"
      "  ['MutationObserver','IntersectionObserver','ResizeObserver','PerformanceObserver'].forEach("
     "    function(n){ if(typeof g[n]==='undefined') g[n]=observer(); });"
+    "  if(g.PerformanceObserver&&!Array.isArray(g.PerformanceObserver.supportedEntryTypes))"
+    "    g.PerformanceObserver.supportedEntryTypes=[];"
     /* IntersectionObserver fires synthetically (2026-07-19): one deferred
      * delivery per observe() with isIntersecting:true and constant synthetic
      * geometry (zero real layout/scroll/timing leaks). Scroll-reveal libraries
@@ -2098,7 +2140,7 @@ jd_status jd_install_console(js_context *ctx, fb_buffer *log) {
         JSValue fn = JS_NewCFunctionMagic(jsctx, m_console, LV[i].name, 1,
                                           JS_CFUNC_generic_magic, LV[i].level);
         if (JS_IsException(fn)) { JS_FreeValue(jsctx, console); return JD_ERR_OOM; }
-        JS_DefinePropertyValueStr(jsctx, console, LV[i].name, fn, JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueStr(jsctx, console, LV[i].name, fn, JS_PROP_C_W_E);
     }
 
     JSValue global = JS_GetGlobalObject(jsctx);

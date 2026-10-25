@@ -274,35 +274,35 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
 - `table` (function) `src/js_dom.c:632` `* a table (dom.viewport() non-null);`
 - `attrNames` (function) `src/js_dom.c:673` `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
      * a missing '...`
-- `scripts` (function) `src/js_dom.c:839` `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
-- `enough` (function) `src/js_dom.c:1002` `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-- `ms` (function) `src/js_dom.c:1146` `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-- `empty` (function) `src/js_dom.c:1330` `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-- `geometry` (function) `src/js_dom.c:1332` `* constant geometry (zero real leak);`
-- `size` (function) `src/js_dom.c:1335` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
-- `js_env` (function) `src/js_dom.c:1338` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+- `scripts` (function) `src/js_dom.c:840` `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
+- `enough` (function) `src/js_dom.c:1013` `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
+- `ms` (function) `src/js_dom.c:1181` `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+- `empty` (function) `src/js_dom.c:1370` `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+- `geometry` (function) `src/js_dom.c:1372` `* constant geometry (zero real leak);`
+- `size` (function) `src/js_dom.c:1375` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
+- `js_env` (function) `src/js_dom.c:1378` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
-- `jd_install` (function) `src/js_dom.c:1871` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-- `jd_flush_custom_elements` (function) `src/js_dom.c:1953` `void jd_flush_custom_elements(js_context *ctx)`
-- `fails` (function) `src/js_dom.c:1967` `* cap is reached or an allocation fails (caller stops), else 0. */
+- `jd_install` (function) `src/js_dom.c:1913` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+- `jd_flush_custom_elements` (function) `src/js_dom.c:1995` `void jd_flush_custom_elements(js_context *ctx)`
+- `fails` (function) `src/js_dom.c:2009` `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-- `jd_install_console` (function) `src/js_dom.c:2081` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-- `jd_set_cookies` (function) `src/js_dom.c:2118` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-- `jd_get_cookies` (function) `src/js_dom.c:2138` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-- `jd_set_computed` (function) `src/js_dom.c:2161` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-- `jd_set_geometry` (function) `src/js_dom.c:2172` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+- `jd_install_console` (function) `src/js_dom.c:2123` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+- `jd_set_cookies` (function) `src/js_dom.c:2160` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+- `jd_get_cookies` (function) `src/js_dom.c:2180` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+- `jd_set_computed` (function) `src/js_dom.c:2203` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+- `jd_set_geometry` (function) `src/js_dom.c:2214` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
 
 ## src/js_dom_ext.c
 Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`
-- `identity` (function) `src/js_dom_ext.c:100` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
-- `registration` (function) `src/js_dom_ext.c:376` `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
+- `identity` (function) `src/js_dom_ext.c:102` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
+- `registration` (function) `src/js_dom_ext.c:385` `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
  * observer...`
-- `run` (function) `src/js_dom_ext.c:1126` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
-- `jdx_install` (function) `src/js_dom_ext.c:1191` `int jdx_install(JSContext *ctx)`
-- `jd_install_repl_api` (function) `src/js_dom_ext.c:1200` `jd_status jd_install_repl_api(js_context *ctx)`
-- `jd_set_repl_css` (function) `src/js_dom_ext.c:1208` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
-- `jd_install_geolocation` (function) `src/js_dom_ext.c:1221` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
-- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1240` `jd_status jd_install_indexeddb(js_context *ctx)`
+- `run` (function) `src/js_dom_ext.c:1135` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
+- `jdx_install` (function) `src/js_dom_ext.c:1200` `int jdx_install(JSContext *ctx)`
+- `jd_install_repl_api` (function) `src/js_dom_ext.c:1209` `jd_status jd_install_repl_api(js_context *ctx)`
+- `jd_set_repl_css` (function) `src/js_dom_ext.c:1217` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
+- `jd_install_geolocation` (function) `src/js_dom_ext.c:1230` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
+- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1249` `jd_status jd_install_indexeddb(js_context *ctx)`
 
 ## src/js_dom_ext.h
 Imported by: `src/js_dom.c`, `src/js_dom_ext.c`

@@ -3,6 +3,16 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_result_free_on_zeroed` | function | `tests/test_js_sandbox.c:196` | `static void test_result_free_on_zeroed(void **state)` |
+| `test_set_time_budget_applies` | function | `tests/test_js_sandbox.c:163` | `static void test_set_time_budget_applies(void **state)` |
+| `test_validate_accepts_within_cap` | function | `tests/test_js_sandbox.c:53` | `static void test_validate_accepts_within_cap(void **state)` |
+| `test_validate_rejects_empty` | function | `tests/test_js_sandbox.c:41` | `static void test_validate_rejects_empty(void **state)` |
+| `test_validate_rejects_null` | function | `tests/test_js_sandbox.c:36` | `static void test_validate_rejects_null(void **state)` |
+| `test_validate_rejects_oversize` | function | `tests/test_js_sandbox.c:46` | `static void test_validate_rejects_oversize(void **state)` |
+| `main` | function | `tests/test_link_nav.c:273` | `int main(void)` |
+| `test_block_reason_text` | function | `tests/test_link_nav.c:234` | `static void test_block_reason_text(void **state)` |
+| `test_block_reasons` | function | `tests/test_link_nav.c:207` | `static void test_block_reasons(void **state)` |
+| `test_file_absolute_path` | function | `tests/test_link_nav.c:141` | `static void test_file_absolute_path(void **state)` |
 | `test_file_base_blocks_schemes_and_scheme_relative` | function | `tests/test_link_nav.c:165` | `static void test_file_base_blocks_schemes_and_scheme_relative(void **state)` |
 | `test_file_base_to_https` | function | `tests/test_link_nav.c:157` | `static void test_file_base_to_https(void **state)` |
 | `test_file_drops_fragment` | function | `tests/test_link_nav.c:149` | `static void test_file_drops_fragment(void **state)` |
@@ -486,15 +496,5 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `test_enforce_strict_requires_pq_chain` | function | `tests/test_secure_fetch.c:245` | `static void test_enforce_strict_requires_pq_chain(void **state)` |
 | `test_fallback_ladder_is_shared_and_ordered` | function | `tests/test_secure_fetch.c:299` | `static void test_fallback_ladder_is_shared_and_ordered(void **state)` |
 | `test_get_follow_null_args` | function | `tests/test_secure_fetch.c:544` | `static void test_get_follow_null_args(void **state)` |
-| `test_get_null_args` | function | `tests/test_secure_fetch.c:553` | `static void test_get_null_args(void **state)` |
-| `test_group_accepts_hybrid` | function | `tests/test_secure_fetch.c:137` | `static void test_group_accepts_hybrid(void **state)` |
-| `test_group_rejects_classical` | function | `tests/test_secure_fetch.c:123` | `static void test_group_rejects_classical(void **state)` |
-| `test_group_rejects_pure_pq` | function | `tests/test_secure_fetch.c:130` | `static void test_group_rejects_pure_pq(void **state)` |
-| `test_header_value_reads_named_header` | function | `tests/test_secure_fetch.c:389` | `static void test_header_value_reads_named_header(void **state)` |
-| `test_header_value_rejects_other_empty_and_oversize` | function | `tests/test_secure_fetch.c:400` | `static void test_header_value_rejects_other_empty_and_oversize(void **state)` |
-| `test_location_is_case_insensitive_and_trims` | function | `tests/test_secure_fetch.c:421` | `static void test_location_is_case_insensitive_and_trims(void **state)` |
-| `test_location_parses_value` | function | `tests/test_secure_fetch.c:413` | `static void test_location_parses_value(void **state)` |
-| `test_location_rejects_non_location_and_empty` | function | `tests/test_secure_fetch.c:431` | `static void test_location_rejects_non_location_and_empty(void **state)` |
-| `test_location_rejects_overflow` | function | `tests/test_secure_fetch.c:443` | `static void test_location_rejects_overflow(void **state)` |
 
 Next: [SYMBOLS_p15.md](SYMBOLS_p15.md)

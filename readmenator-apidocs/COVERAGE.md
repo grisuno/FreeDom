@@ -1,6 +1,6 @@
 # Documentation Coverage
 
-Overall: **39.4%** (1378 of 3495 public modules, types, and callables). Data members are excluded from the ratio.
+Overall: **39.4%** (1378 of 3499 public modules, types, and callables). Data members are excluded from the ratio.
 
 [Back to index](index.md)
 
@@ -10,7 +10,7 @@ Overall: **39.4%** (1378 of 3495 public modules, types, and callables). Data mem
 |---|---|---|---|
 | enum | 80 | 155 | 51.6% |
 | function | 766 | 1810 | 42.3% |
-| macro | 300 | 931 | 32.2% |
+| macro | 300 | 935 | 32.1% |
 | method | 0 | 23 | 0.0% |
 | module | 30 | 204 | 14.7% |
 | struct | 105 | 241 | 43.6% |
@@ -34,7 +34,7 @@ Overall: **39.4%** (1378 of 3495 public modules, types, and callables). Data mem
 | [`src/webcaps.c`](modules/src.webcaps.c.md) | 0 | 5 | 0.0% |
 | [`src/webfont.c`](modules/src.webfont.c.md) | 0 | 7 | 0.0% |
 | [`tools/gen_psl.c`](modules/tools.gen_psl.c.md) | 0 | 4 | 0.0% |
-| [`src/local_store.c`](modules/src.local_store.c.md) | 5 | 310 | 1.6% |
+| [`src/local_store.c`](modules/src.local_store.c.md) | 5 | 314 | 1.6% |
 | [`src/pq_seal.c`](modules/src.pq_seal.c.md) | 1 | 10 | 10.0% |
 | [`src/tls_impersonate.c`](modules/src.tls_impersonate.c.md) | 1 | 10 | 10.0% |
 | [`include/download.h`](modules/include.download.h.md) | 1 | 9 | 11.1% |
@@ -229,7 +229,7 @@ Overall: **39.4%** (1378 of 3495 public modules, types, and callables). Data mem
 
 DOC001 undocumented public item, DOC002 parameter not documented, DOC003 documented parameter missing from the signature (stale doc), DOC004 return value not documented, DOC005 raised exception not documented.
 
-DOC001: 2117, DOC004: 1
+DOC001: 2121, DOC004: 1
 
 - DOC004 `app.py:47` return value of run_freedom_headless is not documented
 - DOC001 `docker-entrypoint.sh:1` module docker-entrypoint.sh is not documented
@@ -731,4 +731,4 @@ DOC001: 2117, DOC004: 1
 - DOC001 `include/html_parse.h:70` function hp_get_title is not documented
 - DOC001 `include/html_parse.h:90` function src is not documented
 - DOC001 `include/html_parse.h:94` function modules is not documented
-- ... 1618 more in `api/warnings.jsonl`
+- ... 1622 more in `api/warnings.jsonl`

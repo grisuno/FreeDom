@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_hex_long_alpha` | function | `tests/test_css_color.c:53` | `static void test_hex_long_alpha(void **state)` |
+| `test_hex_short` | function | `tests/test_css_color.c:28` | `static void test_hex_short(void **state)` |
+| `test_hex_short_alpha` | function | `tests/test_css_color.c:37` | `static void test_hex_short_alpha(void **state)` |
+| `test_hsl` | function | `tests/test_css_color.c:134` | `static void test_hsl(void **state)` |
 | `test_hsl_120` | function | `tests/test_css_color.c:140` | `static void test_hsl_120(void **state)` |
 | `test_hsl_240` | function | `tests/test_css_color.c:147` | `static void test_hsl_240(void **state)` |
 | `test_hsl_fractional_hue` | function | `tests/test_css_color.c:256` | `static void test_hsl_fractional_hue(void **state)` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_no_args` | function | `tests/test_freedom.c:126` | `static void test_no_args(void **state)` |
 | `test_no_dump_console_without_flag` | function | `tests/test_freedom.c:2357` | `static void test_no_dump_console_without_flag(void **state)` |
 | `test_rejects_http_url` | function | `tests/test_freedom.c:3754` | `static void test_rejects_http_url(void **state)` |
-| `test_version` | function | `tests/test_freedom.c:117` | `static void test_version(void **state)` |
-| `wf_test_host_font` | function | `tests/test_freedom.c:1800` | `static uint8_t *wf_test_host_font(const char *name, size_t *out_n)` |
-| `white` | function | `tests/test_freedom.c:3816` | `* and not white (the old behaviour where only text rows got background fills). */ static void tes...` |
-| `main` | function | `tests/test_hls.c:219` | `int main(void)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

@@ -3,7 +3,7 @@
  "format": "jsonl",
  "meta": {
   "modules": 204,
-  "entities": 3525,
+  "entities": 3529,
   "languages": {
    "c": 95,
    "h": 93,
@@ -14,7 +14,7 @@
    "constant": 23,
    "enum": 155,
    "function": 1810,
-   "macro": 931,
+   "macro": 935,
    "method": 23,
    "module": 204,
    "struct": 241,
@@ -28,7 +28,7 @@
  "coverage": {
   "overall": {
    "documented": 1378,
-   "total": 3495,
+   "total": 3499,
    "percent": 39.4
   },
   "by_kind": {
@@ -44,8 +44,8 @@
    },
    "macro": {
     "documented": 300,
-    "total": 931,
-    "percent": 32.2
+    "total": 935,
+    "percent": 32.1
    },
    "method": {
     "documented": 0,
@@ -866,7 +866,7 @@
    },
    "src/local_store.c": {
     "documented": 5,
-    "total": 310,
+    "total": 314,
     "percent": 1.6
    },
    "src/media_decoder.c": {
@@ -1890,7 +1890,7 @@
   {
    "uid": "src/local_store.c",
    "path": "modules/src.local_store.c.jsonl",
-   "entities": 310
+   "entities": 314
   },
   {
    "uid": "src/media_decoder.c",
@@ -2115,7 +2115,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2118
+  "total": 2122
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

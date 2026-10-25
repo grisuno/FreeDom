@@ -394,6 +394,57 @@ static void test_uncaught_timer_error_fires_window_error_event(void **state) {
 
 /* A promise rejected with no handler by the end of the job checkpoint fires
  * `unhandledrejection` (PromiseRejectionEvent: promise, reason); one handled in time does not. */
+/* <template>.content is a DocumentFragment backed by REAL nodes: innerHTML parses into it,
+ * siblings and cloneNode(true) keep their links (Svelte/Lit/Vue walk firstChild/nextSibling
+ * over template.content.cloneNode(true)), and appending the fragment moves its children. */
+static void test_template_content_is_a_real_fragment(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "globalThis.t=document.createElement('template');"
+              "t.innerHTML='<div class=\"a\"><span>s</span></div> <!>x';"
+              "var c=t.content; [c.nodeType,c.firstChild.className,c.firstChild.nextSibling.nodeType,"
+              "c.childNodes.length].join()", "11,a,3,4");
+    EXPECT(f, "globalThis.k=t.content.cloneNode(true);"
+              "[k.nodeType,k.firstChild.firstChild.nodeName,k.firstChild.nextSibling.nodeType,"
+              "t.content.childNodes.length].join()", "11,SPAN,3,4");
+    EXPECT(f, "document.body.appendChild(k); [k.childNodes.length,"
+              "document.body.innerHTML.indexOf('<span>s</span>')>=0].join()", "0,true");
+    EXPECT(f, "var u=document.createElement('template'); u.innerHTML='<p>q</p>'; u.innerHTML", "<p>q</p>");
+}
+
+/* PerformanceObserver.supportedEntryTypes is a static array: web-vitals code (GitHub, reddit) calls
+ * .includes on it at boot. Freedom emits no performance entries, so it is honestly empty. */
+static void test_performance_observer_supported_entry_types(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "[Array.isArray(PerformanceObserver.supportedEntryTypes),"
+              "PerformanceObserver.supportedEntryTypes.includes('soft-navigation')].join()", "true,false");
+}
+
+/* Document is a ParentNode: its only element child is the root element (GitHub reads
+ * document.firstElementChild.classList at boot). */
+static void test_document_parentnode_surface(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "[document.firstElementChild===document.documentElement,"
+              "document.lastElementChild===document.documentElement,"
+              "document.childElementCount,document.children.length,"
+              "document.firstElementChild.classList.contains('x')].join()", "true,true,1,1,false");
+}
+
+/* element.attributes is iterable (spread / for-of / Array.from), each entry a name/value Attr. */
+static void test_attributes_are_iterable(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var e=document.createElement('div'); e.setAttribute('a','1'); e.setAttribute('b','2');"
+              "[[...e.attributes].map(function(x){return x.name+'='+x.value;}).join('&'),"
+              "Array.from(e.attributes).length].join()", "a=1&b=2,2");
+}
+
+/* An element's nodeValue is null (DOM 4.4); only character data carries a string. */
+static void test_element_nodevalue_is_null(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "String(document.body.nodeValue)", "null");
+    EXPECT(f, "document.createElement('span').nodeName+document.body.nodeName", "SPANBODY");
+    EXPECT(f, "document.createTextNode('z').nodeValue", "z");
+}
+
 static void test_unhandled_rejection_event(void **state) {
     fixture *f = (fixture *)*state;
     EXPECT(f, "globalThis.rj=[]; window.addEventListener('unhandledrejection',function(e){"
@@ -1087,6 +1138,48 @@ static void test_console_object_and_throwing_tostring(void **state) {
      * does NOT call toString) → "{}". */
     assert_string_equal(fb_buffer_at(&log, 1)->text, "{}");
 
+    console_teardown(doc, idx, ctx, &log);
+}
+
+/* console methods are plain writable properties (WebIDL namespace members): Sentry-style
+ * instrumentation wraps console[level] and a read-only slot threw "'debug' is read-only". */
+static void test_console_methods_are_writable(void **state) {
+    (void)state;
+    hp_document *doc; dom_index *idx; js_context *ctx; fb_buffer log;
+    console_fixture(&doc, &idx, &ctx, &log);
+    const char *src =
+        "var o=console.debug; console.debug=function(){ o.apply(console,arguments); };"
+        "'use strict'; console.debug('wrapped');";
+    js_result r; memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, src, strlen(src), &r), JS_OK);
+    js_result_free(&r);
+    assert_int_equal(fb_buffer_count(&log), 1);
+    assert_non_null(strstr(fb_buffer_at(&log, 0)->text, "wrapped"));
+    const char *st =
+        "(function(){ 'use strict'; try{ console.info=function(){}; return 'ok'; }"
+        "catch(e){ return e.message; } })()";
+    memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, st, strlen(st), &r), JS_OK);
+    assert_string_equal(r.value, "ok");
+    js_result_free(&r);
+    console_teardown(doc, idx, ctx, &log);
+}
+
+/* An unhandled rejection with a DOMException names it ("SyntaxError: ...") in the console:
+ * its stack alone has no header, so the cause was invisible in Freebug. */
+static void test_unhandled_rejection_report_carries_the_message(void **state) {
+    (void)state;
+    hp_document *doc; dom_index *idx; js_context *ctx; fb_buffer log;
+    console_fixture(&doc, &idx, &ctx, &log);
+    const char *src = "Promise.reject(new DOMException('bad name here','SyntaxError')); 0";
+    js_result r; memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, src, strlen(src), &r), JS_OK);
+    js_result_free(&r);
+    js_pump_jobs(ctx, 64);
+    int found = 0;
+    for (size_t i = 0; i < fb_buffer_count(&log); i++)
+        if (strstr(fb_buffer_at(&log, i)->text, "SyntaxError: bad name here")) found = 1;
+    assert_int_equal(found, 1);
     console_teardown(doc, idx, ctx, &log);
 }
 
@@ -3011,6 +3104,11 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_no_invented_jquery_and_svg_interfaces_exist, setup, teardown),
         cmocka_unit_test_setup_teardown(test_uncaught_timer_error_fires_window_error_event, setup, teardown),
         cmocka_unit_test_setup_teardown(test_unhandled_rejection_event, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_template_content_is_a_real_fragment, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_element_nodevalue_is_null, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_attributes_are_iterable, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_document_parentnode_surface, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_performance_observer_supported_entry_types, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_root_is_event_target_and_observable, setup, teardown),
         cmocka_unit_test_setup_teardown(test_element_members_survive_prototype_swaps_and_detached_calls, setup, teardown),
         cmocka_unit_test_setup_teardown(test_dynamic_inline_script_runs_once_on_insert, setup, teardown),
@@ -3054,6 +3152,8 @@ int main(void) {
         cmocka_unit_test(test_console_captures_levels),
         cmocka_unit_test(test_console_formats_errors_and_elements),
         cmocka_unit_test(test_console_object_and_throwing_tostring),
+        cmocka_unit_test(test_console_methods_are_writable),
+        cmocka_unit_test(test_unhandled_rejection_report_carries_the_message),
         cmocka_unit_test(test_console_null_buffer_is_noop),
         cmocka_unit_test(test_console_null_ctx),
         cmocka_unit_test_setup_teardown(test_event_add_event_listener_fires, setup, teardown),

@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `os_isolate_namespaces` | function | `src/os_sandbox.c:116` | `os_status os_isolate_namespaces(void)` |
+| `os_landlock_abi` | function | `src/os_sandbox.c:285` | `int os_landlock_abi(void)` |
+| `os_landlock_abi` | function | `src/os_sandbox.c:331` | `int os_landlock_abi(void)` |
+| `os_landlock_restrict` | function | `src/os_sandbox.c:291` | `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)` |
 | `os_landlock_restrict` | function | `src/os_sandbox.c:332` | `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)` |
 | `os_namespace_flags` | function | `src/os_sandbox.c:115` | `int os_namespace_flags(void)` |
 | `os_no_dump` | function | `src/os_sandbox.c:75` | `os_status os_no_dump(void)` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `sv_fit` | function | `src/svg_render.c:754` | `void sv_fit(const sv_image *img, double dw, double dh,             double *scale, double *off_x, ...` |
 | `sv_flag` | function | `src/svg_render.c:477` | `static int sv_flag(const char *s, size_t n, size_t *i, double *out)` |
 | `sv_is_digit` | function | `src/svg_render.c:25` | `static int sv_is_digit(char c)` |
-| `sv_is_dropped_element` | function | `src/svg_render.c:646` | `static int sv_is_dropped_element(const char *name, size_t n)` |
-| `sv_is_space` | function | `src/svg_render.c:21` | `static int sv_is_space(char c)` |
-| `sv_lower` | function | `src/svg_render.c:27` | `static char sv_lower(char c)` |
-| `sv_mat_identity` | function | `src/svg_render.c:161` | `static void sv_mat_identity(double *m)` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

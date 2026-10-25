@@ -1,6 +1,6 @@
 # GraphRAG Community Reports
 
-Entities: 7782 | Relationships: 13593 | Communities: 11 | Themes: 3 | Text units: 7333
+Entities: 7796 | Relationships: 13608 | Communities: 11 | Themes: 3 | Text units: 7347
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
@@ -85,7 +85,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - `include/dom.h` ranks 2 by PageRank, 17 importers, 29 symbols: dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: * "after this node" and "first" cannot be expressed by an element-only reference).
 - `include/url.h` ranks 3 by PageRank, 16 importers, 14 symbols: url_parts: Components of a validated absolute https URL, sliced for a JS location object.
 - Hotspot `src/tab.c`: 145 symbols, 66 connections (score 0.39).
-- Hotspot `tests/test_js_dom.c`: 215 symbols, 24 connections (score 0.24).
+- Hotspot `tests/test_js_dom.c`: 221 symbols, 24 connections (score 0.25).
 - Dependency cycle: js_dom.h -> js_location.h -> js_dom.h.
 - Dataflow: 3 INFERRED issues (first: UNCHECKED_ALLOC in jd_click_state_new).
 - Key entities: file:tests/test_js_dom.c, file:src/tab.c, file:tests/test_tab.c, file:src/js_dom.c, file:include/tab.h, file:tests/test_url.c, file:src/js_sandbox.c, file:tests/test_dom.c
@@ -117,7 +117,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - Hotspot `src/text_shape.c`: 61 symbols, 13 connections (score 0.10).
 - 1 layer violations, e.g. render_policy.c (presentation) -> data_url.h (data_access).
 - Dataflow: 1 INFERRED issues (first: UNCHECKED_ALLOC in headless_fetch).
-- Key entities: file:src/text_shape.c, file:src/freedom.c, file:include/text_shape.h, file:tests/test_text_shape.c, file:include/tls_impersonate.h, file:tests/test_data_url.c, file:include/webfont.h, file:tests/test_webfont_load.c
+- Key entities: file:src/text_shape.c, file:src/freedom.c, file:include/text_shape.h, file:tests/test_text_shape.c, file:tests/test_data_url.c, file:include/tls_impersonate.h, file:include/webfont.h, file:tests/test_webfont_load.c
 - Rating 3.0/10 = 7 x PageRank share 0.43 + 3 x risk 0.00. Internal imports: 47.
 
 ## include: page_view (`c4`, community, rating 1.7)
@@ -140,7 +140,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - `include/local_store.h` ranks 1 by PageRank, 8 importers, 11 symbols: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container so ls_open_passphrase can re-derive. ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len...
 - `include/http_cache.h` ranks 2 by PageRank, 3 importers, 19 symbols: hc_parse_http_date: } hc_class; typedef struct hc_meta { char   final_url[HC_URL_MAX]; char   content_type[HC_TYPE_MAX]; char   etag[HC_VAL_MAX]; char   last_modified[HC_VAL_MAX]; char   cache_control[HC_VAL_MAX]; char...
 - `include/pq_seal.h` ranks 3 by PageRank, 3 importers, 8 symbols: pqs_buf_free: DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der is owned * (release with pqs_buf_free). pqs_status pqs_export(const pqs_keys *k, uint8_t **der, size_t *len); pqs_status pqs_import(const...
-- Hotspot `src/local_store.c`: 315 symbols, 10 connections (score 0.25).
+- Hotspot `src/local_store.c`: 319 symbols, 10 connections (score 0.25).
 - Hotspot `src/http_cache.c`: 38 symbols, 20 connections (score 0.11).
 - 3 layer violations, e.g. http_cache.h (presentation) -> local_store.h (data_access).
 - Surprising bridge: css_index.c <-> pq_seal.c (8 hops across communities).

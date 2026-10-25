@@ -2,12 +2,12 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 286 files at commit `353ef26c333c`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 286 files at commit `36219af27cf9`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of the LazyOwn Redteam Framework: a free, open-source web browser (`README.md:5`)
-- Domain vocabulary (term, files): `null` (153), `max` (126), `not` (120), `size` (119), `out` (118), `one` (118), `include` (118), `freedom` (112), `free` (104), `char` (103), `const` (101), `css` (95), `its` (93), `void` (91), `static` (90)
+- Domain vocabulary (term, files): `null` (153), `max` (126), `not` (120), `size` (119), `out` (118), `one` (118), `include` (118), `freedom` (113), `free` (104), `char` (103), `const` (101), `css` (95), `its` (93), `void` (91), `static` (90)
 - Subsystem `src: css`: 53 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
 - Subsystem `include: browser_ui`: 45 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
 - Subsystem `src: tab`: 45 files, core `src/tab.c`: clip_pm_ok: A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile...
@@ -68,7 +68,7 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 177 files, 5800 symbols; docstrings on 27% of symbols; functions snake_case (99%); types PascalCase (0%); median file 241 lines, max 19138.
+- c: 177 files, 5814 symbols; docstrings on 27% of symbols; functions snake_case (99%); types PascalCase (0%); median file 241 lines, max 19138.
 - h: 93 files, 1498 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 75 lines, max 1250.
 - py: 12 files, 50 symbols; docstrings on 22% of symbols; functions snake_case (100%); median file 123 lines, max 345.
 - sh: 4 files, 0 symbols; median file 39 lines, max 91.
