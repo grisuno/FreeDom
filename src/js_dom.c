@@ -1048,6 +1048,9 @@ static const char JD_DOCUMENT_SHIM[] =
     "  var fragSeq=0;"
     "  function mkFrag(){ var kids=[]; var fk=null;"
     "    function fkey(){ if(fk===null){ fk='oF'+(++fragSeq); __G.__objRegister('F'+fragSeq,f); } return fk; }"
+    "function fq(s,one){ var out=[]; for(var i=0;i<kids.length;i++){ var k=kids[i]; if(!k||k.nodeType!==1) continue;"
+    "  if(k.matches&&k.matches(s)){ out.push(k); if(one) return out; }"
+    "  var sub=k.querySelectorAll?k.querySelectorAll(s):[]; for(var j=0;j<sub.length;j++){ out.push(sub[j]); if(one) return out; } } return out; }"
     "    var f={nodeType:11, __frag:kids,"
     "    addEventListener:function(t,fn,o){ __G.__evAdd(fkey(),t,fn,o); },"
     "    removeEventListener:function(t,fn,o){ __G.__evRemove(fkey(),t,fn,o); },"
@@ -1062,8 +1065,9 @@ static const char JD_DOCUMENT_SHIM[] =
     "    get firstChild(){ return kids.length?kids[0]:null; },"
     "    get lastChild(){ return kids.length?kids[kids.length-1]:null; },"
     "    get childElementCount(){ return kids.length; }, hasChildNodes:function(){ return kids.length>0; },"
-    "    getElementById:function(){return null;},"
-    "    querySelector:function(){return null;}, querySelectorAll:function(){return [];} }; return f; }"
+    "    getElementById:function(id){ var r=fq('[id=\\\"'+String(id).replace(/[\\\"\\\\]/g,'\\\\$&')+'\\\"]',true); return r.length?r[0]:null; },"
+    "    get firstElementChild(){ for(var i=0;i<kids.length;i++) if(kids[i]&&kids[i].nodeType===1) return kids[i]; return null; },"
+    "    querySelector:function(s){ var r=fq(String(s),true); return r.length?r[0]:null; }, querySelectorAll:function(s){ return fq(String(s),false); } }; return f; }"
     /* A DocumentFragment over real nodes: every member delegates to the holder element that owns
      * them. __frag is a fresh snapshot, which nodesOf() moves natively into the new parent. */
     "  function mkHolderFrag(h){"

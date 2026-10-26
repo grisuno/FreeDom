@@ -2068,6 +2068,15 @@ static void test_shadow_styles_are_scoped(void **state) {
            "@media (min-width:1px){[data-fzh=\"1\"][open] p[data-fzs=\"1\"]::before{x:y}}");
 }
 
+static void test_fragment_queries(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var fr=document.createDocumentFragment(), a=document.createElement('div'), b=document.createElement('p');"
+              "a.id='x'; b.className='k'; a.appendChild(b); fr.appendChild(a);"
+              "[fr.querySelector('.k')===b, fr.querySelectorAll('div,p').length, fr.getElementById('x')===a,"
+              "fr.firstElementChild===a, fr.childElementCount, fr.querySelector('.none')].join()",
+           "true,2,true,true,1,");
+}
+
 /* Streams (spec/js_platform.md): ReadableStream/WritableStream/TransformStream and Response.body over
  * the already-received body. Async: the jobs are pumped before the result is read. */
 /* navigator.geolocation (spec/identity.md): absent until the host installs it; then it answers
@@ -3490,6 +3499,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_platform_form_controls, setup, teardown),
         cmocka_unit_test_setup_teardown(test_form_elements_collection, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_styles_are_scoped, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_fragment_queries, setup, teardown),
         cmocka_unit_test_setup_teardown(test_indexeddb_core, setup, teardown),
         cmocka_unit_test_setup_teardown(test_geolocation_fixed_coordinates, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_streams, setup, teardown),
