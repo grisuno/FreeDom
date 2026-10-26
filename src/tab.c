@@ -601,7 +601,8 @@ static int write_view(int wfd, const pv_view *v) {
              * read_view mirrors this). See pv_run.ph_color. */
             (int32_t)r->ph_color,
             /* text-wrap-style: balance, tanda 43 (appended). */
-            (int32_t)r->text_balance,
+            /* bit 0 = text_balance; bit 1 = ctl_bare (the control's frame was cleared). */
+            (int32_t)(r->text_balance | (r->ctl_bare << 1)),
             /* the image's height is its CSS px height, tanda 43 (appended). */
             (int32_t)(r->img_h_css | (r->img_inline << 1) | (r->img_lazy << 2)),
             /* the float founder's own width halves, tanda 44 (appended). */
@@ -2476,13 +2477,14 @@ static int read_view(int fd, pv_view **out) {
             e.image_rendering = (int)tirend; e.caret_color = (int)tcaret;
             e.object_fit = (int)tobject_fit;
             e.fontface = (unsigned)b[57];
-            e.text_balance = (b[59] == 1) ? 1 : 0;
+            e.text_balance = (b[59] & 1) ? 1 : 0;
             /* A hostile worker's list is bounded like the cascade's own (anything
              * longer is not something css_style could have produced): fail closed
              * to the generic bucket. */
             if (fll > 0 && fll < sizeof e.font_list && fontl != NULL)
                 memcpy(e.font_list, fontl, fll + 1);
             pv_set_text_ext(v, &e);
+            v->runs[v->count - 1].ctl_bare = (b[59] & 2) ? 1 : 0;
             free(fontl);
             fontl = NULL;
             /* gradient text, 2026-07-19: already resolved at build time, so it

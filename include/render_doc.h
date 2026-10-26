@@ -140,6 +140,7 @@ typedef struct rd_block {
     int              image_rendering; /* css_image_rendering; set only with caps.css, else 0 */
     int              caret_color;     /* 0xRRGGBB; set only with caps.css, else -1 */
     int              ph_color;        /* pv_run.ph_color with caps.css, else PV_PH_THEME */
+    int              ctl_bare;        /* pv_run.ctl_bare with caps.css, else 0 */
     int              object_fit;      /* css_object_fit; set only with caps.css, else 0 */
     /* Gradient text (2026-07-19): glyph fill gradient from the nearest
      * background-clip:text ancestor. Set only with caps.css, else n = 0. */

@@ -270,6 +270,7 @@ static void run_init_common(pv_run *r) {
     r->block_id = -1;
     r->own_box_id = -1;
     r->ph_color = PV_PH_THEME;
+    r->ctl_bare = 0;
     r->input_type = 0;
     r->name = NULL;
     r->value = NULL;
@@ -1558,6 +1559,22 @@ static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
 static int css_has_position(const css_style *cs) {
     return cs->position == CSS_POS_RELATIVE || cs->position == CSS_POS_ABSOLUTE ||
            cs->position == CSS_POS_FIXED   || cs->position == CSS_POS_STICKY;
+}
+
+/* A side whose border the author zeroed (`border:0`, `border-width:0`) or switched off
+ * (`border:none`); an unset side is the UA's, so it keeps its frame. */
+static int border_side_cleared(int width, int style) {
+    return width == 0 || style == CSS_BST_NONE;
+}
+
+/* The author cleared the control's frame on all four sides (pure): Firefox then paints
+ * no native field chrome at all. */
+static int pv_control_frame_cleared(const css_style *cs) {
+    return cs != NULL &&
+           border_side_cleared(cs->border_top_width, cs->border_top_style) &&
+           border_side_cleared(cs->border_right_width, cs->border_right_style) &&
+           border_side_cleared(cs->border_bottom_width, cs->border_bottom_style) &&
+           border_side_cleared(cs->border_left_width, cs->border_left_style);
 }
 
 static int css_has_boxdeco(const css_style *cs) {
@@ -5734,6 +5751,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     css_style ph = cch_pseudo_style(el, sheet, CSS_PSEUDO_PLACEHOLDER,
                                                     pv_cached_font_px(&cache, n), NULL);
                     pv_set_input_placeholder(v, pv_placeholder_color(&ph));
+                    v->runs[v->count - 1].ctl_bare = pv_control_frame_cleared(
+                        cached_element_style_ref(el, sheet, &cache));
                 }
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;

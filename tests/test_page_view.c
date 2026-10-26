@@ -2128,6 +2128,29 @@ static void test_build_img_loading_lazy_is_recorded(void **state) {
     hp_document_free(doc);
 }
 
+/* An author border:0 / border:none on a text field drops the native frame (Firefox does not
+ * paint one): the run says so. A field with no author border, or with only some sides cleared,
+ * keeps it. */
+static void test_build_input_bare_chrome(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>.a{border:0}.b{border:none}.c{border-top:0}.d{padding:4px}</style></head><body>"
+        "<p><input class=\"a\" placeholder=\"za\"></p>"
+        "<p><input class=\"b\" placeholder=\"zb\"></p>"
+        "<p><input class=\"c\" placeholder=\"zc\"></p>"
+        "<p><input class=\"d\" placeholder=\"zd\"></p>"
+        "<p><input placeholder=\"ze\"></p></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_int_equal(find_text(v, "za")->ctl_bare, 1);
+    assert_int_equal(find_text(v, "zb")->ctl_bare, 1);
+    assert_int_equal(find_text(v, "zc")->ctl_bare, 0);
+    assert_int_equal(find_text(v, "zd")->ctl_bare, 0);
+    assert_int_equal(find_text(v, "ze")->ctl_bare, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* A styled text field records its own box and its ::placeholder style. */
 static void test_build_input_own_box_and_placeholder(void **state) {
     (void)state;
@@ -5344,6 +5367,7 @@ int main(void) {
         cmocka_unit_test(test_root_insets),
         cmocka_unit_test(test_build_inline_block_row_alignment),
         cmocka_unit_test(test_build_input_own_box_and_placeholder),
+        cmocka_unit_test(test_build_input_bare_chrome),
         cmocka_unit_test(test_build_img_loading_lazy_is_recorded),
         cmocka_unit_test(test_build_inline_block_row_ignores_oof_child),
         cmocka_unit_test(test_build_intrinsic_width_flag),

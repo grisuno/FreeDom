@@ -437,6 +437,9 @@ typedef struct pv_run {
      * theme's placeholder color, PV_PH_HIDDEN (-2) = opacity 0 or transparent, else
      * the author's 0xRRGGBB. */
     int     ph_color;
+    /* The author cleared the control's frame on every side (border:0 / border:none): the
+     * painter drops the native chrome, as Firefox does. 0 otherwise (UA frame). */
+    int     ctl_bare;
     char   *select_opts;   /* NULL or "optval||lbl||optval||lbl" for <select> */
     /* Author font-family list, normalized (css_style.font_list), owned; NULL =
      * none. The painter resolves it to a local family (spec/text_shape.md 7). */

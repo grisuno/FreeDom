@@ -203,6 +203,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->checked = -1;
     b->select_opts = NULL;
     b->ph_color = PV_PH_THEME;
+    b->ctl_bare = 0;
     return 0;
 }
 
@@ -392,7 +393,10 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             case PV_INPUT:
                 rc = rd_push_input(d, r->block_break, r);
                 /* ::placeholder is author presentation: caps.css-gated. */
-                if (rc == 0 && caps.css) d->blocks[d->count - 1].ph_color = r->ph_color;
+                if (rc == 0 && caps.css) {
+                    d->blocks[d->count - 1].ph_color = r->ph_color;
+                    d->blocks[d->count - 1].ctl_bare = r->ctl_bare;
+                }
                 break;
             case PV_LINK:
                 rc = rd_push(d, RD_LINK, r->heading, r->block_break, r->text, r->href,
