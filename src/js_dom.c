@@ -740,6 +740,8 @@ static const char JD_DOCUMENT_SHIM[] =
      "      set value(v){ var h=this._h; dom.setAttribute(h,'value',String(v)); },"
      "      get type(){ var h=this._h; var v=dom.getAttribute(h,'type'); return v===null?'text':v; },"
      "      set type(v){ var h=this._h; dom.setAttribute(h,'type',String(v)); },"
+     "      get name(){ var h=this._h; var v=dom.getAttribute(h,'name'); return v===null?'':v; },"
+     "      set name(v){ var h=this._h; dom.setAttribute(h,'name',String(v)); },"
      "      get disabled(){ var h=this._h; var v=dom.getAttribute(h,'disabled'); return v!==null; },"
      "      set disabled(v){ var h=this._h; if(v) dom.setAttribute(h,'disabled','disabled'); else dom.removeAttribute(h,'disabled'); },"
      "      get selected(){ var h=this._h; var v=dom.getAttribute(h,'selected'); return v!==null; },"

@@ -2035,6 +2035,28 @@ static void test_platform_form_controls(void **state) {
               "var a=e.validity.typeMismatch; e.value='a@b.c'; a+','+e.validity.typeMismatch", "true,false");
 }
 
+static void test_form_elements_collection(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var fm=document.forms[0]; [fm.elements.length, fm.length, fm.elements.namedItem('q').name,"
+              "fm.elements[0].name, fm.elements.q===fm.elements.namedItem('q'), fm.elements.namedItem('zz')].join()",
+           "2,2,q,q,true,");
+    EXPECT(f, "document.forms[0].elements.namedItem('q').value='sol'; document.forms[0].elements.q.value", "sol");
+    set_https_location(f, "https://example.com/a/b");
+    {
+        js_result r; char buf[256]; int replace = 0;
+        assert_int_equal(run(f, "var g=document.createElement('form'); g.setAttribute('method','GET'); g.setAttribute('action','/s');"
+                                "var h=document.createElement('input'); h.name='a b'; h.value='x&y'; g.appendChild(h);"
+                                "document.body.appendChild(g); g.submit();", &r), JS_OK);
+        js_result_free(&r);
+        assert_int_equal(jd_take_nav_request(f->ctx, buf, sizeof buf, &replace), 1);
+        assert_string_equal(buf, "/s?a+b=x%26y");
+        /* a POST form is never turned into a script-driven navigation */
+        assert_int_equal(run(f, "document.forms[0].submit();", &r), JS_OK);
+        js_result_free(&r);
+        assert_int_equal(jd_take_nav_request(f->ctx, buf, sizeof buf, &replace), 0);
+    }
+}
+
 /* Streams (spec/js_platform.md): ReadableStream/WritableStream/TransformStream and Response.body over
  * the already-received body. Async: the jobs are pumped before the result is read. */
 /* navigator.geolocation (spec/identity.md): absent until the host installs it; then it answers
@@ -3455,6 +3477,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_platform_interfaces_and_events, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_dommatrix_and_imagedata, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_form_controls, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_form_elements_collection, setup, teardown),
         cmocka_unit_test_setup_teardown(test_indexeddb_core, setup, teardown),
         cmocka_unit_test_setup_teardown(test_geolocation_fixed_coordinates, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_streams, setup, teardown),
