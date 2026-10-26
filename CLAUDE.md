@@ -405,6 +405,8 @@ Cada línea es la decisión + su porqué; el detalle vive en `spec/`, en `git lo
 
 - **Tanda 70 (oct 25) — YouTube arranca su app: `readyState` real y reacciones CE reentrantes.** `readyState` recorría solo `loading`; una inserción dentro de un `connectedCallback` se descartaba (guard booleano); y la búsqueda de custom elements usaba un selector con TODAS las definiciones (~900 en YouTube) que no resolvía, dejando `ytd-page-manager` sin actualizar (`PAGE_TOKEN` sin proveedor). Masthead real en PNG; contenido de portada y reddit siguen abiertos. `spec/js_dom.md` 7q. `[[freedom-ce-reactions-readystate-tanda70-2026-10-25]]`
 
+- **Tanda 71 (oct 26) — sitios de `js.conf` sin errores de consola: reddit pasa su verificacion, OSM arranca, x.com muestra su landing.** `form.elements`/`submit` GET, estilos de shadow acotados (`:host`), `currentScript` real, `createHTMLDocument` desacoplado (jQuery 3 borraba el `<body>`), consultas en fragmentos. ASan + `fuzz-jsdom` limpios, `parity` +0.01. Abierto: hidratado Lit de reddit, iframes (JustPaste/TinyMCE), chrome UA de inputs con `border:0`, GitHub header. `[[freedom-shadow-scope-shadydom-trap-tanda71-2026-10-26]]`
+
 ### 7.4 Tandas de paridad 21–25
 
 - **Tanda 21 (sep 6) — "sale del flujo" necesita ancla, y el bloque contenedor de un contenedor SIN caja era el de su primer ítem.** `[[freedom-oof-leaves-flow-anchor-2026-09-06]]`

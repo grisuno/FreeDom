@@ -657,3 +657,28 @@ muerta de `#page-manager` volvía, con `isConnected === false`, y la app no mont
   `a.pathname.startsWith("/")` y moría con `cannot read property 'startsWith' of undefined`. Test:
   `test_anchor_url_decomposition`. Estado medido: en vivo `ytd-browse` (home) se monta; el PNG todavía
   muestra el esqueleto del servidor y la portada no se pinta (abierto).
+
+## 7r. Formularios, `currentScript` real y `createHTMLDocument` desacoplado (2026-10-26)
+
+Medido barriendo los sitios de `js.conf` (reddit, x.com, OSM):
+
+- **`form.elements`** (colección indexable + `namedItem`/`item`/`length`, nombres por `name` o `id`),
+  `form.length`, y **`input.name`** refleja el atributo (antes `Object.assign(input,{name})` no
+  llegaba al DOM). `form.submit()` solo navega con `method=GET`: arma la consulta con `FormData`
+  (solo valores string) y la entrega a `location.assign`, que el padre sigue gateando con
+  `ln_resolve`. Un `POST` desde script **nunca** navega (fail-closed). La verificacion anti-bot de
+  reddit (`elements.namedItem('solution')` + `requestSubmit()`) ahora llega a la pagina real.
+- **`document.currentScript`** es el elemento `<script>` REAL cuando esta en el documento (se
+  reclama una vez por elemento, por `src`+`type`, en orden de documento); si no existe
+  (script sintetico) cae al objeto minimo anterior. x.com termina cada trozo del router con
+  `document.currentScript.remove()`.
+- **`document.implementation.createHTMLDocument(titulo)`** devuelve un documento DESACOPLADO
+  (`html`/`head`/`body` propios). Antes devolvia `document`, y el test de soporte de jQuery 3
+  (`createHTMLDocument("").body.innerHTML="<form></form><form></form>"`) **borraba el `<body>` de la
+  pagina real** (OSM quedaba con dos `<form>` y "Map container not found").
+- **`DocumentFragment`**: `querySelector/All`, `getElementById`, `firstElementChild` sobre sus hijos.
+- Descartado a proposito: mover los miembros del fragmento al prototipo (para que ShadyDOM de
+  YouTube los reemplace). Activa de verdad el arbol logico de Shady, que necesita un `TreeWalker`
+  completo (`previousNode`/`lastChild` son stubs) y hace desaparecer el masthead. Ver memoria
+  `freedom-shadow-scope-shadydom-trap-tanda71-2026-10-26`.
+
