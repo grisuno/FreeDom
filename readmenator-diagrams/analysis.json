@@ -1,7 +1,7 @@
 {
  "metadata": {
-  "generated_at": "2026-10-25T23:19:52.132784+00:00",
-  "source_tree_hash": "685a62bffc4b86a783f5421712bf529a67d1eee241e1f977a48757ede0b5b7f2",
+  "generated_at": "2026-10-26T01:21:15.988783+00:00",
+  "source_tree_hash": "249c676337c5f6e37c3809197d3dbbbb7b0133da72730e1cf72048b2ca2c2dd6",
   "repo_name": "freedom-0.0.3",
   "depth_level": 2,
   "depth_cap": 3,
@@ -665,7 +665,7 @@
   },
   "src/local_store.c": {
    "language": "c",
-   "symbols": 327
+   "symbols": 331
   },
   "src/media_decoder.c": {
    "language": "c",
@@ -969,7 +969,7 @@
   },
   "tests/test_js_dom.c": {
    "language": "c",
-   "symbols": 243
+   "symbols": 247
   },
   "tests/test_js_env.c": {
    "language": "c",
@@ -28244,10 +28244,10 @@
   "src/js_custom_elements.c|src/js_custom_elements.c::jdce_install": {
    "file_path": "src/js_custom_elements.c",
    "qualified_name": "src/js_custom_elements.c::jdce_install",
-   "start_line": 183,
-   "end_line": 188,
+   "start_line": 190,
+   "end_line": 195,
    "type": "FUNCTION",
-   "content_hash": "222f64d92e6b12d0"
+   "content_hash": "85d7c154c7e93c46"
   },
   "src/js_custom_elements.h|src/js_custom_elements.h::FREEDOM_JS_CUSTOM_ELEMENTS_H": {
    "file_path": "src/js_custom_elements.h",
@@ -28637,137 +28637,137 @@
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::table",
    "start_line": 639,
-   "end_line": 679,
+   "end_line": 685,
    "type": "FUNCTION",
    "content_hash": "40f43a32d714683c"
   },
   "src/js_dom.c|src/js_dom.c::attrNames": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::attrNames",
-   "start_line": 680,
-   "end_line": 851,
+   "start_line": 686,
+   "end_line": 865,
    "type": "FUNCTION",
-   "content_hash": "45cb9ce5849d5f1d"
+   "content_hash": "e4dae111b39704ed"
   },
   "src/js_dom.c|src/js_dom.c::scripts": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::scripts",
-   "start_line": 852,
-   "end_line": 1024,
+   "start_line": 866,
+   "end_line": 1038,
    "type": "FUNCTION",
-   "content_hash": "5b7d238c3fc9f7fd"
+   "content_hash": "d2fb18e48c67fe10"
   },
   "src/js_dom.c|src/js_dom.c::enough": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::enough",
-   "start_line": 1025,
-   "end_line": 1195,
+   "start_line": 1039,
+   "end_line": 1209,
    "type": "FUNCTION",
-   "content_hash": "9c81296014772007"
+   "content_hash": "77bae082f7f658e1"
   },
   "src/js_dom.c|src/js_dom.c::ms": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::ms",
-   "start_line": 1196,
-   "end_line": 1384,
+   "start_line": 1210,
+   "end_line": 1400,
    "type": "FUNCTION",
-   "content_hash": "a9c26260fbbd356c"
+   "content_hash": "371abda74fd9988d"
   },
   "src/js_dom.c|src/js_dom.c::empty": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::empty",
-   "start_line": 1385,
-   "end_line": 1386,
+   "start_line": 1401,
+   "end_line": 1402,
    "type": "FUNCTION",
-   "content_hash": "152eb67e23dfd39e"
+   "content_hash": "e4bff5052e31c4e9"
   },
   "src/js_dom.c|src/js_dom.c::geometry": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::geometry",
-   "start_line": 1387,
-   "end_line": 1389,
+   "start_line": 1403,
+   "end_line": 1405,
    "type": "FUNCTION",
-   "content_hash": "8350aabb9b8bfff8"
+   "content_hash": "aaaf3069d5ad27cc"
   },
   "src/js_dom.c|src/js_dom.c::size": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::size",
-   "start_line": 1390,
-   "end_line": 1392,
+   "start_line": 1406,
+   "end_line": 1408,
    "type": "FUNCTION",
-   "content_hash": "d4e87bd6fa956943"
+   "content_hash": "70df692da594798f"
   },
   "src/js_dom.c|src/js_dom.c::js_env": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::js_env",
-   "start_line": 1393,
-   "end_line": 1927,
+   "start_line": 1409,
+   "end_line": 1943,
    "type": "FUNCTION",
-   "content_hash": "3b9fc5bd7bb7cb8a"
+   "content_hash": "2f35cd762c18a663"
   },
   "src/js_dom.c|src/js_dom.c::jd_install": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::jd_install",
-   "start_line": 1928,
-   "end_line": 2009,
+   "start_line": 1944,
+   "end_line": 2025,
    "type": "FUNCTION",
-   "content_hash": "610f4639c9e5cb9b"
+   "content_hash": "ca80209602a36621"
   },
   "src/js_dom.c|src/js_dom.c::jd_flush_custom_elements": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::jd_flush_custom_elements",
-   "start_line": 2010,
-   "end_line": 2023,
+   "start_line": 2026,
+   "end_line": 2039,
    "type": "FUNCTION",
-   "content_hash": "e77d00dcf165d4ac"
+   "content_hash": "d9f902c5fbabb1bd"
   },
   "src/js_dom.c|src/js_dom.c::fails": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::fails",
-   "start_line": 2024,
-   "end_line": 2137,
+   "start_line": 2040,
+   "end_line": 2153,
    "type": "FUNCTION",
-   "content_hash": "0ca5bae5a2b70166"
+   "content_hash": "a4f2860136a77704"
   },
   "src/js_dom.c|src/js_dom.c::jd_install_console": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::jd_install_console",
-   "start_line": 2138,
-   "end_line": 2174,
+   "start_line": 2154,
+   "end_line": 2190,
    "type": "FUNCTION",
-   "content_hash": "71b5e1541d956407"
+   "content_hash": "79b212a0be56f6c0"
   },
   "src/js_dom.c|src/js_dom.c::jd_set_cookies": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::jd_set_cookies",
-   "start_line": 2175,
-   "end_line": 2194,
+   "start_line": 2191,
+   "end_line": 2210,
    "type": "FUNCTION",
-   "content_hash": "aa0ccf38a95d2407"
+   "content_hash": "5cac24461e951ce0"
   },
   "src/js_dom.c|src/js_dom.c::jd_get_cookies": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::jd_get_cookies",
-   "start_line": 2195,
-   "end_line": 2217,
+   "start_line": 2211,
+   "end_line": 2233,
    "type": "FUNCTION",
-   "content_hash": "1f9128ea1a73a58f"
+   "content_hash": "0419d11743d5efcc"
   },
   "src/js_dom.c|src/js_dom.c::jd_set_computed": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::jd_set_computed",
-   "start_line": 2218,
-   "end_line": 2228,
+   "start_line": 2234,
+   "end_line": 2244,
    "type": "FUNCTION",
-   "content_hash": "47dc2bd6652a337d"
+   "content_hash": "a2592fae5dc47a49"
   },
   "src/js_dom.c|src/js_dom.c::jd_set_geometry": {
    "file_path": "src/js_dom.c",
    "qualified_name": "src/js_dom.c::jd_set_geometry",
-   "start_line": 2229,
-   "end_line": 2237,
+   "start_line": 2245,
+   "end_line": 2253,
    "type": "FUNCTION",
-   "content_hash": "875acdbb5a79ecf6"
+   "content_hash": "e8e340b9fd39f06e"
   },
   "src/js_dom_ext.c|src/js_dom_ext.c::identity": {
    "file_path": "src/js_dom_ext.c",
@@ -30292,226 +30292,226 @@
   "src/local_store.c|src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES",
-   "start_line": 852,
-   "end_line": 854,
+   "start_line": 863,
+   "end_line": 865,
    "type": "FUNCTION",
-   "content_hash": "83f4b669088edf79"
+   "content_hash": "02c1c18f4cd1f024"
   },
   "src/local_store.c|src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST",
-   "start_line": 855,
-   "end_line": 857,
+   "start_line": 866,
+   "end_line": 868,
    "type": "FUNCTION",
-   "content_hash": "b3f37551999863b8"
+   "content_hash": "ecf525831b8cb52e"
   },
   "src/local_store.c|src/local_store.c::OSSL_KDF_PARAM_THREADS": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OSSL_KDF_PARAM_THREADS",
-   "start_line": 858,
-   "end_line": 860,
+   "start_line": 869,
+   "end_line": 871,
    "type": "FUNCTION",
-   "content_hash": "dfce9b87e5f018b4"
+   "content_hash": "9a7b7c2a795146ef"
   },
   "src/local_store.c|src/local_store.c::_GNU_SOURCE": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::_GNU_SOURCE",
-   "start_line": 825,
-   "end_line": 851,
+   "start_line": 836,
+   "end_line": 862,
    "type": "FUNCTION",
-   "content_hash": "77529d67c093ec32"
+   "content_hash": "f95d312165b23283"
   },
   "src/local_store.c|src/local_store.c::LS_VERSION": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_VERSION",
-   "start_line": 861,
-   "end_line": 861,
+   "start_line": 872,
+   "end_line": 872,
    "type": "FUNCTION",
-   "content_hash": "838ba0f4a75e449c"
+   "content_hash": "8ca974b16e25c1df"
   },
   "src/local_store.c|src/local_store.c::LS_KDF_NONE": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_KDF_NONE",
-   "start_line": 862,
-   "end_line": 862,
+   "start_line": 873,
+   "end_line": 873,
    "type": "FUNCTION",
-   "content_hash": "428040b2eab3e014"
+   "content_hash": "0ae866766f2c075e"
   },
   "src/local_store.c|src/local_store.c::LS_KDF_ARGON2ID": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_KDF_ARGON2ID",
-   "start_line": 863,
-   "end_line": 865,
+   "start_line": 874,
+   "end_line": 876,
    "type": "FUNCTION",
-   "content_hash": "0da7f32c19efa960"
+   "content_hash": "7d9ba6212b0a2e61"
   },
   "src/local_store.c|src/local_store.c::LS_ARGON2_T": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_ARGON2_T",
-   "start_line": 866,
-   "end_line": 866,
+   "start_line": 877,
+   "end_line": 877,
    "type": "FUNCTION",
-   "content_hash": "866cacdd0339cb6d"
+   "content_hash": "f3633ec9b65b5d8e"
   },
   "src/local_store.c|src/local_store.c::LS_ARGON2_M_KIB": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_ARGON2_M_KIB",
-   "start_line": 867,
-   "end_line": 867,
+   "start_line": 878,
+   "end_line": 878,
    "type": "FUNCTION",
-   "content_hash": "2bdbeb97111c2aa0"
+   "content_hash": "05cf5bf3251e9506"
   },
   "src/local_store.c|src/local_store.c::LS_ARGON2_P": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::LS_ARGON2_P",
-   "start_line": 868,
-   "end_line": 870,
+   "start_line": 879,
+   "end_line": 881,
    "type": "FUNCTION",
-   "content_hash": "4aa0ae6373fcbbc1"
+   "content_hash": "09e9ad0dff0529d4"
   },
   "src/local_store.c|src/local_store.c::OFF_MAGIC": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_MAGIC",
-   "start_line": 871,
-   "end_line": 871,
+   "start_line": 882,
+   "end_line": 882,
    "type": "FUNCTION",
-   "content_hash": "adeced5e17d7555a"
+   "content_hash": "1b58984b7ddf9793"
   },
   "src/local_store.c|src/local_store.c::OFF_VERSION": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_VERSION",
-   "start_line": 872,
-   "end_line": 872,
+   "start_line": 883,
+   "end_line": 883,
    "type": "FUNCTION",
-   "content_hash": "23ca901e95ecc7ec"
+   "content_hash": "abd941a0bd224a2f"
   },
   "src/local_store.c|src/local_store.c::OFF_AEAD": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_AEAD",
-   "start_line": 873,
-   "end_line": 873,
+   "start_line": 884,
+   "end_line": 884,
    "type": "FUNCTION",
-   "content_hash": "a582d8a6e9f38e9f"
+   "content_hash": "167b84c5b39c4e30"
   },
   "src/local_store.c|src/local_store.c::OFF_KDF": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_KDF",
-   "start_line": 874,
-   "end_line": 874,
+   "start_line": 885,
+   "end_line": 885,
    "type": "FUNCTION",
-   "content_hash": "4535a0c07d877438"
+   "content_hash": "c69f7d16b035affd"
   },
   "src/local_store.c|src/local_store.c::OFF_SALT": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_SALT",
-   "start_line": 875,
-   "end_line": 875,
+   "start_line": 886,
+   "end_line": 886,
    "type": "FUNCTION",
-   "content_hash": "a1d1c9b0cec091d0"
+   "content_hash": "acdb4c7218c3d131"
   },
   "src/local_store.c|src/local_store.c::OFF_NONCE": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::OFF_NONCE",
-   "start_line": 876,
-   "end_line": 881,
+   "start_line": 887,
+   "end_line": 892,
    "type": "FUNCTION",
-   "content_hash": "8d6d7ee3465ddbe4"
+   "content_hash": "2418122b08233aca"
   },
   "src/local_store.c|src/local_store.c::cipher_for": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::cipher_for",
-   "start_line": 882,
-   "end_line": 891,
+   "start_line": 893,
+   "end_line": 902,
    "type": "FUNCTION",
-   "content_hash": "356e4f90b2ad89cc"
+   "content_hash": "574101ca9d238709"
   },
   "src/local_store.c|src/local_store.c::argon2id_derive": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::argon2id_derive",
-   "start_line": 892,
-   "end_line": 920,
+   "start_line": 903,
+   "end_line": 931,
    "type": "FUNCTION",
-   "content_hash": "d1952b83c03c33cc"
+   "content_hash": "ffa14ce9ac753ced"
   },
   "src/local_store.c|src/local_store.c::ls_derive_key": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_derive_key",
-   "start_line": 921,
-   "end_line": 929,
+   "start_line": 932,
+   "end_line": 940,
    "type": "FUNCTION",
-   "content_hash": "90f86f06c81c3df8"
+   "content_hash": "0d06be431e95d79c"
   },
   "src/local_store.c|src/local_store.c::aead_encrypt": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::aead_encrypt",
-   "start_line": 930,
-   "end_line": 955,
+   "start_line": 941,
+   "end_line": 966,
    "type": "FUNCTION",
-   "content_hash": "70980d210ea2bc95"
+   "content_hash": "c4c31476dbeb1d23"
   },
   "src/local_store.c|src/local_store.c::aead_decrypt": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::aead_decrypt",
-   "start_line": 956,
-   "end_line": 983,
+   "start_line": 967,
+   "end_line": 994,
    "type": "FUNCTION",
-   "content_hash": "7ad824585d858a43"
+   "content_hash": "769bdf933d1aefc8"
   },
   "src/local_store.c|src/local_store.c::seal_core": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::seal_core",
-   "start_line": 984,
-   "end_line": 1020,
+   "start_line": 995,
+   "end_line": 1031,
    "type": "FUNCTION",
-   "content_hash": "86203f90baf7f125"
+   "content_hash": "e507a34e0ef7029b"
   },
   "src/local_store.c|src/local_store.c::decrypt_blob": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::decrypt_blob",
-   "start_line": 1021,
-   "end_line": 1051,
+   "start_line": 1032,
+   "end_line": 1062,
    "type": "FUNCTION",
-   "content_hash": "2f67ccaf8e60d6b6"
+   "content_hash": "f67a854893be3793"
   },
   "src/local_store.c|src/local_store.c::ls_seal": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_seal",
-   "start_line": 1052,
-   "end_line": 1064,
+   "start_line": 1063,
+   "end_line": 1075,
    "type": "FUNCTION",
-   "content_hash": "bec306747f9484b6"
+   "content_hash": "b98c703ae9099f61"
   },
   "src/local_store.c|src/local_store.c::ls_open": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_open",
-   "start_line": 1065,
-   "end_line": 1075,
+   "start_line": 1076,
+   "end_line": 1086,
    "type": "FUNCTION",
-   "content_hash": "fd38c31de0901f94"
+   "content_hash": "f60ed1b826f7e8e7"
   },
   "src/local_store.c|src/local_store.c::ls_seal_passphrase": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_seal_passphrase",
-   "start_line": 1076,
-   "end_line": 1096,
+   "start_line": 1087,
+   "end_line": 1107,
    "type": "FUNCTION",
-   "content_hash": "637c1adea5c5a8c0"
+   "content_hash": "7afdb84fa40f140b"
   },
   "src/local_store.c|src/local_store.c::ls_open_passphrase": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_open_passphrase",
-   "start_line": 1097,
-   "end_line": 1116,
+   "start_line": 1108,
+   "end_line": 1127,
    "type": "FUNCTION",
-   "content_hash": "f65a45ed8ca4ca4c"
+   "content_hash": "8c34e75c46f2a74e"
   },
   "src/local_store.c|src/local_store.c::ls_free": {
    "file_path": "src/local_store.c",
    "qualified_name": "src/local_store.c::ls_free",
-   "start_line": 1117,
-   "end_line": 1121,
+   "start_line": 1128,
+   "end_line": 1132,
    "type": "FUNCTION",
-   "content_hash": "ea17a6dcdafffb5b"
+   "content_hash": "6cd7f44bbd1ac882"
   },
   "src/media_decoder.c|src/media_decoder.c::open": {
    "file_path": "src/media_decoder.c",
@@ -48132,10 +48132,10 @@
   "tests/test_js_dom.c|tests/test_js_dom.c::EXPECT": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::EXPECT",
-   "start_line": 3008,
-   "end_line": 3017,
+   "start_line": 3074,
+   "end_line": 3083,
    "type": "FUNCTION",
-   "content_hash": "ad23cc95acdb5ad0"
+   "content_hash": "4fef394fcb5042de"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_install_null_args": {
    "file_path": "tests/test_js_dom.c",
@@ -49597,249 +49597,281 @@
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_lifecycle_listeners_get_event",
    "start_line": 2741,
-   "end_line": 2752,
+   "end_line": 2754,
    "type": "FUNCTION",
    "content_hash": "e58bd703ef5a205f"
+  },
+  "tests/test_js_dom.c|tests/test_js_dom.c::test_ready_state_walks_loading_interactive_complete": {
+   "file_path": "tests/test_js_dom.c",
+   "qualified_name": "tests/test_js_dom.c::test_ready_state_walks_loading_interactive_complete",
+   "start_line": 2755,
+   "end_line": 2782,
+   "type": "FUNCTION",
+   "content_hash": "0cfad6c30e905231"
+  },
+  "tests/test_js_dom.c|tests/test_js_dom.c::test_custom_element_reactions_through_template_fragment": {
+   "file_path": "tests/test_js_dom.c",
+   "qualified_name": "tests/test_js_dom.c::test_custom_element_reactions_through_template_fragment",
+   "start_line": 2783,
+   "end_line": 2797,
+   "type": "FUNCTION",
+   "content_hash": "718e27e3a57c73ca"
+  },
+  "tests/test_js_dom.c|tests/test_js_dom.c::test_custom_element_found_in_subtree_with_many_definitions": {
+   "file_path": "tests/test_js_dom.c",
+   "qualified_name": "tests/test_js_dom.c::test_custom_element_found_in_subtree_with_many_definitions",
+   "start_line": 2798,
+   "end_line": 2809,
+   "type": "FUNCTION",
+   "content_hash": "94b48200fc6b999f"
+  },
+  "tests/test_js_dom.c|tests/test_js_dom.c::test_anchor_url_decomposition": {
+   "file_path": "tests/test_js_dom.c",
+   "qualified_name": "tests/test_js_dom.c::test_anchor_url_decomposition",
+   "start_line": 2810,
+   "end_line": 2818,
+   "type": "FUNCTION",
+   "content_hash": "0908ee1531b410e0"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::fake_net": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::fake_net",
-   "start_line": 2753,
-   "end_line": 2753,
+   "start_line": 2819,
+   "end_line": 2819,
    "type": "CLASS",
-   "content_hash": "8cbd1016fd1da654"
+   "content_hash": "599ecc02c714763d"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::fake_fetch": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::fake_fetch",
-   "start_line": 2754,
-   "end_line": 2779,
+   "start_line": 2820,
+   "end_line": 2845,
    "type": "FUNCTION",
-   "content_hash": "70070d6f1adc69a4"
+   "content_hash": "d8b74005a82c2294"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_trusted_fetch_request_response": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_trusted_fetch_request_response",
-   "start_line": 2780,
-   "end_line": 2800,
+   "start_line": 2846,
+   "end_line": 2866,
    "type": "FUNCTION",
-   "content_hash": "34cb29ed66fe7647"
+   "content_hash": "9560f0e19e72d99f"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_ext_is_equal_node": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_ext_is_equal_node",
-   "start_line": 2801,
-   "end_line": 2802,
+   "start_line": 2867,
+   "end_line": 2868,
    "type": "FUNCTION",
-   "content_hash": "ebc070b0ad28d4e9"
+   "content_hash": "9669f3d2caace7dd"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_trusted_send_beacon": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_trusted_send_beacon",
-   "start_line": 2842,
-   "end_line": 2862,
+   "start_line": 2908,
+   "end_line": 2928,
    "type": "FUNCTION",
-   "content_hash": "2ac3ba81a3d7d614"
+   "content_hash": "b670f31667cb3c4b"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_trusted_send_beacon_can_be_patched": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_trusted_send_beacon_can_be_patched",
-   "start_line": 2863,
-   "end_line": 2867,
+   "start_line": 2929,
+   "end_line": 2933,
    "type": "FUNCTION",
-   "content_hash": "f183a04f1b5d023f"
+   "content_hash": "12de22e417909dec"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_trusted_request_headers_cross_to_host": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_trusted_request_headers_cross_to_host",
-   "start_line": 2879,
-   "end_line": 2882,
+   "start_line": 2945,
+   "end_line": 2948,
    "type": "FUNCTION",
-   "content_hash": "08834551cf23469e"
+   "content_hash": "073e009480ee7560"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_trusted_xhr_event_target_and_response_headers": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_trusted_xhr_event_target_and_response_headers",
-   "start_line": 2899,
-   "end_line": 2902,
+   "start_line": 2965,
+   "end_line": 2968,
    "type": "FUNCTION",
-   "content_hash": "761cb60dd5877b74"
+   "content_hash": "55b0b31c64c60d73"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_trusted_fetch_exposes_response_headers": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_trusted_fetch_exposes_response_headers",
-   "start_line": 2925,
-   "end_line": 2928,
+   "start_line": 2991,
+   "end_line": 2994,
    "type": "FUNCTION",
-   "content_hash": "65b703796f68ae09"
+   "content_hash": "201e0b7d1bc93d7a"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_xml_serializer_covers_fragments_and_text": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_xml_serializer_covers_fragments_and_text",
-   "start_line": 2938,
-   "end_line": 2939,
+   "start_line": 3004,
+   "end_line": 3005,
    "type": "FUNCTION",
-   "content_hash": "acacda736f6ccfc6"
+   "content_hash": "6b4f9aa881707ab8"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_ce_create_runs_constructor": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_ce_create_runs_constructor",
-   "start_line": 2952,
-   "end_line": 2953,
+   "start_line": 3018,
+   "end_line": 3019,
    "type": "FUNCTION",
-   "content_hash": "a6227f9f7729c617"
+   "content_hash": "5027cca700faf8b1"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_ce_define_upgrades_existing": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_ce_define_upgrades_existing",
-   "start_line": 2962,
-   "end_line": 2963,
+   "start_line": 3028,
+   "end_line": 3029,
    "type": "FUNCTION",
-   "content_hash": "b9dab0a1b7b27a2d"
+   "content_hash": "05a4e0405cfe73a9"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_ce_connected_callbacks": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_ce_connected_callbacks",
-   "start_line": 2973,
-   "end_line": 2974,
+   "start_line": 3039,
+   "end_line": 3040,
    "type": "FUNCTION",
-   "content_hash": "8e6eb93997b4889c"
+   "content_hash": "b7266b373855183b"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_ce_attribute_changed": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_ce_attribute_changed",
-   "start_line": 2982,
-   "end_line": 2983,
+   "start_line": 3048,
+   "end_line": 3049,
    "type": "FUNCTION",
-   "content_hash": "2a8a0c6e537a8877"
+   "content_hash": "a6176571ae80c9aa"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_ce_sync_on_mutation": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_ce_sync_on_mutation",
-   "start_line": 2995,
-   "end_line": 2996,
+   "start_line": 3061,
+   "end_line": 3062,
    "type": "FUNCTION",
-   "content_hash": "7874986c38070c54"
+   "content_hash": "2b827d0741909b2d"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_ce_define_validation": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_ce_define_validation",
-   "start_line": 3006,
-   "end_line": 3007,
+   "start_line": 3072,
+   "end_line": 3073,
    "type": "FUNCTION",
-   "content_hash": "37ca78a31fbe56b1"
+   "content_hash": "50a4fa0bd6eeee64"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::pump_ticks": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::pump_ticks",
-   "start_line": 3018,
-   "end_line": 3024,
+   "start_line": 3084,
+   "end_line": 3090,
    "type": "FUNCTION",
-   "content_hash": "de3cf4b5fc45044b"
+   "content_hash": "a033f8c7951bc7c0"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_trusted_worker": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_trusted_worker",
-   "start_line": 3025,
-   "end_line": 3057,
+   "start_line": 3091,
+   "end_line": 3123,
    "type": "FUNCTION",
-   "content_hash": "1e4bd1f5094e992b"
+   "content_hash": "915d371aecfff2ee"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_video_shim_no_video": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_video_shim_no_video",
-   "start_line": 3058,
-   "end_line": 3065,
+   "start_line": 3124,
+   "end_line": 3131,
    "type": "FUNCTION",
-   "content_hash": "efa25275194fa28b"
+   "content_hash": "54025aabfbd1468d"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_video_shim_uses_index_1": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_video_shim_uses_index_1",
-   "start_line": 3066,
-   "end_line": 3089,
+   "start_line": 3132,
+   "end_line": 3155,
    "type": "FUNCTION",
-   "content_hash": "8e6ba40a00971a48"
+   "content_hash": "227dc80b556d1ee9"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_video_shim_video_data_wins": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_video_shim_video_data_wins",
-   "start_line": 3090,
-   "end_line": 3113,
+   "start_line": 3156,
+   "end_line": 3179,
    "type": "FUNCTION",
-   "content_hash": "3673b702000794f8"
+   "content_hash": "53ef9ab5450e5202"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_video_shim_relative_url_resolved": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_video_shim_relative_url_resolved",
-   "start_line": 3114,
-   "end_line": 3131,
+   "start_line": 3180,
+   "end_line": 3197,
    "type": "FUNCTION",
-   "content_hash": "965c740c4b623a98"
+   "content_hash": "7404f4ae231bd389"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_video_shim_empty_html": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_video_shim_empty_html",
-   "start_line": 3132,
-   "end_line": 3143,
+   "start_line": 3198,
+   "end_line": 3209,
    "type": "FUNCTION",
-   "content_hash": "af44d23155cafbc5"
+   "content_hash": "2583cae4907f5adc"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_video_shim_null_ctx": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_video_shim_null_ctx",
-   "start_line": 3144,
-   "end_line": 3175,
+   "start_line": 3210,
+   "end_line": 3241,
    "type": "FUNCTION",
-   "content_hash": "76c395197dc719a5"
+   "content_hash": "b20efaa6d611488d"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_video_from_scripts_video_data_is_variable": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_video_from_scripts_video_data_is_variable",
-   "start_line": 3176,
-   "end_line": 3190,
+   "start_line": 3242,
+   "end_line": 3256,
    "type": "FUNCTION",
-   "content_hash": "78bf89d7252894ad"
+   "content_hash": "6391cdb7f5dc0f93"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_video_from_scripts_relative_resolved": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_video_from_scripts_relative_resolved",
-   "start_line": 3191,
-   "end_line": 3208,
+   "start_line": 3257,
+   "end_line": 3274,
    "type": "FUNCTION",
-   "content_hash": "f6a9d4a2c69312a1"
+   "content_hash": "8dcde26af04c1252"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_video_from_scripts_video_data_string": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_video_from_scripts_video_data_string",
-   "start_line": 3209,
-   "end_line": 3225,
+   "start_line": 3275,
+   "end_line": 3291,
    "type": "FUNCTION",
-   "content_hash": "32159777938130a9"
+   "content_hash": "27d7b75e6a0196bd"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_video_from_scripts_no_video": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_video_from_scripts_no_video",
-   "start_line": 3226,
-   "end_line": 3236,
+   "start_line": 3292,
+   "end_line": 3302,
    "type": "FUNCTION",
-   "content_hash": "574485f424a5886f"
+   "content_hash": "3fcbfe9fcea6e017"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::test_video_from_scripts_null_args": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::test_video_from_scripts_null_args",
-   "start_line": 3237,
-   "end_line": 3247,
+   "start_line": 3303,
+   "end_line": 3313,
    "type": "FUNCTION",
-   "content_hash": "d3733ce51f32c5bb"
+   "content_hash": "adead8da0d2fae5c"
   },
   "tests/test_js_dom.c|tests/test_js_dom.c::main": {
    "file_path": "tests/test_js_dom.c",
    "qualified_name": "tests/test_js_dom.c::main",
-   "start_line": 3248,
-   "end_line": 3457,
+   "start_line": 3314,
+   "end_line": 3528,
    "type": "FUNCTION",
-   "content_hash": "acf0d68b841a18a0"
+   "content_hash": "028b73f77eb33fa9"
   },
   "tests/test_js_env.c|tests/test_js_env.c::fixture": {
    "file_path": "tests/test_js_env.c",
@@ -73578,6 +73610,10 @@
       "tests/test_js_dom.c::test_ext_prototype_delegation",
       "tests/test_js_dom.c::test_intl_surface",
       "tests/test_js_dom.c::test_lifecycle_listeners_get_event",
+      "tests/test_js_dom.c::test_ready_state_walks_loading_interactive_complete",
+      "tests/test_js_dom.c::test_custom_element_reactions_through_template_fragment",
+      "tests/test_js_dom.c::test_custom_element_found_in_subtree_with_many_definitions",
+      "tests/test_js_dom.c::test_anchor_url_decomposition",
       "tests/test_js_dom.c::fake_net",
       "tests/test_js_dom.c::fake_fetch",
       "tests/test_js_dom.c::test_trusted_fetch_request_response",
@@ -75399,6 +75435,10 @@
         "tests/test_js_dom.c::test_ext_prototype_delegation",
         "tests/test_js_dom.c::test_intl_surface",
         "tests/test_js_dom.c::test_lifecycle_listeners_get_event",
+        "tests/test_js_dom.c::test_ready_state_walks_loading_interactive_complete",
+        "tests/test_js_dom.c::test_custom_element_reactions_through_template_fragment",
+        "tests/test_js_dom.c::test_custom_element_found_in_subtree_with_many_definitions",
+        "tests/test_js_dom.c::test_anchor_url_decomposition",
         "tests/test_js_dom.c::fake_net",
         "tests/test_js_dom.c::fake_fetch",
         "tests/test_js_dom.c::test_trusted_fetch_request_response",
@@ -75805,7 +75845,7 @@
      "components": [],
      "components_relations": [],
      "layer": "testing",
-     "symbol_count": 639,
+     "symbol_count": 643,
      "top_symbols": [
       {
        "n": "_POSIX_C_SOURCE",
@@ -75820,7 +75860,7 @@
        "k": "function"
       }
      ],
-     "top_symbols_more": 577
+     "top_symbols_more": 581
     }
    ],
    "components_relations": [
@@ -76481,9 +76521,9 @@
      "relation": "calls into",
      "src_name": "src",
      "dst_name": "include",
-     "evidence": "51 imports, 167 calls across the boundary",
+     "evidence": "51 imports, 168 calls across the boundary",
      "import_count": 51,
-     "call_count": 167,
+     "call_count": 168,
      "key_edges": [
       {
        "source": "src/js_dom.c|src/js_dom.c::m_node_count",
@@ -76704,28 +76744,6 @@
        "target": "include/tab.h|include/tab.h::replace",
        "call_sites": [
         {
-         "line": 703,
-         "column": 31
-        }
-       ],
-       "description": ""
-      },
-      {
-       "source": "src/js_dom.c|src/js_dom.c::attrNames",
-       "target": "include/tab.h|include/tab.h::replace",
-       "call_sites": [
-        {
-         "line": 706,
-         "column": 31
-        }
-       ],
-       "description": ""
-      },
-      {
-       "source": "src/js_dom.c|src/js_dom.c::attrNames",
-       "target": "include/tab.h|include/tab.h::replace",
-       "call_sites": [
-        {
          "line": 709,
          "column": 31
         }
@@ -76734,21 +76752,32 @@
       },
       {
        "source": "src/js_dom.c|src/js_dom.c::attrNames",
-       "target": "include/html_parse.h|include/html_parse.h::src",
+       "target": "include/tab.h|include/tab.h::replace",
        "call_sites": [
         {
-         "line": 714,
-         "column": 16
+         "line": 712,
+         "column": 31
         }
        ],
        "description": ""
       },
       {
        "source": "src/js_dom.c|src/js_dom.c::attrNames",
-       "target": "include/html_parse.h|include/html_parse.h::src",
+       "target": "include/tab.h|include/tab.h::replace",
        "call_sites": [
         {
          "line": 715,
+         "column": 31
+        }
+       ],
+       "description": ""
+      },
+      {
+       "source": "src/js_dom.c|src/js_dom.c::attrNames",
+       "target": "include/html_parse.h|include/html_parse.h::src",
+       "call_sites": [
+        {
+         "line": 720,
          "column": 16
         }
        ],
@@ -76756,44 +76785,22 @@
       },
       {
        "source": "src/js_dom.c|src/js_dom.c::attrNames",
-       "target": "include/dom.h|include/dom.h::parent",
+       "target": "include/html_parse.h|include/html_parse.h::src",
        "call_sites": [
         {
-         "line": 753,
-         "column": 90
+         "line": 721,
+         "column": 16
         }
        ],
        "description": ""
       },
       {
        "source": "src/js_dom.c|src/js_dom.c::attrNames",
-       "target": "include/dom.h|include/dom.h::parent",
+       "target": "include/js_dom.h|include/js_dom.h::host",
        "call_sites": [
         {
-         "line": 758,
-         "column": 56
-        }
-       ],
-       "description": ""
-      },
-      {
-       "source": "src/js_dom.c|src/js_dom.c::attrNames",
-       "target": "include/dom.h|include/dom.h::parent",
-       "call_sites": [
-        {
-         "line": 760,
-         "column": 55
-        }
-       ],
-       "description": ""
-      },
-      {
-       "source": "src/js_dom.c|src/js_dom.c::attrNames",
-       "target": "include/dom.h|include/dom.h::parent",
-       "call_sites": [
-        {
-         "line": 762,
-         "column": 61
+         "line": 725,
+         "column": 16
         }
        ],
        "description": ""
@@ -76804,6 +76811,17 @@
        "call_sites": [
         {
          "line": 767,
+         "column": 90
+        }
+       ],
+       "description": ""
+      },
+      {
+       "source": "src/js_dom.c|src/js_dom.c::attrNames",
+       "target": "include/dom.h|include/dom.h::parent",
+       "call_sites": [
+        {
+         "line": 772,
          "column": 56
         }
        ],
@@ -76814,8 +76832,8 @@
        "target": "include/dom.h|include/dom.h::parent",
        "call_sites": [
         {
-         "line": 769,
-         "column": 54
+         "line": 774,
+         "column": 55
         }
        ],
        "description": ""
@@ -76825,8 +76843,8 @@
        "target": "include/dom.h|include/dom.h::parent",
        "call_sites": [
         {
-         "line": 770,
-         "column": 57
+         "line": 776,
+         "column": 61
         }
        ],
        "description": ""
@@ -76837,6 +76855,39 @@
        "call_sites": [
         {
          "line": 781,
+         "column": 56
+        }
+       ],
+       "description": ""
+      },
+      {
+       "source": "src/js_dom.c|src/js_dom.c::attrNames",
+       "target": "include/dom.h|include/dom.h::parent",
+       "call_sites": [
+        {
+         "line": 783,
+         "column": 54
+        }
+       ],
+       "description": ""
+      },
+      {
+       "source": "src/js_dom.c|src/js_dom.c::attrNames",
+       "target": "include/dom.h|include/dom.h::parent",
+       "call_sites": [
+        {
+         "line": 784,
+         "column": 57
+        }
+       ],
+       "description": ""
+      },
+      {
+       "source": "src/js_dom.c|src/js_dom.c::attrNames",
+       "target": "include/dom.h|include/dom.h::parent",
+       "call_sites": [
+        {
+         "line": 795,
          "column": 159
         }
        ],
@@ -76847,7 +76898,7 @@
        "target": "include/dom.h|include/dom.h::length",
        "call_sites": [
         {
-         "line": 815,
+         "line": 829,
          "column": 19
         }
        ],
@@ -76858,7 +76909,7 @@
        "target": "include/tab.h|include/tab.h::replace",
        "call_sites": [
         {
-         "line": 822,
+         "line": 836,
          "column": 49
         }
        ],
@@ -76869,7 +76920,7 @@
        "target": "include/tab.h|include/tab.h::replace",
        "call_sites": [
         {
-         "line": 1004,
+         "line": 1018,
          "column": 39
         }
        ],
@@ -76880,7 +76931,7 @@
        "target": "include/tab.h|include/tab.h::replace",
        "call_sites": [
         {
-         "line": 1005,
+         "line": 1019,
          "column": 38
         }
        ],
@@ -76891,7 +76942,7 @@
        "target": "include/tab.h|include/tab.h::replace",
        "call_sites": [
         {
-         "line": 1012,
+         "line": 1026,
          "column": 45
         }
        ],
@@ -76902,7 +76953,7 @@
        "target": "include/tab.h|include/tab.h::replace",
        "call_sites": [
         {
-         "line": 1012,
+         "line": 1026,
          "column": 105
         }
        ],
@@ -76913,7 +76964,7 @@
        "target": "include/tab.h|include/tab.h::replace",
        "call_sites": [
         {
-         "line": 1018,
+         "line": 1032,
          "column": 102
         }
        ],
@@ -76924,7 +76975,7 @@
        "target": "include/tab.h|include/tab.h::replace",
        "call_sites": [
         {
-         "line": 1070,
+         "line": 1084,
          "column": 81
         }
        ],
@@ -76935,7 +76986,7 @@
        "target": "include/dom.h|include/dom.h::length",
        "call_sites": [
         {
-         "line": 1111,
+         "line": 1125,
          "column": 15
         }
        ],
@@ -76946,7 +76997,7 @@
        "target": "include/dom.h|include/dom.h::parent",
        "call_sites": [
         {
-         "line": 1356,
+         "line": 1372,
          "column": 42
         }
        ],
@@ -76957,7 +77008,7 @@
        "target": "include/dom.h|include/dom.h::parent",
        "call_sites": [
         {
-         "line": 1357,
+         "line": 1373,
          "column": 68
         }
        ],
@@ -76968,7 +77019,7 @@
        "target": "include/tab.h|include/tab.h::replace",
        "call_sites": [
         {
-         "line": 1510,
+         "line": 1526,
          "column": 41
         }
        ],
@@ -77113,17 +77164,6 @@
         {
          "line": 591,
          "column": 32
-        }
-       ],
-       "description": ""
-      },
-      {
-       "source": "src/js_dom_ext.c|src/js_dom_ext.c::registration",
-       "target": "include/tab.h|include/tab.h::replace",
-       "call_sites": [
-        {
-         "line": 593,
-         "column": 57
         }
        ],
        "description": ""
@@ -78519,7 +78559,7 @@
     }
    ],
    "layer": "utility",
-   "symbol_count": 1381,
+   "symbol_count": 1385,
    "top_symbols": [
     {
      "n": "FREEDOM_HTML_PARSE_H",
@@ -78534,7 +78574,7 @@
      "k": "type_alias"
     }
    ],
-   "top_symbols_more": 1201,
+   "top_symbols_more": 1205,
    "hub": false
   },
   {
@@ -91239,6 +91279,10 @@
       "src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES",
       "src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST",
       "src/local_store.c::OSSL_KDF_PARAM_THREADS",
+      "src/local_store.c::_GNU_SOURCE",
+      "src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES",
+      "src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST",
+      "src/local_store.c::OSSL_KDF_PARAM_THREADS",
       "src/local_store.c::LS_VERSION",
       "src/local_store.c::LS_KDF_NONE",
       "src/local_store.c::LS_KDF_ARGON2ID",
@@ -91978,6 +92022,10 @@
         "src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES",
         "src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST",
         "src/local_store.c::OSSL_KDF_PARAM_THREADS",
+        "src/local_store.c::_GNU_SOURCE",
+        "src/local_store.c::OSSL_KDF_PARAM_ARGON2_LANES",
+        "src/local_store.c::OSSL_KDF_PARAM_ARGON2_MEMCOST",
+        "src/local_store.c::OSSL_KDF_PARAM_THREADS",
         "src/local_store.c::LS_VERSION",
         "src/local_store.c::LS_KDF_NONE",
         "src/local_store.c::LS_KDF_ARGON2ID",
@@ -92040,7 +92088,7 @@
      "components": [],
      "components_relations": [],
      "layer": "data_access",
-     "symbol_count": 405,
+     "symbol_count": 409,
      "top_symbols": [
       {
        "n": "_POSIX_C_SOURCE",
@@ -94144,7 +94192,7 @@
     }
    ],
    "layer": "testing",
-   "symbol_count": 522,
+   "symbol_count": 526,
    "top_symbols": [
     {
      "n": "FREEDOM_LOCAL_STORE_H",
@@ -105309,9 +105357,9 @@
    "relation": "calls into",
    "src_name": "src: tab",
    "dst_name": "include: browser_ui",
-   "evidence": "2 imports, 128 calls across the boundary",
+   "evidence": "2 imports, 129 calls across the boundary",
    "import_count": 2,
-   "call_count": 128,
+   "call_count": 129,
    "key_edges": [
     {
      "source": "include/link_nav.h|include/link_nav.h::ln_action",
@@ -105326,10 +105374,21 @@
     },
     {
      "source": "src/js_custom_elements.c|src/js_custom_elements.c",
+     "target": "gui/browser_ui.c|gui/browser_ui.c::them",
+     "call_sites": [
+      {
+       "line": 81,
+       "column": 77
+      }
+     ],
+     "description": ""
+    },
+    {
+     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
      "target": "gui/browser_ui.c|gui/browser_ui.c::resolve",
      "call_sites": [
       {
-       "line": 136,
+       "line": 146,
        "column": 41
       }
      ],
@@ -105351,7 +105410,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::rect",
      "call_sites": [
       {
-       "line": 650,
+       "line": 656,
        "column": 37
       }
      ],
@@ -105362,7 +105421,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::rect",
      "call_sites": [
       {
-       "line": 654,
+       "line": 660,
        "column": 35
       }
      ],
@@ -105373,7 +105432,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::children",
      "call_sites": [
       {
-       "line": 777,
+       "line": 791,
        "column": 15
       }
      ],
@@ -105384,19 +105443,8 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::rect",
      "call_sites": [
       {
-       "line": 795,
+       "line": 809,
        "column": 66
-      }
-     ],
-     "description": ""
-    },
-    {
-     "source": "src/js_dom.c|src/js_dom.c::attrNames",
-     "target": "gui/browser_ui.c|gui/browser_ui.c::rect",
-     "call_sites": [
-      {
-       "line": 798,
-       "column": 59
       }
      ],
      "description": ""
@@ -105419,10 +105467,21 @@
     },
     {
      "source": "src/js_custom_elements.c|src/js_custom_elements.c",
+     "target": "gui/browser_ui.c|gui/browser_ui.c::them",
+     "call_sites": [
+      {
+       "line": 81,
+       "column": 77
+      }
+     ],
+     "description": ""
+    },
+    {
+     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
      "target": "gui/browser_ui.c|gui/browser_ui.c::resolve",
      "call_sites": [
       {
-       "line": 136,
+       "line": 146,
        "column": 41
       }
      ],
@@ -105444,7 +105503,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::rect",
      "call_sites": [
       {
-       "line": 650,
+       "line": 656,
        "column": 37
       }
      ],
@@ -105455,7 +105514,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::rect",
      "call_sites": [
       {
-       "line": 654,
+       "line": 660,
        "column": 35
       }
      ],
@@ -105466,7 +105525,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::children",
      "call_sites": [
       {
-       "line": 777,
+       "line": 791,
        "column": 15
       }
      ],
@@ -105477,7 +105536,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::rect",
      "call_sites": [
       {
-       "line": 795,
+       "line": 809,
        "column": 66
       }
      ],
@@ -105488,7 +105547,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::rect",
      "call_sites": [
       {
-       "line": 798,
+       "line": 812,
        "column": 59
       }
      ],
@@ -105499,7 +105558,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::resolve",
      "call_sites": [
       {
-       "line": 858,
+       "line": 872,
        "column": 63
       }
      ],
@@ -105510,7 +105569,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::resolve",
      "call_sites": [
       {
-       "line": 987,
+       "line": 1001,
        "column": 53
       }
      ],
@@ -105521,7 +105580,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::resolve",
      "call_sites": [
       {
-       "line": 988,
+       "line": 1002,
        "column": 40
       }
      ],
@@ -105532,7 +105591,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::children",
      "call_sites": [
       {
-       "line": 1045,
+       "line": 1059,
        "column": 55
       }
      ],
@@ -105543,7 +105602,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::children",
      "call_sites": [
       {
-       "line": 1063,
+       "line": 1077,
        "column": 57
       }
      ],
@@ -105554,7 +105613,7 @@
      "target": "gui/browser_ui.c|gui/browser_ui.c::resolve",
      "call_sites": [
       {
-       "line": 1218,
+       "line": 1232,
        "column": 75
       }
      ],
@@ -105944,17 +106003,6 @@
       }
      ],
      "description": ""
-    },
-    {
-     "source": "src/tab.c|src/tab.c::child_handle_decode_image",
-     "target": "include/image_decode.h|include/image_decode.h::img_pixels_free",
-     "call_sites": [
-      {
-       "line": 1961,
-       "column": 4
-      }
-     ],
-     "description": ""
     }
    ]
   },
@@ -105962,9 +106010,9 @@
    "relation": "calls into",
    "src_name": "src: tab",
    "dst_name": "src: css",
-   "evidence": "4 imports, 1340 calls across the boundary",
+   "evidence": "4 imports, 1329 calls across the boundary",
    "import_count": 4,
-   "call_count": 1340,
+   "call_count": 1329,
    "key_edges": [
     {
      "source": "include/dom.h|include/dom.h::dom_index",
@@ -106372,7 +106420,7 @@
      "target": "src/css.c|src/css.c::function",
      "call_sites": [
       {
-       "line": 113,
+       "line": 123,
        "column": 25
       }
      ],
@@ -106383,7 +106431,7 @@
      "target": "src/css.c|src/css.c::function",
      "call_sites": [
       {
-       "line": 118,
+       "line": 128,
        "column": 16
       }
      ],
@@ -106394,7 +106442,7 @@
      "target": "src/css.c|src/css.c::function",
      "call_sites": [
       {
-       "line": 131,
+       "line": 141,
        "column": 13
       }
      ],
@@ -106405,40 +106453,7 @@
      "target": "src/css.c|src/css.c::function",
      "call_sites": [
       {
-       "line": 132,
-       "column": 17
-      }
-     ],
-     "description": ""
-    },
-    {
-     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
-     "target": "src/css.c|src/css.c::function",
-     "call_sites": [
-      {
-       "line": 133,
-       "column": 21
-      }
-     ],
-     "description": ""
-    },
-    {
-     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
-     "target": "src/css.c|src/css.c::function",
-     "call_sites": [
-      {
-       "line": 137,
-       "column": 30
-      }
-     ],
-     "description": ""
-    },
-    {
-     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
-     "target": "src/css.c|src/css.c::function",
-     "call_sites": [
-      {
-       "line": 139,
+       "line": 142,
        "column": 17
       }
      ],
@@ -106450,6 +106465,28 @@
      "call_sites": [
       {
        "line": 143,
+       "column": 21
+      }
+     ],
+     "description": ""
+    },
+    {
+     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
+     "target": "src/css.c|src/css.c::function",
+     "call_sites": [
+      {
+       "line": 147,
+       "column": 30
+      }
+     ],
+     "description": ""
+    },
+    {
+     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
+     "target": "src/css.c|src/css.c::function",
+     "call_sites": [
+      {
+       "line": 149,
        "column": 17
       }
      ],
@@ -106460,7 +106497,7 @@
      "target": "src/css.c|src/css.c::function",
      "call_sites": [
       {
-       "line": 146,
+       "line": 153,
        "column": 19
       }
      ],
@@ -106471,7 +106508,7 @@
      "target": "src/css.c|src/css.c::function",
      "call_sites": [
       {
-       "line": 175,
+       "line": 182,
        "column": 19
       }
      ],
@@ -106482,7 +106519,7 @@
      "target": "src/css.c|src/css.c::function",
      "call_sites": [
       {
-       "line": 176,
+       "line": 183,
        "column": 29
       }
      ],
@@ -106493,7 +106530,7 @@
      "target": "src/css.c|src/css.c::function",
      "call_sites": [
       {
-       "line": 177,
+       "line": 184,
        "column": 49
       }
      ],
@@ -106504,7 +106541,7 @@
      "target": "src/css.c|src/css.c::function",
      "call_sites": [
       {
-       "line": 179,
+       "line": 186,
        "column": 40
       }
      ],
@@ -106608,6 +106645,17 @@
       }
      ],
      "description": ""
+    },
+    {
+     "source": "src/js_dom.c|src/js_dom.c::m_set_text",
+     "target": "src/dom.c|src/dom.c::dom_set_text_content",
+     "call_sites": [
+      {
+       "line": 225,
+       "column": 20
+      }
+     ],
+     "description": ""
     }
    ]
   },
@@ -106646,7 +106694,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 99,
+       "line": 109,
        "column": 25
       }
      ],
@@ -106657,7 +106705,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 163,
+       "line": 170,
        "column": 25
       }
      ],
@@ -106679,7 +106727,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 661,
+       "line": 667,
        "column": 64
       }
      ],
@@ -106690,7 +106738,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 662,
+       "line": 668,
        "column": 135
       }
      ],
@@ -106701,7 +106749,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 825,
+       "line": 839,
        "column": 44
       }
      ],
@@ -106739,7 +106787,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 99,
+       "line": 109,
        "column": 25
       }
      ],
@@ -106750,7 +106798,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 163,
+       "line": 170,
        "column": 25
       }
      ],
@@ -106772,7 +106820,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 661,
+       "line": 667,
        "column": 64
       }
      ],
@@ -106783,7 +106831,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 662,
+       "line": 668,
        "column": 135
       }
      ],
@@ -106794,7 +106842,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 825,
+       "line": 839,
        "column": 44
       }
      ],
@@ -106805,7 +106853,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 825,
+       "line": 839,
        "column": 82
       }
      ],
@@ -106816,7 +106864,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1045,
+       "line": 1059,
        "column": 39
       }
      ],
@@ -106827,7 +106875,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1045,
+       "line": 1059,
        "column": 79
       }
      ],
@@ -106838,7 +106886,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1088,
+       "line": 1102,
        "column": 53
       }
      ],
@@ -106849,7 +106897,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1135,
+       "line": 1149,
        "column": 104
       }
      ],
@@ -106860,7 +106908,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1287,
+       "line": 1301,
        "column": 51
       }
      ],
@@ -106871,7 +106919,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1308,
+       "line": 1324,
        "column": 45
       }
      ],
@@ -106882,7 +106930,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1309,
+       "line": 1325,
        "column": 36
       }
      ],
@@ -106893,7 +106941,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1347,
+       "line": 1363,
        "column": 20
       }
      ],
@@ -106904,7 +106952,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1356,
+       "line": 1372,
        "column": 58
       }
      ],
@@ -106915,7 +106963,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1491,
+       "line": 1507,
        "column": 19
       }
      ],
@@ -106926,7 +106974,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1492,
+       "line": 1508,
        "column": 52
       }
      ],
@@ -106937,7 +106985,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1492,
+       "line": 1508,
        "column": 76
       }
      ],
@@ -106948,7 +106996,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1507,
+       "line": 1523,
        "column": 54
       }
      ],
@@ -106959,7 +107007,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1555,
+       "line": 1571,
        "column": 27
       }
      ],
@@ -106970,7 +107018,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1555,
+       "line": 1571,
        "column": 56
       }
      ],
@@ -106981,7 +107029,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1555,
+       "line": 1571,
        "column": 85
       }
      ],
@@ -106992,7 +107040,7 @@
      "target": "src/text_shape.c|src/text_shape.c::slice",
      "call_sites": [
       {
-       "line": 1556,
+       "line": 1572,
        "column": 40
       }
      ],
@@ -107268,9 +107316,9 @@
    "relation": "calls into",
    "src_name": "src: tab",
    "dst_name": "include: page_view",
-   "evidence": "4 imports, 156 calls across the boundary",
+   "evidence": "4 imports, 160 calls across the boundary",
    "import_count": 4,
-   "call_count": 156,
+   "call_count": 160,
    "key_edges": [
     {
      "source": "include/html_parse.h|include/html_parse.h::hp_config",
@@ -107306,56 +107354,56 @@
      "description": ""
     },
     {
-     "source": "src/js_dom.c|src/js_dom.c::attrNames",
-     "target": "src/page_view.c|src/page_view.c::attributes",
-     "call_sites": [
-      {
-       "line": 683,
-       "column": 15
-      }
-     ],
-     "description": ""
-    },
-    {
-     "source": "src/js_dom_ext.c|src/js_dom_ext.c::registration",
+     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
      "target": "src/page_view.c|src/page_view.c::inside",
      "call_sites": [
       {
-       "line": 408,
+       "line": 82,
        "column": 16
       }
      ],
      "description": ""
     },
     {
-     "source": "src/js_dom_ext.c|src/js_dom_ext.c::registration",
+     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
      "target": "src/page_view.c|src/page_view.c::inside",
      "call_sites": [
       {
-       "line": 414,
-       "column": 72
+       "line": 94,
+       "column": 18
       }
      ],
      "description": ""
     },
     {
-     "source": "src/js_dom_ext.c|src/js_dom_ext.c::registration",
-     "target": "src/page_view.c|src/page_view.c::walk",
+     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
+     "target": "src/page_view.c|src/page_view.c::inside",
      "call_sites": [
       {
-       "line": 496,
-       "column": 19
+       "line": 160,
+       "column": 60
       }
      ],
      "description": ""
     },
     {
-     "source": "src/js_dom_ext.c|src/js_dom_ext.c::registration",
-     "target": "src/page_view.c|src/page_view.c::walk",
+     "source": "src/js_dom.c|src/js_dom.c::table",
+     "target": "src/page_view.c|src/page_view.c::URL",
      "call_sites": [
       {
-       "line": 497,
-       "column": 81
+       "line": 655,
+       "column": 29
+      }
+     ],
+     "description": ""
+    },
+    {
+     "source": "src/js_dom.c|src/js_dom.c::attrNames",
+     "target": "src/page_view.c|src/page_view.c::attributes",
+     "call_sites": [
+      {
+       "line": 689,
+       "column": 15
       }
      ],
      "description": ""
@@ -107399,11 +107447,55 @@
      "description": ""
     },
     {
+     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
+     "target": "src/page_view.c|src/page_view.c::inside",
+     "call_sites": [
+      {
+       "line": 82,
+       "column": 16
+      }
+     ],
+     "description": ""
+    },
+    {
+     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
+     "target": "src/page_view.c|src/page_view.c::inside",
+     "call_sites": [
+      {
+       "line": 94,
+       "column": 18
+      }
+     ],
+     "description": ""
+    },
+    {
+     "source": "src/js_custom_elements.c|src/js_custom_elements.c",
+     "target": "src/page_view.c|src/page_view.c::inside",
+     "call_sites": [
+      {
+       "line": 160,
+       "column": 60
+      }
+     ],
+     "description": ""
+    },
+    {
+     "source": "src/js_dom.c|src/js_dom.c::table",
+     "target": "src/page_view.c|src/page_view.c::URL",
+     "call_sites": [
+      {
+       "line": 655,
+       "column": 29
+      }
+     ],
+     "description": ""
+    },
+    {
      "source": "src/js_dom.c|src/js_dom.c::attrNames",
      "target": "src/page_view.c|src/page_view.c::attributes",
      "call_sites": [
       {
-       "line": 683,
+       "line": 689,
        "column": 15
       }
      ],
@@ -107867,50 +107959,6 @@
       {
        "line": 2372,
        "column": 61
-      }
-     ],
-     "description": ""
-    },
-    {
-     "source": "src/tab.c|src/tab.c::read_view",
-     "target": "include/page_view.h|include/page_view.h::pv_free",
-     "call_sites": [
-      {
-       "line": 2395,
-       "column": 61
-      }
-     ],
-     "description": ""
-    },
-    {
-     "source": "src/tab.c|src/tab.c::read_view",
-     "target": "include/page_view.h|include/page_view.h::pv_free",
-     "call_sites": [
-      {
-       "line": 2397,
-       "column": 108
-      }
-     ],
-     "description": ""
-    },
-    {
-     "source": "src/tab.c|src/tab.c::read_view",
-     "target": "include/page_view.h|include/page_view.h::pv_free",
-     "call_sites": [
-      {
-       "line": 2399,
-       "column": 85
-      }
-     ],
-     "description": ""
-    },
-    {
-     "source": "src/tab.c|src/tab.c::read_view",
-     "target": "include/page_view.h|include/page_view.h::pv_free",
-     "call_sites": [
-      {
-       "line": 2405,
-       "column": 24
       }
      ],
      "description": ""
@@ -109093,7 +109141,7 @@
      "target": "src/import_map.c|src/import_map.c::match",
      "call_sites": [
       {
-       "line": 1007,
+       "line": 1021,
        "column": 22
       }
      ],
@@ -109104,7 +109152,7 @@
      "target": "src/import_map.c|src/import_map.c::match",
      "call_sites": [
       {
-       "line": 1008,
+       "line": 1022,
        "column": 22
       }
      ],
@@ -109186,7 +109234,7 @@
      "target": "src/import_map.c|src/import_map.c::match",
      "call_sites": [
       {
-       "line": 1007,
+       "line": 1021,
        "column": 22
       }
      ],
@@ -109197,7 +109245,7 @@
      "target": "src/import_map.c|src/import_map.c::match",
      "call_sites": [
       {
-       "line": 1008,
+       "line": 1022,
        "column": 22
       }
      ],

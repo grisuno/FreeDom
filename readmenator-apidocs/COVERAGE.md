@@ -1,6 +1,6 @@
 # Documentation Coverage
 
-Overall: **39.6%** (1415 of 3573 public modules, types, and callables). Data members are excluded from the ratio.
+Overall: **39.6%** (1415 of 3577 public modules, types, and callables). Data members are excluded from the ratio.
 
 [Back to index](index.md)
 
@@ -10,7 +10,7 @@ Overall: **39.6%** (1415 of 3573 public modules, types, and callables). Data mem
 |---|---|---|---|
 | enum | 80 | 156 | 51.3% |
 | function | 795 | 1853 | 42.9% |
-| macro | 307 | 960 | 32.0% |
+| macro | 307 | 964 | 31.8% |
 | method | 0 | 24 | 0.0% |
 | module | 30 | 207 | 14.5% |
 | struct | 106 | 242 | 43.8% |
@@ -35,7 +35,7 @@ Overall: **39.6%** (1415 of 3573 public modules, types, and callables). Data mem
 | [`src/webcaps.c`](modules/src.webcaps.c.md) | 0 | 5 | 0.0% |
 | [`src/webfont.c`](modules/src.webfont.c.md) | 0 | 7 | 0.0% |
 | [`tools/gen_psl.c`](modules/tools.gen_psl.c.md) | 0 | 4 | 0.0% |
-| [`src/local_store.c`](modules/src.local_store.c.md) | 5 | 322 | 1.6% |
+| [`src/local_store.c`](modules/src.local_store.c.md) | 5 | 326 | 1.5% |
 | [`src/pq_seal.c`](modules/src.pq_seal.c.md) | 1 | 10 | 10.0% |
 | [`src/tls_impersonate.c`](modules/src.tls_impersonate.c.md) | 1 | 10 | 10.0% |
 | [`include/download.h`](modules/include.download.h.md) | 1 | 9 | 11.1% |
@@ -232,7 +232,7 @@ Overall: **39.6%** (1415 of 3573 public modules, types, and callables). Data mem
 
 DOC001 undocumented public item, DOC002 parameter not documented, DOC003 documented parameter missing from the signature (stale doc), DOC004 return value not documented, DOC005 raised exception not documented.
 
-DOC001: 2158, DOC004: 1
+DOC001: 2162, DOC004: 1
 
 - DOC004 `app.py:47` return value of run_freedom_headless is not documented
 - DOC001 `docker-entrypoint.sh:1` module docker-entrypoint.sh is not documented
@@ -734,4 +734,4 @@ DOC001: 2158, DOC004: 1
 - DOC001 `include/html_parse.h:31` type_alias max_bytes is not documented
 - DOC001 `include/html_parse.h:32` struct hp_config is not documented
 - DOC001 `include/html_parse.h:41` macro HP_DEFAULT_MAX_BYTES is not documented
-- ... 1659 more in `api/warnings.jsonl`
+- ... 1663 more in `api/warnings.jsonl`

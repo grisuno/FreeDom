@@ -1,6 +1,33 @@
 # Subsystem: tests (page 6 of 8)
 Previous: [KB_tests_p5.md](KB_tests_p5.md)
 
+## tests/test_os_sandbox.c
+- Doc: test_policy_denies_io_uring: io_uring is a seccomp-bypass primitive (its IORING_OP_* operations...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_policy_allows_safe` (function, line 43) `static void test_policy_allows_safe(void **state)`
+  - `test_policy_denies_dangerous` (function, line 51) `static void test_policy_denies_dangerous(void **state)`
+  - `test_policy_denies_io_uring` (function, line 64) `static void test_policy_denies_io_uring(void **state)`
+  - `test_policy_size` (function, line 71) `static void test_policy_size(void **state)`
+  - `test_harden_kills_denied_syscall` (function, line 79) `static void test_harden_kills_denied_syscall(void **state)`
+  - `test_harden_allows_permitted_syscall` (function, line 96) `static void test_harden_allows_permitted_syscall(void **state)`
+  - `test_harden_errno_denies_with_eperm` (function, line 112) `static void test_harden_errno_denies_with_eperm(void **state)`
+  - `test_harden_kills_io_uring_setup` (function, line 130) `static void test_harden_kills_io_uring_setup(void **state)`
+  - `test_prot_allowed_wx` (function, line 151) `static void test_prot_allowed_wx(void **state)`
+  - `test_harden_blocks_exec_mmap` (function, line 162) `static void test_harden_blocks_exec_mmap(void **state)`
+  - `test_harden_blocks_exec_mprotect` (function, line 182) `static void test_harden_blocks_exec_mprotect(void **state)`
+  - `test_no_dump_undumpable` (function, line 214) `static void test_no_dump_undumpable(void **state)`
+  - `test_landlock_abi_present` (function, line 233) `static void test_landlock_abi_present(void **state)`
+  - `test_landlock_deny_all` (function, line 239) `static void test_landlock_deny_all(void **state)`
+  - `test_landlock_allow_read` (function, line 257) `static void test_landlock_allow_read(void **state)`
+  - `net_ns_inode` (function, line 304) `static unsigned long net_ns_inode(void)`
+  - `suite` (function, line 313) `* suite (it is best-effort defense in depth), and on a host that allows them the
+ * isolation mus...`
+  - `main` (function, line 335) `int main(void)`
+  - `_GNU_SOURCE` (macro, line 14) `#define _GNU_SOURCE`
+- Depends on: `include/os_sandbox.h`
+
 ## tests/test_page_view.c
 - Doc: parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include...
 - Layer: testing
@@ -455,30 +482,6 @@ static void test_build_heading_own_relative_size_replac...`
   - `test_result_free_null_and_double` (function, line 84) `static void test_result_free_null_and_double(void **state)`
   - `main` (function, line 93) `int main(void)`
 - Depends on: `include/renderer.h`
-
-## tests/test_request_policy.c
-- Doc: test_site_of_psl: } static void test_site_of_multi_suffix(void **state) { (void)state; char...
-- Layer: testing
-- Language: c
-- Symbols:
-  - `test_host_of_basic` (function, line 19) `static void test_host_of_basic(void **state)`
-  - `test_host_of_invalid` (function, line 30) `static void test_host_of_invalid(void **state)`
-  - `test_host_of_overflow` (function, line 38) `static void test_host_of_overflow(void **state)`
-  - `test_site_of` (function, line 46) `static void test_site_of(void **state)`
-  - `test_site_of_multi_suffix` (function, line 59) `static void test_site_of_multi_suffix(void **state)`
-  - `test_site_of_psl` (function, line 71) `static void test_site_of_psl(void **state)`
-  - `test_same_site` (function, line 92) `static void test_same_site(void **state)`
-  - `test_evaluate_allow_same_site` (function, line 106) `static void test_evaluate_allow_same_site(void **state)`
-  - `test_evaluate_block_third_party` (function, line 113) `static void test_evaluate_block_third_party(void **state)`
-  - `test_evaluate_block_scheme` (function, line 121) `static void test_evaluate_block_scheme(void **state)`
-  - `test_evaluate_block_invalid` (function, line 129) `static void test_evaluate_block_invalid(void **state)`
-  - `test_hdr_keeps_application_headers` (function, line 142) `static void test_hdr_keeps_application_headers(void **state)`
-  - `test_hdr_drops_forbidden_and_identity` (function, line 157) `static void test_hdr_drops_forbidden_and_identity(void **state)`
-  - `test_hdr_rejects_malformed` (function, line 171) `static void test_hdr_rejects_malformed(void **state)`
-  - `test_hdr_first_duplicate_wins` (function, line 184) `static void test_hdr_first_duplicate_wins(void **state)`
-  - `test_hdr_caps_and_args` (function, line 191) `static void test_hdr_caps_and_args(void **state)`
-  - `main` (function, line 212) `int main(void)`
-- Depends on: `include/request_policy.h`
 
 
 Next: [KB_tests_p7.md](KB_tests_p7.md)

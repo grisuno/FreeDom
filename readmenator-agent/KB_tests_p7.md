@@ -1,6 +1,30 @@
 # Subsystem: tests (page 7 of 8)
 Previous: [KB_tests_p6.md](KB_tests_p6.md)
 
+## tests/test_request_policy.c
+- Doc: test_site_of_psl: } static void test_site_of_multi_suffix(void **state) { (void)state; char...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_host_of_basic` (function, line 19) `static void test_host_of_basic(void **state)`
+  - `test_host_of_invalid` (function, line 30) `static void test_host_of_invalid(void **state)`
+  - `test_host_of_overflow` (function, line 38) `static void test_host_of_overflow(void **state)`
+  - `test_site_of` (function, line 46) `static void test_site_of(void **state)`
+  - `test_site_of_multi_suffix` (function, line 59) `static void test_site_of_multi_suffix(void **state)`
+  - `test_site_of_psl` (function, line 71) `static void test_site_of_psl(void **state)`
+  - `test_same_site` (function, line 92) `static void test_same_site(void **state)`
+  - `test_evaluate_allow_same_site` (function, line 106) `static void test_evaluate_allow_same_site(void **state)`
+  - `test_evaluate_block_third_party` (function, line 113) `static void test_evaluate_block_third_party(void **state)`
+  - `test_evaluate_block_scheme` (function, line 121) `static void test_evaluate_block_scheme(void **state)`
+  - `test_evaluate_block_invalid` (function, line 129) `static void test_evaluate_block_invalid(void **state)`
+  - `test_hdr_keeps_application_headers` (function, line 142) `static void test_hdr_keeps_application_headers(void **state)`
+  - `test_hdr_drops_forbidden_and_identity` (function, line 157) `static void test_hdr_drops_forbidden_and_identity(void **state)`
+  - `test_hdr_rejects_malformed` (function, line 171) `static void test_hdr_rejects_malformed(void **state)`
+  - `test_hdr_first_duplicate_wins` (function, line 184) `static void test_hdr_first_duplicate_wins(void **state)`
+  - `test_hdr_caps_and_args` (function, line 191) `static void test_hdr_caps_and_args(void **state)`
+  - `main` (function, line 212) `int main(void)`
+- Depends on: `include/request_policy.h`
+
 ## tests/test_secure_fetch.c
 - Doc: test_default_groups_offer_p384: Some servers (justpaste.it, 2026 Let's Encrypt P-384 chain)...
 - Layer: testing
@@ -463,30 +487,6 @@ static void tes...`
   - `test_name_hash` (function, line 218) `static void test_name_hash(void **state)`
   - `main` (function, line 229) `int main(void)`
 - Depends on: `include/webfont.h`
-
-## tests/test_webfont_load.c
-- Doc: test_b64: if (b == NULL) { fclose(f); return NULL; } if (fread(b, 1, (size_t)sz, f) !=...
-- Layer: testing
-- Language: c
-- Symbols:
-  - `stub` (struct, line 30)
-  - `stub_fetch` (function, line 38) `static int stub_fetch(void *ctx, const char *url,
-                      int *out_status, char **o...`
-  - `read_host_font` (function, line 64) `static unsigned char *read_host_font(size_t *out_n)`
-  - `test_b64` (function, line 92) `static char *test_b64(const unsigned char *in, size_t n)`
-  - `test_null_args` (function, line 113) `static void test_null_args(void **state)`
-  - `test_https_stub_registers` (function, line 126) `static void test_https_stub_registers(void **state)`
-  - `test_woff2_never_fetched` (function, line 152) `static void test_woff2_never_fetched(void **state)`
-  - `test_fallback_second_url` (function, line 170) `static void test_fallback_second_url(void **state)`
-  - `test_first_wins` (function, line 194) `static void test_first_wins(void **state)`
-  - `test_extern_sheet_relative_url` (function, line 217) `static void test_extern_sheet_relative_url(void **state)`
-  - `test_data_url_bad_bytes_skipped` (function, line 240) `static void test_data_url_bad_bytes_skipped(void **state)`
-  - `test_data_url_registers` (function, line 255) `static void test_data_url_registers(void **state)`
-  - `test_null_page_data_only` (function, line 288) `static void test_null_page_data_only(void **state)`
-  - `teardown` (function, line 318) `static int teardown(void **state)`
-  - `main` (function, line 325) `int main(void)`
-  - `_POSIX_C_SOURCE` (macro, line 13) `#define _POSIX_C_SOURCE`
-- Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`, `include/webfont_load.h`
 
 
 Next: [KB_tests_p8.md](KB_tests_p8.md)

@@ -1,6 +1,30 @@
 # Subsystem: tests (page 8 of 8)
 Previous: [KB_tests_p7.md](KB_tests_p7.md)
 
+## tests/test_webfont_load.c
+- Doc: test_b64: if (b == NULL) { fclose(f); return NULL; } if (fread(b, 1, (size_t)sz, f) !=...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `stub` (struct, line 30)
+  - `stub_fetch` (function, line 38) `static int stub_fetch(void *ctx, const char *url,
+                      int *out_status, char **o...`
+  - `read_host_font` (function, line 64) `static unsigned char *read_host_font(size_t *out_n)`
+  - `test_b64` (function, line 92) `static char *test_b64(const unsigned char *in, size_t n)`
+  - `test_null_args` (function, line 113) `static void test_null_args(void **state)`
+  - `test_https_stub_registers` (function, line 126) `static void test_https_stub_registers(void **state)`
+  - `test_woff2_never_fetched` (function, line 152) `static void test_woff2_never_fetched(void **state)`
+  - `test_fallback_second_url` (function, line 170) `static void test_fallback_second_url(void **state)`
+  - `test_first_wins` (function, line 194) `static void test_first_wins(void **state)`
+  - `test_extern_sheet_relative_url` (function, line 217) `static void test_extern_sheet_relative_url(void **state)`
+  - `test_data_url_bad_bytes_skipped` (function, line 240) `static void test_data_url_bad_bytes_skipped(void **state)`
+  - `test_data_url_registers` (function, line 255) `static void test_data_url_registers(void **state)`
+  - `test_null_page_data_only` (function, line 288) `static void test_null_page_data_only(void **state)`
+  - `teardown` (function, line 318) `static int teardown(void **state)`
+  - `main` (function, line 325) `int main(void)`
+  - `_POSIX_C_SOURCE` (macro, line 13) `#define _POSIX_C_SOURCE`
+- Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`, `include/webfont_load.h`
+
 ## tests/test_wl_display.c
 - Doc: test_wl_display — CMocka suite for the pure Wayland socket picker.
 - Layer: testing

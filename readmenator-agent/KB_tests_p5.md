@@ -2,12 +2,12 @@
 Previous: [KB_tests_p4.md](KB_tests_p4.md)
 
 ## tests/test_js_dom.c
-- Doc: fake_net: Object.defineProperty(event, ...) -- it threw "not an object" on openstreetmap), *...
+- Doc: fake_net: HTMLAnchorElement URL decomposition (HTML 4.6.3): YouTube routes on a.pathname and...
 - Layer: testing
 - Language: c
 - Symbols:
   - `fixture` (struct, line 43)
-  - `fake_net` (struct, line 2753)
+  - `fake_net` (struct, line 2819)
   - `setup` (function, line 50) `static int setup(void **state)`
   - `teardown` (function, line 61) `static int teardown(void **state)`
   - `run` (function, line 74) `static js_status run(fixture *f, const char *src, js_result *r)`
@@ -209,54 +209,58 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_ext_prototype_delegation` (function, line 2711) `static void test_ext_prototype_delegation(void **state)`
   - `test_intl_surface` (function, line 2727) `static void test_intl_surface(void **state)`
   - `test_lifecycle_listeners_get_event` (function, line 2741) `static void test_lifecycle_listeners_get_event(void **state)`
-  - `fake_fetch` (function, line 2754) `static int fake_fetch(void *ctx, const char *method, const char *url, const char *body,
+  - `test_ready_state_walks_loading_interactive_complete` (function, line 2755) `static void test_ready_state_walks_loading_interactive_complete(void **state)`
+  - `test_custom_element_reactions_through_template_fragment` (function, line 2783) `static void test_custom_element_reactions_through_template_fragment(void **state)`
+  - `test_custom_element_found_in_subtree_with_many_definitions` (function, line 2798) `static void test_custom_element_found_in_subtree_with_many_definitions(void **state)`
+  - `test_anchor_url_decomposition` (function, line 2810) `static void test_anchor_url_decomposition(void **state)`
+  - `fake_fetch` (function, line 2820) `static int fake_fetch(void *ctx, const char *method, const char *url, const char *body,
          ...`
-  - `test_trusted_fetch_request_response` (function, line 2780) `static void test_trusted_fetch_request_response(void **state)`
-  - `test_ext_is_equal_node` (function, line 2801) `static void test_ext_is_equal_node(void **state)`
-  - `EXPECT` (function, line 2803) `EXPECT(f, "function mk(h)`
-  - `test_trusted_send_beacon` (function, line 2842) `static void test_trusted_send_beacon(void **state)`
-  - `test_trusted_send_beacon_can_be_patched` (function, line 2863) `static void test_trusted_send_beacon_can_be_patched(void **state)`
-  - `EXPECT` (function, line 2868) `EXPECT(f, "(function()`
-  - `test_trusted_request_headers_cross_to_host` (function, line 2879) `static void test_trusted_request_headers_cross_to_host(void **state)`
-  - `EXPECT` (function, line 2883) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 2887) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 2891) `EXPECT(f, "(function()`
-  - `test_trusted_xhr_event_target_and_response_headers` (function, line 2899) `static void test_trusted_xhr_event_target_and_response_headers(void **state)`
-  - `EXPECT` (function, line 2903) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 2914) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 2918) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 2921) `EXPECT(f, "(function()`
-  - `test_trusted_fetch_exposes_response_headers` (function, line 2925) `static void test_trusted_fetch_exposes_response_headers(void **state)`
-  - `EXPECT` (function, line 2929) `EXPECT(f, "(function()`
-  - `test_xml_serializer_covers_fragments_and_text` (function, line 2938) `static void test_xml_serializer_covers_fragments_and_text(void **state)`
-  - `EXPECT` (function, line 2940) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 2942) `EXPECT(f, "(function()`
-  - `test_ce_create_runs_constructor` (function, line 2952) `static void test_ce_create_runs_constructor(void **state)`
-  - `EXPECT` (function, line 2954) `EXPECT(f, "(function()`
-  - `test_ce_define_upgrades_existing` (function, line 2962) `static void test_ce_define_upgrades_existing(void **state)`
-  - `EXPECT` (function, line 2964) `EXPECT(f, "(function()`
-  - `test_ce_connected_callbacks` (function, line 2973) `static void test_ce_connected_callbacks(void **state)`
-  - `EXPECT` (function, line 2975) `EXPECT(f, "(function()`
-  - `test_ce_attribute_changed` (function, line 2982) `static void test_ce_attribute_changed(void **state)`
+  - `test_trusted_fetch_request_response` (function, line 2846) `static void test_trusted_fetch_request_response(void **state)`
+  - `test_ext_is_equal_node` (function, line 2867) `static void test_ext_is_equal_node(void **state)`
+  - `EXPECT` (function, line 2869) `EXPECT(f, "function mk(h)`
+  - `test_trusted_send_beacon` (function, line 2908) `static void test_trusted_send_beacon(void **state)`
+  - `test_trusted_send_beacon_can_be_patched` (function, line 2929) `static void test_trusted_send_beacon_can_be_patched(void **state)`
+  - `EXPECT` (function, line 2934) `EXPECT(f, "(function()`
+  - `test_trusted_request_headers_cross_to_host` (function, line 2945) `static void test_trusted_request_headers_cross_to_host(void **state)`
+  - `EXPECT` (function, line 2949) `EXPECT(f, "(function()`
+  - `EXPECT` (function, line 2953) `EXPECT(f, "(function()`
+  - `EXPECT` (function, line 2957) `EXPECT(f, "(function()`
+  - `test_trusted_xhr_event_target_and_response_headers` (function, line 2965) `static void test_trusted_xhr_event_target_and_response_headers(void **state)`
+  - `EXPECT` (function, line 2969) `EXPECT(f, "(function()`
+  - `EXPECT` (function, line 2980) `EXPECT(f, "(function()`
   - `EXPECT` (function, line 2984) `EXPECT(f, "(function()`
-  - `test_ce_sync_on_mutation` (function, line 2995) `static void test_ce_sync_on_mutation(void **state)`
-  - `EXPECT` (function, line 2997) `EXPECT(f, "(function()`
-  - `test_ce_define_validation` (function, line 3006) `static void test_ce_define_validation(void **state)`
+  - `EXPECT` (function, line 2987) `EXPECT(f, "(function()`
+  - `test_trusted_fetch_exposes_response_headers` (function, line 2991) `static void test_trusted_fetch_exposes_response_headers(void **state)`
+  - `EXPECT` (function, line 2995) `EXPECT(f, "(function()`
+  - `test_xml_serializer_covers_fragments_and_text` (function, line 3004) `static void test_xml_serializer_covers_fragments_and_text(void **state)`
+  - `EXPECT` (function, line 3006) `EXPECT(f, "(function()`
   - `EXPECT` (function, line 3008) `EXPECT(f, "(function()`
-  - `pump_ticks` (function, line 3018) `static void pump_ticks(fixture *f, int n)`
-  - `test_trusted_worker` (function, line 3025) `static void test_trusted_worker(void **state)`
-  - `test_video_shim_no_video` (function, line 3058) `static void test_video_shim_no_video(void **state)`
-  - `test_video_shim_uses_index_1` (function, line 3066) `static void test_video_shim_uses_index_1(void **state)`
-  - `test_video_shim_video_data_wins` (function, line 3090) `static void test_video_shim_video_data_wins(void **state)`
-  - `test_video_shim_relative_url_resolved` (function, line 3114) `static void test_video_shim_relative_url_resolved(void **state)`
-  - `test_video_shim_empty_html` (function, line 3132) `static void test_video_shim_empty_html(void **state)`
-  - `test_video_shim_null_ctx` (function, line 3144) `static void test_video_shim_null_ctx(void **state)`
-  - `test_video_from_scripts_video_data_is_variable` (function, line 3176) `static void test_video_from_scripts_video_data_is_variable(void **state)`
-  - `test_video_from_scripts_relative_resolved` (function, line 3191) `static void test_video_from_scripts_relative_resolved(void **state)`
-  - `test_video_from_scripts_video_data_string` (function, line 3209) `static void test_video_from_scripts_video_data_string(void **state)`
-  - `test_video_from_scripts_no_video` (function, line 3226) `static void test_video_from_scripts_no_video(void **state)`
-  - `test_video_from_scripts_null_args` (function, line 3237) `static void test_video_from_scripts_null_args(void **state)`
-  - `main` (function, line 3248) `int main(void)`
+  - `test_ce_create_runs_constructor` (function, line 3018) `static void test_ce_create_runs_constructor(void **state)`
+  - `EXPECT` (function, line 3020) `EXPECT(f, "(function()`
+  - `test_ce_define_upgrades_existing` (function, line 3028) `static void test_ce_define_upgrades_existing(void **state)`
+  - `EXPECT` (function, line 3030) `EXPECT(f, "(function()`
+  - `test_ce_connected_callbacks` (function, line 3039) `static void test_ce_connected_callbacks(void **state)`
+  - `EXPECT` (function, line 3041) `EXPECT(f, "(function()`
+  - `test_ce_attribute_changed` (function, line 3048) `static void test_ce_attribute_changed(void **state)`
+  - `EXPECT` (function, line 3050) `EXPECT(f, "(function()`
+  - `test_ce_sync_on_mutation` (function, line 3061) `static void test_ce_sync_on_mutation(void **state)`
+  - `EXPECT` (function, line 3063) `EXPECT(f, "(function()`
+  - `test_ce_define_validation` (function, line 3072) `static void test_ce_define_validation(void **state)`
+  - `EXPECT` (function, line 3074) `EXPECT(f, "(function()`
+  - `pump_ticks` (function, line 3084) `static void pump_ticks(fixture *f, int n)`
+  - `test_trusted_worker` (function, line 3091) `static void test_trusted_worker(void **state)`
+  - `test_video_shim_no_video` (function, line 3124) `static void test_video_shim_no_video(void **state)`
+  - `test_video_shim_uses_index_1` (function, line 3132) `static void test_video_shim_uses_index_1(void **state)`
+  - `test_video_shim_video_data_wins` (function, line 3156) `static void test_video_shim_video_data_wins(void **state)`
+  - `test_video_shim_relative_url_resolved` (function, line 3180) `static void test_video_shim_relative_url_resolved(void **state)`
+  - `test_video_shim_empty_html` (function, line 3198) `static void test_video_shim_empty_html(void **state)`
+  - `test_video_shim_null_ctx` (function, line 3210) `static void test_video_shim_null_ctx(void **state)`
+  - `test_video_from_scripts_video_data_is_variable` (function, line 3242) `static void test_video_from_scripts_video_data_is_variable(void **state)`
+  - `test_video_from_scripts_relative_resolved` (function, line 3257) `static void test_video_from_scripts_relative_resolved(void **state)`
+  - `test_video_from_scripts_video_data_string` (function, line 3275) `static void test_video_from_scripts_video_data_string(void **state)`
+  - `test_video_from_scripts_no_video` (function, line 3292) `static void test_video_from_scripts_no_video(void **state)`
+  - `test_video_from_scripts_null_args` (function, line 3303) `static void test_video_from_scripts_null_args(void **state)`
+  - `main` (function, line 3314) `int main(void)`
   - `identity` (function, line 620) `* identity (the same one innerWidth and the CSS viewport units use);`
   - `it` (function, line 792) `* itself no longer finds it (getElementById only answers with attached elements). */ assert_string_equal(r.value...`
   - `EXPECT` (macro, line 78) `#define EXPECT(f, src, expected)`
@@ -467,33 +471,6 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_names` (function, line 126) `static void test_names(void **state)`
   - `main` (function, line 140) `int main(void)`
 - Depends on: `include/net_realm.h`
-
-## tests/test_os_sandbox.c
-- Doc: test_policy_denies_io_uring: io_uring is a seccomp-bypass primitive (its IORING_OP_* operations...
-- Layer: testing
-- Language: c
-- Symbols:
-  - `test_policy_allows_safe` (function, line 43) `static void test_policy_allows_safe(void **state)`
-  - `test_policy_denies_dangerous` (function, line 51) `static void test_policy_denies_dangerous(void **state)`
-  - `test_policy_denies_io_uring` (function, line 64) `static void test_policy_denies_io_uring(void **state)`
-  - `test_policy_size` (function, line 71) `static void test_policy_size(void **state)`
-  - `test_harden_kills_denied_syscall` (function, line 79) `static void test_harden_kills_denied_syscall(void **state)`
-  - `test_harden_allows_permitted_syscall` (function, line 96) `static void test_harden_allows_permitted_syscall(void **state)`
-  - `test_harden_errno_denies_with_eperm` (function, line 112) `static void test_harden_errno_denies_with_eperm(void **state)`
-  - `test_harden_kills_io_uring_setup` (function, line 130) `static void test_harden_kills_io_uring_setup(void **state)`
-  - `test_prot_allowed_wx` (function, line 151) `static void test_prot_allowed_wx(void **state)`
-  - `test_harden_blocks_exec_mmap` (function, line 162) `static void test_harden_blocks_exec_mmap(void **state)`
-  - `test_harden_blocks_exec_mprotect` (function, line 182) `static void test_harden_blocks_exec_mprotect(void **state)`
-  - `test_no_dump_undumpable` (function, line 214) `static void test_no_dump_undumpable(void **state)`
-  - `test_landlock_abi_present` (function, line 233) `static void test_landlock_abi_present(void **state)`
-  - `test_landlock_deny_all` (function, line 239) `static void test_landlock_deny_all(void **state)`
-  - `test_landlock_allow_read` (function, line 257) `static void test_landlock_allow_read(void **state)`
-  - `net_ns_inode` (function, line 304) `static unsigned long net_ns_inode(void)`
-  - `suite` (function, line 313) `* suite (it is best-effort defense in depth), and on a host that allows them the
- * isolation mus...`
-  - `main` (function, line 335) `int main(void)`
-  - `_GNU_SOURCE` (macro, line 14) `#define _GNU_SOURCE`
-- Depends on: `include/os_sandbox.h`
 
 
 Next: [KB_tests_p6.md](KB_tests_p6.md)

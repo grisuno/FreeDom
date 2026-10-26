@@ -18,13 +18,13 @@ Open work clusters around documentation (14% file coverage), 0 security findings
 | Metric | Value |
 |--------|-------|
 | Files | 290 |
-| Symbols | 7511 |
+| Symbols | 7519 |
 | Resolved imports | 547 |
 | Languages | c, h, py, sh |
 | Communities | 10 |
 | Doc coverage | 14% (40/290 files) |
 | Security findings | 0 |
-| Estimated read cost | ~219183 tokens (chars/4, offline so $0) |
+| Estimated read cost | ~219430 tokens (chars/4, offline so $0) |
 | Large files (>256KB, maybe generated) | 4: `browser_ui.c`, `css.c`, `page_view.c`, `test_css.c` |
 
 ## Reading Order

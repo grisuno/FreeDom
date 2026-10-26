@@ -1,15 +1,15 @@
 {
   "tool": "readmenator",
   "schema_version": 2,
-  "generated_at": "2026-10-25T23:18:33Z",
+  "generated_at": "2026-10-26T01:20:01Z",
   "project_root": ".",
   "project_name": "freedom-0.0.3",
-  "git_commit": "aff636aeefc8d41ff258f9d38ffd3981102c94dd",
+  "git_commit": "cbb711c92ec9a0edb730cd766444ba056cc49a26",
   "git_branch": "main",
-  "source_fingerprint": "685a62bffc4b86a783f5421712bf529a67d1eee241e1f977a48757ede0b5b7f2",
+  "source_fingerprint": "249c676337c5f6e37c3809197d3dbbbb7b0133da72730e1cf72048b2ca2c2dd6",
   "freshness_check": "readmenator . fresh  # exit 0 = docs match sources, exit 1 = run: readmenator . --rebuild",
   "files": 290,
-  "symbols": 7511,
+  "symbols": 7519,
   "imports": 1679,
   "calls": 649,
   "inherits": 0,
@@ -195,8 +195,8 @@
     },
     {
       "path": "KB_src_p6.md",
-      "lines": 430,
-      "approx_tokens": 8199
+      "lines": 434,
+      "approx_tokens": 8279
     },
     {
       "path": "KB_src_p7.md",
@@ -235,23 +235,23 @@
     },
     {
       "path": "KB_tests_p5.md",
-      "lines": 499,
-      "approx_tokens": 11904
+      "lines": 476,
+      "approx_tokens": 11510
     },
     {
       "path": "KB_tests_p6.md",
-      "lines": 484,
-      "approx_tokens": 12101
+      "lines": 487,
+      "approx_tokens": 12163
     },
     {
       "path": "KB_tests_p7.md",
       "lines": 492,
-      "approx_tokens": 11566
+      "approx_tokens": 11616
     },
     {
       "path": "KB_tests_p8.md",
-      "lines": 64,
-      "approx_tokens": 993
+      "lines": 88,
+      "approx_tokens": 1430
     },
     {
       "path": "KB_tools.md",
@@ -261,7 +261,7 @@
     {
       "path": "MEMORY.md",
       "lines": 102,
-      "approx_tokens": 1707
+      "approx_tokens": 1717
     },
     {
       "path": "SECURITY.md",
@@ -276,37 +276,37 @@
     {
       "path": "SYMBOLS_p10.md",
       "lines": 500,
-      "approx_tokens": 13805
+      "approx_tokens": 13863
     },
     {
       "path": "SYMBOLS_p11.md",
       "lines": 500,
-      "approx_tokens": 16434
+      "approx_tokens": 16387
     },
     {
       "path": "SYMBOLS_p12.md",
       "lines": 500,
-      "approx_tokens": 15727
+      "approx_tokens": 15707
     },
     {
       "path": "SYMBOLS_p13.md",
       "lines": 500,
-      "approx_tokens": 16747
+      "approx_tokens": 16771
     },
     {
       "path": "SYMBOLS_p14.md",
       "lines": 500,
-      "approx_tokens": 17074
+      "approx_tokens": 17115
     },
     {
       "path": "SYMBOLS_p15.md",
       "lines": 500,
-      "approx_tokens": 16492
+      "approx_tokens": 16506
     },
     {
       "path": "SYMBOLS_p16.md",
-      "lines": 122,
-      "approx_tokens": 2779
+      "lines": 130,
+      "approx_tokens": 3018
     },
     {
       "path": "SYMBOLS_p2.md",
@@ -341,12 +341,12 @@
     {
       "path": "SYMBOLS_p8.md",
       "lines": 500,
-      "approx_tokens": 13632
+      "approx_tokens": 13654
     },
     {
       "path": "SYMBOLS_p9.md",
       "lines": 500,
-      "approx_tokens": 14682
+      "approx_tokens": 14622
     },
     {
       "path": "recipes/add-function.md",
@@ -356,7 +356,7 @@
     {
       "path": "recipes/change-impact.md",
       "lines": 9,
-      "approx_tokens": 106
+      "approx_tokens": 108
     },
     {
       "path": "recipes/fix-cycle.md",

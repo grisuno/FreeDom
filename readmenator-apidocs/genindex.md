@@ -1279,6 +1279,7 @@
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.os_sandbox.c.md#_gnu_source) macro in `src/os_sandbox.c`
 - [`_GNU_SOURCE`](modules/src.tab.c.md#_gnu_source) macro in `src/tab.c`
 - [`gradient`](modules/src.css_gradient.c.md#gradient) function in `src/css_gradient.c`
@@ -2102,6 +2103,7 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -2178,6 +2180,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`

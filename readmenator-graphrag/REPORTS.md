@@ -1,6 +1,6 @@
 # GraphRAG Community Reports
 
-Entities: 7949 | Relationships: 13865 | Communities: 10 | Themes: 3 | Text units: 7496
+Entities: 7957 | Relationships: 13873 | Communities: 10 | Themes: 3 | Text units: 7504
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
@@ -98,7 +98,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - `include/dom.h` ranks 2 by PageRank, 17 importers, 30 symbols: dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: * "after this node" and "first" cannot be expressed by an element-only reference).
 - `include/url.h` ranks 3 by PageRank, 16 importers, 14 symbols: url_parts: Components of a validated absolute https URL, sliced for a JS location object.
 - Hotspot `src/tab.c`: 146 symbols, 68 connections (score 0.39).
-- Hotspot `tests/test_js_dom.c`: 243 symbols, 26 connections (score 0.27).
+- Hotspot `tests/test_js_dom.c`: 247 symbols, 26 connections (score 0.27).
 - Dependency cycle: js_dom.h -> js_location.h -> js_dom.h.
 - Dataflow: 2 INFERRED issues (first: UNCHECKED_ALLOC in jd_click_state_new).
 - Key entities: file:tests/test_js_dom.c, file:src/tab.c, file:tests/test_tab.c, file:src/js_dom.c, file:src/js_sandbox.c, file:include/tab.h, file:tests/test_js_sandbox.c, file:tests/test_url.c
@@ -138,7 +138,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - `include/local_store.h` ranks 1 by PageRank, 8 importers, 11 symbols: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container so ls_open_passphrase can re-derive. ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len...
 - `include/http_cache.h` ranks 2 by PageRank, 3 importers, 19 symbols: hc_parse_http_date: } hc_class; typedef struct hc_meta { char   final_url[HC_URL_MAX]; char   content_type[HC_TYPE_MAX]; char   etag[HC_VAL_MAX]; char   last_modified[HC_VAL_MAX]; char   cache_control[HC_VAL_MAX]; char...
 - `include/pq_seal.h` ranks 3 by PageRank, 3 importers, 8 symbols: pqs_buf_free: DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der is owned * (release with pqs_buf_free). pqs_status pqs_export(const pqs_keys *k, uint8_t **der, size_t *len); pqs_status pqs_import(const...
-- Hotspot `src/local_store.c`: 327 symbols, 10 connections (score 0.25).
+- Hotspot `src/local_store.c`: 331 symbols, 10 connections (score 0.25).
 - Hotspot `src/http_cache.c`: 38 symbols, 20 connections (score 0.11).
 - 3 layer violations, e.g. http_cache.h (presentation) -> local_store.h (data_access).
 - Surprising bridge: css_index.c <-> pq_seal.c (8 hops across communities).

@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `zm_zoom_in` | function | `src/zoom.c:20` | `int zm_zoom_in(int pct)` |
+| `zm_zoom_out` | function | `src/zoom.c:28` | `int zm_zoom_out(int pct)` |
+| `CHECK` | macro | `tests/itest_secure_fetch.c:16` | `#define CHECK(cond, msg)` |
+| `main` | function | `tests/itest_secure_fetch.c:26` | `int main(void)` |
 | `main` | function | `tests/test_anti_fp.c:197` | `int main(void)` |
 | `test_boolean_props` | function | `tests/test_anti_fp.c:74` | `static void test_boolean_props(void **state)` |
 | `test_bucket_screen` | function | `tests/test_anti_fp.c:83` | `static void test_bucket_screen(void **state)` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_pseudo_empty` | function | `tests/test_css.c:2320` | `static void test_pseudo_empty(void **state)` |
 | `test_pseudo_geometry_does_not_leak_to_element` | function | `tests/test_css.c:2163` | `static void test_pseudo_geometry_does_not_leak_to_element(void **state)` |
 | `test_pseudo_lang` | function | `tests/test_css.c:2357` | `static void test_pseudo_lang(void **state)` |
-| `test_pseudo_link` | function | `tests/test_css.c:1628` | `static void test_pseudo_link(void **state)` |
-| `test_pseudo_never_match_keeps_group` | function | `tests/test_css.c:1646` | `static void test_pseudo_never_match_keeps_group(void **state)` |
-| `test_pseudo_nth_child` | function | `tests/test_css.c:1704` | `static void test_pseudo_nth_child(void **state)` |
-| `test_pseudo_nth_last_child` | function | `tests/test_css.c:1727` | `static void test_pseudo_nth_last_child(void **state)` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

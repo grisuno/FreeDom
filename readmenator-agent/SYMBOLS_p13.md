@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_push_loc_null_file_and_negative_nums` | function | `tests/test_freebug.c:197` | `static void test_push_loc_null_file_and_negative_nums(void **state)` |
+| `test_push_loc_records_location` | function | `tests/test_freebug.c:175` | `static void test_push_loc_records_location(void **state)` |
+| `test_reset_reuses_and_no_leak` | function | `tests/test_freebug.c:140` | `static void test_reset_reuses_and_no_leak(void **state)` |
+| `test_total_bytes_cap_fails_closed` | function | `tests/test_freebug.c:93` | `static void test_total_bytes_cap_fails_closed(void **state)` |
 | `ERR_FILE` | macro | `tests/test_freedom.c:29` | `#define ERR_FILE` |
 | `FREEDOM_BIN` | macro | `tests/test_freedom.c:27` | `#define FREEDOM_BIN` |
 | `OUT_FILE` | macro | `tests/test_freedom.c:28` | `#define OUT_FILE` |
@@ -312,30 +316,30 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `EXPECT` | function | `tests/test_js_dom.c:2141` | `EXPECT(f, "R[2].declarations.concat(R[3].declarations).map(function(x)` |
 | `EXPECT` | function | `tests/test_js_dom.c:2228` | `EXPECT(f, "function onc()` |
 | `EXPECT` | function | `tests/test_js_dom.c:2662` | `EXPECT(f, "['DocumentType','CDATASection','ProcessingInstruction','Window','NamedNodeMap',"      ...` |
-| `EXPECT` | function | `tests/test_js_dom.c:2803` | `EXPECT(f, "function mk(h)` |
-| `EXPECT` | function | `tests/test_js_dom.c:2868` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2883` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2887` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2891` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2903` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2914` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2918` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2921` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2929` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2940` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2942` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2954` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2964` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2975` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2869` | `EXPECT(f, "function mk(h)` |
+| `EXPECT` | function | `tests/test_js_dom.c:2934` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2949` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2953` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2957` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2969` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2980` | `EXPECT(f, "(function()` |
 | `EXPECT` | function | `tests/test_js_dom.c:2984` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2997` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2987` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2995` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:3006` | `EXPECT(f, "(function()` |
 | `EXPECT` | function | `tests/test_js_dom.c:3008` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:3020` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:3030` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:3041` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:3050` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:3063` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:3074` | `EXPECT(f, "(function()` |
 | `assert_int_equal` | function | `tests/test_js_dom.c:885` | `assert_int_equal(run(f,         "window.onload=function()` |
 | `bundle` | function | `tests/test_js_dom.c:653` | `* library bundle (DuckDuckGo's l.js "cannot read property createElement of  * undefined"). This l...` |
 | `console_fixture` | function | `tests/test_js_dom.c:1079` | `static void console_fixture(hp_document **doc, dom_index **idx, js_context **ctx,                ...` |
 | `console_teardown` | function | `tests/test_js_dom.c:1092` | `static void console_teardown(hp_document *doc, dom_index *idx, js_context *ctx,                  ...` |
-| `fake_fetch` | function | `tests/test_js_dom.c:2754` | `static int fake_fetch(void *ctx, const char *method, const char *url, const char *body,          ...` |
-| `fake_net` | struct | `tests/test_js_dom.c:2753` | `` |
+| `fake_fetch` | function | `tests/test_js_dom.c:2820` | `static int fake_fetch(void *ctx, const char *method, const char *url, const char *body,          ...` |
+| `fake_net` | struct | `tests/test_js_dom.c:2819` | `` |
 | `fixture` | struct | `tests/test_js_dom.c:43` | `` |
 | `geom_parent` | function | `tests/test_js_dom.c:1911` | `static dom_node_id geom_parent(void *ctx, dom_node_id n)` |
 | `handle_after` | function | `tests/test_js_dom.c:1715` | `static dom_node_id handle_after(fixture *f, const char *src)` |
@@ -343,10 +347,10 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `it` | function | `tests/test_js_dom.c:792` | `* itself no longer finds it (getElementById only answers with attached elements). */ assert_string_equal(r.value...` |
 | `jQuery` | function | `tests/test_js_dom.c:247` | `* page that ships jQuery (Slashdot). The fragment must be complete enough that the  * detection c...` |
 | `js_handle` | function | `tests/test_js_dom.c:1915` | `static dom_node_id js_handle(fixture *f, const char *expr)` |
-| `main` | function | `tests/test_js_dom.c:3248` | `int main(void)` |
+| `main` | function | `tests/test_js_dom.c:3314` | `int main(void)` |
 | `methods` | function | `tests/test_js_dom.c:669` | `* backed by the sealed dom methods (this element's own attributes only). */ static void test_elem...` |
 | `persisted` | function | `tests/test_js_dom.c:943` | `* never persisted (process-lifetime only). */ static void test_cookie_jar_enabled_for_trusted_hos...` |
-| `pump_ticks` | function | `tests/test_js_dom.c:3018` | `static void pump_ticks(fixture *f, int n)` |
+| `pump_ticks` | function | `tests/test_js_dom.c:3084` | `static void pump_ticks(fixture *f, int n)` |
 | `run` | function | `tests/test_js_dom.c:74` | `static js_status run(fixture *f, const char *src, js_result *r)` |
 | `run_pane` | function | `tests/test_js_dom.c:2151` | `static void run_pane(fixture *f, int tab, const char *arg, js_result *r)` |
 | `set_https_location` | function | `tests/test_js_dom.c:979` | `static void set_https_location(fixture *f, const char *url)` |
@@ -354,17 +358,18 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `setup` | function | `tests/test_js_dom.c:50` | `static int setup(void **state)` |
 | `teardown` | function | `tests/test_js_dom.c:61` | `static int teardown(void **state)` |
 | `test_ambient_apis_do_not_throw` | function | `tests/test_js_dom.c:968` | `static void test_ambient_apis_do_not_throw(void **state)` |
+| `test_anchor_url_decomposition` | function | `tests/test_js_dom.c:2810` | `static void test_anchor_url_decomposition(void **state)` |
 | `test_append_cycle_is_rejected` | function | `tests/test_js_dom.c:873` | `static void test_append_cycle_is_rejected(void **state)` |
 | `test_attributes` | function | `tests/test_js_dom.c:131` | `static void test_attributes(void **state)` |
 | `test_attributes_are_iterable` | function | `tests/test_js_dom.c:434` | `static void test_attributes_are_iterable(void **state)` |
 | `test_blur_onblur_fires` | function | `tests/test_js_dom.c:1346` | `static void test_blur_onblur_fires(void **state)` |
 | `test_by_class_and_tag` | function | `tests/test_js_dom.c:113` | `static void test_by_class_and_tag(void **state)` |
-| `test_ce_attribute_changed` | function | `tests/test_js_dom.c:2982` | `static void test_ce_attribute_changed(void **state)` |
-| `test_ce_connected_callbacks` | function | `tests/test_js_dom.c:2973` | `static void test_ce_connected_callbacks(void **state)` |
-| `test_ce_create_runs_constructor` | function | `tests/test_js_dom.c:2952` | `static void test_ce_create_runs_constructor(void **state)` |
-| `test_ce_define_upgrades_existing` | function | `tests/test_js_dom.c:2962` | `static void test_ce_define_upgrades_existing(void **state)` |
-| `test_ce_define_validation` | function | `tests/test_js_dom.c:3006` | `static void test_ce_define_validation(void **state)` |
-| `test_ce_sync_on_mutation` | function | `tests/test_js_dom.c:2995` | `static void test_ce_sync_on_mutation(void **state)` |
+| `test_ce_attribute_changed` | function | `tests/test_js_dom.c:3048` | `static void test_ce_attribute_changed(void **state)` |
+| `test_ce_connected_callbacks` | function | `tests/test_js_dom.c:3039` | `static void test_ce_connected_callbacks(void **state)` |
+| `test_ce_create_runs_constructor` | function | `tests/test_js_dom.c:3018` | `static void test_ce_create_runs_constructor(void **state)` |
+| `test_ce_define_upgrades_existing` | function | `tests/test_js_dom.c:3028` | `static void test_ce_define_upgrades_existing(void **state)` |
+| `test_ce_define_validation` | function | `tests/test_js_dom.c:3072` | `static void test_ce_define_validation(void **state)` |
+| `test_ce_sync_on_mutation` | function | `tests/test_js_dom.c:3061` | `static void test_ce_sync_on_mutation(void **state)` |
 | `test_classlist_backs_class_attr` | function | `tests/test_js_dom.c:223` | `static void test_classlist_backs_class_attr(void **state)` |
 | `test_click_add_event_listener_fires` | function | `tests/test_js_dom.c:1563` | `static void test_click_add_event_listener_fires(void **state)` |
 | `test_click_install_null_args` | function | `tests/test_js_dom.c:1557` | `static void test_click_install_null_args(void **state)` |
@@ -380,6 +385,8 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_cookie_and_referrer_leak_nothing` | function | `tests/test_js_dom.c:929` | `static void test_cookie_and_referrer_leak_nothing(void **state)` |
 | `test_create_append_renders_in_tree` | function | `tests/test_js_dom.c:807` | `static void test_create_append_renders_in_tree(void **state)` |
 | `test_current_script_values_and_methods` | function | `tests/test_js_dom.c:2565` | `static void test_current_script_values_and_methods(void **state)` |
+| `test_custom_element_found_in_subtree_with_many_definitions` | function | `tests/test_js_dom.c:2798` | `static void test_custom_element_found_in_subtree_with_many_definitions(void **state)` |
+| `test_custom_element_reactions_through_template_fragment` | function | `tests/test_js_dom.c:2783` | `static void test_custom_element_reactions_through_template_fragment(void **state)` |
 | `test_dataset_is_a_domstringmap` | function | `tests/test_js_dom.c:453` | `static void test_dataset_is_a_domstringmap(void **state)` |
 | `test_document_fragment_reparents` | function | `tests/test_js_dom.c:233` | `static void test_document_fragment_reparents(void **state)` |
 | `test_document_is_not_io` | function | `tests/test_js_dom.c:798` | `static void test_document_is_not_io(void **state)` |
@@ -427,7 +434,7 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_ext_compare_document_position` | function | `tests/test_js_dom.c:2589` | `static void test_ext_compare_document_position(void **state)` |
 | `test_ext_document_helpers` | function | `tests/test_js_dom.c:2619` | `static void test_ext_document_helpers(void **state)` |
 | `test_ext_insert_adjacent` | function | `tests/test_js_dom.c:2696` | `static void test_ext_insert_adjacent(void **state)` |
-| `test_ext_is_equal_node` | function | `tests/test_js_dom.c:2801` | `static void test_ext_is_equal_node(void **state)` |
+| `test_ext_is_equal_node` | function | `tests/test_js_dom.c:2867` | `static void test_ext_is_equal_node(void **state)` |
 | `test_ext_prototype_delegation` | function | `tests/test_js_dom.c:2711` | `static void test_ext_prototype_delegation(void **state)` |
 | `test_ext_shadow_root` | function | `tests/test_js_dom.c:2598` | `static void test_ext_shadow_root(void **state)` |
 | `test_ext_tree_navigation` | function | `tests/test_js_dom.c:2578` | `static void test_ext_tree_navigation(void **state)` |
@@ -489,12 +496,5 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_node_identity_is_cached` | function | `tests/test_js_dom.c:207` | `static void test_node_identity_is_cached(void **state)` |
 | `test_onload_runs_and_mutates` | function | `tests/test_js_dom.c:881` | `static void test_onload_runs_and_mutates(void **state)` |
 | `test_performance_observer_supported_entry_types` | function | `tests/test_js_dom.c:417` | `static void test_performance_observer_supported_entry_types(void **state)` |
-| `test_platform_dommatrix_and_imagedata` | function | `tests/test_js_dom.c:2013` | `static void test_platform_dommatrix_and_imagedata(void **state)` |
-| `test_platform_element_surface` | function | `tests/test_js_dom.c:2112` | `static void test_platform_element_surface(void **state)` |
-| `test_platform_form_controls` | function | `tests/test_js_dom.c:2022` | `static void test_platform_form_controls(void **state)` |
-| `test_platform_streams` | function | `tests/test_js_dom.c:2088` | `static void test_platform_streams(void **state)` |
-| `test_query_selector_from_js` | function | `tests/test_js_dom.c:183` | `static void test_query_selector_from_js(void **state)` |
-| `test_repl_api_inspect_and_event_listeners` | function | `tests/test_js_dom.c:2223` | `static void test_repl_api_inspect_and_event_listeners(void **state)` |
-| `test_repl_api_is_repl_only_and_nondestructive` | function | `tests/test_js_dom.c:1974` | `static void test_repl_api_is_repl_only_and_nondestructive(void **state)` |
 
 Next: [SYMBOLS_p14.md](SYMBOLS_p14.md)

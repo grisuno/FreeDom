@@ -20,9 +20,9 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `m_sibling_node` | function | `src/js_dom.c:166` | `static JSValue m_sibling_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
 | `m_tag_name` | function | `src/js_dom.c:112` | `static JSValue m_tag_name(JSContext *ctx, JSValueConst this_val,                           int ar...` |
 | `m_text_content` | function | `src/js_dom.c:207` | `static JSValue m_text_content(JSContext *ctx, JSValueConst this_val,                             ...` |
-| `ms` | function | `src/js_dom.c:1196` | `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);` |
-| `scripts` | function | `src/js_dom.c:852` | `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...` |
-| `size` | function | `src/js_dom.c:1390` | `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);` |
+| `ms` | function | `src/js_dom.c:1210` | `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);` |
+| `scripts` | function | `src/js_dom.c:866` | `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...` |
+| `size` | function | `src/js_dom.c:1406` | `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);` |
 | `table` | function | `src/js_dom.c:639` | `* a table (dom.viewport() non-null);` |
 | `identity` | function | `src/js_dom_ext.c:102` | `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...` |
 | `jd_install_geolocation` | function | `src/js_dom_ext.c:1239` | `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)` |
@@ -214,18 +214,18 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `ln_resolve` | function | `src/link_nav.c:172` | `ln_status ln_resolve(const char *base, const char *href, ln_result *out)` |
 | `pop_seg` | function | `src/link_nav.c:98` | `static void pop_seg(char *body, size_t *blen)` |
 | `resolve_file` | function | `src/link_nav.c:149` | `static int resolve_file(const char *base, const char *ref, char *out, size_t outsz)` |
-| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:867` | `#define LS_ARGON2_M_KIB` |
-| `LS_ARGON2_P` | macro | `src/local_store.c:868` | `#define LS_ARGON2_P` |
-| `LS_ARGON2_T` | macro | `src/local_store.c:866` | `#define LS_ARGON2_T` |
-| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:863` | `#define LS_KDF_ARGON2ID` |
-| `LS_KDF_NONE` | macro | `src/local_store.c:862` | `#define LS_KDF_NONE` |
-| `LS_VERSION` | macro | `src/local_store.c:861` | `#define LS_VERSION` |
-| `OFF_AEAD` | macro | `src/local_store.c:873` | `#define OFF_AEAD` |
-| `OFF_KDF` | macro | `src/local_store.c:874` | `#define OFF_KDF` |
-| `OFF_MAGIC` | macro | `src/local_store.c:871` | `#define OFF_MAGIC` |
-| `OFF_NONCE` | macro | `src/local_store.c:876` | `#define OFF_NONCE` |
-| `OFF_SALT` | macro | `src/local_store.c:875` | `#define OFF_SALT` |
-| `OFF_VERSION` | macro | `src/local_store.c:872` | `#define OFF_VERSION` |
+| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:878` | `#define LS_ARGON2_M_KIB` |
+| `LS_ARGON2_P` | macro | `src/local_store.c:879` | `#define LS_ARGON2_P` |
+| `LS_ARGON2_T` | macro | `src/local_store.c:877` | `#define LS_ARGON2_T` |
+| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:874` | `#define LS_KDF_ARGON2ID` |
+| `LS_KDF_NONE` | macro | `src/local_store.c:873` | `#define LS_KDF_NONE` |
+| `LS_VERSION` | macro | `src/local_store.c:872` | `#define LS_VERSION` |
+| `OFF_AEAD` | macro | `src/local_store.c:884` | `#define OFF_AEAD` |
+| `OFF_KDF` | macro | `src/local_store.c:885` | `#define OFF_KDF` |
+| `OFF_MAGIC` | macro | `src/local_store.c:882` | `#define OFF_MAGIC` |
+| `OFF_NONCE` | macro | `src/local_store.c:887` | `#define OFF_NONCE` |
+| `OFF_SALT` | macro | `src/local_store.c:886` | `#define OFF_SALT` |
+| `OFF_VERSION` | macro | `src/local_store.c:883` | `#define OFF_VERSION` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:3` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:14` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:25` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
@@ -301,7 +301,8 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:795` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:806` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:817` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:852` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
+| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:828` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
+| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:863` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:6` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:17` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:28` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
@@ -377,7 +378,8 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:798` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:809` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:820` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:855` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
+| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:831` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
+| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:866` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:9` | `#define OSSL_KDF_PARAM_THREADS` |
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:20` | `#define OSSL_KDF_PARAM_THREADS` |
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:31` | `#define OSSL_KDF_PARAM_THREADS` |
@@ -453,7 +455,8 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:801` | `#define OSSL_KDF_PARAM_THREADS` |
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:812` | `#define OSSL_KDF_PARAM_THREADS` |
 | `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:823` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:858` | `#define OSSL_KDF_PARAM_THREADS` |
+| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:834` | `#define OSSL_KDF_PARAM_THREADS` |
+| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:869` | `#define OSSL_KDF_PARAM_THREADS` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:11` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:22` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:33` | `#define _GNU_SOURCE` |
@@ -493,8 +496,5 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `_GNU_SOURCE` | macro | `src/local_store.c:407` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:418` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:429` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:440` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:451` | `#define _GNU_SOURCE` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:462` | `#define _GNU_SOURCE` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

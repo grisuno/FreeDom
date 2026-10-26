@@ -10,7 +10,7 @@ Second-brain semantic layer: nouns map atomically to file sets (EXTRACTED); verb
 | `not` | 121 | 613 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h` |
 | `include` | 120 | 223 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h` |
 | `out` | 119 | 646 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h` |
-| `one` | 119 | 554 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/block_flow.h` |
+| `one` | 119 | 555 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/block_flow.h` |
 | `freedom` | 115 | 172 | `app.py`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/freedom_view.c`, `gui/ui_render.c` |
 | `when` | 114 | 421 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h` |
 | `int` | 109 | 1074 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/svg_paint.c`, `gui/ui_render.c` |
@@ -19,25 +19,25 @@ Second-brain semantic layer: nouns map atomically to file sets (EXTRACTED); verb
 | `returns` | 105 | 297 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h` |
 | `const` | 104 | 599 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h` |
 | `only` | 104 | 385 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_style.h` |
-| `never` | 99 | 319 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/compositor.h` |
+| `never` | 99 | 320 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/compositor.h` |
 | `css` | 97 | 2046 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/block_flow.h`, `include/box_style.h`, `include/compositor.h` |
 | `its` | 97 | 573 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h` |
 | `name` | 94 | 367 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h` |
 | `void` | 92 | 587 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/ui_render.c`, `include/anti_fp.h`, `include/cached_fetch.h` |
-| `empty` | 92 | 259 | `gui/browser_ui.c`, `include/browser.h`, `include/css.h`, `include/css_mq.h`, `include/css_select.h` |
+| `empty` | 92 | 260 | `gui/browser_ui.c`, `include/browser.h`, `include/css.h`, `include/css_mq.h`, `include/css_select.h` |
 | `static` | 91 | 395 | `gui/browser_ui.c`, `gui/svg_paint.c`, `gui/ui_render.c`, `include/box_tree.h`, `include/compositor.h` |
 | `text` | 90 | 681 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/svg_paint.c`, `gui/ui_render.c` |
-| `url` | 85 | 514 | `gui/browser_ui.c`, `include/browser.h`, `include/cached_fetch.h`, `include/css.h`, `include/css_decl.h` |
-| `every` | 84 | 277 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/box_style.h` |
+| `url` | 85 | 518 | `gui/browser_ui.c`, `include/browser.h`, `include/cached_fetch.h`, `include/css.h`, `include/css_decl.h` |
+| `every` | 84 | 278 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/box_style.h` |
 | `spec` | 82 | 201 | `gui/browser_ui.c`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h` |
-| `value` | 81 | 327 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anti_fp.h`, `include/box_style.h`, `include/compositor.h` |
+| `value` | 81 | 326 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anti_fp.h`, `include/box_style.h`, `include/compositor.h` |
 | `return` | 80 | 824 | `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/box_blur.h`, `include/box_tree.h` |
 | `per` | 79 | 218 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/anti_fp.h`, `include/box_blur.h`, `include/box_style.h` |
 | `page` | 78 | 438 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h` |
 | `len` | 78 | 361 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h` |
 | `closed` | 77 | 178 | `gui/browser_ui.c`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/css.h` |
-| `source` | 76 | 225 | `docker_run.sh`, `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/freedom_view.c`, `gui/ui_render.c` |
-| `first` | 75 | 214 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/box_tree.h`, `include/compositor.h`, `include/css.h` |
+| `source` | 76 | 226 | `docker_run.sh`, `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/freedom_view.c`, `gui/ui_render.c` |
+| `first` | 75 | 215 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/box_tree.h`, `include/compositor.h`, `include/css.h` |
 | `set` | 74 | 327 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/box_style.h` |
 | `cap` | 74 | 235 | `gui/browser_ui.c`, `include/box_style.h`, `include/css.h`, `include/css_computed.h`, `include/css_length.h` |
 | `bytes` | 74 | 187 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/css.h`, `include/css_computed.h`, `include/css_mq.h` |
@@ -48,12 +48,12 @@ Second-brain semantic layer: nouns map atomically to file sets (EXTRACTED); verb
 | `none` | 66 | 362 | `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/anti_fp.h`, `include/box_style.h` |
 | `zero` | 66 | 145 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h` |
 | `fail` | 66 | 140 | `gui/browser_ui.c`, `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h` |
-| `state` | 64 | 372 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/browser.h`, `include/css.h` |
+| `state` | 64 | 375 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/browser.h`, `include/css.h` |
 | `status` | 64 | 172 | `app.py`, `gui/browser_ui.c`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h` |
 | `case` | 64 | 154 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_computed.h`, `include/css_length.h` |
 | `caller` | 63 | 147 | `gui/browser_ui.c`, `gui/svg_paint.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h` |
 | `without` | 62 | 127 | `gui/browser_ui.c`, `include/box_style.h`, `include/css.h`, `include/css_length.h`, `include/dom.h` |
-| `must` | 61 | 184 | `gui/browser_ui.c`, `include/box_tree.h`, `include/css_index.h`, `include/css_length.h`, `include/dom.h` |
+| `must` | 61 | 186 | `gui/browser_ui.c`, `include/box_tree.h`, `include/css_index.h`, `include/css_length.h`, `include/dom.h` |
 
 ## Verb Edges
 

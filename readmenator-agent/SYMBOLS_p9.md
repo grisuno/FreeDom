@@ -3,6 +3,9 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `_GNU_SOURCE` | macro | `src/local_store.c:440` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:451` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:462` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:473` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:484` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:495` | `#define _GNU_SOURCE` |
@@ -36,18 +39,19 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `_GNU_SOURCE` | macro | `src/local_store.c:803` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:814` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:825` | `#define _GNU_SOURCE` |
-| `aead_decrypt` | function | `src/local_store.c:956` | `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
-| `aead_encrypt` | function | `src/local_store.c:930` | `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
-| `argon2id_derive` | function | `src/local_store.c:892` | `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,                           ...` |
-| `cipher_for` | function | `src/local_store.c:882` | `static const EVP_CIPHER *cipher_for(ls_aead aead)` |
-| `decrypt_blob` | function | `src/local_store.c:1021` | `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,          ...` |
-| `ls_derive_key` | function | `src/local_store.c:921` | `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,                         const...` |
-| `ls_free` | function | `src/local_store.c:1117` | `void ls_free(uint8_t *buf, size_t len)` |
-| `ls_open` | function | `src/local_store.c:1065` | `ls_status ls_open(const uint8_t key[LS_KEY_LEN],                   const uint8_t *blob, size_t bl...` |
-| `ls_open_passphrase` | function | `src/local_store.c:1097` | `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,                         ...` |
-| `ls_seal` | function | `src/local_store.c:1052` | `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,                   const uint8_t *p...` |
-| `ls_seal_passphrase` | function | `src/local_store.c:1076` | `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,           ...` |
-| `seal_core` | function | `src/local_store.c:984` | `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,                     ...` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:836` | `#define _GNU_SOURCE` |
+| `aead_decrypt` | function | `src/local_store.c:967` | `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
+| `aead_encrypt` | function | `src/local_store.c:941` | `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
+| `argon2id_derive` | function | `src/local_store.c:903` | `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,                           ...` |
+| `cipher_for` | function | `src/local_store.c:893` | `static const EVP_CIPHER *cipher_for(ls_aead aead)` |
+| `decrypt_blob` | function | `src/local_store.c:1032` | `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,          ...` |
+| `ls_derive_key` | function | `src/local_store.c:932` | `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,                         const...` |
+| `ls_free` | function | `src/local_store.c:1128` | `void ls_free(uint8_t *buf, size_t len)` |
+| `ls_open` | function | `src/local_store.c:1076` | `ls_status ls_open(const uint8_t key[LS_KEY_LEN],                   const uint8_t *blob, size_t bl...` |
+| `ls_open_passphrase` | function | `src/local_store.c:1108` | `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,                         ...` |
+| `ls_seal` | function | `src/local_store.c:1063` | `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,                   const uint8_t *p...` |
+| `ls_seal_passphrase` | function | `src/local_store.c:1087` | `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,           ...` |
+| `seal_core` | function | `src/local_store.c:995` | `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,                     ...` |
 | `_POSIX_C_SOURCE` | macro | `src/media_decoder.c:23` | `#define _POSIX_C_SOURCE` |
 | `av_rescale_q` | function | `src/media_decoder.c:217` | `return av_rescale_q(f->pts, tb, (AVRational)` |
 | `decode_segment` | function | `src/media_decoder.c:276` | `static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len)` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `lower` | function | `src/request_policy.c:22` | `static char lower(char c)` |
 | `psl_cmp` | function | `src/request_policy.c:36` | `static int psl_cmp(const void *key, const void *elem)` |
 | `psl_in` | function | `src/request_policy.c:40` | `static int psl_in(const char *const *arr, size_t n, const char *key)` |
-| `public_suffix_labels` | function | `src/request_policy.c:48` | `static size_t public_suffix_labels(const char *host, const size_t *off, size_t n)` |
-| `rp_evaluate` | function | `src/request_policy.c:143` | `rp_decision rp_evaluate(const char *top_level_url, const char *request_url)` |
-| `rp_host_of` | function | `src/request_policy.c:76` | `int rp_host_of(const char *url, char *out, size_t out_size)` |
-| `rp_same_site` | function | `src/request_policy.c:134` | `int rp_same_site(const char *top_level_url, const char *request_url)` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

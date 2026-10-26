@@ -5,28 +5,28 @@ Previous: [KB_src_p5.md](KB_src_p5.md)
 - Layer: data_access
 - Language: c
 - Symbols:
-  - `cipher_for` (function, line 882) `static const EVP_CIPHER *cipher_for(ls_aead aead)`
-  - `argon2id_derive` (function, line 892) `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
+  - `cipher_for` (function, line 893) `static const EVP_CIPHER *cipher_for(ls_aead aead)`
+  - `argon2id_derive` (function, line 903) `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
                           ...`
-  - `ls_derive_key` (function, line 921) `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
+  - `ls_derive_key` (function, line 932) `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
                         const...`
-  - `aead_encrypt` (function, line 930) `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+  - `aead_encrypt` (function, line 941) `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-  - `aead_decrypt` (function, line 956) `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+  - `aead_decrypt` (function, line 967) `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-  - `seal_core` (function, line 984) `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
+  - `seal_core` (function, line 995) `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
                     ...`
-  - `decrypt_blob` (function, line 1021) `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
+  - `decrypt_blob` (function, line 1032) `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
          ...`
-  - `ls_seal` (function, line 1052) `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
+  - `ls_seal` (function, line 1063) `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
                   const uint8_t *p...`
-  - `ls_open` (function, line 1065) `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
+  - `ls_open` (function, line 1076) `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
                   const uint8_t *blob, size_t bl...`
-  - `ls_seal_passphrase` (function, line 1076) `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
+  - `ls_seal_passphrase` (function, line 1087) `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
           ...`
-  - `ls_open_passphrase` (function, line 1097) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
+  - `ls_open_passphrase` (function, line 1108) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
-  - `ls_free` (function, line 1117) `void ls_free(uint8_t *buf, size_t len)`
+  - `ls_free` (function, line 1128) `void ls_free(uint8_t *buf, size_t len)`
   - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 3) `#define OSSL_KDF_PARAM_ARGON2_LANES`
   - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 6) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
   - `OSSL_KDF_PARAM_THREADS` (macro, line 9) `#define OSSL_KDF_PARAM_THREADS`
@@ -327,21 +327,25 @@ Previous: [KB_src_p5.md](KB_src_p5.md)
   - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 820) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
   - `OSSL_KDF_PARAM_THREADS` (macro, line 823) `#define OSSL_KDF_PARAM_THREADS`
   - `_GNU_SOURCE` (macro, line 825) `#define _GNU_SOURCE`
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 852) `#define OSSL_KDF_PARAM_ARGON2_LANES`
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 855) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 858) `#define OSSL_KDF_PARAM_THREADS`
-  - `LS_VERSION` (macro, line 861) `#define LS_VERSION`
-  - `LS_KDF_NONE` (macro, line 862) `#define LS_KDF_NONE`
-  - `LS_KDF_ARGON2ID` (macro, line 863) `#define LS_KDF_ARGON2ID`
-  - `LS_ARGON2_T` (macro, line 866) `#define LS_ARGON2_T`
-  - `LS_ARGON2_M_KIB` (macro, line 867) `#define LS_ARGON2_M_KIB`
-  - `LS_ARGON2_P` (macro, line 868) `#define LS_ARGON2_P`
-  - `OFF_MAGIC` (macro, line 871) `#define OFF_MAGIC`
-  - `OFF_VERSION` (macro, line 872) `#define OFF_VERSION`
-  - `OFF_AEAD` (macro, line 873) `#define OFF_AEAD`
-  - `OFF_KDF` (macro, line 874) `#define OFF_KDF`
-  - `OFF_SALT` (macro, line 875) `#define OFF_SALT`
-  - `OFF_NONCE` (macro, line 876) `#define OFF_NONCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 828) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 831) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 834) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 836) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 863) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 866) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 869) `#define OSSL_KDF_PARAM_THREADS`
+  - `LS_VERSION` (macro, line 872) `#define LS_VERSION`
+  - `LS_KDF_NONE` (macro, line 873) `#define LS_KDF_NONE`
+  - `LS_KDF_ARGON2ID` (macro, line 874) `#define LS_KDF_ARGON2ID`
+  - `LS_ARGON2_T` (macro, line 877) `#define LS_ARGON2_T`
+  - `LS_ARGON2_M_KIB` (macro, line 878) `#define LS_ARGON2_M_KIB`
+  - `LS_ARGON2_P` (macro, line 879) `#define LS_ARGON2_P`
+  - `OFF_MAGIC` (macro, line 882) `#define OFF_MAGIC`
+  - `OFF_VERSION` (macro, line 883) `#define OFF_VERSION`
+  - `OFF_AEAD` (macro, line 884) `#define OFF_AEAD`
+  - `OFF_KDF` (macro, line 885) `#define OFF_KDF`
+  - `OFF_SALT` (macro, line 886) `#define OFF_SALT`
+  - `OFF_NONCE` (macro, line 887) `#define OFF_NONCE`
 - Depends on: `include/local_store.h`
 
 ## src/media_decoder.c

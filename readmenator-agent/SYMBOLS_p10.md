@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `public_suffix_labels` | function | `src/request_policy.c:48` | `static size_t public_suffix_labels(const char *host, const size_t *off, size_t n)` |
+| `rp_evaluate` | function | `src/request_policy.c:143` | `rp_decision rp_evaluate(const char *top_level_url, const char *request_url)` |
+| `rp_host_of` | function | `src/request_policy.c:76` | `int rp_host_of(const char *url, char *out, size_t out_size)` |
+| `rp_same_site` | function | `src/request_policy.c:134` | `int rp_same_site(const char *top_level_url, const char *request_url)` |
 | `rp_sanitize_request_headers` | function | `src/request_policy.c:197` | `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap)` |
 | `rp_site_of` | function | `src/request_policy.c:102` | `int rp_site_of(const char *host, char *out, size_t out_size)` |
 | `SF_RCACHE_SLOTS` | macro | `src/secure_fetch.c:1164` | `#define SF_RCACHE_SLOTS` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 | `zm_clamp` | function | `src/zoom.c:14` | `int zm_clamp(int pct)` |
 | `zm_reset` | function | `src/zoom.c:36` | `int zm_reset(void)` |
 | `zm_scale` | function | `src/zoom.c:40` | `double zm_scale(int pct)` |
-| `zm_zoom_in` | function | `src/zoom.c:20` | `int zm_zoom_in(int pct)` |
-| `zm_zoom_out` | function | `src/zoom.c:28` | `int zm_zoom_out(int pct)` |
-| `CHECK` | macro | `tests/itest_secure_fetch.c:16` | `#define CHECK(cond, msg)` |
-| `main` | function | `tests/itest_secure_fetch.c:26` | `int main(void)` |
 
 Next: [SYMBOLS_p11.md](SYMBOLS_p11.md)

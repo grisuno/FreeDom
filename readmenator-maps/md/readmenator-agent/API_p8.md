@@ -194,7 +194,7 @@ Depends on: `include/interp.h`
 
 ## src/js_custom_elements.c
 Depends on: `src/js_custom_elements.h`
-- `jdce_install` (function) `src/js_custom_elements.c:183` `int jdce_install(JSContext *ctx)`
+- `jdce_install` (function) `src/js_custom_elements.c:190` `int jdce_install(JSContext *ctx)`
 
 ## src/js_custom_elements.h
 Imported by: `src/js_custom_elements.c`, `src/js_dom.c`
@@ -272,25 +272,25 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
 - `jd_is_mutator` (function) `src/js_dom.c:603` `static int jd_is_mutator(const char *name)`
 - `jd_freeze_mutators` (function) `src/js_dom.c:609` `static int jd_freeze_mutators(JSContext *jsctx)`
 - `table` (function) `src/js_dom.c:639` `* a table (dom.viewport() non-null);`
-- `attrNames` (function) `src/js_dom.c:680` `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
+- `attrNames` (function) `src/js_dom.c:686` `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
      * a missing '...`
-- `scripts` (function) `src/js_dom.c:852` `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
-- `enough` (function) `src/js_dom.c:1025` `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-- `ms` (function) `src/js_dom.c:1196` `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-- `empty` (function) `src/js_dom.c:1385` `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-- `geometry` (function) `src/js_dom.c:1387` `* constant geometry (zero real leak);`
-- `size` (function) `src/js_dom.c:1390` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
-- `js_env` (function) `src/js_dom.c:1393` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+- `scripts` (function) `src/js_dom.c:866` `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
+- `enough` (function) `src/js_dom.c:1039` `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
+- `ms` (function) `src/js_dom.c:1210` `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+- `empty` (function) `src/js_dom.c:1401` `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+- `geometry` (function) `src/js_dom.c:1403` `* constant geometry (zero real leak);`
+- `size` (function) `src/js_dom.c:1406` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
+- `js_env` (function) `src/js_dom.c:1409` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
-- `jd_install` (function) `src/js_dom.c:1928` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-- `jd_flush_custom_elements` (function) `src/js_dom.c:2010` `void jd_flush_custom_elements(js_context *ctx)`
-- `fails` (function) `src/js_dom.c:2024` `* cap is reached or an allocation fails (caller stops), else 0. */
+- `jd_install` (function) `src/js_dom.c:1944` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+- `jd_flush_custom_elements` (function) `src/js_dom.c:2026` `void jd_flush_custom_elements(js_context *ctx)`
+- `fails` (function) `src/js_dom.c:2040` `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-- `jd_install_console` (function) `src/js_dom.c:2138` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-- `jd_set_cookies` (function) `src/js_dom.c:2175` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-- `jd_get_cookies` (function) `src/js_dom.c:2195` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-- `jd_set_computed` (function) `src/js_dom.c:2218` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-- `jd_set_geometry` (function) `src/js_dom.c:2229` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+- `jd_install_console` (function) `src/js_dom.c:2154` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+- `jd_set_cookies` (function) `src/js_dom.c:2191` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+- `jd_get_cookies` (function) `src/js_dom.c:2211` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+- `jd_set_computed` (function) `src/js_dom.c:2234` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+- `jd_set_geometry` (function) `src/js_dom.c:2245` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
 
 ## src/js_dom_ext.c
 Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`

@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_pseudo_link` | function | `tests/test_css.c:1628` | `static void test_pseudo_link(void **state)` |
+| `test_pseudo_never_match_keeps_group` | function | `tests/test_css.c:1646` | `static void test_pseudo_never_match_keeps_group(void **state)` |
+| `test_pseudo_nth_child` | function | `tests/test_css.c:1704` | `static void test_pseudo_nth_child(void **state)` |
+| `test_pseudo_nth_last_child` | function | `tests/test_css.c:1727` | `static void test_pseudo_nth_last_child(void **state)` |
 | `test_pseudo_nth_malformed_drops` | function | `tests/test_css.c:2267` | `static void test_pseudo_nth_malformed_drops(void **state)` |
 | `test_pseudo_nth_of_type` | function | `tests/test_css.c:2304` | `static void test_pseudo_nth_of_type(void **state)` |
 | `test_pseudo_of_type` | function | `tests/test_css.c:2285` | `static void test_pseudo_of_type(void **state)` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_level_name` | function | `tests/test_freebug.c:129` | `static void test_level_name(void **state)` |
 | `test_push_and_read` | function | `tests/test_freebug.c:21` | `static void test_push_and_read(void **state)` |
 | `test_push_loc_file_truncated` | function | `tests/test_freebug.c:214` | `static void test_push_loc_file_truncated(void **state)` |
-| `test_push_loc_null_file_and_negative_nums` | function | `tests/test_freebug.c:197` | `static void test_push_loc_null_file_and_negative_nums(void **state)` |
-| `test_push_loc_records_location` | function | `tests/test_freebug.c:175` | `static void test_push_loc_records_location(void **state)` |
-| `test_reset_reuses_and_no_leak` | function | `tests/test_freebug.c:140` | `static void test_reset_reuses_and_no_leak(void **state)` |
-| `test_total_bytes_cap_fails_closed` | function | `tests/test_freebug.c:93` | `static void test_total_bytes_cap_fails_closed(void **state)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

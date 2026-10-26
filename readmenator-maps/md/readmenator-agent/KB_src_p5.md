@@ -37,7 +37,7 @@ Previous: [KB_src_p4.md](KB_src_p4.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `jdce_install` (function, line 183) `int jdce_install(JSContext *ctx)`
+  - `jdce_install` (function, line 190) `int jdce_install(JSContext *ctx)`
 - Depends on: `src/js_custom_elements.h`
 
 ## src/js_custom_elements.h
@@ -124,26 +124,26 @@ Previous: [KB_src_p4.md](KB_src_p4.md)
                             in...`
   - `jd_is_mutator` (function, line 603) `static int jd_is_mutator(const char *name)`
   - `jd_freeze_mutators` (function, line 609) `static int jd_freeze_mutators(JSContext *jsctx)`
-  - `attrNames` (function, line 680) `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
+  - `attrNames` (function, line 686) `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
      * a missing '...`
-  - `js_env` (function, line 1393) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+  - `js_env` (function, line 1409) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
-  - `jd_install` (function, line 1928) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-  - `jd_flush_custom_elements` (function, line 2010) `void jd_flush_custom_elements(js_context *ctx)`
-  - `fails` (function, line 2024) `* cap is reached or an allocation fails (caller stops), else 0. */
+  - `jd_install` (function, line 1944) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+  - `jd_flush_custom_elements` (function, line 2026) `void jd_flush_custom_elements(js_context *ctx)`
+  - `fails` (function, line 2040) `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-  - `jd_install_console` (function, line 2138) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-  - `jd_set_cookies` (function, line 2175) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-  - `jd_get_cookies` (function, line 2195) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-  - `jd_set_computed` (function, line 2218) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-  - `jd_set_geometry` (function, line 2229) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+  - `jd_install_console` (function, line 2154) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+  - `jd_set_cookies` (function, line 2191) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+  - `jd_get_cookies` (function, line 2211) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+  - `jd_set_computed` (function, line 2234) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+  - `jd_set_geometry` (function, line 2245) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
   - `table` (function, line 639) `* a table (dom.viewport() non-null);`
-  - `scripts` (function, line 852) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
-  - `enough` (function, line 1025) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-  - `ms` (function, line 1196) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-  - `empty` (function, line 1385) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-  - `geometry` (function, line 1387) `* constant geometry (zero real leak);`
-  - `size` (function, line 1390) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
+  - `scripts` (function, line 866) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
+  - `enough` (function, line 1039) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
+  - `ms` (function, line 1210) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+  - `empty` (function, line 1401) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+  - `geometry` (function, line 1403) `* constant geometry (zero real leak);`
+  - `size` (function, line 1406) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
   - `_GNU_SOURCE` (macro, line 10) `#define _GNU_SOURCE`
   - `JD_COMPUTED_VALUE_MAX` (macro, line 412) `#define JD_COMPUTED_VALUE_MAX`
   - `JD_QSA_INLINE` (macro, line 475) `#define JD_QSA_INLINE`
