@@ -3,6 +3,12 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_pseudo_content_none_parses_empty` | function | `tests/test_css.c:2041` | `static void test_pseudo_content_none_parses_empty(void **state)` |
+| `test_pseudo_does_not_claim_cascade_slot` | function | `tests/test_css.c:2219` | `static void test_pseudo_does_not_claim_cascade_slot(void **state)` |
+| `test_pseudo_element_style` | function | `tests/test_css.c:1273` | `static void test_pseudo_element_style(void **state)` |
+| `test_pseudo_empty` | function | `tests/test_css.c:2320` | `static void test_pseudo_empty(void **state)` |
+| `test_pseudo_geometry_does_not_leak_to_element` | function | `tests/test_css.c:2163` | `static void test_pseudo_geometry_does_not_leak_to_element(void **state)` |
+| `test_pseudo_lang` | function | `tests/test_css.c:2357` | `static void test_pseudo_lang(void **state)` |
 | `test_pseudo_link` | function | `tests/test_css.c:1628` | `static void test_pseudo_link(void **state)` |
 | `test_pseudo_never_match_keeps_group` | function | `tests/test_css.c:1646` | `static void test_pseudo_never_match_keeps_group(void **state)` |
 | `test_pseudo_nth_child` | function | `tests/test_css.c:1704` | `static void test_pseudo_nth_child(void **state)` |
@@ -490,11 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `main` | function | `tests/test_freebug.c:228` | `int main(void)` |
 | `test_count_cap_fails_closed` | function | `tests/test_freebug.c:59` | `static void test_count_cap_fails_closed(void **state)` |
 | `test_empty_and_null_text` | function | `tests/test_freebug.c:46` | `static void test_empty_and_null_text(void **state)` |
-| `test_entry_truncated_not_dropped` | function | `tests/test_freebug.c:75` | `static void test_entry_truncated_not_dropped(void **state)` |
-| `test_free_idempotent` | function | `tests/test_freebug.c:161` | `static void test_free_idempotent(void **state)` |
-| `test_level_clamped` | function | `tests/test_freebug.c:118` | `static void test_level_clamped(void **state)` |
-| `test_level_name` | function | `tests/test_freebug.c:129` | `static void test_level_name(void **state)` |
-| `test_push_and_read` | function | `tests/test_freebug.c:21` | `static void test_push_and_read(void **state)` |
-| `test_push_loc_file_truncated` | function | `tests/test_freebug.c:214` | `static void test_push_loc_file_truncated(void **state)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

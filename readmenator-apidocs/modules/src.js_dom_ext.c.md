@@ -32,7 +32,7 @@
 
 ### `registration`
 
-`function` | [src/js_dom_ext.c:385](../../src/js_dom_ext.c#L385)
+`function` | [src/js_dom_ext.c:439](../../src/js_dom_ext.c#L439)
 
 ```c
 * registration (options, attributeFilter, subtree) and delivered in one microtask. An * observer...
@@ -46,7 +46,7 @@
 
 ### `jdx_install`
 
-`function` | [src/js_dom_ext.c:1209](../../src/js_dom_ext.c#L1209)
+`function` | [src/js_dom_ext.c:1286](../../src/js_dom_ext.c#L1286)
 
 ```c
 int jdx_install(JSContext *ctx)
@@ -66,7 +66,7 @@ int jdx_install(JSContext *ctx)
 
 ### `jd_install_repl_api`
 
-`function` | [src/js_dom_ext.c:1218](../../src/js_dom_ext.c#L1218)
+`function` | [src/js_dom_ext.c:1295](../../src/js_dom_ext.c#L1295)
 
 ```c
 jd_status jd_install_repl_api(js_context *ctx)
@@ -86,7 +86,7 @@ jd_status jd_install_repl_api(js_context *ctx)
 
 ### `jd_set_repl_css`
 
-`function` | [src/js_dom_ext.c:1226](../../src/js_dom_ext.c#L1226)
+`function` | [src/js_dom_ext.c:1303](../../src/js_dom_ext.c#L1303)
 
 ```c
 jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)
@@ -108,7 +108,7 @@ jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)
 
 ### `jd_install_geolocation`
 
-`function` | [src/js_dom_ext.c:1239](../../src/js_dom_ext.c#L1239)
+`function` | [src/js_dom_ext.c:1316](../../src/js_dom_ext.c#L1316)
 
 ```c
 jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)
@@ -133,7 +133,7 @@ jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double
 
 ### `jd_install_indexeddb`
 
-`function` | [src/js_dom_ext.c:1258](../../src/js_dom_ext.c#L1258)
+`function` | [src/js_dom_ext.c:1335](../../src/js_dom_ext.c#L1335)
 
 ```c
 jd_status jd_install_indexeddb(js_context *ctx)

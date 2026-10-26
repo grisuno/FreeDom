@@ -3,6 +3,12 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `wh_send` | function | `src/ws_hub.c:221` | `int wh_send(wh_hub *h, int id, const void *data, size_t len, int binary)` |
+| `ZM_LADDER_N` | macro | `src/zoom.c:12` | `#define ZM_LADDER_N` |
+| `zm_apply` | function | `src/zoom.c:44` | `double zm_apply(double base_px, int pct)` |
+| `zm_clamp` | function | `src/zoom.c:14` | `int zm_clamp(int pct)` |
+| `zm_reset` | function | `src/zoom.c:36` | `int zm_reset(void)` |
+| `zm_scale` | function | `src/zoom.c:40` | `double zm_scale(int pct)` |
 | `zm_zoom_in` | function | `src/zoom.c:20` | `int zm_zoom_in(int pct)` |
 | `zm_zoom_out` | function | `src/zoom.c:28` | `int zm_zoom_out(int pct)` |
 | `CHECK` | macro | `tests/itest_secure_fetch.c:16` | `#define CHECK(cond, msg)` |
@@ -490,11 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_pseudo_content_empty_without_pseudo` | function | `tests/test_css.c:2145` | `static void test_pseudo_content_empty_without_pseudo(void **state)` |
 | `test_pseudo_content_escape_eats_terminator_space` | function | `tests/test_css.c:1894` | `static void test_pseudo_content_escape_eats_terminator_space(void **state)` |
 | `test_pseudo_content_escapes_fail_closed` | function | `tests/test_css.c:2010` | `static void test_pseudo_content_escapes_fail_closed(void **state)` |
-| `test_pseudo_content_none_parses_empty` | function | `tests/test_css.c:2041` | `static void test_pseudo_content_none_parses_empty(void **state)` |
-| `test_pseudo_does_not_claim_cascade_slot` | function | `tests/test_css.c:2219` | `static void test_pseudo_does_not_claim_cascade_slot(void **state)` |
-| `test_pseudo_element_style` | function | `tests/test_css.c:1273` | `static void test_pseudo_element_style(void **state)` |
-| `test_pseudo_empty` | function | `tests/test_css.c:2320` | `static void test_pseudo_empty(void **state)` |
-| `test_pseudo_geometry_does_not_leak_to_element` | function | `tests/test_css.c:2163` | `static void test_pseudo_geometry_does_not_leak_to_element(void **state)` |
-| `test_pseudo_lang` | function | `tests/test_css.c:2357` | `static void test_pseudo_lang(void **state)` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

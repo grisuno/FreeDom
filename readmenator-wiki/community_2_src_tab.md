@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 45 file(s) rooted at `src` with dominant language c (cohesion 0.69). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (247 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
+This community groups 45 file(s) rooted at `src` with dominant language c (cohesion 0.69). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (253 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
 
 ## Files
 
@@ -39,7 +39,7 @@ This community groups 45 file(s) rooted at `src` with dominant language c (cohes
 | `tests/test_dom.c` | c | testing | 44 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
-| `tests/test_js_dom.c` | c | testing | 247 | no |
+| `tests/test_js_dom.c` | c | testing | 253 | no |
 | `tests/test_js_env.c` | c | testing | 28 | no |
 | `tests/test_js_geom.c` | c | testing | 11 | no |
 

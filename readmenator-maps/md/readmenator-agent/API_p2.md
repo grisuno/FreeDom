@@ -340,161 +340,161 @@ static void oof_s...`
 - `select_box_width` (function) `gui/browser_ui.c:10195` `static double select_box_width(double content_w)`
 - `button_box_width` (function) `gui/browser_ui.c:10200` `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
               ...` -- int r = defer_root_of(L, bid); return (only_root < 0) ?
-- `rd_build` (function) `gui/browser_ui.c:10630` `* rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr...`
-- `blit_image_box` (function) `gui/browser_ui.c:10645` `static void blit_image_box(cairo_t *cr, browser_window *w, const rd_block *blk,
+- `rd_build` (function) `gui/browser_ui.c:10632` `* rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr...`
+- `blit_image_box` (function) `gui/browser_ui.c:10647` `static void blit_image_box(cairo_t *cr, browser_window *w, const rd_block *blk,
                  ...` -- Blits a decoded image into the (x, y, dw, dh) rect with the block's object-fit, scaling filter and clipping.
-- `v_read` (function) `gui/browser_ui.c:10836` `static int v_read(int fd, void *buf, size_t n)` -- EINTR/EAGAIN-safe pipe read — loops until all bytes arrive or hard error.
-- `dies` (function) `gui/browser_ui.c:10864` `* child dies (exec failed, device busy, daemon absent) is detected on the
+- `v_read` (function) `gui/browser_ui.c:10838` `static int v_read(int fd, void *buf, size_t n)` -- EINTR/EAGAIN-safe pipe read — loops until all bytes arrive or hard error.
+- `dies` (function) `gui/browser_ui.c:10866` `* child dies (exec failed, device busy, daemon absent) is detected on the
  * next PCM write (EPIP...`
-- `audio_spawn` (function) `gui/browser_ui.c:10873` `static void audio_spawn(browser_window *w, int rate, int channels)`
-- `descriptors` (function) `gui/browser_ui.c:10887` `* descriptors (especially the Wayland display fd) so the sink does * not corrupt the Wayland protocol connection —...`
-- `audio_mark_dead` (function) `gui/browser_ui.c:10927` `static void audio_mark_dead(browser_window *w)` -- Reaps a dead sink child and advances the rotation so the next spawn tries * the next player.
-- `audio_write` (function) `gui/browser_ui.c:10944` `static void audio_write(browser_window *w, const uint8_t *data, size_t len)` -- Best-effort PCM write: whatever does not fit in the pipe is dropped (with PTS pacing the producer runs at ~real...
-- `audio_stop` (function) `gui/browser_ui.c:10959` `static void audio_stop(browser_window *w)`
-- `again` (function) `gui/browser_ui.c:10968` `* before a respawn opens it again (the WNOHANG reap left the old * process alive long enough to make the new one...`
-- `video_stop` (function) `gui/browser_ui.c:10979` `static void video_stop(browser_window *w)`
-- `video_fetch` (function) `gui/browser_ui.c:11157` `static sf_status video_fetch(const char *url, browser_window *w,
+- `audio_spawn` (function) `gui/browser_ui.c:10875` `static void audio_spawn(browser_window *w, int rate, int channels)`
+- `descriptors` (function) `gui/browser_ui.c:10889` `* descriptors (especially the Wayland display fd) so the sink does * not corrupt the Wayland protocol connection —...`
+- `audio_mark_dead` (function) `gui/browser_ui.c:10929` `static void audio_mark_dead(browser_window *w)` -- Reaps a dead sink child and advances the rotation so the next spawn tries * the next player.
+- `audio_write` (function) `gui/browser_ui.c:10946` `static void audio_write(browser_window *w, const uint8_t *data, size_t len)` -- Best-effort PCM write: whatever does not fit in the pipe is dropped (with PTS pacing the producer runs at ~real...
+- `audio_stop` (function) `gui/browser_ui.c:10961` `static void audio_stop(browser_window *w)`
+- `again` (function) `gui/browser_ui.c:10970` `* before a respawn opens it again (the WNOHANG reap left the old * process alive long enough to make the new one...`
+- `video_stop` (function) `gui/browser_ui.c:10981` `static void video_stop(browser_window *w)`
+- `video_fetch` (function) `gui/browser_ui.c:11159` `static sf_status video_fetch(const char *url, browser_window *w,
                               sf...` -- Fetches a single resource (m3u8 or TS segment) under the full policy gates: impersonation, routing, auth...
-- `video_play` (function) `gui/browser_ui.c:11174` `static int video_play(browser_window *w, const char *m3u8_url)` -- Starts video playback from an m3u8 playlist URL.
-- `blocking` (function) `gui/browser_ui.c:11255` `* are blocking (POLLIN guaranteed data is available). */ int flags = fcntl(out_fd, F_GETFL, 0);`
-- `video_stop` (function) `gui/browser_ui.c:11276` `* each segment loop so a video_stop() in the main thread (which sets it to 0
+- `video_play` (function) `gui/browser_ui.c:11176` `static int video_play(browser_window *w, const char *m3u8_url)` -- Starts video playback from an m3u8 playlist URL.
+- `blocking` (function) `gui/browser_ui.c:11257` `* are blocking (POLLIN guaranteed data is available). */ int flags = fcntl(out_fd, F_GETFL, 0);`
+- `video_stop` (function) `gui/browser_ui.c:11278` `* each segment loop so a video_stop() in the main thread (which sets it to 0
  * then calls pthrea...`
-- `paint_video_row` (function) `gui/browser_ui.c:11330` `static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
+- `paint_video_row` (function) `gui/browser_ui.c:11332` `static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
                 ...`
-- `row_line_slack` (function) `gui/browser_ui.c:11442` `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)` -- Free space left on a row's LINE BOX after its last fragment, or a negative/zero value when the line is full.
-- `row_align_offset` (function) `gui/browser_ui.c:11454` `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` -- Horizontal shift a row's text gets from author text-align (center/right): the slack between the available width and...
-- `upstream` (function) `gui/browser_ui.c:11482` `* upstream (see spec/css.md). */
+- `row_line_slack` (function) `gui/browser_ui.c:11444` `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)` -- Free space left on a row's LINE BOX after its last fragment, or a negative/zero value when the line is full.
+- `row_align_offset` (function) `gui/browser_ui.c:11456` `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` -- Horizontal shift a row's text gets from author text-align (center/right): the slack between the available width and...
+- `upstream` (function) `gui/browser_ui.c:11484` `* upstream (see spec/css.md). */
 static void box_path4(cairo_t *cr, double x, double y, double w,...`
-- `box_path` (function) `gui/browser_ui.c:11510` `static void box_path(cairo_t *cr, double x, double y, double w, double h, double r)` -- One radius for all four corners: the shape every non-border-radius caller * (shadow blur, backdrop clip) still wants.
-- `paint_box_shadow_layer` (function) `gui/browser_ui.c:11521` `static void paint_box_shadow_layer(cairo_t *cr, double x, double y, double w, double h,
+- `box_path` (function) `gui/browser_ui.c:11512` `static void box_path(cairo_t *cr, double x, double y, double w, double h, double r)` -- One radius for all four corners: the shape every non-border-radius caller * (shadow blur, backdrop clip) still wants.
+- `paint_box_shadow_layer` (function) `gui/browser_ui.c:11523` `static void paint_box_shadow_layer(cairo_t *cr, double x, double y, double w, double h,
          ...` -- One box-shadow layer {dx, dy, blur, spread, color, inset} around the border box (x, y, w, h, corner radius r).
-- `rect` (function) `gui/browser_ui.c:11608` `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops...`
-- `text` (function) `gui/browser_ui.c:11612` `* fill and gradient text (2026-07-19). */
+- `rect` (function) `gui/browser_ui.c:11610` `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops...`
+- `text` (function) `gui/browser_ui.c:11614` `* fill and gradient text (2026-07-19). */
 static cairo_pattern_t *bui_linear_grad(double x, doubl...`
-- `grad_stop` (function) `gui/browser_ui.c:11639` `static ui_rgb grad_stop(const int *cols, int nst, int k, double *alpha)` -- Stop k of a gradient (spec/css.md, stop alpha): its colour and opacity.
-- `bui_grad_color_at` (function) `gui/browser_ui.c:11654` `static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
+- `grad_stop` (function) `gui/browser_ui.c:11641` `static ui_rgb grad_stop(const int *cols, int nst, int k, double *alpha)` -- Stop k of a gradient (spec/css.md, stop alpha): its colour and opacity.
+- `bui_grad_color_at` (function) `gui/browser_ui.c:11656` `static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
                    ...` -- Interpolated gradient color at fraction t (0..1) of the stop run.
-- `spaced` (function) `gui/browser_ui.c:11687` `* or evenly spaced (bui_grad_color_at). */
+- `spaced` (function) `gui/browser_ui.c:11689` `* or evenly spaced (bui_grad_color_at). */
 static void bui_paint_conic(cairo_t *cr, double x, dou...`
-- `paint_bg_layer` (function) `gui/browser_ui.c:11720` `static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
+- `paint_bg_layer` (function) `gui/browser_ui.c:11722` `static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
                ...` -- Paints one background-image layer into the box rect (x,y,w,h) with `radius_c` corners.
-- `paint_gradient_fill` (function) `gui/browser_ui.c:11766` `static void paint_gradient_fill(cairo_t *cr, const rc_box *bx, double x, double y,
+- `paint_gradient_fill` (function) `gui/browser_ui.c:11768` `static void paint_gradient_fill(cairo_t *cr, const rc_box *bx, double x, double y,
               ...` -- Fills (x,y,w,h) with the box's gradient (conic, radial or linear), clipped to the rounded * path.
-- `paint_gradient_tiled` (function) `gui/browser_ui.c:11813` `static void paint_gradient_tiled(cairo_t *cr, const rc_box *bx, double x, double y,
+- `paint_gradient_tiled` (function) `gui/browser_ui.c:11815` `static void paint_gradient_tiled(cairo_t *cr, const rc_box *bx, double x, double y,
              ...` -- A gradient with an explicit px background-size repeats as a tile (`radial-gradient(circle, #8a8a934d .8px, #0000...
-- `paint_box_decoration` (function) `gui/browser_ui.c:11840` `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
+- `paint_box_decoration` (function) `gui/browser_ui.c:11842` `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
            ...`
-- `layer` (function) `gui/browser_ui.c:11917` `* first layer (CSS multi-background: the first declared URL is the topmost) * and OVER bg_rgb/gradient, UNDER the...`
-- `widths` (function) `gui/browser_ui.c:11965` `* the outer minus the adjacent border widths (CSS Backgrounds 3 5.2). The straight
+- `layer` (function) `gui/browser_ui.c:11919` `* first layer (CSS multi-background: the first declared URL is the topmost) * and OVER bg_rgb/gradient, UNDER the...`
+- `widths` (function) `gui/browser_ui.c:11967` `* the outer minus the adjacent border widths (CSS Backgrounds 3 5.2). The straight
      * per-sid...`
-- `cairo_set_dash` (function) `gui/browser_ui.c:12001` `cairo_set_dash(cr, (double[])`
-- `cairo_set_dash` (function) `gui/browser_ui.c:12004` `cairo_set_dash(cr, (double[])`
-- `cairo_set_dash` (function) `gui/browser_ui.c:12050` `cairo_set_dash(cr, (double[])`
-- `cairo_set_dash` (function) `gui/browser_ui.c:12053` `cairo_set_dash(cr, (double[])`
-- `convention` (function) `gui/browser_ui.c:12073` `* on the 3D bevel convention (light top/left, dark right/bottom). */ int is_3d = (style == CSS_BST_GROOVE || style...`
-- `set_rgb` (function) `gui/browser_ui.c:12087` `set_rgb(cr, (ui_rgb)`
-- `cairo_set_dash` (function) `gui/browser_ui.c:12111` `cairo_set_dash(cr, (double[])`
-- `cairo_set_dash` (function) `gui/browser_ui.c:12114` `cairo_set_dash(cr, (double[])`
-- `paint_deco_line` (function) `gui/browser_ui.c:12172` `static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
+- `cairo_set_dash` (function) `gui/browser_ui.c:12003` `cairo_set_dash(cr, (double[])`
+- `cairo_set_dash` (function) `gui/browser_ui.c:12006` `cairo_set_dash(cr, (double[])`
+- `cairo_set_dash` (function) `gui/browser_ui.c:12052` `cairo_set_dash(cr, (double[])`
+- `cairo_set_dash` (function) `gui/browser_ui.c:12055` `cairo_set_dash(cr, (double[])`
+- `convention` (function) `gui/browser_ui.c:12075` `* on the 3D bevel convention (light top/left, dark right/bottom). */ int is_3d = (style == CSS_BST_GROOVE || style...`
+- `set_rgb` (function) `gui/browser_ui.c:12089` `set_rgb(cr, (ui_rgb)`
+- `cairo_set_dash` (function) `gui/browser_ui.c:12113` `cairo_set_dash(cr, (double[])`
+- `cairo_set_dash` (function) `gui/browser_ui.c:12116` `cairo_set_dash(cr, (double[])`
+- `paint_deco_line` (function) `gui/browser_ui.c:12174` `static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
                        ...` -- Paints one text-decoration line at a given y.
-- `cairo_set_dash` (function) `gui/browser_ui.c:12206` `cairo_set_dash(cr, (double[])`
 - `cairo_set_dash` (function) `gui/browser_ui.c:12208` `cairo_set_dash(cr, (double[])`
-- `row_owner_block_id` (function) `gui/browser_ui.c:12223` `static int row_owner_block_id(const rc_layout *L, const rc_row *r);` -- Paints one laid-out row at vertical position ry.
-- `paint_svg_at` (function) `gui/browser_ui.c:12228` `static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
+- `cairo_set_dash` (function) `gui/browser_ui.c:12210` `cairo_set_dash(cr, (double[])`
+- `row_owner_block_id` (function) `gui/browser_ui.c:12225` `static int row_owner_block_id(const rc_layout *L, const rc_row *r);` -- Paints one laid-out row at vertical position ry.
+- `paint_svg_at` (function) `gui/browser_ui.c:12230` `static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
                          doub...` -- Draws one SVG block into an arbitrary rect.
-- `replaced_current_color` (function) `gui/browser_ui.c:12248` `static int replaced_current_color(const browser_window *w, const rd_block *blk)` -- Resolves currentColor for a replaced element: the run's own author colour when it has one, else the theme's text...
-- `paint_inline_replaced` (function) `gui/browser_ui.c:12257` `static void paint_inline_replaced(cairo_t *cr, browser_window *w,
+- `replaced_current_color` (function) `gui/browser_ui.c:12250` `static int replaced_current_color(const browser_window *w, const rd_block *blk)` -- Resolves currentColor for a replaced element: the run's own author colour when it has one, else the theme's text...
+- `paint_inline_replaced` (function) `gui/browser_ui.c:12259` `static void paint_inline_replaced(cairo_t *cr, browser_window *w,
                                ...` -- Resolves currentColor for a replaced element: the run's own author colour when it has one, else the theme's text...
-- `exactly` (function) `gui/browser_ui.c:12269` `* the resolved size exactly (like the SVG path above): routing through * paint_image_row would re-resolve a % width...`
-- `paint_content_row` (function) `gui/browser_ui.c:12302` `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
+- `exactly` (function) `gui/browser_ui.c:12271` `* the resolved size exactly (like the SVG path above): routing through * paint_image_row would re-resolve a % width...`
+- `paint_content_row` (function) `gui/browser_ui.c:12304` `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                ...`
-- `paint_content_row_ex` (function) `gui/browser_ui.c:12309` `static void paint_content_row_ex(cairo_t *cr, browser_window *w, const rc_layout *L,
+- `paint_content_row_ex` (function) `gui/browser_ui.c:12311` `static void paint_content_row_ex(cairo_t *cr, browser_window *w, const rc_layout *L,
             ...`
-- `bg` (function) `gui/browser_ui.c:12367` `* its own DISTINCT bg (an inline span highlight) still paints. */ int own_bid = row_owner_block_id(L, r);`
-- `ov_box_clips` (function) `gui/browser_ui.c:12520` `static int ov_box_clips(const pv_box_def *d)` -- Returns nonzero if a box clips content on either axis (single predicate with * the layout path's close_top_box...
-- `ov_collect_chain` (function) `gui/browser_ui.c:12527` `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)` -- Walks the ancestor chain of block_id and collects overflow:hidden box IDs * into out[] (outermost first).
-- `ov_box_bounds` (function) `gui/browser_ui.c:12548` `static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out)` -- Fills *out (x/top/w/h only) with the UNION of every rc_box fragment carrying block_id bid, returning 1 if any exists.
-- `ov_content_rect` (function) `gui/browser_ui.c:12574` `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
+- `bg` (function) `gui/browser_ui.c:12369` `* its own DISTINCT bg (an inline span highlight) still paints. */ int own_bid = row_owner_block_id(L, r);`
+- `ov_box_clips` (function) `gui/browser_ui.c:12522` `static int ov_box_clips(const pv_box_def *d)` -- Returns nonzero if a box clips content on either axis (single predicate with * the layout path's close_top_box...
+- `ov_collect_chain` (function) `gui/browser_ui.c:12529` `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)` -- Walks the ancestor chain of block_id and collects overflow:hidden box IDs * into out[] (outermost first).
+- `ov_box_bounds` (function) `gui/browser_ui.c:12550` `static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out)` -- Fills *out (x/top/w/h only) with the UNION of every rc_box fragment carrying block_id bid, returning 1 if any exists.
+- `ov_content_rect` (function) `gui/browser_ui.c:12576` `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
                             do...` -- Computes the PADDING-box rect (in page coords: y, x, w, h) of a box: the region overflow clips to (CSS Overflow 3...
-- `rows` (function) `gui/browser_ui.c:12589` `* RC_IMAGE rows (see its declaration);`
-- `fragment` (function) `gui/browser_ui.c:12590` `* first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
+- `rows` (function) `gui/browser_ui.c:12591` `* RC_IMAGE rows (see its declaration);`
+- `fragment` (function) `gui/browser_ui.c:12592` `* first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
  * blk->block_id alo...`
-- `box_forms_stacking_context` (function) `gui/browser_ui.c:12645` `static int box_forms_stacking_context(const pv_box_def *def)` -- Does this box need its own offscreen compositing group?
-- `bui_skew_tan` (function) `gui/browser_ui.c:12689` `static double bui_skew_tan(int deg)` -- transform (M1.2 translate; M1.2b scale/rotate; M1.2c skew + origin): builds the box's full 2D affine transform...
-- `box_transform_matrix` (function) `gui/browser_ui.c:12696` `static int box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
+- `box_forms_stacking_context` (function) `gui/browser_ui.c:12647` `static int box_forms_stacking_context(const pv_box_def *def)` -- Does this box need its own offscreen compositing group?
+- `bui_skew_tan` (function) `gui/browser_ui.c:12691` `static double bui_skew_tan(int deg)` -- transform (M1.2 translate; M1.2b scale/rotate; M1.2c skew + origin): builds the box's full 2D affine transform...
+- `box_transform_matrix` (function) `gui/browser_ui.c:12698` `static int box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
               ...`
-- `bui_blend_operator` (function) `gui/browser_ui.c:12824` `static cairo_operator_t bui_blend_operator(int mix_blend)` -- Maps CSS mix-blend-mode to the Cairo compositing operator used when a box's offscreen group is blended back over its...
-- `bui_gaussian_blur_surface` (function) `gui/browser_ui.c:12850` `static void bui_gaussian_blur_surface(cairo_surface_t *surf, double sigma)` -- Gaussian blur of a premultiplied ARGB32 surface, standard deviation `sigma` px, in place (CSS Filter Effects 1...
-- `bui_paint_backdrop_blur` (function) `gui/browser_ui.c:12893` `static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
+- `bui_blend_operator` (function) `gui/browser_ui.c:12826` `static cairo_operator_t bui_blend_operator(int mix_blend)` -- Maps CSS mix-blend-mode to the Cairo compositing operator used when a box's offscreen group is blended back over its...
+- `bui_gaussian_blur_surface` (function) `gui/browser_ui.c:12852` `static void bui_gaussian_blur_surface(cairo_surface_t *surf, double sigma)` -- Gaussian blur of a premultiplied ARGB32 surface, standard deviation `sigma` px, in place (CSS Filter Effects 1...
+- `bui_paint_backdrop_blur` (function) `gui/browser_ui.c:12895` `static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
                          ...` -- backdrop-filter: blur (2026-07-19, glassmorphism v1).
-- `bui_mask_ref_rect` (function) `gui/browser_ui.c:12962` `static int bui_mask_ref_rect(const rc_layout *L, int ref, rc_box *out)` -- The layout rect (x, y, w, h) and rc_box of box `ref`, found among the in-flow boxes or the * positioned ones; 0 when...
-- `bui_build_mask` (function) `gui/browser_ui.c:12978` `static cairo_surface_t *bui_build_mask(const pv_box_def *def, const rc_box *bx_in,
+- `bui_mask_ref_rect` (function) `gui/browser_ui.c:12964` `static int bui_mask_ref_rect(const rc_layout *L, int ref, rc_box *out)` -- The layout rect (x, y, w, h) and rc_box of box `ref`, found among the in-flow boxes or the * positioned ones; 0 when...
+- `bui_build_mask` (function) `gui/browser_ui.c:12980` `static cairo_surface_t *bui_build_mask(const pv_box_def *def, const rc_box *bx_in,
               ...`
-- `bui_pop_group_composite` (function) `gui/browser_ui.c:13084` `static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms,
+- `bui_pop_group_composite` (function) `gui/browser_ui.c:13086` `static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms,
     ...` -- Composites the currently-pushed group back onto cr using def's opacity/mix-blend (the group must already be open via...
-- `made` (function) `gui/browser_ui.c:13147` `* its zero channels made (255,255,255,alpha 0) -- an invalid * premultiplied value Cairo composites as ADDITIVE...`
-- `the` (function) `gui/browser_ui.c:13251` `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset...`
-- `limits` (function) `gui/browser_ui.c:13336` `* documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
+- `made` (function) `gui/browser_ui.c:13149` `* its zero channels made (255,255,255,alpha 0) -- an invalid * premultiplied value Cairo composites as ADDITIVE...`
+- `the` (function) `gui/browser_ui.c:13253` `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset...`
+- `limits` (function) `gui/browser_ui.c:13338` `* documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
  * grouped this w...`
-- `paint_box_decoration_grouped` (function) `gui/browser_ui.c:13405` `static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
+- `paint_box_decoration_grouped` (function) `gui/browser_ui.c:13407` `static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                         ...`
-- `fill` (function) `gui/browser_ui.c:13435` `* fill (paint_content_row's r->bg_rgb branch) cascades the SAME author * background-color as the box, but paints in...`
-- `paint_box_and_direct_rows` (function) `gui/browser_ui.c:13446` `static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
+- `fill` (function) `gui/browser_ui.c:13437` `* fill (paint_content_row's r->bg_rgb branch) cascades the SAME author * background-color as the box, but paints in...`
+- `paint_box_and_direct_rows` (function) `gui/browser_ui.c:13448` `static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
        ...` -- (blk->block_id match), together, when the box forms a stacking context -- so a translucent/blended box's background...
-- `overflow` (function) `gui/browser_ui.c:13495` `* adding two of them in int was signed overflow (UB, found by UBSan). */ double ox = left + bx->x +...`
-- `bui_pop_group_composite` (function) `gui/browser_ui.c:13522` `bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
+- `overflow` (function) `gui/browser_ui.c:13497` `* adding two of them in int was signed overflow (UB, found by UBSan). */ double ox = left + bx->x +...`
+- `bui_pop_group_composite` (function) `gui/browser_ui.c:13524` `bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
              ...`
-- `compositing` (function) `gui/browser_ui.c:13538` `* * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context * (box_forms_stacking_context...`
-- `paint_oof_sub` (function) `gui/browser_ui.c:13576` `static void paint_oof_sub(cairo_t *cr, browser_window *w, const rc_oof_sub *sub,
+- `compositing` (function) `gui/browser_ui.c:13540` `* * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context * (box_forms_stacking_context...`
+- `paint_oof_sub` (function) `gui/browser_ui.c:13578` `static void paint_oof_sub(cairo_t *cr, browser_window *w, const rc_oof_sub *sub,
                 ...` -- Stage 2f: paints one out-of-flow subtree's own layout at its translation.
-- `paint_positioned_one` (function) `gui/browser_ui.c:13614` `static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
+- `paint_positioned_one` (function) `gui/browser_ui.c:13616` `static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
             ...`
-- `box` (function) `gui/browser_ui.c:13735` `* content belongs to that box (painted by its own positioned entry). */
+- `box` (function) `gui/browser_ui.c:13737` `* content belongs to that box (painted by its own positioned entry). */
     if (sub == NULL)`
-- `paint_owned_negz` (function) `gui/browser_ui.c:13840` `static void paint_owned_negz(cairo_t *cr, browser_window *w, rc_layout *L, double left,
+- `paint_owned_negz` (function) `gui/browser_ui.c:13842` `static void paint_owned_negz(cairo_t *cr, browser_window *w, rc_layout *L, double left,
          ...` -- Paints the negative-z positioned boxes owned by stacking-context box `owner`, right after * that box's own...
-- `paint_nested_children` (function) `gui/browser_ui.c:13856` `static void paint_nested_children(cairo_t *cr, browser_window *w,
+- `paint_nested_children` (function) `gui/browser_ui.c:13858` `static void paint_nested_children(cairo_t *cr, browser_window *w,
                                ...` -- R6: recursively paints child boxes of `parent_id` that form stacking contexts, inside the parent's already-open...
-- `bui_pop_group_composite` (function) `gui/browser_ui.c:13879` `bui_pop_group_composite(cr, cdef, now_ms() - w->page_load_mono_ms, &L->boxes[j], left, origin,
+- `bui_pop_group_composite` (function) `gui/browser_ui.c:13881` `bui_pop_group_composite(cr, cdef, now_ms() - w->page_load_mono_ms, &L->boxes[j], left, origin,
   ...`
-- `geom_from_layout` (function) `gui/browser_ui.c:13894` `static void geom_from_layout(const rd_doc *doc, const rc_layout *L, double left,
+- `geom_from_layout` (function) `gui/browser_ui.c:13896` `static void geom_from_layout(const rd_doc *doc, const rc_layout *L, double left,
                 ...` -- One rect per element from a final layout, in document coordinates (spec/js_geom.md): every text fragment under its...
-- `publish_geometry` (function) `gui/browser_ui.c:13925` `static void publish_geometry(browser_window *w, const rc_layout *L, double left,
+- `publish_geometry` (function) `gui/browser_ui.c:13927` `static void publish_geometry(browser_window *w, const rc_layout *L, double left,
                 ...` -- Hands the window's final layout to a TRUSTED page's JS.
-- `defer_root_z` (function) `gui/browser_ui.c:13987` `static int defer_root_z(const rd_doc *doc, size_t root)` -- if (!bx->canvas_bg || bx->bg_rgb < 0 || bx->canvas_done) continue; double a = (bx->bg_alpha != PV_LEN_UNSET) ?
-- `defer_root_before` (function) `gui/browser_ui.c:13993` `static int defer_root_before(const rd_doc *doc, const rc_layout *L, size_t a, size_t b)` -- cairo_paint(cr); cairo_restore(cr); bx->canvas_done = 1; return; } } /* The z-index a deferred root paints at (auto...
-- `paint_positioned_layer` (function) `gui/browser_ui.c:13999` `static void paint_positioned_layer(cairo_t *cr, browser_window *w, const ui_theme *th,
+- `defer_root_z` (function) `gui/browser_ui.c:13989` `static int defer_root_z(const rd_doc *doc, size_t root)` -- if (!bx->canvas_bg || bx->bg_rgb < 0 || bx->canvas_done) continue; double a = (bx->bg_alpha != PV_LEN_UNSET) ?
+- `defer_root_before` (function) `gui/browser_ui.c:13995` `static int defer_root_before(const rd_doc *doc, const rc_layout *L, size_t a, size_t b)` -- cairo_paint(cr); cairo_restore(cr); bx->canvas_done = 1; return; } } /* The z-index a deferred root paints at (auto...
+- `paint_positioned_layer` (function) `gui/browser_ui.c:14001` `static void paint_positioned_layer(cairo_t *cr, browser_window *w, const ui_theme *th,
           ...`
-- `paint_screen_inflow` (function) `gui/browser_ui.c:14064` `static void paint_screen_inflow(const screen_flow_ctx *c, int only_root)` -- Paints the in-flow boxes and rows the pass `only_root` serves (see defer_wants): * -1 = everything that is not...
-- `bui_pop_group_composite` (function) `gui/browser_ui.c:14131` `bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
+- `paint_screen_inflow` (function) `gui/browser_ui.c:14066` `static void paint_screen_inflow(const screen_flow_ctx *c, int only_root)` -- Paints the in-flow boxes and rows the pass `only_root` serves (see defer_wants): * -1 = everything that is not...
+- `bui_pop_group_composite` (function) `gui/browser_ui.c:14133` `bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
              ...`
-- `lazy_slot` (function) `gui/browser_ui.c:14185` `static ui_image *lazy_slot(browser_window *w, const char *href, size_t *idx)`
-- `lazy_load_one` (function) `gui/browser_ui.c:14196` `static void lazy_load_one(browser_window *w, ui_image *slot, const rd_block *b)` -- #define UI_LAZY_PER_PASS 16 #define UI_LAZY_PASSES 4 static ui_image *lazy_slot(browser_window *w, const char *href...
-- `once` (function) `gui/browser_ui.c:14251` `* box the layout never placed loads at once (fail open);`
-- `load_lazy_bg_images` (function) `gui/browser_ui.c:14252` `static void load_lazy_bg_images(browser_window *w, const rc_layout *L, double origin,
+- `lazy_slot` (function) `gui/browser_ui.c:14187` `static ui_image *lazy_slot(browser_window *w, const char *href, size_t *idx)`
+- `lazy_load_one` (function) `gui/browser_ui.c:14198` `static void lazy_load_one(browser_window *w, ui_image *slot, const rd_block *b)` -- #define UI_LAZY_PER_PASS 16 #define UI_LAZY_PASSES 4 static ui_image *lazy_slot(browser_window *w, const char *href...
+- `once` (function) `gui/browser_ui.c:14253` `* box the layout never placed loads at once (fail open);`
+- `load_lazy_bg_images` (function) `gui/browser_ui.c:14254` `static void load_lazy_bg_images(browser_window *w, const rc_layout *L, double origin,
            ...` -- Fetches the deferred CSS background-images whose box is near the viewport (spec/lazy_load.md).
-- `paint_screen_deferred` (function) `gui/browser_ui.c:14287` `static void paint_screen_deferred(void *ctx, int root)`
-- `gui_prof_now_ms` (function) `gui/browser_ui.c:14292` `static double gui_prof_now_ms(void)` -- slot->nat_w = twin->nat_w; slot->nat_h = twin->nat_h; continue; } fetch_decode_image(w, w->tab_worker...
-- `gui_prof_log` (function) `gui/browser_ui.c:14297` `static void gui_prof_log(const char *what, double ms)`
-- `paint_structured` (function) `gui/browser_ui.c:14303` `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
+- `paint_screen_deferred` (function) `gui/browser_ui.c:14289` `static void paint_screen_deferred(void *ctx, int root)`
+- `gui_prof_now_ms` (function) `gui/browser_ui.c:14294` `static double gui_prof_now_ms(void)` -- slot->nat_w = twin->nat_w; slot->nat_h = twin->nat_h; continue; } fetch_decode_image(w, w->tab_worker...
+- `gui_prof_log` (function) `gui/browser_ui.c:14299` `static void gui_prof_log(const char *what, double ms)`
+- `paint_structured` (function) `gui/browser_ui.c:14305` `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 ...`
-- `write_doc_pdf` (function) `gui/browser_ui.c:14434` `static long write_doc_pdf(browser_window *w, const char *path)` -- Writes the window's current laid-out document to a vector PDF at `path`, paginated to US Letter.
-- `export_pdf` (function) `gui/browser_ui.c:14543` `static void export_pdf(browser_window *w)`
-- `ui_render_viewport_w` (function) `gui/browser_ui.c:14598` `int ui_render_viewport_w(void)`
-- `paint_png_inflow` (function) `gui/browser_ui.c:14626` `static void paint_png_inflow(const png_flow_ctx *c, int only_root)` -- Paints the in-flow boxes and rows the pass `only_root` serves (see defer_wants): -1 = everything that is not...
-- `paint_png_deferred` (function) `gui/browser_ui.c:14662` `static void paint_png_deferred(void *ctx, int root)`
-- `write_doc_png` (function) `gui/browser_ui.c:14671` `static long write_doc_png(browser_window *w, const char *path)` -- Writes the window's current laid-out document to a single full-height PNG at `path` (the same layout/paint path as...
-- `export_png` (function) `gui/browser_ui.c:14771` `static void export_png(browser_window *w)`
-- `caller` (function) `gui/browser_ui.c:14805` `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
+- `write_doc_pdf` (function) `gui/browser_ui.c:14436` `static long write_doc_pdf(browser_window *w, const char *path)` -- Writes the window's current laid-out document to a vector PDF at `path`, paginated to US Letter.
+- `export_pdf` (function) `gui/browser_ui.c:14545` `static void export_pdf(browser_window *w)`
+- `ui_render_viewport_w` (function) `gui/browser_ui.c:14600` `int ui_render_viewport_w(void)`
+- `paint_png_inflow` (function) `gui/browser_ui.c:14628` `static void paint_png_inflow(const png_flow_ctx *c, int only_root)` -- Paints the in-flow boxes and rows the pass `only_root` serves (see defer_wants): -1 = everything that is not...
+- `paint_png_deferred` (function) `gui/browser_ui.c:14664` `static void paint_png_deferred(void *ctx, int root)`
+- `write_doc_png` (function) `gui/browser_ui.c:14673` `static long write_doc_png(browser_window *w, const char *path)` -- Writes the window's current laid-out document to a single full-height PNG at `path` (the same layout/paint path as...
+- `export_png` (function) `gui/browser_ui.c:14773` `static void export_png(browser_window *w)`
+- `caller` (function) `gui/browser_ui.c:14807` `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
  * out_path ve...`
-- `ui_render_png` (function) `gui/browser_ui.c:14828` `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` -- Headless PNG export (no Wayland; see include/ui.h).
-- `origin` (function) `gui/browser_ui.c:14884` `* top_url is the page origin (https or file://);`
-- `render_doc_images` (function) `gui/browser_ui.c:14888` `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
+- `ui_render_png` (function) `gui/browser_ui.c:14830` `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` -- Headless PNG export (no Wayland; see include/ui.h).
+- `origin` (function) `gui/browser_ui.c:14886` `* top_url is the page origin (https or file://);`
+- `render_doc_images` (function) `gui/browser_ui.c:14890` `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
               ...` -- Headless PNG/PDF export WITH image decoding (see include/ui.h).
-- `ui_render_png_images` (function) `gui/browser_ui.c:14919` `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
+- `ui_render_png_images` (function) `gui/browser_ui.c:14921` `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-- `ui_render_pdf_images` (function) `gui/browser_ui.c:14925` `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
+- `ui_render_pdf_images` (function) `gui/browser_ui.c:14927` `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-- `ui_dump_layout` (function) `gui/browser_ui.c:14940` `ui_status ui_dump_layout(const rd_doc *doc)` -- Headless layout dump: runs the same layout_doc + position_doc pass as the on-screen/PNG renderer and prints the...
+- `ui_dump_layout` (function) `gui/browser_ui.c:14942` `ui_status ui_dump_layout(const rd_doc *doc)` -- Headless layout dump: runs the same layout_doc + position_doc pass as the on-screen/PNG renderer and prints the...
 
 Next: [API_p3.md](API_p3.md)

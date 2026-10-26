@@ -1,6 +1,6 @@
 # GraphRAG Community Reports
 
-Entities: 7957 | Relationships: 13873 | Communities: 10 | Themes: 3 | Text units: 7504
+Entities: 7970 | Relationships: 13886 | Communities: 10 | Themes: 3 | Text units: 7517
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
@@ -98,7 +98,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - `include/dom.h` ranks 2 by PageRank, 17 importers, 30 symbols: dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: * "after this node" and "first" cannot be expressed by an element-only reference).
 - `include/url.h` ranks 3 by PageRank, 16 importers, 14 symbols: url_parts: Components of a validated absolute https URL, sliced for a JS location object.
 - Hotspot `src/tab.c`: 146 symbols, 68 connections (score 0.39).
-- Hotspot `tests/test_js_dom.c`: 247 symbols, 26 connections (score 0.27).
+- Hotspot `tests/test_js_dom.c`: 253 symbols, 26 connections (score 0.27).
 - Dependency cycle: js_dom.h -> js_location.h -> js_dom.h.
 - Dataflow: 2 INFERRED issues (first: UNCHECKED_ALLOC in jd_click_state_new).
 - Key entities: file:tests/test_js_dom.c, file:src/tab.c, file:tests/test_tab.c, file:src/js_dom.c, file:src/js_sandbox.c, file:include/tab.h, file:tests/test_js_sandbox.c, file:tests/test_url.c
@@ -125,8 +125,8 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - `include/render_policy.h` ranks 1 by PageRank, 8 importers, 9 symbols: rdp_caps: Render capabilities for a page.
 - `include/box_style.h` ranks 2 by PageRank, 11 importers, 31 symbols: bx_edges: anything longer fails closed instead of truncating into a wrong match. #define BX_TAG_NAME_MAX 32u typedef enum bx_display { BX_DISPLAY_BLOCK = 0,     /* stacks vertically, takes the available width BX_DISPLAY_INLINE...
 - `include/flex_layout.h` ranks 3 by PageRank, 11 importers, 43 symbols: fx_item: Upper bound on items per flex line / grid columns.
-- Hotspot `src/page_view.c`: 253 symbols, 39 connections (score 0.33).
-- Hotspot `tests/test_page_view.c`: 212 symbols, 22 connections (score 0.23).
+- Hotspot `src/page_view.c`: 255 symbols, 39 connections (score 0.33).
+- Hotspot `tests/test_page_view.c`: 213 symbols, 22 connections (score 0.23).
 - 14 layer violations, e.g. render_doc.c (presentation) -> data_url.h (data_access).
 - Key entities: file:src/page_view.c, file:tests/test_page_view.c, file:include/page_view.h, file:tests/test_flex_layout.c, file:tests/test_box_tree.c, file:tests/test_box_style.c, file:include/flex_layout.h, file:src/box_style.c
 - Rating 1.7/10 = 7 x PageRank share 0.24 + 3 x risk 0.00. Internal imports: 37.
@@ -138,7 +138,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - `include/local_store.h` ranks 1 by PageRank, 8 importers, 11 symbols: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container so ls_open_passphrase can re-derive. ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len...
 - `include/http_cache.h` ranks 2 by PageRank, 3 importers, 19 symbols: hc_parse_http_date: } hc_class; typedef struct hc_meta { char   final_url[HC_URL_MAX]; char   content_type[HC_TYPE_MAX]; char   etag[HC_VAL_MAX]; char   last_modified[HC_VAL_MAX]; char   cache_control[HC_VAL_MAX]; char...
 - `include/pq_seal.h` ranks 3 by PageRank, 3 importers, 8 symbols: pqs_buf_free: DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der is owned * (release with pqs_buf_free). pqs_status pqs_export(const pqs_keys *k, uint8_t **der, size_t *len); pqs_status pqs_import(const...
-- Hotspot `src/local_store.c`: 331 symbols, 10 connections (score 0.25).
+- Hotspot `src/local_store.c`: 335 symbols, 10 connections (score 0.25).
 - Hotspot `src/http_cache.c`: 38 symbols, 20 connections (score 0.11).
 - 3 layer violations, e.g. http_cache.h (presentation) -> local_store.h (data_access).
 - Surprising bridge: css_index.c <-> pq_seal.c (8 hops across communities).

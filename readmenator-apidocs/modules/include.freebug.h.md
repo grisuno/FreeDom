@@ -230,7 +230,7 @@ Idempotent; safe on NULL.
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
 
-*Called by:* [`tab_eval`](src.tab.c.md#tab_eval), [`tab_load_full`](src.tab.c.md#tab_load_full), [`tab_page_free`](src.tab.c.md#tab_page_free)
+*Called by:* [`tab_eval`](src.tab.c.md#tab_eval), [`tab_load_full`](src.tab.c.md#tab_load_full)
 
 ---
 

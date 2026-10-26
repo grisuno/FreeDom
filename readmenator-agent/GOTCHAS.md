@@ -9,7 +9,7 @@ These files have the most connections. Changes here have high blast radius.
 - `src/tab.c` (score: 68.60)
 - `src/freedom.c` (score: 60.80)
 - `src/css.c` (score: 56.70)
-- `src/page_view.c` (score: 55.30)
+- `src/page_view.c` (score: 55.50)
 - `include/html_parse.h` (score: 38.40, imported by 18 files)
 - `include/page_view.h` (score: 37.10, imported by 11 files)
 
@@ -17,8 +17,8 @@ These files have the most connections. Changes here have high blast radius.
 
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
-- `include/css_color.h` -- 13 direct, 53 total dependents
-- `include/css.h` -- 36 direct, 50 total dependents
+- `include/css.h` -- 36 direct, 52 total dependents
+- `include/css_color.h` -- 13 direct, 52 total dependents
 - `include/html_parse.h` -- 18 direct, 40 total dependents
 - `include/dom.h` -- 16 direct, 36 total dependents
 - `include/css_select.h` -- 14 direct, 28 total dependents

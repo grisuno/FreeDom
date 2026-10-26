@@ -9,7 +9,6 @@ graph LR
     tests["tests"]
     include -- "calls into" --> src
     src -- "calls into" --> include
-    src -- "calls into" --> tests
     tests -- "calls into" --> include
     tests -- "calls into" --> src
 ```

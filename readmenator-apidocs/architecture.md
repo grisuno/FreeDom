@@ -21,12 +21,12 @@ flowchart TB
     end
     subgraph lane_1["Tier 2"]
         direction LR
-        n_c6["src: local_store<br/>11 files, 454 symbols<br/>Data access"]:::cycle
+        n_c6["src: local_store<br/>11 files, 458 symbols<br/>Data access"]:::cycle
         n_c3["src: text_shape<br/>29 files, 407 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_2["Tier 3"]
         direction LR
-        n_c4["include: page_view<br/>12 files, 620 symbols<br/>Presentation / entry"]:::cycle
+        n_c4["include: page_view<br/>12 files, 622 symbols<br/>Presentation / entry"]:::cycle
     end
     subgraph lane_3["Tier 4"]
         direction LR
@@ -304,9 +304,9 @@ flowchart LR
     n_gui_browser_ui_c__clear_doc["browser_ui.clear_doc<br/>Releases the structured render of the previou...<br/>browser_ui.c:1374"]:::external
     n_gui_browser_ui_c__free_inputs["browser_ui.free_inputs<br/>are not text-editable -- they are tracked via...<br/>browser_ui.c:1117"]:::external
     n_gui_browser_ui_c__free_images["browser_ui.free_images<br/>static int input_is_editable(int input_type)...<br/>browser_ui.c:1125"]:::external
-    n_include_render_doc_h__rd_free["render_doc.rd_free<br/>Builds the paint-ready document from an inert...<br/>render_doc.h:315"]:::external
+    n_include_render_doc_h__rd_free["render_doc.rd_free<br/>Builds the paint-ready document from an inert...<br/>render_doc.h:316"]:::external
     n_gui_browser_ui_c__set_cache["browser_ui.set_cache<br/>Releases the structured render of the previou...<br/>browser_ui.c:1384"]:::external
-    n_gui_browser_ui_c__gui_quiesce["browser_ui.gui_quiesce<br/>browser_ui.c:15466"]:::external
+    n_gui_browser_ui_c__gui_quiesce["browser_ui.gui_quiesce<br/>browser_ui.c:15468"]:::external
     n_include_browser_h__browser_set_page["browser.browser_set_page<br/>browser.h:71"]:::external
     n_src_browser_c__browser_navigate["browser.browser_navigate<br/>browser.c:224"]:::external
     n_src_browser_c__browser_back["browser.browser_back<br/>browser.c:268"]:::external
@@ -320,7 +320,7 @@ flowchart LR
     n_src_prefs_c__prefs_history_add["prefs.prefs_history_add<br/>prefs.c:152"]:::external
     n_src_profile_c__profile_save["profile.profile_save<br/>profile.c:133"]:::external
     n_gui_browser_ui_c__show_busy["browser_ui.show_busy<br/>Marks a request in flight and paints a frame...<br/>browser_ui.c:2559"]:::external
-    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:16545"]:::external
+    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:16547"]:::external
     n_tools_gen_psl_c__emit["gen_psl.emit<br/>gen_psl.c:61"]:::default
     n_tools_gen_psl_c__main -.->|"recursion"| n_tools_gen_psl_c__main
     n_tools_gen_psl_c__main -->|"1"| n_tools_gen_psl_c__ascii_lower

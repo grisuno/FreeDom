@@ -2,126 +2,126 @@
 Previous: [KB_gui.md](KB_gui.md)
 
 ## gui/browser_ui.c (continued)
-  - `deliver_fetch_result` (function, line 15682) `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
-  - `drain_fetch_results` (function, line 15736) `static void drain_fetch_results(browser_window *w)`
-  - `toggle_reader` (function, line 15841) `static void toggle_reader(browser_window *w)`
-  - `menu_item_checked` (function, line 15852) `static int menu_item_checked(const browser_window *w, size_t i)`
-  - `menu_item_toggle` (function, line 15874) `static void menu_item_toggle(browser_window *w, size_t i)`
-  - `draw_clock` (function, line 15989) `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
+  - `deliver_fetch_result` (function, line 15684) `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
+  - `drain_fetch_results` (function, line 15738) `static void drain_fetch_results(browser_window *w)`
+  - `toggle_reader` (function, line 15843) `static void toggle_reader(browser_window *w)`
+  - `menu_item_checked` (function, line 15854) `static int menu_item_checked(const browser_window *w, size_t i)`
+  - `menu_item_toggle` (function, line 15876) `static void menu_item_toggle(browser_window *w, size_t i)`
+  - `draw_clock` (function, line 15991) `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
                ...`
-  - `draw_hamburger` (function, line 16001) `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-  - `draw_reload` (function, line 16017) `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-  - `draw_menu` (function, line 16039) `static void draw_menu(cairo_t *cr, browser_window *w)`
-  - `draw_hover_url` (function, line 16150) `static double draw_hover_url(cairo_t *cr, browser_window *w)`
-  - `draw_toast` (function, line 16182) `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)`
-  - `draw_tabstrip` (function, line 16212) `static void draw_tabstrip(cairo_t *cr, browser_window *w)`
-  - `draw_omnibox` (function, line 16267) `static void draw_omnibox(cairo_t *cr, browser_window *w)`
-  - `paint` (function, line 16301) `static void paint(browser_window *w)`
-  - `redraw` (function, line 16545) `static void redraw(browser_window *w)`
-  - `wm_base_ping` (function, line 16576) `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)`
-  - `xdg_surface_configure` (function, line 16582) `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-  - `toplevel_configure` (function, line 16590) `static void toplevel_configure(void *data, struct xdg_toplevel *t,
+  - `draw_hamburger` (function, line 16003) `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
+  - `draw_reload` (function, line 16019) `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)`
+  - `draw_menu` (function, line 16041) `static void draw_menu(cairo_t *cr, browser_window *w)`
+  - `draw_hover_url` (function, line 16152) `static double draw_hover_url(cairo_t *cr, browser_window *w)`
+  - `draw_toast` (function, line 16184) `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)`
+  - `draw_tabstrip` (function, line 16214) `static void draw_tabstrip(cairo_t *cr, browser_window *w)`
+  - `draw_omnibox` (function, line 16269) `static void draw_omnibox(cairo_t *cr, browser_window *w)`
+  - `paint` (function, line 16303) `static void paint(browser_window *w)`
+  - `redraw` (function, line 16547) `static void redraw(browser_window *w)`
+  - `wm_base_ping` (function, line 16578) `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)`
+  - `xdg_surface_configure` (function, line 16584) `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
+  - `toplevel_configure` (function, line 16592) `static void toplevel_configure(void *data, struct xdg_toplevel *t,
                               ...`
-  - `wl_array_for_each` (function, line 16606) `wl_array_for_each(st, states)`
-  - `toplevel_close` (function, line 16612) `static void toplevel_close(void *data, struct xdg_toplevel *t)`
-  - `deco_configure` (function, line 16621) `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
-  - `set_cursor` (function, line 16633) `static void set_cursor(browser_window *w, int cur_kind)`
-  - `element` (function, line 16663) `* cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
+  - `wl_array_for_each` (function, line 16608) `wl_array_for_each(st, states)`
+  - `toplevel_close` (function, line 16614) `static void toplevel_close(void *data, struct xdg_toplevel *t)`
+  - `deco_configure` (function, line 16623) `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
+  - `set_cursor` (function, line 16635) `static void set_cursor(browser_window *w, int cur_kind)`
+  - `element` (function, line 16665) `* cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
  * even without...`
-  - `fbw_split_y` (function, line 16740) `static double fbw_split_y(const freebug_window *fb)`
-  - `freebug_ensure_buffer` (function, line 16749) `static int freebug_ensure_buffer(freebug_window *fb)`
-  - `fbw_level_rgb` (function, line 16776) `static void fbw_level_rgb(int level, double *r, double *g, double *b)`
-  - `fbw_console_lines` (function, line 16787) `static size_t fbw_console_lines(const fb_buffer *log)`
-  - `fbw_cell_w` (function, line 16801) `static double fbw_cell_w(cairo_t *cr)`
-  - `fbw_text_lines` (function, line 16807) `static size_t fbw_text_lines(const char *t)`
-  - `fbw_arg_hint` (function, line 16814) `static const char *fbw_arg_hint(int which)`
-  - `fbw_paint_tabs` (function, line 16825) `static void fbw_paint_tabs(cairo_t *cr, const freebug_window *fb)`
-  - `fbw_paint_pane` (function, line 16849) `static void fbw_paint_pane(cairo_t *cr, const freebug_window *fb, double y, double split_y)`
-  - `freebug_paint` (function, line 16880) `static void freebug_paint(freebug_window *fb)`
-  - `freebug_redraw_fb` (function, line 17087) `static void freebug_redraw_fb(freebug_window *fb)`
-  - `freebug_redraw` (function, line 17096) `static void freebug_redraw(browser_window *w)`
-  - `freebug_hide` (function, line 17100) `static void freebug_hide(browser_window *w)`
-  - `fbw_xdg_surface_configure` (function, line 17116) `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-  - `fbw_toplevel_configure` (function, line 17124) `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
+  - `fbw_split_y` (function, line 16742) `static double fbw_split_y(const freebug_window *fb)`
+  - `freebug_ensure_buffer` (function, line 16751) `static int freebug_ensure_buffer(freebug_window *fb)`
+  - `fbw_level_rgb` (function, line 16778) `static void fbw_level_rgb(int level, double *r, double *g, double *b)`
+  - `fbw_console_lines` (function, line 16789) `static size_t fbw_console_lines(const fb_buffer *log)`
+  - `fbw_cell_w` (function, line 16803) `static double fbw_cell_w(cairo_t *cr)`
+  - `fbw_text_lines` (function, line 16809) `static size_t fbw_text_lines(const char *t)`
+  - `fbw_arg_hint` (function, line 16816) `static const char *fbw_arg_hint(int which)`
+  - `fbw_paint_tabs` (function, line 16827) `static void fbw_paint_tabs(cairo_t *cr, const freebug_window *fb)`
+  - `fbw_paint_pane` (function, line 16851) `static void fbw_paint_pane(cairo_t *cr, const freebug_window *fb, double y, double split_y)`
+  - `freebug_paint` (function, line 16882) `static void freebug_paint(freebug_window *fb)`
+  - `freebug_redraw_fb` (function, line 17089) `static void freebug_redraw_fb(freebug_window *fb)`
+  - `freebug_redraw` (function, line 17098) `static void freebug_redraw(browser_window *w)`
+  - `freebug_hide` (function, line 17102) `static void freebug_hide(browser_window *w)`
+  - `fbw_xdg_surface_configure` (function, line 17118) `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
+  - `fbw_toplevel_configure` (function, line 17126) `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
                           ...`
-  - `fbw_toplevel_close` (function, line 17133) `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
-  - `freebug_show` (function, line 17143) `static void freebug_show(browser_window *w)`
-  - `freebug_toggle` (function, line 17173) `static void freebug_toggle(browser_window *w)`
-  - `freebug_destroy` (function, line 17178) `static void freebug_destroy(browser_window *w)`
-  - `freebug_owns_surface` (function, line 17186) `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
-  - `freebug_is_open` (function, line 17190) `static int freebug_is_open(const browser_window *w)`
-  - `freebug_repl_worker` (function, line 17197) `static tab *freebug_repl_worker(browser_window *w)`
-  - `freebug_pane_refresh` (function, line 17239) `static void freebug_pane_refresh(browser_window *w)`
-  - `freebug_set_tab` (function, line 17276) `static void freebug_set_tab(browser_window *w, int which)`
-  - `freebug_panes_invalidate` (function, line 17294) `static void freebug_panes_invalidate(browser_window *w)`
-  - `freebug_eval` (function, line 17301) `static void freebug_eval(browser_window *w)`
-  - `freebug_handle_key` (function, line 17342) `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
+  - `fbw_toplevel_close` (function, line 17135) `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
+  - `freebug_show` (function, line 17145) `static void freebug_show(browser_window *w)`
+  - `freebug_toggle` (function, line 17175) `static void freebug_toggle(browser_window *w)`
+  - `freebug_destroy` (function, line 17180) `static void freebug_destroy(browser_window *w)`
+  - `freebug_owns_surface` (function, line 17188) `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
+  - `freebug_is_open` (function, line 17192) `static int freebug_is_open(const browser_window *w)`
+  - `freebug_repl_worker` (function, line 17199) `static tab *freebug_repl_worker(browser_window *w)`
+  - `freebug_pane_refresh` (function, line 17241) `static void freebug_pane_refresh(browser_window *w)`
+  - `freebug_set_tab` (function, line 17278) `static void freebug_set_tab(browser_window *w, int which)`
+  - `freebug_panes_invalidate` (function, line 17296) `static void freebug_panes_invalidate(browser_window *w)`
+  - `freebug_eval` (function, line 17303) `static void freebug_eval(browser_window *w)`
+  - `freebug_handle_key` (function, line 17344) `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
                              ...`
-  - `freebug_pointer_button` (function, line 17385) `static void freebug_pointer_button(browser_window *w, uint32_t serial,
+  - `freebug_pointer_button` (function, line 17387) `static void freebug_pointer_button(browser_window *w, uint32_t serial,
                           ...`
-  - `freebug_pointer_motion` (function, line 17414) `static void freebug_pointer_motion(browser_window *w)`
-  - `freebug_pointer_axis` (function, line 17436) `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
-  - `ptr_enter` (function, line 17454) `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
+  - `freebug_pointer_motion` (function, line 17416) `static void freebug_pointer_motion(browser_window *w)`
+  - `freebug_pointer_axis` (function, line 17438) `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
+  - `ptr_enter` (function, line 17456) `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_...`
-  - `ptr_leave` (function, line 17472) `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
-  - `ptr_motion` (function, line 17489) `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
-  - `load_current` (function, line 17514) `static void load_current(browser_window *w)`
-  - `go_omnibox` (function, line 17527) `static void go_omnibox(browser_window *w)`
-  - `ptr_button` (function, line 17572) `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
+  - `ptr_leave` (function, line 17474) `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
+  - `ptr_motion` (function, line 17491) `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
+  - `load_current` (function, line 17516) `static void load_current(browser_window *w)`
+  - `go_omnibox` (function, line 17529) `static void go_omnibox(browser_window *w)`
+  - `ptr_button` (function, line 17574) `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
               ...`
-  - `scroll_line_px` (function, line 17819) `static double scroll_line_px(const browser_window *w)`
-  - `ptr_axis` (function, line 17823) `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
+  - `scroll_line_px` (function, line 17821) `static double scroll_line_px(const browser_window *w)`
+  - `ptr_axis` (function, line 17825) `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32...`
-  - `ptr_frame` (function, line 17847) `static void ptr_frame(void *d, struct wl_pointer *p)`
-  - `mime_is_text` (function, line 17863) `static int mime_is_text(const char *mime)`
-  - `data_offer_source_actions` (function, line 17881) `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
-  - `data_offer_action` (function, line 17884) `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
-  - `data_device_data_offer` (function, line 17894) `static void data_device_data_offer(void *data, struct wl_data_device *dev,
+  - `ptr_frame` (function, line 17849) `static void ptr_frame(void *d, struct wl_pointer *p)`
+  - `mime_is_text` (function, line 17865) `static int mime_is_text(const char *mime)`
+  - `data_offer_source_actions` (function, line 17883) `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
+  - `data_offer_action` (function, line 17886) `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
+  - `data_device_data_offer` (function, line 17896) `static void data_device_data_offer(void *data, struct wl_data_device *dev,
                       ...`
-  - `data_device_selection` (function, line 17906) `static void data_device_selection(void *data, struct wl_data_device *dev,
+  - `data_device_selection` (function, line 17908) `static void data_device_selection(void *data, struct wl_data_device *dev,
                        ...`
-  - `data_device_enter` (function, line 17925) `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
+  - `data_device_enter` (function, line 17927) `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
              ...`
-  - `data_device_leave` (function, line 17930) `static void data_device_leave(void *d, struct wl_data_device *dev)`
-  - `data_device_motion` (function, line 17931) `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
+  - `data_device_leave` (function, line 17932) `static void data_device_leave(void *d, struct wl_data_device *dev)`
+  - `data_device_motion` (function, line 17933) `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
                  ...`
-  - `data_device_drop` (function, line 17935) `static void data_device_drop(void *d, struct wl_data_device *dev)`
-  - `data_source_cancelled` (function, line 17946) `static void data_source_cancelled(void *data, struct wl_data_source *src)`
-  - `data_source_send` (function, line 17952) `static void data_source_send(void *data, struct wl_data_source *src,
+  - `data_device_drop` (function, line 17937) `static void data_device_drop(void *d, struct wl_data_device *dev)`
+  - `data_source_cancelled` (function, line 17948) `static void data_source_cancelled(void *data, struct wl_data_source *src)`
+  - `data_source_send` (function, line 17954) `static void data_source_send(void *data, struct wl_data_source *src,
                             ...`
-  - `data_source_target` (function, line 17965) `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
-  - `freebug_copy_console` (function, line 17977) `static void freebug_copy_console(browser_window *w)`
-  - `insert_pasted_text` (function, line 18045) `static void insert_pasted_text(browser_window *w, const char *text, size_t len)`
-  - `clipboard_copy` (function, line 18109) `static void clipboard_copy(browser_window *w)`
-  - `keyboard_keymap` (function, line 18157) `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
+  - `data_source_target` (function, line 17967) `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
+  - `freebug_copy_console` (function, line 17979) `static void freebug_copy_console(browser_window *w)`
+  - `insert_pasted_text` (function, line 18047) `static void insert_pasted_text(browser_window *w, const char *text, size_t len)`
+  - `clipboard_copy` (function, line 18111) `static void clipboard_copy(browser_window *w)`
+  - `keyboard_keymap` (function, line 18159) `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
                             uint...`
-  - `keyboard_enter` (function, line 18178) `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
+  - `keyboard_enter` (function, line 18180) `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                         ...`
-  - `keyboard_leave` (function, line 18185) `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
-  - `key_sym_to_js_key` (function, line 18193) `static const char *key_sym_to_js_key(xkb_keysym_t sym)`
-  - `key_sym_to_keycode` (function, line 18219) `static int key_sym_to_keycode(xkb_keysym_t sym)`
-  - `dispatch_js_event` (function, line 18244) `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
+  - `keyboard_leave` (function, line 18187) `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
+  - `key_sym_to_js_key` (function, line 18195) `static const char *key_sym_to_js_key(xkb_keysym_t sym)`
+  - `key_sym_to_keycode` (function, line 18221) `static int key_sym_to_keycode(xkb_keysym_t sym)`
+  - `dispatch_js_event` (function, line 18246) `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
                            ...`
-  - `handle_key_press` (function, line 18302) `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
+  - `handle_key_press` (function, line 18304) `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
              ...`
-  - `key_is_repeatable` (function, line 18638) `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)`
-  - `key_repeat_arm` (function, line 18654) `static void key_repeat_arm(browser_window *w, uint32_t key)`
-  - `key_repeat_stop` (function, line 18667) `static void key_repeat_stop(browser_window *w)`
-  - `key_repeat_fire` (function, line 18678) `static void key_repeat_fire(browser_window *w)`
-  - `keyboard_key` (function, line 18692) `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
+  - `key_is_repeatable` (function, line 18640) `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)`
+  - `key_repeat_arm` (function, line 18656) `static void key_repeat_arm(browser_window *w, uint32_t key)`
+  - `key_repeat_stop` (function, line 18669) `static void key_repeat_stop(browser_window *w)`
+  - `key_repeat_fire` (function, line 18680) `static void key_repeat_fire(browser_window *w)`
+  - `keyboard_key` (function, line 18694) `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                   ...`
-  - `keyboard_modifiers` (function, line 18732) `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
+  - `keyboard_modifiers` (function, line 18734) `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                  ...`
-  - `keyboard_repeat_info` (function, line 18741) `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
-  - `seat_caps` (function, line 18760) `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
-  - `seat_name` (function, line 18771) `static void seat_name(void *d, struct wl_seat *s, const char *name)`
-  - `registry_global` (function, line 18778) `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
+  - `keyboard_repeat_info` (function, line 18743) `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
+  - `seat_caps` (function, line 18762) `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
+  - `seat_name` (function, line 18773) `static void seat_name(void *d, struct wl_seat *s, const char *name)`
+  - `registry_global` (function, line 18780) `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...`
-  - `registry_remove` (function, line 18798) `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
-  - `gui_is_idle` (function, line 18811) `static int gui_is_idle(const browser_window *w)`
-  - `gui_timing_step` (function, line 18822) `static int gui_timing_step(browser_window *w, uint64_t now)`
-  - `ui_run_browser` (function, line 18837) `ui_status ui_run_browser(const char *start_url)`
-  - `cost` (function, line 19277) `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
+  - `registry_remove` (function, line 18800) `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
+  - `gui_is_idle` (function, line 18813) `static int gui_is_idle(const browser_window *w)`
+  - `gui_timing_step` (function, line 18824) `static int gui_timing_step(browser_window *w, uint64_t now)`
+  - `ui_run_browser` (function, line 18839) `ui_status ui_run_browser(const char *start_url)`
+  - `cost` (function, line 19279) `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
              * cheap pages paint at...`
   - `offset` (function, line 178) `* offset (labels and the flag live in one place, no magic indices);`
   - `fields` (function, line 290) `* fields (so the 200+ render/event call sites stay unchanged);`
@@ -177,33 +177,33 @@ Previous: [KB_gui.md](KB_gui.md)
   - `have` (function, line 9530) `* as they always have (spec/float.md §6b.3). The line still open beside * the previous float is committed first, at...`
   - `standalone` (function, line 9551) `* must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */...`
   - `margin` (function, line 9945) `* own left margin (the margin box starts at the anchor point), a right- * anchored one ends at it. Same for the...`
-  - `rd_build` (function, line 10630) `* rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr...`
-  - `descriptors` (function, line 10887) `* descriptors (especially the Wayland display fd) so the sink does * not corrupt the Wayland protocol connection —...`
-  - `again` (function, line 10968) `* before a respawn opens it again (the WNOHANG reap left the old * process alive long enough to make the new one...`
-  - `blocking` (function, line 11255) `* are blocking (POLLIN guaranteed data is available). */ int flags = fcntl(out_fd, F_GETFL, 0);`
-  - `rect` (function, line 11608) `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops...`
-  - `layer` (function, line 11917) `* first layer (CSS multi-background: the first declared URL is the topmost) * and OVER bg_rgb/gradient, UNDER the...`
-  - `convention` (function, line 12073) `* on the 3D bevel convention (light top/left, dark right/bottom). */ int is_3d = (style == CSS_BST_GROOVE || style...`
-  - `row_owner_block_id` (function, line 12223) `static int row_owner_block_id(const rc_layout *L, const rc_row *r);`
-  - `exactly` (function, line 12269) `* the resolved size exactly (like the SVG path above): routing through * paint_image_row would re-resolve a % width...`
-  - `bg` (function, line 12367) `* its own DISTINCT bg (an inline span highlight) still paints. */ int own_bid = row_owner_block_id(L, r);`
-  - `rows` (function, line 12589) `* RC_IMAGE rows (see its declaration);`
-  - `made` (function, line 13147) `* its zero channels made (255,255,255,alpha 0) -- an invalid * premultiplied value Cairo composites as ADDITIVE...`
-  - `the` (function, line 13251) `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset...`
-  - `fill` (function, line 13435) `* fill (paint_content_row's r->bg_rgb branch) cascades the SAME author * background-color as the box, but paints in...`
-  - `overflow` (function, line 13495) `* adding two of them in int was signed overflow (UB, found by UBSan). */ double ox = left + bx->x +...`
-  - `compositing` (function, line 13538) `* * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context * (box_forms_stacking_context...`
-  - `once` (function, line 14251) `* box the layout never placed loads at once (fail open);`
-  - `origin` (function, line 14884) `* top_url is the page origin (https or file://);`
-  - `in` (function, line 14962) `* a line landed in (Stage 3), which no other dump shows. Text stays out (it is * --dump-dom's job);`
-  - `sf_ws_url_check` (function, line 15332) `&& sf_ws_url_check(op->data) == SF_OK && rp_host_of(op->data, host, sizeof host) == 0 && hb_check(w->hosts, host) !=...`
-  - `presentation` (function, line 15872) `* affect presentation (a repaint, which re-runs layout, suffices);`
-  - `resizes` (function, line 16598) `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);`
-  - `down` (function, line 17448) `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void...`
-  - `loop` (function, line 18036) `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately...`
-  - `saving` (function, line 18856) `* disables saving (never clobber);`
-  - `redraws` (function, line 18946) `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
-  - `moves` (function, line 18959) `* client that stops reading its socket while the pointer moves (spec/wl_guard.md). */ if...`
+  - `rd_build` (function, line 10632) `* rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr...`
+  - `descriptors` (function, line 10889) `* descriptors (especially the Wayland display fd) so the sink does * not corrupt the Wayland protocol connection —...`
+  - `again` (function, line 10970) `* before a respawn opens it again (the WNOHANG reap left the old * process alive long enough to make the new one...`
+  - `blocking` (function, line 11257) `* are blocking (POLLIN guaranteed data is available). */ int flags = fcntl(out_fd, F_GETFL, 0);`
+  - `rect` (function, line 11610) `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops...`
+  - `layer` (function, line 11919) `* first layer (CSS multi-background: the first declared URL is the topmost) * and OVER bg_rgb/gradient, UNDER the...`
+  - `convention` (function, line 12075) `* on the 3D bevel convention (light top/left, dark right/bottom). */ int is_3d = (style == CSS_BST_GROOVE || style...`
+  - `row_owner_block_id` (function, line 12225) `static int row_owner_block_id(const rc_layout *L, const rc_row *r);`
+  - `exactly` (function, line 12271) `* the resolved size exactly (like the SVG path above): routing through * paint_image_row would re-resolve a % width...`
+  - `bg` (function, line 12369) `* its own DISTINCT bg (an inline span highlight) still paints. */ int own_bid = row_owner_block_id(L, r);`
+  - `rows` (function, line 12591) `* RC_IMAGE rows (see its declaration);`
+  - `made` (function, line 13149) `* its zero channels made (255,255,255,alpha 0) -- an invalid * premultiplied value Cairo composites as ADDITIVE...`
+  - `the` (function, line 13253) `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset...`
+  - `fill` (function, line 13437) `* fill (paint_content_row's r->bg_rgb branch) cascades the SAME author * background-color as the box, but paints in...`
+  - `overflow` (function, line 13497) `* adding two of them in int was signed overflow (UB, found by UBSan). */ double ox = left + bx->x +...`
+  - `compositing` (function, line 13540) `* * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context * (box_forms_stacking_context...`
+  - `once` (function, line 14253) `* box the layout never placed loads at once (fail open);`
+  - `origin` (function, line 14886) `* top_url is the page origin (https or file://);`
+  - `in` (function, line 14964) `* a line landed in (Stage 3), which no other dump shows. Text stays out (it is * --dump-dom's job);`
+  - `sf_ws_url_check` (function, line 15334) `&& sf_ws_url_check(op->data) == SF_OK && rp_host_of(op->data, host, sizeof host) == 0 && hb_check(w->hosts, host) !=...`
+  - `presentation` (function, line 15874) `* affect presentation (a repaint, which re-runs layout, suffices);`
+  - `resizes` (function, line 16600) `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);`
+  - `down` (function, line 17450) `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void...`
+  - `loop` (function, line 18038) `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately...`
+  - `saving` (function, line 18858) `* disables saving (never clobber);`
+  - `redraws` (function, line 18948) `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
+  - `moves` (function, line 18961) `* client that stops reading its socket while the pointer moves (spec/wl_guard.md). */ if...`
   - `_GNU_SOURCE` (macro, line 12) `#define _GNU_SOURCE`
   - `UI_TOOLBAR_H` (macro, line 95) `#define UI_TOOLBAR_H`
   - `UI_TITLEBAR_H` (macro, line 96) `#define UI_TITLEBAR_H`
@@ -267,34 +267,34 @@ Previous: [KB_gui.md](KB_gui.md)
   - `RC_DEFER_COLS` (macro, line 8196) `#define RC_DEFER_COLS`
   - `RC_DEFER_RANGES` (macro, line 8197) `#define RC_DEFER_RANGES`
   - `RC_DEFER_BAND_RUNS` (macro, line 8279) `#define RC_DEFER_BAND_RUNS`
-  - `BUI_CONIC_SLICES` (macro, line 11681) `#define BUI_CONIC_SLICES`
-  - `ROW_PAINT_ALL` (macro, line 12293) `#define ROW_PAINT_ALL`
-  - `ROW_PAINT_BAND` (macro, line 12294) `#define ROW_PAINT_BAND`
-  - `ROW_PAINT_CONTENT` (macro, line 12295) `#define ROW_PAINT_CONTENT`
-  - `OV_MAX_DEPTH` (macro, line 12516) `#define OV_MAX_DEPTH`
-  - `H2R` (macro, line 13203) `#define H2R(p,q,t)`
-  - `UI_LAZY_PER_PASS` (macro, line 14182) `#define UI_LAZY_PER_PASS`
-  - `UI_LAZY_PASSES` (macro, line 14183) `#define UI_LAZY_PASSES`
-  - `PDF_PAGE_W` (macro, line 14418) `#define PDF_PAGE_W`
-  - `PDF_PAGE_H` (macro, line 14419) `#define PDF_PAGE_H`
-  - `PDF_MARGIN` (macro, line 14420) `#define PDF_MARGIN`
-  - `PNG_PAGE_W` (macro, line 14585) `#define PNG_PAGE_W`
-  - `PNG_MARGIN` (macro, line 14609) `#define PNG_MARGIN`
-  - `PNG_MAX_H` (macro, line 14610) `#define PNG_MAX_H`
-  - `FBW_W` (macro, line 16699) `#define FBW_W`
-  - `FBW_H` (macro, line 16700) `#define FBW_H`
-  - `FBW_HEADER` (macro, line 16701) `#define FBW_HEADER`
-  - `FBW_TABBAR` (macro, line 16702) `#define FBW_TABBAR`
-  - `FBW_TOP` (macro, line 16703) `#define FBW_TOP`
-  - `FBW_TAB_PAD` (macro, line 16704) `#define FBW_TAB_PAD`
-  - `FBW_PAD` (macro, line 16705) `#define FBW_PAD`
-  - `FBW_LINE` (macro, line 16706) `#define FBW_LINE`
-  - `FBW_GUTTER` (macro, line 16707) `#define FBW_GUTTER`
-  - `FBW_MIN_SPLIT` (macro, line 16708) `#define FBW_MIN_SPLIT`
-  - `FBW_MAX_SPLIT` (macro, line 16709) `#define FBW_MAX_SPLIT`
-  - `FBW_COPY_BTN_W` (macro, line 16710) `#define FBW_COPY_BTN_W`
-  - `FBW_COPY_BTN_H` (macro, line 16711) `#define FBW_COPY_BTN_H`
-  - `TIMING_QUIET_MS` (macro, line 18821) `#define TIMING_QUIET_MS`
+  - `BUI_CONIC_SLICES` (macro, line 11683) `#define BUI_CONIC_SLICES`
+  - `ROW_PAINT_ALL` (macro, line 12295) `#define ROW_PAINT_ALL`
+  - `ROW_PAINT_BAND` (macro, line 12296) `#define ROW_PAINT_BAND`
+  - `ROW_PAINT_CONTENT` (macro, line 12297) `#define ROW_PAINT_CONTENT`
+  - `OV_MAX_DEPTH` (macro, line 12518) `#define OV_MAX_DEPTH`
+  - `H2R` (macro, line 13205) `#define H2R(p,q,t)`
+  - `UI_LAZY_PER_PASS` (macro, line 14184) `#define UI_LAZY_PER_PASS`
+  - `UI_LAZY_PASSES` (macro, line 14185) `#define UI_LAZY_PASSES`
+  - `PDF_PAGE_W` (macro, line 14420) `#define PDF_PAGE_W`
+  - `PDF_PAGE_H` (macro, line 14421) `#define PDF_PAGE_H`
+  - `PDF_MARGIN` (macro, line 14422) `#define PDF_MARGIN`
+  - `PNG_PAGE_W` (macro, line 14587) `#define PNG_PAGE_W`
+  - `PNG_MARGIN` (macro, line 14611) `#define PNG_MARGIN`
+  - `PNG_MAX_H` (macro, line 14612) `#define PNG_MAX_H`
+  - `FBW_W` (macro, line 16701) `#define FBW_W`
+  - `FBW_H` (macro, line 16702) `#define FBW_H`
+  - `FBW_HEADER` (macro, line 16703) `#define FBW_HEADER`
+  - `FBW_TABBAR` (macro, line 16704) `#define FBW_TABBAR`
+  - `FBW_TOP` (macro, line 16705) `#define FBW_TOP`
+  - `FBW_TAB_PAD` (macro, line 16706) `#define FBW_TAB_PAD`
+  - `FBW_PAD` (macro, line 16707) `#define FBW_PAD`
+  - `FBW_LINE` (macro, line 16708) `#define FBW_LINE`
+  - `FBW_GUTTER` (macro, line 16709) `#define FBW_GUTTER`
+  - `FBW_MIN_SPLIT` (macro, line 16710) `#define FBW_MIN_SPLIT`
+  - `FBW_MAX_SPLIT` (macro, line 16711) `#define FBW_MAX_SPLIT`
+  - `FBW_COPY_BTN_W` (macro, line 16712) `#define FBW_COPY_BTN_W`
+  - `FBW_COPY_BTN_H` (macro, line 16713) `#define FBW_COPY_BTN_H`
+  - `TIMING_QUIET_MS` (macro, line 18823) `#define TIMING_QUIET_MS`
 - Depends on: `gui/browser_ui_internal.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/cached_fetch.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`, `include/css_gradient.h`, `include/css_mask.h`, `include/css_values.h`, `include/data_url.h`, `include/download.h`, `include/fb_panes.h`, `include/form.h`, `include/frame_clock.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/hostedit.h`, `include/identity.h`, `include/image_decode.h`, `include/interp.h`, `include/js_policy.h`, `include/lazy_load.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/pdf_export.h`, `include/prefetch.h`, `include/prefs.h`, `include/profile.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/shm_slots.h`, `include/svg_paint.h`, `include/svg_render.h`, `include/tab.h`, `include/text_case.h`, `include/text_shape.h`, `include/textfield.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/web_storage.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_guard.h`, `include/ws_hub.h`, `include/zoom.h`
 
 ## gui/browser_ui_internal.h

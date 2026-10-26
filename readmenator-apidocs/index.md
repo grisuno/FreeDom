@@ -1,6 +1,6 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 207 modules, 3607 documented entities, documentation coverage 39.6% (1415/3577 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 207 modules, 3611 documented entities, documentation coverage 39.5% (1415/3581 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
@@ -189,7 +189,7 @@ Languages: c (96), h (95), py (12), sh (4)
 | [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 29 | 39.4% |
 | [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 13 | 33.3% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
-| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 325 | 1.5% |
+| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 329 | 1.5% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |

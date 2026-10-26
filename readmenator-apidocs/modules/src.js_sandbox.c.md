@@ -579,7 +579,7 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 
 ### `js_set_current_script`
 
-`function` | [src/js_sandbox.c:806](../../src/js_sandbox.c#L806)
+`function` | [src/js_sandbox.c:810](../../src/js_sandbox.c#L810)
 
 ```c
 void js_set_current_script(js_context *ctx, const char *src, const char *type)
@@ -605,7 +605,7 @@ The script element is a fabricated plain object with {src, type, getAttribute} t
 
 ### `js_context_raw`
 
-`function` | [src/js_sandbox.c:839](../../src/js_sandbox.c#L839)
+`function` | [src/js_sandbox.c:843](../../src/js_sandbox.c#L843)
 
 ```c
 void *js_context_raw(js_context *ctx)
@@ -627,7 +627,7 @@ void *js_context_raw(js_context *ctx)
 
 ### `js_set_module_host`
 
-`function` | [src/js_sandbox.c:919](../../src/js_sandbox.c#L919)
+`function` | [src/js_sandbox.c:923](../../src/js_sandbox.c#L923)
 
 ```c
 void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host)
@@ -654,7 +654,7 @@ NULL functions uninstall it (every import then fails).
 
 ### `js_eval_module`
 
-`function` | [src/js_sandbox.c:949](../../src/js_sandbox.c#L949)
+`function` | [src/js_sandbox.c:953](../../src/js_sandbox.c#L953)
 
 ```c
 js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name, js_result *res)
@@ -680,7 +680,7 @@ js_status js_eval_module(js_context *ctx, const char *src, size_t len, const cha
 
 ### `js_install_realms`
 
-`function` | [src/js_sandbox.c:1111](../../src/js_sandbox.c#L1111)
+`function` | [src/js_sandbox.c:1115](../../src/js_sandbox.c#L1115)
 
 ```c
 js_status js_install_realms(js_context *ctx)
@@ -740,7 +740,7 @@ js_status js_install_realms(js_context *ctx)
 
 ### `JS_MODULE_URL_MAX`
 
-`macro` | [src/js_sandbox.c:844](../../src/js_sandbox.c#L844)
+`macro` | [src/js_sandbox.c:848](../../src/js_sandbox.c#L848)
 
 ```c
 #define JS_MODULE_URL_MAX

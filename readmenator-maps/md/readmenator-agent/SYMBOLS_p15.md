@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_single_record` | function | `tests/test_perf_trace.c:28` | `static void test_single_record(void **state)` |
+| `test_stage_name` | function | `tests/test_perf_trace.c:101` | `static void test_stage_name(void **state)` |
+| `test_stage_out_of_range_is_noop` | function | `tests/test_perf_trace.c:72` | `static void test_stage_out_of_range_is_noop(void **state)` |
+| `_GNU_SOURCE` | macro | `tests/test_pq_seal.c:1` | `#define _GNU_SOURCE` |
+| `main` | function | `tests/test_pq_seal.c:95` | `int main(void)` |
+| `test_each_seal_is_fresh` | function | `tests/test_pq_seal.c:31` | `static void test_each_seal_is_fresh(void **state)` |
+| `test_export_import_keeps_decapsulation` | function | `tests/test_pq_seal.c:77` | `static void test_export_import_keeps_decapsulation(void **state)` |
+| `test_format_errors` | function | `tests/test_pq_seal.c:65` | `static void test_format_errors(void **state)` |
+| `test_requires_both_secrets_and_detects_tamper` | function | `tests/test_pq_seal.c:44` | `static void test_requires_both_secrets_and_detects_tamper(void **state)` |
+| `test_seal_open_roundtrip` | function | `tests/test_pq_seal.c:12` | `static void test_seal_open_roundtrip(void **state)` |
+| `_POSIX_C_SOURCE` | macro | `tests/test_prefetch.c:5` | `#define _POSIX_C_SOURCE` |
+| `bare_fetch` | function | `tests/test_prefetch.c:333` | `static int bare_fetch(void *ctx, const char *method, const char *url,                       const...` |
+| `barrier` | type_alias | `tests/test_prefetch.c:126` | `typedef struct fake_ctx { pthread_barrier_t barrier;` |
 | `fake_ctx` | struct | `tests/test_prefetch.c:126` | `` |
 | `fake_fetch` | function | `tests/test_prefetch.c:135` | `static int fake_fetch(void *vctx, const char *method, const char *url,                       cons...` |
 | `graph_fetch` | function | `tests/test_prefetch.c:320` | `static int graph_fetch(void *ctx, const char *method, const char *url,                        con...` |
@@ -483,18 +496,5 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_bad_mode_fails_closed` | function | `tests/test_webcaps.c:127` | `static void test_bad_mode_fails_closed(void **state)` |
 | `test_from_flags_headless` | function | `tests/test_webcaps.c:153` | `static void test_from_flags_headless(void **state)` |
 | `test_jspon_alone_is_not_trust` | function | `tests/test_webcaps.c:85` | `static void test_jspon_alone_is_not_trust(void **state)` |
-| `test_present_trust_css_images_only` | function | `tests/test_webcaps.c:56` | `static void test_present_trust_css_images_only(void **state)` |
-| `test_render_caps_projection` | function | `tests/test_webcaps.c:138` | `static void test_render_caps_projection(void **state)` |
-| `test_safe_is_all_off` | function | `tests/test_webcaps.c:29` | `static void test_safe_is_all_off(void **state)` |
-| `test_trusted_host_gets_all_caps` | function | `tests/test_webcaps.c:38` | `static void test_trusted_host_gets_all_caps(void **state)` |
-| `test_user_toggles_grant_leakfree` | function | `tests/test_webcaps.c:100` | `static void test_user_toggles_grant_leakfree(void **state)` |
-| `main` | function | `tests/test_webfont.c:229` | `int main(void)` |
-| `test_data_url_decodes_at_scan` | function | `tests/test_webfont.c:181` | `static void test_data_url_decodes_at_scan(void **state)` |
-| `test_name_hash` | function | `tests/test_webfont.c:218` | `static void test_name_hash(void **state)` |
-| `test_ref_move_transfers_bytes` | function | `tests/test_webfont.c:198` | `static void test_ref_move_transfers_bytes(void **state)` |
-| `test_scan_basic_two_formats` | function | `tests/test_webfont.c:36` | `static void test_scan_basic_two_formats(void **state)` |
-| `test_scan_case_and_ws` | function | `tests/test_webfont.c:106` | `static void test_scan_case_and_ws(void **state)` |
-| `test_scan_hostile_truncations` | function | `tests/test_webfont.c:120` | `static void test_scan_hostile_truncations(void **state)` |
-| `test_scan_ignores_other_at_rules` | function | `tests/test_webfont.c:168` | `static void test_scan_ignores_other_at_rules(void **state)` |
 
 Next: [SYMBOLS_p16.md](SYMBOLS_p16.md)

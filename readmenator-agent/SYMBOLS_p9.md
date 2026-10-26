@@ -3,6 +3,9 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `_GNU_SOURCE` | macro | `src/local_store.c:407` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:418` | `#define _GNU_SOURCE` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:429` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:440` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:451` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:462` | `#define _GNU_SOURCE` |
@@ -40,18 +43,19 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `_GNU_SOURCE` | macro | `src/local_store.c:814` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:825` | `#define _GNU_SOURCE` |
 | `_GNU_SOURCE` | macro | `src/local_store.c:836` | `#define _GNU_SOURCE` |
-| `aead_decrypt` | function | `src/local_store.c:967` | `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
-| `aead_encrypt` | function | `src/local_store.c:941` | `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
-| `argon2id_derive` | function | `src/local_store.c:903` | `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,                           ...` |
-| `cipher_for` | function | `src/local_store.c:893` | `static const EVP_CIPHER *cipher_for(ls_aead aead)` |
-| `decrypt_blob` | function | `src/local_store.c:1032` | `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,          ...` |
-| `ls_derive_key` | function | `src/local_store.c:932` | `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,                         const...` |
-| `ls_free` | function | `src/local_store.c:1128` | `void ls_free(uint8_t *buf, size_t len)` |
-| `ls_open` | function | `src/local_store.c:1076` | `ls_status ls_open(const uint8_t key[LS_KEY_LEN],                   const uint8_t *blob, size_t bl...` |
-| `ls_open_passphrase` | function | `src/local_store.c:1108` | `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,                         ...` |
-| `ls_seal` | function | `src/local_store.c:1063` | `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,                   const uint8_t *p...` |
-| `ls_seal_passphrase` | function | `src/local_store.c:1087` | `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,           ...` |
-| `seal_core` | function | `src/local_store.c:995` | `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,                     ...` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:847` | `#define _GNU_SOURCE` |
+| `aead_decrypt` | function | `src/local_store.c:978` | `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
+| `aead_encrypt` | function | `src/local_store.c:952` | `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
+| `argon2id_derive` | function | `src/local_store.c:914` | `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,                           ...` |
+| `cipher_for` | function | `src/local_store.c:904` | `static const EVP_CIPHER *cipher_for(ls_aead aead)` |
+| `decrypt_blob` | function | `src/local_store.c:1043` | `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,          ...` |
+| `ls_derive_key` | function | `src/local_store.c:943` | `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,                         const...` |
+| `ls_free` | function | `src/local_store.c:1139` | `void ls_free(uint8_t *buf, size_t len)` |
+| `ls_open` | function | `src/local_store.c:1087` | `ls_status ls_open(const uint8_t key[LS_KEY_LEN],                   const uint8_t *blob, size_t bl...` |
+| `ls_open_passphrase` | function | `src/local_store.c:1119` | `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,                         ...` |
+| `ls_seal` | function | `src/local_store.c:1074` | `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,                   const uint8_t *p...` |
+| `ls_seal_passphrase` | function | `src/local_store.c:1098` | `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,           ...` |
+| `seal_core` | function | `src/local_store.c:1006` | `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,                     ...` |
 | `_POSIX_C_SOURCE` | macro | `src/media_decoder.c:23` | `#define _POSIX_C_SOURCE` |
 | `av_rescale_q` | function | `src/media_decoder.c:217` | `return av_rescale_q(f->pts, tb, (AVRational)` |
 | `decode_segment` | function | `src/media_decoder.c:276` | `static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len)` |
@@ -108,259 +112,261 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `os_policy_size` | function | `src/os_sandbox.c:107` | `size_t os_policy_size(void)` |
 | `os_prot_allowed` | function | `src/os_sandbox.c:65` | `int os_prot_allowed(long syscall_nr, unsigned long prot)` |
 | `os_prot_allowed` | function | `src/os_sandbox.c:108` | `int os_prot_allowed(long syscall_nr, unsigned long prot)` |
-| `PV_COLOR_TOKEN_MAX` | macro | `src/page_view.c:1207` | `#define PV_COLOR_TOKEN_MAX` |
+| `PV_COLOR_TOKEN_MAX` | macro | `src/page_view.c:1208` | `#define PV_COLOR_TOKEN_MAX` |
 | `PV_FONT_CHAIN_MAX` | macro | `src/page_view.c:64` | `#define PV_FONT_CHAIN_MAX` |
 | `PV_FONT_PCT_MAX` | macro | `src/page_view.c:66` | `#define PV_FONT_PCT_MAX` |
 | `PV_FONT_PCT_MIN` | macro | `src/page_view.c:65` | `#define PV_FONT_PCT_MIN` |
 | `PV_FONT_REL_MAX` | macro | `src/page_view.c:58` | `#define PV_FONT_REL_MAX` |
 | `PV_FONT_REL_MIN` | macro | `src/page_view.c:57` | `#define PV_FONT_REL_MIN` |
-| `PV_MAX_BOXES` | macro | `src/page_view.c:1254` | `#define PV_MAX_BOXES` |
-| `PV_MAX_CONTAINERS` | macro | `src/page_view.c:1245` | `#define PV_MAX_CONTAINERS` |
+| `PV_MAX_BOXES` | macro | `src/page_view.c:1255` | `#define PV_MAX_BOXES` |
+| `PV_MAX_CONTAINERS` | macro | `src/page_view.c:1246` | `#define PV_MAX_CONTAINERS` |
 | `PV_MAX_DIM` | macro | `src/page_view.c:52` | `#define PV_MAX_DIM` |
-| `PV_MAX_GRID_COLS` | macro | `src/page_view.c:1246` | `#define PV_MAX_GRID_COLS` |
-| `PV_MAX_INLINE_ROW_ITEMS` | macro | `src/page_view.c:2894` | `#define PV_MAX_INLINE_ROW_ITEMS` |
-| `PV_MAX_STYLE_BYTES` | macro | `src/page_view.c:5052` | `#define PV_MAX_STYLE_BYTES` |
-| `PV_NODE_MAP_INIT_CAP` | macro | `src/page_view.c:346` | `#define PV_NODE_MAP_INIT_CAP` |
-| `PV_STYLE_RETIRE_MAX` | macro | `src/page_view.c:2292` | `#define PV_STYLE_RETIRE_MAX` |
-| `PV_TEXTLESS_DEPTH_MAX` | macro | `src/page_view.c:3224` | `#define PV_TEXTLESS_DEPTH_MAX` |
-| `URL` | function | `src/page_view.c:6270` | `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);` |
+| `PV_MAX_GRID_COLS` | macro | `src/page_view.c:1247` | `#define PV_MAX_GRID_COLS` |
+| `PV_MAX_INLINE_ROW_ITEMS` | macro | `src/page_view.c:2911` | `#define PV_MAX_INLINE_ROW_ITEMS` |
+| `PV_MAX_STYLE_BYTES` | macro | `src/page_view.c:5069` | `#define PV_MAX_STYLE_BYTES` |
+| `PV_NODE_MAP_INIT_CAP` | macro | `src/page_view.c:347` | `#define PV_NODE_MAP_INIT_CAP` |
+| `PV_STYLE_RETIRE_MAX` | macro | `src/page_view.c:2309` | `#define PV_STYLE_RETIRE_MAX` |
+| `PV_TEXTLESS_DEPTH_MAX` | macro | `src/page_view.c:3241` | `#define PV_TEXTLESS_DEPTH_MAX` |
+| `URL` | function | `src/page_view.c:6289` | `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);` |
 | `_POSIX_C_SOURCE` | macro | `src/page_view.c:10` | `#define _POSIX_C_SOURCE` |
-| `address` | function | `src/page_view.c:1257` | `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <=...` |
-| `after_pending_emit` | function | `src/page_view.c:1862` | `static pv_status after_pending_emit(pv_view *v, pv_container_reg *reg, pv_item_track *items,     ...` |
-| `annotate_flow_run` | function | `src/page_view.c:1814` | `static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *items,           ...` |
-| `annotate_replaced_run` | function | `src/page_view.c:5188` | `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,                             ...` |
-| `ascii_ieq` | function | `src/page_view.c:4470` | `static int ascii_ieq(const char *s, const char *lit)` |
-| `attr_dup` | function | `src/page_view.c:4482` | `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` |
-| `attributes` | function | `src/page_view.c:4404` | `* carries those attributes (spec/css.md, "Root matcher"). */ static int root_els_match(void *ctx,...` |
-| `band` | function | `src/page_view.c:5961` | `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...` |
-| `bgcolor_attr` | function | `src/page_view.c:1235` | `static int bgcolor_attr(lxb_dom_element_t *el)` |
-| `block` | function | `src/page_view.c:6558` | `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break \|\| block...` |
-| `block_id` | function | `src/page_view.c:6129` | `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...` |
-| `box_reg_free` | function | `src/page_view.c:1929` | `static void box_reg_free(pv_box_reg *r)` |
-| `box_reg_id` | function | `src/page_view.c:2186` | `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,            ...` |
-| `box_reg_id_ex` | function | `src/page_view.c:2705` | `static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,         ...` |
-| `boxdef_from_style` | function | `src/page_view.c:1938` | `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` |
-| `builder` | function | `src/page_view.c:2808` | `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box  * (the ...` |
-| `cached_element_style` | function | `src/page_view.c:2627` | `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,             ...` |
-| `cached_element_style_ref` | function | `src/page_view.c:2544` | `static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const css_sheet *sheet,  ...` |
-| `cached_pseudo_style` | function | `src/page_view.c:2743` | `static css_style cached_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet,              ...` |
-| `causes_block_break` | function | `src/page_view.c:1091` | `static int causes_block_break(lxb_tag_id_t t, css_display display)` |
-| `cell_anchors` | function | `src/page_view.c:4947` | `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)` |
-| `cell_has_nested_table` | function | `src/page_view.c:4927` | `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)` |
-| `chain` | type_alias | `src/page_view.c:2278` | `typedef struct pv_var_node { cvr_chain chain;` |
-| `child` | function | `src/page_view.c:1265` | `* child (NULL = anonymous item: text directly inside the container);` |
-| `children_all_inline_block` | function | `src/page_view.c:2922` | `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,            ...` |
-| `classify_input` | function | `src/page_view.c:4564` | `static pv_input_type classify_input(const char *type)` |
-| `col_free_share` | function | `src/page_view.c:2688` | `static int col_free_share(const lxb_dom_node_t *el, const css_style *cs, const css_sheet *sheet, pv_style_cache...` |
-| `col_has_free_space` | function | `src/page_view.c:2947` | `static int col_has_free_space(const css_style *cs)` |
-| `collapse_ws` | function | `src/page_view.c:4163` | `static char *collapse_ws(const char *s, size_t n)` |
-| `collect_page_css` | function | `src/page_view.c:5271` | `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,                      ...` |
-| `collect_text` | function | `src/page_view.c:4540` | `static char *collect_text(const lxb_dom_node_t *el)` |
-| `cols` | type_alias | `src/page_view.c:1267` | `typedef struct pv_cont_info { int id, display, gap, justify, cols;` |
-| `column_gap_candidate` | function | `src/page_view.c:3051` | `static int column_gap_candidate(const lxb_dom_node_t *el, const css_sheet *sheet,                ...` |
-| `cont_def_reset` | function | `src/page_view.c:1707` | `static void cont_def_reset(pv_cont_def *d)` |
-| `container` | function | `src/page_view.c:3853` | `* membership in this container (and none in any container further out,                  * since i...` |
-| `container_id` | function | `src/page_view.c:1726` | `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` |
-| `content` | function | `src/page_view.c:1189` | `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);` |
-| `control` | function | `src/page_view.c:5719` | `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);` |
+| `address` | function | `src/page_view.c:1258` | `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <=...` |
+| `after_pending_emit` | function | `src/page_view.c:1879` | `static pv_status after_pending_emit(pv_view *v, pv_container_reg *reg, pv_item_track *items,     ...` |
+| `annotate_flow_run` | function | `src/page_view.c:1831` | `static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *items,           ...` |
+| `annotate_replaced_run` | function | `src/page_view.c:5205` | `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,                             ...` |
+| `ascii_ieq` | function | `src/page_view.c:4487` | `static int ascii_ieq(const char *s, const char *lit)` |
+| `attr_dup` | function | `src/page_view.c:4499` | `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` |
+| `attributes` | function | `src/page_view.c:4421` | `* carries those attributes (spec/css.md, "Root matcher"). */ static int root_els_match(void *ctx,...` |
+| `band` | function | `src/page_view.c:5980` | `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...` |
+| `bgcolor_attr` | function | `src/page_view.c:1236` | `static int bgcolor_attr(lxb_dom_element_t *el)` |
+| `block` | function | `src/page_view.c:6577` | `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break \|\| block...` |
+| `block_id` | function | `src/page_view.c:6148` | `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...` |
+| `border_side_cleared` | function | `src/page_view.c:1566` | `static int border_side_cleared(int width, int style)` |
+| `box_reg_free` | function | `src/page_view.c:1946` | `static void box_reg_free(pv_box_reg *r)` |
+| `box_reg_id` | function | `src/page_view.c:2203` | `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,            ...` |
+| `box_reg_id_ex` | function | `src/page_view.c:2722` | `static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,         ...` |
+| `boxdef_from_style` | function | `src/page_view.c:1955` | `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` |
+| `builder` | function | `src/page_view.c:2825` | `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box  * (the ...` |
+| `cached_element_style` | function | `src/page_view.c:2644` | `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,             ...` |
+| `cached_element_style_ref` | function | `src/page_view.c:2561` | `static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const css_sheet *sheet,  ...` |
+| `cached_pseudo_style` | function | `src/page_view.c:2760` | `static css_style cached_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet,              ...` |
+| `causes_block_break` | function | `src/page_view.c:1092` | `static int causes_block_break(lxb_tag_id_t t, css_display display)` |
+| `cell_anchors` | function | `src/page_view.c:4964` | `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)` |
+| `cell_has_nested_table` | function | `src/page_view.c:4944` | `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)` |
+| `chain` | type_alias | `src/page_view.c:2295` | `typedef struct pv_var_node { cvr_chain chain;` |
+| `child` | function | `src/page_view.c:1266` | `* child (NULL = anonymous item: text directly inside the container);` |
+| `children_all_inline_block` | function | `src/page_view.c:2939` | `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,            ...` |
+| `classify_input` | function | `src/page_view.c:4581` | `static pv_input_type classify_input(const char *type)` |
+| `col_free_share` | function | `src/page_view.c:2705` | `static int col_free_share(const lxb_dom_node_t *el, const css_style *cs, const css_sheet *sheet, pv_style_cache...` |
+| `col_has_free_space` | function | `src/page_view.c:2964` | `static int col_has_free_space(const css_style *cs)` |
+| `collapse_ws` | function | `src/page_view.c:4180` | `static char *collapse_ws(const char *s, size_t n)` |
+| `collect_page_css` | function | `src/page_view.c:5288` | `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,                      ...` |
+| `collect_text` | function | `src/page_view.c:4557` | `static char *collect_text(const lxb_dom_node_t *el)` |
+| `cols` | type_alias | `src/page_view.c:1268` | `typedef struct pv_cont_info { int id, display, gap, justify, cols;` |
+| `column_gap_candidate` | function | `src/page_view.c:3068` | `static int column_gap_candidate(const lxb_dom_node_t *el, const css_sheet *sheet,                ...` |
+| `cont_def_reset` | function | `src/page_view.c:1724` | `static void cont_def_reset(pv_cont_def *d)` |
+| `container` | function | `src/page_view.c:3870` | `* membership in this container (and none in any container further out,                  * since i...` |
+| `container_id` | function | `src/page_view.c:1743` | `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` |
+| `content` | function | `src/page_view.c:1190` | `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);` |
+| `control` | function | `src/page_view.c:5736` | `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);` |
 | `cp1252_to_ucs` | function | `src/page_view.c:90` | `static unsigned int cp1252_to_ucs(unsigned char c)` |
-| `css_has_boxdeco` | function | `src/page_view.c:1563` | `static int css_has_boxdeco(const css_style *cs)` |
-| `css_has_hbox` | function | `src/page_view.c:1484` | `static int css_has_hbox(const css_style *cs)` |
-| `css_has_hmargin` | function | `src/page_view.c:3087` | `static int css_has_hmargin(const css_style *cs)` |
-| `css_has_position` | function | `src/page_view.c:1558` | `static int css_has_position(const css_style *cs)` |
-| `css_hbox_resolve` | function | `src/page_view.c:1505` | `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)` |
-| `css_inline_boxdeco` | function | `src/page_view.c:3690` | `css_inline_boxdeco(cs) &&                            !is_layout_item(p, sheet, style_cache))` |
-| `css_replaced_h_fixed` | function | `src/page_view.c:2790` | `static int css_replaced_h_fixed(lxb_dom_element_t *el, const css_sheet *sheet,                   ...` |
-| `css_to_fx_justify` | function | `src/page_view.c:2837` | `static int css_to_fx_justify(css_justify j)` |
-| `dimensions` | function | `src/page_view.c:4345` | `* viewport dimensions (data: inline detection, <picture> <source> scanning). */ static void srcse...` |
+| `css_has_boxdeco` | function | `src/page_view.c:1580` | `static int css_has_boxdeco(const css_style *cs)` |
+| `css_has_hbox` | function | `src/page_view.c:1485` | `static int css_has_hbox(const css_style *cs)` |
+| `css_has_hmargin` | function | `src/page_view.c:3104` | `static int css_has_hmargin(const css_style *cs)` |
+| `css_has_position` | function | `src/page_view.c:1559` | `static int css_has_position(const css_style *cs)` |
+| `css_hbox_resolve` | function | `src/page_view.c:1506` | `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)` |
+| `css_inline_boxdeco` | function | `src/page_view.c:3707` | `css_inline_boxdeco(cs) &&                            !is_layout_item(p, sheet, style_cache))` |
+| `css_replaced_h_fixed` | function | `src/page_view.c:2807` | `static int css_replaced_h_fixed(lxb_dom_element_t *el, const css_sheet *sheet,                   ...` |
+| `css_to_fx_justify` | function | `src/page_view.c:2854` | `static int css_to_fx_justify(css_justify j)` |
+| `dimensions` | function | `src/page_view.c:4362` | `* viewport dimensions (data: inline detection, <picture> <source> scanning). */ static void srcse...` |
 | `dup_n` | function | `src/page_view.c:151` | `static char *dup_n(const char *s, size_t n)` |
-| `element_is_content_leaf` | function | `src/page_view.c:3315` | `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,              ...` |
-| `element_is_content_leaf_d` | function | `src/page_view.c:3275` | `static int element_is_content_leaf_d(const lxb_dom_node_t *n, const css_sheet *sheet,            ...` |
-| `engine` | function | `src/page_view.c:6842` | `* layout engine (contiguous item gather) drops every cell onto its own row and          * a 2-col...` |
-| `find_body` | function | `src/page_view.c:4377` | `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)` |
-| `find_root_els` | function | `src/page_view.c:4390` | `static pv_root_els find_root_els(lxb_dom_node_t *root)` |
-| `flex_column_flows_as_block` | function | `src/page_view.c:2958` | `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,             ...` |
-| `float` | function | `src/page_view.c:4076` | `* genuinely nested float (oid != id) takes the deferred-column path. */     if (cont->float_oid =...` |
-| `flow` | function | `src/page_view.c:6736` | `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...` |
-| `flow_table` | function | `src/page_view.c:4986` | `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)` |
-| `fold_column_gap` | function | `src/page_view.c:3026` | `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,                             ...` |
-| `font_color_attr` | function | `src/page_view.c:1229` | `static int font_color_attr(lxb_dom_element_t *el)` |
-| `form_for` | function | `src/page_view.c:4511` | `static int form_for(const form_table *ft, const lxb_dom_node_t *n,                     const lxb_...` |
-| `form_rec` | struct | `src/page_view.c:4452` | `` |
-| `form_table` | struct | `src/page_view.c:4458` | `` |
-| `forms_add` | function | `src/page_view.c:4491` | `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` |
-| `forms_free` | function | `src/page_view.c:4463` | `static void forms_free(form_table *ft)` |
-| `generates_box` | function | `src/page_view.c:1072` | `static int generates_box(lxb_tag_id_t t, css_display display)` |
-| `generates_box_style` | function | `src/page_view.c:1084` | `static int generates_box_style(lxb_tag_id_t t, const css_style *cs)` |
-| `glyphs` | function | `src/page_view.c:2088` | `* glyphs (the runs carry it as their fill source);` |
-| `heading_level` | function | `src/page_view.c:1151` | `static int heading_level(lxb_tag_id_t t)` |
-| `height` | function | `src/page_view.c:5988` | `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);` |
-| `here` | function | `src/page_view.c:2040` | `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3...` |
-| `id` | function | `src/page_view.c:1289` | `* group id (-1 = the nearest IS the outermost: single-level float, the * painter's old path);` |
-| `ignored` | function | `src/page_view.c:671` | `* source is ignored (fail-visible: never invisible text from half a      * pattern). A real text-...` |
-| `in_boilerplate_subtree` | function | `src/page_view.c:5123` | `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
-| `in_closed_details_subtree` | function | `src/page_view.c:5138` | `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
-| `in_flow_table_cell` | function | `src/page_view.c:4998` | `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,            ...` |
-| `in_hidden_subtree` | function | `src/page_view.c:5099` | `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,                ...` |
-| `in_mixed_line` | function | `src/page_view.c:2906` | `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,                        ...` |
-| `in_skipped_subtree` | function | `src/page_view.c:1192` | `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,               ...` |
-| `inherited_text_color` | function | `src/page_view.c:2694` | `static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,              ...` |
-| `inside` | function | `src/page_view.c:5410` | `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...` |
-| `is_block_like` | function | `src/page_view.c:1021` | `static int is_block_like(lxb_tag_id_t t, css_display display)` |
-| `is_block_like_style` | function | `src/page_view.c:1060` | `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)` |
-| `is_block_tag` | function | `src/page_view.c:996` | `static int is_block_tag(lxb_tag_id_t t)` |
-| `is_bold_tag` | function | `src/page_view.c:2856` | `static int is_bold_tag(lxb_tag_id_t t)` |
-| `is_inline_level_style` | function | `src/page_view.c:2898` | `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)` |
-| `is_italic_tag` | function | `src/page_view.c:2861` | `static int is_italic_tag(lxb_tag_id_t t)` |
-| `is_layout_container` | function | `src/page_view.c:3061` | `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,                    ...` |
-| `is_plain_wrapper` | function | `src/page_view.c:3263` | `static int is_plain_wrapper(const lxb_dom_node_t *c, const css_style *cs)` |
-| `is_skipped_tag` | function | `src/page_view.c:1163` | `static int is_skipped_tag(lxb_tag_id_t t)` |
-| `it` | function | `src/page_view.c:1386` | `* it (they inherit in CSS). list_style drives the <li> marker (structural);` |
-| `item_ordinal` | function | `src/page_view.c:1357` | `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` |
-| `item_sizes_itself` | function | `src/page_view.c:3116` | `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,                      ...` |
-| `li_is_list_item` | function | `src/page_view.c:3132` | `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,                     ...` |
-| `li_ordinal` | function | `src/page_view.c:4736` | `static int li_ordinal(const lxb_dom_node_t *li)` |
-| `line` | function | `src/page_view.c:6851` | `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);` |
-| `links` | function | `src/page_view.c:4965` | `* its links (the Hacker News case: every story link lives inside a <td>), so the  * caller flows ...` |
-| `list_marker` | function | `src/page_view.c:4787` | `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,                   ...` |
-| `margins` | function | `src/page_view.c:3730` | `* margins (boxdef_from_style) and the painter applies them when                          * it ope...` |
-| `mb` | type_alias | `src/page_view.c:1369` | `typedef struct pv_box_info { int l, r, w, center, mt, mb;` |
-| `media_has_source` | function | `src/page_view.c:3301` | `static int media_has_source(const lxb_dom_node_t *n)` |
-| `nearest_cell` | function | `src/page_view.c:4912` | `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,   ...` |
-| `nearest_table` | function | `src/page_view.c:4846` | `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,  ...` |
-| `next_skip` | function | `src/page_view.c:4936` | `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` |
-| `node_next` | function | `src/page_view.c:986` | `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` |
-| `node_table_role` | function | `src/page_view.c:4828` | `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
-| `node_tag` | function | `src/page_view.c:1184` | `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)` |
-| `none` | function | `src/page_view.c:2710` | `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...` |
-| `opens` | function | `src/page_view.c:3650` | `* painter applies it when the box opens (band/shared context) — seeding              * it onto ru...` |
-| `outermost` | function | `src/page_view.c:3593` | `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);` |
-| `paints` | function | `src/page_view.c:1104` | `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas  * vacías"). Comment a...` |
-| `parent_is_table_internal` | function | `src/page_view.c:4885` | `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
-| `parse_dim` | function | `src/page_view.c:4187` | `static int parse_dim(const lxb_char_t *s, size_t len)` |
+| `element_is_content_leaf` | function | `src/page_view.c:3332` | `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,              ...` |
+| `element_is_content_leaf_d` | function | `src/page_view.c:3292` | `static int element_is_content_leaf_d(const lxb_dom_node_t *n, const css_sheet *sheet,            ...` |
+| `engine` | function | `src/page_view.c:6861` | `* layout engine (contiguous item gather) drops every cell onto its own row and          * a 2-col...` |
+| `find_body` | function | `src/page_view.c:4394` | `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)` |
+| `find_root_els` | function | `src/page_view.c:4407` | `static pv_root_els find_root_els(lxb_dom_node_t *root)` |
+| `flex_column_flows_as_block` | function | `src/page_view.c:2975` | `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,             ...` |
+| `float` | function | `src/page_view.c:4093` | `* genuinely nested float (oid != id) takes the deferred-column path. */     if (cont->float_oid =...` |
+| `flow` | function | `src/page_view.c:6755` | `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...` |
+| `flow_table` | function | `src/page_view.c:5003` | `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)` |
+| `fold_column_gap` | function | `src/page_view.c:3043` | `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,                             ...` |
+| `font_color_attr` | function | `src/page_view.c:1230` | `static int font_color_attr(lxb_dom_element_t *el)` |
+| `form_for` | function | `src/page_view.c:4528` | `static int form_for(const form_table *ft, const lxb_dom_node_t *n,                     const lxb_...` |
+| `form_rec` | struct | `src/page_view.c:4469` | `` |
+| `form_table` | struct | `src/page_view.c:4475` | `` |
+| `forms_add` | function | `src/page_view.c:4508` | `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` |
+| `forms_free` | function | `src/page_view.c:4480` | `static void forms_free(form_table *ft)` |
+| `generates_box` | function | `src/page_view.c:1073` | `static int generates_box(lxb_tag_id_t t, css_display display)` |
+| `generates_box_style` | function | `src/page_view.c:1085` | `static int generates_box_style(lxb_tag_id_t t, const css_style *cs)` |
+| `glyphs` | function | `src/page_view.c:2105` | `* glyphs (the runs carry it as their fill source);` |
+| `heading_level` | function | `src/page_view.c:1152` | `static int heading_level(lxb_tag_id_t t)` |
+| `height` | function | `src/page_view.c:6007` | `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);` |
+| `here` | function | `src/page_view.c:2057` | `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3...` |
+| `id` | function | `src/page_view.c:1290` | `* group id (-1 = the nearest IS the outermost: single-level float, the * painter's old path);` |
+| `ignored` | function | `src/page_view.c:672` | `* source is ignored (fail-visible: never invisible text from half a      * pattern). A real text-...` |
+| `in_boilerplate_subtree` | function | `src/page_view.c:5140` | `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
+| `in_closed_details_subtree` | function | `src/page_view.c:5155` | `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
+| `in_flow_table_cell` | function | `src/page_view.c:5015` | `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,            ...` |
+| `in_hidden_subtree` | function | `src/page_view.c:5116` | `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,                ...` |
+| `in_mixed_line` | function | `src/page_view.c:2923` | `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,                        ...` |
+| `in_skipped_subtree` | function | `src/page_view.c:1193` | `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,               ...` |
+| `inherited_text_color` | function | `src/page_view.c:2711` | `static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,              ...` |
+| `inside` | function | `src/page_view.c:5427` | `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...` |
+| `is_block_like` | function | `src/page_view.c:1022` | `static int is_block_like(lxb_tag_id_t t, css_display display)` |
+| `is_block_like_style` | function | `src/page_view.c:1061` | `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)` |
+| `is_block_tag` | function | `src/page_view.c:997` | `static int is_block_tag(lxb_tag_id_t t)` |
+| `is_bold_tag` | function | `src/page_view.c:2873` | `static int is_bold_tag(lxb_tag_id_t t)` |
+| `is_inline_level_style` | function | `src/page_view.c:2915` | `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)` |
+| `is_italic_tag` | function | `src/page_view.c:2878` | `static int is_italic_tag(lxb_tag_id_t t)` |
+| `is_layout_container` | function | `src/page_view.c:3078` | `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,                    ...` |
+| `is_plain_wrapper` | function | `src/page_view.c:3280` | `static int is_plain_wrapper(const lxb_dom_node_t *c, const css_style *cs)` |
+| `is_skipped_tag` | function | `src/page_view.c:1164` | `static int is_skipped_tag(lxb_tag_id_t t)` |
+| `it` | function | `src/page_view.c:1387` | `* it (they inherit in CSS). list_style drives the <li> marker (structural);` |
+| `item_ordinal` | function | `src/page_view.c:1358` | `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` |
+| `item_sizes_itself` | function | `src/page_view.c:3133` | `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,                      ...` |
+| `li_is_list_item` | function | `src/page_view.c:3149` | `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,                     ...` |
+| `li_ordinal` | function | `src/page_view.c:4753` | `static int li_ordinal(const lxb_dom_node_t *li)` |
+| `line` | function | `src/page_view.c:6870` | `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);` |
+| `links` | function | `src/page_view.c:4982` | `* its links (the Hacker News case: every story link lives inside a <td>), so the  * caller flows ...` |
+| `list_marker` | function | `src/page_view.c:4804` | `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,                   ...` |
+| `margins` | function | `src/page_view.c:3747` | `* margins (boxdef_from_style) and the painter applies them when                          * it ope...` |
+| `mb` | type_alias | `src/page_view.c:1370` | `typedef struct pv_box_info { int l, r, w, center, mt, mb;` |
+| `media_has_source` | function | `src/page_view.c:3318` | `static int media_has_source(const lxb_dom_node_t *n)` |
+| `nearest_cell` | function | `src/page_view.c:4929` | `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,   ...` |
+| `nearest_table` | function | `src/page_view.c:4863` | `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,  ...` |
+| `next_skip` | function | `src/page_view.c:4953` | `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` |
+| `node_next` | function | `src/page_view.c:987` | `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` |
+| `node_table_role` | function | `src/page_view.c:4845` | `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
+| `node_tag` | function | `src/page_view.c:1185` | `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)` |
+| `none` | function | `src/page_view.c:2727` | `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...` |
+| `opens` | function | `src/page_view.c:3667` | `* painter applies it when the box opens (band/shared context) — seeding              * it onto ru...` |
+| `outermost` | function | `src/page_view.c:3610` | `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);` |
+| `paints` | function | `src/page_view.c:1105` | `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas  * vacías"). Comment a...` |
+| `parent_is_table_internal` | function | `src/page_view.c:4902` | `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
+| `parse_dim` | function | `src/page_view.c:4204` | `static int parse_dim(const lxb_char_t *s, size_t len)` |
 | `positions` | function | `src/page_view.c:140` | `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);` |
-| `present` | function | `src/page_view.c:4204` | `* when no width descriptors are present (density-only or bare URLs). */ static void srcset_best_u...` |
-| `pseudo_box_reg` | function | `src/page_view.c:2215` | `static int pseudo_box_reg(pv_box_reg *r, const lxb_dom_node_t *el, int which,                    ...` |
-| `pseudo_generates_box` | function | `src/page_view.c:2236` | `static int pseudo_generates_box(const css_style *ps)` |
-| `pseudo_is_block` | function | `src/page_view.c:2253` | `static int pseudo_is_block(const css_style *ps)` |
-| `pseudo_is_oof` | function | `src/page_view.c:2249` | `static int pseudo_is_oof(const css_style *ps)` |
-| `pseudo_key` | function | `src/page_view.c:2259` | `static const void *pseudo_key(const lxb_dom_node_t *el, int which)` |
-| `pv_add_box_def` | function | `src/page_view.c:934` | `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)` |
-| `pv_add_cont_def` | function | `src/page_view.c:912` | `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)` |
-| `pv_after_pending` | struct | `src/page_view.c:1849` | `` |
-| `pv_append` | function | `src/page_view.c:419` | `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,                     c...` |
-| `pv_append_image` | function | `src/page_view.c:454` | `pv_status pv_append_image(pv_view *v, int heading, int block_break,                           con...` |
-| `pv_append_input` | function | `src/page_view.c:484` | `pv_status pv_append_input(pv_view *v, int heading, int block_break,                           pv_...` |
-| `pv_append_svg` | function | `src/page_view.c:560` | `pv_status pv_append_svg(pv_view *v, int heading, int block_break,                         const c...` |
-| `pv_append_video` | function | `src/page_view.c:524` | `pv_status pv_append_video(pv_view *v, int heading, int block_break,                           con...` |
-| `pv_at` | function | `src/page_view.c:969` | `const pv_run *pv_at(const pv_view *v, size_t i)` |
-| `pv_box_at` | function | `src/page_view.c:978` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i)` |
-| `pv_box_count` | function | `src/page_view.c:974` | `size_t pv_box_count(const pv_view *v)` |
-| `pv_box_info` | struct | `src/page_view.c:1369` | `` |
-| `pv_box_reg` | struct | `src/page_view.c:1890` | `` |
-| `pv_build` | function | `src/page_view.c:5158` | `pv_status pv_build(const hp_document *doc, pv_view **out)` |
-| `pv_build_ex` | function | `src/page_view.c:5162` | `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)` |
-| `pv_build_full` | function | `src/page_view.c:5166` | `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,                      ...` |
-| `pv_build_styled` | function | `src/page_view.c:5300` | `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,                    ...` |
-| `pv_cache_find` | function | `src/page_view.c:2376` | `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
-| `pv_cache_put` | function | `src/page_view.c:2396` | `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,                      ...` |
-| `pv_cache_reindex` | function | `src/page_view.c:2330` | `static void pv_cache_reindex(pv_style_cache *c)` |
-| `pv_cached_font_px` | function | `src/page_view.c:2391` | `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
-| `pv_computed` | struct | `src/page_view.c:7013` | `` |
-| `pv_computed_free` | function | `src/page_view.c:7059` | `void pv_computed_free(pv_computed *pc)` |
-| `pv_computed_get` | function | `src/page_view.c:7037` | `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,                     do...` |
-| `pv_computed_new` | function | `src/page_view.c:7018` | `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,   ...` |
-| `pv_cont_at` | function | `src/page_view.c:929` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)` |
-| `pv_cont_count` | function | `src/page_view.c:925` | `size_t pv_cont_count(const pv_view *v)` |
-| `pv_cont_info` | struct | `src/page_view.c:1267` | `` |
-| `pv_container_reg` | struct | `src/page_view.c:1696` | `` |
-| `pv_content_hidden` | function | `src/page_view.c:1390` | `int pv_content_hidden(int box_hidden, int run_visibility)` |
-| `pv_count` | function | `src/page_view.c:965` | `size_t pv_count(const pv_view *v)` |
-| `pv_css_drops` | function | `src/page_view.c:6984` | `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,                        const cha...` |
-| `pv_def_h` | struct | `src/page_view.c:2287` | `` |
-| `pv_element_has_before` | function | `src/page_view.c:3209` | `static int pv_element_has_before(lxb_dom_node_t *n, const css_sheet *sheet,                      ...` |
-| `pv_flow_reg` | struct | `src/page_view.c:3324` | `` |
-| `pv_flow_reg` | struct | `src/page_view.c:4814` | `` |
-| `pv_free` | function | `src/page_view.c:947` | `void pv_free(pv_view *v)` |
-| `pv_item_track` | struct | `src/page_view.c:1350` | `` |
-| `pv_mauto_of` | function | `src/page_view.c:1498` | `static int pv_mauto_of(const css_style *cs)` |
-| `pv_new` | function | `src/page_view.c:415` | `pv_view *pv_new(void)` |
-| `pv_node_map` | struct | `src/page_view.c:348` | `` |
-| `pv_node_map_build` | function | `src/page_view.c:406` | `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)` |
-| `pv_node_map_free` | function | `src/page_view.c:364` | `static void pv_node_map_free(pv_node_map *m)` |
-| `pv_node_map_init` | function | `src/page_view.c:355` | `static int pv_node_map_init(pv_node_map *m)` |
-| `pv_parent_element` | function | `src/page_view.c:2467` | `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)` |
-| `pv_placeholder_color` | function | `src/page_view.c:896` | `int pv_placeholder_color(const css_style *ph)` |
-| `pv_ptr_hash` | function | `src/page_view.c:2322` | `static size_t pv_ptr_hash(const void *p)` |
-| `pv_ptrmap` | struct | `src/page_view.c:294` | `` |
-| `pv_ptrmap_free` | function | `src/page_view.c:340` | `static void pv_ptrmap_free(pv_ptrmap *m)` |
-| `pv_ptrmap_get` | function | `src/page_view.c:310` | `static int pv_ptrmap_get(const pv_ptrmap *m, const void *k, int *out)` |
-| `pv_ptrmap_put` | function | `src/page_view.c:318` | `static void pv_ptrmap_put(pv_ptrmap *m, const void *k, int v)` |
-| `pv_ptrmap_slot` | function | `src/page_view.c:300` | `static size_t pv_ptrmap_slot(const pv_ptrmap *m, const void *k)` |
-| `pv_root_els` | struct | `src/page_view.c:4386` | `` |
-| `pv_root_insets` | function | `src/page_view.c:5261` | `void pv_root_insets(const css_style *body, int out[4])` |
-| `pv_set_bgcolor` | function | `src/page_view.c:606` | `void pv_set_bgcolor(pv_view *v, int bg_rgb)` |
-| `pv_set_block_id` | function | `src/page_view.c:827` | `void pv_set_block_id(pv_view *v, int block_id)` |
-| `pv_set_block_node` | function | `src/page_view.c:847` | `void pv_set_block_node(pv_view *v, dom_node_id id)` |
-| `pv_set_box` | function | `src/page_view.c:786` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,                 int box_center, int ...` |
-| `pv_set_box_maxw` | function | `src/page_view.c:809` | `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct)` |
-| `pv_set_box_pct` | function | `src/page_view.c:798` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,                     ...` |
-| `pv_set_br_line` | function | `src/page_view.c:852` | `void pv_set_br_line(pv_view *v, int br_line)` |
-| `pv_set_color` | function | `src/page_view.c:601` | `void pv_set_color(pv_view *v, int fg_rgb)` |
-| `pv_set_cont_box` | function | `src/page_view.c:726` | `void pv_set_cont_box(pv_view *v, int cont_box_id)` |
-| `pv_set_cont_item` | function | `src/page_view.c:748` | `void pv_set_cont_item(pv_view *v, int cont_item)` |
-| `pv_set_container` | function | `src/page_view.c:686` | `void pv_set_container(pv_view *v, int cont_id, int cont_display,                       int cont_g...` |
-| `pv_set_emphasis` | function | `src/page_view.c:589` | `void pv_set_emphasis(pv_view *v, int bold, int italic)` |
-| `pv_set_flex` | function | `src/page_view.c:730` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,                  int...` |
-| `pv_set_flex_mauto` | function | `src/page_view.c:742` | `void pv_set_flex_mauto(pv_view *v, int mauto)` |
-| `pv_set_float` | function | `src/page_view.c:764` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,                 int ...` |
-| `pv_set_float_w` | function | `src/page_view.c:753` | `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box,                     ...` |
-| `pv_set_grad_text` | function | `src/page_view.c:622` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)` |
-| `pv_set_grid` | function | `src/page_view.c:712` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)` |
-| `pv_set_grid_area` | function | `src/page_view.c:705` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start)` |
-| `pv_set_grid_rows` | function | `src/page_view.c:722` | `void pv_set_grid_rows(pv_view *v, int grid_rows)` |
-| `pv_set_indent` | function | `src/page_view.c:596` | `void pv_set_indent(pv_view *v, int indent)` |
-| `pv_set_input_checked` | function | `src/page_view.c:857` | `void pv_set_input_checked(pv_view *v, int checked)` |
-| `pv_set_input_placeholder` | function | `src/page_view.c:862` | `void pv_set_input_placeholder(pv_view *v, int ph_color)` |
-| `pv_set_input_select_opts` | function | `src/page_view.c:904` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts)` |
-| `pv_set_justify_self` | function | `src/page_view.c:842` | `void pv_set_justify_self(pv_view *v, int justify_self)` |
-| `pv_set_node_id` | function | `src/page_view.c:822` | `void pv_set_node_id(pv_view *v, dom_node_id node_id)` |
-| `pv_set_oof` | function | `src/page_view.c:837` | `void pv_set_oof(pv_view *v, int oof)` |
-| `pv_set_own_box` | function | `src/page_view.c:832` | `void pv_set_own_box(pv_view *v, int box_id)` |
-| `pv_set_row_span` | function | `src/page_view.c:701` | `void pv_set_row_span(pv_view *v, int row_span)` |
-| `pv_set_text_ext` | function | `src/page_view.c:630` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)` |
-| `pv_set_text_style` | function | `src/page_view.c:611` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,                 ...` |
-| `pv_set_ua_tag` | function | `src/page_view.c:816` | `void pv_set_ua_tag(pv_view *v, int ua_tag)` |
-| `pv_style_cache` | struct | `src/page_view.c:2294` | `` |
-| `pv_style_cache_free` | function | `src/page_view.c:2360` | `static void pv_style_cache_free(pv_style_cache *c)` |
-| `pv_style_cache_init` | function | `src/page_view.c:2340` | `static int pv_style_cache_init(pv_style_cache *c)` |
-| `pv_svg_append_root_attrs` | function | `src/page_view.c:867` | `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs,                ...` |
-| `pv_text_ext_merge` | function | `src/page_view.c:1422` | `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` |
-| `pv_text_ext_reset` | function | `src/page_view.c:1396` | `void pv_text_ext_reset(pv_text_ext *e)` |
-| `pv_var_node` | struct | `src/page_view.c:2278` | `` |
-| `pv_var_push` | function | `src/page_view.c:2446` | `static const cvr_chain *pv_var_push(pv_style_cache *cache, cvr_table *own,                       ...` |
-| `px` | function | `src/page_view.c:5895` | `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */                 if (iw <...` |
-| `resolve_context` | function | `src/page_view.c:3329` | `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,                 ...` |
-| `resolves` | function | `src/page_view.c:1050` | `* box_tree already resolves (R4/R8) had nothing to place -- every badge/close  * button/tooltip w...` |
-| `roman_marker` | function | `src/page_view.c:4762` | `static void roman_marker(int n, int upper, char *out, size_t cap)` |
+| `present` | function | `src/page_view.c:4221` | `* when no width descriptors are present (density-only or bare URLs). */ static void srcset_best_u...` |
+| `pseudo_box_reg` | function | `src/page_view.c:2232` | `static int pseudo_box_reg(pv_box_reg *r, const lxb_dom_node_t *el, int which,                    ...` |
+| `pseudo_generates_box` | function | `src/page_view.c:2253` | `static int pseudo_generates_box(const css_style *ps)` |
+| `pseudo_is_block` | function | `src/page_view.c:2270` | `static int pseudo_is_block(const css_style *ps)` |
+| `pseudo_is_oof` | function | `src/page_view.c:2266` | `static int pseudo_is_oof(const css_style *ps)` |
+| `pseudo_key` | function | `src/page_view.c:2276` | `static const void *pseudo_key(const lxb_dom_node_t *el, int which)` |
+| `pv_add_box_def` | function | `src/page_view.c:935` | `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)` |
+| `pv_add_cont_def` | function | `src/page_view.c:913` | `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)` |
+| `pv_after_pending` | struct | `src/page_view.c:1866` | `` |
+| `pv_append` | function | `src/page_view.c:420` | `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,                     c...` |
+| `pv_append_image` | function | `src/page_view.c:455` | `pv_status pv_append_image(pv_view *v, int heading, int block_break,                           con...` |
+| `pv_append_input` | function | `src/page_view.c:485` | `pv_status pv_append_input(pv_view *v, int heading, int block_break,                           pv_...` |
+| `pv_append_svg` | function | `src/page_view.c:561` | `pv_status pv_append_svg(pv_view *v, int heading, int block_break,                         const c...` |
+| `pv_append_video` | function | `src/page_view.c:525` | `pv_status pv_append_video(pv_view *v, int heading, int block_break,                           con...` |
+| `pv_at` | function | `src/page_view.c:970` | `const pv_run *pv_at(const pv_view *v, size_t i)` |
+| `pv_box_at` | function | `src/page_view.c:979` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i)` |
+| `pv_box_count` | function | `src/page_view.c:975` | `size_t pv_box_count(const pv_view *v)` |
+| `pv_box_info` | struct | `src/page_view.c:1370` | `` |
+| `pv_box_reg` | struct | `src/page_view.c:1907` | `` |
+| `pv_build` | function | `src/page_view.c:5175` | `pv_status pv_build(const hp_document *doc, pv_view **out)` |
+| `pv_build_ex` | function | `src/page_view.c:5179` | `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)` |
+| `pv_build_full` | function | `src/page_view.c:5183` | `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,                      ...` |
+| `pv_build_styled` | function | `src/page_view.c:5317` | `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,                    ...` |
+| `pv_cache_find` | function | `src/page_view.c:2393` | `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
+| `pv_cache_put` | function | `src/page_view.c:2413` | `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,                      ...` |
+| `pv_cache_reindex` | function | `src/page_view.c:2347` | `static void pv_cache_reindex(pv_style_cache *c)` |
+| `pv_cached_font_px` | function | `src/page_view.c:2408` | `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
+| `pv_computed` | struct | `src/page_view.c:7032` | `` |
+| `pv_computed_free` | function | `src/page_view.c:7078` | `void pv_computed_free(pv_computed *pc)` |
+| `pv_computed_get` | function | `src/page_view.c:7056` | `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,                     do...` |
+| `pv_computed_new` | function | `src/page_view.c:7037` | `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,   ...` |
+| `pv_cont_at` | function | `src/page_view.c:930` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)` |
+| `pv_cont_count` | function | `src/page_view.c:926` | `size_t pv_cont_count(const pv_view *v)` |
+| `pv_cont_info` | struct | `src/page_view.c:1268` | `` |
+| `pv_container_reg` | struct | `src/page_view.c:1713` | `` |
+| `pv_content_hidden` | function | `src/page_view.c:1391` | `int pv_content_hidden(int box_hidden, int run_visibility)` |
+| `pv_control_frame_cleared` | function | `src/page_view.c:1572` | `static int pv_control_frame_cleared(const css_style *cs)` |
+| `pv_count` | function | `src/page_view.c:966` | `size_t pv_count(const pv_view *v)` |
+| `pv_css_drops` | function | `src/page_view.c:7003` | `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,                        const cha...` |
+| `pv_def_h` | struct | `src/page_view.c:2304` | `` |
+| `pv_element_has_before` | function | `src/page_view.c:3226` | `static int pv_element_has_before(lxb_dom_node_t *n, const css_sheet *sheet,                      ...` |
+| `pv_flow_reg` | struct | `src/page_view.c:3341` | `` |
+| `pv_flow_reg` | struct | `src/page_view.c:4831` | `` |
+| `pv_free` | function | `src/page_view.c:948` | `void pv_free(pv_view *v)` |
+| `pv_item_track` | struct | `src/page_view.c:1351` | `` |
+| `pv_mauto_of` | function | `src/page_view.c:1499` | `static int pv_mauto_of(const css_style *cs)` |
+| `pv_new` | function | `src/page_view.c:416` | `pv_view *pv_new(void)` |
+| `pv_node_map` | struct | `src/page_view.c:349` | `` |
+| `pv_node_map_build` | function | `src/page_view.c:407` | `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)` |
+| `pv_node_map_free` | function | `src/page_view.c:365` | `static void pv_node_map_free(pv_node_map *m)` |
+| `pv_node_map_init` | function | `src/page_view.c:356` | `static int pv_node_map_init(pv_node_map *m)` |
+| `pv_parent_element` | function | `src/page_view.c:2484` | `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)` |
+| `pv_placeholder_color` | function | `src/page_view.c:897` | `int pv_placeholder_color(const css_style *ph)` |
+| `pv_ptr_hash` | function | `src/page_view.c:2339` | `static size_t pv_ptr_hash(const void *p)` |
+| `pv_ptrmap` | struct | `src/page_view.c:295` | `` |
+| `pv_ptrmap_free` | function | `src/page_view.c:341` | `static void pv_ptrmap_free(pv_ptrmap *m)` |
+| `pv_ptrmap_get` | function | `src/page_view.c:311` | `static int pv_ptrmap_get(const pv_ptrmap *m, const void *k, int *out)` |
+| `pv_ptrmap_put` | function | `src/page_view.c:319` | `static void pv_ptrmap_put(pv_ptrmap *m, const void *k, int v)` |
+| `pv_ptrmap_slot` | function | `src/page_view.c:301` | `static size_t pv_ptrmap_slot(const pv_ptrmap *m, const void *k)` |
+| `pv_root_els` | struct | `src/page_view.c:4403` | `` |
+| `pv_root_insets` | function | `src/page_view.c:5278` | `void pv_root_insets(const css_style *body, int out[4])` |
+| `pv_set_bgcolor` | function | `src/page_view.c:607` | `void pv_set_bgcolor(pv_view *v, int bg_rgb)` |
+| `pv_set_block_id` | function | `src/page_view.c:828` | `void pv_set_block_id(pv_view *v, int block_id)` |
+| `pv_set_block_node` | function | `src/page_view.c:848` | `void pv_set_block_node(pv_view *v, dom_node_id id)` |
+| `pv_set_box` | function | `src/page_view.c:787` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,                 int box_center, int ...` |
+| `pv_set_box_maxw` | function | `src/page_view.c:810` | `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct)` |
+| `pv_set_box_pct` | function | `src/page_view.c:799` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,                     ...` |
+| `pv_set_br_line` | function | `src/page_view.c:853` | `void pv_set_br_line(pv_view *v, int br_line)` |
+| `pv_set_color` | function | `src/page_view.c:602` | `void pv_set_color(pv_view *v, int fg_rgb)` |
+| `pv_set_cont_box` | function | `src/page_view.c:727` | `void pv_set_cont_box(pv_view *v, int cont_box_id)` |
+| `pv_set_cont_item` | function | `src/page_view.c:749` | `void pv_set_cont_item(pv_view *v, int cont_item)` |
+| `pv_set_container` | function | `src/page_view.c:687` | `void pv_set_container(pv_view *v, int cont_id, int cont_display,                       int cont_g...` |
+| `pv_set_emphasis` | function | `src/page_view.c:590` | `void pv_set_emphasis(pv_view *v, int bold, int italic)` |
+| `pv_set_flex` | function | `src/page_view.c:731` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,                  int...` |
+| `pv_set_flex_mauto` | function | `src/page_view.c:743` | `void pv_set_flex_mauto(pv_view *v, int mauto)` |
+| `pv_set_float` | function | `src/page_view.c:765` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,                 int ...` |
+| `pv_set_float_w` | function | `src/page_view.c:754` | `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box,                     ...` |
+| `pv_set_grad_text` | function | `src/page_view.c:623` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)` |
+| `pv_set_grid` | function | `src/page_view.c:713` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)` |
+| `pv_set_grid_area` | function | `src/page_view.c:706` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start)` |
+| `pv_set_grid_rows` | function | `src/page_view.c:723` | `void pv_set_grid_rows(pv_view *v, int grid_rows)` |
+| `pv_set_indent` | function | `src/page_view.c:597` | `void pv_set_indent(pv_view *v, int indent)` |
+| `pv_set_input_checked` | function | `src/page_view.c:858` | `void pv_set_input_checked(pv_view *v, int checked)` |
+| `pv_set_input_placeholder` | function | `src/page_view.c:863` | `void pv_set_input_placeholder(pv_view *v, int ph_color)` |
+| `pv_set_input_select_opts` | function | `src/page_view.c:905` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts)` |
+| `pv_set_justify_self` | function | `src/page_view.c:843` | `void pv_set_justify_self(pv_view *v, int justify_self)` |
+| `pv_set_node_id` | function | `src/page_view.c:823` | `void pv_set_node_id(pv_view *v, dom_node_id node_id)` |
+| `pv_set_oof` | function | `src/page_view.c:838` | `void pv_set_oof(pv_view *v, int oof)` |
+| `pv_set_own_box` | function | `src/page_view.c:833` | `void pv_set_own_box(pv_view *v, int box_id)` |
+| `pv_set_row_span` | function | `src/page_view.c:702` | `void pv_set_row_span(pv_view *v, int row_span)` |
+| `pv_set_text_ext` | function | `src/page_view.c:631` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)` |
+| `pv_set_text_style` | function | `src/page_view.c:612` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,                 ...` |
+| `pv_set_ua_tag` | function | `src/page_view.c:817` | `void pv_set_ua_tag(pv_view *v, int ua_tag)` |
+| `pv_style_cache` | struct | `src/page_view.c:2311` | `` |
+| `pv_style_cache_free` | function | `src/page_view.c:2377` | `static void pv_style_cache_free(pv_style_cache *c)` |
+| `pv_style_cache_init` | function | `src/page_view.c:2357` | `static int pv_style_cache_init(pv_style_cache *c)` |
+| `pv_svg_append_root_attrs` | function | `src/page_view.c:868` | `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs,                ...` |
+| `pv_text_ext_merge` | function | `src/page_view.c:1423` | `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` |
+| `pv_text_ext_reset` | function | `src/page_view.c:1397` | `void pv_text_ext_reset(pv_text_ext *e)` |
+| `pv_var_node` | struct | `src/page_view.c:2295` | `` |
+| `pv_var_push` | function | `src/page_view.c:2463` | `static const cvr_chain *pv_var_push(pv_style_cache *cache, cvr_table *own,                       ...` |
+| `px` | function | `src/page_view.c:5914` | `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */                 if (iw <...` |
+| `resolve_context` | function | `src/page_view.c:3346` | `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,                 ...` |
+| `resolves` | function | `src/page_view.c:1051` | `* box_tree already resolves (R4/R8) had nothing to place -- every badge/close  * button/tooltip w...` |
+| `roman_marker` | function | `src/page_view.c:4779` | `static void roman_marker(int n, int upper, char *out, size_t cap)` |
 | `run_init_common` | function | `src/page_view.c:165` | `static void run_init_common(pv_run *r)` |
-| `serialize_subtree` | function | `src/page_view.c:4144` | `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)` |
-| `size` | function | `src/page_view.c:2781` | `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */ static void app...` |
-| `srcset_slot_width` | function | `src/page_view.c:4299` | `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,                               ...` |
-| `string` | function | `src/page_view.c:4415` | `* Returns a heap string (caller frees) or NULL when neither carries a class —  * NULL simply mean...` |
-| `subtree_has_own_text` | function | `src/page_view.c:3241` | `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,             ...` |
-| `subtree_is_oof` | function | `src/page_view.c:2761` | `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,                      ...` |
-| `sz_count` | function | `src/page_view.c:4122` | `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` |
-| `sz_fill` | struct | `src/page_view.c:4130` | `` |
-| `sz_write` | function | `src/page_view.c:4136` | `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)` |
-| `table` | function | `src/page_view.c:5007` | `* FLOW table (multi-link: walked so its links survive) do NOT suppress their  * content -- their ...` |
-| `table_columns` | function | `src/page_view.c:5025` | `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` |
-| `trying` | function | `src/page_view.c:1900` | `* a real page passes without trying (slashdot's front page saturates it), and past  * it box_reg_...` |
-| `ua_tag_of` | function | `src/page_view.c:1129` | `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)` |
-| `under_unrendered` | function | `src/page_view.c:4527` | `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` |
+| `serialize_subtree` | function | `src/page_view.c:4161` | `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)` |
+| `size` | function | `src/page_view.c:2798` | `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */ static void app...` |
+| `srcset_slot_width` | function | `src/page_view.c:4316` | `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,                               ...` |
+| `string` | function | `src/page_view.c:4432` | `* Returns a heap string (caller frees) or NULL when neither carries a class —  * NULL simply mean...` |
+| `subtree_has_own_text` | function | `src/page_view.c:3258` | `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,             ...` |
+| `subtree_is_oof` | function | `src/page_view.c:2778` | `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,                      ...` |
+| `sz_count` | function | `src/page_view.c:4139` | `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` |
+| `sz_fill` | struct | `src/page_view.c:4147` | `` |
+| `sz_write` | function | `src/page_view.c:4153` | `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)` |
+| `table` | function | `src/page_view.c:5024` | `* FLOW table (multi-link: walked so its links survive) do NOT suppress their  * content -- their ...` |
+| `table_columns` | function | `src/page_view.c:5042` | `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` |
+| `trying` | function | `src/page_view.c:1917` | `* a real page passes without trying (slashdot's front page saturates it), and past  * it box_reg_...` |
+| `ua_tag_of` | function | `src/page_view.c:1130` | `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)` |
+| `under_unrendered` | function | `src/page_view.c:4544` | `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` |
 | `utf8_encode` | function | `src/page_view.c:104` | `static size_t utf8_encode(unsigned int cp, char *out)` |
 | `utf8_sanitized_dup` | function | `src/page_view.c:117` | `static char *utf8_sanitized_dup(const char *s)` |
-| `walk` | function | `src/page_view.c:3951` | `* far on this walk (they are all inside this element). */                          /* The innermo...` |
+| `walk` | function | `src/page_view.c:3968` | `* far on this walk (they are all inside this element). */                          /* The innermo...` |
 | `pe_build_path` | function | `src/pdf_export.c:91` | `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz)` |
 | `pe_build_path_ext` | function | `src/pdf_export.c:66` | `pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext,                 ...` |
 | `pe_paginate` | function | `src/pdf_export.c:95` | `size_t pe_paginate(const double *tops, const double *heights, size_t n,                    double...` |
@@ -453,26 +459,26 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `profile_load` | function | `src/profile.c:112` | `profile_status profile_load(const profile_ctx *ctx, prefs_state *out)` |
 | `profile_open` | function | `src/profile.c:59` | `profile_status profile_open(profile_ctx *ctx, const char *dir)` |
 | `profile_save` | function | `src/profile.c:133` | `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p)` |
-| `place` | function | `src/render_doc.c:237` | `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...` |
-| `rd_at` | function | `src/render_doc.c:763` | `const rd_block *rd_at(const rd_doc *d, size_t i)` |
-| `rd_block_heading_level` | function | `src/render_doc.c:800` | `int rd_block_heading_level(const rd_block *b)` |
-| `rd_block_tag` | function | `src/render_doc.c:811` | `const char *rd_block_tag(const rd_block *b)` |
-| `rd_box_at` | function | `src/render_doc.c:772` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)` |
-| `rd_box_count` | function | `src/render_doc.c:768` | `size_t rd_box_count(const rd_doc *d)` |
-| `rd_build` | function | `src/render_doc.c:269` | `rd_status rd_build(const pv_view *view, rdp_caps caps,                    const char *top_level_u...` |
-| `rd_cont_at` | function | `src/render_doc.c:781` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)` |
-| `rd_cont_count` | function | `src/render_doc.c:777` | `size_t rd_cont_count(const rd_doc *d)` |
-| `rd_count` | function | `src/render_doc.c:759` | `size_t rd_count(const rd_doc *d)` |
-| `rd_free` | function | `src/render_doc.c:742` | `void rd_free(rd_doc *d)` |
-| `rd_image_fail_label` | function | `src/render_doc.c:877` | `const char *rd_image_fail_label(img_fail_reason reason)` |
-| `rd_image_label` | function | `src/render_doc.c:866` | `const char *rd_image_label(rdp_img_decision d)` |
-| `rd_input_invisible` | function | `src/render_doc.c:862` | `int rd_input_invisible(int input_type)` |
-| `rd_input_label` | function | `src/render_doc.c:842` | `const char *rd_input_label(int input_type)` |
-| `rd_kind_name` | function | `src/render_doc.c:786` | `const char *rd_kind_name(rd_kind k)` |
+| `place` | function | `src/render_doc.c:238` | `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...` |
+| `rd_at` | function | `src/render_doc.c:767` | `const rd_block *rd_at(const rd_doc *d, size_t i)` |
+| `rd_block_heading_level` | function | `src/render_doc.c:804` | `int rd_block_heading_level(const rd_block *b)` |
+| `rd_block_tag` | function | `src/render_doc.c:815` | `const char *rd_block_tag(const rd_block *b)` |
+| `rd_box_at` | function | `src/render_doc.c:776` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)` |
+| `rd_box_count` | function | `src/render_doc.c:772` | `size_t rd_box_count(const rd_doc *d)` |
+| `rd_build` | function | `src/render_doc.c:270` | `rd_status rd_build(const pv_view *view, rdp_caps caps,                    const char *top_level_u...` |
+| `rd_cont_at` | function | `src/render_doc.c:785` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)` |
+| `rd_cont_count` | function | `src/render_doc.c:781` | `size_t rd_cont_count(const rd_doc *d)` |
+| `rd_count` | function | `src/render_doc.c:763` | `size_t rd_count(const rd_doc *d)` |
+| `rd_free` | function | `src/render_doc.c:746` | `void rd_free(rd_doc *d)` |
+| `rd_image_fail_label` | function | `src/render_doc.c:881` | `const char *rd_image_fail_label(img_fail_reason reason)` |
+| `rd_image_label` | function | `src/render_doc.c:870` | `const char *rd_image_label(rdp_img_decision d)` |
+| `rd_input_invisible` | function | `src/render_doc.c:866` | `int rd_input_invisible(int input_type)` |
+| `rd_input_label` | function | `src/render_doc.c:846` | `const char *rd_input_label(int input_type)` |
+| `rd_kind_name` | function | `src/render_doc.c:790` | `const char *rd_kind_name(rd_kind k)` |
 | `rd_push` | function | `src/render_doc.c:60` | `static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,                  ...` |
-| `rd_push_input` | function | `src/render_doc.c:211` | `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` |
-| `resolve_image_decision` | function | `src/render_doc.c:247` | `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,         ...` |
-| `unset` | function | `src/render_doc.c:677` | `* background paints as if unset (no border/box-shadow-style                  * "broken image" pla...` |
+| `rd_push_input` | function | `src/render_doc.c:212` | `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` |
+| `resolve_image_decision` | function | `src/render_doc.c:248` | `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,         ...` |
+| `unset` | function | `src/render_doc.c:681` | `* background paints as if unset (no border/box-shadow-style                  * "broken image" pla...` |
 | `utf8_sanitized_dup` | function | `src/render_doc.c:28` | `static char *utf8_sanitized_dup(const char *s)` |
 | `rdp_caps_safe` | function | `src/render_policy.c:17` | `rdp_caps rdp_caps_safe(void)` |
 | `rdp_image_decision` | function | `src/render_policy.c:28` | `rdp_img_decision rdp_image_decision(rdp_caps caps,                                     const char...` |
@@ -490,11 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `ci_starts_with` | function | `src/request_policy.c:26` | `static int ci_starts_with(const char *s, const char *prefix)` |
 | `hdr_forbidden` | function | `src/request_policy.c:184` | `static int hdr_forbidden(const char *n, size_t len)` |
 | `hdr_lower` | function | `src/request_policy.c:162` | `static int hdr_lower(int c)` |
-| `hdr_name_has_prefix` | function | `src/request_policy.c:171` | `static int hdr_name_has_prefix(const char *a, size_t alen, const char *lit)` |
-| `hdr_name_ieq` | function | `src/request_policy.c:164` | `static int hdr_name_ieq(const char *a, size_t alen, const char *lit)` |
-| `hdr_token_char` | function | `src/request_policy.c:178` | `static int hdr_token_char(unsigned char c)` |
-| `lower` | function | `src/request_policy.c:22` | `static char lower(char c)` |
-| `psl_cmp` | function | `src/request_policy.c:36` | `static int psl_cmp(const void *key, const void *elem)` |
-| `psl_in` | function | `src/request_policy.c:40` | `static int psl_in(const char *const *arr, size_t n, const char *key)` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

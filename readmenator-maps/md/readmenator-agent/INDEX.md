@@ -164,11 +164,11 @@
 | `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 61 | 0 |
 | `src/js_trusted.c` | ws_payload: } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for... | src | 17 | 0 |
 | `src/link_nav.c` | clean_href: Removes tab/newline/CR anywhere and trims leading/trailing spaces, in place * into out. | src | 10 | 0 |
-| `src/local_store.c` | - | src | 331 | 0 |
+| `src/local_store.c` | - | src | 335 | 0 |
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
-| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 253 | 0 |
+| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 255 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
 | `src/pq_seal.c` | derive_key: pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out) { if (der ==... | src | 11 | 0 |
@@ -240,7 +240,7 @@
 | `tests/test_image_decode.c` | - | tests | 37 | 0 |
 | `tests/test_import_map.c` | tres: Test URL resolver: absolute https passes, "/x" is origin-relative, "./x" and "../x" * are... | tests | 8 | 0 |
 | `tests/test_interp.c` | assert_float_equal: ip_ease_fn fns_0to0[] = { { .kind = IP_EASE_LINEAR }, { .kind = IP_EASE_EASE... | tests | 37 | 0 |
-| `tests/test_js_dom.c` | fake_net: HTMLAnchorElement URL decomposition (HTML 4.6.3): YouTube routes on a.pathname and... | tests | 247 | 0 |
+| `tests/test_js_dom.c` | fake_net: HTMLAnchorElement URL decomposition (HTML 4.6.3): YouTube routes on a.pathname and... | tests | 253 | 0 |
 | `tests/test_js_env.c` | test_install_identity_override: /* --- install --- static void test_install_null_args(void... | tests | 28 | 0 |
 | `tests/test_js_geom.c` | test_same_node_unions: assert_int_equal(jg_add(&t, 2, 0, 0, 5, 5), 0)... | tests | 11 | 0 |
 | `tests/test_js_policy.c` | test_trusted_requires_both_signals: Hito 28: a host is TRUSTED (full author CSS + images, on top... | tests | 5 | 0 |
@@ -250,7 +250,7 @@
 | `tests/test_media_decoder.c` | test_pacer_paces_by_pts_delta: #include "media_decoder.h" /* First frame anchors the epoch and... | tests | 6 | 0 |
 | `tests/test_net_realm.c` | test_classify_host_lookalikes: static void test_classify_host_i2p(void **state) { (void)state... | tests | 13 | 0 |
 | `tests/test_os_sandbox.c` | test_policy_denies_io_uring: io_uring is a seccomp-bypass primitive (its IORING_OP_* operations... | tests | 19 | 0 |
-| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 212 | 0 |
+| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 213 | 0 |
 | `tests/test_pdf_export.c` | - | tests | 30 | 0 |
 | `tests/test_perf_trace.c` | - | tests | 12 | 0 |
 | `tests/test_pq_seal.c` | test_requires_both_secrets_and_detects_tamper: static void test_each_seal_is_fresh(void **state)... | tests | 7 | 0 |
