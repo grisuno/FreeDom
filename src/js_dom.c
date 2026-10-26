@@ -647,6 +647,12 @@ static const char JD_DOCUMENT_SHIM[] =
     "    if(list[i]&&list[i]._h!==undefined) dom.insertBefore(p,list[i]._h,ref);"
     "    if(typeof __G.__ceTouch==='function') __G.__ceTouch(list);"
     "    if(typeof __G.__scriptsInserted==='function') __G.__scriptsInserted(list); }"
+    /* HTMLAnchorElement/HTMLAreaElement URL decomposition (HTML 4.6.3): the href attribute resolved
+     * against the document URL, read through the URL class. Any other element has no such member. */
+    "  function anchorPart(el,prop){ var t=dom.tagName(el._h); t=t===null?'':String(t).toLowerCase();"
+    "    if(t!=='a'&&t!=='area') return undefined;"
+    "    var v=dom.getAttribute(el._h,'href'); if(v===null) return '';"
+    "    try{ return new __G.URL(v,(__G.location&&__G.location.href)||undefined)[prop]; }catch(e){ return prop==='protocol'?':':''; } }"
     "  function gRect(h){ return dom.rect(h)||[0,0,0,0]; }"
     "  function mkRect(x,y,w,ht){ var o={x:x,y:y,left:x,top:y,width:w,height:ht,right:x+w,bottom:y+ht};"
     "    o.toJSON=function(){ return {x:x,y:y,left:x,top:y,width:w,height:ht,right:x+w,bottom:y+ht}; };"
@@ -715,6 +721,14 @@ static const char JD_DOCUMENT_SHIM[] =
      "      set src(v){ var h=this._h; dom.setAttribute(h,'src',String(v)); },"
      "      get href(){ var h=this._h; var v=dom.getAttribute(h,'href'); return v===null?'':v; },"
      "      set href(v){ var h=this._h; dom.setAttribute(h,'href',String(v)); },"
+     "      get protocol(){ return anchorPart(this,'protocol'); },"
+     "      get host(){ return anchorPart(this,'host'); },"
+     "      get hostname(){ return anchorPart(this,'hostname'); },"
+     "      get port(){ return anchorPart(this,'port'); },"
+     "      get pathname(){ return anchorPart(this,'pathname'); },"
+     "      get search(){ return anchorPart(this,'search'); },"
+     "      get hash(){ return anchorPart(this,'hash'); },"
+     "      get origin(){ return anchorPart(this,'origin'); },"
      /* Form element properties (jQuery/Bootstrap feature detection needs these).
       * checked/value/type/disabled map to their attributes; defaultChecked/selected
       * fall back to the attribute when the property itself is unset. These are

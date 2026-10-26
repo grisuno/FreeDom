@@ -633,3 +633,9 @@ muerta de `#page-manager` volvía, con `isConnected === false`, y la app no mont
   sigue en su logo de carga. Tests: `test_ready_state_walks_loading_interactive_complete`,
   `test_custom_element_reactions_nest`, `..._through_template_fragment`,
   `..._found_in_subtree_with_many_definitions`.
+- **`<a>`/`<area>` exponen la descomposición de URL** (`protocol`, `host`, `hostname`, `port`, `pathname`,
+  `search`, `hash`, `origin`): el atributo `href` resuelto contra la URL del documento con la clase `URL`;
+  cualquier otro elemento devuelve `undefined`. `href` sigue devolviendo el atributo crudo. YouTube enruta con
+  `a.pathname.startsWith("/")` y moría con `cannot read property 'startsWith' of undefined`. Test:
+  `test_anchor_url_decomposition`. Estado medido: en vivo `ytd-browse` (home) se monta; el PNG todavía
+  muestra el esqueleto del servidor y la portada no se pinta (abierto).

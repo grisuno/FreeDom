@@ -2805,6 +2805,16 @@ static void test_custom_element_found_in_subtree_with_many_definitions(void **st
               "399,0");
 }
 
+/* HTMLAnchorElement URL decomposition (HTML 4.6.3): YouTube routes on a.pathname and died on
+ * "cannot read property 'startsWith' of undefined". Other elements have no such members. */
+static void test_anchor_url_decomposition(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var a=document.createElement('a'); a.href='https://ex.test:8080/p/q?x=1#h';"
+              "[a.protocol,a.host,a.hostname,a.port,a.pathname,a.search,a.hash,a.origin,"
+              " typeof document.createElement('div').pathname].join('|')",
+              "https:|ex.test:8080|ex.test|8080|/p/q|?x=1|#h|https://ex.test:8080|undefined");
+}
+
 /* Fake host fetch: records what crossed to the parent and answers 200 JSON. */
 typedef struct { char method[16]; char url[256]; char body[256]; char headers[256]; int calls; } fake_net;
 static int fake_fetch(void *ctx, const char *method, const char *url, const char *body,
@@ -3484,6 +3494,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_custom_element_reactions_nest, setup, teardown),
         cmocka_unit_test_setup_teardown(test_custom_element_reactions_through_template_fragment, setup, teardown),
         cmocka_unit_test_setup_teardown(test_custom_element_found_in_subtree_with_many_definitions, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_anchor_url_decomposition, setup, teardown),
         cmocka_unit_test_setup_teardown(test_trusted_fetch_request_response, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ext_is_equal_node, setup, teardown),
         cmocka_unit_test_setup_teardown(test_text_nodes_are_real, setup, teardown),
