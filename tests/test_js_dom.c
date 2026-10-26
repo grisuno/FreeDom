@@ -2077,6 +2077,18 @@ static void test_fragment_queries(void **state) {
            "true,2,true,true,1,");
 }
 
+/* jQuery's support test does createHTMLDocument("").body.innerHTML=...: it must be a detached
+ * document, never the page (it used to wipe the real <body> of every jQuery 3 page). */
+static void test_create_html_document_is_detached(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var n0=document.body.children.length; var doc=document.implementation.createHTMLDocument('T');"
+              "doc.body.innerHTML='<form></form><form></form>';"
+              "[doc.body.childNodes.length, document.body.children.length===n0, doc.body!==document.body, doc.title,"
+              " doc.documentElement.tagName, doc.head.tagName, doc.querySelectorAll('form').length,"
+              " doc.getElementById('nope')].join()",
+           "2,true,true,T,HTML,HEAD,2,");
+}
+
 /* Streams (spec/js_platform.md): ReadableStream/WritableStream/TransformStream and Response.body over
  * the already-received body. Async: the jobs are pumped before the result is read. */
 /* navigator.geolocation (spec/identity.md): absent until the host installs it; then it answers
@@ -3515,6 +3527,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_form_elements_collection, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_styles_are_scoped, setup, teardown),
         cmocka_unit_test_setup_teardown(test_fragment_queries, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_create_html_document_is_detached, setup, teardown),
         cmocka_unit_test_setup_teardown(test_indexeddb_core, setup, teardown),
         cmocka_unit_test_setup_teardown(test_geolocation_fixed_coordinates, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_streams, setup, teardown),
