@@ -2089,6 +2089,16 @@ static void test_create_html_document_is_detached(void **state) {
            "2,true,true,T,HTML,HEAD,2,");
 }
 
+static void test_tree_walker_reverse_navigation(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var r=document.createElement('div'); r.innerHTML='<a id=a><i id=i></i></a><b id=b></b><u id=u></u>';"
+              "var w=document.createTreeWalker(r,1); var fw=[]; var n; while((n=w.nextNode())) fw.push(n.id);"
+              "var bw=[]; while((n=w.previousNode())) bw.push(n===r?'ROOT':n.id);"
+              "w.currentNode=r.querySelector('#u'); var ps=w.previousSibling().id; var lc=document.createTreeWalker(r,1).lastChild().id;"
+              "[fw.join(''), bw.join(''), ps, lc].join('|')",
+           "aibu|bia|b|u");
+}
+
 /* Streams (spec/js_platform.md): ReadableStream/WritableStream/TransformStream and Response.body over
  * the already-received body. Async: the jobs are pumped before the result is read. */
 /* navigator.geolocation (spec/identity.md): absent until the host installs it; then it answers
@@ -3527,6 +3537,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_form_elements_collection, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_styles_are_scoped, setup, teardown),
         cmocka_unit_test_setup_teardown(test_fragment_queries, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_tree_walker_reverse_navigation, setup, teardown),
         cmocka_unit_test_setup_teardown(test_create_html_document_is_detached, setup, teardown),
         cmocka_unit_test_setup_teardown(test_indexeddb_core, setup, teardown),
         cmocka_unit_test_setup_teardown(test_geolocation_fixed_coordinates, setup, teardown),
