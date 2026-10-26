@@ -2615,6 +2615,21 @@ static void test_current_script_values_and_methods(void **state) {
     EXPECT(f, "String(document.currentScript)", "null");
 }
 
+/* The executing <script> that exists in the document is handed out as the REAL element (remove(),
+ * id, parentNode): x.com's router stream ends every chunk with document.currentScript.remove().
+ * Each element is claimed once, so two identical inline scripts resolve in document order. */
+static void test_current_script_is_the_real_element(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var a=document.createElement('script'); a.id='s1'; a.setAttribute('type','text/javascript'); document.body.appendChild(a);"
+              "var b=document.createElement('script'); b.id='s2'; b.setAttribute('type','text/javascript'); document.body.appendChild(b); 1", "1");
+    js_set_current_script(f->ctx, "", "text/javascript");
+    EXPECT(f, "var c1=document.currentScript; c1.id+','+typeof c1.remove", "s1,function");
+    EXPECT(f, "c1.remove(); !document.getElementById('s1')", "true");
+    js_set_current_script(f->ctx, "", "text/javascript");
+    EXPECT(f, "document.currentScript.id", "s2");
+    js_set_current_script(f->ctx, NULL, NULL);
+}
+
 /* --- DOM Standard extras (js_dom_ext) --- */
 
 static void test_ext_tree_navigation(void **state) {
@@ -3523,6 +3538,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_dom_interface_prototypes, setup, teardown),
         cmocka_unit_test_setup_teardown(test_dom_template_content, setup, teardown),
         cmocka_unit_test_setup_teardown(test_current_script_values_and_methods, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_current_script_is_the_real_element, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ext_tree_navigation, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ext_compare_document_position, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ext_shadow_root, setup, teardown),

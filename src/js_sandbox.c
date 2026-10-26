@@ -801,7 +801,11 @@ static const char JS_CURRENT_SCRIPT_FACTORY[] =
     "    if(n==='src') return src===''?null:src; if(n==='type') return type===''?null:type;"
     "    return null; };"
     "  e.hasAttribute=function(n){ return e.getAttribute(n)!==null; };"
-    "  document.currentScript=e; })";
+    "  var real=null; try{ var L=document.getElementsByTagName('script'), cl=document.__fzcl;"
+    "    if(!cl){ cl=new Set(); Object.defineProperty(document,'__fzcl',{value:cl,enumerable:false}); }"
+    "    for(var i=0;i<L.length;i++){ var s=L[i]; if(cl.has(s._h)) continue;"
+    "      if((s.getAttribute('src')||'')===src&&(s.getAttribute('type')||'')===type){ cl.add(s._h); real=s; break; } } }catch(x){}"
+    "  document.currentScript=real||e; })";
 
 void js_set_current_script(js_context *ctx, const char *src, const char *type) {
     if (ctx == NULL) return;
