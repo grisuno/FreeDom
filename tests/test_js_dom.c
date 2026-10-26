@@ -2057,6 +2057,17 @@ static void test_form_elements_collection(void **state) {
     }
 }
 
+static void test_shadow_styles_are_scoped(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var host=document.createElement('div'); document.body.appendChild(host);"
+              "var sr=host.attachShadow({mode:'open'});"
+              "var st=document.createElement('style'); st.textContent=':host{display:none}.a,.b > i{color:red}@media (min-width:1px){:host([open]) p::before{x:y}}';"
+              "sr.appendChild(st); var p=document.createElement('p'); p.className='a'; sr.appendChild(p);"
+              "__shSync(); [host.getAttribute('data-fzh'), p.getAttribute('data-fzs'), st.textContent].join('|')",
+           "1|1|[data-fzh=\"1\"]{display:none}.a[data-fzs=\"1\"],.b > i[data-fzs=\"1\"]{color:red}"
+           "@media (min-width:1px){[data-fzh=\"1\"][open] p[data-fzs=\"1\"]::before{x:y}}");
+}
+
 /* Streams (spec/js_platform.md): ReadableStream/WritableStream/TransformStream and Response.body over
  * the already-received body. Async: the jobs are pumped before the result is read. */
 /* navigator.geolocation (spec/identity.md): absent until the host installs it; then it answers
@@ -3478,6 +3489,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_platform_dommatrix_and_imagedata, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_form_controls, setup, teardown),
         cmocka_unit_test_setup_teardown(test_form_elements_collection, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_shadow_styles_are_scoped, setup, teardown),
         cmocka_unit_test_setup_teardown(test_indexeddb_core, setup, teardown),
         cmocka_unit_test_setup_teardown(test_geolocation_fixed_coordinates, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_streams, setup, teardown),

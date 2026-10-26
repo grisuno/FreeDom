@@ -501,6 +501,24 @@ Encapsulación real (shadow Oculta light sin slot, proyección en `<slot>`) fuer
 - **Seguridad:** misma capacidad que `appendChild`/`setInnerHtml` (ya selladas, mismo
   documento). Sin red, sin cross-tree. Cota de moves por op (100k, como `replaceChildren`).
 
+## 7k.1 Shadow: estilos acotados por scope (2026-10-26)
+
+Medido en reddit (`shreddit`, Lit): el `<style>` de cada shadow se espejaba al light DOM sin
+acotar, asi que `:host{...}` no casaba con nada y las reglas `.x` fugaban a toda la pagina
+(tooltips y texto solo-lectores visibles).
+
+- Cada shadow root recibe un id; `__shSync()` (via `jd_flush_custom_elements`, antes de cada
+  `pv_build_styled` en carga y click) marca el host con `data-fzh=id` y cada nodo espejado de
+  nivel superior y sus descendientes con `data-fzs=id` (los nodos tope de un shadow anidado se
+  saltan: pertenecen a su propio scope).
+- El texto de cada `<style>` espejado se reescribe UNA vez (`data-fzr`): `:host`->`[data-fzh]`,
+  `:host(sel)`->`[data-fzh]sel`, `:host-context(x)`->`x [data-fzh]`, `::slotted(x)`->` > x`, y el
+  ultimo compuesto de cualquier otro selector recibe `[data-fzs]` (antes de un pseudo-elemento);
+  `@media/@supports/@layer/@container` se recorren, `@keyframes/@font-face` no.
+- Limites conocidos: el CSS del documento sigue alcanzando nodos shadow; sin distribucion real de
+  `<slot>`; los atributos `data-fz*` son visibles al JS de la pagina. Abierto: el hidratado SSR de
+  Lit (reddit) deja marcadores `$lit$` y no aplica `class`.
+
 ## 7l. Errores no capturados, `ShadowRoot` como `EventTarget`, observar el documento (2026-10-24)
 
 - **Errores (HTML 8.1.5.5).** Una excepcion no capturada de un temporizador, un listener o el ciclo

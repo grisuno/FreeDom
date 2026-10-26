@@ -1525,6 +1525,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         hp_free_scripts(scripts, nscripts);
     }
     if (ok) {
+        if (cs->js != NULL) jd_flush_custom_elements(cs->js);
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);
         double pt2 = prof_now_ms();
@@ -1688,6 +1689,7 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
         } else {
             (void)jd_fire_click(cs->js, node_id);
         }
+        if (cs->js != NULL) jd_flush_custom_elements(cs->js);
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);
         if (title != NULL && text != NULL

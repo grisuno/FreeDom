@@ -2027,7 +2027,7 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
 
 void jd_flush_custom_elements(js_context *ctx) {
     if (ctx == NULL) return;
-    static const char flush[] = "if(typeof __ceFlush==='function')__ceFlush();";
+    static const char flush[] = "if(typeof __ceFlush==='function')__ceFlush();if(typeof __shSync==='function')__shSync();";
     js_result r;
     memset(&r, 0, sizeof r);
     (void)js_eval(ctx, flush, sizeof flush - 1, &r);
