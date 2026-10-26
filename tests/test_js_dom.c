@@ -2749,6 +2749,62 @@ static void test_lifecycle_listeners_get_event(void **state) {
               "DOMContentLoaded:true|load:true:true:1|on:load");
 }
 
+/* HTML 8.4.5: readyState is 'loading' while scripts run, 'interactive' at the first
+ * readystatechange + DOMContentLoaded, 'complete' at the second readystatechange + load.
+ * YouTube/reddit gate their bootstrap on readyState and never started while it stayed 'loading'. */
+static void test_ready_state_walks_loading_interactive_complete(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var L=[document.readyState];"
+              "document.addEventListener('readystatechange', function(){ L.push('rsc:'+document.readyState); });"
+              "document.onreadystatechange=function(){ L.push('on:'+document.readyState); };"
+              "document.addEventListener('DOMContentLoaded', function(){ L.push('dcl:'+document.readyState); });"
+              "window.addEventListener('load', function(){ L.push('load:'+document.readyState); });"
+              "__fireDeferred(); L.join('|')+'|end:'+document.readyState",
+              "loading|rsc:interactive|on:interactive|dcl:interactive|rsc:complete|on:complete|load:complete|end:complete");
+}
+
+/* CE reactions are processed at the end of EVERY API call, also those made from inside a
+ * callback: Polymer stamps its template in connectedCallback and the stamped child's
+ * connectedCallback (ytd-page-manager.ready registers PAGE_TOKEN) must have run before the
+ * parent's callback goes on. A flush guard that swallowed nested insertions starved YouTube. */
+static void test_custom_element_reactions_nest(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var L=[];"
+              "class Kid extends HTMLElement{ connectedCallback(){ L.push('kid'); } }"
+              "class Par extends HTMLElement{ connectedCallback(){ L.push('par-start');"
+              "  var k=document.createElement('x-kid'); this.appendChild(k); L.push('par-end'); } }"
+              "customElements.define('x-kid',Kid); customElements.define('x-par',Par);"
+              "document.body.appendChild(document.createElement('x-par')); L.join('|')",
+              "par-start|kid|par-end");
+}
+
+/* Polymer stamps a template: importNode(template.content, true) yields a real fragment that the
+ * insertion empties, so the children it carried must be reacted to, not the (now empty) fragment. */
+static void test_custom_element_reactions_through_template_fragment(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var L=[];"
+              "class Kid extends HTMLElement{ connectedCallback(){ L.push('kid'); } }"
+              "class Par extends HTMLElement{ connectedCallback(){ L.push('par-start');"
+              "  var t=document.createElement('template'); t.innerHTML='<x-kid></x-kid><b></b>';"
+              "  this.appendChild(document.importNode(t.content,true)); L.push('par-end'); } }"
+              "customElements.define('x-kid',Kid); customElements.define('x-par',Par);"
+              "document.body.appendChild(document.createElement('x-par')); L.join('|')",
+              "par-start|kid|par-end");
+}
+
+/* With hundreds of definitions (YouTube defines ~900 ytd-* names) a subtree inserted later must
+ * still find the custom element deep inside it: the lookup cannot depend on one selector list
+ * that names every definition. */
+static void test_custom_element_found_in_subtree_with_many_definitions(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var L=[];"
+              "for(var i=0;i<400;i++){ (function(i){ customElements.define('x-e'+i, class extends HTMLElement{"
+              "  connectedCallback(){ L.push(i); } }); })(i); }"
+              "var d=document.createElement('div'); d.innerHTML='<p><x-e399></x-e399><x-e0></x-e0></p>';"
+              "document.body.appendChild(d); L.join(',')",
+              "399,0");
+}
+
 /* Fake host fetch: records what crossed to the parent and answers 200 JSON. */
 typedef struct { char method[16]; char url[256]; char body[256]; char headers[256]; int calls; } fake_net;
 static int fake_fetch(void *ctx, const char *method, const char *url, const char *body,
@@ -3424,6 +3480,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_ext_prototype_delegation, setup, teardown),
         cmocka_unit_test_setup_teardown(test_intl_surface, setup, teardown),
         cmocka_unit_test_setup_teardown(test_lifecycle_listeners_get_event, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_ready_state_walks_loading_interactive_complete, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_custom_element_reactions_nest, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_custom_element_reactions_through_template_fragment, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_custom_element_found_in_subtree_with_many_definitions, setup, teardown),
         cmocka_unit_test_setup_teardown(test_trusted_fetch_request_response, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ext_is_equal_node, setup, teardown),
         cmocka_unit_test_setup_teardown(test_text_nodes_are_real, setup, teardown),

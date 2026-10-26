@@ -612,3 +612,24 @@ usa `dom_get_connected_by_id`: un elemento cuyo ancestro superior no es el docum
 dos vivos, gana el primero en orden de árbol). Polymer/YouTube vuelve a estampar plantillas; la copia
 muerta de `#page-manager` volvía, con `isConnected === false`, y la app no montaba página.
 `dom_get_element_by_id` queda como búsqueda de handle por índice (también de nodos desprendidos).
+
+## 7q. Ciclo de vida del documento y reacciones de custom elements (2026-10-25)
+
+- **`readyState` recorre `loading` → `interactive` → `complete`** (HTML §8.4.5). Los scripts corren en
+  `loading`; al cerrar el análisis `readyState='interactive'` y se disparan `readystatechange` (listeners
+  y `onreadystatechange`) y `DOMContentLoaded`; luego `'complete'`, `readystatechange` y `load`. Antes
+  quedaba en `'loading'` para siempre y un solo `readystatechange` se disparaba sin cambiar el estado:
+  el arranque de YouTube/reddit que pregunta por `readyState` nunca empezaba.
+- **Las reacciones CE son reentrantes** (profundidad acotada, 48). Una inserción hecha desde dentro de un
+  `connectedCallback` se procesa al terminar esa llamada, no se descarta: Polymer estampa su plantilla en
+  `connectedCallback` y el hijo estampado (`ytd-page-manager.ready` registra `PAGE_TOKEN`) tiene que
+  haberse conectado antes de que siga el padre. `done`/`connected` se marcan antes de llamar, así que la
+  reentrada es idempotente.
+- **Los custom elements de un subárbol se buscan con UN recorrido `*` filtrado por nombre**, no con una
+  lista de selectores que nombre todas las definiciones: con cientos (YouTube define ~900 `ytd-*`) la
+  lista no resolvía y el elemento estampado quedaba SIN actualizar (`ready()` nunca corría).
+- Medido: YouTube pasa de esqueleto gris a masthead real (menú, buscador, botones de cuenta); el contenido
+  de la portada sigue siendo el esqueleto (el siguiente bloqueo está después de `PAGE_TOKEN`). reddit
+  sigue en su logo de carga. Tests: `test_ready_state_walks_loading_interactive_complete`,
+  `test_custom_element_reactions_nest`, `..._through_template_fragment`,
+  `..._found_in_subtree_with_many_definitions`.
