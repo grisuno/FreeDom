@@ -67,3 +67,10 @@ Un `fh_host` por documento top trusted. Mantiene un `fbk_table` y **una pestana-
   pinta como instantanea (se refresca por generacion, no por cuadro); sin scroll interno ni frames
   anidados pintados; los iframes en blanco de JS (TinyMCE/JustPaste) aun no se pintan; **la ventana real
   no se ha visto con un frame visible** (perfil con JS apagado en este host): solo headless verificado.
+
+### 5.1 Ventana real
+
+Verificado en la GUI (Xvfb+weston, `FREEDOM_AS_HOST`, `FREEDOM_JS=allowlist`): el frame se pinta dentro de su caja.
+El `<iframe>` se marca tras construir la primera vista, asi que la GUI registra la ranura de imagen del frame al
+llegar sus operaciones (`ensure_frame_slots`), y todo re-render de la pagina usa las mismas capacidades que la
+primera carga (`page_render_caps`), no las del toggle del usuario.

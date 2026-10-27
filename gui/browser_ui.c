@@ -14903,10 +14903,41 @@ static void fill_frame_slot(browser_window *w, const rd_block *b, ui_image *slot
 
 /* Repaints every live-frame box from the frames' current documents; called when the frame host's
  * generation moved (a frame loaded, ran a timer, or closed). */
+/* A frame is only marked after the first view is built (its scan runs with the page's scripts), so
+ * the load that sized w->images never saw it: register one slot per live-frame block that has none. */
+static int ensure_frame_slots(browser_window *w) {
+    size_t n = rd_count(w->doc), need = 0;
+    for (size_t i = 0; i < n; ++i) {
+        const rd_block *b = rd_at(w->doc, i);
+        if (b->kind == RD_IMAGE && b->img_decision == RDP_IMG_ALLOW && is_frame_href(b->href)
+            && find_image(w, b->href) == NULL) need++;
+    }
+    if (need == 0) return 0;
+    if (w->image_count > SIZE_MAX / sizeof *w->images - need) return 0;
+    ui_image *grown = (ui_image *)realloc(w->images, (w->image_count + need) * sizeof *w->images);
+    if (grown == NULL) return 0;
+    w->images = grown;
+    int added = 0;
+    for (size_t i = 0; i < n; ++i) {
+        const rd_block *b = rd_at(w->doc, i);
+        if (b->kind != RD_IMAGE || b->img_decision != RDP_IMG_ALLOW || !is_frame_href(b->href)
+            || find_image(w, b->href) != NULL) continue;
+        ui_image *slot = &w->images[w->image_count];
+        memset(slot, 0, sizeof *slot);
+        slot->href = strdup(b->href);
+        if (slot->href == NULL) continue;
+        w->image_count++;
+        added = 1;
+    }
+    return added;
+}
+
 static void refresh_frame_images(browser_window *w) {
-    if (w->frames == NULL || w->doc == NULL || w->images == NULL) return;
+    if (w->frames == NULL || w->doc == NULL) return;
+    int fresh = ensure_frame_slots(w);
+    if (w->images == NULL) return;
     unsigned gen = fh_generation(w->frames);
-    if (gen == w->frames_gen) return;
+    if (gen == w->frames_gen && !fresh) return;
     w->frames_gen = gen;
     size_t n = rd_count(w->doc);
     for (size_t i = 0; i < n; ++i) {
@@ -15601,6 +15632,19 @@ static void history_step(browser_window *w, int steps) {
     load_current(w);
 }
 
+/* The caps a document of THIS page is rendered with: the user's toggles widened by the host's trust
+ * (webcaps), identical for the first load and for every later re-render. */
+static rdp_caps page_render_caps(const browser_window *w) {
+    return wc_render_caps(wc_derive((wc_input){
+        .js_mode       = w->js_mode,
+        .host_in_js    = page_js_host_allowlisted(w),
+        .host_in_allow = page_host_allowlisted(w),
+        .reader        = w->reader,
+        .user_css      = w->caps.css,
+        .user_images   = w->caps.images,
+    }));
+}
+
 /* Applies a click/event/timer result returned by the worker: rebuild the rendered
  * document and refresh inputs/console, keeping the current page in history. Images
  * are not re-fetched: a handler may add text, but v1 does not introduce new remote
@@ -15623,8 +15667,7 @@ static int apply_click_result(browser_window *w, tab_page *page) {
     if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
     w->hover_href = NULL; /* aliased the doc we just freed; recomputed on next hover */
     w->hover_cursor = CSS_CUR_UNSET;
-    rdp_caps eff = w->caps;
-    if (w->reader) { eff.css = false; eff.images = false; }
+    rdp_caps eff = page_render_caps(w);
     rd_doc *doc = NULL;
     if (rd_build(page->view, eff, w->cur_top, &doc) == RD_OK) {
         w->doc = doc;
