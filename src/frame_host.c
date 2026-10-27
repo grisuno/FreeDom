@@ -15,6 +15,8 @@ typedef struct fh_slot {
     tab *t;
     int  token;          /* the token the PARENT document's JS gave this <iframe> */
     int  next_timer_ms;  /* -1 when none */
+    pv_view *view;       /* the frame document as its worker last built it (owned) */
+    char    *url;        /* the URL it was loaded from (owned) */
 } fh_slot;
 
 struct fh_host {
@@ -25,6 +27,7 @@ struct fh_host {
     fh_top_msg_fn top_msg;
     void         *top_ctx;
     int           depth;
+    unsigned      gen;   /* bumped whenever a frame's view changes: the painter's refresh cue */
 };
 
 static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n);
@@ -41,6 +44,13 @@ fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
     return h;
 }
 
+static void slot_release_view(fh_slot *sl) {
+    pv_free(sl->view);
+    sl->view = NULL;
+    free(sl->url);
+    sl->url = NULL;
+}
+
 /* Closes the worker of every frame that is no longer in the table. */
 static void reap(fh_host *h) {
     for (int i = 1; i < FBK_MAX_FRAMES; ++i) {
@@ -48,6 +58,8 @@ static void reap(fh_host *h) {
             tab_close(h->slot[i].t);
             h->slot[i].t = NULL;
             h->slot[i].next_timer_ms = -1;
+            slot_release_view(&h->slot[i]);
+            h->gen++;
         }
     }
 }
@@ -56,6 +68,7 @@ void fh_free(fh_host *h) {
     if (h == NULL) return;
     for (int i = 1; i < FBK_MAX_FRAMES; ++i) {
         if (h->slot[i].t != NULL) tab_close(h->slot[i].t);
+        slot_release_view(&h->slot[i]);
     }
     free(h);
 }
@@ -98,6 +111,17 @@ static void load_frame(fh_host *h, int id, const char *url) {
     }
     free(body);
     h->slot[id].next_timer_ms = pg.next_timer_ms;
+    /* Keep the document the worker built: the painter renders it into the <iframe> box. */
+    slot_release_view(&h->slot[id]);
+    h->slot[id].view = pg.view;
+    pg.view = NULL;
+    {
+        size_t ul = strlen(url);
+        char *u = (ul == (size_t)-1) ? NULL : (char *)malloc(ul + 1);
+        if (u != NULL) { memcpy(u, url, ul); u[ul] = '\0'; }
+        h->slot[id].url = u;
+    }
+    h->gen++;
     if (fbk_origin(&h->tbl, id) != NULL) apply_ops(h, id, pg.ws, pg.nws);
     tab_page_free(&pg);
 }
@@ -208,6 +232,12 @@ int fh_tick(fh_host *h, int elapsed_ms) {
         memset(&pg, 0, sizeof pg);
         if (tab_tick(h->slot[i].t, elapsed_ms, &pg) == TAB_OK) {
             h->slot[i].next_timer_ms = pg.next_timer_ms;
+            if (pg.view != NULL) {
+                pv_free(h->slot[i].view);
+                h->slot[i].view = pg.view;
+                pg.view = NULL;
+                h->gen++;
+            }
             if (fbk_origin(&h->tbl, i) != NULL) apply_ops(h, i, pg.ws, pg.nws);
         }
         tab_page_free(&pg);
@@ -215,4 +245,19 @@ int fh_tick(fh_host *h, int elapsed_ms) {
         if (t >= 0 && (next < 0 || t < next)) next = t;
     }
     return next;
+}
+
+unsigned fh_generation(const fh_host *h) { return h != NULL ? h->gen : 0; }
+
+const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out) {
+    if (t_out != NULL) *t_out = NULL;
+    if (h == NULL || url == NULL) return NULL;
+    for (int i = 1; i < FBK_MAX_FRAMES; ++i) {
+        const fh_slot *sl = &h->slot[i];
+        if (sl->t != NULL && sl->view != NULL && sl->url != NULL && strcmp(sl->url, url) == 0) {
+            if (t_out != NULL) *t_out = sl->t;
+            return sl->view;
+        }
+    }
+    return NULL;
 }

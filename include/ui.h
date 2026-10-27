@@ -125,6 +125,15 @@ ui_status ui_render_png_images(const struct rd_doc *doc, struct tab *t, const ch
                                                 const char *, size_t, int *, char **,
                                                 size_t *, char **),
                                void *fetch_ctx, const char *out_path, long *out_h);
+/* ui_render_png_images, plus the live <iframe>s of a trusted page: `frames` (may be NULL) is the
+ * frame host whose documents are painted into the frame boxes, exactly as the window does. */
+struct fh_host;
+ui_status ui_render_png_frames(const struct rd_doc *doc, struct tab *t, const char *top_url,
+                               int (*img_fetch)(void *, const char *, const char *,
+                                                const char *, size_t, int *, char **,
+                                                size_t *, char **),
+                               void *fetch_ctx, struct fh_host *frames,
+                               const char *out_path, long *out_h);
 ui_status ui_render_pdf_images(const struct rd_doc *doc, struct tab *t, const char *top_url,
                                int (*img_fetch)(void *, const char *, const char *,
                                                 const char *, size_t, int *, char **,

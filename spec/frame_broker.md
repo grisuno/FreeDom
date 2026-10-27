@@ -45,3 +45,25 @@ Un `fh_host` por documento top trusted. Mantiene un `fbk_table` y **una pestana-
 - `fh_tick` avanza el reloj virtual de cada frame y procesa sus ops; devuelve el proximo timer.
 - Un frame no se pinta (documento oculto): reCAPTCHA v3 / BotGuard de fondo; el pintado visible es
   un hito aparte.
+
+## 5. Pintado del frame (tanda 75, 2026-10-27)
+
+- Dado un `<iframe src>` que el worker de un host allow∩js marco como vivo (`data-fzf`), cuando se arma
+  la vista, entonces es un run `PV_IMAGE` de **elemento reemplazado** con `src = "freedom-frame:" + src`
+  y tamano `width`/`height`/CSS (por defecto 300x150). Sin la marca sigue siendo el enlace
+  "Embedded frame: ..." de siempre.
+- Dado ese esquema interno, `render_doc` lo permite solo con imagenes activas (trusted ya las tiene) y
+  **jamas lo resuelve ni lo pide a la red**; el pool de imagenes y `fetch_decode_image` lo excluyen.
+- `frame_host` conserva la vista y la URL de cada frame (`fh_frame_view`) y un contador
+  (`fh_generation`) que cambia cuando un frame carga, corre un timer o se cierra.
+- El pintor (`paint_doc_surface`, extraido de `write_doc_png`, parametrizado por ancho) renderiza el
+  documento del frame al ancho de su caja, recortado a su alto, y esa superficie ocupa la ranura de
+  imagen del bloque. GUI: `refresh_frame_images` repinta cuando cambia la generacion. Headless
+  (`--as-gui --download-png`): mismo `frame_host` via `ui_render_png_frames`.
+- Garantias: el frame sigue siendo su propio worker confinado; el padre solo lee su vista. Un
+  `<img src="freedom-frame:...">` de autor no abre red (esquema no resoluble) y solo muestra la
+  superficie de un frame que el propio padre abrio.
+- Limites declarados: el tamano de la superficie es el declarado (px) -- un `width:%` escala; el frame se
+  pinta como instantanea (se refresca por generacion, no por cuadro); sin scroll interno ni frames
+  anidados pintados; los iframes en blanco de JS (TinyMCE/JustPaste) aun no se pintan; **la ventana real
+  no se ha visto con un frame visible** (perfil con JS apagado en este host): solo headless verificado.

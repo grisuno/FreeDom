@@ -250,6 +250,10 @@ static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_le
                                                 char *resolved, size_t resolved_cap,
                                                 const char **out_url) {
     *out_url = raw_src;
+    /* A live frame is painted from its own document, never fetched: no resolution, no tracker
+     * heuristic, and with images off it stays blocked like any other replaced element. */
+    if (raw_src != NULL && strncmp(raw_src, PV_FRAME_SCHEME, sizeof PV_FRAME_SCHEME - 1) == 0)
+        return caps.images ? RDP_IMG_ALLOW : RDP_IMG_BLOCK_DISABLED;
     if (raw_src != NULL && du_is_data_url(raw_src))
         return rdp_image_decision(caps, top_level_url, raw_src, w, h);
     if (top_level_url != NULL && url_is_file(top_level_url)) {

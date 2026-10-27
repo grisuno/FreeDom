@@ -4201,6 +4201,21 @@ static char *collapse_ws(const char *s, size_t n) {
 /* Parses the leading non-negative integer of an HTML length attribute value
  * (e.g. "640", "640px", "50%"). Returns the value clamped to a sane bound, or -1
  * if the value is absent, empty, or does not start with a digit. */
+/* An <iframe> the confined worker marked live (data-fzf: only the trusted-host frame shim sets it,
+ * spec/frame_broker.md section 5) is a replaced element painted from the frame's own document. */
+#define PV_FRAME_DEF_W 300
+#define PV_FRAME_DEF_H 150
+#define PV_FRAME_URL_MAX 2048   /* FBK_URL_MAX: a longer src never opened a frame */
+
+static int pv_frame_marked(const lxb_dom_node_t *n) {
+    if (n == NULL || n->local_name != LXB_TAG_IFRAME) return 0;
+    lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)n);
+    size_t fl = 0, sl = 0;
+    const lxb_char_t *f = lxb_dom_element_get_attribute(el, (const lxb_char_t *)"data-fzf", 8, &fl);
+    const lxb_char_t *src = lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &sl);
+    return f != NULL && fl > 0 && src != NULL && sl > 0;
+}
+
 static int parse_dim(const lxb_char_t *s, size_t len) {
     if (s == NULL || len == 0) return -1;
     size_t i = 0;
@@ -5996,7 +6011,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 continue;
             }
 
-            if (t == LXB_TAG_IMG && !in_skipped_subtree(n, base, js_enabled)
+            if ((t == LXB_TAG_IMG || pv_frame_marked(n)) && !in_skipped_subtree(n, base, js_enabled)
                 && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                 && !(reader && in_boilerplate_subtree(n, base))) {
                 /* `in_hidden_subtree` IS checked here (display:none is structural,
@@ -6019,12 +6034,29 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     lxb_dom_element_get_attribute(el, (const lxb_char_t *)"height", 6, &hl);
                 int iw = parse_dim(ws, wl);
                 int ih = parse_dim(hs, hl);
+                const int is_frame = (t == LXB_TAG_IFRAME);
+                if (is_frame) {
+                    if (iw <= 0) iw = PV_FRAME_DEF_W;
+                    if (ih <= 0) ih = PV_FRAME_DEF_H;
+                }
                 apply_css_replaced_size(el, sheet, &cache, &iw, &ih);
                 size_t sl = 0;
                 const lxb_char_t *src =
                     lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &sl);
                 const char *img_src = (const char *)src;
                 size_t img_src_len = sl;
+                char frame_src[PV_FRAME_URL_MAX + sizeof PV_FRAME_SCHEME + 1];
+                if (is_frame) {
+                    /* The src rides behind an internal scheme no <img> can resolve: the image
+                     * pipeline never fetches it (render_doc/the painter look the frame up). */
+                    int fr = snprintf(frame_src, sizeof frame_src, PV_FRAME_SCHEME "%.*s",
+                                      (int)(sl < PV_FRAME_URL_MAX ? sl : PV_FRAME_URL_MAX), (const char *)src);
+                    if (fr < 0 || (size_t)fr >= sizeof frame_src) continue;
+                    img_src = frame_src;
+                    img_src_len = (size_t)fr;
+                    al = 0;
+                    alt = NULL;
+                }
                 if (img_src == NULL || img_src_len == 0) {
                     /* No plain src: select the best srcset candidate for the
                      * viewport width (1000px default for headless/export).

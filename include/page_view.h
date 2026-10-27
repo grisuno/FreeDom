@@ -1250,4 +1250,9 @@ const pv_run *pv_at(const pv_view *v, size_t i);
 size_t            pv_box_count(const pv_view *v);
 const pv_box_def *pv_box_at(const pv_view *v, size_t i);
 
+
+/* Internal scheme of the src of a live <iframe> run (a PV_IMAGE): the frame's own document is its
+ * pixels, never a fetched image (spec/frame_broker.md section 5). No <img> can resolve it. */
+#define PV_FRAME_SCHEME "freedom-frame:"
+
 #endif /* FREEDOM_PAGE_VIEW_H */

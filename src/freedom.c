@@ -29,6 +29,7 @@
 #include "request_policy.h"
 #include "secure_fetch.h"
 #include "tab.h"
+#include "frame_host.h"
 #include "webcaps.h"
 #include "page_view.h"
 #include "media_decoder.h"
@@ -203,6 +204,24 @@ static char global_i2p_addr[64] = "127.0.0.1:4444";
 
 static hb_set *g_hosts = NULL;
 static hb_set *g_js_hosts = NULL;
+/* Frames of a trusted page, headless: the same frame_host the window drives, so the export shows
+ * what the window paints. A message a frame posts to the top document is delivered to the page
+ * worker; whatever that produces (further frame ops) goes back to the host. */
+typedef struct hl_frames {
+    tab      *top;
+    fh_host  *host;
+} hl_frames;
+
+static void hl_frame_top_msg(void *ctx, const char *data, size_t len) {
+    hl_frames *hf = (hl_frames *)ctx;
+    if (hf == NULL || hf->top == NULL) return;
+    tab_page pg;
+    memset(&pg, 0, sizeof pg);
+    if (tab_ws_event(hf->top, 0, TAB_WSE_FRAME_MSG, 0, data, len, &pg) == TAB_OK && hf->host != NULL)
+        fh_apply_top(hf->host, &pg);
+    tab_page_free(&pg);
+}
+
 /* --as-gui / --as-host: take the page's capabilities from the GUI's own derivation
  * (wc_derive over allow.conf/js.conf) instead of from the operator's flags. */
 static int g_as_gui = 0;
@@ -772,6 +791,14 @@ static int render_page(const char *html, size_t len, const char *top_url,
     }
     hl_font_stash_free(&fstash);
 
+    /* A trusted page's <iframe>s: one confined worker per frame, painted into their boxes. */
+    hl_frames hframes = { t, NULL };
+    if (wc.net && top_url != NULL) {
+        hframes.host = fh_new(top_url, headless_fetch, (void *)(uintptr_t)top_url,
+                              hl_frame_top_msg, &hframes);
+        if (hframes.host != NULL) fh_apply_top(hframes.host, &page);
+    }
+
     /* Real async timers (2026-07-11): pump up to HL_TICK_MAX virtual ticks so a
      * page that renders via setTimeout/setInterval shows its final state in the
      * export. Each tick advances the worker's virtual clock straight to the next
@@ -810,6 +837,7 @@ static int render_page(const char *html, size_t len, const char *top_url,
         if (tab_tick(t, page.next_timer_ms, &ticked) != TAB_OK) break;
         tab_page_free(&page);
         page = ticked;
+        if (hframes.host != NULL) fh_apply_top(hframes.host, &page);
     }
 
     /* Fold JS-set session cookies back into the ephemeral network jar so a JS-driven
@@ -872,7 +900,8 @@ static int render_page(const char *html, size_t len, const char *top_url,
             long img_h = 0;
             uint64_t paint_t0 = now_us();
             ui_status ur = caps.images
-                ? ui_render_png_images(doc, t, top_url, img_fetch, img_ctx, g_png_out, &img_h)
+                ? ui_render_png_frames(doc, t, top_url, img_fetch, img_ctx, hframes.host,
+                                       g_png_out, &img_h)
                 : ui_render_png(doc, g_png_out, &img_h);
             pt_record(&g_timings, PT_PAINT, pt_elapsed_us(paint_t0, now_us()));
             if (ur != UI_OK) {
@@ -921,6 +950,8 @@ static int render_page(const char *html, size_t len, const char *top_url,
         }
     }
     rd_free(doc);
+    fh_free(hframes.host);
+    hframes.host = NULL;
 
     /* --eval: one REPL line (command-line API included) against the page worker, the same
      * path as the Freebug window; the value prints to stdout, its console output to stderr. */

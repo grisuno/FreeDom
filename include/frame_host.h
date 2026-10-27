@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include "tab.h"
+#include "page_view.h"
 
 #ifdef __cplusplus
 #error "Freedom is pure C (C11). C++ is not supported."
@@ -40,5 +41,14 @@ int fh_tick(fh_host *h, int elapsed_ms);
 
 /* Number of live frame workers (excludes the top). */
 int fh_count(const fh_host *h);
+
+/* Painting (spec/frame_broker.md section 5). The document of the frame loaded from `url`, as its
+ * confined worker last built it (NULL when no live frame has that URL); *t_out (optional) is that
+ * worker, which decodes the frame's own images. Both stay owned by the host and are valid until the
+ * next fh_apply_top/fh_tick/fh_free. */
+const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);
+
+/* Changes whenever any frame view appears, is replaced or goes away: repaint the frames then. */
+unsigned fh_generation(const fh_host *h);
 
 #endif /* FREEDOM_FRAME_HOST_H */

@@ -5239,6 +5239,28 @@ static void test_build_iframe_emits_navigable_link(void **state) {
     hp_document_free(doc);
 }
 
+/* A live frame (data-fzf, set only by the trusted-host worker shim) is a replaced element painted
+ * from the frame's own document: an image run behind the internal scheme, 300x150 by default. */
+static void test_build_live_iframe_is_a_sized_replaced_run(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><iframe data-fzf='1' src='https://e.example/a'></iframe>"
+        "<iframe data-fzf='2' width='400' height='90' src='https://e.example/b'></iframe></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *a = find_image(v, "freedom-frame:https://e.example/a");
+    const pv_run *b = find_image(v, "freedom-frame:https://e.example/b");
+    assert_non_null(a);
+    assert_non_null(b);
+    assert_int_equal(a->img_w, 300);
+    assert_int_equal(a->img_h, 150);
+    assert_int_equal(b->img_w, 400);
+    assert_int_equal(b->img_h, 90);
+    assert_null(find_link(v, "https://e.example/a"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_iframe_without_src_ignored(void **state) {
     (void)state;
     hp_document *doc = parse("<body><iframe></iframe><p>after</p></body>");
@@ -5283,6 +5305,7 @@ int main(void) {
         cmocka_unit_test(test_build_iframe_emits_navigable_link),
         cmocka_unit_test(test_build_iframe_without_src_ignored),
         cmocka_unit_test(test_build_iframe_display_none_hidden),
+        cmocka_unit_test(test_build_live_iframe_is_a_sized_replaced_run),
         cmocka_unit_test(test_append_transcodes_latin1),
         cmocka_unit_test(test_append_transcodes_word),
         cmocka_unit_test(test_append_transcodes_cp1252_quotes),

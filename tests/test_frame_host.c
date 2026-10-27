@@ -85,6 +85,30 @@ static void test_open_route_both_ways_and_drop_mismatch(void **state) {
     tab_close(top);
 }
 
+/* The painter asks the host for the document of the frame loaded from a URL; a closed or unknown
+ * frame has none, and the generation moves whenever the set of views changes. */
+static void test_frame_view_is_exposed_for_painting(void **state) {
+    (void)state;
+    g_nlog = 0;
+    tab *top = NULL;
+    assert_int_equal(tab_open(&top), TAB_OK);
+    tab_set_net_allowed(top, 1);
+    fh_host *h = fh_new("https://top.test/", stub_fetch, NULL, on_top_msg, NULL);
+    assert_int_equal(fh_generation(h), 0);
+    tab_page p;
+    assert_int_equal(tab_load_full(top, TOP_PAGE, sizeof TOP_PAGE - 1, "https://top.test/",
+                                   1, 0, 0, &p), TAB_OK);
+    fh_apply_top(h, &p);
+    tab_page_free(&p);
+    tab *ft = NULL;
+    assert_non_null(fh_frame_view(h, "https://rc.test/anchor", &ft));
+    assert_non_null(ft);
+    assert_null(fh_frame_view(h, "https://rc.test/other", NULL));
+    assert_true(fh_generation(h) > 0);
+    fh_free(h);
+    tab_close(top);
+}
+
 static void test_removing_iframe_closes_worker(void **state) {
     (void)state;
     g_nlog = 0;
@@ -139,6 +163,7 @@ int main(int argc, char **argv) {
     tab_worker_dispatch(argc, argv);   /* the re-exec'd worker entry: must be first */
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_open_route_both_ways_and_drop_mismatch),
+        cmocka_unit_test(test_frame_view_is_exposed_for_painting),
         cmocka_unit_test(test_removing_iframe_closes_worker),
         cmocka_unit_test(test_failed_fetch_leaves_no_frame),
         cmocka_unit_test(test_bad_args),

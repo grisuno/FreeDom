@@ -147,6 +147,30 @@ static void test_image_off_emits_notice_and_blocked(void **state) {
     pv_free(v);
 }
 
+/* A live-frame run is painted from the frame's own document: with images on it is allowed WITHOUT
+ * being resolved against the page (it is never fetched), with images off it stays blocked. */
+static void test_frame_scheme_is_never_fetched_and_gated_by_images(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_image(v, 0, 1, "", PV_FRAME_SCHEME "https://e.example/f", 300, 150), PV_OK);
+    rd_doc *d = NULL;
+    rdp_caps on = rdp_caps_safe();
+    on.images = 1;
+    assert_int_equal(rd_build(v, on, TOP, &d), RD_OK);
+    const rd_block *b = first_kind(d, RD_IMAGE);
+    assert_non_null(b);
+    assert_int_equal(b->img_decision, RDP_IMG_ALLOW);
+    assert_string_equal(b->href, PV_FRAME_SCHEME "https://e.example/f");
+    rd_free(d);
+    d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    b = first_kind(d, RD_IMAGE);
+    assert_non_null(b);
+    assert_int_equal(b->img_decision, RDP_IMG_BLOCK_DISABLED);
+    rd_free(d);
+    pv_free(v);
+}
+
 static void test_no_images_no_notice(void **state) {
     (void)state;
     pv_view *v = pv_new();
@@ -842,6 +866,7 @@ static void test_node_id_carried_by_default(void **state) {
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_build_null_out),
+        cmocka_unit_test(test_frame_scheme_is_never_fetched_and_gated_by_images),
         cmocka_unit_test(test_container_carried_by_default),
         cmocka_unit_test(test_cont_item_carried_by_default),
         cmocka_unit_test(test_flex_item_carried_by_default),

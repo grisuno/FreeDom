@@ -603,6 +603,7 @@ typedef struct browser_window {
      * document wait in frame_q until the call that produced them returns. */
     struct fh_host *frames;
     uint64_t        frames_due_ms;   /* absolute now_ms() of the next frame tick, 0 = none */
+    unsigned        frames_gen;      /* fh_generation the <iframe> boxes were last painted at */
     uint64_t        frames_last_ms;  /* when the frames were last ticked */
     char           *frame_q[32];
     size_t          frame_qn;
@@ -2130,6 +2131,14 @@ static int image_is_deferred(const browser_window *w, const rd_block *b, int def
            && w->cur_top != NULL && !url_is_file(w->cur_top) && !du_is_data_url(b->href);
 }
 
+/* A live <iframe> run is painted from its frame's own document (spec/frame_broker.md section 5):
+ * its "image" is a surface rendered here, never bytes fetched from the network. */
+static int is_frame_href(const char *href) {
+    return href != NULL && strncmp(href, PV_FRAME_SCHEME, sizeof PV_FRAME_SCHEME - 1) == 0;
+}
+static void fill_frame_slot(browser_window *w, const rd_block *b, ui_image *slot,
+                            tab_fetch_fn img_fetch, void *fetch_ctx);
+
 static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx,
                         int defer) {
     if (w->doc == NULL) return;
@@ -2159,7 +2168,7 @@ static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void 
              * prefetch, and it is not a real network request the pool fetcher
              * could perform. */
             if (b->kind == RD_IMAGE && b->img_decision == RDP_IMG_ALLOW
-                && b->href != NULL && !du_is_data_url(b->href)
+                && b->href != NULL && !du_is_data_url(b->href) && !is_frame_href(b->href)
                 && !image_is_deferred(w, b, defer))
                 purls[np++] = b->href;
         }
@@ -2194,6 +2203,7 @@ static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void 
                                &slot->surface, &slot->nat_w, &slot->nat_h);
         } else {
             if (b->img_decision != RDP_IMG_ALLOW) continue;
+            if (is_frame_href(b->href)) { fill_frame_slot(w, b, slot, img_fetch, fetch_ctx); continue; }
             if (w->cur_top == NULL && !du_is_data_url(b->href)) continue;
             if (image_is_deferred(w, b, defer)) { slot->deferred = 1; continue; }
             img_fail_reason reason = fetch_decode_image(w, t, img_fetch, fetch_ctx, target_url,
@@ -14655,6 +14665,7 @@ typedef struct png_flow_ctx {
     rc_layout *L;
     double left, margin, content_w;
     double no_cull_top, no_cull_h;
+    double page_w;   /* the canvas width: the viewport the box/row painters cull against */
 } png_flow_ctx;
 
 /* Paints the in-flow boxes and rows the pass `only_root` serves (see defer_wants):
@@ -14669,14 +14680,14 @@ static void paint_png_inflow(const png_flow_ctx *c, int only_root) {
     for (size_t bi = 0; bi < L->nbox; ++bi) {
         if (!defer_wants(L, L->boxes[bi].block_id, only_root)) continue;
         paint_box_and_direct_rows(cr, w, L, &L->boxes[bi], c->left, c->margin,
-                                  c->content_w, PNG_PAGE_W, c->no_cull_top, c->no_cull_h,
+                                  c->content_w, c->page_w, c->no_cull_top, c->no_cull_h,
                                   0, row_done);
         {
             const pv_box_def *sd = (L->boxes[bi].block_id >= 0)
                 ? rd_box_at(w->doc, (size_t)L->boxes[bi].block_id) : NULL;
             if (sd != NULL && box_forms_stacking_context(sd))
                 paint_owned_negz(cr, w, L, c->left, c->margin, c->no_cull_top, c->no_cull_h,
-                                 PNG_PAGE_W, L->boxes[bi].block_id);
+                                 c->page_w, L->boxes[bi].block_id);
         }
     }
     for (int pass = ROW_PAINT_BAND; pass <= ROW_PAINT_CONTENT; ++pass) {
@@ -14690,7 +14701,7 @@ static void paint_png_inflow(const png_flow_ctx *c, int only_root) {
             ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, L,
                          c->left, c->margin);
             paint_content_row_ex(cr, w, L, r, c->left,
-                                 c->margin + r->top, c->content_w, PNG_PAGE_W, 0, pass);
+                                 c->margin + r->top, c->content_w, c->page_w, 0, pass);
         }
         while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
     }
@@ -14706,7 +14717,13 @@ static void paint_png_deferred(void *ctx, int root) {
  * light theme so it is dark-on-white). Returns the image height in px (0 when the
  * document lays out to nothing), or -1 on a Cairo error. No Wayland state is
  * touched -- only w->doc and w->theme are read. */
-static long write_doc_png(browser_window *w, const char *path) {
+/* Lays out and paints w->doc, in a forced light theme, onto a new ARGB surface page_w wide and as
+ * tall as the content (capped at max_h). The one painter behind the PNG export and the live
+ * <iframe> boxes. *out_h is the surface height in px, 0 when the document lays out to nothing, -1
+ * on a Cairo error (NULL is returned for both). No Wayland state is touched. */
+static cairo_surface_t *paint_doc_surface(browser_window *w, double page_w, double png_margin,
+                                          double view_h, long max_h, long *out_h) {
+    *out_h = 0;
     ui_theme saved = w->theme;
     w->theme = ui_theme_for(UI_THEME_LIGHT);
     const ui_theme *th = &w->theme;
@@ -14714,9 +14731,8 @@ static long write_doc_png(browser_window *w, const char *path) {
      * sides); the author's body margin is the body box's own. html_margin_top used
      * to be taken here as a margin on all four sides, which doubled a declared
      * body margin horizontally. */
-    double png_margin = PNG_MARGIN;
     double png_left = png_margin + ((w->doc != NULL) ? (double)w->doc->root_m[3] : 0.0);
-    double content_w = PNG_PAGE_W - 2.0 * png_margin
+    double content_w = page_w - 2.0 * png_margin
                      - ((w->doc != NULL) ? (double)(w->doc->root_m[1] + w->doc->root_m[3]) : 0.0);
     if (w->doc != NULL && w->doc->html_max_width > 0) {
         double cap = (double)w->doc->html_max_width;
@@ -14736,7 +14752,7 @@ static long write_doc_png(browser_window *w, const char *path) {
     layout_doc(mcr, w, content_w, &L);
     /* The headless viewport (a fixed box's containing block): the same height
      * window.innerHeight reports and the parity reference renders at. */
-    position_doc(mcr, w, content_w, (double)FC_HEADLESS_VIEW_H, &L);
+    position_doc(mcr, w, content_w, view_h, &L);
     double content_h = L.total_h;
     /* The document is as tall as its tallest THING, not as its text flow: a page
      * whose content is entirely boxes (a hero, a card grid, an absolutely placed
@@ -14754,15 +14770,15 @@ static long write_doc_png(browser_window *w, const char *path) {
     cairo_destroy(mcr);
     cairo_surface_destroy(meas);
 
-    if (content_h <= 0.0) { rc_free(&L); w->theme = saved; return 0; }
+    if (content_h <= 0.0) { rc_free(&L); w->theme = saved; return NULL; }
 
     long img_h = (long)(content_h + 2.0 * png_margin + 0.5);
-    if (img_h > PNG_MAX_H) img_h = PNG_MAX_H;
+    if (img_h > max_h) img_h = max_h;
 
     cairo_surface_t *surf =
-        cairo_image_surface_create(CAIRO_FORMAT_ARGB32, (int)PNG_PAGE_W, (int)img_h);
+        cairo_image_surface_create(CAIRO_FORMAT_ARGB32, (int)page_w, (int)img_h);
     if (cairo_surface_status(surf) != CAIRO_STATUS_SUCCESS) {
-        cairo_surface_destroy(surf); rc_free(&L); w->theme = saved; return -1;
+        cairo_surface_destroy(surf); rc_free(&L); w->theme = saved; *out_h = -1; return NULL;
     }
     cairo_t *cr = cairo_create(surf);
     if (w->doc != NULL && w->doc->canvas_bg >= 0 && !w->force_theme)
@@ -14784,7 +14800,7 @@ static long write_doc_png(browser_window *w, const char *path) {
         for (size_t i = 0; i < L.npositioned && L.positioned[i].z_index < 0; ++i) {
             if (negz_owner_box(w, &L, &L.positioned[i]) >= 0) continue;
             paint_positioned_one(cr, w, th, &L.positioned[i], png_left, png_margin,
-                                 no_cull_top, no_cull_h, PNG_PAGE_W,
+                                 no_cull_top, no_cull_h, page_w,
                                  neg_ov_stack, &neg_ov_depth, &L);
         }
         while (neg_ov_depth > 0) { cairo_restore(cr); neg_ov_depth--; }
@@ -14793,17 +14809,114 @@ static long write_doc_png(browser_window *w, const char *path) {
     /* The normal in-flow pass, then the positioned layer: out-of-flow boxes and the
      * in-flow positioned subtrees deferred behind them, merged by (z, tree order). */
     png_flow_ctx pfc = { cr, w, &L, png_left, png_margin, content_w,
-                         no_cull_top, no_cull_h };
+                         no_cull_top, no_cull_h, page_w };
     paint_png_inflow(&pfc, -1);
     paint_positioned_layer(cr, w, th, &L, png_left, png_margin, no_cull_top, no_cull_h,
-                           PNG_PAGE_W, paint_png_deferred, &pfc);
+                           page_w, paint_png_deferred, &pfc);
 
     cairo_destroy(cr);
-    cairo_status_t st = cairo_surface_write_to_png(surf, path);
-    cairo_surface_destroy(surf);
     rc_free(&L);
     w->theme = saved;
+    *out_h = img_h;
+    return surf;
+}
+
+static long write_doc_png(browser_window *w, const char *path) {
+    long img_h = 0;
+    cairo_surface_t *surf = paint_doc_surface(w, PNG_PAGE_W, PNG_MARGIN,
+                                              (double)FC_HEADLESS_VIEW_H, PNG_MAX_H, &img_h);
+    if (surf == NULL) return img_h;   /* 0 = nothing to paint, -1 = Cairo error */
+    cairo_status_t st = cairo_surface_write_to_png(surf, path);
+    cairo_surface_destroy(surf);
     return (st == CAIRO_STATUS_SUCCESS) ? img_h : -1;
+}
+
+/* Renders a frame's document at its box size: a white canvas bw x bh with the page laid out at
+ * that width from the top-left, clipped to the box (what an <iframe> with no scrolling shows). */
+static cairo_surface_t *render_frame_surface(const pv_view *view, tab *ft, const char *url,
+                                             int bw, int bh,
+                                             tab_fetch_fn img_fetch, void *fetch_ctx) {
+    cairo_surface_t *out = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, bw, bh);
+    if (cairo_surface_status(out) != CAIRO_STATUS_SUCCESS) {
+        cairo_surface_destroy(out);
+        return NULL;
+    }
+    cairo_t *cr = cairo_create(out);
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    cairo_paint(cr);
+
+    rdp_caps caps = rdp_caps_safe();
+    caps.images = true;
+    caps.css = true;
+    rd_doc *doc = NULL;
+    if (rd_build(view, caps, url, &doc) == RD_OK && rd_count(doc) > 0) {
+        browser_window fw;
+        memset(&fw, 0, sizeof fw);
+        fw.theme = ui_theme_for(UI_THEME_LIGHT);
+        fw.doc = doc;
+        fw.focused_input = -1;
+        fw.cur_top = strdup(url);
+        if (ft != NULL && img_fetch != NULL) load_images(&fw, ft, img_fetch, fetch_ctx, 0);
+        long h = 0;
+        cairo_surface_t *page = paint_doc_surface(&fw, (double)bw, 0.0, (double)bh, bh, &h);
+        if (page != NULL) {
+            cairo_set_source_surface(cr, page, 0.0, 0.0);
+            cairo_paint(cr);
+            cairo_surface_destroy(page);
+        }
+        free_images(&fw);
+        free(fw.cur_top);
+    }
+    rd_free(doc);
+    cairo_destroy(cr);
+    return out;
+}
+
+#define FRAME_BOX_MAX 4096
+
+static void fill_frame_slot(browser_window *w, const rd_block *b, ui_image *slot,
+                            tab_fetch_fn img_fetch, void *fetch_ctx) {
+    if (w->frames == NULL || w->cur_top == NULL || b->href == NULL) return;
+    char abs[URL_MAX_LEN + 1];
+    const char *raw = b->href + sizeof PV_FRAME_SCHEME - 1;
+    if (url_resolve_https(w->cur_top, raw, abs, sizeof abs) != URL_OK) {
+        /* A local (file://) page has no https base to resolve against: an absolute https src is
+         * its own resolution, anything else cannot name a frame. */
+        size_t rl = strlen(raw);
+        if (strncmp(raw, "https://", 8) != 0 || rl >= sizeof abs) return;
+        memcpy(abs, raw, rl + 1);
+    }
+    tab *ft = NULL;
+    const pv_view *v = fh_frame_view(w->frames, abs, &ft);
+    if (v == NULL) return;
+    int bw = b->video_w > 0 ? b->video_w : 300;
+    int bh = b->video_h > 0 ? b->video_h : 150;
+    if (bw > FRAME_BOX_MAX) bw = FRAME_BOX_MAX;
+    if (bh > FRAME_BOX_MAX) bh = FRAME_BOX_MAX;
+    cairo_surface_t *surf = render_frame_surface(v, ft, abs, bw, bh, img_fetch, fetch_ctx);
+    if (surf == NULL) return;
+    if (slot->surface != NULL) cairo_surface_destroy(slot->surface);
+    slot->surface = surf;
+    slot->nat_w = bw;
+    slot->nat_h = bh;
+}
+
+/* Repaints every live-frame box from the frames' current documents; called when the frame host's
+ * generation moved (a frame loaded, ran a timer, or closed). */
+static void refresh_frame_images(browser_window *w) {
+    if (w->frames == NULL || w->doc == NULL || w->images == NULL) return;
+    unsigned gen = fh_generation(w->frames);
+    if (gen == w->frames_gen) return;
+    w->frames_gen = gen;
+    size_t n = rd_count(w->doc);
+    for (size_t i = 0; i < n; ++i) {
+        const rd_block *b = rd_at(w->doc, i);
+        if (b->kind != RD_IMAGE || b->img_decision != RDP_IMG_ALLOW || !is_frame_href(b->href))
+            continue;
+        const ui_image *slot = find_image(w, b->href);
+        if (slot != NULL) fill_frame_slot(w, b, (ui_image *)slot, gui_image_fetch, w);
+    }
+    redraw(w);
 }
 
 static void export_png(browser_window *w) {
@@ -14924,7 +15037,7 @@ ui_status ui_page_geometry(const rd_doc *doc, jg_table *out) {
  * The zeroed window mirrors ui_render_png; cur_top drives the local-vs-remote branch in
  * load_images and is released before returning. */
 static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
-                                   tab_fetch_fn img_fetch, void *fetch_ctx,
+                                   tab_fetch_fn img_fetch, void *fetch_ctx, struct fh_host *frames,
                                    const char *out_path, int as_pdf, long *out_metric) {
     if (out_metric != NULL) *out_metric = 0;
     if (doc == NULL || out_path == NULL || rd_count(doc) == 0) return UI_ERR_NULL_ARG;
@@ -14935,6 +15048,7 @@ static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_ur
     w.doc = (rd_doc *)doc;
     w.focused_input = -1;
     w.cur_top = (top_url != NULL) ? strdup(top_url) : NULL;
+    w.frames = frames;   /* borrowed: the caller owns and frees the host */
 
     /* Decode allowed images into w.images (fetch/read + worker decode); a failure per
      * image just leaves surface == NULL and its placeholder is drawn. Background-images
@@ -14949,6 +15063,7 @@ static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_ur
     free_images(&w);
     free_bg_images(&w);
     free(w.cur_top);
+    w.frames = NULL;
     if (metric < 0) return UI_ERR_INTERNAL;
     if (out_metric != NULL) *out_metric = metric;
     return UI_OK;
@@ -14957,13 +15072,19 @@ static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_ur
 ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
                                tab_fetch_fn img_fetch, void *fetch_ctx,
                                const char *out_path, long *out_h) {
-    return render_doc_images(doc, t, top_url, img_fetch, fetch_ctx, out_path, 0, out_h);
+    return render_doc_images(doc, t, top_url, img_fetch, fetch_ctx, NULL, out_path, 0, out_h);
+}
+
+ui_status ui_render_png_frames(const rd_doc *doc, tab *t, const char *top_url,
+                               tab_fetch_fn img_fetch, void *fetch_ctx, struct fh_host *frames,
+                               const char *out_path, long *out_h) {
+    return render_doc_images(doc, t, top_url, img_fetch, fetch_ctx, frames, out_path, 0, out_h);
 }
 
 ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
                                tab_fetch_fn img_fetch, void *fetch_ctx,
                                const char *out_path, long *out_pages) {
-    return render_doc_images(doc, t, top_url, img_fetch, fetch_ctx, out_path, 1, out_pages);
+    return render_doc_images(doc, t, top_url, img_fetch, fetch_ctx, NULL, out_path, 1, out_pages);
 }
 
 /* Headless layout dump: runs the same layout_doc + position_doc pass as the
@@ -15403,6 +15524,7 @@ static void frames_apply(browser_window *w, const tab_page *page) {
     w->frames_last_ms = now_ms();
     w->frames_due_ms = w->frames_last_ms + 50;
     frames_drain(w);
+    refresh_frame_images(w);
 }
 
 static void ws_apply_ops(browser_window *w, const tab_page *page) {
@@ -19395,6 +19517,7 @@ ui_status ui_run_browser(const char *start_url) {
             w.frames_last_ms = nowv;
             int nx = fh_tick(w.frames, el);
             frames_drain(&w);
+            refresh_frame_images(&w);
             if (w.frames != NULL)
                 w.frames_due_ms = (nx < 0) ? 0 : nowv + (uint64_t)(nx < 20 ? 20 : nx);
         }
